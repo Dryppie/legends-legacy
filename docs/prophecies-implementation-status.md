@@ -103,13 +103,16 @@ The migrations create the prophecy tables and add prophecy reward balance column
 
 ### Prophecy Content
 
-Added JSON-authored prophecy definitions under `LL/src/API/API.LL/Data/prophecies.json`.
+Added JSON-authored prophecy definitions under `LL/src/API/API.LL/Data/prophecies/`:
+
+- `daily.json`
+- `weekly.json`
 
 Added prophecy definition loading under `LL/src/Infrastructure/Service/Services.LL/Prophecies/`:
 
 - `JsonProphecyDefinitionProvider`
 
-The provider loads the API content file through the same content root and shared JSON serializer options used by other authored game data. It validates empty files, duplicate ids, missing required fields, missing allowed slots, and invalid weights at startup.
+The provider loads the API content files through the same content root and shared JSON serializer options used by other authored game data. It validates empty files, duplicate ids, missing required fields, missing allowed slots, and invalid weights at startup.
 
 ### Prophecy Service
 
@@ -224,7 +227,7 @@ The page shows:
 
 ### Prophecy Content Authoring
 
-The system is data-driven at the `ProphecyDefinition` level. The initial daily and weekly definition set now lives in `LL/src/API/API.LL/Data/prophecies.json` and is loaded through `JsonProphecyDefinitionProvider`.
+The system is data-driven at the `ProphecyDefinition` level. The initial daily and weekly definition set now lives in `LL/src/API/API.LL/Data/prophecies/daily.json` and `LL/src/API/API.LL/Data/prophecies/weekly.json`, loaded through `JsonProphecyDefinitionProvider`.
 
 What exists:
 
@@ -322,6 +325,10 @@ dotnet test tests\EssenceSystem.Tests\EssenceSystem.Tests.csproj --no-build --lo
 git diff --check
 npm run build:development
 .\node_modules\.bin\ng.cmd build --configuration development
+Get-Content .\LL\src\API\API.LL\Data\prophecies\daily.json | ConvertFrom-Json | Select-Object -ExpandProperty definitions | Measure-Object
+Get-Content .\LL\src\API\API.LL\Data\prophecies\weekly.json | ConvertFrom-Json | Select-Object -ExpandProperty definitions | Measure-Object
+dotnet build .\LL\src\Infrastructure\Service\Services.LL\Services.LL.csproj
+dotnet build .\LL\src\API\API.LL\API.LL.csproj -p:BaseOutputPath=.\LL\artifacts\codex-api-build\
 ```
 
 Results:
@@ -331,6 +338,9 @@ Results:
 - `git diff --check` succeeded; only line-ending warnings were reported.
 - `npm run build:development` failed before Angular started because the local npm shim points to missing `C:\Users\HrHoe\AppData\Roaming\npm\node_modules\npm\bin\npm-cli.js`.
 - `.\node_modules\.bin\ng.cmd build --configuration development` succeeded.
+- Prophecy JSON parsed successfully: `daily.json` contains 20 definitions and `weekly.json` contains 8 definitions.
+- `dotnet build .\LL\src\Infrastructure\Service\Services.LL\Services.LL.csproj` succeeded with existing warnings.
+- `dotnet build .\LL\src\API\API.LL\API.LL.csproj -p:BaseOutputPath=.\LL\artifacts\codex-api-build\` succeeded with existing warnings; the isolated output folder was removed afterward.
 
 ## Deployment Notes
 

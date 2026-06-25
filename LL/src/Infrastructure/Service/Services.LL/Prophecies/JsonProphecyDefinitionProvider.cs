@@ -32,16 +32,29 @@ public sealed class JsonProphecyDefinitionProvider : IProphecyDefinitionProvider
         JsonSerializerOptions options)
     {
         var contentRoot = config["Content:Root"] ?? "Data";
-        var path = Path.Combine(contentRootPath, contentRoot, "prophecies.json");
+        var path = Path.Combine(contentRootPath, contentRoot, "prophecies");
+        var definitions = new[]
+            {
+                Path.Combine(path, "daily.json"),
+                Path.Combine(path, "weekly.json")
+            }
+            .SelectMany(filePath => ReadDefinitions(filePath, options))
+            .ToList();
+
+        ThrowIfInvalid(definitions);
+        _definitions = definitions;
+    }
+
+    public IReadOnlyList<ProphecyDefinition> GetAll() => _definitions;
+
+    private static IReadOnlyList<ProphecyDefinition> ReadDefinitions(string path, JsonSerializerOptions options)
+    {
         var document = JsonSerializer.Deserialize<ProphecyDefinitionDocument>(
             File.ReadAllText(path),
             options) ?? new();
 
-        ThrowIfInvalid(document.Definitions);
-        _definitions = document.Definitions;
+        return document.Definitions;
     }
-
-    public IReadOnlyList<ProphecyDefinition> GetAll() => _definitions;
 
     private static void ThrowIfInvalid(IReadOnlyList<ProphecyDefinition> definitions)
     {
