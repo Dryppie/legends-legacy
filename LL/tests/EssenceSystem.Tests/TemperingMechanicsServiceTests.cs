@@ -1,4 +1,3 @@
-using Application.Interfaces.Services.LL.Professions;
 using Domain.Models.Attributes;
 using Domain.Models.Items;
 using Domain.Models.Items.Equipments;
@@ -12,8 +11,7 @@ public sealed class TemperingMechanicsServiceTests
     [Fact]
     public void ApplyTemperingAttempt_WhenRarityDoesNotIncrease_DoesNotAddInstanceModifier()
     {
-        var service = new TemperingMechanicsService(new TestCraftingDefinitionProvider(
-            new Dictionary<Rarity, int> { [Rarity.Uncommon] = 10 }));
+        var service = new TemperingMechanicsService();
         var equipment = CreateEquipment();
         var profile = CreateProfile();
 
@@ -21,7 +19,7 @@ public sealed class TemperingMechanicsServiceTests
 
         Assert.False(result.RarityUpgraded);
         Assert.Equal(Rarity.Common, equipment.Rarity);
-        Assert.Equal(3, equipment.TemperingProgress);
+        Assert.Equal(0, equipment.ItemXp);
         Assert.Equal(9, equipment.Potential);
         Assert.Empty(equipment.InstanceModifiers);
     }
@@ -29,15 +27,16 @@ public sealed class TemperingMechanicsServiceTests
     [Fact]
     public void ApplyTemperingAttempt_WhenRarityIncreases_AddsRarityUpgradeReward()
     {
-        var service = new TemperingMechanicsService(new TestCraftingDefinitionProvider(
-            new Dictionary<Rarity, int> { [Rarity.Uncommon] = 3 }));
+        var service = new TemperingMechanicsService();
         var equipment = CreateEquipment();
+        equipment.ItemXp = 9;
         var profile = CreateProfile();
 
-        var result = service.ApplyTemperingAttempt(equipment, profile, new FixedRandom(0.50d));
+        var result = service.ApplyTemperingAttempt(equipment, profile, new FixedRandom(0.01d));
 
         Assert.True(result.RarityUpgraded);
         Assert.Equal(Rarity.Uncommon, equipment.Rarity);
+        Assert.Equal(0, equipment.ItemXp);
         var modifier = Assert.Single(equipment.InstanceModifiers);
         Assert.Equal(AttributeType.Armor, modifier.AttributeType);
         Assert.Equal(4, modifier.Amount);
@@ -93,28 +92,5 @@ public sealed class TemperingMechanicsServiceTests
         public override int Next(int maxValue) => 0;
 
         public override int Next(int minValue, int maxValue) => minValue;
-    }
-
-    private sealed class TestCraftingDefinitionProvider(
-        IReadOnlyDictionary<Rarity, int> temperingProgressThresholds) : ICraftingDefinitionProvider
-    {
-        public IReadOnlyList<MaterialDefinition> GetMaterials() => [];
-
-        public IReadOnlyList<CraftingRecipeDefinition> GetRecipes() => [];
-
-        public IReadOnlyList<BlueprintDefinition> GetBlueprints() => [];
-
-        public IReadOnlyDictionary<Rarity, int> GetTemperingProgressThresholds() => temperingProgressThresholds;
-
-        public MaterialDefinition? GetStandardMaterial(MaterialFamily family, int tier) => null;
-
-        public MaterialDefinition? GetMaterialByItemId(string itemId) => null;
-
-        public CraftingRecipeDefinition? GetRecipe(string recipeId) => null;
-
-        public BlueprintDefinition? GetBlueprint(string blueprintId) => null;
-
-        public BlueprintDefinition? GetBlueprintByItemId(string itemId) => null;
-
     }
 }

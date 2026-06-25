@@ -1,24 +1,14 @@
 using Application.Interfaces.Services.LL.Professions;
-using AutoMapper;
 using Domain.Models.Attributes.Modifiers;
-using Domain.Models.CharacterActions.Sessions;
 using Domain.Models.Items;
 using Domain.Models.Items.Equipments;
 using Domain.Models.Professions.Crafting;
 using Domain.Models.Professions.Crafting.V2;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Services.LL.Professions.Craftings;
 
 public sealed class TemperingMechanicsService : ITemperingMechanicsService
 {
-    private readonly ICraftingDefinitionProvider _definitions;
-
-    public TemperingMechanicsService(ICraftingDefinitionProvider definitions)
-    {
-        _definitions = definitions;
-    }
-
     public TemperingAttemptResult ApplyTemperingAttempt(
         EquipmentInstance equipment,
         TemperingProfileDefinition profile,
@@ -26,6 +16,7 @@ public sealed class TemperingMechanicsService : ITemperingMechanicsService
     {
         var previousRarity = equipment.Rarity;
         var outcome = RollOutcome(previousRarity, rng);
+        var upgraded = false;
 
         switch (outcome)
         {
@@ -34,7 +25,7 @@ public sealed class TemperingMechanicsService : ITemperingMechanicsService
                 break;
 
             case TemperingOutcome.Positive:
-                HandlePositiveOutcome(equipment, profile, rng/*, doubleItemExpChance*/);
+                upgraded = HandlePositiveOutcome(equipment, profile, rng);
                 break;
 
             case TemperingOutcome.Negative:
@@ -49,9 +40,6 @@ public sealed class TemperingMechanicsService : ITemperingMechanicsService
 
         equipment.Potential -= TemperingConstants.PotentialCost;
 
-        var upgraded = false;
-        
-
         return new TemperingAttemptResult(
             equipment,
             outcome,
@@ -61,14 +49,13 @@ public sealed class TemperingMechanicsService : ITemperingMechanicsService
             upgraded);
     }
 
-    private void HandlePositiveOutcome(EquipmentInstance equipment, TemperingProfileDefinition profile, Random rng/*, double doubleItemExpChance*/)
+    private static bool HandlePositiveOutcome(EquipmentInstance equipment, TemperingProfileDefinition profile, Random rng)
     {
         var experience = 1;
-        //if (rng.NextDouble() < (doubleItemExpChance / 100)) experience *= 2;
 
         equipment.ItemXp += experience;
 
-        TryUpgradeRarity(equipment, profile, rng);
+        return TryUpgradeRarity(equipment, profile, rng);
     }
 
     private static void HandleNegativeOutcome(EquipmentInstance equipment, Random rng)
@@ -142,16 +129,20 @@ public sealed class TemperingMechanicsService : ITemperingMechanicsService
         };
     }
 
-    private void TryUpgradeRarity(EquipmentInstance equipment, TemperingProfileDefinition profile, Random rng)
+    private static bool TryUpgradeRarity(EquipmentInstance equipment, TemperingProfileDefinition profile, Random rng)
     {
         const int XpPerTier = 10;
+        var upgraded = false;
 
         while (equipment.ItemXp >= XpPerTier && equipment.Rarity < Rarity.Legacy)
         {
             equipment.ItemXp -= XpPerTier;
             equipment.Rarity = equipment.Rarity + 1;        // next tier
             ApplyRarityUpgradeReward(equipment, profile, rng);
+            upgraded = true;
         }
+
+        return upgraded;
     }
 
     private static void ApplyRarityUpgradeReward(EquipmentInstance equipment, TemperingProfileDefinition profile, Random rng)

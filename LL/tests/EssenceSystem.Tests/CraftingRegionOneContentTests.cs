@@ -82,7 +82,6 @@ public sealed class CraftingRegionOneContentTests
         var blueprints = ReadArray("crafting/blueprints.json");
         var affixes = ReadArray("crafting/affixes.json");
         var specialModifiers = ReadArray("crafting/special-modifiers.json");
-        var tierBudgets = ReadArray("crafting/tier-budgets.json");
 
         Assert.True(affixes.Count >= 30);
         Assert.True(specialModifiers.Count >= 9);
@@ -112,15 +111,6 @@ public sealed class CraftingRegionOneContentTests
                 Assert.False(specialModifierRef?.AsObject().ContainsKey("statModifier") == true);
             }
         }
-
-        var budgetRarities = tierBudgets
-            .Select(budget => budget?["rarity"]?.GetValue<string>() ?? string.Empty)
-            .ToHashSet(StringComparer.OrdinalIgnoreCase);
-
-        Assert.Contains("Uncommon", budgetRarities);
-        Assert.Contains("Rare", budgetRarities);
-        Assert.Contains("Epic", budgetRarities);
-        Assert.Contains("Legendary", budgetRarities);
     }
 
     private static JsonArray ReadArray(string relativePath)

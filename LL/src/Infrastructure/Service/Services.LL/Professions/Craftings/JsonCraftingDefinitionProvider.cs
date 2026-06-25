@@ -18,7 +18,6 @@ public class JsonCraftingDefinitionProvider : ICraftingDefinitionProvider
     public IReadOnlyList<MaterialDefinition> GetMaterials() => _definitions.Value.Materials;
     public IReadOnlyList<CraftingRecipeDefinition> GetRecipes() => _definitions.Value.Recipes;
     public IReadOnlyList<BlueprintDefinition> GetBlueprints() => _definitions.Value.Blueprints;
-    public IReadOnlyDictionary<Rarity, int> GetTemperingProgressThresholds() => _definitions.Value.TemperingProgressThresholds;
 
     public MaterialDefinition? GetStandardMaterial(MaterialFamily family, int tier) =>
         _definitions.Value.Materials.FirstOrDefault(x => x.IsStandardTieredMaterial && x.Family == family && x.Tier == tier);
@@ -45,14 +44,12 @@ public class JsonCraftingDefinitionProvider : ICraftingDefinitionProvider
         var rawBlueprints = Read<IReadOnlyList<BlueprintDefinition>>(craftingRoot, "blueprints.json", options);
         var affixes = Read<IReadOnlyList<WeightedAffixDefinition>>(craftingRoot, "affixes.json", options);
         var specialModifiers = Read<IReadOnlyList<WeightedAffixDefinition>>(craftingRoot, "special-modifiers.json", options);
-        var tierBudgets = Read<IReadOnlyList<TemperingTierBudgetDefinition>>(craftingRoot, "tier-budgets.json", options);
         var recipes = ResolveRecipeTemperingProfiles(rawBaseRecipes, affixes, specialModifiers);
         var blueprints = ResolveBlueprintTemperingProfiles(rawBlueprints, affixes, specialModifiers);
 
-        Validate(materials, recipes, blueprints, affixes, specialModifiers, tierBudgets);
-        var temperingProgressThresholds = tierBudgets.ToDictionary(x => x.Rarity, x => x.ProgressRequired);
+        Validate(materials, recipes, blueprints, affixes, specialModifiers);
 
-        return new DefinitionSet(materials, recipes, blueprints, temperingProgressThresholds);
+        return new DefinitionSet(materials, recipes, blueprints);
     }
 
     private static T Read<T>(string root, string fileName, JsonSerializerOptions options)
@@ -70,8 +67,7 @@ public class JsonCraftingDefinitionProvider : ICraftingDefinitionProvider
         IReadOnlyList<CraftingRecipeDefinition> recipes,
         IReadOnlyList<BlueprintDefinition> blueprints,
         IReadOnlyList<WeightedAffixDefinition> affixes,
-        IReadOnlyList<WeightedAffixDefinition> specialModifiers,
-        IReadOnlyList<TemperingTierBudgetDefinition> tierBudgets)
+        IReadOnlyList<WeightedAffixDefinition> specialModifiers)
     {
         var duplicateMaterial = materials
             .Where(x => x.IsStandardTieredMaterial)
@@ -129,17 +125,6 @@ public class JsonCraftingDefinitionProvider : ICraftingDefinitionProvider
         ValidateModifierDefinitions("affix", affixes);
         ValidateModifierDefinitions("special modifier", specialModifiers);
 
-        var duplicateBudget = tierBudgets
-            .GroupBy(x => x.Rarity)
-            .FirstOrDefault(g => g.Count() > 1);
-        if (duplicateBudget != null)
-            throw new InvalidOperationException($"Duplicate tempering tier budget for rarity '{duplicateBudget.Key}'.");
-
-        foreach (var rarity in new[] { Rarity.Uncommon, Rarity.Rare, Rarity.Epic, Rarity.Unique, Rarity.Legendary, Rarity.Legacy })
-        {
-            if (tierBudgets.All(x => x.Rarity != rarity))
-                throw new InvalidOperationException($"Missing tempering tier budget for rarity '{rarity}'.");
-        }
     }
 
     private static void ValidateModifierDefinitions(string label, IReadOnlyList<WeightedAffixDefinition> definitions)
@@ -269,6 +254,5 @@ public class JsonCraftingDefinitionProvider : ICraftingDefinitionProvider
     private sealed record DefinitionSet(
         IReadOnlyList<MaterialDefinition> Materials,
         IReadOnlyList<CraftingRecipeDefinition> Recipes,
-        IReadOnlyList<BlueprintDefinition> Blueprints,
-        IReadOnlyDictionary<Rarity, int> TemperingProgressThresholds);
+        IReadOnlyList<BlueprintDefinition> Blueprints);
 }
