@@ -1,5 +1,6 @@
 using Application.Interfaces.Services.LL.Professions;
 using Domain.Models.CharacterActions.Sessions;
+using Domain.Models.Items;
 using Domain.Models.Professions.Crafting;
 using Domain.Models.Professions.Crafting.V2;
 using Services.LL.Interfaces;
@@ -21,13 +22,17 @@ public class TemperingService : ITemperingService
     public bool CanTemper(CraftingQueueItem current)
     {
         var profile = GetQueuedProfile(current);
-        return profile != null && (current.EquipmentInstance.Potential ?? 0) >= TemperingConstants.PotentialCost;
+        return profile != null &&
+               current.EquipmentInstance.Rarity < Rarity.Legacy &&
+               (current.EquipmentInstance.Potential ?? 0) >= TemperingConstants.PotentialCost;
     }
 
     public bool HandleTempering(CraftingQueueItem current, TemperingSummary temperingSummary, Random rng, Dictionary<TemperingOutcome, double> temperingBonuses)
     {
         var profile = GetQueuedProfile(current);
-        if (profile == null || (current.EquipmentInstance.Potential ?? 0) < TemperingConstants.PotentialCost)
+        if (profile == null ||
+            current.EquipmentInstance.Rarity >= Rarity.Legacy ||
+            (current.EquipmentInstance.Potential ?? 0) < TemperingConstants.PotentialCost)
             return false;
 
         var result = _temperingMechanics.ApplyTemperingAttempt(current.EquipmentInstance, profile, rng);

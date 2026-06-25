@@ -23,6 +23,8 @@ export class TemperingComponent {
   @Input({ required: true }) inventory!: Signal<InventoryItem[]>;
   @Input({ required: true }) craftType!: CraftType;
 
+  private readonly itemXpPerRarity = 10;
+
   readonly craftingQueue: Signal<CraftingQueueItem[]>;
   readonly error = signal<string | null>(null);
   readonly lastOutcome = signal<string | null>(null);
@@ -167,6 +169,21 @@ export class TemperingComponent {
     if (seconds > 0 || parts.length === 0) parts.push(`${seconds}s`);
 
     return parts.join(' ');
+  }
+
+  itemXpPercent(equipment: EquipmentInstance): number {
+    return Math.min(
+      Math.max(((equipment.itemXp ?? 0) / this.itemXpPerRarity) * 100, 0),
+      100,
+    );
+  }
+
+  itemXpShortLabel(equipment: EquipmentInstance): string {
+    const currentXp = Math.min(
+      Math.max(equipment.itemXp ?? 0, 0),
+      this.itemXpPerRarity,
+    );
+    return `${currentXp} / ${this.itemXpPerRarity} EXP`;
   }
 
   removeQueuedItem(queueItem: CraftingQueueItem, event: MouseEvent): void {

@@ -4,7 +4,9 @@
   <div class="flex h-full w-full flex-col space-y-2 md:order-2">
     <section class="ll-panel p-4">
       <h2 class="ll-heading text-xl">Tempering</h2>
-      <ng-container *ngIf="selectedEquipmentInstance() as equipment; else noItem">
+      <ng-container
+        *ngIf="selectedEquipmentInstance() as equipment; else noItem"
+      >
         <app-equipment-display [item]="equipment"></app-equipment-display>
 
         <div *ngIf="selectedQueueStatus() as queueStatus" class="ll-state mt-4">
@@ -14,7 +16,10 @@
         <div *ngIf="lastOutcome() as outcome" class="ll-state mt-4">
           {{ outcome }}
         </div>
-        <div *ngIf="error() as errorMessage" class="ll-state ll-state-danger mt-4">
+        <div
+          *ngIf="error() as errorMessage"
+          class="ll-state ll-state-danger mt-4"
+        >
           {{ errorMessage }}
         </div>
 
@@ -40,7 +45,9 @@
       </ng-template>
     </section>
 
-    <section class="ll-panel max-h-72 min-h-24 overflow-y-auto p-4 sm:max-h-full">
+    <section
+      class="ll-panel max-h-72 min-h-24 overflow-y-auto p-4 sm:max-h-full"
+    >
       <h2 class="ll-heading text-xl">Tempering Queue</h2>
       <ng-container *ngIf="activeQueueItem() as workingItem; else emptyQueue">
         <div class="flex items-center justify-between gap-3">
@@ -55,14 +62,34 @@
           (click)="selectQueuedItem(workingItem)"
           [ngClass]="{
             'border-primary':
-              selectedEquipmentInstance()?.id === workingItem.equipmentInstance.id,
+              selectedEquipmentInstance()?.id ===
+              workingItem.equipmentInstance.id,
           }"
         >
           <div class="mb-2 flex items-start justify-between gap-3">
             <div class="min-w-0">
               <app-item [item]="workingItem.equipmentInstance"></app-item>
               <div class="ll-copy mt-2 flex flex-wrap gap-2">
-                <span>{{ workingItem.equipmentInstance.potential ?? 0 }} Potential</span>
+                <span
+                  >{{
+                    workingItem.equipmentInstance.potential ?? 0
+                  }}
+                  Potential</span
+                >
+              </div>
+              <div class="mt-1 text-sm text-white">Tempering progress</div>
+              <div class="mt-1 flex items-center gap-2">
+                <div class="ll-progress-track h-1.5 w-28">
+                  <div
+                    class="ll-progress-bar"
+                    [style.width.%]="
+                      itemXpPercent(workingItem.equipmentInstance)
+                    "
+                  ></div>
+                </div>
+                <span class="text-xs text-white">
+                  {{ itemXpShortLabel(workingItem.equipmentInstance) }}
+                </span>
               </div>
             </div>
             <div class="flex shrink-0 flex-col items-end gap-2">
@@ -92,14 +119,20 @@
             (click)="selectQueuedItem(queueItem)"
             [ngClass]="{
               'll-card-accent':
-                selectedEquipmentInstance()?.id === queueItem.equipmentInstance.id,
+                selectedEquipmentInstance()?.id ===
+                queueItem.equipmentInstance.id,
             }"
           >
             <div class="mb-2 flex items-start justify-between gap-3">
               <div class="min-w-0">
                 <app-item [item]="queueItem.equipmentInstance"></app-item>
                 <div class="ll-copy mt-2 flex flex-wrap gap-2">
-                  <span>{{ queueItem.equipmentInstance.potential ?? 0 }} Potential</span>
+                  <span
+                    >{{
+                      queueItem.equipmentInstance.potential ?? 0
+                    }}
+                    Potential</span
+                  >
                 </div>
               </div>
               <div class="flex shrink-0 flex-col items-end gap-2">
@@ -117,7 +150,9 @@
         </ng-container>
       </ng-container>
       <ng-template #emptyQueue>
-        <div class="ll-empty-state mt-3">No items are queued for tempering.</div>
+        <div class="ll-empty-state mt-3">
+          No items are queued for tempering.
+        </div>
       </ng-template>
     </section>
   </div>
