@@ -22,7 +22,6 @@ export interface StartCombatActionRequest {
 export interface StartCraftingActionRequest {
   queueId: string;
   itemInstanceId: string;
-  temperingRecipeId?: string | null;
 }
 
 export interface CombatActionDetails {

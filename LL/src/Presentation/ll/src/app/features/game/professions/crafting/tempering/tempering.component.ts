@@ -110,7 +110,6 @@ export class TemperingComponent {
     const queueItem: CraftingQueueItem = {
       id: queueId,
       equipmentInstance: equipment,
-      temperingRecipeId: '',
     };
 
     this.characterActionsState.startAction(CharacterActionType.Crafting, {

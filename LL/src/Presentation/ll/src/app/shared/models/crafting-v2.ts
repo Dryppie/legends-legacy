@@ -1,6 +1,5 @@
 import { InventoryItem } from './inventoryItem';
 import { ItemQuality } from './enums/itemQuality';
-import { EquipmentInstance } from './item';
 import { EquipmentType } from './enums/equipmentType';
 
 export enum RecipeType {
@@ -90,22 +89,4 @@ export interface BlueprintLearningOption {
   outputItemType: EquipmentType;
   compatibleFormIds: string[];
   compatibleFormNames: string[];
-}
-
-export interface TemperingRecipe {
-  id: string;
-  name: string;
-  applicableItemTypes: EquipmentType[];
-  requiredItemAffinityTags: string[];
-  directionTags: string[];
-}
-
-export interface TemperItemResult {
-  equipment: EquipmentInstance;
-  outcome: string;
-  potentialSpent: number;
-  progressGained: number;
-  previousRarity: string;
-  newRarity: string;
-  rarityUpgraded: boolean;
 }

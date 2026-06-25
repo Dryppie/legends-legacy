@@ -12,7 +12,6 @@ import {
   CraftItemsRequest,
   CraftItemsResult,
   LearnBlueprintResult,
-  TemperingRecipe,
 } from '../../../../shared/models/crafting-v2';
 import { ApiResponse } from '../../../../shared/models/response';
 
@@ -106,31 +105,6 @@ export class CraftingService {
               ),
           ),
         ),
-      );
-  }
-
-  public getTemperingOptions(itemId: string): Observable<TemperingRecipe[]> {
-    return this.api.get(`Crafting/items/${itemId}/tempering-options`).pipe(
-      map((response) => this.unwrapResponse<TemperingRecipe[]>(response)),
-      catchError(() =>
-        throwError(() => new Error('Failed to load tempering options')),
-      ),
-    );
-  }
-
-  public temperItem(
-    itemInstanceId: string,
-    temperingRecipeId?: string | null,
-  ): Observable<boolean> {
-    return this.api
-      .post('Crafting/temper', { itemInstanceId, temperingRecipeId })
-      .pipe(
-        map((response) => {
-          const result = this.unwrapResponse<boolean>(response);
-          this.toast.showToast('Queued tempering', 'success', true, 'tr');
-          return result;
-        }),
-        catchError(() => throwError(() => new Error('Failed to queue tempering'))),
       );
   }
 

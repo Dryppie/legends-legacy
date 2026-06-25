@@ -9,7 +9,7 @@ using Domain.Models.Professions.Crafting.V2;
 using MediatR;
 
 namespace Application.UseCases.CharacterActions.Commands.StartCraftingAction;
-public record StartCraftingActionCommand(Guid CharacterId, string QueueId, string ItemInstanceId, string? TemperingRecipeId) : ICommand<Response<bool>>;
+public record StartCraftingActionCommand(Guid CharacterId, string QueueId, string ItemInstanceId) : ICommand<Response<bool>>;
 public class StartCraftingActionCommandHandler : IRequestHandler<StartCraftingActionCommand, Response<bool>>
 {
     private readonly ICharacterActionService _characterActionService;
@@ -40,7 +40,7 @@ public class StartCraftingActionCommandHandler : IRequestHandler<StartCraftingAc
         if (equipmentInstance.EquipmentBase.EquipmentType == EquipmentType.Tool)
             return Response<bool>.Fail("Tools cannot be modified through Crafting.");
 
-        var temperingRecipe = _temperingRecipeResolver.ResolveFor(equipmentInstance, request.TemperingRecipeId);
+        var temperingRecipe = _temperingRecipeResolver.ResolveFor(equipmentInstance);
         if (temperingRecipe == null)
             return Response<bool>.Fail("No tempering recipe applies to this item.");
 
