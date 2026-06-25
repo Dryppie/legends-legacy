@@ -1,5 +1,7 @@
-﻿using Application.Interfaces.Services.LL;
+using Application.Interfaces.Services.LL;
+using Application.Interfaces.Services.LL.Prophecies;
 using Application.Interfaces.Services.LL.Professions;
+using Application.UseCases.Prophecies.Events;
 using Application.UseCases.Soulstones.Events;
 using Domain.Helpers.Constants;
 using Domain.Models.Bonuses;
@@ -42,7 +44,6 @@ public class CraftingService : ICraftingService
 
     public async Task<InventoryItem?> CraftItemFromRecipeAsync(Guid characterId, Guid recipeId, CancellationToken cancellationToken)
     {
-        // Load the recipe
         var recipe = await _recipeService.GetRecipeByIdAsync(recipeId, cancellationToken);
         if (recipe == null) return null;
 
@@ -54,12 +55,9 @@ public class CraftingService : ICraftingService
             _ => throw new NotImplementedException()
         };
 
-        // Check profession level
         var professionLevel = await _professionService.GetProfessionLevelAsync(characterId, professionType, cancellationToken);
-        // Is the profession level sufficient for this recipe?
         if (professionLevel < recipe.LevelRequirement) return null;
 
-        // Check inventory for required materials
         var removedMaterials = await _inventoryService.TryRemoveCraftingMaterialsAsync(characterId, [.. recipe.Materials], cancellationToken);
         if (!removedMaterials) return null;
 
@@ -69,7 +67,6 @@ public class CraftingService : ICraftingService
             ItemBaseId = recipe.ItemId,
             ItemBase = recipe.Item,
             Potential = 500 + (10 * professionLevel),
-
         };
         var inventoryItem = new InventoryItem()
         {
@@ -89,7 +86,7 @@ public class CraftingService : ICraftingService
         var now = DateTimeOffset.UtcNow;
 
         var actionDetails = (characterAction.ActionDetails as CraftingActionDetails)!;
-        var produced = new List<InventoryItem>(); // TODO: This can be used to send to the frontend to improve the display of what's happened
+        var produced = new List<InventoryItem>();
         var sessionStartedAt = characterAction.UpdatedAt;
 
         var temperingSummary = new TemperingSummary();
@@ -126,22 +123,20 @@ public class CraftingService : ICraftingService
             if (current.EquipmentInstance.Potential == 0)
             {
                 temperingSummary.TotalItemsCrafted++;
-                actionDetails.CraftingQueueItems.Remove(current); // next item slides up
+                actionDetails.CraftingQueueItems.Remove(current);
                 await _inventoryService.AddItemInstanceBackToInventory(characterAction.CharacterId, current.EquipmentInstance, cancellationToken);
             }
         }
-        // If all items in the queue are processed, mark the action as deleted (finished / completed)
+
         if (actionDetails.CraftingQueueItems.Count == 0)
         {
             characterAction.IsDeleted = true;
-            //characterAction.ActionDetails = null;
         }
 
         temperingSummary.TotalSoulstones = await ProcessSoulstoneDrops(characterAction.CharacterId, temperingSummary.TotalActions, soulstoneDropRate, soulstoneDoubleDropChance, cancellationToken);
         await UpdateCharacterProfessionsAsync(characterAction.CharacterId, temperingSummary, cancellationToken);
+        await PublishProphecyProgressAsync(characterAction.CharacterId, now, temperingSummary, cancellationToken);
 
-        // TODO: Publish event to handle earning soulstones
-        // TODO: Perhaps publish event with nothing but a durationInSeconds, and a CharacterGuid. The event can then handle checking whether SS drops
         var temperingSession = new TemperingSession()
         {
             From = sessionStartedAt,
@@ -152,14 +147,39 @@ public class CraftingService : ICraftingService
         return temperingSession;
     }
 
-    private async Task<int> ProcessSoulstoneDrops(Guid characterId, int actionsPerformed, double dropRate, double doubleDropChance, CancellationToken cancellationToken)
+    private async Task<int> ProcessSoulstoneDrops(Guid characterId, int actionsPerformed, double dropRate, double doubleChance, CancellationToken cancellationToken)
     {
         var durationInSeconds = 6 * actionsPerformed;
-        var soulstonesEarned = _lootService.GenerateSoulstoneLoot(durationInSeconds, dropRate, doubleDropChance);
+        var soulstonesEarned = _lootService.GenerateSoulstoneLoot(durationInSeconds, dropRate, doubleChance);
         if (soulstonesEarned < 1) return 0;
 
         await _publisher.Publish(new SoulstoneDropEvent(characterId, soulstonesEarned), cancellationToken);
         return soulstonesEarned;
+    }
+
+    private async Task PublishProphecyProgressAsync(
+        Guid characterId,
+        DateTimeOffset occurredAt,
+        TemperingSummary temperingSummary,
+        CancellationToken cancellationToken)
+    {
+        if (temperingSummary.TotalActions <= 0)
+        {
+            return;
+        }
+
+        await _publisher.Publish(new ProphecyProgressNotification(new ProphecyProgressEvent(
+            characterId,
+            occurredAt,
+            ProphecyProgressKind.ItemTempered,
+            temperingSummary.TotalActions)), cancellationToken);
+
+        await _publisher.Publish(new ProphecyProgressNotification(new ProphecyProgressEvent(
+            characterId,
+            occurredAt,
+            ProphecyProgressKind.PotentialSpent,
+            temperingSummary.TotalActions,
+            PotentialSpent: temperingSummary.TotalActions)), cancellationToken);
     }
 
     private async Task UpdateCharacterProfessionsAsync(Guid characterId, TemperingSummary temperingSummary, CancellationToken cancellationToken)
@@ -184,29 +204,27 @@ public class CraftingService : ICraftingService
                     professionsToUpdate.Add(profession);
                     break;
                 default:
-                    continue; // Skip if the profession type is not recognized
+                    continue;
             }
             await _levelingService.UpdateProfessionLevel(profession, cancellationToken);
         }
-
 
         _professionService.UpdateProfessionLevel(professionsToUpdate);
     }
 
     public async Task<bool> RemoveCraftingQueueItemsAsync(Guid characterId, List<Guid> queueItemIds, CancellationToken cancellationToken)
-{
-    var anyItemAdded = false;
-
-    foreach (var queueItemId in queueItemIds)
     {
-        var equipmentInstance = await _craftingRepository.RemoveCraftingQueueItemAndReturnItemAsync(characterId, queueItemId, cancellationToken);
-        if (equipmentInstance == null) continue;
+        var anyItemAdded = false;
 
-        var itemAdded = await _inventoryService.AddItemInstanceBackToInventory(characterId, equipmentInstance, cancellationToken);
-        if (itemAdded) anyItemAdded = true;
+        foreach (var queueItemId in queueItemIds)
+        {
+            var equipmentInstance = await _craftingRepository.RemoveCraftingQueueItemAndReturnItemAsync(characterId, queueItemId, cancellationToken);
+            if (equipmentInstance == null) continue;
+
+            var itemAdded = await _inventoryService.AddItemInstanceBackToInventory(characterId, equipmentInstance, cancellationToken);
+            if (itemAdded) anyItemAdded = true;
+        }
+
+        return anyItemAdded;
     }
-
-    return anyItemAdded;
-}
-
 }

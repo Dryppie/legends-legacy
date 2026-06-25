@@ -203,6 +203,9 @@ The page shows:
 - Daily and Greater Prophecy target values were increased substantially for a 10-second action cadence, and current offered/accepted prophecies are rebalanced upward on overview without changing completed or claimed history.
 - The Daily Claimed and empty Cache side panels were removed; daily cards are the single source of daily state, claimable prophecy/milestone rewards sit below the cards when present, and owned caches render as compact openable tiles.
 - Reward overflow and Weekly Revelation milestone hover details now use CDK connected overlays with viewport push/fallback positioning instead of clipped in-card popups.
+- The page now scrolls from directly below the Weekly Favor/Revelation block, keeping the header and weekly progress visible while daily, Greater, and history sections scroll.
+- Prophecy sidebar notification counts are now refreshed from the sidebar when a character is available, so refreshes show actionable prophecy badges before visiting the Prophecies page.
+- Prophecy application DTOs now follow the repository mapping convention: class DTOs implement `IMapFrom<T>`, configure maps through `Mapping(Profile)`, and command handlers use injected `IMapper` instead of the removed static DTO mapper.
 - Condensed Greater Prophecy and recent history sections that avoid repeating full reward rows above the fold.
 
 ## Partially Added
