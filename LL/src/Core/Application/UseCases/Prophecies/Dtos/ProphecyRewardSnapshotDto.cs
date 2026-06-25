@@ -1,4 +1,5 @@
 using Application.Common.Mappings;
+using AutoMapper;
 using Domain.Models.Prophecies;
 
 namespace Application.UseCases.Prophecies.Dtos;
@@ -15,4 +16,9 @@ public sealed class ProphecyRewardSnapshotDto : IMapFrom<ProphecyRewardSnapshot>
     public int FateEcho { get; set; }
     public string? CacheItemId { get; set; }
     public List<RewardItemSnapshotDto> Items { get; set; } = [];
+
+    public void Mapping(Profile profile)
+    {
+        profile.CreateMap<ProphecyRewardSnapshot, ProphecyRewardSnapshotDto>();
+    }
 }
