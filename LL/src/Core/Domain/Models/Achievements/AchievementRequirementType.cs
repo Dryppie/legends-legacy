@@ -1,0 +1,38 @@
+namespace Domain.Models.Achievements;
+
+public enum AchievementRequirementType
+{
+    AccountCreatedOrFirstCharacterCreated = 0,
+    CharacterLevelReached = 1,
+    AchievementPointsReached = 2,
+    MonstersDefeated = 3,
+    CreatureFamilyDefeated = 4,
+    PlayerDefeats = 5,
+    WinCombatBelowHealthPercent = 6,
+    LoseToSpecificCreatureWhileOverpowered = 7,
+    EssencesAbsorbed = 8,
+    EquippedEssenceCountReached = 9,
+    UniqueEssencesArchived = 10,
+    EssencesAscended = 11,
+    EssencesAscendedToTier = 12,
+    EssenceCollectionCompleted = 13,
+    DungeonRunsStarted = 14,
+    DungeonRunsCompleted = 15,
+    SpecificDungeonCompleted = 16,
+    SpecificDungeonBossDefeated = 17,
+    DungeonCompletedWithoutDefeat = 18,
+    DungeonCompletedWithoutCheckpointRetreat = 19,
+    DungeonTrapsTriggered = 20,
+    ItemsCrafted = 21,
+    ItemsTempered = 22,
+    MasterpiecesCrafted = 23,
+    BlueprintsUnlocked = 24,
+    SetItemsCrafted = 25,
+    HighQualityItemCraftedBelowPotential = 26,
+    CursedCraftingOutcomes = 27,
+    ColosseumBattlesCompleted = 28,
+    ColosseumBattlesWon = 29,
+    DefeatColosseumOpponentRatingAbove = 30,
+    ColosseumWinStreak = 31,
+    WinColosseumAfterLosingStreak = 32
+}
