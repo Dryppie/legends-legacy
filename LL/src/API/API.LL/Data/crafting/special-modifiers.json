@@ -1,0 +1,83 @@
+[
+  {
+    "id": "special_arcane_cycle",
+    "name": "Arcane Cycle",
+    "minRarity": "Legendary",
+    "statModifier": {
+      "stat": "Cooldown",
+      "weight": 4
+    }
+  },
+  {
+    "id": "special_battle_trance",
+    "name": "Battle Trance",
+    "minRarity": "Legendary",
+    "statModifier": {
+      "stat": "CritDamage",
+      "weight": 5
+    }
+  },
+  {
+    "id": "special_deadeye",
+    "name": "Deadeye",
+    "minRarity": "Legendary",
+    "statModifier": {
+      "stat": "CritDamage",
+      "weight": 5
+    }
+  },
+  {
+    "id": "special_decisive_edge",
+    "name": "Decisive Edge",
+    "minRarity": "Legendary",
+    "statModifier": {
+      "stat": "CritDamage",
+      "weight": 5
+    }
+  },
+  {
+    "id": "special_poison_critical",
+    "name": "Poison Critical",
+    "minRarity": "Legendary",
+    "statModifier": {
+      "stat": "CritDamage",
+      "weight": 5
+    }
+  },
+  {
+    "id": "special_restless_ward",
+    "name": "Restless Ward",
+    "minRarity": "Legendary",
+    "statModifier": {
+      "stat": "Resistance",
+      "weight": 5
+    }
+  },
+  {
+    "id": "special_swarm_shell",
+    "name": "Swarm Shell",
+    "minRarity": "Legendary",
+    "statModifier": {
+      "stat": "StatusResistance",
+      "weight": 5
+    }
+  },
+  {
+    "id": "special_unbroken_guard",
+    "name": "Unbroken Guard",
+    "minRarity": "Legendary",
+    "statModifier": {
+      "stat": "DamageReduction",
+      "weight": 4
+    }
+  },
+  {
+    "id": "special_wild_bond",
+    "name": "Wild Bond",
+    "minRarity": "Legendary",
+    "statModifier": {
+      "stat": "SummonPower",
+      "weight": 5
+    }
+  }
+]

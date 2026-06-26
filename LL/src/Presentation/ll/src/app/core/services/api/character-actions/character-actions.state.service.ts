@@ -19,6 +19,7 @@ import { CharacterActionsService } from './character-actions.service';
 import { CharacterActionTypePersistenceService } from './helpers/character-action-type-persistence.service';
 import { GameService } from '../../client-side/game/game.service';
 import { CombatService } from '../../client-side/combat/combat.service';
+import { InventoryStateService } from '../inventory/inventory-state.service';
 
 @Injectable({ providedIn: 'root' })
 export class CharacterActionsStateService {
@@ -73,6 +74,7 @@ export class CharacterActionsStateService {
     private readonly craftingHandler: CraftingActionHandler,
     private readonly gameService: GameService,
     private readonly combatService: CombatService,
+    private readonly inventoryState: InventoryStateService,
   ) {
     // When action changes, route to handler + update display
     effect(() => {
@@ -176,12 +178,18 @@ export class CharacterActionsStateService {
   }
 
   stopAction(): void {
+    const wasCraftingAction = this.isCraftingAction();
     this.handleDeletionOfCurrentAction();
 
     this.actionsService
       .stop()
       .pipe(
-        tap(() => this.clear()),
+        tap(() => {
+          this.clear();
+          if (wasCraftingAction) {
+            this.inventoryState.load(true);
+          }
+        }),
         catchError((err) => {
           console.error('Failed to stop action', err);
           return of(null);
@@ -262,6 +270,17 @@ export class CharacterActionsStateService {
     this.applyActionUpdate(action);
   }
 
+  refreshCurrentAction(): void {
+    this.trackActionRefresh(
+      this.actionsService.getCurrentAction().pipe(
+        catchError((err) => {
+          console.error('[Manual Refresh] Failed to fetch current action', err);
+          return of(null);
+        }),
+      ),
+    ).subscribe((action) => this.applyActionUpdate(action));
+  }
+
   private applyActionUpdate(action: CharacterActionDto | null): void {
     const currentKey = this.getActionUpdateKey(this._currentAction());
     const nextKey = this.getActionUpdateKey(action);
@@ -291,9 +310,13 @@ export class CharacterActionsStateService {
       ].join('|');
     }
 
-    return [action.characterActionType, action.updatedAt, action.isDeleted].join(
-      '|',
-    );
+    return [
+      action.characterActionType,
+      action.updatedAt,
+      action.isDeleted,
+      action.combatSession ? 'combat-session' : 'no-combat-session',
+      action.craftingActionDetails?.craftingQueueItems?.length ?? 0,
+    ].join('|');
   }
 
   private trackActionRefresh(

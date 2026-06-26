@@ -9,7 +9,7 @@ public class ItemService : IItemService
 {
     //private readonly IItemRepository _itemRepository;
     private readonly ItemBaseJsonReader _itemReader;
-    public ItemService(/*IItemRepository itemRepository,*/ IDbContext context)
+    public ItemService(/*IItemRepository itemRepository*/)
     {
         //_itemRepository = itemRepository;
         _itemReader = new();

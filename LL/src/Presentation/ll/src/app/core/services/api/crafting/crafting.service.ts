@@ -1,10 +1,19 @@
 import { Injectable } from '@angular/core';
+import { HttpParams } from '@angular/common/http';
 import { ApiService } from '../api.service';
-import { BehaviorSubject, catchError, map, Observable, throwError } from 'rxjs';
+import { BehaviorSubject, catchError, map, Observable, Subject, throwError } from 'rxjs';
 import { InventoryItem } from '../../../../shared/models/inventoryItem';
 import { CraftingQueueItem } from '../../../../shared/models/profession';
 import { ToastService } from '../../client-side/components/toast/toast.service';
 import { CharacterActionDto } from '../../../../shared/models/Dtos/characterActionDto';
+import {
+  BlueprintLearningOption,
+  CraftingRecipe,
+  CraftItemsRequest,
+  CraftItemsResult,
+  LearnBlueprintResult,
+} from '../../../../shared/models/crafting-v2';
+import { ApiResponse } from '../../../../shared/models/response';
 
 export interface RemoveCraftingQueueItemResponse {
   inventoryItems: InventoryItem[];
@@ -16,36 +25,87 @@ export interface RemoveCraftingQueueItemResponse {
 })
 export class CraftingService {
   private readonly queueSubject = new BehaviorSubject<CraftingQueueItem[]>([]);
+  private readonly blueprintLearnedSubject = new Subject<LearnBlueprintResult>();
   /** Observable that callers (components, other services) can subscribe to */
   readonly craftingQueue$ = this.queueSubject.asObservable();
+  readonly blueprintLearned$ = this.blueprintLearnedSubject.asObservable();
 
   constructor(
     private api: ApiService,
     private toast: ToastService,
   ) {}
 
-  public craftItem(recipeId: string): Observable<InventoryItem> {
-    return this.api.post('Crafting/CraftItem', recipeId).pipe(
-      map((item: InventoryItem) => {
+  public getRecipes(targetTier = 1): Observable<CraftingRecipe[]> {
+    const params = new HttpParams().set('targetTier', targetTier);
+    return this.api.get('Crafting/recipes', params).pipe(
+      map((response) => this.unwrapResponse<CraftingRecipe[]>(response)),
+      catchError(() =>
+        throwError(() => new Error('Failed to load crafting recipes')),
+      ),
+    );
+  }
+
+  public craftItems(request: CraftItemsRequest): Observable<CraftItemsResult> {
+    return this.api.post('Crafting/craft', request).pipe(
+      map((response) => {
+        const result = this.unwrapResponse<CraftItemsResult>(response);
+        const count = result.createdItems.length;
         this.toast.showToast(
-          `Crafted ${item.itemInstance.itemBase.name}`,
+          `Crafted ${count} item${count === 1 ? '' : 's'}`,
           'success',
           true,
           'tr',
         );
-        return item;
+        return result;
       }),
-
-      catchError(() => {
-        // this.toastService.showToast(
-        //   'Login Failed',
-        //   'Wrong email or password',
-        //   'error',
-        //   't',
-        // );
-        return throwError(() => new Error('Failed to craft item'));
-      }),
+      catchError(() => throwError(() => new Error('Failed to craft items'))),
     );
+  }
+
+  public learnBlueprint(
+    blueprintItemInstanceId: string,
+    recipeId: string,
+  ): Observable<LearnBlueprintResult> {
+    return this.api
+      .post('Crafting/blueprints/learn', { blueprintItemInstanceId, recipeId })
+      .pipe(
+        map((response) => {
+          const result = this.unwrapResponse<LearnBlueprintResult>(response);
+          this.blueprintLearnedSubject.next(result);
+          this.toast.showToast(
+            `Learned ${result.unlockedRecipeName}`,
+            'success',
+            true,
+            'tr',
+          );
+          return result;
+        }),
+        catchError((err) =>
+          throwError(
+            () => new Error(err.message ?? 'Failed to learn blueprint'),
+          ),
+        ),
+      );
+  }
+
+  public getBlueprintLearningOptions(
+    blueprintItemInstanceId: string,
+  ): Observable<BlueprintLearningOption[]> {
+    return this.api
+      .get(`Crafting/blueprints/${blueprintItemInstanceId}/learning-options`)
+      .pipe(
+        map((response) =>
+          this.unwrapResponse<BlueprintLearningOption[]>(response),
+        ),
+        catchError((err) =>
+          throwError(
+            () =>
+              new Error(
+                err.message ?? 'Failed to load blueprint learning options',
+              ),
+          ),
+        ),
+      );
   }
 
   removeItemFromQueue(
@@ -53,17 +113,13 @@ export class CraftingService {
   ): Observable<RemoveCraftingQueueItemResponse> {
     return this.api.post('Crafting/RemoveCraftingQueueItem', queueItem.id).pipe(
       map((response) => {
-        return response;
+        const result = this.unwrapResponse<RemoveCraftingQueueItemResponse>(response);
+        this.toast.showToast('Removed item from queue', 'success', true, 'tr');
+        return result;
       }),
 
       catchError(() => {
-        // this.toastService.showToast(
-        //   'Login Failed',
-        //   'Wrong email or password',
-        //   'error',
-        //   't',
-        // );
-        return throwError(() => new Error('Failed to craft item'));
+        return throwError(() => new Error('Failed to remove item from queue'));
       }),
     );
   }
@@ -75,5 +131,27 @@ export class CraftingService {
 
   get currentQueue(): CraftingQueueItem[] {
     return this.queueSubject.value;
+  }
+
+  private unwrapResponse<T>(response: T | ApiResponse<T>): T {
+    if (
+      response &&
+      typeof response === 'object' &&
+      'isSuccess' in response &&
+      'data' in response
+    ) {
+      const apiResponse = response as ApiResponse<T>;
+      if (!apiResponse.isSuccess) {
+        throw new Error(apiResponse.errorMessage ?? 'Request failed');
+      }
+
+      if (apiResponse.data == null) {
+        throw new Error('Response did not include data');
+      }
+
+      return apiResponse.data;
+    }
+
+    return response as T;
   }
 }

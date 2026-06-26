@@ -20,6 +20,7 @@ using Domain.Models.LootTables;
 using Domain.Models.MarketPlaces;
 using Domain.Models.Professions;
 using Domain.Models.Professions.Crafting;
+using Domain.Models.Prophecies;
 using Domain.Models.Regions;
 using Domain.Models.Regions.Areas;
 using Domain.Models.Snapshots;
@@ -197,7 +198,11 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : DbContext(opti
 
     //public DbSet<TownBuilding> TownBuildings => Set<TownBuilding>();
 
-    public DbSet<Recipe> Recipes => Set<Recipe>();
+    public DbSet<CharacterRecipeUnlock> CharacterRecipeUnlocks => Set<CharacterRecipeUnlock>();
+    public DbSet<CharacterRecipeMastery> CharacterRecipeMasteries => Set<CharacterRecipeMastery>();
+    public DbSet<ProphecyDefinition> ProphecyDefinitions => Set<ProphecyDefinition>();
+    public DbSet<PlayerProphecyInstance> PlayerProphecyInstances => Set<PlayerProphecyInstance>();
+    public DbSet<WeeklyRevelationProgress> WeeklyRevelationProgress => Set<WeeklyRevelationProgress>();
 
     public DbSet<Region> Regions => Set<Region>();
 

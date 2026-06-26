@@ -94,6 +94,13 @@ function getSidebarSections(): SidebarSection[] {
           title: 'World Map',
           description: 'Travel and explore',
         },
+        {
+          id: 'prophecies',
+          route: ['prophecies'],
+          icon: 'world/Quest',
+          title: 'Prophecies',
+          description: 'Daily and weekly omens',
+        },
       ],
     },
     {

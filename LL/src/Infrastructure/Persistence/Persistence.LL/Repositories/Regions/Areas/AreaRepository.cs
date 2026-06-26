@@ -21,4 +21,13 @@ public class AreaRepository : IAreaRepository
 
         return area;
     }
+
+    public async Task<IReadOnlyList<Area>> GetAreasWithCreaturesAsync(CancellationToken cancellationToken) =>
+        await _dbContext.Areas
+            .Include(area => area.Creatures)
+            .ToListAsync(cancellationToken);
+
+    public async Task<int> CountByIdAsync(string areaId, CancellationToken cancellationToken) =>
+        await _dbContext.Areas
+            .CountAsync(area => area.Id == areaId, cancellationToken);
 }

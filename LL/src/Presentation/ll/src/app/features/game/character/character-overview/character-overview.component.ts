@@ -1,8 +1,9 @@
 import { NgFor, NgIf } from '@angular/common';
 import { Component, computed, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { catchError, EMPTY, finalize, skip, take } from 'rxjs';
+import { catchError, EMPTY, finalize, skip } from 'rxjs';
 import { CharacterService } from '../../../../core/services/api/character/character.service';
+import { CharacterStateService } from '../../../../core/services/api/character/character-state.service';
 import { DefaultHeaderComponent } from '../../../../shared/components/default-header/default-header.component';
 import { CharacterOverviewDto } from '../../../../shared/models/Dtos/characterDto';
 import { RegularButtonComponent } from '../../../../shared/components/custom-components/buttons/regular-button/regular-button.component';
@@ -29,9 +30,26 @@ import { ActivatedRoute, Router } from '@angular/router';
 export class CharacterOverviewComponent {
   readonly AttributeType = AttributeType;
   searchValue = signal('');
-  character = signal<CharacterOverviewDto | null>(null);
-  isLoading = signal(false);
-  errorMessage = signal('');
+  private readonly searchedCharacter = signal<CharacterOverviewDto | null>(
+    null,
+  );
+  private readonly searchLoading = signal(false);
+  private readonly searchErrorMessage = signal('');
+  readonly character = computed(() =>
+    this.isViewingSearchResult()
+      ? this.searchedCharacter()
+      : this.characterState.overview(),
+  );
+  readonly isLoading = computed(
+    () =>
+      this.searchLoading() ||
+      (!this.isViewingSearchResult() && this.characterState.loading()),
+  );
+  readonly errorMessage = computed(
+    () =>
+      this.searchErrorMessage() ||
+      (!this.isViewingSearchResult() ? this.characterState.error() ?? '' : ''),
+  );
   viewedCharacterName = signal('');
   isViewingSearchResult = signal(false);
   readonly profileLabel = computed(() => {
@@ -91,6 +109,7 @@ export class CharacterOverviewComponent {
 
   constructor(
     private characterService: CharacterService,
+    private readonly characterState: CharacterStateService,
     private readonly route: ActivatedRoute,
     private readonly router: Router,
   ) {
@@ -102,13 +121,13 @@ export class CharacterOverviewComponent {
       this.searchValue.set(initialCharacterName);
       this.searchCharacter(initialCharacterName);
     } else {
-      this.loadCurrentCharacter();
+      this.showCurrentCharacter();
     }
 
     this.route.queryParamMap.pipe(skip(1)).subscribe((params) => {
       const characterName = params.get('characterName')?.trim();
       if (!characterName) {
-        this.loadCurrentCharacter();
+        this.showCurrentCharacter();
         return;
       }
 
@@ -127,6 +146,18 @@ export class CharacterOverviewComponent {
     this.navigateToCharacter(trimmed);
   }
 
+  refresh(): void {
+    if (this.isViewingSearchResult()) {
+      const characterName = this.viewedCharacterName().trim();
+      if (characterName) {
+        this.searchCharacter(characterName);
+        return;
+      }
+    }
+
+    this.characterState.refresh();
+  }
+
   private navigateToCharacter(characterName: string | null): void {
     this.router.navigate([], {
       relativeTo: this.route,
@@ -136,45 +167,32 @@ export class CharacterOverviewComponent {
   }
 
   private searchCharacter(characterName: string): void {
-    this.isLoading.set(true);
-    this.errorMessage.set('');
+    this.searchLoading.set(true);
+    this.searchErrorMessage.set('');
 
     this.characterService
       .searchCharacter(characterName)
       .pipe(
         catchError((err) => {
-          this.errorMessage.set(err.message);
+          this.searchErrorMessage.set(err.message);
           return EMPTY;
         }),
-        finalize(() => this.isLoading.set(false)),
+        finalize(() => this.searchLoading.set(false)),
       )
       .subscribe((character) => {
-        this.character.set(character);
+        this.searchedCharacter.set(character);
         this.viewedCharacterName.set(characterName);
         this.isViewingSearchResult.set(true);
       });
   }
 
-  loadCurrentCharacter(): void {
-    this.isLoading.set(true);
-    this.errorMessage.set('');
-
-    this.characterService.characterOverview$
-      .pipe(
-        take(1),
-        catchError(() => {
-          this.errorMessage.set('Unable to load your character overview.');
-          return EMPTY;
-        }),
-        finalize(() => this.isLoading.set(false)),
-      )
-      .subscribe((c) => {
-        this.character.set(c);
-        this.viewedCharacterName.set(
-          this.characterService.currentCharacter()?.name ?? '',
-        );
-        this.isViewingSearchResult.set(false);
-      });
+  private showCurrentCharacter(): void {
+    this.searchErrorMessage.set('');
+    this.searchedCharacter.set(null);
+    this.viewedCharacterName.set(
+      this.characterService.currentCharacter()?.name ?? '',
+    );
+    this.isViewingSearchResult.set(false);
   }
 
   onEnter(event: KeyboardEvent) {

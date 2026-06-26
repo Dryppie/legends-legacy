@@ -38,12 +38,6 @@ export class SidebarService {
             title: 'Items',
           },
           {
-            id: 'recipes',
-            route: 'recipes',
-            icon: 'character/essences',
-            title: 'Recipes',
-          },
-          {
             id: 'diagnostics',
             route: 'diagnostics',
             icon: 'settings/settings',

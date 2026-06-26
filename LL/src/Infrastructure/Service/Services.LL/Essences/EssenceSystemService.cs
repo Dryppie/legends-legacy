@@ -1,4 +1,6 @@
 using Application.Interfaces.Services.LL.Essences;
+using Application.Interfaces.Services.LL.Prophecies;
+using Application.UseCases.Prophecies.Events;
 using Domain.Models.Attributes.Modifiers;
 using Domain.Models.Combat.Abilities;
 using Domain.Models.Entities.Creatures;
@@ -7,6 +9,7 @@ using Domain.Models.Essences.Definitions;
 using Domain.Models.Inventories;
 using Domain.Models.Items;
 using Domain.Models.Items.EssenceItems;
+using MediatR;
 using Services.LL.Interfaces;
 
 namespace Services.LL.Essences;
@@ -23,6 +26,7 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
     private readonly IEssenceLoadoutLimitService _loadoutLimits;
     private readonly IInventoryItemFactory _inventoryItemFactory;
     private readonly IRandomProvider _random;
+    private readonly IPublisher? _publisher;
 
     public EssenceSystemService(
         IEssenceRepository essences,
@@ -33,7 +37,8 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
         IEssenceSlotUnlockService slotUnlocks,
         IEssenceLoadoutLimitService loadoutLimits,
         IInventoryItemFactory inventoryItemFactory,
-        IRandomProvider random)
+        IRandomProvider random,
+        IPublisher? publisher = null)
     {
         _essences = essences;
         _inventory = inventory;
@@ -44,6 +49,7 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
         _loadoutLimits = loadoutLimits;
         _inventoryItemFactory = inventoryItemFactory;
         _random = random;
+        _publisher = publisher;
     }
 
     public async Task<SoulArchive> GetSoulArchiveAsync(Guid characterId, CancellationToken cancellationToken)
@@ -96,6 +102,14 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
         }, cancellationToken);
 
         ConsumeInventoryItem(inventoryItem, 1);
+        if (_publisher is not null)
+        {
+            await _publisher.Publish(new ProphecyProgressNotification(new ProphecyProgressEvent(
+                characterId,
+                DateTimeOffset.UtcNow,
+                ProphecyProgressKind.EssenceArchived)), cancellationToken);
+        }
+
         return Ok("Essence absorbed into the Soul Archive.");
     }
 
@@ -256,11 +270,25 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
 
     public async Task GrantCombatXpToAttunedEssencesAsync(Guid characterId, int xp, CancellationToken cancellationToken)
     {
+        var totalGranted = 0;
         var activeSlots = await GetActiveSlotsAsync(characterId, cancellationToken);
         foreach (var slot in activeSlots.Where(x => x.PlayerEssence is not null))
         {
             var definition = _definitions.GetById(slot.PlayerEssence!.EssenceDefinitionId);
-            if (definition is not null) _progression.GrantXp(slot.PlayerEssence, definition, xp);
+            if (definition is not null)
+            {
+                var result = _progression.GrantXp(slot.PlayerEssence, definition, xp);
+                totalGranted += result.XpGained;
+            }
+        }
+
+        if (totalGranted > 0 && _publisher is not null)
+        {
+            await _publisher.Publish(new ProphecyProgressNotification(new ProphecyProgressEvent(
+                characterId,
+                DateTimeOffset.UtcNow,
+                ProphecyProgressKind.EssenceXpGained,
+                totalGranted)), cancellationToken);
         }
     }
 

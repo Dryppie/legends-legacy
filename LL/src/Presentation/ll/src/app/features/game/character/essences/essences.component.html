@@ -91,6 +91,7 @@
             {{ essenceState.archive()?.essences?.length ?? 0 }}
           </p>
           <app-dropdown
+            appearance="field"
             label="Sort"
             [value]="archiveSort()"
             [options]="archiveSorts"
@@ -452,6 +453,7 @@
             <span class="ll-label">Slot {{ slotIndex + 1 }}</span>
             <app-dropdown
               class="block w-full"
+              appearance="field"
               label="Empty"
               [value]="essenceState.draftSlots()[slotIndex]"
               [options]="draftSlotDropdownOptions(slotIndex)"

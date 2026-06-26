@@ -17,6 +17,7 @@ using Domain.Models.LootTables;
 using Domain.Models.MarketPlaces;
 using Domain.Models.Professions;
 using Domain.Models.Professions.Crafting;
+using Domain.Models.Prophecies;
 using Domain.Models.Regions;
 using Domain.Models.Regions.Areas;
 using Domain.Models.Snapshots;
@@ -84,7 +85,11 @@ public interface IDbContext
     //DbSet<Title> Titles { get; }
     //DbSet<Town> Towns { get; }
     //DbSet<TownBuilding> TownBuildings { get; }
-    DbSet<Recipe> Recipes { get; }
+    DbSet<CharacterRecipeUnlock> CharacterRecipeUnlocks { get; }
+    DbSet<CharacterRecipeMastery> CharacterRecipeMasteries { get; }
+    DbSet<ProphecyDefinition> ProphecyDefinitions { get; }
+    DbSet<PlayerProphecyInstance> PlayerProphecyInstances { get; }
+    DbSet<WeeklyRevelationProgress> WeeklyRevelationProgress { get; }
     DbSet<Region> Regions { get; }
 
     // Snapshots

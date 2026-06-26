@@ -6,6 +6,7 @@ using Application.Interfaces.Services.LL.Dungeons;
 using Application.Interfaces.Services.LL.Entities;
 using Application.Interfaces.Services.LL.Essences;
 using Application.Interfaces.Services.LL.Items;
+using Application.Interfaces.Services.LL.Prophecies;
 using Application.Interfaces.Services.LL.Professions;
 using Application.Interfaces.Services.LL.Regions;
 using Domain.Models.Dungeons;
@@ -57,6 +58,7 @@ using Services.LL.Loots;
 using Services.LL.LootTables;
 using Services.LL.MarketPlaces;
 using Services.LL.Players;
+using Services.LL.Prophecies;
 using Services.LL.Professions;
 using Services.LL.Professions.Craftings;
 using Services.LL.Providers;
@@ -106,6 +108,19 @@ public static class DependencyInjection
 
         services.AddScoped<ICraftingService, CraftingService>();
         services.AddScoped<ITemperingService, TemperingService>();
+        services.AddScoped<ITemperingProfileResolver, TemperingProfileResolver>();
+        services.AddScoped<ITemperingMechanicsService, TemperingMechanicsService>();
+        services.AddScoped<ICraftingProgressionService, CraftingProgressionService>();
+        services.AddScoped<ICraftingItemCatalogService, CraftingItemCatalogService>();
+        services.AddScoped<IItemQualityRollService, ItemQualityRollService>();
+        services.AddScoped<IItemPotentialService, ItemPotentialService>();
+        services.AddScoped<ICraftingRequirementResolver, CraftingRequirementResolver>();
+        services.AddScoped<IItemStatRollService, ItemStatRollService>();
+        services.AddSingleton<ICraftingDefinitionProvider>(sp =>
+            new JsonCraftingDefinitionProvider(
+                config,
+                contentRootPath,
+                sp.GetRequiredService<JsonSerializerOptions>()));
 
         services.AddScoped<DungeonRunFactory>();
         services.AddScoped<IDungeonRunService, DungeonRunService>();
@@ -190,9 +205,14 @@ public static class DependencyInjection
         services.AddScoped<IMarketPlaceService, MarketPlaceService>();
 
         services.AddScoped<IProfessionService, ProfessionService>();
-        services.AddScoped<IRecipeService, RecipeService>();
 
         services.AddScoped<IPlayerService, PlayerService>();
+        services.AddSingleton<IProphecyDefinitionProvider>(sp =>
+            new JsonProphecyDefinitionProvider(
+                config,
+                contentRootPath,
+                sp.GetRequiredService<JsonSerializerOptions>()));
+        services.AddScoped<IProphecyService, ProphecyService>();
 
         services.AddScoped<ISoulstoneUpgradeService, SoulstoneUpgradeService>();
 
