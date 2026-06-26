@@ -43,6 +43,13 @@ public class ChatMessageRepository : IChatMessageRepository
             .Take(take)
             .ToListAsync(cancellationToken);
 
-        return [.. publicMessages, .. guildMessages, .. whisperMessages];
+        var systemMessages = await _context.ChatMessages
+            .AsNoTracking()
+            .Where(m => m.ChannelType == ChatChannelType.System && (m.TargetCharacterId == null || m.TargetCharacterId == userId))
+            .OrderByDescending(m => m.SentAt)
+            .Take(take)
+            .ToListAsync(cancellationToken);
+
+        return [.. publicMessages, .. guildMessages, .. whisperMessages, .. systemMessages];
     }
 }

@@ -5,5 +5,6 @@ public enum ChatChannelType
     Trade,     // e.g., "trade", "help"
     Help,     // e.g., "trade", "help"
     Guild,      // based on user's guild ID
-    Whisper     // direct player-to-player
+    Whisper,     // direct player-to-player
+    System
 }

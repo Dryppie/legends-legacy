@@ -19,6 +19,8 @@ public class SendMessageCommandHandler : IRequestHandler<SendMessageCommand, Cha
 
     public async Task<ChatMessageDto?> Handle(SendMessageCommand request, CancellationToken cancellationToken)
     {
+        if (request.ChannelType == ChatChannelType.System) return null;
+
         if (!Guid.TryParse(request.SenderId, out var senderId)) return null;
         var targetCharacterId = Guid.Empty; // Default to empty GUID for whisper messages
         if (request.TargetCharacterId != null && request.TargetCharacterName != null)
