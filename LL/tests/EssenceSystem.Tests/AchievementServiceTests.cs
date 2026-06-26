@@ -55,20 +55,36 @@ public sealed class AchievementServiceTests
             AchievementRequirementType.ColosseumBattlesWon,
             1,
             AchievementScope.Character);
-        SeedTitle(db, "title.duelist", "colosseum.duelist", TitleScope.Character, TitleDisplayPosition.Prefix);
+        SeedTitle(db, "title.duelist", "colosseum.duelist", TitleScope.Character);
         await db.SaveChangesAsync();
         var service = new AchievementService(db);
 
-        Assert.Null(await service.EquipTitleAsync(accountId, firstCharacterId, "title.duelist", CancellationToken.None));
+        Assert.Null(await service.EquipTitleAsync(
+            accountId,
+            firstCharacterId,
+            "title.duelist",
+            TitleDisplayPosition.Prefix,
+            CancellationToken.None));
 
         await service.AddProgressAsync(accountId, firstCharacterId, AchievementRequirementType.ColosseumBattlesWon);
         await db.SaveChangesAsync();
 
-        var equipped = await service.EquipTitleAsync(accountId, firstCharacterId, "title.duelist", CancellationToken.None);
-        var rejected = await service.EquipTitleAsync(accountId, secondCharacterId, "title.duelist", CancellationToken.None);
+        var equipped = await service.EquipTitleAsync(
+            accountId,
+            firstCharacterId,
+            "title.duelist",
+            TitleDisplayPosition.Suffix,
+            CancellationToken.None);
+        var rejected = await service.EquipTitleAsync(
+            accountId,
+            secondCharacterId,
+            "title.duelist",
+            TitleDisplayPosition.Prefix,
+            CancellationToken.None);
 
         Assert.NotNull(equipped);
-        Assert.Equal("Duelist First", equipped!.DisplayName);
+        Assert.Equal("First, the Duelist", equipped!.DisplayName);
+        Assert.Equal(TitleDisplayPosition.Suffix, equipped.DisplayPosition);
         Assert.Null(rejected);
     }
 
@@ -412,8 +428,7 @@ public sealed class AchievementServiceTests
         LLDbContext db,
         string key,
         string sourceAchievementKey,
-        TitleScope scope,
-        TitleDisplayPosition position = TitleDisplayPosition.Prefix)
+        TitleScope scope)
     {
         db.TitleDefinitions.Add(new TitleDefinition
         {
@@ -423,7 +438,6 @@ public sealed class AchievementServiceTests
             Description = "Duelist title",
             Category = AchievementCategory.Colosseum,
             Rarity = TitleRarity.Common,
-            DisplayPosition = position,
             Scope = scope,
             IsActive = true,
             SourceAchievementKey = sourceAchievementKey,

@@ -908,7 +908,12 @@ public sealed class EssenceSystemServiceTests
         public Task<IReadOnlyList<TitleDto>> GetTitlesAsync(Guid accountId, Guid characterId, TitleFilters filters, CancellationToken cancellationToken) =>
             Task.FromResult<IReadOnlyList<TitleDto>>([]);
 
-        public Task<EquippedTitleDto?> EquipTitleAsync(Guid accountId, Guid characterId, string titleKey, CancellationToken cancellationToken) =>
+        public Task<EquippedTitleDto?> EquipTitleAsync(
+            Guid accountId,
+            Guid characterId,
+            string titleKey,
+            TitleDisplayPosition displayPosition,
+            CancellationToken cancellationToken) =>
             Task.FromResult<EquippedTitleDto?>(null);
 
         public Task UnequipTitleAsync(Guid accountId, Guid characterId, CancellationToken cancellationToken) =>
