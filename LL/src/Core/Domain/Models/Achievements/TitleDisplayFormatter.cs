@@ -9,13 +9,8 @@ public static class TitleDisplayFormatter
 
         return position == TitleDisplayPosition.Prefix
             ? $"{normalizedTitleName} {normalizedCharacterName}"
-            : $"{normalizedCharacterName}, {FormatSuffixTitle(normalizedTitleName)}";
+            : $"{normalizedCharacterName}, the {normalizedTitleName}";
     }
-
-    private static string FormatSuffixTitle(string titleName) =>
-        titleName.StartsWith("the ", StringComparison.OrdinalIgnoreCase)
-            ? titleName
-            : $"the {titleName}";
 
     private static string Normalize(string value, string fallback) =>
         string.IsNullOrWhiteSpace(value)

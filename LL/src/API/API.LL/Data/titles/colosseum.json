@@ -37,7 +37,7 @@
   },
   {
     "key": "title.undefeated",
-    "name": "the Undefeated",
+    "name": "Undefeated",
     "description": "Earned by winning 10 Colosseum battles in a row.",
     "category": "Colosseum",
     "rarity": "Exalted",
@@ -49,7 +49,7 @@
   },
   {
     "key": "title.challenger",
-    "name": "the Challenger",
+    "name": "Challenger",
     "description": "Earned by completing 100 Colosseum battles.",
     "category": "Colosseum",
     "rarity": "Renowned",

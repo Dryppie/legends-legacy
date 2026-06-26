@@ -1,7 +1,7 @@
 [
   {
     "key": "title.soulbound",
-    "name": "the Soulbound",
+    "name": "Soulbound",
     "description": "Earned by equipping 10 Essences at once.",
     "category": "Essences",
     "rarity": "Renowned",
@@ -49,7 +49,7 @@
   },
   {
     "key": "title.ascendant",
-    "name": "the Ascendant",
+    "name": "Ascendant",
     "description": "Earned by ascending your first Essence.",
     "category": "Essences",
     "rarity": "Renowned",

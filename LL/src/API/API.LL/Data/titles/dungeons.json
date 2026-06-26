@@ -37,7 +37,7 @@
   },
   {
     "key": "title.hivebreaker",
-    "name": "the Hivebreaker",
+    "name": "Hivebreaker",
     "description": "Earned by defeating the Ant Queen in The Hive's Abyss.",
     "category": "Dungeons",
     "rarity": "Exalted",
@@ -61,7 +61,7 @@
   },
   {
     "key": "title.untouched",
-    "name": "the Untouched",
+    "name": "Untouched",
     "description": "Earned by clearing a dungeon without being defeated.",
     "category": "Dungeons",
     "rarity": "Exalted",

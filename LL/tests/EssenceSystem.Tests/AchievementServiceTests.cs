@@ -144,8 +144,9 @@ public sealed class AchievementServiceTests
 
     [Theory]
     [InlineData("Hero", "Duelist", TitleDisplayPosition.Prefix, "Duelist Hero")]
+    [InlineData("Hero", "Scarred", TitleDisplayPosition.Prefix, "Scarred Hero")]
     [InlineData("Hero", "Duelist", TitleDisplayPosition.Suffix, "Hero, the Duelist")]
-    [InlineData("Hero", "the Relentless", TitleDisplayPosition.Suffix, "Hero, the Relentless")]
+    [InlineData("Hero", "Relentless", TitleDisplayPosition.Suffix, "Hero, the Relentless")]
     public void Title_display_formatter_formats_prefix_and_suffix_titles(
         string characterName,
         string titleName,
