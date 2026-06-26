@@ -1,0 +1,298 @@
+<div class="ll-page-stack pb-4">
+  <div class="flex flex-wrap items-center justify-between gap-3 pr-4">
+    <app-default-header
+      section="Character"
+      title="Achievements"
+      text="Legacy Renown, records, and titles"
+      icon="character/achievements"
+    ></app-default-header>
+
+    <app-regular-button
+      [disabled]="loading()"
+      [text]="loading() ? 'Refreshing' : 'Refresh'"
+      (pressed)="load()"
+    ></app-regular-button>
+  </div>
+
+  <p *ngIf="error()" class="ll-state ll-state-danger mr-4">
+    {{ error() }}
+  </p>
+
+  <section *ngIf="overview() as o" class="grid gap-3 pr-4 md:grid-cols-4">
+    <article class="ll-stat-card">
+      <div class="ll-stat-label">Achievement Points</div>
+      <div class="ll-heading mt-1 text-3xl">{{ o.totalAchievementPoints }}</div>
+    </article>
+    <article class="ll-stat-card ll-card-accent">
+      <div class="ll-stat-label">Legacy Renown</div>
+      <div class="ll-heading mt-1 text-2xl">
+        {{ o.legacyRenownRank }} · {{ o.legacyRenownName }}
+      </div>
+    </article>
+    <article class="ll-stat-card">
+      <div class="ll-stat-label">Achievements</div>
+      <div class="ll-heading mt-1 text-3xl">
+        {{ o.totalAchievementsUnlocked }}/{{ o.totalAchievementsAvailable }}
+      </div>
+    </article>
+    <article class="ll-stat-card">
+      <div class="ll-stat-label">Titles</div>
+      <div class="ll-heading mt-1 text-3xl">{{ o.totalTitlesUnlocked }}</div>
+    </article>
+  </section>
+
+  <div
+    class="grid min-h-0 flex-1 grid-cols-1 gap-4 overflow-hidden pr-4 xl:grid-cols-[minmax(0,1fr)_24rem]"
+  >
+    <section class="ll-panel flex min-h-0 flex-col overflow-hidden">
+      <div
+        class="ll-toolbar flex-col items-stretch rounded-none border-x-0 border-t-0 px-3 py-3"
+      >
+        <div class="ll-segmented w-full flex-wrap gap-1 bg-black/30 p-1">
+          <button
+            *ngFor="let category of categories"
+            type="button"
+            class="ll-segmented-button flex min-h-9 items-center gap-2 px-3 py-2 text-xs font-semibold uppercase"
+            [ngClass]="{
+              'll-segmented-button-active': activeCategory() === category,
+            }"
+            (click)="setCategory(category)"
+          >
+            <span>{{ category }}</span>
+            <span
+              *ngIf="category !== 'All'"
+              class="rounded border border-light_gray/60 bg-black/25 px-1.5 py-0.5 text-[0.65rem] leading-none text-zinc-400"
+              [ngClass]="{
+                'border-black/20 bg-black/15 text-black':
+                  activeCategory() === category,
+              }"
+            >
+              {{ categoryProgress(category) }}
+            </span>
+          </button>
+        </div>
+
+        <div
+          class="mt-3 grid gap-2 lg:grid-cols-[minmax(12rem,1fr)_10rem_10rem_auto]"
+        >
+          <input
+            type="search"
+            class="ll-input min-w-0"
+            placeholder="Search achievements"
+            [ngModel]="search()"
+            (ngModelChange)="search.set($event)"
+          />
+
+          <select
+            class="ll-input min-w-0"
+            [ngModel]="achievementState()"
+            (ngModelChange)="achievementState.set($event)"
+          >
+            <option *ngFor="let state of achievementStates" [ngValue]="state">
+              {{ state }}
+            </option>
+          </select>
+
+          <select
+            class="ll-input min-w-0"
+            [ngModel]="sortMode()"
+            (ngModelChange)="sortMode.set($event)"
+          >
+            <option *ngFor="let mode of sortModes" [ngValue]="mode">
+              {{ mode }}
+            </option>
+          </select>
+
+          <button
+            type="button"
+            class="ll-button px-3 py-1 text-xs"
+            (click)="clearFilters()"
+          >
+            Clear
+          </button>
+        </div>
+      </div>
+
+      <div class="min-h-0 flex-1 overflow-y-auto p-2">
+        <div
+          *ngIf="!filteredAchievements().length"
+          class="ll-empty-state min-h-60"
+        >
+          No achievements found.
+        </div>
+
+        <article
+          *ngFor="let achievement of filteredAchievements()"
+          class="ll-card mb-2 p-3"
+          [ngClass]="{
+            'border-primary/60 bg-primary/10': achievement.isCompleted,
+          }"
+        >
+          <div class="flex flex-wrap items-start justify-between gap-3">
+            <div class="min-w-0">
+              <div class="flex flex-wrap items-center gap-2">
+                <h3 class="ll-heading text-base">{{ achievement.name }}</h3>
+                <span class="ll-badge rounded">{{ achievement.rarity }}</span>
+                <span class="ll-badge rounded text-zinc-400">
+                  {{ achievement.category }}
+                </span>
+              </div>
+              <p class="ll-copy mt-1">{{ achievement.description }}</p>
+              <p
+                *ngIf="achievement.rewardTitleName"
+                class="mt-1 text-xs text-primary"
+              >
+                Title: {{ achievement.rewardTitleName }}
+              </p>
+            </div>
+
+            <div class="text-right">
+              <div class="ll-stat-label">Points</div>
+              <div class="text-lg font-semibold text-primary">
+                {{ achievement.points }}
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-3">
+            <div class="mb-1 flex items-center justify-between text-xs">
+              <span class="text-zinc-400">
+                {{
+                  achievement.requiredAmount
+                    ? achievement.currentAmount +
+                      " / " +
+                      achievement.requiredAmount
+                    : achievement.visibility
+                }}
+              </span>
+              <span
+                [ngClass]="{
+                  'text-primary': achievement.isCompleted,
+                  'text-zinc-500': !achievement.isCompleted,
+                }"
+              >
+                {{
+                  achievement.isCompleted
+                    ? "Unlocked"
+                    : progressPercent(achievement) + "%"
+                }}
+              </span>
+            </div>
+            <div class="h-2 overflow-hidden rounded bg-black/40">
+              <div
+                class="h-full rounded bg-primary transition-all"
+                [style.width.%]="progressPercent(achievement)"
+              ></div>
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <aside class="ll-panel flex min-h-0 flex-col overflow-hidden">
+      <div class="border-b border-light_gray/70 p-4">
+        <div class="flex items-center justify-between gap-3">
+          <div>
+            <h2 class="ll-heading">Titles</h2>
+            <p class="ll-copy">{{ unlockedTitles().length }} unlocked</p>
+          </div>
+          <button
+            type="button"
+            class="ll-button px-3 py-1 text-xs"
+            [disabled]="!equippedTitle()"
+            (click)="unequip()"
+          >
+            Unequip
+          </button>
+        </div>
+
+        <div class="mt-3 border-t border-light_gray/60 pt-3">
+          <div class="ll-stat-label">Equipped</div>
+          <ng-container *ngIf="equippedTitle() as title; else noEquippedTitle">
+            <div class="mt-1 text-base font-semibold text-primary">
+              {{ title.preview }}
+            </div>
+            <p class="ll-copy mt-1">{{ title.description }}</p>
+          </ng-container>
+          <ng-template #noEquippedTitle>
+            <div class="mt-1 text-sm text-zinc-400">No title equipped</div>
+          </ng-template>
+        </div>
+
+        <div class="mt-3 grid gap-2">
+          <input
+            type="search"
+            class="ll-input min-w-0"
+            placeholder="Search titles"
+            [ngModel]="titleSearch()"
+            (ngModelChange)="titleSearch.set($event)"
+          />
+
+          <div class="flex flex-wrap gap-2">
+            <button
+              *ngFor="let state of titleStates"
+              type="button"
+              class="ll-segmented-button rounded border border-light_gray px-3 py-1.5 text-xs"
+              [ngClass]="{
+                'll-segmented-button-active': titleState() === state,
+              }"
+              (click)="titleState.set(state)"
+            >
+              {{ state }}
+            </button>
+            <button
+              type="button"
+              class="ll-button px-3 py-1 text-xs"
+              (click)="clearTitleFilters()"
+            >
+              Clear
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="min-h-0 flex-1 overflow-y-auto p-2">
+        <div *ngIf="!filteredTitles().length" class="ll-empty-state min-h-40">
+          No titles found.
+        </div>
+
+        <article
+          *ngFor="let title of filteredTitles()"
+          class="ll-card mb-2 p-3"
+          [ngClass]="{
+            'border-primary/60 bg-primary/10': title.isEquipped,
+            'opacity-70': !title.isUnlocked,
+          }"
+        >
+          <div class="flex items-start justify-between gap-3">
+            <div class="min-w-0">
+              <h3 class="ll-heading text-base">{{ title.name }}</h3>
+              <p class="ll-copy mt-1">{{ title.preview }}</p>
+              <div class="mt-2 flex flex-wrap gap-2">
+                <span class="ll-badge rounded">{{ title.rarity }}</span>
+                <span class="ll-badge rounded text-zinc-400">
+                  {{ title.scope }}
+                </span>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              class="ll-button px-3 py-1 text-xs"
+              [disabled]="!title.isUnlocked || title.isEquipped"
+              (click)="equip(title)"
+            >
+              {{
+                title.isEquipped
+                  ? "Equipped"
+                  : title.isUnlocked
+                    ? "Equip"
+                    : "Locked"
+              }}
+            </button>
+          </div>
+        </article>
+      </div>
+    </aside>
+  </div>
+</div>

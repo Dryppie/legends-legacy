@@ -6,10 +6,10 @@ import { environment } from '../../../../../environments/environment';
 import { ChatApiService } from '../chat-api.service';
 import { HttpParams } from '@angular/common/http';
 import { toObservable } from '@angular/core/rxjs-interop';
-import { EventBusService } from '../../client-side/event-bus/event-bus.service';
 import { AuthService } from '../../api/auth/auth.service';
 import { GuildStateService } from '../../api/guild/guild-state.service';
 import { CharacterService } from '../../api/character/character.service';
+import { GameEventService } from '../../real-time/game-event.service';
 
 export interface ChatMessageDto {
   id: string;
@@ -44,6 +44,7 @@ export class ChatService {
   private lastConnectionWarningAt = 0;
   private readonly connectionWarningThrottleMs = 30_000;
   private readonly unavailableRetryDelayMs = 30_000;
+  private readonly systemSenderId = '00000000-0000-0000-0000-000000000000';
   // expose an observable stream of all messages
   private readonly messageList = signal<ChatMessageDto[]>([]);
   public messages$ = toObservable(this.messageList);
@@ -55,12 +56,32 @@ export class ChatService {
     private chatApi: ChatApiService,
     private characterService: CharacterService,
     private guildState: GuildStateService,
-    private eventBus: EventBusService,
+    private gameEvents: GameEventService,
     private auth: AuthService,
   ) {
     this.incoming$.subscribe((msg) => {
       this.messageList.update((prev) => [...prev, msg]);
     });
+
+    effect(
+      () => {
+        const envelope = this.gameEvents.eventEnvelope.AchievementUnlockedMsg();
+        const payload = envelope?.payload;
+        if (!payload?.message) return;
+
+        this.addMessage({
+          id: envelope?.updateId ?? crypto.randomUUID(),
+          channelType: ChatChannelType.System,
+          contextKey: 'system',
+          senderId: this.systemSenderId,
+          senderName: payload.isGlobal ? 'World' : 'System',
+          body: payload.message,
+          sentAt: new Date(envelope?.occurredAt ?? Date.now()),
+        });
+      },
+      { allowSignalWrites: true },
+    );
+
     effect(
       () => {
         const id = this.auth.identity(); // ← depends on username + login

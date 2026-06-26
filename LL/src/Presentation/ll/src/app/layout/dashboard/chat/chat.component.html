@@ -36,31 +36,38 @@
               <span>{{ m.sentAt | date: "shortTime" }}:</span>
               <span class="font-bold">
                 <ng-container
-                  *ngIf="m.channelType === 'Whisper'; else normalSender"
+                  *ngIf="m.channelType === 'System'; else playerSender"
                 >
-                  <ng-container
-                    *ngIf="m.senderId === characterId(); else incomingWhisper"
-                  >
-                    To
-                    <div class="flex">
-                      <app-character-tag
-                        [id]="m.targetCharacterId ?? ''"
-                        [name]="m.targetCharacterName ?? ''"
-                      ></app-character-tag
-                      >:
-                    </div>
-                  </ng-container>
-                  <ng-template #incomingWhisper>
-                    From
-                    <div class="flex">
-                      <app-character-tag
-                        [id]="m.senderId"
-                        [name]="m.senderName"
-                      ></app-character-tag
-                      >:
-                    </div>
-                  </ng-template>
+                  {{ m.senderName }}:
                 </ng-container>
+                <ng-template #playerSender>
+                  <ng-container
+                    *ngIf="m.channelType === 'Whisper'; else normalSender"
+                  >
+                    <ng-container
+                      *ngIf="m.senderId === characterId(); else incomingWhisper"
+                    >
+                      To
+                      <div class="flex">
+                        <app-character-tag
+                          [id]="m.targetCharacterId ?? ''"
+                          [name]="m.targetCharacterName ?? ''"
+                        ></app-character-tag
+                        >:
+                      </div>
+                    </ng-container>
+                    <ng-template #incomingWhisper>
+                      From
+                      <div class="flex">
+                        <app-character-tag
+                          [id]="m.senderId"
+                          [name]="m.senderName"
+                        ></app-character-tag
+                        >:
+                      </div>
+                    </ng-template>
+                  </ng-container>
+                </ng-template>
                 <ng-template #normalSender>
                   <div class="flex">
                     <app-character-tag
