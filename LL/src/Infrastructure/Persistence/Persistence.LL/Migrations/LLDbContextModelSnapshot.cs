@@ -135,6 +135,40 @@ namespace Persistence.LL.Migrations
                     b.UseTphMappingStrategy();
                 });
 
+            modelBuilder.Entity("Domain.Models.Colosseum.ArenaDefenseSnapshot", b =>
+                {
+                    b.Property<Guid>("CharacterId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("CharacterSnapshotId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsOutdated")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsValid")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("LoadoutHash")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("CharacterId");
+
+                    b.HasIndex("CharacterSnapshotId")
+                        .IsUnique();
+
+                    b.ToTable("ArenaDefenseSnapshots");
+                });
+
             modelBuilder.Entity("Domain.Models.Colosseum.ArenaTicketStatus", b =>
                 {
                     b.Property<Guid>("CharacterId")
@@ -151,11 +185,91 @@ namespace Persistence.LL.Migrations
                     b.ToTable("ArenaTicketStatus");
                 });
 
+            modelBuilder.Entity("Domain.Models.Colosseum.ChampionMarketPurchase", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("CharacterId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("GloryCostPaid")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("ItemId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTimeOffset>("PurchasedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CharacterId", "ItemId", "PurchasedAt");
+
+                    b.ToTable("ChampionMarketPurchases");
+                });
+
+            modelBuilder.Entity("Domain.Models.Colosseum.CharacterArenaProfile", b =>
+                {
+                    b.Property<Guid>("CharacterId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("AttackDraws")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("AttackLosses")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("AttackWins")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("BestAttackWinStreak")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("CurrentAttackWinStreak")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("DefenseDraws")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("DefenseLosses")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("DefenseWins")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Glory")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTimeOffset?>("LastFirstWinBonusAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("LifetimeHighestRating")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Rating")
+                        .HasColumnType("integer");
+
+                    b.HasKey("CharacterId");
+
+                    b.HasIndex("Rating");
+
+                    b.ToTable("CharacterArenaProfiles");
+                });
+
             modelBuilder.Entity("Domain.Models.Colosseum.ColosseumMatchResult", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
+
+                    b.Property<int>("CharacterAGloryEarned")
+                        .HasColumnType("integer");
 
                     b.Property<Guid>("CharacterAId")
                         .HasColumnType("uuid");
@@ -170,6 +284,18 @@ namespace Persistence.LL.Migrations
                     b.Property<int>("CharacterARatingBefore")
                         .HasColumnType("integer");
 
+                    b.Property<int>("CharacterARatingDelta")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("CharacterAStreakAfter")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("CharacterAStreakBefore")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("CharacterBGloryEarned")
+                        .HasColumnType("integer");
+
                     b.Property<Guid>("CharacterBId")
                         .HasColumnType("uuid");
 
@@ -182,6 +308,13 @@ namespace Persistence.LL.Migrations
 
                     b.Property<int>("CharacterBRatingBefore")
                         .HasColumnType("integer");
+
+                    b.Property<int>("CharacterBRatingDelta")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Outcome")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<DateTimeOffset>("PlayedAt")
                         .HasColumnType("timestamp with time zone");
@@ -889,59 +1022,6 @@ namespace Persistence.LL.Migrations
                     b.ToTable("MarketPlaceListings");
                 });
 
-            modelBuilder.Entity("Domain.Models.Professions.Crafting.CharacterRecipeMastery", b =>
-                {
-                    b.Property<Guid>("CharacterId")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("RecipeId")
-                        .HasMaxLength(128)
-                        .HasColumnType("character varying(128)");
-
-                    b.Property<int>("Experience")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("Level")
-                        .HasColumnType("integer");
-
-                    b.Property<DateTimeOffset>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.HasKey("CharacterId", "RecipeId");
-
-                    b.ToTable("CharacterRecipeMasteries");
-                });
-
-            modelBuilder.Entity("Domain.Models.Professions.Crafting.CharacterRecipeUnlock", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("BlueprintId")
-                        .IsRequired()
-                        .HasMaxLength(128)
-                        .HasColumnType("character varying(128)");
-
-                    b.Property<Guid>("CharacterId")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("RecipeId")
-                        .IsRequired()
-                        .HasMaxLength(128)
-                        .HasColumnType("character varying(128)");
-
-                    b.Property<DateTimeOffset>("UnlockedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CharacterId", "RecipeId", "BlueprintId")
-                        .IsUnique();
-
-                    b.ToTable("CharacterRecipeUnlocks");
-                });
-
             modelBuilder.Entity("Domain.Models.Professions.Crafting.CraftingQueueItem", b =>
                 {
                     b.Property<Guid>("Id")
@@ -969,6 +1049,62 @@ namespace Persistence.LL.Migrations
                     b.ToTable("CraftingQueueItems");
                 });
 
+            modelBuilder.Entity("Domain.Models.Professions.Crafting.Material", b =>
+                {
+                    b.Property<Guid>("RecipeId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ItemId")
+                        .HasColumnType("text");
+
+                    b.Property<string>("ItemBaseId")
+                        .HasColumnType("text");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("integer");
+
+                    b.HasKey("RecipeId", "ItemId");
+
+                    b.HasIndex("ItemBaseId");
+
+                    b.HasIndex("ItemId");
+
+                    b.ToTable("Material");
+                });
+
+            modelBuilder.Entity("Domain.Models.Professions.Crafting.Recipe", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("CraftType")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("ItemId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("ItemType")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("LevelRequirement")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ItemId");
+
+                    b.ToTable("Recipes");
+                });
+
             modelBuilder.Entity("Domain.Models.Professions.Profession", b =>
                 {
                     b.Property<Guid>("CharacterId")
@@ -986,218 +1122,6 @@ namespace Persistence.LL.Migrations
                     b.HasKey("CharacterId", "ProfessionType");
 
                     b.ToTable("Professions");
-                });
-
-            modelBuilder.Entity("Domain.Models.Prophecies.PlayerProphecyInstance", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTimeOffset?>("AcceptedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid>("CharacterId")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTimeOffset?>("ClaimedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTimeOffset?>("CompletedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int>("CurrentValue")
-                        .HasColumnType("integer");
-
-                    b.Property<DateTimeOffset>("GeneratedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("ObjectiveParameterSnapshotJson")
-                        .IsRequired()
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("jsonb")
-                        .HasDefaultValue("{}");
-
-                    b.Property<DateTimeOffset>("PeriodEnd")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTimeOffset>("PeriodStart")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid>("PlayerId")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("ProgressJson")
-                        .IsRequired()
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("jsonb")
-                        .HasDefaultValue("{}");
-
-                    b.Property<string>("ProphecyDefinitionId")
-                        .IsRequired()
-                        .HasMaxLength(128)
-                        .HasColumnType("character varying(128)");
-
-                    b.Property<string>("RewardSnapshotJson")
-                        .IsRequired()
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("jsonb")
-                        .HasDefaultValue("{}");
-
-                    b.Property<long>("RowVersion")
-                        .IsConcurrencyToken()
-                        .HasColumnType("bigint");
-
-                    b.Property<int>("Scope")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("SlotType")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("TargetValue")
-                        .HasColumnType("integer");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ProphecyDefinitionId");
-
-                    b.HasIndex("PlayerId", "CharacterId", "Status");
-
-                    b.HasIndex("PlayerId", "CharacterId", "Scope", "PeriodStart", "PeriodEnd");
-
-                    b.HasIndex("PlayerId", "CharacterId", "Scope", "PeriodStart", "SlotType")
-                        .IsUnique()
-                        .HasDatabaseName("IX_PlayerProphecyInstances_PlayerId_CharacterId_Scope_PeriodS~1");
-
-                    b.ToTable("PlayerProphecyInstances");
-                });
-
-            modelBuilder.Entity("Domain.Models.Prophecies.ProphecyDefinition", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasMaxLength(128)
-                        .HasColumnType("character varying(128)");
-
-                    b.Property<string>("AllowedSlots")
-                        .IsRequired()
-                        .HasColumnType("jsonb");
-
-                    b.Property<int>("Category")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("Difficulty")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("ExcludedTags")
-                        .IsRequired()
-                        .HasColumnType("jsonb");
-
-                    b.Property<string>("FlavorText")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)");
-
-                    b.Property<bool>("IsEnabled")
-                        .HasColumnType("boolean");
-
-                    b.Property<int?>("MaxPlayerLevel")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("MinPlayerLevel")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("ObjectiveParameterJson")
-                        .IsRequired()
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("jsonb")
-                        .HasDefaultValue("{}");
-
-                    b.Property<string>("ObjectiveText")
-                        .IsRequired()
-                        .HasMaxLength(240)
-                        .HasColumnType("character varying(240)");
-
-                    b.Property<string>("ObjectiveType")
-                        .IsRequired()
-                        .HasMaxLength(80)
-                        .HasColumnType("character varying(80)");
-
-                    b.Property<string>("RequiredFeatures")
-                        .IsRequired()
-                        .HasColumnType("jsonb");
-
-                    b.Property<string>("RequiredTags")
-                        .IsRequired()
-                        .HasColumnType("jsonb");
-
-                    b.Property<string>("RewardProfileId")
-                        .IsRequired()
-                        .HasMaxLength(80)
-                        .HasColumnType("character varying(80)");
-
-                    b.Property<int>("Scope")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasMaxLength(160)
-                        .HasColumnType("character varying(160)");
-
-                    b.Property<int>("Weight")
-                        .HasColumnType("integer");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Scope", "Category", "Difficulty", "IsEnabled");
-
-                    b.ToTable("ProphecyDefinitions");
-                });
-
-            modelBuilder.Entity("Domain.Models.Prophecies.WeeklyRevelationProgress", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("CharacterId")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<bool>("Milestone3Claimed")
-                        .HasColumnType("boolean");
-
-                    b.Property<bool>("Milestone5Claimed")
-                        .HasColumnType("boolean");
-
-                    b.Property<bool>("Milestone7Claimed")
-                        .HasColumnType("boolean");
-
-                    b.Property<DateTimeOffset>("PeriodEnd")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTimeOffset>("PeriodStart")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid>("PlayerId")
-                        .HasColumnType("uuid");
-
-                    b.Property<int>("PropheticFavor")
-                        .HasColumnType("integer");
-
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("PlayerId", "CharacterId", "PeriodStart")
-                        .IsUnique();
-
-                    b.ToTable("WeeklyRevelationProgress");
                 });
 
             modelBuilder.Entity("Domain.Models.Regions.Areas.Area", b =>
@@ -1575,23 +1499,11 @@ namespace Persistence.LL.Migrations
                 {
                     b.HasBaseType("Domain.Models.Entities.Entity");
 
-                    b.Property<int>("ArenaRating")
-                        .HasColumnType("integer");
-
-                    b.Property<long>("AscensionStoneFragments")
-                        .HasColumnType("bigint");
-
                     b.Property<long>("Cinders")
                         .HasColumnType("bigint");
 
                     b.Property<float>("Experience")
                         .HasColumnType("real");
-
-                    b.Property<long>("FateEcho")
-                        .HasColumnType("bigint");
-
-                    b.Property<long>("SigilFragments")
-                        .HasColumnType("bigint");
 
                     b.Property<long>("Soulstones")
                         .HasColumnType("bigint");
@@ -1692,19 +1604,6 @@ namespace Persistence.LL.Migrations
                 {
                     b.HasBaseType("Domain.Models.Items.ItemInstance");
 
-                    b.PrimitiveCollection<List<string>>("AffinityTags")
-                        .IsRequired()
-                        .HasColumnType("text[]");
-
-                    b.Property<string>("BaseRecipeId")
-                        .HasColumnType("text");
-
-                    b.Property<string>("BlueprintId")
-                        .HasColumnType("text");
-
-                    b.Property<string>("CraftedName")
-                        .HasColumnType("text");
-
                     b.Property<bool>("IsLevelingItem")
                         .HasColumnType("boolean");
 
@@ -1714,29 +1613,10 @@ namespace Persistence.LL.Migrations
                     b.Property<int>("ItemXp")
                         .HasColumnType("integer");
 
-                    b.Property<int?>("MaxPotential")
-                        .HasColumnType("integer");
-
                     b.Property<int?>("Potential")
                         .HasColumnType("integer");
 
-                    b.Property<int>("Quality")
-                        .HasColumnType("integer");
-
                     b.Property<int>("Rarity")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("RecipeId")
-                        .HasColumnType("text");
-
-                    b.PrimitiveCollection<List<string>>("SpecialModifiers")
-                        .IsRequired()
-                        .HasColumnType("text[]");
-
-                    b.Property<int>("TemperingProgress")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("Tier")
                         .HasColumnType("integer");
 
                     b.HasDiscriminator().HasValue(0);
@@ -1845,11 +1725,33 @@ namespace Persistence.LL.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("Domain.Models.Colosseum.ArenaDefenseSnapshot", b =>
+                {
+                    b.HasOne("Domain.Models.Snapshots.CharacterSnapshot", "CharacterSnapshot")
+                        .WithOne()
+                        .HasForeignKey("Domain.Models.Colosseum.ArenaDefenseSnapshot", "CharacterSnapshotId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("CharacterSnapshot");
+                });
+
             modelBuilder.Entity("Domain.Models.Colosseum.ArenaTicketStatus", b =>
                 {
                     b.HasOne("Domain.Models.Entities.Characters.Character", "Character")
                         .WithOne("ArenaTicketStatus")
                         .HasForeignKey("Domain.Models.Colosseum.ArenaTicketStatus", "CharacterId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Character");
+                });
+
+            modelBuilder.Entity("Domain.Models.Colosseum.CharacterArenaProfile", b =>
+                {
+                    b.HasOne("Domain.Models.Entities.Characters.Character", "Character")
+                        .WithOne("ArenaProfile")
+                        .HasForeignKey("Domain.Models.Colosseum.CharacterArenaProfile", "CharacterId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -2092,6 +1994,38 @@ namespace Persistence.LL.Migrations
                     b.Navigation("EquipmentInstance");
                 });
 
+            modelBuilder.Entity("Domain.Models.Professions.Crafting.Material", b =>
+                {
+                    b.HasOne("Domain.Models.Items.ItemBase", null)
+                        .WithMany("Materials")
+                        .HasForeignKey("ItemBaseId");
+
+                    b.HasOne("Domain.Models.Items.ItemBase", "Item")
+                        .WithMany()
+                        .HasForeignKey("ItemId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Domain.Models.Professions.Crafting.Recipe", null)
+                        .WithMany("Materials")
+                        .HasForeignKey("RecipeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Item");
+                });
+
+            modelBuilder.Entity("Domain.Models.Professions.Crafting.Recipe", b =>
+                {
+                    b.HasOne("Domain.Models.Items.Equipments.EquipmentBase", "Item")
+                        .WithMany()
+                        .HasForeignKey("ItemId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Item");
+                });
+
             modelBuilder.Entity("Domain.Models.Professions.Profession", b =>
                 {
                     b.HasOne("Domain.Models.Entities.Characters.Character", null)
@@ -2099,17 +2033,6 @@ namespace Persistence.LL.Migrations
                         .HasForeignKey("CharacterId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("Domain.Models.Prophecies.PlayerProphecyInstance", b =>
-                {
-                    b.HasOne("Domain.Models.Prophecies.ProphecyDefinition", "ProphecyDefinition")
-                        .WithMany()
-                        .HasForeignKey("ProphecyDefinitionId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("ProphecyDefinition");
                 });
 
             modelBuilder.Entity("Domain.Models.Regions.Areas.Area", b =>
@@ -2296,6 +2219,13 @@ namespace Persistence.LL.Migrations
                     b.Navigation("ItemInstances");
 
                     b.Navigation("LootTablesItems");
+
+                    b.Navigation("Materials");
+                });
+
+            modelBuilder.Entity("Domain.Models.Professions.Crafting.Recipe", b =>
+                {
+                    b.Navigation("Materials");
                 });
 
             modelBuilder.Entity("Domain.Models.Regions.Areas.Area", b =>
@@ -2338,6 +2268,9 @@ namespace Persistence.LL.Migrations
 
             modelBuilder.Entity("Domain.Models.Entities.Characters.Character", b =>
                 {
+                    b.Navigation("ArenaProfile")
+                        .IsRequired();
+
                     b.Navigation("ArenaTicketStatus")
                         .IsRequired();
 

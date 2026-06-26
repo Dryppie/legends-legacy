@@ -19,6 +19,7 @@ public class CharacterDto : IMapFrom<Character>
 
     public void Mapping(Profile profile)
     {
-        profile.CreateMap<Character, CharacterDto>();
+        profile.CreateMap<Character, CharacterDto>()
+            .ForMember(dest => dest.ArenaRating, opt => opt.MapFrom(src => src.ArenaProfile != null ? src.ArenaProfile.Rating : 1000));
     }
 }

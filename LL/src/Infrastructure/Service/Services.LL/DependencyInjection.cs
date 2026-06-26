@@ -93,6 +93,11 @@ public static class DependencyInjection
         services.AddScoped<IBonusProvider, SoulstoneBonusProvider>();
         services.AddScoped<IBonusProvider, GuildBonusProvider>();
 
+        services.AddSingleton<IChampionMarketCatalog>(sp =>
+            new JsonChampionMarketCatalog(
+                config,
+                contentRootPath,
+                sp.GetRequiredService<JsonSerializerOptions>()));
         services.AddScoped<IColosseumService, ColosseumService>();
         services.AddScoped<IRatingService, RatingService>();
 

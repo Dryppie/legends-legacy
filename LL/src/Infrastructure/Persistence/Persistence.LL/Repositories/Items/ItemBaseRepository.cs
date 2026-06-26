@@ -27,6 +27,8 @@ public class ItemBaseRepository : IItemBaseRepository
         await NormalizePlainItemBaseDiscriminatorsAsync(itemIds, cancellationToken);
 
         return await _context.ItemBases
+            .Include(x => (x as EquipmentBase)!.AttributeModifiers)
+            .Include(x => (x as EquipmentBase)!.ToolBonuses)
             .Where(x => itemIds.Contains(x.Id))
             .ToDictionaryAsync(x => x.Id, cancellationToken);
     }

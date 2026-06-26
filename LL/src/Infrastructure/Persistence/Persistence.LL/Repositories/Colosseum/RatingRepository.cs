@@ -14,21 +14,21 @@ public class RatingRepository : IRatingRepository
 
     public async Task<int> GetColosseumRatingAsync(Guid characterId, CancellationToken cancellationToken)
     {
-        var character = await _context.Characters
+        var profile = await _context.CharacterArenaProfiles
             .FindAsync([characterId], cancellationToken);
 
-        NotFoundException.ThrowIfNull(character, nameof(character), characterId);
+        NotFoundException.ThrowIfNull(profile, nameof(profile), characterId);
 
-        return character.ArenaRating;
+        return profile.Rating;
     }
 
     public async Task SetColosseumRatingAsync(Guid characterId, int newA, CancellationToken cancellationToken)
     {
-        var character = await _context.Characters
+        var profile = await _context.CharacterArenaProfiles
             .FindAsync([characterId], cancellationToken);
 
-        NotFoundException.ThrowIfNull(character, nameof(character), characterId);
+        NotFoundException.ThrowIfNull(profile, nameof(profile), characterId);
 
-        character.ArenaRating = newA;
+        profile.Rating = newA;
     }
 }

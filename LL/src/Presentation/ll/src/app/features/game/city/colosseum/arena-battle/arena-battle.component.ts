@@ -64,13 +64,19 @@ export class ArenaBattleComponent implements OnChanges, OnDestroy {
       return;
     }
 
+    const now = Date.now();
+    const nextTicketAt = this.arenaTicketStatus.nextTicketAt
+      ? new Date(this.arenaTicketStatus.nextTicketAt).getTime()
+      : null;
     const restoreIntervalMs = 3 * 60 * 60 * 1000;
     const lastTicket = new Date(
       this.arenaTicketStatus.lastTicketUpdate,
     ).getTime();
-    const now = Date.now();
     const elapsed = now - lastTicket;
-    const remainder = restoreIntervalMs - (elapsed % restoreIntervalMs);
+    const fallbackRemainder = restoreIntervalMs - (elapsed % restoreIntervalMs);
+    const remainder = nextTicketAt
+      ? Math.max(0, nextTicketAt - now)
+      : fallbackRemainder;
 
     this.newTicketsIn = this.formatTime(remainder);
   }

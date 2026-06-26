@@ -1,5 +1,59 @@
-<section class="ll-panel flex h-full w-full items-center justify-center p-4">
-  <div class="ll-empty-state w-full">
-    Champions market is not available yet.
+<section class="ll-panel flex h-full w-full flex-col overflow-hidden p-4 text-white">
+  <div class="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+    <div>
+      <p class="ll-stat-label">Champion's Market</p>
+      <h2 class="ll-heading mt-1 text-xl">
+        {{ (state.championMarket()?.glory ?? state.status()?.glory ?? 0) | numberFormat }}
+        Glory
+      </h2>
+    </div>
+
+    <p class="text-sm text-secondary" *ngIf="state.championMarket()?.weeklyResetAt">
+      Weekly reset {{ state.championMarket()?.weeklyResetAt | date: "mediumDate" }}
+    </p>
   </div>
+
+  <div
+    *ngIf="state.championMarket()?.items?.length; else emptyMarket"
+    class="mt-4 grid min-h-0 flex-1 gap-3 overflow-y-auto pr-1 md:grid-cols-2 xl:grid-cols-3"
+  >
+    <article
+      *ngFor="let item of state.championMarket()?.items ?? []"
+      class="ll-card flex min-h-40 flex-col justify-between gap-3 p-3"
+    >
+      <div>
+        <div class="flex items-start justify-between gap-2">
+          <div class="min-w-0">
+            <p class="ll-stat-label">{{ item.category }}</p>
+            <h3 class="ll-heading mt-1 text-base">{{ item.name }}</h3>
+          </div>
+          <span class="shrink-0 text-sm text-primary">
+            {{ item.gloryCost | numberFormat }}
+          </span>
+        </div>
+
+        <p class="mt-2 text-sm text-secondary">{{ item.description }}</p>
+        <p class="mt-2 text-xs text-secondary" *ngIf="item.weeklyPurchaseLimit">
+          Weekly remaining: {{ item.remainingWeeklyPurchases }}
+        </p>
+        <p class="mt-2 text-xs text-secondary" *ngIf="item.lifetimePurchaseLimit">
+          Remaining: {{ item.remainingLifetimePurchases }} /
+          {{ item.lifetimePurchaseLimit }}
+        </p>
+      </div>
+
+      <button
+        type="button"
+        class="ll-button-primary w-full px-3 py-2"
+        [disabled]="!item.canPurchase || state.loading()"
+        (click)="purchase(item)"
+      >
+        {{ item.canPurchase ? "Purchase" : (item.cannotPurchaseReason ?? "Unavailable") }}
+      </button>
+    </article>
+  </div>
+
+  <ng-template #emptyMarket>
+    <div class="ll-empty-state w-full">Champion's market is empty.</div>
+  </ng-template>
 </section>

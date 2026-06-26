@@ -16,59 +16,121 @@
       <app-banner image="colosseum" class="w-full"></app-banner>
     </div>
 
-    <section class="grid w-full grid-cols-2 gap-2 text-white md:grid-cols-4">
+    <section class="grid w-full grid-cols-2 gap-2 text-white md:grid-cols-4 xl:grid-cols-7">
       <div class="ll-stat-card p-2">
         <p class="ll-stat-label">Tickets</p>
         <p class="ll-heading mt-1 text-lg">
-          {{ state.arenaTicketStatus()?.currentTickets ?? 0 }} /
-          {{ state.arenaTicketStatus()?.maxTickets ?? 0 }}
+          {{ state.status()?.tickets ?? state.arenaTicketStatus()?.currentTickets ?? 0 }} /
+          {{ state.status()?.maxTickets ?? state.arenaTicketStatus()?.maxTickets ?? 0 }}
         </p>
       </div>
 
       <div class="ll-stat-card p-2">
-        <p class="ll-stat-label">Your Rank</p>
+        <p class="ll-stat-label">Tier</p>
         <p class="ll-heading mt-1 text-lg">
-          {{ myRanking ? "#" + myRanking.rank : "-" }}
+          {{ state.status()?.rankProgress?.currentTierName ?? "-" }}
         </p>
       </div>
 
       <div class="ll-stat-card p-2">
         <p class="ll-stat-label">Rating</p>
         <p class="ll-heading mt-1 text-lg">
-          {{ myRanking ? (myRanking.level | numberFormat) : "-" }}
+          {{ (state.status()?.rating ?? myRanking?.level) | numberFormat }}
         </p>
       </div>
 
       <div class="ll-stat-card p-2">
-        <p class="ll-stat-label">Recent Record</p>
+        <p class="ll-stat-label">Glory</p>
         <p class="ll-heading mt-1 text-lg">
-          {{ recentRecord.wins }}-{{ recentRecord.losses }}-{{
-            recentRecord.draws
-          }}
+          {{ (state.status()?.glory ?? 0) | numberFormat }}
+        </p>
+      </div>
+
+      <div class="ll-stat-card p-2">
+        <p class="ll-stat-label">Streak</p>
+        <p class="ll-heading mt-1 text-lg">
+          {{ state.status()?.currentAttackWinStreak ?? 0 }}
+          <span class="text-sm text-secondary">
+            / {{ state.status()?.bestAttackWinStreak ?? 0 }}
+          </span>
+        </p>
+      </div>
+
+      <div class="ll-stat-card p-2">
+        <p class="ll-stat-label">Daily First Win</p>
+        <p class="ll-heading mt-1 text-lg">
+          {{ state.status()?.dailyFirstWinAvailable ? "Available" : "Claimed" }}
+        </p>
+        <p class="text-xs text-secondary" *ngIf="state.status()?.dailyFirstWinAvailable">
+          +{{ state.status()?.dailyFirstWinBonusGlory ?? 20 }} Glory
+        </p>
+      </div>
+
+      <div class="ll-stat-card p-2">
+        <p class="ll-stat-label">Record</p>
+        <p class="ll-heading mt-1 text-lg">
+          {{ state.status()?.attackRecord?.wins ?? recentRecord.wins }}-{{
+            state.status()?.attackRecord?.losses ?? recentRecord.losses
+          }}-{{ state.status()?.attackRecord?.draws ?? recentRecord.draws }}
         </p>
       </div>
     </section>
 
     <app-tabs class="flex w-full flex-col overflow-hidden">
       <app-tab label="Arena">
-        <app-arena-battle
-          class="overflow-hidden"
-          [opponents]="state.opponents()"
-          [arenaTicketStatus]="state.arenaTicketStatus()"
-          (refreshOpponents)="onRefreshOpponents()"
-          (challenge)="challenge($event)"
-        >
-        </app-arena-battle>
+        <div class="flex min-h-0 w-full flex-col gap-3">
+          <section
+            class="ll-stat-card flex flex-col gap-3 p-3 text-white md:flex-row md:items-center md:justify-between"
+          >
+            <div class="min-w-0">
+              <div class="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                <p class="ll-stat-label">Defense</p>
+                <p class="ll-heading text-base">
+                  {{
+                    state.status()?.defenseStatus?.isValid
+                      ? "Snapshot Active"
+                      : "No Active Snapshot"
+                  }}
+                </p>
+              </div>
+              <p class="ll-copy mt-1">
+                Defenses always affect rating
+                <span *ngIf="state.status()?.defenseStatus?.updatedAt">
+                  · Updated
+                  {{ state.status()?.defenseStatus?.updatedAt | date: "short" }}
+                </span>
+              </p>
+            </div>
+
+            <button
+              type="button"
+              class="ll-button-primary shrink-0 px-3 py-2 text-sm"
+              [disabled]="state.loading()"
+              (click)="updateDefenseSnapshot()"
+            >
+              Update Defense
+            </button>
+          </section>
+
+          <app-arena-battle
+            class="min-h-0 overflow-hidden"
+            [opponents]="state.opponents()"
+            [arenaTicketStatus]="state.arenaTicketStatus()"
+            (refreshOpponents)="onRefreshOpponents()"
+            (challenge)="challenge($event)"
+          >
+          </app-arena-battle>
+        </div>
       </app-tab>
 
       <!-- <app-tab label="Tournament Grounds">
         <app-tournament-grounds class="overflow-hidden">
         </app-tournament-grounds>
-      </app-tab>
+      </app-tab> -->
 
       <app-tab label="Champion's Market">
         <app-champions-market class="overflow-hidden"> </app-champions-market>
-      </app-tab> -->
+      </app-tab>
 
       <app-tab label="Rankings">
         <app-rankings-glory
@@ -89,8 +151,8 @@
   </div>
 </ng-template>
 <app-colosseum-result
-  *ngIf="colosseumBattleResult"
-  [outcome]="colosseumBattleResult"
+  *ngIf="state.latestBattleResult() as colosseumBattleResult"
+  [result]="colosseumBattleResult"
   (closed)="hideBattleResult()"
 >
 </app-colosseum-result>

@@ -27,7 +27,7 @@ public class Character : Entity
     public long AscensionStoneFragments { get; set; } = 0;
     public ICollection<CharacterSoulstoneUpgrade> CharacterSoulstoneUpgrades { get; set; } = [];
     public Inventory Inventory { get; set; } = null!;
-    public int ArenaRating { get; set; } = 1000;
+    public CharacterArenaProfile ArenaProfile { get; set; } = null!;
     public ICollection<ColosseumMatchResult> ColosseumMatches { get; set; } = [];
     public ArenaTicketStatus ArenaTicketStatus { get; set; } = null!;
     public ICollection<EssenceLoadout> EssenceLoadouts { get; set; } = [];
