@@ -1,4 +1,5 @@
 using Application.Interfaces.Services;
+using Application.Interfaces.Services.LL.Achievements;
 using Application.Interfaces.Services.LL.Colosseum;
 using Application.Interfaces.WebSockets;
 using Application.UseCases.Colosseum.Events;
@@ -11,15 +12,18 @@ public class ArenaBattleCompletedEventHandler : INotificationHandler<ArenaBattle
     private readonly IRatingService _ratingService;
     private readonly IColosseumService _colosseumService;
     private readonly IGameEventPublisher _eventPublisher;
+    private readonly IAchievementService _achievementService;
 
     public ArenaBattleCompletedEventHandler(
         IRatingService ratingService,
         IColosseumService colosseumService,
-        IGameEventPublisher eventPublisher)
+        IGameEventPublisher eventPublisher,
+        IAchievementService achievementService)
     {
         _ratingService = ratingService;
         _colosseumService = colosseumService;
         _eventPublisher = eventPublisher;
+        _achievementService = achievementService;
     }
 
     public async Task Handle(ArenaBattleCompletedEvent notification, CancellationToken cancellationToken)
@@ -28,6 +32,13 @@ public class ArenaBattleCompletedEventHandler : INotificationHandler<ArenaBattle
             notification.CharacterId, notification.EnemyId, notification.Outcome, cancellationToken);
 
         await _colosseumService.SaveArenaMatchResult(notification.CharacterId, notification.EnemyId, notification.Outcome, ratingResult, cancellationToken);
+        await _achievementService.RecordColosseumBattleAsync(
+            notification.CharacterId,
+            notification.EnemyId,
+            notification.Outcome,
+            ratingResult.CharacterARatingBefore,
+            ratingResult.CharacterBRatingBefore,
+            cancellationToken);
 
         var msg = new ArenaBattleCompletedMsg(
             notification.CharacterId,
