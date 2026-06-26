@@ -13,6 +13,12 @@ public class ColosseumRepository : IColosseumRepository
         _context = context;
     }
 
+    public async Task<Character?> GetArenaCharacterAsync(Guid characterId, CancellationToken cancellationToken)
+    {
+        return await _context.Characters
+            .FirstOrDefaultAsync(c => c.Id == characterId, cancellationToken);
+    }
+
     public async Task<(List<Character> Opponents, int MyRating)> GetArenaOpponentsWithRating(Guid characterId, CancellationToken cancellationToken)
     {
         var characters = await _context.Characters
@@ -24,7 +30,8 @@ public class ColosseumRepository : IColosseumRepository
         if (self == null) return ([], 0);
 
         var opponents = characters
-            .Where(c => c.Id != characterId)
+            .Where(c => c.Id != characterId
+                        && c.Character.UserId != self.Character.UserId)
             .OrderBy(c => Math.Abs(c.ArenaRating - self.ArenaRating))
             .Take(25)
             .Select(c => c.Character)
@@ -42,6 +49,16 @@ public class ColosseumRepository : IColosseumRepository
             .ToListAsync(cancellationToken);
 
         return colosseumMatchResults;
+    }
+
+    public async Task<bool> HasRecentMatchAsync(Guid attackerCharacterId, Guid defenderCharacterId, DateTimeOffset since, CancellationToken cancellationToken)
+    {
+        return await _context.ColosseumMatches
+            .AnyAsync(match =>
+                match.CharacterAId == attackerCharacterId &&
+                match.CharacterBId == defenderCharacterId &&
+                match.PlayedAt >= since,
+                cancellationToken);
     }
 
     public async Task<List<Character>> GetRankings(Guid characterId, CancellationToken cancellationToken)
@@ -85,5 +102,54 @@ public class ColosseumRepository : IColosseumRepository
     public void UpdateArenaTicketStatus(ArenaTicketStatus arenaTicketStatus)
     {
         _context.ArenaTicketStatus.Update(arenaTicketStatus);
+    }
+
+    public async Task<ArenaDefenseSnapshot?> GetArenaDefenseSnapshotAsync(Guid characterId, CancellationToken cancellationToken)
+    {
+        return await _context.ArenaDefenseSnapshots
+            .Include(x => x.CharacterSnapshot)
+                .ThenInclude(x => x.BaseAttributes)
+            .Include(x => x.CharacterSnapshot)
+                .ThenInclude(x => x.Equipment)
+                    .ThenInclude(x => x.InstanceModifiers)
+            .Include(x => x.CharacterSnapshot)
+                .ThenInclude(x => x.EquippedEssences)
+            .FirstOrDefaultAsync(x => x.CharacterId == characterId, cancellationToken);
+    }
+
+    public async Task SaveArenaDefenseSnapshotAsync(ArenaDefenseSnapshot snapshot, CancellationToken cancellationToken)
+    {
+        var existing = await _context.ArenaDefenseSnapshots
+            .FirstOrDefaultAsync(x => x.CharacterId == snapshot.CharacterId, cancellationToken);
+
+        if (existing is null)
+        {
+            await _context.ArenaDefenseSnapshots.AddAsync(snapshot, cancellationToken);
+            return;
+        }
+
+        existing.CharacterSnapshotId = snapshot.CharacterSnapshotId;
+        existing.LoadoutHash = snapshot.LoadoutHash;
+        existing.IsValid = snapshot.IsValid;
+        existing.IsOutdated = snapshot.IsOutdated;
+        existing.UpdatedAt = snapshot.UpdatedAt;
+    }
+
+    public async Task<int> CountChampionMarketPurchasesAsync(Guid characterId, string itemId, DateTimeOffset? since, CancellationToken cancellationToken)
+    {
+        var query = _context.ChampionMarketPurchases
+            .Where(x => x.CharacterId == characterId && x.ItemId == itemId);
+
+        if (since.HasValue)
+        {
+            query = query.Where(x => x.PurchasedAt >= since.Value);
+        }
+
+        return await query.SumAsync(x => x.Quantity, cancellationToken);
+    }
+
+    public async Task SaveChampionMarketPurchaseAsync(ChampionMarketPurchase purchase, CancellationToken cancellationToken)
+    {
+        await _context.ChampionMarketPurchases.AddAsync(purchase, cancellationToken);
     }
 }

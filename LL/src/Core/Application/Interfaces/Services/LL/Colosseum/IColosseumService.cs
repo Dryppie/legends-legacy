@@ -6,13 +6,33 @@ using Domain.Models.Leaderboards;
 namespace Application.Interfaces.Services.LL.Colosseum;
 
 public sealed record StartArenaBattleResult(
+    Guid BattleId,
     CombatResult CombatResult,
-    ArenaTicketStatus ArenaTicketStatus);
+    ArenaTicketStatus ArenaTicketStatus,
+    ColosseumMatchResult MatchResult,
+    ArenaRankProgress AttackerRankBefore,
+    ArenaRankProgress AttackerRankAfter,
+    ArenaOpponentPreview Opponent,
+    int GloryEarned,
+    int BaseGloryEarned,
+    int DailyFirstWinBonus,
+    int DefenderGloryEarned,
+    int AttackStreakBefore,
+    int AttackStreakAfter);
+
+public sealed record ChampionMarketPurchaseResult(
+    ChampionMarketItem Item,
+    int Quantity,
+    int GlorySpent,
+    int GloryRemaining,
+    int CindersGranted,
+    int SoulstonesGranted);
 
 public interface IColosseumService
 {
     Task<IReadOnlyList<ArenaOpponentPreview>> GetArenaOpponents(Guid characterId, CancellationToken cancellationToken);
     Task<ArenaTicketStatus> GetArenaTicketStatusAsync(Guid characterId, CancellationToken cancellationToken);
+    Task<Character?> GetArenaCharacterAsync(Guid characterId, CancellationToken cancellationToken);
 
     /// <summary>
     /// Get a previous match results from the arena
@@ -33,4 +53,9 @@ public interface IColosseumService
     /// <returns></returns>
     Task SaveArenaMatchResult(Guid characterId, Guid enemyId, BattleOutcome outcome, ColosseumRatingResult ratingResult, CancellationToken cancellationToken);
     Task<StartArenaBattleResult?> StartArenaBattle(Guid characterId, Guid enemyId, CancellationToken cancellationToken);
+    Task<ArenaDefenseSnapshot?> UpdateDefenseSnapshotAsync(Guid characterId, CancellationToken cancellationToken);
+    Task<ArenaDefenseSnapshot?> GetArenaDefenseSnapshotAsync(Guid characterId, CancellationToken cancellationToken);
+    IReadOnlyList<ChampionMarketItem> GetChampionMarketItems();
+    Task<ChampionMarketPurchaseResult?> PurchaseChampionMarketItemAsync(Guid characterId, string itemId, int quantity, CancellationToken cancellationToken);
+    Task<int> CountChampionMarketPurchasesAsync(Guid characterId, string itemId, DateTimeOffset? since, CancellationToken cancellationToken);
 }

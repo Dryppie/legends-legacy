@@ -2,15 +2,23 @@
 using Application.Interfaces.Services.LL.Entities;
 using Domain.Models.Colosseum;
 using Domain.Models.Combat;
+using Domain.Models.Entities.Characters;
+using Domain.Models.Items;
+using Domain.Models.Items.Equipments;
 using Domain.Models.Leaderboards;
+using Domain.Models.Snapshots;
 using Services.LL.Combat.Layers.Orchestration.Models;
 using Services.LL.Combat.Layers.Resolution.Models;
 using Services.LL.Interfaces;
 using Services.LL.Interfaces.Combat.Resolution;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace Services.LL.Colosseum;
 public class ColosseumService : IColosseumService
 {
+    private static readonly TimeSpan SameDefenderCooldown = TimeSpan.FromMinutes(2);
+
     private readonly IEntityService _entityService;
     private readonly ICharacterService _characterService;
     private readonly ICombatSetupService _combatSetupService;
@@ -18,6 +26,9 @@ public class ColosseumService : IColosseumService
     private readonly ICombatEngineExecutor _combatEngineExecutor;
     private readonly ICombatEncounterResultFactory _combatEncounterResultFactory;
     private readonly IRatingService _ratingService;
+    private readonly ICharacterSnapshotService _characterSnapshotService;
+    private readonly IItemBaseRepository _itemBaseRepository;
+    private readonly IChampionMarketCatalog _championMarketCatalog;
 
     public ColosseumService(
         IEntityService es,
@@ -26,7 +37,10 @@ public class ColosseumService : IColosseumService
         IColosseumRepository cr,
         ICombatEngineExecutor combatEngineExecutor,
         ICombatEncounterResultFactory combatEncounterResultFactory,
-        IRatingService rs)
+        IRatingService rs,
+        ICharacterSnapshotService characterSnapshotService,
+        IItemBaseRepository itemBaseRepository,
+        IChampionMarketCatalog championMarketCatalog)
     {
         _entityService = es;
         _characterService = cs;
@@ -35,6 +49,9 @@ public class ColosseumService : IColosseumService
         _combatEngineExecutor = combatEngineExecutor;
         _combatEncounterResultFactory = combatEncounterResultFactory;
         _ratingService = rs;
+        _characterSnapshotService = characterSnapshotService;
+        _itemBaseRepository = itemBaseRepository;
+        _championMarketCatalog = championMarketCatalog;
     }
 
     public async Task<StartArenaBattleResult?> StartArenaBattle(Guid characterId, Guid enemyId, CancellationToken cancellationToken)
@@ -42,10 +59,19 @@ public class ColosseumService : IColosseumService
         var now = DateTimeOffset.UtcNow;
 
         var arenaTicketStatus = await GetArenaTicketStatusAsync(characterId, cancellationToken);
+        if (characterId == enemyId || arenaTicketStatus.CurrentTickets < 1) return null;
 
-        if (arenaTicketStatus.CurrentTickets < 1) return null;
-        arenaTicketStatus.CurrentTickets--;
-        _colosseumRepository.UpdateArenaTicketStatus(arenaTicketStatus);
+        var attacker = await _colosseumRepository.GetArenaCharacterAsync(characterId, cancellationToken);
+        var defender = await _colosseumRepository.GetArenaCharacterAsync(enemyId, cancellationToken);
+        if (attacker is null || defender is null || attacker.UserId == defender.UserId) return null;
+
+        var (eligibleOpponents, _) = await _colosseumRepository.GetArenaOpponentsWithRating(characterId, cancellationToken);
+        if (eligibleOpponents.All(opponent => opponent.Id != enemyId)) return null;
+
+        if (await _colosseumRepository.HasRecentMatchAsync(characterId, enemyId, now.Subtract(SameDefenderCooldown), cancellationToken))
+            return null;
+
+        var defenderSnapshot = await _colosseumRepository.GetArenaDefenseSnapshotAsync(enemyId, cancellationToken);
 
         var playerTeam = await _entityService.GetEntitiesByIdsForCombatAsync([characterId], cancellationToken);
         if (playerTeam.Count == 0) return null;
@@ -53,10 +79,13 @@ public class ColosseumService : IColosseumService
         if (enemyTeam.Count == 0) return null;
 
         var combatPlayerEntities = _combatSetupService.CreatePlayerCombatEntities(playerTeam);
-        var combatEnemyEntities = _combatSetupService.CreatePlayerCombatEntities(enemyTeam);
+        var combatEnemyEntities = await CreateDefenderCombatEntitiesAsync(enemyTeam, defenderSnapshot, cancellationToken);
         await _combatSetupService.PrepareEntitiesForCombat([.. combatPlayerEntities, .. combatEnemyEntities]);
 
         var encounterPlan = CreateArenaEncounterPlan(characterId, enemyId, now);
+        arenaTicketStatus.CurrentTickets--;
+        _colosseumRepository.UpdateArenaTicketStatus(arenaTicketStatus);
+
         var runtime = new CombatEncounterRuntime(
             encounterPlan,
             [
@@ -75,7 +104,209 @@ public class ColosseumService : IColosseumService
         var combatResult = await _combatEngineExecutor.ExecuteAsync(runtime, cancellationToken);
         combatResult = _combatEncounterResultFactory.Create(runtime, combatResult).CombatResult;
 
-        return new StartArenaBattleResult(combatResult, arenaTicketStatus);
+        var attackerRankBefore = ArenaRank.GetProgress(attacker.ArenaRating);
+        var defenderRatingBefore = defender.ArenaRating;
+        var ratingResult = ApplyRatings(attacker, defender, combatResult.Outcome);
+        var attackerRankAfter = ArenaRank.GetProgress(attacker.ArenaRating);
+
+        var streakBefore = attacker.ArenaCurrentAttackWinStreak;
+        ApplyRecordsAndStreak(attacker, defender, combatResult.Outcome);
+        var (baseGlory, firstWinBonus) = ApplyAttackGlory(attacker, combatResult.Outcome, now);
+
+        var matchResult = new ColosseumMatchResult
+        {
+            Id = encounterPlan.EncounterId,
+            CharacterAId = characterId,
+            CharacterAName = attacker.Name,
+            CharacterARatingBefore = ratingResult.CharacterARatingBefore,
+            CharacterARatingAfter = ratingResult.CharacterARatingAfter,
+            CharacterARatingDelta = ratingResult.CharacterADelta,
+            CharacterAGloryEarned = baseGlory + firstWinBonus,
+            CharacterAStreakBefore = streakBefore,
+            CharacterAStreakAfter = attacker.ArenaCurrentAttackWinStreak,
+
+            CharacterBId = enemyId,
+            CharacterBName = defender.Name,
+            CharacterBRatingBefore = defenderRatingBefore,
+            CharacterBRatingAfter = ratingResult.CharacterBRatingAfter,
+            CharacterBRatingDelta = ratingResult.CharacterBDelta,
+            CharacterBGloryEarned = 0,
+
+            WinnerId = combatResult.Outcome == BattleOutcome.Victory ? characterId : combatResult.Outcome == BattleOutcome.Defeat ? enemyId : null,
+            WinnerName = combatResult.Outcome == BattleOutcome.Victory ? attacker.Name : combatResult.Outcome == BattleOutcome.Defeat ? defender.Name : string.Empty,
+            Outcome = ToHistoryOutcome(combatResult.Outcome),
+            PlayedAt = now
+        };
+
+        await _colosseumRepository.SaveArenaMatchResult(matchResult, cancellationToken);
+
+        return new StartArenaBattleResult(
+            encounterPlan.EncounterId,
+            combatResult,
+            arenaTicketStatus,
+            matchResult,
+            attackerRankBefore,
+            attackerRankAfter,
+            new ArenaOpponentPreview
+            {
+                Opponent = defender,
+                RatingDelta = _ratingService.Preview(ratingResult.CharacterARatingBefore, ratingResult.CharacterBRatingBefore)
+            },
+            baseGlory + firstWinBonus,
+            baseGlory,
+            firstWinBonus,
+            0,
+            streakBefore,
+            attacker.ArenaCurrentAttackWinStreak);
+    }
+
+    private async Task<CombatEntity> CreateSnapshotCombatEntityAsync(Character sourceCharacter, CharacterSnapshot snapshot, CancellationToken cancellationToken)
+    {
+        var template = _combatSetupService.CreatePlayerCombatEntities([sourceCharacter]).Single();
+        template.Name = snapshot.Name;
+        template.Level = snapshot.Level;
+        template.BaseAttributes = snapshot.BaseAttributes
+            .Select(x => new Domain.Models.Attributes.EntityAttribute
+            {
+                EntityId = snapshot.CharacterId,
+                AttributeType = x.AttributeType,
+                Value = x.Value
+            })
+            .ToList();
+        template.EquippedEssences = snapshot.EquippedEssences
+            .OrderBy(x => x.SlotIndex)
+            .Select(x => x.ToPlayerEssence(snapshot.CharacterId))
+            .ToList();
+        template.HasEquippedEssenceSnapshot = true;
+
+        var itemBases = await _itemBaseRepository.GetItemBasesByIdsAsync(
+            snapshot.Equipment.Select(x => x.ItemBaseId).Distinct().ToArray(),
+            cancellationToken);
+
+        template.Equipment = snapshot.Equipment
+            .OrderBy(x => x.Slot)
+            .Where(x => itemBases.ContainsKey(x.ItemBaseId))
+            .Select(x => new EquipmentInstance
+            {
+                Id = x.EquipmentInstanceId,
+                ItemBaseId = x.ItemBaseId,
+                ItemBase = itemBases[x.ItemBaseId],
+                Rarity = x.Rarity,
+                Potential = x.Potential,
+                ItemXp = x.ItemXp,
+                IsMasterpiece = x.IsMasterpiece,
+                IsLevelingItem = x.IsLevelingItem,
+                InstanceModifiers = x.InstanceModifiers.ToList()
+            })
+            .ToList();
+
+        return template;
+    }
+
+    private async Task<List<CombatEntity>> CreateDefenderCombatEntitiesAsync(
+        List<Domain.Models.Entities.Entity> enemyTeam,
+        ArenaDefenseSnapshot? defenderSnapshot,
+        CancellationToken cancellationToken)
+    {
+        if (defenderSnapshot is { IsValid: true, IsOutdated: false })
+        {
+            return
+            [
+                await CreateSnapshotCombatEntityAsync(
+                    (Character)enemyTeam.Single(),
+                    defenderSnapshot.CharacterSnapshot,
+                    cancellationToken)
+            ];
+        }
+
+        return _combatSetupService.CreatePlayerCombatEntities(enemyTeam);
+    }
+
+    private ColosseumRatingResult ApplyRatings(Character attacker, Character defender, BattleOutcome outcome)
+    {
+        var attackerRatingBefore = attacker.ArenaRating;
+        var defenderRatingBefore = defender.ArenaRating;
+
+        var preview = _ratingService.Preview(attacker.ArenaRating, defender.ArenaRating);
+        var defenderPreview = _ratingService.Preview(defender.ArenaRating, attacker.ArenaRating);
+
+        attacker.ArenaRating = outcome switch
+        {
+            BattleOutcome.Victory => preview.RatingIfVictory,
+            BattleOutcome.Draw => preview.RatingIfDraw,
+            _ => preview.RatingIfDefeat
+        };
+
+        defender.ArenaRating = outcome switch
+        {
+            BattleOutcome.Victory => defenderPreview.RatingIfDefeat,
+            BattleOutcome.Draw => defenderPreview.RatingIfDraw,
+            _ => defenderPreview.RatingIfVictory
+        };
+
+        attacker.ArenaLifetimeHighestRating = Math.Max(attacker.ArenaLifetimeHighestRating, attacker.ArenaRating);
+        defender.ArenaLifetimeHighestRating = Math.Max(defender.ArenaLifetimeHighestRating, defender.ArenaRating);
+
+        return new ColosseumRatingResult
+        {
+            CharacterARatingBefore = attackerRatingBefore,
+            CharacterARatingAfter = attacker.ArenaRating,
+            CharacterBRatingBefore = defenderRatingBefore,
+            CharacterBRatingAfter = defender.ArenaRating
+        };
+    }
+
+    private static void ApplyRecordsAndStreak(Character attacker, Character defender, BattleOutcome outcome)
+    {
+        switch (outcome)
+        {
+            case BattleOutcome.Victory:
+                attacker.ArenaAttackWins++;
+                defender.ArenaDefenseLosses++;
+                attacker.ArenaCurrentAttackWinStreak++;
+                attacker.ArenaBestAttackWinStreak = Math.Max(attacker.ArenaBestAttackWinStreak, attacker.ArenaCurrentAttackWinStreak);
+                break;
+            case BattleOutcome.Draw:
+                attacker.ArenaAttackDraws++;
+                defender.ArenaDefenseDraws++;
+                attacker.ArenaCurrentAttackWinStreak = 0;
+                break;
+            default:
+                attacker.ArenaAttackLosses++;
+                defender.ArenaDefenseWins++;
+                attacker.ArenaCurrentAttackWinStreak = 0;
+                break;
+        }
+    }
+
+    private static (int BaseGlory, int DailyFirstWinBonus) ApplyAttackGlory(Character attacker, BattleOutcome outcome, DateTimeOffset now)
+    {
+        var (baseGlory, firstWinBonus) = ArenaRewards.CalculateAttackGlory(
+            outcome,
+            !HasReceivedFirstWinBonusToday(attacker, now));
+
+        if (firstWinBonus > 0)
+        {
+            attacker.ArenaLastFirstWinBonusAt = now;
+        }
+
+        attacker.ArenaGlory += baseGlory + firstWinBonus;
+        return (baseGlory, firstWinBonus);
+    }
+
+    private static bool HasReceivedFirstWinBonusToday(Character attacker, DateTimeOffset now)
+    {
+        return attacker.ArenaLastFirstWinBonusAt?.UtcDateTime.Date == now.UtcDateTime.Date;
+    }
+
+    private static string ToHistoryOutcome(BattleOutcome outcome)
+    {
+        return outcome switch
+        {
+            BattleOutcome.Victory => "AttackerWin",
+            BattleOutcome.Draw => "Draw",
+            _ => "DefenderWin"
+        };
     }
 
     private static CombatEncounterPlan CreateArenaEncounterPlan(
@@ -113,6 +344,133 @@ public class ColosseumService : IColosseumService
                 RatingDelta = _ratingService.Preview(myRating, opp.ArenaRating)
             })
             .ToList();
+    }
+
+    public async Task<ArenaDefenseSnapshot?> UpdateDefenseSnapshotAsync(Guid characterId, CancellationToken cancellationToken)
+    {
+        var character = await _colosseumRepository.GetArenaCharacterAsync(characterId, cancellationToken);
+        if (character is null) return null;
+
+        var team = await _entityService.GetEntitiesByIdsForCombatAsync([characterId], cancellationToken);
+        if (team.Count == 0) return null;
+
+        var combatEntities = _combatSetupService.CreatePlayerCombatEntities(team);
+        await _combatSetupService.PrepareEntitiesForCombat(combatEntities);
+
+        var snapshot = await _characterSnapshotService.CreateAsync(characterId, cancellationToken);
+        var now = DateTimeOffset.UtcNow;
+        var defenseSnapshot = new ArenaDefenseSnapshot
+        {
+            CharacterId = characterId,
+            CharacterSnapshotId = snapshot.Id,
+            CharacterSnapshot = snapshot,
+            LoadoutHash = CreateLoadoutHash(snapshot),
+            IsValid = true,
+            IsOutdated = false,
+            CreatedAt = now,
+            UpdatedAt = now
+        };
+
+        await _colosseumRepository.SaveArenaDefenseSnapshotAsync(defenseSnapshot, cancellationToken);
+        return defenseSnapshot;
+    }
+
+    public async Task<ArenaDefenseSnapshot?> GetArenaDefenseSnapshotAsync(Guid characterId, CancellationToken cancellationToken)
+    {
+        return await _colosseumRepository.GetArenaDefenseSnapshotAsync(characterId, cancellationToken);
+    }
+
+    public IReadOnlyList<ChampionMarketItem> GetChampionMarketItems()
+    {
+        return _championMarketCatalog.GetAll();
+    }
+
+    public async Task<ChampionMarketPurchaseResult?> PurchaseChampionMarketItemAsync(Guid characterId, string itemId, int quantity, CancellationToken cancellationToken)
+    {
+        if (quantity < 1) return null;
+
+        var item = _championMarketCatalog.GetById(itemId);
+        if (item?.IsEnabled != true) return null;
+
+        var character = await _colosseumRepository.GetArenaCharacterAsync(characterId, cancellationToken);
+        if (character is null) return null;
+
+        if (!MeetsMarketRequirement(character, item)) return null;
+
+        var weeklyResetAt = ArenaCalendar.GetCurrentWeeklyResetStart(DateTimeOffset.UtcNow);
+        var weeklyPurchased = await _colosseumRepository.CountChampionMarketPurchasesAsync(characterId, item.Id, weeklyResetAt, cancellationToken);
+        var lifetimePurchased = await _colosseumRepository.CountChampionMarketPurchasesAsync(characterId, item.Id, null, cancellationToken);
+
+        if (item.WeeklyPurchaseLimit.HasValue && weeklyPurchased + quantity > item.WeeklyPurchaseLimit.Value) return null;
+        if (item.LifetimePurchaseLimit.HasValue && lifetimePurchased + quantity > item.LifetimePurchaseLimit.Value) return null;
+
+        var totalCost = item.GloryCost * quantity;
+        if (character.ArenaGlory < totalCost) return null;
+
+        character.ArenaGlory -= totalCost;
+        var cindersGranted = item.CindersGranted * quantity;
+        var soulstonesGranted = item.SoulstonesGranted * quantity;
+        character.Cinders += cindersGranted;
+        character.Soulstones += soulstonesGranted;
+
+        await _colosseumRepository.SaveChampionMarketPurchaseAsync(new ChampionMarketPurchase
+        {
+            Id = Guid.NewGuid(),
+            CharacterId = characterId,
+            ItemId = item.Id,
+            Quantity = quantity,
+            GloryCostPaid = totalCost,
+            PurchasedAt = DateTimeOffset.UtcNow
+        }, cancellationToken);
+
+        return new ChampionMarketPurchaseResult(
+            item,
+            quantity,
+            totalCost,
+            character.ArenaGlory,
+            cindersGranted,
+            soulstonesGranted);
+    }
+
+    public async Task<int> CountChampionMarketPurchasesAsync(Guid characterId, string itemId, DateTimeOffset? since, CancellationToken cancellationToken)
+    {
+        return await _colosseumRepository.CountChampionMarketPurchasesAsync(characterId, itemId, since, cancellationToken);
+    }
+
+    private static bool MeetsMarketRequirement(Character character, ChampionMarketItem item)
+    {
+        if (item.RequiredRating.HasValue && character.ArenaRating < item.RequiredRating.Value)
+        {
+            return false;
+        }
+
+        if (!string.IsNullOrWhiteSpace(item.RequiredRankTier))
+        {
+            var currentTier = ArenaRank.GetTier(character.ArenaRating);
+            var requiredTier = ArenaRank.Tiers.FirstOrDefault(x => x.Id == item.RequiredRankTier);
+            if (requiredTier is null || currentTier.SortOrder < requiredTier.SortOrder)
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private static string CreateLoadoutHash(CharacterSnapshot snapshot)
+    {
+        var payload = string.Join("|",
+            snapshot.BaseAttributes.OrderBy(x => x.AttributeType).Select(x => $"a:{x.AttributeType}:{x.Value}")
+                .Concat(snapshot.Equipment.OrderBy(x => x.Slot).Select(x => $"e:{x.Slot}:{x.ItemBaseId}:{x.Rarity}:{x.Potential}:{x.ItemXp}:{x.IsMasterpiece}:{x.IsLevelingItem}:{string.Join(",", x.InstanceModifiers.OrderBy(m => m.AttributeType).Select(m => $"{m.AttributeType}:{m.Amount}:{m.ModifierType}"))}"))
+                .Concat(snapshot.EquippedEssences.OrderBy(x => x.SlotIndex).Select(x => $"s:{x.SlotIndex}:{x.EssenceDefinitionId}:{x.Level}:{x.AscensionTier}:{x.IsEvolved}")));
+
+        var bytes = SHA256.HashData(Encoding.UTF8.GetBytes(payload));
+        return Convert.ToHexString(bytes);
+    }
+
+    public async Task<Character?> GetArenaCharacterAsync(Guid characterId, CancellationToken cancellationToken)
+    {
+        return await _colosseumRepository.GetArenaCharacterAsync(characterId, cancellationToken);
     }
 
     public async Task SaveArenaMatchResult(Guid characterId, Guid enemyId, BattleOutcome outcome, ColosseumRatingResult ratingResult, CancellationToken cancellationToken)

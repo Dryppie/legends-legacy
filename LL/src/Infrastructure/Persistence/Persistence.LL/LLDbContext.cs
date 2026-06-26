@@ -128,6 +128,8 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : DbContext(opti
     //public DbSet<Building> Buildings => Set<Building>();
     public DbSet<ArenaTicketStatus> ArenaTicketStatus => Set<ArenaTicketStatus>();
     public DbSet<ColosseumMatchResult> ColosseumMatches => Set<ColosseumMatchResult>();
+    public DbSet<ArenaDefenseSnapshot> ArenaDefenseSnapshots => Set<ArenaDefenseSnapshot>();
+    public DbSet<ChampionMarketPurchase> ChampionMarketPurchases => Set<ChampionMarketPurchase>();
     public DbSet<Character> Characters => Set<Character>();
     public DbSet<CharacterSoulstoneUpgrade> CharacterSoulstoneUpgrades => Set<CharacterSoulstoneUpgrade>();
     public DbSet<Creature> Creatures => Set<Creature>();

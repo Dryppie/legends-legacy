@@ -1,5 +1,6 @@
 using Application.Common.Interfaces;
 using Domain.Models.Items;
+using Domain.Models.Items.Equipments;
 using Microsoft.EntityFrameworkCore;
 
 namespace Persistence.LL.Repositories.Items;
@@ -23,6 +24,8 @@ public class ItemBaseRepository : IItemBaseRepository
         }
 
         return await _context.ItemBases
+            .Include(x => (x as EquipmentBase)!.AttributeModifiers)
+            .Include(x => (x as EquipmentBase)!.ToolBonuses)
             .Where(x => itemIds.Contains(x.Id))
             .ToDictionaryAsync(x => x.Id, cancellationToken);
     }

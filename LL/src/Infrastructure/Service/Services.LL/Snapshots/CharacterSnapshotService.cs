@@ -20,4 +20,9 @@ public class CharacterSnapshotService : ICharacterSnapshotService
     {
         return await _repository.GetSnapshotByCharacterIdAsync(characterId, ct);
     }
+
+    public async Task<CharacterSnapshot?> GetSnapshotByIdAsync(Guid snapshotId, CancellationToken ct)
+    {
+        return await _repository.GetSnapshotByIdAsync(snapshotId, ct);
+    }
 }

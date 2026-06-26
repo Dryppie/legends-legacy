@@ -35,6 +35,8 @@ public interface IDbContext
     //DbSet<Building> Buildings { get; }
     DbSet<ArenaTicketStatus> ArenaTicketStatus { get; }
     DbSet<ColosseumMatchResult> ColosseumMatches { get; }
+    DbSet<ArenaDefenseSnapshot> ArenaDefenseSnapshots { get; }
+    DbSet<ChampionMarketPurchase> ChampionMarketPurchases { get; }
     DbSet<Character> Characters { get; }
     DbSet<CharacterSoulstoneUpgrade> CharacterSoulstoneUpgrades { get; }
     DbSet<Creature> Creatures { get; }
