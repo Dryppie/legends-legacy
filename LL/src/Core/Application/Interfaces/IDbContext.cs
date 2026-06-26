@@ -1,4 +1,5 @@
 using Domain.Models.Attributes;
+using Domain.Models.Achievements;
 using Domain.Models.CharacterActions;
 using Domain.Models.CharacterActions.CharacterActionDetails;
 using Domain.Models.Colosseum;
@@ -30,7 +31,10 @@ using Microsoft.EntityFrameworkCore.Storage;
 namespace Application.Common.Interfaces;
 public interface IDbContext
 {
-    //DbSet<Achievement> Achievements { get; }
+    DbSet<AchievementDefinition> AchievementDefinitions { get; }
+    DbSet<PlayerAchievementProgress> PlayerAchievementProgresses { get; }
+    DbSet<TitleDefinition> TitleDefinitions { get; }
+    DbSet<PlayerTitleUnlock> PlayerTitleUnlocks { get; }
     DbSet<Area> Areas { get; }
     DbSet<EntityAttribute> EntityAttributes { get; }
     //DbSet<Building> Buildings { get; }

@@ -1,3 +1,4 @@
+using Application.Interfaces.Services.LL.Achievements;
 using Application.Interfaces.WebSockets;
 using Application.UseCases.Characters.Events;
 using Application.WebSockets.Contracts;
@@ -8,16 +9,25 @@ namespace Application.UseCases.Characters.EventHandlers;
 public class CharacterLevelUpEventHandler : INotificationHandler<CharacterLevelUpEvent>
 {
     private readonly IGameEventPublisher _eventPublisher;
+    private readonly IAchievementService _achievementService;
 
-    public CharacterLevelUpEventHandler(IGameEventPublisher eventPublisher)
+    public CharacterLevelUpEventHandler(
+        IGameEventPublisher eventPublisher,
+        IAchievementService achievementService)
     {
         _eventPublisher = eventPublisher;
+        _achievementService = achievementService;
     }
 
     public async Task Handle(CharacterLevelUpEvent notification, CancellationToken cancellationToken)
     {
         // Essence attunement slots are now derived by IEssenceSlotUnlockService from character level.
         // No legacy EssenceSlot rows are created on level-up.
+        await _achievementService.RecordCharacterLevelReachedAsync(
+            notification.CharacterId,
+            notification.Level,
+            cancellationToken);
+
         await _eventPublisher.PublishAsync(
             new Audience.Character(notification.CharacterId),
             new CharacterLevelUpMsg(

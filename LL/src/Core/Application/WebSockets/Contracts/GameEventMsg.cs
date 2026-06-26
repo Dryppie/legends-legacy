@@ -12,4 +12,13 @@ public record GuildMembershipChangedMsg(Guid GuildId, Guid CharacterId) : GameEv
 public record GuildDisbandedMsg(Guid GuildId) : GameEventMsg;
 public record GuildDirectoryChangedMsg(string Reason) : GameEventMsg;
 public record RiftOpenedMsg(Guid ZoneId, DateTimeOffset Time) : GameEventMsg;
+public record AchievementUnlockedMsg(
+    Guid? CharacterId,
+    string AchievementKey,
+    string AchievementName,
+    int Points,
+    string? TitleKey,
+    string? TitleName,
+    string Message,
+    bool IsGlobal) : GameEventMsg;
 //public record LootReceivedMsg(Guid CharacterId, List<InventoryItemDto> Items) : GameEventMsg;

@@ -1,4 +1,5 @@
 using Application.Interfaces.Services.LL;
+using Application.Interfaces.Services.LL.Achievements;
 using Application.Interfaces.Services.LL.Dungeons;
 using Application.Interfaces.Services.LL.Entities;
 using Application.MediatR.Markers;
@@ -22,6 +23,7 @@ public class StartDungeonRunCommandHandler : IRequestHandler<StartDungeonRunComm
     private readonly IDungeonAccessPolicy _dungeonAccess;
     private readonly ICharacterService _characters;
     private readonly IInventoryService _inventoryService;
+    private readonly IAchievementService _achievementService;
 
     public StartDungeonRunCommandHandler(
         IMapper mapper,
@@ -29,7 +31,8 @@ public class StartDungeonRunCommandHandler : IRequestHandler<StartDungeonRunComm
         IDungeonDefinitions dungeonDefinitions,
         IDungeonAccessPolicy dungeonAccess,
         ICharacterService characters,
-        IInventoryService inventoryService)
+        IInventoryService inventoryService,
+        IAchievementService achievementService)
     {
         _mapper = mapper;
         _dungeonRunService = dungeonRunService;
@@ -37,6 +40,7 @@ public class StartDungeonRunCommandHandler : IRequestHandler<StartDungeonRunComm
         _dungeonAccess = dungeonAccess;
         _characters = characters;
         _inventoryService = inventoryService;
+        _achievementService = achievementService;
     }
 
     public async Task<Response<StartDungeonRunResponseDto>> Handle(StartDungeonRunCommand request, CancellationToken cancellationToken)
@@ -60,6 +64,8 @@ public class StartDungeonRunCommandHandler : IRequestHandler<StartDungeonRunComm
 
         if (dungeon == null)
             return Response<StartDungeonRunResponseDto>.Fail("You already have an ongoing dungeon run.");
+
+        await _achievementService.RecordDungeonRunStartedAsync(request.CharacterId, cancellationToken);
 
         var inventory = await _inventoryService.GetInventoryByIdAsync(request.CharacterId, cancellationToken);
 

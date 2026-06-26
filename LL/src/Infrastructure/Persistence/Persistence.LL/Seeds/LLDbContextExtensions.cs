@@ -1,4 +1,5 @@
 ﻿using Domain.Helpers;
+using Domain.Models.Achievements;
 using Domain.Models.CharacterActions.CharacterActionDetails;
 using Domain.Models.Colosseum;
 using Domain.Models.Entities;
@@ -62,6 +63,11 @@ public static class LLDbContextExtensions
     {
         // Always seed from the json files. Might update old data
         await DbJsonSeeder.RunAsync(context);
+        if (await SeedAchievementAndTitleDefinitions(context))
+        {
+            await context.SaveChangesAsync();
+        }
+
         if (await RemoveRetiredGoblinMinesIdleArea(context))
         {
             await context.SaveChangesAsync();
@@ -487,6 +493,152 @@ public static class LLDbContextExtensions
         }
 
         return changed;
+    }
+
+    private static async Task<bool> SeedAchievementAndTitleDefinitions(LLDbContext context)
+    {
+        var changed = false;
+        var catalog = AchievementTitleSeedData.Load();
+        var achievementsByKey = await context.AchievementDefinitions
+            .ToDictionaryAsync(x => x.Key, StringComparer.OrdinalIgnoreCase);
+
+        foreach (var seed in catalog.Achievements)
+        {
+            if (!achievementsByKey.TryGetValue(seed.Key, out var existing))
+            {
+                await context.AchievementDefinitions.AddAsync(Clone(seed));
+                changed = true;
+                continue;
+            }
+
+            changed |= Update(existing, seed);
+        }
+
+        var titlesByKey = await context.TitleDefinitions
+            .ToDictionaryAsync(x => x.Key, StringComparer.OrdinalIgnoreCase);
+
+        foreach (var seed in catalog.Titles)
+        {
+            if (!titlesByKey.TryGetValue(seed.Key, out var existing))
+            {
+                await context.TitleDefinitions.AddAsync(Clone(seed));
+                changed = true;
+                continue;
+            }
+
+            changed |= Update(existing, seed);
+        }
+
+        return changed;
+    }
+
+    private static AchievementDefinition Clone(AchievementDefinition seed) => new()
+    {
+        Id = seed.Id,
+        Key = seed.Key,
+        Name = seed.Name,
+        Description = seed.Description,
+        Hint = seed.Hint,
+        Category = seed.Category,
+        Type = seed.Type,
+        Scope = seed.Scope,
+        Visibility = seed.Visibility,
+        Rarity = seed.Rarity,
+        Points = seed.Points,
+        IsRepeatable = seed.IsRepeatable,
+        IsActive = seed.IsActive,
+        SortOrder = seed.SortOrder,
+        IconKey = seed.IconKey,
+        RequirementType = seed.RequirementType,
+        RequirementTarget = seed.RequirementTarget,
+        RequirementAmount = seed.RequirementAmount,
+        MetadataJson = seed.MetadataJson,
+        CreatedAt = seed.CreatedAt,
+        UpdatedAt = seed.UpdatedAt
+    };
+
+    private static bool Update(AchievementDefinition existing, AchievementDefinition seed)
+    {
+        var changed = false;
+        changed |= SetIfChanged(existing.Name, seed.Name, value => existing.Name = value);
+        changed |= SetIfChanged(existing.Description, seed.Description, value => existing.Description = value);
+        changed |= SetIfChanged(existing.Hint, seed.Hint, value => existing.Hint = value);
+        changed |= SetIfChanged(existing.Category, seed.Category, value => existing.Category = value);
+        changed |= SetIfChanged(existing.Type, seed.Type, value => existing.Type = value);
+        changed |= SetIfChanged(existing.Scope, seed.Scope, value => existing.Scope = value);
+        changed |= SetIfChanged(existing.Visibility, seed.Visibility, value => existing.Visibility = value);
+        changed |= SetIfChanged(existing.Rarity, seed.Rarity, value => existing.Rarity = value);
+        changed |= SetIfChanged(existing.Points, seed.Points, value => existing.Points = value);
+        changed |= SetIfChanged(existing.IsRepeatable, seed.IsRepeatable, value => existing.IsRepeatable = value);
+        changed |= SetIfChanged(existing.IsActive, seed.IsActive, value => existing.IsActive = value);
+        changed |= SetIfChanged(existing.SortOrder, seed.SortOrder, value => existing.SortOrder = value);
+        changed |= SetIfChanged(existing.IconKey, seed.IconKey, value => existing.IconKey = value);
+        changed |= SetIfChanged(existing.RequirementType, seed.RequirementType, value => existing.RequirementType = value);
+        changed |= SetIfChanged(existing.RequirementTarget, seed.RequirementTarget, value => existing.RequirementTarget = value);
+        changed |= SetIfChanged(existing.RequirementAmount, seed.RequirementAmount, value => existing.RequirementAmount = value);
+        changed |= SetIfChanged(existing.MetadataJson, seed.MetadataJson, value => existing.MetadataJson = value);
+
+        if (changed)
+        {
+            existing.UpdatedAt = DateTimeOffset.UtcNow;
+        }
+
+        return changed;
+    }
+
+    private static TitleDefinition Clone(TitleDefinition seed) => new()
+    {
+        Id = seed.Id,
+        Key = seed.Key,
+        Name = seed.Name,
+        Description = seed.Description,
+        Category = seed.Category,
+        Rarity = seed.Rarity,
+        Scope = seed.Scope,
+        IsActive = seed.IsActive,
+        IsHiddenUntilUnlocked = seed.IsHiddenUntilUnlocked,
+        SourceAchievementKey = seed.SourceAchievementKey,
+        SeasonNumber = seed.SeasonNumber,
+        IconKey = seed.IconKey,
+        SortOrder = seed.SortOrder,
+        MetadataJson = seed.MetadataJson,
+        CreatedAt = seed.CreatedAt,
+        UpdatedAt = seed.UpdatedAt
+    };
+
+    private static bool Update(TitleDefinition existing, TitleDefinition seed)
+    {
+        var changed = false;
+        changed |= SetIfChanged(existing.Name, seed.Name, value => existing.Name = value);
+        changed |= SetIfChanged(existing.Description, seed.Description, value => existing.Description = value);
+        changed |= SetIfChanged(existing.Category, seed.Category, value => existing.Category = value);
+        changed |= SetIfChanged(existing.Rarity, seed.Rarity, value => existing.Rarity = value);
+        changed |= SetIfChanged(existing.Scope, seed.Scope, value => existing.Scope = value);
+        changed |= SetIfChanged(existing.IsActive, seed.IsActive, value => existing.IsActive = value);
+        changed |= SetIfChanged(existing.IsHiddenUntilUnlocked, seed.IsHiddenUntilUnlocked, value => existing.IsHiddenUntilUnlocked = value);
+        changed |= SetIfChanged(existing.SourceAchievementKey, seed.SourceAchievementKey, value => existing.SourceAchievementKey = value);
+        changed |= SetIfChanged(existing.SeasonNumber, seed.SeasonNumber, value => existing.SeasonNumber = value);
+        changed |= SetIfChanged(existing.IconKey, seed.IconKey, value => existing.IconKey = value);
+        changed |= SetIfChanged(existing.SortOrder, seed.SortOrder, value => existing.SortOrder = value);
+        changed |= SetIfChanged(existing.MetadataJson, seed.MetadataJson, value => existing.MetadataJson = value);
+
+        if (changed)
+        {
+            existing.UpdatedAt = DateTimeOffset.UtcNow;
+        }
+
+        return changed;
+    }
+
+    private static bool SetIfChanged<T>(T existing, T updated, Action<T> setter)
+    {
+        if (EqualityComparer<T>.Default.Equals(existing, updated))
+        {
+            return false;
+        }
+
+        setter(updated);
+        return true;
     }
 
 }

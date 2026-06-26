@@ -53,6 +53,11 @@ export class CharacterOverviewComponent {
   viewedCharacterName = signal('');
   isViewingSearchResult = signal(false);
   readonly profileLabel = computed(() => {
+    const equippedTitle = this.character()?.equippedTitle?.displayName;
+    if (equippedTitle) {
+      return equippedTitle;
+    }
+
     if (this.isViewingSearchResult()) {
       return this.viewedCharacterName();
     }

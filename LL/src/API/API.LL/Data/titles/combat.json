@@ -1,0 +1,50 @@
+[
+  {
+    "key": "title.relentless",
+    "name": "Relentless",
+    "description": "Earned by defeating 10,000 monsters.",
+    "category": "Combat",
+    "rarity": "Exalted",
+    "scope": "Account",
+    "sourceAchievementKey": "combat.relentless",
+    "isHiddenUntilUnlocked": false,
+    "isActive": true,
+    "sortOrder": 4
+  },
+  {
+    "key": "title.goblin_bane",
+    "name": "Goblin Bane",
+    "description": "Earned by defeating 1,000 Goblin-family creatures.",
+    "category": "Combat",
+    "rarity": "Renowned",
+    "scope": "Account",
+    "sourceAchievementKey": "combat.goblin_bane_2",
+    "isHiddenUntilUnlocked": false,
+    "isActive": true,
+    "sortOrder": 5
+  },
+  {
+    "key": "title.scarred",
+    "name": "Scarred",
+    "description": "Earned by surviving many defeats.",
+    "category": "Combat",
+    "rarity": "Renowned",
+    "scope": "Character",
+    "sourceAchievementKey": "combat.death_teaches",
+    "isHiddenUntilUnlocked": false,
+    "isActive": true,
+    "sortOrder": 6
+  },
+  {
+    "key": "title.unyielding",
+    "name": "Unyielding",
+    "description": "Earned by winning a combat encounter with less than 5% Health remaining.",
+    "category": "Combat",
+    "rarity": "Exalted",
+    "scope": "Character",
+    "sourceAchievementKey": "combat.unyielding",
+    "isHiddenUntilUnlocked": false,
+    "isActive": true,
+    "sortOrder": 7
+  }
+]

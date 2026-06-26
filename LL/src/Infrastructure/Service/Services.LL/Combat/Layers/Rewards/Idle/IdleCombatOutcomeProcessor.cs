@@ -1,7 +1,10 @@
+using Application.Interfaces.Services.LL.Achievements;
 using Application.Interfaces.Services.LL.Prophecies;
 using Application.UseCases.Prophecies.Events;
 using Domain.Models.CharacterActions.Sessions;
 using MediatR;
+using Domain.Models.Combat;
+using Domain.Models.Entities.Creatures;
 using Services.LL.Combat.Layers.Orchestration.Idle;
 using Services.LL.Combat.Layers.Orchestration.Models;
 using Services.LL.Combat.Layers.Rewards.Models;
@@ -16,6 +19,7 @@ public sealed class IdleCombatOutcomeProcessor : ICombatOutcomeProcessor
     private readonly IIdleCombatRewardCalculator _calculator;
     private readonly IIdleCombatRewardApplier _applier;
     private readonly IIdleCombatSessionFactory _sessionFactory;
+    private readonly IAchievementService _achievementService;
     private readonly IPublisher _publisher;
 
     public IdleCombatOutcomeProcessor(
@@ -23,6 +27,7 @@ public sealed class IdleCombatOutcomeProcessor : ICombatOutcomeProcessor
         IIdleCombatRewardCalculator calculator,
         IIdleCombatRewardApplier applier,
         IIdleCombatSessionFactory sessionFactory,
+        IAchievementService achievementService,
         IPublisher publisher)
     {
         _factBuilder = factBuilder;
@@ -30,6 +35,7 @@ public sealed class IdleCombatOutcomeProcessor : ICombatOutcomeProcessor
         _applier = applier;
         _sessionFactory = sessionFactory;
         _publisher = publisher;
+        _achievementService = achievementService;
     }
 
     public CombatMode Mode => CombatMode.Idle;
@@ -44,6 +50,7 @@ public sealed class IdleCombatOutcomeProcessor : ICombatOutcomeProcessor
         var calculatedOutcome = await _calculator.CalculateAsync(facts, cancellationToken);
         await _applier.ApplyAsync(facts, calculatedOutcome, cancellationToken);
         await PublishProphecyProgressAsync(facts, calculatedOutcome, cancellationToken);
+        await RecordAchievementsAsync(facts, cancellationToken);
 
         return _sessionFactory.Create(facts, calculatedOutcome);
     }
@@ -106,6 +113,47 @@ public sealed class IdleCombatOutcomeProcessor : ICombatOutcomeProcessor
                 ProphecyProgressKind.TreasureProgress,
                 outcome.TotalLoot.Count)), cancellationToken);
         }
+    }
+
+    private async Task RecordAchievementsAsync(IdleCombatRewardFacts facts, CancellationToken cancellationToken)
+    {
+        var winningEncounters = facts.Encounters
+            .Where(x => x.Outcome == BattleOutcome.Victory)
+            .ToList();
+
+        var defeatedCreatures = winningEncounters
+            .SelectMany(x => x.HostileCreatures)
+            .ToList();
+
+        var lowestWinningHealthPercent = winningEncounters
+            .SelectMany(x => x.CombatResult.PlayerTeam)
+            .Where(x => x.MaxHealth > 0 && x.Health > 0)
+            .Select(x => (int)Math.Ceiling((double)x.Health * 100 / x.MaxHealth))
+            .DefaultIfEmpty()
+            .Min();
+
+        await _achievementService.RecordIdleCombatAsync(
+            facts.CharacterId,
+            defeatedCreatures.Count,
+            [.. defeatedCreatures.Select(GetCreatureFamilyKey)],
+            facts.Encounters.Count(x => x.Outcome == BattleOutcome.Defeat),
+            lowestWinningHealthPercent == 0 ? null : lowestWinningHealthPercent,
+            cancellationToken);
+    }
+
+    private static string GetCreatureFamilyKey(Creature creature)
+    {
+        var name = creature.Name.Trim();
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            return string.Empty;
+        }
+
+        var firstToken = name
+            .Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .FirstOrDefault();
+
+        return firstToken?.Trim('\'', '"', ',', '.', ':', ';') ?? string.Empty;
     }
 
     private static IdleCombatOutcomeContext CreateContext(CombatOutcomeRequest request)

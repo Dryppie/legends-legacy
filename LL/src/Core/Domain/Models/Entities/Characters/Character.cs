@@ -1,5 +1,6 @@
 ﻿using Domain.Models.CharacterActions;
 using Domain.Models.Colosseum;
+using Domain.Models.Achievements;
 using Domain.Models.Guilds;
 using Domain.Models.Inventories;
 using Domain.Models.Essences;
@@ -31,6 +32,9 @@ public class Character : Entity
     public ICollection<ColosseumMatchResult> ColosseumMatches { get; set; } = [];
     public ArenaTicketStatus ArenaTicketStatus { get; set; } = null!;
     public ICollection<EssenceLoadout> EssenceLoadouts { get; set; } = [];
+    public Guid? EquippedTitleDefinitionId { get; set; }
+    public TitleDisplayPosition EquippedTitleDisplayPosition { get; set; } = TitleDisplayPosition.Prefix;
+    public TitleDefinition? EquippedTitleDefinition { get; set; }
     //public Guid? GuildId { get; set; }
     public Guild? Guild { get; set; }
     public ICollection<Profession> Professions { get; set; } = [];

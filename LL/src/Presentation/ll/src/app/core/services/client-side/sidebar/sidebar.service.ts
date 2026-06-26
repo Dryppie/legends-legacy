@@ -75,6 +75,13 @@ function getSidebarSections(): SidebarSection[] {
           description: 'Archive, attune, ascend',
         },
         {
+          id: 'achievements',
+          route: ['character', 'achievements'],
+          icon: 'character/achievements',
+          title: 'Achievements',
+          description: 'Records and titles',
+        },
+        {
           id: 'soulstone-archive',
           route: ['character', 'soulstone-archive'],
           icon: 'character/essences',

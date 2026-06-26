@@ -13,12 +13,22 @@ export interface CharacterDto {
   sigilFragments: number;
   ascensionStoneFragments: number;
   arenaRating: number;
+  equippedTitle?: EquippedTitleDto | null;
 }
 
 export interface CharacterOverviewDto {
+  id: string;
   level: number;
   combatRating: number;
   baseAttributes: AttributeDto[];
   baseCombatAttributes: AttributeDto[];
   activeEssenceLoadout?: EssenceLoadoutDto | null;
+  equippedTitle?: EquippedTitleDto | null;
+}
+
+export interface EquippedTitleDto {
+  key: string;
+  name: string;
+  displayPosition: 'Prefix' | 'Suffix';
+  displayName: string;
 }

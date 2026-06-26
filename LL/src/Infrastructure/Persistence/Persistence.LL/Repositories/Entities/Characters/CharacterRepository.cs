@@ -42,12 +42,14 @@ public class CharacterRepository : ICharacterRepository
     public async Task<Character?> GetCharacterByUserIdAsync(Guid userId, CancellationToken cancellationToken) =>
         await _context.Characters
             .Include(c => c.ArenaProfile)
+            .Include(c => c.EquippedTitleDefinition)
             .FirstOrDefaultAsync(c => c.UserId.Equals(userId), cancellationToken);
 
     public async Task<Character> GetCharacterByCharacterIdAsync(Guid characterId, CancellationToken cancellationToken)
     {
         var character = await _context.Characters
             .Include(c => c.ArenaProfile)
+            .Include(c => c.EquippedTitleDefinition)
             .FirstOrDefaultAsync(c => c.Id.Equals(characterId), cancellationToken);
         NotFoundException.ThrowIfNull(character, nameof(Character), characterId);
         return character;
@@ -57,12 +59,14 @@ public class CharacterRepository : ICharacterRepository
         await _context.Characters
             .AsNoTracking()
             .EntireCharacter()
+            .Include(c => c.EquippedTitleDefinition)
             .FirstOrDefaultAsync(c => c.Id.Equals(characterId), cancellationToken);
 
     public async Task<Character?> GetCharacterOverviewByCharacterNameAsync(string characterName, CancellationToken cancellationToken) =>
         await _context.Characters
             .AsNoTracking()
             .EntireCharacter()
+            .Include(c => c.EquippedTitleDefinition)
             .FirstOrDefaultAsync(c => c.Name.ToLower() == characterName.ToLower(), cancellationToken);
 
     public async Task<Character> GetBaseCharacterByIdAsync(Guid characterId, CancellationToken cancellationToken)

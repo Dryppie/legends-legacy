@@ -1,4 +1,5 @@
 using Application.Interfaces.Services.LL;
+using Application.Interfaces.Services.LL.Achievements;
 using Application.Interfaces.Services.LL.Dungeons;
 using Application.Interfaces.Services.LL.Entities;
 using Application.Interfaces.WebSockets;
@@ -22,19 +23,22 @@ public class ClaimDungeonRewardsCommandHandler : IRequestHandler<ClaimDungeonRew
     private readonly ICharacterService _characterService;
     private readonly IGameRealtimeBroadcaster _gameRealtime;
     private readonly IMapper _mapper;
+    private readonly IAchievementService _achievementService;
 
     public ClaimDungeonRewardsCommandHandler(
         IDungeonRunService dungeonRunService,
         IInventoryService inventoryService,
         ICharacterService characterService,
         IGameRealtimeBroadcaster gameRealtime,
-        IMapper mapper)
+        IMapper mapper,
+        IAchievementService achievementService)
     {
         _dungeonRunService = dungeonRunService;
         _inventoryService = inventoryService;
         _characterService = characterService;
         _gameRealtime = gameRealtime;
         _mapper = mapper;
+        _achievementService = achievementService;
     }
 
     public async Task<Response<ClaimDungeonRewardsResponseDto>> Handle(ClaimDungeonRewardsCommand request, CancellationToken cancellationToken)
@@ -42,6 +46,17 @@ public class ClaimDungeonRewardsCommandHandler : IRequestHandler<ClaimDungeonRew
         var result = await _dungeonRunService.ClaimRewardsAsync(request.CharacterId, cancellationToken);
         if (result == null)
             return Response<ClaimDungeonRewardsResponseDto>.Fail("No completed dungeon run found.");
+
+        if (result.WasCompleted)
+        {
+            await _achievementService.RecordDungeonRunCompletedAsync(
+                request.CharacterId,
+                result.DungeonDefinitionId,
+                result.CompletedWithoutDefeat,
+                result.CompletedWithoutCheckpointRetreat,
+                result.DefeatedBossKeys,
+                cancellationToken);
+        }
 
         var inventory = await _inventoryService.GetInventoryByIdAsync(request.CharacterId, cancellationToken);
         var character = await _characterService.GetCharacterByCharacterIdAsync(request.CharacterId, cancellationToken);

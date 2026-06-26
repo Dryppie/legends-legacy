@@ -28,6 +28,8 @@ public sealed class DungeonRun
     public int PendingCinders { get; set; }
     public int PendingSoulstones { get; set; }
     public List<RunReward> PendingRewards { get; set; } = [];
+    public int DeathsDuringRun { get; set; }
+    public bool UsedCheckpointRetreat { get; set; }
 
     public DateTimeOffset CreatedAt { get; set; }
     public DateTimeOffset? CompletedAt { get; set; }

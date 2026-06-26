@@ -11,6 +11,16 @@ public class CharacterConfiguration : IEntityTypeConfiguration<Character>
             .HasIndex(c => c.UserId);
 
         builder
+            .Property(c => c.EquippedTitleDisplayPosition)
+            .HasConversion<int>();
+
+        builder
+            .HasOne(c => c.EquippedTitleDefinition)
+            .WithMany()
+            .HasForeignKey(c => c.EquippedTitleDefinitionId)
+            .OnDelete(DeleteBehavior.SetNull);
+
+        builder
             .HasMany(c => c.ColosseumMatches)
             .WithOne()
             .HasForeignKey(c => c.CharacterAId);

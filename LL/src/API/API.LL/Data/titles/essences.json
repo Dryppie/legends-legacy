@@ -1,0 +1,86 @@
+[
+  {
+    "key": "title.soulbound",
+    "name": "Soulbound",
+    "description": "Earned by equipping 10 Essences at once.",
+    "category": "Essences",
+    "rarity": "Renowned",
+    "scope": "Character",
+    "sourceAchievementKey": "essence.soulbound",
+    "isHiddenUntilUnlocked": false,
+    "isActive": true,
+    "sortOrder": 10
+  },
+  {
+    "key": "title.archivist",
+    "name": "Archivist",
+    "description": "Earned by adding 100 unique Essences to the Soul Archive.",
+    "category": "Essences",
+    "rarity": "Exalted",
+    "scope": "Account",
+    "sourceAchievementKey": "essence.archivist",
+    "isHiddenUntilUnlocked": false,
+    "isActive": true,
+    "sortOrder": 11
+  },
+  {
+    "key": "title.master_archivist",
+    "name": "Master Archivist",
+    "description": "Earned by adding 250 unique Essences to the Soul Archive.",
+    "category": "Essences",
+    "rarity": "Exalted",
+    "scope": "Account",
+    "sourceAchievementKey": "essence.master_archivist",
+    "isHiddenUntilUnlocked": false,
+    "isActive": true,
+    "sortOrder": 12
+  },
+  {
+    "key": "title.living_archive",
+    "name": "Living Archive",
+    "description": "Earned by adding 500 unique Essences to the Soul Archive.",
+    "category": "Essences",
+    "rarity": "Mythic",
+    "scope": "Account",
+    "sourceAchievementKey": "essence.living_archive",
+    "isHiddenUntilUnlocked": false,
+    "isActive": true,
+    "sortOrder": 13
+  },
+  {
+    "key": "title.ascendant",
+    "name": "Ascendant",
+    "description": "Earned by ascending your first Essence.",
+    "category": "Essences",
+    "rarity": "Renowned",
+    "scope": "Account",
+    "sourceAchievementKey": "essence.ascendant",
+    "isHiddenUntilUnlocked": false,
+    "isActive": true,
+    "sortOrder": 14
+  },
+  {
+    "key": "title.essence_paragon",
+    "name": "Essence Paragon",
+    "description": "Earned by ascending 10 Essences to Tier 3.",
+    "category": "Essences",
+    "rarity": "Exalted",
+    "scope": "Account",
+    "sourceAchievementKey": "essence.paragon",
+    "isHiddenUntilUnlocked": false,
+    "isActive": true,
+    "sortOrder": 15
+  },
+  {
+    "key": "title.beastbinder",
+    "name": "Beastbinder",
+    "description": "Earned by completing the Beast Essence collection.",
+    "category": "Essences",
+    "rarity": "Exalted",
+    "scope": "Account",
+    "sourceAchievementKey": "essence.beastbinder",
+    "isHiddenUntilUnlocked": false,
+    "isActive": true,
+    "sortOrder": 16
+  }
+]

@@ -156,7 +156,6 @@ export class CombatComponent implements OnInit, OnDestroy {
     effect(() => {
       const type = this.battleTypeSignal();
       const result = this.combatStateService.getCombatResult(type)();
-      console.log(result);
       if (result?.playerTeam.length) {
         this.displayCombat = true;
         this.setupCombat();

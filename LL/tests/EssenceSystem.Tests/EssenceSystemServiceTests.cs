@@ -1,8 +1,12 @@
+using Application.Interfaces.Services.LL.Achievements;
 using Application.Interfaces.Services.LL.Essences;
+using Application.UseCases.Achievements.Dtos;
 using Application.UseCases.Essences.Dtos;
 using Domain.Components.Attributes;
+using Domain.Models.Achievements;
 using Domain.Models.Attributes;
 using Domain.Models.Attributes.Modifiers;
+using Domain.Models.CharacterActions.Sessions;
 using Domain.Models.Combat;
 using Domain.Models.Combat.Abilities;
 using Domain.Models.Entities.Characters;
@@ -11,6 +15,7 @@ using Domain.Models.Essences;
 using Domain.Models.Essences.Definitions;
 using Domain.Models.Inventories;
 using Domain.Models.Items;
+using Domain.Models.Items.Equipments;
 using Domain.Models.Items.EssenceItems;
 using Domain.Models.Regions.Areas;
 using Microsoft.EntityFrameworkCore;
@@ -668,7 +673,8 @@ public sealed class EssenceSystemServiceTests
             new EssenceSlotUnlockService(),
             new EssenceLoadoutLimitService(),
             new InventoryItemFactory(),
-            random ?? new QueueRandomProvider(0.99));
+            random ?? new QueueRandomProvider(0.99),
+            new NoopAchievementService());
     }
 
     private static EssenceDefinition UtilityDefinition() => new()
@@ -889,5 +895,70 @@ public sealed class EssenceSystemServiceTests
         private readonly Queue<double> _values = new(values);
 
         public double NextDouble() => _values.Count == 0 ? 0.99 : _values.Dequeue();
+    }
+
+    private sealed class NoopAchievementService : IAchievementService
+    {
+        public Task<AchievementOverviewDto> GetOverviewAsync(Guid accountId, Guid characterId, CancellationToken cancellationToken) =>
+            Task.FromResult(new AchievementOverviewDto());
+
+        public Task<IReadOnlyList<AchievementDto>> GetAchievementsAsync(Guid accountId, Guid characterId, AchievementFilters filters, CancellationToken cancellationToken) =>
+            Task.FromResult<IReadOnlyList<AchievementDto>>([]);
+
+        public Task<IReadOnlyList<TitleDto>> GetTitlesAsync(Guid accountId, Guid characterId, TitleFilters filters, CancellationToken cancellationToken) =>
+            Task.FromResult<IReadOnlyList<TitleDto>>([]);
+
+        public Task<EquippedTitleDto?> EquipTitleAsync(
+            Guid accountId,
+            Guid characterId,
+            string titleKey,
+            TitleDisplayPosition displayPosition,
+            CancellationToken cancellationToken) =>
+            Task.FromResult<EquippedTitleDto?>(null);
+
+        public Task UnequipTitleAsync(Guid accountId, Guid characterId, CancellationToken cancellationToken) =>
+            Task.CompletedTask;
+
+        public Task<IReadOnlyList<AchievementUnlockDto>> AddProgressAsync(Guid accountId, Guid? characterId, AchievementRequirementType requirementType, long amount = 1, string? requirementTarget = null, bool setToMax = false, int? seasonId = null, string? metadataJson = null, CancellationToken cancellationToken = default) =>
+            Task.FromResult<IReadOnlyList<AchievementUnlockDto>>([]);
+
+        public Task RecordColosseumBattleAsync(Guid characterId, Guid opponentCharacterId, BattleOutcome outcome, int characterRatingBefore, int opponentRatingBefore, CancellationToken cancellationToken) =>
+            Task.CompletedTask;
+
+        public Task RecordDungeonRunStartedAsync(Guid characterId, CancellationToken cancellationToken) =>
+            Task.CompletedTask;
+
+        public Task RecordDungeonRunCompletedAsync(Guid characterId, string dungeonDefinitionId, bool completedWithoutDefeat, bool completedWithoutCheckpointRetreat, IReadOnlyCollection<string> defeatedBossKeys, CancellationToken cancellationToken) =>
+            Task.CompletedTask;
+
+        public Task RecordIdleCombatAsync(Guid characterId, int monstersDefeated, IReadOnlyCollection<string> defeatedCreatureFamilyKeys, int playerDefeats, int? lowestWinningHealthPercent, CancellationToken cancellationToken) =>
+            Task.CompletedTask;
+
+        public Task RecordEssenceAbsorbedAsync(Guid characterId, int uniqueEssenceCount, IReadOnlyCollection<string> completedCollectionKeys, CancellationToken cancellationToken) =>
+            Task.CompletedTask;
+
+        public Task RecordEssenceLoadoutSavedAsync(Guid characterId, int equippedEssenceCount, CancellationToken cancellationToken) =>
+            Task.CompletedTask;
+
+        public Task RecordEssenceAscendedAsync(Guid characterId, int ascensionTier, int ascendedToTierCount, CancellationToken cancellationToken) =>
+            Task.CompletedTask;
+
+        public Task RecordItemsCraftedAsync(Guid characterId, IReadOnlyCollection<EquipmentInstance> craftedItems, CancellationToken cancellationToken) =>
+            Task.CompletedTask;
+
+        public Task RecordItemsTemperedAsync(Guid characterId, TemperingSummary summary, IReadOnlyCollection<EquipmentInstance> completedItems, CancellationToken cancellationToken) =>
+            Task.CompletedTask;
+
+        public Task RecordBlueprintUnlockedAsync(Guid characterId, CancellationToken cancellationToken) =>
+            Task.CompletedTask;
+
+        public Task RecordCharacterCreatedAsync(Guid characterId, CancellationToken cancellationToken) =>
+            Task.CompletedTask;
+
+        public Task RecordCharacterLevelReachedAsync(Guid characterId, int level, CancellationToken cancellationToken) =>
+            Task.CompletedTask;
+
+        public Task<AchievementRecalculationResultDto?> RecalculateProgressAsync(Guid accountId, Guid characterId, CancellationToken cancellationToken) =>
+            Task.FromResult<AchievementRecalculationResultDto?>(null);
     }
 }
