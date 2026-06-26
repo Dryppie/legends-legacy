@@ -11,6 +11,8 @@ public class ArenaBattleCompletedEventHandler : INotificationHandler<ArenaBattle
 {
     private readonly IGameEventPublisher _eventPublisher;
     private readonly IAchievementService _achievementService;
+    private readonly IRatingService _ratingService;
+    private readonly IColosseumService _colosseumService;
 
     public ArenaBattleCompletedEventHandler(
         IRatingService ratingService,

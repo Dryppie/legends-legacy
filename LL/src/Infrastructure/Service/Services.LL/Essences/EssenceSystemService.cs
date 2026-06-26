@@ -41,8 +41,8 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
         IEssenceLoadoutLimitService loadoutLimits,
         IInventoryItemFactory inventoryItemFactory,
         IRandomProvider random,
-        IPublisher? publisher = null,
-        IAchievementService achievementService)
+        IAchievementService achievementService,
+        IPublisher? publisher = null)
     {
         _essences = essences;
         _inventory = inventory;
