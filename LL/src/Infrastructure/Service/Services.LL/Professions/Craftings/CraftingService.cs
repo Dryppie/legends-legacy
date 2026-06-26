@@ -1,4 +1,5 @@
 using Application.Interfaces.Services.LL;
+using Application.Interfaces.Services.LL.Achievements;
 using Application.Interfaces.Services.LL.Professions;
 using Application.UseCases.Crafting;
 using Application.UseCases.Crafting.Dtos;
@@ -39,6 +40,7 @@ public class CraftingService : ICraftingService
     private readonly IItemStatRollService _statRollService;
     private readonly ICraftingProgressionService _progressionService;
     private readonly ICraftingItemCatalogService _itemCatalogService;
+    private readonly IAchievementService _achievementService;
     private readonly IMapper _mapper;
 
     public CraftingService(
@@ -57,6 +59,7 @@ public class CraftingService : ICraftingService
         IItemStatRollService statRollService,
         ICraftingProgressionService progressionService,
         ICraftingItemCatalogService itemCatalogService,
+        IAchievementService achievementService,
         IMapper mapper)
     {
         _craftingRepository = cr;
@@ -74,6 +77,7 @@ public class CraftingService : ICraftingService
         _statRollService = statRollService;
         _progressionService = progressionService;
         _itemCatalogService = itemCatalogService;
+        _achievementService = achievementService;
         _mapper = mapper;
     }
 
@@ -85,6 +89,7 @@ public class CraftingService : ICraftingService
         var sessionStartedAt = characterAction.UpdatedAt;
 
         var temperingSummary = new TemperingSummary();
+        var completedItems = new List<EquipmentInstance>();
         var rng = Random.Shared;
 
         var factors = await _bonusService.GetAggregatedAsync(characterAction.CharacterId, now, cancellationToken);
@@ -105,7 +110,7 @@ public class CraftingService : ICraftingService
             var current = actionDetails.CraftingQueueItems.First();
             if (!_temperingService.HandleTempering(current, temperingSummary, rng, temperingBonuses))
             {
-                await CompleteCurrentQueueItemAsync(characterAction.CharacterId, actionDetails, current, temperingSummary, cancellationToken);
+                await CompleteCurrentQueueItemAsync(characterAction.CharacterId, actionDetails, current, temperingSummary, completedItems, cancellationToken);
                 continue;
             }
 
@@ -115,7 +120,7 @@ public class CraftingService : ICraftingService
 
             if (!_temperingService.CanTemper(current))
             {
-                await CompleteCurrentQueueItemAsync(characterAction.CharacterId, actionDetails, current, temperingSummary, cancellationToken);
+                await CompleteCurrentQueueItemAsync(characterAction.CharacterId, actionDetails, current, temperingSummary, completedItems, cancellationToken);
             }
         }
 
@@ -131,6 +136,11 @@ public class CraftingService : ICraftingService
             soulstoneDoubleDropChance,
             cancellationToken);
         await UpdateCharacterProfessionsAsync(characterAction.CharacterId, temperingSummary, cancellationToken);
+        await _achievementService.RecordItemsTemperedAsync(
+            characterAction.CharacterId,
+            temperingSummary,
+            completedItems,
+            cancellationToken);
 
         return new TemperingSession
         {
@@ -239,6 +249,7 @@ public class CraftingService : ICraftingService
         if (!unlocked) return Response<LearnBlueprintResult>.Fail("Blueprint is already known for this recipe.");
 
         await _inventoryService.TryConsumeInventoryItemAsync(characterId, blueprintItemInstanceId, cancellationToken);
+        await _achievementService.RecordBlueprintUnlockedAsync(characterId, cancellationToken);
 
         return Response<LearnBlueprintResult>.Success(new LearnBlueprintResult(blueprint.Id, recipe.Id, recipe.Name));
     }
@@ -333,6 +344,10 @@ public class CraftingService : ICraftingService
         }
 
         await _inventoryService.AddItemsToInventory(characterId, created, cancellationToken);
+        await _achievementService.RecordItemsCraftedAsync(
+            characterId,
+            [.. created.Select(x => (EquipmentInstance)x.ItemInstance)],
+            cancellationToken);
 
         var xpGained = craftQuantity * CraftingMasteryProgression.ExperiencePerCraft;
         mastery.Experience += xpGained;
@@ -353,10 +368,12 @@ public class CraftingService : ICraftingService
         CraftingActionDetails actionDetails,
         CraftingQueueItem current,
         TemperingSummary temperingSummary,
+        List<EquipmentInstance> completedItems,
         CancellationToken cancellationToken)
     {
         temperingSummary.TotalItemsCrafted++;
         actionDetails.CraftingQueueItems.Remove(current);
+        completedItems.Add(current.EquipmentInstance);
         await _inventoryService.AddItemInstanceBackToInventory(characterId, current.EquipmentInstance, cancellationToken);
     }
 

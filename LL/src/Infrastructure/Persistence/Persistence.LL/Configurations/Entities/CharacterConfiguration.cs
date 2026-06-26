@@ -11,6 +11,10 @@ public class CharacterConfiguration : IEntityTypeConfiguration<Character>
             .HasIndex(c => c.UserId);
 
         builder
+            .Property(c => c.EquippedTitleDisplayPosition)
+            .HasConversion<int>();
+
+        builder
             .HasOne(c => c.EquippedTitleDefinition)
             .WithMany()
             .HasForeignKey(c => c.EquippedTitleDefinitionId)

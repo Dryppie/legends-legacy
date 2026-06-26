@@ -35,7 +35,23 @@ public class TemperingService : ITemperingService
             (current.EquipmentInstance.Potential ?? 0) < TemperingConstants.PotentialCost)
             return false;
 
+        var wasMasterpiece = current.EquipmentInstance.IsMasterpiece;
+        var wasLevelingItem = current.EquipmentInstance.IsLevelingItem;
         var result = _temperingMechanics.ApplyTemperingAttempt(current.EquipmentInstance, profile, rng);
+        if (result.Outcome == TemperingOutcome.Negative)
+        {
+            temperingSummary.CursedOutcomes++;
+        }
+
+        if (!wasMasterpiece && current.EquipmentInstance.IsMasterpiece)
+        {
+            temperingSummary.Masterpieces++;
+        }
+
+        if (!wasLevelingItem && current.EquipmentInstance.IsLevelingItem)
+        {
+            temperingSummary.LevelingItems++;
+        }
 
         temperingBonuses.TryGetValue(TemperingOutcome.Positive, out var doubleProfessionExperienceChance);
         var experience = result.Outcome switch

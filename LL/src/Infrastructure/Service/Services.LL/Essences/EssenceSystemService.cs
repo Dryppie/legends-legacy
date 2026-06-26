@@ -1,3 +1,4 @@
+using Application.Interfaces.Services.LL.Achievements;
 using Application.Interfaces.Services.LL.Essences;
 using Domain.Models.Attributes.Modifiers;
 using Domain.Models.Combat.Abilities;
@@ -14,6 +15,7 @@ namespace Services.LL.Essences;
 public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvider, IEssenceAbilityProvider, IEssenceCombatLoadoutResolver, IEssenceResonanceService
 {
     private const string EssenceDustItemId = "soul_dust";
+    private static readonly string[] CollectionAchievementTags = ["Beast"];
     private readonly IEssenceRepository _essences;
     private readonly IInventoryRepository _inventory;
     private readonly IItemBaseRepository _itemBases;
@@ -23,6 +25,7 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
     private readonly IEssenceLoadoutLimitService _loadoutLimits;
     private readonly IInventoryItemFactory _inventoryItemFactory;
     private readonly IRandomProvider _random;
+    private readonly IAchievementService _achievementService;
 
     public EssenceSystemService(
         IEssenceRepository essences,
@@ -33,7 +36,8 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
         IEssenceSlotUnlockService slotUnlocks,
         IEssenceLoadoutLimitService loadoutLimits,
         IInventoryItemFactory inventoryItemFactory,
-        IRandomProvider random)
+        IRandomProvider random,
+        IAchievementService achievementService)
     {
         _essences = essences;
         _inventory = inventory;
@@ -44,6 +48,7 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
         _loadoutLimits = loadoutLimits;
         _inventoryItemFactory = inventoryItemFactory;
         _random = random;
+        _achievementService = achievementService;
     }
 
     public async Task<SoulArchive> GetSoulArchiveAsync(Guid characterId, CancellationToken cancellationToken)
@@ -85,6 +90,13 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
         var alreadyAbsorbed = await _essences.HasPlayerEssenceAsync(characterId, definitionId, cancellationToken);
         if (alreadyAbsorbed) return Fail("This Essence is already absorbed in the Soul Archive.");
 
+        var existingEssences = await _essences.GetPlayerEssencesAsync(characterId, cancellationToken);
+        var archivedEssenceIds = existingEssences
+            .Select(x => x.EssenceDefinitionId)
+            .Append(definitionId)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
         await _essences.AddPlayerEssenceAsync(new PlayerEssence
         {
             Id = Guid.NewGuid(),
@@ -96,6 +108,12 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
         }, cancellationToken);
 
         ConsumeInventoryItem(inventoryItem, 1);
+        await _achievementService.RecordEssenceAbsorbedAsync(
+            characterId,
+            archivedEssenceIds.Count,
+            GetCompletedCollectionKeys(archivedEssenceIds),
+            cancellationToken);
+
         return Ok("Essence absorbed into the Soul Archive.");
     }
 
@@ -152,6 +170,20 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
 
         essence.AscensionTier = nextTier;
         essence.UpdatedAt = DateTimeOffset.UtcNow;
+        var ascendedToTierCount = nextTier switch
+        {
+            1 => ascensionCounts.TierOneOrHigher + 1,
+            2 => ascensionCounts.TierTwoOrHigher + 1,
+            3 => ascensionCounts.TierThreeOrHigher + 1,
+            _ => 1
+        };
+
+        await _achievementService.RecordEssenceAscendedAsync(
+            characterId,
+            nextTier,
+            ascendedToTierCount,
+            cancellationToken);
+
         return Ok("Essence ascended.");
     }
 
@@ -202,6 +234,10 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
         loadout.Name = request.Name.Trim();
         loadout.UpdatedAt = DateTimeOffset.UtcNow;
         await ReplaceLoadoutSlotsAsync(loadout, normalizedSlots, cancellationToken);
+        if (loadout.IsActive)
+        {
+            await _achievementService.RecordEssenceLoadoutSavedAsync(characterId, normalizedSlots.Count, cancellationToken);
+        }
 
         return loadout;
     }
@@ -234,6 +270,7 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
         if (ownedCount != essenceIds.Count) return Fail("Loadout references an Essence that is no longer absorbed.");
 
         foreach (var loadout in loadouts) loadout.IsActive = loadout.Id == loadoutId;
+        await _achievementService.RecordEssenceLoadoutSavedAsync(characterId, selected.Slots.Count(x => x.PlayerEssenceId.HasValue), cancellationToken);
         return Ok("Essence loadout activated.");
     }
 
@@ -415,6 +452,26 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
             essences.Count(x => x.AscensionTier >= 2),
             essences.Count(x => x.AscensionTier >= 3));
     }
+
+    private IReadOnlyCollection<string> GetCompletedCollectionKeys(IReadOnlyCollection<string> archivedEssenceIds)
+    {
+        var archived = archivedEssenceIds.ToHashSet(StringComparer.OrdinalIgnoreCase);
+        return CollectionAchievementTags
+            .Where(tag =>
+            {
+                var collectionIds = _definitions.GetAll()
+                    .Where(definition => definition.Tags.Any(definitionTag => MatchesCollectionTag(definitionTag, tag)))
+                    .Select(definition => definition.Id)
+                    .ToList();
+
+                return collectionIds.Count > 0 && collectionIds.All(archived.Contains);
+            })
+            .ToList();
+    }
+
+    private static bool MatchesCollectionTag(string definitionTag, string collectionKey) =>
+        definitionTag.Equals(collectionKey, StringComparison.OrdinalIgnoreCase) ||
+        definitionTag.EndsWith($".{collectionKey}", StringComparison.OrdinalIgnoreCase);
 
     private void ConsumeInventoryItem(InventoryItem inventoryItem, int quantity)
     {

@@ -131,14 +131,25 @@ public sealed class DungeonRunService : IDungeonRunService
             return null;
 
         var claimedLoot = await _rewardClaimer.ClaimAsync(run, cancellationToken);
+        var result = new ClaimDungeonRewardsResult
+        {
+            ClaimedLoot = claimedLoot,
+            WasCompleted = run.Status == DungeonRunStatus.Completed,
+            DungeonDefinitionId = run.DungeonDefinitionId,
+            CompletedWithoutDefeat = run.DeathsDuringRun == 0,
+            CompletedWithoutCheckpointRetreat = !run.UsedCheckpointRetreat,
+            DefeatedBossKeys = run.Rooms
+                .Where(room => room.Type == RoomType.Boss && room.Status == RoomInstanceStatus.Completed)
+                .SelectMany(room => room.EncounterIds)
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList()
+        };
 
         run.Status = DungeonRunStatus.RewardsClaimed;
         run.RewardsClaimedAt = DateTimeOffset.UtcNow;
 
         var deleted = await _dungeonRuns.DeleteDungeonRunAsync(run, cancellationToken);
-        return deleted
-            ? new ClaimDungeonRewardsResult { ClaimedLoot = claimedLoot }
-            : null;
+        return deleted ? result : null;
     }
 
     public async Task<bool> DismissFailedRunAsync(Guid characterId, CancellationToken cancellationToken)
@@ -343,6 +354,7 @@ public sealed class DungeonRunService : IDungeonRunService
             case "leave":
             case "withdraw":
                 run.Status = DungeonRunStatus.Withdrawn;
+                run.UsedCheckpointRetreat = true;
                 run.CompletedAt = DateTimeOffset.UtcNow;
                 room.Status = RoomInstanceStatus.Completed;
                 run.State.SecuredLoot = CreateLootBagFromRun(run);
@@ -473,6 +485,7 @@ public sealed class DungeonRunService : IDungeonRunService
         else
         {
             run.Status = DungeonRunStatus.Failed;
+            run.DeathsDuringRun++;
             room.Status = RoomInstanceStatus.Completed;
             run.CompletedAt = DateTimeOffset.UtcNow;
 
@@ -653,6 +666,7 @@ public sealed class DungeonRunService : IDungeonRunService
         switch (result.Outcome)
         {
             case DungeonCheckpointChoiceOutcome.Withdraw:
+                run.UsedCheckpointRetreat = true;
                 return new ExecuteDungeonActionResult
                 {
                     Run = run,
@@ -683,6 +697,7 @@ public sealed class DungeonRunService : IDungeonRunService
                 };
 
             case DungeonCheckpointChoiceOutcome.Rest:
+                run.UsedCheckpointRetreat = true;
                 return new ExecuteDungeonActionResult
                 {
                     Run = run,

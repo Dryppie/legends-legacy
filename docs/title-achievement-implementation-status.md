@@ -1,6 +1,6 @@
 # Title & Achievement System Implementation Status
 
-Last updated: 2026-06-25
+Last updated: 2026-06-26
 
 This tracks the implementation based on `C:\Users\HrHoe\Downloads\title-achievement-system-design.md`.
 The target service is the primary Legends Legacy game app under `LL/`.
@@ -69,6 +69,7 @@ The target service is the primary Legends Legacy game app under `LL/`.
 - Wired the catalog into `LLDbContextExtensions.SeedData`.
 - Definitions are updated by stable key rather than EF `HasData`, which keeps the catalog easier to evolve.
 - JSON entries use readable string keys instead of GUIDs; internal database GUIDs are derived deterministically from those keys by the seed loader.
+- Title JSON entries no longer hardcode prefix/suffix display position; all titles can be displayed either way.
 - Achievement JSON entries can define `playerSystemMessageTemplate` and `globalSystemMessageTemplate`.
 - All seeded achievements currently define a player system message template.
 - Exalted/Mythic seeded achievements currently define a global system message template.
@@ -83,6 +84,9 @@ The target service is the primary Legends Legacy game app under `LL/`.
 - Implemented progress updates and non-repeatable unlock guarding.
 - Implemented title rewards from source achievements.
 - Implemented equip/unequip title validation.
+- Implemented player-selected equipped-title display position.
+- Prefix titles format as `Title Name`.
+- Suffix titles format as `Name, the Title`, while avoiding duplicate `the` when the title text already starts that way.
 - Implemented same-account Colosseum achievement prevention.
 - Implemented dungeon start and completion progress helpers.
 - Implemented idle combat progress helper.
@@ -185,6 +189,8 @@ The target service is the primary Legends Legacy game app under `LL/`.
 - Added equipped-title DTO data to character/profile projections.
 - Included `EquippedTitleDefinition` when loading character data.
 - Updated the Angular character overview profile label to prefer the equipped title display name.
+- Moved prefix/suffix choice from `TitleDefinition` to the character's equipped-title state.
+- Title list DTOs now include prefix and suffix previews so the frontend can show both display options before equipping.
 
 ### Angular MVP
 
@@ -204,6 +210,9 @@ The target service is the primary Legends Legacy game app under `LL/`.
 - The chat UI now exposes a `System` room and renders system senders without requiring a character tag.
 - Added achievement collection search, status filtering, and sort controls.
 - Added title search, title status filters, and an equipped-title preview panel.
+- Added a prefix/suffix segmented control to the title browser.
+- Equipping a title now sends the selected display position.
+- An already equipped title can be updated from prefix to suffix, or back again, without unequipping first.
 
 ### Chat persistence
 
@@ -221,6 +230,7 @@ Added focused backend tests for:
 - achievement points/title rewards are awarded once
 - locked title equip rejection
 - character-bound title ownership validation
+- suffix title display formatting
 - hidden/obscured masking
 - Legacy Renown thresholds
 - same-account Colosseum achievement prevention
@@ -334,19 +344,29 @@ dotnet build LL\LegendsLegacy.sln
 npm.cmd run build
 ```
 
+Latest verification after player-selected title display position:
+
+```powershell
+dotnet build LL\tests\EssenceSystem.Tests\EssenceSystem.Tests.csproj /p:UseSharedCompilation=false
+dotnet test LL\tests\EssenceSystem.Tests\EssenceSystem.Tests.csproj --no-build
+npm.cmd run build
+```
+
 The focused test project now has `188` passing tests.
 
 Notes:
 
 - The first plain `npm run build` failed because the local `npm` shim pointed to a missing global npm install; rerunning with `npm.cmd` fixed that.
 - The latest first sandboxed Angular build failed because Angular's resolver could not read parent directories in the sandbox; rerunning the same command with approval succeeded.
-- Angular build completed with an existing bundle budget warning: latest initial bundle total was `739.93 kB` against a `512.00 kB` budget.
+- The latest first sandboxed Angular build failed because Angular font inlining could not fetch Google Fonts without network access; rerunning the same command with approval succeeded.
+- Angular build completed with an existing bundle budget warning: latest initial bundle total was `740.11 kB` against a `512.00 kB` budget.
 - `LL-Chat` build reported the existing AutoMapper advisory warning and nullable warnings in chat hub/rate limiter code.
 - `npm.cmd ci` reported dependency audit findings from the installed dependency tree: 77 vulnerabilities. No dependency versions were changed.
 
 ## Deployment Notes
 
 - The generated migration adds achievement/title tables, dungeon run fact columns, and the character equipped-title FK.
+- The generated migration now stores the selected equipped-title display position on characters/entities instead of storing display position on title definitions.
 - The generated migration also adds achievement system message template columns.
 - The migration was generated only; it was not applied.
 - The achievement/title catalog seeds at application startup through existing seed flow.
