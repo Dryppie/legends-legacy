@@ -76,15 +76,20 @@ public sealed class TitleDto : IMapFrom<TitleDefinition>
     public Guid? UnlockedByCharacterId { get; init; }
     public DateTimeOffset? UnlockedAt { get; init; }
     public string Preview { get; init; } = string.Empty;
+    public string PrefixPreview { get; init; } = string.Empty;
+    public string SuffixPreview { get; init; } = string.Empty;
 
     public void Mapping(Profile profile)
     {
         profile.CreateMap<TitleDefinition, TitleDto>()
+            .ForMember(dest => dest.DisplayPosition, opt => opt.Ignore())
             .ForMember(dest => dest.IsUnlocked, opt => opt.Ignore())
             .ForMember(dest => dest.IsEquipped, opt => opt.Ignore())
             .ForMember(dest => dest.UnlockedByCharacterId, opt => opt.Ignore())
             .ForMember(dest => dest.UnlockedAt, opt => opt.Ignore())
-            .ForMember(dest => dest.Preview, opt => opt.MapFrom(src => src.Name));
+            .ForMember(dest => dest.Preview, opt => opt.MapFrom(src => src.Name))
+            .ForMember(dest => dest.PrefixPreview, opt => opt.MapFrom(src => src.Name))
+            .ForMember(dest => dest.SuffixPreview, opt => opt.MapFrom(src => src.Name));
     }
 }
 
@@ -98,6 +103,7 @@ public sealed class EquippedTitleDto : IMapFrom<TitleDefinition>
     public void Mapping(Profile profile)
     {
         profile.CreateMap<TitleDefinition, EquippedTitleDto>()
+            .ForMember(dest => dest.DisplayPosition, opt => opt.Ignore())
             .ForMember(dest => dest.DisplayName, opt => opt.MapFrom(src => src.Name));
     }
 }

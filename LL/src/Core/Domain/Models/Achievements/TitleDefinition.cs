@@ -8,7 +8,6 @@ public sealed class TitleDefinition
     public string Description { get; set; } = string.Empty;
     public AchievementCategory Category { get; set; }
     public TitleRarity Rarity { get; set; }
-    public TitleDisplayPosition DisplayPosition { get; set; }
     public TitleScope Scope { get; set; }
     public bool IsActive { get; set; } = true;
     public bool IsHiddenUntilUnlocked { get; set; }

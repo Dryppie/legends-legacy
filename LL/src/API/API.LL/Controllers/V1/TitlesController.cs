@@ -31,7 +31,8 @@ public sealed class TitlesController : BaseController
         await Mediator.Send(new EquipTitleCommand(
             CurrentUserId,
             CurrentCharacterGuid,
-            request.TitleKey));
+            request.TitleKey,
+            request.DisplayPosition));
 
     [HttpPost("unequip")]
     public async Task<ActionResult<Response<EquippedTitleDto?>>> Unequip() =>

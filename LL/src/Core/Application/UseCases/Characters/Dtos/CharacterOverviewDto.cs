@@ -64,12 +64,17 @@ public sealed class CharacterOverviewConverter : ITypeConverter<Character, Chara
         {
             Key = title.Key,
             Name = title.Name,
-            DisplayPosition = title.DisplayPosition,
-            DisplayName = title.DisplayPosition == TitleDisplayPosition.Prefix
+            DisplayPosition = source.EquippedTitleDisplayPosition,
+            DisplayName = source.EquippedTitleDisplayPosition == TitleDisplayPosition.Prefix
                 ? $"{title.Name} {source.Name}"
-                : $"{source.Name}, {title.Name}"
+                : $"{source.Name}, {FormatSuffixTitle(title.Name)}"
         };
     }
+
+    private static string FormatSuffixTitle(string title) =>
+        title.StartsWith("the ", StringComparison.OrdinalIgnoreCase)
+            ? title
+            : $"the {title}";
 
     private EssenceLoadoutDto? MapActiveLoadout(Character source)
     {

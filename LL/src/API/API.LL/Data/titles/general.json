@@ -5,7 +5,6 @@
     "description": "A beginning hero with a long road ahead.",
     "category": "General",
     "rarity": "Common",
-    "displayPosition": "Prefix",
     "scope": "Account",
     "sourceAchievementKey": "general.adventurer",
     "isHiddenUntilUnlocked": false,

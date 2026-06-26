@@ -586,7 +586,6 @@ public static class LLDbContextExtensions
         Description = seed.Description,
         Category = seed.Category,
         Rarity = seed.Rarity,
-        DisplayPosition = seed.DisplayPosition,
         Scope = seed.Scope,
         IsActive = seed.IsActive,
         IsHiddenUntilUnlocked = seed.IsHiddenUntilUnlocked,
@@ -606,7 +605,6 @@ public static class LLDbContextExtensions
         changed |= SetIfChanged(existing.Description, seed.Description, value => existing.Description = value);
         changed |= SetIfChanged(existing.Category, seed.Category, value => existing.Category = value);
         changed |= SetIfChanged(existing.Rarity, seed.Rarity, value => existing.Rarity = value);
-        changed |= SetIfChanged(existing.DisplayPosition, seed.DisplayPosition, value => existing.DisplayPosition = value);
         changed |= SetIfChanged(existing.Scope, seed.Scope, value => existing.Scope = value);
         changed |= SetIfChanged(existing.IsActive, seed.IsActive, value => existing.IsActive = value);
         changed |= SetIfChanged(existing.IsHiddenUntilUnlocked, seed.IsHiddenUntilUnlocked, value => existing.IsHiddenUntilUnlocked = value);

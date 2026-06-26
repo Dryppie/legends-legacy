@@ -223,9 +223,6 @@ namespace Persistence.LL.Migrations
                         .HasMaxLength(600)
                         .HasColumnType("character varying(600)");
 
-                    b.Property<int>("DisplayPosition")
-                        .HasColumnType("integer");
-
                     b.Property<string>("IconKey")
                         .HasMaxLength(120)
                         .HasColumnType("character varying(120)");
@@ -1630,6 +1627,9 @@ namespace Persistence.LL.Migrations
 
                     b.Property<Guid?>("EquippedTitleDefinitionId")
                         .HasColumnType("uuid");
+
+                    b.Property<int>("EquippedTitleDisplayPosition")
+                        .HasColumnType("integer");
 
                     b.Property<float>("Experience")
                         .HasColumnType("real");
