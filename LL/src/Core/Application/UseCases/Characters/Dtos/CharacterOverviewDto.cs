@@ -1,8 +1,10 @@
 using Application.Common.Mappings;
 using Application.Interfaces.Services.LL.Essences;
+using Application.UseCases.Achievements.Dtos;
 using Application.UseCases.Essences.Dtos;
 using AutoMapper;
 using Domain.Components.Attributes;
+using Domain.Models.Achievements;
 using Domain.Models.Attributes;
 using Domain.Models.Entities.Characters;
 using Domain.Models.Essences;
@@ -16,6 +18,7 @@ public class CharacterOverviewDto : IMapFrom<Character>
     public List<EntityAttribute> BaseAttributes { get; set; } = [];
     public List<EntityAttribute> BaseCombatAttributes { get; set; } = [];
     public EssenceLoadoutDto? ActiveEssenceLoadout { get; set; }
+    public EquippedTitleDto? EquippedTitle { get; set; }
 
     public void Mapping(Profile profile)
     {
@@ -47,7 +50,24 @@ public sealed class CharacterOverviewConverter : ITypeConverter<Character, Chara
                 AttributeType = kvp.Key,
                 Value = kvp.Value
             }).ToList(),
-            ActiveEssenceLoadout = MapActiveLoadout(source)
+            ActiveEssenceLoadout = MapActiveLoadout(source),
+            EquippedTitle = MapEquippedTitle(source)
+        };
+    }
+
+    private static EquippedTitleDto? MapEquippedTitle(Character source)
+    {
+        var title = source.EquippedTitleDefinition;
+        if (title is null) return null;
+
+        return new EquippedTitleDto
+        {
+            Key = title.Key,
+            Name = title.Name,
+            DisplayPosition = title.DisplayPosition,
+            DisplayName = title.DisplayPosition == TitleDisplayPosition.Prefix
+                ? $"{title.Name} {source.Name}"
+                : $"{source.Name}, {title.Name}"
         };
     }
 
