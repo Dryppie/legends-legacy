@@ -1,0 +1,42 @@
+[
+  {
+    "key": "legacy.renowned",
+    "name": "Renowned",
+    "description": "Earn 2,000 total Achievement Points.",
+    "category": "Legacy",
+    "type": "Milestone",
+    "scope": "Account",
+    "visibility": "Visible",
+    "rarity": "Exalted",
+    "requirementType": "AchievementPointsReached",
+    "requirementTarget": null,
+    "requirementAmount": 2000,
+    "points": 0,
+    "hint": null,
+    "isRepeatable": false,
+    "isActive": true,
+    "sortOrder": 4,
+    "playerSystemMessageTemplate": "Achievement unlocked: {achievementName} (+{points} points).",
+    "globalSystemMessageTemplate": "{characterName} unlocked {achievementName} (+{points} points)."
+  },
+  {
+    "key": "legacy.living_legend",
+    "name": "Living Legend",
+    "description": "Earn 15,000 total Achievement Points.",
+    "category": "Legacy",
+    "type": "Milestone",
+    "scope": "Account",
+    "visibility": "Visible",
+    "rarity": "Mythic",
+    "requirementType": "AchievementPointsReached",
+    "requirementTarget": null,
+    "requirementAmount": 15000,
+    "points": 0,
+    "hint": null,
+    "isRepeatable": false,
+    "isActive": true,
+    "sortOrder": 5,
+    "playerSystemMessageTemplate": "Achievement unlocked: {achievementName} (+{points} points).",
+    "globalSystemMessageTemplate": "{characterName} unlocked {achievementName} (+{points} points)."
+  }
+]

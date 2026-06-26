@@ -1,0 +1,28 @@
+[
+  {
+    "key": "title.renowned",
+    "name": "Renowned",
+    "description": "Known across the world for many accomplishments.",
+    "category": "Legacy",
+    "rarity": "Exalted",
+    "displayPosition": "Prefix",
+    "scope": "Account",
+    "sourceAchievementKey": "legacy.renowned",
+    "isHiddenUntilUnlocked": false,
+    "isActive": true,
+    "sortOrder": 2
+  },
+  {
+    "key": "title.living_legend",
+    "name": "Living Legend",
+    "description": "A name that will not be forgotten.",
+    "category": "Legacy",
+    "rarity": "Mythic",
+    "displayPosition": "Prefix",
+    "scope": "Account",
+    "sourceAchievementKey": "legacy.living_legend",
+    "isHiddenUntilUnlocked": false,
+    "isActive": true,
+    "sortOrder": 3
+  }
+]

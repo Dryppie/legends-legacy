@@ -1,0 +1,67 @@
+[
+  {
+    "key": "title.duelist",
+    "name": "Duelist",
+    "description": "Earned by winning 25 Colosseum battles.",
+    "category": "Colosseum",
+    "rarity": "Renowned",
+    "displayPosition": "Prefix",
+    "scope": "Character",
+    "sourceAchievementKey": "colosseum.duelist",
+    "isHiddenUntilUnlocked": false,
+    "isActive": true,
+    "sortOrder": 29
+  },
+  {
+    "key": "title.arena_blooded",
+    "name": "Arena-Blooded",
+    "description": "Earned by winning 250 Colosseum battles.",
+    "category": "Colosseum",
+    "rarity": "Exalted",
+    "displayPosition": "Prefix",
+    "scope": "Character",
+    "sourceAchievementKey": "colosseum.arena_blooded",
+    "isHiddenUntilUnlocked": false,
+    "isActive": true,
+    "sortOrder": 30
+  },
+  {
+    "key": "title.giant_slayer",
+    "name": "Giant Slayer",
+    "description": "Earned by defeating a Colosseum opponent at least 200 rating above you.",
+    "category": "Colosseum",
+    "rarity": "Exalted",
+    "displayPosition": "Prefix",
+    "scope": "Character",
+    "sourceAchievementKey": "colosseum.giant_slayer",
+    "isHiddenUntilUnlocked": false,
+    "isActive": true,
+    "sortOrder": 31
+  },
+  {
+    "key": "title.undefeated",
+    "name": "the Undefeated",
+    "description": "Earned by winning 10 Colosseum battles in a row.",
+    "category": "Colosseum",
+    "rarity": "Exalted",
+    "displayPosition": "Suffix",
+    "scope": "Character",
+    "sourceAchievementKey": "colosseum.untouchable",
+    "isHiddenUntilUnlocked": false,
+    "isActive": true,
+    "sortOrder": 32
+  },
+  {
+    "key": "title.challenger",
+    "name": "the Challenger",
+    "description": "Earned by completing 100 Colosseum battles.",
+    "category": "Colosseum",
+    "rarity": "Renowned",
+    "displayPosition": "Suffix",
+    "scope": "Character",
+    "sourceAchievementKey": "colosseum.challenger",
+    "isHiddenUntilUnlocked": false,
+    "isActive": true,
+    "sortOrder": 33
+  }
+]

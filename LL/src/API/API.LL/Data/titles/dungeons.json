@@ -1,0 +1,80 @@
+[
+  {
+    "key": "title.deep_delver",
+    "name": "Deep Delver",
+    "description": "Earned by clearing 100 total dungeons.",
+    "category": "Dungeons",
+    "rarity": "Exalted",
+    "displayPosition": "Prefix",
+    "scope": "Account",
+    "sourceAchievementKey": "dungeon.deep_delver",
+    "isHiddenUntilUnlocked": false,
+    "isActive": true,
+    "sortOrder": 17
+  },
+  {
+    "key": "title.minebreaker",
+    "name": "Minebreaker",
+    "description": "Earned by clearing Goblin Mines.",
+    "category": "Dungeons",
+    "rarity": "Renowned",
+    "displayPosition": "Prefix",
+    "scope": "Character",
+    "sourceAchievementKey": "dungeon.goblin_mines_clear",
+    "isHiddenUntilUnlocked": false,
+    "isActive": true,
+    "sortOrder": 18
+  },
+  {
+    "key": "title.catacomb_walker",
+    "name": "Catacomb Walker",
+    "description": "Earned by clearing Forgotten Catacombs.",
+    "category": "Dungeons",
+    "rarity": "Renowned",
+    "displayPosition": "Prefix",
+    "scope": "Character",
+    "sourceAchievementKey": "dungeon.forgotten_catacombs_clear",
+    "isHiddenUntilUnlocked": false,
+    "isActive": true,
+    "sortOrder": 19
+  },
+  {
+    "key": "title.hivebreaker",
+    "name": "the Hivebreaker",
+    "description": "Earned by defeating the Ant Queen in The Hive's Abyss.",
+    "category": "Dungeons",
+    "rarity": "Exalted",
+    "displayPosition": "Suffix",
+    "scope": "Character",
+    "sourceAchievementKey": "dungeon.hive_abyss_clear",
+    "isHiddenUntilUnlocked": false,
+    "isActive": true,
+    "sortOrder": 20
+  },
+  {
+    "key": "title.royal_exterminator",
+    "name": "Royal Exterminator",
+    "description": "Earned by defeating the Ant King in The Hive's Abyss.",
+    "category": "Dungeons",
+    "rarity": "Exalted",
+    "displayPosition": "Prefix",
+    "scope": "Character",
+    "sourceAchievementKey": "dungeon.ant_king",
+    "isHiddenUntilUnlocked": false,
+    "isActive": true,
+    "sortOrder": 21
+  },
+  {
+    "key": "title.untouched",
+    "name": "the Untouched",
+    "description": "Earned by clearing a dungeon without being defeated.",
+    "category": "Dungeons",
+    "rarity": "Exalted",
+    "displayPosition": "Suffix",
+    "scope": "Character",
+    "sourceAchievementKey": "dungeon.deathless_run",
+    "isHiddenUntilUnlocked": false,
+    "isActive": true,
+    "sortOrder": 22
+  }
+]

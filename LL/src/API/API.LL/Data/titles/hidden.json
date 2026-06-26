@@ -1,0 +1,67 @@
+[
+  {
+    "key": "title.one_health_wonder",
+    "name": "One Health Wonder",
+    "description": "Earned by winning a combat encounter with 1% Health or less remaining.",
+    "category": "Hidden",
+    "rarity": "Exalted",
+    "displayPosition": "Prefix",
+    "scope": "Character",
+    "sourceAchievementKey": "combat.one_health_wonder",
+    "isHiddenUntilUnlocked": true,
+    "isActive": true,
+    "sortOrder": 8
+  },
+  {
+    "key": "title.rat_food",
+    "name": "Rat Food",
+    "description": "Earned by losing to a Rat when you really should not have.",
+    "category": "Hidden",
+    "rarity": "Renowned",
+    "displayPosition": "Prefix",
+    "scope": "Character",
+    "sourceAchievementKey": "combat.rat_food",
+    "isHiddenUntilUnlocked": true,
+    "isActive": true,
+    "sortOrder": 9
+  },
+  {
+    "key": "title.trap_magnet",
+    "name": "Trap Magnet",
+    "description": "Earned by triggering many dungeon traps.",
+    "category": "Hidden",
+    "rarity": "Renowned",
+    "displayPosition": "Prefix",
+    "scope": "Account",
+    "sourceAchievementKey": "dungeon.trap_magnet",
+    "isHiddenUntilUnlocked": true,
+    "isActive": true,
+    "sortOrder": 23
+  },
+  {
+    "key": "title.tempered",
+    "name": "the Tempered",
+    "description": "Earned by pushing a crafted item to its limit.",
+    "category": "Hidden",
+    "rarity": "Exalted",
+    "displayPosition": "Suffix",
+    "scope": "Account",
+    "sourceAchievementKey": "crafting.tempered",
+    "isHiddenUntilUnlocked": true,
+    "isActive": true,
+    "sortOrder": 27
+  },
+  {
+    "key": "title.cursed_hands",
+    "name": "Cursed Hands",
+    "description": "Earned by triggering many cursed crafting outcomes.",
+    "category": "Hidden",
+    "rarity": "Renowned",
+    "displayPosition": "Prefix",
+    "scope": "Account",
+    "sourceAchievementKey": "crafting.cursed_hands",
+    "isHiddenUntilUnlocked": true,
+    "isActive": true,
+    "sortOrder": 28
+  }
+]
