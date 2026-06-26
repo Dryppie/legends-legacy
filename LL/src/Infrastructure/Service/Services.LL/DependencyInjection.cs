@@ -1,5 +1,6 @@
 using Application.Authorization.Interfaces;
 using Application.Interfaces.Services.LL;
+using Application.Interfaces.Services.LL.Achievements;
 using Application.Interfaces.Services.LL.CharacterActions;
 using Application.Interfaces.Services.LL.Colosseum;
 using Application.Interfaces.Services.LL.Dungeons;
@@ -16,6 +17,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Services.LL._Simulator;
 using Services.LL.Attributes;
+using Services.LL.Achievements;
 using Services.LL.Authorization;
 using Services.LL.Bonuses;
 using Services.LL.CharacterActions;
@@ -80,6 +82,10 @@ public static class DependencyInjection
         services.AddScoped<IRegionOneContentDiagnostics, RegionOneContentDiagnostics>();
 
         services.AddScoped<IAttributeService, AttributeService>();
+        services.AddScoped<IAchievementService, AchievementService>();
+        services.Configure<AchievementSystemChatOptions>(config.GetSection("Chat:SystemMessages"));
+        services.AddSingleton<HttpClient>();
+        services.AddScoped<IAchievementSystemChatPublisher, AchievementSystemChatPublisher>();
         services.AddScoped<ICharacterService, CharacterService>();
         services.AddScoped<ICharacterActionService, CharacterActionService>();
         services.AddScoped<IActionDetailsService, ActionDetailsService>();

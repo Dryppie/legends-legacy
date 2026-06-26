@@ -14,6 +14,39 @@ namespace Persistence.LL.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
+                name: "AchievementDefinitions",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Key = table.Column<string>(type: "character varying(160)", maxLength: 160, nullable: false),
+                    Name = table.Column<string>(type: "character varying(160)", maxLength: 160, nullable: false),
+                    Description = table.Column<string>(type: "character varying(600)", maxLength: 600, nullable: false),
+                    Hint = table.Column<string>(type: "character varying(600)", maxLength: 600, nullable: true),
+                    PlayerSystemMessageTemplate = table.Column<string>(type: "character varying(600)", maxLength: 600, nullable: true),
+                    GlobalSystemMessageTemplate = table.Column<string>(type: "character varying(600)", maxLength: 600, nullable: true),
+                    Category = table.Column<int>(type: "integer", nullable: false),
+                    Type = table.Column<int>(type: "integer", nullable: false),
+                    Scope = table.Column<int>(type: "integer", nullable: false),
+                    Visibility = table.Column<int>(type: "integer", nullable: false),
+                    Rarity = table.Column<int>(type: "integer", nullable: false),
+                    Points = table.Column<int>(type: "integer", nullable: false),
+                    IsRepeatable = table.Column<bool>(type: "boolean", nullable: false),
+                    IsActive = table.Column<bool>(type: "boolean", nullable: false),
+                    SortOrder = table.Column<int>(type: "integer", nullable: false),
+                    IconKey = table.Column<string>(type: "character varying(120)", maxLength: 120, nullable: true),
+                    RequirementType = table.Column<int>(type: "integer", nullable: false),
+                    RequirementTarget = table.Column<string>(type: "character varying(160)", maxLength: 160, nullable: true),
+                    RequirementAmount = table.Column<long>(type: "bigint", nullable: false),
+                    MetadataJson = table.Column<string>(type: "jsonb", nullable: true),
+                    CreatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    UpdatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AchievementDefinitions", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "CharacterDungeonMasteries",
                 columns: table => new
                 {
@@ -106,6 +139,8 @@ namespace Persistence.LL.Migrations
                     PendingExperience = table.Column<int>(type: "integer", nullable: false),
                     PendingCinders = table.Column<int>(type: "integer", nullable: false),
                     PendingSoulstones = table.Column<int>(type: "integer", nullable: false),
+                    DeathsDuringRun = table.Column<int>(type: "integer", nullable: false),
+                    UsedCheckpointRetreat = table.Column<bool>(type: "boolean", nullable: false),
                     CreatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     CompletedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
                     RewardsClaimedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true)
@@ -191,6 +226,33 @@ namespace Persistence.LL.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "TitleDefinitions",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Key = table.Column<string>(type: "character varying(160)", maxLength: 160, nullable: false),
+                    Name = table.Column<string>(type: "character varying(160)", maxLength: 160, nullable: false),
+                    Description = table.Column<string>(type: "character varying(600)", maxLength: 600, nullable: false),
+                    Category = table.Column<int>(type: "integer", nullable: false),
+                    Rarity = table.Column<int>(type: "integer", nullable: false),
+                    DisplayPosition = table.Column<int>(type: "integer", nullable: false),
+                    Scope = table.Column<int>(type: "integer", nullable: false),
+                    IsActive = table.Column<bool>(type: "boolean", nullable: false),
+                    IsHiddenUntilUnlocked = table.Column<bool>(type: "boolean", nullable: false),
+                    SourceAchievementKey = table.Column<string>(type: "character varying(160)", maxLength: 160, nullable: true),
+                    SeasonNumber = table.Column<int>(type: "integer", nullable: true),
+                    IconKey = table.Column<string>(type: "character varying(120)", maxLength: 120, nullable: true),
+                    SortOrder = table.Column<int>(type: "integer", nullable: false),
+                    MetadataJson = table.Column<string>(type: "jsonb", nullable: true),
+                    CreatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    UpdatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_TitleDefinitions", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Users",
                 columns: table => new
                 {
@@ -207,6 +269,35 @@ namespace Persistence.LL.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Users", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "PlayerAchievementProgresses",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    AccountId = table.Column<Guid>(type: "uuid", nullable: false),
+                    CharacterId = table.Column<Guid>(type: "uuid", nullable: true),
+                    AchievementDefinitionId = table.Column<Guid>(type: "uuid", nullable: false),
+                    SeasonId = table.Column<int>(type: "integer", nullable: true),
+                    CurrentAmount = table.Column<long>(type: "bigint", nullable: false),
+                    RequiredAmount = table.Column<long>(type: "bigint", nullable: false),
+                    IsCompleted = table.Column<bool>(type: "boolean", nullable: false),
+                    CompletedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
+                    CompletedByCharacterId = table.Column<Guid>(type: "uuid", nullable: true),
+                    MetadataJson = table.Column<string>(type: "jsonb", nullable: true),
+                    CreatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    UpdatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PlayerAchievementProgresses", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_PlayerAchievementProgresses_AchievementDefinitions_Achievem~",
+                        column: x => x.AchievementDefinitionId,
+                        principalTable: "AchievementDefinitions",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -430,6 +521,30 @@ namespace Persistence.LL.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "PlayerTitleUnlocks",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    AccountId = table.Column<Guid>(type: "uuid", nullable: false),
+                    CharacterId = table.Column<Guid>(type: "uuid", nullable: true),
+                    TitleDefinitionId = table.Column<Guid>(type: "uuid", nullable: false),
+                    UnlockedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    UnlockedByAchievementDefinitionId = table.Column<Guid>(type: "uuid", nullable: true),
+                    SeasonId = table.Column<int>(type: "integer", nullable: true),
+                    MetadataJson = table.Column<string>(type: "jsonb", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PlayerTitleUnlocks", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_PlayerTitleUnlocks_TitleDefinitions_TitleDefinitionId",
+                        column: x => x.TitleDefinitionId,
+                        principalTable: "TitleDefinitions",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "ExternalLogins",
                 columns: table => new
                 {
@@ -571,6 +686,7 @@ namespace Persistence.LL.Migrations
                     Cinders = table.Column<long>(type: "bigint", nullable: true),
                     Soulstones = table.Column<long>(type: "bigint", nullable: true),
                     ArenaRating = table.Column<int>(type: "integer", nullable: true),
+                    EquippedTitleDefinitionId = table.Column<Guid>(type: "uuid", nullable: true),
                     Archetype = table.Column<int>(type: "integer", nullable: true),
                     DamageProfile = table.Column<int>(type: "integer", nullable: true),
                     DefenseProfile = table.Column<int>(type: "integer", nullable: true),
@@ -588,6 +704,12 @@ namespace Persistence.LL.Migrations
                         principalTable: "LootTableEntry",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Entities_TitleDefinitions_EquippedTitleDefinitionId",
+                        column: x => x.EquippedTitleDefinitionId,
+                        principalTable: "TitleDefinitions",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.SetNull);
                     table.ForeignKey(
                         name: "FK_Entities_Users_UserId",
                         column: x => x.UserId,
@@ -1077,6 +1199,12 @@ namespace Persistence.LL.Migrations
                 });
 
             migrationBuilder.CreateIndex(
+                name: "IX_AchievementDefinitions_Key",
+                table: "AchievementDefinitions",
+                column: "Key",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_ActionDetails_AreaId",
                 table: "ActionDetails",
                 column: "AreaId");
@@ -1113,9 +1241,9 @@ namespace Persistence.LL.Migrations
                 column: "DungeonDefinitionId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_CharacterRecipeUnlocks_CharacterId_RecipeId",
+                name: "IX_CharacterRecipeUnlocks_CharacterId_RecipeId_BlueprintId",
                 table: "CharacterRecipeUnlocks",
-                columns: new[] { "CharacterId", "RecipeId" },
+                columns: new[] { "CharacterId", "RecipeId", "BlueprintId" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
@@ -1138,6 +1266,11 @@ namespace Persistence.LL.Migrations
                 table: "DungeonCompletionRecords",
                 columns: new[] { "CharacterId", "DungeonDefinitionId" },
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Entities_EquippedTitleDefinitionId",
+                table: "Entities",
+                column: "EquippedTitleDefinitionId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Entities_LootTableId",
@@ -1277,6 +1410,17 @@ namespace Persistence.LL.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_PlayerAchievementProgresses_AccountId_CharacterId_Achieveme~",
+                table: "PlayerAchievementProgresses",
+                columns: new[] { "AccountId", "CharacterId", "AchievementDefinitionId", "SeasonId" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PlayerAchievementProgresses_AchievementDefinitionId",
+                table: "PlayerAchievementProgresses",
+                column: "AchievementDefinitionId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_PlayerEssences_CharacterId",
                 table: "PlayerEssences",
                 column: "CharacterId");
@@ -1286,6 +1430,17 @@ namespace Persistence.LL.Migrations
                 table: "PlayerEssences",
                 columns: new[] { "CharacterId", "EssenceDefinitionId" },
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PlayerTitleUnlocks_AccountId_CharacterId_TitleDefinitionId_~",
+                table: "PlayerTitleUnlocks",
+                columns: new[] { "AccountId", "CharacterId", "TitleDefinitionId", "SeasonId" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PlayerTitleUnlocks_TitleDefinitionId",
+                table: "PlayerTitleUnlocks",
+                column: "TitleDefinitionId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_RefreshTokens_AppUserId",
@@ -1311,6 +1466,12 @@ namespace Persistence.LL.Migrations
                 name: "IX_StatOverride_CreatureId",
                 table: "StatOverride",
                 column: "CreatureId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_TitleDefinitions_Key",
+                table: "TitleDefinitions",
+                column: "Key",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_ToolBonusModifier_EquipmentBaseId",
@@ -1402,6 +1563,12 @@ namespace Persistence.LL.Migrations
                 name: "MonsterResonances");
 
             migrationBuilder.DropTable(
+                name: "PlayerAchievementProgresses");
+
+            migrationBuilder.DropTable(
+                name: "PlayerTitleUnlocks");
+
+            migrationBuilder.DropTable(
                 name: "Professions");
 
             migrationBuilder.DropTable(
@@ -1438,6 +1605,9 @@ namespace Persistence.LL.Migrations
                 name: "Inventories");
 
             migrationBuilder.DropTable(
+                name: "AchievementDefinitions");
+
+            migrationBuilder.DropTable(
                 name: "DungeonRuns");
 
             migrationBuilder.DropTable(
@@ -1460,6 +1630,9 @@ namespace Persistence.LL.Migrations
 
             migrationBuilder.DropTable(
                 name: "LootTableEntry");
+
+            migrationBuilder.DropTable(
+                name: "TitleDefinitions");
 
             migrationBuilder.DropTable(
                 name: "Users");

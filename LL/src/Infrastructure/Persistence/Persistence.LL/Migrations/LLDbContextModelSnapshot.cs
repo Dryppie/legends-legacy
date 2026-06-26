@@ -23,6 +23,256 @@ namespace Persistence.LL.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("Domain.Models.Achievements.AchievementDefinition", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Category")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(600)
+                        .HasColumnType("character varying(600)");
+
+                    b.Property<string>("GlobalSystemMessageTemplate")
+                        .HasMaxLength(600)
+                        .HasColumnType("character varying(600)");
+
+                    b.Property<string>("Hint")
+                        .HasMaxLength(600)
+                        .HasColumnType("character varying(600)");
+
+                    b.Property<string>("IconKey")
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsRepeatable")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Key")
+                        .IsRequired()
+                        .HasMaxLength(160)
+                        .HasColumnType("character varying(160)");
+
+                    b.Property<string>("MetadataJson")
+                        .HasColumnType("jsonb");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(160)
+                        .HasColumnType("character varying(160)");
+
+                    b.Property<string>("PlayerSystemMessageTemplate")
+                        .HasMaxLength(600)
+                        .HasColumnType("character varying(600)");
+
+                    b.Property<int>("Points")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Rarity")
+                        .HasColumnType("integer");
+
+                    b.Property<long>("RequirementAmount")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("RequirementTarget")
+                        .HasMaxLength(160)
+                        .HasColumnType("character varying(160)");
+
+                    b.Property<int>("RequirementType")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Scope")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("Visibility")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Key")
+                        .IsUnique();
+
+                    b.ToTable("AchievementDefinitions");
+                });
+
+            modelBuilder.Entity("Domain.Models.Achievements.PlayerAchievementProgress", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("AccountId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("AchievementDefinitionId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("CharacterId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset?>("CompletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("CompletedByCharacterId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<long>("CurrentAmount")
+                        .HasColumnType("bigint");
+
+                    b.Property<bool>("IsCompleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("MetadataJson")
+                        .HasColumnType("jsonb");
+
+                    b.Property<long>("RequiredAmount")
+                        .HasColumnType("bigint");
+
+                    b.Property<int?>("SeasonId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AchievementDefinitionId");
+
+                    b.HasIndex("AccountId", "CharacterId", "AchievementDefinitionId", "SeasonId")
+                        .IsUnique();
+
+                    b.ToTable("PlayerAchievementProgresses");
+                });
+
+            modelBuilder.Entity("Domain.Models.Achievements.PlayerTitleUnlock", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("AccountId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("CharacterId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("MetadataJson")
+                        .HasColumnType("jsonb");
+
+                    b.Property<int?>("SeasonId")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("TitleDefinitionId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("UnlockedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("UnlockedByAchievementDefinitionId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TitleDefinitionId");
+
+                    b.HasIndex("AccountId", "CharacterId", "TitleDefinitionId", "SeasonId")
+                        .IsUnique();
+
+                    b.ToTable("PlayerTitleUnlocks");
+                });
+
+            modelBuilder.Entity("Domain.Models.Achievements.TitleDefinition", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Category")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(600)
+                        .HasColumnType("character varying(600)");
+
+                    b.Property<int>("DisplayPosition")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("IconKey")
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsHiddenUntilUnlocked")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Key")
+                        .IsRequired()
+                        .HasMaxLength(160)
+                        .HasColumnType("character varying(160)");
+
+                    b.Property<string>("MetadataJson")
+                        .HasColumnType("jsonb");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(160)
+                        .HasColumnType("character varying(160)");
+
+                    b.Property<int>("Rarity")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Scope")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("SeasonNumber")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("SourceAchievementKey")
+                        .HasMaxLength(160)
+                        .HasColumnType("character varying(160)");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Key")
+                        .IsUnique();
+
+                    b.ToTable("TitleDefinitions");
+                });
+
             modelBuilder.Entity("Domain.Models.Attributes.EntityAttribute", b =>
                 {
                     b.Property<Guid>("EntityId")
@@ -283,6 +533,9 @@ namespace Persistence.LL.Migrations
                     b.Property<int>("CurrentRoomIndex")
                         .HasColumnType("integer");
 
+                    b.Property<int>("DeathsDuringRun")
+                        .HasColumnType("integer");
+
                     b.Property<string>("DungeonDefinitionId")
                         .IsRequired()
                         .HasColumnType("text");
@@ -312,6 +565,9 @@ namespace Persistence.LL.Migrations
 
                     b.Property<int>("Status")
                         .HasColumnType("integer");
+
+                    b.Property<bool>("UsedCheckpointRetreat")
+                        .HasColumnType("boolean");
 
                     b.HasKey("Id");
 
@@ -1369,6 +1625,9 @@ namespace Persistence.LL.Migrations
                     b.Property<long>("Cinders")
                         .HasColumnType("bigint");
 
+                    b.Property<Guid?>("EquippedTitleDefinitionId")
+                        .HasColumnType("uuid");
+
                     b.Property<float>("Experience")
                         .HasColumnType("real");
 
@@ -1377,6 +1636,8 @@ namespace Persistence.LL.Migrations
 
                     b.Property<Guid>("UserId")
                         .HasColumnType("uuid");
+
+                    b.HasIndex("EquippedTitleDefinitionId");
 
                     b.HasIndex("UserId");
 
@@ -1555,6 +1816,28 @@ namespace Persistence.LL.Migrations
                     b.HasIndex("ItemId");
 
                     b.HasDiscriminator().HasValue(2);
+                });
+
+            modelBuilder.Entity("Domain.Models.Achievements.PlayerAchievementProgress", b =>
+                {
+                    b.HasOne("Domain.Models.Achievements.AchievementDefinition", "AchievementDefinition")
+                        .WithMany()
+                        .HasForeignKey("AchievementDefinitionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("AchievementDefinition");
+                });
+
+            modelBuilder.Entity("Domain.Models.Achievements.PlayerTitleUnlock", b =>
+                {
+                    b.HasOne("Domain.Models.Achievements.TitleDefinition", "TitleDefinition")
+                        .WithMany()
+                        .HasForeignKey("TitleDefinitionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("TitleDefinition");
                 });
 
             modelBuilder.Entity("Domain.Models.Attributes.EntityAttribute", b =>
@@ -1988,11 +2271,18 @@ namespace Persistence.LL.Migrations
 
             modelBuilder.Entity("Domain.Models.Entities.Characters.Character", b =>
                 {
+                    b.HasOne("Domain.Models.Achievements.TitleDefinition", "EquippedTitleDefinition")
+                        .WithMany()
+                        .HasForeignKey("EquippedTitleDefinitionId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
                     b.HasOne("Domain.Models.Users.AppUser", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("EquippedTitleDefinition");
 
                     b.Navigation("User");
                 });
