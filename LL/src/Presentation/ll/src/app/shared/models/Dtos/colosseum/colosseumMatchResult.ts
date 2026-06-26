@@ -10,4 +10,11 @@ export interface ColosseumMatchResult {
   winnerId: string;
   winnerName: string;
   playedAt: Date;
+  outcome: string;
+  characterARatingDelta: number;
+  characterBRatingDelta: number;
+  characterAGloryEarned: number;
+  characterBGloryEarned: number;
+  characterAStreakBefore: number;
+  characterAStreakAfter: number;
 }
