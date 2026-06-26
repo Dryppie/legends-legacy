@@ -29,14 +29,10 @@ public class CharacterDto : IMapFrom<Character>
                         Key = src.EquippedTitleDefinition.Key,
                         Name = src.EquippedTitleDefinition.Name,
                         DisplayPosition = src.EquippedTitleDisplayPosition,
-                        DisplayName = src.EquippedTitleDisplayPosition == TitleDisplayPosition.Prefix
-                            ? $"{src.EquippedTitleDefinition.Name} {src.Name}"
-                            : $"{src.Name}, {FormatSuffixTitle(src.EquippedTitleDefinition.Name)}"
+                        DisplayName = TitleDisplayFormatter.Format(
+                            src.Name,
+                            src.EquippedTitleDefinition.Name,
+                            src.EquippedTitleDisplayPosition)
                     }));
     }
-
-    private static string FormatSuffixTitle(string title) =>
-        title.StartsWith("the ", StringComparison.OrdinalIgnoreCase)
-            ? title
-            : $"the {title}";
 }

@@ -142,6 +142,19 @@ public sealed class AchievementServiceTests
         Assert.Equal(name, result.Name);
     }
 
+    [Theory]
+    [InlineData("Hero", "Duelist", TitleDisplayPosition.Prefix, "Duelist Hero")]
+    [InlineData("Hero", "Duelist", TitleDisplayPosition.Suffix, "Hero, the Duelist")]
+    [InlineData("Hero", "the Relentless", TitleDisplayPosition.Suffix, "Hero, the Relentless")]
+    public void Title_display_formatter_formats_prefix_and_suffix_titles(
+        string characterName,
+        string titleName,
+        TitleDisplayPosition position,
+        string expected)
+    {
+        Assert.Equal(expected, TitleDisplayFormatter.Format(characterName, titleName, position));
+    }
+
     [Fact]
     public async Task Colosseum_same_account_battles_do_not_progress_achievements()
     {

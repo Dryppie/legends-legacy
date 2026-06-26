@@ -1542,9 +1542,9 @@ public sealed class AchievementService : IAchievementService
             SourceAchievementKey = hidden ? null : title.SourceAchievementKey,
             UnlockedByCharacterId = unlock?.CharacterId,
             UnlockedAt = unlock?.UnlockedAt,
-            Preview = FormatTitleDisplay(characterName, name, displayPosition),
-            PrefixPreview = FormatTitleDisplay(characterName, name, TitleDisplayPosition.Prefix),
-            SuffixPreview = FormatTitleDisplay(characterName, name, TitleDisplayPosition.Suffix)
+            Preview = TitleDisplayFormatter.Format(characterName, name, displayPosition),
+            PrefixPreview = TitleDisplayFormatter.Format(characterName, name, TitleDisplayPosition.Prefix),
+            SuffixPreview = TitleDisplayFormatter.Format(characterName, name, TitleDisplayPosition.Suffix)
         };
     }
 
@@ -1556,7 +1556,7 @@ public sealed class AchievementService : IAchievementService
         Key = title.Key,
         Name = title.Name,
         DisplayPosition = displayPosition,
-        DisplayName = FormatTitleDisplay(characterName, title.Name, displayPosition)
+        DisplayName = TitleDisplayFormatter.Format(characterName, title.Name, displayPosition)
     };
 
     private static bool MatchesSearch(AchievementDto achievement, string? search)
@@ -1649,13 +1649,4 @@ public sealed class AchievementService : IAchievementService
             .Replace("{characterName}", characterName ?? "A hero", StringComparison.OrdinalIgnoreCase);
     }
 
-    private static string FormatTitleDisplay(string characterName, string title, TitleDisplayPosition position) =>
-        position == TitleDisplayPosition.Prefix
-            ? $"{title} {characterName}"
-            : $"{characterName}, {FormatSuffixTitle(title)}";
-
-    private static string FormatSuffixTitle(string title) =>
-        title.StartsWith("the ", StringComparison.OrdinalIgnoreCase)
-            ? title
-            : $"the {title}";
 }
