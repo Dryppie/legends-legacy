@@ -26,8 +26,7 @@ This document tracks what is currently implemented from the Colosseum PvP finish
 
 - Existing MediatR transaction behavior still serializes commands per attacking `CharacterId`.
 - Added same attacker-to-defender short cooldown protection.
-- Added daily incoming rated defense cap for defenders.
-- Added daily defensive Glory cap tracking.
+- Incoming defenses always apply rating changes; there is no daily rated defense cap.
 
 ### Arena defense snapshots
 
@@ -36,8 +35,8 @@ This document tracks what is currently implemented from the Colosseum PvP finish
 - Defense snapshots are built from the current character snapshot and include equipment, modifiers, base attributes, and equipped essences.
 - Rated battles prefer the defender's saved snapshot when it is valid and non-outdated.
 - If no valid snapshot exists, rated battles fall back to the defender's current live setup.
-- Colosseum status includes defense snapshot state and daily incoming rated defense usage.
-- Frontend overview has an Arena Defense panel with update action and cap status.
+- Colosseum status includes defense snapshot state.
+- Frontend overview has an Arena Defense panel with update action and always-rated defense messaging.
 
 ### Rank tiers, Glory, and records
 
@@ -56,13 +55,13 @@ This document tracks what is currently implemented from the Colosseum PvP finish
   - draw: 8
   - loss: 5
   - daily first win bonus: +20 once per UTC day.
-- Defense wins award defensive Glory, capped per UTC day.
+- Defense wins update records and rating, but do not award Glory.
 - Glory and streaks do not affect rating.
 
 ### REST result and status APIs
 
 - `StartArenaBattleResponseDto` includes battle id, combat result, outcome, ticket status, rating deltas, rank changes, Glory breakdown, streak changes, and opponent summary.
-- `GET /api/v1/colosseum/status` includes rating, lifetime high, rank progress, Glory, ticket status, streaks, attack/defense records, defense status, and daily incoming defense cap.
+- `GET /api/v1/colosseum/status` includes rating, lifetime high, rank progress, Glory, ticket status, streaks, attack/defense records, and defense status.
 - Match history stores outcome, rating deltas, Glory earned by each side, and attack streak before/after.
 
 ### Champion's Market v1
@@ -101,7 +100,7 @@ This document tracks what is currently implemented from the Colosseum PvP finish
 
 - Added Colosseum rank boundary tests.
 - Added weekly arena calendar reset tests for Champion's Market purchase windows.
-- Added direct arena reward tests for base Glory, daily first win, and defensive Glory cap behavior.
+- Added direct arena reward tests for base Glory and daily first win behavior.
 - Full .NET test suite passes with 186 tests.
 
 ## Partially Implemented
@@ -109,7 +108,7 @@ This document tracks what is currently implemented from the Colosseum PvP finish
 ### Database-level concurrency and idempotency
 
 - In-process command serialization and transaction behavior are in place.
-- Validation-before-ticket-spend, repeat defender cooldown, and daily incoming defense cap are in place.
+- Validation-before-ticket-spend and repeat defender cooldown are in place.
 - Still missing:
   - row-version/concurrency token on ticket/rating rows;
   - request idempotency keys for duplicate HTTP requests across multiple app instances;
@@ -180,7 +179,7 @@ This document tracks what is currently implemented from the Colosseum PvP finish
 
 1. **Add full backend battle safety tests.** Cover invalid-opponent no-ticket-loss paths, self/same-account rejection, arbitrary opponent rejection, Glory rules, daily first win, streak changes, and response shape.
 
-2. **Add DB-level idempotency/concurrency controls.** Introduce request idempotency keys and row-version or locking around tickets, ratings, and defender incoming battle caps.
+2. **Add DB-level idempotency/concurrency controls.** Introduce request idempotency keys and row-version or locking around tickets, ratings, and simultaneous incoming defender battles.
 
 3. **Automate defense snapshot invalidation.** Mark snapshots outdated when equipment, equipped essences, stats, or other PvP-relevant loadout data changes.
 
