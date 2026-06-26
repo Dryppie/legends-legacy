@@ -25,30 +25,31 @@ public sealed class GetColosseumStatusQueryHandler : IRequestHandler<GetColosseu
     {
         var character = await _colosseumService.GetArenaCharacterAsync(request.CharacterId, cancellationToken)
             ?? throw new InvalidOperationException("Character was not found.");
+        var arena = character.ArenaProfile;
         var tickets = await _colosseumService.GetArenaTicketStatusAsync(request.CharacterId, cancellationToken);
         var defense = await _colosseumService.GetArenaDefenseSnapshotAsync(request.CharacterId, cancellationToken);
-        var rankProgress = ArenaRank.GetProgress(character.ArenaRating);
+        var rankProgress = ArenaRank.GetProgress(arena.Rating);
 
         return _mapper.Map<ColosseumStatusDto>(new ColosseumStatusModel(
-            character.ArenaRating,
-            character.ArenaLifetimeHighestRating,
+            arena.Rating,
+            arena.LifetimeHighestRating,
             rankProgress,
-            character.ArenaGlory,
+            arena.Glory,
             tickets.CurrentTickets,
             tickets.MaxTickets,
             tickets.CurrentTickets >= tickets.MaxTickets ? null : tickets.LastTicketUpdate.AddHours(3),
-            character.ArenaCurrentAttackWinStreak,
-            character.ArenaBestAttackWinStreak,
-            !HasReceivedFirstWinBonusToday(character.ArenaLastFirstWinBonusAt),
+            arena.CurrentAttackWinStreak,
+            arena.BestAttackWinStreak,
+            !HasReceivedFirstWinBonusToday(arena.LastFirstWinBonusAt),
             ArenaRewards.DailyFirstWinGlory,
             new ArenaRecordModel(
-                character.ArenaAttackWins,
-                character.ArenaAttackDraws,
-                character.ArenaAttackLosses),
+                arena.AttackWins,
+                arena.AttackDraws,
+                arena.AttackLosses),
             new ArenaRecordModel(
-                character.ArenaDefenseWins,
-                character.ArenaDefenseDraws,
-                character.ArenaDefenseLosses),
+                arena.DefenseWins,
+                arena.DefenseDraws,
+                arena.DefenseLosses),
             new ArenaDefenseStatusModel(
                 defense is not null,
                 defense?.IsValid == true,

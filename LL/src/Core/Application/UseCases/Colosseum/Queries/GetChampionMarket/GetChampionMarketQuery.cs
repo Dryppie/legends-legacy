@@ -25,6 +25,7 @@ public sealed class GetChampionMarketQueryHandler : IRequestHandler<GetChampionM
     {
         var character = await _colosseumService.GetArenaCharacterAsync(request.CharacterId, cancellationToken)
             ?? throw new InvalidOperationException("Character was not found.");
+        var arena = character.ArenaProfile;
         var weekStart = ArenaCalendar.GetCurrentWeeklyResetStart(DateTimeOffset.UtcNow);
         var weeklyResetAt = weekStart.AddDays(7);
 
@@ -37,7 +38,7 @@ public sealed class GetChampionMarketQueryHandler : IRequestHandler<GetChampionM
         }
 
         return _mapper.Map<ChampionMarketDto>(new ChampionMarketModel(
-            character.ArenaGlory,
+            arena.Glory,
             weeklyResetAt,
             items));
     }
@@ -73,14 +74,15 @@ public sealed class GetChampionMarketQueryHandler : IRequestHandler<GetChampionM
 
     private static string? GetCannotPurchaseReason(Domain.Models.Entities.Characters.Character character, ChampionMarketItem item, int remainingWeekly, int remainingLifetime)
     {
-        if (character.ArenaGlory < item.GloryCost) return "Not enough Glory";
+        var arena = character.ArenaProfile;
         if (remainingWeekly <= 0) return "Weekly limit reached";
         if (remainingLifetime <= 0) return "Already purchased";
-        if (item.RequiredRating.HasValue && character.ArenaRating < item.RequiredRating.Value) return $"Requires {item.RequiredRating.Value} rating";
+        if (arena.Glory < item.GloryCost) return "Not enough Glory";
+        if (item.RequiredRating.HasValue && arena.Rating < item.RequiredRating.Value) return $"Requires {item.RequiredRating.Value} rating";
 
         if (!string.IsNullOrWhiteSpace(item.RequiredRankTier))
         {
-            var current = ArenaRank.GetTier(character.ArenaRating);
+            var current = ArenaRank.GetTier(arena.Rating);
             var required = ArenaRank.Tiers.FirstOrDefault(x => x.Id == item.RequiredRankTier);
             if (required is not null && current.SortOrder < required.SortOrder)
             {

@@ -126,6 +126,7 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : DbContext(opti
     public DbSet<EntityAttribute> EntityAttributes => Set<EntityAttribute>();
 
     //public DbSet<Building> Buildings => Set<Building>();
+    public DbSet<CharacterArenaProfile> CharacterArenaProfiles => Set<CharacterArenaProfile>();
     public DbSet<ArenaTicketStatus> ArenaTicketStatus => Set<ArenaTicketStatus>();
     public DbSet<ColosseumMatchResult> ColosseumMatches => Set<ColosseumMatchResult>();
     public DbSet<ArenaDefenseSnapshot> ArenaDefenseSnapshots => Set<ArenaDefenseSnapshot>();
@@ -214,7 +215,7 @@ public class LLDbContextFactory : IDesignTimeDbContextFactory<LLDbContext>
 {
     public LLDbContext CreateDbContext(string[] args)
     {
-        var basePath = Directory.GetCurrentDirectory() + "\\..\\API.LL";
+        var basePath = ResolveApiProjectPath();
 
         var configuration = new ConfigurationBuilder()
             .SetBasePath(basePath)
@@ -230,5 +231,30 @@ public class LLDbContextFactory : IDesignTimeDbContextFactory<LLDbContext>
         optionsBuilder.UseNpgsql(connectionString, sqlServerOptions => sqlServerOptions.CommandTimeout(timeout));
 
         return new(optionsBuilder.Options);
+    }
+
+    private static string ResolveApiProjectPath()
+    {
+        var current = new DirectoryInfo(Directory.GetCurrentDirectory());
+        while (current is not null)
+        {
+            var candidates = new[]
+            {
+                Path.Combine(current.FullName, "appsettings.json"),
+                Path.Combine(current.FullName, "API.LL", "appsettings.json"),
+                Path.Combine(current.FullName, "src", "API", "API.LL", "appsettings.json"),
+                Path.Combine(current.FullName, "LL", "src", "API", "API.LL", "appsettings.json"),
+            };
+
+            var appSettings = candidates.FirstOrDefault(File.Exists);
+            if (appSettings is not null)
+            {
+                return Path.GetDirectoryName(appSettings)!;
+            }
+
+            current = current.Parent;
+        }
+
+        throw new DirectoryNotFoundException("Could not locate API.LL appsettings.json for design-time DbContext creation.");
     }
 }

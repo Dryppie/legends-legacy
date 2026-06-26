@@ -33,9 +33,9 @@ public class ArenaOpponentPreviewDto : IMapFrom<ArenaOpponentPreview>
             .ForMember(dto => dto.CharacterId, opt => opt.MapFrom(src => src.Opponent.Id))
             .ForMember(dto => dto.Name, opt => opt.MapFrom(src => src.Opponent.Name))
             .ForMember(dto => dto.Level, opt => opt.MapFrom(src => src.Opponent.Level))
-            .ForMember(dto => dto.OpponentRating, opt => opt.MapFrom(src => src.Opponent.ArenaRating))
-            .ForMember(dto => dto.RankTier, opt => opt.MapFrom(src => ArenaRank.GetTier(src.Opponent.ArenaRating).Name))
-            .ForMember(dto => dto.RankTierId, opt => opt.MapFrom(src => ArenaRank.GetTier(src.Opponent.ArenaRating).Id))
+            .ForMember(dto => dto.OpponentRating, opt => opt.MapFrom(src => src.Opponent.ArenaProfile.Rating))
+            .ForMember(dto => dto.RankTier, opt => opt.MapFrom(src => ArenaRank.GetTier(src.Opponent.ArenaProfile.Rating).Name))
+            .ForMember(dto => dto.RankTierId, opt => opt.MapFrom(src => ArenaRank.GetTier(src.Opponent.ArenaProfile.Rating).Id))
             // source = ArenaOpponentPreview.RatingDelta  ─────────────────────────────
             .ForMember(dto => dto.DeltaIfVictory, opt => opt.MapFrom(src => src.RatingDelta.DeltaIfVictory))
             .ForMember(dto => dto.DeltaIfDefeat, opt => opt.MapFrom(src => src.RatingDelta.DeltaIfDefeat))

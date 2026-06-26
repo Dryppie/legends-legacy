@@ -143,6 +143,7 @@ public static class LLDbContextExtensions
             LastTicketUpdate = DateTime.UtcNow,
         };
         character.ArenaTicketStatus = arenaTicketStatus;
+        character.ArenaProfile = new CharacterArenaProfile { CharacterId = character.Id };
 
         var equipmentSlots = SeedEquipmentSlots(character);
         context.EquipmentSlots.AddRange(equipmentSlots);
@@ -185,6 +186,7 @@ public static class LLDbContextExtensions
             };
 
             character.ArenaTicketStatus = arenaTicketStatus;
+            character.ArenaProfile ??= new CharacterArenaProfile { CharacterId = character.Id };
 
             await context.Users.AddAsync(user);
             context.Characters.Add(character);
@@ -197,6 +199,7 @@ public static class LLDbContextExtensions
     private static Character CreateLocalGuestCharacter(AppUser user)
     {
         var characterId = Guid.NewGuid();
+        var arenaRating = Random.Shared.Next(900, 1201);
         return new Character
         {
             Id = characterId,
@@ -207,7 +210,12 @@ public static class LLDbContextExtensions
             Level = Random.Shared.Next(1, 16),
             Cinders = Random.Shared.Next(250, 5001),
             Soulstones = Random.Shared.Next(0, 501),
-            ArenaRating = Random.Shared.Next(900, 1201),
+            ArenaProfile = new CharacterArenaProfile
+            {
+                CharacterId = characterId,
+                Rating = arenaRating,
+                LifetimeHighestRating = Math.Max(1000, arenaRating),
+            },
             Professions = ProfessionsSeederHelper.CreateProfessions(characterId),
         };
     }

@@ -104,12 +104,14 @@ public class ColosseumService : IColosseumService
         var combatResult = await _combatEngineExecutor.ExecuteAsync(runtime, cancellationToken);
         combatResult = _combatEncounterResultFactory.Create(runtime, combatResult).CombatResult;
 
-        var attackerRankBefore = ArenaRank.GetProgress(attacker.ArenaRating);
-        var defenderRatingBefore = defender.ArenaRating;
+        var attackerArena = attacker.ArenaProfile;
+        var defenderArena = defender.ArenaProfile;
+        var attackerRankBefore = ArenaRank.GetProgress(attackerArena.Rating);
+        var defenderRatingBefore = defenderArena.Rating;
         var ratingResult = ApplyRatings(attacker, defender, combatResult.Outcome);
-        var attackerRankAfter = ArenaRank.GetProgress(attacker.ArenaRating);
+        var attackerRankAfter = ArenaRank.GetProgress(attackerArena.Rating);
 
-        var streakBefore = attacker.ArenaCurrentAttackWinStreak;
+        var streakBefore = attackerArena.CurrentAttackWinStreak;
         ApplyRecordsAndStreak(attacker, defender, combatResult.Outcome);
         var (baseGlory, firstWinBonus) = ApplyAttackGlory(attacker, combatResult.Outcome, now);
 
@@ -123,7 +125,7 @@ public class ColosseumService : IColosseumService
             CharacterARatingDelta = ratingResult.CharacterADelta,
             CharacterAGloryEarned = baseGlory + firstWinBonus,
             CharacterAStreakBefore = streakBefore,
-            CharacterAStreakAfter = attacker.ArenaCurrentAttackWinStreak,
+            CharacterAStreakAfter = attackerArena.CurrentAttackWinStreak,
 
             CharacterBId = enemyId,
             CharacterBName = defender.Name,
@@ -157,7 +159,7 @@ public class ColosseumService : IColosseumService
             firstWinBonus,
             0,
             streakBefore,
-            attacker.ArenaCurrentAttackWinStreak);
+            attackerArena.CurrentAttackWinStreak);
     }
 
     private async Task<CombatEntity> CreateSnapshotCombatEntityAsync(Character sourceCharacter, CharacterSnapshot snapshot, CancellationToken cancellationToken)
@@ -224,57 +226,62 @@ public class ColosseumService : IColosseumService
 
     private ColosseumRatingResult ApplyRatings(Character attacker, Character defender, BattleOutcome outcome)
     {
-        var attackerRatingBefore = attacker.ArenaRating;
-        var defenderRatingBefore = defender.ArenaRating;
+        var attackerArena = attacker.ArenaProfile;
+        var defenderArena = defender.ArenaProfile;
+        var attackerRatingBefore = attackerArena.Rating;
+        var defenderRatingBefore = defenderArena.Rating;
 
-        var preview = _ratingService.Preview(attacker.ArenaRating, defender.ArenaRating);
-        var defenderPreview = _ratingService.Preview(defender.ArenaRating, attacker.ArenaRating);
+        var preview = _ratingService.Preview(attackerArena.Rating, defenderArena.Rating);
+        var defenderPreview = _ratingService.Preview(defenderArena.Rating, attackerArena.Rating);
 
-        attacker.ArenaRating = outcome switch
+        attackerArena.Rating = outcome switch
         {
             BattleOutcome.Victory => preview.RatingIfVictory,
             BattleOutcome.Draw => preview.RatingIfDraw,
             _ => preview.RatingIfDefeat
         };
 
-        defender.ArenaRating = outcome switch
+        defenderArena.Rating = outcome switch
         {
             BattleOutcome.Victory => defenderPreview.RatingIfDefeat,
             BattleOutcome.Draw => defenderPreview.RatingIfDraw,
             _ => defenderPreview.RatingIfVictory
         };
 
-        attacker.ArenaLifetimeHighestRating = Math.Max(attacker.ArenaLifetimeHighestRating, attacker.ArenaRating);
-        defender.ArenaLifetimeHighestRating = Math.Max(defender.ArenaLifetimeHighestRating, defender.ArenaRating);
+        attackerArena.LifetimeHighestRating = Math.Max(attackerArena.LifetimeHighestRating, attackerArena.Rating);
+        defenderArena.LifetimeHighestRating = Math.Max(defenderArena.LifetimeHighestRating, defenderArena.Rating);
 
         return new ColosseumRatingResult
         {
             CharacterARatingBefore = attackerRatingBefore,
-            CharacterARatingAfter = attacker.ArenaRating,
+            CharacterARatingAfter = attackerArena.Rating,
             CharacterBRatingBefore = defenderRatingBefore,
-            CharacterBRatingAfter = defender.ArenaRating
+            CharacterBRatingAfter = defenderArena.Rating
         };
     }
 
     private static void ApplyRecordsAndStreak(Character attacker, Character defender, BattleOutcome outcome)
     {
+        var attackerArena = attacker.ArenaProfile;
+        var defenderArena = defender.ArenaProfile;
+
         switch (outcome)
         {
             case BattleOutcome.Victory:
-                attacker.ArenaAttackWins++;
-                defender.ArenaDefenseLosses++;
-                attacker.ArenaCurrentAttackWinStreak++;
-                attacker.ArenaBestAttackWinStreak = Math.Max(attacker.ArenaBestAttackWinStreak, attacker.ArenaCurrentAttackWinStreak);
+                attackerArena.AttackWins++;
+                defenderArena.DefenseLosses++;
+                attackerArena.CurrentAttackWinStreak++;
+                attackerArena.BestAttackWinStreak = Math.Max(attackerArena.BestAttackWinStreak, attackerArena.CurrentAttackWinStreak);
                 break;
             case BattleOutcome.Draw:
-                attacker.ArenaAttackDraws++;
-                defender.ArenaDefenseDraws++;
-                attacker.ArenaCurrentAttackWinStreak = 0;
+                attackerArena.AttackDraws++;
+                defenderArena.DefenseDraws++;
+                attackerArena.CurrentAttackWinStreak = 0;
                 break;
             default:
-                attacker.ArenaAttackLosses++;
-                defender.ArenaDefenseWins++;
-                attacker.ArenaCurrentAttackWinStreak = 0;
+                attackerArena.AttackLosses++;
+                defenderArena.DefenseWins++;
+                attackerArena.CurrentAttackWinStreak = 0;
                 break;
         }
     }
@@ -287,16 +294,16 @@ public class ColosseumService : IColosseumService
 
         if (firstWinBonus > 0)
         {
-            attacker.ArenaLastFirstWinBonusAt = now;
+            attacker.ArenaProfile.LastFirstWinBonusAt = now;
         }
 
-        attacker.ArenaGlory += baseGlory + firstWinBonus;
+        attacker.ArenaProfile.Glory += baseGlory + firstWinBonus;
         return (baseGlory, firstWinBonus);
     }
 
     private static bool HasReceivedFirstWinBonusToday(Character attacker, DateTimeOffset now)
     {
-        return attacker.ArenaLastFirstWinBonusAt?.UtcDateTime.Date == now.UtcDateTime.Date;
+        return attacker.ArenaProfile.LastFirstWinBonusAt?.UtcDateTime.Date == now.UtcDateTime.Date;
     }
 
     private static string ToHistoryOutcome(BattleOutcome outcome)
@@ -341,7 +348,7 @@ public class ColosseumService : IColosseumService
             .Select(opp => new ArenaOpponentPreview
             {
                 Opponent = opp,
-                RatingDelta = _ratingService.Preview(myRating, opp.ArenaRating)
+                RatingDelta = _ratingService.Preview(myRating, opp.ArenaProfile.Rating)
             })
             .ToList();
     }
@@ -404,10 +411,11 @@ public class ColosseumService : IColosseumService
         if (item.WeeklyPurchaseLimit.HasValue && weeklyPurchased + quantity > item.WeeklyPurchaseLimit.Value) return null;
         if (item.LifetimePurchaseLimit.HasValue && lifetimePurchased + quantity > item.LifetimePurchaseLimit.Value) return null;
 
+        var arena = character.ArenaProfile;
         var totalCost = item.GloryCost * quantity;
-        if (character.ArenaGlory < totalCost) return null;
+        if (arena.Glory < totalCost) return null;
 
-        character.ArenaGlory -= totalCost;
+        arena.Glory -= totalCost;
         var cindersGranted = item.CindersGranted * quantity;
         var soulstonesGranted = item.SoulstonesGranted * quantity;
         character.Cinders += cindersGranted;
@@ -427,7 +435,7 @@ public class ColosseumService : IColosseumService
             item,
             quantity,
             totalCost,
-            character.ArenaGlory,
+            arena.Glory,
             cindersGranted,
             soulstonesGranted);
     }
@@ -439,14 +447,15 @@ public class ColosseumService : IColosseumService
 
     private static bool MeetsMarketRequirement(Character character, ChampionMarketItem item)
     {
-        if (item.RequiredRating.HasValue && character.ArenaRating < item.RequiredRating.Value)
+        var arena = character.ArenaProfile;
+        if (item.RequiredRating.HasValue && arena.Rating < item.RequiredRating.Value)
         {
             return false;
         }
 
         if (!string.IsNullOrWhiteSpace(item.RequiredRankTier))
         {
-            var currentTier = ArenaRank.GetTier(character.ArenaRating);
+            var currentTier = ArenaRank.GetTier(arena.Rating);
             var requiredTier = ArenaRank.Tiers.FirstOrDefault(x => x.Id == item.RequiredRankTier);
             if (requiredTier is null || currentTier.SortOrder < requiredTier.SortOrder)
             {
@@ -536,7 +545,7 @@ public class ColosseumService : IColosseumService
             {
                 CharacterId = ranking.Character.Id,
                 CharacterName = ranking.Character.Name,
-                Level = ranking.Character.ArenaRating,
+                Level = ranking.Character.ArenaProfile.Rating,
                 Rank = ranking.Rank,
             })
             .ToList();
