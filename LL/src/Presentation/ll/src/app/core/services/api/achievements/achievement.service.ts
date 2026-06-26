@@ -8,6 +8,7 @@ import {
   AchievementOverviewDto,
   EquippedTitleDto,
   TitleDto,
+  TitleDisplayPosition,
   TitleRarity,
 } from '../../../../shared/models/achievement';
 
@@ -49,8 +50,11 @@ export class AchievementService {
     return this.api.get('Titles', params);
   }
 
-  equipTitle(titleKey: string): Observable<EquippedTitleDto> {
-    return this.api.post('Titles/equip', { titleKey });
+  equipTitle(
+    titleKey: string,
+    displayPosition: TitleDisplayPosition,
+  ): Observable<EquippedTitleDto> {
+    return this.api.post('Titles/equip', { titleKey, displayPosition });
   }
 
   unequipTitle(): Observable<EquippedTitleDto | null> {

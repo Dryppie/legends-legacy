@@ -11,6 +11,7 @@ import {
   AchievementDto,
   AchievementOverviewDto,
   TitleDto,
+  TitleDisplayPosition,
 } from '../../../../shared/models/achievement';
 
 type AchievementTab = AchievementCategory | 'All';
@@ -55,6 +56,7 @@ export class AchievementsComponent implements OnInit {
   readonly sortMode = signal<AchievementSortMode>('Progress');
   readonly titleSearch = signal('');
   readonly titleState = signal<TitleStateFilter>('All');
+  readonly titleDisplayPosition = signal<TitleDisplayPosition>('Prefix');
 
   readonly achievementStates: AchievementStateFilter[] = [
     'All',
@@ -68,6 +70,7 @@ export class AchievementsComponent implements OnInit {
     'Recent',
   ];
   readonly titleStates: TitleStateFilter[] = ['All', 'Unlocked', 'Locked'];
+  readonly titleDisplayPositions: TitleDisplayPosition[] = ['Prefix', 'Suffix'];
 
   readonly filteredAchievements = computed(() => {
     const category = this.activeCategory();
@@ -154,6 +157,8 @@ export class AchievementsComponent implements OnInit {
           title.name,
           title.description,
           title.preview,
+          title.prefixPreview,
+          title.suffixPreview,
           title.rarity,
           title.scope,
         ]
@@ -210,17 +215,19 @@ export class AchievementsComponent implements OnInit {
   }
 
   equip(title: TitleDto): void {
-    if (!title.isUnlocked || title.isEquipped) {
+    if (!this.canEquip(title)) {
       return;
     }
 
-    this.achievementsApi.equipTitle(title.key).subscribe({
-      next: () => {
-        this.refreshTitles();
-        this.characterState.refresh();
-      },
-      error: (err) => this.error.set(err.message),
-    });
+    this.achievementsApi
+      .equipTitle(title.key, this.titleDisplayPosition())
+      .subscribe({
+        next: () => {
+          this.refreshTitles();
+          this.characterState.refresh();
+        },
+        error: (err) => this.error.set(err.message),
+      });
   }
 
   unequip(): void {
@@ -270,6 +277,34 @@ export class AchievementsComponent implements OnInit {
   clearTitleFilters(): void {
     this.titleSearch.set('');
     this.titleState.set('All');
+  }
+
+  titlePreview(title: TitleDto): string {
+    return this.titleDisplayPosition() === 'Prefix'
+      ? title.prefixPreview || title.preview
+      : title.suffixPreview || title.preview;
+  }
+
+  canEquip(title: TitleDto): boolean {
+    return (
+      title.isUnlocked &&
+      (!title.isEquipped ||
+        title.displayPosition !== this.titleDisplayPosition())
+    );
+  }
+
+  equipButtonText(title: TitleDto): string {
+    if (!title.isUnlocked) {
+      return 'Locked';
+    }
+
+    if (title.isEquipped) {
+      return title.displayPosition === this.titleDisplayPosition()
+        ? 'Equipped'
+        : 'Update';
+    }
+
+    return 'Equip';
   }
 
   private completedAtTicks(achievement: AchievementDto): number {

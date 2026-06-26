@@ -77,6 +77,8 @@ export interface TitleDto {
   unlockedByCharacterId?: string | null;
   unlockedAt?: string | null;
   preview: string;
+  prefixPreview: string;
+  suffixPreview: string;
 }
 
 export interface EquippedTitleDto {

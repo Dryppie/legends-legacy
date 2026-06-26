@@ -80,11 +80,11 @@ export class ChatComponent implements OnInit, OnDestroy {
       channelType: ChatChannelType.Trade,
     },
     { label: 'Help', contextKey: 'help', channelType: ChatChannelType.Help },
-    // {
-    //   label: 'System',
-    //   contextKey: 'system',
-    //   channelType: ChatChannelType.Public,
-    // },
+    {
+      label: 'System',
+      contextKey: 'system',
+      channelType: ChatChannelType.System,
+    },
   ];
 
   get visibleRooms(): ChatRoom[] {

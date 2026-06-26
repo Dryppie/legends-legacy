@@ -219,6 +219,23 @@
           </ng-template>
         </div>
 
+        <div class="mt-3">
+          <div class="ll-segmented flex bg-black/30 p-1">
+            <button
+              *ngFor="let position of titleDisplayPositions"
+              type="button"
+              class="ll-segmented-button min-h-8 flex-1 px-3 py-1.5 text-xs font-semibold uppercase"
+              [ngClass]="{
+                'll-segmented-button-active':
+                  titleDisplayPosition() === position,
+              }"
+              (click)="titleDisplayPosition.set(position)"
+            >
+              {{ position }}
+            </button>
+          </div>
+        </div>
+
         <div class="mt-3 grid gap-2">
           <input
             type="search"
@@ -267,7 +284,7 @@
           <div class="flex items-start justify-between gap-3">
             <div class="min-w-0">
               <h3 class="ll-heading text-base">{{ title.name }}</h3>
-              <p class="ll-copy mt-1">{{ title.preview }}</p>
+              <p class="ll-copy mt-1">{{ titlePreview(title) }}</p>
               <div class="mt-2 flex flex-wrap gap-2">
                 <span class="ll-badge rounded">{{ title.rarity }}</span>
                 <span class="ll-badge rounded text-zinc-400">
@@ -279,16 +296,10 @@
             <button
               type="button"
               class="ll-button px-3 py-1 text-xs"
-              [disabled]="!title.isUnlocked || title.isEquipped"
+              [disabled]="!canEquip(title)"
               (click)="equip(title)"
             >
-              {{
-                title.isEquipped
-                  ? "Equipped"
-                  : title.isUnlocked
-                    ? "Equip"
-                    : "Locked"
-              }}
+              {{ equipButtonText(title) }}
             </button>
           </div>
         </article>
