@@ -9,6 +9,7 @@ export const NOTIFICATION_SURFACE = {
 export const SIDEBAR_NOTIFICATION = {
   Guild: 'guild',
   Colosseum: 'colosseum',
+  Prophecies: 'prophecies',
 } as const;
 
 export type NotificationSurface =
@@ -64,6 +65,22 @@ export class NotificationService {
         },
       };
     });
+  }
+
+  setCount(surface: NotificationSurface, key: string, count: number): void {
+    if (count <= 0) {
+      this.markSeen(surface, key);
+      return;
+    }
+
+    const entryKey = this.entryKey(surface, key);
+    this._entries.update((entries) => ({
+      ...entries,
+      [entryKey]: {
+        count,
+        seen: false,
+      },
+    }));
   }
 
   markSeen(surface: NotificationSurface, key: string): void {

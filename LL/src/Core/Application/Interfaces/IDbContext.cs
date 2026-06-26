@@ -18,6 +18,7 @@ using Domain.Models.LootTables;
 using Domain.Models.MarketPlaces;
 using Domain.Models.Professions;
 using Domain.Models.Professions.Crafting;
+using Domain.Models.Prophecies;
 using Domain.Models.Regions;
 using Domain.Models.Regions.Areas;
 using Domain.Models.Snapshots;
@@ -37,8 +38,11 @@ public interface IDbContext
     DbSet<Area> Areas { get; }
     DbSet<EntityAttribute> EntityAttributes { get; }
     //DbSet<Building> Buildings { get; }
+    DbSet<CharacterArenaProfile> CharacterArenaProfiles { get; }
     DbSet<ArenaTicketStatus> ArenaTicketStatus { get; }
     DbSet<ColosseumMatchResult> ColosseumMatches { get; }
+    DbSet<ArenaDefenseSnapshot> ArenaDefenseSnapshots { get; }
+    DbSet<ChampionMarketPurchase> ChampionMarketPurchases { get; }
     DbSet<Character> Characters { get; }
     DbSet<CharacterSoulstoneUpgrade> CharacterSoulstoneUpgrades { get; }
     DbSet<Creature> Creatures { get; }
@@ -87,6 +91,9 @@ public interface IDbContext
     //DbSet<TownBuilding> TownBuildings { get; }
     DbSet<CharacterRecipeUnlock> CharacterRecipeUnlocks { get; }
     DbSet<CharacterRecipeMastery> CharacterRecipeMasteries { get; }
+    DbSet<ProphecyDefinition> ProphecyDefinitions { get; }
+    DbSet<PlayerProphecyInstance> PlayerProphecyInstances { get; }
+    DbSet<WeeklyRevelationProgress> WeeklyRevelationProgress { get; }
     DbSet<Region> Regions { get; }
 
     // Snapshots

@@ -24,6 +24,7 @@ import { GuildStateChangedMsg } from '../guild/guild-state-changed';
 import { GuildMembershipChangedMsg } from '../guild/guild-membership-changed';
 import { GuildDisbandedMsg } from '../guild/guild-disbanded';
 import { GuildDirectoryChangedMsg } from '../guild/guild-directory-changed';
+import { ProphecyProgressedMsg } from '../prophecies/prophecy-progressed';
 import { AchievementUnlockedMsg } from '../achievement/achievement-unlocked';
 
 export const gameEventNames = [
@@ -43,6 +44,7 @@ export const gameEventNames = [
   'GuildMembershipChangedMsg',
   'GuildDisbandedMsg',
   'GuildDirectoryChangedMsg',
+  'ProphecyProgressedMsg',
   'AchievementUnlockedMsg',
 ] as const;
 
@@ -72,6 +74,7 @@ export interface GameEventMap {
   GuildMembershipChangedMsg: GuildMembershipChangedMsg;
   GuildDisbandedMsg: GuildDisbandedMsg;
   GuildDirectoryChangedMsg: GuildDirectoryChangedMsg;
+  ProphecyProgressedMsg: ProphecyProgressedMsg;
   AchievementUnlockedMsg: AchievementUnlockedMsg;
   //   SaleCompleted: SaleCompletedMsg;
   //   RiftOpened:    RiftOpenedMsg;

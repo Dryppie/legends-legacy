@@ -34,7 +34,7 @@
     *ngIf="opponents.length; else noOpponents"
   >
     <article
-      class="ll-card flex min-h-[13rem] flex-col justify-between p-4"
+      class="ll-card flex min-h-[15rem] flex-col justify-between p-3 pt-4"
       *ngFor="let o of opponents"
     >
       <div class="space-y-4">
@@ -44,7 +44,9 @@
               [id]="o.characterId"
               [name]="o.name"
             ></app-character-tag>
-            <p class="ll-eyebrow mt-2">Level {{ o.level }}</p>
+            <p class="ll-eyebrow mt-2">
+              {{ o.rankTier || "Unranked" }} - Level {{ o.level }}
+            </p>
           </div>
           <div class="text-right">
             <p class="ll-stat-label">Rating</p>
@@ -63,6 +65,7 @@
             >
               {{ formatDelta(o.deltaIfVictory) }}
             </p>
+            <p class="ll-copy mt-1">+{{ o.gloryIfVictory }} Glory</p>
           </div>
           <div class="ll-card p-2">
             <p class="ll-stat-label">Draw</p>
@@ -72,6 +75,7 @@
             >
               {{ formatDelta(o.deltaIfDraw) }}
             </p>
+            <p class="ll-copy mt-1">+{{ o.gloryIfDraw }} Glory</p>
           </div>
           <div class="ll-card p-2">
             <p class="ll-stat-label">Loss</p>
@@ -81,16 +85,20 @@
             >
               {{ formatDelta(o.deltaIfDefeat) }}
             </p>
+            <p class="ll-copy mt-1">+{{ o.gloryIfDefeat }} Glory</p>
           </div>
         </div>
       </div>
 
-      <app-regular-button
-        class="mt-4 self-end"
-        text="Challenge"
-        (pressed)="onChallenge(o.characterId)"
-        [disabled]="!canChallenge()"
-      />
+      <div
+        class="mt-4 flex shrink-0 justify-end border-t border-light_gray/50 pt-3"
+      >
+        <app-regular-button
+          text="Challenge"
+          (pressed)="onChallenge(o.opponentId)"
+          [disabled]="!canChallenge()"
+        />
+      </div>
     </article>
   </div>
 

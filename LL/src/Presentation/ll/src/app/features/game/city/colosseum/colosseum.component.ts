@@ -1,7 +1,7 @@
 import { Component, effect, OnInit } from '@angular/core';
 import { BannerComponent } from '../../../../shared/components/banner/banner.component';
 import { TabComponent } from '../../../../shared/components/custom-components/tabs/tab/tab.component';
-import { NgIf } from '@angular/common';
+import { DatePipe, NgIf } from '@angular/common';
 import { CombatComponent } from '../../../../shared/components/combat/combat.component';
 import { BattleType } from '../../../../core/state/combat-state/combatState';
 import { CombatStateService } from '../../../../core/state/combat-state/combat-state.service';
@@ -27,6 +27,7 @@ import { NumberFormatPipe } from '../../../../shared/pipes/number-format/number-
     TabComponent,
     CombatComponent,
     NgIf,
+    DatePipe,
     ArenaBattleComponent,
     ChampionsMarketComponent,
     RankingsGloryComponent,
@@ -39,8 +40,6 @@ import { NumberFormatPipe } from '../../../../shared/pipes/number-format/number-
   templateUrl: './colosseum.component.html',
 })
 export class ColosseumComponent implements OnInit {
-  colosseumBattleResult: 'Victory' | 'Defeat' | 'Draw' | null = null;
-
   battleType = BattleType.Colosseum;
 
   constructor(
@@ -62,8 +61,8 @@ export class ColosseumComponent implements OnInit {
       () => {
         const finished = this.eventBus.on('colosseum-combat-finished')();
         if (finished) {
-          this.displayResultScreen(finished.outcome);
           this.eventBus.clear('colosseum-combat-finished');
+          this.state.loadStatus();
           this.state.loadArenaOpponents();
           this.state.loadColosseumMatchResults();
         }
@@ -77,12 +76,8 @@ export class ColosseumComponent implements OnInit {
     this.state.refresh();
   }
 
-  displayResultScreen(outcome: 'Victory' | 'Defeat' | 'Draw' | null) {
-    this.colosseumBattleResult = outcome;
-  }
-
   hideBattleResult() {
-    this.colosseumBattleResult = null;
+    this.state.clearLatestBattleResult();
   }
 
   skipBattle() {
@@ -95,6 +90,10 @@ export class ColosseumComponent implements OnInit {
 
   challenge(id: string) {
     this.state.startArenaBattle(id);
+  }
+
+  updateDefenseSnapshot(): void {
+    this.state.updateDefenseSnapshot();
   }
 
   get myRanking(): LeaderboardEntry | undefined {

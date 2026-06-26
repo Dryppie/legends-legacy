@@ -9,8 +9,6 @@ using MediatR;
 namespace Application.UseCases.Colosseum.EventHandlers;
 public class ArenaBattleCompletedEventHandler : INotificationHandler<ArenaBattleCompletedEvent>
 {
-    private readonly IRatingService _ratingService;
-    private readonly IColosseumService _colosseumService;
     private readonly IGameEventPublisher _eventPublisher;
     private readonly IAchievementService _achievementService;
 
@@ -20,8 +18,6 @@ public class ArenaBattleCompletedEventHandler : INotificationHandler<ArenaBattle
         IGameEventPublisher eventPublisher,
         IAchievementService achievementService)
     {
-        _ratingService = ratingService;
-        _colosseumService = colosseumService;
         _eventPublisher = eventPublisher;
         _achievementService = achievementService;
     }
@@ -44,10 +40,10 @@ public class ArenaBattleCompletedEventHandler : INotificationHandler<ArenaBattle
             notification.CharacterId,
             notification.EnemyId,
             notification.Outcome.ToString(),
-            ratingResult.CharacterARatingBefore,
-            ratingResult.CharacterARatingAfter,
-            ratingResult.CharacterBRatingBefore,
-            ratingResult.CharacterBRatingAfter);
+            notification.CharacterRatingBefore,
+            notification.CharacterRatingAfter,
+            notification.EnemyRatingBefore,
+            notification.EnemyRatingAfter);
 
         await _eventPublisher.PublishAsync(new Audience.Character(notification.CharacterId), msg);
         await _eventPublisher.PublishAsync(new Audience.Character(notification.EnemyId), msg);

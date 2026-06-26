@@ -67,7 +67,19 @@ public class CharacterSnapshotRepository : ICharacterSnapshotRepository
             .AsNoTracking()
             .Include(x => x.BaseAttributes)
             .Include(x => x.Equipment)
+                .ThenInclude(x => x.InstanceModifiers)
             .Include(x => x.EquippedEssences)
             .FirstOrDefaultAsync(s => s.CharacterId == characterId, ct);
+    }
+
+    public async Task<CharacterSnapshot?> GetSnapshotByIdAsync(Guid snapshotId, CancellationToken ct)
+    {
+        return await _dbContext.CharacterSnapshots
+            .AsNoTracking()
+            .Include(x => x.BaseAttributes)
+            .Include(x => x.Equipment)
+                .ThenInclude(x => x.InstanceModifiers)
+            .Include(x => x.EquippedEssences)
+            .FirstOrDefaultAsync(s => s.Id == snapshotId, ct);
     }
 }
