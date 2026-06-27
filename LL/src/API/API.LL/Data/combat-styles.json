@@ -16,7 +16,50 @@
           "description": "Pure survival: Protective Shell and barrier effects scale at levels 10, 25, and 40.",
           "unlockLevel": 10,
           "recommendedTags": [ "Tank", "Barrier" ],
-          "recommendedStats": [ "MaxHealth", "DamageReduction" ]
+          "recommendedStats": [ "MaxHealth", "DamageReduction" ],
+          "rules": [
+            {
+              "id": "defensive_bulwark_barrier_l10",
+              "eventType": "EffectCalculation",
+              "minStyleLevel": 10,
+              "maxStyleLevel": 24,
+              "predicate": {
+                "sourceMustBePlayer": true,
+                "effectOperations": [ "GrantBarrier" ]
+              },
+              "operation": {
+                "type": "modifyEffectAmount",
+                "additivePercent": 0.05
+              }
+            },
+            {
+              "id": "defensive_bulwark_barrier_l25",
+              "eventType": "EffectCalculation",
+              "minStyleLevel": 25,
+              "maxStyleLevel": 39,
+              "predicate": {
+                "sourceMustBePlayer": true,
+                "effectOperations": [ "GrantBarrier" ]
+              },
+              "operation": {
+                "type": "modifyEffectAmount",
+                "additivePercent": 0.10
+              }
+            },
+            {
+              "id": "defensive_bulwark_barrier_l40",
+              "eventType": "EffectCalculation",
+              "minStyleLevel": 40,
+              "predicate": {
+                "sourceMustBePlayer": true,
+                "effectOperations": [ "GrantBarrier" ]
+              },
+              "operation": {
+                "type": "modifyEffectAmount",
+                "additivePercent": 0.15
+              }
+            }
+          ]
         },
         {
           "id": "counterguard",
@@ -24,7 +67,71 @@
           "description": "Retaliation guard: after taking damage, your next active damage effect is empowered more strongly at levels 25 and 40.",
           "unlockLevel": 10,
           "recommendedTags": [ "Tank", "Barrier" ],
-          "recommendedStats": [ "MaxHealth", "Armor" ]
+          "recommendedStats": [ "MaxHealth", "Armor" ],
+          "rules": [
+            {
+              "id": "defensive_counterguard_retaliation_l10",
+              "eventType": "DamageTaken",
+              "minStyleLevel": 10,
+              "maxStyleLevel": 24,
+              "predicate": {
+                "targetMustBePlayer": true,
+                "effectOperations": [ "Damage" ]
+              },
+              "operation": {
+                "type": "setPendingEmpowerment",
+                "empowermentId": "defensive_counterguard_retaliation",
+                "appliesTo": {
+                  "sourceMustBePlayer": true,
+                  "activeAbilityOnly": true,
+                  "effectOperations": [ "Damage" ]
+                },
+                "additivePercent": 0.10,
+                "consumeOnUse": true
+              }
+            },
+            {
+              "id": "defensive_counterguard_retaliation_l25",
+              "eventType": "DamageTaken",
+              "minStyleLevel": 25,
+              "maxStyleLevel": 39,
+              "predicate": {
+                "targetMustBePlayer": true,
+                "effectOperations": [ "Damage" ]
+              },
+              "operation": {
+                "type": "setPendingEmpowerment",
+                "empowermentId": "defensive_counterguard_retaliation",
+                "appliesTo": {
+                  "sourceMustBePlayer": true,
+                  "activeAbilityOnly": true,
+                  "effectOperations": [ "Damage" ]
+                },
+                "additivePercent": 0.15,
+                "consumeOnUse": true
+              }
+            },
+            {
+              "id": "defensive_counterguard_retaliation_l40",
+              "eventType": "DamageTaken",
+              "minStyleLevel": 40,
+              "predicate": {
+                "targetMustBePlayer": true,
+                "effectOperations": [ "Damage" ]
+              },
+              "operation": {
+                "type": "setPendingEmpowerment",
+                "empowermentId": "defensive_counterguard_retaliation",
+                "appliesTo": {
+                  "sourceMustBePlayer": true,
+                  "activeAbilityOnly": true,
+                  "effectOperations": [ "Damage" ]
+                },
+                "additivePercent": 0.20,
+                "consumeOnUse": true
+              }
+            }
+          ]
         },
         {
           "id": "commander",
@@ -32,7 +139,94 @@
           "description": "Protective command: owned summons gain stronger durability and build more Guard when struck as the style levels.",
           "unlockLevel": 10,
           "recommendedTags": [ "Summon", "Tank" ],
-          "recommendedStats": [ "MaxHealth", "SummonHealth" ]
+          "recommendedStats": [ "MaxHealth", "SummonHealth" ],
+          "rules": [
+            {
+              "id": "defensive_commander_summon_stats_l10",
+              "eventType": "SummonCreated",
+              "minStyleLevel": 10,
+              "maxStyleLevel": 24,
+              "predicate": {
+                "sourceMustBePlayer": true
+              },
+              "operation": {
+                "type": "modifySummonStats",
+                "maxHealthPercent": 0.15,
+                "damagePercent": 0.05
+              }
+            },
+            {
+              "id": "defensive_commander_summon_stats_l25",
+              "eventType": "SummonCreated",
+              "minStyleLevel": 25,
+              "maxStyleLevel": 39,
+              "predicate": {
+                "sourceMustBePlayer": true
+              },
+              "operation": {
+                "type": "modifySummonStats",
+                "maxHealthPercent": 0.20,
+                "damagePercent": 0.10
+              }
+            },
+            {
+              "id": "defensive_commander_summon_stats_l40",
+              "eventType": "SummonCreated",
+              "minStyleLevel": 40,
+              "predicate": {
+                "sourceMustBePlayer": true
+              },
+              "operation": {
+                "type": "modifySummonStats",
+                "maxHealthPercent": 0.25,
+                "damagePercent": 0.15
+              }
+            },
+            {
+              "id": "defensive_commander_guard_on_summon_taken_l10",
+              "eventType": "DamageTaken",
+              "minStyleLevel": 10,
+              "maxStyleLevel": 24,
+              "predicate": {
+                "targetMustBeOwnedSummon": true,
+                "effectOperations": [ "Damage" ]
+              },
+              "operation": {
+                "type": "gainStyleResource",
+                "resourceId": "guard",
+                "amount": 3
+              }
+            },
+            {
+              "id": "defensive_commander_guard_on_summon_taken_l25",
+              "eventType": "DamageTaken",
+              "minStyleLevel": 25,
+              "maxStyleLevel": 39,
+              "predicate": {
+                "targetMustBeOwnedSummon": true,
+                "effectOperations": [ "Damage" ]
+              },
+              "operation": {
+                "type": "gainStyleResource",
+                "resourceId": "guard",
+                "amount": 5
+              }
+            },
+            {
+              "id": "defensive_commander_guard_on_summon_taken_l40",
+              "eventType": "DamageTaken",
+              "minStyleLevel": 40,
+              "predicate": {
+                "targetMustBeOwnedSummon": true,
+                "effectOperations": [ "Damage" ]
+              },
+              "operation": {
+                "type": "gainStyleResource",
+                "resourceId": "guard",
+                "amount": 7
+              }
+            }
+          ]
         }
       ],
       "rules": [
@@ -110,7 +304,56 @@
           "description": "Reliable precision: active single-target damage effects scale upward at levels 10, 25, and 40.",
           "unlockLevel": 10,
           "recommendedTags": [ "Melee" ],
-          "recommendedStats": [ "Power", "Precision" ]
+          "recommendedStats": [ "Power", "Precision" ],
+          "rules": [
+            {
+              "id": "fighter_duelist_damage_l10",
+              "eventType": "EffectCalculation",
+              "minStyleLevel": 10,
+              "maxStyleLevel": 24,
+              "predicate": {
+                "sourceMustBePlayer": true,
+                "activeAbilityOnly": true,
+                "effectOperations": [ "Damage" ],
+                "targetSelectors": [ "CurrentTarget" ]
+              },
+              "operation": {
+                "type": "modifyEffectAmount",
+                "additivePercent": 0.08
+              }
+            },
+            {
+              "id": "fighter_duelist_damage_l25",
+              "eventType": "EffectCalculation",
+              "minStyleLevel": 25,
+              "maxStyleLevel": 39,
+              "predicate": {
+                "sourceMustBePlayer": true,
+                "activeAbilityOnly": true,
+                "effectOperations": [ "Damage" ],
+                "targetSelectors": [ "CurrentTarget" ]
+              },
+              "operation": {
+                "type": "modifyEffectAmount",
+                "additivePercent": 0.12
+              }
+            },
+            {
+              "id": "fighter_duelist_damage_l40",
+              "eventType": "EffectCalculation",
+              "minStyleLevel": 40,
+              "predicate": {
+                "sourceMustBePlayer": true,
+                "activeAbilityOnly": true,
+                "effectOperations": [ "Damage" ],
+                "targetSelectors": [ "CurrentTarget" ]
+              },
+              "operation": {
+                "type": "modifyEffectAmount",
+                "additivePercent": 0.16
+              }
+            }
+          ]
         },
         {
           "id": "berserker",
@@ -118,7 +361,56 @@
           "description": "Risk pressure: active damage is empowered while wounded, scaling higher at levels 25 and 40.",
           "unlockLevel": 10,
           "recommendedTags": [ "Melee", "Bleed" ],
-          "recommendedStats": [ "Power", "CritDamage" ]
+          "recommendedStats": [ "Power", "CritDamage" ],
+          "rules": [
+            {
+              "id": "fighter_berserker_damage_l10",
+              "eventType": "EffectCalculation",
+              "minStyleLevel": 10,
+              "maxStyleLevel": 24,
+              "predicate": {
+                "sourceMustBePlayer": true,
+                "activeAbilityOnly": true,
+                "effectOperations": [ "Damage" ],
+                "sourceHealthPercentAtOrBelow": 50
+              },
+              "operation": {
+                "type": "modifyEffectAmount",
+                "additivePercent": 0.12
+              }
+            },
+            {
+              "id": "fighter_berserker_damage_l25",
+              "eventType": "EffectCalculation",
+              "minStyleLevel": 25,
+              "maxStyleLevel": 39,
+              "predicate": {
+                "sourceMustBePlayer": true,
+                "activeAbilityOnly": true,
+                "effectOperations": [ "Damage" ],
+                "sourceHealthPercentAtOrBelow": 50
+              },
+              "operation": {
+                "type": "modifyEffectAmount",
+                "additivePercent": 0.18
+              }
+            },
+            {
+              "id": "fighter_berserker_damage_l40",
+              "eventType": "EffectCalculation",
+              "minStyleLevel": 40,
+              "predicate": {
+                "sourceMustBePlayer": true,
+                "activeAbilityOnly": true,
+                "effectOperations": [ "Damage" ],
+                "sourceHealthPercentAtOrBelow": 60
+              },
+              "operation": {
+                "type": "modifyEffectAmount",
+                "additivePercent": 0.24
+              }
+            }
+          ]
         },
         {
           "id": "vanguard",
@@ -126,7 +418,94 @@
           "description": "Durable pressure: direct damage reduction and Momentum gained when hit scale at levels 10, 25, and 40.",
           "unlockLevel": 10,
           "recommendedTags": [ "Tank", "Melee" ],
-          "recommendedStats": [ "Power", "Armor" ]
+          "recommendedStats": [ "Power", "Armor" ],
+          "rules": [
+            {
+              "id": "fighter_vanguard_damage_reduction_l10",
+              "eventType": "EffectCalculation",
+              "minStyleLevel": 10,
+              "maxStyleLevel": 24,
+              "predicate": {
+                "targetMustBePlayer": true,
+                "effectOperations": [ "Damage" ]
+              },
+              "operation": {
+                "type": "addDamageReduction",
+                "percent": 0.05
+              }
+            },
+            {
+              "id": "fighter_vanguard_damage_reduction_l25",
+              "eventType": "EffectCalculation",
+              "minStyleLevel": 25,
+              "maxStyleLevel": 39,
+              "predicate": {
+                "targetMustBePlayer": true,
+                "effectOperations": [ "Damage" ]
+              },
+              "operation": {
+                "type": "addDamageReduction",
+                "percent": 0.08
+              }
+            },
+            {
+              "id": "fighter_vanguard_damage_reduction_l40",
+              "eventType": "EffectCalculation",
+              "minStyleLevel": 40,
+              "predicate": {
+                "targetMustBePlayer": true,
+                "effectOperations": [ "Damage" ]
+              },
+              "operation": {
+                "type": "addDamageReduction",
+                "percent": 0.12
+              }
+            },
+            {
+              "id": "fighter_vanguard_momentum_taken_l10",
+              "eventType": "DamageTaken",
+              "minStyleLevel": 10,
+              "maxStyleLevel": 24,
+              "predicate": {
+                "targetMustBePlayer": true,
+                "effectOperations": [ "Damage" ]
+              },
+              "operation": {
+                "type": "gainStyleResource",
+                "resourceId": "momentum",
+                "amount": 4
+              }
+            },
+            {
+              "id": "fighter_vanguard_momentum_taken_l25",
+              "eventType": "DamageTaken",
+              "minStyleLevel": 25,
+              "maxStyleLevel": 39,
+              "predicate": {
+                "targetMustBePlayer": true,
+                "effectOperations": [ "Damage" ]
+              },
+              "operation": {
+                "type": "gainStyleResource",
+                "resourceId": "momentum",
+                "amount": 6
+              }
+            },
+            {
+              "id": "fighter_vanguard_momentum_taken_l40",
+              "eventType": "DamageTaken",
+              "minStyleLevel": 40,
+              "predicate": {
+                "targetMustBePlayer": true,
+                "effectOperations": [ "Damage" ]
+              },
+              "operation": {
+                "type": "gainStyleResource",
+                "resourceId": "momentum",
+                "amount": 8
+              }
+            }
+          ]
         }
       ],
       "rules": [
@@ -182,7 +561,89 @@
           "description": "Pure arcana: active Magic and Spell effects scale higher and build extra Arcane Charge at later milestones.",
           "unlockLevel": 10,
           "recommendedTags": [ "Magic", "Spell" ],
-          "recommendedStats": [ "Spirit", "MagicPenetration" ]
+          "recommendedStats": [ "Spirit", "MagicPenetration" ],
+          "rules": [
+            {
+              "id": "caster_arcanist_effect_l10",
+              "eventType": "EffectCalculation",
+              "minStyleLevel": 10,
+              "maxStyleLevel": 24,
+              "predicate": {
+                "sourceMustBePlayer": true,
+                "activeAbilityOnly": true,
+                "amplifiableEffectOnly": true,
+                "anyTags": [ "Magic", "Spell" ]
+              },
+              "operation": {
+                "type": "modifyEffectAmount",
+                "additivePercent": 0.10
+              }
+            },
+            {
+              "id": "caster_arcanist_effect_l25",
+              "eventType": "EffectCalculation",
+              "minStyleLevel": 25,
+              "maxStyleLevel": 39,
+              "predicate": {
+                "sourceMustBePlayer": true,
+                "activeAbilityOnly": true,
+                "amplifiableEffectOnly": true,
+                "anyTags": [ "Magic", "Spell" ]
+              },
+              "operation": {
+                "type": "modifyEffectAmount",
+                "additivePercent": 0.15
+              }
+            },
+            {
+              "id": "caster_arcanist_effect_l40",
+              "eventType": "EffectCalculation",
+              "minStyleLevel": 40,
+              "predicate": {
+                "sourceMustBePlayer": true,
+                "activeAbilityOnly": true,
+                "amplifiableEffectOnly": true,
+                "anyTags": [ "Magic", "Spell" ]
+              },
+              "operation": {
+                "type": "modifyEffectAmount",
+                "additivePercent": 0.20
+              }
+            },
+            {
+              "id": "caster_arcanist_charge_l25",
+              "eventType": "AbilityResolved",
+              "minStyleLevel": 25,
+              "maxStyleLevel": 39,
+              "predicate": {
+                "sourceMustBePlayer": true,
+                "activeAbilityOnly": true,
+                "anyTags": [ "Magic", "Spell" ]
+              },
+              "operation": {
+                "type": "gainStyleResource",
+                "resourceId": "arcaneCharge",
+                "amount": 1,
+                "usesProcCoefficient": false
+              }
+            },
+            {
+              "id": "caster_arcanist_charge_l40",
+              "eventType": "AbilityResolved",
+              "minStyleLevel": 40,
+              "predicate": {
+                "sourceMustBePlayer": true,
+                "activeAbilityOnly": true,
+                "anyTags": [ "Magic", "Spell" ]
+              },
+              "operation": {
+                "type": "gainStyleResource",
+                "resourceId": "arcaneCharge",
+                "amount": 2,
+                "usesProcCoefficient": false
+              }
+            }
+          ]
         },
         {
           "id": "spellblade",
@@ -190,7 +651,62 @@
           "description": "Adds Spirit-scaling arcane damage to Melee active effects, improving at levels 25 and 40.",
           "unlockLevel": 10,
           "recommendedTags": [ "Melee", "Magic" ],
-          "recommendedStats": [ "Spirit", "Power" ]
+          "recommendedStats": [ "Spirit", "Power" ],
+          "rules": [
+            {
+              "id": "caster_spellblade_bonus_l10",
+              "eventType": "EffectCalculation",
+              "minStyleLevel": 10,
+              "maxStyleLevel": 24,
+              "predicate": {
+                "sourceMustBePlayer": true,
+                "activeAbilityOnly": true,
+                "effectOperations": [ "Damage" ],
+                "anyTags": [ "Melee" ]
+              },
+              "operation": {
+                "type": "addBonusDamageFromStat",
+                "stat": "Spirit",
+                "coefficient": 0.15,
+                "damageType": "Magical"
+              }
+            },
+            {
+              "id": "caster_spellblade_bonus_l25",
+              "eventType": "EffectCalculation",
+              "minStyleLevel": 25,
+              "maxStyleLevel": 39,
+              "predicate": {
+                "sourceMustBePlayer": true,
+                "activeAbilityOnly": true,
+                "effectOperations": [ "Damage" ],
+                "anyTags": [ "Melee" ]
+              },
+              "operation": {
+                "type": "addBonusDamageFromStat",
+                "stat": "Spirit",
+                "coefficient": 0.20,
+                "damageType": "Magical"
+              }
+            },
+            {
+              "id": "caster_spellblade_bonus_l40",
+              "eventType": "EffectCalculation",
+              "minStyleLevel": 40,
+              "predicate": {
+                "sourceMustBePlayer": true,
+                "activeAbilityOnly": true,
+                "effectOperations": [ "Damage" ],
+                "anyTags": [ "Melee" ]
+              },
+              "operation": {
+                "type": "addBonusDamageFromStat",
+                "stat": "Spirit",
+                "coefficient": 0.25,
+                "damageType": "Magical"
+              }
+            }
+          ]
         },
         {
           "id": "occultist",
@@ -198,7 +714,72 @@
           "description": "Dark study: Curse and damage-over-time active effects scale higher and build extra Arcane Charge.",
           "unlockLevel": 10,
           "recommendedTags": [ "Curse", "DoT" ],
-          "recommendedStats": [ "Spirit", "Cooldown" ]
+          "recommendedStats": [ "Spirit", "Cooldown" ],
+          "rules": [
+            {
+              "id": "caster_occultist_effect_l10",
+              "eventType": "EffectCalculation",
+              "minStyleLevel": 10,
+              "maxStyleLevel": 24,
+              "predicate": {
+                "sourceMustBePlayer": true,
+                "activeAbilityOnly": true,
+                "amplifiableEffectOnly": true,
+                "anyTags": [ "Curse", "DoT" ]
+              },
+              "operation": {
+                "type": "modifyEffectAmount",
+                "additivePercent": 0.10
+              }
+            },
+            {
+              "id": "caster_occultist_effect_l25",
+              "eventType": "EffectCalculation",
+              "minStyleLevel": 25,
+              "maxStyleLevel": 39,
+              "predicate": {
+                "sourceMustBePlayer": true,
+                "activeAbilityOnly": true,
+                "amplifiableEffectOnly": true,
+                "anyTags": [ "Curse", "DoT" ]
+              },
+              "operation": {
+                "type": "modifyEffectAmount",
+                "additivePercent": 0.15
+              }
+            },
+            {
+              "id": "caster_occultist_effect_l40",
+              "eventType": "EffectCalculation",
+              "minStyleLevel": 40,
+              "predicate": {
+                "sourceMustBePlayer": true,
+                "activeAbilityOnly": true,
+                "amplifiableEffectOnly": true,
+                "anyTags": [ "Curse", "DoT" ]
+              },
+              "operation": {
+                "type": "modifyEffectAmount",
+                "additivePercent": 0.20
+              }
+            },
+            {
+              "id": "caster_occultist_charge_l10",
+              "eventType": "AbilityResolved",
+              "minStyleLevel": 10,
+              "predicate": {
+                "sourceMustBePlayer": true,
+                "activeAbilityOnly": true,
+                "anyTags": [ "Curse", "DoT" ]
+              },
+              "operation": {
+                "type": "gainStyleResource",
+                "resourceId": "arcaneCharge",
+                "amount": 1,
+                "usesProcCoefficient": false
+              }
+            }
+          ]
         }
       ],
       "rules": [
@@ -255,7 +836,25 @@
           "description": "Many allies: owned summons gain offensive power that scales at levels 10, 25, and 40.",
           "unlockLevel": 10,
           "recommendedTags": [ "Summon" ],
-          "recommendedStats": [ "SummonPower" ]
+          "recommendedStats": [ "SummonPower" ],
+          "rules": [
+            {
+              "id": "summoner_horde_summon_damage",
+              "eventType": "SummonCreated",
+              "minStyleLevel": 10,
+              "predicate": {
+                "sourceMustBePlayer": true
+              },
+              "operation": {
+                "type": "modifySummonStats",
+                "damagePercent": 0.05,
+                "damagePercentModifiers": [
+                  { "type": "focusLevel", "focusId": "horde", "minStyleLevel": 25, "value": 0.05 },
+                  { "type": "focusLevel", "focusId": "horde", "minStyleLevel": 40, "value": 0.05 }
+                ]
+              }
+            }
+          ]
         },
         {
           "id": "champion",
@@ -263,7 +862,25 @@
           "description": "One strong ally: owned summons gain maximum health that scales at levels 10, 25, and 40.",
           "unlockLevel": 10,
           "recommendedTags": [ "Summon" ],
-          "recommendedStats": [ "SummonHealth", "SummonPower" ]
+          "recommendedStats": [ "SummonHealth", "SummonPower" ],
+          "rules": [
+            {
+              "id": "summoner_champion_summon_health",
+              "eventType": "SummonCreated",
+              "minStyleLevel": 10,
+              "predicate": {
+                "sourceMustBePlayer": true
+              },
+              "operation": {
+                "type": "modifySummonStats",
+                "maxHealthPercent": 0.10,
+                "maxHealthPercentModifiers": [
+                  { "type": "focusLevel", "focusId": "champion", "minStyleLevel": 25, "value": 0.05 },
+                  { "type": "focusLevel", "focusId": "champion", "minStyleLevel": 40, "value": 0.10 }
+                ]
+              }
+            }
+          ]
         },
         {
           "id": "ritualist",
@@ -271,7 +888,26 @@
           "description": "Sacred or profane rites: Curse/Holy summon effects gain stronger amplification at later milestones.",
           "unlockLevel": 10,
           "recommendedTags": [ "Summon", "Curse", "Holy" ],
-          "recommendedStats": [ "Spirit" ]
+          "recommendedStats": [ "Spirit" ],
+          "rules": [
+            {
+              "id": "summoner_ritualist_summon_effect",
+              "eventType": "EffectCalculation",
+              "minStyleLevel": 10,
+              "predicate": {
+                "sourceMustBePlayer": true,
+                "anyTags": [ "Summon" ]
+              },
+              "operation": {
+                "type": "modifyEffectAmount",
+                "additivePercent": 0.10,
+                "additivePercentModifiers": [
+                  { "type": "focusLevel", "focusId": "ritualist", "minStyleLevel": 25, "value": 0.05 },
+                  { "type": "focusLevel", "focusId": "ritualist", "minStyleLevel": 40, "value": 0.05 }
+                ]
+              }
+            }
+          ]
         }
       ],
       "rules": [
@@ -340,7 +976,56 @@
           "description": "Rapid pressure: active Melee and Ranged damage scale at levels 10, 25, and 40.",
           "unlockLevel": 10,
           "recommendedTags": [ "Melee", "Ranged" ],
-          "recommendedStats": [ "Precision", "CritChance" ]
+          "recommendedStats": [ "Precision", "CritChance" ],
+          "rules": [
+            {
+              "id": "swift_flurry_damage_l10",
+              "eventType": "EffectCalculation",
+              "minStyleLevel": 10,
+              "maxStyleLevel": 24,
+              "predicate": {
+                "sourceMustBePlayer": true,
+                "activeAbilityOnly": true,
+                "effectOperations": [ "Damage" ],
+                "anyTags": [ "Melee", "Ranged" ]
+              },
+              "operation": {
+                "type": "modifyEffectAmount",
+                "additivePercent": 0.05
+              }
+            },
+            {
+              "id": "swift_flurry_damage_l25",
+              "eventType": "EffectCalculation",
+              "minStyleLevel": 25,
+              "maxStyleLevel": 39,
+              "predicate": {
+                "sourceMustBePlayer": true,
+                "activeAbilityOnly": true,
+                "effectOperations": [ "Damage" ],
+                "anyTags": [ "Melee", "Ranged" ]
+              },
+              "operation": {
+                "type": "modifyEffectAmount",
+                "additivePercent": 0.08
+              }
+            },
+            {
+              "id": "swift_flurry_damage_l40",
+              "eventType": "EffectCalculation",
+              "minStyleLevel": 40,
+              "predicate": {
+                "sourceMustBePlayer": true,
+                "activeAbilityOnly": true,
+                "effectOperations": [ "Damage" ],
+                "anyTags": [ "Melee", "Ranged" ]
+              },
+              "operation": {
+                "type": "modifyEffectAmount",
+                "additivePercent": 0.12
+              }
+            }
+          ]
         },
         {
           "id": "evasion",
@@ -348,7 +1033,50 @@
           "description": "Survival through movement: incoming direct damage reduction scales at levels 10, 25, and 40.",
           "unlockLevel": 10,
           "recommendedTags": [ "Dodge", "Tank" ],
-          "recommendedStats": [ "DodgeChance", "CrowdControlResistance" ]
+          "recommendedStats": [ "DodgeChance", "CrowdControlResistance" ],
+          "rules": [
+            {
+              "id": "swift_evasion_reduction_l10",
+              "eventType": "EffectCalculation",
+              "minStyleLevel": 10,
+              "maxStyleLevel": 24,
+              "predicate": {
+                "targetMustBePlayer": true,
+                "effectOperations": [ "Damage" ]
+              },
+              "operation": {
+                "type": "addDamageReduction",
+                "percent": 0.05
+              }
+            },
+            {
+              "id": "swift_evasion_reduction_l25",
+              "eventType": "EffectCalculation",
+              "minStyleLevel": 25,
+              "maxStyleLevel": 39,
+              "predicate": {
+                "targetMustBePlayer": true,
+                "effectOperations": [ "Damage" ]
+              },
+              "operation": {
+                "type": "addDamageReduction",
+                "percent": 0.08
+              }
+            },
+            {
+              "id": "swift_evasion_reduction_l40",
+              "eventType": "EffectCalculation",
+              "minStyleLevel": 40,
+              "predicate": {
+                "targetMustBePlayer": true,
+                "effectOperations": [ "Damage" ]
+              },
+              "operation": {
+                "type": "addDamageReduction",
+                "percent": 0.12
+              }
+            }
+          ]
         },
         {
           "id": "tempo",
@@ -356,7 +1084,56 @@
           "description": "Rhythm play: active effects gain extra Flow and stronger Flow empowerment at later milestones.",
           "unlockLevel": 10,
           "recommendedTags": [ "Cooldown", "Speed" ],
-          "recommendedStats": [ "Cooldown", "Precision" ]
+          "recommendedStats": [ "Cooldown", "Precision" ],
+          "rules": [
+            {
+              "id": "swift_tempo_flow_l10",
+              "eventType": "AbilityResolved",
+              "minStyleLevel": 10,
+              "maxStyleLevel": 24,
+              "predicate": {
+                "sourceMustBePlayer": true,
+                "activeAbilityOnly": true
+              },
+              "operation": {
+                "type": "gainStyleResource",
+                "resourceId": "flow",
+                "amount": 2,
+                "usesProcCoefficient": false
+              }
+            },
+            {
+              "id": "swift_tempo_flow_l25",
+              "eventType": "AbilityResolved",
+              "minStyleLevel": 25,
+              "maxStyleLevel": 39,
+              "predicate": {
+                "sourceMustBePlayer": true,
+                "activeAbilityOnly": true
+              },
+              "operation": {
+                "type": "gainStyleResource",
+                "resourceId": "flow",
+                "amount": 5,
+                "usesProcCoefficient": false
+              }
+            },
+            {
+              "id": "swift_tempo_flow_l40",
+              "eventType": "AbilityResolved",
+              "minStyleLevel": 40,
+              "predicate": {
+                "sourceMustBePlayer": true,
+                "activeAbilityOnly": true
+              },
+              "operation": {
+                "type": "gainStyleResource",
+                "resourceId": "flow",
+                "amount": 8,
+                "usesProcCoefficient": false
+              }
+            }
+          ]
         }
       ],
       "rules": [
@@ -426,7 +1203,28 @@
           "description": "Single-target precision: ranged single-target damage scales at levels 10, 25, and 40.",
           "unlockLevel": 10,
           "recommendedTags": [ "Ranged", "Critical" ],
-          "recommendedStats": [ "Precision", "CritDamage" ]
+          "recommendedStats": [ "Precision", "CritDamage" ],
+          "rules": [
+            {
+              "id": "marksman_sniper_damage",
+              "eventType": "EffectCalculation",
+              "minStyleLevel": 10,
+              "predicate": {
+                "sourceMustBePlayer": true,
+                "rangedOnly": true,
+                "targetSelectors": [ "CurrentTarget" ],
+                "effectOperations": [ "Damage" ]
+              },
+              "operation": {
+                "type": "modifyEffectAmount",
+                "additivePercent": 0.08,
+                "additivePercentModifiers": [
+                  { "type": "focusLevel", "focusId": "sniper", "minStyleLevel": 25, "value": 0.04 },
+                  { "type": "focusLevel", "focusId": "sniper", "minStyleLevel": 40, "value": 0.04 }
+                ]
+              }
+            }
+          ]
         },
         {
           "id": "volley",
@@ -434,7 +1232,28 @@
           "description": "Multi-target fire: ranged multi-target damage scales at levels 10, 25, and 40.",
           "unlockLevel": 10,
           "recommendedTags": [ "Ranged", "MultiTarget" ],
-          "recommendedStats": [ "Precision", "CritChance" ]
+          "recommendedStats": [ "Precision", "CritChance" ],
+          "rules": [
+            {
+              "id": "marksman_volley_damage",
+              "eventType": "EffectCalculation",
+              "minStyleLevel": 10,
+              "predicate": {
+                "sourceMustBePlayer": true,
+                "rangedOnly": true,
+                "multiTargetOnly": true,
+                "effectOperations": [ "Damage" ]
+              },
+              "operation": {
+                "type": "modifyEffectAmount",
+                "additivePercent": 0.08,
+                "additivePercentModifiers": [
+                  { "type": "focusLevel", "focusId": "volley", "minStyleLevel": 25, "value": 0.04 },
+                  { "type": "focusLevel", "focusId": "volley", "minStyleLevel": 40, "value": 0.04 }
+                ]
+              }
+            }
+          ]
         },
         {
           "id": "trapper",
@@ -442,7 +1261,43 @@
           "description": "Marks and setup: ranged status and debuff effects build more Aim and scale at milestones.",
           "unlockLevel": 10,
           "recommendedTags": [ "Ranged", "Mark", "Debuff" ],
-          "recommendedStats": [ "Precision", "Cooldown" ]
+          "recommendedStats": [ "Precision", "Cooldown" ],
+          "rules": [
+            {
+              "id": "marksman_trapper_effect",
+              "eventType": "EffectCalculation",
+              "minStyleLevel": 10,
+              "predicate": {
+                "sourceMustBePlayer": true,
+                "rangedOnly": true,
+                "statusOrDebuffOnly": true
+              },
+              "operation": {
+                "type": "modifyEffectAmount",
+                "additivePercent": 0.08,
+                "additivePercentModifiers": [
+                  { "type": "focusLevel", "focusId": "trapper", "minStyleLevel": 25, "value": 0.04 },
+                  { "type": "focusLevel", "focusId": "trapper", "minStyleLevel": 40, "value": 0.04 }
+                ]
+              }
+            },
+            {
+              "id": "marksman_trapper_aim",
+              "eventType": "DamageDealt",
+              "minStyleLevel": 25,
+              "predicate": {
+                "sourceMustBePlayer": true,
+                "rangedOnly": true,
+                "statusOrDebuffOnly": true,
+                "effectOperations": [ "Damage" ]
+              },
+              "operation": {
+                "type": "gainStyleResource",
+                "resourceId": "aim",
+                "amount": 5
+              }
+            }
+          ]
         }
       ],
       "rules": [
@@ -514,7 +1369,26 @@
           "description": "Restoration focus: healing effects scale at levels 10, 25, and 40.",
           "unlockLevel": 10,
           "recommendedTags": [ "Healing" ],
-          "recommendedStats": [ "HealingPowerPercent", "Spirit" ]
+          "recommendedStats": [ "HealingPowerPercent", "Spirit" ],
+          "rules": [
+            {
+              "id": "support_healer_heal",
+              "eventType": "EffectCalculation",
+              "minStyleLevel": 10,
+              "predicate": {
+                "sourceMustBePlayer": true,
+                "effectOperations": [ "Heal" ]
+              },
+              "operation": {
+                "type": "modifyEffectAmount",
+                "additivePercent": 0.10,
+                "additivePercentModifiers": [
+                  { "type": "focusLevel", "focusId": "healer", "minStyleLevel": 25, "value": 0.05 },
+                  { "type": "focusLevel", "focusId": "healer", "minStyleLevel": 40, "value": 0.05 }
+                ]
+              }
+            }
+          ]
         },
         {
           "id": "warden",
@@ -522,7 +1396,43 @@
           "description": "Protection focus: barrier effects and ally protection scale at levels 10, 25, and 40.",
           "unlockLevel": 10,
           "recommendedTags": [ "Barrier", "Tank" ],
-          "recommendedStats": [ "MaxHealth", "HealingPowerPercent" ]
+          "recommendedStats": [ "MaxHealth", "HealingPowerPercent" ],
+          "rules": [
+            {
+              "id": "support_warden_barrier",
+              "eventType": "EffectCalculation",
+              "minStyleLevel": 10,
+              "predicate": {
+                "sourceMustBePlayer": true,
+                "effectOperations": [ "GrantBarrier" ]
+              },
+              "operation": {
+                "type": "modifyEffectAmount",
+                "additivePercent": 0.10,
+                "additivePercentModifiers": [
+                  { "type": "focusLevel", "focusId": "warden", "minStyleLevel": 25, "value": 0.05 },
+                  { "type": "focusLevel", "focusId": "warden", "minStyleLevel": 40, "value": 0.05 }
+                ]
+              }
+            },
+            {
+              "id": "support_warden_reduction",
+              "eventType": "EffectCalculation",
+              "minStyleLevel": 10,
+              "predicate": {
+                "targetMustBePlayer": true,
+                "effectOperations": [ "Damage" ]
+              },
+              "operation": {
+                "type": "addDamageReduction",
+                "percent": 0.03,
+                "percentModifiers": [
+                  { "type": "focusLevel", "focusId": "warden", "minStyleLevel": 25, "value": 0.02 },
+                  { "type": "focusLevel", "focusId": "warden", "minStyleLevel": 40, "value": 0.03 }
+                ]
+              }
+            }
+          ]
         },
         {
           "id": "chaplain",
@@ -530,7 +1440,27 @@
           "description": "Holy hybrid support: Holy healing, barriers, and damage scale at milestones.",
           "unlockLevel": 10,
           "recommendedTags": [ "Holy", "Healing", "Barrier" ],
-          "recommendedStats": [ "Spirit", "HealingPowerPercent" ]
+          "recommendedStats": [ "Spirit", "HealingPowerPercent" ],
+          "rules": [
+            {
+              "id": "support_chaplain_holy",
+              "eventType": "EffectCalculation",
+              "minStyleLevel": 10,
+              "predicate": {
+                "sourceMustBePlayer": true,
+                "anyTags": [ "Holy" ],
+                "amplifiableEffectOnly": true
+              },
+              "operation": {
+                "type": "modifyEffectAmount",
+                "additivePercent": 0.08,
+                "additivePercentModifiers": [
+                  { "type": "focusLevel", "focusId": "chaplain", "minStyleLevel": 25, "value": 0.04 },
+                  { "type": "focusLevel", "focusId": "chaplain", "minStyleLevel": 40, "value": 0.04 }
+                ]
+              }
+            }
+          ]
         }
       ],
       "rules": [
@@ -586,7 +1516,27 @@
           "description": "Curse and attrition: Curse/DoT effects scale at levels 10, 25, and 40.",
           "unlockLevel": 10,
           "recommendedTags": [ "Curse", "DoT" ],
-          "recommendedStats": [ "Spirit", "Cooldown" ]
+          "recommendedStats": [ "Spirit", "Cooldown" ],
+          "rules": [
+            {
+              "id": "controller_hexer_effect",
+              "eventType": "EffectCalculation",
+              "minStyleLevel": 10,
+              "predicate": {
+                "sourceMustBePlayer": true,
+                "anyTags": [ "Curse", "DoT" ],
+                "statusOrDebuffOnly": true
+              },
+              "operation": {
+                "type": "modifyEffectAmount",
+                "additivePercent": 0.10,
+                "additivePercentModifiers": [
+                  { "type": "focusLevel", "focusId": "hexer", "minStyleLevel": 25, "value": 0.05 },
+                  { "type": "focusLevel", "focusId": "hexer", "minStyleLevel": 40, "value": 0.05 }
+                ]
+              }
+            }
+          ]
         },
         {
           "id": "tactician",
@@ -594,7 +1544,27 @@
           "description": "Debuff setup: debuffs and tactical damage windows scale at milestones.",
           "unlockLevel": 10,
           "recommendedTags": [ "Debuff", "Physical" ],
-          "recommendedStats": [ "Precision", "Cooldown" ]
+          "recommendedStats": [ "Precision", "Cooldown" ],
+          "rules": [
+            {
+              "id": "controller_tactician_effect",
+              "eventType": "EffectCalculation",
+              "minStyleLevel": 10,
+              "predicate": {
+                "sourceMustBePlayer": true,
+                "anyTags": [ "Debuff", "Physical" ],
+                "statusOrDebuffOnly": true
+              },
+              "operation": {
+                "type": "modifyEffectAmount",
+                "additivePercent": 0.08,
+                "additivePercentModifiers": [
+                  { "type": "focusLevel", "focusId": "tactician", "minStyleLevel": 25, "value": 0.04 },
+                  { "type": "focusLevel", "focusId": "tactician", "minStyleLevel": 40, "value": 0.04 }
+                ]
+              }
+            }
+          ]
         },
         {
           "id": "frostbinder",
@@ -602,7 +1572,27 @@
           "description": "Hard control: control-tagged statuses and follow-up damage scale at milestones.",
           "unlockLevel": 10,
           "recommendedTags": [ "Control", "Magic" ],
-          "recommendedStats": [ "Spirit", "CrowdControlResistance" ]
+          "recommendedStats": [ "Spirit", "CrowdControlResistance" ],
+          "rules": [
+            {
+              "id": "controller_frostbinder_effect",
+              "eventType": "EffectCalculation",
+              "minStyleLevel": 10,
+              "predicate": {
+                "sourceMustBePlayer": true,
+                "anyTags": [ "Control", "Freeze", "Stun" ],
+                "statusOrDebuffOnly": true
+              },
+              "operation": {
+                "type": "modifyEffectAmount",
+                "additivePercent": 0.08,
+                "additivePercentModifiers": [
+                  { "type": "focusLevel", "focusId": "frostbinder", "minStyleLevel": 25, "value": 0.04 },
+                  { "type": "focusLevel", "focusId": "frostbinder", "minStyleLevel": 40, "value": 0.04 }
+                ]
+              }
+            }
+          ]
         }
       ],
       "rules": [
