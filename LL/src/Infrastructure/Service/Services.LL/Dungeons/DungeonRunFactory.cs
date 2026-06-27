@@ -1,5 +1,6 @@
 ﻿using Domain.Models.Dungeons;
 using Domain.Models.Dungeons.Definitions.Events;
+using Application.Interfaces.Services.LL.CombatStyles;
 using Application.Interfaces.Services.LL.Dungeons;
 using Domain.Models.Dungeons.Definitions.Rooms;
 using Domain.Models.Dungeons.Runs;
@@ -11,17 +12,20 @@ public sealed class DungeonRunFactory
 {
     private readonly IDungeonDefinitions _dungeons;
     private readonly ICharacterSnapshotService _snapshotService;
+    private readonly ICombatStyleService _combatStyles;
 
-    public DungeonRunFactory(IDungeonDefinitions dungeons, ICharacterSnapshotService snapshots)
+    public DungeonRunFactory(IDungeonDefinitions dungeons, ICharacterSnapshotService snapshots, ICombatStyleService combatStyles)
     {
         _dungeons = dungeons;
         _snapshotService = snapshots;
+        _combatStyles = combatStyles;
     }
 
     public async Task<DungeonRun> CreateAsync(Guid characterId, string dungeonDefinitionId, int seed, CancellationToken ct)
     {
         var dungeon = _dungeons.GetByKey(dungeonDefinitionId);
         var snapshot = await _snapshotService.CreateAsync(characterId, ct);
+        var combatStyleSnapshot = await _combatStyles.GetActiveSnapshotAsync(characterId, ct);
 
         // You can enforce access rules here if desired (key, recommended power, etc.)
         var rand = new Random(seed);
@@ -45,7 +49,8 @@ public sealed class DungeonRunFactory
                     : dungeon.Mechanic.DisplayName,
                 MechanicMaxValue = Math.Max(1, dungeon.Mechanic?.MaxValue ?? 100),
                 Pressure = Math.Clamp(dungeon.Mechanic?.InitialValue ?? 0, 0, Math.Max(1, dungeon.Mechanic?.MaxValue ?? 100)),
-                RewardMultiplierPercent = 100
+                RewardMultiplierPercent = 100,
+                CombatStyle = combatStyleSnapshot
             },
             CreatedAt = DateTimeOffset.UtcNow
         };

@@ -109,7 +109,11 @@ public static class DependencyInjection
         services.AddScoped<IColosseumService, ColosseumService>();
         services.AddScoped<IRatingService, RatingService>();
 
-        services.AddSingleton<ICombatStyleDefinitionProvider, StaticCombatStyleDefinitionProvider>();
+        services.AddSingleton<ICombatStyleDefinitionProvider>(sp =>
+            new JsonCombatStyleDefinitionProvider(
+                config,
+                contentRootPath,
+                sp.GetRequiredService<JsonSerializerOptions>()));
         services.AddScoped<ICombatStyleBalanceSimulator, CombatStyleBalanceSimulator>();
         services.AddScoped<ICombatStyleSwitchValidator, CombatStyleSwitchValidator>();
         services.AddScoped<ICombatStyleService, CombatStyleService>();

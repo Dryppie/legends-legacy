@@ -453,7 +453,8 @@ public sealed class DungeonRunService : IDungeonRunService
             EnemyCreatureKeys: room.EncounterIds,
             RunAttributeModifiers: _boons.GetActiveAttributeModifiers(run),
             RunAbilityModifiers: _boons.GetActiveAbilityModifiers(run),
-            EnemyAttributeModifiers: enemyAttributeModifiers);
+            EnemyAttributeModifiers: enemyAttributeModifiers,
+            CombatStyle: run.State.CombatStyle);
 
         var orchestrationResult = await _orchestrationCoordinator.OrchestrateAsync(
             orchestrationRequest,
