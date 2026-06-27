@@ -12,7 +12,6 @@ import { TabsComponent } from '../../../../../shared/components/custom-component
 import { NgFor, NgIf } from '@angular/common';
 import { HumanizeEnumPipe } from '../../../../../shared/pipes/enums/humanize-enum.pipe';
 import { NumberFormatPipe } from '../../../../../shared/pipes/number-format/number-format.pipe';
-import { GuildBuildingType } from '../../../../../shared/models/Dtos/guild/guildBuilding';
 
 @Component({
   selector: 'app-in-a-guild',
@@ -34,11 +33,8 @@ import { GuildBuildingType } from '../../../../../shared/models/Dtos/guild/guild
 })
 export class InAGuildComponent {
   @Input() guild!: Guild;
-  readonly buildings;
 
-  constructor(private state: GuildStateService) {
-    this.buildings = this.state.buildings;
-  }
+  constructor(private state: GuildStateService) {}
 
   inviteCharacterByName($event: string) {
     const invite: InviteToGuild = {
@@ -66,26 +62,5 @@ export class InAGuildComponent {
 
   get resourceSummary() {
     return this.guild.resources ?? [];
-  }
-
-  buildingLevel(type: GuildBuildingType): number {
-    return (
-      this.buildings()?.buildings.find((building) => building.definition.type === type)
-        ?.level ?? 0
-    );
-  }
-
-  lockedFeatureStatus(type: GuildBuildingType, requiredLevel: number): string {
-    const level = this.buildingLevel(type);
-    return level >= requiredLevel
-      ? `Ready at level ${level}`
-      : `Requires ${this.buildingName(type)} level ${requiredLevel}`;
-  }
-
-  buildingName(type: GuildBuildingType): string {
-    return (
-      this.buildings()?.buildings.find((building) => building.definition.type === type)
-        ?.definition.name ?? type
-    );
   }
 }
