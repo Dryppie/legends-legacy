@@ -339,6 +339,119 @@ public sealed class CombatStyleSystemTests
     }
 
     [Fact]
+    public void Generic_rule_selector_applies_ranked_node_rules_and_max_style_level()
+    {
+        var node = new CombatStyleTreeNodeDefinition(
+            "branch-technique",
+            "branch",
+            "Technique",
+            "Test node",
+            3,
+            1,
+            null,
+            0,
+            0,
+            [],
+            [],
+            true)
+        {
+            Rules =
+            [
+                new CombatStyleRuleDefinition
+                {
+                    Id = "ranked_node_damage_bonus",
+                    EventType = CombatStyleEventType.EffectCalculation,
+                    MinStyleLevel = 1,
+                    MaxStyleLevel = 10,
+                    Predicate = new EffectPredicate
+                    {
+                        SourceMustBePlayer = true,
+                        EffectOperations = [AbilityEffectOperation.Damage]
+                    },
+                    Operation = new ModifyEffectAmountOperation(
+                        0.05m,
+                        AdditivePercentModifiers:
+                        [
+                            new StyleValueModifier("nodeRank", 0.02m, NodeId: "branch-technique")
+                        ])
+                }
+            ]
+        };
+        var definition = CreateSingleRuleDefinition("node-test", "charge", [node], [], []);
+        var engine = new CombatStyleRuleEngine(new SingleDefinitionProvider(definition));
+        var active = engine.CreateState(new CombatStyleSnapshot(
+            "node-test",
+            "Node Test",
+            10,
+            0,
+            null,
+            null,
+            new Dictionary<string, int> { ["branch-technique"] = 2 }));
+        var expired = engine.CreateState(new CombatStyleSnapshot(
+            "node-test",
+            "Node Test",
+            11,
+            0,
+            null,
+            null,
+            new Dictionary<string, int> { ["branch-technique"] = 2 }));
+        var player = CreateCombatant("player", CombatTeam.Friendly);
+        var enemy = CreateCombatant("enemy", CombatTeam.Hostile);
+
+        var activeAmount = engine.ModifyEffectAmount(active, DamageEffect(active: true), player, enemy, 100);
+        var expiredAmount = engine.ModifyEffectAmount(expired, DamageEffect(active: true), player, enemy, 100);
+
+        Assert.Equal(109, activeAmount);
+        Assert.Equal(100, expiredAmount);
+    }
+
+    [Fact]
+    public void Resource_overflow_dispatches_pending_empowerment_operation()
+    {
+        var definition = CreateSingleRuleDefinition(
+            "overflow-test",
+            "charge",
+            [],
+            [
+                new CombatStyleRuleDefinition
+                {
+                    Id = "charge_on_active",
+                    EventType = CombatStyleEventType.AbilityResolved,
+                    Predicate = new EffectPredicate
+                    {
+                        SourceMustBePlayer = true,
+                        ActiveAbilityOnly = true
+                    },
+                    Operation = new GainStyleResourceOperation("charge", 10, UsesProcCoefficient: false)
+                }
+            ],
+            [
+                new SetPendingEmpowermentOperation(
+                    "charge_empowerment",
+                    new EffectPredicate
+                    {
+                        SourceMustBePlayer = true,
+                        ActiveAbilityOnly = true,
+                        EffectOperations = [AbilityEffectOperation.Damage]
+                    },
+                    0.25m)
+            ],
+            resourceMaxAmount: 10);
+        var engine = new CombatStyleRuleEngine(new SingleDefinitionProvider(definition));
+        var state = engine.CreateState(new CombatStyleSnapshot("overflow-test", "Overflow Test", 1, 0, null, null));
+        var player = CreateCombatant("player", CombatTeam.Friendly);
+        var enemy = CreateCombatant("enemy", CombatTeam.Hostile);
+        var effect = DamageEffect(active: true);
+
+        engine.OnAbilityResolved(state, ActiveAbility("active", []), player);
+        var empowered = engine.ModifyEffectAmount(state, effect, player, enemy, 100);
+        var consumed = engine.ModifyEffectAmount(state, effect, player, enemy, 100);
+
+        Assert.Equal(125, empowered);
+        Assert.Equal(100, consumed);
+    }
+
+    [Fact]
     public void Combat_style_balance_simulator_ranks_style_focus_candidates()
     {
         var simulator = new CombatStyleBalanceSimulator(CreateDefinitionProvider());
@@ -1157,6 +1270,28 @@ public sealed class CombatStyleSystemTests
             FindApiContentRoot(),
             options);
     }
+
+    private static CombatStyleDefinition CreateSingleRuleDefinition(
+        string styleId,
+        string resourceId,
+        IReadOnlyList<CombatStyleTreeNodeDefinition> nodes,
+        IReadOnlyList<CombatStyleRuleDefinition> rules,
+        IReadOnlyList<StyleRuleOperation> overflowOperations,
+        decimal resourceMaxAmount = 100) =>
+        new(
+            styleId,
+            styleId,
+            "Test style",
+            resourceId,
+            resourceMaxAmount,
+            50,
+            [],
+            [],
+            [],
+            nodes,
+            rules,
+            overflowOperations,
+            "Test");
 
     private static string FindApiContentRoot()
     {
