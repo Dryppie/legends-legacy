@@ -6,7 +6,7 @@ public record GuildApplicationMsg(Guid GuildId, Guid PlayerId) : GameEventMsg;
 public record GuildInviteReceivedMsg(Guid GuildId, Guid CharacterId) : GameEventMsg;
 public record GuildInviteRejectedMsg(Guid GuildId, Guid CharacterId) : GameEventMsg;
 public record GuildApplicationRejectedMsg(Guid GuildId, Guid CharacterId) : GameEventMsg;
-public record GuildBuildingUpgradedMsg(Guid GuildId, string BuildingId) : GameEventMsg;
+public record GuildBuildingsChangedMsg(Guid GuildId, string BuildingId) : GameEventMsg;
 public record GuildStateChangedMsg(Guid GuildId) : GameEventMsg;
 public record GuildMembershipChangedMsg(Guid GuildId, Guid CharacterId) : GameEventMsg;
 public record GuildDisbandedMsg(Guid GuildId) : GameEventMsg;

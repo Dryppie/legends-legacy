@@ -1,0 +1,93 @@
+<div *ngIf="shop() as shop" class="h-full overflow-y-auto p-4 text-sm text-neutral-200">
+  <div class="mb-4 flex flex-wrap items-start justify-between gap-3">
+    <div>
+      <p class="ll-eyebrow">Guild Shop</p>
+      <h2 class="ll-heading text-lg">Market Office</h2>
+      <p class="ll-copy mt-1">
+        Weekly stock resets {{ shop.nextWeeklyResetAt | date: "mediumDate" }}
+        <span class="text-primary">({{ resetLabel(shop.nextWeeklyResetAt) }})</span>.
+      </p>
+    </div>
+    <div class="flex gap-2">
+      <div class="ll-stat-card px-3 py-2">
+        <div class="ll-stat-label">Favor</div>
+        <div class="ll-heading mt-1 text-lg">{{ shop.guildFavor | numberFormat }}</div>
+      </div>
+      <div class="ll-stat-card px-3 py-2">
+        <div class="ll-stat-label">Honors</div>
+        <div class="ll-heading mt-1 text-lg">{{ shop.guildHonors | numberFormat }}</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="space-y-4">
+    <section *ngFor="let stockType of stockTypes" [class.hidden]="!hasStock(stockType)">
+      <div class="mb-2 flex items-center justify-between gap-3">
+        <h3 class="ll-heading text-base">{{ stockType | humanize }}</h3>
+        <span class="rounded border px-2 py-1 text-xs" [ngClass]="stockClass(stockType)">
+          {{ itemsForStock(stockType).length }} item{{ itemsForStock(stockType).length === 1 ? "" : "s" }}
+        </span>
+      </div>
+
+      <div class="grid gap-3 lg:grid-cols-2">
+        <div *ngFor="let item of itemsForStock(stockType)" class="ll-card flex flex-col gap-3 p-4">
+          <div class="flex flex-wrap items-start justify-between gap-2">
+            <div>
+              <div class="ll-heading text-base">{{ item.name }}</div>
+              <p class="ll-copy mt-1 text-xs">{{ item.description }}</p>
+            </div>
+            <span class="rounded border px-2 py-1 text-xs" [ngClass]="stockClass(item.stockType)">
+              {{ item.isInWeeklyRotation ? "Rotating" : (item.stockType | humanize) }}
+            </span>
+          </div>
+
+          <div class="grid gap-2 sm:grid-cols-3">
+            <div class="ll-stat-card px-3 py-2">
+              <div class="ll-stat-label">Cost</div>
+              <div class="mt-1">
+                <span *ngIf="item.guildFavorCost > 0">{{ item.guildFavorCost | numberFormat }} Favor</span>
+                <span *ngIf="item.guildHonorsCost > 0">{{ item.guildHonorsCost | numberFormat }} Honors</span>
+              </div>
+            </div>
+            <div class="ll-stat-card px-3 py-2">
+              <div class="ll-stat-label">Limit</div>
+              <div class="mt-1">{{ item.purchasedThisPeriod }} / {{ item.weeklyLimit }}</div>
+            </div>
+            <div class="ll-stat-card px-3 py-2">
+              <div class="ll-stat-label">Requires</div>
+              <div class="mt-1 text-xs">{{ requirementText(item) }}</div>
+            </div>
+          </div>
+
+          <div>
+            <div class="mb-2 text-xs uppercase tracking-wide text-primary">Rewards</div>
+            <div class="grid gap-2 sm:grid-cols-2">
+              <div
+                *ngFor="let reward of item.rewards"
+                class="rounded border border-zinc-300/20 bg-zinc-950/30 px-3 py-2"
+              >
+                <div class="ll-stat-label">{{ reward.type | humanize }}</div>
+                <div class="ll-heading mt-1 text-base">{{ rewardAmountLabel(reward) }}</div>
+                <div class="mt-1 text-xs text-neutral-300">{{ rewardLabel(reward) | humanize }}</div>
+                <p *ngIf="reward.description" class="ll-copy mt-1 text-xs">
+                  {{ reward.description }}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-auto flex flex-wrap items-center justify-between gap-2">
+            <p class="text-xs" [ngClass]="item.canPurchase ? 'text-emerald-300' : 'text-neutral-400'">
+              {{ item.lockedReason ?? "Available" }}
+            </p>
+            <app-regular-button
+              [disabled]="!item.canPurchase || loading()"
+              (pressed)="purchase(item)"
+              text="Purchase"
+            ></app-regular-button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>

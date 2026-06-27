@@ -34,6 +34,5 @@ public interface IGuildService
     Task<bool> RejectInviteAsync(Guid characterId, Guid guildId, CancellationToken cancellationToken);
     Task<bool> ApproveApplicationAsync(Guid characterId, Guid applicationCharacterId, CancellationToken cancellationToken);
     Task<bool> RejectApplicationAsync(Guid characterId, Guid applicationCharacterId, CancellationToken cancellationToken);
-    Task<Guild?> GetGuildWithUpgradesAsync(Guid characterId, CancellationToken cancellationToken);
-    Task<bool> DonateToGuildAsync(Guid characterId, Dictionary<GuildResourceType, int> donations, CancellationToken cancellationToken);
+    Task<Guild?> GetGuildForMemberAsync(Guid characterId, CancellationToken cancellationToken);
 }
