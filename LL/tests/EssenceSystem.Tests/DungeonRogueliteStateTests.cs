@@ -4,6 +4,7 @@ using Application.Interfaces.Services.LL.CombatStyles;
 using Application.Interfaces.Services.LL.Dungeons;
 using Application.UseCases._AdminDashboard.Creatures.Dtos;
 using Application.UseCases.CombatStyles.Dtos;
+using Application.UseCases.CombatStyles.Models;
 using Domain.Models.Attributes;
 using Domain.Models.Attributes.Modifiers;
 using Domain.Models.CombatStyles;
@@ -1420,7 +1421,7 @@ public sealed class DungeonRogueliteStateTests
         public long ExperienceGranted { get; private set; }
         public string Source { get; private set; } = string.Empty;
 
-        public Task<CombatStylesOverviewDto> GetOverviewAsync(Guid characterId, CancellationToken cancellationToken) =>
+        public Task<CombatStylesOverviewModel> GetOverviewAsync(Guid characterId, CancellationToken cancellationToken) =>
             throw new NotSupportedException();
 
         public Task<CombatStyleOperationResult> ActivateStyleAsync(
@@ -1429,27 +1430,27 @@ public sealed class DungeonRogueliteStateTests
             CancellationToken cancellationToken) =>
             throw new NotSupportedException();
 
-        public Task<CombatStyleOperationResult<CombatStyleDto>> SelectFocusAsync(
+        public Task<CombatStyleOperationResult<CombatStyleModel>> SelectFocusAsync(
             Guid characterId,
             string styleId,
             string focusId,
             CancellationToken cancellationToken) =>
             throw new NotSupportedException();
 
-        public Task<CombatStyleOperationResult<CombatStyleDto>> RankUpNodeAsync(
+        public Task<CombatStyleOperationResult<CombatStyleModel>> RankUpNodeAsync(
             Guid characterId,
             string styleId,
             string nodeId,
             CancellationToken cancellationToken) =>
             throw new NotSupportedException();
 
-        public Task<CombatStyleOperationResult<CombatStyleDto>> ResetSkillTreeAsync(
+        public Task<CombatStyleOperationResult<CombatStyleModel>> ResetSkillTreeAsync(
             Guid characterId,
             string styleId,
             CancellationToken cancellationToken) =>
             throw new NotSupportedException();
 
-        public Task<CombatBuildPreviewDto> GetBuildPreviewAsync(Guid characterId, CancellationToken cancellationToken) =>
+        public Task<CombatBuildPreviewModel> GetBuildPreviewAsync(Guid characterId, CancellationToken cancellationToken) =>
             throw new NotSupportedException();
 
         public Task<CombatStyleSnapshot?> GetActiveSnapshotAsync(Guid characterId, CancellationToken cancellationToken) =>

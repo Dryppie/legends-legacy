@@ -150,6 +150,7 @@ public sealed class AbilityEffectSpec
     public AttackType AttackType { get; set; } = AttackType.None;
     public DamageType DamageType { get; set; } = DamageType.None;
     public float LifeStealPercentage { get; set; }
+    public decimal ProcCoefficient { get; set; } = 1m;
     public List<string> Tags { get; set; } = [];
     public List<AbilityConditionSpec> Conditions { get; set; } = [];
 }
