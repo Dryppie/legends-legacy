@@ -52,8 +52,67 @@
     <app-tab label="Buildings">
       <app-guild-buildings class="h-full overflow-hidden"></app-guild-buildings>
     </app-tab>
-    <app-tab label="Vault">
-      <app-guild-vault class="h-full overflow-hidden"></app-guild-vault>
+    <app-tab label="Missions">
+      <app-guild-missions class="h-full overflow-hidden"></app-guild-missions>
+    </app-tab>
+    <app-tab label="Shop">
+      <app-guild-shop class="h-full overflow-hidden"></app-guild-shop>
+    </app-tab>
+    <app-tab label="Raids">
+      <div class="h-full overflow-y-auto p-4">
+        <div class="ll-card p-4">
+          <p class="ll-eyebrow">Raid Hall</p>
+          <h2 class="ll-heading mt-1 text-lg">Guild Raids</h2>
+          <div class="mt-4 grid gap-3 sm:grid-cols-3">
+            <div class="ll-stat-card px-3 py-2">
+              <div class="ll-stat-label">Status</div>
+              <div class="ll-heading mt-1 text-base">
+                {{ lockedFeatureStatus("RaidHall", 1) }}
+              </div>
+            </div>
+            <div class="ll-stat-card px-3 py-2">
+              <div class="ll-stat-label">Raid Hall</div>
+              <div class="ll-heading mt-1 text-base">
+                Level {{ buildingLevel("RaidHall") }}
+              </div>
+            </div>
+            <div class="ll-stat-card px-3 py-2">
+              <div class="ll-stat-label">Next Step</div>
+              <div class="ll-heading mt-1 text-base">
+                Registration
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </app-tab>
+    <app-tab label="Wars">
+      <div class="h-full overflow-y-auto p-4">
+        <div class="ll-card p-4">
+          <p class="ll-eyebrow">War Room</p>
+          <h2 class="ll-heading mt-1 text-lg">Guild Wars</h2>
+          <div class="mt-4 grid gap-3 sm:grid-cols-3">
+            <div class="ll-stat-card px-3 py-2">
+              <div class="ll-stat-label">Status</div>
+              <div class="ll-heading mt-1 text-base">
+                {{ lockedFeatureStatus("WarRoom", 1) }}
+              </div>
+            </div>
+            <div class="ll-stat-card px-3 py-2">
+              <div class="ll-stat-label">War Room</div>
+              <div class="ll-heading mt-1 text-base">
+                Level {{ buildingLevel("WarRoom") }}
+              </div>
+            </div>
+            <div class="ll-stat-card px-3 py-2">
+              <div class="ll-stat-label">Next Step</div>
+              <div class="ll-heading mt-1 text-base">
+                Rosters
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </app-tab>
     <app-tab label="Rankings">
       <app-guild-rankings class="h-full overflow-hidden"></app-guild-rankings>

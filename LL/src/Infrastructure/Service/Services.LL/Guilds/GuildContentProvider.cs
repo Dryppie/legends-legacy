@@ -46,14 +46,15 @@ public sealed class JsonGuildContentProvider : IGuildContentProvider
 
     private void Apply(GuildContentDocument document)
     {
-        Buildings = document.Buildings.Count == 0 ? GuildContentDefaults.Document.Buildings : document.Buildings;
-        WeeklyMissions = document.WeeklyMissions.Count == 0 ? GuildContentDefaults.Document.WeeklyMissions : document.WeeklyMissions;
-        DailyOrders = document.DailyOrders.Count == 0 ? GuildContentDefaults.Document.DailyOrders : document.DailyOrders;
-        ShopItems = document.ShopItems.Count == 0 ? GuildContentDefaults.Document.ShopItems : document.ShopItems;
+        Buildings = document.Buildings;
+        WeeklyMissions = document.WeeklyMissions;
+        DailyOrders = document.DailyOrders;
+        ShopItems = document.ShopItems;
     }
 
     private static GuildContentDocument Validate(GuildContentDocument document, IGuildContentValidator validator)
     {
+        document = ApplyDefaults(document);
         var result = validator.Validate(document);
         if (result.IsValid)
         {
@@ -62,6 +63,14 @@ public sealed class JsonGuildContentProvider : IGuildContentProvider
 
         throw new InvalidOperationException($"Guild content validation failed: {string.Join("; ", result.Errors)}");
     }
+
+    private static GuildContentDocument ApplyDefaults(GuildContentDocument document) => new()
+    {
+        Buildings = document.Buildings.Count == 0 ? GuildContentDefaults.Document.Buildings : document.Buildings,
+        WeeklyMissions = document.WeeklyMissions.Count == 0 ? GuildContentDefaults.Document.WeeklyMissions : document.WeeklyMissions,
+        DailyOrders = document.DailyOrders.Count == 0 ? GuildContentDefaults.Document.DailyOrders : document.DailyOrders,
+        ShopItems = document.ShopItems.Count == 0 ? GuildContentDefaults.Document.ShopItems : document.ShopItems
+    };
 }
 
 public sealed class DefaultGuildContentProvider : IGuildContentProvider

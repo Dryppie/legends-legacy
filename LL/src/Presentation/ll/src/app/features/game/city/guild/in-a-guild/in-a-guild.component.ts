@@ -5,23 +5,27 @@ import { Guild } from '../../../../../shared/models/Dtos/guild/guild';
 import { InviteToGuild } from '../../../../../shared/models/requestDtos/guilds/inviteToGuild';
 import { GuildStateService } from '../../../../../core/services/api/guild/guild-state.service';
 import { GuildBuildingsComponent } from './guild-buildings/guild-buildings.component';
-import { GuildVaultComponent } from './guild-vault/guild-vault.component';
+import { GuildMissionsComponent } from './guild-missions/guild-missions.component';
+import { GuildShopComponent } from './guild-shop/guild-shop.component';
 import { GuildRankingsComponent } from './guild-rankings/guild-rankings.component';
 import { TabsComponent } from '../../../../../shared/components/custom-components/tabs/tabs.component';
-import { NgFor } from '@angular/common';
+import { NgFor, NgIf } from '@angular/common';
 import { HumanizeEnumPipe } from '../../../../../shared/pipes/enums/humanize-enum.pipe';
 import { NumberFormatPipe } from '../../../../../shared/pipes/number-format/number-format.pipe';
+import { GuildBuildingType } from '../../../../../shared/models/Dtos/guild/guildBuilding';
 
 @Component({
   selector: 'app-in-a-guild',
   standalone: true,
   imports: [
     NgFor,
+    NgIf,
     TabComponent,
     GuildInfoComponent,
     TabsComponent,
     GuildBuildingsComponent,
-    GuildVaultComponent,
+    GuildMissionsComponent,
+    GuildShopComponent,
     GuildRankingsComponent,
     HumanizeEnumPipe,
     NumberFormatPipe,
@@ -30,8 +34,11 @@ import { NumberFormatPipe } from '../../../../../shared/pipes/number-format/numb
 })
 export class InAGuildComponent {
   @Input() guild!: Guild;
+  readonly buildings;
 
-  constructor(private state: GuildStateService) {}
+  constructor(private state: GuildStateService) {
+    this.buildings = this.state.buildings;
+  }
 
   inviteCharacterByName($event: string) {
     const invite: InviteToGuild = {
@@ -59,5 +66,26 @@ export class InAGuildComponent {
 
   get resourceSummary() {
     return this.guild.resources ?? [];
+  }
+
+  buildingLevel(type: GuildBuildingType): number {
+    return (
+      this.buildings()?.buildings.find((building) => building.definition.type === type)
+        ?.level ?? 0
+    );
+  }
+
+  lockedFeatureStatus(type: GuildBuildingType, requiredLevel: number): string {
+    const level = this.buildingLevel(type);
+    return level >= requiredLevel
+      ? `Ready at level ${level}`
+      : `Requires ${this.buildingName(type)} level ${requiredLevel}`;
+  }
+
+  buildingName(type: GuildBuildingType): string {
+    return (
+      this.buildings()?.buildings.find((building) => building.definition.type === type)
+        ?.definition.name ?? type
+    );
   }
 }

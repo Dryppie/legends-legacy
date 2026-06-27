@@ -7,6 +7,8 @@ export interface Guild {
   name: string;
   tag: string;
   description?: string;
+  guildXp: number;
+  guildLevel: number;
   members: GuildMember[];
   maxMembers: number;
   invites: GuildInvite[];
