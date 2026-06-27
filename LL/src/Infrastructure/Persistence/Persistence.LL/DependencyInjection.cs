@@ -2,6 +2,7 @@
 using Domain.Models.Attributes;
 using Domain.Models.CharacterActions;
 using Domain.Models.Colosseum;
+using Domain.Models.CombatStyles;
 using Domain.Models.Dungeons.Mastery;
 using Domain.Models.Dungeons.Runs;
 using Domain.Models.Entities;
@@ -31,6 +32,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Persistence.LL.Repositories.Attributes;
 using Persistence.LL.Repositories.CharacterActions;
 using Persistence.LL.Repositories.Colosseum;
+using Persistence.LL.Repositories.CombatStyles;
 using Persistence.LL.Repositories.Dungeons;
 using Persistence.LL.Repositories.Entities;
 using Persistence.LL.Repositories.Entities.Characters;
@@ -79,6 +81,8 @@ public static class DependencyInjection
 
         services.AddScoped<IColosseumRepository, ColosseumRepository>();
         services.AddScoped<IRatingRepository, RatingRepository>();
+
+        services.AddScoped<IPlayerCombatStyleRepository, PlayerCombatStyleRepository>();
 
         services.AddScoped<IDungeonRunRepository, DungeonRunRepository>();
         services.AddScoped<ICharacterDungeonMasteryRepository, CharacterDungeonMasteryRepository>();

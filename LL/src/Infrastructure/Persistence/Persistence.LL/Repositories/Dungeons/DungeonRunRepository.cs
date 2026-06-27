@@ -53,6 +53,13 @@ public class DungeonRunRepository : IDungeonRunRepository
              .FirstOrDefaultAsync(x => x.Id.Equals(dungeonId), cancellationToken);
     }
 
+    public async Task<bool> HasActiveDungeonRunAsync(Guid characterId, CancellationToken cancellationToken)
+    {
+        return await _context.DungeonRuns.AnyAsync(
+            run => run.CharacterId == characterId && run.Status == DungeonRunStatus.Active,
+            cancellationToken);
+    }
+
     public async Task<IReadOnlyList<DungeonCompletionRecord>> GetCompletionRecordsAsync(
         Guid characterId,
         IReadOnlyCollection<string> dungeonDefinitionIds,

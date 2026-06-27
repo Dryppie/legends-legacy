@@ -13,7 +13,7 @@ using Persistence.LL;
 namespace Persistence.LL.Migrations
 {
     [DbContext(typeof(LLDbContext))]
-    [Migration("20260626132310_BaseMigration")]
+    [Migration("20260627182720_BaseMigration")]
     partial class BaseMigration
     {
         /// <inheritdoc />
@@ -581,6 +581,95 @@ namespace Persistence.LL.Migrations
                     b.HasIndex("CharacterBId");
 
                     b.ToTable("ColosseumMatches");
+                });
+
+            modelBuilder.Entity("Domain.Models.CombatStyles.PlayerCombatStyle", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("CharacterId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<long>("Experience")
+                        .HasColumnType("bigint");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<int>("Level")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("SelectedFocusId")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<string>("StyleId")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CharacterId");
+
+                    b.HasIndex("CharacterId", "StyleId")
+                        .IsUnique();
+
+                    b.ToTable("PlayerCombatStyles", t =>
+                        {
+                            t.HasCheckConstraint("CK_PlayerCombatStyles_Experience", "\"Experience\" >= 0");
+
+                            t.HasCheckConstraint("CK_PlayerCombatStyles_Level", "\"Level\" >= 1 AND \"Level\" <= 50");
+                        });
+                });
+
+            modelBuilder.Entity("Domain.Models.CombatStyles.PlayerCombatStyleNode", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("CharacterId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("NodeId")
+                        .IsRequired()
+                        .HasMaxLength(96)
+                        .HasColumnType("character varying(96)");
+
+                    b.Property<int>("Rank")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("StyleId")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CharacterId");
+
+                    b.HasIndex("CharacterId", "StyleId", "NodeId")
+                        .IsUnique();
+
+                    b.ToTable("PlayerCombatStyleNodes", t =>
+                        {
+                            t.HasCheckConstraint("CK_PlayerCombatStyleNodes_Rank", "\"Rank\" >= 0");
+                        });
                 });
 
             modelBuilder.Entity("Domain.Models.Dungeons.Mastery.CharacterDungeonMastery", b =>
@@ -2299,6 +2388,24 @@ namespace Persistence.LL.Migrations
                     b.HasOne("Domain.Models.Entities.Characters.Character", null)
                         .WithMany("ColosseumMatches")
                         .HasForeignKey("CharacterBId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Domain.Models.CombatStyles.PlayerCombatStyle", b =>
+                {
+                    b.HasOne("Domain.Models.Entities.Characters.Character", null)
+                        .WithMany()
+                        .HasForeignKey("CharacterId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Domain.Models.CombatStyles.PlayerCombatStyleNode", b =>
+                {
+                    b.HasOne("Domain.Models.Entities.Characters.Character", null)
+                        .WithMany()
+                        .HasForeignKey("CharacterId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

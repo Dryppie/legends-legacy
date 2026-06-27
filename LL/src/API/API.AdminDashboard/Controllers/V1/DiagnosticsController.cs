@@ -1,3 +1,4 @@
+using Application.Interfaces.Services.LL.CombatStyles;
 using Application.Interfaces.Services.LL.Entities;
 using Application.Interfaces.Services.LL.Essences;
 using Application.Interfaces.Services.LL.Regions;
@@ -7,6 +8,7 @@ using Application.UseCases._AdminDashboard.Diagnostics.Queries.GetAbilityCatalog
 using Application.UseCases._AdminDashboard.Diagnostics.Queries.GetCreatureBuildProfileDiagnostics;
 using Application.UseCases._AdminDashboard.Diagnostics.Queries.GetRegionOneContentDiagnostics;
 using Application.UseCases._AdminDashboard.Diagnostics.Queries.RunAbilityBalanceSimulation;
+using Application.UseCases._AdminDashboard.Diagnostics.Queries.RunCombatStyleBalanceSimulation;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.AdminDashboard.Controllers.V1;
@@ -48,5 +50,12 @@ public class DiagnosticsController : BaseController
         [FromBody] AbilityBalanceSimulationRequest request)
     {
         return await Mediator.Send(new RunAbilityBalanceSimulationQuery(request));
+    }
+
+    [HttpPost("combat-style-balance-simulation")]
+    public async Task<ActionResult<CombatStyleBalanceSimulationReport>> RunCombatStyleBalanceSimulation(
+        [FromBody] CombatStyleBalanceSimulationRequest request)
+    {
+        return await Mediator.Send(new RunCombatStyleBalanceSimulationQuery(request));
     }
 }

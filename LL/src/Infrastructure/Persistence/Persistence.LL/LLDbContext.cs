@@ -4,6 +4,7 @@ using Domain.Models.Attributes;
 using Domain.Models.CharacterActions;
 using Domain.Models.CharacterActions.CharacterActionDetails;
 using Domain.Models.Colosseum;
+using Domain.Models.CombatStyles;
 using Domain.Models.Dungeons.Mastery;
 using Domain.Models.Dungeons.Runs;
 using Domain.Models.Entities;
@@ -136,6 +137,8 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : DbContext(opti
     public DbSet<ColosseumMatchResult> ColosseumMatches => Set<ColosseumMatchResult>();
     public DbSet<ArenaDefenseSnapshot> ArenaDefenseSnapshots => Set<ArenaDefenseSnapshot>();
     public DbSet<ChampionMarketPurchase> ChampionMarketPurchases => Set<ChampionMarketPurchase>();
+    public DbSet<PlayerCombatStyle> PlayerCombatStyles => Set<PlayerCombatStyle>();
+    public DbSet<PlayerCombatStyleNode> PlayerCombatStyleNodes => Set<PlayerCombatStyleNode>();
     public DbSet<Character> Characters => Set<Character>();
     public DbSet<CharacterSoulstoneUpgrade> CharacterSoulstoneUpgrades => Set<CharacterSoulstoneUpgrade>();
     public DbSet<Creature> Creatures => Set<Creature>();
