@@ -1,5 +1,6 @@
 using Domain.Models.CharacterActions;
 using Domain.Models.CharacterActions.CharacterActionDetails;
+using Domain.Models.CombatStyles;
 using Domain.Models.Regions.Areas;
 using Services.LL.CharacterActions;
 using Services.LL.Combat.Layers.Orchestration.Idle;
@@ -49,6 +50,20 @@ public sealed class IdleCombatPlannerTests
 
         Assert.Equal(3, plan.PlannedEncounterCount);
         Assert.Equal(firstEncounterAt.AddSeconds(30), plan.ExecutableUntil);
+    }
+
+    [Fact]
+    public void CreateEncounterPlan_attaches_combat_style_snapshot()
+    {
+        var now = DateTimeOffset.Parse("2026-06-23T12:00:00Z");
+        var action = CreateCombatAction(now);
+        var planner = new IdleCombatPlanner(new FakeSpawningService());
+        var plan = planner.CreatePlan(new IdleCombatOrchestrationRequest(action, now));
+        var style = new CombatStyleSnapshot("fighter", "Fighter", 12, 100, "duelist", "Duelist");
+
+        var encounter = planner.CreateEncounterPlan(plan, 1, now, style);
+
+        Assert.Same(style, encounter.PlayerCombatStyle);
     }
 
     private static CharacterAction CreateCombatAction(DateTimeOffset nextEncounterAt)

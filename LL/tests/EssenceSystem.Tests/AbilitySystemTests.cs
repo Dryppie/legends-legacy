@@ -799,6 +799,23 @@ public sealed class AbilitySystemTests
     }
 
     [Fact]
+    public void Json_catalog_authors_proc_coefficients_for_all_effects()
+    {
+        var catalog = new JsonAbilityCatalogProvider(
+            CreateConfig(),
+            FindApiContentRoot(),
+            CreateJsonOptions()).GetCatalog();
+        var abilityEffects = catalog.AbilitiesById.Values.SelectMany(x => x.Effects);
+        var statusEffects = catalog.Statuses.SelectMany(x => x.Effects);
+        var effects = abilityEffects.Concat(statusEffects).ToArray();
+
+        Assert.NotEmpty(effects);
+        Assert.All(effects, effect => Assert.InRange(effect.ProcCoefficient, 0.01m, 2m));
+        Assert.Contains(effects, effect => effect.ProcCoefficient < 1m);
+        Assert.Contains(effects, effect => effect.Operation == AbilityEffectOperation.Damage && effect.ProcCoefficient < 1m);
+    }
+
+    [Fact]
     public void Balance_simulator_ranks_random_essence_combinations()
     {
         var provider = new JsonAbilityCatalogProvider(
