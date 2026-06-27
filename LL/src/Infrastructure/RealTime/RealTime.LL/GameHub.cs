@@ -30,7 +30,7 @@ public sealed class GameHub : Hub<IGameClient>
     public async Task SubscribeToGuild(Guid guildId)
     {
         var characterId = Context.RequireCharacterId();
-        var guild = await _guildService.GetGuildWithUpgradesAsync(characterId, Context.ConnectionAborted);
+        var guild = await _guildService.GetGuildForMemberAsync(characterId, Context.ConnectionAborted);
 
         if (guild?.Id != guildId)
         {

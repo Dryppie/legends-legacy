@@ -49,19 +49,24 @@ Shipped:
 - Personal daily orders generated lazily per guild member.
 - Personal order reward claim flow.
 - Contribution aggregation for daily and weekly periods.
+- Weekly contribution leaderboard.
 - Contribution idempotency through `GuildContributionLedger`.
+- Guild activity log entries for mission selection and reward claims.
 
 Current weekly mission definitions:
 
 - Monster Extermination
 - Dungeon Expedition
 - Craftsmen's Commission
+- Forge Quota
+- Dungeon Vanguard
 
 Current personal daily order definitions:
 
 - Defeat 100 creatures
 - Clear 5 dungeon rooms
 - Complete 20 tempering actions
+- Craft 5 items
 
 Claimed personal orders award Guild Favor, Guild XP, Guild Supplies, and contribution-period reward aggregates.
 
@@ -90,6 +95,11 @@ Shipped:
   - Cinders
   - Soulstones
   - Fate Echo
+  - Sigil Fragments
+  - Ascension Stone Fragments
+  - inventory items by `ItemBase.Id`
+  - character titles by `TitleDefinition.Key`
+- Guild activity log entries for shop purchases.
 - Shop stock is loaded through `Data/guild-content.json` with in-code defaults as fallback.
 - Weekly and prestige stock use deterministic weekly rotation.
 - Market Office level gates common, expanded, weekly, and prestige stock.
@@ -201,6 +211,8 @@ Shipped in the Angular `ll` presentation app:
   - claiming weekly mission rewards
   - loading shop
   - purchasing shop items
+- Mission contribution leaderboard UI.
+- Richer guild shop reward cards for keyed item/title rewards.
 
 The Vault tab and donation UI have been removed.
 
@@ -227,12 +239,12 @@ Partially shipped:
 - Mission definitions are loaded from `Data/guild-content.json`.
 - Mission Board level can add an additional weekly option and improve mission rewards.
 - Upgraded Mission Board weekly options use deterministic weekly rotation.
+- Mission selection and reward claims write guild activity logs.
 
 Still partial:
 
 - Gathering, Colosseum, Essence, Raid, and War metrics are modeled but not connected to gameplay services.
 - Mission reset display is still lightweight and not a live ticking timer.
-- There is no guild activity log entry for mission selection.
 
 ### Personal Guild Orders
 
@@ -260,7 +272,7 @@ Partially shipped:
 
 Still partial:
 
-- No officer action audit logs outside building construction/upgrade logs.
+- Officer action audit logs currently cover building construction/upgrades and mission selection.
 - No account-level weekly caps.
 - No retention/cleanup policy for contribution ledgers.
 
@@ -277,11 +289,12 @@ Partially shipped:
 - Common, weekly, and prestige stock categories exist.
 - Weekly and prestige stock rotate deterministically by week.
 - Market Office requirements are enforced.
-- Rewards are limited to direct currency/resource grants.
+- Rewards support direct character currencies, inventory item grants, and title unlocks.
 
 Still partial:
 
-- Item, chest, cosmetic, and title rewards are not implemented.
+- Chest and cosmetic reward types are not modeled as distinct reward systems yet.
+- Item and title rewards require matching seeded item/title catalog entries.
 
 ### Guild Buildings
 
@@ -306,12 +319,12 @@ Partially shipped:
 - Mission/order progress is shown.
 - Building benefit, cost, status, and activity log information is shown.
 - Shop items are grouped by stock category with requirement and reward cards.
+- Contribution leaderboard is shown on the Missions tab.
 - Raids and Wars have locked-state tabs.
 
 Still partial:
 
-- No contribution leaderboard.
-- Reward preview is richer for direct currency rewards, but item/chest/cosmetic/title previews are not available until those rewards exist.
+- Reward previews support optional reward keys, names, and descriptions.
 
 ## Not Shipped Yet
 
@@ -374,16 +387,17 @@ Shipped:
 - JSON mission definitions
 - JSON shop stock
 - JSON/data-driven building definitions
+- Guild content validation for duplicate keys, missing required definitions, invalid numeric values, invalid benefits, and invalid keyed rewards
 
 Partially shipped:
 
-- `Data/guild-content.json` is consumed by a JSON-backed provider with in-code defaults as fallback.
+- `Data/guild-content.json` is consumed by a JSON-backed provider with in-code defaults as fallback and load-time validation.
 
 Still partial:
 
 - reward profile definitions
 - admin dashboard tooling for guild content
-- schema validation or diagnostics for guild content
+- richer diagnostics/admin visibility for guild content
 
 ## Persistence and Migrations
 
@@ -440,9 +454,7 @@ No infrastructure-as-code changes were made.
 ## Recommended Next Steps
 
 1. Add contribution hooks for Colosseum and Essence gameplay.
-2. Add guild activity logs for mission selection, reward claims, and shop purchases.
-3. Add schema validation/diagnostics for `Data/guild-content.json`.
-4. Add item, chest, cosmetic, and title reward support to the guild shop.
-5. Add contribution leaderboard UI.
-6. Implement Guild Raids before Guild Wars.
-7. Add admin dashboard tooling for guild content tuning.
+2. Add chest/cosmetic reward systems or map them explicitly to existing item/title catalogs.
+3. Add admin dashboard tooling for guild content tuning and diagnostics.
+4. Add account-level anti-abuse caps and contribution-ledger cleanup policy.
+5. Implement Guild Raids before Guild Wars.

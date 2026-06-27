@@ -40,14 +40,14 @@ public class GuildRepository : IGuildRepository
             .Include(g => g.Invites)
                 .ThenInclude(i => i.Character)
             .Include(g => g.Resources)
-            .Include(g => g.GuildBuildingUpgrades)
+            .Include(g => g.Buildings)
             .SingleOrDefaultAsync(g => g.Members.Select(gm => gm.CharacterId).Contains(characterId), cancellationToken);
 
     public async Task<List<Guild>> GetAllGuildsAsync(CancellationToken cancellationToken) =>
         await _context.Guilds
             .Include(g => g.Owner)
             .Include(g => g.Members)
-            .Include(g => g.GuildBuildingUpgrades)
+            .Include(g => g.Buildings)
             .ToListAsync(cancellationToken);
 
     public async Task<bool> LeaveGuildAsync(Guid characterId, CancellationToken cancellationToken)
@@ -215,10 +215,10 @@ public class GuildRepository : IGuildRepository
         return true;
     }
 
-    public async Task<Guild?> GetGuildWithUpgradesAsync(Guid characterId, CancellationToken cancellationToken) =>
+    public async Task<Guild?> GetGuildForMemberAsync(Guid characterId, CancellationToken cancellationToken) =>
         await _context.Guilds
             .Include(g => g.Members)
             .Include(g => g.Resources)
-            .Include(g => g.GuildBuildingUpgrades)
+            .Include(g => g.Buildings)
             .FirstOrDefaultAsync(g => g.Members.Select(gm => gm.CharacterId).Contains(characterId), cancellationToken);
 }

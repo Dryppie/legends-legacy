@@ -12,6 +12,9 @@ using Domain.Models.Entities.Creatures;
 using Domain.Models.Entities.NPCs;
 using Domain.Models.Essences;
 using Domain.Models.Guilds;
+using Domain.Models.Guilds.Buildings;
+using Domain.Models.Guilds.Missions;
+using Domain.Models.Guilds.Shop;
 using Domain.Models.Inventories;
 using Domain.Models.Items;
 using Domain.Models.Items.Equipments;
@@ -172,6 +175,15 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : DbContext(opti
     public DbSet<GuildInvite> GuildInvites => Set<GuildInvite>();
 
     public DbSet<GuildMember> GuildMembers => Set<GuildMember>();
+    public DbSet<GuildBuilding> GuildBuildings => Set<GuildBuilding>();
+    public DbSet<GuildActivityLog> GuildActivityLogs => Set<GuildActivityLog>();
+    public DbSet<GuildMissionOption> GuildMissionOptions => Set<GuildMissionOption>();
+    public DbSet<GuildMissionInstance> GuildMissionInstances => Set<GuildMissionInstance>();
+    public DbSet<GuildMissionContribution> GuildMissionContributions => Set<GuildMissionContribution>();
+    public DbSet<PersonalGuildOrder> PersonalGuildOrders => Set<PersonalGuildOrder>();
+    public DbSet<GuildMemberContributionPeriod> GuildMemberContributionPeriods => Set<GuildMemberContributionPeriod>();
+    public DbSet<GuildContributionLedger> GuildContributionLedgers => Set<GuildContributionLedger>();
+    public DbSet<GuildShopPurchase> GuildShopPurchases => Set<GuildShopPurchase>();
 
     public DbSet<Inventory> Inventories => Set<Inventory>();
 
