@@ -35,18 +35,25 @@ public sealed class JsonCombatStyleDefinitionProvider : ICombatStyleDefinitionPr
     public CombatStyleFocusDefinition? GetFocus(string styleId, string focusId) =>
         GetById(styleId)?.Focuses.FirstOrDefault(x => x.Id.Equals(focusId, StringComparison.OrdinalIgnoreCase));
 
-    private static CombatStyleDefinition ToDomain(CombatStyleDefinitionJson style) =>
-        new(
+    private static CombatStyleDefinition ToDomain(CombatStyleDefinitionJson style)
+    {
+        var focuses = style.Focuses.Select(focus => ToDomain(style.Id, focus)).ToList();
+
+        return new(
             style.Id,
             style.Name,
             style.Description,
             style.ResourceId,
+            style.ResourceMaxAmount,
             style.MaxLevel,
             style.RecommendedTags,
             style.RecommendedStats,
-            [.. style.Focuses.Select(focus => ToDomain(style.Id, focus))],
+            focuses,
+            CombatStyleSkillTreeDefinitionFactory.Create(style.Id, focuses),
             [.. style.Rules.Select(ToDomain)],
+            [.. style.ResourceOverflowOperations.Select(ToDomain)],
             style.CoreMechanic);
+    }
 
     private static CombatStyleFocusDefinition ToDomain(string styleId, CombatStyleFocusDefinitionJson focus) =>
         new(
@@ -90,8 +97,23 @@ public sealed class JsonCombatStyleDefinitionProvider : ICombatStyleDefinitionPr
                 operation.Coefficient,
                 operation.DamageType,
                 operation.UsesProcCoefficient ?? true),
+            "setPendingEmpowerment" => new SetPendingEmpowermentOperation(
+                operation.EmpowermentId ?? string.Empty,
+                operation.AppliesTo,
+                operation.AdditivePercent,
+                operation.ConsumeOnUse ?? true,
+                [.. operation.AdditivePercentModifiers.Select(ToDomain)]),
+            "triggerProtectiveShell" => new TriggerProtectiveShellOperation(),
             _ => new NoOpStyleRuleOperation()
         };
+
+    private static StyleValueModifier ToDomain(StyleValueModifierJson modifier) =>
+        new(
+            modifier.Type,
+            modifier.Value,
+            modifier.NodeId,
+            modifier.FocusId,
+            modifier.MinStyleLevel);
 
     private static void ThrowIfInvalid(IReadOnlyList<CombatStyleDefinition> definitions)
     {
@@ -142,11 +164,13 @@ public sealed class JsonCombatStyleDefinitionProvider : ICombatStyleDefinitionPr
         public string Name { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
         public string ResourceId { get; set; } = string.Empty;
+        public decimal ResourceMaxAmount { get; set; } = 100m;
         public int MaxLevel { get; set; } = 50;
         public IReadOnlyList<string> RecommendedTags { get; set; } = [];
         public IReadOnlyList<AttributeType> RecommendedStats { get; set; } = [];
         public IReadOnlyList<CombatStyleFocusDefinitionJson> Focuses { get; set; } = [];
         public IReadOnlyList<CombatStyleRuleDefinitionJson> Rules { get; set; } = [];
+        public IReadOnlyList<CombatStyleRuleOperationJson> ResourceOverflowOperations { get; set; } = [];
         public string CoreMechanic { get; set; } = string.Empty;
     }
 
@@ -184,5 +208,18 @@ public sealed class JsonCombatStyleDefinitionProvider : ICombatStyleDefinitionPr
         public decimal Coefficient { get; set; }
         public DamageType DamageType { get; set; }
         public bool? UsesProcCoefficient { get; set; }
+        public string? EmpowermentId { get; set; }
+        public EffectPredicate AppliesTo { get; set; } = new();
+        public bool? ConsumeOnUse { get; set; }
+        public IReadOnlyList<StyleValueModifierJson> AdditivePercentModifiers { get; set; } = [];
+    }
+
+    private sealed class StyleValueModifierJson
+    {
+        public string Type { get; set; } = string.Empty;
+        public decimal Value { get; set; }
+        public string? NodeId { get; set; }
+        public string? FocusId { get; set; }
+        public int MinStyleLevel { get; set; } = 1;
     }
 }
