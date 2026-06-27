@@ -23,6 +23,17 @@ public sealed class DungeonRunStateDto
     public List<DungeonBossModifierDto> CurrentBossModifiers { get; set; } = [];
     public List<DungeonMechanicThresholdStateDto> CurrentMechanicThresholds { get; set; } = [];
     public List<DungeonMasteryAwardReasonDto> MasteryAwardReasons { get; set; } = [];
+    public DungeonCombatStyleSnapshotDto? CombatStyle { get; set; }
+}
+
+public sealed class DungeonCombatStyleSnapshotDto
+{
+    public string StyleId { get; set; } = string.Empty;
+    public string StyleName { get; set; } = string.Empty;
+    public int Level { get; set; }
+    public long Experience { get; set; }
+    public string? SelectedFocusId { get; set; }
+    public string? SelectedFocusName { get; set; }
 }
 
 public sealed class DungeonMasteryAwardReasonDto

@@ -206,7 +206,18 @@ public class DungeonRunDto : IMapFrom<DungeonRun>
                 Id = reason.Id,
                 Description = reason.Description,
                 Experience = reason.Experience
-            }).ToList()
+            }).ToList(),
+            CombatStyle = state.CombatStyle is null
+                ? null
+                : new DungeonCombatStyleSnapshotDto
+                {
+                    StyleId = state.CombatStyle.StyleId,
+                    StyleName = state.CombatStyle.StyleName,
+                    Level = state.CombatStyle.Level,
+                    Experience = state.CombatStyle.Experience,
+                    SelectedFocusId = state.CombatStyle.SelectedFocusId,
+                    SelectedFocusName = state.CombatStyle.SelectedFocusName
+                }
         };
     }
 }
