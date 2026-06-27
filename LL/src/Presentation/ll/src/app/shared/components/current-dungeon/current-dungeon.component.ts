@@ -46,6 +46,15 @@ export class CurrentDungeonComponent {
     return this.activeDungeon()?.dungeonDefinitionName ?? 'Dungeon';
   });
 
+  readonly combatStyleLabel = computed(() => {
+    const style = this.activeDungeon()?.state?.combatStyle;
+    if (!style) return null;
+
+    return style.selectedFocusName
+      ? `${style.styleName} - ${style.selectedFocusName}`
+      : style.styleName;
+  });
+
   readonly statusLabel = computed(() => {
     const status = this.activeDungeon()?.status;
 

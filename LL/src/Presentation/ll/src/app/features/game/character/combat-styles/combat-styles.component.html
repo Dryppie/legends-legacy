@@ -1,0 +1,305 @@
+<div class="ll-page-stack sm:gap-4">
+  <app-default-header
+    section="Character"
+    title="Combat Styles"
+    text="How your Essences fight"
+    icon="character/essences"
+  ></app-default-header>
+
+  <div *ngIf="combatStyles.error()" class="ll-state ll-state-danger">
+    {{ combatStyles.error() }}
+  </div>
+  <div *ngIf="combatStyles.loading()" class="ll-state ll-state-muted">
+    Updating Combat Styles...
+  </div>
+
+  <section class="grid gap-4 xl:grid-cols-[280px_minmax(0,1fr)]">
+    <aside class="ll-panel p-3">
+      <div class="grid gap-2">
+        <button
+          type="button"
+          class="rounded border border-zinc-700/80 px-3 py-3 text-left transition-colors hover:border-primary hover:bg-zinc-300/10"
+          *ngFor="let style of combatStyles.styles(); trackBy: trackStyle"
+          [ngClass]="{
+            'border-primary bg-primary/10': isSelectedStyle(style),
+          }"
+          (click)="selectStyle(style.id)"
+        >
+          <div class="flex items-center justify-between gap-3">
+            <span class="font-semibold text-white">{{ style.name }}</span>
+            <span
+              class="ll-badge ll-badge-accent rounded"
+              *ngIf="style.isActive"
+            >
+              Active
+            </span>
+          </div>
+          <div class="mt-2 flex items-center justify-between text-xs">
+            <span class="text-zinc-400">Level {{ style.level }}</span>
+            <span class="text-primary">{{ style.resourceId }}</span>
+          </div>
+          <div class="ll-progress-track mt-2 h-1.5">
+            <div
+              class="ll-progress-bar"
+              [style.width.%]="xpProgress(style)"
+            ></div>
+          </div>
+        </button>
+      </div>
+    </aside>
+
+    <article class="ll-panel p-4" *ngIf="selectedStyle() as style">
+      <div class="flex flex-wrap items-start justify-between gap-4">
+        <div class="max-w-3xl">
+          <div class="flex flex-wrap items-center gap-2">
+            <p class="ll-eyebrow text-primary">
+              {{ style.isActive ? 'Active Combat Style' : 'Combat Style' }}
+            </p>
+            <span class="ll-badge ll-badge-accent rounded" *ngIf="style.isActive">
+              Active
+            </span>
+          </div>
+          <h2 class="ll-heading mt-1 text-2xl">
+            {{ style.name }} - {{ focusLabel(style) }}
+          </h2>
+          <p class="ll-copy mt-2">{{ style.description }}</p>
+        </div>
+
+        <button
+          type="button"
+          class="ll-button"
+          [disabled]="style.isActive || combatStyles.saving()"
+          (click)="combatStyles.activateStyle(style.id)"
+        >
+          Activate
+        </button>
+      </div>
+
+      <div class="mt-5 grid gap-4 lg:grid-cols-[minmax(0,1fr)_240px]">
+        <div>
+          <div class="flex items-center justify-between text-sm">
+            <span class="text-zinc-400">Level {{ style.level }}</span>
+            <span class="text-primary">{{ style.resourceId }}</span>
+          </div>
+          <div class="ll-progress-track mt-2 h-2">
+            <div
+              class="ll-progress-bar"
+              [style.width.%]="xpProgress(style)"
+            ></div>
+          </div>
+          <p class="ll-copy mt-1 text-xs">
+            {{ style.experience }} / {{ style.experienceForNextLevel }} XP
+          </p>
+        </div>
+
+        <div class="grid gap-2">
+          <p class="ll-eyebrow text-primary">Skill Points</p>
+          <div class="rounded border border-zinc-700/80 px-3 py-2">
+            <div class="flex items-center justify-between text-sm">
+              <span class="text-zinc-400">Available</span>
+              <span class="text-primary">{{ style.skillPointsAvailable }}</span>
+            </div>
+            <div class="mt-1 flex items-center justify-between text-xs text-zinc-500">
+              <span>Spent</span>
+              <span>{{ style.skillPointsSpent }} / {{ style.skillPointsEarned }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-5 grid gap-4 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
+        <section class="ll-card p-3">
+          <p class="ll-eyebrow text-primary">Core Mechanic</p>
+          <p class="mt-1 text-sm text-zinc-300">{{ style.coreMechanic }}</p>
+        </section>
+
+        <section class="grid gap-3 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
+          <div>
+            <p class="ll-eyebrow text-primary">Recommended Tags</p>
+            <div class="mt-2 flex flex-wrap gap-2">
+              <span
+                class="ll-badge rounded"
+                *ngFor="let tag of style.recommendedTags"
+              >
+                {{ tag }}
+              </span>
+            </div>
+          </div>
+          <div>
+            <p class="ll-eyebrow text-primary">Recommended Stats</p>
+            <div class="mt-2 flex flex-wrap gap-2">
+              <span
+                class="ll-badge ll-badge-accent rounded"
+                *ngFor="let stat of style.recommendedStats"
+              >
+                {{ stat }}
+              </span>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <section class="mt-5 grid gap-4 xl:grid-cols-[minmax(0,1fr)_310px]">
+        <div class="skill-tree">
+          <div class="skill-tree__summary">
+            <div>
+              <p class="ll-eyebrow text-primary">Skill Tree</p>
+              <h3 class="ll-heading mt-1 text-xl">{{ style.name }} Paths</h3>
+            </div>
+            <div class="skill-tree__points">
+              <span>{{ style.skillPointsAvailable }}</span>
+              <small>available</small>
+            </div>
+          </div>
+
+          <div
+            class="skill-tree__canvas"
+            [style.--branch-count]="style.skillTree.branches.length"
+          >
+            <div class="skill-tree__constellation" aria-hidden="true"></div>
+
+            <div class="tree-root">
+              <div class="tree-root__node">
+                {{ styleInitial(style) }}
+              </div>
+              <div class="tree-root__text">
+                <span>Style Core</span>
+                <small>{{ style.resourceId }}</small>
+              </div>
+            </div>
+
+            <div class="tree-branches">
+              <section
+                class="tree-branch"
+                *ngFor="
+                  let branch of style.skillTree.branches;
+                  let branchIndex = index;
+                  trackBy: trackBranch
+                "
+              >
+                <header class="tree-branch__header">
+                  <span>{{ branch.name }}</span>
+                  <small>{{ branch.pointsSpent }} pts</small>
+                </header>
+
+                <ol class="tree-branch__nodes">
+                  <li
+                    class="tree-node-slot"
+                    *ngFor="
+                      let node of branch.nodes;
+                      trackBy: trackNode
+                    "
+                    [style.grid-column]="nodeGridColumn(node)"
+                    [style.grid-row]="nodeGridRow(node)"
+                    [class.tree-node-slot--root]="node.y === 0"
+                    [class.tree-node-slot--left]="node.x < 0"
+                    [class.tree-node-slot--center]="node.x === 0"
+                    [class.tree-node-slot--right]="node.x > 0"
+                    [class.tree-node-slot--capstone]="node.y >= 3"
+                  >
+                    <button
+                      type="button"
+                      class="tree-node"
+                      [ngClass]="nodeClasses(node)"
+                      (click)="selectNode(node.id)"
+                    >
+                      <span class="tree-node__orb">
+                        <span class="tree-node__mark">
+                          {{ node.rank > 0 ? node.rank : node.y + 1 }}
+                        </span>
+                      </span>
+                      <span class="tree-node__body">
+                        <span class="tree-node__name">{{ node.name }}</span>
+                        <span class="tree-node__meta">
+                          Level {{ node.requiredLevel }}
+                        </span>
+                      </span>
+                      <span class="tree-node__rank">
+                        {{ node.rank }}/{{ node.maxRank }}
+                      </span>
+                    </button>
+                  </li>
+                </ol>
+              </section>
+            </div>
+          </div>
+        </div>
+
+        <aside class="ll-card p-4" *ngIf="selectedNode() as node">
+          <p class="ll-eyebrow text-primary">Selected Perk</p>
+          <h3 class="ll-heading mt-1 text-xl">{{ node.name }}</h3>
+          <p class="ll-copy mt-2">{{ node.description }}</p>
+
+          <div class="mt-4 grid gap-2 text-sm">
+            <div class="flex items-center justify-between">
+              <span class="text-zinc-400">Rank</span>
+              <span class="text-primary">{{ node.rank }} / {{ node.maxRank }}</span>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="text-zinc-400">Requires</span>
+              <span>Level {{ node.requiredLevel }}</span>
+            </div>
+          </div>
+
+          <div class="mt-4">
+            <p class="ll-eyebrow text-primary">Effects</p>
+            <ul class="mt-2 grid gap-2 text-sm text-zinc-300">
+              <li *ngFor="let effect of node.effects">{{ effect }}</li>
+            </ul>
+          </div>
+
+          <div class="mt-4">
+            <p class="ll-eyebrow text-primary">Tags</p>
+            <div class="mt-2 flex flex-wrap gap-2">
+              <span class="ll-badge rounded" *ngFor="let tag of node.tags">
+                {{ tag }}
+              </span>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            class="ll-button mt-5 w-full"
+            [disabled]="!node.canRankUp || combatStyles.saving()"
+            (click)="combatStyles.rankUpNode(style.id, node.id)"
+          >
+            Rank Up
+          </button>
+          <button
+            type="button"
+            class="mt-3 w-full rounded border border-zinc-700 px-3 py-2 text-sm text-zinc-300 transition-colors hover:border-primary hover:text-white"
+            [disabled]="style.skillPointsSpent === 0 || combatStyles.saving()"
+            (click)="combatStyles.resetTree(style.id)"
+          >
+            Reset Tree
+          </button>
+        </aside>
+      </section>
+
+      <div
+        class="mt-5 grid gap-3 md:grid-cols-3"
+        *ngIf="style.isActive && combatStyles.buildPreview() as preview"
+      >
+        <article class="ll-card p-3">
+          <p class="ll-eyebrow text-primary">Build Identity</p>
+          <h3 class="mt-1 font-semibold text-white">{{ preview.buildName }}</h3>
+          <p class="ll-copy mt-2 text-xs" *ngFor="let note of preview.notes">
+            {{ note }}
+          </p>
+        </article>
+        <article class="ll-card p-3 md:col-span-2">
+          <p class="ll-eyebrow text-primary">Top Essence Tags</p>
+          <div class="mt-2 flex flex-wrap gap-2">
+            <span class="ll-badge rounded" *ngFor="let tag of preview.topTags">
+              {{ tag.tag }} {{ tag.score }}
+            </span>
+            <span class="ll-copy text-xs" *ngIf="preview.topTags.length === 0">
+              No equipped Essence tags found.
+            </span>
+          </div>
+        </article>
+      </div>
+
+    </article>
+  </section>
+</div>
