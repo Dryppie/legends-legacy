@@ -45,7 +45,8 @@ public sealed class DungeonCombatOrchestrator : ICombatOrchestrator
             enemySourceEntityIds: resolvedParticipants,
             runAttributeModifiers: dungeonRequest.RunAttributeModifiers,
             runAbilityModifiers: dungeonRequest.RunAbilityModifiers,
-            enemyAttributeModifiers: dungeonRequest.EnemyAttributeModifiers);
+            enemyAttributeModifiers: dungeonRequest.EnemyAttributeModifiers,
+            combatStyle: dungeonRequest.CombatStyle);
 
         var resolutionSession = await _resolutionSessionFactory.CreateAsync(
             plan,

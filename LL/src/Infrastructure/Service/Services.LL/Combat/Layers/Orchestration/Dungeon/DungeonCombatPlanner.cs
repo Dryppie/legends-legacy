@@ -1,5 +1,6 @@
 using Domain.Models.Snapshots;
 using Domain.Models.Attributes.Modifiers;
+using Domain.Models.CombatStyles;
 using Domain.Models.Essences.Definitions;
 using Services.LL.Combat.Layers.Orchestration.Models;
 using Services.LL.Interfaces.Combat.Orchestration;
@@ -16,7 +17,8 @@ public sealed class DungeonCombatPlanner : IDungeonCombatPlanner
         IReadOnlyList<Guid> enemySourceEntityIds,
         IReadOnlyList<AttributeModifierBase>? runAttributeModifiers = null,
         IReadOnlyList<EssenceAbilityModifierDefinition>? runAbilityModifiers = null,
-        IReadOnlyList<AttributeModifierBase>? enemyAttributeModifiers = null) =>
+        IReadOnlyList<AttributeModifierBase>? enemyAttributeModifiers = null,
+        CombatStyleSnapshot? combatStyle = null) =>
         new(
             DungeonRunId: dungeonRunId,
             CharacterId: characterId,
@@ -25,7 +27,8 @@ public sealed class DungeonCombatPlanner : IDungeonCombatPlanner
             EnemySourceEntityIds: enemySourceEntityIds,
             RunAttributeModifiers: runAttributeModifiers ?? [],
             RunAbilityModifiers: runAbilityModifiers ?? [],
-            EnemyAttributeModifiers: enemyAttributeModifiers ?? []);
+            EnemyAttributeModifiers: enemyAttributeModifiers ?? [],
+            CombatStyle: combatStyle);
 
     public CombatEncounterPlan CreateEncounterPlan(DungeonCombatPlan plan, int sequence, DateTimeOffset startsAt)
     {
@@ -51,6 +54,7 @@ public sealed class DungeonCombatPlanner : IDungeonCombatPlanner
             StartsAt: startsAt,
             Participants: participants,
             SourceContext: new DungeonEncounterSourceContext(
-                DungeonRunId: plan.DungeonRunId));
+                DungeonRunId: plan.DungeonRunId),
+            PlayerCombatStyle: plan.CombatStyle);
     }
 }

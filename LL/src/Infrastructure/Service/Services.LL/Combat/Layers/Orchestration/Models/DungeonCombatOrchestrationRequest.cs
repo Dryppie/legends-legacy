@@ -1,4 +1,5 @@
 using Domain.Models.Attributes.Modifiers;
+using Domain.Models.CombatStyles;
 using Domain.Models.Essences.Definitions;
 using Domain.Models.Snapshots;
 
@@ -12,5 +13,6 @@ public sealed record DungeonCombatOrchestrationRequest(
     IReadOnlyList<string> EnemyCreatureKeys,
     IReadOnlyList<AttributeModifierBase>? RunAttributeModifiers = null,
     IReadOnlyList<EssenceAbilityModifierDefinition>? RunAbilityModifiers = null,
-    IReadOnlyList<AttributeModifierBase>? EnemyAttributeModifiers = null)
+    IReadOnlyList<AttributeModifierBase>? EnemyAttributeModifiers = null,
+    CombatStyleSnapshot? CombatStyle = null)
     : CombatOrchestrationRequest(CombatMode.Dungeon);

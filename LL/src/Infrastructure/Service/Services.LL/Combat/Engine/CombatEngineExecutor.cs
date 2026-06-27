@@ -1,7 +1,10 @@
 using Application.Interfaces.Services.LL.Essences;
+using Application.Interfaces.Services.LL.CombatStyles;
 using Domain.Models.Attributes;
 using Domain.Models.Combat;
 using Domain.Models.Combat.Abilities;
+using Domain.Models.CombatStyles;
+using Domain.Models.Entities.Characters;
 using Domain.Models.Essences;
 using Domain.Models.Essences.Definitions;
 using Services.LL.Combat.Layers.Resolution.Models;
@@ -13,16 +16,22 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
 {
     private readonly IAbilityCatalogProvider _catalogProvider;
     private readonly IEssenceDefinitionRepository? _essenceDefinitions;
+    private readonly ICombatStyleDefinitionProvider? _combatStyleDefinitions;
+    private readonly ICombatStyleService? _combatStyleService;
 
     public CombatEngineExecutor(
         IAbilityCatalogProvider catalogProvider,
-        IEssenceDefinitionRepository? essenceDefinitions = null)
+        IEssenceDefinitionRepository? essenceDefinitions = null,
+        ICombatStyleDefinitionProvider? combatStyleDefinitions = null,
+        ICombatStyleService? combatStyleService = null)
     {
         _catalogProvider = catalogProvider;
         _essenceDefinitions = essenceDefinitions;
+        _combatStyleDefinitions = combatStyleDefinitions;
+        _combatStyleService = combatStyleService;
     }
 
-    public Task<CombatResult> ExecuteAsync(
+    public async Task<CombatResult> ExecuteAsync(
         CombatEncounterRuntime runtime,
         CancellationToken cancellationToken)
     {
@@ -45,13 +54,40 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
         var hostile = runtime.HostileParticipants
             .Select(participant => CreateRuntimeCombatant(participant.Combatant, CombatTeam.Hostile, catalog, compiledAbilities))
             .ToList();
-        var engine = new FastCombatEngine(compiledStatuses, compiledSummons, compiledAbilities);
+        var friendlyCombatStyle = runtime.Plan.PlayerCombatStyle
+            ?? await ResolveCombatStyleAsync(runtime.FriendlyParticipants, cancellationToken);
+        var hostileCombatStyle = runtime.Plan.HostileCombatStyle
+            ?? await ResolveCombatStyleAsync(runtime.HostileParticipants, cancellationToken);
+        var engine = new FastCombatEngine(
+            compiledStatuses,
+            compiledSummons,
+            compiledAbilities,
+            styleSnapshot: friendlyCombatStyle,
+            hostileStyleSnapshot: hostileCombatStyle,
+            combatStyleDefinitions: _combatStyleDefinitions);
         var result = engine.Run(friendly, hostile);
         SyncCombatEntityState(runtime.FriendlyParticipants, friendly);
         SyncCombatEntityState(runtime.HostileParticipants, hostile);
         result.StartedAt = runtime.Plan.StartsAt;
 
-        return Task.FromResult(result);
+        return result;
+    }
+
+    private async Task<CombatStyleSnapshot?> ResolveCombatStyleAsync(
+        IReadOnlyList<CombatRuntimeParticipant> participants,
+        CancellationToken cancellationToken)
+    {
+        if (_combatStyleService is null)
+            return null;
+
+        var character = participants
+            .Select(participant => participant.SourceEntity)
+            .OfType<Character>()
+            .FirstOrDefault();
+
+        return character is null
+            ? null
+            : await _combatStyleService.GetActiveSnapshotAsync(character.Id, cancellationToken);
     }
 
     private static void SyncCombatEntityState(
@@ -421,6 +457,7 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
             AttackType = effect.AttackType,
             DamageType = effect.DamageType,
             LifeStealPercentage = effect.LifeStealPercentage,
+            ProcCoefficient = effect.ProcCoefficient,
             Tags = [.. effect.Tags],
             Conditions = [.. effect.Conditions.Select(CloneCondition)]
         };

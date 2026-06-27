@@ -228,6 +228,9 @@ public static class AbilityCatalogValidator
             if (effect.ChancePercent is < 0 or > 100)
                 errors.Add($"{label}: chance must be between 0 and 100.");
 
+            if (effect.ProcCoefficient is <= 0 or > 2)
+                errors.Add($"{label}: procCoefficient must be greater than 0 and no more than 2.");
+
             if (effect.DurationTicks < 0 || effect.IntervalTicks < 0 || effect.Uses < 0)
                 errors.Add($"{label}: duration, interval, and uses cannot be negative.");
 
