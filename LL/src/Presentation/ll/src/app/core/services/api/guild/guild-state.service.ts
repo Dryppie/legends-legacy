@@ -291,6 +291,10 @@ export class GuildStateService {
       });
   }
 
+  refreshNotificationCount(): void {
+    this.refresh();
+  }
+
   /* ─────────── guild lifecycle ─────────── */
 
   create(name: string): void {

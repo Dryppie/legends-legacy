@@ -37,6 +37,7 @@ export class ColosseumStateService {
   private readonly _loading = signal(false);
   private readonly _error = signal<string | null>(null);
   private hasLoaded = false;
+  private notificationLoading = false;
   private readonly eventDeduper = new GameEventDeduper();
 
   readonly opponents = computed(() => this._opponents());
@@ -113,6 +114,25 @@ export class ColosseumStateService {
     this.loadColosseumRankings();
     this.loadColosseumMatchResults();
     this.loadChampionMarket();
+  }
+
+  refreshNotificationCount(): void {
+    if (this.notificationLoading) return;
+
+    this.notificationLoading = true;
+    this.colosseumService
+      .getStatus()
+      .pipe(finalize(() => (this.notificationLoading = false)))
+      .subscribe({
+        next: (status) => {
+          this._status.set(status);
+          this.initializeNotificationCount(this.countStatusActions(status));
+        },
+        error: (err) =>
+          this._error.set(
+            err.message ?? 'Failed to load colosseum notifications',
+          ),
+      });
   }
 
   loadStatus(): void {
@@ -307,6 +327,28 @@ export class ColosseumStateService {
       NOTIFICATION_SURFACE.Sidebar,
       SIDEBAR_NOTIFICATION.Colosseum,
     );
+  }
+
+  private initializeNotificationCount(count: number): void {
+    this.notificationService.initializeCount(
+      NOTIFICATION_SURFACE.Sidebar,
+      SIDEBAR_NOTIFICATION.Colosseum,
+      count,
+    );
+  }
+
+  private countStatusActions(status: ColosseumStatus | null): number {
+    if (!status) return 0;
+
+    const hasTickets = status.tickets > 0;
+    const defenseNeedsUpdate =
+      !status.defenseStatus?.isValid || status.defenseStatus.isOutdated;
+
+    return [
+      hasTickets,
+      hasTickets && status.dailyFirstWinAvailable,
+      defenseNeedsUpdate,
+    ].filter(Boolean).length;
   }
 
   private showChampionMarketPurchaseToast(
