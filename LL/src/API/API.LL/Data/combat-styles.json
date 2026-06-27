@@ -5,6 +5,7 @@
       "name": "Defensive",
       "description": "Survives through Guard, damage reduction, barriers, and protection effects.",
       "resourceId": "guard",
+      "resourceMaxAmount": 100,
       "maxLevel": 50,
       "recommendedTags": [ "Tank", "Barrier", "Summon", "Holy" ],
       "recommendedStats": [ "MaxHealth", "DamageReduction", "Armor" ],
@@ -73,6 +74,11 @@
           }
         }
       ],
+      "resourceOverflowOperations": [
+        {
+          "type": "triggerProtectiveShell"
+        }
+      ],
       "coreMechanic": "Gain Guard when taking damage. At 100 Guard, gain Protective Shell."
     },
     {
@@ -80,6 +86,7 @@
       "name": "Fighter",
       "description": "Builds Momentum through direct damage and converts it into empowered strikes.",
       "resourceId": "momentum",
+      "resourceMaxAmount": 100,
       "maxLevel": 50,
       "recommendedTags": [ "Melee", "Physical", "Bleed" ],
       "recommendedStats": [ "Power", "WeaponDamage", "Precision" ],
@@ -124,6 +131,26 @@
           }
         }
       ],
+      "resourceOverflowOperations": [
+        {
+          "type": "setPendingEmpowerment",
+          "empowermentId": "fighter_momentum_empowerment",
+          "appliesTo": {
+            "sourceMustBePlayer": true,
+            "activeAbilityOnly": true,
+            "effectOperations": [ "Damage" ]
+          },
+          "additivePercent": 0.15,
+          "consumeOnUse": true,
+          "additivePercentModifiers": [
+            { "type": "nodeRank", "nodeId": "duelist-specialization", "value": 0.03 },
+            { "type": "nodeRank", "nodeId": "duelist-amplifier", "value": 0.04 },
+            { "type": "nodeRank", "nodeId": "duelist-focus", "value": 0.05 },
+            { "type": "nodeRank", "nodeId": "berserker-specialization", "value": 0.04 },
+            { "type": "nodeRank", "nodeId": "vanguard-amplifier", "value": 0.03 }
+          ]
+        }
+      ],
       "coreMechanic": "Gain Momentum from direct damage. At 100 Momentum, empower the next direct damage active effect."
     },
     {
@@ -131,6 +158,7 @@
       "name": "Caster",
       "description": "Builds Arcane Charge through active Essence use and amplifies magic-adjacent effects.",
       "resourceId": "arcaneCharge",
+      "resourceMaxAmount": 5,
       "maxLevel": 50,
       "recommendedTags": [ "Magic", "Spell", "Curse", "Melee" ],
       "recommendedStats": [ "Spirit", "Power", "MagicPenetration" ],
@@ -193,6 +221,26 @@
           }
         }
       ],
+      "resourceOverflowOperations": [
+        {
+          "type": "setPendingEmpowerment",
+          "empowermentId": "caster_arcane_empowerment",
+          "appliesTo": {
+            "sourceMustBePlayer": true,
+            "activeAbilityOnly": true
+          },
+          "additivePercent": 0.20,
+          "consumeOnUse": true,
+          "additivePercentModifiers": [
+            { "type": "nodeRank", "nodeId": "arcanist-specialization", "value": 0.03 },
+            { "type": "nodeRank", "nodeId": "arcanist-focus", "value": 0.05 },
+            { "type": "nodeRank", "nodeId": "spellblade-specialization", "value": 0.03 },
+            { "type": "nodeRank", "nodeId": "spellblade-focus", "value": 0.05 },
+            { "type": "nodeRank", "nodeId": "occultist-specialization", "value": 0.03 },
+            { "type": "nodeRank", "nodeId": "occultist-focus", "value": 0.05 }
+          ]
+        }
+      ],
       "coreMechanic": "Gain Arcane Charge from active Essence abilities. At 5 Charge, empower the next eligible active effect."
     },
     {
@@ -200,6 +248,7 @@
       "name": "Summoner",
       "description": "Builds Command through summon-tagged actions and improves summon effects without creating summons by itself.",
       "resourceId": "command",
+      "resourceMaxAmount": 100,
       "maxLevel": 50,
       "recommendedTags": [ "Summon", "Minion", "Curse", "Holy" ],
       "recommendedStats": [ "SummonPower", "SummonHealth", "Spirit" ],
@@ -257,6 +306,26 @@
           }
         }
       ],
+      "resourceOverflowOperations": [
+        {
+          "type": "setPendingEmpowerment",
+          "empowermentId": "summoner_command_empowerment",
+          "appliesTo": {
+            "sourceMustBePlayer": true,
+            "anyTags": [ "Summon" ]
+          },
+          "additivePercent": 0.20,
+          "consumeOnUse": true,
+          "additivePercentModifiers": [
+            { "type": "nodeRank", "nodeId": "horde-specialization", "value": 0.03 },
+            { "type": "nodeRank", "nodeId": "horde-focus", "value": 0.05 },
+            { "type": "nodeRank", "nodeId": "champion-specialization", "value": 0.03 },
+            { "type": "nodeRank", "nodeId": "champion-focus", "value": 0.05 },
+            { "type": "nodeRank", "nodeId": "ritualist-specialization", "value": 0.03 },
+            { "type": "nodeRank", "nodeId": "ritualist-focus", "value": 0.05 }
+          ]
+        }
+      ],
       "coreMechanic": "Gain Command from Summon-tagged active abilities. At 100 Command, empower the next Summon-tagged effect."
     },
     {
@@ -264,6 +333,7 @@
       "name": "Swift",
       "description": "Builds Flow through quick active Essence use and rewards evasive, mobile pressure.",
       "resourceId": "flow",
+      "resourceMaxAmount": 100,
       "maxLevel": 50,
       "recommendedTags": [ "Melee", "Ranged", "Dodge", "Speed" ],
       "recommendedStats": [ "Precision", "DodgeChance", "Cooldown" ],
@@ -321,6 +391,27 @@
           }
         }
       ],
+      "resourceOverflowOperations": [
+        {
+          "type": "setPendingEmpowerment",
+          "empowermentId": "swift_flow_empowerment",
+          "appliesTo": {
+            "sourceMustBePlayer": true,
+            "activeAbilityOnly": true
+          },
+          "additivePercent": 0.15,
+          "consumeOnUse": true,
+          "additivePercentModifiers": [
+            { "type": "focusLevel", "focusId": "tempo", "minStyleLevel": 40, "value": 0.07 },
+            { "type": "nodeRank", "nodeId": "flurry-specialization", "value": 0.03 },
+            { "type": "nodeRank", "nodeId": "flurry-focus", "value": 0.05 },
+            { "type": "nodeRank", "nodeId": "evasion-specialization", "value": 0.03 },
+            { "type": "nodeRank", "nodeId": "evasion-focus", "value": 0.05 },
+            { "type": "nodeRank", "nodeId": "tempo-specialization", "value": 0.03 },
+            { "type": "nodeRank", "nodeId": "tempo-focus", "value": 0.05 }
+          ]
+        }
+      ],
       "coreMechanic": "Gain Flow from active Essence abilities. At 100 Flow, empower the next active effect."
     },
     {
@@ -328,6 +419,7 @@
       "name": "Marksman",
       "description": "Builds Aim through ranged direct damage and rewards precision, marks, and tactical shots.",
       "resourceId": "aim",
+      "resourceMaxAmount": 100,
       "maxLevel": 50,
       "recommendedTags": [ "Ranged", "Physical", "Critical", "Mark" ],
       "recommendedStats": [ "Precision", "CritChance", "ArmorPenetration" ],
@@ -386,6 +478,28 @@
           }
         }
       ],
+      "resourceOverflowOperations": [
+        {
+          "type": "setPendingEmpowerment",
+          "empowermentId": "marksman_aim_empowerment",
+          "appliesTo": {
+            "sourceMustBePlayer": true,
+            "effectOperations": [ "Damage" ],
+            "anyTags": [ "Ranged" ]
+          },
+          "additivePercent": 0.20,
+          "consumeOnUse": true,
+          "additivePercentModifiers": [
+            { "type": "focusLevel", "focusId": "sniper", "minStyleLevel": 40, "value": 0.05 },
+            { "type": "nodeRank", "nodeId": "sniper-specialization", "value": 0.03 },
+            { "type": "nodeRank", "nodeId": "sniper-focus", "value": 0.05 },
+            { "type": "nodeRank", "nodeId": "volley-specialization", "value": 0.03 },
+            { "type": "nodeRank", "nodeId": "volley-focus", "value": 0.05 },
+            { "type": "nodeRank", "nodeId": "trapper-specialization", "value": 0.03 },
+            { "type": "nodeRank", "nodeId": "trapper-focus", "value": 0.05 }
+          ]
+        }
+      ],
       "coreMechanic": "Gain Aim from ranged direct damage. At 100 Aim, empower the next ranged damage effect."
     },
     {
@@ -393,6 +507,7 @@
       "name": "Support",
       "description": "Builds Resolve through healing, barriers, and ally protection effects.",
       "resourceId": "resolve",
+      "resourceMaxAmount": 100,
       "maxLevel": 50,
       "recommendedTags": [ "Healing", "Barrier", "Holy", "Support" ],
       "recommendedStats": [ "HealingPowerPercent", "Spirit", "Cooldown" ],
@@ -436,6 +551,27 @@
           }
         }
       ],
+      "resourceOverflowOperations": [
+        {
+          "type": "setPendingEmpowerment",
+          "empowermentId": "support_resolve_empowerment",
+          "appliesTo": {
+            "sourceMustBePlayer": true,
+            "effectOperations": [ "Heal", "GrantBarrier" ]
+          },
+          "additivePercent": 0.20,
+          "consumeOnUse": true,
+          "additivePercentModifiers": [
+            { "type": "focusLevel", "focusId": "healer", "minStyleLevel": 40, "value": 0.08 },
+            { "type": "nodeRank", "nodeId": "healer-specialization", "value": 0.03 },
+            { "type": "nodeRank", "nodeId": "healer-focus", "value": 0.05 },
+            { "type": "nodeRank", "nodeId": "warden-specialization", "value": 0.03 },
+            { "type": "nodeRank", "nodeId": "warden-focus", "value": 0.05 },
+            { "type": "nodeRank", "nodeId": "chaplain-specialization", "value": 0.03 },
+            { "type": "nodeRank", "nodeId": "chaplain-focus", "value": 0.05 }
+          ]
+        }
+      ],
       "coreMechanic": "Gain Resolve from healing and barrier effects. At 100 Resolve, empower the next heal or barrier."
     },
     {
@@ -443,6 +579,7 @@
       "name": "Controller",
       "description": "Builds Control through status, debuff, and disruption effects.",
       "resourceId": "control",
+      "resourceMaxAmount": 100,
       "maxLevel": 50,
       "recommendedTags": [ "Control", "Debuff", "Curse", "DoT" ],
       "recommendedStats": [ "Spirit", "Cooldown", "StatusResistance" ],
@@ -484,6 +621,27 @@
             "type": "modifyEffectAmount",
             "additivePercent": 0.05
           }
+        }
+      ],
+      "resourceOverflowOperations": [
+        {
+          "type": "setPendingEmpowerment",
+          "empowermentId": "controller_control_empowerment",
+          "appliesTo": {
+            "sourceMustBePlayer": true,
+            "effectOperations": [ "ApplyStatus", "ModifyAttribute", "Damage" ]
+          },
+          "additivePercent": 0.20,
+          "consumeOnUse": true,
+          "additivePercentModifiers": [
+            { "type": "focusLevel", "focusId": "hexer", "minStyleLevel": 40, "value": 0.08 },
+            { "type": "nodeRank", "nodeId": "hexer-specialization", "value": 0.03 },
+            { "type": "nodeRank", "nodeId": "hexer-focus", "value": 0.05 },
+            { "type": "nodeRank", "nodeId": "tactician-specialization", "value": 0.03 },
+            { "type": "nodeRank", "nodeId": "tactician-focus", "value": 0.05 },
+            { "type": "nodeRank", "nodeId": "frostbinder-specialization", "value": 0.03 },
+            { "type": "nodeRank", "nodeId": "frostbinder-focus", "value": 0.05 }
+          ]
         }
       ],
       "coreMechanic": "Gain Control from active status and debuff effects. At 100 Control, empower the next control, debuff, curse, or damage-over-time effect."
