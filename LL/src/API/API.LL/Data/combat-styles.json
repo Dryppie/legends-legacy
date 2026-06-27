@@ -76,7 +76,20 @@
       ],
       "resourceOverflowOperations": [
         {
-          "type": "triggerProtectiveShell"
+          "type": "grantBarrierFromMaxHealth",
+          "triggerKey": "defensive_protective_shell",
+          "percent": 0.10,
+          "maxTriggersPerEncounter": 2,
+          "percentModifiers": [
+            { "type": "focusLevel", "focusId": "bulwark", "minStyleLevel": 10, "maxStyleLevel": 39, "value": 0.03 },
+            { "type": "focusLevel", "focusId": "bulwark", "minStyleLevel": 40, "value": 0.07 },
+            { "type": "nodeRank", "nodeId": "bulwark-instinct", "value": 0.01 },
+            { "type": "nodeRank", "nodeId": "bulwark-focus", "value": 0.05 }
+          ],
+          "maxTriggerModifiers": [
+            { "type": "nodeRank", "nodeId": "bulwark-specialization", "value": 1 },
+            { "type": "nodeRank", "nodeId": "bulwark-focus", "value": 1 }
+          ]
         }
       ],
       "coreMechanic": "Gain Guard when taking damage. At 100 Guard, gain Protective Shell."
@@ -201,23 +214,6 @@
             "resourceId": "arcaneCharge",
             "amount": 1,
             "usesProcCoefficient": false
-          }
-        },
-        {
-          "id": "caster_spellblade_bonus_damage",
-          "minStyleLevel": 10,
-          "eventType": "EffectCalculation",
-          "predicate": {
-            "sourceMustBePlayer": true,
-            "activeAbilityOnly": true,
-            "anyTags": [ "Melee" ],
-            "effectOperations": [ "Damage" ]
-          },
-          "operation": {
-            "type": "addBonusDamageFromStat",
-            "stat": "Spirit",
-            "coefficient": 0.15,
-            "damageType": "Magical"
           }
         }
       ],
