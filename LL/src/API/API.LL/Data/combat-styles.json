@@ -1,0 +1,492 @@
+{
+  "styles": [
+    {
+      "id": "defensive",
+      "name": "Defensive",
+      "description": "Survives through Guard, damage reduction, barriers, and protection effects.",
+      "resourceId": "guard",
+      "maxLevel": 50,
+      "recommendedTags": [ "Tank", "Barrier", "Summon", "Holy" ],
+      "recommendedStats": [ "MaxHealth", "DamageReduction", "Armor" ],
+      "focuses": [
+        {
+          "id": "bulwark",
+          "name": "Bulwark",
+          "description": "Pure survival: Protective Shell and barrier effects scale at levels 10, 25, and 40.",
+          "unlockLevel": 10,
+          "recommendedTags": [ "Tank", "Barrier" ],
+          "recommendedStats": [ "MaxHealth", "DamageReduction" ]
+        },
+        {
+          "id": "counterguard",
+          "name": "Counterguard",
+          "description": "Retaliation guard: after taking damage, your next active damage effect is empowered more strongly at levels 25 and 40.",
+          "unlockLevel": 10,
+          "recommendedTags": [ "Tank", "Barrier" ],
+          "recommendedStats": [ "MaxHealth", "Armor" ]
+        },
+        {
+          "id": "commander",
+          "name": "Commander",
+          "description": "Protective command: owned summons gain stronger durability and build more Guard when struck as the style levels.",
+          "unlockLevel": 10,
+          "recommendedTags": [ "Summon", "Tank" ],
+          "recommendedStats": [ "MaxHealth", "SummonHealth" ]
+        }
+      ],
+      "rules": [
+        {
+          "id": "defensive_direct_damage_reduction",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "targetMustBePlayer": true,
+            "effectOperations": [ "Damage" ]
+          },
+          "operation": {
+            "type": "addDamageReduction",
+            "percent": 0.05
+          }
+        },
+        {
+          "id": "defensive_guard_on_damage_taken",
+          "eventType": "DamageTaken",
+          "predicate": {
+            "targetMustBePlayer": true,
+            "effectOperations": [ "Damage" ]
+          },
+          "operation": {
+            "type": "gainStyleResource",
+            "resourceId": "guard",
+            "amount": 5
+          }
+        },
+        {
+          "id": "defensive_barrier_bonus",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "sourceMustBePlayer": true,
+            "effectOperations": [ "GrantBarrier" ]
+          },
+          "operation": {
+            "type": "modifyEffectAmount",
+            "additivePercent": 0.05
+          }
+        }
+      ],
+      "coreMechanic": "Gain Guard when taking damage. At 100 Guard, gain Protective Shell."
+    },
+    {
+      "id": "fighter",
+      "name": "Fighter",
+      "description": "Builds Momentum through direct damage and converts it into empowered strikes.",
+      "resourceId": "momentum",
+      "maxLevel": 50,
+      "recommendedTags": [ "Melee", "Physical", "Bleed" ],
+      "recommendedStats": [ "Power", "WeaponDamage", "Precision" ],
+      "focuses": [
+        {
+          "id": "duelist",
+          "name": "Duelist",
+          "description": "Reliable precision: active single-target damage effects scale upward at levels 10, 25, and 40.",
+          "unlockLevel": 10,
+          "recommendedTags": [ "Melee" ],
+          "recommendedStats": [ "Power", "Precision" ]
+        },
+        {
+          "id": "berserker",
+          "name": "Berserker",
+          "description": "Risk pressure: active damage is empowered while wounded, scaling higher at levels 25 and 40.",
+          "unlockLevel": 10,
+          "recommendedTags": [ "Melee", "Bleed" ],
+          "recommendedStats": [ "Power", "CritDamage" ]
+        },
+        {
+          "id": "vanguard",
+          "name": "Vanguard",
+          "description": "Durable pressure: direct damage reduction and Momentum gained when hit scale at levels 10, 25, and 40.",
+          "unlockLevel": 10,
+          "recommendedTags": [ "Tank", "Melee" ],
+          "recommendedStats": [ "Power", "Armor" ]
+        }
+      ],
+      "rules": [
+        {
+          "id": "fighter_momentum_on_damage_dealt",
+          "eventType": "DamageDealt",
+          "predicate": {
+            "sourceMustBePlayer": true,
+            "effectOperations": [ "Damage" ]
+          },
+          "operation": {
+            "type": "gainStyleResource",
+            "resourceId": "momentum",
+            "amount": 8
+          }
+        }
+      ],
+      "coreMechanic": "Gain Momentum from direct damage. At 100 Momentum, empower the next direct damage active effect."
+    },
+    {
+      "id": "caster",
+      "name": "Caster",
+      "description": "Builds Arcane Charge through active Essence use and amplifies magic-adjacent effects.",
+      "resourceId": "arcaneCharge",
+      "maxLevel": 50,
+      "recommendedTags": [ "Magic", "Spell", "Curse", "Melee" ],
+      "recommendedStats": [ "Spirit", "Power", "MagicPenetration" ],
+      "focuses": [
+        {
+          "id": "arcanist",
+          "name": "Arcanist",
+          "description": "Pure arcana: active Magic and Spell effects scale higher and build extra Arcane Charge at later milestones.",
+          "unlockLevel": 10,
+          "recommendedTags": [ "Magic", "Spell" ],
+          "recommendedStats": [ "Spirit", "MagicPenetration" ]
+        },
+        {
+          "id": "spellblade",
+          "name": "Spellblade",
+          "description": "Adds Spirit-scaling arcane damage to Melee active effects, improving at levels 25 and 40.",
+          "unlockLevel": 10,
+          "recommendedTags": [ "Melee", "Magic" ],
+          "recommendedStats": [ "Spirit", "Power" ]
+        },
+        {
+          "id": "occultist",
+          "name": "Occultist",
+          "description": "Dark study: Curse and damage-over-time active effects scale higher and build extra Arcane Charge.",
+          "unlockLevel": 10,
+          "recommendedTags": [ "Curse", "DoT" ],
+          "recommendedStats": [ "Spirit", "Cooldown" ]
+        }
+      ],
+      "rules": [
+        {
+          "id": "caster_arcane_charge_on_active",
+          "eventType": "AbilityResolved",
+          "predicate": {
+            "sourceMustBePlayer": true,
+            "activeAbilityOnly": true
+          },
+          "operation": {
+            "type": "gainStyleResource",
+            "resourceId": "arcaneCharge",
+            "amount": 1,
+            "usesProcCoefficient": false
+          }
+        },
+        {
+          "id": "caster_spellblade_bonus_damage",
+          "minStyleLevel": 10,
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "sourceMustBePlayer": true,
+            "activeAbilityOnly": true,
+            "anyTags": [ "Melee" ],
+            "effectOperations": [ "Damage" ]
+          },
+          "operation": {
+            "type": "addBonusDamageFromStat",
+            "stat": "Spirit",
+            "coefficient": 0.15,
+            "damageType": "Magical"
+          }
+        }
+      ],
+      "coreMechanic": "Gain Arcane Charge from active Essence abilities. At 5 Charge, empower the next eligible active effect."
+    },
+    {
+      "id": "summoner",
+      "name": "Summoner",
+      "description": "Builds Command through summon-tagged actions and improves summon effects without creating summons by itself.",
+      "resourceId": "command",
+      "maxLevel": 50,
+      "recommendedTags": [ "Summon", "Minion", "Curse", "Holy" ],
+      "recommendedStats": [ "SummonPower", "SummonHealth", "Spirit" ],
+      "focuses": [
+        {
+          "id": "horde",
+          "name": "Horde",
+          "description": "Many allies: owned summons gain offensive power that scales at levels 10, 25, and 40.",
+          "unlockLevel": 10,
+          "recommendedTags": [ "Summon" ],
+          "recommendedStats": [ "SummonPower" ]
+        },
+        {
+          "id": "champion",
+          "name": "Champion",
+          "description": "One strong ally: owned summons gain maximum health that scales at levels 10, 25, and 40.",
+          "unlockLevel": 10,
+          "recommendedTags": [ "Summon" ],
+          "recommendedStats": [ "SummonHealth", "SummonPower" ]
+        },
+        {
+          "id": "ritualist",
+          "name": "Ritualist",
+          "description": "Sacred or profane rites: Curse/Holy summon effects gain stronger amplification at later milestones.",
+          "unlockLevel": 10,
+          "recommendedTags": [ "Summon", "Curse", "Holy" ],
+          "recommendedStats": [ "Spirit" ]
+        }
+      ],
+      "rules": [
+        {
+          "id": "summoner_command_on_summon_active",
+          "eventType": "AbilityResolved",
+          "predicate": {
+            "sourceMustBePlayer": true,
+            "activeAbilityOnly": true,
+            "anyTags": [ "Summon" ]
+          },
+          "operation": {
+            "type": "gainStyleResource",
+            "resourceId": "command",
+            "amount": 15
+          }
+        },
+        {
+          "id": "summoner_summon_effect_bonus",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "sourceMustBePlayer": true,
+            "anyTags": [ "Summon" ]
+          },
+          "operation": {
+            "type": "modifyEffectAmount",
+            "additivePercent": 0.05
+          }
+        }
+      ],
+      "coreMechanic": "Gain Command from Summon-tagged active abilities. At 100 Command, empower the next Summon-tagged effect."
+    },
+    {
+      "id": "swift",
+      "name": "Swift",
+      "description": "Builds Flow through quick active Essence use and rewards evasive, mobile pressure.",
+      "resourceId": "flow",
+      "maxLevel": 50,
+      "recommendedTags": [ "Melee", "Ranged", "Dodge", "Speed" ],
+      "recommendedStats": [ "Precision", "DodgeChance", "Cooldown" ],
+      "focuses": [
+        {
+          "id": "flurry",
+          "name": "Flurry",
+          "description": "Rapid pressure: active Melee and Ranged damage scale at levels 10, 25, and 40.",
+          "unlockLevel": 10,
+          "recommendedTags": [ "Melee", "Ranged" ],
+          "recommendedStats": [ "Precision", "CritChance" ]
+        },
+        {
+          "id": "evasion",
+          "name": "Evasion",
+          "description": "Survival through movement: incoming direct damage reduction scales at levels 10, 25, and 40.",
+          "unlockLevel": 10,
+          "recommendedTags": [ "Dodge", "Tank" ],
+          "recommendedStats": [ "DodgeChance", "CrowdControlResistance" ]
+        },
+        {
+          "id": "tempo",
+          "name": "Tempo",
+          "description": "Rhythm play: active effects gain extra Flow and stronger Flow empowerment at later milestones.",
+          "unlockLevel": 10,
+          "recommendedTags": [ "Cooldown", "Speed" ],
+          "recommendedStats": [ "Cooldown", "Precision" ]
+        }
+      ],
+      "rules": [
+        {
+          "id": "swift_flow_on_active",
+          "eventType": "AbilityResolved",
+          "predicate": {
+            "sourceMustBePlayer": true,
+            "activeAbilityOnly": true
+          },
+          "operation": {
+            "type": "gainStyleResource",
+            "resourceId": "flow",
+            "amount": 10,
+            "usesProcCoefficient": false
+          }
+        },
+        {
+          "id": "swift_active_effect_bonus",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "sourceMustBePlayer": true,
+            "activeAbilityOnly": true
+          },
+          "operation": {
+            "type": "modifyEffectAmount",
+            "additivePercent": 0.03
+          }
+        }
+      ],
+      "coreMechanic": "Gain Flow from active Essence abilities. At 100 Flow, empower the next active effect."
+    },
+    {
+      "id": "marksman",
+      "name": "Marksman",
+      "description": "Builds Aim through ranged direct damage and rewards precision, marks, and tactical shots.",
+      "resourceId": "aim",
+      "maxLevel": 50,
+      "recommendedTags": [ "Ranged", "Physical", "Critical", "Mark" ],
+      "recommendedStats": [ "Precision", "CritChance", "ArmorPenetration" ],
+      "focuses": [
+        {
+          "id": "sniper",
+          "name": "Sniper",
+          "description": "Single-target precision: ranged single-target damage scales at levels 10, 25, and 40.",
+          "unlockLevel": 10,
+          "recommendedTags": [ "Ranged", "Critical" ],
+          "recommendedStats": [ "Precision", "CritDamage" ]
+        },
+        {
+          "id": "volley",
+          "name": "Volley",
+          "description": "Multi-target fire: ranged multi-target damage scales at levels 10, 25, and 40.",
+          "unlockLevel": 10,
+          "recommendedTags": [ "Ranged", "MultiTarget" ],
+          "recommendedStats": [ "Precision", "CritChance" ]
+        },
+        {
+          "id": "trapper",
+          "name": "Trapper",
+          "description": "Marks and setup: ranged status and debuff effects build more Aim and scale at milestones.",
+          "unlockLevel": 10,
+          "recommendedTags": [ "Ranged", "Mark", "Debuff" ],
+          "recommendedStats": [ "Precision", "Cooldown" ]
+        }
+      ],
+      "rules": [
+        {
+          "id": "marksman_aim_on_ranged_damage",
+          "eventType": "DamageDealt",
+          "predicate": {
+            "sourceMustBePlayer": true,
+            "anyTags": [ "Ranged" ],
+            "effectOperations": [ "Damage" ]
+          },
+          "operation": {
+            "type": "gainStyleResource",
+            "resourceId": "aim",
+            "amount": 10
+          }
+        },
+        {
+          "id": "marksman_ranged_damage_bonus",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "sourceMustBePlayer": true,
+            "anyTags": [ "Ranged" ],
+            "effectOperations": [ "Damage" ]
+          },
+          "operation": {
+            "type": "modifyEffectAmount",
+            "additivePercent": 0.05
+          }
+        }
+      ],
+      "coreMechanic": "Gain Aim from ranged direct damage. At 100 Aim, empower the next ranged damage effect."
+    },
+    {
+      "id": "support",
+      "name": "Support",
+      "description": "Builds Resolve through healing, barriers, and ally protection effects.",
+      "resourceId": "resolve",
+      "maxLevel": 50,
+      "recommendedTags": [ "Healing", "Barrier", "Holy", "Support" ],
+      "recommendedStats": [ "HealingPowerPercent", "Spirit", "Cooldown" ],
+      "focuses": [
+        {
+          "id": "healer",
+          "name": "Healer",
+          "description": "Restoration focus: healing effects scale at levels 10, 25, and 40.",
+          "unlockLevel": 10,
+          "recommendedTags": [ "Healing" ],
+          "recommendedStats": [ "HealingPowerPercent", "Spirit" ]
+        },
+        {
+          "id": "warden",
+          "name": "Warden",
+          "description": "Protection focus: barrier effects and ally protection scale at levels 10, 25, and 40.",
+          "unlockLevel": 10,
+          "recommendedTags": [ "Barrier", "Tank" ],
+          "recommendedStats": [ "MaxHealth", "HealingPowerPercent" ]
+        },
+        {
+          "id": "chaplain",
+          "name": "Chaplain",
+          "description": "Holy hybrid support: Holy healing, barriers, and damage scale at milestones.",
+          "unlockLevel": 10,
+          "recommendedTags": [ "Holy", "Healing", "Barrier" ],
+          "recommendedStats": [ "Spirit", "HealingPowerPercent" ]
+        }
+      ],
+      "rules": [
+        {
+          "id": "support_heal_barrier_bonus",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "sourceMustBePlayer": true,
+            "effectOperations": [ "Heal", "GrantBarrier" ]
+          },
+          "operation": {
+            "type": "modifyEffectAmount",
+            "additivePercent": 0.05
+          }
+        }
+      ],
+      "coreMechanic": "Gain Resolve from healing and barrier effects. At 100 Resolve, empower the next heal or barrier."
+    },
+    {
+      "id": "controller",
+      "name": "Controller",
+      "description": "Builds Control through status, debuff, and disruption effects.",
+      "resourceId": "control",
+      "maxLevel": 50,
+      "recommendedTags": [ "Control", "Debuff", "Curse", "DoT" ],
+      "recommendedStats": [ "Spirit", "Cooldown", "StatusResistance" ],
+      "focuses": [
+        {
+          "id": "hexer",
+          "name": "Hexer",
+          "description": "Curse and attrition: Curse/DoT effects scale at levels 10, 25, and 40.",
+          "unlockLevel": 10,
+          "recommendedTags": [ "Curse", "DoT" ],
+          "recommendedStats": [ "Spirit", "Cooldown" ]
+        },
+        {
+          "id": "tactician",
+          "name": "Tactician",
+          "description": "Debuff setup: debuffs and tactical damage windows scale at milestones.",
+          "unlockLevel": 10,
+          "recommendedTags": [ "Debuff", "Physical" ],
+          "recommendedStats": [ "Precision", "Cooldown" ]
+        },
+        {
+          "id": "frostbinder",
+          "name": "Frostbinder",
+          "description": "Hard control: control-tagged statuses and follow-up damage scale at milestones.",
+          "unlockLevel": 10,
+          "recommendedTags": [ "Control", "Magic" ],
+          "recommendedStats": [ "Spirit", "CrowdControlResistance" ]
+        }
+      ],
+      "rules": [
+        {
+          "id": "controller_status_debuff_bonus",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "sourceMustBePlayer": true,
+            "effectOperations": [ "ApplyStatus", "ModifyAttribute" ]
+          },
+          "operation": {
+            "type": "modifyEffectAmount",
+            "additivePercent": 0.05
+          }
+        }
+      ],
+      "coreMechanic": "Gain Control from active status and debuff effects. At 100 Control, empower the next control, debuff, curse, or damage-over-time effect."
+    }
+  ]
+}

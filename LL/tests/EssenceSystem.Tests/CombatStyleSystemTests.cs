@@ -2,6 +2,8 @@ using Application.Interfaces.Services.LL.CombatStyles;
 using Application.Interfaces.Services.LL.Essences;
 using Application.UseCases.CombatStyles.Dtos;
 using Application.UseCases.CombatStyles.Models;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using Domain.Models.Attributes;
 using Domain.Models.Combat.Abilities;
 using Domain.Models.CombatStyles;
@@ -11,6 +13,7 @@ using Domain.Models.Entities.Characters;
 using Domain.Models.Essences.Definitions;
 using Domain.Models.Inventories;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging.Abstractions;
 using Persistence.LL;
 using Persistence.LL.Repositories.CombatStyles;
@@ -230,7 +233,7 @@ public sealed class CombatStyleSystemTests
     [Fact]
     public void Defensive_guard_triggers_protective_shell_twice_per_encounter()
     {
-        var engine = new CombatStyleRuleEngine(new StaticCombatStyleDefinitionProvider());
+        var engine = new CombatStyleRuleEngine(CreateDefinitionProvider());
         var state = engine.CreateState(new CombatStyleSnapshot("defensive", "Defensive", 1, 0, null, null));
         var player = CreateCombatant("player", CombatTeam.Friendly, maxHealth: 1000);
         var enemy = CreateCombatant("enemy", CombatTeam.Hostile);
@@ -244,7 +247,7 @@ public sealed class CombatStyleSystemTests
     [Fact]
     public void Fighter_momentum_empowers_next_direct_damage_effect()
     {
-        var engine = new CombatStyleRuleEngine(new StaticCombatStyleDefinitionProvider());
+        var engine = new CombatStyleRuleEngine(CreateDefinitionProvider());
         var state = engine.CreateState(new CombatStyleSnapshot("fighter", "Fighter", 1, 0, null, null));
         var player = CreateCombatant("player", CombatTeam.Friendly);
         var enemy = CreateCombatant("enemy", CombatTeam.Hostile);
@@ -263,7 +266,7 @@ public sealed class CombatStyleSystemTests
     [Fact]
     public void Hostile_side_combat_style_applies_to_hostile_player()
     {
-        var engine = new CombatStyleRuleEngine(new StaticCombatStyleDefinitionProvider());
+        var engine = new CombatStyleRuleEngine(CreateDefinitionProvider());
         var state = engine.CreateState(
             new CombatStyleSnapshot("defensive", "Defensive", 1, 0, null, null),
             appliesToFriendlyTeam: false);
@@ -280,7 +283,7 @@ public sealed class CombatStyleSystemTests
     [Fact]
     public void Rule_definitions_apply_baseline_effect_modifiers()
     {
-        var engine = new CombatStyleRuleEngine(new StaticCombatStyleDefinitionProvider());
+        var engine = new CombatStyleRuleEngine(CreateDefinitionProvider());
         var state = engine.CreateState(new CombatStyleSnapshot("defensive", "Defensive", 1, 0, null, null));
         var player = CreateCombatant("player", CombatTeam.Friendly);
         var enemy = CreateCombatant("enemy", CombatTeam.Hostile);
@@ -335,7 +338,7 @@ public sealed class CombatStyleSystemTests
     [Fact]
     public void Combat_style_balance_simulator_ranks_style_focus_candidates()
     {
-        var simulator = new CombatStyleBalanceSimulator(new StaticCombatStyleDefinitionProvider());
+        var simulator = new CombatStyleBalanceSimulator(CreateDefinitionProvider());
 
         var report = simulator.Run(new CombatStyleBalanceSimulationRequest(
             BattleCount: 1,
@@ -360,7 +363,7 @@ public sealed class CombatStyleSystemTests
     [Fact]
     public void Caster_spellblade_adds_spirit_scaling_to_melee_active_damage()
     {
-        var engine = new CombatStyleRuleEngine(new StaticCombatStyleDefinitionProvider());
+        var engine = new CombatStyleRuleEngine(CreateDefinitionProvider());
         var state = engine.CreateState(new CombatStyleSnapshot("caster", "Caster", 10, 0, "spellblade", "Spellblade"));
         var player = CreateCombatant("player", CombatTeam.Friendly, spirit: 100);
         var enemy = CreateCombatant("enemy", CombatTeam.Hostile);
@@ -373,7 +376,7 @@ public sealed class CombatStyleSystemTests
     [Fact]
     public void Defensive_level_ten_foci_have_distinct_runtime_effects()
     {
-        var engine = new CombatStyleRuleEngine(new StaticCombatStyleDefinitionProvider());
+        var engine = new CombatStyleRuleEngine(CreateDefinitionProvider());
         var player = CreateCombatant("player", CombatTeam.Friendly);
         var enemy = CreateCombatant("enemy", CombatTeam.Hostile);
         var counterguard = engine.CreateState(new CombatStyleSnapshot("defensive", "Defensive", 10, 0, "counterguard", "Counterguard"));
@@ -398,7 +401,7 @@ public sealed class CombatStyleSystemTests
     [Fact]
     public void Defensive_focus_milestones_scale_level_twenty_five_and_forty_effects()
     {
-        var engine = new CombatStyleRuleEngine(new StaticCombatStyleDefinitionProvider());
+        var engine = new CombatStyleRuleEngine(CreateDefinitionProvider());
         var player = CreateCombatant("player", CombatTeam.Friendly, maxHealth: 1000);
         var enemy = CreateCombatant("enemy", CombatTeam.Hostile);
         var bulwark25 = engine.CreateState(new CombatStyleSnapshot("defensive", "Defensive", 25, 0, "bulwark", "Bulwark"));
@@ -430,7 +433,7 @@ public sealed class CombatStyleSystemTests
     [Fact]
     public void Fighter_level_ten_foci_have_distinct_runtime_effects()
     {
-        var engine = new CombatStyleRuleEngine(new StaticCombatStyleDefinitionProvider());
+        var engine = new CombatStyleRuleEngine(CreateDefinitionProvider());
         var player = CreateCombatant("player", CombatTeam.Friendly);
         var enemy = CreateCombatant("enemy", CombatTeam.Hostile);
         var duelist = engine.CreateState(new CombatStyleSnapshot("fighter", "Fighter", 10, 0, "duelist", "Duelist"));
@@ -450,7 +453,7 @@ public sealed class CombatStyleSystemTests
     [Fact]
     public void Fighter_focus_milestones_scale_level_twenty_five_and_forty_effects()
     {
-        var engine = new CombatStyleRuleEngine(new StaticCombatStyleDefinitionProvider());
+        var engine = new CombatStyleRuleEngine(CreateDefinitionProvider());
         var player = CreateCombatant("player", CombatTeam.Friendly);
         var enemy = CreateCombatant("enemy", CombatTeam.Hostile);
         var duelist25 = engine.CreateState(new CombatStyleSnapshot("fighter", "Fighter", 25, 0, "duelist", "Duelist"));
@@ -473,7 +476,7 @@ public sealed class CombatStyleSystemTests
     [Fact]
     public void Defensive_and_fighter_skill_tree_nodes_have_runtime_effects_without_selected_focus()
     {
-        var engine = new CombatStyleRuleEngine(new StaticCombatStyleDefinitionProvider());
+        var engine = new CombatStyleRuleEngine(CreateDefinitionProvider());
         var player = CreateCombatant("player", CombatTeam.Friendly);
         var enemy = CreateCombatant("enemy", CombatTeam.Hostile);
         var defensive = engine.CreateState(new CombatStyleSnapshot(
@@ -515,7 +518,7 @@ public sealed class CombatStyleSystemTests
     [Fact]
     public void Caster_level_ten_foci_have_distinct_runtime_effects()
     {
-        var engine = new CombatStyleRuleEngine(new StaticCombatStyleDefinitionProvider());
+        var engine = new CombatStyleRuleEngine(CreateDefinitionProvider());
         var player = CreateCombatant("player", CombatTeam.Friendly);
         var enemy = CreateCombatant("enemy", CombatTeam.Hostile);
         var arcanist = engine.CreateState(new CombatStyleSnapshot("caster", "Caster", 10, 0, "arcanist", "Arcanist"));
@@ -533,7 +536,7 @@ public sealed class CombatStyleSystemTests
     [Fact]
     public void Caster_focus_milestones_scale_level_twenty_five_and_forty_effects()
     {
-        var engine = new CombatStyleRuleEngine(new StaticCombatStyleDefinitionProvider());
+        var engine = new CombatStyleRuleEngine(CreateDefinitionProvider());
         var player = CreateCombatant("player", CombatTeam.Friendly, spirit: 100);
         var enemy = CreateCombatant("enemy", CombatTeam.Hostile);
         var arcanist40 = engine.CreateState(new CombatStyleSnapshot("caster", "Caster", 40, 0, "arcanist", "Arcanist"));
@@ -554,7 +557,7 @@ public sealed class CombatStyleSystemTests
     [Fact]
     public void Caster_skill_tree_nodes_have_runtime_effects_without_selected_focus()
     {
-        var engine = new CombatStyleRuleEngine(new StaticCombatStyleDefinitionProvider());
+        var engine = new CombatStyleRuleEngine(CreateDefinitionProvider());
         var player = CreateCombatant("player", CombatTeam.Friendly, spirit: 100);
         var enemy = CreateCombatant("enemy", CombatTeam.Hostile);
         var arcanist = engine.CreateState(new CombatStyleSnapshot(
@@ -607,7 +610,7 @@ public sealed class CombatStyleSystemTests
     [Fact]
     public void Summoner_improves_owned_summon_attributes_without_creating_summons()
     {
-        var engine = new CombatStyleRuleEngine(new StaticCombatStyleDefinitionProvider());
+        var engine = new CombatStyleRuleEngine(CreateDefinitionProvider());
         var state = engine.CreateState(new CombatStyleSnapshot("summoner", "Summoner", 1, 0, null, null));
         var player = CreateCombatant("player", CombatTeam.Friendly);
 
@@ -627,7 +630,7 @@ public sealed class CombatStyleSystemTests
     [Fact]
     public void Summoner_ritualist_amplifies_curse_or_holy_summon_effects()
     {
-        var engine = new CombatStyleRuleEngine(new StaticCombatStyleDefinitionProvider());
+        var engine = new CombatStyleRuleEngine(CreateDefinitionProvider());
         var state = engine.CreateState(new CombatStyleSnapshot("summoner", "Summoner", 10, 0, "ritualist", "Ritualist"));
         var player = CreateCombatant("player", CombatTeam.Friendly);
         var enemy = CreateCombatant("enemy", CombatTeam.Hostile);
@@ -640,7 +643,7 @@ public sealed class CombatStyleSystemTests
     [Fact]
     public void Summoner_focus_milestones_scale_level_twenty_five_and_forty_effects()
     {
-        var engine = new CombatStyleRuleEngine(new StaticCombatStyleDefinitionProvider());
+        var engine = new CombatStyleRuleEngine(CreateDefinitionProvider());
         var player = CreateCombatant("player", CombatTeam.Friendly);
         var enemy = CreateCombatant("enemy", CombatTeam.Hostile);
         var horde40 = engine.CreateState(new CombatStyleSnapshot("summoner", "Summoner", 40, 0, "horde", "Horde"));
@@ -678,7 +681,7 @@ public sealed class CombatStyleSystemTests
     [Fact]
     public void Summoner_skill_tree_nodes_have_runtime_effects_without_selected_focus()
     {
-        var engine = new CombatStyleRuleEngine(new StaticCombatStyleDefinitionProvider());
+        var engine = new CombatStyleRuleEngine(CreateDefinitionProvider());
         var player = CreateCombatant("player", CombatTeam.Friendly);
         var enemy = CreateCombatant("enemy", CombatTeam.Hostile);
         var horde = engine.CreateState(new CombatStyleSnapshot(
@@ -753,7 +756,7 @@ public sealed class CombatStyleSystemTests
     [Fact]
     public void Swift_style_builds_flow_and_empowers_active_effects()
     {
-        var engine = new CombatStyleRuleEngine(new StaticCombatStyleDefinitionProvider());
+        var engine = new CombatStyleRuleEngine(CreateDefinitionProvider());
         var state = engine.CreateState(new CombatStyleSnapshot("swift", "Swift", 40, 0, "tempo", "Tempo"));
         var player = CreateCombatant("player", CombatTeam.Friendly);
         var enemy = CreateCombatant("enemy", CombatTeam.Hostile);
@@ -770,7 +773,7 @@ public sealed class CombatStyleSystemTests
     [Fact]
     public void Swift_skill_tree_nodes_have_runtime_effects_without_selected_focus()
     {
-        var engine = new CombatStyleRuleEngine(new StaticCombatStyleDefinitionProvider());
+        var engine = new CombatStyleRuleEngine(CreateDefinitionProvider());
         var player = CreateCombatant("player", CombatTeam.Friendly);
         var enemy = CreateCombatant("enemy", CombatTeam.Hostile);
         var flurry = engine.CreateState(new CombatStyleSnapshot(
@@ -826,7 +829,7 @@ public sealed class CombatStyleSystemTests
     [Fact]
     public void Marksman_style_builds_aim_from_ranged_damage()
     {
-        var engine = new CombatStyleRuleEngine(new StaticCombatStyleDefinitionProvider());
+        var engine = new CombatStyleRuleEngine(CreateDefinitionProvider());
         var state = engine.CreateState(new CombatStyleSnapshot("marksman", "Marksman", 40, 0, "sniper", "Sniper"));
         var player = CreateCombatant("player", CombatTeam.Friendly);
         var enemy = CreateCombatant("enemy", CombatTeam.Hostile);
@@ -843,7 +846,7 @@ public sealed class CombatStyleSystemTests
     [Fact]
     public void Marksman_skill_tree_nodes_have_runtime_effects_without_selected_focus()
     {
-        var engine = new CombatStyleRuleEngine(new StaticCombatStyleDefinitionProvider());
+        var engine = new CombatStyleRuleEngine(CreateDefinitionProvider());
         var player = CreateCombatant("player", CombatTeam.Friendly);
         var enemy = CreateCombatant("enemy", CombatTeam.Hostile);
         var sniper = engine.CreateState(new CombatStyleSnapshot(
@@ -905,7 +908,7 @@ public sealed class CombatStyleSystemTests
     [Fact]
     public void Support_style_builds_resolve_from_healing_and_barriers()
     {
-        var engine = new CombatStyleRuleEngine(new StaticCombatStyleDefinitionProvider());
+        var engine = new CombatStyleRuleEngine(CreateDefinitionProvider());
         var state = engine.CreateState(new CombatStyleSnapshot("support", "Support", 40, 0, "healer", "Healer"));
         var player = CreateCombatant("player", CombatTeam.Friendly);
 
@@ -920,7 +923,7 @@ public sealed class CombatStyleSystemTests
     [Fact]
     public void Support_skill_tree_nodes_have_runtime_effects_without_selected_focus()
     {
-        var engine = new CombatStyleRuleEngine(new StaticCombatStyleDefinitionProvider());
+        var engine = new CombatStyleRuleEngine(CreateDefinitionProvider());
         var player = CreateCombatant("player", CombatTeam.Friendly);
         var enemy = CreateCombatant("enemy", CombatTeam.Hostile);
         var healer = engine.CreateState(new CombatStyleSnapshot(
@@ -1001,7 +1004,7 @@ public sealed class CombatStyleSystemTests
     [Fact]
     public void Controller_style_builds_control_from_active_status_and_debuff_effects()
     {
-        var engine = new CombatStyleRuleEngine(new StaticCombatStyleDefinitionProvider());
+        var engine = new CombatStyleRuleEngine(CreateDefinitionProvider());
         var state = engine.CreateState(new CombatStyleSnapshot("controller", "Controller", 40, 0, "hexer", "Hexer"));
         var player = CreateCombatant("player", CombatTeam.Friendly);
         var enemy = CreateCombatant("enemy", CombatTeam.Hostile);
@@ -1018,7 +1021,7 @@ public sealed class CombatStyleSystemTests
     [Fact]
     public void Controller_skill_tree_nodes_have_runtime_effects_without_selected_focus()
     {
-        var engine = new CombatStyleRuleEngine(new StaticCombatStyleDefinitionProvider());
+        var engine = new CombatStyleRuleEngine(CreateDefinitionProvider());
         var player = CreateCombatant("player", CombatTeam.Friendly);
         var enemy = CreateCombatant("enemy", CombatTeam.Hostile);
         var hexer = engine.CreateState(new CombatStyleSnapshot(
@@ -1126,7 +1129,7 @@ public sealed class CombatStyleSystemTests
 
     private static CombatStyleService CreateService(LLDbContext db)
     {
-        var definitions = new StaticCombatStyleDefinitionProvider();
+        var definitions = CreateDefinitionProvider();
         return new CombatStyleService(
             new PlayerCombatStyleRepository(db),
             definitions,
@@ -1134,6 +1137,37 @@ public sealed class CombatStyleSystemTests
             new EmptyEssenceDefinitionRepository(),
             new EssenceRepository(db),
             NullLogger<CombatStyleService>.Instance);
+    }
+
+    private static ICombatStyleDefinitionProvider CreateDefinitionProvider()
+    {
+        var options = new JsonSerializerOptions
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            ReadCommentHandling = JsonCommentHandling.Skip,
+            AllowTrailingCommas = true
+        };
+        options.Converters.Add(new JsonStringEnumConverter());
+
+        return new JsonCombatStyleDefinitionProvider(
+            new ConfigurationBuilder().Build(),
+            FindApiContentRoot(),
+            options);
+    }
+
+    private static string FindApiContentRoot()
+    {
+        var directory = new DirectoryInfo(Directory.GetCurrentDirectory());
+        while (directory is not null)
+        {
+            var candidate = Path.Combine(directory.FullName, "LL", "src", "API", "API.LL");
+            if (File.Exists(Path.Combine(candidate, "Data", "combat-styles.json")))
+                return candidate;
+
+            directory = directory.Parent;
+        }
+
+        throw new DirectoryNotFoundException("Could not locate API.LL content root for combat style definitions.");
     }
 
     private static RuntimeCombatant CreateCombatant(

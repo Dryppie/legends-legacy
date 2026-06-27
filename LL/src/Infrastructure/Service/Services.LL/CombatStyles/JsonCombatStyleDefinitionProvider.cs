@@ -77,19 +77,19 @@ public sealed class JsonCombatStyleDefinitionProvider : ICombatStyleDefinitionPr
         {
             "modifyEffectAmount" => new ModifyEffectAmountOperation(
                 operation.AdditivePercent,
-                operation.UsesProcCoefficient),
+                operation.UsesProcCoefficient ?? false),
             "addDamageReduction" => new AddDamageReductionOperation(
                 operation.Percent,
-                operation.UsesProcCoefficient),
+                operation.UsesProcCoefficient ?? false),
             "gainStyleResource" => new GainStyleResourceOperation(
                 operation.ResourceId ?? string.Empty,
                 operation.Amount,
-                operation.UsesProcCoefficient),
+                operation.UsesProcCoefficient ?? true),
             "addBonusDamageFromStat" => new AddBonusDamageFromStatOperation(
                 operation.Stat,
                 operation.Coefficient,
                 operation.DamageType,
-                operation.UsesProcCoefficient),
+                operation.UsesProcCoefficient ?? true),
             _ => new NoOpStyleRuleOperation()
         };
 
@@ -183,6 +183,6 @@ public sealed class JsonCombatStyleDefinitionProvider : ICombatStyleDefinitionPr
         public AttributeType Stat { get; set; }
         public decimal Coefficient { get; set; }
         public DamageType DamageType { get; set; }
-        public bool UsesProcCoefficient { get; set; } = true;
+        public bool? UsesProcCoefficient { get; set; }
     }
 }
