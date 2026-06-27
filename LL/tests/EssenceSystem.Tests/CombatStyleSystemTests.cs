@@ -301,7 +301,9 @@ public sealed class CombatStyleSystemTests
             "Capped",
             "Test style",
             "test",
+            100,
             50,
+            [],
             [],
             [],
             [],
@@ -319,6 +321,7 @@ public sealed class CombatStyleSystemTests
                     MaxTriggersPerEncounter = 2
                 }
             ],
+            [],
             "Test");
         var engine = new CombatStyleRuleEngine(new SingleDefinitionProvider(definition));
         var state = engine.CreateState(new CombatStyleSnapshot("capped", "Capped", 1, 0, null, null));
