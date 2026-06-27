@@ -1237,6 +1237,7 @@ public sealed class DungeonRogueliteStateTests
             null!,
             null!,
             null!,
+            null!,
             null!);
 
         var method = typeof(DungeonRunService).GetMethod(
