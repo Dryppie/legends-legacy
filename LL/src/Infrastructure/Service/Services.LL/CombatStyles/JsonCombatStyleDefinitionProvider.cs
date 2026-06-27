@@ -71,6 +71,7 @@ public sealed class JsonCombatStyleDefinitionProvider : ICombatStyleDefinitionPr
         {
             Id = rule.Id,
             MinStyleLevel = rule.MinStyleLevel,
+            MaxStyleLevel = rule.MaxStyleLevel,
             EventType = rule.EventType,
             Predicate = rule.Predicate,
             Operation = ToDomain(rule.Operation),
@@ -84,25 +85,43 @@ public sealed class JsonCombatStyleDefinitionProvider : ICombatStyleDefinitionPr
         {
             "modifyEffectAmount" => new ModifyEffectAmountOperation(
                 operation.AdditivePercent,
-                operation.UsesProcCoefficient ?? false),
+                operation.UsesProcCoefficient ?? false,
+                [.. operation.AdditivePercentModifiers.Select(ToDomain)]),
             "addDamageReduction" => new AddDamageReductionOperation(
                 operation.Percent,
-                operation.UsesProcCoefficient ?? false),
+                operation.UsesProcCoefficient ?? false,
+                [.. operation.PercentModifiers.Select(ToDomain)]),
             "gainStyleResource" => new GainStyleResourceOperation(
                 operation.ResourceId ?? string.Empty,
                 operation.Amount,
-                operation.UsesProcCoefficient ?? true),
+                operation.UsesProcCoefficient ?? true,
+                [.. operation.AmountModifiers.Select(ToDomain)]),
             "addBonusDamageFromStat" => new AddBonusDamageFromStatOperation(
                 operation.Stat,
                 operation.Coefficient,
                 operation.DamageType,
-                operation.UsesProcCoefficient ?? true),
+                operation.UsesProcCoefficient ?? true,
+                [.. operation.CoefficientModifiers.Select(ToDomain)]),
+            "modifySummonStats" => new ModifySummonStatsOperation(
+                operation.MaxHealthPercent,
+                operation.DamagePercent,
+                operation.DamageReductionInheritancePercent,
+                operation.MagicPowerInheritancePercent,
+                operation.MaxInheritedDamageReductionPercent,
+                [.. operation.MaxHealthPercentModifiers.Select(ToDomain)],
+                [.. operation.DamagePercentModifiers.Select(ToDomain)]),
             "setPendingEmpowerment" => new SetPendingEmpowermentOperation(
                 operation.EmpowermentId ?? string.Empty,
                 operation.AppliesTo,
                 operation.AdditivePercent,
                 operation.ConsumeOnUse ?? true,
                 [.. operation.AdditivePercentModifiers.Select(ToDomain)]),
+            "grantBarrierFromMaxHealth" => new GrantBarrierFromMaxHealthOperation(
+                operation.TriggerKey ?? string.Empty,
+                operation.Percent,
+                operation.MaxTriggersPerEncounter,
+                [.. operation.PercentModifiers.Select(ToDomain)],
+                [.. operation.MaxTriggerModifiers.Select(ToDomain)]),
             "triggerProtectiveShell" => new TriggerProtectiveShellOperation(),
             _ => new NoOpStyleRuleOperation()
         };
@@ -113,7 +132,8 @@ public sealed class JsonCombatStyleDefinitionProvider : ICombatStyleDefinitionPr
             modifier.Value,
             modifier.NodeId,
             modifier.FocusId,
-            modifier.MinStyleLevel);
+            modifier.MinStyleLevel,
+            modifier.MaxStyleLevel);
 
     private static void ThrowIfInvalid(IReadOnlyList<CombatStyleDefinition> definitions)
     {
@@ -189,6 +209,7 @@ public sealed class JsonCombatStyleDefinitionProvider : ICombatStyleDefinitionPr
     {
         public string Id { get; set; } = string.Empty;
         public int MinStyleLevel { get; set; } = 1;
+        public int? MaxStyleLevel { get; set; }
         public CombatStyleEventType EventType { get; set; }
         public EffectPredicate Predicate { get; set; } = new();
         public CombatStyleRuleOperationJson Operation { get; set; } = new();
@@ -204,6 +225,7 @@ public sealed class JsonCombatStyleDefinitionProvider : ICombatStyleDefinitionPr
         public decimal Percent { get; set; }
         public string? ResourceId { get; set; }
         public decimal Amount { get; set; }
+        public string? TriggerKey { get; set; }
         public AttributeType Stat { get; set; }
         public decimal Coefficient { get; set; }
         public DamageType DamageType { get; set; }
@@ -211,7 +233,19 @@ public sealed class JsonCombatStyleDefinitionProvider : ICombatStyleDefinitionPr
         public string? EmpowermentId { get; set; }
         public EffectPredicate AppliesTo { get; set; } = new();
         public bool? ConsumeOnUse { get; set; }
+        public decimal? MaxHealthPercent { get; set; }
+        public decimal? DamagePercent { get; set; }
+        public decimal? DamageReductionInheritancePercent { get; set; }
+        public decimal? MagicPowerInheritancePercent { get; set; }
+        public decimal? MaxInheritedDamageReductionPercent { get; set; }
+        public int? MaxTriggersPerEncounter { get; set; }
         public IReadOnlyList<StyleValueModifierJson> AdditivePercentModifiers { get; set; } = [];
+        public IReadOnlyList<StyleValueModifierJson> PercentModifiers { get; set; } = [];
+        public IReadOnlyList<StyleValueModifierJson> AmountModifiers { get; set; } = [];
+        public IReadOnlyList<StyleValueModifierJson> CoefficientModifiers { get; set; } = [];
+        public IReadOnlyList<StyleValueModifierJson> MaxHealthPercentModifiers { get; set; } = [];
+        public IReadOnlyList<StyleValueModifierJson> DamagePercentModifiers { get; set; } = [];
+        public IReadOnlyList<StyleValueModifierJson> MaxTriggerModifiers { get; set; } = [];
     }
 
     private sealed class StyleValueModifierJson
@@ -221,5 +255,6 @@ public sealed class JsonCombatStyleDefinitionProvider : ICombatStyleDefinitionPr
         public string? NodeId { get; set; }
         public string? FocusId { get; set; }
         public int MinStyleLevel { get; set; } = 1;
+        public int? MaxStyleLevel { get; set; }
     }
 }
