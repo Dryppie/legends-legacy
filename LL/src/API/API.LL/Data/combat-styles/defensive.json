@@ -18,264 +18,52 @@
   ],
   "focuses": [
     {
-      "id": "bulwark",
-      "name": "Bulwark",
-      "description": "Pure survival: Protective Shell and barrier effects scale at levels 10, 25, and 40.",
-      "unlockLevel": 10,
+      "id": "defensive_unbreakable_aegis",
+      "name": "Unbreakable Aegis",
+      "description": "Aegis Barrier +20%. While Aegis is active, damage taken -10%. Aegis prevents one interrupt, stun, silence, knockback, or displacement effect.",
+      "unlockLevel": 25,
       "recommendedTags": [
-        "Tank",
-        "Barrier"
+        "Left",
+        "Major"
       ],
       "recommendedStats": [
         "MaxHealth",
-        "DamageReduction"
-      ],
-      "rules": [
-        {
-          "id": "defensive_bulwark_barrier_l10",
-          "eventType": "EffectCalculation",
-          "minStyleLevel": 10,
-          "maxStyleLevel": 24,
-          "predicate": {
-            "sourceMustBePlayer": true,
-            "effectOperations": [
-              "GrantBarrier"
-            ]
-          },
-          "operation": {
-            "type": "modifyEffectAmount",
-            "additivePercent": 0.05
-          }
-        },
-        {
-          "id": "defensive_bulwark_barrier_l25",
-          "eventType": "EffectCalculation",
-          "minStyleLevel": 25,
-          "maxStyleLevel": 39,
-          "predicate": {
-            "sourceMustBePlayer": true,
-            "effectOperations": [
-              "GrantBarrier"
-            ]
-          },
-          "operation": {
-            "type": "modifyEffectAmount",
-            "additivePercent": 0.1
-          }
-        },
-        {
-          "id": "defensive_bulwark_barrier_l40",
-          "eventType": "EffectCalculation",
-          "minStyleLevel": 40,
-          "predicate": {
-            "sourceMustBePlayer": true,
-            "effectOperations": [
-              "GrantBarrier"
-            ]
-          },
-          "operation": {
-            "type": "modifyEffectAmount",
-            "additivePercent": 0.15
-          }
-        }
-      ]
-    },
-    {
-      "id": "counterguard",
-      "name": "Counterguard",
-      "description": "Retaliation guard: after taking damage, your next active damage effect is empowered more strongly at levels 25 and 40.",
-      "unlockLevel": 10,
-      "recommendedTags": [
-        "Tank",
-        "Barrier"
-      ],
-      "recommendedStats": [
-        "MaxHealth",
+        "DamageReduction",
         "Armor"
       ],
-      "rules": [
-        {
-          "id": "defensive_counterguard_retaliation_l10",
-          "eventType": "DamageTaken",
-          "minStyleLevel": 10,
-          "maxStyleLevel": 24,
-          "predicate": {
-            "targetMustBePlayer": true,
-            "effectOperations": [
-              "Damage"
-            ]
-          },
-          "operation": {
-            "type": "setPendingEmpowerment",
-            "empowermentId": "defensive_counterguard_retaliation",
-            "appliesTo": {
-              "sourceMustBePlayer": true,
-              "activeAbilityOnly": true,
-              "effectOperations": [
-                "Damage"
-              ]
-            },
-            "additivePercent": 0.1,
-            "consumeOnUse": true
-          }
-        },
-        {
-          "id": "defensive_counterguard_retaliation_l25",
-          "eventType": "DamageTaken",
-          "minStyleLevel": 25,
-          "maxStyleLevel": 39,
-          "predicate": {
-            "targetMustBePlayer": true,
-            "effectOperations": [
-              "Damage"
-            ]
-          },
-          "operation": {
-            "type": "setPendingEmpowerment",
-            "empowermentId": "defensive_counterguard_retaliation",
-            "appliesTo": {
-              "sourceMustBePlayer": true,
-              "activeAbilityOnly": true,
-              "effectOperations": [
-                "Damage"
-              ]
-            },
-            "additivePercent": 0.15,
-            "consumeOnUse": true
-          }
-        },
-        {
-          "id": "defensive_counterguard_retaliation_l40",
-          "eventType": "DamageTaken",
-          "minStyleLevel": 40,
-          "predicate": {
-            "targetMustBePlayer": true,
-            "effectOperations": [
-              "Damage"
-            ]
-          },
-          "operation": {
-            "type": "setPendingEmpowerment",
-            "empowermentId": "defensive_counterguard_retaliation",
-            "appliesTo": {
-              "sourceMustBePlayer": true,
-              "activeAbilityOnly": true,
-              "effectOperations": [
-                "Damage"
-              ]
-            },
-            "additivePercent": 0.2,
-            "consumeOnUse": true
-          }
-        }
-      ]
+      "rules": []
     },
     {
-      "id": "commander",
-      "name": "Commander",
-      "description": "Protective command: owned summons gain stronger durability and build more Guard when struck as the style levels.",
-      "unlockLevel": 10,
+      "id": "defensive_second_wind",
+      "name": "Second Wind",
+      "description": "If you would take lethal damage while at 75+ Guard, consume 75 Guard, prevent death, set Health to 1, immediately activate Aegis at 75 Guard strength, and heal for 6% Max Health over 4 seconds. 120 second cooldown.",
+      "unlockLevel": 25,
       "recommendedTags": [
-        "Summon",
-        "Tank"
+        "Middle",
+        "Major"
       ],
       "recommendedStats": [
         "MaxHealth",
-        "SummonHealth"
+        "DamageReduction",
+        "Armor"
       ],
-      "rules": [
-        {
-          "id": "defensive_commander_summon_stats_l10",
-          "eventType": "SummonCreated",
-          "minStyleLevel": 10,
-          "maxStyleLevel": 24,
-          "predicate": {
-            "sourceMustBePlayer": true
-          },
-          "operation": {
-            "type": "modifySummonStats",
-            "maxHealthPercent": 0.15,
-            "damagePercent": 0.05
-          }
-        },
-        {
-          "id": "defensive_commander_summon_stats_l25",
-          "eventType": "SummonCreated",
-          "minStyleLevel": 25,
-          "maxStyleLevel": 39,
-          "predicate": {
-            "sourceMustBePlayer": true
-          },
-          "operation": {
-            "type": "modifySummonStats",
-            "maxHealthPercent": 0.2,
-            "damagePercent": 0.1
-          }
-        },
-        {
-          "id": "defensive_commander_summon_stats_l40",
-          "eventType": "SummonCreated",
-          "minStyleLevel": 40,
-          "predicate": {
-            "sourceMustBePlayer": true
-          },
-          "operation": {
-            "type": "modifySummonStats",
-            "maxHealthPercent": 0.25,
-            "damagePercent": 0.15
-          }
-        },
-        {
-          "id": "defensive_commander_guard_on_summon_taken_l10",
-          "eventType": "DamageTaken",
-          "minStyleLevel": 10,
-          "maxStyleLevel": 24,
-          "predicate": {
-            "targetMustBeOwnedSummon": true,
-            "effectOperations": [
-              "Damage"
-            ]
-          },
-          "operation": {
-            "type": "gainStyleResource",
-            "resourceId": "guard",
-            "amount": 3
-          }
-        },
-        {
-          "id": "defensive_commander_guard_on_summon_taken_l25",
-          "eventType": "DamageTaken",
-          "minStyleLevel": 25,
-          "maxStyleLevel": 39,
-          "predicate": {
-            "targetMustBeOwnedSummon": true,
-            "effectOperations": [
-              "Damage"
-            ]
-          },
-          "operation": {
-            "type": "gainStyleResource",
-            "resourceId": "guard",
-            "amount": 5
-          }
-        },
-        {
-          "id": "defensive_commander_guard_on_summon_taken_l40",
-          "eventType": "DamageTaken",
-          "minStyleLevel": 40,
-          "predicate": {
-            "targetMustBeOwnedSummon": true,
-            "effectOperations": [
-              "Damage"
-            ]
-          },
-          "operation": {
-            "type": "gainStyleResource",
-            "resourceId": "guard",
-            "amount": 7
-          }
-        }
-      ]
+      "rules": []
+    },
+    {
+      "id": "defensive_counterpoise",
+      "name": "Counterpoise",
+      "description": "When Aegis breaks or expires, your next Essence ability within 8 seconds gains up to +12% Effect Potency based on damage absorbed by Aegis. Bonus = absorbed damage / 20% Max Health, capped at 12%. Also refunds 15% resource cost and refunds 10% cooldown if it defeats an enemy or successfully applies a debuff/control effect.",
+      "unlockLevel": 25,
+      "recommendedTags": [
+        "Right",
+        "Major"
+      ],
+      "recommendedStats": [
+        "MaxHealth",
+        "DamageReduction",
+        "Armor"
+      ],
+      "rules": []
     }
   ],
   "rules": [
@@ -329,1186 +117,1049 @@
       "triggerKey": "defensive_protective_shell",
       "percent": 0.1,
       "maxTriggersPerEncounter": 2,
-      "percentModifiers": [
-        {
-          "type": "focusLevel",
-          "focusId": "bulwark",
-          "minStyleLevel": 10,
-          "maxStyleLevel": 39,
-          "value": 0.03
-        },
-        {
-          "type": "focusLevel",
-          "focusId": "bulwark",
-          "minStyleLevel": 40,
-          "value": 0.07
-        },
-        {
-          "type": "nodeRank",
-          "nodeId": "bulwark-instinct",
-          "value": 0.01
-        },
-        {
-          "type": "nodeRank",
-          "nodeId": "bulwark-focus",
-          "value": 0.05
-        }
-      ],
-      "maxTriggerModifiers": [
-        {
-          "type": "nodeRank",
-          "nodeId": "bulwark-specialization",
-          "value": 1
-        },
-        {
-          "type": "nodeRank",
-          "nodeId": "bulwark-focus",
-          "value": 1
-        }
-      ]
+      "percentModifiers": [],
+      "maxTriggerModifiers": []
     }
   ],
   "coreMechanic": "Gain Guard when taking damage. At 100 Guard, gain Protective Shell.",
   "skillTreeNodes": [
     {
-      "id": "bulwark-path",
-      "branchId": "bulwark",
-      "name": "Bulwark Root",
-      "description": "Opens Bulwark barrier training.",
+      "id": "defensive_iron_frame",
+      "branchId": "left",
+      "name": "Iron Frame",
+      "description": "Max Health +8%. While below 35% Health, direct damage taken -10%. Aegis Barrier +10% when cast below 50% Health.",
+      "maxRank": 1,
+      "requiredLevel": 1,
+      "requiredNodeId": null,
+      "x": -1,
+      "y": 0,
+      "tags": [
+        "Left",
+        "Major"
+      ],
+      "effects": [
+        "Max Health +8%. While below 35% Health, direct damage taken -10%. Aegis Barrier +10% when cast below 50% Health."
+      ],
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 1,
+      "lane": "Left",
+      "nodeType": "Major",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "Eligible active Essence abilities."
+        ],
+        "changes": [
+          "Max Health +8%. While below 35% Health, direct damage taken -10%. Aegis Barrier +10% when cast below 50% Health."
+        ],
+        "tradeoffs": [
+          "Advanced cooldowns, target caps, and PvP coefficients can be tuned per node."
+        ],
+        "doesNotAffect": [
+          "Abilities that do not match the listed tags, effect operations, or conversion flags.",
+          "True damage unless the ability explicitly allows conversion."
+        ]
+      }
+    },
+    {
+      "id": "defensive_deflection_habit",
+      "branchId": "middle",
+      "name": "Deflection Habit",
+      "description": "Dodging, blocking, parrying, or fully absorbing an attack grants the same Guard as taking Health damage. First direct hit taken every 8 seconds deals 8% less damage. Enemy misses still grant +2 Guard.",
       "maxRank": 1,
       "requiredLevel": 1,
       "requiredNodeId": null,
       "x": 0,
       "y": 0,
       "tags": [
-        "Tank",
-        "Barrier"
+        "Middle",
+        "Major"
       ],
       "effects": [
-        "Incoming player damage is reduced by 1%.",
-        "Player barrier effects gain +1%.",
-        "Does not choose Bulwark as the effective focus by itself."
+        "Dodging, blocking, parrying, or fully absorbing an attack grants the same Guard as taking Health damage. First direct hit taken every 8 seconds deals 8% less damage. Enemy misses still grant +2 Guard."
       ],
       "countsTowardFocus": false,
-      "rules": [
-        {
-          "id": "defensive_bulwark_nodes_reduction_bulwark-path_percentModifiers",
-          "eventType": "EffectCalculation",
-          "predicate": {
-            "effectOperations": [
-              "Damage"
-            ],
-            "targetMustBePlayer": true
-          },
-          "operation": {
-            "type": "addDamageReduction",
-            "percent": 0,
-            "percentModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 0.01,
-                "nodeId": "bulwark-path"
-              }
-            ]
-          }
-        },
-        {
-          "id": "defensive_bulwark_nodes_barrier_bulwark-path_additivePercentModifiers",
-          "eventType": "EffectCalculation",
-          "predicate": {
-            "sourceMustBePlayer": true,
-            "effectOperations": [
-              "GrantBarrier"
-            ]
-          },
-          "operation": {
-            "type": "modifyEffectAmount",
-            "additivePercent": 0,
-            "additivePercentModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 0.01,
-                "nodeId": "bulwark-path"
-              }
-            ]
-          }
-        }
-      ]
+      "rules": [],
+      "row": 1,
+      "lane": "Middle",
+      "nodeType": "Major",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "Eligible active Essence abilities."
+        ],
+        "changes": [
+          "Dodging, blocking, parrying, or fully absorbing an attack grants the same Guard as taking Health damage. First direct hit taken every 8 seconds deals 8% less damage. Enemy misses still grant +2 Guard."
+        ],
+        "tradeoffs": [
+          "Advanced cooldowns, target caps, and PvP coefficients can be tuned per node."
+        ],
+        "doesNotAffect": [
+          "Abilities that do not match the listed tags, effect operations, or conversion flags.",
+          "True damage unless the ability explicitly allows conversion."
+        ]
+      }
     },
     {
-      "id": "bulwark-instinct",
-      "branchId": "bulwark",
-      "name": "Bulwark Instinct",
-      "description": "Improves Protective Shell size.",
-      "maxRank": 3,
-      "requiredLevel": 5,
-      "requiredNodeId": "bulwark-path",
-      "x": -1,
-      "y": 1,
-      "tags": [
-        "Tank",
-        "Barrier"
-      ],
-      "effects": [
-        "Each rank makes Protective Shell grant +1% more max health as barrier.",
-        "Adds 1 Bulwark branch point per rank."
-      ],
-      "countsTowardFocus": true
-    },
-    {
-      "id": "bulwark-technique",
-      "branchId": "bulwark",
-      "name": "Bulwark Technique",
-      "description": "Improves player barrier effects.",
-      "maxRank": 3,
-      "requiredLevel": 10,
-      "requiredNodeId": "bulwark-path",
-      "x": 0,
-      "y": 1,
-      "tags": [
-        "Tank",
-        "Barrier"
-      ],
-      "effects": [
-        "Each rank gives player barrier effects +2% effect amount.",
-        "Adds 1 Bulwark branch point per rank."
-      ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "defensive_bulwark_nodes_barrier_bulwark-technique_additivePercentModifiers",
-          "eventType": "EffectCalculation",
-          "predicate": {
-            "sourceMustBePlayer": true,
-            "effectOperations": [
-              "GrantBarrier"
-            ]
-          },
-          "operation": {
-            "type": "modifyEffectAmount",
-            "additivePercent": 0,
-            "additivePercentModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 0.02,
-                "nodeId": "bulwark-technique"
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "bulwark-discipline",
-      "branchId": "bulwark",
-      "name": "Bulwark Discipline",
-      "description": "Builds extra Guard when struck.",
-      "maxRank": 3,
-      "requiredLevel": 5,
-      "requiredNodeId": "bulwark-path",
-      "x": 1,
-      "y": 1,
-      "tags": [
-        "Tank",
-        "Barrier"
-      ],
-      "effects": [
-        "Each rank grants +1 additional Guard when the player takes damage.",
-        "Adds 1 Bulwark branch point per rank."
-      ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "defensive_nodes_guard_on_taken_bulwark-discipline_amountModifiers",
-          "eventType": "DamageTaken",
-          "predicate": {
-            "effectOperations": [
-              "Damage"
-            ],
-            "targetMustBePlayer": true
-          },
-          "operation": {
-            "type": "gainStyleResource",
-            "resourceId": "guard",
-            "amount": 0,
-            "usesProcCoefficient": true,
-            "amountModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 1,
-                "nodeId": "bulwark-discipline"
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "bulwark-specialization",
-      "branchId": "bulwark",
-      "name": "Bulwark Specialization",
-      "description": "Raises Protective Shell endurance.",
-      "maxRank": 2,
-      "requiredLevel": 20,
-      "requiredNodeId": "bulwark-instinct",
-      "x": -1,
-      "y": 2,
-      "tags": [
-        "Tank",
-        "Barrier"
-      ],
-      "effects": [
-        "Each rank allows Protective Shell to trigger 1 additional time per encounter.",
-        "Adds 1 Bulwark branch point per rank."
-      ],
-      "countsTowardFocus": true
-    },
-    {
-      "id": "bulwark-mastery",
-      "branchId": "bulwark",
-      "name": "Bulwark Mastery",
-      "description": "Hardens incoming damage reduction.",
-      "maxRank": 3,
-      "requiredLevel": 25,
-      "requiredNodeId": "bulwark-technique",
-      "x": 0,
-      "y": 2,
-      "tags": [
-        "Tank",
-        "Barrier"
-      ],
-      "effects": [
-        "Each rank reduces incoming player damage by 1%.",
-        "Adds 1 Bulwark branch point per rank."
-      ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "defensive_bulwark_nodes_reduction_bulwark-mastery_percentModifiers",
-          "eventType": "EffectCalculation",
-          "predicate": {
-            "effectOperations": [
-              "Damage"
-            ],
-            "targetMustBePlayer": true
-          },
-          "operation": {
-            "type": "addDamageReduction",
-            "percent": 0,
-            "percentModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 0.01,
-                "nodeId": "bulwark-mastery"
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "bulwark-amplifier",
-      "branchId": "bulwark",
-      "name": "Bulwark Amplifier",
-      "description": "Amplifies barrier output.",
-      "maxRank": 2,
-      "requiredLevel": 20,
-      "requiredNodeId": "bulwark-discipline",
-      "x": 1,
-      "y": 2,
-      "tags": [
-        "Tank",
-        "Barrier"
-      ],
-      "effects": [
-        "Each rank gives player barrier effects +3% effect amount.",
-        "Adds 1 Bulwark branch point per rank."
-      ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "defensive_bulwark_nodes_barrier_bulwark-amplifier_additivePercentModifiers",
-          "eventType": "EffectCalculation",
-          "predicate": {
-            "sourceMustBePlayer": true,
-            "effectOperations": [
-              "GrantBarrier"
-            ]
-          },
-          "operation": {
-            "type": "modifyEffectAmount",
-            "additivePercent": 0,
-            "additivePercentModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 0.03,
-                "nodeId": "bulwark-amplifier"
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "bulwark-focus",
-      "branchId": "bulwark",
-      "name": "Bulwark Focus",
-      "description": "Completes the Bulwark focus.",
-      "maxRank": 1,
-      "requiredLevel": 40,
-      "requiredNodeId": "bulwark-mastery",
-      "x": 0,
-      "y": 3,
-      "tags": [
-        "Tank",
-        "Barrier"
-      ],
-      "effects": [
-        "Protective Shell grants +5% more max health as barrier.",
-        "Protective Shell can trigger 1 additional time per encounter.",
-        "Player barrier effects gain +5%.",
-        "Adds 1 Bulwark branch point."
-      ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "defensive_bulwark_nodes_barrier_bulwark-focus_additivePercentModifiers",
-          "eventType": "EffectCalculation",
-          "predicate": {
-            "sourceMustBePlayer": true,
-            "effectOperations": [
-              "GrantBarrier"
-            ]
-          },
-          "operation": {
-            "type": "modifyEffectAmount",
-            "additivePercent": 0,
-            "additivePercentModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 0.05,
-                "nodeId": "bulwark-focus"
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "counterguard-path",
-      "branchId": "counterguard",
-      "name": "Counterguard Root",
-      "description": "Opens Counterguard retaliation training.",
+      "id": "defensive_calm_under_fire",
+      "branchId": "right",
+      "name": "Calm Under Fire",
+      "description": "Using any Essence ability below 75% Health grants +3 additional Guard. Using any Essence ability below 50% Health grants 5% damage reduction for 3 seconds. 6 second internal cooldown.",
       "maxRank": 1,
       "requiredLevel": 1,
       "requiredNodeId": null,
-      "x": 0,
+      "x": 1,
       "y": 0,
       "tags": [
-        "Tank",
-        "Barrier"
+        "Right",
+        "Major"
       ],
       "effects": [
-        "Incoming player damage is reduced by 1%.",
-        "Does not choose Counterguard as the effective focus by itself."
+        "Using any Essence ability below 75% Health grants +3 additional Guard. Using any Essence ability below 50% Health grants 5% damage reduction for 3 seconds. 6 second internal cooldown."
       ],
       "countsTowardFocus": false,
-      "rules": [
-        {
-          "id": "defensive_counterguard_nodes_reduction_counterguard-path_percentModifiers",
-          "eventType": "EffectCalculation",
-          "predicate": {
-            "effectOperations": [
-              "Damage"
-            ],
-            "targetMustBePlayer": true
-          },
-          "operation": {
-            "type": "addDamageReduction",
-            "percent": 0,
-            "percentModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 0.01,
-                "nodeId": "counterguard-path"
-              }
-            ]
-          }
-        }
-      ]
+      "rules": [],
+      "row": 1,
+      "lane": "Right",
+      "nodeType": "Major",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "Eligible active Essence abilities."
+        ],
+        "changes": [
+          "Using any Essence ability below 75% Health grants +3 additional Guard. Using any Essence ability below 50% Health grants 5% damage reduction for 3 seconds. 6 second internal cooldown."
+        ],
+        "tradeoffs": [
+          "Advanced cooldowns, target caps, and PvP coefficients can be tuned per node."
+        ],
+        "doesNotAffect": [
+          "Abilities that do not match the listed tags, effect operations, or conversion flags.",
+          "True damage unless the ability explicitly allows conversion."
+        ]
+      }
     },
     {
-      "id": "counterguard-instinct",
-      "branchId": "counterguard",
-      "name": "Counterguard Instinct",
-      "description": "Builds extra Guard when struck.",
-      "maxRank": 3,
-      "requiredLevel": 5,
-      "requiredNodeId": "counterguard-path",
-      "x": -1,
-      "y": 1,
-      "tags": [
-        "Tank",
-        "Barrier"
-      ],
-      "effects": [
-        "Each rank grants +1 additional Guard when the player takes damage.",
-        "Adds 1 Counterguard branch point per rank."
-      ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "defensive_nodes_guard_on_taken_counterguard-instinct_amountModifiers",
-          "eventType": "DamageTaken",
-          "predicate": {
-            "effectOperations": [
-              "Damage"
-            ],
-            "targetMustBePlayer": true
-          },
-          "operation": {
-            "type": "gainStyleResource",
-            "resourceId": "guard",
-            "amount": 0,
-            "usesProcCoefficient": true,
-            "amountModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 1,
-                "nodeId": "counterguard-instinct"
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "counterguard-technique",
-      "branchId": "counterguard",
-      "name": "Counterguard Technique",
-      "description": "Improves retaliation strength.",
-      "maxRank": 3,
-      "requiredLevel": 10,
-      "requiredNodeId": "counterguard-path",
-      "x": 0,
-      "y": 1,
-      "tags": [
-        "Tank",
-        "Barrier"
-      ],
-      "effects": [
-        "Each rank makes the next active damage effect after taking damage gain +3% effect amount.",
-        "Adds 1 Counterguard branch point per rank."
-      ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "defensive_counterguard_retaliation_nodes_counterguard-technique_additivePercentModifiers",
-          "eventType": "DamageTaken",
-          "predicate": {
-            "effectOperations": [
-              "Damage"
-            ],
-            "targetMustBePlayer": true
-          },
-          "operation": {
-            "type": "setPendingEmpowerment",
-            "empowermentId": "defensive_counterguard_retaliation_nodes_counterguard-technique",
-            "appliesTo": {
-              "effectOperations": [
-                "Damage"
-              ],
-              "sourceMustBePlayer": true,
-              "activeAbilityOnly": true
-            },
-            "additivePercent": 0,
-            "consumeOnUse": true,
-            "additivePercentModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 0.03,
-                "nodeId": "counterguard-technique"
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "counterguard-discipline",
-      "branchId": "counterguard",
-      "name": "Counterguard Discipline",
-      "description": "Turns impact into a small barrier.",
-      "maxRank": 3,
-      "requiredLevel": 5,
-      "requiredNodeId": "counterguard-path",
-      "x": 1,
-      "y": 1,
-      "tags": [
-        "Tank",
-        "Barrier"
-      ],
-      "effects": [
-        "Each rank grants a barrier equal to 1% of max health when the player takes damage.",
-        "Adds 1 Counterguard branch point per rank."
-      ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "defensive_counterguard_barrier_node_counterguard-discipline_percentModifiers",
-          "eventType": "DamageTaken",
-          "predicate": {
-            "effectOperations": [
-              "Damage"
-            ],
-            "targetMustBePlayer": true
-          },
-          "operation": {
-            "type": "grantBarrierFromMaxHealth",
-            "triggerKey": "defensive_counterguard_barrier_node",
-            "percent": 0,
-            "percentModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 0.01,
-                "nodeId": "counterguard-discipline"
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "counterguard-specialization",
-      "branchId": "counterguard",
-      "name": "Counterguard Specialization",
-      "description": "Deepens retaliation strength.",
-      "maxRank": 2,
-      "requiredLevel": 20,
-      "requiredNodeId": "counterguard-instinct",
-      "x": -1,
-      "y": 2,
-      "tags": [
-        "Tank",
-        "Barrier"
-      ],
-      "effects": [
-        "Each rank makes the next active damage effect after taking damage gain +4% effect amount.",
-        "Adds 1 Counterguard branch point per rank."
-      ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "defensive_counterguard_retaliation_nodes_counterguard-specialization_additivePercentModifiers",
-          "eventType": "DamageTaken",
-          "predicate": {
-            "effectOperations": [
-              "Damage"
-            ],
-            "targetMustBePlayer": true
-          },
-          "operation": {
-            "type": "setPendingEmpowerment",
-            "empowermentId": "defensive_counterguard_retaliation_nodes_counterguard-specialization",
-            "appliesTo": {
-              "effectOperations": [
-                "Damage"
-              ],
-              "sourceMustBePlayer": true,
-              "activeAbilityOnly": true
-            },
-            "additivePercent": 0,
-            "consumeOnUse": true,
-            "additivePercentModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 0.04,
-                "nodeId": "counterguard-specialization"
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "counterguard-mastery",
-      "branchId": "counterguard",
-      "name": "Counterguard Mastery",
-      "description": "Hardens the counter stance.",
-      "maxRank": 3,
-      "requiredLevel": 25,
-      "requiredNodeId": "counterguard-technique",
-      "x": 0,
-      "y": 2,
-      "tags": [
-        "Tank",
-        "Barrier"
-      ],
-      "effects": [
-        "Each rank reduces incoming player damage by 1%.",
-        "Adds 1 Counterguard branch point per rank."
-      ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "defensive_counterguard_nodes_reduction_counterguard-mastery_percentModifiers",
-          "eventType": "EffectCalculation",
-          "predicate": {
-            "effectOperations": [
-              "Damage"
-            ],
-            "targetMustBePlayer": true
-          },
-          "operation": {
-            "type": "addDamageReduction",
-            "percent": 0,
-            "percentModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 0.01,
-                "nodeId": "counterguard-mastery"
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "counterguard-amplifier",
-      "branchId": "counterguard",
-      "name": "Counterguard Amplifier",
-      "description": "Amplifies retaliation strength.",
-      "maxRank": 2,
-      "requiredLevel": 20,
-      "requiredNodeId": "counterguard-discipline",
-      "x": 1,
-      "y": 2,
-      "tags": [
-        "Tank",
-        "Barrier"
-      ],
-      "effects": [
-        "Each rank makes the next active damage effect after taking damage gain +5% effect amount.",
-        "Adds 1 Counterguard branch point per rank."
-      ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "defensive_counterguard_retaliation_nodes_counterguard-amplifier_additivePercentModifiers",
-          "eventType": "DamageTaken",
-          "predicate": {
-            "effectOperations": [
-              "Damage"
-            ],
-            "targetMustBePlayer": true
-          },
-          "operation": {
-            "type": "setPendingEmpowerment",
-            "empowermentId": "defensive_counterguard_retaliation_nodes_counterguard-amplifier",
-            "appliesTo": {
-              "effectOperations": [
-                "Damage"
-              ],
-              "sourceMustBePlayer": true,
-              "activeAbilityOnly": true
-            },
-            "additivePercent": 0,
-            "consumeOnUse": true,
-            "additivePercentModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 0.05,
-                "nodeId": "counterguard-amplifier"
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "counterguard-focus",
-      "branchId": "counterguard",
-      "name": "Counterguard Focus",
-      "description": "Completes the Counterguard focus.",
+      "id": "defensive_protected_execution",
+      "branchId": "left",
+      "name": "Protected Execution",
+      "description": "Mutator Group: DefensiveConversion. After Aegis activates, your next Essence ability within 8 seconds becomes Protected. Protected abilities cannot be interrupted. Damage, healing, barrier, resource, and utility effects gain +8% Effect Potency. Debuff and control effects gain +10% application chance. Summon and persistent effects gain +10% duration.",
       "maxRank": 1,
-      "requiredLevel": 40,
-      "requiredNodeId": "counterguard-mastery",
+      "requiredLevel": 10,
+      "requiredNodeId": null,
+      "x": -1,
+      "y": 3,
+      "tags": [
+        "DefensiveConversion",
+        "Left",
+        "Major"
+      ],
+      "effects": [
+        "Mutator Group: DefensiveConversion. After Aegis activates, your next Essence ability within 8 seconds becomes Protected. Protected abilities cannot be interrupted. Damage, healing, barrier, resource, and utility effects gain +8% Effect Potency. Debuff and control effects gain +10% application chance. Summon and persistent effects gain +10% duration."
+      ],
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 2,
+      "lane": "Left",
+      "nodeType": "Major",
+      "mutatorKind": "Converter",
+      "mutatorGroups": [
+        "DefensiveConversion"
+      ],
+      "mutator": {
+        "kind": "Converter",
+        "groups": [
+          "DefensiveConversion"
+        ],
+        "conditions": {
+          "requiredAbilityTags": [],
+          "anyAbilityTags": [],
+          "requiredDeliveryTags": [],
+          "anyDeliveryTags": [],
+          "requiredEffectTags": [],
+          "anyEffectTags": [
+            "Damage",
+            "Heal",
+            "Barrier",
+            "Summon",
+            "Debuff"
+          ],
+          "effectOperations": [
+            "Damage",
+            "Heal",
+            "GrantBarrier",
+            "Summon",
+            "ApplyStatus",
+            "RestoreResource"
+          ],
+          "allowedDamageTypes": [],
+          "targetSelectors": [],
+          "activeAbilityOnly": true,
+          "passiveAbilityOnly": false,
+          "allowDamageTypeConversionRequired": null,
+          "allowScalingConversionRequired": null,
+          "allowDeliveryConversionRequired": null,
+          "allowTargetingConversionRequired": null,
+          "allowSummonProxyRequired": null,
+          "allowEquipmentOverrideRequired": null,
+          "excludeTrueDamage": true,
+          "excludeHardCrowdControl": true
+        },
+        "transform": {
+          "damageType": null,
+          "targetingType": null,
+          "scalingAttribute": null,
+          "scalingCoefficientOverride": null,
+          "scalingCoefficientMultiplier": null,
+          "effectPotencyMultiplier": 1.08,
+          "cooldownMultiplier": null,
+          "resourceCostMultiplier": null,
+          "addAbilityTags": [],
+          "addDeliveryTags": [],
+          "addEffectTags": [
+            "Damage",
+            "Heal",
+            "Barrier",
+            "Summon",
+            "Debuff",
+            "Resource",
+            "Protected"
+          ],
+          "addEffectTagsToMatchingEffects": [
+            "Damage",
+            "Heal",
+            "Barrier",
+            "Summon",
+            "Debuff",
+            "Resource",
+            "Protected"
+          ]
+        },
+        "tradeoff": {
+          "effectPotencyMultiplier": 0.95,
+          "cooldownMultiplier": 1.03,
+          "resourceCostMultiplier": 1.05,
+          "procCoefficientMultiplier": null
+        },
+        "pvpCoefficient": 0.7
+      },
+      "tooltip": {
+        "affects": [
+          "Eligible active Essence abilities matching DefensiveConversion."
+        ],
+        "changes": [
+          "Mutator Group: DefensiveConversion. After Aegis activates, your next Essence ability within 8 seconds becomes Protected. Protected abilities cannot be interrupted. Damage, healing, barrier, resource, and utility effects gain +8% Effect Potency. Debuff and control effects gain +10% application chance. Summon and persistent effects gain +10% duration."
+        ],
+        "tradeoffs": [
+          "Conversion uses a +5% resource cost safety tradeoff and PvP coefficient until explicit balance values are authored."
+        ],
+        "doesNotAffect": [
+          "Abilities that do not match the listed tags, effect operations, or conversion flags.",
+          "True damage unless the ability explicitly allows conversion."
+        ]
+      }
+    },
+    {
+      "id": "defensive_guardian_conduit",
+      "branchId": "middle",
+      "name": "Guardian Conduit",
+      "description": "Mutator Group: SupportConversion. When you create a Barrier with an Essence ability, 20% of the Barrier value is also applied to your lowest-Health controlled ally. If no controlled ally exists, 15% of excess Barrier applied to you becomes Guard. While Aegis is active, this shared Barrier value is increased by 50%.",
+      "maxRank": 1,
+      "requiredLevel": 10,
+      "requiredNodeId": null,
       "x": 0,
       "y": 3,
       "tags": [
-        "Tank",
-        "Barrier"
+        "SupportConversion",
+        "Middle",
+        "Major"
       ],
       "effects": [
-        "The next active damage effect after taking damage gains +10% effect amount.",
-        "Adds 1 Counterguard branch point."
+        "Mutator Group: SupportConversion. When you create a Barrier with an Essence ability, 20% of the Barrier value is also applied to your lowest-Health controlled ally. If no controlled ally exists, 15% of excess Barrier applied to you becomes Guard. While Aegis is active, this shared Barrier value is increased by 50%."
       ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "defensive_counterguard_retaliation_nodes_counterguard-focus_additivePercentModifiers",
-          "eventType": "DamageTaken",
-          "predicate": {
-            "effectOperations": [
-              "Damage"
-            ],
-            "targetMustBePlayer": true
-          },
-          "operation": {
-            "type": "setPendingEmpowerment",
-            "empowermentId": "defensive_counterguard_retaliation_nodes_counterguard-focus",
-            "appliesTo": {
-              "effectOperations": [
-                "Damage"
-              ],
-              "sourceMustBePlayer": true,
-              "activeAbilityOnly": true
-            },
-            "additivePercent": 0,
-            "consumeOnUse": true,
-            "additivePercentModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 0.1,
-                "nodeId": "counterguard-focus"
-              }
-            ]
-          }
-        }
-      ]
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 2,
+      "lane": "Middle",
+      "nodeType": "Major",
+      "mutatorKind": "Converter",
+      "mutatorGroups": [
+        "SupportConversion"
+      ],
+      "mutator": {
+        "kind": "Converter",
+        "groups": [
+          "SupportConversion"
+        ],
+        "conditions": {
+          "requiredAbilityTags": [],
+          "anyAbilityTags": [],
+          "requiredDeliveryTags": [],
+          "anyDeliveryTags": [],
+          "requiredEffectTags": [],
+          "anyEffectTags": [
+            "Heal",
+            "Barrier",
+            "Summon",
+            "Debuff"
+          ],
+          "effectOperations": [
+            "Heal",
+            "GrantBarrier",
+            "Summon",
+            "ApplyStatus"
+          ],
+          "allowedDamageTypes": [],
+          "targetSelectors": [],
+          "activeAbilityOnly": true,
+          "passiveAbilityOnly": false,
+          "allowDamageTypeConversionRequired": null,
+          "allowScalingConversionRequired": null,
+          "allowDeliveryConversionRequired": null,
+          "allowTargetingConversionRequired": null,
+          "allowSummonProxyRequired": null,
+          "allowEquipmentOverrideRequired": null,
+          "excludeTrueDamage": true,
+          "excludeHardCrowdControl": true
+        },
+        "transform": {
+          "damageType": null,
+          "targetingType": null,
+          "scalingAttribute": null,
+          "scalingCoefficientOverride": null,
+          "scalingCoefficientMultiplier": null,
+          "effectPotencyMultiplier": 1.05,
+          "cooldownMultiplier": null,
+          "resourceCostMultiplier": null,
+          "addAbilityTags": [],
+          "addDeliveryTags": [],
+          "addEffectTags": [
+            "Heal",
+            "Barrier",
+            "Summon",
+            "Debuff",
+            "Support"
+          ],
+          "addEffectTagsToMatchingEffects": [
+            "Heal",
+            "Barrier",
+            "Summon",
+            "Debuff",
+            "Support"
+          ]
+        },
+        "tradeoff": {
+          "effectPotencyMultiplier": null,
+          "cooldownMultiplier": null,
+          "resourceCostMultiplier": 1.05,
+          "procCoefficientMultiplier": null
+        },
+        "pvpCoefficient": 0.7
+      },
+      "tooltip": {
+        "affects": [
+          "Eligible active Essence abilities matching SupportConversion."
+        ],
+        "changes": [
+          "Mutator Group: SupportConversion. When you create a Barrier with an Essence ability, 20% of the Barrier value is also applied to your lowest-Health controlled ally. If no controlled ally exists, 15% of excess Barrier applied to you becomes Guard. While Aegis is active, this shared Barrier value is increased by 50%."
+        ],
+        "tradeoffs": [
+          "Conversion uses a +5% resource cost safety tradeoff and PvP coefficient until explicit balance values are authored."
+        ],
+        "doesNotAffect": [
+          "Abilities that do not match the listed tags, effect operations, or conversion flags.",
+          "True damage unless the ability explicitly allows conversion."
+        ]
+      }
     },
     {
-      "id": "commander-path",
-      "branchId": "commander",
-      "name": "Commander Root",
-      "description": "Opens Commander summon protection.",
+      "id": "defensive_retaliatory_shell",
+      "branchId": "right",
+      "name": "Retaliatory Shell",
+      "description": "Mutator Group: DefensiveConversion. Damage absorbed by Aegis is stored as Retaliation for 8 seconds after Aegis breaks or expires. Your next Essence ability consumes Retaliation. Damage abilities gain bonus damage, healing/barrier abilities gain bonus value, debuff/control abilities gain application chance, and summon/persistent abilities grant their target a Barrier. Bonus is capped at +12% Effect Potency.",
       "maxRank": 1,
+      "requiredLevel": 10,
+      "requiredNodeId": null,
+      "x": 1,
+      "y": 3,
+      "tags": [
+        "DefensiveConversion",
+        "Right",
+        "Major"
+      ],
+      "effects": [
+        "Mutator Group: DefensiveConversion. Damage absorbed by Aegis is stored as Retaliation for 8 seconds after Aegis breaks or expires. Your next Essence ability consumes Retaliation. Damage abilities gain bonus damage, healing/barrier abilities gain bonus value, debuff/control abilities gain application chance, and summon/persistent abilities grant their target a Barrier. Bonus is capped at +12% Effect Potency."
+      ],
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 2,
+      "lane": "Right",
+      "nodeType": "Major",
+      "mutatorKind": "Converter",
+      "mutatorGroups": [
+        "DefensiveConversion"
+      ],
+      "mutator": {
+        "kind": "Converter",
+        "groups": [
+          "DefensiveConversion"
+        ],
+        "conditions": {
+          "requiredAbilityTags": [],
+          "anyAbilityTags": [],
+          "requiredDeliveryTags": [],
+          "anyDeliveryTags": [],
+          "requiredEffectTags": [],
+          "anyEffectTags": [
+            "Damage",
+            "Heal",
+            "Barrier",
+            "Summon",
+            "Debuff"
+          ],
+          "effectOperations": [
+            "Damage",
+            "Heal",
+            "GrantBarrier",
+            "Summon",
+            "ApplyStatus"
+          ],
+          "allowedDamageTypes": [],
+          "targetSelectors": [],
+          "activeAbilityOnly": true,
+          "passiveAbilityOnly": false,
+          "allowDamageTypeConversionRequired": null,
+          "allowScalingConversionRequired": null,
+          "allowDeliveryConversionRequired": null,
+          "allowTargetingConversionRequired": null,
+          "allowSummonProxyRequired": null,
+          "allowEquipmentOverrideRequired": null,
+          "excludeTrueDamage": true,
+          "excludeHardCrowdControl": true
+        },
+        "transform": {
+          "damageType": null,
+          "targetingType": null,
+          "scalingAttribute": null,
+          "scalingCoefficientOverride": null,
+          "scalingCoefficientMultiplier": null,
+          "effectPotencyMultiplier": 1.12,
+          "cooldownMultiplier": null,
+          "resourceCostMultiplier": null,
+          "addAbilityTags": [],
+          "addDeliveryTags": [],
+          "addEffectTags": [
+            "Damage",
+            "Heal",
+            "Barrier",
+            "Summon",
+            "Debuff",
+            "Protected"
+          ],
+          "addEffectTagsToMatchingEffects": [
+            "Damage",
+            "Heal",
+            "Barrier",
+            "Summon",
+            "Debuff",
+            "Protected"
+          ]
+        },
+        "tradeoff": {
+          "effectPotencyMultiplier": 0.95,
+          "cooldownMultiplier": 1.03,
+          "resourceCostMultiplier": 1.05,
+          "procCoefficientMultiplier": null
+        },
+        "pvpCoefficient": 0.7
+      },
+      "tooltip": {
+        "affects": [
+          "Eligible active Essence abilities matching DefensiveConversion."
+        ],
+        "changes": [
+          "Mutator Group: DefensiveConversion. Damage absorbed by Aegis is stored as Retaliation for 8 seconds after Aegis breaks or expires. Your next Essence ability consumes Retaliation. Damage abilities gain bonus damage, healing/barrier abilities gain bonus value, debuff/control abilities gain application chance, and summon/persistent abilities grant their target a Barrier. Bonus is capped at +12% Effect Potency."
+        ],
+        "tradeoffs": [
+          "Conversion uses a +5% resource cost safety tradeoff and PvP coefficient until explicit balance values are authored."
+        ],
+        "doesNotAffect": [
+          "Abilities that do not match the listed tags, effect operations, or conversion flags.",
+          "True damage unless the ability explicitly allows conversion."
+        ]
+      }
+    },
+    {
+      "id": "defensive_unbreakable_aegis",
+      "branchId": "left",
+      "name": "Unbreakable Aegis",
+      "description": "Aegis Barrier +20%. While Aegis is active, damage taken -10%. Aegis prevents one interrupt, stun, silence, knockback, or displacement effect.",
+      "maxRank": 1,
+      "requiredLevel": 25,
+      "requiredNodeId": null,
+      "x": -1,
+      "y": 6,
+      "tags": [
+        "Left",
+        "Major"
+      ],
+      "effects": [
+        "Aegis Barrier +20%. While Aegis is active, damage taken -10%. Aegis prevents one interrupt, stun, silence, knockback, or displacement effect."
+      ],
+      "countsTowardFocus": true,
+      "rules": [],
+      "row": 3,
+      "lane": "Left",
+      "nodeType": "Major",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "Eligible active Essence abilities."
+        ],
+        "changes": [
+          "Aegis Barrier +20%. While Aegis is active, damage taken -10%. Aegis prevents one interrupt, stun, silence, knockback, or displacement effect."
+        ],
+        "tradeoffs": [
+          "Advanced cooldowns, target caps, and PvP coefficients can be tuned per node."
+        ],
+        "doesNotAffect": [
+          "Abilities that do not match the listed tags, effect operations, or conversion flags.",
+          "True damage unless the ability explicitly allows conversion."
+        ]
+      }
+    },
+    {
+      "id": "defensive_second_wind",
+      "branchId": "middle",
+      "name": "Second Wind",
+      "description": "If you would take lethal damage while at 75+ Guard, consume 75 Guard, prevent death, set Health to 1, immediately activate Aegis at 75 Guard strength, and heal for 6% Max Health over 4 seconds. 120 second cooldown.",
+      "maxRank": 1,
+      "requiredLevel": 25,
+      "requiredNodeId": null,
+      "x": 0,
+      "y": 6,
+      "tags": [
+        "Middle",
+        "Major"
+      ],
+      "effects": [
+        "If you would take lethal damage while at 75+ Guard, consume 75 Guard, prevent death, set Health to 1, immediately activate Aegis at 75 Guard strength, and heal for 6% Max Health over 4 seconds. 120 second cooldown."
+      ],
+      "countsTowardFocus": true,
+      "rules": [],
+      "row": 3,
+      "lane": "Middle",
+      "nodeType": "Major",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "Eligible active Essence abilities."
+        ],
+        "changes": [
+          "If you would take lethal damage while at 75+ Guard, consume 75 Guard, prevent death, set Health to 1, immediately activate Aegis at 75 Guard strength, and heal for 6% Max Health over 4 seconds. 120 second cooldown."
+        ],
+        "tradeoffs": [
+          "Advanced cooldowns, target caps, and PvP coefficients can be tuned per node."
+        ],
+        "doesNotAffect": [
+          "Abilities that do not match the listed tags, effect operations, or conversion flags.",
+          "True damage unless the ability explicitly allows conversion."
+        ]
+      }
+    },
+    {
+      "id": "defensive_counterpoise",
+      "branchId": "right",
+      "name": "Counterpoise",
+      "description": "When Aegis breaks or expires, your next Essence ability within 8 seconds gains up to +12% Effect Potency based on damage absorbed by Aegis. Bonus = absorbed damage / 20% Max Health, capped at 12%. Also refunds 15% resource cost and refunds 10% cooldown if it defeats an enemy or successfully applies a debuff/control effect.",
+      "maxRank": 1,
+      "requiredLevel": 25,
+      "requiredNodeId": null,
+      "x": 1,
+      "y": 6,
+      "tags": [
+        "Right",
+        "Major"
+      ],
+      "effects": [
+        "When Aegis breaks or expires, your next Essence ability within 8 seconds gains up to +12% Effect Potency based on damage absorbed by Aegis. Bonus = absorbed damage / 20% Max Health, capped at 12%. Also refunds 15% resource cost and refunds 10% cooldown if it defeats an enemy or successfully applies a debuff/control effect."
+      ],
+      "countsTowardFocus": true,
+      "rules": [],
+      "row": 3,
+      "lane": "Right",
+      "nodeType": "Major",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "Eligible active Essence abilities."
+        ],
+        "changes": [
+          "When Aegis breaks or expires, your next Essence ability within 8 seconds gains up to +12% Effect Potency based on damage absorbed by Aegis. Bonus = absorbed damage / 20% Max Health, capped at 12%. Also refunds 15% resource cost and refunds 10% cooldown if it defeats an enemy or successfully applies a debuff/control effect."
+        ],
+        "tradeoffs": [
+          "Advanced cooldowns, target caps, and PvP coefficients can be tuned per node."
+        ],
+        "doesNotAffect": [
+          "Abilities that do not match the listed tags, effect operations, or conversion flags.",
+          "True damage unless the ability explicitly allows conversion."
+        ]
+      }
+    },
+    {
+      "id": "defensive_vital_reserves",
+      "branchId": "left",
+      "name": "Vital Reserves",
+      "description": "Max Health +3% / +6%.",
+      "maxRank": 2,
+      "requiredLevel": 1,
+      "requiredNodeId": null,
+      "x": -1,
+      "y": 1,
+      "tags": [
+        "Left",
+        "Minor",
+        "Heal"
+      ],
+      "effects": [
+        "Max Health +3% / +6%."
+      ],
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 1,
+      "lane": "Left",
+      "nodeType": "Minor",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "This style-tree passive while the node has ranks."
+        ],
+        "changes": [
+          "Max Health +3% / +6%."
+        ],
+        "tradeoffs": [],
+        "doesNotAffect": []
+      }
+    },
+    {
+      "id": "defensive_guard_discipline",
+      "branchId": "middle",
+      "name": "Guard Discipline",
+      "description": "Max Guard +10 / +20.",
+      "maxRank": 2,
       "requiredLevel": 1,
       "requiredNodeId": null,
       "x": 0,
-      "y": 0,
+      "y": 1,
       "tags": [
-        "Summon",
-        "Tank"
+        "Middle",
+        "Minor"
       ],
       "effects": [
-        "Owned summons gain +3% max health.",
-        "Does not choose Commander as the effective focus by itself."
+        "Max Guard +10 / +20."
       ],
       "countsTowardFocus": false,
-      "rules": [
-        {
-          "id": "defensive_commander_summon_stats_nodes_commander-path_maxHealthPercentModifiers",
-          "eventType": "SummonCreated",
-          "predicate": {
-            "sourceMustBePlayer": true
-          },
-          "operation": {
-            "type": "modifySummonStats",
-            "maxHealthPercent": 0,
-            "maxHealthPercentModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 0.03,
-                "nodeId": "commander-path"
-              }
-            ]
-          }
-        }
-      ]
+      "rules": [],
+      "row": 1,
+      "lane": "Middle",
+      "nodeType": "Minor",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "This style-tree passive while the node has ranks."
+        ],
+        "changes": [
+          "Max Guard +10 / +20."
+        ],
+        "tradeoffs": [],
+        "doesNotAffect": []
+      }
     },
     {
-      "id": "commander-instinct",
-      "branchId": "commander",
-      "name": "Commander Instinct",
-      "description": "Turns summon damage into Guard.",
-      "maxRank": 3,
-      "requiredLevel": 5,
-      "requiredNodeId": "commander-path",
-      "x": -1,
+      "id": "defensive_firm_footing",
+      "branchId": "right",
+      "name": "Firm Footing",
+      "description": "Stun, silence, disarm, knockback, and displacement duration against you reduced by 8% / 16%.",
+      "maxRank": 2,
+      "requiredLevel": 1,
+      "requiredNodeId": null,
+      "x": 1,
       "y": 1,
       "tags": [
-        "Summon",
-        "Tank"
+        "Right",
+        "Minor",
+        "Debuff"
       ],
       "effects": [
-        "Each rank grants +1 Guard to the owner when an owned summon takes damage.",
-        "Adds 1 Commander branch point per rank."
+        "Stun, silence, disarm, knockback, and displacement duration against you reduced by 8% / 16%."
       ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "defensive_commander_guard_on_summon_taken_commander-instinct_amountModifiers",
-          "eventType": "DamageTaken",
-          "predicate": {
-            "effectOperations": [
-              "Damage"
-            ],
-            "targetMustBeOwnedSummon": true
-          },
-          "operation": {
-            "type": "gainStyleResource",
-            "resourceId": "guard",
-            "amount": 0,
-            "usesProcCoefficient": true,
-            "amountModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 1,
-                "nodeId": "commander-instinct"
-              }
-            ]
-          }
-        }
-      ]
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 1,
+      "lane": "Right",
+      "nodeType": "Minor",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "This style-tree passive while the node has ranks."
+        ],
+        "changes": [
+          "Stun, silence, disarm, knockback, and displacement duration against you reduced by 8% / 16%."
+        ],
+        "tradeoffs": [],
+        "doesNotAffect": []
+      }
     },
     {
-      "id": "commander-technique",
-      "branchId": "commander",
-      "name": "Commander Technique",
-      "description": "Improves owned summon durability and power.",
-      "maxRank": 3,
+      "id": "defensive_composed_breathing",
+      "branchId": "middle",
+      "name": "Composed Breathing",
+      "description": "When you gain Guard, restore 0.5% / 1% missing primary resource. 2 second internal cooldown. If you have no primary resource, restore Health instead.",
+      "maxRank": 2,
+      "requiredLevel": 1,
+      "requiredNodeId": null,
+      "x": 0,
+      "y": 2,
+      "tags": [
+        "Middle",
+        "Minor",
+        "Heal"
+      ],
+      "effects": [
+        "When you gain Guard, restore 0.5% / 1% missing primary resource. 2 second internal cooldown. If you have no primary resource, restore Health instead."
+      ],
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 1,
+      "lane": "Middle",
+      "nodeType": "Minor",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "This style-tree passive while the node has ranks."
+        ],
+        "changes": [
+          "When you gain Guard, restore 0.5% / 1% missing primary resource. 2 second internal cooldown. If you have no primary resource, restore Health instead."
+        ],
+        "tradeoffs": [],
+        "doesNotAffect": []
+      }
+    },
+    {
+      "id": "defensive_reinforced_aegis",
+      "branchId": "left",
+      "name": "Reinforced Aegis",
+      "description": "Aegis Barrier +8% / +16%.",
+      "maxRank": 2,
       "requiredLevel": 10,
-      "requiredNodeId": "commander-path",
-      "x": 0,
-      "y": 1,
-      "tags": [
-        "Summon",
-        "Tank"
-      ],
-      "effects": [
-        "Each rank gives owned summons +3% max health and +1% power.",
-        "Adds 1 Commander branch point per rank."
-      ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "defensive_commander_summon_stats_nodes_commander-technique_maxHealthPercentModifiers",
-          "eventType": "SummonCreated",
-          "predicate": {
-            "sourceMustBePlayer": true
-          },
-          "operation": {
-            "type": "modifySummonStats",
-            "maxHealthPercent": 0,
-            "maxHealthPercentModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 0.03,
-                "nodeId": "commander-technique"
-              }
-            ]
-          }
-        },
-        {
-          "id": "defensive_commander_summon_stats_nodes_commander-technique_damagePercentModifiers",
-          "eventType": "SummonCreated",
-          "predicate": {
-            "sourceMustBePlayer": true
-          },
-          "operation": {
-            "type": "modifySummonStats",
-            "damagePercent": 0,
-            "damagePercentModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 0.01,
-                "nodeId": "commander-technique"
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "commander-discipline",
-      "branchId": "commander",
-      "name": "Commander Discipline",
-      "description": "Protects owned summons from direct damage.",
-      "maxRank": 3,
-      "requiredLevel": 5,
-      "requiredNodeId": "commander-path",
-      "x": 1,
-      "y": 1,
-      "tags": [
-        "Summon",
-        "Tank"
-      ],
-      "effects": [
-        "Each rank reduces incoming damage to owned summons by 2%.",
-        "Adds 1 Commander branch point per rank."
-      ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "defensive_commander_summon_damage_reduction_commander-discipline_percentModifiers",
-          "eventType": "EffectCalculation",
-          "predicate": {
-            "effectOperations": [
-              "Damage"
-            ],
-            "targetMustBeOwnedSummon": true
-          },
-          "operation": {
-            "type": "addDamageReduction",
-            "percent": 0,
-            "percentModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 0.02,
-                "nodeId": "commander-discipline"
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "commander-specialization",
-      "branchId": "commander",
-      "name": "Commander Specialization",
-      "description": "Improves owned summon effect output.",
-      "maxRank": 2,
-      "requiredLevel": 20,
-      "requiredNodeId": "commander-instinct",
+      "requiredNodeId": null,
       "x": -1,
-      "y": 2,
+      "y": 4,
       "tags": [
-        "Summon",
-        "Tank"
+        "Left",
+        "Minor",
+        "Barrier"
       ],
       "effects": [
-        "Each rank gives owned summon effects +3% effect amount.",
-        "Adds 1 Commander branch point per rank."
+        "Aegis Barrier +8% / +16%."
       ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "defensive_commander_summon_effect_bonus_commander-specialization_additivePercentModifiers",
-          "eventType": "EffectCalculation",
-          "predicate": {
-            "amplifiableEffectOnly": true,
-            "sourceMustBeOwnedSummon": true
-          },
-          "operation": {
-            "type": "modifyEffectAmount",
-            "additivePercent": 0,
-            "additivePercentModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 0.03,
-                "nodeId": "commander-specialization"
-              }
-            ]
-          }
-        }
-      ]
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 2,
+      "lane": "Left",
+      "nodeType": "Minor",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "This style-tree passive while the node has ranks."
+        ],
+        "changes": [
+          "Aegis Barrier +8% / +16%."
+        ],
+        "tradeoffs": [],
+        "doesNotAffect": []
+      }
     },
     {
-      "id": "commander-mastery",
-      "branchId": "commander",
-      "name": "Commander Mastery",
-      "description": "Further improves owned summon attributes.",
-      "maxRank": 3,
-      "requiredLevel": 25,
-      "requiredNodeId": "commander-technique",
-      "x": 0,
-      "y": 2,
-      "tags": [
-        "Summon",
-        "Tank"
-      ],
-      "effects": [
-        "Each rank gives owned summons +4% max health and +2% power.",
-        "Adds 1 Commander branch point per rank."
-      ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "defensive_commander_summon_stats_nodes_commander-mastery_maxHealthPercentModifiers",
-          "eventType": "SummonCreated",
-          "predicate": {
-            "sourceMustBePlayer": true
-          },
-          "operation": {
-            "type": "modifySummonStats",
-            "maxHealthPercent": 0,
-            "maxHealthPercentModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 0.04,
-                "nodeId": "commander-mastery"
-              }
-            ]
-          }
-        },
-        {
-          "id": "defensive_commander_summon_stats_nodes_commander-mastery_damagePercentModifiers",
-          "eventType": "SummonCreated",
-          "predicate": {
-            "sourceMustBePlayer": true
-          },
-          "operation": {
-            "type": "modifySummonStats",
-            "damagePercent": 0,
-            "damagePercentModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 0.02,
-                "nodeId": "commander-mastery"
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "commander-amplifier",
-      "branchId": "commander",
-      "name": "Commander Amplifier",
-      "description": "Improves command response.",
+      "id": "defensive_clean_recovery",
+      "branchId": "middle",
+      "name": "Clean Recovery",
+      "description": "When Aegis activates, reduce current negative effect durations on you by 10% / 20%.",
       "maxRank": 2,
-      "requiredLevel": 20,
-      "requiredNodeId": "commander-discipline",
-      "x": 1,
-      "y": 2,
+      "requiredLevel": 10,
+      "requiredNodeId": null,
+      "x": 0,
+      "y": 4,
       "tags": [
-        "Summon",
-        "Tank"
+        "Middle",
+        "Minor"
       ],
       "effects": [
-        "Each rank grants +2 Guard to the owner when an owned summon takes damage.",
-        "Each rank gives owned summon effects +2% effect amount.",
-        "Adds 1 Commander branch point per rank."
+        "When Aegis activates, reduce current negative effect durations on you by 10% / 20%."
       ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "defensive_commander_summon_effect_bonus_commander-amplifier_additivePercentModifiers",
-          "eventType": "EffectCalculation",
-          "predicate": {
-            "amplifiableEffectOnly": true,
-            "sourceMustBeOwnedSummon": true
-          },
-          "operation": {
-            "type": "modifyEffectAmount",
-            "additivePercent": 0,
-            "additivePercentModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 0.02,
-                "nodeId": "commander-amplifier"
-              }
-            ]
-          }
-        },
-        {
-          "id": "defensive_commander_guard_on_summon_taken_commander-amplifier_amountModifiers",
-          "eventType": "DamageTaken",
-          "predicate": {
-            "effectOperations": [
-              "Damage"
-            ],
-            "targetMustBeOwnedSummon": true
-          },
-          "operation": {
-            "type": "gainStyleResource",
-            "resourceId": "guard",
-            "amount": 0,
-            "usesProcCoefficient": true,
-            "amountModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 2,
-                "nodeId": "commander-amplifier"
-              }
-            ]
-          }
-        }
-      ]
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 2,
+      "lane": "Middle",
+      "nodeType": "Minor",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "This style-tree passive while the node has ranks."
+        ],
+        "changes": [
+          "When Aegis activates, reduce current negative effect durations on you by 10% / 20%."
+        ],
+        "tradeoffs": [],
+        "doesNotAffect": []
+      }
     },
     {
-      "id": "commander-focus",
-      "branchId": "commander",
-      "name": "Commander Focus",
-      "description": "Completes the Commander focus.",
-      "maxRank": 1,
-      "requiredLevel": 40,
-      "requiredNodeId": "commander-mastery",
-      "x": 0,
-      "y": 3,
+      "id": "defensive_pressure_release",
+      "branchId": "right",
+      "name": "Pressure Release",
+      "description": "Every 25 Guard spent reduces the remaining cooldown of your highest-cooldown non-style Essence ability by 0.5 / 1 second.",
+      "maxRank": 2,
+      "requiredLevel": 10,
+      "requiredNodeId": null,
+      "x": 1,
+      "y": 4,
       "tags": [
-        "Summon",
-        "Tank"
+        "Right",
+        "Minor"
       ],
       "effects": [
-        "Owned summons gain +8% max health and +4% power.",
-        "The owner gains +3 Guard when an owned summon takes damage.",
-        "Adds 1 Commander branch point."
+        "Every 25 Guard spent reduces the remaining cooldown of your highest-cooldown non-style Essence ability by 0.5 / 1 second."
       ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "defensive_commander_guard_on_summon_taken_commander-focus_amountModifiers",
-          "eventType": "DamageTaken",
-          "predicate": {
-            "effectOperations": [
-              "Damage"
-            ],
-            "targetMustBeOwnedSummon": true
-          },
-          "operation": {
-            "type": "gainStyleResource",
-            "resourceId": "guard",
-            "amount": 0,
-            "usesProcCoefficient": true,
-            "amountModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 3,
-                "nodeId": "commander-focus"
-              }
-            ]
-          }
-        },
-        {
-          "id": "defensive_commander_summon_stats_nodes_commander-focus_maxHealthPercentModifiers",
-          "eventType": "SummonCreated",
-          "predicate": {
-            "sourceMustBePlayer": true
-          },
-          "operation": {
-            "type": "modifySummonStats",
-            "maxHealthPercent": 0,
-            "maxHealthPercentModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 0.08,
-                "nodeId": "commander-focus"
-              }
-            ]
-          }
-        },
-        {
-          "id": "defensive_commander_summon_stats_nodes_commander-focus_damagePercentModifiers",
-          "eventType": "SummonCreated",
-          "predicate": {
-            "sourceMustBePlayer": true
-          },
-          "operation": {
-            "type": "modifySummonStats",
-            "damagePercent": 0,
-            "damagePercentModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 0.04,
-                "nodeId": "commander-focus"
-              }
-            ]
-          }
-        }
-      ]
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 2,
+      "lane": "Right",
+      "nodeType": "Minor",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "This style-tree passive while the node has ranks."
+        ],
+        "changes": [
+          "Every 25 Guard spent reduces the remaining cooldown of your highest-cooldown non-style Essence ability by 0.5 / 1 second."
+        ],
+        "tradeoffs": [],
+        "doesNotAffect": []
+      }
+    },
+    {
+      "id": "defensive_guarded_casting",
+      "branchId": "middle",
+      "name": "Guarded Casting",
+      "description": "Essence abilities used while you have a Barrier gain +2% / +4% Effect Potency.",
+      "maxRank": 2,
+      "requiredLevel": 10,
+      "requiredNodeId": null,
+      "x": 0,
+      "y": 5,
+      "tags": [
+        "Middle",
+        "Minor",
+        "Barrier"
+      ],
+      "effects": [
+        "Essence abilities used while you have a Barrier gain +2% / +4% Effect Potency."
+      ],
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 2,
+      "lane": "Middle",
+      "nodeType": "Minor",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "This style-tree passive while the node has ranks."
+        ],
+        "changes": [
+          "Essence abilities used while you have a Barrier gain +2% / +4% Effect Potency."
+        ],
+        "tradeoffs": [],
+        "doesNotAffect": []
+      }
+    },
+    {
+      "id": "defensive_emergency_guard",
+      "branchId": "left",
+      "name": "Emergency Guard",
+      "description": "When you fall below 40% Health, gain 20 / 40 Guard. 45 second cooldown.",
+      "maxRank": 2,
+      "requiredLevel": 25,
+      "requiredNodeId": null,
+      "x": -1,
+      "y": 7,
+      "tags": [
+        "Left",
+        "Minor",
+        "Heal"
+      ],
+      "effects": [
+        "When you fall below 40% Health, gain 20 / 40 Guard. 45 second cooldown."
+      ],
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 3,
+      "lane": "Left",
+      "nodeType": "Minor",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "This style-tree passive while the node has ranks."
+        ],
+        "changes": [
+          "When you fall below 40% Health, gain 20 / 40 Guard. 45 second cooldown."
+        ],
+        "tradeoffs": [],
+        "doesNotAffect": []
+      }
+    },
+    {
+      "id": "defensive_soft_landing",
+      "branchId": "middle",
+      "name": "Soft Landing",
+      "description": "When Aegis breaks, gain 4% / 8% damage reduction for 3 seconds.",
+      "maxRank": 2,
+      "requiredLevel": 25,
+      "requiredNodeId": null,
+      "x": 0,
+      "y": 7,
+      "tags": [
+        "Middle",
+        "Minor",
+        "Damage"
+      ],
+      "effects": [
+        "When Aegis breaks, gain 4% / 8% damage reduction for 3 seconds."
+      ],
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 3,
+      "lane": "Middle",
+      "nodeType": "Minor",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "This style-tree passive while the node has ranks."
+        ],
+        "changes": [
+          "When Aegis breaks, gain 4% / 8% damage reduction for 3 seconds."
+        ],
+        "tradeoffs": [],
+        "doesNotAffect": []
+      }
+    },
+    {
+      "id": "defensive_critical_guard",
+      "branchId": "right",
+      "name": "Critical Guard",
+      "description": "Enemy critical damage against you reduced by 6% / 12%.",
+      "maxRank": 2,
+      "requiredLevel": 25,
+      "requiredNodeId": null,
+      "x": 1,
+      "y": 7,
+      "tags": [
+        "Right",
+        "Minor",
+        "Damage"
+      ],
+      "effects": [
+        "Enemy critical damage against you reduced by 6% / 12%."
+      ],
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 3,
+      "lane": "Right",
+      "nodeType": "Minor",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "This style-tree passive while the node has ranks."
+        ],
+        "changes": [
+          "Enemy critical damage against you reduced by 6% / 12%."
+        ],
+        "tradeoffs": [],
+        "doesNotAffect": []
+      }
+    },
+    {
+      "id": "defensive_excess_protection",
+      "branchId": "middle",
+      "name": "Excess Protection",
+      "description": "10% / 20% of overhealing or excess barrier applied to you becomes Guard.",
+      "maxRank": 2,
+      "requiredLevel": 25,
+      "requiredNodeId": null,
+      "x": 0,
+      "y": 8,
+      "tags": [
+        "Middle",
+        "Minor",
+        "Heal",
+        "Barrier"
+      ],
+      "effects": [
+        "10% / 20% of overhealing or excess barrier applied to you becomes Guard."
+      ],
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 3,
+      "lane": "Middle",
+      "nodeType": "Minor",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "This style-tree passive while the node has ranks."
+        ],
+        "changes": [
+          "10% / 20% of overhealing or excess barrier applied to you becomes Guard."
+        ],
+        "tradeoffs": [],
+        "doesNotAffect": []
+      }
     }
   ]
 }
-

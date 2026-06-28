@@ -114,10 +114,29 @@ public sealed class CombatStyleSkillTreeNodeDto : IMapFrom<CombatStyleSkillTreeN
     public bool CanRankUp { get; set; }
     public IReadOnlyList<string> Tags { get; set; } = [];
     public IReadOnlyList<string> Effects { get; set; } = [];
+    public int Row { get; set; }
+    public string Lane { get; set; } = string.Empty;
+    public string NodeType { get; set; } = string.Empty;
+    public string? MutatorKind { get; set; }
+    public IReadOnlyList<string> MutatorGroups { get; set; } = [];
+    public CombatStyleNodeTooltipDto Tooltip { get; set; } = new();
 
     public void Mapping(Profile profile)
     {
         profile.CreateMap<CombatStyleSkillTreeNodeModel, CombatStyleSkillTreeNodeDto>();
+    }
+}
+
+public sealed class CombatStyleNodeTooltipDto : IMapFrom<CombatStyleNodeTooltipModel>
+{
+    public IReadOnlyList<string> Affects { get; set; } = [];
+    public IReadOnlyList<string> Changes { get; set; } = [];
+    public IReadOnlyList<string> Tradeoffs { get; set; } = [];
+    public IReadOnlyList<string> DoesNotAffect { get; set; } = [];
+
+    public void Mapping(Profile profile)
+    {
+        profile.CreateMap<CombatStyleNodeTooltipModel, CombatStyleNodeTooltipDto>();
     }
 }
 

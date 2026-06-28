@@ -17,260 +17,52 @@
   ],
   "focuses": [
     {
-      "id": "duelist",
-      "name": "Duelist",
-      "description": "Reliable precision: active single-target damage effects scale upward at levels 10, 25, and 40.",
-      "unlockLevel": 10,
+      "id": "fighter_juggernaut_trance",
+      "name": "Juggernaut Trance",
+      "description": "Overpower also grants 12% damage reduction and 20% crowd control resistance for 8 seconds.",
+      "unlockLevel": 25,
       "recommendedTags": [
-        "Melee"
+        "Left",
+        "Major"
       ],
       "recommendedStats": [
         "Power",
+        "WeaponDamage",
         "Precision"
       ],
-      "rules": [
-        {
-          "id": "fighter_duelist_damage_l10",
-          "eventType": "EffectCalculation",
-          "minStyleLevel": 10,
-          "maxStyleLevel": 24,
-          "predicate": {
-            "sourceMustBePlayer": true,
-            "activeAbilityOnly": true,
-            "effectOperations": [
-              "Damage"
-            ],
-            "targetSelectors": [
-              "CurrentTarget"
-            ]
-          },
-          "operation": {
-            "type": "modifyEffectAmount",
-            "additivePercent": 0.08
-          }
-        },
-        {
-          "id": "fighter_duelist_damage_l25",
-          "eventType": "EffectCalculation",
-          "minStyleLevel": 25,
-          "maxStyleLevel": 39,
-          "predicate": {
-            "sourceMustBePlayer": true,
-            "activeAbilityOnly": true,
-            "effectOperations": [
-              "Damage"
-            ],
-            "targetSelectors": [
-              "CurrentTarget"
-            ]
-          },
-          "operation": {
-            "type": "modifyEffectAmount",
-            "additivePercent": 0.12
-          }
-        },
-        {
-          "id": "fighter_duelist_damage_l40",
-          "eventType": "EffectCalculation",
-          "minStyleLevel": 40,
-          "predicate": {
-            "sourceMustBePlayer": true,
-            "activeAbilityOnly": true,
-            "effectOperations": [
-              "Damage"
-            ],
-            "targetSelectors": [
-              "CurrentTarget"
-            ]
-          },
-          "operation": {
-            "type": "modifyEffectAmount",
-            "additivePercent": 0.16
-          }
-        }
-      ]
+      "rules": []
     },
     {
-      "id": "berserker",
-      "name": "Berserker",
-      "description": "Risk pressure: active damage is empowered while wounded, scaling higher at levels 25 and 40.",
-      "unlockLevel": 10,
+      "id": "fighter_duelists_claim",
+      "name": "Duelists Claim",
+      "description": "Overpower marks the primary target for 10 seconds. Your Essence effects against the marked target gain +10% Effect Potency. The marked enemy deals 8% less damage to you. If the mark is an ally, your healing/barriers/buffs on that ally gain +10% Effect Potency and the ally takes 8% less damage.",
+      "unlockLevel": 25,
       "recommendedTags": [
-        "Melee",
-        "Bleed"
+        "Middle",
+        "Major"
       ],
       "recommendedStats": [
         "Power",
-        "CritDamage"
+        "WeaponDamage",
+        "Precision"
       ],
-      "rules": [
-        {
-          "id": "fighter_berserker_damage_l10",
-          "eventType": "EffectCalculation",
-          "minStyleLevel": 10,
-          "maxStyleLevel": 24,
-          "predicate": {
-            "sourceMustBePlayer": true,
-            "activeAbilityOnly": true,
-            "effectOperations": [
-              "Damage"
-            ],
-            "sourceHealthPercentAtOrBelow": 50
-          },
-          "operation": {
-            "type": "modifyEffectAmount",
-            "additivePercent": 0.12
-          }
-        },
-        {
-          "id": "fighter_berserker_damage_l25",
-          "eventType": "EffectCalculation",
-          "minStyleLevel": 25,
-          "maxStyleLevel": 39,
-          "predicate": {
-            "sourceMustBePlayer": true,
-            "activeAbilityOnly": true,
-            "effectOperations": [
-              "Damage"
-            ],
-            "sourceHealthPercentAtOrBelow": 50
-          },
-          "operation": {
-            "type": "modifyEffectAmount",
-            "additivePercent": 0.18
-          }
-        },
-        {
-          "id": "fighter_berserker_damage_l40",
-          "eventType": "EffectCalculation",
-          "minStyleLevel": 40,
-          "predicate": {
-            "sourceMustBePlayer": true,
-            "activeAbilityOnly": true,
-            "effectOperations": [
-              "Damage"
-            ],
-            "sourceHealthPercentAtOrBelow": 60
-          },
-          "operation": {
-            "type": "modifyEffectAmount",
-            "additivePercent": 0.24
-          }
-        }
-      ]
+      "rules": []
     },
     {
-      "id": "vanguard",
-      "name": "Vanguard",
-      "description": "Durable pressure: direct damage reduction and Momentum gained when hit scale at levels 10, 25, and 40.",
-      "unlockLevel": 10,
+      "id": "fighter_finishers_surge",
+      "name": "Finishers Surge",
+      "description": "If an Overpowered Essence ability defeats an enemy or saves an ally below 30% Health with healing/barrier, refund 30 Battle Rhythm and reduce Overpower's remaining cooldown by 25%.",
+      "unlockLevel": 25,
       "recommendedTags": [
-        "Tank",
-        "Melee"
+        "Right",
+        "Major"
       ],
       "recommendedStats": [
         "Power",
-        "Armor"
+        "WeaponDamage",
+        "Precision"
       ],
-      "rules": [
-        {
-          "id": "fighter_vanguard_damage_reduction_l10",
-          "eventType": "EffectCalculation",
-          "minStyleLevel": 10,
-          "maxStyleLevel": 24,
-          "predicate": {
-            "targetMustBePlayer": true,
-            "effectOperations": [
-              "Damage"
-            ]
-          },
-          "operation": {
-            "type": "addDamageReduction",
-            "percent": 0.05
-          }
-        },
-        {
-          "id": "fighter_vanguard_damage_reduction_l25",
-          "eventType": "EffectCalculation",
-          "minStyleLevel": 25,
-          "maxStyleLevel": 39,
-          "predicate": {
-            "targetMustBePlayer": true,
-            "effectOperations": [
-              "Damage"
-            ]
-          },
-          "operation": {
-            "type": "addDamageReduction",
-            "percent": 0.08
-          }
-        },
-        {
-          "id": "fighter_vanguard_damage_reduction_l40",
-          "eventType": "EffectCalculation",
-          "minStyleLevel": 40,
-          "predicate": {
-            "targetMustBePlayer": true,
-            "effectOperations": [
-              "Damage"
-            ]
-          },
-          "operation": {
-            "type": "addDamageReduction",
-            "percent": 0.12
-          }
-        },
-        {
-          "id": "fighter_vanguard_momentum_taken_l10",
-          "eventType": "DamageTaken",
-          "minStyleLevel": 10,
-          "maxStyleLevel": 24,
-          "predicate": {
-            "targetMustBePlayer": true,
-            "effectOperations": [
-              "Damage"
-            ]
-          },
-          "operation": {
-            "type": "gainStyleResource",
-            "resourceId": "momentum",
-            "amount": 4
-          }
-        },
-        {
-          "id": "fighter_vanguard_momentum_taken_l25",
-          "eventType": "DamageTaken",
-          "minStyleLevel": 25,
-          "maxStyleLevel": 39,
-          "predicate": {
-            "targetMustBePlayer": true,
-            "effectOperations": [
-              "Damage"
-            ]
-          },
-          "operation": {
-            "type": "gainStyleResource",
-            "resourceId": "momentum",
-            "amount": 6
-          }
-        },
-        {
-          "id": "fighter_vanguard_momentum_taken_l40",
-          "eventType": "DamageTaken",
-          "minStyleLevel": 40,
-          "predicate": {
-            "targetMustBePlayer": true,
-            "effectOperations": [
-              "Damage"
-            ]
-          },
-          "operation": {
-            "type": "gainStyleResource",
-            "resourceId": "momentum",
-            "amount": 8
-          }
-        }
-      ]
+      "rules": []
     }
   ],
   "rules": [
@@ -303,1079 +95,1029 @@
       },
       "additivePercent": 0.15,
       "consumeOnUse": true,
-      "additivePercentModifiers": [
-        {
-          "type": "nodeRank",
-          "nodeId": "duelist-specialization",
-          "value": 0.03
-        },
-        {
-          "type": "nodeRank",
-          "nodeId": "duelist-amplifier",
-          "value": 0.04
-        },
-        {
-          "type": "nodeRank",
-          "nodeId": "duelist-focus",
-          "value": 0.05
-        },
-        {
-          "type": "nodeRank",
-          "nodeId": "berserker-specialization",
-          "value": 0.04
-        },
-        {
-          "type": "nodeRank",
-          "nodeId": "vanguard-amplifier",
-          "value": 0.03
-        }
-      ]
+      "additivePercentModifiers": []
     }
   ],
   "coreMechanic": "Gain Momentum from direct damage. At 100 Momentum, empower the next direct damage active effect.",
   "skillTreeNodes": [
     {
-      "id": "duelist-path",
-      "branchId": "duelist",
-      "name": "Duelist Root",
-      "description": "Opens Duelist precision training.",
+      "id": "fighter_bruisers_grit",
+      "branchId": "left",
+      "name": "Bruisers Grit",
+      "description": "Max Health +5%. Taking direct Health damage grants +4 additional Battle Rhythm. After you hit with a direct Essence ability, heal for 1% Max Health. 3 second internal cooldown.",
+      "maxRank": 1,
+      "requiredLevel": 1,
+      "requiredNodeId": null,
+      "x": -1,
+      "y": 0,
+      "tags": [
+        "Left",
+        "Major"
+      ],
+      "effects": [
+        "Max Health +5%. Taking direct Health damage grants +4 additional Battle Rhythm. After you hit with a direct Essence ability, heal for 1% Max Health. 3 second internal cooldown."
+      ],
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 1,
+      "lane": "Left",
+      "nodeType": "Major",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "Eligible active Essence abilities."
+        ],
+        "changes": [
+          "Max Health +5%. Taking direct Health damage grants +4 additional Battle Rhythm. After you hit with a direct Essence ability, heal for 1% Max Health. 3 second internal cooldown."
+        ],
+        "tradeoffs": [
+          "Advanced cooldowns, target caps, and PvP coefficients can be tuned per node."
+        ],
+        "doesNotAffect": [
+          "Abilities that do not match the listed tags, effect operations, or conversion flags.",
+          "True damage unless the ability explicitly allows conversion."
+        ]
+      }
+    },
+    {
+      "id": "fighter_duelists_focus",
+      "branchId": "middle",
+      "name": "Duelists Focus",
+      "description": "Repeatedly affecting the same target increases your Effect Potency against that target by 2% per stack, up to 6%. Stacks last 6 seconds. At 3 stacks, gain +10 Battle Rhythm.",
       "maxRank": 1,
       "requiredLevel": 1,
       "requiredNodeId": null,
       "x": 0,
       "y": 0,
       "tags": [
-        "Melee"
+        "Middle",
+        "Major"
       ],
       "effects": [
-        "Active damage against the current target gains +1% effect amount.",
-        "Does not choose Duelist as the effective focus by itself."
+        "Repeatedly affecting the same target increases your Effect Potency against that target by 2% per stack, up to 6%. Stacks last 6 seconds. At 3 stacks, gain +10 Battle Rhythm."
       ],
       "countsTowardFocus": false,
-      "rules": [
-        {
-          "id": "fighter_duelist_nodes_current_target_duelist-path_additivePercentModifiers",
-          "eventType": "EffectCalculation",
-          "predicate": {
-            "effectOperations": [
-              "Damage"
-            ],
-            "sourceMustBePlayer": true,
-            "targetSelectors": [
-              "CurrentTarget"
-            ],
-            "activeAbilityOnly": true
-          },
-          "operation": {
-            "type": "modifyEffectAmount",
-            "additivePercent": 0,
-            "additivePercentModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 0.01,
-                "nodeId": "duelist-path"
-              }
-            ]
-          }
-        }
-      ]
+      "rules": [],
+      "row": 1,
+      "lane": "Middle",
+      "nodeType": "Major",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "Eligible active Essence abilities."
+        ],
+        "changes": [
+          "Repeatedly affecting the same target increases your Effect Potency against that target by 2% per stack, up to 6%. Stacks last 6 seconds. At 3 stacks, gain +10 Battle Rhythm."
+        ],
+        "tradeoffs": [
+          "Advanced cooldowns, target caps, and PvP coefficients can be tuned per node."
+        ],
+        "doesNotAffect": [
+          "Abilities that do not match the listed tags, effect operations, or conversion flags.",
+          "True damage unless the ability explicitly allows conversion."
+        ]
+      }
     },
     {
-      "id": "duelist-instinct",
-      "branchId": "duelist",
-      "name": "Duelist Instinct",
-      "description": "Builds extra Momentum from direct damage.",
-      "maxRank": 3,
-      "requiredLevel": 5,
-      "requiredNodeId": "duelist-path",
-      "x": -1,
-      "y": 1,
-      "tags": [
-        "Melee"
-      ],
-      "effects": [
-        "Each rank grants +1 additional Momentum when the player deals direct damage.",
-        "Adds 1 Duelist branch point per rank."
-      ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "fighter_nodes_momentum_on_damage_duelist-instinct_amountModifiers",
-          "eventType": "DamageDealt",
-          "predicate": {
-            "sourceMustBePlayer": true,
-            "effectOperations": [
-              "Damage"
-            ]
-          },
-          "operation": {
-            "type": "gainStyleResource",
-            "resourceId": "momentum",
-            "amount": 0,
-            "usesProcCoefficient": true,
-            "amountModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 1,
-                "nodeId": "duelist-instinct"
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "duelist-technique",
-      "branchId": "duelist",
-      "name": "Duelist Technique",
-      "description": "Improves current-target active damage.",
-      "maxRank": 3,
-      "requiredLevel": 10,
-      "requiredNodeId": "duelist-path",
-      "x": 0,
-      "y": 1,
-      "tags": [
-        "Melee"
-      ],
-      "effects": [
-        "Each rank gives active damage against the current target +2% effect amount.",
-        "Adds 1 Duelist branch point per rank."
-      ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "fighter_duelist_nodes_current_target_duelist-technique_additivePercentModifiers",
-          "eventType": "EffectCalculation",
-          "predicate": {
-            "effectOperations": [
-              "Damage"
-            ],
-            "sourceMustBePlayer": true,
-            "targetSelectors": [
-              "CurrentTarget"
-            ],
-            "activeAbilityOnly": true
-          },
-          "operation": {
-            "type": "modifyEffectAmount",
-            "additivePercent": 0,
-            "additivePercentModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 0.02,
-                "nodeId": "duelist-technique"
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "duelist-discipline",
-      "branchId": "duelist",
-      "name": "Duelist Discipline",
-      "description": "Improves martial active damage.",
-      "maxRank": 3,
-      "requiredLevel": 5,
-      "requiredNodeId": "duelist-path",
-      "x": 1,
-      "y": 1,
-      "tags": [
-        "Melee"
-      ],
-      "effects": [
-        "Each rank gives active Melee or Physical damage +1% effect amount.",
-        "Adds 1 Duelist branch point per rank."
-      ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "fighter_duelist_discipline_duelist-discipline_additivePercentModifiers",
-          "eventType": "EffectCalculation",
-          "predicate": {
-            "effectOperations": [
-              "Damage"
-            ],
-            "sourceMustBePlayer": true,
-            "anyTags": [
-              "Melee",
-              "Physical"
-            ],
-            "activeAbilityOnly": true
-          },
-          "operation": {
-            "type": "modifyEffectAmount",
-            "additivePercent": 0,
-            "additivePercentModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 0.01,
-                "nodeId": "duelist-discipline"
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "duelist-specialization",
-      "branchId": "duelist",
-      "name": "Duelist Specialization",
-      "description": "Improves Momentum empowerment.",
-      "maxRank": 2,
-      "requiredLevel": 20,
-      "requiredNodeId": "duelist-instinct",
-      "x": -1,
-      "y": 2,
-      "tags": [
-        "Melee"
-      ],
-      "effects": [
-        "Each rank makes Momentum empowerment +3% stronger.",
-        "Adds 1 Duelist branch point per rank."
-      ],
-      "countsTowardFocus": true
-    },
-    {
-      "id": "duelist-mastery",
-      "branchId": "duelist",
-      "name": "Duelist Mastery",
-      "description": "Deepens current-target active damage.",
-      "maxRank": 3,
-      "requiredLevel": 25,
-      "requiredNodeId": "duelist-technique",
-      "x": 0,
-      "y": 2,
-      "tags": [
-        "Melee"
-      ],
-      "effects": [
-        "Each rank gives active damage against the current target +3% effect amount.",
-        "Adds 1 Duelist branch point per rank."
-      ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "fighter_duelist_nodes_current_target_duelist-mastery_additivePercentModifiers",
-          "eventType": "EffectCalculation",
-          "predicate": {
-            "effectOperations": [
-              "Damage"
-            ],
-            "sourceMustBePlayer": true,
-            "targetSelectors": [
-              "CurrentTarget"
-            ],
-            "activeAbilityOnly": true
-          },
-          "operation": {
-            "type": "modifyEffectAmount",
-            "additivePercent": 0,
-            "additivePercentModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 0.03,
-                "nodeId": "duelist-mastery"
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "duelist-amplifier",
-      "branchId": "duelist",
-      "name": "Duelist Amplifier",
-      "description": "Further improves Momentum empowerment.",
-      "maxRank": 2,
-      "requiredLevel": 20,
-      "requiredNodeId": "duelist-discipline",
-      "x": 1,
-      "y": 2,
-      "tags": [
-        "Melee"
-      ],
-      "effects": [
-        "Each rank makes Momentum empowerment +4% stronger.",
-        "Adds 1 Duelist branch point per rank."
-      ],
-      "countsTowardFocus": true
-    },
-    {
-      "id": "duelist-focus",
-      "branchId": "duelist",
-      "name": "Duelist Focus",
-      "description": "Completes the Duelist focus.",
-      "maxRank": 1,
-      "requiredLevel": 40,
-      "requiredNodeId": "duelist-mastery",
-      "x": 0,
-      "y": 3,
-      "tags": [
-        "Melee"
-      ],
-      "effects": [
-        "Active damage against the current target gains +6% effect amount.",
-        "Momentum empowerment becomes +5% stronger.",
-        "Adds 1 Duelist branch point."
-      ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "fighter_duelist_nodes_current_target_duelist-focus_additivePercentModifiers",
-          "eventType": "EffectCalculation",
-          "predicate": {
-            "effectOperations": [
-              "Damage"
-            ],
-            "sourceMustBePlayer": true,
-            "targetSelectors": [
-              "CurrentTarget"
-            ],
-            "activeAbilityOnly": true
-          },
-          "operation": {
-            "type": "modifyEffectAmount",
-            "additivePercent": 0,
-            "additivePercentModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 0.06,
-                "nodeId": "duelist-focus"
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "berserker-path",
-      "branchId": "berserker",
-      "name": "Berserker Root",
-      "description": "Opens Berserker wounded-pressure training.",
+      "id": "fighter_breaker_stance",
+      "branchId": "right",
+      "name": "Breaker Stance",
+      "description": "Hostile Essence abilities reduce the target's Physical Defense and Magical Defense by 4% for 5 seconds. Non-hostile Essence abilities grant the target 4% defense penetration on their next hostile action.",
       "maxRank": 1,
       "requiredLevel": 1,
       "requiredNodeId": null,
-      "x": 0,
+      "x": 1,
       "y": 0,
       "tags": [
-        "Melee",
-        "Bleed"
+        "Right",
+        "Major"
       ],
       "effects": [
-        "While within the Berserker health threshold, active damage gains +2% effect amount.",
-        "Does not choose Berserker as the effective focus by itself."
+        "Hostile Essence abilities reduce the target's Physical Defense and Magical Defense by 4% for 5 seconds. Non-hostile Essence abilities grant the target 4% defense penetration on their next hostile action."
       ],
       "countsTowardFocus": false,
-      "rules": [
-        {
-          "id": "fighter_berserker_nodes_berserker-path_additivePercentModifiers",
-          "eventType": "EffectCalculation",
-          "predicate": {
-            "effectOperations": [
-              "Damage"
-            ],
-            "sourceHealthPercentAtOrBelow": 50,
-            "sourceMustBePlayer": true,
-            "sourceHealthPercentAtOrBelowModifiers": [
-              {
-                "type": "nodeRank",
-                "nodeId": "berserker-amplifier",
-                "value": 5
-              },
-              {
-                "type": "nodeRank",
-                "nodeId": "berserker-focus",
-                "value": 10
-              }
-            ],
-            "activeAbilityOnly": true
-          },
-          "operation": {
-            "type": "modifyEffectAmount",
-            "additivePercent": 0,
-            "additivePercentModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 0.02,
-                "nodeId": "berserker-path"
-              }
-            ]
-          }
-        }
-      ]
+      "rules": [],
+      "row": 1,
+      "lane": "Right",
+      "nodeType": "Major",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "Eligible active Essence abilities."
+        ],
+        "changes": [
+          "Hostile Essence abilities reduce the target's Physical Defense and Magical Defense by 4% for 5 seconds. Non-hostile Essence abilities grant the target 4% defense penetration on their next hostile action."
+        ],
+        "tradeoffs": [
+          "Advanced cooldowns, target caps, and PvP coefficients can be tuned per node."
+        ],
+        "doesNotAffect": [
+          "Abilities that do not match the listed tags, effect operations, or conversion flags.",
+          "True damage unless the ability explicitly allows conversion."
+        ]
+      }
     },
     {
-      "id": "berserker-instinct",
-      "branchId": "berserker",
-      "name": "Berserker Instinct",
-      "description": "Builds extra Momentum while wounded.",
-      "maxRank": 3,
-      "requiredLevel": 5,
-      "requiredNodeId": "berserker-path",
-      "x": -1,
-      "y": 1,
-      "tags": [
-        "Melee",
-        "Bleed"
-      ],
-      "effects": [
-        "Each rank grants +1 additional Momentum when the player deals direct damage while within the Berserker health threshold.",
-        "Adds 1 Berserker branch point per rank."
-      ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "fighter_nodes_momentum_on_damage_berserker-instinct_amountModifiers",
-          "eventType": "DamageDealt",
-          "predicate": {
-            "sourceMustBePlayer": true,
-            "effectOperations": [
-              "Damage"
-            ]
-          },
-          "operation": {
-            "type": "gainStyleResource",
-            "resourceId": "momentum",
-            "amount": 0,
-            "usesProcCoefficient": true,
-            "amountModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 1,
-                "nodeId": "berserker-instinct"
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "berserker-technique",
-      "branchId": "berserker",
-      "name": "Berserker Technique",
-      "description": "Improves wounded active damage.",
-      "maxRank": 3,
+      "id": "fighter_colossus_grip",
+      "branchId": "left",
+      "name": "Colossus Grip",
+      "description": "Mutator Group: EquipmentOverride. You may equip a Two-Handed weapon in your Offhand slot. Offhand Two-Handed weapons contribute 55% base weapon damage, 40% offensive attributes, and 25% defensive/utility attributes. Direct Melee Essence abilities gain Offhand Impact, adding a second weapon coefficient hit at 35% value. Penalty: Action Speed -10%, Dodge and Parry -30%, self-applied Barrier effects -10%, and shield/offhand-specific effects are disabled.",
+      "maxRank": 1,
       "requiredLevel": 10,
-      "requiredNodeId": "berserker-path",
-      "x": 0,
-      "y": 1,
-      "tags": [
-        "Melee",
-        "Bleed"
-      ],
-      "effects": [
-        "Each rank gives active damage +3% effect amount while within the Berserker health threshold.",
-        "Adds 1 Berserker branch point per rank."
-      ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "fighter_berserker_nodes_berserker-technique_additivePercentModifiers",
-          "eventType": "EffectCalculation",
-          "predicate": {
-            "effectOperations": [
-              "Damage"
-            ],
-            "sourceHealthPercentAtOrBelow": 50,
-            "sourceMustBePlayer": true,
-            "sourceHealthPercentAtOrBelowModifiers": [
-              {
-                "type": "nodeRank",
-                "nodeId": "berserker-amplifier",
-                "value": 5
-              },
-              {
-                "type": "nodeRank",
-                "nodeId": "berserker-focus",
-                "value": 10
-              }
-            ],
-            "activeAbilityOnly": true
-          },
-          "operation": {
-            "type": "modifyEffectAmount",
-            "additivePercent": 0,
-            "additivePercentModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 0.03,
-                "nodeId": "berserker-technique"
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "berserker-discipline",
-      "branchId": "berserker",
-      "name": "Berserker Discipline",
-      "description": "Improves wounded endurance.",
-      "maxRank": 3,
-      "requiredLevel": 5,
-      "requiredNodeId": "berserker-path",
-      "x": 1,
-      "y": 1,
-      "tags": [
-        "Melee",
-        "Bleed"
-      ],
-      "effects": [
-        "Each rank reduces incoming player damage by 1% while within the Berserker health threshold.",
-        "Adds 1 Berserker branch point per rank."
-      ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "fighter_berserker_discipline_berserker-discipline_percentModifiers",
-          "eventType": "EffectCalculation",
-          "predicate": {
-            "effectOperations": [
-              "Damage"
-            ],
-            "targetMustBePlayer": true,
-            "targetHealthPercentAtOrBelow": 50,
-            "targetHealthPercentAtOrBelowModifiers": [
-              {
-                "type": "nodeRank",
-                "nodeId": "berserker-amplifier",
-                "value": 5
-              },
-              {
-                "type": "nodeRank",
-                "nodeId": "berserker-focus",
-                "value": 10
-              }
-            ]
-          },
-          "operation": {
-            "type": "addDamageReduction",
-            "percent": 0,
-            "percentModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 0.01,
-                "nodeId": "berserker-discipline"
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "berserker-specialization",
-      "branchId": "berserker",
-      "name": "Berserker Specialization",
-      "description": "Improves Momentum empowerment.",
-      "maxRank": 2,
-      "requiredLevel": 20,
-      "requiredNodeId": "berserker-instinct",
-      "x": -1,
-      "y": 2,
-      "tags": [
-        "Melee",
-        "Bleed"
-      ],
-      "effects": [
-        "Each rank makes Momentum empowerment +4% stronger.",
-        "Adds 1 Berserker branch point per rank."
-      ],
-      "countsTowardFocus": true
-    },
-    {
-      "id": "berserker-mastery",
-      "branchId": "berserker",
-      "name": "Berserker Mastery",
-      "description": "Deepens wounded active damage.",
-      "maxRank": 3,
-      "requiredLevel": 25,
-      "requiredNodeId": "berserker-technique",
-      "x": 0,
-      "y": 2,
-      "tags": [
-        "Melee",
-        "Bleed"
-      ],
-      "effects": [
-        "Each rank gives active damage +4% effect amount while within the Berserker health threshold.",
-        "Adds 1 Berserker branch point per rank."
-      ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "fighter_berserker_nodes_berserker-mastery_additivePercentModifiers",
-          "eventType": "EffectCalculation",
-          "predicate": {
-            "effectOperations": [
-              "Damage"
-            ],
-            "sourceHealthPercentAtOrBelow": 50,
-            "sourceMustBePlayer": true,
-            "sourceHealthPercentAtOrBelowModifiers": [
-              {
-                "type": "nodeRank",
-                "nodeId": "berserker-amplifier",
-                "value": 5
-              },
-              {
-                "type": "nodeRank",
-                "nodeId": "berserker-focus",
-                "value": 10
-              }
-            ],
-            "activeAbilityOnly": true
-          },
-          "operation": {
-            "type": "modifyEffectAmount",
-            "additivePercent": 0,
-            "additivePercentModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 0.04,
-                "nodeId": "berserker-mastery"
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "berserker-amplifier",
-      "branchId": "berserker",
-      "name": "Berserker Amplifier",
-      "description": "Expands the wounded threshold.",
-      "maxRank": 2,
-      "requiredLevel": 20,
-      "requiredNodeId": "berserker-discipline",
-      "x": 1,
-      "y": 2,
-      "tags": [
-        "Melee",
-        "Bleed"
-      ],
-      "effects": [
-        "Each rank raises the Berserker health threshold by 5 percentage points.",
-        "Adds 1 Berserker branch point per rank."
-      ],
-      "countsTowardFocus": true
-    },
-    {
-      "id": "berserker-focus",
-      "branchId": "berserker",
-      "name": "Berserker Focus",
-      "description": "Completes the Berserker focus.",
-      "maxRank": 1,
-      "requiredLevel": 40,
-      "requiredNodeId": "berserker-mastery",
-      "x": 0,
-      "y": 3,
-      "tags": [
-        "Melee",
-        "Bleed"
-      ],
-      "effects": [
-        "Active damage gains +8% effect amount while within the Berserker health threshold.",
-        "Raises the Berserker health threshold by 10 percentage points.",
-        "Adds 1 Berserker branch point."
-      ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "fighter_berserker_nodes_berserker-focus_additivePercentModifiers",
-          "eventType": "EffectCalculation",
-          "predicate": {
-            "effectOperations": [
-              "Damage"
-            ],
-            "sourceHealthPercentAtOrBelow": 50,
-            "sourceMustBePlayer": true,
-            "sourceHealthPercentAtOrBelowModifiers": [
-              {
-                "type": "nodeRank",
-                "nodeId": "berserker-amplifier",
-                "value": 5
-              },
-              {
-                "type": "nodeRank",
-                "nodeId": "berserker-focus",
-                "value": 10
-              }
-            ],
-            "activeAbilityOnly": true
-          },
-          "operation": {
-            "type": "modifyEffectAmount",
-            "additivePercent": 0,
-            "additivePercentModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 0.08,
-                "nodeId": "berserker-focus"
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "vanguard-path",
-      "branchId": "vanguard",
-      "name": "Vanguard Root",
-      "description": "Opens Vanguard guard-pressure training.",
-      "maxRank": 1,
-      "requiredLevel": 1,
       "requiredNodeId": null,
-      "x": 0,
-      "y": 0,
-      "tags": [
-        "Tank",
-        "Melee"
-      ],
-      "effects": [
-        "Incoming player damage is reduced by 1%.",
-        "Does not choose Vanguard as the effective focus by itself."
-      ],
-      "countsTowardFocus": false,
-      "rules": [
-        {
-          "id": "fighter_vanguard_nodes_reduction_vanguard-path_percentModifiers",
-          "eventType": "EffectCalculation",
-          "predicate": {
-            "effectOperations": [
-              "Damage"
-            ],
-            "targetMustBePlayer": true
-          },
-          "operation": {
-            "type": "addDamageReduction",
-            "percent": 0,
-            "percentModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 0.01,
-                "nodeId": "vanguard-path"
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "vanguard-instinct",
-      "branchId": "vanguard",
-      "name": "Vanguard Instinct",
-      "description": "Builds Momentum when struck.",
-      "maxRank": 3,
-      "requiredLevel": 5,
-      "requiredNodeId": "vanguard-path",
       "x": -1,
-      "y": 1,
-      "tags": [
-        "Tank",
-        "Melee"
-      ],
-      "effects": [
-        "Each rank grants +1 additional Momentum when the player takes damage.",
-        "Adds 1 Vanguard branch point per rank."
-      ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "fighter_vanguard_nodes_momentum_taken_vanguard-instinct_amountModifiers",
-          "eventType": "DamageTaken",
-          "predicate": {
-            "effectOperations": [
-              "Damage"
-            ],
-            "targetMustBePlayer": true
-          },
-          "operation": {
-            "type": "gainStyleResource",
-            "resourceId": "momentum",
-            "amount": 0,
-            "usesProcCoefficient": true,
-            "amountModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 1,
-                "nodeId": "vanguard-instinct"
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "vanguard-technique",
-      "branchId": "vanguard",
-      "name": "Vanguard Technique",
-      "description": "Improves incoming damage reduction.",
-      "maxRank": 3,
-      "requiredLevel": 10,
-      "requiredNodeId": "vanguard-path",
-      "x": 0,
-      "y": 1,
-      "tags": [
-        "Tank",
-        "Melee"
-      ],
-      "effects": [
-        "Each rank reduces incoming player damage by 2%.",
-        "Adds 1 Vanguard branch point per rank."
-      ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "fighter_vanguard_nodes_reduction_vanguard-technique_percentModifiers",
-          "eventType": "EffectCalculation",
-          "predicate": {
-            "effectOperations": [
-              "Damage"
-            ],
-            "targetMustBePlayer": true
-          },
-          "operation": {
-            "type": "addDamageReduction",
-            "percent": 0,
-            "percentModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 0.02,
-                "nodeId": "vanguard-technique"
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "vanguard-discipline",
-      "branchId": "vanguard",
-      "name": "Vanguard Discipline",
-      "description": "Creates a guarded counter after being hit.",
-      "maxRank": 3,
-      "requiredLevel": 5,
-      "requiredNodeId": "vanguard-path",
-      "x": 1,
-      "y": 1,
-      "tags": [
-        "Tank",
-        "Melee"
-      ],
-      "effects": [
-        "Each rank makes the next active damage effect after taking damage gain +2% effect amount.",
-        "Adds 1 Vanguard branch point per rank."
-      ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "fighter_vanguard_guarded_counter_vanguard-discipline_additivePercentModifiers",
-          "eventType": "DamageTaken",
-          "predicate": {
-            "effectOperations": [
-              "Damage"
-            ],
-            "targetMustBePlayer": true
-          },
-          "operation": {
-            "type": "setPendingEmpowerment",
-            "empowermentId": "fighter_vanguard_guarded_counter_vanguard-discipline",
-            "appliesTo": {
-              "effectOperations": [
-                "Damage"
-              ],
-              "sourceMustBePlayer": true,
-              "activeAbilityOnly": true
-            },
-            "additivePercent": 0,
-            "consumeOnUse": true,
-            "additivePercentModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 0.02,
-                "nodeId": "vanguard-discipline"
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "vanguard-specialization",
-      "branchId": "vanguard",
-      "name": "Vanguard Specialization",
-      "description": "Improves Momentum gained when struck.",
-      "maxRank": 2,
-      "requiredLevel": 20,
-      "requiredNodeId": "vanguard-instinct",
-      "x": -1,
-      "y": 2,
-      "tags": [
-        "Tank",
-        "Melee"
-      ],
-      "effects": [
-        "Each rank grants +2 additional Momentum when the player takes damage.",
-        "Adds 1 Vanguard branch point per rank."
-      ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "fighter_vanguard_nodes_momentum_taken_vanguard-specialization_amountModifiers",
-          "eventType": "DamageTaken",
-          "predicate": {
-            "effectOperations": [
-              "Damage"
-            ],
-            "targetMustBePlayer": true
-          },
-          "operation": {
-            "type": "gainStyleResource",
-            "resourceId": "momentum",
-            "amount": 0,
-            "usesProcCoefficient": true,
-            "amountModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 2,
-                "nodeId": "vanguard-specialization"
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "vanguard-mastery",
-      "branchId": "vanguard",
-      "name": "Vanguard Mastery",
-      "description": "Deepens incoming damage reduction.",
-      "maxRank": 3,
-      "requiredLevel": 25,
-      "requiredNodeId": "vanguard-technique",
-      "x": 0,
-      "y": 2,
-      "tags": [
-        "Tank",
-        "Melee"
-      ],
-      "effects": [
-        "Each rank reduces incoming player damage by 3%.",
-        "Adds 1 Vanguard branch point per rank."
-      ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "fighter_vanguard_nodes_reduction_vanguard-mastery_percentModifiers",
-          "eventType": "EffectCalculation",
-          "predicate": {
-            "effectOperations": [
-              "Damage"
-            ],
-            "targetMustBePlayer": true
-          },
-          "operation": {
-            "type": "addDamageReduction",
-            "percent": 0,
-            "percentModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 0.03,
-                "nodeId": "vanguard-mastery"
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "vanguard-amplifier",
-      "branchId": "vanguard",
-      "name": "Vanguard Amplifier",
-      "description": "Improves Momentum empowerment.",
-      "maxRank": 2,
-      "requiredLevel": 20,
-      "requiredNodeId": "vanguard-discipline",
-      "x": 1,
-      "y": 2,
-      "tags": [
-        "Tank",
-        "Melee"
-      ],
-      "effects": [
-        "Each rank makes Momentum empowerment +3% stronger.",
-        "Adds 1 Vanguard branch point per rank."
-      ],
-      "countsTowardFocus": true
-    },
-    {
-      "id": "vanguard-focus",
-      "branchId": "vanguard",
-      "name": "Vanguard Focus",
-      "description": "Completes the Vanguard focus.",
-      "maxRank": 1,
-      "requiredLevel": 40,
-      "requiredNodeId": "vanguard-mastery",
-      "x": 0,
       "y": 3,
       "tags": [
-        "Tank",
-        "Melee"
+        "EquipmentOverride",
+        "Left",
+        "Major"
       ],
       "effects": [
-        "Incoming player damage is reduced by 5%.",
-        "Taking damage grants +5 additional Momentum.",
-        "Adds 1 Vanguard branch point."
+        "Mutator Group: EquipmentOverride. You may equip a Two-Handed weapon in your Offhand slot. Offhand Two-Handed weapons contribute 55% base weapon damage, 40% offensive attributes, and 25% defensive/utility attributes. Direct Melee Essence abilities gain Offhand Impact, adding a second weapon coefficient hit at 35% value. Penalty: Action Speed -10%, Dodge and Parry -30%, self-applied Barrier effects -10%, and shield/offhand-specific effects are disabled."
       ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "fighter_vanguard_nodes_reduction_vanguard-focus_percentModifiers",
-          "eventType": "EffectCalculation",
-          "predicate": {
-            "effectOperations": [
-              "Damage"
-            ],
-            "targetMustBePlayer": true
-          },
-          "operation": {
-            "type": "addDamageReduction",
-            "percent": 0,
-            "percentModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 0.05,
-                "nodeId": "vanguard-focus"
-              }
-            ]
-          }
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 2,
+      "lane": "Left",
+      "nodeType": "Major",
+      "mutatorKind": "Enabler",
+      "mutatorGroups": [
+        "EquipmentOverride"
+      ],
+      "mutator": {
+        "kind": "Enabler",
+        "groups": [
+          "EquipmentOverride"
+        ],
+        "conditions": {
+          "requiredAbilityTags": [],
+          "anyAbilityTags": [
+            "Weapon"
+          ],
+          "requiredDeliveryTags": [],
+          "anyDeliveryTags": [
+            "Melee"
+          ],
+          "requiredEffectTags": [],
+          "anyEffectTags": [
+            "Damage",
+            "Barrier"
+          ],
+          "effectOperations": [
+            "Damage",
+            "GrantBarrier"
+          ],
+          "allowedDamageTypes": [],
+          "targetSelectors": [],
+          "activeAbilityOnly": true,
+          "passiveAbilityOnly": false,
+          "allowDamageTypeConversionRequired": null,
+          "allowScalingConversionRequired": null,
+          "allowDeliveryConversionRequired": null,
+          "allowTargetingConversionRequired": null,
+          "allowSummonProxyRequired": null,
+          "allowEquipmentOverrideRequired": true,
+          "excludeTrueDamage": true,
+          "excludeHardCrowdControl": true
         },
-        {
-          "id": "fighter_vanguard_nodes_momentum_taken_vanguard-focus_amountModifiers",
-          "eventType": "DamageTaken",
-          "predicate": {
-            "effectOperations": [
-              "Damage"
-            ],
-            "targetMustBePlayer": true
-          },
-          "operation": {
-            "type": "gainStyleResource",
-            "resourceId": "momentum",
-            "amount": 0,
-            "usesProcCoefficient": true,
-            "amountModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 5,
-                "nodeId": "vanguard-focus"
-              }
-            ]
-          }
-        }
-      ]
+        "transform": {
+          "damageType": null,
+          "targetingType": null,
+          "scalingAttribute": null,
+          "scalingCoefficientOverride": null,
+          "scalingCoefficientMultiplier": null,
+          "effectPotencyMultiplier": 1.04,
+          "cooldownMultiplier": null,
+          "resourceCostMultiplier": null,
+          "addAbilityTags": [
+            "Weapon",
+            "EquipmentOverride"
+          ],
+          "addDeliveryTags": [
+            "Melee"
+          ],
+          "addEffectTags": [
+            "Damage",
+            "Barrier"
+          ],
+          "addEffectTagsToMatchingEffects": [
+            "Damage",
+            "Barrier"
+          ]
+        },
+        "tradeoff": {
+          "effectPotencyMultiplier": null,
+          "cooldownMultiplier": null,
+          "resourceCostMultiplier": null,
+          "procCoefficientMultiplier": null
+        },
+        "pvpCoefficient": 0.85
+      },
+      "tooltip": {
+        "affects": [
+          "Eligible active Essence abilities matching EquipmentOverride."
+        ],
+        "changes": [
+          "Mutator Group: EquipmentOverride. You may equip a Two-Handed weapon in your Offhand slot. Offhand Two-Handed weapons contribute 55% base weapon damage, 40% offensive attributes, and 25% defensive/utility attributes. Direct Melee Essence abilities gain Offhand Impact, adding a second weapon coefficient hit at 35% value. Penalty: Action Speed -10%, Dodge and Parry -30%, self-applied Barrier effects -10%, and shield/offhand-specific effects are disabled."
+        ],
+        "tradeoffs": [
+          "Advanced cooldowns, target caps, and PvP coefficients can be tuned per node."
+        ],
+        "doesNotAffect": [
+          "Abilities that do not match the listed tags, effect operations, or conversion flags.",
+          "True damage unless the ability explicitly allows conversion."
+        ]
+      }
+    },
+    {
+      "id": "fighter_martial_imprint",
+      "branchId": "middle",
+      "name": "Martial Imprint",
+      "description": "Mutator Group: DeliveryConversion. After a basic attack or direct Melee Essence ability, your next non-Melee direct hostile Essence ability within 4 seconds gains the Melee and Weapon tags and can trigger weapon effects at 40% value. The ability keeps its original damage type and scaling. If the ability was already Melee, it gains +6% Effect Potency instead. Does not apply to Summon, Trap, Aura, or pure persistent tick effects.",
+      "maxRank": 1,
+      "requiredLevel": 10,
+      "requiredNodeId": null,
+      "x": 0,
+      "y": 3,
+      "tags": [
+        "DeliveryConversion",
+        "Middle",
+        "Major"
+      ],
+      "effects": [
+        "Mutator Group: DeliveryConversion. After a basic attack or direct Melee Essence ability, your next non-Melee direct hostile Essence ability within 4 seconds gains the Melee and Weapon tags and can trigger weapon effects at 40% value. The ability keeps its original damage type and scaling. If the ability was already Melee, it gains +6% Effect Potency instead. Does not apply to Summon, Trap, Aura, or pure persistent tick effects."
+      ],
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 2,
+      "lane": "Middle",
+      "nodeType": "Major",
+      "mutatorKind": "Converter",
+      "mutatorGroups": [
+        "DeliveryConversion"
+      ],
+      "mutator": {
+        "kind": "Converter",
+        "groups": [
+          "DeliveryConversion"
+        ],
+        "conditions": {
+          "requiredAbilityTags": [],
+          "anyAbilityTags": [
+            "Weapon"
+          ],
+          "requiredDeliveryTags": [],
+          "anyDeliveryTags": [
+            "Melee"
+          ],
+          "requiredEffectTags": [],
+          "anyEffectTags": [
+            "Damage",
+            "Summon"
+          ],
+          "effectOperations": [
+            "Damage",
+            "Summon"
+          ],
+          "allowedDamageTypes": [],
+          "targetSelectors": [],
+          "activeAbilityOnly": true,
+          "passiveAbilityOnly": false,
+          "allowDamageTypeConversionRequired": null,
+          "allowScalingConversionRequired": null,
+          "allowDeliveryConversionRequired": true,
+          "allowTargetingConversionRequired": null,
+          "allowSummonProxyRequired": null,
+          "allowEquipmentOverrideRequired": null,
+          "excludeTrueDamage": true,
+          "excludeHardCrowdControl": true
+        },
+        "transform": {
+          "damageType": null,
+          "targetingType": null,
+          "scalingAttribute": null,
+          "scalingCoefficientOverride": null,
+          "scalingCoefficientMultiplier": null,
+          "effectPotencyMultiplier": 1.06,
+          "cooldownMultiplier": null,
+          "resourceCostMultiplier": null,
+          "addAbilityTags": [
+            "Weapon",
+            "ConvertedDelivery"
+          ],
+          "addDeliveryTags": [
+            "Melee"
+          ],
+          "addEffectTags": [
+            "Damage",
+            "Summon"
+          ],
+          "addEffectTagsToMatchingEffects": [
+            "Damage",
+            "Summon"
+          ]
+        },
+        "tradeoff": {
+          "effectPotencyMultiplier": 0.95,
+          "cooldownMultiplier": 1.03,
+          "resourceCostMultiplier": 1.05,
+          "procCoefficientMultiplier": null
+        },
+        "pvpCoefficient": 0.7
+      },
+      "tooltip": {
+        "affects": [
+          "Eligible active Essence abilities matching DeliveryConversion."
+        ],
+        "changes": [
+          "Mutator Group: DeliveryConversion. After a basic attack or direct Melee Essence ability, your next non-Melee direct hostile Essence ability within 4 seconds gains the Melee and Weapon tags and can trigger weapon effects at 40% value. The ability keeps its original damage type and scaling. If the ability was already Melee, it gains +6% Effect Potency instead. Does not apply to Summon, Trap, Aura, or pure persistent tick effects."
+        ],
+        "tradeoffs": [
+          "Conversion uses a +5% resource cost safety tradeoff and PvP coefficient until explicit balance values are authored."
+        ],
+        "doesNotAffect": [
+          "Abilities that do not match the listed tags, effect operations, or conversion flags.",
+          "True damage unless the ability explicitly allows conversion."
+        ]
+      }
+    },
+    {
+      "id": "fighter_bloodied_tempo",
+      "branchId": "right",
+      "name": "Bloodied Tempo",
+      "description": "Mutator Group: DefensiveConversion. After you take Health damage, your next healing, barrier, or self-buff Essence ability within 6 seconds becomes Bloodied: +8% Effect Potency and +10 Battle Rhythm. After using a Bloodied ability, your next direct hostile Essence ability within 5 seconds heals you for 2% Max Health. 8 second internal cooldown.",
+      "maxRank": 1,
+      "requiredLevel": 10,
+      "requiredNodeId": null,
+      "x": 1,
+      "y": 3,
+      "tags": [
+        "DefensiveConversion",
+        "Right",
+        "Major"
+      ],
+      "effects": [
+        "Mutator Group: DefensiveConversion. After you take Health damage, your next healing, barrier, or self-buff Essence ability within 6 seconds becomes Bloodied: +8% Effect Potency and +10 Battle Rhythm. After using a Bloodied ability, your next direct hostile Essence ability within 5 seconds heals you for 2% Max Health. 8 second internal cooldown."
+      ],
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 2,
+      "lane": "Right",
+      "nodeType": "Major",
+      "mutatorKind": "Converter",
+      "mutatorGroups": [
+        "DefensiveConversion"
+      ],
+      "mutator": {
+        "kind": "Converter",
+        "groups": [
+          "DefensiveConversion"
+        ],
+        "conditions": {
+          "requiredAbilityTags": [],
+          "anyAbilityTags": [],
+          "requiredDeliveryTags": [],
+          "anyDeliveryTags": [],
+          "requiredEffectTags": [],
+          "anyEffectTags": [
+            "Damage",
+            "Heal",
+            "Barrier"
+          ],
+          "effectOperations": [
+            "Damage",
+            "Heal",
+            "GrantBarrier"
+          ],
+          "allowedDamageTypes": [],
+          "targetSelectors": [],
+          "activeAbilityOnly": true,
+          "passiveAbilityOnly": false,
+          "allowDamageTypeConversionRequired": null,
+          "allowScalingConversionRequired": null,
+          "allowDeliveryConversionRequired": null,
+          "allowTargetingConversionRequired": null,
+          "allowSummonProxyRequired": null,
+          "allowEquipmentOverrideRequired": null,
+          "excludeTrueDamage": true,
+          "excludeHardCrowdControl": true
+        },
+        "transform": {
+          "damageType": null,
+          "targetingType": null,
+          "scalingAttribute": null,
+          "scalingCoefficientOverride": null,
+          "scalingCoefficientMultiplier": null,
+          "effectPotencyMultiplier": 1.08,
+          "cooldownMultiplier": null,
+          "resourceCostMultiplier": null,
+          "addAbilityTags": [],
+          "addDeliveryTags": [],
+          "addEffectTags": [
+            "Damage",
+            "Heal",
+            "Barrier",
+            "Protected"
+          ],
+          "addEffectTagsToMatchingEffects": [
+            "Damage",
+            "Heal",
+            "Barrier",
+            "Protected"
+          ]
+        },
+        "tradeoff": {
+          "effectPotencyMultiplier": 0.95,
+          "cooldownMultiplier": 1.03,
+          "resourceCostMultiplier": 1.05,
+          "procCoefficientMultiplier": null
+        },
+        "pvpCoefficient": 0.7
+      },
+      "tooltip": {
+        "affects": [
+          "Eligible active Essence abilities matching DefensiveConversion."
+        ],
+        "changes": [
+          "Mutator Group: DefensiveConversion. After you take Health damage, your next healing, barrier, or self-buff Essence ability within 6 seconds becomes Bloodied: +8% Effect Potency and +10 Battle Rhythm. After using a Bloodied ability, your next direct hostile Essence ability within 5 seconds heals you for 2% Max Health. 8 second internal cooldown."
+        ],
+        "tradeoffs": [
+          "Conversion uses a +5% resource cost safety tradeoff and PvP coefficient until explicit balance values are authored."
+        ],
+        "doesNotAffect": [
+          "Abilities that do not match the listed tags, effect operations, or conversion flags.",
+          "True damage unless the ability explicitly allows conversion."
+        ]
+      }
+    },
+    {
+      "id": "fighter_juggernaut_trance",
+      "branchId": "left",
+      "name": "Juggernaut Trance",
+      "description": "Overpower also grants 12% damage reduction and 20% crowd control resistance for 8 seconds.",
+      "maxRank": 1,
+      "requiredLevel": 25,
+      "requiredNodeId": null,
+      "x": -1,
+      "y": 6,
+      "tags": [
+        "Left",
+        "Major"
+      ],
+      "effects": [
+        "Overpower also grants 12% damage reduction and 20% crowd control resistance for 8 seconds."
+      ],
+      "countsTowardFocus": true,
+      "rules": [],
+      "row": 3,
+      "lane": "Left",
+      "nodeType": "Major",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "Eligible active Essence abilities."
+        ],
+        "changes": [
+          "Overpower also grants 12% damage reduction and 20% crowd control resistance for 8 seconds."
+        ],
+        "tradeoffs": [
+          "Advanced cooldowns, target caps, and PvP coefficients can be tuned per node."
+        ],
+        "doesNotAffect": [
+          "Abilities that do not match the listed tags, effect operations, or conversion flags.",
+          "True damage unless the ability explicitly allows conversion."
+        ]
+      }
+    },
+    {
+      "id": "fighter_duelists_claim",
+      "branchId": "middle",
+      "name": "Duelists Claim",
+      "description": "Overpower marks the primary target for 10 seconds. Your Essence effects against the marked target gain +10% Effect Potency. The marked enemy deals 8% less damage to you. If the mark is an ally, your healing/barriers/buffs on that ally gain +10% Effect Potency and the ally takes 8% less damage.",
+      "maxRank": 1,
+      "requiredLevel": 25,
+      "requiredNodeId": null,
+      "x": 0,
+      "y": 6,
+      "tags": [
+        "Middle",
+        "Major"
+      ],
+      "effects": [
+        "Overpower marks the primary target for 10 seconds. Your Essence effects against the marked target gain +10% Effect Potency. The marked enemy deals 8% less damage to you. If the mark is an ally, your healing/barriers/buffs on that ally gain +10% Effect Potency and the ally takes 8% less damage."
+      ],
+      "countsTowardFocus": true,
+      "rules": [],
+      "row": 3,
+      "lane": "Middle",
+      "nodeType": "Major",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "Eligible active Essence abilities."
+        ],
+        "changes": [
+          "Overpower marks the primary target for 10 seconds. Your Essence effects against the marked target gain +10% Effect Potency. The marked enemy deals 8% less damage to you. If the mark is an ally, your healing/barriers/buffs on that ally gain +10% Effect Potency and the ally takes 8% less damage."
+        ],
+        "tradeoffs": [
+          "Advanced cooldowns, target caps, and PvP coefficients can be tuned per node."
+        ],
+        "doesNotAffect": [
+          "Abilities that do not match the listed tags, effect operations, or conversion flags.",
+          "True damage unless the ability explicitly allows conversion."
+        ]
+      }
+    },
+    {
+      "id": "fighter_finishers_surge",
+      "branchId": "right",
+      "name": "Finishers Surge",
+      "description": "If an Overpowered Essence ability defeats an enemy or saves an ally below 30% Health with healing/barrier, refund 30 Battle Rhythm and reduce Overpower's remaining cooldown by 25%.",
+      "maxRank": 1,
+      "requiredLevel": 25,
+      "requiredNodeId": null,
+      "x": 1,
+      "y": 6,
+      "tags": [
+        "Right",
+        "Major"
+      ],
+      "effects": [
+        "If an Overpowered Essence ability defeats an enemy or saves an ally below 30% Health with healing/barrier, refund 30 Battle Rhythm and reduce Overpower's remaining cooldown by 25%."
+      ],
+      "countsTowardFocus": true,
+      "rules": [],
+      "row": 3,
+      "lane": "Right",
+      "nodeType": "Major",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "Eligible active Essence abilities."
+        ],
+        "changes": [
+          "If an Overpowered Essence ability defeats an enemy or saves an ally below 30% Health with healing/barrier, refund 30 Battle Rhythm and reduce Overpower's remaining cooldown by 25%."
+        ],
+        "tradeoffs": [
+          "Advanced cooldowns, target caps, and PvP coefficients can be tuned per node."
+        ],
+        "doesNotAffect": [
+          "Abilities that do not match the listed tags, effect operations, or conversion flags.",
+          "True damage unless the ability explicitly allows conversion."
+        ]
+      }
+    },
+    {
+      "id": "fighter_battle_conditioning",
+      "branchId": "left",
+      "name": "Battle Conditioning",
+      "description": "Max Health +2% / +4%.",
+      "maxRank": 2,
+      "requiredLevel": 1,
+      "requiredNodeId": null,
+      "x": -1,
+      "y": 1,
+      "tags": [
+        "Left",
+        "Minor",
+        "Heal"
+      ],
+      "effects": [
+        "Max Health +2% / +4%."
+      ],
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 1,
+      "lane": "Left",
+      "nodeType": "Minor",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "This style-tree passive while the node has ranks."
+        ],
+        "changes": [
+          "Max Health +2% / +4%."
+        ],
+        "tradeoffs": [],
+        "doesNotAffect": []
+      }
+    },
+    {
+      "id": "fighter_rhythm_capacity",
+      "branchId": "middle",
+      "name": "Rhythm Capacity",
+      "description": "Max Battle Rhythm +10 / +20.",
+      "maxRank": 2,
+      "requiredLevel": 1,
+      "requiredNodeId": null,
+      "x": 0,
+      "y": 1,
+      "tags": [
+        "Middle",
+        "Minor"
+      ],
+      "effects": [
+        "Max Battle Rhythm +10 / +20."
+      ],
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 1,
+      "lane": "Middle",
+      "nodeType": "Minor",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "This style-tree passive while the node has ranks."
+        ],
+        "changes": [
+          "Max Battle Rhythm +10 / +20."
+        ],
+        "tradeoffs": [],
+        "doesNotAffect": []
+      }
+    },
+    {
+      "id": "fighter_quick_recovery",
+      "branchId": "right",
+      "name": "Quick Recovery",
+      "description": "When you take direct Health damage, restore 0.5% / 1% missing primary resource. 2 second internal cooldown.",
+      "maxRank": 2,
+      "requiredLevel": 1,
+      "requiredNodeId": null,
+      "x": 1,
+      "y": 1,
+      "tags": [
+        "Right",
+        "Minor",
+        "Damage",
+        "Heal"
+      ],
+      "effects": [
+        "When you take direct Health damage, restore 0.5% / 1% missing primary resource. 2 second internal cooldown."
+      ],
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 1,
+      "lane": "Right",
+      "nodeType": "Minor",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "This style-tree passive while the node has ranks."
+        ],
+        "changes": [
+          "When you take direct Health damage, restore 0.5% / 1% missing primary resource. 2 second internal cooldown."
+        ],
+        "tradeoffs": [],
+        "doesNotAffect": []
+      }
+    },
+    {
+      "id": "fighter_adrenal_response",
+      "branchId": "middle",
+      "name": "Adrenal Response",
+      "description": "While below 50% Health, Action Speed +3% / +6%.",
+      "maxRank": 2,
+      "requiredLevel": 1,
+      "requiredNodeId": null,
+      "x": 0,
+      "y": 2,
+      "tags": [
+        "Middle",
+        "Minor",
+        "Heal"
+      ],
+      "effects": [
+        "While below 50% Health, Action Speed +3% / +6%."
+      ],
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 1,
+      "lane": "Middle",
+      "nodeType": "Minor",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "This style-tree passive while the node has ranks."
+        ],
+        "changes": [
+          "While below 50% Health, Action Speed +3% / +6%."
+        ],
+        "tradeoffs": [],
+        "doesNotAffect": []
+      }
+    },
+    {
+      "id": "fighter_weaponized_intent",
+      "branchId": "left",
+      "name": "Weaponized Intent",
+      "description": "Direct Essence abilities gain +2% / +4% Effect Potency.",
+      "maxRank": 2,
+      "requiredLevel": 10,
+      "requiredNodeId": null,
+      "x": -1,
+      "y": 4,
+      "tags": [
+        "Left",
+        "Minor"
+      ],
+      "effects": [
+        "Direct Essence abilities gain +2% / +4% Effect Potency."
+      ],
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 2,
+      "lane": "Left",
+      "nodeType": "Minor",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "This style-tree passive while the node has ranks."
+        ],
+        "changes": [
+          "Direct Essence abilities gain +2% / +4% Effect Potency."
+        ],
+        "tradeoffs": [],
+        "doesNotAffect": []
+      }
+    },
+    {
+      "id": "fighter_press_advantage",
+      "branchId": "middle",
+      "name": "Press Advantage",
+      "description": "Essence effects against targets affected by your debuffs or control effects gain +3% / +6% Effect Potency.",
+      "maxRank": 2,
+      "requiredLevel": 10,
+      "requiredNodeId": null,
+      "x": 0,
+      "y": 4,
+      "tags": [
+        "Middle",
+        "Minor",
+        "Debuff"
+      ],
+      "effects": [
+        "Essence effects against targets affected by your debuffs or control effects gain +3% / +6% Effect Potency."
+      ],
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 2,
+      "lane": "Middle",
+      "nodeType": "Minor",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "This style-tree passive while the node has ranks."
+        ],
+        "changes": [
+          "Essence effects against targets affected by your debuffs or control effects gain +3% / +6% Effect Potency."
+        ],
+        "tradeoffs": [],
+        "doesNotAffect": []
+      }
+    },
+    {
+      "id": "fighter_second_strike",
+      "branchId": "right",
+      "name": "Second Strike",
+      "description": "Direct Essence abilities have a 10% / 20% chance to grant +5 Battle Rhythm.",
+      "maxRank": 2,
+      "requiredLevel": 10,
+      "requiredNodeId": null,
+      "x": 1,
+      "y": 4,
+      "tags": [
+        "Right",
+        "Minor"
+      ],
+      "effects": [
+        "Direct Essence abilities have a 10% / 20% chance to grant +5 Battle Rhythm."
+      ],
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 2,
+      "lane": "Right",
+      "nodeType": "Minor",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "This style-tree passive while the node has ranks."
+        ],
+        "changes": [
+          "Direct Essence abilities have a 10% / 20% chance to grant +5 Battle Rhythm."
+        ],
+        "tradeoffs": [],
+        "doesNotAffect": []
+      }
+    },
+    {
+      "id": "fighter_weight_training",
+      "branchId": "middle",
+      "name": "Weight Training",
+      "description": "Penalties from Fighter equipment overrides are reduced by 10% / 20%.",
+      "maxRank": 2,
+      "requiredLevel": 10,
+      "requiredNodeId": null,
+      "x": 0,
+      "y": 5,
+      "tags": [
+        "Middle",
+        "Minor"
+      ],
+      "effects": [
+        "Penalties from Fighter equipment overrides are reduced by 10% / 20%."
+      ],
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 2,
+      "lane": "Middle",
+      "nodeType": "Minor",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "This style-tree passive while the node has ranks."
+        ],
+        "changes": [
+          "Penalties from Fighter equipment overrides are reduced by 10% / 20%."
+        ],
+        "tradeoffs": [],
+        "doesNotAffect": []
+      }
+    },
+    {
+      "id": "fighter_clean_finish",
+      "branchId": "left",
+      "name": "Clean Finish",
+      "description": "Defeating an enemy restores 1% / 2% Max Health and primary resource.",
+      "maxRank": 2,
+      "requiredLevel": 25,
+      "requiredNodeId": null,
+      "x": -1,
+      "y": 7,
+      "tags": [
+        "Left",
+        "Minor",
+        "Heal"
+      ],
+      "effects": [
+        "Defeating an enemy restores 1% / 2% Max Health and primary resource."
+      ],
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 3,
+      "lane": "Left",
+      "nodeType": "Minor",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "This style-tree passive while the node has ranks."
+        ],
+        "changes": [
+          "Defeating an enemy restores 1% / 2% Max Health and primary resource."
+        ],
+        "tradeoffs": [],
+        "doesNotAffect": []
+      }
+    },
+    {
+      "id": "fighter_combat_footwork",
+      "branchId": "middle",
+      "name": "Combat Footwork",
+      "description": "Dodge, parry, and block chance +2% / +4%. If those stats do not exist for the character, gain 2% / 4% direct damage reduction instead.",
+      "maxRank": 2,
+      "requiredLevel": 25,
+      "requiredNodeId": null,
+      "x": 0,
+      "y": 7,
+      "tags": [
+        "Middle",
+        "Minor",
+        "Damage"
+      ],
+      "effects": [
+        "Dodge, parry, and block chance +2% / +4%. If those stats do not exist for the character, gain 2% / 4% direct damage reduction instead."
+      ],
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 3,
+      "lane": "Middle",
+      "nodeType": "Minor",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "This style-tree passive while the node has ranks."
+        ],
+        "changes": [
+          "Dodge, parry, and block chance +2% / +4%. If those stats do not exist for the character, gain 2% / 4% direct damage reduction instead."
+        ],
+        "tradeoffs": [],
+        "doesNotAffect": []
+      }
+    },
+    {
+      "id": "fighter_decisive_momentum",
+      "branchId": "right",
+      "name": "Decisive Momentum",
+      "description": "Overpower cooldown reduced by 2 / 4 seconds.",
+      "maxRank": 2,
+      "requiredLevel": 25,
+      "requiredNodeId": null,
+      "x": 1,
+      "y": 7,
+      "tags": [
+        "Right",
+        "Minor"
+      ],
+      "effects": [
+        "Overpower cooldown reduced by 2 / 4 seconds."
+      ],
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 3,
+      "lane": "Right",
+      "nodeType": "Minor",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "This style-tree passive while the node has ranks."
+        ],
+        "changes": [
+          "Overpower cooldown reduced by 2 / 4 seconds."
+        ],
+        "tradeoffs": [],
+        "doesNotAffect": []
+      }
+    },
+    {
+      "id": "fighter_unbroken_rhythm",
+      "branchId": "middle",
+      "name": "Unbroken Rhythm",
+      "description": "Battle Rhythm generated while below 50% Health increased by 15% / 30%.",
+      "maxRank": 2,
+      "requiredLevel": 25,
+      "requiredNodeId": null,
+      "x": 0,
+      "y": 8,
+      "tags": [
+        "Middle",
+        "Minor",
+        "Heal"
+      ],
+      "effects": [
+        "Battle Rhythm generated while below 50% Health increased by 15% / 30%."
+      ],
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 3,
+      "lane": "Middle",
+      "nodeType": "Minor",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "This style-tree passive while the node has ranks."
+        ],
+        "changes": [
+          "Battle Rhythm generated while below 50% Health increased by 15% / 30%."
+        ],
+        "tradeoffs": [],
+        "doesNotAffect": []
+      }
     }
   ]
 }
-

@@ -34,6 +34,113 @@ public sealed record CombatStyleTreeNodeDefinition(
     bool CountsTowardFocus)
 {
     public IReadOnlyList<CombatStyleRuleDefinition> Rules { get; init; } = [];
+    public int Row { get; init; }
+    public string Lane { get; init; } = CombatStyleNodeLanes.Middle;
+    public string NodeType { get; init; } = CombatStyleNodeTypes.Minor;
+    public string? MutatorKind { get; init; }
+    public IReadOnlyList<string> MutatorGroups { get; init; } = [];
+    public CombatStyleAbilityMutatorDefinition? Mutator { get; init; }
+    public CombatStyleNodeTooltipDefinition Tooltip { get; init; } = new();
+}
+
+public static class CombatStyleNodeTypes
+{
+    public const string Major = "Major";
+    public const string Minor = "Minor";
+}
+
+public static class CombatStyleNodeLanes
+{
+    public const string Left = "Left";
+    public const string Middle = "Middle";
+    public const string Right = "Right";
+}
+
+public static class CombatStyleMutatorKinds
+{
+    public const string Amplifier = "Amplifier";
+    public const string Converter = "Converter";
+    public const string Enabler = "Enabler";
+}
+
+public static class CombatStyleMutatorGroups
+{
+    public const string DamageTypeConversion = "DamageTypeConversion";
+    public const string ScalingConversion = "ScalingConversion";
+    public const string DeliveryConversion = "DeliveryConversion";
+    public const string EquipmentOverride = "EquipmentOverride";
+    public const string TargetingConversion = "TargetingConversion";
+    public const string ResourceConversion = "ResourceConversion";
+    public const string SummonConversion = "SummonConversion";
+    public const string DefensiveConversion = "DefensiveConversion";
+    public const string SupportConversion = "SupportConversion";
+    public const string ControlConversion = "ControlConversion";
+    public const string TimingConversion = "TimingConversion";
+}
+
+public sealed record CombatStyleNodeTooltipDefinition
+{
+    public IReadOnlyList<string> Affects { get; init; } = [];
+    public IReadOnlyList<string> Changes { get; init; } = [];
+    public IReadOnlyList<string> Tradeoffs { get; init; } = [];
+    public IReadOnlyList<string> DoesNotAffect { get; init; } = [];
+}
+
+public sealed record CombatStyleAbilityMutatorDefinition
+{
+    public string Kind { get; init; } = string.Empty;
+    public IReadOnlyList<string> Groups { get; init; } = [];
+    public CombatStyleMutatorConditionDefinition Conditions { get; init; } = new();
+    public CombatStyleMutatorTransformDefinition Transform { get; init; } = new();
+    public CombatStyleMutatorTradeoffDefinition Tradeoff { get; init; } = new();
+    public decimal? PvpCoefficient { get; init; }
+}
+
+public sealed record CombatStyleMutatorConditionDefinition
+{
+    public IReadOnlyList<string> RequiredAbilityTags { get; init; } = [];
+    public IReadOnlyList<string> AnyAbilityTags { get; init; } = [];
+    public IReadOnlyList<string> RequiredDeliveryTags { get; init; } = [];
+    public IReadOnlyList<string> AnyDeliveryTags { get; init; } = [];
+    public IReadOnlyList<string> RequiredEffectTags { get; init; } = [];
+    public IReadOnlyList<string> AnyEffectTags { get; init; } = [];
+    public IReadOnlyList<AbilityEffectOperation> EffectOperations { get; init; } = [];
+    public IReadOnlyList<DamageType> AllowedDamageTypes { get; init; } = [];
+    public IReadOnlyList<AbilityTargetSelector> TargetSelectors { get; init; } = [];
+    public bool ActiveAbilityOnly { get; init; } = true;
+    public bool PassiveAbilityOnly { get; init; }
+    public bool? AllowDamageTypeConversionRequired { get; init; }
+    public bool? AllowScalingConversionRequired { get; init; }
+    public bool? AllowDeliveryConversionRequired { get; init; }
+    public bool? AllowTargetingConversionRequired { get; init; }
+    public bool? AllowSummonProxyRequired { get; init; }
+    public bool? AllowEquipmentOverrideRequired { get; init; }
+    public bool ExcludeTrueDamage { get; init; } = true;
+    public bool ExcludeHardCrowdControl { get; init; }
+}
+
+public sealed record CombatStyleMutatorTransformDefinition
+{
+    public DamageType? DamageType { get; init; }
+    public AbilityTargetSelector? TargetingType { get; init; }
+    public AttributeType? ScalingAttribute { get; init; }
+    public float? ScalingCoefficientOverride { get; init; }
+    public decimal? ScalingCoefficientMultiplier { get; init; }
+    public decimal? EffectPotencyMultiplier { get; init; }
+    public decimal? CooldownMultiplier { get; init; }
+    public decimal? ResourceCostMultiplier { get; init; }
+    public IReadOnlyList<string> AddAbilityTags { get; init; } = [];
+    public IReadOnlyList<string> AddDeliveryTags { get; init; } = [];
+    public IReadOnlyList<string> AddEffectTags { get; init; } = [];
+    public IReadOnlyList<string> AddEffectTagsToMatchingEffects { get; init; } = [];
+}
+
+public sealed record CombatStyleMutatorTradeoffDefinition
+{
+    public decimal? EffectPotencyMultiplier { get; init; }
+    public decimal? CooldownMultiplier { get; init; }
+    public decimal? ResourceCostMultiplier { get; init; }
+    public decimal? ProcCoefficientMultiplier { get; init; }
 }
 
 public sealed record CombatStyleFocusDefinition(

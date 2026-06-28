@@ -232,6 +232,16 @@
 
           <div class="mt-4 grid gap-2 text-sm">
             <div class="flex items-center justify-between">
+              <span class="text-zinc-400">Type</span>
+              <span class="text-primary">
+                {{ node.nodeType }}{{ node.mutatorKind ? ' / ' + node.mutatorKind : '' }}
+              </span>
+            </div>
+            <div class="flex items-center justify-between" *ngIf="node.row > 0">
+              <span class="text-zinc-400">Position</span>
+              <span>{{ node.lane }} Row {{ node.row }}</span>
+            </div>
+            <div class="flex items-center justify-between">
               <span class="text-zinc-400">Rank</span>
               <span class="text-primary">{{ node.rank }} / {{ node.maxRank }}</span>
             </div>
@@ -241,10 +251,47 @@
             </div>
           </div>
 
+          <div class="mt-4" *ngIf="node.mutatorGroups.length > 0">
+            <p class="ll-eyebrow text-primary">Mutator Groups</p>
+            <div class="mt-2 flex flex-wrap gap-2">
+              <span class="ll-badge ll-badge-accent rounded" *ngFor="let group of node.mutatorGroups">
+                {{ group }}
+              </span>
+            </div>
+          </div>
+
           <div class="mt-4">
             <p class="ll-eyebrow text-primary">Effects</p>
             <ul class="mt-2 grid gap-2 text-sm text-zinc-300">
               <li *ngFor="let effect of node.effects">{{ effect }}</li>
+            </ul>
+          </div>
+
+          <div class="mt-4" *ngIf="node.tooltip.affects.length > 0">
+            <p class="ll-eyebrow text-primary">Affects</p>
+            <ul class="mt-2 grid gap-2 text-sm text-zinc-300">
+              <li *ngFor="let item of node.tooltip.affects">{{ item }}</li>
+            </ul>
+          </div>
+
+          <div class="mt-4" *ngIf="node.tooltip.changes.length > 0">
+            <p class="ll-eyebrow text-primary">Changes</p>
+            <ul class="mt-2 grid gap-2 text-sm text-zinc-300">
+              <li *ngFor="let item of node.tooltip.changes">{{ item }}</li>
+            </ul>
+          </div>
+
+          <div class="mt-4" *ngIf="node.tooltip.tradeoffs.length > 0">
+            <p class="ll-eyebrow text-primary">Tradeoffs</p>
+            <ul class="mt-2 grid gap-2 text-sm text-zinc-300">
+              <li *ngFor="let item of node.tooltip.tradeoffs">{{ item }}</li>
+            </ul>
+          </div>
+
+          <div class="mt-4" *ngIf="node.tooltip.doesNotAffect.length > 0">
+            <p class="ll-eyebrow text-primary">Does Not Affect</p>
+            <ul class="mt-2 grid gap-2 text-sm text-zinc-300">
+              <li *ngFor="let item of node.tooltip.doesNotAffect">{{ item }}</li>
             </ul>
           </div>
 

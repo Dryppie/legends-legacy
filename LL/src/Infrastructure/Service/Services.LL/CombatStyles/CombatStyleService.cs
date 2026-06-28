@@ -156,11 +156,14 @@ public sealed class CombatStyleService : ICombatStyleService
         if (GetAvailableSkillPoints(style, styleNodes) <= 0)
             return CombatStyleOperationResult<CombatStyleModel>.Fail("No Combat Style skill points available.");
 
-        if (node.RequiredNodeId is not null)
+        if (!IsNodeUnlocked(definition, style, styleNodes, node))
+            return CombatStyleOperationResult<CombatStyleModel>.Fail("Required node is not unlocked.");
+
+        if (IsMajorNode(node)
+            && existing is null
+            && HasRankedMajorNodeInRow(nodeDefinitions, styleNodes, node.Row))
         {
-            var required = styleNodes.FirstOrDefault(x => x.NodeId.Equals(node.RequiredNodeId, StringComparison.OrdinalIgnoreCase));
-            if ((required?.Rank ?? 0) <= 0)
-                return CombatStyleOperationResult<CombatStyleModel>.Fail("Required node is not unlocked.");
+            return CombatStyleOperationResult<CombatStyleModel>.Fail($"A major node is already selected in row {node.Row}.");
         }
 
         var now = DateTimeOffset.UtcNow;
@@ -394,70 +397,159 @@ public sealed class CombatStyleService : ICombatStyleService
         var earned = GetEarnedSkillPoints(progress);
         var spent = GetSpentSkillPoints(nodes);
         var available = Math.Max(0, earned - spent);
-        var nodeDefinitions = definition.SkillTreeNodes.ToList();
 
         return new CombatStyleSkillTreeModel
         {
             Branches =
             [
-                .. definition.Focuses.Select((focus, branchIndex) =>
-                {
-                    var branchNodes = nodeDefinitions
-                        .Where(x => x.BranchId.Equals(focus.Id, StringComparison.OrdinalIgnoreCase))
-                        .OrderBy(x => x.Y)
-                        .ThenBy(x => x.X)
-                        .ToList();
-
-                    return new CombatStyleSkillTreeBranchModel
-                    {
-                        Id = focus.Id,
-                        Name = focus.Name,
-                        Description = focus.Description,
-                        RecommendedTags = focus.RecommendedTags,
-                        RecommendedStats = [.. focus.RecommendedStats.Select(x => x.ToString())],
-                        PointsSpent = nodes
-                            .Where(node => branchNodes.Any(def => def.Id.Equals(node.NodeId, StringComparison.OrdinalIgnoreCase)))
-                            .Sum(x => x.Rank),
-                        Nodes =
-                        [
-                            .. branchNodes.Select(node =>
-                            {
-                                var rank = nodes.FirstOrDefault(x => x.NodeId.Equals(node.Id, StringComparison.OrdinalIgnoreCase))?.Rank ?? 0;
-                                var requiredRank = node.RequiredNodeId is null
-                                    ? 1
-                                    : nodes.FirstOrDefault(x => x.NodeId.Equals(node.RequiredNodeId, StringComparison.OrdinalIgnoreCase))?.Rank ?? 0;
-                                var unlocked = progress.Level >= node.RequiredLevel && requiredRank > 0;
-
-                                return new CombatStyleSkillTreeNodeModel
-                                {
-                                    Id = node.Id,
-                                    BranchId = node.BranchId,
-                                    Name = node.Name,
-                                    Description = node.Description,
-                                    Rank = rank,
-                                    MaxRank = node.MaxRank,
-                                    RequiredLevel = node.RequiredLevel,
-                                    RequiredNodeId = node.RequiredNodeId,
-                                    X = node.X,
-                                    Y = node.Y,
-                                    IsUnlocked = unlocked,
-                                    CanRankUp = unlocked && rank < node.MaxRank && available > 0,
-                                    Tags = node.Tags,
-                                    Effects = node.Effects
-                                };
-                            })
-                        ]
-                    };
-                })
+                .. (UsesRowLaneTree(definition)
+                    ? CreateRowLaneBranches(definition, progress, nodes, available)
+                    : CreateFocusBranches(definition, progress, nodes, available))
             ]
         };
     }
+
+    private static IEnumerable<CombatStyleSkillTreeBranchModel> CreateFocusBranches(
+        CombatStyleDefinition definition,
+        PlayerCombatStyle progress,
+        IReadOnlyList<PlayerCombatStyleNode> nodes,
+        int available)
+    {
+        var nodeDefinitions = definition.SkillTreeNodes.ToList();
+        return definition.Focuses.Select(focus =>
+        {
+            var branchNodes = nodeDefinitions
+                .Where(x => x.BranchId.Equals(focus.Id, StringComparison.OrdinalIgnoreCase))
+                .OrderBy(x => x.Y)
+                .ThenBy(x => x.X)
+                .ToList();
+
+            return new CombatStyleSkillTreeBranchModel
+            {
+                Id = focus.Id,
+                Name = focus.Name,
+                Description = focus.Description,
+                RecommendedTags = focus.RecommendedTags,
+                RecommendedStats = [.. focus.RecommendedStats.Select(x => x.ToString())],
+                PointsSpent = nodes
+                    .Where(node => branchNodes.Any(def => def.Id.Equals(node.NodeId, StringComparison.OrdinalIgnoreCase)))
+                    .Sum(x => x.Rank),
+                Nodes =
+                [
+                    .. branchNodes.Select(node =>
+                    {
+                        var rank = GetNodeRank(nodes, node.Id);
+                        var unlocked = IsNodeUnlocked(definition, progress, nodes, node);
+                        return MapNode(node, rank, unlocked, unlocked && rank < node.MaxRank && available > 0);
+                    })
+                ]
+            };
+        });
+    }
+
+    private static IEnumerable<CombatStyleSkillTreeBranchModel> CreateRowLaneBranches(
+        CombatStyleDefinition definition,
+        PlayerCombatStyle progress,
+        IReadOnlyList<PlayerCombatStyleNode> nodes,
+        int available)
+    {
+        var lanes = new[]
+        {
+            CombatStyleNodeLanes.Left,
+            CombatStyleNodeLanes.Middle,
+            CombatStyleNodeLanes.Right
+        };
+        var nodeDefinitions = definition.SkillTreeNodes.ToList();
+
+        foreach (var lane in lanes)
+        {
+            var branchNodes = nodeDefinitions
+                .Where(x => x.Lane.Equals(lane, StringComparison.OrdinalIgnoreCase))
+                .OrderBy(x => x.Row)
+                .ThenBy(x => x.Y)
+                .ThenBy(x => x.X)
+                .ToList();
+
+            yield return new CombatStyleSkillTreeBranchModel
+            {
+                Id = lane.ToLowerInvariant(),
+                Name = lane,
+                Description = $"{definition.Name} {lane.ToLowerInvariant()} lane.",
+                RecommendedTags = [lane],
+                RecommendedStats = [.. definition.RecommendedStats.Select(x => x.ToString())],
+                PointsSpent = nodes
+                    .Where(node => branchNodes.Any(def => def.Id.Equals(node.NodeId, StringComparison.OrdinalIgnoreCase)))
+                    .Sum(x => x.Rank),
+                Nodes =
+                [
+                    .. branchNodes.Select(node =>
+                    {
+                        var rank = GetNodeRank(nodes, node.Id);
+                        var unlocked = IsNodeUnlocked(definition, progress, nodes, node);
+                        var majorRowBlocked = IsMajorNode(node)
+                            && rank <= 0
+                            && HasRankedMajorNodeInRow(nodeDefinitions, nodes, node.Row);
+                        return MapNode(
+                            node,
+                            rank,
+                            unlocked,
+                            unlocked && !majorRowBlocked && rank < node.MaxRank && available > 0);
+                    })
+                ]
+            };
+        }
+    }
+
+    private static CombatStyleSkillTreeNodeModel MapNode(
+        CombatStyleTreeNodeDefinition node,
+        int rank,
+        bool unlocked,
+        bool canRankUp) =>
+        new()
+        {
+            Id = node.Id,
+            BranchId = node.BranchId,
+            Name = node.Name,
+            Description = node.Description,
+            Rank = rank,
+            MaxRank = node.MaxRank,
+            RequiredLevel = node.RequiredLevel,
+            RequiredNodeId = node.RequiredNodeId,
+            X = node.X,
+            Y = node.Y,
+            IsUnlocked = unlocked,
+            CanRankUp = canRankUp,
+            Tags = node.Tags,
+            Effects = node.Effects,
+            Row = node.Row,
+            Lane = node.Lane,
+            NodeType = node.NodeType,
+            MutatorKind = node.MutatorKind,
+            MutatorGroups = node.MutatorGroups,
+            Tooltip = new CombatStyleNodeTooltipModel
+            {
+                Affects = node.Tooltip.Affects,
+                Changes = node.Tooltip.Changes,
+                Tradeoffs = node.Tooltip.Tradeoffs,
+                DoesNotAffect = node.Tooltip.DoesNotAffect
+            }
+        };
 
     private static string? DetermineEffectiveFocusId(
         CombatStyleDefinition definition,
         PlayerCombatStyle progress,
         IReadOnlyList<PlayerCombatStyleNode> nodes)
     {
+        if (UsesRowLaneTree(definition))
+        {
+            var rowThreeMajor = definition.SkillTreeNodes
+                .Where(node => IsMajorNode(node) && node.Row == 3 && GetNodeRank(nodes, node.Id) > 0)
+                .OrderBy(node => node.X)
+                .FirstOrDefault();
+
+            return rowThreeMajor?.Id ?? progress.SelectedFocusId;
+        }
+
         var nodeDefinitions = definition.SkillTreeNodes;
         var branchScores = definition.Focuses
             .Select(focus => new
@@ -478,6 +570,60 @@ public sealed class CombatStyleService : ICombatStyleService
 
         return branchScores?.Id ?? progress.SelectedFocusId;
     }
+
+    private static bool IsNodeUnlocked(
+        CombatStyleDefinition definition,
+        PlayerCombatStyle progress,
+        IReadOnlyList<PlayerCombatStyleNode> nodes,
+        CombatStyleTreeNodeDefinition node)
+    {
+        if (progress.Level < node.RequiredLevel)
+            return false;
+
+        if (!UsesRowLaneTree(definition))
+        {
+            var requiredRank = node.RequiredNodeId is null
+                ? 1
+                : GetNodeRank(nodes, node.RequiredNodeId);
+            return requiredRank > 0;
+        }
+
+        if (node.Row <= 1)
+            return true;
+
+        var previousMajor = definition.SkillTreeNodes.FirstOrDefault(candidate =>
+            IsMajorNode(candidate)
+            && candidate.Row == node.Row - 1
+            && GetNodeRank(nodes, candidate.Id) > 0);
+
+        return previousMajor is not null && CanLaneUnlock(previousMajor.Lane, node.Lane);
+    }
+
+    private static bool CanLaneUnlock(string sourceLane, string targetLane) =>
+        sourceLane.Equals(CombatStyleNodeLanes.Middle, StringComparison.OrdinalIgnoreCase)
+        || sourceLane.Equals(targetLane, StringComparison.OrdinalIgnoreCase)
+        || (sourceLane.Equals(CombatStyleNodeLanes.Left, StringComparison.OrdinalIgnoreCase)
+            && targetLane.Equals(CombatStyleNodeLanes.Middle, StringComparison.OrdinalIgnoreCase))
+        || (sourceLane.Equals(CombatStyleNodeLanes.Right, StringComparison.OrdinalIgnoreCase)
+            && targetLane.Equals(CombatStyleNodeLanes.Middle, StringComparison.OrdinalIgnoreCase));
+
+    private static bool UsesRowLaneTree(CombatStyleDefinition definition) =>
+        definition.SkillTreeNodes.Any(x => x.Row > 0);
+
+    private static bool IsMajorNode(CombatStyleTreeNodeDefinition node) =>
+        node.NodeType.Equals(CombatStyleNodeTypes.Major, StringComparison.OrdinalIgnoreCase);
+
+    private static bool HasRankedMajorNodeInRow(
+        IReadOnlyList<CombatStyleTreeNodeDefinition> nodeDefinitions,
+        IReadOnlyList<PlayerCombatStyleNode> nodes,
+        int row) =>
+        row > 0
+        && nodeDefinitions
+            .Where(node => IsMajorNode(node) && node.Row == row)
+            .Any(node => GetNodeRank(nodes, node.Id) > 0);
+
+    private static int GetNodeRank(IReadOnlyList<PlayerCombatStyleNode> nodes, string nodeId) =>
+        nodes.FirstOrDefault(x => x.NodeId.Equals(nodeId, StringComparison.OrdinalIgnoreCase))?.Rank ?? 0;
 
     private static int GetEarnedSkillPoints(PlayerCombatStyle style) =>
         Math.Max(1, style.Level);

@@ -70,6 +70,19 @@ export interface CombatStyleSkillTreeNodeDto {
   canRankUp: boolean;
   tags: string[];
   effects: string[];
+  row: number;
+  lane: string;
+  nodeType: string;
+  mutatorKind: string | null;
+  mutatorGroups: string[];
+  tooltip: CombatStyleNodeTooltipDto;
+}
+
+export interface CombatStyleNodeTooltipDto {
+  affects: string[];
+  changes: string[];
+  tradeoffs: string[];
+  doesNotAffect: string[];
 }
 
 export interface ActivateCombatStyleResponseDto {

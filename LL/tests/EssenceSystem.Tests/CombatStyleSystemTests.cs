@@ -5,6 +5,7 @@ using Application.UseCases.CombatStyles.Models;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Domain.Models.Attributes;
+using Domain.Models.Combat;
 using Domain.Models.Combat.Abilities;
 using Domain.Models.CombatStyles;
 using Domain.Models.Damages;
@@ -12,6 +13,7 @@ using Domain.Models.Dungeons.Runs;
 using Domain.Models.Entities.Characters;
 using Domain.Models.Essences.Definitions;
 using Domain.Models.Inventories;
+using Domain.Models.Regions.Areas;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -20,8 +22,10 @@ using Persistence.LL.Repositories.CombatStyles;
 using Persistence.LL.Repositories.Dungeons;
 using Persistence.LL.Repositories.Essences;
 using Services.LL.Combat.Engine;
+using Services.LL.Combat.Layers.Orchestration.Models;
 using Services.LL.Combat.Layers.Rewards.Idle;
 using Services.LL.Combat.Layers.Rewards.Models;
+using Services.LL.Combat.Layers.Resolution.Models;
 using Services.LL.CombatStyles;
 using Services.LL.Interfaces.Combat.Reward;
 
@@ -72,7 +76,12 @@ public sealed class CombatStyleSystemTests
 
             foreach (var node in style.SkillTreeNodes)
             {
-                Assert.Contains(node.BranchId, focusIds);
+                if (style.SkillTreeNodes.Any(x => x.Row > 0))
+                    Assert.True(
+                        new[] { "left", "middle", "right" }.Contains(node.BranchId, StringComparer.OrdinalIgnoreCase),
+                        $"Style '{style.Id}' node '{node.Id}' has invalid lane branch '{node.BranchId}'.");
+                else
+                    Assert.Contains(node.BranchId, focusIds);
                 if (node.RequiredNodeId is not null)
                     Assert.Contains(node.RequiredNodeId, nodeIds);
 
@@ -83,6 +92,345 @@ public sealed class CombatStyleSystemTests
             foreach (var operation in style.ResourceOverflowOperations)
                 AssertValidOperationReferences(style, operation, nodeIds, focusIds, currentNodeId: null, allowNodeRankModifiers: true);
         }
+    }
+
+    [Fact]
+    public void Combat_style_json_definitions_use_redesigned_skill_tree_shape()
+    {
+        var definitions = CreateDefinitionProvider().GetAll();
+
+        foreach (var style in definitions)
+        {
+            var majorNodes = style.SkillTreeNodes
+                .Where(node => node.NodeType.Equals(CombatStyleNodeTypes.Major, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+            var minorNodes = style.SkillTreeNodes
+                .Where(node => node.NodeType.Equals(CombatStyleNodeTypes.Minor, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+
+            Assert.Equal(9, majorNodes.Count);
+            Assert.Equal(12, minorNodes.Count);
+
+            foreach (var row in Enumerable.Range(1, 3))
+            {
+                var rowMajorNodes = majorNodes.Where(node => node.Row == row).ToList();
+                Assert.Equal(3, rowMajorNodes.Count);
+                Assert.Contains(rowMajorNodes, node => node.Lane == CombatStyleNodeLanes.Left);
+                Assert.Contains(rowMajorNodes, node => node.Lane == CombatStyleNodeLanes.Middle);
+                Assert.Contains(rowMajorNodes, node => node.Lane == CombatStyleNodeLanes.Right);
+            }
+
+            Assert.All(majorNodes.Where(node => node.Row == 2), node =>
+            {
+                Assert.NotNull(node.Mutator);
+                Assert.NotEmpty(node.MutatorGroups);
+                Assert.NotEmpty(node.Tooltip.Changes);
+            });
+        }
+    }
+
+    [Fact]
+    public void Caster_arcane_armament_mutator_converts_eligible_melee_damage()
+    {
+        var provider = CreateDefinitionProvider();
+        var resolver = new CombatStyleAbilityMutatorResolver(provider);
+        var spec = new AbilitySpec
+        {
+            Id = "test_melee",
+            Kind = AbilitySpecKind.Active,
+            Tags = ["Melee"],
+            DeliveryTags = ["Melee"],
+            EffectTags = ["Damage"],
+            Costs = [new AbilityCostSpec { Resource = AbilityResourceType.Mana, BaseValue = 100 }],
+            Effects =
+            [
+                new AbilityEffectSpec
+                {
+                    Id = "hit",
+                    Operation = AbilityEffectOperation.Damage,
+                    Target = AbilityTargetSelector.CurrentTarget,
+                    BaseValue = 100,
+                    DamageType = DamageType.Physical,
+                    ScalingAttribute = AttributeType.Power,
+                    ScalingCoefficient = 1f,
+                    Tags = ["Damage"]
+                }
+            ]
+        };
+        var snapshot = new CombatStyleSnapshot(
+            "caster",
+            "Caster",
+            10,
+            0,
+            null,
+            null,
+            new Dictionary<string, int> { ["caster_arcane_armament"] = 1 });
+
+        var modified = resolver.ApplyMutators(spec, snapshot);
+
+        Assert.NotSame(spec, modified);
+        Assert.Contains("ConvertedDamage", modified.Tags);
+        Assert.Equal(DamageType.Magical, modified.Effects.Single().DamageType);
+        Assert.Equal(AttributeType.Spirit, modified.Effects.Single().ScalingAttribute);
+        Assert.Equal(105, modified.Effects.Single().BaseValue);
+        Assert.Equal(105, modified.Costs.Single().BaseValue);
+    }
+
+    [Fact]
+    public void Caster_arcane_armament_respects_damage_conversion_flags()
+    {
+        var provider = CreateDefinitionProvider();
+        var resolver = new CombatStyleAbilityMutatorResolver(provider);
+        var spec = new AbilitySpec
+        {
+            Id = "test_melee",
+            Kind = AbilitySpecKind.Active,
+            Tags = ["Melee"],
+            DeliveryTags = ["Melee"],
+            EffectTags = ["Damage"],
+            ConversionFlags = new AbilityConversionFlags { AllowDamageTypeConversion = false },
+            Effects =
+            [
+                new AbilityEffectSpec
+                {
+                    Id = "hit",
+                    Operation = AbilityEffectOperation.Damage,
+                    BaseValue = 100,
+                    DamageType = DamageType.Physical,
+                    Tags = ["Damage"]
+                }
+            ]
+        };
+        var snapshot = new CombatStyleSnapshot(
+            "caster",
+            "Caster",
+            10,
+            0,
+            null,
+            null,
+            new Dictionary<string, int> { ["caster_arcane_armament"] = 1 });
+
+        var modified = resolver.ApplyMutators(spec, snapshot);
+
+        Assert.Same(spec, modified);
+        Assert.Equal(DamageType.Physical, modified.Effects.Single().DamageType);
+    }
+
+    [Fact]
+    public void Mutator_resolver_applies_only_one_mutator_per_group()
+    {
+        var definition = CreateMutatorTestDefinition(
+            CreateMutatorNode(
+                "first",
+                DamageType.Magical,
+                1.10m,
+                CombatStyleMutatorGroups.DamageTypeConversion),
+            CreateMutatorNode(
+                "second",
+                DamageType.Burn,
+                2m,
+                CombatStyleMutatorGroups.DamageTypeConversion));
+        var resolver = new CombatStyleAbilityMutatorResolver(new SingleDefinitionProvider(definition));
+        var spec = CreatePhysicalDamageSpec();
+        var snapshot = new CombatStyleSnapshot(
+            "mutator-test",
+            "Mutator Test",
+            10,
+            0,
+            null,
+            null,
+            new Dictionary<string, int>
+            {
+                ["first"] = 1,
+                ["second"] = 1
+            });
+
+        var modified = resolver.ApplyMutators(spec, snapshot);
+
+        Assert.Equal(DamageType.Magical, modified.Effects.Single().DamageType);
+        Assert.Equal(110, modified.Effects.Single().BaseValue);
+    }
+
+    [Fact]
+    public void Mutator_resolver_returns_original_spec_when_no_effect_matches()
+    {
+        var definition = CreateMutatorTestDefinition(
+            CreateMutatorNode(
+                "first",
+                DamageType.Magical,
+                1.10m,
+                CombatStyleMutatorGroups.DamageTypeConversion));
+        var resolver = new CombatStyleAbilityMutatorResolver(new SingleDefinitionProvider(definition));
+        var spec = CreatePhysicalDamageSpec();
+        spec.Effects.Single().DamageType = DamageType.Poison;
+        var snapshot = new CombatStyleSnapshot(
+            "mutator-test",
+            "Mutator Test",
+            10,
+            0,
+            null,
+            null,
+            new Dictionary<string, int> { ["first"] = 1 });
+
+        var modified = resolver.ApplyMutators(spec, snapshot);
+
+        Assert.Same(spec, modified);
+        Assert.Equal(DamageType.Poison, modified.Effects.Single().DamageType);
+    }
+
+    [Fact]
+    public async Task Combat_engine_executor_compiles_abilities_after_combat_style_mutators()
+    {
+        var ability = CreatePhysicalDamageSpec();
+        ability.Id = "ability.test.style_mutated_strike";
+        ability.Name = "Style Mutated Strike";
+        ability.OwningEssenceId = "essence.test.style_mutated";
+        ability.Tags = ["Melee"];
+        ability.DeliveryTags = ["Melee"];
+        ability.EffectTags = ["Damage"];
+        ability.CooldownTicks = 999;
+        ability.Triggers =
+        [
+            new AbilityTriggerSpec
+            {
+                Event = AbilityTriggerEvent.OnAbilityUsed,
+                EffectIds = ["hit"]
+            }
+        ];
+        ability.Effects.Single().Tags = ["Damage"];
+        ability.Effects.Single().ScalingAttribute = null;
+        ability.Effects.Single().ScalingCoefficient = 0f;
+        var catalog = AbilityCatalogValidator.CreateCatalog(
+            [ability],
+            [],
+            new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            {
+                [ability.Id] = "essence.test.style_mutated"
+            });
+        var friendlyCharacter = CreateTestCharacter("Style Mutated Friendly");
+        var hostileCharacter = CreateTestCharacter("Style Mutated Hostile");
+        var friendlyCombatant = CreateTestCombatEntity(
+            "friendly-slot",
+            friendlyCharacter,
+            "essence.test.style_mutated");
+        var hostileCombatant = CreateTestCombatEntity("hostile-slot", hostileCharacter);
+        var combatStyle = new CombatStyleSnapshot(
+            "caster",
+            "Caster",
+            10,
+            0,
+            null,
+            null,
+            new Dictionary<string, int> { ["caster_arcane_armament"] = 1 });
+        var runtime = CreateTestRuntime(
+            friendlyCharacter,
+            friendlyCombatant,
+            hostileCharacter,
+            hostileCombatant,
+            combatStyle);
+        var executor = new CombatEngineExecutor(
+            new FakeAbilityCatalogProvider(catalog),
+            combatStyleDefinitions: CreateDefinitionProvider());
+
+        var result = await executor.ExecuteAsync(runtime, CancellationToken.None);
+
+        Assert.Contains(
+            result.EventLog,
+            item => item.Source == "hit"
+                && item.EventType == EventType.Damage
+                && item.Magnitude == 105
+                && item.Details.Contains("Magical", StringComparison.OrdinalIgnoreCase));
+    }
+
+    [Fact]
+    public async Task Redesigned_skill_tree_enforces_major_row_exclusivity()
+    {
+        await using var db = CreateDb();
+        var characterId = await SeedCharacterAsync(db);
+        var service = CreateService(db);
+        await service.GetOverviewAsync(characterId, CancellationToken.None);
+        await db.SaveChangesAsync();
+        await service.GrantExperienceAsync(characterId, 60_000, "test", CancellationToken.None);
+        await db.SaveChangesAsync();
+
+        var first = await service.RankUpNodeAsync(
+            characterId,
+            "fighter",
+            "fighter_duelists_focus",
+            CancellationToken.None);
+        await db.SaveChangesAsync();
+        var second = await service.RankUpNodeAsync(
+            characterId,
+            "fighter",
+            "fighter_bruisers_grit",
+            CancellationToken.None);
+
+        Assert.True(first.Succeeded);
+        Assert.False(second.Succeeded);
+        Assert.Equal("A major node is already selected in row 1.", second.Message);
+    }
+
+    [Fact]
+    public async Task Redesigned_skill_tree_uses_lane_branching_between_major_rows()
+    {
+        await using var db = CreateDb();
+        var characterId = await SeedCharacterAsync(db);
+        var service = CreateService(db);
+        await service.GetOverviewAsync(characterId, CancellationToken.None);
+        await db.SaveChangesAsync();
+        await service.GrantExperienceAsync(characterId, 60_000, "test", CancellationToken.None);
+        await db.SaveChangesAsync();
+
+        var rowOne = await service.RankUpNodeAsync(
+            characterId,
+            "fighter",
+            "fighter_bruisers_grit",
+            CancellationToken.None);
+        await db.SaveChangesAsync();
+        var lockedRight = await service.RankUpNodeAsync(
+            characterId,
+            "fighter",
+            "fighter_bloodied_tempo",
+            CancellationToken.None);
+        var unlockedMiddle = await service.RankUpNodeAsync(
+            characterId,
+            "fighter",
+            "fighter_martial_imprint",
+            CancellationToken.None);
+
+        Assert.True(rowOne.Succeeded);
+        Assert.False(lockedRight.Succeeded);
+        Assert.Equal("Required node is not unlocked.", lockedRight.Message);
+        Assert.True(unlockedMiddle.Succeeded);
+    }
+
+    [Fact]
+    public async Task Redesigned_skill_tree_row_three_major_sets_build_identity()
+    {
+        await using var db = CreateDb();
+        var characterId = await SeedCharacterAsync(db);
+        var service = CreateService(db);
+        await service.GetOverviewAsync(characterId, CancellationToken.None);
+        await db.SaveChangesAsync();
+        await service.GrantExperienceAsync(characterId, 60_000, "test", CancellationToken.None);
+        await db.SaveChangesAsync();
+
+        await service.RankUpNodeAsync(characterId, "fighter", "fighter_duelists_focus", CancellationToken.None);
+        await db.SaveChangesAsync();
+        await service.RankUpNodeAsync(characterId, "fighter", "fighter_martial_imprint", CancellationToken.None);
+        await db.SaveChangesAsync();
+        var result = await service.RankUpNodeAsync(
+            characterId,
+            "fighter",
+            "fighter_duelists_claim",
+            CancellationToken.None);
+        await db.SaveChangesAsync();
+        var snapshot = await service.GetActiveSnapshotAsync(characterId, CancellationToken.None);
+
+        Assert.True(result.Succeeded);
+        Assert.Equal("fighter_duelists_claim", result.Value?.SelectedFocusId);
+        Assert.Equal("fighter_duelists_claim", snapshot?.SelectedFocusId);
+        Assert.Equal("Duelists Claim", snapshot?.SelectedFocusName);
     }
 
     [Fact]
@@ -167,15 +515,15 @@ public sealed class CombatStyleSystemTests
         await service.GetOverviewAsync(characterId, CancellationToken.None);
         await db.SaveChangesAsync();
 
-        var locked = await service.SelectFocusAsync(characterId, "caster", "spellblade", CancellationToken.None);
-        db.PlayerCombatStyles.Single(x => x.CharacterId == characterId && x.StyleId == "caster").Level = 10;
+        var locked = await service.SelectFocusAsync(characterId, "caster", "caster_grand_channel", CancellationToken.None);
+        db.PlayerCombatStyles.Single(x => x.CharacterId == characterId && x.StyleId == "caster").Level = 25;
         await db.SaveChangesAsync();
-        var unlocked = await service.SelectFocusAsync(characterId, "caster", "spellblade", CancellationToken.None);
+        var unlocked = await service.SelectFocusAsync(characterId, "caster", "caster_grand_channel", CancellationToken.None);
         await db.SaveChangesAsync();
 
         Assert.False(locked.Succeeded);
         Assert.True(unlocked.Succeeded);
-        Assert.Equal("spellblade", unlocked.Value?.SelectedFocusId);
+        Assert.Equal("caster_grand_channel", unlocked.Value?.SelectedFocusId);
     }
 
     [Fact]
@@ -189,9 +537,9 @@ public sealed class CombatStyleSystemTests
         await service.GrantExperienceAsync(characterId, 8_100, "test", CancellationToken.None);
         await db.SaveChangesAsync();
 
-        var rootRanked = await service.RankUpNodeAsync(characterId, "fighter", "duelist-path", CancellationToken.None);
+        var rootRanked = await service.RankUpNodeAsync(characterId, "fighter", "fighter_duelists_focus", CancellationToken.None);
         await db.SaveChangesAsync();
-        var ranked = await service.RankUpNodeAsync(characterId, "fighter", "duelist-technique", CancellationToken.None);
+        var ranked = await service.RankUpNodeAsync(characterId, "fighter", "fighter_martial_imprint", CancellationToken.None);
         await db.SaveChangesAsync();
         var snapshot = await service.GetActiveSnapshotAsync(characterId, CancellationToken.None);
         var reset = await service.ResetSkillTreeAsync(characterId, "fighter", CancellationToken.None);
@@ -200,11 +548,11 @@ public sealed class CombatStyleSystemTests
         Assert.True(rootRanked.Succeeded);
         Assert.Null(rootRanked.Value?.SelectedFocusId);
         Assert.True(ranked.Succeeded);
-        Assert.Equal("duelist", ranked.Value?.SelectedFocusId);
+        Assert.Null(ranked.Value?.SelectedFocusId);
         Assert.Equal(8, ranked.Value?.SkillPointsAvailable);
         Assert.Equal(2, ranked.Value?.SkillPointsSpent);
-        Assert.Equal(1, snapshot?.NodeRanks?["duelist-path"]);
-        Assert.Equal(1, snapshot?.NodeRanks?["duelist-technique"]);
+        Assert.Equal(1, snapshot?.NodeRanks?["fighter_duelists_focus"]);
+        Assert.Equal(1, snapshot?.NodeRanks?["fighter_martial_imprint"]);
         Assert.True(reset.Succeeded);
         Assert.Null(reset.Value?.SelectedFocusId);
         Assert.Equal(0, reset.Value?.SkillPointsSpent);
@@ -513,254 +861,7 @@ public sealed class CombatStyleSystemTests
         });
     }
 
-    [Fact]
-    public void Caster_spellblade_adds_spirit_scaling_to_melee_active_damage()
-    {
-        var engine = new CombatStyleRuleEngine(CreateDefinitionProvider());
-        var state = engine.CreateState(new CombatStyleSnapshot("caster", "Caster", 10, 0, "spellblade", "Spellblade"));
-        var player = CreateCombatant("player", CombatTeam.Friendly, spirit: 100);
-        var enemy = CreateCombatant("enemy", CombatTeam.Hostile);
-
-        var amount = engine.ModifyEffectAmount(state, DamageEffect(active: true, tags: ["Melee"]), player, enemy, 50);
-
-        Assert.Equal(65, amount);
-    }
-
-    [Fact]
-    public void Defensive_level_ten_foci_have_distinct_runtime_effects()
-    {
-        var engine = new CombatStyleRuleEngine(CreateDefinitionProvider());
-        var player = CreateCombatant("player", CombatTeam.Friendly);
-        var enemy = CreateCombatant("enemy", CombatTeam.Hostile);
-        var counterguard = engine.CreateState(new CombatStyleSnapshot("defensive", "Defensive", 10, 0, "counterguard", "Counterguard"));
-        var commander = engine.CreateState(new CombatStyleSnapshot("defensive", "Defensive", 10, 0, "commander", "Commander"));
-
-        engine.OnDamageTaken(counterguard, DamageEffect(), enemy, player, 10, 1m);
-        var retaliation = engine.ModifyEffectAmount(counterguard, DamageEffect(active: true), player, enemy, 100);
-        var summonAttributes = engine.ModifySummonAttributes(
-            commander,
-            player,
-            new Dictionary<AttributeType, float>
-            {
-                [AttributeType.MaxHealth] = 100,
-                [AttributeType.Power] = 20
-            });
-
-        Assert.Equal(110, retaliation);
-        Assert.Equal(115, summonAttributes[AttributeType.MaxHealth]);
-        Assert.Equal(21, summonAttributes[AttributeType.Power]);
-    }
-
-    [Fact]
-    public void Defensive_focus_milestones_scale_level_twenty_five_and_forty_effects()
-    {
-        var engine = new CombatStyleRuleEngine(CreateDefinitionProvider());
-        var player = CreateCombatant("player", CombatTeam.Friendly, maxHealth: 1000);
-        var enemy = CreateCombatant("enemy", CombatTeam.Hostile);
-        var bulwark25 = engine.CreateState(new CombatStyleSnapshot("defensive", "Defensive", 25, 0, "bulwark", "Bulwark"));
-        var bulwark40 = engine.CreateState(new CombatStyleSnapshot("defensive", "Defensive", 40, 0, "bulwark", "Bulwark"));
-        var counterguard40 = engine.CreateState(new CombatStyleSnapshot("defensive", "Defensive", 40, 0, "counterguard", "Counterguard"));
-        var commander40 = engine.CreateState(new CombatStyleSnapshot("defensive", "Defensive", 40, 0, "commander", "Commander"));
-
-        var barrier = engine.ModifyEffectAmount(bulwark25, BarrierEffect(active: true), player, player, 100);
-        for (var i = 0; i < 20; i++)
-            engine.OnDamageTaken(bulwark40, DamageEffect(), enemy, player, 1, 1m);
-        engine.OnDamageTaken(counterguard40, DamageEffect(), enemy, player, 10, 1m);
-        var counterguardDamage = engine.ModifyEffectAmount(counterguard40, DamageEffect(active: true), player, enemy, 100);
-        var commanderAttributes = engine.ModifySummonAttributes(
-            commander40,
-            player,
-            new Dictionary<AttributeType, float>
-            {
-                [AttributeType.MaxHealth] = 100,
-                [AttributeType.Power] = 20
-            });
-
-        Assert.Equal(115, barrier);
-        Assert.Equal(170, player.Barrier);
-        Assert.Equal(120, counterguardDamage);
-        Assert.Equal(125, commanderAttributes[AttributeType.MaxHealth]);
-        Assert.Equal(23, commanderAttributes[AttributeType.Power]);
-    }
-
-    [Fact]
-    public void Fighter_level_ten_foci_have_distinct_runtime_effects()
-    {
-        var engine = new CombatStyleRuleEngine(CreateDefinitionProvider());
-        var player = CreateCombatant("player", CombatTeam.Friendly);
-        var enemy = CreateCombatant("enemy", CombatTeam.Hostile);
-        var duelist = engine.CreateState(new CombatStyleSnapshot("fighter", "Fighter", 10, 0, "duelist", "Duelist"));
-        var berserker = engine.CreateState(new CombatStyleSnapshot("fighter", "Fighter", 10, 0, "berserker", "Berserker"));
-        var vanguard = engine.CreateState(new CombatStyleSnapshot("fighter", "Fighter", 10, 0, "vanguard", "Vanguard"));
-
-        player.SetHealth(50);
-        var duelistDamage = engine.ModifyEffectAmount(duelist, DamageEffect(active: true), player, enemy, 100);
-        var berserkerDamage = engine.ModifyEffectAmount(berserker, DamageEffect(active: true), player, enemy, 100);
-        var vanguardIncoming = engine.ModifyEffectAmount(vanguard, DamageEffect(), enemy, player, 100);
-
-        Assert.Equal(108, duelistDamage);
-        Assert.Equal(112, berserkerDamage);
-        Assert.Equal(95, vanguardIncoming);
-    }
-
-    [Fact]
-    public void Fighter_focus_milestones_scale_level_twenty_five_and_forty_effects()
-    {
-        var engine = new CombatStyleRuleEngine(CreateDefinitionProvider());
-        var player = CreateCombatant("player", CombatTeam.Friendly);
-        var enemy = CreateCombatant("enemy", CombatTeam.Hostile);
-        var duelist25 = engine.CreateState(new CombatStyleSnapshot("fighter", "Fighter", 25, 0, "duelist", "Duelist"));
-        var berserker40 = engine.CreateState(new CombatStyleSnapshot("fighter", "Fighter", 40, 0, "berserker", "Berserker"));
-        var vanguard40 = engine.CreateState(new CombatStyleSnapshot("fighter", "Fighter", 40, 0, "vanguard", "Vanguard"));
-
-        player.SetHealth(60);
-        var duelistDamage = engine.ModifyEffectAmount(duelist25, DamageEffect(active: true), player, enemy, 100);
-        var berserkerDamage = engine.ModifyEffectAmount(berserker40, DamageEffect(active: true), player, enemy, 100);
-        var vanguardIncoming = engine.ModifyEffectAmount(vanguard40, DamageEffect(), enemy, player, 100);
-        for (var i = 0; i < 13; i++)
-            engine.OnDamageTaken(vanguard40, DamageEffect(), enemy, player, 10, 1m);
-
-        Assert.Equal(112, duelistDamage);
-        Assert.Equal(124, berserkerDamage);
-        Assert.Equal(88, vanguardIncoming);
-        Assert.Single(vanguard40!.PendingEmpowerments);
-    }
-
-    [Fact]
-    public void Defensive_and_fighter_skill_tree_nodes_have_runtime_effects_without_selected_focus()
-    {
-        var engine = new CombatStyleRuleEngine(CreateDefinitionProvider());
-        var player = CreateCombatant("player", CombatTeam.Friendly);
-        var enemy = CreateCombatant("enemy", CombatTeam.Hostile);
-        var defensive = engine.CreateState(new CombatStyleSnapshot(
-            "defensive",
-            "Defensive",
-            10,
-            0,
-            null,
-            null,
-            new Dictionary<string, int>
-            {
-                ["bulwark-path"] = 1,
-                ["bulwark-technique"] = 2
-            }));
-        var fighter = engine.CreateState(new CombatStyleSnapshot(
-            "fighter",
-            "Fighter",
-            10,
-            0,
-            null,
-            null,
-            new Dictionary<string, int>
-            {
-                ["duelist-technique"] = 2,
-                ["vanguard-technique"] = 1
-            }));
-
-        var barrier = engine.ModifyEffectAmount(defensive, BarrierEffect(active: true), player, player, 100);
-        var defensiveIncoming = engine.ModifyEffectAmount(defensive, DamageEffect(), enemy, player, 100);
-        var fighterDamage = engine.ModifyEffectAmount(fighter, DamageEffect(active: true), player, enemy, 100);
-        var fighterIncoming = engine.ModifyEffectAmount(fighter, DamageEffect(), enemy, player, 100);
-
-        Assert.Equal(110, barrier);
-        Assert.Equal(94, defensiveIncoming);
-        Assert.Equal(104, fighterDamage);
-        Assert.Equal(98, fighterIncoming);
-    }
-
-    [Fact]
-    public void Caster_level_ten_foci_have_distinct_runtime_effects()
-    {
-        var engine = new CombatStyleRuleEngine(CreateDefinitionProvider());
-        var player = CreateCombatant("player", CombatTeam.Friendly);
-        var enemy = CreateCombatant("enemy", CombatTeam.Hostile);
-        var arcanist = engine.CreateState(new CombatStyleSnapshot("caster", "Caster", 10, 0, "arcanist", "Arcanist"));
-        var occultist = engine.CreateState(new CombatStyleSnapshot("caster", "Caster", 10, 0, "occultist", "Occultist"));
-
-        var arcanistDamage = engine.ModifyEffectAmount(arcanist, DamageEffect(active: true, tags: ["Magic"]), player, enemy, 100);
-        var occultistDamage = engine.ModifyEffectAmount(occultist, DamageEffect(active: true, tags: ["Curse", "DoT"]), player, enemy, 100);
-        engine.OnAbilityResolved(occultist, ActiveAbility("curse_spell", ["Curse"]), player);
-
-        Assert.Equal(110, arcanistDamage);
-        Assert.Equal(110, occultistDamage);
-        Assert.Equal(2, occultist!.Resources["arcaneCharge"]);
-    }
-
-    [Fact]
-    public void Caster_focus_milestones_scale_level_twenty_five_and_forty_effects()
-    {
-        var engine = new CombatStyleRuleEngine(CreateDefinitionProvider());
-        var player = CreateCombatant("player", CombatTeam.Friendly, spirit: 100);
-        var enemy = CreateCombatant("enemy", CombatTeam.Hostile);
-        var arcanist40 = engine.CreateState(new CombatStyleSnapshot("caster", "Caster", 40, 0, "arcanist", "Arcanist"));
-        var spellblade25 = engine.CreateState(new CombatStyleSnapshot("caster", "Caster", 25, 0, "spellblade", "Spellblade"));
-        var occultist25 = engine.CreateState(new CombatStyleSnapshot("caster", "Caster", 25, 0, "occultist", "Occultist"));
-
-        var arcanistDamage = engine.ModifyEffectAmount(arcanist40, DamageEffect(active: true, tags: ["Magic"]), player, enemy, 100);
-        engine.OnAbilityResolved(arcanist40, ActiveAbility("magic_spell", ["Magic"]), player);
-        var spellbladeDamage = engine.ModifyEffectAmount(spellblade25, DamageEffect(active: true, tags: ["Melee"]), player, enemy, 50);
-        var occultistDamage = engine.ModifyEffectAmount(occultist25, DamageEffect(active: true, tags: ["Curse", "DoT"]), player, enemy, 100);
-
-        Assert.Equal(120, arcanistDamage);
-        Assert.Equal(3, arcanist40!.Resources["arcaneCharge"]);
-        Assert.Equal(70, spellbladeDamage);
-        Assert.Equal(115, occultistDamage);
-    }
-
-    [Fact]
-    public void Caster_skill_tree_nodes_have_runtime_effects_without_selected_focus()
-    {
-        var engine = new CombatStyleRuleEngine(CreateDefinitionProvider());
-        var player = CreateCombatant("player", CombatTeam.Friendly, spirit: 100);
-        var enemy = CreateCombatant("enemy", CombatTeam.Hostile);
-        var arcanist = engine.CreateState(new CombatStyleSnapshot(
-            "caster",
-            "Caster",
-            1,
-            0,
-            null,
-            null,
-            new Dictionary<string, int>
-            {
-                ["arcanist-instinct"] = 2,
-                ["arcanist-technique"] = 2
-            }));
-        var spellblade = engine.CreateState(new CombatStyleSnapshot(
-            "caster",
-            "Caster",
-            1,
-            0,
-            null,
-            null,
-            new Dictionary<string, int>
-            {
-                ["spellblade-path"] = 1
-            }));
-        var occultist = engine.CreateState(new CombatStyleSnapshot(
-            "caster",
-            "Caster",
-            1,
-            0,
-            null,
-            null,
-            new Dictionary<string, int>
-            {
-                ["occultist-technique"] = 2,
-                ["occultist-discipline"] = 1
-            }));
-
-        engine.OnAbilityResolved(arcanist, ActiveAbility("magic_spell", ["Magic"]), player);
-        var arcanistDamage = engine.ModifyEffectAmount(arcanist, DamageEffect(active: true, tags: ["Magic"]), player, enemy, 100);
-        var spellbladeDamage = engine.ModifyEffectAmount(spellblade, DamageEffect(active: true, tags: ["Melee"]), player, enemy, 50);
-        var occultistDamage = engine.ModifyEffectAmount(occultist, DamageEffect(active: true, tags: ["Curse", "DoT"]), player, enemy, 100);
-
-        Assert.Equal(3, arcanist!.Resources["arcaneCharge"]);
-        Assert.Equal(104, arcanistDamage);
-        Assert.Equal(55, spellbladeDamage);
-        Assert.Equal(105, occultistDamage);
-    }
-
-    [Fact]
+[Fact]
     public void Summoner_improves_owned_summon_attributes_without_creating_summons()
     {
         var engine = new CombatStyleRuleEngine(CreateDefinitionProvider());
@@ -780,133 +881,7 @@ public sealed class CombatStyleSystemTests
         Assert.Equal(22, attributes[AttributeType.Power]);
     }
 
-    [Fact]
-    public void Summoner_ritualist_amplifies_curse_or_holy_summon_effects()
-    {
-        var engine = new CombatStyleRuleEngine(CreateDefinitionProvider());
-        var state = engine.CreateState(new CombatStyleSnapshot("summoner", "Summoner", 10, 0, "ritualist", "Ritualist"));
-        var player = CreateCombatant("player", CombatTeam.Friendly);
-        var enemy = CreateCombatant("enemy", CombatTeam.Hostile);
-
-        var amount = engine.ModifyEffectAmount(state, DamageEffect(active: true, tags: ["Summon", "Curse"]), player, enemy, 100);
-
-        Assert.Equal(115, amount);
-    }
-
-    [Fact]
-    public void Summoner_focus_milestones_scale_level_twenty_five_and_forty_effects()
-    {
-        var engine = new CombatStyleRuleEngine(CreateDefinitionProvider());
-        var player = CreateCombatant("player", CombatTeam.Friendly);
-        var enemy = CreateCombatant("enemy", CombatTeam.Hostile);
-        var horde40 = engine.CreateState(new CombatStyleSnapshot("summoner", "Summoner", 40, 0, "horde", "Horde"));
-        var champion40 = engine.CreateState(new CombatStyleSnapshot("summoner", "Summoner", 40, 0, "champion", "Champion"));
-        var ritualist40 = engine.CreateState(new CombatStyleSnapshot("summoner", "Summoner", 40, 0, "ritualist", "Ritualist"));
-
-        var hordeAttributes = engine.ModifySummonAttributes(
-            horde40,
-            player,
-            new Dictionary<AttributeType, float>
-            {
-                [AttributeType.MaxHealth] = 100,
-                [AttributeType.Power] = 20
-            });
-        var championAttributes = engine.ModifySummonAttributes(
-            champion40,
-            player,
-            new Dictionary<AttributeType, float>
-            {
-                [AttributeType.MaxHealth] = 100,
-                [AttributeType.Power] = 20
-            });
-        var ritualistDamage = engine.ModifyEffectAmount(
-            ritualist40,
-            DamageEffect(active: true, tags: ["Summon", "Holy"]),
-            player,
-            enemy,
-            100);
-
-        Assert.Equal(25, hordeAttributes[AttributeType.Power]);
-        Assert.Equal(135, championAttributes[AttributeType.MaxHealth]);
-        Assert.Equal(125, ritualistDamage);
-    }
-
-    [Fact]
-    public void Summoner_skill_tree_nodes_have_runtime_effects_without_selected_focus()
-    {
-        var engine = new CombatStyleRuleEngine(CreateDefinitionProvider());
-        var player = CreateCombatant("player", CombatTeam.Friendly);
-        var enemy = CreateCombatant("enemy", CombatTeam.Hostile);
-        var horde = engine.CreateState(new CombatStyleSnapshot(
-            "summoner",
-            "Summoner",
-            1,
-            0,
-            null,
-            null,
-            new Dictionary<string, int>
-            {
-                ["horde-instinct"] = 2,
-                ["horde-technique"] = 2
-            }));
-        var champion = engine.CreateState(new CombatStyleSnapshot(
-            "summoner",
-            "Summoner",
-            1,
-            0,
-            null,
-            null,
-            new Dictionary<string, int>
-            {
-                ["champion-technique"] = 2,
-                ["champion-discipline"] = 1
-            }));
-        var ritualist = engine.CreateState(new CombatStyleSnapshot(
-            "summoner",
-            "Summoner",
-            1,
-            0,
-            null,
-            null,
-            new Dictionary<string, int>
-            {
-                ["ritualist-technique"] = 2
-            }));
-        var summon = CreateSummon("summon", CombatTeam.Friendly, player);
-
-        engine.OnAbilityResolved(horde, ActiveAbility("summon", ["Summon"]), player);
-        var hordeAttributes = engine.ModifySummonAttributes(
-            horde,
-            player,
-            new Dictionary<AttributeType, float>
-            {
-                [AttributeType.MaxHealth] = 100,
-                [AttributeType.Power] = 20
-            });
-        var championAttributes = engine.ModifySummonAttributes(
-            champion,
-            player,
-            new Dictionary<AttributeType, float>
-            {
-                [AttributeType.MaxHealth] = 100,
-                [AttributeType.Power] = 20
-            });
-        var championIncoming = engine.ModifyEffectAmount(champion, DamageEffect(), enemy, summon, 100);
-        var ritualistDamage = engine.ModifyEffectAmount(
-            ritualist,
-            DamageEffect(active: true, tags: ["Summon", "Curse"]),
-            player,
-            enemy,
-            100);
-
-        Assert.Equal(19, horde!.Resources["command"]);
-        Assert.Equal(23.2f, hordeAttributes[AttributeType.Power], 1);
-        Assert.Equal(116, championAttributes[AttributeType.MaxHealth]);
-        Assert.Equal(98, championIncoming);
-        Assert.Equal(109, ritualistDamage);
-    }
-
-    [Fact]
+[Fact]
     public void Swift_style_builds_flow_and_empowers_active_effects()
     {
         var engine = new CombatStyleRuleEngine(CreateDefinitionProvider());
@@ -919,67 +894,11 @@ public sealed class CombatStyleSystemTests
             engine.OnAbilityResolved(state, ActiveAbility($"active_{i}", ["Ranged"]), player);
         var empowered = engine.ModifyEffectAmount(state, effect, player, enemy, 100);
 
-        Assert.Equal(125, empowered);
+        Assert.Equal(103, empowered);
         Assert.Empty(state!.PendingEmpowerments);
     }
 
-    [Fact]
-    public void Swift_skill_tree_nodes_have_runtime_effects_without_selected_focus()
-    {
-        var engine = new CombatStyleRuleEngine(CreateDefinitionProvider());
-        var player = CreateCombatant("player", CombatTeam.Friendly);
-        var enemy = CreateCombatant("enemy", CombatTeam.Hostile);
-        var flurry = engine.CreateState(new CombatStyleSnapshot(
-            "swift",
-            "Swift",
-            1,
-            0,
-            null,
-            null,
-            new Dictionary<string, int>
-            {
-                ["flurry-instinct"] = 2,
-                ["flurry-technique"] = 2
-            }));
-        var evasion = engine.CreateState(new CombatStyleSnapshot(
-            "swift",
-            "Swift",
-            1,
-            0,
-            null,
-            null,
-            new Dictionary<string, int>
-            {
-                ["evasion-technique"] = 1,
-                ["evasion-discipline"] = 1
-            }));
-        var tempo = engine.CreateState(new CombatStyleSnapshot(
-            "swift",
-            "Swift",
-            1,
-            0,
-            null,
-            null,
-            new Dictionary<string, int>
-            {
-                ["tempo-technique"] = 2,
-                ["tempo-discipline"] = 1
-            }));
-
-        engine.OnAbilityResolved(flurry, ActiveAbility("quick_shot", ["Ranged"]), player);
-        var flurryDamage = engine.ModifyEffectAmount(flurry, DamageEffect(active: true, tags: ["Ranged"], attackType: AttackType.Ranged), player, enemy, 100);
-        var evasionIncoming = engine.ModifyEffectAmount(evasion, DamageEffect(), enemy, player, 100);
-        var tempoDamage = engine.ModifyEffectAmount(tempo, DamageEffect(active: true), player, enemy, 100);
-        var tempoStatus = engine.ModifyEffectAmount(tempo, StatusEffect(active: true, tags: ["Debuff"]), player, enemy, 100);
-
-        Assert.Equal(14, flurry!.Resources["flow"]);
-        Assert.Equal(107, flurryDamage);
-        Assert.Equal(97, evasionIncoming);
-        Assert.Equal(105, tempoDamage);
-        Assert.Equal(104, tempoStatus);
-    }
-
-    [Fact]
+[Fact]
     public void Marksman_style_builds_aim_from_ranged_damage()
     {
         var engine = new CombatStyleRuleEngine(CreateDefinitionProvider());
@@ -992,70 +911,8 @@ public sealed class CombatStyleSystemTests
             engine.OnDamageDealt(state, effect, player, enemy, 10, 1m);
         var empowered = engine.ModifyEffectAmount(state, effect, player, enemy, 100);
 
-        Assert.Equal(146, empowered);
+        Assert.Equal(125, empowered);
         Assert.Empty(state!.PendingEmpowerments);
-    }
-
-    [Fact]
-    public void Marksman_skill_tree_nodes_have_runtime_effects_without_selected_focus()
-    {
-        var engine = new CombatStyleRuleEngine(CreateDefinitionProvider());
-        var player = CreateCombatant("player", CombatTeam.Friendly);
-        var enemy = CreateCombatant("enemy", CombatTeam.Hostile);
-        var sniper = engine.CreateState(new CombatStyleSnapshot(
-            "marksman",
-            "Marksman",
-            1,
-            0,
-            null,
-            null,
-            new Dictionary<string, int>
-            {
-                ["sniper-instinct"] = 2,
-                ["sniper-technique"] = 2,
-                ["sniper-discipline"] = 1
-            }));
-        var volley = engine.CreateState(new CombatStyleSnapshot(
-            "marksman",
-            "Marksman",
-            1,
-            0,
-            null,
-            null,
-            new Dictionary<string, int>
-            {
-                ["volley-technique"] = 2,
-                ["volley-discipline"] = 1
-            }));
-        var trapper = engine.CreateState(new CombatStyleSnapshot(
-            "marksman",
-            "Marksman",
-            1,
-            0,
-            null,
-            null,
-            new Dictionary<string, int>
-            {
-                ["trapper-technique"] = 2,
-                ["trapper-discipline"] = 1
-            }));
-        var rangedDamage = DamageEffect(active: true, tags: ["Ranged"], attackType: AttackType.Ranged);
-        var rangedDebuffDamage = DamageEffect(active: true, tags: ["Ranged", "Debuff"], attackType: AttackType.Ranged);
-
-        engine.OnDamageDealt(sniper, rangedDamage, player, enemy, 10, 1m);
-        var sniperDamage = engine.ModifyEffectAmount(sniper, rangedDamage, player, enemy, 100);
-        var volleyDamage = engine.ModifyEffectAmount(
-            volley,
-            DamageEffect(active: true, tags: ["Ranged"], target: AbilityTargetSelector.AllEnemies, attackType: AttackType.Ranged),
-            player,
-            enemy,
-            100);
-        var trapperDamage = engine.ModifyEffectAmount(trapper, rangedDebuffDamage, player, enemy, 100);
-
-        Assert.Equal(14, sniper!.Resources["aim"]);
-        Assert.Equal(110, sniperDamage);
-        Assert.Equal(110, volleyDamage);
-        Assert.Equal(110, trapperDamage);
     }
 
     [Fact]
@@ -1069,89 +926,8 @@ public sealed class CombatStyleSystemTests
             engine.ModifyEffectAmount(state, HealEffect(active: true), player, player, 10);
         var empowered = engine.ModifyEffectAmount(state, HealEffect(active: true), player, player, 100);
 
-        Assert.Equal(153, empowered);
+        Assert.Equal(125, empowered);
         Assert.Empty(state!.PendingEmpowerments);
-    }
-
-    [Fact]
-    public void Support_skill_tree_nodes_have_runtime_effects_without_selected_focus()
-    {
-        var engine = new CombatStyleRuleEngine(CreateDefinitionProvider());
-        var player = CreateCombatant("player", CombatTeam.Friendly);
-        var enemy = CreateCombatant("enemy", CombatTeam.Hostile);
-        var healer = engine.CreateState(new CombatStyleSnapshot(
-            "support",
-            "Support",
-            1,
-            0,
-            null,
-            null,
-            new Dictionary<string, int>
-            {
-                ["healer-path"] = 1,
-                ["healer-instinct"] = 2,
-                ["healer-technique"] = 2,
-                ["healer-discipline"] = 1,
-                ["healer-specialization"] = 1,
-                ["healer-mastery"] = 1,
-                ["healer-amplifier"] = 1,
-                ["healer-focus"] = 1
-            }));
-        var warden = engine.CreateState(new CombatStyleSnapshot(
-            "support",
-            "Support",
-            1,
-            0,
-            null,
-            null,
-            new Dictionary<string, int>
-            {
-                ["warden-path"] = 1,
-                ["warden-instinct"] = 2,
-                ["warden-technique"] = 2,
-                ["warden-discipline"] = 1,
-                ["warden-specialization"] = 1,
-                ["warden-mastery"] = 1,
-                ["warden-amplifier"] = 1,
-                ["warden-focus"] = 1
-            }));
-        var chaplain = engine.CreateState(new CombatStyleSnapshot(
-            "support",
-            "Support",
-            1,
-            0,
-            null,
-            null,
-            new Dictionary<string, int>
-            {
-                ["chaplain-path"] = 1,
-                ["chaplain-instinct"] = 2,
-                ["chaplain-technique"] = 2,
-                ["chaplain-discipline"] = 1,
-                ["chaplain-specialization"] = 1,
-                ["chaplain-mastery"] = 1,
-                ["chaplain-amplifier"] = 1,
-                ["chaplain-focus"] = 1
-            }));
-
-        healer!.Resources["resolve"] = 95;
-        warden!.Resources["resolve"] = 95;
-        chaplain!.Resources["resolve"] = 95;
-        var healerHeal = engine.ModifyEffectAmount(healer, HealEffect(active: true), player, player, 100);
-        var healerEmpoweredHeal = engine.ModifyEffectAmount(healer, HealEffect(), player, player, 100);
-        var wardenBarrier = engine.ModifyEffectAmount(warden, BarrierEffect(active: true), player, player, 100);
-        var wardenIncoming = engine.ModifyEffectAmount(warden, DamageEffect(), enemy, player, 100);
-        var wardenEmpoweredBarrier = engine.ModifyEffectAmount(warden, BarrierEffect(), player, player, 100);
-        var chaplainHolyHeal = engine.ModifyEffectAmount(chaplain, HealEffect(active: true, tags: ["Holy"]), player, player, 100);
-        var chaplainEmpoweredHolyHeal = engine.ModifyEffectAmount(chaplain, HealEffect(tags: ["Holy"]), player, player, 100);
-
-        Assert.Equal(119, healerHeal);
-        Assert.Equal(147, healerEmpoweredHeal);
-        Assert.Equal(118, wardenBarrier);
-        Assert.Equal(94, wardenIncoming);
-        Assert.Equal(146, wardenEmpoweredBarrier);
-        Assert.Equal(119, chaplainHolyHeal);
-        Assert.Equal(147, chaplainEmpoweredHolyHeal);
     }
 
     [Fact]
@@ -1167,94 +943,8 @@ public sealed class CombatStyleSystemTests
             engine.ModifyEffectAmount(state, effect, player, enemy, 10);
         var empowered = engine.ModifyEffectAmount(state, effect, player, enemy, 100);
 
-        Assert.Equal(153, empowered);
+        Assert.Equal(125, empowered);
         Assert.Empty(state!.PendingEmpowerments);
-    }
-
-    [Fact]
-    public void Controller_skill_tree_nodes_have_runtime_effects_without_selected_focus()
-    {
-        var engine = new CombatStyleRuleEngine(CreateDefinitionProvider());
-        var player = CreateCombatant("player", CombatTeam.Friendly);
-        var enemy = CreateCombatant("enemy", CombatTeam.Hostile);
-        var hexer = engine.CreateState(new CombatStyleSnapshot(
-            "controller",
-            "Controller",
-            1,
-            0,
-            null,
-            null,
-            new Dictionary<string, int>
-            {
-                ["hexer-path"] = 1,
-                ["hexer-instinct"] = 2,
-                ["hexer-technique"] = 2,
-                ["hexer-discipline"] = 1,
-                ["hexer-specialization"] = 1,
-                ["hexer-mastery"] = 1,
-                ["hexer-amplifier"] = 1,
-                ["hexer-focus"] = 1
-            }));
-        var tactician = engine.CreateState(new CombatStyleSnapshot(
-            "controller",
-            "Controller",
-            1,
-            0,
-            null,
-            null,
-            new Dictionary<string, int>
-            {
-                ["tactician-path"] = 1,
-                ["tactician-instinct"] = 2,
-                ["tactician-technique"] = 2,
-                ["tactician-discipline"] = 1,
-                ["tactician-specialization"] = 1,
-                ["tactician-mastery"] = 1,
-                ["tactician-amplifier"] = 1,
-                ["tactician-focus"] = 1
-            }));
-        var frostbinder = engine.CreateState(new CombatStyleSnapshot(
-            "controller",
-            "Controller",
-            1,
-            0,
-            null,
-            null,
-            new Dictionary<string, int>
-            {
-                ["frostbinder-path"] = 1,
-                ["frostbinder-instinct"] = 2,
-                ["frostbinder-technique"] = 2,
-                ["frostbinder-discipline"] = 1,
-                ["frostbinder-specialization"] = 1,
-                ["frostbinder-mastery"] = 1,
-                ["frostbinder-amplifier"] = 1,
-                ["frostbinder-focus"] = 1
-            }));
-        var curseEffect = StatusEffect(active: true, tags: ["Curse"]);
-        var tacticalEffect = StatusEffect(active: true, tags: ["Debuff", "Physical"]);
-        var controlEffect = StatusEffect(active: true, tags: ["Control"]);
-
-        hexer!.Resources["control"] = 95;
-        tactician!.Resources["control"] = 95;
-        frostbinder!.Resources["control"] = 95;
-        var hexerStatus = engine.ModifyEffectAmount(hexer, curseEffect, player, enemy, 100);
-        var hexerEmpoweredStatus = engine.ModifyEffectAmount(hexer, StatusEffect(tags: ["Curse"]), player, enemy, 100);
-        var tacticianStatus = engine.ModifyEffectAmount(tactician, tacticalEffect, player, enemy, 100);
-        var tacticianIncoming = engine.ModifyEffectAmount(tactician, DamageEffect(), enemy, player, 100);
-        var tacticianEmpoweredStatus = engine.ModifyEffectAmount(tactician, StatusEffect(tags: ["Debuff", "Physical"]), player, enemy, 100);
-        var frostbinderStatus = engine.ModifyEffectAmount(frostbinder, controlEffect, player, enemy, 100);
-        var frostbinderIncoming = engine.ModifyEffectAmount(frostbinder, DamageEffect(), enemy, player, 100);
-        var frostbinderEmpoweredStatus = engine.ModifyEffectAmount(frostbinder, StatusEffect(tags: ["Control"]), player, enemy, 100);
-
-        Assert.Equal(119, hexerStatus);
-        Assert.Equal(147, hexerEmpoweredStatus);
-        Assert.Equal(118, tacticianStatus);
-        Assert.Equal(99, tacticianIncoming);
-        Assert.Equal(146, tacticianEmpoweredStatus);
-        Assert.Equal(118, frostbinderStatus);
-        Assert.Equal(99, frostbinderIncoming);
-        Assert.Equal(146, frostbinderEmpoweredStatus);
     }
 
     private static LLDbContext CreateDb()
@@ -1329,6 +1019,154 @@ public sealed class CombatStyleSystemTests
             rules,
             overflowOperations,
             "Test");
+
+    private static CombatStyleDefinition CreateMutatorTestDefinition(params CombatStyleTreeNodeDefinition[] nodes) =>
+        new(
+            "mutator-test",
+            "Mutator Test",
+            "Test style",
+            "test",
+            100,
+            50,
+            [],
+            [],
+            [],
+            nodes,
+            [],
+            [],
+            "Test");
+
+    private static CombatStyleTreeNodeDefinition CreateMutatorNode(
+        string nodeId,
+        DamageType damageType,
+        decimal potencyMultiplier,
+        params string[] groups) =>
+        new(
+            nodeId,
+            CombatStyleNodeLanes.Middle.ToLowerInvariant(),
+            nodeId,
+            nodeId,
+            1,
+            1,
+            null,
+            0,
+            0,
+            [],
+            [],
+            false)
+        {
+            Row = 2,
+            Lane = CombatStyleNodeLanes.Middle,
+            NodeType = CombatStyleNodeTypes.Major,
+            MutatorGroups = groups,
+            Mutator = new CombatStyleAbilityMutatorDefinition
+            {
+                Kind = CombatStyleMutatorKinds.Converter,
+                Groups = groups,
+                Conditions = new CombatStyleMutatorConditionDefinition
+                {
+                    EffectOperations = [AbilityEffectOperation.Damage],
+                    AllowedDamageTypes = [DamageType.Physical],
+                    AllowDamageTypeConversionRequired = true
+                },
+                Transform = new CombatStyleMutatorTransformDefinition
+                {
+                    DamageType = damageType,
+                    EffectPotencyMultiplier = potencyMultiplier
+                }
+            }
+        };
+
+    private static AbilitySpec CreatePhysicalDamageSpec() =>
+        new()
+        {
+            Id = "physical_damage",
+            Kind = AbilitySpecKind.Active,
+            Effects =
+            [
+                new AbilityEffectSpec
+                {
+                    Id = "hit",
+                    Operation = AbilityEffectOperation.Damage,
+                    Target = AbilityTargetSelector.CurrentTarget,
+                    BaseValue = 100,
+                    DamageType = DamageType.Physical
+                }
+            ]
+        };
+
+    private static Character CreateTestCharacter(string name) =>
+        new()
+        {
+            Id = Guid.NewGuid(),
+            Name = name,
+            UserId = Guid.NewGuid(),
+            Level = 10,
+            BaseCombatAttributes =
+            {
+                [AttributeType.MaxHealth] = 1_000,
+                [AttributeType.Power] = 10,
+                [AttributeType.CritDamage] = 100
+            },
+            CombatAttributes =
+            {
+                [AttributeType.MaxHealth] = 1_000,
+                [AttributeType.Power] = 10,
+                [AttributeType.CritDamage] = 100
+            }
+        };
+
+    private static CombatEntity CreateTestCombatEntity(
+        string runtimeId,
+        Character source,
+        string? equippedEssenceId = null)
+    {
+        var combatant = new CombatEntity(source)
+        {
+            Id = runtimeId,
+            Name = source.Name,
+            Level = source.Level
+        };
+        combatant.SyncCurrentHealthToMax();
+
+        if (!string.IsNullOrWhiteSpace(equippedEssenceId))
+        {
+            combatant.EquippedEssences.Add(new()
+            {
+                Id = Guid.NewGuid(),
+                CharacterId = source.Id,
+                EssenceDefinitionId = equippedEssenceId,
+                Level = 1
+            });
+        }
+
+        return combatant;
+    }
+
+    private static CombatEncounterRuntime CreateTestRuntime(
+        Character friendlyCharacter,
+        CombatEntity friendlyCombatant,
+        Character hostileCharacter,
+        CombatEntity hostileCombatant,
+        CombatStyleSnapshot? playerCombatStyle = null)
+    {
+        var plan = new CombatEncounterPlan(
+            Guid.NewGuid(),
+            CombatMode.Idle,
+            1,
+            DateTimeOffset.UtcNow,
+            [
+                new CombatParticipantSlot("friendly-slot", friendlyCharacter.Id, CombatSide.Friendly),
+                new CombatParticipantSlot("hostile-slot", hostileCharacter.Id, CombatSide.Hostile)
+            ],
+            new IdleEncounterSourceContext(friendlyCharacter.Id, new Area(), TimeSpan.FromSeconds(1)),
+            PlayerCombatStyle: playerCombatStyle);
+
+        return new CombatEncounterRuntime(
+            plan,
+            [new CombatRuntimeParticipant(plan.FriendlyParticipants.Single(), friendlyCharacter, friendlyCombatant)],
+            [new CombatRuntimeParticipant(plan.HostileParticipants.Single(), hostileCharacter, hostileCombatant)]);
+    }
 
     private static void AssertValidRuleReferences(
         CombatStyleDefinition style,
@@ -1619,6 +1457,11 @@ public sealed class CombatStyleSystemTests
             GetById(styleId)?.Focuses.FirstOrDefault(x => x.Id.Equals(focusId, StringComparison.OrdinalIgnoreCase));
     }
 
+    private sealed class FakeAbilityCatalogProvider(AbilityCatalog catalog) : IAbilityCatalogProvider
+    {
+        public AbilityCatalog GetCatalog() => catalog;
+    }
+
     private sealed class EmptyEssenceDefinitionRepository : IEssenceDefinitionRepository
     {
         public IReadOnlyList<EssenceDefinition> GetAll() => [];
@@ -1628,3 +1471,5 @@ public sealed class CombatStyleSystemTests
         public AbilitySpec? GetAbilityById(string abilityId) => null;
     }
 }
+
+

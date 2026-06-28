@@ -18,208 +18,52 @@
   ],
   "focuses": [
     {
-      "id": "flurry",
-      "name": "Flurry",
-      "description": "Rapid pressure: active Melee and Ranged damage scale at levels 10, 25, and 40.",
-      "unlockLevel": 10,
+      "id": "swift_phantom_step",
+      "name": "Phantom Step",
+      "description": "Quickstep lasts 2 seconds longer, removes slows/roots, and prevents the first crowd control effect applied to you during Quickstep.",
+      "unlockLevel": 25,
       "recommendedTags": [
-        "Melee",
-        "Ranged"
+        "Left",
+        "Major"
       ],
       "recommendedStats": [
         "Precision",
-        "CritChance"
-      ],
-      "rules": [
-        {
-          "id": "swift_flurry_damage_l10",
-          "eventType": "EffectCalculation",
-          "minStyleLevel": 10,
-          "maxStyleLevel": 24,
-          "predicate": {
-            "sourceMustBePlayer": true,
-            "activeAbilityOnly": true,
-            "effectOperations": [
-              "Damage"
-            ],
-            "anyTags": [
-              "Melee",
-              "Ranged"
-            ]
-          },
-          "operation": {
-            "type": "modifyEffectAmount",
-            "additivePercent": 0.05
-          }
-        },
-        {
-          "id": "swift_flurry_damage_l25",
-          "eventType": "EffectCalculation",
-          "minStyleLevel": 25,
-          "maxStyleLevel": 39,
-          "predicate": {
-            "sourceMustBePlayer": true,
-            "activeAbilityOnly": true,
-            "effectOperations": [
-              "Damage"
-            ],
-            "anyTags": [
-              "Melee",
-              "Ranged"
-            ]
-          },
-          "operation": {
-            "type": "modifyEffectAmount",
-            "additivePercent": 0.08
-          }
-        },
-        {
-          "id": "swift_flurry_damage_l40",
-          "eventType": "EffectCalculation",
-          "minStyleLevel": 40,
-          "predicate": {
-            "sourceMustBePlayer": true,
-            "activeAbilityOnly": true,
-            "effectOperations": [
-              "Damage"
-            ],
-            "anyTags": [
-              "Melee",
-              "Ranged"
-            ]
-          },
-          "operation": {
-            "type": "modifyEffectAmount",
-            "additivePercent": 0.12
-          }
-        }
-      ]
-    },
-    {
-      "id": "evasion",
-      "name": "Evasion",
-      "description": "Survival through movement: incoming direct damage reduction scales at levels 10, 25, and 40.",
-      "unlockLevel": 10,
-      "recommendedTags": [
-        "Dodge",
-        "Tank"
-      ],
-      "recommendedStats": [
         "DodgeChance",
-        "CrowdControlResistance"
+        "Cooldown"
       ],
-      "rules": [
-        {
-          "id": "swift_evasion_reduction_l10",
-          "eventType": "EffectCalculation",
-          "minStyleLevel": 10,
-          "maxStyleLevel": 24,
-          "predicate": {
-            "targetMustBePlayer": true,
-            "effectOperations": [
-              "Damage"
-            ]
-          },
-          "operation": {
-            "type": "addDamageReduction",
-            "percent": 0.05
-          }
-        },
-        {
-          "id": "swift_evasion_reduction_l25",
-          "eventType": "EffectCalculation",
-          "minStyleLevel": 25,
-          "maxStyleLevel": 39,
-          "predicate": {
-            "targetMustBePlayer": true,
-            "effectOperations": [
-              "Damage"
-            ]
-          },
-          "operation": {
-            "type": "addDamageReduction",
-            "percent": 0.08
-          }
-        },
-        {
-          "id": "swift_evasion_reduction_l40",
-          "eventType": "EffectCalculation",
-          "minStyleLevel": 40,
-          "predicate": {
-            "targetMustBePlayer": true,
-            "effectOperations": [
-              "Damage"
-            ]
-          },
-          "operation": {
-            "type": "addDamageReduction",
-            "percent": 0.12
-          }
-        }
-      ]
+      "rules": []
     },
     {
-      "id": "tempo",
-      "name": "Tempo",
-      "description": "Rhythm play: active effects gain extra Flow and stronger Flow empowerment at later milestones.",
-      "unlockLevel": 10,
+      "id": "swift_flurry_state",
+      "name": "Flurry State",
+      "description": "Quickstep empowers your next 3 Essence abilities instead of 1. Each receives 60% of the Quickstep potency bonus. Quickstep Action Speed bonus increased from 10% to 15%.",
+      "unlockLevel": 25,
       "recommendedTags": [
-        "Cooldown",
-        "Speed"
+        "Middle",
+        "Major"
       ],
       "recommendedStats": [
-        "Cooldown",
-        "Precision"
+        "Precision",
+        "DodgeChance",
+        "Cooldown"
       ],
-      "rules": [
-        {
-          "id": "swift_tempo_flow_l10",
-          "eventType": "AbilityResolved",
-          "minStyleLevel": 10,
-          "maxStyleLevel": 24,
-          "predicate": {
-            "sourceMustBePlayer": true,
-            "activeAbilityOnly": true
-          },
-          "operation": {
-            "type": "gainStyleResource",
-            "resourceId": "flow",
-            "amount": 2,
-            "usesProcCoefficient": false
-          }
-        },
-        {
-          "id": "swift_tempo_flow_l25",
-          "eventType": "AbilityResolved",
-          "minStyleLevel": 25,
-          "maxStyleLevel": 39,
-          "predicate": {
-            "sourceMustBePlayer": true,
-            "activeAbilityOnly": true
-          },
-          "operation": {
-            "type": "gainStyleResource",
-            "resourceId": "flow",
-            "amount": 5,
-            "usesProcCoefficient": false
-          }
-        },
-        {
-          "id": "swift_tempo_flow_l40",
-          "eventType": "AbilityResolved",
-          "minStyleLevel": 40,
-          "predicate": {
-            "sourceMustBePlayer": true,
-            "activeAbilityOnly": true
-          },
-          "operation": {
-            "type": "gainStyleResource",
-            "resourceId": "flow",
-            "amount": 8,
-            "usesProcCoefficient": false
-          }
-        }
-      ]
+      "rules": []
+    },
+    {
+      "id": "swift_assassinate_timing",
+      "name": "Assassinate Timing",
+      "description": "During Quickstep, your first Essence effect against a target below 35% Health gains +18% Effect Potency. Healing/barrier effects on allies below 35% Health also gain +18%. If the effect does not defeat an enemy or prevent an ally from dropping lower, only half the bonus applies.",
+      "unlockLevel": 25,
+      "recommendedTags": [
+        "Right",
+        "Major"
+      ],
+      "recommendedStats": [
+        "Precision",
+        "DodgeChance",
+        "Cooldown"
+      ],
+      "rules": []
     }
   ],
   "rules": [
@@ -260,1076 +104,1008 @@
       },
       "additivePercent": 0.15,
       "consumeOnUse": true,
-      "additivePercentModifiers": [
-        {
-          "type": "focusLevel",
-          "focusId": "tempo",
-          "minStyleLevel": 40,
-          "value": 0.07
-        },
-        {
-          "type": "nodeRank",
-          "nodeId": "flurry-specialization",
-          "value": 0.03
-        },
-        {
-          "type": "nodeRank",
-          "nodeId": "flurry-focus",
-          "value": 0.05
-        },
-        {
-          "type": "nodeRank",
-          "nodeId": "evasion-specialization",
-          "value": 0.03
-        },
-        {
-          "type": "nodeRank",
-          "nodeId": "evasion-focus",
-          "value": 0.05
-        },
-        {
-          "type": "nodeRank",
-          "nodeId": "tempo-specialization",
-          "value": 0.03
-        },
-        {
-          "type": "nodeRank",
-          "nodeId": "tempo-focus",
-          "value": 0.05
-        }
-      ]
+      "additivePercentModifiers": []
     }
   ],
   "coreMechanic": "Gain Flow from active Essence abilities. At 100 Flow, empower the next active effect.",
   "skillTreeNodes": [
     {
-      "id": "flurry-path",
-      "branchId": "flurry",
-      "name": "Flurry Root",
-      "description": "Opens Flurry rapid-strike pressure.",
+      "id": "swift_untouchable_rhythm",
+      "branchId": "left",
+      "name": "Untouchable Rhythm",
+      "description": "Dodging, parrying, avoiding, or being missed grants +4 additional Flow. After avoiding damage, your next Essence ability costs 10% less resource.",
+      "maxRank": 1,
+      "requiredLevel": 1,
+      "requiredNodeId": null,
+      "x": -1,
+      "y": 0,
+      "tags": [
+        "Left",
+        "Major"
+      ],
+      "effects": [
+        "Dodging, parrying, avoiding, or being missed grants +4 additional Flow. After avoiding damage, your next Essence ability costs 10% less resource."
+      ],
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 1,
+      "lane": "Left",
+      "nodeType": "Major",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "Eligible active Essence abilities."
+        ],
+        "changes": [
+          "Dodging, parrying, avoiding, or being missed grants +4 additional Flow. After avoiding damage, your next Essence ability costs 10% less resource."
+        ],
+        "tradeoffs": [
+          "Advanced cooldowns, target caps, and PvP coefficients can be tuned per node."
+        ],
+        "doesNotAffect": [
+          "Abilities that do not match the listed tags, effect operations, or conversion flags.",
+          "True damage unless the ability explicitly allows conversion."
+        ]
+      }
+    },
+    {
+      "id": "swift_quick_hands",
+      "branchId": "middle",
+      "name": "Quick Hands",
+      "description": "Non-style Essence cooldowns recover 6% faster. Using any Essence ability grants +4 Flow. 4 second internal cooldown.",
       "maxRank": 1,
       "requiredLevel": 1,
       "requiredNodeId": null,
       "x": 0,
       "y": 0,
       "tags": [
-        "Melee",
-        "Ranged"
+        "Middle",
+        "Major"
       ],
       "effects": [
-        "Active Melee or Ranged damage gains +1% effect amount.",
-        "Does not choose Flurry as the effective focus by itself."
+        "Non-style Essence cooldowns recover 6% faster. Using any Essence ability grants +4 Flow. 4 second internal cooldown."
       ],
       "countsTowardFocus": false,
-      "rules": [
-        {
-          "id": "swift_flurry_nodes_flurry-path_additivePercentModifiers",
-          "eventType": "EffectCalculation",
-          "predicate": {
-            "effectOperations": [
-              "Damage"
-            ],
-            "sourceMustBePlayer": true,
-            "anyTags": [
-              "Melee",
-              "Ranged"
-            ],
-            "activeAbilityOnly": true
-          },
-          "operation": {
-            "type": "modifyEffectAmount",
-            "additivePercent": 0,
-            "additivePercentModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 0.01,
-                "nodeId": "flurry-path"
-              }
-            ]
-          }
-        }
-      ]
+      "rules": [],
+      "row": 1,
+      "lane": "Middle",
+      "nodeType": "Major",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "Eligible active Essence abilities."
+        ],
+        "changes": [
+          "Non-style Essence cooldowns recover 6% faster. Using any Essence ability grants +4 Flow. 4 second internal cooldown."
+        ],
+        "tradeoffs": [
+          "Advanced cooldowns, target caps, and PvP coefficients can be tuned per node."
+        ],
+        "doesNotAffect": [
+          "Abilities that do not match the listed tags, effect operations, or conversion flags.",
+          "True damage unless the ability explicitly allows conversion."
+        ]
+      }
     },
     {
-      "id": "flurry-instinct",
-      "branchId": "flurry",
-      "name": "Flurry Instinct",
-      "description": "Builds extra Flow from active abilities.",
-      "maxRank": 3,
-      "requiredLevel": 5,
-      "requiredNodeId": "flurry-path",
-      "x": -1,
-      "y": 1,
-      "tags": [
-        "Melee",
-        "Ranged"
-      ],
-      "effects": [
-        "Each rank grants +2 additional Flow when an active ability resolves.",
-        "Adds 1 Flurry branch point per rank."
-      ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "swift_nodes_flow_flurry-instinct_amountModifiers",
-          "eventType": "AbilityResolved",
-          "predicate": {
-            "sourceMustBePlayer": true,
-            "activeAbilityOnly": true
-          },
-          "operation": {
-            "type": "gainStyleResource",
-            "resourceId": "flow",
-            "amount": 0,
-            "usesProcCoefficient": false,
-            "amountModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 2,
-                "nodeId": "flurry-instinct"
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "flurry-technique",
-      "branchId": "flurry",
-      "name": "Flurry Technique",
-      "description": "Improves active Melee and Ranged damage.",
-      "maxRank": 3,
-      "requiredLevel": 10,
-      "requiredNodeId": "flurry-path",
-      "x": 0,
-      "y": 1,
-      "tags": [
-        "Melee",
-        "Ranged"
-      ],
-      "effects": [
-        "Each rank gives active Melee or Ranged damage +2% effect amount.",
-        "Adds 1 Flurry branch point per rank."
-      ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "swift_flurry_nodes_flurry-technique_additivePercentModifiers",
-          "eventType": "EffectCalculation",
-          "predicate": {
-            "effectOperations": [
-              "Damage"
-            ],
-            "sourceMustBePlayer": true,
-            "anyTags": [
-              "Melee",
-              "Ranged"
-            ],
-            "activeAbilityOnly": true
-          },
-          "operation": {
-            "type": "modifyEffectAmount",
-            "additivePercent": 0,
-            "additivePercentModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 0.02,
-                "nodeId": "flurry-technique"
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "flurry-discipline",
-      "branchId": "flurry",
-      "name": "Flurry Discipline",
-      "description": "Improves rapid cadence.",
-      "maxRank": 3,
-      "requiredLevel": 5,
-      "requiredNodeId": "flurry-path",
-      "x": 1,
-      "y": 1,
-      "tags": [
-        "Melee",
-        "Ranged"
-      ],
-      "effects": [
-        "Each rank gives active Melee or Ranged damage +1% effect amount.",
-        "Adds 1 Flurry branch point per rank."
-      ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "swift_flurry_nodes_flurry-discipline_additivePercentModifiers",
-          "eventType": "EffectCalculation",
-          "predicate": {
-            "effectOperations": [
-              "Damage"
-            ],
-            "sourceMustBePlayer": true,
-            "anyTags": [
-              "Melee",
-              "Ranged"
-            ],
-            "activeAbilityOnly": true
-          },
-          "operation": {
-            "type": "modifyEffectAmount",
-            "additivePercent": 0,
-            "additivePercentModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 0.01,
-                "nodeId": "flurry-discipline"
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "flurry-specialization",
-      "branchId": "flurry",
-      "name": "Flurry Specialization",
-      "description": "Improves Flow empowerment.",
-      "maxRank": 2,
-      "requiredLevel": 20,
-      "requiredNodeId": "flurry-instinct",
-      "x": -1,
-      "y": 2,
-      "tags": [
-        "Melee",
-        "Ranged"
-      ],
-      "effects": [
-        "Each rank makes Flow empowerment +3% stronger.",
-        "Adds 1 Flurry branch point per rank."
-      ],
-      "countsTowardFocus": true
-    },
-    {
-      "id": "flurry-mastery",
-      "branchId": "flurry",
-      "name": "Flurry Mastery",
-      "description": "Deepens active Melee and Ranged damage.",
-      "maxRank": 3,
-      "requiredLevel": 25,
-      "requiredNodeId": "flurry-technique",
-      "x": 0,
-      "y": 2,
-      "tags": [
-        "Melee",
-        "Ranged"
-      ],
-      "effects": [
-        "Each rank gives active Melee or Ranged damage +3% effect amount.",
-        "Adds 1 Flurry branch point per rank."
-      ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "swift_flurry_nodes_flurry-mastery_additivePercentModifiers",
-          "eventType": "EffectCalculation",
-          "predicate": {
-            "effectOperations": [
-              "Damage"
-            ],
-            "sourceMustBePlayer": true,
-            "anyTags": [
-              "Melee",
-              "Ranged"
-            ],
-            "activeAbilityOnly": true
-          },
-          "operation": {
-            "type": "modifyEffectAmount",
-            "additivePercent": 0,
-            "additivePercentModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 0.03,
-                "nodeId": "flurry-mastery"
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "flurry-amplifier",
-      "branchId": "flurry",
-      "name": "Flurry Amplifier",
-      "description": "Improves Flow generation.",
-      "maxRank": 2,
-      "requiredLevel": 20,
-      "requiredNodeId": "flurry-discipline",
-      "x": 1,
-      "y": 2,
-      "tags": [
-        "Melee",
-        "Ranged"
-      ],
-      "effects": [
-        "Each rank grants +3 additional Flow when an active ability resolves.",
-        "Adds 1 Flurry branch point per rank."
-      ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "swift_nodes_flow_flurry-amplifier_amountModifiers",
-          "eventType": "AbilityResolved",
-          "predicate": {
-            "sourceMustBePlayer": true,
-            "activeAbilityOnly": true
-          },
-          "operation": {
-            "type": "gainStyleResource",
-            "resourceId": "flow",
-            "amount": 0,
-            "usesProcCoefficient": false,
-            "amountModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 3,
-                "nodeId": "flurry-amplifier"
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "flurry-focus",
-      "branchId": "flurry",
-      "name": "Flurry Focus",
-      "description": "Completes the Flurry focus.",
+      "id": "swift_precise_timing",
+      "branchId": "right",
+      "name": "Precise Timing",
+      "description": "Essence effects against enemies above 80% Health or below 30% Health gain +6% Effect Potency. Healing/barriers on allies below 30% Health also gain +6% Effect Potency.",
       "maxRank": 1,
-      "requiredLevel": 40,
-      "requiredNodeId": "flurry-mastery",
-      "x": 0,
+      "requiredLevel": 1,
+      "requiredNodeId": null,
+      "x": 1,
+      "y": 0,
+      "tags": [
+        "Right",
+        "Major"
+      ],
+      "effects": [
+        "Essence effects against enemies above 80% Health or below 30% Health gain +6% Effect Potency. Healing/barriers on allies below 30% Health also gain +6% Effect Potency."
+      ],
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 1,
+      "lane": "Right",
+      "nodeType": "Major",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "Eligible active Essence abilities."
+        ],
+        "changes": [
+          "Essence effects against enemies above 80% Health or below 30% Health gain +6% Effect Potency. Healing/barriers on allies below 30% Health also gain +6% Effect Potency."
+        ],
+        "tradeoffs": [
+          "Advanced cooldowns, target caps, and PvP coefficients can be tuned per node."
+        ],
+        "doesNotAffect": [
+          "Abilities that do not match the listed tags, effect operations, or conversion flags.",
+          "True damage unless the ability explicitly allows conversion."
+        ]
+      }
+    },
+    {
+      "id": "swift_split_action",
+      "branchId": "left",
+      "name": "Split Action",
+      "description": "Mutator Group: TimingConversion. Eligible Essence abilities with a cooldown of 12+ seconds may split into two activations. The first activation resolves at 65% Effect Potency. The second resolves 2 seconds later at 45% Effect Potency if the target is still valid. Hard crowd control effects do not reapply; instead they gain 20% duration on the first activation. Resource cost +5%. 12 second internal cooldown.",
+      "maxRank": 1,
+      "requiredLevel": 10,
+      "requiredNodeId": null,
+      "x": -1,
       "y": 3,
       "tags": [
-        "Melee",
-        "Ranged"
+        "TimingConversion",
+        "Left",
+        "Major"
       ],
       "effects": [
-        "Active Melee or Ranged damage gains +5% effect amount.",
-        "Active Melee or Ranged abilities grant +5 additional Flow.",
-        "Flow empowerment becomes +5% stronger.",
-        "Adds 1 Flurry branch point."
+        "Mutator Group: TimingConversion. Eligible Essence abilities with a cooldown of 12+ seconds may split into two activations. The first activation resolves at 65% Effect Potency. The second resolves 2 seconds later at 45% Effect Potency if the target is still valid. Hard crowd control effects do not reapply; instead they gain 20% duration on the first activation. Resource cost +5%. 12 second internal cooldown."
       ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "swift_flurry_nodes_flurry-focus_additivePercentModifiers",
-          "eventType": "EffectCalculation",
-          "predicate": {
-            "effectOperations": [
-              "Damage"
-            ],
-            "sourceMustBePlayer": true,
-            "anyTags": [
-              "Melee",
-              "Ranged"
-            ],
-            "activeAbilityOnly": true
-          },
-          "operation": {
-            "type": "modifyEffectAmount",
-            "additivePercent": 0,
-            "additivePercentModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 0.05,
-                "nodeId": "flurry-focus"
-              }
-            ]
-          }
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 2,
+      "lane": "Left",
+      "nodeType": "Major",
+      "mutatorKind": "Converter",
+      "mutatorGroups": [
+        "TimingConversion"
+      ],
+      "mutator": {
+        "kind": "Converter",
+        "groups": [
+          "TimingConversion"
+        ],
+        "conditions": {
+          "requiredAbilityTags": [],
+          "anyAbilityTags": [],
+          "requiredDeliveryTags": [],
+          "anyDeliveryTags": [],
+          "requiredEffectTags": [],
+          "anyEffectTags": [
+            "Debuff"
+          ],
+          "effectOperations": [
+            "ApplyStatus",
+            "RestoreResource"
+          ],
+          "allowedDamageTypes": [],
+          "targetSelectors": [],
+          "activeAbilityOnly": true,
+          "passiveAbilityOnly": false,
+          "allowDamageTypeConversionRequired": null,
+          "allowScalingConversionRequired": null,
+          "allowDeliveryConversionRequired": null,
+          "allowTargetingConversionRequired": null,
+          "allowSummonProxyRequired": null,
+          "allowEquipmentOverrideRequired": null,
+          "excludeTrueDamage": true,
+          "excludeHardCrowdControl": true
         },
-        {
-          "id": "swift_nodes_flow_flurry-focus_amountModifiers",
-          "eventType": "AbilityResolved",
-          "predicate": {
-            "sourceMustBePlayer": true,
-            "activeAbilityOnly": true
-          },
-          "operation": {
-            "type": "gainStyleResource",
-            "resourceId": "flow",
-            "amount": 0,
-            "usesProcCoefficient": false,
-            "amountModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 5,
-                "nodeId": "flurry-focus"
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "evasion-path",
-      "branchId": "evasion",
-      "name": "Evasion Root",
-      "description": "Opens Evasion damage avoidance.",
-      "maxRank": 1,
-      "requiredLevel": 1,
-      "requiredNodeId": null,
-      "x": 0,
-      "y": 0,
-      "tags": [
-        "Dodge",
-        "Tank"
-      ],
-      "effects": [
-        "Incoming player damage is reduced by 1%.",
-        "Does not choose Evasion as the effective focus by itself."
-      ],
-      "countsTowardFocus": false,
-      "rules": [
-        {
-          "id": "swift_evasion_nodes_evasion-path_percentModifiers",
-          "eventType": "EffectCalculation",
-          "predicate": {
-            "effectOperations": [
-              "Damage"
-            ],
-            "targetMustBePlayer": true
-          },
-          "operation": {
-            "type": "addDamageReduction",
-            "percent": 0,
-            "percentModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 0.01,
-                "nodeId": "evasion-path"
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "evasion-instinct",
-      "branchId": "evasion",
-      "name": "Evasion Instinct",
-      "description": "Builds extra Flow from active abilities.",
-      "maxRank": 3,
-      "requiredLevel": 5,
-      "requiredNodeId": "evasion-path",
-      "x": -1,
-      "y": 1,
-      "tags": [
-        "Dodge",
-        "Tank"
-      ],
-      "effects": [
-        "Each rank grants +2 additional Flow when an active ability resolves.",
-        "Adds 1 Evasion branch point per rank."
-      ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "swift_nodes_flow_evasion-instinct_amountModifiers",
-          "eventType": "AbilityResolved",
-          "predicate": {
-            "sourceMustBePlayer": true,
-            "activeAbilityOnly": true
-          },
-          "operation": {
-            "type": "gainStyleResource",
-            "resourceId": "flow",
-            "amount": 0,
-            "usesProcCoefficient": false,
-            "amountModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 2,
-                "nodeId": "evasion-instinct"
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "evasion-technique",
-      "branchId": "evasion",
-      "name": "Evasion Technique",
-      "description": "Improves incoming damage reduction.",
-      "maxRank": 3,
-      "requiredLevel": 10,
-      "requiredNodeId": "evasion-path",
-      "x": 0,
-      "y": 1,
-      "tags": [
-        "Dodge",
-        "Tank"
-      ],
-      "effects": [
-        "Each rank reduces incoming player damage by 2%.",
-        "Adds 1 Evasion branch point per rank."
-      ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "swift_evasion_nodes_evasion-technique_percentModifiers",
-          "eventType": "EffectCalculation",
-          "predicate": {
-            "effectOperations": [
-              "Damage"
-            ],
-            "targetMustBePlayer": true
-          },
-          "operation": {
-            "type": "addDamageReduction",
-            "percent": 0,
-            "percentModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 0.02,
-                "nodeId": "evasion-technique"
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "evasion-discipline",
-      "branchId": "evasion",
-      "name": "Evasion Discipline",
-      "description": "Improves evasive tempo.",
-      "maxRank": 3,
-      "requiredLevel": 5,
-      "requiredNodeId": "evasion-path",
-      "x": 1,
-      "y": 1,
-      "tags": [
-        "Dodge",
-        "Tank"
-      ],
-      "effects": [
-        "Each rank reduces incoming player damage by 1%.",
-        "Adds 1 Evasion branch point per rank."
-      ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "swift_evasion_nodes_evasion-discipline_percentModifiers",
-          "eventType": "EffectCalculation",
-          "predicate": {
-            "effectOperations": [
-              "Damage"
-            ],
-            "targetMustBePlayer": true
-          },
-          "operation": {
-            "type": "addDamageReduction",
-            "percent": 0,
-            "percentModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 0.01,
-                "nodeId": "evasion-discipline"
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "evasion-specialization",
-      "branchId": "evasion",
-      "name": "Evasion Specialization",
-      "description": "Improves Flow empowerment.",
-      "maxRank": 2,
-      "requiredLevel": 20,
-      "requiredNodeId": "evasion-instinct",
-      "x": -1,
-      "y": 2,
-      "tags": [
-        "Dodge",
-        "Tank"
-      ],
-      "effects": [
-        "Each rank makes Flow empowerment +3% stronger.",
-        "Adds 1 Evasion branch point per rank."
-      ],
-      "countsTowardFocus": true
-    },
-    {
-      "id": "evasion-mastery",
-      "branchId": "evasion",
-      "name": "Evasion Mastery",
-      "description": "Deepens incoming damage reduction.",
-      "maxRank": 3,
-      "requiredLevel": 25,
-      "requiredNodeId": "evasion-technique",
-      "x": 0,
-      "y": 2,
-      "tags": [
-        "Dodge",
-        "Tank"
-      ],
-      "effects": [
-        "Each rank reduces incoming player damage by 3%.",
-        "Adds 1 Evasion branch point per rank."
-      ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "swift_evasion_nodes_evasion-mastery_percentModifiers",
-          "eventType": "EffectCalculation",
-          "predicate": {
-            "effectOperations": [
-              "Damage"
-            ],
-            "targetMustBePlayer": true
-          },
-          "operation": {
-            "type": "addDamageReduction",
-            "percent": 0,
-            "percentModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 0.03,
-                "nodeId": "evasion-mastery"
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "evasion-amplifier",
-      "branchId": "evasion",
-      "name": "Evasion Amplifier",
-      "description": "Improves Flow generation.",
-      "maxRank": 2,
-      "requiredLevel": 20,
-      "requiredNodeId": "evasion-discipline",
-      "x": 1,
-      "y": 2,
-      "tags": [
-        "Dodge",
-        "Tank"
-      ],
-      "effects": [
-        "Each rank grants +3 additional Flow when an active ability resolves.",
-        "Adds 1 Evasion branch point per rank."
-      ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "swift_nodes_flow_evasion-amplifier_amountModifiers",
-          "eventType": "AbilityResolved",
-          "predicate": {
-            "sourceMustBePlayer": true,
-            "activeAbilityOnly": true
-          },
-          "operation": {
-            "type": "gainStyleResource",
-            "resourceId": "flow",
-            "amount": 0,
-            "usesProcCoefficient": false,
-            "amountModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 3,
-                "nodeId": "evasion-amplifier"
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "evasion-focus",
-      "branchId": "evasion",
-      "name": "Evasion Focus",
-      "description": "Completes the Evasion focus.",
-      "maxRank": 1,
-      "requiredLevel": 40,
-      "requiredNodeId": "evasion-mastery",
-      "x": 0,
-      "y": 3,
-      "tags": [
-        "Dodge",
-        "Tank"
-      ],
-      "effects": [
-        "Incoming player damage is reduced by 5%.",
-        "Flow empowerment becomes +5% stronger.",
-        "Adds 1 Evasion branch point."
-      ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "swift_evasion_nodes_evasion-focus_percentModifiers",
-          "eventType": "EffectCalculation",
-          "predicate": {
-            "effectOperations": [
-              "Damage"
-            ],
-            "targetMustBePlayer": true
-          },
-          "operation": {
-            "type": "addDamageReduction",
-            "percent": 0,
-            "percentModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 0.05,
-                "nodeId": "evasion-focus"
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "tempo-path",
-      "branchId": "tempo",
-      "name": "Tempo Root",
-      "description": "Opens Tempo active-effect rhythm.",
-      "maxRank": 1,
-      "requiredLevel": 1,
-      "requiredNodeId": null,
-      "x": 0,
-      "y": 0,
-      "tags": [
-        "Cooldown",
-        "Speed"
-      ],
-      "effects": [
-        "Active effects gain +1% effect amount.",
-        "Does not choose Tempo as the effective focus by itself."
-      ],
-      "countsTowardFocus": false,
-      "rules": [
-        {
-          "id": "swift_tempo_nodes_active_tempo-path_additivePercentModifiers",
-          "eventType": "EffectCalculation",
-          "predicate": {
-            "amplifiableEffectOnly": true,
-            "sourceMustBePlayer": true,
-            "activeAbilityOnly": true
-          },
-          "operation": {
-            "type": "modifyEffectAmount",
-            "additivePercent": 0,
-            "additivePercentModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 0.01,
-                "nodeId": "tempo-path"
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "tempo-instinct",
-      "branchId": "tempo",
-      "name": "Tempo Instinct",
-      "description": "Builds extra Flow from active abilities.",
-      "maxRank": 3,
-      "requiredLevel": 5,
-      "requiredNodeId": "tempo-path",
-      "x": -1,
-      "y": 1,
-      "tags": [
-        "Cooldown",
-        "Speed"
-      ],
-      "effects": [
-        "Each rank grants +2 additional Flow when an active ability resolves.",
-        "Adds 1 Tempo branch point per rank."
-      ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "swift_nodes_flow_tempo-instinct_amountModifiers",
-          "eventType": "AbilityResolved",
-          "predicate": {
-            "sourceMustBePlayer": true,
-            "activeAbilityOnly": true
-          },
-          "operation": {
-            "type": "gainStyleResource",
-            "resourceId": "flow",
-            "amount": 0,
-            "usesProcCoefficient": false,
-            "amountModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 2,
-                "nodeId": "tempo-instinct"
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "tempo-technique",
-      "branchId": "tempo",
-      "name": "Tempo Technique",
-      "description": "Improves active effect output.",
-      "maxRank": 3,
-      "requiredLevel": 10,
-      "requiredNodeId": "tempo-path",
-      "x": 0,
-      "y": 1,
-      "tags": [
-        "Cooldown",
-        "Speed"
-      ],
-      "effects": [
-        "Each rank gives active effects +1% effect amount.",
-        "Adds 1 Tempo branch point per rank."
-      ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "swift_tempo_nodes_active_tempo-technique_additivePercentModifiers",
-          "eventType": "EffectCalculation",
-          "predicate": {
-            "amplifiableEffectOnly": true,
-            "sourceMustBePlayer": true,
-            "activeAbilityOnly": true
-          },
-          "operation": {
-            "type": "modifyEffectAmount",
-            "additivePercent": 0,
-            "additivePercentModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 0.01,
-                "nodeId": "tempo-technique"
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "tempo-discipline",
-      "branchId": "tempo",
-      "name": "Tempo Discipline",
-      "description": "Improves status rhythm.",
-      "maxRank": 3,
-      "requiredLevel": 5,
-      "requiredNodeId": "tempo-path",
-      "x": 1,
-      "y": 1,
-      "tags": [
-        "Cooldown",
-        "Speed"
-      ],
-      "effects": [
-        "Each rank gives status and debuff effects +1% effect amount.",
-        "Adds 1 Tempo branch point per rank."
-      ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "swift_tempo_status_tempo-discipline_additivePercentModifiers",
-          "eventType": "EffectCalculation",
-          "predicate": {
-            "statusOrDebuffOnly": true
-          },
-          "operation": {
-            "type": "modifyEffectAmount",
-            "additivePercent": 0,
-            "additivePercentModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 0.01,
-                "nodeId": "tempo-discipline"
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "tempo-specialization",
-      "branchId": "tempo",
-      "name": "Tempo Specialization",
-      "description": "Improves Flow empowerment.",
-      "maxRank": 2,
-      "requiredLevel": 20,
-      "requiredNodeId": "tempo-instinct",
-      "x": -1,
-      "y": 2,
-      "tags": [
-        "Cooldown",
-        "Speed"
-      ],
-      "effects": [
-        "Each rank makes Flow empowerment +3% stronger.",
-        "Adds 1 Tempo branch point per rank."
-      ],
-      "countsTowardFocus": true
-    },
-    {
-      "id": "tempo-mastery",
-      "branchId": "tempo",
-      "name": "Tempo Mastery",
-      "description": "Deepens active effect output.",
-      "maxRank": 3,
-      "requiredLevel": 25,
-      "requiredNodeId": "tempo-technique",
-      "x": 0,
-      "y": 2,
-      "tags": [
-        "Cooldown",
-        "Speed"
-      ],
-      "effects": [
-        "Each rank gives active effects +2% effect amount.",
-        "Adds 1 Tempo branch point per rank."
-      ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "swift_tempo_nodes_active_tempo-mastery_additivePercentModifiers",
-          "eventType": "EffectCalculation",
-          "predicate": {
-            "amplifiableEffectOnly": true,
-            "sourceMustBePlayer": true,
-            "activeAbilityOnly": true
-          },
-          "operation": {
-            "type": "modifyEffectAmount",
-            "additivePercent": 0,
-            "additivePercentModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 0.02,
-                "nodeId": "tempo-mastery"
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "tempo-amplifier",
-      "branchId": "tempo",
-      "name": "Tempo Amplifier",
-      "description": "Improves Flow generation.",
-      "maxRank": 2,
-      "requiredLevel": 20,
-      "requiredNodeId": "tempo-discipline",
-      "x": 1,
-      "y": 2,
-      "tags": [
-        "Cooldown",
-        "Speed"
-      ],
-      "effects": [
-        "Each rank grants +3 additional Flow when an active ability resolves.",
-        "Adds 1 Tempo branch point per rank."
-      ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "swift_nodes_flow_tempo-amplifier_amountModifiers",
-          "eventType": "AbilityResolved",
-          "predicate": {
-            "sourceMustBePlayer": true,
-            "activeAbilityOnly": true
-          },
-          "operation": {
-            "type": "gainStyleResource",
-            "resourceId": "flow",
-            "amount": 0,
-            "usesProcCoefficient": false,
-            "amountModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 3,
-                "nodeId": "tempo-amplifier"
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "tempo-focus",
-      "branchId": "tempo",
-      "name": "Tempo Focus",
-      "description": "Completes the Tempo focus.",
-      "maxRank": 1,
-      "requiredLevel": 40,
-      "requiredNodeId": "tempo-mastery",
-      "x": 0,
-      "y": 3,
-      "tags": [
-        "Cooldown",
-        "Speed"
-      ],
-      "effects": [
-        "Active effects gain +4% effect amount.",
-        "Active abilities grant +5 additional Flow.",
-        "Flow empowerment becomes +5% stronger.",
-        "Adds 1 Tempo branch point."
-      ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "swift_tempo_nodes_active_tempo-focus_additivePercentModifiers",
-          "eventType": "EffectCalculation",
-          "predicate": {
-            "amplifiableEffectOnly": true,
-            "sourceMustBePlayer": true,
-            "activeAbilityOnly": true
-          },
-          "operation": {
-            "type": "modifyEffectAmount",
-            "additivePercent": 0,
-            "additivePercentModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 0.04,
-                "nodeId": "tempo-focus"
-              }
-            ]
-          }
+        "transform": {
+          "damageType": null,
+          "targetingType": null,
+          "scalingAttribute": null,
+          "scalingCoefficientOverride": null,
+          "scalingCoefficientMultiplier": null,
+          "effectPotencyMultiplier": 1.05,
+          "cooldownMultiplier": 0.95,
+          "resourceCostMultiplier": null,
+          "addAbilityTags": [
+            "Timing"
+          ],
+          "addDeliveryTags": [],
+          "addEffectTags": [
+            "Debuff",
+            "Resource"
+          ],
+          "addEffectTagsToMatchingEffects": [
+            "Debuff",
+            "Resource"
+          ]
         },
-        {
-          "id": "swift_nodes_flow_tempo-focus_amountModifiers",
-          "eventType": "AbilityResolved",
-          "predicate": {
-            "sourceMustBePlayer": true,
-            "activeAbilityOnly": true
-          },
-          "operation": {
-            "type": "gainStyleResource",
-            "resourceId": "flow",
-            "amount": 0,
-            "usesProcCoefficient": false,
-            "amountModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 5,
-                "nodeId": "tempo-focus"
-              }
-            ]
-          }
-        }
-      ]
+        "tradeoff": {
+          "effectPotencyMultiplier": null,
+          "cooldownMultiplier": 1.03,
+          "resourceCostMultiplier": 1.05,
+          "procCoefficientMultiplier": 0.75
+        },
+        "pvpCoefficient": 0.7
+      },
+      "tooltip": {
+        "affects": [
+          "Eligible active Essence abilities matching TimingConversion."
+        ],
+        "changes": [
+          "Mutator Group: TimingConversion. Eligible Essence abilities with a cooldown of 12+ seconds may split into two activations. The first activation resolves at 65% Effect Potency. The second resolves 2 seconds later at 45% Effect Potency if the target is still valid. Hard crowd control effects do not reapply; instead they gain 20% duration on the first activation. Resource cost +5%. 12 second internal cooldown."
+        ],
+        "tradeoffs": [
+          "Conversion uses a +5% resource cost safety tradeoff and PvP coefficient until explicit balance values are authored."
+        ],
+        "doesNotAffect": [
+          "Abilities that do not match the listed tags, effect operations, or conversion flags.",
+          "True damage unless the ability explicitly allows conversion."
+        ]
+      }
+    },
+    {
+      "id": "swift_chain_tempo",
+      "branchId": "middle",
+      "name": "Chain Tempo",
+      "description": "Mutator Group: TimingConversion + ResourceConversion. Using two different Essence effect categories within 5 seconds gives the second ability the Quick tag. Quick abilities recover 10% cooldown faster and cost 5% less resource. If the same effect category is repeated, the second ability gains only half benefit.",
+      "maxRank": 1,
+      "requiredLevel": 10,
+      "requiredNodeId": null,
+      "x": 0,
+      "y": 3,
+      "tags": [
+        "TimingConversion",
+        "ResourceConversion",
+        "Middle",
+        "Major"
+      ],
+      "effects": [
+        "Mutator Group: TimingConversion + ResourceConversion. Using two different Essence effect categories within 5 seconds gives the second ability the Quick tag. Quick abilities recover 10% cooldown faster and cost 5% less resource. If the same effect category is repeated, the second ability gains only half benefit."
+      ],
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 2,
+      "lane": "Middle",
+      "nodeType": "Major",
+      "mutatorKind": "Converter",
+      "mutatorGroups": [
+        "TimingConversion",
+        "ResourceConversion"
+      ],
+      "mutator": {
+        "kind": "Converter",
+        "groups": [
+          "TimingConversion",
+          "ResourceConversion"
+        ],
+        "conditions": {
+          "requiredAbilityTags": [],
+          "anyAbilityTags": [],
+          "requiredDeliveryTags": [],
+          "anyDeliveryTags": [],
+          "requiredEffectTags": [],
+          "anyEffectTags": [],
+          "effectOperations": [
+            "RestoreResource"
+          ],
+          "allowedDamageTypes": [],
+          "targetSelectors": [],
+          "activeAbilityOnly": true,
+          "passiveAbilityOnly": false,
+          "allowDamageTypeConversionRequired": null,
+          "allowScalingConversionRequired": null,
+          "allowDeliveryConversionRequired": null,
+          "allowTargetingConversionRequired": null,
+          "allowSummonProxyRequired": null,
+          "allowEquipmentOverrideRequired": null,
+          "excludeTrueDamage": true,
+          "excludeHardCrowdControl": true
+        },
+        "transform": {
+          "damageType": null,
+          "targetingType": null,
+          "scalingAttribute": null,
+          "scalingCoefficientOverride": null,
+          "scalingCoefficientMultiplier": null,
+          "effectPotencyMultiplier": 1.05,
+          "cooldownMultiplier": 0.95,
+          "resourceCostMultiplier": null,
+          "addAbilityTags": [
+            "Timing"
+          ],
+          "addDeliveryTags": [],
+          "addEffectTags": [
+            "Resource"
+          ],
+          "addEffectTagsToMatchingEffects": [
+            "Resource"
+          ]
+        },
+        "tradeoff": {
+          "effectPotencyMultiplier": null,
+          "cooldownMultiplier": 1.03,
+          "resourceCostMultiplier": 1.05,
+          "procCoefficientMultiplier": 0.75
+        },
+        "pvpCoefficient": 0.7
+      },
+      "tooltip": {
+        "affects": [
+          "Eligible active Essence abilities matching TimingConversion, ResourceConversion."
+        ],
+        "changes": [
+          "Mutator Group: TimingConversion + ResourceConversion. Using two different Essence effect categories within 5 seconds gives the second ability the Quick tag. Quick abilities recover 10% cooldown faster and cost 5% less resource. If the same effect category is repeated, the second ability gains only half benefit."
+        ],
+        "tradeoffs": [
+          "Conversion uses a +5% resource cost safety tradeoff and PvP coefficient until explicit balance values are authored."
+        ],
+        "doesNotAffect": [
+          "Abilities that do not match the listed tags, effect operations, or conversion flags.",
+          "True damage unless the ability explicitly allows conversion."
+        ]
+      }
+    },
+    {
+      "id": "swift_evasive_channel",
+      "branchId": "right",
+      "name": "Evasive Channel",
+      "description": "Mutator Group: DefensiveConversion + TimingConversion. After you dodge, parry, avoid, or activate Quickstep, your next cast, channel, summon, aura, or persistent Essence ability within 5 seconds becomes Evasive. Evasive abilities are 50% harder to interrupt, have 10% shorter cast/channel time, and grant 4% damage reduction for 3 seconds after resolving.",
+      "maxRank": 1,
+      "requiredLevel": 10,
+      "requiredNodeId": null,
+      "x": 1,
+      "y": 3,
+      "tags": [
+        "DefensiveConversion",
+        "TimingConversion",
+        "Right",
+        "Major"
+      ],
+      "effects": [
+        "Mutator Group: DefensiveConversion + TimingConversion. After you dodge, parry, avoid, or activate Quickstep, your next cast, channel, summon, aura, or persistent Essence ability within 5 seconds becomes Evasive. Evasive abilities are 50% harder to interrupt, have 10% shorter cast/channel time, and grant 4% damage reduction for 3 seconds after resolving."
+      ],
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 2,
+      "lane": "Right",
+      "nodeType": "Major",
+      "mutatorKind": "Converter",
+      "mutatorGroups": [
+        "DefensiveConversion",
+        "TimingConversion"
+      ],
+      "mutator": {
+        "kind": "Converter",
+        "groups": [
+          "DefensiveConversion",
+          "TimingConversion"
+        ],
+        "conditions": {
+          "requiredAbilityTags": [],
+          "anyAbilityTags": [],
+          "requiredDeliveryTags": [],
+          "anyDeliveryTags": [],
+          "requiredEffectTags": [],
+          "anyEffectTags": [
+            "Damage",
+            "Summon"
+          ],
+          "effectOperations": [
+            "Damage",
+            "Summon"
+          ],
+          "allowedDamageTypes": [],
+          "targetSelectors": [],
+          "activeAbilityOnly": true,
+          "passiveAbilityOnly": false,
+          "allowDamageTypeConversionRequired": null,
+          "allowScalingConversionRequired": null,
+          "allowDeliveryConversionRequired": null,
+          "allowTargetingConversionRequired": null,
+          "allowSummonProxyRequired": null,
+          "allowEquipmentOverrideRequired": null,
+          "excludeTrueDamage": true,
+          "excludeHardCrowdControl": true
+        },
+        "transform": {
+          "damageType": null,
+          "targetingType": null,
+          "scalingAttribute": null,
+          "scalingCoefficientOverride": null,
+          "scalingCoefficientMultiplier": null,
+          "effectPotencyMultiplier": 1.05,
+          "cooldownMultiplier": 0.95,
+          "resourceCostMultiplier": null,
+          "addAbilityTags": [
+            "Timing"
+          ],
+          "addDeliveryTags": [],
+          "addEffectTags": [
+            "Damage",
+            "Summon",
+            "Protected"
+          ],
+          "addEffectTagsToMatchingEffects": [
+            "Damage",
+            "Summon",
+            "Protected"
+          ]
+        },
+        "tradeoff": {
+          "effectPotencyMultiplier": null,
+          "cooldownMultiplier": 1.03,
+          "resourceCostMultiplier": 1.05,
+          "procCoefficientMultiplier": null
+        },
+        "pvpCoefficient": 0.7
+      },
+      "tooltip": {
+        "affects": [
+          "Eligible active Essence abilities matching DefensiveConversion, TimingConversion."
+        ],
+        "changes": [
+          "Mutator Group: DefensiveConversion + TimingConversion. After you dodge, parry, avoid, or activate Quickstep, your next cast, channel, summon, aura, or persistent Essence ability within 5 seconds becomes Evasive. Evasive abilities are 50% harder to interrupt, have 10% shorter cast/channel time, and grant 4% damage reduction for 3 seconds after resolving."
+        ],
+        "tradeoffs": [
+          "Conversion uses a +5% resource cost safety tradeoff and PvP coefficient until explicit balance values are authored."
+        ],
+        "doesNotAffect": [
+          "Abilities that do not match the listed tags, effect operations, or conversion flags.",
+          "True damage unless the ability explicitly allows conversion."
+        ]
+      }
+    },
+    {
+      "id": "swift_phantom_step",
+      "branchId": "left",
+      "name": "Phantom Step",
+      "description": "Quickstep lasts 2 seconds longer, removes slows/roots, and prevents the first crowd control effect applied to you during Quickstep.",
+      "maxRank": 1,
+      "requiredLevel": 25,
+      "requiredNodeId": null,
+      "x": -1,
+      "y": 6,
+      "tags": [
+        "Left",
+        "Major"
+      ],
+      "effects": [
+        "Quickstep lasts 2 seconds longer, removes slows/roots, and prevents the first crowd control effect applied to you during Quickstep."
+      ],
+      "countsTowardFocus": true,
+      "rules": [],
+      "row": 3,
+      "lane": "Left",
+      "nodeType": "Major",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "Eligible active Essence abilities."
+        ],
+        "changes": [
+          "Quickstep lasts 2 seconds longer, removes slows/roots, and prevents the first crowd control effect applied to you during Quickstep."
+        ],
+        "tradeoffs": [
+          "Advanced cooldowns, target caps, and PvP coefficients can be tuned per node."
+        ],
+        "doesNotAffect": [
+          "Abilities that do not match the listed tags, effect operations, or conversion flags.",
+          "True damage unless the ability explicitly allows conversion."
+        ]
+      }
+    },
+    {
+      "id": "swift_flurry_state",
+      "branchId": "middle",
+      "name": "Flurry State",
+      "description": "Quickstep empowers your next 3 Essence abilities instead of 1. Each receives 60% of the Quickstep potency bonus. Quickstep Action Speed bonus increased from 10% to 15%.",
+      "maxRank": 1,
+      "requiredLevel": 25,
+      "requiredNodeId": null,
+      "x": 0,
+      "y": 6,
+      "tags": [
+        "Middle",
+        "Major"
+      ],
+      "effects": [
+        "Quickstep empowers your next 3 Essence abilities instead of 1. Each receives 60% of the Quickstep potency bonus. Quickstep Action Speed bonus increased from 10% to 15%."
+      ],
+      "countsTowardFocus": true,
+      "rules": [],
+      "row": 3,
+      "lane": "Middle",
+      "nodeType": "Major",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "Eligible active Essence abilities."
+        ],
+        "changes": [
+          "Quickstep empowers your next 3 Essence abilities instead of 1. Each receives 60% of the Quickstep potency bonus. Quickstep Action Speed bonus increased from 10% to 15%."
+        ],
+        "tradeoffs": [
+          "Advanced cooldowns, target caps, and PvP coefficients can be tuned per node."
+        ],
+        "doesNotAffect": [
+          "Abilities that do not match the listed tags, effect operations, or conversion flags.",
+          "True damage unless the ability explicitly allows conversion."
+        ]
+      }
+    },
+    {
+      "id": "swift_assassinate_timing",
+      "branchId": "right",
+      "name": "Assassinate Timing",
+      "description": "During Quickstep, your first Essence effect against a target below 35% Health gains +18% Effect Potency. Healing/barrier effects on allies below 35% Health also gain +18%. If the effect does not defeat an enemy or prevent an ally from dropping lower, only half the bonus applies.",
+      "maxRank": 1,
+      "requiredLevel": 25,
+      "requiredNodeId": null,
+      "x": 1,
+      "y": 6,
+      "tags": [
+        "Right",
+        "Major"
+      ],
+      "effects": [
+        "During Quickstep, your first Essence effect against a target below 35% Health gains +18% Effect Potency. Healing/barrier effects on allies below 35% Health also gain +18%. If the effect does not defeat an enemy or prevent an ally from dropping lower, only half the bonus applies."
+      ],
+      "countsTowardFocus": true,
+      "rules": [],
+      "row": 3,
+      "lane": "Right",
+      "nodeType": "Major",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "Eligible active Essence abilities."
+        ],
+        "changes": [
+          "During Quickstep, your first Essence effect against a target below 35% Health gains +18% Effect Potency. Healing/barrier effects on allies below 35% Health also gain +18%. If the effect does not defeat an enemy or prevent an ally from dropping lower, only half the bonus applies."
+        ],
+        "tradeoffs": [
+          "Advanced cooldowns, target caps, and PvP coefficients can be tuned per node."
+        ],
+        "doesNotAffect": [
+          "Abilities that do not match the listed tags, effect operations, or conversion flags.",
+          "True damage unless the ability explicitly allows conversion."
+        ]
+      }
+    },
+    {
+      "id": "swift_flow_capacity",
+      "branchId": "left",
+      "name": "Flow Capacity",
+      "description": "Max Flow +10 / +20.",
+      "maxRank": 2,
+      "requiredLevel": 1,
+      "requiredNodeId": null,
+      "x": -1,
+      "y": 1,
+      "tags": [
+        "Left",
+        "Minor"
+      ],
+      "effects": [
+        "Max Flow +10 / +20."
+      ],
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 1,
+      "lane": "Left",
+      "nodeType": "Minor",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "This style-tree passive while the node has ranks."
+        ],
+        "changes": [
+          "Max Flow +10 / +20."
+        ],
+        "tradeoffs": [],
+        "doesNotAffect": []
+      }
+    },
+    {
+      "id": "swift_hasty_preparation",
+      "branchId": "middle",
+      "name": "Hasty Preparation",
+      "description": "Start combat with +10 / +20 Flow.",
+      "maxRank": 2,
+      "requiredLevel": 1,
+      "requiredNodeId": null,
+      "x": 0,
+      "y": 1,
+      "tags": [
+        "Middle",
+        "Minor"
+      ],
+      "effects": [
+        "Start combat with +10 / +20 Flow."
+      ],
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 1,
+      "lane": "Middle",
+      "nodeType": "Minor",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "This style-tree passive while the node has ranks."
+        ],
+        "changes": [
+          "Start combat with +10 / +20 Flow."
+        ],
+        "tradeoffs": [],
+        "doesNotAffect": []
+      }
+    },
+    {
+      "id": "swift_nimble_footing",
+      "branchId": "right",
+      "name": "Nimble Footing",
+      "description": "Dodge chance +2% / +4%. If dodge does not exist for the character, direct damage taken -2% / -4% instead.",
+      "maxRank": 2,
+      "requiredLevel": 1,
+      "requiredNodeId": null,
+      "x": 1,
+      "y": 1,
+      "tags": [
+        "Right",
+        "Minor",
+        "Damage"
+      ],
+      "effects": [
+        "Dodge chance +2% / +4%. If dodge does not exist for the character, direct damage taken -2% / -4% instead."
+      ],
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 1,
+      "lane": "Right",
+      "nodeType": "Minor",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "This style-tree passive while the node has ranks."
+        ],
+        "changes": [
+          "Dodge chance +2% / +4%. If dodge does not exist for the character, direct damage taken -2% / -4% instead."
+        ],
+        "tradeoffs": [],
+        "doesNotAffect": []
+      }
+    },
+    {
+      "id": "swift_fleet_reserves",
+      "branchId": "middle",
+      "name": "Fleet Reserves",
+      "description": "Essence abilities used within 5 seconds of another Essence ability cost 3% / 6% less resource.",
+      "maxRank": 2,
+      "requiredLevel": 1,
+      "requiredNodeId": null,
+      "x": 0,
+      "y": 2,
+      "tags": [
+        "Middle",
+        "Minor"
+      ],
+      "effects": [
+        "Essence abilities used within 5 seconds of another Essence ability cost 3% / 6% less resource."
+      ],
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 1,
+      "lane": "Middle",
+      "nodeType": "Minor",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "This style-tree passive while the node has ranks."
+        ],
+        "changes": [
+          "Essence abilities used within 5 seconds of another Essence ability cost 3% / 6% less resource."
+        ],
+        "tradeoffs": [],
+        "doesNotAffect": []
+      }
+    },
+    {
+      "id": "swift_cooldown_slip",
+      "branchId": "left",
+      "name": "Cooldown Slip",
+      "description": "When you avoid damage, reduce the remaining cooldown of your highest-cooldown non-style Essence ability by 0.5 / 1 second. 3 second internal cooldown.",
+      "maxRank": 2,
+      "requiredLevel": 10,
+      "requiredNodeId": null,
+      "x": -1,
+      "y": 4,
+      "tags": [
+        "Left",
+        "Minor",
+        "Damage"
+      ],
+      "effects": [
+        "When you avoid damage, reduce the remaining cooldown of your highest-cooldown non-style Essence ability by 0.5 / 1 second. 3 second internal cooldown."
+      ],
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 2,
+      "lane": "Left",
+      "nodeType": "Minor",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "This style-tree passive while the node has ranks."
+        ],
+        "changes": [
+          "When you avoid damage, reduce the remaining cooldown of your highest-cooldown non-style Essence ability by 0.5 / 1 second. 3 second internal cooldown."
+        ],
+        "tradeoffs": [],
+        "doesNotAffect": []
+      }
+    },
+    {
+      "id": "swift_swift_casting",
+      "branchId": "middle",
+      "name": "Swift Casting",
+      "description": "Essence cast/channel/recovery time reduced by 4% / 8%. Instant abilities gain +2% / +4% cooldown recovery instead.",
+      "maxRank": 2,
+      "requiredLevel": 10,
+      "requiredNodeId": null,
+      "x": 0,
+      "y": 4,
+      "tags": [
+        "Middle",
+        "Minor"
+      ],
+      "effects": [
+        "Essence cast/channel/recovery time reduced by 4% / 8%. Instant abilities gain +2% / +4% cooldown recovery instead."
+      ],
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 2,
+      "lane": "Middle",
+      "nodeType": "Minor",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "This style-tree passive while the node has ranks."
+        ],
+        "changes": [
+          "Essence cast/channel/recovery time reduced by 4% / 8%. Instant abilities gain +2% / +4% cooldown recovery instead."
+        ],
+        "tradeoffs": [],
+        "doesNotAffect": []
+      }
+    },
+    {
+      "id": "swift_reflex_guard",
+      "branchId": "right",
+      "name": "Reflex Guard",
+      "description": "After avoiding damage, damage taken is reduced by 4% / 8% for 3 seconds.",
+      "maxRank": 2,
+      "requiredLevel": 10,
+      "requiredNodeId": null,
+      "x": 1,
+      "y": 4,
+      "tags": [
+        "Right",
+        "Minor",
+        "Damage"
+      ],
+      "effects": [
+        "After avoiding damage, damage taken is reduced by 4% / 8% for 3 seconds."
+      ],
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 2,
+      "lane": "Right",
+      "nodeType": "Minor",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "This style-tree passive while the node has ranks."
+        ],
+        "changes": [
+          "After avoiding damage, damage taken is reduced by 4% / 8% for 3 seconds."
+        ],
+        "tradeoffs": [],
+        "doesNotAffect": []
+      }
+    },
+    {
+      "id": "swift_clean_sequence",
+      "branchId": "middle",
+      "name": "Clean Sequence",
+      "description": "Essence abilities used after a different effect category gain +2% / +4% Effect Potency.",
+      "maxRank": 2,
+      "requiredLevel": 10,
+      "requiredNodeId": null,
+      "x": 0,
+      "y": 5,
+      "tags": [
+        "Middle",
+        "Minor"
+      ],
+      "effects": [
+        "Essence abilities used after a different effect category gain +2% / +4% Effect Potency."
+      ],
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 2,
+      "lane": "Middle",
+      "nodeType": "Minor",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "This style-tree passive while the node has ranks."
+        ],
+        "changes": [
+          "Essence abilities used after a different effect category gain +2% / +4% Effect Potency."
+        ],
+        "tradeoffs": [],
+        "doesNotAffect": []
+      }
+    },
+    {
+      "id": "swift_clean_escape",
+      "branchId": "left",
+      "name": "Clean Escape",
+      "description": "After using Quickstep, damage taken is reduced by 5% / 10% for 3 seconds.",
+      "maxRank": 2,
+      "requiredLevel": 25,
+      "requiredNodeId": null,
+      "x": -1,
+      "y": 7,
+      "tags": [
+        "Left",
+        "Minor",
+        "Damage"
+      ],
+      "effects": [
+        "After using Quickstep, damage taken is reduced by 5% / 10% for 3 seconds."
+      ],
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 3,
+      "lane": "Left",
+      "nodeType": "Minor",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "This style-tree passive while the node has ranks."
+        ],
+        "changes": [
+          "After using Quickstep, damage taken is reduced by 5% / 10% for 3 seconds."
+        ],
+        "tradeoffs": [],
+        "doesNotAffect": []
+      }
+    },
+    {
+      "id": "swift_light_recovery",
+      "branchId": "middle",
+      "name": "Light Recovery",
+      "description": "When you gain Flow, restore 0.3% / 0.6% missing primary resource. 2 second internal cooldown.",
+      "maxRank": 2,
+      "requiredLevel": 25,
+      "requiredNodeId": null,
+      "x": 0,
+      "y": 7,
+      "tags": [
+        "Middle",
+        "Minor"
+      ],
+      "effects": [
+        "When you gain Flow, restore 0.3% / 0.6% missing primary resource. 2 second internal cooldown."
+      ],
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 3,
+      "lane": "Middle",
+      "nodeType": "Minor",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "This style-tree passive while the node has ranks."
+        ],
+        "changes": [
+          "When you gain Flow, restore 0.3% / 0.6% missing primary resource. 2 second internal cooldown."
+        ],
+        "tradeoffs": [],
+        "doesNotAffect": []
+      }
+    },
+    {
+      "id": "swift_critical_footwork",
+      "branchId": "right",
+      "name": "Critical Footwork",
+      "description": "Enemy critical chance against you reduced by 3% / 6%.",
+      "maxRank": 2,
+      "requiredLevel": 25,
+      "requiredNodeId": null,
+      "x": 1,
+      "y": 7,
+      "tags": [
+        "Right",
+        "Minor"
+      ],
+      "effects": [
+        "Enemy critical chance against you reduced by 3% / 6%."
+      ],
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 3,
+      "lane": "Right",
+      "nodeType": "Minor",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "This style-tree passive while the node has ranks."
+        ],
+        "changes": [
+          "Enemy critical chance against you reduced by 3% / 6%."
+        ],
+        "tradeoffs": [],
+        "doesNotAffect": []
+      }
+    },
+    {
+      "id": "swift_rapid_reset",
+      "branchId": "middle",
+      "name": "Rapid Reset",
+      "description": "Quickstep cooldown reduced by 2 / 4 seconds.",
+      "maxRank": 2,
+      "requiredLevel": 25,
+      "requiredNodeId": null,
+      "x": 0,
+      "y": 8,
+      "tags": [
+        "Middle",
+        "Minor"
+      ],
+      "effects": [
+        "Quickstep cooldown reduced by 2 / 4 seconds."
+      ],
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 3,
+      "lane": "Middle",
+      "nodeType": "Minor",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "This style-tree passive while the node has ranks."
+        ],
+        "changes": [
+          "Quickstep cooldown reduced by 2 / 4 seconds."
+        ],
+        "tradeoffs": [],
+        "doesNotAffect": []
+      }
     }
   ]
 }
-

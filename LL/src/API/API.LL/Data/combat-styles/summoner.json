@@ -18,130 +18,52 @@
   ],
   "focuses": [
     {
-      "id": "horde",
-      "name": "Horde",
-      "description": "Many allies: owned summons gain offensive power that scales at levels 10, 25, and 40.",
-      "unlockLevel": 10,
+      "id": "summoner_grand_rally",
+      "name": "Grand Rally",
+      "description": "Rally Command lasts 4 seconds longer. Controlled allies gain +10% Effect Potency during Rally Command. Solo fallback: you gain +5% Effect Potency during Rally Command.",
+      "unlockLevel": 25,
       "recommendedTags": [
-        "Summon"
+        "Left",
+        "Major"
       ],
       "recommendedStats": [
-        "SummonPower"
-      ],
-      "rules": [
-        {
-          "id": "summoner_horde_summon_damage",
-          "eventType": "SummonCreated",
-          "minStyleLevel": 10,
-          "predicate": {
-            "sourceMustBePlayer": true
-          },
-          "operation": {
-            "type": "modifySummonStats",
-            "damagePercent": 0.05,
-            "damagePercentModifiers": [
-              {
-                "type": "focusLevel",
-                "focusId": "horde",
-                "minStyleLevel": 25,
-                "value": 0.05
-              },
-              {
-                "type": "focusLevel",
-                "focusId": "horde",
-                "minStyleLevel": 40,
-                "value": 0.05
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "champion",
-      "name": "Champion",
-      "description": "One strong ally: owned summons gain maximum health that scales at levels 10, 25, and 40.",
-      "unlockLevel": 10,
-      "recommendedTags": [
-        "Summon"
-      ],
-      "recommendedStats": [
+        "SummonPower",
         "SummonHealth",
-        "SummonPower"
-      ],
-      "rules": [
-        {
-          "id": "summoner_champion_summon_health",
-          "eventType": "SummonCreated",
-          "minStyleLevel": 10,
-          "predicate": {
-            "sourceMustBePlayer": true
-          },
-          "operation": {
-            "type": "modifySummonStats",
-            "maxHealthPercent": 0.1,
-            "maxHealthPercentModifiers": [
-              {
-                "type": "focusLevel",
-                "focusId": "champion",
-                "minStyleLevel": 25,
-                "value": 0.05
-              },
-              {
-                "type": "focusLevel",
-                "focusId": "champion",
-                "minStyleLevel": 40,
-                "value": 0.1
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "ritualist",
-      "name": "Ritualist",
-      "description": "Sacred or profane rites: Curse/Holy summon effects gain stronger amplification at later milestones.",
-      "unlockLevel": 10,
-      "recommendedTags": [
-        "Summon",
-        "Curse",
-        "Holy"
-      ],
-      "recommendedStats": [
         "Spirit"
       ],
-      "rules": [
-        {
-          "id": "summoner_ritualist_summon_effect",
-          "eventType": "EffectCalculation",
-          "minStyleLevel": 10,
-          "predicate": {
-            "sourceMustBePlayer": true,
-            "anyTags": [
-              "Summon"
-            ]
-          },
-          "operation": {
-            "type": "modifyEffectAmount",
-            "additivePercent": 0.1,
-            "additivePercentModifiers": [
-              {
-                "type": "focusLevel",
-                "focusId": "ritualist",
-                "minStyleLevel": 25,
-                "value": 0.05
-              },
-              {
-                "type": "focusLevel",
-                "focusId": "ritualist",
-                "minStyleLevel": 40,
-                "value": 0.05
-              }
-            ]
-          }
-        }
-      ]
+      "rules": []
+    },
+    {
+      "id": "summoner_last_bastion_order",
+      "name": "Last Bastion Order",
+      "description": "Once per Rally Command, if a controlled ally would die, prevent death and give it a Barrier equal to 15% of your Max Health for 4 seconds. If you have no controlled allies, Rally Command cooldown is reduced by 50% when you fall below 35% Health. 90 second internal cooldown.",
+      "unlockLevel": 25,
+      "recommendedTags": [
+        "Middle",
+        "Major"
+      ],
+      "recommendedStats": [
+        "SummonPower",
+        "SummonHealth",
+        "Spirit"
+      ],
+      "rules": []
+    },
+    {
+      "id": "summoner_overwhelming_coordination",
+      "name": "Overwhelming Coordination",
+      "description": "During Rally Command, each controlled ally or active persistent Essence effect grants your next Essence ability +2% Effect Potency, capped at +12%. If you have no controlled allies or persistent effects, count as 2 stacks.",
+      "unlockLevel": 25,
+      "recommendedTags": [
+        "Right",
+        "Major"
+      ],
+      "recommendedStats": [
+        "SummonPower",
+        "SummonHealth",
+        "Spirit"
+      ],
+      "rules": []
     }
   ],
   "rules": [
@@ -202,1202 +124,1046 @@
       },
       "additivePercent": 0.2,
       "consumeOnUse": true,
-      "additivePercentModifiers": [
-        {
-          "type": "nodeRank",
-          "nodeId": "horde-specialization",
-          "value": 0.03
-        },
-        {
-          "type": "nodeRank",
-          "nodeId": "horde-focus",
-          "value": 0.05
-        },
-        {
-          "type": "nodeRank",
-          "nodeId": "champion-specialization",
-          "value": 0.03
-        },
-        {
-          "type": "nodeRank",
-          "nodeId": "champion-focus",
-          "value": 0.05
-        },
-        {
-          "type": "nodeRank",
-          "nodeId": "ritualist-specialization",
-          "value": 0.03
-        },
-        {
-          "type": "nodeRank",
-          "nodeId": "ritualist-focus",
-          "value": 0.05
-        }
-      ]
+      "additivePercentModifiers": []
     }
   ],
   "coreMechanic": "Gain Command from Summon-tagged active abilities. At 100 Command, empower the next Summon-tagged effect.",
   "skillTreeNodes": [
     {
-      "id": "horde-path",
-      "branchId": "horde",
-      "name": "Horde Root",
-      "description": "Opens Horde summon-effect pressure.",
+      "id": "summoner_broad_command",
+      "branchId": "left",
+      "name": "Broad Command",
+      "description": "Controlled allies gain +8% Max Health. If you have no controlled allies, your persistent Essence effects gain +6% duration.",
+      "maxRank": 1,
+      "requiredLevel": 1,
+      "requiredNodeId": null,
+      "x": -1,
+      "y": 0,
+      "tags": [
+        "Left",
+        "Major"
+      ],
+      "effects": [
+        "Controlled allies gain +8% Max Health. If you have no controlled allies, your persistent Essence effects gain +6% duration."
+      ],
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 1,
+      "lane": "Left",
+      "nodeType": "Major",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "Eligible active Essence abilities."
+        ],
+        "changes": [
+          "Controlled allies gain +8% Max Health. If you have no controlled allies, your persistent Essence effects gain +6% duration."
+        ],
+        "tradeoffs": [
+          "Advanced cooldowns, target caps, and PvP coefficients can be tuned per node."
+        ],
+        "doesNotAffect": [
+          "Abilities that do not match the listed tags, effect operations, or conversion flags.",
+          "True damage unless the ability explicitly allows conversion."
+        ]
+      }
+    },
+    {
+      "id": "summoner_soul_link",
+      "branchId": "middle",
+      "name": "Soul Link",
+      "description": "While you have at least one controlled ally or persistent Essence effect active, you take 8% reduced damage. Controlled allies take 8% reduced area damage.",
       "maxRank": 1,
       "requiredLevel": 1,
       "requiredNodeId": null,
       "x": 0,
       "y": 0,
       "tags": [
-        "Summon"
+        "Middle",
+        "Major"
       ],
       "effects": [
-        "Player Summon-tagged effects gain +1% effect amount.",
-        "Owned summons gain +2% power.",
-        "Does not choose Horde as the effective focus by itself."
+        "While you have at least one controlled ally or persistent Essence effect active, you take 8% reduced damage. Controlled allies take 8% reduced area damage."
       ],
       "countsTowardFocus": false,
-      "rules": [
-        {
-          "id": "summoner_horde_player_summon_effect_horde-path_additivePercentModifiers",
-          "eventType": "EffectCalculation",
-          "predicate": {
-            "sourceMustBePlayer": true,
-            "anyTags": [
-              "Summon"
-            ]
-          },
-          "operation": {
-            "type": "modifyEffectAmount",
-            "additivePercent": 0,
-            "additivePercentModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 0.01,
-                "nodeId": "horde-path"
-              }
-            ]
-          }
-        },
-        {
-          "id": "summoner_summon_stats_nodes_horde-path_damagePercentModifiers",
-          "eventType": "SummonCreated",
-          "predicate": {
-            "sourceMustBePlayer": true
-          },
-          "operation": {
-            "type": "modifySummonStats",
-            "damagePercent": 0,
-            "damagePercentModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 0.02,
-                "nodeId": "horde-path"
-              }
-            ]
-          }
-        }
-      ]
+      "rules": [],
+      "row": 1,
+      "lane": "Middle",
+      "nodeType": "Major",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "Eligible active Essence abilities."
+        ],
+        "changes": [
+          "While you have at least one controlled ally or persistent Essence effect active, you take 8% reduced damage. Controlled allies take 8% reduced area damage."
+        ],
+        "tradeoffs": [
+          "Advanced cooldowns, target caps, and PvP coefficients can be tuned per node."
+        ],
+        "doesNotAffect": [
+          "Abilities that do not match the listed tags, effect operations, or conversion flags.",
+          "True damage unless the ability explicitly allows conversion."
+        ]
+      }
     },
     {
-      "id": "horde-instinct",
-      "branchId": "horde",
-      "name": "Horde Instinct",
-      "description": "Builds extra Command from Summon abilities.",
-      "maxRank": 3,
-      "requiredLevel": 5,
-      "requiredNodeId": "horde-path",
-      "x": -1,
-      "y": 1,
-      "tags": [
-        "Summon"
-      ],
-      "effects": [
-        "Each rank grants +2 additional Command when a Summon-tagged active ability resolves.",
-        "Adds 1 Horde branch point per rank."
-      ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "summoner_nodes_command_horde-instinct_amountModifiers",
-          "eventType": "AbilityResolved",
-          "predicate": {
-            "sourceMustBePlayer": true,
-            "anyTags": [
-              "Summon"
-            ],
-            "activeAbilityOnly": true
-          },
-          "operation": {
-            "type": "gainStyleResource",
-            "resourceId": "command",
-            "amount": 0,
-            "usesProcCoefficient": false,
-            "amountModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 2,
-                "nodeId": "horde-instinct"
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "horde-technique",
-      "branchId": "horde",
-      "name": "Horde Technique",
-      "description": "Improves owned summon power.",
-      "maxRank": 3,
-      "requiredLevel": 10,
-      "requiredNodeId": "horde-path",
-      "x": 0,
-      "y": 1,
-      "tags": [
-        "Summon"
-      ],
-      "effects": [
-        "Each rank gives owned summons +3% power.",
-        "Adds 1 Horde branch point per rank."
-      ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "summoner_horde_player_summon_effect_horde-technique_additivePercentModifiers",
-          "eventType": "EffectCalculation",
-          "predicate": {
-            "sourceMustBePlayer": true,
-            "anyTags": [
-              "Summon"
-            ]
-          },
-          "operation": {
-            "type": "modifyEffectAmount",
-            "additivePercent": 0,
-            "additivePercentModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 0.02,
-                "nodeId": "horde-technique"
-              }
-            ]
-          }
-        },
-        {
-          "id": "summoner_summon_stats_nodes_horde-technique_damagePercentModifiers",
-          "eventType": "SummonCreated",
-          "predicate": {
-            "sourceMustBePlayer": true
-          },
-          "operation": {
-            "type": "modifySummonStats",
-            "damagePercent": 0,
-            "damagePercentModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 0.03,
-                "nodeId": "horde-technique"
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "horde-discipline",
-      "branchId": "horde",
-      "name": "Horde Discipline",
-      "description": "Keeps the horde alive.",
-      "maxRank": 3,
-      "requiredLevel": 5,
-      "requiredNodeId": "horde-path",
-      "x": 1,
-      "y": 1,
-      "tags": [
-        "Summon"
-      ],
-      "effects": [
-        "Each rank reduces incoming damage to owned summons by 1%.",
-        "Adds 1 Horde branch point per rank."
-      ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "summoner_champion_reduction_horde-discipline_percentModifiers",
-          "eventType": "EffectCalculation",
-          "predicate": {
-            "effectOperations": [
-              "Damage"
-            ],
-            "targetMustBeOwnedSummon": true
-          },
-          "operation": {
-            "type": "addDamageReduction",
-            "percent": 0,
-            "percentModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 0.01,
-                "nodeId": "horde-discipline"
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "horde-specialization",
-      "branchId": "horde",
-      "name": "Horde Specialization",
-      "description": "Improves owned summon effect output.",
-      "maxRank": 2,
-      "requiredLevel": 20,
-      "requiredNodeId": "horde-instinct",
-      "x": -1,
-      "y": 2,
-      "tags": [
-        "Summon"
-      ],
-      "effects": [
-        "Each rank gives owned summon effects +3% effect amount.",
-        "Each rank makes Command empowerment +3% stronger.",
-        "Adds 1 Horde branch point per rank."
-      ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "summoner_horde_owned_summon_effect_horde-specialization_additivePercentModifiers",
-          "eventType": "EffectCalculation",
-          "predicate": {
-            "amplifiableEffectOnly": true,
-            "sourceMustBeOwnedSummon": true
-          },
-          "operation": {
-            "type": "modifyEffectAmount",
-            "additivePercent": 0,
-            "additivePercentModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 0.03,
-                "nodeId": "horde-specialization"
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "horde-mastery",
-      "branchId": "horde",
-      "name": "Horde Mastery",
-      "description": "Deepens owned summon power.",
-      "maxRank": 3,
-      "requiredLevel": 25,
-      "requiredNodeId": "horde-technique",
-      "x": 0,
-      "y": 2,
-      "tags": [
-        "Summon"
-      ],
-      "effects": [
-        "Each rank gives owned summons +4% power.",
-        "Adds 1 Horde branch point per rank."
-      ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "summoner_horde_player_summon_effect_horde-mastery_additivePercentModifiers",
-          "eventType": "EffectCalculation",
-          "predicate": {
-            "sourceMustBePlayer": true,
-            "anyTags": [
-              "Summon"
-            ]
-          },
-          "operation": {
-            "type": "modifyEffectAmount",
-            "additivePercent": 0,
-            "additivePercentModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 0.03,
-                "nodeId": "horde-mastery"
-              }
-            ]
-          }
-        },
-        {
-          "id": "summoner_summon_stats_nodes_horde-mastery_damagePercentModifiers",
-          "eventType": "SummonCreated",
-          "predicate": {
-            "sourceMustBePlayer": true
-          },
-          "operation": {
-            "type": "modifySummonStats",
-            "damagePercent": 0,
-            "damagePercentModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 0.04,
-                "nodeId": "horde-mastery"
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "horde-amplifier",
-      "branchId": "horde",
-      "name": "Horde Amplifier",
-      "description": "Improves command cadence.",
-      "maxRank": 2,
-      "requiredLevel": 20,
-      "requiredNodeId": "horde-discipline",
-      "x": 1,
-      "y": 2,
-      "tags": [
-        "Summon"
-      ],
-      "effects": [
-        "Each rank grants +3 additional Command when a Summon-tagged active ability resolves.",
-        "Each rank gives owned summon effects +2% effect amount.",
-        "Adds 1 Horde branch point per rank."
-      ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "summoner_horde_owned_summon_effect_horde-amplifier_additivePercentModifiers",
-          "eventType": "EffectCalculation",
-          "predicate": {
-            "amplifiableEffectOnly": true,
-            "sourceMustBeOwnedSummon": true
-          },
-          "operation": {
-            "type": "modifyEffectAmount",
-            "additivePercent": 0,
-            "additivePercentModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 0.02,
-                "nodeId": "horde-amplifier"
-              }
-            ]
-          }
-        },
-        {
-          "id": "summoner_nodes_command_horde-amplifier_amountModifiers",
-          "eventType": "AbilityResolved",
-          "predicate": {
-            "sourceMustBePlayer": true,
-            "anyTags": [
-              "Summon"
-            ],
-            "activeAbilityOnly": true
-          },
-          "operation": {
-            "type": "gainStyleResource",
-            "resourceId": "command",
-            "amount": 0,
-            "usesProcCoefficient": false,
-            "amountModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 3,
-                "nodeId": "horde-amplifier"
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "horde-focus",
-      "branchId": "horde",
-      "name": "Horde Focus",
-      "description": "Completes the Horde focus.",
-      "maxRank": 1,
-      "requiredLevel": 40,
-      "requiredNodeId": "horde-mastery",
-      "x": 0,
-      "y": 3,
-      "tags": [
-        "Summon"
-      ],
-      "effects": [
-        "Player Summon-tagged effects gain +5% effect amount.",
-        "Owned summons gain +8% power.",
-        "Command empowerment becomes +5% stronger.",
-        "Adds 1 Horde branch point."
-      ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "summoner_horde_player_summon_effect_horde-focus_additivePercentModifiers",
-          "eventType": "EffectCalculation",
-          "predicate": {
-            "sourceMustBePlayer": true,
-            "anyTags": [
-              "Summon"
-            ]
-          },
-          "operation": {
-            "type": "modifyEffectAmount",
-            "additivePercent": 0,
-            "additivePercentModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 0.05,
-                "nodeId": "horde-focus"
-              }
-            ]
-          }
-        },
-        {
-          "id": "summoner_summon_stats_nodes_horde-focus_damagePercentModifiers",
-          "eventType": "SummonCreated",
-          "predicate": {
-            "sourceMustBePlayer": true
-          },
-          "operation": {
-            "type": "modifySummonStats",
-            "damagePercent": 0,
-            "damagePercentModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 0.08,
-                "nodeId": "horde-focus"
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "champion-path",
-      "branchId": "champion",
-      "name": "Champion Root",
-      "description": "Opens Champion summon durability.",
+      "id": "summoner_tactical_orders",
+      "branchId": "right",
+      "name": "Tactical Orders",
+      "description": "When you use an Essence ability, controlled allies gain +6% Effect Potency on their next action against that target. If you have no controlled allies, your next Essence ability gains +4% Effect Potency. 6 second internal cooldown.",
       "maxRank": 1,
       "requiredLevel": 1,
       "requiredNodeId": null,
-      "x": 0,
+      "x": 1,
       "y": 0,
       "tags": [
-        "Summon"
+        "Right",
+        "Major"
       ],
       "effects": [
-        "Owned summons gain +3% max health.",
-        "Does not choose Champion as the effective focus by itself."
+        "When you use an Essence ability, controlled allies gain +6% Effect Potency on their next action against that target. If you have no controlled allies, your next Essence ability gains +4% Effect Potency. 6 second internal cooldown."
       ],
       "countsTowardFocus": false,
-      "rules": [
-        {
-          "id": "summoner_summon_stats_nodes_champion-path_maxHealthPercentModifiers",
-          "eventType": "SummonCreated",
-          "predicate": {
-            "sourceMustBePlayer": true
-          },
-          "operation": {
-            "type": "modifySummonStats",
-            "maxHealthPercent": 0,
-            "maxHealthPercentModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 0.03,
-                "nodeId": "champion-path"
-              }
-            ]
-          }
-        }
-      ]
+      "rules": [],
+      "row": 1,
+      "lane": "Right",
+      "nodeType": "Major",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "Eligible active Essence abilities."
+        ],
+        "changes": [
+          "When you use an Essence ability, controlled allies gain +6% Effect Potency on their next action against that target. If you have no controlled allies, your next Essence ability gains +4% Effect Potency. 6 second internal cooldown."
+        ],
+        "tradeoffs": [
+          "Advanced cooldowns, target caps, and PvP coefficients can be tuned per node."
+        ],
+        "doesNotAffect": [
+          "Abilities that do not match the listed tags, effect operations, or conversion flags.",
+          "True damage unless the ability explicitly allows conversion."
+        ]
+      }
     },
     {
-      "id": "champion-instinct",
-      "branchId": "champion",
-      "name": "Champion Instinct",
-      "description": "Builds extra Command from Summon abilities.",
-      "maxRank": 3,
-      "requiredLevel": 5,
-      "requiredNodeId": "champion-path",
-      "x": -1,
-      "y": 1,
-      "tags": [
-        "Summon"
-      ],
-      "effects": [
-        "Each rank grants +2 additional Command when a Summon-tagged active ability resolves.",
-        "Adds 1 Champion branch point per rank."
-      ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "summoner_nodes_command_champion-instinct_amountModifiers",
-          "eventType": "AbilityResolved",
-          "predicate": {
-            "sourceMustBePlayer": true,
-            "anyTags": [
-              "Summon"
-            ],
-            "activeAbilityOnly": true
-          },
-          "operation": {
-            "type": "gainStyleResource",
-            "resourceId": "command",
-            "amount": 0,
-            "usesProcCoefficient": false,
-            "amountModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 2,
-                "nodeId": "champion-instinct"
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "champion-technique",
-      "branchId": "champion",
-      "name": "Champion Technique",
-      "description": "Improves owned summon max health.",
-      "maxRank": 3,
-      "requiredLevel": 10,
-      "requiredNodeId": "champion-path",
-      "x": 0,
-      "y": 1,
-      "tags": [
-        "Summon"
-      ],
-      "effects": [
-        "Each rank gives owned summons +3% max health.",
-        "Adds 1 Champion branch point per rank."
-      ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "summoner_summon_stats_nodes_champion-technique_maxHealthPercentModifiers",
-          "eventType": "SummonCreated",
-          "predicate": {
-            "sourceMustBePlayer": true
-          },
-          "operation": {
-            "type": "modifySummonStats",
-            "maxHealthPercent": 0,
-            "maxHealthPercentModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 0.03,
-                "nodeId": "champion-technique"
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "champion-discipline",
-      "branchId": "champion",
-      "name": "Champion Discipline",
-      "description": "Protects owned summons from direct damage.",
-      "maxRank": 3,
-      "requiredLevel": 5,
-      "requiredNodeId": "champion-path",
-      "x": 1,
-      "y": 1,
-      "tags": [
-        "Summon"
-      ],
-      "effects": [
-        "Each rank reduces incoming damage to owned summons by 2%.",
-        "Adds 1 Champion branch point per rank."
-      ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "summoner_champion_reduction_champion-discipline_percentModifiers",
-          "eventType": "EffectCalculation",
-          "predicate": {
-            "effectOperations": [
-              "Damage"
-            ],
-            "targetMustBeOwnedSummon": true
-          },
-          "operation": {
-            "type": "addDamageReduction",
-            "percent": 0,
-            "percentModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 0.02,
-                "nodeId": "champion-discipline"
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "champion-specialization",
-      "branchId": "champion",
-      "name": "Champion Specialization",
-      "description": "Improves champion empowerment.",
-      "maxRank": 2,
-      "requiredLevel": 20,
-      "requiredNodeId": "champion-instinct",
-      "x": -1,
-      "y": 2,
-      "tags": [
-        "Summon"
-      ],
-      "effects": [
-        "Each rank gives owned summons +4% max health.",
-        "Each rank makes Command empowerment +3% stronger.",
-        "Adds 1 Champion branch point per rank."
-      ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "summoner_summon_stats_nodes_champion-specialization_maxHealthPercentModifiers",
-          "eventType": "SummonCreated",
-          "predicate": {
-            "sourceMustBePlayer": true
-          },
-          "operation": {
-            "type": "modifySummonStats",
-            "maxHealthPercent": 0,
-            "maxHealthPercentModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 0.04,
-                "nodeId": "champion-specialization"
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "champion-mastery",
-      "branchId": "champion",
-      "name": "Champion Mastery",
-      "description": "Deepens summon protection.",
-      "maxRank": 3,
-      "requiredLevel": 25,
-      "requiredNodeId": "champion-technique",
-      "x": 0,
-      "y": 2,
-      "tags": [
-        "Summon"
-      ],
-      "effects": [
-        "Each rank reduces incoming damage to owned summons by 2%.",
-        "Adds 1 Champion branch point per rank."
-      ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "summoner_champion_reduction_champion-mastery_percentModifiers",
-          "eventType": "EffectCalculation",
-          "predicate": {
-            "effectOperations": [
-              "Damage"
-            ],
-            "targetMustBeOwnedSummon": true
-          },
-          "operation": {
-            "type": "addDamageReduction",
-            "percent": 0,
-            "percentModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 0.02,
-                "nodeId": "champion-mastery"
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "champion-amplifier",
-      "branchId": "champion",
-      "name": "Champion Amplifier",
-      "description": "Improves command cadence.",
-      "maxRank": 2,
-      "requiredLevel": 20,
-      "requiredNodeId": "champion-discipline",
-      "x": 1,
-      "y": 2,
-      "tags": [
-        "Summon"
-      ],
-      "effects": [
-        "Each rank grants +3 additional Command when a Summon-tagged active ability resolves.",
-        "Adds 1 Champion branch point per rank."
-      ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "summoner_nodes_command_champion-amplifier_amountModifiers",
-          "eventType": "AbilityResolved",
-          "predicate": {
-            "sourceMustBePlayer": true,
-            "anyTags": [
-              "Summon"
-            ],
-            "activeAbilityOnly": true
-          },
-          "operation": {
-            "type": "gainStyleResource",
-            "resourceId": "command",
-            "amount": 0,
-            "usesProcCoefficient": false,
-            "amountModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 3,
-                "nodeId": "champion-amplifier"
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "champion-focus",
-      "branchId": "champion",
-      "name": "Champion Focus",
-      "description": "Completes the Champion focus.",
+      "id": "summoner_proxy_command",
+      "branchId": "left",
+      "name": "Proxy Command",
+      "description": "Mutator Group: DeliveryConversion + SummonConversion. Eligible Essence abilities may be delivered through your strongest controlled ally once every 8 seconds. Hostile abilities use your stats but originate from the ally's position and target, resolving at 75% Effect Potency. Non-hostile abilities use the ally as the origin point at 85% Effect Potency. If no controlled ally exists, your next persistent Essence effect gains +10% duration instead.",
       "maxRank": 1,
-      "requiredLevel": 40,
-      "requiredNodeId": "champion-mastery",
+      "requiredLevel": 10,
+      "requiredNodeId": null,
+      "x": -1,
+      "y": 3,
+      "tags": [
+        "DeliveryConversion",
+        "SummonConversion",
+        "Left",
+        "Major"
+      ],
+      "effects": [
+        "Mutator Group: DeliveryConversion + SummonConversion. Eligible Essence abilities may be delivered through your strongest controlled ally once every 8 seconds. Hostile abilities use your stats but originate from the ally's position and target, resolving at 75% Effect Potency. Non-hostile abilities use the ally as the origin point at 85% Effect Potency. If no controlled ally exists, your next persistent Essence effect gains +10% duration instead."
+      ],
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 2,
+      "lane": "Left",
+      "nodeType": "Major",
+      "mutatorKind": "Converter",
+      "mutatorGroups": [
+        "DeliveryConversion",
+        "SummonConversion"
+      ],
+      "mutator": {
+        "kind": "Converter",
+        "groups": [
+          "DeliveryConversion",
+          "SummonConversion"
+        ],
+        "conditions": {
+          "requiredAbilityTags": [],
+          "anyAbilityTags": [],
+          "requiredDeliveryTags": [],
+          "anyDeliveryTags": [],
+          "requiredEffectTags": [],
+          "anyEffectTags": [
+            "Damage",
+            "Summon",
+            "Debuff"
+          ],
+          "effectOperations": [
+            "Damage",
+            "Summon",
+            "ApplyStatus"
+          ],
+          "allowedDamageTypes": [],
+          "targetSelectors": [],
+          "activeAbilityOnly": true,
+          "passiveAbilityOnly": false,
+          "allowDamageTypeConversionRequired": null,
+          "allowScalingConversionRequired": null,
+          "allowDeliveryConversionRequired": true,
+          "allowTargetingConversionRequired": null,
+          "allowSummonProxyRequired": null,
+          "allowEquipmentOverrideRequired": null,
+          "excludeTrueDamage": true,
+          "excludeHardCrowdControl": true
+        },
+        "transform": {
+          "damageType": null,
+          "targetingType": null,
+          "scalingAttribute": null,
+          "scalingCoefficientOverride": null,
+          "scalingCoefficientMultiplier": null,
+          "effectPotencyMultiplier": 1.05,
+          "cooldownMultiplier": null,
+          "resourceCostMultiplier": null,
+          "addAbilityTags": [
+            "ConvertedDelivery"
+          ],
+          "addDeliveryTags": [],
+          "addEffectTags": [
+            "Damage",
+            "Summon",
+            "Debuff"
+          ],
+          "addEffectTagsToMatchingEffects": [
+            "Damage",
+            "Summon",
+            "Debuff"
+          ]
+        },
+        "tradeoff": {
+          "effectPotencyMultiplier": null,
+          "cooldownMultiplier": 1.03,
+          "resourceCostMultiplier": 1.05,
+          "procCoefficientMultiplier": null
+        },
+        "pvpCoefficient": 0.7
+      },
+      "tooltip": {
+        "affects": [
+          "Eligible active Essence abilities matching DeliveryConversion, SummonConversion."
+        ],
+        "changes": [
+          "Mutator Group: DeliveryConversion + SummonConversion. Eligible Essence abilities may be delivered through your strongest controlled ally once every 8 seconds. Hostile abilities use your stats but originate from the ally's position and target, resolving at 75% Effect Potency. Non-hostile abilities use the ally as the origin point at 85% Effect Potency. If no controlled ally exists, your next persistent Essence effect gains +10% duration instead."
+        ],
+        "tradeoffs": [
+          "Conversion uses a +5% resource cost safety tradeoff and PvP coefficient until explicit balance values are authored."
+        ],
+        "doesNotAffect": [
+          "Abilities that do not match the listed tags, effect operations, or conversion flags.",
+          "True damage unless the ability explicitly allows conversion."
+        ]
+      }
+    },
+    {
+      "id": "summoner_shared_instinct",
+      "branchId": "middle",
+      "name": "Shared Instinct",
+      "description": "Mutator Group: SupportConversion + SummonConversion. When you heal, barrier, buff, or cleanse yourself, your strongest controlled ally receives 35% of the effect. When you heal, barrier, buff, or cleanse a controlled ally, you receive 20% of the effect. If no controlled ally exists, self-targeted non-hostile Essence effects gain +5% Effect Potency.",
+      "maxRank": 1,
+      "requiredLevel": 10,
+      "requiredNodeId": null,
       "x": 0,
       "y": 3,
       "tags": [
-        "Summon"
+        "SupportConversion",
+        "SummonConversion",
+        "Middle",
+        "Major"
       ],
       "effects": [
-        "Owned summons gain +8% max health.",
-        "Incoming damage to owned summons is reduced by 5%.",
-        "Command empowerment becomes +5% stronger.",
-        "Adds 1 Champion branch point."
+        "Mutator Group: SupportConversion + SummonConversion. When you heal, barrier, buff, or cleanse yourself, your strongest controlled ally receives 35% of the effect. When you heal, barrier, buff, or cleanse a controlled ally, you receive 20% of the effect. If no controlled ally exists, self-targeted non-hostile Essence effects gain +5% Effect Potency."
       ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "summoner_champion_reduction_champion-focus_percentModifiers",
-          "eventType": "EffectCalculation",
-          "predicate": {
-            "effectOperations": [
-              "Damage"
-            ],
-            "targetMustBeOwnedSummon": true
-          },
-          "operation": {
-            "type": "addDamageReduction",
-            "percent": 0,
-            "percentModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 0.05,
-                "nodeId": "champion-focus"
-              }
-            ]
-          }
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 2,
+      "lane": "Middle",
+      "nodeType": "Major",
+      "mutatorKind": "Converter",
+      "mutatorGroups": [
+        "SupportConversion",
+        "SummonConversion"
+      ],
+      "mutator": {
+        "kind": "Converter",
+        "groups": [
+          "SupportConversion",
+          "SummonConversion"
+        ],
+        "conditions": {
+          "requiredAbilityTags": [],
+          "anyAbilityTags": [],
+          "requiredDeliveryTags": [],
+          "anyDeliveryTags": [],
+          "requiredEffectTags": [],
+          "anyEffectTags": [
+            "Damage",
+            "Heal",
+            "Barrier",
+            "Summon",
+            "Debuff"
+          ],
+          "effectOperations": [
+            "Damage",
+            "Heal",
+            "GrantBarrier",
+            "Summon",
+            "ApplyStatus"
+          ],
+          "allowedDamageTypes": [],
+          "targetSelectors": [],
+          "activeAbilityOnly": true,
+          "passiveAbilityOnly": false,
+          "allowDamageTypeConversionRequired": null,
+          "allowScalingConversionRequired": null,
+          "allowDeliveryConversionRequired": null,
+          "allowTargetingConversionRequired": null,
+          "allowSummonProxyRequired": null,
+          "allowEquipmentOverrideRequired": null,
+          "excludeTrueDamage": true,
+          "excludeHardCrowdControl": true
         },
-        {
-          "id": "summoner_summon_stats_nodes_champion-focus_maxHealthPercentModifiers",
-          "eventType": "SummonCreated",
-          "predicate": {
-            "sourceMustBePlayer": true
-          },
-          "operation": {
-            "type": "modifySummonStats",
-            "maxHealthPercent": 0,
-            "maxHealthPercentModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 0.08,
-                "nodeId": "champion-focus"
-              }
-            ]
-          }
-        }
-      ]
+        "transform": {
+          "damageType": null,
+          "targetingType": null,
+          "scalingAttribute": null,
+          "scalingCoefficientOverride": null,
+          "scalingCoefficientMultiplier": null,
+          "effectPotencyMultiplier": 1.05,
+          "cooldownMultiplier": null,
+          "resourceCostMultiplier": null,
+          "addAbilityTags": [],
+          "addDeliveryTags": [],
+          "addEffectTags": [
+            "Damage",
+            "Heal",
+            "Barrier",
+            "Summon",
+            "Debuff",
+            "Support"
+          ],
+          "addEffectTagsToMatchingEffects": [
+            "Damage",
+            "Heal",
+            "Barrier",
+            "Summon",
+            "Debuff",
+            "Support"
+          ]
+        },
+        "tradeoff": {
+          "effectPotencyMultiplier": null,
+          "cooldownMultiplier": null,
+          "resourceCostMultiplier": 1.05,
+          "procCoefficientMultiplier": null
+        },
+        "pvpCoefficient": 0.7
+      },
+      "tooltip": {
+        "affects": [
+          "Eligible active Essence abilities matching SupportConversion, SummonConversion."
+        ],
+        "changes": [
+          "Mutator Group: SupportConversion + SummonConversion. When you heal, barrier, buff, or cleanse yourself, your strongest controlled ally receives 35% of the effect. When you heal, barrier, buff, or cleanse a controlled ally, you receive 20% of the effect. If no controlled ally exists, self-targeted non-hostile Essence effects gain +5% Effect Potency."
+        ],
+        "tradeoffs": [
+          "Conversion uses a +5% resource cost safety tradeoff and PvP coefficient until explicit balance values are authored."
+        ],
+        "doesNotAffect": [
+          "Abilities that do not match the listed tags, effect operations, or conversion flags.",
+          "True damage unless the ability explicitly allows conversion."
+        ]
+      }
     },
     {
-      "id": "ritualist-path",
-      "branchId": "ritualist",
-      "name": "Ritualist Root",
-      "description": "Opens Ritualist summon rites.",
+      "id": "summoner_commanded_strike",
+      "branchId": "right",
+      "name": "Commanded Strike",
+      "description": "Mutator Group: TargetingConversion + SummonConversion. Direct hostile Essence abilities mark the target for controlled allies for 5 seconds. Controlled allies deal/apply +8% Effect Potency against the marked target. If no controlled ally exists, your next DamageOverTime, Aura, Trap, or Persistent Essence effect against that target gains +4% Effect Potency.",
       "maxRank": 1,
+      "requiredLevel": 10,
+      "requiredNodeId": null,
+      "x": 1,
+      "y": 3,
+      "tags": [
+        "TargetingConversion",
+        "SummonConversion",
+        "Right",
+        "Major"
+      ],
+      "effects": [
+        "Mutator Group: TargetingConversion + SummonConversion. Direct hostile Essence abilities mark the target for controlled allies for 5 seconds. Controlled allies deal/apply +8% Effect Potency against the marked target. If no controlled ally exists, your next DamageOverTime, Aura, Trap, or Persistent Essence effect against that target gains +4% Effect Potency."
+      ],
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 2,
+      "lane": "Right",
+      "nodeType": "Major",
+      "mutatorKind": "Converter",
+      "mutatorGroups": [
+        "TargetingConversion",
+        "SummonConversion"
+      ],
+      "mutator": {
+        "kind": "Converter",
+        "groups": [
+          "TargetingConversion",
+          "SummonConversion"
+        ],
+        "conditions": {
+          "requiredAbilityTags": [],
+          "anyAbilityTags": [],
+          "requiredDeliveryTags": [],
+          "anyDeliveryTags": [],
+          "requiredEffectTags": [],
+          "anyEffectTags": [
+            "Damage",
+            "Summon",
+            "Debuff"
+          ],
+          "effectOperations": [
+            "Damage",
+            "Summon",
+            "ApplyStatus"
+          ],
+          "allowedDamageTypes": [],
+          "targetSelectors": [],
+          "activeAbilityOnly": true,
+          "passiveAbilityOnly": false,
+          "allowDamageTypeConversionRequired": null,
+          "allowScalingConversionRequired": null,
+          "allowDeliveryConversionRequired": null,
+          "allowTargetingConversionRequired": true,
+          "allowSummonProxyRequired": null,
+          "allowEquipmentOverrideRequired": null,
+          "excludeTrueDamage": true,
+          "excludeHardCrowdControl": true
+        },
+        "transform": {
+          "damageType": null,
+          "targetingType": null,
+          "scalingAttribute": null,
+          "scalingCoefficientOverride": null,
+          "scalingCoefficientMultiplier": null,
+          "effectPotencyMultiplier": 1.08,
+          "cooldownMultiplier": null,
+          "resourceCostMultiplier": null,
+          "addAbilityTags": [
+            "ConvertedTargeting"
+          ],
+          "addDeliveryTags": [],
+          "addEffectTags": [
+            "Damage",
+            "Summon",
+            "Debuff"
+          ],
+          "addEffectTagsToMatchingEffects": [
+            "Damage",
+            "Summon",
+            "Debuff"
+          ]
+        },
+        "tradeoff": {
+          "effectPotencyMultiplier": 0.95,
+          "cooldownMultiplier": 1.03,
+          "resourceCostMultiplier": 1.05,
+          "procCoefficientMultiplier": null
+        },
+        "pvpCoefficient": 0.7
+      },
+      "tooltip": {
+        "affects": [
+          "Eligible active Essence abilities matching TargetingConversion, SummonConversion."
+        ],
+        "changes": [
+          "Mutator Group: TargetingConversion + SummonConversion. Direct hostile Essence abilities mark the target for controlled allies for 5 seconds. Controlled allies deal/apply +8% Effect Potency against the marked target. If no controlled ally exists, your next DamageOverTime, Aura, Trap, or Persistent Essence effect against that target gains +4% Effect Potency."
+        ],
+        "tradeoffs": [
+          "Conversion uses a +5% resource cost safety tradeoff and PvP coefficient until explicit balance values are authored."
+        ],
+        "doesNotAffect": [
+          "Abilities that do not match the listed tags, effect operations, or conversion flags.",
+          "True damage unless the ability explicitly allows conversion."
+        ]
+      }
+    },
+    {
+      "id": "summoner_grand_rally",
+      "branchId": "left",
+      "name": "Grand Rally",
+      "description": "Rally Command lasts 4 seconds longer. Controlled allies gain +10% Effect Potency during Rally Command. Solo fallback: you gain +5% Effect Potency during Rally Command.",
+      "maxRank": 1,
+      "requiredLevel": 25,
+      "requiredNodeId": null,
+      "x": -1,
+      "y": 6,
+      "tags": [
+        "Left",
+        "Major"
+      ],
+      "effects": [
+        "Rally Command lasts 4 seconds longer. Controlled allies gain +10% Effect Potency during Rally Command. Solo fallback: you gain +5% Effect Potency during Rally Command."
+      ],
+      "countsTowardFocus": true,
+      "rules": [],
+      "row": 3,
+      "lane": "Left",
+      "nodeType": "Major",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "Eligible active Essence abilities."
+        ],
+        "changes": [
+          "Rally Command lasts 4 seconds longer. Controlled allies gain +10% Effect Potency during Rally Command. Solo fallback: you gain +5% Effect Potency during Rally Command."
+        ],
+        "tradeoffs": [
+          "Advanced cooldowns, target caps, and PvP coefficients can be tuned per node."
+        ],
+        "doesNotAffect": [
+          "Abilities that do not match the listed tags, effect operations, or conversion flags.",
+          "True damage unless the ability explicitly allows conversion."
+        ]
+      }
+    },
+    {
+      "id": "summoner_last_bastion_order",
+      "branchId": "middle",
+      "name": "Last Bastion Order",
+      "description": "Once per Rally Command, if a controlled ally would die, prevent death and give it a Barrier equal to 15% of your Max Health for 4 seconds. If you have no controlled allies, Rally Command cooldown is reduced by 50% when you fall below 35% Health. 90 second internal cooldown.",
+      "maxRank": 1,
+      "requiredLevel": 25,
+      "requiredNodeId": null,
+      "x": 0,
+      "y": 6,
+      "tags": [
+        "Middle",
+        "Major"
+      ],
+      "effects": [
+        "Once per Rally Command, if a controlled ally would die, prevent death and give it a Barrier equal to 15% of your Max Health for 4 seconds. If you have no controlled allies, Rally Command cooldown is reduced by 50% when you fall below 35% Health. 90 second internal cooldown."
+      ],
+      "countsTowardFocus": true,
+      "rules": [],
+      "row": 3,
+      "lane": "Middle",
+      "nodeType": "Major",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "Eligible active Essence abilities."
+        ],
+        "changes": [
+          "Once per Rally Command, if a controlled ally would die, prevent death and give it a Barrier equal to 15% of your Max Health for 4 seconds. If you have no controlled allies, Rally Command cooldown is reduced by 50% when you fall below 35% Health. 90 second internal cooldown."
+        ],
+        "tradeoffs": [
+          "Advanced cooldowns, target caps, and PvP coefficients can be tuned per node."
+        ],
+        "doesNotAffect": [
+          "Abilities that do not match the listed tags, effect operations, or conversion flags.",
+          "True damage unless the ability explicitly allows conversion."
+        ]
+      }
+    },
+    {
+      "id": "summoner_overwhelming_coordination",
+      "branchId": "right",
+      "name": "Overwhelming Coordination",
+      "description": "During Rally Command, each controlled ally or active persistent Essence effect grants your next Essence ability +2% Effect Potency, capped at +12%. If you have no controlled allies or persistent effects, count as 2 stacks.",
+      "maxRank": 1,
+      "requiredLevel": 25,
+      "requiredNodeId": null,
+      "x": 1,
+      "y": 6,
+      "tags": [
+        "Right",
+        "Major"
+      ],
+      "effects": [
+        "During Rally Command, each controlled ally or active persistent Essence effect grants your next Essence ability +2% Effect Potency, capped at +12%. If you have no controlled allies or persistent effects, count as 2 stacks."
+      ],
+      "countsTowardFocus": true,
+      "rules": [],
+      "row": 3,
+      "lane": "Right",
+      "nodeType": "Major",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "Eligible active Essence abilities."
+        ],
+        "changes": [
+          "During Rally Command, each controlled ally or active persistent Essence effect grants your next Essence ability +2% Effect Potency, capped at +12%. If you have no controlled allies or persistent effects, count as 2 stacks."
+        ],
+        "tradeoffs": [
+          "Advanced cooldowns, target caps, and PvP coefficients can be tuned per node."
+        ],
+        "doesNotAffect": [
+          "Abilities that do not match the listed tags, effect operations, or conversion flags.",
+          "True damage unless the ability explicitly allows conversion."
+        ]
+      }
+    },
+    {
+      "id": "summoner_command_capacity",
+      "branchId": "left",
+      "name": "Command Capacity",
+      "description": "Max Command +10 / +20.",
+      "maxRank": 2,
+      "requiredLevel": 1,
+      "requiredNodeId": null,
+      "x": -1,
+      "y": 1,
+      "tags": [
+        "Left",
+        "Minor"
+      ],
+      "effects": [
+        "Max Command +10 / +20."
+      ],
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 1,
+      "lane": "Left",
+      "nodeType": "Minor",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "This style-tree passive while the node has ranks."
+        ],
+        "changes": [
+          "Max Command +10 / +20."
+        ],
+        "tradeoffs": [],
+        "doesNotAffect": []
+      }
+    },
+    {
+      "id": "summoner_command_reserves",
+      "branchId": "middle",
+      "name": "Command Reserves",
+      "description": "Start combat with +10 / +20 Command.",
+      "maxRank": 2,
       "requiredLevel": 1,
       "requiredNodeId": null,
       "x": 0,
-      "y": 0,
+      "y": 1,
       "tags": [
-        "Summon",
-        "Curse",
-        "Holy"
+        "Middle",
+        "Minor"
       ],
       "effects": [
-        "Summon effects that are also Curse or Holy gain +1% effect amount.",
-        "Does not choose Ritualist as the effective focus by itself."
+        "Start combat with +10 / +20 Command."
       ],
       "countsTowardFocus": false,
-      "rules": [
-        {
-          "id": "summoner_ritualist_nodes_ritualist-path_additivePercentModifiers",
-          "eventType": "EffectCalculation",
-          "predicate": {
-            "sourceMustBePlayer": true,
-            "anyTags": [
-              "Summon",
-              "Curse",
-              "Holy"
-            ]
-          },
-          "operation": {
-            "type": "modifyEffectAmount",
-            "additivePercent": 0,
-            "additivePercentModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 0.01,
-                "nodeId": "ritualist-path"
-              }
-            ]
-          }
-        }
-      ]
+      "rules": [],
+      "row": 1,
+      "lane": "Middle",
+      "nodeType": "Minor",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "This style-tree passive while the node has ranks."
+        ],
+        "changes": [
+          "Start combat with +10 / +20 Command."
+        ],
+        "tradeoffs": [],
+        "doesNotAffect": []
+      }
     },
     {
-      "id": "ritualist-instinct",
-      "branchId": "ritualist",
-      "name": "Ritualist Instinct",
-      "description": "Builds extra Command from Summon abilities.",
-      "maxRank": 3,
-      "requiredLevel": 5,
-      "requiredNodeId": "ritualist-path",
-      "x": -1,
+      "id": "summoner_minion_vitality",
+      "branchId": "right",
+      "name": "Minion Vitality",
+      "description": "Controlled allies gain +5% / +10% Max Health. Solo fallback: your persistent Essence effects gain +3% / +6% duration.",
+      "maxRank": 2,
+      "requiredLevel": 1,
+      "requiredNodeId": null,
+      "x": 1,
       "y": 1,
       "tags": [
-        "Summon",
-        "Curse",
-        "Holy"
+        "Right",
+        "Minor",
+        "Heal",
+        "Debuff"
       ],
       "effects": [
-        "Each rank grants +2 additional Command when a Summon-tagged active ability resolves.",
-        "Adds 1 Ritualist branch point per rank."
+        "Controlled allies gain +5% / +10% Max Health. Solo fallback: your persistent Essence effects gain +3% / +6% duration."
       ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "summoner_nodes_command_ritualist-instinct_amountModifiers",
-          "eventType": "AbilityResolved",
-          "predicate": {
-            "sourceMustBePlayer": true,
-            "anyTags": [
-              "Summon"
-            ],
-            "activeAbilityOnly": true
-          },
-          "operation": {
-            "type": "gainStyleResource",
-            "resourceId": "command",
-            "amount": 0,
-            "usesProcCoefficient": false,
-            "amountModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 2,
-                "nodeId": "ritualist-instinct"
-              }
-            ]
-          }
-        }
-      ]
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 1,
+      "lane": "Right",
+      "nodeType": "Minor",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "This style-tree passive while the node has ranks."
+        ],
+        "changes": [
+          "Controlled allies gain +5% / +10% Max Health. Solo fallback: your persistent Essence effects gain +3% / +6% duration."
+        ],
+        "tradeoffs": [],
+        "doesNotAffect": []
+      }
     },
     {
-      "id": "ritualist-technique",
-      "branchId": "ritualist",
-      "name": "Ritualist Technique",
-      "description": "Improves Curse and Holy summon effects.",
-      "maxRank": 3,
+      "id": "summoner_lone_commander",
+      "branchId": "middle",
+      "name": "Lone Commander",
+      "description": "While you have no controlled allies, your Essence abilities gain +3% / +6% Effect Potency. This bonus ends for 8 seconds after you gain a controlled ally.",
+      "maxRank": 2,
+      "requiredLevel": 1,
+      "requiredNodeId": null,
+      "x": 0,
+      "y": 2,
+      "tags": [
+        "Middle",
+        "Minor",
+        "Summon",
+        "Debuff"
+      ],
+      "effects": [
+        "While you have no controlled allies, your Essence abilities gain +3% / +6% Effect Potency. This bonus ends for 8 seconds after you gain a controlled ally."
+      ],
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 1,
+      "lane": "Middle",
+      "nodeType": "Minor",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "This style-tree passive while the node has ranks."
+        ],
+        "changes": [
+          "While you have no controlled allies, your Essence abilities gain +3% / +6% Effect Potency. This bonus ends for 8 seconds after you gain a controlled ally."
+        ],
+        "tradeoffs": [],
+        "doesNotAffect": []
+      }
+    },
+    {
+      "id": "summoner_persistent_will",
+      "branchId": "left",
+      "name": "Persistent Will",
+      "description": "Persistent Essence effect duration +4% / +8%.",
+      "maxRank": 2,
       "requiredLevel": 10,
-      "requiredNodeId": "ritualist-path",
-      "x": 0,
-      "y": 1,
-      "tags": [
-        "Summon",
-        "Curse",
-        "Holy"
-      ],
-      "effects": [
-        "Each rank gives Summon effects that are also Curse or Holy +2% effect amount.",
-        "Adds 1 Ritualist branch point per rank."
-      ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "summoner_ritualist_nodes_ritualist-technique_additivePercentModifiers",
-          "eventType": "EffectCalculation",
-          "predicate": {
-            "sourceMustBePlayer": true,
-            "anyTags": [
-              "Summon",
-              "Curse",
-              "Holy"
-            ]
-          },
-          "operation": {
-            "type": "modifyEffectAmount",
-            "additivePercent": 0,
-            "additivePercentModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 0.02,
-                "nodeId": "ritualist-technique"
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "ritualist-discipline",
-      "branchId": "ritualist",
-      "name": "Ritualist Discipline",
-      "description": "Strengthens Holy effects.",
-      "maxRank": 3,
-      "requiredLevel": 5,
-      "requiredNodeId": "ritualist-path",
-      "x": 1,
-      "y": 1,
-      "tags": [
-        "Summon",
-        "Curse",
-        "Holy"
-      ],
-      "effects": [
-        "Each rank gives Holy effects +1% effect amount.",
-        "Adds 1 Ritualist branch point per rank."
-      ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "summoner_ritualist_holy_discipline_ritualist-discipline_additivePercentModifiers",
-          "eventType": "EffectCalculation",
-          "predicate": {
-            "amplifiableEffectOnly": true,
-            "sourceMustBePlayer": true,
-            "anyTags": [
-              "Holy"
-            ]
-          },
-          "operation": {
-            "type": "modifyEffectAmount",
-            "additivePercent": 0,
-            "additivePercentModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 0.01,
-                "nodeId": "ritualist-discipline"
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "ritualist-specialization",
-      "branchId": "ritualist",
-      "name": "Ritualist Specialization",
-      "description": "Improves Command empowerment.",
-      "maxRank": 2,
-      "requiredLevel": 20,
-      "requiredNodeId": "ritualist-instinct",
+      "requiredNodeId": null,
       "x": -1,
-      "y": 2,
+      "y": 4,
       "tags": [
-        "Summon",
-        "Curse",
-        "Holy"
+        "Left",
+        "Minor"
       ],
       "effects": [
-        "Each rank makes Command empowerment +3% stronger.",
-        "Adds 1 Ritualist branch point per rank."
+        "Persistent Essence effect duration +4% / +8%."
       ],
-      "countsTowardFocus": true
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 2,
+      "lane": "Left",
+      "nodeType": "Minor",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "This style-tree passive while the node has ranks."
+        ],
+        "changes": [
+          "Persistent Essence effect duration +4% / +8%."
+        ],
+        "tradeoffs": [],
+        "doesNotAffect": []
+      }
     },
     {
-      "id": "ritualist-mastery",
-      "branchId": "ritualist",
-      "name": "Ritualist Mastery",
-      "description": "Deepens Curse and Holy summon effects.",
-      "maxRank": 3,
-      "requiredLevel": 25,
-      "requiredNodeId": "ritualist-technique",
-      "x": 0,
-      "y": 2,
-      "tags": [
-        "Summon",
-        "Curse",
-        "Holy"
-      ],
-      "effects": [
-        "Each rank gives Summon effects that are also Curse or Holy +3% effect amount.",
-        "Adds 1 Ritualist branch point per rank."
-      ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "summoner_ritualist_nodes_ritualist-mastery_additivePercentModifiers",
-          "eventType": "EffectCalculation",
-          "predicate": {
-            "sourceMustBePlayer": true,
-            "anyTags": [
-              "Summon",
-              "Curse",
-              "Holy"
-            ]
-          },
-          "operation": {
-            "type": "modifyEffectAmount",
-            "additivePercent": 0,
-            "additivePercentModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 0.03,
-                "nodeId": "ritualist-mastery"
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "ritualist-amplifier",
-      "branchId": "ritualist",
-      "name": "Ritualist Amplifier",
-      "description": "Improves ritual command cadence.",
+      "id": "summoner_shared_defenses",
+      "branchId": "middle",
+      "name": "Shared Defenses",
+      "description": "Controlled allies gain +5% / +10% damage reduction against area damage. Solo fallback: you gain +2% / +4% damage reduction while a persistent Essence effect is active.",
       "maxRank": 2,
-      "requiredLevel": 20,
-      "requiredNodeId": "ritualist-discipline",
-      "x": 1,
-      "y": 2,
+      "requiredLevel": 10,
+      "requiredNodeId": null,
+      "x": 0,
+      "y": 4,
       "tags": [
-        "Summon",
-        "Curse",
-        "Holy"
+        "Middle",
+        "Minor",
+        "Damage",
+        "Debuff"
       ],
       "effects": [
-        "Each rank grants +3 additional Command when a Summon-tagged active ability resolves.",
-        "Adds 1 Ritualist branch point per rank."
+        "Controlled allies gain +5% / +10% damage reduction against area damage. Solo fallback: you gain +2% / +4% damage reduction while a persistent Essence effect is active."
       ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "summoner_nodes_command_ritualist-amplifier_amountModifiers",
-          "eventType": "AbilityResolved",
-          "predicate": {
-            "sourceMustBePlayer": true,
-            "anyTags": [
-              "Summon"
-            ],
-            "activeAbilityOnly": true
-          },
-          "operation": {
-            "type": "gainStyleResource",
-            "resourceId": "command",
-            "amount": 0,
-            "usesProcCoefficient": false,
-            "amountModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 3,
-                "nodeId": "ritualist-amplifier"
-              }
-            ]
-          }
-        }
-      ]
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 2,
+      "lane": "Middle",
+      "nodeType": "Minor",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "This style-tree passive while the node has ranks."
+        ],
+        "changes": [
+          "Controlled allies gain +5% / +10% damage reduction against area damage. Solo fallback: you gain +2% / +4% damage reduction while a persistent Essence effect is active."
+        ],
+        "tradeoffs": [],
+        "doesNotAffect": []
+      }
     },
     {
-      "id": "ritualist-focus",
-      "branchId": "ritualist",
-      "name": "Ritualist Focus",
-      "description": "Completes the Ritualist focus.",
-      "maxRank": 1,
-      "requiredLevel": 40,
-      "requiredNodeId": "ritualist-mastery",
-      "x": 0,
-      "y": 3,
+      "id": "summoner_efficient_orders",
+      "branchId": "right",
+      "name": "Efficient Orders",
+      "description": "Essence abilities that create, refresh, or command persistent effects cost 4% / 8% less resource.",
+      "maxRank": 2,
+      "requiredLevel": 10,
+      "requiredNodeId": null,
+      "x": 1,
+      "y": 4,
       "tags": [
-        "Summon",
-        "Curse",
-        "Holy"
+        "Right",
+        "Minor"
       ],
       "effects": [
-        "Summon effects that are also Curse or Holy gain +5% effect amount.",
-        "Summon abilities that are also Curse or Holy grant +5 additional Command.",
-        "Command empowerment becomes +5% stronger.",
-        "Adds 1 Ritualist branch point."
+        "Essence abilities that create, refresh, or command persistent effects cost 4% / 8% less resource."
       ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "summoner_ritualist_nodes_ritualist-focus_additivePercentModifiers",
-          "eventType": "EffectCalculation",
-          "predicate": {
-            "sourceMustBePlayer": true,
-            "anyTags": [
-              "Summon",
-              "Curse",
-              "Holy"
-            ]
-          },
-          "operation": {
-            "type": "modifyEffectAmount",
-            "additivePercent": 0,
-            "additivePercentModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 0.05,
-                "nodeId": "ritualist-focus"
-              }
-            ]
-          }
-        },
-        {
-          "id": "summoner_nodes_command_ritualist-focus_amountModifiers",
-          "eventType": "AbilityResolved",
-          "predicate": {
-            "sourceMustBePlayer": true,
-            "anyTags": [
-              "Summon"
-            ],
-            "activeAbilityOnly": true
-          },
-          "operation": {
-            "type": "gainStyleResource",
-            "resourceId": "command",
-            "amount": 0,
-            "usesProcCoefficient": false,
-            "amountModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 5,
-                "nodeId": "ritualist-focus"
-              }
-            ]
-          }
-        }
-      ]
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 2,
+      "lane": "Right",
+      "nodeType": "Minor",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "This style-tree passive while the node has ranks."
+        ],
+        "changes": [
+          "Essence abilities that create, refresh, or command persistent effects cost 4% / 8% less resource."
+        ],
+        "tradeoffs": [],
+        "doesNotAffect": []
+      }
+    },
+    {
+      "id": "summoner_proxy_precision",
+      "branchId": "middle",
+      "name": "Proxy Precision",
+      "description": "Proxy Command potency penalty is reduced by 5% / 10%.",
+      "maxRank": 2,
+      "requiredLevel": 10,
+      "requiredNodeId": null,
+      "x": 0,
+      "y": 5,
+      "tags": [
+        "Middle",
+        "Minor"
+      ],
+      "effects": [
+        "Proxy Command potency penalty is reduced by 5% / 10%."
+      ],
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 2,
+      "lane": "Middle",
+      "nodeType": "Minor",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "This style-tree passive while the node has ranks."
+        ],
+        "changes": [
+          "Proxy Command potency penalty is reduced by 5% / 10%."
+        ],
+        "tradeoffs": [],
+        "doesNotAffect": []
+      }
+    },
+    {
+      "id": "summoner_rally_cooldown",
+      "branchId": "left",
+      "name": "Rally Cooldown",
+      "description": "Rally Command cooldown reduced by 2 / 4 seconds.",
+      "maxRank": 2,
+      "requiredLevel": 25,
+      "requiredNodeId": null,
+      "x": -1,
+      "y": 7,
+      "tags": [
+        "Left",
+        "Minor"
+      ],
+      "effects": [
+        "Rally Command cooldown reduced by 2 / 4 seconds."
+      ],
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 3,
+      "lane": "Left",
+      "nodeType": "Minor",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "This style-tree passive while the node has ranks."
+        ],
+        "changes": [
+          "Rally Command cooldown reduced by 2 / 4 seconds."
+        ],
+        "tradeoffs": [],
+        "doesNotAffect": []
+      }
+    },
+    {
+      "id": "summoner_squad_discipline",
+      "branchId": "middle",
+      "name": "Squad Discipline",
+      "description": "Controlled allies gain 10% / 20% crowd control resistance. Solo fallback: your own crowd control resistance +5% / +10%.",
+      "maxRank": 2,
+      "requiredLevel": 25,
+      "requiredNodeId": null,
+      "x": 0,
+      "y": 7,
+      "tags": [
+        "Middle",
+        "Minor",
+        "Debuff"
+      ],
+      "effects": [
+        "Controlled allies gain 10% / 20% crowd control resistance. Solo fallback: your own crowd control resistance +5% / +10%."
+      ],
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 3,
+      "lane": "Middle",
+      "nodeType": "Minor",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "This style-tree passive while the node has ranks."
+        ],
+        "changes": [
+          "Controlled allies gain 10% / 20% crowd control resistance. Solo fallback: your own crowd control resistance +5% / +10%."
+        ],
+        "tradeoffs": [],
+        "doesNotAffect": []
+      }
+    },
+    {
+      "id": "summoner_bonded_recovery",
+      "branchId": "right",
+      "name": "Bonded Recovery",
+      "description": "When a controlled ally acts, you recover 0.3% / 0.6% missing Health. 2 second internal cooldown. Solo fallback: persistent Essence ticks restore 0.2% / 0.4% missing Health.",
+      "maxRank": 2,
+      "requiredLevel": 25,
+      "requiredNodeId": null,
+      "x": 1,
+      "y": 7,
+      "tags": [
+        "Right",
+        "Minor",
+        "Heal",
+        "Summon",
+        "Debuff"
+      ],
+      "effects": [
+        "When a controlled ally acts, you recover 0.3% / 0.6% missing Health. 2 second internal cooldown. Solo fallback: persistent Essence ticks restore 0.2% / 0.4% missing Health."
+      ],
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 3,
+      "lane": "Right",
+      "nodeType": "Minor",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "This style-tree passive while the node has ranks."
+        ],
+        "changes": [
+          "When a controlled ally acts, you recover 0.3% / 0.6% missing Health. 2 second internal cooldown. Solo fallback: persistent Essence ticks restore 0.2% / 0.4% missing Health."
+        ],
+        "tradeoffs": [],
+        "doesNotAffect": []
+      }
+    },
+    {
+      "id": "summoner_emergency_recall",
+      "branchId": "middle",
+      "name": "Emergency Recall",
+      "description": "When a controlled ally falls below 30% Health, it gains a Barrier equal to 5% / 10% of your Max Health. 30 second cooldown per ally. Solo fallback: you gain this Barrier when you fall below 30% Health.",
+      "maxRank": 2,
+      "requiredLevel": 25,
+      "requiredNodeId": null,
+      "x": 0,
+      "y": 8,
+      "tags": [
+        "Middle",
+        "Minor",
+        "Heal",
+        "Barrier",
+        "Summon",
+        "Debuff"
+      ],
+      "effects": [
+        "When a controlled ally falls below 30% Health, it gains a Barrier equal to 5% / 10% of your Max Health. 30 second cooldown per ally. Solo fallback: you gain this Barrier when you fall below 30% Health."
+      ],
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 3,
+      "lane": "Middle",
+      "nodeType": "Minor",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "This style-tree passive while the node has ranks."
+        ],
+        "changes": [
+          "When a controlled ally falls below 30% Health, it gains a Barrier equal to 5% / 10% of your Max Health. 30 second cooldown per ally. Solo fallback: you gain this Barrier when you fall below 30% Health."
+        ],
+        "tradeoffs": [],
+        "doesNotAffect": []
+      }
     }
   ]
 }
-

@@ -95,7 +95,14 @@ public sealed class JsonCombatStyleDefinitionProvider : ICombatStyleDefinitionPr
             node.Effects,
             node.CountsTowardFocus)
         {
-            Rules = [.. node.Rules.Select(ToDomain)]
+            Rules = [.. node.Rules.Select(ToDomain)],
+            Row = node.Row,
+            Lane = string.IsNullOrWhiteSpace(node.Lane) ? node.BranchId : node.Lane,
+            NodeType = string.IsNullOrWhiteSpace(node.NodeType) ? CombatStyleNodeTypes.Minor : node.NodeType,
+            MutatorKind = node.MutatorKind,
+            MutatorGroups = node.MutatorGroups,
+            Mutator = node.Mutator,
+            Tooltip = node.Tooltip
         };
 
     private static CombatStyleFocusDefinition ToDomain(string styleId, CombatStyleFocusDefinitionJson focus) =>
@@ -232,8 +239,58 @@ public sealed class JsonCombatStyleDefinitionProvider : ICombatStyleDefinitionPr
                 .ToList();
             if (missingRequiredNodes.Count > 0)
                 throw new InvalidOperationException($"Combat style '{style.Id}' has skill tree nodes with missing required nodes: {string.Join(", ", missingRequiredNodes)}");
+
+            if (style.SkillTreeNodes.Any(x => x.Row > 0))
+                ThrowIfInvalidRedesignedTree(style);
         }
     }
+
+    private static void ThrowIfInvalidRedesignedTree(CombatStyleDefinition style)
+    {
+        var validLanes = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+        {
+            CombatStyleNodeLanes.Left,
+            CombatStyleNodeLanes.Middle,
+            CombatStyleNodeLanes.Right
+        };
+
+        var invalidLanes = style.SkillTreeNodes
+            .Where(x => !validLanes.Contains(x.Lane))
+            .Select(x => $"{x.Id}:{x.Lane}")
+            .ToList();
+        if (invalidLanes.Count > 0)
+            throw new InvalidOperationException($"Combat style '{style.Id}' has invalid node lanes: {string.Join(", ", invalidLanes)}");
+
+        var majorNodes = style.SkillTreeNodes
+            .Where(x => IsNodeType(x, CombatStyleNodeTypes.Major))
+            .ToList();
+        var minorNodes = style.SkillTreeNodes
+            .Where(x => IsNodeType(x, CombatStyleNodeTypes.Minor))
+            .ToList();
+
+        if (majorNodes.Count != 9 || minorNodes.Count != 12)
+            throw new InvalidOperationException($"Combat style '{style.Id}' redesigned trees require 9 major nodes and 12 minor nodes.");
+
+        foreach (var row in Enumerable.Range(1, 3))
+        {
+            var rowMajorNodes = majorNodes.Where(x => x.Row == row).ToList();
+            if (rowMajorNodes.Count != 3
+                || !validLanes.All(lane => rowMajorNodes.Any(x => x.Lane.Equals(lane, StringComparison.OrdinalIgnoreCase))))
+            {
+                throw new InvalidOperationException($"Combat style '{style.Id}' must define one major node per lane in row {row}.");
+            }
+        }
+
+        var missingMutators = majorNodes
+            .Where(x => x.Row == 2 && x.Mutator is null)
+            .Select(x => x.Id)
+            .ToList();
+        if (missingMutators.Count > 0)
+            throw new InvalidOperationException($"Combat style '{style.Id}' row 2 major nodes require mutators: {string.Join(", ", missingMutators)}");
+    }
+
+    private static bool IsNodeType(CombatStyleTreeNodeDefinition node, string nodeType) =>
+        node.NodeType.Equals(nodeType, StringComparison.OrdinalIgnoreCase);
 
     private sealed class CombatStyleDefinitionJson
     {
@@ -267,6 +324,13 @@ public sealed class JsonCombatStyleDefinitionProvider : ICombatStyleDefinitionPr
         public IReadOnlyList<string> Effects { get; set; } = [];
         public bool CountsTowardFocus { get; set; }
         public IReadOnlyList<CombatStyleRuleDefinitionJson> Rules { get; set; } = [];
+        public int Row { get; set; }
+        public string Lane { get; set; } = CombatStyleNodeLanes.Middle;
+        public string NodeType { get; set; } = CombatStyleNodeTypes.Minor;
+        public string? MutatorKind { get; set; }
+        public IReadOnlyList<string> MutatorGroups { get; set; } = [];
+        public CombatStyleAbilityMutatorDefinition? Mutator { get; set; }
+        public CombatStyleNodeTooltipDefinition Tooltip { get; set; } = new();
     }
 
     private sealed class CombatStyleFocusDefinitionJson

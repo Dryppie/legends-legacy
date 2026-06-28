@@ -110,9 +110,29 @@ public sealed class AbilitySpec
     public string? OwningEssenceId { get; set; }
     public int CooldownTicks { get; set; }
     public List<string> Tags { get; set; } = [];
+    public List<string> DeliveryTags { get; set; } = [];
+    public List<string> EffectTags { get; set; } = [];
+    public AbilityTargetSelector? TargetingType { get; set; }
+    public Dictionary<AttributeType, float> Scaling { get; set; } = [];
+    public AbilityConversionFlags ConversionFlags { get; set; } = new();
+    public bool IsHardCrowdControl { get; set; }
+    public bool CanEcho { get; set; } = true;
+    public bool CanRepeat { get; set; } = true;
+    public bool CanTriggerWeaponEffects { get; set; } = true;
     public List<AbilityCostSpec> Costs { get; set; } = [];
     public List<AbilityTriggerSpec> Triggers { get; set; } = [];
     public List<AbilityEffectSpec> Effects { get; set; } = [];
+}
+
+public sealed class AbilityConversionFlags
+{
+    public bool AllowDamageTypeConversion { get; set; } = true;
+    public bool AllowScalingConversion { get; set; } = true;
+    public bool AllowDeliveryConversion { get; set; } = true;
+    public bool AllowTargetingConversion { get; set; } = true;
+    public bool AllowSummonProxy { get; set; }
+    public bool AllowEquipmentOverride { get; set; } = true;
+    public bool AllowTrueDamageConversion { get; set; }
 }
 
 public sealed class AbilityCostSpec

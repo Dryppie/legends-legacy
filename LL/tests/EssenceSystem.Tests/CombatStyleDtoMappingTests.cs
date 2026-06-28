@@ -74,7 +74,19 @@ public sealed class CombatStyleDtoMappingTests
                                 IsUnlocked = true,
                                 CanRankUp = true,
                                 Tags = ["Melee"],
-                                Effects = ["Each rank gives active damage against the current target +2% effect amount."]
+                                Effects = ["Each rank gives active damage against the current target +2% effect amount."],
+                                Row = 2,
+                                Lane = "Middle",
+                                NodeType = "Major",
+                                MutatorKind = "Converter",
+                                MutatorGroups = ["DamageTypeConversion"],
+                                Tooltip = new CombatStyleNodeTooltipModel
+                                {
+                                    Affects = ["Physical melee abilities."],
+                                    Changes = ["Damage becomes magical."],
+                                    Tradeoffs = ["Resource cost +5%."],
+                                    DoesNotAffect = ["True damage."]
+                                }
                             }
                         ]
                     }
@@ -105,9 +117,15 @@ public sealed class CombatStyleDtoMappingTests
         var activationDto = mapper.Map<ActivateCombatStyleResponseDto>(
             CombatStyleOperationResult.Success("Fighter Style activated.", "fighter"));
         var previewDto = mapper.Map<CombatBuildPreviewDto>(preview);
+        var nodeDto = overviewDto.Styles.Single().SkillTree.Branches.Single().Nodes.Single();
 
         Assert.Equal("fighter", overviewDto.ActiveStyleId);
-        Assert.Equal("duelist-technique", overviewDto.Styles.Single().SkillTree.Branches.Single().Nodes.Single().Id);
+        Assert.Equal("duelist-technique", nodeDto.Id);
+        Assert.Equal("Middle", nodeDto.Lane);
+        Assert.Equal("Major", nodeDto.NodeType);
+        Assert.Equal("Converter", nodeDto.MutatorKind);
+        Assert.Equal("DamageTypeConversion", nodeDto.MutatorGroups.Single());
+        Assert.Equal("Damage becomes magical.", nodeDto.Tooltip.Changes.Single());
         Assert.Equal("Direct damage builds Momentum.", overviewDto.Styles.Single().RuleSummaries.Single().Text);
         Assert.True(mutationDto.Success);
         Assert.Equal("fighter", mutationDto.Style?.Id);

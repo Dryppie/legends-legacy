@@ -114,6 +114,7 @@ export class CombatStylesComponent implements OnInit {
       'tree-node--selected': this.isSelectedNode(node),
       'tree-node--maxed': node.rank >= node.maxRank,
       'tree-node--capstone': node.y >= 3,
+      'tree-node--major': node.nodeType?.toLowerCase() === 'major',
     };
   }
 

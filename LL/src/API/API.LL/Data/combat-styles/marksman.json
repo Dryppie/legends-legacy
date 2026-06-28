@@ -18,163 +18,52 @@
   ],
   "focuses": [
     {
-      "id": "sniper",
-      "name": "Sniper",
-      "description": "Single-target precision: ranged single-target damage scales at levels 10, 25, and 40.",
-      "unlockLevel": 10,
+      "id": "marksman_perfect_shot",
+      "name": "Perfect Shot",
+      "description": "Deadeye's empowered Essence ability cannot miss and gains +15% application chance against non-immune targets. If used at 100 Aim, it also gains +15% Effect Potency.",
+      "unlockLevel": 25,
       "recommendedTags": [
-        "Ranged",
-        "Critical"
+        "Left",
+        "Major"
       ],
       "recommendedStats": [
         "Precision",
-        "CritDamage"
+        "CritChance",
+        "ArmorPenetration"
       ],
-      "rules": [
-        {
-          "id": "marksman_sniper_damage",
-          "eventType": "EffectCalculation",
-          "minStyleLevel": 10,
-          "predicate": {
-            "sourceMustBePlayer": true,
-            "rangedOnly": true,
-            "targetSelectors": [
-              "CurrentTarget"
-            ],
-            "effectOperations": [
-              "Damage"
-            ]
-          },
-          "operation": {
-            "type": "modifyEffectAmount",
-            "additivePercent": 0.08,
-            "additivePercentModifiers": [
-              {
-                "type": "focusLevel",
-                "focusId": "sniper",
-                "minStyleLevel": 25,
-                "value": 0.04
-              },
-              {
-                "type": "focusLevel",
-                "focusId": "sniper",
-                "minStyleLevel": 40,
-                "value": 0.04
-              }
-            ]
-          }
-        }
-      ]
+      "rules": []
     },
     {
-      "id": "volley",
-      "name": "Volley",
-      "description": "Multi-target fire: ranged multi-target damage scales at levels 10, 25, and 40.",
-      "unlockLevel": 10,
+      "id": "marksman_rain_of_arrows",
+      "name": "Rain Of Arrows",
+      "description": "Deadeye spreads 40% of the empowered Essence effect to up to 2 nearby valid targets. Damage/healing/barrier/resource effects spread at 40% value. Buffs/debuffs/control/summon-related effects spread as 40% duration or strength.",
+      "unlockLevel": 25,
       "recommendedTags": [
-        "Ranged",
-        "MultiTarget"
+        "Middle",
+        "Major"
       ],
       "recommendedStats": [
         "Precision",
-        "CritChance"
+        "CritChance",
+        "ArmorPenetration"
       ],
-      "rules": [
-        {
-          "id": "marksman_volley_damage",
-          "eventType": "EffectCalculation",
-          "minStyleLevel": 10,
-          "predicate": {
-            "sourceMustBePlayer": true,
-            "rangedOnly": true,
-            "multiTargetOnly": true,
-            "effectOperations": [
-              "Damage"
-            ]
-          },
-          "operation": {
-            "type": "modifyEffectAmount",
-            "additivePercent": 0.08,
-            "additivePercentModifiers": [
-              {
-                "type": "focusLevel",
-                "focusId": "volley",
-                "minStyleLevel": 25,
-                "value": 0.04
-              },
-              {
-                "type": "focusLevel",
-                "focusId": "volley",
-                "minStyleLevel": 40,
-                "value": 0.04
-              }
-            ]
-          }
-        }
-      ]
+      "rules": []
     },
     {
-      "id": "trapper",
-      "name": "Trapper",
-      "description": "Marks and setup: ranged status and debuff effects build more Aim and scale at milestones.",
-      "unlockLevel": 10,
+      "id": "marksman_hunters_patience",
+      "name": "Hunters Patience",
+      "description": "Deadeye Mark lasts 5 seconds longer. If you take no Health damage during Deadeye, reduce Deadeye's remaining cooldown by 10 seconds and gain +30 Aim after it ends.",
+      "unlockLevel": 25,
       "recommendedTags": [
-        "Ranged",
-        "Mark",
-        "Debuff"
+        "Right",
+        "Major"
       ],
       "recommendedStats": [
         "Precision",
-        "Cooldown"
+        "CritChance",
+        "ArmorPenetration"
       ],
-      "rules": [
-        {
-          "id": "marksman_trapper_effect",
-          "eventType": "EffectCalculation",
-          "minStyleLevel": 10,
-          "predicate": {
-            "sourceMustBePlayer": true,
-            "rangedOnly": true,
-            "statusOrDebuffOnly": true
-          },
-          "operation": {
-            "type": "modifyEffectAmount",
-            "additivePercent": 0.08,
-            "additivePercentModifiers": [
-              {
-                "type": "focusLevel",
-                "focusId": "trapper",
-                "minStyleLevel": 25,
-                "value": 0.04
-              },
-              {
-                "type": "focusLevel",
-                "focusId": "trapper",
-                "minStyleLevel": 40,
-                "value": 0.04
-              }
-            ]
-          }
-        },
-        {
-          "id": "marksman_trapper_aim",
-          "eventType": "DamageDealt",
-          "minStyleLevel": 25,
-          "predicate": {
-            "sourceMustBePlayer": true,
-            "rangedOnly": true,
-            "statusOrDebuffOnly": true,
-            "effectOperations": [
-              "Damage"
-            ]
-          },
-          "operation": {
-            "type": "gainStyleResource",
-            "resourceId": "aim",
-            "amount": 5
-          }
-        }
-      ]
+      "rules": []
     }
   ],
   "rules": [
@@ -229,1134 +118,1031 @@
       },
       "additivePercent": 0.2,
       "consumeOnUse": true,
-      "additivePercentModifiers": [
-        {
-          "type": "focusLevel",
-          "focusId": "sniper",
-          "minStyleLevel": 40,
-          "value": 0.05
-        },
-        {
-          "type": "nodeRank",
-          "nodeId": "sniper-specialization",
-          "value": 0.03
-        },
-        {
-          "type": "nodeRank",
-          "nodeId": "sniper-focus",
-          "value": 0.05
-        },
-        {
-          "type": "nodeRank",
-          "nodeId": "volley-specialization",
-          "value": 0.03
-        },
-        {
-          "type": "nodeRank",
-          "nodeId": "volley-focus",
-          "value": 0.05
-        },
-        {
-          "type": "nodeRank",
-          "nodeId": "trapper-specialization",
-          "value": 0.03
-        },
-        {
-          "type": "nodeRank",
-          "nodeId": "trapper-focus",
-          "value": 0.05
-        }
-      ]
+      "additivePercentModifiers": []
     }
   ],
   "coreMechanic": "Gain Aim from ranged direct damage. At 100 Aim, empower the next ranged damage effect.",
   "skillTreeNodes": [
     {
-      "id": "sniper-path",
-      "branchId": "sniper",
-      "name": "Sniper Root",
-      "description": "Opens Sniper single-target precision.",
+      "id": "marksman_steady_aim",
+      "branchId": "left",
+      "name": "Steady Aim",
+      "description": "Every 3 seconds without taking Health damage grants +4 additional Aim. Essence effects against your priority target gain +4% Effect Potency while you have 50+ Aim.",
+      "maxRank": 1,
+      "requiredLevel": 1,
+      "requiredNodeId": null,
+      "x": -1,
+      "y": 0,
+      "tags": [
+        "Left",
+        "Major"
+      ],
+      "effects": [
+        "Every 3 seconds without taking Health damage grants +4 additional Aim. Essence effects against your priority target gain +4% Effect Potency while you have 50+ Aim."
+      ],
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 1,
+      "lane": "Left",
+      "nodeType": "Major",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "Eligible active Essence abilities."
+        ],
+        "changes": [
+          "Every 3 seconds without taking Health damage grants +4 additional Aim. Essence effects against your priority target gain +4% Effect Potency while you have 50+ Aim."
+        ],
+        "tradeoffs": [
+          "Advanced cooldowns, target caps, and PvP coefficients can be tuned per node."
+        ],
+        "doesNotAffect": [
+          "Abilities that do not match the listed tags, effect operations, or conversion flags.",
+          "True damage unless the ability explicitly allows conversion."
+        ]
+      }
+    },
+    {
+      "id": "marksman_skirmishers_sight",
+      "branchId": "middle",
+      "name": "Skirmishers Sight",
+      "description": "Dodging, avoiding, or being missed no longer causes Aim loss and instead grants +5 Aim. After avoiding damage, your next Essence effect against your priority target gains +5% Effect Potency.",
       "maxRank": 1,
       "requiredLevel": 1,
       "requiredNodeId": null,
       "x": 0,
       "y": 0,
       "tags": [
-        "Ranged",
-        "Critical"
+        "Middle",
+        "Major"
       ],
       "effects": [
-        "Ranged current-target damage gains +1% effect amount.",
-        "Does not choose Sniper as the effective focus by itself."
+        "Dodging, avoiding, or being missed no longer causes Aim loss and instead grants +5 Aim. After avoiding damage, your next Essence effect against your priority target gains +5% Effect Potency."
       ],
       "countsTowardFocus": false,
-      "rules": [
-        {
-          "id": "marksman_sniper_nodes_sniper-path_additivePercentModifiers",
-          "eventType": "EffectCalculation",
-          "predicate": {
-            "effectOperations": [
-              "Damage"
-            ],
-            "targetSelectors": [
-              "CurrentTarget"
-            ],
-            "sourceMustBePlayer": true,
-            "rangedOnly": true
-          },
-          "operation": {
-            "type": "modifyEffectAmount",
-            "additivePercent": 0,
-            "additivePercentModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 0.01,
-                "nodeId": "sniper-path"
-              }
-            ]
-          }
-        }
-      ]
+      "rules": [],
+      "row": 1,
+      "lane": "Middle",
+      "nodeType": "Major",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "Eligible active Essence abilities."
+        ],
+        "changes": [
+          "Dodging, avoiding, or being missed no longer causes Aim loss and instead grants +5 Aim. After avoiding damage, your next Essence effect against your priority target gains +5% Effect Potency."
+        ],
+        "tradeoffs": [
+          "Advanced cooldowns, target caps, and PvP coefficients can be tuned per node."
+        ],
+        "doesNotAffect": [
+          "Abilities that do not match the listed tags, effect operations, or conversion flags.",
+          "True damage unless the ability explicitly allows conversion."
+        ]
+      }
     },
     {
-      "id": "sniper-instinct",
-      "branchId": "sniper",
-      "name": "Sniper Instinct",
-      "description": "Builds extra Aim from ranged damage.",
-      "maxRank": 3,
-      "requiredLevel": 5,
-      "requiredNodeId": "sniper-path",
-      "x": -1,
-      "y": 1,
-      "tags": [
-        "Ranged",
-        "Critical"
-      ],
-      "effects": [
-        "Each rank grants +2 additional Aim when the player deals ranged damage.",
-        "Adds 1 Sniper branch point per rank."
-      ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "marksman_nodes_aim_sniper-instinct_amountModifiers",
-          "eventType": "DamageDealt",
-          "predicate": {
-            "effectOperations": [
-              "Damage"
-            ],
-            "sourceMustBePlayer": true,
-            "rangedOnly": true
-          },
-          "operation": {
-            "type": "gainStyleResource",
-            "resourceId": "aim",
-            "amount": 0,
-            "usesProcCoefficient": true,
-            "amountModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 2,
-                "nodeId": "sniper-instinct"
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "sniper-technique",
-      "branchId": "sniper",
-      "name": "Sniper Technique",
-      "description": "Improves ranged current-target damage.",
-      "maxRank": 3,
-      "requiredLevel": 10,
-      "requiredNodeId": "sniper-path",
-      "x": 0,
-      "y": 1,
-      "tags": [
-        "Ranged",
-        "Critical"
-      ],
-      "effects": [
-        "Each rank gives ranged current-target damage +2% effect amount.",
-        "Adds 1 Sniper branch point per rank."
-      ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "marksman_sniper_nodes_sniper-technique_additivePercentModifiers",
-          "eventType": "EffectCalculation",
-          "predicate": {
-            "effectOperations": [
-              "Damage"
-            ],
-            "targetSelectors": [
-              "CurrentTarget"
-            ],
-            "sourceMustBePlayer": true,
-            "rangedOnly": true
-          },
-          "operation": {
-            "type": "modifyEffectAmount",
-            "additivePercent": 0,
-            "additivePercentModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 0.02,
-                "nodeId": "sniper-technique"
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "sniper-discipline",
-      "branchId": "sniper",
-      "name": "Sniper Discipline",
-      "description": "Improves ranged damage consistency.",
-      "maxRank": 3,
-      "requiredLevel": 5,
-      "requiredNodeId": "sniper-path",
-      "x": 1,
-      "y": 1,
-      "tags": [
-        "Ranged",
-        "Critical"
-      ],
-      "effects": [
-        "Each rank gives ranged damage +1% effect amount.",
-        "Adds 1 Sniper branch point per rank."
-      ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "marksman_damage_discipline_sniper-discipline_additivePercentModifiers",
-          "eventType": "EffectCalculation",
-          "predicate": {
-            "effectOperations": [
-              "Damage"
-            ],
-            "sourceMustBePlayer": true,
-            "rangedOnly": true
-          },
-          "operation": {
-            "type": "modifyEffectAmount",
-            "additivePercent": 0,
-            "additivePercentModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 0.01,
-                "nodeId": "sniper-discipline"
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "sniper-specialization",
-      "branchId": "sniper",
-      "name": "Sniper Specialization",
-      "description": "Improves Aim empowerment.",
-      "maxRank": 2,
-      "requiredLevel": 20,
-      "requiredNodeId": "sniper-instinct",
-      "x": -1,
-      "y": 2,
-      "tags": [
-        "Ranged",
-        "Critical"
-      ],
-      "effects": [
-        "Each rank makes Aim empowerment +3% stronger.",
-        "Adds 1 Sniper branch point per rank."
-      ],
-      "countsTowardFocus": true
-    },
-    {
-      "id": "sniper-mastery",
-      "branchId": "sniper",
-      "name": "Sniper Mastery",
-      "description": "Deepens ranged current-target damage.",
-      "maxRank": 3,
-      "requiredLevel": 25,
-      "requiredNodeId": "sniper-technique",
-      "x": 0,
-      "y": 2,
-      "tags": [
-        "Ranged",
-        "Critical"
-      ],
-      "effects": [
-        "Each rank gives ranged current-target damage +3% effect amount.",
-        "Adds 1 Sniper branch point per rank."
-      ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "marksman_sniper_nodes_sniper-mastery_additivePercentModifiers",
-          "eventType": "EffectCalculation",
-          "predicate": {
-            "effectOperations": [
-              "Damage"
-            ],
-            "targetSelectors": [
-              "CurrentTarget"
-            ],
-            "sourceMustBePlayer": true,
-            "rangedOnly": true
-          },
-          "operation": {
-            "type": "modifyEffectAmount",
-            "additivePercent": 0,
-            "additivePercentModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 0.03,
-                "nodeId": "sniper-mastery"
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "sniper-amplifier",
-      "branchId": "sniper",
-      "name": "Sniper Amplifier",
-      "description": "Improves Aim generation.",
-      "maxRank": 2,
-      "requiredLevel": 20,
-      "requiredNodeId": "sniper-discipline",
-      "x": 1,
-      "y": 2,
-      "tags": [
-        "Ranged",
-        "Critical"
-      ],
-      "effects": [
-        "Each rank grants +3 additional Aim when the player deals ranged damage.",
-        "Adds 1 Sniper branch point per rank."
-      ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "marksman_nodes_aim_sniper-amplifier_amountModifiers",
-          "eventType": "DamageDealt",
-          "predicate": {
-            "effectOperations": [
-              "Damage"
-            ],
-            "sourceMustBePlayer": true,
-            "rangedOnly": true
-          },
-          "operation": {
-            "type": "gainStyleResource",
-            "resourceId": "aim",
-            "amount": 0,
-            "usesProcCoefficient": true,
-            "amountModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 3,
-                "nodeId": "sniper-amplifier"
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "sniper-focus",
-      "branchId": "sniper",
-      "name": "Sniper Focus",
-      "description": "Completes the Sniper focus.",
-      "maxRank": 1,
-      "requiredLevel": 40,
-      "requiredNodeId": "sniper-mastery",
-      "x": 0,
-      "y": 3,
-      "tags": [
-        "Ranged",
-        "Critical"
-      ],
-      "effects": [
-        "Ranged current-target damage gains +5% effect amount.",
-        "Ranged current-target damage grants +5 additional Aim.",
-        "Aim empowerment becomes +5% stronger.",
-        "Adds 1 Sniper branch point."
-      ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "marksman_sniper_nodes_sniper-focus_additivePercentModifiers",
-          "eventType": "EffectCalculation",
-          "predicate": {
-            "effectOperations": [
-              "Damage"
-            ],
-            "targetSelectors": [
-              "CurrentTarget"
-            ],
-            "sourceMustBePlayer": true,
-            "rangedOnly": true
-          },
-          "operation": {
-            "type": "modifyEffectAmount",
-            "additivePercent": 0,
-            "additivePercentModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 0.05,
-                "nodeId": "sniper-focus"
-              }
-            ]
-          }
-        },
-        {
-          "id": "marksman_nodes_aim_sniper-focus_amountModifiers",
-          "eventType": "DamageDealt",
-          "predicate": {
-            "effectOperations": [
-              "Damage"
-            ],
-            "sourceMustBePlayer": true,
-            "rangedOnly": true
-          },
-          "operation": {
-            "type": "gainStyleResource",
-            "resourceId": "aim",
-            "amount": 0,
-            "usesProcCoefficient": true,
-            "amountModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 5,
-                "nodeId": "sniper-focus"
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "volley-path",
-      "branchId": "volley",
-      "name": "Volley Root",
-      "description": "Opens Volley multi-target fire.",
+      "id": "marksman_suppressive_focus",
+      "branchId": "right",
+      "name": "Suppressive Focus",
+      "description": "Applying a debuff/control effect to your priority target reduces its damage dealt to you by 4% for 5 seconds. Non-hostile Essence effects on an allied priority target grant that ally 4% damage reduction for 5 seconds.",
       "maxRank": 1,
       "requiredLevel": 1,
       "requiredNodeId": null,
-      "x": 0,
+      "x": 1,
       "y": 0,
       "tags": [
-        "Ranged",
-        "MultiTarget"
+        "Right",
+        "Major"
       ],
       "effects": [
-        "Ranged multi-target damage gains +1% effect amount.",
-        "Does not choose Volley as the effective focus by itself."
+        "Applying a debuff/control effect to your priority target reduces its damage dealt to you by 4% for 5 seconds. Non-hostile Essence effects on an allied priority target grant that ally 4% damage reduction for 5 seconds."
       ],
       "countsTowardFocus": false,
-      "rules": [
-        {
-          "id": "marksman_volley_nodes_volley-path_additivePercentModifiers",
-          "eventType": "EffectCalculation",
-          "predicate": {
-            "effectOperations": [
-              "Damage"
-            ],
-            "multiTargetOnly": true,
-            "sourceMustBePlayer": true,
-            "rangedOnly": true
-          },
-          "operation": {
-            "type": "modifyEffectAmount",
-            "additivePercent": 0,
-            "additivePercentModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 0.01,
-                "nodeId": "volley-path"
-              }
-            ]
-          }
-        }
-      ]
+      "rules": [],
+      "row": 1,
+      "lane": "Right",
+      "nodeType": "Major",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "Eligible active Essence abilities."
+        ],
+        "changes": [
+          "Applying a debuff/control effect to your priority target reduces its damage dealt to you by 4% for 5 seconds. Non-hostile Essence effects on an allied priority target grant that ally 4% damage reduction for 5 seconds."
+        ],
+        "tradeoffs": [
+          "Advanced cooldowns, target caps, and PvP coefficients can be tuned per node."
+        ],
+        "doesNotAffect": [
+          "Abilities that do not match the listed tags, effect operations, or conversion flags.",
+          "True damage unless the ability explicitly allows conversion."
+        ]
+      }
     },
     {
-      "id": "volley-instinct",
-      "branchId": "volley",
-      "name": "Volley Instinct",
-      "description": "Builds extra Aim from ranged damage.",
-      "maxRank": 3,
-      "requiredLevel": 5,
-      "requiredNodeId": "volley-path",
-      "x": -1,
-      "y": 1,
-      "tags": [
-        "Ranged",
-        "MultiTarget"
-      ],
-      "effects": [
-        "Each rank grants +2 additional Aim when the player deals ranged damage.",
-        "Adds 1 Volley branch point per rank."
-      ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "marksman_nodes_aim_volley-instinct_amountModifiers",
-          "eventType": "DamageDealt",
-          "predicate": {
-            "effectOperations": [
-              "Damage"
-            ],
-            "sourceMustBePlayer": true,
-            "rangedOnly": true
-          },
-          "operation": {
-            "type": "gainStyleResource",
-            "resourceId": "aim",
-            "amount": 0,
-            "usesProcCoefficient": true,
-            "amountModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 2,
-                "nodeId": "volley-instinct"
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "volley-technique",
-      "branchId": "volley",
-      "name": "Volley Technique",
-      "description": "Improves ranged multi-target damage.",
-      "maxRank": 3,
-      "requiredLevel": 10,
-      "requiredNodeId": "volley-path",
-      "x": 0,
-      "y": 1,
-      "tags": [
-        "Ranged",
-        "MultiTarget"
-      ],
-      "effects": [
-        "Each rank gives ranged multi-target damage +2% effect amount.",
-        "Adds 1 Volley branch point per rank."
-      ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "marksman_volley_nodes_volley-technique_additivePercentModifiers",
-          "eventType": "EffectCalculation",
-          "predicate": {
-            "effectOperations": [
-              "Damage"
-            ],
-            "multiTargetOnly": true,
-            "sourceMustBePlayer": true,
-            "rangedOnly": true
-          },
-          "operation": {
-            "type": "modifyEffectAmount",
-            "additivePercent": 0,
-            "additivePercentModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 0.02,
-                "nodeId": "volley-technique"
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "volley-discipline",
-      "branchId": "volley",
-      "name": "Volley Discipline",
-      "description": "Improves broad ranged damage.",
-      "maxRank": 3,
-      "requiredLevel": 5,
-      "requiredNodeId": "volley-path",
-      "x": 1,
-      "y": 1,
-      "tags": [
-        "Ranged",
-        "MultiTarget"
-      ],
-      "effects": [
-        "Each rank gives ranged damage +1% effect amount.",
-        "Adds 1 Volley branch point per rank."
-      ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "marksman_damage_discipline_volley-discipline_additivePercentModifiers",
-          "eventType": "EffectCalculation",
-          "predicate": {
-            "effectOperations": [
-              "Damage"
-            ],
-            "sourceMustBePlayer": true,
-            "rangedOnly": true
-          },
-          "operation": {
-            "type": "modifyEffectAmount",
-            "additivePercent": 0,
-            "additivePercentModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 0.01,
-                "nodeId": "volley-discipline"
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "volley-specialization",
-      "branchId": "volley",
-      "name": "Volley Specialization",
-      "description": "Improves Aim empowerment.",
-      "maxRank": 2,
-      "requiredLevel": 20,
-      "requiredNodeId": "volley-instinct",
-      "x": -1,
-      "y": 2,
-      "tags": [
-        "Ranged",
-        "MultiTarget"
-      ],
-      "effects": [
-        "Each rank makes Aim empowerment +3% stronger.",
-        "Adds 1 Volley branch point per rank."
-      ],
-      "countsTowardFocus": true
-    },
-    {
-      "id": "volley-mastery",
-      "branchId": "volley",
-      "name": "Volley Mastery",
-      "description": "Deepens ranged multi-target damage.",
-      "maxRank": 3,
-      "requiredLevel": 25,
-      "requiredNodeId": "volley-technique",
-      "x": 0,
-      "y": 2,
-      "tags": [
-        "Ranged",
-        "MultiTarget"
-      ],
-      "effects": [
-        "Each rank gives ranged multi-target damage +3% effect amount.",
-        "Adds 1 Volley branch point per rank."
-      ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "marksman_volley_nodes_volley-mastery_additivePercentModifiers",
-          "eventType": "EffectCalculation",
-          "predicate": {
-            "effectOperations": [
-              "Damage"
-            ],
-            "multiTargetOnly": true,
-            "sourceMustBePlayer": true,
-            "rangedOnly": true
-          },
-          "operation": {
-            "type": "modifyEffectAmount",
-            "additivePercent": 0,
-            "additivePercentModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 0.03,
-                "nodeId": "volley-mastery"
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "volley-amplifier",
-      "branchId": "volley",
-      "name": "Volley Amplifier",
-      "description": "Improves Aim generation.",
-      "maxRank": 2,
-      "requiredLevel": 20,
-      "requiredNodeId": "volley-discipline",
-      "x": 1,
-      "y": 2,
-      "tags": [
-        "Ranged",
-        "MultiTarget"
-      ],
-      "effects": [
-        "Each rank grants +3 additional Aim when the player deals ranged damage.",
-        "Adds 1 Volley branch point per rank."
-      ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "marksman_nodes_aim_volley-amplifier_amountModifiers",
-          "eventType": "DamageDealt",
-          "predicate": {
-            "effectOperations": [
-              "Damage"
-            ],
-            "sourceMustBePlayer": true,
-            "rangedOnly": true
-          },
-          "operation": {
-            "type": "gainStyleResource",
-            "resourceId": "aim",
-            "amount": 0,
-            "usesProcCoefficient": true,
-            "amountModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 3,
-                "nodeId": "volley-amplifier"
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "volley-focus",
-      "branchId": "volley",
-      "name": "Volley Focus",
-      "description": "Completes the Volley focus.",
+      "id": "marksman_focus_fire",
+      "branchId": "left",
+      "name": "Focus Fire",
+      "description": "Mutator Group: TargetingConversion. Eligible Area and Cleave Essence abilities concentrate their effect into your priority target. The priority target receives +25% Effect Potency. Secondary targets receive 60% less effect. If the ability is non-hostile, the lowest-Health allied priority target receives the bonus and other allies receive reduced value.",
       "maxRank": 1,
-      "requiredLevel": 40,
-      "requiredNodeId": "volley-mastery",
+      "requiredLevel": 10,
+      "requiredNodeId": null,
+      "x": -1,
+      "y": 3,
+      "tags": [
+        "TargetingConversion",
+        "Left",
+        "Major"
+      ],
+      "effects": [
+        "Mutator Group: TargetingConversion. Eligible Area and Cleave Essence abilities concentrate their effect into your priority target. The priority target receives +25% Effect Potency. Secondary targets receive 60% less effect. If the ability is non-hostile, the lowest-Health allied priority target receives the bonus and other allies receive reduced value."
+      ],
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 2,
+      "lane": "Left",
+      "nodeType": "Major",
+      "mutatorKind": "Converter",
+      "mutatorGroups": [
+        "TargetingConversion"
+      ],
+      "mutator": {
+        "kind": "Converter",
+        "groups": [
+          "TargetingConversion"
+        ],
+        "conditions": {
+          "requiredAbilityTags": [],
+          "anyAbilityTags": [],
+          "requiredDeliveryTags": [],
+          "anyDeliveryTags": [],
+          "requiredEffectTags": [],
+          "anyEffectTags": [
+            "Damage",
+            "Heal"
+          ],
+          "effectOperations": [
+            "Damage",
+            "Heal"
+          ],
+          "allowedDamageTypes": [],
+          "targetSelectors": [
+            "AllEnemies",
+            "CurrentTarget"
+          ],
+          "activeAbilityOnly": true,
+          "passiveAbilityOnly": false,
+          "allowDamageTypeConversionRequired": null,
+          "allowScalingConversionRequired": null,
+          "allowDeliveryConversionRequired": null,
+          "allowTargetingConversionRequired": true,
+          "allowSummonProxyRequired": null,
+          "allowEquipmentOverrideRequired": null,
+          "excludeTrueDamage": true,
+          "excludeHardCrowdControl": true
+        },
+        "transform": {
+          "damageType": null,
+          "targetingType": "AllEnemies",
+          "scalingAttribute": null,
+          "scalingCoefficientOverride": null,
+          "scalingCoefficientMultiplier": null,
+          "effectPotencyMultiplier": 1.25,
+          "cooldownMultiplier": null,
+          "resourceCostMultiplier": null,
+          "addAbilityTags": [
+            "Area",
+            "ConvertedTargeting"
+          ],
+          "addDeliveryTags": [],
+          "addEffectTags": [
+            "Damage",
+            "Heal"
+          ],
+          "addEffectTagsToMatchingEffects": [
+            "Damage",
+            "Heal"
+          ]
+        },
+        "tradeoff": {
+          "effectPotencyMultiplier": 0.95,
+          "cooldownMultiplier": null,
+          "resourceCostMultiplier": 1.05,
+          "procCoefficientMultiplier": 0.75
+        },
+        "pvpCoefficient": 0.7
+      },
+      "tooltip": {
+        "affects": [
+          "Eligible active Essence abilities matching TargetingConversion."
+        ],
+        "changes": [
+          "Mutator Group: TargetingConversion. Eligible Area and Cleave Essence abilities concentrate their effect into your priority target. The priority target receives +25% Effect Potency. Secondary targets receive 60% less effect. If the ability is non-hostile, the lowest-Health allied priority target receives the bonus and other allies receive reduced value."
+        ],
+        "tradeoffs": [
+          "Conversion uses a +5% resource cost safety tradeoff and PvP coefficient until explicit balance values are authored."
+        ],
+        "doesNotAffect": [
+          "Abilities that do not match the listed tags, effect operations, or conversion flags.",
+          "True damage unless the ability explicitly allows conversion."
+        ]
+      }
+    },
+    {
+      "id": "marksman_huntmaster",
+      "branchId": "middle",
+      "name": "Huntmaster",
+      "description": "Mutator Group: SummonConversion + TargetingConversion. Controlled allies prioritize your Deadeye target. Their first action against that target gains +10% accuracy/application chance and +8% Effect Potency. When a controlled ally affects your Deadeye target, gain +5 Aim. 5 second internal cooldown. Solo fallback: your own single-target Essence effects against the Deadeye target gain +4% Effect Potency.",
+      "maxRank": 1,
+      "requiredLevel": 10,
+      "requiredNodeId": null,
       "x": 0,
       "y": 3,
       "tags": [
-        "Ranged",
-        "MultiTarget"
+        "SummonConversion",
+        "TargetingConversion",
+        "Middle",
+        "Major"
       ],
       "effects": [
-        "Ranged multi-target damage gains +5% effect amount.",
-        "Ranged multi-target damage grants +5 additional Aim.",
-        "Aim empowerment becomes +5% stronger.",
-        "Adds 1 Volley branch point."
+        "Mutator Group: SummonConversion + TargetingConversion. Controlled allies prioritize your Deadeye target. Their first action against that target gains +10% accuracy/application chance and +8% Effect Potency. When a controlled ally affects your Deadeye target, gain +5 Aim. 5 second internal cooldown. Solo fallback: your own single-target Essence effects against the Deadeye target gain +4% Effect Potency."
       ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "marksman_volley_nodes_volley-focus_additivePercentModifiers",
-          "eventType": "EffectCalculation",
-          "predicate": {
-            "effectOperations": [
-              "Damage"
-            ],
-            "multiTargetOnly": true,
-            "sourceMustBePlayer": true,
-            "rangedOnly": true
-          },
-          "operation": {
-            "type": "modifyEffectAmount",
-            "additivePercent": 0,
-            "additivePercentModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 0.05,
-                "nodeId": "volley-focus"
-              }
-            ]
-          }
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 2,
+      "lane": "Middle",
+      "nodeType": "Major",
+      "mutatorKind": "Converter",
+      "mutatorGroups": [
+        "SummonConversion",
+        "TargetingConversion"
+      ],
+      "mutator": {
+        "kind": "Converter",
+        "groups": [
+          "SummonConversion",
+          "TargetingConversion"
+        ],
+        "conditions": {
+          "requiredAbilityTags": [],
+          "anyAbilityTags": [],
+          "requiredDeliveryTags": [],
+          "anyDeliveryTags": [],
+          "requiredEffectTags": [],
+          "anyEffectTags": [
+            "Summon",
+            "Debuff"
+          ],
+          "effectOperations": [
+            "Summon",
+            "ApplyStatus"
+          ],
+          "allowedDamageTypes": [],
+          "targetSelectors": [
+            "CurrentTarget"
+          ],
+          "activeAbilityOnly": true,
+          "passiveAbilityOnly": false,
+          "allowDamageTypeConversionRequired": null,
+          "allowScalingConversionRequired": null,
+          "allowDeliveryConversionRequired": null,
+          "allowTargetingConversionRequired": true,
+          "allowSummonProxyRequired": null,
+          "allowEquipmentOverrideRequired": null,
+          "excludeTrueDamage": true,
+          "excludeHardCrowdControl": true
         },
-        {
-          "id": "marksman_nodes_aim_volley-focus_amountModifiers",
-          "eventType": "DamageDealt",
-          "predicate": {
-            "effectOperations": [
-              "Damage"
-            ],
-            "sourceMustBePlayer": true,
-            "rangedOnly": true
-          },
-          "operation": {
-            "type": "gainStyleResource",
-            "resourceId": "aim",
-            "amount": 0,
-            "usesProcCoefficient": true,
-            "amountModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 5,
-                "nodeId": "volley-focus"
-              }
-            ]
-          }
-        }
-      ]
+        "transform": {
+          "damageType": null,
+          "targetingType": null,
+          "scalingAttribute": null,
+          "scalingCoefficientOverride": null,
+          "scalingCoefficientMultiplier": null,
+          "effectPotencyMultiplier": 1.08,
+          "cooldownMultiplier": null,
+          "resourceCostMultiplier": null,
+          "addAbilityTags": [
+            "ConvertedTargeting"
+          ],
+          "addDeliveryTags": [],
+          "addEffectTags": [
+            "Summon",
+            "Debuff"
+          ],
+          "addEffectTagsToMatchingEffects": [
+            "Summon",
+            "Debuff"
+          ]
+        },
+        "tradeoff": {
+          "effectPotencyMultiplier": 0.95,
+          "cooldownMultiplier": 1.03,
+          "resourceCostMultiplier": 1.05,
+          "procCoefficientMultiplier": null
+        },
+        "pvpCoefficient": 0.7
+      },
+      "tooltip": {
+        "affects": [
+          "Eligible active Essence abilities matching SummonConversion, TargetingConversion."
+        ],
+        "changes": [
+          "Mutator Group: SummonConversion + TargetingConversion. Controlled allies prioritize your Deadeye target. Their first action against that target gains +10% accuracy/application chance and +8% Effect Potency. When a controlled ally affects your Deadeye target, gain +5 Aim. 5 second internal cooldown. Solo fallback: your own single-target Essence effects against the Deadeye target gain +4% Effect Potency."
+        ],
+        "tradeoffs": [
+          "Conversion uses a +5% resource cost safety tradeoff and PvP coefficient until explicit balance values are authored."
+        ],
+        "doesNotAffect": [
+          "Abilities that do not match the listed tags, effect operations, or conversion flags.",
+          "True damage unless the ability explicitly allows conversion."
+        ]
+      }
     },
     {
-      "id": "trapper-path",
-      "branchId": "trapper",
-      "name": "Trapper Root",
-      "description": "Opens Trapper ranged setup.",
+      "id": "marksman_surgical_delivery",
+      "branchId": "right",
+      "name": "Surgical Delivery",
+      "description": "Mutator Group: TargetingConversion. Single-target healing, barrier, buff, debuff, and control Essence abilities gain +10% Effect Potency against your priority target. Hostile debuffs/control gain +8% application chance. Ally-targeted buffs gain +10% duration. Direct damage abilities instead ignore 6% defense and resistance against the priority target.",
       "maxRank": 1,
+      "requiredLevel": 10,
+      "requiredNodeId": null,
+      "x": 1,
+      "y": 3,
+      "tags": [
+        "TargetingConversion",
+        "Right",
+        "Major"
+      ],
+      "effects": [
+        "Mutator Group: TargetingConversion. Single-target healing, barrier, buff, debuff, and control Essence abilities gain +10% Effect Potency against your priority target. Hostile debuffs/control gain +8% application chance. Ally-targeted buffs gain +10% duration. Direct damage abilities instead ignore 6% defense and resistance against the priority target."
+      ],
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 2,
+      "lane": "Right",
+      "nodeType": "Major",
+      "mutatorKind": "Converter",
+      "mutatorGroups": [
+        "TargetingConversion"
+      ],
+      "mutator": {
+        "kind": "Converter",
+        "groups": [
+          "TargetingConversion"
+        ],
+        "conditions": {
+          "requiredAbilityTags": [],
+          "anyAbilityTags": [],
+          "requiredDeliveryTags": [],
+          "anyDeliveryTags": [],
+          "requiredEffectTags": [],
+          "anyEffectTags": [
+            "Damage",
+            "Heal",
+            "Barrier",
+            "Debuff"
+          ],
+          "effectOperations": [
+            "Damage",
+            "Heal",
+            "GrantBarrier",
+            "ApplyStatus"
+          ],
+          "allowedDamageTypes": [],
+          "targetSelectors": [
+            "CurrentTarget"
+          ],
+          "activeAbilityOnly": true,
+          "passiveAbilityOnly": false,
+          "allowDamageTypeConversionRequired": null,
+          "allowScalingConversionRequired": null,
+          "allowDeliveryConversionRequired": null,
+          "allowTargetingConversionRequired": true,
+          "allowSummonProxyRequired": null,
+          "allowEquipmentOverrideRequired": null,
+          "excludeTrueDamage": true,
+          "excludeHardCrowdControl": true
+        },
+        "transform": {
+          "damageType": null,
+          "targetingType": null,
+          "scalingAttribute": null,
+          "scalingCoefficientOverride": null,
+          "scalingCoefficientMultiplier": null,
+          "effectPotencyMultiplier": 1.1,
+          "cooldownMultiplier": null,
+          "resourceCostMultiplier": null,
+          "addAbilityTags": [
+            "ConvertedTargeting"
+          ],
+          "addDeliveryTags": [],
+          "addEffectTags": [
+            "Damage",
+            "Heal",
+            "Barrier",
+            "Debuff"
+          ],
+          "addEffectTagsToMatchingEffects": [
+            "Damage",
+            "Heal",
+            "Barrier",
+            "Debuff"
+          ]
+        },
+        "tradeoff": {
+          "effectPotencyMultiplier": 0.95,
+          "cooldownMultiplier": 1.03,
+          "resourceCostMultiplier": 1.05,
+          "procCoefficientMultiplier": null
+        },
+        "pvpCoefficient": 0.7
+      },
+      "tooltip": {
+        "affects": [
+          "Eligible active Essence abilities matching TargetingConversion."
+        ],
+        "changes": [
+          "Mutator Group: TargetingConversion. Single-target healing, barrier, buff, debuff, and control Essence abilities gain +10% Effect Potency against your priority target. Hostile debuffs/control gain +8% application chance. Ally-targeted buffs gain +10% duration. Direct damage abilities instead ignore 6% defense and resistance against the priority target."
+        ],
+        "tradeoffs": [
+          "Conversion uses a +5% resource cost safety tradeoff and PvP coefficient until explicit balance values are authored."
+        ],
+        "doesNotAffect": [
+          "Abilities that do not match the listed tags, effect operations, or conversion flags.",
+          "True damage unless the ability explicitly allows conversion."
+        ]
+      }
+    },
+    {
+      "id": "marksman_perfect_shot",
+      "branchId": "left",
+      "name": "Perfect Shot",
+      "description": "Deadeye's empowered Essence ability cannot miss and gains +15% application chance against non-immune targets. If used at 100 Aim, it also gains +15% Effect Potency.",
+      "maxRank": 1,
+      "requiredLevel": 25,
+      "requiredNodeId": null,
+      "x": -1,
+      "y": 6,
+      "tags": [
+        "Left",
+        "Major"
+      ],
+      "effects": [
+        "Deadeye's empowered Essence ability cannot miss and gains +15% application chance against non-immune targets. If used at 100 Aim, it also gains +15% Effect Potency."
+      ],
+      "countsTowardFocus": true,
+      "rules": [],
+      "row": 3,
+      "lane": "Left",
+      "nodeType": "Major",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "Eligible active Essence abilities."
+        ],
+        "changes": [
+          "Deadeye's empowered Essence ability cannot miss and gains +15% application chance against non-immune targets. If used at 100 Aim, it also gains +15% Effect Potency."
+        ],
+        "tradeoffs": [
+          "Advanced cooldowns, target caps, and PvP coefficients can be tuned per node."
+        ],
+        "doesNotAffect": [
+          "Abilities that do not match the listed tags, effect operations, or conversion flags.",
+          "True damage unless the ability explicitly allows conversion."
+        ]
+      }
+    },
+    {
+      "id": "marksman_rain_of_arrows",
+      "branchId": "middle",
+      "name": "Rain Of Arrows",
+      "description": "Deadeye spreads 40% of the empowered Essence effect to up to 2 nearby valid targets. Damage/healing/barrier/resource effects spread at 40% value. Buffs/debuffs/control/summon-related effects spread as 40% duration or strength.",
+      "maxRank": 1,
+      "requiredLevel": 25,
+      "requiredNodeId": null,
+      "x": 0,
+      "y": 6,
+      "tags": [
+        "Middle",
+        "Major"
+      ],
+      "effects": [
+        "Deadeye spreads 40% of the empowered Essence effect to up to 2 nearby valid targets. Damage/healing/barrier/resource effects spread at 40% value. Buffs/debuffs/control/summon-related effects spread as 40% duration or strength."
+      ],
+      "countsTowardFocus": true,
+      "rules": [],
+      "row": 3,
+      "lane": "Middle",
+      "nodeType": "Major",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "Eligible active Essence abilities."
+        ],
+        "changes": [
+          "Deadeye spreads 40% of the empowered Essence effect to up to 2 nearby valid targets. Damage/healing/barrier/resource effects spread at 40% value. Buffs/debuffs/control/summon-related effects spread as 40% duration or strength."
+        ],
+        "tradeoffs": [
+          "Advanced cooldowns, target caps, and PvP coefficients can be tuned per node."
+        ],
+        "doesNotAffect": [
+          "Abilities that do not match the listed tags, effect operations, or conversion flags.",
+          "True damage unless the ability explicitly allows conversion."
+        ]
+      }
+    },
+    {
+      "id": "marksman_hunters_patience",
+      "branchId": "right",
+      "name": "Hunters Patience",
+      "description": "Deadeye Mark lasts 5 seconds longer. If you take no Health damage during Deadeye, reduce Deadeye's remaining cooldown by 10 seconds and gain +30 Aim after it ends.",
+      "maxRank": 1,
+      "requiredLevel": 25,
+      "requiredNodeId": null,
+      "x": 1,
+      "y": 6,
+      "tags": [
+        "Right",
+        "Major"
+      ],
+      "effects": [
+        "Deadeye Mark lasts 5 seconds longer. If you take no Health damage during Deadeye, reduce Deadeye's remaining cooldown by 10 seconds and gain +30 Aim after it ends."
+      ],
+      "countsTowardFocus": true,
+      "rules": [],
+      "row": 3,
+      "lane": "Right",
+      "nodeType": "Major",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "Eligible active Essence abilities."
+        ],
+        "changes": [
+          "Deadeye Mark lasts 5 seconds longer. If you take no Health damage during Deadeye, reduce Deadeye's remaining cooldown by 10 seconds and gain +30 Aim after it ends."
+        ],
+        "tradeoffs": [
+          "Advanced cooldowns, target caps, and PvP coefficients can be tuned per node."
+        ],
+        "doesNotAffect": [
+          "Abilities that do not match the listed tags, effect operations, or conversion flags.",
+          "True damage unless the ability explicitly allows conversion."
+        ]
+      }
+    },
+    {
+      "id": "marksman_aim_capacity",
+      "branchId": "left",
+      "name": "Aim Capacity",
+      "description": "Max Aim +10 / +20.",
+      "maxRank": 2,
+      "requiredLevel": 1,
+      "requiredNodeId": null,
+      "x": -1,
+      "y": 1,
+      "tags": [
+        "Left",
+        "Minor"
+      ],
+      "effects": [
+        "Max Aim +10 / +20."
+      ],
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 1,
+      "lane": "Left",
+      "nodeType": "Minor",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "This style-tree passive while the node has ranks."
+        ],
+        "changes": [
+          "Max Aim +10 / +20."
+        ],
+        "tradeoffs": [],
+        "doesNotAffect": []
+      }
+    },
+    {
+      "id": "marksman_long_watch",
+      "branchId": "middle",
+      "name": "Long Watch",
+      "description": "Start combat with +10 / +20 Aim.",
+      "maxRank": 2,
       "requiredLevel": 1,
       "requiredNodeId": null,
       "x": 0,
-      "y": 0,
+      "y": 1,
       "tags": [
-        "Ranged",
-        "Mark",
-        "Debuff"
+        "Middle",
+        "Minor"
       ],
       "effects": [
-        "Ranged status or debuff effects gain +1% effect amount.",
-        "Does not choose Trapper as the effective focus by itself."
+        "Start combat with +10 / +20 Aim."
       ],
       "countsTowardFocus": false,
-      "rules": [
-        {
-          "id": "marksman_trapper_nodes_trapper-path_additivePercentModifiers",
-          "eventType": "EffectCalculation",
-          "predicate": {
-            "statusOrDebuffOnly": true,
-            "sourceMustBePlayer": true,
-            "rangedOnly": true
-          },
-          "operation": {
-            "type": "modifyEffectAmount",
-            "additivePercent": 0,
-            "additivePercentModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 0.01,
-                "nodeId": "trapper-path"
-              }
-            ]
-          }
-        }
-      ]
+      "rules": [],
+      "row": 1,
+      "lane": "Middle",
+      "nodeType": "Minor",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "This style-tree passive while the node has ranks."
+        ],
+        "changes": [
+          "Start combat with +10 / +20 Aim."
+        ],
+        "tradeoffs": [],
+        "doesNotAffect": []
+      }
     },
     {
-      "id": "trapper-instinct",
-      "branchId": "trapper",
-      "name": "Trapper Instinct",
-      "description": "Builds extra Aim from ranged damage.",
-      "maxRank": 3,
-      "requiredLevel": 5,
-      "requiredNodeId": "trapper-path",
-      "x": -1,
+      "id": "marksman_sharp_senses",
+      "branchId": "right",
+      "name": "Sharp Senses",
+      "description": "Accuracy and debuff/control application chance +3% / +6%. If neither applies, gain +2% / +4% Effect Potency against priority targets.",
+      "maxRank": 2,
+      "requiredLevel": 1,
+      "requiredNodeId": null,
+      "x": 1,
       "y": 1,
       "tags": [
-        "Ranged",
-        "Mark",
+        "Right",
+        "Minor",
         "Debuff"
       ],
       "effects": [
-        "Each rank grants +2 additional Aim when the player deals ranged damage.",
-        "Adds 1 Trapper branch point per rank."
+        "Accuracy and debuff/control application chance +3% / +6%. If neither applies, gain +2% / +4% Effect Potency against priority targets."
       ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "marksman_nodes_aim_trapper-instinct_amountModifiers",
-          "eventType": "DamageDealt",
-          "predicate": {
-            "effectOperations": [
-              "Damage"
-            ],
-            "sourceMustBePlayer": true,
-            "rangedOnly": true
-          },
-          "operation": {
-            "type": "gainStyleResource",
-            "resourceId": "aim",
-            "amount": 0,
-            "usesProcCoefficient": true,
-            "amountModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 2,
-                "nodeId": "trapper-instinct"
-              }
-            ]
-          }
-        }
-      ]
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 1,
+      "lane": "Right",
+      "nodeType": "Minor",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "This style-tree passive while the node has ranks."
+        ],
+        "changes": [
+          "Accuracy and debuff/control application chance +3% / +6%. If neither applies, gain +2% / +4% Effect Potency against priority targets."
+        ],
+        "tradeoffs": [],
+        "doesNotAffect": []
+      }
     },
     {
-      "id": "trapper-technique",
-      "branchId": "trapper",
-      "name": "Trapper Technique",
-      "description": "Improves ranged status and debuff effects.",
-      "maxRank": 3,
+      "id": "marksman_target_discipline",
+      "branchId": "middle",
+      "name": "Target Discipline",
+      "description": "Aim lost from taking Health damage reduced by 25% / 50%.",
+      "maxRank": 2,
+      "requiredLevel": 1,
+      "requiredNodeId": null,
+      "x": 0,
+      "y": 2,
+      "tags": [
+        "Middle",
+        "Minor",
+        "Damage",
+        "Heal"
+      ],
+      "effects": [
+        "Aim lost from taking Health damage reduced by 25% / 50%."
+      ],
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 1,
+      "lane": "Middle",
+      "nodeType": "Minor",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "This style-tree passive while the node has ranks."
+        ],
+        "changes": [
+          "Aim lost from taking Health damage reduced by 25% / 50%."
+        ],
+        "tradeoffs": [],
+        "doesNotAffect": []
+      }
+    },
+    {
+      "id": "marksman_marked_recovery",
+      "branchId": "left",
+      "name": "Marked Recovery",
+      "description": "Essence abilities affecting your priority target refund 3% / 6% of their resource cost. 4 second internal cooldown.",
+      "maxRank": 2,
       "requiredLevel": 10,
-      "requiredNodeId": "trapper-path",
-      "x": 0,
-      "y": 1,
-      "tags": [
-        "Ranged",
-        "Mark",
-        "Debuff"
-      ],
-      "effects": [
-        "Each rank gives ranged status or debuff effects +2% effect amount.",
-        "Adds 1 Trapper branch point per rank."
-      ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "marksman_trapper_nodes_trapper-technique_additivePercentModifiers",
-          "eventType": "EffectCalculation",
-          "predicate": {
-            "statusOrDebuffOnly": true,
-            "sourceMustBePlayer": true,
-            "rangedOnly": true
-          },
-          "operation": {
-            "type": "modifyEffectAmount",
-            "additivePercent": 0,
-            "additivePercentModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 0.02,
-                "nodeId": "trapper-technique"
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "trapper-discipline",
-      "branchId": "trapper",
-      "name": "Trapper Discipline",
-      "description": "Improves tactical debuffs.",
-      "maxRank": 3,
-      "requiredLevel": 5,
-      "requiredNodeId": "trapper-path",
-      "x": 1,
-      "y": 1,
-      "tags": [
-        "Ranged",
-        "Mark",
-        "Debuff"
-      ],
-      "effects": [
-        "Each rank gives status and debuff effects +1% effect amount.",
-        "Adds 1 Trapper branch point per rank."
-      ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "marksman_trapper_discipline_trapper-discipline_additivePercentModifiers",
-          "eventType": "EffectCalculation",
-          "predicate": {
-            "statusOrDebuffOnly": true
-          },
-          "operation": {
-            "type": "modifyEffectAmount",
-            "additivePercent": 0,
-            "additivePercentModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 0.01,
-                "nodeId": "trapper-discipline"
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "trapper-specialization",
-      "branchId": "trapper",
-      "name": "Trapper Specialization",
-      "description": "Improves Aim empowerment.",
-      "maxRank": 2,
-      "requiredLevel": 20,
-      "requiredNodeId": "trapper-instinct",
+      "requiredNodeId": null,
       "x": -1,
-      "y": 2,
+      "y": 4,
       "tags": [
-        "Ranged",
-        "Mark",
-        "Debuff"
+        "Left",
+        "Minor"
       ],
       "effects": [
-        "Each rank makes Aim empowerment +3% stronger.",
-        "Adds 1 Trapper branch point per rank."
+        "Essence abilities affecting your priority target refund 3% / 6% of their resource cost. 4 second internal cooldown."
       ],
-      "countsTowardFocus": true
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 2,
+      "lane": "Left",
+      "nodeType": "Minor",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "This style-tree passive while the node has ranks."
+        ],
+        "changes": [
+          "Essence abilities affecting your priority target refund 3% / 6% of their resource cost. 4 second internal cooldown."
+        ],
+        "tradeoffs": [],
+        "doesNotAffect": []
+      }
     },
     {
-      "id": "trapper-mastery",
-      "branchId": "trapper",
-      "name": "Trapper Mastery",
-      "description": "Deepens ranged status and debuff effects.",
-      "maxRank": 3,
-      "requiredLevel": 25,
-      "requiredNodeId": "trapper-technique",
-      "x": 0,
-      "y": 2,
-      "tags": [
-        "Ranged",
-        "Mark",
-        "Debuff"
-      ],
-      "effects": [
-        "Each rank gives ranged status or debuff effects +3% effect amount.",
-        "Adds 1 Trapper branch point per rank."
-      ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "marksman_trapper_nodes_trapper-mastery_additivePercentModifiers",
-          "eventType": "EffectCalculation",
-          "predicate": {
-            "statusOrDebuffOnly": true,
-            "sourceMustBePlayer": true,
-            "rangedOnly": true
-          },
-          "operation": {
-            "type": "modifyEffectAmount",
-            "additivePercent": 0,
-            "additivePercentModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 0.03,
-                "nodeId": "trapper-mastery"
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "trapper-amplifier",
-      "branchId": "trapper",
-      "name": "Trapper Amplifier",
-      "description": "Improves Aim generation.",
+      "id": "marksman_cover_use",
+      "branchId": "middle",
+      "name": "Cover Use",
+      "description": "While you have 50+ Aim, direct damage taken reduced by 3% / 6%.",
       "maxRank": 2,
-      "requiredLevel": 20,
-      "requiredNodeId": "trapper-discipline",
-      "x": 1,
-      "y": 2,
+      "requiredLevel": 10,
+      "requiredNodeId": null,
+      "x": 0,
+      "y": 4,
       "tags": [
-        "Ranged",
-        "Mark",
-        "Debuff"
+        "Middle",
+        "Minor",
+        "Damage"
       ],
       "effects": [
-        "Each rank grants +3 additional Aim when the player deals ranged damage.",
-        "Adds 1 Trapper branch point per rank."
+        "While you have 50+ Aim, direct damage taken reduced by 3% / 6%."
       ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "marksman_nodes_aim_trapper-amplifier_amountModifiers",
-          "eventType": "DamageDealt",
-          "predicate": {
-            "effectOperations": [
-              "Damage"
-            ],
-            "sourceMustBePlayer": true,
-            "rangedOnly": true
-          },
-          "operation": {
-            "type": "gainStyleResource",
-            "resourceId": "aim",
-            "amount": 0,
-            "usesProcCoefficient": true,
-            "amountModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 3,
-                "nodeId": "trapper-amplifier"
-              }
-            ]
-          }
-        }
-      ]
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 2,
+      "lane": "Middle",
+      "nodeType": "Minor",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "This style-tree passive while the node has ranks."
+        ],
+        "changes": [
+          "While you have 50+ Aim, direct damage taken reduced by 3% / 6%."
+        ],
+        "tradeoffs": [],
+        "doesNotAffect": []
+      }
     },
     {
-      "id": "trapper-focus",
-      "branchId": "trapper",
-      "name": "Trapper Focus",
-      "description": "Completes the Trapper focus.",
-      "maxRank": 1,
-      "requiredLevel": 40,
-      "requiredNodeId": "trapper-mastery",
-      "x": 0,
-      "y": 3,
+      "id": "marksman_piercing_focus",
+      "branchId": "right",
+      "name": "Piercing Focus",
+      "description": "Essence effects against priority targets ignore 3% / 6% defense and resistance.",
+      "maxRank": 2,
+      "requiredLevel": 10,
+      "requiredNodeId": null,
+      "x": 1,
+      "y": 4,
       "tags": [
-        "Ranged",
-        "Mark",
+        "Right",
+        "Minor"
+      ],
+      "effects": [
+        "Essence effects against priority targets ignore 3% / 6% defense and resistance."
+      ],
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 2,
+      "lane": "Right",
+      "nodeType": "Minor",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "This style-tree passive while the node has ranks."
+        ],
+        "changes": [
+          "Essence effects against priority targets ignore 3% / 6% defense and resistance."
+        ],
+        "tradeoffs": [],
+        "doesNotAffect": []
+      }
+    },
+    {
+      "id": "marksman_field_triage",
+      "branchId": "middle",
+      "name": "Field Triage",
+      "description": "Healing/barriers/buffs on an allied priority target gain +3% / +6% Effect Potency.",
+      "maxRank": 2,
+      "requiredLevel": 10,
+      "requiredNodeId": null,
+      "x": 0,
+      "y": 5,
+      "tags": [
+        "Middle",
+        "Minor",
+        "Heal",
+        "Barrier"
+      ],
+      "effects": [
+        "Healing/barriers/buffs on an allied priority target gain +3% / +6% Effect Potency."
+      ],
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 2,
+      "lane": "Middle",
+      "nodeType": "Minor",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "This style-tree passive while the node has ranks."
+        ],
+        "changes": [
+          "Healing/barriers/buffs on an allied priority target gain +3% / +6% Effect Potency."
+        ],
+        "tradeoffs": [],
+        "doesNotAffect": []
+      }
+    },
+    {
+      "id": "marksman_focused_volley",
+      "branchId": "left",
+      "name": "Focused Volley",
+      "description": "AoE Essence abilities deal/apply 5% / 10% more of their effect to your priority target.",
+      "maxRank": 2,
+      "requiredLevel": 25,
+      "requiredNodeId": null,
+      "x": -1,
+      "y": 7,
+      "tags": [
+        "Left",
+        "Minor"
+      ],
+      "effects": [
+        "AoE Essence abilities deal/apply 5% / 10% more of their effect to your priority target."
+      ],
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 3,
+      "lane": "Left",
+      "nodeType": "Minor",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "This style-tree passive while the node has ranks."
+        ],
+        "changes": [
+          "AoE Essence abilities deal/apply 5% / 10% more of their effect to your priority target."
+        ],
+        "tradeoffs": [],
+        "doesNotAffect": []
+      }
+    },
+    {
+      "id": "marksman_clean_line",
+      "branchId": "middle",
+      "name": "Clean Line",
+      "description": "If only one enemy is alive, Essence effects against it gain +4% / +8% Effect Potency. If only one ally is alive, healing/barrier/buff effects on that ally gain the same bonus.",
+      "maxRank": 2,
+      "requiredLevel": 25,
+      "requiredNodeId": null,
+      "x": 0,
+      "y": 7,
+      "tags": [
+        "Middle",
+        "Minor",
+        "Heal",
+        "Barrier"
+      ],
+      "effects": [
+        "If only one enemy is alive, Essence effects against it gain +4% / +8% Effect Potency. If only one ally is alive, healing/barrier/buff effects on that ally gain the same bonus."
+      ],
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 3,
+      "lane": "Middle",
+      "nodeType": "Minor",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "This style-tree passive while the node has ranks."
+        ],
+        "changes": [
+          "If only one enemy is alive, Essence effects against it gain +4% / +8% Effect Potency. If only one ally is alive, healing/barrier/buff effects on that ally gain the same bonus."
+        ],
+        "tradeoffs": [],
+        "doesNotAffect": []
+      }
+    },
+    {
+      "id": "marksman_signal_shot",
+      "branchId": "right",
+      "name": "Signal Shot",
+      "description": "When you apply Deadeye, controlled allies gain +5% / +10% Action Speed for 4 seconds. Solo fallback: you gain +2.5% / +5% Action Speed.",
+      "maxRank": 2,
+      "requiredLevel": 25,
+      "requiredNodeId": null,
+      "x": 1,
+      "y": 7,
+      "tags": [
+        "Right",
+        "Minor",
         "Debuff"
       ],
       "effects": [
-        "Ranged status or debuff effects gain +5% effect amount.",
-        "Ranged status or debuff damage grants +5 additional Aim.",
-        "Aim empowerment becomes +5% stronger.",
-        "Adds 1 Trapper branch point."
+        "When you apply Deadeye, controlled allies gain +5% / +10% Action Speed for 4 seconds. Solo fallback: you gain +2.5% / +5% Action Speed."
       ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "marksman_trapper_nodes_trapper-focus_additivePercentModifiers",
-          "eventType": "EffectCalculation",
-          "predicate": {
-            "statusOrDebuffOnly": true,
-            "sourceMustBePlayer": true,
-            "rangedOnly": true
-          },
-          "operation": {
-            "type": "modifyEffectAmount",
-            "additivePercent": 0,
-            "additivePercentModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 0.05,
-                "nodeId": "trapper-focus"
-              }
-            ]
-          }
-        },
-        {
-          "id": "marksman_nodes_aim_trapper-focus_amountModifiers",
-          "eventType": "DamageDealt",
-          "predicate": {
-            "effectOperations": [
-              "Damage"
-            ],
-            "sourceMustBePlayer": true,
-            "rangedOnly": true
-          },
-          "operation": {
-            "type": "gainStyleResource",
-            "resourceId": "aim",
-            "amount": 0,
-            "usesProcCoefficient": true,
-            "amountModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 5,
-                "nodeId": "trapper-focus"
-              }
-            ]
-          }
-        }
-      ]
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 3,
+      "lane": "Right",
+      "nodeType": "Minor",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "This style-tree passive while the node has ranks."
+        ],
+        "changes": [
+          "When you apply Deadeye, controlled allies gain +5% / +10% Action Speed for 4 seconds. Solo fallback: you gain +2.5% / +5% Action Speed."
+        ],
+        "tradeoffs": [],
+        "doesNotAffect": []
+      }
+    },
+    {
+      "id": "marksman_deadeye_reset",
+      "branchId": "middle",
+      "name": "Deadeye Reset",
+      "description": "Deadeye cooldown reduced by 2 / 4 seconds.",
+      "maxRank": 2,
+      "requiredLevel": 25,
+      "requiredNodeId": null,
+      "x": 0,
+      "y": 8,
+      "tags": [
+        "Middle",
+        "Minor"
+      ],
+      "effects": [
+        "Deadeye cooldown reduced by 2 / 4 seconds."
+      ],
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 3,
+      "lane": "Middle",
+      "nodeType": "Minor",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "This style-tree passive while the node has ranks."
+        ],
+        "changes": [
+          "Deadeye cooldown reduced by 2 / 4 seconds."
+        ],
+        "tradeoffs": [],
+        "doesNotAffect": []
+      }
     }
   ]
 }
-

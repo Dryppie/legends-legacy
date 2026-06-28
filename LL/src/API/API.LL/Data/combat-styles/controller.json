@@ -18,146 +18,52 @@
   ],
   "focuses": [
     {
-      "id": "hexer",
-      "name": "Hexer",
-      "description": "Curse and attrition: Curse/DoT effects scale at levels 10, 25, and 40.",
-      "unlockLevel": 10,
+      "id": "controller_absolute_lockdown",
+      "name": "Absolute Lockdown",
+      "description": "Lockdown's hostile effect also applies Suppression for 4 seconds: Action Speed -20% and damage dealt -15%. Against non-immune targets, Lockdown's debuff/control application cannot miss. Non-hostile Lockdown grants the ally Unstoppable: crowd control immunity for 2 seconds.",
+      "unlockLevel": 25,
       "recommendedTags": [
-        "Curse",
-        "DoT"
+        "Left",
+        "Major"
       ],
       "recommendedStats": [
         "Spirit",
-        "Cooldown"
+        "Cooldown",
+        "StatusResistance"
       ],
-      "rules": [
-        {
-          "id": "controller_hexer_effect",
-          "eventType": "EffectCalculation",
-          "minStyleLevel": 10,
-          "predicate": {
-            "sourceMustBePlayer": true,
-            "anyTags": [
-              "Curse",
-              "DoT"
-            ],
-            "statusOrDebuffOnly": true
-          },
-          "operation": {
-            "type": "modifyEffectAmount",
-            "additivePercent": 0.1,
-            "additivePercentModifiers": [
-              {
-                "type": "focusLevel",
-                "focusId": "hexer",
-                "minStyleLevel": 25,
-                "value": 0.05
-              },
-              {
-                "type": "focusLevel",
-                "focusId": "hexer",
-                "minStyleLevel": 40,
-                "value": 0.05
-              }
-            ]
-          }
-        }
-      ]
+      "rules": []
     },
     {
-      "id": "tactician",
-      "name": "Tactician",
-      "description": "Debuff setup: debuffs and tactical damage windows scale at milestones.",
-      "unlockLevel": 10,
+      "id": "controller_grand_manipulation",
+      "name": "Grand Manipulation",
+      "description": "Lockdown affects up to 3 valid targets. Primary target receives full value. Secondary targets receive 50% value. For non-hostile abilities, spreads to nearby allies instead.",
+      "unlockLevel": 25,
       "recommendedTags": [
-        "Debuff",
-        "Physical"
-      ],
-      "recommendedStats": [
-        "Precision",
-        "Cooldown"
-      ],
-      "rules": [
-        {
-          "id": "controller_tactician_effect",
-          "eventType": "EffectCalculation",
-          "minStyleLevel": 10,
-          "predicate": {
-            "sourceMustBePlayer": true,
-            "anyTags": [
-              "Debuff",
-              "Physical"
-            ],
-            "statusOrDebuffOnly": true
-          },
-          "operation": {
-            "type": "modifyEffectAmount",
-            "additivePercent": 0.08,
-            "additivePercentModifiers": [
-              {
-                "type": "focusLevel",
-                "focusId": "tactician",
-                "minStyleLevel": 25,
-                "value": 0.04
-              },
-              {
-                "type": "focusLevel",
-                "focusId": "tactician",
-                "minStyleLevel": 40,
-                "value": 0.04
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "frostbinder",
-      "name": "Frostbinder",
-      "description": "Hard control: control-tagged statuses and follow-up damage scale at milestones.",
-      "unlockLevel": 10,
-      "recommendedTags": [
-        "Control",
-        "Magic"
+        "Middle",
+        "Major"
       ],
       "recommendedStats": [
         "Spirit",
-        "CrowdControlResistance"
+        "Cooldown",
+        "StatusResistance"
       ],
-      "rules": [
-        {
-          "id": "controller_frostbinder_effect",
-          "eventType": "EffectCalculation",
-          "minStyleLevel": 10,
-          "predicate": {
-            "sourceMustBePlayer": true,
-            "anyTags": [
-              "Control",
-              "Freeze",
-              "Stun"
-            ],
-            "statusOrDebuffOnly": true
-          },
-          "operation": {
-            "type": "modifyEffectAmount",
-            "additivePercent": 0.08,
-            "additivePercentModifiers": [
-              {
-                "type": "focusLevel",
-                "focusId": "frostbinder",
-                "minStyleLevel": 25,
-                "value": 0.04
-              },
-              {
-                "type": "focusLevel",
-                "focusId": "frostbinder",
-                "minStyleLevel": 40,
-                "value": 0.04
-              }
-            ]
-          }
-        }
-      ]
+      "rules": []
+    },
+    {
+      "id": "controller_control_cascade",
+      "name": "Control Cascade",
+      "description": "When a Lockdown-empowered debuff/control effect expires or its target dies, 50% of its remaining duration or strength spreads to the nearest valid enemy. Non-hostile Lockdown effects spread 50% remaining duration to the nearest ally.",
+      "unlockLevel": 25,
+      "recommendedTags": [
+        "Right",
+        "Major"
+      ],
+      "recommendedStats": [
+        "Spirit",
+        "Cooldown",
+        "StatusResistance"
+      ],
+      "rules": []
     }
   ],
   "rules": [
@@ -207,1114 +113,1022 @@
       },
       "additivePercent": 0.2,
       "consumeOnUse": true,
-      "additivePercentModifiers": [
-        {
-          "type": "focusLevel",
-          "focusId": "hexer",
-          "minStyleLevel": 40,
-          "value": 0.08
-        },
-        {
-          "type": "nodeRank",
-          "nodeId": "hexer-specialization",
-          "value": 0.03
-        },
-        {
-          "type": "nodeRank",
-          "nodeId": "hexer-focus",
-          "value": 0.05
-        },
-        {
-          "type": "nodeRank",
-          "nodeId": "tactician-specialization",
-          "value": 0.03
-        },
-        {
-          "type": "nodeRank",
-          "nodeId": "tactician-focus",
-          "value": 0.05
-        },
-        {
-          "type": "nodeRank",
-          "nodeId": "frostbinder-specialization",
-          "value": 0.03
-        },
-        {
-          "type": "nodeRank",
-          "nodeId": "frostbinder-focus",
-          "value": 0.05
-        }
-      ]
+      "additivePercentModifiers": []
     }
   ],
   "coreMechanic": "Gain Control from active status and debuff effects. At 100 Control, empower the next control, debuff, curse, or damage-over-time effect.",
   "skillTreeNodes": [
     {
-      "id": "hexer-path",
-      "branchId": "hexer",
-      "name": "Hexer Root",
-      "description": "Opens Hexer curse control.",
+      "id": "controller_heavy_chains",
+      "branchId": "left",
+      "name": "Heavy Chains",
+      "description": "Slow, root, stun, silence, fear, and displacement durations you apply are increased by 10% in PvE. Against control-immune targets, 50% of this value becomes damage dealt reduction instead.",
+      "maxRank": 1,
+      "requiredLevel": 1,
+      "requiredNodeId": null,
+      "x": -1,
+      "y": 0,
+      "tags": [
+        "Left",
+        "Major"
+      ],
+      "effects": [
+        "Slow, root, stun, silence, fear, and displacement durations you apply are increased by 10% in PvE. Against control-immune targets, 50% of this value becomes damage dealt reduction instead."
+      ],
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 1,
+      "lane": "Left",
+      "nodeType": "Major",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "Eligible active Essence abilities."
+        ],
+        "changes": [
+          "Slow, root, stun, silence, fear, and displacement durations you apply are increased by 10% in PvE. Against control-immune targets, 50% of this value becomes damage dealt reduction instead."
+        ],
+        "tradeoffs": [
+          "Advanced cooldowns, target caps, and PvP coefficients can be tuned per node."
+        ],
+        "doesNotAffect": [
+          "Abilities that do not match the listed tags, effect operations, or conversion flags.",
+          "True damage unless the ability explicitly allows conversion."
+        ]
+      }
+    },
+    {
+      "id": "controller_expose_weakness",
+      "branchId": "middle",
+      "name": "Expose Weakness",
+      "description": "Your debuffs cause enemies to take 4% increased Effect Potency from your Essence abilities. If the target is an ally affected by your anti-control effects, your healing/barriers/buffs on them gain +4% Effect Potency.",
       "maxRank": 1,
       "requiredLevel": 1,
       "requiredNodeId": null,
       "x": 0,
       "y": 0,
       "tags": [
-        "Curse",
-        "DoT"
+        "Middle",
+        "Major"
       ],
       "effects": [
-        "Player Curse or DoT damage, status, and debuff effects gain +1% effect amount.",
-        "Does not choose Hexer as the effective focus by itself."
+        "Your debuffs cause enemies to take 4% increased Effect Potency from your Essence abilities. If the target is an ally affected by your anti-control effects, your healing/barriers/buffs on them gain +4% Effect Potency."
       ],
       "countsTowardFocus": false,
-      "rules": [
-        {
-          "id": "controller_hexer_nodes_hexer-path_additivePercentModifiers",
-          "eventType": "EffectCalculation",
-          "predicate": {
-            "statusOrDebuffOnly": true,
-            "sourceMustBePlayer": true,
-            "anyTags": [
-              "Curse",
-              "DoT"
-            ]
-          },
-          "operation": {
-            "type": "modifyEffectAmount",
-            "additivePercent": 0,
-            "additivePercentModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 0.01,
-                "nodeId": "hexer-path"
-              }
-            ]
-          }
-        }
-      ]
+      "rules": [],
+      "row": 1,
+      "lane": "Middle",
+      "nodeType": "Major",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "Eligible active Essence abilities."
+        ],
+        "changes": [
+          "Your debuffs cause enemies to take 4% increased Effect Potency from your Essence abilities. If the target is an ally affected by your anti-control effects, your healing/barriers/buffs on them gain +4% Effect Potency."
+        ],
+        "tradeoffs": [
+          "Advanced cooldowns, target caps, and PvP coefficients can be tuned per node."
+        ],
+        "doesNotAffect": [
+          "Abilities that do not match the listed tags, effect operations, or conversion flags.",
+          "True damage unless the ability explicitly allows conversion."
+        ]
+      }
     },
     {
-      "id": "hexer-instinct",
-      "branchId": "hexer",
-      "name": "Hexer Instinct",
-      "description": "Builds extra Control from curses.",
-      "maxRank": 3,
-      "requiredLevel": 5,
-      "requiredNodeId": "hexer-path",
-      "x": -1,
-      "y": 1,
-      "tags": [
-        "Curse",
-        "DoT"
-      ],
-      "effects": [
-        "Each rank grants +2 additional Control when an active Curse or DoT status/debuff effect resolves.",
-        "Adds 1 Hexer branch point per rank."
-      ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "controller_control_gain_hexer-instinct_amountModifiers",
-          "eventType": "EffectCalculation",
-          "predicate": {
-            "statusOrDebuffOnly": true,
-            "sourceMustBePlayer": true,
-            "activeAbilityOnly": true
-          },
-          "operation": {
-            "type": "gainStyleResource",
-            "resourceId": "control",
-            "amount": 0,
-            "usesProcCoefficient": true,
-            "amountModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 2,
-                "nodeId": "hexer-instinct"
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "hexer-technique",
-      "branchId": "hexer",
-      "name": "Hexer Technique",
-      "description": "Improves curse pressure.",
-      "maxRank": 3,
-      "requiredLevel": 10,
-      "requiredNodeId": "hexer-path",
-      "x": 0,
-      "y": 1,
-      "tags": [
-        "Curse",
-        "DoT"
-      ],
-      "effects": [
-        "Each rank gives player Curse or DoT damage, status, and debuff effects +2% effect amount.",
-        "Adds 1 Hexer branch point per rank."
-      ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "controller_hexer_nodes_hexer-technique_additivePercentModifiers",
-          "eventType": "EffectCalculation",
-          "predicate": {
-            "statusOrDebuffOnly": true,
-            "sourceMustBePlayer": true,
-            "anyTags": [
-              "Curse",
-              "DoT"
-            ]
-          },
-          "operation": {
-            "type": "modifyEffectAmount",
-            "additivePercent": 0,
-            "additivePercentModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 0.02,
-                "nodeId": "hexer-technique"
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "hexer-discipline",
-      "branchId": "hexer",
-      "name": "Hexer Discipline",
-      "description": "Improves disruptive effects.",
-      "maxRank": 3,
-      "requiredLevel": 5,
-      "requiredNodeId": "hexer-path",
-      "x": 1,
-      "y": 1,
-      "tags": [
-        "Curse",
-        "DoT"
-      ],
-      "effects": [
-        "Each rank gives status and debuff effects +1% effect amount.",
-        "Adds 1 Hexer branch point per rank."
-      ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "controller_hexer_discipline_hexer-discipline_additivePercentModifiers",
-          "eventType": "EffectCalculation",
-          "predicate": {
-            "statusOrDebuffOnly": true
-          },
-          "operation": {
-            "type": "modifyEffectAmount",
-            "additivePercent": 0,
-            "additivePercentModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 0.01,
-                "nodeId": "hexer-discipline"
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "hexer-specialization",
-      "branchId": "hexer",
-      "name": "Hexer Specialization",
-      "description": "Improves Control empowerment.",
-      "maxRank": 2,
-      "requiredLevel": 20,
-      "requiredNodeId": "hexer-instinct",
-      "x": -1,
-      "y": 2,
-      "tags": [
-        "Curse",
-        "DoT"
-      ],
-      "effects": [
-        "Each rank makes Control empowerment +3% stronger.",
-        "Adds 1 Hexer branch point per rank."
-      ],
-      "countsTowardFocus": true
-    },
-    {
-      "id": "hexer-mastery",
-      "branchId": "hexer",
-      "name": "Hexer Mastery",
-      "description": "Deepens curse pressure.",
-      "maxRank": 3,
-      "requiredLevel": 25,
-      "requiredNodeId": "hexer-technique",
-      "x": 0,
-      "y": 2,
-      "tags": [
-        "Curse",
-        "DoT"
-      ],
-      "effects": [
-        "Each rank gives player Curse or DoT damage, status, and debuff effects +3% effect amount.",
-        "Adds 1 Hexer branch point per rank."
-      ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "controller_hexer_nodes_hexer-mastery_additivePercentModifiers",
-          "eventType": "EffectCalculation",
-          "predicate": {
-            "statusOrDebuffOnly": true,
-            "sourceMustBePlayer": true,
-            "anyTags": [
-              "Curse",
-              "DoT"
-            ]
-          },
-          "operation": {
-            "type": "modifyEffectAmount",
-            "additivePercent": 0,
-            "additivePercentModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 0.03,
-                "nodeId": "hexer-mastery"
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "hexer-amplifier",
-      "branchId": "hexer",
-      "name": "Hexer Amplifier",
-      "description": "Improves curse Control gain.",
-      "maxRank": 2,
-      "requiredLevel": 20,
-      "requiredNodeId": "hexer-discipline",
-      "x": 1,
-      "y": 2,
-      "tags": [
-        "Curse",
-        "DoT"
-      ],
-      "effects": [
-        "Each rank grants +3 additional Control when an active Curse or DoT status/debuff effect resolves.",
-        "Adds 1 Hexer branch point per rank."
-      ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "controller_control_gain_hexer-amplifier_amountModifiers",
-          "eventType": "EffectCalculation",
-          "predicate": {
-            "statusOrDebuffOnly": true,
-            "sourceMustBePlayer": true,
-            "activeAbilityOnly": true
-          },
-          "operation": {
-            "type": "gainStyleResource",
-            "resourceId": "control",
-            "amount": 0,
-            "usesProcCoefficient": true,
-            "amountModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 3,
-                "nodeId": "hexer-amplifier"
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "hexer-focus",
-      "branchId": "hexer",
-      "name": "Hexer Focus",
-      "description": "Completes the Hexer focus.",
-      "maxRank": 1,
-      "requiredLevel": 40,
-      "requiredNodeId": "hexer-mastery",
-      "x": 0,
-      "y": 3,
-      "tags": [
-        "Curse",
-        "DoT"
-      ],
-      "effects": [
-        "Player Curse or DoT damage, status, and debuff effects gain +5% effect amount.",
-        "Active Curse or DoT status/debuff effects grant +5 additional Control.",
-        "Control empowerment becomes +5% stronger.",
-        "Adds 1 Hexer branch point."
-      ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "controller_hexer_nodes_hexer-focus_additivePercentModifiers",
-          "eventType": "EffectCalculation",
-          "predicate": {
-            "statusOrDebuffOnly": true,
-            "sourceMustBePlayer": true,
-            "anyTags": [
-              "Curse",
-              "DoT"
-            ]
-          },
-          "operation": {
-            "type": "modifyEffectAmount",
-            "additivePercent": 0,
-            "additivePercentModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 0.05,
-                "nodeId": "hexer-focus"
-              }
-            ]
-          }
-        },
-        {
-          "id": "controller_control_gain_hexer-focus_amountModifiers",
-          "eventType": "EffectCalculation",
-          "predicate": {
-            "statusOrDebuffOnly": true,
-            "sourceMustBePlayer": true,
-            "activeAbilityOnly": true
-          },
-          "operation": {
-            "type": "gainStyleResource",
-            "resourceId": "control",
-            "amount": 0,
-            "usesProcCoefficient": true,
-            "amountModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 5,
-                "nodeId": "hexer-focus"
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "tactician-path",
-      "branchId": "tactician",
-      "name": "Tactician Root",
-      "description": "Opens Tactician battlefield setup.",
+      "id": "controller_disruptive_rhythm",
+      "branchId": "right",
+      "name": "Disruptive Rhythm",
+      "description": "Applying a debuff/control effect reduces the target's Action Speed by 5% for 4 seconds. Against control-immune targets, reduce damage dealt by 3% instead.",
       "maxRank": 1,
       "requiredLevel": 1,
       "requiredNodeId": null,
-      "x": 0,
+      "x": 1,
       "y": 0,
       "tags": [
-        "Debuff",
-        "Physical"
+        "Right",
+        "Major"
       ],
       "effects": [
-        "Player Debuff or Physical damage, status, and debuff effects gain +1% effect amount.",
-        "Does not choose Tactician as the effective focus by itself."
+        "Applying a debuff/control effect reduces the target's Action Speed by 5% for 4 seconds. Against control-immune targets, reduce damage dealt by 3% instead."
       ],
       "countsTowardFocus": false,
-      "rules": [
-        {
-          "id": "controller_tactician_nodes_tactician-path_additivePercentModifiers",
-          "eventType": "EffectCalculation",
-          "predicate": {
-            "statusOrDebuffOnly": true,
-            "sourceMustBePlayer": true,
-            "anyTags": [
-              "Debuff",
-              "Physical"
-            ]
-          },
-          "operation": {
-            "type": "modifyEffectAmount",
-            "additivePercent": 0,
-            "additivePercentModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 0.01,
-                "nodeId": "tactician-path"
-              }
-            ]
-          }
-        }
-      ]
+      "rules": [],
+      "row": 1,
+      "lane": "Right",
+      "nodeType": "Major",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "Eligible active Essence abilities."
+        ],
+        "changes": [
+          "Applying a debuff/control effect reduces the target's Action Speed by 5% for 4 seconds. Against control-immune targets, reduce damage dealt by 3% instead."
+        ],
+        "tradeoffs": [
+          "Advanced cooldowns, target caps, and PvP coefficients can be tuned per node."
+        ],
+        "doesNotAffect": [
+          "Abilities that do not match the listed tags, effect operations, or conversion flags.",
+          "True damage unless the ability explicitly allows conversion."
+        ]
+      }
     },
     {
-      "id": "tactician-instinct",
-      "branchId": "tactician",
-      "name": "Tactician Instinct",
-      "description": "Builds extra Control from tactical effects.",
-      "maxRank": 3,
-      "requiredLevel": 5,
-      "requiredNodeId": "tactician-path",
-      "x": -1,
-      "y": 1,
-      "tags": [
-        "Debuff",
-        "Physical"
-      ],
-      "effects": [
-        "Each rank grants +2 additional Control when an active Debuff or Physical status/debuff effect resolves.",
-        "Adds 1 Tactician branch point per rank."
-      ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "controller_control_gain_tactician-instinct_amountModifiers",
-          "eventType": "EffectCalculation",
-          "predicate": {
-            "statusOrDebuffOnly": true,
-            "sourceMustBePlayer": true,
-            "activeAbilityOnly": true
-          },
-          "operation": {
-            "type": "gainStyleResource",
-            "resourceId": "control",
-            "amount": 0,
-            "usesProcCoefficient": true,
-            "amountModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 2,
-                "nodeId": "tactician-instinct"
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "tactician-technique",
-      "branchId": "tactician",
-      "name": "Tactician Technique",
-      "description": "Improves tactical pressure.",
-      "maxRank": 3,
-      "requiredLevel": 10,
-      "requiredNodeId": "tactician-path",
-      "x": 0,
-      "y": 1,
-      "tags": [
-        "Debuff",
-        "Physical"
-      ],
-      "effects": [
-        "Each rank gives player Debuff or Physical damage, status, and debuff effects +2% effect amount.",
-        "Adds 1 Tactician branch point per rank."
-      ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "controller_tactician_nodes_tactician-technique_additivePercentModifiers",
-          "eventType": "EffectCalculation",
-          "predicate": {
-            "statusOrDebuffOnly": true,
-            "sourceMustBePlayer": true,
-            "anyTags": [
-              "Debuff",
-              "Physical"
-            ]
-          },
-          "operation": {
-            "type": "modifyEffectAmount",
-            "additivePercent": 0,
-            "additivePercentModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 0.02,
-                "nodeId": "tactician-technique"
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "tactician-discipline",
-      "branchId": "tactician",
-      "name": "Tactician Discipline",
-      "description": "Improves tactical defense.",
-      "maxRank": 3,
-      "requiredLevel": 5,
-      "requiredNodeId": "tactician-path",
-      "x": 1,
-      "y": 1,
-      "tags": [
-        "Debuff",
-        "Physical"
-      ],
-      "effects": [
-        "Each rank reduces incoming player damage by 1%.",
-        "Adds 1 Tactician branch point per rank."
-      ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "controller_tactician_reduction_tactician-discipline_percentModifiers",
-          "eventType": "EffectCalculation",
-          "predicate": {
-            "effectOperations": [
-              "Damage"
-            ],
-            "targetMustBePlayer": true
-          },
-          "operation": {
-            "type": "addDamageReduction",
-            "percent": 0,
-            "percentModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 0.01,
-                "nodeId": "tactician-discipline"
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "tactician-specialization",
-      "branchId": "tactician",
-      "name": "Tactician Specialization",
-      "description": "Improves Control empowerment.",
-      "maxRank": 2,
-      "requiredLevel": 20,
-      "requiredNodeId": "tactician-instinct",
-      "x": -1,
-      "y": 2,
-      "tags": [
-        "Debuff",
-        "Physical"
-      ],
-      "effects": [
-        "Each rank makes Control empowerment +3% stronger.",
-        "Adds 1 Tactician branch point per rank."
-      ],
-      "countsTowardFocus": true
-    },
-    {
-      "id": "tactician-mastery",
-      "branchId": "tactician",
-      "name": "Tactician Mastery",
-      "description": "Deepens tactical pressure.",
-      "maxRank": 3,
-      "requiredLevel": 25,
-      "requiredNodeId": "tactician-technique",
-      "x": 0,
-      "y": 2,
-      "tags": [
-        "Debuff",
-        "Physical"
-      ],
-      "effects": [
-        "Each rank gives player Debuff or Physical damage, status, and debuff effects +3% effect amount.",
-        "Adds 1 Tactician branch point per rank."
-      ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "controller_tactician_nodes_tactician-mastery_additivePercentModifiers",
-          "eventType": "EffectCalculation",
-          "predicate": {
-            "statusOrDebuffOnly": true,
-            "sourceMustBePlayer": true,
-            "anyTags": [
-              "Debuff",
-              "Physical"
-            ]
-          },
-          "operation": {
-            "type": "modifyEffectAmount",
-            "additivePercent": 0,
-            "additivePercentModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 0.03,
-                "nodeId": "tactician-mastery"
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "tactician-amplifier",
-      "branchId": "tactician",
-      "name": "Tactician Amplifier",
-      "description": "Improves tactical Control gain.",
-      "maxRank": 2,
-      "requiredLevel": 20,
-      "requiredNodeId": "tactician-discipline",
-      "x": 1,
-      "y": 2,
-      "tags": [
-        "Debuff",
-        "Physical"
-      ],
-      "effects": [
-        "Each rank grants +3 additional Control when an active Debuff or Physical status/debuff effect resolves.",
-        "Adds 1 Tactician branch point per rank."
-      ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "controller_control_gain_tactician-amplifier_amountModifiers",
-          "eventType": "EffectCalculation",
-          "predicate": {
-            "statusOrDebuffOnly": true,
-            "sourceMustBePlayer": true,
-            "activeAbilityOnly": true
-          },
-          "operation": {
-            "type": "gainStyleResource",
-            "resourceId": "control",
-            "amount": 0,
-            "usesProcCoefficient": true,
-            "amountModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 3,
-                "nodeId": "tactician-amplifier"
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "tactician-focus",
-      "branchId": "tactician",
-      "name": "Tactician Focus",
-      "description": "Completes the Tactician focus.",
+      "id": "controller_suppressive_damage",
+      "branchId": "left",
+      "name": "Suppressive Damage",
+      "description": "Mutator Group: ControlConversion. Direct hostile Essence abilities apply Suppressed for 4 seconds. Suppressed enemies deal 4% less damage and have 4% reduced Action Speed. If the ability already applies debuff/control, the Suppressed values are increased by 50%. 6 second internal cooldown per target.",
       "maxRank": 1,
-      "requiredLevel": 40,
-      "requiredNodeId": "tactician-mastery",
+      "requiredLevel": 10,
+      "requiredNodeId": null,
+      "x": -1,
+      "y": 3,
+      "tags": [
+        "ControlConversion",
+        "Left",
+        "Major"
+      ],
+      "effects": [
+        "Mutator Group: ControlConversion. Direct hostile Essence abilities apply Suppressed for 4 seconds. Suppressed enemies deal 4% less damage and have 4% reduced Action Speed. If the ability already applies debuff/control, the Suppressed values are increased by 50%. 6 second internal cooldown per target."
+      ],
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 2,
+      "lane": "Left",
+      "nodeType": "Major",
+      "mutatorKind": "Converter",
+      "mutatorGroups": [
+        "ControlConversion"
+      ],
+      "mutator": {
+        "kind": "Converter",
+        "groups": [
+          "ControlConversion"
+        ],
+        "conditions": {
+          "requiredAbilityTags": [],
+          "anyAbilityTags": [],
+          "requiredDeliveryTags": [],
+          "anyDeliveryTags": [],
+          "requiredEffectTags": [],
+          "anyEffectTags": [
+            "Damage",
+            "Debuff"
+          ],
+          "effectOperations": [
+            "Damage",
+            "ApplyStatus"
+          ],
+          "allowedDamageTypes": [],
+          "targetSelectors": [],
+          "activeAbilityOnly": true,
+          "passiveAbilityOnly": false,
+          "allowDamageTypeConversionRequired": null,
+          "allowScalingConversionRequired": null,
+          "allowDeliveryConversionRequired": null,
+          "allowTargetingConversionRequired": null,
+          "allowSummonProxyRequired": null,
+          "allowEquipmentOverrideRequired": null,
+          "excludeTrueDamage": true,
+          "excludeHardCrowdControl": true
+        },
+        "transform": {
+          "damageType": null,
+          "targetingType": null,
+          "scalingAttribute": null,
+          "scalingCoefficientOverride": null,
+          "scalingCoefficientMultiplier": null,
+          "effectPotencyMultiplier": 1.05,
+          "cooldownMultiplier": null,
+          "resourceCostMultiplier": null,
+          "addAbilityTags": [],
+          "addDeliveryTags": [],
+          "addEffectTags": [
+            "Damage",
+            "Debuff",
+            "Control"
+          ],
+          "addEffectTagsToMatchingEffects": [
+            "Damage",
+            "Debuff",
+            "Control"
+          ]
+        },
+        "tradeoff": {
+          "effectPotencyMultiplier": null,
+          "cooldownMultiplier": 1.03,
+          "resourceCostMultiplier": 1.05,
+          "procCoefficientMultiplier": null
+        },
+        "pvpCoefficient": 0.7
+      },
+      "tooltip": {
+        "affects": [
+          "Eligible active Essence abilities matching ControlConversion."
+        ],
+        "changes": [
+          "Mutator Group: ControlConversion. Direct hostile Essence abilities apply Suppressed for 4 seconds. Suppressed enemies deal 4% less damage and have 4% reduced Action Speed. If the ability already applies debuff/control, the Suppressed values are increased by 50%. 6 second internal cooldown per target."
+        ],
+        "tradeoffs": [
+          "Conversion uses a +5% resource cost safety tradeoff and PvP coefficient until explicit balance values are authored."
+        ],
+        "doesNotAffect": [
+          "Abilities that do not match the listed tags, effect operations, or conversion flags.",
+          "True damage unless the ability explicitly allows conversion."
+        ]
+      }
+    },
+    {
+      "id": "controller_boss_conversion",
+      "branchId": "middle",
+      "name": "Boss Conversion",
+      "description": "Mutator Group: ControlConversion. When an enemy resists or is immune to your debuff/control, 40% of the lost control duration or effect value becomes Weakened duration instead. Weakened reduces damage dealt by 5%. Also gain +10 Dominance and your next Essence ability against that enemy gains +6% Effect Potency. 8 second internal cooldown per enemy.",
+      "maxRank": 1,
+      "requiredLevel": 10,
+      "requiredNodeId": null,
       "x": 0,
       "y": 3,
       "tags": [
-        "Debuff",
-        "Physical"
+        "ControlConversion",
+        "Middle",
+        "Major"
       ],
       "effects": [
-        "Player Debuff or Physical damage, status, and debuff effects gain +5% effect amount.",
-        "Active Debuff or Physical status/debuff effects grant +5 additional Control.",
-        "Control empowerment becomes +5% stronger.",
-        "Adds 1 Tactician branch point."
+        "Mutator Group: ControlConversion. When an enemy resists or is immune to your debuff/control, 40% of the lost control duration or effect value becomes Weakened duration instead. Weakened reduces damage dealt by 5%. Also gain +10 Dominance and your next Essence ability against that enemy gains +6% Effect Potency. 8 second internal cooldown per enemy."
       ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "controller_tactician_nodes_tactician-focus_additivePercentModifiers",
-          "eventType": "EffectCalculation",
-          "predicate": {
-            "statusOrDebuffOnly": true,
-            "sourceMustBePlayer": true,
-            "anyTags": [
-              "Debuff",
-              "Physical"
-            ]
-          },
-          "operation": {
-            "type": "modifyEffectAmount",
-            "additivePercent": 0,
-            "additivePercentModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 0.05,
-                "nodeId": "tactician-focus"
-              }
-            ]
-          }
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 2,
+      "lane": "Middle",
+      "nodeType": "Major",
+      "mutatorKind": "Converter",
+      "mutatorGroups": [
+        "ControlConversion"
+      ],
+      "mutator": {
+        "kind": "Converter",
+        "groups": [
+          "ControlConversion"
+        ],
+        "conditions": {
+          "requiredAbilityTags": [],
+          "anyAbilityTags": [],
+          "requiredDeliveryTags": [],
+          "anyDeliveryTags": [],
+          "requiredEffectTags": [],
+          "anyEffectTags": [
+            "Damage",
+            "Debuff"
+          ],
+          "effectOperations": [
+            "Damage",
+            "ApplyStatus"
+          ],
+          "allowedDamageTypes": [],
+          "targetSelectors": [],
+          "activeAbilityOnly": true,
+          "passiveAbilityOnly": false,
+          "allowDamageTypeConversionRequired": null,
+          "allowScalingConversionRequired": null,
+          "allowDeliveryConversionRequired": null,
+          "allowTargetingConversionRequired": null,
+          "allowSummonProxyRequired": null,
+          "allowEquipmentOverrideRequired": null,
+          "excludeTrueDamage": true,
+          "excludeHardCrowdControl": true
         },
-        {
-          "id": "controller_control_gain_tactician-focus_amountModifiers",
-          "eventType": "EffectCalculation",
-          "predicate": {
-            "statusOrDebuffOnly": true,
-            "sourceMustBePlayer": true,
-            "activeAbilityOnly": true
-          },
-          "operation": {
-            "type": "gainStyleResource",
-            "resourceId": "control",
-            "amount": 0,
-            "usesProcCoefficient": true,
-            "amountModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 5,
-                "nodeId": "tactician-focus"
-              }
-            ]
-          }
-        }
-      ]
+        "transform": {
+          "damageType": null,
+          "targetingType": null,
+          "scalingAttribute": null,
+          "scalingCoefficientOverride": null,
+          "scalingCoefficientMultiplier": null,
+          "effectPotencyMultiplier": 1.06,
+          "cooldownMultiplier": null,
+          "resourceCostMultiplier": null,
+          "addAbilityTags": [],
+          "addDeliveryTags": [],
+          "addEffectTags": [
+            "Damage",
+            "Debuff",
+            "Control"
+          ],
+          "addEffectTagsToMatchingEffects": [
+            "Damage",
+            "Debuff",
+            "Control"
+          ]
+        },
+        "tradeoff": {
+          "effectPotencyMultiplier": 0.95,
+          "cooldownMultiplier": 1.03,
+          "resourceCostMultiplier": 1.05,
+          "procCoefficientMultiplier": null
+        },
+        "pvpCoefficient": 0.7
+      },
+      "tooltip": {
+        "affects": [
+          "Eligible active Essence abilities matching ControlConversion."
+        ],
+        "changes": [
+          "Mutator Group: ControlConversion. When an enemy resists or is immune to your debuff/control, 40% of the lost control duration or effect value becomes Weakened duration instead. Weakened reduces damage dealt by 5%. Also gain +10 Dominance and your next Essence ability against that enemy gains +6% Effect Potency. 8 second internal cooldown per enemy."
+        ],
+        "tradeoffs": [
+          "Conversion uses a +5% resource cost safety tradeoff and PvP coefficient until explicit balance values are authored."
+        ],
+        "doesNotAffect": [
+          "Abilities that do not match the listed tags, effect operations, or conversion flags.",
+          "True damage unless the ability explicitly allows conversion."
+        ]
+      }
     },
     {
-      "id": "frostbinder-path",
-      "branchId": "frostbinder",
-      "name": "Frostbinder Root",
-      "description": "Opens Frostbinder lockdown.",
+      "id": "controller_dominated_minions",
+      "branchId": "right",
+      "name": "Dominated Minions",
+      "description": "Mutator Group: SummonConversion + ControlConversion. Controlled allies apply a minor version of your most recent debuff to their target at 25% strength or duration. 5 second internal cooldown per ally. If no controlled ally exists, your DamageOverTime and Persistent Essence effects deal/apply +3% Effect Potency against debuffed enemies.",
       "maxRank": 1,
+      "requiredLevel": 10,
+      "requiredNodeId": null,
+      "x": 1,
+      "y": 3,
+      "tags": [
+        "SummonConversion",
+        "ControlConversion",
+        "Right",
+        "Major"
+      ],
+      "effects": [
+        "Mutator Group: SummonConversion + ControlConversion. Controlled allies apply a minor version of your most recent debuff to their target at 25% strength or duration. 5 second internal cooldown per ally. If no controlled ally exists, your DamageOverTime and Persistent Essence effects deal/apply +3% Effect Potency against debuffed enemies."
+      ],
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 2,
+      "lane": "Right",
+      "nodeType": "Major",
+      "mutatorKind": "Converter",
+      "mutatorGroups": [
+        "SummonConversion",
+        "ControlConversion"
+      ],
+      "mutator": {
+        "kind": "Converter",
+        "groups": [
+          "SummonConversion",
+          "ControlConversion"
+        ],
+        "conditions": {
+          "requiredAbilityTags": [],
+          "anyAbilityTags": [],
+          "requiredDeliveryTags": [],
+          "anyDeliveryTags": [],
+          "requiredEffectTags": [],
+          "anyEffectTags": [
+            "Damage",
+            "Summon",
+            "Debuff"
+          ],
+          "effectOperations": [
+            "Damage",
+            "Summon",
+            "ApplyStatus"
+          ],
+          "allowedDamageTypes": [],
+          "targetSelectors": [],
+          "activeAbilityOnly": true,
+          "passiveAbilityOnly": false,
+          "allowDamageTypeConversionRequired": null,
+          "allowScalingConversionRequired": null,
+          "allowDeliveryConversionRequired": null,
+          "allowTargetingConversionRequired": null,
+          "allowSummonProxyRequired": null,
+          "allowEquipmentOverrideRequired": null,
+          "excludeTrueDamage": true,
+          "excludeHardCrowdControl": true
+        },
+        "transform": {
+          "damageType": null,
+          "targetingType": null,
+          "scalingAttribute": null,
+          "scalingCoefficientOverride": null,
+          "scalingCoefficientMultiplier": null,
+          "effectPotencyMultiplier": 1.03,
+          "cooldownMultiplier": null,
+          "resourceCostMultiplier": null,
+          "addAbilityTags": [],
+          "addDeliveryTags": [],
+          "addEffectTags": [
+            "Damage",
+            "Summon",
+            "Debuff",
+            "Control"
+          ],
+          "addEffectTagsToMatchingEffects": [
+            "Damage",
+            "Summon",
+            "Debuff",
+            "Control"
+          ]
+        },
+        "tradeoff": {
+          "effectPotencyMultiplier": null,
+          "cooldownMultiplier": 1.03,
+          "resourceCostMultiplier": 1.05,
+          "procCoefficientMultiplier": null
+        },
+        "pvpCoefficient": 0.7
+      },
+      "tooltip": {
+        "affects": [
+          "Eligible active Essence abilities matching SummonConversion, ControlConversion."
+        ],
+        "changes": [
+          "Mutator Group: SummonConversion + ControlConversion. Controlled allies apply a minor version of your most recent debuff to their target at 25% strength or duration. 5 second internal cooldown per ally. If no controlled ally exists, your DamageOverTime and Persistent Essence effects deal/apply +3% Effect Potency against debuffed enemies."
+        ],
+        "tradeoffs": [
+          "Conversion uses a +5% resource cost safety tradeoff and PvP coefficient until explicit balance values are authored."
+        ],
+        "doesNotAffect": [
+          "Abilities that do not match the listed tags, effect operations, or conversion flags.",
+          "True damage unless the ability explicitly allows conversion."
+        ]
+      }
+    },
+    {
+      "id": "controller_absolute_lockdown",
+      "branchId": "left",
+      "name": "Absolute Lockdown",
+      "description": "Lockdown's hostile effect also applies Suppression for 4 seconds: Action Speed -20% and damage dealt -15%. Against non-immune targets, Lockdown's debuff/control application cannot miss. Non-hostile Lockdown grants the ally Unstoppable: crowd control immunity for 2 seconds.",
+      "maxRank": 1,
+      "requiredLevel": 25,
+      "requiredNodeId": null,
+      "x": -1,
+      "y": 6,
+      "tags": [
+        "Left",
+        "Major"
+      ],
+      "effects": [
+        "Lockdown's hostile effect also applies Suppression for 4 seconds: Action Speed -20% and damage dealt -15%. Against non-immune targets, Lockdown's debuff/control application cannot miss. Non-hostile Lockdown grants the ally Unstoppable: crowd control immunity for 2 seconds."
+      ],
+      "countsTowardFocus": true,
+      "rules": [],
+      "row": 3,
+      "lane": "Left",
+      "nodeType": "Major",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "Eligible active Essence abilities."
+        ],
+        "changes": [
+          "Lockdown's hostile effect also applies Suppression for 4 seconds: Action Speed -20% and damage dealt -15%. Against non-immune targets, Lockdown's debuff/control application cannot miss. Non-hostile Lockdown grants the ally Unstoppable: crowd control immunity for 2 seconds."
+        ],
+        "tradeoffs": [
+          "Advanced cooldowns, target caps, and PvP coefficients can be tuned per node."
+        ],
+        "doesNotAffect": [
+          "Abilities that do not match the listed tags, effect operations, or conversion flags.",
+          "True damage unless the ability explicitly allows conversion."
+        ]
+      }
+    },
+    {
+      "id": "controller_grand_manipulation",
+      "branchId": "middle",
+      "name": "Grand Manipulation",
+      "description": "Lockdown affects up to 3 valid targets. Primary target receives full value. Secondary targets receive 50% value. For non-hostile abilities, spreads to nearby allies instead.",
+      "maxRank": 1,
+      "requiredLevel": 25,
+      "requiredNodeId": null,
+      "x": 0,
+      "y": 6,
+      "tags": [
+        "Middle",
+        "Major"
+      ],
+      "effects": [
+        "Lockdown affects up to 3 valid targets. Primary target receives full value. Secondary targets receive 50% value. For non-hostile abilities, spreads to nearby allies instead."
+      ],
+      "countsTowardFocus": true,
+      "rules": [],
+      "row": 3,
+      "lane": "Middle",
+      "nodeType": "Major",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "Eligible active Essence abilities."
+        ],
+        "changes": [
+          "Lockdown affects up to 3 valid targets. Primary target receives full value. Secondary targets receive 50% value. For non-hostile abilities, spreads to nearby allies instead."
+        ],
+        "tradeoffs": [
+          "Advanced cooldowns, target caps, and PvP coefficients can be tuned per node."
+        ],
+        "doesNotAffect": [
+          "Abilities that do not match the listed tags, effect operations, or conversion flags.",
+          "True damage unless the ability explicitly allows conversion."
+        ]
+      }
+    },
+    {
+      "id": "controller_control_cascade",
+      "branchId": "right",
+      "name": "Control Cascade",
+      "description": "When a Lockdown-empowered debuff/control effect expires or its target dies, 50% of its remaining duration or strength spreads to the nearest valid enemy. Non-hostile Lockdown effects spread 50% remaining duration to the nearest ally.",
+      "maxRank": 1,
+      "requiredLevel": 25,
+      "requiredNodeId": null,
+      "x": 1,
+      "y": 6,
+      "tags": [
+        "Right",
+        "Major"
+      ],
+      "effects": [
+        "When a Lockdown-empowered debuff/control effect expires or its target dies, 50% of its remaining duration or strength spreads to the nearest valid enemy. Non-hostile Lockdown effects spread 50% remaining duration to the nearest ally."
+      ],
+      "countsTowardFocus": true,
+      "rules": [],
+      "row": 3,
+      "lane": "Right",
+      "nodeType": "Major",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "Eligible active Essence abilities."
+        ],
+        "changes": [
+          "When a Lockdown-empowered debuff/control effect expires or its target dies, 50% of its remaining duration or strength spreads to the nearest valid enemy. Non-hostile Lockdown effects spread 50% remaining duration to the nearest ally."
+        ],
+        "tradeoffs": [
+          "Advanced cooldowns, target caps, and PvP coefficients can be tuned per node."
+        ],
+        "doesNotAffect": [
+          "Abilities that do not match the listed tags, effect operations, or conversion flags.",
+          "True damage unless the ability explicitly allows conversion."
+        ]
+      }
+    },
+    {
+      "id": "controller_dominance_capacity",
+      "branchId": "left",
+      "name": "Dominance Capacity",
+      "description": "Max Dominance +10 / +20.",
+      "maxRank": 2,
+      "requiredLevel": 1,
+      "requiredNodeId": null,
+      "x": -1,
+      "y": 1,
+      "tags": [
+        "Left",
+        "Minor"
+      ],
+      "effects": [
+        "Max Dominance +10 / +20."
+      ],
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 1,
+      "lane": "Left",
+      "nodeType": "Minor",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "This style-tree passive while the node has ranks."
+        ],
+        "changes": [
+          "Max Dominance +10 / +20."
+        ],
+        "tradeoffs": [],
+        "doesNotAffect": []
+      }
+    },
+    {
+      "id": "controller_lingering_effects",
+      "branchId": "middle",
+      "name": "Lingering Effects",
+      "description": "Debuff, slow, and control durations +4% / +8%.",
+      "maxRank": 2,
       "requiredLevel": 1,
       "requiredNodeId": null,
       "x": 0,
-      "y": 0,
+      "y": 1,
       "tags": [
-        "Control",
-        "Magic"
+        "Middle",
+        "Minor",
+        "Debuff"
       ],
       "effects": [
-        "Player Control, Freeze, or Stun damage, status, and debuff effects gain +1% effect amount.",
-        "Does not choose Frostbinder as the effective focus by itself."
+        "Debuff, slow, and control durations +4% / +8%."
       ],
       "countsTowardFocus": false,
-      "rules": [
-        {
-          "id": "controller_frostbinder_nodes_frostbinder-path_additivePercentModifiers",
-          "eventType": "EffectCalculation",
-          "predicate": {
-            "statusOrDebuffOnly": true,
-            "sourceMustBePlayer": true,
-            "anyTags": [
-              "Control",
-              "Freeze",
-              "Stun"
-            ]
-          },
-          "operation": {
-            "type": "modifyEffectAmount",
-            "additivePercent": 0,
-            "additivePercentModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 0.01,
-                "nodeId": "frostbinder-path"
-              }
-            ]
-          }
-        }
-      ]
+      "rules": [],
+      "row": 1,
+      "lane": "Middle",
+      "nodeType": "Minor",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "This style-tree passive while the node has ranks."
+        ],
+        "changes": [
+          "Debuff, slow, and control durations +4% / +8%."
+        ],
+        "tradeoffs": [],
+        "doesNotAffect": []
+      }
     },
     {
-      "id": "frostbinder-instinct",
-      "branchId": "frostbinder",
-      "name": "Frostbinder Instinct",
-      "description": "Builds extra Control from lockdown effects.",
-      "maxRank": 3,
-      "requiredLevel": 5,
-      "requiredNodeId": "frostbinder-path",
-      "x": -1,
+      "id": "controller_application_training",
+      "branchId": "right",
+      "name": "Application Training",
+      "description": "Debuff/control application chance +3% / +6%. If the ability cannot apply debuff/control, gain +2% / +4% Effect Potency against debuffed enemies.",
+      "maxRank": 2,
+      "requiredLevel": 1,
+      "requiredNodeId": null,
+      "x": 1,
       "y": 1,
       "tags": [
-        "Control",
-        "Magic"
+        "Right",
+        "Minor",
+        "Debuff"
       ],
       "effects": [
-        "Each rank grants +2 additional Control when an active Control, Freeze, or Stun status/debuff effect resolves.",
-        "Adds 1 Frostbinder branch point per rank."
+        "Debuff/control application chance +3% / +6%. If the ability cannot apply debuff/control, gain +2% / +4% Effect Potency against debuffed enemies."
       ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "controller_control_gain_frostbinder-instinct_amountModifiers",
-          "eventType": "EffectCalculation",
-          "predicate": {
-            "statusOrDebuffOnly": true,
-            "sourceMustBePlayer": true,
-            "activeAbilityOnly": true
-          },
-          "operation": {
-            "type": "gainStyleResource",
-            "resourceId": "control",
-            "amount": 0,
-            "usesProcCoefficient": true,
-            "amountModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 2,
-                "nodeId": "frostbinder-instinct"
-              }
-            ]
-          }
-        }
-      ]
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 1,
+      "lane": "Right",
+      "nodeType": "Minor",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "This style-tree passive while the node has ranks."
+        ],
+        "changes": [
+          "Debuff/control application chance +3% / +6%. If the ability cannot apply debuff/control, gain +2% / +4% Effect Potency against debuffed enemies."
+        ],
+        "tradeoffs": [],
+        "doesNotAffect": []
+      }
     },
     {
-      "id": "frostbinder-technique",
-      "branchId": "frostbinder",
-      "name": "Frostbinder Technique",
-      "description": "Improves lockdown pressure.",
-      "maxRank": 3,
+      "id": "controller_cleanse_resistance",
+      "branchId": "middle",
+      "name": "Cleanse Resistance",
+      "description": "Your debuffs are 10% / 20% harder to cleanse or reduce. Against bosses, your debuffs lose 5% / 10% less duration from boss resistance rules.",
+      "maxRank": 2,
+      "requiredLevel": 1,
+      "requiredNodeId": null,
+      "x": 0,
+      "y": 2,
+      "tags": [
+        "Middle",
+        "Minor",
+        "Debuff"
+      ],
+      "effects": [
+        "Your debuffs are 10% / 20% harder to cleanse or reduce. Against bosses, your debuffs lose 5% / 10% less duration from boss resistance rules."
+      ],
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 1,
+      "lane": "Middle",
+      "nodeType": "Minor",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "This style-tree passive while the node has ranks."
+        ],
+        "changes": [
+          "Your debuffs are 10% / 20% harder to cleanse or reduce. Against bosses, your debuffs lose 5% / 10% less duration from boss resistance rules."
+        ],
+        "tradeoffs": [],
+        "doesNotAffect": []
+      }
+    },
+    {
+      "id": "controller_weakening_touch",
+      "branchId": "left",
+      "name": "Weakening Touch",
+      "description": "Debuffed enemies deal 2% / 4% less damage to you.",
+      "maxRank": 2,
       "requiredLevel": 10,
-      "requiredNodeId": "frostbinder-path",
-      "x": 0,
-      "y": 1,
-      "tags": [
-        "Control",
-        "Magic"
-      ],
-      "effects": [
-        "Each rank gives player Control, Freeze, or Stun damage, status, and debuff effects +2% effect amount.",
-        "Adds 1 Frostbinder branch point per rank."
-      ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "controller_frostbinder_nodes_frostbinder-technique_additivePercentModifiers",
-          "eventType": "EffectCalculation",
-          "predicate": {
-            "statusOrDebuffOnly": true,
-            "sourceMustBePlayer": true,
-            "anyTags": [
-              "Control",
-              "Freeze",
-              "Stun"
-            ]
-          },
-          "operation": {
-            "type": "modifyEffectAmount",
-            "additivePercent": 0,
-            "additivePercentModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 0.02,
-                "nodeId": "frostbinder-technique"
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "frostbinder-discipline",
-      "branchId": "frostbinder",
-      "name": "Frostbinder Discipline",
-      "description": "Improves frozen defense.",
-      "maxRank": 3,
-      "requiredLevel": 5,
-      "requiredNodeId": "frostbinder-path",
-      "x": 1,
-      "y": 1,
-      "tags": [
-        "Control",
-        "Magic"
-      ],
-      "effects": [
-        "Each rank reduces incoming player damage by 1%.",
-        "Adds 1 Frostbinder branch point per rank."
-      ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "controller_frostbinder_reduction_frostbinder-discipline_percentModifiers",
-          "eventType": "EffectCalculation",
-          "predicate": {
-            "effectOperations": [
-              "Damage"
-            ],
-            "targetMustBePlayer": true
-          },
-          "operation": {
-            "type": "addDamageReduction",
-            "percent": 0,
-            "percentModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 0.01,
-                "nodeId": "frostbinder-discipline"
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "frostbinder-specialization",
-      "branchId": "frostbinder",
-      "name": "Frostbinder Specialization",
-      "description": "Improves Control empowerment.",
-      "maxRank": 2,
-      "requiredLevel": 20,
-      "requiredNodeId": "frostbinder-instinct",
+      "requiredNodeId": null,
       "x": -1,
-      "y": 2,
+      "y": 4,
       "tags": [
-        "Control",
-        "Magic"
+        "Left",
+        "Minor",
+        "Damage",
+        "Debuff"
       ],
       "effects": [
-        "Each rank makes Control empowerment +3% stronger.",
-        "Adds 1 Frostbinder branch point per rank."
+        "Debuffed enemies deal 2% / 4% less damage to you."
       ],
-      "countsTowardFocus": true
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 2,
+      "lane": "Left",
+      "nodeType": "Minor",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "This style-tree passive while the node has ranks."
+        ],
+        "changes": [
+          "Debuffed enemies deal 2% / 4% less damage to you."
+        ],
+        "tradeoffs": [],
+        "doesNotAffect": []
+      }
     },
     {
-      "id": "frostbinder-mastery",
-      "branchId": "frostbinder",
-      "name": "Frostbinder Mastery",
-      "description": "Deepens lockdown pressure.",
-      "maxRank": 3,
-      "requiredLevel": 25,
-      "requiredNodeId": "frostbinder-technique",
-      "x": 0,
-      "y": 2,
-      "tags": [
-        "Control",
-        "Magic"
-      ],
-      "effects": [
-        "Each rank gives player Control, Freeze, or Stun damage, status, and debuff effects +3% effect amount.",
-        "Adds 1 Frostbinder branch point per rank."
-      ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "controller_frostbinder_nodes_frostbinder-mastery_additivePercentModifiers",
-          "eventType": "EffectCalculation",
-          "predicate": {
-            "statusOrDebuffOnly": true,
-            "sourceMustBePlayer": true,
-            "anyTags": [
-              "Control",
-              "Freeze",
-              "Stun"
-            ]
-          },
-          "operation": {
-            "type": "modifyEffectAmount",
-            "additivePercent": 0,
-            "additivePercentModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 0.03,
-                "nodeId": "frostbinder-mastery"
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "frostbinder-amplifier",
-      "branchId": "frostbinder",
-      "name": "Frostbinder Amplifier",
-      "description": "Improves lockdown Control gain.",
+      "id": "controller_cooldown_snare",
+      "branchId": "middle",
+      "name": "Cooldown Snare",
+      "description": "Applying a debuff/control effect reduces the remaining cooldown of your highest-cooldown non-style Essence ability by 0.5 / 1 second. 4 second internal cooldown.",
       "maxRank": 2,
-      "requiredLevel": 20,
-      "requiredNodeId": "frostbinder-discipline",
-      "x": 1,
-      "y": 2,
+      "requiredLevel": 10,
+      "requiredNodeId": null,
+      "x": 0,
+      "y": 4,
       "tags": [
-        "Control",
-        "Magic"
+        "Middle",
+        "Minor",
+        "Debuff"
       ],
       "effects": [
-        "Each rank grants +3 additional Control when an active Control, Freeze, or Stun status/debuff effect resolves.",
-        "Adds 1 Frostbinder branch point per rank."
+        "Applying a debuff/control effect reduces the remaining cooldown of your highest-cooldown non-style Essence ability by 0.5 / 1 second. 4 second internal cooldown."
       ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "controller_control_gain_frostbinder-amplifier_amountModifiers",
-          "eventType": "EffectCalculation",
-          "predicate": {
-            "statusOrDebuffOnly": true,
-            "sourceMustBePlayer": true,
-            "activeAbilityOnly": true
-          },
-          "operation": {
-            "type": "gainStyleResource",
-            "resourceId": "control",
-            "amount": 0,
-            "usesProcCoefficient": true,
-            "amountModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 3,
-                "nodeId": "frostbinder-amplifier"
-              }
-            ]
-          }
-        }
-      ]
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 2,
+      "lane": "Middle",
+      "nodeType": "Minor",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "This style-tree passive while the node has ranks."
+        ],
+        "changes": [
+          "Applying a debuff/control effect reduces the remaining cooldown of your highest-cooldown non-style Essence ability by 0.5 / 1 second. 4 second internal cooldown."
+        ],
+        "tradeoffs": [],
+        "doesNotAffect": []
+      }
     },
     {
-      "id": "frostbinder-focus",
-      "branchId": "frostbinder",
-      "name": "Frostbinder Focus",
-      "description": "Completes the Frostbinder focus.",
-      "maxRank": 1,
-      "requiredLevel": 40,
-      "requiredNodeId": "frostbinder-mastery",
-      "x": 0,
-      "y": 3,
+      "id": "controller_resource_denial",
+      "branchId": "right",
+      "name": "Resource Denial",
+      "description": "Debuffed enemies have resource generation or recovery reduced by 5% / 10%. If enemies do not use resources, reduce their Action Speed by 2% / 4% instead.",
+      "maxRank": 2,
+      "requiredLevel": 10,
+      "requiredNodeId": null,
+      "x": 1,
+      "y": 4,
       "tags": [
-        "Control",
-        "Magic"
+        "Right",
+        "Minor",
+        "Debuff"
       ],
       "effects": [
-        "Player Control, Freeze, or Stun damage, status, and debuff effects gain +5% effect amount.",
-        "Active Control, Freeze, or Stun status/debuff effects grant +5 additional Control.",
-        "Control empowerment becomes +5% stronger.",
-        "Adds 1 Frostbinder branch point."
+        "Debuffed enemies have resource generation or recovery reduced by 5% / 10%. If enemies do not use resources, reduce their Action Speed by 2% / 4% instead."
       ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "controller_frostbinder_nodes_frostbinder-focus_additivePercentModifiers",
-          "eventType": "EffectCalculation",
-          "predicate": {
-            "statusOrDebuffOnly": true,
-            "sourceMustBePlayer": true,
-            "anyTags": [
-              "Control",
-              "Freeze",
-              "Stun"
-            ]
-          },
-          "operation": {
-            "type": "modifyEffectAmount",
-            "additivePercent": 0,
-            "additivePercentModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 0.05,
-                "nodeId": "frostbinder-focus"
-              }
-            ]
-          }
-        },
-        {
-          "id": "controller_control_gain_frostbinder-focus_amountModifiers",
-          "eventType": "EffectCalculation",
-          "predicate": {
-            "statusOrDebuffOnly": true,
-            "sourceMustBePlayer": true,
-            "activeAbilityOnly": true
-          },
-          "operation": {
-            "type": "gainStyleResource",
-            "resourceId": "control",
-            "amount": 0,
-            "usesProcCoefficient": true,
-            "amountModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 5,
-                "nodeId": "frostbinder-focus"
-              }
-            ]
-          }
-        }
-      ]
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 2,
+      "lane": "Right",
+      "nodeType": "Minor",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "This style-tree passive while the node has ranks."
+        ],
+        "changes": [
+          "Debuffed enemies have resource generation or recovery reduced by 5% / 10%. If enemies do not use resources, reduce their Action Speed by 2% / 4% instead."
+        ],
+        "tradeoffs": [],
+        "doesNotAffect": []
+      }
+    },
+    {
+      "id": "controller_resistance_study",
+      "branchId": "middle",
+      "name": "Resistance Study",
+      "description": "Against control-immune enemies, 15% / 30% of your lost control duration becomes Weakened duration. Weakened reduces damage dealt by 5%.",
+      "maxRank": 2,
+      "requiredLevel": 10,
+      "requiredNodeId": null,
+      "x": 0,
+      "y": 5,
+      "tags": [
+        "Middle",
+        "Minor",
+        "Damage",
+        "Debuff"
+      ],
+      "effects": [
+        "Against control-immune enemies, 15% / 30% of your lost control duration becomes Weakened duration. Weakened reduces damage dealt by 5%."
+      ],
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 2,
+      "lane": "Middle",
+      "nodeType": "Minor",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "This style-tree passive while the node has ranks."
+        ],
+        "changes": [
+          "Against control-immune enemies, 15% / 30% of your lost control duration becomes Weakened duration. Weakened reduces damage dealt by 5%."
+        ],
+        "tradeoffs": [],
+        "doesNotAffect": []
+      }
+    },
+    {
+      "id": "controller_exploit_window",
+      "branchId": "left",
+      "name": "Exploit Window",
+      "description": "Your Essence effects against enemies within 3 seconds of you applying control/debuff gain +3% / +6% Effect Potency.",
+      "maxRank": 2,
+      "requiredLevel": 25,
+      "requiredNodeId": null,
+      "x": -1,
+      "y": 7,
+      "tags": [
+        "Left",
+        "Minor",
+        "Debuff"
+      ],
+      "effects": [
+        "Your Essence effects against enemies within 3 seconds of you applying control/debuff gain +3% / +6% Effect Potency."
+      ],
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 3,
+      "lane": "Left",
+      "nodeType": "Minor",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "This style-tree passive while the node has ranks."
+        ],
+        "changes": [
+          "Your Essence effects against enemies within 3 seconds of you applying control/debuff gain +3% / +6% Effect Potency."
+        ],
+        "tradeoffs": [],
+        "doesNotAffect": []
+      }
+    },
+    {
+      "id": "controller_safe_debuffing",
+      "branchId": "middle",
+      "name": "Safe Debuffing",
+      "description": "After applying a debuff/control effect, damage taken from that target is reduced by 4% / 8% for 4 seconds.",
+      "maxRank": 2,
+      "requiredLevel": 25,
+      "requiredNodeId": null,
+      "x": 0,
+      "y": 7,
+      "tags": [
+        "Middle",
+        "Minor",
+        "Damage",
+        "Debuff"
+      ],
+      "effects": [
+        "After applying a debuff/control effect, damage taken from that target is reduced by 4% / 8% for 4 seconds."
+      ],
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 3,
+      "lane": "Middle",
+      "nodeType": "Minor",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "This style-tree passive while the node has ranks."
+        ],
+        "changes": [
+          "After applying a debuff/control effect, damage taken from that target is reduced by 4% / 8% for 4 seconds."
+        ],
+        "tradeoffs": [],
+        "doesNotAffect": []
+      }
+    },
+    {
+      "id": "controller_controlled_breathing",
+      "branchId": "right",
+      "name": "Controlled Breathing",
+      "description": "When you gain Dominance, restore 0.4% / 0.8% missing primary resource. 2 second internal cooldown.",
+      "maxRank": 2,
+      "requiredLevel": 25,
+      "requiredNodeId": null,
+      "x": 1,
+      "y": 7,
+      "tags": [
+        "Right",
+        "Minor"
+      ],
+      "effects": [
+        "When you gain Dominance, restore 0.4% / 0.8% missing primary resource. 2 second internal cooldown."
+      ],
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 3,
+      "lane": "Right",
+      "nodeType": "Minor",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "This style-tree passive while the node has ranks."
+        ],
+        "changes": [
+          "When you gain Dominance, restore 0.4% / 0.8% missing primary resource. 2 second internal cooldown."
+        ],
+        "tradeoffs": [],
+        "doesNotAffect": []
+      }
+    },
+    {
+      "id": "controller_lockdown_reset",
+      "branchId": "middle",
+      "name": "Lockdown Reset",
+      "description": "Lockdown cooldown reduced by 2 / 4 seconds.",
+      "maxRank": 2,
+      "requiredLevel": 25,
+      "requiredNodeId": null,
+      "x": 0,
+      "y": 8,
+      "tags": [
+        "Middle",
+        "Minor"
+      ],
+      "effects": [
+        "Lockdown cooldown reduced by 2 / 4 seconds."
+      ],
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 3,
+      "lane": "Middle",
+      "nodeType": "Minor",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "This style-tree passive while the node has ranks."
+        ],
+        "changes": [
+          "Lockdown cooldown reduced by 2 / 4 seconds."
+        ],
+        "tradeoffs": [],
+        "doesNotAffect": []
+      }
     }
   ]
 }
-

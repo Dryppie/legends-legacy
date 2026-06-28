@@ -18,287 +18,52 @@
   ],
   "focuses": [
     {
-      "id": "arcanist",
-      "name": "Arcanist",
-      "description": "Pure arcana: active Magic and Spell effects scale higher and build extra Arcane Charge at later milestones.",
-      "unlockLevel": 10,
+      "id": "caster_grand_channel",
+      "name": "Grand Channel",
+      "description": "Overchannel affects your next 2 Essence abilities. The second ability receives 70% of the Overchannel bonus.",
+      "unlockLevel": 25,
       "recommendedTags": [
-        "Magic",
-        "Spell"
+        "Left",
+        "Major"
       ],
       "recommendedStats": [
         "Spirit",
+        "Power",
         "MagicPenetration"
       ],
-      "rules": [
-        {
-          "id": "caster_arcanist_effect_l10",
-          "eventType": "EffectCalculation",
-          "minStyleLevel": 10,
-          "maxStyleLevel": 24,
-          "predicate": {
-            "sourceMustBePlayer": true,
-            "activeAbilityOnly": true,
-            "amplifiableEffectOnly": true,
-            "anyTags": [
-              "Magic",
-              "Spell"
-            ]
-          },
-          "operation": {
-            "type": "modifyEffectAmount",
-            "additivePercent": 0.1
-          }
-        },
-        {
-          "id": "caster_arcanist_effect_l25",
-          "eventType": "EffectCalculation",
-          "minStyleLevel": 25,
-          "maxStyleLevel": 39,
-          "predicate": {
-            "sourceMustBePlayer": true,
-            "activeAbilityOnly": true,
-            "amplifiableEffectOnly": true,
-            "anyTags": [
-              "Magic",
-              "Spell"
-            ]
-          },
-          "operation": {
-            "type": "modifyEffectAmount",
-            "additivePercent": 0.15
-          }
-        },
-        {
-          "id": "caster_arcanist_effect_l40",
-          "eventType": "EffectCalculation",
-          "minStyleLevel": 40,
-          "predicate": {
-            "sourceMustBePlayer": true,
-            "activeAbilityOnly": true,
-            "amplifiableEffectOnly": true,
-            "anyTags": [
-              "Magic",
-              "Spell"
-            ]
-          },
-          "operation": {
-            "type": "modifyEffectAmount",
-            "additivePercent": 0.2
-          }
-        },
-        {
-          "id": "caster_arcanist_charge_l25",
-          "eventType": "AbilityResolved",
-          "minStyleLevel": 25,
-          "maxStyleLevel": 39,
-          "predicate": {
-            "sourceMustBePlayer": true,
-            "activeAbilityOnly": true,
-            "anyTags": [
-              "Magic",
-              "Spell"
-            ]
-          },
-          "operation": {
-            "type": "gainStyleResource",
-            "resourceId": "arcaneCharge",
-            "amount": 1,
-            "usesProcCoefficient": false
-          }
-        },
-        {
-          "id": "caster_arcanist_charge_l40",
-          "eventType": "AbilityResolved",
-          "minStyleLevel": 40,
-          "predicate": {
-            "sourceMustBePlayer": true,
-            "activeAbilityOnly": true,
-            "anyTags": [
-              "Magic",
-              "Spell"
-            ]
-          },
-          "operation": {
-            "type": "gainStyleResource",
-            "resourceId": "arcaneCharge",
-            "amount": 2,
-            "usesProcCoefficient": false
-          }
-        }
-      ]
+      "rules": []
     },
     {
-      "id": "spellblade",
-      "name": "Spellblade",
-      "description": "Adds Spirit-scaling arcane damage to Melee active effects, improving at levels 25 and 40.",
-      "unlockLevel": 10,
+      "id": "caster_safe_channel",
+      "name": "Safe Channel",
+      "description": "Overchannel grants a Barrier equal to 10% Max Health for 8 seconds and interruption immunity for the Overchanneled ability. If the ability is still interrupted, refund 50 Focus.",
+      "unlockLevel": 25,
       "recommendedTags": [
-        "Melee",
-        "Magic"
+        "Middle",
+        "Major"
       ],
       "recommendedStats": [
         "Spirit",
-        "Power"
+        "Power",
+        "MagicPenetration"
       ],
-      "rules": [
-        {
-          "id": "caster_spellblade_bonus_l10",
-          "eventType": "EffectCalculation",
-          "minStyleLevel": 10,
-          "maxStyleLevel": 24,
-          "predicate": {
-            "sourceMustBePlayer": true,
-            "activeAbilityOnly": true,
-            "effectOperations": [
-              "Damage"
-            ],
-            "anyTags": [
-              "Melee"
-            ]
-          },
-          "operation": {
-            "type": "addBonusDamageFromStat",
-            "stat": "Spirit",
-            "coefficient": 0.15,
-            "damageType": "Magical"
-          }
-        },
-        {
-          "id": "caster_spellblade_bonus_l25",
-          "eventType": "EffectCalculation",
-          "minStyleLevel": 25,
-          "maxStyleLevel": 39,
-          "predicate": {
-            "sourceMustBePlayer": true,
-            "activeAbilityOnly": true,
-            "effectOperations": [
-              "Damage"
-            ],
-            "anyTags": [
-              "Melee"
-            ]
-          },
-          "operation": {
-            "type": "addBonusDamageFromStat",
-            "stat": "Spirit",
-            "coefficient": 0.2,
-            "damageType": "Magical"
-          }
-        },
-        {
-          "id": "caster_spellblade_bonus_l40",
-          "eventType": "EffectCalculation",
-          "minStyleLevel": 40,
-          "predicate": {
-            "sourceMustBePlayer": true,
-            "activeAbilityOnly": true,
-            "effectOperations": [
-              "Damage"
-            ],
-            "anyTags": [
-              "Melee"
-            ]
-          },
-          "operation": {
-            "type": "addBonusDamageFromStat",
-            "stat": "Spirit",
-            "coefficient": 0.25,
-            "damageType": "Magical"
-          }
-        }
-      ]
+      "rules": []
     },
     {
-      "id": "occultist",
-      "name": "Occultist",
-      "description": "Dark study: Curse and damage-over-time active effects scale higher and build extra Arcane Charge.",
-      "unlockLevel": 10,
+      "id": "caster_cataclysmic_release",
+      "name": "Cataclysmic Release",
+      "description": "Overchannel affects only one ability, but its potency bonus is doubled, capped at +24% Effect Potency. Overchannel cooldown +15 seconds and the empowered ability costs 20% more resource or cooldown.",
+      "unlockLevel": 25,
       "recommendedTags": [
-        "Curse",
-        "DoT"
+        "Right",
+        "Major"
       ],
       "recommendedStats": [
         "Spirit",
-        "Cooldown"
+        "Power",
+        "MagicPenetration"
       ],
-      "rules": [
-        {
-          "id": "caster_occultist_effect_l10",
-          "eventType": "EffectCalculation",
-          "minStyleLevel": 10,
-          "maxStyleLevel": 24,
-          "predicate": {
-            "sourceMustBePlayer": true,
-            "activeAbilityOnly": true,
-            "amplifiableEffectOnly": true,
-            "anyTags": [
-              "Curse",
-              "DoT"
-            ]
-          },
-          "operation": {
-            "type": "modifyEffectAmount",
-            "additivePercent": 0.1
-          }
-        },
-        {
-          "id": "caster_occultist_effect_l25",
-          "eventType": "EffectCalculation",
-          "minStyleLevel": 25,
-          "maxStyleLevel": 39,
-          "predicate": {
-            "sourceMustBePlayer": true,
-            "activeAbilityOnly": true,
-            "amplifiableEffectOnly": true,
-            "anyTags": [
-              "Curse",
-              "DoT"
-            ]
-          },
-          "operation": {
-            "type": "modifyEffectAmount",
-            "additivePercent": 0.15
-          }
-        },
-        {
-          "id": "caster_occultist_effect_l40",
-          "eventType": "EffectCalculation",
-          "minStyleLevel": 40,
-          "predicate": {
-            "sourceMustBePlayer": true,
-            "activeAbilityOnly": true,
-            "amplifiableEffectOnly": true,
-            "anyTags": [
-              "Curse",
-              "DoT"
-            ]
-          },
-          "operation": {
-            "type": "modifyEffectAmount",
-            "additivePercent": 0.2
-          }
-        },
-        {
-          "id": "caster_occultist_charge_l10",
-          "eventType": "AbilityResolved",
-          "minStyleLevel": 10,
-          "predicate": {
-            "sourceMustBePlayer": true,
-            "activeAbilityOnly": true,
-            "anyTags": [
-              "Curse",
-              "DoT"
-            ]
-          },
-          "operation": {
-            "type": "gainStyleResource",
-            "resourceId": "arcaneCharge",
-            "amount": 1,
-            "usesProcCoefficient": false
-          }
-        }
-      ]
+      "rules": []
     }
   ],
   "rules": [
@@ -327,1135 +92,1027 @@
       },
       "additivePercent": 0.2,
       "consumeOnUse": true,
-      "additivePercentModifiers": [
-        {
-          "type": "nodeRank",
-          "nodeId": "arcanist-specialization",
-          "value": 0.03
-        },
-        {
-          "type": "nodeRank",
-          "nodeId": "arcanist-focus",
-          "value": 0.05
-        },
-        {
-          "type": "nodeRank",
-          "nodeId": "spellblade-specialization",
-          "value": 0.03
-        },
-        {
-          "type": "nodeRank",
-          "nodeId": "spellblade-focus",
-          "value": 0.05
-        },
-        {
-          "type": "nodeRank",
-          "nodeId": "occultist-specialization",
-          "value": 0.03
-        },
-        {
-          "type": "nodeRank",
-          "nodeId": "occultist-focus",
-          "value": 0.05
-        }
-      ]
+      "additivePercentModifiers": []
     }
   ],
   "coreMechanic": "Gain Arcane Charge from active Essence abilities. At 5 Charge, empower the next eligible active effect.",
   "skillTreeNodes": [
     {
-      "id": "arcanist-path",
-      "branchId": "arcanist",
-      "name": "Arcanist Root",
-      "description": "Opens Arcanist spell amplification.",
+      "id": "caster_deep_reservoir",
+      "branchId": "left",
+      "name": "Deep Reservoir",
+      "description": "Max primary resource +10%. Essence abilities that spend 10%+ resource grant +4 additional Focus. If no primary resource exists, long-cooldown Essence abilities grant +4 additional Focus.",
+      "maxRank": 1,
+      "requiredLevel": 1,
+      "requiredNodeId": null,
+      "x": -1,
+      "y": 0,
+      "tags": [
+        "Left",
+        "Major"
+      ],
+      "effects": [
+        "Max primary resource +10%. Essence abilities that spend 10%+ resource grant +4 additional Focus. If no primary resource exists, long-cooldown Essence abilities grant +4 additional Focus."
+      ],
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 1,
+      "lane": "Left",
+      "nodeType": "Major",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "Eligible active Essence abilities."
+        ],
+        "changes": [
+          "Max primary resource +10%. Essence abilities that spend 10%+ resource grant +4 additional Focus. If no primary resource exists, long-cooldown Essence abilities grant +4 additional Focus."
+        ],
+        "tradeoffs": [
+          "Advanced cooldowns, target caps, and PvP coefficients can be tuned per node."
+        ],
+        "doesNotAffect": [
+          "Abilities that do not match the listed tags, effect operations, or conversion flags.",
+          "True damage unless the ability explicitly allows conversion."
+        ]
+      }
+    },
+    {
+      "id": "caster_spell_weaving",
+      "branchId": "middle",
+      "name": "Spell Weaving",
+      "description": "Using Essence abilities from two different effect categories in sequence grants +5 Focus and gives the second ability +4% Effect Potency. 6 second internal cooldown.",
       "maxRank": 1,
       "requiredLevel": 1,
       "requiredNodeId": null,
       "x": 0,
       "y": 0,
       "tags": [
-        "Magic",
-        "Spell"
+        "Middle",
+        "Major"
       ],
       "effects": [
-        "Active Magic or Spell effects gain +1% effect amount.",
-        "Does not choose Arcanist as the effective focus by itself."
+        "Using Essence abilities from two different effect categories in sequence grants +5 Focus and gives the second ability +4% Effect Potency. 6 second internal cooldown."
       ],
       "countsTowardFocus": false,
-      "rules": [
-        {
-          "id": "caster_arcanist_nodes_arcanist-path_additivePercentModifiers",
-          "eventType": "EffectCalculation",
-          "predicate": {
-            "amplifiableEffectOnly": true,
-            "sourceMustBePlayer": true,
-            "anyTags": [
-              "Magic",
-              "Spell"
-            ],
-            "activeAbilityOnly": true
-          },
-          "operation": {
-            "type": "modifyEffectAmount",
-            "additivePercent": 0,
-            "additivePercentModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 0.01,
-                "nodeId": "arcanist-path"
-              }
-            ]
-          }
-        }
-      ]
+      "rules": [],
+      "row": 1,
+      "lane": "Middle",
+      "nodeType": "Major",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "Eligible active Essence abilities."
+        ],
+        "changes": [
+          "Using Essence abilities from two different effect categories in sequence grants +5 Focus and gives the second ability +4% Effect Potency. 6 second internal cooldown."
+        ],
+        "tradeoffs": [
+          "Advanced cooldowns, target caps, and PvP coefficients can be tuned per node."
+        ],
+        "doesNotAffect": [
+          "Abilities that do not match the listed tags, effect operations, or conversion flags.",
+          "True damage unless the ability explicitly allows conversion."
+        ]
+      }
     },
     {
-      "id": "arcanist-instinct",
-      "branchId": "arcanist",
-      "name": "Arcanist Instinct",
-      "description": "Builds extra Arcane Charge from Magic and Spell abilities.",
-      "maxRank": 3,
-      "requiredLevel": 5,
-      "requiredNodeId": "arcanist-path",
-      "x": -1,
-      "y": 1,
-      "tags": [
-        "Magic",
-        "Spell"
-      ],
-      "effects": [
-        "Each rank grants +1 Arcane Charge when an active Magic or Spell ability resolves.",
-        "Adds 1 Arcanist branch point per rank."
-      ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "caster_arcanist_nodes_charge_arcanist-instinct_amountModifiers",
-          "eventType": "AbilityResolved",
-          "predicate": {
-            "sourceMustBePlayer": true,
-            "anyTags": [
-              "Magic",
-              "Spell"
-            ],
-            "activeAbilityOnly": true
-          },
-          "operation": {
-            "type": "gainStyleResource",
-            "resourceId": "arcaneCharge",
-            "amount": 0,
-            "usesProcCoefficient": false,
-            "amountModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 1,
-                "nodeId": "arcanist-instinct"
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "arcanist-technique",
-      "branchId": "arcanist",
-      "name": "Arcanist Technique",
-      "description": "Improves Magic and Spell active effects.",
-      "maxRank": 3,
-      "requiredLevel": 10,
-      "requiredNodeId": "arcanist-path",
-      "x": 0,
-      "y": 1,
-      "tags": [
-        "Magic",
-        "Spell"
-      ],
-      "effects": [
-        "Each rank gives active Magic or Spell effects +2% effect amount.",
-        "Adds 1 Arcanist branch point per rank."
-      ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "caster_arcanist_nodes_arcanist-technique_additivePercentModifiers",
-          "eventType": "EffectCalculation",
-          "predicate": {
-            "amplifiableEffectOnly": true,
-            "sourceMustBePlayer": true,
-            "anyTags": [
-              "Magic",
-              "Spell"
-            ],
-            "activeAbilityOnly": true
-          },
-          "operation": {
-            "type": "modifyEffectAmount",
-            "additivePercent": 0,
-            "additivePercentModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 0.02,
-                "nodeId": "arcanist-technique"
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "arcanist-discipline",
-      "branchId": "arcanist",
-      "name": "Arcanist Discipline",
-      "description": "Stabilizes arcane casting.",
-      "maxRank": 3,
-      "requiredLevel": 5,
-      "requiredNodeId": "arcanist-path",
-      "x": 1,
-      "y": 1,
-      "tags": [
-        "Magic",
-        "Spell"
-      ],
-      "effects": [
-        "Each rank gives active Magic or Spell effects +1% effect amount.",
-        "Adds 1 Arcanist branch point per rank."
-      ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "caster_arcanist_nodes_arcanist-discipline_additivePercentModifiers",
-          "eventType": "EffectCalculation",
-          "predicate": {
-            "amplifiableEffectOnly": true,
-            "sourceMustBePlayer": true,
-            "anyTags": [
-              "Magic",
-              "Spell"
-            ],
-            "activeAbilityOnly": true
-          },
-          "operation": {
-            "type": "modifyEffectAmount",
-            "additivePercent": 0,
-            "additivePercentModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 0.01,
-                "nodeId": "arcanist-discipline"
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "arcanist-specialization",
-      "branchId": "arcanist",
-      "name": "Arcanist Specialization",
-      "description": "Improves Arcane Charge empowerment.",
-      "maxRank": 2,
-      "requiredLevel": 20,
-      "requiredNodeId": "arcanist-instinct",
-      "x": -1,
-      "y": 2,
-      "tags": [
-        "Magic",
-        "Spell"
-      ],
-      "effects": [
-        "Each rank makes Arcane Charge empowerment +3% stronger.",
-        "Adds 1 Arcanist branch point per rank."
-      ],
-      "countsTowardFocus": true
-    },
-    {
-      "id": "arcanist-mastery",
-      "branchId": "arcanist",
-      "name": "Arcanist Mastery",
-      "description": "Deepens Magic and Spell active effects.",
-      "maxRank": 3,
-      "requiredLevel": 25,
-      "requiredNodeId": "arcanist-technique",
-      "x": 0,
-      "y": 2,
-      "tags": [
-        "Magic",
-        "Spell"
-      ],
-      "effects": [
-        "Each rank gives active Magic or Spell effects +3% effect amount.",
-        "Adds 1 Arcanist branch point per rank."
-      ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "caster_arcanist_nodes_arcanist-mastery_additivePercentModifiers",
-          "eventType": "EffectCalculation",
-          "predicate": {
-            "amplifiableEffectOnly": true,
-            "sourceMustBePlayer": true,
-            "anyTags": [
-              "Magic",
-              "Spell"
-            ],
-            "activeAbilityOnly": true
-          },
-          "operation": {
-            "type": "modifyEffectAmount",
-            "additivePercent": 0,
-            "additivePercentModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 0.03,
-                "nodeId": "arcanist-mastery"
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "arcanist-amplifier",
-      "branchId": "arcanist",
-      "name": "Arcanist Amplifier",
-      "description": "Accelerates Arcane Charge generation.",
-      "maxRank": 2,
-      "requiredLevel": 20,
-      "requiredNodeId": "arcanist-discipline",
-      "x": 1,
-      "y": 2,
-      "tags": [
-        "Magic",
-        "Spell"
-      ],
-      "effects": [
-        "Each rank grants +1 Arcane Charge when an active Magic or Spell ability resolves.",
-        "Adds 1 Arcanist branch point per rank."
-      ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "caster_arcanist_nodes_charge_arcanist-amplifier_amountModifiers",
-          "eventType": "AbilityResolved",
-          "predicate": {
-            "sourceMustBePlayer": true,
-            "anyTags": [
-              "Magic",
-              "Spell"
-            ],
-            "activeAbilityOnly": true
-          },
-          "operation": {
-            "type": "gainStyleResource",
-            "resourceId": "arcaneCharge",
-            "amount": 0,
-            "usesProcCoefficient": false,
-            "amountModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 1,
-                "nodeId": "arcanist-amplifier"
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "arcanist-focus",
-      "branchId": "arcanist",
-      "name": "Arcanist Focus",
-      "description": "Completes the Arcanist focus.",
+      "id": "caster_stable_mind",
+      "branchId": "right",
+      "name": "Stable Mind",
+      "description": "Every 10 seconds, prevent one interruption. Negative effect durations against you are reduced by 10% while you have 50+ Focus.",
       "maxRank": 1,
-      "requiredLevel": 40,
-      "requiredNodeId": "arcanist-mastery",
-      "x": 0,
+      "requiredLevel": 1,
+      "requiredNodeId": null,
+      "x": 1,
+      "y": 0,
+      "tags": [
+        "Right",
+        "Major"
+      ],
+      "effects": [
+        "Every 10 seconds, prevent one interruption. Negative effect durations against you are reduced by 10% while you have 50+ Focus."
+      ],
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 1,
+      "lane": "Right",
+      "nodeType": "Major",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "Eligible active Essence abilities."
+        ],
+        "changes": [
+          "Every 10 seconds, prevent one interruption. Negative effect durations against you are reduced by 10% while you have 50+ Focus."
+        ],
+        "tradeoffs": [
+          "Advanced cooldowns, target caps, and PvP coefficients can be tuned per node."
+        ],
+        "doesNotAffect": [
+          "Abilities that do not match the listed tags, effect operations, or conversion flags.",
+          "True damage unless the ability explicitly allows conversion."
+        ]
+      }
+    },
+    {
+      "id": "caster_arcane_armament",
+      "branchId": "left",
+      "name": "Arcane Armament",
+      "description": "Mutator Group: DamageTypeConversion + ScalingConversion. Eligible hostile Physical Melee Essence abilities deal Magical damage instead of Physical damage. Converted abilities scale from Spell Power instead of Attack Power, retain the Melee tag, gain the Spell tag, cannot benefit from Physical penetration, and benefit from Magical penetration at 70% value. Resource cost +8%. If the ability was already Magical, it gains +5% Effect Potency instead.",
+      "maxRank": 1,
+      "requiredLevel": 10,
+      "requiredNodeId": null,
+      "x": -1,
       "y": 3,
       "tags": [
-        "Magic",
-        "Spell"
+        "DamageTypeConversion",
+        "ScalingConversion",
+        "Left",
+        "Major"
       ],
       "effects": [
-        "Active Magic or Spell effects gain +5% effect amount.",
-        "Active Magic or Spell abilities grant +1 Arcane Charge.",
-        "Arcane Charge empowerment becomes +5% stronger.",
-        "Adds 1 Arcanist branch point."
+        "Mutator Group: DamageTypeConversion + ScalingConversion. Eligible hostile Physical Melee Essence abilities deal Magical damage instead of Physical damage. Converted abilities scale from Spell Power instead of Attack Power, retain the Melee tag, gain the Spell tag, cannot benefit from Physical penetration, and benefit from Magical penetration at 70% value. Resource cost +8%. If the ability was already Magical, it gains +5% Effect Potency instead."
       ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "caster_arcanist_nodes_arcanist-focus_additivePercentModifiers",
-          "eventType": "EffectCalculation",
-          "predicate": {
-            "amplifiableEffectOnly": true,
-            "sourceMustBePlayer": true,
-            "anyTags": [
-              "Magic",
-              "Spell"
-            ],
-            "activeAbilityOnly": true
-          },
-          "operation": {
-            "type": "modifyEffectAmount",
-            "additivePercent": 0,
-            "additivePercentModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 0.05,
-                "nodeId": "arcanist-focus"
-              }
-            ]
-          }
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 2,
+      "lane": "Left",
+      "nodeType": "Major",
+      "mutatorKind": "Converter",
+      "mutatorGroups": [
+        "DamageTypeConversion",
+        "ScalingConversion"
+      ],
+      "mutator": {
+        "kind": "Converter",
+        "groups": [
+          "DamageTypeConversion",
+          "ScalingConversion"
+        ],
+        "conditions": {
+          "requiredAbilityTags": [],
+          "anyAbilityTags": [],
+          "requiredDeliveryTags": [],
+          "anyDeliveryTags": [
+            "Melee"
+          ],
+          "requiredEffectTags": [],
+          "anyEffectTags": [
+            "Damage"
+          ],
+          "effectOperations": [
+            "Damage",
+            "RestoreResource"
+          ],
+          "allowedDamageTypes": [
+            "Physical"
+          ],
+          "targetSelectors": [],
+          "activeAbilityOnly": true,
+          "passiveAbilityOnly": false,
+          "allowDamageTypeConversionRequired": true,
+          "allowScalingConversionRequired": true,
+          "allowDeliveryConversionRequired": null,
+          "allowTargetingConversionRequired": null,
+          "allowSummonProxyRequired": null,
+          "allowEquipmentOverrideRequired": null,
+          "excludeTrueDamage": true,
+          "excludeHardCrowdControl": true
         },
-        {
-          "id": "caster_arcanist_nodes_charge_arcanist-focus_amountModifiers",
-          "eventType": "AbilityResolved",
-          "predicate": {
-            "sourceMustBePlayer": true,
-            "anyTags": [
-              "Magic",
-              "Spell"
-            ],
-            "activeAbilityOnly": true
-          },
-          "operation": {
-            "type": "gainStyleResource",
-            "resourceId": "arcaneCharge",
-            "amount": 0,
-            "usesProcCoefficient": false,
-            "amountModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 1,
-                "nodeId": "arcanist-focus"
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "spellblade-path",
-      "branchId": "spellblade",
-      "name": "Spellblade Root",
-      "description": "Opens Spellblade Spirit-scaling melee.",
-      "maxRank": 1,
-      "requiredLevel": 1,
-      "requiredNodeId": null,
-      "x": 0,
-      "y": 0,
-      "tags": [
-        "Melee",
-        "Magic"
-      ],
-      "effects": [
-        "Active Melee damage adds magical bonus damage equal to 5% of Spirit, scaled by proc coefficient.",
-        "Does not choose Spellblade as the effective focus by itself."
-      ],
-      "countsTowardFocus": false,
-      "rules": [
-        {
-          "id": "caster_spellblade_nodes_bonus_spellblade-path_coefficientModifiers",
-          "eventType": "EffectCalculation",
-          "predicate": {
-            "effectOperations": [
-              "Damage"
-            ],
-            "sourceMustBePlayer": true,
-            "anyTags": [
-              "Melee"
-            ],
-            "activeAbilityOnly": true
-          },
-          "operation": {
-            "type": "addBonusDamageFromStat",
-            "stat": "Spirit",
-            "coefficient": 0,
-            "damageType": "Magical",
-            "coefficientModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 0.05,
-                "nodeId": "spellblade-path"
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "spellblade-instinct",
-      "branchId": "spellblade",
-      "name": "Spellblade Instinct",
-      "description": "Builds Arcane Charge from melee abilities.",
-      "maxRank": 3,
-      "requiredLevel": 5,
-      "requiredNodeId": "spellblade-path",
-      "x": -1,
-      "y": 1,
-      "tags": [
-        "Melee",
-        "Magic"
-      ],
-      "effects": [
-        "Each rank grants +1 Arcane Charge when an active Melee ability resolves.",
-        "Adds 1 Spellblade branch point per rank."
-      ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "caster_spellblade_nodes_charge_spellblade-instinct_amountModifiers",
-          "eventType": "AbilityResolved",
-          "predicate": {
-            "sourceMustBePlayer": true,
-            "anyTags": [
-              "Melee"
-            ],
-            "activeAbilityOnly": true
-          },
-          "operation": {
-            "type": "gainStyleResource",
-            "resourceId": "arcaneCharge",
-            "amount": 0,
-            "usesProcCoefficient": false,
-            "amountModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 1,
-                "nodeId": "spellblade-instinct"
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "spellblade-technique",
-      "branchId": "spellblade",
-      "name": "Spellblade Technique",
-      "description": "Improves Spirit-scaling melee damage.",
-      "maxRank": 3,
-      "requiredLevel": 10,
-      "requiredNodeId": "spellblade-path",
-      "x": 0,
-      "y": 1,
-      "tags": [
-        "Melee",
-        "Magic"
-      ],
-      "effects": [
-        "Each rank adds magical bonus damage equal to 5% of Spirit to active Melee damage, scaled by proc coefficient.",
-        "Adds 1 Spellblade branch point per rank."
-      ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "caster_spellblade_nodes_bonus_spellblade-technique_coefficientModifiers",
-          "eventType": "EffectCalculation",
-          "predicate": {
-            "effectOperations": [
-              "Damage"
-            ],
-            "sourceMustBePlayer": true,
-            "anyTags": [
-              "Melee"
-            ],
-            "activeAbilityOnly": true
-          },
-          "operation": {
-            "type": "addBonusDamageFromStat",
-            "stat": "Spirit",
-            "coefficient": 0,
-            "damageType": "Magical",
-            "coefficientModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 0.05,
-                "nodeId": "spellblade-technique"
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "spellblade-discipline",
-      "branchId": "spellblade",
-      "name": "Spellblade Discipline",
-      "description": "Sharpens melee active effects.",
-      "maxRank": 3,
-      "requiredLevel": 5,
-      "requiredNodeId": "spellblade-path",
-      "x": 1,
-      "y": 1,
-      "tags": [
-        "Melee",
-        "Magic"
-      ],
-      "effects": [
-        "Each rank gives active Melee damage +1% effect amount.",
-        "Adds 1 Spellblade branch point per rank."
-      ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "caster_spellblade_discipline_spellblade-discipline_additivePercentModifiers",
-          "eventType": "EffectCalculation",
-          "predicate": {
-            "effectOperations": [
-              "Damage"
-            ],
-            "sourceMustBePlayer": true,
-            "anyTags": [
-              "Melee"
-            ],
-            "activeAbilityOnly": true
-          },
-          "operation": {
-            "type": "modifyEffectAmount",
-            "additivePercent": 0,
-            "additivePercentModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 0.01,
-                "nodeId": "spellblade-discipline"
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "spellblade-specialization",
-      "branchId": "spellblade",
-      "name": "Spellblade Specialization",
-      "description": "Improves Arcane Charge empowerment.",
-      "maxRank": 2,
-      "requiredLevel": 20,
-      "requiredNodeId": "spellblade-instinct",
-      "x": -1,
-      "y": 2,
-      "tags": [
-        "Melee",
-        "Magic"
-      ],
-      "effects": [
-        "Each rank makes Arcane Charge empowerment +3% stronger.",
-        "Adds 1 Spellblade branch point per rank."
-      ],
-      "countsTowardFocus": true
-    },
-    {
-      "id": "spellblade-mastery",
-      "branchId": "spellblade",
-      "name": "Spellblade Mastery",
-      "description": "Deepens Spirit-scaling melee damage.",
-      "maxRank": 3,
-      "requiredLevel": 25,
-      "requiredNodeId": "spellblade-technique",
-      "x": 0,
-      "y": 2,
-      "tags": [
-        "Melee",
-        "Magic"
-      ],
-      "effects": [
-        "Each rank adds magical bonus damage equal to 6% of Spirit to active Melee damage, scaled by proc coefficient.",
-        "Adds 1 Spellblade branch point per rank."
-      ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "caster_spellblade_nodes_bonus_spellblade-mastery_coefficientModifiers",
-          "eventType": "EffectCalculation",
-          "predicate": {
-            "effectOperations": [
-              "Damage"
-            ],
-            "sourceMustBePlayer": true,
-            "anyTags": [
-              "Melee"
-            ],
-            "activeAbilityOnly": true
-          },
-          "operation": {
-            "type": "addBonusDamageFromStat",
-            "stat": "Spirit",
-            "coefficient": 0,
-            "damageType": "Magical",
-            "coefficientModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 0.06,
-                "nodeId": "spellblade-mastery"
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "spellblade-amplifier",
-      "branchId": "spellblade",
-      "name": "Spellblade Amplifier",
-      "description": "Accelerates melee Arcane Charge generation.",
-      "maxRank": 2,
-      "requiredLevel": 20,
-      "requiredNodeId": "spellblade-discipline",
-      "x": 1,
-      "y": 2,
-      "tags": [
-        "Melee",
-        "Magic"
-      ],
-      "effects": [
-        "Each rank grants +1 Arcane Charge when an active Melee ability resolves.",
-        "Adds 1 Spellblade branch point per rank."
-      ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "caster_spellblade_nodes_charge_spellblade-amplifier_amountModifiers",
-          "eventType": "AbilityResolved",
-          "predicate": {
-            "sourceMustBePlayer": true,
-            "anyTags": [
-              "Melee"
-            ],
-            "activeAbilityOnly": true
-          },
-          "operation": {
-            "type": "gainStyleResource",
-            "resourceId": "arcaneCharge",
-            "amount": 0,
-            "usesProcCoefficient": false,
-            "amountModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 1,
-                "nodeId": "spellblade-amplifier"
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "spellblade-focus",
-      "branchId": "spellblade",
-      "name": "Spellblade Focus",
-      "description": "Completes the Spellblade focus.",
-      "maxRank": 1,
-      "requiredLevel": 40,
-      "requiredNodeId": "spellblade-mastery",
-      "x": 0,
-      "y": 3,
-      "tags": [
-        "Melee",
-        "Magic"
-      ],
-      "effects": [
-        "Active Melee damage adds magical bonus damage equal to 10% of Spirit, scaled by proc coefficient.",
-        "Arcane Charge empowerment becomes +5% stronger.",
-        "Adds 1 Spellblade branch point."
-      ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "caster_spellblade_nodes_bonus_spellblade-focus_coefficientModifiers",
-          "eventType": "EffectCalculation",
-          "predicate": {
-            "effectOperations": [
-              "Damage"
-            ],
-            "sourceMustBePlayer": true,
-            "anyTags": [
-              "Melee"
-            ],
-            "activeAbilityOnly": true
-          },
-          "operation": {
-            "type": "addBonusDamageFromStat",
-            "stat": "Spirit",
-            "coefficient": 0,
-            "damageType": "Magical",
-            "coefficientModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 0.1,
-                "nodeId": "spellblade-focus"
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "occultist-path",
-      "branchId": "occultist",
-      "name": "Occultist Root",
-      "description": "Opens Occultist curse amplification.",
-      "maxRank": 1,
-      "requiredLevel": 1,
-      "requiredNodeId": null,
-      "x": 0,
-      "y": 0,
-      "tags": [
-        "Curse",
-        "DoT"
-      ],
-      "effects": [
-        "Active Curse or DoT effects gain +1% effect amount.",
-        "Does not choose Occultist as the effective focus by itself."
-      ],
-      "countsTowardFocus": false,
-      "rules": [
-        {
-          "id": "caster_occultist_nodes_occultist-path_additivePercentModifiers",
-          "eventType": "EffectCalculation",
-          "predicate": {
-            "amplifiableEffectOnly": true,
-            "sourceMustBePlayer": true,
-            "anyTags": [
-              "Curse",
-              "DoT"
-            ],
-            "activeAbilityOnly": true
-          },
-          "operation": {
-            "type": "modifyEffectAmount",
-            "additivePercent": 0,
-            "additivePercentModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 0.01,
-                "nodeId": "occultist-path"
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "occultist-instinct",
-      "branchId": "occultist",
-      "name": "Occultist Instinct",
-      "description": "Builds Arcane Charge from Curse and DoT abilities.",
-      "maxRank": 3,
-      "requiredLevel": 5,
-      "requiredNodeId": "occultist-path",
-      "x": -1,
-      "y": 1,
-      "tags": [
-        "Curse",
-        "DoT"
-      ],
-      "effects": [
-        "Each rank grants +1 Arcane Charge when an active Curse or DoT ability resolves.",
-        "Adds 1 Occultist branch point per rank."
-      ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "caster_occultist_nodes_charge_occultist-instinct_amountModifiers",
-          "eventType": "AbilityResolved",
-          "predicate": {
-            "sourceMustBePlayer": true,
-            "anyTags": [
-              "Curse",
-              "DoT"
-            ],
-            "activeAbilityOnly": true
-          },
-          "operation": {
-            "type": "gainStyleResource",
-            "resourceId": "arcaneCharge",
-            "amount": 0,
-            "usesProcCoefficient": false,
-            "amountModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 1,
-                "nodeId": "occultist-instinct"
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "occultist-technique",
-      "branchId": "occultist",
-      "name": "Occultist Technique",
-      "description": "Improves Curse and DoT active effects.",
-      "maxRank": 3,
-      "requiredLevel": 10,
-      "requiredNodeId": "occultist-path",
-      "x": 0,
-      "y": 1,
-      "tags": [
-        "Curse",
-        "DoT"
-      ],
-      "effects": [
-        "Each rank gives active Curse or DoT effects +2% effect amount.",
-        "Adds 1 Occultist branch point per rank."
-      ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "caster_occultist_nodes_occultist-technique_additivePercentModifiers",
-          "eventType": "EffectCalculation",
-          "predicate": {
-            "amplifiableEffectOnly": true,
-            "sourceMustBePlayer": true,
-            "anyTags": [
-              "Curse",
-              "DoT"
-            ],
-            "activeAbilityOnly": true
-          },
-          "operation": {
-            "type": "modifyEffectAmount",
-            "additivePercent": 0,
-            "additivePercentModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 0.02,
-                "nodeId": "occultist-technique"
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "occultist-discipline",
-      "branchId": "occultist",
-      "name": "Occultist Discipline",
-      "description": "Strengthens status and debuff effects.",
-      "maxRank": 3,
-      "requiredLevel": 5,
-      "requiredNodeId": "occultist-path",
-      "x": 1,
-      "y": 1,
-      "tags": [
-        "Curse",
-        "DoT"
-      ],
-      "effects": [
-        "Each rank gives status and debuff effects +1% effect amount.",
-        "Adds 1 Occultist branch point per rank."
-      ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "caster_occultist_discipline_occultist-discipline_additivePercentModifiers",
-          "eventType": "EffectCalculation",
-          "predicate": {
-            "sourceMustBePlayer": true,
-            "statusOrDebuffOnly": true
-          },
-          "operation": {
-            "type": "modifyEffectAmount",
-            "additivePercent": 0,
-            "additivePercentModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 0.01,
-                "nodeId": "occultist-discipline"
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "occultist-specialization",
-      "branchId": "occultist",
-      "name": "Occultist Specialization",
-      "description": "Improves Arcane Charge empowerment.",
-      "maxRank": 2,
-      "requiredLevel": 20,
-      "requiredNodeId": "occultist-instinct",
-      "x": -1,
-      "y": 2,
-      "tags": [
-        "Curse",
-        "DoT"
-      ],
-      "effects": [
-        "Each rank makes Arcane Charge empowerment +3% stronger.",
-        "Adds 1 Occultist branch point per rank."
-      ],
-      "countsTowardFocus": true
-    },
-    {
-      "id": "occultist-mastery",
-      "branchId": "occultist",
-      "name": "Occultist Mastery",
-      "description": "Deepens Curse and DoT active effects.",
-      "maxRank": 3,
-      "requiredLevel": 25,
-      "requiredNodeId": "occultist-technique",
-      "x": 0,
-      "y": 2,
-      "tags": [
-        "Curse",
-        "DoT"
-      ],
-      "effects": [
-        "Each rank gives active Curse or DoT effects +3% effect amount.",
-        "Adds 1 Occultist branch point per rank."
-      ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "caster_occultist_nodes_occultist-mastery_additivePercentModifiers",
-          "eventType": "EffectCalculation",
-          "predicate": {
-            "amplifiableEffectOnly": true,
-            "sourceMustBePlayer": true,
-            "anyTags": [
-              "Curse",
-              "DoT"
-            ],
-            "activeAbilityOnly": true
-          },
-          "operation": {
-            "type": "modifyEffectAmount",
-            "additivePercent": 0,
-            "additivePercentModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 0.03,
-                "nodeId": "occultist-mastery"
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "occultist-amplifier",
-      "branchId": "occultist",
-      "name": "Occultist Amplifier",
-      "description": "Accelerates occult Arcane Charge generation.",
-      "maxRank": 2,
-      "requiredLevel": 20,
-      "requiredNodeId": "occultist-discipline",
-      "x": 1,
-      "y": 2,
-      "tags": [
-        "Curse",
-        "DoT"
-      ],
-      "effects": [
-        "Each rank grants +1 Arcane Charge when an active Curse or DoT ability resolves.",
-        "Adds 1 Occultist branch point per rank."
-      ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "caster_occultist_nodes_charge_occultist-amplifier_amountModifiers",
-          "eventType": "AbilityResolved",
-          "predicate": {
-            "sourceMustBePlayer": true,
-            "anyTags": [
-              "Curse",
-              "DoT"
-            ],
-            "activeAbilityOnly": true
-          },
-          "operation": {
-            "type": "gainStyleResource",
-            "resourceId": "arcaneCharge",
-            "amount": 0,
-            "usesProcCoefficient": false,
-            "amountModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 1,
-                "nodeId": "occultist-amplifier"
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "occultist-focus",
-      "branchId": "occultist",
-      "name": "Occultist Focus",
-      "description": "Completes the Occultist focus.",
-      "maxRank": 1,
-      "requiredLevel": 40,
-      "requiredNodeId": "occultist-mastery",
-      "x": 0,
-      "y": 3,
-      "tags": [
-        "Curse",
-        "DoT"
-      ],
-      "effects": [
-        "Active Curse or DoT effects gain +5% effect amount.",
-        "Active Curse or DoT abilities grant +1 Arcane Charge.",
-        "Arcane Charge empowerment becomes +5% stronger.",
-        "Adds 1 Occultist branch point."
-      ],
-      "countsTowardFocus": true,
-      "rules": [
-        {
-          "id": "caster_occultist_nodes_occultist-focus_additivePercentModifiers",
-          "eventType": "EffectCalculation",
-          "predicate": {
-            "amplifiableEffectOnly": true,
-            "sourceMustBePlayer": true,
-            "anyTags": [
-              "Curse",
-              "DoT"
-            ],
-            "activeAbilityOnly": true
-          },
-          "operation": {
-            "type": "modifyEffectAmount",
-            "additivePercent": 0,
-            "additivePercentModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 0.05,
-                "nodeId": "occultist-focus"
-              }
-            ]
-          }
+        "transform": {
+          "damageType": "Magical",
+          "targetingType": null,
+          "scalingAttribute": "Spirit",
+          "scalingCoefficientOverride": null,
+          "scalingCoefficientMultiplier": 1.05,
+          "effectPotencyMultiplier": 1.05,
+          "cooldownMultiplier": null,
+          "resourceCostMultiplier": null,
+          "addAbilityTags": [
+            "ConvertedDamage",
+            "ConvertedScaling"
+          ],
+          "addDeliveryTags": [
+            "Melee"
+          ],
+          "addEffectTags": [
+            "Damage",
+            "Resource"
+          ],
+          "addEffectTagsToMatchingEffects": [
+            "Damage",
+            "Resource"
+          ]
         },
-        {
-          "id": "caster_occultist_nodes_charge_occultist-focus_amountModifiers",
-          "eventType": "AbilityResolved",
-          "predicate": {
-            "sourceMustBePlayer": true,
-            "anyTags": [
-              "Curse",
-              "DoT"
-            ],
-            "activeAbilityOnly": true
-          },
-          "operation": {
-            "type": "gainStyleResource",
-            "resourceId": "arcaneCharge",
-            "amount": 0,
-            "usesProcCoefficient": false,
-            "amountModifiers": [
-              {
-                "type": "nodeRank",
-                "value": 1,
-                "nodeId": "occultist-focus"
-              }
-            ]
-          }
-        }
-      ]
+        "tradeoff": {
+          "effectPotencyMultiplier": null,
+          "cooldownMultiplier": null,
+          "resourceCostMultiplier": 1.05,
+          "procCoefficientMultiplier": null
+        },
+        "pvpCoefficient": 0.7
+      },
+      "tooltip": {
+        "affects": [
+          "Eligible active Essence abilities matching DamageTypeConversion, ScalingConversion."
+        ],
+        "changes": [
+          "Mutator Group: DamageTypeConversion + ScalingConversion. Eligible hostile Physical Melee Essence abilities deal Magical damage instead of Physical damage. Converted abilities scale from Spell Power instead of Attack Power, retain the Melee tag, gain the Spell tag, cannot benefit from Physical penetration, and benefit from Magical penetration at 70% value. Resource cost +8%. If the ability was already Magical, it gains +5% Effect Potency instead."
+        ],
+        "tradeoffs": [
+          "Conversion uses a +5% resource cost safety tradeoff and PvP coefficient until explicit balance values are authored."
+        ],
+        "doesNotAffect": [
+          "Abilities that do not match the listed tags, effect operations, or conversion flags.",
+          "True damage unless the ability explicitly allows conversion."
+        ]
+      }
+    },
+    {
+      "id": "caster_elemental_thesis",
+      "branchId": "middle",
+      "name": "Elemental Thesis",
+      "description": "Mutator Group: DamageTypeConversion. Choose one Elemental Thesis outside combat: Fire, Frost, Lightning, Earth, Poison, Holy, or Shadow. Eligible hostile Essence abilities convert their damage type to the chosen element. Converted abilities lose 10% base Effect Potency but benefit from elemental bonuses, resistance penetration, and elemental synergies. True damage cannot be converted. Non-hostile Essence abilities instead grant 4% resistance to the chosen element for 5 seconds.",
+      "maxRank": 1,
+      "requiredLevel": 10,
+      "requiredNodeId": null,
+      "x": 0,
+      "y": 3,
+      "tags": [
+        "DamageTypeConversion",
+        "Middle",
+        "Major"
+      ],
+      "effects": [
+        "Mutator Group: DamageTypeConversion. Choose one Elemental Thesis outside combat: Fire, Frost, Lightning, Earth, Poison, Holy, or Shadow. Eligible hostile Essence abilities convert their damage type to the chosen element. Converted abilities lose 10% base Effect Potency but benefit from elemental bonuses, resistance penetration, and elemental synergies. True damage cannot be converted. Non-hostile Essence abilities instead grant 4% resistance to the chosen element for 5 seconds."
+      ],
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 2,
+      "lane": "Middle",
+      "nodeType": "Major",
+      "mutatorKind": "Converter",
+      "mutatorGroups": [
+        "DamageTypeConversion"
+      ],
+      "mutator": {
+        "kind": "Converter",
+        "groups": [
+          "DamageTypeConversion"
+        ],
+        "conditions": {
+          "requiredAbilityTags": [],
+          "anyAbilityTags": [],
+          "requiredDeliveryTags": [],
+          "anyDeliveryTags": [],
+          "requiredEffectTags": [],
+          "anyEffectTags": [
+            "Damage"
+          ],
+          "effectOperations": [
+            "Damage"
+          ],
+          "allowedDamageTypes": [
+            "Physical"
+          ],
+          "targetSelectors": [],
+          "activeAbilityOnly": true,
+          "passiveAbilityOnly": false,
+          "allowDamageTypeConversionRequired": true,
+          "allowScalingConversionRequired": null,
+          "allowDeliveryConversionRequired": null,
+          "allowTargetingConversionRequired": null,
+          "allowSummonProxyRequired": null,
+          "allowEquipmentOverrideRequired": null,
+          "excludeTrueDamage": true,
+          "excludeHardCrowdControl": true
+        },
+        "transform": {
+          "damageType": "Burn",
+          "targetingType": null,
+          "scalingAttribute": null,
+          "scalingCoefficientOverride": null,
+          "scalingCoefficientMultiplier": null,
+          "effectPotencyMultiplier": 1.05,
+          "cooldownMultiplier": null,
+          "resourceCostMultiplier": null,
+          "addAbilityTags": [
+            "ConvertedDamage"
+          ],
+          "addDeliveryTags": [],
+          "addEffectTags": [
+            "Damage"
+          ],
+          "addEffectTagsToMatchingEffects": [
+            "Damage"
+          ]
+        },
+        "tradeoff": {
+          "effectPotencyMultiplier": null,
+          "cooldownMultiplier": null,
+          "resourceCostMultiplier": 1.05,
+          "procCoefficientMultiplier": null
+        },
+        "pvpCoefficient": 0.7
+      },
+      "tooltip": {
+        "affects": [
+          "Eligible active Essence abilities matching DamageTypeConversion."
+        ],
+        "changes": [
+          "Mutator Group: DamageTypeConversion. Choose one Elemental Thesis outside combat: Fire, Frost, Lightning, Earth, Poison, Holy, or Shadow. Eligible hostile Essence abilities convert their damage type to the chosen element. Converted abilities lose 10% base Effect Potency but benefit from elemental bonuses, resistance penetration, and elemental synergies. True damage cannot be converted. Non-hostile Essence abilities instead grant 4% resistance to the chosen element for 5 seconds."
+        ],
+        "tradeoffs": [
+          "Conversion uses a +5% resource cost safety tradeoff and PvP coefficient until explicit balance values are authored."
+        ],
+        "doesNotAffect": [
+          "Abilities that do not match the listed tags, effect operations, or conversion flags.",
+          "True damage unless the ability explicitly allows conversion."
+        ]
+      }
+    },
+    {
+      "id": "caster_ritual_formula",
+      "branchId": "right",
+      "name": "Ritual Formula",
+      "description": "Mutator Group: SummonConversion + DeliveryConversion. Summon, Aura, DamageOverTime, HealOverTime, and Persistent Essence effects gain the Spell tag. They tick, act, or trigger 8% slower, but gain +12% Effect Potency, duration, or summon stat scaling. If the effect is Overchanneled, reduce the slow penalty to 4%.",
+      "maxRank": 1,
+      "requiredLevel": 10,
+      "requiredNodeId": null,
+      "x": 1,
+      "y": 3,
+      "tags": [
+        "SummonConversion",
+        "DeliveryConversion",
+        "Right",
+        "Major"
+      ],
+      "effects": [
+        "Mutator Group: SummonConversion + DeliveryConversion. Summon, Aura, DamageOverTime, HealOverTime, and Persistent Essence effects gain the Spell tag. They tick, act, or trigger 8% slower, but gain +12% Effect Potency, duration, or summon stat scaling. If the effect is Overchanneled, reduce the slow penalty to 4%."
+      ],
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 2,
+      "lane": "Right",
+      "nodeType": "Major",
+      "mutatorKind": "Converter",
+      "mutatorGroups": [
+        "SummonConversion",
+        "DeliveryConversion"
+      ],
+      "mutator": {
+        "kind": "Converter",
+        "groups": [
+          "SummonConversion",
+          "DeliveryConversion"
+        ],
+        "conditions": {
+          "requiredAbilityTags": [],
+          "anyAbilityTags": [],
+          "requiredDeliveryTags": [],
+          "anyDeliveryTags": [],
+          "requiredEffectTags": [],
+          "anyEffectTags": [
+            "Damage",
+            "Heal",
+            "Summon",
+            "Debuff"
+          ],
+          "effectOperations": [
+            "Damage",
+            "Heal",
+            "Summon",
+            "ApplyStatus"
+          ],
+          "allowedDamageTypes": [],
+          "targetSelectors": [],
+          "activeAbilityOnly": true,
+          "passiveAbilityOnly": false,
+          "allowDamageTypeConversionRequired": null,
+          "allowScalingConversionRequired": null,
+          "allowDeliveryConversionRequired": true,
+          "allowTargetingConversionRequired": null,
+          "allowSummonProxyRequired": null,
+          "allowEquipmentOverrideRequired": null,
+          "excludeTrueDamage": true,
+          "excludeHardCrowdControl": true
+        },
+        "transform": {
+          "damageType": null,
+          "targetingType": null,
+          "scalingAttribute": null,
+          "scalingCoefficientOverride": null,
+          "scalingCoefficientMultiplier": null,
+          "effectPotencyMultiplier": 1.12,
+          "cooldownMultiplier": null,
+          "resourceCostMultiplier": null,
+          "addAbilityTags": [
+            "ConvertedDelivery"
+          ],
+          "addDeliveryTags": [],
+          "addEffectTags": [
+            "Damage",
+            "Heal",
+            "Summon",
+            "Debuff"
+          ],
+          "addEffectTagsToMatchingEffects": [
+            "Damage",
+            "Heal",
+            "Summon",
+            "Debuff"
+          ]
+        },
+        "tradeoff": {
+          "effectPotencyMultiplier": 0.95,
+          "cooldownMultiplier": 1.03,
+          "resourceCostMultiplier": 1.05,
+          "procCoefficientMultiplier": null
+        },
+        "pvpCoefficient": 0.7
+      },
+      "tooltip": {
+        "affects": [
+          "Eligible active Essence abilities matching SummonConversion, DeliveryConversion."
+        ],
+        "changes": [
+          "Mutator Group: SummonConversion + DeliveryConversion. Summon, Aura, DamageOverTime, HealOverTime, and Persistent Essence effects gain the Spell tag. They tick, act, or trigger 8% slower, but gain +12% Effect Potency, duration, or summon stat scaling. If the effect is Overchanneled, reduce the slow penalty to 4%."
+        ],
+        "tradeoffs": [
+          "Conversion uses a +5% resource cost safety tradeoff and PvP coefficient until explicit balance values are authored."
+        ],
+        "doesNotAffect": [
+          "Abilities that do not match the listed tags, effect operations, or conversion flags.",
+          "True damage unless the ability explicitly allows conversion."
+        ]
+      }
+    },
+    {
+      "id": "caster_grand_channel",
+      "branchId": "left",
+      "name": "Grand Channel",
+      "description": "Overchannel affects your next 2 Essence abilities. The second ability receives 70% of the Overchannel bonus.",
+      "maxRank": 1,
+      "requiredLevel": 25,
+      "requiredNodeId": null,
+      "x": -1,
+      "y": 6,
+      "tags": [
+        "Left",
+        "Major"
+      ],
+      "effects": [
+        "Overchannel affects your next 2 Essence abilities. The second ability receives 70% of the Overchannel bonus."
+      ],
+      "countsTowardFocus": true,
+      "rules": [],
+      "row": 3,
+      "lane": "Left",
+      "nodeType": "Major",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "Eligible active Essence abilities."
+        ],
+        "changes": [
+          "Overchannel affects your next 2 Essence abilities. The second ability receives 70% of the Overchannel bonus."
+        ],
+        "tradeoffs": [
+          "Advanced cooldowns, target caps, and PvP coefficients can be tuned per node."
+        ],
+        "doesNotAffect": [
+          "Abilities that do not match the listed tags, effect operations, or conversion flags.",
+          "True damage unless the ability explicitly allows conversion."
+        ]
+      }
+    },
+    {
+      "id": "caster_safe_channel",
+      "branchId": "middle",
+      "name": "Safe Channel",
+      "description": "Overchannel grants a Barrier equal to 10% Max Health for 8 seconds and interruption immunity for the Overchanneled ability. If the ability is still interrupted, refund 50 Focus.",
+      "maxRank": 1,
+      "requiredLevel": 25,
+      "requiredNodeId": null,
+      "x": 0,
+      "y": 6,
+      "tags": [
+        "Middle",
+        "Major"
+      ],
+      "effects": [
+        "Overchannel grants a Barrier equal to 10% Max Health for 8 seconds and interruption immunity for the Overchanneled ability. If the ability is still interrupted, refund 50 Focus."
+      ],
+      "countsTowardFocus": true,
+      "rules": [],
+      "row": 3,
+      "lane": "Middle",
+      "nodeType": "Major",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "Eligible active Essence abilities."
+        ],
+        "changes": [
+          "Overchannel grants a Barrier equal to 10% Max Health for 8 seconds and interruption immunity for the Overchanneled ability. If the ability is still interrupted, refund 50 Focus."
+        ],
+        "tradeoffs": [
+          "Advanced cooldowns, target caps, and PvP coefficients can be tuned per node."
+        ],
+        "doesNotAffect": [
+          "Abilities that do not match the listed tags, effect operations, or conversion flags.",
+          "True damage unless the ability explicitly allows conversion."
+        ]
+      }
+    },
+    {
+      "id": "caster_cataclysmic_release",
+      "branchId": "right",
+      "name": "Cataclysmic Release",
+      "description": "Overchannel affects only one ability, but its potency bonus is doubled, capped at +24% Effect Potency. Overchannel cooldown +15 seconds and the empowered ability costs 20% more resource or cooldown.",
+      "maxRank": 1,
+      "requiredLevel": 25,
+      "requiredNodeId": null,
+      "x": 1,
+      "y": 6,
+      "tags": [
+        "Right",
+        "Major"
+      ],
+      "effects": [
+        "Overchannel affects only one ability, but its potency bonus is doubled, capped at +24% Effect Potency. Overchannel cooldown +15 seconds and the empowered ability costs 20% more resource or cooldown."
+      ],
+      "countsTowardFocus": true,
+      "rules": [],
+      "row": 3,
+      "lane": "Right",
+      "nodeType": "Major",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "Eligible active Essence abilities."
+        ],
+        "changes": [
+          "Overchannel affects only one ability, but its potency bonus is doubled, capped at +24% Effect Potency. Overchannel cooldown +15 seconds and the empowered ability costs 20% more resource or cooldown."
+        ],
+        "tradeoffs": [
+          "Advanced cooldowns, target caps, and PvP coefficients can be tuned per node."
+        ],
+        "doesNotAffect": [
+          "Abilities that do not match the listed tags, effect operations, or conversion flags.",
+          "True damage unless the ability explicitly allows conversion."
+        ]
+      }
+    },
+    {
+      "id": "caster_focus_capacity",
+      "branchId": "left",
+      "name": "Focus Capacity",
+      "description": "Max Focus +10 / +20.",
+      "maxRank": 2,
+      "requiredLevel": 1,
+      "requiredNodeId": null,
+      "x": -1,
+      "y": 1,
+      "tags": [
+        "Left",
+        "Minor"
+      ],
+      "effects": [
+        "Max Focus +10 / +20."
+      ],
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 1,
+      "lane": "Left",
+      "nodeType": "Minor",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "This style-tree passive while the node has ranks."
+        ],
+        "changes": [
+          "Max Focus +10 / +20."
+        ],
+        "tradeoffs": [],
+        "doesNotAffect": []
+      }
+    },
+    {
+      "id": "caster_arcane_reserves",
+      "branchId": "middle",
+      "name": "Arcane Reserves",
+      "description": "Start combat with +10 / +20 Focus.",
+      "maxRank": 2,
+      "requiredLevel": 1,
+      "requiredNodeId": null,
+      "x": 0,
+      "y": 1,
+      "tags": [
+        "Middle",
+        "Minor"
+      ],
+      "effects": [
+        "Start combat with +10 / +20 Focus."
+      ],
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 1,
+      "lane": "Middle",
+      "nodeType": "Minor",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "This style-tree passive while the node has ranks."
+        ],
+        "changes": [
+          "Start combat with +10 / +20 Focus."
+        ],
+        "tradeoffs": [],
+        "doesNotAffect": []
+      }
+    },
+    {
+      "id": "caster_mana_flow",
+      "branchId": "right",
+      "name": "Mana Flow",
+      "description": "Essence abilities restore 0.5% / 1% missing primary resource when they successfully apply at least one effect. 3 second internal cooldown.",
+      "maxRank": 2,
+      "requiredLevel": 1,
+      "requiredNodeId": null,
+      "x": 1,
+      "y": 1,
+      "tags": [
+        "Right",
+        "Minor"
+      ],
+      "effects": [
+        "Essence abilities restore 0.5% / 1% missing primary resource when they successfully apply at least one effect. 3 second internal cooldown."
+      ],
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 1,
+      "lane": "Right",
+      "nodeType": "Minor",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "This style-tree passive while the node has ranks."
+        ],
+        "changes": [
+          "Essence abilities restore 0.5% / 1% missing primary resource when they successfully apply at least one effect. 3 second internal cooldown."
+        ],
+        "tradeoffs": [],
+        "doesNotAffect": []
+      }
+    },
+    {
+      "id": "caster_clear_mind",
+      "branchId": "middle",
+      "name": "Clear Mind",
+      "description": "Interrupt, silence, and mana-disruption duration reduced by 8% / 16%.",
+      "maxRank": 2,
+      "requiredLevel": 1,
+      "requiredNodeId": null,
+      "x": 0,
+      "y": 2,
+      "tags": [
+        "Middle",
+        "Minor",
+        "Debuff"
+      ],
+      "effects": [
+        "Interrupt, silence, and mana-disruption duration reduced by 8% / 16%."
+      ],
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 1,
+      "lane": "Middle",
+      "nodeType": "Minor",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "This style-tree passive while the node has ranks."
+        ],
+        "changes": [
+          "Interrupt, silence, and mana-disruption duration reduced by 8% / 16%."
+        ],
+        "tradeoffs": [],
+        "doesNotAffect": []
+      }
+    },
+    {
+      "id": "caster_effect_precision",
+      "branchId": "left",
+      "name": "Effect Precision",
+      "description": "Debuff and control application chance +3% / +6%. If the ability cannot apply debuffs/control, gain +2% / +4% Effect Potency instead.",
+      "maxRank": 2,
+      "requiredLevel": 10,
+      "requiredNodeId": null,
+      "x": -1,
+      "y": 4,
+      "tags": [
+        "Left",
+        "Minor",
+        "Debuff"
+      ],
+      "effects": [
+        "Debuff and control application chance +3% / +6%. If the ability cannot apply debuffs/control, gain +2% / +4% Effect Potency instead."
+      ],
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 2,
+      "lane": "Left",
+      "nodeType": "Minor",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "This style-tree passive while the node has ranks."
+        ],
+        "changes": [
+          "Debuff and control application chance +3% / +6%. If the ability cannot apply debuffs/control, gain +2% / +4% Effect Potency instead."
+        ],
+        "tradeoffs": [],
+        "doesNotAffect": []
+      }
+    },
+    {
+      "id": "caster_sustained_concentration",
+      "branchId": "middle",
+      "name": "Sustained Concentration",
+      "description": "Buff, debuff, DoT, HoT, summon, and aura durations +3% / +6%.",
+      "maxRank": 2,
+      "requiredLevel": 10,
+      "requiredNodeId": null,
+      "x": 0,
+      "y": 4,
+      "tags": [
+        "Middle",
+        "Minor",
+        "Summon",
+        "Debuff"
+      ],
+      "effects": [
+        "Buff, debuff, DoT, HoT, summon, and aura durations +3% / +6%."
+      ],
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 2,
+      "lane": "Middle",
+      "nodeType": "Minor",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "This style-tree passive while the node has ranks."
+        ],
+        "changes": [
+          "Buff, debuff, DoT, HoT, summon, and aura durations +3% / +6%."
+        ],
+        "tradeoffs": [],
+        "doesNotAffect": []
+      }
+    },
+    {
+      "id": "caster_balanced_formula",
+      "branchId": "right",
+      "name": "Balanced Formula",
+      "description": "Essence abilities gain +2% / +4% Effect Potency if they are not empowered by Overchannel.",
+      "maxRank": 2,
+      "requiredLevel": 10,
+      "requiredNodeId": null,
+      "x": 1,
+      "y": 4,
+      "tags": [
+        "Right",
+        "Minor"
+      ],
+      "effects": [
+        "Essence abilities gain +2% / +4% Effect Potency if they are not empowered by Overchannel."
+      ],
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 2,
+      "lane": "Right",
+      "nodeType": "Minor",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "This style-tree passive while the node has ranks."
+        ],
+        "changes": [
+          "Essence abilities gain +2% / +4% Effect Potency if they are not empowered by Overchannel."
+        ],
+        "tradeoffs": [],
+        "doesNotAffect": []
+      }
+    },
+    {
+      "id": "caster_conversion_stability",
+      "branchId": "middle",
+      "name": "Conversion Stability",
+      "description": "Penalties from Caster Row 2 conversions are reduced by 10% / 20%.",
+      "maxRank": 2,
+      "requiredLevel": 10,
+      "requiredNodeId": null,
+      "x": 0,
+      "y": 5,
+      "tags": [
+        "Middle",
+        "Minor"
+      ],
+      "effects": [
+        "Penalties from Caster Row 2 conversions are reduced by 10% / 20%."
+      ],
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 2,
+      "lane": "Middle",
+      "nodeType": "Minor",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "This style-tree passive while the node has ranks."
+        ],
+        "changes": [
+          "Penalties from Caster Row 2 conversions are reduced by 10% / 20%."
+        ],
+        "tradeoffs": [],
+        "doesNotAffect": []
+      }
+    },
+    {
+      "id": "caster_quick_incantation",
+      "branchId": "left",
+      "name": "Quick Incantation",
+      "description": "Essence cast/channel time and recovery time reduced by 4% / 8%. For instant abilities, cooldown recovery +2% / +4% instead.",
+      "maxRank": 2,
+      "requiredLevel": 25,
+      "requiredNodeId": null,
+      "x": -1,
+      "y": 7,
+      "tags": [
+        "Left",
+        "Minor"
+      ],
+      "effects": [
+        "Essence cast/channel time and recovery time reduced by 4% / 8%. For instant abilities, cooldown recovery +2% / +4% instead."
+      ],
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 3,
+      "lane": "Left",
+      "nodeType": "Minor",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "This style-tree passive while the node has ranks."
+        ],
+        "changes": [
+          "Essence cast/channel time and recovery time reduced by 4% / 8%. For instant abilities, cooldown recovery +2% / +4% instead."
+        ],
+        "tradeoffs": [],
+        "doesNotAffect": []
+      }
+    },
+    {
+      "id": "caster_channel_guard",
+      "branchId": "middle",
+      "name": "Channel Guard",
+      "description": "Using an Essence ability below 60% Health grants a Barrier equal to 3% / 6% Max Health. 10 second internal cooldown.",
+      "maxRank": 2,
+      "requiredLevel": 25,
+      "requiredNodeId": null,
+      "x": 0,
+      "y": 7,
+      "tags": [
+        "Middle",
+        "Minor",
+        "Heal",
+        "Barrier"
+      ],
+      "effects": [
+        "Using an Essence ability below 60% Health grants a Barrier equal to 3% / 6% Max Health. 10 second internal cooldown."
+      ],
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 3,
+      "lane": "Middle",
+      "nodeType": "Minor",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "This style-tree passive while the node has ranks."
+        ],
+        "changes": [
+          "Using an Essence ability below 60% Health grants a Barrier equal to 3% / 6% Max Health. 10 second internal cooldown."
+        ],
+        "tradeoffs": [],
+        "doesNotAffect": []
+      }
+    },
+    {
+      "id": "caster_cool_mind",
+      "branchId": "right",
+      "name": "Cool Mind",
+      "description": "Overchannel cooldown reduced by 2 / 4 seconds.",
+      "maxRank": 2,
+      "requiredLevel": 25,
+      "requiredNodeId": null,
+      "x": 1,
+      "y": 7,
+      "tags": [
+        "Right",
+        "Minor"
+      ],
+      "effects": [
+        "Overchannel cooldown reduced by 2 / 4 seconds."
+      ],
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 3,
+      "lane": "Right",
+      "nodeType": "Minor",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "This style-tree passive while the node has ranks."
+        ],
+        "changes": [
+          "Overchannel cooldown reduced by 2 / 4 seconds."
+        ],
+        "tradeoffs": [],
+        "doesNotAffect": []
+      }
+    },
+    {
+      "id": "caster_stored_power",
+      "branchId": "middle",
+      "name": "Stored Power",
+      "description": "If you reach maximum Focus, your next Essence ability gains +4% / +8% Effect Potency and consumes 20 Focus.",
+      "maxRank": 2,
+      "requiredLevel": 25,
+      "requiredNodeId": null,
+      "x": 0,
+      "y": 8,
+      "tags": [
+        "Middle",
+        "Minor"
+      ],
+      "effects": [
+        "If you reach maximum Focus, your next Essence ability gains +4% / +8% Effect Potency and consumes 20 Focus."
+      ],
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 3,
+      "lane": "Middle",
+      "nodeType": "Minor",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "This style-tree passive while the node has ranks."
+        ],
+        "changes": [
+          "If you reach maximum Focus, your next Essence ability gains +4% / +8% Effect Potency and consumes 20 Focus."
+        ],
+        "tradeoffs": [],
+        "doesNotAffect": []
+      }
     }
   ]
 }
-
