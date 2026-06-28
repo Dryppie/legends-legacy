@@ -81,9 +81,7 @@
       "requiredNodeId": null,
       "x": -1,
       "y": 0,
-      "tags": [
-        "Major"
-      ],
+      "tags": [],
       "countsTowardFocus": false,
       "rules": [],
       "row": 1,
@@ -115,9 +113,7 @@
       "requiredNodeId": null,
       "x": 0,
       "y": 0,
-      "tags": [
-        "Major"
-      ],
+      "tags": [],
       "countsTowardFocus": false,
       "rules": [],
       "row": 1,
@@ -149,9 +145,7 @@
       "requiredNodeId": null,
       "x": 1,
       "y": 0,
-      "tags": [
-        "Major"
-      ],
+      "tags": [],
       "countsTowardFocus": false,
       "rules": [],
       "row": 1,
@@ -184,8 +178,7 @@
       "x": -1,
       "y": 3,
       "tags": [
-        "TimingConversion",
-        "Major"
+        "TimingConversion"
       ],
       "countsTowardFocus": false,
       "rules": [],
@@ -282,8 +275,7 @@
       "y": 3,
       "tags": [
         "TimingConversion",
-        "ResourceConversion",
-        "Major"
+        "ResourceConversion"
       ],
       "countsTowardFocus": false,
       "rules": [],
@@ -377,8 +369,7 @@
       "y": 3,
       "tags": [
         "DefensiveConversion",
-        "TimingConversion",
-        "Major"
+        "TimingConversion"
       ],
       "countsTowardFocus": false,
       "rules": [],
@@ -478,9 +469,7 @@
       "requiredNodeId": null,
       "x": -1,
       "y": 6,
-      "tags": [
-        "Major"
-      ],
+      "tags": [],
       "countsTowardFocus": true,
       "rules": [],
       "row": 3,
@@ -512,9 +501,7 @@
       "requiredNodeId": null,
       "x": 0,
       "y": 6,
-      "tags": [
-        "Major"
-      ],
+      "tags": [],
       "countsTowardFocus": true,
       "rules": [],
       "row": 3,
@@ -546,9 +533,7 @@
       "requiredNodeId": null,
       "x": 1,
       "y": 6,
-      "tags": [
-        "Major"
-      ],
+      "tags": [],
       "countsTowardFocus": true,
       "rules": [],
       "row": 3,
@@ -580,9 +565,7 @@
       "requiredNodeId": null,
       "x": -1,
       "y": 1,
-      "tags": [
-        "Minor"
-      ],
+      "tags": [],
       "countsTowardFocus": false,
       "rules": [],
       "row": 1,
@@ -609,9 +592,7 @@
       "requiredNodeId": null,
       "x": 0,
       "y": 1,
-      "tags": [
-        "Minor"
-      ],
+      "tags": [],
       "countsTowardFocus": false,
       "rules": [],
       "row": 1,
@@ -639,7 +620,6 @@
       "x": 1,
       "y": 1,
       "tags": [
-        "Minor",
         "Damage"
       ],
       "countsTowardFocus": false,
@@ -668,9 +648,7 @@
       "requiredNodeId": null,
       "x": 0,
       "y": 2,
-      "tags": [
-        "Minor"
-      ],
+      "tags": [],
       "countsTowardFocus": false,
       "rules": [],
       "row": 1,
@@ -698,7 +676,6 @@
       "x": -1,
       "y": 4,
       "tags": [
-        "Minor",
         "Damage"
       ],
       "countsTowardFocus": false,
@@ -727,9 +704,7 @@
       "requiredNodeId": null,
       "x": 0,
       "y": 4,
-      "tags": [
-        "Minor"
-      ],
+      "tags": [],
       "countsTowardFocus": false,
       "rules": [],
       "row": 2,
@@ -757,7 +732,6 @@
       "x": 1,
       "y": 4,
       "tags": [
-        "Minor",
         "Damage"
       ],
       "countsTowardFocus": false,
@@ -786,9 +760,7 @@
       "requiredNodeId": null,
       "x": 0,
       "y": 5,
-      "tags": [
-        "Minor"
-      ],
+      "tags": [],
       "countsTowardFocus": false,
       "rules": [],
       "row": 2,
@@ -816,7 +788,6 @@
       "x": -1,
       "y": 7,
       "tags": [
-        "Minor",
         "Damage"
       ],
       "countsTowardFocus": false,
@@ -845,9 +816,7 @@
       "requiredNodeId": null,
       "x": 0,
       "y": 7,
-      "tags": [
-        "Minor"
-      ],
+      "tags": [],
       "countsTowardFocus": false,
       "rules": [],
       "row": 3,
@@ -874,9 +843,7 @@
       "requiredNodeId": null,
       "x": 1,
       "y": 7,
-      "tags": [
-        "Minor"
-      ],
+      "tags": [],
       "countsTowardFocus": false,
       "rules": [],
       "row": 3,
@@ -903,9 +870,7 @@
       "requiredNodeId": null,
       "x": 0,
       "y": 8,
-      "tags": [
-        "Minor"
-      ],
+      "tags": [],
       "countsTowardFocus": false,
       "rules": [],
       "row": 3,

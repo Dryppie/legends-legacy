@@ -95,9 +95,7 @@
       "requiredNodeId": null,
       "x": -1,
       "y": 0,
-      "tags": [
-        "Major"
-      ],
+      "tags": [],
       "countsTowardFocus": false,
       "rules": [],
       "row": 1,
@@ -129,9 +127,7 @@
       "requiredNodeId": null,
       "x": 0,
       "y": 0,
-      "tags": [
-        "Major"
-      ],
+      "tags": [],
       "countsTowardFocus": false,
       "rules": [],
       "row": 1,
@@ -163,9 +159,7 @@
       "requiredNodeId": null,
       "x": 1,
       "y": 0,
-      "tags": [
-        "Major"
-      ],
+      "tags": [],
       "countsTowardFocus": false,
       "rules": [],
       "row": 1,
@@ -198,8 +192,7 @@
       "x": -1,
       "y": 3,
       "tags": [
-        "TargetingConversion",
-        "Major"
+        "TargetingConversion"
       ],
       "countsTowardFocus": false,
       "rules": [],
@@ -301,8 +294,7 @@
       "y": 3,
       "tags": [
         "SummonConversion",
-        "TargetingConversion",
-        "Major"
+        "TargetingConversion"
       ],
       "countsTowardFocus": false,
       "rules": [],
@@ -403,8 +395,7 @@
       "x": 1,
       "y": 3,
       "tags": [
-        "TargetingConversion",
-        "Major"
+        "TargetingConversion"
       ],
       "countsTowardFocus": false,
       "rules": [],
@@ -510,9 +501,7 @@
       "requiredNodeId": null,
       "x": -1,
       "y": 6,
-      "tags": [
-        "Major"
-      ],
+      "tags": [],
       "countsTowardFocus": true,
       "rules": [],
       "row": 3,
@@ -544,9 +533,7 @@
       "requiredNodeId": null,
       "x": 0,
       "y": 6,
-      "tags": [
-        "Major"
-      ],
+      "tags": [],
       "countsTowardFocus": true,
       "rules": [],
       "row": 3,
@@ -578,9 +565,7 @@
       "requiredNodeId": null,
       "x": 1,
       "y": 6,
-      "tags": [
-        "Major"
-      ],
+      "tags": [],
       "countsTowardFocus": true,
       "rules": [],
       "row": 3,
@@ -612,9 +597,7 @@
       "requiredNodeId": null,
       "x": -1,
       "y": 1,
-      "tags": [
-        "Minor"
-      ],
+      "tags": [],
       "countsTowardFocus": false,
       "rules": [],
       "row": 1,
@@ -641,9 +624,7 @@
       "requiredNodeId": null,
       "x": 0,
       "y": 1,
-      "tags": [
-        "Minor"
-      ],
+      "tags": [],
       "countsTowardFocus": false,
       "rules": [],
       "row": 1,
@@ -671,7 +652,6 @@
       "x": 1,
       "y": 1,
       "tags": [
-        "Minor",
         "Debuff"
       ],
       "countsTowardFocus": false,
@@ -701,7 +681,6 @@
       "x": 0,
       "y": 2,
       "tags": [
-        "Minor",
         "Damage",
         "Heal"
       ],
@@ -731,9 +710,7 @@
       "requiredNodeId": null,
       "x": -1,
       "y": 4,
-      "tags": [
-        "Minor"
-      ],
+      "tags": [],
       "countsTowardFocus": false,
       "rules": [],
       "row": 2,
@@ -761,7 +738,6 @@
       "x": 0,
       "y": 4,
       "tags": [
-        "Minor",
         "Damage"
       ],
       "countsTowardFocus": false,
@@ -790,9 +766,7 @@
       "requiredNodeId": null,
       "x": 1,
       "y": 4,
-      "tags": [
-        "Minor"
-      ],
+      "tags": [],
       "countsTowardFocus": false,
       "rules": [],
       "row": 2,
@@ -820,7 +794,6 @@
       "x": 0,
       "y": 5,
       "tags": [
-        "Minor",
         "Heal",
         "Barrier"
       ],
@@ -850,9 +823,7 @@
       "requiredNodeId": null,
       "x": -1,
       "y": 7,
-      "tags": [
-        "Minor"
-      ],
+      "tags": [],
       "countsTowardFocus": false,
       "rules": [],
       "row": 3,
@@ -880,7 +851,6 @@
       "x": 0,
       "y": 7,
       "tags": [
-        "Minor",
         "Heal",
         "Barrier"
       ],
@@ -911,7 +881,6 @@
       "x": 1,
       "y": 7,
       "tags": [
-        "Minor",
         "Debuff"
       ],
       "countsTowardFocus": false,
@@ -940,9 +909,7 @@
       "requiredNodeId": null,
       "x": 0,
       "y": 8,
-      "tags": [
-        "Minor"
-      ],
+      "tags": [],
       "countsTowardFocus": false,
       "rules": [],
       "row": 3,
