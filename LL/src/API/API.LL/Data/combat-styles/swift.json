@@ -82,7 +82,6 @@
       "x": -1,
       "y": 0,
       "tags": [
-        "Left",
         "Major"
       ],
       "countsTowardFocus": false,
@@ -117,7 +116,6 @@
       "x": 0,
       "y": 0,
       "tags": [
-        "Middle",
         "Major"
       ],
       "countsTowardFocus": false,
@@ -152,7 +150,6 @@
       "x": 1,
       "y": 0,
       "tags": [
-        "Right",
         "Major"
       ],
       "countsTowardFocus": false,
@@ -188,7 +185,6 @@
       "y": 3,
       "tags": [
         "TimingConversion",
-        "Left",
         "Major"
       ],
       "countsTowardFocus": false,
@@ -287,7 +283,6 @@
       "tags": [
         "TimingConversion",
         "ResourceConversion",
-        "Middle",
         "Major"
       ],
       "countsTowardFocus": false,
@@ -383,7 +378,6 @@
       "tags": [
         "DefensiveConversion",
         "TimingConversion",
-        "Right",
         "Major"
       ],
       "countsTowardFocus": false,
@@ -485,7 +479,6 @@
       "x": -1,
       "y": 6,
       "tags": [
-        "Left",
         "Major"
       ],
       "countsTowardFocus": true,
@@ -520,7 +513,6 @@
       "x": 0,
       "y": 6,
       "tags": [
-        "Middle",
         "Major"
       ],
       "countsTowardFocus": true,
@@ -555,7 +547,6 @@
       "x": 1,
       "y": 6,
       "tags": [
-        "Right",
         "Major"
       ],
       "countsTowardFocus": true,
@@ -590,7 +581,6 @@
       "x": -1,
       "y": 1,
       "tags": [
-        "Left",
         "Minor"
       ],
       "countsTowardFocus": false,
@@ -620,7 +610,6 @@
       "x": 0,
       "y": 1,
       "tags": [
-        "Middle",
         "Minor"
       ],
       "countsTowardFocus": false,
@@ -650,7 +639,6 @@
       "x": 1,
       "y": 1,
       "tags": [
-        "Right",
         "Minor",
         "Damage"
       ],
@@ -681,7 +669,6 @@
       "x": 0,
       "y": 2,
       "tags": [
-        "Middle",
         "Minor"
       ],
       "countsTowardFocus": false,
@@ -711,7 +698,6 @@
       "x": -1,
       "y": 4,
       "tags": [
-        "Left",
         "Minor",
         "Damage"
       ],
@@ -742,7 +728,6 @@
       "x": 0,
       "y": 4,
       "tags": [
-        "Middle",
         "Minor"
       ],
       "countsTowardFocus": false,
@@ -772,7 +757,6 @@
       "x": 1,
       "y": 4,
       "tags": [
-        "Right",
         "Minor",
         "Damage"
       ],
@@ -803,7 +787,6 @@
       "x": 0,
       "y": 5,
       "tags": [
-        "Middle",
         "Minor"
       ],
       "countsTowardFocus": false,
@@ -833,7 +816,6 @@
       "x": -1,
       "y": 7,
       "tags": [
-        "Left",
         "Minor",
         "Damage"
       ],
@@ -864,7 +846,6 @@
       "x": 0,
       "y": 7,
       "tags": [
-        "Middle",
         "Minor"
       ],
       "countsTowardFocus": false,
@@ -894,7 +875,6 @@
       "x": 1,
       "y": 7,
       "tags": [
-        "Right",
         "Minor"
       ],
       "countsTowardFocus": false,
@@ -924,7 +904,6 @@
       "x": 0,
       "y": 8,
       "tags": [
-        "Middle",
         "Minor"
       ],
       "countsTowardFocus": false,

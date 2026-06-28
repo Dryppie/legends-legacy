@@ -96,7 +96,6 @@
       "x": -1,
       "y": 0,
       "tags": [
-        "Left",
         "Major"
       ],
       "countsTowardFocus": false,
@@ -131,7 +130,6 @@
       "x": 0,
       "y": 0,
       "tags": [
-        "Middle",
         "Major"
       ],
       "countsTowardFocus": false,
@@ -166,7 +164,6 @@
       "x": 1,
       "y": 0,
       "tags": [
-        "Right",
         "Major"
       ],
       "countsTowardFocus": false,
@@ -202,7 +199,6 @@
       "y": 3,
       "tags": [
         "DefensiveConversion",
-        "Left",
         "Major"
       ],
       "countsTowardFocus": false,
@@ -316,7 +312,6 @@
       "y": 3,
       "tags": [
         "DefensiveTempo",
-        "Middle",
         "Major"
       ],
       "countsTowardFocus": false,
@@ -431,7 +426,6 @@
       "y": 3,
       "tags": [
         "SupportConversion",
-        "Right",
         "Major"
       ],
       "countsTowardFocus": false,
@@ -537,7 +531,6 @@
       "x": -1,
       "y": 6,
       "tags": [
-        "Left",
         "Major"
       ],
       "countsTowardFocus": true,
@@ -572,7 +565,6 @@
       "x": 0,
       "y": 6,
       "tags": [
-        "Middle",
         "Major"
       ],
       "countsTowardFocus": true,
@@ -607,7 +599,6 @@
       "x": 1,
       "y": 6,
       "tags": [
-        "Right",
         "Major"
       ],
       "countsTowardFocus": true,
@@ -642,7 +633,6 @@
       "x": -1,
       "y": 1,
       "tags": [
-        "Left",
         "Minor",
         "Heal"
       ],
@@ -673,7 +663,6 @@
       "x": 0,
       "y": 1,
       "tags": [
-        "Middle",
         "Minor"
       ],
       "countsTowardFocus": false,
@@ -703,7 +692,6 @@
       "x": 1,
       "y": 1,
       "tags": [
-        "Right",
         "Minor",
         "Debuff"
       ],
@@ -734,7 +722,6 @@
       "x": 0,
       "y": 2,
       "tags": [
-        "Middle",
         "Minor",
         "Heal"
       ],
@@ -765,7 +752,6 @@
       "x": -1,
       "y": 4,
       "tags": [
-        "Left",
         "Minor",
         "Barrier"
       ],
@@ -796,7 +782,6 @@
       "x": 0,
       "y": 4,
       "tags": [
-        "Middle",
         "Minor"
       ],
       "countsTowardFocus": false,
@@ -826,7 +811,6 @@
       "x": 1,
       "y": 4,
       "tags": [
-        "Right",
         "Minor"
       ],
       "countsTowardFocus": false,
@@ -856,7 +840,6 @@
       "x": 0,
       "y": 5,
       "tags": [
-        "Middle",
         "Minor",
         "Heal",
         "Barrier"
@@ -888,7 +871,6 @@
       "x": -1,
       "y": 7,
       "tags": [
-        "Left",
         "Minor",
         "Heal"
       ],
@@ -919,7 +901,6 @@
       "x": 0,
       "y": 7,
       "tags": [
-        "Middle",
         "Minor",
         "Damage"
       ],
@@ -950,7 +931,6 @@
       "x": 1,
       "y": 7,
       "tags": [
-        "Right",
         "Minor",
         "Damage"
       ],
@@ -981,7 +961,6 @@
       "x": 0,
       "y": 8,
       "tags": [
-        "Middle",
         "Minor",
         "Heal",
         "Barrier"
