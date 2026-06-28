@@ -13,8 +13,8 @@ using Persistence.LL;
 namespace Persistence.LL.Migrations
 {
     [DbContext(typeof(LLDbContext))]
-    [Migration("20260628101403_AddCombatStyleSnapshotToCharacterSnapshots")]
-    partial class AddCombatStyleSnapshotToCharacterSnapshots
+    [Migration("20260628160145_BaseMigration")]
+    partial class BaseMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -1065,6 +1065,83 @@ namespace Persistence.LL.Migrations
                     b.ToTable("PlayerEssences");
                 });
 
+            modelBuilder.Entity("Domain.Models.Guilds.Buildings.GuildActivityLog", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("CharacterId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("GuildId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<string>("Metadata")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("GuildId", "CreatedAt");
+
+                    b.ToTable("GuildActivityLogs");
+                });
+
+            modelBuilder.Entity("Domain.Models.Guilds.Buildings.GuildBuilding", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset?>("CompletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset?>("CompletesAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("GuildId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Level")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTimeOffset>("StartedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int?>("TargetLevel")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("GuildId", "Type")
+                        .IsUnique();
+
+                    b.ToTable("GuildBuildings");
+                });
+
             modelBuilder.Entity("Domain.Models.Guilds.Guild", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1077,6 +1154,12 @@ namespace Persistence.LL.Migrations
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<int>("GuildLevel")
+                        .HasColumnType("integer");
+
+                    b.Property<long>("GuildXp")
+                        .HasColumnType("bigint");
 
                     b.Property<int>("MaxMembers")
                         .HasColumnType("integer");
@@ -1098,22 +1181,6 @@ namespace Persistence.LL.Migrations
                         .IsUnique();
 
                     b.ToTable("Guilds");
-                });
-
-            modelBuilder.Entity("Domain.Models.Guilds.GuildBuildingUpgrade", b =>
-                {
-                    b.Property<Guid>("GuildId")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("BuildingUpgradeDefinitionId")
-                        .HasColumnType("text");
-
-                    b.Property<int>("Level")
-                        .HasColumnType("integer");
-
-                    b.HasKey("GuildId", "BuildingUpgradeDefinitionId");
-
-                    b.ToTable("GuildBuildingUpgrade");
                 });
 
             modelBuilder.Entity("Domain.Models.Guilds.GuildInvite", b =>
@@ -1172,6 +1239,302 @@ namespace Persistence.LL.Migrations
                     b.HasKey("GuildId", "Resource");
 
                     b.ToTable("GuildResource");
+                });
+
+            modelBuilder.Entity("Domain.Models.Guilds.Missions.GuildContributionLedger", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<long>("Amount")
+                        .HasColumnType("bigint");
+
+                    b.Property<Guid>("CharacterId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ContextId")
+                        .HasColumnType("text");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("GuildId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("IdempotencyKey")
+                        .HasColumnType("text");
+
+                    b.Property<int>("Metric")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTimeOffset>("OccurredAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("Source")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("IdempotencyKey")
+                        .IsUnique();
+
+                    b.HasIndex("GuildId", "CharacterId", "OccurredAt");
+
+                    b.ToTable("GuildContributionLedgers");
+                });
+
+            modelBuilder.Entity("Domain.Models.Guilds.Missions.GuildMemberContributionPeriod", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("CharacterId")
+                        .HasColumnType("uuid");
+
+                    b.Property<long>("ContributionScore")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("GuildFavorEarned")
+                        .HasColumnType("bigint");
+
+                    b.Property<Guid>("GuildId")
+                        .HasColumnType("uuid");
+
+                    b.Property<long>("GuildSuppliesGenerated")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("GuildXpGenerated")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTimeOffset?>("LastContributedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("OrdersCompleted")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("PeriodKey")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("PeriodType")
+                        .HasColumnType("integer");
+
+                    b.Property<long>("WeeklyMissionContribution")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("LastContributedAt");
+
+                    b.HasIndex("GuildId", "CharacterId", "PeriodType", "PeriodKey")
+                        .IsUnique();
+
+                    b.ToTable("GuildMemberContributionPeriods");
+                });
+
+            modelBuilder.Entity("Domain.Models.Guilds.Missions.GuildMissionContribution", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<long>("Amount")
+                        .HasColumnType("bigint");
+
+                    b.Property<Guid>("CharacterId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("ContributionTier")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("GuildId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("GuildMissionInstanceId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset?>("LastContributedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset?>("RewardClaimedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("GuildMissionInstanceId", "CharacterId")
+                        .IsUnique();
+
+                    b.ToTable("GuildMissionContributions");
+                });
+
+            modelBuilder.Entity("Domain.Models.Guilds.Missions.GuildMissionInstance", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset?>("CompletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<long>("CurrentAmount")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTimeOffset>("EndsAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("GuildId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("MissionDefinitionId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("RewardClaimDeadline")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset>("StartedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.Property<long>("TargetAmount")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("WeekKey")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("GuildId", "WeekKey");
+
+                    b.ToTable("GuildMissionInstances");
+                });
+
+            modelBuilder.Entity("Domain.Models.Guilds.Missions.GuildMissionOption", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset>("GeneratedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("GuildId")
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("IsSelected")
+                        .HasColumnType("boolean");
+
+                    b.Property<Guid>("MissionDefinitionId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset?>("SelectedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("SelectedByCharacterId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("WeekKey")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("GuildId", "WeekKey");
+
+                    b.HasIndex("GuildId", "WeekKey", "IsSelected");
+
+                    b.ToTable("GuildMissionOptions");
+                });
+
+            modelBuilder.Entity("Domain.Models.Guilds.Missions.PersonalGuildOrder", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("CharacterId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset?>("CompletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<long>("CurrentAmount")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTimeOffset>("GeneratedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("GuildId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("MissionDefinitionId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("PeriodKey")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("PeriodType")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTimeOffset?>("RewardClaimedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.Property<long>("TargetAmount")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("GuildId", "CharacterId", "PeriodType", "PeriodKey");
+
+                    b.ToTable("PersonalGuildOrders");
+                });
+
+            modelBuilder.Entity("Domain.Models.Guilds.Shop.GuildShopPurchase", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("CharacterId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("GuildId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("PeriodKey")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTimeOffset>("PurchasedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("ShopItemKey")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("StockType")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("GuildId", "CharacterId", "ShopItemKey", "PeriodKey")
+                        .IsUnique();
+
+                    b.ToTable("GuildShopPurchases");
                 });
 
             modelBuilder.Entity("Domain.Models.Inventories.Inventory", b =>
@@ -2079,6 +2442,12 @@ namespace Persistence.LL.Migrations
                     b.Property<long>("FateEcho")
                         .HasColumnType("bigint");
 
+                    b.Property<long>("GuildFavor")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("GuildHonors")
+                        .HasColumnType("bigint");
+
                     b.Property<long>("SigilFragments")
                         .HasColumnType("bigint");
 
@@ -2475,6 +2844,28 @@ namespace Persistence.LL.Migrations
                     b.Navigation("PlayerEssence");
                 });
 
+            modelBuilder.Entity("Domain.Models.Guilds.Buildings.GuildActivityLog", b =>
+                {
+                    b.HasOne("Domain.Models.Guilds.Guild", "Guild")
+                        .WithMany("ActivityLogs")
+                        .HasForeignKey("GuildId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Guild");
+                });
+
+            modelBuilder.Entity("Domain.Models.Guilds.Buildings.GuildBuilding", b =>
+                {
+                    b.HasOne("Domain.Models.Guilds.Guild", "Guild")
+                        .WithMany("Buildings")
+                        .HasForeignKey("GuildId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Guild");
+                });
+
             modelBuilder.Entity("Domain.Models.Guilds.Guild", b =>
                 {
                     b.HasOne("Domain.Models.Entities.Characters.Character", "Owner")
@@ -2484,17 +2875,6 @@ namespace Persistence.LL.Migrations
                         .IsRequired();
 
                     b.Navigation("Owner");
-                });
-
-            modelBuilder.Entity("Domain.Models.Guilds.GuildBuildingUpgrade", b =>
-                {
-                    b.HasOne("Domain.Models.Guilds.Guild", "Guild")
-                        .WithMany("GuildBuildingUpgrades")
-                        .HasForeignKey("GuildId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Guild");
                 });
 
             modelBuilder.Entity("Domain.Models.Guilds.GuildInvite", b =>
@@ -2539,6 +2919,59 @@ namespace Persistence.LL.Migrations
                 {
                     b.HasOne("Domain.Models.Guilds.Guild", null)
                         .WithMany("Resources")
+                        .HasForeignKey("GuildId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Domain.Models.Guilds.Missions.GuildMissionContribution", b =>
+                {
+                    b.HasOne("Domain.Models.Guilds.Missions.GuildMissionInstance", "GuildMissionInstance")
+                        .WithMany("Contributions")
+                        .HasForeignKey("GuildMissionInstanceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("GuildMissionInstance");
+                });
+
+            modelBuilder.Entity("Domain.Models.Guilds.Missions.GuildMissionInstance", b =>
+                {
+                    b.HasOne("Domain.Models.Guilds.Guild", "Guild")
+                        .WithMany("MissionInstances")
+                        .HasForeignKey("GuildId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Guild");
+                });
+
+            modelBuilder.Entity("Domain.Models.Guilds.Missions.GuildMissionOption", b =>
+                {
+                    b.HasOne("Domain.Models.Guilds.Guild", "Guild")
+                        .WithMany("MissionOptions")
+                        .HasForeignKey("GuildId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Guild");
+                });
+
+            modelBuilder.Entity("Domain.Models.Guilds.Missions.PersonalGuildOrder", b =>
+                {
+                    b.HasOne("Domain.Models.Guilds.Guild", "Guild")
+                        .WithMany("PersonalGuildOrders")
+                        .HasForeignKey("GuildId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Guild");
+                });
+
+            modelBuilder.Entity("Domain.Models.Guilds.Shop.GuildShopPurchase", b =>
+                {
+                    b.HasOne("Domain.Models.Guilds.Guild", null)
+                        .WithMany("ShopPurchases")
                         .HasForeignKey("GuildId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -2845,13 +3278,28 @@ namespace Persistence.LL.Migrations
 
             modelBuilder.Entity("Domain.Models.Guilds.Guild", b =>
                 {
-                    b.Navigation("GuildBuildingUpgrades");
+                    b.Navigation("ActivityLogs");
+
+                    b.Navigation("Buildings");
 
                     b.Navigation("Invites");
 
                     b.Navigation("Members");
 
+                    b.Navigation("MissionInstances");
+
+                    b.Navigation("MissionOptions");
+
+                    b.Navigation("PersonalGuildOrders");
+
                     b.Navigation("Resources");
+
+                    b.Navigation("ShopPurchases");
+                });
+
+            modelBuilder.Entity("Domain.Models.Guilds.Missions.GuildMissionInstance", b =>
+                {
+                    b.Navigation("Contributions");
                 });
 
             modelBuilder.Entity("Domain.Models.Inventories.Inventory", b =>
