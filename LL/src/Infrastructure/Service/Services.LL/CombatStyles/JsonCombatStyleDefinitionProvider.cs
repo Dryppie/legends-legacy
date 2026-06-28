@@ -18,12 +18,7 @@ public sealed class JsonCombatStyleDefinitionProvider : ICombatStyleDefinitionPr
         JsonSerializerOptions options)
     {
         var contentRoot = config["Content:Root"] ?? "Data";
-        var path = Path.Combine(contentRootPath, contentRoot, "combat-styles.json");
-        var document = JsonSerializer.Deserialize<CombatStyleDefinitionDocument>(
-            File.ReadAllText(path),
-            options) ?? new();
-
-        _definitions = [.. document.Styles.Select(ToDomain)];
+        _definitions = [.. LoadDefinitions(contentRootPath, contentRoot, options).Select(ToDomain)];
         ThrowIfInvalid(_definitions);
     }
 
@@ -35,9 +30,39 @@ public sealed class JsonCombatStyleDefinitionProvider : ICombatStyleDefinitionPr
     public CombatStyleFocusDefinition? GetFocus(string styleId, string focusId) =>
         GetById(styleId)?.Focuses.FirstOrDefault(x => x.Id.Equals(focusId, StringComparison.OrdinalIgnoreCase));
 
+    private static IEnumerable<CombatStyleDefinitionJson> LoadDefinitions(
+        string contentRootPath,
+        string contentRoot,
+        JsonSerializerOptions options)
+    {
+        var folderPath = Path.Combine(contentRootPath, contentRoot, "combat-styles");
+        if (Directory.Exists(folderPath))
+        {
+            var files = Directory
+                .EnumerateFiles(folderPath, "*.json", SearchOption.TopDirectoryOnly)
+                .OrderBy(Path.GetFileName, StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+            if (files.Count > 0)
+            {
+                foreach (var file in files)
+                {
+                    yield return JsonSerializer.Deserialize<CombatStyleDefinitionJson>(
+                        File.ReadAllText(file),
+                        options) ?? new();
+                }
+
+                yield break;
+            }
+        }
+
+        throw new DirectoryNotFoundException($"Could not locate combat style definition files under '{folderPath}'.");
+    }
+
     private static CombatStyleDefinition ToDomain(CombatStyleDefinitionJson style)
     {
         var focuses = style.Focuses.Select(focus => ToDomain(style.Id, focus)).ToList();
+        var skillTreeNodes = style.SkillTreeNodes.Select(ToDomain).ToList();
 
         return new(
             style.Id,
@@ -49,11 +74,29 @@ public sealed class JsonCombatStyleDefinitionProvider : ICombatStyleDefinitionPr
             style.RecommendedTags,
             style.RecommendedStats,
             focuses,
-            CombatStyleSkillTreeDefinitionFactory.Create(style.Id, focuses),
+            skillTreeNodes,
             [.. style.Rules.Select(ToDomain)],
             [.. style.ResourceOverflowOperations.Select(ToDomain)],
             style.CoreMechanic);
     }
+
+    private static CombatStyleTreeNodeDefinition ToDomain(CombatStyleTreeNodeDefinitionJson node) =>
+        new(
+            node.Id,
+            node.BranchId,
+            node.Name,
+            node.Description,
+            node.MaxRank,
+            node.RequiredLevel,
+            node.RequiredNodeId,
+            node.X,
+            node.Y,
+            node.Tags,
+            node.Effects,
+            node.CountsTowardFocus)
+        {
+            Rules = [.. node.Rules.Select(ToDomain)]
+        };
 
     private static CombatStyleFocusDefinition ToDomain(string styleId, CombatStyleFocusDefinitionJson focus) =>
         new(
@@ -157,6 +200,9 @@ public sealed class JsonCombatStyleDefinitionProvider : ICombatStyleDefinitionPr
 
         foreach (var style in definitions)
         {
+            if (style.SkillTreeNodes.Count == 0)
+                throw new InvalidOperationException($"Combat style '{style.Id}' must define skill tree nodes.");
+
             var duplicateFoci = style.Focuses
                 .GroupBy(x => x.Id, StringComparer.OrdinalIgnoreCase)
                 .Where(x => x.Count() > 1)
@@ -170,12 +216,23 @@ public sealed class JsonCombatStyleDefinitionProvider : ICombatStyleDefinitionPr
                 .ToList();
             if (invalidFoci.Count > 0)
                 throw new InvalidOperationException($"Combat style '{style.Id}' has focus definitions without ids or names.");
-        }
-    }
 
-    private sealed class CombatStyleDefinitionDocument
-    {
-        public List<CombatStyleDefinitionJson> Styles { get; set; } = [];
+            var duplicateNodes = style.SkillTreeNodes
+                .GroupBy(x => x.Id, StringComparer.OrdinalIgnoreCase)
+                .Where(x => x.Count() > 1)
+                .Select(x => x.Key)
+                .ToList();
+            if (duplicateNodes.Count > 0)
+                throw new InvalidOperationException($"Combat style '{style.Id}' has duplicate skill tree node ids: {string.Join(", ", duplicateNodes)}");
+
+            var missingRequiredNodes = style.SkillTreeNodes
+                .Where(x => x.RequiredNodeId is not null
+                    && !style.SkillTreeNodes.Any(candidate => candidate.Id.Equals(x.RequiredNodeId, StringComparison.OrdinalIgnoreCase)))
+                .Select(x => $"{x.Id}->{x.RequiredNodeId}")
+                .ToList();
+            if (missingRequiredNodes.Count > 0)
+                throw new InvalidOperationException($"Combat style '{style.Id}' has skill tree nodes with missing required nodes: {string.Join(", ", missingRequiredNodes)}");
+        }
     }
 
     private sealed class CombatStyleDefinitionJson
@@ -189,9 +246,27 @@ public sealed class JsonCombatStyleDefinitionProvider : ICombatStyleDefinitionPr
         public IReadOnlyList<string> RecommendedTags { get; set; } = [];
         public IReadOnlyList<AttributeType> RecommendedStats { get; set; } = [];
         public IReadOnlyList<CombatStyleFocusDefinitionJson> Focuses { get; set; } = [];
+        public IReadOnlyList<CombatStyleTreeNodeDefinitionJson> SkillTreeNodes { get; set; } = [];
         public IReadOnlyList<CombatStyleRuleDefinitionJson> Rules { get; set; } = [];
         public IReadOnlyList<CombatStyleRuleOperationJson> ResourceOverflowOperations { get; set; } = [];
         public string CoreMechanic { get; set; } = string.Empty;
+    }
+
+    private sealed class CombatStyleTreeNodeDefinitionJson
+    {
+        public string Id { get; set; } = string.Empty;
+        public string BranchId { get; set; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
+        public int MaxRank { get; set; } = 1;
+        public int RequiredLevel { get; set; }
+        public string? RequiredNodeId { get; set; }
+        public int X { get; set; }
+        public int Y { get; set; }
+        public IReadOnlyList<string> Tags { get; set; } = [];
+        public IReadOnlyList<string> Effects { get; set; } = [];
+        public bool CountsTowardFocus { get; set; }
+        public IReadOnlyList<CombatStyleRuleDefinitionJson> Rules { get; set; } = [];
     }
 
     private sealed class CombatStyleFocusDefinitionJson
