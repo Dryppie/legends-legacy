@@ -1,5 +1,3 @@
-using Domain.Models.CombatStyles;
-
 namespace Services.LL.Combat.Layers.Orchestration.Models;
 
 public sealed record CombatEncounterPlan(
@@ -8,9 +6,7 @@ public sealed record CombatEncounterPlan(
     int Sequence,
     DateTimeOffset StartsAt,
     IReadOnlyList<CombatParticipantSlot> Participants,
-    CombatEncounterSourceContext SourceContext,
-    CombatStyleSnapshot? PlayerCombatStyle = null,
-    CombatStyleSnapshot? HostileCombatStyle = null)
+    CombatEncounterSourceContext SourceContext)
 {
     public IReadOnlyList<CombatParticipantSlot> FriendlyParticipants =>
         [.. Participants.Where(x => x.Side == CombatSide.Friendly)];

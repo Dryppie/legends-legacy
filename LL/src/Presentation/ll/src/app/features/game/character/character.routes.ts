@@ -5,7 +5,6 @@ import { CharacterOverviewComponent } from './character-overview/character-overv
 import { SoulstoneArchiveComponent } from './soulstone-archive/soulstone-archive.component';
 import { EssencesComponent } from './essences/essences.component';
 import { AchievementsComponent } from './achievements/achievements.component';
-import { CombatStyleComponent } from './combat-style/combat-style.component';
 
 export const CHARACTER_ROUTES: Routes = [
   {
@@ -28,15 +27,6 @@ export const CHARACTER_ROUTES: Routes = [
       {
         path: 'essences',
         component: EssencesComponent,
-      },
-      {
-        path: 'combat-style',
-        component: CombatStyleComponent,
-      },
-      {
-        path: 'combat-styles',
-        redirectTo: 'combat-style',
-        pathMatch: 'full',
       },
       {
         path: 'achievements',

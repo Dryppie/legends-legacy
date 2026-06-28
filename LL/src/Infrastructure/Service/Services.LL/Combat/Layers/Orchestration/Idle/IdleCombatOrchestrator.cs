@@ -1,4 +1,3 @@
-using Application.Interfaces.Services.LL.CombatStyles;
 using Services.LL.Combat.Layers.Orchestration.Models;
 using Services.LL.Interfaces.Combat.Orchestration;
 using Services.LL.Interfaces.Combat.Resolution.Idle;
@@ -9,16 +8,13 @@ public sealed class IdleCombatOrchestrator : ICombatOrchestrator
 {
     private readonly IIdleCombatPlanner _planner;
     private readonly IIdleCombatResolutionSessionFactory _resolutionSessionFactory;
-    private readonly ICombatStyleService _combatStyleService;
 
     public IdleCombatOrchestrator(
         IIdleCombatPlanner planner,
-        IIdleCombatResolutionSessionFactory resolutionSessionFactory,
-        ICombatStyleService combatStyleService)
+        IIdleCombatResolutionSessionFactory resolutionSessionFactory)
     {
         _planner = planner;
         _resolutionSessionFactory = resolutionSessionFactory;
-        _combatStyleService = combatStyleService;
     }
 
     public CombatMode Mode => CombatMode.Idle;
@@ -48,9 +44,6 @@ public sealed class IdleCombatOrchestrator : ICombatOrchestrator
 
         var records = new List<CombatEncounterRecord>(plan.PlannedEncounterCount);
         var cursor = plan.From;
-        var combatStyle = await _combatStyleService.GetActiveSnapshotAsync(
-            plan.CharacterId,
-            cancellationToken);
 
         var resolutionSession = await _resolutionSessionFactory.CreateAsync(
             plan,
@@ -60,7 +53,7 @@ public sealed class IdleCombatOrchestrator : ICombatOrchestrator
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            var encounterPlan = _planner.CreateEncounterPlan(plan, sequence, cursor, combatStyle);
+            var encounterPlan = _planner.CreateEncounterPlan(plan, sequence, cursor);
             var resolution = await resolutionSession.ResolveAsync(encounterPlan, cancellationToken);
 
             records.Add(new CombatEncounterRecord(encounterPlan, resolution));

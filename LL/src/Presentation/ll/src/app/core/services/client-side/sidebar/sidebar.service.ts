@@ -75,13 +75,6 @@ function getSidebarSections(): SidebarSection[] {
           description: 'Archive, attune, ascend',
         },
         {
-          id: 'combat-styles',
-          route: ['character', 'combat-style'],
-          icon: 'character/essences',
-          title: 'Combat Styles',
-          description: 'Fighting stance and focus',
-        },
-        {
           id: 'achievements',
           route: ['character', 'achievements'],
           icon: 'character/achievements',

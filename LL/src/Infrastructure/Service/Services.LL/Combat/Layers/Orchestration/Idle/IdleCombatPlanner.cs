@@ -1,4 +1,3 @@
-using Domain.Models.CombatStyles;
 using Services.LL.CharacterActions;
 using Services.LL.Combat.Layers.Orchestration.Models;
 using Services.LL.Interfaces.Combat.Orchestration;
@@ -53,8 +52,7 @@ public sealed class IdleCombatPlanner : IIdleCombatPlanner
     public CombatEncounterPlan CreateEncounterPlan(
         IdleCombatPlan plan,
         int sequence,
-        DateTimeOffset startsAt,
-        CombatStyleSnapshot? combatStyle = null)
+        DateTimeOffset startsAt)
     {
         var monsterCount = _spawningService.HowManyMonstersToSpawn(plan.Area.SpawnProbabilities);
         var selectedCreatures = _spawningService.WhatAreaCreaturesToSpawn(
@@ -86,7 +84,6 @@ public sealed class IdleCombatPlanner : IIdleCombatPlanner
             SourceContext: new IdleEncounterSourceContext(
                 CharacterId: plan.CharacterId,
                 Area: plan.Area,
-                EncounterCadence: plan.EncounterCadence),
-            PlayerCombatStyle: combatStyle);
+                EncounterCadence: plan.EncounterCadence));
     }
 }

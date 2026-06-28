@@ -1,9 +1,7 @@
 using Application.Interfaces.Services.LL.Colosseum;
-using Application.Interfaces.Services.LL.CombatStyles;
 using Application.Interfaces.Services.LL.Entities;
 using Domain.Models.Colosseum;
 using Domain.Models.Combat;
-using Domain.Models.CombatStyles;
 using Domain.Models.Entities.Characters;
 using Domain.Models.Items;
 using Domain.Models.Items.Equipments;
@@ -31,7 +29,6 @@ public class ColosseumService : IColosseumService
     private readonly ICharacterSnapshotService _characterSnapshotService;
     private readonly IItemBaseRepository _itemBaseRepository;
     private readonly IChampionMarketCatalog _championMarketCatalog;
-    private readonly ICombatStyleService _combatStyleService;
 
     public ColosseumService(
         IEntityService es,
@@ -43,8 +40,7 @@ public class ColosseumService : IColosseumService
         IRatingService rs,
         ICharacterSnapshotService characterSnapshotService,
         IItemBaseRepository itemBaseRepository,
-        IChampionMarketCatalog championMarketCatalog,
-        ICombatStyleService combatStyleService)
+        IChampionMarketCatalog championMarketCatalog)
     {
         _entityService = es;
         _characterService = cs;
@@ -56,7 +52,6 @@ public class ColosseumService : IColosseumService
         _characterSnapshotService = characterSnapshotService;
         _itemBaseRepository = itemBaseRepository;
         _championMarketCatalog = championMarketCatalog;
-        _combatStyleService = combatStyleService;
     }
 
     public async Task<StartArenaBattleResult?> StartArenaBattle(Guid characterId, Guid enemyId, CancellationToken cancellationToken)
@@ -87,14 +82,10 @@ public class ColosseumService : IColosseumService
         var combatEnemyEntities = await CreateDefenderCombatEntitiesAsync(enemyTeam, defenderSnapshot, cancellationToken);
         await _combatSetupService.PrepareEntitiesForCombat([.. combatPlayerEntities, .. combatEnemyEntities]);
 
-        var attackerCombatStyle = await _combatStyleService.GetActiveSnapshotAsync(characterId, cancellationToken);
-        var defenderCombatStyle = await _combatStyleService.GetActiveSnapshotAsync(enemyId, cancellationToken);
         var encounterPlan = CreateArenaEncounterPlan(
             characterId,
             enemyId,
-            now,
-            attackerCombatStyle,
-            defenderCombatStyle);
+            now);
         arenaTicketStatus.CurrentTickets--;
         _colosseumRepository.UpdateArenaTicketStatus(arenaTicketStatus);
 
@@ -331,9 +322,7 @@ public class ColosseumService : IColosseumService
     private static CombatEncounterPlan CreateArenaEncounterPlan(
         Guid characterId,
         Guid enemyId,
-        DateTimeOffset startsAt,
-        CombatStyleSnapshot? attackerCombatStyle,
-        CombatStyleSnapshot? defenderCombatStyle)
+        DateTimeOffset startsAt)
     {
         var matchId = Guid.NewGuid();
         return new CombatEncounterPlan(
@@ -346,9 +335,7 @@ public class ColosseumService : IColosseumService
                 new CombatParticipantSlot(characterId.ToString(), characterId, CombatSide.Friendly),
                 new CombatParticipantSlot(enemyId.ToString(), enemyId, CombatSide.Hostile)
             ],
-            SourceContext: new PvpEncounterSourceContext(matchId, characterId, enemyId),
-            PlayerCombatStyle: attackerCombatStyle,
-            HostileCombatStyle: defenderCombatStyle);
+            SourceContext: new PvpEncounterSourceContext(matchId, characterId, enemyId));
     }
 
     /// <summary>

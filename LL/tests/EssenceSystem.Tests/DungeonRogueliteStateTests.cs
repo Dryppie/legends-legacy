@@ -1,13 +1,9 @@
 using Application.Interfaces.Services.AdminDashboard;
 using Application.Interfaces.Services.LL;
-using Application.Interfaces.Services.LL.CombatStyles;
 using Application.Interfaces.Services.LL.Dungeons;
 using Application.UseCases._AdminDashboard.Creatures.Dtos;
-using Application.UseCases.CombatStyles.Dtos;
-using Application.UseCases.CombatStyles.Models;
 using Domain.Models.Attributes;
 using Domain.Models.Attributes.Modifiers;
-using Domain.Models.CombatStyles;
 using Domain.Models.Dungeons;
 using Domain.Models.Dungeons.Definitions;
 using Domain.Models.Dungeons.Definitions.Boons;
@@ -861,7 +857,6 @@ public sealed class DungeonRogueliteStateTests
         var experience = new CapturingExperienceRewardWriter();
         var currency = new CapturingCurrencyRewardWriter();
         var inventory = new CapturingInventoryService();
-        var combatStyles = new CapturingCombatStyleService();
         var claimer = new DungeonRunRewardClaimer(
             experience,
             currency,
@@ -871,14 +866,11 @@ public sealed class DungeonRogueliteStateTests
                 new() { Id = "item.unsecured", Name = "Unsecured", ItemType = ItemType.Resource, Stackable = true }
             ]),
             new InventoryItemFactory(),
-            inventory,
-            combatStyles);
+            inventory);
 
         var claimed = await claimer.ClaimAsync(run, CancellationToken.None);
 
         Assert.Equal(50, experience.TotalExperience);
-        Assert.Equal(50, combatStyles.ExperienceGranted);
-        Assert.Equal("dungeon_reward_claim", combatStyles.Source);
         Assert.Equal(20, currency.Cinders);
         Assert.Equal(2, currency.Soulstones);
         var claimedItem = Assert.Single(claimed);
@@ -1421,58 +1413,6 @@ public sealed class DungeonRogueliteStateTests
         {
             Cinders += cinders;
             Soulstones += soulstones;
-            return Task.CompletedTask;
-        }
-    }
-
-    private sealed class CapturingCombatStyleService : ICombatStyleService
-    {
-        public long ExperienceGranted { get; private set; }
-        public string Source { get; private set; } = string.Empty;
-
-        public Task<CombatStylesOverviewModel> GetOverviewAsync(Guid characterId, CancellationToken cancellationToken) =>
-            throw new NotSupportedException();
-
-        public Task<CombatStyleOperationResult> ActivateStyleAsync(
-            Guid characterId,
-            string styleId,
-            CancellationToken cancellationToken) =>
-            throw new NotSupportedException();
-
-        public Task<CombatStyleOperationResult<CombatStyleModel>> SelectFocusAsync(
-            Guid characterId,
-            string styleId,
-            string focusId,
-            CancellationToken cancellationToken) =>
-            throw new NotSupportedException();
-
-        public Task<CombatStyleOperationResult<CombatStyleModel>> RankUpNodeAsync(
-            Guid characterId,
-            string styleId,
-            string nodeId,
-            CancellationToken cancellationToken) =>
-            throw new NotSupportedException();
-
-        public Task<CombatStyleOperationResult<CombatStyleModel>> ResetSkillTreeAsync(
-            Guid characterId,
-            string styleId,
-            CancellationToken cancellationToken) =>
-            throw new NotSupportedException();
-
-        public Task<CombatBuildPreviewModel> GetBuildPreviewAsync(Guid characterId, CancellationToken cancellationToken) =>
-            throw new NotSupportedException();
-
-        public Task<CombatStyleSnapshot?> GetActiveSnapshotAsync(Guid characterId, CancellationToken cancellationToken) =>
-            throw new NotSupportedException();
-
-        public Task GrantExperienceAsync(
-            Guid characterId,
-            long amount,
-            string source,
-            CancellationToken cancellationToken)
-        {
-            ExperienceGranted += amount;
-            Source = source;
             return Task.CompletedTask;
         }
     }

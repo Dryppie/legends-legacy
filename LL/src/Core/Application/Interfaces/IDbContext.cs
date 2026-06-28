@@ -3,7 +3,6 @@ using Domain.Models.Achievements;
 using Domain.Models.CharacterActions;
 using Domain.Models.CharacterActions.CharacterActionDetails;
 using Domain.Models.Colosseum;
-using Domain.Models.CombatStyles;
 using Domain.Models.Dungeons.Mastery;
 using Domain.Models.Dungeons.Runs;
 using Domain.Models.Entities;
@@ -47,8 +46,6 @@ public interface IDbContext
     DbSet<ColosseumMatchResult> ColosseumMatches { get; }
     DbSet<ArenaDefenseSnapshot> ArenaDefenseSnapshots { get; }
     DbSet<ChampionMarketPurchase> ChampionMarketPurchases { get; }
-    DbSet<PlayerCombatStyle> PlayerCombatStyles { get; }
-    DbSet<PlayerCombatStyleNode> PlayerCombatStyleNodes { get; }
     DbSet<Character> Characters { get; }
     DbSet<CharacterSoulstoneUpgrade> CharacterSoulstoneUpgrades { get; }
     DbSet<Creature> Creatures { get; }

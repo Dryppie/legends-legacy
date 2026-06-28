@@ -15,7 +15,6 @@ public sealed class DungeonBoonDefinition
     public int MaxStacks { get; set; } = 1;
     public int MaxFamilyStacks { get; set; }
     public List<string> EssenceTags { get; set; } = [];
-    public List<string> CombatStyleTags { get; set; } = [];
     public List<EssenceAttributeModifier> AttributeModifiers { get; set; } = [];
     public List<EssenceAbilityModifierDefinition> AbilityModifiers { get; set; } = [];
 }
