@@ -111,9 +111,6 @@
         "Left",
         "Major"
       ],
-      "effects": [
-        "Max primary resource +10%. Essence abilities that spend 10%+ resource grant +4 additional Focus. If no primary resource exists, long-cooldown Essence abilities grant +4 additional Focus."
-      ],
       "countsTowardFocus": false,
       "rules": [],
       "row": 1,
@@ -149,9 +146,6 @@
         "Middle",
         "Major"
       ],
-      "effects": [
-        "Using Essence abilities from two different effect categories in sequence grants +5 Focus and gives the second ability +4% Effect Potency. 6 second internal cooldown."
-      ],
       "countsTowardFocus": false,
       "rules": [],
       "row": 1,
@@ -186,9 +180,6 @@
       "tags": [
         "Right",
         "Major"
-      ],
-      "effects": [
-        "Every 10 seconds, prevent one interruption. Negative effect durations against you are reduced by 10% while you have 50+ Focus."
       ],
       "countsTowardFocus": false,
       "rules": [],
@@ -226,9 +217,6 @@
         "ScalingConversion",
         "Left",
         "Major"
-      ],
-      "effects": [
-        "Mutator Group: DamageTypeConversion + ScalingConversion. Eligible hostile Physical Melee Essence abilities deal Magical damage instead of Physical damage. Converted abilities scale from Spell Power instead of Attack Power, retain the Melee tag, gain the Spell tag, cannot benefit from Physical penetration, and benefit from Magical penetration at 70% value. Resource cost +8%. If the ability was already Magical, it gains +5% Effect Potency instead."
       ],
       "countsTowardFocus": false,
       "rules": [],
@@ -337,9 +325,6 @@
         "Middle",
         "Major"
       ],
-      "effects": [
-        "Mutator Group: DamageTypeConversion. Choose one Elemental Thesis outside combat: Fire, Frost, Lightning, Earth, Poison, Holy, or Shadow. Eligible hostile Essence abilities convert their damage type to the chosen element. Converted abilities lose 10% base Effect Potency but benefit from elemental bonuses, resistance penetration, and elemental synergies. True damage cannot be converted. Non-hostile Essence abilities instead grant 4% resistance to the chosen element for 5 seconds."
-      ],
       "countsTowardFocus": false,
       "rules": [],
       "row": 2,
@@ -437,9 +422,6 @@
         "DeliveryConversion",
         "Right",
         "Major"
-      ],
-      "effects": [
-        "Mutator Group: SummonConversion + DeliveryConversion. Summon, Aura, DamageOverTime, HealOverTime, and Persistent Essence effects gain the Spell tag. They tick, act, or trigger 8% slower, but gain +12% Effect Potency, duration, or summon stat scaling. If the effect is Overchanneled, reduce the slow penalty to 4%."
       ],
       "countsTowardFocus": false,
       "rules": [],
@@ -549,9 +531,6 @@
         "Left",
         "Major"
       ],
-      "effects": [
-        "Overchannel affects your next 2 Essence abilities. The second ability receives 70% of the Overchannel bonus."
-      ],
       "countsTowardFocus": true,
       "rules": [],
       "row": 3,
@@ -586,9 +565,6 @@
       "tags": [
         "Middle",
         "Major"
-      ],
-      "effects": [
-        "Overchannel grants a Barrier equal to 10% Max Health for 8 seconds and interruption immunity for the Overchanneled ability. If the ability is still interrupted, refund 50 Focus."
       ],
       "countsTowardFocus": true,
       "rules": [],
@@ -625,9 +601,6 @@
         "Right",
         "Major"
       ],
-      "effects": [
-        "Overchannel affects only one ability, but its potency bonus is doubled, capped at +24% Effect Potency. Overchannel cooldown +15 seconds and the empowered ability costs 20% more resource or cooldown."
-      ],
       "countsTowardFocus": true,
       "rules": [],
       "row": 3,
@@ -663,9 +636,6 @@
         "Left",
         "Minor"
       ],
-      "effects": [
-        "Max Focus +10 / +20."
-      ],
       "countsTowardFocus": false,
       "rules": [],
       "row": 1,
@@ -696,9 +666,6 @@
         "Middle",
         "Minor"
       ],
-      "effects": [
-        "Start combat with +10 / +20 Focus."
-      ],
       "countsTowardFocus": false,
       "rules": [],
       "row": 1,
@@ -728,9 +695,6 @@
       "tags": [
         "Right",
         "Minor"
-      ],
-      "effects": [
-        "Essence abilities restore 0.5% / 1% missing primary resource when they successfully apply at least one effect. 3 second internal cooldown."
       ],
       "countsTowardFocus": false,
       "rules": [],
@@ -763,9 +727,6 @@
         "Minor",
         "Debuff"
       ],
-      "effects": [
-        "Interrupt, silence, and mana-disruption duration reduced by 8% / 16%."
-      ],
       "countsTowardFocus": false,
       "rules": [],
       "row": 1,
@@ -796,9 +757,6 @@
         "Left",
         "Minor",
         "Debuff"
-      ],
-      "effects": [
-        "Debuff and control application chance +3% / +6%. If the ability cannot apply debuffs/control, gain +2% / +4% Effect Potency instead."
       ],
       "countsTowardFocus": false,
       "rules": [],
@@ -832,9 +790,6 @@
         "Summon",
         "Debuff"
       ],
-      "effects": [
-        "Buff, debuff, DoT, HoT, summon, and aura durations +3% / +6%."
-      ],
       "countsTowardFocus": false,
       "rules": [],
       "row": 2,
@@ -864,9 +819,6 @@
       "tags": [
         "Right",
         "Minor"
-      ],
-      "effects": [
-        "Essence abilities gain +2% / +4% Effect Potency if they are not empowered by Overchannel."
       ],
       "countsTowardFocus": false,
       "rules": [],
@@ -898,9 +850,6 @@
         "Middle",
         "Minor"
       ],
-      "effects": [
-        "Penalties from Caster Row 2 conversions are reduced by 10% / 20%."
-      ],
       "countsTowardFocus": false,
       "rules": [],
       "row": 2,
@@ -930,9 +879,6 @@
       "tags": [
         "Left",
         "Minor"
-      ],
-      "effects": [
-        "Essence cast/channel time and recovery time reduced by 4% / 8%. For instant abilities, cooldown recovery +2% / +4% instead."
       ],
       "countsTowardFocus": false,
       "rules": [],
@@ -966,9 +912,6 @@
         "Heal",
         "Barrier"
       ],
-      "effects": [
-        "Using an Essence ability below 60% Health grants a Barrier equal to 3% / 6% Max Health. 10 second internal cooldown."
-      ],
       "countsTowardFocus": false,
       "rules": [],
       "row": 3,
@@ -999,9 +942,6 @@
         "Right",
         "Minor"
       ],
-      "effects": [
-        "Overchannel cooldown reduced by 2 / 4 seconds."
-      ],
       "countsTowardFocus": false,
       "rules": [],
       "row": 3,
@@ -1031,9 +971,6 @@
       "tags": [
         "Middle",
         "Minor"
-      ],
-      "effects": [
-        "If you reach maximum Focus, your next Essence ability gains +4% / +8% Effect Potency and consumes 20 Focus."
       ],
       "countsTowardFocus": false,
       "rules": [],

@@ -1,7 +1,6 @@
 import { Injectable, computed, signal } from '@angular/core';
 import { finalize } from 'rxjs/operators';
 import {
-  CombatBuildPreviewDto,
   CombatStyleDto,
   CombatStylesOverviewDto,
 } from '../../../../shared/models/combat-style';
@@ -13,13 +12,11 @@ import { CombatStyleService } from './combat-style.service';
 })
 export class CombatStyleStateService {
   private readonly _overview = signal<CombatStylesOverviewDto | null>(null);
-  private readonly _buildPreview = signal<CombatBuildPreviewDto | null>(null);
   private readonly _loading = signal(false);
   private readonly _saving = signal(false);
   private readonly _error = signal<string | null>(null);
 
   readonly overview = computed(() => this._overview());
-  readonly buildPreview = computed(() => this._buildPreview());
   readonly loading = computed(() => this._loading());
   readonly saving = computed(() => this._saving());
   readonly error = computed(() => this._error());
@@ -43,21 +40,10 @@ export class CombatStyleStateService {
       .getCombatStyles()
       .pipe(finalize(() => this._loading.set(false)))
       .subscribe({
-        next: (overview) => {
-          this._overview.set(overview);
-          this.loadBuildPreview();
-        },
+        next: (overview) => this._overview.set(overview),
         error: (error) =>
           this._error.set(error.message ?? 'Failed to load Combat Styles'),
       });
-  }
-
-  loadBuildPreview(): void {
-    this.service.getBuildPreview().subscribe({
-      next: (preview) => this._buildPreview.set(preview),
-      error: (error) =>
-        this._error.set(error.message ?? 'Failed to load build preview'),
-    });
   }
 
   activateStyle(styleId: string): void {
@@ -130,7 +116,6 @@ export class CombatStyleStateService {
 
           this.replaceStyle(response.style);
           this.toast.showToast(response.message ?? 'Skill node ranked up.', '', true);
-          this.loadBuildPreview();
         },
         error: (error) =>
           this._error.set(error.message ?? 'Failed to rank up skill node'),
@@ -155,7 +140,6 @@ export class CombatStyleStateService {
 
           this.replaceStyle(response.style);
           this.toast.showToast(response.message ?? 'Skill tree reset.', '', true);
-          this.loadBuildPreview();
         },
         error: (error) =>
           this._error.set(error.message ?? 'Failed to reset skill tree'),

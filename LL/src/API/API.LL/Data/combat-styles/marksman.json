@@ -137,9 +137,6 @@
         "Left",
         "Major"
       ],
-      "effects": [
-        "Every 3 seconds without taking Health damage grants +4 additional Aim. Essence effects against your priority target gain +4% Effect Potency while you have 50+ Aim."
-      ],
       "countsTowardFocus": false,
       "rules": [],
       "row": 1,
@@ -174,9 +171,6 @@
       "tags": [
         "Middle",
         "Major"
-      ],
-      "effects": [
-        "Dodging, avoiding, or being missed no longer causes Aim loss and instead grants +5 Aim. After avoiding damage, your next Essence effect against your priority target gains +5% Effect Potency."
       ],
       "countsTowardFocus": false,
       "rules": [],
@@ -213,9 +207,6 @@
         "Right",
         "Major"
       ],
-      "effects": [
-        "Applying a debuff/control effect to your priority target reduces its damage dealt to you by 4% for 5 seconds. Non-hostile Essence effects on an allied priority target grant that ally 4% damage reduction for 5 seconds."
-      ],
       "countsTowardFocus": false,
       "rules": [],
       "row": 1,
@@ -251,9 +242,6 @@
         "TargetingConversion",
         "Left",
         "Major"
-      ],
-      "effects": [
-        "Mutator Group: TargetingConversion. Eligible Area and Cleave Essence abilities concentrate their effect into your priority target. The priority target receives +25% Effect Potency. Secondary targets receive 60% less effect. If the ability is non-hostile, the lowest-Health allied priority target receives the bonus and other allies receive reduced value."
       ],
       "countsTowardFocus": false,
       "rules": [],
@@ -359,9 +347,6 @@
         "Middle",
         "Major"
       ],
-      "effects": [
-        "Mutator Group: SummonConversion + TargetingConversion. Controlled allies prioritize your Deadeye target. Their first action against that target gains +10% accuracy/application chance and +8% Effect Potency. When a controlled ally affects your Deadeye target, gain +5 Aim. 5 second internal cooldown. Solo fallback: your own single-target Essence effects against the Deadeye target gain +4% Effect Potency."
-      ],
       "countsTowardFocus": false,
       "rules": [],
       "row": 2,
@@ -464,9 +449,6 @@
         "TargetingConversion",
         "Right",
         "Major"
-      ],
-      "effects": [
-        "Mutator Group: TargetingConversion. Single-target healing, barrier, buff, debuff, and control Essence abilities gain +10% Effect Potency against your priority target. Hostile debuffs/control gain +8% application chance. Ally-targeted buffs gain +10% duration. Direct damage abilities instead ignore 6% defense and resistance against the priority target."
       ],
       "countsTowardFocus": false,
       "rules": [],
@@ -576,9 +558,6 @@
         "Left",
         "Major"
       ],
-      "effects": [
-        "Deadeye's empowered Essence ability cannot miss and gains +15% application chance against non-immune targets. If used at 100 Aim, it also gains +15% Effect Potency."
-      ],
       "countsTowardFocus": true,
       "rules": [],
       "row": 3,
@@ -613,9 +592,6 @@
       "tags": [
         "Middle",
         "Major"
-      ],
-      "effects": [
-        "Deadeye spreads 40% of the empowered Essence effect to up to 2 nearby valid targets. Damage/healing/barrier/resource effects spread at 40% value. Buffs/debuffs/control/summon-related effects spread as 40% duration or strength."
       ],
       "countsTowardFocus": true,
       "rules": [],
@@ -652,9 +628,6 @@
         "Right",
         "Major"
       ],
-      "effects": [
-        "Deadeye Mark lasts 5 seconds longer. If you take no Health damage during Deadeye, reduce Deadeye's remaining cooldown by 10 seconds and gain +30 Aim after it ends."
-      ],
       "countsTowardFocus": true,
       "rules": [],
       "row": 3,
@@ -690,9 +663,6 @@
         "Left",
         "Minor"
       ],
-      "effects": [
-        "Max Aim +10 / +20."
-      ],
       "countsTowardFocus": false,
       "rules": [],
       "row": 1,
@@ -722,9 +692,6 @@
       "tags": [
         "Middle",
         "Minor"
-      ],
-      "effects": [
-        "Start combat with +10 / +20 Aim."
       ],
       "countsTowardFocus": false,
       "rules": [],
@@ -756,9 +723,6 @@
         "Right",
         "Minor",
         "Debuff"
-      ],
-      "effects": [
-        "Accuracy and debuff/control application chance +3% / +6%. If neither applies, gain +2% / +4% Effect Potency against priority targets."
       ],
       "countsTowardFocus": false,
       "rules": [],
@@ -792,9 +756,6 @@
         "Damage",
         "Heal"
       ],
-      "effects": [
-        "Aim lost from taking Health damage reduced by 25% / 50%."
-      ],
       "countsTowardFocus": false,
       "rules": [],
       "row": 1,
@@ -824,9 +785,6 @@
       "tags": [
         "Left",
         "Minor"
-      ],
-      "effects": [
-        "Essence abilities affecting your priority target refund 3% / 6% of their resource cost. 4 second internal cooldown."
       ],
       "countsTowardFocus": false,
       "rules": [],
@@ -859,9 +817,6 @@
         "Minor",
         "Damage"
       ],
-      "effects": [
-        "While you have 50+ Aim, direct damage taken reduced by 3% / 6%."
-      ],
       "countsTowardFocus": false,
       "rules": [],
       "row": 2,
@@ -891,9 +846,6 @@
       "tags": [
         "Right",
         "Minor"
-      ],
-      "effects": [
-        "Essence effects against priority targets ignore 3% / 6% defense and resistance."
       ],
       "countsTowardFocus": false,
       "rules": [],
@@ -927,9 +879,6 @@
         "Heal",
         "Barrier"
       ],
-      "effects": [
-        "Healing/barriers/buffs on an allied priority target gain +3% / +6% Effect Potency."
-      ],
       "countsTowardFocus": false,
       "rules": [],
       "row": 2,
@@ -959,9 +908,6 @@
       "tags": [
         "Left",
         "Minor"
-      ],
-      "effects": [
-        "AoE Essence abilities deal/apply 5% / 10% more of their effect to your priority target."
       ],
       "countsTowardFocus": false,
       "rules": [],
@@ -995,9 +941,6 @@
         "Heal",
         "Barrier"
       ],
-      "effects": [
-        "If only one enemy is alive, Essence effects against it gain +4% / +8% Effect Potency. If only one ally is alive, healing/barrier/buff effects on that ally gain the same bonus."
-      ],
       "countsTowardFocus": false,
       "rules": [],
       "row": 3,
@@ -1029,9 +972,6 @@
         "Minor",
         "Debuff"
       ],
-      "effects": [
-        "When you apply Deadeye, controlled allies gain +5% / +10% Action Speed for 4 seconds. Solo fallback: you gain +2.5% / +5% Action Speed."
-      ],
       "countsTowardFocus": false,
       "rules": [],
       "row": 3,
@@ -1061,9 +1001,6 @@
       "tags": [
         "Middle",
         "Minor"
-      ],
-      "effects": [
-        "Deadeye cooldown reduced by 2 / 4 seconds."
       ],
       "countsTowardFocus": false,
       "rules": [],

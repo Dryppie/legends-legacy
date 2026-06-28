@@ -1,9 +1,6 @@
 using Application.Interfaces.Services.LL.CombatStyles;
-using Application.Interfaces.Services.LL.Essences;
 using Application.UseCases.CombatStyles.Models;
 using Domain.Models.CombatStyles;
-using Domain.Models.Essences;
-using Domain.Models.Essences.Definitions;
 using Microsoft.Extensions.Logging;
 
 namespace Services.LL.CombatStyles;
@@ -14,23 +11,17 @@ public sealed class CombatStyleService : ICombatStyleService
     private readonly IPlayerCombatStyleRepository _combatStyles;
     private readonly ICombatStyleDefinitionProvider _definitions;
     private readonly ICombatStyleSwitchValidator _switchValidator;
-    private readonly IEssenceDefinitionRepository _essenceDefinitions;
-    private readonly IEssenceRepository _essences;
     private readonly ILogger<CombatStyleService> _logger;
 
     public CombatStyleService(
         IPlayerCombatStyleRepository combatStyles,
         ICombatStyleDefinitionProvider definitions,
         ICombatStyleSwitchValidator switchValidator,
-        IEssenceDefinitionRepository essenceDefinitions,
-        IEssenceRepository essences,
         ILogger<CombatStyleService> logger)
     {
         _combatStyles = combatStyles;
         _definitions = definitions;
         _switchValidator = switchValidator;
-        _essenceDefinitions = essenceDefinitions;
-        _essences = essences;
         _logger = logger;
     }
 
@@ -218,38 +209,6 @@ public sealed class CombatStyleService : ICombatStyleService
         return CombatStyleOperationResult<CombatStyleModel>.Success(
             MapStyle(definition, style, []),
             "Combat Style skill tree reset.");
-    }
-
-    public async Task<CombatBuildPreviewModel> GetBuildPreviewAsync(Guid characterId, CancellationToken cancellationToken)
-    {
-        var progress = await EnsureProgressAsync(characterId, cancellationToken);
-        var active = progress.First(x => x.IsActive);
-        var definition = _definitions.GetById(active.StyleId) ?? _definitions.GetById(DefaultStyleId)!;
-        var nodes = await _combatStyles.GetNodesByCharacterIdAsync(characterId, cancellationToken);
-        var focusId = DetermineEffectiveFocusId(
-            definition,
-            active,
-            nodes.Where(x => x.StyleId.Equals(definition.Id, StringComparison.OrdinalIgnoreCase)).ToList());
-        var focus = focusId is null ? null : _definitions.GetFocus(definition.Id, focusId);
-        var tagScores = await CalculateTagScoresAsync(characterId, cancellationToken);
-        var topTags = tagScores
-            .OrderByDescending(x => x.Value)
-            .ThenBy(x => x.Key)
-            .Take(6)
-            .Select(x => new TagScoreModel { Tag = x.Key, Score = x.Value })
-            .ToList();
-
-        return new CombatBuildPreviewModel
-        {
-            ActiveStyleId = definition.Id,
-            ActiveStyleName = definition.Name,
-            SelectedFocusId = focus?.Id,
-            SelectedFocusName = focus?.Name,
-            BuildName = DetermineBuildName(definition, focus, tagScores),
-            TopTags = topTags,
-            RecommendedStats = [.. definition.RecommendedStats.Select(x => x.ToString())],
-            Notes = CreateBuildNotes(definition, focus, tagScores)
-        };
     }
 
     public async Task<CombatStyleSnapshot?> GetActiveSnapshotAsync(Guid characterId, CancellationToken cancellationToken)
@@ -520,7 +479,6 @@ public sealed class CombatStyleService : ICombatStyleService
             IsUnlocked = unlocked,
             CanRankUp = canRankUp,
             Tags = node.Tags,
-            Effects = node.Effects,
             Row = node.Row,
             Lane = node.Lane,
             NodeType = node.NodeType,
@@ -637,104 +595,6 @@ public sealed class CombatStyleService : ICombatStyleService
         PlayerCombatStyle style,
         IReadOnlyList<PlayerCombatStyleNode> nodes) =>
         Math.Max(0, GetEarnedSkillPoints(style) - GetSpentSkillPoints(nodes));
-
-    private async Task<Dictionary<string, int>> CalculateTagScoresAsync(Guid characterId, CancellationToken cancellationToken)
-    {
-        var loadout = await _essences.GetActiveLoadoutAsync(characterId, cancellationToken);
-
-        if (loadout is null)
-            return new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
-
-        var scores = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
-        foreach (var essence in loadout.Slots.Select(x => x.PlayerEssence).OfType<PlayerEssence>())
-        {
-            var definition = _essenceDefinitions.GetById(essence.EssenceDefinitionId);
-            if (definition is null)
-                continue;
-
-            AddTags(scores, definition.Tags, 1);
-            AddTags(scores, definition.ActiveAbility.Tags, 2);
-            AddTags(scores, definition.PassiveAbility.Tags, 2);
-        }
-
-        return scores;
-    }
-
-    private static void AddTags(Dictionary<string, int> scores, IEnumerable<string> tags, int amount)
-    {
-        foreach (var tag in tags.Where(x => !string.IsNullOrWhiteSpace(x)))
-            scores[tag] = scores.GetValueOrDefault(tag) + amount;
-    }
-
-    private static string DetermineBuildName(
-        CombatStyleDefinition style,
-        CombatStyleFocusDefinition? focus,
-        IReadOnlyDictionary<string, int> tags)
-    {
-        var focusId = focus?.Id ?? string.Empty;
-        var summon = Score(tags, "Summon");
-        var barrier = Score(tags, "Barrier");
-        var tank = Score(tags, "Tank");
-        var melee = Score(tags, "Melee");
-        var ranged = Score(tags, "Ranged");
-        var magic = Score(tags, "Magic") + Score(tags, "Spell");
-        var curse = Score(tags, "Curse") + Score(tags, "DoT");
-        var holy = Score(tags, "Holy");
-        var healing = Score(tags, "Healing") + Score(tags, "Heal");
-        var control = Score(tags, "Control") + Score(tags, "Debuff");
-        var dodge = Score(tags, "Dodge");
-
-        return (style.Id, focusId) switch
-        {
-            ("defensive", "commander") when summon >= 4 => "Tanky Summoner",
-            ("defensive", "bulwark") when barrier + tank >= 4 => "Bulwark Guardian",
-            ("defensive", "counterguard") => "Counterguard",
-            ("caster", "spellblade") when melee >= 3 => "Magic Swordsman",
-            ("caster", "occultist") when curse >= 3 => "Hexcaster",
-            ("caster", "arcanist") when magic >= 3 => "Arcanist",
-            ("fighter", "duelist") => "Duelist",
-            ("fighter", "berserker") => "Berserker",
-            ("summoner", "horde") => "Swarmcaller",
-            ("summoner", "champion") => "Soul Champion",
-            ("summoner", "ritualist") when curse >= 3 => "Necromancer",
-            ("summoner", "ritualist") when holy >= 3 => "Divine Host",
-            ("swift", "flurry") when melee + ranged >= 3 => "Blade Dancer",
-            ("swift", "evasion") when dodge + tank >= 3 => "Mist Walker",
-            ("swift", "tempo") => "Tempo Striker",
-            ("marksman", "sniper") => "Sharpshooter",
-            ("marksman", "volley") when ranged >= 3 => "Volley Captain",
-            ("marksman", "trapper") => "Trap Ranger",
-            ("support", "healer") when healing >= 3 => "Restoration Adept",
-            ("support", "warden") when barrier + tank >= 3 => "Aegis Warden",
-            ("support", "chaplain") when holy >= 3 => "Battle Chaplain",
-            ("controller", "hexer") when curse >= 3 => "Hex Controller",
-            ("controller", "tactician") when control >= 3 => "Field Tactician",
-            ("controller", "frostbinder") => "Frostbinder",
-            _ => $"{style.Name} Adventurer"
-        };
-    }
-
-    private static List<string> CreateBuildNotes(
-        CombatStyleDefinition style,
-        CombatStyleFocusDefinition? focus,
-        IReadOnlyDictionary<string, int> tags)
-    {
-        var notes = new List<string>
-        {
-            focus is null
-                ? $"{style.Name} Style is active. Invest past a branch root to form an effective focus."
-                : $"{focus.Name} Focus is active through skill tree investment."
-        };
-
-        var matchingTags = style.RecommendedTags.Where(tag => Score(tags, tag) > 0).ToList();
-        if (matchingTags.Count > 0)
-            notes.Add($"Current loadout matches {string.Join(", ", matchingTags)} style synergies.");
-
-        return notes;
-    }
-
-    private static int Score(IReadOnlyDictionary<string, int> tags, string tag) =>
-        tags.TryGetValue(tag, out var score) ? score : 0;
 
     private static string FormatRuleSummary(CombatStyleRuleDefinition rule) =>
         rule.Operation switch

@@ -224,10 +224,6 @@ export class CombatStyleComponent implements OnInit {
     return node.tags ?? [];
   }
 
-  nodeEffects(node: CombatStyleSkillTreeNodeDto): string[] {
-    return node.effects ?? [];
-  }
-
   nodeTooltipAffects(node: CombatStyleSkillTreeNodeDto): string[] {
     return node.tooltip?.affects ?? [];
   }
@@ -236,7 +232,6 @@ export class CombatStyleComponent implements OnInit {
     return (
       !!node.description ||
       this.nodeTags(node).length > 0 ||
-      this.nodeEffects(node).length > 0 ||
       this.nodeTooltipAffects(node).length > 0
     );
   }

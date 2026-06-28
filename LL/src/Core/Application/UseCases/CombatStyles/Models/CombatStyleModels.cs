@@ -78,7 +78,6 @@ public sealed class CombatStyleSkillTreeNodeModel
     public bool IsUnlocked { get; set; }
     public bool CanRankUp { get; set; }
     public IReadOnlyList<string> Tags { get; set; } = [];
-    public IReadOnlyList<string> Effects { get; set; } = [];
     public int Row { get; set; }
     public string Lane { get; set; } = string.Empty;
     public string NodeType { get; set; } = string.Empty;
@@ -94,20 +93,3 @@ public sealed class CombatStyleNodeTooltipModel
     public IReadOnlyList<string> DoesNotAffect { get; set; } = [];
 }
 
-public sealed class CombatBuildPreviewModel
-{
-    public string ActiveStyleId { get; set; } = string.Empty;
-    public string ActiveStyleName { get; set; } = string.Empty;
-    public string? SelectedFocusId { get; set; }
-    public string? SelectedFocusName { get; set; }
-    public string BuildName { get; set; } = string.Empty;
-    public IReadOnlyList<TagScoreModel> TopTags { get; set; } = [];
-    public IReadOnlyList<string> RecommendedStats { get; set; } = [];
-    public IReadOnlyList<string> Notes { get; set; } = [];
-}
-
-public sealed class TagScoreModel
-{
-    public string Tag { get; set; } = string.Empty;
-    public int Score { get; set; }
-}

@@ -30,7 +30,6 @@ public sealed record CombatStyleTreeNodeDefinition(
     int X,
     int Y,
     IReadOnlyList<string> Tags,
-    IReadOnlyList<string> Effects,
     bool CountsTowardFocus)
 {
     public IReadOnlyList<CombatStyleRuleDefinition> Rules { get; init; } = [];

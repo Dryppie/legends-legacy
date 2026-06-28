@@ -92,7 +92,6 @@ public sealed class JsonCombatStyleDefinitionProvider : ICombatStyleDefinitionPr
             node.X,
             node.Y,
             node.Tags,
-            node.Effects,
             node.CountsTowardFocus)
         {
             Rules = [.. node.Rules.Select(ToDomain)],
@@ -321,7 +320,6 @@ public sealed class JsonCombatStyleDefinitionProvider : ICombatStyleDefinitionPr
         public int X { get; set; }
         public int Y { get; set; }
         public IReadOnlyList<string> Tags { get; set; } = [];
-        public IReadOnlyList<string> Effects { get; set; } = [];
         public bool CountsTowardFocus { get; set; }
         public IReadOnlyList<CombatStyleRuleDefinitionJson> Rules { get; set; } = [];
         public int Row { get; set; }

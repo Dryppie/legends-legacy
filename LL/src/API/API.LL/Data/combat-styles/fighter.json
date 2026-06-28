@@ -114,9 +114,6 @@
         "Left",
         "Major"
       ],
-      "effects": [
-        "Max Health +5%. Taking direct Health damage grants +4 additional Battle Rhythm. After you hit with a direct Essence ability, heal for 1% Max Health. 3 second internal cooldown."
-      ],
       "countsTowardFocus": false,
       "rules": [],
       "row": 1,
@@ -151,9 +148,6 @@
       "tags": [
         "Middle",
         "Major"
-      ],
-      "effects": [
-        "Repeatedly affecting the same target increases your Effect Potency against that target by 2% per stack, up to 6%. Stacks last 6 seconds. At 3 stacks, gain +10 Battle Rhythm."
       ],
       "countsTowardFocus": false,
       "rules": [],
@@ -190,9 +184,6 @@
         "Right",
         "Major"
       ],
-      "effects": [
-        "Hostile Essence abilities reduce the target's Physical Defense and Magical Defense by 4% for 5 seconds. Non-hostile Essence abilities grant the target 4% defense penetration on their next hostile action."
-      ],
       "countsTowardFocus": false,
       "rules": [],
       "row": 1,
@@ -228,9 +219,6 @@
         "EquipmentOverride",
         "Left",
         "Major"
-      ],
-      "effects": [
-        "Mutator Group: EquipmentOverride. You may equip a Two-Handed weapon in your Offhand slot. Offhand Two-Handed weapons contribute 55% base weapon damage, 40% offensive attributes, and 25% defensive/utility attributes. Direct Melee Essence abilities gain Offhand Impact, adding a second weapon coefficient hit at 35% value. Penalty: Action Speed -10%, Dodge and Parry -30%, self-applied Barrier effects -10%, and shield/offhand-specific effects are disabled."
       ],
       "countsTowardFocus": false,
       "rules": [],
@@ -338,9 +326,6 @@
         "Middle",
         "Major"
       ],
-      "effects": [
-        "Mutator Group: DeliveryConversion. After a basic attack or direct Melee Essence ability, your next non-Melee direct hostile Essence ability within 4 seconds gains the Melee and Weapon tags and can trigger weapon effects at 40% value. The ability keeps its original damage type and scaling. If the ability was already Melee, it gains +6% Effect Potency instead. Does not apply to Summon, Trap, Aura, or pure persistent tick effects."
-      ],
       "countsTowardFocus": false,
       "rules": [],
       "row": 2,
@@ -447,9 +432,6 @@
         "Right",
         "Major"
       ],
-      "effects": [
-        "Mutator Group: DefensiveConversion. After you take Health damage, your next healing, barrier, or self-buff Essence ability within 6 seconds becomes Bloodied: +8% Effect Potency and +10 Battle Rhythm. After using a Bloodied ability, your next direct hostile Essence ability within 5 seconds heals you for 2% Max Health. 8 second internal cooldown."
-      ],
       "countsTowardFocus": false,
       "rules": [],
       "row": 2,
@@ -552,9 +534,6 @@
         "Left",
         "Major"
       ],
-      "effects": [
-        "Overpower also grants 12% damage reduction and 20% crowd control resistance for 8 seconds."
-      ],
       "countsTowardFocus": true,
       "rules": [],
       "row": 3,
@@ -590,9 +569,6 @@
         "Middle",
         "Major"
       ],
-      "effects": [
-        "Overpower marks the primary target for 10 seconds. Your Essence effects against the marked target gain +10% Effect Potency. The marked enemy deals 8% less damage to you. If the mark is an ally, your healing/barriers/buffs on that ally gain +10% Effect Potency and the ally takes 8% less damage."
-      ],
       "countsTowardFocus": true,
       "rules": [],
       "row": 3,
@@ -627,9 +603,6 @@
       "tags": [
         "Right",
         "Major"
-      ],
-      "effects": [
-        "If an Overpowered Essence ability defeats an enemy or saves an ally below 30% Health with healing/barrier, refund 30 Battle Rhythm and reduce Overpower's remaining cooldown by 25%."
       ],
       "countsTowardFocus": true,
       "rules": [],
@@ -667,9 +640,6 @@
         "Minor",
         "Heal"
       ],
-      "effects": [
-        "Max Health +2% / +4%."
-      ],
       "countsTowardFocus": false,
       "rules": [],
       "row": 1,
@@ -699,9 +669,6 @@
       "tags": [
         "Middle",
         "Minor"
-      ],
-      "effects": [
-        "Max Battle Rhythm +10 / +20."
       ],
       "countsTowardFocus": false,
       "rules": [],
@@ -735,9 +702,6 @@
         "Damage",
         "Heal"
       ],
-      "effects": [
-        "When you take direct Health damage, restore 0.5% / 1% missing primary resource. 2 second internal cooldown."
-      ],
       "countsTowardFocus": false,
       "rules": [],
       "row": 1,
@@ -769,9 +733,6 @@
         "Minor",
         "Heal"
       ],
-      "effects": [
-        "While below 50% Health, Action Speed +3% / +6%."
-      ],
       "countsTowardFocus": false,
       "rules": [],
       "row": 1,
@@ -801,9 +762,6 @@
       "tags": [
         "Left",
         "Minor"
-      ],
-      "effects": [
-        "Direct Essence abilities gain +2% / +4% Effect Potency."
       ],
       "countsTowardFocus": false,
       "rules": [],
@@ -836,9 +794,6 @@
         "Minor",
         "Debuff"
       ],
-      "effects": [
-        "Essence effects against targets affected by your debuffs or control effects gain +3% / +6% Effect Potency."
-      ],
       "countsTowardFocus": false,
       "rules": [],
       "row": 2,
@@ -869,9 +824,6 @@
         "Right",
         "Minor"
       ],
-      "effects": [
-        "Direct Essence abilities have a 10% / 20% chance to grant +5 Battle Rhythm."
-      ],
       "countsTowardFocus": false,
       "rules": [],
       "row": 2,
@@ -901,9 +853,6 @@
       "tags": [
         "Middle",
         "Minor"
-      ],
-      "effects": [
-        "Penalties from Fighter equipment overrides are reduced by 10% / 20%."
       ],
       "countsTowardFocus": false,
       "rules": [],
@@ -936,9 +885,6 @@
         "Minor",
         "Heal"
       ],
-      "effects": [
-        "Defeating an enemy restores 1% / 2% Max Health and primary resource."
-      ],
       "countsTowardFocus": false,
       "rules": [],
       "row": 3,
@@ -970,9 +916,6 @@
         "Minor",
         "Damage"
       ],
-      "effects": [
-        "Dodge, parry, and block chance +2% / +4%. If those stats do not exist for the character, gain 2% / 4% direct damage reduction instead."
-      ],
       "countsTowardFocus": false,
       "rules": [],
       "row": 3,
@@ -1002,9 +945,6 @@
       "tags": [
         "Right",
         "Minor"
-      ],
-      "effects": [
-        "Overpower cooldown reduced by 2 / 4 seconds."
       ],
       "countsTowardFocus": false,
       "rules": [],
@@ -1036,9 +976,6 @@
         "Middle",
         "Minor",
         "Heal"
-      ],
-      "effects": [
-        "Battle Rhythm generated while below 50% Health increased by 15% / 30%."
       ],
       "countsTowardFocus": false,
       "rules": [],

@@ -143,9 +143,6 @@
         "Left",
         "Major"
       ],
-      "effects": [
-        "Controlled allies gain +8% Max Health. If you have no controlled allies, your persistent Essence effects gain +6% duration."
-      ],
       "countsTowardFocus": false,
       "rules": [],
       "row": 1,
@@ -181,9 +178,6 @@
         "Middle",
         "Major"
       ],
-      "effects": [
-        "While you have at least one controlled ally or persistent Essence effect active, you take 8% reduced damage. Controlled allies take 8% reduced area damage."
-      ],
       "countsTowardFocus": false,
       "rules": [],
       "row": 1,
@@ -218,9 +212,6 @@
       "tags": [
         "Right",
         "Major"
-      ],
-      "effects": [
-        "When you use an Essence ability, controlled allies gain +6% Effect Potency on their next action against that target. If you have no controlled allies, your next Essence ability gains +4% Effect Potency. 6 second internal cooldown."
       ],
       "countsTowardFocus": false,
       "rules": [],
@@ -258,9 +249,6 @@
         "SummonConversion",
         "Left",
         "Major"
-      ],
-      "effects": [
-        "Mutator Group: DeliveryConversion + SummonConversion. Eligible Essence abilities may be delivered through your strongest controlled ally once every 8 seconds. Hostile abilities use your stats but originate from the ally's position and target, resolving at 75% Effect Potency. Non-hostile abilities use the ally as the origin point at 85% Effect Potency. If no controlled ally exists, your next persistent Essence effect gains +10% duration instead."
       ],
       "countsTowardFocus": false,
       "rules": [],
@@ -367,9 +355,6 @@
         "SummonConversion",
         "Middle",
         "Major"
-      ],
-      "effects": [
-        "Mutator Group: SupportConversion + SummonConversion. When you heal, barrier, buff, or cleanse yourself, your strongest controlled ally receives 35% of the effect. When you heal, barrier, buff, or cleanse a controlled ally, you receive 20% of the effect. If no controlled ally exists, self-targeted non-hostile Essence effects gain +5% Effect Potency."
       ],
       "countsTowardFocus": false,
       "rules": [],
@@ -485,9 +470,6 @@
         "Right",
         "Major"
       ],
-      "effects": [
-        "Mutator Group: TargetingConversion + SummonConversion. Direct hostile Essence abilities mark the target for controlled allies for 5 seconds. Controlled allies deal/apply +8% Effect Potency against the marked target. If no controlled ally exists, your next DamageOverTime, Aura, Trap, or Persistent Essence effect against that target gains +4% Effect Potency."
-      ],
       "countsTowardFocus": false,
       "rules": [],
       "row": 2,
@@ -592,9 +574,6 @@
         "Left",
         "Major"
       ],
-      "effects": [
-        "Rally Command lasts 4 seconds longer. Controlled allies gain +10% Effect Potency during Rally Command. Solo fallback: you gain +5% Effect Potency during Rally Command."
-      ],
       "countsTowardFocus": true,
       "rules": [],
       "row": 3,
@@ -629,9 +608,6 @@
       "tags": [
         "Middle",
         "Major"
-      ],
-      "effects": [
-        "Once per Rally Command, if a controlled ally would die, prevent death and give it a Barrier equal to 15% of your Max Health for 4 seconds. If you have no controlled allies, Rally Command cooldown is reduced by 50% when you fall below 35% Health. 90 second internal cooldown."
       ],
       "countsTowardFocus": true,
       "rules": [],
@@ -668,9 +644,6 @@
         "Right",
         "Major"
       ],
-      "effects": [
-        "During Rally Command, each controlled ally or active persistent Essence effect grants your next Essence ability +2% Effect Potency, capped at +12%. If you have no controlled allies or persistent effects, count as 2 stacks."
-      ],
       "countsTowardFocus": true,
       "rules": [],
       "row": 3,
@@ -706,9 +679,6 @@
         "Left",
         "Minor"
       ],
-      "effects": [
-        "Max Command +10 / +20."
-      ],
       "countsTowardFocus": false,
       "rules": [],
       "row": 1,
@@ -738,9 +708,6 @@
       "tags": [
         "Middle",
         "Minor"
-      ],
-      "effects": [
-        "Start combat with +10 / +20 Command."
       ],
       "countsTowardFocus": false,
       "rules": [],
@@ -774,9 +741,6 @@
         "Heal",
         "Debuff"
       ],
-      "effects": [
-        "Controlled allies gain +5% / +10% Max Health. Solo fallback: your persistent Essence effects gain +3% / +6% duration."
-      ],
       "countsTowardFocus": false,
       "rules": [],
       "row": 1,
@@ -809,9 +773,6 @@
         "Summon",
         "Debuff"
       ],
-      "effects": [
-        "While you have no controlled allies, your Essence abilities gain +3% / +6% Effect Potency. This bonus ends for 8 seconds after you gain a controlled ally."
-      ],
       "countsTowardFocus": false,
       "rules": [],
       "row": 1,
@@ -841,9 +802,6 @@
       "tags": [
         "Left",
         "Minor"
-      ],
-      "effects": [
-        "Persistent Essence effect duration +4% / +8%."
       ],
       "countsTowardFocus": false,
       "rules": [],
@@ -877,9 +835,6 @@
         "Damage",
         "Debuff"
       ],
-      "effects": [
-        "Controlled allies gain +5% / +10% damage reduction against area damage. Solo fallback: you gain +2% / +4% damage reduction while a persistent Essence effect is active."
-      ],
       "countsTowardFocus": false,
       "rules": [],
       "row": 2,
@@ -909,9 +864,6 @@
       "tags": [
         "Right",
         "Minor"
-      ],
-      "effects": [
-        "Essence abilities that create, refresh, or command persistent effects cost 4% / 8% less resource."
       ],
       "countsTowardFocus": false,
       "rules": [],
@@ -943,9 +895,6 @@
         "Middle",
         "Minor"
       ],
-      "effects": [
-        "Proxy Command potency penalty is reduced by 5% / 10%."
-      ],
       "countsTowardFocus": false,
       "rules": [],
       "row": 2,
@@ -975,9 +924,6 @@
       "tags": [
         "Left",
         "Minor"
-      ],
-      "effects": [
-        "Rally Command cooldown reduced by 2 / 4 seconds."
       ],
       "countsTowardFocus": false,
       "rules": [],
@@ -1009,9 +955,6 @@
         "Middle",
         "Minor",
         "Debuff"
-      ],
-      "effects": [
-        "Controlled allies gain 10% / 20% crowd control resistance. Solo fallback: your own crowd control resistance +5% / +10%."
       ],
       "countsTowardFocus": false,
       "rules": [],
@@ -1046,9 +989,6 @@
         "Summon",
         "Debuff"
       ],
-      "effects": [
-        "When a controlled ally acts, you recover 0.3% / 0.6% missing Health. 2 second internal cooldown. Solo fallback: persistent Essence ticks restore 0.2% / 0.4% missing Health."
-      ],
       "countsTowardFocus": false,
       "rules": [],
       "row": 3,
@@ -1082,9 +1022,6 @@
         "Barrier",
         "Summon",
         "Debuff"
-      ],
-      "effects": [
-        "When a controlled ally falls below 30% Health, it gains a Barrier equal to 5% / 10% of your Max Health. 30 second cooldown per ally. Solo fallback: you gain this Barrier when you fall below 30% Health."
       ],
       "countsTowardFocus": false,
       "rules": [],

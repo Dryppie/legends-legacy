@@ -3,7 +3,6 @@ import { Observable } from 'rxjs';
 import { ApiService } from '../api.service';
 import {
   ActivateCombatStyleResponseDto,
-  CombatBuildPreviewDto,
   CombatStyleDto,
   CombatStyleMutationResponseDto,
   CombatStylesOverviewDto,
@@ -41,9 +40,5 @@ export class CombatStyleService {
 
   resetTree(styleId: string): Observable<CombatStyleMutationResponseDto> {
     return this.api.post(`combat-styles/${styleId}/tree/reset`);
-  }
-
-  getBuildPreview(): Observable<CombatBuildPreviewDto> {
-    return this.api.get('combat-styles/build-preview');
   }
 }

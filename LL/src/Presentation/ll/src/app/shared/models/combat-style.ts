@@ -69,7 +69,6 @@ export interface CombatStyleSkillTreeNodeDto {
   isUnlocked: boolean;
   canRankUp: boolean;
   tags: string[];
-  effects: string[];
   row: number;
   lane: string;
   nodeType: string;
@@ -96,18 +95,3 @@ export interface CombatStyleMutationResponseDto {
   style: CombatStyleDto | null;
 }
 
-export interface CombatBuildPreviewDto {
-  activeStyleId: string;
-  activeStyleName: string;
-  selectedFocusId: string | null;
-  selectedFocusName: string | null;
-  buildName: string;
-  topTags: TagScoreDto[];
-  recommendedStats: string[];
-  notes: string[];
-}
-
-export interface TagScoreDto {
-  tag: string;
-  score: number;
-}

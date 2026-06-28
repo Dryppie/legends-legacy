@@ -131,9 +131,6 @@
         "Left",
         "Major"
       ],
-      "effects": [
-        "Healing and barriers you apply gain +8% Effect Potency. 20% of overhealing becomes a temporary Barrier lasting 6 seconds."
-      ],
       "countsTowardFocus": false,
       "rules": [],
       "row": 1,
@@ -168,9 +165,6 @@
       "tags": [
         "Middle",
         "Major"
-      ],
-      "effects": [
-        "Buffs and self-effects you apply last 10% longer. Using any Essence ability grants the lowest-Health ally a Barrier equal to 3% of your Max Health. If no ally exists, you gain the Barrier. 8 second internal cooldown."
       ],
       "countsTowardFocus": false,
       "rules": [],
@@ -207,9 +201,6 @@
         "Right",
         "Major"
       ],
-      "effects": [
-        "Effects on targets below 50% Health gain +10% Effect Potency. After you use an Essence ability, the lowest-Health ally takes 5% less damage for 4 seconds. Solo fallback applies to yourself."
-      ],
       "countsTowardFocus": false,
       "rules": [],
       "row": 1,
@@ -245,9 +236,6 @@
         "SupportConversion",
         "Left",
         "Major"
-      ],
-      "effects": [
-        "Mutator Group: SupportConversion. Hostile Essence abilities heal or barrier the lowest-Health ally for 12% of the hostile effect value, capped at 5% of your Max Health. If fighting alone, this applies to yourself at 60% value. Does not trigger from reflected damage or repeated echo effects unless explicitly allowed."
       ],
       "countsTowardFocus": false,
       "rules": [],
@@ -351,9 +339,6 @@
         "SupportConversion",
         "Middle",
         "Major"
-      ],
-      "effects": [
-        "Mutator Group: SupportConversion. Self-targeted buff, barrier, heal, cleanse, and resource Essence effects also apply 30% of their value or duration to the lowest-Health ally or strongest controlled ally. If no ally exists, self-targeted non-hostile effects gain +10% duration."
       ],
       "countsTowardFocus": false,
       "rules": [],
@@ -470,9 +455,6 @@
         "Right",
         "Major"
       ],
-      "effects": [
-        "Mutator Group: SupportConversion + ControlConversion. Damaging a Weakened, Controlled, Suppressed, or Marked enemy causes your next healing/barrier Essence ability within 6 seconds to gain +8% Effect Potency. Healing or barriering an ally below 50% Health causes your next hostile Essence ability to apply Weakened for 4 seconds: damage dealt -5%. 8 second internal cooldown."
-      ],
       "countsTowardFocus": false,
       "rules": [],
       "row": 2,
@@ -583,9 +565,6 @@
         "Left",
         "Major"
       ],
-      "effects": [
-        "Benediction affects your next 2 Essence abilities. The second ability receives 70% of the Benediction bonus."
-      ],
       "countsTowardFocus": true,
       "rules": [],
       "row": 3,
@@ -620,9 +599,6 @@
       "tags": [
         "Middle",
         "Major"
-      ],
-      "effects": [
-        "Benediction creates an 8 second Sanctuary. You and allies affected by Benediction take 10% less damage. Solo fallback: you gain 10% damage reduction."
       ],
       "countsTowardFocus": true,
       "rules": [],
@@ -659,9 +635,6 @@
         "Right",
         "Major"
       ],
-      "effects": [
-        "Benedicted effects on targets below 35% Health gain +20% Effect Potency. If the Benedicted ability is hostile and the enemy is targeting a low-Health ally, that enemy deals 10% less damage for 5 seconds."
-      ],
       "countsTowardFocus": true,
       "rules": [],
       "row": 3,
@@ -697,9 +670,6 @@
         "Left",
         "Minor"
       ],
-      "effects": [
-        "Max Harmony +10 / +20."
-      ],
       "countsTowardFocus": false,
       "rules": [],
       "row": 1,
@@ -732,9 +702,6 @@
         "Heal",
         "Barrier"
       ],
-      "effects": [
-        "Healing and barrier Effect Potency +3% / +6%."
-      ],
       "countsTowardFocus": false,
       "rules": [],
       "row": 1,
@@ -764,9 +731,6 @@
       "tags": [
         "Right",
         "Minor"
-      ],
-      "effects": [
-        "Buff duration +4% / +8%."
       ],
       "countsTowardFocus": false,
       "rules": [],
@@ -798,9 +762,6 @@
         "Middle",
         "Minor",
         "Debuff"
-      ],
-      "effects": [
-        "While no allies or controlled allies are present, Support effects on yourself gain +3% / +6% Effect Potency."
       ],
       "countsTowardFocus": false,
       "rules": [],
@@ -834,9 +795,6 @@
         "Heal",
         "Barrier"
       ],
-      "effects": [
-        "When you heal, barrier, cleanse, or buff a target, restore 0.5% / 1% of their missing primary resource. 4 second internal cooldown per target. Solo fallback applies to yourself."
-      ],
       "countsTowardFocus": false,
       "rules": [],
       "row": 2,
@@ -866,9 +824,6 @@
       "tags": [
         "Middle",
         "Minor"
-      ],
-      "effects": [
-        "Negative effect durations on you and affected allies reduced by 5% / 10%."
       ],
       "countsTowardFocus": false,
       "rules": [],
@@ -902,9 +857,6 @@
         "Heal",
         "Barrier"
       ],
-      "effects": [
-        "10% / 20% of overhealing becomes a temporary Barrier lasting 6 seconds."
-      ],
       "countsTowardFocus": false,
       "rules": [],
       "row": 2,
@@ -936,9 +888,6 @@
         "Minor",
         "Heal",
         "Barrier"
-      ],
-      "effects": [
-        "Healing, barrier, buff, and cleanse Essence abilities cost 4% / 8% less resource."
       ],
       "countsTowardFocus": false,
       "rules": [],
@@ -972,9 +921,6 @@
         "Heal",
         "Barrier"
       ],
-      "effects": [
-        "When you or an ally falls below 40% Health, grant them a Barrier equal to 4% / 8% of your Max Health. 30 second cooldown per target."
-      ],
       "countsTowardFocus": false,
       "rules": [],
       "row": 3,
@@ -1007,9 +953,6 @@
         "Heal",
         "Barrier"
       ],
-      "effects": [
-        "When you receive healing or barrier from your own effects, the lowest-Health ally receives 10% / 20% of that value. Solo fallback: increase the value on yourself by 5% / 10%."
-      ],
       "countsTowardFocus": false,
       "rules": [],
       "row": 3,
@@ -1040,9 +983,6 @@
         "Right",
         "Minor"
       ],
-      "effects": [
-        "Benediction grants +3% / +6% Action Speed for 6 seconds."
-      ],
       "countsTowardFocus": false,
       "rules": [],
       "row": 3,
@@ -1072,9 +1012,6 @@
       "tags": [
         "Middle",
         "Minor"
-      ],
-      "effects": [
-        "Benediction cooldown reduced by 2 / 4 seconds."
       ],
       "countsTowardFocus": false,
       "rules": [],

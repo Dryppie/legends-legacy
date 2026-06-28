@@ -137,9 +137,6 @@
         "Left",
         "Major"
       ],
-      "effects": [
-        "Max Health +8%. While below 35% Health, direct damage taken -10%. Aegis Barrier +10% when cast below 50% Health."
-      ],
       "countsTowardFocus": false,
       "rules": [],
       "row": 1,
@@ -174,9 +171,6 @@
       "tags": [
         "Middle",
         "Major"
-      ],
-      "effects": [
-        "Dodging, blocking, parrying, or fully absorbing an attack grants the same Guard as taking Health damage. First direct hit taken every 8 seconds deals 8% less damage. Enemy misses still grant +2 Guard."
       ],
       "countsTowardFocus": false,
       "rules": [],
@@ -213,9 +207,6 @@
         "Right",
         "Major"
       ],
-      "effects": [
-        "Using any Essence ability below 75% Health grants +3 additional Guard. Using any Essence ability below 50% Health grants 5% damage reduction for 3 seconds. 6 second internal cooldown."
-      ],
       "countsTowardFocus": false,
       "rules": [],
       "row": 1,
@@ -251,9 +242,6 @@
         "DefensiveConversion",
         "Left",
         "Major"
-      ],
-      "effects": [
-        "Mutator Group: DefensiveConversion. After Aegis activates, your next Essence ability within 8 seconds becomes Protected. Protected abilities cannot be interrupted. Damage, healing, barrier, resource, and utility effects gain +8% Effect Potency. Debuff and control effects gain +10% application chance. Summon and persistent effects gain +10% duration."
       ],
       "countsTowardFocus": false,
       "rules": [],
@@ -368,9 +356,6 @@
         "DefensiveTempo",
         "Middle",
         "Major"
-      ],
-      "effects": [
-        "Mutator Group: DefensiveTempo. While Aegis is active, eligible Essence abilities recover cooldown faster and cost less resource. If Aegis survives its full duration, regain a portion of the Guard spent."
       ],
       "countsTowardFocus": false,
       "rules": [],
@@ -487,9 +472,6 @@
         "Right",
         "Major"
       ],
-      "effects": [
-        "Mutator Group: SupportConversion. When you create a Barrier with an Essence ability, 20% of the Barrier value is also applied to your lowest-Health controlled ally. If no controlled ally exists, 15% of excess Barrier applied to you becomes Guard. While Aegis is active, this shared Barrier value is increased by 50%."
-      ],
       "countsTowardFocus": false,
       "rules": [],
       "row": 2,
@@ -596,9 +578,6 @@
         "Left",
         "Major"
       ],
-      "effects": [
-        "Aegis Barrier +20%. While Aegis is active, damage taken -10%. Aegis prevents one interrupt, stun, silence, knockback, or displacement effect."
-      ],
       "countsTowardFocus": true,
       "rules": [],
       "row": 3,
@@ -634,9 +613,6 @@
         "Middle",
         "Major"
       ],
-      "effects": [
-        "If you would take lethal damage while at 75+ Guard, consume 75 Guard, prevent death, set Health to 1, immediately activate Aegis at 75 Guard strength, and heal for 6% Max Health over 4 seconds. 120 second cooldown."
-      ],
       "countsTowardFocus": true,
       "rules": [],
       "row": 3,
@@ -671,9 +647,6 @@
       "tags": [
         "Right",
         "Major"
-      ],
-      "effects": [
-        "When Aegis breaks or expires, your next Essence ability within 8 seconds gains up to +12% Effect Potency based on damage absorbed by Aegis. Bonus = absorbed damage / 20% Max Health, capped at 12%. Also refunds 15% resource cost and refunds 10% cooldown if it defeats an enemy or successfully applies a debuff/control effect."
       ],
       "countsTowardFocus": true,
       "rules": [],
@@ -711,9 +684,6 @@
         "Minor",
         "Heal"
       ],
-      "effects": [
-        "Max Health +3% / +6%."
-      ],
       "countsTowardFocus": false,
       "rules": [],
       "row": 1,
@@ -743,9 +713,6 @@
       "tags": [
         "Middle",
         "Minor"
-      ],
-      "effects": [
-        "Max Guard +10 / +20."
       ],
       "countsTowardFocus": false,
       "rules": [],
@@ -778,9 +745,6 @@
         "Minor",
         "Debuff"
       ],
-      "effects": [
-        "Stun, silence, disarm, knockback, and displacement duration against you reduced by 8% / 16%."
-      ],
       "countsTowardFocus": false,
       "rules": [],
       "row": 1,
@@ -811,9 +775,6 @@
         "Middle",
         "Minor",
         "Heal"
-      ],
-      "effects": [
-        "When you gain Guard, restore 0.5% / 1% missing primary resource. 2 second internal cooldown. If you have no primary resource, restore Health instead."
       ],
       "countsTowardFocus": false,
       "rules": [],
@@ -846,9 +807,6 @@
         "Minor",
         "Barrier"
       ],
-      "effects": [
-        "Aegis Barrier +8% / +16%."
-      ],
       "countsTowardFocus": false,
       "rules": [],
       "row": 2,
@@ -879,9 +837,6 @@
         "Middle",
         "Minor"
       ],
-      "effects": [
-        "When Aegis activates, reduce current negative effect durations on you by 10% / 20%."
-      ],
       "countsTowardFocus": false,
       "rules": [],
       "row": 2,
@@ -911,9 +866,6 @@
       "tags": [
         "Right",
         "Minor"
-      ],
-      "effects": [
-        "Every 25 Guard spent reduces the remaining cooldown of your highest-cooldown non-style Essence ability by 0.5 / 1 second."
       ],
       "countsTowardFocus": false,
       "rules": [],
@@ -947,9 +899,6 @@
         "Heal",
         "Barrier"
       ],
-      "effects": [
-        "Healing and Barrier effects used while Aegis is active gain +2% / +4% Effect Potency."
-      ],
       "countsTowardFocus": false,
       "rules": [],
       "row": 2,
@@ -980,9 +929,6 @@
         "Left",
         "Minor",
         "Heal"
-      ],
-      "effects": [
-        "When you fall below 40% Health, gain 20 / 40 Guard. 45 second cooldown."
       ],
       "countsTowardFocus": false,
       "rules": [],
@@ -1015,9 +961,6 @@
         "Minor",
         "Damage"
       ],
-      "effects": [
-        "When Aegis breaks, gain 4% / 8% damage reduction for 3 seconds."
-      ],
       "countsTowardFocus": false,
       "rules": [],
       "row": 3,
@@ -1048,9 +991,6 @@
         "Right",
         "Minor",
         "Damage"
-      ],
-      "effects": [
-        "Enemy critical damage against you reduced by 6% / 12%."
       ],
       "countsTowardFocus": false,
       "rules": [],
@@ -1083,9 +1023,6 @@
         "Minor",
         "Heal",
         "Barrier"
-      ],
-      "effects": [
-        "10% / 20% of overhealing or excess barrier applied to you becomes Guard."
       ],
       "countsTowardFocus": false,
       "rules": [],

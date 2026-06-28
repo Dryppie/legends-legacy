@@ -3,7 +3,6 @@ using Application.UseCases.CombatStyles.Commands.RankUpCombatStyleNode;
 using Application.UseCases.CombatStyles.Commands.ResetCombatStyleTree;
 using Application.UseCases.CombatStyles.Commands.SelectCombatStyleFocus;
 using Application.UseCases.CombatStyles.Dtos;
-using Application.UseCases.CombatStyles.Queries.GetCombatBuildPreview;
 using Application.UseCases.CombatStyles.Queries.GetCombatStyles;
 using Common.Primitives;
 using Microsoft.AspNetCore.Mvc;
@@ -32,8 +31,4 @@ public sealed class CombatStylesController : BaseController
     [HttpPost("{styleId}/tree/reset")]
     public async Task<ActionResult<Response<CombatStyleMutationResponseDto>>> ResetTree(string styleId) =>
         await Mediator.Send(new ResetCombatStyleTreeCommand(CurrentCharacterGuid, styleId));
-
-    [HttpGet("build-preview")]
-    public async Task<ActionResult<CombatBuildPreviewDto>> GetBuildPreview() =>
-        await Mediator.Send(new GetCombatBuildPreviewQuery(CurrentCharacterGuid));
 }

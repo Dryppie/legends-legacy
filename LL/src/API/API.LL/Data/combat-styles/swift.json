@@ -123,9 +123,6 @@
         "Left",
         "Major"
       ],
-      "effects": [
-        "Dodging, parrying, avoiding, or being missed grants +4 additional Flow. After avoiding damage, your next Essence ability costs 10% less resource."
-      ],
       "countsTowardFocus": false,
       "rules": [],
       "row": 1,
@@ -160,9 +157,6 @@
       "tags": [
         "Middle",
         "Major"
-      ],
-      "effects": [
-        "Non-style Essence cooldowns recover 6% faster. Using any Essence ability grants +4 Flow. 4 second internal cooldown."
       ],
       "countsTowardFocus": false,
       "rules": [],
@@ -199,9 +193,6 @@
         "Right",
         "Major"
       ],
-      "effects": [
-        "Essence effects against enemies above 80% Health or below 30% Health gain +6% Effect Potency. Healing/barriers on allies below 30% Health also gain +6% Effect Potency."
-      ],
       "countsTowardFocus": false,
       "rules": [],
       "row": 1,
@@ -237,9 +228,6 @@
         "TimingConversion",
         "Left",
         "Major"
-      ],
-      "effects": [
-        "Mutator Group: TimingConversion. Eligible Essence abilities with a cooldown of 12+ seconds may split into two activations. The first activation resolves at 65% Effect Potency. The second resolves 2 seconds later at 45% Effect Potency if the target is still valid. Hard crowd control effects do not reapply; instead they gain 20% duration on the first activation. Resource cost +5%. 12 second internal cooldown."
       ],
       "countsTowardFocus": false,
       "rules": [],
@@ -340,9 +328,6 @@
         "Middle",
         "Major"
       ],
-      "effects": [
-        "Mutator Group: TimingConversion + ResourceConversion. Using two different Essence effect categories within 5 seconds gives the second ability the Quick tag. Quick abilities recover 10% cooldown faster and cost 5% less resource. If the same effect category is repeated, the second ability gains only half benefit."
-      ],
       "countsTowardFocus": false,
       "rules": [],
       "row": 2,
@@ -438,9 +423,6 @@
         "TimingConversion",
         "Right",
         "Major"
-      ],
-      "effects": [
-        "Mutator Group: DefensiveConversion + TimingConversion. After you dodge, parry, avoid, or activate Quickstep, your next cast, channel, summon, aura, or persistent Essence ability within 5 seconds becomes Evasive. Evasive abilities are 50% harder to interrupt, have 10% shorter cast/channel time, and grant 4% damage reduction for 3 seconds after resolving."
       ],
       "countsTowardFocus": false,
       "rules": [],
@@ -544,9 +526,6 @@
         "Left",
         "Major"
       ],
-      "effects": [
-        "Quickstep lasts 2 seconds longer, removes slows/roots, and prevents the first crowd control effect applied to you during Quickstep."
-      ],
       "countsTowardFocus": true,
       "rules": [],
       "row": 3,
@@ -581,9 +560,6 @@
       "tags": [
         "Middle",
         "Major"
-      ],
-      "effects": [
-        "Quickstep empowers your next 3 Essence abilities instead of 1. Each receives 60% of the Quickstep potency bonus. Quickstep Action Speed bonus increased from 10% to 15%."
       ],
       "countsTowardFocus": true,
       "rules": [],
@@ -620,9 +596,6 @@
         "Right",
         "Major"
       ],
-      "effects": [
-        "During Quickstep, your first Essence effect against a target below 35% Health gains +18% Effect Potency. Healing/barrier effects on allies below 35% Health also gain +18%. If the effect does not defeat an enemy or prevent an ally from dropping lower, only half the bonus applies."
-      ],
       "countsTowardFocus": true,
       "rules": [],
       "row": 3,
@@ -658,9 +631,6 @@
         "Left",
         "Minor"
       ],
-      "effects": [
-        "Max Flow +10 / +20."
-      ],
       "countsTowardFocus": false,
       "rules": [],
       "row": 1,
@@ -690,9 +660,6 @@
       "tags": [
         "Middle",
         "Minor"
-      ],
-      "effects": [
-        "Start combat with +10 / +20 Flow."
       ],
       "countsTowardFocus": false,
       "rules": [],
@@ -725,9 +692,6 @@
         "Minor",
         "Damage"
       ],
-      "effects": [
-        "Dodge chance +2% / +4%. If dodge does not exist for the character, direct damage taken -2% / -4% instead."
-      ],
       "countsTowardFocus": false,
       "rules": [],
       "row": 1,
@@ -757,9 +721,6 @@
       "tags": [
         "Middle",
         "Minor"
-      ],
-      "effects": [
-        "Essence abilities used within 5 seconds of another Essence ability cost 3% / 6% less resource."
       ],
       "countsTowardFocus": false,
       "rules": [],
@@ -792,9 +753,6 @@
         "Minor",
         "Damage"
       ],
-      "effects": [
-        "When you avoid damage, reduce the remaining cooldown of your highest-cooldown non-style Essence ability by 0.5 / 1 second. 3 second internal cooldown."
-      ],
       "countsTowardFocus": false,
       "rules": [],
       "row": 2,
@@ -824,9 +782,6 @@
       "tags": [
         "Middle",
         "Minor"
-      ],
-      "effects": [
-        "Essence cast/channel/recovery time reduced by 4% / 8%. Instant abilities gain +2% / +4% cooldown recovery instead."
       ],
       "countsTowardFocus": false,
       "rules": [],
@@ -859,9 +814,6 @@
         "Minor",
         "Damage"
       ],
-      "effects": [
-        "After avoiding damage, damage taken is reduced by 4% / 8% for 3 seconds."
-      ],
       "countsTowardFocus": false,
       "rules": [],
       "row": 2,
@@ -891,9 +843,6 @@
       "tags": [
         "Middle",
         "Minor"
-      ],
-      "effects": [
-        "Essence abilities used after a different effect category gain +2% / +4% Effect Potency."
       ],
       "countsTowardFocus": false,
       "rules": [],
@@ -926,9 +875,6 @@
         "Minor",
         "Damage"
       ],
-      "effects": [
-        "After using Quickstep, damage taken is reduced by 5% / 10% for 3 seconds."
-      ],
       "countsTowardFocus": false,
       "rules": [],
       "row": 3,
@@ -958,9 +904,6 @@
       "tags": [
         "Middle",
         "Minor"
-      ],
-      "effects": [
-        "When you gain Flow, restore 0.3% / 0.6% missing primary resource. 2 second internal cooldown."
       ],
       "countsTowardFocus": false,
       "rules": [],
@@ -992,9 +935,6 @@
         "Right",
         "Minor"
       ],
-      "effects": [
-        "Enemy critical chance against you reduced by 3% / 6%."
-      ],
       "countsTowardFocus": false,
       "rules": [],
       "row": 3,
@@ -1024,9 +964,6 @@
       "tags": [
         "Middle",
         "Minor"
-      ],
-      "effects": [
-        "Quickstep cooldown reduced by 2 / 4 seconds."
       ],
       "countsTowardFocus": false,
       "rules": [],
