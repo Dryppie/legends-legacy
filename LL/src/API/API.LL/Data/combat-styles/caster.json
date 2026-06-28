@@ -1,0 +1,1461 @@
+{
+  "id": "caster",
+  "name": "Caster",
+  "description": "Builds Arcane Charge through active Essence use and amplifies magic-adjacent effects.",
+  "resourceId": "arcaneCharge",
+  "resourceMaxAmount": 5,
+  "maxLevel": 50,
+  "recommendedTags": [
+    "Magic",
+    "Spell",
+    "Curse",
+    "Melee"
+  ],
+  "recommendedStats": [
+    "Spirit",
+    "Power",
+    "MagicPenetration"
+  ],
+  "focuses": [
+    {
+      "id": "arcanist",
+      "name": "Arcanist",
+      "description": "Pure arcana: active Magic and Spell effects scale higher and build extra Arcane Charge at later milestones.",
+      "unlockLevel": 10,
+      "recommendedTags": [
+        "Magic",
+        "Spell"
+      ],
+      "recommendedStats": [
+        "Spirit",
+        "MagicPenetration"
+      ],
+      "rules": [
+        {
+          "id": "caster_arcanist_effect_l10",
+          "eventType": "EffectCalculation",
+          "minStyleLevel": 10,
+          "maxStyleLevel": 24,
+          "predicate": {
+            "sourceMustBePlayer": true,
+            "activeAbilityOnly": true,
+            "amplifiableEffectOnly": true,
+            "anyTags": [
+              "Magic",
+              "Spell"
+            ]
+          },
+          "operation": {
+            "type": "modifyEffectAmount",
+            "additivePercent": 0.1
+          }
+        },
+        {
+          "id": "caster_arcanist_effect_l25",
+          "eventType": "EffectCalculation",
+          "minStyleLevel": 25,
+          "maxStyleLevel": 39,
+          "predicate": {
+            "sourceMustBePlayer": true,
+            "activeAbilityOnly": true,
+            "amplifiableEffectOnly": true,
+            "anyTags": [
+              "Magic",
+              "Spell"
+            ]
+          },
+          "operation": {
+            "type": "modifyEffectAmount",
+            "additivePercent": 0.15
+          }
+        },
+        {
+          "id": "caster_arcanist_effect_l40",
+          "eventType": "EffectCalculation",
+          "minStyleLevel": 40,
+          "predicate": {
+            "sourceMustBePlayer": true,
+            "activeAbilityOnly": true,
+            "amplifiableEffectOnly": true,
+            "anyTags": [
+              "Magic",
+              "Spell"
+            ]
+          },
+          "operation": {
+            "type": "modifyEffectAmount",
+            "additivePercent": 0.2
+          }
+        },
+        {
+          "id": "caster_arcanist_charge_l25",
+          "eventType": "AbilityResolved",
+          "minStyleLevel": 25,
+          "maxStyleLevel": 39,
+          "predicate": {
+            "sourceMustBePlayer": true,
+            "activeAbilityOnly": true,
+            "anyTags": [
+              "Magic",
+              "Spell"
+            ]
+          },
+          "operation": {
+            "type": "gainStyleResource",
+            "resourceId": "arcaneCharge",
+            "amount": 1,
+            "usesProcCoefficient": false
+          }
+        },
+        {
+          "id": "caster_arcanist_charge_l40",
+          "eventType": "AbilityResolved",
+          "minStyleLevel": 40,
+          "predicate": {
+            "sourceMustBePlayer": true,
+            "activeAbilityOnly": true,
+            "anyTags": [
+              "Magic",
+              "Spell"
+            ]
+          },
+          "operation": {
+            "type": "gainStyleResource",
+            "resourceId": "arcaneCharge",
+            "amount": 2,
+            "usesProcCoefficient": false
+          }
+        }
+      ]
+    },
+    {
+      "id": "spellblade",
+      "name": "Spellblade",
+      "description": "Adds Spirit-scaling arcane damage to Melee active effects, improving at levels 25 and 40.",
+      "unlockLevel": 10,
+      "recommendedTags": [
+        "Melee",
+        "Magic"
+      ],
+      "recommendedStats": [
+        "Spirit",
+        "Power"
+      ],
+      "rules": [
+        {
+          "id": "caster_spellblade_bonus_l10",
+          "eventType": "EffectCalculation",
+          "minStyleLevel": 10,
+          "maxStyleLevel": 24,
+          "predicate": {
+            "sourceMustBePlayer": true,
+            "activeAbilityOnly": true,
+            "effectOperations": [
+              "Damage"
+            ],
+            "anyTags": [
+              "Melee"
+            ]
+          },
+          "operation": {
+            "type": "addBonusDamageFromStat",
+            "stat": "Spirit",
+            "coefficient": 0.15,
+            "damageType": "Magical"
+          }
+        },
+        {
+          "id": "caster_spellblade_bonus_l25",
+          "eventType": "EffectCalculation",
+          "minStyleLevel": 25,
+          "maxStyleLevel": 39,
+          "predicate": {
+            "sourceMustBePlayer": true,
+            "activeAbilityOnly": true,
+            "effectOperations": [
+              "Damage"
+            ],
+            "anyTags": [
+              "Melee"
+            ]
+          },
+          "operation": {
+            "type": "addBonusDamageFromStat",
+            "stat": "Spirit",
+            "coefficient": 0.2,
+            "damageType": "Magical"
+          }
+        },
+        {
+          "id": "caster_spellblade_bonus_l40",
+          "eventType": "EffectCalculation",
+          "minStyleLevel": 40,
+          "predicate": {
+            "sourceMustBePlayer": true,
+            "activeAbilityOnly": true,
+            "effectOperations": [
+              "Damage"
+            ],
+            "anyTags": [
+              "Melee"
+            ]
+          },
+          "operation": {
+            "type": "addBonusDamageFromStat",
+            "stat": "Spirit",
+            "coefficient": 0.25,
+            "damageType": "Magical"
+          }
+        }
+      ]
+    },
+    {
+      "id": "occultist",
+      "name": "Occultist",
+      "description": "Dark study: Curse and damage-over-time active effects scale higher and build extra Arcane Charge.",
+      "unlockLevel": 10,
+      "recommendedTags": [
+        "Curse",
+        "DoT"
+      ],
+      "recommendedStats": [
+        "Spirit",
+        "Cooldown"
+      ],
+      "rules": [
+        {
+          "id": "caster_occultist_effect_l10",
+          "eventType": "EffectCalculation",
+          "minStyleLevel": 10,
+          "maxStyleLevel": 24,
+          "predicate": {
+            "sourceMustBePlayer": true,
+            "activeAbilityOnly": true,
+            "amplifiableEffectOnly": true,
+            "anyTags": [
+              "Curse",
+              "DoT"
+            ]
+          },
+          "operation": {
+            "type": "modifyEffectAmount",
+            "additivePercent": 0.1
+          }
+        },
+        {
+          "id": "caster_occultist_effect_l25",
+          "eventType": "EffectCalculation",
+          "minStyleLevel": 25,
+          "maxStyleLevel": 39,
+          "predicate": {
+            "sourceMustBePlayer": true,
+            "activeAbilityOnly": true,
+            "amplifiableEffectOnly": true,
+            "anyTags": [
+              "Curse",
+              "DoT"
+            ]
+          },
+          "operation": {
+            "type": "modifyEffectAmount",
+            "additivePercent": 0.15
+          }
+        },
+        {
+          "id": "caster_occultist_effect_l40",
+          "eventType": "EffectCalculation",
+          "minStyleLevel": 40,
+          "predicate": {
+            "sourceMustBePlayer": true,
+            "activeAbilityOnly": true,
+            "amplifiableEffectOnly": true,
+            "anyTags": [
+              "Curse",
+              "DoT"
+            ]
+          },
+          "operation": {
+            "type": "modifyEffectAmount",
+            "additivePercent": 0.2
+          }
+        },
+        {
+          "id": "caster_occultist_charge_l10",
+          "eventType": "AbilityResolved",
+          "minStyleLevel": 10,
+          "predicate": {
+            "sourceMustBePlayer": true,
+            "activeAbilityOnly": true,
+            "anyTags": [
+              "Curse",
+              "DoT"
+            ]
+          },
+          "operation": {
+            "type": "gainStyleResource",
+            "resourceId": "arcaneCharge",
+            "amount": 1,
+            "usesProcCoefficient": false
+          }
+        }
+      ]
+    }
+  ],
+  "rules": [
+    {
+      "id": "caster_arcane_charge_on_active",
+      "eventType": "AbilityResolved",
+      "predicate": {
+        "sourceMustBePlayer": true,
+        "activeAbilityOnly": true
+      },
+      "operation": {
+        "type": "gainStyleResource",
+        "resourceId": "arcaneCharge",
+        "amount": 1,
+        "usesProcCoefficient": false
+      }
+    }
+  ],
+  "resourceOverflowOperations": [
+    {
+      "type": "setPendingEmpowerment",
+      "empowermentId": "caster_arcane_empowerment",
+      "appliesTo": {
+        "sourceMustBePlayer": true,
+        "activeAbilityOnly": true
+      },
+      "additivePercent": 0.2,
+      "consumeOnUse": true,
+      "additivePercentModifiers": [
+        {
+          "type": "nodeRank",
+          "nodeId": "arcanist-specialization",
+          "value": 0.03
+        },
+        {
+          "type": "nodeRank",
+          "nodeId": "arcanist-focus",
+          "value": 0.05
+        },
+        {
+          "type": "nodeRank",
+          "nodeId": "spellblade-specialization",
+          "value": 0.03
+        },
+        {
+          "type": "nodeRank",
+          "nodeId": "spellblade-focus",
+          "value": 0.05
+        },
+        {
+          "type": "nodeRank",
+          "nodeId": "occultist-specialization",
+          "value": 0.03
+        },
+        {
+          "type": "nodeRank",
+          "nodeId": "occultist-focus",
+          "value": 0.05
+        }
+      ]
+    }
+  ],
+  "coreMechanic": "Gain Arcane Charge from active Essence abilities. At 5 Charge, empower the next eligible active effect.",
+  "skillTreeNodes": [
+    {
+      "id": "arcanist-path",
+      "branchId": "arcanist",
+      "name": "Arcanist Root",
+      "description": "Opens Arcanist spell amplification.",
+      "maxRank": 1,
+      "requiredLevel": 1,
+      "requiredNodeId": null,
+      "x": 0,
+      "y": 0,
+      "tags": [
+        "Magic",
+        "Spell"
+      ],
+      "effects": [
+        "Active Magic or Spell effects gain +1% effect amount.",
+        "Does not choose Arcanist as the effective focus by itself."
+      ],
+      "countsTowardFocus": false,
+      "rules": [
+        {
+          "id": "caster_arcanist_nodes_arcanist-path_additivePercentModifiers",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "amplifiableEffectOnly": true,
+            "sourceMustBePlayer": true,
+            "anyTags": [
+              "Magic",
+              "Spell"
+            ],
+            "activeAbilityOnly": true
+          },
+          "operation": {
+            "type": "modifyEffectAmount",
+            "additivePercent": 0,
+            "additivePercentModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 0.01,
+                "nodeId": "arcanist-path"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "arcanist-instinct",
+      "branchId": "arcanist",
+      "name": "Arcanist Instinct",
+      "description": "Builds extra Arcane Charge from Magic and Spell abilities.",
+      "maxRank": 3,
+      "requiredLevel": 5,
+      "requiredNodeId": "arcanist-path",
+      "x": -1,
+      "y": 1,
+      "tags": [
+        "Magic",
+        "Spell"
+      ],
+      "effects": [
+        "Each rank grants +1 Arcane Charge when an active Magic or Spell ability resolves.",
+        "Adds 1 Arcanist branch point per rank."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "caster_arcanist_nodes_charge_arcanist-instinct_amountModifiers",
+          "eventType": "AbilityResolved",
+          "predicate": {
+            "sourceMustBePlayer": true,
+            "anyTags": [
+              "Magic",
+              "Spell"
+            ],
+            "activeAbilityOnly": true
+          },
+          "operation": {
+            "type": "gainStyleResource",
+            "resourceId": "arcaneCharge",
+            "amount": 0,
+            "usesProcCoefficient": false,
+            "amountModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 1,
+                "nodeId": "arcanist-instinct"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "arcanist-technique",
+      "branchId": "arcanist",
+      "name": "Arcanist Technique",
+      "description": "Improves Magic and Spell active effects.",
+      "maxRank": 3,
+      "requiredLevel": 10,
+      "requiredNodeId": "arcanist-path",
+      "x": 0,
+      "y": 1,
+      "tags": [
+        "Magic",
+        "Spell"
+      ],
+      "effects": [
+        "Each rank gives active Magic or Spell effects +2% effect amount.",
+        "Adds 1 Arcanist branch point per rank."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "caster_arcanist_nodes_arcanist-technique_additivePercentModifiers",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "amplifiableEffectOnly": true,
+            "sourceMustBePlayer": true,
+            "anyTags": [
+              "Magic",
+              "Spell"
+            ],
+            "activeAbilityOnly": true
+          },
+          "operation": {
+            "type": "modifyEffectAmount",
+            "additivePercent": 0,
+            "additivePercentModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 0.02,
+                "nodeId": "arcanist-technique"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "arcanist-discipline",
+      "branchId": "arcanist",
+      "name": "Arcanist Discipline",
+      "description": "Stabilizes arcane casting.",
+      "maxRank": 3,
+      "requiredLevel": 5,
+      "requiredNodeId": "arcanist-path",
+      "x": 1,
+      "y": 1,
+      "tags": [
+        "Magic",
+        "Spell"
+      ],
+      "effects": [
+        "Each rank gives active Magic or Spell effects +1% effect amount.",
+        "Adds 1 Arcanist branch point per rank."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "caster_arcanist_nodes_arcanist-discipline_additivePercentModifiers",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "amplifiableEffectOnly": true,
+            "sourceMustBePlayer": true,
+            "anyTags": [
+              "Magic",
+              "Spell"
+            ],
+            "activeAbilityOnly": true
+          },
+          "operation": {
+            "type": "modifyEffectAmount",
+            "additivePercent": 0,
+            "additivePercentModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 0.01,
+                "nodeId": "arcanist-discipline"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "arcanist-specialization",
+      "branchId": "arcanist",
+      "name": "Arcanist Specialization",
+      "description": "Improves Arcane Charge empowerment.",
+      "maxRank": 2,
+      "requiredLevel": 20,
+      "requiredNodeId": "arcanist-instinct",
+      "x": -1,
+      "y": 2,
+      "tags": [
+        "Magic",
+        "Spell"
+      ],
+      "effects": [
+        "Each rank makes Arcane Charge empowerment +3% stronger.",
+        "Adds 1 Arcanist branch point per rank."
+      ],
+      "countsTowardFocus": true
+    },
+    {
+      "id": "arcanist-mastery",
+      "branchId": "arcanist",
+      "name": "Arcanist Mastery",
+      "description": "Deepens Magic and Spell active effects.",
+      "maxRank": 3,
+      "requiredLevel": 25,
+      "requiredNodeId": "arcanist-technique",
+      "x": 0,
+      "y": 2,
+      "tags": [
+        "Magic",
+        "Spell"
+      ],
+      "effects": [
+        "Each rank gives active Magic or Spell effects +3% effect amount.",
+        "Adds 1 Arcanist branch point per rank."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "caster_arcanist_nodes_arcanist-mastery_additivePercentModifiers",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "amplifiableEffectOnly": true,
+            "sourceMustBePlayer": true,
+            "anyTags": [
+              "Magic",
+              "Spell"
+            ],
+            "activeAbilityOnly": true
+          },
+          "operation": {
+            "type": "modifyEffectAmount",
+            "additivePercent": 0,
+            "additivePercentModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 0.03,
+                "nodeId": "arcanist-mastery"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "arcanist-amplifier",
+      "branchId": "arcanist",
+      "name": "Arcanist Amplifier",
+      "description": "Accelerates Arcane Charge generation.",
+      "maxRank": 2,
+      "requiredLevel": 20,
+      "requiredNodeId": "arcanist-discipline",
+      "x": 1,
+      "y": 2,
+      "tags": [
+        "Magic",
+        "Spell"
+      ],
+      "effects": [
+        "Each rank grants +1 Arcane Charge when an active Magic or Spell ability resolves.",
+        "Adds 1 Arcanist branch point per rank."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "caster_arcanist_nodes_charge_arcanist-amplifier_amountModifiers",
+          "eventType": "AbilityResolved",
+          "predicate": {
+            "sourceMustBePlayer": true,
+            "anyTags": [
+              "Magic",
+              "Spell"
+            ],
+            "activeAbilityOnly": true
+          },
+          "operation": {
+            "type": "gainStyleResource",
+            "resourceId": "arcaneCharge",
+            "amount": 0,
+            "usesProcCoefficient": false,
+            "amountModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 1,
+                "nodeId": "arcanist-amplifier"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "arcanist-focus",
+      "branchId": "arcanist",
+      "name": "Arcanist Focus",
+      "description": "Completes the Arcanist focus.",
+      "maxRank": 1,
+      "requiredLevel": 40,
+      "requiredNodeId": "arcanist-mastery",
+      "x": 0,
+      "y": 3,
+      "tags": [
+        "Magic",
+        "Spell"
+      ],
+      "effects": [
+        "Active Magic or Spell effects gain +5% effect amount.",
+        "Active Magic or Spell abilities grant +1 Arcane Charge.",
+        "Arcane Charge empowerment becomes +5% stronger.",
+        "Adds 1 Arcanist branch point."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "caster_arcanist_nodes_arcanist-focus_additivePercentModifiers",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "amplifiableEffectOnly": true,
+            "sourceMustBePlayer": true,
+            "anyTags": [
+              "Magic",
+              "Spell"
+            ],
+            "activeAbilityOnly": true
+          },
+          "operation": {
+            "type": "modifyEffectAmount",
+            "additivePercent": 0,
+            "additivePercentModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 0.05,
+                "nodeId": "arcanist-focus"
+              }
+            ]
+          }
+        },
+        {
+          "id": "caster_arcanist_nodes_charge_arcanist-focus_amountModifiers",
+          "eventType": "AbilityResolved",
+          "predicate": {
+            "sourceMustBePlayer": true,
+            "anyTags": [
+              "Magic",
+              "Spell"
+            ],
+            "activeAbilityOnly": true
+          },
+          "operation": {
+            "type": "gainStyleResource",
+            "resourceId": "arcaneCharge",
+            "amount": 0,
+            "usesProcCoefficient": false,
+            "amountModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 1,
+                "nodeId": "arcanist-focus"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "spellblade-path",
+      "branchId": "spellblade",
+      "name": "Spellblade Root",
+      "description": "Opens Spellblade Spirit-scaling melee.",
+      "maxRank": 1,
+      "requiredLevel": 1,
+      "requiredNodeId": null,
+      "x": 0,
+      "y": 0,
+      "tags": [
+        "Melee",
+        "Magic"
+      ],
+      "effects": [
+        "Active Melee damage adds magical bonus damage equal to 5% of Spirit, scaled by proc coefficient.",
+        "Does not choose Spellblade as the effective focus by itself."
+      ],
+      "countsTowardFocus": false,
+      "rules": [
+        {
+          "id": "caster_spellblade_nodes_bonus_spellblade-path_coefficientModifiers",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "effectOperations": [
+              "Damage"
+            ],
+            "sourceMustBePlayer": true,
+            "anyTags": [
+              "Melee"
+            ],
+            "activeAbilityOnly": true
+          },
+          "operation": {
+            "type": "addBonusDamageFromStat",
+            "stat": "Spirit",
+            "coefficient": 0,
+            "damageType": "Magical",
+            "coefficientModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 0.05,
+                "nodeId": "spellblade-path"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "spellblade-instinct",
+      "branchId": "spellblade",
+      "name": "Spellblade Instinct",
+      "description": "Builds Arcane Charge from melee abilities.",
+      "maxRank": 3,
+      "requiredLevel": 5,
+      "requiredNodeId": "spellblade-path",
+      "x": -1,
+      "y": 1,
+      "tags": [
+        "Melee",
+        "Magic"
+      ],
+      "effects": [
+        "Each rank grants +1 Arcane Charge when an active Melee ability resolves.",
+        "Adds 1 Spellblade branch point per rank."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "caster_spellblade_nodes_charge_spellblade-instinct_amountModifiers",
+          "eventType": "AbilityResolved",
+          "predicate": {
+            "sourceMustBePlayer": true,
+            "anyTags": [
+              "Melee"
+            ],
+            "activeAbilityOnly": true
+          },
+          "operation": {
+            "type": "gainStyleResource",
+            "resourceId": "arcaneCharge",
+            "amount": 0,
+            "usesProcCoefficient": false,
+            "amountModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 1,
+                "nodeId": "spellblade-instinct"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "spellblade-technique",
+      "branchId": "spellblade",
+      "name": "Spellblade Technique",
+      "description": "Improves Spirit-scaling melee damage.",
+      "maxRank": 3,
+      "requiredLevel": 10,
+      "requiredNodeId": "spellblade-path",
+      "x": 0,
+      "y": 1,
+      "tags": [
+        "Melee",
+        "Magic"
+      ],
+      "effects": [
+        "Each rank adds magical bonus damage equal to 5% of Spirit to active Melee damage, scaled by proc coefficient.",
+        "Adds 1 Spellblade branch point per rank."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "caster_spellblade_nodes_bonus_spellblade-technique_coefficientModifiers",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "effectOperations": [
+              "Damage"
+            ],
+            "sourceMustBePlayer": true,
+            "anyTags": [
+              "Melee"
+            ],
+            "activeAbilityOnly": true
+          },
+          "operation": {
+            "type": "addBonusDamageFromStat",
+            "stat": "Spirit",
+            "coefficient": 0,
+            "damageType": "Magical",
+            "coefficientModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 0.05,
+                "nodeId": "spellblade-technique"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "spellblade-discipline",
+      "branchId": "spellblade",
+      "name": "Spellblade Discipline",
+      "description": "Sharpens melee active effects.",
+      "maxRank": 3,
+      "requiredLevel": 5,
+      "requiredNodeId": "spellblade-path",
+      "x": 1,
+      "y": 1,
+      "tags": [
+        "Melee",
+        "Magic"
+      ],
+      "effects": [
+        "Each rank gives active Melee damage +1% effect amount.",
+        "Adds 1 Spellblade branch point per rank."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "caster_spellblade_discipline_spellblade-discipline_additivePercentModifiers",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "effectOperations": [
+              "Damage"
+            ],
+            "sourceMustBePlayer": true,
+            "anyTags": [
+              "Melee"
+            ],
+            "activeAbilityOnly": true
+          },
+          "operation": {
+            "type": "modifyEffectAmount",
+            "additivePercent": 0,
+            "additivePercentModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 0.01,
+                "nodeId": "spellblade-discipline"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "spellblade-specialization",
+      "branchId": "spellblade",
+      "name": "Spellblade Specialization",
+      "description": "Improves Arcane Charge empowerment.",
+      "maxRank": 2,
+      "requiredLevel": 20,
+      "requiredNodeId": "spellblade-instinct",
+      "x": -1,
+      "y": 2,
+      "tags": [
+        "Melee",
+        "Magic"
+      ],
+      "effects": [
+        "Each rank makes Arcane Charge empowerment +3% stronger.",
+        "Adds 1 Spellblade branch point per rank."
+      ],
+      "countsTowardFocus": true
+    },
+    {
+      "id": "spellblade-mastery",
+      "branchId": "spellblade",
+      "name": "Spellblade Mastery",
+      "description": "Deepens Spirit-scaling melee damage.",
+      "maxRank": 3,
+      "requiredLevel": 25,
+      "requiredNodeId": "spellblade-technique",
+      "x": 0,
+      "y": 2,
+      "tags": [
+        "Melee",
+        "Magic"
+      ],
+      "effects": [
+        "Each rank adds magical bonus damage equal to 6% of Spirit to active Melee damage, scaled by proc coefficient.",
+        "Adds 1 Spellblade branch point per rank."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "caster_spellblade_nodes_bonus_spellblade-mastery_coefficientModifiers",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "effectOperations": [
+              "Damage"
+            ],
+            "sourceMustBePlayer": true,
+            "anyTags": [
+              "Melee"
+            ],
+            "activeAbilityOnly": true
+          },
+          "operation": {
+            "type": "addBonusDamageFromStat",
+            "stat": "Spirit",
+            "coefficient": 0,
+            "damageType": "Magical",
+            "coefficientModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 0.06,
+                "nodeId": "spellblade-mastery"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "spellblade-amplifier",
+      "branchId": "spellblade",
+      "name": "Spellblade Amplifier",
+      "description": "Accelerates melee Arcane Charge generation.",
+      "maxRank": 2,
+      "requiredLevel": 20,
+      "requiredNodeId": "spellblade-discipline",
+      "x": 1,
+      "y": 2,
+      "tags": [
+        "Melee",
+        "Magic"
+      ],
+      "effects": [
+        "Each rank grants +1 Arcane Charge when an active Melee ability resolves.",
+        "Adds 1 Spellblade branch point per rank."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "caster_spellblade_nodes_charge_spellblade-amplifier_amountModifiers",
+          "eventType": "AbilityResolved",
+          "predicate": {
+            "sourceMustBePlayer": true,
+            "anyTags": [
+              "Melee"
+            ],
+            "activeAbilityOnly": true
+          },
+          "operation": {
+            "type": "gainStyleResource",
+            "resourceId": "arcaneCharge",
+            "amount": 0,
+            "usesProcCoefficient": false,
+            "amountModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 1,
+                "nodeId": "spellblade-amplifier"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "spellblade-focus",
+      "branchId": "spellblade",
+      "name": "Spellblade Focus",
+      "description": "Completes the Spellblade focus.",
+      "maxRank": 1,
+      "requiredLevel": 40,
+      "requiredNodeId": "spellblade-mastery",
+      "x": 0,
+      "y": 3,
+      "tags": [
+        "Melee",
+        "Magic"
+      ],
+      "effects": [
+        "Active Melee damage adds magical bonus damage equal to 10% of Spirit, scaled by proc coefficient.",
+        "Arcane Charge empowerment becomes +5% stronger.",
+        "Adds 1 Spellblade branch point."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "caster_spellblade_nodes_bonus_spellblade-focus_coefficientModifiers",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "effectOperations": [
+              "Damage"
+            ],
+            "sourceMustBePlayer": true,
+            "anyTags": [
+              "Melee"
+            ],
+            "activeAbilityOnly": true
+          },
+          "operation": {
+            "type": "addBonusDamageFromStat",
+            "stat": "Spirit",
+            "coefficient": 0,
+            "damageType": "Magical",
+            "coefficientModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 0.1,
+                "nodeId": "spellblade-focus"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "occultist-path",
+      "branchId": "occultist",
+      "name": "Occultist Root",
+      "description": "Opens Occultist curse amplification.",
+      "maxRank": 1,
+      "requiredLevel": 1,
+      "requiredNodeId": null,
+      "x": 0,
+      "y": 0,
+      "tags": [
+        "Curse",
+        "DoT"
+      ],
+      "effects": [
+        "Active Curse or DoT effects gain +1% effect amount.",
+        "Does not choose Occultist as the effective focus by itself."
+      ],
+      "countsTowardFocus": false,
+      "rules": [
+        {
+          "id": "caster_occultist_nodes_occultist-path_additivePercentModifiers",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "amplifiableEffectOnly": true,
+            "sourceMustBePlayer": true,
+            "anyTags": [
+              "Curse",
+              "DoT"
+            ],
+            "activeAbilityOnly": true
+          },
+          "operation": {
+            "type": "modifyEffectAmount",
+            "additivePercent": 0,
+            "additivePercentModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 0.01,
+                "nodeId": "occultist-path"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "occultist-instinct",
+      "branchId": "occultist",
+      "name": "Occultist Instinct",
+      "description": "Builds Arcane Charge from Curse and DoT abilities.",
+      "maxRank": 3,
+      "requiredLevel": 5,
+      "requiredNodeId": "occultist-path",
+      "x": -1,
+      "y": 1,
+      "tags": [
+        "Curse",
+        "DoT"
+      ],
+      "effects": [
+        "Each rank grants +1 Arcane Charge when an active Curse or DoT ability resolves.",
+        "Adds 1 Occultist branch point per rank."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "caster_occultist_nodes_charge_occultist-instinct_amountModifiers",
+          "eventType": "AbilityResolved",
+          "predicate": {
+            "sourceMustBePlayer": true,
+            "anyTags": [
+              "Curse",
+              "DoT"
+            ],
+            "activeAbilityOnly": true
+          },
+          "operation": {
+            "type": "gainStyleResource",
+            "resourceId": "arcaneCharge",
+            "amount": 0,
+            "usesProcCoefficient": false,
+            "amountModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 1,
+                "nodeId": "occultist-instinct"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "occultist-technique",
+      "branchId": "occultist",
+      "name": "Occultist Technique",
+      "description": "Improves Curse and DoT active effects.",
+      "maxRank": 3,
+      "requiredLevel": 10,
+      "requiredNodeId": "occultist-path",
+      "x": 0,
+      "y": 1,
+      "tags": [
+        "Curse",
+        "DoT"
+      ],
+      "effects": [
+        "Each rank gives active Curse or DoT effects +2% effect amount.",
+        "Adds 1 Occultist branch point per rank."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "caster_occultist_nodes_occultist-technique_additivePercentModifiers",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "amplifiableEffectOnly": true,
+            "sourceMustBePlayer": true,
+            "anyTags": [
+              "Curse",
+              "DoT"
+            ],
+            "activeAbilityOnly": true
+          },
+          "operation": {
+            "type": "modifyEffectAmount",
+            "additivePercent": 0,
+            "additivePercentModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 0.02,
+                "nodeId": "occultist-technique"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "occultist-discipline",
+      "branchId": "occultist",
+      "name": "Occultist Discipline",
+      "description": "Strengthens status and debuff effects.",
+      "maxRank": 3,
+      "requiredLevel": 5,
+      "requiredNodeId": "occultist-path",
+      "x": 1,
+      "y": 1,
+      "tags": [
+        "Curse",
+        "DoT"
+      ],
+      "effects": [
+        "Each rank gives status and debuff effects +1% effect amount.",
+        "Adds 1 Occultist branch point per rank."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "caster_occultist_discipline_occultist-discipline_additivePercentModifiers",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "sourceMustBePlayer": true,
+            "statusOrDebuffOnly": true
+          },
+          "operation": {
+            "type": "modifyEffectAmount",
+            "additivePercent": 0,
+            "additivePercentModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 0.01,
+                "nodeId": "occultist-discipline"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "occultist-specialization",
+      "branchId": "occultist",
+      "name": "Occultist Specialization",
+      "description": "Improves Arcane Charge empowerment.",
+      "maxRank": 2,
+      "requiredLevel": 20,
+      "requiredNodeId": "occultist-instinct",
+      "x": -1,
+      "y": 2,
+      "tags": [
+        "Curse",
+        "DoT"
+      ],
+      "effects": [
+        "Each rank makes Arcane Charge empowerment +3% stronger.",
+        "Adds 1 Occultist branch point per rank."
+      ],
+      "countsTowardFocus": true
+    },
+    {
+      "id": "occultist-mastery",
+      "branchId": "occultist",
+      "name": "Occultist Mastery",
+      "description": "Deepens Curse and DoT active effects.",
+      "maxRank": 3,
+      "requiredLevel": 25,
+      "requiredNodeId": "occultist-technique",
+      "x": 0,
+      "y": 2,
+      "tags": [
+        "Curse",
+        "DoT"
+      ],
+      "effects": [
+        "Each rank gives active Curse or DoT effects +3% effect amount.",
+        "Adds 1 Occultist branch point per rank."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "caster_occultist_nodes_occultist-mastery_additivePercentModifiers",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "amplifiableEffectOnly": true,
+            "sourceMustBePlayer": true,
+            "anyTags": [
+              "Curse",
+              "DoT"
+            ],
+            "activeAbilityOnly": true
+          },
+          "operation": {
+            "type": "modifyEffectAmount",
+            "additivePercent": 0,
+            "additivePercentModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 0.03,
+                "nodeId": "occultist-mastery"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "occultist-amplifier",
+      "branchId": "occultist",
+      "name": "Occultist Amplifier",
+      "description": "Accelerates occult Arcane Charge generation.",
+      "maxRank": 2,
+      "requiredLevel": 20,
+      "requiredNodeId": "occultist-discipline",
+      "x": 1,
+      "y": 2,
+      "tags": [
+        "Curse",
+        "DoT"
+      ],
+      "effects": [
+        "Each rank grants +1 Arcane Charge when an active Curse or DoT ability resolves.",
+        "Adds 1 Occultist branch point per rank."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "caster_occultist_nodes_charge_occultist-amplifier_amountModifiers",
+          "eventType": "AbilityResolved",
+          "predicate": {
+            "sourceMustBePlayer": true,
+            "anyTags": [
+              "Curse",
+              "DoT"
+            ],
+            "activeAbilityOnly": true
+          },
+          "operation": {
+            "type": "gainStyleResource",
+            "resourceId": "arcaneCharge",
+            "amount": 0,
+            "usesProcCoefficient": false,
+            "amountModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 1,
+                "nodeId": "occultist-amplifier"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "occultist-focus",
+      "branchId": "occultist",
+      "name": "Occultist Focus",
+      "description": "Completes the Occultist focus.",
+      "maxRank": 1,
+      "requiredLevel": 40,
+      "requiredNodeId": "occultist-mastery",
+      "x": 0,
+      "y": 3,
+      "tags": [
+        "Curse",
+        "DoT"
+      ],
+      "effects": [
+        "Active Curse or DoT effects gain +5% effect amount.",
+        "Active Curse or DoT abilities grant +1 Arcane Charge.",
+        "Arcane Charge empowerment becomes +5% stronger.",
+        "Adds 1 Occultist branch point."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "caster_occultist_nodes_occultist-focus_additivePercentModifiers",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "amplifiableEffectOnly": true,
+            "sourceMustBePlayer": true,
+            "anyTags": [
+              "Curse",
+              "DoT"
+            ],
+            "activeAbilityOnly": true
+          },
+          "operation": {
+            "type": "modifyEffectAmount",
+            "additivePercent": 0,
+            "additivePercentModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 0.05,
+                "nodeId": "occultist-focus"
+              }
+            ]
+          }
+        },
+        {
+          "id": "caster_occultist_nodes_charge_occultist-focus_amountModifiers",
+          "eventType": "AbilityResolved",
+          "predicate": {
+            "sourceMustBePlayer": true,
+            "anyTags": [
+              "Curse",
+              "DoT"
+            ],
+            "activeAbilityOnly": true
+          },
+          "operation": {
+            "type": "gainStyleResource",
+            "resourceId": "arcaneCharge",
+            "amount": 0,
+            "usesProcCoefficient": false,
+            "amountModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 1,
+                "nodeId": "occultist-focus"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
+

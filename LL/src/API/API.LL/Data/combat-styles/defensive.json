@@ -1,0 +1,1514 @@
+{
+  "id": "defensive",
+  "name": "Defensive",
+  "description": "Survives through Guard, damage reduction, barriers, and protection effects.",
+  "resourceId": "guard",
+  "resourceMaxAmount": 100,
+  "maxLevel": 50,
+  "recommendedTags": [
+    "Tank",
+    "Barrier",
+    "Summon",
+    "Holy"
+  ],
+  "recommendedStats": [
+    "MaxHealth",
+    "DamageReduction",
+    "Armor"
+  ],
+  "focuses": [
+    {
+      "id": "bulwark",
+      "name": "Bulwark",
+      "description": "Pure survival: Protective Shell and barrier effects scale at levels 10, 25, and 40.",
+      "unlockLevel": 10,
+      "recommendedTags": [
+        "Tank",
+        "Barrier"
+      ],
+      "recommendedStats": [
+        "MaxHealth",
+        "DamageReduction"
+      ],
+      "rules": [
+        {
+          "id": "defensive_bulwark_barrier_l10",
+          "eventType": "EffectCalculation",
+          "minStyleLevel": 10,
+          "maxStyleLevel": 24,
+          "predicate": {
+            "sourceMustBePlayer": true,
+            "effectOperations": [
+              "GrantBarrier"
+            ]
+          },
+          "operation": {
+            "type": "modifyEffectAmount",
+            "additivePercent": 0.05
+          }
+        },
+        {
+          "id": "defensive_bulwark_barrier_l25",
+          "eventType": "EffectCalculation",
+          "minStyleLevel": 25,
+          "maxStyleLevel": 39,
+          "predicate": {
+            "sourceMustBePlayer": true,
+            "effectOperations": [
+              "GrantBarrier"
+            ]
+          },
+          "operation": {
+            "type": "modifyEffectAmount",
+            "additivePercent": 0.1
+          }
+        },
+        {
+          "id": "defensive_bulwark_barrier_l40",
+          "eventType": "EffectCalculation",
+          "minStyleLevel": 40,
+          "predicate": {
+            "sourceMustBePlayer": true,
+            "effectOperations": [
+              "GrantBarrier"
+            ]
+          },
+          "operation": {
+            "type": "modifyEffectAmount",
+            "additivePercent": 0.15
+          }
+        }
+      ]
+    },
+    {
+      "id": "counterguard",
+      "name": "Counterguard",
+      "description": "Retaliation guard: after taking damage, your next active damage effect is empowered more strongly at levels 25 and 40.",
+      "unlockLevel": 10,
+      "recommendedTags": [
+        "Tank",
+        "Barrier"
+      ],
+      "recommendedStats": [
+        "MaxHealth",
+        "Armor"
+      ],
+      "rules": [
+        {
+          "id": "defensive_counterguard_retaliation_l10",
+          "eventType": "DamageTaken",
+          "minStyleLevel": 10,
+          "maxStyleLevel": 24,
+          "predicate": {
+            "targetMustBePlayer": true,
+            "effectOperations": [
+              "Damage"
+            ]
+          },
+          "operation": {
+            "type": "setPendingEmpowerment",
+            "empowermentId": "defensive_counterguard_retaliation",
+            "appliesTo": {
+              "sourceMustBePlayer": true,
+              "activeAbilityOnly": true,
+              "effectOperations": [
+                "Damage"
+              ]
+            },
+            "additivePercent": 0.1,
+            "consumeOnUse": true
+          }
+        },
+        {
+          "id": "defensive_counterguard_retaliation_l25",
+          "eventType": "DamageTaken",
+          "minStyleLevel": 25,
+          "maxStyleLevel": 39,
+          "predicate": {
+            "targetMustBePlayer": true,
+            "effectOperations": [
+              "Damage"
+            ]
+          },
+          "operation": {
+            "type": "setPendingEmpowerment",
+            "empowermentId": "defensive_counterguard_retaliation",
+            "appliesTo": {
+              "sourceMustBePlayer": true,
+              "activeAbilityOnly": true,
+              "effectOperations": [
+                "Damage"
+              ]
+            },
+            "additivePercent": 0.15,
+            "consumeOnUse": true
+          }
+        },
+        {
+          "id": "defensive_counterguard_retaliation_l40",
+          "eventType": "DamageTaken",
+          "minStyleLevel": 40,
+          "predicate": {
+            "targetMustBePlayer": true,
+            "effectOperations": [
+              "Damage"
+            ]
+          },
+          "operation": {
+            "type": "setPendingEmpowerment",
+            "empowermentId": "defensive_counterguard_retaliation",
+            "appliesTo": {
+              "sourceMustBePlayer": true,
+              "activeAbilityOnly": true,
+              "effectOperations": [
+                "Damage"
+              ]
+            },
+            "additivePercent": 0.2,
+            "consumeOnUse": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "commander",
+      "name": "Commander",
+      "description": "Protective command: owned summons gain stronger durability and build more Guard when struck as the style levels.",
+      "unlockLevel": 10,
+      "recommendedTags": [
+        "Summon",
+        "Tank"
+      ],
+      "recommendedStats": [
+        "MaxHealth",
+        "SummonHealth"
+      ],
+      "rules": [
+        {
+          "id": "defensive_commander_summon_stats_l10",
+          "eventType": "SummonCreated",
+          "minStyleLevel": 10,
+          "maxStyleLevel": 24,
+          "predicate": {
+            "sourceMustBePlayer": true
+          },
+          "operation": {
+            "type": "modifySummonStats",
+            "maxHealthPercent": 0.15,
+            "damagePercent": 0.05
+          }
+        },
+        {
+          "id": "defensive_commander_summon_stats_l25",
+          "eventType": "SummonCreated",
+          "minStyleLevel": 25,
+          "maxStyleLevel": 39,
+          "predicate": {
+            "sourceMustBePlayer": true
+          },
+          "operation": {
+            "type": "modifySummonStats",
+            "maxHealthPercent": 0.2,
+            "damagePercent": 0.1
+          }
+        },
+        {
+          "id": "defensive_commander_summon_stats_l40",
+          "eventType": "SummonCreated",
+          "minStyleLevel": 40,
+          "predicate": {
+            "sourceMustBePlayer": true
+          },
+          "operation": {
+            "type": "modifySummonStats",
+            "maxHealthPercent": 0.25,
+            "damagePercent": 0.15
+          }
+        },
+        {
+          "id": "defensive_commander_guard_on_summon_taken_l10",
+          "eventType": "DamageTaken",
+          "minStyleLevel": 10,
+          "maxStyleLevel": 24,
+          "predicate": {
+            "targetMustBeOwnedSummon": true,
+            "effectOperations": [
+              "Damage"
+            ]
+          },
+          "operation": {
+            "type": "gainStyleResource",
+            "resourceId": "guard",
+            "amount": 3
+          }
+        },
+        {
+          "id": "defensive_commander_guard_on_summon_taken_l25",
+          "eventType": "DamageTaken",
+          "minStyleLevel": 25,
+          "maxStyleLevel": 39,
+          "predicate": {
+            "targetMustBeOwnedSummon": true,
+            "effectOperations": [
+              "Damage"
+            ]
+          },
+          "operation": {
+            "type": "gainStyleResource",
+            "resourceId": "guard",
+            "amount": 5
+          }
+        },
+        {
+          "id": "defensive_commander_guard_on_summon_taken_l40",
+          "eventType": "DamageTaken",
+          "minStyleLevel": 40,
+          "predicate": {
+            "targetMustBeOwnedSummon": true,
+            "effectOperations": [
+              "Damage"
+            ]
+          },
+          "operation": {
+            "type": "gainStyleResource",
+            "resourceId": "guard",
+            "amount": 7
+          }
+        }
+      ]
+    }
+  ],
+  "rules": [
+    {
+      "id": "defensive_direct_damage_reduction",
+      "eventType": "EffectCalculation",
+      "predicate": {
+        "targetMustBePlayer": true,
+        "effectOperations": [
+          "Damage"
+        ]
+      },
+      "operation": {
+        "type": "addDamageReduction",
+        "percent": 0.05
+      }
+    },
+    {
+      "id": "defensive_guard_on_damage_taken",
+      "eventType": "DamageTaken",
+      "predicate": {
+        "targetMustBePlayer": true,
+        "effectOperations": [
+          "Damage"
+        ]
+      },
+      "operation": {
+        "type": "gainStyleResource",
+        "resourceId": "guard",
+        "amount": 5
+      }
+    },
+    {
+      "id": "defensive_barrier_bonus",
+      "eventType": "EffectCalculation",
+      "predicate": {
+        "sourceMustBePlayer": true,
+        "effectOperations": [
+          "GrantBarrier"
+        ]
+      },
+      "operation": {
+        "type": "modifyEffectAmount",
+        "additivePercent": 0.05
+      }
+    }
+  ],
+  "resourceOverflowOperations": [
+    {
+      "type": "grantBarrierFromMaxHealth",
+      "triggerKey": "defensive_protective_shell",
+      "percent": 0.1,
+      "maxTriggersPerEncounter": 2,
+      "percentModifiers": [
+        {
+          "type": "focusLevel",
+          "focusId": "bulwark",
+          "minStyleLevel": 10,
+          "maxStyleLevel": 39,
+          "value": 0.03
+        },
+        {
+          "type": "focusLevel",
+          "focusId": "bulwark",
+          "minStyleLevel": 40,
+          "value": 0.07
+        },
+        {
+          "type": "nodeRank",
+          "nodeId": "bulwark-instinct",
+          "value": 0.01
+        },
+        {
+          "type": "nodeRank",
+          "nodeId": "bulwark-focus",
+          "value": 0.05
+        }
+      ],
+      "maxTriggerModifiers": [
+        {
+          "type": "nodeRank",
+          "nodeId": "bulwark-specialization",
+          "value": 1
+        },
+        {
+          "type": "nodeRank",
+          "nodeId": "bulwark-focus",
+          "value": 1
+        }
+      ]
+    }
+  ],
+  "coreMechanic": "Gain Guard when taking damage. At 100 Guard, gain Protective Shell.",
+  "skillTreeNodes": [
+    {
+      "id": "bulwark-path",
+      "branchId": "bulwark",
+      "name": "Bulwark Root",
+      "description": "Opens Bulwark barrier training.",
+      "maxRank": 1,
+      "requiredLevel": 1,
+      "requiredNodeId": null,
+      "x": 0,
+      "y": 0,
+      "tags": [
+        "Tank",
+        "Barrier"
+      ],
+      "effects": [
+        "Incoming player damage is reduced by 1%.",
+        "Player barrier effects gain +1%.",
+        "Does not choose Bulwark as the effective focus by itself."
+      ],
+      "countsTowardFocus": false,
+      "rules": [
+        {
+          "id": "defensive_bulwark_nodes_reduction_bulwark-path_percentModifiers",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "effectOperations": [
+              "Damage"
+            ],
+            "targetMustBePlayer": true
+          },
+          "operation": {
+            "type": "addDamageReduction",
+            "percent": 0,
+            "percentModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 0.01,
+                "nodeId": "bulwark-path"
+              }
+            ]
+          }
+        },
+        {
+          "id": "defensive_bulwark_nodes_barrier_bulwark-path_additivePercentModifiers",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "sourceMustBePlayer": true,
+            "effectOperations": [
+              "GrantBarrier"
+            ]
+          },
+          "operation": {
+            "type": "modifyEffectAmount",
+            "additivePercent": 0,
+            "additivePercentModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 0.01,
+                "nodeId": "bulwark-path"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "bulwark-instinct",
+      "branchId": "bulwark",
+      "name": "Bulwark Instinct",
+      "description": "Improves Protective Shell size.",
+      "maxRank": 3,
+      "requiredLevel": 5,
+      "requiredNodeId": "bulwark-path",
+      "x": -1,
+      "y": 1,
+      "tags": [
+        "Tank",
+        "Barrier"
+      ],
+      "effects": [
+        "Each rank makes Protective Shell grant +1% more max health as barrier.",
+        "Adds 1 Bulwark branch point per rank."
+      ],
+      "countsTowardFocus": true
+    },
+    {
+      "id": "bulwark-technique",
+      "branchId": "bulwark",
+      "name": "Bulwark Technique",
+      "description": "Improves player barrier effects.",
+      "maxRank": 3,
+      "requiredLevel": 10,
+      "requiredNodeId": "bulwark-path",
+      "x": 0,
+      "y": 1,
+      "tags": [
+        "Tank",
+        "Barrier"
+      ],
+      "effects": [
+        "Each rank gives player barrier effects +2% effect amount.",
+        "Adds 1 Bulwark branch point per rank."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "defensive_bulwark_nodes_barrier_bulwark-technique_additivePercentModifiers",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "sourceMustBePlayer": true,
+            "effectOperations": [
+              "GrantBarrier"
+            ]
+          },
+          "operation": {
+            "type": "modifyEffectAmount",
+            "additivePercent": 0,
+            "additivePercentModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 0.02,
+                "nodeId": "bulwark-technique"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "bulwark-discipline",
+      "branchId": "bulwark",
+      "name": "Bulwark Discipline",
+      "description": "Builds extra Guard when struck.",
+      "maxRank": 3,
+      "requiredLevel": 5,
+      "requiredNodeId": "bulwark-path",
+      "x": 1,
+      "y": 1,
+      "tags": [
+        "Tank",
+        "Barrier"
+      ],
+      "effects": [
+        "Each rank grants +1 additional Guard when the player takes damage.",
+        "Adds 1 Bulwark branch point per rank."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "defensive_nodes_guard_on_taken_bulwark-discipline_amountModifiers",
+          "eventType": "DamageTaken",
+          "predicate": {
+            "effectOperations": [
+              "Damage"
+            ],
+            "targetMustBePlayer": true
+          },
+          "operation": {
+            "type": "gainStyleResource",
+            "resourceId": "guard",
+            "amount": 0,
+            "usesProcCoefficient": true,
+            "amountModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 1,
+                "nodeId": "bulwark-discipline"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "bulwark-specialization",
+      "branchId": "bulwark",
+      "name": "Bulwark Specialization",
+      "description": "Raises Protective Shell endurance.",
+      "maxRank": 2,
+      "requiredLevel": 20,
+      "requiredNodeId": "bulwark-instinct",
+      "x": -1,
+      "y": 2,
+      "tags": [
+        "Tank",
+        "Barrier"
+      ],
+      "effects": [
+        "Each rank allows Protective Shell to trigger 1 additional time per encounter.",
+        "Adds 1 Bulwark branch point per rank."
+      ],
+      "countsTowardFocus": true
+    },
+    {
+      "id": "bulwark-mastery",
+      "branchId": "bulwark",
+      "name": "Bulwark Mastery",
+      "description": "Hardens incoming damage reduction.",
+      "maxRank": 3,
+      "requiredLevel": 25,
+      "requiredNodeId": "bulwark-technique",
+      "x": 0,
+      "y": 2,
+      "tags": [
+        "Tank",
+        "Barrier"
+      ],
+      "effects": [
+        "Each rank reduces incoming player damage by 1%.",
+        "Adds 1 Bulwark branch point per rank."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "defensive_bulwark_nodes_reduction_bulwark-mastery_percentModifiers",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "effectOperations": [
+              "Damage"
+            ],
+            "targetMustBePlayer": true
+          },
+          "operation": {
+            "type": "addDamageReduction",
+            "percent": 0,
+            "percentModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 0.01,
+                "nodeId": "bulwark-mastery"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "bulwark-amplifier",
+      "branchId": "bulwark",
+      "name": "Bulwark Amplifier",
+      "description": "Amplifies barrier output.",
+      "maxRank": 2,
+      "requiredLevel": 20,
+      "requiredNodeId": "bulwark-discipline",
+      "x": 1,
+      "y": 2,
+      "tags": [
+        "Tank",
+        "Barrier"
+      ],
+      "effects": [
+        "Each rank gives player barrier effects +3% effect amount.",
+        "Adds 1 Bulwark branch point per rank."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "defensive_bulwark_nodes_barrier_bulwark-amplifier_additivePercentModifiers",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "sourceMustBePlayer": true,
+            "effectOperations": [
+              "GrantBarrier"
+            ]
+          },
+          "operation": {
+            "type": "modifyEffectAmount",
+            "additivePercent": 0,
+            "additivePercentModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 0.03,
+                "nodeId": "bulwark-amplifier"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "bulwark-focus",
+      "branchId": "bulwark",
+      "name": "Bulwark Focus",
+      "description": "Completes the Bulwark focus.",
+      "maxRank": 1,
+      "requiredLevel": 40,
+      "requiredNodeId": "bulwark-mastery",
+      "x": 0,
+      "y": 3,
+      "tags": [
+        "Tank",
+        "Barrier"
+      ],
+      "effects": [
+        "Protective Shell grants +5% more max health as barrier.",
+        "Protective Shell can trigger 1 additional time per encounter.",
+        "Player barrier effects gain +5%.",
+        "Adds 1 Bulwark branch point."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "defensive_bulwark_nodes_barrier_bulwark-focus_additivePercentModifiers",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "sourceMustBePlayer": true,
+            "effectOperations": [
+              "GrantBarrier"
+            ]
+          },
+          "operation": {
+            "type": "modifyEffectAmount",
+            "additivePercent": 0,
+            "additivePercentModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 0.05,
+                "nodeId": "bulwark-focus"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "counterguard-path",
+      "branchId": "counterguard",
+      "name": "Counterguard Root",
+      "description": "Opens Counterguard retaliation training.",
+      "maxRank": 1,
+      "requiredLevel": 1,
+      "requiredNodeId": null,
+      "x": 0,
+      "y": 0,
+      "tags": [
+        "Tank",
+        "Barrier"
+      ],
+      "effects": [
+        "Incoming player damage is reduced by 1%.",
+        "Does not choose Counterguard as the effective focus by itself."
+      ],
+      "countsTowardFocus": false,
+      "rules": [
+        {
+          "id": "defensive_counterguard_nodes_reduction_counterguard-path_percentModifiers",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "effectOperations": [
+              "Damage"
+            ],
+            "targetMustBePlayer": true
+          },
+          "operation": {
+            "type": "addDamageReduction",
+            "percent": 0,
+            "percentModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 0.01,
+                "nodeId": "counterguard-path"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "counterguard-instinct",
+      "branchId": "counterguard",
+      "name": "Counterguard Instinct",
+      "description": "Builds extra Guard when struck.",
+      "maxRank": 3,
+      "requiredLevel": 5,
+      "requiredNodeId": "counterguard-path",
+      "x": -1,
+      "y": 1,
+      "tags": [
+        "Tank",
+        "Barrier"
+      ],
+      "effects": [
+        "Each rank grants +1 additional Guard when the player takes damage.",
+        "Adds 1 Counterguard branch point per rank."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "defensive_nodes_guard_on_taken_counterguard-instinct_amountModifiers",
+          "eventType": "DamageTaken",
+          "predicate": {
+            "effectOperations": [
+              "Damage"
+            ],
+            "targetMustBePlayer": true
+          },
+          "operation": {
+            "type": "gainStyleResource",
+            "resourceId": "guard",
+            "amount": 0,
+            "usesProcCoefficient": true,
+            "amountModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 1,
+                "nodeId": "counterguard-instinct"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "counterguard-technique",
+      "branchId": "counterguard",
+      "name": "Counterguard Technique",
+      "description": "Improves retaliation strength.",
+      "maxRank": 3,
+      "requiredLevel": 10,
+      "requiredNodeId": "counterguard-path",
+      "x": 0,
+      "y": 1,
+      "tags": [
+        "Tank",
+        "Barrier"
+      ],
+      "effects": [
+        "Each rank makes the next active damage effect after taking damage gain +3% effect amount.",
+        "Adds 1 Counterguard branch point per rank."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "defensive_counterguard_retaliation_nodes_counterguard-technique_additivePercentModifiers",
+          "eventType": "DamageTaken",
+          "predicate": {
+            "effectOperations": [
+              "Damage"
+            ],
+            "targetMustBePlayer": true
+          },
+          "operation": {
+            "type": "setPendingEmpowerment",
+            "empowermentId": "defensive_counterguard_retaliation_nodes_counterguard-technique",
+            "appliesTo": {
+              "effectOperations": [
+                "Damage"
+              ],
+              "sourceMustBePlayer": true,
+              "activeAbilityOnly": true
+            },
+            "additivePercent": 0,
+            "consumeOnUse": true,
+            "additivePercentModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 0.03,
+                "nodeId": "counterguard-technique"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "counterguard-discipline",
+      "branchId": "counterguard",
+      "name": "Counterguard Discipline",
+      "description": "Turns impact into a small barrier.",
+      "maxRank": 3,
+      "requiredLevel": 5,
+      "requiredNodeId": "counterguard-path",
+      "x": 1,
+      "y": 1,
+      "tags": [
+        "Tank",
+        "Barrier"
+      ],
+      "effects": [
+        "Each rank grants a barrier equal to 1% of max health when the player takes damage.",
+        "Adds 1 Counterguard branch point per rank."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "defensive_counterguard_barrier_node_counterguard-discipline_percentModifiers",
+          "eventType": "DamageTaken",
+          "predicate": {
+            "effectOperations": [
+              "Damage"
+            ],
+            "targetMustBePlayer": true
+          },
+          "operation": {
+            "type": "grantBarrierFromMaxHealth",
+            "triggerKey": "defensive_counterguard_barrier_node",
+            "percent": 0,
+            "percentModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 0.01,
+                "nodeId": "counterguard-discipline"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "counterguard-specialization",
+      "branchId": "counterguard",
+      "name": "Counterguard Specialization",
+      "description": "Deepens retaliation strength.",
+      "maxRank": 2,
+      "requiredLevel": 20,
+      "requiredNodeId": "counterguard-instinct",
+      "x": -1,
+      "y": 2,
+      "tags": [
+        "Tank",
+        "Barrier"
+      ],
+      "effects": [
+        "Each rank makes the next active damage effect after taking damage gain +4% effect amount.",
+        "Adds 1 Counterguard branch point per rank."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "defensive_counterguard_retaliation_nodes_counterguard-specialization_additivePercentModifiers",
+          "eventType": "DamageTaken",
+          "predicate": {
+            "effectOperations": [
+              "Damage"
+            ],
+            "targetMustBePlayer": true
+          },
+          "operation": {
+            "type": "setPendingEmpowerment",
+            "empowermentId": "defensive_counterguard_retaliation_nodes_counterguard-specialization",
+            "appliesTo": {
+              "effectOperations": [
+                "Damage"
+              ],
+              "sourceMustBePlayer": true,
+              "activeAbilityOnly": true
+            },
+            "additivePercent": 0,
+            "consumeOnUse": true,
+            "additivePercentModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 0.04,
+                "nodeId": "counterguard-specialization"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "counterguard-mastery",
+      "branchId": "counterguard",
+      "name": "Counterguard Mastery",
+      "description": "Hardens the counter stance.",
+      "maxRank": 3,
+      "requiredLevel": 25,
+      "requiredNodeId": "counterguard-technique",
+      "x": 0,
+      "y": 2,
+      "tags": [
+        "Tank",
+        "Barrier"
+      ],
+      "effects": [
+        "Each rank reduces incoming player damage by 1%.",
+        "Adds 1 Counterguard branch point per rank."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "defensive_counterguard_nodes_reduction_counterguard-mastery_percentModifiers",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "effectOperations": [
+              "Damage"
+            ],
+            "targetMustBePlayer": true
+          },
+          "operation": {
+            "type": "addDamageReduction",
+            "percent": 0,
+            "percentModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 0.01,
+                "nodeId": "counterguard-mastery"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "counterguard-amplifier",
+      "branchId": "counterguard",
+      "name": "Counterguard Amplifier",
+      "description": "Amplifies retaliation strength.",
+      "maxRank": 2,
+      "requiredLevel": 20,
+      "requiredNodeId": "counterguard-discipline",
+      "x": 1,
+      "y": 2,
+      "tags": [
+        "Tank",
+        "Barrier"
+      ],
+      "effects": [
+        "Each rank makes the next active damage effect after taking damage gain +5% effect amount.",
+        "Adds 1 Counterguard branch point per rank."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "defensive_counterguard_retaliation_nodes_counterguard-amplifier_additivePercentModifiers",
+          "eventType": "DamageTaken",
+          "predicate": {
+            "effectOperations": [
+              "Damage"
+            ],
+            "targetMustBePlayer": true
+          },
+          "operation": {
+            "type": "setPendingEmpowerment",
+            "empowermentId": "defensive_counterguard_retaliation_nodes_counterguard-amplifier",
+            "appliesTo": {
+              "effectOperations": [
+                "Damage"
+              ],
+              "sourceMustBePlayer": true,
+              "activeAbilityOnly": true
+            },
+            "additivePercent": 0,
+            "consumeOnUse": true,
+            "additivePercentModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 0.05,
+                "nodeId": "counterguard-amplifier"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "counterguard-focus",
+      "branchId": "counterguard",
+      "name": "Counterguard Focus",
+      "description": "Completes the Counterguard focus.",
+      "maxRank": 1,
+      "requiredLevel": 40,
+      "requiredNodeId": "counterguard-mastery",
+      "x": 0,
+      "y": 3,
+      "tags": [
+        "Tank",
+        "Barrier"
+      ],
+      "effects": [
+        "The next active damage effect after taking damage gains +10% effect amount.",
+        "Adds 1 Counterguard branch point."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "defensive_counterguard_retaliation_nodes_counterguard-focus_additivePercentModifiers",
+          "eventType": "DamageTaken",
+          "predicate": {
+            "effectOperations": [
+              "Damage"
+            ],
+            "targetMustBePlayer": true
+          },
+          "operation": {
+            "type": "setPendingEmpowerment",
+            "empowermentId": "defensive_counterguard_retaliation_nodes_counterguard-focus",
+            "appliesTo": {
+              "effectOperations": [
+                "Damage"
+              ],
+              "sourceMustBePlayer": true,
+              "activeAbilityOnly": true
+            },
+            "additivePercent": 0,
+            "consumeOnUse": true,
+            "additivePercentModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 0.1,
+                "nodeId": "counterguard-focus"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "commander-path",
+      "branchId": "commander",
+      "name": "Commander Root",
+      "description": "Opens Commander summon protection.",
+      "maxRank": 1,
+      "requiredLevel": 1,
+      "requiredNodeId": null,
+      "x": 0,
+      "y": 0,
+      "tags": [
+        "Summon",
+        "Tank"
+      ],
+      "effects": [
+        "Owned summons gain +3% max health.",
+        "Does not choose Commander as the effective focus by itself."
+      ],
+      "countsTowardFocus": false,
+      "rules": [
+        {
+          "id": "defensive_commander_summon_stats_nodes_commander-path_maxHealthPercentModifiers",
+          "eventType": "SummonCreated",
+          "predicate": {
+            "sourceMustBePlayer": true
+          },
+          "operation": {
+            "type": "modifySummonStats",
+            "maxHealthPercent": 0,
+            "maxHealthPercentModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 0.03,
+                "nodeId": "commander-path"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "commander-instinct",
+      "branchId": "commander",
+      "name": "Commander Instinct",
+      "description": "Turns summon damage into Guard.",
+      "maxRank": 3,
+      "requiredLevel": 5,
+      "requiredNodeId": "commander-path",
+      "x": -1,
+      "y": 1,
+      "tags": [
+        "Summon",
+        "Tank"
+      ],
+      "effects": [
+        "Each rank grants +1 Guard to the owner when an owned summon takes damage.",
+        "Adds 1 Commander branch point per rank."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "defensive_commander_guard_on_summon_taken_commander-instinct_amountModifiers",
+          "eventType": "DamageTaken",
+          "predicate": {
+            "effectOperations": [
+              "Damage"
+            ],
+            "targetMustBeOwnedSummon": true
+          },
+          "operation": {
+            "type": "gainStyleResource",
+            "resourceId": "guard",
+            "amount": 0,
+            "usesProcCoefficient": true,
+            "amountModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 1,
+                "nodeId": "commander-instinct"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "commander-technique",
+      "branchId": "commander",
+      "name": "Commander Technique",
+      "description": "Improves owned summon durability and power.",
+      "maxRank": 3,
+      "requiredLevel": 10,
+      "requiredNodeId": "commander-path",
+      "x": 0,
+      "y": 1,
+      "tags": [
+        "Summon",
+        "Tank"
+      ],
+      "effects": [
+        "Each rank gives owned summons +3% max health and +1% power.",
+        "Adds 1 Commander branch point per rank."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "defensive_commander_summon_stats_nodes_commander-technique_maxHealthPercentModifiers",
+          "eventType": "SummonCreated",
+          "predicate": {
+            "sourceMustBePlayer": true
+          },
+          "operation": {
+            "type": "modifySummonStats",
+            "maxHealthPercent": 0,
+            "maxHealthPercentModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 0.03,
+                "nodeId": "commander-technique"
+              }
+            ]
+          }
+        },
+        {
+          "id": "defensive_commander_summon_stats_nodes_commander-technique_damagePercentModifiers",
+          "eventType": "SummonCreated",
+          "predicate": {
+            "sourceMustBePlayer": true
+          },
+          "operation": {
+            "type": "modifySummonStats",
+            "damagePercent": 0,
+            "damagePercentModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 0.01,
+                "nodeId": "commander-technique"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "commander-discipline",
+      "branchId": "commander",
+      "name": "Commander Discipline",
+      "description": "Protects owned summons from direct damage.",
+      "maxRank": 3,
+      "requiredLevel": 5,
+      "requiredNodeId": "commander-path",
+      "x": 1,
+      "y": 1,
+      "tags": [
+        "Summon",
+        "Tank"
+      ],
+      "effects": [
+        "Each rank reduces incoming damage to owned summons by 2%.",
+        "Adds 1 Commander branch point per rank."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "defensive_commander_summon_damage_reduction_commander-discipline_percentModifiers",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "effectOperations": [
+              "Damage"
+            ],
+            "targetMustBeOwnedSummon": true
+          },
+          "operation": {
+            "type": "addDamageReduction",
+            "percent": 0,
+            "percentModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 0.02,
+                "nodeId": "commander-discipline"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "commander-specialization",
+      "branchId": "commander",
+      "name": "Commander Specialization",
+      "description": "Improves owned summon effect output.",
+      "maxRank": 2,
+      "requiredLevel": 20,
+      "requiredNodeId": "commander-instinct",
+      "x": -1,
+      "y": 2,
+      "tags": [
+        "Summon",
+        "Tank"
+      ],
+      "effects": [
+        "Each rank gives owned summon effects +3% effect amount.",
+        "Adds 1 Commander branch point per rank."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "defensive_commander_summon_effect_bonus_commander-specialization_additivePercentModifiers",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "amplifiableEffectOnly": true,
+            "sourceMustBeOwnedSummon": true
+          },
+          "operation": {
+            "type": "modifyEffectAmount",
+            "additivePercent": 0,
+            "additivePercentModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 0.03,
+                "nodeId": "commander-specialization"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "commander-mastery",
+      "branchId": "commander",
+      "name": "Commander Mastery",
+      "description": "Further improves owned summon attributes.",
+      "maxRank": 3,
+      "requiredLevel": 25,
+      "requiredNodeId": "commander-technique",
+      "x": 0,
+      "y": 2,
+      "tags": [
+        "Summon",
+        "Tank"
+      ],
+      "effects": [
+        "Each rank gives owned summons +4% max health and +2% power.",
+        "Adds 1 Commander branch point per rank."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "defensive_commander_summon_stats_nodes_commander-mastery_maxHealthPercentModifiers",
+          "eventType": "SummonCreated",
+          "predicate": {
+            "sourceMustBePlayer": true
+          },
+          "operation": {
+            "type": "modifySummonStats",
+            "maxHealthPercent": 0,
+            "maxHealthPercentModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 0.04,
+                "nodeId": "commander-mastery"
+              }
+            ]
+          }
+        },
+        {
+          "id": "defensive_commander_summon_stats_nodes_commander-mastery_damagePercentModifiers",
+          "eventType": "SummonCreated",
+          "predicate": {
+            "sourceMustBePlayer": true
+          },
+          "operation": {
+            "type": "modifySummonStats",
+            "damagePercent": 0,
+            "damagePercentModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 0.02,
+                "nodeId": "commander-mastery"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "commander-amplifier",
+      "branchId": "commander",
+      "name": "Commander Amplifier",
+      "description": "Improves command response.",
+      "maxRank": 2,
+      "requiredLevel": 20,
+      "requiredNodeId": "commander-discipline",
+      "x": 1,
+      "y": 2,
+      "tags": [
+        "Summon",
+        "Tank"
+      ],
+      "effects": [
+        "Each rank grants +2 Guard to the owner when an owned summon takes damage.",
+        "Each rank gives owned summon effects +2% effect amount.",
+        "Adds 1 Commander branch point per rank."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "defensive_commander_summon_effect_bonus_commander-amplifier_additivePercentModifiers",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "amplifiableEffectOnly": true,
+            "sourceMustBeOwnedSummon": true
+          },
+          "operation": {
+            "type": "modifyEffectAmount",
+            "additivePercent": 0,
+            "additivePercentModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 0.02,
+                "nodeId": "commander-amplifier"
+              }
+            ]
+          }
+        },
+        {
+          "id": "defensive_commander_guard_on_summon_taken_commander-amplifier_amountModifiers",
+          "eventType": "DamageTaken",
+          "predicate": {
+            "effectOperations": [
+              "Damage"
+            ],
+            "targetMustBeOwnedSummon": true
+          },
+          "operation": {
+            "type": "gainStyleResource",
+            "resourceId": "guard",
+            "amount": 0,
+            "usesProcCoefficient": true,
+            "amountModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 2,
+                "nodeId": "commander-amplifier"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "commander-focus",
+      "branchId": "commander",
+      "name": "Commander Focus",
+      "description": "Completes the Commander focus.",
+      "maxRank": 1,
+      "requiredLevel": 40,
+      "requiredNodeId": "commander-mastery",
+      "x": 0,
+      "y": 3,
+      "tags": [
+        "Summon",
+        "Tank"
+      ],
+      "effects": [
+        "Owned summons gain +8% max health and +4% power.",
+        "The owner gains +3 Guard when an owned summon takes damage.",
+        "Adds 1 Commander branch point."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "defensive_commander_guard_on_summon_taken_commander-focus_amountModifiers",
+          "eventType": "DamageTaken",
+          "predicate": {
+            "effectOperations": [
+              "Damage"
+            ],
+            "targetMustBeOwnedSummon": true
+          },
+          "operation": {
+            "type": "gainStyleResource",
+            "resourceId": "guard",
+            "amount": 0,
+            "usesProcCoefficient": true,
+            "amountModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 3,
+                "nodeId": "commander-focus"
+              }
+            ]
+          }
+        },
+        {
+          "id": "defensive_commander_summon_stats_nodes_commander-focus_maxHealthPercentModifiers",
+          "eventType": "SummonCreated",
+          "predicate": {
+            "sourceMustBePlayer": true
+          },
+          "operation": {
+            "type": "modifySummonStats",
+            "maxHealthPercent": 0,
+            "maxHealthPercentModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 0.08,
+                "nodeId": "commander-focus"
+              }
+            ]
+          }
+        },
+        {
+          "id": "defensive_commander_summon_stats_nodes_commander-focus_damagePercentModifiers",
+          "eventType": "SummonCreated",
+          "predicate": {
+            "sourceMustBePlayer": true
+          },
+          "operation": {
+            "type": "modifySummonStats",
+            "damagePercent": 0,
+            "damagePercentModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 0.04,
+                "nodeId": "commander-focus"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
+

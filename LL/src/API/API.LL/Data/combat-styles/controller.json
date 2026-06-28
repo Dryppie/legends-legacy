@@ -1,0 +1,1320 @@
+{
+  "id": "controller",
+  "name": "Controller",
+  "description": "Builds Control through status, debuff, and disruption effects.",
+  "resourceId": "control",
+  "resourceMaxAmount": 100,
+  "maxLevel": 50,
+  "recommendedTags": [
+    "Control",
+    "Debuff",
+    "Curse",
+    "DoT"
+  ],
+  "recommendedStats": [
+    "Spirit",
+    "Cooldown",
+    "StatusResistance"
+  ],
+  "focuses": [
+    {
+      "id": "hexer",
+      "name": "Hexer",
+      "description": "Curse and attrition: Curse/DoT effects scale at levels 10, 25, and 40.",
+      "unlockLevel": 10,
+      "recommendedTags": [
+        "Curse",
+        "DoT"
+      ],
+      "recommendedStats": [
+        "Spirit",
+        "Cooldown"
+      ],
+      "rules": [
+        {
+          "id": "controller_hexer_effect",
+          "eventType": "EffectCalculation",
+          "minStyleLevel": 10,
+          "predicate": {
+            "sourceMustBePlayer": true,
+            "anyTags": [
+              "Curse",
+              "DoT"
+            ],
+            "statusOrDebuffOnly": true
+          },
+          "operation": {
+            "type": "modifyEffectAmount",
+            "additivePercent": 0.1,
+            "additivePercentModifiers": [
+              {
+                "type": "focusLevel",
+                "focusId": "hexer",
+                "minStyleLevel": 25,
+                "value": 0.05
+              },
+              {
+                "type": "focusLevel",
+                "focusId": "hexer",
+                "minStyleLevel": 40,
+                "value": 0.05
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "tactician",
+      "name": "Tactician",
+      "description": "Debuff setup: debuffs and tactical damage windows scale at milestones.",
+      "unlockLevel": 10,
+      "recommendedTags": [
+        "Debuff",
+        "Physical"
+      ],
+      "recommendedStats": [
+        "Precision",
+        "Cooldown"
+      ],
+      "rules": [
+        {
+          "id": "controller_tactician_effect",
+          "eventType": "EffectCalculation",
+          "minStyleLevel": 10,
+          "predicate": {
+            "sourceMustBePlayer": true,
+            "anyTags": [
+              "Debuff",
+              "Physical"
+            ],
+            "statusOrDebuffOnly": true
+          },
+          "operation": {
+            "type": "modifyEffectAmount",
+            "additivePercent": 0.08,
+            "additivePercentModifiers": [
+              {
+                "type": "focusLevel",
+                "focusId": "tactician",
+                "minStyleLevel": 25,
+                "value": 0.04
+              },
+              {
+                "type": "focusLevel",
+                "focusId": "tactician",
+                "minStyleLevel": 40,
+                "value": 0.04
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "frostbinder",
+      "name": "Frostbinder",
+      "description": "Hard control: control-tagged statuses and follow-up damage scale at milestones.",
+      "unlockLevel": 10,
+      "recommendedTags": [
+        "Control",
+        "Magic"
+      ],
+      "recommendedStats": [
+        "Spirit",
+        "CrowdControlResistance"
+      ],
+      "rules": [
+        {
+          "id": "controller_frostbinder_effect",
+          "eventType": "EffectCalculation",
+          "minStyleLevel": 10,
+          "predicate": {
+            "sourceMustBePlayer": true,
+            "anyTags": [
+              "Control",
+              "Freeze",
+              "Stun"
+            ],
+            "statusOrDebuffOnly": true
+          },
+          "operation": {
+            "type": "modifyEffectAmount",
+            "additivePercent": 0.08,
+            "additivePercentModifiers": [
+              {
+                "type": "focusLevel",
+                "focusId": "frostbinder",
+                "minStyleLevel": 25,
+                "value": 0.04
+              },
+              {
+                "type": "focusLevel",
+                "focusId": "frostbinder",
+                "minStyleLevel": 40,
+                "value": 0.04
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "rules": [
+    {
+      "id": "controller_status_debuff_bonus",
+      "eventType": "EffectCalculation",
+      "predicate": {
+        "sourceMustBePlayer": true,
+        "effectOperations": [
+          "ApplyStatus",
+          "ModifyAttribute"
+        ]
+      },
+      "operation": {
+        "type": "modifyEffectAmount",
+        "additivePercent": 0.05
+      }
+    },
+    {
+      "id": "controller_control_gain",
+      "eventType": "EffectCalculation",
+      "predicate": {
+        "statusOrDebuffOnly": true,
+        "sourceMustBePlayer": true,
+        "activeAbilityOnly": true
+      },
+      "operation": {
+        "type": "gainStyleResource",
+        "resourceId": "control",
+        "amount": 15,
+        "usesProcCoefficient": true,
+        "amountModifiers": []
+      }
+    }
+  ],
+  "resourceOverflowOperations": [
+    {
+      "type": "setPendingEmpowerment",
+      "empowermentId": "controller_control_empowerment",
+      "appliesTo": {
+        "sourceMustBePlayer": true,
+        "effectOperations": [
+          "ApplyStatus",
+          "ModifyAttribute",
+          "Damage"
+        ]
+      },
+      "additivePercent": 0.2,
+      "consumeOnUse": true,
+      "additivePercentModifiers": [
+        {
+          "type": "focusLevel",
+          "focusId": "hexer",
+          "minStyleLevel": 40,
+          "value": 0.08
+        },
+        {
+          "type": "nodeRank",
+          "nodeId": "hexer-specialization",
+          "value": 0.03
+        },
+        {
+          "type": "nodeRank",
+          "nodeId": "hexer-focus",
+          "value": 0.05
+        },
+        {
+          "type": "nodeRank",
+          "nodeId": "tactician-specialization",
+          "value": 0.03
+        },
+        {
+          "type": "nodeRank",
+          "nodeId": "tactician-focus",
+          "value": 0.05
+        },
+        {
+          "type": "nodeRank",
+          "nodeId": "frostbinder-specialization",
+          "value": 0.03
+        },
+        {
+          "type": "nodeRank",
+          "nodeId": "frostbinder-focus",
+          "value": 0.05
+        }
+      ]
+    }
+  ],
+  "coreMechanic": "Gain Control from active status and debuff effects. At 100 Control, empower the next control, debuff, curse, or damage-over-time effect.",
+  "skillTreeNodes": [
+    {
+      "id": "hexer-path",
+      "branchId": "hexer",
+      "name": "Hexer Root",
+      "description": "Opens Hexer curse control.",
+      "maxRank": 1,
+      "requiredLevel": 1,
+      "requiredNodeId": null,
+      "x": 0,
+      "y": 0,
+      "tags": [
+        "Curse",
+        "DoT"
+      ],
+      "effects": [
+        "Player Curse or DoT damage, status, and debuff effects gain +1% effect amount.",
+        "Does not choose Hexer as the effective focus by itself."
+      ],
+      "countsTowardFocus": false,
+      "rules": [
+        {
+          "id": "controller_hexer_nodes_hexer-path_additivePercentModifiers",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "statusOrDebuffOnly": true,
+            "sourceMustBePlayer": true,
+            "anyTags": [
+              "Curse",
+              "DoT"
+            ]
+          },
+          "operation": {
+            "type": "modifyEffectAmount",
+            "additivePercent": 0,
+            "additivePercentModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 0.01,
+                "nodeId": "hexer-path"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "hexer-instinct",
+      "branchId": "hexer",
+      "name": "Hexer Instinct",
+      "description": "Builds extra Control from curses.",
+      "maxRank": 3,
+      "requiredLevel": 5,
+      "requiredNodeId": "hexer-path",
+      "x": -1,
+      "y": 1,
+      "tags": [
+        "Curse",
+        "DoT"
+      ],
+      "effects": [
+        "Each rank grants +2 additional Control when an active Curse or DoT status/debuff effect resolves.",
+        "Adds 1 Hexer branch point per rank."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "controller_control_gain_hexer-instinct_amountModifiers",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "statusOrDebuffOnly": true,
+            "sourceMustBePlayer": true,
+            "activeAbilityOnly": true
+          },
+          "operation": {
+            "type": "gainStyleResource",
+            "resourceId": "control",
+            "amount": 0,
+            "usesProcCoefficient": true,
+            "amountModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 2,
+                "nodeId": "hexer-instinct"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "hexer-technique",
+      "branchId": "hexer",
+      "name": "Hexer Technique",
+      "description": "Improves curse pressure.",
+      "maxRank": 3,
+      "requiredLevel": 10,
+      "requiredNodeId": "hexer-path",
+      "x": 0,
+      "y": 1,
+      "tags": [
+        "Curse",
+        "DoT"
+      ],
+      "effects": [
+        "Each rank gives player Curse or DoT damage, status, and debuff effects +2% effect amount.",
+        "Adds 1 Hexer branch point per rank."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "controller_hexer_nodes_hexer-technique_additivePercentModifiers",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "statusOrDebuffOnly": true,
+            "sourceMustBePlayer": true,
+            "anyTags": [
+              "Curse",
+              "DoT"
+            ]
+          },
+          "operation": {
+            "type": "modifyEffectAmount",
+            "additivePercent": 0,
+            "additivePercentModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 0.02,
+                "nodeId": "hexer-technique"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "hexer-discipline",
+      "branchId": "hexer",
+      "name": "Hexer Discipline",
+      "description": "Improves disruptive effects.",
+      "maxRank": 3,
+      "requiredLevel": 5,
+      "requiredNodeId": "hexer-path",
+      "x": 1,
+      "y": 1,
+      "tags": [
+        "Curse",
+        "DoT"
+      ],
+      "effects": [
+        "Each rank gives status and debuff effects +1% effect amount.",
+        "Adds 1 Hexer branch point per rank."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "controller_hexer_discipline_hexer-discipline_additivePercentModifiers",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "statusOrDebuffOnly": true
+          },
+          "operation": {
+            "type": "modifyEffectAmount",
+            "additivePercent": 0,
+            "additivePercentModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 0.01,
+                "nodeId": "hexer-discipline"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "hexer-specialization",
+      "branchId": "hexer",
+      "name": "Hexer Specialization",
+      "description": "Improves Control empowerment.",
+      "maxRank": 2,
+      "requiredLevel": 20,
+      "requiredNodeId": "hexer-instinct",
+      "x": -1,
+      "y": 2,
+      "tags": [
+        "Curse",
+        "DoT"
+      ],
+      "effects": [
+        "Each rank makes Control empowerment +3% stronger.",
+        "Adds 1 Hexer branch point per rank."
+      ],
+      "countsTowardFocus": true
+    },
+    {
+      "id": "hexer-mastery",
+      "branchId": "hexer",
+      "name": "Hexer Mastery",
+      "description": "Deepens curse pressure.",
+      "maxRank": 3,
+      "requiredLevel": 25,
+      "requiredNodeId": "hexer-technique",
+      "x": 0,
+      "y": 2,
+      "tags": [
+        "Curse",
+        "DoT"
+      ],
+      "effects": [
+        "Each rank gives player Curse or DoT damage, status, and debuff effects +3% effect amount.",
+        "Adds 1 Hexer branch point per rank."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "controller_hexer_nodes_hexer-mastery_additivePercentModifiers",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "statusOrDebuffOnly": true,
+            "sourceMustBePlayer": true,
+            "anyTags": [
+              "Curse",
+              "DoT"
+            ]
+          },
+          "operation": {
+            "type": "modifyEffectAmount",
+            "additivePercent": 0,
+            "additivePercentModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 0.03,
+                "nodeId": "hexer-mastery"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "hexer-amplifier",
+      "branchId": "hexer",
+      "name": "Hexer Amplifier",
+      "description": "Improves curse Control gain.",
+      "maxRank": 2,
+      "requiredLevel": 20,
+      "requiredNodeId": "hexer-discipline",
+      "x": 1,
+      "y": 2,
+      "tags": [
+        "Curse",
+        "DoT"
+      ],
+      "effects": [
+        "Each rank grants +3 additional Control when an active Curse or DoT status/debuff effect resolves.",
+        "Adds 1 Hexer branch point per rank."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "controller_control_gain_hexer-amplifier_amountModifiers",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "statusOrDebuffOnly": true,
+            "sourceMustBePlayer": true,
+            "activeAbilityOnly": true
+          },
+          "operation": {
+            "type": "gainStyleResource",
+            "resourceId": "control",
+            "amount": 0,
+            "usesProcCoefficient": true,
+            "amountModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 3,
+                "nodeId": "hexer-amplifier"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "hexer-focus",
+      "branchId": "hexer",
+      "name": "Hexer Focus",
+      "description": "Completes the Hexer focus.",
+      "maxRank": 1,
+      "requiredLevel": 40,
+      "requiredNodeId": "hexer-mastery",
+      "x": 0,
+      "y": 3,
+      "tags": [
+        "Curse",
+        "DoT"
+      ],
+      "effects": [
+        "Player Curse or DoT damage, status, and debuff effects gain +5% effect amount.",
+        "Active Curse or DoT status/debuff effects grant +5 additional Control.",
+        "Control empowerment becomes +5% stronger.",
+        "Adds 1 Hexer branch point."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "controller_hexer_nodes_hexer-focus_additivePercentModifiers",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "statusOrDebuffOnly": true,
+            "sourceMustBePlayer": true,
+            "anyTags": [
+              "Curse",
+              "DoT"
+            ]
+          },
+          "operation": {
+            "type": "modifyEffectAmount",
+            "additivePercent": 0,
+            "additivePercentModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 0.05,
+                "nodeId": "hexer-focus"
+              }
+            ]
+          }
+        },
+        {
+          "id": "controller_control_gain_hexer-focus_amountModifiers",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "statusOrDebuffOnly": true,
+            "sourceMustBePlayer": true,
+            "activeAbilityOnly": true
+          },
+          "operation": {
+            "type": "gainStyleResource",
+            "resourceId": "control",
+            "amount": 0,
+            "usesProcCoefficient": true,
+            "amountModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 5,
+                "nodeId": "hexer-focus"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "tactician-path",
+      "branchId": "tactician",
+      "name": "Tactician Root",
+      "description": "Opens Tactician battlefield setup.",
+      "maxRank": 1,
+      "requiredLevel": 1,
+      "requiredNodeId": null,
+      "x": 0,
+      "y": 0,
+      "tags": [
+        "Debuff",
+        "Physical"
+      ],
+      "effects": [
+        "Player Debuff or Physical damage, status, and debuff effects gain +1% effect amount.",
+        "Does not choose Tactician as the effective focus by itself."
+      ],
+      "countsTowardFocus": false,
+      "rules": [
+        {
+          "id": "controller_tactician_nodes_tactician-path_additivePercentModifiers",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "statusOrDebuffOnly": true,
+            "sourceMustBePlayer": true,
+            "anyTags": [
+              "Debuff",
+              "Physical"
+            ]
+          },
+          "operation": {
+            "type": "modifyEffectAmount",
+            "additivePercent": 0,
+            "additivePercentModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 0.01,
+                "nodeId": "tactician-path"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "tactician-instinct",
+      "branchId": "tactician",
+      "name": "Tactician Instinct",
+      "description": "Builds extra Control from tactical effects.",
+      "maxRank": 3,
+      "requiredLevel": 5,
+      "requiredNodeId": "tactician-path",
+      "x": -1,
+      "y": 1,
+      "tags": [
+        "Debuff",
+        "Physical"
+      ],
+      "effects": [
+        "Each rank grants +2 additional Control when an active Debuff or Physical status/debuff effect resolves.",
+        "Adds 1 Tactician branch point per rank."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "controller_control_gain_tactician-instinct_amountModifiers",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "statusOrDebuffOnly": true,
+            "sourceMustBePlayer": true,
+            "activeAbilityOnly": true
+          },
+          "operation": {
+            "type": "gainStyleResource",
+            "resourceId": "control",
+            "amount": 0,
+            "usesProcCoefficient": true,
+            "amountModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 2,
+                "nodeId": "tactician-instinct"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "tactician-technique",
+      "branchId": "tactician",
+      "name": "Tactician Technique",
+      "description": "Improves tactical pressure.",
+      "maxRank": 3,
+      "requiredLevel": 10,
+      "requiredNodeId": "tactician-path",
+      "x": 0,
+      "y": 1,
+      "tags": [
+        "Debuff",
+        "Physical"
+      ],
+      "effects": [
+        "Each rank gives player Debuff or Physical damage, status, and debuff effects +2% effect amount.",
+        "Adds 1 Tactician branch point per rank."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "controller_tactician_nodes_tactician-technique_additivePercentModifiers",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "statusOrDebuffOnly": true,
+            "sourceMustBePlayer": true,
+            "anyTags": [
+              "Debuff",
+              "Physical"
+            ]
+          },
+          "operation": {
+            "type": "modifyEffectAmount",
+            "additivePercent": 0,
+            "additivePercentModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 0.02,
+                "nodeId": "tactician-technique"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "tactician-discipline",
+      "branchId": "tactician",
+      "name": "Tactician Discipline",
+      "description": "Improves tactical defense.",
+      "maxRank": 3,
+      "requiredLevel": 5,
+      "requiredNodeId": "tactician-path",
+      "x": 1,
+      "y": 1,
+      "tags": [
+        "Debuff",
+        "Physical"
+      ],
+      "effects": [
+        "Each rank reduces incoming player damage by 1%.",
+        "Adds 1 Tactician branch point per rank."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "controller_tactician_reduction_tactician-discipline_percentModifiers",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "effectOperations": [
+              "Damage"
+            ],
+            "targetMustBePlayer": true
+          },
+          "operation": {
+            "type": "addDamageReduction",
+            "percent": 0,
+            "percentModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 0.01,
+                "nodeId": "tactician-discipline"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "tactician-specialization",
+      "branchId": "tactician",
+      "name": "Tactician Specialization",
+      "description": "Improves Control empowerment.",
+      "maxRank": 2,
+      "requiredLevel": 20,
+      "requiredNodeId": "tactician-instinct",
+      "x": -1,
+      "y": 2,
+      "tags": [
+        "Debuff",
+        "Physical"
+      ],
+      "effects": [
+        "Each rank makes Control empowerment +3% stronger.",
+        "Adds 1 Tactician branch point per rank."
+      ],
+      "countsTowardFocus": true
+    },
+    {
+      "id": "tactician-mastery",
+      "branchId": "tactician",
+      "name": "Tactician Mastery",
+      "description": "Deepens tactical pressure.",
+      "maxRank": 3,
+      "requiredLevel": 25,
+      "requiredNodeId": "tactician-technique",
+      "x": 0,
+      "y": 2,
+      "tags": [
+        "Debuff",
+        "Physical"
+      ],
+      "effects": [
+        "Each rank gives player Debuff or Physical damage, status, and debuff effects +3% effect amount.",
+        "Adds 1 Tactician branch point per rank."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "controller_tactician_nodes_tactician-mastery_additivePercentModifiers",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "statusOrDebuffOnly": true,
+            "sourceMustBePlayer": true,
+            "anyTags": [
+              "Debuff",
+              "Physical"
+            ]
+          },
+          "operation": {
+            "type": "modifyEffectAmount",
+            "additivePercent": 0,
+            "additivePercentModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 0.03,
+                "nodeId": "tactician-mastery"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "tactician-amplifier",
+      "branchId": "tactician",
+      "name": "Tactician Amplifier",
+      "description": "Improves tactical Control gain.",
+      "maxRank": 2,
+      "requiredLevel": 20,
+      "requiredNodeId": "tactician-discipline",
+      "x": 1,
+      "y": 2,
+      "tags": [
+        "Debuff",
+        "Physical"
+      ],
+      "effects": [
+        "Each rank grants +3 additional Control when an active Debuff or Physical status/debuff effect resolves.",
+        "Adds 1 Tactician branch point per rank."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "controller_control_gain_tactician-amplifier_amountModifiers",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "statusOrDebuffOnly": true,
+            "sourceMustBePlayer": true,
+            "activeAbilityOnly": true
+          },
+          "operation": {
+            "type": "gainStyleResource",
+            "resourceId": "control",
+            "amount": 0,
+            "usesProcCoefficient": true,
+            "amountModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 3,
+                "nodeId": "tactician-amplifier"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "tactician-focus",
+      "branchId": "tactician",
+      "name": "Tactician Focus",
+      "description": "Completes the Tactician focus.",
+      "maxRank": 1,
+      "requiredLevel": 40,
+      "requiredNodeId": "tactician-mastery",
+      "x": 0,
+      "y": 3,
+      "tags": [
+        "Debuff",
+        "Physical"
+      ],
+      "effects": [
+        "Player Debuff or Physical damage, status, and debuff effects gain +5% effect amount.",
+        "Active Debuff or Physical status/debuff effects grant +5 additional Control.",
+        "Control empowerment becomes +5% stronger.",
+        "Adds 1 Tactician branch point."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "controller_tactician_nodes_tactician-focus_additivePercentModifiers",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "statusOrDebuffOnly": true,
+            "sourceMustBePlayer": true,
+            "anyTags": [
+              "Debuff",
+              "Physical"
+            ]
+          },
+          "operation": {
+            "type": "modifyEffectAmount",
+            "additivePercent": 0,
+            "additivePercentModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 0.05,
+                "nodeId": "tactician-focus"
+              }
+            ]
+          }
+        },
+        {
+          "id": "controller_control_gain_tactician-focus_amountModifiers",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "statusOrDebuffOnly": true,
+            "sourceMustBePlayer": true,
+            "activeAbilityOnly": true
+          },
+          "operation": {
+            "type": "gainStyleResource",
+            "resourceId": "control",
+            "amount": 0,
+            "usesProcCoefficient": true,
+            "amountModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 5,
+                "nodeId": "tactician-focus"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "frostbinder-path",
+      "branchId": "frostbinder",
+      "name": "Frostbinder Root",
+      "description": "Opens Frostbinder lockdown.",
+      "maxRank": 1,
+      "requiredLevel": 1,
+      "requiredNodeId": null,
+      "x": 0,
+      "y": 0,
+      "tags": [
+        "Control",
+        "Magic"
+      ],
+      "effects": [
+        "Player Control, Freeze, or Stun damage, status, and debuff effects gain +1% effect amount.",
+        "Does not choose Frostbinder as the effective focus by itself."
+      ],
+      "countsTowardFocus": false,
+      "rules": [
+        {
+          "id": "controller_frostbinder_nodes_frostbinder-path_additivePercentModifiers",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "statusOrDebuffOnly": true,
+            "sourceMustBePlayer": true,
+            "anyTags": [
+              "Control",
+              "Freeze",
+              "Stun"
+            ]
+          },
+          "operation": {
+            "type": "modifyEffectAmount",
+            "additivePercent": 0,
+            "additivePercentModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 0.01,
+                "nodeId": "frostbinder-path"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "frostbinder-instinct",
+      "branchId": "frostbinder",
+      "name": "Frostbinder Instinct",
+      "description": "Builds extra Control from lockdown effects.",
+      "maxRank": 3,
+      "requiredLevel": 5,
+      "requiredNodeId": "frostbinder-path",
+      "x": -1,
+      "y": 1,
+      "tags": [
+        "Control",
+        "Magic"
+      ],
+      "effects": [
+        "Each rank grants +2 additional Control when an active Control, Freeze, or Stun status/debuff effect resolves.",
+        "Adds 1 Frostbinder branch point per rank."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "controller_control_gain_frostbinder-instinct_amountModifiers",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "statusOrDebuffOnly": true,
+            "sourceMustBePlayer": true,
+            "activeAbilityOnly": true
+          },
+          "operation": {
+            "type": "gainStyleResource",
+            "resourceId": "control",
+            "amount": 0,
+            "usesProcCoefficient": true,
+            "amountModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 2,
+                "nodeId": "frostbinder-instinct"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "frostbinder-technique",
+      "branchId": "frostbinder",
+      "name": "Frostbinder Technique",
+      "description": "Improves lockdown pressure.",
+      "maxRank": 3,
+      "requiredLevel": 10,
+      "requiredNodeId": "frostbinder-path",
+      "x": 0,
+      "y": 1,
+      "tags": [
+        "Control",
+        "Magic"
+      ],
+      "effects": [
+        "Each rank gives player Control, Freeze, or Stun damage, status, and debuff effects +2% effect amount.",
+        "Adds 1 Frostbinder branch point per rank."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "controller_frostbinder_nodes_frostbinder-technique_additivePercentModifiers",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "statusOrDebuffOnly": true,
+            "sourceMustBePlayer": true,
+            "anyTags": [
+              "Control",
+              "Freeze",
+              "Stun"
+            ]
+          },
+          "operation": {
+            "type": "modifyEffectAmount",
+            "additivePercent": 0,
+            "additivePercentModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 0.02,
+                "nodeId": "frostbinder-technique"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "frostbinder-discipline",
+      "branchId": "frostbinder",
+      "name": "Frostbinder Discipline",
+      "description": "Improves frozen defense.",
+      "maxRank": 3,
+      "requiredLevel": 5,
+      "requiredNodeId": "frostbinder-path",
+      "x": 1,
+      "y": 1,
+      "tags": [
+        "Control",
+        "Magic"
+      ],
+      "effects": [
+        "Each rank reduces incoming player damage by 1%.",
+        "Adds 1 Frostbinder branch point per rank."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "controller_frostbinder_reduction_frostbinder-discipline_percentModifiers",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "effectOperations": [
+              "Damage"
+            ],
+            "targetMustBePlayer": true
+          },
+          "operation": {
+            "type": "addDamageReduction",
+            "percent": 0,
+            "percentModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 0.01,
+                "nodeId": "frostbinder-discipline"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "frostbinder-specialization",
+      "branchId": "frostbinder",
+      "name": "Frostbinder Specialization",
+      "description": "Improves Control empowerment.",
+      "maxRank": 2,
+      "requiredLevel": 20,
+      "requiredNodeId": "frostbinder-instinct",
+      "x": -1,
+      "y": 2,
+      "tags": [
+        "Control",
+        "Magic"
+      ],
+      "effects": [
+        "Each rank makes Control empowerment +3% stronger.",
+        "Adds 1 Frostbinder branch point per rank."
+      ],
+      "countsTowardFocus": true
+    },
+    {
+      "id": "frostbinder-mastery",
+      "branchId": "frostbinder",
+      "name": "Frostbinder Mastery",
+      "description": "Deepens lockdown pressure.",
+      "maxRank": 3,
+      "requiredLevel": 25,
+      "requiredNodeId": "frostbinder-technique",
+      "x": 0,
+      "y": 2,
+      "tags": [
+        "Control",
+        "Magic"
+      ],
+      "effects": [
+        "Each rank gives player Control, Freeze, or Stun damage, status, and debuff effects +3% effect amount.",
+        "Adds 1 Frostbinder branch point per rank."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "controller_frostbinder_nodes_frostbinder-mastery_additivePercentModifiers",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "statusOrDebuffOnly": true,
+            "sourceMustBePlayer": true,
+            "anyTags": [
+              "Control",
+              "Freeze",
+              "Stun"
+            ]
+          },
+          "operation": {
+            "type": "modifyEffectAmount",
+            "additivePercent": 0,
+            "additivePercentModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 0.03,
+                "nodeId": "frostbinder-mastery"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "frostbinder-amplifier",
+      "branchId": "frostbinder",
+      "name": "Frostbinder Amplifier",
+      "description": "Improves lockdown Control gain.",
+      "maxRank": 2,
+      "requiredLevel": 20,
+      "requiredNodeId": "frostbinder-discipline",
+      "x": 1,
+      "y": 2,
+      "tags": [
+        "Control",
+        "Magic"
+      ],
+      "effects": [
+        "Each rank grants +3 additional Control when an active Control, Freeze, or Stun status/debuff effect resolves.",
+        "Adds 1 Frostbinder branch point per rank."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "controller_control_gain_frostbinder-amplifier_amountModifiers",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "statusOrDebuffOnly": true,
+            "sourceMustBePlayer": true,
+            "activeAbilityOnly": true
+          },
+          "operation": {
+            "type": "gainStyleResource",
+            "resourceId": "control",
+            "amount": 0,
+            "usesProcCoefficient": true,
+            "amountModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 3,
+                "nodeId": "frostbinder-amplifier"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "frostbinder-focus",
+      "branchId": "frostbinder",
+      "name": "Frostbinder Focus",
+      "description": "Completes the Frostbinder focus.",
+      "maxRank": 1,
+      "requiredLevel": 40,
+      "requiredNodeId": "frostbinder-mastery",
+      "x": 0,
+      "y": 3,
+      "tags": [
+        "Control",
+        "Magic"
+      ],
+      "effects": [
+        "Player Control, Freeze, or Stun damage, status, and debuff effects gain +5% effect amount.",
+        "Active Control, Freeze, or Stun status/debuff effects grant +5 additional Control.",
+        "Control empowerment becomes +5% stronger.",
+        "Adds 1 Frostbinder branch point."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "controller_frostbinder_nodes_frostbinder-focus_additivePercentModifiers",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "statusOrDebuffOnly": true,
+            "sourceMustBePlayer": true,
+            "anyTags": [
+              "Control",
+              "Freeze",
+              "Stun"
+            ]
+          },
+          "operation": {
+            "type": "modifyEffectAmount",
+            "additivePercent": 0,
+            "additivePercentModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 0.05,
+                "nodeId": "frostbinder-focus"
+              }
+            ]
+          }
+        },
+        {
+          "id": "controller_control_gain_frostbinder-focus_amountModifiers",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "statusOrDebuffOnly": true,
+            "sourceMustBePlayer": true,
+            "activeAbilityOnly": true
+          },
+          "operation": {
+            "type": "gainStyleResource",
+            "resourceId": "control",
+            "amount": 0,
+            "usesProcCoefficient": true,
+            "amountModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 5,
+                "nodeId": "frostbinder-focus"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
+

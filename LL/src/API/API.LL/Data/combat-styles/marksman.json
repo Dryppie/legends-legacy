@@ -1,0 +1,1362 @@
+{
+  "id": "marksman",
+  "name": "Marksman",
+  "description": "Builds Aim through ranged direct damage and rewards precision, marks, and tactical shots.",
+  "resourceId": "aim",
+  "resourceMaxAmount": 100,
+  "maxLevel": 50,
+  "recommendedTags": [
+    "Ranged",
+    "Physical",
+    "Critical",
+    "Mark"
+  ],
+  "recommendedStats": [
+    "Precision",
+    "CritChance",
+    "ArmorPenetration"
+  ],
+  "focuses": [
+    {
+      "id": "sniper",
+      "name": "Sniper",
+      "description": "Single-target precision: ranged single-target damage scales at levels 10, 25, and 40.",
+      "unlockLevel": 10,
+      "recommendedTags": [
+        "Ranged",
+        "Critical"
+      ],
+      "recommendedStats": [
+        "Precision",
+        "CritDamage"
+      ],
+      "rules": [
+        {
+          "id": "marksman_sniper_damage",
+          "eventType": "EffectCalculation",
+          "minStyleLevel": 10,
+          "predicate": {
+            "sourceMustBePlayer": true,
+            "rangedOnly": true,
+            "targetSelectors": [
+              "CurrentTarget"
+            ],
+            "effectOperations": [
+              "Damage"
+            ]
+          },
+          "operation": {
+            "type": "modifyEffectAmount",
+            "additivePercent": 0.08,
+            "additivePercentModifiers": [
+              {
+                "type": "focusLevel",
+                "focusId": "sniper",
+                "minStyleLevel": 25,
+                "value": 0.04
+              },
+              {
+                "type": "focusLevel",
+                "focusId": "sniper",
+                "minStyleLevel": 40,
+                "value": 0.04
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "volley",
+      "name": "Volley",
+      "description": "Multi-target fire: ranged multi-target damage scales at levels 10, 25, and 40.",
+      "unlockLevel": 10,
+      "recommendedTags": [
+        "Ranged",
+        "MultiTarget"
+      ],
+      "recommendedStats": [
+        "Precision",
+        "CritChance"
+      ],
+      "rules": [
+        {
+          "id": "marksman_volley_damage",
+          "eventType": "EffectCalculation",
+          "minStyleLevel": 10,
+          "predicate": {
+            "sourceMustBePlayer": true,
+            "rangedOnly": true,
+            "multiTargetOnly": true,
+            "effectOperations": [
+              "Damage"
+            ]
+          },
+          "operation": {
+            "type": "modifyEffectAmount",
+            "additivePercent": 0.08,
+            "additivePercentModifiers": [
+              {
+                "type": "focusLevel",
+                "focusId": "volley",
+                "minStyleLevel": 25,
+                "value": 0.04
+              },
+              {
+                "type": "focusLevel",
+                "focusId": "volley",
+                "minStyleLevel": 40,
+                "value": 0.04
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "trapper",
+      "name": "Trapper",
+      "description": "Marks and setup: ranged status and debuff effects build more Aim and scale at milestones.",
+      "unlockLevel": 10,
+      "recommendedTags": [
+        "Ranged",
+        "Mark",
+        "Debuff"
+      ],
+      "recommendedStats": [
+        "Precision",
+        "Cooldown"
+      ],
+      "rules": [
+        {
+          "id": "marksman_trapper_effect",
+          "eventType": "EffectCalculation",
+          "minStyleLevel": 10,
+          "predicate": {
+            "sourceMustBePlayer": true,
+            "rangedOnly": true,
+            "statusOrDebuffOnly": true
+          },
+          "operation": {
+            "type": "modifyEffectAmount",
+            "additivePercent": 0.08,
+            "additivePercentModifiers": [
+              {
+                "type": "focusLevel",
+                "focusId": "trapper",
+                "minStyleLevel": 25,
+                "value": 0.04
+              },
+              {
+                "type": "focusLevel",
+                "focusId": "trapper",
+                "minStyleLevel": 40,
+                "value": 0.04
+              }
+            ]
+          }
+        },
+        {
+          "id": "marksman_trapper_aim",
+          "eventType": "DamageDealt",
+          "minStyleLevel": 25,
+          "predicate": {
+            "sourceMustBePlayer": true,
+            "rangedOnly": true,
+            "statusOrDebuffOnly": true,
+            "effectOperations": [
+              "Damage"
+            ]
+          },
+          "operation": {
+            "type": "gainStyleResource",
+            "resourceId": "aim",
+            "amount": 5
+          }
+        }
+      ]
+    }
+  ],
+  "rules": [
+    {
+      "id": "marksman_aim_on_ranged_damage",
+      "eventType": "DamageDealt",
+      "predicate": {
+        "sourceMustBePlayer": true,
+        "anyTags": [
+          "Ranged"
+        ],
+        "effectOperations": [
+          "Damage"
+        ]
+      },
+      "operation": {
+        "type": "gainStyleResource",
+        "resourceId": "aim",
+        "amount": 10
+      }
+    },
+    {
+      "id": "marksman_ranged_damage_bonus",
+      "eventType": "EffectCalculation",
+      "predicate": {
+        "sourceMustBePlayer": true,
+        "anyTags": [
+          "Ranged"
+        ],
+        "effectOperations": [
+          "Damage"
+        ]
+      },
+      "operation": {
+        "type": "modifyEffectAmount",
+        "additivePercent": 0.05
+      }
+    }
+  ],
+  "resourceOverflowOperations": [
+    {
+      "type": "setPendingEmpowerment",
+      "empowermentId": "marksman_aim_empowerment",
+      "appliesTo": {
+        "sourceMustBePlayer": true,
+        "effectOperations": [
+          "Damage"
+        ],
+        "anyTags": [
+          "Ranged"
+        ]
+      },
+      "additivePercent": 0.2,
+      "consumeOnUse": true,
+      "additivePercentModifiers": [
+        {
+          "type": "focusLevel",
+          "focusId": "sniper",
+          "minStyleLevel": 40,
+          "value": 0.05
+        },
+        {
+          "type": "nodeRank",
+          "nodeId": "sniper-specialization",
+          "value": 0.03
+        },
+        {
+          "type": "nodeRank",
+          "nodeId": "sniper-focus",
+          "value": 0.05
+        },
+        {
+          "type": "nodeRank",
+          "nodeId": "volley-specialization",
+          "value": 0.03
+        },
+        {
+          "type": "nodeRank",
+          "nodeId": "volley-focus",
+          "value": 0.05
+        },
+        {
+          "type": "nodeRank",
+          "nodeId": "trapper-specialization",
+          "value": 0.03
+        },
+        {
+          "type": "nodeRank",
+          "nodeId": "trapper-focus",
+          "value": 0.05
+        }
+      ]
+    }
+  ],
+  "coreMechanic": "Gain Aim from ranged direct damage. At 100 Aim, empower the next ranged damage effect.",
+  "skillTreeNodes": [
+    {
+      "id": "sniper-path",
+      "branchId": "sniper",
+      "name": "Sniper Root",
+      "description": "Opens Sniper single-target precision.",
+      "maxRank": 1,
+      "requiredLevel": 1,
+      "requiredNodeId": null,
+      "x": 0,
+      "y": 0,
+      "tags": [
+        "Ranged",
+        "Critical"
+      ],
+      "effects": [
+        "Ranged current-target damage gains +1% effect amount.",
+        "Does not choose Sniper as the effective focus by itself."
+      ],
+      "countsTowardFocus": false,
+      "rules": [
+        {
+          "id": "marksman_sniper_nodes_sniper-path_additivePercentModifiers",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "effectOperations": [
+              "Damage"
+            ],
+            "targetSelectors": [
+              "CurrentTarget"
+            ],
+            "sourceMustBePlayer": true,
+            "rangedOnly": true
+          },
+          "operation": {
+            "type": "modifyEffectAmount",
+            "additivePercent": 0,
+            "additivePercentModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 0.01,
+                "nodeId": "sniper-path"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "sniper-instinct",
+      "branchId": "sniper",
+      "name": "Sniper Instinct",
+      "description": "Builds extra Aim from ranged damage.",
+      "maxRank": 3,
+      "requiredLevel": 5,
+      "requiredNodeId": "sniper-path",
+      "x": -1,
+      "y": 1,
+      "tags": [
+        "Ranged",
+        "Critical"
+      ],
+      "effects": [
+        "Each rank grants +2 additional Aim when the player deals ranged damage.",
+        "Adds 1 Sniper branch point per rank."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "marksman_nodes_aim_sniper-instinct_amountModifiers",
+          "eventType": "DamageDealt",
+          "predicate": {
+            "effectOperations": [
+              "Damage"
+            ],
+            "sourceMustBePlayer": true,
+            "rangedOnly": true
+          },
+          "operation": {
+            "type": "gainStyleResource",
+            "resourceId": "aim",
+            "amount": 0,
+            "usesProcCoefficient": true,
+            "amountModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 2,
+                "nodeId": "sniper-instinct"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "sniper-technique",
+      "branchId": "sniper",
+      "name": "Sniper Technique",
+      "description": "Improves ranged current-target damage.",
+      "maxRank": 3,
+      "requiredLevel": 10,
+      "requiredNodeId": "sniper-path",
+      "x": 0,
+      "y": 1,
+      "tags": [
+        "Ranged",
+        "Critical"
+      ],
+      "effects": [
+        "Each rank gives ranged current-target damage +2% effect amount.",
+        "Adds 1 Sniper branch point per rank."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "marksman_sniper_nodes_sniper-technique_additivePercentModifiers",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "effectOperations": [
+              "Damage"
+            ],
+            "targetSelectors": [
+              "CurrentTarget"
+            ],
+            "sourceMustBePlayer": true,
+            "rangedOnly": true
+          },
+          "operation": {
+            "type": "modifyEffectAmount",
+            "additivePercent": 0,
+            "additivePercentModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 0.02,
+                "nodeId": "sniper-technique"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "sniper-discipline",
+      "branchId": "sniper",
+      "name": "Sniper Discipline",
+      "description": "Improves ranged damage consistency.",
+      "maxRank": 3,
+      "requiredLevel": 5,
+      "requiredNodeId": "sniper-path",
+      "x": 1,
+      "y": 1,
+      "tags": [
+        "Ranged",
+        "Critical"
+      ],
+      "effects": [
+        "Each rank gives ranged damage +1% effect amount.",
+        "Adds 1 Sniper branch point per rank."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "marksman_damage_discipline_sniper-discipline_additivePercentModifiers",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "effectOperations": [
+              "Damage"
+            ],
+            "sourceMustBePlayer": true,
+            "rangedOnly": true
+          },
+          "operation": {
+            "type": "modifyEffectAmount",
+            "additivePercent": 0,
+            "additivePercentModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 0.01,
+                "nodeId": "sniper-discipline"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "sniper-specialization",
+      "branchId": "sniper",
+      "name": "Sniper Specialization",
+      "description": "Improves Aim empowerment.",
+      "maxRank": 2,
+      "requiredLevel": 20,
+      "requiredNodeId": "sniper-instinct",
+      "x": -1,
+      "y": 2,
+      "tags": [
+        "Ranged",
+        "Critical"
+      ],
+      "effects": [
+        "Each rank makes Aim empowerment +3% stronger.",
+        "Adds 1 Sniper branch point per rank."
+      ],
+      "countsTowardFocus": true
+    },
+    {
+      "id": "sniper-mastery",
+      "branchId": "sniper",
+      "name": "Sniper Mastery",
+      "description": "Deepens ranged current-target damage.",
+      "maxRank": 3,
+      "requiredLevel": 25,
+      "requiredNodeId": "sniper-technique",
+      "x": 0,
+      "y": 2,
+      "tags": [
+        "Ranged",
+        "Critical"
+      ],
+      "effects": [
+        "Each rank gives ranged current-target damage +3% effect amount.",
+        "Adds 1 Sniper branch point per rank."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "marksman_sniper_nodes_sniper-mastery_additivePercentModifiers",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "effectOperations": [
+              "Damage"
+            ],
+            "targetSelectors": [
+              "CurrentTarget"
+            ],
+            "sourceMustBePlayer": true,
+            "rangedOnly": true
+          },
+          "operation": {
+            "type": "modifyEffectAmount",
+            "additivePercent": 0,
+            "additivePercentModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 0.03,
+                "nodeId": "sniper-mastery"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "sniper-amplifier",
+      "branchId": "sniper",
+      "name": "Sniper Amplifier",
+      "description": "Improves Aim generation.",
+      "maxRank": 2,
+      "requiredLevel": 20,
+      "requiredNodeId": "sniper-discipline",
+      "x": 1,
+      "y": 2,
+      "tags": [
+        "Ranged",
+        "Critical"
+      ],
+      "effects": [
+        "Each rank grants +3 additional Aim when the player deals ranged damage.",
+        "Adds 1 Sniper branch point per rank."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "marksman_nodes_aim_sniper-amplifier_amountModifiers",
+          "eventType": "DamageDealt",
+          "predicate": {
+            "effectOperations": [
+              "Damage"
+            ],
+            "sourceMustBePlayer": true,
+            "rangedOnly": true
+          },
+          "operation": {
+            "type": "gainStyleResource",
+            "resourceId": "aim",
+            "amount": 0,
+            "usesProcCoefficient": true,
+            "amountModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 3,
+                "nodeId": "sniper-amplifier"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "sniper-focus",
+      "branchId": "sniper",
+      "name": "Sniper Focus",
+      "description": "Completes the Sniper focus.",
+      "maxRank": 1,
+      "requiredLevel": 40,
+      "requiredNodeId": "sniper-mastery",
+      "x": 0,
+      "y": 3,
+      "tags": [
+        "Ranged",
+        "Critical"
+      ],
+      "effects": [
+        "Ranged current-target damage gains +5% effect amount.",
+        "Ranged current-target damage grants +5 additional Aim.",
+        "Aim empowerment becomes +5% stronger.",
+        "Adds 1 Sniper branch point."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "marksman_sniper_nodes_sniper-focus_additivePercentModifiers",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "effectOperations": [
+              "Damage"
+            ],
+            "targetSelectors": [
+              "CurrentTarget"
+            ],
+            "sourceMustBePlayer": true,
+            "rangedOnly": true
+          },
+          "operation": {
+            "type": "modifyEffectAmount",
+            "additivePercent": 0,
+            "additivePercentModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 0.05,
+                "nodeId": "sniper-focus"
+              }
+            ]
+          }
+        },
+        {
+          "id": "marksman_nodes_aim_sniper-focus_amountModifiers",
+          "eventType": "DamageDealt",
+          "predicate": {
+            "effectOperations": [
+              "Damage"
+            ],
+            "sourceMustBePlayer": true,
+            "rangedOnly": true
+          },
+          "operation": {
+            "type": "gainStyleResource",
+            "resourceId": "aim",
+            "amount": 0,
+            "usesProcCoefficient": true,
+            "amountModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 5,
+                "nodeId": "sniper-focus"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "volley-path",
+      "branchId": "volley",
+      "name": "Volley Root",
+      "description": "Opens Volley multi-target fire.",
+      "maxRank": 1,
+      "requiredLevel": 1,
+      "requiredNodeId": null,
+      "x": 0,
+      "y": 0,
+      "tags": [
+        "Ranged",
+        "MultiTarget"
+      ],
+      "effects": [
+        "Ranged multi-target damage gains +1% effect amount.",
+        "Does not choose Volley as the effective focus by itself."
+      ],
+      "countsTowardFocus": false,
+      "rules": [
+        {
+          "id": "marksman_volley_nodes_volley-path_additivePercentModifiers",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "effectOperations": [
+              "Damage"
+            ],
+            "multiTargetOnly": true,
+            "sourceMustBePlayer": true,
+            "rangedOnly": true
+          },
+          "operation": {
+            "type": "modifyEffectAmount",
+            "additivePercent": 0,
+            "additivePercentModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 0.01,
+                "nodeId": "volley-path"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "volley-instinct",
+      "branchId": "volley",
+      "name": "Volley Instinct",
+      "description": "Builds extra Aim from ranged damage.",
+      "maxRank": 3,
+      "requiredLevel": 5,
+      "requiredNodeId": "volley-path",
+      "x": -1,
+      "y": 1,
+      "tags": [
+        "Ranged",
+        "MultiTarget"
+      ],
+      "effects": [
+        "Each rank grants +2 additional Aim when the player deals ranged damage.",
+        "Adds 1 Volley branch point per rank."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "marksman_nodes_aim_volley-instinct_amountModifiers",
+          "eventType": "DamageDealt",
+          "predicate": {
+            "effectOperations": [
+              "Damage"
+            ],
+            "sourceMustBePlayer": true,
+            "rangedOnly": true
+          },
+          "operation": {
+            "type": "gainStyleResource",
+            "resourceId": "aim",
+            "amount": 0,
+            "usesProcCoefficient": true,
+            "amountModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 2,
+                "nodeId": "volley-instinct"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "volley-technique",
+      "branchId": "volley",
+      "name": "Volley Technique",
+      "description": "Improves ranged multi-target damage.",
+      "maxRank": 3,
+      "requiredLevel": 10,
+      "requiredNodeId": "volley-path",
+      "x": 0,
+      "y": 1,
+      "tags": [
+        "Ranged",
+        "MultiTarget"
+      ],
+      "effects": [
+        "Each rank gives ranged multi-target damage +2% effect amount.",
+        "Adds 1 Volley branch point per rank."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "marksman_volley_nodes_volley-technique_additivePercentModifiers",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "effectOperations": [
+              "Damage"
+            ],
+            "multiTargetOnly": true,
+            "sourceMustBePlayer": true,
+            "rangedOnly": true
+          },
+          "operation": {
+            "type": "modifyEffectAmount",
+            "additivePercent": 0,
+            "additivePercentModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 0.02,
+                "nodeId": "volley-technique"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "volley-discipline",
+      "branchId": "volley",
+      "name": "Volley Discipline",
+      "description": "Improves broad ranged damage.",
+      "maxRank": 3,
+      "requiredLevel": 5,
+      "requiredNodeId": "volley-path",
+      "x": 1,
+      "y": 1,
+      "tags": [
+        "Ranged",
+        "MultiTarget"
+      ],
+      "effects": [
+        "Each rank gives ranged damage +1% effect amount.",
+        "Adds 1 Volley branch point per rank."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "marksman_damage_discipline_volley-discipline_additivePercentModifiers",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "effectOperations": [
+              "Damage"
+            ],
+            "sourceMustBePlayer": true,
+            "rangedOnly": true
+          },
+          "operation": {
+            "type": "modifyEffectAmount",
+            "additivePercent": 0,
+            "additivePercentModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 0.01,
+                "nodeId": "volley-discipline"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "volley-specialization",
+      "branchId": "volley",
+      "name": "Volley Specialization",
+      "description": "Improves Aim empowerment.",
+      "maxRank": 2,
+      "requiredLevel": 20,
+      "requiredNodeId": "volley-instinct",
+      "x": -1,
+      "y": 2,
+      "tags": [
+        "Ranged",
+        "MultiTarget"
+      ],
+      "effects": [
+        "Each rank makes Aim empowerment +3% stronger.",
+        "Adds 1 Volley branch point per rank."
+      ],
+      "countsTowardFocus": true
+    },
+    {
+      "id": "volley-mastery",
+      "branchId": "volley",
+      "name": "Volley Mastery",
+      "description": "Deepens ranged multi-target damage.",
+      "maxRank": 3,
+      "requiredLevel": 25,
+      "requiredNodeId": "volley-technique",
+      "x": 0,
+      "y": 2,
+      "tags": [
+        "Ranged",
+        "MultiTarget"
+      ],
+      "effects": [
+        "Each rank gives ranged multi-target damage +3% effect amount.",
+        "Adds 1 Volley branch point per rank."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "marksman_volley_nodes_volley-mastery_additivePercentModifiers",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "effectOperations": [
+              "Damage"
+            ],
+            "multiTargetOnly": true,
+            "sourceMustBePlayer": true,
+            "rangedOnly": true
+          },
+          "operation": {
+            "type": "modifyEffectAmount",
+            "additivePercent": 0,
+            "additivePercentModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 0.03,
+                "nodeId": "volley-mastery"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "volley-amplifier",
+      "branchId": "volley",
+      "name": "Volley Amplifier",
+      "description": "Improves Aim generation.",
+      "maxRank": 2,
+      "requiredLevel": 20,
+      "requiredNodeId": "volley-discipline",
+      "x": 1,
+      "y": 2,
+      "tags": [
+        "Ranged",
+        "MultiTarget"
+      ],
+      "effects": [
+        "Each rank grants +3 additional Aim when the player deals ranged damage.",
+        "Adds 1 Volley branch point per rank."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "marksman_nodes_aim_volley-amplifier_amountModifiers",
+          "eventType": "DamageDealt",
+          "predicate": {
+            "effectOperations": [
+              "Damage"
+            ],
+            "sourceMustBePlayer": true,
+            "rangedOnly": true
+          },
+          "operation": {
+            "type": "gainStyleResource",
+            "resourceId": "aim",
+            "amount": 0,
+            "usesProcCoefficient": true,
+            "amountModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 3,
+                "nodeId": "volley-amplifier"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "volley-focus",
+      "branchId": "volley",
+      "name": "Volley Focus",
+      "description": "Completes the Volley focus.",
+      "maxRank": 1,
+      "requiredLevel": 40,
+      "requiredNodeId": "volley-mastery",
+      "x": 0,
+      "y": 3,
+      "tags": [
+        "Ranged",
+        "MultiTarget"
+      ],
+      "effects": [
+        "Ranged multi-target damage gains +5% effect amount.",
+        "Ranged multi-target damage grants +5 additional Aim.",
+        "Aim empowerment becomes +5% stronger.",
+        "Adds 1 Volley branch point."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "marksman_volley_nodes_volley-focus_additivePercentModifiers",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "effectOperations": [
+              "Damage"
+            ],
+            "multiTargetOnly": true,
+            "sourceMustBePlayer": true,
+            "rangedOnly": true
+          },
+          "operation": {
+            "type": "modifyEffectAmount",
+            "additivePercent": 0,
+            "additivePercentModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 0.05,
+                "nodeId": "volley-focus"
+              }
+            ]
+          }
+        },
+        {
+          "id": "marksman_nodes_aim_volley-focus_amountModifiers",
+          "eventType": "DamageDealt",
+          "predicate": {
+            "effectOperations": [
+              "Damage"
+            ],
+            "sourceMustBePlayer": true,
+            "rangedOnly": true
+          },
+          "operation": {
+            "type": "gainStyleResource",
+            "resourceId": "aim",
+            "amount": 0,
+            "usesProcCoefficient": true,
+            "amountModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 5,
+                "nodeId": "volley-focus"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "trapper-path",
+      "branchId": "trapper",
+      "name": "Trapper Root",
+      "description": "Opens Trapper ranged setup.",
+      "maxRank": 1,
+      "requiredLevel": 1,
+      "requiredNodeId": null,
+      "x": 0,
+      "y": 0,
+      "tags": [
+        "Ranged",
+        "Mark",
+        "Debuff"
+      ],
+      "effects": [
+        "Ranged status or debuff effects gain +1% effect amount.",
+        "Does not choose Trapper as the effective focus by itself."
+      ],
+      "countsTowardFocus": false,
+      "rules": [
+        {
+          "id": "marksman_trapper_nodes_trapper-path_additivePercentModifiers",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "statusOrDebuffOnly": true,
+            "sourceMustBePlayer": true,
+            "rangedOnly": true
+          },
+          "operation": {
+            "type": "modifyEffectAmount",
+            "additivePercent": 0,
+            "additivePercentModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 0.01,
+                "nodeId": "trapper-path"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "trapper-instinct",
+      "branchId": "trapper",
+      "name": "Trapper Instinct",
+      "description": "Builds extra Aim from ranged damage.",
+      "maxRank": 3,
+      "requiredLevel": 5,
+      "requiredNodeId": "trapper-path",
+      "x": -1,
+      "y": 1,
+      "tags": [
+        "Ranged",
+        "Mark",
+        "Debuff"
+      ],
+      "effects": [
+        "Each rank grants +2 additional Aim when the player deals ranged damage.",
+        "Adds 1 Trapper branch point per rank."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "marksman_nodes_aim_trapper-instinct_amountModifiers",
+          "eventType": "DamageDealt",
+          "predicate": {
+            "effectOperations": [
+              "Damage"
+            ],
+            "sourceMustBePlayer": true,
+            "rangedOnly": true
+          },
+          "operation": {
+            "type": "gainStyleResource",
+            "resourceId": "aim",
+            "amount": 0,
+            "usesProcCoefficient": true,
+            "amountModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 2,
+                "nodeId": "trapper-instinct"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "trapper-technique",
+      "branchId": "trapper",
+      "name": "Trapper Technique",
+      "description": "Improves ranged status and debuff effects.",
+      "maxRank": 3,
+      "requiredLevel": 10,
+      "requiredNodeId": "trapper-path",
+      "x": 0,
+      "y": 1,
+      "tags": [
+        "Ranged",
+        "Mark",
+        "Debuff"
+      ],
+      "effects": [
+        "Each rank gives ranged status or debuff effects +2% effect amount.",
+        "Adds 1 Trapper branch point per rank."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "marksman_trapper_nodes_trapper-technique_additivePercentModifiers",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "statusOrDebuffOnly": true,
+            "sourceMustBePlayer": true,
+            "rangedOnly": true
+          },
+          "operation": {
+            "type": "modifyEffectAmount",
+            "additivePercent": 0,
+            "additivePercentModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 0.02,
+                "nodeId": "trapper-technique"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "trapper-discipline",
+      "branchId": "trapper",
+      "name": "Trapper Discipline",
+      "description": "Improves tactical debuffs.",
+      "maxRank": 3,
+      "requiredLevel": 5,
+      "requiredNodeId": "trapper-path",
+      "x": 1,
+      "y": 1,
+      "tags": [
+        "Ranged",
+        "Mark",
+        "Debuff"
+      ],
+      "effects": [
+        "Each rank gives status and debuff effects +1% effect amount.",
+        "Adds 1 Trapper branch point per rank."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "marksman_trapper_discipline_trapper-discipline_additivePercentModifiers",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "statusOrDebuffOnly": true
+          },
+          "operation": {
+            "type": "modifyEffectAmount",
+            "additivePercent": 0,
+            "additivePercentModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 0.01,
+                "nodeId": "trapper-discipline"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "trapper-specialization",
+      "branchId": "trapper",
+      "name": "Trapper Specialization",
+      "description": "Improves Aim empowerment.",
+      "maxRank": 2,
+      "requiredLevel": 20,
+      "requiredNodeId": "trapper-instinct",
+      "x": -1,
+      "y": 2,
+      "tags": [
+        "Ranged",
+        "Mark",
+        "Debuff"
+      ],
+      "effects": [
+        "Each rank makes Aim empowerment +3% stronger.",
+        "Adds 1 Trapper branch point per rank."
+      ],
+      "countsTowardFocus": true
+    },
+    {
+      "id": "trapper-mastery",
+      "branchId": "trapper",
+      "name": "Trapper Mastery",
+      "description": "Deepens ranged status and debuff effects.",
+      "maxRank": 3,
+      "requiredLevel": 25,
+      "requiredNodeId": "trapper-technique",
+      "x": 0,
+      "y": 2,
+      "tags": [
+        "Ranged",
+        "Mark",
+        "Debuff"
+      ],
+      "effects": [
+        "Each rank gives ranged status or debuff effects +3% effect amount.",
+        "Adds 1 Trapper branch point per rank."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "marksman_trapper_nodes_trapper-mastery_additivePercentModifiers",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "statusOrDebuffOnly": true,
+            "sourceMustBePlayer": true,
+            "rangedOnly": true
+          },
+          "operation": {
+            "type": "modifyEffectAmount",
+            "additivePercent": 0,
+            "additivePercentModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 0.03,
+                "nodeId": "trapper-mastery"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "trapper-amplifier",
+      "branchId": "trapper",
+      "name": "Trapper Amplifier",
+      "description": "Improves Aim generation.",
+      "maxRank": 2,
+      "requiredLevel": 20,
+      "requiredNodeId": "trapper-discipline",
+      "x": 1,
+      "y": 2,
+      "tags": [
+        "Ranged",
+        "Mark",
+        "Debuff"
+      ],
+      "effects": [
+        "Each rank grants +3 additional Aim when the player deals ranged damage.",
+        "Adds 1 Trapper branch point per rank."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "marksman_nodes_aim_trapper-amplifier_amountModifiers",
+          "eventType": "DamageDealt",
+          "predicate": {
+            "effectOperations": [
+              "Damage"
+            ],
+            "sourceMustBePlayer": true,
+            "rangedOnly": true
+          },
+          "operation": {
+            "type": "gainStyleResource",
+            "resourceId": "aim",
+            "amount": 0,
+            "usesProcCoefficient": true,
+            "amountModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 3,
+                "nodeId": "trapper-amplifier"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "trapper-focus",
+      "branchId": "trapper",
+      "name": "Trapper Focus",
+      "description": "Completes the Trapper focus.",
+      "maxRank": 1,
+      "requiredLevel": 40,
+      "requiredNodeId": "trapper-mastery",
+      "x": 0,
+      "y": 3,
+      "tags": [
+        "Ranged",
+        "Mark",
+        "Debuff"
+      ],
+      "effects": [
+        "Ranged status or debuff effects gain +5% effect amount.",
+        "Ranged status or debuff damage grants +5 additional Aim.",
+        "Aim empowerment becomes +5% stronger.",
+        "Adds 1 Trapper branch point."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "marksman_trapper_nodes_trapper-focus_additivePercentModifiers",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "statusOrDebuffOnly": true,
+            "sourceMustBePlayer": true,
+            "rangedOnly": true
+          },
+          "operation": {
+            "type": "modifyEffectAmount",
+            "additivePercent": 0,
+            "additivePercentModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 0.05,
+                "nodeId": "trapper-focus"
+              }
+            ]
+          }
+        },
+        {
+          "id": "marksman_nodes_aim_trapper-focus_amountModifiers",
+          "eventType": "DamageDealt",
+          "predicate": {
+            "effectOperations": [
+              "Damage"
+            ],
+            "sourceMustBePlayer": true,
+            "rangedOnly": true
+          },
+          "operation": {
+            "type": "gainStyleResource",
+            "resourceId": "aim",
+            "amount": 0,
+            "usesProcCoefficient": true,
+            "amountModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 5,
+                "nodeId": "trapper-focus"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
+

@@ -1,0 +1,1381 @@
+{
+  "id": "fighter",
+  "name": "Fighter",
+  "description": "Builds Momentum through direct damage and converts it into empowered strikes.",
+  "resourceId": "momentum",
+  "resourceMaxAmount": 100,
+  "maxLevel": 50,
+  "recommendedTags": [
+    "Melee",
+    "Physical",
+    "Bleed"
+  ],
+  "recommendedStats": [
+    "Power",
+    "WeaponDamage",
+    "Precision"
+  ],
+  "focuses": [
+    {
+      "id": "duelist",
+      "name": "Duelist",
+      "description": "Reliable precision: active single-target damage effects scale upward at levels 10, 25, and 40.",
+      "unlockLevel": 10,
+      "recommendedTags": [
+        "Melee"
+      ],
+      "recommendedStats": [
+        "Power",
+        "Precision"
+      ],
+      "rules": [
+        {
+          "id": "fighter_duelist_damage_l10",
+          "eventType": "EffectCalculation",
+          "minStyleLevel": 10,
+          "maxStyleLevel": 24,
+          "predicate": {
+            "sourceMustBePlayer": true,
+            "activeAbilityOnly": true,
+            "effectOperations": [
+              "Damage"
+            ],
+            "targetSelectors": [
+              "CurrentTarget"
+            ]
+          },
+          "operation": {
+            "type": "modifyEffectAmount",
+            "additivePercent": 0.08
+          }
+        },
+        {
+          "id": "fighter_duelist_damage_l25",
+          "eventType": "EffectCalculation",
+          "minStyleLevel": 25,
+          "maxStyleLevel": 39,
+          "predicate": {
+            "sourceMustBePlayer": true,
+            "activeAbilityOnly": true,
+            "effectOperations": [
+              "Damage"
+            ],
+            "targetSelectors": [
+              "CurrentTarget"
+            ]
+          },
+          "operation": {
+            "type": "modifyEffectAmount",
+            "additivePercent": 0.12
+          }
+        },
+        {
+          "id": "fighter_duelist_damage_l40",
+          "eventType": "EffectCalculation",
+          "minStyleLevel": 40,
+          "predicate": {
+            "sourceMustBePlayer": true,
+            "activeAbilityOnly": true,
+            "effectOperations": [
+              "Damage"
+            ],
+            "targetSelectors": [
+              "CurrentTarget"
+            ]
+          },
+          "operation": {
+            "type": "modifyEffectAmount",
+            "additivePercent": 0.16
+          }
+        }
+      ]
+    },
+    {
+      "id": "berserker",
+      "name": "Berserker",
+      "description": "Risk pressure: active damage is empowered while wounded, scaling higher at levels 25 and 40.",
+      "unlockLevel": 10,
+      "recommendedTags": [
+        "Melee",
+        "Bleed"
+      ],
+      "recommendedStats": [
+        "Power",
+        "CritDamage"
+      ],
+      "rules": [
+        {
+          "id": "fighter_berserker_damage_l10",
+          "eventType": "EffectCalculation",
+          "minStyleLevel": 10,
+          "maxStyleLevel": 24,
+          "predicate": {
+            "sourceMustBePlayer": true,
+            "activeAbilityOnly": true,
+            "effectOperations": [
+              "Damage"
+            ],
+            "sourceHealthPercentAtOrBelow": 50
+          },
+          "operation": {
+            "type": "modifyEffectAmount",
+            "additivePercent": 0.12
+          }
+        },
+        {
+          "id": "fighter_berserker_damage_l25",
+          "eventType": "EffectCalculation",
+          "minStyleLevel": 25,
+          "maxStyleLevel": 39,
+          "predicate": {
+            "sourceMustBePlayer": true,
+            "activeAbilityOnly": true,
+            "effectOperations": [
+              "Damage"
+            ],
+            "sourceHealthPercentAtOrBelow": 50
+          },
+          "operation": {
+            "type": "modifyEffectAmount",
+            "additivePercent": 0.18
+          }
+        },
+        {
+          "id": "fighter_berserker_damage_l40",
+          "eventType": "EffectCalculation",
+          "minStyleLevel": 40,
+          "predicate": {
+            "sourceMustBePlayer": true,
+            "activeAbilityOnly": true,
+            "effectOperations": [
+              "Damage"
+            ],
+            "sourceHealthPercentAtOrBelow": 60
+          },
+          "operation": {
+            "type": "modifyEffectAmount",
+            "additivePercent": 0.24
+          }
+        }
+      ]
+    },
+    {
+      "id": "vanguard",
+      "name": "Vanguard",
+      "description": "Durable pressure: direct damage reduction and Momentum gained when hit scale at levels 10, 25, and 40.",
+      "unlockLevel": 10,
+      "recommendedTags": [
+        "Tank",
+        "Melee"
+      ],
+      "recommendedStats": [
+        "Power",
+        "Armor"
+      ],
+      "rules": [
+        {
+          "id": "fighter_vanguard_damage_reduction_l10",
+          "eventType": "EffectCalculation",
+          "minStyleLevel": 10,
+          "maxStyleLevel": 24,
+          "predicate": {
+            "targetMustBePlayer": true,
+            "effectOperations": [
+              "Damage"
+            ]
+          },
+          "operation": {
+            "type": "addDamageReduction",
+            "percent": 0.05
+          }
+        },
+        {
+          "id": "fighter_vanguard_damage_reduction_l25",
+          "eventType": "EffectCalculation",
+          "minStyleLevel": 25,
+          "maxStyleLevel": 39,
+          "predicate": {
+            "targetMustBePlayer": true,
+            "effectOperations": [
+              "Damage"
+            ]
+          },
+          "operation": {
+            "type": "addDamageReduction",
+            "percent": 0.08
+          }
+        },
+        {
+          "id": "fighter_vanguard_damage_reduction_l40",
+          "eventType": "EffectCalculation",
+          "minStyleLevel": 40,
+          "predicate": {
+            "targetMustBePlayer": true,
+            "effectOperations": [
+              "Damage"
+            ]
+          },
+          "operation": {
+            "type": "addDamageReduction",
+            "percent": 0.12
+          }
+        },
+        {
+          "id": "fighter_vanguard_momentum_taken_l10",
+          "eventType": "DamageTaken",
+          "minStyleLevel": 10,
+          "maxStyleLevel": 24,
+          "predicate": {
+            "targetMustBePlayer": true,
+            "effectOperations": [
+              "Damage"
+            ]
+          },
+          "operation": {
+            "type": "gainStyleResource",
+            "resourceId": "momentum",
+            "amount": 4
+          }
+        },
+        {
+          "id": "fighter_vanguard_momentum_taken_l25",
+          "eventType": "DamageTaken",
+          "minStyleLevel": 25,
+          "maxStyleLevel": 39,
+          "predicate": {
+            "targetMustBePlayer": true,
+            "effectOperations": [
+              "Damage"
+            ]
+          },
+          "operation": {
+            "type": "gainStyleResource",
+            "resourceId": "momentum",
+            "amount": 6
+          }
+        },
+        {
+          "id": "fighter_vanguard_momentum_taken_l40",
+          "eventType": "DamageTaken",
+          "minStyleLevel": 40,
+          "predicate": {
+            "targetMustBePlayer": true,
+            "effectOperations": [
+              "Damage"
+            ]
+          },
+          "operation": {
+            "type": "gainStyleResource",
+            "resourceId": "momentum",
+            "amount": 8
+          }
+        }
+      ]
+    }
+  ],
+  "rules": [
+    {
+      "id": "fighter_momentum_on_damage_dealt",
+      "eventType": "DamageDealt",
+      "predicate": {
+        "sourceMustBePlayer": true,
+        "effectOperations": [
+          "Damage"
+        ]
+      },
+      "operation": {
+        "type": "gainStyleResource",
+        "resourceId": "momentum",
+        "amount": 8
+      }
+    }
+  ],
+  "resourceOverflowOperations": [
+    {
+      "type": "setPendingEmpowerment",
+      "empowermentId": "fighter_momentum_empowerment",
+      "appliesTo": {
+        "sourceMustBePlayer": true,
+        "activeAbilityOnly": true,
+        "effectOperations": [
+          "Damage"
+        ]
+      },
+      "additivePercent": 0.15,
+      "consumeOnUse": true,
+      "additivePercentModifiers": [
+        {
+          "type": "nodeRank",
+          "nodeId": "duelist-specialization",
+          "value": 0.03
+        },
+        {
+          "type": "nodeRank",
+          "nodeId": "duelist-amplifier",
+          "value": 0.04
+        },
+        {
+          "type": "nodeRank",
+          "nodeId": "duelist-focus",
+          "value": 0.05
+        },
+        {
+          "type": "nodeRank",
+          "nodeId": "berserker-specialization",
+          "value": 0.04
+        },
+        {
+          "type": "nodeRank",
+          "nodeId": "vanguard-amplifier",
+          "value": 0.03
+        }
+      ]
+    }
+  ],
+  "coreMechanic": "Gain Momentum from direct damage. At 100 Momentum, empower the next direct damage active effect.",
+  "skillTreeNodes": [
+    {
+      "id": "duelist-path",
+      "branchId": "duelist",
+      "name": "Duelist Root",
+      "description": "Opens Duelist precision training.",
+      "maxRank": 1,
+      "requiredLevel": 1,
+      "requiredNodeId": null,
+      "x": 0,
+      "y": 0,
+      "tags": [
+        "Melee"
+      ],
+      "effects": [
+        "Active damage against the current target gains +1% effect amount.",
+        "Does not choose Duelist as the effective focus by itself."
+      ],
+      "countsTowardFocus": false,
+      "rules": [
+        {
+          "id": "fighter_duelist_nodes_current_target_duelist-path_additivePercentModifiers",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "effectOperations": [
+              "Damage"
+            ],
+            "sourceMustBePlayer": true,
+            "targetSelectors": [
+              "CurrentTarget"
+            ],
+            "activeAbilityOnly": true
+          },
+          "operation": {
+            "type": "modifyEffectAmount",
+            "additivePercent": 0,
+            "additivePercentModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 0.01,
+                "nodeId": "duelist-path"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "duelist-instinct",
+      "branchId": "duelist",
+      "name": "Duelist Instinct",
+      "description": "Builds extra Momentum from direct damage.",
+      "maxRank": 3,
+      "requiredLevel": 5,
+      "requiredNodeId": "duelist-path",
+      "x": -1,
+      "y": 1,
+      "tags": [
+        "Melee"
+      ],
+      "effects": [
+        "Each rank grants +1 additional Momentum when the player deals direct damage.",
+        "Adds 1 Duelist branch point per rank."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "fighter_nodes_momentum_on_damage_duelist-instinct_amountModifiers",
+          "eventType": "DamageDealt",
+          "predicate": {
+            "sourceMustBePlayer": true,
+            "effectOperations": [
+              "Damage"
+            ]
+          },
+          "operation": {
+            "type": "gainStyleResource",
+            "resourceId": "momentum",
+            "amount": 0,
+            "usesProcCoefficient": true,
+            "amountModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 1,
+                "nodeId": "duelist-instinct"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "duelist-technique",
+      "branchId": "duelist",
+      "name": "Duelist Technique",
+      "description": "Improves current-target active damage.",
+      "maxRank": 3,
+      "requiredLevel": 10,
+      "requiredNodeId": "duelist-path",
+      "x": 0,
+      "y": 1,
+      "tags": [
+        "Melee"
+      ],
+      "effects": [
+        "Each rank gives active damage against the current target +2% effect amount.",
+        "Adds 1 Duelist branch point per rank."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "fighter_duelist_nodes_current_target_duelist-technique_additivePercentModifiers",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "effectOperations": [
+              "Damage"
+            ],
+            "sourceMustBePlayer": true,
+            "targetSelectors": [
+              "CurrentTarget"
+            ],
+            "activeAbilityOnly": true
+          },
+          "operation": {
+            "type": "modifyEffectAmount",
+            "additivePercent": 0,
+            "additivePercentModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 0.02,
+                "nodeId": "duelist-technique"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "duelist-discipline",
+      "branchId": "duelist",
+      "name": "Duelist Discipline",
+      "description": "Improves martial active damage.",
+      "maxRank": 3,
+      "requiredLevel": 5,
+      "requiredNodeId": "duelist-path",
+      "x": 1,
+      "y": 1,
+      "tags": [
+        "Melee"
+      ],
+      "effects": [
+        "Each rank gives active Melee or Physical damage +1% effect amount.",
+        "Adds 1 Duelist branch point per rank."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "fighter_duelist_discipline_duelist-discipline_additivePercentModifiers",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "effectOperations": [
+              "Damage"
+            ],
+            "sourceMustBePlayer": true,
+            "anyTags": [
+              "Melee",
+              "Physical"
+            ],
+            "activeAbilityOnly": true
+          },
+          "operation": {
+            "type": "modifyEffectAmount",
+            "additivePercent": 0,
+            "additivePercentModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 0.01,
+                "nodeId": "duelist-discipline"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "duelist-specialization",
+      "branchId": "duelist",
+      "name": "Duelist Specialization",
+      "description": "Improves Momentum empowerment.",
+      "maxRank": 2,
+      "requiredLevel": 20,
+      "requiredNodeId": "duelist-instinct",
+      "x": -1,
+      "y": 2,
+      "tags": [
+        "Melee"
+      ],
+      "effects": [
+        "Each rank makes Momentum empowerment +3% stronger.",
+        "Adds 1 Duelist branch point per rank."
+      ],
+      "countsTowardFocus": true
+    },
+    {
+      "id": "duelist-mastery",
+      "branchId": "duelist",
+      "name": "Duelist Mastery",
+      "description": "Deepens current-target active damage.",
+      "maxRank": 3,
+      "requiredLevel": 25,
+      "requiredNodeId": "duelist-technique",
+      "x": 0,
+      "y": 2,
+      "tags": [
+        "Melee"
+      ],
+      "effects": [
+        "Each rank gives active damage against the current target +3% effect amount.",
+        "Adds 1 Duelist branch point per rank."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "fighter_duelist_nodes_current_target_duelist-mastery_additivePercentModifiers",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "effectOperations": [
+              "Damage"
+            ],
+            "sourceMustBePlayer": true,
+            "targetSelectors": [
+              "CurrentTarget"
+            ],
+            "activeAbilityOnly": true
+          },
+          "operation": {
+            "type": "modifyEffectAmount",
+            "additivePercent": 0,
+            "additivePercentModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 0.03,
+                "nodeId": "duelist-mastery"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "duelist-amplifier",
+      "branchId": "duelist",
+      "name": "Duelist Amplifier",
+      "description": "Further improves Momentum empowerment.",
+      "maxRank": 2,
+      "requiredLevel": 20,
+      "requiredNodeId": "duelist-discipline",
+      "x": 1,
+      "y": 2,
+      "tags": [
+        "Melee"
+      ],
+      "effects": [
+        "Each rank makes Momentum empowerment +4% stronger.",
+        "Adds 1 Duelist branch point per rank."
+      ],
+      "countsTowardFocus": true
+    },
+    {
+      "id": "duelist-focus",
+      "branchId": "duelist",
+      "name": "Duelist Focus",
+      "description": "Completes the Duelist focus.",
+      "maxRank": 1,
+      "requiredLevel": 40,
+      "requiredNodeId": "duelist-mastery",
+      "x": 0,
+      "y": 3,
+      "tags": [
+        "Melee"
+      ],
+      "effects": [
+        "Active damage against the current target gains +6% effect amount.",
+        "Momentum empowerment becomes +5% stronger.",
+        "Adds 1 Duelist branch point."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "fighter_duelist_nodes_current_target_duelist-focus_additivePercentModifiers",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "effectOperations": [
+              "Damage"
+            ],
+            "sourceMustBePlayer": true,
+            "targetSelectors": [
+              "CurrentTarget"
+            ],
+            "activeAbilityOnly": true
+          },
+          "operation": {
+            "type": "modifyEffectAmount",
+            "additivePercent": 0,
+            "additivePercentModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 0.06,
+                "nodeId": "duelist-focus"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "berserker-path",
+      "branchId": "berserker",
+      "name": "Berserker Root",
+      "description": "Opens Berserker wounded-pressure training.",
+      "maxRank": 1,
+      "requiredLevel": 1,
+      "requiredNodeId": null,
+      "x": 0,
+      "y": 0,
+      "tags": [
+        "Melee",
+        "Bleed"
+      ],
+      "effects": [
+        "While within the Berserker health threshold, active damage gains +2% effect amount.",
+        "Does not choose Berserker as the effective focus by itself."
+      ],
+      "countsTowardFocus": false,
+      "rules": [
+        {
+          "id": "fighter_berserker_nodes_berserker-path_additivePercentModifiers",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "effectOperations": [
+              "Damage"
+            ],
+            "sourceHealthPercentAtOrBelow": 50,
+            "sourceMustBePlayer": true,
+            "sourceHealthPercentAtOrBelowModifiers": [
+              {
+                "type": "nodeRank",
+                "nodeId": "berserker-amplifier",
+                "value": 5
+              },
+              {
+                "type": "nodeRank",
+                "nodeId": "berserker-focus",
+                "value": 10
+              }
+            ],
+            "activeAbilityOnly": true
+          },
+          "operation": {
+            "type": "modifyEffectAmount",
+            "additivePercent": 0,
+            "additivePercentModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 0.02,
+                "nodeId": "berserker-path"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "berserker-instinct",
+      "branchId": "berserker",
+      "name": "Berserker Instinct",
+      "description": "Builds extra Momentum while wounded.",
+      "maxRank": 3,
+      "requiredLevel": 5,
+      "requiredNodeId": "berserker-path",
+      "x": -1,
+      "y": 1,
+      "tags": [
+        "Melee",
+        "Bleed"
+      ],
+      "effects": [
+        "Each rank grants +1 additional Momentum when the player deals direct damage while within the Berserker health threshold.",
+        "Adds 1 Berserker branch point per rank."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "fighter_nodes_momentum_on_damage_berserker-instinct_amountModifiers",
+          "eventType": "DamageDealt",
+          "predicate": {
+            "sourceMustBePlayer": true,
+            "effectOperations": [
+              "Damage"
+            ]
+          },
+          "operation": {
+            "type": "gainStyleResource",
+            "resourceId": "momentum",
+            "amount": 0,
+            "usesProcCoefficient": true,
+            "amountModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 1,
+                "nodeId": "berserker-instinct"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "berserker-technique",
+      "branchId": "berserker",
+      "name": "Berserker Technique",
+      "description": "Improves wounded active damage.",
+      "maxRank": 3,
+      "requiredLevel": 10,
+      "requiredNodeId": "berserker-path",
+      "x": 0,
+      "y": 1,
+      "tags": [
+        "Melee",
+        "Bleed"
+      ],
+      "effects": [
+        "Each rank gives active damage +3% effect amount while within the Berserker health threshold.",
+        "Adds 1 Berserker branch point per rank."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "fighter_berserker_nodes_berserker-technique_additivePercentModifiers",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "effectOperations": [
+              "Damage"
+            ],
+            "sourceHealthPercentAtOrBelow": 50,
+            "sourceMustBePlayer": true,
+            "sourceHealthPercentAtOrBelowModifiers": [
+              {
+                "type": "nodeRank",
+                "nodeId": "berserker-amplifier",
+                "value": 5
+              },
+              {
+                "type": "nodeRank",
+                "nodeId": "berserker-focus",
+                "value": 10
+              }
+            ],
+            "activeAbilityOnly": true
+          },
+          "operation": {
+            "type": "modifyEffectAmount",
+            "additivePercent": 0,
+            "additivePercentModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 0.03,
+                "nodeId": "berserker-technique"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "berserker-discipline",
+      "branchId": "berserker",
+      "name": "Berserker Discipline",
+      "description": "Improves wounded endurance.",
+      "maxRank": 3,
+      "requiredLevel": 5,
+      "requiredNodeId": "berserker-path",
+      "x": 1,
+      "y": 1,
+      "tags": [
+        "Melee",
+        "Bleed"
+      ],
+      "effects": [
+        "Each rank reduces incoming player damage by 1% while within the Berserker health threshold.",
+        "Adds 1 Berserker branch point per rank."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "fighter_berserker_discipline_berserker-discipline_percentModifiers",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "effectOperations": [
+              "Damage"
+            ],
+            "targetMustBePlayer": true,
+            "targetHealthPercentAtOrBelow": 50,
+            "targetHealthPercentAtOrBelowModifiers": [
+              {
+                "type": "nodeRank",
+                "nodeId": "berserker-amplifier",
+                "value": 5
+              },
+              {
+                "type": "nodeRank",
+                "nodeId": "berserker-focus",
+                "value": 10
+              }
+            ]
+          },
+          "operation": {
+            "type": "addDamageReduction",
+            "percent": 0,
+            "percentModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 0.01,
+                "nodeId": "berserker-discipline"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "berserker-specialization",
+      "branchId": "berserker",
+      "name": "Berserker Specialization",
+      "description": "Improves Momentum empowerment.",
+      "maxRank": 2,
+      "requiredLevel": 20,
+      "requiredNodeId": "berserker-instinct",
+      "x": -1,
+      "y": 2,
+      "tags": [
+        "Melee",
+        "Bleed"
+      ],
+      "effects": [
+        "Each rank makes Momentum empowerment +4% stronger.",
+        "Adds 1 Berserker branch point per rank."
+      ],
+      "countsTowardFocus": true
+    },
+    {
+      "id": "berserker-mastery",
+      "branchId": "berserker",
+      "name": "Berserker Mastery",
+      "description": "Deepens wounded active damage.",
+      "maxRank": 3,
+      "requiredLevel": 25,
+      "requiredNodeId": "berserker-technique",
+      "x": 0,
+      "y": 2,
+      "tags": [
+        "Melee",
+        "Bleed"
+      ],
+      "effects": [
+        "Each rank gives active damage +4% effect amount while within the Berserker health threshold.",
+        "Adds 1 Berserker branch point per rank."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "fighter_berserker_nodes_berserker-mastery_additivePercentModifiers",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "effectOperations": [
+              "Damage"
+            ],
+            "sourceHealthPercentAtOrBelow": 50,
+            "sourceMustBePlayer": true,
+            "sourceHealthPercentAtOrBelowModifiers": [
+              {
+                "type": "nodeRank",
+                "nodeId": "berserker-amplifier",
+                "value": 5
+              },
+              {
+                "type": "nodeRank",
+                "nodeId": "berserker-focus",
+                "value": 10
+              }
+            ],
+            "activeAbilityOnly": true
+          },
+          "operation": {
+            "type": "modifyEffectAmount",
+            "additivePercent": 0,
+            "additivePercentModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 0.04,
+                "nodeId": "berserker-mastery"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "berserker-amplifier",
+      "branchId": "berserker",
+      "name": "Berserker Amplifier",
+      "description": "Expands the wounded threshold.",
+      "maxRank": 2,
+      "requiredLevel": 20,
+      "requiredNodeId": "berserker-discipline",
+      "x": 1,
+      "y": 2,
+      "tags": [
+        "Melee",
+        "Bleed"
+      ],
+      "effects": [
+        "Each rank raises the Berserker health threshold by 5 percentage points.",
+        "Adds 1 Berserker branch point per rank."
+      ],
+      "countsTowardFocus": true
+    },
+    {
+      "id": "berserker-focus",
+      "branchId": "berserker",
+      "name": "Berserker Focus",
+      "description": "Completes the Berserker focus.",
+      "maxRank": 1,
+      "requiredLevel": 40,
+      "requiredNodeId": "berserker-mastery",
+      "x": 0,
+      "y": 3,
+      "tags": [
+        "Melee",
+        "Bleed"
+      ],
+      "effects": [
+        "Active damage gains +8% effect amount while within the Berserker health threshold.",
+        "Raises the Berserker health threshold by 10 percentage points.",
+        "Adds 1 Berserker branch point."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "fighter_berserker_nodes_berserker-focus_additivePercentModifiers",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "effectOperations": [
+              "Damage"
+            ],
+            "sourceHealthPercentAtOrBelow": 50,
+            "sourceMustBePlayer": true,
+            "sourceHealthPercentAtOrBelowModifiers": [
+              {
+                "type": "nodeRank",
+                "nodeId": "berserker-amplifier",
+                "value": 5
+              },
+              {
+                "type": "nodeRank",
+                "nodeId": "berserker-focus",
+                "value": 10
+              }
+            ],
+            "activeAbilityOnly": true
+          },
+          "operation": {
+            "type": "modifyEffectAmount",
+            "additivePercent": 0,
+            "additivePercentModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 0.08,
+                "nodeId": "berserker-focus"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "vanguard-path",
+      "branchId": "vanguard",
+      "name": "Vanguard Root",
+      "description": "Opens Vanguard guard-pressure training.",
+      "maxRank": 1,
+      "requiredLevel": 1,
+      "requiredNodeId": null,
+      "x": 0,
+      "y": 0,
+      "tags": [
+        "Tank",
+        "Melee"
+      ],
+      "effects": [
+        "Incoming player damage is reduced by 1%.",
+        "Does not choose Vanguard as the effective focus by itself."
+      ],
+      "countsTowardFocus": false,
+      "rules": [
+        {
+          "id": "fighter_vanguard_nodes_reduction_vanguard-path_percentModifiers",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "effectOperations": [
+              "Damage"
+            ],
+            "targetMustBePlayer": true
+          },
+          "operation": {
+            "type": "addDamageReduction",
+            "percent": 0,
+            "percentModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 0.01,
+                "nodeId": "vanguard-path"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "vanguard-instinct",
+      "branchId": "vanguard",
+      "name": "Vanguard Instinct",
+      "description": "Builds Momentum when struck.",
+      "maxRank": 3,
+      "requiredLevel": 5,
+      "requiredNodeId": "vanguard-path",
+      "x": -1,
+      "y": 1,
+      "tags": [
+        "Tank",
+        "Melee"
+      ],
+      "effects": [
+        "Each rank grants +1 additional Momentum when the player takes damage.",
+        "Adds 1 Vanguard branch point per rank."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "fighter_vanguard_nodes_momentum_taken_vanguard-instinct_amountModifiers",
+          "eventType": "DamageTaken",
+          "predicate": {
+            "effectOperations": [
+              "Damage"
+            ],
+            "targetMustBePlayer": true
+          },
+          "operation": {
+            "type": "gainStyleResource",
+            "resourceId": "momentum",
+            "amount": 0,
+            "usesProcCoefficient": true,
+            "amountModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 1,
+                "nodeId": "vanguard-instinct"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "vanguard-technique",
+      "branchId": "vanguard",
+      "name": "Vanguard Technique",
+      "description": "Improves incoming damage reduction.",
+      "maxRank": 3,
+      "requiredLevel": 10,
+      "requiredNodeId": "vanguard-path",
+      "x": 0,
+      "y": 1,
+      "tags": [
+        "Tank",
+        "Melee"
+      ],
+      "effects": [
+        "Each rank reduces incoming player damage by 2%.",
+        "Adds 1 Vanguard branch point per rank."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "fighter_vanguard_nodes_reduction_vanguard-technique_percentModifiers",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "effectOperations": [
+              "Damage"
+            ],
+            "targetMustBePlayer": true
+          },
+          "operation": {
+            "type": "addDamageReduction",
+            "percent": 0,
+            "percentModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 0.02,
+                "nodeId": "vanguard-technique"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "vanguard-discipline",
+      "branchId": "vanguard",
+      "name": "Vanguard Discipline",
+      "description": "Creates a guarded counter after being hit.",
+      "maxRank": 3,
+      "requiredLevel": 5,
+      "requiredNodeId": "vanguard-path",
+      "x": 1,
+      "y": 1,
+      "tags": [
+        "Tank",
+        "Melee"
+      ],
+      "effects": [
+        "Each rank makes the next active damage effect after taking damage gain +2% effect amount.",
+        "Adds 1 Vanguard branch point per rank."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "fighter_vanguard_guarded_counter_vanguard-discipline_additivePercentModifiers",
+          "eventType": "DamageTaken",
+          "predicate": {
+            "effectOperations": [
+              "Damage"
+            ],
+            "targetMustBePlayer": true
+          },
+          "operation": {
+            "type": "setPendingEmpowerment",
+            "empowermentId": "fighter_vanguard_guarded_counter_vanguard-discipline",
+            "appliesTo": {
+              "effectOperations": [
+                "Damage"
+              ],
+              "sourceMustBePlayer": true,
+              "activeAbilityOnly": true
+            },
+            "additivePercent": 0,
+            "consumeOnUse": true,
+            "additivePercentModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 0.02,
+                "nodeId": "vanguard-discipline"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "vanguard-specialization",
+      "branchId": "vanguard",
+      "name": "Vanguard Specialization",
+      "description": "Improves Momentum gained when struck.",
+      "maxRank": 2,
+      "requiredLevel": 20,
+      "requiredNodeId": "vanguard-instinct",
+      "x": -1,
+      "y": 2,
+      "tags": [
+        "Tank",
+        "Melee"
+      ],
+      "effects": [
+        "Each rank grants +2 additional Momentum when the player takes damage.",
+        "Adds 1 Vanguard branch point per rank."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "fighter_vanguard_nodes_momentum_taken_vanguard-specialization_amountModifiers",
+          "eventType": "DamageTaken",
+          "predicate": {
+            "effectOperations": [
+              "Damage"
+            ],
+            "targetMustBePlayer": true
+          },
+          "operation": {
+            "type": "gainStyleResource",
+            "resourceId": "momentum",
+            "amount": 0,
+            "usesProcCoefficient": true,
+            "amountModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 2,
+                "nodeId": "vanguard-specialization"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "vanguard-mastery",
+      "branchId": "vanguard",
+      "name": "Vanguard Mastery",
+      "description": "Deepens incoming damage reduction.",
+      "maxRank": 3,
+      "requiredLevel": 25,
+      "requiredNodeId": "vanguard-technique",
+      "x": 0,
+      "y": 2,
+      "tags": [
+        "Tank",
+        "Melee"
+      ],
+      "effects": [
+        "Each rank reduces incoming player damage by 3%.",
+        "Adds 1 Vanguard branch point per rank."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "fighter_vanguard_nodes_reduction_vanguard-mastery_percentModifiers",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "effectOperations": [
+              "Damage"
+            ],
+            "targetMustBePlayer": true
+          },
+          "operation": {
+            "type": "addDamageReduction",
+            "percent": 0,
+            "percentModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 0.03,
+                "nodeId": "vanguard-mastery"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "vanguard-amplifier",
+      "branchId": "vanguard",
+      "name": "Vanguard Amplifier",
+      "description": "Improves Momentum empowerment.",
+      "maxRank": 2,
+      "requiredLevel": 20,
+      "requiredNodeId": "vanguard-discipline",
+      "x": 1,
+      "y": 2,
+      "tags": [
+        "Tank",
+        "Melee"
+      ],
+      "effects": [
+        "Each rank makes Momentum empowerment +3% stronger.",
+        "Adds 1 Vanguard branch point per rank."
+      ],
+      "countsTowardFocus": true
+    },
+    {
+      "id": "vanguard-focus",
+      "branchId": "vanguard",
+      "name": "Vanguard Focus",
+      "description": "Completes the Vanguard focus.",
+      "maxRank": 1,
+      "requiredLevel": 40,
+      "requiredNodeId": "vanguard-mastery",
+      "x": 0,
+      "y": 3,
+      "tags": [
+        "Tank",
+        "Melee"
+      ],
+      "effects": [
+        "Incoming player damage is reduced by 5%.",
+        "Taking damage grants +5 additional Momentum.",
+        "Adds 1 Vanguard branch point."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "fighter_vanguard_nodes_reduction_vanguard-focus_percentModifiers",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "effectOperations": [
+              "Damage"
+            ],
+            "targetMustBePlayer": true
+          },
+          "operation": {
+            "type": "addDamageReduction",
+            "percent": 0,
+            "percentModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 0.05,
+                "nodeId": "vanguard-focus"
+              }
+            ]
+          }
+        },
+        {
+          "id": "fighter_vanguard_nodes_momentum_taken_vanguard-focus_amountModifiers",
+          "eventType": "DamageTaken",
+          "predicate": {
+            "effectOperations": [
+              "Damage"
+            ],
+            "targetMustBePlayer": true
+          },
+          "operation": {
+            "type": "gainStyleResource",
+            "resourceId": "momentum",
+            "amount": 0,
+            "usesProcCoefficient": true,
+            "amountModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 5,
+                "nodeId": "vanguard-focus"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
+

@@ -1,0 +1,1341 @@
+{
+  "id": "support",
+  "name": "Support",
+  "description": "Builds Resolve through healing, barriers, and ally protection effects.",
+  "resourceId": "resolve",
+  "resourceMaxAmount": 100,
+  "maxLevel": 50,
+  "recommendedTags": [
+    "Healing",
+    "Barrier",
+    "Holy",
+    "Support"
+  ],
+  "recommendedStats": [
+    "HealingPowerPercent",
+    "Spirit",
+    "Cooldown"
+  ],
+  "focuses": [
+    {
+      "id": "healer",
+      "name": "Healer",
+      "description": "Restoration focus: healing effects scale at levels 10, 25, and 40.",
+      "unlockLevel": 10,
+      "recommendedTags": [
+        "Healing"
+      ],
+      "recommendedStats": [
+        "HealingPowerPercent",
+        "Spirit"
+      ],
+      "rules": [
+        {
+          "id": "support_healer_heal",
+          "eventType": "EffectCalculation",
+          "minStyleLevel": 10,
+          "predicate": {
+            "sourceMustBePlayer": true,
+            "effectOperations": [
+              "Heal"
+            ]
+          },
+          "operation": {
+            "type": "modifyEffectAmount",
+            "additivePercent": 0.1,
+            "additivePercentModifiers": [
+              {
+                "type": "focusLevel",
+                "focusId": "healer",
+                "minStyleLevel": 25,
+                "value": 0.05
+              },
+              {
+                "type": "focusLevel",
+                "focusId": "healer",
+                "minStyleLevel": 40,
+                "value": 0.05
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "warden",
+      "name": "Warden",
+      "description": "Protection focus: barrier effects and ally protection scale at levels 10, 25, and 40.",
+      "unlockLevel": 10,
+      "recommendedTags": [
+        "Barrier",
+        "Tank"
+      ],
+      "recommendedStats": [
+        "MaxHealth",
+        "HealingPowerPercent"
+      ],
+      "rules": [
+        {
+          "id": "support_warden_barrier",
+          "eventType": "EffectCalculation",
+          "minStyleLevel": 10,
+          "predicate": {
+            "sourceMustBePlayer": true,
+            "effectOperations": [
+              "GrantBarrier"
+            ]
+          },
+          "operation": {
+            "type": "modifyEffectAmount",
+            "additivePercent": 0.1,
+            "additivePercentModifiers": [
+              {
+                "type": "focusLevel",
+                "focusId": "warden",
+                "minStyleLevel": 25,
+                "value": 0.05
+              },
+              {
+                "type": "focusLevel",
+                "focusId": "warden",
+                "minStyleLevel": 40,
+                "value": 0.05
+              }
+            ]
+          }
+        },
+        {
+          "id": "support_warden_reduction",
+          "eventType": "EffectCalculation",
+          "minStyleLevel": 10,
+          "predicate": {
+            "targetMustBePlayer": true,
+            "effectOperations": [
+              "Damage"
+            ]
+          },
+          "operation": {
+            "type": "addDamageReduction",
+            "percent": 0.03,
+            "percentModifiers": [
+              {
+                "type": "focusLevel",
+                "focusId": "warden",
+                "minStyleLevel": 25,
+                "value": 0.02
+              },
+              {
+                "type": "focusLevel",
+                "focusId": "warden",
+                "minStyleLevel": 40,
+                "value": 0.03
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "chaplain",
+      "name": "Chaplain",
+      "description": "Holy hybrid support: Holy healing, barriers, and damage scale at milestones.",
+      "unlockLevel": 10,
+      "recommendedTags": [
+        "Holy",
+        "Healing",
+        "Barrier"
+      ],
+      "recommendedStats": [
+        "Spirit",
+        "HealingPowerPercent"
+      ],
+      "rules": [
+        {
+          "id": "support_chaplain_holy",
+          "eventType": "EffectCalculation",
+          "minStyleLevel": 10,
+          "predicate": {
+            "sourceMustBePlayer": true,
+            "anyTags": [
+              "Holy"
+            ],
+            "amplifiableEffectOnly": true
+          },
+          "operation": {
+            "type": "modifyEffectAmount",
+            "additivePercent": 0.08,
+            "additivePercentModifiers": [
+              {
+                "type": "focusLevel",
+                "focusId": "chaplain",
+                "minStyleLevel": 25,
+                "value": 0.04
+              },
+              {
+                "type": "focusLevel",
+                "focusId": "chaplain",
+                "minStyleLevel": 40,
+                "value": 0.04
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "rules": [
+    {
+      "id": "support_heal_barrier_bonus",
+      "eventType": "EffectCalculation",
+      "predicate": {
+        "sourceMustBePlayer": true,
+        "effectOperations": [
+          "Heal",
+          "GrantBarrier"
+        ]
+      },
+      "operation": {
+        "type": "modifyEffectAmount",
+        "additivePercent": 0.05
+      }
+    },
+    {
+      "id": "support_resolve_gain",
+      "eventType": "EffectCalculation",
+      "predicate": {
+        "healOrBarrierOnly": true,
+        "sourceMustBePlayer": true,
+        "activeAbilityOnly": true
+      },
+      "operation": {
+        "type": "gainStyleResource",
+        "resourceId": "resolve",
+        "amount": 12,
+        "usesProcCoefficient": true,
+        "amountModifiers": []
+      }
+    }
+  ],
+  "resourceOverflowOperations": [
+    {
+      "type": "setPendingEmpowerment",
+      "empowermentId": "support_resolve_empowerment",
+      "appliesTo": {
+        "sourceMustBePlayer": true,
+        "effectOperations": [
+          "Heal",
+          "GrantBarrier"
+        ]
+      },
+      "additivePercent": 0.2,
+      "consumeOnUse": true,
+      "additivePercentModifiers": [
+        {
+          "type": "focusLevel",
+          "focusId": "healer",
+          "minStyleLevel": 40,
+          "value": 0.08
+        },
+        {
+          "type": "nodeRank",
+          "nodeId": "healer-specialization",
+          "value": 0.03
+        },
+        {
+          "type": "nodeRank",
+          "nodeId": "healer-focus",
+          "value": 0.05
+        },
+        {
+          "type": "nodeRank",
+          "nodeId": "warden-specialization",
+          "value": 0.03
+        },
+        {
+          "type": "nodeRank",
+          "nodeId": "warden-focus",
+          "value": 0.05
+        },
+        {
+          "type": "nodeRank",
+          "nodeId": "chaplain-specialization",
+          "value": 0.03
+        },
+        {
+          "type": "nodeRank",
+          "nodeId": "chaplain-focus",
+          "value": 0.05
+        }
+      ]
+    }
+  ],
+  "coreMechanic": "Gain Resolve from healing and barrier effects. At 100 Resolve, empower the next heal or barrier.",
+  "skillTreeNodes": [
+    {
+      "id": "healer-path",
+      "branchId": "healer",
+      "name": "Healer Root",
+      "description": "Opens Healer restorative training.",
+      "maxRank": 1,
+      "requiredLevel": 1,
+      "requiredNodeId": null,
+      "x": 0,
+      "y": 0,
+      "tags": [
+        "Healing"
+      ],
+      "effects": [
+        "Player heal effects gain +1% effect amount.",
+        "Does not choose Healer as the effective focus by itself."
+      ],
+      "countsTowardFocus": false,
+      "rules": [
+        {
+          "id": "support_healer_nodes_healer-path_additivePercentModifiers",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "sourceMustBePlayer": true,
+            "effectOperations": [
+              "Heal"
+            ]
+          },
+          "operation": {
+            "type": "modifyEffectAmount",
+            "additivePercent": 0,
+            "additivePercentModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 0.01,
+                "nodeId": "healer-path"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "healer-instinct",
+      "branchId": "healer",
+      "name": "Healer Instinct",
+      "description": "Builds extra Resolve from healing.",
+      "maxRank": 3,
+      "requiredLevel": 5,
+      "requiredNodeId": "healer-path",
+      "x": -1,
+      "y": 1,
+      "tags": [
+        "Healing"
+      ],
+      "effects": [
+        "Each rank grants +2 additional Resolve when the player uses an active heal effect.",
+        "Adds 1 Healer branch point per rank."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "support_resolve_gain_healer-instinct_amountModifiers",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "healOrBarrierOnly": true,
+            "sourceMustBePlayer": true,
+            "activeAbilityOnly": true
+          },
+          "operation": {
+            "type": "gainStyleResource",
+            "resourceId": "resolve",
+            "amount": 0,
+            "usesProcCoefficient": true,
+            "amountModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 2,
+                "nodeId": "healer-instinct"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "healer-technique",
+      "branchId": "healer",
+      "name": "Healer Technique",
+      "description": "Improves direct healing.",
+      "maxRank": 3,
+      "requiredLevel": 10,
+      "requiredNodeId": "healer-path",
+      "x": 0,
+      "y": 1,
+      "tags": [
+        "Healing"
+      ],
+      "effects": [
+        "Each rank gives player heal effects +2% effect amount.",
+        "Adds 1 Healer branch point per rank."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "support_healer_nodes_healer-technique_additivePercentModifiers",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "sourceMustBePlayer": true,
+            "effectOperations": [
+              "Heal"
+            ]
+          },
+          "operation": {
+            "type": "modifyEffectAmount",
+            "additivePercent": 0,
+            "additivePercentModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 0.02,
+                "nodeId": "healer-technique"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "healer-discipline",
+      "branchId": "healer",
+      "name": "Healer Discipline",
+      "description": "Improves healing consistency.",
+      "maxRank": 3,
+      "requiredLevel": 5,
+      "requiredNodeId": "healer-path",
+      "x": 1,
+      "y": 1,
+      "tags": [
+        "Healing"
+      ],
+      "effects": [
+        "Each rank gives player heal effects +1% effect amount.",
+        "Adds 1 Healer branch point per rank."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "support_healer_nodes_healer-discipline_additivePercentModifiers",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "sourceMustBePlayer": true,
+            "effectOperations": [
+              "Heal"
+            ]
+          },
+          "operation": {
+            "type": "modifyEffectAmount",
+            "additivePercent": 0,
+            "additivePercentModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 0.01,
+                "nodeId": "healer-discipline"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "healer-specialization",
+      "branchId": "healer",
+      "name": "Healer Specialization",
+      "description": "Improves Resolve empowerment.",
+      "maxRank": 2,
+      "requiredLevel": 20,
+      "requiredNodeId": "healer-instinct",
+      "x": -1,
+      "y": 2,
+      "tags": [
+        "Healing"
+      ],
+      "effects": [
+        "Each rank makes Resolve empowerment +3% stronger.",
+        "Adds 1 Healer branch point per rank."
+      ],
+      "countsTowardFocus": true
+    },
+    {
+      "id": "healer-mastery",
+      "branchId": "healer",
+      "name": "Healer Mastery",
+      "description": "Deepens direct healing.",
+      "maxRank": 3,
+      "requiredLevel": 25,
+      "requiredNodeId": "healer-technique",
+      "x": 0,
+      "y": 2,
+      "tags": [
+        "Healing"
+      ],
+      "effects": [
+        "Each rank gives player heal effects +3% effect amount.",
+        "Adds 1 Healer branch point per rank."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "support_healer_nodes_healer-mastery_additivePercentModifiers",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "sourceMustBePlayer": true,
+            "effectOperations": [
+              "Heal"
+            ]
+          },
+          "operation": {
+            "type": "modifyEffectAmount",
+            "additivePercent": 0,
+            "additivePercentModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 0.03,
+                "nodeId": "healer-mastery"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "healer-amplifier",
+      "branchId": "healer",
+      "name": "Healer Amplifier",
+      "description": "Improves Resolve gain from healing.",
+      "maxRank": 2,
+      "requiredLevel": 20,
+      "requiredNodeId": "healer-discipline",
+      "x": 1,
+      "y": 2,
+      "tags": [
+        "Healing"
+      ],
+      "effects": [
+        "Each rank grants +3 additional Resolve when the player uses an active heal effect.",
+        "Adds 1 Healer branch point per rank."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "support_resolve_gain_healer-amplifier_amountModifiers",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "healOrBarrierOnly": true,
+            "sourceMustBePlayer": true,
+            "activeAbilityOnly": true
+          },
+          "operation": {
+            "type": "gainStyleResource",
+            "resourceId": "resolve",
+            "amount": 0,
+            "usesProcCoefficient": true,
+            "amountModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 3,
+                "nodeId": "healer-amplifier"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "healer-focus",
+      "branchId": "healer",
+      "name": "Healer Focus",
+      "description": "Completes the Healer focus.",
+      "maxRank": 1,
+      "requiredLevel": 40,
+      "requiredNodeId": "healer-mastery",
+      "x": 0,
+      "y": 3,
+      "tags": [
+        "Healing"
+      ],
+      "effects": [
+        "Player heal effects gain +5% effect amount.",
+        "Active heal effects grant +5 additional Resolve.",
+        "Resolve empowerment becomes +5% stronger.",
+        "Adds 1 Healer branch point."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "support_healer_nodes_healer-focus_additivePercentModifiers",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "sourceMustBePlayer": true,
+            "effectOperations": [
+              "Heal"
+            ]
+          },
+          "operation": {
+            "type": "modifyEffectAmount",
+            "additivePercent": 0,
+            "additivePercentModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 0.05,
+                "nodeId": "healer-focus"
+              }
+            ]
+          }
+        },
+        {
+          "id": "support_resolve_gain_healer-focus_amountModifiers",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "healOrBarrierOnly": true,
+            "sourceMustBePlayer": true,
+            "activeAbilityOnly": true
+          },
+          "operation": {
+            "type": "gainStyleResource",
+            "resourceId": "resolve",
+            "amount": 0,
+            "usesProcCoefficient": true,
+            "amountModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 5,
+                "nodeId": "healer-focus"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "warden-path",
+      "branchId": "warden",
+      "name": "Warden Root",
+      "description": "Opens Warden barrier training.",
+      "maxRank": 1,
+      "requiredLevel": 1,
+      "requiredNodeId": null,
+      "x": 0,
+      "y": 0,
+      "tags": [
+        "Barrier",
+        "Tank"
+      ],
+      "effects": [
+        "Player barrier effects gain +1% effect amount.",
+        "Does not choose Warden as the effective focus by itself."
+      ],
+      "countsTowardFocus": false,
+      "rules": [
+        {
+          "id": "support_warden_barrier_nodes_warden-path_additivePercentModifiers",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "sourceMustBePlayer": true,
+            "effectOperations": [
+              "GrantBarrier"
+            ]
+          },
+          "operation": {
+            "type": "modifyEffectAmount",
+            "additivePercent": 0,
+            "additivePercentModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 0.01,
+                "nodeId": "warden-path"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "warden-instinct",
+      "branchId": "warden",
+      "name": "Warden Instinct",
+      "description": "Builds extra Resolve from barriers.",
+      "maxRank": 3,
+      "requiredLevel": 5,
+      "requiredNodeId": "warden-path",
+      "x": -1,
+      "y": 1,
+      "tags": [
+        "Barrier",
+        "Tank"
+      ],
+      "effects": [
+        "Each rank grants +2 additional Resolve when the player uses an active barrier effect.",
+        "Adds 1 Warden branch point per rank."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "support_resolve_gain_warden-instinct_amountModifiers",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "healOrBarrierOnly": true,
+            "sourceMustBePlayer": true,
+            "activeAbilityOnly": true
+          },
+          "operation": {
+            "type": "gainStyleResource",
+            "resourceId": "resolve",
+            "amount": 0,
+            "usesProcCoefficient": true,
+            "amountModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 2,
+                "nodeId": "warden-instinct"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "warden-technique",
+      "branchId": "warden",
+      "name": "Warden Technique",
+      "description": "Improves barrier strength.",
+      "maxRank": 3,
+      "requiredLevel": 10,
+      "requiredNodeId": "warden-path",
+      "x": 0,
+      "y": 1,
+      "tags": [
+        "Barrier",
+        "Tank"
+      ],
+      "effects": [
+        "Each rank gives player barrier effects +2% effect amount.",
+        "Adds 1 Warden branch point per rank."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "support_warden_barrier_nodes_warden-technique_additivePercentModifiers",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "sourceMustBePlayer": true,
+            "effectOperations": [
+              "GrantBarrier"
+            ]
+          },
+          "operation": {
+            "type": "modifyEffectAmount",
+            "additivePercent": 0,
+            "additivePercentModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 0.02,
+                "nodeId": "warden-technique"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "warden-discipline",
+      "branchId": "warden",
+      "name": "Warden Discipline",
+      "description": "Improves defensive coverage.",
+      "maxRank": 3,
+      "requiredLevel": 5,
+      "requiredNodeId": "warden-path",
+      "x": 1,
+      "y": 1,
+      "tags": [
+        "Barrier",
+        "Tank"
+      ],
+      "effects": [
+        "Each rank reduces incoming player damage by 1%.",
+        "Adds 1 Warden branch point per rank."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "support_warden_reduction_nodes_warden-discipline_percentModifiers",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "effectOperations": [
+              "Damage"
+            ],
+            "targetMustBePlayer": true
+          },
+          "operation": {
+            "type": "addDamageReduction",
+            "percent": 0,
+            "percentModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 0.01,
+                "nodeId": "warden-discipline"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "warden-specialization",
+      "branchId": "warden",
+      "name": "Warden Specialization",
+      "description": "Improves Resolve empowerment.",
+      "maxRank": 2,
+      "requiredLevel": 20,
+      "requiredNodeId": "warden-instinct",
+      "x": -1,
+      "y": 2,
+      "tags": [
+        "Barrier",
+        "Tank"
+      ],
+      "effects": [
+        "Each rank makes Resolve empowerment +3% stronger.",
+        "Adds 1 Warden branch point per rank."
+      ],
+      "countsTowardFocus": true
+    },
+    {
+      "id": "warden-mastery",
+      "branchId": "warden",
+      "name": "Warden Mastery",
+      "description": "Deepens barrier strength.",
+      "maxRank": 3,
+      "requiredLevel": 25,
+      "requiredNodeId": "warden-technique",
+      "x": 0,
+      "y": 2,
+      "tags": [
+        "Barrier",
+        "Tank"
+      ],
+      "effects": [
+        "Each rank gives player barrier effects +3% effect amount.",
+        "Adds 1 Warden branch point per rank."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "support_warden_barrier_nodes_warden-mastery_additivePercentModifiers",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "sourceMustBePlayer": true,
+            "effectOperations": [
+              "GrantBarrier"
+            ]
+          },
+          "operation": {
+            "type": "modifyEffectAmount",
+            "additivePercent": 0,
+            "additivePercentModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 0.03,
+                "nodeId": "warden-mastery"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "warden-amplifier",
+      "branchId": "warden",
+      "name": "Warden Amplifier",
+      "description": "Improves Resolve gain from barriers.",
+      "maxRank": 2,
+      "requiredLevel": 20,
+      "requiredNodeId": "warden-discipline",
+      "x": 1,
+      "y": 2,
+      "tags": [
+        "Barrier",
+        "Tank"
+      ],
+      "effects": [
+        "Each rank grants +3 additional Resolve when the player uses an active barrier effect.",
+        "Adds 1 Warden branch point per rank."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "support_resolve_gain_warden-amplifier_amountModifiers",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "healOrBarrierOnly": true,
+            "sourceMustBePlayer": true,
+            "activeAbilityOnly": true
+          },
+          "operation": {
+            "type": "gainStyleResource",
+            "resourceId": "resolve",
+            "amount": 0,
+            "usesProcCoefficient": true,
+            "amountModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 3,
+                "nodeId": "warden-amplifier"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "warden-focus",
+      "branchId": "warden",
+      "name": "Warden Focus",
+      "description": "Completes the Warden focus.",
+      "maxRank": 1,
+      "requiredLevel": 40,
+      "requiredNodeId": "warden-mastery",
+      "x": 0,
+      "y": 3,
+      "tags": [
+        "Barrier",
+        "Tank"
+      ],
+      "effects": [
+        "Player barrier effects gain +5% effect amount.",
+        "Incoming player damage is reduced by 5%.",
+        "Active barrier effects grant +5 additional Resolve.",
+        "Resolve empowerment becomes +5% stronger.",
+        "Adds 1 Warden branch point."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "support_warden_barrier_nodes_warden-focus_additivePercentModifiers",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "sourceMustBePlayer": true,
+            "effectOperations": [
+              "GrantBarrier"
+            ]
+          },
+          "operation": {
+            "type": "modifyEffectAmount",
+            "additivePercent": 0,
+            "additivePercentModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 0.05,
+                "nodeId": "warden-focus"
+              }
+            ]
+          }
+        },
+        {
+          "id": "support_warden_reduction_nodes_warden-focus_percentModifiers",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "effectOperations": [
+              "Damage"
+            ],
+            "targetMustBePlayer": true
+          },
+          "operation": {
+            "type": "addDamageReduction",
+            "percent": 0,
+            "percentModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 0.05,
+                "nodeId": "warden-focus"
+              }
+            ]
+          }
+        },
+        {
+          "id": "support_resolve_gain_warden-focus_amountModifiers",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "healOrBarrierOnly": true,
+            "sourceMustBePlayer": true,
+            "activeAbilityOnly": true
+          },
+          "operation": {
+            "type": "gainStyleResource",
+            "resourceId": "resolve",
+            "amount": 0,
+            "usesProcCoefficient": true,
+            "amountModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 5,
+                "nodeId": "warden-focus"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "chaplain-path",
+      "branchId": "chaplain",
+      "name": "Chaplain Root",
+      "description": "Opens Chaplain holy support.",
+      "maxRank": 1,
+      "requiredLevel": 1,
+      "requiredNodeId": null,
+      "x": 0,
+      "y": 0,
+      "tags": [
+        "Holy",
+        "Healing",
+        "Barrier"
+      ],
+      "effects": [
+        "Player Holy effects that can be amplified gain +1% effect amount.",
+        "Does not choose Chaplain as the effective focus by itself."
+      ],
+      "countsTowardFocus": false,
+      "rules": [
+        {
+          "id": "support_chaplain_nodes_chaplain-path_additivePercentModifiers",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "amplifiableEffectOnly": true,
+            "sourceMustBePlayer": true,
+            "anyTags": [
+              "Holy"
+            ]
+          },
+          "operation": {
+            "type": "modifyEffectAmount",
+            "additivePercent": 0,
+            "additivePercentModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 0.01,
+                "nodeId": "chaplain-path"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "chaplain-instinct",
+      "branchId": "chaplain",
+      "name": "Chaplain Instinct",
+      "description": "Builds extra Resolve from Holy support.",
+      "maxRank": 3,
+      "requiredLevel": 5,
+      "requiredNodeId": "chaplain-path",
+      "x": -1,
+      "y": 1,
+      "tags": [
+        "Holy",
+        "Healing",
+        "Barrier"
+      ],
+      "effects": [
+        "Each rank grants +2 additional Resolve when an active heal or barrier effect has the Holy tag.",
+        "Adds 1 Chaplain branch point per rank."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "support_resolve_gain_chaplain-instinct_amountModifiers",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "healOrBarrierOnly": true,
+            "sourceMustBePlayer": true,
+            "activeAbilityOnly": true
+          },
+          "operation": {
+            "type": "gainStyleResource",
+            "resourceId": "resolve",
+            "amount": 0,
+            "usesProcCoefficient": true,
+            "amountModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 2,
+                "nodeId": "chaplain-instinct"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "chaplain-technique",
+      "branchId": "chaplain",
+      "name": "Chaplain Technique",
+      "description": "Improves Holy support effects.",
+      "maxRank": 3,
+      "requiredLevel": 10,
+      "requiredNodeId": "chaplain-path",
+      "x": 0,
+      "y": 1,
+      "tags": [
+        "Holy",
+        "Healing",
+        "Barrier"
+      ],
+      "effects": [
+        "Each rank gives player Holy effects that can be amplified +2% effect amount.",
+        "Adds 1 Chaplain branch point per rank."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "support_chaplain_nodes_chaplain-technique_additivePercentModifiers",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "amplifiableEffectOnly": true,
+            "sourceMustBePlayer": true,
+            "anyTags": [
+              "Holy"
+            ]
+          },
+          "operation": {
+            "type": "modifyEffectAmount",
+            "additivePercent": 0,
+            "additivePercentModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 0.02,
+                "nodeId": "chaplain-technique"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "chaplain-discipline",
+      "branchId": "chaplain",
+      "name": "Chaplain Discipline",
+      "description": "Improves broad support output.",
+      "maxRank": 3,
+      "requiredLevel": 5,
+      "requiredNodeId": "chaplain-path",
+      "x": 1,
+      "y": 1,
+      "tags": [
+        "Holy",
+        "Healing",
+        "Barrier"
+      ],
+      "effects": [
+        "Each rank gives player heal and barrier effects +1% effect amount.",
+        "Adds 1 Chaplain branch point per rank."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "support_chaplain_discipline_chaplain-discipline_additivePercentModifiers",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "sourceMustBePlayer": true,
+            "healOrBarrierOnly": true
+          },
+          "operation": {
+            "type": "modifyEffectAmount",
+            "additivePercent": 0,
+            "additivePercentModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 0.01,
+                "nodeId": "chaplain-discipline"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "chaplain-specialization",
+      "branchId": "chaplain",
+      "name": "Chaplain Specialization",
+      "description": "Improves Resolve empowerment.",
+      "maxRank": 2,
+      "requiredLevel": 20,
+      "requiredNodeId": "chaplain-instinct",
+      "x": -1,
+      "y": 2,
+      "tags": [
+        "Holy",
+        "Healing",
+        "Barrier"
+      ],
+      "effects": [
+        "Each rank makes Resolve empowerment +3% stronger.",
+        "Adds 1 Chaplain branch point per rank."
+      ],
+      "countsTowardFocus": true
+    },
+    {
+      "id": "chaplain-mastery",
+      "branchId": "chaplain",
+      "name": "Chaplain Mastery",
+      "description": "Deepens Holy support effects.",
+      "maxRank": 3,
+      "requiredLevel": 25,
+      "requiredNodeId": "chaplain-technique",
+      "x": 0,
+      "y": 2,
+      "tags": [
+        "Holy",
+        "Healing",
+        "Barrier"
+      ],
+      "effects": [
+        "Each rank gives player Holy effects that can be amplified +3% effect amount.",
+        "Adds 1 Chaplain branch point per rank."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "support_chaplain_nodes_chaplain-mastery_additivePercentModifiers",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "amplifiableEffectOnly": true,
+            "sourceMustBePlayer": true,
+            "anyTags": [
+              "Holy"
+            ]
+          },
+          "operation": {
+            "type": "modifyEffectAmount",
+            "additivePercent": 0,
+            "additivePercentModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 0.03,
+                "nodeId": "chaplain-mastery"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "chaplain-amplifier",
+      "branchId": "chaplain",
+      "name": "Chaplain Amplifier",
+      "description": "Improves Holy Resolve gain.",
+      "maxRank": 2,
+      "requiredLevel": 20,
+      "requiredNodeId": "chaplain-discipline",
+      "x": 1,
+      "y": 2,
+      "tags": [
+        "Holy",
+        "Healing",
+        "Barrier"
+      ],
+      "effects": [
+        "Each rank grants +3 additional Resolve when an active heal or barrier effect has the Holy tag.",
+        "Adds 1 Chaplain branch point per rank."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "support_resolve_gain_chaplain-amplifier_amountModifiers",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "healOrBarrierOnly": true,
+            "sourceMustBePlayer": true,
+            "activeAbilityOnly": true
+          },
+          "operation": {
+            "type": "gainStyleResource",
+            "resourceId": "resolve",
+            "amount": 0,
+            "usesProcCoefficient": true,
+            "amountModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 3,
+                "nodeId": "chaplain-amplifier"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "chaplain-focus",
+      "branchId": "chaplain",
+      "name": "Chaplain Focus",
+      "description": "Completes the Chaplain focus.",
+      "maxRank": 1,
+      "requiredLevel": 40,
+      "requiredNodeId": "chaplain-mastery",
+      "x": 0,
+      "y": 3,
+      "tags": [
+        "Holy",
+        "Healing",
+        "Barrier"
+      ],
+      "effects": [
+        "Player Holy effects that can be amplified gain +5% effect amount.",
+        "Active Holy heal or barrier effects grant +5 additional Resolve.",
+        "Resolve empowerment becomes +5% stronger.",
+        "Adds 1 Chaplain branch point."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "support_chaplain_nodes_chaplain-focus_additivePercentModifiers",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "amplifiableEffectOnly": true,
+            "sourceMustBePlayer": true,
+            "anyTags": [
+              "Holy"
+            ]
+          },
+          "operation": {
+            "type": "modifyEffectAmount",
+            "additivePercent": 0,
+            "additivePercentModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 0.05,
+                "nodeId": "chaplain-focus"
+              }
+            ]
+          }
+        },
+        {
+          "id": "support_resolve_gain_chaplain-focus_amountModifiers",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "healOrBarrierOnly": true,
+            "sourceMustBePlayer": true,
+            "activeAbilityOnly": true
+          },
+          "operation": {
+            "type": "gainStyleResource",
+            "resourceId": "resolve",
+            "amount": 0,
+            "usesProcCoefficient": true,
+            "amountModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 5,
+                "nodeId": "chaplain-focus"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
+

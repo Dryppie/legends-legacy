@@ -1,0 +1,1335 @@
+{
+  "id": "swift",
+  "name": "Swift",
+  "description": "Builds Flow through quick active Essence use and rewards evasive, mobile pressure.",
+  "resourceId": "flow",
+  "resourceMaxAmount": 100,
+  "maxLevel": 50,
+  "recommendedTags": [
+    "Melee",
+    "Ranged",
+    "Dodge",
+    "Speed"
+  ],
+  "recommendedStats": [
+    "Precision",
+    "DodgeChance",
+    "Cooldown"
+  ],
+  "focuses": [
+    {
+      "id": "flurry",
+      "name": "Flurry",
+      "description": "Rapid pressure: active Melee and Ranged damage scale at levels 10, 25, and 40.",
+      "unlockLevel": 10,
+      "recommendedTags": [
+        "Melee",
+        "Ranged"
+      ],
+      "recommendedStats": [
+        "Precision",
+        "CritChance"
+      ],
+      "rules": [
+        {
+          "id": "swift_flurry_damage_l10",
+          "eventType": "EffectCalculation",
+          "minStyleLevel": 10,
+          "maxStyleLevel": 24,
+          "predicate": {
+            "sourceMustBePlayer": true,
+            "activeAbilityOnly": true,
+            "effectOperations": [
+              "Damage"
+            ],
+            "anyTags": [
+              "Melee",
+              "Ranged"
+            ]
+          },
+          "operation": {
+            "type": "modifyEffectAmount",
+            "additivePercent": 0.05
+          }
+        },
+        {
+          "id": "swift_flurry_damage_l25",
+          "eventType": "EffectCalculation",
+          "minStyleLevel": 25,
+          "maxStyleLevel": 39,
+          "predicate": {
+            "sourceMustBePlayer": true,
+            "activeAbilityOnly": true,
+            "effectOperations": [
+              "Damage"
+            ],
+            "anyTags": [
+              "Melee",
+              "Ranged"
+            ]
+          },
+          "operation": {
+            "type": "modifyEffectAmount",
+            "additivePercent": 0.08
+          }
+        },
+        {
+          "id": "swift_flurry_damage_l40",
+          "eventType": "EffectCalculation",
+          "minStyleLevel": 40,
+          "predicate": {
+            "sourceMustBePlayer": true,
+            "activeAbilityOnly": true,
+            "effectOperations": [
+              "Damage"
+            ],
+            "anyTags": [
+              "Melee",
+              "Ranged"
+            ]
+          },
+          "operation": {
+            "type": "modifyEffectAmount",
+            "additivePercent": 0.12
+          }
+        }
+      ]
+    },
+    {
+      "id": "evasion",
+      "name": "Evasion",
+      "description": "Survival through movement: incoming direct damage reduction scales at levels 10, 25, and 40.",
+      "unlockLevel": 10,
+      "recommendedTags": [
+        "Dodge",
+        "Tank"
+      ],
+      "recommendedStats": [
+        "DodgeChance",
+        "CrowdControlResistance"
+      ],
+      "rules": [
+        {
+          "id": "swift_evasion_reduction_l10",
+          "eventType": "EffectCalculation",
+          "minStyleLevel": 10,
+          "maxStyleLevel": 24,
+          "predicate": {
+            "targetMustBePlayer": true,
+            "effectOperations": [
+              "Damage"
+            ]
+          },
+          "operation": {
+            "type": "addDamageReduction",
+            "percent": 0.05
+          }
+        },
+        {
+          "id": "swift_evasion_reduction_l25",
+          "eventType": "EffectCalculation",
+          "minStyleLevel": 25,
+          "maxStyleLevel": 39,
+          "predicate": {
+            "targetMustBePlayer": true,
+            "effectOperations": [
+              "Damage"
+            ]
+          },
+          "operation": {
+            "type": "addDamageReduction",
+            "percent": 0.08
+          }
+        },
+        {
+          "id": "swift_evasion_reduction_l40",
+          "eventType": "EffectCalculation",
+          "minStyleLevel": 40,
+          "predicate": {
+            "targetMustBePlayer": true,
+            "effectOperations": [
+              "Damage"
+            ]
+          },
+          "operation": {
+            "type": "addDamageReduction",
+            "percent": 0.12
+          }
+        }
+      ]
+    },
+    {
+      "id": "tempo",
+      "name": "Tempo",
+      "description": "Rhythm play: active effects gain extra Flow and stronger Flow empowerment at later milestones.",
+      "unlockLevel": 10,
+      "recommendedTags": [
+        "Cooldown",
+        "Speed"
+      ],
+      "recommendedStats": [
+        "Cooldown",
+        "Precision"
+      ],
+      "rules": [
+        {
+          "id": "swift_tempo_flow_l10",
+          "eventType": "AbilityResolved",
+          "minStyleLevel": 10,
+          "maxStyleLevel": 24,
+          "predicate": {
+            "sourceMustBePlayer": true,
+            "activeAbilityOnly": true
+          },
+          "operation": {
+            "type": "gainStyleResource",
+            "resourceId": "flow",
+            "amount": 2,
+            "usesProcCoefficient": false
+          }
+        },
+        {
+          "id": "swift_tempo_flow_l25",
+          "eventType": "AbilityResolved",
+          "minStyleLevel": 25,
+          "maxStyleLevel": 39,
+          "predicate": {
+            "sourceMustBePlayer": true,
+            "activeAbilityOnly": true
+          },
+          "operation": {
+            "type": "gainStyleResource",
+            "resourceId": "flow",
+            "amount": 5,
+            "usesProcCoefficient": false
+          }
+        },
+        {
+          "id": "swift_tempo_flow_l40",
+          "eventType": "AbilityResolved",
+          "minStyleLevel": 40,
+          "predicate": {
+            "sourceMustBePlayer": true,
+            "activeAbilityOnly": true
+          },
+          "operation": {
+            "type": "gainStyleResource",
+            "resourceId": "flow",
+            "amount": 8,
+            "usesProcCoefficient": false
+          }
+        }
+      ]
+    }
+  ],
+  "rules": [
+    {
+      "id": "swift_flow_on_active",
+      "eventType": "AbilityResolved",
+      "predicate": {
+        "sourceMustBePlayer": true,
+        "activeAbilityOnly": true
+      },
+      "operation": {
+        "type": "gainStyleResource",
+        "resourceId": "flow",
+        "amount": 10,
+        "usesProcCoefficient": false
+      }
+    },
+    {
+      "id": "swift_active_effect_bonus",
+      "eventType": "EffectCalculation",
+      "predicate": {
+        "sourceMustBePlayer": true,
+        "activeAbilityOnly": true
+      },
+      "operation": {
+        "type": "modifyEffectAmount",
+        "additivePercent": 0.03
+      }
+    }
+  ],
+  "resourceOverflowOperations": [
+    {
+      "type": "setPendingEmpowerment",
+      "empowermentId": "swift_flow_empowerment",
+      "appliesTo": {
+        "sourceMustBePlayer": true,
+        "activeAbilityOnly": true
+      },
+      "additivePercent": 0.15,
+      "consumeOnUse": true,
+      "additivePercentModifiers": [
+        {
+          "type": "focusLevel",
+          "focusId": "tempo",
+          "minStyleLevel": 40,
+          "value": 0.07
+        },
+        {
+          "type": "nodeRank",
+          "nodeId": "flurry-specialization",
+          "value": 0.03
+        },
+        {
+          "type": "nodeRank",
+          "nodeId": "flurry-focus",
+          "value": 0.05
+        },
+        {
+          "type": "nodeRank",
+          "nodeId": "evasion-specialization",
+          "value": 0.03
+        },
+        {
+          "type": "nodeRank",
+          "nodeId": "evasion-focus",
+          "value": 0.05
+        },
+        {
+          "type": "nodeRank",
+          "nodeId": "tempo-specialization",
+          "value": 0.03
+        },
+        {
+          "type": "nodeRank",
+          "nodeId": "tempo-focus",
+          "value": 0.05
+        }
+      ]
+    }
+  ],
+  "coreMechanic": "Gain Flow from active Essence abilities. At 100 Flow, empower the next active effect.",
+  "skillTreeNodes": [
+    {
+      "id": "flurry-path",
+      "branchId": "flurry",
+      "name": "Flurry Root",
+      "description": "Opens Flurry rapid-strike pressure.",
+      "maxRank": 1,
+      "requiredLevel": 1,
+      "requiredNodeId": null,
+      "x": 0,
+      "y": 0,
+      "tags": [
+        "Melee",
+        "Ranged"
+      ],
+      "effects": [
+        "Active Melee or Ranged damage gains +1% effect amount.",
+        "Does not choose Flurry as the effective focus by itself."
+      ],
+      "countsTowardFocus": false,
+      "rules": [
+        {
+          "id": "swift_flurry_nodes_flurry-path_additivePercentModifiers",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "effectOperations": [
+              "Damage"
+            ],
+            "sourceMustBePlayer": true,
+            "anyTags": [
+              "Melee",
+              "Ranged"
+            ],
+            "activeAbilityOnly": true
+          },
+          "operation": {
+            "type": "modifyEffectAmount",
+            "additivePercent": 0,
+            "additivePercentModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 0.01,
+                "nodeId": "flurry-path"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "flurry-instinct",
+      "branchId": "flurry",
+      "name": "Flurry Instinct",
+      "description": "Builds extra Flow from active abilities.",
+      "maxRank": 3,
+      "requiredLevel": 5,
+      "requiredNodeId": "flurry-path",
+      "x": -1,
+      "y": 1,
+      "tags": [
+        "Melee",
+        "Ranged"
+      ],
+      "effects": [
+        "Each rank grants +2 additional Flow when an active ability resolves.",
+        "Adds 1 Flurry branch point per rank."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "swift_nodes_flow_flurry-instinct_amountModifiers",
+          "eventType": "AbilityResolved",
+          "predicate": {
+            "sourceMustBePlayer": true,
+            "activeAbilityOnly": true
+          },
+          "operation": {
+            "type": "gainStyleResource",
+            "resourceId": "flow",
+            "amount": 0,
+            "usesProcCoefficient": false,
+            "amountModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 2,
+                "nodeId": "flurry-instinct"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "flurry-technique",
+      "branchId": "flurry",
+      "name": "Flurry Technique",
+      "description": "Improves active Melee and Ranged damage.",
+      "maxRank": 3,
+      "requiredLevel": 10,
+      "requiredNodeId": "flurry-path",
+      "x": 0,
+      "y": 1,
+      "tags": [
+        "Melee",
+        "Ranged"
+      ],
+      "effects": [
+        "Each rank gives active Melee or Ranged damage +2% effect amount.",
+        "Adds 1 Flurry branch point per rank."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "swift_flurry_nodes_flurry-technique_additivePercentModifiers",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "effectOperations": [
+              "Damage"
+            ],
+            "sourceMustBePlayer": true,
+            "anyTags": [
+              "Melee",
+              "Ranged"
+            ],
+            "activeAbilityOnly": true
+          },
+          "operation": {
+            "type": "modifyEffectAmount",
+            "additivePercent": 0,
+            "additivePercentModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 0.02,
+                "nodeId": "flurry-technique"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "flurry-discipline",
+      "branchId": "flurry",
+      "name": "Flurry Discipline",
+      "description": "Improves rapid cadence.",
+      "maxRank": 3,
+      "requiredLevel": 5,
+      "requiredNodeId": "flurry-path",
+      "x": 1,
+      "y": 1,
+      "tags": [
+        "Melee",
+        "Ranged"
+      ],
+      "effects": [
+        "Each rank gives active Melee or Ranged damage +1% effect amount.",
+        "Adds 1 Flurry branch point per rank."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "swift_flurry_nodes_flurry-discipline_additivePercentModifiers",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "effectOperations": [
+              "Damage"
+            ],
+            "sourceMustBePlayer": true,
+            "anyTags": [
+              "Melee",
+              "Ranged"
+            ],
+            "activeAbilityOnly": true
+          },
+          "operation": {
+            "type": "modifyEffectAmount",
+            "additivePercent": 0,
+            "additivePercentModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 0.01,
+                "nodeId": "flurry-discipline"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "flurry-specialization",
+      "branchId": "flurry",
+      "name": "Flurry Specialization",
+      "description": "Improves Flow empowerment.",
+      "maxRank": 2,
+      "requiredLevel": 20,
+      "requiredNodeId": "flurry-instinct",
+      "x": -1,
+      "y": 2,
+      "tags": [
+        "Melee",
+        "Ranged"
+      ],
+      "effects": [
+        "Each rank makes Flow empowerment +3% stronger.",
+        "Adds 1 Flurry branch point per rank."
+      ],
+      "countsTowardFocus": true
+    },
+    {
+      "id": "flurry-mastery",
+      "branchId": "flurry",
+      "name": "Flurry Mastery",
+      "description": "Deepens active Melee and Ranged damage.",
+      "maxRank": 3,
+      "requiredLevel": 25,
+      "requiredNodeId": "flurry-technique",
+      "x": 0,
+      "y": 2,
+      "tags": [
+        "Melee",
+        "Ranged"
+      ],
+      "effects": [
+        "Each rank gives active Melee or Ranged damage +3% effect amount.",
+        "Adds 1 Flurry branch point per rank."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "swift_flurry_nodes_flurry-mastery_additivePercentModifiers",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "effectOperations": [
+              "Damage"
+            ],
+            "sourceMustBePlayer": true,
+            "anyTags": [
+              "Melee",
+              "Ranged"
+            ],
+            "activeAbilityOnly": true
+          },
+          "operation": {
+            "type": "modifyEffectAmount",
+            "additivePercent": 0,
+            "additivePercentModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 0.03,
+                "nodeId": "flurry-mastery"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "flurry-amplifier",
+      "branchId": "flurry",
+      "name": "Flurry Amplifier",
+      "description": "Improves Flow generation.",
+      "maxRank": 2,
+      "requiredLevel": 20,
+      "requiredNodeId": "flurry-discipline",
+      "x": 1,
+      "y": 2,
+      "tags": [
+        "Melee",
+        "Ranged"
+      ],
+      "effects": [
+        "Each rank grants +3 additional Flow when an active ability resolves.",
+        "Adds 1 Flurry branch point per rank."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "swift_nodes_flow_flurry-amplifier_amountModifiers",
+          "eventType": "AbilityResolved",
+          "predicate": {
+            "sourceMustBePlayer": true,
+            "activeAbilityOnly": true
+          },
+          "operation": {
+            "type": "gainStyleResource",
+            "resourceId": "flow",
+            "amount": 0,
+            "usesProcCoefficient": false,
+            "amountModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 3,
+                "nodeId": "flurry-amplifier"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "flurry-focus",
+      "branchId": "flurry",
+      "name": "Flurry Focus",
+      "description": "Completes the Flurry focus.",
+      "maxRank": 1,
+      "requiredLevel": 40,
+      "requiredNodeId": "flurry-mastery",
+      "x": 0,
+      "y": 3,
+      "tags": [
+        "Melee",
+        "Ranged"
+      ],
+      "effects": [
+        "Active Melee or Ranged damage gains +5% effect amount.",
+        "Active Melee or Ranged abilities grant +5 additional Flow.",
+        "Flow empowerment becomes +5% stronger.",
+        "Adds 1 Flurry branch point."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "swift_flurry_nodes_flurry-focus_additivePercentModifiers",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "effectOperations": [
+              "Damage"
+            ],
+            "sourceMustBePlayer": true,
+            "anyTags": [
+              "Melee",
+              "Ranged"
+            ],
+            "activeAbilityOnly": true
+          },
+          "operation": {
+            "type": "modifyEffectAmount",
+            "additivePercent": 0,
+            "additivePercentModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 0.05,
+                "nodeId": "flurry-focus"
+              }
+            ]
+          }
+        },
+        {
+          "id": "swift_nodes_flow_flurry-focus_amountModifiers",
+          "eventType": "AbilityResolved",
+          "predicate": {
+            "sourceMustBePlayer": true,
+            "activeAbilityOnly": true
+          },
+          "operation": {
+            "type": "gainStyleResource",
+            "resourceId": "flow",
+            "amount": 0,
+            "usesProcCoefficient": false,
+            "amountModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 5,
+                "nodeId": "flurry-focus"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "evasion-path",
+      "branchId": "evasion",
+      "name": "Evasion Root",
+      "description": "Opens Evasion damage avoidance.",
+      "maxRank": 1,
+      "requiredLevel": 1,
+      "requiredNodeId": null,
+      "x": 0,
+      "y": 0,
+      "tags": [
+        "Dodge",
+        "Tank"
+      ],
+      "effects": [
+        "Incoming player damage is reduced by 1%.",
+        "Does not choose Evasion as the effective focus by itself."
+      ],
+      "countsTowardFocus": false,
+      "rules": [
+        {
+          "id": "swift_evasion_nodes_evasion-path_percentModifiers",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "effectOperations": [
+              "Damage"
+            ],
+            "targetMustBePlayer": true
+          },
+          "operation": {
+            "type": "addDamageReduction",
+            "percent": 0,
+            "percentModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 0.01,
+                "nodeId": "evasion-path"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "evasion-instinct",
+      "branchId": "evasion",
+      "name": "Evasion Instinct",
+      "description": "Builds extra Flow from active abilities.",
+      "maxRank": 3,
+      "requiredLevel": 5,
+      "requiredNodeId": "evasion-path",
+      "x": -1,
+      "y": 1,
+      "tags": [
+        "Dodge",
+        "Tank"
+      ],
+      "effects": [
+        "Each rank grants +2 additional Flow when an active ability resolves.",
+        "Adds 1 Evasion branch point per rank."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "swift_nodes_flow_evasion-instinct_amountModifiers",
+          "eventType": "AbilityResolved",
+          "predicate": {
+            "sourceMustBePlayer": true,
+            "activeAbilityOnly": true
+          },
+          "operation": {
+            "type": "gainStyleResource",
+            "resourceId": "flow",
+            "amount": 0,
+            "usesProcCoefficient": false,
+            "amountModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 2,
+                "nodeId": "evasion-instinct"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "evasion-technique",
+      "branchId": "evasion",
+      "name": "Evasion Technique",
+      "description": "Improves incoming damage reduction.",
+      "maxRank": 3,
+      "requiredLevel": 10,
+      "requiredNodeId": "evasion-path",
+      "x": 0,
+      "y": 1,
+      "tags": [
+        "Dodge",
+        "Tank"
+      ],
+      "effects": [
+        "Each rank reduces incoming player damage by 2%.",
+        "Adds 1 Evasion branch point per rank."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "swift_evasion_nodes_evasion-technique_percentModifiers",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "effectOperations": [
+              "Damage"
+            ],
+            "targetMustBePlayer": true
+          },
+          "operation": {
+            "type": "addDamageReduction",
+            "percent": 0,
+            "percentModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 0.02,
+                "nodeId": "evasion-technique"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "evasion-discipline",
+      "branchId": "evasion",
+      "name": "Evasion Discipline",
+      "description": "Improves evasive tempo.",
+      "maxRank": 3,
+      "requiredLevel": 5,
+      "requiredNodeId": "evasion-path",
+      "x": 1,
+      "y": 1,
+      "tags": [
+        "Dodge",
+        "Tank"
+      ],
+      "effects": [
+        "Each rank reduces incoming player damage by 1%.",
+        "Adds 1 Evasion branch point per rank."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "swift_evasion_nodes_evasion-discipline_percentModifiers",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "effectOperations": [
+              "Damage"
+            ],
+            "targetMustBePlayer": true
+          },
+          "operation": {
+            "type": "addDamageReduction",
+            "percent": 0,
+            "percentModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 0.01,
+                "nodeId": "evasion-discipline"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "evasion-specialization",
+      "branchId": "evasion",
+      "name": "Evasion Specialization",
+      "description": "Improves Flow empowerment.",
+      "maxRank": 2,
+      "requiredLevel": 20,
+      "requiredNodeId": "evasion-instinct",
+      "x": -1,
+      "y": 2,
+      "tags": [
+        "Dodge",
+        "Tank"
+      ],
+      "effects": [
+        "Each rank makes Flow empowerment +3% stronger.",
+        "Adds 1 Evasion branch point per rank."
+      ],
+      "countsTowardFocus": true
+    },
+    {
+      "id": "evasion-mastery",
+      "branchId": "evasion",
+      "name": "Evasion Mastery",
+      "description": "Deepens incoming damage reduction.",
+      "maxRank": 3,
+      "requiredLevel": 25,
+      "requiredNodeId": "evasion-technique",
+      "x": 0,
+      "y": 2,
+      "tags": [
+        "Dodge",
+        "Tank"
+      ],
+      "effects": [
+        "Each rank reduces incoming player damage by 3%.",
+        "Adds 1 Evasion branch point per rank."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "swift_evasion_nodes_evasion-mastery_percentModifiers",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "effectOperations": [
+              "Damage"
+            ],
+            "targetMustBePlayer": true
+          },
+          "operation": {
+            "type": "addDamageReduction",
+            "percent": 0,
+            "percentModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 0.03,
+                "nodeId": "evasion-mastery"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "evasion-amplifier",
+      "branchId": "evasion",
+      "name": "Evasion Amplifier",
+      "description": "Improves Flow generation.",
+      "maxRank": 2,
+      "requiredLevel": 20,
+      "requiredNodeId": "evasion-discipline",
+      "x": 1,
+      "y": 2,
+      "tags": [
+        "Dodge",
+        "Tank"
+      ],
+      "effects": [
+        "Each rank grants +3 additional Flow when an active ability resolves.",
+        "Adds 1 Evasion branch point per rank."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "swift_nodes_flow_evasion-amplifier_amountModifiers",
+          "eventType": "AbilityResolved",
+          "predicate": {
+            "sourceMustBePlayer": true,
+            "activeAbilityOnly": true
+          },
+          "operation": {
+            "type": "gainStyleResource",
+            "resourceId": "flow",
+            "amount": 0,
+            "usesProcCoefficient": false,
+            "amountModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 3,
+                "nodeId": "evasion-amplifier"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "evasion-focus",
+      "branchId": "evasion",
+      "name": "Evasion Focus",
+      "description": "Completes the Evasion focus.",
+      "maxRank": 1,
+      "requiredLevel": 40,
+      "requiredNodeId": "evasion-mastery",
+      "x": 0,
+      "y": 3,
+      "tags": [
+        "Dodge",
+        "Tank"
+      ],
+      "effects": [
+        "Incoming player damage is reduced by 5%.",
+        "Flow empowerment becomes +5% stronger.",
+        "Adds 1 Evasion branch point."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "swift_evasion_nodes_evasion-focus_percentModifiers",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "effectOperations": [
+              "Damage"
+            ],
+            "targetMustBePlayer": true
+          },
+          "operation": {
+            "type": "addDamageReduction",
+            "percent": 0,
+            "percentModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 0.05,
+                "nodeId": "evasion-focus"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "tempo-path",
+      "branchId": "tempo",
+      "name": "Tempo Root",
+      "description": "Opens Tempo active-effect rhythm.",
+      "maxRank": 1,
+      "requiredLevel": 1,
+      "requiredNodeId": null,
+      "x": 0,
+      "y": 0,
+      "tags": [
+        "Cooldown",
+        "Speed"
+      ],
+      "effects": [
+        "Active effects gain +1% effect amount.",
+        "Does not choose Tempo as the effective focus by itself."
+      ],
+      "countsTowardFocus": false,
+      "rules": [
+        {
+          "id": "swift_tempo_nodes_active_tempo-path_additivePercentModifiers",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "amplifiableEffectOnly": true,
+            "sourceMustBePlayer": true,
+            "activeAbilityOnly": true
+          },
+          "operation": {
+            "type": "modifyEffectAmount",
+            "additivePercent": 0,
+            "additivePercentModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 0.01,
+                "nodeId": "tempo-path"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "tempo-instinct",
+      "branchId": "tempo",
+      "name": "Tempo Instinct",
+      "description": "Builds extra Flow from active abilities.",
+      "maxRank": 3,
+      "requiredLevel": 5,
+      "requiredNodeId": "tempo-path",
+      "x": -1,
+      "y": 1,
+      "tags": [
+        "Cooldown",
+        "Speed"
+      ],
+      "effects": [
+        "Each rank grants +2 additional Flow when an active ability resolves.",
+        "Adds 1 Tempo branch point per rank."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "swift_nodes_flow_tempo-instinct_amountModifiers",
+          "eventType": "AbilityResolved",
+          "predicate": {
+            "sourceMustBePlayer": true,
+            "activeAbilityOnly": true
+          },
+          "operation": {
+            "type": "gainStyleResource",
+            "resourceId": "flow",
+            "amount": 0,
+            "usesProcCoefficient": false,
+            "amountModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 2,
+                "nodeId": "tempo-instinct"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "tempo-technique",
+      "branchId": "tempo",
+      "name": "Tempo Technique",
+      "description": "Improves active effect output.",
+      "maxRank": 3,
+      "requiredLevel": 10,
+      "requiredNodeId": "tempo-path",
+      "x": 0,
+      "y": 1,
+      "tags": [
+        "Cooldown",
+        "Speed"
+      ],
+      "effects": [
+        "Each rank gives active effects +1% effect amount.",
+        "Adds 1 Tempo branch point per rank."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "swift_tempo_nodes_active_tempo-technique_additivePercentModifiers",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "amplifiableEffectOnly": true,
+            "sourceMustBePlayer": true,
+            "activeAbilityOnly": true
+          },
+          "operation": {
+            "type": "modifyEffectAmount",
+            "additivePercent": 0,
+            "additivePercentModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 0.01,
+                "nodeId": "tempo-technique"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "tempo-discipline",
+      "branchId": "tempo",
+      "name": "Tempo Discipline",
+      "description": "Improves status rhythm.",
+      "maxRank": 3,
+      "requiredLevel": 5,
+      "requiredNodeId": "tempo-path",
+      "x": 1,
+      "y": 1,
+      "tags": [
+        "Cooldown",
+        "Speed"
+      ],
+      "effects": [
+        "Each rank gives status and debuff effects +1% effect amount.",
+        "Adds 1 Tempo branch point per rank."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "swift_tempo_status_tempo-discipline_additivePercentModifiers",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "statusOrDebuffOnly": true
+          },
+          "operation": {
+            "type": "modifyEffectAmount",
+            "additivePercent": 0,
+            "additivePercentModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 0.01,
+                "nodeId": "tempo-discipline"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "tempo-specialization",
+      "branchId": "tempo",
+      "name": "Tempo Specialization",
+      "description": "Improves Flow empowerment.",
+      "maxRank": 2,
+      "requiredLevel": 20,
+      "requiredNodeId": "tempo-instinct",
+      "x": -1,
+      "y": 2,
+      "tags": [
+        "Cooldown",
+        "Speed"
+      ],
+      "effects": [
+        "Each rank makes Flow empowerment +3% stronger.",
+        "Adds 1 Tempo branch point per rank."
+      ],
+      "countsTowardFocus": true
+    },
+    {
+      "id": "tempo-mastery",
+      "branchId": "tempo",
+      "name": "Tempo Mastery",
+      "description": "Deepens active effect output.",
+      "maxRank": 3,
+      "requiredLevel": 25,
+      "requiredNodeId": "tempo-technique",
+      "x": 0,
+      "y": 2,
+      "tags": [
+        "Cooldown",
+        "Speed"
+      ],
+      "effects": [
+        "Each rank gives active effects +2% effect amount.",
+        "Adds 1 Tempo branch point per rank."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "swift_tempo_nodes_active_tempo-mastery_additivePercentModifiers",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "amplifiableEffectOnly": true,
+            "sourceMustBePlayer": true,
+            "activeAbilityOnly": true
+          },
+          "operation": {
+            "type": "modifyEffectAmount",
+            "additivePercent": 0,
+            "additivePercentModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 0.02,
+                "nodeId": "tempo-mastery"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "tempo-amplifier",
+      "branchId": "tempo",
+      "name": "Tempo Amplifier",
+      "description": "Improves Flow generation.",
+      "maxRank": 2,
+      "requiredLevel": 20,
+      "requiredNodeId": "tempo-discipline",
+      "x": 1,
+      "y": 2,
+      "tags": [
+        "Cooldown",
+        "Speed"
+      ],
+      "effects": [
+        "Each rank grants +3 additional Flow when an active ability resolves.",
+        "Adds 1 Tempo branch point per rank."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "swift_nodes_flow_tempo-amplifier_amountModifiers",
+          "eventType": "AbilityResolved",
+          "predicate": {
+            "sourceMustBePlayer": true,
+            "activeAbilityOnly": true
+          },
+          "operation": {
+            "type": "gainStyleResource",
+            "resourceId": "flow",
+            "amount": 0,
+            "usesProcCoefficient": false,
+            "amountModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 3,
+                "nodeId": "tempo-amplifier"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "tempo-focus",
+      "branchId": "tempo",
+      "name": "Tempo Focus",
+      "description": "Completes the Tempo focus.",
+      "maxRank": 1,
+      "requiredLevel": 40,
+      "requiredNodeId": "tempo-mastery",
+      "x": 0,
+      "y": 3,
+      "tags": [
+        "Cooldown",
+        "Speed"
+      ],
+      "effects": [
+        "Active effects gain +4% effect amount.",
+        "Active abilities grant +5 additional Flow.",
+        "Flow empowerment becomes +5% stronger.",
+        "Adds 1 Tempo branch point."
+      ],
+      "countsTowardFocus": true,
+      "rules": [
+        {
+          "id": "swift_tempo_nodes_active_tempo-focus_additivePercentModifiers",
+          "eventType": "EffectCalculation",
+          "predicate": {
+            "amplifiableEffectOnly": true,
+            "sourceMustBePlayer": true,
+            "activeAbilityOnly": true
+          },
+          "operation": {
+            "type": "modifyEffectAmount",
+            "additivePercent": 0,
+            "additivePercentModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 0.04,
+                "nodeId": "tempo-focus"
+              }
+            ]
+          }
+        },
+        {
+          "id": "swift_nodes_flow_tempo-focus_amountModifiers",
+          "eventType": "AbilityResolved",
+          "predicate": {
+            "sourceMustBePlayer": true,
+            "activeAbilityOnly": true
+          },
+          "operation": {
+            "type": "gainStyleResource",
+            "resourceId": "flow",
+            "amount": 0,
+            "usesProcCoefficient": false,
+            "amountModifiers": [
+              {
+                "type": "nodeRank",
+                "value": 5,
+                "nodeId": "tempo-focus"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
+
