@@ -106,16 +106,99 @@ export class CombatStylesComponent implements OnInit {
     return `${node.y + 1}`;
   }
 
+  treeNodes(style: CombatStyleDto): CombatStyleSkillTreeNodeDto[] {
+    return style.skillTree.branches
+      .flatMap((branch) => branch.nodes)
+      .sort((left, right) => {
+        const rowCompare = left.row - right.row;
+        if (rowCompare !== 0) return rowCompare;
+
+        const typeCompare =
+          this.nodeTypeOrder(left.nodeType) - this.nodeTypeOrder(right.nodeType);
+        if (typeCompare !== 0) return typeCompare;
+
+        const yCompare = left.y - right.y;
+        if (yCompare !== 0) return yCompare;
+
+        return this.laneOrder(left.lane) - this.laneOrder(right.lane);
+      });
+  }
+
+  usesTreeMap(style: CombatStyleDto): boolean {
+    return this.treeNodes(style).some((node) => node.row > 0 && !!node.lane);
+  }
+
+  treeMapColumn(node: CombatStyleSkillTreeNodeDto): string {
+    const lane = node.lane?.toLowerCase();
+    const baseColumn =
+      lane === 'left' ? 2 : lane === 'right' ? 6 : lane === 'middle' ? 4 : 4;
+
+    if (node.nodeType?.toLowerCase() === 'major') {
+      return `${baseColumn}`;
+    }
+
+    const rowStartY = Math.max(0, (node.row - 1) * 3);
+    const rowOffset = node.y - rowStartY;
+
+    if (lane === 'left') return '1';
+    if (lane === 'right') return '7';
+    if (rowOffset >= 2) return '5';
+
+    return `${baseColumn}`;
+  }
+
+  treeMapRow(node: CombatStyleSkillTreeNodeDto): string {
+    if (node.row <= 0) return this.nodeGridRow(node);
+
+    const rowBase = (node.row - 1) * 4 + 1;
+    if (node.nodeType?.toLowerCase() === 'major') {
+      return `${rowBase}`;
+    }
+
+    const rowStartY = Math.max(0, (node.row - 1) * 3);
+    const rowOffset = Math.max(1, node.y - rowStartY);
+    return `${rowBase + Math.min(rowOffset, 3)}`;
+  }
+
   nodeClasses(node: CombatStyleSkillTreeNodeDto): Record<string, boolean> {
+    const nodeType = node.nodeType?.toLowerCase();
+
     return {
       'tree-node--ranked': node.rank > 0,
       'tree-node--available': node.canRankUp,
       'tree-node--locked': !node.isUnlocked,
       'tree-node--selected': this.isSelectedNode(node),
       'tree-node--maxed': node.rank >= node.maxRank,
-      'tree-node--capstone': node.y >= 3,
-      'tree-node--major': node.nodeType?.toLowerCase() === 'major',
+      'tree-node--capstone': nodeType === 'capstone' || (node.row <= 0 && node.y >= 3),
+      'tree-node--major': nodeType === 'major',
+      'tree-node--minor': nodeType === 'minor',
     };
+  }
+
+  private laneOrder(lane: string): number {
+    switch (lane?.toLowerCase()) {
+      case 'left':
+        return 0;
+      case 'middle':
+        return 1;
+      case 'right':
+        return 2;
+      default:
+        return 3;
+    }
+  }
+
+  private nodeTypeOrder(nodeType: string): number {
+    switch (nodeType?.toLowerCase()) {
+      case 'major':
+        return 0;
+      case 'minor':
+        return 1;
+      case 'capstone':
+        return 2;
+      default:
+        return 3;
+    }
   }
 
   trackStyle(_: number, style: CombatStyleDto): string {

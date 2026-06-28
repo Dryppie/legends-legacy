@@ -154,6 +154,7 @@
 
           <div
             class="skill-tree__canvas"
+            [class.skill-tree__canvas--map]="usesTreeMap(style)"
             [style.--branch-count]="style.skillTree.branches.length"
           >
             <div class="skill-tree__constellation" aria-hidden="true"></div>
@@ -168,7 +169,50 @@
               </div>
             </div>
 
-            <div class="tree-branches">
+            <ng-container *ngIf="usesTreeMap(style); else branchTree">
+              <ol class="tree-map">
+                <li
+                  class="tree-node-slot tree-node-slot--map"
+                  *ngFor="
+                    let node of treeNodes(style);
+                    trackBy: trackNode
+                  "
+                  [style.grid-column]="treeMapColumn(node)"
+                  [style.grid-row]="treeMapRow(node)"
+                  [class.tree-node-slot--root]="node.row === 1 && node.nodeType.toLowerCase() === 'major'"
+                  [class.tree-node-slot--left]="node.lane.toLowerCase() === 'left'"
+                  [class.tree-node-slot--center]="node.lane.toLowerCase() === 'middle'"
+                  [class.tree-node-slot--right]="node.lane.toLowerCase() === 'right'"
+                  [class.tree-node-slot--major]="node.nodeType.toLowerCase() === 'major'"
+                  [class.tree-node-slot--minor]="node.nodeType.toLowerCase() === 'minor'"
+                >
+                  <button
+                    type="button"
+                    class="tree-node"
+                    [ngClass]="nodeClasses(node)"
+                    (click)="selectNode(node.id)"
+                  >
+                    <span class="tree-node__orb">
+                      <span class="tree-node__mark">
+                        {{ node.rank > 0 ? node.rank : node.row || node.y + 1 }}
+                      </span>
+                    </span>
+                    <span class="tree-node__body">
+                      <span class="tree-node__name">{{ node.name }}</span>
+                      <span class="tree-node__meta">
+                        Level {{ node.requiredLevel }}
+                      </span>
+                    </span>
+                    <span class="tree-node__rank">
+                      {{ node.rank }}/{{ node.maxRank }}
+                    </span>
+                  </button>
+                </li>
+              </ol>
+            </ng-container>
+
+            <ng-template #branchTree>
+              <div class="tree-branches">
               <section
                 class="tree-branch"
                 *ngFor="
@@ -221,7 +265,8 @@
                   </li>
                 </ol>
               </section>
-            </div>
+              </div>
+            </ng-template>
           </div>
         </div>
 

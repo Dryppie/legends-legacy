@@ -2,11 +2,17 @@
   position: relative;
   overflow: hidden;
   min-height: 520px;
-  border: 1px solid rgb(63 63 70 / 0.9);
-  border-radius: 8px;
+  border: 1px solid var(--ll-color-border);
+  border-radius: var(--ll-radius-md);
   background:
-    radial-gradient(circle at 50% 18%, rgb(245 188 82 / 0.12), transparent 22rem),
-    linear-gradient(180deg, rgb(8 11 15 / 0.94), rgb(8 8 10 / 0.92));
+    linear-gradient(
+      to right,
+      rgba(73, 46, 37, 0.12) 0%,
+      rgba(52, 35, 33, 0.28) 36%,
+      rgba(20, 19, 27, 0.5) 100%
+    ),
+    url('/assets/core/texture.png');
+  box-shadow: var(--ll-shadow-sm);
 }
 
 .skill-tree__summary {
@@ -23,43 +29,44 @@
   display: grid;
   min-width: 5.5rem;
   justify-items: center;
-  border: 1px solid rgb(245 188 82 / 0.45);
-  border-radius: 6px;
-  padding: 0.45rem 0.75rem;
-  background: rgb(0 0 0 / 0.32);
-  color: rgb(245 188 82);
+  border: 1px solid var(--ll-color-border-strong);
+  border-radius: var(--ll-radius-sm);
+  padding: var(--ll-space-1) var(--ll-space-3);
+  background: var(--ll-color-primary-soft);
+  color: var(--ll-color-primary);
   font-weight: 700;
 }
 
 .skill-tree__points small {
-  color: rgb(161 161 170);
+  color: var(--ll-color-text-muted);
   font-size: 0.68rem;
   font-weight: 500;
   text-transform: uppercase;
 }
 
 .skill-tree__canvas {
-  --tree-line: rgb(245 188 82 / 0.36);
-  --tree-line-strong: rgb(245 188 82 / 0.82);
+  --tree-line: rgba(249, 220, 160, 0.26);
+  --tree-line-strong: rgba(249, 220, 160, 0.58);
   position: relative;
   min-height: 450px;
   padding: 0.75rem 1rem 1.25rem;
 }
 
+.skill-tree__canvas--map {
+  min-height: 760px;
+  overflow-x: auto;
+  padding-inline: 1.25rem;
+}
+
 .skill-tree__constellation {
   position: absolute;
-  inset: 0.5rem;
-  opacity: 0.55;
+  inset: 0;
+  opacity: 0.5;
   background-image:
-    radial-gradient(circle, rgb(245 188 82 / 0.18) 1px, transparent 1px),
-    radial-gradient(circle, rgb(255 255 255 / 0.08) 1px, transparent 1px);
-  background-position:
-    0 0,
-    18px 24px;
-  background-size:
-    72px 72px,
-    96px 96px;
-  mask-image: radial-gradient(circle at 50% 26%, black, transparent 72%);
+    linear-gradient(rgba(249, 220, 160, 0.055) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(249, 220, 160, 0.045) 1px, transparent 1px);
+  background-size: 8rem 8rem;
+  mask-image: linear-gradient(to bottom, black, transparent 92%);
   pointer-events: none;
 }
 
@@ -76,39 +83,42 @@
 .tree-root::after {
   content: '';
   width: 1px;
-  height: 3.75rem;
+  height: 3rem;
   background: linear-gradient(180deg, var(--tree-line-strong), var(--tree-line));
-  box-shadow: 0 0 18px rgb(245 188 82 / 0.45);
+  box-shadow: 0 0 10px rgba(249, 220, 160, 0.24);
+}
+
+.skill-tree__canvas--map .tree-root::after {
+  height: 2.5rem;
 }
 
 .tree-root__node {
   display: grid;
-  width: 5rem;
-  height: 5rem;
+  width: 4.25rem;
+  height: 4.25rem;
   place-items: center;
-  border: 2px solid rgb(245 188 82 / 0.92);
-  border-radius: 999px;
+  border: 1px solid var(--ll-color-border-strong);
+  border-radius: var(--ll-radius-full);
   background:
-    radial-gradient(circle at 50% 38%, rgb(245 188 82 / 0.34), rgb(28 20 9 / 0.92) 64%),
-    rgb(10 10 12);
+    linear-gradient(180deg, rgba(249, 220, 160, 0.14), rgba(0, 0, 0, 0.28)),
+    var(--ll-color-surface-strong);
   box-shadow:
-    0 0 0 0.45rem rgb(245 188 82 / 0.08),
-    0 0 2.25rem rgb(245 188 82 / 0.42),
-    inset 0 0 1rem rgb(245 188 82 / 0.22);
-  color: rgb(255 236 185);
-  font-family: var(--ll-font-heading, inherit);
-  font-size: 2rem;
+    inset 0 0 0 1px rgba(255, 255, 255, 0.04),
+    var(--ll-shadow-sm);
+  color: var(--ll-color-primary);
+  font-family: var(--ll-font-display);
+  font-size: 1.85rem;
 }
 
 .tree-root__text {
   display: grid;
   gap: 0.1rem;
-  color: white;
+  color: var(--ll-color-text);
   font-weight: 700;
 }
 
 .tree-root__text small {
-  color: rgb(245 188 82);
+  color: var(--ll-color-primary);
   font-size: 0.72rem;
   font-weight: 500;
 }
@@ -130,7 +140,7 @@
   right: calc(100% / var(--branch-count) / 2);
   height: 1px;
   background: linear-gradient(90deg, transparent, var(--tree-line-strong), transparent);
-  box-shadow: 0 0 16px rgb(245 188 82 / 0.35);
+  box-shadow: 0 0 10px rgba(249, 220, 160, 0.18);
 }
 
 .tree-branch {
@@ -150,7 +160,7 @@
   width: 1px;
   height: 2rem;
   background: var(--tree-line);
-  box-shadow: 0 0 12px rgb(245 188 82 / 0.32);
+  box-shadow: 0 0 8px rgba(249, 220, 160, 0.18);
 }
 
 .tree-branch__header {
@@ -159,10 +169,10 @@
   justify-items: center;
   gap: 0.15rem;
   min-height: 3.4rem;
-  border: 1px solid rgb(245 188 82 / 0.34);
-  border-radius: 4px;
-  padding: 0.55rem 0.7rem;
-  background: linear-gradient(180deg, rgb(40 30 14 / 0.74), rgb(11 12 15 / 0.78));
+  border: 1px solid var(--ll-color-border);
+  border-radius: var(--ll-radius-sm);
+  padding: var(--ll-space-2) var(--ll-space-3);
+  background: var(--ll-color-surface-soft);
   text-align: center;
 }
 
@@ -173,8 +183,8 @@
   left: 50%;
   width: 0.55rem;
   height: 0.55rem;
-  border: 1px solid rgb(245 188 82 / 0.68);
-  background: rgb(12 12 14);
+  border: 1px solid var(--ll-color-border-strong);
+  background: #101014;
   transform: translateX(-50%) rotate(45deg);
 }
 
@@ -187,13 +197,13 @@
 }
 
 .tree-branch__header span {
-  color: rgb(255 222 153);
-  font-family: var(--ll-font-heading, inherit);
+  color: var(--ll-color-primary);
+  font-family: var(--ll-font-display);
   font-size: 1rem;
 }
 
 .tree-branch__header small {
-  color: rgb(161 161 170);
+  color: var(--ll-color-text-muted);
   font-size: 0.68rem;
 }
 
@@ -216,8 +226,44 @@
   bottom: 3.4rem;
   left: 50%;
   width: 1px;
-  background: linear-gradient(180deg, var(--tree-line-strong), var(--tree-line), rgb(113 113 122 / 0.38));
-  box-shadow: 0 0 14px rgb(245 188 82 / 0.28);
+  background: linear-gradient(180deg, var(--tree-line-strong), var(--tree-line), rgba(113, 113, 122, 0.24));
+  box-shadow: 0 0 10px rgba(249, 220, 160, 0.14);
+}
+
+.tree-map {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: repeat(7, minmax(5.6rem, 1fr));
+  grid-template-rows: repeat(11, minmax(4.25rem, auto));
+  column-gap: clamp(0.75rem, 1.6vw, 1.35rem);
+  row-gap: 0.85rem;
+  min-width: 62rem;
+  margin: 0;
+  padding: 1.25rem 0 0.75rem;
+  list-style: none;
+}
+
+.tree-map::before {
+  content: '';
+  position: absolute;
+  top: 1.2rem;
+  left: 14%;
+  right: 14%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--tree-line-strong), transparent);
+  box-shadow: 0 0 10px rgba(249, 220, 160, 0.18);
+}
+
+.tree-map::after {
+  content: '';
+  position: absolute;
+  top: -2.5rem;
+  left: 50%;
+  width: 1px;
+  height: 3.7rem;
+  background: linear-gradient(180deg, var(--tree-line-strong), var(--tree-line));
+  box-shadow: 0 0 10px rgba(249, 220, 160, 0.18);
 }
 
 .tree-node-slot {
@@ -237,7 +283,7 @@
   width: 1px;
   height: 1.25rem;
   background: var(--tree-line);
-  box-shadow: 0 0 12px rgb(245 188 82 / 0.24);
+  box-shadow: 0 0 8px rgba(249, 220, 160, 0.14);
 }
 
 .tree-node-slot--root::before {
@@ -254,7 +300,7 @@
   width: calc(50% + 0.7rem);
   height: 1px;
   background: linear-gradient(90deg, transparent, var(--tree-line-strong), transparent);
-  box-shadow: 0 0 12px rgb(245 188 82 / 0.24);
+  box-shadow: 0 0 8px rgba(249, 220, 160, 0.14);
 }
 
 .tree-node-slot--left::after {
@@ -269,6 +315,54 @@
   align-items: end;
 }
 
+.tree-node-slot--map {
+  z-index: 2;
+}
+
+.tree-node-slot--map::before {
+  top: -1.1rem;
+  height: 1.5rem;
+}
+
+.tree-node-slot--map::after {
+  display: none;
+}
+
+.tree-node-slot--map.tree-node-slot--major::before {
+  top: -1.45rem;
+  height: 1.85rem;
+  background: linear-gradient(180deg, var(--tree-line-strong), var(--tree-line));
+}
+
+.tree-node-slot--map.tree-node-slot--minor::before {
+  height: 1.3rem;
+  opacity: 0.82;
+}
+
+.tree-node-slot--map.tree-node-slot--minor::after {
+  content: '';
+  position: absolute;
+  top: 1.8rem;
+  display: block;
+  width: clamp(2.1rem, 44%, 3.75rem);
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--tree-line), transparent);
+  box-shadow: 0 0 8px rgba(249, 220, 160, 0.12);
+}
+
+.tree-node-slot--map.tree-node-slot--left.tree-node-slot--minor::after {
+  left: 50%;
+}
+
+.tree-node-slot--map.tree-node-slot--center.tree-node-slot--minor::after {
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.tree-node-slot--map.tree-node-slot--right.tree-node-slot--minor::after {
+  right: 50%;
+}
+
 .tree-node {
   position: relative;
   display: grid;
@@ -276,44 +370,49 @@
   min-height: 6.6rem;
   justify-items: center;
   gap: 0.35rem;
-  border: 0;
-  border-radius: 8px;
-  padding: 0.15rem 0.2rem 1rem;
+  border: 1px solid transparent;
+  border-radius: var(--ll-radius-sm);
+  padding: var(--ll-space-1) var(--ll-space-1) 0.9rem;
   background: transparent;
-  color: rgb(212 212 216);
+  color: var(--ll-color-text-muted);
   text-align: center;
   transition:
+    border-color 150ms ease,
+    background-color 150ms ease,
     box-shadow 150ms ease,
     color 150ms ease,
     transform 150ms ease;
 }
 
 .tree-node:hover {
-  color: white;
+  border-color: var(--ll-color-border);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--ll-color-text);
   transform: translateY(-1px);
 }
 
 .tree-node__orb {
   display: grid;
-  width: 3.85rem;
-  height: 3.85rem;
+  width: 3.25rem;
+  height: 3.25rem;
   place-items: center;
-  border: 1px solid rgb(113 113 122 / 0.95);
-  border-radius: 999px;
-  background: radial-gradient(circle at 50% 40%, rgb(63 63 70), rgb(13 13 16) 68%);
+  border: 1px solid var(--ll-color-border);
+  border-radius: var(--ll-radius-full);
+  background: var(--ll-color-surface-strong);
   box-shadow:
-    inset 0 0 0 0.34rem rgb(0 0 0 / 0.38),
-    0 0 0 0.25rem rgb(255 255 255 / 0.03);
+    inset 0 0 0 1px rgba(255, 255, 255, 0.04),
+    var(--ll-shadow-sm);
 }
 
 .tree-node__mark {
   display: grid;
-  width: 1.7rem;
-  height: 1.7rem;
+  width: 1.55rem;
+  height: 1.55rem;
   place-items: center;
-  border-radius: 999px;
-  background: rgb(0 0 0 / 0.35);
-  color: rgb(212 212 216);
+  border: 1px solid var(--ll-color-border);
+  border-radius: var(--ll-radius-full);
+  background: rgba(0, 0, 0, 0.28);
+  color: var(--ll-color-text-muted);
   font-size: 0.72rem;
   font-weight: 700;
 }
@@ -329,12 +428,12 @@
   overflow-wrap: anywhere;
   color: inherit;
   font-weight: 700;
-  font-size: 0.76rem;
+  font-size: var(--ll-text-xs);
   line-height: 1.08;
 }
 
 .tree-node__meta {
-  color: rgb(161 161 170);
+  color: var(--ll-color-text-subtle);
   font-size: 0.64rem;
 }
 
@@ -343,44 +442,46 @@
   left: 50%;
   bottom: 0.05rem;
   transform: translateX(-50%);
-  border: 1px solid rgb(245 188 82 / 0.46);
-  border-radius: 4px;
+  border: 1px solid var(--ll-color-border);
+  border-radius: var(--ll-radius-sm);
   padding: 0.02rem 0.38rem;
-  background: rgb(0 0 0 / 0.68);
-  color: rgb(245 188 82);
+  background: var(--ll-color-surface-strong);
+  color: var(--ll-color-primary);
   font-size: 0.68rem;
 }
 
 .tree-node--available .tree-node__orb {
-  border-color: rgb(245 188 82 / 0.88);
+  border-color: var(--ll-color-border-strong);
   box-shadow:
-    inset 0 0 0 0.34rem rgb(0 0 0 / 0.36),
-    0 0 1.15rem rgb(245 188 82 / 0.24);
+    inset 0 0 0 1px rgba(255, 255, 255, 0.06),
+    var(--ll-shadow-focus);
 }
 
 .tree-node--ranked {
-  color: white;
+  color: var(--ll-color-text);
 }
 
 .tree-node--ranked .tree-node__orb {
-  border-color: rgb(245 188 82);
-  background: radial-gradient(circle at 50% 40%, rgb(245 188 82 / 0.72), rgb(40 28 10) 68%);
+  border-color: var(--ll-color-border-strong);
+  background: var(--ll-color-primary-soft);
   box-shadow:
-    0 0 1rem rgb(245 188 82 / 0.35),
-    inset 0 0 0 0.3rem rgb(0 0 0 / 0.26);
+    inset 0 0 0 1px rgba(255, 255, 255, 0.05),
+    var(--ll-shadow-sm);
 }
 
 .tree-node--maxed .tree-node__mark {
-  color: rgb(255 236 185);
+  color: var(--ll-color-primary);
 }
 
 .tree-node--selected {
-  color: rgb(255 236 185);
+  border-color: var(--ll-color-border-strong);
+  background: var(--ll-color-primary-soft);
+  color: var(--ll-color-primary);
 }
 
 .tree-node--selected .tree-node__orb {
-  outline: 1px solid rgb(245 188 82);
-  outline-offset: 4px;
+  border-color: var(--ll-color-primary);
+  box-shadow: var(--ll-shadow-focus);
 }
 
 .tree-node--capstone {
@@ -388,9 +489,29 @@
 }
 
 .tree-node--capstone .tree-node__orb {
-  width: 4.7rem;
-  height: 4.7rem;
-  border-color: rgb(245 188 82 / 0.62);
+  width: 4.25rem;
+  height: 4.25rem;
+  border-color: var(--ll-color-border-strong);
+}
+
+.skill-tree__canvas--map .tree-node {
+  width: min(100%, 7rem);
+  min-height: 5.7rem;
+  padding-bottom: 0.85rem;
+}
+
+.skill-tree__canvas--map .tree-node--major {
+  min-height: 6.45rem;
+}
+
+.skill-tree__canvas--map .tree-node--major .tree-node__orb {
+  width: 3.75rem;
+  height: 3.75rem;
+}
+
+.skill-tree__canvas--map .tree-node--minor .tree-node__orb {
+  width: 3rem;
+  height: 3rem;
 }
 
 .tree-node--locked {
@@ -412,7 +533,15 @@
     padding-bottom: 1rem;
   }
 
+  .skill-tree__canvas--map {
+    min-height: 720px;
+  }
+
   .tree-branches {
     min-width: max(58rem, calc(var(--branch-count) * 17rem));
+  }
+
+  .tree-map {
+    min-width: 62rem;
   }
 }
