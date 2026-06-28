@@ -225,107 +225,52 @@
           </div>
         </section>
 
-        <section class="grid gap-4">
-          <article
-            *ngFor="let branch of style.skillTree.branches; trackBy: trackBranch"
-            class="ll-panel overflow-hidden"
-          >
-            <div
-              class="flex flex-wrap items-start justify-between gap-3 border-b border-light_gray/70 p-4"
-            >
-              <div class="min-w-0">
-                <h2 class="ll-heading">{{ branch.name }}</h2>
-                <p class="ll-copy mt-1">{{ branchDescription(branch) }}</p>
-              </div>
-              <span class="ll-badge ll-badge-accent rounded">
-                {{ branch.pointsSpent }} spent
-              </span>
+        <section class="ll-panel p-4">
+          <div class="mb-4 flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <h2 class="ll-heading">Skill Tree</h2>
+              <p class="ll-copy">
+                {{ style.skillPointsAvailable }} points available |
+                {{ style.skillPointsSpent }} spent
+              </p>
             </div>
-
-            <div
-              class="grid gap-3 border-b border-light_gray/50 p-4 text-xs md:grid-cols-2"
-            >
-              <div>
-                <div class="font-semibold uppercase text-zinc-400">Tags</div>
-                <div class="mt-2 flex flex-wrap gap-2">
-                  <span
-                    *ngFor="let tag of branchTags(branch); trackBy: trackText"
-                    class="ll-badge rounded text-zinc-300"
-                  >
-                    {{ tag }}
-                  </span>
-                </div>
-              </div>
-              <div>
-                <div class="font-semibold uppercase text-zinc-400">Stats</div>
-                <div class="mt-2 flex flex-wrap gap-2">
-                  <span
-                    *ngFor="let stat of branchStats(branch); trackBy: trackText"
-                    class="ll-badge rounded text-zinc-300"
-                  >
-                    {{ stat }}
-                  </span>
-                </div>
-              </div>
+            <div class="flex flex-wrap gap-2">
+              <span class="ll-badge ll-badge-success rounded">Ready</span>
+              <span class="ll-badge ll-badge-accent rounded">Ranked</span>
+              <span class="ll-badge ll-badge-muted rounded">Locked</span>
             </div>
+          </div>
 
-            <div class="grid gap-3 p-3 md:grid-cols-2 2xl:grid-cols-3">
+          <div class="combat-tree">
+            <div
+              class="combat-tree-grid"
+              [style.grid-template-columns]="
+                'repeat(' +
+                style.skillTree.branches.length +
+                ', minmax(14rem, 1fr))'
+              "
+            >
               <article
-                *ngFor="let node of branch.nodes; trackBy: trackNode"
-                class="ll-card p-3"
-                [ngClass]="{
-                  'll-card-accent': node.rank > 0,
-                  'border-primary/60': node.canRankUp,
-                  'opacity-70': !node.isUnlocked,
-                }"
+                *ngFor="
+                  let branch of style.skillTree.branches;
+                  trackBy: trackBranch
+                "
+                class="combat-tree-branch"
               >
-                <div class="flex items-start justify-between gap-3">
-                  <div class="min-w-0">
-                    <div class="flex flex-wrap items-center gap-2">
-                      <h3 class="ll-heading text-base">{{ node.name }}</h3>
-                      <span class="ll-badge rounded text-zinc-300">
-                        {{ node.nodeType }}
-                      </span>
-                    </div>
-                    <p class="ll-copy mt-1 text-xs">
-                      Row {{ node.row }} | {{ node.lane }} | Level
-                      {{ node.requiredLevel }}
-                    </p>
-                  </div>
-
-                  <div class="shrink-0 text-right">
-                    <div class="ll-stat-label">Rank</div>
-                    <div class="text-base font-semibold text-primary">
-                      {{ node.rank }}/{{ node.maxRank }}
-                    </div>
-                  </div>
-                </div>
-
-                <div *ngIf="hasNodeDetails(node)" class="mt-3 grid gap-2">
-                  <p *ngIf="node.description" class="ll-copy text-xs">
-                    {{ node.description }}
+                <div class="relative z-[1] mb-4 text-center">
+                  <h3 class="ll-heading text-lg">{{ branch.name }}</h3>
+                  <p class="ll-copy mt-1 text-xs">
+                    {{ branchDescription(branch) }}
                   </p>
-
-                  <div
-                    *ngIf="nodeEffects(node).length"
-                    class="rounded border border-light_gray/50 px-3 py-2 text-xs text-zinc-300"
-                  >
-                    <div class="mb-1 font-semibold uppercase text-zinc-400">
-                      Effects
-                    </div>
-                    <div
+                  <div class="mt-3 flex flex-wrap justify-center gap-2">
+                    <span class="ll-badge ll-badge-accent rounded">
+                      {{ branch.pointsSpent }} spent
+                    </span>
+                    <span
                       *ngFor="
-                        let effect of nodeEffects(node);
+                        let tag of branchTags(branch);
                         trackBy: trackText
                       "
-                    >
-                      {{ effect }}
-                    </div>
-                  </div>
-
-                  <div class="flex flex-wrap gap-2">
-                    <span
-                      *ngFor="let tag of nodeTags(node); trackBy: trackText"
                       class="ll-badge rounded text-zinc-300"
                     >
                       {{ tag }}
@@ -333,21 +278,122 @@
                   </div>
                 </div>
 
-                <button
-                  type="button"
-                  class="ll-button mt-3 w-full"
-                  [disabled]="!node.canRankUp || combatStyleState.saving()"
-                  (click)="rankUpNode(style, node)"
+                <div
+                  *ngFor="let row of branchRows(branch); trackBy: trackRow"
+                  class="combat-tree-tier"
                 >
-                  {{ node.canRankUp ? "Rank Up" : "Locked" }}
-                </button>
+                  <button
+                    *ngFor="
+                      let node of nodesInRow(branch, row);
+                      trackBy: trackNode
+                    "
+                    type="button"
+                    class="combat-tree-node"
+                    [ngClass]="{
+                      'combat-tree-node-major': node.nodeType === 'Major',
+                      'combat-tree-node-ranked': node.rank > 0,
+                      'combat-tree-node-ready': node.canRankUp,
+                      'combat-tree-node-locked': !node.isUnlocked,
+                      'combat-tree-node-selected': isSelectedNode(node),
+                    }"
+                    (click)="selectNode(node)"
+                  >
+                    <span class="combat-tree-node-orb">
+                      {{ nodeIcon(node) }}
+                    </span>
+                    <span class="combat-tree-node-rank">
+                      {{ nodeRankLabel(node) }}
+                    </span>
+                    <span class="combat-tree-node-name">
+                      {{ node.name }}
+                    </span>
+                  </button>
+                </div>
               </article>
             </div>
-          </article>
+          </div>
         </section>
       </main>
 
       <aside class="grid content-start gap-4">
+        <section class="ll-panel p-4" *ngIf="selectedNode() as node">
+          <div class="flex items-start justify-between gap-3">
+            <div class="min-w-0">
+              <div class="ll-stat-label">Selected Skill</div>
+              <h2 class="ll-heading mt-1">{{ node.name }}</h2>
+              <p class="ll-copy mt-1 text-xs">
+                {{ node.nodeType }} | {{ node.lane }} | Level
+                {{ node.requiredLevel }}
+              </p>
+            </div>
+            <span
+              class="ll-badge rounded"
+              [ngClass]="{
+                'll-badge-success': node.canRankUp,
+                'll-badge-accent': node.rank > 0 && !node.canRankUp,
+                'll-badge-muted': !node.isUnlocked,
+              }"
+            >
+              {{ nodeStatusLabel(node) }}
+            </span>
+          </div>
+
+          <div class="mt-4 flex items-center justify-between gap-3">
+            <span class="text-sm text-zinc-400">Rank</span>
+            <span class="text-lg font-semibold text-primary">
+              {{ nodeRankLabel(node) }}
+            </span>
+          </div>
+
+          <p *ngIf="node.description" class="ll-copy mt-3">
+            {{ node.description }}
+          </p>
+
+          <div *ngIf="nodeEffects(node).length" class="ll-card mt-4 p-3">
+            <div class="ll-stat-label">Effects</div>
+            <div class="mt-2 grid gap-2 text-sm text-zinc-300">
+              <div *ngFor="let effect of nodeEffects(node); trackBy: trackText">
+                {{ effect }}
+              </div>
+            </div>
+          </div>
+
+          <div *ngIf="nodeTooltipChanges(node).length" class="ll-card mt-3 p-3">
+            <div class="ll-stat-label">Changes</div>
+            <div class="mt-2 grid gap-2 text-sm text-zinc-300">
+              <div
+                *ngFor="
+                  let change of nodeTooltipChanges(node);
+                  trackBy: trackText
+                "
+              >
+                {{ change }}
+              </div>
+            </div>
+          </div>
+
+          <div *ngIf="nodeTags(node).length" class="mt-4">
+            <div class="ll-stat-label mb-2">Tags</div>
+            <div class="flex flex-wrap gap-2">
+              <span
+                *ngFor="let tag of nodeTags(node); trackBy: trackText"
+                class="ll-badge rounded text-zinc-300"
+              >
+                {{ tag }}
+              </span>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            class="ll-button mt-4 w-full"
+            [disabled]="!node.canRankUp || combatStyleState.saving()"
+            (click)="rankUpNode(style, node)"
+          >
+            {{ node.canRankUp ? "Rank Up" : "Locked" }}
+          </button>
+        </section>
+
         <section class="ll-panel p-4" *ngIf="combatStyleState.buildPreview() as preview">
           <h2 class="ll-heading">Build Preview</h2>
           <p class="ll-copy mt-1">{{ preview.buildName }}</p>

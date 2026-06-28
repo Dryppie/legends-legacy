@@ -16,9 +16,11 @@ import {
   standalone: true,
   imports: [CommonModule, DefaultHeaderComponent, RegularButtonComponent],
   templateUrl: './combat-style.component.html',
+  styleUrl: './combat-style.component.css',
 })
 export class CombatStyleComponent implements OnInit {
   readonly selectedStyleId = signal<string | null>(null);
+  readonly selectedNodeId = signal<string | null>(null);
 
   readonly selectedStyle = computed<CombatStyleDto | null>(() => {
     const styles = this.combatStyleState.styles();
@@ -32,6 +34,21 @@ export class CombatStyleComponent implements OnInit {
     );
   });
 
+  readonly selectedNode = computed<CombatStyleSkillTreeNodeDto | null>(() => {
+    const style = this.selectedStyle();
+    if (!style) return null;
+
+    const nodes = style.skillTree.branches.flatMap((branch) => branch.nodes);
+    const selectedId = this.selectedNodeId();
+
+    return (
+      nodes.find((node) => node.id === selectedId) ??
+      nodes.find((node) => node.canRankUp) ??
+      nodes[0] ??
+      null
+    );
+  });
+
   constructor(public readonly combatStyleState: CombatStyleStateService) {}
 
   ngOnInit(): void {
@@ -40,6 +57,11 @@ export class CombatStyleComponent implements OnInit {
 
   selectStyle(style: CombatStyleDto): void {
     this.selectedStyleId.set(style.id);
+    this.selectedNodeId.set(null);
+  }
+
+  selectNode(node: CombatStyleSkillTreeNodeDto): void {
+    this.selectedNodeId.set(node.id);
   }
 
   experiencePercent(style: CombatStyleDto): number {
@@ -94,6 +116,27 @@ export class CombatStyleComponent implements OnInit {
     return branch.recommendedStats ?? [];
   }
 
+  branchRows(branch: CombatStyleSkillTreeBranchDto): number[] {
+    return [...new Set(branch.nodes.map((node) => node.row))].sort(
+      (left, right) => left - right,
+    );
+  }
+
+  nodesInRow(
+    branch: CombatStyleSkillTreeBranchDto,
+    row: number,
+  ): CombatStyleSkillTreeNodeDto[] {
+    return branch.nodes
+      .filter((node) => node.row === row)
+      .sort((left, right) => {
+        if (left.nodeType !== right.nodeType) {
+          return left.nodeType === 'Major' ? -1 : 1;
+        }
+
+        return left.name.localeCompare(right.name);
+      });
+  }
+
   nodeTags(node: CombatStyleSkillTreeNodeDto): string[] {
     return node.tags ?? [];
   }
@@ -120,6 +163,29 @@ export class CombatStyleComponent implements OnInit {
     );
   }
 
+  nodeIcon(node: CombatStyleSkillTreeNodeDto): string {
+    if (node.nodeType === 'Major') {
+      return node.name.slice(0, 1);
+    }
+
+    return '+';
+  }
+
+  nodeRankLabel(node: CombatStyleSkillTreeNodeDto): string {
+    return `${node.rank}/${node.maxRank}`;
+  }
+
+  nodeStatusLabel(node: CombatStyleSkillTreeNodeDto): string {
+    if (node.rank >= node.maxRank) return 'Maxed';
+    if (node.canRankUp) return 'Ready';
+    if (node.isUnlocked) return 'Unlocked';
+    return `Level ${node.requiredLevel}`;
+  }
+
+  isSelectedNode(node: CombatStyleSkillTreeNodeDto): boolean {
+    return this.selectedNode()?.id === node.id;
+  }
+
   trackStyle(_: number, style: CombatStyleDto): string {
     return style.id;
   }
@@ -134,6 +200,10 @@ export class CombatStyleComponent implements OnInit {
 
   trackNode(_: number, node: CombatStyleSkillTreeNodeDto): string {
     return node.id;
+  }
+
+  trackRow(_: number, row: number): number {
+    return row;
   }
 
   trackRule(_: number, rule: CombatStyleRuleSummaryDto): string {

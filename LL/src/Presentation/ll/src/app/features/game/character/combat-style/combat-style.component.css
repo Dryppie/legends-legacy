@@ -1,0 +1,179 @@
+.combat-tree {
+  position: relative;
+  overflow-x: auto;
+  border: 1px solid var(--ll-color-border);
+  border-radius: var(--ll-radius-md);
+  background:
+    radial-gradient(circle at 50% 12%, rgba(249, 220, 160, 0.12), transparent 24rem),
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.38));
+  padding: 1rem;
+}
+
+.combat-tree-grid {
+  display: grid;
+  min-width: 760px;
+  gap: 1rem;
+}
+
+.combat-tree-branch {
+  position: relative;
+  min-width: 0;
+  border: 1px solid rgba(249, 220, 160, 0.18);
+  border-radius: var(--ll-radius-md);
+  background: rgba(0, 0, 0, 0.2);
+  padding: 0.75rem;
+}
+
+.combat-tree-branch::before {
+  position: absolute;
+  top: 6.25rem;
+  bottom: 1.5rem;
+  left: 50%;
+  width: 1px;
+  background: linear-gradient(
+    to bottom,
+    rgba(249, 220, 160, 0.54),
+    rgba(249, 220, 160, 0.16)
+  );
+  content: "";
+  transform: translateX(-50%);
+}
+
+.combat-tree-tier {
+  position: relative;
+  display: flex;
+  min-height: 7.5rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+.combat-tree-tier::before {
+  position: absolute;
+  top: 50%;
+  left: 18%;
+  right: 18%;
+  height: 1px;
+  background: linear-gradient(
+    to right,
+    transparent,
+    rgba(249, 220, 160, 0.34),
+    transparent
+  );
+  content: "";
+}
+
+.combat-tree-node {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  width: 5.5rem;
+  min-width: 5.5rem;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--ll-color-text-muted);
+  text-align: center;
+}
+
+.combat-tree-node:hover:not(:disabled) .combat-tree-node-orb {
+  border-color: var(--ll-color-primary);
+  box-shadow:
+    0 0 0 3px rgba(249, 220, 160, 0.1),
+    0 0 22px rgba(249, 220, 160, 0.3);
+}
+
+.combat-tree-node-orb {
+  display: flex;
+  height: 4rem;
+  width: 4rem;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid rgba(212, 212, 216, 0.36);
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at 50% 34%, rgba(255, 255, 255, 0.1), transparent 1.35rem),
+    rgba(0, 0, 0, 0.64);
+  color: rgba(212, 212, 216, 0.86);
+  font-family: var(--ll-font-display);
+  font-size: 1.25rem;
+  font-weight: var(--ll-weight-semibold);
+  transition:
+    border-color 150ms ease,
+    box-shadow 150ms ease,
+    color 150ms ease,
+    transform 150ms ease;
+}
+
+.combat-tree-node-rank {
+  margin-top: -1rem;
+  border: 1px solid var(--ll-color-border);
+  border-radius: var(--ll-radius-sm);
+  background: #090909;
+  padding: 0.1rem 0.4rem;
+  color: var(--ll-color-primary);
+  font-size: 0.7rem;
+  line-height: 1;
+}
+
+.combat-tree-node-name {
+  width: 100%;
+  overflow: hidden;
+  color: var(--ll-color-text);
+  font-size: 0.72rem;
+  font-weight: var(--ll-weight-semibold);
+  line-height: 1.15;
+  text-overflow: ellipsis;
+}
+
+.combat-tree-node-ready .combat-tree-node-orb {
+  border-color: rgba(65, 241, 182, 0.72);
+  color: var(--ll-color-success);
+  box-shadow: 0 0 16px rgba(65, 241, 182, 0.12);
+}
+
+.combat-tree-node-ranked .combat-tree-node-orb {
+  border-color: rgba(249, 220, 160, 0.92);
+  color: var(--ll-color-primary);
+  box-shadow:
+    inset 0 0 16px rgba(249, 220, 160, 0.12),
+    0 0 24px rgba(249, 220, 160, 0.2);
+}
+
+.combat-tree-node-locked {
+  opacity: 0.56;
+}
+
+.combat-tree-node-locked .combat-tree-node-orb {
+  border-color: rgba(113, 113, 122, 0.48);
+  color: rgba(161, 161, 170, 0.68);
+}
+
+.combat-tree-node-selected .combat-tree-node-orb {
+  transform: translateY(-2px);
+  border-color: var(--ll-color-primary);
+  box-shadow:
+    0 0 0 4px rgba(249, 220, 160, 0.12),
+    0 0 28px rgba(249, 220, 160, 0.32);
+}
+
+.combat-tree-node-major .combat-tree-node-orb {
+  height: 4.5rem;
+  width: 4.5rem;
+  font-size: 1.4rem;
+}
+
+@media (max-width: 48rem) {
+  .combat-tree {
+    padding: 0.75rem;
+  }
+
+  .combat-tree-grid {
+    min-width: 680px;
+  }
+
+  .combat-tree-node {
+    width: 5rem;
+    min-width: 5rem;
+  }
+}
