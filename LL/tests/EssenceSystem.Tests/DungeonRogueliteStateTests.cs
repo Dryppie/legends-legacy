@@ -1206,11 +1206,19 @@ public sealed class DungeonRogueliteStateTests
         var directory = new DirectoryInfo(AppContext.BaseDirectory);
         while (directory is not null)
         {
-            var dataPath = Path.Combine(directory.FullName, "src", "API", "API.LL", "Data");
-            var boonCandidate = Path.Combine(dataPath, "dungeon-boons.json");
-            if (File.Exists(boonCandidate))
+            var candidates = new[]
             {
-                return Path.Combine(directory.FullName, "src", "API", "API.LL");
+                Path.Combine(directory.FullName, "src", "API", "API.LL"),
+                Path.Combine(directory.FullName, "LL", "src", "API", "API.LL")
+            };
+
+            foreach (var candidate in candidates)
+            {
+                var boonCandidate = Path.Combine(candidate, "Data", "dungeon-boons.json");
+                if (File.Exists(boonCandidate))
+                {
+                    return candidate;
+                }
             }
 
             directory = directory.Parent;

@@ -86,7 +86,9 @@ public sealed record EffectPredicate
     public bool ActiveAbilityOnly { get; init; }
     public bool PassiveAbilityOnly { get; init; }
     public decimal? SourceHealthPercentAtOrBelow { get; init; }
+    public IReadOnlyList<StyleValueModifier> SourceHealthPercentAtOrBelowModifiers { get; init; } = [];
     public decimal? TargetHealthPercentAtOrBelow { get; init; }
+    public IReadOnlyList<StyleValueModifier> TargetHealthPercentAtOrBelowModifiers { get; init; } = [];
     public bool MultiTargetOnly { get; init; }
     public bool AmplifiableEffectOnly { get; init; }
     public bool HealOrBarrierOnly { get; init; }

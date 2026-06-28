@@ -1,5 +1,4 @@
 using Domain.Models.Attributes.Modifiers;
-using Domain.Models.CombatStyles;
 using Domain.Models.Essences.Definitions;
 using Domain.Models.Snapshots;
 
@@ -13,5 +12,4 @@ public sealed record DungeonCombatPlan(
     IReadOnlyList<Guid> EnemySourceEntityIds,
     IReadOnlyList<AttributeModifierBase> RunAttributeModifiers,
     IReadOnlyList<EssenceAbilityModifierDefinition> RunAbilityModifiers,
-    IReadOnlyList<AttributeModifierBase> EnemyAttributeModifiers,
-    CombatStyleSnapshot? CombatStyle);
+    IReadOnlyList<AttributeModifierBase> EnemyAttributeModifiers);

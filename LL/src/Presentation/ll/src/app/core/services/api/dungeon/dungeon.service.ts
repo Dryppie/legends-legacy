@@ -87,16 +87,6 @@ export interface DungeonRunState {
   currentBossModifiers: DungeonBossModifier[];
   currentMechanicThresholds: DungeonMechanicThresholdState[];
   masteryAwardReasons: DungeonMasteryAwardReason[];
-  combatStyle?: DungeonCombatStyleSnapshot | null;
-}
-
-export interface DungeonCombatStyleSnapshot {
-  styleId: string;
-  styleName: string;
-  level: number;
-  experience: number;
-  selectedFocusId?: string | null;
-  selectedFocusName?: string | null;
 }
 
 export interface DungeonLootBag {
