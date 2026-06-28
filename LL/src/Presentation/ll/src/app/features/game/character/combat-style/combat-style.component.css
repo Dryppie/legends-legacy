@@ -4,63 +4,231 @@
   border: 1px solid var(--ll-color-border);
   border-radius: var(--ll-radius-md);
   background:
-    radial-gradient(circle at 50% 12%, rgba(249, 220, 160, 0.12), transparent 24rem),
-    linear-gradient(to bottom, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.38));
-  padding: 1rem;
+    radial-gradient(circle at 50% 10%, rgba(249, 220, 160, 0.12), transparent 24rem),
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.42));
+  padding: 0.75rem;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.03),
+    inset 0 24rem 18rem rgba(249, 220, 160, 0.03);
 }
 
-.combat-tree-grid {
+.combat-tree-core,
+.combat-tree-lanes,
+.combat-tree-map,
+.combat-tree-node-grid {
+  min-width: 860px;
+}
+
+.combat-tree-core {
   display: grid;
-  min-width: 760px;
-  gap: 1rem;
+  grid-template-columns: minmax(14rem, 1fr) 3rem minmax(14rem, 1fr);
+  align-items: stretch;
+  border: 1px solid rgba(249, 220, 160, 0.16);
+  border-radius: var(--ll-radius-md) var(--ll-radius-md) 0 0;
+  background: rgba(0, 0, 0, 0.18);
 }
 
-.combat-tree-branch {
+.combat-tree-core-card {
+  padding: 0.875rem 1rem;
+  text-align: center;
+}
+
+.combat-tree-core-card-active {
+  border-left: 1px solid rgba(249, 220, 160, 0.12);
+}
+
+.combat-tree-core-link {
+  position: relative;
+  min-height: 100%;
+}
+
+.combat-tree-core-link::before,
+.combat-tree-core-link::after {
+  position: absolute;
+  content: "";
+}
+
+.combat-tree-core-link::before {
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: rgba(249, 220, 160, 0.42);
+}
+
+.combat-tree-core-link::after {
+  top: calc(50% - 0.25rem);
+  right: 0.15rem;
+  height: 0.5rem;
+  width: 0.5rem;
+  border-top: 1px solid rgba(249, 220, 160, 0.6);
+  border-right: 1px solid rgba(249, 220, 160, 0.6);
+  transform: rotate(45deg);
+}
+
+.combat-tree-lanes {
+  display: grid;
+  overflow: hidden;
+  border-right: 1px solid rgba(249, 220, 160, 0.16);
+  border-left: 1px solid rgba(249, 220, 160, 0.16);
+  background:
+    linear-gradient(to right, rgba(249, 220, 160, 0.06), transparent 16%, transparent 84%, rgba(249, 220, 160, 0.06)),
+    rgba(0, 0, 0, 0.18);
+}
+
+.combat-tree-lane-title {
   position: relative;
   min-width: 0;
-  border: 1px solid rgba(249, 220, 160, 0.18);
-  border-radius: var(--ll-radius-md);
-  background: rgba(0, 0, 0, 0.2);
-  padding: 0.75rem;
+  padding: 0.875rem 0.75rem;
+  text-align: center;
 }
 
-.combat-tree-branch::before {
-  position: absolute;
-  top: 6.25rem;
-  bottom: 1.5rem;
-  left: 50%;
-  width: 1px;
-  background: linear-gradient(
-    to bottom,
-    rgba(249, 220, 160, 0.54),
-    rgba(249, 220, 160, 0.16)
-  );
-  content: "";
-  transform: translateX(-50%);
+.combat-tree-lane-title:not(:last-child) {
+  border-right: 1px solid rgba(249, 220, 160, 0.12);
 }
 
-.combat-tree-tier {
+.combat-tree-map {
+  overflow: hidden;
+  border: 1px solid rgba(249, 220, 160, 0.16);
+  border-top: 0;
+  border-radius: 0 0 var(--ll-radius-md) var(--ll-radius-md);
+  background:
+    radial-gradient(circle at 50% 24%, rgba(249, 220, 160, 0.1), transparent 18rem),
+    rgba(0, 0, 0, 0.18);
+}
+
+.combat-tree-row {
   position: relative;
-  display: flex;
-  min-height: 7.5rem;
-  align-items: center;
-  justify-content: center;
-  gap: 0.75rem;
+  padding: 0.95rem;
+  border-top: 1px solid rgba(249, 220, 160, 0.12);
 }
 
-.combat-tree-tier::before {
+.combat-tree-row:first-child {
+  border-top: 0;
+}
+
+.combat-tree-row::before {
+  position: absolute;
+  top: -0.65rem;
+  left: 50%;
+  height: 1.3rem;
+  width: 1px;
+  background: rgba(249, 220, 160, 0.34);
+  content: "";
+}
+
+.combat-tree-row:first-child::before {
+  top: -1rem;
+  height: 1rem;
+}
+
+.combat-tree-row-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+  padding-right: 0.5rem;
+  padding-left: 0.5rem;
+}
+
+.combat-tree-node-grid {
+  position: relative;
+  display: grid;
+  gap: 0;
+  overflow: hidden;
+  border: 1px solid rgba(249, 220, 160, 0.12);
+  border-radius: var(--ll-radius-sm);
+  background: rgba(0, 0, 0, 0.16);
+}
+
+.combat-tree-node-grid::before {
   position: absolute;
   top: 50%;
-  left: 18%;
-  right: 18%;
+  left: 10%;
+  right: 10%;
+  z-index: 0;
   height: 1px;
   background: linear-gradient(
     to right,
     transparent,
-    rgba(249, 220, 160, 0.34),
+    rgba(249, 220, 160, 0.22),
+    rgba(249, 220, 160, 0.32),
+    rgba(249, 220, 160, 0.22),
     transparent
   );
   content: "";
+}
+
+.combat-tree-row-lane {
+  position: relative;
+  display: flex;
+  min-height: 9rem;
+  min-width: 0;
+  align-items: center;
+  justify-content: center;
+  padding: 0.9rem 0.75rem;
+  background:
+    radial-gradient(circle at 50% 44%, rgba(249, 220, 160, 0.08), transparent 7rem),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.018), transparent 52%, rgba(0, 0, 0, 0.08));
+}
+
+.combat-tree-row-lane:not(:last-child) {
+  border-right: 1px solid rgba(249, 220, 160, 0.08);
+}
+
+.combat-tree-row-lane::before {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 1px;
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    rgba(249, 220, 160, 0.24),
+    transparent
+  );
+  content: "";
+}
+
+.combat-tree-lane-node-line {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.7rem;
+  width: 100%;
+}
+
+.combat-tree-lane-node-line::before {
+  position: absolute;
+  top: 2.5rem;
+  left: 10%;
+  right: 10%;
+  z-index: 0;
+  height: 1px;
+  background: linear-gradient(
+    to right,
+    transparent,
+    rgba(249, 220, 160, 0.22),
+    transparent
+  );
+  content: "";
+}
+
+.combat-tree-cell-left {
+  color: #8ecbff;
+}
+
+.combat-tree-cell-middle {
+  color: #d4e7ff;
+}
+
+.combat-tree-cell-right {
+  color: #d8a8ff;
 }
 
 .combat-tree-node {
@@ -74,6 +242,16 @@
   gap: 0.35rem;
   color: var(--ll-color-text-muted);
   text-align: center;
+}
+
+.combat-tree-node-major {
+  width: 8rem;
+  min-width: 8rem;
+}
+
+.combat-tree-node-minor {
+  width: 5.1rem;
+  min-width: 5.1rem;
 }
 
 .combat-tree-node:hover:not(:disabled) .combat-tree-node-orb {
@@ -105,6 +283,18 @@
     transform 150ms ease;
 }
 
+.combat-tree-node-major .combat-tree-node-orb {
+  height: 5rem;
+  width: 5rem;
+  font-size: 1.5rem;
+}
+
+.combat-tree-node-minor .combat-tree-node-orb {
+  height: 3.35rem;
+  width: 3.35rem;
+  font-size: 1rem;
+}
+
 .combat-tree-node-rank {
   margin-top: -1rem;
   border: 1px solid var(--ll-color-border);
@@ -124,6 +314,10 @@
   font-weight: var(--ll-weight-semibold);
   line-height: 1.15;
   text-overflow: ellipsis;
+}
+
+.combat-tree-node-major .combat-tree-node-name {
+  font-size: 0.82rem;
 }
 
 .combat-tree-node-ready .combat-tree-node-orb {
@@ -157,19 +351,16 @@
     0 0 28px rgba(249, 220, 160, 0.32);
 }
 
-.combat-tree-node-major .combat-tree-node-orb {
-  height: 4.5rem;
-  width: 4.5rem;
-  font-size: 1.4rem;
-}
-
 @media (max-width: 48rem) {
   .combat-tree {
     padding: 0.75rem;
   }
 
-  .combat-tree-grid {
-    min-width: 680px;
+  .combat-tree-core,
+  .combat-tree-lanes,
+  .combat-tree-map,
+  .combat-tree-node-grid {
+    min-width: 760px;
   }
 
   .combat-tree-node {

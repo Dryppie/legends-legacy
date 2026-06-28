@@ -596,7 +596,10 @@ public sealed class CombatStyleService : ICombatStyleService
             && candidate.Row == node.Row - 1
             && GetNodeRank(nodes, candidate.Id) > 0);
 
-        return previousMajor is not null && CanLaneUnlock(previousMajor.Lane, node.Lane);
+        if (previousMajor is null)
+            return false;
+
+        return !IsMajorNode(node) || CanLaneUnlock(previousMajor.Lane, node.Lane);
     }
 
     private static bool CanLaneUnlock(string sourceLane, string targetLane) =>

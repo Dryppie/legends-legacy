@@ -162,72 +162,6 @@
         <section class="ll-panel p-4">
           <div class="mb-4 flex flex-wrap items-start justify-between gap-3">
             <div>
-              <h2 class="ll-heading">Focus Paths</h2>
-              <p class="ll-copy">
-                Selected:
-                {{
-                  style.selectedFocusId
-                    ? style.selectedFocusId
-                    : "No focus selected"
-                }}
-              </p>
-            </div>
-          </div>
-
-          <div class="grid gap-3 md:grid-cols-3">
-            <article
-              *ngFor="let focus of style.focuses; trackBy: trackFocus"
-              class="ll-card p-3"
-              [ngClass]="{
-                'll-card-accent': focus.isSelected,
-                'opacity-70': !focus.isUnlocked,
-              }"
-            >
-              <div class="flex items-start justify-between gap-3">
-                <div class="min-w-0">
-                  <h3 class="ll-heading text-base">{{ focus.name }}</h3>
-                  <p class="ll-copy mt-1 text-xs">
-                    {{ focusDescription(focus) }}
-                  </p>
-                </div>
-                <span
-                  class="ll-badge rounded"
-                  [ngClass]="
-                    focus.isUnlocked ? 'll-badge-success' : 'll-badge-muted'
-                  "
-                >
-                  L{{ focus.unlockLevel }}
-                </span>
-              </div>
-
-              <div class="mt-3 flex flex-wrap gap-2">
-                <span
-                  *ngFor="let tag of focus.recommendedTags; trackBy: trackText"
-                  class="ll-badge rounded text-zinc-300"
-                >
-                  {{ tag }}
-                </span>
-              </div>
-
-              <button
-                type="button"
-                class="ll-button mt-3 w-full"
-                [disabled]="
-                  !focus.isUnlocked ||
-                  focus.isSelected ||
-                  combatStyleState.saving()
-                "
-                (click)="selectFocus(style, focus)"
-              >
-                {{ focus.isSelected ? "Selected" : "Select Focus" }}
-              </button>
-            </article>
-          </div>
-        </section>
-
-        <section class="ll-panel p-4">
-          <div class="mb-4 flex flex-wrap items-start justify-between gap-3">
-            <div>
               <h2 class="ll-heading">Skill Tree</h2>
               <p class="ll-copy">
                 {{ style.skillPointsAvailable }} points available |
@@ -242,74 +176,105 @@
           </div>
 
           <div class="combat-tree">
-            <div
-              class="combat-tree-grid"
-              [style.grid-template-columns]="
-                'repeat(' +
-                style.skillTree.branches.length +
-                ', minmax(14rem, 1fr))'
-              "
-            >
-              <article
-                *ngFor="
-                  let branch of style.skillTree.branches;
-                  trackBy: trackBranch
-                "
-                class="combat-tree-branch"
-              >
-                <div class="relative z-[1] mb-4 text-center">
-                  <h3 class="ll-heading text-lg">{{ branch.name }}</h3>
-                  <p class="ll-copy mt-1 text-xs">
-                    {{ branchDescription(branch) }}
-                  </p>
-                  <div class="mt-3 flex flex-wrap justify-center gap-2">
-                    <span class="ll-badge ll-badge-accent rounded">
-                      {{ branch.pointsSpent }} spent
-                    </span>
-                    <span
-                      *ngFor="
-                        let tag of branchTags(branch);
-                        trackBy: trackText
-                      "
-                      class="ll-badge rounded text-zinc-300"
-                    >
-                      {{ tag }}
-                    </span>
-                  </div>
-                </div>
-
-                <div
-                  *ngFor="let row of branchRows(branch); trackBy: trackRow"
-                  class="combat-tree-tier"
-                >
-                  <button
-                    *ngFor="
-                      let node of nodesInRow(branch, row);
-                      trackBy: trackNode
-                    "
-                    type="button"
-                    class="combat-tree-node"
-                    [ngClass]="{
-                      'combat-tree-node-major': node.nodeType === 'Major',
-                      'combat-tree-node-ranked': node.rank > 0,
-                      'combat-tree-node-ready': node.canRankUp,
-                      'combat-tree-node-locked': !node.isUnlocked,
-                      'combat-tree-node-selected': isSelectedNode(node),
-                    }"
-                    (click)="selectNode(node)"
-                  >
-                    <span class="combat-tree-node-orb">
-                      {{ nodeIcon(node) }}
-                    </span>
-                    <span class="combat-tree-node-rank">
-                      {{ nodeRankLabel(node) }}
-                    </span>
-                    <span class="combat-tree-node-name">
-                      {{ node.name }}
-                    </span>
-                  </button>
-                </div>
+            <div class="combat-tree-core">
+              <article class="combat-tree-core-card">
+                <div class="ll-stat-label">Core Passive</div>
+                <h3 class="ll-heading mt-1">{{ corePassiveName(style) }}</h3>
+                <p class="ll-copy mt-1 text-xs">{{ style.coreMechanic }}</p>
               </article>
+              <div class="combat-tree-core-link"></div>
+              <article class="combat-tree-core-card combat-tree-core-card-active">
+                <div class="ll-stat-label">Core Active</div>
+                <h3 class="ll-heading mt-1">{{ coreActiveName(style) }}</h3>
+                <p class="ll-copy mt-1 text-xs">
+                  {{ coreActiveDescription(style) }}
+                </p>
+              </article>
+            </div>
+
+            <div
+              class="combat-tree-lanes"
+              [style.grid-template-columns]="'repeat(3, minmax(12rem, 1fr))'"
+            >
+              <div
+                *ngFor="let lane of treeLanes; trackBy: trackText"
+                class="combat-tree-lane-title"
+                [ngClass]="laneCellClass(lane)"
+              >
+                <h3 class="ll-heading text-lg">{{ lane }}</h3>
+                <p class="ll-copy mt-1 text-xs">
+                  {{ laneDescription(style, lane) }}
+                </p>
+                <div class="mt-3 flex flex-wrap justify-center gap-2">
+                  <span class="ll-badge ll-badge-accent rounded">
+                    {{ lanePointsSpent(style, lane) }} spent
+                  </span>
+                  <span class="ll-badge rounded text-zinc-300">
+                    {{ lane }}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div
+              class="combat-tree-map"
+            >
+              <ng-container
+                *ngFor="let row of treeRows(style); trackBy: trackRow"
+              >
+                <section class="combat-tree-row">
+                  <div class="combat-tree-row-heading">
+                    <div>
+                      <span class="ll-stat-label">Row {{ row }}</span>
+                      <h3 class="ll-heading mt-1">{{ rowTitle(style, row) }}</h3>
+                    </div>
+                    <p class="ll-copy text-xs">{{ rowDescription(style, row) }}</p>
+                  </div>
+
+                  <div
+                    class="combat-tree-node-grid"
+                    [style.grid-template-columns]="
+                      'repeat(3, minmax(12rem, 1fr))'
+                    "
+                  >
+                    <div
+                      *ngFor="let lane of treeLanes; trackBy: trackText"
+                      class="combat-tree-row-lane"
+                      [ngClass]="laneCellClass(lane)"
+                    >
+                      <div class="combat-tree-lane-node-line">
+                        <button
+                          *ngFor="
+                            let node of laneNodes(style, row, lane);
+                            trackBy: trackNode
+                          "
+                          type="button"
+                          class="combat-tree-node"
+                          [ngClass]="{
+                            'combat-tree-node-major': node.nodeType === 'Major',
+                            'combat-tree-node-minor': node.nodeType !== 'Major',
+                            'combat-tree-node-ranked': node.rank > 0,
+                            'combat-tree-node-ready': node.canRankUp,
+                            'combat-tree-node-locked': !node.isUnlocked,
+                            'combat-tree-node-selected': isSelectedNode(node),
+                          }"
+                          (click)="selectNode(node)"
+                        >
+                          <span class="combat-tree-node-orb">
+                            {{ nodeIcon(node) }}
+                          </span>
+                          <span class="combat-tree-node-rank">
+                            {{ nodeRankLabel(node) }}
+                          </span>
+                          <span class="combat-tree-node-name">
+                            {{ node.name }}
+                          </span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </section>
+              </ng-container>
             </div>
           </div>
         </section>
@@ -348,6 +313,20 @@
           <p *ngIf="node.description" class="ll-copy mt-3">
             {{ node.description }}
           </p>
+
+          <div *ngIf="nodeLockReasons(style, node).length" class="ll-card mt-4 p-3">
+            <div class="ll-stat-label">Requirements</div>
+            <div class="mt-2 grid gap-2 text-sm text-zinc-300">
+              <div
+                *ngFor="
+                  let reason of nodeLockReasons(style, node);
+                  trackBy: trackText
+                "
+              >
+                {{ reason }}
+              </div>
+            </div>
+          </div>
 
           <div *ngIf="nodeEffects(node).length" class="ll-card mt-4 p-3">
             <div class="ll-stat-label">Effects</div>

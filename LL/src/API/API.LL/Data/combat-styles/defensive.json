@@ -21,7 +21,7 @@
       "id": "defensive_unbreakable_aegis",
       "name": "Unbreakable Aegis",
       "description": "Aegis Barrier +20%. While Aegis is active, damage taken -10%. Aegis prevents one interrupt, stun, silence, knockback, or displacement effect.",
-      "unlockLevel": 25,
+      "unlockLevel": 20,
       "recommendedTags": [
         "Left",
         "Major"
@@ -37,7 +37,7 @@
       "id": "defensive_second_wind",
       "name": "Second Wind",
       "description": "If you would take lethal damage while at 75+ Guard, consume 75 Guard, prevent death, set Health to 1, immediately activate Aegis at 75 Guard strength, and heal for 6% Max Health over 4 seconds. 120 second cooldown.",
-      "unlockLevel": 25,
+      "unlockLevel": 20,
       "recommendedTags": [
         "Middle",
         "Major"
@@ -53,7 +53,7 @@
       "id": "defensive_counterpoise",
       "name": "Counterpoise",
       "description": "When Aegis breaks or expires, your next Essence ability within 8 seconds gains up to +12% Effect Potency based on damage absorbed by Aegis. Bonus = absorbed damage / 20% Max Health, capped at 12%. Also refunds 15% resource cost and refunds 10% cooldown if it defeats an enemy or successfully applies a debuff/control effect.",
-      "unlockLevel": 25,
+      "unlockLevel": 20,
       "recommendedTags": [
         "Right",
         "Major"
@@ -121,7 +121,7 @@
       "maxTriggerModifiers": []
     }
   ],
-  "coreMechanic": "Gain Guard when taking damage. At 100 Guard, gain Protective Shell.",
+  "coreMechanic": "Gain Guard from incoming pressure: being attacked, taking damage, blocking, dodging, absorbing hits, and using Essence abilities while injured. Defensive also grants Aegis, which spends Guard to create Barrier, reduce crowd-control duration, and reduce interruption pressure.",
   "skillTreeNodes": [
     {
       "id": "defensive_iron_frame",
@@ -369,16 +369,137 @@
     {
       "id": "defensive_guardian_conduit",
       "branchId": "middle",
-      "name": "Guardian Conduit",
-      "description": "Mutator Group: SupportConversion. When you create a Barrier with an Essence ability, 20% of the Barrier value is also applied to your lowest-Health controlled ally. If no controlled ally exists, 15% of excess Barrier applied to you becomes Guard. While Aegis is active, this shared Barrier value is increased by 50%.",
+      "name": "Sheltered Momentum",
+      "description": "Mutator Group: DefensiveTempo. While Aegis is active, eligible Essence abilities recover cooldown faster and cost less resource. If Aegis survives its full duration, regain a portion of the Guard spent.",
       "maxRank": 1,
       "requiredLevel": 10,
       "requiredNodeId": null,
       "x": 0,
       "y": 3,
       "tags": [
-        "SupportConversion",
+        "DefensiveTempo",
         "Middle",
+        "Major"
+      ],
+      "effects": [
+        "Mutator Group: DefensiveTempo. While Aegis is active, eligible Essence abilities recover cooldown faster and cost less resource. If Aegis survives its full duration, regain a portion of the Guard spent."
+      ],
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 2,
+      "lane": "Middle",
+      "nodeType": "Major",
+      "mutatorKind": "Converter",
+      "mutatorGroups": [
+        "DefensiveTempo"
+      ],
+      "mutator": {
+        "kind": "Converter",
+        "groups": [
+          "DefensiveTempo"
+        ],
+        "conditions": {
+          "requiredAbilityTags": [],
+          "anyAbilityTags": [],
+          "requiredDeliveryTags": [],
+          "anyDeliveryTags": [],
+          "requiredEffectTags": [],
+          "anyEffectTags": [
+            "Damage",
+            "Heal",
+            "Barrier",
+            "Summon",
+            "Debuff",
+            "Resource"
+          ],
+          "effectOperations": [
+            "Damage",
+            "Heal",
+            "GrantBarrier",
+            "Summon",
+            "ApplyStatus",
+            "RestoreResource"
+          ],
+          "allowedDamageTypes": [],
+          "targetSelectors": [],
+          "activeAbilityOnly": true,
+          "passiveAbilityOnly": false,
+          "allowDamageTypeConversionRequired": null,
+          "allowScalingConversionRequired": null,
+          "allowDeliveryConversionRequired": null,
+          "allowTargetingConversionRequired": null,
+          "allowSummonProxyRequired": null,
+          "allowEquipmentOverrideRequired": null,
+          "excludeTrueDamage": true,
+          "excludeHardCrowdControl": true
+        },
+        "transform": {
+          "damageType": null,
+          "targetingType": null,
+          "scalingAttribute": null,
+          "scalingCoefficientOverride": null,
+          "scalingCoefficientMultiplier": null,
+          "effectPotencyMultiplier": null,
+          "cooldownMultiplier": 0.9,
+          "resourceCostMultiplier": 0.9,
+          "addAbilityTags": [],
+          "addDeliveryTags": [],
+          "addEffectTags": [
+            "Damage",
+            "Heal",
+            "Barrier",
+            "Summon",
+            "Debuff",
+            "Resource",
+            "Protected"
+          ],
+          "addEffectTagsToMatchingEffects": [
+            "Damage",
+            "Heal",
+            "Barrier",
+            "Summon",
+            "Debuff",
+            "Resource",
+            "Protected"
+          ]
+        },
+        "tradeoff": {
+          "effectPotencyMultiplier": 0.97,
+          "cooldownMultiplier": null,
+          "resourceCostMultiplier": null,
+          "procCoefficientMultiplier": null
+        },
+        "pvpCoefficient": 0.7
+      },
+      "tooltip": {
+        "affects": [
+          "Eligible active Essence abilities matching DefensiveTempo."
+        ],
+        "changes": [
+          "Mutator Group: DefensiveTempo. While Aegis is active, eligible Essence abilities recover cooldown faster and cost less resource. If Aegis survives its full duration, regain a portion of the Guard spent."
+        ],
+        "tradeoffs": [
+          "Conversion uses a small potency safety tradeoff and PvP coefficient until explicit balance values are authored."
+        ],
+        "doesNotAffect": [
+          "Abilities that do not match the listed tags, effect operations, or conversion flags.",
+          "True damage unless the ability explicitly allows conversion."
+        ]
+      }
+    },
+    {
+      "id": "defensive_retaliatory_shell",
+      "branchId": "right",
+      "name": "Ward the Many",
+      "description": "Mutator Group: SupportConversion. When you create a Barrier with an Essence ability, 20% of the Barrier value is also applied to your lowest-Health controlled ally. If no controlled ally exists, 15% of excess Barrier applied to you becomes Guard. While Aegis is active, this shared Barrier value is increased by 50%.",
+      "maxRank": 1,
+      "requiredLevel": 10,
+      "requiredNodeId": null,
+      "x": 1,
+      "y": 3,
+      "tags": [
+        "SupportConversion",
+        "Right",
         "Major"
       ],
       "effects": [
@@ -387,7 +508,7 @@
       "countsTowardFocus": false,
       "rules": [],
       "row": 2,
-      "lane": "Middle",
+      "lane": "Right",
       "nodeType": "Major",
       "mutatorKind": "Converter",
       "mutatorGroups": [
@@ -480,129 +601,12 @@
       }
     },
     {
-      "id": "defensive_retaliatory_shell",
-      "branchId": "right",
-      "name": "Retaliatory Shell",
-      "description": "Mutator Group: DefensiveConversion. Damage absorbed by Aegis is stored as Retaliation for 8 seconds after Aegis breaks or expires. Your next Essence ability consumes Retaliation. Damage abilities gain bonus damage, healing/barrier abilities gain bonus value, debuff/control abilities gain application chance, and summon/persistent abilities grant their target a Barrier. Bonus is capped at +12% Effect Potency.",
-      "maxRank": 1,
-      "requiredLevel": 10,
-      "requiredNodeId": null,
-      "x": 1,
-      "y": 3,
-      "tags": [
-        "DefensiveConversion",
-        "Right",
-        "Major"
-      ],
-      "effects": [
-        "Mutator Group: DefensiveConversion. Damage absorbed by Aegis is stored as Retaliation for 8 seconds after Aegis breaks or expires. Your next Essence ability consumes Retaliation. Damage abilities gain bonus damage, healing/barrier abilities gain bonus value, debuff/control abilities gain application chance, and summon/persistent abilities grant their target a Barrier. Bonus is capped at +12% Effect Potency."
-      ],
-      "countsTowardFocus": false,
-      "rules": [],
-      "row": 2,
-      "lane": "Right",
-      "nodeType": "Major",
-      "mutatorKind": "Converter",
-      "mutatorGroups": [
-        "DefensiveConversion"
-      ],
-      "mutator": {
-        "kind": "Converter",
-        "groups": [
-          "DefensiveConversion"
-        ],
-        "conditions": {
-          "requiredAbilityTags": [],
-          "anyAbilityTags": [],
-          "requiredDeliveryTags": [],
-          "anyDeliveryTags": [],
-          "requiredEffectTags": [],
-          "anyEffectTags": [
-            "Damage",
-            "Heal",
-            "Barrier",
-            "Summon",
-            "Debuff"
-          ],
-          "effectOperations": [
-            "Damage",
-            "Heal",
-            "GrantBarrier",
-            "Summon",
-            "ApplyStatus"
-          ],
-          "allowedDamageTypes": [],
-          "targetSelectors": [],
-          "activeAbilityOnly": true,
-          "passiveAbilityOnly": false,
-          "allowDamageTypeConversionRequired": null,
-          "allowScalingConversionRequired": null,
-          "allowDeliveryConversionRequired": null,
-          "allowTargetingConversionRequired": null,
-          "allowSummonProxyRequired": null,
-          "allowEquipmentOverrideRequired": null,
-          "excludeTrueDamage": true,
-          "excludeHardCrowdControl": true
-        },
-        "transform": {
-          "damageType": null,
-          "targetingType": null,
-          "scalingAttribute": null,
-          "scalingCoefficientOverride": null,
-          "scalingCoefficientMultiplier": null,
-          "effectPotencyMultiplier": 1.12,
-          "cooldownMultiplier": null,
-          "resourceCostMultiplier": null,
-          "addAbilityTags": [],
-          "addDeliveryTags": [],
-          "addEffectTags": [
-            "Damage",
-            "Heal",
-            "Barrier",
-            "Summon",
-            "Debuff",
-            "Protected"
-          ],
-          "addEffectTagsToMatchingEffects": [
-            "Damage",
-            "Heal",
-            "Barrier",
-            "Summon",
-            "Debuff",
-            "Protected"
-          ]
-        },
-        "tradeoff": {
-          "effectPotencyMultiplier": 0.95,
-          "cooldownMultiplier": 1.03,
-          "resourceCostMultiplier": 1.05,
-          "procCoefficientMultiplier": null
-        },
-        "pvpCoefficient": 0.7
-      },
-      "tooltip": {
-        "affects": [
-          "Eligible active Essence abilities matching DefensiveConversion."
-        ],
-        "changes": [
-          "Mutator Group: DefensiveConversion. Damage absorbed by Aegis is stored as Retaliation for 8 seconds after Aegis breaks or expires. Your next Essence ability consumes Retaliation. Damage abilities gain bonus damage, healing/barrier abilities gain bonus value, debuff/control abilities gain application chance, and summon/persistent abilities grant their target a Barrier. Bonus is capped at +12% Effect Potency."
-        ],
-        "tradeoffs": [
-          "Conversion uses a +5% resource cost safety tradeoff and PvP coefficient until explicit balance values are authored."
-        ],
-        "doesNotAffect": [
-          "Abilities that do not match the listed tags, effect operations, or conversion flags.",
-          "True damage unless the ability explicitly allows conversion."
-        ]
-      }
-    },
-    {
       "id": "defensive_unbreakable_aegis",
       "branchId": "left",
       "name": "Unbreakable Aegis",
       "description": "Aegis Barrier +20%. While Aegis is active, damage taken -10%. Aegis prevents one interrupt, stun, silence, knockback, or displacement effect.",
       "maxRank": 1,
-      "requiredLevel": 25,
+      "requiredLevel": 20,
       "requiredNodeId": null,
       "x": -1,
       "y": 6,
@@ -643,7 +647,7 @@
       "name": "Second Wind",
       "description": "If you would take lethal damage while at 75+ Guard, consume 75 Guard, prevent death, set Health to 1, immediately activate Aegis at 75 Guard strength, and heal for 6% Max Health over 4 seconds. 120 second cooldown.",
       "maxRank": 1,
-      "requiredLevel": 25,
+      "requiredLevel": 20,
       "requiredNodeId": null,
       "x": 0,
       "y": 6,
@@ -684,7 +688,7 @@
       "name": "Counterpoise",
       "description": "When Aegis breaks or expires, your next Essence ability within 8 seconds gains up to +12% Effect Potency based on damage absorbed by Aegis. Bonus = absorbed damage / 20% Max Health, capped at 12%. Also refunds 15% resource cost and refunds 10% cooldown if it defeats an enemy or successfully applies a debuff/control effect.",
       "maxRank": 1,
-      "requiredLevel": 25,
+      "requiredLevel": 20,
       "requiredNodeId": null,
       "x": 1,
       "y": 6,
@@ -978,8 +982,8 @@
     {
       "id": "defensive_guarded_casting",
       "branchId": "middle",
-      "name": "Guarded Casting",
-      "description": "Essence abilities used while you have a Barrier gain +2% / +4% Effect Potency.",
+      "name": "Mender's Shell",
+      "description": "Healing and Barrier effects used while Aegis is active gain +2% / +4% Effect Potency.",
       "maxRank": 2,
       "requiredLevel": 10,
       "requiredNodeId": null,
@@ -988,10 +992,11 @@
       "tags": [
         "Middle",
         "Minor",
+        "Heal",
         "Barrier"
       ],
       "effects": [
-        "Essence abilities used while you have a Barrier gain +2% / +4% Effect Potency."
+        "Healing and Barrier effects used while Aegis is active gain +2% / +4% Effect Potency."
       ],
       "countsTowardFocus": false,
       "rules": [],
@@ -1006,7 +1011,7 @@
           "This style-tree passive while the node has ranks."
         ],
         "changes": [
-          "Essence abilities used while you have a Barrier gain +2% / +4% Effect Potency."
+          "Healing and Barrier effects used while Aegis is active gain +2% / +4% Effect Potency."
         ],
         "tradeoffs": [],
         "doesNotAffect": []
@@ -1018,7 +1023,7 @@
       "name": "Emergency Guard",
       "description": "When you fall below 40% Health, gain 20 / 40 Guard. 45 second cooldown.",
       "maxRank": 2,
-      "requiredLevel": 25,
+      "requiredLevel": 20,
       "requiredNodeId": null,
       "x": -1,
       "y": 7,
@@ -1055,7 +1060,7 @@
       "name": "Soft Landing",
       "description": "When Aegis breaks, gain 4% / 8% damage reduction for 3 seconds.",
       "maxRank": 2,
-      "requiredLevel": 25,
+      "requiredLevel": 20,
       "requiredNodeId": null,
       "x": 0,
       "y": 7,
@@ -1092,7 +1097,7 @@
       "name": "Critical Guard",
       "description": "Enemy critical damage against you reduced by 6% / 12%.",
       "maxRank": 2,
-      "requiredLevel": 25,
+      "requiredLevel": 20,
       "requiredNodeId": null,
       "x": 1,
       "y": 7,
@@ -1129,7 +1134,7 @@
       "name": "Excess Protection",
       "description": "10% / 20% of overhealing or excess barrier applied to you becomes Guard.",
       "maxRank": 2,
-      "requiredLevel": 25,
+      "requiredLevel": 20,
       "requiredNodeId": null,
       "x": 0,
       "y": 8,
