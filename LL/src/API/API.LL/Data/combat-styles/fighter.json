@@ -129,9 +129,6 @@
         "affects": [
           "Eligible active Essence abilities."
         ],
-        "changes": [
-          "Max Health +5%. Taking direct Health damage grants +4 additional Battle Rhythm. After you hit with a direct Essence ability, heal for 1% Max Health. 3 second internal cooldown."
-        ],
         "tradeoffs": [
           "Advanced cooldowns, target caps, and PvP coefficients can be tuned per node."
         ],
@@ -170,9 +167,6 @@
         "affects": [
           "Eligible active Essence abilities."
         ],
-        "changes": [
-          "Repeatedly affecting the same target increases your Effect Potency against that target by 2% per stack, up to 6%. Stacks last 6 seconds. At 3 stacks, gain +10 Battle Rhythm."
-        ],
         "tradeoffs": [
           "Advanced cooldowns, target caps, and PvP coefficients can be tuned per node."
         ],
@@ -210,9 +204,6 @@
       "tooltip": {
         "affects": [
           "Eligible active Essence abilities."
-        ],
-        "changes": [
-          "Hostile Essence abilities reduce the target's Physical Defense and Magical Defense by 4% for 5 seconds. Non-hostile Essence abilities grant the target 4% defense penetration on their next hostile action."
         ],
         "tradeoffs": [
           "Advanced cooldowns, target caps, and PvP coefficients can be tuned per node."
@@ -323,9 +314,6 @@
         "affects": [
           "Eligible active Essence abilities matching EquipmentOverride."
         ],
-        "changes": [
-          "Mutator Group: EquipmentOverride. You may equip a Two-Handed weapon in your Offhand slot. Offhand Two-Handed weapons contribute 55% base weapon damage, 40% offensive attributes, and 25% defensive/utility attributes. Direct Melee Essence abilities gain Offhand Impact, adding a second weapon coefficient hit at 35% value. Penalty: Action Speed -10%, Dodge and Parry -30%, self-applied Barrier effects -10%, and shield/offhand-specific effects are disabled."
-        ],
         "tradeoffs": [
           "Advanced cooldowns, target caps, and PvP coefficients can be tuned per node."
         ],
@@ -435,9 +423,6 @@
         "affects": [
           "Eligible active Essence abilities matching DeliveryConversion."
         ],
-        "changes": [
-          "Mutator Group: DeliveryConversion. After a basic attack or direct Melee Essence ability, your next non-Melee direct hostile Essence ability within 4 seconds gains the Melee and Weapon tags and can trigger weapon effects at 40% value. The ability keeps its original damage type and scaling. If the ability was already Melee, it gains +6% Effect Potency instead. Does not apply to Summon, Trap, Aura, or pure persistent tick effects."
-        ],
         "tradeoffs": [
           "Conversion uses a +5% resource cost safety tradeoff and PvP coefficient until explicit balance values are authored."
         ],
@@ -544,9 +529,6 @@
         "affects": [
           "Eligible active Essence abilities matching DefensiveConversion."
         ],
-        "changes": [
-          "Mutator Group: DefensiveConversion. After you take Health damage, your next healing, barrier, or self-buff Essence ability within 6 seconds becomes Bloodied: +8% Effect Potency and +10 Battle Rhythm. After using a Bloodied ability, your next direct hostile Essence ability within 5 seconds heals you for 2% Max Health. 8 second internal cooldown."
-        ],
         "tradeoffs": [
           "Conversion uses a +5% resource cost safety tradeoff and PvP coefficient until explicit balance values are authored."
         ],
@@ -584,9 +566,6 @@
       "tooltip": {
         "affects": [
           "Eligible active Essence abilities."
-        ],
-        "changes": [
-          "Overpower also grants 12% damage reduction and 20% crowd control resistance for 8 seconds."
         ],
         "tradeoffs": [
           "Advanced cooldowns, target caps, and PvP coefficients can be tuned per node."
@@ -626,9 +605,6 @@
         "affects": [
           "Eligible active Essence abilities."
         ],
-        "changes": [
-          "Overpower marks the primary target for 10 seconds. Your Essence effects against the marked target gain +10% Effect Potency. The marked enemy deals 8% less damage to you. If the mark is an ally, your healing/barriers/buffs on that ally gain +10% Effect Potency and the ally takes 8% less damage."
-        ],
         "tradeoffs": [
           "Advanced cooldowns, target caps, and PvP coefficients can be tuned per node."
         ],
@@ -666,9 +642,6 @@
       "tooltip": {
         "affects": [
           "Eligible active Essence abilities."
-        ],
-        "changes": [
-          "If an Overpowered Essence ability defeats an enemy or saves an ally below 30% Health with healing/barrier, refund 30 Battle Rhythm and reduce Overpower's remaining cooldown by 25%."
         ],
         "tradeoffs": [
           "Advanced cooldowns, target caps, and PvP coefficients can be tuned per node."
@@ -709,9 +682,6 @@
         "affects": [
           "This style-tree passive while the node has ranks."
         ],
-        "changes": [
-          "Max Health +2% / +4%."
-        ],
         "tradeoffs": [],
         "doesNotAffect": []
       }
@@ -744,9 +714,6 @@
       "tooltip": {
         "affects": [
           "This style-tree passive while the node has ranks."
-        ],
-        "changes": [
-          "Max Battle Rhythm +10 / +20."
         ],
         "tradeoffs": [],
         "doesNotAffect": []
@@ -783,9 +750,6 @@
         "affects": [
           "This style-tree passive while the node has ranks."
         ],
-        "changes": [
-          "When you take direct Health damage, restore 0.5% / 1% missing primary resource. 2 second internal cooldown."
-        ],
         "tradeoffs": [],
         "doesNotAffect": []
       }
@@ -820,9 +784,6 @@
         "affects": [
           "This style-tree passive while the node has ranks."
         ],
-        "changes": [
-          "While below 50% Health, Action Speed +3% / +6%."
-        ],
         "tradeoffs": [],
         "doesNotAffect": []
       }
@@ -855,9 +816,6 @@
       "tooltip": {
         "affects": [
           "This style-tree passive while the node has ranks."
-        ],
-        "changes": [
-          "Direct Essence abilities gain +2% / +4% Effect Potency."
         ],
         "tradeoffs": [],
         "doesNotAffect": []
@@ -893,9 +851,6 @@
         "affects": [
           "This style-tree passive while the node has ranks."
         ],
-        "changes": [
-          "Essence effects against targets affected by your debuffs or control effects gain +3% / +6% Effect Potency."
-        ],
         "tradeoffs": [],
         "doesNotAffect": []
       }
@@ -929,9 +884,6 @@
         "affects": [
           "This style-tree passive while the node has ranks."
         ],
-        "changes": [
-          "Direct Essence abilities have a 10% / 20% chance to grant +5 Battle Rhythm."
-        ],
         "tradeoffs": [],
         "doesNotAffect": []
       }
@@ -964,9 +916,6 @@
       "tooltip": {
         "affects": [
           "This style-tree passive while the node has ranks."
-        ],
-        "changes": [
-          "Penalties from Fighter equipment overrides are reduced by 10% / 20%."
         ],
         "tradeoffs": [],
         "doesNotAffect": []
@@ -1002,9 +951,6 @@
         "affects": [
           "This style-tree passive while the node has ranks."
         ],
-        "changes": [
-          "Defeating an enemy restores 1% / 2% Max Health and primary resource."
-        ],
         "tradeoffs": [],
         "doesNotAffect": []
       }
@@ -1039,9 +985,6 @@
         "affects": [
           "This style-tree passive while the node has ranks."
         ],
-        "changes": [
-          "Dodge, parry, and block chance +2% / +4%. If those stats do not exist for the character, gain 2% / 4% direct damage reduction instead."
-        ],
         "tradeoffs": [],
         "doesNotAffect": []
       }
@@ -1074,9 +1017,6 @@
       "tooltip": {
         "affects": [
           "This style-tree passive while the node has ranks."
-        ],
-        "changes": [
-          "Overpower cooldown reduced by 2 / 4 seconds."
         ],
         "tradeoffs": [],
         "doesNotAffect": []
@@ -1111,9 +1051,6 @@
       "tooltip": {
         "affects": [
           "This style-tree passive while the node has ranks."
-        ],
-        "changes": [
-          "Battle Rhythm generated while below 50% Health increased by 15% / 30%."
         ],
         "tradeoffs": [],
         "doesNotAffect": []

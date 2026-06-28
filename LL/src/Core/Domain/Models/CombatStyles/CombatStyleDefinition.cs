@@ -81,7 +81,6 @@ public static class CombatStyleMutatorGroups
 public sealed record CombatStyleNodeTooltipDefinition
 {
     public IReadOnlyList<string> Affects { get; init; } = [];
-    public IReadOnlyList<string> Changes { get; init; } = [];
     public IReadOnlyList<string> Tradeoffs { get; init; } = [];
     public IReadOnlyList<string> DoesNotAffect { get; init; } = [];
 }

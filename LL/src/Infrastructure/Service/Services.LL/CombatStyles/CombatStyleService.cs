@@ -529,7 +529,6 @@ public sealed class CombatStyleService : ICombatStyleService
             Tooltip = new CombatStyleNodeTooltipModel
             {
                 Affects = node.Tooltip.Affects,
-                Changes = node.Tooltip.Changes,
                 Tradeoffs = node.Tooltip.Tradeoffs,
                 DoesNotAffect = node.Tooltip.DoesNotAffect
             }

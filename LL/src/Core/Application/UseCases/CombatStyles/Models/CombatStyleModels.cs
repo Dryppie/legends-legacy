@@ -90,7 +90,6 @@ public sealed class CombatStyleSkillTreeNodeModel
 public sealed class CombatStyleNodeTooltipModel
 {
     public IReadOnlyList<string> Affects { get; set; } = [];
-    public IReadOnlyList<string> Changes { get; set; } = [];
     public IReadOnlyList<string> Tradeoffs { get; set; } = [];
     public IReadOnlyList<string> DoesNotAffect { get; set; } = [];
 }

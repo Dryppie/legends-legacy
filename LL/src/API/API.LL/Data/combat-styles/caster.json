@@ -126,9 +126,6 @@
         "affects": [
           "Eligible active Essence abilities."
         ],
-        "changes": [
-          "Max primary resource +10%. Essence abilities that spend 10%+ resource grant +4 additional Focus. If no primary resource exists, long-cooldown Essence abilities grant +4 additional Focus."
-        ],
         "tradeoffs": [
           "Advanced cooldowns, target caps, and PvP coefficients can be tuned per node."
         ],
@@ -167,9 +164,6 @@
         "affects": [
           "Eligible active Essence abilities."
         ],
-        "changes": [
-          "Using Essence abilities from two different effect categories in sequence grants +5 Focus and gives the second ability +4% Effect Potency. 6 second internal cooldown."
-        ],
         "tradeoffs": [
           "Advanced cooldowns, target caps, and PvP coefficients can be tuned per node."
         ],
@@ -207,9 +201,6 @@
       "tooltip": {
         "affects": [
           "Eligible active Essence abilities."
-        ],
-        "changes": [
-          "Every 10 seconds, prevent one interruption. Negative effect durations against you are reduced by 10% while you have 50+ Focus."
         ],
         "tradeoffs": [
           "Advanced cooldowns, target caps, and PvP coefficients can be tuned per node."
@@ -322,9 +313,6 @@
         "affects": [
           "Eligible active Essence abilities matching DamageTypeConversion, ScalingConversion."
         ],
-        "changes": [
-          "Mutator Group: DamageTypeConversion + ScalingConversion. Eligible hostile Physical Melee Essence abilities deal Magical damage instead of Physical damage. Converted abilities scale from Spell Power instead of Attack Power, retain the Melee tag, gain the Spell tag, cannot benefit from Physical penetration, and benefit from Magical penetration at 70% value. Resource cost +8%. If the ability was already Magical, it gains +5% Effect Potency instead."
-        ],
         "tradeoffs": [
           "Conversion uses a +5% resource cost safety tradeoff and PvP coefficient until explicit balance values are authored."
         ],
@@ -424,9 +412,6 @@
       "tooltip": {
         "affects": [
           "Eligible active Essence abilities matching DamageTypeConversion."
-        ],
-        "changes": [
-          "Mutator Group: DamageTypeConversion. Choose one Elemental Thesis outside combat: Fire, Frost, Lightning, Earth, Poison, Holy, or Shadow. Eligible hostile Essence abilities convert their damage type to the chosen element. Converted abilities lose 10% base Effect Potency but benefit from elemental bonuses, resistance penetration, and elemental synergies. True damage cannot be converted. Non-hostile Essence abilities instead grant 4% resistance to the chosen element for 5 seconds."
         ],
         "tradeoffs": [
           "Conversion uses a +5% resource cost safety tradeoff and PvP coefficient until explicit balance values are authored."
@@ -541,9 +526,6 @@
         "affects": [
           "Eligible active Essence abilities matching SummonConversion, DeliveryConversion."
         ],
-        "changes": [
-          "Mutator Group: SummonConversion + DeliveryConversion. Summon, Aura, DamageOverTime, HealOverTime, and Persistent Essence effects gain the Spell tag. They tick, act, or trigger 8% slower, but gain +12% Effect Potency, duration, or summon stat scaling. If the effect is Overchanneled, reduce the slow penalty to 4%."
-        ],
         "tradeoffs": [
           "Conversion uses a +5% resource cost safety tradeoff and PvP coefficient until explicit balance values are authored."
         ],
@@ -581,9 +563,6 @@
       "tooltip": {
         "affects": [
           "Eligible active Essence abilities."
-        ],
-        "changes": [
-          "Overchannel affects your next 2 Essence abilities. The second ability receives 70% of the Overchannel bonus."
         ],
         "tradeoffs": [
           "Advanced cooldowns, target caps, and PvP coefficients can be tuned per node."
@@ -623,9 +602,6 @@
         "affects": [
           "Eligible active Essence abilities."
         ],
-        "changes": [
-          "Overchannel grants a Barrier equal to 10% Max Health for 8 seconds and interruption immunity for the Overchanneled ability. If the ability is still interrupted, refund 50 Focus."
-        ],
         "tradeoffs": [
           "Advanced cooldowns, target caps, and PvP coefficients can be tuned per node."
         ],
@@ -663,9 +639,6 @@
       "tooltip": {
         "affects": [
           "Eligible active Essence abilities."
-        ],
-        "changes": [
-          "Overchannel affects only one ability, but its potency bonus is doubled, capped at +24% Effect Potency. Overchannel cooldown +15 seconds and the empowered ability costs 20% more resource or cooldown."
         ],
         "tradeoffs": [
           "Advanced cooldowns, target caps, and PvP coefficients can be tuned per node."
@@ -705,9 +678,6 @@
         "affects": [
           "This style-tree passive while the node has ranks."
         ],
-        "changes": [
-          "Max Focus +10 / +20."
-        ],
         "tradeoffs": [],
         "doesNotAffect": []
       }
@@ -741,9 +711,6 @@
         "affects": [
           "This style-tree passive while the node has ranks."
         ],
-        "changes": [
-          "Start combat with +10 / +20 Focus."
-        ],
         "tradeoffs": [],
         "doesNotAffect": []
       }
@@ -776,9 +743,6 @@
       "tooltip": {
         "affects": [
           "This style-tree passive while the node has ranks."
-        ],
-        "changes": [
-          "Essence abilities restore 0.5% / 1% missing primary resource when they successfully apply at least one effect. 3 second internal cooldown."
         ],
         "tradeoffs": [],
         "doesNotAffect": []
@@ -814,9 +778,6 @@
         "affects": [
           "This style-tree passive while the node has ranks."
         ],
-        "changes": [
-          "Interrupt, silence, and mana-disruption duration reduced by 8% / 16%."
-        ],
         "tradeoffs": [],
         "doesNotAffect": []
       }
@@ -850,9 +811,6 @@
       "tooltip": {
         "affects": [
           "This style-tree passive while the node has ranks."
-        ],
-        "changes": [
-          "Debuff and control application chance +3% / +6%. If the ability cannot apply debuffs/control, gain +2% / +4% Effect Potency instead."
         ],
         "tradeoffs": [],
         "doesNotAffect": []
@@ -889,9 +847,6 @@
         "affects": [
           "This style-tree passive while the node has ranks."
         ],
-        "changes": [
-          "Buff, debuff, DoT, HoT, summon, and aura durations +3% / +6%."
-        ],
         "tradeoffs": [],
         "doesNotAffect": []
       }
@@ -924,9 +879,6 @@
       "tooltip": {
         "affects": [
           "This style-tree passive while the node has ranks."
-        ],
-        "changes": [
-          "Essence abilities gain +2% / +4% Effect Potency if they are not empowered by Overchannel."
         ],
         "tradeoffs": [],
         "doesNotAffect": []
@@ -961,9 +913,6 @@
         "affects": [
           "This style-tree passive while the node has ranks."
         ],
-        "changes": [
-          "Penalties from Caster Row 2 conversions are reduced by 10% / 20%."
-        ],
         "tradeoffs": [],
         "doesNotAffect": []
       }
@@ -996,9 +945,6 @@
       "tooltip": {
         "affects": [
           "This style-tree passive while the node has ranks."
-        ],
-        "changes": [
-          "Essence cast/channel time and recovery time reduced by 4% / 8%. For instant abilities, cooldown recovery +2% / +4% instead."
         ],
         "tradeoffs": [],
         "doesNotAffect": []
@@ -1035,9 +981,6 @@
         "affects": [
           "This style-tree passive while the node has ranks."
         ],
-        "changes": [
-          "Using an Essence ability below 60% Health grants a Barrier equal to 3% / 6% Max Health. 10 second internal cooldown."
-        ],
         "tradeoffs": [],
         "doesNotAffect": []
       }
@@ -1071,9 +1014,6 @@
         "affects": [
           "This style-tree passive while the node has ranks."
         ],
-        "changes": [
-          "Overchannel cooldown reduced by 2 / 4 seconds."
-        ],
         "tradeoffs": [],
         "doesNotAffect": []
       }
@@ -1106,9 +1046,6 @@
       "tooltip": {
         "affects": [
           "This style-tree passive while the node has ranks."
-        ],
-        "changes": [
-          "If you reach maximum Focus, your next Essence ability gains +4% / +8% Effect Potency and consumes 20 Focus."
         ],
         "tradeoffs": [],
         "doesNotAffect": []

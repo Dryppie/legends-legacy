@@ -146,9 +146,6 @@
         "affects": [
           "Eligible active Essence abilities."
         ],
-        "changes": [
-          "Healing and barriers you apply gain +8% Effect Potency. 20% of overhealing becomes a temporary Barrier lasting 6 seconds."
-        ],
         "tradeoffs": [
           "Advanced cooldowns, target caps, and PvP coefficients can be tuned per node."
         ],
@@ -187,9 +184,6 @@
         "affects": [
           "Eligible active Essence abilities."
         ],
-        "changes": [
-          "Buffs and self-effects you apply last 10% longer. Using any Essence ability grants the lowest-Health ally a Barrier equal to 3% of your Max Health. If no ally exists, you gain the Barrier. 8 second internal cooldown."
-        ],
         "tradeoffs": [
           "Advanced cooldowns, target caps, and PvP coefficients can be tuned per node."
         ],
@@ -227,9 +221,6 @@
       "tooltip": {
         "affects": [
           "Eligible active Essence abilities."
-        ],
-        "changes": [
-          "Effects on targets below 50% Health gain +10% Effect Potency. After you use an Essence ability, the lowest-Health ally takes 5% less damage for 4 seconds. Solo fallback applies to yourself."
         ],
         "tradeoffs": [
           "Advanced cooldowns, target caps, and PvP coefficients can be tuned per node."
@@ -336,9 +327,6 @@
       "tooltip": {
         "affects": [
           "Eligible active Essence abilities matching SupportConversion."
-        ],
-        "changes": [
-          "Mutator Group: SupportConversion. Hostile Essence abilities heal or barrier the lowest-Health ally for 12% of the hostile effect value, capped at 5% of your Max Health. If fighting alone, this applies to yourself at 60% value. Does not trigger from reflected damage or repeated echo effects unless explicitly allowed."
         ],
         "tradeoffs": [
           "Conversion uses a +5% resource cost safety tradeoff and PvP coefficient until explicit balance values are authored."
@@ -457,9 +445,6 @@
         "affects": [
           "Eligible active Essence abilities matching SupportConversion."
         ],
-        "changes": [
-          "Mutator Group: SupportConversion. Self-targeted buff, barrier, heal, cleanse, and resource Essence effects also apply 30% of their value or duration to the lowest-Health ally or strongest controlled ally. If no ally exists, self-targeted non-hostile effects gain +10% duration."
-        ],
         "tradeoffs": [
           "Conversion uses a +5% resource cost safety tradeoff and PvP coefficient until explicit balance values are authored."
         ],
@@ -575,9 +560,6 @@
         "affects": [
           "Eligible active Essence abilities matching SupportConversion, ControlConversion."
         ],
-        "changes": [
-          "Mutator Group: SupportConversion + ControlConversion. Damaging a Weakened, Controlled, Suppressed, or Marked enemy causes your next healing/barrier Essence ability within 6 seconds to gain +8% Effect Potency. Healing or barriering an ally below 50% Health causes your next hostile Essence ability to apply Weakened for 4 seconds: damage dealt -5%. 8 second internal cooldown."
-        ],
         "tradeoffs": [
           "Conversion uses a +5% resource cost safety tradeoff and PvP coefficient until explicit balance values are authored."
         ],
@@ -615,9 +597,6 @@
       "tooltip": {
         "affects": [
           "Eligible active Essence abilities."
-        ],
-        "changes": [
-          "Benediction affects your next 2 Essence abilities. The second ability receives 70% of the Benediction bonus."
         ],
         "tradeoffs": [
           "Advanced cooldowns, target caps, and PvP coefficients can be tuned per node."
@@ -657,9 +636,6 @@
         "affects": [
           "Eligible active Essence abilities."
         ],
-        "changes": [
-          "Benediction creates an 8 second Sanctuary. You and allies affected by Benediction take 10% less damage. Solo fallback: you gain 10% damage reduction."
-        ],
         "tradeoffs": [
           "Advanced cooldowns, target caps, and PvP coefficients can be tuned per node."
         ],
@@ -697,9 +673,6 @@
       "tooltip": {
         "affects": [
           "Eligible active Essence abilities."
-        ],
-        "changes": [
-          "Benedicted effects on targets below 35% Health gain +20% Effect Potency. If the Benedicted ability is hostile and the enemy is targeting a low-Health ally, that enemy deals 10% less damage for 5 seconds."
         ],
         "tradeoffs": [
           "Advanced cooldowns, target caps, and PvP coefficients can be tuned per node."
@@ -739,9 +712,6 @@
         "affects": [
           "This style-tree passive while the node has ranks."
         ],
-        "changes": [
-          "Max Harmony +10 / +20."
-        ],
         "tradeoffs": [],
         "doesNotAffect": []
       }
@@ -777,9 +747,6 @@
         "affects": [
           "This style-tree passive while the node has ranks."
         ],
-        "changes": [
-          "Healing and barrier Effect Potency +3% / +6%."
-        ],
         "tradeoffs": [],
         "doesNotAffect": []
       }
@@ -812,9 +779,6 @@
       "tooltip": {
         "affects": [
           "This style-tree passive while the node has ranks."
-        ],
-        "changes": [
-          "Buff duration +4% / +8%."
         ],
         "tradeoffs": [],
         "doesNotAffect": []
@@ -849,9 +813,6 @@
       "tooltip": {
         "affects": [
           "This style-tree passive while the node has ranks."
-        ],
-        "changes": [
-          "While no allies or controlled allies are present, Support effects on yourself gain +3% / +6% Effect Potency."
         ],
         "tradeoffs": [],
         "doesNotAffect": []
@@ -888,9 +849,6 @@
         "affects": [
           "This style-tree passive while the node has ranks."
         ],
-        "changes": [
-          "When you heal, barrier, cleanse, or buff a target, restore 0.5% / 1% of their missing primary resource. 4 second internal cooldown per target. Solo fallback applies to yourself."
-        ],
         "tradeoffs": [],
         "doesNotAffect": []
       }
@@ -923,9 +881,6 @@
       "tooltip": {
         "affects": [
           "This style-tree passive while the node has ranks."
-        ],
-        "changes": [
-          "Negative effect durations on you and affected allies reduced by 5% / 10%."
         ],
         "tradeoffs": [],
         "doesNotAffect": []
@@ -962,9 +917,6 @@
         "affects": [
           "This style-tree passive while the node has ranks."
         ],
-        "changes": [
-          "10% / 20% of overhealing becomes a temporary Barrier lasting 6 seconds."
-        ],
         "tradeoffs": [],
         "doesNotAffect": []
       }
@@ -999,9 +951,6 @@
       "tooltip": {
         "affects": [
           "This style-tree passive while the node has ranks."
-        ],
-        "changes": [
-          "Healing, barrier, buff, and cleanse Essence abilities cost 4% / 8% less resource."
         ],
         "tradeoffs": [],
         "doesNotAffect": []
@@ -1038,9 +987,6 @@
         "affects": [
           "This style-tree passive while the node has ranks."
         ],
-        "changes": [
-          "When you or an ally falls below 40% Health, grant them a Barrier equal to 4% / 8% of your Max Health. 30 second cooldown per target."
-        ],
         "tradeoffs": [],
         "doesNotAffect": []
       }
@@ -1076,9 +1022,6 @@
         "affects": [
           "This style-tree passive while the node has ranks."
         ],
-        "changes": [
-          "When you receive healing or barrier from your own effects, the lowest-Health ally receives 10% / 20% of that value. Solo fallback: increase the value on yourself by 5% / 10%."
-        ],
         "tradeoffs": [],
         "doesNotAffect": []
       }
@@ -1112,9 +1055,6 @@
         "affects": [
           "This style-tree passive while the node has ranks."
         ],
-        "changes": [
-          "Benediction grants +3% / +6% Action Speed for 6 seconds."
-        ],
         "tradeoffs": [],
         "doesNotAffect": []
       }
@@ -1147,9 +1087,6 @@
       "tooltip": {
         "affects": [
           "This style-tree passive while the node has ranks."
-        ],
-        "changes": [
-          "Benediction cooldown reduced by 2 / 4 seconds."
         ],
         "tradeoffs": [],
         "doesNotAffect": []

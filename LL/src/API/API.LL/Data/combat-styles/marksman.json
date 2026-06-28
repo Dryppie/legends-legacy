@@ -152,9 +152,6 @@
         "affects": [
           "Eligible active Essence abilities."
         ],
-        "changes": [
-          "Every 3 seconds without taking Health damage grants +4 additional Aim. Essence effects against your priority target gain +4% Effect Potency while you have 50+ Aim."
-        ],
         "tradeoffs": [
           "Advanced cooldowns, target caps, and PvP coefficients can be tuned per node."
         ],
@@ -193,9 +190,6 @@
         "affects": [
           "Eligible active Essence abilities."
         ],
-        "changes": [
-          "Dodging, avoiding, or being missed no longer causes Aim loss and instead grants +5 Aim. After avoiding damage, your next Essence effect against your priority target gains +5% Effect Potency."
-        ],
         "tradeoffs": [
           "Advanced cooldowns, target caps, and PvP coefficients can be tuned per node."
         ],
@@ -233,9 +227,6 @@
       "tooltip": {
         "affects": [
           "Eligible active Essence abilities."
-        ],
-        "changes": [
-          "Applying a debuff/control effect to your priority target reduces its damage dealt to you by 4% for 5 seconds. Non-hostile Essence effects on an allied priority target grant that ally 4% damage reduction for 5 seconds."
         ],
         "tradeoffs": [
           "Advanced cooldowns, target caps, and PvP coefficients can be tuned per node."
@@ -343,9 +334,6 @@
         "affects": [
           "Eligible active Essence abilities matching TargetingConversion."
         ],
-        "changes": [
-          "Mutator Group: TargetingConversion. Eligible Area and Cleave Essence abilities concentrate their effect into your priority target. The priority target receives +25% Effect Potency. Secondary targets receive 60% less effect. If the ability is non-hostile, the lowest-Health allied priority target receives the bonus and other allies receive reduced value."
-        ],
         "tradeoffs": [
           "Conversion uses a +5% resource cost safety tradeoff and PvP coefficient until explicit balance values are authored."
         ],
@@ -452,9 +440,6 @@
       "tooltip": {
         "affects": [
           "Eligible active Essence abilities matching SummonConversion, TargetingConversion."
-        ],
-        "changes": [
-          "Mutator Group: SummonConversion + TargetingConversion. Controlled allies prioritize your Deadeye target. Their first action against that target gains +10% accuracy/application chance and +8% Effect Potency. When a controlled ally affects your Deadeye target, gain +5 Aim. 5 second internal cooldown. Solo fallback: your own single-target Essence effects against the Deadeye target gain +4% Effect Potency."
         ],
         "tradeoffs": [
           "Conversion uses a +5% resource cost safety tradeoff and PvP coefficient until explicit balance values are authored."
@@ -568,9 +553,6 @@
         "affects": [
           "Eligible active Essence abilities matching TargetingConversion."
         ],
-        "changes": [
-          "Mutator Group: TargetingConversion. Single-target healing, barrier, buff, debuff, and control Essence abilities gain +10% Effect Potency against your priority target. Hostile debuffs/control gain +8% application chance. Ally-targeted buffs gain +10% duration. Direct damage abilities instead ignore 6% defense and resistance against the priority target."
-        ],
         "tradeoffs": [
           "Conversion uses a +5% resource cost safety tradeoff and PvP coefficient until explicit balance values are authored."
         ],
@@ -608,9 +590,6 @@
       "tooltip": {
         "affects": [
           "Eligible active Essence abilities."
-        ],
-        "changes": [
-          "Deadeye's empowered Essence ability cannot miss and gains +15% application chance against non-immune targets. If used at 100 Aim, it also gains +15% Effect Potency."
         ],
         "tradeoffs": [
           "Advanced cooldowns, target caps, and PvP coefficients can be tuned per node."
@@ -650,9 +629,6 @@
         "affects": [
           "Eligible active Essence abilities."
         ],
-        "changes": [
-          "Deadeye spreads 40% of the empowered Essence effect to up to 2 nearby valid targets. Damage/healing/barrier/resource effects spread at 40% value. Buffs/debuffs/control/summon-related effects spread as 40% duration or strength."
-        ],
         "tradeoffs": [
           "Advanced cooldowns, target caps, and PvP coefficients can be tuned per node."
         ],
@@ -690,9 +666,6 @@
       "tooltip": {
         "affects": [
           "Eligible active Essence abilities."
-        ],
-        "changes": [
-          "Deadeye Mark lasts 5 seconds longer. If you take no Health damage during Deadeye, reduce Deadeye's remaining cooldown by 10 seconds and gain +30 Aim after it ends."
         ],
         "tradeoffs": [
           "Advanced cooldowns, target caps, and PvP coefficients can be tuned per node."
@@ -732,9 +705,6 @@
         "affects": [
           "This style-tree passive while the node has ranks."
         ],
-        "changes": [
-          "Max Aim +10 / +20."
-        ],
         "tradeoffs": [],
         "doesNotAffect": []
       }
@@ -767,9 +737,6 @@
       "tooltip": {
         "affects": [
           "This style-tree passive while the node has ranks."
-        ],
-        "changes": [
-          "Start combat with +10 / +20 Aim."
         ],
         "tradeoffs": [],
         "doesNotAffect": []
@@ -804,9 +771,6 @@
       "tooltip": {
         "affects": [
           "This style-tree passive while the node has ranks."
-        ],
-        "changes": [
-          "Accuracy and debuff/control application chance +3% / +6%. If neither applies, gain +2% / +4% Effect Potency against priority targets."
         ],
         "tradeoffs": [],
         "doesNotAffect": []
@@ -843,9 +807,6 @@
         "affects": [
           "This style-tree passive while the node has ranks."
         ],
-        "changes": [
-          "Aim lost from taking Health damage reduced by 25% / 50%."
-        ],
         "tradeoffs": [],
         "doesNotAffect": []
       }
@@ -878,9 +839,6 @@
       "tooltip": {
         "affects": [
           "This style-tree passive while the node has ranks."
-        ],
-        "changes": [
-          "Essence abilities affecting your priority target refund 3% / 6% of their resource cost. 4 second internal cooldown."
         ],
         "tradeoffs": [],
         "doesNotAffect": []
@@ -916,9 +874,6 @@
         "affects": [
           "This style-tree passive while the node has ranks."
         ],
-        "changes": [
-          "While you have 50+ Aim, direct damage taken reduced by 3% / 6%."
-        ],
         "tradeoffs": [],
         "doesNotAffect": []
       }
@@ -951,9 +906,6 @@
       "tooltip": {
         "affects": [
           "This style-tree passive while the node has ranks."
-        ],
-        "changes": [
-          "Essence effects against priority targets ignore 3% / 6% defense and resistance."
         ],
         "tradeoffs": [],
         "doesNotAffect": []
@@ -990,9 +942,6 @@
         "affects": [
           "This style-tree passive while the node has ranks."
         ],
-        "changes": [
-          "Healing/barriers/buffs on an allied priority target gain +3% / +6% Effect Potency."
-        ],
         "tradeoffs": [],
         "doesNotAffect": []
       }
@@ -1025,9 +974,6 @@
       "tooltip": {
         "affects": [
           "This style-tree passive while the node has ranks."
-        ],
-        "changes": [
-          "AoE Essence abilities deal/apply 5% / 10% more of their effect to your priority target."
         ],
         "tradeoffs": [],
         "doesNotAffect": []
@@ -1064,9 +1010,6 @@
         "affects": [
           "This style-tree passive while the node has ranks."
         ],
-        "changes": [
-          "If only one enemy is alive, Essence effects against it gain +4% / +8% Effect Potency. If only one ally is alive, healing/barrier/buff effects on that ally gain the same bonus."
-        ],
         "tradeoffs": [],
         "doesNotAffect": []
       }
@@ -1101,9 +1044,6 @@
         "affects": [
           "This style-tree passive while the node has ranks."
         ],
-        "changes": [
-          "When you apply Deadeye, controlled allies gain +5% / +10% Action Speed for 4 seconds. Solo fallback: you gain +2.5% / +5% Action Speed."
-        ],
         "tradeoffs": [],
         "doesNotAffect": []
       }
@@ -1136,9 +1076,6 @@
       "tooltip": {
         "affects": [
           "This style-tree passive while the node has ranks."
-        ],
-        "changes": [
-          "Deadeye cooldown reduced by 2 / 4 seconds."
         ],
         "tradeoffs": [],
         "doesNotAffect": []

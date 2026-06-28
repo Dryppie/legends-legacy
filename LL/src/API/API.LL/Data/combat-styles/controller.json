@@ -147,9 +147,6 @@
         "affects": [
           "Eligible active Essence abilities."
         ],
-        "changes": [
-          "Slow, root, stun, silence, fear, and displacement durations you apply are increased by 10% in PvE. Against control-immune targets, 50% of this value becomes damage dealt reduction instead."
-        ],
         "tradeoffs": [
           "Advanced cooldowns, target caps, and PvP coefficients can be tuned per node."
         ],
@@ -188,9 +185,6 @@
         "affects": [
           "Eligible active Essence abilities."
         ],
-        "changes": [
-          "Your debuffs cause enemies to take 4% increased Effect Potency from your Essence abilities. If the target is an ally affected by your anti-control effects, your healing/barriers/buffs on them gain +4% Effect Potency."
-        ],
         "tradeoffs": [
           "Advanced cooldowns, target caps, and PvP coefficients can be tuned per node."
         ],
@@ -228,9 +222,6 @@
       "tooltip": {
         "affects": [
           "Eligible active Essence abilities."
-        ],
-        "changes": [
-          "Applying a debuff/control effect reduces the target's Action Speed by 5% for 4 seconds. Against control-immune targets, reduce damage dealt by 3% instead."
         ],
         "tradeoffs": [
           "Advanced cooldowns, target caps, and PvP coefficients can be tuned per node."
@@ -334,9 +325,6 @@
         "affects": [
           "Eligible active Essence abilities matching ControlConversion."
         ],
-        "changes": [
-          "Mutator Group: ControlConversion. Direct hostile Essence abilities apply Suppressed for 4 seconds. Suppressed enemies deal 4% less damage and have 4% reduced Action Speed. If the ability already applies debuff/control, the Suppressed values are increased by 50%. 6 second internal cooldown per target."
-        ],
         "tradeoffs": [
           "Conversion uses a +5% resource cost safety tradeoff and PvP coefficient until explicit balance values are authored."
         ],
@@ -438,9 +426,6 @@
       "tooltip": {
         "affects": [
           "Eligible active Essence abilities matching ControlConversion."
-        ],
-        "changes": [
-          "Mutator Group: ControlConversion. When an enemy resists or is immune to your debuff/control, 40% of the lost control duration or effect value becomes Weakened duration instead. Weakened reduces damage dealt by 5%. Also gain +10 Dominance and your next Essence ability against that enemy gains +6% Effect Potency. 8 second internal cooldown per enemy."
         ],
         "tradeoffs": [
           "Conversion uses a +5% resource cost safety tradeoff and PvP coefficient until explicit balance values are authored."
@@ -551,9 +536,6 @@
         "affects": [
           "Eligible active Essence abilities matching SummonConversion, ControlConversion."
         ],
-        "changes": [
-          "Mutator Group: SummonConversion + ControlConversion. Controlled allies apply a minor version of your most recent debuff to their target at 25% strength or duration. 5 second internal cooldown per ally. If no controlled ally exists, your DamageOverTime and Persistent Essence effects deal/apply +3% Effect Potency against debuffed enemies."
-        ],
         "tradeoffs": [
           "Conversion uses a +5% resource cost safety tradeoff and PvP coefficient until explicit balance values are authored."
         ],
@@ -591,9 +573,6 @@
       "tooltip": {
         "affects": [
           "Eligible active Essence abilities."
-        ],
-        "changes": [
-          "Lockdown's hostile effect also applies Suppression for 4 seconds: Action Speed -20% and damage dealt -15%. Against non-immune targets, Lockdown's debuff/control application cannot miss. Non-hostile Lockdown grants the ally Unstoppable: crowd control immunity for 2 seconds."
         ],
         "tradeoffs": [
           "Advanced cooldowns, target caps, and PvP coefficients can be tuned per node."
@@ -633,9 +612,6 @@
         "affects": [
           "Eligible active Essence abilities."
         ],
-        "changes": [
-          "Lockdown affects up to 3 valid targets. Primary target receives full value. Secondary targets receive 50% value. For non-hostile abilities, spreads to nearby allies instead."
-        ],
         "tradeoffs": [
           "Advanced cooldowns, target caps, and PvP coefficients can be tuned per node."
         ],
@@ -673,9 +649,6 @@
       "tooltip": {
         "affects": [
           "Eligible active Essence abilities."
-        ],
-        "changes": [
-          "When a Lockdown-empowered debuff/control effect expires or its target dies, 50% of its remaining duration or strength spreads to the nearest valid enemy. Non-hostile Lockdown effects spread 50% remaining duration to the nearest ally."
         ],
         "tradeoffs": [
           "Advanced cooldowns, target caps, and PvP coefficients can be tuned per node."
@@ -715,9 +688,6 @@
         "affects": [
           "This style-tree passive while the node has ranks."
         ],
-        "changes": [
-          "Max Dominance +10 / +20."
-        ],
         "tradeoffs": [],
         "doesNotAffect": []
       }
@@ -751,9 +721,6 @@
       "tooltip": {
         "affects": [
           "This style-tree passive while the node has ranks."
-        ],
-        "changes": [
-          "Debuff, slow, and control durations +4% / +8%."
         ],
         "tradeoffs": [],
         "doesNotAffect": []
@@ -789,9 +756,6 @@
         "affects": [
           "This style-tree passive while the node has ranks."
         ],
-        "changes": [
-          "Debuff/control application chance +3% / +6%. If the ability cannot apply debuff/control, gain +2% / +4% Effect Potency against debuffed enemies."
-        ],
         "tradeoffs": [],
         "doesNotAffect": []
       }
@@ -825,9 +789,6 @@
       "tooltip": {
         "affects": [
           "This style-tree passive while the node has ranks."
-        ],
-        "changes": [
-          "Your debuffs are 10% / 20% harder to cleanse or reduce. Against bosses, your debuffs lose 5% / 10% less duration from boss resistance rules."
         ],
         "tradeoffs": [],
         "doesNotAffect": []
@@ -864,9 +825,6 @@
         "affects": [
           "This style-tree passive while the node has ranks."
         ],
-        "changes": [
-          "Debuffed enemies deal 2% / 4% less damage to you."
-        ],
         "tradeoffs": [],
         "doesNotAffect": []
       }
@@ -901,9 +859,6 @@
         "affects": [
           "This style-tree passive while the node has ranks."
         ],
-        "changes": [
-          "Applying a debuff/control effect reduces the remaining cooldown of your highest-cooldown non-style Essence ability by 0.5 / 1 second. 4 second internal cooldown."
-        ],
         "tradeoffs": [],
         "doesNotAffect": []
       }
@@ -937,9 +892,6 @@
       "tooltip": {
         "affects": [
           "This style-tree passive while the node has ranks."
-        ],
-        "changes": [
-          "Debuffed enemies have resource generation or recovery reduced by 5% / 10%. If enemies do not use resources, reduce their Action Speed by 2% / 4% instead."
         ],
         "tradeoffs": [],
         "doesNotAffect": []
@@ -976,9 +928,6 @@
         "affects": [
           "This style-tree passive while the node has ranks."
         ],
-        "changes": [
-          "Against control-immune enemies, 15% / 30% of your lost control duration becomes Weakened duration. Weakened reduces damage dealt by 5%."
-        ],
         "tradeoffs": [],
         "doesNotAffect": []
       }
@@ -1012,9 +961,6 @@
       "tooltip": {
         "affects": [
           "This style-tree passive while the node has ranks."
-        ],
-        "changes": [
-          "Your Essence effects against enemies within 3 seconds of you applying control/debuff gain +3% / +6% Effect Potency."
         ],
         "tradeoffs": [],
         "doesNotAffect": []
@@ -1051,9 +997,6 @@
         "affects": [
           "This style-tree passive while the node has ranks."
         ],
-        "changes": [
-          "After applying a debuff/control effect, damage taken from that target is reduced by 4% / 8% for 4 seconds."
-        ],
         "tradeoffs": [],
         "doesNotAffect": []
       }
@@ -1087,9 +1030,6 @@
         "affects": [
           "This style-tree passive while the node has ranks."
         ],
-        "changes": [
-          "When you gain Dominance, restore 0.4% / 0.8% missing primary resource. 2 second internal cooldown."
-        ],
         "tradeoffs": [],
         "doesNotAffect": []
       }
@@ -1122,9 +1062,6 @@
       "tooltip": {
         "affects": [
           "This style-tree passive while the node has ranks."
-        ],
-        "changes": [
-          "Lockdown cooldown reduced by 2 / 4 seconds."
         ],
         "tradeoffs": [],
         "doesNotAffect": []

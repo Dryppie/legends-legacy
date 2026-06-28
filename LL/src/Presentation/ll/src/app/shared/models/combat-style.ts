@@ -80,7 +80,6 @@ export interface CombatStyleSkillTreeNodeDto {
 
 export interface CombatStyleNodeTooltipDto {
   affects: string[];
-  changes: string[];
   tradeoffs: string[];
   doesNotAffect: string[];
 }

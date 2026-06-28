@@ -138,9 +138,6 @@
         "affects": [
           "Eligible active Essence abilities."
         ],
-        "changes": [
-          "Dodging, parrying, avoiding, or being missed grants +4 additional Flow. After avoiding damage, your next Essence ability costs 10% less resource."
-        ],
         "tradeoffs": [
           "Advanced cooldowns, target caps, and PvP coefficients can be tuned per node."
         ],
@@ -179,9 +176,6 @@
         "affects": [
           "Eligible active Essence abilities."
         ],
-        "changes": [
-          "Non-style Essence cooldowns recover 6% faster. Using any Essence ability grants +4 Flow. 4 second internal cooldown."
-        ],
         "tradeoffs": [
           "Advanced cooldowns, target caps, and PvP coefficients can be tuned per node."
         ],
@@ -219,9 +213,6 @@
       "tooltip": {
         "affects": [
           "Eligible active Essence abilities."
-        ],
-        "changes": [
-          "Essence effects against enemies above 80% Health or below 30% Health gain +6% Effect Potency. Healing/barriers on allies below 30% Health also gain +6% Effect Potency."
         ],
         "tradeoffs": [
           "Advanced cooldowns, target caps, and PvP coefficients can be tuned per node."
@@ -324,9 +315,6 @@
         "affects": [
           "Eligible active Essence abilities matching TimingConversion."
         ],
-        "changes": [
-          "Mutator Group: TimingConversion. Eligible Essence abilities with a cooldown of 12+ seconds may split into two activations. The first activation resolves at 65% Effect Potency. The second resolves 2 seconds later at 45% Effect Potency if the target is still valid. Hard crowd control effects do not reapply; instead they gain 20% duration on the first activation. Resource cost +5%. 12 second internal cooldown."
-        ],
         "tradeoffs": [
           "Conversion uses a +5% resource cost safety tradeoff and PvP coefficient until explicit balance values are authored."
         ],
@@ -425,9 +413,6 @@
       "tooltip": {
         "affects": [
           "Eligible active Essence abilities matching TimingConversion, ResourceConversion."
-        ],
-        "changes": [
-          "Mutator Group: TimingConversion + ResourceConversion. Using two different Essence effect categories within 5 seconds gives the second ability the Quick tag. Quick abilities recover 10% cooldown faster and cost 5% less resource. If the same effect category is repeated, the second ability gains only half benefit."
         ],
         "tradeoffs": [
           "Conversion uses a +5% resource cost safety tradeoff and PvP coefficient until explicit balance values are authored."
@@ -536,9 +521,6 @@
         "affects": [
           "Eligible active Essence abilities matching DefensiveConversion, TimingConversion."
         ],
-        "changes": [
-          "Mutator Group: DefensiveConversion + TimingConversion. After you dodge, parry, avoid, or activate Quickstep, your next cast, channel, summon, aura, or persistent Essence ability within 5 seconds becomes Evasive. Evasive abilities are 50% harder to interrupt, have 10% shorter cast/channel time, and grant 4% damage reduction for 3 seconds after resolving."
-        ],
         "tradeoffs": [
           "Conversion uses a +5% resource cost safety tradeoff and PvP coefficient until explicit balance values are authored."
         ],
@@ -576,9 +558,6 @@
       "tooltip": {
         "affects": [
           "Eligible active Essence abilities."
-        ],
-        "changes": [
-          "Quickstep lasts 2 seconds longer, removes slows/roots, and prevents the first crowd control effect applied to you during Quickstep."
         ],
         "tradeoffs": [
           "Advanced cooldowns, target caps, and PvP coefficients can be tuned per node."
@@ -618,9 +597,6 @@
         "affects": [
           "Eligible active Essence abilities."
         ],
-        "changes": [
-          "Quickstep empowers your next 3 Essence abilities instead of 1. Each receives 60% of the Quickstep potency bonus. Quickstep Action Speed bonus increased from 10% to 15%."
-        ],
         "tradeoffs": [
           "Advanced cooldowns, target caps, and PvP coefficients can be tuned per node."
         ],
@@ -658,9 +634,6 @@
       "tooltip": {
         "affects": [
           "Eligible active Essence abilities."
-        ],
-        "changes": [
-          "During Quickstep, your first Essence effect against a target below 35% Health gains +18% Effect Potency. Healing/barrier effects on allies below 35% Health also gain +18%. If the effect does not defeat an enemy or prevent an ally from dropping lower, only half the bonus applies."
         ],
         "tradeoffs": [
           "Advanced cooldowns, target caps, and PvP coefficients can be tuned per node."
@@ -700,9 +673,6 @@
         "affects": [
           "This style-tree passive while the node has ranks."
         ],
-        "changes": [
-          "Max Flow +10 / +20."
-        ],
         "tradeoffs": [],
         "doesNotAffect": []
       }
@@ -735,9 +705,6 @@
       "tooltip": {
         "affects": [
           "This style-tree passive while the node has ranks."
-        ],
-        "changes": [
-          "Start combat with +10 / +20 Flow."
         ],
         "tradeoffs": [],
         "doesNotAffect": []
@@ -773,9 +740,6 @@
         "affects": [
           "This style-tree passive while the node has ranks."
         ],
-        "changes": [
-          "Dodge chance +2% / +4%. If dodge does not exist for the character, direct damage taken -2% / -4% instead."
-        ],
         "tradeoffs": [],
         "doesNotAffect": []
       }
@@ -808,9 +772,6 @@
       "tooltip": {
         "affects": [
           "This style-tree passive while the node has ranks."
-        ],
-        "changes": [
-          "Essence abilities used within 5 seconds of another Essence ability cost 3% / 6% less resource."
         ],
         "tradeoffs": [],
         "doesNotAffect": []
@@ -846,9 +807,6 @@
         "affects": [
           "This style-tree passive while the node has ranks."
         ],
-        "changes": [
-          "When you avoid damage, reduce the remaining cooldown of your highest-cooldown non-style Essence ability by 0.5 / 1 second. 3 second internal cooldown."
-        ],
         "tradeoffs": [],
         "doesNotAffect": []
       }
@@ -881,9 +839,6 @@
       "tooltip": {
         "affects": [
           "This style-tree passive while the node has ranks."
-        ],
-        "changes": [
-          "Essence cast/channel/recovery time reduced by 4% / 8%. Instant abilities gain +2% / +4% cooldown recovery instead."
         ],
         "tradeoffs": [],
         "doesNotAffect": []
@@ -919,9 +874,6 @@
         "affects": [
           "This style-tree passive while the node has ranks."
         ],
-        "changes": [
-          "After avoiding damage, damage taken is reduced by 4% / 8% for 3 seconds."
-        ],
         "tradeoffs": [],
         "doesNotAffect": []
       }
@@ -954,9 +906,6 @@
       "tooltip": {
         "affects": [
           "This style-tree passive while the node has ranks."
-        ],
-        "changes": [
-          "Essence abilities used after a different effect category gain +2% / +4% Effect Potency."
         ],
         "tradeoffs": [],
         "doesNotAffect": []
@@ -992,9 +941,6 @@
         "affects": [
           "This style-tree passive while the node has ranks."
         ],
-        "changes": [
-          "After using Quickstep, damage taken is reduced by 5% / 10% for 3 seconds."
-        ],
         "tradeoffs": [],
         "doesNotAffect": []
       }
@@ -1027,9 +973,6 @@
       "tooltip": {
         "affects": [
           "This style-tree passive while the node has ranks."
-        ],
-        "changes": [
-          "When you gain Flow, restore 0.3% / 0.6% missing primary resource. 2 second internal cooldown."
         ],
         "tradeoffs": [],
         "doesNotAffect": []
@@ -1064,9 +1007,6 @@
         "affects": [
           "This style-tree passive while the node has ranks."
         ],
-        "changes": [
-          "Enemy critical chance against you reduced by 3% / 6%."
-        ],
         "tradeoffs": [],
         "doesNotAffect": []
       }
@@ -1099,9 +1039,6 @@
       "tooltip": {
         "affects": [
           "This style-tree passive while the node has ranks."
-        ],
-        "changes": [
-          "Quickstep cooldown reduced by 2 / 4 seconds."
         ],
         "tradeoffs": [],
         "doesNotAffect": []

@@ -130,7 +130,6 @@ public sealed class CombatStyleSkillTreeNodeDto : IMapFrom<CombatStyleSkillTreeN
 public sealed class CombatStyleNodeTooltipDto : IMapFrom<CombatStyleNodeTooltipModel>
 {
     public IReadOnlyList<string> Affects { get; set; } = [];
-    public IReadOnlyList<string> Changes { get; set; } = [];
     public IReadOnlyList<string> Tradeoffs { get; set; } = [];
     public IReadOnlyList<string> DoesNotAffect { get; set; } = [];
 
