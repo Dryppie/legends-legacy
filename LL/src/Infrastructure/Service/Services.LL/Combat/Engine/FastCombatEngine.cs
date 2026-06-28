@@ -1,10 +1,7 @@
-using Application.Interfaces.Services.LL.CombatStyles;
 using Domain.Models.Attributes;
 using Domain.Models.Combat;
 using Domain.Models.Combat.Abilities;
-using Domain.Models.CombatStyles;
 using Domain.Models.Damages;
-using Services.LL.CombatStyles;
 using Services.LL.Combat.Stats;
 
 namespace Services.LL.Combat.Engine;
@@ -16,8 +13,6 @@ public sealed class FastCombatEngine
     private readonly IReadOnlyDictionary<string, CompiledStatus> _statusesById;
     private readonly IReadOnlyDictionary<string, CompiledSummon> _summonsById;
     private readonly IReadOnlyDictionary<string, CompiledAbility> _abilitiesById;
-    private readonly CombatStyleRuleEngine? _styleRuleEngine;
-    private readonly IReadOnlyList<CombatStyleRuntimeState> _styleStates = [];
     private readonly Random _random;
     private readonly int _maxTicks;
     private readonly int _basicAttackIntervalTicks;
@@ -36,27 +31,12 @@ public sealed class FastCombatEngine
         IReadOnlyDictionary<string, CompiledStatus> statusesById,
         IReadOnlyDictionary<string, CompiledSummon> summonsById,
         IReadOnlyDictionary<string, CompiledAbility> abilitiesById,
-        FastCombatEngineOptions? options = null,
-        CombatStyleSnapshot? styleSnapshot = null,
-        CombatStyleSnapshot? hostileStyleSnapshot = null,
-        ICombatStyleDefinitionProvider? combatStyleDefinitions = null)
+        FastCombatEngineOptions? options = null)
     {
         var resolved = options ?? new FastCombatEngineOptions();
         _statusesById = statusesById;
         _summonsById = summonsById;
         _abilitiesById = abilitiesById;
-        if (combatStyleDefinitions is not null)
-        {
-            _styleRuleEngine = new CombatStyleRuleEngine(combatStyleDefinitions);
-            _styleStates =
-            [
-                .. new[]
-                {
-                    _styleRuleEngine.CreateState(styleSnapshot),
-                    _styleRuleEngine.CreateState(hostileStyleSnapshot, appliesToFriendlyTeam: false)
-                }.Where(state => state is not null).Select(state => state!)
-            ];
-        }
         _random = new Random(resolved.RandomSeed);
         _maxTicks = resolved.MaxTicks;
         _basicAttackIntervalTicks = resolved.BasicAttackIntervalTicks;
@@ -124,8 +104,6 @@ public sealed class FastCombatEngine
             ability.StartCooldown(additionalCooldownTicks);
             Log(actor, null, ability.Definition.Name, EventType.AbilityUse, 0, $"{actor.Name} used {ability.Definition.Name}");
             Publish(new CombatEvent(AbilityTriggerEvent.OnAbilityUsed, actor, null, ability.Definition.Id), combatants);
-            foreach (var styleState in _styleStates)
-                _styleRuleEngine?.OnAbilityResolved(styleState, ability.Definition, actor);
         }
     }
 
@@ -371,8 +349,6 @@ public sealed class FastCombatEngine
     {
         var value = CalculateValue(effect, source);
         var statsSource = statsSourceOverride ?? effect.StatsSource;
-        foreach (var styleState in _styleStates)
-            value = _styleRuleEngine?.ModifyEffectAmount(styleState, effect, source, target, value) ?? value;
 
         switch (effect.Operation)
         {
@@ -474,13 +450,6 @@ public sealed class FastCombatEngine
         Publish(new CombatEvent(AbilityTriggerEvent.OnAttacked, target, source, null), combatants);
         if (healthDamage > 0)
             Publish(new CombatEvent(AbilityTriggerEvent.OnHealthChanged, target, source, null), combatants);
-
-        var procCoefficient = effect?.ProcCoefficient ?? 1m;
-        foreach (var styleState in _styleStates)
-        {
-            _styleRuleEngine?.OnDamageDealt(styleState, effect, source, target, healthDamage, procCoefficient);
-            _styleRuleEngine?.OnDamageTaken(styleState, effect, source, target, healthDamage, procCoefficient);
-        }
 
         if (!target.IsAlive)
         {
@@ -614,18 +583,6 @@ public sealed class FastCombatEngine
             return;
 
         var summon = CreateSummonedCombatant(source, effect, summonDefinition, _abilitiesById);
-        if (_styleRuleEngine is not null)
-        {
-            foreach (var styleState in _styleStates)
-            {
-                var attributes = _styleRuleEngine.ModifySummonAttributes(styleState, source, summon.Attributes);
-                summon.Attributes.Clear();
-                foreach (var (attribute, value) in attributes)
-                    summon.Attributes[attribute] = value;
-            }
-
-            summon.SetHealth(summon.GetAttribute(AttributeType.MaxHealth));
-        }
         mutableCombatants.Add(summon);
         _basicAttackTimers[summon] = _basicAttackIntervalTicks;
 

@@ -1,4 +1,3 @@
-using Domain.Models.CombatStyles;
 using Services.LL.Combat.Layers.Orchestration.Models;
 
 namespace Services.LL.Interfaces.Combat.Orchestration;
@@ -10,6 +9,5 @@ public interface IIdleCombatPlanner
     CombatEncounterPlan CreateEncounterPlan(
         IdleCombatPlan plan,
         int sequence,
-        DateTimeOffset startsAt,
-        CombatStyleSnapshot? combatStyle = null);
+        DateTimeOffset startsAt);
 }

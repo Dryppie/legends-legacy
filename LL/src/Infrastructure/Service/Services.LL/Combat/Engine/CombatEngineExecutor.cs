@@ -1,14 +1,11 @@
 using Application.Interfaces.Services.LL.Essences;
-using Application.Interfaces.Services.LL.CombatStyles;
 using Domain.Models.Attributes;
 using Domain.Models.Combat;
 using Domain.Models.Combat.Abilities;
-using Domain.Models.CombatStyles;
 using Domain.Models.Entities.Characters;
 using Domain.Models.Essences;
 using Domain.Models.Essences.Definitions;
 using Services.LL.Combat.Layers.Resolution.Models;
-using Services.LL.CombatStyles;
 using Services.LL.Interfaces.Combat.Resolution;
 
 namespace Services.LL.Combat.Engine;
@@ -17,23 +14,13 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
 {
     private readonly IAbilityCatalogProvider _catalogProvider;
     private readonly IEssenceDefinitionRepository? _essenceDefinitions;
-    private readonly ICombatStyleDefinitionProvider? _combatStyleDefinitions;
-    private readonly ICombatStyleService? _combatStyleService;
-    private readonly CombatStyleAbilityMutatorResolver? _combatStyleAbilityMutators;
 
     public CombatEngineExecutor(
         IAbilityCatalogProvider catalogProvider,
-        IEssenceDefinitionRepository? essenceDefinitions = null,
-        ICombatStyleDefinitionProvider? combatStyleDefinitions = null,
-        ICombatStyleService? combatStyleService = null)
+        IEssenceDefinitionRepository? essenceDefinitions = null)
     {
         _catalogProvider = catalogProvider;
         _essenceDefinitions = essenceDefinitions;
-        _combatStyleDefinitions = combatStyleDefinitions;
-        _combatStyleService = combatStyleService;
-        _combatStyleAbilityMutators = combatStyleDefinitions is null
-            ? null
-            : new CombatStyleAbilityMutatorResolver(combatStyleDefinitions);
     }
 
     public async Task<CombatResult> ExecuteAsync(
@@ -53,46 +40,22 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
         var compiledStatuses = AbilityCompiler.CompileStatuses(catalog.Statuses);
         var compiledSummons = AbilityCompiler.CompileSummons(
             summonIds.Select(summonId => catalog.SummonsById[summonId]));
-        var friendlyCombatStyle = runtime.Plan.PlayerCombatStyle
-            ?? await ResolveCombatStyleAsync(runtime.FriendlyParticipants, cancellationToken);
-        var hostileCombatStyle = runtime.Plan.HostileCombatStyle
-            ?? await ResolveCombatStyleAsync(runtime.HostileParticipants, cancellationToken);
         var friendly = runtime.FriendlyParticipants
-            .Select(participant => CreateRuntimeCombatant(participant.Combatant, CombatTeam.Friendly, catalog, compiledAbilities, friendlyCombatStyle))
+            .Select(participant => CreateRuntimeCombatant(participant.Combatant, CombatTeam.Friendly, catalog, compiledAbilities))
             .ToList();
         var hostile = runtime.HostileParticipants
-            .Select(participant => CreateRuntimeCombatant(participant.Combatant, CombatTeam.Hostile, catalog, compiledAbilities, hostileCombatStyle))
+            .Select(participant => CreateRuntimeCombatant(participant.Combatant, CombatTeam.Hostile, catalog, compiledAbilities))
             .ToList();
         var engine = new FastCombatEngine(
             compiledStatuses,
             compiledSummons,
-            compiledAbilities,
-            styleSnapshot: friendlyCombatStyle,
-            hostileStyleSnapshot: hostileCombatStyle,
-            combatStyleDefinitions: _combatStyleDefinitions);
+            compiledAbilities);
         var result = engine.Run(friendly, hostile);
         SyncCombatEntityState(runtime.FriendlyParticipants, friendly);
         SyncCombatEntityState(runtime.HostileParticipants, hostile);
         result.StartedAt = runtime.Plan.StartsAt;
 
         return result;
-    }
-
-    private async Task<CombatStyleSnapshot?> ResolveCombatStyleAsync(
-        IReadOnlyList<CombatRuntimeParticipant> participants,
-        CancellationToken cancellationToken)
-    {
-        if (_combatStyleService is null)
-            return null;
-
-        var character = participants
-            .Select(participant => participant.SourceEntity)
-            .OfType<Character>()
-            .FirstOrDefault();
-
-        return character is null
-            ? null
-            : await _combatStyleService.GetActiveSnapshotAsync(character.Id, cancellationToken);
     }
 
     private static void SyncCombatEntityState(
@@ -114,10 +77,9 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
         CombatEntity combatant,
         CombatTeam team,
         AbilityCatalog catalog,
-        IReadOnlyDictionary<string, CompiledAbility> compiledAbilities,
-        CombatStyleSnapshot? combatStyle)
+        IReadOnlyDictionary<string, CompiledAbility> compiledAbilities)
     {
-        var abilities = CreateCombatantAbilities(combatant, catalog, compiledAbilities, combatStyle).ToList();
+        var abilities = CreateCombatantAbilities(combatant, catalog, compiledAbilities).ToList();
 
         return new RuntimeCombatant(
             combatant.Id,
@@ -133,8 +95,7 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
     private IEnumerable<CompiledAbility> CreateCombatantAbilities(
         CombatEntity combatant,
         AbilityCatalog catalog,
-        IReadOnlyDictionary<string, CompiledAbility> compiledAbilities,
-        CombatStyleSnapshot? combatStyle)
+        IReadOnlyDictionary<string, CompiledAbility> compiledAbilities)
     {
         var selected = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
@@ -152,7 +113,6 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
                 var baseSpec = catalog.AbilitiesById[abilityId];
                 var modifiedSpec = ApplyEvolutionModifiers(baseSpec, essence, catalog);
                 modifiedSpec = ApplyTemporaryAbilityModifiers(modifiedSpec, combatant, catalog);
-                modifiedSpec = _combatStyleAbilityMutators?.ApplyMutators(modifiedSpec, combatStyle) ?? modifiedSpec;
                 yield return ReferenceEquals(baseSpec, modifiedSpec)
                     ? compiledAbilities[abilityId]
                     : AbilityCompiler.CompileAbility(modifiedSpec);
@@ -171,7 +131,6 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
 
                 var baseSpec = catalog.AbilitiesById[abilityId];
                 var modifiedSpec = ApplyTemporaryAbilityModifiers(baseSpec, combatant, catalog);
-                modifiedSpec = _combatStyleAbilityMutators?.ApplyMutators(modifiedSpec, combatStyle) ?? modifiedSpec;
                 yield return ReferenceEquals(baseSpec, modifiedSpec)
                     ? compiledAbilities[abilityId]
                     : AbilityCompiler.CompileAbility(modifiedSpec);
