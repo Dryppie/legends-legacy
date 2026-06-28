@@ -60,7 +60,9 @@
           <button
             type="button"
             class="ll-button"
-            [disabled]="style.skillPointsSpent === 0 || combatStyleState.saving()"
+            [disabled]="
+              style.skillPointsSpent === 0 || combatStyleState.saving()
+            "
             (click)="resetTree(style)"
           >
             Reset Tree
@@ -176,61 +178,11 @@
           </div>
 
           <div class="combat-tree">
-            <div class="combat-tree-core">
-              <article class="combat-tree-core-card">
-                <div class="ll-stat-label">Core Passive</div>
-                <h3 class="ll-heading mt-1">{{ corePassiveName(style) }}</h3>
-                <p class="ll-copy mt-1 text-xs">{{ style.coreMechanic }}</p>
-              </article>
-              <div class="combat-tree-core-link"></div>
-              <article class="combat-tree-core-card combat-tree-core-card-active">
-                <div class="ll-stat-label">Core Active</div>
-                <h3 class="ll-heading mt-1">{{ coreActiveName(style) }}</h3>
-                <p class="ll-copy mt-1 text-xs">
-                  {{ coreActiveDescription(style) }}
-                </p>
-              </article>
-            </div>
-
-            <div
-              class="combat-tree-lanes"
-              [style.grid-template-columns]="'repeat(3, minmax(12rem, 1fr))'"
-            >
-              <div
-                *ngFor="let lane of treeLanes; trackBy: trackText"
-                class="combat-tree-lane-title"
-                [ngClass]="laneCellClass(lane)"
-              >
-                <h3 class="ll-heading text-lg">{{ lane }}</h3>
-                <p class="ll-copy mt-1 text-xs">
-                  {{ laneDescription(style, lane) }}
-                </p>
-                <div class="mt-3 flex flex-wrap justify-center gap-2">
-                  <span class="ll-badge ll-badge-accent rounded">
-                    {{ lanePointsSpent(style, lane) }} spent
-                  </span>
-                  <span class="ll-badge rounded text-zinc-300">
-                    {{ lane }}
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            <div
-              class="combat-tree-map"
-            >
+            <div class="combat-tree-map">
               <ng-container
                 *ngFor="let row of treeRows(style); trackBy: trackRow"
               >
                 <section class="combat-tree-row">
-                  <div class="combat-tree-row-heading">
-                    <div>
-                      <span class="ll-stat-label">Row {{ row }}</span>
-                      <h3 class="ll-heading mt-1">{{ rowTitle(style, row) }}</h3>
-                    </div>
-                    <p class="ll-copy text-xs">{{ rowDescription(style, row) }}</p>
-                  </div>
-
                   <div
                     class="combat-tree-node-grid"
                     [style.grid-template-columns]="
@@ -314,7 +266,10 @@
             {{ node.description }}
           </p>
 
-          <div *ngIf="nodeLockReasons(style, node).length" class="ll-card mt-4 p-3">
+          <div
+            *ngIf="nodeLockReasons(style, node).length"
+            class="ll-card mt-4 p-3"
+          >
             <div class="ll-stat-label">Requirements</div>
             <div class="mt-2 grid gap-2 text-sm text-zinc-300">
               <div
@@ -373,7 +328,10 @@
           </button>
         </section>
 
-        <section class="ll-panel p-4" *ngIf="combatStyleState.buildPreview() as preview">
+        <section
+          class="ll-panel p-4"
+          *ngIf="combatStyleState.buildPreview() as preview"
+        >
           <h2 class="ll-heading">Build Preview</h2>
           <p class="ll-copy mt-1">{{ preview.buildName }}</p>
 
@@ -442,7 +400,10 @@
   </ng-container>
 
   <ng-template #noCombatStyle>
-    <div *ngIf="!combatStyleState.loading()" class="ll-empty-state mr-4 min-h-60">
+    <div
+      *ngIf="!combatStyleState.loading()"
+      class="ll-empty-state mr-4 min-h-60"
+    >
       No Combat Style data found.
     </div>
   </ng-template>

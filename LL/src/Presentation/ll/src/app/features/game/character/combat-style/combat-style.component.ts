@@ -176,54 +176,6 @@ export class CombatStyleComponent implements OnInit {
     return 'Granted automatically while the style is equipped; unlocks Row 1 major choices and row minor passives.';
   }
 
-  rowTitle(style: CombatStyleDto, row: number): string {
-    if (style.id === 'defensive') {
-      switch (row) {
-        case 1:
-          return 'Foundation';
-        case 2:
-          return 'Defensive Expression';
-        case 3:
-          return 'Aegis Upgrade';
-      }
-    }
-
-    switch (row) {
-      case 1:
-        return 'Foundation';
-      case 2:
-        return 'Conversion';
-      case 3:
-        return 'Active Upgrade';
-      default:
-        return `Row ${row}`;
-    }
-  }
-
-  rowDescription(style: CombatStyleDto, row: number): string {
-    if (style.id === 'defensive') {
-      switch (row) {
-        case 1:
-          return 'Choose the Guard foundation that opens your path.';
-        case 2:
-          return 'Choose how Guard and Aegis interact with Essence combat.';
-        case 3:
-          return 'Choose one mutually exclusive Aegis identity.';
-      }
-    }
-
-    switch (row) {
-      case 1:
-        return 'Choose a foundation major node.';
-      case 2:
-        return 'Choose an Essence, equipment, or combat-rule mutator.';
-      case 3:
-        return 'Choose the build identity and active upgrade.';
-      default:
-        return 'Choose one major node for this row.';
-    }
-  }
-
   nodeLockReasons(
     style: CombatStyleDto,
     node: CombatStyleSkillTreeNodeDto,
