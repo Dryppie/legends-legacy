@@ -157,7 +157,6 @@
 }
 
 .combat-tree-node-selected .combat-tree-node-orb {
-  transform: translateY(-2px);
   border-color: var(--ll-color-primary);
   box-shadow:
     0 0 0 4px rgba(249, 220, 160, 0.12),
