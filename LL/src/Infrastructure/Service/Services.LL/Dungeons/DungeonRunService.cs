@@ -1,11 +1,13 @@
 ﻿using Application.Interfaces.Services.LL.Dungeons;
 using Domain.Helpers.Constants;
+using Application.Interfaces.Services.LL.Guilds;
 using Domain.Models.Combat;
 using Domain.Models.Dungeons;
 using Domain.Models.Dungeons.Definitions;
 using Domain.Models.Dungeons.Definitions.Events;
 using Domain.Models.Dungeons.Definitions.Rooms;
 using Domain.Models.Dungeons.Runs;
+using Domain.Models.Guilds.Missions;
 using Domain.Models.Inventories;
 using Domain.Models.Items;
 using Domain.Models.Snapshots;
@@ -40,6 +42,7 @@ public sealed class DungeonRunService : IDungeonRunService
     private readonly IDungeonMasteryService _mastery;
     private readonly IDungeonBossModifierService _bossModifiers;
     private readonly IDungeonEncounterModifierService _encounterModifiers;
+    private readonly IGuildMissionService _guildMissionService;
 
     // Blessings are offered on shrine events; you’ll likely have a repository for these.
     //private readonly IReadOnlyList<Guid> _globalBlessingPool;
@@ -66,7 +69,8 @@ public sealed class DungeonRunService : IDungeonRunService
         IDungeonEventChoiceService events,
         IDungeonMasteryService mastery,
         IDungeonBossModifierService bossModifiers,
-        IDungeonEncounterModifierService encounterModifiers
+        IDungeonEncounterModifierService encounterModifiers,
+        IGuildMissionService guildMissionService
         //IDungeonRunStore runStore,
         /*IReadOnlyList<Guid> globalBlessingPool*/)
     {
@@ -90,6 +94,7 @@ public sealed class DungeonRunService : IDungeonRunService
         _mastery = mastery;
         _bossModifiers = bossModifiers;
         _encounterModifiers = encounterModifiers;
+        _guildMissionService = guildMissionService;
         //_globalBlessingPool = globalBlessingPool;
     }
 
@@ -343,6 +348,7 @@ public sealed class DungeonRunService : IDungeonRunService
             case "continue":
                 CompleteRoom(run, room);
                 MoveToNextRoom(run);
+                await RecordDungeonProgressContributionAsync(run, room, ct);
                 await ApplyCompletionRewardsIfNeeded(run, ct);
 
                 return new ExecuteDungeonActionResult
@@ -412,6 +418,7 @@ public sealed class DungeonRunService : IDungeonRunService
             case DungeonActionConstants.EventIgnore:
                 CompleteRoom(run, room);
                 MoveToNextRoom(run);
+                await RecordDungeonProgressContributionAsync(run, room, ct);
                 await ApplyCompletionRewardsIfNeeded(run, ct);
 
                 return new ExecuteDungeonActionResult
@@ -477,7 +484,12 @@ public sealed class DungeonRunService : IDungeonRunService
             if (run.State.CurrentBoonChoices.Count == 0)
             {
                 MoveToNextRoom(run);
+                await RecordDungeonProgressContributionAsync(run, room, ct);
                 await ApplyCompletionRewardsIfNeeded(run, ct);
+            }
+            else
+            {
+                await RecordDungeonProgressContributionAsync(run, room, ct);
             }
             
             outcome = run.Status == DungeonRunStatus.Completed
@@ -528,6 +540,7 @@ public sealed class DungeonRunService : IDungeonRunService
                 _pressure.ApplyPressureDelta(run, 4);
                 CompleteRoom(run, room);
                 MoveToNextRoom(run);
+                await RecordDungeonProgressContributionAsync(run, room, ct);
                 await ApplyCompletionRewardsIfNeeded(run, ct);
 
                 return new ExecuteDungeonActionResult
@@ -546,6 +559,7 @@ public sealed class DungeonRunService : IDungeonRunService
                 run.State.UnsecuredLoot.Experience += Math.Max(10, dungeon.Tier * 15);
                 CompleteRoom(run, room);
                 MoveToNextRoom(run);
+                await RecordDungeonProgressContributionAsync(run, room, ct);
                 await ApplyCompletionRewardsIfNeeded(run, ct);
 
                 return new ExecuteDungeonActionResult
@@ -564,6 +578,7 @@ public sealed class DungeonRunService : IDungeonRunService
                 _pressure.ApplyPressureDelta(run, 10);
                 CompleteRoom(run, room);
                 MoveToNextRoom(run);
+                await RecordDungeonProgressContributionAsync(run, room, ct);
                 await ApplyCompletionRewardsIfNeeded(run, ct);
 
                 return new ExecuteDungeonActionResult
@@ -618,6 +633,7 @@ public sealed class DungeonRunService : IDungeonRunService
             var room = GetCurrentRoom(run);
             CompleteRoom(run, room);
             MoveToNextRoom(run);
+            await RecordDungeonProgressContributionAsync(run, room, ct);
             await ApplyCompletionRewardsIfNeeded(run, ct);
         }
         else if (shouldAdvanceRoom)
@@ -626,6 +642,7 @@ public sealed class DungeonRunService : IDungeonRunService
             if (room?.Status == RoomInstanceStatus.Completed)
             {
                 MoveToNextRoom(run);
+                await RecordDungeonProgressContributionAsync(run, room, ct);
                 await ApplyCompletionRewardsIfNeeded(run, ct);
             }
         }
@@ -687,6 +704,7 @@ public sealed class DungeonRunService : IDungeonRunService
             case DungeonCheckpointChoiceOutcome.PushDeeper:
                 CompleteRoom(run, room);
                 MoveToNextRoom(run);
+                await RecordDungeonProgressContributionAsync(run, room, ct);
                 await ApplyCompletionRewardsIfNeeded(run, ct);
 
                 return new ExecuteDungeonActionResult
@@ -810,6 +828,7 @@ public sealed class DungeonRunService : IDungeonRunService
         run.State.CurrentEventChoices.Clear();
         CompleteRoom(run, room);
         MoveToNextRoom(run);
+        await RecordDungeonProgressContributionAsync(run, room, ct);
         if (choice.RevealsHiddenRoute)
         {
             AddHiddenRouteOption(run);
@@ -971,6 +990,41 @@ public sealed class DungeonRunService : IDungeonRunService
         }
 
         await _completionRewardApplier.ApplyAsync(run, cancellationToken);
+    }
+
+    private async Task RecordDungeonProgressContributionAsync(
+        DungeonRun run,
+        RoomInstance room,
+        CancellationToken cancellationToken)
+    {
+        var occurredAt = DateTimeOffset.UtcNow;
+
+        await _guildMissionService.RecordContributionAsync(
+            new GuildContributionEvent(
+                run.CharacterId,
+                GuildContributionSource.Dungeon,
+                GuildContributionMetric.DungeonRoomsCleared,
+                1,
+                ContextId: run.Id.ToString(),
+                OccurredAt: occurredAt,
+                IdempotencyKey: $"dungeon-room-cleared:{run.Id}:{room.RoomIndex}"),
+            cancellationToken);
+
+        if (run.Status != DungeonRunStatus.Completed)
+        {
+            return;
+        }
+
+        await _guildMissionService.RecordContributionAsync(
+            new GuildContributionEvent(
+                run.CharacterId,
+                GuildContributionSource.Dungeon,
+                GuildContributionMetric.DungeonsCompleted,
+                1,
+                ContextId: run.Id.ToString(),
+                OccurredAt: occurredAt,
+                IdempotencyKey: $"dungeon-completed:{run.Id}"),
+            cancellationToken);
     }
 
     private void AbandonRun(DungeonRun run)

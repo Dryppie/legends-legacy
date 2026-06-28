@@ -1,17 +1,19 @@
+import { DatePipe, NgClass, NgFor, NgIf } from '@angular/common';
 import { Component, computed, effect, signal } from '@angular/core';
 import { GuildStateService } from '../../../../../../core/services/api/guild/guild-state.service';
-import { NgClass, NgFor, NgIf } from '@angular/common';
-import { BuildingUpgradeView } from '../../../../../../shared/models/guilds/buildings/buildingUpgradeView';
-import { NumberFormatPipe } from '../../../../../../shared/pipes/number-format/number-format.pipe';
+import {
+  GuildBuilding,
+  GuildBuildingType,
+} from '../../../../../../shared/models/Dtos/guild/guildBuilding';
 import { RegularButtonComponent } from '../../../../../../shared/components/custom-components/buttons/regular-button/regular-button.component';
 import { HumanizeEnumPipe } from '../../../../../../shared/pipes/enums/humanize-enum.pipe';
-import { CharacterStateService } from '../../../../../../core/services/api/character/character-state.service';
-import { GuildRole } from '../../../../../../shared/models/Dtos/guild/guildRole';
+import { NumberFormatPipe } from '../../../../../../shared/pipes/number-format/number-format.pipe';
 
 @Component({
   selector: 'app-guild-buildings',
   standalone: true,
   imports: [
+    DatePipe,
     NgIf,
     NgFor,
     NgClass,
@@ -22,106 +24,121 @@ import { GuildRole } from '../../../../../../shared/models/Dtos/guild/guildRole'
   templateUrl: './guild-buildings.component.html',
 })
 export class GuildBuildingsComponent {
-  readonly upgrades;
-  readonly guild;
-  readonly character;
-  readonly guildMember = computed(() => {
-    return this.guild()?.members.find(
-      (m) => m.characterId === this.character()?.id,
-    );
+  readonly overview;
+  readonly selected = signal<GuildBuilding | null>(null);
+
+  readonly selectedCost = computed(() => {
+    const cost = this.selected()?.nextCost ?? {};
+    return Object.entries(cost).map(([resource, amount]) => ({
+      resource,
+      amount: amount ?? 0,
+    }));
   });
 
-  readonly selected = signal<BuildingUpgradeView | null>(null);
-
-  readonly isLeader = computed(() => {
-    return this.guildMember()?.role === GuildRole.Leader;
+  readonly selectedActionText = computed(() => {
+    const building = this.selected();
+    if (!building) return 'Select';
+    return building.canConstruct ? 'Construct' : 'Upgrade';
   });
 
-  readonly canUpgrade = computed(() => {
-    if (this.state.loading()) return false;
-
-    const upgrade = this.selected();
-    const guildResources = this.guild()?.resources ?? [];
-    const cost = upgrade?.nextCost ?? {};
-
-    for (const [type, required] of Object.entries(cost)) {
-      const available =
-        guildResources.find((r) => r.resource === type)?.amount ?? 0;
-      if (available < required) return false;
-    }
-
-    return true;
+  readonly canActOnSelected = computed(() => {
+    const building = this.selected();
+    if (!building || this.state.loading()) return false;
+    return building.canConstruct || building.canUpgrade;
   });
 
-  constructor(
-    private readonly state: GuildStateService,
-    private readonly characterState: CharacterStateService,
-  ) {
-    this.upgrades = this.state.upgrades;
-    this.guild = this.state.guild;
-    this.character = this.characterState.currentCharacter;
+  constructor(private readonly state: GuildStateService) {
+    this.overview = this.state.buildings;
 
     effect(
       () => {
-        const list = this.upgrades();
-        if (list.length > 0 && !this.selected()) {
-          this.selected.set(list[0]);
-        }
+        const buildings = this.overview()?.buildings ?? [];
+        const current = this.selected();
+        if (buildings.length === 0) return;
+
+        const refreshed = current
+          ? buildings.find((building) => building.definition.type === current.definition.type)
+          : buildings[0];
+        this.selected.set(refreshed ?? buildings[0]);
       },
       { allowSignalWrites: true },
     );
   }
 
-  select(upgrade: BuildingUpgradeView): void {
-    this.selected.set(upgrade);
+  select(building: GuildBuilding): void {
+    this.selected.set(building);
   }
 
-  upgradeSelected(): void {
-    const current = this.selected();
-    if (!current?.definition?.id || !current.nextCost) return;
-    this.state.upgradeGuildBuilding(current);
-  }
+  actOnSelected(): void {
+    const building = this.selected();
+    if (!building) return;
 
-  getUpgradeProgress(upgrade: BuildingUpgradeView): number {
-    const guildResources = this.guild()?.resources ?? [];
-    const cost = upgrade.nextCost ?? {};
-    const types = Object.keys(cost);
-    if (types.length === 0) return 0;
-
-    let totalRatio = 0;
-    for (const type of types) {
-      const required = cost[type];
-      const available =
-        guildResources.find((r) => r.resource === type)?.amount ?? 0;
-      totalRatio += Math.min(1, available / required);
+    if (building.canConstruct) {
+      this.state.constructBuilding(building.definition.type as GuildBuildingType);
+      return;
     }
 
-    return totalRatio / types.length; // average of the ratios
+    if (building.canUpgrade) {
+      this.state.upgradeBuilding(building);
+    }
   }
 
-  getGuildResourceAmount(type: string): number {
-    return (
-      this.guild()?.resources?.find((r) => r.resource === type)?.amount ?? 0
-    );
+  isSelected(building: GuildBuilding): boolean {
+    return this.selected()?.definition.type === building.definition.type;
   }
 
-  selectedStatusLabel(): string {
-    if (!this.isLeader()) return 'Leader only';
-    return this.canUpgrade() ? 'Ready to upgrade' : 'Needs resources';
+  buildingStatusLabel(building: GuildBuilding): string {
+    if (building.status === 'UnderConstruction') return 'Constructing';
+    if (building.status === 'Upgrading') return `Upgrading to ${building.targetLevel}`;
+    if (building.level <= 0) return 'Unbuilt';
+    return `Level ${building.level}`;
   }
 
-  selectedStatusClass(): string {
-    if (!this.isLeader()) return 'll-badge-muted';
-    return this.canUpgrade() ? 'll-badge-success' : 'll-badge-accent';
+  buildingCardClass(building: GuildBuilding): string {
+    if (this.isSelected(building)) return 'border-primary bg-primary/10';
+    if (building.lockedReason) return 'border-zinc-700/70 opacity-80';
+    return 'border-zinc-300/30 hover:bg-zinc-800/30';
   }
 
-  resourceRequirementClass(type: string, required: number): string {
-    return this.getGuildResourceAmount(type) >= required
-      ? 'll-resource-ready'
-      : 'll-resource-missing';
+  statusBadgeClass(building: GuildBuilding): string {
+    if (building.status !== 'Active') return 'll-badge-accent';
+    if (building.canConstruct || building.canUpgrade) return 'll-badge-success';
+    if (building.lockedReason) return 'll-badge-muted';
+    return 'll-badge-muted';
   }
 
-  isSelected(upgrade: BuildingUpgradeView): boolean {
-    return this.selected()?.definition.id === upgrade.definition.id;
+  supplyProgress(building: GuildBuilding): number {
+    const required = building.nextCost?.GuildSupplies ?? 0;
+    const available = this.overview()?.guildSupplies ?? 0;
+    if (required <= 0) return 100;
+    return Math.min(100, (available / required) * 100);
+  }
+
+  benefitState(
+    building: GuildBuilding,
+    benefit: { level: number; isImplemented: boolean },
+  ): 'active' | 'future' | 'planned' {
+    if (!benefit.isImplemented) return 'planned';
+    return building.level >= benefit.level ? 'active' : 'future';
+  }
+
+  benefitStateLabel(
+    building: GuildBuilding,
+    benefit: { level: number; isImplemented: boolean },
+  ): string {
+    const state = this.benefitState(building, benefit);
+    if (state === 'active') return 'Active';
+    if (state === 'future') return `Level ${benefit.level}`;
+    return 'Planned';
+  }
+
+  benefitClass(
+    building: GuildBuilding,
+    benefit: { level: number; isImplemented: boolean },
+  ): string {
+    const state = this.benefitState(building, benefit);
+    if (state === 'active') return 'border-primary/70 bg-primary/10';
+    if (state === 'future') return 'border-zinc-500/50 bg-zinc-900/40';
+    return 'border-zinc-700/70 bg-black/20 opacity-80';
   }
 }

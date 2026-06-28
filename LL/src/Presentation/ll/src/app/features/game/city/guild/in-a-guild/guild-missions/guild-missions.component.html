@@ -1,0 +1,193 @@
+<div *ngIf="missions() as missions" class="h-full overflow-y-auto p-4 text-sm text-neutral-200">
+  <div class="grid gap-3 xl:grid-cols-[1.2fr_0.8fr]">
+    <section class="space-y-3">
+      <div class="ll-card p-4">
+        <div class="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <p class="ll-eyebrow">Weekly Mission</p>
+            <h2 class="ll-heading text-lg">
+              {{ missions.activeMission?.definition?.name ?? "Awaiting Selection" }}
+            </h2>
+            <p class="ll-copy mt-1">
+              {{
+                missions.activeMission?.definition?.description ??
+                  "Choose one weekly objective for the guild."
+              }}
+            </p>
+          </div>
+          <span class="rounded border px-2 py-1 text-xs">
+            Level {{ missions.guildLevel }}
+          </span>
+        </div>
+
+        <ng-container *ngIf="missions.activeMission as active; else options">
+          <div class="mt-4">
+            <div class="flex justify-between text-xs text-neutral-400">
+              <span>{{ active.currentAmount | numberFormat }}</span>
+              <span>{{ active.targetAmount | numberFormat }}</span>
+            </div>
+            <div class="mt-1 h-2 rounded bg-zinc-800">
+              <div
+                class="h-2 rounded bg-primary transition-all"
+                [style.width.%]="missionProgress()"
+              ></div>
+            </div>
+          </div>
+
+          <div class="mt-4 grid gap-2 sm:grid-cols-3">
+            <div class="ll-stat-card px-3 py-2">
+              <div class="ll-stat-label">Your Tier</div>
+              <div class="mt-1">
+                <span
+                  class="rounded border px-2 py-1 text-xs"
+                  [ngClass]="tierClass(missions.myWeeklyContribution?.tier)"
+                >
+                  {{ missions.myWeeklyContribution?.tier ?? "None" }}
+                </span>
+              </div>
+            </div>
+            <div class="ll-stat-card px-3 py-2">
+              <div class="ll-stat-label">Your Progress</div>
+              <div class="ll-heading mt-1 text-lg">
+                {{ missions.myWeeklyContribution?.amount ?? 0 | numberFormat }}
+              </div>
+            </div>
+            <div class="ll-stat-card px-3 py-2">
+              <div class="ll-stat-label">Resets</div>
+              <div class="mt-1 text-xs">
+                {{ missions.nextWeeklyResetAt | date: "mediumDate" }}
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-4 flex justify-end">
+            <app-regular-button
+              [disabled]="!missions.myWeeklyContribution?.canClaimReward || loading()"
+              (pressed)="claimWeeklyReward()"
+              text="Claim Weekly"
+            ></app-regular-button>
+          </div>
+        </ng-container>
+
+        <ng-template #options>
+          <div class="mt-4 grid gap-2">
+            <button
+              *ngFor="let option of missions.weeklyOptions"
+              type="button"
+              class="ll-card border-zinc-300/30 p-3 text-left hover:bg-zinc-800/30"
+              [ngClass]="{ 'border-primary bg-primary/10': option.isSelected }"
+              (click)="selectMission(option)"
+            >
+              <div class="flex items-center justify-between gap-2">
+                <span class="font-semibold">{{ option.definition.name }}</span>
+                <span class="text-xs text-primary">
+                  {{ option.definition.category | humanize }}
+                </span>
+              </div>
+              <p class="ll-copy mt-1 text-xs">{{ option.definition.description }}</p>
+            </button>
+          </div>
+        </ng-template>
+      </div>
+
+      <div class="ll-card p-4">
+        <div class="flex items-center justify-between gap-3">
+          <div>
+            <p class="ll-eyebrow">Daily Orders</p>
+            <h2 class="ll-heading text-lg">Personal Guild Orders</h2>
+          </div>
+          <span class="text-xs text-neutral-400">
+            {{ missions.nextDailyResetAt | date: "shortTime" }}
+          </span>
+        </div>
+
+        <div class="mt-4 grid gap-2">
+          <div *ngFor="let order of missions.personalOrders" class="ll-card p-3">
+            <div class="flex flex-wrap items-start justify-between gap-2">
+              <div>
+                <div class="font-semibold">{{ order.definition.name }}</div>
+                <p class="ll-copy mt-1 text-xs">{{ order.definition.description }}</p>
+              </div>
+              <app-regular-button
+                [disabled]="!order.canClaimReward || loading()"
+                (pressed)="claimOrder(order)"
+                text="Claim"
+              ></app-regular-button>
+            </div>
+            <div class="mt-3">
+              <div class="flex justify-between text-xs text-neutral-400">
+                <span>{{ order.currentAmount | numberFormat }}</span>
+                <span>{{ order.targetAmount | numberFormat }}</span>
+              </div>
+              <div class="mt-1 h-1 rounded bg-zinc-800">
+                <div
+                  class="h-1 rounded bg-primary"
+                  [style.width.%]="orderProgress(order)"
+                ></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <aside class="space-y-3">
+      <div class="ll-card p-4">
+        <p class="ll-eyebrow">Contribution</p>
+        <h2 class="ll-heading text-lg">This Week</h2>
+        <div class="mt-4 grid gap-2">
+          <div class="flex justify-between border-b border-zinc-700/60 py-2">
+            <span>Score</span>
+            <span>{{ missions.contributionSummary.weeklyContributionScore | numberFormat }}</span>
+          </div>
+          <div class="flex justify-between border-b border-zinc-700/60 py-2">
+            <span>Favor Earned</span>
+            <span>{{ missions.contributionSummary.guildFavorEarned | numberFormat }}</span>
+          </div>
+          <div class="flex justify-between border-b border-zinc-700/60 py-2">
+            <span>Supplies Generated</span>
+            <span>{{ missions.contributionSummary.guildSuppliesGenerated | numberFormat }}</span>
+          </div>
+          <div class="flex justify-between py-2">
+            <span>Orders Claimed</span>
+            <span>{{ missions.contributionSummary.ordersCompleted }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="ll-card p-4">
+        <p class="ll-eyebrow">Leaderboard</p>
+        <h2 class="ll-heading text-lg">Top Contributors</h2>
+        <div class="mt-4 space-y-2">
+          <div
+            *ngFor="let entry of missions.contributionLeaderboard; let index = index"
+            class="rounded border border-zinc-300/20 bg-zinc-950/20 px-3 py-2"
+          >
+            <div class="flex items-center justify-between gap-3">
+              <div class="min-w-0">
+                <div class="truncate font-semibold">
+                  {{ index + 1 }}. {{ entry.characterName }}
+                </div>
+                <div class="mt-1 text-xs text-neutral-400">
+                  {{ entry.weeklyMissionContribution | numberFormat }} mission / {{ entry.ordersCompleted }} orders
+                </div>
+              </div>
+              <div class="text-right">
+                <div class="ll-heading text-base">{{ entry.weeklyContributionScore | numberFormat }}</div>
+                <div class="text-xs text-primary">score</div>
+              </div>
+            </div>
+          </div>
+          <p *ngIf="missions.contributionLeaderboard.length === 0" class="ll-copy text-xs">
+            No weekly contributions yet.
+          </p>
+        </div>
+      </div>
+
+      <div class="ll-card p-4">
+        <p class="ll-eyebrow">Guild Progress</p>
+        <h2 class="ll-heading text-lg">{{ missions.guildXp | numberFormat }} XP</h2>
+      </div>
+    </aside>
+  </div>
+</div>

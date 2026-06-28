@@ -24,7 +24,7 @@ public class RejectApplicationCommandHandler : IRequestHandler<RejectApplication
     {
         if (!Guid.TryParse(request.ApplicationCharacterId, out var applicationCharacterId)) return Response<bool>.Fail("Invalid character");
 
-        var guild = await _guildService.GetGuildWithUpgradesAsync(request.CharacterId, cancellationToken);
+        var guild = await _guildService.GetGuildForMemberAsync(request.CharacterId, cancellationToken);
         if (guild == null)
             return Response<bool>.Fail("Failed to reject application");
 

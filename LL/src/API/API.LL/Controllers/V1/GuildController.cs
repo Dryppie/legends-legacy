@@ -3,19 +3,26 @@ using Application.UseCases.Guilds.Commands.ApplyToGuild;
 using Application.UseCases.Guilds.Commands.ApproveApplication;
 using Application.UseCases.Guilds.Commands.CreateGuild;
 using Application.UseCases.Guilds.Commands.DisbandGuild;
-using Application.UseCases.Guilds.Commands.DonateToGuild;
 using Application.UseCases.Guilds.Commands.Invite;
 using Application.UseCases.Guilds.Commands.InviteCharacterByName;
 using Application.UseCases.Guilds.Commands.LeaveGuild;
+using Application.UseCases.Guilds.Commands.ConstructGuildBuilding;
+using Application.UseCases.Guilds.Commands.ClaimGuildOrderReward;
+using Application.UseCases.Guilds.Commands.ClaimGuildWeeklyMissionReward;
+using Application.UseCases.Guilds.Commands.PurchaseGuildShopItem;
 using Application.UseCases.Guilds.Commands.RejectApplication;
 using Application.UseCases.Guilds.Commands.RejectInvite;
+using Application.UseCases.Guilds.Commands.SelectGuildMission;
 using Application.UseCases.Guilds.Commands.UpgradeGuildBuilding;
 using Application.UseCases.Guilds.Dtos.Requests;
 using Application.UseCases.Guilds.Dtos.Responses;
 using Application.UseCases.Guilds.Queries.GetAllGuilds;
-using Application.UseCases.Guilds.Queries.GetGuildUpgrades;
+using Application.UseCases.Guilds.Queries.GetGuildMissions;
+using Application.UseCases.Guilds.Queries.GetGuildShop;
+using Application.UseCases.Guilds.Queries.GetGuildBuildings;
 using Application.UseCases.Guilds.Queries.GetMyGuild;
 using Application.UseCases.Guilds.Queries.GetMyInvites;
+using Application.Interfaces.Services.LL.Guilds;
 using Common.Primitives;
 using Domain.Models.Guilds;
 using Domain.Models.Guilds.Buildings;
@@ -80,17 +87,39 @@ public class GuildController : BaseController
     public async Task<ActionResult<Response<bool>>> DisbandGuild() =>
         await Mediator.Send(new DisbandGuildCommand(CurrentCharacterGuid));
 
-    [HttpGet("GetUpgrades")]
-    public async Task<ActionResult<Response<List<BuildingUpgradeView>>>> GetUpgrades() =>
-        await Mediator.Send(new GetGuildUpgradesQuery(CurrentCharacterGuid));
+    [HttpGet("GetBuildings")]
+    public async Task<GuildBuildingOverviewDto?> GetBuildings() =>
+        await Mediator.Send(new GetGuildBuildingsQuery(CurrentCharacterGuid));
 
-    public record GuildDonation(GuildResourceType Type, int Amount);
+    [HttpPost("ConstructBuilding")]
+    public async Task<ActionResult<Response<GuildBuildingOverviewDto>>> ConstructBuilding([FromBody] GuildBuildingType buildingType) =>
+        await Mediator.Send(new ConstructGuildBuildingCommand(CurrentCharacterGuid, buildingType));
 
-    [HttpPost("Donate")]
-    public async Task<ActionResult<Response<bool>>> Donate([FromBody] List<GuildDonation> donations) =>
-        await Mediator.Send(new DonateToGuildCommand(CurrentCharacterGuid, donations.ToDictionary(k => k.Type, k => k.Amount)));
+    [HttpPost("UpgradeBuilding")]
+    public async Task<ActionResult<Response<GuildBuildingOverviewDto>>> UpgradeBuilding([FromBody] string id) =>
+        await Mediator.Send(new UpgradeGuildBuildingCommand(CurrentCharacterGuid, Guid.Parse(id)));
 
-    [HttpPost("UpgradeGuildBuilding")]
-    public async Task<ActionResult<Response<bool>>> UpgradeGuildBuilding([FromBody] string id) =>
-        await Mediator.Send(new UpgradeGuildBuildingCommand(CurrentCharacterGuid, id));
+    [HttpGet("GetMissions")]
+    public async Task<GuildMissionOverviewDto?> GetMissions() =>
+        await Mediator.Send(new GetGuildMissionsQuery(CurrentCharacterGuid));
+
+    [HttpPost("SelectMission")]
+    public async Task<ActionResult<Response<GuildMissionOverviewDto>>> SelectMission([FromBody] string missionOptionId) =>
+        await Mediator.Send(new SelectGuildMissionCommand(CurrentCharacterGuid, Guid.Parse(missionOptionId)));
+
+    [HttpPost("ClaimOrderReward")]
+    public async Task<ActionResult<Response<GuildMissionOverviewDto>>> ClaimOrderReward([FromBody] string orderId) =>
+        await Mediator.Send(new ClaimGuildOrderRewardCommand(CurrentCharacterGuid, Guid.Parse(orderId)));
+
+    [HttpPost("ClaimWeeklyMissionReward")]
+    public async Task<ActionResult<Response<GuildMissionOverviewDto>>> ClaimWeeklyMissionReward() =>
+        await Mediator.Send(new ClaimGuildWeeklyMissionRewardCommand(CurrentCharacterGuid));
+
+    [HttpGet("GetShop")]
+    public async Task<GuildShopOverviewDto?> GetShop() =>
+        await Mediator.Send(new GetGuildShopQuery(CurrentCharacterGuid));
+
+    [HttpPost("PurchaseShopItem")]
+    public async Task<ActionResult<Response<GuildShopOverviewDto>>> PurchaseShopItem([FromBody] string itemKey) =>
+        await Mediator.Send(new PurchaseGuildShopItemCommand(CurrentCharacterGuid, itemKey));
 }

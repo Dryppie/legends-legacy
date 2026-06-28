@@ -17,6 +17,6 @@ public class GuildSimpleDto : IMapFrom<Guild>
         profile.CreateMap<Guild, GuildSimpleDto>()
             .ForMember(dto => dto.OwnerName, opt => opt.MapFrom(src => src.Owner.Name))
             .ForMember(dto => dto.MemberCount, opt => opt.MapFrom(src => src.Members.Count()))
-            .ForMember(dto => dto.Upgrades, opt => opt.MapFrom(src => src.GuildBuildingUpgrades.Sum(b => b.Level)));
+            .ForMember(dto => dto.Upgrades, opt => opt.MapFrom(src => src.Buildings.Sum(b => b.Level)));
     }
 }

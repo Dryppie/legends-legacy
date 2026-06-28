@@ -22,7 +22,7 @@ public class DisbandGuildCommandHandler : IRequestHandler<DisbandGuildCommand, R
 
     public async Task<Response<bool>> Handle(DisbandGuildCommand request, CancellationToken cancellationToken)
     {
-        var guild = await _guildService.GetGuildWithUpgradesAsync(request.CharacterId, cancellationToken);
+        var guild = await _guildService.GetGuildForMemberAsync(request.CharacterId, cancellationToken);
         if (guild == null)
             return Response<bool>.Fail("Failed to disband guild");
 

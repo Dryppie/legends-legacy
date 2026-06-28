@@ -1,125 +1,144 @@
 <div
-  class="flex h-full w-full flex-col overflow-hidden text-sm text-neutral-200 lg:flex-row"
+  *ngIf="overview() as overview"
+  class="grid h-full gap-3 overflow-y-auto p-4 text-sm text-neutral-200 xl:grid-cols-[1fr_20rem]"
 >
-  <!-- Building Details -->
-  <div
-    *ngIf="selected() as selectedUpgrade"
-    class="space-y-2 p-4 lg:order-2 lg:w-2/3"
-  >
+  <section class="space-y-3">
     <div class="flex flex-wrap items-start justify-between gap-3">
       <div>
-        <p class="ll-eyebrow">Selected Building</p>
-        <h2 class="ll-heading">
-          {{ selectedUpgrade.definition.name }}
-        </h2>
+        <p class="ll-eyebrow">Guild Buildings</p>
+        <h2 class="ll-heading text-lg">Guild Hall Level {{ overview.guildHallLevel }}</h2>
       </div>
-      <span
-        class="rounded border px-2 py-1 text-xs"
-        [ngClass]="selectedStatusClass()"
-      >
-        {{ selectedStatusLabel() }}
-      </span>
-    </div>
-    <p class="ll-copy">
-      {{ selectedUpgrade.definition.description }}
-    </p>
-
-    <div class="flex justify-between gap-20 text-sm sm:justify-normal">
-      <div>
-        <div class="font-medium text-primary">Current Level</div>
-        <div>
-          +{{
-            selectedUpgrade.definition.effect.perLevel * selectedUpgrade.level
-          }}%
-        </div>
-      </div>
-      <div>
-        <div class="font-medium text-primary">Next Level</div>
-        <div>
-          {{
-            selectedUpgrade.definition.effect.perLevel *
-              (selectedUpgrade.level + 1)
-          }}%
-        </div>
+      <div class="ll-stat-card px-3 py-2">
+        <div class="ll-stat-label">Guild Supplies</div>
+        <div class="ll-heading mt-1 text-lg">{{ overview.guildSupplies | numberFormat }}</div>
       </div>
     </div>
 
-    <div
-      class="flex flex-wrap justify-between border-y border-zinc-300/30 py-4"
-    >
-      <div>
-        <h3 class="mb-2 font-semibold text-primary">Upgrade Requirements</h3>
-        <ul
-          *ngFor="let cost of selectedUpgrade.definition.costCurves"
-          class="list-inside list-disc space-y-1"
+    <div class="grid gap-3 lg:grid-cols-[18rem_1fr]">
+      <div class="space-y-2">
+        <button
+          *ngFor="let building of overview.buildings"
+          type="button"
+          class="ll-card w-full p-3 text-left transition"
+          [ngClass]="buildingCardClass(building)"
+          (click)="select(building)"
         >
-          <li>
-            <span
-              [ngClass]="
-                resourceRequirementClass(
-                  cost.resource,
-                  cost.base + cost.increment * selectedUpgrade.level
-                )
-              "
-            >
-              {{
-                cost.base + cost.increment * selectedUpgrade.level
-                  | numberFormat
-              }}
-              {{ cost.resource | humanize }}
-            </span>
-            <span class="text-muted text-xs">
-              ({{ getGuildResourceAmount(cost.resource) | numberFormat }})
-            </span>
-          </li>
-        </ul>
+          <div class="flex items-start justify-between gap-2">
+            <div>
+              <div class="font-semibold">{{ building.definition.name }}</div>
+              <div class="mt-1 text-xs text-primary">
+                {{ buildingStatusLabel(building) }}
+              </div>
+            </div>
+          </div>
+          <div
+            *ngIf="building.nextCost?.GuildSupplies"
+            class="mt-3 h-1 rounded bg-zinc-800"
+          >
+            <div
+              class="h-1 rounded bg-primary transition"
+              [style.width.%]="supplyProgress(building)"
+            ></div>
+          </div>
+        </button>
       </div>
-      <ng-container *ngIf="isLeader(); else notLeader">
-        <div class="place-self-end pt-2">
+
+      <div *ngIf="selected() as building" class="ll-card p-4">
+        <div class="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <p class="ll-eyebrow">Selected Building</p>
+            <h3 class="ll-heading text-lg">{{ building.definition.name }}</h3>
+          </div>
+          <span class="rounded border px-2 py-1 text-xs" [ngClass]="statusBadgeClass(building)">
+            {{ buildingStatusLabel(building) }}
+          </span>
+        </div>
+
+        <p class="ll-copy mt-2">{{ building.definition.description }}</p>
+        <p class="ll-copy mt-1 text-xs">{{ building.definition.unlockSummary }}</p>
+
+        <div class="mt-4 grid gap-2 sm:grid-cols-3">
+          <div class="ll-stat-card px-3 py-2">
+            <div class="ll-stat-label">Current</div>
+            <div class="ll-heading mt-1 text-lg">{{ building.level }}</div>
+          </div>
+          <div class="ll-stat-card px-3 py-2">
+            <div class="ll-stat-label">Max</div>
+            <div class="ll-heading mt-1 text-lg">{{ building.definition.maxLevel }}</div>
+          </div>
+          <div class="ll-stat-card px-3 py-2">
+            <div class="ll-stat-label">Requires Hall</div>
+            <div class="ll-heading mt-1 text-lg">
+              {{ building.definition.requiredGuildHallLevel }}
+            </div>
+          </div>
+        </div>
+
+        <div *ngIf="building.completesAt" class="mt-4 border-y border-zinc-700/60 py-3">
+          <div class="text-xs uppercase text-primary">Completes</div>
+          <div class="mt-1">{{ building.completesAt | date: "medium" }}</div>
+        </div>
+
+        <div class="mt-4">
+          <div class="mb-2 text-xs uppercase tracking-wide text-primary">Benefits</div>
+          <div class="grid gap-2 lg:grid-cols-2">
+            <div
+              *ngFor="let benefit of building.definition.benefits"
+              class="rounded border p-3"
+              [ngClass]="benefitClass(building, benefit)"
+            >
+              <div class="flex items-start justify-between gap-2">
+                <div class="font-semibold text-neutral-100">{{ benefit.title }}</div>
+                <span class="shrink-0 rounded border border-zinc-400/40 px-2 py-1 text-[11px] uppercase text-primary">
+                  {{ benefitStateLabel(building, benefit) }}
+                </span>
+              </div>
+              <p class="ll-copy mt-2 text-xs">{{ benefit.description }}</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-4">
+          <div class="mb-2 text-xs uppercase tracking-wide text-primary">Next Cost</div>
+          <div class="flex flex-wrap gap-2">
+            <span
+              *ngFor="let cost of selectedCost()"
+              class="rounded border border-zinc-300/30 px-2 py-1 text-xs"
+            >
+              {{ cost.amount | numberFormat }} {{ cost.resource | humanize }}
+            </span>
+            <span *ngIf="selectedCost().length === 0" class="text-xs text-neutral-400">
+              No further upgrade.
+            </span>
+          </div>
+        </div>
+
+        <div class="mt-4 flex flex-wrap items-center justify-between gap-3">
+          <p class="text-xs text-neutral-400">
+            {{ building.lockedReason ?? "Ready" }}
+          </p>
           <app-regular-button
-            [disabled]="!canUpgrade()"
-            (pressed)="upgradeSelected()"
-            text="Upgrade"
+            [disabled]="!canActOnSelected()"
+            (pressed)="actOnSelected()"
+            [text]="selectedActionText()"
           ></app-regular-button>
         </div>
-      </ng-container>
-      <ng-template #notLeader>
-        <p class="mt-4 place-self-end text-center italic text-neutral-400">
-          Only the guild leader can upgrade buildings.
-        </p>
-      </ng-template>
-    </div>
-  </div>
-
-  <!-- Buildings List -->
-  <div
-    *ngIf="upgrades() as upgrades"
-    class="space-y-3 overflow-y-auto border-zinc-300/30 p-4 lg:order-1 lg:w-1/3 lg:border-r lg:border-t-0"
-  >
-    <h2 class="ll-heading mb-2 text-lg">Buildings</h2>
-
-    <div *ngFor="let upgrade of upgrades" class="space-y-2">
-      <div
-        class="ll-card p-3 hover:cursor-pointer"
-        [ngClass]="{
-          'scale-[1.02] border-primary bg-primary/10':
-            selected()?.definition?.id === upgrade.definition.id,
-          'border-zinc-300/30 hover:bg-zinc-800/30':
-            selected()?.definition?.id !== upgrade.definition.id,
-        }"
-        (click)="select(upgrade)"
-      >
-        <div class="flex items-center justify-between pb-1">
-          <span class="font-semibold">{{ upgrade.definition.name }}</span>
-        </div>
-        <div class="text-xs text-primary">Level - {{ upgrade.level }}</div>
-        <div class="mt-2 h-1 rounded bg-zinc-700">
-          <div
-            class="h-1 rounded bg-primary transition-all duration-300 ease-in-out"
-            [style.width.%]="getUpgradeProgress(upgrade) * 100"
-          ></div>
-        </div>
       </div>
     </div>
-  </div>
+  </section>
+
+  <aside class="ll-card p-4">
+    <p class="ll-eyebrow">Activity</p>
+    <h2 class="ll-heading text-lg">Building Log</h2>
+    <div class="mt-4 space-y-3">
+      <div *ngFor="let log of overview.activityLogs" class="border-b border-zinc-700/60 pb-3">
+        <div class="text-xs text-primary">{{ log.type | humanize }}</div>
+        <div class="mt-1">{{ log.message }}</div>
+        <div class="mt-1 text-xs text-neutral-500">{{ log.createdAt | date: "short" }}</div>
+      </div>
+      <p *ngIf="overview.activityLogs.length === 0" class="ll-copy text-xs">
+        No building activity yet.
+      </p>
+    </div>
+  </aside>
 </div>

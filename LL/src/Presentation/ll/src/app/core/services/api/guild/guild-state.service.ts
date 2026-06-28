@@ -4,11 +4,15 @@ import { Guild, GuildSimple } from '../../../../shared/models/Dtos/guild/guild';
 import { GuildInvite } from '../../../../shared/models/Dtos/guild/guildInvite';
 import { InviteToGuild } from '../../../../shared/models/requestDtos/guilds/inviteToGuild';
 import { GuildService } from './guild.service';
-import { BuildingUpgradeView } from '../../../../shared/models/guilds/buildings/buildingUpgradeView';
-import { GuildResourceType } from '../../../../shared/models/Dtos/guild/guildResourceType';
+import { GuildMissionOverview } from '../../../../shared/models/Dtos/guild/guildMission';
+import { GuildShopOverview } from '../../../../shared/models/Dtos/guild/guildShop';
+import {
+  GuildBuilding,
+  GuildBuildingOverview,
+  GuildBuildingType,
+} from '../../../../shared/models/Dtos/guild/guildBuilding';
 import { GameEventService } from '../../real-time/game-event.service';
 import { AuthService } from '../auth/auth.service';
-import { InventoryStateService } from '../inventory/inventory-state.service';
 import {
   NOTIFICATION_SURFACE,
   NotificationService,
@@ -23,7 +27,7 @@ type GuildRealtimeEventName = Extract<
   | 'GuildInviteReceivedMsg'
   | 'GuildInviteRejectedMsg'
   | 'GuildApplicationRejectedMsg'
-  | 'GuildBuildingUpgradedMsg'
+  | 'GuildBuildingsChangedMsg'
   | 'GuildStateChangedMsg'
   | 'GuildMembershipChangedMsg'
   | 'GuildDisbandedMsg'
@@ -58,7 +62,9 @@ interface GuildRealtimeHandler {
 export class GuildStateService {
   /* ─────────── writable signals ─────────── */
   private readonly _guild = signal<Guild | null>(null);
-  private readonly _upgrades = signal<BuildingUpgradeView[]>([]);
+  private readonly _buildings = signal<GuildBuildingOverview | null>(null);
+  private readonly _missions = signal<GuildMissionOverview | null>(null);
+  private readonly _shop = signal<GuildShopOverview | null>(null);
   private readonly _invites = signal<GuildInvite[]>([]);
   private readonly _allGuilds = signal<GuildSimple[]>([]);
   private readonly _loading = signal(false);
@@ -69,7 +75,9 @@ export class GuildStateService {
 
   /* ─────────── public, read-only selectors ─────────── */
   readonly guild = computed(() => this._guild());
-  readonly upgrades = computed(() => this._upgrades());
+  readonly buildings = computed(() => this._buildings());
+  readonly missions = computed(() => this._missions());
+  readonly shop = computed(() => this._shop());
   readonly invites = computed(() => this._invites());
   readonly allGuilds = computed(() => this._allGuilds());
   readonly loading = computed(() => this._loading());
@@ -86,7 +94,6 @@ export class GuildStateService {
   constructor(
     private readonly service: GuildService,
     private readonly eventService: GameEventService,
-    private readonly inventoryState: InventoryStateService,
     private readonly auth: AuthService,
     private readonly notificationService: NotificationService,
   ) {
@@ -162,8 +169,8 @@ export class GuildStateService {
         refresh: true,
       },
       {
-        eventName: 'GuildBuildingUpgradedMsg',
-        key: 'guild-building-upgraded',
+        eventName: 'GuildBuildingsChangedMsg',
+        key: 'guild-buildings-changed',
         scope: 'member',
         matches: inCurrentGuild,
         refresh: true,
@@ -279,10 +286,15 @@ export class GuildStateService {
             );
             this._invites.set([]);
             this._allGuilds.set([]);
-            this.loadGuildUpgrades();
+            this.loadGuildBuildings();
+            this.loadGuildMissions();
+            this.loadGuildShop();
             this.loadAllGuilds();
           } else {
             this._guild.set(null);
+            this._buildings.set(null);
+            this._missions.set(null);
+            this._shop.set(null);
             this.loadAllGuilds();
             this.loadMyInvites();
           }
@@ -318,6 +330,7 @@ export class GuildStateService {
       .subscribe({
         next: () => {
           this._guild.set(null);
+          this._buildings.set(null);
           this.refresh();
         },
         error: (e) => this._error.set(e.message ?? 'Failed to leave guild'),
@@ -333,38 +346,109 @@ export class GuildStateService {
       .subscribe({
         next: () => {
           this._guild.set(null);
+          this._buildings.set(null);
           this.refresh();
         },
         error: (e) => this._error.set(e.message ?? 'Failed to disband guild'),
       });
   }
 
-  donate(donations: { type: GuildResourceType; amount: number }[]) {
+  constructBuilding(buildingType: GuildBuildingType): void {
     this._loading.set(true);
 
     this.service
-      .donate(donations)
+      .constructBuilding(buildingType)
       .pipe(finalize(() => this._loading.set(false)))
       .subscribe({
-        next: () => {
+        next: (buildings) => {
+          this._buildings.set(buildings);
           this.refresh();
-          this.inventoryState.load(true);
-          this.auth.refreshCurrentCharacter();
         },
-        error: (e) => this._error.set(e.message ?? 'Failed to donate to guild'),
+        error: (e) =>
+          this._error.set(e.message ?? 'Failed to construct guild building'),
       });
   }
 
-  upgradeGuildBuilding(upgrade: BuildingUpgradeView) {
+  upgradeBuilding(building: GuildBuilding): void {
+    if (!building.id) return;
+
     this._loading.set(true);
 
     this.service
-      .upgradeGuildBuilding(upgrade.definition.id)
+      .upgradeBuilding(building.id)
       .pipe(finalize(() => this._loading.set(false)))
       .subscribe({
-        next: () => this.refresh(),
+        next: (buildings) => {
+          this._buildings.set(buildings);
+          this.refresh();
+        },
         error: (e) =>
           this._error.set(e.message ?? 'Failed to upgrade guild building'),
+      });
+  }
+
+  selectMission(optionId: string): void {
+    this._loading.set(true);
+
+    this.service
+      .selectMission(optionId)
+      .pipe(finalize(() => this._loading.set(false)))
+      .subscribe({
+        next: (missions) => this._missions.set(missions),
+        error: (e) =>
+          this._error.set(e.message ?? 'Failed to select guild mission'),
+      });
+  }
+
+  claimOrderReward(orderId: string): void {
+    this._loading.set(true);
+
+    this.service
+      .claimOrderReward(orderId)
+      .pipe(finalize(() => this._loading.set(false)))
+      .subscribe({
+        next: (missions) => {
+          this._missions.set(missions);
+          this.loadGuildShop();
+          this.refresh();
+        },
+        error: (e) =>
+          this._error.set(e.message ?? 'Failed to claim guild order'),
+      });
+  }
+
+  claimWeeklyMissionReward(): void {
+    this._loading.set(true);
+
+    this.service
+      .claimWeeklyMissionReward()
+      .pipe(finalize(() => this._loading.set(false)))
+      .subscribe({
+        next: (missions) => {
+          this._missions.set(missions);
+          this.loadGuildShop();
+          this.refresh();
+        },
+        error: (e) =>
+          this._error.set(
+            e.message ?? 'Failed to claim weekly guild mission reward',
+          ),
+      });
+  }
+
+  purchaseShopItem(itemKey: string): void {
+    this._loading.set(true);
+
+    this.service
+      .purchaseShopItem(itemKey)
+      .pipe(finalize(() => this._loading.set(false)))
+      .subscribe({
+        next: (shop) => {
+          this._shop.set(shop);
+          this.auth.refreshCurrentCharacter();
+        },
+        error: (e) =>
+          this._error.set(e.message ?? 'Failed to purchase guild shop item'),
       });
   }
 
@@ -389,10 +473,24 @@ export class GuildStateService {
     });
   }
 
-  private loadGuildUpgrades(): void {
-    this.service.getUpgrades().subscribe({
-      next: (inv) => this._upgrades.set(inv),
-      error: (e) => this._error.set(e.message ?? 'Failed to load upgrades'),
+  private loadGuildBuildings(): void {
+    this.service.getBuildings().subscribe({
+      next: (buildings) => this._buildings.set(buildings),
+      error: (e) => this._error.set(e.message ?? 'Failed to load buildings'),
+    });
+  }
+
+  private loadGuildMissions(): void {
+    this.service.getMissions().subscribe({
+      next: (missions) => this._missions.set(missions),
+      error: (e) => this._error.set(e.message ?? 'Failed to load missions'),
+    });
+  }
+
+  private loadGuildShop(): void {
+    this.service.getShop().subscribe({
+      next: (shop) => this._shop.set(shop),
+      error: (e) => this._error.set(e.message ?? 'Failed to load guild shop'),
     });
   }
 

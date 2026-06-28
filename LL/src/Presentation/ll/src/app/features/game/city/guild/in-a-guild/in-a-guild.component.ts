@@ -5,10 +5,11 @@ import { Guild } from '../../../../../shared/models/Dtos/guild/guild';
 import { InviteToGuild } from '../../../../../shared/models/requestDtos/guilds/inviteToGuild';
 import { GuildStateService } from '../../../../../core/services/api/guild/guild-state.service';
 import { GuildBuildingsComponent } from './guild-buildings/guild-buildings.component';
-import { GuildVaultComponent } from './guild-vault/guild-vault.component';
+import { GuildMissionsComponent } from './guild-missions/guild-missions.component';
+import { GuildShopComponent } from './guild-shop/guild-shop.component';
 import { GuildRankingsComponent } from './guild-rankings/guild-rankings.component';
 import { TabsComponent } from '../../../../../shared/components/custom-components/tabs/tabs.component';
-import { NgFor } from '@angular/common';
+import { NgFor, NgIf } from '@angular/common';
 import { HumanizeEnumPipe } from '../../../../../shared/pipes/enums/humanize-enum.pipe';
 import { NumberFormatPipe } from '../../../../../shared/pipes/number-format/number-format.pipe';
 
@@ -17,11 +18,13 @@ import { NumberFormatPipe } from '../../../../../shared/pipes/number-format/numb
   standalone: true,
   imports: [
     NgFor,
+    NgIf,
     TabComponent,
     GuildInfoComponent,
     TabsComponent,
     GuildBuildingsComponent,
-    GuildVaultComponent,
+    GuildMissionsComponent,
+    GuildShopComponent,
     GuildRankingsComponent,
     HumanizeEnumPipe,
     NumberFormatPipe,

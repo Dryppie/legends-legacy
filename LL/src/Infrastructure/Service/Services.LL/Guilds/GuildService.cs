@@ -1,22 +1,16 @@
 ﻿using Application.Common.Interfaces;
 using Application.Interfaces.Services.LL;
 using Domain.Extensions.Guilds;
-using Domain.Models.Entities.Characters;
 using Domain.Models.Guilds;
-using Domain.Models.Inventories;
 
 namespace Services.LL.Guilds;
 public class GuildService : IGuildService
 {
     private readonly IGuildRepository _guildRepository;
-    private readonly IInventoryRepository _inventoryRepository;
-    private readonly ICharacterRepository _characterRepository;
 
-    public GuildService(IGuildRepository guildRepository, IInventoryRepository inventoryRepository, ICharacterRepository characterRepository)
+    public GuildService(IGuildRepository guildRepository)
     {
         _guildRepository = guildRepository;
-        _inventoryRepository = inventoryRepository;
-        _characterRepository = characterRepository;
     }
 
     #region guild
@@ -26,8 +20,8 @@ public class GuildService : IGuildService
     public async Task<Guild?> GetMyGuildAsync(Guid characterId, CancellationToken cancellationToken) =>
         await _guildRepository.GetMyGuildAsync(characterId, cancellationToken);
 
-    public async Task<Guild?> GetGuildWithUpgradesAsync(Guid characterId, CancellationToken cancellationToken) =>
-        await _guildRepository.GetGuildWithUpgradesAsync(characterId, cancellationToken);
+    public async Task<Guild?> GetGuildForMemberAsync(Guid characterId, CancellationToken cancellationToken) =>
+        await _guildRepository.GetGuildForMemberAsync(characterId, cancellationToken);
 
     public async Task<List<Guild>> GetAllGuildsAsync(CancellationToken cancellationToken) =>
         await _guildRepository.GetAllGuildsAsync(cancellationToken);
@@ -89,65 +83,4 @@ public class GuildService : IGuildService
         await _guildRepository.RejectGuildInviteAsync(characterId, guildId, cancellationToken);
     #endregion
 
-    public async Task<bool> DonateToGuildAsync(Guid characterId, Dictionary<GuildResourceType, int> donations, CancellationToken cancellationToken)
-    {
-        var guild = await _guildRepository.GetMyGuildAsync(characterId, cancellationToken);
-        if (guild == null) return false;
-
-        var character = await _characterRepository.GetCharacterByCharacterIdAsync(characterId, cancellationToken);
-        if (character == null) return false;
-
-        var inventory = await _inventoryRepository.GetInventoryByIdAsync(characterId, cancellationToken);
-        if (inventory == null) return false;
-
-        foreach (var (resourceType, amount) in donations)
-        {
-            if (amount <= 0)
-                continue;
-
-            switch (resourceType)
-            {
-                case GuildResourceType.Cinders:
-                    if (character.Cinders < amount)
-                        return false;
-                    character.Cinders -= amount;
-                    break;
-
-                case GuildResourceType.Soulstones:
-                    if (character.Soulstones < amount)
-                        return false;
-                    character.Soulstones -= amount;
-                    break;
-
-                default:
-                    // Inventory-based resources
-                    var matchingItem = inventory.InventoryItems
-                        .FirstOrDefault(i =>
-                            i.ItemInstance?.ItemBase?.Name.Replace(" ", "") == resourceType.ToString());
-
-                    if (matchingItem == null || matchingItem.Quantity < amount)
-                        return false;
-
-                    if (matchingItem.Quantity == amount)
-                    {
-                        _inventoryRepository.RemoveInventoryItem(matchingItem);
-                    }
-                    else
-                    {
-                        matchingItem.Quantity -= amount;
-                    }
-
-                    break;
-            }
-
-            // Add to guild vault or resource list (pseudo, depends on how you're storing it)
-            var resource = guild.Resources.FirstOrDefault(r => r.Resource == resourceType);
-            if (resource == null)
-                guild.Resources.Add(new GuildResource { Resource = resourceType, Amount = amount });
-            else
-                resource.Amount += amount;
-        }
-
-        return true;
-    }
 }

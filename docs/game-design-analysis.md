@@ -245,12 +245,12 @@ Guilds currently allow players to:
 
 - Create, join, leave, disband.
 - Invite/apply/approve/reject.
-- View members, rankings, vault/resources.
-- Donate Cinders/Soulstones/material-like guild resources.
-- Upgrade guild buildings if leader.
+- View members, rankings, missions, shop, buildings, and guild-owned resources.
+- Earn Guild Supplies through guild activity.
+- Construct and upgrade guild buildings if leader/officer.
 - Subscribe to guild realtime groups.
 
-Evidence: `GuildService.cs`, `GuildBuildingUpgradeService.cs`, `GuildController.cs`, guild frontend components, and `guild-building-upgrades.json`.
+Evidence: `GuildService.cs`, `GuildBuildingService.cs`, `GuildMissionService.cs`, `GuildShopService.cs`, `GuildController.cs`, and guild frontend components.
 
 Guild progression exists through buildings, but meaningful cooperation is underdeveloped. There are no guild missions, wars, raids, guild shop, shared bosses, or recurring guild goals found. Guilds are currently a resource sink and social container, not yet a deep game feature.
 
