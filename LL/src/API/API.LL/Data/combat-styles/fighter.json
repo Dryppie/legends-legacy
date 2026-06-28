@@ -5,31 +5,12 @@
   "resourceId": "momentum",
   "resourceMaxAmount": 100,
   "maxLevel": 50,
-  "recommendedTags": [
-    "Melee",
-    "Physical",
-    "Bleed"
-  ],
-  "recommendedStats": [
-    "Power",
-    "WeaponDamage",
-    "Precision"
-  ],
   "focuses": [
     {
       "id": "fighter_juggernaut_trance",
       "name": "Juggernaut Trance",
       "description": "Overpower also grants 12% damage reduction and 20% crowd control resistance for 8 seconds.",
       "unlockLevel": 25,
-      "recommendedTags": [
-        "Left",
-        "Major"
-      ],
-      "recommendedStats": [
-        "Power",
-        "WeaponDamage",
-        "Precision"
-      ],
       "rules": []
     },
     {
@@ -37,15 +18,6 @@
       "name": "Duelists Claim",
       "description": "Overpower marks the primary target for 10 seconds. Your Essence effects against the marked target gain +10% Effect Potency. The marked enemy deals 8% less damage to you. If the mark is an ally, your healing/barriers/buffs on that ally gain +10% Effect Potency and the ally takes 8% less damage.",
       "unlockLevel": 25,
-      "recommendedTags": [
-        "Middle",
-        "Major"
-      ],
-      "recommendedStats": [
-        "Power",
-        "WeaponDamage",
-        "Precision"
-      ],
       "rules": []
     },
     {
@@ -53,15 +25,6 @@
       "name": "Finishers Surge",
       "description": "If an Overpowered Essence ability defeats an enemy or saves an ally below 30% Health with healing/barrier, refund 30 Battle Rhythm and reduce Overpower's remaining cooldown by 25%.",
       "unlockLevel": 25,
-      "recommendedTags": [
-        "Right",
-        "Major"
-      ],
-      "recommendedStats": [
-        "Power",
-        "WeaponDamage",
-        "Precision"
-      ],
       "rules": []
     }
   ],

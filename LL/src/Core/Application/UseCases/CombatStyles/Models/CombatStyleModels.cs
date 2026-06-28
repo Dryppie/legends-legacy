@@ -22,8 +22,6 @@ public sealed class CombatStyleModel
     public int SkillPointsEarned { get; set; }
     public int SkillPointsSpent { get; set; }
     public int SkillPointsAvailable { get; set; }
-    public IReadOnlyList<string> RecommendedTags { get; set; } = [];
-    public IReadOnlyList<string> RecommendedStats { get; set; } = [];
     public IReadOnlyList<CombatStyleFocusModel> Focuses { get; set; } = [];
     public CombatStyleSkillTreeModel SkillTree { get; set; } = new();
     public IReadOnlyList<CombatStyleRuleSummaryModel> RuleSummaries { get; set; } = [];
@@ -37,8 +35,6 @@ public sealed class CombatStyleFocusModel
     public int UnlockLevel { get; set; }
     public bool IsUnlocked { get; set; }
     public bool IsSelected { get; set; }
-    public IReadOnlyList<string> RecommendedTags { get; set; } = [];
-    public IReadOnlyList<string> RecommendedStats { get; set; } = [];
 }
 
 public sealed class CombatStyleRuleSummaryModel
@@ -57,8 +53,6 @@ public sealed class CombatStyleSkillTreeBranchModel
     public string Id { get; set; } = string.Empty;
     public string Name { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
-    public IReadOnlyList<string> RecommendedTags { get; set; } = [];
-    public IReadOnlyList<string> RecommendedStats { get; set; } = [];
     public int PointsSpent { get; set; }
     public IReadOnlyList<CombatStyleSkillTreeNodeModel> Nodes { get; set; } = [];
 }

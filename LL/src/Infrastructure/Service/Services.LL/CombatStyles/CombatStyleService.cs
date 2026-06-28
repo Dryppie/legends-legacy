@@ -326,8 +326,6 @@ public sealed class CombatStyleService : ICombatStyleService
             SkillPointsEarned = earned,
             SkillPointsSpent = spent,
             SkillPointsAvailable = Math.Max(0, earned - spent),
-            RecommendedTags = definition.RecommendedTags,
-            RecommendedStats = [.. definition.RecommendedStats.Select(x => x.ToString())],
             Focuses = [.. definition.Focuses.Select(focus => new CombatStyleFocusModel
             {
                 Id = focus.Id,
@@ -335,9 +333,7 @@ public sealed class CombatStyleService : ICombatStyleService
                 Description = focus.Description,
                 UnlockLevel = focus.UnlockLevel,
                 IsUnlocked = progress.Level >= focus.UnlockLevel,
-                IsSelected = focus.Id.Equals(selectedFocusId, StringComparison.OrdinalIgnoreCase),
-                RecommendedTags = focus.RecommendedTags,
-                RecommendedStats = [.. focus.RecommendedStats.Select(x => x.ToString())]
+                IsSelected = focus.Id.Equals(selectedFocusId, StringComparison.OrdinalIgnoreCase)
             })],
             SkillTree = CreateSkillTreeDto(definition, progress, nodes),
             RuleSummaries = [.. definition.Rules.Select(rule => new CombatStyleRuleSummaryModel
@@ -388,8 +384,6 @@ public sealed class CombatStyleService : ICombatStyleService
                 Id = focus.Id,
                 Name = focus.Name,
                 Description = focus.Description,
-                RecommendedTags = focus.RecommendedTags,
-                RecommendedStats = [.. focus.RecommendedStats.Select(x => x.ToString())],
                 PointsSpent = nodes
                     .Where(node => branchNodes.Any(def => def.Id.Equals(node.NodeId, StringComparison.OrdinalIgnoreCase)))
                     .Sum(x => x.Rank),
@@ -434,8 +428,6 @@ public sealed class CombatStyleService : ICombatStyleService
                 Id = lane.ToLowerInvariant(),
                 Name = lane,
                 Description = $"{definition.Name} {lane.ToLowerInvariant()} lane.",
-                RecommendedTags = [lane],
-                RecommendedStats = [.. definition.RecommendedStats.Select(x => x.ToString())],
                 PointsSpent = nodes
                     .Where(node => branchNodes.Any(def => def.Id.Equals(node.NodeId, StringComparison.OrdinalIgnoreCase)))
                     .Sum(x => x.Rank),

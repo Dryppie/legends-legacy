@@ -18,8 +18,6 @@ export interface CombatStyleDto {
   skillPointsEarned: number;
   skillPointsSpent: number;
   skillPointsAvailable: number;
-  recommendedTags: string[];
-  recommendedStats: string[];
   focuses: CombatStyleFocusDto[];
   skillTree: CombatStyleSkillTreeDto;
   ruleSummaries: CombatStyleRuleSummaryDto[];
@@ -32,8 +30,6 @@ export interface CombatStyleFocusDto {
   unlockLevel: number;
   isUnlocked: boolean;
   isSelected: boolean;
-  recommendedTags: string[];
-  recommendedStats: string[];
 }
 
 export interface CombatStyleRuleSummaryDto {
@@ -49,8 +45,6 @@ export interface CombatStyleSkillTreeBranchDto {
   id: string;
   name: string;
   description: string;
-  recommendedTags: string[];
-  recommendedStats: string[];
   pointsSpent: number;
   nodes: CombatStyleSkillTreeNodeDto[];
 }

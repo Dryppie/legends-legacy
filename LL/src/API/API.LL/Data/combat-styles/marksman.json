@@ -5,32 +5,12 @@
   "resourceId": "aim",
   "resourceMaxAmount": 100,
   "maxLevel": 50,
-  "recommendedTags": [
-    "Ranged",
-    "Physical",
-    "Critical",
-    "Mark"
-  ],
-  "recommendedStats": [
-    "Precision",
-    "CritChance",
-    "ArmorPenetration"
-  ],
   "focuses": [
     {
       "id": "marksman_perfect_shot",
       "name": "Perfect Shot",
       "description": "Deadeye's empowered Essence ability cannot miss and gains +15% application chance against non-immune targets. If used at 100 Aim, it also gains +15% Effect Potency.",
       "unlockLevel": 25,
-      "recommendedTags": [
-        "Left",
-        "Major"
-      ],
-      "recommendedStats": [
-        "Precision",
-        "CritChance",
-        "ArmorPenetration"
-      ],
       "rules": []
     },
     {
@@ -38,15 +18,6 @@
       "name": "Rain Of Arrows",
       "description": "Deadeye spreads 40% of the empowered Essence effect to up to 2 nearby valid targets. Damage/healing/barrier/resource effects spread at 40% value. Buffs/debuffs/control/summon-related effects spread as 40% duration or strength.",
       "unlockLevel": 25,
-      "recommendedTags": [
-        "Middle",
-        "Major"
-      ],
-      "recommendedStats": [
-        "Precision",
-        "CritChance",
-        "ArmorPenetration"
-      ],
       "rules": []
     },
     {
@@ -54,15 +25,6 @@
       "name": "Hunters Patience",
       "description": "Deadeye Mark lasts 5 seconds longer. If you take no Health damage during Deadeye, reduce Deadeye's remaining cooldown by 10 seconds and gain +30 Aim after it ends.",
       "unlockLevel": 25,
-      "recommendedTags": [
-        "Right",
-        "Major"
-      ],
-      "recommendedStats": [
-        "Precision",
-        "CritChance",
-        "ArmorPenetration"
-      ],
       "rules": []
     }
   ],

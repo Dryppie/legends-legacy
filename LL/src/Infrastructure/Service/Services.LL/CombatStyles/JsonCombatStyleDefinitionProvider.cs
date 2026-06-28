@@ -71,8 +71,6 @@ public sealed class JsonCombatStyleDefinitionProvider : ICombatStyleDefinitionPr
             style.ResourceId,
             style.ResourceMaxAmount,
             style.MaxLevel,
-            style.RecommendedTags,
-            style.RecommendedStats,
             focuses,
             skillTreeNodes,
             [.. style.Rules.Select(ToDomain)],
@@ -111,8 +109,6 @@ public sealed class JsonCombatStyleDefinitionProvider : ICombatStyleDefinitionPr
             focus.Name,
             focus.Description,
             focus.UnlockLevel,
-            focus.RecommendedTags,
-            focus.RecommendedStats,
             [.. focus.Rules.Select(ToDomain)]);
 
     private static CombatStyleRuleDefinition ToDomain(CombatStyleRuleDefinitionJson rule) =>
@@ -299,8 +295,6 @@ public sealed class JsonCombatStyleDefinitionProvider : ICombatStyleDefinitionPr
         public string ResourceId { get; set; } = string.Empty;
         public decimal ResourceMaxAmount { get; set; } = 100m;
         public int MaxLevel { get; set; } = 50;
-        public IReadOnlyList<string> RecommendedTags { get; set; } = [];
-        public IReadOnlyList<AttributeType> RecommendedStats { get; set; } = [];
         public IReadOnlyList<CombatStyleFocusDefinitionJson> Focuses { get; set; } = [];
         public IReadOnlyList<CombatStyleTreeNodeDefinitionJson> SkillTreeNodes { get; set; } = [];
         public IReadOnlyList<CombatStyleRuleDefinitionJson> Rules { get; set; } = [];
@@ -337,8 +331,6 @@ public sealed class JsonCombatStyleDefinitionProvider : ICombatStyleDefinitionPr
         public string Name { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
         public int UnlockLevel { get; set; } = 10;
-        public IReadOnlyList<string> RecommendedTags { get; set; } = [];
-        public IReadOnlyList<AttributeType> RecommendedStats { get; set; } = [];
         public IReadOnlyList<CombatStyleRuleDefinitionJson> Rules { get; set; } = [];
     }
 

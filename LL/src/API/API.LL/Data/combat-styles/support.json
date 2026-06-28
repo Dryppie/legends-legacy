@@ -5,32 +5,12 @@
   "resourceId": "resolve",
   "resourceMaxAmount": 100,
   "maxLevel": 50,
-  "recommendedTags": [
-    "Healing",
-    "Barrier",
-    "Holy",
-    "Support"
-  ],
-  "recommendedStats": [
-    "HealingPowerPercent",
-    "Spirit",
-    "Cooldown"
-  ],
   "focuses": [
     {
       "id": "support_greater_benediction",
       "name": "Greater Benediction",
       "description": "Benediction affects your next 2 Essence abilities. The second ability receives 70% of the Benediction bonus.",
       "unlockLevel": 25,
-      "recommendedTags": [
-        "Left",
-        "Major"
-      ],
-      "recommendedStats": [
-        "HealingPowerPercent",
-        "Spirit",
-        "Cooldown"
-      ],
       "rules": []
     },
     {
@@ -38,15 +18,6 @@
       "name": "Sanctuary",
       "description": "Benediction creates an 8 second Sanctuary. You and allies affected by Benediction take 10% less damage. Solo fallback: you gain 10% damage reduction.",
       "unlockLevel": 25,
-      "recommendedTags": [
-        "Middle",
-        "Major"
-      ],
-      "recommendedStats": [
-        "HealingPowerPercent",
-        "Spirit",
-        "Cooldown"
-      ],
       "rules": []
     },
     {
@@ -54,15 +25,6 @@
       "name": "Miracle Timing",
       "description": "Benedicted effects on targets below 35% Health gain +20% Effect Potency. If the Benedicted ability is hostile and the enemy is targeting a low-Health ally, that enemy deals 10% less damage for 5 seconds.",
       "unlockLevel": 25,
-      "recommendedTags": [
-        "Right",
-        "Major"
-      ],
-      "recommendedStats": [
-        "HealingPowerPercent",
-        "Spirit",
-        "Cooldown"
-      ],
       "rules": []
     }
   ],

@@ -32,8 +32,6 @@ public sealed class CombatStyleDto : IMapFrom<CombatStyleModel>
     public int SkillPointsEarned { get; set; }
     public int SkillPointsSpent { get; set; }
     public int SkillPointsAvailable { get; set; }
-    public IReadOnlyList<string> RecommendedTags { get; set; } = [];
-    public IReadOnlyList<string> RecommendedStats { get; set; } = [];
     public IReadOnlyList<CombatStyleFocusDto> Focuses { get; set; } = [];
     public CombatStyleSkillTreeDto SkillTree { get; set; } = new();
     public IReadOnlyList<CombatStyleRuleSummaryDto> RuleSummaries { get; set; } = [];
@@ -52,8 +50,6 @@ public sealed class CombatStyleFocusDto : IMapFrom<CombatStyleFocusModel>
     public int UnlockLevel { get; set; }
     public bool IsUnlocked { get; set; }
     public bool IsSelected { get; set; }
-    public IReadOnlyList<string> RecommendedTags { get; set; } = [];
-    public IReadOnlyList<string> RecommendedStats { get; set; } = [];
 
     public void Mapping(Profile profile)
     {
@@ -87,8 +83,6 @@ public sealed class CombatStyleSkillTreeBranchDto : IMapFrom<CombatStyleSkillTre
     public string Id { get; set; } = string.Empty;
     public string Name { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
-    public IReadOnlyList<string> RecommendedTags { get; set; } = [];
-    public IReadOnlyList<string> RecommendedStats { get; set; } = [];
     public int PointsSpent { get; set; }
     public IReadOnlyList<CombatStyleSkillTreeNodeDto> Nodes { get; set; } = [];
 

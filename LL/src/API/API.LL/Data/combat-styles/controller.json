@@ -5,32 +5,12 @@
   "resourceId": "control",
   "resourceMaxAmount": 100,
   "maxLevel": 50,
-  "recommendedTags": [
-    "Control",
-    "Debuff",
-    "Curse",
-    "DoT"
-  ],
-  "recommendedStats": [
-    "Spirit",
-    "Cooldown",
-    "StatusResistance"
-  ],
   "focuses": [
     {
       "id": "controller_absolute_lockdown",
       "name": "Absolute Lockdown",
       "description": "Lockdown's hostile effect also applies Suppression for 4 seconds: Action Speed -20% and damage dealt -15%. Against non-immune targets, Lockdown's debuff/control application cannot miss. Non-hostile Lockdown grants the ally Unstoppable: crowd control immunity for 2 seconds.",
       "unlockLevel": 25,
-      "recommendedTags": [
-        "Left",
-        "Major"
-      ],
-      "recommendedStats": [
-        "Spirit",
-        "Cooldown",
-        "StatusResistance"
-      ],
       "rules": []
     },
     {
@@ -38,15 +18,6 @@
       "name": "Grand Manipulation",
       "description": "Lockdown affects up to 3 valid targets. Primary target receives full value. Secondary targets receive 50% value. For non-hostile abilities, spreads to nearby allies instead.",
       "unlockLevel": 25,
-      "recommendedTags": [
-        "Middle",
-        "Major"
-      ],
-      "recommendedStats": [
-        "Spirit",
-        "Cooldown",
-        "StatusResistance"
-      ],
       "rules": []
     },
     {
@@ -54,15 +25,6 @@
       "name": "Control Cascade",
       "description": "When a Lockdown-empowered debuff/control effect expires or its target dies, 50% of its remaining duration or strength spreads to the nearest valid enemy. Non-hostile Lockdown effects spread 50% remaining duration to the nearest ally.",
       "unlockLevel": 25,
-      "recommendedTags": [
-        "Right",
-        "Major"
-      ],
-      "recommendedStats": [
-        "Spirit",
-        "Cooldown",
-        "StatusResistance"
-      ],
       "rules": []
     }
   ],

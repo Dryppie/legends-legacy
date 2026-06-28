@@ -11,8 +11,6 @@ public sealed record CombatStyleDefinition(
     string ResourceId,
     decimal ResourceMaxAmount,
     int MaxLevel,
-    IReadOnlyList<string> RecommendedTags,
-    IReadOnlyList<AttributeType> RecommendedStats,
     IReadOnlyList<CombatStyleFocusDefinition> Focuses,
     IReadOnlyList<CombatStyleTreeNodeDefinition> SkillTreeNodes,
     IReadOnlyList<CombatStyleRuleDefinition> Rules,
@@ -147,8 +145,6 @@ public sealed record CombatStyleFocusDefinition(
     string Name,
     string Description,
     int UnlockLevel,
-    IReadOnlyList<string> RecommendedTags,
-    IReadOnlyList<AttributeType> RecommendedStats,
     IReadOnlyList<CombatStyleRuleDefinition> Rules);
 
 public sealed record CombatStyleRuleDefinition

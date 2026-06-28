@@ -121,32 +121,9 @@
               <h2 class="ll-heading">Core Mechanic</h2>
               <p class="ll-copy mt-2">{{ style.coreMechanic }}</p>
             </div>
-            <div class="flex flex-wrap gap-2">
-              <span
-                *ngFor="let tag of style.recommendedTags; trackBy: trackText"
-                class="ll-badge ll-badge-accent rounded"
-              >
-                {{ tag }}
-              </span>
-            </div>
           </div>
 
-          <div class="mt-4 grid gap-3 md:grid-cols-2">
-            <article class="ll-card p-3">
-              <h3 class="ll-eyebrow text-primary">Recommended Stats</h3>
-              <div class="mt-3 flex flex-wrap gap-2">
-                <span
-                  *ngFor="
-                    let stat of style.recommendedStats;
-                    trackBy: trackText
-                  "
-                  class="ll-badge rounded"
-                >
-                  {{ stat }}
-                </span>
-              </div>
-            </article>
-
+          <div class="mt-4 grid gap-3">
             <article class="ll-card p-3">
               <h3 class="ll-eyebrow text-primary">Rules</h3>
               <div class="mt-3 grid gap-2">
@@ -239,8 +216,7 @@
               <div class="ll-stat-label">Selected Skill</div>
               <h2 class="ll-heading mt-1">{{ node.name }}</h2>
               <p class="ll-copy mt-1 text-xs">
-                {{ node.nodeType }} | {{ node.lane }} | Level
-                {{ node.requiredLevel }}
+                {{ node.nodeType }} | Level {{ node.requiredLevel }}
               </p>
             </div>
             <span

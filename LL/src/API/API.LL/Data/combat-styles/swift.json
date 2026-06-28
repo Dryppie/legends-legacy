@@ -5,32 +5,12 @@
   "resourceId": "flow",
   "resourceMaxAmount": 100,
   "maxLevel": 50,
-  "recommendedTags": [
-    "Melee",
-    "Ranged",
-    "Dodge",
-    "Speed"
-  ],
-  "recommendedStats": [
-    "Precision",
-    "DodgeChance",
-    "Cooldown"
-  ],
   "focuses": [
     {
       "id": "swift_phantom_step",
       "name": "Phantom Step",
       "description": "Quickstep lasts 2 seconds longer, removes slows/roots, and prevents the first crowd control effect applied to you during Quickstep.",
       "unlockLevel": 25,
-      "recommendedTags": [
-        "Left",
-        "Major"
-      ],
-      "recommendedStats": [
-        "Precision",
-        "DodgeChance",
-        "Cooldown"
-      ],
       "rules": []
     },
     {
@@ -38,15 +18,6 @@
       "name": "Flurry State",
       "description": "Quickstep empowers your next 3 Essence abilities instead of 1. Each receives 60% of the Quickstep potency bonus. Quickstep Action Speed bonus increased from 10% to 15%.",
       "unlockLevel": 25,
-      "recommendedTags": [
-        "Middle",
-        "Major"
-      ],
-      "recommendedStats": [
-        "Precision",
-        "DodgeChance",
-        "Cooldown"
-      ],
       "rules": []
     },
     {
@@ -54,15 +25,6 @@
       "name": "Assassinate Timing",
       "description": "During Quickstep, your first Essence effect against a target below 35% Health gains +18% Effect Potency. Healing/barrier effects on allies below 35% Health also gain +18%. If the effect does not defeat an enemy or prevent an ally from dropping lower, only half the bonus applies.",
       "unlockLevel": 25,
-      "recommendedTags": [
-        "Right",
-        "Major"
-      ],
-      "recommendedStats": [
-        "Precision",
-        "DodgeChance",
-        "Cooldown"
-      ],
       "rules": []
     }
   ],

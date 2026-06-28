@@ -194,9 +194,7 @@ export class CombatStyleComponent implements OnInit {
       } else if (node.nodeType === 'Major') {
         const allowedLanes = this.allowedNextLanes(previousMajor.lane);
         if (!allowedLanes.includes(node.lane as CombatTreeLane)) {
-          reasons.push(
-            `${previousMajor.name} unlocks Row ${node.row} ${this.formatLaneList(allowedLanes)} only.`,
-          );
+          reasons.push('Requires a connected major choice from the previous row.');
         }
       }
     }
@@ -296,18 +294,6 @@ export class CombatStyleComponent implements OnInit {
 
   private allowedNextLanes(lane: string): CombatTreeLane[] {
     return this.nextRowLaneUnlocks[lane as CombatTreeLane] ?? [];
-  }
-
-  private formatLaneList(lanes: CombatTreeLane[]): string {
-    if (lanes.length <= 1) {
-      return lanes[0] ?? 'no lanes';
-    }
-
-    if (lanes.length === 2) {
-      return `${lanes[0]} or ${lanes[1]}`;
-    }
-
-    return `${lanes.slice(0, -1).join(', ')}, or ${lanes[lanes.length - 1]}`;
   }
 
   private laneIndex(lane: string): number {

@@ -5,32 +5,12 @@
   "resourceId": "command",
   "resourceMaxAmount": 100,
   "maxLevel": 50,
-  "recommendedTags": [
-    "Summon",
-    "Minion",
-    "Curse",
-    "Holy"
-  ],
-  "recommendedStats": [
-    "SummonPower",
-    "SummonHealth",
-    "Spirit"
-  ],
   "focuses": [
     {
       "id": "summoner_grand_rally",
       "name": "Grand Rally",
       "description": "Rally Command lasts 4 seconds longer. Controlled allies gain +10% Effect Potency during Rally Command. Solo fallback: you gain +5% Effect Potency during Rally Command.",
       "unlockLevel": 25,
-      "recommendedTags": [
-        "Left",
-        "Major"
-      ],
-      "recommendedStats": [
-        "SummonPower",
-        "SummonHealth",
-        "Spirit"
-      ],
       "rules": []
     },
     {
@@ -38,15 +18,6 @@
       "name": "Last Bastion Order",
       "description": "Once per Rally Command, if a controlled ally would die, prevent death and give it a Barrier equal to 15% of your Max Health for 4 seconds. If you have no controlled allies, Rally Command cooldown is reduced by 50% when you fall below 35% Health. 90 second internal cooldown.",
       "unlockLevel": 25,
-      "recommendedTags": [
-        "Middle",
-        "Major"
-      ],
-      "recommendedStats": [
-        "SummonPower",
-        "SummonHealth",
-        "Spirit"
-      ],
       "rules": []
     },
     {
@@ -54,15 +25,6 @@
       "name": "Overwhelming Coordination",
       "description": "During Rally Command, each controlled ally or active persistent Essence effect grants your next Essence ability +2% Effect Potency, capped at +12%. If you have no controlled allies or persistent effects, count as 2 stacks.",
       "unlockLevel": 25,
-      "recommendedTags": [
-        "Right",
-        "Major"
-      ],
-      "recommendedStats": [
-        "SummonPower",
-        "SummonHealth",
-        "Spirit"
-      ],
       "rules": []
     }
   ],
