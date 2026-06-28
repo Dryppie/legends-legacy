@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Combat Styles are a build-shaping layer that determines how a character fights while Essences remain the primary source of abilities. The current implementation adds the foundation for one active Combat Style per character, persisted style progression, focus path selection, dungeon snapshotting, runtime combat resources, combat rule integration, API endpoints, and an Angular management page.
+Combat Styles are a build-shaping layer that determines how a character fights while Essences remain the primary source of abilities. The current implementation adds the foundation for one active Combat Style per character, persisted style progression, row/lane skill-tree investment, dungeon snapshotting, runtime combat resources, combat rule integration, Essence ability mutators, API endpoints, and an Angular management page.
 
 The system intentionally preserves these design rules:
 
@@ -36,9 +36,9 @@ Persistence is wired through `IDbContext`, `LLDbContext`, EF configuration, and 
 - Level range from 1 to 50.
 - Non-negative experience.
 
-### Static Definitions
+### Data-Driven Definitions
 
-Combat Style definitions are static C# game data via `ICombatStyleDefinitionProvider`, implemented by `StaticCombatStyleDefinitionProvider`.
+Combat Style definitions are JSON-backed game data via `ICombatStyleDefinitionProvider`, implemented by `JsonCombatStyleDefinitionProvider`.
 
 The current styles are:
 
@@ -59,10 +59,12 @@ Each definition includes:
 - Recommended tags.
 - Recommended stats.
 - Core mechanic text.
-- Focus paths.
+- Row/lane skill-tree nodes.
+- Mutator metadata for eligible tree nodes.
+- Structured node tooltip content.
 - Rule metadata.
 
-Definitions are centralized so balance values and future styles can be tuned without touching controllers or UI code.
+Definitions are centralized in `LL/src/API/API.LL/Data/combat-styles/*.json` so balance values, tree layout, node text, and future styles can be tuned without touching controllers or UI code.
 
 ### Service Layer
 
@@ -73,6 +75,8 @@ Definitions are centralized so balance values and future styles can be tuned wit
 - Default Fighter as active style when no active style exists.
 - Activate a style.
 - Select a focus path.
+- Rank up skill-tree nodes.
+- Reset the skill tree.
 - Validate focus unlock level.
 - Generate an active style snapshot.
 - Generate a build preview from equipped Essence tags.
@@ -121,6 +125,7 @@ Runtime state tracks:
 - Style ID.
 - Style level.
 - Focus ID.
+- Ranked tree node IDs and ranks.
 - The combat side the style belongs to.
 - Resource values.
 - Trigger counts.
@@ -140,12 +145,13 @@ The runtime is side-aware. A style state treats the non-summoned combatant on it
 
 ### Rule Engine and Trigger Caps
 
-`CombatStyleRuleEngine` now executes reusable rule definitions for the common combat hooks:
+`CombatStyleRuleEngine` now acts as a facade over reusable rule-definition interpretation for the common combat hooks:
 
 - Active ability resolution.
 - Effect amount calculation.
 - Damage dealt.
 - Damage taken.
+- Summon attribute calculation.
 
 Generic rule execution currently supports:
 
@@ -156,8 +162,23 @@ Generic rule execution currently supports:
 - Encounter-level trigger caps.
 - Source-level trigger caps.
 - Target-level trigger caps.
+- Summon stat modification.
 
-The rule engine still keeps bespoke C# paths for behavior that needs focus-specific ownership, milestone scaling, summon attribute shaping, or multi-step resource spend behavior. This keeps the declarative rule layer useful without forcing every advanced style mechanic into an underpowered abstraction.
+Rule selection gathers base style rules, ranked node rules, selected focus/build-identity rules, and resource-overflow rules. Style-specific behavior should live in JSON definitions plus reusable operations rather than style identity branches in the engine.
+
+### Essence Ability Mutators
+
+`CombatStyleAbilityMutatorResolver` applies selected tree mutators before ability compilation.
+
+The resolver:
+
+- Gathers ranked combat-style nodes with mutator definitions.
+- Applies at most one mutator per mutator group.
+- Checks ability metadata, delivery tags, effect tags, targeting, damage type, operation type, and conversion flags.
+- Applies transforms such as tag additions, damage type changes, scaling changes, cooldown/resource multipliers, potency multipliers, and tradeoffs.
+- Leaves ineligible abilities unchanged.
+
+This keeps Combat Styles as a build-shaping layer over equipped Essence abilities instead of giving styles their own active ability list.
 
 ### Balance Simulation
 
@@ -287,16 +308,27 @@ The Angular implementation adds:
 
 The Combat Styles page displays:
 
-- Active style and focus.
+- Active style and selected build identity/focus signal.
 - Style level and XP progress.
 - Resource ID.
 - Core mechanic.
 - Build identity.
 - Top Essence tags.
 - Recommended tags and stats.
-- Focus path cards, including locked paths.
-- Activate and select focus actions.
+- A one-style-at-a-time management view.
+- A unified row/lane skill-tree map for redesigned combat-style trees.
+- Legacy branch rendering as a fallback for older tree data.
+- Selected node details with exact effects, mutator groups, affected ability categories, changes, tradeoffs, and non-affected cases.
+- Activate, rank-up node, and reset tree actions.
 - Backend validation errors, including active dungeon switching failures.
+
+The skill-tree UI follows the shared frontend design system:
+
+- Shared `--ll-*` colors, radii, shadows, and display font tokens.
+- Texture-backed dark panels.
+- Compact bordered node controls.
+- Restrained gold accents for selected, ranked, and available states.
+- Subtle tree connectors that sit behind the content.
 
 ## Partially Implemented Areas
 
@@ -370,7 +402,7 @@ The MVP blocks active dungeon runs only. Later validators should include:
 
 ### Frontend Visual QA
 
-Angular build verification passes, but browser-level visual QA has not been performed for the Combat Styles page.
+Angular build verification passes. Browser-level route smoke checking was performed against a temporary local Angular dev server, but the isolated browser session did not have signed-in game state, so final in-game visual approval still needs a signed-in session.
 
 ## Runtime Flow
 
@@ -417,6 +449,7 @@ Backend:
 - `LL/src/Core/Application/Interfaces/Services/LL/CombatStyles/`
 - `LL/src/Core/Application/UseCases/CombatStyles/`
 - `LL/src/Core/Application/UseCases/_AdminDashboard/Diagnostics/Queries/RunCombatStyleBalanceSimulation/`
+- `LL/src/API/API.LL/Data/combat-styles/`
 - `LL/src/Infrastructure/Service/Services.LL/CombatStyles/`
 - `LL/src/API/API.LL/Controllers/V1/CombatStylesController.cs`
 - `LL/src/API/API.AdminDashboard/Controllers/V1/DiagnosticsController.cs`
@@ -464,12 +497,14 @@ Completed:
 - `dotnet test LL\tests\EssenceSystem.Tests\EssenceSystem.Tests.csproj`
 - `dotnet ef migrations add AddCombatStyles --project LL\src\Infrastructure\Persistence\Persistence.LL --startup-project LL\src\API\API.LL`
 - Angular build through direct system npm CLI invocation after `npm ci`.
+- `LL\src\Presentation\ll\node_modules\.bin\ng.cmd build --configuration development`
 
 Notes:
 
 - The normal `npm` shim points to a missing user-level npm installation, so frontend verification used the system npm CLI through `node`.
 - The Angular build emits an existing initial bundle budget warning.
 - `npm ci` reported existing dependency audit findings; dependencies were not upgraded as part of this feature.
+- The latest frontend verification used the local Angular CLI binary directly because the user-level `npm` shim is still broken.
 
 ## Migration and Deployment Notes
 

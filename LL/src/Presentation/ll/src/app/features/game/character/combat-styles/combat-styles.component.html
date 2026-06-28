@@ -53,9 +53,12 @@
         <div class="max-w-3xl">
           <div class="flex flex-wrap items-center gap-2">
             <p class="ll-eyebrow text-primary">
-              {{ style.isActive ? 'Active Combat Style' : 'Combat Style' }}
+              {{ style.isActive ? "Active Combat Style" : "Combat Style" }}
             </p>
-            <span class="ll-badge ll-badge-accent rounded" *ngIf="style.isActive">
+            <span
+              class="ll-badge ll-badge-accent rounded"
+              *ngIf="style.isActive"
+            >
               Active
             </span>
           </div>
@@ -99,21 +102,30 @@
               <span class="text-zinc-400">Available</span>
               <span class="text-primary">{{ style.skillPointsAvailable }}</span>
             </div>
-            <div class="mt-1 flex items-center justify-between text-xs text-zinc-500">
+            <div
+              class="mt-1 flex items-center justify-between text-xs text-zinc-500"
+            >
               <span>Spent</span>
-              <span>{{ style.skillPointsSpent }} / {{ style.skillPointsEarned }}</span>
+              <span
+                >{{ style.skillPointsSpent }} /
+                {{ style.skillPointsEarned }}</span
+              >
             </div>
           </div>
         </div>
       </div>
 
-      <div class="mt-5 grid gap-4 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
+      <div
+        class="mt-5 grid gap-4 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]"
+      >
         <section class="ll-card p-3">
           <p class="ll-eyebrow text-primary">Core Mechanic</p>
           <p class="mt-1 text-sm text-zinc-300">{{ style.coreMechanic }}</p>
         </section>
 
-        <section class="grid gap-3 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
+        <section
+          class="grid gap-3 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2"
+        >
           <div>
             <p class="ll-eyebrow text-primary">Recommended Tags</p>
             <div class="mt-2 flex flex-wrap gap-2">
@@ -173,18 +185,27 @@
               <ol class="tree-map">
                 <li
                   class="tree-node-slot tree-node-slot--map"
-                  *ngFor="
-                    let node of treeNodes(style);
-                    trackBy: trackNode
-                  "
+                  *ngFor="let node of treeNodes(style); trackBy: trackNode"
                   [style.grid-column]="treeMapColumn(node)"
                   [style.grid-row]="treeMapRow(node)"
-                  [class.tree-node-slot--root]="node.row === 1 && node.nodeType.toLowerCase() === 'major'"
-                  [class.tree-node-slot--left]="node.lane.toLowerCase() === 'left'"
-                  [class.tree-node-slot--center]="node.lane.toLowerCase() === 'middle'"
-                  [class.tree-node-slot--right]="node.lane.toLowerCase() === 'right'"
-                  [class.tree-node-slot--major]="node.nodeType.toLowerCase() === 'major'"
-                  [class.tree-node-slot--minor]="node.nodeType.toLowerCase() === 'minor'"
+                  [class.tree-node-slot--root]="
+                    node.row === 1 && node.nodeType.toLowerCase() === 'major'
+                  "
+                  [class.tree-node-slot--left]="
+                    node.lane.toLowerCase() === 'left'
+                  "
+                  [class.tree-node-slot--center]="
+                    node.lane.toLowerCase() === 'middle'
+                  "
+                  [class.tree-node-slot--right]="
+                    node.lane.toLowerCase() === 'right'
+                  "
+                  [class.tree-node-slot--major]="
+                    node.nodeType.toLowerCase() === 'major'
+                  "
+                  [class.tree-node-slot--minor]="
+                    node.nodeType.toLowerCase() === 'minor'
+                  "
                 >
                   <button
                     type="button"
@@ -213,58 +234,55 @@
 
             <ng-template #branchTree>
               <div class="tree-branches">
-              <section
-                class="tree-branch"
-                *ngFor="
-                  let branch of style.skillTree.branches;
-                  let branchIndex = index;
-                  trackBy: trackBranch
-                "
-              >
-                <header class="tree-branch__header">
-                  <span>{{ branch.name }}</span>
-                  <small>{{ branch.pointsSpent }} pts</small>
-                </header>
+                <section
+                  class="tree-branch"
+                  *ngFor="
+                    let branch of style.skillTree.branches;
+                    let branchIndex = index;
+                    trackBy: trackBranch
+                  "
+                >
+                  <header class="tree-branch__header">
+                    <span>{{ branch.name }}</span>
+                    <small>{{ branch.pointsSpent }} pts</small>
+                  </header>
 
-                <ol class="tree-branch__nodes">
-                  <li
-                    class="tree-node-slot"
-                    *ngFor="
-                      let node of branch.nodes;
-                      trackBy: trackNode
-                    "
-                    [style.grid-column]="nodeGridColumn(node)"
-                    [style.grid-row]="nodeGridRow(node)"
-                    [class.tree-node-slot--root]="node.y === 0"
-                    [class.tree-node-slot--left]="node.x < 0"
-                    [class.tree-node-slot--center]="node.x === 0"
-                    [class.tree-node-slot--right]="node.x > 0"
-                    [class.tree-node-slot--capstone]="node.y >= 3"
-                  >
-                    <button
-                      type="button"
-                      class="tree-node"
-                      [ngClass]="nodeClasses(node)"
-                      (click)="selectNode(node.id)"
+                  <ol class="tree-branch__nodes">
+                    <li
+                      class="tree-node-slot"
+                      *ngFor="let node of branch.nodes; trackBy: trackNode"
+                      [style.grid-column]="nodeGridColumn(node)"
+                      [style.grid-row]="nodeGridRow(node)"
+                      [class.tree-node-slot--root]="node.y === 0"
+                      [class.tree-node-slot--left]="node.x < 0"
+                      [class.tree-node-slot--center]="node.x === 0"
+                      [class.tree-node-slot--right]="node.x > 0"
+                      [class.tree-node-slot--capstone]="node.y >= 3"
                     >
-                      <span class="tree-node__orb">
-                        <span class="tree-node__mark">
-                          {{ node.rank > 0 ? node.rank : node.y + 1 }}
+                      <button
+                        type="button"
+                        class="tree-node"
+                        [ngClass]="nodeClasses(node)"
+                        (click)="selectNode(node.id)"
+                      >
+                        <span class="tree-node__orb">
+                          <span class="tree-node__mark">
+                            {{ node.rank > 0 ? node.rank : node.y + 1 }}
+                          </span>
                         </span>
-                      </span>
-                      <span class="tree-node__body">
-                        <span class="tree-node__name">{{ node.name }}</span>
-                        <span class="tree-node__meta">
-                          Level {{ node.requiredLevel }}
+                        <span class="tree-node__body">
+                          <span class="tree-node__name">{{ node.name }}</span>
+                          <span class="tree-node__meta">
+                            Level {{ node.requiredLevel }}
+                          </span>
                         </span>
-                      </span>
-                      <span class="tree-node__rank">
-                        {{ node.rank }}/{{ node.maxRank }}
-                      </span>
-                    </button>
-                  </li>
-                </ol>
-              </section>
+                        <span class="tree-node__rank">
+                          {{ node.rank }}/{{ node.maxRank }}
+                        </span>
+                      </button>
+                    </li>
+                  </ol>
+                </section>
               </div>
             </ng-template>
           </div>
@@ -279,7 +297,8 @@
             <div class="flex items-center justify-between">
               <span class="text-zinc-400">Type</span>
               <span class="text-primary">
-                {{ node.nodeType }}{{ node.mutatorKind ? ' / ' + node.mutatorKind : '' }}
+                {{ node.nodeType
+                }}{{ node.mutatorKind ? " / " + node.mutatorKind : "" }}
               </span>
             </div>
             <div class="flex items-center justify-between" *ngIf="node.row > 0">
@@ -288,7 +307,9 @@
             </div>
             <div class="flex items-center justify-between">
               <span class="text-zinc-400">Rank</span>
-              <span class="text-primary">{{ node.rank }} / {{ node.maxRank }}</span>
+              <span class="text-primary"
+                >{{ node.rank }} / {{ node.maxRank }}</span
+              >
             </div>
             <div class="flex items-center justify-between">
               <span class="text-zinc-400">Requires</span>
@@ -299,7 +320,10 @@
           <div class="mt-4" *ngIf="node.mutatorGroups.length > 0">
             <p class="ll-eyebrow text-primary">Mutator Groups</p>
             <div class="mt-2 flex flex-wrap gap-2">
-              <span class="ll-badge ll-badge-accent rounded" *ngFor="let group of node.mutatorGroups">
+              <span
+                class="ll-badge ll-badge-accent rounded"
+                *ngFor="let group of node.mutatorGroups"
+              >
                 {{ group }}
               </span>
             </div>
@@ -336,7 +360,9 @@
           <div class="mt-4" *ngIf="node.tooltip.doesNotAffect.length > 0">
             <p class="ll-eyebrow text-primary">Does Not Affect</p>
             <ul class="mt-2 grid gap-2 text-sm text-zinc-300">
-              <li *ngFor="let item of node.tooltip.doesNotAffect">{{ item }}</li>
+              <li *ngFor="let item of node.tooltip.doesNotAffect">
+                {{ item }}
+              </li>
             </ul>
           </div>
 
@@ -391,7 +417,6 @@
           </div>
         </article>
       </div>
-
     </article>
   </section>
 </div>

@@ -14,9 +14,27 @@ The new structure follows `combat_style_skill_trees_essence_mutator_redesign.md`
 - Row 2 major nodes are Style Mutators unless explicitly marked otherwise.
 - Style Mutators alter eligible Essence abilities before combat resolution.
 
+## Current Implementation Status
+
+Implemented:
+
+- Combat Style definitions are JSON-backed under `LL/src/API/API.LL/Data/combat-styles/*.json`.
+- All 8 styles have the redesigned 9-major / 12-minor row-lane tree structure.
+- Tree nodes expose row, lane, node type, mutator kind, mutator groups, effects, and structured tooltip sections through DTOs.
+- Row/lane unlock rules and one-major-per-row selection rules are enforced.
+- Row 2 mutators are resolved through `CombatStyleAbilityMutatorResolver` before ability compilation.
+- The Combat Styles page renders redesigned row/lane trees as a unified skill-tree map rather than separate branch cards.
+- The skill-tree UI now uses the shared game design system: `--ll-*` tokens, texture surfaces, compact bordered controls, restrained gold accents, and shared radius/shadow language.
+
+Partially implemented:
+
+- Representative mutator transforms exist for the current tree content.
+- Advanced combat-resolution features from the source redesign document still need separate work where they require new engine behavior.
+- Browser-level visual verification is limited by the isolated local browser session not having signed-in game state; Angular build and route smoke checks pass.
+
 ## Implementation Phases
 
-### Phase 1: Data Model Support
+### Phase 1: Data Model Support - Implemented
 
 Add the schema needed to represent the redesign without forcing every combat behavior to be hard-coded.
 
@@ -44,7 +62,7 @@ Add the schema needed to represent the redesign without forcing every combat beh
   - `CanRepeat`
   - `CanTriggerWeaponEffects`
 
-### Phase 2: Skill Tree Rules
+### Phase 2: Skill Tree Rules - Implemented
 
 Replace the old branch/focus assumptions with row/lane rules.
 
@@ -58,7 +76,7 @@ Replace the old branch/focus assumptions with row/lane rules.
 - Major nodes are mutually exclusive per row.
 - Minor nodes keep normal rank-up behavior.
 
-### Phase 3: JSON Content Migration
+### Phase 3: JSON Content Migration - Implemented
 
 Update `LL/src/API/API.LL/Data/combat-styles/*.json` to represent the new design.
 
@@ -68,7 +86,7 @@ Update `LL/src/API/API.LL/Data/combat-styles/*.json` to represent the new design
 - Preserve node effect text as authored tooltip content.
 - Use Row 3 major nodes as the effective build identity/focus signal.
 
-### Phase 4: Style Mutator Resolver
+### Phase 4: Style Mutator Resolver - Implemented
 
 Add a reusable resolver that applies selected Row 2 mutators to Essence abilities before ability compilation.
 
@@ -85,7 +103,7 @@ Resolver responsibilities:
   - multiply effect potency
 - Apply tradeoffs after transforms.
 
-### Phase 5: Combat Integration
+### Phase 5: Combat Integration - Implemented
 
 Integrate the resolver into `CombatEngineExecutor`.
 
@@ -98,7 +116,7 @@ Integrate the resolver into `CombatEngineExecutor`.
   - compile modified ability
 - Keep `FastCombatEngine` rule-engine integration for runtime resource gain, pending empowerments, damage reduction, and summon modifiers.
 
-### Phase 6: API/UI Support
+### Phase 6: API/UI Support - Implemented
 
 Expose the new tree metadata through existing combat-style DTOs.
 
@@ -110,8 +128,11 @@ Expose the new tree metadata through existing combat-style DTOs.
   - Tradeoff
   - Does not affect
 - Update the Angular model and selected-node panel.
+- Render row/lane tree data as one connected skill-tree map.
+- Keep the legacy branch renderer as a fallback for older tree data.
+- Match the Combat Styles page to the rest of the game frontend design system.
 
-### Phase 7: Validation and Tests
+### Phase 7: Validation and Tests - Partially Implemented
 
 Add focused tests for the new behavior.
 
@@ -122,10 +143,11 @@ Add focused tests for the new behavior.
 - Mutator eligibility respects conversion flags.
 - Fighter/Caster representative mutators change eligible ability specs.
 - Ineligible abilities remain unchanged.
+- Angular development build passes through the local Angular CLI binary.
 
 ## First Implementation Scope
 
-This implementation will deliver the framework and data migration needed for the redesign:
+This implementation delivered the framework and data migration needed for the redesign:
 
 - New schema and DTO support.
 - Row/lane tree behavior.
@@ -133,5 +155,21 @@ This implementation will deliver the framework and data migration needed for the
 - New JSON skill-tree layout for all 8 styles.
 - Row 2 mutator metadata for all 8 styles.
 - Representative executable transforms for common mutator cases.
+- Unified Angular skill-tree renderer for the redesigned row/lane trees.
+- Design-system-aligned skill-tree styling.
 
 Some advanced effects from the document, such as full proxy casting, active style abilities, PvP-specific coefficients, control immunity conversion, and advanced target spreading, remain follow-up combat-resolution features after the base mutator pipeline exists.
+
+## Recent UI Update
+
+The Combat Styles page now avoids showing the redesigned tree as three independent `Left`, `Middle`, and `Right` branch panels. Redesigned trees are flattened into a single row/lane map:
+
+- Major nodes anchor the left, middle, and right lanes.
+- Minor nodes offset beside their related lane instead of forming boxed subtrees.
+- The old branch renderer remains available for non-row/lane data.
+- Visual styling uses the same texture, compact borders, muted panels, and gold accent system as the rest of Legend's Legacy.
+
+Verification:
+
+- `LL/src/Presentation/ll/node_modules/.bin/ng.cmd build --configuration development` passed.
+- A temporary Angular dev server was started for route smoke checking and stopped afterward.
