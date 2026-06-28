@@ -49,6 +49,43 @@ public sealed class CombatStyleSystemTests
     }
 
     [Fact]
+    public void Combat_style_json_definitions_have_valid_skill_tree_rule_references()
+    {
+        var definitions = CreateDefinitionProvider().GetAll();
+
+        foreach (var style in definitions)
+        {
+            Assert.NotEmpty(style.SkillTreeNodes);
+
+            var nodeIds = style.SkillTreeNodes.Select(x => x.Id).ToHashSet(StringComparer.OrdinalIgnoreCase);
+            var focusIds = style.Focuses.Select(x => x.Id).ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+            foreach (var rule in style.Rules)
+                AssertValidRuleReferences(style, rule, nodeIds, focusIds, currentNodeId: null, allowNodeRankModifiers: false);
+
+            foreach (var focus in style.Focuses)
+            {
+                Assert.Contains(focus.Id, focusIds);
+                foreach (var rule in focus.Rules)
+                    AssertValidRuleReferences(style, rule, nodeIds, focusIds, currentNodeId: null, allowNodeRankModifiers: false);
+            }
+
+            foreach (var node in style.SkillTreeNodes)
+            {
+                Assert.Contains(node.BranchId, focusIds);
+                if (node.RequiredNodeId is not null)
+                    Assert.Contains(node.RequiredNodeId, nodeIds);
+
+                foreach (var rule in node.Rules)
+                    AssertValidRuleReferences(style, rule, nodeIds, focusIds, node.Id, allowNodeRankModifiers: true);
+            }
+
+            foreach (var operation in style.ResourceOverflowOperations)
+                AssertValidOperationReferences(style, operation, nodeIds, focusIds, currentNodeId: null, allowNodeRankModifiers: true);
+        }
+    }
+
+    [Fact]
     public async Task Activating_style_deactivates_previous_style()
     {
         await using var db = CreateDb();
@@ -1293,13 +1330,85 @@ public sealed class CombatStyleSystemTests
             overflowOperations,
             "Test");
 
+    private static void AssertValidRuleReferences(
+        CombatStyleDefinition style,
+        CombatStyleRuleDefinition rule,
+        IReadOnlySet<string> nodeIds,
+        IReadOnlySet<string> focusIds,
+        string? currentNodeId,
+        bool allowNodeRankModifiers) =>
+        AssertValidOperationReferences(style, rule.Operation, nodeIds, focusIds, currentNodeId, allowNodeRankModifiers);
+
+    private static void AssertValidOperationReferences(
+        CombatStyleDefinition style,
+        StyleRuleOperation operation,
+        IReadOnlySet<string> nodeIds,
+        IReadOnlySet<string> focusIds,
+        string? currentNodeId,
+        bool allowNodeRankModifiers)
+    {
+        switch (operation)
+        {
+            case ModifyEffectAmountOperation op:
+                AssertValidModifiers(style, op.AdditivePercentModifiers, nodeIds, focusIds, currentNodeId, allowNodeRankModifiers);
+                break;
+            case AddDamageReductionOperation op:
+                AssertValidModifiers(style, op.PercentModifiers, nodeIds, focusIds, currentNodeId, allowNodeRankModifiers);
+                break;
+            case GainStyleResourceOperation op:
+                Assert.Equal(style.ResourceId, op.ResourceId);
+                AssertValidModifiers(style, op.AmountModifiers, nodeIds, focusIds, currentNodeId, allowNodeRankModifiers);
+                break;
+            case AddBonusDamageFromStatOperation op:
+                AssertValidModifiers(style, op.CoefficientModifiers, nodeIds, focusIds, currentNodeId, allowNodeRankModifiers);
+                break;
+            case SetPendingEmpowermentOperation op:
+                AssertValidModifiers(style, op.AdditivePercentModifiers, nodeIds, focusIds, currentNodeId, allowNodeRankModifiers);
+                break;
+            case ModifySummonStatsOperation op:
+                AssertValidModifiers(style, op.MaxHealthPercentModifiers, nodeIds, focusIds, currentNodeId, allowNodeRankModifiers);
+                AssertValidModifiers(style, op.DamagePercentModifiers, nodeIds, focusIds, currentNodeId, allowNodeRankModifiers);
+                break;
+            case GrantBarrierFromMaxHealthOperation op:
+                AssertValidModifiers(style, op.PercentModifiers, nodeIds, focusIds, currentNodeId, allowNodeRankModifiers);
+                AssertValidModifiers(style, op.MaxTriggerModifiers, nodeIds, focusIds, currentNodeId, allowNodeRankModifiers);
+                break;
+        }
+    }
+
+    private static void AssertValidModifiers(
+        CombatStyleDefinition style,
+        IReadOnlyList<StyleValueModifier>? modifiers,
+        IReadOnlySet<string> nodeIds,
+        IReadOnlySet<string> focusIds,
+        string? currentNodeId,
+        bool allowNodeRankModifiers)
+    {
+        foreach (var modifier in modifiers ?? [])
+        {
+            if (modifier.NodeId is not null)
+            {
+                Assert.True(
+                    allowNodeRankModifiers,
+                    $"Style '{style.Id}' has nodeRank modifier '{modifier.NodeId}' outside a node rule or resource overflow operation.");
+                Assert.Contains(modifier.NodeId, nodeIds);
+
+                if (currentNodeId is not null)
+                    Assert.Equal(currentNodeId, modifier.NodeId);
+            }
+
+            if (modifier.FocusId is not null)
+                Assert.Contains(modifier.FocusId, focusIds);
+        }
+    }
+
     private static string FindApiContentRoot()
     {
         var directory = new DirectoryInfo(Directory.GetCurrentDirectory());
         while (directory is not null)
         {
             var candidate = Path.Combine(directory.FullName, "LL", "src", "API", "API.LL");
-            if (File.Exists(Path.Combine(candidate, "Data", "combat-styles.json")))
+            if (Directory.Exists(Path.Combine(candidate, "Data", "combat-styles")))
                 return candidate;
 
             directory = directory.Parent;
