@@ -1,0 +1,1169 @@
+{
+  "id": "summoner",
+  "name": "Summoner",
+  "description": "Builds Command through summon-tagged actions and improves summon effects without creating summons by itself.",
+  "resourceId": "command",
+  "resourceMaxAmount": 100,
+  "maxLevel": 50,
+  "recommendedTags": [
+    "Summon",
+    "Minion",
+    "Curse",
+    "Holy"
+  ],
+  "recommendedStats": [
+    "SummonPower",
+    "SummonHealth",
+    "Spirit"
+  ],
+  "focuses": [
+    {
+      "id": "summoner_grand_rally",
+      "name": "Grand Rally",
+      "description": "Rally Command lasts 4 seconds longer. Controlled allies gain +10% Effect Potency during Rally Command. Solo fallback: you gain +5% Effect Potency during Rally Command.",
+      "unlockLevel": 25,
+      "recommendedTags": [
+        "Left",
+        "Major"
+      ],
+      "recommendedStats": [
+        "SummonPower",
+        "SummonHealth",
+        "Spirit"
+      ],
+      "rules": []
+    },
+    {
+      "id": "summoner_last_bastion_order",
+      "name": "Last Bastion Order",
+      "description": "Once per Rally Command, if a controlled ally would die, prevent death and give it a Barrier equal to 15% of your Max Health for 4 seconds. If you have no controlled allies, Rally Command cooldown is reduced by 50% when you fall below 35% Health. 90 second internal cooldown.",
+      "unlockLevel": 25,
+      "recommendedTags": [
+        "Middle",
+        "Major"
+      ],
+      "recommendedStats": [
+        "SummonPower",
+        "SummonHealth",
+        "Spirit"
+      ],
+      "rules": []
+    },
+    {
+      "id": "summoner_overwhelming_coordination",
+      "name": "Overwhelming Coordination",
+      "description": "During Rally Command, each controlled ally or active persistent Essence effect grants your next Essence ability +2% Effect Potency, capped at +12%. If you have no controlled allies or persistent effects, count as 2 stacks.",
+      "unlockLevel": 25,
+      "recommendedTags": [
+        "Right",
+        "Major"
+      ],
+      "recommendedStats": [
+        "SummonPower",
+        "SummonHealth",
+        "Spirit"
+      ],
+      "rules": []
+    }
+  ],
+  "rules": [
+    {
+      "id": "summoner_command_on_summon_active",
+      "eventType": "AbilityResolved",
+      "predicate": {
+        "sourceMustBePlayer": true,
+        "activeAbilityOnly": true,
+        "anyTags": [
+          "Summon"
+        ]
+      },
+      "operation": {
+        "type": "gainStyleResource",
+        "resourceId": "command",
+        "amount": 15
+      }
+    },
+    {
+      "id": "summoner_summon_effect_bonus",
+      "eventType": "EffectCalculation",
+      "predicate": {
+        "sourceMustBePlayer": true,
+        "anyTags": [
+          "Summon"
+        ]
+      },
+      "operation": {
+        "type": "modifyEffectAmount",
+        "additivePercent": 0.05
+      }
+    },
+    {
+      "id": "summoner_summon_stats_nodes",
+      "eventType": "SummonCreated",
+      "predicate": {
+        "sourceMustBePlayer": true
+      },
+      "operation": {
+        "type": "modifySummonStats",
+        "maxHealthPercent": 0.1,
+        "damagePercent": 0.1,
+        "maxHealthPercentModifiers": [],
+        "damagePercentModifiers": []
+      }
+    }
+  ],
+  "resourceOverflowOperations": [
+    {
+      "type": "setPendingEmpowerment",
+      "empowermentId": "summoner_command_empowerment",
+      "appliesTo": {
+        "sourceMustBePlayer": true,
+        "anyTags": [
+          "Summon"
+        ]
+      },
+      "additivePercent": 0.2,
+      "consumeOnUse": true,
+      "additivePercentModifiers": []
+    }
+  ],
+  "coreMechanic": "Gain Command from Summon-tagged active abilities. At 100 Command, empower the next Summon-tagged effect.",
+  "skillTreeNodes": [
+    {
+      "id": "summoner_broad_command",
+      "branchId": "left",
+      "name": "Broad Command",
+      "description": "Controlled allies gain +8% Max Health. If you have no controlled allies, your persistent Essence effects gain +6% duration.",
+      "maxRank": 1,
+      "requiredLevel": 1,
+      "requiredNodeId": null,
+      "x": -1,
+      "y": 0,
+      "tags": [
+        "Left",
+        "Major"
+      ],
+      "effects": [
+        "Controlled allies gain +8% Max Health. If you have no controlled allies, your persistent Essence effects gain +6% duration."
+      ],
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 1,
+      "lane": "Left",
+      "nodeType": "Major",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "Eligible active Essence abilities."
+        ],
+        "changes": [
+          "Controlled allies gain +8% Max Health. If you have no controlled allies, your persistent Essence effects gain +6% duration."
+        ],
+        "tradeoffs": [
+          "Advanced cooldowns, target caps, and PvP coefficients can be tuned per node."
+        ],
+        "doesNotAffect": [
+          "Abilities that do not match the listed tags, effect operations, or conversion flags.",
+          "True damage unless the ability explicitly allows conversion."
+        ]
+      }
+    },
+    {
+      "id": "summoner_soul_link",
+      "branchId": "middle",
+      "name": "Soul Link",
+      "description": "While you have at least one controlled ally or persistent Essence effect active, you take 8% reduced damage. Controlled allies take 8% reduced area damage.",
+      "maxRank": 1,
+      "requiredLevel": 1,
+      "requiredNodeId": null,
+      "x": 0,
+      "y": 0,
+      "tags": [
+        "Middle",
+        "Major"
+      ],
+      "effects": [
+        "While you have at least one controlled ally or persistent Essence effect active, you take 8% reduced damage. Controlled allies take 8% reduced area damage."
+      ],
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 1,
+      "lane": "Middle",
+      "nodeType": "Major",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "Eligible active Essence abilities."
+        ],
+        "changes": [
+          "While you have at least one controlled ally or persistent Essence effect active, you take 8% reduced damage. Controlled allies take 8% reduced area damage."
+        ],
+        "tradeoffs": [
+          "Advanced cooldowns, target caps, and PvP coefficients can be tuned per node."
+        ],
+        "doesNotAffect": [
+          "Abilities that do not match the listed tags, effect operations, or conversion flags.",
+          "True damage unless the ability explicitly allows conversion."
+        ]
+      }
+    },
+    {
+      "id": "summoner_tactical_orders",
+      "branchId": "right",
+      "name": "Tactical Orders",
+      "description": "When you use an Essence ability, controlled allies gain +6% Effect Potency on their next action against that target. If you have no controlled allies, your next Essence ability gains +4% Effect Potency. 6 second internal cooldown.",
+      "maxRank": 1,
+      "requiredLevel": 1,
+      "requiredNodeId": null,
+      "x": 1,
+      "y": 0,
+      "tags": [
+        "Right",
+        "Major"
+      ],
+      "effects": [
+        "When you use an Essence ability, controlled allies gain +6% Effect Potency on their next action against that target. If you have no controlled allies, your next Essence ability gains +4% Effect Potency. 6 second internal cooldown."
+      ],
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 1,
+      "lane": "Right",
+      "nodeType": "Major",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "Eligible active Essence abilities."
+        ],
+        "changes": [
+          "When you use an Essence ability, controlled allies gain +6% Effect Potency on their next action against that target. If you have no controlled allies, your next Essence ability gains +4% Effect Potency. 6 second internal cooldown."
+        ],
+        "tradeoffs": [
+          "Advanced cooldowns, target caps, and PvP coefficients can be tuned per node."
+        ],
+        "doesNotAffect": [
+          "Abilities that do not match the listed tags, effect operations, or conversion flags.",
+          "True damage unless the ability explicitly allows conversion."
+        ]
+      }
+    },
+    {
+      "id": "summoner_proxy_command",
+      "branchId": "left",
+      "name": "Proxy Command",
+      "description": "Mutator Group: DeliveryConversion + SummonConversion. Eligible Essence abilities may be delivered through your strongest controlled ally once every 8 seconds. Hostile abilities use your stats but originate from the ally's position and target, resolving at 75% Effect Potency. Non-hostile abilities use the ally as the origin point at 85% Effect Potency. If no controlled ally exists, your next persistent Essence effect gains +10% duration instead.",
+      "maxRank": 1,
+      "requiredLevel": 10,
+      "requiredNodeId": null,
+      "x": -1,
+      "y": 3,
+      "tags": [
+        "DeliveryConversion",
+        "SummonConversion",
+        "Left",
+        "Major"
+      ],
+      "effects": [
+        "Mutator Group: DeliveryConversion + SummonConversion. Eligible Essence abilities may be delivered through your strongest controlled ally once every 8 seconds. Hostile abilities use your stats but originate from the ally's position and target, resolving at 75% Effect Potency. Non-hostile abilities use the ally as the origin point at 85% Effect Potency. If no controlled ally exists, your next persistent Essence effect gains +10% duration instead."
+      ],
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 2,
+      "lane": "Left",
+      "nodeType": "Major",
+      "mutatorKind": "Converter",
+      "mutatorGroups": [
+        "DeliveryConversion",
+        "SummonConversion"
+      ],
+      "mutator": {
+        "kind": "Converter",
+        "groups": [
+          "DeliveryConversion",
+          "SummonConversion"
+        ],
+        "conditions": {
+          "requiredAbilityTags": [],
+          "anyAbilityTags": [],
+          "requiredDeliveryTags": [],
+          "anyDeliveryTags": [],
+          "requiredEffectTags": [],
+          "anyEffectTags": [
+            "Damage",
+            "Summon",
+            "Debuff"
+          ],
+          "effectOperations": [
+            "Damage",
+            "Summon",
+            "ApplyStatus"
+          ],
+          "allowedDamageTypes": [],
+          "targetSelectors": [],
+          "activeAbilityOnly": true,
+          "passiveAbilityOnly": false,
+          "allowDamageTypeConversionRequired": null,
+          "allowScalingConversionRequired": null,
+          "allowDeliveryConversionRequired": true,
+          "allowTargetingConversionRequired": null,
+          "allowSummonProxyRequired": null,
+          "allowEquipmentOverrideRequired": null,
+          "excludeTrueDamage": true,
+          "excludeHardCrowdControl": true
+        },
+        "transform": {
+          "damageType": null,
+          "targetingType": null,
+          "scalingAttribute": null,
+          "scalingCoefficientOverride": null,
+          "scalingCoefficientMultiplier": null,
+          "effectPotencyMultiplier": 1.05,
+          "cooldownMultiplier": null,
+          "resourceCostMultiplier": null,
+          "addAbilityTags": [
+            "ConvertedDelivery"
+          ],
+          "addDeliveryTags": [],
+          "addEffectTags": [
+            "Damage",
+            "Summon",
+            "Debuff"
+          ],
+          "addEffectTagsToMatchingEffects": [
+            "Damage",
+            "Summon",
+            "Debuff"
+          ]
+        },
+        "tradeoff": {
+          "effectPotencyMultiplier": null,
+          "cooldownMultiplier": 1.03,
+          "resourceCostMultiplier": 1.05,
+          "procCoefficientMultiplier": null
+        },
+        "pvpCoefficient": 0.7
+      },
+      "tooltip": {
+        "affects": [
+          "Eligible active Essence abilities matching DeliveryConversion, SummonConversion."
+        ],
+        "changes": [
+          "Mutator Group: DeliveryConversion + SummonConversion. Eligible Essence abilities may be delivered through your strongest controlled ally once every 8 seconds. Hostile abilities use your stats but originate from the ally's position and target, resolving at 75% Effect Potency. Non-hostile abilities use the ally as the origin point at 85% Effect Potency. If no controlled ally exists, your next persistent Essence effect gains +10% duration instead."
+        ],
+        "tradeoffs": [
+          "Conversion uses a +5% resource cost safety tradeoff and PvP coefficient until explicit balance values are authored."
+        ],
+        "doesNotAffect": [
+          "Abilities that do not match the listed tags, effect operations, or conversion flags.",
+          "True damage unless the ability explicitly allows conversion."
+        ]
+      }
+    },
+    {
+      "id": "summoner_shared_instinct",
+      "branchId": "middle",
+      "name": "Shared Instinct",
+      "description": "Mutator Group: SupportConversion + SummonConversion. When you heal, barrier, buff, or cleanse yourself, your strongest controlled ally receives 35% of the effect. When you heal, barrier, buff, or cleanse a controlled ally, you receive 20% of the effect. If no controlled ally exists, self-targeted non-hostile Essence effects gain +5% Effect Potency.",
+      "maxRank": 1,
+      "requiredLevel": 10,
+      "requiredNodeId": null,
+      "x": 0,
+      "y": 3,
+      "tags": [
+        "SupportConversion",
+        "SummonConversion",
+        "Middle",
+        "Major"
+      ],
+      "effects": [
+        "Mutator Group: SupportConversion + SummonConversion. When you heal, barrier, buff, or cleanse yourself, your strongest controlled ally receives 35% of the effect. When you heal, barrier, buff, or cleanse a controlled ally, you receive 20% of the effect. If no controlled ally exists, self-targeted non-hostile Essence effects gain +5% Effect Potency."
+      ],
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 2,
+      "lane": "Middle",
+      "nodeType": "Major",
+      "mutatorKind": "Converter",
+      "mutatorGroups": [
+        "SupportConversion",
+        "SummonConversion"
+      ],
+      "mutator": {
+        "kind": "Converter",
+        "groups": [
+          "SupportConversion",
+          "SummonConversion"
+        ],
+        "conditions": {
+          "requiredAbilityTags": [],
+          "anyAbilityTags": [],
+          "requiredDeliveryTags": [],
+          "anyDeliveryTags": [],
+          "requiredEffectTags": [],
+          "anyEffectTags": [
+            "Damage",
+            "Heal",
+            "Barrier",
+            "Summon",
+            "Debuff"
+          ],
+          "effectOperations": [
+            "Damage",
+            "Heal",
+            "GrantBarrier",
+            "Summon",
+            "ApplyStatus"
+          ],
+          "allowedDamageTypes": [],
+          "targetSelectors": [],
+          "activeAbilityOnly": true,
+          "passiveAbilityOnly": false,
+          "allowDamageTypeConversionRequired": null,
+          "allowScalingConversionRequired": null,
+          "allowDeliveryConversionRequired": null,
+          "allowTargetingConversionRequired": null,
+          "allowSummonProxyRequired": null,
+          "allowEquipmentOverrideRequired": null,
+          "excludeTrueDamage": true,
+          "excludeHardCrowdControl": true
+        },
+        "transform": {
+          "damageType": null,
+          "targetingType": null,
+          "scalingAttribute": null,
+          "scalingCoefficientOverride": null,
+          "scalingCoefficientMultiplier": null,
+          "effectPotencyMultiplier": 1.05,
+          "cooldownMultiplier": null,
+          "resourceCostMultiplier": null,
+          "addAbilityTags": [],
+          "addDeliveryTags": [],
+          "addEffectTags": [
+            "Damage",
+            "Heal",
+            "Barrier",
+            "Summon",
+            "Debuff",
+            "Support"
+          ],
+          "addEffectTagsToMatchingEffects": [
+            "Damage",
+            "Heal",
+            "Barrier",
+            "Summon",
+            "Debuff",
+            "Support"
+          ]
+        },
+        "tradeoff": {
+          "effectPotencyMultiplier": null,
+          "cooldownMultiplier": null,
+          "resourceCostMultiplier": 1.05,
+          "procCoefficientMultiplier": null
+        },
+        "pvpCoefficient": 0.7
+      },
+      "tooltip": {
+        "affects": [
+          "Eligible active Essence abilities matching SupportConversion, SummonConversion."
+        ],
+        "changes": [
+          "Mutator Group: SupportConversion + SummonConversion. When you heal, barrier, buff, or cleanse yourself, your strongest controlled ally receives 35% of the effect. When you heal, barrier, buff, or cleanse a controlled ally, you receive 20% of the effect. If no controlled ally exists, self-targeted non-hostile Essence effects gain +5% Effect Potency."
+        ],
+        "tradeoffs": [
+          "Conversion uses a +5% resource cost safety tradeoff and PvP coefficient until explicit balance values are authored."
+        ],
+        "doesNotAffect": [
+          "Abilities that do not match the listed tags, effect operations, or conversion flags.",
+          "True damage unless the ability explicitly allows conversion."
+        ]
+      }
+    },
+    {
+      "id": "summoner_commanded_strike",
+      "branchId": "right",
+      "name": "Commanded Strike",
+      "description": "Mutator Group: TargetingConversion + SummonConversion. Direct hostile Essence abilities mark the target for controlled allies for 5 seconds. Controlled allies deal/apply +8% Effect Potency against the marked target. If no controlled ally exists, your next DamageOverTime, Aura, Trap, or Persistent Essence effect against that target gains +4% Effect Potency.",
+      "maxRank": 1,
+      "requiredLevel": 10,
+      "requiredNodeId": null,
+      "x": 1,
+      "y": 3,
+      "tags": [
+        "TargetingConversion",
+        "SummonConversion",
+        "Right",
+        "Major"
+      ],
+      "effects": [
+        "Mutator Group: TargetingConversion + SummonConversion. Direct hostile Essence abilities mark the target for controlled allies for 5 seconds. Controlled allies deal/apply +8% Effect Potency against the marked target. If no controlled ally exists, your next DamageOverTime, Aura, Trap, or Persistent Essence effect against that target gains +4% Effect Potency."
+      ],
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 2,
+      "lane": "Right",
+      "nodeType": "Major",
+      "mutatorKind": "Converter",
+      "mutatorGroups": [
+        "TargetingConversion",
+        "SummonConversion"
+      ],
+      "mutator": {
+        "kind": "Converter",
+        "groups": [
+          "TargetingConversion",
+          "SummonConversion"
+        ],
+        "conditions": {
+          "requiredAbilityTags": [],
+          "anyAbilityTags": [],
+          "requiredDeliveryTags": [],
+          "anyDeliveryTags": [],
+          "requiredEffectTags": [],
+          "anyEffectTags": [
+            "Damage",
+            "Summon",
+            "Debuff"
+          ],
+          "effectOperations": [
+            "Damage",
+            "Summon",
+            "ApplyStatus"
+          ],
+          "allowedDamageTypes": [],
+          "targetSelectors": [],
+          "activeAbilityOnly": true,
+          "passiveAbilityOnly": false,
+          "allowDamageTypeConversionRequired": null,
+          "allowScalingConversionRequired": null,
+          "allowDeliveryConversionRequired": null,
+          "allowTargetingConversionRequired": true,
+          "allowSummonProxyRequired": null,
+          "allowEquipmentOverrideRequired": null,
+          "excludeTrueDamage": true,
+          "excludeHardCrowdControl": true
+        },
+        "transform": {
+          "damageType": null,
+          "targetingType": null,
+          "scalingAttribute": null,
+          "scalingCoefficientOverride": null,
+          "scalingCoefficientMultiplier": null,
+          "effectPotencyMultiplier": 1.08,
+          "cooldownMultiplier": null,
+          "resourceCostMultiplier": null,
+          "addAbilityTags": [
+            "ConvertedTargeting"
+          ],
+          "addDeliveryTags": [],
+          "addEffectTags": [
+            "Damage",
+            "Summon",
+            "Debuff"
+          ],
+          "addEffectTagsToMatchingEffects": [
+            "Damage",
+            "Summon",
+            "Debuff"
+          ]
+        },
+        "tradeoff": {
+          "effectPotencyMultiplier": 0.95,
+          "cooldownMultiplier": 1.03,
+          "resourceCostMultiplier": 1.05,
+          "procCoefficientMultiplier": null
+        },
+        "pvpCoefficient": 0.7
+      },
+      "tooltip": {
+        "affects": [
+          "Eligible active Essence abilities matching TargetingConversion, SummonConversion."
+        ],
+        "changes": [
+          "Mutator Group: TargetingConversion + SummonConversion. Direct hostile Essence abilities mark the target for controlled allies for 5 seconds. Controlled allies deal/apply +8% Effect Potency against the marked target. If no controlled ally exists, your next DamageOverTime, Aura, Trap, or Persistent Essence effect against that target gains +4% Effect Potency."
+        ],
+        "tradeoffs": [
+          "Conversion uses a +5% resource cost safety tradeoff and PvP coefficient until explicit balance values are authored."
+        ],
+        "doesNotAffect": [
+          "Abilities that do not match the listed tags, effect operations, or conversion flags.",
+          "True damage unless the ability explicitly allows conversion."
+        ]
+      }
+    },
+    {
+      "id": "summoner_grand_rally",
+      "branchId": "left",
+      "name": "Grand Rally",
+      "description": "Rally Command lasts 4 seconds longer. Controlled allies gain +10% Effect Potency during Rally Command. Solo fallback: you gain +5% Effect Potency during Rally Command.",
+      "maxRank": 1,
+      "requiredLevel": 25,
+      "requiredNodeId": null,
+      "x": -1,
+      "y": 6,
+      "tags": [
+        "Left",
+        "Major"
+      ],
+      "effects": [
+        "Rally Command lasts 4 seconds longer. Controlled allies gain +10% Effect Potency during Rally Command. Solo fallback: you gain +5% Effect Potency during Rally Command."
+      ],
+      "countsTowardFocus": true,
+      "rules": [],
+      "row": 3,
+      "lane": "Left",
+      "nodeType": "Major",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "Eligible active Essence abilities."
+        ],
+        "changes": [
+          "Rally Command lasts 4 seconds longer. Controlled allies gain +10% Effect Potency during Rally Command. Solo fallback: you gain +5% Effect Potency during Rally Command."
+        ],
+        "tradeoffs": [
+          "Advanced cooldowns, target caps, and PvP coefficients can be tuned per node."
+        ],
+        "doesNotAffect": [
+          "Abilities that do not match the listed tags, effect operations, or conversion flags.",
+          "True damage unless the ability explicitly allows conversion."
+        ]
+      }
+    },
+    {
+      "id": "summoner_last_bastion_order",
+      "branchId": "middle",
+      "name": "Last Bastion Order",
+      "description": "Once per Rally Command, if a controlled ally would die, prevent death and give it a Barrier equal to 15% of your Max Health for 4 seconds. If you have no controlled allies, Rally Command cooldown is reduced by 50% when you fall below 35% Health. 90 second internal cooldown.",
+      "maxRank": 1,
+      "requiredLevel": 25,
+      "requiredNodeId": null,
+      "x": 0,
+      "y": 6,
+      "tags": [
+        "Middle",
+        "Major"
+      ],
+      "effects": [
+        "Once per Rally Command, if a controlled ally would die, prevent death and give it a Barrier equal to 15% of your Max Health for 4 seconds. If you have no controlled allies, Rally Command cooldown is reduced by 50% when you fall below 35% Health. 90 second internal cooldown."
+      ],
+      "countsTowardFocus": true,
+      "rules": [],
+      "row": 3,
+      "lane": "Middle",
+      "nodeType": "Major",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "Eligible active Essence abilities."
+        ],
+        "changes": [
+          "Once per Rally Command, if a controlled ally would die, prevent death and give it a Barrier equal to 15% of your Max Health for 4 seconds. If you have no controlled allies, Rally Command cooldown is reduced by 50% when you fall below 35% Health. 90 second internal cooldown."
+        ],
+        "tradeoffs": [
+          "Advanced cooldowns, target caps, and PvP coefficients can be tuned per node."
+        ],
+        "doesNotAffect": [
+          "Abilities that do not match the listed tags, effect operations, or conversion flags.",
+          "True damage unless the ability explicitly allows conversion."
+        ]
+      }
+    },
+    {
+      "id": "summoner_overwhelming_coordination",
+      "branchId": "right",
+      "name": "Overwhelming Coordination",
+      "description": "During Rally Command, each controlled ally or active persistent Essence effect grants your next Essence ability +2% Effect Potency, capped at +12%. If you have no controlled allies or persistent effects, count as 2 stacks.",
+      "maxRank": 1,
+      "requiredLevel": 25,
+      "requiredNodeId": null,
+      "x": 1,
+      "y": 6,
+      "tags": [
+        "Right",
+        "Major"
+      ],
+      "effects": [
+        "During Rally Command, each controlled ally or active persistent Essence effect grants your next Essence ability +2% Effect Potency, capped at +12%. If you have no controlled allies or persistent effects, count as 2 stacks."
+      ],
+      "countsTowardFocus": true,
+      "rules": [],
+      "row": 3,
+      "lane": "Right",
+      "nodeType": "Major",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "Eligible active Essence abilities."
+        ],
+        "changes": [
+          "During Rally Command, each controlled ally or active persistent Essence effect grants your next Essence ability +2% Effect Potency, capped at +12%. If you have no controlled allies or persistent effects, count as 2 stacks."
+        ],
+        "tradeoffs": [
+          "Advanced cooldowns, target caps, and PvP coefficients can be tuned per node."
+        ],
+        "doesNotAffect": [
+          "Abilities that do not match the listed tags, effect operations, or conversion flags.",
+          "True damage unless the ability explicitly allows conversion."
+        ]
+      }
+    },
+    {
+      "id": "summoner_command_capacity",
+      "branchId": "left",
+      "name": "Command Capacity",
+      "description": "Max Command +10 / +20.",
+      "maxRank": 2,
+      "requiredLevel": 1,
+      "requiredNodeId": null,
+      "x": -1,
+      "y": 1,
+      "tags": [
+        "Left",
+        "Minor"
+      ],
+      "effects": [
+        "Max Command +10 / +20."
+      ],
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 1,
+      "lane": "Left",
+      "nodeType": "Minor",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "This style-tree passive while the node has ranks."
+        ],
+        "changes": [
+          "Max Command +10 / +20."
+        ],
+        "tradeoffs": [],
+        "doesNotAffect": []
+      }
+    },
+    {
+      "id": "summoner_command_reserves",
+      "branchId": "middle",
+      "name": "Command Reserves",
+      "description": "Start combat with +10 / +20 Command.",
+      "maxRank": 2,
+      "requiredLevel": 1,
+      "requiredNodeId": null,
+      "x": 0,
+      "y": 1,
+      "tags": [
+        "Middle",
+        "Minor"
+      ],
+      "effects": [
+        "Start combat with +10 / +20 Command."
+      ],
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 1,
+      "lane": "Middle",
+      "nodeType": "Minor",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "This style-tree passive while the node has ranks."
+        ],
+        "changes": [
+          "Start combat with +10 / +20 Command."
+        ],
+        "tradeoffs": [],
+        "doesNotAffect": []
+      }
+    },
+    {
+      "id": "summoner_minion_vitality",
+      "branchId": "right",
+      "name": "Minion Vitality",
+      "description": "Controlled allies gain +5% / +10% Max Health. Solo fallback: your persistent Essence effects gain +3% / +6% duration.",
+      "maxRank": 2,
+      "requiredLevel": 1,
+      "requiredNodeId": null,
+      "x": 1,
+      "y": 1,
+      "tags": [
+        "Right",
+        "Minor",
+        "Heal",
+        "Debuff"
+      ],
+      "effects": [
+        "Controlled allies gain +5% / +10% Max Health. Solo fallback: your persistent Essence effects gain +3% / +6% duration."
+      ],
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 1,
+      "lane": "Right",
+      "nodeType": "Minor",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "This style-tree passive while the node has ranks."
+        ],
+        "changes": [
+          "Controlled allies gain +5% / +10% Max Health. Solo fallback: your persistent Essence effects gain +3% / +6% duration."
+        ],
+        "tradeoffs": [],
+        "doesNotAffect": []
+      }
+    },
+    {
+      "id": "summoner_lone_commander",
+      "branchId": "middle",
+      "name": "Lone Commander",
+      "description": "While you have no controlled allies, your Essence abilities gain +3% / +6% Effect Potency. This bonus ends for 8 seconds after you gain a controlled ally.",
+      "maxRank": 2,
+      "requiredLevel": 1,
+      "requiredNodeId": null,
+      "x": 0,
+      "y": 2,
+      "tags": [
+        "Middle",
+        "Minor",
+        "Summon",
+        "Debuff"
+      ],
+      "effects": [
+        "While you have no controlled allies, your Essence abilities gain +3% / +6% Effect Potency. This bonus ends for 8 seconds after you gain a controlled ally."
+      ],
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 1,
+      "lane": "Middle",
+      "nodeType": "Minor",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "This style-tree passive while the node has ranks."
+        ],
+        "changes": [
+          "While you have no controlled allies, your Essence abilities gain +3% / +6% Effect Potency. This bonus ends for 8 seconds after you gain a controlled ally."
+        ],
+        "tradeoffs": [],
+        "doesNotAffect": []
+      }
+    },
+    {
+      "id": "summoner_persistent_will",
+      "branchId": "left",
+      "name": "Persistent Will",
+      "description": "Persistent Essence effect duration +4% / +8%.",
+      "maxRank": 2,
+      "requiredLevel": 10,
+      "requiredNodeId": null,
+      "x": -1,
+      "y": 4,
+      "tags": [
+        "Left",
+        "Minor"
+      ],
+      "effects": [
+        "Persistent Essence effect duration +4% / +8%."
+      ],
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 2,
+      "lane": "Left",
+      "nodeType": "Minor",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "This style-tree passive while the node has ranks."
+        ],
+        "changes": [
+          "Persistent Essence effect duration +4% / +8%."
+        ],
+        "tradeoffs": [],
+        "doesNotAffect": []
+      }
+    },
+    {
+      "id": "summoner_shared_defenses",
+      "branchId": "middle",
+      "name": "Shared Defenses",
+      "description": "Controlled allies gain +5% / +10% damage reduction against area damage. Solo fallback: you gain +2% / +4% damage reduction while a persistent Essence effect is active.",
+      "maxRank": 2,
+      "requiredLevel": 10,
+      "requiredNodeId": null,
+      "x": 0,
+      "y": 4,
+      "tags": [
+        "Middle",
+        "Minor",
+        "Damage",
+        "Debuff"
+      ],
+      "effects": [
+        "Controlled allies gain +5% / +10% damage reduction against area damage. Solo fallback: you gain +2% / +4% damage reduction while a persistent Essence effect is active."
+      ],
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 2,
+      "lane": "Middle",
+      "nodeType": "Minor",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "This style-tree passive while the node has ranks."
+        ],
+        "changes": [
+          "Controlled allies gain +5% / +10% damage reduction against area damage. Solo fallback: you gain +2% / +4% damage reduction while a persistent Essence effect is active."
+        ],
+        "tradeoffs": [],
+        "doesNotAffect": []
+      }
+    },
+    {
+      "id": "summoner_efficient_orders",
+      "branchId": "right",
+      "name": "Efficient Orders",
+      "description": "Essence abilities that create, refresh, or command persistent effects cost 4% / 8% less resource.",
+      "maxRank": 2,
+      "requiredLevel": 10,
+      "requiredNodeId": null,
+      "x": 1,
+      "y": 4,
+      "tags": [
+        "Right",
+        "Minor"
+      ],
+      "effects": [
+        "Essence abilities that create, refresh, or command persistent effects cost 4% / 8% less resource."
+      ],
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 2,
+      "lane": "Right",
+      "nodeType": "Minor",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "This style-tree passive while the node has ranks."
+        ],
+        "changes": [
+          "Essence abilities that create, refresh, or command persistent effects cost 4% / 8% less resource."
+        ],
+        "tradeoffs": [],
+        "doesNotAffect": []
+      }
+    },
+    {
+      "id": "summoner_proxy_precision",
+      "branchId": "middle",
+      "name": "Proxy Precision",
+      "description": "Proxy Command potency penalty is reduced by 5% / 10%.",
+      "maxRank": 2,
+      "requiredLevel": 10,
+      "requiredNodeId": null,
+      "x": 0,
+      "y": 5,
+      "tags": [
+        "Middle",
+        "Minor"
+      ],
+      "effects": [
+        "Proxy Command potency penalty is reduced by 5% / 10%."
+      ],
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 2,
+      "lane": "Middle",
+      "nodeType": "Minor",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "This style-tree passive while the node has ranks."
+        ],
+        "changes": [
+          "Proxy Command potency penalty is reduced by 5% / 10%."
+        ],
+        "tradeoffs": [],
+        "doesNotAffect": []
+      }
+    },
+    {
+      "id": "summoner_rally_cooldown",
+      "branchId": "left",
+      "name": "Rally Cooldown",
+      "description": "Rally Command cooldown reduced by 2 / 4 seconds.",
+      "maxRank": 2,
+      "requiredLevel": 25,
+      "requiredNodeId": null,
+      "x": -1,
+      "y": 7,
+      "tags": [
+        "Left",
+        "Minor"
+      ],
+      "effects": [
+        "Rally Command cooldown reduced by 2 / 4 seconds."
+      ],
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 3,
+      "lane": "Left",
+      "nodeType": "Minor",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "This style-tree passive while the node has ranks."
+        ],
+        "changes": [
+          "Rally Command cooldown reduced by 2 / 4 seconds."
+        ],
+        "tradeoffs": [],
+        "doesNotAffect": []
+      }
+    },
+    {
+      "id": "summoner_squad_discipline",
+      "branchId": "middle",
+      "name": "Squad Discipline",
+      "description": "Controlled allies gain 10% / 20% crowd control resistance. Solo fallback: your own crowd control resistance +5% / +10%.",
+      "maxRank": 2,
+      "requiredLevel": 25,
+      "requiredNodeId": null,
+      "x": 0,
+      "y": 7,
+      "tags": [
+        "Middle",
+        "Minor",
+        "Debuff"
+      ],
+      "effects": [
+        "Controlled allies gain 10% / 20% crowd control resistance. Solo fallback: your own crowd control resistance +5% / +10%."
+      ],
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 3,
+      "lane": "Middle",
+      "nodeType": "Minor",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "This style-tree passive while the node has ranks."
+        ],
+        "changes": [
+          "Controlled allies gain 10% / 20% crowd control resistance. Solo fallback: your own crowd control resistance +5% / +10%."
+        ],
+        "tradeoffs": [],
+        "doesNotAffect": []
+      }
+    },
+    {
+      "id": "summoner_bonded_recovery",
+      "branchId": "right",
+      "name": "Bonded Recovery",
+      "description": "When a controlled ally acts, you recover 0.3% / 0.6% missing Health. 2 second internal cooldown. Solo fallback: persistent Essence ticks restore 0.2% / 0.4% missing Health.",
+      "maxRank": 2,
+      "requiredLevel": 25,
+      "requiredNodeId": null,
+      "x": 1,
+      "y": 7,
+      "tags": [
+        "Right",
+        "Minor",
+        "Heal",
+        "Summon",
+        "Debuff"
+      ],
+      "effects": [
+        "When a controlled ally acts, you recover 0.3% / 0.6% missing Health. 2 second internal cooldown. Solo fallback: persistent Essence ticks restore 0.2% / 0.4% missing Health."
+      ],
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 3,
+      "lane": "Right",
+      "nodeType": "Minor",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "This style-tree passive while the node has ranks."
+        ],
+        "changes": [
+          "When a controlled ally acts, you recover 0.3% / 0.6% missing Health. 2 second internal cooldown. Solo fallback: persistent Essence ticks restore 0.2% / 0.4% missing Health."
+        ],
+        "tradeoffs": [],
+        "doesNotAffect": []
+      }
+    },
+    {
+      "id": "summoner_emergency_recall",
+      "branchId": "middle",
+      "name": "Emergency Recall",
+      "description": "When a controlled ally falls below 30% Health, it gains a Barrier equal to 5% / 10% of your Max Health. 30 second cooldown per ally. Solo fallback: you gain this Barrier when you fall below 30% Health.",
+      "maxRank": 2,
+      "requiredLevel": 25,
+      "requiredNodeId": null,
+      "x": 0,
+      "y": 8,
+      "tags": [
+        "Middle",
+        "Minor",
+        "Heal",
+        "Barrier",
+        "Summon",
+        "Debuff"
+      ],
+      "effects": [
+        "When a controlled ally falls below 30% Health, it gains a Barrier equal to 5% / 10% of your Max Health. 30 second cooldown per ally. Solo fallback: you gain this Barrier when you fall below 30% Health."
+      ],
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 3,
+      "lane": "Middle",
+      "nodeType": "Minor",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "This style-tree passive while the node has ranks."
+        ],
+        "changes": [
+          "When a controlled ally falls below 30% Health, it gains a Barrier equal to 5% / 10% of your Max Health. 30 second cooldown per ally. Solo fallback: you gain this Barrier when you fall below 30% Health."
+        ],
+        "tradeoffs": [],
+        "doesNotAffect": []
+      }
+    }
+  ]
+}

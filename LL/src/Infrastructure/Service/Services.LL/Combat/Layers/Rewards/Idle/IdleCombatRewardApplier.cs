@@ -1,5 +1,6 @@
 using Application.Interfaces.Services.LL.Guilds;
 using Domain.Models.Guilds.Missions;
+using Application.Interfaces.Services.LL.CombatStyles;
 using Services.LL.Combat.Layers.Rewards.Models;
 using Services.LL.Interfaces.Combat.Reward;
 using Services.LL.Interfaces.Combat.Reward.Idle;
@@ -12,17 +13,20 @@ public sealed class IdleCombatRewardApplier : IIdleCombatRewardApplier
     private readonly ILootRewardWriter _lootWriter;
     private readonly ICurrencyRewardWriter _currencyWriter;
     private readonly IGuildMissionService _guildMissionService;
+    private readonly ICombatStyleService _combatStyleService;
 
     public IdleCombatRewardApplier(
         IExperienceRewardWriter experienceWriter,
         ILootRewardWriter lootWriter,
         ICurrencyRewardWriter currencyWriter,
+        ICombatStyleService combatStyleService,
         IGuildMissionService guildMissionService)
     {
         _experienceWriter = experienceWriter;
         _lootWriter = lootWriter;
         _currencyWriter = currencyWriter;
         _guildMissionService = guildMissionService;
+        _combatStyleService = combatStyleService;
     }
 
     public async Task ApplyAsync(
@@ -35,6 +39,12 @@ public sealed class IdleCombatRewardApplier : IIdleCombatRewardApplier
             await _experienceWriter.AddSplitExperienceAsync(
                 facts.PlayerEntityIds,
                 outcome.TotalExperience,
+                cancellationToken);
+
+            await _combatStyleService.GrantExperienceAsync(
+                facts.CharacterId,
+                outcome.TotalExperience,
+                "idle_combat",
                 cancellationToken);
         }
 

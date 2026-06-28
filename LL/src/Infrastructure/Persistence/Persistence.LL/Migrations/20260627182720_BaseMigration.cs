@@ -1124,6 +1124,57 @@ namespace Persistence.LL.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "PlayerCombatStyleNodes",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    CharacterId = table.Column<Guid>(type: "uuid", nullable: false),
+                    StyleId = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: false),
+                    NodeId = table.Column<string>(type: "character varying(96)", maxLength: 96, nullable: false),
+                    Rank = table.Column<int>(type: "integer", nullable: false),
+                    CreatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    UpdatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PlayerCombatStyleNodes", x => x.Id);
+                    table.CheckConstraint("CK_PlayerCombatStyleNodes_Rank", "\"Rank\" >= 0");
+                    table.ForeignKey(
+                        name: "FK_PlayerCombatStyleNodes_Entities_CharacterId",
+                        column: x => x.CharacterId,
+                        principalTable: "Entities",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "PlayerCombatStyles",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    CharacterId = table.Column<Guid>(type: "uuid", nullable: false),
+                    StyleId = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: false),
+                    Level = table.Column<int>(type: "integer", nullable: false),
+                    Experience = table.Column<long>(type: "bigint", nullable: false),
+                    SelectedFocusId = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: true),
+                    IsActive = table.Column<bool>(type: "boolean", nullable: false),
+                    CreatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    UpdatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PlayerCombatStyles", x => x.Id);
+                    table.CheckConstraint("CK_PlayerCombatStyles_Experience", "\"Experience\" >= 0");
+                    table.CheckConstraint("CK_PlayerCombatStyles_Level", "\"Level\" >= 1 AND \"Level\" <= 50");
+                    table.ForeignKey(
+                        name: "FK_PlayerCombatStyles_Entities_CharacterId",
+                        column: x => x.CharacterId,
+                        principalTable: "Entities",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Professions",
                 columns: table => new
                 {
@@ -1598,6 +1649,28 @@ namespace Persistence.LL.Migrations
                 column: "AchievementDefinitionId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_PlayerCombatStyleNodes_CharacterId",
+                table: "PlayerCombatStyleNodes",
+                column: "CharacterId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PlayerCombatStyleNodes_CharacterId_StyleId_NodeId",
+                table: "PlayerCombatStyleNodes",
+                columns: new[] { "CharacterId", "StyleId", "NodeId" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PlayerCombatStyles_CharacterId",
+                table: "PlayerCombatStyles",
+                column: "CharacterId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PlayerCombatStyles_CharacterId_StyleId",
+                table: "PlayerCombatStyles",
+                columns: new[] { "CharacterId", "StyleId" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_PlayerEssences_CharacterId",
                 table: "PlayerEssences",
                 column: "CharacterId");
@@ -1782,6 +1855,12 @@ namespace Persistence.LL.Migrations
 
             migrationBuilder.DropTable(
                 name: "PlayerAchievementProgresses");
+
+            migrationBuilder.DropTable(
+                name: "PlayerCombatStyleNodes");
+
+            migrationBuilder.DropTable(
+                name: "PlayerCombatStyles");
 
             migrationBuilder.DropTable(
                 name: "PlayerProphecyInstances");

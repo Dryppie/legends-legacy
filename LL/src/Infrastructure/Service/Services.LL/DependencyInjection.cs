@@ -4,6 +4,7 @@ using Application.Interfaces.Services.LL.Guilds;
 using Application.Interfaces.Services.LL.Achievements;
 using Application.Interfaces.Services.LL.CharacterActions;
 using Application.Interfaces.Services.LL.Colosseum;
+using Application.Interfaces.Services.LL.CombatStyles;
 using Application.Interfaces.Services.LL.Dungeons;
 using Application.Interfaces.Services.LL.Entities;
 using Application.Interfaces.Services.LL.Essences;
@@ -25,6 +26,7 @@ using Services.LL.Bonuses;
 using Services.LL.CharacterActions;
 using Services.LL.Colosseum;
 using Services.LL.Combat;
+using Services.LL.CombatStyles;
 using Services.LL.Combat.Layers.Orchestration;
 using Services.LL.Combat.Layers.Orchestration.Dungeon;
 using Services.LL.Combat.Layers.Orchestration.Idle;
@@ -106,6 +108,15 @@ public static class DependencyInjection
                 sp.GetRequiredService<JsonSerializerOptions>()));
         services.AddScoped<IColosseumService, ColosseumService>();
         services.AddScoped<IRatingService, RatingService>();
+
+        services.AddSingleton<ICombatStyleDefinitionProvider>(sp =>
+            new JsonCombatStyleDefinitionProvider(
+                config,
+                contentRootPath,
+                sp.GetRequiredService<JsonSerializerOptions>()));
+        services.AddScoped<ICombatStyleBalanceSimulator, CombatStyleBalanceSimulator>();
+        services.AddScoped<ICombatStyleSwitchValidator, CombatStyleSwitchValidator>();
+        services.AddScoped<ICombatStyleService, CombatStyleService>();
 
         services.AddCombatDependencyInjection();
         services.AddScoped<ICombatService, CombatService>();

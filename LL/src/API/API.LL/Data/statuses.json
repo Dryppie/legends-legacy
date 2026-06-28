@@ -6,11 +6,16 @@
     "stackingPolicy": "Stack",
     "maxStacks": 5,
     "durationTicks": 24,
-    "tags": [ "Status.Burn", "Pattern.Periodic" ],
+    "tags": [
+      "Status.Burn",
+      "Pattern.Periodic"
+    ],
     "triggers": [
       {
         "event": "OnStatusApplied",
-        "effectIds": [ "effect.burn.dot" ]
+        "effectIds": [
+          "effect.burn.dot"
+        ]
       }
     ],
     "effects": [
@@ -22,7 +27,8 @@
         "durationTicks": 12,
         "intervalTicks": 4,
         "attackType": "DamageOverTime",
-        "damageType": "Burn"
+        "damageType": "Burn",
+        "procCoefficient": 0.2
       }
     ]
   },
@@ -33,11 +39,15 @@
     "stackingPolicy": "Refresh",
     "maxStacks": 1,
     "durationTicks": 80,
-    "tags": [ "Status.Reflect" ],
+    "tags": [
+      "Status.Reflect"
+    ],
     "triggers": [
       {
         "event": "OnDamaged",
-        "effectIds": [ "effect.reflect.damage" ]
+        "effectIds": [
+          "effect.reflect.damage"
+        ]
       }
     ],
     "effects": [
@@ -47,7 +57,8 @@
         "target": "EventTarget",
         "baseValue": 5,
         "attackType": "None",
-        "damageType": "Physical"
+        "damageType": "Physical",
+        "procCoefficient": 0.45
       }
     ]
   },
@@ -58,11 +69,16 @@
     "stackingPolicy": "Stack",
     "maxStacks": 5,
     "durationTicks": 80,
-    "tags": [ "Status.Bleed", "Pattern.Periodic" ],
+    "tags": [
+      "Status.Bleed",
+      "Pattern.Periodic"
+    ],
     "triggers": [
       {
         "event": "OnStatusApplied",
-        "effectIds": [ "effect.bleed.dot" ]
+        "effectIds": [
+          "effect.bleed.dot"
+        ]
       }
     ],
     "effects": [
@@ -74,7 +90,8 @@
         "durationTicks": 80,
         "intervalTicks": 20,
         "attackType": "DamageOverTime",
-        "damageType": "Bleed"
+        "damageType": "Bleed",
+        "procCoefficient": 0.2
       }
     ]
   },
@@ -85,11 +102,16 @@
     "stackingPolicy": "Stack",
     "maxStacks": 5,
     "durationTicks": 100,
-    "tags": [ "Status.Burn", "Pattern.Periodic" ],
+    "tags": [
+      "Status.Burn",
+      "Pattern.Periodic"
+    ],
     "triggers": [
       {
         "event": "OnStatusApplied",
-        "effectIds": [ "effect.burn.dot" ]
+        "effectIds": [
+          "effect.burn.dot"
+        ]
       }
     ],
     "effects": [
@@ -101,7 +123,8 @@
         "durationTicks": 60,
         "intervalTicks": 20,
         "attackType": "DamageOverTime",
-        "damageType": "Burn"
+        "damageType": "Burn",
+        "procCoefficient": 0.2
       }
     ]
   },
@@ -112,11 +135,16 @@
     "stackingPolicy": "Stack",
     "maxStacks": 5,
     "durationTicks": 120,
-    "tags": [ "Status.Curse", "Pattern.Periodic" ],
+    "tags": [
+      "Status.Curse",
+      "Pattern.Periodic"
+    ],
     "triggers": [
       {
         "event": "OnStatusApplied",
-        "effectIds": [ "effect.curse.dot" ]
+        "effectIds": [
+          "effect.curse.dot"
+        ]
       }
     ],
     "effects": [
@@ -128,7 +156,8 @@
         "durationTicks": 120,
         "intervalTicks": 20,
         "attackType": "DamageOverTime",
-        "damageType": "Magical"
+        "damageType": "Magical",
+        "procCoefficient": 0.2
       }
     ]
   },
@@ -139,7 +168,9 @@
     "stackingPolicy": "Refresh",
     "maxStacks": 1,
     "durationTicks": 80,
-    "tags": [ "Control.Taunt" ]
+    "tags": [
+      "Control.Taunt"
+    ]
   },
   {
     "id": "status.lesser_burn",
@@ -148,11 +179,16 @@
     "stackingPolicy": "Stack",
     "maxStacks": 3,
     "durationTicks": 80,
-    "tags": [ "Status.Burn", "Pattern.Periodic" ],
+    "tags": [
+      "Status.Burn",
+      "Pattern.Periodic"
+    ],
     "triggers": [
       {
         "event": "OnStatusApplied",
-        "effectIds": [ "effect.lesser_burn.dot" ]
+        "effectIds": [
+          "effect.lesser_burn.dot"
+        ]
       }
     ],
     "effects": [
@@ -164,7 +200,8 @@
         "durationTicks": 80,
         "intervalTicks": 20,
         "attackType": "DamageOverTime",
-        "damageType": "Burn"
+        "damageType": "Burn",
+        "procCoefficient": 0.2
       }
     ]
   },
@@ -175,11 +212,15 @@
     "stackingPolicy": "Refresh",
     "maxStacks": 1,
     "durationTicks": 60,
-    "tags": [ "Status.Vulnerable" ],
+    "tags": [
+      "Status.Vulnerable"
+    ],
     "triggers": [
       {
         "event": "OnDamaged",
-        "effectIds": [ "effect.vulnerable_mark.damage" ]
+        "effectIds": [
+          "effect.vulnerable_mark.damage"
+        ]
       }
     ],
     "effects": [
@@ -189,7 +230,8 @@
         "target": "EventSource",
         "baseValue": 5,
         "uses": 1,
-        "damageType": "Physical"
+        "damageType": "Physical",
+        "procCoefficient": 0.45
       }
     ]
   },
@@ -200,11 +242,17 @@
     "stackingPolicy": "Stack",
     "maxStacks": 5,
     "durationTicks": 80,
-    "tags": [ "Status.Bleed", "Pattern.Periodic" ],
+    "tags": [
+      "Status.Bleed",
+      "Pattern.Periodic"
+    ],
     "triggers": [
       {
         "event": "OnStatusApplied",
-        "effectIds": [ "effect.initial.damage", "effect.bleed.dot" ]
+        "effectIds": [
+          "effect.initial.damage",
+          "effect.bleed.dot"
+        ]
       }
     ],
     "effects": [
@@ -216,7 +264,8 @@
         "scalingAttribute": "Power",
         "scalingCoefficient": 0.15,
         "attackType": "Melee",
-        "damageType": "Physical"
+        "damageType": "Physical",
+        "procCoefficient": 0.2
       },
       {
         "id": "effect.bleed.dot",
@@ -226,7 +275,8 @@
         "durationTicks": 80,
         "intervalTicks": 40,
         "attackType": "DamageOverTime",
-        "damageType": "Bleed"
+        "damageType": "Bleed",
+        "procCoefficient": 0.2
       }
     ]
   },
@@ -237,11 +287,17 @@
     "stackingPolicy": "Stack",
     "maxStacks": 5,
     "durationTicks": 30,
-    "tags": [ "Status.Poison", "Pattern.Periodic", "Arrows" ],
+    "tags": [
+      "Status.Poison",
+      "Pattern.Periodic",
+      "Arrows"
+    ],
     "triggers": [
       {
         "event": "OnStatusApplied",
-        "effectIds": [ "effect.poison.dot" ]
+        "effectIds": [
+          "effect.poison.dot"
+        ]
       }
     ],
     "effects": [
@@ -253,7 +309,8 @@
         "durationTicks": 30,
         "intervalTicks": 10,
         "attackType": "DamageOverTime",
-        "damageType": "Poison"
+        "damageType": "Poison",
+        "procCoefficient": 0.2
       }
     ]
   },
@@ -264,7 +321,10 @@
     "stackingPolicy": "Stack",
     "maxStacks": 5,
     "durationTicks": 0,
-    "tags": [ "Status.Cold", "Element.Frost" ],
+    "tags": [
+      "Status.Cold",
+      "Element.Frost"
+    ],
     "triggers": [],
     "effects": []
   },
@@ -275,7 +335,11 @@
     "stackingPolicy": "Refresh",
     "maxStacks": 1,
     "durationTicks": 40,
-    "tags": [ "Status.Freeze", "Element.Frost", "Control.Freeze" ],
+    "tags": [
+      "Status.Freeze",
+      "Element.Frost",
+      "Control.Freeze"
+    ],
     "triggers": [],
     "effects": []
   },
@@ -286,7 +350,10 @@
     "stackingPolicy": "Refresh",
     "maxStacks": 1,
     "durationTicks": 100,
-    "tags": [ "Status.Summon", "Element.Shadow" ],
+    "tags": [
+      "Status.Summon",
+      "Element.Shadow"
+    ],
     "triggers": [],
     "effects": []
   },
@@ -297,11 +364,16 @@
     "stackingPolicy": "Stack",
     "maxStacks": 5,
     "durationTicks": 90,
-    "tags": [ "Status.Poison", "Pattern.Periodic" ],
+    "tags": [
+      "Status.Poison",
+      "Pattern.Periodic"
+    ],
     "triggers": [
       {
         "event": "OnStatusApplied",
-        "effectIds": [ "effect.green_slime_poison.dot" ]
+        "effectIds": [
+          "effect.green_slime_poison.dot"
+        ]
       }
     ],
     "effects": [
@@ -313,7 +385,8 @@
         "durationTicks": 90,
         "intervalTicks": 30,
         "attackType": "DamageOverTime",
-        "damageType": "Poison"
+        "damageType": "Poison",
+        "procCoefficient": 0.2
       }
     ]
   },
@@ -324,11 +397,16 @@
     "stackingPolicy": "Stack",
     "maxStacks": 5,
     "durationTicks": 120,
-    "tags": [ "Status.Poison", "Pattern.Periodic" ],
+    "tags": [
+      "Status.Poison",
+      "Pattern.Periodic"
+    ],
     "triggers": [
       {
         "event": "OnStatusApplied",
-        "effectIds": [ "effect.corrosive_ooze_poison.dot" ]
+        "effectIds": [
+          "effect.corrosive_ooze_poison.dot"
+        ]
       }
     ],
     "effects": [
@@ -340,7 +418,8 @@
         "durationTicks": 120,
         "intervalTicks": 40,
         "attackType": "DamageOverTime",
-        "damageType": "Poison"
+        "damageType": "Poison",
+        "procCoefficient": 0.2
       }
     ]
   },
@@ -351,11 +430,17 @@
     "stackingPolicy": "Refresh",
     "maxStacks": 1,
     "durationTicks": 100,
-    "tags": [ "Status.Buff", "Pattern.TimedBuff" ],
+    "tags": [
+      "Status.Buff",
+      "Pattern.TimedBuff"
+    ],
     "triggers": [
       {
         "event": "OnStatusApplied",
-        "effectIds": [ "effect.unstable_colors.power_one", "effect.unstable_colors.power_two" ]
+        "effectIds": [
+          "effect.unstable_colors.power_one",
+          "effect.unstable_colors.power_two"
+        ]
       }
     ],
     "effects": [
@@ -365,7 +450,8 @@
         "target": "EventTarget",
         "attribute": "Power",
         "baseValue": 20,
-        "durationTicks": 100
+        "durationTicks": 100,
+        "procCoefficient": 0.4
       },
       {
         "id": "effect.unstable_colors.power_two",
@@ -373,7 +459,8 @@
         "target": "EventTarget",
         "attribute": "Power",
         "baseValue": 20,
-        "durationTicks": 100
+        "durationTicks": 100,
+        "procCoefficient": 0.4
       }
     ]
   },
@@ -384,11 +471,17 @@
     "stackingPolicy": "Refresh",
     "maxStacks": 1,
     "durationTicks": 100,
-    "tags": [ "Status.Burn", "Element.Fire", "Pattern.Periodic" ],
+    "tags": [
+      "Status.Burn",
+      "Element.Fire",
+      "Pattern.Periodic"
+    ],
     "triggers": [
       {
         "event": "OnStatusApplied",
-        "effectIds": [ "effect.fire_aura.dot" ]
+        "effectIds": [
+          "effect.fire_aura.dot"
+        ]
       }
     ],
     "effects": [
@@ -400,7 +493,8 @@
         "durationTicks": 100,
         "intervalTicks": 10,
         "attackType": "DamageOverTime",
-        "damageType": "Burn"
+        "damageType": "Burn",
+        "procCoefficient": 0.2
       }
     ]
   },
@@ -411,11 +505,16 @@
     "stackingPolicy": "Refresh",
     "maxStacks": 1,
     "durationTicks": 30,
-    "tags": [ "Control.Stun", "Pattern.Periodic" ],
+    "tags": [
+      "Control.Stun",
+      "Pattern.Periodic"
+    ],
     "triggers": [
       {
         "event": "OnStatusApplied",
-        "effectIds": [ "effect.engulf.damage" ]
+        "effectIds": [
+          "effect.engulf.damage"
+        ]
       }
     ],
     "effects": [
@@ -427,7 +526,8 @@
         "durationTicks": 30,
         "intervalTicks": 10,
         "attackType": "DamageOverTime",
-        "damageType": "Physical"
+        "damageType": "Physical",
+        "procCoefficient": 0.2
       }
     ]
   },
@@ -438,11 +538,17 @@
     "stackingPolicy": "Refresh",
     "maxStacks": 1,
     "durationTicks": 30,
-    "tags": [ "Status.Buff", "Defense.Dodge", "Pattern.TimedBuff" ],
+    "tags": [
+      "Status.Buff",
+      "Defense.Dodge",
+      "Pattern.TimedBuff"
+    ],
     "triggers": [
       {
         "event": "OnStatusApplied",
-        "effectIds": [ "effect.transparent_dodge_boost.dodge" ]
+        "effectIds": [
+          "effect.transparent_dodge_boost.dodge"
+        ]
       }
     ],
     "effects": [
@@ -452,7 +558,8 @@
         "target": "EventTarget",
         "attribute": "DodgeChance",
         "baseValue": 40,
-        "durationTicks": 30
+        "durationTicks": 30,
+        "procCoefficient": 0.4
       }
     ]
   },
@@ -463,7 +570,10 @@
     "stackingPolicy": "Refresh",
     "maxStacks": 1,
     "durationTicks": 50,
-    "tags": [ "Control.Stun", "Status.Charm" ],
+    "tags": [
+      "Control.Stun",
+      "Status.Charm"
+    ],
     "triggers": [],
     "effects": []
   },
@@ -474,11 +584,17 @@
     "stackingPolicy": "Stack",
     "maxStacks": 5,
     "durationTicks": 50,
-    "tags": [ "Status.Debuff", "Debuff.Precision", "Pattern.TimedDebuff" ],
+    "tags": [
+      "Status.Debuff",
+      "Debuff.Precision",
+      "Pattern.TimedDebuff"
+    ],
     "triggers": [
       {
         "event": "OnStatusApplied",
-        "effectIds": [ "effect.accuracy_debuff.precision" ]
+        "effectIds": [
+          "effect.accuracy_debuff.precision"
+        ]
       }
     ],
     "effects": [
@@ -488,7 +604,8 @@
         "target": "EventTarget",
         "attribute": "Precision",
         "baseValue": -10,
-        "durationTicks": 50
+        "durationTicks": 50,
+        "procCoefficient": 0.4
       }
     ]
   },
@@ -499,11 +616,18 @@
     "stackingPolicy": "Stack",
     "maxStacks": 5,
     "durationTicks": 0,
-    "tags": [ "Status.Stack", "Retaliation", "Element.Magical" ],
+    "tags": [
+      "Status.Stack",
+      "Retaliation",
+      "Element.Magical"
+    ],
     "triggers": [
       {
         "event": "OnAttacked",
-        "effectIds": [ "effect.foxfire.damage", "effect.foxfire.consume" ]
+        "effectIds": [
+          "effect.foxfire.damage",
+          "effect.foxfire.consume"
+        ]
       }
     ],
     "effects": [
@@ -521,7 +645,8 @@
             "statusId": "status.foxfire_stack",
             "value": 1
           }
-        ]
+        ],
+        "procCoefficient": 0.45
       },
       {
         "id": "effect.foxfire.consume",
@@ -536,7 +661,8 @@
             "statusId": "status.foxfire_stack",
             "value": 1
           }
-        ]
+        ],
+        "procCoefficient": 0.25
       }
     ]
   },
@@ -547,11 +673,18 @@
     "stackingPolicy": "Refresh",
     "maxStacks": 1,
     "durationTicks": 80,
-    "tags": [ "Status.Debuff", "Debuff.Regeneration", "Pattern.TimedDebuff" ],
+    "tags": [
+      "Status.Debuff",
+      "Debuff.Regeneration",
+      "Pattern.TimedDebuff"
+    ],
     "triggers": [
       {
         "event": "OnStatusApplied",
-        "effectIds": [ "effect.necrotic_spores.health_regen", "effect.necrotic_spores.spirit" ]
+        "effectIds": [
+          "effect.necrotic_spores.health_regen",
+          "effect.necrotic_spores.spirit"
+        ]
       }
     ],
     "effects": [
@@ -561,7 +694,8 @@
         "target": "EventTarget",
         "attribute": "HealthRegeneration",
         "baseValue": -40,
-        "durationTicks": 80
+        "durationTicks": 80,
+        "procCoefficient": 0.4
       },
       {
         "id": "effect.necrotic_spores.spirit",
@@ -569,7 +703,8 @@
         "target": "EventTarget",
         "attribute": "Spirit",
         "baseValue": -40,
-        "durationTicks": 80
+        "durationTicks": 80,
+        "procCoefficient": 0.4
       }
     ]
   },
@@ -580,11 +715,15 @@
     "stackingPolicy": "Refresh",
     "maxStacks": 1,
     "durationTicks": 1,
-    "tags": [ "Range.Melee" ],
+    "tags": [
+      "Range.Melee"
+    ],
     "triggers": [
       {
         "event": "OnStatusApplied",
-        "effectIds": [ "effect.feral_pounce.damage" ]
+        "effectIds": [
+          "effect.feral_pounce.damage"
+        ]
       }
     ],
     "effects": [
@@ -596,7 +735,8 @@
         "scalingAttribute": "Power",
         "scalingCoefficient": 0.3,
         "attackType": "Melee",
-        "damageType": "Physical"
+        "damageType": "Physical",
+        "procCoefficient": 0.45
       }
     ]
   },
@@ -607,7 +747,9 @@
     "stackingPolicy": "Refresh",
     "maxStacks": 1,
     "durationTicks": 30,
-    "tags": [ "Control.Stun" ],
+    "tags": [
+      "Control.Stun"
+    ],
     "triggers": [],
     "effects": []
   },
@@ -618,11 +760,16 @@
     "stackingPolicy": "Stack",
     "maxStacks": 5,
     "durationTicks": 40,
-    "tags": [ "Status.Bleed", "Pattern.Periodic" ],
+    "tags": [
+      "Status.Bleed",
+      "Pattern.Periodic"
+    ],
     "triggers": [
       {
         "event": "OnStatusApplied",
-        "effectIds": [ "effect.shredding_claws_bleed.dot" ]
+        "effectIds": [
+          "effect.shredding_claws_bleed.dot"
+        ]
       }
     ],
     "effects": [
@@ -634,7 +781,8 @@
         "durationTicks": 40,
         "intervalTicks": 10,
         "attackType": "DamageOverTime",
-        "damageType": "Bleed"
+        "damageType": "Bleed",
+        "procCoefficient": 0.2
       }
     ]
   },
@@ -645,11 +793,17 @@
     "stackingPolicy": "Refresh",
     "maxStacks": 1,
     "durationTicks": 30,
-    "tags": [ "Status.Bleed", "Pattern.Periodic" ],
+    "tags": [
+      "Status.Bleed",
+      "Pattern.Periodic"
+    ],
     "triggers": [
       {
         "event": "OnStatusApplied",
-        "effectIds": [ "effect.plague_swipe.damage", "effect.plague_swipe.dot" ]
+        "effectIds": [
+          "effect.plague_swipe.damage",
+          "effect.plague_swipe.dot"
+        ]
       }
     ],
     "effects": [
@@ -661,7 +815,8 @@
         "scalingAttribute": "Power",
         "scalingCoefficient": 0.25,
         "attackType": "Melee",
-        "damageType": "Physical"
+        "damageType": "Physical",
+        "procCoefficient": 0.2
       },
       {
         "id": "effect.plague_swipe.dot",
@@ -671,7 +826,8 @@
         "durationTicks": 30,
         "intervalTicks": 10,
         "attackType": "DamageOverTime",
-        "damageType": "Bleed"
+        "damageType": "Bleed",
+        "procCoefficient": 0.2
       }
     ]
   },
@@ -682,11 +838,16 @@
     "stackingPolicy": "Refresh",
     "maxStacks": 1,
     "durationTicks": 60,
-    "tags": [ "Status.Poison", "Pattern.Periodic" ],
+    "tags": [
+      "Status.Poison",
+      "Pattern.Periodic"
+    ],
     "triggers": [
       {
         "event": "OnStatusApplied",
-        "effectIds": [ "effect.pestilent_touch_poison.dot" ]
+        "effectIds": [
+          "effect.pestilent_touch_poison.dot"
+        ]
       }
     ],
     "effects": [
@@ -698,7 +859,8 @@
         "durationTicks": 60,
         "intervalTicks": 20,
         "attackType": "DamageOverTime",
-        "damageType": "Poison"
+        "damageType": "Poison",
+        "procCoefficient": 0.2
       }
     ]
   },
@@ -709,11 +871,17 @@
     "stackingPolicy": "Refresh",
     "maxStacks": 1,
     "durationTicks": 100,
-    "tags": [ "Status.Weakened", "Pattern.TimedDebuff" ],
+    "tags": [
+      "Status.Weakened",
+      "Pattern.TimedDebuff"
+    ],
     "triggers": [
       {
         "event": "OnStatusApplied",
-        "effectIds": [ "effect.draining_claws.damage", "effect.draining_claws.power" ]
+        "effectIds": [
+          "effect.draining_claws.damage",
+          "effect.draining_claws.power"
+        ]
       }
     ],
     "effects": [
@@ -725,7 +893,8 @@
         "scalingAttribute": "Power",
         "scalingCoefficient": 0.25,
         "attackType": "Melee",
-        "damageType": "Physical"
+        "damageType": "Physical",
+        "procCoefficient": 0.45
       },
       {
         "id": "effect.draining_claws.power",
@@ -733,7 +902,8 @@
         "target": "EventTarget",
         "attribute": "Power",
         "baseValue": -24,
-        "durationTicks": 100
+        "durationTicks": 100,
+        "procCoefficient": 0.4
       }
     ]
   },
@@ -744,11 +914,16 @@
     "stackingPolicy": "Refresh",
     "maxStacks": 1,
     "durationTicks": 90,
-    "tags": [ "Status.Bleed", "Pattern.Periodic" ],
+    "tags": [
+      "Status.Bleed",
+      "Pattern.Periodic"
+    ],
     "triggers": [
       {
         "event": "OnStatusApplied",
-        "effectIds": [ "effect.piercing_arrow_bleed.dot" ]
+        "effectIds": [
+          "effect.piercing_arrow_bleed.dot"
+        ]
       }
     ],
     "effects": [
@@ -760,7 +935,8 @@
         "durationTicks": 90,
         "intervalTicks": 30,
         "attackType": "DamageOverTime",
-        "damageType": "Bleed"
+        "damageType": "Bleed",
+        "procCoefficient": 0.2
       }
     ]
   },
@@ -771,11 +947,16 @@
     "stackingPolicy": "Refresh",
     "maxStacks": 1,
     "durationTicks": 140,
-    "tags": [ "Status.Poison", "Pattern.Periodic" ],
+    "tags": [
+      "Status.Poison",
+      "Pattern.Periodic"
+    ],
     "triggers": [
       {
         "event": "OnStatusApplied",
-        "effectIds": [ "effect.venomous_spit_poison.dot" ]
+        "effectIds": [
+          "effect.venomous_spit_poison.dot"
+        ]
       }
     ],
     "effects": [
@@ -787,7 +968,8 @@
         "durationTicks": 140,
         "intervalTicks": 20,
         "attackType": "DamageOverTime",
-        "damageType": "Poison"
+        "damageType": "Poison",
+        "procCoefficient": 0.2
       }
     ]
   },
@@ -798,11 +980,16 @@
     "stackingPolicy": "Refresh",
     "maxStacks": 1,
     "durationTicks": 100,
-    "tags": [ "Status.Poison", "Pattern.Periodic" ],
+    "tags": [
+      "Status.Poison",
+      "Pattern.Periodic"
+    ],
     "triggers": [
       {
         "event": "OnStatusApplied",
-        "effectIds": [ "effect.toxic_bite_poison.dot" ]
+        "effectIds": [
+          "effect.toxic_bite_poison.dot"
+        ]
       }
     ],
     "effects": [
@@ -814,7 +1001,8 @@
         "durationTicks": 100,
         "intervalTicks": 20,
         "attackType": "DamageOverTime",
-        "damageType": "Poison"
+        "damageType": "Poison",
+        "procCoefficient": 0.2
       }
     ]
   },
@@ -825,11 +1013,16 @@
     "stackingPolicy": "Refresh",
     "maxStacks": 1,
     "durationTicks": 100,
-    "tags": [ "Status.Poison", "Pattern.Periodic" ],
+    "tags": [
+      "Status.Poison",
+      "Pattern.Periodic"
+    ],
     "triggers": [
       {
         "event": "OnStatusApplied",
-        "effectIds": [ "effect.toxic_blood.poison" ]
+        "effectIds": [
+          "effect.toxic_blood.poison"
+        ]
       }
     ],
     "effects": [
@@ -840,7 +1033,8 @@
         "statusId": "status.toxic_bite_poison",
         "baseValue": 1,
         "durationTicks": 100,
-        "intervalTicks": 10
+        "intervalTicks": 10,
+        "procCoefficient": 0.35
       }
     ]
   },
@@ -851,11 +1045,16 @@
     "stackingPolicy": "Refresh",
     "maxStacks": 1,
     "durationTicks": 100,
-    "tags": [ "Status.Reflect", "Pattern.TimedBuff" ],
+    "tags": [
+      "Status.Reflect",
+      "Pattern.TimedBuff"
+    ],
     "triggers": [
       {
         "event": "OnMeleeAttacked",
-        "effectIds": [ "effect.bramble_shield.thorns" ]
+        "effectIds": [
+          "effect.bramble_shield.thorns"
+        ]
       }
     ],
     "effects": [
@@ -865,7 +1064,8 @@
         "target": "EventTarget",
         "baseValue": 8,
         "attackType": "None",
-        "damageType": "Physical"
+        "damageType": "Physical",
+        "procCoefficient": 0.45
       }
     ]
   },
@@ -876,11 +1076,16 @@
     "stackingPolicy": "Refresh",
     "maxStacks": 1,
     "durationTicks": 200,
-    "tags": [ "Status.Poison", "Pattern.Periodic" ],
+    "tags": [
+      "Status.Poison",
+      "Pattern.Periodic"
+    ],
     "triggers": [
       {
         "event": "OnStatusApplied",
-        "effectIds": [ "effect.venom_web_poison.dot" ]
+        "effectIds": [
+          "effect.venom_web_poison.dot"
+        ]
       }
     ],
     "effects": [
@@ -892,7 +1097,8 @@
         "durationTicks": 200,
         "intervalTicks": 50,
         "attackType": "DamageOverTime",
-        "damageType": "Poison"
+        "damageType": "Poison",
+        "procCoefficient": 0.2
       }
     ]
   },
@@ -903,11 +1109,16 @@
     "stackingPolicy": "Stack",
     "maxStacks": 5,
     "durationTicks": 120,
-    "tags": [ "Status.Poison", "Pattern.Periodic" ],
+    "tags": [
+      "Status.Poison",
+      "Pattern.Periodic"
+    ],
     "triggers": [
       {
         "event": "OnStatusApplied",
-        "effectIds": [ "effect.tainted_fangs_poison.dot" ]
+        "effectIds": [
+          "effect.tainted_fangs_poison.dot"
+        ]
       }
     ],
     "effects": [
@@ -919,7 +1130,8 @@
         "durationTicks": 120,
         "intervalTicks": 60,
         "attackType": "DamageOverTime",
-        "damageType": "Poison"
+        "damageType": "Poison",
+        "procCoefficient": 0.2
       }
     ]
   }

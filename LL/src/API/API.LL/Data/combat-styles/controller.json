@@ -1,0 +1,1134 @@
+{
+  "id": "controller",
+  "name": "Controller",
+  "description": "Builds Control through status, debuff, and disruption effects.",
+  "resourceId": "control",
+  "resourceMaxAmount": 100,
+  "maxLevel": 50,
+  "recommendedTags": [
+    "Control",
+    "Debuff",
+    "Curse",
+    "DoT"
+  ],
+  "recommendedStats": [
+    "Spirit",
+    "Cooldown",
+    "StatusResistance"
+  ],
+  "focuses": [
+    {
+      "id": "controller_absolute_lockdown",
+      "name": "Absolute Lockdown",
+      "description": "Lockdown's hostile effect also applies Suppression for 4 seconds: Action Speed -20% and damage dealt -15%. Against non-immune targets, Lockdown's debuff/control application cannot miss. Non-hostile Lockdown grants the ally Unstoppable: crowd control immunity for 2 seconds.",
+      "unlockLevel": 25,
+      "recommendedTags": [
+        "Left",
+        "Major"
+      ],
+      "recommendedStats": [
+        "Spirit",
+        "Cooldown",
+        "StatusResistance"
+      ],
+      "rules": []
+    },
+    {
+      "id": "controller_grand_manipulation",
+      "name": "Grand Manipulation",
+      "description": "Lockdown affects up to 3 valid targets. Primary target receives full value. Secondary targets receive 50% value. For non-hostile abilities, spreads to nearby allies instead.",
+      "unlockLevel": 25,
+      "recommendedTags": [
+        "Middle",
+        "Major"
+      ],
+      "recommendedStats": [
+        "Spirit",
+        "Cooldown",
+        "StatusResistance"
+      ],
+      "rules": []
+    },
+    {
+      "id": "controller_control_cascade",
+      "name": "Control Cascade",
+      "description": "When a Lockdown-empowered debuff/control effect expires or its target dies, 50% of its remaining duration or strength spreads to the nearest valid enemy. Non-hostile Lockdown effects spread 50% remaining duration to the nearest ally.",
+      "unlockLevel": 25,
+      "recommendedTags": [
+        "Right",
+        "Major"
+      ],
+      "recommendedStats": [
+        "Spirit",
+        "Cooldown",
+        "StatusResistance"
+      ],
+      "rules": []
+    }
+  ],
+  "rules": [
+    {
+      "id": "controller_status_debuff_bonus",
+      "eventType": "EffectCalculation",
+      "predicate": {
+        "sourceMustBePlayer": true,
+        "effectOperations": [
+          "ApplyStatus",
+          "ModifyAttribute"
+        ]
+      },
+      "operation": {
+        "type": "modifyEffectAmount",
+        "additivePercent": 0.05
+      }
+    },
+    {
+      "id": "controller_control_gain",
+      "eventType": "EffectCalculation",
+      "predicate": {
+        "statusOrDebuffOnly": true,
+        "sourceMustBePlayer": true,
+        "activeAbilityOnly": true
+      },
+      "operation": {
+        "type": "gainStyleResource",
+        "resourceId": "control",
+        "amount": 15,
+        "usesProcCoefficient": true,
+        "amountModifiers": []
+      }
+    }
+  ],
+  "resourceOverflowOperations": [
+    {
+      "type": "setPendingEmpowerment",
+      "empowermentId": "controller_control_empowerment",
+      "appliesTo": {
+        "sourceMustBePlayer": true,
+        "effectOperations": [
+          "ApplyStatus",
+          "ModifyAttribute",
+          "Damage"
+        ]
+      },
+      "additivePercent": 0.2,
+      "consumeOnUse": true,
+      "additivePercentModifiers": []
+    }
+  ],
+  "coreMechanic": "Gain Control from active status and debuff effects. At 100 Control, empower the next control, debuff, curse, or damage-over-time effect.",
+  "skillTreeNodes": [
+    {
+      "id": "controller_heavy_chains",
+      "branchId": "left",
+      "name": "Heavy Chains",
+      "description": "Slow, root, stun, silence, fear, and displacement durations you apply are increased by 10% in PvE. Against control-immune targets, 50% of this value becomes damage dealt reduction instead.",
+      "maxRank": 1,
+      "requiredLevel": 1,
+      "requiredNodeId": null,
+      "x": -1,
+      "y": 0,
+      "tags": [
+        "Left",
+        "Major"
+      ],
+      "effects": [
+        "Slow, root, stun, silence, fear, and displacement durations you apply are increased by 10% in PvE. Against control-immune targets, 50% of this value becomes damage dealt reduction instead."
+      ],
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 1,
+      "lane": "Left",
+      "nodeType": "Major",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "Eligible active Essence abilities."
+        ],
+        "changes": [
+          "Slow, root, stun, silence, fear, and displacement durations you apply are increased by 10% in PvE. Against control-immune targets, 50% of this value becomes damage dealt reduction instead."
+        ],
+        "tradeoffs": [
+          "Advanced cooldowns, target caps, and PvP coefficients can be tuned per node."
+        ],
+        "doesNotAffect": [
+          "Abilities that do not match the listed tags, effect operations, or conversion flags.",
+          "True damage unless the ability explicitly allows conversion."
+        ]
+      }
+    },
+    {
+      "id": "controller_expose_weakness",
+      "branchId": "middle",
+      "name": "Expose Weakness",
+      "description": "Your debuffs cause enemies to take 4% increased Effect Potency from your Essence abilities. If the target is an ally affected by your anti-control effects, your healing/barriers/buffs on them gain +4% Effect Potency.",
+      "maxRank": 1,
+      "requiredLevel": 1,
+      "requiredNodeId": null,
+      "x": 0,
+      "y": 0,
+      "tags": [
+        "Middle",
+        "Major"
+      ],
+      "effects": [
+        "Your debuffs cause enemies to take 4% increased Effect Potency from your Essence abilities. If the target is an ally affected by your anti-control effects, your healing/barriers/buffs on them gain +4% Effect Potency."
+      ],
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 1,
+      "lane": "Middle",
+      "nodeType": "Major",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "Eligible active Essence abilities."
+        ],
+        "changes": [
+          "Your debuffs cause enemies to take 4% increased Effect Potency from your Essence abilities. If the target is an ally affected by your anti-control effects, your healing/barriers/buffs on them gain +4% Effect Potency."
+        ],
+        "tradeoffs": [
+          "Advanced cooldowns, target caps, and PvP coefficients can be tuned per node."
+        ],
+        "doesNotAffect": [
+          "Abilities that do not match the listed tags, effect operations, or conversion flags.",
+          "True damage unless the ability explicitly allows conversion."
+        ]
+      }
+    },
+    {
+      "id": "controller_disruptive_rhythm",
+      "branchId": "right",
+      "name": "Disruptive Rhythm",
+      "description": "Applying a debuff/control effect reduces the target's Action Speed by 5% for 4 seconds. Against control-immune targets, reduce damage dealt by 3% instead.",
+      "maxRank": 1,
+      "requiredLevel": 1,
+      "requiredNodeId": null,
+      "x": 1,
+      "y": 0,
+      "tags": [
+        "Right",
+        "Major"
+      ],
+      "effects": [
+        "Applying a debuff/control effect reduces the target's Action Speed by 5% for 4 seconds. Against control-immune targets, reduce damage dealt by 3% instead."
+      ],
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 1,
+      "lane": "Right",
+      "nodeType": "Major",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "Eligible active Essence abilities."
+        ],
+        "changes": [
+          "Applying a debuff/control effect reduces the target's Action Speed by 5% for 4 seconds. Against control-immune targets, reduce damage dealt by 3% instead."
+        ],
+        "tradeoffs": [
+          "Advanced cooldowns, target caps, and PvP coefficients can be tuned per node."
+        ],
+        "doesNotAffect": [
+          "Abilities that do not match the listed tags, effect operations, or conversion flags.",
+          "True damage unless the ability explicitly allows conversion."
+        ]
+      }
+    },
+    {
+      "id": "controller_suppressive_damage",
+      "branchId": "left",
+      "name": "Suppressive Damage",
+      "description": "Mutator Group: ControlConversion. Direct hostile Essence abilities apply Suppressed for 4 seconds. Suppressed enemies deal 4% less damage and have 4% reduced Action Speed. If the ability already applies debuff/control, the Suppressed values are increased by 50%. 6 second internal cooldown per target.",
+      "maxRank": 1,
+      "requiredLevel": 10,
+      "requiredNodeId": null,
+      "x": -1,
+      "y": 3,
+      "tags": [
+        "ControlConversion",
+        "Left",
+        "Major"
+      ],
+      "effects": [
+        "Mutator Group: ControlConversion. Direct hostile Essence abilities apply Suppressed for 4 seconds. Suppressed enemies deal 4% less damage and have 4% reduced Action Speed. If the ability already applies debuff/control, the Suppressed values are increased by 50%. 6 second internal cooldown per target."
+      ],
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 2,
+      "lane": "Left",
+      "nodeType": "Major",
+      "mutatorKind": "Converter",
+      "mutatorGroups": [
+        "ControlConversion"
+      ],
+      "mutator": {
+        "kind": "Converter",
+        "groups": [
+          "ControlConversion"
+        ],
+        "conditions": {
+          "requiredAbilityTags": [],
+          "anyAbilityTags": [],
+          "requiredDeliveryTags": [],
+          "anyDeliveryTags": [],
+          "requiredEffectTags": [],
+          "anyEffectTags": [
+            "Damage",
+            "Debuff"
+          ],
+          "effectOperations": [
+            "Damage",
+            "ApplyStatus"
+          ],
+          "allowedDamageTypes": [],
+          "targetSelectors": [],
+          "activeAbilityOnly": true,
+          "passiveAbilityOnly": false,
+          "allowDamageTypeConversionRequired": null,
+          "allowScalingConversionRequired": null,
+          "allowDeliveryConversionRequired": null,
+          "allowTargetingConversionRequired": null,
+          "allowSummonProxyRequired": null,
+          "allowEquipmentOverrideRequired": null,
+          "excludeTrueDamage": true,
+          "excludeHardCrowdControl": true
+        },
+        "transform": {
+          "damageType": null,
+          "targetingType": null,
+          "scalingAttribute": null,
+          "scalingCoefficientOverride": null,
+          "scalingCoefficientMultiplier": null,
+          "effectPotencyMultiplier": 1.05,
+          "cooldownMultiplier": null,
+          "resourceCostMultiplier": null,
+          "addAbilityTags": [],
+          "addDeliveryTags": [],
+          "addEffectTags": [
+            "Damage",
+            "Debuff",
+            "Control"
+          ],
+          "addEffectTagsToMatchingEffects": [
+            "Damage",
+            "Debuff",
+            "Control"
+          ]
+        },
+        "tradeoff": {
+          "effectPotencyMultiplier": null,
+          "cooldownMultiplier": 1.03,
+          "resourceCostMultiplier": 1.05,
+          "procCoefficientMultiplier": null
+        },
+        "pvpCoefficient": 0.7
+      },
+      "tooltip": {
+        "affects": [
+          "Eligible active Essence abilities matching ControlConversion."
+        ],
+        "changes": [
+          "Mutator Group: ControlConversion. Direct hostile Essence abilities apply Suppressed for 4 seconds. Suppressed enemies deal 4% less damage and have 4% reduced Action Speed. If the ability already applies debuff/control, the Suppressed values are increased by 50%. 6 second internal cooldown per target."
+        ],
+        "tradeoffs": [
+          "Conversion uses a +5% resource cost safety tradeoff and PvP coefficient until explicit balance values are authored."
+        ],
+        "doesNotAffect": [
+          "Abilities that do not match the listed tags, effect operations, or conversion flags.",
+          "True damage unless the ability explicitly allows conversion."
+        ]
+      }
+    },
+    {
+      "id": "controller_boss_conversion",
+      "branchId": "middle",
+      "name": "Boss Conversion",
+      "description": "Mutator Group: ControlConversion. When an enemy resists or is immune to your debuff/control, 40% of the lost control duration or effect value becomes Weakened duration instead. Weakened reduces damage dealt by 5%. Also gain +10 Dominance and your next Essence ability against that enemy gains +6% Effect Potency. 8 second internal cooldown per enemy.",
+      "maxRank": 1,
+      "requiredLevel": 10,
+      "requiredNodeId": null,
+      "x": 0,
+      "y": 3,
+      "tags": [
+        "ControlConversion",
+        "Middle",
+        "Major"
+      ],
+      "effects": [
+        "Mutator Group: ControlConversion. When an enemy resists or is immune to your debuff/control, 40% of the lost control duration or effect value becomes Weakened duration instead. Weakened reduces damage dealt by 5%. Also gain +10 Dominance and your next Essence ability against that enemy gains +6% Effect Potency. 8 second internal cooldown per enemy."
+      ],
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 2,
+      "lane": "Middle",
+      "nodeType": "Major",
+      "mutatorKind": "Converter",
+      "mutatorGroups": [
+        "ControlConversion"
+      ],
+      "mutator": {
+        "kind": "Converter",
+        "groups": [
+          "ControlConversion"
+        ],
+        "conditions": {
+          "requiredAbilityTags": [],
+          "anyAbilityTags": [],
+          "requiredDeliveryTags": [],
+          "anyDeliveryTags": [],
+          "requiredEffectTags": [],
+          "anyEffectTags": [
+            "Damage",
+            "Debuff"
+          ],
+          "effectOperations": [
+            "Damage",
+            "ApplyStatus"
+          ],
+          "allowedDamageTypes": [],
+          "targetSelectors": [],
+          "activeAbilityOnly": true,
+          "passiveAbilityOnly": false,
+          "allowDamageTypeConversionRequired": null,
+          "allowScalingConversionRequired": null,
+          "allowDeliveryConversionRequired": null,
+          "allowTargetingConversionRequired": null,
+          "allowSummonProxyRequired": null,
+          "allowEquipmentOverrideRequired": null,
+          "excludeTrueDamage": true,
+          "excludeHardCrowdControl": true
+        },
+        "transform": {
+          "damageType": null,
+          "targetingType": null,
+          "scalingAttribute": null,
+          "scalingCoefficientOverride": null,
+          "scalingCoefficientMultiplier": null,
+          "effectPotencyMultiplier": 1.06,
+          "cooldownMultiplier": null,
+          "resourceCostMultiplier": null,
+          "addAbilityTags": [],
+          "addDeliveryTags": [],
+          "addEffectTags": [
+            "Damage",
+            "Debuff",
+            "Control"
+          ],
+          "addEffectTagsToMatchingEffects": [
+            "Damage",
+            "Debuff",
+            "Control"
+          ]
+        },
+        "tradeoff": {
+          "effectPotencyMultiplier": 0.95,
+          "cooldownMultiplier": 1.03,
+          "resourceCostMultiplier": 1.05,
+          "procCoefficientMultiplier": null
+        },
+        "pvpCoefficient": 0.7
+      },
+      "tooltip": {
+        "affects": [
+          "Eligible active Essence abilities matching ControlConversion."
+        ],
+        "changes": [
+          "Mutator Group: ControlConversion. When an enemy resists or is immune to your debuff/control, 40% of the lost control duration or effect value becomes Weakened duration instead. Weakened reduces damage dealt by 5%. Also gain +10 Dominance and your next Essence ability against that enemy gains +6% Effect Potency. 8 second internal cooldown per enemy."
+        ],
+        "tradeoffs": [
+          "Conversion uses a +5% resource cost safety tradeoff and PvP coefficient until explicit balance values are authored."
+        ],
+        "doesNotAffect": [
+          "Abilities that do not match the listed tags, effect operations, or conversion flags.",
+          "True damage unless the ability explicitly allows conversion."
+        ]
+      }
+    },
+    {
+      "id": "controller_dominated_minions",
+      "branchId": "right",
+      "name": "Dominated Minions",
+      "description": "Mutator Group: SummonConversion + ControlConversion. Controlled allies apply a minor version of your most recent debuff to their target at 25% strength or duration. 5 second internal cooldown per ally. If no controlled ally exists, your DamageOverTime and Persistent Essence effects deal/apply +3% Effect Potency against debuffed enemies.",
+      "maxRank": 1,
+      "requiredLevel": 10,
+      "requiredNodeId": null,
+      "x": 1,
+      "y": 3,
+      "tags": [
+        "SummonConversion",
+        "ControlConversion",
+        "Right",
+        "Major"
+      ],
+      "effects": [
+        "Mutator Group: SummonConversion + ControlConversion. Controlled allies apply a minor version of your most recent debuff to their target at 25% strength or duration. 5 second internal cooldown per ally. If no controlled ally exists, your DamageOverTime and Persistent Essence effects deal/apply +3% Effect Potency against debuffed enemies."
+      ],
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 2,
+      "lane": "Right",
+      "nodeType": "Major",
+      "mutatorKind": "Converter",
+      "mutatorGroups": [
+        "SummonConversion",
+        "ControlConversion"
+      ],
+      "mutator": {
+        "kind": "Converter",
+        "groups": [
+          "SummonConversion",
+          "ControlConversion"
+        ],
+        "conditions": {
+          "requiredAbilityTags": [],
+          "anyAbilityTags": [],
+          "requiredDeliveryTags": [],
+          "anyDeliveryTags": [],
+          "requiredEffectTags": [],
+          "anyEffectTags": [
+            "Damage",
+            "Summon",
+            "Debuff"
+          ],
+          "effectOperations": [
+            "Damage",
+            "Summon",
+            "ApplyStatus"
+          ],
+          "allowedDamageTypes": [],
+          "targetSelectors": [],
+          "activeAbilityOnly": true,
+          "passiveAbilityOnly": false,
+          "allowDamageTypeConversionRequired": null,
+          "allowScalingConversionRequired": null,
+          "allowDeliveryConversionRequired": null,
+          "allowTargetingConversionRequired": null,
+          "allowSummonProxyRequired": null,
+          "allowEquipmentOverrideRequired": null,
+          "excludeTrueDamage": true,
+          "excludeHardCrowdControl": true
+        },
+        "transform": {
+          "damageType": null,
+          "targetingType": null,
+          "scalingAttribute": null,
+          "scalingCoefficientOverride": null,
+          "scalingCoefficientMultiplier": null,
+          "effectPotencyMultiplier": 1.03,
+          "cooldownMultiplier": null,
+          "resourceCostMultiplier": null,
+          "addAbilityTags": [],
+          "addDeliveryTags": [],
+          "addEffectTags": [
+            "Damage",
+            "Summon",
+            "Debuff",
+            "Control"
+          ],
+          "addEffectTagsToMatchingEffects": [
+            "Damage",
+            "Summon",
+            "Debuff",
+            "Control"
+          ]
+        },
+        "tradeoff": {
+          "effectPotencyMultiplier": null,
+          "cooldownMultiplier": 1.03,
+          "resourceCostMultiplier": 1.05,
+          "procCoefficientMultiplier": null
+        },
+        "pvpCoefficient": 0.7
+      },
+      "tooltip": {
+        "affects": [
+          "Eligible active Essence abilities matching SummonConversion, ControlConversion."
+        ],
+        "changes": [
+          "Mutator Group: SummonConversion + ControlConversion. Controlled allies apply a minor version of your most recent debuff to their target at 25% strength or duration. 5 second internal cooldown per ally. If no controlled ally exists, your DamageOverTime and Persistent Essence effects deal/apply +3% Effect Potency against debuffed enemies."
+        ],
+        "tradeoffs": [
+          "Conversion uses a +5% resource cost safety tradeoff and PvP coefficient until explicit balance values are authored."
+        ],
+        "doesNotAffect": [
+          "Abilities that do not match the listed tags, effect operations, or conversion flags.",
+          "True damage unless the ability explicitly allows conversion."
+        ]
+      }
+    },
+    {
+      "id": "controller_absolute_lockdown",
+      "branchId": "left",
+      "name": "Absolute Lockdown",
+      "description": "Lockdown's hostile effect also applies Suppression for 4 seconds: Action Speed -20% and damage dealt -15%. Against non-immune targets, Lockdown's debuff/control application cannot miss. Non-hostile Lockdown grants the ally Unstoppable: crowd control immunity for 2 seconds.",
+      "maxRank": 1,
+      "requiredLevel": 25,
+      "requiredNodeId": null,
+      "x": -1,
+      "y": 6,
+      "tags": [
+        "Left",
+        "Major"
+      ],
+      "effects": [
+        "Lockdown's hostile effect also applies Suppression for 4 seconds: Action Speed -20% and damage dealt -15%. Against non-immune targets, Lockdown's debuff/control application cannot miss. Non-hostile Lockdown grants the ally Unstoppable: crowd control immunity for 2 seconds."
+      ],
+      "countsTowardFocus": true,
+      "rules": [],
+      "row": 3,
+      "lane": "Left",
+      "nodeType": "Major",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "Eligible active Essence abilities."
+        ],
+        "changes": [
+          "Lockdown's hostile effect also applies Suppression for 4 seconds: Action Speed -20% and damage dealt -15%. Against non-immune targets, Lockdown's debuff/control application cannot miss. Non-hostile Lockdown grants the ally Unstoppable: crowd control immunity for 2 seconds."
+        ],
+        "tradeoffs": [
+          "Advanced cooldowns, target caps, and PvP coefficients can be tuned per node."
+        ],
+        "doesNotAffect": [
+          "Abilities that do not match the listed tags, effect operations, or conversion flags.",
+          "True damage unless the ability explicitly allows conversion."
+        ]
+      }
+    },
+    {
+      "id": "controller_grand_manipulation",
+      "branchId": "middle",
+      "name": "Grand Manipulation",
+      "description": "Lockdown affects up to 3 valid targets. Primary target receives full value. Secondary targets receive 50% value. For non-hostile abilities, spreads to nearby allies instead.",
+      "maxRank": 1,
+      "requiredLevel": 25,
+      "requiredNodeId": null,
+      "x": 0,
+      "y": 6,
+      "tags": [
+        "Middle",
+        "Major"
+      ],
+      "effects": [
+        "Lockdown affects up to 3 valid targets. Primary target receives full value. Secondary targets receive 50% value. For non-hostile abilities, spreads to nearby allies instead."
+      ],
+      "countsTowardFocus": true,
+      "rules": [],
+      "row": 3,
+      "lane": "Middle",
+      "nodeType": "Major",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "Eligible active Essence abilities."
+        ],
+        "changes": [
+          "Lockdown affects up to 3 valid targets. Primary target receives full value. Secondary targets receive 50% value. For non-hostile abilities, spreads to nearby allies instead."
+        ],
+        "tradeoffs": [
+          "Advanced cooldowns, target caps, and PvP coefficients can be tuned per node."
+        ],
+        "doesNotAffect": [
+          "Abilities that do not match the listed tags, effect operations, or conversion flags.",
+          "True damage unless the ability explicitly allows conversion."
+        ]
+      }
+    },
+    {
+      "id": "controller_control_cascade",
+      "branchId": "right",
+      "name": "Control Cascade",
+      "description": "When a Lockdown-empowered debuff/control effect expires or its target dies, 50% of its remaining duration or strength spreads to the nearest valid enemy. Non-hostile Lockdown effects spread 50% remaining duration to the nearest ally.",
+      "maxRank": 1,
+      "requiredLevel": 25,
+      "requiredNodeId": null,
+      "x": 1,
+      "y": 6,
+      "tags": [
+        "Right",
+        "Major"
+      ],
+      "effects": [
+        "When a Lockdown-empowered debuff/control effect expires or its target dies, 50% of its remaining duration or strength spreads to the nearest valid enemy. Non-hostile Lockdown effects spread 50% remaining duration to the nearest ally."
+      ],
+      "countsTowardFocus": true,
+      "rules": [],
+      "row": 3,
+      "lane": "Right",
+      "nodeType": "Major",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "Eligible active Essence abilities."
+        ],
+        "changes": [
+          "When a Lockdown-empowered debuff/control effect expires or its target dies, 50% of its remaining duration or strength spreads to the nearest valid enemy. Non-hostile Lockdown effects spread 50% remaining duration to the nearest ally."
+        ],
+        "tradeoffs": [
+          "Advanced cooldowns, target caps, and PvP coefficients can be tuned per node."
+        ],
+        "doesNotAffect": [
+          "Abilities that do not match the listed tags, effect operations, or conversion flags.",
+          "True damage unless the ability explicitly allows conversion."
+        ]
+      }
+    },
+    {
+      "id": "controller_dominance_capacity",
+      "branchId": "left",
+      "name": "Dominance Capacity",
+      "description": "Max Dominance +10 / +20.",
+      "maxRank": 2,
+      "requiredLevel": 1,
+      "requiredNodeId": null,
+      "x": -1,
+      "y": 1,
+      "tags": [
+        "Left",
+        "Minor"
+      ],
+      "effects": [
+        "Max Dominance +10 / +20."
+      ],
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 1,
+      "lane": "Left",
+      "nodeType": "Minor",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "This style-tree passive while the node has ranks."
+        ],
+        "changes": [
+          "Max Dominance +10 / +20."
+        ],
+        "tradeoffs": [],
+        "doesNotAffect": []
+      }
+    },
+    {
+      "id": "controller_lingering_effects",
+      "branchId": "middle",
+      "name": "Lingering Effects",
+      "description": "Debuff, slow, and control durations +4% / +8%.",
+      "maxRank": 2,
+      "requiredLevel": 1,
+      "requiredNodeId": null,
+      "x": 0,
+      "y": 1,
+      "tags": [
+        "Middle",
+        "Minor",
+        "Debuff"
+      ],
+      "effects": [
+        "Debuff, slow, and control durations +4% / +8%."
+      ],
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 1,
+      "lane": "Middle",
+      "nodeType": "Minor",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "This style-tree passive while the node has ranks."
+        ],
+        "changes": [
+          "Debuff, slow, and control durations +4% / +8%."
+        ],
+        "tradeoffs": [],
+        "doesNotAffect": []
+      }
+    },
+    {
+      "id": "controller_application_training",
+      "branchId": "right",
+      "name": "Application Training",
+      "description": "Debuff/control application chance +3% / +6%. If the ability cannot apply debuff/control, gain +2% / +4% Effect Potency against debuffed enemies.",
+      "maxRank": 2,
+      "requiredLevel": 1,
+      "requiredNodeId": null,
+      "x": 1,
+      "y": 1,
+      "tags": [
+        "Right",
+        "Minor",
+        "Debuff"
+      ],
+      "effects": [
+        "Debuff/control application chance +3% / +6%. If the ability cannot apply debuff/control, gain +2% / +4% Effect Potency against debuffed enemies."
+      ],
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 1,
+      "lane": "Right",
+      "nodeType": "Minor",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "This style-tree passive while the node has ranks."
+        ],
+        "changes": [
+          "Debuff/control application chance +3% / +6%. If the ability cannot apply debuff/control, gain +2% / +4% Effect Potency against debuffed enemies."
+        ],
+        "tradeoffs": [],
+        "doesNotAffect": []
+      }
+    },
+    {
+      "id": "controller_cleanse_resistance",
+      "branchId": "middle",
+      "name": "Cleanse Resistance",
+      "description": "Your debuffs are 10% / 20% harder to cleanse or reduce. Against bosses, your debuffs lose 5% / 10% less duration from boss resistance rules.",
+      "maxRank": 2,
+      "requiredLevel": 1,
+      "requiredNodeId": null,
+      "x": 0,
+      "y": 2,
+      "tags": [
+        "Middle",
+        "Minor",
+        "Debuff"
+      ],
+      "effects": [
+        "Your debuffs are 10% / 20% harder to cleanse or reduce. Against bosses, your debuffs lose 5% / 10% less duration from boss resistance rules."
+      ],
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 1,
+      "lane": "Middle",
+      "nodeType": "Minor",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "This style-tree passive while the node has ranks."
+        ],
+        "changes": [
+          "Your debuffs are 10% / 20% harder to cleanse or reduce. Against bosses, your debuffs lose 5% / 10% less duration from boss resistance rules."
+        ],
+        "tradeoffs": [],
+        "doesNotAffect": []
+      }
+    },
+    {
+      "id": "controller_weakening_touch",
+      "branchId": "left",
+      "name": "Weakening Touch",
+      "description": "Debuffed enemies deal 2% / 4% less damage to you.",
+      "maxRank": 2,
+      "requiredLevel": 10,
+      "requiredNodeId": null,
+      "x": -1,
+      "y": 4,
+      "tags": [
+        "Left",
+        "Minor",
+        "Damage",
+        "Debuff"
+      ],
+      "effects": [
+        "Debuffed enemies deal 2% / 4% less damage to you."
+      ],
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 2,
+      "lane": "Left",
+      "nodeType": "Minor",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "This style-tree passive while the node has ranks."
+        ],
+        "changes": [
+          "Debuffed enemies deal 2% / 4% less damage to you."
+        ],
+        "tradeoffs": [],
+        "doesNotAffect": []
+      }
+    },
+    {
+      "id": "controller_cooldown_snare",
+      "branchId": "middle",
+      "name": "Cooldown Snare",
+      "description": "Applying a debuff/control effect reduces the remaining cooldown of your highest-cooldown non-style Essence ability by 0.5 / 1 second. 4 second internal cooldown.",
+      "maxRank": 2,
+      "requiredLevel": 10,
+      "requiredNodeId": null,
+      "x": 0,
+      "y": 4,
+      "tags": [
+        "Middle",
+        "Minor",
+        "Debuff"
+      ],
+      "effects": [
+        "Applying a debuff/control effect reduces the remaining cooldown of your highest-cooldown non-style Essence ability by 0.5 / 1 second. 4 second internal cooldown."
+      ],
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 2,
+      "lane": "Middle",
+      "nodeType": "Minor",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "This style-tree passive while the node has ranks."
+        ],
+        "changes": [
+          "Applying a debuff/control effect reduces the remaining cooldown of your highest-cooldown non-style Essence ability by 0.5 / 1 second. 4 second internal cooldown."
+        ],
+        "tradeoffs": [],
+        "doesNotAffect": []
+      }
+    },
+    {
+      "id": "controller_resource_denial",
+      "branchId": "right",
+      "name": "Resource Denial",
+      "description": "Debuffed enemies have resource generation or recovery reduced by 5% / 10%. If enemies do not use resources, reduce their Action Speed by 2% / 4% instead.",
+      "maxRank": 2,
+      "requiredLevel": 10,
+      "requiredNodeId": null,
+      "x": 1,
+      "y": 4,
+      "tags": [
+        "Right",
+        "Minor",
+        "Debuff"
+      ],
+      "effects": [
+        "Debuffed enemies have resource generation or recovery reduced by 5% / 10%. If enemies do not use resources, reduce their Action Speed by 2% / 4% instead."
+      ],
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 2,
+      "lane": "Right",
+      "nodeType": "Minor",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "This style-tree passive while the node has ranks."
+        ],
+        "changes": [
+          "Debuffed enemies have resource generation or recovery reduced by 5% / 10%. If enemies do not use resources, reduce their Action Speed by 2% / 4% instead."
+        ],
+        "tradeoffs": [],
+        "doesNotAffect": []
+      }
+    },
+    {
+      "id": "controller_resistance_study",
+      "branchId": "middle",
+      "name": "Resistance Study",
+      "description": "Against control-immune enemies, 15% / 30% of your lost control duration becomes Weakened duration. Weakened reduces damage dealt by 5%.",
+      "maxRank": 2,
+      "requiredLevel": 10,
+      "requiredNodeId": null,
+      "x": 0,
+      "y": 5,
+      "tags": [
+        "Middle",
+        "Minor",
+        "Damage",
+        "Debuff"
+      ],
+      "effects": [
+        "Against control-immune enemies, 15% / 30% of your lost control duration becomes Weakened duration. Weakened reduces damage dealt by 5%."
+      ],
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 2,
+      "lane": "Middle",
+      "nodeType": "Minor",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "This style-tree passive while the node has ranks."
+        ],
+        "changes": [
+          "Against control-immune enemies, 15% / 30% of your lost control duration becomes Weakened duration. Weakened reduces damage dealt by 5%."
+        ],
+        "tradeoffs": [],
+        "doesNotAffect": []
+      }
+    },
+    {
+      "id": "controller_exploit_window",
+      "branchId": "left",
+      "name": "Exploit Window",
+      "description": "Your Essence effects against enemies within 3 seconds of you applying control/debuff gain +3% / +6% Effect Potency.",
+      "maxRank": 2,
+      "requiredLevel": 25,
+      "requiredNodeId": null,
+      "x": -1,
+      "y": 7,
+      "tags": [
+        "Left",
+        "Minor",
+        "Debuff"
+      ],
+      "effects": [
+        "Your Essence effects against enemies within 3 seconds of you applying control/debuff gain +3% / +6% Effect Potency."
+      ],
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 3,
+      "lane": "Left",
+      "nodeType": "Minor",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "This style-tree passive while the node has ranks."
+        ],
+        "changes": [
+          "Your Essence effects against enemies within 3 seconds of you applying control/debuff gain +3% / +6% Effect Potency."
+        ],
+        "tradeoffs": [],
+        "doesNotAffect": []
+      }
+    },
+    {
+      "id": "controller_safe_debuffing",
+      "branchId": "middle",
+      "name": "Safe Debuffing",
+      "description": "After applying a debuff/control effect, damage taken from that target is reduced by 4% / 8% for 4 seconds.",
+      "maxRank": 2,
+      "requiredLevel": 25,
+      "requiredNodeId": null,
+      "x": 0,
+      "y": 7,
+      "tags": [
+        "Middle",
+        "Minor",
+        "Damage",
+        "Debuff"
+      ],
+      "effects": [
+        "After applying a debuff/control effect, damage taken from that target is reduced by 4% / 8% for 4 seconds."
+      ],
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 3,
+      "lane": "Middle",
+      "nodeType": "Minor",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "This style-tree passive while the node has ranks."
+        ],
+        "changes": [
+          "After applying a debuff/control effect, damage taken from that target is reduced by 4% / 8% for 4 seconds."
+        ],
+        "tradeoffs": [],
+        "doesNotAffect": []
+      }
+    },
+    {
+      "id": "controller_controlled_breathing",
+      "branchId": "right",
+      "name": "Controlled Breathing",
+      "description": "When you gain Dominance, restore 0.4% / 0.8% missing primary resource. 2 second internal cooldown.",
+      "maxRank": 2,
+      "requiredLevel": 25,
+      "requiredNodeId": null,
+      "x": 1,
+      "y": 7,
+      "tags": [
+        "Right",
+        "Minor"
+      ],
+      "effects": [
+        "When you gain Dominance, restore 0.4% / 0.8% missing primary resource. 2 second internal cooldown."
+      ],
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 3,
+      "lane": "Right",
+      "nodeType": "Minor",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "This style-tree passive while the node has ranks."
+        ],
+        "changes": [
+          "When you gain Dominance, restore 0.4% / 0.8% missing primary resource. 2 second internal cooldown."
+        ],
+        "tradeoffs": [],
+        "doesNotAffect": []
+      }
+    },
+    {
+      "id": "controller_lockdown_reset",
+      "branchId": "middle",
+      "name": "Lockdown Reset",
+      "description": "Lockdown cooldown reduced by 2 / 4 seconds.",
+      "maxRank": 2,
+      "requiredLevel": 25,
+      "requiredNodeId": null,
+      "x": 0,
+      "y": 8,
+      "tags": [
+        "Middle",
+        "Minor"
+      ],
+      "effects": [
+        "Lockdown cooldown reduced by 2 / 4 seconds."
+      ],
+      "countsTowardFocus": false,
+      "rules": [],
+      "row": 3,
+      "lane": "Middle",
+      "nodeType": "Minor",
+      "mutatorKind": null,
+      "mutatorGroups": [],
+      "mutator": null,
+      "tooltip": {
+        "affects": [
+          "This style-tree passive while the node has ranks."
+        ],
+        "changes": [
+          "Lockdown cooldown reduced by 2 / 4 seconds."
+        ],
+        "tradeoffs": [],
+        "doesNotAffect": []
+      }
+    }
+  ]
+}

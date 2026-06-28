@@ -51,6 +51,7 @@ public sealed class DungeonCombatPlanner : IDungeonCombatPlanner
             StartsAt: startsAt,
             Participants: participants,
             SourceContext: new DungeonEncounterSourceContext(
-                DungeonRunId: plan.DungeonRunId));
+                DungeonRunId: plan.DungeonRunId),
+            PlayerCombatStyle: plan.CharacterSnapshot.CombatStyle);
     }
 }

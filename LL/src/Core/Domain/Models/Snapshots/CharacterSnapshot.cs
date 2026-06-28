@@ -1,4 +1,6 @@
-﻿namespace Domain.Models.Snapshots;
+using Domain.Models.CombatStyles;
+
+namespace Domain.Models.Snapshots;
 
 public sealed class CharacterSnapshot
 {
@@ -12,4 +14,6 @@ public sealed class CharacterSnapshot
     public ICollection<EquipmentSnapshot> Equipment { get; init; } = [];
 
     public ICollection<EquippedEssenceSnapshot> EquippedEssences { get; init; } = [];
+
+    public CombatStyleSnapshot? CombatStyle { get; set; }
 }

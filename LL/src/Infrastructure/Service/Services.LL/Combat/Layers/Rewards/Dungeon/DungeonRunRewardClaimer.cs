@@ -1,4 +1,5 @@
 using Application.Interfaces.Services.LL;
+using Application.Interfaces.Services.LL.CombatStyles;
 using Domain.Models.Dungeons.Runs;
 using Domain.Models.Inventories;
 using Domain.Models.Items;
@@ -15,19 +16,22 @@ public sealed class DungeonRunRewardClaimer : IDungeonRunRewardClaimer
     private readonly IItemBaseRepository _itemBases;
     private readonly IInventoryItemFactory _inventoryItemFactory;
     private readonly IInventoryService _inventoryService;
+    private readonly ICombatStyleService _combatStyleService;
 
     public DungeonRunRewardClaimer(
         IExperienceRewardWriter experienceWriter,
         ICurrencyRewardWriter currencyWriter,
         IItemBaseRepository itemBases,
         IInventoryItemFactory inventoryItemFactory,
-        IInventoryService inventoryService)
+        IInventoryService inventoryService,
+        ICombatStyleService combatStyleService)
     {
         _experienceWriter = experienceWriter;
         _currencyWriter = currencyWriter;
         _itemBases = itemBases;
         _inventoryItemFactory = inventoryItemFactory;
         _inventoryService = inventoryService;
+        _combatStyleService = combatStyleService;
     }
 
     public async Task<IReadOnlyList<InventoryItem>> ClaimAsync(DungeonRun run, CancellationToken cancellationToken)
@@ -39,6 +43,12 @@ public sealed class DungeonRunRewardClaimer : IDungeonRunRewardClaimer
             await _experienceWriter.AddSplitExperienceAsync(
                 [run.CharacterId],
                 rewardState.Experience,
+                cancellationToken);
+
+            await _combatStyleService.GrantExperienceAsync(
+                run.CharacterId,
+                rewardState.Experience,
+                "dungeon_reward_claim",
                 cancellationToken);
         }
 

@@ -24,6 +24,7 @@
     <ProjectReference Include="..\..\src\Core\Domain\Domain.csproj" />
     <ProjectReference Include="..\..\src\Infrastructure\Persistence\Persistence.LL\Persistence.LL.csproj" />
     <ProjectReference Include="..\..\src\Infrastructure\Service\Services.LL\Services.LL.csproj" />
+    <ProjectReference Include="..\..\src\API\API.LL\API.LL.csproj" />
   </ItemGroup>
 
 </Project>

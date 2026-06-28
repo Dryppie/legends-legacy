@@ -294,7 +294,9 @@ public sealed class DungeonRunService : IDungeonRunService
             case RoomType.Combat:
             case RoomType.MiniBoss:
             case RoomType.Boss:
-                var snapshot = await _characterSnapshots.GetSnapshotByCharacterIdAsync(run.CharacterId, ct);
+                var snapshot = run.CharacterSnapshotId.HasValue
+                    ? await _characterSnapshots.GetSnapshotByIdAsync(run.CharacterSnapshotId.Value, ct)
+                    : await _characterSnapshots.GetSnapshotByCharacterIdAsync(run.CharacterId, ct);
                 if (snapshot == null)
                     return null;
 

@@ -12,7 +12,7 @@ public static class AbilityCompiler
             : spec.Triggers;
 
         var compiledTriggers = triggers
-            .Select(trigger => CompileTrigger(trigger, effectsById.Values, effectsById, spec.Name))
+            .Select(trigger => CompileTrigger(trigger, effectsById.Values, effectsById, spec.Name, spec.Kind, spec.Tags))
             .GroupBy(x => x.Event)
             .ToDictionary(x => x.Key, x => (IReadOnlyList<CompiledTrigger>)x.ToList());
 
@@ -32,7 +32,7 @@ public static class AbilityCompiler
     {
         var effectsById = spec.Effects.ToDictionary(x => x.Id, StringComparer.OrdinalIgnoreCase);
         var compiledTriggers = spec.Triggers
-            .Select(trigger => CompileTrigger(trigger, spec.Effects, effectsById, spec.Name))
+            .Select(trigger => CompileTrigger(trigger, spec.Effects, effectsById, spec.Name, AbilitySpecKind.Passive, spec.Tags))
             .GroupBy(x => x.Event)
             .ToDictionary(x => x.Key, x => (IReadOnlyList<CompiledTrigger>)x.ToList());
 
@@ -74,7 +74,9 @@ public static class AbilityCompiler
         AbilityTriggerSpec trigger,
         IEnumerable<AbilityEffectSpec> defaultEffects,
         IReadOnlyDictionary<string, AbilityEffectSpec> effectsById,
-        string statsSource)
+        string statsSource,
+        AbilitySpecKind abilityKind,
+        IReadOnlyList<string> abilityTags)
     {
         var selectedEffects = trigger.EffectIds.Count == 0
             ? defaultEffects
@@ -85,11 +87,15 @@ public static class AbilityCompiler
             Event = trigger.Event,
             InternalCooldownTicks = trigger.InternalCooldownTicks,
             Conditions = [.. trigger.Conditions.Select(CompileCondition)],
-            Effects = [.. selectedEffects.Select(effect => CompileEffect(effect, statsSource))]
+            Effects = [.. selectedEffects.Select(effect => CompileEffect(effect, statsSource, abilityKind, abilityTags))]
         };
     }
 
-    private static CompiledEffect CompileEffect(AbilityEffectSpec effect, string statsSource) =>
+    private static CompiledEffect CompileEffect(
+        AbilityEffectSpec effect,
+        string statsSource,
+        AbilitySpecKind abilityKind,
+        IReadOnlyList<string> abilityTags) =>
         new()
         {
             Id = effect.Id,
@@ -110,6 +116,10 @@ public static class AbilityCompiler
             AttackType = effect.AttackType,
             DamageType = effect.DamageType,
             LifeStealPercentage = effect.LifeStealPercentage,
+            ProcCoefficient = effect.ProcCoefficient <= 0 ? 1m : effect.ProcCoefficient,
+            AbilityKind = abilityKind,
+            AbilityTags = new HashSet<string>(abilityTags, StringComparer.OrdinalIgnoreCase),
+            Tags = new HashSet<string>(effect.Tags, StringComparer.OrdinalIgnoreCase),
             Conditions = [.. effect.Conditions.Select(CompileCondition)]
         };
 
