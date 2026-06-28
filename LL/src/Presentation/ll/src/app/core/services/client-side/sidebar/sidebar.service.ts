@@ -76,7 +76,7 @@ function getSidebarSections(): SidebarSection[] {
         },
         {
           id: 'combat-styles',
-          route: ['character', 'combat-styles'],
+          route: ['character', 'combat-style'],
           icon: 'character/essences',
           title: 'Combat Styles',
           description: 'Fighting stance and focus',

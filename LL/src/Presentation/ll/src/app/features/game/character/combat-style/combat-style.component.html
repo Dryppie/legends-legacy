@@ -1,0 +1,424 @@
+<div class="ll-page-stack pb-4">
+  <div class="flex flex-wrap items-center justify-between gap-3 pr-4">
+    <app-default-header
+      section="Character"
+      title="Combat Style"
+      text="Stance, focus, and skill tree"
+      icon="character/essences"
+    ></app-default-header>
+
+    <app-regular-button
+      [disabled]="combatStyleState.loading()"
+      [text]="combatStyleState.loading() ? 'Refreshing' : 'Refresh'"
+      (pressed)="combatStyleState.refresh()"
+    ></app-regular-button>
+  </div>
+
+  <p *ngIf="combatStyleState.error()" class="ll-state ll-state-danger mr-4">
+    {{ combatStyleState.error() }}
+  </p>
+
+  <div *ngIf="combatStyleState.loading()" class="ll-state ll-state-muted mr-4">
+    Loading Combat Styles...
+  </div>
+
+  <ng-container *ngIf="selectedStyle() as style; else noCombatStyle">
+    <section class="ll-panel mr-4 p-3">
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <div class="ll-segmented flex-wrap bg-black/30 p-1">
+          <button
+            *ngFor="
+              let availableStyle of combatStyleState.styles();
+              trackBy: trackStyle
+            "
+            type="button"
+            class="ll-segmented-button min-h-9 px-3 py-2 text-xs font-semibold uppercase"
+            [ngClass]="{
+              'll-segmented-button-active': style.id === availableStyle.id,
+            }"
+            (click)="selectStyle(availableStyle)"
+          >
+            {{ availableStyle.name }}
+          </button>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2">
+          <span
+            class="ll-badge rounded"
+            [ngClass]="style.isActive ? 'll-badge-success' : 'll-badge-muted'"
+          >
+            {{ style.isActive ? "Active" : "Inactive" }}
+          </span>
+          <button
+            type="button"
+            class="ll-button"
+            [disabled]="style.isActive || combatStyleState.saving()"
+            (click)="activateStyle(style)"
+          >
+            Activate
+          </button>
+          <button
+            type="button"
+            class="ll-button"
+            [disabled]="style.skillPointsSpent === 0 || combatStyleState.saving()"
+            (click)="resetTree(style)"
+          >
+            Reset Tree
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <section class="grid gap-3 pr-4 md:grid-cols-4">
+      <article class="ll-stat-card ll-card-accent md:col-span-2">
+        <div class="flex flex-wrap items-start justify-between gap-3">
+          <div class="min-w-0">
+            <div class="ll-stat-label">Style</div>
+            <h2 class="ll-heading mt-1 text-3xl">{{ style.name }}</h2>
+            <p class="ll-copy mt-2">{{ style.description }}</p>
+          </div>
+          <span class="ll-badge ll-badge-accent rounded">
+            {{ style.resourceId }}
+          </span>
+        </div>
+      </article>
+
+      <article class="ll-stat-card">
+        <div class="ll-stat-label">Level</div>
+        <div class="ll-heading mt-1 text-3xl">{{ style.level }}</div>
+        <div class="ll-progress-track mt-3 h-2">
+          <div
+            class="ll-progress-bar"
+            [style.width.%]="experiencePercent(style)"
+          ></div>
+        </div>
+        <p class="ll-copy mt-2 text-xs">
+          {{ style.experience }} / {{ style.experienceForNextLevel }} XP
+        </p>
+      </article>
+
+      <article class="ll-stat-card">
+        <div class="ll-stat-label">Skill Points</div>
+        <div class="ll-heading mt-1 text-3xl">
+          {{ style.skillPointsAvailable }}
+        </div>
+        <p class="ll-copy mt-2 text-xs">
+          {{ style.skillPointsSpent }} spent of {{ style.skillPointsEarned }}
+          earned
+        </p>
+      </article>
+    </section>
+
+    <div
+      class="grid min-h-0 flex-1 grid-cols-1 gap-4 overflow-y-auto pr-4 xl:grid-cols-[minmax(0,1fr)_24rem]"
+    >
+      <main class="grid min-h-0 gap-4">
+        <section class="ll-panel p-4">
+          <div class="flex flex-wrap items-start justify-between gap-4">
+            <div class="min-w-0">
+              <h2 class="ll-heading">Core Mechanic</h2>
+              <p class="ll-copy mt-2">{{ style.coreMechanic }}</p>
+            </div>
+            <div class="flex flex-wrap gap-2">
+              <span
+                *ngFor="let tag of style.recommendedTags; trackBy: trackText"
+                class="ll-badge ll-badge-accent rounded"
+              >
+                {{ tag }}
+              </span>
+            </div>
+          </div>
+
+          <div class="mt-4 grid gap-3 md:grid-cols-2">
+            <article class="ll-card p-3">
+              <h3 class="ll-eyebrow text-primary">Recommended Stats</h3>
+              <div class="mt-3 flex flex-wrap gap-2">
+                <span
+                  *ngFor="
+                    let stat of style.recommendedStats;
+                    trackBy: trackText
+                  "
+                  class="ll-badge rounded"
+                >
+                  {{ stat }}
+                </span>
+              </div>
+            </article>
+
+            <article class="ll-card p-3">
+              <h3 class="ll-eyebrow text-primary">Rules</h3>
+              <div class="mt-3 grid gap-2">
+                <div
+                  *ngFor="let rule of style.ruleSummaries; trackBy: trackRule"
+                  class="rounded border border-light_gray/50 px-3 py-2 text-sm text-zinc-300"
+                >
+                  {{ rule.text }}
+                </div>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section class="ll-panel p-4">
+          <div class="mb-4 flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <h2 class="ll-heading">Focus Paths</h2>
+              <p class="ll-copy">
+                Selected:
+                {{
+                  style.selectedFocusId
+                    ? style.selectedFocusId
+                    : "No focus selected"
+                }}
+              </p>
+            </div>
+          </div>
+
+          <div class="grid gap-3 md:grid-cols-3">
+            <article
+              *ngFor="let focus of style.focuses; trackBy: trackFocus"
+              class="ll-card p-3"
+              [ngClass]="{
+                'll-card-accent': focus.isSelected,
+                'opacity-70': !focus.isUnlocked,
+              }"
+            >
+              <div class="flex items-start justify-between gap-3">
+                <div class="min-w-0">
+                  <h3 class="ll-heading text-base">{{ focus.name }}</h3>
+                  <p class="ll-copy mt-1 text-xs">
+                    {{ focusDescription(focus) }}
+                  </p>
+                </div>
+                <span
+                  class="ll-badge rounded"
+                  [ngClass]="
+                    focus.isUnlocked ? 'll-badge-success' : 'll-badge-muted'
+                  "
+                >
+                  L{{ focus.unlockLevel }}
+                </span>
+              </div>
+
+              <div class="mt-3 flex flex-wrap gap-2">
+                <span
+                  *ngFor="let tag of focus.recommendedTags; trackBy: trackText"
+                  class="ll-badge rounded text-zinc-300"
+                >
+                  {{ tag }}
+                </span>
+              </div>
+
+              <button
+                type="button"
+                class="ll-button mt-3 w-full"
+                [disabled]="
+                  !focus.isUnlocked ||
+                  focus.isSelected ||
+                  combatStyleState.saving()
+                "
+                (click)="selectFocus(style, focus)"
+              >
+                {{ focus.isSelected ? "Selected" : "Select Focus" }}
+              </button>
+            </article>
+          </div>
+        </section>
+
+        <section class="grid gap-4">
+          <article
+            *ngFor="let branch of style.skillTree.branches; trackBy: trackBranch"
+            class="ll-panel overflow-hidden"
+          >
+            <div
+              class="flex flex-wrap items-start justify-between gap-3 border-b border-light_gray/70 p-4"
+            >
+              <div class="min-w-0">
+                <h2 class="ll-heading">{{ branch.name }}</h2>
+                <p class="ll-copy mt-1">{{ branchDescription(branch) }}</p>
+              </div>
+              <span class="ll-badge ll-badge-accent rounded">
+                {{ branch.pointsSpent }} spent
+              </span>
+            </div>
+
+            <div
+              class="grid gap-3 border-b border-light_gray/50 p-4 text-xs md:grid-cols-2"
+            >
+              <div>
+                <div class="font-semibold uppercase text-zinc-400">Tags</div>
+                <div class="mt-2 flex flex-wrap gap-2">
+                  <span
+                    *ngFor="let tag of branchTags(branch); trackBy: trackText"
+                    class="ll-badge rounded text-zinc-300"
+                  >
+                    {{ tag }}
+                  </span>
+                </div>
+              </div>
+              <div>
+                <div class="font-semibold uppercase text-zinc-400">Stats</div>
+                <div class="mt-2 flex flex-wrap gap-2">
+                  <span
+                    *ngFor="let stat of branchStats(branch); trackBy: trackText"
+                    class="ll-badge rounded text-zinc-300"
+                  >
+                    {{ stat }}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div class="grid gap-3 p-3 md:grid-cols-2 2xl:grid-cols-3">
+              <article
+                *ngFor="let node of branch.nodes; trackBy: trackNode"
+                class="ll-card p-3"
+                [ngClass]="{
+                  'll-card-accent': node.rank > 0,
+                  'border-primary/60': node.canRankUp,
+                  'opacity-70': !node.isUnlocked,
+                }"
+              >
+                <div class="flex items-start justify-between gap-3">
+                  <div class="min-w-0">
+                    <div class="flex flex-wrap items-center gap-2">
+                      <h3 class="ll-heading text-base">{{ node.name }}</h3>
+                      <span class="ll-badge rounded text-zinc-300">
+                        {{ node.nodeType }}
+                      </span>
+                    </div>
+                    <p class="ll-copy mt-1 text-xs">
+                      Row {{ node.row }} | {{ node.lane }} | Level
+                      {{ node.requiredLevel }}
+                    </p>
+                  </div>
+
+                  <div class="shrink-0 text-right">
+                    <div class="ll-stat-label">Rank</div>
+                    <div class="text-base font-semibold text-primary">
+                      {{ node.rank }}/{{ node.maxRank }}
+                    </div>
+                  </div>
+                </div>
+
+                <div *ngIf="hasNodeDetails(node)" class="mt-3 grid gap-2">
+                  <p *ngIf="node.description" class="ll-copy text-xs">
+                    {{ node.description }}
+                  </p>
+
+                  <div
+                    *ngIf="nodeEffects(node).length"
+                    class="rounded border border-light_gray/50 px-3 py-2 text-xs text-zinc-300"
+                  >
+                    <div class="mb-1 font-semibold uppercase text-zinc-400">
+                      Effects
+                    </div>
+                    <div
+                      *ngFor="
+                        let effect of nodeEffects(node);
+                        trackBy: trackText
+                      "
+                    >
+                      {{ effect }}
+                    </div>
+                  </div>
+
+                  <div class="flex flex-wrap gap-2">
+                    <span
+                      *ngFor="let tag of nodeTags(node); trackBy: trackText"
+                      class="ll-badge rounded text-zinc-300"
+                    >
+                      {{ tag }}
+                    </span>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  class="ll-button mt-3 w-full"
+                  [disabled]="!node.canRankUp || combatStyleState.saving()"
+                  (click)="rankUpNode(style, node)"
+                >
+                  {{ node.canRankUp ? "Rank Up" : "Locked" }}
+                </button>
+              </article>
+            </div>
+          </article>
+        </section>
+      </main>
+
+      <aside class="grid content-start gap-4">
+        <section class="ll-panel p-4" *ngIf="combatStyleState.buildPreview() as preview">
+          <h2 class="ll-heading">Build Preview</h2>
+          <p class="ll-copy mt-1">{{ preview.buildName }}</p>
+
+          <div class="mt-4 grid gap-3">
+            <div class="ll-card p-3">
+              <div class="ll-stat-label">Active Style</div>
+              <div class="mt-1 text-base font-semibold text-primary">
+                {{ preview.activeStyleName }}
+              </div>
+            </div>
+
+            <div class="ll-card p-3">
+              <div class="ll-stat-label">Focus</div>
+              <div class="mt-1 text-base font-semibold text-primary">
+                {{ preview.selectedFocusName || "None selected" }}
+              </div>
+            </div>
+
+            <div class="ll-card p-3">
+              <div class="ll-stat-label">Top Tags</div>
+              <div class="mt-3 grid gap-2">
+                <div
+                  *ngFor="let tag of preview.topTags"
+                  class="flex items-center justify-between rounded border border-light_gray/50 px-2 py-1.5 text-sm"
+                >
+                  <span class="text-zinc-300">{{ tag.tag }}</span>
+                  <span class="text-primary">{{ tag.score }}</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="ll-card p-3">
+              <div class="ll-stat-label">Notes</div>
+              <ul class="mt-2 list-disc space-y-1 pl-4 text-sm text-zinc-400">
+                <li *ngFor="let note of preview.notes; trackBy: trackText">
+                  {{ note }}
+                </li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        <section class="ll-panel p-4">
+          <h2 class="ll-heading">Current State</h2>
+          <div class="mt-4 grid gap-2 text-sm">
+            <div class="flex items-center justify-between gap-3">
+              <span class="text-zinc-400">Saving</span>
+              <span class="text-primary">
+                {{ combatStyleState.saving() ? "Yes" : "No" }}
+              </span>
+            </div>
+            <div class="flex items-center justify-between gap-3">
+              <span class="text-zinc-400">Available points</span>
+              <span class="text-primary">{{ style.skillPointsAvailable }}</span>
+            </div>
+            <div class="flex items-center justify-between gap-3">
+              <span class="text-zinc-400">Selected focus</span>
+              <span class="text-primary">
+                {{ style.selectedFocusId || "None" }}
+              </span>
+            </div>
+          </div>
+        </section>
+      </aside>
+    </div>
+  </ng-container>
+
+  <ng-template #noCombatStyle>
+    <div *ngIf="!combatStyleState.loading()" class="ll-empty-state mr-4 min-h-60">
+      No Combat Style data found.
+    </div>
+  </ng-template>
+</div>
