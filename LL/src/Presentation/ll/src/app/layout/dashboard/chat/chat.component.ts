@@ -171,6 +171,62 @@ export class ChatComponent implements OnInit, OnDestroy {
     );
   }
 
+  channelLabel(message: ChatMessageDto): string {
+    if (message.channelType === ChatChannelType.General) {
+      return message.contextKey === 'trade' || message.contextKey === 'help'
+        ? message.contextKey
+        : 'general';
+    }
+
+    return message.channelType;
+  }
+
+  channelBadgeClasses(message: ChatMessageDto): string {
+    switch (message.channelType) {
+      case ChatChannelType.Trade:
+        return 'border-emerald-400/30 bg-emerald-400/10 text-emerald-300';
+      case ChatChannelType.Help:
+        return 'border-sky-400/30 bg-sky-400/10 text-sky-300';
+      case ChatChannelType.Guild:
+        return 'border-rose-400/30 bg-rose-400/10 text-rose-300';
+      case ChatChannelType.Whisper:
+        return 'border-fuchsia-400/30 bg-fuchsia-400/10 text-fuchsia-300';
+      case ChatChannelType.System:
+        return 'border-zinc-400/25 bg-zinc-400/10 text-zinc-300';
+      default:
+        return 'border-primary/30 bg-primary/10 text-primary';
+    }
+  }
+
+  messageRowClasses(message: ChatMessageDto): string {
+    switch (message.channelType) {
+      case ChatChannelType.Trade:
+        return 'border-l-emerald-400/40';
+      case ChatChannelType.Help:
+        return 'border-l-sky-400/40';
+      case ChatChannelType.Guild:
+        return 'border-l-rose-400/40';
+      case ChatChannelType.Whisper:
+        return 'border-l-fuchsia-400/50 bg-fuchsia-950/10';
+      case ChatChannelType.System:
+        return 'border-l-zinc-400/40 bg-zinc-900/20';
+      default:
+        return 'border-l-primary/40';
+    }
+  }
+
+  whisperDisplayId(message: ChatMessageDto): string {
+    return message.senderId === this.characterId()
+      ? (message.targetCharacterId ?? '')
+      : message.senderId;
+  }
+
+  whisperDisplayName(message: ChatMessageDto): string {
+    return message.senderId === this.characterId()
+      ? (message.targetCharacterName ?? '')
+      : message.senderName;
+  }
+
   onDraftChange(): void {
     this.sendError = '';
     if (this.draft.length > 200) {
