@@ -23,6 +23,7 @@ using Services.LL.Authorization;
 using Services.LL.Bonuses;
 using Services.LL.CharacterActions;
 using Services.LL.Colosseum;
+using Services.LL.Colosseum.Tournaments;
 using Services.LL.Combat;
 using Services.LL.Combat.Layers.Orchestration;
 using Services.LL.Combat.Layers.Orchestration.Dungeon;
@@ -105,6 +106,10 @@ public static class DependencyInjection
                 contentRootPath,
                 sp.GetRequiredService<JsonSerializerOptions>()));
         services.AddScoped<IColosseumService, ColosseumService>();
+        services.Configure<TournamentGroundsOptions>(config.GetSection("Colosseum:TournamentGrounds"));
+        services.AddSingleton(TimeProvider.System);
+        services.AddScoped<ITournamentLockService, PostgresTournamentLockService>();
+        services.AddScoped<ITournamentGroundsService, TournamentGroundsService>();
         services.AddScoped<IRatingService, RatingService>();
 
         services.AddCombatDependencyInjection();

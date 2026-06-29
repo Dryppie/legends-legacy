@@ -3,6 +3,7 @@ using Domain.Models.Achievements;
 using Domain.Models.CharacterActions;
 using Domain.Models.CharacterActions.CharacterActionDetails;
 using Domain.Models.Colosseum;
+using Domain.Models.Colosseum.Tournaments;
 using Domain.Models.Dungeons.Mastery;
 using Domain.Models.Dungeons.Runs;
 using Domain.Models.Entities;
@@ -43,6 +44,17 @@ public interface IDbContext
     DbSet<ColosseumMatchResult> ColosseumMatches { get; }
     DbSet<ArenaDefenseSnapshot> ArenaDefenseSnapshots { get; }
     DbSet<ChampionMarketPurchase> ChampionMarketPurchases { get; }
+    DbSet<TournamentDefinition> TournamentDefinitions { get; }
+    DbSet<TournamentInstance> ArenaTournaments { get; }
+    DbSet<TournamentTeam> TournamentTeams { get; }
+    DbSet<TournamentTeamApplication> TournamentTeamApplications { get; }
+    DbSet<TournamentTeamInvite> TournamentTeamInvites { get; }
+    DbSet<TournamentParticipant> TournamentParticipants { get; }
+    DbSet<TournamentCombatSnapshot> TournamentCombatSnapshots { get; }
+    DbSet<TournamentCombatReplay> TournamentCombatReplays { get; }
+    DbSet<TournamentRound> TournamentRounds { get; }
+    DbSet<TournamentMatch> TournamentMatches { get; }
+    DbSet<TournamentRewardGrant> TournamentRewardGrants { get; }
     DbSet<Character> Characters { get; }
     DbSet<CharacterSoulstoneUpgrade> CharacterSoulstoneUpgrades { get; }
     DbSet<Creature> Creatures { get; }

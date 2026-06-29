@@ -1,7 +1,11 @@
 using Application.UseCases.Colosseum.Commands.StartArenaBattle;
+using Application.UseCases.CharacterActions.Dtos.Responses.CombatDtos;
 using Application.UseCases.Colosseum.Commands.PurchaseChampionMarketItem;
 using Application.UseCases.Colosseum.Commands.UpdateArenaDefenseSnapshot;
 using Application.UseCases.Colosseum.Dtos;
+using Application.UseCases.Colosseum.Tournaments;
+using Application.UseCases.Colosseum.Tournaments.Commands;
+using Application.UseCases.Colosseum.Tournaments.Queries;
 using Application.UseCases.Colosseum.Queries.GetArenaOpponents;
 using Application.UseCases.Colosseum.Queries.GetArenaTickets;
 using Application.UseCases.Colosseum.Queries.GetChampionMarket;
@@ -15,6 +19,9 @@ using Microsoft.AspNetCore.Mvc;
 namespace API.LL.Controllers.V1;
 public class ColosseumController : BaseController
 {
+    public sealed record CreateTournamentTeamRequest(string Name);
+    public sealed record InviteTournamentTeamMemberRequest(Guid InvitedParticipantId);
+
     [HttpGet("status")]
     [HttpGet("GetStatus")]
     public async Task<ActionResult<ColosseumStatusDto>> GetStatus() =>
@@ -57,4 +64,92 @@ public class ColosseumController : BaseController
     [HttpPost("PurchaseChampionMarketItem")]
     public async Task<ActionResult<Response<PurchaseChampionMarketItemResponseDto>>> PurchaseChampionMarketItem([FromBody] PurchaseChampionMarketItemRequestDto request) =>
         await Mediator.Send(new PurchaseChampionMarketItemCommand(CurrentCharacterGuid, request.ItemId, request.Quantity));
+
+    [HttpGet("tournaments/status")]
+    public async Task<ActionResult<TournamentGroundsStatusDto>> GetTournamentGroundsStatus() =>
+        await Mediator.Send(new GetTournamentGroundsStatusQuery(CurrentCharacterGuid));
+
+    [HttpGet("tournaments/history")]
+    public async Task<ActionResult<IReadOnlyList<TournamentHistoryEntryDto>>> GetTournamentHistory() =>
+        Ok(await Mediator.Send(new GetTournamentHistoryQuery(CurrentCharacterGuid)));
+
+    [HttpGet("tournaments/hall-of-fame")]
+    public async Task<ActionResult<IReadOnlyList<TournamentHallOfFameEntryDto>>> GetTournamentHallOfFame() =>
+        Ok(await Mediator.Send(new GetTournamentHallOfFameQuery()));
+
+    [HttpGet("tournaments/season-leaderboard")]
+    public async Task<ActionResult<IReadOnlyList<TournamentSeasonLeaderboardEntryDto>>> GetTournamentSeasonLeaderboard() =>
+        Ok(await Mediator.Send(new GetTournamentSeasonLeaderboardQuery()));
+
+    [HttpGet("tournaments/{tournamentId:guid}")]
+    public async Task<ActionResult<TournamentDetailsDto?>> GetTournament(Guid tournamentId) =>
+        await Mediator.Send(new GetTournamentDetailsQuery(CurrentCharacterGuid, tournamentId));
+
+    [HttpGet("tournaments/{tournamentId:guid}/bracket")]
+    public async Task<ActionResult<TournamentBracketDto?>> GetTournamentBracket(Guid tournamentId) =>
+        await Mediator.Send(new GetTournamentBracketQuery(CurrentCharacterGuid, tournamentId));
+
+    [HttpGet("tournaments/{tournamentId:guid}/matches/{matchId:guid}/replay")]
+    public async Task<ActionResult<CombatResultDto?>> GetTournamentMatchReplay(Guid tournamentId, Guid matchId) =>
+        await Mediator.Send(new GetTournamentMatchReplayQuery(CurrentCharacterGuid, tournamentId, matchId));
+
+    [HttpGet("tournaments/rewards")]
+    public async Task<ActionResult<IReadOnlyList<TournamentRewardGrantDto>>> GetTournamentRewards() =>
+        Ok(await Mediator.Send(new GetTournamentRewardsQuery(CurrentCharacterGuid, null)));
+
+    [HttpGet("tournaments/{tournamentId:guid}/rewards")]
+    public async Task<ActionResult<IReadOnlyList<TournamentRewardGrantDto>>> GetTournamentRewards(Guid tournamentId) =>
+        Ok(await Mediator.Send(new GetTournamentRewardsQuery(CurrentCharacterGuid, tournamentId)));
+
+    [HttpPost("tournaments/{tournamentId:guid}/register")]
+    public async Task<ActionResult<Response<RegisterTournamentResponseDto>>> RegisterTournament(Guid tournamentId) =>
+        await Mediator.Send(new RegisterTournamentCommand(CurrentCharacterGuid, tournamentId));
+
+    [HttpPost("tournaments/{tournamentId:guid}/withdraw")]
+    public async Task<ActionResult<Response<WithdrawTournamentResponseDto>>> WithdrawTournament(Guid tournamentId) =>
+        await Mediator.Send(new WithdrawTournamentRegistrationCommand(CurrentCharacterGuid, tournamentId));
+
+    [HttpPost("tournaments/{tournamentId:guid}/teams")]
+    public async Task<ActionResult<Response<CreateTournamentTeamResponseDto>>> CreateTournamentTeam(
+        Guid tournamentId,
+        [FromBody] CreateTournamentTeamRequest request) =>
+        await Mediator.Send(new CreateTournamentTeamCommand(CurrentCharacterGuid, tournamentId, request.Name));
+
+    [HttpPost("tournaments/{tournamentId:guid}/teams/{teamId:guid}/invite")]
+    public async Task<ActionResult<Response<TournamentTeamActionResponseDto>>> InviteTournamentTeamMember(
+        Guid tournamentId,
+        Guid teamId,
+        [FromBody] InviteTournamentTeamMemberRequest request) =>
+        await Mediator.Send(new InviteTournamentTeamMemberCommand(
+            CurrentCharacterGuid,
+            tournamentId,
+            teamId,
+            request.InvitedParticipantId));
+
+    [HttpPost("tournaments/team-invites/{inviteId:guid}/accept")]
+    public async Task<ActionResult<Response<TournamentTeamActionResponseDto>>> AcceptTournamentTeamInvite(Guid inviteId) =>
+        await Mediator.Send(new AcceptTournamentTeamInviteCommand(CurrentCharacterGuid, inviteId));
+
+    [HttpPost("tournaments/{tournamentId:guid}/teams/{teamId:guid}/apply")]
+    public async Task<ActionResult<Response<TournamentTeamActionResponseDto>>> ApplyToTournamentTeam(Guid tournamentId, Guid teamId) =>
+        await Mediator.Send(new ApplyToTournamentTeamCommand(CurrentCharacterGuid, tournamentId, teamId));
+
+    [HttpPost("tournaments/team-applications/{applicationId:guid}/accept")]
+    public async Task<ActionResult<Response<TournamentTeamActionResponseDto>>> AcceptTournamentTeamApplication(Guid applicationId) =>
+        await Mediator.Send(new AcceptTournamentTeamApplicationCommand(CurrentCharacterGuid, applicationId));
+
+    [HttpPost("tournaments/{tournamentId:guid}/teams/{teamId:guid}/members/{participantId:guid}/kick")]
+    public async Task<ActionResult<Response<TournamentTeamActionResponseDto>>> KickTournamentTeamMember(
+        Guid tournamentId,
+        Guid teamId,
+        Guid participantId) =>
+        await Mediator.Send(new KickTournamentTeamMemberCommand(CurrentCharacterGuid, tournamentId, teamId, participantId));
+
+    [HttpPost("tournaments/rewards/claim")]
+    public async Task<ActionResult<Response<ClaimTournamentRewardsResponseDto>>> ClaimTournamentRewards() =>
+        await Mediator.Send(new ClaimTournamentRewardsCommand(CurrentCharacterGuid, null));
+
+    [HttpPost("tournaments/{tournamentId:guid}/rewards/claim")]
+    public async Task<ActionResult<Response<ClaimTournamentRewardsResponseDto>>> ClaimTournamentRewards(Guid tournamentId) =>
+        await Mediator.Send(new ClaimTournamentRewardsCommand(CurrentCharacterGuid, tournamentId));
 }
