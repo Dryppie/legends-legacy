@@ -1,4 +1,4 @@
-using Application.Interfaces.Services.LL;
+using Application.Interfaces.Services.LL.Guilds;
 using Application.Interfaces.WebSockets;
 using Application.MediatR.Markers;
 using Application.WebSockets.Contracts;
@@ -6,37 +6,37 @@ using Common.Primitives;
 using MediatR;
 
 namespace Application.UseCases.Guilds.Commands.UpgradeGuildBuilding;
-public record UpgradeGuildBuildingCommand(Guid CharacterId, string BuildingId) : ICommand<Response<bool>>;
-public class UpgradeGuildBuildingCommandHandler : IRequestHandler<UpgradeGuildBuildingCommand, Response<bool>>
+
+public record UpgradeGuildBuildingCommand(Guid CharacterId, Guid BuildingId) : ICommand<Response<GuildBuildingOverviewDto>>;
+
+public class UpgradeGuildBuildingCommandHandler : IRequestHandler<UpgradeGuildBuildingCommand, Response<GuildBuildingOverviewDto>>
 {
-    private readonly IGuildBuildingUpgradeService _upgradeService;
-    private readonly IGuildService _guildService;
+    private readonly IGuildBuildingService _guildBuildingService;
     private readonly IGameEventPublisher _eventPublisher;
 
     public UpgradeGuildBuildingCommandHandler(
-        IGuildBuildingUpgradeService upgradeService,
-        IGuildService guildService,
+        IGuildBuildingService guildBuildingService,
         IGameEventPublisher eventPublisher)
     {
-        _upgradeService = upgradeService;
-        _guildService = guildService;
+        _guildBuildingService = guildBuildingService;
         _eventPublisher = eventPublisher;
     }
 
-    public async Task<Response<bool>> Handle(UpgradeGuildBuildingCommand request, CancellationToken cancellationToken)
+    public async Task<Response<GuildBuildingOverviewDto>> Handle(UpgradeGuildBuildingCommand request, CancellationToken cancellationToken)
     {
-        var upgraded = await _upgradeService.PurchaseAsync(request.CharacterId, request.BuildingId, cancellationToken);
-        if (!upgraded)
-            return Response<bool>.Fail("Failed to upgrade guild building.");
+        var result = await _guildBuildingService.UpgradeAsync(
+            request.CharacterId,
+            request.BuildingId,
+            DateTimeOffset.UtcNow,
+            cancellationToken);
 
-        var guild = await _guildService.GetGuildWithUpgradesAsync(request.CharacterId, cancellationToken);
-        if (guild != null)
-        {
-            await _eventPublisher.PublishAsync(
-                new Audience.Guild(guild.Id),
-                new GuildBuildingUpgradedMsg(guild.Id, request.BuildingId));
-        }
+        if (!result.Succeeded || result.Value is null)
+            return Response<GuildBuildingOverviewDto>.Fail(result.Error ?? "Failed to upgrade guild building.");
 
-        return Response<bool>.Success(true);
+        await _eventPublisher.PublishAsync(
+            new Audience.Guild(result.Value.GuildId),
+            new GuildBuildingsChangedMsg(result.Value.GuildId, request.BuildingId.ToString()));
+
+        return Response<GuildBuildingOverviewDto>.Success(result.Value);
     }
 }

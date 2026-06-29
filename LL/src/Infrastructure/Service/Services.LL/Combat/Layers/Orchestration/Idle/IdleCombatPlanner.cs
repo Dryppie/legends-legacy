@@ -1,4 +1,4 @@
-﻿using Services.LL.CharacterActions;
+using Services.LL.CharacterActions;
 using Services.LL.Combat.Layers.Orchestration.Models;
 using Services.LL.Interfaces.Combat.Orchestration;
 
@@ -49,7 +49,10 @@ public sealed class IdleCombatPlanner : IIdleCombatPlanner
             PlannedEncounterCount: plannedEncounterCount);
     }
 
-    public CombatEncounterPlan CreateEncounterPlan(IdleCombatPlan plan, int sequence, DateTimeOffset startsAt)
+    public CombatEncounterPlan CreateEncounterPlan(
+        IdleCombatPlan plan,
+        int sequence,
+        DateTimeOffset startsAt)
     {
         var monsterCount = _spawningService.HowManyMonstersToSpawn(plan.Area.SpawnProbabilities);
         var selectedCreatures = _spawningService.WhatAreaCreaturesToSpawn(

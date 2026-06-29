@@ -1,4 +1,4 @@
-﻿namespace Services.LL.Combat.Layers.Orchestration.Models;
+namespace Services.LL.Combat.Layers.Orchestration.Models;
 
 public sealed record CombatEncounterPlan(
     Guid EncounterId,

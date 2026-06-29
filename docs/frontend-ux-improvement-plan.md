@@ -30,7 +30,7 @@
 | Essence management | Browse Essences, understand abilities/progression, manage loadouts, absorb. | Powerful but dense; archive, selected Essence, progression, and loadout controls compete for attention. | Improve selected Essence hierarchy, action eligibility explanations, and loadout editing clarity. | Medium |
 | Profession gathering/crafting | Choose resource nodes or crafting actions and monitor progression. | Gathering cards are listed with minimal page-level guidance; empty/loading states are not obvious from the container. | Add page-level header/help, improve grid spacing, and clarify available actions/requirements. | Low |
 | Marketplace | Buy/sell resources, equipment, and Essences with Cinders. | Header is functional but plain; selected category and buy/sell flow can feel utilitarian compared with game screens. | Improve market header, category summary, empty states, and Cinders context. | Medium |
-| Guild | Manage membership, buildings, vault, rankings, or find/create a guild. | Parent slice delegates well, but no-guild and in-guild paths likely need separate focused passes. | Audit subviews independently; improve no-guild onboarding and in-guild action hierarchy. | Medium |
+| Guild | Manage membership, buildings, missions, shop, rankings, or find/create a guild. | Parent slice delegates well, but no-guild and in-guild paths likely need separate focused passes. | Audit subviews independently; improve no-guild onboarding and in-guild action hierarchy. | Medium |
 | Navigation/sidebar | Move between core game loops and see current activity. | Strong game shell, but current dungeon/action cards are compact and may not clearly advertise required next action. | Improve active activity cards and notification clarity without changing route structure. | Low |
 
 ## First Slice: Active Dungeon Run Page
@@ -175,19 +175,19 @@ The Soulstones page is a permanent progression surface, but it was still using a
 
 ### Why This Slice Next
 
-The Guild area spans several related workflows: guild overview, buildings, vault donations, and rankings. This pass focused on shared context and scanability across those views without changing membership, donation, building, or ranking rules.
+The Guild area spans several related workflows: guild overview, buildings, missions, shop, and rankings. This pass focused on shared context and scanability across those views without changing membership, building, mission, shop, or ranking rules.
 
 ### UX Problems Addressed
 
 - Added an in-guild summary header with guild name, tag, member count, applications, and key resources.
 - Tightened the Guild tab into action context plus a cleaner member roster.
 - Added building readiness status and cost requirement coloring.
-- Split the Vault into clear guild-resource and donation panels with donation totals and over-limit feedback.
+- Added clearer guild-owned resource context through the activity-driven guild systems.
 - Added leaderboard summary cards and rank numbers to Rankings.
 
 ### Out Of Scope For This Pass
 
-- No changes to guild permissions, applications, invites, donations, building upgrade rules, rankings sort rules, or backend APIs.
+- No changes to guild permissions, applications, invites, building upgrade rules, rankings sort rules, or backend APIs.
 - No redesign of the no-guild onboarding flow.
 - No changes to guild realtime behavior or chat.
 

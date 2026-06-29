@@ -15,6 +15,7 @@ import { MarketListingCanceledMsg } from '../market/market-listing-canceled';
 import { SoulstoneDropMsg } from '../character/soulstone-drop';
 import { CharacterLevelUpMsg } from '../character/character-level-up';
 import { ArenaBattleCompletedMsg } from '../colosseum/arena-battle-completed';
+import { GuildBuildingsChangedMsg } from '../guild/guild-buildings-changed';
 import { TournamentGroundsUpdated } from '../colosseum/tournament-grounds-updated';
 import { GuildBuildingUpgradedMsg } from '../guild/guild-building-upgraded';
 import { GuildApplicationMsg } from '../guild/guild-application';
@@ -36,6 +37,7 @@ export const gameEventNames = [
   'SoulstoneDropMsg',
   'CharacterLevelUpMsg',
   'ArenaBattleCompletedMsg',
+  'GuildBuildingsChangedMsg',
   'TournamentGroundsUpdated',
   'GuildBuildingUpgradedMsg',
   'GuildApplicationMsg',
@@ -67,6 +69,7 @@ export interface GameEventMap {
   SoulstoneDropMsg: SoulstoneDropMsg;
   CharacterLevelUpMsg: CharacterLevelUpMsg;
   ArenaBattleCompletedMsg: ArenaBattleCompletedMsg;
+  GuildBuildingsChangedMsg: GuildBuildingsChangedMsg;
   TournamentGroundsUpdated: TournamentGroundsUpdated;
   GuildBuildingUpgradedMsg: GuildBuildingUpgradedMsg;
   GuildApplicationMsg: GuildApplicationMsg;

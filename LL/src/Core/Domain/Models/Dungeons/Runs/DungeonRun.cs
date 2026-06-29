@@ -4,6 +4,7 @@ public sealed class DungeonRun
 {
     public Guid Id { get; set; }
     public Guid CharacterId { get; set; }
+    public Guid? CharacterSnapshotId { get; set; }
 
     public string DungeonDefinitionId { get; set; } = string.Empty;
     public string DungeonDefinitionName { get; set; } = string.Empty;

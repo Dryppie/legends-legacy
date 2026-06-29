@@ -1,4 +1,4 @@
-﻿using Application.Interfaces.Services.LL.Colosseum;
+using Application.Interfaces.Services.LL.Colosseum;
 using Application.Interfaces.Services.LL.Entities;
 using Domain.Models.Colosseum;
 using Domain.Models.Combat;
@@ -82,7 +82,10 @@ public class ColosseumService : IColosseumService
         var combatEnemyEntities = await CreateDefenderCombatEntitiesAsync(enemyTeam, defenderSnapshot, cancellationToken);
         await _combatSetupService.PrepareEntitiesForCombat([.. combatPlayerEntities, .. combatEnemyEntities]);
 
-        var encounterPlan = CreateArenaEncounterPlan(characterId, enemyId, now);
+        var encounterPlan = CreateArenaEncounterPlan(
+            characterId,
+            enemyId,
+            now);
         arenaTicketStatus.CurrentTickets--;
         _colosseumRepository.UpdateArenaTicketStatus(arenaTicketStatus);
 
@@ -575,3 +578,4 @@ public class ColosseumService : IColosseumService
         return arenaTicketStatus;
     }
 }
+

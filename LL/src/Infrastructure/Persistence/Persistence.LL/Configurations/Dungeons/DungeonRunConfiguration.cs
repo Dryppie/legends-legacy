@@ -1,4 +1,5 @@
 using Domain.Models.Dungeons.Runs;
+using Domain.Models.Snapshots;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -30,5 +31,11 @@ public class DungeonRunConfiguration : IEntityTypeConfiguration<DungeonRun>
             .HasMany(x => x.PendingRewards)
             .WithOne()
             .OnDelete(DeleteBehavior.Cascade);
+
+        builder
+            .HasOne<CharacterSnapshot>()
+            .WithMany()
+            .HasForeignKey(x => x.CharacterSnapshotId)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }

@@ -1,3 +1,5 @@
+using Application.Interfaces.Services.LL.Guilds;
+using Domain.Models.Guilds.Missions;
 using Services.LL.Combat.Layers.Rewards.Models;
 using Services.LL.Interfaces.Combat.Reward;
 using Services.LL.Interfaces.Combat.Reward.Idle;
@@ -9,15 +11,18 @@ public sealed class IdleCombatRewardApplier : IIdleCombatRewardApplier
     private readonly IExperienceRewardWriter _experienceWriter;
     private readonly ILootRewardWriter _lootWriter;
     private readonly ICurrencyRewardWriter _currencyWriter;
+    private readonly IGuildMissionService _guildMissionService;
 
     public IdleCombatRewardApplier(
         IExperienceRewardWriter experienceWriter,
         ILootRewardWriter lootWriter,
-        ICurrencyRewardWriter currencyWriter)
+        ICurrencyRewardWriter currencyWriter,
+        IGuildMissionService guildMissionService)
     {
         _experienceWriter = experienceWriter;
         _lootWriter = lootWriter;
         _currencyWriter = currencyWriter;
+        _guildMissionService = guildMissionService;
     }
 
     public async Task ApplyAsync(
@@ -47,6 +52,22 @@ public sealed class IdleCombatRewardApplier : IIdleCombatRewardApplier
                 facts.CharacterId,
                 outcome.TotalCinders,
                 outcome.TotalSoulstones,
+                cancellationToken);
+        }
+
+        var creaturesDefeated = facts.Encounters
+            .Where(x => x.IsVictory)
+            .Sum(x => x.HostileCreatures.Count);
+        if (creaturesDefeated > 0)
+        {
+            await _guildMissionService.RecordContributionAsync(
+                new GuildContributionEvent(
+                    facts.CharacterId,
+                    GuildContributionSource.Combat,
+                    GuildContributionMetric.CreaturesDefeated,
+                    creaturesDefeated,
+                    OccurredAt: facts.ProcessedUntil,
+                    IdempotencyKey: $"idle-combat:{facts.CharacterId}:{facts.From:O}:{facts.ProcessedUntil:O}:{creaturesDefeated}"),
                 cancellationToken);
         }
     }

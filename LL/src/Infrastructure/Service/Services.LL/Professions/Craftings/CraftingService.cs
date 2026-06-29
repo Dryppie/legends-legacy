@@ -1,6 +1,7 @@
 using Application.Interfaces.Services.LL;
 using Application.Interfaces.Services.LL.Prophecies;
 using Application.Interfaces.Services.LL.Achievements;
+using Application.Interfaces.Services.LL.Guilds;
 using Application.Interfaces.Services.LL.Professions;
 using Application.UseCases.Crafting;
 using Application.UseCases.Crafting.Dtos;
@@ -13,6 +14,7 @@ using Domain.Models.Bonuses;
 using Domain.Models.CharacterActions;
 using Domain.Models.CharacterActions.CharacterActionDetails;
 using Domain.Models.CharacterActions.Sessions;
+using Domain.Models.Guilds.Missions;
 using Domain.Models.Inventories;
 using Domain.Models.Items;
 using Domain.Models.Items.Equipments;
@@ -43,6 +45,7 @@ public class CraftingService : ICraftingService
     private readonly ICraftingProgressionService _progressionService;
     private readonly ICraftingItemCatalogService _itemCatalogService;
     private readonly IAchievementService _achievementService;
+    private readonly IGuildMissionService _guildMissionService;
     private readonly IMapper _mapper;
 
     public CraftingService(
@@ -62,6 +65,7 @@ public class CraftingService : ICraftingService
         ICraftingProgressionService progressionService,
         ICraftingItemCatalogService itemCatalogService,
         IAchievementService achievementService,
+        IGuildMissionService guildMissionService,
         IMapper mapper)
     {
         _craftingRepository = cr;
@@ -80,6 +84,7 @@ public class CraftingService : ICraftingService
         _progressionService = progressionService;
         _itemCatalogService = itemCatalogService;
         _achievementService = achievementService;
+        _guildMissionService = guildMissionService;
         _mapper = mapper;
     }
 
@@ -142,6 +147,13 @@ public class CraftingService : ICraftingService
             characterAction.CharacterId,
             temperingSummary,
             completedItems,
+            cancellationToken);
+        await RecordGuildCraftingContributionsAsync(
+            characterAction.CharacterId,
+            sessionStartedAt,
+            now,
+            temperingSummary,
+            completedItems.Count,
             cancellationToken);
         await PublishProphecyProgressAsync(characterAction.CharacterId, now, temperingSummary, cancellationToken);
 
@@ -351,6 +363,16 @@ public class CraftingService : ICraftingService
             characterId,
             [.. created.Select(x => (EquipmentInstance)x.ItemInstance)],
             cancellationToken);
+        var craftedAt = DateTimeOffset.UtcNow;
+        await _guildMissionService.RecordContributionAsync(
+            new GuildContributionEvent(
+                characterId,
+                GuildContributionSource.Crafting,
+                GuildContributionMetric.ItemsCrafted,
+                created.Count,
+                OccurredAt: craftedAt,
+                IdempotencyKey: $"craft-items:{characterId}:{recipe.Id}:{targetTier}:{created.Count}:{craftedAt:O}"),
+            cancellationToken);
 
         var xpGained = craftQuantity * CraftingMasteryProgression.ExperiencePerCraft;
         mastery.Experience += xpGained;
@@ -378,6 +400,41 @@ public class CraftingService : ICraftingService
         actionDetails.CraftingQueueItems.Remove(current);
         completedItems.Add(current.EquipmentInstance);
         await _inventoryService.AddItemInstanceBackToInventory(characterId, current.EquipmentInstance, cancellationToken);
+    }
+
+    private async Task RecordGuildCraftingContributionsAsync(
+        Guid characterId,
+        DateTimeOffset sessionStartedAt,
+        DateTimeOffset now,
+        TemperingSummary temperingSummary,
+        int completedItemCount,
+        CancellationToken cancellationToken)
+    {
+        if (temperingSummary.TotalActions > 0)
+        {
+            await _guildMissionService.RecordContributionAsync(
+                new GuildContributionEvent(
+                    characterId,
+                    GuildContributionSource.Tempering,
+                    GuildContributionMetric.TemperingActionsCompleted,
+                    temperingSummary.TotalActions,
+                    OccurredAt: now,
+                    IdempotencyKey: $"tempering:{characterId}:{sessionStartedAt:O}:{now:O}:{temperingSummary.TotalActions}"),
+                cancellationToken);
+        }
+
+        if (completedItemCount > 0)
+        {
+            await _guildMissionService.RecordContributionAsync(
+                new GuildContributionEvent(
+                    characterId,
+                    GuildContributionSource.Crafting,
+                    GuildContributionMetric.ItemsCrafted,
+                    completedItemCount,
+                    OccurredAt: now,
+                    IdempotencyKey: $"tempering-items:{characterId}:{sessionStartedAt:O}:{now:O}:{completedItemCount}"),
+                cancellationToken);
+        }
     }
 
     private async Task<int> ProcessSoulstoneDrops(Guid characterId, int actionsPerformed, double dropRate, double doubleDropChance, CancellationToken cancellationToken)

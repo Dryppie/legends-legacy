@@ -1,4 +1,4 @@
-﻿namespace Domain.Models.Snapshots;
+namespace Domain.Models.Snapshots;
 
 public sealed class CharacterSnapshot
 {

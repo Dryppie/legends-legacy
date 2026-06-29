@@ -57,6 +57,10 @@ public sealed class CompiledEffect
     public AttackType AttackType { get; init; }
     public DamageType DamageType { get; init; }
     public float LifeStealPercentage { get; init; }
+    public decimal ProcCoefficient { get; init; }
+    public AbilitySpecKind AbilityKind { get; init; }
+    public required IReadOnlySet<string> AbilityTags { get; init; }
+    public required IReadOnlySet<string> Tags { get; init; }
     public required IReadOnlyList<CompiledCondition> Conditions { get; init; }
 }
 

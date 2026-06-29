@@ -2,6 +2,7 @@ using Application.Interfaces.Services.LL.Essences;
 using Domain.Models.Attributes;
 using Domain.Models.Combat;
 using Domain.Models.Combat.Abilities;
+using Domain.Models.Entities.Characters;
 using Domain.Models.Essences;
 using Domain.Models.Essences.Definitions;
 using Services.LL.Combat.Layers.Resolution.Models;
@@ -22,7 +23,7 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
         _essenceDefinitions = essenceDefinitions;
     }
 
-    public Task<CombatResult> ExecuteAsync(
+    public async Task<CombatResult> ExecuteAsync(
         CombatEncounterRuntime runtime,
         CancellationToken cancellationToken)
     {
@@ -45,13 +46,16 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
         var hostile = runtime.HostileParticipants
             .Select(participant => CreateRuntimeCombatant(participant.Combatant, CombatTeam.Hostile, catalog, compiledAbilities))
             .ToList();
-        var engine = new FastCombatEngine(compiledStatuses, compiledSummons, compiledAbilities);
+        var engine = new FastCombatEngine(
+            compiledStatuses,
+            compiledSummons,
+            compiledAbilities);
         var result = engine.Run(friendly, hostile);
         SyncCombatEntityState(runtime.FriendlyParticipants, friendly);
         SyncCombatEntityState(runtime.HostileParticipants, hostile);
         result.StartedAt = runtime.Plan.StartsAt;
 
-        return Task.FromResult(result);
+        return result;
     }
 
     private static void SyncCombatEntityState(
@@ -122,8 +126,14 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
 
             foreach (var abilityId in abilityIds)
             {
-                if (selected.Add(abilityId))
-                    yield return compiledAbilities[abilityId];
+                if (!selected.Add(abilityId))
+                    continue;
+
+                var baseSpec = catalog.AbilitiesById[abilityId];
+                var modifiedSpec = ApplyTemporaryAbilityModifiers(baseSpec, combatant, catalog);
+                yield return ReferenceEquals(baseSpec, modifiedSpec)
+                    ? compiledAbilities[abilityId]
+                    : AbilityCompiler.CompileAbility(modifiedSpec);
             }
         }
     }
@@ -378,9 +388,30 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
             OwningEssenceId = spec.OwningEssenceId,
             CooldownTicks = spec.CooldownTicks,
             Tags = [.. spec.Tags],
+            DeliveryTags = [.. spec.DeliveryTags],
+            EffectTags = [.. spec.EffectTags],
+            TargetingType = spec.TargetingType,
+            Scaling = new Dictionary<AttributeType, float>(spec.Scaling),
+            ConversionFlags = CloneConversionFlags(spec.ConversionFlags),
+            IsHardCrowdControl = spec.IsHardCrowdControl,
+            CanEcho = spec.CanEcho,
+            CanRepeat = spec.CanRepeat,
+            CanTriggerWeaponEffects = spec.CanTriggerWeaponEffects,
             Costs = [.. spec.Costs.Select(CloneCost)],
             Triggers = [.. spec.Triggers.Select(CloneTrigger)],
             Effects = [.. spec.Effects.Select(CloneEffect)]
+        };
+
+    private static AbilityConversionFlags CloneConversionFlags(AbilityConversionFlags flags) =>
+        new()
+        {
+            AllowDamageTypeConversion = flags.AllowDamageTypeConversion,
+            AllowScalingConversion = flags.AllowScalingConversion,
+            AllowDeliveryConversion = flags.AllowDeliveryConversion,
+            AllowTargetingConversion = flags.AllowTargetingConversion,
+            AllowSummonProxy = flags.AllowSummonProxy,
+            AllowEquipmentOverride = flags.AllowEquipmentOverride,
+            AllowTrueDamageConversion = flags.AllowTrueDamageConversion
         };
 
     private static AbilityCostSpec CloneCost(AbilityCostSpec cost) =>
@@ -421,6 +452,7 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
             AttackType = effect.AttackType,
             DamageType = effect.DamageType,
             LifeStealPercentage = effect.LifeStealPercentage,
+            ProcCoefficient = effect.ProcCoefficient,
             Tags = [.. effect.Tags],
             Conditions = [.. effect.Conditions.Select(CloneCondition)]
         };

@@ -1,5 +1,6 @@
 using Application.Authorization.Interfaces;
 using Application.Interfaces.Services.LL;
+using Application.Interfaces.Services.LL.Guilds;
 using Application.Interfaces.Services.LL.Achievements;
 using Application.Interfaces.Services.LL.CharacterActions;
 using Application.Interfaces.Services.LL.Colosseum;
@@ -98,7 +99,6 @@ public static class DependencyInjection
 
         services.AddScoped<IBonusService, BonusService>();
         services.AddScoped<IBonusProvider, SoulstoneBonusProvider>();
-        services.AddScoped<IBonusProvider, GuildBonusProvider>();
 
         services.AddSingleton<IChampionMarketCatalog>(sp =>
             new JsonChampionMarketCatalog(
@@ -203,7 +203,16 @@ public static class DependencyInjection
         services.AddScoped<IEssenceCatalogService, EssenceCatalogService>();
 
         services.AddScoped<IGuildService, GuildService>();
-        services.AddScoped<IGuildBuildingUpgradeService, GuildBuildingUpgradeService>();
+        services.AddSingleton<IGuildContentValidator, GuildContentValidator>();
+        services.AddSingleton<IGuildContentProvider>(sp =>
+            new JsonGuildContentProvider(
+                config,
+                contentRootPath,
+                sp.GetRequiredService<JsonSerializerOptions>(),
+                sp.GetRequiredService<IGuildContentValidator>()));
+        services.AddScoped<IGuildBuildingService, GuildBuildingService>();
+        services.AddScoped<IGuildMissionService, GuildMissionService>();
+        services.AddScoped<IGuildShopService, GuildShopService>();
 
         services.AddScoped<ILevelingService, LevelingService>();
         services.AddScoped<ILeaderboardService, LeaderboardService>();
@@ -240,7 +249,6 @@ public static class DependencyInjection
 
         services.AddScoped<ISimulatorService, SimulatorService>();
 
-        services.AddSingleton<GuildBuildingUpgradeDefinitionProvider>();
         services.AddSingleton<SoulstoneUpgradeDefinitionProvider>();
 
         services.AddJsonDefinitionReader(config, contentRootPath);

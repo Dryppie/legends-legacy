@@ -30,6 +30,7 @@ public sealed class DungeonRunFactory
         {
             Id = Guid.NewGuid(),
             CharacterId = characterId,
+            CharacterSnapshotId = snapshot.Id,
             DungeonDefinitionId = dungeonDefinitionId,
             DungeonDefinitionName = dungeon.Name,
             Seed = seed,

@@ -1,4 +1,4 @@
-﻿using Services.LL.Combat.Layers.Orchestration.Models;
+using Services.LL.Combat.Layers.Orchestration.Models;
 using Services.LL.Interfaces.Combat.Orchestration;
 using Services.LL.Interfaces.Combat.Resolution.Idle;
 

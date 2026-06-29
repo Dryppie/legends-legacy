@@ -1,0 +1,355 @@
+using Application.Common.Interfaces;
+using Application.Interfaces.Services.LL.Guilds;
+using Domain.Models.Achievements;
+using Domain.Models.Entities.Characters;
+using Domain.Models.Guilds;
+using Domain.Models.Guilds.Buildings;
+using Domain.Models.Guilds.Missions;
+using Domain.Models.Guilds.Shop;
+using Microsoft.EntityFrameworkCore;
+using Services.LL.Inventories;
+using Services.LL.Interfaces;
+
+namespace Services.LL.Guilds;
+
+public class GuildShopService : IGuildShopService
+{
+    private readonly IDbContext _context;
+    private readonly IInventoryItemFactory _inventoryItemFactory;
+    private readonly IReadOnlyList<GuildShopItemDefinition> _items;
+
+    public GuildShopService(IDbContext context)
+        : this(context, new DefaultGuildContentProvider(), new InventoryItemFactory())
+    {
+    }
+
+    public GuildShopService(IDbContext context, IGuildContentProvider content)
+        : this(context, content, new InventoryItemFactory())
+    {
+    }
+
+    public GuildShopService(IDbContext context, IGuildContentProvider content, IInventoryItemFactory inventoryItemFactory)
+    {
+        _context = context;
+        _inventoryItemFactory = inventoryItemFactory;
+        _items = content.ShopItems;
+    }
+
+    public async Task<GuildShopOverviewDto?> GetOverviewAsync(Guid characterId, DateTimeOffset now, CancellationToken cancellationToken)
+    {
+        var state = await LoadStateAsync(characterId, now, cancellationToken);
+        return state is null ? null : BuildOverview(state.Value, now);
+    }
+
+    public async Task<GuildOperationResult<GuildShopOverviewDto>> PurchaseAsync(Guid characterId, string itemKey, DateTimeOffset now, CancellationToken cancellationToken)
+    {
+        var state = await LoadStateAsync(characterId, now, cancellationToken);
+        if (state is null) return GuildOperationResult<GuildShopOverviewDto>.Fail("You are not in a guild.");
+
+        var definition = GetActiveItems(state.Value).FirstOrDefault(x => x.Key == itemKey);
+        if (definition is null) return GuildOperationResult<GuildShopOverviewDto>.Fail("Guild shop item was not found.");
+
+        var lockedReason = GetLockedReason(state.Value, definition, now);
+        if (lockedReason is not null)
+        {
+            return GuildOperationResult<GuildShopOverviewDto>.Fail(lockedReason);
+        }
+
+        var rewardLockedReason = await GetRewardLockedReasonAsync(state.Value.Character, definition, cancellationToken);
+        if (rewardLockedReason is not null)
+        {
+            return GuildOperationResult<GuildShopOverviewDto>.Fail(rewardLockedReason);
+        }
+
+        if (state.Value.Character.GuildFavor < definition.GuildFavorCost)
+            return GuildOperationResult<GuildShopOverviewDto>.Fail("Not enough Guild Favor.");
+        if (state.Value.Character.GuildHonors < definition.GuildHonorsCost)
+            return GuildOperationResult<GuildShopOverviewDto>.Fail("Not enough Guild Honors.");
+
+        state.Value.Character.GuildFavor -= definition.GuildFavorCost;
+        state.Value.Character.GuildHonors -= definition.GuildHonorsCost;
+        foreach (var reward in definition.Rewards)
+        {
+            await ApplyRewardAsync(state.Value.Character, reward, now, cancellationToken);
+        }
+
+        var purchase = state.Value.Purchases.FirstOrDefault(x => x.ShopItemKey == definition.Key && x.PeriodKey == state.Value.WeeklyPeriodKey);
+        if (purchase is null)
+        {
+            purchase = new GuildShopPurchase
+            {
+                GuildId = state.Value.Guild.Id,
+                CharacterId = characterId,
+                ShopItemKey = definition.Key,
+                StockType = definition.StockType,
+                PeriodKey = state.Value.WeeklyPeriodKey,
+                Quantity = 1,
+                PurchasedAt = now
+            };
+            _context.GuildShopPurchases.Add(purchase);
+            state.Value.Purchases.Add(purchase);
+        }
+        else
+        {
+            purchase.Quantity++;
+            purchase.PurchasedAt = now;
+        }
+
+        AddActivityLog(
+            state.Value.Guild,
+            GuildActivityLogType.ShopItemPurchased,
+            characterId,
+            $"{definition.Name} purchased from the guild shop.",
+            now);
+
+        return GuildOperationResult<GuildShopOverviewDto>.Success(BuildOverview(state.Value, now));
+    }
+
+    private async Task<ShopState?> LoadStateAsync(Guid characterId, DateTimeOffset now, CancellationToken cancellationToken)
+    {
+        var guild = await _context.Guilds
+            .Include(x => x.Members)
+            .Include(x => x.Buildings)
+            .FirstOrDefaultAsync(x => x.Members.Select(m => m.CharacterId).Contains(characterId), cancellationToken);
+        if (guild is null) return null;
+
+        var member = guild.Members.FirstOrDefault(x => x.CharacterId == characterId);
+        if (member is null) return null;
+
+        var character = await _context.Characters.FirstOrDefaultAsync(x => x.Id == characterId, cancellationToken);
+        if (character is null) return null;
+
+        var weeklyPeriod = GetWeek(now);
+        var purchases = await _context.GuildShopPurchases
+            .Where(x => x.GuildId == guild.Id && x.CharacterId == characterId && x.PeriodKey == weeklyPeriod.Key)
+            .ToListAsync(cancellationToken);
+        var contribution = await _context.GuildMemberContributionPeriods
+            .FirstOrDefaultAsync(x => x.GuildId == guild.Id
+                && x.CharacterId == characterId
+                && x.PeriodType == GuildMissionPeriodType.Weekly
+                && x.PeriodKey == weeklyPeriod.Key, cancellationToken);
+
+        return new ShopState(guild, character, purchases, contribution, weeklyPeriod.Key, weeklyPeriod.EndsAt);
+    }
+
+    private GuildShopOverviewDto BuildOverview(ShopState state, DateTimeOffset now) =>
+        new(
+            state.Guild.Id,
+            state.Character.GuildFavor,
+            state.Character.GuildHonors,
+            state.WeeklyPeriodKey,
+            state.NextWeeklyResetAt,
+            GetActiveItems(state).Select(item =>
+            {
+                var purchased = state.Purchases.FirstOrDefault(x => x.ShopItemKey == item.Key && x.PeriodKey == state.WeeklyPeriodKey)?.Quantity ?? 0;
+                var lockedReason = GetLockedReason(state, item, now);
+                return new GuildShopItemDto(
+                    item.Key,
+                    item.Name,
+                    item.Description,
+                    item.StockType,
+                    item.GuildFavorCost,
+                    item.GuildHonorsCost,
+                    item.WeeklyLimit,
+                    purchased,
+                    item.RequiredWeeklyContribution,
+                    item.RequiredMarketOfficeLevel,
+                    item.RotatesWeekly,
+                    item.Rewards,
+                    lockedReason is null,
+                    lockedReason);
+            }).ToList());
+
+    private IReadOnlyList<GuildShopItemDefinition> GetActiveItems(ShopState state)
+    {
+        var fixedItems = _items.Where(x => !x.RotatesWeekly);
+        var weeklyItems = GuildContentHelpers.PickWeeklyRotation(
+            _items.Where(x => x.RotatesWeekly && x.StockType == GuildShopStockType.Weekly),
+            state.WeeklyPeriodKey,
+            count: 2,
+            x => x.Key);
+        var prestigeItems = GuildContentHelpers.PickWeeklyRotation(
+            _items.Where(x => x.RotatesWeekly && x.StockType == GuildShopStockType.Prestige),
+            state.WeeklyPeriodKey,
+            count: 1,
+            x => x.Key);
+
+        return fixedItems
+            .Concat(weeklyItems)
+            .Concat(prestigeItems)
+            .OrderBy(x => x.StockType)
+            .ThenBy(x => x.RequiredMarketOfficeLevel)
+            .ThenBy(x => x.Key)
+            .ToList();
+    }
+
+    private static string? GetLockedReason(ShopState state, GuildShopItemDefinition item, DateTimeOffset now)
+    {
+        var marketOfficeLevel = GetMarketOfficeLevel(state.Guild);
+        if (marketOfficeLevel < item.RequiredMarketOfficeLevel)
+            return $"Requires Market Office level {item.RequiredMarketOfficeLevel}.";
+
+        var purchased = state.Purchases.FirstOrDefault(x => x.ShopItemKey == item.Key && x.PeriodKey == state.WeeklyPeriodKey)?.Quantity ?? 0;
+        if (item.WeeklyLimit > 0 && purchased >= item.WeeklyLimit)
+            return "Weekly purchase limit reached.";
+
+        var contribution = state.Contribution?.ContributionScore ?? 0;
+        if (contribution < item.RequiredWeeklyContribution)
+            return $"Requires {item.RequiredWeeklyContribution:N0} weekly contribution.";
+
+        if (state.Character.GuildFavor < item.GuildFavorCost)
+            return "Not enough Guild Favor.";
+
+        if (state.Character.GuildHonors < item.GuildHonorsCost)
+            return "Not enough Guild Honors.";
+
+        return null;
+    }
+
+    private static int GetMarketOfficeLevel(Guild guild) =>
+        guild.Buildings.FirstOrDefault(x => x.Type == GuildBuildingType.MarketOffice
+            && x.Status == GuildBuildingStatus.Active)?.Level ?? 0;
+
+    private async Task<string?> GetRewardLockedReasonAsync(
+        Character character,
+        GuildShopItemDefinition item,
+        CancellationToken cancellationToken)
+    {
+        foreach (var reward in item.Rewards)
+        {
+            if (reward.Type is GuildShopRewardType.Item && string.IsNullOrWhiteSpace(reward.Key))
+                return $"{item.Name} has an invalid item reward.";
+            if (reward.Type is GuildShopRewardType.Title && string.IsNullOrWhiteSpace(reward.Key))
+                return $"{item.Name} has an invalid title reward.";
+            if (reward.Type is GuildShopRewardType.Item && reward.Amount > int.MaxValue)
+                return $"{item.Name} grants too many item copies.";
+
+            if (reward.Type == GuildShopRewardType.Item)
+            {
+                var itemExists = await _context.ItemBases.AnyAsync(x => x.Id == reward.Key, cancellationToken);
+                if (!itemExists) return $"Reward item '{reward.Key}' was not found.";
+            }
+
+            if (reward.Type == GuildShopRewardType.Title)
+            {
+                var title = await _context.TitleDefinitions
+                    .FirstOrDefaultAsync(x => x.Key == reward.Key && x.IsActive, cancellationToken);
+                if (title is null) return $"Reward title '{reward.Key}' was not found.";
+
+                var alreadyUnlocked = _context.PlayerTitleUnlocks.Local.Any(x =>
+                        x.AccountId == character.UserId &&
+                        x.CharacterId == character.Id &&
+                        x.TitleDefinitionId == title.Id)
+                    || await _context.PlayerTitleUnlocks.AnyAsync(x =>
+                        x.AccountId == character.UserId &&
+                        x.CharacterId == character.Id &&
+                        x.TitleDefinitionId == title.Id,
+                        cancellationToken);
+                if (alreadyUnlocked) return $"Title '{title.Name}' is already unlocked.";
+            }
+        }
+
+        return null;
+    }
+
+    private async Task ApplyRewardAsync(
+        Character character,
+        GuildShopRewardDto reward,
+        DateTimeOffset now,
+        CancellationToken cancellationToken)
+    {
+        switch (reward.Type)
+        {
+            case GuildShopRewardType.Cinders:
+                character.Cinders += reward.Amount;
+                break;
+            case GuildShopRewardType.Soulstones:
+                character.Soulstones += reward.Amount;
+                break;
+            case GuildShopRewardType.FateEcho:
+                character.FateEcho += reward.Amount;
+                break;
+            case GuildShopRewardType.SigilFragments:
+                character.SigilFragments += reward.Amount;
+                break;
+            case GuildShopRewardType.AscensionStoneFragments:
+                character.AscensionStoneFragments += reward.Amount;
+                break;
+            case GuildShopRewardType.Item:
+                await ApplyItemRewardAsync(character.Id, reward, cancellationToken);
+                break;
+            case GuildShopRewardType.Title:
+                await ApplyTitleRewardAsync(character, reward, now, cancellationToken);
+                break;
+        }
+    }
+
+    private async Task ApplyItemRewardAsync(Guid characterId, GuildShopRewardDto reward, CancellationToken cancellationToken)
+    {
+        var itemBase = await _context.ItemBases.FirstAsync(x => x.Id == reward.Key, cancellationToken);
+        var items = _inventoryItemFactory.CreateForQuantity(itemBase, checked((int)reward.Amount), characterId);
+        foreach (var item in items)
+        {
+            if (_context.GetEntry(item.ItemInstance).State == EntityState.Detached)
+            {
+                await _context.ItemInstances.AddAsync(item.ItemInstance, cancellationToken);
+            }
+
+            await _context.InventoryItems.AddAsync(item, cancellationToken);
+        }
+    }
+
+    private async Task ApplyTitleRewardAsync(
+        Character character,
+        GuildShopRewardDto reward,
+        DateTimeOffset now,
+        CancellationToken cancellationToken)
+    {
+        var title = await _context.TitleDefinitions.FirstAsync(x => x.Key == reward.Key && x.IsActive, cancellationToken);
+        _context.PlayerTitleUnlocks.Add(new PlayerTitleUnlock
+        {
+            Id = Guid.NewGuid(),
+            AccountId = character.UserId,
+            CharacterId = character.Id,
+            TitleDefinitionId = title.Id,
+            TitleDefinition = title,
+            UnlockedAt = now,
+            MetadataJson = "{\"source\":\"guild-shop\"}"
+        });
+    }
+
+    private void AddActivityLog(
+        Guild guild,
+        GuildActivityLogType type,
+        Guid? characterId,
+        string message,
+        DateTimeOffset now)
+    {
+        _context.GuildActivityLogs.Add(new GuildActivityLog
+        {
+            GuildId = guild.Id,
+            Type = type,
+            CharacterId = characterId,
+            Message = message,
+            CreatedAt = now
+        });
+    }
+
+    private static WeekPeriod GetWeek(DateTimeOffset now)
+    {
+        var utcDate = now.UtcDateTime.Date;
+        var daysSinceMonday = ((int)utcDate.DayOfWeek - (int)DayOfWeek.Monday + 7) % 7;
+        var start = new DateTimeOffset(utcDate.AddDays(-daysSinceMonday), TimeSpan.Zero);
+        return new WeekPeriod(start.ToString("yyyyMMdd"), start.AddDays(7));
+    }
+
+    private readonly record struct ShopState(
+        Guild Guild,
+        Character Character,
+        List<GuildShopPurchase> Purchases,
+        GuildMemberContributionPeriod? Contribution,
+        string WeeklyPeriodKey,
+        DateTimeOffset NextWeeklyResetAt);
+
+    private sealed record WeekPeriod(string Key, DateTimeOffset EndsAt);
+}

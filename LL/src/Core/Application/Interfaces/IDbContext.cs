@@ -11,6 +11,9 @@ using Domain.Models.Entities.Characters;
 using Domain.Models.Entities.Creatures;
 using Domain.Models.Essences;
 using Domain.Models.Guilds;
+using Domain.Models.Guilds.Buildings;
+using Domain.Models.Guilds.Missions;
+using Domain.Models.Guilds.Shop;
 using Domain.Models.Inventories;
 using Domain.Models.Items;
 using Domain.Models.Items.Equipments.Slots;
@@ -84,6 +87,15 @@ public interface IDbContext
     DbSet<Guild> Guilds { get; }
     DbSet<GuildInvite> GuildInvites { get; }
     DbSet<GuildMember> GuildMembers { get; }
+    DbSet<GuildBuilding> GuildBuildings { get; }
+    DbSet<GuildActivityLog> GuildActivityLogs { get; }
+    DbSet<GuildMissionOption> GuildMissionOptions { get; }
+    DbSet<GuildMissionInstance> GuildMissionInstances { get; }
+    DbSet<GuildMissionContribution> GuildMissionContributions { get; }
+    DbSet<PersonalGuildOrder> PersonalGuildOrders { get; }
+    DbSet<GuildMemberContributionPeriod> GuildMemberContributionPeriods { get; }
+    DbSet<GuildContributionLedger> GuildContributionLedgers { get; }
+    DbSet<GuildShopPurchase> GuildShopPurchases { get; }
     DbSet<Inventory> Inventories { get; }
     DbSet<InventoryItem> InventoryItems { get; }
     DbSet<ItemBase> ItemBases { get; }

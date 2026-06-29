@@ -1,4 +1,4 @@
-﻿using Domain.Models.Snapshots;
+using Domain.Models.Snapshots;
 using Services.LL.Interfaces;
 
 namespace Services.LL.Snapshots;
@@ -6,6 +6,7 @@ namespace Services.LL.Snapshots;
 public class CharacterSnapshotService : ICharacterSnapshotService
 {
     private readonly ICharacterSnapshotRepository _repository;
+
     public CharacterSnapshotService(ICharacterSnapshotRepository repository)
     {
         _repository = repository;

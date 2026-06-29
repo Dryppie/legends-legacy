@@ -27,7 +27,8 @@
         "scalingAttribute": "Power",
         "scalingCoefficient": 0.2,
         "attackType": "Melee",
-        "damageType": "Physical"
+        "damageType": "Physical",
+        "procCoefficient": 1
       }
     ]
   },
@@ -57,14 +58,16 @@
         "id": "effect.barrier.main",
         "operation": "GrantBarrier",
         "target": "Self",
-        "baseValue": 18
+        "baseValue": 18,
+        "procCoefficient": 0.9
       },
       {
         "id": "effect.status.reflect",
         "operation": "ApplyStatus",
         "target": "Self",
         "statusId": "status.training.reflect",
-        "baseValue": 1
+        "baseValue": 1,
+        "procCoefficient": 0.45
       }
     ]
   },
@@ -94,7 +97,8 @@
         "operation": "ApplyStatus",
         "target": "CurrentTarget",
         "statusId": "status.training.burn",
-        "baseValue": 1
+        "baseValue": 1,
+        "procCoefficient": 0.35
       }
     ]
   },
@@ -127,14 +131,16 @@
         "target": "CurrentTarget",
         "baseValue": 18,
         "attackType": "Melee",
-        "damageType": "Physical"
+        "damageType": "Physical",
+        "procCoefficient": 1
       },
       {
         "id": "effect.status.bleed",
         "operation": "ApplyStatus",
         "target": "CurrentTarget",
         "statusId": "status.bleed",
-        "baseValue": 1
+        "baseValue": 1,
+        "procCoefficient": 0.35
       }
     ]
   },
@@ -172,7 +178,8 @@
         "target": "Self",
         "attribute": "CritChance",
         "baseValue": 3,
-        "durationTicks": 60
+        "durationTicks": 60,
+        "procCoefficient": 0.4
       }
     ]
   },
@@ -201,7 +208,8 @@
         "id": "effect.barrier.main",
         "operation": "GrantBarrier",
         "target": "LowestHealthAlly",
-        "baseValue": 24
+        "baseValue": 24,
+        "procCoefficient": 0.9
       },
       {
         "id": "effect.buff.block",
@@ -209,7 +217,8 @@
         "target": "LowestHealthAlly",
         "attribute": "BlockChance",
         "baseValue": 4,
-        "durationTicks": 80
+        "durationTicks": 80,
+        "procCoefficient": 0.55
       }
     ]
   },
@@ -246,7 +255,8 @@
         "target": "Self",
         "attribute": "DamageReduction",
         "baseValue": 2,
-        "durationTicks": 50
+        "durationTicks": 50,
+        "procCoefficient": 0.4
       }
     ]
   },
@@ -277,7 +287,8 @@
         "target": "CurrentTarget",
         "baseValue": 12,
         "attackType": "Melee",
-        "damageType": "Burn"
+        "damageType": "Burn",
+        "procCoefficient": 1
       }
     ]
   },
@@ -307,7 +318,8 @@
         "operation": "ModifyAttribute",
         "target": "Self",
         "attribute": "DamageReduction",
-        "baseValue": 3
+        "baseValue": 3,
+        "procCoefficient": 0.4
       }
     ]
   },
@@ -339,7 +351,8 @@
         "target": "CurrentTarget",
         "baseValue": 10,
         "attackType": "Ranged",
-        "damageType": "Physical"
+        "damageType": "Physical",
+        "procCoefficient": 1
       },
       {
         "id": "effect.debuff.accuracy",
@@ -347,7 +360,8 @@
         "target": "CurrentTarget",
         "attribute": "Precision",
         "baseValue": -5,
-        "durationTicks": 60
+        "durationTicks": 60,
+        "procCoefficient": 0.55
       }
     ]
   },
@@ -378,7 +392,8 @@
         "target": "Self",
         "attribute": "Precision",
         "baseValue": 4,
-        "durationTicks": 50
+        "durationTicks": 50,
+        "procCoefficient": 0.4
       }
     ]
   },
@@ -410,14 +425,16 @@
         "target": "CurrentTarget",
         "baseValue": 14,
         "attackType": "Ranged",
-        "damageType": "Magical"
+        "damageType": "Magical",
+        "procCoefficient": 0.2
       },
       {
         "id": "effect.status.curse",
         "operation": "ApplyStatus",
         "target": "CurrentTarget",
         "statusId": "status.curse",
-        "baseValue": 1
+        "baseValue": 1,
+        "procCoefficient": 0.35
       }
     ]
   },
@@ -447,7 +464,8 @@
         "operation": "RestoreResource",
         "target": "Self",
         "resource": "Cooldown",
-        "baseValue": 3
+        "baseValue": 3,
+        "procCoefficient": 0.5
       }
     ]
   },
@@ -476,7 +494,8 @@
         "operation": "ApplyStatus",
         "target": "CurrentTarget",
         "statusId": "status.sneak_attack_bleed",
-        "baseValue": 1
+        "baseValue": 1,
+        "procCoefficient": 0.35
       }
     ]
   },
@@ -508,7 +527,8 @@
         "baseValue": -3,
         "durationTicks": 110,
         "attackType": "None",
-        "damageType": "None"
+        "damageType": "None",
+        "procCoefficient": 0.4
       }
     ]
   },
@@ -544,7 +564,8 @@
         "damageType": "Physical",
         "tags": [
           "Slashing"
-        ]
+        ],
+        "procCoefficient": 0.7
       }
     ]
   },
@@ -574,14 +595,16 @@
         "operation": "ModifyAttribute",
         "target": "Self",
         "attribute": "Power",
-        "baseValue": 20
+        "baseValue": 20,
+        "procCoefficient": 0.4
       },
       {
         "id": "effect.debuff.armor",
         "operation": "ModifyAttribute",
         "target": "Self",
         "attribute": "Armor",
-        "baseValue": -20
+        "baseValue": -20,
+        "procCoefficient": 0.4
       }
     ]
   },
@@ -616,7 +639,8 @@
         "damageType": "Physical",
         "tags": [
           "Arrows"
-        ]
+        ],
+        "procCoefficient": 1
       }
     ]
   },
@@ -652,7 +676,8 @@
             "type": "ChancePercent",
             "value": 20
           }
-        ]
+        ],
+        "procCoefficient": 0.35
       }
     ]
   },
@@ -684,7 +709,8 @@
         "scalingAttribute": "Power",
         "scalingCoefficient": 0.2,
         "attackType": "Melee",
-        "damageType": "Physical"
+        "damageType": "Physical",
+        "procCoefficient": 1
       }
     ]
   },
@@ -713,7 +739,8 @@
         "operation": "ModifyAttribute",
         "target": "Self",
         "attribute": "MaxHealth",
-        "baseValue": 50
+        "baseValue": 50,
+        "procCoefficient": 0.4
       }
     ]
   },
@@ -746,7 +773,8 @@
         "scalingAttribute": "Spirit",
         "scalingCoefficient": 0.2,
         "attackType": "Ranged",
-        "damageType": "Magical"
+        "damageType": "Magical",
+        "procCoefficient": 1
       }
     ]
   },
@@ -783,7 +811,8 @@
             "type": "ChancePercent",
             "value": 30
           }
-        ]
+        ],
+        "procCoefficient": 0.45
       }
     ]
   },
@@ -821,7 +850,8 @@
             "statusId": "status.cold",
             "value": 2
           }
-        ]
+        ],
+        "procCoefficient": 0.45
       }
     ]
   },
@@ -852,7 +882,8 @@
         "operation": "ApplyStatus",
         "target": "EventTarget",
         "statusId": "status.cold",
-        "baseValue": 1
+        "baseValue": 1,
+        "procCoefficient": 0.45
       }
     ]
   },
@@ -884,14 +915,16 @@
         "target": "Self",
         "summonId": "shadowImage",
         "baseValue": 1,
-        "durationTicks": 100
+        "durationTicks": 100,
+        "procCoefficient": 0.75
       },
       {
         "id": "effect.shadow_image.status",
         "operation": "ApplyStatus",
         "target": "Self",
         "statusId": "status.shadow_image",
-        "baseValue": 1
+        "baseValue": 1,
+        "procCoefficient": 0.45
       }
     ]
   },
@@ -921,7 +954,8 @@
         "operation": "ModifyAttribute",
         "target": "Self",
         "attribute": "DodgeChance",
-        "baseValue": 2
+        "baseValue": 2,
+        "procCoefficient": 0.4
       }
     ]
   },
@@ -955,7 +989,8 @@
         "scalingCoefficient": 0.2,
         "attackType": "Melee",
         "damageType": "Physical",
-        "lifeStealPercentage": 30
+        "lifeStealPercentage": 30,
+        "procCoefficient": 1
       }
     ]
   },
@@ -984,7 +1019,8 @@
         "id": "effect.dark_vitality.heal",
         "operation": "Heal",
         "target": "Self",
-        "baseValue": 4
+        "baseValue": 4,
+        "procCoefficient": 0.9
       }
     ]
   },
@@ -1017,7 +1053,8 @@
         "scalingAttribute": "Power",
         "scalingCoefficient": 0.2,
         "durationTicks": 80,
-        "intervalTicks": 20
+        "intervalTicks": 20,
+        "procCoefficient": 0.65
       }
     ]
   },
@@ -1047,7 +1084,8 @@
         "operation": "ModifyAttribute",
         "target": "Self",
         "attribute": "Cooldown",
-        "baseValue": -2
+        "baseValue": -2,
+        "procCoefficient": 0.4
       }
     ]
   },
@@ -1078,7 +1116,8 @@
         "target": "Self",
         "attribute": "DamageReduction",
         "baseValue": 2,
-        "durationTicks": 65
+        "durationTicks": 65,
+        "procCoefficient": 0.55
       }
     ]
   },
@@ -1108,7 +1147,8 @@
         "operation": "ModifyAttribute",
         "target": "Self",
         "attribute": "Armor",
-        "baseValue": 15
+        "baseValue": 15,
+        "procCoefficient": 0.4
       }
     ]
   },
@@ -1138,7 +1178,8 @@
         "operation": "ApplyStatus",
         "target": "AllEnemies",
         "statusId": "status.green_slime.poison",
-        "baseValue": 1
+        "baseValue": 1,
+        "procCoefficient": 0.35
       }
     ]
   },
@@ -1168,7 +1209,8 @@
         "operation": "ApplyStatus",
         "target": "EventTarget",
         "statusId": "status.corrosive_ooze.poison",
-        "baseValue": 1
+        "baseValue": 1,
+        "procCoefficient": 0.35
       }
     ]
   },
@@ -1204,7 +1246,8 @@
             "type": "ChancePercent",
             "value": 30
           }
-        ]
+        ],
+        "procCoefficient": 0.45
       }
     ]
   },
@@ -1233,7 +1276,8 @@
         "id": "effect.colorful_shield.barrier",
         "operation": "GrantBarrier",
         "target": "HighestMaxHealthAlly",
-        "baseValue": 20
+        "baseValue": 20,
+        "procCoefficient": 0.9
       }
     ]
   },
@@ -1263,7 +1307,8 @@
         "operation": "ApplyStatus",
         "target": "EveryoneButSelf",
         "statusId": "status.red_slime.fire_aura",
-        "baseValue": 1
+        "baseValue": 1,
+        "procCoefficient": 0.35
       }
     ]
   },
@@ -1294,7 +1339,8 @@
         "operation": "ModifyAttribute",
         "target": "Self",
         "attribute": "Resistance",
-        "baseValue": 5
+        "baseValue": 5,
+        "procCoefficient": 0.4
       }
     ]
   },
@@ -1324,7 +1370,8 @@
         "operation": "ApplyStatus",
         "target": "CurrentTarget",
         "statusId": "status.transparent_engulfed",
-        "baseValue": 1
+        "baseValue": 1,
+        "procCoefficient": 0.35
       }
     ]
   },
@@ -1362,7 +1409,8 @@
             "subject": "Source",
             "value": 30
           }
-        ]
+        ],
+        "procCoefficient": 0.45
       }
     ]
   },
@@ -1391,7 +1439,8 @@
         "id": "effect.faes_embrace.barrier",
         "operation": "GrantBarrier",
         "target": "TwoAllies",
-        "baseValue": 20
+        "baseValue": 20,
+        "procCoefficient": 0.75
       }
     ]
   },
@@ -1424,7 +1473,8 @@
         "baseValue": 1,
         "durationTicks": 6000,
         "intervalTicks": 180,
-        "chancePercent": 30
+        "chancePercent": 30,
+        "procCoefficient": 0.35
       }
     ]
   },
@@ -1456,7 +1506,8 @@
         "scalingAttribute": "Power",
         "scalingCoefficient": 0.2,
         "attackType": "Melee",
-        "damageType": "Physical"
+        "damageType": "Physical",
+        "procCoefficient": 1
       }
     ]
   },
@@ -1486,7 +1537,8 @@
         "operation": "ModifyAttribute",
         "target": "Self",
         "attribute": "CritDamage",
-        "baseValue": 15
+        "baseValue": 15,
+        "procCoefficient": 0.4
       }
     ]
   },
@@ -1522,7 +1574,8 @@
             "type": "ChancePercent",
             "value": 35
           }
-        ]
+        ],
+        "procCoefficient": 0.45
       }
     ]
   },
@@ -1554,7 +1607,8 @@
         "statusId": "status.foxfire_stack",
         "baseValue": 1,
         "durationTicks": 6000,
-        "intervalTicks": 50
+        "intervalTicks": 50,
+        "procCoefficient": 0.35
       }
     ]
   },
@@ -1584,7 +1638,8 @@
         "operation": "ApplyStatus",
         "target": "AllEnemies",
         "statusId": "status.necrotic_spore_debuff",
-        "baseValue": 1
+        "baseValue": 1,
+        "procCoefficient": 0.45
       }
     ]
   },
@@ -1616,7 +1671,8 @@
         "target": "AllAllies",
         "baseValue": 29,
         "durationTicks": 6000,
-        "intervalTicks": 110
+        "intervalTicks": 110,
+        "procCoefficient": 0.65
       }
     ]
   },
@@ -1649,7 +1705,8 @@
         "scalingAttribute": "Spirit",
         "scalingCoefficient": 0.3,
         "attackType": "Ranged",
-        "damageType": "Magical"
+        "damageType": "Magical",
+        "procCoefficient": 0.5
       }
     ]
   },
@@ -1679,7 +1736,8 @@
         "operation": "ModifyAttribute",
         "target": "AllAllies",
         "attribute": "CritChance",
-        "baseValue": 1
+        "baseValue": 1,
+        "procCoefficient": 0.45
       }
     ]
   },
@@ -1711,7 +1769,8 @@
         "target": "Self",
         "attribute": "Cooldown",
         "baseValue": -24,
-        "durationTicks": 100
+        "durationTicks": 100,
+        "procCoefficient": 0.55
       },
       {
         "id": "effect.frenzy.crit_chance",
@@ -1719,7 +1778,8 @@
         "target": "Self",
         "attribute": "CritChance",
         "baseValue": 25,
-        "durationTicks": 100
+        "durationTicks": 100,
+        "procCoefficient": 0.55
       }
     ]
   },
@@ -1757,7 +1817,8 @@
             "subject": "Source",
             "value": 80
           }
-        ]
+        ],
+        "procCoefficient": 0.4
       }
     ]
   },
@@ -1788,7 +1849,8 @@
         "operation": "ApplyStatus",
         "target": "CurrentTarget",
         "statusId": "status.feral_pounce_impact",
-        "baseValue": 1
+        "baseValue": 1,
+        "procCoefficient": 0.45
       },
       {
         "id": "effect.feral_pounce.stun",
@@ -1796,7 +1858,8 @@
         "target": "CurrentTarget",
         "statusId": "status.feral_pounce_stunned",
         "chancePercent": 30,
-        "baseValue": 1
+        "baseValue": 1,
+        "procCoefficient": 0.45
       }
     ]
   },
@@ -1832,7 +1895,8 @@
             "type": "ChancePercent",
             "value": 50
           }
-        ]
+        ],
+        "procCoefficient": 0.35
       }
     ]
   },
@@ -1863,7 +1927,8 @@
         "operation": "ApplyStatus",
         "target": "TwoEnemies",
         "statusId": "status.plague_swipe_poison",
-        "baseValue": 1
+        "baseValue": 1,
+        "procCoefficient": 0.35
       }
     ]
   },
@@ -1899,7 +1964,8 @@
             "type": "ChancePercent",
             "value": 17
           }
-        ]
+        ],
+        "procCoefficient": 0.35
       }
     ]
   },
@@ -1929,7 +1995,8 @@
         "operation": "ApplyStatus",
         "target": "CurrentTarget",
         "statusId": "status.draining_claws_debuff",
-        "baseValue": 1
+        "baseValue": 1,
+        "procCoefficient": 0.45
       }
     ]
   },
@@ -1959,7 +2026,8 @@
         "operation": "Heal",
         "target": "Self",
         "baseValue": 9999,
-        "uses": 1
+        "uses": 1,
+        "procCoefficient": 0.9
       }
     ]
   },
@@ -1995,7 +2063,8 @@
         "damageType": "Physical",
         "tags": [
           "Piercing"
-        ]
+        ],
+        "procCoefficient": 1
       }
     ]
   },
@@ -2031,7 +2100,8 @@
             "type": "ChancePercent",
             "value": 15
           }
-        ]
+        ],
+        "procCoefficient": 0.35
       }
     ]
   },
@@ -2064,7 +2134,8 @@
         "scalingAttribute": "Spirit",
         "scalingCoefficient": 0.3,
         "attackType": "Ranged",
-        "damageType": "Magical"
+        "damageType": "Magical",
+        "procCoefficient": 1
       }
     ]
   },
@@ -2095,7 +2166,8 @@
         "target": "Self",
         "baseValue": 25,
         "durationTicks": 6000,
-        "intervalTicks": 100
+        "intervalTicks": 100,
+        "procCoefficient": 0.9
       }
     ]
   },
@@ -2126,7 +2198,8 @@
         "target": "Self",
         "attribute": "DamageReduction",
         "baseValue": 10,
-        "durationTicks": 80
+        "durationTicks": 80,
+        "procCoefficient": 0.55
       }
     ]
   },
@@ -2157,7 +2230,8 @@
         "target": "EventTarget",
         "baseValue": 6,
         "attackType": "None",
-        "damageType": "Physical"
+        "damageType": "Physical",
+        "procCoefficient": 0.45
       }
     ]
   },
@@ -2189,7 +2263,8 @@
         "target": "Self",
         "attribute": "DodgeChance",
         "baseValue": 20,
-        "durationTicks": 20
+        "durationTicks": 20,
+        "procCoefficient": 0.55
       },
       {
         "id": "effect.moss_camouflage.damage",
@@ -2199,7 +2274,8 @@
         "scalingAttribute": "Precision",
         "scalingCoefficient": 0.2,
         "attackType": "Melee",
-        "damageType": "Physical"
+        "damageType": "Physical",
+        "procCoefficient": 1
       }
     ]
   },
@@ -2238,7 +2314,8 @@
             "subject": "Source",
             "value": 40
           }
-        ]
+        ],
+        "procCoefficient": 0.4
       }
     ]
   },
@@ -2270,7 +2347,8 @@
         "scalingAttribute": "Precision",
         "scalingCoefficient": 0.2,
         "attackType": "Melee",
-        "damageType": "Physical"
+        "damageType": "Physical",
+        "procCoefficient": 1
       }
     ]
   },
@@ -2300,7 +2378,8 @@
         "operation": "ModifyAttribute",
         "target": "Self",
         "attribute": "CritChance",
-        "baseValue": 2
+        "baseValue": 2,
+        "procCoefficient": 0.4
       }
     ]
   },
@@ -2330,7 +2409,8 @@
         "target": "Self",
         "baseValue": 25,
         "scalingAttribute": "Spirit",
-        "scalingCoefficient": 0.2
+        "scalingCoefficient": 0.2,
+        "procCoefficient": 0.9
       }
     ]
   },
@@ -2360,7 +2440,8 @@
         "operation": "ModifyAttribute",
         "target": "Self",
         "attribute": "HealingPowerPercent",
-        "baseValue": 15
+        "baseValue": 15,
+        "procCoefficient": 0.4
       }
     ]
   },
@@ -2390,7 +2471,8 @@
         "operation": "ApplyStatus",
         "target": "CurrentTarget",
         "statusId": "status.venomous_spit_poison",
-        "baseValue": 1
+        "baseValue": 1,
+        "procCoefficient": 0.35
       }
     ]
   },
@@ -2420,7 +2502,8 @@
         "operation": "ModifyAttribute",
         "target": "Self",
         "attribute": "StatusResistance",
-        "baseValue": 7
+        "baseValue": 7,
+        "procCoefficient": 0.4
       }
     ]
   },
@@ -2454,7 +2537,8 @@
         "scalingAttribute": "Power",
         "scalingCoefficient": 0.2,
         "attackType": "Melee",
-        "damageType": "Physical"
+        "damageType": "Physical",
+        "procCoefficient": 1
       },
       {
         "id": "effect.piercing_fangs.poison_bonus",
@@ -2469,7 +2553,8 @@
             "subject": "Target",
             "statusId": "status.venomous_spit_poison"
           }
-        ]
+        ],
+        "procCoefficient": 1
       }
     ]
   },
@@ -2499,7 +2584,8 @@
         "operation": "ModifyAttribute",
         "target": "Self",
         "attribute": "MagicPenetration",
-        "baseValue": 2
+        "baseValue": 2,
+        "procCoefficient": 0.4
       }
     ]
   },
@@ -2532,7 +2618,8 @@
         "scalingAttribute": "Spirit",
         "scalingCoefficient": 0.2,
         "durationTicks": 200,
-        "intervalTicks": 40
+        "intervalTicks": 40,
+        "procCoefficient": 0.9
       }
     ]
   },
@@ -2562,7 +2649,8 @@
         "id": "effect.spirit_link.heal",
         "operation": "Heal",
         "target": "AllAllies",
-        "baseValue": 5
+        "baseValue": 5,
+        "procCoefficient": 0.65
       }
     ]
   },
@@ -2593,7 +2681,8 @@
         "operation": "ApplyStatus",
         "target": "CurrentTarget",
         "statusId": "status.toxic_bite_poison",
-        "baseValue": 1
+        "baseValue": 1,
+        "procCoefficient": 0.35
       },
       {
         "id": "effect.toxic_bite.toxic_blood",
@@ -2606,7 +2695,8 @@
             "type": "ChancePercent",
             "value": 20
           }
-        ]
+        ],
+        "procCoefficient": 0.35
       }
     ]
   },
@@ -2636,7 +2726,8 @@
         "operation": "ModifyAttribute",
         "target": "Self",
         "attribute": "StatusResistance",
-        "baseValue": 4
+        "baseValue": 4,
+        "procCoefficient": 0.4
       }
     ]
   },
@@ -2668,7 +2759,8 @@
         "scalingAttribute": "Spirit",
         "scalingCoefficient": 0.2,
         "attackType": "Ranged",
-        "damageType": "Magical"
+        "damageType": "Magical",
+        "procCoefficient": 0.5
       }
     ]
   },
@@ -2705,7 +2797,8 @@
             "type": "ChancePercent",
             "value": 30
           }
-        ]
+        ],
+        "procCoefficient": 0.5
       }
     ]
   },
@@ -2734,7 +2827,8 @@
         "id": "effect.workers_aid.heal",
         "operation": "Heal",
         "target": "LowestHealthAlly",
-        "baseValue": 17
+        "baseValue": 17,
+        "procCoefficient": 0.9
       }
     ]
   },
@@ -2764,7 +2858,8 @@
         "operation": "ModifyAttribute",
         "target": "Self",
         "attribute": "DamageReduction",
-        "baseValue": 5
+        "baseValue": 5,
+        "procCoefficient": 0.4
       }
     ]
   },
@@ -2793,7 +2888,8 @@
         "id": "effect.rejuvenation.heal",
         "operation": "Heal",
         "target": "LowestHealthAlly",
-        "baseValue": 15
+        "baseValue": 15,
+        "procCoefficient": 0.9
       }
     ]
   },
@@ -2823,7 +2919,8 @@
         "operation": "ModifyAttribute",
         "target": "Self",
         "attribute": "Resistance",
-        "baseValue": 4
+        "baseValue": 4,
+        "procCoefficient": 0.4
       }
     ]
   },
@@ -2853,7 +2950,8 @@
         "operation": "ApplyStatus",
         "target": "HighestMaxHealthAlly",
         "statusId": "status.bramble_shield",
-        "baseValue": 1
+        "baseValue": 1,
+        "procCoefficient": 0.45
       }
     ]
   },
@@ -2883,7 +2981,8 @@
         "operation": "ModifyAttribute",
         "target": "Self",
         "attribute": "HealthRegeneration",
-        "baseValue": 2
+        "baseValue": 2,
+        "procCoefficient": 0.4
       }
     ]
   },
@@ -2914,7 +3013,8 @@
         "target": "CurrentTarget",
         "baseValue": 40,
         "attackType": "Melee",
-        "damageType": "Physical"
+        "damageType": "Physical",
+        "procCoefficient": 1
       },
       {
         "id": "effect.spider_crash.self_damage",
@@ -2922,7 +3022,8 @@
         "target": "Self",
         "baseValue": 20,
         "attackType": "None",
-        "damageType": "Physical"
+        "damageType": "Physical",
+        "procCoefficient": 0.1
       }
     ]
   },
@@ -2952,7 +3053,8 @@
         "operation": "ModifyAttribute",
         "target": "Self",
         "attribute": "Armor",
-        "baseValue": 20
+        "baseValue": 20,
+        "procCoefficient": 0.4
       }
     ]
   },
@@ -2982,7 +3084,8 @@
         "operation": "ApplyStatus",
         "target": "CurrentTarget",
         "statusId": "status.venom_web_poison",
-        "baseValue": 1
+        "baseValue": 1,
+        "procCoefficient": 0.35
       }
     ]
   },
@@ -3018,7 +3121,8 @@
             "type": "ChancePercent",
             "value": 50
           }
-        ]
+        ],
+        "procCoefficient": 0.35
       }
     ]
   },
@@ -3050,7 +3154,8 @@
         "scalingAttribute": "Power",
         "scalingCoefficient": 0.2,
         "attackType": "None",
-        "damageType": "Magical"
+        "damageType": "Magical",
+        "procCoefficient": 1
       }
     ]
   },
@@ -3083,7 +3188,8 @@
         "scalingAttribute": "Power",
         "scalingCoefficient": 0.2,
         "attackType": "Melee",
-        "damageType": "Physical"
+        "damageType": "Physical",
+        "procCoefficient": 1
       }
     ]
   },
@@ -3112,7 +3218,8 @@
         "operation": "ModifyAttribute",
         "target": "Self",
         "attribute": "ArmorPenetration",
-        "baseValue": 4
+        "baseValue": 4,
+        "procCoefficient": 0.4
       }
     ]
   },
@@ -3145,7 +3252,8 @@
         "scalingAttribute": "Precision",
         "scalingCoefficient": 0.15,
         "attackType": "Ranged",
-        "damageType": "Magical"
+        "damageType": "Magical",
+        "procCoefficient": 1
       }
     ]
   },
@@ -3174,7 +3282,8 @@
         "operation": "ModifyAttribute",
         "target": "Self",
         "attribute": "Precision",
-        "baseValue": 3
+        "baseValue": 3,
+        "procCoefficient": 0.4
       }
     ]
   },
@@ -3207,7 +3316,8 @@
         "scalingAttribute": "Precision",
         "scalingCoefficient": 0.25,
         "attackType": "Melee",
-        "damageType": "Poison"
+        "damageType": "Poison",
+        "procCoefficient": 1
       }
     ]
   },
@@ -3236,7 +3346,8 @@
         "operation": "ModifyAttribute",
         "target": "Self",
         "attribute": "DodgeChance",
-        "baseValue": 3
+        "baseValue": 3,
+        "procCoefficient": 0.4
       }
     ]
   },
@@ -3269,7 +3380,8 @@
         "scalingAttribute": "Spirit",
         "scalingCoefficient": 0.15,
         "attackType": "None",
-        "damageType": "Magical"
+        "damageType": "Magical",
+        "procCoefficient": 0.5
       }
     ]
   },
@@ -3298,7 +3410,8 @@
         "operation": "ModifyAttribute",
         "target": "Self",
         "attribute": "CrowdControlResistance",
-        "baseValue": 5
+        "baseValue": 5,
+        "procCoefficient": 0.4
       }
     ]
   },
@@ -3329,7 +3442,8 @@
         "target": "LowestHealthAlly",
         "baseValue": 18,
         "scalingAttribute": "Spirit",
-        "scalingCoefficient": 0.2
+        "scalingCoefficient": 0.2,
+        "procCoefficient": 0.9
       }
     ]
   },
@@ -3358,7 +3472,8 @@
         "operation": "ModifyAttribute",
         "target": "Self",
         "attribute": "Spirit",
-        "baseValue": 3
+        "baseValue": 3,
+        "procCoefficient": 0.4
       }
     ]
   },
@@ -3394,13 +3509,15 @@
         "scalingAttribute": "Spirit",
         "scalingCoefficient": 0.15,
         "attackType": "Melee",
-        "damageType": "Magical"
+        "damageType": "Magical",
+        "procCoefficient": 1
       },
       {
         "id": "effect.ethereal_touch.barrier",
         "operation": "GrantBarrier",
         "target": "Self",
-        "baseValue": 10
+        "baseValue": 10,
+        "procCoefficient": 0.9
       }
     ]
   },
@@ -3429,7 +3546,8 @@
         "operation": "ModifyAttribute",
         "target": "Self",
         "attribute": "DodgeChance",
-        "baseValue": 4
+        "baseValue": 4,
+        "procCoefficient": 0.4
       }
     ]
   },
@@ -3462,7 +3580,8 @@
         "scalingAttribute": "Spirit",
         "scalingCoefficient": 0.2,
         "attackType": "None",
-        "damageType": "Magical"
+        "damageType": "Magical",
+        "procCoefficient": 0.5
       }
     ]
   },
@@ -3491,7 +3610,8 @@
         "operation": "ModifyAttribute",
         "target": "Self",
         "attribute": "MagicPenetration",
-        "baseValue": 4
+        "baseValue": 4,
+        "procCoefficient": 0.4
       }
     ]
   },
@@ -3524,7 +3644,8 @@
         "scalingAttribute": "Fortitude",
         "scalingCoefficient": 0.15,
         "attackType": "Melee",
-        "damageType": "Physical"
+        "damageType": "Physical",
+        "procCoefficient": 1
       }
     ]
   },
@@ -3553,7 +3674,8 @@
         "operation": "ModifyAttribute",
         "target": "Self",
         "attribute": "MaxHealth",
-        "baseValue": 35
+        "baseValue": 35,
+        "procCoefficient": 0.4
       }
     ]
   },
@@ -3588,7 +3710,8 @@
         "scalingCoefficient": 0.15,
         "attackType": "Melee",
         "damageType": "Physical",
-        "lifeStealPercentage": 25
+        "lifeStealPercentage": 25,
+        "procCoefficient": 1
       }
     ]
   },
@@ -3617,7 +3740,8 @@
         "operation": "ModifyAttribute",
         "target": "Self",
         "attribute": "HealthRegeneration",
-        "baseValue": 2
+        "baseValue": 2,
+        "procCoefficient": 0.4
       }
     ]
   },
@@ -3650,7 +3774,8 @@
         "scalingAttribute": "Power",
         "scalingCoefficient": 0.15,
         "attackType": "Melee",
-        "damageType": "Physical"
+        "damageType": "Physical",
+        "procCoefficient": 0.7
       }
     ]
   },
@@ -3679,7 +3804,8 @@
         "operation": "ModifyAttribute",
         "target": "Self",
         "attribute": "StatusResistance",
-        "baseValue": 5
+        "baseValue": 5,
+        "procCoefficient": 0.4
       }
     ]
   },
@@ -3714,7 +3840,8 @@
         "scalingCoefficient": 0.2,
         "attackType": "Melee",
         "damageType": "Bleed",
-        "lifeStealPercentage": 40
+        "lifeStealPercentage": 40,
+        "procCoefficient": 1
       }
     ]
   },
@@ -3743,7 +3870,8 @@
         "operation": "ModifyAttribute",
         "target": "Self",
         "attribute": "LifeSteal",
-        "baseValue": 4
+        "baseValue": 4,
+        "procCoefficient": 0.4
       }
     ]
   },
@@ -3776,7 +3904,8 @@
         "scalingAttribute": "Fortitude",
         "scalingCoefficient": 0.2,
         "attackType": "Melee",
-        "damageType": "Physical"
+        "damageType": "Physical",
+        "procCoefficient": 1
       }
     ]
   },
@@ -3805,7 +3934,8 @@
         "operation": "ModifyAttribute",
         "target": "Self",
         "attribute": "Armor",
-        "baseValue": 15
+        "baseValue": 15,
+        "procCoefficient": 0.4
       }
     ]
   },
@@ -3838,7 +3968,8 @@
         "scalingAttribute": "Power",
         "scalingCoefficient": 0.2,
         "attackType": "None",
-        "damageType": "Physical"
+        "damageType": "Physical",
+        "procCoefficient": 0.5
       }
     ]
   },
@@ -3867,7 +3998,8 @@
         "operation": "ModifyAttribute",
         "target": "Self",
         "attribute": "Power",
-        "baseValue": 4
+        "baseValue": 4,
+        "procCoefficient": 0.4
       }
     ]
   },
@@ -3902,7 +4034,8 @@
         "scalingCoefficient": 0.15,
         "attackType": "Melee",
         "damageType": "Physical",
-        "lifeStealPercentage": 75
+        "lifeStealPercentage": 75,
+        "procCoefficient": 1
       }
     ]
   },
@@ -3931,7 +4064,8 @@
         "operation": "ModifyAttribute",
         "target": "Self",
         "attribute": "LifeSteal",
-        "baseValue": 3
+        "baseValue": 3,
+        "procCoefficient": 0.4
       }
     ]
   },
@@ -3967,13 +4101,15 @@
         "scalingAttribute": "Fortitude",
         "scalingCoefficient": 0.15,
         "attackType": "Melee",
-        "damageType": "Physical"
+        "damageType": "Physical",
+        "procCoefficient": 1
       },
       {
         "id": "effect.stone_gnaw.barrier",
         "operation": "GrantBarrier",
         "target": "Self",
-        "baseValue": 8
+        "baseValue": 8,
+        "procCoefficient": 0.9
       }
     ]
   },
@@ -4002,7 +4138,8 @@
         "operation": "ModifyAttribute",
         "target": "Self",
         "attribute": "DamageReduction",
-        "baseValue": 3
+        "baseValue": 3,
+        "procCoefficient": 0.4
       }
     ]
   },
@@ -4035,7 +4172,8 @@
         "scalingAttribute": "Power",
         "scalingCoefficient": 0.2,
         "attackType": "None",
-        "damageType": "Physical"
+        "damageType": "Physical",
+        "procCoefficient": 0.7
       }
     ]
   },
@@ -4064,7 +4202,8 @@
         "operation": "ModifyAttribute",
         "target": "Self",
         "attribute": "ArmorPenetration",
-        "baseValue": 3
+        "baseValue": 3,
+        "procCoefficient": 0.4
       }
     ]
   }

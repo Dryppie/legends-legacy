@@ -22,7 +22,7 @@ public class LeaveGuildCommandHandler : IRequestHandler<LeaveGuildCommand, Respo
 
     public async Task<Response<bool>> Handle(LeaveGuildCommand request, CancellationToken cancellationToken)
     {
-        var guild = await _guildService.GetGuildWithUpgradesAsync(request.CharacterId, cancellationToken);
+        var guild = await _guildService.GetGuildForMemberAsync(request.CharacterId, cancellationToken);
         if (guild == null)
             return Response<bool>.Fail("Failed to leave guild");
 

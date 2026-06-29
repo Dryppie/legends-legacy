@@ -120,7 +120,7 @@ public sealed class FastCombatEngine
         var damage = Math.Max(1, (int)Math.Round(1 + actor.GetAttribute(AttributeType.Power) / 10f));
         Log(actor, null, "Basic Attack", EventType.AbilityUse, 0, $"{actor.Name} used Basic Attack");
         Publish(new CombatEvent(AbilityTriggerEvent.OnBasicAttack, actor, target, null), combatants);
-        ApplyDamage(actor, target, damage, AttackType.Melee, DamageType.Physical, combatants, "Basic Attack");
+        ApplyDamage(actor, target, damage, AttackType.Melee, DamageType.Physical, null, combatants, "Basic Attack");
     }
 
     private static bool IsActionBlocked(RuntimeCombatant combatant) =>
@@ -353,7 +353,7 @@ public sealed class FastCombatEngine
         switch (effect.Operation)
         {
             case AbilityEffectOperation.Damage:
-                var healthDamage = ApplyDamage(source, target, value, effect.AttackType, effect.DamageType, combatants, effect.Id, statsSource, countStatsActivation);
+                var healthDamage = ApplyDamage(source, target, value, effect.AttackType, effect.DamageType, effect, combatants, effect.Id, statsSource, countStatsActivation);
                 ApplyLifeSteal(effect, source, healthDamage, combatants, statsSource);
                 break;
             case AbilityEffectOperation.Heal:
@@ -417,6 +417,7 @@ public sealed class FastCombatEngine
         int damage,
         AttackType attackType,
         DamageType damageType,
+        CompiledEffect? effect,
         IReadOnlyList<RuntimeCombatant> combatants,
         string sourceName,
         string? statsSource = null,

@@ -49,4 +49,5 @@ public class DiagnosticsController : BaseController
     {
         return await Mediator.Send(new RunAbilityBalanceSimulationQuery(request));
     }
+
 }
