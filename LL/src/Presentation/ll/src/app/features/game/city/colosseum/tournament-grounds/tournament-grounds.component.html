@@ -1,5 +1,475 @@
-<section class="ll-panel flex h-full w-full items-center justify-center p-4">
-  <div class="ll-empty-state w-full">
-    Tournament grounds are not available yet.
+<section class="flex h-full w-full flex-col gap-3 overflow-auto text-white">
+  <div *ngIf="error()" class="ll-panel border border-red-500/40 p-3 text-sm text-red-200">
+    {{ error() }}
   </div>
+
+  <ng-container *ngIf="current() as tournament; else emptyState">
+    <section class="ll-stat-card flex flex-col gap-4 p-4">
+      <div class="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+        <div class="min-w-0">
+          <p class="ll-stat-label">Tournament Grounds</p>
+          <h2 class="ll-heading mt-1 text-xl">{{ tournament.name }}</h2>
+          <p class="ll-copy mt-1">
+            {{ nextStateLabel(tournament) }}
+            <span *ngIf="tournament.status === 'RegistrationOpen'">
+              · {{ tournament.registrationEndsAtUtc | date: "short" }}
+            </span>
+            <span *ngIf="tournament.status === 'Scheduled'">
+              · {{ tournament.registrationStartsAtUtc | date: "short" }}
+            </span>
+            <span *ngIf="tournament.status === 'BracketGenerated' || tournament.status === 'RegistrationClosed'">
+              · {{ tournament.startsAtUtc | date: "short" }}
+            </span>
+          </p>
+          <p *ngIf="latestRealtimeUpdate() as update" class="mt-1 text-xs text-secondary">
+            Latest: {{ enumLabel(update.event) }} ·
+            #{{ update.tournamentNumber }} {{ update.tournamentName }} ·
+            {{ update.registeredParticipantCount }} / {{ update.maxParticipants }} teams
+            <span *ngIf="update.currentRoundNumber">
+              · Round {{ update.currentRoundNumber }}
+            </span>
+            <span *ngIf="update.nextActionAtUtc">
+              · Next {{ update.nextActionAtUtc | date: "short" }}
+            </span>
+          </p>
+        </div>
+
+        <div class="flex shrink-0 flex-wrap gap-2">
+          <button
+            type="button"
+            class="ll-button-secondary px-3 py-2 text-sm"
+            [disabled]="loading() || actionLoading()"
+            (click)="refresh()"
+          >
+            Refresh
+          </button>
+          <button
+            *ngIf="tournament.canRegister"
+            type="button"
+            class="ll-button-primary px-3 py-2 text-sm"
+            [disabled]="actionLoading()"
+            (click)="register(tournament)"
+          >
+            Register
+          </button>
+          <button
+            *ngIf="tournament.isRegistered && tournament.status === 'RegistrationOpen'"
+            type="button"
+            class="ll-button-secondary px-3 py-2 text-sm"
+            [disabled]="actionLoading()"
+            (click)="withdraw(tournament)"
+          >
+            Withdraw
+          </button>
+          <button
+            *ngIf="unclaimedRewards().length > 0"
+            type="button"
+            class="ll-button-primary px-3 py-2 text-sm"
+            [disabled]="actionLoading()"
+            (click)="claim(tournament)"
+          >
+            Claim Rewards
+          </button>
+        </div>
+      </div>
+
+      <div class="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+        <div class="ll-panel p-3">
+          <p class="ll-stat-label">Status</p>
+          <p class="ll-heading mt-1 text-base">{{ enumLabel(tournament.status) }}</p>
+        </div>
+        <div class="ll-panel p-3">
+          <p class="ll-stat-label">Teams</p>
+          <p class="ll-heading mt-1 text-base">
+            {{ tournament.registeredParticipantCount }} / {{ tournament.maxParticipants }}
+          </p>
+          <p class="text-xs text-secondary">Minimum {{ tournament.minParticipants }} teams</p>
+        </div>
+        <div class="ll-panel p-3">
+          <p class="ll-stat-label">Registration</p>
+          <p class="ll-heading mt-1 text-base">
+            {{ tournament.registrationStartsAtUtc | date: "short" }}
+          </p>
+          <p class="text-xs text-secondary">
+            Closes {{ tournament.registrationEndsAtUtc | date: "short" }}
+          </p>
+        </div>
+        <div class="ll-panel p-3">
+          <p class="ll-stat-label">Your Entry</p>
+          <p class="ll-heading mt-1 text-base">
+            {{ playerStatusLabel(tournament) }}
+          </p>
+          <p class="text-xs text-secondary">
+            <span *ngIf="tournament.playerSeed">Seed #{{ tournament.playerSeed }}</span>
+            <span *ngIf="tournament.playerSeed && tournament.playerEntryArenaRating">
+              · {{ tournament.playerEntryArenaRating }} rating
+            </span>
+            <span *ngIf="!tournament.playerSeed">
+              {{ tournament.cannotRegisterReason || "Current defense setup will be locked." }}
+            </span>
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section
+      *ngIf="tournament.isRegistered && tournament.status === 'RegistrationOpen'"
+      class="ll-stat-card flex flex-col gap-3 p-4"
+    >
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h3 class="ll-heading text-lg">Teams</h3>
+          <p class="text-sm text-secondary">Tournament Grounds battles resolve as teams of up to three.</p>
+        </div>
+        <p class="text-xs uppercase tracking-wide text-secondary">
+          {{ teams().length }} teams forming
+        </p>
+      </div>
+
+      <div *ngIf="playerPendingInvites().length > 0" class="grid gap-2 md:grid-cols-2">
+        <div *ngFor="let pending of playerPendingInvites()" class="ll-panel p-3">
+          <p class="ll-heading text-base">{{ pending.team.name }}</p>
+          <p class="text-sm text-secondary">
+            Invite from {{ pending.team.ownerName }} · {{ pending.team.memberCount }}/3 members
+          </p>
+          <button
+            type="button"
+            class="ll-button-primary mt-3 px-3 py-2 text-sm"
+            [disabled]="actionLoading()"
+            (click)="acceptInvite(pending.invite)"
+          >
+            Accept Invite
+          </button>
+        </div>
+      </div>
+
+      <ng-container *ngIf="playerTeam() as team; else teamFinder">
+        <div class="ll-panel p-3">
+          <div class="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <p class="ll-heading text-base">{{ team.name }}</p>
+              <p class="text-sm text-secondary">
+                Owner {{ team.ownerName }} · {{ team.memberCount }}/3 members
+              </p>
+            </div>
+            <span class="text-xs uppercase tracking-wide text-amber-200" *ngIf="team.isPlayerOwner">
+              Owner
+            </span>
+          </div>
+
+          <div class="mt-3 grid gap-2 md:grid-cols-3">
+            <div *ngFor="let member of team.members" class="rounded border border-white/10 p-2 text-sm">
+              <div class="flex items-center justify-between gap-2">
+                <span>{{ member.characterName }}</span>
+                <button
+                  *ngIf="team.isPlayerOwner && member.participantId !== team.ownerParticipantId"
+                  type="button"
+                  class="rounded border border-red-400/40 px-2 py-1 text-[11px] font-semibold uppercase text-red-200 hover:bg-red-500/10"
+                  [disabled]="actionLoading()"
+                  (click)="kickMember(tournament, team, member)"
+                >
+                  Kick
+                </button>
+              </div>
+              <p class="text-xs text-secondary">{{ member.entryArenaRating }} rating</p>
+            </div>
+          </div>
+
+          <div *ngIf="team.isPlayerOwner && team.applications.length > 0" class="mt-3 border-t border-white/10 pt-3">
+            <p class="ll-stat-label">Applications</p>
+            <div class="mt-2 flex flex-col gap-2">
+              <div *ngFor="let application of team.applications" class="flex items-center justify-between gap-2 text-sm">
+                <span>{{ application.applicantName }}</span>
+                <button
+                  type="button"
+                  class="ll-button-secondary px-3 py-1 text-xs"
+                  [disabled]="actionLoading() || team.memberCount >= 3"
+                  (click)="acceptApplication(application.applicationId)"
+                >
+                  Accept
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div *ngIf="team.isPlayerOwner && team.memberCount < 3 && unassignedParticipants().length > 0" class="mt-3 border-t border-white/10 pt-3">
+            <p class="ll-stat-label">Invite Registered Players</p>
+            <div class="mt-2 flex flex-wrap gap-2">
+              <button
+                *ngFor="let participant of unassignedParticipants()"
+                type="button"
+                class="ll-button-secondary px-3 py-1 text-xs"
+                [disabled]="actionLoading()"
+                (click)="inviteToTeam(tournament, team, participant)"
+              >
+                {{ participant.characterName }}
+              </button>
+            </div>
+          </div>
+        </div>
+      </ng-container>
+    </section>
+
+    <section class="grid gap-3 xl:grid-cols-[1fr_320px]">
+      <div class="ll-stat-card p-4">
+        <div class="mb-3 flex items-center justify-between gap-3">
+          <h3 class="ll-heading text-lg">Bracket</h3>
+          <p class="text-xs text-secondary" *ngIf="bracket() as currentBracket">
+            {{ enumLabel(currentBracket.status) }}
+          </p>
+        </div>
+
+        <div *ngIf="bracket()?.rounds?.length; else noBracket" class="flex flex-col gap-3">
+          <section *ngFor="let round of bracket()?.rounds" class="ll-panel p-3">
+            <div class="mb-2 flex flex-wrap items-baseline justify-between gap-2">
+              <h4 class="ll-heading text-base">{{ round.name }}</h4>
+              <p class="text-xs text-secondary">
+                {{ enumLabel(round.status) }} · {{ round.startsAtUtc | date: "short" }}
+              </p>
+            </div>
+            <div class="flex flex-col gap-2">
+              <div
+                *ngFor="let match of round.matches"
+                class="grid gap-2 border-t border-white/10 py-2 text-sm md:grid-cols-[1fr_auto_1fr]"
+              >
+                <span [class.text-amber-200]="match.winnerTeamId === match.playerOne?.teamId">
+                  {{ teamLabel(match.playerOne) }}
+                </span>
+                <span class="text-xs uppercase tracking-wide text-secondary">
+                  {{ outcomeLabel(match) }}
+                  <button
+                    *ngIf="match.battleHistoryId"
+                    type="button"
+                    class="ml-2 rounded border border-primary/40 px-2 py-1 text-[11px] font-semibold uppercase text-primary hover:bg-primary/10"
+                    [disabled]="actionLoading()"
+                    [routerLink]="[
+                      '/game',
+                      'city',
+                      'colosseum',
+                      'tournaments',
+                      tournament.id,
+                      'matches',
+                      match.id,
+                      'replay'
+                    ]"
+                  >
+                    Replay
+                  </button>
+                </span>
+                <span
+                  class="md:text-right"
+                  [class.text-amber-200]="match.winnerTeamId === match.playerTwo?.teamId"
+                >
+                  {{ teamLabel(match.playerTwo) }}
+                </span>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+
+      <aside class="ll-stat-card flex flex-col gap-3 p-4">
+        <h3 class="ll-heading text-lg">Rewards</h3>
+        <div *ngIf="unclaimedRewards().length === 0 && claimedRewards().length === 0" class="ll-empty-state">
+          No rewards yet.
+        </div>
+        <div *ngFor="let reward of unclaimedRewards()" class="ll-panel p-3">
+          <p class="ll-heading text-base">{{ rewardLabel(reward) }}</p>
+          <p class="text-sm text-secondary">
+            {{ reward.arenaGlory }} Glory · {{ reward.cinders }} Cinders ·
+            {{ reward.soulstones }} Soulstones
+          </p>
+        </div>
+        <div *ngFor="let reward of claimedRewards()" class="ll-panel p-3 opacity-70">
+          <p class="ll-heading text-base">{{ rewardLabel(reward) }} claimed</p>
+          <p class="text-sm text-secondary">
+            {{ reward.arenaGlory }} Glory · {{ reward.cinders }} Cinders ·
+            {{ reward.soulstones }} Soulstones
+          </p>
+        </div>
+
+        <div class="border-t border-white/10 pt-3" *ngIf="upcoming().length > 0">
+          <h3 class="ll-heading text-lg">Upcoming</h3>
+          <div *ngFor="let upcomingTournament of upcoming()" class="mt-2 ll-panel p-3">
+            <p class="ll-heading text-base">{{ upcomingTournament.name }}</p>
+            <p class="text-sm text-secondary">
+              {{ upcomingTournament.registrationStartsAtUtc | date: "short" }}
+            </p>
+          </div>
+        </div>
+
+        <div class="border-t border-white/10 pt-3" *ngIf="recent().length > 0">
+          <h3 class="ll-heading text-lg">Recent Results</h3>
+          <div *ngFor="let recentTournament of recent()" class="mt-2 ll-panel p-3">
+            <p class="ll-heading text-base">{{ recentTournament.name }}</p>
+            <p class="text-sm text-secondary">
+              {{ tournamentResultLabel(recentTournament) }}
+              <span *ngIf="recentTournament.completedAtUtc">
+                · {{ recentTournament.completedAtUtc | date: "short" }}
+              </span>
+              <span *ngIf="recentTournament.cancelledAtUtc">
+                · {{ recentTournament.cancelledAtUtc | date: "short" }}
+              </span>
+            </p>
+          </div>
+        </div>
+
+        <div class="border-t border-white/10 pt-3">
+          <h3 class="ll-heading text-lg">Your Tournament History</h3>
+          <div *ngIf="history().length === 0" class="ll-empty-state mt-2">
+            No completed entries yet.
+          </div>
+          <div *ngFor="let entry of history()" class="mt-2 ll-panel p-3">
+            <div class="flex items-start justify-between gap-3">
+              <div class="min-w-0">
+                <p class="ll-heading text-base">
+                  #{{ entry.tournamentNumber }} {{ entry.tournamentName }}
+                </p>
+                <p class="text-sm text-secondary">
+                  {{ historyResultLabel(entry) }}
+                  <span *ngIf="entry.completedAtUtc">
+                    · {{ entry.completedAtUtc | date: "short" }}
+                  </span>
+                  <span *ngIf="entry.cancelledAtUtc">
+                    · {{ entry.cancelledAtUtc | date: "short" }}
+                  </span>
+                </p>
+              </div>
+              <span class="shrink-0 text-xs uppercase tracking-wide text-secondary">
+                {{ entry.replayCount }} replays
+              </span>
+            </div>
+            <p class="mt-1 text-xs text-secondary">
+              <span *ngIf="entry.seed">Seed #{{ entry.seed }} · </span>
+              {{ entry.entryArenaRating }} rating · {{ entry.entryRankTier }}
+              <span *ngIf="entry.rewardStatus">
+                · Reward {{ entry.rewardStatus }}
+              </span>
+            </p>
+          </div>
+        </div>
+
+        <div class="border-t border-white/10 pt-3">
+          <h3 class="ll-heading text-lg">Hall of Fame</h3>
+          <div *ngIf="hallOfFame().length === 0" class="ll-empty-state mt-2">
+            No champions crowned yet.
+          </div>
+          <div *ngFor="let champion of hallOfFame()" class="mt-2 ll-panel p-3">
+            <div class="flex items-start justify-between gap-3">
+              <div class="min-w-0">
+                <p class="ll-heading text-base">{{ champion.championName }}</p>
+                <p class="text-sm text-secondary">
+                  #{{ champion.tournamentNumber }} {{ champion.tournamentName }}
+                </p>
+              </div>
+              <span class="shrink-0 text-xs uppercase tracking-wide text-amber-200">
+                Champion
+              </span>
+            </div>
+            <p class="mt-1 text-xs text-secondary">
+              {{ championSeedLabel(champion) }} ·
+              {{ champion.championEntryArenaRating }} rating ·
+              {{ champion.participantCount }} entrants ·
+              {{ champion.completedAtUtc | date: "short" }}
+            </p>
+          </div>
+        </div>
+
+        <div class="border-t border-white/10 pt-3">
+          <h3 class="ll-heading text-lg">Season Points</h3>
+          <div *ngIf="seasonLeaderboard().length === 0" class="ll-empty-state mt-2">
+            No season points yet.
+          </div>
+          <div *ngFor="let entry of seasonLeaderboard()" class="mt-2 ll-panel p-3">
+            <div class="flex items-start justify-between gap-3">
+              <div class="min-w-0">
+                <p class="ll-heading text-base">
+                  #{{ entry.rank }} {{ entry.characterName }}
+                </p>
+                <p class="text-sm text-secondary">
+                  {{ entry.points }} points · {{ leaderboardPlacementLabel(entry) }}
+                </p>
+              </div>
+              <span class="shrink-0 text-xs uppercase tracking-wide text-secondary">
+                {{ entry.seasonKey }}
+              </span>
+            </div>
+            <p class="mt-1 text-xs text-secondary">
+              {{ entry.tournamentsEntered }} entries ·
+              {{ entry.championships }} titles ·
+              {{ entry.finalistFinishes }} finalist runs
+            </p>
+          </div>
+        </div>
+      </aside>
+    </section>
+  </ng-container>
 </section>
+
+<ng-template #teamFinder>
+  <div class="grid gap-3 lg:grid-cols-[280px_1fr]">
+    <div class="ll-panel p-3">
+      <p class="ll-heading text-base">Create Team</p>
+      <p class="text-sm text-secondary">Start a team and invite registered players.</p>
+      <input
+        #teamNameInput
+        type="text"
+        maxlength="80"
+        class="mt-3 w-full rounded border border-white/10 bg-black/30 px-3 py-2 text-sm text-white outline-none focus:border-primary/60"
+        placeholder="Team name"
+      />
+      <button
+        type="button"
+        class="ll-button-primary mt-3 w-full px-3 py-2 text-sm"
+        [disabled]="actionLoading()"
+        (click)="createTeam(current(), teamNameInput.value)"
+      >
+        Create Team
+      </button>
+    </div>
+
+    <div class="ll-panel p-3">
+      <p class="ll-heading text-base">Open Teams</p>
+      <div *ngIf="openTeams().length === 0" class="ll-empty-state mt-2">
+        No teams are looking for members yet.
+      </div>
+      <div class="mt-2 grid gap-2 md:grid-cols-2">
+        <div *ngFor="let team of openTeams()" class="rounded border border-white/10 p-3">
+          <div class="flex items-start justify-between gap-3">
+            <div>
+              <p class="ll-heading text-base">{{ team.name }}</p>
+              <p class="text-sm text-secondary">
+                Owner {{ team.ownerName }} · {{ team.memberCount }}/3 members
+              </p>
+            </div>
+            <button
+              type="button"
+              class="ll-button-secondary px-3 py-1 text-xs"
+              [disabled]="actionLoading()"
+              (click)="applyToTeam(current(), team)"
+            >
+              Apply
+            </button>
+          </div>
+          <p class="mt-2 text-xs text-secondary">
+            Missing {{ team.missingParticipantCount }} player{{ team.missingParticipantCount === 1 ? "" : "s" }}
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</ng-template>
+
+<ng-template #emptyState>
+  <section class="ll-panel flex h-48 w-full items-center justify-center p-4">
+    <div class="ll-empty-state w-full">
+      {{ loading() ? "Loading tournament grounds..." : "No tournament scheduled." }}
+    </div>
+  </section>
+</ng-template>
+
+<ng-template #noBracket>
+  <div class="ll-empty-state">
+    Bracket appears after registration closes.
+  </div>
+</ng-template>

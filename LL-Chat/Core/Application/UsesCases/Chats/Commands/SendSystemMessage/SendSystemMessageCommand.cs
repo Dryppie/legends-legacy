@@ -45,12 +45,14 @@ public class SendSystemMessageCommandHandler : IRequestHandler<SendSystemMessage
             SenderName = string.IsNullOrWhiteSpace(request.SenderName)
                 ? request.IsGlobal ? "World" : "System"
                 : request.SenderName.Trim(),
+            SenderTitleDisplayName = null,
             Body = request.Body.Trim(),
             ContextKey = "system",
             SentAt = request.SentAt ?? DateTimeOffset.UtcNow,
             ChannelType = ChatChannelType.System,
             TargetCharacterId = request.IsGlobal ? null : request.TargetCharacterId,
-            TargetCharacterName = null
+            TargetCharacterName = null,
+            TargetCharacterTitleDisplayName = null
         };
 
         await _chatService.AddAsync(message, cancellationToken);

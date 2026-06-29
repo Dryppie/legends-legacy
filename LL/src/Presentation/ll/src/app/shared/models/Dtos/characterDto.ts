@@ -20,6 +20,7 @@ export interface CharacterDto {
 
 export interface CharacterOverviewDto {
   id: string;
+  name: string;
   level: number;
   combatRating: number;
   baseAttributes: AttributeDto[];

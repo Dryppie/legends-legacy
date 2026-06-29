@@ -39,11 +39,21 @@ public class CharacterRepository : ICharacterRepository
         return character;
     }
 
-    public async Task<Character?> GetCharacterByUserIdAsync(Guid userId, CancellationToken cancellationToken) =>
-        await _context.Characters
+    public async Task<Character?> GetCharacterByUserIdAsync(Guid userId, CancellationToken cancellationToken)
+    {
+        var localCharacter = _context.Characters.Local
+            .FirstOrDefault(c => c.UserId == userId);
+
+        if (localCharacter is not null)
+        {
+            return localCharacter;
+        }
+
+        return await _context.Characters
             .Include(c => c.ArenaProfile)
             .Include(c => c.EquippedTitleDefinition)
             .FirstOrDefaultAsync(c => c.UserId.Equals(userId), cancellationToken);
+    }
 
     public async Task<Character> GetCharacterByCharacterIdAsync(Guid characterId, CancellationToken cancellationToken)
     {

@@ -12,6 +12,7 @@ import { ChatService } from '../../../../core/services/ll-chat/chat-service/chat
 export class CharacterTagComponent {
   @Input() id!: string;
   @Input() name!: string;
+  @Input() titleDisplayName?: string | null;
 
   isMenuOpen = false;
 
@@ -19,6 +20,11 @@ export class CharacterTagComponent {
     private readonly router: Router,
     private readonly chat: ChatService,
   ) {}
+
+  get displayName(): string {
+    const titleDisplayName = this.titleDisplayName?.trim();
+    return titleDisplayName || this.name;
+  }
 
   toggleMenu() {
     this.isMenuOpen = !this.isMenuOpen;

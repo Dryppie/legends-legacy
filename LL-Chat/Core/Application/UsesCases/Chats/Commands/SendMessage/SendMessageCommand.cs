@@ -5,7 +5,16 @@ using Domain.Models.Chats;
 using MediatR;
 
 namespace Application.UsesCases.Chats.Commands.SendMessage;
-public record SendMessageCommand(string Channel, string Body, string SenderId, string SenderName, ChatChannelType ChannelType, string? TargetCharacterId = null, string? TargetCharacterName = null) : IRequest<ChatMessageDto?>;
+public record SendMessageCommand(
+    string Channel,
+    string Body,
+    string SenderId,
+    string SenderName,
+    string? SenderTitleDisplayName,
+    ChatChannelType ChannelType,
+    string? TargetCharacterId = null,
+    string? TargetCharacterName = null,
+    string? TargetCharacterTitleDisplayName = null) : IRequest<ChatMessageDto?>;
 public class SendMessageCommandHandler : IRequestHandler<SendMessageCommand, ChatMessageDto?>
 {
     private readonly IChatService _chatService;
@@ -37,16 +46,25 @@ public class SendMessageCommandHandler : IRequestHandler<SendMessageCommand, Cha
         {
             SenderId = senderId,
             SenderName = request.SenderName,
+            SenderTitleDisplayName = NormalizeTitle(request.SenderTitleDisplayName),
             Body = request.Body,
             ContextKey = request.Channel,
             SentAt = DateTime.UtcNow,
             ChannelType = request.ChannelType,
             TargetCharacterId = targetCharacterId,
-            TargetCharacterName = request.TargetCharacterName
+            TargetCharacterName = request.TargetCharacterName,
+            TargetCharacterTitleDisplayName = NormalizeTitle(request.TargetCharacterTitleDisplayName)
         };
 
         await _chatService.AddAsync(message, cancellationToken);
 
         return _mapper.Map<ChatMessageDto>(message);
+    }
+
+    private static string? NormalizeTitle(string? titleDisplayName)
+    {
+        return string.IsNullOrWhiteSpace(titleDisplayName)
+            ? null
+            : titleDisplayName.Trim();
     }
 }

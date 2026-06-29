@@ -95,6 +95,7 @@ export class ChatComponent implements OnInit, OnDestroy {
 
   messages: ChatMessageDto[] = [];
   draft = '';
+  sendError = '';
   private sub?: Subscription;
 
   get activeRoomKey(): string {
@@ -170,7 +171,70 @@ export class ChatComponent implements OnInit, OnDestroy {
     );
   }
 
+  channelLabel(message: ChatMessageDto): string {
+    if (message.channelType === ChatChannelType.General) {
+      return message.contextKey === 'trade' || message.contextKey === 'help'
+        ? message.contextKey
+        : 'general';
+    }
+
+    return message.channelType;
+  }
+
+  channelBadgeClasses(message: ChatMessageDto): string {
+    switch (message.channelType) {
+      case ChatChannelType.Trade:
+        return 'border-emerald-400/30 bg-emerald-400/10 text-emerald-300';
+      case ChatChannelType.Help:
+        return 'border-sky-400/30 bg-sky-400/10 text-sky-300';
+      case ChatChannelType.Guild:
+        return 'border-rose-400/30 bg-rose-400/10 text-rose-300';
+      case ChatChannelType.Whisper:
+        return 'border-fuchsia-400/30 bg-fuchsia-400/10 text-fuchsia-300';
+      case ChatChannelType.System:
+        return 'border-zinc-400/25 bg-zinc-400/10 text-zinc-300';
+      default:
+        return 'border-primary/30 bg-primary/10 text-primary';
+    }
+  }
+
+  messageRowClasses(message: ChatMessageDto): string {
+    switch (message.channelType) {
+      case ChatChannelType.Trade:
+        return 'border-l-emerald-400/40';
+      case ChatChannelType.Help:
+        return 'border-l-sky-400/40';
+      case ChatChannelType.Guild:
+        return 'border-l-rose-400/40';
+      case ChatChannelType.Whisper:
+        return 'border-l-fuchsia-400/50 bg-fuchsia-950/10';
+      case ChatChannelType.System:
+        return 'border-l-zinc-400/40 bg-zinc-900/20';
+      default:
+        return 'border-l-primary/40';
+    }
+  }
+
+  whisperDisplayId(message: ChatMessageDto): string {
+    return message.senderId === this.characterId()
+      ? (message.targetCharacterId ?? '')
+      : message.senderId;
+  }
+
+  whisperDisplayName(message: ChatMessageDto): string {
+    return message.senderId === this.characterId()
+      ? (message.targetCharacterName ?? '')
+      : message.senderName;
+  }
+
+  whisperDisplayTitle(message: ChatMessageDto): string | null | undefined {
+    return message.senderId === this.characterId()
+      ? message.targetCharacterTitleDisplayName
+      : message.senderTitleDisplayName;
+  }
+
   onDraftChange(): void {
+    this.sendError = '';
     if (this.draft.length > 200) {
       this.draft = this.draft.slice(0, 200);
     }
@@ -190,43 +254,48 @@ export class ChatComponent implements OnInit, OnDestroy {
     const body = this.draft.trim();
     if (!body || !isMessageAllowed(body)) return;
 
-    this.draft = '';
-
     let { type, contextKey } = this.activeChannel;
 
-    if (body.startsWith('/w ')) {
-      const parts = body.split(' ');
-      if (parts.length < 3) return; // Invalid
+    try {
+      if (body.startsWith('/w ')) {
+        const parts = body.split(' ');
+        if (parts.length < 3) return; // Invalid
 
-      const targetName = parts[1];
-      const messageBody = body
-        .slice(body.indexOf(targetName) + targetName.length)
-        .trim();
+        const targetName = parts[1];
+        const messageBody = body
+          .slice(body.indexOf(targetName) + targetName.length)
+          .trim();
 
-      try {
         await this.chat.sendWhisperToName(targetName, messageBody);
-      } catch (err) {
-        // You could show a toast or log error here
-        console.warn(err);
+        this.draft = '';
+        return;
       }
-      return;
-    }
 
-    if (contextKey === 'all') contextKey = 'general';
-    switch (type) {
-      case ChatChannelType.General:
-      case ChatChannelType.Trade:
-      case ChatChannelType.Help:
-        await this.chat.sendPublic(type, contextKey, body);
-        break;
-      // case ChatChannelType.Whisper:
-      //   if (this.chat.targetUserId) {
-      //     await this.chat.sendWhisper(this.chat.targetUserId, body);
-      //   }
-      //   break;
-      case ChatChannelType.Guild:
-        await this.chat.sendGuild(this.guild()!.id, body);
-        break;
+      if (contextKey === 'all') contextKey = 'general';
+      switch (type) {
+        case ChatChannelType.General:
+        case ChatChannelType.Trade:
+        case ChatChannelType.Help:
+          await this.chat.sendPublic(type, contextKey, body);
+          break;
+        // case ChatChannelType.Whisper:
+        //   if (this.chat.targetUserId) {
+        //     await this.chat.sendWhisper(this.chat.targetUserId, body);
+        //   }
+        //   break;
+        case ChatChannelType.Guild:
+          await this.chat.sendGuild(this.guild()!.id, body);
+          break;
+        default:
+          return;
+      }
+
+      this.draft = '';
+      this.sendError = '';
+    } catch (err) {
+      this.sendError =
+        err instanceof Error ? err.message : 'Unable to send chat message.';
+      console.warn('Unable to send chat message.', err);
     }
   }
 }

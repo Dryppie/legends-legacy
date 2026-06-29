@@ -25,78 +25,74 @@
       </button>
     </div>
 
-    <section class="flex flex-col overflow-y-auto text-white" appStickyScroll>
+    <section
+      class="flex flex-col gap-0.5 overflow-y-auto px-2 py-2 text-white"
+      appStickyScroll
+    >
       <ng-container *ngIf="filteredMessages as messages">
-        <div
+        <article
           *ngFor="let m of messages"
-          class="p-1 odd:bg-zinc-300/5 even:bg-transparent"
+          class="group grid grid-cols-[3.4rem_minmax(0,1fr)] gap-1 rounded-sm border-l-2 bg-black/10 px-2 py-1.5 transition-colors hover:bg-white/[0.06]"
+          [ngClass]="messageRowClasses(m)"
         >
-          <span class="animate-fade-in-up break-words">
-            <div>
-              <span>{{ m.sentAt | date: "shortTime" }}:</span>
-              <span class="font-bold">
-                <ng-container
-                  *ngIf="m.channelType === 'System'; else playerSender"
-                >
-                  {{ m.senderName }}:
-                </ng-container>
-                <ng-template #playerSender>
-                  <ng-container
-                    *ngIf="m.channelType === 'Whisper'; else normalSender"
-                  >
-                    <ng-container
-                      *ngIf="m.senderId === characterId(); else incomingWhisper"
-                    >
-                      To
-                      <div class="flex">
-                        <app-character-tag
-                          [id]="m.targetCharacterId ?? ''"
-                          [name]="m.targetCharacterName ?? ''"
-                        ></app-character-tag
-                        >:
-                      </div>
-                    </ng-container>
-                    <ng-template #incomingWhisper>
-                      From
-                      <div class="flex">
-                        <app-character-tag
-                          [id]="m.senderId"
-                          [name]="m.senderName"
-                        ></app-character-tag
-                        >:
-                      </div>
-                    </ng-template>
-                  </ng-container>
-                </ng-template>
-                <ng-template #normalSender>
-                  <div class="flex">
-                    <app-character-tag
-                      [id]="m.senderId"
-                      [name]="m.senderName"
-                    ></app-character-tag
-                    >:
-                  </div>
-                </ng-template>
-              </span>
-            </div>
-            <div class="break-words text-sm">
-              <label
-                [ngClass]="{
-                  'text-primary': m.channelType === 'General',
-                  'text-emerald-400': m.channelType === 'Trade',
-                  'text-sky-400': m.channelType === 'Help',
-                  'text-rose-400': m.channelType === 'Guild',
-                  'text-fuchsia-400': m.channelType === 'Whisper',
-                  'text-slate-400': m.channelType === 'System',
-                }"
-                >[{{ m.channelType }}]</label
+          <time class="pt-0.5 text-[11px] leading-4 text-zinc-500">
+            {{ m.sentAt | date: "shortTime" }}
+          </time>
+
+          <div class="min-w-0">
+            <div
+              class="flex min-w-0 flex-wrap items-center gap-x-1.5 gap-y-0.5"
+            >
+              <span
+                class="rounded border px-1.5 py-0.5 text-[10px] font-semibold uppercase leading-none tracking-normal"
+                [ngClass]="channelBadgeClasses(m)"
               >
-              <span>
-                {{ m.body }}
+                {{ channelLabel(m) }}
               </span>
+
+              <ng-container
+                *ngIf="m.channelType === 'System'; else playerSender"
+              >
+                <span class="text-xs font-semibold text-zinc-300">
+                  {{ m.senderName }}
+                </span>
+              </ng-container>
+
+              <ng-template #playerSender>
+                <ng-container
+                  *ngIf="m.channelType === 'Whisper'; else normalSender"
+                >
+                  <span class="text-[11px] uppercase text-zinc-500">
+                    {{ m.senderId === characterId() ? "to" : "from" }}
+                  </span>
+                  <app-character-tag
+                    [id]="whisperDisplayId(m)"
+                    [name]="whisperDisplayName(m)"
+                    [titleDisplayName]="whisperDisplayTitle(m)"
+                  ></app-character-tag>
+                </ng-container>
+              </ng-template>
+
+              <ng-template #normalSender>
+                <app-character-tag
+                  [id]="m.senderId"
+                  [name]="m.senderName"
+                  [titleDisplayName]="m.senderTitleDisplayName"
+                ></app-character-tag>
+              </ng-template>
             </div>
-          </span>
-        </div>
+
+            <p
+              class="mt-0.5 break-words text-sm leading-5"
+              [ngClass]="{
+                'italic text-zinc-300': m.channelType === 'System',
+                'text-zinc-100': m.channelType !== 'System',
+              }"
+            >
+              {{ m.body }}
+            </p>
+          </div>
+        </article>
       </ng-container>
     </section>
     <div
@@ -106,22 +102,27 @@
       <div>{{ draft.length }}/200 characters</div>
     </div>
   </div>
-  <div class="flex bg-black/40 p-1">
-    <input
-      #chatInput
-      type="text"
-      placeholder="write here.."
-      class="w-full rounded-md bg-transparent p-3 text-primary placeholder:text-zinc-300"
-      [(ngModel)]="draft"
-      (ngModelChange)="onDraftChange()"
-      (keydown.enter)="send()"
-      maxlength="200"
-    />
-    <app-regular-button
-      class="p-1"
-      (pressed)="send()"
-      text="Send"
-      [disabled]="!draft"
-    />
+  <div class="bg-black/40 p-1">
+    <div class="flex">
+      <input
+        #chatInput
+        type="text"
+        placeholder="write here.."
+        class="w-full rounded-md bg-transparent p-3 text-primary placeholder:text-zinc-300"
+        [(ngModel)]="draft"
+        (ngModelChange)="onDraftChange()"
+        (keydown.enter)="send()"
+        maxlength="200"
+      />
+      <app-regular-button
+        class="p-1"
+        (pressed)="send()"
+        text="Send"
+        [disabled]="!draft"
+      />
+    </div>
+    <p *ngIf="sendError" class="px-3 pb-2 text-xs text-rose-400">
+      {{ sendError }}
+    </p>
   </div>
 </div>

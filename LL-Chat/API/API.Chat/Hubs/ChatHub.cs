@@ -3,12 +3,14 @@ using API.Chat.Utility;
 using Application.UsesCases.Chats.Commands.SendMessage;
 using Domain.Models.Chats;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Caching.Distributed;
 using System.Security.Claims;
 
 namespace API.Chat.Hubs;
 
+[Authorize]
 public sealed class ChatHub : Hub<IChatClient>
 {
     private const string PublicPrefix = "pub:";   // e.g.  "pub:general"
@@ -24,16 +26,39 @@ public sealed class ChatHub : Hub<IChatClient>
         _cache = cache;
     }
 
-    public async Task Send(string contextKey, string body, ChatChannelType channelType, string? targetCharacterId = null, string? targetCharacterName = null)
+    public async Task Send(
+        string contextKey,
+        string body,
+        ChatChannelType channelType,
+        string? targetCharacterId = null,
+        string? targetCharacterName = null,
+        string? targetCharacterTitleDisplayName = null,
+        string? senderTitleDisplayName = null)
     {
 
         var senderId = Context.UserIdentifier;
+        if (string.IsNullOrWhiteSpace(senderId))
+        {
+            throw new HubException("Chat connection is not authenticated.");
+        }
+
         if (!await RateLimiter.EnsureAllowedAsync(_cache, senderId))
             return;
 
         var senderName = Context.User!.Identity!.Name ?? "Unknown Sender";
+        senderTitleDisplayName = NormalizeTitleDisplayName(senderTitleDisplayName)
+            ?? NormalizeTitleDisplayName(Context.User.FindFirst("CharacterTitleDisplayName")?.Value);
 
-        var msg = await _mediator.Send(new SendMessageCommand(contextKey, body, senderId, senderName, channelType, targetCharacterId, targetCharacterName));
+        var msg = await _mediator.Send(new SendMessageCommand(
+            contextKey,
+            body,
+            senderId,
+            senderName,
+            senderTitleDisplayName,
+            channelType,
+            targetCharacterId,
+            targetCharacterName,
+            targetCharacterTitleDisplayName));
         if (msg == null) return;
 
         switch (channelType)
@@ -84,5 +109,12 @@ public sealed class ChatHub : Hub<IChatClient>
     {
         //await Groups.AddToGroupAsync(Context.ConnectionId, StatsGroup);
         await Groups.AddToGroupAsync(Context.ConnectionId, PublicPrefix);
+    }
+
+    private static string? NormalizeTitleDisplayName(string? titleDisplayName)
+    {
+        return string.IsNullOrWhiteSpace(titleDisplayName)
+            ? null
+            : titleDisplayName.Trim();
     }
 }

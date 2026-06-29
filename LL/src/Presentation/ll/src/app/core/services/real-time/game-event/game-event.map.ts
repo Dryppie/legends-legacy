@@ -16,6 +16,8 @@ import { SoulstoneDropMsg } from '../character/soulstone-drop';
 import { CharacterLevelUpMsg } from '../character/character-level-up';
 import { ArenaBattleCompletedMsg } from '../colosseum/arena-battle-completed';
 import { GuildBuildingsChangedMsg } from '../guild/guild-buildings-changed';
+import { TournamentGroundsUpdated } from '../colosseum/tournament-grounds-updated';
+import { GuildBuildingUpgradedMsg } from '../guild/guild-building-upgraded';
 import { GuildApplicationMsg } from '../guild/guild-application';
 import { GuildInviteReceivedMsg } from '../guild/guild-invite-received';
 import { GuildInviteRejectedMsg } from '../guild/guild-invite-rejected';
@@ -36,6 +38,8 @@ export const gameEventNames = [
   'CharacterLevelUpMsg',
   'ArenaBattleCompletedMsg',
   'GuildBuildingsChangedMsg',
+  'TournamentGroundsUpdated',
+  'GuildBuildingUpgradedMsg',
   'GuildApplicationMsg',
   'GuildInviteReceivedMsg',
   'GuildInviteRejectedMsg',
@@ -66,6 +70,8 @@ export interface GameEventMap {
   CharacterLevelUpMsg: CharacterLevelUpMsg;
   ArenaBattleCompletedMsg: ArenaBattleCompletedMsg;
   GuildBuildingsChangedMsg: GuildBuildingsChangedMsg;
+  TournamentGroundsUpdated: TournamentGroundsUpdated;
+  GuildBuildingUpgradedMsg: GuildBuildingUpgradedMsg;
   GuildApplicationMsg: GuildApplicationMsg;
   GuildInviteReceivedMsg: GuildInviteReceivedMsg;
   GuildInviteRejectedMsg: GuildInviteRejectedMsg;
