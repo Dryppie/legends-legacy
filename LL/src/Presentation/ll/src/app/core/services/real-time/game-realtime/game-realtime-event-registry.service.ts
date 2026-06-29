@@ -34,8 +34,10 @@ export class GameRealtimeEventRegistry {
 
   initialize(): void {
     if (!isGameRealtimeEnabled() || this.registered) return;
-    this.registered = true;
+
+    this.handlers.clear();
     this.registerHandlers();
+    this.registered = true;
     this.subscription = this.connection.events$.subscribe((envelope) =>
       this.dispatch(envelope),
     );
@@ -44,6 +46,9 @@ export class GameRealtimeEventRegistry {
   dispose(): void {
     this.subscription?.unsubscribe();
     this.subscription = undefined;
+    this.handlers.clear();
+    this.pendingIdleEnvelope = null;
+    this.idleBatchScheduled = false;
     this.registered = false;
   }
 

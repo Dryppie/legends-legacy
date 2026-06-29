@@ -3,12 +3,14 @@ using API.Chat.Utility;
 using Application.UsesCases.Chats.Commands.SendMessage;
 using Domain.Models.Chats;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Caching.Distributed;
 using System.Security.Claims;
 
 namespace API.Chat.Hubs;
 
+[Authorize]
 public sealed class ChatHub : Hub<IChatClient>
 {
     private const string PublicPrefix = "pub:";   // e.g.  "pub:general"
@@ -28,6 +30,11 @@ public sealed class ChatHub : Hub<IChatClient>
     {
 
         var senderId = Context.UserIdentifier;
+        if (string.IsNullOrWhiteSpace(senderId))
+        {
+            throw new HubException("Chat connection is not authenticated.");
+        }
+
         if (!await RateLimiter.EnsureAllowedAsync(_cache, senderId))
             return;
 

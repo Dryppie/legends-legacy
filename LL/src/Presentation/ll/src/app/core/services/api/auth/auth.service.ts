@@ -28,6 +28,7 @@ export class AuthService {
   private refreshSub?: Subscription;
   /** UNIX seconds when the current access token expires */
   private _accessExpiresAt = 0;
+  private _accessToken = '';
 
   /** shared refresh observable while a refresh is in-flight */
   private _refreshInFlight$?: Observable<number>;
@@ -93,9 +94,9 @@ export class AuthService {
     return this.api
       .post('auth/login', { Email: email, Password: password })
       .pipe(
-        tap(({ accessExpiresAt }) => {
+        tap(({ accessToken, accessExpiresAt }) => {
           this.toast.showToast('Login successful', '', true);
-          this.afterSuccessfulAuth(accessExpiresAt);
+          this.afterSuccessfulAuth(accessToken, accessExpiresAt);
         }),
         map(() => void 0),
         catchError((e) => {
@@ -117,9 +118,9 @@ export class AuthService {
         Password: password,
       })
       .pipe(
-        tap(({ accessExpiresAt }) => {
+        tap(({ accessToken, accessExpiresAt }) => {
           this.toast.showToast('Registration success', '', true);
-          this.afterSuccessfulAuth(accessExpiresAt);
+          this.afterSuccessfulAuth(accessToken, accessExpiresAt);
         }),
         catchError((e) => {
           this.toast.showToast('Registration failed', e.errorMessage, false);
@@ -132,9 +133,9 @@ export class AuthService {
     this.api
       .post('auth/loginAsGuest')
       .pipe(
-        tap(({ accessExpiresAt }) => {
+        tap(({ accessToken, accessExpiresAt }) => {
           this.toast.showToast('Guest session started', '', true);
-          this.afterSuccessfulAuth(accessExpiresAt);
+          this.afterSuccessfulAuth(accessToken, accessExpiresAt);
         }),
         catchError((e) => {
           this.toast.showToast('Guest login error', e.message, false);
@@ -148,9 +149,9 @@ export class AuthService {
     this.api
       .post('auth/google', idToken)
       .pipe(
-        tap(({ accessExpiresAt }) => {
+        tap(({ accessToken, accessExpiresAt }) => {
           this.toast.showToast('Google sign-in success', '', true);
-          this.afterSuccessfulAuth(accessExpiresAt);
+          this.afterSuccessfulAuth(accessToken, accessExpiresAt);
         }),
         catchError((e) => {
           this.toast.showToast('Google sign-in error', e.message, false);
@@ -188,10 +189,10 @@ export class AuthService {
         Password: password,
       })
       .pipe(
-        tap(({ accessExpiresAt }) => {
+        tap(({ accessToken, accessExpiresAt }) => {
           this.toast.showToast('Account converted', '', true);
           // cookies already updated server‑side; just restart auth flow
-          this.afterSuccessfulAuth(accessExpiresAt);
+          this.afterSuccessfulAuth(accessToken, accessExpiresAt);
         }),
         catchError((e) => {
           this.toast.showToast('Guest to real account error', e.message, false);
@@ -202,9 +203,9 @@ export class AuthService {
 
   renameCharacter(newName: string) {
     return this.api.post('auth/rename', newName).pipe(
-      tap(async ({ accessExpiresAt }) => {
+      tap(async ({ accessToken, accessExpiresAt }) => {
         this.toast.showToast('Edited name', '', true);
-        this.afterSuccessfulAuth(accessExpiresAt);
+        this.afterSuccessfulAuth(accessToken, accessExpiresAt);
 
         // reconnect chat after rename
         // await this.chat.reconnect('global'); // or current channel if tracked
@@ -225,6 +226,8 @@ export class AuthService {
 
   private finishLogout(): void {
     this.refreshSub?.unsubscribe(); // stop future refresh attempts
+    this._accessToken = '';
+    this._accessExpiresAt = 0;
     this.markUnauthenticated();
     this.router.navigateByUrl('/');
   }
@@ -245,8 +248,8 @@ export class AuthService {
   /** Returns `true` when refresh succeeded. */
   private tryRefresh(): Observable<number> {
     return this.api.post('auth/createNewTokens').pipe(
-      map(({ accessExpiresAt }) => {
-        this.setAccessExpiry(accessExpiresAt);
+      map(({ accessToken, accessExpiresAt }) => {
+        this.setAccessToken(accessToken, accessExpiresAt);
         return accessExpiresAt;
       }),
       catchError(() => of(0)),
@@ -254,10 +257,10 @@ export class AuthService {
     );
   }
 
-  private afterSuccessfulAuth(accessExpiresAt: number) {
+  private afterSuccessfulAuth(accessToken: string, accessExpiresAt: number) {
     this.markAuthenticated();
 
-    this.setAccessExpiry(accessExpiresAt);
+    this.setAccessToken(accessToken, accessExpiresAt);
     // preload character, then redirect
     this.fetchCharacter().subscribe({
       next: () => this.router.navigateByUrl('/game'),
@@ -316,7 +319,12 @@ export class AuthService {
     );
   }
 
-  private setAccessExpiry(exp: number) {
+  getAccessToken(): string {
+    return this._accessToken;
+  }
+
+  private setAccessToken(token: string, exp: number) {
+    this._accessToken = token;
     this._accessExpiresAt = exp;
   }
 

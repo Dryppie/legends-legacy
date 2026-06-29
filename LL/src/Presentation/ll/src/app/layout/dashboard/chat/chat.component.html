@@ -106,22 +106,27 @@
       <div>{{ draft.length }}/200 characters</div>
     </div>
   </div>
-  <div class="flex bg-black/40 p-1">
-    <input
-      #chatInput
-      type="text"
-      placeholder="write here.."
-      class="w-full rounded-md bg-transparent p-3 text-primary placeholder:text-zinc-300"
-      [(ngModel)]="draft"
-      (ngModelChange)="onDraftChange()"
-      (keydown.enter)="send()"
-      maxlength="200"
-    />
-    <app-regular-button
-      class="p-1"
-      (pressed)="send()"
-      text="Send"
-      [disabled]="!draft"
-    />
+  <div class="bg-black/40 p-1">
+    <div class="flex">
+      <input
+        #chatInput
+        type="text"
+        placeholder="write here.."
+        class="w-full rounded-md bg-transparent p-3 text-primary placeholder:text-zinc-300"
+        [(ngModel)]="draft"
+        (ngModelChange)="onDraftChange()"
+        (keydown.enter)="send()"
+        maxlength="200"
+      />
+      <app-regular-button
+        class="p-1"
+        (pressed)="send()"
+        text="Send"
+        [disabled]="!draft"
+      />
+    </div>
+    <p *ngIf="sendError" class="px-3 pb-2 text-xs text-rose-400">
+      {{ sendError }}
+    </p>
   </div>
 </div>

@@ -6,6 +6,7 @@ import {
   OnDestroy,
   OnInit,
   Output,
+  untracked,
 } from '@angular/core';
 import { Router, RouterLink, NavigationEnd } from '@angular/router';
 import { filter, Subject, takeUntil } from 'rxjs';
@@ -70,7 +71,9 @@ export class SidebarComponent implements OnInit, OnDestroy {
 
     effect(() => {
       const characterId = this.characterState.currentCharacter()?.id;
-      this.sidebarNotificationRefreshService.refreshForCharacter(characterId);
+      untracked(() =>
+        this.sidebarNotificationRefreshService.refreshForCharacter(characterId),
+      );
     });
 
     this.currentCharacter = this.characterState.currentCharacter;

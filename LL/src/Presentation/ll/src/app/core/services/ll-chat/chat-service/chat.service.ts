@@ -220,11 +220,13 @@ export class ChatService {
   }
 
   private async buildHubConnection(): Promise<void> {
+    await firstValueFrom(this.auth.ensureValidToken());
+
     this.hub = new signalR.HubConnectionBuilder()
       .withUrl(`${this.apiBase}/hub`, {
         withCredentials: true, // send AccessToken cookie
-        // DEV ONLY – include bearer if you keep tokens outside cookies
-        accessTokenFactory: () => localStorage.getItem('DevAuth') ?? '',
+        accessTokenFactory: () =>
+          this.auth.getAccessToken() || localStorage.getItem('DevAuth') || '',
       })
       .withAutomaticReconnect({
         nextRetryDelayInMilliseconds: (retry) =>
