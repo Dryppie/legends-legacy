@@ -337,7 +337,23 @@ export class AuthService {
       a.experienceUntilNextLevel === b.experienceUntilNextLevel &&
       a.cinders === b.cinders &&
       a.soulstones === b.soulstones &&
-      a.arenaRating === b.arenaRating
+      a.arenaRating === b.arenaRating &&
+      this.isSameEquippedTitle(a.equippedTitle, b.equippedTitle)
+    );
+  }
+
+  private isSameEquippedTitle(
+    a: CharacterDto['equippedTitle'],
+    b: CharacterDto['equippedTitle'],
+  ): boolean {
+    if (!a && !b) return true;
+    if (!a || !b) return false;
+
+    return (
+      a.key === b.key &&
+      a.name === b.name &&
+      a.displayPosition === b.displayPosition &&
+      a.displayName === b.displayName
     );
   }
 }

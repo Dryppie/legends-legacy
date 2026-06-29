@@ -26,7 +26,14 @@ public sealed class ChatHub : Hub<IChatClient>
         _cache = cache;
     }
 
-    public async Task Send(string contextKey, string body, ChatChannelType channelType, string? targetCharacterId = null, string? targetCharacterName = null)
+    public async Task Send(
+        string contextKey,
+        string body,
+        ChatChannelType channelType,
+        string? targetCharacterId = null,
+        string? targetCharacterName = null,
+        string? targetCharacterTitleDisplayName = null,
+        string? senderTitleDisplayName = null)
     {
 
         var senderId = Context.UserIdentifier;
@@ -39,8 +46,19 @@ public sealed class ChatHub : Hub<IChatClient>
             return;
 
         var senderName = Context.User!.Identity!.Name ?? "Unknown Sender";
+        senderTitleDisplayName = NormalizeTitleDisplayName(senderTitleDisplayName)
+            ?? NormalizeTitleDisplayName(Context.User.FindFirst("CharacterTitleDisplayName")?.Value);
 
-        var msg = await _mediator.Send(new SendMessageCommand(contextKey, body, senderId, senderName, channelType, targetCharacterId, targetCharacterName));
+        var msg = await _mediator.Send(new SendMessageCommand(
+            contextKey,
+            body,
+            senderId,
+            senderName,
+            senderTitleDisplayName,
+            channelType,
+            targetCharacterId,
+            targetCharacterName,
+            targetCharacterTitleDisplayName));
         if (msg == null) return;
 
         switch (channelType)
@@ -91,5 +109,12 @@ public sealed class ChatHub : Hub<IChatClient>
     {
         //await Groups.AddToGroupAsync(Context.ConnectionId, StatsGroup);
         await Groups.AddToGroupAsync(Context.ConnectionId, PublicPrefix);
+    }
+
+    private static string? NormalizeTitleDisplayName(string? titleDisplayName)
+    {
+        return string.IsNullOrWhiteSpace(titleDisplayName)
+            ? null
+            : titleDisplayName.Trim();
     }
 }

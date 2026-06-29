@@ -13,6 +13,7 @@ namespace Application.UseCases.Characters.Dtos;
 public class CharacterOverviewDto : IMapFrom<Character>
 {
     public Guid Id { get; set; }
+    public string Name { get; set; } = string.Empty;
     public int Level { get; set; }
     public int CombatRating { get; set; }
     public List<EntityAttribute> BaseAttributes { get; set; } = [];
@@ -41,6 +42,7 @@ public sealed class CharacterOverviewConverter : ITypeConverter<Character, Chara
         return new CharacterOverviewDto
         {
             Id = source.Id,
+            Name = source.Name,
             Level = source.Level,
             CombatRating = CombatRatingCalculator.Calculate(source.BaseCombatAttributes, source.Level),
             BaseAttributes = source.BaseAttributes.ToList(),

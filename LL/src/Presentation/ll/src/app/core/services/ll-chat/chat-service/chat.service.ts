@@ -17,8 +17,10 @@ export interface ChatMessageDto {
   contextKey: string;
   senderId: string;
   senderName: string;
+  senderTitleDisplayName?: string | null;
   targetCharacterId?: string;
   targetCharacterName?: string;
+  targetCharacterTitleDisplayName?: string | null;
   body: string;
   sentAt: Date;
 }
@@ -151,7 +153,16 @@ export class ChatService {
     body: string,
   ): Promise<void> {
     await this.ensureConnected();
-    await this.hub!.invoke('Send', contextKey, body, channelType, null, null);
+    await this.hub!.invoke(
+      'Send',
+      contextKey,
+      body,
+      channelType,
+      null,
+      null,
+      null,
+      this.currentSenderTitleDisplayName(),
+    );
   }
 
   async sendGuild(guildId: string, body: string): Promise<void> {
@@ -163,16 +174,23 @@ export class ChatService {
       ChatChannelType.Guild,
       null,
       null,
+      null,
+      this.currentSenderTitleDisplayName(),
     );
   }
 
   async sendWhisperToName(targetName: string, body: string): Promise<void> {
-    const targetId = await firstValueFrom(
-      this.characterService.resolveCharacterIdByName(targetName),
+    const target = await firstValueFrom(
+      this.characterService.searchCharacter(targetName),
     );
-    if (!targetId) return;
+    if (!target?.id) return;
 
-    return this.sendWhisper(targetId, targetName, body);
+    return this.sendWhisper(
+      target.id,
+      target.name || targetName,
+      body,
+      target.equippedTitle?.displayName ?? null,
+    );
   }
 
   prepareWhisperToName(targetName: string): void {
@@ -186,6 +204,7 @@ export class ChatService {
     targetUserId: string,
     targetName: string,
     body: string,
+    targetTitleDisplayName?: string | null,
   ): Promise<void> {
     await this.ensureConnected();
     await this.hub!.invoke(
@@ -195,6 +214,8 @@ export class ChatService {
       ChatChannelType.Whisper,
       targetUserId,
       targetName,
+      targetTitleDisplayName ?? null,
+      this.currentSenderTitleDisplayName(),
     );
   }
 
@@ -301,5 +322,9 @@ export class ChatService {
 
   private isTemporarilyUnavailable(): boolean {
     return Date.now() < this.unavailableUntil;
+  }
+
+  private currentSenderTitleDisplayName(): string | null {
+    return this.auth.currentCharacter()?.equippedTitle?.displayName?.trim() || null;
   }
 }

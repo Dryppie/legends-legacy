@@ -227,6 +227,12 @@ export class ChatComponent implements OnInit, OnDestroy {
       : message.senderName;
   }
 
+  whisperDisplayTitle(message: ChatMessageDto): string | null | undefined {
+    return message.senderId === this.characterId()
+      ? message.targetCharacterTitleDisplayName
+      : message.senderTitleDisplayName;
+  }
+
   onDraftChange(): void {
     this.sendError = '';
     if (this.draft.length > 200) {
