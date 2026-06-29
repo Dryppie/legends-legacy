@@ -25,9 +25,11 @@ using Domain.Models.Regions.Areas;
 using Domain.Models.Snapshots;
 using Domain.Models.Soulstones;
 using Domain.Models.Users;
+using Application.BackgroundJobs;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Persistence.LL.BackgroundJobs;
 using Persistence.LL.Repositories.Attributes;
 using Persistence.LL.Repositories.CharacterActions;
 using Persistence.LL.Repositories.Colosseum;
@@ -57,12 +59,19 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddPersistence(this IServiceCollection services, IConfiguration configuration)
     {
+        services.AddOptions<BackgroundJobOptions>()
+            .Bind(configuration.GetSection(BackgroundJobOptions.SectionName))
+            .Validate(options => options.MaxConcurrency > 0, "BackgroundJobs:MaxConcurrency must be greater than zero.")
+            .Validate(options => options.RunningExecutionTimeoutMinutes > 0, "BackgroundJobs:RunningExecutionTimeoutMinutes must be greater than zero.")
+            .ValidateOnStart();
+
         var timeout = configuration.GetSection("Database").GetValue<int>("TimeoutInSeconds");
         services.AddDbContextFactory<LLDbContext>(options =>
             options.UseNpgsql(configuration.GetConnectionString("LegendsLegacyDB"), npgsqlOptions => npgsqlOptions.CommandTimeout(timeout))
         );
 
         services.AddScoped<IDbContext>(provider => provider.GetRequiredService<LLDbContext>() ?? throw new SystemException("LLDbContext could not be resolved"));
+        services.AddScoped<IBackgroundJobExecutionService, BackgroundJobExecutionService>();
 
         return services;
     }

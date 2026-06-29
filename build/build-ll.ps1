@@ -22,6 +22,8 @@ Write-Debug "BUILD_VERSION: $BUILD_VERSION"
 
 Write-Debug "--- dotnet publish ---"
 dotnet publish "$root/LL/src/API/API.LL/API.LL.csproj" -c Release -o $artifactPath/api.ll /p:UseAppHost=false --no-self-contained
+dotnet publish "$root/LL/src/Worker/Worker.LL/Worker.LL.csproj" -c Release -o $artifactPath/worker.ll /p:UseAppHost=false --no-self-contained
 
 Write-Debug "--- docker build ---"
 docker build --push -f "$buildpath/ll-backend.dockerfile" $artifactPath/api.ll/. --tag "$($DOCKER_REGISTRY)ll-backend:$IMAGE_TAG"
+docker build --push -f "$buildpath/ll-worker.dockerfile" $artifactPath/worker.ll/. --tag "$($DOCKER_REGISTRY)ll-worker:$IMAGE_TAG"
