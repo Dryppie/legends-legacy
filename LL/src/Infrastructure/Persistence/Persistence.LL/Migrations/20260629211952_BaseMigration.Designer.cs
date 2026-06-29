@@ -13,13 +13,8 @@ using Persistence.LL;
 namespace Persistence.LL.Migrations
 {
     [DbContext(typeof(LLDbContext))]
-<<<<<<<< HEAD:LL/src/Infrastructure/Persistence/Persistence.LL/Migrations/20260629203618_BaseMigration.Designer.cs
-    [Migration("20260629203618_BaseMigration")]
+    [Migration("20260629211952_BaseMigration")]
     partial class BaseMigration
-========
-    [Migration("20260628222221_RemoveCombatStyles")]
-    partial class RemoveCombatStyles
->>>>>>>> main:LL/src/Infrastructure/Persistence/Persistence.LL/Migrations/20260628222221_RemoveCombatStyles.Designer.cs
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -3282,7 +3277,6 @@ namespace Persistence.LL.Migrations
                         .IsRequired();
                 });
 
-<<<<<<<< HEAD:LL/src/Infrastructure/Persistence/Persistence.LL/Migrations/20260629203618_BaseMigration.Designer.cs
             modelBuilder.Entity("Domain.Models.Colosseum.Tournaments.TournamentCombatReplay", b =>
                 {
                     b.HasOne("Domain.Models.Colosseum.Tournaments.TournamentMatch", "Match")
@@ -3430,14 +3424,14 @@ namespace Persistence.LL.Migrations
                         .IsRequired();
 
                     b.Navigation("Team");
-========
+                });
+
             modelBuilder.Entity("Domain.Models.Dungeons.Runs.DungeonRun", b =>
                 {
                     b.HasOne("Domain.Models.Snapshots.CharacterSnapshot", null)
                         .WithMany()
                         .HasForeignKey("CharacterSnapshotId")
                         .OnDelete(DeleteBehavior.Restrict);
->>>>>>>> main:LL/src/Infrastructure/Persistence/Persistence.LL/Migrations/20260628222221_RemoveCombatStyles.Designer.cs
                 });
 
             modelBuilder.Entity("Domain.Models.Dungeons.Runs.RoomInstance", b =>
