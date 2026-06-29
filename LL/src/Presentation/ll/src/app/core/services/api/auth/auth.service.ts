@@ -258,9 +258,9 @@ export class AuthService {
   }
 
   private afterSuccessfulAuth(accessToken: string, accessExpiresAt: number) {
+    this.setAccessToken(accessToken, accessExpiresAt);
     this.markAuthenticated();
 
-    this.setAccessToken(accessToken, accessExpiresAt);
     // preload character, then redirect
     this.fetchCharacter().subscribe({
       next: () => this.router.navigateByUrl('/game'),

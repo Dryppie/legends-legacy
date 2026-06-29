@@ -1016,6 +1016,33 @@ namespace Persistence.LL.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "TournamentTeams",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    TournamentId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Name = table.Column<string>(type: "character varying(80)", maxLength: 80, nullable: false),
+                    OwnerParticipantId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Seed = table.Column<int>(type: "integer", nullable: true),
+                    Status = table.Column<int>(type: "integer", nullable: false),
+                    MemberCount = table.Column<int>(type: "integer", nullable: false),
+                    EliminatedInRoundNumber = table.Column<int>(type: "integer", nullable: true),
+                    FinalPlacement = table.Column<int>(type: "integer", nullable: true),
+                    CreatedAtUtc = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    UpdatedAtUtc = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_TournamentTeams", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_TournamentTeams_ArenaTournaments_TournamentId",
+                        column: x => x.TournamentId,
+                        principalTable: "ArenaTournaments",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "AreaCreature",
                 columns: table => new
                 {
@@ -1307,41 +1334,6 @@ namespace Persistence.LL.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "TournamentParticipants",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    TournamentId = table.Column<Guid>(type: "uuid", nullable: false),
-                    CharacterId = table.Column<Guid>(type: "uuid", nullable: false),
-                    AccountId = table.Column<Guid>(type: "uuid", nullable: false),
-                    SnapshotId = table.Column<Guid>(type: "uuid", nullable: false),
-                    Seed = table.Column<int>(type: "integer", nullable: true),
-                    EntryArenaRating = table.Column<int>(type: "integer", nullable: false),
-                    EntryRankTier = table.Column<string>(type: "character varying(80)", maxLength: 80, nullable: false),
-                    Status = table.Column<int>(type: "integer", nullable: false),
-                    EliminatedInRoundNumber = table.Column<int>(type: "integer", nullable: true),
-                    FinalPlacement = table.Column<int>(type: "integer", nullable: true),
-                    RegisteredAtUtc = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    UpdatedAtUtc = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_TournamentParticipants", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_TournamentParticipants_ArenaTournaments_TournamentId",
-                        column: x => x.TournamentId,
-                        principalTable: "ArenaTournaments",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_TournamentParticipants_TournamentCombatSnapshots_SnapshotId",
-                        column: x => x.SnapshotId,
-                        principalTable: "TournamentCombatSnapshots",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "TournamentMatches",
                 columns: table => new
                 {
@@ -1375,6 +1367,96 @@ namespace Persistence.LL.Migrations
                         name: "FK_TournamentMatches_TournamentRounds_RoundId",
                         column: x => x.RoundId,
                         principalTable: "TournamentRounds",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "TournamentParticipants",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    TournamentId = table.Column<Guid>(type: "uuid", nullable: false),
+                    CharacterId = table.Column<Guid>(type: "uuid", nullable: false),
+                    AccountId = table.Column<Guid>(type: "uuid", nullable: false),
+                    TeamId = table.Column<Guid>(type: "uuid", nullable: true),
+                    IsTeamOwner = table.Column<bool>(type: "boolean", nullable: false),
+                    SnapshotId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Seed = table.Column<int>(type: "integer", nullable: true),
+                    EntryArenaRating = table.Column<int>(type: "integer", nullable: false),
+                    EntryRankTier = table.Column<string>(type: "character varying(80)", maxLength: 80, nullable: false),
+                    Status = table.Column<int>(type: "integer", nullable: false),
+                    EliminatedInRoundNumber = table.Column<int>(type: "integer", nullable: true),
+                    FinalPlacement = table.Column<int>(type: "integer", nullable: true),
+                    RegisteredAtUtc = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    UpdatedAtUtc = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_TournamentParticipants", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_TournamentParticipants_ArenaTournaments_TournamentId",
+                        column: x => x.TournamentId,
+                        principalTable: "ArenaTournaments",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_TournamentParticipants_TournamentCombatSnapshots_SnapshotId",
+                        column: x => x.SnapshotId,
+                        principalTable: "TournamentCombatSnapshots",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_TournamentParticipants_TournamentTeams_TeamId",
+                        column: x => x.TeamId,
+                        principalTable: "TournamentTeams",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.SetNull);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "TournamentTeamApplications",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    TournamentId = table.Column<Guid>(type: "uuid", nullable: false),
+                    TeamId = table.Column<Guid>(type: "uuid", nullable: false),
+                    ApplicantParticipantId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Status = table.Column<int>(type: "integer", nullable: false),
+                    CreatedAtUtc = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    UpdatedAtUtc = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_TournamentTeamApplications", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_TournamentTeamApplications_TournamentTeams_TeamId",
+                        column: x => x.TeamId,
+                        principalTable: "TournamentTeams",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "TournamentTeamInvites",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    TournamentId = table.Column<Guid>(type: "uuid", nullable: false),
+                    TeamId = table.Column<Guid>(type: "uuid", nullable: false),
+                    InviterParticipantId = table.Column<Guid>(type: "uuid", nullable: false),
+                    InvitedParticipantId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Status = table.Column<int>(type: "integer", nullable: false),
+                    CreatedAtUtc = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    UpdatedAtUtc = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_TournamentTeamInvites", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_TournamentTeamInvites_TournamentTeams_TeamId",
+                        column: x => x.TeamId,
+                        principalTable: "TournamentTeams",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -2049,6 +2131,11 @@ namespace Persistence.LL.Migrations
                 column: "Status");
 
             migrationBuilder.CreateIndex(
+                name: "IX_TournamentParticipants_TeamId",
+                table: "TournamentParticipants",
+                column: "TeamId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_TournamentParticipants_TournamentId_AccountId",
                 table: "TournamentParticipants",
                 columns: new[] { "TournamentId", "AccountId" },
@@ -2064,6 +2151,11 @@ namespace Persistence.LL.Migrations
                 name: "IX_TournamentParticipants_TournamentId_Seed",
                 table: "TournamentParticipants",
                 columns: new[] { "TournamentId", "Seed" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_TournamentParticipants_TournamentId_TeamId",
+                table: "TournamentParticipants",
+                columns: new[] { "TournamentId", "TeamId" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_TournamentRewardGrants_CharacterId_Status",
@@ -2090,6 +2182,47 @@ namespace Persistence.LL.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_TournamentRounds_TournamentId_Status",
                 table: "TournamentRounds",
+                columns: new[] { "TournamentId", "Status" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_TournamentTeamApplications_TeamId_ApplicantParticipantId_St~",
+                table: "TournamentTeamApplications",
+                columns: new[] { "TeamId", "ApplicantParticipantId", "Status" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_TournamentTeamApplications_TournamentId_ApplicantParticipan~",
+                table: "TournamentTeamApplications",
+                columns: new[] { "TournamentId", "ApplicantParticipantId" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_TournamentTeamInvites_TeamId_InvitedParticipantId_Status",
+                table: "TournamentTeamInvites",
+                columns: new[] { "TeamId", "InvitedParticipantId", "Status" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_TournamentTeamInvites_TournamentId_InvitedParticipantId",
+                table: "TournamentTeamInvites",
+                columns: new[] { "TournamentId", "InvitedParticipantId" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_TournamentTeams_OwnerParticipantId",
+                table: "TournamentTeams",
+                column: "OwnerParticipantId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_TournamentTeams_TournamentId_Name",
+                table: "TournamentTeams",
+                columns: new[] { "TournamentId", "Name" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_TournamentTeams_TournamentId_Seed",
+                table: "TournamentTeams",
+                columns: new[] { "TournamentId", "Seed" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_TournamentTeams_TournamentId_Status",
+                table: "TournamentTeams",
                 columns: new[] { "TournamentId", "Status" });
 
             migrationBuilder.CreateIndex(
@@ -2223,6 +2356,12 @@ namespace Persistence.LL.Migrations
                 name: "TournamentRewardGrants");
 
             migrationBuilder.DropTable(
+                name: "TournamentTeamApplications");
+
+            migrationBuilder.DropTable(
+                name: "TournamentTeamInvites");
+
+            migrationBuilder.DropTable(
                 name: "WeeklyRevelationProgress");
 
             migrationBuilder.DropTable(
@@ -2260,6 +2399,9 @@ namespace Persistence.LL.Migrations
 
             migrationBuilder.DropTable(
                 name: "TournamentCombatSnapshots");
+
+            migrationBuilder.DropTable(
+                name: "TournamentTeams");
 
             migrationBuilder.DropTable(
                 name: "Areas");

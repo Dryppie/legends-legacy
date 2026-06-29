@@ -47,7 +47,7 @@ export class AuthInterceptor implements HttpInterceptor {
 
     /* 1️⃣  guarantee a fresh token before the call leaves the browser */
     return this.auth.ensureValidToken().pipe(
-      switchMap(() => next.handle(req)),
+      switchMap(() => next.handle(this.withAuthHeader(req))),
       catchError((err) => this.handle401(err, req, next)),
     );
   }
@@ -100,12 +100,25 @@ export class AuthInterceptor implements HttpInterceptor {
       if (error) {
         subject.error(error);
       } else {
-        next.handle(req).subscribe({
+        next.handle(this.withAuthHeader(req)).subscribe({
           next: (res) => subject.next(res),
           error: (err) => subject.error(err),
           complete: () => subject.complete(),
         });
       }
     }
+  }
+
+  private withAuthHeader(req: HttpRequest<any>): HttpRequest<any> {
+    const token = this.auth.getAccessToken();
+    if (!token) {
+      return req;
+    }
+
+    return req.clone({
+      setHeaders: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
   }
 }

@@ -13,7 +13,7 @@ using Persistence.LL;
 namespace Persistence.LL.Migrations
 {
     [DbContext(typeof(LLDbContext))]
-    [Migration("20260628233001_BaseMigration")]
+    [Migration("20260629203618_BaseMigration")]
     partial class BaseMigration
     {
         /// <inheritdoc />
@@ -923,6 +923,9 @@ namespace Persistence.LL.Migrations
                     b.Property<int?>("FinalPlacement")
                         .HasColumnType("integer");
 
+                    b.Property<bool>("IsTeamOwner")
+                        .HasColumnType("boolean");
+
                     b.Property<DateTimeOffset>("RegisteredAtUtc")
                         .HasColumnType("timestamp with time zone");
 
@@ -934,6 +937,9 @@ namespace Persistence.LL.Migrations
 
                     b.Property<int>("Status")
                         .HasColumnType("integer");
+
+                    b.Property<Guid?>("TeamId")
+                        .HasColumnType("uuid");
 
                     b.Property<Guid>("TournamentId")
                         .HasColumnType("uuid");
@@ -949,6 +955,8 @@ namespace Persistence.LL.Migrations
 
                     b.HasIndex("Status");
 
+                    b.HasIndex("TeamId");
+
                     b.HasIndex("TournamentId", "AccountId")
                         .IsUnique();
 
@@ -956,6 +964,8 @@ namespace Persistence.LL.Migrations
                         .IsUnique();
 
                     b.HasIndex("TournamentId", "Seed");
+
+                    b.HasIndex("TournamentId", "TeamId");
 
                     b.ToTable("TournamentParticipants");
                 });
@@ -1050,6 +1060,127 @@ namespace Persistence.LL.Migrations
                     b.HasIndex("TournamentId", "Status");
 
                     b.ToTable("TournamentRounds");
+                });
+
+            modelBuilder.Entity("Domain.Models.Colosseum.Tournaments.TournamentTeam", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int?>("EliminatedInRoundNumber")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("FinalPlacement")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("MemberCount")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("character varying(80)");
+
+                    b.Property<Guid>("OwnerParticipantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int?>("Seed")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("TournamentId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("UpdatedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OwnerParticipantId");
+
+                    b.HasIndex("TournamentId", "Name")
+                        .IsUnique();
+
+                    b.HasIndex("TournamentId", "Seed");
+
+                    b.HasIndex("TournamentId", "Status");
+
+                    b.ToTable("TournamentTeams");
+                });
+
+            modelBuilder.Entity("Domain.Models.Colosseum.Tournaments.TournamentTeamApplication", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("ApplicantParticipantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("TeamId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("TournamentId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("UpdatedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TournamentId", "ApplicantParticipantId");
+
+                    b.HasIndex("TeamId", "ApplicantParticipantId", "Status");
+
+                    b.ToTable("TournamentTeamApplications");
+                });
+
+            modelBuilder.Entity("Domain.Models.Colosseum.Tournaments.TournamentTeamInvite", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("InvitedParticipantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("InviterParticipantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("TeamId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("TournamentId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("UpdatedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TournamentId", "InvitedParticipantId");
+
+                    b.HasIndex("TeamId", "InvitedParticipantId", "Status");
+
+                    b.ToTable("TournamentTeamInvites");
                 });
 
             modelBuilder.Entity("Domain.Models.Dungeons.Mastery.CharacterDungeonMastery", b =>
@@ -2848,6 +2979,11 @@ namespace Persistence.LL.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("Domain.Models.Colosseum.Tournaments.TournamentTeam", "Team")
+                        .WithMany()
+                        .HasForeignKey("TeamId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
                     b.HasOne("Domain.Models.Colosseum.Tournaments.TournamentInstance", "Tournament")
                         .WithMany()
                         .HasForeignKey("TournamentId")
@@ -2855,6 +2991,8 @@ namespace Persistence.LL.Migrations
                         .IsRequired();
 
                     b.Navigation("Snapshot");
+
+                    b.Navigation("Team");
 
                     b.Navigation("Tournament");
                 });
@@ -2879,6 +3017,39 @@ namespace Persistence.LL.Migrations
                         .IsRequired();
 
                     b.Navigation("Tournament");
+                });
+
+            modelBuilder.Entity("Domain.Models.Colosseum.Tournaments.TournamentTeam", b =>
+                {
+                    b.HasOne("Domain.Models.Colosseum.Tournaments.TournamentInstance", "Tournament")
+                        .WithMany()
+                        .HasForeignKey("TournamentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Tournament");
+                });
+
+            modelBuilder.Entity("Domain.Models.Colosseum.Tournaments.TournamentTeamApplication", b =>
+                {
+                    b.HasOne("Domain.Models.Colosseum.Tournaments.TournamentTeam", "Team")
+                        .WithMany()
+                        .HasForeignKey("TeamId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Team");
+                });
+
+            modelBuilder.Entity("Domain.Models.Colosseum.Tournaments.TournamentTeamInvite", b =>
+                {
+                    b.HasOne("Domain.Models.Colosseum.Tournaments.TournamentTeam", "Team")
+                        .WithMany()
+                        .HasForeignKey("TeamId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Team");
                 });
 
             modelBuilder.Entity("Domain.Models.Dungeons.Runs.RoomInstance", b =>

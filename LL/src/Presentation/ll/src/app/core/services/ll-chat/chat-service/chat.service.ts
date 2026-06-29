@@ -38,7 +38,8 @@ export class ChatService {
   private hub?: HubConnection;
   private incoming$ = new Subject<ChatMessageDto>();
   private readonly whisperDraftRequests = new Subject<string>();
-  private activeGuildId?: string;
+  private activeIdentity?: string;
+  private activeGuildId: string | null = null;
   private connectAndLoadPromise?: Promise<void>;
   private unavailableUntil = 0;
   private lastConnectionWarningAt = 0;
@@ -85,16 +86,17 @@ export class ChatService {
     effect(
       () => {
         const id = this.auth.identity(); // ← depends on username + login
-        const guildId = this.guildState.guild()?.id;
+        const guildId = this.guildState.guild()?.id ?? null;
 
-        if (!id || !guildId) {
-          if (this.hub || this.activeGuildId) {
+        if (!id) {
+          if (this.hub || this.activeIdentity) {
             void this.disconnect();
           }
           return;
         }
 
         if (
+          this.activeIdentity === id &&
           this.activeGuildId === guildId &&
           (this.connectAndLoadPromise ||
             this.hub?.state === signalR.HubConnectionState.Connected ||
@@ -105,8 +107,9 @@ export class ChatService {
 
         if (this.isTemporarilyUnavailable()) return;
 
+        this.activeIdentity = id;
         this.activeGuildId = guildId;
-        this.connectAndLoadPromise = this.connectAndLoad(guildId)
+        this.connectAndLoadPromise = this.connectAndLoad(guildId ?? undefined)
           .catch((error) => {
             this.unavailableUntil = Date.now() + this.unavailableRetryDelayMs;
             this.handleConnectionError(error);
@@ -216,7 +219,9 @@ export class ChatService {
   /* -------------------- private helpers -------------------- */
 
   private addMessage(msg: ChatMessageDto): void {
-    this.messageList.update((prev) => [...prev, msg]);
+    this.messageList.update((prev) =>
+      prev.some((existing) => existing.id === msg.id) ? prev : [...prev, msg],
+    );
   }
 
   private async buildHubConnection(): Promise<void> {
@@ -275,7 +280,8 @@ export class ChatService {
       await this.hub.stop();
     }
     this.hub = undefined;
-    this.activeGuildId = undefined;
+    this.activeIdentity = undefined;
+    this.activeGuildId = null;
     this.connectAndLoadPromise = undefined;
     this.messageList.set([]);
 

@@ -1,6 +1,6 @@
 import { ConnectedPosition, OverlayModule } from '@angular/cdk/overlay';
 import { NgClass, NgFor, NgIf } from '@angular/common';
-import { Component, OnInit, computed, effect, signal } from '@angular/core';
+import { Component, OnDestroy, OnInit, computed, effect, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { DefaultHeaderComponent } from '../../../shared/components/default-header/default-header.component';
 import { AuthService } from '../../../core/services/api/auth/auth.service';
@@ -38,11 +38,12 @@ interface ProphecyGuidance {
   imports: [DefaultHeaderComponent, NgClass, NgFor, NgIf, OverlayModule, RouterLink],
   templateUrl: './prophecies-page.component.html',
 })
-export class PropheciesPageComponent implements OnInit {
+export class PropheciesPageComponent implements OnInit, OnDestroy {
   readonly overview = signal<PropheciesOverviewDto | null>(null);
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
   readonly message = signal<string | null>(null);
+  private readonly now = signal(Date.now());
   readonly weeklyFavorMarkers = [1, 2, 4, 6];
   readonly weeklyTrackEndPercent = 96;
   readonly rewardTooltipPositions: ConnectedPosition[] = [
@@ -76,6 +77,7 @@ export class PropheciesPageComponent implements OnInit {
     },
   ];
   private readonly eventDeduper = new GameEventDeduper();
+  private clockIntervalId: ReturnType<typeof setInterval> | null = null;
   hoveredRewardOverflowId: string | null = null;
   hoveredWeeklyMilestoneFavor: number | null = null;
 
@@ -131,7 +133,15 @@ export class PropheciesPageComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.clockIntervalId = setInterval(() => this.now.set(Date.now()), 30_000);
     this.refresh();
+  }
+
+  ngOnDestroy(): void {
+    if (this.clockIntervalId) {
+      clearInterval(this.clockIntervalId);
+      this.clockIntervalId = null;
+    }
   }
 
   refresh(): void {
@@ -498,7 +508,7 @@ export class PropheciesPageComponent implements OnInit {
   }
 
   timeRemaining(end: string): string {
-    const ms = new Date(end).getTime() - Date.now();
+    const ms = new Date(end).getTime() - this.now();
     if (ms <= 0) return 'Expired';
     const hours = Math.floor(ms / 3_600_000);
     const minutes = Math.floor((ms % 3_600_000) / 60_000);
