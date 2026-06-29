@@ -1,5 +1,6 @@
 using Domain.Models.Attributes;
 using Domain.Models.Achievements;
+using Domain.Models.BackgroundJobs;
 using Domain.Models.CharacterActions;
 using Domain.Models.CharacterActions.CharacterActionDetails;
 using Domain.Models.Colosseum;
@@ -38,6 +39,7 @@ public interface IDbContext
     DbSet<PlayerAchievementProgress> PlayerAchievementProgresses { get; }
     DbSet<TitleDefinition> TitleDefinitions { get; }
     DbSet<PlayerTitleUnlock> PlayerTitleUnlocks { get; }
+    DbSet<BackgroundJobExecution> BackgroundJobExecutions { get; }
     DbSet<Area> Areas { get; }
     DbSet<EntityAttribute> EntityAttributes { get; }
     //DbSet<Building> Buildings { get; }

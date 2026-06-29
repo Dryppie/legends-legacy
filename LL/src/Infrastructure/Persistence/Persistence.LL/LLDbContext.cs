@@ -1,6 +1,7 @@
 using Application.Common.Interfaces;
 using Domain.Models.Achievements;
 using Domain.Models.Attributes;
+using Domain.Models.BackgroundJobs;
 using Domain.Models.CharacterActions;
 using Domain.Models.CharacterActions.CharacterActionDetails;
 using Domain.Models.Colosseum;
@@ -130,6 +131,7 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : DbContext(opti
     public DbSet<PlayerAchievementProgress> PlayerAchievementProgresses => Set<PlayerAchievementProgress>();
     public DbSet<TitleDefinition> TitleDefinitions => Set<TitleDefinition>();
     public DbSet<PlayerTitleUnlock> PlayerTitleUnlocks => Set<PlayerTitleUnlock>();
+    public DbSet<BackgroundJobExecution> BackgroundJobExecutions => Set<BackgroundJobExecution>();
     public DbSet<Area> Areas => Set<Area>();
     public DbSet<EntityAttribute> EntityAttributes => Set<EntityAttribute>();
 

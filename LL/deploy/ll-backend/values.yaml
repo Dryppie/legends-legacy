@@ -10,6 +10,17 @@ image:
   # Overrides the image tag whose default is the chart appVersion.
   tag: ""
 
+worker:
+  enabled: false
+  replicaCount: 1
+  terminationGracePeriodSeconds: 60
+  env: {}
+  image:
+    repository: ghcr.io/dryppie/ll-worker
+    pullPolicy: IfNotPresent
+    tag: ""
+  resources: {}
+
 imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""
