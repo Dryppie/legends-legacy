@@ -1,9 +1,6 @@
-using Application.Common.Interfaces;
 using Application.Interfaces.WebSockets;
 using Application.Interfaces.Services.LL.Colosseum;
 using Application.Interfaces.Services.LL.Entities;
-using Application.UseCases.CharacterActions.Dtos.Responses.CombatDtos;
-using Application.UseCases.Colosseum.Tournaments;
 using Domain.Models.Colosseum;
 using Domain.Models.Colosseum.Tournaments;
 using Domain.Models.Combat;
@@ -12,7 +9,6 @@ using Domain.Models.Items;
 using Domain.Models.Items.Equipments;
 using Domain.Models.Snapshots;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Options;
 using Services.LL.Combat.Layers.Orchestration.Models;
 using Services.LL.Combat.Layers.Resolution.Models;
@@ -41,7 +37,7 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
         Converters = { new JsonStringEnumConverter() }
     };
 
-    private readonly IDbContext _db;
+    private readonly ITournamentGroundsRepository _tournaments;
     private readonly IEntityService _entityService;
     private readonly ICombatSetupService _combatSetupService;
     private readonly ICharacterSnapshotService _characterSnapshotService;
@@ -54,7 +50,7 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
     private readonly TournamentGroundsOptions _options;
 
     public TournamentGroundsService(
-        IDbContext db,
+        ITournamentGroundsRepository tournaments,
         IEntityService entityService,
         ICombatSetupService combatSetupService,
         ICharacterSnapshotService characterSnapshotService,
@@ -66,7 +62,7 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
         TimeProvider timeProvider,
         IOptions<TournamentGroundsOptions> options)
     {
-        _db = db;
+        _tournaments = tournaments;
         _entityService = entityService;
         _combatSetupService = combatSetupService;
         _characterSnapshotService = characterSnapshotService;
@@ -86,7 +82,7 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
         var now = UtcNow();
         var definition = await EnsureDefaultDefinitionAsync(now, cancellationToken);
 
-        var hasUpcoming = await _db.ArenaTournaments.AnyAsync(t =>
+        var hasUpcoming = await _tournaments.Tournaments.AnyAsync(t =>
             t.DefinitionId == definition.Id &&
             t.Status != TournamentStatus.Completed &&
             t.Status != TournamentStatus.Cancelled &&
@@ -97,7 +93,7 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
 
         var registrationWindow = BuildNextRegistrationWindow(now);
 
-        var nextNumber = await _db.ArenaTournaments
+        var nextNumber = await _tournaments.Tournaments
             .Select(t => (int?)t.TournamentNumber)
             .MaxAsync(cancellationToken) ?? 0;
 
@@ -118,8 +114,8 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
             UpdatedAtUtc = now
         };
 
-        await _db.ArenaTournaments.AddAsync(tournament, cancellationToken);
-        await _db.SaveChangesAsync(cancellationToken);
+        await _tournaments.AddAsync(tournament, cancellationToken);
+        await _tournaments.SaveChangesAsync(cancellationToken);
     }
 
     public async Task AdvanceDueTournamentsAsync(CancellationToken cancellationToken)
@@ -127,7 +123,7 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
         if (!_options.Enabled) return;
 
         var now = UtcNow();
-        var dueIds = await _db.ArenaTournaments
+        var dueIds = await _tournaments.Tournaments
             .Where(t => t.Status != TournamentStatus.Completed && t.Status != TournamentStatus.Cancelled)
             .Where(t =>
                 (t.Status == TournamentStatus.Scheduled && t.RegistrationStartsAtUtc <= now) ||
@@ -135,7 +131,7 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
                 (t.Status == TournamentStatus.RegistrationClosed) ||
                 (t.Status == TournamentStatus.BracketGenerated && t.StartsAtUtc <= now) ||
                 (t.Status == TournamentStatus.InProgress &&
-                    _db.TournamentRounds.Any(r => r.TournamentId == t.Id &&
+                    _tournaments.Rounds.Any(r => r.TournamentId == t.Id &&
                         r.Status != TournamentRoundStatus.Completed &&
                         r.StartsAtUtc <= now)))
             .Select(t => t.Id)
@@ -148,59 +144,59 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
         }
     }
 
-    public async Task<TournamentGroundsStatusDto> GetStatusAsync(Guid characterId, CancellationToken cancellationToken)
+    public async Task<TournamentGroundsStatus> GetStatusAsync(Guid characterId, CancellationToken cancellationToken)
     {
         await EnsureUpcomingTournamentsAsync(cancellationToken);
         await AdvanceDueTournamentsAsync(cancellationToken);
 
         var now = UtcNow();
-        var tournaments = await _db.ArenaTournaments
+        var tournaments = await _tournaments.Tournaments
             .Where(t => t.Status != TournamentStatus.Completed && t.Status != TournamentStatus.Cancelled)
             .OrderBy(t => t.RegistrationStartsAtUtc)
             .Take(4)
             .ToListAsync(cancellationToken);
 
-        var summaries = new List<TournamentSummaryDto>();
+        var summaries = new List<TournamentSummary>();
         foreach (var tournament in tournaments)
         {
             summaries.Add(await MapSummaryAsync(tournament, characterId, now, cancellationToken));
         }
 
-        var recentTournaments = await _db.ArenaTournaments
+        var recentTournaments = await _tournaments.Tournaments
             .Where(t => t.Status == TournamentStatus.Completed || t.Status == TournamentStatus.Cancelled)
             .Where(t =>
-                _db.TournamentParticipants.Any(p => p.TournamentId == t.Id && p.CharacterId == characterId) ||
-                _db.TournamentRewardGrants.Any(r => r.TournamentId == t.Id && r.CharacterId == characterId))
+                _tournaments.Participants.Any(p => p.TournamentId == t.Id && p.CharacterId == characterId) ||
+                _tournaments.RewardGrants.Any(r => r.TournamentId == t.Id && r.CharacterId == characterId))
             .OrderByDescending(t => t.CompletedAtUtc ?? t.CancelledAtUtc ?? t.UpdatedAtUtc)
             .Take(5)
             .ToListAsync(cancellationToken);
 
-        var recentSummaries = new List<TournamentSummaryDto>();
+        var recentSummaries = new List<TournamentSummary>();
         foreach (var tournament in recentTournaments)
         {
             recentSummaries.Add(await MapSummaryAsync(tournament, characterId, now, cancellationToken));
         }
 
-        return new TournamentGroundsStatusDto(now, summaries.FirstOrDefault(), summaries.Skip(1).ToList(), recentSummaries);
+        return new TournamentGroundsStatus(now, summaries.FirstOrDefault(), summaries.Skip(1).ToList(), recentSummaries);
     }
 
-    public async Task<TournamentDetailsDto?> GetDetailsAsync(Guid characterId, Guid tournamentId, CancellationToken cancellationToken)
+    public async Task<TournamentDetails?> GetDetailsAsync(Guid characterId, Guid tournamentId, CancellationToken cancellationToken)
     {
         await AdvanceTournamentAsync(tournamentId, cancellationToken);
 
         var now = UtcNow();
-        var tournament = await _db.ArenaTournaments.FirstOrDefaultAsync(t => t.Id == tournamentId, cancellationToken);
+        var tournament = await _tournaments.Tournaments.FirstOrDefaultAsync(t => t.Id == tournamentId, cancellationToken);
         if (tournament is null) return null;
 
         var participants = await MapParticipantsAsync(tournamentId, cancellationToken);
         var teams = await MapTeamsAsync(tournamentId, characterId, cancellationToken);
         var rewards = await GetRewardsAsync(characterId, tournamentId, cancellationToken);
-        return new TournamentDetailsDto(await MapSummaryAsync(tournament, characterId, now, cancellationToken), participants, teams, rewards);
+        return new TournamentDetails(await MapSummaryAsync(tournament, characterId, now, cancellationToken), participants, teams, rewards);
     }
 
-    public async Task<IReadOnlyList<TournamentHistoryEntryDto>> GetHistoryAsync(Guid characterId, CancellationToken cancellationToken)
+    public async Task<IReadOnlyList<TournamentHistoryEntry>> GetHistoryAsync(Guid characterId, CancellationToken cancellationToken)
     {
-        var entries = await _db.TournamentParticipants
+        var entries = await _tournaments.Participants
             .Include(p => p.Tournament)
             .Where(p => p.CharacterId == characterId)
             .Where(p => p.Tournament.Status == TournamentStatus.Completed || p.Tournament.Status == TournamentStatus.Cancelled)
@@ -209,16 +205,16 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
             .Select(p => new
             {
                 Participant = p,
-                RewardStatus = _db.TournamentRewardGrants
+                RewardStatus = _tournaments.RewardGrants
                     .Where(r => r.TournamentId == p.TournamentId && r.CharacterId == characterId)
                     .OrderByDescending(r => r.CreatedAtUtc)
                     .Select(r => (TournamentRewardStatus?)r.Status)
                     .FirstOrDefault(),
-                ReplayCount = _db.TournamentCombatReplays.Count(r => r.TournamentId == p.TournamentId)
+                ReplayCount = _tournaments.CombatReplays.Count(r => r.TournamentId == p.TournamentId)
             })
             .ToListAsync(cancellationToken);
 
-        return entries.Select(entry => new TournamentHistoryEntryDto(
+        return entries.Select(entry => new TournamentHistoryEntry(
             entry.Participant.TournamentId,
             entry.Participant.Tournament.TournamentNumber,
             entry.Participant.Tournament.Name,
@@ -236,9 +232,9 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
             entry.ReplayCount)).ToList();
     }
 
-    public async Task<IReadOnlyList<TournamentHallOfFameEntryDto>> GetHallOfFameAsync(CancellationToken cancellationToken)
+    public async Task<IReadOnlyList<TournamentHallOfFameEntry>> GetHallOfFameAsync(CancellationToken cancellationToken)
     {
-        var championTeams = await _db.TournamentTeams
+        var championTeams = await _tournaments.Teams
             .Include(t => t.Tournament)
             .Where(t => t.Status == TournamentTeamStatus.Champion)
             .Where(t => t.Tournament.Status == TournamentStatus.Completed && t.Tournament.CompletedAtUtc.HasValue)
@@ -249,16 +245,16 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
         if (championTeams.Count == 0) return [];
 
         var ownerIds = championTeams.Select(t => t.OwnerParticipantId).ToList();
-        var owners = await _db.TournamentParticipants
+        var owners = await _tournaments.Participants
             .Where(p => ownerIds.Contains(p.Id))
             .ToDictionaryAsync(p => p.Id, cancellationToken);
         var characterIds = owners.Values.Select(p => p.CharacterId).ToList();
-        var characterNames = await _db.Characters
+        var characterNames = await _tournaments.Characters
             .Where(c => characterIds.Contains(c.Id))
             .Select(c => new { c.Id, c.Name })
             .ToDictionaryAsync(c => c.Id, c => c.Name, cancellationToken);
 
-        var entries = new List<TournamentHallOfFameEntryDto>();
+        var entries = new List<TournamentHallOfFameEntry>();
         foreach (var team in championTeams)
         {
             if (!owners.TryGetValue(team.OwnerParticipantId, out var owner))
@@ -266,7 +262,7 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
                 continue;
             }
 
-            entries.Add(new TournamentHallOfFameEntryDto(
+            entries.Add(new TournamentHallOfFameEntry(
                 team.TournamentId,
                 team.Tournament.TournamentNumber,
                 team.Tournament.Name,
@@ -278,20 +274,20 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
                 team.Seed,
                 owner.EntryArenaRating,
                 owner.EntryRankTier,
-                await _db.TournamentCombatReplays.CountAsync(r => r.TournamentId == team.TournamentId, cancellationToken)));
+                await _tournaments.CombatReplays.CountAsync(r => r.TournamentId == team.TournamentId, cancellationToken)));
         }
 
         return entries;
     }
 
-    public async Task<IReadOnlyList<TournamentSeasonLeaderboardEntryDto>> GetSeasonLeaderboardAsync(CancellationToken cancellationToken)
+    public async Task<IReadOnlyList<TournamentSeasonLeaderboardEntry>> GetSeasonLeaderboardAsync(CancellationToken cancellationToken)
     {
         var now = UtcNow();
         var seasonStart = new DateTimeOffset(now.Year, now.Month, 1, 0, 0, 0, TimeSpan.Zero);
         var seasonEnd = seasonStart.AddMonths(1);
         var seasonKey = seasonStart.ToString("yyyy-MM");
 
-        var placements = await _db.TournamentParticipants
+        var placements = await _tournaments.Participants
             .Include(p => p.Tournament)
             .Where(p => p.Tournament.Status == TournamentStatus.Completed)
             .Where(p => p.Tournament.CompletedAtUtc >= seasonStart && p.Tournament.CompletedAtUtc < seasonEnd)
@@ -307,7 +303,7 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
         if (placements.Count == 0) return [];
 
         var characterIds = placements.Select(p => p.CharacterId).Distinct().ToList();
-        var characterNames = await _db.Characters
+        var characterNames = await _tournaments.Characters
             .Where(c => characterIds.Contains(c.Id))
             .Select(c => new { c.Id, c.Name })
             .ToDictionaryAsync(c => c.Id, c => c.Name, cancellationToken);
@@ -334,7 +330,7 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
             .ThenBy(entry => entry.BestPlacement ?? int.MaxValue)
             .ThenByDescending(entry => entry.LatestCompletedAtUtc)
             .Take(20)
-            .Select((entry, index) => new TournamentSeasonLeaderboardEntryDto(
+            .Select((entry, index) => new TournamentSeasonLeaderboardEntry(
                 index + 1,
                 entry.CharacterId,
                 entry.CharacterName,
@@ -348,26 +344,26 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
             .ToList();
     }
 
-    public async Task<TournamentBracketDto?> GetBracketAsync(Guid characterId, Guid tournamentId, CancellationToken cancellationToken)
+    public async Task<TournamentBracket?> GetBracketAsync(Guid characterId, Guid tournamentId, CancellationToken cancellationToken)
     {
         await AdvanceTournamentAsync(tournamentId, cancellationToken);
 
-        var tournament = await _db.ArenaTournaments.FirstOrDefaultAsync(t => t.Id == tournamentId, cancellationToken);
+        var tournament = await _tournaments.Tournaments.FirstOrDefaultAsync(t => t.Id == tournamentId, cancellationToken);
         if (tournament is null) return null;
 
         var teamMap = (await MapTeamsAsync(tournamentId, characterId, cancellationToken))
             .ToDictionary(t => t.TeamId);
 
-        var rounds = await _db.TournamentRounds
+        var rounds = await _tournaments.Rounds
             .Where(r => r.TournamentId == tournamentId)
             .Include(r => r.Matches)
             .OrderBy(r => r.RoundNumber)
             .ToListAsync(cancellationToken);
 
-        return new TournamentBracketDto(
+        return new TournamentBracket(
             tournament.Id,
             tournament.Status.ToString(),
-            rounds.Select(r => new TournamentRoundDto(
+            rounds.Select(r => new TournamentBracketRound(
                 r.Id,
                 r.RoundNumber,
                 r.Name,
@@ -376,7 +372,7 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
                 r.ResolvedAtUtc,
                 r.Matches
                     .OrderBy(m => m.MatchNumber)
-                    .Select(m => new TournamentMatchDto(
+                    .Select(m => new TournamentBracketMatch(
                         m.Id,
                         m.RoundNumber,
                         m.MatchNumber,
@@ -391,32 +387,32 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
                 .ToList());
     }
 
-    public async Task<CombatResultDto?> GetMatchReplayAsync(
+    public async Task<CombatResult?> GetMatchReplayAsync(
         Guid characterId,
         Guid tournamentId,
         Guid matchId,
         CancellationToken cancellationToken)
     {
-        var replay = await _db.TournamentCombatReplays
+        var replay = await _tournaments.CombatReplays
             .FirstOrDefaultAsync(r => r.TournamentId == tournamentId && r.MatchId == matchId, cancellationToken);
         if (replay is null) return null;
 
-        var canView = await _db.TournamentParticipants
+        var canView = await _tournaments.Participants
             .AnyAsync(p => p.TournamentId == tournamentId && p.CharacterId == characterId, cancellationToken);
         if (!canView)
         {
-            canView = await _db.TournamentRewardGrants
+            canView = await _tournaments.RewardGrants
                 .AnyAsync(r => r.TournamentId == tournamentId && r.CharacterId == characterId, cancellationToken);
         }
 
         if (!canView) return null;
 
-        return JsonSerializer.Deserialize<CombatResultDto>(replay.CombatResultJson, ReplayJsonOptions);
+        return JsonSerializer.Deserialize<CombatResult>(replay.CombatResultJson, ReplayJsonOptions);
     }
 
-    public async Task<IReadOnlyList<TournamentRewardGrantDto>> GetRewardsAsync(Guid characterId, Guid? tournamentId, CancellationToken cancellationToken)
+    public async Task<IReadOnlyList<TournamentRewardGrantEntry>> GetRewardsAsync(Guid characterId, Guid? tournamentId, CancellationToken cancellationToken)
     {
-        var query = _db.TournamentRewardGrants
+        var query = _tournaments.RewardGrants
             .Include(r => r.Tournament)
             .Where(r => r.CharacterId == characterId);
 
@@ -427,7 +423,7 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
 
         return await query
             .OrderByDescending(r => r.CreatedAtUtc)
-            .Select(r => new TournamentRewardGrantDto(
+            .Select(r => new TournamentRewardGrantEntry(
                 r.Id,
                 r.TournamentId,
                 r.Tournament.Name,
@@ -442,7 +438,7 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
             .ToListAsync(cancellationToken);
     }
 
-    public async Task<RegisterTournamentResponseDto?> RegisterAsync(Guid characterId, Guid tournamentId, CancellationToken cancellationToken)
+    public async Task<RegisterTournamentResult?> RegisterAsync(Guid characterId, Guid tournamentId, CancellationToken cancellationToken)
     {
         if (!_options.Enabled) return null;
 
@@ -451,25 +447,25 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
         await _tournamentLockService.LockTournamentAsync(tournamentId, cancellationToken);
 
         var now = UtcNow();
-        var tournament = await _db.ArenaTournaments.FirstOrDefaultAsync(t => t.Id == tournamentId, cancellationToken);
+        var tournament = await _tournaments.Tournaments.FirstOrDefaultAsync(t => t.Id == tournamentId, cancellationToken);
         if (tournament is null || tournament.Status != TournamentStatus.RegistrationOpen) return null;
         if (now < tournament.RegistrationStartsAtUtc || now >= tournament.RegistrationEndsAtUtc) return null;
         if (tournament.RegisteredParticipantCount >= GetMaxRegisteredParticipants(tournament)) return null;
 
-        var character = await _db.Characters
+        var character = await _tournaments.Characters
             .Include(c => c.ArenaProfile)
             .FirstOrDefaultAsync(c => c.Id == characterId, cancellationToken);
         if (character?.ArenaProfile is null) return null;
 
-        var definition = await _db.TournamentDefinitions.FirstOrDefaultAsync(d => d.Id == tournament.DefinitionId, cancellationToken);
+        var definition = await _tournaments.Definitions.FirstOrDefaultAsync(d => d.Id == tournament.DefinitionId, cancellationToken);
         if (definition is null || !MeetsEligibility(character, definition)) return null;
 
-        var existing = await _db.TournamentParticipants
+        var existing = await _tournaments.Participants
             .AnyAsync(p => p.TournamentId == tournamentId && p.Status != TournamentParticipantStatus.Withdrawn &&
                 (p.CharacterId == characterId || p.AccountId == character.UserId), cancellationToken);
         if (existing) return null;
 
-        var withdrawnParticipant = await _db.TournamentParticipants
+        var withdrawnParticipant = await _tournaments.Participants
             .FirstOrDefaultAsync(p =>
                 p.TournamentId == tournamentId &&
                 p.Status == TournamentParticipantStatus.Withdrawn &&
@@ -482,7 +478,7 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
 
         var snapshot = await _characterSnapshotService.CreateAsync(characterId, cancellationToken);
         var tier = ArenaRank.GetTier(character.ArenaProfile.Rating);
-        var tournamentSnapshot = await _db.TournamentCombatSnapshots
+        var tournamentSnapshot = await _tournaments.CombatSnapshots
             .FirstOrDefaultAsync(s => s.TournamentId == tournamentId && s.CharacterId == characterId, cancellationToken);
         if (tournamentSnapshot is null)
         {
@@ -493,7 +489,7 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
                 CharacterId = characterId,
                 CreatedAtUtc = now
             };
-            await _db.TournamentCombatSnapshots.AddAsync(tournamentSnapshot, cancellationToken);
+            await _tournaments.AddAsync(tournamentSnapshot, cancellationToken);
         }
 
         tournamentSnapshot.CharacterSnapshotId = snapshot.Id;
@@ -530,14 +526,14 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
         tournament.UpdatedAtUtc = now;
         if (withdrawnParticipant is null)
         {
-            await _db.TournamentParticipants.AddAsync(participant, cancellationToken);
+            await _tournaments.AddAsync(participant, cancellationToken);
         }
 
-        await _db.SaveChangesAsync(cancellationToken);
+        await _tournaments.SaveChangesAsync(cancellationToken);
         await transaction.CommitAsync(cancellationToken);
         await PublishTournamentEventAsync(tournament, "TournamentRegistrationUpdated", now, cancellationToken);
 
-        return new RegisterTournamentResponseDto(
+        return new RegisterTournamentResult(
             true,
             participant.Id,
             tournamentSnapshot.Id,
@@ -546,7 +542,7 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
             "Registered. Your current combat setup has been locked for this tournament.");
     }
 
-    public async Task<WithdrawTournamentResponseDto?> WithdrawAsync(Guid characterId, Guid tournamentId, CancellationToken cancellationToken)
+    public async Task<WithdrawTournamentResult?> WithdrawAsync(Guid characterId, Guid tournamentId, CancellationToken cancellationToken)
     {
         if (!_options.Enabled || !_options.AllowWithdrawDuringRegistration) return null;
 
@@ -555,22 +551,22 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
         await _tournamentLockService.LockTournamentAsync(tournamentId, cancellationToken);
 
         var now = UtcNow();
-        var tournament = await _db.ArenaTournaments.FirstOrDefaultAsync(t => t.Id == tournamentId, cancellationToken);
+        var tournament = await _tournaments.Tournaments.FirstOrDefaultAsync(t => t.Id == tournamentId, cancellationToken);
         if (tournament is null || tournament.Status != TournamentStatus.RegistrationOpen || now >= tournament.RegistrationEndsAtUtc) return null;
 
-        var participant = await _db.TournamentParticipants
+        var participant = await _tournaments.Participants
             .FirstOrDefaultAsync(p => p.TournamentId == tournamentId && p.CharacterId == characterId, cancellationToken);
         if (participant is null || participant.Status == TournamentParticipantStatus.Withdrawn) return null;
 
         if (participant.TeamId.HasValue)
         {
-            var team = await _db.TournamentTeams
+            var team = await _tournaments.Teams
                 .FirstOrDefaultAsync(t => t.Id == participant.TeamId.Value, cancellationToken);
             if (team is not null)
             {
                 if (team.OwnerParticipantId == participant.Id)
                 {
-                    var replacementOwner = await _db.TournamentParticipants
+                    var replacementOwner = await _tournaments.Participants
                         .Where(p => p.TeamId == team.Id && p.Id != participant.Id && p.Status != TournamentParticipantStatus.Withdrawn)
                         .OrderBy(p => p.RegisteredAtUtc)
                         .FirstOrDefaultAsync(cancellationToken);
@@ -604,14 +600,14 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
         participant.UpdatedAtUtc = now;
         tournament.RegisteredParticipantCount = Math.Max(0, tournament.RegisteredParticipantCount - 1);
         tournament.UpdatedAtUtc = now;
-        await _db.SaveChangesAsync(cancellationToken);
+        await _tournaments.SaveChangesAsync(cancellationToken);
         await transaction.CommitAsync(cancellationToken);
         await PublishTournamentEventAsync(tournament, "TournamentRegistrationUpdated", now, cancellationToken);
 
-        return new WithdrawTournamentResponseDto(true);
+        return new WithdrawTournamentResult(true);
     }
 
-    public async Task<CreateTournamentTeamResponseDto?> CreateTeamAsync(
+    public async Task<CreateTournamentTeamResult?> CreateTeamAsync(
         Guid characterId,
         Guid tournamentId,
         string name,
@@ -623,7 +619,7 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
         await _tournamentLockService.LockTournamentAsync(tournamentId, cancellationToken);
 
         var now = UtcNow();
-        var tournament = await _db.ArenaTournaments.FirstOrDefaultAsync(t => t.Id == tournamentId, cancellationToken);
+        var tournament = await _tournaments.Tournaments.FirstOrDefaultAsync(t => t.Id == tournamentId, cancellationToken);
         if (tournament is null || tournament.Status != TournamentStatus.RegistrationOpen || now >= tournament.RegistrationEndsAtUtc) return null;
 
         var participant = await GetRegisteredParticipantAsync(characterId, tournamentId, cancellationToken);
@@ -631,7 +627,7 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
         if (await GetCurrentTeamCountAsync(tournamentId, cancellationToken) >= tournament.MaxParticipants) return null;
 
         var teamName = NormalizeTeamName(name, participant.CharacterId);
-        var nameExists = await _db.TournamentTeams.AnyAsync(t => t.TournamentId == tournamentId && t.Name == teamName, cancellationToken);
+        var nameExists = await _tournaments.Teams.AnyAsync(t => t.TournamentId == tournamentId && t.Name == teamName, cancellationToken);
         if (nameExists) return null;
 
         var team = new TournamentTeam
@@ -651,15 +647,15 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
         participant.IsTeamOwner = true;
         participant.UpdatedAtUtc = now;
 
-        await _db.TournamentTeams.AddAsync(team, cancellationToken);
-        await _db.SaveChangesAsync(cancellationToken);
+        await _tournaments.AddAsync(team, cancellationToken);
+        await _tournaments.SaveChangesAsync(cancellationToken);
         await transaction.CommitAsync(cancellationToken);
         await PublishTournamentEventAsync(tournament, "TournamentTeamUpdated", now, cancellationToken);
 
-        return new CreateTournamentTeamResponseDto(true, team.Id);
+        return new CreateTournamentTeamResult(true, team.Id);
     }
 
-    public async Task<TournamentTeamActionResponseDto?> InviteToTeamAsync(
+    public async Task<TournamentTeamActionResult?> InviteToTeamAsync(
         Guid characterId,
         Guid tournamentId,
         Guid teamId,
@@ -672,24 +668,24 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
         var now = UtcNow();
         if (!await CanMutateTeamsAsync(tournamentId, now, cancellationToken)) return null;
 
-        var team = await _db.TournamentTeams.FirstOrDefaultAsync(t => t.Id == teamId && t.TournamentId == tournamentId, cancellationToken);
+        var team = await _tournaments.Teams.FirstOrDefaultAsync(t => t.Id == teamId && t.TournamentId == tournamentId, cancellationToken);
         if (team is null || team.MemberCount >= 3) return null;
         if (!await IsTeamOwnerAsync(characterId, team, cancellationToken)) return null;
 
-        var invited = await _db.TournamentParticipants.FirstOrDefaultAsync(p => p.Id == invitedParticipantId && p.TournamentId == tournamentId, cancellationToken);
+        var invited = await _tournaments.Participants.FirstOrDefaultAsync(p => p.Id == invitedParticipantId && p.TournamentId == tournamentId, cancellationToken);
         if (invited is null || invited.Status == TournamentParticipantStatus.Withdrawn || invited.TeamId.HasValue) return null;
 
-        var exists = await _db.TournamentTeamInvites.AnyAsync(i =>
+        var exists = await _tournaments.TeamInvites.AnyAsync(i =>
             i.TeamId == teamId &&
             i.InvitedParticipantId == invitedParticipantId &&
             i.Status == TournamentTeamRequestStatus.Pending,
             cancellationToken);
-        if (exists) return new TournamentTeamActionResponseDto(true);
+        if (exists) return new TournamentTeamActionResult(true);
 
         var inviter = await GetRegisteredParticipantAsync(characterId, tournamentId, cancellationToken);
         if (inviter is null) return null;
 
-        await _db.TournamentTeamInvites.AddAsync(new TournamentTeamInvite
+        await _tournaments.AddAsync(new TournamentTeamInvite
         {
             Id = Guid.NewGuid(),
             TournamentId = tournamentId,
@@ -701,17 +697,17 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
             UpdatedAtUtc = now
         }, cancellationToken);
 
-        await _db.SaveChangesAsync(cancellationToken);
+        await _tournaments.SaveChangesAsync(cancellationToken);
         await transaction.CommitAsync(cancellationToken);
         await PublishTournamentEventAsync(tournamentId, "TournamentTeamUpdated", now, cancellationToken);
-        return new TournamentTeamActionResponseDto(true);
+        return new TournamentTeamActionResult(true);
     }
 
-    public async Task<TournamentTeamActionResponseDto?> AcceptTeamInviteAsync(Guid characterId, Guid inviteId, CancellationToken cancellationToken)
+    public async Task<TournamentTeamActionResult?> AcceptTeamInviteAsync(Guid characterId, Guid inviteId, CancellationToken cancellationToken)
     {
         await using var transaction = await BeginOwnedTransactionIfNeededAsync(cancellationToken);
 
-        var invite = await _db.TournamentTeamInvites
+        var invite = await _tournaments.TeamInvites
             .Include(i => i.Team)
             .FirstOrDefaultAsync(i => i.Id == inviteId, cancellationToken);
         if (invite is null || invite.Status != TournamentTeamRequestStatus.Pending || invite.Team.MemberCount >= 3) return null;
@@ -732,13 +728,13 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
         invite.UpdatedAtUtc = now;
         await CancelPendingRequestsForParticipantAsync(invite.TournamentId, participant.Id, now, cancellationToken);
 
-        await _db.SaveChangesAsync(cancellationToken);
+        await _tournaments.SaveChangesAsync(cancellationToken);
         await transaction.CommitAsync(cancellationToken);
         await PublishTournamentEventAsync(invite.TournamentId, "TournamentTeamUpdated", now, cancellationToken);
-        return new TournamentTeamActionResponseDto(true);
+        return new TournamentTeamActionResult(true);
     }
 
-    public async Task<TournamentTeamActionResponseDto?> ApplyToTeamAsync(
+    public async Task<TournamentTeamActionResult?> ApplyToTeamAsync(
         Guid characterId,
         Guid tournamentId,
         Guid teamId,
@@ -747,20 +743,20 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
         var now = UtcNow();
         if (!await CanMutateTeamsAsync(tournamentId, now, cancellationToken)) return null;
 
-        var team = await _db.TournamentTeams.FirstOrDefaultAsync(t => t.Id == teamId && t.TournamentId == tournamentId, cancellationToken);
+        var team = await _tournaments.Teams.FirstOrDefaultAsync(t => t.Id == teamId && t.TournamentId == tournamentId, cancellationToken);
         if (team is null || team.MemberCount >= 3) return null;
 
         var participant = await GetRegisteredParticipantAsync(characterId, tournamentId, cancellationToken);
         if (participant is null || participant.TeamId.HasValue) return null;
 
-        var exists = await _db.TournamentTeamApplications.AnyAsync(a =>
+        var exists = await _tournaments.TeamApplications.AnyAsync(a =>
             a.TeamId == teamId &&
             a.ApplicantParticipantId == participant.Id &&
             a.Status == TournamentTeamRequestStatus.Pending,
             cancellationToken);
-        if (exists) return new TournamentTeamActionResponseDto(true);
+        if (exists) return new TournamentTeamActionResult(true);
 
-        await _db.TournamentTeamApplications.AddAsync(new TournamentTeamApplication
+        await _tournaments.AddAsync(new TournamentTeamApplication
         {
             Id = Guid.NewGuid(),
             TournamentId = tournamentId,
@@ -770,19 +766,19 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
             CreatedAtUtc = now,
             UpdatedAtUtc = now
         }, cancellationToken);
-        await _db.SaveChangesAsync(cancellationToken);
+        await _tournaments.SaveChangesAsync(cancellationToken);
         await PublishTournamentEventAsync(tournamentId, "TournamentTeamUpdated", now, cancellationToken);
-        return new TournamentTeamActionResponseDto(true);
+        return new TournamentTeamActionResult(true);
     }
 
-    public async Task<TournamentTeamActionResponseDto?> AcceptTeamApplicationAsync(
+    public async Task<TournamentTeamActionResult?> AcceptTeamApplicationAsync(
         Guid characterId,
         Guid applicationId,
         CancellationToken cancellationToken)
     {
         await using var transaction = await BeginOwnedTransactionIfNeededAsync(cancellationToken);
 
-        var application = await _db.TournamentTeamApplications
+        var application = await _tournaments.TeamApplications
             .Include(a => a.Team)
             .FirstOrDefaultAsync(a => a.Id == applicationId, cancellationToken);
         if (application is null || application.Status != TournamentTeamRequestStatus.Pending || application.Team.MemberCount >= 3) return null;
@@ -793,7 +789,7 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
 
         if (!await IsTeamOwnerAsync(characterId, application.Team, cancellationToken)) return null;
 
-        var participant = await _db.TournamentParticipants
+        var participant = await _tournaments.Participants
             .FirstOrDefaultAsync(p => p.Id == application.ApplicantParticipantId, cancellationToken);
         if (participant is null || participant.TeamId.HasValue || participant.Status == TournamentParticipantStatus.Withdrawn) return null;
 
@@ -806,13 +802,13 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
         application.UpdatedAtUtc = now;
         await CancelPendingRequestsForParticipantAsync(application.TournamentId, participant.Id, now, cancellationToken);
 
-        await _db.SaveChangesAsync(cancellationToken);
+        await _tournaments.SaveChangesAsync(cancellationToken);
         await transaction.CommitAsync(cancellationToken);
         await PublishTournamentEventAsync(application.TournamentId, "TournamentTeamUpdated", now, cancellationToken);
-        return new TournamentTeamActionResponseDto(true);
+        return new TournamentTeamActionResult(true);
     }
 
-    public async Task<TournamentTeamActionResponseDto?> KickTeamMemberAsync(
+    public async Task<TournamentTeamActionResult?> KickTeamMemberAsync(
         Guid characterId,
         Guid tournamentId,
         Guid teamId,
@@ -825,11 +821,11 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
         var now = UtcNow();
         if (!await CanMutateTeamsAsync(tournamentId, now, cancellationToken)) return null;
 
-        var team = await _db.TournamentTeams.FirstOrDefaultAsync(t => t.Id == teamId && t.TournamentId == tournamentId, cancellationToken);
+        var team = await _tournaments.Teams.FirstOrDefaultAsync(t => t.Id == teamId && t.TournamentId == tournamentId, cancellationToken);
         if (team is null || !await IsTeamOwnerAsync(characterId, team, cancellationToken)) return null;
         if (team.OwnerParticipantId == participantId) return null;
 
-        var participant = await _db.TournamentParticipants.FirstOrDefaultAsync(p => p.Id == participantId && p.TeamId == teamId, cancellationToken);
+        var participant = await _tournaments.Participants.FirstOrDefaultAsync(p => p.Id == participantId && p.TeamId == teamId, cancellationToken);
         if (participant is null) return null;
 
         participant.TeamId = null;
@@ -838,25 +834,25 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
         team.MemberCount = Math.Max(0, team.MemberCount - 1);
         team.UpdatedAtUtc = now;
 
-        await _db.SaveChangesAsync(cancellationToken);
+        await _tournaments.SaveChangesAsync(cancellationToken);
         await transaction.CommitAsync(cancellationToken);
         await PublishTournamentEventAsync(tournamentId, "TournamentTeamUpdated", now, cancellationToken);
-        return new TournamentTeamActionResponseDto(true);
+        return new TournamentTeamActionResult(true);
     }
 
-    public async Task<ClaimTournamentRewardsResponseDto> ClaimRewardsAsync(Guid characterId, Guid? tournamentId, CancellationToken cancellationToken)
+    public async Task<ClaimTournamentRewardsResult> ClaimRewardsAsync(Guid characterId, Guid? tournamentId, CancellationToken cancellationToken)
     {
         await using var transaction = await BeginOwnedTransactionIfNeededAsync(cancellationToken);
 
-        var character = await _db.Characters
+        var character = await _tournaments.Characters
             .Include(c => c.ArenaProfile)
             .FirstOrDefaultAsync(c => c.Id == characterId, cancellationToken);
         if (character?.ArenaProfile is null)
         {
-            return new ClaimTournamentRewardsResponseDto(false, 0, 0, 0);
+            return new ClaimTournamentRewardsResult(false, 0, 0, 0);
         }
 
-        var query = _db.TournamentRewardGrants
+        var query = _tournaments.RewardGrants
             .Where(r => r.CharacterId == characterId && r.Status == TournamentRewardStatus.Unclaimed);
         if (tournamentId.HasValue)
         {
@@ -866,7 +862,7 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
         var rewards = await query.ToListAsync(cancellationToken);
         if (rewards.Count == 0)
         {
-            return new ClaimTournamentRewardsResponseDto(false, 0, 0, 0);
+            return new ClaimTournamentRewardsResult(false, 0, 0, 0);
         }
 
         var now = UtcNow();
@@ -884,11 +880,11 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
             reward.ClaimedAtUtc = now;
         }
 
-        await _db.SaveChangesAsync(cancellationToken);
+        await _tournaments.SaveChangesAsync(cancellationToken);
         await transaction.CommitAsync(cancellationToken);
         await PublishTournamentEventAsync(rewards[0].TournamentId, "TournamentRewardsAvailable", now, cancellationToken);
 
-        return new ClaimTournamentRewardsResponseDto(true, glory, cinders, soulstones);
+        return new ClaimTournamentRewardsResult(true, glory, cinders, soulstones);
     }
 
     private async Task AdvanceTournamentAsync(Guid tournamentId, CancellationToken cancellationToken)
@@ -897,7 +893,7 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
 
         await using var transaction = await BeginOwnedTransactionIfNeededAsync(cancellationToken);
         await _tournamentLockService.LockTournamentAsync(tournamentId, cancellationToken);
-        var tournament = await _db.ArenaTournaments.FirstOrDefaultAsync(t => t.Id == tournamentId, cancellationToken);
+        var tournament = await _tournaments.Tournaments.FirstOrDefaultAsync(t => t.Id == tournamentId, cancellationToken);
         if (tournament is null)
         {
             return;
@@ -912,12 +908,12 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
             progressionSteps++;
             if (progressionSteps > 100)
             {
-                var roundStates = await _db.TournamentRounds
+                var roundStates = await _tournaments.Rounds
                     .Where(r => r.TournamentId == tournamentId)
                     .OrderBy(r => r.RoundNumber)
                     .Select(r => $"{r.RoundNumber}:{r.Status}")
                     .ToListAsync(cancellationToken);
-                var matchStates = await _db.TournamentMatches
+                var matchStates = await _tournaments.Matches
                     .Where(m => m.TournamentId == tournamentId)
                     .OrderBy(m => m.RoundNumber)
                     .ThenBy(m => m.MatchNumber)
@@ -964,11 +960,11 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
             if (changed)
             {
                 changedAny = true;
-                await _db.SaveChangesAsync(cancellationToken);
+                await _tournaments.SaveChangesAsync(cancellationToken);
             }
         }
 
-        await _db.SaveChangesAsync(cancellationToken);
+        await _tournaments.SaveChangesAsync(cancellationToken);
         await transaction.CommitAsync(cancellationToken);
         if (changedAny)
         {
@@ -978,17 +974,17 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
 
     private async Task GenerateBracketAsync(TournamentInstance tournament, DateTimeOffset now, CancellationToken cancellationToken)
     {
-        if (await _db.TournamentRounds.AnyAsync(r => r.TournamentId == tournament.Id, cancellationToken))
+        if (await _tournaments.Rounds.AnyAsync(r => r.TournamentId == tournament.Id, cancellationToken))
         {
             return;
         }
 
         await PrepareTeamsForBracketAsync(tournament.Id, now, cancellationToken);
 
-        var teams = await _db.TournamentTeams
+        var teams = await _tournaments.Teams
             .Where(t => t.TournamentId == tournament.Id && t.Status == TournamentTeamStatus.Forming && t.MemberCount > 0)
             .OrderByDescending(t =>
-                _db.TournamentParticipants
+                _tournaments.Participants
                     .Where(p => p.TeamId == t.Id && p.Status != TournamentParticipantStatus.Withdrawn)
                     .Average(p => (double?)p.EntryArenaRating) ?? 0)
             .ThenBy(t => t.CreatedAtUtc)
@@ -1000,7 +996,7 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
             tournament.CancelledAtUtc = now;
             tournament.CancellationReason = "Minimum team count was not met.";
             tournament.UpdatedAtUtc = now;
-            await _db.SaveChangesAsync(cancellationToken);
+            await _tournaments.SaveChangesAsync(cancellationToken);
             return;
         }
 
@@ -1010,7 +1006,7 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
             tournament.CancelledAtUtc = now;
             tournament.CancellationReason = "Maximum team count was exceeded.";
             tournament.UpdatedAtUtc = now;
-            await _db.SaveChangesAsync(cancellationToken);
+            await _tournaments.SaveChangesAsync(cancellationToken);
             return;
         }
 
@@ -1022,7 +1018,7 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
         }
 
         var teamIds = teams.Select(t => t.Id).ToList();
-        var participants = await _db.TournamentParticipants
+        var participants = await _tournaments.Participants
             .Where(p => p.TeamId.HasValue && teamIds.Contains(p.TeamId.Value) && p.Status == TournamentParticipantStatus.Registered)
             .ToListAsync(cancellationToken);
         var seedByTeam = teams.ToDictionary(t => t.Id, t => t.Seed);
@@ -1036,7 +1032,7 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
         if (teams.Count == 1)
         {
             await CompleteTournamentAsync(tournament, teams[0].Id, now, cancellationToken);
-            await _db.SaveChangesAsync(cancellationToken);
+            await _tournaments.SaveChangesAsync(cancellationToken);
             return;
         }
 
@@ -1057,7 +1053,7 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
                 UpdatedAtUtc = now
             };
             rounds.Add(round);
-            await _db.TournamentRounds.AddAsync(round, cancellationToken);
+            await _tournaments.AddAsync(round, cancellationToken);
         }
 
         var firstRoundMatchCount = bracketSize / 2;
@@ -1087,7 +1083,7 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
                 CompleteBye(match, playerOne.Id, now);
             }
 
-            await _db.TournamentMatches.AddAsync(match, cancellationToken);
+            await _tournaments.AddAsync(match, cancellationToken);
         }
 
         for (var roundNumber = 2; roundNumber <= roundCount; roundNumber++)
@@ -1095,17 +1091,17 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
             var matchCount = bracketSize / (int)Math.Pow(2, roundNumber);
             for (var matchNumber = 1; matchNumber <= matchCount; matchNumber++)
             {
-                await _db.TournamentMatches.AddAsync(CreateMatch(tournament.Id, rounds[roundNumber - 1].Id, roundNumber, matchNumber, null, null, now), cancellationToken);
+                await _tournaments.AddAsync(CreateMatch(tournament.Id, rounds[roundNumber - 1].Id, roundNumber, matchNumber, null, null, now), cancellationToken);
             }
         }
 
-        await _db.SaveChangesAsync(cancellationToken);
+        await _tournaments.SaveChangesAsync(cancellationToken);
         await AdvanceCompletedFirstRoundByesAsync(tournament.Id, now, cancellationToken);
     }
 
     private async Task<bool> ResolveDueRoundsAsync(TournamentInstance tournament, DateTimeOffset now, CancellationToken cancellationToken)
     {
-        var round = await _db.TournamentRounds
+        var round = await _tournaments.Rounds
             .Where(r => r.TournamentId == tournament.Id && r.Status != TournamentRoundStatus.Completed && r.StartsAtUtc <= now)
             .OrderBy(r => r.RoundNumber)
             .FirstOrDefaultAsync(cancellationToken);
@@ -1119,7 +1115,7 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
             changed = true;
         }
 
-        var matches = await _db.TournamentMatches
+        var matches = await _tournaments.Matches
             .Where(m => m.TournamentId == tournament.Id && m.RoundNumber == round.RoundNumber)
             .OrderBy(m => m.MatchNumber)
             .ToListAsync(cancellationToken);
@@ -1193,7 +1189,7 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
         loser.EliminatedInRoundNumber = match.RoundNumber;
         loser.FinalPlacement = TournamentRules.CalculatePlacement(await GetRoundCountAsync(tournament.Id, cancellationToken), match.RoundNumber);
         loser.UpdatedAtUtc = now;
-        var loserMembers = await _db.TournamentParticipants
+        var loserMembers = await _tournaments.Participants
             .Where(p => p.TeamId == loser.Id && p.Status == TournamentParticipantStatus.Active)
             .ToListAsync(cancellationToken);
         foreach (var member in loserMembers)
@@ -1218,7 +1214,7 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
         CancellationToken cancellationToken)
     {
         var historyId = match.Id;
-        var existing = await _db.ColosseumMatches.FindAsync([historyId], cancellationToken);
+        var existing = await _tournaments.FindAsync<ColosseumMatchResult>([historyId], cancellationToken);
         if (existing is not null)
         {
             await SaveTournamentCombatReplayAsync(
@@ -1242,7 +1238,7 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
         var playerTwoName = playerTwo.Name;
         var winnerName = winner.Id == playerOne.Id ? playerOneName : playerTwoName;
 
-        await _db.ColosseumMatches.AddAsync(new ColosseumMatchResult
+        await _tournaments.AddAsync(new ColosseumMatchResult
         {
             Id = historyId,
             CharacterAId = playerOneRepresentative.CharacterId,
@@ -1290,16 +1286,15 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
         DateTimeOffset now,
         CancellationToken cancellationToken)
     {
-        var existing = await _db.TournamentCombatReplays
+        var existing = await _tournaments.CombatReplays
             .AnyAsync(r => r.MatchId == match.Id, cancellationToken);
         if (existing) return;
 
-        var dto = MapCombatResult(combatResult);
         var playerOneRepresentative = await GetTeamRepresentativeAsync(playerOne.Id, cancellationToken);
         var playerTwoRepresentative = await GetTeamRepresentativeAsync(playerTwo.Id, cancellationToken);
         if (playerOneRepresentative is null || playerTwoRepresentative is null) return;
 
-        await _db.TournamentCombatReplays.AddAsync(new TournamentCombatReplay
+        await _tournaments.AddAsync(new TournamentCombatReplay
         {
             Id = match.Id,
             TournamentId = match.TournamentId,
@@ -1309,9 +1304,9 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
             PlayerOneCharacterId = playerOneRepresentative.CharacterId,
             PlayerTwoCharacterId = playerTwoRepresentative.CharacterId,
             Outcome = outcome.ToString(),
-            StartedAtUtc = dto.StartedAt,
-            Duration = dto.Duration,
-            CombatResultJson = JsonSerializer.Serialize(dto, ReplayJsonOptions),
+            StartedAtUtc = combatResult.StartedAt,
+            Duration = combatResult.Duration,
+            CombatResultJson = JsonSerializer.Serialize(combatResult, ReplayJsonOptions),
             CreatedAtUtc = now
         }, cancellationToken);
     }
@@ -1408,39 +1403,9 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
         };
     }
 
-    private static CombatResultDto MapCombatResult(CombatResult result)
-    {
-        return new CombatResultDto
-        {
-            PlayerTeam = result.PlayerTeam.Select(MapSimpleCombatEntity).ToList(),
-            EnemyTeam = result.EnemyTeam.Select(MapSimpleCombatEntity).ToList(),
-            EventLog = result.EventLog,
-            EntityStats = result.EntityStats,
-            Outcome = result.Outcome,
-            Loot = result.Loot,
-            GatheringRewards = result.GatheringRewards,
-            ExperienceGained = result.ExperienceGained,
-            StartedAt = result.StartedAt,
-            Duration = result.Duration
-        };
-    }
-
-    private static SimpleCombatEntityDto MapSimpleCombatEntity(SimpleCombatEntity entity)
-    {
-        return new SimpleCombatEntityDto
-        {
-            Id = entity.Id,
-            Name = entity.Name,
-            ImagePath = entity.ImagePath,
-            Health = entity.Health,
-            MaxHealth = entity.MaxHealth,
-            Barrier = entity.Barrier
-        };
-    }
-
     private async Task<CharacterSnapshot?> LoadSnapshotAsync(Guid tournamentSnapshotId, CancellationToken cancellationToken)
     {
-        return await _db.TournamentCombatSnapshots
+        return await _tournaments.CombatSnapshots
             .Include(x => x.CharacterSnapshot)
                 .ThenInclude(x => x.BaseAttributes)
             .Include(x => x.CharacterSnapshot)
@@ -1498,12 +1463,12 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
 
     private async Task CompleteTournamentAsync(TournamentInstance tournament, Guid championTeamId, DateTimeOffset now, CancellationToken cancellationToken)
     {
-        var champion = await _db.TournamentTeams.FirstAsync(t => t.Id == championTeamId, cancellationToken);
+        var champion = await _tournaments.Teams.FirstAsync(t => t.Id == championTeamId, cancellationToken);
         champion.Status = TournamentTeamStatus.Champion;
         champion.FinalPlacement = 1;
         champion.UpdatedAtUtc = now;
 
-        var championMembers = await _db.TournamentParticipants
+        var championMembers = await _tournaments.Participants
             .Where(p => p.TeamId == championTeamId && p.Status != TournamentParticipantStatus.Withdrawn)
             .ToListAsync(cancellationToken);
         foreach (var member in championMembers)
@@ -1517,7 +1482,7 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
         tournament.CompletedAtUtc = now;
         tournament.UpdatedAtUtc = now;
 
-        var participants = await _db.TournamentParticipants
+        var participants = await _tournaments.Participants
             .Where(p => p.TournamentId == tournament.Id && p.Status != TournamentParticipantStatus.Withdrawn)
             .ToListAsync(cancellationToken);
 
@@ -1525,11 +1490,11 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
         {
             var placement = participant.FinalPlacement ?? 99;
             var reward = BuildReward(tournament.Id, participant.CharacterId, placement, now);
-            var exists = await _db.TournamentRewardGrants
+            var exists = await _tournaments.RewardGrants
                 .AnyAsync(r => r.TournamentId == reward.TournamentId && r.CharacterId == reward.CharacterId && r.RewardKey == reward.RewardKey, cancellationToken);
             if (!exists)
             {
-                await _db.TournamentRewardGrants.AddAsync(reward, cancellationToken);
+                await _tournaments.AddAsync(reward, cancellationToken);
             }
         }
 
@@ -1573,7 +1538,7 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
 
     private async Task AdvanceCompletedFirstRoundByesAsync(Guid tournamentId, DateTimeOffset now, CancellationToken cancellationToken)
     {
-        var byes = await _db.TournamentMatches
+        var byes = await _tournaments.Matches
             .Where(m => m.TournamentId == tournamentId && m.RoundNumber == 1 && m.Status == TournamentMatchStatus.Bye && m.WinnerParticipantId.HasValue)
             .ToListAsync(cancellationToken);
 
@@ -1587,7 +1552,7 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
     {
         var nextRound = match.RoundNumber + 1;
         var nextMatchNumber = (match.MatchNumber + 1) / 2;
-        var nextMatch = await _db.TournamentMatches
+        var nextMatch = await _tournaments.Matches
             .FirstOrDefaultAsync(m => m.TournamentId == tournamentId && m.RoundNumber == nextRound && m.MatchNumber == nextMatchNumber, cancellationToken);
         if (nextMatch is null) return;
 
@@ -1644,7 +1609,7 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
 
     private async Task PrepareTeamsForBracketAsync(Guid tournamentId, DateTimeOffset now, CancellationToken cancellationToken)
     {
-        var participants = await _db.TournamentParticipants
+        var participants = await _tournaments.Participants
             .Where(p => p.TournamentId == tournamentId && p.Status != TournamentParticipantStatus.Withdrawn)
             .OrderByDescending(p => p.EntryArenaRating)
             .ThenBy(p => p.RegisteredAtUtc)
@@ -1668,15 +1633,15 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
             participant.Team = team;
             participant.IsTeamOwner = true;
             participant.UpdatedAtUtc = now;
-            await _db.TournamentTeams.AddAsync(team, cancellationToken);
+            await _tournaments.AddAsync(team, cancellationToken);
         }
 
-        await _db.SaveChangesAsync(cancellationToken);
+        await _tournaments.SaveChangesAsync(cancellationToken);
         await RecalculateTeamMemberCountsAsync(tournamentId, now, cancellationToken);
 
         while (true)
         {
-            var teams = await _db.TournamentTeams
+            var teams = await _tournaments.Teams
                 .Where(t => t.TournamentId == tournamentId &&
                     t.Status == TournamentTeamStatus.Forming &&
                     t.MemberCount > 0 &&
@@ -1711,19 +1676,19 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
             }
 
             await MergeTeamsAsync(target, source, now, cancellationToken);
-            await _db.SaveChangesAsync(cancellationToken);
+            await _tournaments.SaveChangesAsync(cancellationToken);
         }
     }
 
     private async Task RecalculateTeamMemberCountsAsync(Guid tournamentId, DateTimeOffset now, CancellationToken cancellationToken)
     {
-        var teams = await _db.TournamentTeams
+        var teams = await _tournaments.Teams
             .Where(t => t.TournamentId == tournamentId && t.Status != TournamentTeamStatus.Disbanded)
             .ToListAsync(cancellationToken);
 
         foreach (var team in teams)
         {
-            team.MemberCount = await _db.TournamentParticipants
+            team.MemberCount = await _tournaments.Participants
                 .CountAsync(p => p.TeamId == team.Id && p.Status != TournamentParticipantStatus.Withdrawn, cancellationToken);
             team.UpdatedAtUtc = now;
         }
@@ -1735,7 +1700,7 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
         DateTimeOffset now,
         CancellationToken cancellationToken)
     {
-        var sourceMembers = await _db.TournamentParticipants
+        var sourceMembers = await _tournaments.Participants
             .Where(p => p.TeamId == source.Id && p.Status != TournamentParticipantStatus.Withdrawn)
             .ToListAsync(cancellationToken);
 
@@ -1747,7 +1712,7 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
             await CancelPendingRequestsForParticipantAsync(target.TournamentId, member.Id, now, cancellationToken);
         }
 
-        var sourceRequests = await _db.TournamentTeamApplications
+        var sourceRequests = await _tournaments.TeamApplications
             .Where(a => a.TeamId == source.Id && a.Status == TournamentTeamRequestStatus.Pending)
             .ToListAsync(cancellationToken);
         foreach (var request in sourceRequests)
@@ -1756,7 +1721,7 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
             request.UpdatedAtUtc = now;
         }
 
-        var sourceInvites = await _db.TournamentTeamInvites
+        var sourceInvites = await _tournaments.TeamInvites
             .Where(i => i.TeamId == source.Id && i.Status == TournamentTeamRequestStatus.Pending)
             .ToListAsync(cancellationToken);
         foreach (var invite in sourceInvites)
@@ -1774,12 +1739,12 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
 
     private async Task<TournamentTeam?> LoadTeamAsync(Guid teamId, CancellationToken cancellationToken)
     {
-        return await _db.TournamentTeams.FirstOrDefaultAsync(t => t.Id == teamId, cancellationToken);
+        return await _tournaments.Teams.FirstOrDefaultAsync(t => t.Id == teamId, cancellationToken);
     }
 
     private async Task<IReadOnlyList<TournamentParticipant>> GetTeamMembersAsync(Guid teamId, CancellationToken cancellationToken)
     {
-        return await _db.TournamentParticipants
+        return await _tournaments.Participants
             .Where(p => p.TeamId == teamId && p.Status != TournamentParticipantStatus.Withdrawn)
             .OrderByDescending(p => p.EntryArenaRating)
             .ThenBy(p => p.RegisteredAtUtc)
@@ -1789,7 +1754,7 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
 
     private async Task<TournamentParticipant?> GetTeamRepresentativeAsync(Guid teamId, CancellationToken cancellationToken)
     {
-        return await _db.TournamentParticipants
+        return await _tournaments.Participants
             .Where(p => p.TeamId == teamId && p.Status != TournamentParticipantStatus.Withdrawn)
             .OrderByDescending(p => p.IsTeamOwner)
             .ThenByDescending(p => p.EntryArenaRating)
@@ -1799,23 +1764,23 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
 
     private async Task<int> GetRoundCountAsync(Guid tournamentId, CancellationToken cancellationToken)
     {
-        return await _db.TournamentRounds.CountAsync(r => r.TournamentId == tournamentId, cancellationToken);
+        return await _tournaments.Rounds.CountAsync(r => r.TournamentId == tournamentId, cancellationToken);
     }
 
-    private async Task<TournamentSummaryDto> MapSummaryAsync(
+    private async Task<TournamentSummary> MapSummaryAsync(
         TournamentInstance tournament,
         Guid characterId,
         DateTimeOffset now,
         CancellationToken cancellationToken)
     {
-        var participant = await _db.TournamentParticipants
+        var participant = await _tournaments.Participants
             .FirstOrDefaultAsync(p => p.TournamentId == tournament.Id && p.CharacterId == characterId, cancellationToken);
-        var hasRewards = await _db.TournamentRewardGrants
+        var hasRewards = await _tournaments.RewardGrants
             .AnyAsync(r => r.TournamentId == tournament.Id && r.CharacterId == characterId && r.Status == TournamentRewardStatus.Unclaimed, cancellationToken);
         var reason = GetCannotRegisterReason(tournament, participant, now);
         var registeredTeamCount = await GetCurrentTeamCountAsync(tournament.Id, cancellationToken);
 
-        return new TournamentSummaryDto(
+        return new TournamentSummary(
             tournament.Id,
             tournament.Name,
             tournament.Status.ToString(),
@@ -1839,19 +1804,19 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
             tournament.CancellationReason);
     }
 
-    private async Task<IReadOnlyList<TournamentParticipantDto>> MapParticipantsAsync(Guid tournamentId, CancellationToken cancellationToken)
+    private async Task<IReadOnlyList<TournamentParticipantEntry>> MapParticipantsAsync(Guid tournamentId, CancellationToken cancellationToken)
     {
-        var participants = await _db.TournamentParticipants
+        var participants = await _tournaments.Participants
             .Where(p => p.TournamentId == tournamentId)
             .OrderBy(p => p.Seed ?? int.MaxValue)
             .ToListAsync(cancellationToken);
         var characterIds = participants.Select(p => p.CharacterId).ToList();
-        var names = await _db.Characters
+        var names = await _tournaments.Characters
             .Where(c => characterIds.Contains(c.Id))
             .Select(c => new { c.Id, c.Name })
             .ToDictionaryAsync(c => c.Id, c => c.Name, cancellationToken);
 
-        return participants.Select(p => new TournamentParticipantDto(
+        return participants.Select(p => new TournamentParticipantEntry(
             p.Id,
             p.CharacterId,
             names.TryGetValue(p.CharacterId, out var name) ? name : "Unknown",
@@ -1864,12 +1829,12 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
             p.FinalPlacement)).ToList();
     }
 
-    private async Task<IReadOnlyList<TournamentTeamDto>> MapTeamsAsync(
+    private async Task<IReadOnlyList<TournamentTeamEntry>> MapTeamsAsync(
         Guid tournamentId,
         Guid characterId,
         CancellationToken cancellationToken)
     {
-        var teams = await _db.TournamentTeams
+        var teams = await _tournaments.Teams
             .Where(t => t.TournamentId == tournamentId && t.Status != TournamentTeamStatus.Disbanded)
             .OrderBy(t => t.Seed ?? int.MaxValue)
             .ThenBy(t => t.CreatedAtUtc)
@@ -1881,13 +1846,13 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
         var participantsByTeam = participants
             .Where(p => p.TeamId.HasValue)
             .GroupBy(p => p.TeamId!.Value)
-            .ToDictionary(g => g.Key, g => (IReadOnlyList<TournamentParticipantDto>)g.ToList());
+            .ToDictionary(g => g.Key, g => (IReadOnlyList<TournamentParticipantEntry>)g.ToList());
         var playerParticipant = await GetRegisteredParticipantAsync(characterId, tournamentId, cancellationToken);
 
-        var pendingApplications = await _db.TournamentTeamApplications
+        var pendingApplications = await _tournaments.TeamApplications
             .Where(a => a.TournamentId == tournamentId && a.Status == TournamentTeamRequestStatus.Pending)
             .ToListAsync(cancellationToken);
-        var pendingInvites = await _db.TournamentTeamInvites
+        var pendingInvites = await _tournaments.TeamInvites
             .Where(i => i.TournamentId == tournamentId && i.Status == TournamentTeamRequestStatus.Pending)
             .ToListAsync(cancellationToken);
 
@@ -1895,7 +1860,7 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
         {
             var members = participantsByTeam.GetValueOrDefault(team.Id, []);
             var owner = participantById.GetValueOrDefault(team.OwnerParticipantId);
-            return new TournamentTeamDto(
+            return new TournamentTeamEntry(
                 team.Id,
                 team.Name,
                 team.Status.ToString(),
@@ -1914,7 +1879,7 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
                     .Select(a =>
                     {
                         var applicant = participantById.GetValueOrDefault(a.ApplicantParticipantId);
-                        return new TournamentTeamApplicationDto(
+                        return new TournamentTeamApplicationEntry(
                             a.Id,
                             a.ApplicantParticipantId,
                             applicant?.CharacterId ?? Guid.Empty,
@@ -1928,7 +1893,7 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
                     .Select(i =>
                     {
                         var invited = participantById.GetValueOrDefault(i.InvitedParticipantId);
-                        return new TournamentTeamInviteDto(
+                        return new TournamentTeamInviteEntry(
                             i.Id,
                             i.InvitedParticipantId,
                             invited?.CharacterId ?? Guid.Empty,
@@ -1944,14 +1909,14 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
         Guid characterId,
         Guid tournamentId,
         CancellationToken cancellationToken)
-        => await _db.TournamentParticipants.FirstOrDefaultAsync(p =>
+        => await _tournaments.Participants.FirstOrDefaultAsync(p =>
             p.TournamentId == tournamentId &&
             p.CharacterId == characterId &&
             p.Status != TournamentParticipantStatus.Withdrawn,
             cancellationToken);
 
     private async Task<int> GetCurrentTeamCountAsync(Guid tournamentId, CancellationToken cancellationToken)
-        => await _db.TournamentTeams.CountAsync(t =>
+        => await _tournaments.Teams.CountAsync(t =>
             t.TournamentId == tournamentId &&
             t.Status != TournamentTeamStatus.Disbanded,
             cancellationToken);
@@ -1960,7 +1925,7 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
         Guid tournamentId,
         DateTimeOffset now,
         CancellationToken cancellationToken)
-        => await _db.ArenaTournaments.AnyAsync(t =>
+        => await _tournaments.Tournaments.AnyAsync(t =>
             t.Id == tournamentId &&
             t.Status == TournamentStatus.RegistrationOpen &&
             now < t.RegistrationEndsAtUtc,
@@ -1981,7 +1946,7 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
         DateTimeOffset now,
         CancellationToken cancellationToken)
     {
-        var applications = await _db.TournamentTeamApplications
+        var applications = await _tournaments.TeamApplications
             .Where(a => a.TournamentId == tournamentId && a.ApplicantParticipantId == participantId && a.Status == TournamentTeamRequestStatus.Pending)
             .ToListAsync(cancellationToken);
         foreach (var application in applications)
@@ -1990,7 +1955,7 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
             application.UpdatedAtUtc = now;
         }
 
-        var invites = await _db.TournamentTeamInvites
+        var invites = await _tournaments.TeamInvites
             .Where(i => i.TournamentId == tournamentId && i.InvitedParticipantId == participantId && i.Status == TournamentTeamRequestStatus.Pending)
             .ToListAsync(cancellationToken);
         foreach (var invite in invites)
@@ -2026,7 +1991,7 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
         var definitionKey = string.IsNullOrWhiteSpace(_options.DefaultDefinitionKey)
             ? "weekly-open-grounds"
             : _options.DefaultDefinitionKey.Trim();
-        var definition = await _db.TournamentDefinitions.FirstOrDefaultAsync(d => d.Key == definitionKey, cancellationToken);
+        var definition = await _tournaments.Definitions.FirstOrDefaultAsync(d => d.Key == definitionKey, cancellationToken);
         if (definition is not null) return definition;
 
         definition = new TournamentDefinition
@@ -2050,8 +2015,8 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
             CreatedAtUtc = now,
             UpdatedAtUtc = now
         };
-        await _db.TournamentDefinitions.AddAsync(definition, cancellationToken);
-        await _db.SaveChangesAsync(cancellationToken);
+        await _tournaments.AddAsync(definition, cancellationToken);
+        await _tournaments.SaveChangesAsync(cancellationToken);
         return definition;
     }
 
@@ -2216,15 +2181,8 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
         });
     }
 
-    private async Task<OwnedTransaction> BeginOwnedTransactionIfNeededAsync(CancellationToken cancellationToken)
-    {
-        if (_db.CurrentTransaction is not null)
-        {
-            return new OwnedTransaction(null);
-        }
-
-        return new OwnedTransaction(await _db.BeginTransactionAsync(cancellationToken));
-    }
+    private Task<ITournamentGroundsTransaction> BeginOwnedTransactionIfNeededAsync(CancellationToken cancellationToken)
+        => _tournaments.BeginTransactionIfNeededAsync(cancellationToken);
 
     private async Task PublishTournamentEventAsync(
         Guid tournamentId,
@@ -2232,7 +2190,7 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
         DateTimeOffset now,
         CancellationToken cancellationToken)
     {
-        var tournament = await _db.ArenaTournaments.FirstOrDefaultAsync(t => t.Id == tournamentId, cancellationToken);
+        var tournament = await _tournaments.Tournaments.FirstOrDefaultAsync(t => t.Id == tournamentId, cancellationToken);
         if (tournament is not null)
         {
             await PublishTournamentEventAsync(tournament, eventName, now, cancellationToken);
@@ -2247,9 +2205,9 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
     {
         try
         {
-            var hasBracket = await _db.TournamentRounds
+            var hasBracket = await _tournaments.Rounds
                 .AnyAsync(r => r.TournamentId == tournament.Id, cancellationToken);
-            var currentRound = await _db.TournamentRounds
+            var currentRound = await _tournaments.Rounds
                 .Where(r => r.TournamentId == tournament.Id && r.Status != TournamentRoundStatus.Completed)
                 .OrderBy(r => r.RoundNumber)
                 .Select(r => new { r.RoundNumber, r.StartsAtUtc })
@@ -2287,15 +2245,6 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
         {
             // REST remains authoritative; realtime is only a convenience refresh signal.
         }
-    }
-
-    private sealed class OwnedTransaction(IDbContextTransaction? transaction) : IAsyncDisposable
-    {
-        public Task CommitAsync(CancellationToken cancellationToken)
-            => transaction?.CommitAsync(cancellationToken) ?? Task.CompletedTask;
-
-        public ValueTask DisposeAsync()
-            => transaction?.DisposeAsync() ?? ValueTask.CompletedTask;
     }
 
     private sealed record TournamentRegistrationWindow(
@@ -2343,3 +2292,5 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
         int AscensionTier,
         bool IsEvolved);
 }
+
+

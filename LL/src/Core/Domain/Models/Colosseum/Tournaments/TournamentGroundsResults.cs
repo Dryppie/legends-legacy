@@ -1,12 +1,12 @@
 namespace Domain.Models.Colosseum.Tournaments;
 
-public sealed record TournamentGroundsStatusModel(
+public sealed record TournamentGroundsStatus(
     DateTimeOffset NowUtc,
-    TournamentSummaryModel? CurrentTournament,
-    IReadOnlyList<TournamentSummaryModel> UpcomingTournaments,
-    IReadOnlyList<TournamentSummaryModel> RecentTournaments);
+    TournamentSummary? CurrentTournament,
+    IReadOnlyList<TournamentSummary> UpcomingTournaments,
+    IReadOnlyList<TournamentSummary> RecentTournaments);
 
-public sealed record TournamentSummaryModel(
+public sealed record TournamentSummary(
     Guid Id,
     string Name,
     string Status,
@@ -29,13 +29,13 @@ public sealed record TournamentSummaryModel(
     DateTimeOffset? CancelledAtUtc,
     string? CancellationReason);
 
-public sealed record TournamentDetailsModel(
-    TournamentSummaryModel Summary,
-    IReadOnlyList<TournamentParticipantModel> Participants,
-    IReadOnlyList<TournamentTeamModel> Teams,
-    IReadOnlyList<TournamentRewardGrantModel> Rewards);
+public sealed record TournamentDetails(
+    TournamentSummary Summary,
+    IReadOnlyList<TournamentParticipantEntry> Participants,
+    IReadOnlyList<TournamentTeamEntry> Teams,
+    IReadOnlyList<TournamentRewardGrantEntry> Rewards);
 
-public sealed record TournamentHistoryEntryModel(
+public sealed record TournamentHistoryEntry(
     Guid TournamentId,
     int TournamentNumber,
     string TournamentName,
@@ -52,7 +52,7 @@ public sealed record TournamentHistoryEntryModel(
     string? RewardStatus,
     int ReplayCount);
 
-public sealed record TournamentHallOfFameEntryModel(
+public sealed record TournamentHallOfFameEntry(
     Guid TournamentId,
     int TournamentNumber,
     string TournamentName,
@@ -66,7 +66,7 @@ public sealed record TournamentHallOfFameEntryModel(
     string ChampionEntryRankTier,
     int ReplayCount);
 
-public sealed record TournamentSeasonLeaderboardEntryModel(
+public sealed record TournamentSeasonLeaderboardEntry(
     int Rank,
     Guid CharacterId,
     string CharacterName,
@@ -78,12 +78,12 @@ public sealed record TournamentSeasonLeaderboardEntryModel(
     DateTimeOffset? LatestCompletedAtUtc,
     string SeasonKey);
 
-public sealed record TournamentBracketModel(
+public sealed record TournamentBracket(
     Guid TournamentId,
     string Status,
-    IReadOnlyList<TournamentRoundModel> Rounds);
+    IReadOnlyList<TournamentBracketRound> Rounds);
 
-public sealed record TournamentParticipantModel(
+public sealed record TournamentParticipantEntry(
     Guid ParticipantId,
     Guid CharacterId,
     string CharacterName,
@@ -95,7 +95,7 @@ public sealed record TournamentParticipantModel(
     string Status,
     int? FinalPlacement);
 
-public sealed record TournamentTeamModel(
+public sealed record TournamentTeamEntry(
     Guid TeamId,
     string Name,
     string Status,
@@ -108,11 +108,11 @@ public sealed record TournamentTeamModel(
     bool IsOpen,
     bool IsPlayerTeam,
     bool IsPlayerOwner,
-    IReadOnlyList<TournamentParticipantModel> Members,
-    IReadOnlyList<TournamentTeamApplicationModel> Applications,
-    IReadOnlyList<TournamentTeamInviteModel> Invites);
+    IReadOnlyList<TournamentParticipantEntry> Members,
+    IReadOnlyList<TournamentTeamApplicationEntry> Applications,
+    IReadOnlyList<TournamentTeamInviteEntry> Invites);
 
-public sealed record TournamentTeamApplicationModel(
+public sealed record TournamentTeamApplicationEntry(
     Guid ApplicationId,
     Guid ApplicantParticipantId,
     Guid ApplicantCharacterId,
@@ -120,7 +120,7 @@ public sealed record TournamentTeamApplicationModel(
     string Status,
     DateTimeOffset CreatedAtUtc);
 
-public sealed record TournamentTeamInviteModel(
+public sealed record TournamentTeamInviteEntry(
     Guid InviteId,
     Guid InvitedParticipantId,
     Guid InvitedCharacterId,
@@ -128,28 +128,28 @@ public sealed record TournamentTeamInviteModel(
     string Status,
     DateTimeOffset CreatedAtUtc);
 
-public sealed record TournamentRoundModel(
+public sealed record TournamentBracketRound(
     Guid Id,
     int RoundNumber,
     string Name,
     string Status,
     DateTimeOffset StartsAtUtc,
     DateTimeOffset? ResolvedAtUtc,
-    IReadOnlyList<TournamentMatchModel> Matches);
+    IReadOnlyList<TournamentBracketMatch> Matches);
 
-public sealed record TournamentMatchModel(
+public sealed record TournamentBracketMatch(
     Guid Id,
     int RoundNumber,
     int MatchNumber,
     string Status,
     string Outcome,
-    TournamentTeamModel? PlayerOne,
-    TournamentTeamModel? PlayerTwo,
+    TournamentTeamEntry? PlayerOne,
+    TournamentTeamEntry? PlayerTwo,
     Guid? WinnerTeamId,
     Guid? CombatSessionId,
     Guid? BattleHistoryId);
 
-public sealed record RegisterTournamentResultModel(
+public sealed record RegisterTournamentResult(
     bool Registered,
     Guid ParticipantId,
     Guid SnapshotId,
@@ -157,13 +157,13 @@ public sealed record RegisterTournamentResultModel(
     string EntryRankTier,
     string Message);
 
-public sealed record WithdrawTournamentResultModel(bool Withdrawn);
+public sealed record WithdrawTournamentResult(bool Withdrawn);
 
-public sealed record CreateTournamentTeamResultModel(bool Created, Guid TeamId);
+public sealed record CreateTournamentTeamResult(bool Created, Guid TeamId);
 
-public sealed record TournamentTeamActionResultModel(bool Succeeded);
+public sealed record TournamentTeamActionResult(bool Succeeded);
 
-public sealed record TournamentRewardGrantModel(
+public sealed record TournamentRewardGrantEntry(
     Guid Id,
     Guid TournamentId,
     string TournamentName,
@@ -176,8 +176,9 @@ public sealed record TournamentRewardGrantModel(
     DateTimeOffset CreatedAtUtc,
     DateTimeOffset? ClaimedAtUtc);
 
-public sealed record ClaimTournamentRewardsResultModel(
+public sealed record ClaimTournamentRewardsResult(
     bool Claimed,
     int ArenaGlory,
     int Cinders,
     int Soulstones);
+

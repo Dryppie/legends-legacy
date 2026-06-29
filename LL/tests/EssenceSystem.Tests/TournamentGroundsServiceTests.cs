@@ -16,6 +16,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Options;
 using Persistence.LL;
+using Persistence.LL.Repositories.Colosseum;
 using Services.LL.Colosseum.Tournaments;
 using Services.LL.Combat.Layers.Orchestration.Models;
 using Services.LL.Combat.Layers.Resolution.Models;
@@ -554,8 +555,10 @@ public sealed class TournamentGroundsServiceTests
         ICombatEngineExecutor? combatEngineExecutor = null,
         ICombatEncounterResultFactory? combatEncounterResultFactory = null)
     {
+        var tournaments = new TournamentGroundsRepository(db);
+
         return new TournamentGroundsService(
-            db,
+            tournaments,
             entityService ?? new NoOpEntityService(),
             combatSetupService ?? new NoOpCombatSetupService(),
             characterSnapshotService ?? new DbCharacterSnapshotService(db),
@@ -564,7 +567,7 @@ public sealed class TournamentGroundsServiceTests
             combatEncounterResultFactory ?? new ThrowingCombatEncounterResultFactory(),
             realtime ?? new CapturingGameRealtimeBroadcaster(),
             new PostgresTournamentLockService(
-                db,
+                tournaments,
                 Options.Create(new TournamentGroundsOptions { UsePostgresAdvisoryLocks = true })),
             new FixedTimeProvider(Now),
             Options.Create(new TournamentGroundsOptions
