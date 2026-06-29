@@ -127,6 +127,24 @@ export class CharacterStateService {
     this.auth.updateCharacter(updated);
   }
 
+  updateEquippedTitle(equippedTitle: CharacterDto['equippedTitle']): void {
+    const character = this.currentCharacter();
+    if (!character) return;
+
+    this.auth.updateCharacter({
+      ...character,
+      equippedTitle,
+    });
+
+    const overview = this._overview();
+    if (!overview) return;
+
+    this._overview.set({
+      ...overview,
+      equippedTitle,
+    });
+  }
+
   private updateCurrentCharacter(patch: Partial<CharacterDto>): void {
     const character = this.currentCharacter();
     if (!character) return;

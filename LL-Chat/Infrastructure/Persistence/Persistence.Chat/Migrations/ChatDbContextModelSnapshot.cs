@@ -46,6 +46,9 @@ namespace Persistence.Chat.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<string>("SenderTitleDisplayName")
+                        .HasColumnType("text");
+
                     b.Property<DateTimeOffset>("SentAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -53,6 +56,9 @@ namespace Persistence.Chat.Migrations
                         .HasColumnType("uuid");
 
                     b.Property<string>("TargetCharacterName")
+                        .HasColumnType("text");
+
+                    b.Property<string>("TargetCharacterTitleDisplayName")
                         .HasColumnType("text");
 
                     b.HasKey("Id");

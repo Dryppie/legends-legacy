@@ -222,7 +222,8 @@ export class AchievementsComponent implements OnInit {
     this.achievementsApi
       .equipTitle(title.key, this.titleDisplayPosition())
       .subscribe({
-        next: () => {
+        next: (equippedTitle) => {
+          this.characterState.updateEquippedTitle(equippedTitle);
           this.refreshTitles();
           this.characterState.refresh();
         },
@@ -233,6 +234,7 @@ export class AchievementsComponent implements OnInit {
   unequip(): void {
     this.achievementsApi.unequipTitle().subscribe({
       next: () => {
+        this.characterState.updateEquippedTitle(null);
         this.refreshTitles();
         this.characterState.refresh();
       },

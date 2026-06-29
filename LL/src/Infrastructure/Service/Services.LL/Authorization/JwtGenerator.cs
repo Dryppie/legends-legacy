@@ -2,6 +2,7 @@
 using Application.Interfaces.Services.LL.Entities;
 using Common.Authorization.Security;
 using Common.Options;
+using Domain.Models.Achievements;
 using Domain.Models.Entities.Characters;
 using Domain.Models.Users;
 using Microsoft.Extensions.Options;
@@ -66,7 +67,8 @@ public class JwtGenerator : IJwtGenerator
             new("guest",                       user.IsGuest.ToString()),
             new(ClaimTypes.UserData,           user.Id.ToString()),
             new("CharacterId", character.Id.ToString()),
-            new(ClaimTypes.Name, character.Name)
+            new(ClaimTypes.Name, character.Name),
+            new("CharacterTitleDisplayName", GetCharacterTitleDisplayName(character))
         };
 
         var expiresAt = now.Add(_accessLifespan);
@@ -135,5 +137,15 @@ public class JwtGenerator : IJwtGenerator
     private static SymmetricSecurityKey GetSymmetricSecurityKey(string key)
     {
         return new(Encoding.UTF8.GetBytes(key));
+    }
+
+    private static string GetCharacterTitleDisplayName(Character character)
+    {
+        return character.EquippedTitleDefinition is null
+            ? string.Empty
+            : TitleDisplayFormatter.Format(
+                character.Name,
+                character.EquippedTitleDefinition.Name,
+                character.EquippedTitleDisplayPosition);
     }
 }

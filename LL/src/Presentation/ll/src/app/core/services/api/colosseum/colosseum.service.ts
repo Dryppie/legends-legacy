@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { ApiService } from '../api.service';
 import { catchError, Observable, throwError } from 'rxjs';
 import { CombatService } from '../../client-side/combat/combat.service';
+import { CombatResultDto } from '../../../../shared/models/Dtos/combatResultDto';
 import { ColosseumMatchResult } from '../../../../shared/models/Dtos/colosseum/colosseumMatchResult';
 import { ArenaTicketStatus } from '../../../../shared/models/Dtos/colosseum/arenaTicketStatus';
 import { ArenaOpponentPreview } from '../../../../shared/models/Dtos/colosseum/arenaOpponentPreview';
@@ -15,6 +16,20 @@ import {
   ChampionMarket,
   ChampionMarketPurchaseResponse,
 } from '../../../../shared/models/Dtos/colosseum/championMarket';
+import {
+  ClaimTournamentRewardsResponse,
+  CreateTournamentTeamResponse,
+  RegisterTournamentResponse,
+  TournamentBracket,
+  TournamentDetails,
+  TournamentGroundsStatus,
+  TournamentHallOfFameEntry,
+  TournamentHistoryEntry,
+  TournamentRewardGrant,
+  TournamentSeasonLeaderboardEntry,
+  TournamentTeamActionResponse,
+  WithdrawTournamentResponse,
+} from '../../../../shared/models/Dtos/colosseum/tournamentGrounds';
 
 @Injectable({
   providedIn: 'root',
@@ -113,5 +128,221 @@ export class ColosseumService {
 
   skipColosseumMatch() {
     this.combatService.skipCurrentColosseum();
+  }
+
+  getTournamentGroundsStatus(): Observable<TournamentGroundsStatus> {
+    return this.apiService.get('colosseum/tournaments/status').pipe(
+      catchError(() => {
+        return throwError(
+          () => new Error('Failed to get tournament grounds status'),
+        );
+      }),
+    );
+  }
+
+  getTournament(tournamentId: string): Observable<TournamentDetails> {
+    return this.apiService.get(`colosseum/tournaments/${tournamentId}`).pipe(
+      catchError(() => {
+        return throwError(() => new Error('Failed to get tournament details'));
+      }),
+    );
+  }
+
+  getTournamentHistory(): Observable<TournamentHistoryEntry[]> {
+    return this.apiService.get('colosseum/tournaments/history').pipe(
+      catchError(() => {
+        return throwError(() => new Error('Failed to get tournament history'));
+      }),
+    );
+  }
+
+  getTournamentHallOfFame(): Observable<TournamentHallOfFameEntry[]> {
+    return this.apiService.get('colosseum/tournaments/hall-of-fame').pipe(
+      catchError(() => {
+        return throwError(
+          () => new Error('Failed to get tournament Hall of Fame'),
+        );
+      }),
+    );
+  }
+
+  getTournamentSeasonLeaderboard(): Observable<TournamentSeasonLeaderboardEntry[]> {
+    return this.apiService.get('colosseum/tournaments/season-leaderboard').pipe(
+      catchError(() => {
+        return throwError(
+          () => new Error('Failed to get tournament season leaderboard'),
+        );
+      }),
+    );
+  }
+
+  getTournamentBracket(tournamentId: string): Observable<TournamentBracket> {
+    return this.apiService
+      .get(`colosseum/tournaments/${tournamentId}/bracket`)
+      .pipe(
+        catchError(() => {
+          return throwError(() => new Error('Failed to get tournament bracket'));
+        }),
+      );
+  }
+
+  getTournamentMatchReplay(
+    tournamentId: string,
+    matchId: string,
+  ): Observable<CombatResultDto> {
+    return this.apiService
+      .get(`colosseum/tournaments/${tournamentId}/matches/${matchId}/replay`)
+      .pipe(
+        catchError(() => {
+          return throwError(() => new Error('Failed to get tournament replay'));
+        }),
+      );
+  }
+
+  startTournamentReplay(replay: CombatResultDto): void {
+    this.combatService.startColosseumMatchSimulation(replay);
+  }
+
+  registerTournament(tournamentId: string): Observable<RegisterTournamentResponse> {
+    return this.apiService
+      .post(`colosseum/tournaments/${tournamentId}/register`, {})
+      .pipe(
+        catchError((err) => {
+          return throwError(
+            () => new Error(err.message ?? 'Failed to register for tournament'),
+          );
+        }),
+      );
+  }
+
+  withdrawTournament(tournamentId: string): Observable<WithdrawTournamentResponse> {
+    return this.apiService
+      .post(`colosseum/tournaments/${tournamentId}/withdraw`, {})
+      .pipe(
+        catchError((err) => {
+          return throwError(
+            () => new Error(err.message ?? 'Failed to withdraw from tournament'),
+          );
+        }),
+      );
+  }
+
+  createTournamentTeam(
+    tournamentId: string,
+    name: string,
+  ): Observable<CreateTournamentTeamResponse> {
+    return this.apiService
+      .post(`colosseum/tournaments/${tournamentId}/teams`, { name })
+      .pipe(
+        catchError((err) => {
+          return throwError(
+            () => new Error(err.message ?? 'Failed to create tournament team'),
+          );
+        }),
+      );
+  }
+
+  inviteTournamentTeamMember(
+    tournamentId: string,
+    teamId: string,
+    invitedParticipantId: string,
+  ): Observable<TournamentTeamActionResponse> {
+    return this.apiService
+      .post(`colosseum/tournaments/${tournamentId}/teams/${teamId}/invite`, {
+        invitedParticipantId,
+      })
+      .pipe(
+        catchError((err) => {
+          return throwError(
+            () => new Error(err.message ?? 'Failed to invite tournament team member'),
+          );
+        }),
+      );
+  }
+
+  acceptTournamentTeamInvite(inviteId: string): Observable<TournamentTeamActionResponse> {
+    return this.apiService
+      .post(`colosseum/tournaments/team-invites/${inviteId}/accept`, {})
+      .pipe(
+        catchError((err) => {
+          return throwError(
+            () => new Error(err.message ?? 'Failed to accept tournament team invite'),
+          );
+        }),
+      );
+  }
+
+  applyToTournamentTeam(
+    tournamentId: string,
+    teamId: string,
+  ): Observable<TournamentTeamActionResponse> {
+    return this.apiService
+      .post(`colosseum/tournaments/${tournamentId}/teams/${teamId}/apply`, {})
+      .pipe(
+        catchError((err) => {
+          return throwError(
+            () => new Error(err.message ?? 'Failed to apply to tournament team'),
+          );
+        }),
+      );
+  }
+
+  acceptTournamentTeamApplication(
+    applicationId: string,
+  ): Observable<TournamentTeamActionResponse> {
+    return this.apiService
+      .post(`colosseum/tournaments/team-applications/${applicationId}/accept`, {})
+      .pipe(
+        catchError((err) => {
+          return throwError(
+            () => new Error(err.message ?? 'Failed to accept tournament team application'),
+          );
+        }),
+      );
+  }
+
+  kickTournamentTeamMember(
+    tournamentId: string,
+    teamId: string,
+    participantId: string,
+  ): Observable<TournamentTeamActionResponse> {
+    return this.apiService
+      .post(
+        `colosseum/tournaments/${tournamentId}/teams/${teamId}/members/${participantId}/kick`,
+        {},
+      )
+      .pipe(
+        catchError((err) => {
+          return throwError(
+            () => new Error(err.message ?? 'Failed to kick tournament team member'),
+          );
+        }),
+      );
+  }
+
+  getTournamentRewards(tournamentId?: string): Observable<TournamentRewardGrant[]> {
+    const path = tournamentId
+      ? `colosseum/tournaments/${tournamentId}/rewards`
+      : 'colosseum/tournaments/rewards';
+    return this.apiService.get(path).pipe(
+      catchError(() => {
+        return throwError(() => new Error('Failed to get tournament rewards'));
+      }),
+    );
+  }
+
+  claimTournamentRewards(
+    tournamentId?: string,
+  ): Observable<ClaimTournamentRewardsResponse> {
+    const path = tournamentId
+      ? `colosseum/tournaments/${tournamentId}/rewards/claim`
+      : 'colosseum/tournaments/rewards/claim';
+    return this.apiService.post(path, {}).pipe(
+      catchError((err) => {
+        return throwError(
+          () => new Error(err.message ?? 'Failed to claim tournament rewards'),
+        );
+      }),
+    );
   }
 }

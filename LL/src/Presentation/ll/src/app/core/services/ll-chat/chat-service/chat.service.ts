@@ -17,8 +17,10 @@ export interface ChatMessageDto {
   contextKey: string;
   senderId: string;
   senderName: string;
+  senderTitleDisplayName?: string | null;
   targetCharacterId?: string;
   targetCharacterName?: string;
+  targetCharacterTitleDisplayName?: string | null;
   body: string;
   sentAt: Date;
 }
@@ -38,7 +40,8 @@ export class ChatService {
   private hub?: HubConnection;
   private incoming$ = new Subject<ChatMessageDto>();
   private readonly whisperDraftRequests = new Subject<string>();
-  private activeGuildId?: string;
+  private activeIdentity?: string;
+  private activeGuildId: string | null = null;
   private connectAndLoadPromise?: Promise<void>;
   private unavailableUntil = 0;
   private lastConnectionWarningAt = 0;
@@ -85,16 +88,17 @@ export class ChatService {
     effect(
       () => {
         const id = this.auth.identity(); // ← depends on username + login
-        const guildId = this.guildState.guild()?.id;
+        const guildId = this.guildState.guild()?.id ?? null;
 
-        if (!id || !guildId) {
-          if (this.hub || this.activeGuildId) {
+        if (!id) {
+          if (this.hub || this.activeIdentity) {
             void this.disconnect();
           }
           return;
         }
 
         if (
+          this.activeIdentity === id &&
           this.activeGuildId === guildId &&
           (this.connectAndLoadPromise ||
             this.hub?.state === signalR.HubConnectionState.Connected ||
@@ -105,8 +109,9 @@ export class ChatService {
 
         if (this.isTemporarilyUnavailable()) return;
 
+        this.activeIdentity = id;
         this.activeGuildId = guildId;
-        this.connectAndLoadPromise = this.connectAndLoad(guildId)
+        this.connectAndLoadPromise = this.connectAndLoad(guildId ?? undefined)
           .catch((error) => {
             this.unavailableUntil = Date.now() + this.unavailableRetryDelayMs;
             this.handleConnectionError(error);
@@ -148,7 +153,16 @@ export class ChatService {
     body: string,
   ): Promise<void> {
     await this.ensureConnected();
-    await this.hub!.invoke('Send', contextKey, body, channelType, null, null);
+    await this.hub!.invoke(
+      'Send',
+      contextKey,
+      body,
+      channelType,
+      null,
+      null,
+      null,
+      this.currentSenderTitleDisplayName(),
+    );
   }
 
   async sendGuild(guildId: string, body: string): Promise<void> {
@@ -160,16 +174,23 @@ export class ChatService {
       ChatChannelType.Guild,
       null,
       null,
+      null,
+      this.currentSenderTitleDisplayName(),
     );
   }
 
   async sendWhisperToName(targetName: string, body: string): Promise<void> {
-    const targetId = await firstValueFrom(
-      this.characterService.resolveCharacterIdByName(targetName),
+    const target = await firstValueFrom(
+      this.characterService.searchCharacter(targetName),
     );
-    if (!targetId) return;
+    if (!target?.id) return;
 
-    return this.sendWhisper(targetId, targetName, body);
+    return this.sendWhisper(
+      target.id,
+      target.name || targetName,
+      body,
+      target.equippedTitle?.displayName ?? null,
+    );
   }
 
   prepareWhisperToName(targetName: string): void {
@@ -183,6 +204,7 @@ export class ChatService {
     targetUserId: string,
     targetName: string,
     body: string,
+    targetTitleDisplayName?: string | null,
   ): Promise<void> {
     await this.ensureConnected();
     await this.hub!.invoke(
@@ -192,6 +214,8 @@ export class ChatService {
       ChatChannelType.Whisper,
       targetUserId,
       targetName,
+      targetTitleDisplayName ?? null,
+      this.currentSenderTitleDisplayName(),
     );
   }
 
@@ -216,15 +240,19 @@ export class ChatService {
   /* -------------------- private helpers -------------------- */
 
   private addMessage(msg: ChatMessageDto): void {
-    this.messageList.update((prev) => [...prev, msg]);
+    this.messageList.update((prev) =>
+      prev.some((existing) => existing.id === msg.id) ? prev : [...prev, msg],
+    );
   }
 
   private async buildHubConnection(): Promise<void> {
+    await firstValueFrom(this.auth.ensureValidToken());
+
     this.hub = new signalR.HubConnectionBuilder()
       .withUrl(`${this.apiBase}/hub`, {
         withCredentials: true, // send AccessToken cookie
-        // DEV ONLY – include bearer if you keep tokens outside cookies
-        accessTokenFactory: () => localStorage.getItem('DevAuth') ?? '',
+        accessTokenFactory: () =>
+          this.auth.getAccessToken() || localStorage.getItem('DevAuth') || '',
       })
       .withAutomaticReconnect({
         nextRetryDelayInMilliseconds: (retry) =>
@@ -273,7 +301,8 @@ export class ChatService {
       await this.hub.stop();
     }
     this.hub = undefined;
-    this.activeGuildId = undefined;
+    this.activeIdentity = undefined;
+    this.activeGuildId = null;
     this.connectAndLoadPromise = undefined;
     this.messageList.set([]);
 
@@ -293,5 +322,9 @@ export class ChatService {
 
   private isTemporarilyUnavailable(): boolean {
     return Date.now() < this.unavailableUntil;
+  }
+
+  private currentSenderTitleDisplayName(): string | null {
+    return this.auth.currentCharacter()?.equippedTitle?.displayName?.trim() || null;
   }
 }
