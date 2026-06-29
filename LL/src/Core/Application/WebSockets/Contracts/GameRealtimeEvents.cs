@@ -28,3 +28,19 @@ public sealed record CharacterSnapshot(
 public sealed record IdleCombatProcessed(
     Guid CharacterId,
     CharacterActionDto Action) : GameRealtimeEvent;
+
+public sealed record TournamentGroundsUpdated(
+    Guid TournamentId,
+    int TournamentNumber,
+    string TournamentName,
+    string Event,
+    string Status,
+    int RegisteredParticipantCount,
+    int MinParticipants,
+    int MaxParticipants,
+    bool HasBracket,
+    int? CurrentRoundNumber,
+    DateTimeOffset? NextActionAtUtc,
+    DateTimeOffset? CompletedAtUtc,
+    DateTimeOffset? CancelledAtUtc,
+    DateTimeOffset OccurredAtUtc) : GameRealtimeEvent;
