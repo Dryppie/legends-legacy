@@ -104,20 +104,29 @@
       <input
         #chatInput
         type="text"
-        placeholder="write here.."
-        class="w-full rounded-md bg-transparent p-3 text-primary placeholder:text-zinc-300"
+        [placeholder]="chatPlaceholder"
+        class="w-full rounded-md bg-transparent p-3 text-primary placeholder:text-zinc-300 disabled:cursor-not-allowed disabled:text-zinc-500 disabled:placeholder:text-zinc-500"
         [(ngModel)]="draft"
         (ngModelChange)="onDraftChange()"
         (keydown.enter)="send()"
         maxlength="200"
+        [disabled]="!canWriteChat"
       />
       <app-regular-button
         class="p-1"
         (pressed)="send()"
         text="Send"
-        [disabled]="!draft"
+        [disabled]="!canWriteChat || !draft.trim()"
       />
     </div>
+    <p *ngIf="isGuestAccount" class="px-3 pb-2 text-xs text-zinc-400">
+      <a
+        routerLink="/game/settings"
+        class="text-primary underline decoration-primary/40 underline-offset-2 hover:text-primary/80"
+        >Bind email or Gmail in Settings</a
+      >
+      for access.
+    </p>
     <p *ngIf="sendError" class="px-3 pb-2 text-xs text-rose-400">
       {{ sendError }}
     </p>
