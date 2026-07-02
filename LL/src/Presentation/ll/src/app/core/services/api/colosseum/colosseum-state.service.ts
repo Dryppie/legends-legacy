@@ -336,13 +336,16 @@ export class ColosseumStateService {
   private countStatusActions(status: ColosseumStatus | null): number {
     if (!status) return 0;
 
-    const hasTickets = status.tickets > 0;
+    const hasCappedTickets =
+      status.maxTickets > 0 && status.tickets >= status.maxTickets;
+    if (!hasCappedTickets) return 0;
+
     const defenseNeedsUpdate =
       !status.defenseStatus?.isValid || status.defenseStatus.isOutdated;
 
     return [
-      hasTickets,
-      hasTickets && status.dailyFirstWinAvailable,
+      hasCappedTickets,
+      status.dailyFirstWinAvailable,
       defenseNeedsUpdate,
     ].filter(Boolean).length;
   }

@@ -41,8 +41,38 @@
     </article>
   </section>
 
+  <div class="pr-4">
+    <div class="ll-segmented inline-flex flex-wrap gap-1 bg-black/30 p-1">
+      <button
+        *ngFor="let view of collectionViews"
+        type="button"
+        class="ll-segmented-button flex min-h-9 items-center gap-2 px-4 py-2 text-xs font-semibold uppercase"
+        [ngClass]="{
+          'll-segmented-button-active': activeView() === view,
+        }"
+        (click)="activeView.set(view)"
+      >
+        <span>{{ view }}</span>
+        <span
+          *ngIf="overview() as o"
+          class="ll-segmented-counter"
+          [ngClass]="{
+            'll-segmented-counter-active': activeView() === view,
+          }"
+        >
+          {{
+            view === "Achievements"
+              ? o.totalAchievementsUnlocked + "/" + o.totalAchievementsAvailable
+              : o.totalTitlesUnlocked
+          }}
+        </span>
+      </button>
+    </div>
+  </div>
+
   <div
-    class="grid min-h-0 flex-1 grid-cols-1 gap-4 overflow-hidden pr-4 xl:grid-cols-[minmax(0,1fr)_24rem]"
+    *ngIf="activeView() === 'Achievements'; else titlesView"
+    class="min-h-0 flex-1 overflow-hidden pr-4"
   >
     <section class="ll-panel flex min-h-0 flex-col overflow-hidden">
       <div
@@ -61,10 +91,9 @@
             <span>{{ category }}</span>
             <span
               *ngIf="category !== 'All'"
-              class="rounded border border-light_gray/60 bg-black/25 px-1.5 py-0.5 text-[0.65rem] leading-none text-zinc-400"
+              class="ll-segmented-counter"
               [ngClass]="{
-                'border-black/20 bg-black/15 text-black':
-                  activeCategory() === category,
+                'll-segmented-counter-active': activeCategory() === category,
               }"
             >
               {{ categoryProgress(category) }}
@@ -188,55 +217,61 @@
         </article>
       </div>
     </section>
+  </div>
 
-    <aside class="ll-panel flex min-h-0 flex-col overflow-hidden">
-      <div class="border-b border-light_gray/70 p-4">
-        <div class="flex items-center justify-between gap-3">
-          <div>
-            <h2 class="ll-heading">Titles</h2>
-            <p class="ll-copy">{{ unlockedTitles().length }} unlocked</p>
-          </div>
-          <button
-            type="button"
-            class="ll-button px-3 py-1 text-xs"
-            [disabled]="!equippedTitle()"
-            (click)="unequip()"
-          >
-            Unequip
-          </button>
-        </div>
-
-        <div class="mt-3 border-t border-light_gray/60 pt-3">
-          <div class="ll-stat-label">Equipped</div>
-          <ng-container *ngIf="equippedTitle() as title; else noEquippedTitle">
-            <div class="mt-1 text-base font-semibold text-primary">
-              {{ title.preview }}
+  <ng-template #titlesView>
+    <div
+      class="grid min-h-0 flex-1 grid-cols-1 gap-4 overflow-hidden pr-4 xl:grid-cols-[22rem_minmax(0,1fr)]"
+    >
+      <aside class="ll-panel flex min-h-0 flex-col overflow-hidden">
+        <div class="border-b border-light_gray/70 p-4">
+          <div class="flex items-center justify-between gap-3">
+            <div>
+              <h2 class="ll-heading">Titles</h2>
+              <p class="ll-copy">{{ unlockedTitles().length }} unlocked</p>
             </div>
-            <p class="ll-copy mt-1">{{ title.description }}</p>
-          </ng-container>
-          <ng-template #noEquippedTitle>
-            <div class="mt-1 text-sm text-zinc-400">No title equipped</div>
-          </ng-template>
-        </div>
-
-        <div class="mt-3">
-          <div class="ll-segmented flex bg-black/30 p-1">
             <button
-              *ngFor="let position of titleDisplayPositions"
               type="button"
-              class="ll-segmented-button min-h-8 flex-1 px-3 py-1.5 text-xs font-semibold uppercase"
-              [ngClass]="{
-                'll-segmented-button-active':
-                  titleDisplayPosition() === position,
-              }"
-              (click)="titleDisplayPosition.set(position)"
+              class="ll-button px-3 py-1 text-xs"
+              [disabled]="!equippedTitle()"
+              (click)="unequip()"
             >
-              {{ position }}
+              Unequip
             </button>
           </div>
+
+          <div class="mt-3 border-t border-light_gray/60 pt-3">
+            <div class="ll-stat-label">Equipped</div>
+            <ng-container *ngIf="equippedTitle() as title; else noEquippedTitle">
+              <div class="mt-1 text-base font-semibold text-primary">
+                {{ title.preview }}
+              </div>
+              <p class="ll-copy mt-1">{{ title.description }}</p>
+            </ng-container>
+            <ng-template #noEquippedTitle>
+              <div class="mt-1 text-sm text-zinc-400">No title equipped</div>
+            </ng-template>
+          </div>
+
+          <div class="mt-3">
+            <div class="ll-segmented flex bg-black/30 p-1">
+              <button
+                *ngFor="let position of titleDisplayPositions"
+                type="button"
+                class="ll-segmented-button min-h-8 flex-1 px-3 py-1.5 text-xs font-semibold uppercase"
+                [ngClass]="{
+                  'll-segmented-button-active':
+                    titleDisplayPosition() === position,
+                }"
+                (click)="titleDisplayPosition.set(position)"
+              >
+                {{ position }}
+              </button>
+            </div>
+          </div>
         </div>
 
-        <div class="mt-3 grid gap-2">
+        <div class="grid gap-2 p-4">
           <input
             type="search"
             class="ll-input min-w-0"
@@ -266,44 +301,58 @@
             </button>
           </div>
         </div>
-      </div>
+      </aside>
 
-      <div class="min-h-0 flex-1 overflow-y-auto p-2">
-        <div *ngIf="!filteredTitles().length" class="ll-empty-state min-h-40">
-          No titles found.
+      <section class="ll-panel flex min-h-0 flex-col overflow-hidden">
+        <div
+          class="flex flex-wrap items-center justify-between gap-3 border-b border-light_gray/70 p-4"
+        >
+          <div>
+            <h2 class="ll-heading">Title Collection</h2>
+            <p class="ll-copy">
+              {{ filteredTitles().length }} shown ·
+              {{ lockedTitles().length }} locked
+            </p>
+          </div>
         </div>
 
-        <article
-          *ngFor="let title of filteredTitles()"
-          class="ll-card mb-2 p-3"
-          [ngClass]="{
-            'border-primary/60 bg-primary/10': title.isEquipped,
-            'opacity-70': !title.isUnlocked,
-          }"
-        >
-          <div class="flex items-start justify-between gap-3">
-            <div class="min-w-0">
-              <h3 class="ll-heading text-base">{{ title.name }}</h3>
-              <p class="ll-copy mt-1">{{ titlePreview(title) }}</p>
-              <div class="mt-2 flex flex-wrap gap-2">
-                <span class="ll-badge rounded">{{ title.rarity }}</span>
-                <span class="ll-badge rounded text-zinc-400">
-                  {{ title.scope }}
-                </span>
-              </div>
-            </div>
-
-            <button
-              type="button"
-              class="ll-button px-3 py-1 text-xs"
-              [disabled]="!canEquip(title)"
-              (click)="equip(title)"
-            >
-              {{ equipButtonText(title) }}
-            </button>
+        <div class="min-h-0 flex-1 overflow-y-auto p-2">
+          <div *ngIf="!filteredTitles().length" class="ll-empty-state min-h-40">
+            No titles found.
           </div>
-        </article>
-      </div>
-    </aside>
-  </div>
+
+          <article
+            *ngFor="let title of filteredTitles()"
+            class="ll-card mb-2 p-3"
+            [ngClass]="{
+              'border-primary/60 bg-primary/10': title.isEquipped,
+              'opacity-70': !title.isUnlocked,
+            }"
+          >
+            <div class="flex items-start justify-between gap-3">
+              <div class="min-w-0">
+                <h3 class="ll-heading text-base">{{ title.name }}</h3>
+                <p class="ll-copy mt-1">{{ titlePreview(title) }}</p>
+                <div class="mt-2 flex flex-wrap gap-2">
+                  <span class="ll-badge rounded">{{ title.rarity }}</span>
+                  <span class="ll-badge rounded text-zinc-400">
+                    {{ title.scope }}
+                  </span>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                class="ll-button px-3 py-1 text-xs"
+                [disabled]="!canEquip(title)"
+                (click)="equip(title)"
+              >
+                {{ equipButtonText(title) }}
+              </button>
+            </div>
+          </article>
+        </div>
+      </section>
+    </div>
+  </ng-template>
 </div>
