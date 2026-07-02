@@ -11,6 +11,7 @@ public interface IEssenceService
     Task<EssenceOperationResult> AbsorbUnboundEssenceAsync(Guid characterId, Guid inventoryItemId, CancellationToken cancellationToken);
     Task<DismantleEssenceResult> DismantleUnboundEssenceAsync(Guid characterId, Guid inventoryItemId, CancellationToken cancellationToken);
     Task<SpendEssenceDustResult> SpendEssenceDustAsync(Guid characterId, Guid playerEssenceId, int dustAmount, CancellationToken cancellationToken);
+    Task<EssenceOperationResult> UpgradePotentialAsync(Guid characterId, Guid playerEssenceId, CancellationToken cancellationToken);
     Task<EssenceOperationResult> AscendEssenceAsync(Guid characterId, Guid playerEssenceId, CancellationToken cancellationToken);
     Task<EssenceOperationResult> EvolveEssenceAsync(Guid characterId, Guid playerEssenceId, CancellationToken cancellationToken);
     Task<EssenceLoadout> SaveLoadoutAsync(Guid characterId, SaveEssenceLoadoutRequest request, CancellationToken cancellationToken);

@@ -49,6 +49,38 @@ public sealed class DungeonEssenceRewardTests
         Assert.InRange(reward.Quantity, 3, 6);
     }
 
+    [Fact]
+    public async Task Dungeon_completion_awards_region_potential_core_for_essence_stat_cap()
+    {
+        await using var db = CreateDb();
+        db.ItemBases.Add(new ItemBase
+        {
+            Id = "item.essence_potential_core.region_1",
+            Name = "Region 1 Potential Core",
+            ItemType = ItemType.Resource,
+            Stackable = true
+        });
+        await db.SaveChangesAsync();
+
+        var pendingRewards = new CapturingDungeonPendingRewardWriter();
+        var applier = new DungeonCompletionRewardApplier(
+            new SingleDungeonDefinitions(new DungeonDefinition { Id = "dungeon.region_1", Region = 1, Tier = 1 }),
+            new EmptyDungeonRunRepository(),
+            new EmptyLootTableRepository(),
+            new ItemBaseRepository(db),
+            new EmptyLootService(),
+            pendingRewards,
+            new InventoryItemFactory(),
+            new NoOpDungeonMasteryService());
+
+        await applier.ApplyAsync(new() { Id = Guid.NewGuid(), DungeonDefinitionId = "dungeon.region_1" }, CancellationToken.None);
+
+        var batch = Assert.Single(pendingRewards.Batches, x => x.Source == "Region 1 Potential Cores");
+        var reward = Assert.Single(batch.Loot);
+        Assert.Equal("item.essence_potential_core.region_1", reward.ItemInstance.ItemBaseId);
+        Assert.InRange(reward.Quantity, 1, 3);
+    }
+
     private static LLDbContext CreateDb()
     {
         var options = new DbContextOptionsBuilder<LLDbContext>()

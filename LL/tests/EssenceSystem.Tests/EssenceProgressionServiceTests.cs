@@ -47,6 +47,47 @@ public sealed class EssenceProgressionServiceTests
     }
 
     [Fact]
+    public void GrantXp_uses_potential_tier_for_level_cap_instead_of_ascension()
+    {
+        var service = new EssenceProgressionService();
+        var essence = new PlayerEssence
+        {
+            EssenceDefinitionId = "essence.test",
+            Level = 10,
+            CurrentXp = 0,
+            PotentialTier = 2,
+            AscensionTier = 0
+        };
+
+        var result = service.GrantXp(essence, EssenceDefinitionValidatorTests.ValidDefinition(), 100_000);
+
+        Assert.Equal(20, essence.Level);
+        Assert.Equal(0, essence.CurrentXp);
+        Assert.True(result.ReachedTierCap);
+        Assert.Equal(10, result.LevelsGained);
+    }
+
+    [Fact]
+    public void GrantXp_does_not_let_ascension_raise_level_cap()
+    {
+        var service = new EssenceProgressionService();
+        var essence = new PlayerEssence
+        {
+            EssenceDefinitionId = "essence.test",
+            Level = 10,
+            CurrentXp = 0,
+            PotentialTier = 1,
+            AscensionTier = 3
+        };
+
+        var result = service.GrantXp(essence, EssenceDefinitionValidatorTests.ValidDefinition(), 500);
+
+        Assert.Equal(10, essence.Level);
+        Assert.Equal(0, result.XpGained);
+        Assert.True(result.ReachedTierCap);
+    }
+
+    [Fact]
     public void Ability_value_scaling_uses_level_and_effect_specific_ascension_growth()
     {
         var scaled = EssenceProgressionConstants.ScaleAbilityValue(

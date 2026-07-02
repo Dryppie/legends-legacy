@@ -588,6 +588,49 @@ public sealed class EssenceSystemServiceTests
     }
 
     [Fact]
+    public async Task UpgradePotential_requires_current_level_cap_and_consumes_region_core()
+    {
+        await using var db = CreateDb();
+        var characterId = await SeedCharacterAndInventoryAsync(db);
+        var essenceId = await AddPlayerEssenceAsync(db, characterId, level: 9);
+        await AddInventoryQuantityAsync(db, characterId, "item.essence_potential_core.region_1", 3);
+        var service = CreateService(db);
+
+        var tooEarly = await service.UpgradePotentialAsync(characterId, essenceId, CancellationToken.None);
+        db.PlayerEssences.Single(x => x.Id == essenceId).Level = 10;
+        var upgraded = await service.UpgradePotentialAsync(characterId, essenceId, CancellationToken.None);
+        await db.SaveChangesAsync();
+
+        var essence = db.PlayerEssences.Single(x => x.Id == essenceId);
+        Assert.False(tooEarly.Succeeded);
+        Assert.True(upgraded.Succeeded);
+        Assert.Equal(2, essence.PotentialTier);
+        Assert.Equal(0, await InventoryQuantityAsync(db, characterId, "item.essence_potential_core.region_1"));
+    }
+
+    [Fact]
+    public async Task Ascension_does_not_raise_potential_level_cap()
+    {
+        await using var db = CreateDb();
+        var characterId = await SeedCharacterAndInventoryAsync(db);
+        var essenceId = await AddPlayerEssenceAsync(db, characterId, level: 10);
+        await AddInventoryQuantityAsync(db, characterId, "item.monster_core.lesser", 6);
+        await AddInventoryQuantityAsync(db, characterId, "soul_dust", 100);
+        var service = CreateService(db);
+
+        var ascend = await service.AscendEssenceAsync(characterId, essenceId, CancellationToken.None);
+        var dust = await service.SpendEssenceDustAsync(characterId, essenceId, 100, CancellationToken.None);
+        await db.SaveChangesAsync();
+
+        var essence = db.PlayerEssences.Single(x => x.Id == essenceId);
+        Assert.True(ascend.Succeeded);
+        Assert.False(dust.Succeeded);
+        Assert.Equal(1, essence.AscensionTier);
+        Assert.Equal(1, essence.PotentialTier);
+        Assert.Equal(10, essence.Level);
+    }
+
+    [Fact]
     public async Task Ascend_and_evolve_require_and_consume_items()
     {
         await using var db = CreateDb();

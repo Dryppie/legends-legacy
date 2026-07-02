@@ -7,6 +7,8 @@ public class PlayerEssence
     public string EssenceDefinitionId { get; set; } = string.Empty;
     public int Level { get; set; } = 1;
     public int CurrentXp { get; set; }
+    public int NativeRegion { get; set; } = 1;
+    public int PotentialTier { get; set; } = 1;
     public int AscensionTier { get; set; }
     public bool IsEvolved { get; set; }
     public DateTimeOffset? EvolutionUnlockedAt { get; set; }
