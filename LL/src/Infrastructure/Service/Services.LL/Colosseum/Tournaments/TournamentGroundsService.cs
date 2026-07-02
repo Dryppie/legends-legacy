@@ -79,6 +79,9 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
     {
         if (!_options.Enabled) return;
 
+        await using var transaction = await BeginOwnedTransactionIfNeededAsync(cancellationToken);
+        await _tournamentLockService.LockTournamentScheduleAsync(cancellationToken);
+
         var now = UtcNow();
         var definition = await EnsureDefaultDefinitionAsync(now, cancellationToken);
 
@@ -89,7 +92,11 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
             t.RegistrationEndsAtUtc >= now.AddDays(-7),
             cancellationToken);
 
-        if (hasUpcoming) return;
+        if (hasUpcoming)
+        {
+            await transaction.CommitAsync(cancellationToken);
+            return;
+        }
 
         var registrationWindow = BuildNextRegistrationWindow(now);
 
@@ -116,6 +123,7 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
 
         await _tournaments.AddAsync(tournament, cancellationToken);
         await _tournaments.SaveChangesAsync(cancellationToken);
+        await transaction.CommitAsync(cancellationToken);
     }
 
     public async Task AdvanceDueTournamentsAsync(CancellationToken cancellationToken)
@@ -146,9 +154,6 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
 
     public async Task<TournamentGroundsStatus> GetStatusAsync(Guid characterId, CancellationToken cancellationToken)
     {
-        await EnsureUpcomingTournamentsAsync(cancellationToken);
-        await AdvanceDueTournamentsAsync(cancellationToken);
-
         var now = UtcNow();
         var tournaments = await _tournaments.Tournaments
             .Where(t => t.Status != TournamentStatus.Completed && t.Status != TournamentStatus.Cancelled)
@@ -182,8 +187,6 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
 
     public async Task<TournamentDetails?> GetDetailsAsync(Guid characterId, Guid tournamentId, CancellationToken cancellationToken)
     {
-        await AdvanceTournamentAsync(tournamentId, cancellationToken);
-
         var now = UtcNow();
         var tournament = await _tournaments.Tournaments.FirstOrDefaultAsync(t => t.Id == tournamentId, cancellationToken);
         if (tournament is null) return null;
@@ -346,8 +349,6 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
 
     public async Task<TournamentBracket?> GetBracketAsync(Guid characterId, Guid tournamentId, CancellationToken cancellationToken)
     {
-        await AdvanceTournamentAsync(tournamentId, cancellationToken);
-
         var tournament = await _tournaments.Tournaments.FirstOrDefaultAsync(t => t.Id == tournamentId, cancellationToken);
         if (tournament is null) return null;
 
@@ -442,7 +443,6 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
     {
         if (!_options.Enabled) return null;
 
-        await AdvanceTournamentAsync(tournamentId, cancellationToken);
         await using var transaction = await BeginOwnedTransactionIfNeededAsync(cancellationToken);
         await _tournamentLockService.LockTournamentAsync(tournamentId, cancellationToken);
 
@@ -546,7 +546,6 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
     {
         if (!_options.Enabled || !_options.AllowWithdrawDuringRegistration) return null;
 
-        await AdvanceTournamentAsync(tournamentId, cancellationToken);
         await using var transaction = await BeginOwnedTransactionIfNeededAsync(cancellationToken);
         await _tournamentLockService.LockTournamentAsync(tournamentId, cancellationToken);
 

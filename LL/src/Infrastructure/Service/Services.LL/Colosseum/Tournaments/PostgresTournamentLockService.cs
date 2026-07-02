@@ -8,13 +8,21 @@ public sealed class PostgresTournamentLockService(
     ITournamentGroundsRepository tournaments,
     IOptions<TournamentGroundsOptions> options) : ITournamentLockService
 {
-    public async Task LockTournamentAsync(Guid tournamentId, CancellationToken cancellationToken)
+    private const long TournamentGroundsScheduleLockId = 0x54474C4F434B0001;
+
+    public Task LockTournamentScheduleAsync(CancellationToken cancellationToken)
+        => ExecuteLockAsync(TournamentGroundsScheduleLockId, cancellationToken);
+
+    public Task LockTournamentAsync(Guid tournamentId, CancellationToken cancellationToken)
+        => ExecuteLockAsync(BuildTournamentLockId(tournamentId), cancellationToken);
+
+    private async Task ExecuteLockAsync(long lockId, CancellationToken cancellationToken)
     {
         if (!options.Value.UsePostgresAdvisoryLocks) return;
 
         try
         {
-            await tournaments.ExecuteTournamentAdvisoryLockAsync(BuildTournamentLockId(tournamentId), cancellationToken);
+            await tournaments.ExecuteTournamentAdvisoryLockAsync(lockId, cancellationToken);
         }
         catch
         {
