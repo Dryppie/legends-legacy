@@ -32,8 +32,6 @@ export class ColosseumStateService {
   private readonly _championMarket = signal<ChampionMarket | null>(null);
   private readonly _rankings = signal<LeaderboardEntry[]>([]);
   private readonly _previousMatches = signal<ColosseumMatchResult[]>([]);
-  private readonly _latestBattleResult =
-    signal<StartArenaBattleResponse | null>(null);
   private readonly _loading = signal(false);
   private readonly _error = signal<string | null>(null);
   private hasLoaded = false;
@@ -46,7 +44,6 @@ export class ColosseumStateService {
   readonly championMarket = computed(() => this._championMarket());
   readonly rankings = computed(() => this._rankings());
   readonly previousMatches = computed(() => this._previousMatches());
-  readonly latestBattleResult = computed(() => this._latestBattleResult());
   readonly loading = computed(() => this._loading());
   readonly error = computed(() => this._error());
   readonly notificationCount = computed(() =>
@@ -266,16 +263,12 @@ export class ColosseumStateService {
     this.colosseumService.skipColosseumMatch();
   }
 
-  clearLatestBattleResult(): void {
-    this._latestBattleResult.set(null);
-  }
-
   private applyStartBattleResponse(response: StartArenaBattleResponse): void {
     this.applyTicketStatus(response.arenaTicketStatus);
-    this._latestBattleResult.set(response);
     this.applyCurrentCharacterArenaRating(response.attackerRating.ratingAfter);
     this.applyArenaBattleStatus(response);
     this.loadStatus();
+    this.loadArenaOpponents();
     this.loadColosseumRankings();
     this.loadColosseumMatchResults();
     this.combatService.startColosseumMatchSimulation(response.battle);

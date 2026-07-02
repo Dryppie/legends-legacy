@@ -41,7 +41,7 @@
     <div
       class="ll-panel flex w-full flex-col gap-4 p-4 xl:flex-row xl:items-center xl:justify-between"
     >
-      <div>
+      <div class="min-w-0">
         <p class="ll-eyebrow">
           {{ battleType === "IdleCombat" ? "Idle Combat" : "Battle" }}
         </p>
@@ -55,11 +55,18 @@
           *ngIf="battleType === 'IdleCombat'"
           class="max-w-full"
         ></app-combat-log>
+        <span
+          *ngIf="outcome && battleType !== 'IdleCombat'"
+          class="ll-badge rounded px-3 py-2 text-sm"
+          [ngClass]="outcomeBadgeClass()"
+        >
+          {{ outcome }}
+        </span>
         <app-mini-button
           class="mt-2"
           [text]="combatActionButtonText()"
           [disabled]="isStoppingCombat"
-          [width]="battleType === 'IdleCombat' ? '88px' : '112px'"
+          [width]="battleType === 'IdleCombat' ? '88px' : '132px'"
           (click)="onStopOrSkip()"
         ></app-mini-button>
       </div>
@@ -142,20 +149,6 @@
           [barrier]="selectedEnemyCharacter.barrier"
           [isLoading]="isLoading"
         ></app-combat-avatar>
-      </div>
-
-      <div
-        *ngIf="outcome && battleType !== 'IdleCombat'"
-        class="ll-card flex flex-col items-center justify-center p-3 lg:col-span-2"
-      >
-        <img
-          src="combat/{{ outcome }}.svg"
-          [alt]="outcome"
-          class="flex min-h-12 w-40 object-contain"
-        />
-        <div class="ll-heading mt-3 text-lg">
-          {{ outcome }}
-        </div>
       </div>
     </div>
 

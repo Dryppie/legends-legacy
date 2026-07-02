@@ -12,7 +12,6 @@ import { RankingsGloryComponent } from './rankings-glory/rankings-glory.componen
 import { RecordOfBattleComponent } from './record-of-battle/record-of-battle.component';
 import { TournamentGroundsComponent } from './tournament-grounds/tournament-grounds.component';
 import { EventBusService } from '../../../../core/services/client-side/event-bus/event-bus.service';
-import { ColosseumResultComponent } from '../../../../shared/components/colosseum/colosseum-result/colosseum-result.component';
 import { TabsComponent } from '../../../../shared/components/custom-components/tabs/tabs.component';
 import { ColosseumStateService } from '../../../../core/services/api/colosseum/colosseum-state.service';
 import { LeaderboardEntry } from '../../../../shared/models/Dtos/leaderboard/leaderboardEntry';
@@ -34,7 +33,6 @@ import { NumberFormatPipe } from '../../../../shared/pipes/number-format/number-
     RecordOfBattleComponent,
     TournamentGroundsComponent,
     TabsComponent,
-    ColosseumResultComponent,
     NumberFormatPipe,
   ],
   templateUrl: './colosseum.component.html',
@@ -64,10 +62,6 @@ export class ColosseumComponent implements OnInit {
 
   ngOnInit(): void {
     this.state.refresh();
-  }
-
-  hideBattleResult() {
-    this.state.clearLatestBattleResult();
   }
 
   skipBattle() {

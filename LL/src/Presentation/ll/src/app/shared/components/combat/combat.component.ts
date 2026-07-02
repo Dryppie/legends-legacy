@@ -250,7 +250,20 @@ export class CombatComponent implements OnInit, OnDestroy {
       return this.isStoppingCombat ? 'Quitting...' : 'Quit';
     }
 
-    return 'Skip Battle';
+    return 'Close Summary';
+  }
+
+  outcomeBadgeClass(): string {
+    switch (this.outcome) {
+      case BattleOutcome.Victory:
+        return 'll-badge-success';
+      case BattleOutcome.Defeat:
+        return 'll-badge-danger';
+      case BattleOutcome.Draw:
+        return 'll-badge-warning';
+      default:
+        return 'll-badge-muted';
+    }
   }
 
   skipCombat() {

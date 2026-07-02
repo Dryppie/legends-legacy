@@ -1,23 +1,22 @@
 import { effect, Injectable } from '@angular/core';
-import { bufferTime, delay, filter, of, Subscription } from 'rxjs';
+import { delay, of, Subscription } from 'rxjs';
 import { CharacterActionDto } from '../../../../shared/models/Dtos/characterActionDto';
 import { CombatStateService } from '../../../state/combat-state/combat-state.service';
 import { EventBusService } from '../event-bus/event-bus.service';
 import { BattleType } from '../../../state/combat-state/combatState';
-import { CombatPlaybackService } from './combat-playback/combat-playback-service';
 import { CombatResultDto } from '../../../../shared/models/Dtos/combatResultDto';
+import { LevelingService } from '../leveling/leveling.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class CombatService {
   private combatEndSubscriptions = new Map<BattleType, Subscription>();
-  private combatEventSubscriptions = new Map<BattleType, Subscription>();
 
   constructor(
-    private playback: CombatPlaybackService,
     private combatStateService: CombatStateService,
     private eventBus: EventBusService,
+    private levelingService: LevelingService,
   ) {
     effect(
       () => {
@@ -84,24 +83,13 @@ export class CombatService {
     this.combatStateService.setCombatResult(type, combatAction);
     this.combatStateService.setEntityStats(type, combatAction.entityStats);
 
+    if (type === BattleType.Colosseum || type === BattleType.Dungeon) {
+      this.combatStateService.setCombatOutcome(type, combatAction.outcome);
+      return;
+    }
+
     const combatStartTime = new Date(combatAction.startedAt).getTime();
     const now = Date.now();
-
-    if (combatAction.eventLog.length > 0) {
-      this.combatEventSubscriptions.get(type)?.unsubscribe();
-      const eventSub = this.playback
-        .play(combatResult)
-        .pipe(
-          bufferTime(16),
-          filter((events) => events.length > 0),
-        )
-        .subscribe({
-          next: (events) =>
-            this.combatStateService.addCombatEvents(type, events),
-          complete: () => this.combatEventSubscriptions.delete(type),
-        });
-      this.combatEventSubscriptions.set(type, eventSub);
-    }
 
     const combatDurationMs = combatAction.duration * 100;
     const remainingDuration =
@@ -122,10 +110,7 @@ export class CombatService {
 
     const sub = complete$.subscribe(onComplete);
 
-    if (type === BattleType.Colosseum || type === BattleType.Dungeon) {
-      this.combatEndSubscriptions.get(type)?.unsubscribe();
-      this.combatEndSubscriptions.set(type, sub);
-    }
+    this.combatEndSubscriptions.set(type, sub);
   }
 
   skipCurrentColosseum(): void {
@@ -136,15 +121,9 @@ export class CombatService {
     const combatResult = this.combatStateService.getCombatResult(type)();
     if (!combatResult) return;
 
-    // Cancel the delayed completion subscription
+    // Cancel any pending completion before closing the summary.
     this.combatEndSubscriptions.get(type)?.unsubscribe();
     this.combatEndSubscriptions.delete(type);
-
-    const alreadyPlayed = this.combatStateService.getLastEventsLength(type);
-    this.combatStateService.addCombatEvents(
-      type,
-      combatResult.eventLog.slice(alreadyPlayed),
-    );
 
     this.combatStateService.setCombatOutcome(type, combatResult.outcome);
     this.combatStateService.setCombatActive(type, false);
@@ -160,15 +139,9 @@ export class CombatService {
     const combatResult = this.combatStateService.getCombatResult(type)();
     if (!combatResult) return;
 
-    // Cancel the delayed completion subscription
+    // Cancel any pending completion before closing the summary.
     this.combatEndSubscriptions.get(type)?.unsubscribe();
     this.combatEndSubscriptions.delete(type);
-
-    const alreadyPlayed = this.combatStateService.getLastEventsLength(type);
-    this.combatStateService.addCombatEvents(
-      type,
-      combatResult.eventLog.slice(alreadyPlayed),
-    );
 
     this.combatStateService.setCombatOutcome(type, combatResult.outcome);
     this.combatStateService.setCombatActive(type, false);
@@ -190,6 +163,7 @@ export class CombatService {
     this.combatStateService.setCombatActive(type, false);
 
     if (type === BattleType.IdleCombat) {
+      this.levelingService.gainExperience(combatResult.experienceGained);
       return;
     }
 
@@ -198,16 +172,12 @@ export class CombatService {
 
   /** stop & forget a particular fight (e.g. UI tab closed) */
   stop(battleType: BattleType) {
-    this.combatEventSubscriptions.get(battleType)?.unsubscribe();
-    this.combatEventSubscriptions.delete(battleType);
     this.combatEndSubscriptions.get(battleType)?.unsubscribe();
     this.combatEndSubscriptions.delete(battleType);
     this.combatStateService.resetCombatState(battleType);
   }
 
   handleLogout() {
-    this.combatEventSubscriptions.forEach((sub) => sub.unsubscribe());
-    this.combatEventSubscriptions.clear();
     this.combatEndSubscriptions.forEach((sub) => sub.unsubscribe());
     this.combatEndSubscriptions.clear();
     this.clearCurrentCombat(BattleType.IdleCombat);
