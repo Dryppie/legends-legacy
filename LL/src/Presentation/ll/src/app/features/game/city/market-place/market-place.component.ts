@@ -42,7 +42,7 @@ export class MarketPlaceComponent {
   readonly ItemType = ItemType;
   readonly selectedItemType = signal<DropdownSelection<ItemType>>({
     main: ItemType.Resource,
-    sub: '',
+    sub: 'Metal',
   });
 
   constructor(
