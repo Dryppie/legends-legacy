@@ -1,3 +1,4 @@
+using Application.BackgroundJobs;
 using Application.Interfaces.Services.LL.Colosseum;
 using Application.Interfaces.Services.LL.Entities;
 using Application.Interfaces.WebSockets;
@@ -14,8 +15,10 @@ using Domain.Models.Items.Equipments;
 using Domain.Models.Regions.Areas;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using Persistence.LL;
+using Persistence.LL.BackgroundJobs;
 using Persistence.LL.Repositories.Colosseum;
 using Services.LL.Colosseum.Tournaments;
 using Services.LL.Combat.Layers.Orchestration.Models;
@@ -23,6 +26,8 @@ using Services.LL.Combat.Layers.Resolution.Models;
 using Services.LL.Interfaces;
 using Services.LL.Interfaces.Combat.Resolution;
 using System.Text.Json;
+using Quartz;
+using Worker.LL.BackgroundJobs;
 
 namespace EssenceSystem.Tests;
 
@@ -64,6 +69,36 @@ public sealed class TournamentGroundsServiceTests
         var definition = await db.TournamentDefinitions.SingleAsync();
         Assert.Equal("weekly-open-grounds", definition.Key);
         Assert.Equal(5 * 24 * 60, definition.RegistrationDurationMinutes);
+    }
+
+    [Fact]
+    public async Task EnsureUpcomingTournamentsAsync_acquires_schedule_lock()
+    {
+        await using var db = CreateDbContext();
+        var lockService = new CapturingTournamentLockService();
+        var service = CreateService(db, tournamentLockService: lockService);
+
+        await service.EnsureUpcomingTournamentsAsync(CancellationToken.None);
+
+        Assert.Equal(1, lockService.ScheduleLockCalls);
+        Assert.Equal(0, lockService.TournamentLockCalls);
+        Assert.Single(await db.ArenaTournaments.ToListAsync());
+    }
+
+    [Fact]
+    public async Task GetStatusAsync_does_not_create_or_advance_tournaments()
+    {
+        await using var db = CreateDbContext();
+        var lockService = new CapturingTournamentLockService();
+        var service = CreateService(db, tournamentLockService: lockService);
+
+        var status = await service.GetStatusAsync(Guid.NewGuid(), CancellationToken.None);
+
+        Assert.Null(status.CurrentTournament);
+        Assert.Empty(status.UpcomingTournaments);
+        Assert.Empty(await db.ArenaTournaments.ToListAsync());
+        Assert.Equal(0, lockService.ScheduleLockCalls);
+        Assert.Equal(0, lockService.TournamentLockCalls);
     }
 
     [Fact]
@@ -204,6 +239,61 @@ public sealed class TournamentGroundsServiceTests
         Assert.NotNull(details);
         Assert.Equal(TournamentStatus.Scheduled, tournament.Status);
         Assert.Empty(realtime.Events);
+    }
+
+    [Fact]
+    public async Task GetDetailsAsync_does_not_advance_due_tournament()
+    {
+        await using var db = CreateDbContext();
+        var lockService = new CapturingTournamentLockService();
+        var service = CreateService(db, tournamentLockService: lockService);
+        var tournament = SeedTournament(db, TournamentStatus.Scheduled);
+        var character = SeedCharacter(db, rating: 1500, accountId: Guid.NewGuid());
+        tournament.RegistrationStartsAtUtc = Now.AddMinutes(-10);
+        await db.SaveChangesAsync();
+
+        var details = await service.GetDetailsAsync(character.Id, tournament.Id, CancellationToken.None);
+
+        Assert.NotNull(details);
+        Assert.Equal(TournamentStatus.Scheduled, tournament.Status);
+        Assert.Equal(0, lockService.ScheduleLockCalls);
+        Assert.Equal(0, lockService.TournamentLockCalls);
+    }
+
+    [Fact]
+    public async Task RegisterAsync_does_not_advance_due_scheduled_tournament()
+    {
+        await using var db = CreateDbContext();
+        var service = CreateService(db);
+        var tournament = SeedTournament(db, TournamentStatus.Scheduled);
+        var character = SeedCharacter(db, rating: 1500, accountId: Guid.NewGuid());
+        tournament.RegistrationStartsAtUtc = Now.AddMinutes(-10);
+        tournament.RegistrationEndsAtUtc = Now.AddMinutes(30);
+        await db.SaveChangesAsync();
+
+        var response = await service.RegisterAsync(character.Id, tournament.Id, CancellationToken.None);
+
+        Assert.Null(response);
+        Assert.Equal(TournamentStatus.Scheduled, tournament.Status);
+        Assert.Empty(await db.TournamentParticipants.ToListAsync());
+    }
+
+    [Fact]
+    public async Task WithdrawAsync_does_not_advance_expired_open_tournament()
+    {
+        await using var db = CreateDbContext();
+        var service = CreateService(db);
+        var tournament = SeedTournament(db, TournamentStatus.RegistrationOpen);
+        var participant = SeedParticipant(db, tournament, rating: 1500, registeredOffsetMinutes: 0);
+        tournament.RegistrationEndsAtUtc = Now.AddMinutes(-1);
+        tournament.RegisteredParticipantCount = 1;
+        await db.SaveChangesAsync();
+
+        var response = await service.WithdrawAsync(participant.CharacterId, tournament.Id, CancellationToken.None);
+
+        Assert.Null(response);
+        Assert.Equal(TournamentStatus.RegistrationOpen, tournament.Status);
+        Assert.Equal(TournamentParticipantStatus.Registered, participant.Status);
     }
 
     [Fact]
@@ -440,6 +530,105 @@ public sealed class TournamentGroundsServiceTests
     }
 
     [Fact]
+    public async Task TournamentGroundsProgressionJob_creates_registers_advances_and_rewards_on_postgres()
+    {
+        var connectionString = Environment.GetEnvironmentVariable("LL_TEST_TOURNAMENT_POSTGRES_CONNECTION");
+        if (string.IsNullOrWhiteSpace(connectionString))
+        {
+            return;
+        }
+
+        var schemaName = $"ll_tournament_job_tests_{Guid.NewGuid():N}";
+        await using var adminDb = CreatePostgresDbContext(connectionString);
+        var createSchemaSql = $"CREATE SCHEMA \"{schemaName}\"";
+        var dropSchemaSql = $"DROP SCHEMA IF EXISTS \"{schemaName}\" CASCADE";
+        await adminDb.Database.ExecuteSqlRawAsync(createSchemaSql);
+
+        try
+        {
+            var isolatedConnectionString = WithSearchPath(connectionString, schemaName);
+            await using (var migrationDb = CreatePostgresDbContext(isolatedConnectionString, schemaName))
+            {
+                await migrationDb.Database.MigrateAsync();
+            }
+
+            var clock = new MutableTimeProvider(new DateTimeOffset(2026, 6, 29, 0, 5, 0, TimeSpan.Zero));
+            var options = new TournamentGroundsOptions
+            {
+                Enabled = true,
+                AllowWithdrawDuringRegistration = true,
+                DefaultMinParticipants = 4,
+                DefaultMaxParticipants = 32,
+                DefaultRoundIntervalMinutes = 0
+            };
+
+            Guid tournamentId;
+            var characterIds = new List<Guid>();
+            await using (var db = CreatePostgresDbContext(isolatedConnectionString, schemaName))
+            {
+                var realtime = new CapturingGameRealtimeBroadcaster();
+                var service = CreateService(db, realtime, timeProvider: clock, options: options);
+                var job = CreateProgressionJob(db, service, options);
+
+                await job.Execute(new TournamentJobExecutionContext(clock.GetUtcNow()));
+
+                var tournament = await db.ArenaTournaments.SingleAsync();
+                tournamentId = tournament.Id;
+                Assert.Equal(TournamentStatus.RegistrationOpen, tournament.Status);
+
+                for (var i = 0; i < 10; i++)
+                {
+                    characterIds.Add(SeedCharacter(db, rating: 1800 - (i * 100), accountId: Guid.NewGuid()).Id);
+                }
+
+                await db.SaveChangesAsync();
+
+                foreach (var characterId in characterIds)
+                {
+                    var registration = await service.RegisterAsync(characterId, tournamentId, CancellationToken.None);
+                    Assert.NotNull(registration);
+                    Assert.True(registration.Registered);
+                }
+
+                Assert.Equal(10, await db.TournamentParticipants.CountAsync(p => p.TournamentId == tournamentId));
+            }
+
+            clock.SetUtcNow(new DateTimeOffset(2026, 7, 4, 0, 5, 0, TimeSpan.Zero));
+            await using (var db = CreatePostgresDbContext(isolatedConnectionString, schemaName))
+            {
+                var realtime = new CapturingGameRealtimeBroadcaster();
+                var combatExecutor = new QueuedCombatEngineExecutor(
+                    BattleOutcome.Victory,
+                    BattleOutcome.Victory,
+                    BattleOutcome.Victory);
+                var service = CreateService(
+                    db,
+                    realtime,
+                    entityService: new DbEntityService(db),
+                    combatSetupService: new SimpleCombatSetupService(),
+                    combatEngineExecutor: combatExecutor,
+                    combatEncounterResultFactory: new PassthroughCombatEncounterResultFactory(),
+                    timeProvider: clock,
+                    options: options);
+                var job = CreateProgressionJob(db, service, options);
+
+                await job.Execute(new TournamentJobExecutionContext(clock.GetUtcNow()));
+
+                var tournament = await db.ArenaTournaments.SingleAsync(t => t.Id == tournamentId);
+                Assert.Equal(TournamentStatus.Completed, tournament.Status);
+                Assert.Equal(3, combatExecutor.ExecutionCount);
+                Assert.Equal(10, await db.TournamentRewardGrants.CountAsync(r => r.TournamentId == tournamentId));
+                Assert.Equal(2, await db.BackgroundJobExecutions.CountAsync(e => e.JobName == BackgroundJobNames.TournamentGroundsRollover));
+                Assert.Contains(realtime.Events, e => e.Event == "TournamentCompleted");
+            }
+        }
+        finally
+        {
+            await adminDb.Database.ExecuteSqlRawAsync(dropSchemaSql);
+        }
+    }
+
+    [Fact]
     public async Task RegisterAsync_serializes_capacity_with_postgres_advisory_lock()
     {
         var connectionString = Environment.GetEnvironmentVariable("LL_TEST_TOURNAMENT_POSTGRES_CONNECTION");
@@ -553,9 +742,19 @@ public sealed class TournamentGroundsServiceTests
         ICombatSetupService? combatSetupService = null,
         ICharacterSnapshotService? characterSnapshotService = null,
         ICombatEngineExecutor? combatEngineExecutor = null,
-        ICombatEncounterResultFactory? combatEncounterResultFactory = null)
+        ICombatEncounterResultFactory? combatEncounterResultFactory = null,
+        ITournamentLockService? tournamentLockService = null,
+        TimeProvider? timeProvider = null,
+        TournamentGroundsOptions? options = null)
     {
         var tournaments = new TournamentGroundsRepository(db);
+        var tournamentOptions = options ?? new TournamentGroundsOptions
+        {
+            Enabled = true,
+            AllowWithdrawDuringRegistration = true,
+            DefaultMinParticipants = 4,
+            DefaultMaxParticipants = 32
+        };
 
         return new TournamentGroundsService(
             tournaments,
@@ -566,17 +765,32 @@ public sealed class TournamentGroundsServiceTests
             combatEngineExecutor ?? new ThrowingCombatEngineExecutor(),
             combatEncounterResultFactory ?? new ThrowingCombatEncounterResultFactory(),
             realtime ?? new CapturingGameRealtimeBroadcaster(),
-            new PostgresTournamentLockService(
+            tournamentLockService ?? new PostgresTournamentLockService(
                 tournaments,
-                Options.Create(new TournamentGroundsOptions { UsePostgresAdvisoryLocks = true })),
-            new FixedTimeProvider(Now),
-            Options.Create(new TournamentGroundsOptions
+                Options.Create(tournamentOptions)),
+            timeProvider ?? new FixedTimeProvider(Now),
+            Options.Create(tournamentOptions));
+    }
+
+    private static TournamentGroundsProgressionJob CreateProgressionJob(
+        LLDbContext db,
+        TournamentGroundsService service,
+        TournamentGroundsOptions options)
+    {
+        var executionService = new BackgroundJobExecutionService(
+            db,
+            Options.Create(new BackgroundJobOptions
             {
-                Enabled = true,
-                AllowWithdrawDuringRegistration = true,
-                DefaultMinParticipants = 4,
-                DefaultMaxParticipants = 32
-            }));
+                MaxConcurrency = 5,
+                RunningExecutionTimeoutMinutes = 30
+            }),
+            NullLogger<BackgroundJobExecutionService>.Instance);
+
+        return new TournamentGroundsProgressionJob(
+            service,
+            executionService,
+            Options.Create(options),
+            NullLogger<TournamentGroundsProgressionJob>.Instance);
     }
 
     private static TournamentInstance SeedTournament(LLDbContext db, TournamentStatus status)
@@ -731,6 +945,55 @@ public sealed class TournamentGroundsServiceTests
         public override DateTimeOffset GetUtcNow() => now;
     }
 
+    private sealed class MutableTimeProvider(DateTimeOffset now) : TimeProvider
+    {
+        private DateTimeOffset _now = now;
+
+        public override DateTimeOffset GetUtcNow() => _now;
+
+        public void SetUtcNow(DateTimeOffset now)
+        {
+            _now = now;
+        }
+    }
+
+    private sealed class TournamentJobExecutionContext(DateTimeOffset scheduledFireTime) : IJobExecutionContext
+    {
+        private readonly Dictionary<object, object> _data = [];
+
+        public IScheduler Scheduler => null!;
+        public ITrigger Trigger { get; } = TriggerBuilder.Create()
+            .WithIdentity("pvp.tournament-grounds-progression.trigger", BackgroundJobGroups.PvP)
+            .Build();
+        public ICalendar Calendar => null!;
+        public bool Recovering => false;
+        public TriggerKey RecoveringTriggerKey => null!;
+        public int RefireCount => 0;
+        public JobDataMap MergedJobDataMap { get; } = [];
+        public IJobDetail JobDetail { get; } = JobBuilder.Create<TournamentGroundsProgressionJob>()
+            .WithIdentity(BackgroundJobNames.TournamentGroundsRollover, BackgroundJobGroups.PvP)
+            .Build();
+        public IJob JobInstance => null!;
+        public DateTimeOffset FireTimeUtc => scheduledFireTime;
+        public DateTimeOffset? ScheduledFireTimeUtc => scheduledFireTime;
+        public DateTimeOffset? PreviousFireTimeUtc => null;
+        public DateTimeOffset? NextFireTimeUtc => null;
+        public string FireInstanceId => $"test-fire-instance-{scheduledFireTime:yyyyMMddHHmmss}";
+        public object? Result { get; set; }
+        public TimeSpan JobRunTime => TimeSpan.Zero;
+        public CancellationToken CancellationToken => CancellationToken.None;
+
+        public void Put(object key, object objectValue)
+        {
+            _data[key] = objectValue;
+        }
+
+        public object? Get(object key)
+        {
+            return _data.GetValueOrDefault(key);
+        }
+    }
+
     private sealed class CapturingGameRealtimeBroadcaster : IGameRealtimeBroadcaster
     {
         public List<TournamentGroundsUpdated> Events { get; } = [];
@@ -746,6 +1009,24 @@ public sealed class TournamentGroundsServiceTests
                 Events.Add(tournamentEvent);
             }
 
+            return Task.CompletedTask;
+        }
+    }
+
+    private sealed class CapturingTournamentLockService : ITournamentLockService
+    {
+        public int ScheduleLockCalls { get; private set; }
+        public int TournamentLockCalls { get; private set; }
+
+        public Task LockTournamentScheduleAsync(CancellationToken cancellationToken)
+        {
+            ScheduleLockCalls++;
+            return Task.CompletedTask;
+        }
+
+        public Task LockTournamentAsync(Guid tournamentId, CancellationToken cancellationToken)
+        {
+            TournamentLockCalls++;
             return Task.CompletedTask;
         }
     }
