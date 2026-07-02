@@ -126,7 +126,7 @@ export class ColosseumStateService {
       .subscribe({
         next: (status) => {
           this._status.set(status);
-          this.initializeNotificationCount(this.countStatusActions(status));
+          this.syncNotificationCount(status);
         },
         error: (err) =>
           this._error.set(
@@ -137,7 +137,10 @@ export class ColosseumStateService {
 
   loadStatus(): void {
     this.colosseumService.getStatus().subscribe({
-      next: (status) => this._status.set(status),
+      next: (status) => {
+        this._status.set(status);
+        this.syncNotificationCount(status);
+      },
       error: (err) =>
         this._error.set(err.message ?? 'Failed to load colosseum status'),
     });
@@ -292,13 +295,6 @@ export class ColosseumStateService {
     this._arenaTicketStatus.set(status);
   }
 
-  markNotificationsSeen(): void {
-    this.notificationService.markSeen(
-      NOTIFICATION_SURFACE.Sidebar,
-      SIDEBAR_NOTIFICATION.Colosseum,
-    );
-  }
-
   private isParticipant(
     event: ArenaBattleCompletedMsg,
     characterId: string,
@@ -329,11 +325,11 @@ export class ColosseumStateService {
     );
   }
 
-  private initializeNotificationCount(count: number): void {
-    this.notificationService.initializeCount(
+  private syncNotificationCount(status: ColosseumStatus | null): void {
+    this.notificationService.setCount(
       NOTIFICATION_SURFACE.Sidebar,
       SIDEBAR_NOTIFICATION.Colosseum,
-      count,
+      this.countStatusActions(status),
     );
   }
 
@@ -434,6 +430,7 @@ export class ColosseumStateService {
           : status.dailyFirstWinAvailable,
       attackRecord: this.applyAttackRecord(status.attackRecord, response),
     });
+    this.syncNotificationCount(this._status());
   }
 
   private applyAttackRecord(
