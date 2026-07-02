@@ -49,6 +49,8 @@ public sealed class CompiledEffect
     public AttributeType? Attribute { get; init; }
     public string? StatusId { get; init; }
     public string? SummonId { get; init; }
+    public double SummonPowerMultiplier { get; init; } = 1d;
+    public double SummonHealthMultiplier { get; init; } = 1d;
     public AbilityResourceType Resource { get; init; }
     public int DurationTicks { get; init; }
     public int IntervalTicks { get; init; }

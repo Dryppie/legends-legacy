@@ -162,6 +162,8 @@ public sealed class AbilityEffectSpec
     public AttributeType? Attribute { get; set; }
     public string? StatusId { get; set; }
     public string? SummonId { get; set; }
+    public double SummonPowerMultiplier { get; set; } = 1d;
+    public double SummonHealthMultiplier { get; set; } = 1d;
     public AbilityResourceType Resource { get; set; } = AbilityResourceType.Health;
     public int DurationTicks { get; set; }
     public int IntervalTicks { get; set; }

@@ -108,6 +108,8 @@ public static class AbilityCompiler
             Attribute = effect.Attribute,
             StatusId = effect.StatusId,
             SummonId = effect.SummonId,
+            SummonPowerMultiplier = effect.SummonPowerMultiplier <= 0 ? 1d : effect.SummonPowerMultiplier,
+            SummonHealthMultiplier = effect.SummonHealthMultiplier <= 0 ? 1d : effect.SummonHealthMultiplier,
             Resource = effect.Resource,
             DurationTicks = effect.DurationTicks,
             IntervalTicks = effect.IntervalTicks,

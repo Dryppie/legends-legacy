@@ -112,6 +112,7 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
 
                 var baseSpec = catalog.AbilitiesById[abilityId];
                 var modifiedSpec = ApplyEvolutionModifiers(baseSpec, essence, catalog);
+                modifiedSpec = ApplyEssenceProgressionScaling(modifiedSpec, essence);
                 modifiedSpec = ApplyTemporaryAbilityModifiers(modifiedSpec, combatant, catalog);
                 yield return ReferenceEquals(baseSpec, modifiedSpec)
                     ? compiledAbilities[abilityId]
@@ -191,6 +192,48 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
         }
 
         return clone ?? spec;
+    }
+
+    private static AbilitySpec ApplyEssenceProgressionScaling(AbilitySpec spec, PlayerEssence essence)
+    {
+        if (essence.AscensionTier <= 0)
+            return spec;
+
+        var clone = CloneAbilitySpec(spec);
+        if (clone.Kind == AbilitySpecKind.Active)
+        {
+            clone.CooldownTicks = SecondsToTicks(EssenceProgressionConstants.ScaleActiveCooldownSeconds(
+                clone.CooldownTicks / 10d,
+                essence.AscensionTier));
+        }
+
+        foreach (var effect in clone.Effects)
+        {
+            var valueMultiplier = EssenceProgressionConstants.ScaleAbilityValue(
+                1d,
+                essence.Level,
+                essence.AscensionTier,
+                effect.Operation.ToString());
+            effect.BaseValue = ScaleValue(effect.BaseValue, valueMultiplier);
+            effect.ScalingCoefficient *= (float)valueMultiplier;
+
+            if (effect.DurationTicks > 0)
+            {
+                effect.DurationTicks = SecondsToTicks(EssenceProgressionConstants.ScaleEffectDurationSeconds(
+                    effect.DurationTicks / 10d,
+                    essence.AscensionTier,
+                    effect.Operation.ToString(),
+                    effect.StatusId));
+            }
+
+            if (effect.Operation == AbilityEffectOperation.Summon)
+            {
+                effect.SummonPowerMultiplier *= EssenceProgressionConstants.GetSummonPowerMultiplier(essence.AscensionTier);
+                effect.SummonHealthMultiplier *= EssenceProgressionConstants.GetSummonHealthMultiplier(essence.AscensionTier);
+            }
+        }
+
+        return clone;
     }
 
     private AbilitySpec ApplyTemporaryAbilityModifiers(
@@ -378,6 +421,9 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
     private static int ScaleValue(int value, double multiplier) =>
         (int)Math.Round(value * multiplier, MidpointRounding.AwayFromZero);
 
+    private static int SecondsToTicks(double seconds) =>
+        Math.Max(0, (int)Math.Round(seconds * 10d, MidpointRounding.AwayFromZero));
+
     private static AbilitySpec CloneAbilitySpec(AbilitySpec spec) =>
         new()
         {
@@ -444,6 +490,8 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
             Attribute = effect.Attribute,
             StatusId = effect.StatusId,
             SummonId = effect.SummonId,
+            SummonPowerMultiplier = effect.SummonPowerMultiplier,
+            SummonHealthMultiplier = effect.SummonHealthMultiplier,
             Resource = effect.Resource,
             DurationTicks = effect.DurationTicks,
             IntervalTicks = effect.IntervalTicks,
