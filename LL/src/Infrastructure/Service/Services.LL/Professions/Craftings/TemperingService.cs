@@ -78,19 +78,6 @@ public class TemperingService : ITemperingService
 
     private static void AllocateExpBasedOnCraftingProfession(TemperingSummary temperingSummary, int experience, CraftType craftType)
     {
-        switch (craftType)
-        {
-            case CraftType.ArmorForging:
-                temperingSummary.ArmorForgingExperience += experience;
-                break;
-            case CraftType.JewelryCrafting:
-                temperingSummary.JewelryCraftingExperience += experience;
-                break;
-            case CraftType.WeaponSmithing:
-                temperingSummary.WeaponSmithingExperience += experience;
-                break;
-            default:
-                break;
-        }
+        temperingSummary.CraftingExperience += experience;
     }
 }

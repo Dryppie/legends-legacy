@@ -61,7 +61,14 @@ public class LeaderboardRepository : ILeaderboardRepository
                 wealthTop50.Add(requesterEntry);
         }
 
-        var professions = Enum.GetValues<ProfessionType>();
+        var professions = new[]
+        {
+            ProfessionType.Crafting,
+            ProfessionType.Mining,
+            ProfessionType.Woodcutting,
+            ProfessionType.Fishing,
+            ProfessionType.Skinning
+        };
         var professionLeaderboards = new Dictionary<string, List<LeaderboardEntry>>();
 
         foreach (var profession in professions)

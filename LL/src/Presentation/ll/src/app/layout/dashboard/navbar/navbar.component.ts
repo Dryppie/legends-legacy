@@ -18,8 +18,6 @@ import { CharacterActionsStateService } from '../../../core/services/api/charact
 import { Router } from '@angular/router';
 import { GameService } from '../../../core/services/client-side/game/game.service';
 import { CharacterActionType } from '../../../shared/models/enums/characterActionType';
-import { Equipment } from '../../../shared/models/item';
-import { EquipmentType } from '../../../shared/models/enums/equipmentType';
 
 @Component({
   selector: 'app-navbar',
@@ -129,41 +127,11 @@ export class NavbarComponent implements OnInit, OnDestroy {
       return;
     }
 
-    let route: string[] = [];
-
     if (actionType === CharacterActionType.Crafting) {
-      const equipmentType = (
-        action.craftingActionDetails?.craftingQueueItems[0].equipmentInstance
-          .itemBase as Equipment
-      ).equipmentType;
-
-      switch (equipmentType) {
-        case EquipmentType.Head:
-        case EquipmentType.Chest:
-        case EquipmentType.Legs:
-          route = ['game', 'professions', 'crafting', 'armorforging'];
-          break;
-
-        case EquipmentType.TwoHanded:
-        case EquipmentType.OneHanded:
-        case EquipmentType.OffHand:
-          route = ['game', 'professions', 'crafting', 'weaponsmithing'];
-          break;
-
-        case EquipmentType.Relic:
-        case EquipmentType.Necklace:
-        case EquipmentType.Ring:
-          route = ['game', 'professions', 'crafting', 'jewelrycrafting'];
-          break;
-
-        default:
-          return;
-      }
+      this.router.navigate(['game', 'professions', 'crafting']);
     } else {
       return;
     }
-
-    this.router.navigate(route);
   }
 
   logout() {

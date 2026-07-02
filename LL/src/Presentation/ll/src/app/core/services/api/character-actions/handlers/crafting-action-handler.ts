@@ -28,24 +28,10 @@ export class CraftingActionHandler {
     this.sessionSummaryService.loadCraftingSince(tempering);
     const summary = tempering.temperingSummary;
 
-    if (summary.armorForgingExperience > 0) {
+    if (summary.totalExperience > 0) {
       this.levelingService.gainProfessionExperience(
-        ProfessionType.ArmorForging,
-        summary.armorForgingExperience,
-      );
-    }
-
-    if (summary.jewelryCraftingExperience > 0) {
-      this.levelingService.gainProfessionExperience(
-        ProfessionType.JewelryCrafting,
-        summary.jewelryCraftingExperience,
-      );
-    }
-
-    if (summary.weaponSmithingExperience > 0) {
-      this.levelingService.gainProfessionExperience(
-        ProfessionType.WeaponSmithing,
-        summary.weaponSmithingExperience,
+        ProfessionType.Crafting,
+        summary.totalExperience,
       );
     }
 

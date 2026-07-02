@@ -16,8 +16,6 @@ import { GameService } from '../../../core/services/client-side/game/game.servic
 import { CurrentActionComponent } from '../../../shared/components/current-action/current-action.component';
 import { CharacterActionsStateService } from '../../../core/services/api/character-actions/character-actions.state.service';
 import { CharacterActionType } from '../../../shared/models/enums/characterActionType';
-import { Equipment } from '../../../shared/models/item';
-import { EquipmentType } from '../../../shared/models/enums/equipmentType';
 import { ShortNumberPipe } from '../../../shared/pipes/number-format/short-number.pipe';
 import { NumberFormatPipe } from '../../../shared/pipes/number-format/number-format.pipe';
 import { CharacterStateService } from '../../../core/services/api/character/character-state.service';
@@ -152,40 +150,10 @@ export class SidebarComponent implements OnInit, OnDestroy {
       return;
     }
 
-    let route: string[] = [];
-
     if (actionType === CharacterActionType.Crafting) {
-      const equipmentType = (
-        action.craftingActionDetails?.craftingQueueItems[0].equipmentInstance
-          .itemBase as Equipment
-      ).equipmentType;
-
-      switch (equipmentType) {
-        case EquipmentType.Head:
-        case EquipmentType.Chest:
-        case EquipmentType.Legs:
-          route = ['game', 'professions', 'crafting', 'armorforging'];
-          break;
-
-        case EquipmentType.TwoHanded:
-        case EquipmentType.OneHanded:
-        case EquipmentType.OffHand:
-          route = ['game', 'professions', 'crafting', 'weaponsmithing'];
-          break;
-
-        case EquipmentType.Relic:
-        case EquipmentType.Necklace:
-        case EquipmentType.Ring:
-          route = ['game', 'professions', 'crafting', 'jewelrycrafting'];
-          break;
-
-        default:
-          return;
-      }
+      this.router.navigate(['game', 'professions', 'crafting']);
     } else {
       return;
     }
-
-    this.router.navigate(route);
   }
 }

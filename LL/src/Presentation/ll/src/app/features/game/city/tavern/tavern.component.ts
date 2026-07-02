@@ -52,18 +52,8 @@ export class TavernComponent {
       items: [],
     },
     {
-      id: 'armorforging',
-      label: 'Armorforging',
-      items: [],
-    },
-    {
-      id: 'jewelrycrafting',
-      label: 'Jewelrycrafting',
-      items: [],
-    },
-    {
-      id: 'weaponsmithing',
-      label: 'Weaponsmithing',
+      id: 'crafting',
+      label: 'Crafting',
       items: [],
     },
   ];
@@ -94,12 +84,8 @@ export class TavernComponent {
         return this.state.byProfession('Mining')();
       case 'Woodcutting':
         return this.state.byProfession('Woodcutting')();
-      case 'Armorforging':
-        return this.state.byProfession('ArmorForging')();
-      case 'Jewelrycrafting':
-        return this.state.byProfession('JewelryCrafting')();
-      case 'Weaponsmithing':
-        return this.state.byProfession('WeaponSmithing')();
+      case 'Crafting':
+        return this.state.byProfession('Crafting')();
       default:
         return [];
     }

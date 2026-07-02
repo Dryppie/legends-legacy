@@ -55,47 +55,20 @@ export class ProfessionsService {
     this._professions.set([...this._professions()]);
   }
 
-  getProfessionById(id: string): Profession {
-    if (id.includes('armorforging')) {
-      return this.getArmorforgingProfession();
-    }
-    if (id.includes('jewelrycrafting')) {
-      return this.getJewelrycraftingProfession();
-    }
-    if (id.includes('weaponsmithing')) {
-      return this.getWeaponsmithingProfession();
-    }
-    return this.getArmorforgingProfession();
+  getProfessionById(_id: string): Profession {
+    return this.getCraftingProfession();
   }
 
-  getArmorforgingProfession(): CraftingProfession {
+  getCraftingProfession(): CraftingProfession {
     return {
-      name: 'Armorforging',
-      recipes: this.getWeaponsmithingRecipes(),
+      name: 'Crafting',
+      recipes: this.getCraftingRecipes(),
       iconPath: 'mining',
-      professionType: ProfessionType.ArmorForging,
+      professionType: ProfessionType.Crafting,
     };
   }
 
-  getJewelrycraftingProfession(): CraftingProfession {
-    return {
-      name: 'Jewelrycrafting',
-      recipes: this.getWeaponsmithingRecipes(),
-      iconPath: 'mining',
-      professionType: ProfessionType.JewelryCrafting,
-    };
-  }
-
-  getWeaponsmithingProfession(): CraftingProfession {
-    return {
-      name: 'Weaponsmithing',
-      recipes: this.getWeaponsmithingRecipes(),
-      iconPath: 'mining',
-      professionType: ProfessionType.WeaponSmithing,
-    };
-  }
-
-  getWeaponsmithingRecipes(): Recipe[] {
+  getCraftingRecipes(): Recipe[] {
     return [];
   }
 }
