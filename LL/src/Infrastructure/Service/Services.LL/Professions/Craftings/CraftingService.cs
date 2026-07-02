@@ -305,7 +305,11 @@ public class CraftingService : ICraftingService
         if (professionType == ProfessionType.None)
             return Response<CraftItemsResult>.Fail("Recipe output does not map to a crafting profession.");
 
-        var costs = _requirementResolver.ResolveCosts(recipe, targetTier, blueprint.Value?.SpecialResourceRequirements)
+        var resolvedCosts = _requirementResolver.ResolveCosts(recipe, targetTier, blueprint.Value?.SpecialResourceRequirements);
+        var tierValidationError = ValidateTierDefiningMaterialCosts(resolvedCosts, targetTier);
+        if (tierValidationError != null) return Response<CraftItemsResult>.Fail(tierValidationError);
+
+        var costs = resolvedCosts
             .Select(cost => new Material
             {
                 ItemId = cost.ItemId,
@@ -346,7 +350,7 @@ public class CraftingService : ICraftingService
                 TemperingProgress = 0,
                 AffinityTags = [.. recipe.AffinityTags.Concat(form?.Tags ?? []).Concat(blueprint.Value?.Tags ?? [])],
                 SpecialModifiers = [],
-                InstanceModifiers = [.. _statRollService.RollBaseStats(recipe, targetTier, quality, rng)]
+                InstanceModifiers = [.. _statRollService.RollBaseStats(itemBase, recipe, targetTier, quality, rng)]
             };
 
             created.Add(new InventoryItem
@@ -647,6 +651,27 @@ public class CraftingService : ICraftingService
             EquipmentType.OneHanded or EquipmentType.TwoHanded or EquipmentType.OffHand => ProfessionType.WeaponSmithing,
             _ => ProfessionType.None
         };
+    }
+
+    private static string? ValidateTierDefiningMaterialCosts(IReadOnlyList<ResolvedMaterialCost> costs, int targetTier)
+    {
+        var tierDefiningCosts = costs.Where(x => x.Tier.HasValue).ToList();
+        if (tierDefiningCosts.Count == 0)
+            return "Crafted equipment requires tier-defining materials.";
+
+        var mismatchedCost = tierDefiningCosts.FirstOrDefault(x => x.Tier!.Value != targetTier);
+        if (mismatchedCost != null)
+            return $"Material '{mismatchedCost.Name}' is tier {mismatchedCost.Tier}; crafted equipment tier must match the primary material tier.";
+
+        var mixedTier = tierDefiningCosts
+            .Select(x => x.Tier!.Value)
+            .Distinct()
+            .Skip(1)
+            .Any();
+        if (mixedTier)
+            return "Tier-defining materials must all come from the same tier.";
+
+        return null;
     }
 
     private async Task<(BlueprintDefinition? Value, string? Error)> ResolveCraftingBlueprintAsync(

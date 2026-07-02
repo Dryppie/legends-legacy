@@ -1,7 +1,9 @@
 using Domain.Models.Attributes;
+using Domain.Models.Attributes.Modifiers;
 using Domain.Models.Items;
 using Domain.Models.Items.Equipments;
 using Domain.Models.Professions.Crafting.V2;
+using Microsoft.Extensions.Options;
 using Services.LL.Professions.Craftings;
 
 namespace EssenceSystem.Tests;
@@ -40,6 +42,50 @@ public sealed class TemperingMechanicsServiceTests
         var modifier = Assert.Single(equipment.InstanceModifiers);
         Assert.Equal(AttributeType.Armor, modifier.AttributeType);
         Assert.Equal(4, modifier.Amount);
+    }
+
+    [Fact]
+    public void ApplyTemperingAttempt_WhenQualityIncreaseRollSucceeds_IncreasesQualityWithoutRestoringPotential()
+    {
+        var service = new TemperingMechanicsService(Options.Create(new CraftingBalanceOptions
+        {
+            QualityIncreaseChanceOnTemper = 1d
+        }));
+        var equipment = CreateEquipment();
+        equipment.Quality = ItemQuality.Fine;
+        equipment.MaxPotential = 10;
+        equipment.InstanceModifiers.Add(new InstanceAttributeModifier(AttributeType.Armor, 100));
+        var profile = CreateProfile();
+
+        var result = service.ApplyTemperingAttempt(equipment, profile, new FixedRandom(0.01d));
+
+        Assert.True(result.QualityIncreased);
+        Assert.Equal(ItemQuality.Fine, result.PreviousQuality);
+        Assert.Equal(ItemQuality.Exceptional, result.NewQuality);
+        Assert.Equal(ItemQuality.Exceptional, equipment.Quality);
+        Assert.Equal(9, equipment.Potential);
+        Assert.Equal(10, equipment.MaxPotential);
+        Assert.Equal(104, equipment.InstanceModifiers.Single().Amount);
+    }
+
+    [Fact]
+    public void ApplyTemperingAttempt_WhenQualityAlreadyMaximum_DoesNotIncreaseQuality()
+    {
+        var service = new TemperingMechanicsService(Options.Create(new CraftingBalanceOptions
+        {
+            QualityIncreaseChanceOnTemper = 1d
+        }));
+        var equipment = CreateEquipment();
+        equipment.Quality = ItemQuality.Masterwork;
+        var profile = CreateProfile();
+
+        var result = service.ApplyTemperingAttempt(equipment, profile, new FixedRandom(0.01d));
+
+        Assert.False(result.QualityIncreased);
+        Assert.Null(result.PreviousQuality);
+        Assert.Null(result.NewQuality);
+        Assert.Equal(ItemQuality.Masterwork, equipment.Quality);
+        Assert.Equal(9, equipment.Potential);
     }
 
     private static EquipmentInstance CreateEquipment() => new()

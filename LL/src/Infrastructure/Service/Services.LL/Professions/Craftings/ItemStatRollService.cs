@@ -1,28 +1,29 @@
 using Application.Interfaces.Services.LL.Professions;
 using Domain.Models.Attributes.Modifiers;
 using Domain.Models.Items;
+using Domain.Models.Items.Equipments;
 using Domain.Models.Professions.Crafting.V2;
+using Microsoft.Extensions.Options;
 
 namespace Services.LL.Professions.Craftings;
 
 public class ItemStatRollService : IItemStatRollService
 {
-    private static readonly IReadOnlyDictionary<ItemQuality, double> QualityMultipliers =
-        new Dictionary<ItemQuality, double>
-        {
-            [ItemQuality.Crude] = 0.85d,
-            [ItemQuality.Standard] = 1.00d,
-            [ItemQuality.Fine] = 1.12d,
-            [ItemQuality.Exceptional] = 1.28d,
-            [ItemQuality.Masterwork] = 1.50d
-        };
+    private readonly CraftingBalanceOptions _options;
 
-    public IReadOnlyList<InstanceAttributeModifier> RollBaseStats(CraftingRecipeDefinition recipe, int targetTier, ItemQuality quality, Random rng)
+    public ItemStatRollService(IOptions<CraftingBalanceOptions>? options = null)
+    {
+        _options = options?.Value ?? new CraftingBalanceOptions();
+    }
+
+    public IReadOnlyList<InstanceAttributeModifier> RollBaseStats(EquipmentBase equipment, CraftingRecipeDefinition recipe, int targetTier, ItemQuality quality, Random rng)
     {
         var profile = recipe.BaseStatProfileOverride ?? recipe.BaseStatProfile;
         if (profile.Count == 0) return [];
 
-        var budget = (20 + (targetTier * 12)) * QualityMultipliers.GetValueOrDefault(quality, 1.0d);
+        var budget = _options.GetTierPowerBudget(targetTier)
+            * _options.GetSlotBudgetWeight(equipment.EquipmentType)
+            * _options.GetQualityStatMultiplier(quality);
         var variance = 0.95d + (rng.NextDouble() * 0.10d);
 
         return profile

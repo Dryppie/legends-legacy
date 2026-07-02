@@ -99,6 +99,17 @@
           </div>
           <div class="ll-stat-label">Masterpieces</div>
         </div>
+        <div
+          class="ll-stat-card min-w-0 p-2"
+          *ngIf="
+            temperingSession.temperingSummary.qualityIncreases > 0 as qualityIncreases
+          "
+        >
+          <div class="ll-text-success">
+            {{ qualityIncreases }}
+          </div>
+          <div class="ll-stat-label">Quality Ups</div>
+        </div>
         <div class="ll-stat-card min-w-0 p-2">
           <div class="ll-text-warning">
             {{ temperingSession.temperingSummary.totalExperience }}

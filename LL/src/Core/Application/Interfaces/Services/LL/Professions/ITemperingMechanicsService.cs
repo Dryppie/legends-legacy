@@ -11,7 +11,10 @@ public sealed record TemperingAttemptResult(
     int PotentialSpent,
     Rarity PreviousRarity,
     Rarity NewRarity,
-    bool RarityUpgraded);
+    bool RarityUpgraded,
+    bool QualityIncreased = false,
+    ItemQuality? PreviousQuality = null,
+    ItemQuality? NewQuality = null);
 
 public interface ITemperingMechanicsService
 {

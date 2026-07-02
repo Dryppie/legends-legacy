@@ -53,6 +53,11 @@ public class TemperingService : ITemperingService
             temperingSummary.LevelingItems++;
         }
 
+        if (result.QualityIncreased)
+        {
+            temperingSummary.QualityIncreases++;
+        }
+
         temperingBonuses.TryGetValue(TemperingOutcome.Positive, out var doubleProfessionExperienceChance);
         var experience = result.Outcome switch
         {
