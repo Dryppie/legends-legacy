@@ -113,6 +113,52 @@ public sealed class CraftingRegionOneContentTests
         }
     }
 
+    [Fact]
+    public void Dungeons_DoNotRewardCompletedEquipmentItems()
+    {
+        var items = ReadArray("items.json")
+            .ToDictionary(
+                item => item?["id"]?.GetValue<string>() ?? string.Empty,
+                item => item?["itemType"]?.GetValue<string>() ?? string.Empty,
+                StringComparer.OrdinalIgnoreCase);
+        var dungeons = ReadArray("dungeons.json");
+
+        var completedEquipmentRewards = dungeons
+            .SelectMany(GetDungeonRewardItemIds)
+            .Where(itemId => items.TryGetValue(itemId, out var itemType) &&
+                             itemType.Equals("Equipment", StringComparison.OrdinalIgnoreCase))
+            .ToList();
+
+        Assert.Empty(completedEquipmentRewards);
+    }
+
+    [Fact]
+    public void Dungeons_DoNotRewardCatalogedCraftingMaterialsAboveTheirOwnTier()
+    {
+        var materialTierByItemId = ReadArray("crafting/materials.json")
+            .Select(material => new
+            {
+                ItemId = material?["itemId"]?.GetValue<string>() ?? string.Empty,
+                Tier = material?["tier"]?.GetValue<int?>()
+            })
+            .Where(material => !string.IsNullOrWhiteSpace(material.ItemId) && material.Tier.HasValue)
+            .ToDictionary(material => material.ItemId, material => material.Tier!.Value, StringComparer.OrdinalIgnoreCase);
+        var dungeons = ReadArray("dungeons.json");
+
+        var invalidRewards = dungeons
+            .SelectMany(dungeon =>
+            {
+                var dungeonTier = dungeon?["tier"]?.GetValue<int>() ?? 1;
+                return GetDungeonRewardItemIds(dungeon)
+                    .Where(itemId => materialTierByItemId.TryGetValue(itemId, out var materialTier) &&
+                                     materialTier > dungeonTier)
+                    .Select(itemId => $"{dungeon?["id"]?.GetValue<string>()}:{itemId}");
+            })
+            .ToList();
+
+        Assert.Empty(invalidRewards);
+    }
+
     private static JsonArray ReadArray(string relativePath)
     {
         var dataRoot = FindDataRoot();
@@ -124,6 +170,20 @@ public sealed class CraftingRegionOneContentTests
 
     private static IEnumerable<JsonNode?> ChildArray(JsonNode? node, string propertyName) =>
         node?[propertyName]?.AsArray() ?? Enumerable.Empty<JsonNode?>();
+
+    private static IEnumerable<string> GetDungeonRewardItemIds(JsonNode? dungeon)
+    {
+        var directRewards = new[] { "firstClearRewards", "completionRewards", "bonusRewards" }
+            .SelectMany(list => ChildArray(dungeon?["rewardTable"], list));
+        var gatheringRewards = ChildArray(dungeon, "gatheringNodes")
+            .SelectMany(node => ChildArray(node, "loot"));
+
+        return directRewards
+            .Concat(gatheringRewards)
+            .Select(reward => reward?["itemId"]?.GetValue<string>())
+            .Where(itemId => !string.IsNullOrWhiteSpace(itemId))
+            .Select(itemId => itemId!);
+    }
 
     private static string FindDataRoot()
     {

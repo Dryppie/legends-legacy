@@ -118,6 +118,7 @@ public static class DependencyInjection
         services.AddScoped<ICombatStatsAggregator, CombatStatsAggregator>();
 
         services.AddScoped<ICraftingService, CraftingService>();
+        services.Configure<CraftingBalanceOptions>(config.GetSection("Crafting:Balance"));
         services.AddScoped<ITemperingService, TemperingService>();
         services.AddScoped<ITemperingProfileResolver, TemperingProfileResolver>();
         services.AddScoped<ITemperingMechanicsService, TemperingMechanicsService>();
