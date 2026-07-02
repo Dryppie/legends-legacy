@@ -210,10 +210,13 @@ public sealed class DungeonRunService : IDungeonRunService
         }
     }
 
-    public async Task<ExecuteDungeonActionResult?> ExecuteActionAsync(Guid runId, string actionId, object? payload, CancellationToken ct)
+    public async Task<ExecuteDungeonActionResult?> ExecuteActionAsync(Guid characterId, Guid runId, string actionId, object? payload, CancellationToken ct)
     {
         var run = await _dungeonRuns.GetDungeonRunByDungeonIdAsync(runId, ct);
         if (run == null)
+            return null;
+
+        if (run.CharacterId != characterId)
             return null;
 
         if (run.Status != DungeonRunStatus.Active)

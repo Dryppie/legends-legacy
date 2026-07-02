@@ -80,12 +80,17 @@ builder.Services.SetupSwagger("Legends Legacy - Chat", config);
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
+        var jwtIssuer = builder.Configuration["Jwt:Issuer"];
+        var jwtAudience = builder.Configuration["Jwt:Audience"];
+
         options.TokenValidationParameters = new()
         {
             ValidateIssuerSigningKey = true,
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:SigningKey"]!)),
-            ValidateIssuer = false, // Needs to be true
-            ValidateAudience = false, // Needs to be true
+            ValidateIssuer = !string.IsNullOrWhiteSpace(jwtIssuer),
+            ValidIssuer = jwtIssuer,
+            ValidateAudience = !string.IsNullOrWhiteSpace(jwtAudience),
+            ValidAudience = jwtAudience,
             ValidateLifetime = true,
             NameClaimType = ClaimTypes.Name
         };
@@ -102,15 +107,6 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                     context.Token = context.Request.Headers["DevAuth"].FirstOrDefault();
                 }
 #endif
-                var token = context.Token;
-
-                // Add support for token origin to either be from a http-header or from a http-only cookie
-                // https://alimozdemir.medium.com/asp-net-core-jwt-and-refresh-token-with-httponly-cookies-b1b96c849742
-                if (string.IsNullOrEmpty(context.Token) && context.Request.Cookies.ContainsKey("AccessToken"))
-                {
-                    context.Token = context.Request.Cookies["AccessToken"];
-                }
-
                 var accessToken = context.Request.Query["access_token"].FirstOrDefault();
                 if (string.IsNullOrEmpty(context.Token)
                     && !string.IsNullOrWhiteSpace(accessToken)

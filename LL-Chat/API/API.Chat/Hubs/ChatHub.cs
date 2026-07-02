@@ -45,6 +45,11 @@ public sealed class ChatHub : Hub<IChatClient>
         if (!await RateLimiter.EnsureAllowedAsync(_cache, senderId))
             return;
 
+        if (channelType == ChatChannelType.Guild && !CanAccessGuild(contextKey))
+        {
+            throw new HubException("Forbidden - not a member of that guild.");
+        }
+
         var senderName = Context.User!.Identity!.Name ?? "Unknown Sender";
         senderTitleDisplayName = NormalizeTitleDisplayName(senderTitleDisplayName)
             ?? NormalizeTitleDisplayName(Context.User.FindFirst("CharacterTitleDisplayName")?.Value);
@@ -98,7 +103,14 @@ public sealed class ChatHub : Hub<IChatClient>
 
     /// <summary>Server-side code (e.g. after auth) calls this to enrol a connection in its guilds.</summary>
     public Task JoinGuild(string guildId)
-        => Groups.AddToGroupAsync(Context.ConnectionId, GuildPrefix + guildId);
+    {
+        if (!CanAccessGuild(guildId))
+        {
+            throw new HubException("Forbidden - not a member of that guild.");
+        }
+
+        return Groups.AddToGroupAsync(Context.ConnectionId, GuildPrefix + guildId);
+    }
 
     public Task LeaveGuild(string guildId)
         => Groups.RemoveFromGroupAsync(Context.ConnectionId, GuildPrefix + guildId);
@@ -116,5 +128,16 @@ public sealed class ChatHub : Hub<IChatClient>
         return string.IsNullOrWhiteSpace(titleDisplayName)
             ? null
             : titleDisplayName.Trim();
+    }
+
+    private bool CanAccessGuild(string guildId)
+    {
+        if (string.IsNullOrWhiteSpace(guildId))
+        {
+            return false;
+        }
+
+        var currentGuildId = Context.User?.FindFirstValue("GuildId");
+        return string.Equals(currentGuildId, guildId, StringComparison.OrdinalIgnoreCase);
     }
 }

@@ -3,6 +3,7 @@ using Application.UsesCases.Chats.Dtos;
 using Application.UsesCases.Chats.Queries.GetChatHistory;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace API.Chat.Controllers.V1;
 
@@ -26,8 +27,15 @@ public class ChatController : BaseController
         DateTimeOffset? SentAt);
 
     [HttpGet("GetChatHistory")]
-    public async Task<List<ChatMessageDto>> GetChatHistory([FromQuery] GetChatRequest chatRequest) =>
-        await Mediator.Send(new GetChatHistoryQuery(CurrentCharacterGuid, chatRequest.GuildChannel, chatRequest.Take));
+    public async Task<ActionResult<List<ChatMessageDto>>> GetChatHistory([FromQuery] GetChatRequest chatRequest)
+    {
+        if (!string.IsNullOrWhiteSpace(chatRequest.GuildChannel) && !CanAccessGuild(chatRequest.GuildChannel))
+        {
+            return Forbid();
+        }
+
+        return await Mediator.Send(new GetChatHistoryQuery(CurrentCharacterGuid, chatRequest.GuildChannel, chatRequest.Take));
+    }
 
     [AllowAnonymous]
     [HttpPost("System")]
@@ -54,5 +62,11 @@ public class ChatController : BaseController
             request.SentAt));
 
         return message is null ? BadRequest("Invalid system chat message.") : Ok(message);
+    }
+
+    private bool CanAccessGuild(string guildId)
+    {
+        var currentGuildId = User.FindFirstValue("GuildId");
+        return string.Equals(currentGuildId, guildId, StringComparison.OrdinalIgnoreCase);
     }
 }

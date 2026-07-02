@@ -82,12 +82,17 @@ builder.Services.SetupSwagger("Legends Legacy", config);
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
+        var jwtIssuer = builder.Configuration["Jwt:Issuer"];
+        var jwtAudience = builder.Configuration["Jwt:Audience"];
+
         options.TokenValidationParameters = new()
         {
             ValidateIssuerSigningKey = true,
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:SigningKey"]!)),
-            ValidateIssuer = false, // Needs to be true
-            ValidateAudience = false, // Needs to be true
+            ValidateIssuer = !string.IsNullOrWhiteSpace(jwtIssuer),
+            ValidIssuer = jwtIssuer,
+            ValidateAudience = !string.IsNullOrWhiteSpace(jwtAudience),
+            ValidAudience = jwtAudience,
             ValidateLifetime = true,
             NameClaimType = ClaimTypes.UserData
         };
@@ -104,13 +109,14 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                     ctx.Token = ctx.Request.Headers["DevAuth"].FirstOrDefault();
                 }
 #endif
-                var token = ctx.Token;
+                var accessToken = ctx.Request.Query["access_token"].FirstOrDefault();
+                var path = ctx.HttpContext.Request.Path;
 
-                // Add support for token origin to either be from a http-header or from a http-only cookie
-                // https://alimozdemir.medium.com/asp-net-core-jwt-and-refresh-token-with-httponly-cookies-b1b96c849742
-                if (string.IsNullOrEmpty(ctx.Token) && ctx.Request.Cookies.TryGetValue("AccessToken", out var cookie))
+                if (string.IsNullOrEmpty(ctx.Token)
+                    && !string.IsNullOrWhiteSpace(accessToken)
+                    && path.StartsWithSegments("/hub/game"))
                 {
-                    ctx.Token = cookie;
+                    ctx.Token = accessToken;
                 }
 
                 return Task.CompletedTask;
@@ -203,7 +209,7 @@ app.UseAuthorization();
 
 app.MapHub<GameHub>("/hub/game").RequireAuthorization();
 
-if (config.GetValue("FeatureManagement:AllowAnonymous", "false") == "true")
+if (app.Environment.IsDevelopment() && config.GetValue("FeatureManagement:AllowAnonymous", "false") == "true")
 {
     app.MapControllers().AllowAnonymous();
 }

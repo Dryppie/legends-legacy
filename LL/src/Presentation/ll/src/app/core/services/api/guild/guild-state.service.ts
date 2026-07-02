@@ -72,6 +72,7 @@ export class GuildStateService {
   private readonly eventDeduper = new GameEventDeduper();
   private readonly guildRealtimeHandlers = this.createGuildRealtimeHandlers();
   private hasLoaded = false;
+  private lastTokenGuildId: string | null | undefined = undefined;
 
   /* ─────────── public, read-only selectors ─────────── */
   readonly guild = computed(() => this._guild());
@@ -278,6 +279,9 @@ export class GuildStateService {
       .pipe(finalize(() => this._loading.set(false)))
       .subscribe({
         next: (guild) => {
+          const nextGuildId = guild?.id ?? null;
+          this.refreshAuthSessionIfGuildChanged(nextGuildId);
+
           if (guild) {
             this._guild.set(guild);
             this.initializeGuildNotificationCount(
@@ -574,5 +578,16 @@ export class GuildStateService {
       SIDEBAR_NOTIFICATION.Guild,
       count,
     );
+  }
+
+  private refreshAuthSessionIfGuildChanged(nextGuildId: string | null): void {
+    if (this.lastTokenGuildId === nextGuildId) return;
+
+    this.lastTokenGuildId = nextGuildId;
+    if (!this.auth.isAuthenticated()) return;
+
+    this.auth.refreshSession().subscribe({
+      error: () => undefined,
+    });
   }
 }

@@ -1,6 +1,8 @@
 ﻿using Application.Authorization.Interfaces;
+using Application.Interfaces.Services.LL;
 using Application.Interfaces.Services.LL.Entities;
 using Common.Authorization.Security;
+using Common.Exceptions;
 using Common.Options;
 using Domain.Models.Achievements;
 using Domain.Models.Entities.Characters;
@@ -18,6 +20,7 @@ public class JwtGenerator : IJwtGenerator
     private readonly IUserRepository _userRepo;
     private readonly ITokenHasher _hasher;
     private readonly ICharacterService _characterService;
+    private readonly IGuildService _guildService;
 
     private readonly JwtSecurityTokenHandler _handler = new();
     private readonly SymmetricSecurityKey _signingKey;
@@ -27,12 +30,19 @@ public class JwtGenerator : IJwtGenerator
     private readonly TimeSpan _refreshLifespan;
     private readonly string _validIssuer;
     public readonly string _validAudience;
-    public JwtGenerator(IRefreshTokenRepository repo, IUserRepository userRepo, ITokenHasher hasher, ICharacterService characterService, IOptions<JwtOptions> jwtOpt)
+    public JwtGenerator(
+        IRefreshTokenRepository repo,
+        IUserRepository userRepo,
+        ITokenHasher hasher,
+        ICharacterService characterService,
+        IGuildService guildService,
+        IOptions<JwtOptions> jwtOpt)
     {
         _repo = repo;
         _userRepo = userRepo;
         _hasher = hasher;
         _characterService = characterService;
+        _guildService = guildService;
 
         var opt = jwtOpt.Value;
 
@@ -44,8 +54,8 @@ public class JwtGenerator : IJwtGenerator
 
         _parameters = new TokenValidationParameters
         {
-            ValidateIssuer = true,
-            ValidateAudience = true,
+            ValidateIssuer = !string.IsNullOrWhiteSpace(_validIssuer),
+            ValidateAudience = !string.IsNullOrWhiteSpace(_validAudience),
             ValidateIssuerSigningKey = true,
             ValidateLifetime = true,
             ValidIssuer = _validIssuer,
@@ -70,6 +80,12 @@ public class JwtGenerator : IJwtGenerator
             new(ClaimTypes.Name, character.Name),
             new("CharacterTitleDisplayName", GetCharacterTitleDisplayName(character))
         };
+
+        var guild = await _guildService.GetGuildForMemberAsync(character.Id, CancellationToken.None);
+        if (guild is not null)
+        {
+            claims.Add(new Claim("GuildId", guild.Id.ToString()));
+        }
 
         var expiresAt = now.Add(_accessLifespan);
         var jwt = new JwtSecurityToken(
@@ -100,7 +116,16 @@ public class JwtGenerator : IJwtGenerator
         var record = await _repo.FindAsync(refreshToken, cancellationToken);
 
         if (record == null) return null;
-        if (!record.IsActive) return null;
+        if (!record.IsActive)
+        {
+            if (record.RevokedUtc is not null && record.ReplacedBy is not null)
+            {
+                await _repo.RevokeActiveTokensForUserAsync(record.UserId, cancellationToken);
+                throw new InvalidRefreshTokenException("Refresh token reuse detected.");
+            }
+
+            return null;
+        }
 
         // revoke current token, issue new pair
         record.RevokedUtc = DateTime.UtcNow;
@@ -118,6 +143,17 @@ public class JwtGenerator : IJwtGenerator
         record.ReplacedBy = _hasher.Hash(newTokens.RefreshToken);
 
         return newTokens;
+    }
+
+    public async Task<bool> RevokeRefreshTokenAsync(string refreshToken, CancellationToken cancellationToken)
+    {
+        var record = await _repo.FindAsync(refreshToken, cancellationToken);
+
+        if (record == null || !record.IsActive)
+            return false;
+
+        record.RevokedUtc = DateTime.UtcNow;
+        return true;
     }
 
     /// <inheritdoc />

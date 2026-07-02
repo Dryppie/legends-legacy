@@ -1,11 +1,15 @@
 using System.Text.Json.Serialization;
 using Application;
 using Common;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 using Persistence.LL;
 using Services.AdminDashboard;
 using Services.LL;
 using Services.LL.Validation;
 using RealTime.LL;
+using System.Security.Claims;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 var config = builder.Configuration;
@@ -48,6 +52,42 @@ builder.Services.AddRealTime();
 builder.Services.AddAdminDashboardServices();
 builder.Services.AddCommonServices();
 
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        var jwtIssuer = config["Jwt:Issuer"];
+        var jwtAudience = config["Jwt:Audience"];
+
+        options.TokenValidationParameters = new()
+        {
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["Jwt:SigningKey"]!)),
+            ValidateIssuer = !string.IsNullOrWhiteSpace(jwtIssuer),
+            ValidIssuer = jwtIssuer,
+            ValidateAudience = !string.IsNullOrWhiteSpace(jwtAudience),
+            ValidAudience = jwtAudience,
+            ValidateLifetime = true,
+            NameClaimType = ClaimTypes.UserData
+        };
+    });
+
+builder.Services.AddAuthorizationBuilder()
+    .AddPolicy("AdminDashboard", policy =>
+    {
+        var allowedEmails = config.GetSection("AdminDashboard:AllowedEmails").Get<string[]>()
+            ?? ["admin@hotmail.com"];
+
+        policy.RequireAuthenticatedUser();
+        policy.RequireAssertion(context =>
+        {
+            var email = context.User.FindFirstValue(System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Email)
+                ?? context.User.FindFirstValue(ClaimTypes.Email);
+
+            return !string.IsNullOrWhiteSpace(email)
+                && allowedEmails.Contains(email, StringComparer.OrdinalIgnoreCase);
+        });
+    });
+
 var app = builder.Build();
 
 await app.Services.ValidateCreatureBuildProfilesAsync();
@@ -63,6 +103,7 @@ app.UseHttpsRedirection();
 
 app.UseCors("AllowSpecificOrigin");
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

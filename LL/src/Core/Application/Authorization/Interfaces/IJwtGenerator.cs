@@ -7,6 +7,7 @@ public interface IJwtGenerator
 {
     Task<Tokens> IssueTokens(AppUser user, Character character);
     Task<Tokens?> RefreshAsync(string refreshToken, CancellationToken cancellationToken);
+    Task<bool> RevokeRefreshTokenAsync(string refreshToken, CancellationToken cancellationToken);
 
     /// <summary>
     /// Validates a jwt access token

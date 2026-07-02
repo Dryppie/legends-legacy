@@ -7,6 +7,7 @@ import {
 } from '@microsoft/signalr';
 import { Subject } from 'rxjs';
 import { environment } from '../../../../../environments/environment';
+import { AuthService } from '../../api/auth/auth.service';
 import { GameConnectionStatus } from '../connection-status.model';
 import { GameRealtimeDiagnostics } from './game-realtime-diagnostics.service';
 import { GameRealtimeEnvelope } from './game-realtime-contracts';
@@ -16,6 +17,7 @@ import { isGameRealtimeEnabled } from './game-realtime-feature';
 export class GameRealtimeConnection {
   private readonly hubUrl = `${environment.apiBaseUrl}/hub/game`;
   private readonly zone = inject(NgZone);
+  private readonly auth = inject(AuthService);
   private readonly diagnostics = inject(GameRealtimeDiagnostics);
   private readonly eventsSubject = new Subject<GameRealtimeEnvelope>();
   private readonly _connectionStatus =
@@ -46,7 +48,9 @@ export class GameRealtimeConnection {
 
     if (!this.hub) {
       this.hub = new HubConnectionBuilder()
-        .withUrl(this.hubUrl, { withCredentials: true })
+        .withUrl(this.hubUrl, {
+          accessTokenFactory: () => this.auth.getAccessToken(),
+        })
         .withAutomaticReconnect({
           nextRetryDelayInMilliseconds: (r) =>
             Math.min(10_000, r.previousRetryCount * 2_000),
