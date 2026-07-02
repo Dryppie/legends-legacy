@@ -6,6 +6,7 @@ export interface ArenaOpponentPreview {
   opponentRating: number;
   rankTier: string;
   rankTierId: string;
+  challengeAvailableAt?: Date | string | null;
 
   deltaIfVictory: number;
   deltaIfDefeat: number;

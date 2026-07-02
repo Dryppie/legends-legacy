@@ -5,4 +5,5 @@ public sealed record ArenaOpponentPreview
 {
     public Character Opponent { get; init; } = default!;
     public ColosseumRatingPreview RatingDelta { get; init; } = default!;
+    public DateTimeOffset? ChallengeAvailableAt { get; init; }
 }

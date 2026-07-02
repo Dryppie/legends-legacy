@@ -347,11 +347,21 @@ public class ColosseumService : IColosseumService
     public async Task<IReadOnlyList<ArenaOpponentPreview>> GetArenaOpponents(Guid characterId, CancellationToken cancellationToken)
     {
         var (opponents, myRating) = await _colosseumRepository.GetArenaOpponentsWithRating(characterId, cancellationToken);
+        var cooldownSince = DateTimeOffset.UtcNow.Subtract(SameDefenderCooldown);
+        var recentMatchTimes = await _colosseumRepository.GetRecentAttackerMatchTimesAsync(
+            characterId,
+            opponents.Select(opponent => opponent.Id).ToArray(),
+            cooldownSince,
+            cancellationToken);
+
         return opponents
             .Select(opp => new ArenaOpponentPreview
             {
                 Opponent = opp,
-                RatingDelta = _ratingService.Preview(myRating, opp.ArenaProfile.Rating)
+                RatingDelta = _ratingService.Preview(myRating, opp.ArenaProfile.Rating),
+                ChallengeAvailableAt = recentMatchTimes.TryGetValue(opp.Id, out var lastPlayedAt)
+                    ? lastPlayedAt.Add(SameDefenderCooldown)
+                    : null
             })
             .ToList();
     }

@@ -53,7 +53,7 @@ export class ArenaBattleComponent implements OnChanges, OnDestroy {
     if (this.arenaTicketStatus) {
       this.countdownInterval = setInterval(
         () => this.updateNextTicketCountdown(),
-        60000,
+        1000,
       );
     }
   }
@@ -93,16 +93,51 @@ export class ArenaBattleComponent implements OnChanges, OnDestroy {
   }
 
   onChallenge(id: string) {
-    if (!this.arenaTicketStatus || this.arenaTicketStatus.currentTickets < 1)
-      return;
+    const opponent = this.opponents.find((item) => item.opponentId === id);
+    if (!opponent || !this.canChallenge(opponent)) return;
 
     this.challenge.emit(id);
   }
 
-  canChallenge(): boolean {
+  canChallenge(opponent?: ArenaOpponentPreview): boolean {
     return (
-      !!this.arenaTicketStatus && this.arenaTicketStatus.currentTickets > 0
+      !!this.arenaTicketStatus &&
+      this.arenaTicketStatus.currentTickets > 0 &&
+      !this.isChallengeOnCooldown(opponent)
     );
+  }
+
+  isChallengeOnCooldown(opponent?: ArenaOpponentPreview): boolean {
+    const availableAt = this.challengeAvailableAt(opponent);
+    return availableAt !== null && availableAt.getTime() > Date.now();
+  }
+
+  challengeCooldownLabel(opponent: ArenaOpponentPreview): string {
+    const availableAt = this.challengeAvailableAt(opponent);
+    if (!availableAt) return '';
+
+    const remainingMs = Math.max(0, availableAt.getTime() - Date.now());
+    const totalSeconds = Math.ceil(remainingMs / 1000);
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+
+    if (minutes <= 0) return `${seconds}s`;
+    return `${minutes}m ${seconds.toString().padStart(2, '0')}s`;
+  }
+
+  challengeButtonText(opponent: ArenaOpponentPreview): string {
+    if (!this.isChallengeOnCooldown(opponent)) return 'Challenge';
+
+    return `Challenge in ${this.challengeCooldownLabel(opponent)}`;
+  }
+
+  private challengeAvailableAt(
+    opponent?: ArenaOpponentPreview,
+  ): Date | null {
+    if (!opponent?.challengeAvailableAt) return null;
+
+    const availableAt = new Date(opponent.challengeAvailableAt);
+    return Number.isNaN(availableAt.getTime()) ? null : availableAt;
   }
 
   deltaClass(delta: number, positiveClass = 'll-text-success'): string {

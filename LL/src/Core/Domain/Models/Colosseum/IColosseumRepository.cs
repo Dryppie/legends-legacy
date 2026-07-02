@@ -7,6 +7,11 @@ public interface IColosseumRepository
     Task<(List<Character> Opponents, int MyRating)> GetArenaOpponentsWithRating(Guid characterId, CancellationToken cancellationToken);
     Task<List<ColosseumMatchResult>> GetColosseumMatchResults(Guid characterId, CancellationToken cancellationToken);
     Task<bool> HasRecentMatchAsync(Guid attackerCharacterId, Guid defenderCharacterId, DateTimeOffset since, CancellationToken cancellationToken);
+    Task<IReadOnlyDictionary<Guid, DateTimeOffset>> GetRecentAttackerMatchTimesAsync(
+        Guid attackerCharacterId,
+        IReadOnlyCollection<Guid> defenderCharacterIds,
+        DateTimeOffset since,
+        CancellationToken cancellationToken);
     Task<List<Character>> GetRankings(Guid characterId, CancellationToken cancellationToken);
     Task SaveArenaMatchResult(ColosseumMatchResult arenaMatchResult, CancellationToken cancellationToken);
     Task<ArenaTicketStatus> GetArenaTicketStatusAsync(Guid characterId, CancellationToken cancellationToken);
