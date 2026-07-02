@@ -86,8 +86,10 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         {
             ValidateIssuerSigningKey = true,
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:SigningKey"]!)),
-            ValidateIssuer = false, // Needs to be true
-            ValidateAudience = false, // Needs to be true
+            ValidateIssuer = true,
+            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidateAudience = true,
+            ValidAudience = builder.Configuration["Jwt:Audience"],
             ValidateLifetime = true,
             NameClaimType = ClaimTypes.UserData
         };
@@ -104,15 +106,6 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                     ctx.Token = ctx.Request.Headers["DevAuth"].FirstOrDefault();
                 }
 #endif
-                var token = ctx.Token;
-
-                // Add support for token origin to either be from a http-header or from a http-only cookie
-                // https://alimozdemir.medium.com/asp-net-core-jwt-and-refresh-token-with-httponly-cookies-b1b96c849742
-                if (string.IsNullOrEmpty(ctx.Token) && ctx.Request.Cookies.TryGetValue("AccessToken", out var cookie))
-                {
-                    ctx.Token = cookie;
-                }
-
                 return Task.CompletedTask;
             },
             OnTokenValidated = context =>
@@ -203,7 +196,7 @@ app.UseAuthorization();
 
 app.MapHub<GameHub>("/hub/game").RequireAuthorization();
 
-if (config.GetValue("FeatureManagement:AllowAnonymous", "false") == "true")
+if (app.Environment.IsDevelopment() && config.GetValue("FeatureManagement:AllowAnonymous", "false") == "true")
 {
     app.MapControllers().AllowAnonymous();
 }

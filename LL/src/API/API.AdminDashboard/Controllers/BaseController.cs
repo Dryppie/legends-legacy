@@ -7,7 +7,7 @@ namespace API.AdminDashboard.Controllers;
 /// <summary>
 /// Base controller
 /// </summary>
-[AllowAnonymous]
+[Authorize(Policy = "AdminDashboard")]
 [ApiController]
 [Route("api/v1/[controller]")]
 [Produces("application/json")]
