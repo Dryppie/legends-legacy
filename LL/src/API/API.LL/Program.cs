@@ -82,14 +82,17 @@ builder.Services.SetupSwagger("Legends Legacy", config);
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
+        var jwtIssuer = builder.Configuration["Jwt:Issuer"];
+        var jwtAudience = builder.Configuration["Jwt:Audience"];
+
         options.TokenValidationParameters = new()
         {
             ValidateIssuerSigningKey = true,
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:SigningKey"]!)),
-            ValidateIssuer = true,
-            ValidIssuer = builder.Configuration["Jwt:Issuer"],
-            ValidateAudience = true,
-            ValidAudience = builder.Configuration["Jwt:Audience"],
+            ValidateIssuer = !string.IsNullOrWhiteSpace(jwtIssuer),
+            ValidIssuer = jwtIssuer,
+            ValidateAudience = !string.IsNullOrWhiteSpace(jwtAudience),
+            ValidAudience = jwtAudience,
             ValidateLifetime = true,
             NameClaimType = ClaimTypes.UserData
         };
@@ -106,6 +109,16 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                     ctx.Token = ctx.Request.Headers["DevAuth"].FirstOrDefault();
                 }
 #endif
+                var accessToken = ctx.Request.Query["access_token"].FirstOrDefault();
+                var path = ctx.HttpContext.Request.Path;
+
+                if (string.IsNullOrEmpty(ctx.Token)
+                    && !string.IsNullOrWhiteSpace(accessToken)
+                    && path.StartsWithSegments("/hub/game"))
+                {
+                    ctx.Token = accessToken;
+                }
+
                 return Task.CompletedTask;
             },
             OnTokenValidated = context =>

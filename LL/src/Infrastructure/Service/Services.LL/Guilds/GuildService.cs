@@ -42,6 +42,7 @@ public class GuildService : IGuildService
     {
         var requestingMember = await _guildRepository.GetGuildMember(currentCharacterId, cancellationToken);
         if (requestingMember == null || !requestingMember.HasInvitePermissions()) return false;
+        if (requestingMember.GuildId != guildId) return false;
 
         return await _guildRepository.InviteAsync(currentCharacterId, guildId, invitedCharacterId, cancellationToken);
     }
@@ -50,6 +51,7 @@ public class GuildService : IGuildService
     {
         var requestingMember = await _guildRepository.GetGuildMember(currentCharacterId, cancellationToken);
         if (requestingMember == null || !requestingMember.HasInvitePermissions()) return false;
+        if (requestingMember.GuildId != guildId) return false;
 
         return await _guildRepository.InviteCharacterByNameAsync(currentCharacterId, guildId, invitedCharacterName, cancellationToken);
     }

@@ -6,7 +6,7 @@ public interface IDungeonRunService
 {
     Task<ClaimDungeonRewardsResult?> ClaimRewardsAsync(Guid characterId, CancellationToken cancellationToken);
     Task<bool> DismissFailedRunAsync(Guid characterId, CancellationToken cancellationToken);
-    Task<ExecuteDungeonActionResult?> ExecuteActionAsync(Guid runId, string actionId, object? payload, CancellationToken cancellationToken);
+    Task<ExecuteDungeonActionResult?> ExecuteActionAsync(Guid characterId, Guid runId, string actionId, object? payload, CancellationToken cancellationToken);
     Task<IReadOnlyList<DungeonCompletionRecord>> GetCompletionRecordsAsync(
         Guid characterId,
         IReadOnlyCollection<string> dungeonDefinitionIds,

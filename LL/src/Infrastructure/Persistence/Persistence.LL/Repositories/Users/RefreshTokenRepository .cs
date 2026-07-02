@@ -25,4 +25,17 @@ public sealed class RefreshTokenRepository : IRefreshTokenRepository
         return await _context.RefreshTokens
                         .SingleOrDefaultAsync(t => t.TokenHash == hash, cancellationToken);
     }
+
+    public async Task RevokeActiveTokensForUserAsync(Guid userId, CancellationToken cancellationToken)
+    {
+        var now = DateTime.UtcNow;
+        var tokens = await _context.RefreshTokens
+            .Where(t => t.UserId == userId && t.RevokedUtc == null && t.ExpiresUtc >= now)
+            .ToListAsync(cancellationToken);
+
+        foreach (var token in tokens)
+        {
+            token.RevokedUtc = now;
+        }
+    }
 }

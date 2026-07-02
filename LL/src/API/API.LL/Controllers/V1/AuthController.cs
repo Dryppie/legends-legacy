@@ -1,5 +1,6 @@
 ﻿using API.LL.Controllers;
 using Application.UseCases.Authorization.Commands.CreateNewTokens;
+using Application.UseCases.Authorization.Commands.Logout;
 using Application.UseCases.Authorization.Queries.ValidateToken;
 using Application.UseCases.Users.Commands.BindGoogle;
 using Application.UseCases.Users.Commands.ConvertGuestToUser;
@@ -25,12 +26,25 @@ public class AuthController : BaseController
 
     private const string AccessTokenCookie = "AccessToken";
     private const string RefreshTokenCookie = "RefreshToken";
+    private const string RefreshCookieCsrfHeader = "X-LL-Refresh-Request";
+    private readonly IWebHostEnvironment _env;
+
+    public AuthController(IWebHostEnvironment env)
+    {
+        _env = env;
+    }
 
     [HttpPost("register")]
     [AllowAnonymous]
-    [ProducesResponseType(typeof(Response<Unit>), StatusCodes.Status200OK)]
-    public async Task<ActionResult<Response<Unit>>> Register([FromBody] UserRegisterDto input) =>
-        await Mediator.Send(new RegisterCommand(input.Username, input.Email, input.Password));
+    [ProducesResponseType(typeof(Response<Tokens>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<Response<Tokens>>> Register([FromBody] UserRegisterDto input)
+    {
+        var result = await Mediator.Send(new RegisterCommand(input.Username, input.Email, input.Password));
+        if (result.Data is null) return BadRequest(result);
+
+        SetAuthCookies(result.Data);
+        return Ok(result);
+    }
 
     [HttpPost("login")]
     [AllowAnonymous]
@@ -91,12 +105,20 @@ public class AuthController : BaseController
     /// Logs out a user from Web
     /// </summary>
     [HttpPost("logout")]
+    [AllowAnonymous]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    public ActionResult Logout()
+    public async Task<ActionResult> Logout()
     {
-        var opts = BuildCookieOptions();
-        Response.Cookies.Delete(AccessTokenCookie, opts);
-        Response.Cookies.Delete(RefreshTokenCookie, opts);
+        if (!HasRefreshCookieCsrfHeader()) return BadRequest();
+
+        if (Request.Cookies.TryGetValue(RefreshTokenCookie, out var refresh))
+        {
+            await Mediator.Send(new LogoutCommand(refresh));
+        }
+
+        Response.Cookies.Delete(AccessTokenCookie, BuildLegacyCookieOptions());
+        Response.Cookies.Delete(RefreshTokenCookie, BuildRefreshCookieOptions());
+        Response.Cookies.Delete(RefreshTokenCookie, BuildLegacyCookieOptions());
         return Ok();
     }
 
@@ -116,6 +138,8 @@ public class AuthController : BaseController
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<Response<Tokens>>> CreateNewTokens()
     {
+        if (!HasRefreshCookieCsrfHeader()) return BadRequest();
+
         if (!Request.Cookies.TryGetValue(RefreshTokenCookie, out var refresh))
             return BadRequest();
 
@@ -144,20 +168,52 @@ public class AuthController : BaseController
 
     private void SetAuthCookies(Tokens t)
     {
-        var opts = BuildCookieOptions();
-        Response.Cookies.Append(AccessTokenCookie, t.AccessToken, opts);
-        Response.Cookies.Append(RefreshTokenCookie, t.RefreshToken, opts);
+        Response.Cookies.Delete(AccessTokenCookie, BuildLegacyCookieOptions());
+        Response.Cookies.Delete(RefreshTokenCookie, BuildLegacyCookieOptions());
+        Response.Cookies.Append(RefreshTokenCookie, t.RefreshToken, BuildRefreshCookieOptions());
     }
 
-    private CookieOptions BuildCookieOptions() => new()
+    private CookieOptions BuildRefreshCookieOptions() => new()
     {
         HttpOnly = true,
-        Secure = true,
+        Secure = UseSecureCookies(),
         IsEssential = true,
-        Path = "/",
-        SameSite = /*_env.IsDevelopment() ?*/ SameSiteMode.None /*: SameSiteMode.Strict*/,
+        Path = "/api/v1/auth",
+        SameSite = UseSecureCookies() ? SameSiteMode.None : SameSiteMode.Lax,
         Expires = DateTimeOffset.UtcNow.AddYears(1),
         MaxAge = TimeSpan.FromDays(365)
         // Domain   = _cfg["HostedDomain"] // ← uncomment if you serve from a sub‑domain
     };
+
+    private CookieOptions BuildLegacyCookieOptions() => new()
+    {
+        HttpOnly = true,
+        Secure = UseSecureCookies(),
+        IsEssential = true,
+        Path = "/",
+        SameSite = UseSecureCookies() ? SameSiteMode.None : SameSiteMode.Lax
+    };
+
+    private bool UseSecureCookies()
+    {
+        if (Request.IsHttps) return true;
+        if (_env.IsDevelopment() && IsLocalhost(Request.Host.Host)) return false;
+
+        return true;
+    }
+
+    private static bool IsLocalhost(string? host) =>
+        string.Equals(host, "localhost", StringComparison.OrdinalIgnoreCase)
+        || string.Equals(host, "127.0.0.1", StringComparison.OrdinalIgnoreCase)
+        || string.Equals(host, "::1", StringComparison.OrdinalIgnoreCase);
+
+    private bool HasRefreshCookieCsrfHeader()
+    {
+        if (!Request.Headers.TryGetValue(RefreshCookieCsrfHeader, out var values))
+        {
+            return false;
+        }
+
+        return string.Equals(values.ToString(), "1", StringComparison.Ordinal);
+    }
 }

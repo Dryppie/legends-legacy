@@ -36,13 +36,13 @@ export class AuthInterceptor implements HttpInterceptor {
     req: HttpRequest<any>,
     next: HttpHandler,
   ): Observable<HttpEvent<any>> {
-    /* ➜  auth routes must skip the pre-check or we’d loop forever */
-    if (req.url.includes('/auth/')) {
+    /* Anonymous auth routes must skip the pre-check or refresh would loop. */
+    if (this.isAnonymousAuthRequest(req)) {
       return next.handle(req);
     }
 
     if (!this.auth.isAuthenticated()) {
-      return next.handle(req);
+      return next.handle(this.withAuthHeader(req));
     }
 
     /* 1️⃣  guarantee a fresh token before the call leaves the browser */
@@ -120,5 +120,17 @@ export class AuthInterceptor implements HttpInterceptor {
         Authorization: `Bearer ${token}`,
       },
     });
+  }
+
+  private isAnonymousAuthRequest(req: HttpRequest<any>): boolean {
+    const url = req.url.toLowerCase();
+    return (
+      url.includes('/auth/login') ||
+      url.includes('/auth/loginasguest') ||
+      url.includes('/auth/register') ||
+      url.includes('/auth/google') ||
+      url.includes('/auth/createnewtokens') ||
+      url.includes('/auth/logout')
+    );
   }
 }

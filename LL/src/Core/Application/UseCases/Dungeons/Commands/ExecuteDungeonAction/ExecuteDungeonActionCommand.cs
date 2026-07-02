@@ -33,6 +33,7 @@ public class ExecuteDungeonActionCommandHandler : IRequestHandler<ExecuteDungeon
         CancellationToken cancellationToken)
     {
         var result = await _dungeonRunService.ExecuteActionAsync(
+            request.CharacterId,
             request.RunId,
             request.ActionId,
             request.Payload,

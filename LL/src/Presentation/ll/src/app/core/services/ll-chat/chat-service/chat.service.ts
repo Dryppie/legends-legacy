@@ -250,9 +250,7 @@ export class ChatService {
 
     this.hub = new signalR.HubConnectionBuilder()
       .withUrl(`${this.apiBase}/hub`, {
-        withCredentials: true, // send AccessToken cookie
-        accessTokenFactory: () =>
-          this.auth.getAccessToken() || localStorage.getItem('DevAuth') || '',
+        accessTokenFactory: () => this.auth.getAccessToken(),
       })
       .withAutomaticReconnect({
         nextRetryDelayInMilliseconds: (retry) =>

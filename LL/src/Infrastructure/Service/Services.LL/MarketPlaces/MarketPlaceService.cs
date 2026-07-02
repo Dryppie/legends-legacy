@@ -75,6 +75,7 @@ public class MarketPlaceService : IMarketPlaceService
     {
         var listing = await _marketPlaceRepository.GetListingAsync(listingId, cancellationToken);
         if (listing == null) return null;
+        if (listing.SellerId != characterId) return null;
 
         var inventoryItem = new InventoryItem()
         {

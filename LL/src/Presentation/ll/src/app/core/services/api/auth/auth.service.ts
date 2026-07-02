@@ -21,6 +21,17 @@ import { EventBusService } from '../../client-side/event-bus/event-bus.service';
 import { UserInfoDto } from '../../../../shared/models/Dtos/userInfoDto';
 import { ToastService } from '../../client-side/components/toast/toast.service';
 
+interface ApiResponse<T> {
+  isSuccess: boolean;
+  data?: T;
+  errorMessage?: string;
+}
+
+interface AuthTokens {
+  accessToken: string;
+  accessExpiresAt: number;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -94,9 +105,10 @@ export class AuthService {
     return this.api
       .post('auth/login', { Email: email, Password: password })
       .pipe(
-        tap(({ accessToken, accessExpiresAt }) => {
+        tap((response) => {
+          const tokens = this.unwrapTokens(response);
           this.toast.showToast('Login successful', '', true);
-          this.afterSuccessfulAuth(accessToken, accessExpiresAt);
+          this.afterSuccessfulAuth(tokens.accessToken, tokens.accessExpiresAt);
         }),
         map(() => void 0),
         catchError((e) => {
@@ -118,9 +130,10 @@ export class AuthService {
         Password: password,
       })
       .pipe(
-        tap(({ accessToken, accessExpiresAt }) => {
+        tap((response) => {
+          const tokens = this.unwrapTokens(response);
           this.toast.showToast('Registration success', '', true);
-          this.afterSuccessfulAuth(accessToken, accessExpiresAt);
+          this.afterSuccessfulAuth(tokens.accessToken, tokens.accessExpiresAt);
         }),
         catchError((e) => {
           this.toast.showToast('Registration failed', e.errorMessage, false);
@@ -133,9 +146,10 @@ export class AuthService {
     this.api
       .post('auth/loginAsGuest')
       .pipe(
-        tap(({ accessToken, accessExpiresAt }) => {
+        tap((response) => {
+          const tokens = this.unwrapTokens(response);
           this.toast.showToast('Guest session started', '', true);
-          this.afterSuccessfulAuth(accessToken, accessExpiresAt);
+          this.afterSuccessfulAuth(tokens.accessToken, tokens.accessExpiresAt);
         }),
         catchError((e) => {
           this.toast.showToast('Guest login error', e.message, false);
@@ -149,9 +163,10 @@ export class AuthService {
     this.api
       .post('auth/google', idToken)
       .pipe(
-        tap(({ accessToken, accessExpiresAt }) => {
+        tap((response) => {
+          const tokens = this.unwrapTokens(response);
           this.toast.showToast('Google sign-in success', '', true);
-          this.afterSuccessfulAuth(accessToken, accessExpiresAt);
+          this.afterSuccessfulAuth(tokens.accessToken, tokens.accessExpiresAt);
         }),
         catchError((e) => {
           this.toast.showToast('Google sign-in error', e.message, false);
@@ -189,10 +204,11 @@ export class AuthService {
         Password: password,
       })
       .pipe(
-        tap(({ accessToken, accessExpiresAt }) => {
+        tap((response) => {
+          const tokens = this.unwrapTokens(response);
           this.toast.showToast('Account converted', '', true);
           // cookies already updated server‑side; just restart auth flow
-          this.afterSuccessfulAuth(accessToken, accessExpiresAt);
+          this.afterSuccessfulAuth(tokens.accessToken, tokens.accessExpiresAt);
         }),
         catchError((e) => {
           this.toast.showToast('Guest to real account error', e.message, false);
@@ -203,9 +219,10 @@ export class AuthService {
 
   renameCharacter(newName: string) {
     return this.api.post('auth/rename', newName).pipe(
-      tap(async ({ accessToken, accessExpiresAt }) => {
+      tap((response) => {
+        const tokens = this.unwrapTokens(response);
         this.toast.showToast('Edited name', '', true);
-        this.afterSuccessfulAuth(accessToken, accessExpiresAt);
+        this.afterSuccessfulAuth(tokens.accessToken, tokens.accessExpiresAt);
 
         // reconnect chat after rename
         // await this.chat.reconnect('global'); // or current channel if tracked
@@ -236,6 +253,7 @@ export class AuthService {
     return this.api
       .get('character')
       .pipe(
+        map((response) => this.unwrapResponse<CharacterDto>(response)),
         tap((character) => {
           const current = this._currentCharacter();
           if (!current || !this.isSameCharacter(current, character)) {
@@ -248,9 +266,10 @@ export class AuthService {
   /** Returns `true` when refresh succeeded. */
   private tryRefresh(): Observable<number> {
     return this.api.post('auth/createNewTokens').pipe(
-      map(({ accessToken, accessExpiresAt }) => {
-        this.setAccessToken(accessToken, accessExpiresAt);
-        return accessExpiresAt;
+      map((response) => {
+        const tokens = this.unwrapTokens(response);
+        this.setAccessToken(tokens.accessToken, tokens.accessExpiresAt);
+        return tokens.accessExpiresAt;
       }),
       catchError(() => of(0)),
       shareReplay(1), // so concurrent subscribers share the same call
@@ -270,6 +289,7 @@ export class AuthService {
 
   getUserInfo(): Observable<UserInfoDto> {
     return this.api.get('auth/getUserInfo').pipe(
+      map((response) => this.unwrapResponse<UserInfoDto>(response)),
       catchError(() => {
         return throwError(() => new Error('Failed to register'));
       }),
@@ -326,6 +346,37 @@ export class AuthService {
   private setAccessToken(token: string, exp: number) {
     this._accessToken = token;
     this._accessExpiresAt = exp;
+  }
+
+  private unwrapTokens(response: AuthTokens | ApiResponse<AuthTokens>): AuthTokens {
+    const tokens = this.unwrapResponse<AuthTokens>(response);
+
+    if (!tokens?.accessToken || !tokens.accessExpiresAt) {
+      throw new Error('Authentication response did not include access token data.');
+    }
+
+    return tokens;
+  }
+
+  private unwrapResponse<T>(response: T | ApiResponse<T>): T {
+    if (this.isApiResponse<T>(response)) {
+      if (!response.isSuccess || response.data == null) {
+        throw new Error(response.errorMessage || 'Request failed.');
+      }
+
+      return response.data;
+    }
+
+    return response;
+  }
+
+  private isApiResponse<T>(response: T | ApiResponse<T>): response is ApiResponse<T> {
+    return (
+      response != null &&
+      typeof response === 'object' &&
+      'isSuccess' in response &&
+      'data' in response
+    );
   }
 
   private isSameCharacter(a: CharacterDto, b: CharacterDto): boolean {

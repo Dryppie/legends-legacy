@@ -55,14 +55,17 @@ builder.Services.AddCommonServices();
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
+        var jwtIssuer = config["Jwt:Issuer"];
+        var jwtAudience = config["Jwt:Audience"];
+
         options.TokenValidationParameters = new()
         {
             ValidateIssuerSigningKey = true,
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["Jwt:SigningKey"]!)),
-            ValidateIssuer = true,
-            ValidIssuer = config["Jwt:Issuer"],
-            ValidateAudience = true,
-            ValidAudience = config["Jwt:Audience"],
+            ValidateIssuer = !string.IsNullOrWhiteSpace(jwtIssuer),
+            ValidIssuer = jwtIssuer,
+            ValidateAudience = !string.IsNullOrWhiteSpace(jwtAudience),
+            ValidAudience = jwtAudience,
             ValidateLifetime = true,
             NameClaimType = ClaimTypes.UserData
         };

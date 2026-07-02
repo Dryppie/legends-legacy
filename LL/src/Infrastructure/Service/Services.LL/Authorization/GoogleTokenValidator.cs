@@ -23,6 +23,6 @@ public sealed class GoogleTokenValidator : IGoogleTokenValidator
             Clock = _clock
         };
 
-        return GoogleJsonWebSignature.ValidateAsync(idToken, _clock, false);
+        return GoogleJsonWebSignature.ValidateAsync(idToken, settings);
     }
 }
