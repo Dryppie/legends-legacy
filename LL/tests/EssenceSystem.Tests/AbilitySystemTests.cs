@@ -1826,6 +1826,142 @@ public sealed class AbilitySystemTests
     }
 
     [Fact]
+    public async Task Combat_engine_executor_applies_essence_ascension_scaling_at_runtime()
+    {
+        var ability = new AbilitySpec
+        {
+            Id = "ability.test.ascended_strike",
+            Kind = AbilitySpecKind.Active,
+            Name = "Ascended Strike",
+            OwningEssenceId = "essence.test.ascended",
+            CooldownTicks = 999,
+            Effects =
+            [
+                new()
+                {
+                    Id = "effect.damage.main",
+                    Operation = AbilityEffectOperation.Damage,
+                    Target = AbilityTargetSelector.CurrentTarget,
+                    BaseValue = 100
+                }
+            ]
+        };
+        var catalog = AbilityCatalogValidator.CreateCatalog(
+            [ability],
+            [],
+            new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            {
+                [ability.Id] = "essence.test.ascended"
+            });
+        var provider = new FakeAbilityCatalogProvider(catalog);
+        var friendlyCharacter = CreateSourceCharacter("Ascended Friendly");
+        var hostileCharacter = CreateSourceCharacter("Ascended Hostile");
+        var friendlyCombatant = CreateCombatEntity("friendly-slot", friendlyCharacter, "essence.test.ascended");
+        friendlyCombatant.EquippedEssences.Single().AscensionTier = 2;
+        var hostileCombatant = CreateCombatEntity("hostile-slot", hostileCharacter);
+        var plan = new CombatEncounterPlan(
+            Guid.NewGuid(),
+            CombatMode.Idle,
+            1,
+            DateTimeOffset.UtcNow,
+            [
+                new CombatParticipantSlot("friendly-slot", friendlyCharacter.Id, CombatSide.Friendly),
+                new CombatParticipantSlot("hostile-slot", hostileCharacter.Id, CombatSide.Hostile)
+            ],
+            new IdleEncounterSourceContext(friendlyCharacter.Id, new Area(), TimeSpan.FromSeconds(1)));
+        var runtime = new CombatEncounterRuntime(
+            plan,
+            [new CombatRuntimeParticipant(plan.FriendlyParticipants.Single(), friendlyCharacter, friendlyCombatant)],
+            [new CombatRuntimeParticipant(plan.HostileParticipants.Single(), hostileCharacter, hostileCombatant)]);
+        var executor = new CombatEngineExecutor(provider);
+
+        var result = await executor.ExecuteAsync(runtime, CancellationToken.None);
+
+        Assert.Contains(result.EventLog, x => x.Source == "effect.damage.main" && x.EventType == EventType.Damage && x.Magnitude == 124);
+    }
+
+    [Fact]
+    public async Task Combat_engine_executor_scales_evolved_added_effects_with_ascension()
+    {
+        var ability = new AbilitySpec
+        {
+            Id = "ability.test.ascended_add_effect_strike",
+            Kind = AbilitySpecKind.Active,
+            Name = "Ascended Add Effect Strike",
+            OwningEssenceId = "essence.test.ascended_add_effect",
+            CooldownTicks = 999,
+            Effects =
+            [
+                new()
+                {
+                    Id = "effect.damage.main",
+                    Operation = AbilityEffectOperation.Damage,
+                    Target = AbilityTargetSelector.CurrentTarget,
+                    BaseValue = 100
+                }
+            ]
+        };
+        var essence = new EssenceDefinition
+        {
+            Id = "essence.test.ascended_add_effect",
+            ActiveAbilityId = ability.Id,
+            Evolution = new EssenceEvolutionDefinition
+            {
+                ActiveAbilityModifiers =
+                [
+                    new()
+                    {
+                        Target = "effect.damage.main",
+                        Operation = "AddEffect",
+                        Effect = new AbilityEffectSpec
+                        {
+                            Id = "effect.damage.evolved",
+                            Operation = AbilityEffectOperation.Damage,
+                            Target = AbilityTargetSelector.CurrentTarget,
+                            BaseValue = 50
+                        }
+                    }
+                ]
+            }
+        };
+        var catalog = AbilityCatalogValidator.CreateCatalog(
+            [ability],
+            [],
+            new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            {
+                [ability.Id] = essence.Id
+            });
+        var provider = new FakeAbilityCatalogProvider(catalog);
+        var repository = new FakeLegacyDefinitionRepository([ability], [essence]);
+        var friendlyCharacter = CreateSourceCharacter("Ascended Add Effect Friendly");
+        var hostileCharacter = CreateSourceCharacter("Ascended Add Effect Hostile");
+        var friendlyCombatant = CreateCombatEntity("friendly-slot", friendlyCharacter, essence.Id);
+        friendlyCombatant.EquippedEssences.Single().IsEvolved = true;
+        friendlyCombatant.EquippedEssences.Single().AscensionTier = 1;
+        var hostileCombatant = CreateCombatEntity("hostile-slot", hostileCharacter);
+        var plan = new CombatEncounterPlan(
+            Guid.NewGuid(),
+            CombatMode.Idle,
+            1,
+            DateTimeOffset.UtcNow,
+            [
+                new CombatParticipantSlot("friendly-slot", friendlyCharacter.Id, CombatSide.Friendly),
+                new CombatParticipantSlot("hostile-slot", hostileCharacter.Id, CombatSide.Hostile)
+            ],
+            new IdleEncounterSourceContext(friendlyCharacter.Id, new Area(), TimeSpan.FromSeconds(1)));
+        var runtime = new CombatEncounterRuntime(
+            plan,
+            [new CombatRuntimeParticipant(plan.FriendlyParticipants.Single(), friendlyCharacter, friendlyCombatant)],
+            [new CombatRuntimeParticipant(plan.HostileParticipants.Single(), hostileCharacter, hostileCombatant)]);
+        var executor = new CombatEngineExecutor(provider, repository);
+
+        var result = await executor.ExecuteAsync(runtime, CancellationToken.None);
+
+        Assert.Contains(result.EventLog, x => x.Source == "effect.damage.main" && x.EventType == EventType.Damage && x.Magnitude == 112);
+        Assert.Contains(result.EventLog, x => x.Source == "effect.damage.evolved" && x.EventType == EventType.Damage && x.Magnitude == 56);
+    }
+
+    [Fact]
     public async Task Combat_engine_executor_applies_temporary_ability_modifiers()
     {
         var ability = new AbilitySpec

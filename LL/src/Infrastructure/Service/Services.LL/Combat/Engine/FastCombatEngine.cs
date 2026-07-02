@@ -596,7 +596,7 @@ public sealed class FastCombatEngine
         IReadOnlyDictionary<string, CompiledAbility> abilitiesById)
     {
         var summonId = effect.SummonId!;
-        var attributes = CreateSummonAttributes(source, summonDefinition);
+        var attributes = CreateSummonAttributes(source, effect, summonDefinition);
         var abilities = summonDefinition.AbilityIds
             .Select(abilityId => abilitiesById.TryGetValue(abilityId, out var ability)
                 ? ability
@@ -623,20 +623,30 @@ public sealed class FastCombatEngine
 
     private static Dictionary<AttributeType, float> CreateSummonAttributes(
         RuntimeCombatant source,
+        CompiledEffect effect,
         CompiledSummon summonDefinition)
     {
         var attributes = summonDefinition.Attributes.ToDictionary(
             attribute => attribute.Attribute,
             attribute => (float)Math.Max(
                 attribute.MinimumValue,
-                (int)Math.Round(attribute.BaseValue + (attribute.ScalingAttribute is { } scalingAttribute
-                    ? source.GetAttribute(scalingAttribute) * attribute.ScalingCoefficient
-                    : 0))));
+                (int)Math.Round(
+                    (attribute.BaseValue + (attribute.ScalingAttribute is { } scalingAttribute
+                        ? source.GetAttribute(scalingAttribute) * attribute.ScalingCoefficient
+                        : 0))
+                    * GetSummonAttributeMultiplier(attribute.Attribute, effect))));
 
         attributes.TryAdd(AttributeType.MaxHealth, 1);
         attributes.TryAdd(AttributeType.Power, 0);
         return attributes;
     }
+
+    private static double GetSummonAttributeMultiplier(AttributeType attribute, CompiledEffect effect) =>
+        attribute == AttributeType.MaxHealth
+            ? Math.Max(0d, effect.SummonHealthMultiplier)
+            : attribute == AttributeType.Power
+                ? Math.Max(0d, effect.SummonPowerMultiplier)
+                : 1d;
 
     private void ModifyStatusStacks(
         RuntimeCombatant source,

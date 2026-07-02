@@ -165,7 +165,16 @@ public static class EssenceProgressionConstants
 
     private static bool IsHardCrowdControlStatus(string? statusId) =>
         statusId is not null
-        && HardCrowdControlStatuses.Contains(statusId);
+        && HardCrowdControlStatuses.Contains(NormalizeStatusKey(statusId));
+
+    private static string NormalizeStatusKey(string statusId)
+    {
+        var normalized = statusId.StartsWith("status.", StringComparison.OrdinalIgnoreCase)
+            ? statusId["status.".Length..]
+            : statusId;
+
+        return normalized.Replace("_", string.Empty, StringComparison.OrdinalIgnoreCase);
+    }
 
     private static readonly HashSet<string> HardCrowdControlStatuses = new(StringComparer.OrdinalIgnoreCase)
     {
@@ -176,7 +185,9 @@ public static class EssenceProgressionConstants
         "Petrified",
         "Rooted",
         "Silenced",
-        "Stunned"
+        "Stunned",
+        "Freeze",
+        "Stun"
     };
 }
 

@@ -1,4 +1,5 @@
 using Domain.Models.Essences;
+using Domain.Models.Snapshots;
 using Services.LL.Essences;
 
 namespace EssenceSystem.Tests;
@@ -85,6 +86,54 @@ public sealed class EssenceProgressionServiceTests
         Assert.Equal(10, essence.Level);
         Assert.Equal(0, result.XpGained);
         Assert.True(result.ReachedTierCap);
+    }
+
+    [Fact]
+    public void GrantXp_reaches_first_potential_cap_after_expected_fixed_xp_runs()
+    {
+        var service = new EssenceProgressionService();
+        var essence = new PlayerEssence
+        {
+            EssenceDefinitionId = "essence.test",
+            Level = 1,
+            PotentialTier = 1
+        };
+        var runs = 0;
+
+        while (essence.Level < EssenceProgressionConstants.GetLevelCapForPotential(essence.PotentialTier))
+        {
+            service.GrantXp(essence, EssenceDefinitionValidatorTests.ValidDefinition(), requestedXp: 250);
+            runs++;
+        }
+
+        Assert.Equal(8, runs);
+        Assert.Equal(10, essence.Level);
+        Assert.Equal(0, essence.CurrentXp);
+    }
+
+    [Fact]
+    public void EquippedEssenceSnapshot_round_trips_native_region_and_potential_tier()
+    {
+        var essence = new PlayerEssence
+        {
+            Id = Guid.NewGuid(),
+            CharacterId = Guid.NewGuid(),
+            EssenceDefinitionId = "essence.test",
+            NativeRegion = 3,
+            PotentialTier = 4,
+            Level = 31,
+            CurrentXp = 25,
+            AscensionTier = 2,
+            IsEvolved = true
+        };
+
+        var snapshot = EquippedEssenceSnapshot.From(Guid.NewGuid(), 1, essence);
+        var restored = snapshot.ToPlayerEssence(essence.CharacterId);
+
+        Assert.Equal(3, snapshot.NativeRegion);
+        Assert.Equal(4, snapshot.PotentialTier);
+        Assert.Equal(3, restored.NativeRegion);
+        Assert.Equal(4, restored.PotentialTier);
     }
 
     [Fact]
