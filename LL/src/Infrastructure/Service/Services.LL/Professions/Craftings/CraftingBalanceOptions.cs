@@ -5,7 +5,9 @@ namespace Services.LL.Professions.Craftings;
 
 public sealed class CraftingBalanceOptions
 {
-    public double QualityIncreaseChanceOnTemper { get; set; } = 0.0005d;
+    public double CriticalChanceBase { get; set; } = 0.00001d;
+    public double CriticalChancePerRarityStep { get; set; } = 0.00001d;
+    public double CriticalLevelingItemChance { get; set; } = 0.02d;
 
     public Dictionary<int, double> TierPowerBudgets { get; set; } = new()
     {

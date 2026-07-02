@@ -2,6 +2,7 @@ using Domain.Models.Attributes;
 using Domain.Models.Attributes.Modifiers;
 using Domain.Models.Items;
 using Domain.Models.Items.Equipments;
+using Domain.Models.Professions.Crafting;
 using Domain.Models.Professions.Crafting.V2;
 using Microsoft.Extensions.Options;
 using Services.LL.Professions.Craftings;
@@ -49,7 +50,9 @@ public sealed class TemperingMechanicsServiceTests
     {
         var service = new TemperingMechanicsService(Options.Create(new CraftingBalanceOptions
         {
-            QualityIncreaseChanceOnTemper = 1d
+            CriticalChanceBase = 1d,
+            CriticalChancePerRarityStep = 0d,
+            CriticalLevelingItemChance = 0d
         }));
         var equipment = CreateEquipment();
         equipment.Quality = ItemQuality.Fine;
@@ -59,7 +62,9 @@ public sealed class TemperingMechanicsServiceTests
 
         var result = service.ApplyTemperingAttempt(equipment, profile, new FixedRandom(0.01d));
 
+        Assert.Equal(TemperingOutcome.Critical, result.Outcome);
         Assert.True(result.QualityIncreased);
+        Assert.False(equipment.IsLevelingItem);
         Assert.Equal(ItemQuality.Fine, result.PreviousQuality);
         Assert.Equal(ItemQuality.Exceptional, result.NewQuality);
         Assert.Equal(ItemQuality.Exceptional, equipment.Quality);
@@ -73,7 +78,9 @@ public sealed class TemperingMechanicsServiceTests
     {
         var service = new TemperingMechanicsService(Options.Create(new CraftingBalanceOptions
         {
-            QualityIncreaseChanceOnTemper = 1d
+            CriticalChanceBase = 1d,
+            CriticalChancePerRarityStep = 0d,
+            CriticalLevelingItemChance = 0d
         }));
         var equipment = CreateEquipment();
         equipment.Quality = ItemQuality.Masterwork;
@@ -85,6 +92,30 @@ public sealed class TemperingMechanicsServiceTests
         Assert.Null(result.PreviousQuality);
         Assert.Null(result.NewQuality);
         Assert.Equal(ItemQuality.Masterwork, equipment.Quality);
+        Assert.Equal(9, equipment.Potential);
+    }
+
+    [Fact]
+    public void ApplyTemperingAttempt_WhenCriticalRollChoosesLevelingItem_DoesNotIncreaseQuality()
+    {
+        var service = new TemperingMechanicsService(Options.Create(new CraftingBalanceOptions
+        {
+            CriticalChanceBase = 1d,
+            CriticalChancePerRarityStep = 0d,
+            CriticalLevelingItemChance = 1d
+        }));
+        var equipment = CreateEquipment();
+        equipment.Quality = ItemQuality.Fine;
+        var profile = CreateProfile();
+
+        var result = service.ApplyTemperingAttempt(equipment, profile, new FixedRandom(0.01d));
+
+        Assert.Equal(TemperingOutcome.Critical, result.Outcome);
+        Assert.True(equipment.IsLevelingItem);
+        Assert.False(result.QualityIncreased);
+        Assert.Null(result.PreviousQuality);
+        Assert.Null(result.NewQuality);
+        Assert.Equal(ItemQuality.Fine, equipment.Quality);
         Assert.Equal(9, equipment.Potential);
     }
 

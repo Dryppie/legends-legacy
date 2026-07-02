@@ -4,24 +4,34 @@ using Domain.Models.Items;
 using Domain.Models.Items.Equipments;
 using Domain.Models.Professions.Crafting;
 using Domain.Models.Professions.Crafting.V2;
+using Microsoft.Extensions.Options;
 
 namespace Services.LL.Professions.Craftings;
 
 public sealed class TemperingMechanicsService : ITemperingMechanicsService
 {
+    private readonly CraftingBalanceOptions _options;
+
+    public TemperingMechanicsService(IOptions<CraftingBalanceOptions>? options = null)
+    {
+        _options = options?.Value ?? new CraftingBalanceOptions();
+    }
+
     public TemperingAttemptResult ApplyTemperingAttempt(
         EquipmentInstance equipment,
         TemperingProfileDefinition profile,
         Random rng)
     {
         var previousRarity = equipment.Rarity;
+        var previousQuality = equipment.Quality;
         var outcome = RollOutcome(previousRarity, rng);
         var upgraded = false;
+        var qualityIncreased = false;
 
         switch (outcome)
         {
             case TemperingOutcome.Critical:
-                HandleCriticalOutcome(equipment, rng);
+                qualityIncreased = HandleCriticalOutcome(equipment, previousQuality, rng);
                 break;
 
             case TemperingOutcome.Positive:
@@ -46,7 +56,10 @@ public sealed class TemperingMechanicsService : ITemperingMechanicsService
             TemperingConstants.PotentialCost,
             previousRarity,
             equipment.Rarity,
-            upgraded);
+            upgraded,
+            qualityIncreased,
+            qualityIncreased ? previousQuality : null,
+            qualityIncreased ? equipment.Quality : null);
     }
 
     private static bool HandlePositiveOutcome(EquipmentInstance equipment, TemperingProfileDefinition profile, Random rng)
@@ -73,27 +86,22 @@ public sealed class TemperingMechanicsService : ITemperingMechanicsService
         }
     }
 
-    private static void HandleCriticalOutcome(EquipmentInstance eq, Random rng)
+    private bool HandleCriticalOutcome(EquipmentInstance equipment, ItemQuality previousQuality, Random rng)
     {
-        // 90 % → Masterpiece, 10 % → Leveling Item
-        if (rng.NextDouble() < 0.9)
+        if (rng.NextDouble() < Math.Clamp(_options.CriticalLevelingItemChance, 0d, 1d))
         {
-            eq.IsMasterpiece = true;
-            eq.IsLevelingItem = false;
-            //temperingSummary.Masterpieces++;
+            equipment.IsLevelingItem = true;
+            equipment.IsMasterpiece = false;
+            return false;
         }
-        else
-        {
-            eq.IsLevelingItem = true;
-            eq.IsMasterpiece = false;
-            //temperingSummary.LevelingItems++;
-        }
+
+        return TryIncreaseQuality(equipment, previousQuality);
     }
 
-    private static TemperingOutcome RollOutcome(Rarity rarity, Random rng)
+    private TemperingOutcome RollOutcome(Rarity rarity, Random rng)
     {
         /* ---------------- probability tables ----------------
-        • Critical  : 0.0005 % additive per rarity step
+        • Critical  : extremely rare, configurable base + additive rarity step
         • Negative  : 5 % base  +5 % per rarity step
         • Positive  : See PositiveChance()
         • Neutral   : remainder
@@ -101,7 +109,10 @@ public sealed class TemperingMechanicsService : ITemperingMechanicsService
 
         int rarityIndex = (int)rarity; // Common = 0 … Legacy = 6
 
-        double pCritical = 0.00005 * rarityIndex;  // 0.005 % → 0.035 %
+        double pCritical = Math.Clamp(
+            _options.CriticalChanceBase + (_options.CriticalChancePerRarityStep * rarityIndex),
+            0d,
+            1d);
         double pNegative = (0.05 + 0.05 * rarityIndex); // (5 + -10 = -5) // 5% → 35%
         double pPositive = PositiveChance(rarity);
 
@@ -143,6 +154,38 @@ public sealed class TemperingMechanicsService : ITemperingMechanicsService
         }
 
         return upgraded;
+    }
+
+    private bool TryIncreaseQuality(EquipmentInstance equipment, ItemQuality previousQuality)
+    {
+        var nextQuality = GetNextQuality(previousQuality);
+        if (nextQuality == null) return false;
+
+        equipment.Quality = nextQuality.Value;
+        ApplyQualityStatMultiplierChange(equipment, previousQuality, nextQuality.Value);
+        return true;
+    }
+
+    private void ApplyQualityStatMultiplierChange(EquipmentInstance equipment, ItemQuality previousQuality, ItemQuality newQuality)
+    {
+        var previousMultiplier = _options.GetQualityStatMultiplier(previousQuality);
+        var newMultiplier = _options.GetQualityStatMultiplier(newQuality);
+        if (previousMultiplier <= 0 || newMultiplier <= 0) return;
+
+        var ratio = newMultiplier / previousMultiplier;
+        foreach (var modifier in equipment.InstanceModifiers)
+        {
+            modifier.Amount = (float)Math.Max(1d, Math.Round(modifier.Amount * ratio));
+        }
+    }
+
+    private static ItemQuality? GetNextQuality(ItemQuality current)
+    {
+        var qualities = Enum.GetValues<ItemQuality>().OrderBy(x => x).ToArray();
+        var index = Array.IndexOf(qualities, current);
+        return index >= 0 && index < qualities.Length - 1
+            ? qualities[index + 1]
+            : null;
     }
 
     private static void ApplyRarityUpgradeReward(EquipmentInstance equipment, TemperingProfileDefinition profile, Random rng)
