@@ -9,5 +9,5 @@ public class ArenaTicketStatus
     public int CurrentTickets { get; set; }
     public DateTimeOffset LastTicketUpdate { get; set; }
     [NotMapped]
-    public readonly int MaxTickets = 5;
+    public int MaxTickets { get; } = 5;
 }

@@ -31,6 +31,12 @@ public class CharacterRepository : ICharacterRepository
             Level = 1,
             Soulstones = 0,
             ArenaProfile = new CharacterArenaProfile { CharacterId = characterId },
+            ArenaTicketStatus = new ArenaTicketStatus
+            {
+                CharacterId = characterId,
+                CurrentTickets = 5,
+                LastTicketUpdate = DateTimeOffset.UtcNow
+            },
             Professions = ProfessionsSeederHelper.CreateProfessions(characterId)
         };
 
