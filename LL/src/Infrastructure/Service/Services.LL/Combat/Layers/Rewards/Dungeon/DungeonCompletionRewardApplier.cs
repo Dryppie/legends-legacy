@@ -70,6 +70,7 @@ public sealed class DungeonCompletionRewardApplier : IDungeonCompletionRewardApp
             "Dungeon Completion Rewards",
             cancellationToken);
 
+        await AddPotentialCoreRewardsAsync(run.Id, dungeon.Region, dungeon.Grade, cancellationToken);
         await AddMonsterCoreRewardsAsync(run.Id, dungeon.Grade, cancellationToken);
         await AddFirstCompletionRewardsIfNeededAsync(run, dungeon, cancellationToken);
         await _mastery.AwardCompletionAsync(run, cancellationToken);
@@ -144,6 +145,38 @@ public sealed class DungeonCompletionRewardApplier : IDungeonCompletionRewardApp
             dungeonRunId,
             loot,
             $"{FormatGrade(dungeonGrade)} Monster Cores",
+            cancellationToken);
+    }
+
+    private async Task AddPotentialCoreRewardsAsync(
+        Guid dungeonRunId,
+        int dungeonRegion,
+        DungeonGrade dungeonGrade,
+        CancellationToken cancellationToken)
+    {
+        if (dungeonRegion is < 1 or > 9)
+        {
+            return;
+        }
+
+        var itemId = DungeonRewardCatalog.GetPotentialCoreRewardItemId(dungeonRegion);
+        var amount = RollPotentialCoreAmount(dungeonGrade);
+        var itemBases = await _itemBases.GetItemBasesByIdsAsync([itemId], cancellationToken);
+        if (!itemBases.TryGetValue(itemId, out var itemBase))
+        {
+            return;
+        }
+
+        var loot = _inventoryItemFactory.CreateForQuantity(itemBase, amount).ToList();
+        if (loot.Count == 0)
+        {
+            return;
+        }
+
+        await _pendingRewardWriter.AddLootAsync(
+            dungeonRunId,
+            loot,
+            $"Region {dungeonRegion} Potential Cores",
             cancellationToken);
     }
 
@@ -238,6 +271,24 @@ public sealed class DungeonCompletionRewardApplier : IDungeonCompletionRewardApp
 
         AddBonusStoneChance(grants, dungeonGrade);
         return grants;
+    }
+
+    private static int RollPotentialCoreAmount(DungeonGrade dungeonGrade)
+    {
+        var amount = dungeonGrade switch
+        {
+            DungeonGrade.GradeII => Random.Shared.Next(2, 5),
+            DungeonGrade.GradeIII => Random.Shared.Next(4, 8),
+            _ => Random.Shared.Next(1, 3)
+        };
+
+        const double bonusChance = 0.25;
+        if (Random.Shared.NextDouble() < bonusChance)
+        {
+            amount++;
+        }
+
+        return amount;
     }
 
     private static void AddBonusStoneChance(Dictionary<string, int> grants, DungeonGrade dungeonGrade)

@@ -11,6 +11,7 @@ public sealed class DungeonDefinition
     public string Id { get; set; } = default!;         // e.g. "crypt_of_thorns"
     public string Name { get; set; } = default!;
     public string SigilItemId { get; set; } = default!;
+    public int Region { get; set; } = 1;
     public DungeonGrade Grade { get; set; } = DungeonGrade.GradeI;
     public int Tier { get; set; } = 1;
     public int RecommendedCombatRating { get; set; }

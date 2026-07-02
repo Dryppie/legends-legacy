@@ -39,8 +39,11 @@ public sealed class PlayerEssenceArchiveEntryConverter : ITypeConverter<PlayerEs
         var essence = source.Essence;
         var definition = _definitions.GetById(essence.EssenceDefinitionId) ?? new EssenceDefinition { Id = essence.EssenceDefinitionId, Name = essence.EssenceDefinitionId };
         var missing = GetMissingRequirements(essence, definition).ToList();
-        var canAscend = essence.Level >= _progression.GetLevelCap(essence.AscensionTier) && essence.AscensionTier < 3;
+        var canUpgradePotential = essence.PotentialTier < EssenceProgressionConstants.MaxPotentialTier
+            && essence.Level >= _progression.GetLevelCapForPotential(essence.PotentialTier);
+        var canAscend = CanAscend(essence);
         var canEvolve = !essence.IsEvolved && essence.AscensionTier >= definition.Evolution.RequiredAscensionTier;
+        var potentialCap = _progression.GetLevelCapForPotential(essence.PotentialTier);
 
         return new(
             essence.Id,
@@ -49,14 +52,19 @@ public sealed class PlayerEssenceArchiveEntryConverter : ITypeConverter<PlayerEs
             essence.Level,
             essence.CurrentXp,
             _progression.GetXpRequiredForNextLevel(essence, definition),
+            essence.NativeRegion,
+            essence.PotentialTier,
+            potentialCap,
             essence.AscensionTier,
-            _progression.GetLevelCap(essence.AscensionTier),
+            potentialCap,
             essence.IsEvolved,
             essence.IsFavorite,
             source.AttunedSlot,
             canAscend,
+            canUpgradePotential,
             canEvolve,
             missing,
+            GetPotentialInfo(essence, canUpgradePotential),
             GetAscendInfo(essence, definition, canAscend),
             GetEvolveInfo(essence, definition, canEvolve),
             GetAttributeBonuses(definition, essence).ToList(),
@@ -66,29 +74,81 @@ public sealed class PlayerEssenceArchiveEntryConverter : ITypeConverter<PlayerEs
 
     private IEnumerable<string> GetMissingRequirements(PlayerEssence essence, EssenceDefinition definition)
     {
-        if (essence.Level < _progression.GetLevelCap(essence.AscensionTier)) yield return "Reach current Ascension Tier level cap.";
-        if (essence.AscensionTier >= 3) yield return "Maximum Ascension Tier reached.";
+        if (essence.Level < _progression.GetLevelCapForPotential(essence.PotentialTier)) yield return "Reach current Potential level cap.";
+        if (essence.PotentialTier >= EssenceProgressionConstants.MaxPotentialTier) yield return "Maximum Potential reached.";
+        if (essence.AscensionTier >= EssenceProgressionConstants.MaxAscensionTier) yield return "Maximum Ascension Tier reached.";
         if (essence.IsEvolved) yield return "Already evolved.";
         if (essence.AscensionTier < definition.Evolution.RequiredAscensionTier) yield return $"Reach Ascension Tier {definition.Evolution.RequiredAscensionTier}.";
     }
 
+    private static bool CanAscend(PlayerEssence essence)
+    {
+        if (essence.AscensionTier >= EssenceProgressionConstants.MaxAscensionTier) return false;
+        var requirement = EssenceProgressionConstants.GetAscensionRequirement(essence.AscensionTier + 1);
+        return essence.Level >= requirement.RequiredLevel
+               && essence.PotentialTier >= requirement.RequiredPotentialTier;
+    }
+
+    private EssencePotentialInfoDto GetPotentialInfo(PlayerEssence essence, bool canUpgrade)
+    {
+        var nextTier = essence.PotentialTier >= EssenceProgressionConstants.MaxPotentialTier
+            ? (int?)null
+            : essence.PotentialTier + 1;
+        var currentCap = _progression.GetLevelCapForPotential(essence.PotentialTier);
+        var nextCap = nextTier is null
+            ? (int?)null
+            : _progression.GetLevelCapForPotential(nextTier.Value);
+        var cost = nextTier is null
+            ? null
+            : EssenceProgressionConstants.GetPotentialUpgradeCost(essence.PotentialTier);
+        var requirements = new List<string>();
+
+        if (nextTier is null)
+        {
+            requirements.Add("Already at maximum Potential.");
+        }
+        else
+        {
+            requirements.Add($"Reach Level {currentCap}.");
+            requirements.Add($"Consume {cost!.Amount} {FormatItemName(cost.ItemId)}.");
+        }
+
+        var effects = nextTier is null
+            ? new List<string> { "No further Potential upgrades are available." }
+            : new List<string> { $"Raises the level cap to {nextCap}.", "Allows this Essence to gain more stat levels." };
+
+        return new(
+            canUpgrade,
+            essence.PotentialTier,
+            nextTier,
+            currentCap,
+            nextCap,
+            cost?.ItemId,
+            FormatItemName(cost?.ItemId),
+            requirements,
+            effects);
+    }
+
     private EssenceAscendInfoDto GetAscendInfo(PlayerEssence essence, EssenceDefinition definition, bool canAscend)
     {
-        var nextTier = essence.AscensionTier >= 3 ? (int?)null : essence.AscensionTier + 1;
-        var currentCap = _progression.GetLevelCap(essence.AscensionTier);
+        var nextTier = essence.AscensionTier >= EssenceProgressionConstants.MaxAscensionTier ? (int?)null : essence.AscensionTier + 1;
         var cost = nextTier is null
             ? null
             : EssenceProgressionConstants.GetAscensionCost(nextTier.Value);
+        var requirement = nextTier is null
+            ? null
+            : EssenceProgressionConstants.GetAscensionRequirement(nextTier.Value);
         var requiredItemId = cost?.ItemId;
         var requirements = new List<string>();
 
-        if (essence.AscensionTier >= 3)
+        if (essence.AscensionTier >= EssenceProgressionConstants.MaxAscensionTier)
         {
             requirements.Add("Already at maximum Ascension Tier.");
         }
         else
         {
-            requirements.Add($"Reach Level {currentCap} in Ascension Tier {essence.AscensionTier}.");
+            requirements.Add($"Reach Level {requirement!.RequiredLevel}.");
+            requirements.Add($"Reach Potential Tier {requirement.RequiredPotentialTier}.");
             requirements.Add($"Consume {cost!.Amount} {FormatItemName(requiredItemId)}.");
         }
 
@@ -96,7 +156,6 @@ public sealed class PlayerEssenceArchiveEntryConverter : ITypeConverter<PlayerEs
             ? new List<string> { "No further Ascension bonuses are available." }
             : new List<string>
             {
-                $"Raises the level cap to {_progression.GetLevelCap(nextTier.Value)}.",
                 $"Improves ability values such as damage, healing, barriers, status strength, and summons based on the ability's effect type.",
                 $"Reduces active ability cooldowns by up to {EssenceProgressionConstants.MaxActiveCooldownReduction:P0} at higher Ascension Tiers."
             };
@@ -162,6 +221,13 @@ public sealed class PlayerEssenceArchiveEntryConverter : ITypeConverter<PlayerEs
             return "Greater Monster Core";
         if (itemId.Equals(EssenceProgressionConstants.PrimalMonsterCoreItemId, StringComparison.OrdinalIgnoreCase))
             return "Primal Monster Core";
+
+        const string potentialCorePrefix = "item.essence_potential_core.region_";
+        if (itemId.StartsWith(potentialCorePrefix, StringComparison.OrdinalIgnoreCase)
+            && int.TryParse(itemId[potentialCorePrefix.Length..], out var region))
+        {
+            return $"Region {region} Potential Core";
+        }
 
         var parts = itemId
             .Replace("item.", string.Empty, StringComparison.OrdinalIgnoreCase)

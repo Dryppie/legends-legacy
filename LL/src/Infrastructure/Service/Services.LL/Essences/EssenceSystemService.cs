@@ -91,7 +91,8 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
             return Fail("The selected inventory item is not an Unbound Essence.");
 
         var definitionId = ResolveDefinitionId(essenceItem);
-        if (_definitions.GetById(definitionId) is null) return Fail("The Essence definition no longer exists.");
+        var definition = _definitions.GetById(definitionId);
+        if (definition is null) return Fail("The Essence definition no longer exists.");
 
         var alreadyAbsorbed = await _essences.HasPlayerEssenceAsync(characterId, definitionId, cancellationToken);
         if (alreadyAbsorbed) return Fail("This Essence is already absorbed in the Soul Archive.");
@@ -108,6 +109,8 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
             Id = Guid.NewGuid(),
             CharacterId = characterId,
             EssenceDefinitionId = definitionId,
+            NativeRegion = Math.Clamp(definition.NativeRegion, 1, EssenceProgressionConstants.MaxPotentialTier),
+            PotentialTier = Math.Clamp(definition.NativeRegion, 1, EssenceProgressionConstants.MaxPotentialTier),
             Level = 1,
             AbsorbedAt = DateTimeOffset.UtcNow,
             UpdatedAt = DateTimeOffset.UtcNow
@@ -159,20 +162,45 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
 
         var result = _progression.GrantXp(essence, definition, dustToSpend * 25);
         var spent = (int)Math.Ceiling(result.XpGained / 25d);
-        if (spent <= 0) return new(false, "This Essence is at its current Ascension Tier cap.", 0, 0, 0, true);
+        if (spent <= 0) return new(false, "This Essence is at its current Potential cap.", 0, 0, 0, true);
 
         await RemoveInventoryQuantityAsync(characterId, EssenceDustItemId, spent, cancellationToken);
         return new(true, "Essence Dust spent.", spent, result.XpGained, result.LevelsGained, result.ReachedTierCap);
+    }
+
+    public async Task<EssenceOperationResult> UpgradePotentialAsync(Guid characterId, Guid playerEssenceId, CancellationToken cancellationToken)
+    {
+        var essence = await _essences.GetPlayerEssenceAsync(characterId, playerEssenceId, cancellationToken);
+        if (essence is null) return Fail("Absorbed Essence not found.");
+        if (essence.PotentialTier >= EssenceProgressionConstants.MaxPotentialTier)
+            return Fail("Essence is already at maximum Potential.");
+
+        var currentCap = _progression.GetLevelCapForPotential(essence.PotentialTier);
+        if (essence.Level < currentCap)
+            return Fail($"Essence must reach Level {currentCap} before increasing Potential.");
+
+        var cost = EssenceProgressionConstants.GetPotentialUpgradeCost(essence.PotentialTier);
+        if (!await RemoveInventoryQuantityAsync(characterId, cost.ItemId, cost.Amount, cancellationToken))
+            return Fail($"Requires {cost.Amount} {FormatItemName(cost.ItemId)}.");
+
+        essence.PotentialTier++;
+        essence.UpdatedAt = DateTimeOffset.UtcNow;
+        return Ok("Essence Potential increased.");
     }
 
     public async Task<EssenceOperationResult> AscendEssenceAsync(Guid characterId, Guid playerEssenceId, CancellationToken cancellationToken)
     {
         var essence = await _essences.GetPlayerEssenceAsync(characterId, playerEssenceId, cancellationToken);
         if (essence is null) return Fail("Absorbed Essence not found.");
-        if (essence.AscensionTier >= 3) return Fail("Essence is already at the maximum Ascension Tier.");
-        if (essence.Level < _progression.GetLevelCap(essence.AscensionTier)) return Fail("Essence must reach the current tier level cap before ascending.");
+        if (essence.AscensionTier >= EssenceProgressionConstants.MaxAscensionTier) return Fail("Essence is already at the maximum Ascension Tier.");
 
         var nextTier = essence.AscensionTier + 1;
+        var requirement = EssenceProgressionConstants.GetAscensionRequirement(nextTier);
+        if (essence.Level < requirement.RequiredLevel)
+            return Fail($"Essence must reach Level {requirement.RequiredLevel} before ascending.");
+        if (essence.PotentialTier < requirement.RequiredPotentialTier)
+            return Fail($"Essence must reach Potential Tier {requirement.RequiredPotentialTier} before ascending.");
+
         var ascensionCounts = await GetAscensionCountsAsync(characterId, cancellationToken);
         var cost = EssenceProgressionConstants.GetAscensionCost(
             nextTier,
@@ -541,6 +569,13 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
             return "Greater Monster Core";
         if (itemId.Equals(EssenceProgressionConstants.PrimalMonsterCoreItemId, StringComparison.OrdinalIgnoreCase))
             return "Primal Monster Core";
+
+        const string potentialCorePrefix = "item.essence_potential_core.region_";
+        if (itemId.StartsWith(potentialCorePrefix, StringComparison.OrdinalIgnoreCase)
+            && int.TryParse(itemId[potentialCorePrefix.Length..], out var region))
+        {
+            return $"Region {region} Potential Core";
+        }
 
         var parts = itemId
             .Replace("item.", string.Empty, StringComparison.OrdinalIgnoreCase)

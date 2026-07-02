@@ -4,7 +4,9 @@ public static class EssenceProgressionConstants
 {
     public const int BaseXpPerLevel = 100;
     public const double XpGrowth = 1.18;
-    public const int MaxEssenceLevel = 60;
+    public const int MaxEssenceLevel = 100;
+    public const int MaxPotentialTier = 10;
+    public const int MaxAscensionTier = 3;
     public const string LesserMonsterCoreItemId = "item.monster_core.lesser";
     public const string GreaterMonsterCoreItemId = "item.monster_core.greater";
     public const string PrimalMonsterCoreItemId = "item.monster_core.primal";
@@ -15,6 +17,12 @@ public static class EssenceProgressionConstants
     public const int TierTwoCatchUpThreshold = 10;
     public const int TierOneCatchUpMonsterCoreCost = 3;
     public const int TierTwoCatchUpMonsterCoreCost = 8;
+    public const int AscensionTierOneRequiredLevel = 10;
+    public const int AscensionTierTwoRequiredLevel = 30;
+    public const int AscensionTierThreeRequiredLevel = 60;
+    public const int AscensionTierOneRequiredPotential = 1;
+    public const int AscensionTierTwoRequiredPotential = 3;
+    public const int AscensionTierThreeRequiredPotential = 6;
     public const double AttributeBonusGrowthPerLevel = 0.04;
     public const double ActiveCooldownReductionPerAscensionTier = 0.05;
     public const double MaxActiveCooldownReduction = 0.15;
@@ -35,12 +43,49 @@ public static class EssenceProgressionConstants
         return (int)Math.Ceiling(BaseXpPerLevel * Math.Pow(XpGrowth, Math.Max(0, level - 1)));
     }
 
+    public static int GetLevelCapForPotential(int potentialTier) =>
+        Math.Clamp(potentialTier, 1, MaxPotentialTier) * 10;
+
     public static int GetLevelCap(int ascensionTier) => ascensionTier switch
     {
         <= 0 => 10,
         1 => 30,
         _ => 60
     };
+
+    public static EssencePotentialUpgradeCost GetPotentialUpgradeCost(int currentPotentialTier)
+    {
+        if (currentPotentialTier is < 1 or >= MaxPotentialTier)
+            throw new ArgumentOutOfRangeException(nameof(currentPotentialTier), "Potential tier must be between 1 and 9 for upgrades.");
+
+        var amount = currentPotentialTier switch
+        {
+            1 => 3,
+            2 => 4,
+            3 => 5,
+            4 => 6,
+            5 => 8,
+            6 => 10,
+            7 => 12,
+            8 => 15,
+            9 => 20,
+            _ => throw new ArgumentOutOfRangeException(nameof(currentPotentialTier))
+        };
+
+        return new(GetPotentialCoreItemId(currentPotentialTier), amount);
+    }
+
+    public static string GetPotentialCoreItemId(int sourceRegion) =>
+        $"item.essence_potential_core.region_{Math.Clamp(sourceRegion, 1, 9)}";
+
+    public static EssenceAscensionRequirement GetAscensionRequirement(int nextAscensionTier) =>
+        nextAscensionTier switch
+        {
+            1 => new(AscensionTierOneRequiredLevel, AscensionTierOneRequiredPotential),
+            2 => new(AscensionTierTwoRequiredLevel, AscensionTierTwoRequiredPotential),
+            3 => new(AscensionTierThreeRequiredLevel, AscensionTierThreeRequiredPotential),
+            _ => throw new ArgumentOutOfRangeException(nameof(nextAscensionTier), "Ascension tier must be between 1 and 3.")
+        };
 
     public static EssenceAscensionCost GetAscensionCost(
         int nextAscensionTier,
@@ -136,3 +181,5 @@ public static class EssenceProgressionConstants
 }
 
 public sealed record EssenceAscensionCost(string ItemId, int Amount);
+public sealed record EssencePotentialUpgradeCost(string ItemId, int Amount);
+public sealed record EssenceAscensionRequirement(int RequiredLevel, int RequiredPotentialTier);
