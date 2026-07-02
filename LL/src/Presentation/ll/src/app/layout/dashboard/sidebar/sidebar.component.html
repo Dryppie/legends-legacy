@@ -55,18 +55,18 @@
     </div>
 
     <div
-      class="flex flex-1 flex-col gap-1 overflow-y-auto overscroll-contain px-2 py-2 sm:border-t-0"
+      class="flex flex-1 flex-col gap-0.5 overflow-y-auto overscroll-contain px-2 py-2 sm:border-t-0"
     >
       <div
         *ngFor="let section of sections; trackBy: trackSection"
         class="border-b border-primary/10 pb-1 last:border-b-0"
       >
         <div
-          class="ll-section-label px-2 pb-1 pt-3"
+          class="ll-section-label px-2 pb-1 pt-2.5 first:pt-1"
         >
           {{ section.label }}
         </div>
-        <div class="flex flex-col gap-1">
+        <div class="flex flex-col gap-0.5">
           <div
             *ngFor="let item of section.items; trackBy: trackItem"
             class="min-w-0"
