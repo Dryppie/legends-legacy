@@ -122,6 +122,9 @@ public sealed class RuntimeAbility
     public int RemainingCooldownTicks { get; private set; }
     public bool IsReady => RemainingCooldownTicks <= 0;
 
+    public void StartInitialCooldown() =>
+        RemainingCooldownTicks = Math.Max(0, Definition.CooldownTicks);
+
     public void StartCooldown(int additionalTicks = 0) =>
         RemainingCooldownTicks = Math.Max(0, Definition.CooldownTicks + additionalTicks);
 

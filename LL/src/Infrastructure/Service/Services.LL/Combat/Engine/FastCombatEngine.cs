@@ -6,7 +6,11 @@ using Services.LL.Combat.Stats;
 
 namespace Services.LL.Combat.Engine;
 
-public sealed record FastCombatEngineOptions(int MaxTicks = 6000, int BasicAttackIntervalTicks = 30, int RandomSeed = 1337);
+public sealed record FastCombatEngineOptions(
+    int MaxTicks = 6000,
+    int BasicAttackIntervalTicks = 30,
+    int RandomSeed = 1337,
+    bool StartActiveAbilitiesOnCooldown = false);
 
 public sealed class FastCombatEngine
 {
@@ -16,6 +20,7 @@ public sealed class FastCombatEngine
     private readonly Random _random;
     private readonly int _maxTicks;
     private readonly int _basicAttackIntervalTicks;
+    private readonly bool _startActiveAbilitiesOnCooldown;
     private readonly Dictionary<RuntimeCombatant, int> _basicAttackTimers = [];
     private readonly List<CombatLogItem> _log = [];
     private int _currentTick;
@@ -40,13 +45,17 @@ public sealed class FastCombatEngine
         _random = new Random(resolved.RandomSeed);
         _maxTicks = resolved.MaxTicks;
         _basicAttackIntervalTicks = resolved.BasicAttackIntervalTicks;
+        _startActiveAbilitiesOnCooldown = resolved.StartActiveAbilitiesOnCooldown;
     }
 
     public CombatResult Run(IReadOnlyList<RuntimeCombatant> friendly, IReadOnlyList<RuntimeCombatant> hostile)
     {
         var combatants = friendly.Concat(hostile).ToList();
         foreach (var combatant in combatants)
+        {
             _basicAttackTimers[combatant] = _basicAttackIntervalTicks;
+            InitializeActiveAbilityCooldowns(combatant);
+        }
 
         Publish(new CombatEvent(AbilityTriggerEvent.OnCombatStart, null, null, null), combatants);
 
@@ -585,8 +594,18 @@ public sealed class FastCombatEngine
         var summon = CreateSummonedCombatant(source, effect, summonDefinition, _abilitiesById);
         mutableCombatants.Add(summon);
         _basicAttackTimers[summon] = _basicAttackIntervalTicks;
+        InitializeActiveAbilityCooldowns(summon);
 
         Log(source, summon, effect.Id, EventType.Summon, 1, $"{source.Name} summoned {summon.Name}.", statsSource, countStatsActivation);
+    }
+
+    private void InitializeActiveAbilityCooldowns(RuntimeCombatant combatant)
+    {
+        if (!_startActiveAbilitiesOnCooldown)
+            return;
+
+        foreach (var ability in combatant.Abilities.Where(x => x.Definition.Kind == AbilitySpecKind.Active))
+            ability.StartInitialCooldown();
     }
 
     private static RuntimeCombatant CreateSummonedCombatant(
