@@ -123,27 +123,6 @@ export class CombatComponent implements OnInit, OnDestroy {
       const stats = this.combatStateService.getEntityStats(type)();
       if (stats) this.entityStats = stats;
     });
-
-    /** Handle combat event stream */
-    effect(() => {
-      const type = this.battleTypeSignal();
-      const allEvents = this.combatStateService.getCombatEvents(type)();
-      const lastHandledEvent = this.lastHandledCombatEvent.get(type);
-      const lastHandledIndex = lastHandledEvent
-        ? allEvents.indexOf(lastHandledEvent)
-        : -1;
-      const newEvents =
-        lastHandledEvent && lastHandledIndex >= 0
-          ? allEvents.slice(lastHandledIndex + 1)
-          : allEvents;
-      const newestEvent = allEvents[allEvents.length - 1];
-
-      if (newestEvent) this.lastHandledCombatEvent.set(type, newestEvent);
-      else this.lastHandledCombatEvent.delete(type);
-
-      newEvents.forEach((event) => this.handleCombatEvent(event));
-    });
-
     /** Handle next combat tick */
     effect(() => {
       const type = this.battleTypeSignal();
