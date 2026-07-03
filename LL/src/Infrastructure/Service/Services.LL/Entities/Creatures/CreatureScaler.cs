@@ -11,10 +11,11 @@ public class CreatureScaler : ICreatureScaler
 {
     public void ApplyScaling(Creature creature, Area area)
     {
-        var D = Math.Max(1, area.DifficultyTier);
+        var difficultyTier = Math.Max(1, area.DifficultyTier);
+        var progressionTier = difficultyTier - 1;
 
         InitializeFromBaseline(creature);
-        ApplyDifficultyScaling(creature, D);
+        ApplyDifficultyScaling(creature, progressionTier);
         ApplyArchetype(creature);
         ApplyDamageProfile(creature);
         ApplyDefenseProfile(creature);
@@ -38,25 +39,25 @@ public class CreatureScaler : ICreatureScaler
         }
     }
 
-    private static void ApplyDifficultyScaling(Creature creature, int D)
+    private static void ApplyDifficultyScaling(Creature creature, int progressionTier)
     {
         foreach (var type in MonsterBaseStats.Baseline.Keys)
         {
             var baseValue = MonsterBaseStats.Baseline[type];
             var scaled = type switch
             {
-                AttributeType.MaxHealth => ScaleHp(baseValue, D),
-                AttributeType.Power => ScaleOffense(baseValue, D),
-                AttributeType.Precision => (float)(baseValue * (1.0 + MonsterScalingConstants.AccuracyPerTier * D)),
-                AttributeType.CritChance => Math.Min(baseValue + (float)(MonsterScalingConstants.CritChancePerTier * D), MonsterScalingConstants.CritChanceCap),
-                AttributeType.CritDamage => Math.Min(baseValue + (float)(MonsterScalingConstants.CritDamagePerTier * D), MonsterScalingConstants.CritDamageCap),
-                AttributeType.ArmorPenetration => (float)(baseValue * (1.0 + MonsterScalingConstants.PenPerTier * D)),
-                AttributeType.MagicPenetration => (float)(baseValue * (1.0 + MonsterScalingConstants.PenPerTier * D)),
-                AttributeType.Armor => ScaleDefense(baseValue, D),
-                AttributeType.Resistance => ScaleResistance(baseValue, D),
-                AttributeType.DamageReduction => ScaleSoftDefense(baseValue, D),
-                AttributeType.CrowdControlResistance => ScaleSoftDefense(baseValue, D),
-                AttributeType.StatusResistance => ScaleSoftDefense(baseValue, D),
+                AttributeType.MaxHealth => ScaleHp(baseValue, progressionTier),
+                AttributeType.Power => ScaleOffense(baseValue, progressionTier),
+                AttributeType.Precision => (float)(baseValue * (1.0 + MonsterScalingConstants.AccuracyPerTier * progressionTier)),
+                AttributeType.CritChance => Math.Min(baseValue + (float)(MonsterScalingConstants.CritChancePerTier * progressionTier), MonsterScalingConstants.CritChanceCap),
+                AttributeType.CritDamage => Math.Min(baseValue + (float)(MonsterScalingConstants.CritDamagePerTier * progressionTier), MonsterScalingConstants.CritDamageCap),
+                AttributeType.ArmorPenetration => (float)(baseValue * (1.0 + MonsterScalingConstants.PenPerTier * progressionTier)),
+                AttributeType.MagicPenetration => (float)(baseValue * (1.0 + MonsterScalingConstants.PenPerTier * progressionTier)),
+                AttributeType.Armor => ScaleDefense(baseValue, progressionTier),
+                AttributeType.Resistance => ScaleResistance(baseValue, progressionTier),
+                AttributeType.DamageReduction => ScaleSoftDefense(baseValue, progressionTier),
+                AttributeType.CrowdControlResistance => ScaleSoftDefense(baseValue, progressionTier),
+                AttributeType.StatusResistance => ScaleSoftDefense(baseValue, progressionTier),
                 _ => baseValue
             };
 
@@ -64,36 +65,36 @@ public class CreatureScaler : ICreatureScaler
         }
     }
 
-    private static float ScaleHp(float baseHp, int D)
+    private static float ScaleHp(float baseHp, int progressionTier)
     {
-        var mult = Math.Pow(1 + MonsterScalingConstants.HpA * D, MonsterScalingConstants.HpB);
+        var mult = Math.Pow(1 + MonsterScalingConstants.HpA * progressionTier, MonsterScalingConstants.HpB);
         return (float)(baseHp * mult);
     }
 
-    private static float ScaleOffense(float baseVal, int D)
+    private static float ScaleOffense(float baseVal, int progressionTier)
     {
-        var mult = Math.Pow(1 + MonsterScalingConstants.OffenseC * D, MonsterScalingConstants.OffenseExp);
+        var mult = Math.Pow(1 + MonsterScalingConstants.OffenseC * progressionTier, MonsterScalingConstants.OffenseExp);
         return (float)(baseVal * mult);
     }
 
-    private static float ScaleDefense(float baseVal, int D)
+    private static float ScaleDefense(float baseVal, int progressionTier)
     {
         if (baseVal <= 0) return baseVal;
-        var mult = Math.Pow(1 + MonsterScalingConstants.DefenseA * D, MonsterScalingConstants.DefenseB);
+        var mult = Math.Pow(1 + MonsterScalingConstants.DefenseA * progressionTier, MonsterScalingConstants.DefenseB);
         return (float)(baseVal * mult);
     }
 
-    private static float ScaleSoftDefense(float baseVal, int D)
+    private static float ScaleSoftDefense(float baseVal, int progressionTier)
     {
         if (baseVal <= 0) return baseVal;
-        var mult = 1.0 + 0.05 * D;
+        var mult = 1.0 + 0.05 * progressionTier;
         return (float)(baseVal * mult);
     }
 
-    private static float ScaleResistance(float baseVal, int D)
+    private static float ScaleResistance(float baseVal, int progressionTier)
     {
         if (baseVal <= 0) return baseVal;
-        var mult = Math.Pow(1 + MonsterScalingConstants.ResistA * D, MonsterScalingConstants.ResistB);
+        var mult = Math.Pow(1 + MonsterScalingConstants.ResistA * progressionTier, MonsterScalingConstants.ResistB);
         return (float)(baseVal * mult);
     }
 
