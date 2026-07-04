@@ -109,6 +109,28 @@ public sealed class AbilitySystemTests
     }
 
     [Fact]
+    public void Engine_can_start_active_abilities_on_their_cooldown()
+    {
+        var ability = CreateDamageAbility("ability.initial.cooldown", "Family.Test");
+        ability.CooldownTicks = 3;
+        var abilities = AbilityCompiler.CompileAbilities([ability]);
+        var friendly = CreateCombatant("friendly", CombatTeam.Friendly, abilities.Values);
+        var hostile = CreateCombatant("hostile", CombatTeam.Hostile, []);
+        var engine = new FastCombatEngine(
+            new Dictionary<string, CompiledStatus>(),
+            new FastCombatEngineOptions(
+                MaxTicks: 4,
+                BasicAttackIntervalTicks: 1000,
+                StartActiveAbilitiesOnCooldown: true));
+
+        var result = engine.Run([friendly], [hostile]);
+
+        Assert.DoesNotContain(result.EventLog, x => x.EventType == EventType.AbilityUse && x.Timestamp == 0);
+        Assert.Contains(result.EventLog, x => x.EventType == EventType.AbilityUse && x.Source == ability.Name && x.Timestamp == 3);
+        Assert.Equal(180, hostile.Health);
+    }
+
+    [Fact]
     public void Engine_pays_health_cost_before_using_active_ability()
     {
         var ability = CreateDamageAbility("ability.health.cost", "Family.Test");
@@ -1645,7 +1667,7 @@ public sealed class AbilitySystemTests
             Kind = AbilitySpecKind.Active,
             Name = "Evolved Strike",
             OwningEssenceId = "essence.test.evolved",
-            CooldownTicks = 999,
+            CooldownTicks = 700,
             Triggers =
             [
                 new()
@@ -1744,7 +1766,7 @@ public sealed class AbilitySystemTests
             Kind = AbilitySpecKind.Active,
             Name = "Add Effect Strike",
             OwningEssenceId = "essence.test.add_effect",
-            CooldownTicks = 999,
+            CooldownTicks = 700,
             Triggers =
             [
                 new()
@@ -1834,7 +1856,7 @@ public sealed class AbilitySystemTests
             Kind = AbilitySpecKind.Active,
             Name = "Ascended Strike",
             OwningEssenceId = "essence.test.ascended",
-            CooldownTicks = 999,
+            CooldownTicks = 1,
             Effects =
             [
                 new()
@@ -1889,7 +1911,7 @@ public sealed class AbilitySystemTests
             Kind = AbilitySpecKind.Active,
             Name = "Ascended Add Effect Strike",
             OwningEssenceId = "essence.test.ascended_add_effect",
-            CooldownTicks = 999,
+            CooldownTicks = 1,
             Effects =
             [
                 new()
@@ -1970,7 +1992,7 @@ public sealed class AbilitySystemTests
             Kind = AbilitySpecKind.Active,
             Name = "Temporary Modifier Strike",
             OwningEssenceId = "essence.test.temporary_modifier",
-            CooldownTicks = 999,
+            CooldownTicks = 700,
             Triggers =
             [
                 new()

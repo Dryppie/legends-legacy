@@ -71,6 +71,34 @@ public class ColosseumRepository : IColosseumRepository
                 cancellationToken);
     }
 
+    public async Task<IReadOnlyDictionary<Guid, DateTimeOffset>> GetRecentAttackerMatchTimesAsync(
+        Guid attackerCharacterId,
+        IReadOnlyCollection<Guid> defenderCharacterIds,
+        DateTimeOffset since,
+        CancellationToken cancellationToken)
+    {
+        if (defenderCharacterIds.Count == 0)
+        {
+            return new Dictionary<Guid, DateTimeOffset>();
+        }
+
+        return await _context.ColosseumMatches
+            .Where(match =>
+                match.CharacterAId == attackerCharacterId &&
+                defenderCharacterIds.Contains(match.CharacterBId) &&
+                match.PlayedAt >= since)
+            .GroupBy(match => match.CharacterBId)
+            .Select(group => new
+            {
+                DefenderId = group.Key,
+                LastPlayedAt = group.Max(match => match.PlayedAt)
+            })
+            .ToDictionaryAsync(
+                match => match.DefenderId,
+                match => match.LastPlayedAt,
+                cancellationToken);
+    }
+
     public async Task<List<Character>> GetRankings(Guid characterId, CancellationToken cancellationToken)
     {
         var characters = await _context.Characters

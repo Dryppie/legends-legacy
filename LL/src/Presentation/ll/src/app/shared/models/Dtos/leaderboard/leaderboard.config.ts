@@ -10,8 +10,6 @@ export const COLUMNS_BY_TAB = {
   Wealth: WEALTH_COLUMNS,
   Mining: PROFESSION_COLUMNS,
   Woodcutting: PROFESSION_COLUMNS,
-  Armorforging: PROFESSION_COLUMNS,
-  Jewelrycrafting: PROFESSION_COLUMNS,
-  Weaponsmithing: PROFESSION_COLUMNS,
+  Crafting: PROFESSION_COLUMNS,
   arena: ARENA_COLUMNS,
 } as const;

@@ -3,23 +3,23 @@
   [class.ll-sidebar-nav-item-active]="isActive"
 >
   <app-notification-indicator
-    class="absolute right-3 top-2 z-20"
+    class="absolute right-2.5 top-2 z-20"
     [count]="notificationCount"
   ></app-notification-indicator>
 
-  <div class="relative z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full">
+  <div
+    class="ll-sidebar-nav-icon relative z-10 flex h-8 w-8 shrink-0 items-center justify-center rounded-full"
+  >
     <app-profession-icon
       class="scale-[0.68]"
       [image]="item.icon"
     ></app-profession-icon>
   </div>
-  <div class="relative z-10 ml-3 flex min-w-0 flex-col">
-    <h3
-      class="truncate text-start text-[15px] leading-5 text-primary sm:text-base"
-    >
+  <div class="relative z-10 ml-2 flex min-w-0 flex-col pr-5">
+    <h3 class="ll-sidebar-nav-title truncate text-start">
       {{ item.title }}
     </h3>
-    <small class="truncate text-[11px] leading-4 text-zinc-300">
+    <small class="ll-sidebar-nav-description truncate">
       {{ item.description }}
     </small>
     <!-- Placeholder for additional content injected by child components -->

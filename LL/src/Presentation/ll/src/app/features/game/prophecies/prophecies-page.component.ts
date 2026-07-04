@@ -548,7 +548,7 @@ export class PropheciesPageComponent implements OnInit, OnDestroy {
       case 'TemperItems':
       case 'SpendPotential':
         return {
-          route: ['/game/professions/crafting/weaponsmithing'],
+          route: ['/game/professions/crafting'],
           cta: 'Temper Gear',
           hint: 'Use crafting and tempering actions to spend potential.',
         };

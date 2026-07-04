@@ -16,11 +16,14 @@ import {
 import { Subscription } from 'rxjs';
 import { DatePipe, NgClass, NgFor, NgIf } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { RegularButtonComponent } from '../../../shared/components/custom-components/buttons/regular-button/regular-button.component';
 import { StickyScrollDirective } from '../../../shared/directives/sticky-scroll/sticky-scroll.directive';
 import { GuildStateService } from '../../../core/services/api/guild/guild-state.service';
 import { CharacterStateService } from '../../../core/services/api/character/character-state.service';
 import { CharacterTagComponent } from '../../../shared/components/character/character-tag/character-tag.component';
+import { AuthService } from '../../../core/services/api/auth/auth.service';
+import { UserInfoDto } from '../../../shared/models/Dtos/userInfoDto';
 
 interface ChatRoom {
   label: string;
@@ -41,6 +44,7 @@ interface ChatRoom {
     StickyScrollDirective,
     DatePipe,
     CharacterTagComponent,
+    RouterLink,
   ],
   templateUrl: './chat.component.html',
 })
@@ -96,7 +100,10 @@ export class ChatComponent implements OnInit, OnDestroy {
   messages: ChatMessageDto[] = [];
   draft = '';
   sendError = '';
-  private sub?: Subscription;
+  userInfo: UserInfoDto | null = null;
+  userInfoLoaded = false;
+  chatAccessFailed = false;
+  private sub = new Subscription();
 
   get activeRoomKey(): string {
     return this.activeChannel.contextKey;
@@ -106,10 +113,33 @@ export class ChatComponent implements OnInit, OnDestroy {
     return this.activeChannel.type;
   }
 
+  get isGuestAccount(): boolean {
+    return this.userInfoLoaded && this.userInfo?.isRegisteredUser === false;
+  }
+
+  get canWriteChat(): boolean {
+    return this.userInfoLoaded && this.userInfo?.isRegisteredUser === true;
+  }
+
+  get chatPlaceholder(): string {
+    if (!this.userInfoLoaded) {
+      return 'Checking chat access...';
+    }
+
+    if (this.chatAccessFailed) {
+      return 'Unable to verify chat access';
+    }
+
+    return this.canWriteChat
+      ? 'write here..'
+      : 'Register your account to write in chat';
+  }
+
   constructor(
     public chat: ChatService,
     private readonly guildState: GuildStateService,
     private readonly characterState: CharacterStateService,
+    private readonly authService: AuthService,
   ) {
     this.guild = this.guildState.guild;
     this.characterId = this.characterState.currentCharacterId;
@@ -122,9 +152,26 @@ export class ChatComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.sub = this.chat.messages$.subscribe((m) => {
-      this.messages = m;
-    });
+    this.sub.add(
+      this.chat.messages$.subscribe((m) => {
+        this.messages = m;
+      }),
+    );
+    this.sub.add(
+      this.authService.getUserInfo().subscribe({
+        next: (userInfo) => {
+          this.userInfo = userInfo;
+          this.userInfoLoaded = true;
+          this.chatAccessFailed = false;
+        },
+        error: (err) => {
+          this.userInfoLoaded = true;
+          this.chatAccessFailed = true;
+          this.sendError = 'Unable to verify chat access.';
+          console.warn('Unable to load user info for chat access.', err);
+        },
+      }),
+    );
     this.sub.add(
       this.chat.whisperDraftTarget$.subscribe((targetName) => {
         if (!targetName) return;
@@ -134,13 +181,15 @@ export class ChatComponent implements OnInit, OnDestroy {
           contextKey: 'whisper',
         };
         this.draft = `/w ${targetName} `;
-        this.focusChatInput();
+        if (this.canWriteChat) {
+          this.focusChatInput();
+        }
       }),
     );
   }
 
   ngOnDestroy(): void {
-    this.sub?.unsubscribe();
+    this.sub.unsubscribe();
   }
 
   setChannel(type: ChatChannelType, contextKey: string): void {
@@ -235,6 +284,11 @@ export class ChatComponent implements OnInit, OnDestroy {
 
   onDraftChange(): void {
     this.sendError = '';
+    if (!this.canWriteChat) {
+      this.draft = '';
+      return;
+    }
+
     if (this.draft.length > 200) {
       this.draft = this.draft.slice(0, 200);
     }
@@ -251,6 +305,15 @@ export class ChatComponent implements OnInit, OnDestroy {
   }
 
   async send(): Promise<void> {
+    if (!this.canWriteChat) {
+      this.sendError = this.isGuestAccount
+        ? 'Register your account before writing in chat.'
+        : this.chatAccessFailed
+          ? 'Unable to verify chat access.'
+        : 'Chat access is still loading.';
+      return;
+    }
+
     const body = this.draft.trim();
     if (!body || !isMessageAllowed(body)) return;
 

@@ -2,13 +2,11 @@ import { BattleType } from '../../../core/state/combat-state/combatState';
 import { GatheringType } from '../enums/gatheringType';
 import { Rarity } from '../enums/rarity';
 import { InventoryItem } from '../inventoryItem';
-import { CombatEvent } from './combatEventDto';
 
 export interface CombatResultDto {
   playerTeam: SimpleCombatEntityDto[];
   enemyTeam: SimpleCombatEntityDto[];
   duration: number;
-  eventLog: CombatEvent[];
   startedAt: Date;
   outcome: BattleOutcome;
   loot: InventoryItem[];

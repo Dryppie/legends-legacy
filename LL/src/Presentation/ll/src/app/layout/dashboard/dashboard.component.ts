@@ -11,8 +11,6 @@ import { LootTrackerComponent } from './loot-tracker/loot-tracker.component';
 import { CurrentActionComponent } from '../../shared/components/current-action/current-action.component';
 import { CharacterActionsStateService } from '../../core/services/api/character-actions/character-actions.state.service';
 import { CharacterActionType } from '../../shared/models/enums/characterActionType';
-import { Equipment } from '../../shared/models/item';
-import { EquipmentType } from '../../shared/models/enums/equipmentType';
 
 @Component({
   selector: 'app-dashboard',
@@ -124,40 +122,10 @@ export class DashboardComponent implements OnInit {
       return;
     }
 
-    let route: string[] = [];
-
     if (actionType === CharacterActionType.Crafting) {
-      const equipmentType = (
-        action.craftingActionDetails?.craftingQueueItems[0].equipmentInstance
-          .itemBase as Equipment
-      ).equipmentType;
-
-      switch (equipmentType) {
-        case EquipmentType.Head:
-        case EquipmentType.Chest:
-        case EquipmentType.Legs:
-          route = ['game', 'professions', 'crafting', 'armorforging'];
-          break;
-
-        case EquipmentType.TwoHanded:
-        case EquipmentType.OneHanded:
-        case EquipmentType.OffHand:
-          route = ['game', 'professions', 'crafting', 'weaponsmithing'];
-          break;
-
-        case EquipmentType.Relic:
-        case EquipmentType.Necklace:
-        case EquipmentType.Ring:
-          route = ['game', 'professions', 'crafting', 'jewelrycrafting'];
-          break;
-
-        default:
-          return;
-      }
+      this.router.navigate(['game', 'professions', 'crafting']);
     } else {
       return;
     }
-
-    this.router.navigate(route);
   }
 }

@@ -8,10 +8,7 @@ import {
 } from '@angular/core';
 import { ProfessionHeaderComponent } from '../../../../shared/components/professions/profession-header/profession-header.component';
 import { NgIf } from '@angular/common';
-import {
-  CraftingProfession,
-  CraftType,
-} from '../../../../shared/models/profession';
+import { CraftingProfession } from '../../../../shared/models/profession';
 import { map } from 'rxjs';
 import { ActivatedRoute } from '@angular/router';
 import { ProfessionsService } from '../../../../core/services/api/professions/professions.service';
@@ -24,6 +21,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { InventoryStateService } from '../../../../core/services/api/inventory/inventory-state.service';
 import { EquipmentType } from '../../../../shared/models/enums/equipmentType';
 import { TabsComponent } from '../../../../shared/components/custom-components/tabs/tabs.component';
+import { ProfessionType } from '../../../../shared/models/Dtos/characterProfession';
 
 @Component({
   selector: 'app-crafting',
@@ -50,24 +48,17 @@ export class CraftingComponent implements OnInit {
 
   readonly profession = signal<CraftingProfession | null>(null);
 
-  // Stub until you wire real actions/queue in the service
-  allowedTypesByCraft: Record<CraftType, EquipmentType[]> = {
-    [CraftType.JewelryCrafting]: [
-      EquipmentType.Ring,
-      EquipmentType.Necklace,
-      EquipmentType.Relic,
-    ],
-    [CraftType.ArmorForging]: [
-      EquipmentType.Head,
-      EquipmentType.Chest,
-      EquipmentType.Legs,
-    ],
-    [CraftType.WeaponSmithing]: [
-      EquipmentType.TwoHanded,
-      EquipmentType.OneHanded,
-      EquipmentType.OffHand,
-    ],
-  };
+  private readonly craftableEquipmentTypes = [
+    EquipmentType.Head,
+    EquipmentType.Chest,
+    EquipmentType.Legs,
+    EquipmentType.Ring,
+    EquipmentType.Necklace,
+    EquipmentType.Relic,
+    EquipmentType.TwoHanded,
+    EquipmentType.OneHanded,
+    EquipmentType.OffHand,
+  ];
   // ────────────────────────────────────── ctor/di ─────────────────────────────
   constructor() {
     effect(
@@ -81,17 +72,10 @@ export class CraftingComponent implements OnInit {
     );
   }
 
-  readonly craftType = computed<CraftType>(() => {
-    return (
-      (this.profession()?.professionType as unknown as CraftType) ??
-      CraftType.ArmorForging
-    );
-  });
-
   readonly recipes = computed(() => {
     const prof = this.profession() as CraftingProfession | null;
     if (!prof) return [];
-    return prof.recipes.filter((r) => r.craftType === this.craftType());
+    return prof.recipes;
   });
 
   readonly inventory = computed(() => this.inventoryState.items());
@@ -99,7 +83,7 @@ export class CraftingComponent implements OnInit {
   readonly characterProfessions = this.professionService.characterProfessions;
   readonly characterProfession = computed(() =>
     this.characterProfessions().find(
-      (p) => p.professionType.toLocaleLowerCase() === this.professionId(),
+      (p) => p.professionType === ProfessionType.Crafting,
     ),
   );
 
@@ -108,12 +92,10 @@ export class CraftingComponent implements OnInit {
     const prof = this.profession();
     if (!inventory || !prof) return [];
 
-    const allowed = this.allowedTypesByCraft[this.craftType()];
-
     return this.inventoryState.items().filter((i) => {
       return (
         i.itemInstance.itemBase.itemType === ItemType.Equipment &&
-        allowed.includes(
+        this.craftableEquipmentTypes.includes(
           (i.itemInstance.itemBase as Equipment).equipmentType as EquipmentType,
         )
       );

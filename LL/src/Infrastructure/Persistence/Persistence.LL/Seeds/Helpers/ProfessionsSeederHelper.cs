@@ -7,25 +7,11 @@ public static class ProfessionsSeederHelper
     {
         return new List<Profession>()
         {
-            // Crafting professions
+            // Crafting profession
             new Profession()
             {
                 CharacterId = characterId,
-                ProfessionType = ProfessionType.ArmorForging,
-                Level = 1,
-                Experience = 0
-            },
-            new Profession()
-            {
-                CharacterId = characterId,
-                ProfessionType = ProfessionType.JewelryCrafting,
-                Level = 1,
-                Experience = 0
-            },
-            new Profession()
-            {
-                CharacterId = characterId,
-                ProfessionType = ProfessionType.WeaponSmithing,
+                ProfessionType = ProfessionType.Crafting,
                 Level = 1,
                 Experience = 0
             },

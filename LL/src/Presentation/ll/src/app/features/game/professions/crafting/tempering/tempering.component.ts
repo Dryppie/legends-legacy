@@ -1,7 +1,7 @@
 import { NgClass, NgFor, NgIf } from '@angular/common';
 import { Component, computed, effect, Input, signal, Signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { CraftingQueueItem, CraftType } from '../../../../../shared/models/profession';
+import { CraftingQueueItem } from '../../../../../shared/models/profession';
 import { EquipmentInstance, ItemInstance } from '../../../../../shared/models/item';
 import { CraftingService } from '../../../../../core/services/api/crafting/crafting.service';
 import { InventoryStateService } from '../../../../../core/services/api/inventory/inventory-state.service';
@@ -21,7 +21,6 @@ import { CharacterActionType } from '../../../../../shared/models/enums/characte
 })
 export class TemperingComponent {
   @Input({ required: true }) inventory!: Signal<InventoryItem[]>;
-  @Input({ required: true }) craftType!: CraftType;
 
   private readonly itemXpPerRarity = 10;
   private readonly temperingActionDurationSeconds = 10;

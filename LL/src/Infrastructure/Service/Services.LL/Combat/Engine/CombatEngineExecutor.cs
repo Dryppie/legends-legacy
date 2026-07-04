@@ -49,7 +49,8 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
         var engine = new FastCombatEngine(
             compiledStatuses,
             compiledSummons,
-            compiledAbilities);
+            compiledAbilities,
+            new FastCombatEngineOptions(StartActiveAbilitiesOnCooldown: true));
         var result = engine.Run(friendly, hostile);
         SyncCombatEntityState(runtime.FriendlyParticipants, friendly);
         SyncCombatEntityState(runtime.HostileParticipants, hostile);

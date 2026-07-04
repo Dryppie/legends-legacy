@@ -12,8 +12,6 @@ export interface TemperingSummary {
   qualityIncreases: number;
   totalActions: number;
   totalSoulstones: number;
-  armorForgingExperience: number;
-  jewelryCraftingExperience: number;
-  weaponSmithingExperience: number;
+  craftingExperience: number;
   totalExperience: number;
 }

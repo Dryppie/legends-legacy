@@ -18,6 +18,7 @@ type AchievementTab = AchievementCategory | 'All';
 type AchievementStateFilter = 'All' | 'Unlocked' | 'Locked';
 type AchievementSortMode = 'Progress' | 'Points' | 'Name' | 'Recent';
 type TitleStateFilter = 'All' | 'Unlocked' | 'Locked';
+type CollectionView = 'Achievements' | 'Titles';
 
 @Component({
   selector: 'app-achievements',
@@ -33,6 +34,7 @@ type TitleStateFilter = 'All' | 'Unlocked' | 'Locked';
   templateUrl: './achievements.component.html',
 })
 export class AchievementsComponent implements OnInit {
+  readonly collectionViews: CollectionView[] = ['Achievements', 'Titles'];
   readonly categories: AchievementTab[] = [
     'All',
     'General',
@@ -52,6 +54,7 @@ export class AchievementsComponent implements OnInit {
   readonly loading = signal(false);
   readonly error = signal('');
   readonly search = signal('');
+  readonly activeView = signal<CollectionView>('Achievements');
   readonly achievementState = signal<AchievementStateFilter>('All');
   readonly sortMode = signal<AchievementSortMode>('Progress');
   readonly titleSearch = signal('');

@@ -32,8 +32,6 @@ export class ColosseumStateService {
   private readonly _championMarket = signal<ChampionMarket | null>(null);
   private readonly _rankings = signal<LeaderboardEntry[]>([]);
   private readonly _previousMatches = signal<ColosseumMatchResult[]>([]);
-  private readonly _latestBattleResult =
-    signal<StartArenaBattleResponse | null>(null);
   private readonly _loading = signal(false);
   private readonly _error = signal<string | null>(null);
   private hasLoaded = false;
@@ -46,7 +44,6 @@ export class ColosseumStateService {
   readonly championMarket = computed(() => this._championMarket());
   readonly rankings = computed(() => this._rankings());
   readonly previousMatches = computed(() => this._previousMatches());
-  readonly latestBattleResult = computed(() => this._latestBattleResult());
   readonly loading = computed(() => this._loading());
   readonly error = computed(() => this._error());
   readonly notificationCount = computed(() =>
@@ -126,7 +123,7 @@ export class ColosseumStateService {
       .subscribe({
         next: (status) => {
           this._status.set(status);
-          this.initializeNotificationCount(this.countStatusActions(status));
+          this.syncNotificationCount(status);
         },
         error: (err) =>
           this._error.set(
@@ -137,7 +134,10 @@ export class ColosseumStateService {
 
   loadStatus(): void {
     this.colosseumService.getStatus().subscribe({
-      next: (status) => this._status.set(status),
+      next: (status) => {
+        this._status.set(status);
+        this.syncNotificationCount(status);
+      },
       error: (err) =>
         this._error.set(err.message ?? 'Failed to load colosseum status'),
     });
@@ -263,16 +263,12 @@ export class ColosseumStateService {
     this.colosseumService.skipColosseumMatch();
   }
 
-  clearLatestBattleResult(): void {
-    this._latestBattleResult.set(null);
-  }
-
   private applyStartBattleResponse(response: StartArenaBattleResponse): void {
     this.applyTicketStatus(response.arenaTicketStatus);
-    this._latestBattleResult.set(response);
     this.applyCurrentCharacterArenaRating(response.attackerRating.ratingAfter);
     this.applyArenaBattleStatus(response);
     this.loadStatus();
+    this.loadArenaOpponents();
     this.loadColosseumRankings();
     this.loadColosseumMatchResults();
     this.combatService.startColosseumMatchSimulation(response.battle);
@@ -290,13 +286,6 @@ export class ColosseumStateService {
 
   private applyTicketStatus(status: ArenaTicketStatus): void {
     this._arenaTicketStatus.set(status);
-  }
-
-  markNotificationsSeen(): void {
-    this.notificationService.markSeen(
-      NOTIFICATION_SURFACE.Sidebar,
-      SIDEBAR_NOTIFICATION.Colosseum,
-    );
   }
 
   private isParticipant(
@@ -329,24 +318,27 @@ export class ColosseumStateService {
     );
   }
 
-  private initializeNotificationCount(count: number): void {
-    this.notificationService.initializeCount(
+  private syncNotificationCount(status: ColosseumStatus | null): void {
+    this.notificationService.setCount(
       NOTIFICATION_SURFACE.Sidebar,
       SIDEBAR_NOTIFICATION.Colosseum,
-      count,
+      this.countStatusActions(status),
     );
   }
 
   private countStatusActions(status: ColosseumStatus | null): number {
     if (!status) return 0;
 
-    const hasTickets = status.tickets > 0;
+    const hasCappedTickets =
+      status.maxTickets > 0 && status.tickets >= status.maxTickets;
+    if (!hasCappedTickets) return 0;
+
     const defenseNeedsUpdate =
       !status.defenseStatus?.isValid || status.defenseStatus.isOutdated;
 
     return [
-      hasTickets,
-      hasTickets && status.dailyFirstWinAvailable,
+      hasCappedTickets,
+      status.dailyFirstWinAvailable,
       defenseNeedsUpdate,
     ].filter(Boolean).length;
   }
@@ -434,6 +426,7 @@ export class ColosseumStateService {
           : status.dailyFirstWinAvailable,
       attackRecord: this.applyAttackRecord(status.attackRecord, response),
     });
+    this.syncNotificationCount(this._status());
   }
 
   private applyAttackRecord(

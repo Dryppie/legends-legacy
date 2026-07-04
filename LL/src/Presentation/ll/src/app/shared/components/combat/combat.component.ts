@@ -123,27 +123,6 @@ export class CombatComponent implements OnInit, OnDestroy {
       const stats = this.combatStateService.getEntityStats(type)();
       if (stats) this.entityStats = stats;
     });
-
-    /** Handle combat event stream */
-    effect(() => {
-      const type = this.battleTypeSignal();
-      const allEvents = this.combatStateService.getCombatEvents(type)();
-      const lastHandledEvent = this.lastHandledCombatEvent.get(type);
-      const lastHandledIndex = lastHandledEvent
-        ? allEvents.indexOf(lastHandledEvent)
-        : -1;
-      const newEvents =
-        lastHandledEvent && lastHandledIndex >= 0
-          ? allEvents.slice(lastHandledIndex + 1)
-          : allEvents;
-      const newestEvent = allEvents[allEvents.length - 1];
-
-      if (newestEvent) this.lastHandledCombatEvent.set(type, newestEvent);
-      else this.lastHandledCombatEvent.delete(type);
-
-      newEvents.forEach((event) => this.handleCombatEvent(event));
-    });
-
     /** Handle next combat tick */
     effect(() => {
       const type = this.battleTypeSignal();
@@ -250,7 +229,20 @@ export class CombatComponent implements OnInit, OnDestroy {
       return this.isStoppingCombat ? 'Quitting...' : 'Quit';
     }
 
-    return 'Skip Battle';
+    return 'Close Summary';
+  }
+
+  outcomeBadgeClass(): string {
+    switch (this.outcome) {
+      case BattleOutcome.Victory:
+        return 'll-badge-success';
+      case BattleOutcome.Defeat:
+        return 'll-badge-danger';
+      case BattleOutcome.Draw:
+        return 'll-badge-warning';
+      default:
+        return 'll-badge-muted';
+    }
   }
 
   skipCombat() {
@@ -276,149 +268,6 @@ export class CombatComponent implements OnInit, OnDestroy {
     this.resetTeamSelections();
   }
 
-  private handleCombatEvent(event: CombatEvent | null): void {
-    if (!event) return;
-    switch (event.eventType) {
-      case EventType.AbilityUse:
-        this.handleAbilityUseEvent(event);
-        break;
-      case EventType.Damage:
-        this.handleDamageEvent(event);
-        break;
-      case EventType.DamageOverTime:
-        this.handleDamageEvent(event);
-        break;
-      case EventType.DamageCrit:
-        this.handleDamageEvent(event);
-        break;
-      case EventType.Miss:
-        this.handleMissEvent(event);
-        break;
-      case EventType.Parry:
-        this.handleBlockEvent(event);
-        break;
-      case EventType.Block:
-        this.handleBlockEvent(event);
-        break;
-      case EventType.Heal:
-        this.handleHealEvent(event);
-        break;
-      case EventType.HealOverTime:
-        this.handleHealEvent(event);
-        break;
-      case EventType.HealCrit:
-        this.handleHealEvent(event);
-        break;
-      case EventType.RestoreBarrier:
-        this.handleRestoreBarrierEvent(event);
-        break;
-      case EventType.Lifesteal:
-        this.handleHealEvent(event);
-        break;
-      case EventType.Summon:
-        this.handleSummonEvent(event);
-        break;
-      case EventType.SummonExpired:
-        this.handleSummonExpiredEvent(event);
-        break;
-      case EventType.Buff:
-        this.handleBuffEvent(event);
-        break;
-      case EventType.BuffExpired:
-        const buffExpired = true;
-        this.handleBuffEvent(event, buffExpired);
-        break;
-      case EventType.Debuff:
-        this.handleDebuffEvent(event);
-        break;
-      case EventType.DebuffExpired:
-        const debuffExpired = true;
-        this.handleDebuffEvent(event, debuffExpired);
-        break;
-      case EventType.StatusEffect:
-        this.handleStatusEffectEvent(event);
-        break;
-      case EventType.StatusEffectExpired:
-        const statusEffectExpired = true;
-        this.handleStatusEffectEvent(event, statusEffectExpired);
-        break;
-      case EventType.HealthRegeneration:
-        this.handleRegeneration(event);
-        break;
-      case EventType.Death:
-        break;
-      // Add other event types as needed
-      default:
-        console.warn(`Unhandled event type: ${event.eventType}`);
-    }
-  }
-
-  private handleAbilityUseEvent(event: CombatEvent) {
-    this.updateCharacter(event.combatEntity);
-  }
-
-  private handleDamageEvent(event: CombatEvent): void {
-    this.updateCharacter(event.combatEntity);
-  }
-
-  private handleHealEvent(event: CombatEvent): void {
-    this.updateCharacter(event.combatEntity);
-  }
-
-  private handleRestoreBarrierEvent(event: CombatEvent): void {
-    this.updateCharacter(event.combatEntity);
-  }
-
-  private handleMissEvent(event: CombatEvent): void {
-    // Implement specific logic for handling block events
-  }
-
-  private handleBlockEvent(event: CombatEvent): void {
-    // Implement specific logic for handling block events
-  }
-
-  private handleSummonEvent(event: CombatEvent): void {
-    const summonedCharacter = event.combatEntity;
-    if (!summonedCharacter) return;
-
-    if (this.isEntityInPlayerTeam(event.actorId)) {
-      this.playerCharacters.push(summonedCharacter);
-    } else {
-      this.enemyCharacters.push(summonedCharacter);
-    }
-  }
-
-  private handleSummonExpiredEvent(event: CombatEvent): void {
-    if (this.isEntityInPlayerTeam(event.actorId)) {
-      this.playerCharacters = this.playerCharacters.filter(
-        (c) => c.id !== event.targetId,
-      );
-      this.focusCharacter('player', 0);
-    } else {
-      this.enemyCharacters = this.enemyCharacters.filter(
-        (c) => c.id !== event.targetId,
-      );
-      this.focusCharacter('enemy', 0);
-    }
-  }
-
-  private handleBuffEvent(event: CombatEvent, buffExpired: boolean = false) {
-    this.updateCharacter(event.combatEntity);
-  }
-
-  private handleDebuffEvent(event: CombatEvent, buffExpired: boolean = false) {
-    this.updateCharacter(event.combatEntity);
-  }
-
-  handleStatusEffectEvent(
-    event: CombatEvent,
-    statusEffectExpired: boolean = false,
-  ) {}
-
-  handleRegeneration(event: CombatEvent) {
-    this.updateCharacter(event.combatEntity);
-  }
-
   private updateCharacter(
     combatEntity: SimpleCombatEntityDto | null | undefined,
   ) {
@@ -436,10 +285,6 @@ export class CombatComponent implements OnInit, OnDestroy {
       this.playerCharacters.find((c) => c.id === id) ||
       this.enemyCharacters.find((c) => c.id === id)
     );
-  }
-
-  private isEntityInPlayerTeam(actorId: string): boolean {
-    return this.playerCharacters.some((c) => c.id === actorId);
   }
 
   private resetTeamSelections(): void {

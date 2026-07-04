@@ -92,7 +92,7 @@ export class MarketPlaceFilterComponent {
   ];
 
   readonly selectedTabId = signal<string>('resources');
-  readonly selectedSubCategory = signal<string | null>(null);
+  readonly selectedSubCategory = signal<string | null>('Metal');
 
   @Output() readonly itemTypeChanged = new EventEmitter<
     DropdownSelection<ItemType>

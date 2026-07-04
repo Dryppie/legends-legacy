@@ -42,6 +42,11 @@ public sealed class ChatHub : Hub<IChatClient>
             throw new HubException("Chat connection is not authenticated.");
         }
 
+        if (!CanWriteChat())
+        {
+            throw new HubException("Register your account before writing in chat.");
+        }
+
         if (!await RateLimiter.EnsureAllowedAsync(_cache, senderId))
             return;
 
@@ -139,5 +144,11 @@ public sealed class ChatHub : Hub<IChatClient>
 
         var currentGuildId = Context.User?.FindFirstValue("GuildId");
         return string.Equals(currentGuildId, guildId, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private bool CanWriteChat()
+    {
+        var guestClaim = Context.User?.FindFirstValue("guest");
+        return bool.TryParse(guestClaim, out var isGuest) && !isGuest;
     }
 }

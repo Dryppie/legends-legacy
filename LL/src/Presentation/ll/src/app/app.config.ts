@@ -15,16 +15,9 @@ import {
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { AuthService } from './core/services/api/auth/auth.service';
 import { firstValueFrom } from 'rxjs';
-import { IdlePlaybackStrategy } from './core/services/client-side/combat/combat-playback/idle-playback-strategy';
-import { PLAYBACK_STRATEGIES } from './core/services/client-side/combat/combat-playback/combat-playback-strategy';
-import { BattleType } from './core/state/combat-state/combatState';
-import { CombatLogService } from './core/services/client-side/combat/combat-log/combat-log.service';
-import { LevelingService } from './core/services/client-side/leveling/leveling.service';
-import { ColosseumPlaybackStrategy } from './core/services/client-side/combat/combat-playback/colosseum-playback-strategy';
 import { AuthInterceptor } from './core/interceptors/auth-interceptor';
 import { RealTimeFacade } from './core/services/real-time/real-time-facade';
 import { TimeSyncService } from './core/services/api/time-sync/time-sync.service';
-import { DungeonPlaybackStrategy } from './core/services/client-side/combat/combat-playback/dungeon-playback-strategy';
 
 export function initializeApp(authService: AuthService) {
   return () =>
@@ -39,21 +32,6 @@ export function initializeTimeSync(timeSyncService: TimeSyncService) {
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    {
-      provide: PLAYBACK_STRATEGIES,
-      useFactory: (
-        combatLogService: CombatLogService,
-        levelingService: LevelingService,
-      ) => ({
-        [BattleType.IdleCombat]: new IdlePlaybackStrategy(
-          combatLogService,
-          levelingService,
-        ),
-        [BattleType.Colosseum]: new ColosseumPlaybackStrategy(),
-        [BattleType.Dungeon]: new DungeonPlaybackStrategy(),
-      }),
-      deps: [CombatLogService, LevelingService],
-    },
     { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideAnimations(),

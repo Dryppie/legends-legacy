@@ -4,11 +4,11 @@ namespace Domain.Models.Entities.Creatures;
 
 public static class MonsterBaseStats
 {
-    // Tier-1-ish baseline. Adjust until combat "feels" right.
-    public const float BaseMaxHealth = 100f;
+    // Tier 1 baseline. Difficulty scaling starts after the first area.
+    public const float BaseMaxHealth = 60f;
     public const float BaseHealthRegeneration = 0f;
 
-    public const float BasePower = 10f;
+    public const float BasePower = 7f;
     public const float BaseFortitude = 10f;
     public const float BasePrecision = 10f;
     public const float BaseSpirit = 10f;

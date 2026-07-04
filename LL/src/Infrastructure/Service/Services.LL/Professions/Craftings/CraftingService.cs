@@ -479,32 +479,11 @@ public class CraftingService : ICraftingService
     private async Task UpdateCharacterProfessionsAsync(Guid characterId, TemperingSummary temperingSummary, CancellationToken cancellationToken)
     {
         if (temperingSummary.TotalExperience == 0) return;
-        var professions = await _professionService.GetProfessionsAsync(characterId, cancellationToken);
-        var professionsToUpdate = new List<Profession>();
-        foreach (var profession in professions)
-        {
-            switch (profession.ProfessionType)
-            {
-                case ProfessionType.ArmorForging:
-                    profession.Experience += temperingSummary.ArmorForgingExperience;
-                    professionsToUpdate.Add(profession);
-                    break;
-                case ProfessionType.JewelryCrafting:
-                    profession.Experience += temperingSummary.JewelryCraftingExperience;
-                    professionsToUpdate.Add(profession);
-                    break;
-                case ProfessionType.WeaponSmithing:
-                    profession.Experience += temperingSummary.WeaponSmithingExperience;
-                    professionsToUpdate.Add(profession);
-                    break;
-                default:
-                    continue;
-            }
+        var profession = await _professionService.GetOrCreateProfessionAsync(characterId, ProfessionType.Crafting, cancellationToken);
+        profession.Experience += temperingSummary.TotalExperience;
 
-            await _levelingService.UpdateProfessionLevel(profession, cancellationToken);
-        }
-
-        _professionService.UpdateProfessionLevel(professionsToUpdate);
+        await _levelingService.UpdateProfessionLevel(profession, cancellationToken);
+        _professionService.UpdateProfessionLevel([profession]);
     }
 
     private async Task<IReadOnlyDictionary<string, int>> GetOwnedItemQuantitiesAsync(Guid characterId, CancellationToken cancellationToken)
@@ -646,9 +625,9 @@ public class CraftingService : ICraftingService
     {
         return equipmentType switch
         {
-            EquipmentType.Head or EquipmentType.Chest or EquipmentType.Legs => ProfessionType.ArmorForging,
-            EquipmentType.Ring or EquipmentType.Necklace or EquipmentType.Relic => ProfessionType.JewelryCrafting,
-            EquipmentType.OneHanded or EquipmentType.TwoHanded or EquipmentType.OffHand => ProfessionType.WeaponSmithing,
+            EquipmentType.Head or EquipmentType.Chest or EquipmentType.Legs => ProfessionType.Crafting,
+            EquipmentType.Ring or EquipmentType.Necklace or EquipmentType.Relic => ProfessionType.Crafting,
+            EquipmentType.OneHanded or EquipmentType.TwoHanded or EquipmentType.OffHand => ProfessionType.Crafting,
             _ => ProfessionType.None
         };
     }

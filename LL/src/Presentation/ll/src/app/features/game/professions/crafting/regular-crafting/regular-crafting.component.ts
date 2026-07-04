@@ -6,13 +6,12 @@ import {
   effect,
   inject,
   Input,
-  input,
   signal,
   Signal,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { InventoryItem } from '../../../../../shared/models/inventoryItem';
-import { CraftType, Recipe } from '../../../../../shared/models/profession';
+import { Recipe } from '../../../../../shared/models/profession';
 import { CraftingService } from '../../../../../core/services/api/crafting/crafting.service';
 import { InventoryStateService } from '../../../../../core/services/api/inventory/inventory-state.service';
 import { CharacterProfession } from '../../../../../shared/models/Dtos/characterProfession';
@@ -25,7 +24,6 @@ import {
 import { NumberFormatPipe } from '../../../../../shared/pipes/number-format/number-format.pipe';
 import { TourService } from '../../../../../core/services/client-side/tutorial-tour/tour.service';
 import { CraftingRecipe } from '../../../../../shared/models/crafting-v2';
-import { EquipmentType } from '../../../../../shared/models/enums/equipmentType';
 
 @Component({
   selector: 'app-regular-crafting',
@@ -37,7 +35,6 @@ export class RegularCraftingComponent {
   @Input({ required: true }) recipes!: Signal<Recipe[]>;
   @Input({ required: true }) inventory!: Signal<InventoryItem[]>;
   @Input({ required: true }) characterProfession!: CharacterProfession;
-  readonly craftType = input.required<CraftType>();
 
   readonly recipesV2 = signal<CraftingRecipe[]>([]);
   readonly isLoading = signal(false);
@@ -50,29 +47,9 @@ export class RegularCraftingComponent {
   private readonly selectedRecipeId = signal<string | null>(null);
   readonly selectedFormId = signal<string | null>(null);
   readonly selectedBlueprintId = signal<string | null>(null);
-  private readonly outputTypesByCraft: Record<CraftType, EquipmentType[]> = {
-    [CraftType.ArmorForging]: [
-      EquipmentType.Head,
-      EquipmentType.Chest,
-      EquipmentType.Legs,
-    ],
-    [CraftType.JewelryCrafting]: [
-      EquipmentType.Ring,
-      EquipmentType.Necklace,
-      EquipmentType.Relic,
-    ],
-    [CraftType.WeaponSmithing]: [
-      EquipmentType.TwoHanded,
-      EquipmentType.OneHanded,
-      EquipmentType.OffHand,
-    ],
-  };
 
   readonly familyRecipes = computed<CraftingRecipe[]>(() => {
-    const allowedTypes = this.outputTypesByCraft[this.craftType()] ?? [];
-    return this.recipesV2().filter((recipe) =>
-      allowedTypes.includes(recipe.outputItemType),
-    );
+    return this.recipesV2();
   });
 
   readonly selectedRecipe = computed<CraftingRecipe | null>(() => {

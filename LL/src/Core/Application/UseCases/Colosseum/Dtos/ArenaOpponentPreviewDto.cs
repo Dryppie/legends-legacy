@@ -13,6 +13,7 @@ public class ArenaOpponentPreviewDto : IMapFrom<ArenaOpponentPreview>
     public int OpponentRating { get; set; }
     public string RankTier { get; set; } = string.Empty;
     public string RankTierId { get; set; } = string.Empty;
+    public DateTimeOffset? ChallengeAvailableAt { get; set; }
 
     // ----------------- caller’s potential outcome -----------------
     public int DeltaIfVictory { get; set; }
@@ -36,6 +37,7 @@ public class ArenaOpponentPreviewDto : IMapFrom<ArenaOpponentPreview>
             .ForMember(dto => dto.OpponentRating, opt => opt.MapFrom(src => src.Opponent.ArenaProfile.Rating))
             .ForMember(dto => dto.RankTier, opt => opt.MapFrom(src => ArenaRank.GetTier(src.Opponent.ArenaProfile.Rating).Name))
             .ForMember(dto => dto.RankTierId, opt => opt.MapFrom(src => ArenaRank.GetTier(src.Opponent.ArenaProfile.Rating).Id))
+            .ForMember(dto => dto.ChallengeAvailableAt, opt => opt.MapFrom(src => src.ChallengeAvailableAt))
             // source = ArenaOpponentPreview.RatingDelta  ─────────────────────────────
             .ForMember(dto => dto.DeltaIfVictory, opt => opt.MapFrom(src => src.RatingDelta.DeltaIfVictory))
             .ForMember(dto => dto.DeltaIfDefeat, opt => opt.MapFrom(src => src.RatingDelta.DeltaIfDefeat))

@@ -9,8 +9,12 @@ export const PROFESSIONS_ROUTES: Routes = [
     children: [
       {
         path: '',
-        redirectTo: 'crafting/armorforging',
+        redirectTo: 'crafting',
         pathMatch: 'full',
+      },
+      {
+        path: 'crafting',
+        component: CraftingComponent,
       },
       {
         path: 'crafting/:id',

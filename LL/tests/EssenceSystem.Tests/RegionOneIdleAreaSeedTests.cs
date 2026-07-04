@@ -43,6 +43,24 @@ public sealed class RegionOneIdleAreaSeedTests
     }
 
     [Fact]
+    public async Task SeedCreaturesData_keeps_region_one_idle_areas_level_gated()
+    {
+        await using var db = CreateDb();
+
+        await SeedCreatures.SeedCreaturesData(db);
+        await db.SaveChangesAsync();
+
+        var progression = await db.Areas
+            .Where(area => area.Id.StartsWith("region_01_area_"))
+            .OrderBy(area => area.DifficultyTier)
+            .Select(area => new { area.Name, area.LevelRequirement, area.DifficultyTier })
+            .ToListAsync();
+
+        Assert.Equal([1, 5, 10, 15, 20, 25, 30, 35, 40, 45], progression.Select(area => area.LevelRequirement).ToArray());
+        Assert.Equal(Enumerable.Range(1, 10), progression.Select(area => area.DifficultyTier));
+    }
+
+    [Fact]
     public async Task EnsureRemainingRegionOneIdleAreas_repairs_existing_local_region()
     {
         await using var db = CreateDb();

@@ -7,12 +7,11 @@ export interface CharacterProfession {
 
 export enum ProfessionType {
   // Crafting
-  ArmorForging = 'ArmorForging',
-  JewelryCrafting = 'JewelryCrafting',
-  WeaponSmithing = 'WeaponSmithing',
+  Crafting = 'Crafting',
 
   // Gathering
   Fishing = 'Fishing',
   Mining = 'Mining',
   Woodcutting = 'Woodcutting',
+  Skinning = 'Skinning',
 }
