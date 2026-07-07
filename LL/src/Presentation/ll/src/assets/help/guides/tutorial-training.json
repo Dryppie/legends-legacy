@@ -1,0 +1,17 @@
+{
+  "title": "First Steps - Training Area",
+  "sections": [
+    {
+      "heading": "Your first objective",
+      "body": "The tutorial starts in the Training Area. This area is only available during the first step, and it contains a very weak creature made for a blank character."
+    },
+    {
+      "heading": "What to do",
+      "body": "Use the quest action to open the World Map, then start the fight from the Training Area card. Normal areas stay locked until the tutorial is complete."
+    },
+    {
+      "heading": "Why it matters",
+      "body": "Winning this fight gives you your first unbound Essence. The combat summary shows what happened in the fight, and the Essence becomes the first real upgrade path the tutorial wants you to learn."
+    }
+  ]
+}

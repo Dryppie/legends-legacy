@@ -1,0 +1,12 @@
+[
+  {
+    "id": "go-to-training-area",
+    "kind": "click",
+    "element": "[data-tour=tutorial-quest-action]",
+    "actionSelector": "[data-tour=tutorial-quest-action]",
+    "title": "Go to the Training Area",
+    "description": "Click this button to continue to your next First Steps objective.",
+    "position": "left",
+    "alignment": "center"
+  }
+]

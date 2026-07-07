@@ -1,0 +1,11 @@
+[
+  {
+    "id": "start-training-battle",
+    "kind": "click",
+    "element": "[data-tour=training-area-battle]",
+    "actionSelector": "[data-tour=training-area-battle]",
+    "title": "Training Area",
+    "description": "Click Battle in the Training Area to earn your first Essence.",
+    "position": "left"
+  }
+]

@@ -1,0 +1,17 @@
+{
+  "title": "First Steps - Absorb Essence",
+  "sections": [
+    {
+      "heading": "Your first Essence",
+      "body": "The Training Area reward is an unbound Essence item. Unbound Essences live in your inventory until you absorb them into the Soul Archive."
+    },
+    {
+      "heading": "What to do",
+      "body": "Open the Absorb tab, select the unbound Essence, and press Absorb. Once absorbed, it becomes part of your character instead of a loose inventory item."
+    },
+    {
+      "heading": "Why it matters",
+      "body": "Absorbed Essences can be attuned in a loadout. Attuned Essences provide combat abilities and bonuses, so this is one of your main power systems."
+    }
+  ]
+}

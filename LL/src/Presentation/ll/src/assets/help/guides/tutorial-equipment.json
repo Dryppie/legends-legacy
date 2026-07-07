@@ -1,0 +1,17 @@
+{
+  "title": "First Steps - Equip Gear",
+  "sections": [
+    {
+      "heading": "Your tutorial gear",
+      "body": "Crafting granted three equipment pieces: Tutorial Sword, Tutorial Chest, and Tutorial Ring. These are intentionally weaker than normal crafted gear, but strong enough to begin Lumo Ruins."
+    },
+    {
+      "heading": "What to do",
+      "body": "Open the Equipment tab in Inventory and equip one tutorial gear piece to complete First Steps."
+    },
+    {
+      "heading": "Finishing",
+      "body": "Once one tutorial gear piece is equipped, First Steps completes and normal Shenic combat areas become available."
+    }
+  ]
+}
