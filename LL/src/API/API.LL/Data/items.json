@@ -1396,6 +1396,86 @@
     "scalingAmount": 0
   },
   {
+    "id": "tutorial_sword",
+    "name": "Tutorial Sword",
+    "description": "A simple practice blade. Weaker than a properly crafted sword, but enough to begin.",
+    "itemType": "Equipment",
+    "rarity": "Common",
+    "equipmentType": "OneHanded",
+    "attributeModifiers": [],
+    "toolBonuses": [],
+    "attackSpeed": 20,
+    "magnitude": 5,
+    "magnitudeRange": 10,
+    "gatheringType": null,
+    "scalingAttribute": "Power",
+    "scalingAmount": 0.5
+  },
+  {
+    "id": "tutorial_chest",
+    "name": "Tutorial Chest",
+    "description": "Basic protective gear for first steps beyond the training yard.",
+    "itemType": "Equipment",
+    "rarity": "Common",
+    "equipmentType": "Chest",
+    "attributeModifiers": [
+      {
+        "id": "10000000-0000-0000-0000-000000010001",
+        "attributeType": "Armor",
+        "amount": 10,
+        "modifierType": "Flat"
+      },
+      {
+        "id": "10000000-0000-0000-0000-000000010002",
+        "attributeType": "Resistance",
+        "amount": 10,
+        "modifierType": "Flat"
+      },
+      {
+        "id": "10000000-0000-0000-0000-000000010003",
+        "attributeType": "MaxHealth",
+        "amount": 35,
+        "modifierType": "Flat"
+      }
+    ],
+    "toolBonuses": [],
+    "attackSpeed": 0,
+    "magnitude": 0,
+    "magnitudeRange": 0,
+    "gatheringType": null,
+    "scalingAttribute": "MaxHealth",
+    "scalingAmount": 0
+  },
+  {
+    "id": "tutorial_ring",
+    "name": "Tutorial Ring",
+    "description": "A plain training ring with a small combat lesson etched inside.",
+    "itemType": "Equipment",
+    "rarity": "Common",
+    "equipmentType": "Ring",
+    "attributeModifiers": [
+      {
+        "id": "10000000-0000-0000-0000-000000010004",
+        "attributeType": "Power",
+        "amount": 2,
+        "modifierType": "Flat"
+      },
+      {
+        "id": "10000000-0000-0000-0000-000000010005",
+        "attributeType": "Precision",
+        "amount": 2,
+        "modifierType": "Flat"
+      }
+    ],
+    "toolBonuses": [],
+    "attackSpeed": 0,
+    "magnitude": 0,
+    "magnitudeRange": 0,
+    "gatheringType": null,
+    "scalingAttribute": "Power",
+    "scalingAmount": 0
+  },
+  {
     "id": "amulet",
     "name": "Amulet",
     "description": "A plain amulet ready for blueprint theming.",

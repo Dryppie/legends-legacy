@@ -28,6 +28,7 @@ using Domain.Models.Regions;
 using Domain.Models.Regions.Areas;
 using Domain.Models.Snapshots;
 using Domain.Models.Soulstones;
+using Domain.Models.Tutorials;
 using Domain.Models.Users;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
@@ -62,6 +63,7 @@ public interface IDbContext
     DbSet<TournamentRewardGrant> TournamentRewardGrants { get; }
     DbSet<Character> Characters { get; }
     DbSet<CharacterSoulstoneUpgrade> CharacterSoulstoneUpgrades { get; }
+    DbSet<CharacterTutorialProgress> CharacterTutorialProgresses { get; }
     DbSet<Creature> Creatures { get; }
     //DbSet<Echo> Echoes { get; }
     DbSet<Entity> Entities { get; }
