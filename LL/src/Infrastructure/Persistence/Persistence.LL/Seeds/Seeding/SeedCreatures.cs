@@ -1140,15 +1140,6 @@ public static class SeedCreatures
         return changed;
     }
 
-    public static async Task<bool> EnsureTutorialTrainingGroundsAsync(LLDbContext context)
-    {
-        var shenic = await context.Regions
-            .Include(region => region.Areas)
-            .FirstOrDefaultAsync(region => region.Id == 1);
-
-        return shenic is not null && await EnsureTutorialTrainingGroundsAsync(context, shenic);
-    }
-
     private static async Task<bool> EnsureTutorialTrainingGroundsAsync(LLDbContext context, Region shenic)
     {
         var changed = false;
