@@ -131,19 +131,19 @@ public sealed class AbilitySystemTests
     }
 
     [Fact]
-    public void Engine_uses_precision_to_scale_basic_attack_cadence()
+    public void Engine_uses_fixed_basic_attack_cadence_regardless_of_precision()
     {
-        var slow = CreateCombatant("slow", CombatTeam.Friendly, []);
+        var lowPrecision = CreateCombatant("low-precision", CombatTeam.Friendly, []);
         var baseline = CreateCombatant("baseline", CombatTeam.Hostile, []);
-        slow.Attributes[AttributeType.Precision] = 5;
-        baseline.Attributes[AttributeType.Precision] = 10;
+        lowPrecision.Attributes[AttributeType.Precision] = 5;
+        baseline.Attributes[AttributeType.Precision] = 20;
         var engine = new FastCombatEngine(
             new Dictionary<string, CompiledStatus>(),
             new FastCombatEngineOptions(MaxTicks: 61, BasicAttackIntervalTicks: 30));
 
-        var result = engine.Run([slow], [baseline]);
+        var result = engine.Run([lowPrecision], [baseline]);
 
-        Assert.Equal(1, CountBasicAttacks(result, slow.Id));
+        Assert.Equal(2, CountBasicAttacks(result, lowPrecision.Id));
         Assert.Equal(2, CountBasicAttacks(result, baseline.Id));
     }
 

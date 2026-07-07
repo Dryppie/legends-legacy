@@ -53,7 +53,7 @@ public sealed class FastCombatEngine
         var combatants = friendly.Concat(hostile).ToList();
         foreach (var combatant in combatants)
         {
-            _basicAttackTimers[combatant] = _basicAttackIntervalTicks;
+            _basicAttackTimers[combatant] = GetBasicAttackIntervalTicks();
             InitializeActiveAbilityCooldowns(combatant);
         }
 
@@ -122,7 +122,7 @@ public sealed class FastCombatEngine
         if (_basicAttackTimers[actor] > 0)
             return;
 
-        _basicAttackTimers[actor] = _basicAttackIntervalTicks;
+        _basicAttackTimers[actor] = GetBasicAttackIntervalTicks();
         if (SelectFirstEnemy(actor, combatants) is not { } target)
             return;
 
@@ -593,11 +593,13 @@ public sealed class FastCombatEngine
 
         var summon = CreateSummonedCombatant(source, effect, summonDefinition, _abilitiesById);
         mutableCombatants.Add(summon);
-        _basicAttackTimers[summon] = _basicAttackIntervalTicks;
+        _basicAttackTimers[summon] = GetBasicAttackIntervalTicks();
         InitializeActiveAbilityCooldowns(summon);
 
         Log(source, summon, effect.Id, EventType.Summon, 1, $"{source.Name} summoned {summon.Name}.", statsSource, countStatsActivation);
     }
+
+    private int GetBasicAttackIntervalTicks() => Math.Max(1, _basicAttackIntervalTicks);
 
     private void InitializeActiveAbilityCooldowns(RuntimeCombatant combatant)
     {
