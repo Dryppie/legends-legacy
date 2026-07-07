@@ -11,6 +11,7 @@ import { LootTrackerComponent } from './loot-tracker/loot-tracker.component';
 import { CurrentActionComponent } from '../../shared/components/current-action/current-action.component';
 import { CharacterActionsStateService } from '../../core/services/api/character-actions/character-actions.state.service';
 import { CharacterActionType } from '../../shared/models/enums/characterActionType';
+import { TutorialQuestComponent } from './tutorial-quest/tutorial-quest.component';
 
 @Component({
   selector: 'app-dashboard',
@@ -25,6 +26,7 @@ import { CharacterActionType } from '../../shared/models/enums/characterActionTy
     ChatComponent,
     LootTrackerComponent,
     CurrentActionComponent,
+    TutorialQuestComponent,
   ],
   templateUrl: './dashboard.component.html',
 })

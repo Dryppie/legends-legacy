@@ -22,6 +22,7 @@ import { LocalStorageService } from '../../../../core/services/client-side/local
 })
 export class SelectableListFilterComponent<T> {
   @Input() storageKey?: string;
+  @Input() tourItemId: string | null = null;
 
   /** Raw data to filter. */
   items = input.required<T[]>();

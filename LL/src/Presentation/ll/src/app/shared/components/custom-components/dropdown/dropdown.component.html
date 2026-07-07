@@ -35,6 +35,7 @@
   <ul
     [id]="menuId"
     class="min-w-40 rounded border border-light_gray bg-texture py-1 shadow-xl shadow-black/60"
+    [attr.data-tour]="tourMenuId"
     role="menu"
     (click)="$event.stopPropagation()"
     (keydown)="onDropdownKeydown($event)"
@@ -42,6 +43,7 @@
     <li
       *ngFor="let sub of subOptions"
       class="grid cursor-pointer grid-cols-[1fr_auto] gap-6 whitespace-nowrap px-3 py-2 text-sm text-zinc-300 hover:bg-primary/20 hover:text-white"
+      [attr.data-tour]="tourOptionId"
       role="menuitem"
       tabindex="0"
       (click)="onSubOptionClick(sub)"
@@ -64,6 +66,7 @@
   <ul
     [id]="menuId"
     class="max-h-72 overflow-y-auto rounded border border-light_gray bg-texture py-1 shadow-xl shadow-black/60"
+    [attr.data-tour]="tourMenuId"
     [style.width.px]="dropdownButton.offsetWidth"
     role="listbox"
     (click)="$event.stopPropagation()"
@@ -80,6 +83,7 @@
         'll-dropdown-option-disabled': option.disabled,
       }"
       role="option"
+      [attr.data-tour]="tourOptionId"
       [attr.aria-selected]="isOptionSelected(option)"
       [attr.aria-disabled]="option.disabled || null"
       [attr.tabindex]="option.disabled ? -1 : 0"

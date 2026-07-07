@@ -312,7 +312,9 @@ export class EssenceStateService {
   activateSelectedLoadout(): void {
     const id = this._selectedLoadoutId();
     if (!id) return;
-    this.essencesService.activateLoadout(id).subscribe(() => this.refresh());
+    this.essencesService.activateLoadout(id).subscribe(() => {
+      this.refresh();
+    });
   }
 
   deleteSelectedLoadout(): void {

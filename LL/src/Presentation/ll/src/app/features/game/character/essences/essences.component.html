@@ -6,7 +6,7 @@
     icon="character/essences"
   ></app-default-header>
 
-  <div class="flex flex-wrap gap-2 rounded-lg">
+  <div class="flex flex-wrap gap-2 rounded-lg" data-tour="essence-view-tabs">
     <button
       type="button"
       class="ll-button"
@@ -48,6 +48,7 @@
   >
     <section
       class="ll-panel flex h-[50vh] min-h-0 flex-col overflow-hidden p-3 xl:h-full"
+      data-tour="essence-archive-list"
     >
       <div
         class="mb-3 flex items-center justify-between border-b border-light_gray/70 pb-3"
@@ -451,7 +452,7 @@
         </div>
       </section>
 
-      <section class="ll-panel p-3">
+      <section class="ll-panel p-3" data-tour="essence-loadouts">
         <div class="mb-3 flex items-center justify-between gap-3">
           <div>
             <h2 class="ll-heading">Loadouts</h2>
@@ -511,7 +512,7 @@
           </span>
         </div>
 
-        <div class="grid gap-2">
+        <div class="grid gap-2" data-tour="essence-loadout-slots">
           <div
             class="ll-field"
             *ngFor="let slotIndex of essenceState.slotIndexes()"
@@ -524,6 +525,8 @@
               [value]="essenceState.draftSlots()[slotIndex]"
               [options]="draftSlotDropdownOptions(slotIndex)"
               [selectedValue]="essenceState.draftSlots()[slotIndex]"
+              tourMenuId="essence-loadout-slot-menu"
+              tourOptionId="essence-loadout-slot-option"
               (selection)="setDraftSlotFromDropdown(slotIndex, $event)"
             ></app-dropdown>
           </div>
@@ -533,10 +536,11 @@
           {{ saveHint }}
         </p>
 
-        <div class="mt-3 flex flex-wrap gap-2">
+        <div class="mt-3 flex flex-wrap gap-2" data-tour="essence-loadout-actions">
           <button
             type="button"
             class="ll-button"
+            data-tour="essence-loadout-save"
             [disabled]="!essenceState.canSaveDraft()"
             (click)="essenceState.saveDraftLoadout()"
           >
@@ -545,6 +549,7 @@
           <button
             type="button"
             class="ll-button"
+            data-tour="essence-loadout-activate"
             [disabled]="
               !essenceState.selectedLoadoutId() ||
               essenceState.selectedLoadout()?.isActive

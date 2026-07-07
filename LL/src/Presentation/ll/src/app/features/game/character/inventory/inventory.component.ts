@@ -1,5 +1,5 @@
 import { NgClass, NgFor, NgIf } from '@angular/common';
-import { Component, computed, OnInit } from '@angular/core';
+import { Component, computed, effect, OnInit } from '@angular/core';
 import { SidebarSection } from '../../../../shared/models/sidebar-item';
 import { DefaultHeaderComponent } from '../../../../shared/components/default-header/default-header.component';
 import { InventoryItem } from '../../../../shared/models/inventoryItem';
@@ -20,6 +20,8 @@ import {
   DropdownOption,
   DropdownSelection,
 } from '../../../../shared/components/custom-components/dropdown/dropdown.component';
+import { TutorialStateService } from '../../../../core/services/api/tutorial/tutorial-state.service';
+import { TUTORIAL_STEP_EQUIP_EQUIPMENT } from '../../../../shared/models/tutorial';
 
 @Component({
   selector: 'app-inventory',
@@ -93,10 +95,24 @@ export class InventoryComponent implements OnInit {
     [Rarity.Legacy]: 6,
   };
 
-  constructor(public state: InventoryStateService) {}
+  constructor(
+    public state: InventoryStateService,
+    private readonly tutorialState: TutorialStateService,
+  ) {
+    effect(() => {
+      const tutorial = this.tutorialState.state();
+      if (
+        tutorial?.currentStep === TUTORIAL_STEP_EQUIP_EQUIPMENT &&
+        !tutorial.isCompleted
+      ) {
+        this.enterBrowseMode();
+      }
+    });
+  }
 
   ngOnInit(): void {
     this.state.load();
+
     this.setActiveTab(this.tabs[0]?.label || '');
   }
 

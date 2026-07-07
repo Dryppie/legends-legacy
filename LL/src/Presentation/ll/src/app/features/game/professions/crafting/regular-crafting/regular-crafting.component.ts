@@ -22,7 +22,6 @@ import {
   DropdownSelection,
 } from '../../../../../shared/components/custom-components/dropdown/dropdown.component';
 import { NumberFormatPipe } from '../../../../../shared/pipes/number-format/number-format.pipe';
-import { TourService } from '../../../../../core/services/client-side/tutorial-tour/tour.service';
 import { CraftingRecipe } from '../../../../../shared/models/crafting-v2';
 
 @Component({
@@ -189,10 +188,7 @@ export class RegularCraftingComponent {
   constructor(
     private readonly inventoryState: InventoryStateService,
     private readonly craftingService: CraftingService,
-    private readonly tour: TourService,
   ) {
-    this.tour.start('crafting');
-
     effect(
       () => {
         this.loadRecipes(this.targetTier());

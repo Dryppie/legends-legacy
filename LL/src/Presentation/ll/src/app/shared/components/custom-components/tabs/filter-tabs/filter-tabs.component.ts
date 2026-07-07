@@ -10,6 +10,7 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
 export class FilterTabsComponent {
   @Input() tabs: string[] = [];
   @Input() activeTab: string = '';
+  @Input() tourTabPrefix: string | null = null;
   @Output() tabSelected = new EventEmitter<string>();
 
   // Holds the active tab's label
@@ -17,5 +18,17 @@ export class FilterTabsComponent {
   setActiveTab(tabLabel: string) {
     this.activeTab = tabLabel;
     this.tabSelected.emit(tabLabel); // Emit the selected tab's label
+  }
+
+  getTourId(tab: string): string | null {
+    if (!this.tourTabPrefix) {
+      return null;
+    }
+
+    return `${this.tourTabPrefix}-${this.toKebabCase(tab)}`;
+  }
+
+  private toKebabCase(value: string): string {
+    return value.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-');
   }
 }

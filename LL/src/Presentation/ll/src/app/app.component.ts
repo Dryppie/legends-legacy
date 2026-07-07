@@ -16,6 +16,7 @@ import { CharacterActionsStateService } from './core/services/api/character-acti
 import { ToastService } from './core/services/client-side/components/toast/toast.service';
 import { AppUpdatePopupComponent } from './shared/components/app-update-popup/app-update-popup.component';
 import { AppUpdateService } from './core/services/client-side/app-update/app-update.service';
+import { FirstPartyTourOverlayComponent } from './shared/components/first-party-tour-overlay/first-party-tour-overlay.component';
 
 @Component({
   selector: 'app-root',
@@ -26,6 +27,7 @@ import { AppUpdateService } from './core/services/client-side/app-update/app-upd
     ModalContainerComponent,
     SessionSummaryPopupComponent,
     AppUpdatePopupComponent,
+    FirstPartyTourOverlayComponent,
   ],
   templateUrl: './app.component.html',
 })

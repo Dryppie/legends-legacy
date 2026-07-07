@@ -27,6 +27,14 @@ export class RegionService {
       name: 'Shenic',
       areas: [
         {
+          id: 'tutorial_area_training_grounds',
+          name: 'Training Area',
+          levelRequirement: 1,
+          creatures: ['Training Goblin'],
+          description:
+            'A controlled training route for new adventurers. The creature here is weak enough to practice combat and earn your first Essence.',
+        },
+        {
           id: 'region_01_area_01',
           name: 'Lumo Ruins',
           levelRequirement: 1,
