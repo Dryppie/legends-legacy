@@ -131,6 +131,23 @@ public sealed class AbilitySystemTests
     }
 
     [Fact]
+    public void Engine_uses_precision_to_scale_basic_attack_cadence()
+    {
+        var slow = CreateCombatant("slow", CombatTeam.Friendly, []);
+        var baseline = CreateCombatant("baseline", CombatTeam.Hostile, []);
+        slow.Attributes[AttributeType.Precision] = 5;
+        baseline.Attributes[AttributeType.Precision] = 10;
+        var engine = new FastCombatEngine(
+            new Dictionary<string, CompiledStatus>(),
+            new FastCombatEngineOptions(MaxTicks: 61, BasicAttackIntervalTicks: 30));
+
+        var result = engine.Run([slow], [baseline]);
+
+        Assert.Equal(1, CountBasicAttacks(result, slow.Id));
+        Assert.Equal(2, CountBasicAttacks(result, baseline.Id));
+    }
+
+    [Fact]
     public void Engine_pays_health_cost_before_using_active_ability()
     {
         var ability = CreateDamageAbility("ability.health.cost", "Family.Test");
@@ -2662,6 +2679,12 @@ public sealed class AbilitySystemTests
             },
             abilities,
             ["Role.Test"]);
+
+    private static int CountBasicAttacks(CombatResult result, string actorId) =>
+        result.EventLog.Count(log =>
+            log.EventType == EventType.AbilityUse &&
+            log.Source == "Basic Attack" &&
+            log.ActorId == actorId);
 
     private static IReadOnlyDictionary<string, CompiledAbility> CompileCatalogAbilities(
         AbilityCatalog catalog,

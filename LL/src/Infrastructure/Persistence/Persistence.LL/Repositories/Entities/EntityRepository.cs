@@ -33,6 +33,7 @@ public class EntityRepository : IEntityRepository
                 .ThenInclude(es => es.EquipmentInstance.ToolAffixes)
             .Include(e => e.EquipmentSlots)
                 .ThenInclude(es => (es.EquipmentInstance.ItemBase as EquipmentBase).ToolBonuses)
+            .Include(e => (e as Creature)!.StatOverrides)
             .Include(e => (e as Creature).LootTable)
                 .ThenInclude(lt => lt.Entries)
                     .ThenInclude(lte => (lte as LootTableItem).Item)

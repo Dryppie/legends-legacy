@@ -31,6 +31,7 @@ using Domain.Models.Regions;
 using Domain.Models.Regions.Areas;
 using Domain.Models.Snapshots;
 using Domain.Models.Soulstones;
+using Domain.Models.Tutorials;
 using Domain.Models.Users;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
@@ -155,6 +156,7 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : DbContext(opti
     public DbSet<TournamentRewardGrant> TournamentRewardGrants => Set<TournamentRewardGrant>();
     public DbSet<Character> Characters => Set<Character>();
     public DbSet<CharacterSoulstoneUpgrade> CharacterSoulstoneUpgrades => Set<CharacterSoulstoneUpgrade>();
+    public DbSet<CharacterTutorialProgress> CharacterTutorialProgresses => Set<CharacterTutorialProgress>();
     public DbSet<Creature> Creatures => Set<Creature>();
 
     //public DbSet<Echo> Echoes => Set<Echo>();

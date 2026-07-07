@@ -9,7 +9,7 @@ namespace EssenceSystem.Tests;
 public sealed class RegionOneIdleAreaSeedTests
 {
     [Fact]
-    public async Task SeedCreaturesData_creates_ten_region_one_idle_areas_without_goblin_mines()
+    public async Task SeedCreaturesData_creates_tutorial_area_and_ten_region_one_idle_areas_without_goblin_mines()
     {
         await using var db = CreateDb();
 
@@ -24,9 +24,10 @@ public sealed class RegionOneIdleAreaSeedTests
             .Select(area => area.Name)
             .ToArray();
 
-        Assert.Equal(10, areaNames.Length);
+        Assert.Equal(11, areaNames.Length);
         Assert.Equal(
             [
+                "Training Area",
                 "Lumo Ruins",
                 "Blood Grove",
                 "Crystal Creek",
