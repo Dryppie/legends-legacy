@@ -20,7 +20,6 @@ export class TutorialQuestComponent implements OnInit {
 
   ngOnInit(): void {
     this.presenter.initialize();
-    this.tutorialState.load({ resumeCurrentStep: true });
   }
 
   go(): void {

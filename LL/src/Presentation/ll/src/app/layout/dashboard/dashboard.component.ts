@@ -1,4 +1,4 @@
-import { Component, effect, HostListener, OnInit } from '@angular/core';
+import { Component, effect, HostListener, OnInit, Signal } from '@angular/core';
 import { SidebarComponent } from './sidebar/sidebar.component';
 import { Router, RouterOutlet } from '@angular/router';
 import { NavbarComponent } from './navbar/navbar.component';
@@ -12,6 +12,7 @@ import { CurrentActionComponent } from '../../shared/components/current-action/c
 import { CharacterActionsStateService } from '../../core/services/api/character-actions/character-actions.state.service';
 import { CharacterActionType } from '../../shared/models/enums/characterActionType';
 import { TutorialQuestComponent } from './tutorial-quest/tutorial-quest.component';
+import { GameBootstrapStateService } from '../../core/services/api/game-bootstrap/game-bootstrap-state.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -39,12 +40,20 @@ export class DashboardComponent implements OnInit {
   displayCurrentAction = false;
   isResolvingAction = false;
   combatVisible$!: Observable<boolean>;
+  readonly bootstrapLoaded: Signal<boolean>;
+  readonly bootstrapLoading: Signal<boolean>;
+  readonly bootstrapError: Signal<string | null>;
 
   constructor(
     private readonly gameService: GameService,
     private readonly state: CharacterActionsStateService,
     private readonly router: Router,
+    private readonly bootstrapState: GameBootstrapStateService,
   ) {
+    this.bootstrapLoaded = this.bootstrapState.loaded;
+    this.bootstrapLoading = this.bootstrapState.loading;
+    this.bootstrapError = this.bootstrapState.error;
+
     effect(() => {
       this.displayCurrentAction = this.state.displayCurrentAction();
     });
@@ -57,6 +66,9 @@ export class DashboardComponent implements OnInit {
   ngOnInit() {
     this.checkScreenSize();
     this.combatVisible$ = this.gameService.combatVisible$;
+    this.bootstrapState.load().subscribe({
+      error: () => undefined,
+    });
   }
 
   @HostListener('window:resize')
@@ -129,5 +141,11 @@ export class DashboardComponent implements OnInit {
     } else {
       return;
     }
+  }
+
+  retryBootstrap(): void {
+    this.bootstrapState.reload().subscribe({
+      error: () => undefined,
+    });
   }
 }

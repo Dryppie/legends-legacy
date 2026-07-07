@@ -111,6 +111,19 @@ export class TutorialStateService {
       });
   }
 
+  initialize(
+    state: TutorialState | null,
+    options: TutorialLoadOptions = {},
+  ): void {
+    this._loading.set(false);
+    this._error.set(null);
+    this.applyState(state);
+
+    if (state && !state.isCompleted) {
+      this.resumeCurrentStepIfRequested(state, options);
+    }
+  }
+
   refresh(): void {
     this.tutorialService.getState().subscribe({
       next: (state) => this.applyState(state),
