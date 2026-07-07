@@ -3,7 +3,7 @@
   "sections": [
     {
       "heading": "Crafting handoff",
-      "body": "For the tutorial, simply reaching Crafting is enough. The quest grants a Tutorial Sword, Tutorial Chest, and Tutorial Ring so you can learn equipment without needing to craft under pressure."
+      "body": "For the tutorial, simply reaching Crafting is enough. The quest grants a Tutorial Chest so you can learn equipment without needing to craft under pressure."
     },
     {
       "heading": "What to look at",
@@ -11,7 +11,7 @@
     },
     {
       "heading": "Next step",
-      "body": "After the tutorial gear appears in your inventory, go to Inventory and equip one piece to complete First Steps."
+      "body": "After the Tutorial Chest appears in your inventory, go to Inventory and equip it to complete First Steps."
     }
   ]
 }

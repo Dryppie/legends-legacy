@@ -49,6 +49,7 @@ export class CombatAreaCardComponent implements OnInit {
 
     effect(() => {
       this.tutorialState.state();
+      this.tutorialState.hasLoaded();
       this.setIsLocked();
     });
   }
@@ -104,7 +105,7 @@ export class CombatAreaCardComponent implements OnInit {
     const character = this.currentCharacter();
     const tutorial = this.tutorialState.state();
     const isTrainingArea = this.area.id === TUTORIAL_TRAINING_GROUNDS_AREA_ID;
-    const isTutorialUnknown = !tutorial;
+    const isTutorialUnknown = !this.tutorialState.hasLoaded();
     const isTutorialActive = !!tutorial && !tutorial.isCompleted;
     const isFirstTutorialStep =
       tutorial?.currentStep === TUTORIAL_STEP_DEFEAT_TRAINING_CREATURE;

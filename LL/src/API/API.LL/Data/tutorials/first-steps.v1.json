@@ -1,0 +1,82 @@
+{
+  "tutorialId": "tutorial.first_steps",
+  "version": 1,
+  "title": "First Steps",
+  "initialStepKey": "defeat_training_creature",
+  "steps": [
+    {
+      "key": "defeat_training_creature",
+      "objective": "Defeat the creature in the Training Area.",
+      "requiredAmount": 1,
+      "actionLabel": "Go to Training Area",
+      "destinationRoute": "/game/world/shenic?area=tutorial_area_training_grounds",
+      "tourPageId": "tutorial-training-area",
+      "guidePageId": "tutorial-training",
+      "trigger": {
+        "type": "IdleCombatCompleted",
+        "areaId": "tutorial_area_training_grounds",
+        "requiresVictory": true
+      },
+      "nextStepKey": "absorb_essence"
+    },
+    {
+      "key": "absorb_essence",
+      "objective": "Absorb the Unbound Goblin's Essence into your Soul Archive.",
+      "requiredAmount": 1,
+      "actionLabel": "Open Essences",
+      "destinationRoute": "/game/character/essences",
+      "tourPageId": "tutorial-essence-absorb",
+      "guidePageId": "tutorial-essence-absorb",
+      "trigger": {
+        "type": "EssenceAbsorbed",
+        "essenceDefinitionId": "essence.legacy.goblin"
+      },
+      "nextStepKey": "equip_essence"
+    },
+    {
+      "key": "equip_essence",
+      "objective": "Attune the Goblin's Essence in your active essence loadout.",
+      "requiredAmount": 1,
+      "actionLabel": "Open Loadout",
+      "destinationRoute": "/game/character/essences",
+      "tourPageId": "tutorial-essence-loadout",
+      "guidePageId": "tutorial-essence-loadout",
+      "trigger": {
+        "type": "EssenceLoadoutChanged",
+        "essenceDefinitionId": "essence.legacy.goblin"
+      },
+      "nextStepKey": "craft_equipment"
+    },
+    {
+      "key": "craft_equipment",
+      "objective": "Open Crafting to claim your Tutorial Chest.",
+      "requiredAmount": 1,
+      "actionLabel": "Open Crafting",
+      "destinationRoute": "/game/professions/crafting",
+      "tourPageId": "tutorial-crafting",
+      "guidePageId": "tutorial-crafting",
+      "trigger": {
+        "type": "ClientRouteVisited",
+        "route": "/game/professions/crafting"
+      },
+      "nextStepKey": "equip_equipment"
+    },
+    {
+      "key": "equip_equipment",
+      "objective": "Equip your Tutorial Chest.",
+      "requiredAmount": 1,
+      "actionLabel": "Open Inventory",
+      "destinationRoute": "/game/character/inventory",
+      "tourPageId": "tutorial-inventory",
+      "guidePageId": "tutorial-equipment",
+      "trigger": {
+        "type": "EquipmentChanged",
+        "requiredCount": 1,
+        "itemBaseIds": [
+          "tutorial_chest"
+        ]
+      },
+      "nextStepKey": "complete"
+    }
+  ]
+}

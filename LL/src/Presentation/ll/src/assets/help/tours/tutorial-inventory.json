@@ -9,7 +9,7 @@
       "selector": "[data-tour=inventory-tab-all]"
     },
     "title": "1. Equipment tab",
-    "description": "Click Equipment to find the Tutorial Sword, Tutorial Chest, and Tutorial Ring.",
+    "description": "Click Equipment to find the Tutorial Chest.",
     "position": "bottom"
   },
   {
@@ -18,7 +18,7 @@
     "element": "[data-tour=inventory-items]",
     "actionSelector": "[data-tour=inventory-equipment-item]",
     "title": "2. Inventory items",
-    "description": "Your tutorial equipment is listed here. Select a piece to open its equipment details.",
+    "description": "Your Tutorial Chest is listed here. Select it to open its equipment details.",
     "position": "right"
   }
 ]

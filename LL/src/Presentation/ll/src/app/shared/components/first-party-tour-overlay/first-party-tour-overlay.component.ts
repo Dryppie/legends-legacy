@@ -51,6 +51,7 @@ import {
 
             <div class="flex min-w-0 items-center gap-2">
               <button
+                *ngIf="showBackButton(tour)"
                 type="button"
                 class="ll-button px-3 py-1.5"
                 [disabled]="!tour.canGoBack"
@@ -135,6 +136,10 @@ export class FirstPartyTourOverlayComponent {
 
   eyebrowLabel(tour: FirstPartyTourViewState): string {
     return tour.pageId.startsWith('tutorial-') ? 'Tutorial' : 'Guide';
+  }
+
+  showBackButton(tour: FirstPartyTourViewState): boolean {
+    return !tour.pageId.startsWith('tutorial-');
   }
 
   backdropStyles(rect: FirstPartyTourRect | null): Array<Record<string, string>> {

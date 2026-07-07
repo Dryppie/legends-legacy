@@ -151,7 +151,7 @@ export class CraftingComponent implements OnInit {
       ) {
         this.toast.showToast(
           'Tutorial gear received',
-          'Crafting granted three equipment pieces: Tutorial Sword, Tutorial Chest, and Tutorial Ring. Open Inventory to equip one piece.',
+          'Crafting granted a Tutorial Chest. Open Inventory to equip it.',
           true,
           'tr',
         );

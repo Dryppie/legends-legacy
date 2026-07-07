@@ -21,4 +21,9 @@ public record AchievementUnlockedMsg(
     string? TitleName,
     string Message,
     bool IsGlobal) : GameEventMsg;
+
+public record TutorialProgressedMsg(
+    Application.UseCases.Tutorials.Dtos.TutorialStateDto Tutorial) : GameEventMsg;
+
+public record TutorialCompletedMsg(string TutorialId) : GameEventMsg;
 //public record LootReceivedMsg(Guid CharacterId, List<InventoryItemDto> Items) : GameEventMsg;

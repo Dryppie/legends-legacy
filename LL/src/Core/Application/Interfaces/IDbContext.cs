@@ -21,6 +21,7 @@ using Domain.Models.Items.Equipments.Slots;
 using Domain.Models.Items.EssenceItems;
 using Domain.Models.LootTables;
 using Domain.Models.MarketPlaces;
+using Domain.Models.Outbox;
 using Domain.Models.Professions;
 using Domain.Models.Professions.Crafting;
 using Domain.Models.Prophecies;
@@ -38,6 +39,7 @@ namespace Application.Common.Interfaces;
 public interface IDbContext
 {
     DbSet<AchievementDefinition> AchievementDefinitions { get; }
+    DbSet<AchievementEventLedger> AchievementEventLedgers { get; }
     DbSet<PlayerAchievementProgress> PlayerAchievementProgresses { get; }
     DbSet<TitleDefinition> TitleDefinitions { get; }
     DbSet<PlayerTitleUnlock> PlayerTitleUnlocks { get; }
@@ -108,6 +110,8 @@ public interface IDbContext
     DbSet<LootTableItem> LootTableItems { get; }
 
     DbSet<MarketPlaceListing> MarketPlaceListings { get; }
+    DbSet<GameEventOutboxMessage> GameEventOutboxMessages { get; }
+    DbSet<GameEventOutboxDelivery> GameEventOutboxDeliveries { get; }
     //DbSet<Party> Parties { get; }
     //DbSet<PartyMember> PartyMembers { get; }
     DbSet<Profession> Professions { get; }

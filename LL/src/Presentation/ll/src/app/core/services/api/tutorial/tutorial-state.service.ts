@@ -19,11 +19,15 @@ interface TutorialLoadOptions {
 @Injectable({ providedIn: 'root' })
 export class TutorialStateService {
   private readonly _state = signal<TutorialState | null>(null);
+  private readonly _hasLoaded = signal(false);
+  private readonly _isCompleted = signal(false);
   private readonly _loading = signal(false);
   private readonly _error = signal<string | null>(null);
   private hasResumedCurrentStep = false;
 
   readonly state = computed(() => this._state());
+  readonly hasLoaded = computed(() => this._hasLoaded());
+  readonly isCompleted = computed(() => this._isCompleted());
   readonly loading = computed(() => this._loading());
   readonly error = computed(() => this._error());
   readonly visible = computed(() => {
@@ -42,10 +46,10 @@ export class TutorialStateService {
       () => {
         const state = this._state();
         return (
-          !!state &&
-          (state.isCompleted ||
-            state.currentStep === TUTORIAL_STEP_CRAFT_EQUIPMENT ||
-            state.currentStep === TUTORIAL_STEP_EQUIP_EQUIPMENT)
+          this._isCompleted() ||
+          (!!state &&
+            (state.currentStep === TUTORIAL_STEP_CRAFT_EQUIPMENT ||
+              state.currentStep === TUTORIAL_STEP_EQUIP_EQUIPMENT))
         );
       },
     );
@@ -55,9 +59,8 @@ export class TutorialStateService {
       () => {
         const state = this._state();
         return (
-          !!state &&
-          (state.isCompleted ||
-            state.currentStep !== TUTORIAL_STEP_EQUIP_EQUIPMENT)
+          this._isCompleted() ||
+          (!!state && state.currentStep !== TUTORIAL_STEP_EQUIP_EQUIPMENT)
         );
       },
     );
@@ -79,6 +82,8 @@ export class TutorialStateService {
 
         const current = this._state();
         if (!current || current.tutorialId === event.tutorialId) {
+          this._hasLoaded.set(true);
+          this._isCompleted.set(true);
           this._state.set(null);
         }
       },
@@ -111,6 +116,11 @@ export class TutorialStateService {
       next: (state) => this.applyState(state),
       error: () => undefined,
     });
+  }
+
+  refreshAfterOutboxProgress(delayMs = 750): void {
+    this.refresh();
+    window.setTimeout(() => this.refresh(), delayMs);
   }
 
   recordCraftingPageVisited(onComplete?: (state: TutorialState | null) => void): void {
@@ -168,6 +178,8 @@ export class TutorialStateService {
   }
 
   private applyState(state: TutorialState | null): void {
+    this._hasLoaded.set(true);
+    this._isCompleted.set(!state || state.isCompleted);
     this._state.set(state && !state.isCompleted ? state : null);
   }
 }
