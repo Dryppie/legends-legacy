@@ -1,6 +1,7 @@
-using Application.Interfaces.Services.LL.Achievements;
+using Application.Interfaces.Outbox;
 using Application.Interfaces.WebSockets;
 using Application.UseCases.Colosseum.Events;
+using Application.UseCases.Outbox;
 using Application.WebSockets.Contracts;
 using MediatR;
 
@@ -8,24 +9,28 @@ namespace Application.UseCases.Colosseum.EventHandlers;
 public class ArenaBattleCompletedEventHandler : INotificationHandler<ArenaBattleCompletedEvent>
 {
     private readonly IGameEventPublisher _eventPublisher;
-    private readonly IAchievementService _achievementService;
+    private readonly IGameEventOutbox _outbox;
 
     public ArenaBattleCompletedEventHandler(
         IGameEventPublisher eventPublisher,
-        IAchievementService achievementService)
+        IGameEventOutbox outbox)
     {
         _eventPublisher = eventPublisher;
-        _achievementService = achievementService;
+        _outbox = outbox;
     }
 
     public async Task Handle(ArenaBattleCompletedEvent notification, CancellationToken cancellationToken)
     {
-        await _achievementService.RecordColosseumBattleAsync(
+        await _outbox.EnqueueAsync(
+            GameEventTypes.ColosseumBattleCompleted,
+            new ColosseumBattleCompletedPayload(
+                notification.CharacterId,
+                notification.EnemyId,
+                notification.Outcome,
+                notification.CharacterRatingBefore,
+                notification.EnemyRatingBefore),
             notification.CharacterId,
-            notification.EnemyId,
-            notification.Outcome,
-            notification.CharacterRatingBefore,
-            notification.EnemyRatingBefore,
+            null,
             cancellationToken);
 
         var msg = new ArenaBattleCompletedMsg(

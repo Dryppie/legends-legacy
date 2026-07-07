@@ -1,7 +1,8 @@
-﻿using Application.Interfaces.Services.LL.CharacterActions;
+using Application.Interfaces.Services.LL.CharacterActions;
 using Application.MediatR.Markers;
 using Common.Primitives;
 using Domain.Models.CharacterActions;
+using Domain.Models.Tutorials;
 using MediatR;
 
 namespace Application.UseCases.CharacterActions.Commands.StartCombatAction;
@@ -10,11 +11,15 @@ public class StartCombatActionCommandHandler : IRequestHandler<StartCombatAction
 {
     private readonly ICharacterActionService _characterActionService;
     private readonly IActionDetailsService _actionDetailsService;
-    public StartCombatActionCommandHandler(ICharacterActionService characterActionService, IActionDetailsService actionDetailsService)
+
+    public StartCombatActionCommandHandler(
+        ICharacterActionService characterActionService,
+        IActionDetailsService actionDetailsService)
     {
         _characterActionService = characterActionService;
         _actionDetailsService = actionDetailsService;
     }
+
     public async Task<Response<bool>> Handle(StartCombatActionCommand request, CancellationToken cancellationToken)
     {
         var combatActionDetails = await _actionDetailsService.CreateCombatActionDetailsAsync(request.AreaId, request.CharacterId, cancellationToken);

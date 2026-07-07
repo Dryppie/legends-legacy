@@ -24,6 +24,7 @@ using Domain.Models.Items.Equipments.Slots;
 using Domain.Models.Items.EssenceItems;
 using Domain.Models.LootTables;
 using Domain.Models.MarketPlaces;
+using Domain.Models.Outbox;
 using Domain.Models.Professions;
 using Domain.Models.Professions.Crafting;
 using Domain.Models.Prophecies;
@@ -130,6 +131,7 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : DbContext(opti
     }
 
     public DbSet<AchievementDefinition> AchievementDefinitions => Set<AchievementDefinition>();
+    public DbSet<AchievementEventLedger> AchievementEventLedgers => Set<AchievementEventLedger>();
     public DbSet<PlayerAchievementProgress> PlayerAchievementProgresses => Set<PlayerAchievementProgress>();
     public DbSet<TitleDefinition> TitleDefinitions => Set<TitleDefinition>();
     public DbSet<PlayerTitleUnlock> PlayerTitleUnlocks => Set<PlayerTitleUnlock>();
@@ -211,6 +213,8 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : DbContext(opti
     public DbSet<LootTableItem> LootTableItems => Set<LootTableItem>();
 
     public DbSet<MarketPlaceListing> MarketPlaceListings => Set<MarketPlaceListing>();
+    public DbSet<GameEventOutboxMessage> GameEventOutboxMessages => Set<GameEventOutboxMessage>();
+    public DbSet<GameEventOutboxDelivery> GameEventOutboxDeliveries => Set<GameEventOutboxDelivery>();
 
     //public DbSet<Party> Parties => Set<Party>();
 

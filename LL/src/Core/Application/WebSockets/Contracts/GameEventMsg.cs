@@ -1,4 +1,6 @@
-﻿namespace Application.WebSockets.Contracts;
+﻿using Application.Interfaces.Services.LL.Tutorials;
+
+namespace Application.WebSockets.Contracts;
 public abstract record GameEventMsg;
 
 public record SaleCompletedMsg(Guid ItemId, Guid SellerId, int Price) : GameEventMsg;
@@ -22,8 +24,7 @@ public record AchievementUnlockedMsg(
     string Message,
     bool IsGlobal) : GameEventMsg;
 
-public record TutorialProgressedMsg(
-    Application.UseCases.Tutorials.Dtos.TutorialStateDto Tutorial) : GameEventMsg;
+public record TutorialProgressedMsg(TutorialState Tutorial) : GameEventMsg;
 
 public record TutorialCompletedMsg(string TutorialId) : GameEventMsg;
 //public record LootReceivedMsg(Guid CharacterId, List<InventoryItemDto> Items) : GameEventMsg;

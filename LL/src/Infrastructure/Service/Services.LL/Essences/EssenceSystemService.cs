@@ -1,6 +1,7 @@
-using Application.Interfaces.Services.LL.Achievements;
+using Application.Interfaces.Outbox;
 using Application.Interfaces.Services.LL.Essences;
 using Application.Interfaces.Services.LL.Prophecies;
+using Application.UseCases.Outbox;
 using Application.UseCases.Prophecies.Events;
 using Domain.Models.Attributes.Modifiers;
 using Domain.Models.Combat.Abilities;
@@ -29,7 +30,7 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
     private readonly IInventoryItemFactory _inventoryItemFactory;
     private readonly IRandomProvider _random;
     private readonly IPublisher? _publisher;
-    private readonly IAchievementService _achievementService;
+    private readonly IGameEventOutbox _outbox;
 
     public EssenceSystemService(
         IEssenceRepository essences,
@@ -41,7 +42,7 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
         IEssenceLoadoutLimitService loadoutLimits,
         IInventoryItemFactory inventoryItemFactory,
         IRandomProvider random,
-        IAchievementService achievementService,
+        IGameEventOutbox outbox,
         IPublisher? publisher = null)
     {
         _essences = essences;
@@ -54,7 +55,7 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
         _inventoryItemFactory = inventoryItemFactory;
         _random = random;
         _publisher = publisher;
-        _achievementService = achievementService;
+        _outbox = outbox;
     }
 
     public async Task<SoulArchive> GetSoulArchiveAsync(Guid characterId, CancellationToken cancellationToken)
@@ -125,10 +126,15 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
                 ProphecyProgressKind.EssenceArchived)), cancellationToken);
         }
 
-        await _achievementService.RecordEssenceAbsorbedAsync(
+        await _outbox.EnqueueAsync(
+            GameEventTypes.EssenceAbsorbed,
+            new EssenceAbsorbedPayload(
+                characterId,
+                definitionId,
+                archivedEssenceIds.Count,
+                GetCompletedCollectionKeys(archivedEssenceIds)),
             characterId,
-            archivedEssenceIds.Count,
-            GetCompletedCollectionKeys(archivedEssenceIds),
+            null,
             cancellationToken);
 
         return Ok("Essence absorbed into the Soul Archive.");
@@ -220,10 +226,11 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
             _ => 1
         };
 
-        await _achievementService.RecordEssenceAscendedAsync(
+        await _outbox.EnqueueAsync(
+            GameEventTypes.EssenceAscended,
+            new EssenceAscendedPayload(characterId, nextTier, ascendedToTierCount),
             characterId,
-            nextTier,
-            ascendedToTierCount,
+            null,
             cancellationToken);
 
         return Ok("Essence ascended.");
@@ -278,7 +285,12 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
         await ReplaceLoadoutSlotsAsync(loadout, normalizedSlots, cancellationToken);
         if (loadout.IsActive)
         {
-            await _achievementService.RecordEssenceLoadoutSavedAsync(characterId, normalizedSlots.Count, cancellationToken);
+            await _outbox.EnqueueAsync(
+                GameEventTypes.EssenceLoadoutChanged,
+                new EssenceLoadoutChangedPayload(characterId, essenceIds, normalizedSlots.Count),
+                characterId,
+                null,
+                cancellationToken);
         }
 
         return loadout;
@@ -312,7 +324,15 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
         if (ownedCount != essenceIds.Count) return Fail("Loadout references an Essence that is no longer absorbed.");
 
         foreach (var loadout in loadouts) loadout.IsActive = loadout.Id == loadoutId;
-        await _achievementService.RecordEssenceLoadoutSavedAsync(characterId, selected.Slots.Count(x => x.PlayerEssenceId.HasValue), cancellationToken);
+        await _outbox.EnqueueAsync(
+            GameEventTypes.EssenceLoadoutChanged,
+            new EssenceLoadoutChangedPayload(
+                characterId,
+                essenceIds,
+                selected.Slots.Count(x => x.PlayerEssenceId.HasValue)),
+            characterId,
+            null,
+            cancellationToken);
         return Ok("Essence loadout activated.");
     }
 

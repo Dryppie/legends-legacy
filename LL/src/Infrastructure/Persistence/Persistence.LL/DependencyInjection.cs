@@ -1,4 +1,5 @@
 ﻿using Application.Common.Interfaces;
+using Application.Interfaces.Outbox;
 using Domain.Models.Attributes;
 using Domain.Models.CharacterActions;
 using Domain.Models.Colosseum;
@@ -45,6 +46,7 @@ using Persistence.LL.Repositories.Items;
 using Persistence.LL.Repositories.Leaderboards;
 using Persistence.LL.Repositories.LootTables;
 using Persistence.LL.Repositories.MarketPlaces;
+using Persistence.LL.Repositories.Outbox;
 using Persistence.LL.Repositories.Professions;
 using Persistence.LL.Repositories.Professions.Craftings;
 using Persistence.LL.Repositories.Prophecies;
@@ -106,6 +108,7 @@ public static class DependencyInjection
         services.AddScoped<IItemBaseRepository, ItemBaseRepository>();
 
         services.AddScoped<IMarketPlaceRepository, MarketPlaceRepository>();
+        services.AddScoped<IGameEventOutboxRepository, GameEventOutboxRepository>();
 
         services.AddScoped<IRegionRepository, RegionRepository>();
 

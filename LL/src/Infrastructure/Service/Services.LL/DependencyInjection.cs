@@ -1,4 +1,5 @@
 using Application.Authorization.Interfaces;
+using Application.Interfaces.Outbox;
 using Application.Interfaces.Services.LL;
 using Application.Interfaces.Services.LL.Guilds;
 using Application.Interfaces.Services.LL.Achievements;
@@ -11,6 +12,7 @@ using Application.Interfaces.Services.LL.Items;
 using Application.Interfaces.Services.LL.Prophecies;
 using Application.Interfaces.Services.LL.Professions;
 using Application.Interfaces.Services.LL.Regions;
+using Application.Interfaces.Services.LL.Tutorials;
 using Domain.Models.Dungeons;
 using Domain.Models.Dungeons.Runs;
 using Domain.Models.Users;
@@ -61,6 +63,7 @@ using Services.LL.Levels;
 using Services.LL.Loots;
 using Services.LL.LootTables;
 using Services.LL.MarketPlaces;
+using Services.LL.Outbox;
 using Services.LL.Players;
 using Services.LL.Prophecies;
 using Services.LL.Professions;
@@ -72,6 +75,7 @@ using Services.LL.Snapshots;
 using Services.LL.Soulstones;
 using Services.LL.Spawnings;
 using Services.LL.Users;
+using Services.LL.Tutorials;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -249,6 +253,20 @@ public static class DependencyInjection
         services.AddScoped<IGoogleAuthService, GoogleAuthService>();
 
         services.AddScoped<ISimulatorService, SimulatorService>();
+        services.AddScoped<IGameEventOutbox, GameEventOutbox>();
+        services.AddSingleton<IGameEventOutboxConsumerRegistry, GameEventOutboxConsumerRegistry>();
+        services.AddScoped<IGameEventOutboxConsumer, TutorialGameEventOutboxConsumer>();
+        services.AddScoped<IGameEventOutboxConsumer, AchievementGameEventOutboxConsumer>();
+        services.AddSingleton<ITutorialDefinitionProvider>(sp =>
+            new JsonTutorialDefinitionProvider(
+                config,
+                contentRootPath,
+                sp.GetRequiredService<JsonSerializerOptions>()));
+        services.AddSingleton<ITutorialProgressCache, InMemoryTutorialProgressCache>();
+        services.AddScoped<TutorialService>();
+        services.AddScoped<ITutorialService>(sp => sp.GetRequiredService<TutorialService>());
+        services.AddScoped<ITutorialProgressionService>(sp => sp.GetRequiredService<TutorialService>());
+        services.AddScoped<ITutorialBattleService, TutorialBattleService>();
 
         services.AddSingleton<SoulstoneUpgradeDefinitionProvider>();
 

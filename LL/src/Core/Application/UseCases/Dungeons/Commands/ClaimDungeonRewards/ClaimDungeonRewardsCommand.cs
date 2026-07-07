@@ -1,5 +1,5 @@
+using Application.Interfaces.Outbox;
 using Application.Interfaces.Services.LL;
-using Application.Interfaces.Services.LL.Achievements;
 using Application.Interfaces.Services.LL.Dungeons;
 using Application.Interfaces.Services.LL.Entities;
 using Application.Interfaces.WebSockets;
@@ -7,6 +7,7 @@ using Application.MediatR.Markers;
 using Application.UseCases.Characters.Dtos;
 using Application.UseCases.Dungeons.Dtos;
 using Application.UseCases.Inventories.Dtos;
+using Application.UseCases.Outbox;
 using Application.WebSockets.Contracts;
 using AutoMapper;
 using Common.Primitives;
@@ -23,7 +24,7 @@ public class ClaimDungeonRewardsCommandHandler : IRequestHandler<ClaimDungeonRew
     private readonly ICharacterService _characterService;
     private readonly IGameRealtimeBroadcaster _gameRealtime;
     private readonly IMapper _mapper;
-    private readonly IAchievementService _achievementService;
+    private readonly IGameEventOutbox _outbox;
 
     public ClaimDungeonRewardsCommandHandler(
         IDungeonRunService dungeonRunService,
@@ -31,14 +32,14 @@ public class ClaimDungeonRewardsCommandHandler : IRequestHandler<ClaimDungeonRew
         ICharacterService characterService,
         IGameRealtimeBroadcaster gameRealtime,
         IMapper mapper,
-        IAchievementService achievementService)
+        IGameEventOutbox outbox)
     {
         _dungeonRunService = dungeonRunService;
         _inventoryService = inventoryService;
         _characterService = characterService;
         _gameRealtime = gameRealtime;
         _mapper = mapper;
-        _achievementService = achievementService;
+        _outbox = outbox;
     }
 
     public async Task<Response<ClaimDungeonRewardsResponseDto>> Handle(ClaimDungeonRewardsCommand request, CancellationToken cancellationToken)
@@ -49,12 +50,16 @@ public class ClaimDungeonRewardsCommandHandler : IRequestHandler<ClaimDungeonRew
 
         if (result.WasCompleted)
         {
-            await _achievementService.RecordDungeonRunCompletedAsync(
+            await _outbox.EnqueueAsync(
+                GameEventTypes.DungeonRunCompleted,
+                new DungeonRunCompletedPayload(
+                    request.CharacterId,
+                    result.DungeonDefinitionId,
+                    result.CompletedWithoutDefeat,
+                    result.CompletedWithoutCheckpointRetreat,
+                    result.DefeatedBossKeys),
                 request.CharacterId,
-                result.DungeonDefinitionId,
-                result.CompletedWithoutDefeat,
-                result.CompletedWithoutCheckpointRetreat,
-                result.DefeatedBossKeys,
+                null,
                 cancellationToken);
         }
 

@@ -1,10 +1,11 @@
 using Application.Interfaces.Services.LL;
 using Application.Interfaces.Services.LL.Prophecies;
-using Application.Interfaces.Services.LL.Achievements;
 using Application.Interfaces.Services.LL.Guilds;
+using Application.Interfaces.Outbox;
 using Application.Interfaces.Services.LL.Professions;
 using Application.UseCases.Crafting;
 using Application.UseCases.Crafting.Dtos;
+using Application.UseCases.Outbox;
 using Application.UseCases.Prophecies.Events;
 using Application.UseCases.Soulstones.Events;
 using AutoMapper;
@@ -44,7 +45,7 @@ public class CraftingService : ICraftingService
     private readonly IItemStatRollService _statRollService;
     private readonly ICraftingProgressionService _progressionService;
     private readonly ICraftingItemCatalogService _itemCatalogService;
-    private readonly IAchievementService _achievementService;
+    private readonly IGameEventOutbox _outbox;
     private readonly IGuildMissionService _guildMissionService;
     private readonly IMapper _mapper;
 
@@ -64,7 +65,7 @@ public class CraftingService : ICraftingService
         IItemStatRollService statRollService,
         ICraftingProgressionService progressionService,
         ICraftingItemCatalogService itemCatalogService,
-        IAchievementService achievementService,
+        IGameEventOutbox outbox,
         IGuildMissionService guildMissionService,
         IMapper mapper)
     {
@@ -83,7 +84,7 @@ public class CraftingService : ICraftingService
         _statRollService = statRollService;
         _progressionService = progressionService;
         _itemCatalogService = itemCatalogService;
-        _achievementService = achievementService;
+        _outbox = outbox;
         _guildMissionService = guildMissionService;
         _mapper = mapper;
     }
@@ -143,10 +144,14 @@ public class CraftingService : ICraftingService
             soulstoneDoubleDropChance,
             cancellationToken);
         await UpdateCharacterProfessionsAsync(characterAction.CharacterId, temperingSummary, cancellationToken);
-        await _achievementService.RecordItemsTemperedAsync(
+        await _outbox.EnqueueAsync(
+            GameEventTypes.EquipmentTempered,
+            new EquipmentTemperedPayload(
+                characterAction.CharacterId,
+                temperingSummary,
+                [.. completedItems.Select(ToOutboxEquipmentItem)]),
             characterAction.CharacterId,
-            temperingSummary,
-            completedItems,
+            null,
             cancellationToken);
         await RecordGuildCraftingContributionsAsync(
             characterAction.CharacterId,
@@ -264,7 +269,12 @@ public class CraftingService : ICraftingService
         if (!unlocked) return Response<LearnBlueprintResult>.Fail("Blueprint is already known for this recipe.");
 
         await _inventoryService.TryConsumeInventoryItemAsync(characterId, blueprintItemInstanceId, cancellationToken);
-        await _achievementService.RecordBlueprintUnlockedAsync(characterId, cancellationToken);
+        await _outbox.EnqueueAsync(
+            GameEventTypes.BlueprintUnlocked,
+            new BlueprintUnlockedPayload(characterId),
+            characterId,
+            null,
+            cancellationToken);
 
         return Response<LearnBlueprintResult>.Success(new LearnBlueprintResult(blueprint.Id, recipe.Id, recipe.Name));
     }
@@ -363,9 +373,14 @@ public class CraftingService : ICraftingService
         }
 
         await _inventoryService.AddItemsToInventory(characterId, created, cancellationToken);
-        await _achievementService.RecordItemsCraftedAsync(
+        var craftedEquipment = created.Select(x => (EquipmentInstance)x.ItemInstance).ToList();
+        await _outbox.EnqueueAsync(
+            GameEventTypes.EquipmentCrafted,
+            new EquipmentCraftedPayload(
+                characterId,
+                [.. craftedEquipment.Select(ToOutboxEquipmentItem)]),
             characterId,
-            [.. created.Select(x => (EquipmentInstance)x.ItemInstance)],
+            null,
             cancellationToken);
         var craftedAt = DateTimeOffset.UtcNow;
         await _guildMissionService.RecordContributionAsync(
@@ -377,7 +392,6 @@ public class CraftingService : ICraftingService
                 OccurredAt: craftedAt,
                 IdempotencyKey: $"craft-items:{characterId}:{recipe.Id}:{targetTier}:{created.Count}:{craftedAt:O}"),
             cancellationToken);
-
         var xpGained = craftQuantity * CraftingMasteryProgression.ExperiencePerCraft;
         mastery.Experience += xpGained;
         mastery.Level = CraftingMasteryProgression.GetLevelForExperience(mastery.Experience);
@@ -681,4 +695,18 @@ public class CraftingService : ICraftingService
     {
         return blueprint.AllowedBaseRecipeIds.Count > 0 || blueprint.AllowedRecipeTags.Count > 0;
     }
+
+    private static OutboxEquipmentItemPayload ToOutboxEquipmentItem(EquipmentInstance item) =>
+        new(
+            item.ItemBaseId,
+            item.Tier,
+            item.Rarity,
+            item.Quality,
+            item.Potential,
+            item.RecipeId,
+            item.BaseRecipeId,
+            item.BlueprintId,
+            item.AffinityTags,
+            item.SpecialModifiers,
+            item.IsMasterpiece);
 }
