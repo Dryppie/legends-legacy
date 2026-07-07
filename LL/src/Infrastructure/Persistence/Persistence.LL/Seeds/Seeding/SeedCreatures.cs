@@ -1,10 +1,13 @@
+using Domain.Models.Attributes;
 using Domain.Models.Entities.Creatures;
+using Domain.Models.Entities.Creatures.Templates;
 using Domain.Models.Entities.Creatures.Templates.Enums;
 using Domain.Models.Items;
 using Domain.Models.LootTables;
 using Domain.Models.Professions.Gathering.GatheringNodes;
 using Domain.Models.Regions;
 using Domain.Models.Regions.Areas;
+using Domain.Models.Tutorials;
 using Microsoft.EntityFrameworkCore;
 
 namespace Persistence.LL.Seeds.Seeding;
@@ -78,6 +81,7 @@ public static class SeedCreatures
         var widowStalkerId = Guid.Parse("00000000-0000-0000-0000-000000000051");
         var stonejawGrubId = Guid.Parse("00000000-0000-0000-0000-000000000052");
         var deepBurrowerId = Guid.Parse("00000000-0000-0000-0000-000000000053");
+        var trainingGoblinId = Guid.Parse("00000000-0000-0000-0000-000000000054");
         // Step 2 - Loot Tables
 
 
@@ -541,6 +545,7 @@ public static class SeedCreatures
         var widowStalkerLootTable = BuildEmptyCreatureLootTable();
         var stonejawGrubLootTable = BuildEmptyCreatureLootTable();
         var deepBurrowerLootTable = BuildEmptyCreatureLootTable();
+        var trainingGoblinLootTable = BuildEmptyCreatureLootTable();
         // Loot tables
         await context.LootTables.AddRangeAsync(goblinLootTable, goblinWarriorLootTable, goblinArcherLootTable, largeRatLootTable);
         await context.LootTables.AddRangeAsync(flameImpLootTable, frostImpLootTable, shadowImpLootTable, vampireBatLootTable);
@@ -566,7 +571,8 @@ public static class SeedCreatures
             caveLeechLootTable,
             widowStalkerLootTable,
             stonejawGrubLootTable,
-            deepBurrowerLootTable);
+            deepBurrowerLootTable,
+            trainingGoblinLootTable);
 
         // Step 5 - Create creatures
         var lumoRuinsCreatures = new List<Creature>
@@ -658,6 +664,20 @@ public static class SeedCreatures
             new() { Id = deepBurrowerId, Name = "Deep Burrower", ImagePath = "deep_burrower", LootTableId = deepBurrowerLootTable.Id, ExperienceReward = 25, Archetype = CreatureArchetype.Bruiser },
         };
 
+        var tutorialCreatures = new List<Creature>
+        {
+            new()
+            {
+                Id = trainingGoblinId,
+                Name = "Training Goblin",
+                ImagePath = "goblin",
+                LootTableId = trainingGoblinLootTable.Id,
+                ExperienceReward = 1,
+                Archetype = CreatureArchetype.Balanced,
+                StatOverrides = BuildTrainingGoblinStatOverrides()
+            }
+        };
+
         await context.Creatures.AddRangeAsync(lumoRuinsCreatures);
         await context.Creatures.AddRangeAsync(bloodGroveCreatures);
         await context.Creatures.AddRangeAsync(crystalCreekCreatures);
@@ -667,10 +687,16 @@ public static class SeedCreatures
         await context.Creatures.AddRangeAsync(forgottenRuinsCreatures);
         await context.Creatures.AddRangeAsync(futureRegionOneCreatures);
         await context.Creatures.AddRangeAsync(remainingRegionOneIdleCreatures);
+        await context.Creatures.AddRangeAsync(tutorialCreatures);
 
 
         // Step 6 - Create area
         var lumoRuinsAreaId = "region_01_area_01";
+        var trainingGroundsAreaCreatures = new List<AreaCreature>
+        {
+            new AreaCreature() { AreaId = TutorialConstants.TrainingGroundsAreaId, CreatureId = trainingGoblinId, WeightedSpawnRate = 1f },
+        };
+
         var lumoRuinsAreaCreatures = new List<AreaCreature>
         {
             new AreaCreature() { AreaId = lumoRuinsAreaId, CreatureId = goblinId, WeightedSpawnRate = 0.70f },
@@ -815,6 +841,18 @@ public static class SeedCreatures
 
             var areas = new List<Area>()
             {
+                new Area
+                {
+                    Id = TutorialConstants.TrainingGroundsAreaId,
+                    Name = "Training Area",
+                    LevelRequirement = 1,
+                    Creatures = trainingGroundsAreaCreatures,
+                    SpawnProbabilities =
+                    [
+                        1f
+                    ],
+                    DifficultyTier = 0,
+                },
                 new Area
                 {
                     Id = lumoRuinsAreaId, // region, [area, dungeon, raid, or rift], area
@@ -995,6 +1033,8 @@ public static class SeedCreatures
         }
 
         var changed = false;
+        changed |= await EnsureTutorialTrainingGroundsAsync(context, shenic);
+
         var creatureSeeds = BuildRemainingRegionOneIdleCreatureSeeds();
         var creatureIds = creatureSeeds.Select(creature => creature.Id).ToArray();
         var existingCreatureIds = await context.Creatures
@@ -1100,6 +1140,93 @@ public static class SeedCreatures
         return changed;
     }
 
+    private static async Task<bool> EnsureTutorialTrainingGroundsAsync(LLDbContext context, Region shenic)
+    {
+        var changed = false;
+        var trainingGoblinId = Guid.Parse("00000000-0000-0000-0000-000000000054");
+        var trainingGoblin = await context.Creatures
+            .Include(creature => creature.StatOverrides)
+            .FirstOrDefaultAsync(creature => creature.Id == trainingGoblinId);
+
+        if (trainingGoblin is null)
+        {
+            var lootTable = BuildEmptyCreatureLootTable();
+            context.LootTables.Add(lootTable);
+            context.Creatures.Add(new Creature
+            {
+                Id = trainingGoblinId,
+                Name = "Training Goblin",
+                ImagePath = "goblin",
+                LootTableId = lootTable.Id,
+                ExperienceReward = 1,
+                Archetype = CreatureArchetype.Balanced,
+                StatOverrides = BuildTrainingGoblinStatOverrides()
+            });
+            changed = true;
+        }
+        else if (SynchronizeTrainingGoblinStatOverrides(trainingGoblin))
+        {
+            changed = true;
+        }
+
+        var trainingGrounds = await context.Areas
+            .Include(area => area.Creatures)
+            .FirstOrDefaultAsync(area => area.Id == TutorialConstants.TrainingGroundsAreaId);
+
+        if (trainingGrounds is null)
+        {
+            shenic.Areas.Add(new Area
+            {
+                Id = TutorialConstants.TrainingGroundsAreaId,
+                Name = "Training Area",
+                LevelRequirement = 1,
+                DifficultyTier = 0,
+                SpawnProbabilities = [1f],
+                Creatures =
+                [
+                    new AreaCreature
+                    {
+                        AreaId = TutorialConstants.TrainingGroundsAreaId,
+                        CreatureId = trainingGoblinId,
+                        WeightedSpawnRate = 1f
+                    }
+                ]
+            });
+            return true;
+        }
+
+        if (trainingGrounds.Name != "Training Area"
+            || trainingGrounds.LevelRequirement != 1
+            || trainingGrounds.DifficultyTier != 0
+            || !trainingGrounds.SpawnProbabilities.SequenceEqual(new List<float> { 1f }))
+        {
+            trainingGrounds.Name = "Training Area";
+            trainingGrounds.LevelRequirement = 1;
+            trainingGrounds.DifficultyTier = 0;
+            trainingGrounds.SpawnProbabilities = [1f];
+            changed = true;
+        }
+
+        var areaCreature = trainingGrounds.Creatures.FirstOrDefault(creature => creature.CreatureId == trainingGoblinId);
+        if (areaCreature is null)
+        {
+            trainingGrounds.Creatures.Add(new AreaCreature
+            {
+                AreaId = TutorialConstants.TrainingGroundsAreaId,
+                CreatureId = trainingGoblinId,
+                WeightedSpawnRate = 1f
+            });
+            changed = true;
+        }
+        else if (Math.Abs(areaCreature.WeightedSpawnRate - 1f) > 0.0001f)
+        {
+            areaCreature.WeightedSpawnRate = 1f;
+            changed = true;
+        }
+
+        return changed;
+    }
+
     private static IReadOnlyList<RegionOneCreatureSeed> BuildRemainingRegionOneIdleCreatureSeeds() =>
     [
         new(Guid.Parse("00000000-0000-0000-0000-000000000036"), "Giant Spider", "giant_spider", 18, CreatureArchetype.Bruiser),
@@ -1186,6 +1313,42 @@ public static class SeedCreatures
             Id = Guid.NewGuid(),
             Entries = [legendaryTable]
         };
+    }
+
+    private static List<StatOverride> BuildTrainingGoblinStatOverrides() =>
+    [
+        new() { AttributeType = AttributeType.MaxHealth, Multiplier = 0.20f },
+        new() { AttributeType = AttributeType.Power, Multiplier = 0.10f },
+        new() { AttributeType = AttributeType.WeaponDamage, Multiplier = 0.10f },
+        new() { AttributeType = AttributeType.Precision, Multiplier = 0.50f }
+    ];
+
+    private static bool SynchronizeTrainingGoblinStatOverrides(Creature trainingGoblin)
+    {
+        var changed = false;
+        var expected = BuildTrainingGoblinStatOverrides();
+
+        foreach (var expectedOverride in expected)
+        {
+            var existing = trainingGoblin.StatOverrides
+                .FirstOrDefault(statOverride => statOverride.AttributeType == expectedOverride.AttributeType);
+
+            if (existing is null)
+            {
+                trainingGoblin.StatOverrides.Add(expectedOverride);
+                changed = true;
+                continue;
+            }
+
+            if (existing.Multiplier != expectedOverride.Multiplier || existing.Additive != expectedOverride.Additive)
+            {
+                existing.Multiplier = expectedOverride.Multiplier;
+                existing.Additive = expectedOverride.Additive;
+                changed = true;
+            }
+        }
+
+        return changed;
     }
 
     private static LootTable BuildGatheringLootTable(

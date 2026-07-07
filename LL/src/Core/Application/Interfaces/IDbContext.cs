@@ -21,6 +21,7 @@ using Domain.Models.Items.Equipments.Slots;
 using Domain.Models.Items.EssenceItems;
 using Domain.Models.LootTables;
 using Domain.Models.MarketPlaces;
+using Domain.Models.Outbox;
 using Domain.Models.Professions;
 using Domain.Models.Professions.Crafting;
 using Domain.Models.Prophecies;
@@ -28,6 +29,7 @@ using Domain.Models.Regions;
 using Domain.Models.Regions.Areas;
 using Domain.Models.Snapshots;
 using Domain.Models.Soulstones;
+using Domain.Models.Tutorials;
 using Domain.Models.Users;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
@@ -37,6 +39,7 @@ namespace Application.Common.Interfaces;
 public interface IDbContext
 {
     DbSet<AchievementDefinition> AchievementDefinitions { get; }
+    DbSet<AchievementEventLedger> AchievementEventLedgers { get; }
     DbSet<PlayerAchievementProgress> PlayerAchievementProgresses { get; }
     DbSet<TitleDefinition> TitleDefinitions { get; }
     DbSet<PlayerTitleUnlock> PlayerTitleUnlocks { get; }
@@ -62,6 +65,7 @@ public interface IDbContext
     DbSet<TournamentRewardGrant> TournamentRewardGrants { get; }
     DbSet<Character> Characters { get; }
     DbSet<CharacterSoulstoneUpgrade> CharacterSoulstoneUpgrades { get; }
+    DbSet<CharacterTutorialProgress> CharacterTutorialProgresses { get; }
     DbSet<Creature> Creatures { get; }
     //DbSet<Echo> Echoes { get; }
     DbSet<Entity> Entities { get; }
@@ -106,6 +110,8 @@ public interface IDbContext
     DbSet<LootTableItem> LootTableItems { get; }
 
     DbSet<MarketPlaceListing> MarketPlaceListings { get; }
+    DbSet<GameEventOutboxMessage> GameEventOutboxMessages { get; }
+    DbSet<GameEventOutboxDelivery> GameEventOutboxDeliveries { get; }
     //DbSet<Party> Parties { get; }
     //DbSet<PartyMember> PartyMembers { get; }
     DbSet<Profession> Professions { get; }

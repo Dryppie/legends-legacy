@@ -56,6 +56,12 @@ export class DropdownComponent<T = unknown> implements OnDestroy {
   /** Whether the parent considers this the active/main selection. */
   @Input() selected = false;
 
+  /** Optional tour marker applied to the rendered overlay menu. */
+  @Input() tourMenuId: string | null = null;
+
+  /** Optional tour marker applied to selectable overlay options. */
+  @Input() tourOptionId: string | null = null;
+
   @Output() readonly selection = new EventEmitter<DropdownSelection<T>>();
 
   readonly open = signal(false);
@@ -150,6 +156,7 @@ export class DropdownComponent<T = unknown> implements OnDestroy {
     // Toggle our own dropdown.
     const nowOpen = !this.open();
     this.open.set(nowOpen);
+    this.notifyTourLayoutChange();
 
     if (!nowOpen) {
       // We just closed ourselves → inform registry.
@@ -188,12 +195,14 @@ export class DropdownComponent<T = unknown> implements OnDestroy {
     this.close();
     this.registry.clear(this);
     this.selection.emit({ main: option.value, sub: null });
+    this.notifyTourLayoutChange();
   }
 
   onSubOptionClick(sub: string): void {
     this.close();
     this.registry.clear(this);
     this.selection.emit({ main: this.value, sub });
+    this.notifyTourLayoutChange();
   }
 
   onOptionKeydown(event: KeyboardEvent, option: DropdownOption<T>): void {
@@ -226,6 +235,13 @@ export class DropdownComponent<T = unknown> implements OnDestroy {
   close(): void {
     this.open.set(false);
     this.hoveredOptionIndex.set(null);
+    this.notifyTourLayoutChange();
+  }
+
+  private notifyTourLayoutChange(): void {
+    requestAnimationFrame(() =>
+      window.dispatchEvent(new CustomEvent('ll-tour-layout-change')),
+    );
   }
 
   /* --------------------------------------------------------------------

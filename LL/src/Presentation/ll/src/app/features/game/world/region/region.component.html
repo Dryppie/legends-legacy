@@ -1,3 +1,17 @@
+<ng-container
+  *ngIf="
+    combatStateService.getIsCombatActive(trainingBattleType)() as isTrainingBattleActive;
+    else regionView
+  "
+>
+  <app-combat
+    class="flex h-full w-full"
+    [battleType]="trainingBattleType"
+    (skipBattle)="closeTrainingSummary()"
+  ></app-combat>
+</ng-container>
+
+<ng-template #regionView>
 <div class="flex h-full w-full flex-col gap-4 overflow-hidden pr-4">
   <section class="ll-panel p-4" *ngIf="region">
     <div class="ll-eyebrow">Region</div>
@@ -42,3 +56,4 @@
     </app-tab>
   </app-tabs>
 </div>
+</ng-template>

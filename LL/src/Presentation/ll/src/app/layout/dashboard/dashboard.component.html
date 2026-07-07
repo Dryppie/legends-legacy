@@ -31,34 +31,66 @@
             <div
               class="flex h-full min-h-0 w-full flex-col overflow-hidden pb-4 pl-4 sm:pb-6 sm:pl-6"
             >
-              <app-current-action
-                *ngIf="displayCurrentAction"
-                class="mb-2 block shrink-0 pr-4 sm:hidden"
-                (click)="navigateToAction()"
-              ></app-current-action>
-              <div
-                *ngIf="isResolvingAction"
-                class="ll-panel mb-2 flex shrink-0 items-center gap-3 px-4 py-3 pr-4 text-sm text-white sm:mr-4"
-              >
-                <span
-                  class="h-3 w-3 shrink-0 animate-pulse rounded-full bg-primary"
-                  aria-hidden="true"
-                ></span>
-                <div class="min-w-0">
-                  <p class="font-bold">Catching up offline progress</p>
-                  <p class="ll-copy text-xs">
-                    Resolving stored actions and rewards.
-                  </p>
+              <ng-container *ngIf="bootstrapLoaded(); else bootstrapPending">
+                <app-current-action
+                  *ngIf="displayCurrentAction"
+                  class="mb-2 block shrink-0 pr-4 sm:hidden"
+                  (click)="navigateToAction()"
+                ></app-current-action>
+                <div
+                  *ngIf="isResolvingAction"
+                  class="ll-panel mb-2 flex shrink-0 items-center gap-3 px-4 py-3 pr-4 text-sm text-white sm:mr-4"
+                >
+                  <span
+                    class="h-3 w-3 shrink-0 animate-pulse rounded-full bg-primary"
+                    aria-hidden="true"
+                  ></span>
+                  <div class="min-w-0">
+                    <p class="font-bold">Catching up offline progress</p>
+                    <p class="ll-copy text-xs">
+                      Resolving stored actions and rewards.
+                    </p>
+                  </div>
                 </div>
-              </div>
-              <div class="min-h-0 flex-1 overflow-hidden">
-                <ng-container *ngIf="combatVisible$ | async; else mainView">
-                  <app-combat></app-combat>
-                </ng-container>
-                <ng-template #mainView>
-                  <router-outlet></router-outlet>
-                </ng-template>
-              </div>
+                <app-tutorial-quest class="block shrink-0"></app-tutorial-quest>
+                <div class="min-h-0 flex-1 overflow-hidden">
+                  <ng-container *ngIf="combatVisible$ | async; else mainView">
+                    <app-combat></app-combat>
+                  </ng-container>
+                  <ng-template #mainView>
+                    <router-outlet></router-outlet>
+                  </ng-template>
+                </div>
+              </ng-container>
+              <ng-template #bootstrapPending>
+                <div
+                  class="ll-panel mr-4 flex shrink-0 items-center justify-between gap-4 px-4 py-3 text-sm text-white"
+                >
+                  <div class="flex min-w-0 items-center gap-3">
+                    <span
+                      *ngIf="bootstrapLoading()"
+                      class="h-3 w-3 shrink-0 animate-pulse rounded-full bg-primary"
+                      aria-hidden="true"
+                    ></span>
+                    <div class="min-w-0">
+                      <p class="font-bold">
+                        {{ bootstrapError() ? 'Game state unavailable' : 'Entering the game' }}
+                      </p>
+                      <p class="ll-copy text-xs">
+                        {{ bootstrapError() || 'Loading character, tutorial, and current action.' }}
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    *ngIf="bootstrapError()"
+                    type="button"
+                    class="ll-button-secondary shrink-0 px-3 py-1.5 text-xs"
+                    (click)="retryBootstrap()"
+                  >
+                    Retry
+                  </button>
+                </div>
+              </ng-template>
             </div>
           </main>
         </div>

@@ -1,0 +1,59 @@
+[
+  {
+    "element": "[data-tour=essence-archive-list]",
+    "title": "1. Soul Archive",
+    "description": "Absorbed Essences appear here. Select your Goblin Essence if you want to inspect its abilities.",
+    "position": "right"
+  },
+  {
+    "element": "[data-tour=essence-loadouts]",
+    "title": "2. Loadouts",
+    "description": "Loadouts decide which absorbed Essences are active in combat.",
+    "position": "left"
+  },
+  {
+    "kind": "click",
+    "element": "[data-tour=essence-loadout-slots]",
+    "includeSelectors": ["[data-tour=essence-loadout-slot-menu]"],
+    "advanceOn": {
+      "event": "pointerdown",
+      "selector": "[data-tour=essence-loadout-slot-option]"
+    },
+    "title": "3. Slots",
+    "description": "Place the Goblin Essence into an empty slot.",
+    "position": "left"
+  },
+  {
+    "kind": "click",
+    "element": "[data-tour=essence-loadout-save]",
+    "actionSelector": "[data-tour=essence-loadout-save]",
+    "title": "4. Save",
+    "description": "Save your loadout changes.",
+    "position": "top"
+  },
+  {
+    "kind": "click",
+    "element": "[data-tour=essence-loadout-activate]",
+    "actionSelector": "[data-tour=essence-loadout-activate]",
+    "title": "5. Activate",
+    "description": "Activate the saved loadout.",
+    "position": "top"
+  },
+  {
+    "kind": "waitForState",
+    "element": "[data-tour=essence-loadout-activate]",
+    "stateKey": "tutorial.crafting.ready",
+    "title": "6. Loadout ready",
+    "description": "Your Essence loadout is being activated.",
+    "position": "top"
+  },
+  {
+    "kind": "navigate",
+    "element": "[data-tour=tutorial-quest-action]",
+    "actionSelector": "[data-tour=tutorial-quest-action]",
+    "route": "/game/professions/crafting",
+    "title": "7. Crafting",
+    "description": "Open Crafting to receive your tutorial equipment.",
+    "position": "right"
+  }
+]

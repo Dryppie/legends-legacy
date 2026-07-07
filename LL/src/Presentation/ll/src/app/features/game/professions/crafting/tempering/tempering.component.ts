@@ -8,7 +8,6 @@ import { InventoryStateService } from '../../../../../core/services/api/inventor
 import { InventoryItem } from '../../../../../shared/models/inventoryItem';
 import { ItemComponent } from '../../../../../shared/components/item/item.component';
 import { EquipmentDisplayComponent } from '../../../../../shared/components/equipment/equipment-display/equipment-display.component';
-import { TourService } from '../../../../../core/services/client-side/tutorial-tour/tour.service';
 import { EquipmentType } from '../../../../../shared/models/enums/equipmentType';
 import { CharacterActionsStateService } from '../../../../../core/services/api/character-actions/character-actions.state.service';
 import { CharacterActionType } from '../../../../../shared/models/enums/characterActionType';
@@ -97,7 +96,6 @@ export class TemperingComponent {
     private readonly inventoryState: InventoryStateService,
     private readonly craftingService: CraftingService,
     private readonly characterActionsState: CharacterActionsStateService,
-    private readonly tour: TourService,
   ) {
     this.craftingQueue = toSignal(this.craftingService.craftingQueue$, {
       initialValue: [] as CraftingQueueItem[],
@@ -115,8 +113,6 @@ export class TemperingComponent {
       },
       { allowSignalWrites: true },
     );
-
-    this.tour.start('tempering');
   }
 
   selectItem(e: ItemInstance): void {

@@ -1,0 +1,29 @@
+[
+  {
+    "element": "[data-tour=your-combat-stats]",
+    "title": "1. Your side",
+    "description": "This side shows you a combat summary of you and your opponents' actions.",
+    "position": "bottom"
+  },
+  {
+    "element": "[data-tour=enemy-combat-stats]",
+    "title": "2. Enemy side",
+    "description": "This side shows the creature you fought. The Training Area creature is intentionally weak so you can learn the flow.",
+    "position": "bottom"
+  },
+  {
+    "element": "[data-tour=current-combat-summary]",
+    "title": "3. Combat summary",
+    "description": "The summary lists damage, healing, and ability usage.",
+    "position": "bottom"
+  },
+  {
+    "id": "open-essences",
+    "kind": "click",
+    "element": "[data-tour=tutorial-quest-action]",
+    "actionSelector": "[data-tour=tutorial-quest-action]",
+    "title": "4. Open Essences",
+    "description": " You just received an unbound Essence from winning the fight. Click Open Essences to absorb the Essence.",
+    "position": "bottom"
+  }
+]

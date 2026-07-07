@@ -4,23 +4,30 @@
   <!-- ESSENCE DESCRIPTION -->
   <div class="flex h-full w-full flex-col space-y-2 overflow-y-auto md:order-2">
     <!-- ESSENCE DESCRIPTION -->
-    <div class="ll-panel p-4">
+    <div class="ll-panel p-4" data-tour="essence-absorb-details">
       <ng-container
         *ngIf="
           essenceState.selectedInventoryEssence() as selectedEssence;
           else noEssence
         "
       >
-        <app-essence-details [essence]="selectedEssence"></app-essence-details>
-        <div class="mt-4 flex items-center justify-between gap-2">
+        <div data-tour="essence-absorb-details-content">
+          <app-essence-details [essence]="selectedEssence"></app-essence-details>
+        </div>
+        <div
+          class="mt-4 flex items-center justify-between gap-2"
+          data-tour="essence-absorb-actions"
+        >
           <ng-container
             *ngIf="
               !essenceState.isSelectedInventoryEssenceAbsorbed();
               else essenceIsAbsorbed
             "
           >
-            <app-regular-button (pressed)="absorb()" text="Absorb essence">
-            </app-regular-button>
+            <span class="inline-block" data-tour="essence-absorb-action">
+              <app-regular-button (pressed)="absorb()" text="Absorb essence">
+              </app-regular-button>
+            </span>
           </ng-container>
           <ng-template #essenceIsAbsorbed>
             <span class="ll-state ll-state-danger">
@@ -41,12 +48,16 @@
     </div>
   </div>
   <!-- INVENTORY ESSENCES LIST -->
-  <div class="flex h-full w-full flex-col space-y-2 overflow-y-auto md:order-1">
+  <div
+    class="flex h-full w-full flex-col space-y-2 overflow-y-auto md:order-1"
+    data-tour="inventory-essences-list"
+  >
     <app-selectable-list-filter
       [storageKey]="'essences-absorb'"
       [items]="essenceState.inventoryEssences()"
       [selectedItem]="essenceState.selectedInventoryItem()"
       [filterOptions]="essenceFilters"
+      tourItemId="inventory-essence-item"
       (select)="selectEssence($event)"
     >
       <!-- How *one* essence row looks -->

@@ -1,10 +1,11 @@
+using Application.Interfaces.Outbox;
 using Application.Interfaces.Services.LL;
-using Application.Interfaces.Services.LL.Achievements;
 using Application.Interfaces.Services.LL.Dungeons;
 using Application.Interfaces.Services.LL.Entities;
 using Application.MediatR.Markers;
 using Application.UseCases.Dungeons.Dtos;
 using Application.UseCases.Inventories.Dtos;
+using Application.UseCases.Outbox;
 using AutoMapper;
 using Common.Primitives;
 using Domain.Components.Attributes;
@@ -23,7 +24,7 @@ public class StartDungeonRunCommandHandler : IRequestHandler<StartDungeonRunComm
     private readonly IDungeonAccessPolicy _dungeonAccess;
     private readonly ICharacterService _characters;
     private readonly IInventoryService _inventoryService;
-    private readonly IAchievementService _achievementService;
+    private readonly IGameEventOutbox _outbox;
 
     public StartDungeonRunCommandHandler(
         IMapper mapper,
@@ -32,7 +33,7 @@ public class StartDungeonRunCommandHandler : IRequestHandler<StartDungeonRunComm
         IDungeonAccessPolicy dungeonAccess,
         ICharacterService characters,
         IInventoryService inventoryService,
-        IAchievementService achievementService)
+        IGameEventOutbox outbox)
     {
         _mapper = mapper;
         _dungeonRunService = dungeonRunService;
@@ -40,7 +41,7 @@ public class StartDungeonRunCommandHandler : IRequestHandler<StartDungeonRunComm
         _dungeonAccess = dungeonAccess;
         _characters = characters;
         _inventoryService = inventoryService;
-        _achievementService = achievementService;
+        _outbox = outbox;
     }
 
     public async Task<Response<StartDungeonRunResponseDto>> Handle(StartDungeonRunCommand request, CancellationToken cancellationToken)
@@ -65,7 +66,12 @@ public class StartDungeonRunCommandHandler : IRequestHandler<StartDungeonRunComm
         if (dungeon == null)
             return Response<StartDungeonRunResponseDto>.Fail("You already have an ongoing dungeon run.");
 
-        await _achievementService.RecordDungeonRunStartedAsync(request.CharacterId, cancellationToken);
+        await _outbox.EnqueueAsync(
+            GameEventTypes.DungeonRunStarted,
+            new DungeonRunStartedPayload(request.CharacterId),
+            request.CharacterId,
+            null,
+            cancellationToken);
 
         var inventory = await _inventoryService.GetInventoryByIdAsync(request.CharacterId, cancellationToken);
 

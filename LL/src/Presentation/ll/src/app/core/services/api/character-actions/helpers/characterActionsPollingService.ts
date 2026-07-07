@@ -6,6 +6,7 @@ import {
   timer,
   mergeMap,
   Observable,
+  of,
 } from 'rxjs';
 import { environment } from '../../../../../../environments/environment';
 import { CharacterActionDto } from '../../../../../shared/models/Dtos/characterActionDto';
@@ -34,10 +35,14 @@ export class CharacterActionsPollingService {
   start(
     fetch: () => Observable<CharacterActionDto | null>,
     onUpdate: (action: CharacterActionDto | null) => void,
+    initialAction?: CharacterActionDto | null,
   ): void {
     this.stop(); // ensure only one poller is active
 
-    this.sub = fetch()
+    const firstAction$ =
+      initialAction === undefined ? fetch() : of(initialAction);
+
+    this.sub = firstAction$
       .pipe(
         expand((action) => {
           if (

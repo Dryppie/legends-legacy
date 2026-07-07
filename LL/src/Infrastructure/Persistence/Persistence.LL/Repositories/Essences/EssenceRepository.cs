@@ -41,12 +41,23 @@ public sealed class EssenceRepository : IEssenceRepository
             .Select(x => x.Level)
             .FirstOrDefaultAsync(cancellationToken);
 
-    public async Task<List<PlayerEssence>> GetPlayerEssencesAsync(Guid characterId, CancellationToken cancellationToken) =>
-        await _context.PlayerEssences
+    public async Task<List<PlayerEssence>> GetPlayerEssencesAsync(Guid characterId, CancellationToken cancellationToken)
+    {
+        var persistedEssences = await _context.PlayerEssences
             .Where(x => x.CharacterId == characterId)
             .OrderByDescending(x => x.IsFavorite)
             .ThenBy(x => x.EssenceDefinitionId)
             .ToListAsync(cancellationToken);
+
+        var trackedEssences = _context.PlayerEssences.Local
+            .Where(x => x.CharacterId == characterId && !persistedEssences.Any(persisted => persisted.Id == x.Id));
+
+        return persistedEssences
+            .Concat(trackedEssences)
+            .OrderByDescending(x => x.IsFavorite)
+            .ThenBy(x => x.EssenceDefinitionId)
+            .ToList();
+    }
 
     public async Task<PlayerEssence?> GetPlayerEssenceAsync(Guid characterId, Guid playerEssenceId, CancellationToken cancellationToken) =>
         await _context.PlayerEssences.FirstOrDefaultAsync(x => x.Id == playerEssenceId && x.CharacterId == characterId, cancellationToken);

@@ -1,0 +1,30 @@
+[
+  {
+    "element": "[data-tour=essence-view-tabs]",
+    "title": "1. Absorb tab",
+    "description": "Use the Absorb tab to turn unbound Essence items into permanent Soul Archive entries.",
+    "position": "bottom"
+  },
+  {
+    "kind": "click",
+    "element": "[data-tour=inventory-essences-list]",
+    "actionSelector": "[data-tour=inventory-essence-item]",
+    "title": "2. Essence inventory",
+    "description": "Select the Essence you received from the Training Area.",
+    "position": "right"
+  },
+  {
+    "element": "[data-tour=essence-absorb-details-content]",
+    "title": "3. Essence details",
+    "description": "Review the Essence here before absorbing it.",
+    "position": "left"
+  },
+  {
+    "kind": "click",
+    "element": "[data-tour=essence-absorb-action]",
+    "actionSelector": "[data-tour=essence-absorb-action]",
+    "title": "4. Absorb",
+    "description": "Press Absorb to bind the Essence to your character.",
+    "position": "top"
+  }
+]

@@ -112,7 +112,11 @@ export class CharacterActionsStateService {
     this.startPolling();
   }
 
-  private startPolling(): void {
+  initializeFromBootstrap(action: CharacterActionDto | null): void {
+    this.startPolling(action);
+  }
+
+  private startPolling(initialAction?: CharacterActionDto | null): void {
     this._startTime.set(Date.now());
     this.polling.start(
       () =>
@@ -127,6 +131,7 @@ export class CharacterActionsStateService {
       (action) => {
         this.applyActionUpdate(action);
       },
+      initialAction,
     );
   }
 
@@ -292,6 +297,8 @@ export class CharacterActionsStateService {
     this._currentAction.set(action);
     if (action) {
       this.persistence.set(action.characterActionType);
+    } else {
+      this.persistence.clear();
     }
   }
 

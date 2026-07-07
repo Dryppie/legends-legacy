@@ -1,0 +1,24 @@
+[
+  {
+    "id": "open-equipment-tab",
+    "kind": "click",
+    "element": "[data-tour=inventory-tabs]",
+    "actionSelector": "[data-tour=inventory-tab-equipment]",
+    "restoreOnBack": {
+      "type": "click",
+      "selector": "[data-tour=inventory-tab-all]"
+    },
+    "title": "1. Equipment tab",
+    "description": "Click Equipment to find the Tutorial Chest.",
+    "position": "bottom"
+  },
+  {
+    "id": "find-tutorial-equipment",
+    "kind": "click",
+    "element": "[data-tour=inventory-items]",
+    "actionSelector": "[data-tour=inventory-equipment-item]",
+    "title": "2. Inventory items",
+    "description": "Your Tutorial Chest is listed here. Select it to open its equipment details.",
+    "position": "right"
+  }
+]

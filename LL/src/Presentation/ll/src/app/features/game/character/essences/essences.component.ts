@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { ScrollingModule } from '@angular/cdk/scrolling';
-import { Component, computed, OnInit, signal } from '@angular/core';
+import { Component, computed, effect, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { EssenceStateService } from '../../../../core/services/api/essences/essence-state.service';
 import { DefaultHeaderComponent } from '../../../../shared/components/default-header/default-header.component';
@@ -17,6 +17,11 @@ import {
   DropdownOption,
   DropdownSelection,
 } from '../../../../shared/components/custom-components/dropdown/dropdown.component';
+import { TutorialStateService } from '../../../../core/services/api/tutorial/tutorial-state.service';
+import {
+  TUTORIAL_STEP_ABSORB_ESSENCE,
+  TUTORIAL_STEP_EQUIP_ESSENCE,
+} from '../../../../shared/models/tutorial';
 
 type ArchiveFilter = 'all' | 'favorites' | 'attuned' | 'inactive';
 type ArchiveSort = 'name' | 'level' | 'tier';
@@ -109,7 +114,27 @@ export class EssencesComponent implements OnInit {
       });
   });
 
-  constructor(public readonly essenceState: EssenceStateService) {}
+  constructor(
+    public readonly essenceState: EssenceStateService,
+    private readonly tutorialState: TutorialStateService,
+  ) {
+    effect(
+      () => {
+        const tutorial = this.tutorialState.state();
+        if (!tutorial || tutorial.isCompleted) return;
+
+        if (tutorial.currentStep === TUTORIAL_STEP_ABSORB_ESSENCE) {
+          this.essenceState.setActiveView('absorb');
+          return;
+        }
+
+        if (tutorial.currentStep === TUTORIAL_STEP_EQUIP_ESSENCE) {
+          this.essenceState.setActiveView('archive');
+        }
+      },
+      { allowSignalWrites: true },
+    );
+  }
 
   public ngOnInit(): void {
     this.essenceState.refresh();

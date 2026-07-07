@@ -1,6 +1,7 @@
 import { Injectable, computed, signal } from '@angular/core';
 import { EMPTY, forkJoin, Observable, catchError, tap } from 'rxjs';
 import { InventoryStateService } from '../inventory/inventory-state.service';
+import { TutorialStateService } from '../tutorial/tutorial-state.service';
 import { EssencesService } from './essences.service';
 import { EssenceItemViewService } from './essence-item-view.service';
 import { Essence } from '../../../../shared/models/essence';
@@ -138,6 +139,7 @@ export class EssenceStateService {
     private readonly essencesService: EssencesService,
     private readonly inventoryState: InventoryStateService,
     private readonly essenceItemView: EssenceItemViewService,
+    private readonly tutorialState: TutorialStateService,
   ) {}
 
   setActiveView(view: EssenceView): void {
@@ -221,6 +223,7 @@ export class EssenceStateService {
         }
 
         this.applyEssenceMutation(response);
+        this.tutorialState.refreshAfterOutboxProgress();
         this._selectedInventoryItemId.set(
           this.getFirstAbsorbableInventoryEssenceId(),
         );
@@ -312,7 +315,9 @@ export class EssenceStateService {
   activateSelectedLoadout(): void {
     const id = this._selectedLoadoutId();
     if (!id) return;
-    this.essencesService.activateLoadout(id).subscribe(() => this.refresh());
+    this.essencesService.activateLoadout(id).subscribe(() => {
+      this.refresh();
+    });
   }
 
   deleteSelectedLoadout(): void {

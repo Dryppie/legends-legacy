@@ -1,0 +1,17 @@
+{
+  "title": "First Steps - Essence Loadout",
+  "sections": [
+    {
+      "heading": "Attuning an Essence",
+      "body": "Absorbing an Essence unlocks it, but it does not help in combat until it is placed in an active loadout."
+    },
+    {
+      "heading": "What to do",
+      "body": "Find the Loadouts panel, place the Goblin Essence into an open slot, save the loadout, and make sure the loadout is active."
+    },
+    {
+      "heading": "Why it matters",
+      "body": "After this step, the tutorial points you to Crafting to receive your practice gear. The Essence and tutorial gear together prepare you for Lumo Ruins."
+    }
+  ]
+}

@@ -114,6 +114,36 @@ namespace Persistence.LL.Migrations
                     b.ToTable("AchievementDefinitions");
                 });
 
+            modelBuilder.Entity("Domain.Models.Achievements.AchievementEventLedger", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("CharacterId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("EventType")
+                        .IsRequired()
+                        .HasMaxLength(160)
+                        .HasColumnType("character varying(160)");
+
+                    b.Property<Guid>("OutboxMessageId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("ProcessedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OutboxMessageId")
+                        .IsUnique();
+
+                    b.HasIndex("CharacterId", "ProcessedAt");
+
+                    b.ToTable("AchievementEventLedgers", (string)null);
+                });
+
             modelBuilder.Entity("Domain.Models.Achievements.PlayerAchievementProgress", b =>
                 {
                     b.Property<Guid>("Id")
@@ -2309,6 +2339,104 @@ namespace Persistence.LL.Migrations
                     b.ToTable("MarketPlaceListings");
                 });
 
+            modelBuilder.Entity("Domain.Models.Outbox.GameEventOutboxDelivery", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Attempts")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTimeOffset?>("AvailableAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Consumer")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("LastError")
+                        .HasMaxLength(4000)
+                        .HasColumnType("character varying(4000)");
+
+                    b.Property<Guid>("MessageId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset?>("ProcessedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset?>("ProcessingStartedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MessageId", "Consumer")
+                        .IsUnique();
+
+                    b.HasIndex("Consumer", "Status", "AvailableAt");
+
+                    b.HasIndex("Status", "AvailableAt", "CreatedAt");
+
+                    b.ToTable("GameEventOutboxDeliveries", (string)null);
+                });
+
+            modelBuilder.Entity("Domain.Models.Outbox.GameEventOutboxMessage", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("AccountId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset?>("AvailableAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("CharacterId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("CorrelationId")
+                        .HasMaxLength(160)
+                        .HasColumnType("character varying(160)");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("EventType")
+                        .IsRequired()
+                        .HasMaxLength(160)
+                        .HasColumnType("character varying(160)");
+
+                    b.Property<string>("IdempotencyKey")
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)");
+
+                    b.Property<string>("PayloadJson")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("IdempotencyKey")
+                        .IsUnique()
+                        .HasFilter("\"IdempotencyKey\" IS NOT NULL");
+
+                    b.HasIndex("AvailableAt", "CreatedAt");
+
+                    b.HasIndex("CharacterId", "CreatedAt");
+
+                    b.ToTable("GameEventOutboxMessages", (string)null);
+                });
+
             modelBuilder.Entity("Domain.Models.Professions.Crafting.CharacterRecipeMastery", b =>
                 {
                     b.Property<Guid>("CharacterId")
@@ -2860,6 +2988,57 @@ namespace Persistence.LL.Migrations
                     b.HasKey("CharacterId", "SoulstoneUpgradeDefinitionId");
 
                     b.ToTable("CharacterSoulstoneUpgrades");
+                });
+
+            modelBuilder.Entity("Domain.Models.Tutorials.CharacterTutorialProgress", b =>
+                {
+                    b.Property<Guid>("CharacterId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("TutorialId")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<DateTimeOffset?>("CompletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("CompletionRewardGranted")
+                        .HasColumnType("boolean");
+
+                    b.Property<int>("CraftedTierOneEquipmentCount")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("CurrentStep")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<int>("EquippedTierOneEquipmentCount")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTimeOffset?>("EssenceAbsorbedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset?>("EssenceEquippedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset?>("TrainingCombatWonAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("TrainingEssenceRewardGranted")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("CharacterId", "TutorialId");
+
+                    b.HasIndex("CurrentStep");
+
+                    b.ToTable("CharacterTutorialProgresses");
                 });
 
             modelBuilder.Entity("Domain.Models.Users.AppUser", b =>
@@ -3781,6 +3960,17 @@ namespace Persistence.LL.Migrations
                     b.Navigation("ItemInstance");
                 });
 
+            modelBuilder.Entity("Domain.Models.Outbox.GameEventOutboxDelivery", b =>
+                {
+                    b.HasOne("Domain.Models.Outbox.GameEventOutboxMessage", "Message")
+                        .WithMany("Deliveries")
+                        .HasForeignKey("MessageId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Message");
+                });
+
             modelBuilder.Entity("Domain.Models.Professions.Crafting.CraftingQueueItem", b =>
                 {
                     b.HasOne("Domain.Models.CharacterActions.CharacterActionDetails.CraftingActionDetails", null)
@@ -4029,6 +4219,11 @@ namespace Persistence.LL.Migrations
                     b.Navigation("ItemInstances");
 
                     b.Navigation("LootTablesItems");
+                });
+
+            modelBuilder.Entity("Domain.Models.Outbox.GameEventOutboxMessage", b =>
+                {
+                    b.Navigation("Deliveries");
                 });
 
             modelBuilder.Entity("Domain.Models.Regions.Areas.Area", b =>

@@ -1,14 +1,22 @@
 import { NgFor, NgIf } from '@angular/common';
-import { Component, HostListener, OnInit } from '@angular/core';
+import { Component, effect, HostListener, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { Region } from '../../../../shared/models/Dtos/regionDto';
+import { Region, Area } from '../../../../shared/models/Dtos/regionDto';
 import { RegionService } from '../../../../core/services/client-side/region/region.service';
 import { CombatAreaCardComponent } from '../../../../shared/components/combat/combat-area-card/combat-area-card.component';
-import { TourService } from '../../../../core/services/client-side/tutorial-tour/tour.service';
 import { TabsComponent } from '../../../../shared/components/custom-components/tabs/tabs.component';
 import { TabComponent } from '../../../../shared/components/custom-components/tabs/tab/tab.component';
 import { RaidsComponent } from './raids/raids.component';
 import { DungeonsComponent } from './dungeons/dungeons.component';
+import { CombatComponent } from '../../../../shared/components/combat/combat.component';
+import { CombatStateService } from '../../../../core/state/combat-state/combat-state.service';
+import { BattleType } from '../../../../core/state/combat-state/combatState';
+import { CombatService } from '../../../../core/services/client-side/combat/combat.service';
+import { TutorialStateService } from '../../../../core/services/api/tutorial/tutorial-state.service';
+import {
+  TUTORIAL_STEP_DEFEAT_TRAINING_CREATURE,
+  TUTORIAL_TRAINING_GROUNDS_AREA_ID,
+} from '../../../../shared/models/tutorial';
 
 @Component({
   selector: 'app-region',
@@ -21,19 +29,34 @@ import { DungeonsComponent } from './dungeons/dungeons.component';
     TabComponent,
     RaidsComponent,
     DungeonsComponent,
+    CombatComponent,
   ],
   templateUrl: './region.component.html',
 })
 export class RegionComponent implements OnInit {
   regionId!: string;
   region!: Region; // You can define a more specific type based on your item data structure
+  private sourceRegion: Region | null = null;
+  targetAreaId: string | null = null;
+  readonly trainingBattleType = BattleType.Training;
 
   constructor(
     private route: ActivatedRoute,
     private regionService: RegionService,
-    private tour: TourService,
+    public readonly combatStateService: CombatStateService,
+    private readonly combatService: CombatService,
+    private readonly tutorialState: TutorialStateService,
   ) {
-    this.tour.start('world-page');
+    effect(() => {
+      const tutorial = this.tutorialState.state();
+      this.applyRegionView();
+      if (
+        tutorial?.currentStep === TUTORIAL_STEP_DEFEAT_TRAINING_CREATURE &&
+        !tutorial.isCompleted
+      ) {
+        this.applyRegionView();
+      }
+    });
   }
 
   ngOnInit(): void {
@@ -43,13 +66,19 @@ export class RegionComponent implements OnInit {
       this.regionId = params.get('id') ?? '';
       this.getRegionDetails(this.regionId);
     });
+
+    this.route.queryParamMap.subscribe((params) => {
+      this.targetAreaId = params.get('area');
+      this.applyRegionView();
+    });
   }
 
   ngOnDestroy(): void {}
 
   getRegionDetails(id: string) {
     this.regionService.getRegionById(id).subscribe((data: any) => {
-      this.region = data as Region;
+      this.sourceRegion = data as Region;
+      this.applyRegionView();
     });
   }
 
@@ -73,5 +102,49 @@ export class RegionComponent implements OnInit {
 
   isLastInRow(index: number): boolean {
     return (index + 1) % this.columnCount === 0;
+  }
+
+  private withTargetAreaFirst(region: Region): Region {
+    if (!this.targetAreaId) {
+      return region;
+    }
+
+    const areas = [...region.areas];
+    const targetIndex = areas.findIndex((area: Area) => area.id === this.targetAreaId);
+    if (targetIndex <= 0) {
+      return { ...region, areas };
+    }
+
+    const [targetArea] = areas.splice(targetIndex, 1);
+    return { ...region, areas: [targetArea, ...areas] };
+  }
+
+  private applyRegionView(): void {
+    if (!this.sourceRegion) {
+      return;
+    }
+
+    this.region = this.withTargetAreaFirst(
+      this.withTutorialAreaAvailability(this.sourceRegion),
+    );
+  }
+
+  private withTutorialAreaAvailability(region: Region): Region {
+    const tutorial = this.tutorialState.state();
+    const showTrainingArea =
+      tutorial?.currentStep === TUTORIAL_STEP_DEFEAT_TRAINING_CREATURE &&
+      !tutorial.isCompleted;
+
+    return {
+      ...region,
+      areas: region.areas.filter(
+        (area) =>
+          area.id !== TUTORIAL_TRAINING_GROUNDS_AREA_ID || showTrainingArea,
+      ),
+    };
+  }
+
+  closeTrainingSummary(): void {
+    this.combatService.closeCurrentTrainingBattle();
   }
 }

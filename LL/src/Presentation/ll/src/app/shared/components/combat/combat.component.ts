@@ -28,7 +28,7 @@ import { BattleType } from '../../../core/state/combat-state/combatState';
 import { CharacterActionsStateService } from '../../../core/services/api/character-actions/character-actions.state.service';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { CombatEntityStatsComponent } from './combat-entity-stats/combat-entity-stats.component';
-import { TourService } from '../../../core/services/client-side/tutorial-tour/tour.service';
+import { FirstPartyTourService } from '../../../core/services/client-side/first-party-tour/first-party-tour.service';
 
 @Component({
   selector: 'app-combat',
@@ -82,7 +82,7 @@ export class CombatComponent implements OnInit, OnDestroy {
     private readonly characterActionService: CharacterActionsStateService,
     private readonly gameService: GameService,
     public readonly combatStateService: CombatStateService,
-    private readonly tour: TourService,
+    private readonly tour: FirstPartyTourService,
   ) {
     this.currentAction = this.characterActionService.currentAction;
 
@@ -218,7 +218,8 @@ export class CombatComponent implements OnInit, OnDestroy {
       this.initiateStoppingCombat();
     } else if (
       this.battleType === BattleType.Colosseum ||
-      this.battleType === BattleType.Dungeon
+      this.battleType === BattleType.Dungeon ||
+      this.battleType === BattleType.Training
     ) {
       this.skipCombat();
     }
@@ -323,6 +324,7 @@ export class CombatComponent implements OnInit, OnDestroy {
 
     if (this.battleType === BattleType.Dungeon) return 'Dungeon Battle';
     if (this.battleType === BattleType.Colosseum) return 'Arena Battle';
+    if (this.battleType === BattleType.Training) return 'Training Battle';
 
     return 'Battle';
   }
@@ -397,7 +399,9 @@ export class CombatComponent implements OnInit, OnDestroy {
 
   ngAfterViewInit(): void {
     this.waitForTourElements().then(() => {
-      this.tour.start('combat');
+      if (this.battleType === BattleType.Training) {
+        this.tour.start('tutorial-combat');
+      }
     });
   }
 

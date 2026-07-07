@@ -13,6 +13,7 @@
       'flex-1': tabs.length < 6,
     }"
     [attr.aria-selected]="activeTab === tab"
+    [attr.data-tour]="getTourId(tab)"
     role="tab"
     (click)="setActiveTab(tab)"
   >

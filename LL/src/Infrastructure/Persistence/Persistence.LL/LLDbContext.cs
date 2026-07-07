@@ -24,6 +24,7 @@ using Domain.Models.Items.Equipments.Slots;
 using Domain.Models.Items.EssenceItems;
 using Domain.Models.LootTables;
 using Domain.Models.MarketPlaces;
+using Domain.Models.Outbox;
 using Domain.Models.Professions;
 using Domain.Models.Professions.Crafting;
 using Domain.Models.Prophecies;
@@ -31,6 +32,7 @@ using Domain.Models.Regions;
 using Domain.Models.Regions.Areas;
 using Domain.Models.Snapshots;
 using Domain.Models.Soulstones;
+using Domain.Models.Tutorials;
 using Domain.Models.Users;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
@@ -129,6 +131,7 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : DbContext(opti
     }
 
     public DbSet<AchievementDefinition> AchievementDefinitions => Set<AchievementDefinition>();
+    public DbSet<AchievementEventLedger> AchievementEventLedgers => Set<AchievementEventLedger>();
     public DbSet<PlayerAchievementProgress> PlayerAchievementProgresses => Set<PlayerAchievementProgress>();
     public DbSet<TitleDefinition> TitleDefinitions => Set<TitleDefinition>();
     public DbSet<PlayerTitleUnlock> PlayerTitleUnlocks => Set<PlayerTitleUnlock>();
@@ -155,6 +158,7 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : DbContext(opti
     public DbSet<TournamentRewardGrant> TournamentRewardGrants => Set<TournamentRewardGrant>();
     public DbSet<Character> Characters => Set<Character>();
     public DbSet<CharacterSoulstoneUpgrade> CharacterSoulstoneUpgrades => Set<CharacterSoulstoneUpgrade>();
+    public DbSet<CharacterTutorialProgress> CharacterTutorialProgresses => Set<CharacterTutorialProgress>();
     public DbSet<Creature> Creatures => Set<Creature>();
 
     //public DbSet<Echo> Echoes => Set<Echo>();
@@ -209,6 +213,8 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : DbContext(opti
     public DbSet<LootTableItem> LootTableItems => Set<LootTableItem>();
 
     public DbSet<MarketPlaceListing> MarketPlaceListings => Set<MarketPlaceListing>();
+    public DbSet<GameEventOutboxMessage> GameEventOutboxMessages => Set<GameEventOutboxMessage>();
+    public DbSet<GameEventOutboxDelivery> GameEventOutboxDeliveries => Set<GameEventOutboxDelivery>();
 
     //public DbSet<Party> Parties => Set<Party>();
 

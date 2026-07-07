@@ -66,20 +66,19 @@ export class AuthService {
 
   checkAuth(): Observable<CharacterDto | null> {
     return this.tryRefresh().pipe(
-      switchMap((expiresAt) => (expiresAt ? this.fetchCharacter() : of(null))),
-      tap((ch) => {
-        if (ch) {
+      tap((expiresAt) => {
+        if (expiresAt) {
           this.markAuthenticated();
         } else {
           this.markUnauthenticated();
         }
       }),
+      map(() => null),
     );
   }
 
   private markAuthenticated() {
     this._isAuthenticated.set(true);
-    this.event.emitFetchCurrentAction();
   }
 
   private markUnauthenticated() {
@@ -279,12 +278,7 @@ export class AuthService {
   private afterSuccessfulAuth(accessToken: string, accessExpiresAt: number) {
     this.setAccessToken(accessToken, accessExpiresAt);
     this.markAuthenticated();
-
-    // preload character, then redirect
-    this.fetchCharacter().subscribe({
-      next: () => this.router.navigateByUrl('/game'),
-      error: () => this.router.navigateByUrl('/game'),
-    });
+    this.router.navigateByUrl('/game');
   }
 
   getUserInfo(): Observable<UserInfoDto> {

@@ -5,7 +5,10 @@ import { RouterLink } from '@angular/router';
 import { DefaultHeaderComponent } from '../../../shared/components/default-header/default-header.component';
 import { AuthService } from '../../../core/services/api/auth/auth.service';
 import { ToastService } from '../../../core/services/client-side/components/toast/toast.service';
-import { GameEventDeduper } from '../../../core/services/real-time/game-event/game-event-consumer';
+import {
+  GameEventDeduper,
+  getGameEventId,
+} from '../../../core/services/real-time/game-event/game-event-consumer';
 import { GameEventService } from '../../../core/services/real-time/game-event.service';
 import { ProphecyProgressedMsg } from '../../../core/services/real-time/prophecies/prophecy-progressed';
 import {
@@ -77,6 +80,7 @@ export class PropheciesPageComponent implements OnInit, OnDestroy {
     },
   ];
   private readonly eventDeduper = new GameEventDeduper();
+  private readonly initialProgressEventId: string | null;
   private clockIntervalId: ReturnType<typeof setInterval> | null = null;
   hoveredRewardOverflowId: string | null = null;
   hoveredWeeklyMilestoneFavor: number | null = null;
@@ -111,15 +115,21 @@ export class PropheciesPageComponent implements OnInit, OnDestroy {
     private readonly authService: AuthService,
     private readonly eventService: GameEventService,
   ) {
+    this.initialProgressEventId = getGameEventId(
+      this.eventService.eventEnvelope.ProphecyProgressedMsg(),
+    );
+
     effect(
       () => {
         const characterId = this.authService.currentCharacter()?.id;
         const envelope = this.eventService.eventEnvelope.ProphecyProgressedMsg();
         const update = envelope?.payload;
+        const eventId = getGameEventId(envelope);
 
         if (
           !characterId ||
           !update ||
+          (!!eventId && eventId === this.initialProgressEventId) ||
           update.characterId !== characterId ||
           !this.eventDeduper.shouldProcess('prophecy-progressed', envelope)
         ) {

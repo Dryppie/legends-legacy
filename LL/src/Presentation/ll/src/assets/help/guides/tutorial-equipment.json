@@ -1,0 +1,17 @@
+{
+  "title": "First Steps - Equip Gear",
+  "sections": [
+    {
+      "heading": "Your tutorial gear",
+      "body": "Crafting granted a Tutorial Chest. It is intentionally weaker than normal crafted gear, but strong enough to begin Lumo Ruins."
+    },
+    {
+      "heading": "What to do",
+      "body": "Open the Equipment tab in Inventory and equip the Tutorial Chest to complete First Steps."
+    },
+    {
+      "heading": "Finishing",
+      "body": "Once the Tutorial Chest is equipped, First Steps completes and normal Shenic combat areas become available."
+    }
+  ]
+}
