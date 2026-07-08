@@ -14,15 +14,12 @@ public sealed class UserService : IUserService
         _hasher = hasher;
     }
 
-    public async Task<AppUser?> RegisterAsync(string username, string email, string password, CancellationToken cancellationToken)
+    public async Task<AppUser?> RegisterAsync(string accountLabel, string email, string password, CancellationToken cancellationToken)
     {
         if (await _userRepository.EmailExistsAsync(email, null, cancellationToken))
             return null;
 
-        if (await _userRepository.UsernameExistsAsync(username, null, cancellationToken))
-            return null;
-
-        var user = AppUser.Register(username, email,
+        var user = AppUser.Register(accountLabel, email,
                      _hasher.HashPassword(null!, password));
 
         var added = await _userRepository.AddAsync(user, cancellationToken);
@@ -31,18 +28,15 @@ public sealed class UserService : IUserService
         return user;
     }
 
-    public async Task<AppUser?> RegisterGuestAsync(CancellationToken cancellationToken)
+    public async Task<AppUser?> RegisterGuestAsync(string accountLabel, CancellationToken cancellationToken)
     {
-        for (var attempt = 0; attempt < 10; attempt++)
-        {
-            var guest = AppUser.Guest();
-            guest.Username = GenerateGuestName();
-            guest.NormalizeIdentityFields();
+        var guest = AppUser.Guest();
+        guest.Username = accountLabel;
+        guest.NormalizeIdentityFields();
 
-            if (await _userRepository.AddAsync(guest, cancellationToken))
-            {
-                return guest;
-            }
+        if (await _userRepository.AddAsync(guest, cancellationToken))
+        {
+            return guest;
         }
 
         return null;
@@ -60,16 +54,15 @@ public sealed class UserService : IUserService
         return user;
     }
 
-    public async Task<AppUser?> ConvertGuestToUser(Guid userId, string username, string email, string password, CancellationToken cancellationToken)
+    public async Task<AppUser?> ConvertGuestToUser(Guid userId, string email, string password, CancellationToken cancellationToken)
     {
         var user = await _userRepository.FindByIdAsync(userId, cancellationToken);
         if (user == null) return null;
         if (!user.IsGuest) return null;
         if (await _userRepository.EmailExistsAsync(email, userId, cancellationToken)) return null;
-        if (await _userRepository.UsernameExistsAsync(username, userId, cancellationToken)) return null;
 
 
-        user.ConvertGuestToAccount(username, email,
+        user.ConvertGuestToAccount(email,
                      _hasher.HashPassword(null!, password));
 
         return user;
@@ -78,46 +71,9 @@ public sealed class UserService : IUserService
     public async Task<bool> EmailExistsAsync(string email, Guid? excludedUserId, CancellationToken cancellationToken) =>
         await _userRepository.EmailExistsAsync(email, excludedUserId, cancellationToken);
 
-    public async Task<bool> UsernameExistsAsync(string username, Guid? excludedUserId, CancellationToken cancellationToken) =>
-        await _userRepository.UsernameExistsAsync(username, excludedUserId, cancellationToken);
-
     public async Task<UserInfo?> GetUserInfo(Guid userId, CancellationToken cancellationToken)
     {
         return await _userRepository.GetUserInfo(userId, cancellationToken);
-    }
-
-    private string GenerateGuestName()
-    {
-        var prefixes = new[]
-            {
-                "Silent", "Swift", "Mighty", "Lucky", "Clever", "Brave", "Gentle", "Fierce", "Bold", "Wild",
-                "Calm", "Stormy", "Vivid", "Bright", "Dark", "Noble", "Proud", "Shy", "Quick", "Sly",
-                "Lone", "Nimble", "Radiant", "Wise", "Cheerful", "Eager", "Mystic", "Fearless", "Daring", "Joyful",
-                "Steady", "Thunder", "Majestic", "Silent", "Sparkling", "Serene", "Stout", "Loyal", "Iron", "Fiery"
-            };
-
-        var animals = new[]
-        {
-                "Fox", "Bear", "Tiger", "Hawk", "Lion", "Wolf", "Otter", "Eagle", "Panther", "Falcon",
-                "Raven", "Shark", "Puma", "Cobra", "Jaguar", "Leopard", "Bison", "Lynx", "Cougar", "Phoenix",
-                "Owl", "Dragon", "Unicorn", "Griffin", "Raccoon", "Badger", "Cheetah", "Stag", "Rhino", "Lizard",
-                "Antelope", "Gazelle", "Ram", "Horse", "Buffalo", "Beetle", "Whale", "Spider", "Wolverine", "Elephant"
-            };
-
-        var suffixes = new[]
-        {
-                "Walker", "Seeker", "Rider", "Hunter", "Keeper", "Wanderer", "Dreamer", "Protector", "Guardian", "Voyager",
-                "Strider", "Glider", "Howler", "Whisperer", "Tracker", "Scout", "Mage", "Sentinel", "Scribe", "Knight",
-                "Mystic", "Sailor", "Pathfinder", "Warrior", "Champion", "Explorer", "Savior", "Adventurer", "Defender", "Scout",
-                "Challenger", "Nomad", "Beholder", "Sorcerer", "Alchemist", "Master", "Scribe", "Scholar", "Pilgrim", "Ranger"
-            };
-
-        var random = new Random();
-        var prefix = prefixes[random.Next(prefixes.Length)];
-        var animal = animals[random.Next(animals.Length)];
-        var suffix = suffixes[random.Next(suffixes.Length)];
-
-        return $"{prefix}{animal}{suffix}_{random.Next(1000, 9999)}";
     }
 
     public bool UpdateUserInfo(AppUser user)

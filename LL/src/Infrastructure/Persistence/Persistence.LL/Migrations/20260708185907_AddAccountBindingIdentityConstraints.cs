@@ -37,14 +37,6 @@ namespace Persistence.LL.Migrations
                 nullable: true);
 
             migrationBuilder.AddColumn<string>(
-                name: "NormalizedUsername",
-                table: "Users",
-                type: "character varying(80)",
-                maxLength: 80,
-                nullable: false,
-                defaultValue: "");
-
-            migrationBuilder.AddColumn<string>(
                 name: "NormalizedName",
                 table: "Entities",
                 type: "character varying(80)",
@@ -55,7 +47,6 @@ namespace Persistence.LL.Migrations
                 """
                 UPDATE "Users"
                 SET "Username" = btrim("Username"),
-                    "NormalizedUsername" = upper(btrim("Username")),
                     "Email" = NULLIF(btrim("Email"), ''),
                     "NormalizedEmail" = upper(NULLIF(btrim("Email"), ''))
                 """);
@@ -76,12 +67,6 @@ namespace Persistence.LL.Migrations
                 filter: "\"NormalizedEmail\" IS NOT NULL");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Users_NormalizedUsername",
-                table: "Users",
-                column: "NormalizedUsername",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Entities_NormalizedName",
                 table: "Entities",
                 column: "NormalizedName",
@@ -97,19 +82,11 @@ namespace Persistence.LL.Migrations
                 table: "Users");
 
             migrationBuilder.DropIndex(
-                name: "IX_Users_NormalizedUsername",
-                table: "Users");
-
-            migrationBuilder.DropIndex(
                 name: "IX_Entities_NormalizedName",
                 table: "Entities");
 
             migrationBuilder.DropColumn(
                 name: "NormalizedEmail",
-                table: "Users");
-
-            migrationBuilder.DropColumn(
-                name: "NormalizedUsername",
                 table: "Users");
 
             migrationBuilder.DropColumn(

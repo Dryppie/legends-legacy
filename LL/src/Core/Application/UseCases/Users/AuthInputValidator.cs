@@ -2,15 +2,15 @@ using System.Net.Mail;
 
 namespace Application.UseCases.Users;
 
-public sealed record ValidatedAuthRegistration(string Username, string Email, string Password);
+public sealed record ValidatedAuthRegistration(string CharacterName, string Email, string Password);
 
 public static class AuthInputValidator
 {
-    private const int MaxUsernameLength = 26;
+    private const int MaxCharacterNameLength = 26;
     private const int MinPasswordLength = 8;
 
     public static bool TryValidateRegistration(
-        string? username,
+        string? characterName,
         string? email,
         string? password,
         out ValidatedAuthRegistration validated,
@@ -18,7 +18,7 @@ public static class AuthInputValidator
     {
         validated = new ValidatedAuthRegistration(string.Empty, string.Empty, string.Empty);
 
-        if (!TryValidateName(username, "Username", out var validUsername, out error))
+        if (!TryValidateName(characterName, "Character name", out var validCharacterName, out error))
         {
             return false;
         }
@@ -33,7 +33,7 @@ public static class AuthInputValidator
             return false;
         }
 
-        validated = new ValidatedAuthRegistration(validUsername, validEmail, validPassword);
+        validated = new ValidatedAuthRegistration(validCharacterName, validEmail, validPassword);
         return true;
     }
 
@@ -49,7 +49,7 @@ public static class AuthInputValidator
         }
 
         name = value.Trim();
-        if (name.Length > MaxUsernameLength)
+        if (name.Length > MaxCharacterNameLength)
         {
             error = $"{label} is too long.";
             return false;

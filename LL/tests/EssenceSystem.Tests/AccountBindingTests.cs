@@ -1,4 +1,6 @@
 using Application.Authorization.Interfaces;
+using Application.Interfaces.Services.LL.Entities;
+using Domain.Models.Entities.Characters;
 using Domain.Models.Users;
 using Google.Apis.Auth;
 using Microsoft.AspNetCore.Identity;
@@ -13,7 +15,7 @@ namespace EssenceSystem.Tests;
 public sealed class AccountBindingTests
 {
     [Fact]
-    public async Task UserRepository_rejects_case_insensitive_username_duplicates()
+    public async Task UserRepository_allows_duplicate_internal_account_labels()
     {
         await using var db = CreateDb();
         var repository = new UserRepository(db);
@@ -24,7 +26,7 @@ public sealed class AccountBindingTests
 
         var duplicate = AppUser.Register(" heroname ", "second@example.com", "hash");
 
-        Assert.False(await repository.AddAsync(duplicate, CancellationToken.None));
+        Assert.True(await repository.AddAsync(duplicate, CancellationToken.None));
     }
 
     [Fact]
@@ -44,7 +46,6 @@ public sealed class AccountBindingTests
 
         var converted = await service.ConvertGuestToUser(
             guest.Id,
-            "GuestHero",
             " TAKEN@example.com ",
             "strong-password",
             CancellationToken.None);
@@ -65,7 +66,8 @@ public sealed class AccountBindingTests
             new FakeGoogleTokenValidator("google-subject", "guest@example.com"),
             externals,
             users,
-            userService);
+            userService,
+            new CharacterNameAvailabilityService());
 
         var guest = AppUser.Guest();
         guest.Username = " GuestHero ";
@@ -79,7 +81,6 @@ public sealed class AccountBindingTests
         Assert.False(result.User.IsGuest);
         Assert.True(result.User.EmailConfirmed);
         Assert.Equal("GuestHero", result.User.Username);
-        Assert.Equal("GUESTHERO", result.User.NormalizedUsername);
         Assert.Equal("guest@example.com", result.User.Email);
         Assert.Equal("GUEST@EXAMPLE.COM", result.User.NormalizedEmail);
 
@@ -109,5 +110,41 @@ public sealed class AccountBindingTests
                 Subject = subject,
                 Email = email
             });
+    }
+
+    private sealed class CharacterNameAvailabilityService : ICharacterService
+    {
+        public Task<Character> CreateCharacterAsync(Guid userId, string username, CancellationToken cancellationToken) =>
+            throw new NotSupportedException();
+
+        public Task<Character?> GetMyCharacterAsync(Guid currentUserId, CancellationToken cancellationToken) =>
+            throw new NotSupportedException();
+
+        public Task<Character?> GetCharacterByCharacterIdAsync(Guid characterId, CancellationToken cancellationToken) =>
+            throw new NotSupportedException();
+
+        public Task<Character?> GetMyCharacterOverviewAsync(Guid characterId, CancellationToken cancellationToken) =>
+            throw new NotSupportedException();
+
+        public Task<Character?> GetCharacterOverviewByNameAsync(string characterName, CancellationToken cancellationToken) =>
+            throw new NotSupportedException();
+
+        public Task<Character?> UpdateCharacterNameAsync(Guid userId, string username, CancellationToken cancellationToken) =>
+            throw new NotSupportedException();
+
+        public Task<bool> IsCharacterNameTakenAsync(string name, Guid? excludedCharacterId, CancellationToken cancellationToken) =>
+            Task.FromResult(false);
+
+        public Task<Character?> GetBaseCharacterByIdAsync(Guid characterId, CancellationToken cancellationToken) =>
+            throw new NotSupportedException();
+
+        public Task<Character?> GetCharacterWithSoulstoneUpgradesAsync(Guid characterId, CancellationToken cancellationToken) =>
+            throw new NotSupportedException();
+
+        public Task<Guid?> GetCharacterIdByNameAsync(string name, CancellationToken cancellationToken) =>
+            throw new NotSupportedException();
+
+        public Task<int> GetCombatRatingAsync(Guid characterId, CancellationToken cancellationToken) =>
+            throw new NotSupportedException();
     }
 }

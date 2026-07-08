@@ -69,7 +69,7 @@ builder.Services.AddCors(options =>
 builder.Services.AddPersistence(config);
 builder.Services.AddRepositories();
 builder.Services.AddApplication();
-builder.Services.AddServices(config, builder.Environment.ContentRootPath);
+builder.Services.AddServices(config, builder.Environment.ContentRootPath, builder.Environment.IsDevelopment());
 builder.Services.AddHostedService<GameEventOutboxWorker>();
 builder.Services.AddRealTime(); // RealTime services must be added after Application and Persistence, as they depend on them
 builder.Services.AddAdminDashboardServices(); // TODO: Application layer makes use of AdminDashboard services, so this is necessary at the moment.

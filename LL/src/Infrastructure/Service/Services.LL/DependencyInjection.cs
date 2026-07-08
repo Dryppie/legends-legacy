@@ -82,7 +82,11 @@ using System.Text.Json.Serialization;
 namespace Services.LL;
 public static class DependencyInjection
 {
-    public static IServiceCollection AddServices(this IServiceCollection services, IConfiguration config, string contentRootPath)
+    public static IServiceCollection AddServices(
+        this IServiceCollection services,
+        IConfiguration config,
+        string contentRootPath,
+        bool isDevelopment = false)
     {
         // Related to regions
         services.AddScoped<IRegionService, RegionService>();
@@ -262,6 +266,8 @@ public static class DependencyInjection
                 config,
                 contentRootPath,
                 sp.GetRequiredService<JsonSerializerOptions>()));
+        services.Configure<TutorialDebugOptions>(config.GetSection(TutorialDebugOptions.SectionName));
+        services.PostConfigure<TutorialDebugOptions>(options => options.IsDevelopment = isDevelopment);
         services.AddSingleton<ITutorialProgressCache, InMemoryTutorialProgressCache>();
         services.AddScoped<TutorialService>();
         services.AddScoped<ITutorialService>(sp => sp.GetRequiredService<TutorialService>());

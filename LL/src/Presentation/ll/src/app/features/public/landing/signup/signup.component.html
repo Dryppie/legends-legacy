@@ -35,7 +35,7 @@
           matInput
           data-1p-ignore
           (input)="resetLoginError()"
-          aria-label="Username"
+          aria-label="Character name"
           type="text"
           required
           class="relative ml-auto h-full w-full appearance-none bg-gray pr-3 text-right text-white focus:z-10 focus:outline-none sm:text-sm sm:leading-5"
@@ -43,7 +43,7 @@
         />
       </label>
       <div *ngIf="validateUsername()" class="mt-1 text-sm text-[#D72E34]">
-        Username is too long. Max 26 character
+        Character name is too long. Max 26 characters
       </div>
       <div *ngIf="usernameHelp" class="mt-1 max-w-sm text-xs text-zinc-300">
         {{ usernameHelp }}

@@ -47,7 +47,7 @@ builder.Services.AddSignalR();
 builder.Services.AddPersistence(config);
 builder.Services.AddRepositories();
 builder.Services.AddApplication();
-builder.Services.AddServices(config, apiLLPath);
+builder.Services.AddServices(config, apiLLPath, builder.Environment.IsDevelopment());
 builder.Services.AddRealTime();
 builder.Services.AddAdminDashboardServices();
 builder.Services.AddCommonServices();

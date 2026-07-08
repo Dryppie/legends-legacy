@@ -121,13 +121,13 @@ export class AuthService {
   }
 
   register(
-    username: string,
+    characterName: string,
     email: string,
     password: string,
   ): Observable<void> {
     return this.api
       .post('auth/register', {
-        Username: username,
+        CharacterName: characterName,
         Email: email,
         Password: password,
       })
@@ -197,13 +197,13 @@ export class AuthService {
   }
 
   convertGuestToUser(
-    username: string,
+    characterName: string,
     email: string,
     password: string,
   ): Observable<void> {
     return this.api
       .post('auth/convertGuestToUser', {
-        Username: username,
+        CharacterName: characterName,
         Email: email,
         Password: password,
       })

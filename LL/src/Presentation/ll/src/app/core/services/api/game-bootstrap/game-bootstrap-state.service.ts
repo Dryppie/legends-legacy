@@ -76,7 +76,7 @@ export class GameBootstrapStateService {
       return of(null);
     }
 
-    if (!force && this._loaded()) {
+    if (!force && this.canUseCachedBootstrap()) {
       return of(this._bootstrap());
     }
 
@@ -112,5 +112,17 @@ export class GameBootstrapStateService {
     });
     this.characterActionsState.initializeFromBootstrap(bootstrap.currentAction);
     this._loaded.set(true);
+  }
+
+  private canUseCachedBootstrap(): boolean {
+    const bootstrap = this._bootstrap();
+    const currentCharacter = this.auth.currentCharacter();
+
+    return (
+      this._loaded() &&
+      !!bootstrap &&
+      !!currentCharacter &&
+      bootstrap.character.id === currentCharacter.id
+    );
   }
 }

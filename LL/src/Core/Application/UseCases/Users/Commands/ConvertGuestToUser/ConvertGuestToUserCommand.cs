@@ -9,7 +9,7 @@ using Common.Primitives;
 using MediatR;
 
 namespace Application.UseCases.Users.Commands.ConvertGuestToUser;
-public record ConvertGuestToUserCommand(Guid UserId, string Username, string Email, string Password) : ICommand<Response<Tokens>>;
+public record ConvertGuestToUserCommand(Guid UserId, string CharacterName, string Email, string Password) : ICommand<Response<Tokens>>;
 
 public class ConvertGuestToUserCommandHandler : IRequestHandler<ConvertGuestToUserCommand, Response<Tokens>>
 {
@@ -29,7 +29,7 @@ public class ConvertGuestToUserCommandHandler : IRequestHandler<ConvertGuestToUs
     public async Task<Response<Tokens>> Handle(ConvertGuestToUserCommand request, CancellationToken cancellationToken)
     {
         if (!AuthInputValidator.TryValidateRegistration(
-                request.Username,
+                request.CharacterName,
                 request.Email,
                 request.Password,
                 out var input,
@@ -41,15 +41,15 @@ public class ConvertGuestToUserCommandHandler : IRequestHandler<ConvertGuestToUs
         var character = await _characterService.GetMyCharacterAsync(request.UserId, cancellationToken);
         if (character == null) return Response<Tokens>.Fail("No character is bound to this account.");
 
-        if (await _characterService.IsCharacterNameTakenAsync(input.Username, character.Id, cancellationToken))
+        if (await _characterService.IsCharacterNameTakenAsync(input.CharacterName, character.Id, cancellationToken))
         {
             return Response<Tokens>.Fail("Character name is already in use.");
         }
 
-        var user = await _userService.ConvertGuestToUser(request.UserId, input.Username, input.Email, input.Password, cancellationToken);
-        if (user == null) return Response<Tokens>.Fail("Account is already registered or the username/email is already in use.");
+        var user = await _userService.ConvertGuestToUser(request.UserId, input.Email, input.Password, cancellationToken);
+        if (user == null) return Response<Tokens>.Fail("Account is already registered or the email is already in use.");
 
-        await _publisher.Publish(new ConvertedGuestToUserEvent(user.Id, user.Username), cancellationToken);
+        await _publisher.Publish(new ConvertedGuestToUserEvent(user.Id, input.CharacterName), cancellationToken);
 
 
         var tokens = await _jwtGenerator.IssueTokens(user, character);

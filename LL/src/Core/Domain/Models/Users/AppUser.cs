@@ -5,7 +5,6 @@ public sealed class AppUser
 {
     public Guid Id { get; private set; } = Guid.NewGuid();
     public string Username { get; set; } = string.Empty;
-    public string NormalizedUsername { get; set; } = string.Empty;
     public string? Email { get; set; }
     public string? NormalizedEmail { get; set; }
     public string? PasswordHash { get; set; }
@@ -23,20 +22,18 @@ public sealed class AppUser
     // factory helpers --------------------------------------------------------
 
     public static AppUser Guest() => new();
-    public static AppUser Register(string username, string email, string hash) =>
+    public static AppUser Register(string accountLabel, string email, string hash) =>
         new()
         {
-            Username = username.Trim(),
-            NormalizedUsername = IdentityNormalizer.NormalizeRequired(username),
+            Username = accountLabel.Trim(),
             Email = email.Trim(),
             NormalizedEmail = IdentityNormalizer.NormalizeRequired(email),
             PasswordHash = hash,
             IsGuest = false
         };
-    public void ConvertGuestToAccount(string username, string email, string hash)
+
+    public void ConvertGuestToAccount(string email, string hash)
     {
-        Username = username.Trim();
-        NormalizedUsername = IdentityNormalizer.NormalizeRequired(username);
         Email = email.Trim();
         NormalizedEmail = IdentityNormalizer.NormalizeRequired(email);
         PasswordHash = hash;
@@ -44,10 +41,8 @@ public sealed class AppUser
         IsGuest = false;
     }
 
-    public void ConvertGuestToExternalAccount(string username, string email)
+    public void ConvertGuestToExternalAccount(string email)
     {
-        Username = username.Trim();
-        NormalizedUsername = IdentityNormalizer.NormalizeRequired(username);
         Email = email.Trim();
         NormalizedEmail = IdentityNormalizer.NormalizeRequired(email);
         EmailConfirmed = true;
@@ -70,10 +65,6 @@ public sealed class AppUser
     public void NormalizeIdentityFields()
     {
         Username = Username.Trim();
-        NormalizedUsername = string.IsNullOrWhiteSpace(Username)
-            ? string.Empty
-            : IdentityNormalizer.NormalizeRequired(Username);
-
         Email = string.IsNullOrWhiteSpace(Email) ? null : Email.Trim();
         NormalizedEmail = IdentityNormalizer.NormalizeOptional(Email);
     }

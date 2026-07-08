@@ -3070,11 +3070,6 @@ namespace Persistence.LL.Migrations
                         .HasMaxLength(320)
                         .HasColumnType("character varying(320)");
 
-                    b.Property<string>("NormalizedUsername")
-                        .IsRequired()
-                        .HasMaxLength(80)
-                        .HasColumnType("character varying(80)");
-
                     b.Property<string>("PasswordHash")
                         .HasColumnType("text");
 
@@ -3091,9 +3086,6 @@ namespace Persistence.LL.Migrations
                     b.HasIndex("NormalizedEmail")
                         .IsUnique()
                         .HasFilter("\"NormalizedEmail\" IS NOT NULL");
-
-                    b.HasIndex("NormalizedUsername")
-                        .IsUnique();
 
                     b.ToTable("Users");
                 });

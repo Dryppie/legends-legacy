@@ -14,18 +14,11 @@ public class AppUserConfiguration : IEntityTypeConfiguration<AppUser>
             .HasMaxLength(80)
             .IsRequired();
 
-        builder.Property(e => e.NormalizedUsername)
-            .HasMaxLength(80)
-            .IsRequired();
-
         builder.Property(e => e.Email)
             .HasMaxLength(320);
 
         builder.Property(e => e.NormalizedEmail)
             .HasMaxLength(320);
-
-        builder.HasIndex(e => e.NormalizedUsername)
-            .IsUnique();
 
         builder.HasIndex(e => e.NormalizedEmail)
             .IsUnique()

@@ -1,7 +1,7 @@
 ﻿using Domain.Models.Users;
 
 namespace Application.Authorization.Interfaces;
-public sealed record GoogleLoginResult(AppUser User, bool IsNewAccount);
+public sealed record GoogleLoginResult(AppUser User, bool IsNewAccount, string? CharacterName);
 public sealed record GoogleBindResult(AppUser User, bool AlreadyBound);
 
 public interface IGoogleAuthService

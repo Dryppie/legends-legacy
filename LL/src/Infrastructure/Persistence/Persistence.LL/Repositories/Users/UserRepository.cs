@@ -33,20 +33,9 @@ public class UserRepository : IUserRepository
             cancellationToken);
     }
 
-    public async Task<bool> UsernameExistsAsync(string username, Guid? excludedUserId, CancellationToken cancellationToken)
-    {
-        var normalizedUsername = IdentityNormalizer.NormalizeOptional(username);
-        if (normalizedUsername is null) return false;
-
-        return await _context.Users.AnyAsync(
-            u => u.NormalizedUsername == normalizedUsername && (!excludedUserId.HasValue || u.Id != excludedUserId.Value),
-            cancellationToken);
-    }
-
     public async Task<bool> AddAsync(AppUser user, CancellationToken cancellationToken)
     {
         user.NormalizeIdentityFields();
-        if (await UsernameExistsAsync(user.Username, null, cancellationToken)) return false;
         if (user.Email is not null && await EmailExistsAsync(user.Email, null, cancellationToken)) return false;
 
         _context.Users.Add(user);

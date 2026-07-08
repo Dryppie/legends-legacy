@@ -22,7 +22,15 @@ using Microsoft.AspNetCore.Mvc;
 public class AuthController : BaseController
 {
     public record UserLoginDto(string Email, string Password);
-    public record UserRegisterDto(string Username, string Email, string Password);
+    public sealed record UserRegisterDto
+    {
+        public string? CharacterName { get; init; }
+        public string? Username { get; init; }
+        public string Email { get; init; } = string.Empty;
+        public string Password { get; init; } = string.Empty;
+
+        public string RequestedCharacterName => CharacterName ?? Username ?? string.Empty;
+    }
 
     private const string AccessTokenCookie = "AccessToken";
     private const string RefreshTokenCookie = "RefreshToken";
@@ -39,7 +47,7 @@ public class AuthController : BaseController
     [ProducesResponseType(typeof(Response<Tokens>), StatusCodes.Status200OK)]
     public async Task<ActionResult<Response<Tokens>>> Register([FromBody] UserRegisterDto input)
     {
-        var result = await Mediator.Send(new RegisterCommand(input.Username, input.Email, input.Password));
+        var result = await Mediator.Send(new RegisterCommand(input.RequestedCharacterName, input.Email, input.Password));
         if (result.Data is null) return BadRequest(result);
 
         SetAuthCookies(result.Data);
@@ -79,7 +87,7 @@ public class AuthController : BaseController
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult<Response<Tokens>>> ConvertGuestToUser([FromBody] UserRegisterDto input)
     {
-        var result = await Mediator.Send(new ConvertGuestToUserCommand(CurrentUserId, input.Username, input.Email, input.Password));
+        var result = await Mediator.Send(new ConvertGuestToUserCommand(CurrentUserId, input.RequestedCharacterName, input.Email, input.Password));
         if (result.Data is null) return result;
 
         SetAuthCookies(result.Data);

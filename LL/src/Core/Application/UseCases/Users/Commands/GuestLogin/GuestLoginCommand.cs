@@ -5,6 +5,7 @@ using Application.MediatR.Markers;
 using Application.UseCases.Users.Events;
 using Common.Authorization.Security;
 using Common.Primitives;
+using Domain.Models.Users;
 using MediatR;
 
 namespace Application.UseCases.Users.Commands.GuestLogin;
@@ -29,10 +30,24 @@ public class GuestLoginCommandHandler : IRequestHandler<GuestLoginCommand, Respo
         try
         {
             // Create a new guest user
-            var user = await _userService.RegisterGuestAsync(cancellationToken);
+            AppUser? user = null;
+            var characterName = string.Empty;
+
+            for (var attempt = 0; attempt < 10; attempt++)
+            {
+                characterName = GuestCharacterNameGenerator.Generate();
+                if (await _characterService.IsCharacterNameTakenAsync(characterName, null, cancellationToken))
+                {
+                    continue;
+                }
+
+                user = await _userService.RegisterGuestAsync(characterName, cancellationToken);
+                if (user is not null) break;
+            }
+
             if (user == null) return Response<Tokens>.Fail("Failed to register guest");
 
-            await _publisher.Publish(new UserCreatedEvent(user.Id, user.Username), cancellationToken);
+            await _publisher.Publish(new UserCreatedEvent(user.Id, characterName), cancellationToken);
 
             var character = await _characterService.GetMyCharacterAsync(user.Id, cancellationToken);
             if (character == null) return Response<Tokens>.Fail("Character creation failed during guest registration");
