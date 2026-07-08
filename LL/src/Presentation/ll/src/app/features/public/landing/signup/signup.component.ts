@@ -39,6 +39,8 @@ export class SignupComponent {
   @Input() disableLoginLink: boolean = false;
   @Input() headerText1: string = 'Join the adventure and';
   @Input() headerText2: string = 'create your legend!';
+  @Input() usernameLabel: string = 'Username';
+  @Input() usernameHelp: string | null = null;
 
   registerForm = new FormGroup(
     {

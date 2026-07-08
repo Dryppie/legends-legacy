@@ -11,6 +11,15 @@ public class CharacterConfiguration : IEntityTypeConfiguration<Character>
             .HasIndex(c => c.UserId);
 
         builder
+            .Property(c => c.NormalizedName)
+            .HasMaxLength(80);
+
+        builder
+            .HasIndex(c => c.NormalizedName)
+            .IsUnique()
+            .HasFilter("\"EntityType\" = 1 AND \"NormalizedName\" IS NOT NULL");
+
+        builder
             .Property(c => c.EquippedTitleDisplayPosition)
             .HasConversion<int>();
 

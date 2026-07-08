@@ -3,6 +3,7 @@ using Application.Interfaces.Services.LL;
 using Application.Interfaces.Services.LL.Entities;
 using Application.MediatR.Markers;
 using Application.UseCases.Users.Events;
+using Application.UseCases.Users;
 using Common.Authorization.Security;
 using Common.Primitives;
 using MediatR;
@@ -34,9 +35,17 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, Response<
     {
         try
         {
-            if (request.Username.Length > 26) return Response<Tokens>.Fail("Username is too long.");
+            if (!AuthInputValidator.TryValidateRegistration(
+                    request.Username,
+                    request.Email,
+                    request.Password,
+                    out var input,
+                    out var validationError))
+            {
+                return Response<Tokens>.Fail(validationError);
+            }
 
-            var user = await _userService.RegisterAsync(request.Username, request.Email, request.Password, cancellationToken);
+            var user = await _userService.RegisterAsync(input.Username, input.Email, input.Password, cancellationToken);
             if (user == null) return Response<Tokens>.Fail("Email or username is already in use.");
 
             await _publisher.Publish(new UserCreatedEvent(user.Id, user.Username), cancellationToken);

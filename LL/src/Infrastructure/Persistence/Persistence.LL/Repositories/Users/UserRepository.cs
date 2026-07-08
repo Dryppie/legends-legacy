@@ -12,15 +12,42 @@ public class UserRepository : IUserRepository
         _context = unitOfWork;
     }
 
-    public async Task<AppUser?> FindByEmailAsync(string email, CancellationToken cancellationToken) =>
-        await _context.Users.SingleOrDefaultAsync(u => u.Email == email, cancellationToken);
+    public async Task<AppUser?> FindByEmailAsync(string email, CancellationToken cancellationToken)
+    {
+        var normalizedEmail = IdentityNormalizer.NormalizeOptional(email);
+        if (normalizedEmail is null) return null;
+
+        return await _context.Users.SingleOrDefaultAsync(u => u.NormalizedEmail == normalizedEmail, cancellationToken);
+    }
 
     public async Task<AppUser?> FindByIdAsync(Guid id, CancellationToken cancellationToken) =>
         await _context.Users.FindAsync([id], cancellationToken);
 
+    public async Task<bool> EmailExistsAsync(string email, Guid? excludedUserId, CancellationToken cancellationToken)
+    {
+        var normalizedEmail = IdentityNormalizer.NormalizeOptional(email);
+        if (normalizedEmail is null) return false;
+
+        return await _context.Users.AnyAsync(
+            u => u.NormalizedEmail == normalizedEmail && (!excludedUserId.HasValue || u.Id != excludedUserId.Value),
+            cancellationToken);
+    }
+
+    public async Task<bool> UsernameExistsAsync(string username, Guid? excludedUserId, CancellationToken cancellationToken)
+    {
+        var normalizedUsername = IdentityNormalizer.NormalizeOptional(username);
+        if (normalizedUsername is null) return false;
+
+        return await _context.Users.AnyAsync(
+            u => u.NormalizedUsername == normalizedUsername && (!excludedUserId.HasValue || u.Id != excludedUserId.Value),
+            cancellationToken);
+    }
+
     public async Task<bool> AddAsync(AppUser user, CancellationToken cancellationToken)
     {
-        if (await _context.Users.AnyAsync(u => u.Username.ToLower() == user.Username.ToLower(), cancellationToken)) return false;
+        user.NormalizeIdentityFields();
+        if (await UsernameExistsAsync(user.Username, null, cancellationToken)) return false;
+        if (user.Email is not null && await EmailExistsAsync(user.Email, null, cancellationToken)) return false;
 
         _context.Users.Add(user);
         return true;

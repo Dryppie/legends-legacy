@@ -98,8 +98,14 @@ public class AuthController : BaseController
 
     [HttpPost("bind-google")]
     [Authorize]
-    public async Task<ActionResult<Response<Unit>>> BindGoogle([FromBody] string idToken) =>
-        await Mediator.Send(new BindGoogleCommand(CurrentUserId, idToken));
+    public async Task<ActionResult<Response<Tokens>>> BindGoogle([FromBody] string idToken)
+    {
+        var result = await Mediator.Send(new BindGoogleCommand(CurrentUserId, idToken));
+        if (result.Data is null) return result;
+
+        SetAuthCookies(result.Data);
+        return result;
+    }
 
     /// <summary>
     /// Logs out a user from Web

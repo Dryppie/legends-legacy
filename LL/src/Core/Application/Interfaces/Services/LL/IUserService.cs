@@ -6,6 +6,8 @@ public interface IUserService
     Task<AppUser?> RegisterAsync(string username, string email, string password, CancellationToken cancellationToken);
     Task<AppUser?> RegisterGuestAsync(CancellationToken cancellationToken);
     Task<AppUser?> ValidateCredentialsAsync(string email, string password, CancellationToken cancellationToken);
+    Task<bool> EmailExistsAsync(string email, Guid? excludedUserId, CancellationToken cancellationToken);
+    Task<bool> UsernameExistsAsync(string username, Guid? excludedUserId, CancellationToken cancellationToken);
     Task<UserInfo?> GetUserInfo(Guid UserId, CancellationToken cancellationToken);
 
 

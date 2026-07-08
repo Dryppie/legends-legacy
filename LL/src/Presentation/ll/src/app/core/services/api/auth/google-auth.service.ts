@@ -1,10 +1,8 @@
 import { Injectable } from '@angular/core';
 import { AuthService } from './auth.service';
 import { environment } from '../../../../../environments/environment';
-import { take } from 'rxjs';
 declare const google: any; // GIS is loaded globally
 
-@Injectable({ providedIn: 'root' })
 @Injectable({ providedIn: 'root' })
 export class GoogleAuthService {
   private scriptLoaded?: Promise<void>;
@@ -39,7 +37,7 @@ export class GoogleAuthService {
     /*  ✅ Synchronous, signal-driven read – no take(1), no subscribe */
     const loggedIn = this.auth.isAuthenticated(); // signal<boolean>
     if (loggedIn) {
-      this.auth.bindGoogle(idToken); // bind to existing user
+      this.auth.bindGoogle(idToken).subscribe({ error: () => undefined }); // bind to existing user
     } else {
       this.auth.googleLogin(idToken); // fresh sign-in / sign-up
     }

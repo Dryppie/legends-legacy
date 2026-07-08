@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { UserInfoDto } from '../../../shared/models/Dtos/userInfoDto';
 import { AuthService } from '../../../core/services/api/auth/auth.service';
@@ -44,6 +44,10 @@ export class SettingsComponent {
   ) {
     this.guild = guildState.guild;
     this.currentCharacter = this.authService.currentCharacter;
+
+    effect(() => {
+      this.userInfo = this.authService.userInfo();
+    });
   }
 
   version = '1.0.0'; // or pull from environment

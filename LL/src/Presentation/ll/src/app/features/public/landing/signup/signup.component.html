@@ -30,7 +30,7 @@
           'border-[#494949]': !loginError,
         }"
       >
-        <p class="cursor-text pl-3 text-[#D1D1D1]">Username</p>
+        <p class="cursor-text pl-3 text-[#D1D1D1]">{{ usernameLabel }}</p>
         <input
           matInput
           data-1p-ignore
@@ -44,6 +44,9 @@
       </label>
       <div *ngIf="validateUsername()" class="mt-1 text-sm text-[#D72E34]">
         Username is too long. Max 26 character
+      </div>
+      <div *ngIf="usernameHelp" class="mt-1 max-w-sm text-xs text-zinc-300">
+        {{ usernameHelp }}
       </div>
       <label
         class="group relative mt-4 flex h-12 w-full items-center border border-[#494949] bg-gray focus-within:border-[#B57D0B]"

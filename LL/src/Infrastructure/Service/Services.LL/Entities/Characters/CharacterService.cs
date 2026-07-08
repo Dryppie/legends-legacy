@@ -62,6 +62,9 @@ public class CharacterService : ICharacterService
     public async Task<Character?> UpdateCharacterNameAsync(Guid userId, string username, CancellationToken cancellationToken) =>
         await _characterRepository.UpdateCharacterNameAsync(userId, username, cancellationToken);
 
+    public async Task<bool> IsCharacterNameTakenAsync(string name, Guid? excludedCharacterId, CancellationToken cancellationToken) =>
+        await _characterRepository.IsCharacterNameTakenAsync(name, excludedCharacterId, cancellationToken);
+
     public async Task<Character?> GetCharacterWithSoulstoneUpgradesAsync(Guid characterId, CancellationToken cancellationToken) =>
         await _characterRepository.GetCharacterWithSoulstoneUpgradesAsync(characterId, cancellationToken);
 

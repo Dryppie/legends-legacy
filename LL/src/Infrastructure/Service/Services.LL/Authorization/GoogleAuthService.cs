@@ -33,11 +33,7 @@ public sealed class GoogleAuthService : IGoogleAuthService
         {
             // new user
             isNew = true;
-            user = await _userService.RegisterAsync(
-                       username: payload.Email!.Split('@')[0],
-                       email: payload.Email!,
-                       password: Guid.NewGuid().ToString(), // won't be used yet
-                       cancellationToken);
+            user = await RegisterGoogleUserAsync(payload.Email!, cancellationToken);
             if (user == null) return null;
         }
 
@@ -51,13 +47,24 @@ public sealed class GoogleAuthService : IGoogleAuthService
         return new GoogleLoginResult(user, isNew);
     }
 
-    public async Task<bool> BindAsync(Guid userId, string idToken, CancellationToken cancellationToken)
+    public async Task<GoogleBindResult?> BindAsync(Guid userId, string idToken, CancellationToken cancellationToken)
     {
         var payload = await _validator.ValidateAsync(idToken, cancellationToken);
 
-        // already linked elsewhere? return false (error)
-        if (await _externals.FindAsync(AuthProvider.Google, payload.Subject, cancellationToken) is not null)
-            return false;
+        var existingExternal = await _externals.FindAsync(AuthProvider.Google, payload.Subject, cancellationToken);
+        if (existingExternal is not null)
+        {
+            return existingExternal.UserId == userId
+                ? new GoogleBindResult(existingExternal.User, true)
+                : null;
+        }
+
+        var user = await _users.FindByIdAsync(userId, cancellationToken);
+        if (user is null) return null;
+
+        var emailOwner = await _users.FindByEmailAsync(payload.Email, cancellationToken);
+        if (emailOwner is not null && emailOwner.Id != userId)
+            return null;
 
         _externals.Add(new ExternalLogin
         {
@@ -65,6 +72,54 @@ public sealed class GoogleAuthService : IGoogleAuthService
             Provider = AuthProvider.Google,
             ProviderUserId = payload.Subject
         });
-        return true;
+
+        if (user.IsGuest)
+        {
+            user.ConvertGuestToExternalAccount(user.Username, payload.Email);
+        }
+        else
+        {
+            user.ConfirmExternalEmail(payload.Email);
+        }
+
+        return new GoogleBindResult(user, false);
+    }
+
+    private async Task<AppUser?> RegisterGoogleUserAsync(string email, CancellationToken cancellationToken)
+    {
+        var baseUsername = CreateGoogleUsername(email);
+
+        for (var attempt = 0; attempt < 10; attempt++)
+        {
+            var suffix = attempt == 0 ? string.Empty : Random.Shared.Next(1000, 10000).ToString();
+            var maxBaseLength = 26 - suffix.Length;
+            var usernameBase = baseUsername[..Math.Min(baseUsername.Length, maxBaseLength)];
+            var username = $"{usernameBase}{suffix}";
+
+            var user = await _userService.RegisterAsync(
+                username,
+                email,
+                Guid.NewGuid().ToString(),
+                cancellationToken);
+
+            if (user is not null)
+            {
+                user.EmailConfirmed = true;
+                return user;
+            }
+        }
+
+        return null;
+    }
+
+    private static string CreateGoogleUsername(string email)
+    {
+        var prefix = email.Split('@')[0].Trim();
+        if (string.IsNullOrWhiteSpace(prefix))
+        {
+            prefix = "Player";
+        }
+
+        return prefix.Length <= 26 ? prefix : prefix[..26];
     }
 }

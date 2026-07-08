@@ -16,7 +16,10 @@ public sealed class UserService : IUserService
 
     public async Task<AppUser?> RegisterAsync(string username, string email, string password, CancellationToken cancellationToken)
     {
-        if (await _userRepository.FindByEmailAsync(email, cancellationToken) is not null)
+        if (await _userRepository.EmailExistsAsync(email, null, cancellationToken))
+            return null;
+
+        if (await _userRepository.UsernameExistsAsync(username, null, cancellationToken))
             return null;
 
         var user = AppUser.Register(username, email,
@@ -30,10 +33,19 @@ public sealed class UserService : IUserService
 
     public async Task<AppUser?> RegisterGuestAsync(CancellationToken cancellationToken)
     {
-        var guest = AppUser.Guest();
-        guest.Username = GenerateGuestName();
-        await _userRepository.AddAsync(guest, cancellationToken);
-        return guest;
+        for (var attempt = 0; attempt < 10; attempt++)
+        {
+            var guest = AppUser.Guest();
+            guest.Username = GenerateGuestName();
+            guest.NormalizeIdentityFields();
+
+            if (await _userRepository.AddAsync(guest, cancellationToken))
+            {
+                return guest;
+            }
+        }
+
+        return null;
     }
 
     public async Task<AppUser?> ValidateCredentialsAsync(string email, string password, CancellationToken cancellationToken)
@@ -52,15 +64,22 @@ public sealed class UserService : IUserService
     {
         var user = await _userRepository.FindByIdAsync(userId, cancellationToken);
         if (user == null) return null;
-        if (await _userRepository.FindByEmailAsync(email, cancellationToken) != null) return null;
+        if (!user.IsGuest) return null;
+        if (await _userRepository.EmailExistsAsync(email, userId, cancellationToken)) return null;
+        if (await _userRepository.UsernameExistsAsync(username, userId, cancellationToken)) return null;
 
 
         user.ConvertGuestToAccount(username, email,
                      _hasher.HashPassword(null!, password));
-        user.IsGuest = false;
 
         return user;
     }
+
+    public async Task<bool> EmailExistsAsync(string email, Guid? excludedUserId, CancellationToken cancellationToken) =>
+        await _userRepository.EmailExistsAsync(email, excludedUserId, cancellationToken);
+
+    public async Task<bool> UsernameExistsAsync(string username, Guid? excludedUserId, CancellationToken cancellationToken) =>
+        await _userRepository.UsernameExistsAsync(username, excludedUserId, cancellationToken);
 
     public async Task<UserInfo?> GetUserInfo(Guid userId, CancellationToken cancellationToken)
     {
