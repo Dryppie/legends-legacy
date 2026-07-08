@@ -457,11 +457,15 @@
           <div>
             <h2 class="ll-heading">Loadouts</h2>
             <p class="ll-copy">
-              {{ essenceState.loadouts()?.loadouts?.length ?? 0 }}/{{
-                essenceState.loadouts()?.limit ?? 0
-              }}
-              saved | {{ essenceState.loadouts()?.unlockedSlots ?? 0 }} slots
-              available
+              <ng-container
+                *ngIf="essenceState.loadouts() as loadouts; else loadoutsPending"
+              >
+                {{ loadouts.loadouts.length }}/{{ loadouts.limit }}
+                saved | {{ loadouts.unlockedSlots }} slots available
+              </ng-container>
+              <ng-template #loadoutsPending>
+                Loading loadout slots...
+              </ng-template>
             </p>
           </div>
           <button
@@ -525,6 +529,7 @@
               [value]="essenceState.draftSlots()[slotIndex]"
               [options]="draftSlotDropdownOptions(slotIndex)"
               [selectedValue]="essenceState.draftSlots()[slotIndex]"
+              tourButtonId="essence-loadout-slot-field"
               tourMenuId="essence-loadout-slot-menu"
               tourOptionId="essence-loadout-slot-option"
               (selection)="setDraftSlotFromDropdown(slotIndex, $event)"

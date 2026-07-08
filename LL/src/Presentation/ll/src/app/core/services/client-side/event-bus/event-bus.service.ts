@@ -18,7 +18,7 @@ export const eventPayloadDefaults: {
   providedIn: 'root',
 })
 export class EventBusService {
-  private readonly _logout = signal(false);
+  private readonly _logout = signal(0);
   private readonly _currentAction = signal(0);
 
   // Exposed signals
@@ -39,7 +39,7 @@ export class EventBusService {
   }
 
   emitLogout() {
-    this._logout.set(true);
+    this._logout.update((value) => value + 1);
   }
 
   emitFetchCurrentAction() {

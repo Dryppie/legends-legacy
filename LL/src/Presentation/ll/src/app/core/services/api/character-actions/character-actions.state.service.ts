@@ -20,6 +20,7 @@ import { CharacterActionTypePersistenceService } from './helpers/character-actio
 import { GameService } from '../../client-side/game/game.service';
 import { CombatService } from '../../client-side/combat/combat.service';
 import { InventoryStateService } from '../inventory/inventory-state.service';
+import { EventBusService } from '../../client-side/event-bus/event-bus.service';
 
 @Injectable({ providedIn: 'root' })
 export class CharacterActionsStateService {
@@ -40,6 +41,7 @@ export class CharacterActionsStateService {
 
   private readonly _startTime = signal<number | null>(null);
   private readonly _tickingDuration = signal<number>(0);
+  private resetVersion = 0;
   readonly tickingDuration = computed(() => {
     const ms = this._tickingDuration();
     const sec = Math.floor(ms / 1000) % 60;
@@ -75,6 +77,7 @@ export class CharacterActionsStateService {
     private readonly gameService: GameService,
     private readonly combatService: CombatService,
     private readonly inventoryState: InventoryStateService,
+    private readonly eventBus: EventBusService,
   ) {
     // When action changes, route to handler + update display
     effect(() => {
@@ -106,6 +109,15 @@ export class CharacterActionsStateService {
 
       onCleanup(() => clearInterval(intervalId));
     });
+
+    effect(
+      () => {
+        if (this.eventBus.logout()) {
+          this.reset();
+        }
+      },
+      { allowSignalWrites: true },
+    );
   }
 
   init(): void {
@@ -118,6 +130,8 @@ export class CharacterActionsStateService {
 
   private startPolling(initialAction?: CharacterActionDto | null): void {
     this._startTime.set(Date.now());
+    const requestVersion = this.resetVersion;
+
     this.polling.start(
       () =>
         this.trackActionRefresh(
@@ -129,6 +143,7 @@ export class CharacterActionsStateService {
           ),
         ),
       (action) => {
+        if (requestVersion !== this.resetVersion) return;
         this.applyActionUpdate(action);
       },
       initialAction,
@@ -235,7 +250,16 @@ export class CharacterActionsStateService {
   }
 
   reset(): void {
+    this.resetVersion += 1;
     this.clear();
+    this.activeActionRefreshes = 0;
+    if (this.actionRefreshLoadingTimeout) {
+      clearTimeout(this.actionRefreshLoadingTimeout);
+      this.actionRefreshLoadingTimeout = null;
+    }
+    this._loadingActionRefresh.set(false);
+    this._loadingCombat.set(false);
+    this._showAction.set(false);
     this._currentAction.set(null);
   }
 
@@ -276,6 +300,8 @@ export class CharacterActionsStateService {
   }
 
   refreshCurrentAction(): void {
+    const requestVersion = this.resetVersion;
+
     this.trackActionRefresh(
       this.actionsService.getCurrentAction().pipe(
         catchError((err) => {
@@ -283,7 +309,10 @@ export class CharacterActionsStateService {
           return of(null);
         }),
       ),
-    ).subscribe((action) => this.applyActionUpdate(action));
+    ).subscribe((action) => {
+      if (requestVersion !== this.resetVersion) return;
+      this.applyActionUpdate(action);
+    });
   }
 
   private applyActionUpdate(action: CharacterActionDto | null): void {

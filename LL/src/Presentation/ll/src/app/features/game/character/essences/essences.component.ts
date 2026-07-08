@@ -223,6 +223,7 @@ export class EssencesComponent implements OnInit {
   }
 
   public loadoutSaveHint(): string {
+    if (!this.essenceState.loadouts()) return 'Loading loadout slots.';
     if (this.essenceState.canSaveDraft()) return '';
     if (!this.essenceState.draftLoadoutName().trim()) return 'Name required.';
     if (this.essenceState.hasDuplicateDraftEssences()) {

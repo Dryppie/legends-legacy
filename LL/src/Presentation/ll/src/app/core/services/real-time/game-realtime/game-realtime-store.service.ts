@@ -1,6 +1,7 @@
-import { Injectable, computed, signal } from '@angular/core';
+import { Injectable, computed, effect, signal } from '@angular/core';
 import { CharacterActionDto } from '../../../../shared/models/Dtos/characterActionDto';
 import { InventoryItem } from '../../../../shared/models/inventoryItem';
+import { EventBusService } from '../../client-side/event-bus/event-bus.service';
 
 interface RecentLootEntry {
   item: InventoryItem;
@@ -17,6 +18,17 @@ export class GameRealtimeStore {
   readonly recentLoot = computed(() => this._recentLoot());
   readonly lastIdleAction = computed(() => this._lastIdleAction());
   readonly lastRewardClaim = computed(() => this._lastRewardClaim());
+
+  constructor(private readonly eventBus: EventBusService) {
+    effect(
+      () => {
+        if (this.eventBus.logout()) {
+          this.clear();
+        }
+      },
+      { allowSignalWrites: true },
+    );
+  }
 
   addLoot(items: InventoryItem[]): void {
     if (!items.length) return;

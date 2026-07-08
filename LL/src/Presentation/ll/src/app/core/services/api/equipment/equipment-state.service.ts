@@ -1,4 +1,4 @@
-import { Injectable, signal, computed } from '@angular/core';
+import { Injectable, signal, computed, effect } from '@angular/core';
 import { finalize } from 'rxjs';
 import {
   EquipmentSlot,
@@ -10,12 +10,14 @@ import {
   EquipmentService,
 } from './equipment.service';
 import { InventoryStateService } from '../inventory/inventory-state.service';
+import { EventBusService } from '../../client-side/event-bus/event-bus.service';
 
 @Injectable({ providedIn: 'root' })
 export class EquipmentStateService {
   private readonly _equipmentSlots = signal<EquipmentSlot[]>([]);
   private readonly _loading = signal(false);
   private readonly _error = signal<string | null>(null);
+  private resetVersion = 0;
 
   readonly equipmentSlots = computed(() => this._equipmentSlots());
   readonly loading = computed(() => this._loading());
@@ -27,22 +29,46 @@ export class EquipmentStateService {
   constructor(
     private readonly equipmentService: EquipmentService,
     private readonly inventoryState: InventoryStateService,
+    private readonly eventBus: EventBusService,
   ) {
     this.load();
+
+    effect(
+      () => {
+        if (this.eventBus.logout()) {
+          this.reset();
+        }
+      },
+      { allowSignalWrites: true },
+    );
   }
 
   load(force = false): void {
     if (!force && this._equipmentSlots().length) return;
     this._loading.set(true);
     this._error.set(null);
+    const requestVersion = this.resetVersion;
 
     this.equipmentService
       .getEquipment()
       .pipe(finalize(() => this._loading.set(false)))
       .subscribe({
-        next: (equipmentSlots) => this._equipmentSlots.set(equipmentSlots),
-        error: (err) => this._error.set(err.message ?? 'Unknown error'),
+        next: (equipmentSlots) => {
+          if (requestVersion !== this.resetVersion) return;
+          this._equipmentSlots.set(equipmentSlots);
+        },
+        error: (err) => {
+          if (requestVersion !== this.resetVersion) return;
+          this._error.set(err.message ?? 'Unknown error');
+        },
       });
+  }
+
+  reset(): void {
+    this.resetVersion += 1;
+    this._equipmentSlots.set([]);
+    this._loading.set(false);
+    this._error.set(null);
   }
 
   setSlots(slots: EquipmentSlot[]): void {

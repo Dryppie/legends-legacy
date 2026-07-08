@@ -59,6 +59,9 @@ export class DropdownComponent<T = unknown> implements OnDestroy {
   /** Optional tour marker applied to the rendered overlay menu. */
   @Input() tourMenuId: string | null = null;
 
+  /** Optional tour marker applied to the dropdown trigger button. */
+  @Input() tourButtonId: string | null = null;
+
   /** Optional tour marker applied to selectable overlay options. */
   @Input() tourOptionId: string | null = null;
 
@@ -229,6 +232,14 @@ export class DropdownComponent<T = unknown> implements OnDestroy {
 
   isOptionSelected(option: DropdownOption<T>): boolean {
     return option.value === this.selectedValue;
+  }
+
+  tourOptionMarker(option: DropdownOption<T>): string | null {
+    if (option.disabled || option.value === null || option.value === undefined) {
+      return null;
+    }
+
+    return this.tourOptionId;
   }
 
   /** Public API required by the registry. */

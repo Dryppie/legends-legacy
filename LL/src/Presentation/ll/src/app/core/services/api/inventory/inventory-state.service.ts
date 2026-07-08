@@ -6,6 +6,7 @@ import { ItemType } from '../../../../shared/models/enums/itemType';
 import { GameEventService } from '../../real-time/game-event.service';
 import { GameEventDeduper } from '../../real-time/game-event/game-event-consumer';
 import { isGameRealtimeEnabled } from '../../real-time/game-realtime/game-realtime-feature';
+import { EventBusService } from '../../client-side/event-bus/event-bus.service';
 
 @Injectable({ providedIn: 'root' })
 export class InventoryStateService {
@@ -22,12 +23,23 @@ export class InventoryStateService {
   private readonly _lastLoot = signal<InventoryItem[] | null>(null);
   private readonly suppressedLootSignatures = new Set<string>();
   private readonly eventDeduper = new GameEventDeduper();
+  private resetVersion = 0;
 
   constructor(
     private inventoryService: InventoryService,
     private readonly eventService: GameEventService,
+    private readonly eventBus: EventBusService,
   ) {
     this.load();
+
+    effect(
+      () => {
+        if (this.eventBus.logout()) {
+          this.reset();
+        }
+      },
+      { allowSignalWrites: true },
+    );
 
     effect(
       () => {
@@ -91,15 +103,31 @@ export class InventoryStateService {
   load(force = false): void {
     if (!force && this._items().length) return; // already cached
     this._loading.set(true);
+    this._error.set(null);
+    const requestVersion = this.resetVersion;
+
     this.inventoryService
       .getInventory()
       .pipe(finalize(() => this._loading.set(false)))
       .subscribe({
         next: (dto) => {
+          if (requestVersion !== this.resetVersion) return;
           this._items.set(this.sortItems(dto.inventoryItems));
         },
-        error: (err) => this._error.set(err.message ?? 'Unknown error'),
+        error: (err) => {
+          if (requestVersion !== this.resetVersion) return;
+          this._error.set(err.message ?? 'Unknown error');
+        },
       });
+  }
+
+  reset(): void {
+    this.resetVersion += 1;
+    this._items.set([]);
+    this._loading.set(false);
+    this._error.set(null);
+    this._lastLoot.set(null);
+    this.suppressedLootSignatures.clear();
   }
 
   shatterEssences(essence: InventoryItem, shatterAmount: number) {

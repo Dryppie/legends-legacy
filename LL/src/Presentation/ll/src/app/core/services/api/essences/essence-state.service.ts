@@ -1,9 +1,10 @@
-import { Injectable, computed, signal } from '@angular/core';
-import { EMPTY, forkJoin, Observable, catchError, tap } from 'rxjs';
+import { Injectable, computed, effect, signal } from '@angular/core';
+import { EMPTY, forkJoin, Observable, catchError, finalize, tap } from 'rxjs';
 import { InventoryStateService } from '../inventory/inventory-state.service';
 import { TutorialStateService } from '../tutorial/tutorial-state.service';
 import { EssencesService } from './essences.service';
 import { EssenceItemViewService } from './essence-item-view.service';
+import { EventBusService } from '../../client-side/event-bus/event-bus.service';
 import { Essence } from '../../../../shared/models/essence';
 import { ItemType } from '../../../../shared/models/enums/itemType';
 import { InventoryItem } from '../../../../shared/models/inventoryItem';
@@ -34,6 +35,7 @@ export class EssenceStateService {
   private readonly _draftSlots = signal<(string | null)[]>([]);
   private readonly _loading = signal(false);
   private readonly _error = signal<string | null>(null);
+  private resetVersion = 0;
 
   readonly activeView = computed(() => this._activeView());
   readonly archive = computed(() => this._archive());
@@ -107,6 +109,10 @@ export class EssenceStateService {
         (essence) =>
           essence.attunedSlot !== null && essence.attunedSlot !== undefined,
       ).length ?? 0;
+    if (!loadouts) {
+      return `${absorbed} archived | loadouts loading`;
+    }
+
     return `${absorbed} archived | ${attuned}/${loadouts?.unlockedSlots ?? 0} attuned`;
   });
 
@@ -128,7 +134,9 @@ export class EssenceStateService {
     const name = this._draftLoadoutName().trim();
     const loadouts = this._loadouts();
     const selectedId = this._selectedLoadoutId();
-    const canCreate = !loadouts || loadouts.loadouts.length < loadouts.limit;
+    if (!loadouts) return false;
+
+    const canCreate = loadouts.loadouts.length < loadouts.limit;
 
     return (
       !!name && !this.hasDuplicateDraftEssences() && (!!selectedId || canCreate)
@@ -140,7 +148,17 @@ export class EssenceStateService {
     private readonly inventoryState: InventoryStateService,
     private readonly essenceItemView: EssenceItemViewService,
     private readonly tutorialState: TutorialStateService,
-  ) {}
+    private readonly eventBus: EventBusService,
+  ) {
+    effect(
+      () => {
+        if (this.eventBus.logout()) {
+          this.reset();
+        }
+      },
+      { allowSignalWrites: true },
+    );
+  }
 
   setActiveView(view: EssenceView): void {
     this._activeView.set(view);
@@ -149,12 +167,14 @@ export class EssenceStateService {
   refresh(): void {
     this._loading.set(true);
     this._error.set(null);
+    const requestVersion = this.resetVersion;
 
     forkJoin({
       archive: this.essencesService.getArchive(),
       loadouts: this.essencesService.getLoadouts(),
     }).subscribe({
       next: ({ archive, loadouts }) => {
+        if (requestVersion !== this.resetVersion) return;
         this._archive.set(archive);
         this._loadouts.set(loadouts);
         this.ensureSelectedEssence(archive);
@@ -162,10 +182,25 @@ export class EssenceStateService {
         this._loading.set(false);
       },
       error: (error) => {
+        if (requestVersion !== this.resetVersion) return;
         this._error.set(error?.message ?? 'Failed to load essences');
         this._loading.set(false);
       },
     });
+  }
+
+  reset(): void {
+    this.resetVersion += 1;
+    this._activeView.set('archive');
+    this._archive.set(null);
+    this._loadouts.set(null);
+    this._selectedPlayerEssenceId.set(null);
+    this._selectedLoadoutId.set(null);
+    this._selectedInventoryItemId.set(null);
+    this._draftLoadoutName.set('Default');
+    this._draftSlots.set([]);
+    this._loading.set(false);
+    this._error.set(null);
   }
 
   selectPlayerEssence(essence: PlayerEssenceDto): void {
@@ -223,6 +258,7 @@ export class EssenceStateService {
         }
 
         this.applyEssenceMutation(response);
+        this.refreshLoadouts();
         this.tutorialState.refreshAfterOutboxProgress();
         this._selectedInventoryItemId.set(
           this.getFirstAbsorbableInventoryEssenceId(),
@@ -317,6 +353,7 @@ export class EssenceStateService {
     if (!id) return;
     this.essencesService.activateLoadout(id).subscribe(() => {
       this.refresh();
+      this.tutorialState.refreshAfterOutboxProgress();
     });
   }
 
@@ -367,6 +404,26 @@ export class EssenceStateService {
     this._archive.set(response.archive);
     this.inventoryState.setInventory(response.inventoryItems);
     this.ensureSelectedEssence(response.archive);
+  }
+
+  private refreshLoadouts(): void {
+    this._loading.set(true);
+    const requestVersion = this.resetVersion;
+
+    this.essencesService
+      .getLoadouts()
+      .pipe(finalize(() => this._loading.set(false)))
+      .subscribe({
+        next: (loadouts) => {
+          if (requestVersion !== this.resetVersion) return;
+          this._loadouts.set(loadouts);
+          this.ensureSelectedLoadout(loadouts);
+        },
+        error: (error) => {
+          if (requestVersion !== this.resetVersion) return;
+          this._error.set(error?.message ?? 'Failed to load Essence loadouts');
+        },
+      });
   }
 
   private ensureSelectedLoadout(loadouts: EssenceLoadoutsDto): void {

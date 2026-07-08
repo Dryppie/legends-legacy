@@ -305,7 +305,7 @@ export class FirstPartyTourService {
   ): Promise<HTMLElement | null> {
     const selector = step.element;
     const immediate = document.querySelector<HTMLElement>(selector);
-    if (immediate) {
+    if (this.isTargetReady(immediate, step)) {
       return immediate;
     }
 
@@ -315,7 +315,7 @@ export class FirstPartyTourService {
 
       const check = () => {
         const target = document.querySelector<HTMLElement>(selector);
-        if (target) {
+        if (this.isTargetReady(target, step)) {
           resolve(target);
           return;
         }
@@ -330,6 +330,39 @@ export class FirstPartyTourService {
 
       requestAnimationFrame(check);
     });
+  }
+
+  private isTargetReady(
+    target: HTMLElement | null,
+    step: FirstPartyTourStep,
+  ): target is HTMLElement {
+    if (!target) {
+      return false;
+    }
+
+    if (!step.waitForEnabled) {
+      return true;
+    }
+
+    return !this.isDisabled(target);
+  }
+
+  private isDisabled(element: HTMLElement): boolean {
+    if (
+      element instanceof HTMLButtonElement ||
+      element instanceof HTMLInputElement ||
+      element instanceof HTMLSelectElement ||
+      element instanceof HTMLTextAreaElement
+    ) {
+      return element.disabled;
+    }
+
+    return (
+      element.getAttribute('aria-disabled') === 'true' ||
+      !!element.closest(
+        'button:disabled,input:disabled,select:disabled,textarea:disabled,[aria-disabled="true"]',
+      )
+    );
   }
 
   private measure(element: Element | null): FirstPartyTourRect | null {

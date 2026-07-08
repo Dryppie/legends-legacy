@@ -13,8 +13,9 @@
   },
   {
     "kind": "click",
-    "element": "[data-tour=essence-loadout-slots]",
+    "element": "[data-tour=essence-loadout-slot-field]",
     "includeSelectors": ["[data-tour=essence-loadout-slot-menu]"],
+    "targetTimeoutMs": 5000,
     "advanceOn": {
       "event": "pointerdown",
       "selector": "[data-tour=essence-loadout-slot-option]"
@@ -27,6 +28,8 @@
     "kind": "click",
     "element": "[data-tour=essence-loadout-save]",
     "actionSelector": "[data-tour=essence-loadout-save]",
+    "waitForEnabled": true,
+    "targetTimeoutMs": 5000,
     "title": "4. Save",
     "description": "Save your loadout changes.",
     "position": "top"
@@ -35,6 +38,8 @@
     "kind": "click",
     "element": "[data-tour=essence-loadout-activate]",
     "actionSelector": "[data-tour=essence-loadout-activate]",
+    "waitForEnabled": true,
+    "targetTimeoutMs": 5000,
     "title": "5. Activate",
     "description": "Activate the saved loadout.",
     "position": "top"

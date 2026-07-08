@@ -35,6 +35,7 @@ export interface FirstPartyTourStepJson {
   showNext?: boolean;
   nextElement?: string;
   targetTimeoutMs?: number;
+  waitForEnabled?: boolean;
   allowOutsideInteraction?: boolean;
   restoreOnBack?: FirstPartyTourRestoreAction;
 }
