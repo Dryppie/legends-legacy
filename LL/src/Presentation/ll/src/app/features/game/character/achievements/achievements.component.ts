@@ -7,6 +7,11 @@ import { CharacterStateService } from '../../../../core/services/api/character/c
 import { DefaultHeaderComponent } from '../../../../shared/components/default-header/default-header.component';
 import { RegularButtonComponent } from '../../../../shared/components/custom-components/buttons/regular-button/regular-button.component';
 import {
+  DropdownComponent,
+  DropdownOption,
+  DropdownSelection,
+} from '../../../../shared/components/custom-components/dropdown/dropdown.component';
+import {
   AchievementCategory,
   AchievementDto,
   AchievementOverviewDto,
@@ -30,6 +35,7 @@ type CollectionView = 'Achievements' | 'Titles';
     FormsModule,
     DefaultHeaderComponent,
     RegularButtonComponent,
+    DropdownComponent,
   ],
   templateUrl: './achievements.component.html',
 })
@@ -74,6 +80,10 @@ export class AchievementsComponent implements OnInit {
   ];
   readonly titleStates: TitleStateFilter[] = ['All', 'Unlocked', 'Locked'];
   readonly titleDisplayPositions: TitleDisplayPosition[] = ['Prefix', 'Suffix'];
+  readonly achievementStateOptions: readonly DropdownOption<AchievementStateFilter>[] =
+    this.achievementStates.map((state) => ({ label: state, value: state }));
+  readonly sortModeOptions: readonly DropdownOption<AchievementSortMode>[] =
+    this.sortModes.map((mode) => ({ label: mode, value: mode }));
 
   readonly filteredAchievements = computed(() => {
     const category = this.activeCategory();
@@ -215,6 +225,18 @@ export class AchievementsComponent implements OnInit {
 
   setCategory(category: AchievementTab): void {
     this.activeCategory.set(category);
+  }
+
+  setAchievementStateFromDropdown(
+    selection: DropdownSelection<AchievementStateFilter>,
+  ): void {
+    this.achievementState.set(selection.main);
+  }
+
+  setSortModeFromDropdown(
+    selection: DropdownSelection<AchievementSortMode>,
+  ): void {
+    this.sortMode.set(selection.main);
   }
 
   equip(title: TitleDto): void {

@@ -1,4 +1,4 @@
-<div class="ll-page-stack pb-4">
+<div class="ll-page-stack overflow-y-auto overscroll-contain pb-24 sm:pb-4">
   <div class="flex flex-wrap items-center justify-between gap-3 pr-4">
     <app-default-header
       section="Character"
@@ -18,35 +18,44 @@
     {{ error() }}
   </p>
 
-  <section *ngIf="overview() as o" class="grid gap-3 pr-4 md:grid-cols-4">
-    <article class="ll-stat-card">
-      <div class="ll-stat-label">Achievement Points</div>
-      <div class="ll-heading mt-1 text-3xl">{{ o.totalAchievementPoints }}</div>
+  <section
+    *ngIf="overview() as o"
+    class="grid grid-cols-4 gap-1.5 pr-4 sm:gap-2 md:gap-3"
+  >
+    <article class="ll-stat-card min-w-0 p-2 sm:p-4">
+      <div class="ll-stat-label truncate">Points</div>
+      <div class="ll-heading mt-0.5 truncate text-xl sm:mt-1 sm:text-3xl">
+        {{ o.totalAchievementPoints }}
+      </div>
     </article>
-    <article class="ll-stat-card ll-card-accent">
-      <div class="ll-stat-label">Legacy Renown</div>
-      <div class="ll-heading mt-1 text-2xl">
+    <article class="ll-stat-card ll-card-accent min-w-0 p-2 sm:p-4">
+      <div class="ll-stat-label truncate">Renown</div>
+      <div class="ll-heading mt-0.5 truncate text-base sm:mt-1 sm:text-2xl">
         {{ o.legacyRenownRank }} · {{ o.legacyRenownName }}
       </div>
     </article>
-    <article class="ll-stat-card">
-      <div class="ll-stat-label">Achievements</div>
-      <div class="ll-heading mt-1 text-3xl">
+    <article class="ll-stat-card min-w-0 p-2 sm:p-4">
+      <div class="ll-stat-label truncate">Achievements</div>
+      <div class="ll-heading mt-0.5 truncate text-xl sm:mt-1 sm:text-3xl">
         {{ o.totalAchievementsUnlocked }}/{{ o.totalAchievementsAvailable }}
       </div>
     </article>
-    <article class="ll-stat-card">
-      <div class="ll-stat-label">Titles</div>
-      <div class="ll-heading mt-1 text-3xl">{{ o.totalTitlesUnlocked }}</div>
+    <article class="ll-stat-card min-w-0 p-2 sm:p-4">
+      <div class="ll-stat-label truncate">Titles</div>
+      <div class="ll-heading mt-0.5 truncate text-xl sm:mt-1 sm:text-3xl">
+        {{ o.totalTitlesUnlocked }}
+      </div>
     </article>
   </section>
 
   <div class="pr-4">
-    <div class="ll-segmented inline-flex flex-wrap gap-1 bg-black/30 p-1">
+    <div
+      class="ll-segmented ll-scrollbar-none inline-flex max-w-full flex-nowrap gap-1 overflow-x-auto overscroll-x-contain bg-black/30 p-1 sm:flex-wrap sm:overflow-visible"
+    >
       <button
         *ngFor="let view of collectionViews"
         type="button"
-        class="ll-segmented-button flex min-h-9 items-center gap-2 px-4 py-2 text-xs font-semibold uppercase"
+        class="ll-segmented-button flex min-h-9 min-w-max flex-none items-center gap-2 px-4 py-2 text-xs font-semibold uppercase sm:flex-initial"
         [ngClass]="{
           'll-segmented-button-active': activeView() === view,
         }"
@@ -72,17 +81,19 @@
 
   <div
     *ngIf="activeView() === 'Achievements'; else titlesView"
-    class="min-h-0 flex-1 overflow-hidden pr-4"
+    class="min-h-0 flex-1 overflow-visible pr-4 sm:overflow-hidden"
   >
     <section class="ll-panel flex min-h-0 flex-col overflow-hidden">
       <div
         class="ll-toolbar flex-col items-stretch rounded-none border-x-0 border-t-0 px-3 py-3"
       >
-        <div class="ll-segmented w-full flex-wrap gap-1 bg-black/30 p-1">
+        <div
+          class="ll-segmented ll-scrollbar-none w-full flex-nowrap gap-1 overflow-x-auto overscroll-x-contain bg-black/30 p-1 sm:flex-wrap sm:overflow-visible"
+        >
           <button
             *ngFor="let category of categories"
             type="button"
-            class="ll-segmented-button flex min-h-9 items-center gap-2 px-3 py-2 text-xs font-semibold uppercase"
+            class="ll-segmented-button flex min-h-9 min-w-max flex-none items-center gap-2 px-3 py-2 text-xs font-semibold uppercase sm:flex-initial"
             [ngClass]="{
               'll-segmented-button-active': activeCategory() === category,
             }"
@@ -101,40 +112,38 @@
           </button>
         </div>
 
-        <div
-          class="mt-3 grid gap-2 lg:grid-cols-[minmax(12rem,1fr)_10rem_10rem_auto]"
-        >
+        <div class="mt-3 grid grid-cols-2 gap-2 lg:grid-cols-[minmax(12rem,1fr)_10rem_10rem_auto]">
           <input
             type="search"
-            class="ll-input min-w-0"
+            class="ll-input col-span-2 min-w-0 lg:col-span-1"
             placeholder="Search achievements"
             [ngModel]="search()"
             (ngModelChange)="search.set($event)"
           />
 
-          <select
-            class="ll-input min-w-0"
-            [ngModel]="achievementState()"
-            (ngModelChange)="achievementState.set($event)"
-          >
-            <option *ngFor="let state of achievementStates" [ngValue]="state">
-              {{ state }}
-            </option>
-          </select>
+          <app-dropdown
+            class="block min-w-0"
+            appearance="field"
+            label="All"
+            [value]="achievementState()"
+            [options]="achievementStateOptions"
+            [selectedValue]="achievementState()"
+            (selection)="setAchievementStateFromDropdown($event)"
+          ></app-dropdown>
 
-          <select
-            class="ll-input min-w-0"
-            [ngModel]="sortMode()"
-            (ngModelChange)="sortMode.set($event)"
-          >
-            <option *ngFor="let mode of sortModes" [ngValue]="mode">
-              {{ mode }}
-            </option>
-          </select>
+          <app-dropdown
+            class="block min-w-0"
+            appearance="field"
+            label="Progress"
+            [value]="sortMode()"
+            [options]="sortModeOptions"
+            [selectedValue]="sortMode()"
+            (selection)="setSortModeFromDropdown($event)"
+          ></app-dropdown>
 
           <button
             type="button"
-            class="ll-button px-3 py-1 text-xs"
+            class="ll-button col-span-2 px-3 py-1 text-xs lg:col-span-1"
             (click)="clearFilters()"
           >
             Clear
@@ -142,7 +151,7 @@
         </div>
       </div>
 
-      <div class="min-h-0 flex-1 overflow-y-auto p-2">
+      <div class="min-h-0 flex-1 overflow-y-auto p-2 pb-24 sm:pb-2">
         <div
           *ngIf="!filteredAchievements().length"
           class="ll-empty-state min-h-60"
