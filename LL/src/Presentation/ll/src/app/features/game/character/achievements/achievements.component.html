@@ -1,5 +1,5 @@
-<div class="ll-page-stack overflow-y-auto overscroll-contain pb-24 sm:pb-4">
-  <div class="flex flex-wrap items-center justify-between gap-3 pr-4">
+<div class="ll-page-stack overflow-y-auto overscroll-contain pb-2 sm:pb-4">
+  <div class="flex flex-wrap items-center justify-between gap-2 pr-4">
     <app-default-header
       section="Character"
       title="Achievements"
@@ -7,40 +7,37 @@
       icon="character/achievements"
     ></app-default-header>
 
-    <app-regular-button
+    <!-- <app-regular-button
       [disabled]="loading()"
       [text]="loading() ? 'Refreshing' : 'Refresh'"
       (pressed)="load()"
-    ></app-regular-button>
+    ></app-regular-button> -->
   </div>
 
   <p *ngIf="error()" class="ll-state ll-state-danger mr-4">
     {{ error() }}
   </p>
 
-  <section
-    *ngIf="overview() as o"
-    class="grid grid-cols-4 gap-1.5 pr-4 sm:gap-2 md:gap-3"
-  >
-    <article class="ll-stat-card min-w-0 p-2 sm:p-4">
+  <section *ngIf="overview() as o" class="grid grid-cols-4 gap-1 pr-4 sm:gap-2">
+    <article class="ll-stat-card min-w-0 p-2 sm:p-3">
       <div class="ll-stat-label truncate">Points</div>
       <div class="ll-heading mt-0.5 truncate text-xl sm:mt-1 sm:text-3xl">
         {{ o.totalAchievementPoints }}
       </div>
     </article>
-    <article class="ll-stat-card ll-card-accent min-w-0 p-2 sm:p-4">
+    <article class="ll-stat-card ll-card-accent min-w-0 p-2 sm:p-3">
       <div class="ll-stat-label truncate">Renown</div>
       <div class="ll-heading mt-0.5 truncate text-base sm:mt-1 sm:text-2xl">
         {{ o.legacyRenownRank }} · {{ o.legacyRenownName }}
       </div>
     </article>
-    <article class="ll-stat-card min-w-0 p-2 sm:p-4">
+    <article class="ll-stat-card min-w-0 p-2 sm:p-3">
       <div class="ll-stat-label truncate">Achievements</div>
       <div class="ll-heading mt-0.5 truncate text-xl sm:mt-1 sm:text-3xl">
         {{ o.totalAchievementsUnlocked }}/{{ o.totalAchievementsAvailable }}
       </div>
     </article>
-    <article class="ll-stat-card min-w-0 p-2 sm:p-4">
+    <article class="ll-stat-card min-w-0 p-2 sm:p-3">
       <div class="ll-stat-label truncate">Titles</div>
       <div class="ll-heading mt-0.5 truncate text-xl sm:mt-1 sm:text-3xl">
         {{ o.totalTitlesUnlocked }}
@@ -112,7 +109,9 @@
           </button>
         </div>
 
-        <div class="mt-3 grid grid-cols-2 gap-2 lg:grid-cols-[minmax(12rem,1fr)_10rem_10rem_auto]">
+        <div
+          class="mt-3 grid grid-cols-2 gap-2 lg:grid-cols-[minmax(12rem,1fr)_10rem_10rem_auto]"
+        >
           <input
             type="search"
             class="ll-input col-span-2 min-w-0 lg:col-span-1"
@@ -230,7 +229,7 @@
 
   <ng-template #titlesView>
     <div
-      class="grid min-h-0 flex-1 grid-cols-1 gap-4 overflow-hidden pr-4 xl:grid-cols-[22rem_minmax(0,1fr)]"
+      class="grid min-h-0 flex-1 grid-cols-1 gap-2 overflow-hidden pr-4 xl:grid-cols-[22rem_minmax(0,1fr)]"
     >
       <aside class="ll-panel flex min-h-0 flex-col overflow-hidden">
         <div class="border-b border-light_gray/70 p-4">
@@ -251,7 +250,9 @@
 
           <div class="mt-3 border-t border-light_gray/60 pt-3">
             <div class="ll-stat-label">Equipped</div>
-            <ng-container *ngIf="equippedTitle() as title; else noEquippedTitle">
+            <ng-container
+              *ngIf="equippedTitle() as title; else noEquippedTitle"
+            >
               <div class="mt-1 text-base font-semibold text-primary">
                 {{ title.preview }}
               </div>
