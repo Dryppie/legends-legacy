@@ -11,44 +11,57 @@
   ></app-combat>
 </ng-container>
 <ng-template #showNonCombat>
-  <div class="ll-page-stack items-center pr-4 sm:pr-6">
-    <div class="flex w-full flex-col sm:gap-6">
+  <div
+    class="ll-page-stack items-center gap-2 overflow-hidden pr-4 sm:gap-4 sm:pr-6"
+  >
+    <div class="hidden w-full flex-col sm:flex sm:gap-6">
       <app-banner image="colosseum" class="w-full"></app-banner>
     </div>
 
-    <section class="grid w-full grid-cols-2 gap-2 text-white md:grid-cols-4 xl:grid-cols-7">
-      <div class="ll-stat-card p-2">
-        <p class="ll-stat-label">Tickets</p>
-        <p class="ll-heading mt-1 text-lg">
-          {{ state.status()?.tickets ?? state.arenaTicketStatus()?.currentTickets ?? 0 }} /
-          {{ state.status()?.maxTickets ?? state.arenaTicketStatus()?.maxTickets ?? 0 }}
+    <section
+      class="grid w-full grid-cols-4 gap-1.5 text-white sm:gap-2 md:grid-cols-4 xl:grid-cols-7"
+    >
+      <div class="ll-stat-card min-w-0 p-2 sm:p-3">
+        <p class="ll-stat-label truncate">Tickets</p>
+        <p class="ll-heading mt-0.5 truncate text-base sm:mt-1 sm:text-lg">
+          {{
+            state.status()?.tickets ??
+              state.arenaTicketStatus()?.currentTickets ??
+              0
+          }}
+          /
+          {{
+            state.status()?.maxTickets ??
+              state.arenaTicketStatus()?.maxTickets ??
+              0
+          }}
         </p>
       </div>
 
-      <div class="ll-stat-card p-2">
-        <p class="ll-stat-label">Tier</p>
-        <p class="ll-heading mt-1 text-lg">
+      <div class="ll-stat-card min-w-0 p-2 sm:p-3">
+        <p class="ll-stat-label truncate">Tier</p>
+        <p class="ll-heading mt-0.5 truncate text-base sm:mt-1 sm:text-lg">
           {{ state.status()?.rankProgress?.currentTierName ?? "-" }}
         </p>
       </div>
 
-      <div class="ll-stat-card p-2">
-        <p class="ll-stat-label">Rating</p>
-        <p class="ll-heading mt-1 text-lg">
-          {{ (state.status()?.rating ?? myRanking?.level) | numberFormat }}
+      <div class="ll-stat-card min-w-0 p-2 sm:p-3">
+        <p class="ll-stat-label truncate">Rating</p>
+        <p class="ll-heading mt-0.5 truncate text-base sm:mt-1 sm:text-lg">
+          {{ state.status()?.rating ?? myRanking?.level | numberFormat }}
         </p>
       </div>
 
-      <div class="ll-stat-card p-2">
-        <p class="ll-stat-label">Glory</p>
-        <p class="ll-heading mt-1 text-lg">
-          {{ (state.status()?.glory ?? 0) | numberFormat }}
+      <div class="ll-stat-card min-w-0 p-2 sm:p-3">
+        <p class="ll-stat-label truncate">Glory</p>
+        <p class="ll-heading mt-0.5 truncate text-base sm:mt-1 sm:text-lg">
+          {{ state.status()?.glory ?? 0 | numberFormat }}
         </p>
       </div>
 
-      <div class="ll-stat-card p-2">
-        <p class="ll-stat-label">Streak</p>
-        <p class="ll-heading mt-1 text-lg">
+      <div class="ll-stat-card min-w-0 p-2 sm:p-3">
+        <p class="ll-stat-label truncate">Streak</p>
+        <p class="ll-heading mt-0.5 truncate text-base sm:mt-1 sm:text-lg">
           {{ state.status()?.currentAttackWinStreak ?? 0 }}
           <span class="text-sm text-secondary">
             / {{ state.status()?.bestAttackWinStreak ?? 0 }}
@@ -56,19 +69,22 @@
         </p>
       </div>
 
-      <div class="ll-stat-card p-2">
-        <p class="ll-stat-label">Daily First Win</p>
-        <p class="ll-heading mt-1 text-lg">
+      <div class="ll-stat-card min-w-0 p-2 sm:p-3">
+        <p class="ll-stat-label truncate">Daily Win</p>
+        <p class="ll-heading mt-0.5 truncate text-base sm:mt-1 sm:text-lg">
           {{ state.status()?.dailyFirstWinAvailable ? "Available" : "Claimed" }}
         </p>
-        <p class="text-xs text-secondary" *ngIf="state.status()?.dailyFirstWinAvailable">
+        <p
+          class="truncate text-[0.65rem] text-secondary sm:text-xs"
+          *ngIf="state.status()?.dailyFirstWinAvailable"
+        >
           +{{ state.status()?.dailyFirstWinBonusGlory ?? 20 }} Glory
         </p>
       </div>
 
-      <div class="ll-stat-card p-2">
-        <p class="ll-stat-label">Record</p>
-        <p class="ll-heading mt-1 text-lg">
+      <div class="ll-stat-card min-w-0 p-2 sm:p-3">
+        <p class="ll-stat-label truncate">Record</p>
+        <p class="ll-heading mt-0.5 truncate text-base sm:mt-1 sm:text-lg">
           {{ state.status()?.attackRecord?.wins ?? recentRecord.wins }}-{{
             state.status()?.attackRecord?.losses ?? recentRecord.losses
           }}-{{ state.status()?.attackRecord?.draws ?? recentRecord.draws }}
@@ -78,9 +94,11 @@
 
     <app-tabs class="flex w-full flex-col overflow-hidden">
       <app-tab label="Arena">
-        <div class="flex min-h-0 w-full flex-col gap-3">
+        <div
+          class="flex h-full min-h-0 flex-1 flex-col gap-3 overflow-y-auto overscroll-contain pb-24 pr-1 sm:pb-0"
+        >
           <section
-            class="ll-stat-card flex flex-col gap-3 p-3 text-white md:flex-row md:items-center md:justify-between"
+            class="ll-stat-card flex flex-col gap-3 p-3 text-white sm:p-4 md:flex-row md:items-center md:justify-between"
           >
             <div class="min-w-0">
               <div class="flex flex-wrap items-baseline gap-x-3 gap-y-1">
@@ -113,7 +131,7 @@
           </section>
 
           <app-arena-battle
-            class="min-h-0 overflow-hidden"
+            class="block w-full"
             [opponents]="state.opponents()"
             [arenaTicketStatus]="state.arenaTicketStatus()"
             (refreshOpponents)="onRefreshOpponents()"

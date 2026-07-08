@@ -1,6 +1,6 @@
-<div class="flex h-full w-full flex-col overflow-hidden p-4 text-white">
-  <section class="grid grid-cols-2 gap-3">
-    <div class="ll-stat-card p-4">
+<div class="flex h-full w-full flex-col overflow-hidden p-3 text-white sm:p-4">
+  <section class="grid grid-cols-2 gap-2 sm:gap-3">
+    <div class="ll-stat-card p-3 sm:p-4">
       <p class="ll-stat-label">Battle Log</p>
       <p class="ll-stat-value">
         {{ previousMatches.length | numberFormat }}
@@ -8,7 +8,7 @@
       <p class="ll-copy mt-1">Recorded arena matches</p>
     </div>
 
-    <div class="ll-stat-card p-4">
+    <div class="ll-stat-card p-3 sm:p-4">
       <p class="ll-stat-label">Rating Swing</p>
       <p
         class="mt-2 text-2xl font-semibold"
@@ -31,11 +31,13 @@
     class="mt-4 flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto pr-1"
     *ngIf="filteredMatches.length; else noMatches"
   >
-    <article class="ll-card p-4" *ngFor="let match of filteredMatches">
+    <article class="ll-card p-3 sm:p-4" *ngFor="let match of filteredMatches">
       <div
         class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between"
       >
-        <div class="flex min-w-0 flex-1 gap-3 md:justify-between">
+        <div
+          class="flex min-w-0 flex-1 flex-col gap-3 sm:flex-row sm:items-start sm:justify-between"
+        >
           <div class="min-w-0">
             <p class="ll-eyebrow">Attacker</p>
             <app-character-tag
@@ -64,9 +66,11 @@
             </p>
           </div>
 
-          <div class="self-center text-sm font-semibold text-secondary">vs</div>
+          <div class="text-sm font-semibold text-secondary sm:self-center">
+            vs
+          </div>
 
-          <div class="min-w-0 md:text-right">
+          <div class="min-w-0 sm:text-right">
             <p class="ll-eyebrow">Defender</p>
             <app-character-tag
               [id]="match.characterBId"
@@ -95,7 +99,9 @@
           </div>
         </div>
 
-        <div class="flex shrink-0 flex-col gap-2 pl-4 sm:items-end">
+        <div
+          class="flex shrink-0 flex-col gap-2 border-t border-light_gray/50 pt-3 sm:items-end sm:border-t-0 sm:pl-4 sm:pt-0"
+        >
           <span
             class="rounded border bg-black/30 px-3 py-1 text-sm font-semibold"
             [ngClass]="resultClass(match)"
