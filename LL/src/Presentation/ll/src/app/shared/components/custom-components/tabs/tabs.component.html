@@ -1,13 +1,13 @@
 <div
   *ngIf="panes.length > 1"
-  class="ll-segmented flex w-full flex-wrap"
+  class="ll-segmented flex w-full flex-nowrap overflow-x-auto overscroll-x-contain sm:flex-wrap sm:overflow-visible"
   data-tour="tabs-navigation"
   role="tablist"
 >
   <button
     type="button"
     *ngFor="let pane of panes; let i = index"
-    class="ll-segmented-button flex-1"
+    class="ll-segmented-button min-w-max flex-none sm:flex-1"
     [ngClass]="{ 'll-segmented-button-active': activeIndex() === i }"
     [attr.aria-selected]="activeIndex() === i"
     [attr.tabindex]="activeIndex() === i ? 0 : -1"
