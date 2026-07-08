@@ -56,35 +56,50 @@ public sealed class IdleCombatOutcomeProcessor : ICombatOutcomeProcessor
         return _sessionFactory.Create(facts, calculatedOutcome);
     }
 
-    private async Task EnqueueOutboxProgressAsync(IdleCombatRewardFacts facts, CancellationToken cancellationToken)
+    private Task EnqueueOutboxProgressAsync(IdleCombatRewardFacts facts, CancellationToken cancellationToken)
     {
-        foreach (var encounter in facts.Encounters)
+        if (facts.Encounters.Count == 0)
         {
-            var defeatedCreatures = encounter.IsVictory
-                ? encounter.HostileCreatures
-                : [];
-            var lowestWinningHealthPercent = encounter.IsVictory
-                ? encounter.CombatResult.PlayerTeam
-                    .Where(x => x.MaxHealth > 0 && x.Health > 0)
-                    .Select(x => (int)Math.Ceiling((double)x.Health * 100 / x.MaxHealth))
-                    .DefaultIfEmpty()
-                    .Min()
-                : (int?)null;
-
-            await _outbox.EnqueueAsync(
-                GameEventTypes.IdleCombatEncounterCompleted,
-                new IdleCombatEncounterCompletedPayload(
-                    facts.CharacterId,
-                    facts.Area.Id,
-                    encounter.Outcome == BattleOutcome.Victory,
-                    defeatedCreatures.Count,
-                    [.. defeatedCreatures.Select(GetCreatureFamilyKey)],
-                    encounter.Outcome == BattleOutcome.Defeat ? 1 : 0,
-                    lowestWinningHealthPercent == 0 ? null : lowestWinningHealthPercent),
-                facts.CharacterId,
-                null,
-                cancellationToken);
+            return Task.CompletedTask;
         }
+
+        var defeatedCreatures = facts.Encounters
+            .Where(x => x.IsVictory)
+            .SelectMany(x => x.HostileCreatures)
+            .ToList();
+
+        var lowestWinningHealthPercent = facts.Encounters
+            .Where(x => x.IsVictory)
+            .Select(GetLowestWinningHealthPercent)
+            .Where(x => x.HasValue)
+            .Select(x => x!.Value)
+            .DefaultIfEmpty()
+            .Min();
+
+        return _outbox.EnqueueAsync(
+            GameEventTypes.IdleCombatEncounterCompleted,
+            new IdleCombatEncounterCompletedPayload(
+                facts.CharacterId,
+                facts.Area.Id,
+                facts.Encounters.Any(x => x.Outcome == BattleOutcome.Victory),
+                defeatedCreatures.Count,
+                [.. defeatedCreatures.Select(GetCreatureFamilyKey)],
+                facts.Encounters.Count(x => x.Outcome == BattleOutcome.Defeat),
+                lowestWinningHealthPercent == 0 ? null : lowestWinningHealthPercent),
+            facts.CharacterId,
+            null,
+            cancellationToken);
+    }
+
+    private static int? GetLowestWinningHealthPercent(IdleEncounterRewardFacts encounter)
+    {
+        var lowestHealthPercent = encounter.CombatResult.PlayerTeam
+            .Where(x => x.MaxHealth > 0 && x.Health > 0)
+            .Select(x => (int)Math.Ceiling((double)x.Health * 100 / x.MaxHealth))
+            .DefaultIfEmpty()
+            .Min();
+
+        return lowestHealthPercent == 0 ? null : lowestHealthPercent;
     }
 
     private async Task PublishProphecyProgressAsync(

@@ -5,14 +5,24 @@ using Application.Interfaces.Services.LL.Achievements;
 using Application.Interfaces.Services.LL.Tutorials;
 using Application.UseCases.Achievements.Dtos;
 using Application.UseCases.Outbox;
+using Domain.Models.CharacterActions;
+using Domain.Models.CharacterActions.CharacterActionDetails;
 using Domain.Models.Achievements;
 using Domain.Models.CharacterActions.Sessions;
 using Domain.Models.Combat;
+using Domain.Models.Entities.Creatures;
 using Domain.Models.Items.Equipments;
 using Domain.Models.Outbox;
+using Domain.Models.Regions.Areas;
 using Domain.Models.Tutorials;
+using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Persistence.LL;
+using Services.LL.Combat.Layers.Orchestration.Idle;
+using Services.LL.Combat.Layers.Orchestration.Models;
+using Services.LL.Combat.Layers.Rewards.Idle;
+using Services.LL.Combat.Layers.Rewards.Models;
+using Services.LL.Interfaces.Combat.Reward.Idle;
 using Services.LL.Outbox;
 using Services.LL.Tutorials;
 
@@ -156,6 +166,97 @@ public sealed class GameEventOutboxTests
         Assert.NotNull(progress.EssenceAbsorbedAt);
     }
 
+    [Fact]
+    public async Task Idle_combat_processor_enqueues_one_aggregate_outbox_message_for_many_encounters()
+    {
+        var characterId = Guid.NewGuid();
+        var from = Now.AddMinutes(-3);
+        var area = new Area { Id = "training-grounds", Name = "Training Grounds" };
+        var facts = new IdleCombatRewardFacts(
+            characterId,
+            from,
+            Now,
+            Now,
+            TimeSpan.FromMinutes(3),
+            area,
+            [],
+            null,
+            [
+                CreateEncounter(
+                    1,
+                    BattleOutcome.Victory,
+                    [
+                        new Creature { Name = "Goblin Scout" },
+                        new Creature { Name = "Wolf" }
+                    ],
+                    [new SimpleCombatEntity { MaxHealth = 100, Health = 25 }]),
+                CreateEncounter(
+                    2,
+                    BattleOutcome.Defeat,
+                    [new Creature { Name = "Goblin Brute" }],
+                    []),
+                CreateEncounter(
+                    3,
+                    BattleOutcome.Victory,
+                    [new Creature { Name = "Goblin Archer" }],
+                    [new SimpleCombatEntity { MaxHealth = 100, Health = 12 }])
+            ]);
+
+        var outcome = new IdleCombatCalculatedOutcome(
+            characterId,
+            from,
+            Now,
+            0,
+            0,
+            0,
+            [],
+            [],
+            []);
+        var outbox = new RecordingGameEventOutbox();
+        var processor = new IdleCombatOutcomeProcessor(
+            new StubIdleCombatRewardFactBuilder(facts),
+            new StubIdleCombatRewardCalculator(outcome),
+            new StubIdleCombatRewardApplier(),
+            new StubIdleCombatSessionFactory(),
+            outbox,
+            new NoOpPublisher());
+        var characterAction = new CharacterAction
+        {
+            CharacterId = characterId,
+            UpdatedAt = from,
+            ActionDetails = new CombatActionDetails([], area)
+        };
+        var details = new IdleCombatOrchestrationDetails(
+            from,
+            Now,
+            Now,
+            PlannedEncounterCount: 3,
+            EncounterCadence: TimeSpan.FromMinutes(1));
+
+        await processor.ApplyAsync(
+            new CombatOutcomeRequest(
+                new IdleCombatOrchestrationRequest(characterAction, Now),
+                new CombatOrchestrationResult(
+                    Guid.NewGuid(),
+                    CombatMode.Idle,
+                    [],
+                    details)),
+            CancellationToken.None);
+
+        var message = Assert.Single(outbox.Messages);
+        Assert.Equal(GameEventTypes.IdleCombatEncounterCompleted, message.EventType);
+        Assert.Equal(characterId, message.CharacterId);
+
+        var payload = Assert.IsType<IdleCombatEncounterCompletedPayload>(message.Payload);
+        Assert.Equal(characterId, payload.CharacterId);
+        Assert.Equal(area.Id, payload.AreaId);
+        Assert.True(payload.WonEncounter);
+        Assert.Equal(3, payload.MonstersDefeated);
+        Assert.Equal(["Goblin", "Wolf", "Goblin"], payload.DefeatedCreatureFamilyKeys);
+        Assert.Equal(1, payload.PlayerDefeats);
+        Assert.Equal(12, payload.LowestWinningHealthPercent);
+    }
+
     private static LLDbContext CreateDb()
     {
         var options = new DbContextOptionsBuilder<LLDbContext>()
@@ -168,9 +269,89 @@ public sealed class GameEventOutboxTests
     private static JsonSerializerOptions CreateJsonOptions() =>
         new(JsonSerializerDefaults.Web);
 
+    private static IdleEncounterRewardFacts CreateEncounter(
+        int sequence,
+        BattleOutcome outcome,
+        IReadOnlyList<Creature> hostileCreatures,
+        IReadOnlyList<SimpleCombatEntity> playerTeam) =>
+        new(
+            Guid.NewGuid(),
+            sequence,
+            Now.AddMinutes(sequence),
+            outcome,
+            [.. hostileCreatures.Select(x => x.Id)],
+            hostileCreatures,
+            new CombatResult
+            {
+                Outcome = outcome,
+                PlayerTeam = [.. playerTeam]
+            });
+
     private sealed class FixedTimeProvider(DateTimeOffset now) : TimeProvider
     {
         public override DateTimeOffset GetUtcNow() => now;
+    }
+
+    private sealed class RecordingGameEventOutbox : IGameEventOutbox
+    {
+        public List<RecordedOutboxMessage> Messages { get; } = [];
+
+        public Task EnqueueAsync<TPayload>(
+            string eventType,
+            TPayload payload,
+            Guid? characterId,
+            Guid? accountId,
+            CancellationToken cancellationToken)
+        {
+            Messages.Add(new RecordedOutboxMessage(eventType, payload!, characterId, accountId));
+            return Task.CompletedTask;
+        }
+    }
+
+    private sealed record RecordedOutboxMessage(
+        string EventType,
+        object Payload,
+        Guid? CharacterId,
+        Guid? AccountId);
+
+    private sealed class StubIdleCombatRewardFactBuilder(IdleCombatRewardFacts facts) : IIdleCombatRewardFactBuilder
+    {
+        public Task<IdleCombatRewardFacts> BuildAsync(
+            IdleCombatOutcomeContext context,
+            CancellationToken cancellationToken) =>
+            Task.FromResult(facts);
+    }
+
+    private sealed class StubIdleCombatRewardCalculator(IdleCombatCalculatedOutcome outcome) : IIdleCombatRewardCalculator
+    {
+        public Task<IdleCombatCalculatedOutcome> CalculateAsync(
+            IdleCombatRewardFacts facts,
+            CancellationToken cancellationToken) =>
+            Task.FromResult(outcome);
+    }
+
+    private sealed class StubIdleCombatRewardApplier : IIdleCombatRewardApplier
+    {
+        public Task ApplyAsync(
+            IdleCombatRewardFacts facts,
+            IdleCombatCalculatedOutcome outcome,
+            CancellationToken cancellationToken) =>
+            Task.CompletedTask;
+    }
+
+    private sealed class StubIdleCombatSessionFactory : IIdleCombatSessionFactory
+    {
+        public CombatSession Create(IdleCombatRewardFacts facts, IdleCombatCalculatedOutcome outcome) => new();
+    }
+
+    private sealed class NoOpPublisher : IPublisher
+    {
+        public Task Publish(object notification, CancellationToken cancellationToken = default) =>
+            Task.CompletedTask;
+
+        public Task Publish<TNotification>(TNotification notification, CancellationToken cancellationToken = default)
+            where TNotification : INotification =>
+            Task.CompletedTask;
     }
 
     private sealed class FirstStepsTutorialDefinitionProvider : ITutorialDefinitionProvider
