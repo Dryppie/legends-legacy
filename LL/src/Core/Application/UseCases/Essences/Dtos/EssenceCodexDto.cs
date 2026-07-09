@@ -24,7 +24,11 @@ public sealed record EssenceCodexEntryDto(
     string Description,
     string BenefitText,
     string BonusKind,
+    double BaseBonusValue,
     double BonusValue,
+    double BonusValuePerCollectionAscensionTier,
+    int CollectionAscensionTier,
+    int MaxCollectionAscensionTier,
     int Current,
     int Required,
     bool IsUnlocked,
@@ -32,7 +36,7 @@ public sealed record EssenceCodexEntryDto(
     IReadOnlyList<EssenceCodexMemberDto> Essences) : IMapFrom<EssenceCodexEntry>
 {
     public EssenceCodexEntryDto()
-        : this(string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, 0, 0, 0, false, string.Empty, [])
+        : this(string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, 0, 0, 0, 0, 0, 0, 0, false, string.Empty, [])
     {
     }
 
@@ -46,10 +50,11 @@ public sealed record EssenceCodexEntryDto(
 public sealed record EssenceCodexMemberDto(
     string EssenceDefinitionId,
     string Name,
-    bool IsAbsorbed) : IMapFrom<EssenceCodexMember>
+    bool IsAbsorbed,
+    int AscensionTier) : IMapFrom<EssenceCodexMember>
 {
     public EssenceCodexMemberDto()
-        : this(string.Empty, string.Empty, false)
+        : this(string.Empty, string.Empty, false, 0)
     {
     }
 

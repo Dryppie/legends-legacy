@@ -24,45 +24,61 @@ public sealed class EssenceCodexCollectionService : IEssenceCodexCollectionServi
 
     public async Task<IReadOnlyList<EssenceCodexEntry>> GetVisibleEntriesAsync(Guid characterId, CancellationToken cancellationToken)
     {
-        var absorbedIds = await GetAbsorbedEssenceDefinitionIdsAsync(characterId, cancellationToken);
+        var absorbedEssences = await GetAbsorbedEssencesAsync(characterId, cancellationToken);
 
         return _collectionDefinitions.GetAll()
-            .Where(collection => collection.EssenceDefinitionIds.Any(absorbedIds.Contains))
-            .Select(collection => CreateEntry(collection, absorbedIds))
+            .Where(collection => collection.EssenceDefinitionIds.Any(absorbedEssences.ContainsKey))
+            .Select(collection => CreateEntry(collection, absorbedEssences))
             .OrderBy(entry => entry.IsUnlocked ? 0 : 1)
             .ThenBy(entry => entry.Category)
             .ThenBy(entry => entry.Title)
             .ToList();
     }
 
-    private async Task<HashSet<string>> GetAbsorbedEssenceDefinitionIdsAsync(Guid characterId, CancellationToken cancellationToken)
+    private async Task<IReadOnlyDictionary<string, int>> GetAbsorbedEssencesAsync(Guid characterId, CancellationToken cancellationToken)
     {
-        var ids = await _dbContext.PlayerEssences
+        var essences = await _dbContext.PlayerEssences
             .Where(x => x.CharacterId == characterId)
-            .Select(x => x.EssenceDefinitionId)
-            .Distinct()
+            .Select(x => new
+            {
+                x.EssenceDefinitionId,
+                x.AscensionTier
+            })
             .ToListAsync(cancellationToken);
 
-        return ids.ToHashSet(StringComparer.OrdinalIgnoreCase);
+        return essences
+            .GroupBy(x => x.EssenceDefinitionId, StringComparer.OrdinalIgnoreCase)
+            .ToDictionary(
+                group => group.Key,
+                group => group.Max(x => x.AscensionTier),
+                StringComparer.OrdinalIgnoreCase);
     }
 
     private EssenceCodexEntry CreateEntry(
         EssenceCodexCollectionDefinition collection,
-        HashSet<string> absorbedIds)
+        IReadOnlyDictionary<string, int> absorbedEssences)
     {
         var members = collection.EssenceDefinitionIds
             .Select(id =>
             {
                 var definition = _essenceDefinitions.GetById(id);
+                var isAbsorbed = absorbedEssences.TryGetValue(id, out var ascensionTier);
                 return new EssenceCodexMember(
                     id,
                     definition?.Name ?? FormatEssenceName(id),
-                    absorbedIds.Contains(id));
+                    isAbsorbed,
+                    isAbsorbed ? ascensionTier : 0);
             })
             .ToList();
 
         var current = members.Count(member => member.IsAbsorbed);
         var required = members.Count;
+        var isUnlocked = current >= required;
+        var collectionAscensionTier = isUnlocked
+            ? members.Min(member => member.AscensionTier)
+            : 0;
+        var bonusValue = collection.Bonus.Value +
+            collectionAscensionTier * collection.Bonus.ValuePerCollectionAscensionTier;
 
         return new EssenceCodexEntry(
             collection.Id,
@@ -71,9 +87,13 @@ public sealed class EssenceCodexCollectionService : IEssenceCodexCollectionServi
             collection.Bonus.Description,
             collection.Bonus.Kind,
             collection.Bonus.Value,
+            bonusValue,
+            collection.Bonus.ValuePerCollectionAscensionTier,
+            collectionAscensionTier,
+            EssenceProgressionConstants.MaxAscensionTier,
             current,
             required,
-            current >= required,
+            isUnlocked,
             collection.Category,
             members);
     }

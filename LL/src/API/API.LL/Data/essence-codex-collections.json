@@ -13,6 +13,7 @@
       "bonus": {
         "kind": "EssenceDropRateRelativeBps",
         "value": 50,
+        "valuePerCollectionAscensionTier": 10,
         "description": "+0.5% relative Essence drop chance."
       }
     },
@@ -28,6 +29,7 @@
       "bonus": {
         "kind": "DuplicateEssenceExtraMaterialChanceBps",
         "value": 75,
+        "valuePerCollectionAscensionTier": 15,
         "description": "+0.75% chance for extra materials from duplicate Essences."
       }
     },
@@ -44,6 +46,7 @@
       "bonus": {
         "kind": "EssencePityProgressionGainBps",
         "value": 75,
+        "valuePerCollectionAscensionTier": 15,
         "description": "+0.75% Essence pity progression gain."
       }
     },
@@ -63,6 +66,7 @@
       "bonus": {
         "kind": "EssenceDropRateRelativeBps",
         "value": 100,
+        "valuePerCollectionAscensionTier": 25,
         "description": "+1% relative Essence drop chance."
       }
     },
@@ -81,6 +85,7 @@
       "bonus": {
         "kind": "FocusedMonsterEssenceDropRateRelativeBps",
         "value": 75,
+        "valuePerCollectionAscensionTier": 15,
         "description": "+0.75% relative Essence drop chance against focused monsters."
       }
     },
@@ -100,6 +105,7 @@
       "bonus": {
         "kind": "DungeonRewardRetentionBps",
         "value": 50,
+        "valuePerCollectionAscensionTier": 10,
         "description": "+0.5% dungeon reward retention."
       }
     }

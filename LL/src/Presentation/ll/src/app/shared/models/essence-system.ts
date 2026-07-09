@@ -97,7 +97,11 @@ export interface EssenceCodexEntryDto {
   description: string;
   benefitText: string;
   bonusKind: string;
+  baseBonusValue: number;
   bonusValue: number;
+  bonusValuePerCollectionAscensionTier: number;
+  collectionAscensionTier: number;
+  maxCollectionAscensionTier: number;
   current: number;
   required: number;
   isUnlocked: boolean;
@@ -109,6 +113,7 @@ export interface EssenceCodexMemberDto {
   essenceDefinitionId: string;
   name: string;
   isAbsorbed: boolean;
+  ascensionTier: number;
 }
 
 export interface PlayerEssenceDto {

@@ -29,7 +29,11 @@ public sealed record EssenceCodexEntry(
     string Description,
     string BenefitText,
     BonusKind BonusKind,
+    double BaseBonusValue,
     double BonusValue,
+    double BonusValuePerCollectionAscensionTier,
+    int CollectionAscensionTier,
+    int MaxCollectionAscensionTier,
     int Current,
     int Required,
     bool IsUnlocked,
@@ -39,7 +43,8 @@ public sealed record EssenceCodexEntry(
 public sealed record EssenceCodexMember(
     string EssenceDefinitionId,
     string Name,
-    bool IsAbsorbed);
+    bool IsAbsorbed,
+    int AscensionTier);
 
 public sealed record PlayerEssenceArchiveEntry(
     PlayerEssence Essence,

@@ -96,8 +96,11 @@ public sealed class CreatureArchiveServiceTests
         Assert.Equal(3, entry.Required);
         Assert.False(entry.IsUnlocked);
         Assert.Equal(BonusKind.EssenceDropRateRelativeBps, entry.BonusKind);
+        Assert.Equal(50, entry.BaseBonusValue);
         Assert.Equal(50, entry.BonusValue);
-        Assert.Contains(entry.Essences, member => member.EssenceDefinitionId == "essence.cave_bat" && member.IsAbsorbed);
+        Assert.Equal(0, entry.CollectionAscensionTier);
+        Assert.Equal(10, entry.BonusValuePerCollectionAscensionTier);
+        Assert.Contains(entry.Essences, member => member.EssenceDefinitionId == "essence.cave_bat" && member.IsAbsorbed && member.AscensionTier == 0);
         Assert.Contains(entry.Essences, member => member.EssenceDefinitionId == "essence.forest_wolf" && !member.IsAbsorbed);
     }
 
@@ -118,7 +121,33 @@ public sealed class CreatureArchiveServiceTests
         var entry = Assert.Single(codex.Entries);
         Assert.True(entry.IsUnlocked);
         Assert.Equal(3, entry.Current);
+        Assert.Equal(0, entry.CollectionAscensionTier);
+        Assert.Equal(50, entry.BonusValue);
         Assert.All(entry.Essences, member => Assert.True(member.IsAbsorbed));
+    }
+
+    [Fact]
+    public async Task GetEssenceCodex_upgrades_collection_bonus_from_lowest_member_ascension_tier()
+    {
+        await using var db = CreateDb();
+        var characterId = Guid.NewGuid();
+        db.PlayerEssences.AddRange(
+            CreatePlayerEssence(characterId, "essence.cave_bat", ascensionTier: 2),
+            CreatePlayerEssence(characterId, "essence.forest_wolf", ascensionTier: 1),
+            CreatePlayerEssence(characterId, "essence.stone_boar", ascensionTier: 3));
+        await db.SaveChangesAsync();
+        var service = CreateService(db);
+
+        var codex = await service.GetEssenceCodexAsync(characterId, CancellationToken.None);
+
+        var entry = Assert.Single(codex.Entries);
+        Assert.True(entry.IsUnlocked);
+        Assert.Equal(1, entry.CollectionAscensionTier);
+        Assert.Equal(EssenceProgressionConstants.MaxAscensionTier, entry.MaxCollectionAscensionTier);
+        Assert.Equal(60, entry.BonusValue);
+        Assert.Contains(entry.Essences, member => member.EssenceDefinitionId == "essence.cave_bat" && member.AscensionTier == 2);
+        Assert.Contains(entry.Essences, member => member.EssenceDefinitionId == "essence.forest_wolf" && member.AscensionTier == 1);
+        Assert.Contains(entry.Essences, member => member.EssenceDefinitionId == "essence.stone_boar" && member.AscensionTier == 3);
     }
 
     [Fact]
@@ -127,9 +156,9 @@ public sealed class CreatureArchiveServiceTests
         await using var db = CreateDb();
         var characterId = Guid.NewGuid();
         db.PlayerEssences.AddRange(
-            CreatePlayerEssence(characterId, "essence.cave_bat"),
-            CreatePlayerEssence(characterId, "essence.forest_wolf"),
-            CreatePlayerEssence(characterId, "essence.stone_boar"));
+            CreatePlayerEssence(characterId, "essence.cave_bat", ascensionTier: 2),
+            CreatePlayerEssence(characterId, "essence.forest_wolf", ascensionTier: 2),
+            CreatePlayerEssence(characterId, "essence.stone_boar", ascensionTier: 2));
         await db.SaveChangesAsync();
         var definitions = new FakeDefinitionRepository();
         var collectionService = CreateCodexCollectionService(db, definitions);
@@ -139,7 +168,7 @@ public sealed class CreatureArchiveServiceTests
 
         var bonus = Assert.Single(bonuses);
         Assert.Equal(BonusKind.EssenceDropRateRelativeBps, bonus.Kind);
-        Assert.Equal(50, bonus.Value);
+        Assert.Equal(70, bonus.Value);
     }
 
     private static LLDbContext CreateDb()
@@ -162,12 +191,16 @@ public sealed class CreatureArchiveServiceTests
         IEssenceDefinitionRepository definitions) =>
         new(db, new FakeCollectionDefinitionProvider(), definitions);
 
-    private static PlayerEssence CreatePlayerEssence(Guid characterId, string essenceDefinitionId) =>
+    private static PlayerEssence CreatePlayerEssence(
+        Guid characterId,
+        string essenceDefinitionId,
+        int ascensionTier = 0) =>
         new()
         {
             Id = Guid.NewGuid(),
             CharacterId = characterId,
-            EssenceDefinitionId = essenceDefinitionId
+            EssenceDefinitionId = essenceDefinitionId,
+            AscensionTier = ascensionTier
         };
 
     private sealed class FakeCollectionDefinitionProvider : IEssenceCodexCollectionDefinitionProvider
@@ -190,6 +223,7 @@ public sealed class CreatureArchiveServiceTests
                 {
                     Kind = BonusKind.EssenceDropRateRelativeBps,
                     Value = 50,
+                    ValuePerCollectionAscensionTier = 10,
                     Description = "+0.5% relative Essence drop chance."
                 }
             }

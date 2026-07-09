@@ -289,6 +289,13 @@ export class EssencesComponent implements OnInit {
     return Math.min(100, Math.round((current / required) * 100));
   }
 
+  public bonusValueLabel(entry: EssenceCodexEntryDto): string {
+    const percent = entry.bonusValue / 100;
+    return `${percent.toLocaleString(undefined, {
+      maximumFractionDigits: 2,
+    })}%`;
+  }
+
   public tagLabel(tag: string): string {
     const displayPart = tag.split('.').at(-1) ?? tag;
     return this.formatDisplayLabel(displayPart);

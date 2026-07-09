@@ -90,6 +90,16 @@ public sealed class JsonEssenceCodexCollectionDefinitionProvider : IEssenceCodex
         {
             throw new InvalidDataException("Essence Codex collections reference unknown essence ids: " + string.Join(", ", unknownEssences));
         }
+
+        var invalidBonusValues = definitions
+            .Where(x => x.Bonus.Value <= 0 || x.Bonus.ValuePerCollectionAscensionTier < 0)
+            .Select(x => x.Id)
+            .ToList();
+
+        if (invalidBonusValues.Count > 0)
+        {
+            throw new InvalidDataException("Essence Codex collections require positive base bonus values and non-negative ascension bonus values: " + string.Join(", ", invalidBonusValues));
+        }
     }
 
     private sealed class EssenceCodexCollectionDefinitionDocument

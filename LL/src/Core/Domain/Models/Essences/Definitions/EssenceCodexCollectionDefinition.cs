@@ -16,5 +16,6 @@ public sealed class EssenceCodexCollectionBonusDefinition
 {
     public BonusKind Kind { get; set; }
     public double Value { get; set; }
+    public double ValuePerCollectionAscensionTier { get; set; }
     public string Description { get; set; } = string.Empty;
 }
