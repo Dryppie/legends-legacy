@@ -25,7 +25,6 @@ using Services.LL.Achievements;
 using Services.LL.Authorization;
 using Services.LL.Bonuses;
 using Services.LL.CharacterActions;
-using Services.LL.Characters;
 using Services.LL.Colosseum;
 using Services.LL.Colosseum.Tournaments;
 using Services.LL.Combat;
@@ -96,7 +95,6 @@ public static class DependencyInjection
         services.AddSingleton<HttpClient>();
         services.AddScoped<IAchievementSystemChatPublisher, AchievementSystemChatPublisher>();
         services.AddScoped<ICharacterService, CharacterService>();
-        services.AddScoped<ICharacterProgressionService, CharacterProgressionService>();
         services.AddScoped<ICharacterActionService, CharacterActionService>();
         services.AddScoped<IActionDetailsService, ActionDetailsService>();
         services.AddScoped<ICreatureService, CreatureService>();

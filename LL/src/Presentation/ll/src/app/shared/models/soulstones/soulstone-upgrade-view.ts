@@ -20,8 +20,6 @@ export interface SoulstoneUpgradeView {
   disabledReason?: string | null;
   appliesTo: string[];
   doesNotApplyTo: string[];
-  isRegionCapped: boolean;
-  requiredRegionForNextRank?: number | null;
   refundValue: number;
   sortOrder: number;
   frontendHint?: string | null;

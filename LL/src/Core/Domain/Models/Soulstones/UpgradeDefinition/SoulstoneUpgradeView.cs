@@ -14,8 +14,6 @@ public sealed record SoulstoneUpgradeView(
     string? DisabledReason,
     IReadOnlyList<string> AppliesTo,
     IReadOnlyList<string> DoesNotApplyTo,
-    bool IsRegionCapped,
-    int? RequiredRegionForNextRank,
     int RefundValue,
     int SortOrder,
     string? FrontendHint);

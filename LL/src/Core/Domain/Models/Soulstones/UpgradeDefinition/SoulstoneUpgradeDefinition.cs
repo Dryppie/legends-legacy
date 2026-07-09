@@ -14,6 +14,5 @@ public sealed record SoulstoneUpgradeDefinition(
     int SortOrder = 0,
     string? IconKey = null,
     IReadOnlyList<string>? RequiresUpgradeIds = null,
-    IReadOnlyList<SoulstoneRegionRankCap>? RegionRankCaps = null,
     string? FrontendHint = null,
     bool IsConvenienceUpgrade = false);

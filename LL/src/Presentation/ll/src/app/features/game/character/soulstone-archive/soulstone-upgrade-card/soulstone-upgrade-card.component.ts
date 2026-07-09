@@ -43,7 +43,6 @@ export class SoulstoneUpgradeCardComponent {
       return 'Upgrading';
     }
     if (upgrade.currentRank >= upgrade.maxRank) return 'Maxed';
-    if (upgrade.isRegionCapped) return `Region ${upgrade.requiredRegionForNextRank}`;
     return upgrade.canPurchase ? 'Available' : 'Locked';
   }
 

@@ -26,18 +26,15 @@ public sealed class SoulstoneUpgradeService : ISoulstoneUpgradeService
     };
 
     private readonly ICharacterService _characterService;
-    private readonly ICharacterProgressionService _progressionService;
     private readonly SoulstoneUpgradeDefinitionProvider _provider;
     private readonly IDbContext _dbContext;
 
     public SoulstoneUpgradeService(
         ICharacterService characterService,
-        ICharacterProgressionService progressionService,
         SoulstoneUpgradeDefinitionProvider provider,
         IDbContext dbContext)
     {
         _characterService = characterService;
-        _progressionService = progressionService;
         _provider = provider;
         _dbContext = dbContext;
     }
@@ -50,7 +47,7 @@ public sealed class SoulstoneUpgradeService : ISoulstoneUpgradeService
             return [];
         }
 
-        return await BuildViewsAsync(character, cancellationToken);
+        return BuildViews(character);
     }
 
     public async Task<Response<SoulstoneUpgradeMutationResult>> PurchaseAsync(
@@ -80,7 +77,6 @@ public sealed class SoulstoneUpgradeService : ISoulstoneUpgradeService
             return Response<SoulstoneUpgradeMutationResult>.Fail("Character was not found.");
         }
 
-        var highestRegion = await _progressionService.GetHighestUnlockedRegionAsync(characterId, cancellationToken);
         var entry = character.CharacterSoulstoneUpgrades
             .FirstOrDefault(u => u.SoulstoneUpgradeDefinitionId.Equals(def.Id, StringComparison.OrdinalIgnoreCase));
         var currentRank = Math.Clamp(entry?.Level ?? 0, 0, def.MaxRank);
@@ -91,12 +87,6 @@ public sealed class SoulstoneUpgradeService : ISoulstoneUpgradeService
         }
 
         var nextRank = currentRank + 1;
-        var rankCap = GetRankCap(def, highestRegion);
-        if (nextRank > rankCap)
-        {
-            return Response<SoulstoneUpgradeMutationResult>.Fail($"Reach region {GetRequiredRegionForRank(def, nextRank)} to unlock the next rank.");
-        }
-
         var missingRequirement = GetMissingRequirement(def, character);
         if (missingRequirement is not null)
         {
@@ -135,7 +125,7 @@ public sealed class SoulstoneUpgradeService : ISoulstoneUpgradeService
         }
 
         return Response<SoulstoneUpgradeMutationResult>.Success(new SoulstoneUpgradeMutationResult(
-            await BuildViewsAsync(character, cancellationToken),
+            BuildViews(character),
             character.Soulstones));
     }
 
@@ -164,18 +154,17 @@ public sealed class SoulstoneUpgradeService : ISoulstoneUpgradeService
         }
 
         return Response<SoulstoneUpgradeMutationResult>.Success(new SoulstoneUpgradeMutationResult(
-            await BuildViewsAsync(character, cancellationToken),
+            BuildViews(character),
             character.Soulstones,
             totalRefund));
     }
 
-    private async Task<List<SoulstoneUpgradeView>> BuildViewsAsync(Character character, CancellationToken cancellationToken)
+    private List<SoulstoneUpgradeView> BuildViews(Character character)
     {
         var levels = character.CharacterSoulstoneUpgrades
             .Where(u => !LegacyUpgradeIds.Contains(u.SoulstoneUpgradeDefinitionId))
             .GroupBy(u => u.SoulstoneUpgradeDefinitionId, StringComparer.OrdinalIgnoreCase)
             .ToDictionary(g => g.Key, g => g.Max(x => x.Level), StringComparer.OrdinalIgnoreCase);
-        var highestRegion = await _progressionService.GetHighestUnlockedRegionAsync(character.Id, cancellationToken);
 
         return _provider.All.Values
             .Where(def => def.Enabled)
@@ -185,7 +174,7 @@ public sealed class SoulstoneUpgradeService : ISoulstoneUpgradeService
             .Select(def =>
             {
                 levels.TryGetValue(def.Id, out var currentRank);
-                return BuildView(def, Math.Clamp((int)currentRank, 0, def.MaxRank), character.Soulstones, highestRegion, character);
+                return BuildView(def, Math.Clamp((int)currentRank, 0, def.MaxRank), character.Soulstones, character);
             })
             .ToList();
     }
@@ -194,21 +183,16 @@ public sealed class SoulstoneUpgradeService : ISoulstoneUpgradeService
         SoulstoneUpgradeDefinition def,
         int currentRank,
         long availableSoulstones,
-        int highestRegion,
         Character character)
     {
         var nextRank = currentRank + 1;
         var isMaxed = currentRank >= def.MaxRank;
         int? nextCost = isMaxed ? null : def.CostsByRank[currentRank];
-        var rankCap = GetRankCap(def, highestRegion);
-        var isRegionCapped = !isMaxed && nextRank > rankCap;
         var missingRequirement = GetMissingRequirement(def, character);
 
         string? disabledReason = null;
         if (isMaxed)
             disabledReason = "Max rank reached.";
-        else if (isRegionCapped)
-            disabledReason = $"Requires region {GetRequiredRegionForRank(def, nextRank)}.";
         else if (missingRequirement is not null)
             disabledReason = $"Requires {missingRequirement}.";
         else if (nextCost > availableSoulstones)
@@ -228,8 +212,6 @@ public sealed class SoulstoneUpgradeService : ISoulstoneUpgradeService
             disabledReason,
             def.AppliesTo,
             def.DoesNotApplyTo,
-            isRegionCapped,
-            isRegionCapped ? GetRequiredRegionForRank(def, nextRank) : null,
             def.CostsByRank.Take(currentRank).Sum(),
             def.SortOrder,
             def.FrontendHint);
@@ -265,45 +247,6 @@ public sealed class SoulstoneUpgradeService : ISoulstoneUpgradeService
         }
 
         return 1275 + ((level - 50) * 50);
-    }
-
-    private static int GetRankCap(SoulstoneUpgradeDefinition def, int highestRegion)
-    {
-        if (def.RegionRankCaps is { Count: > 0 })
-        {
-            return def.RegionRankCaps
-                .Where(cap => highestRegion >= cap.MinRegion)
-                .DefaultIfEmpty(new SoulstoneRegionRankCap(1, 0))
-                .Max(cap => cap.MaxRank);
-        }
-
-        return highestRegion switch
-        {
-            <= 2 => Math.Min(2, def.MaxRank),
-            <= 4 => Math.Min(3, def.MaxRank),
-            <= 7 => Math.Min(4, def.MaxRank),
-            _ => def.MaxRank
-        };
-    }
-
-    private static int GetRequiredRegionForRank(SoulstoneUpgradeDefinition def, int rank)
-    {
-        if (def.RegionRankCaps is { Count: > 0 })
-        {
-            return def.RegionRankCaps
-                .Where(cap => cap.MaxRank >= rank)
-                .OrderBy(cap => cap.MinRegion)
-                .Select(cap => cap.MinRegion)
-                .FirstOrDefault();
-        }
-
-        return rank switch
-        {
-            <= 2 => 1,
-            3 => 3,
-            4 => 5,
-            _ => 8
-        };
     }
 
     private static string? GetMissingRequirement(SoulstoneUpgradeDefinition def, Character character)
