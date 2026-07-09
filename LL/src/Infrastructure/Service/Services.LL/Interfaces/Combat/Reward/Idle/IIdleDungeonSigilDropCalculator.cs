@@ -6,6 +6,7 @@ namespace Services.LL.Interfaces.Combat.Reward.Idle;
 public interface IIdleDungeonSigilDropCalculator
 {
     Task<IReadOnlyList<InventoryItem>> RollAsync(
+        Guid characterId,
         Area area,
         int eligibleVictories,
         CancellationToken cancellationToken);

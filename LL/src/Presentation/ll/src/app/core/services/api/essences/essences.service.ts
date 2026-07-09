@@ -2,8 +2,10 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ApiService } from '../../api/api.service';
 import {
+  CreatureArchiveDto,
   EssenceLoadoutDto,
   EssenceLoadoutsDto,
+  EssenceCodexDto,
   EssenceMutationResponseDto,
   ResponseMessageDto,
   SaveEssenceLoadoutDto,
@@ -22,6 +24,14 @@ export class EssencesService {
 
   public getLoadouts(): Observable<EssenceLoadoutsDto> {
     return this.apiService.get('essence/loadouts');
+  }
+
+  public getCreatureArchive(): Observable<CreatureArchiveDto> {
+    return this.apiService.get('essence/creatures');
+  }
+
+  public getCodex(): Observable<EssenceCodexDto> {
+    return this.apiService.get('essence/codex');
   }
 
   public getActiveLoadout(): Observable<EssenceLoadoutDto | null> {

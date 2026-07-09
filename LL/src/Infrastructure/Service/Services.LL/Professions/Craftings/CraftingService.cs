@@ -382,7 +382,10 @@ public class CraftingService : ICraftingService
                 OccurredAt: craftedAt,
                 IdempotencyKey: $"craft-items:{characterId}:{recipe.Id}:{targetTier}:{created.Count}:{craftedAt:O}"),
             cancellationToken);
-        var xpGained = craftQuantity * CraftingMasteryProgression.ExperiencePerCraft;
+        var blueprintFactors = await _bonusService.GetAggregatedAsync(characterId, DateTimeOffset.UtcNow, cancellationToken);
+        var blueprintProgressionGainBps = blueprintFactors.Get(BonusKind.BlueprintProgressionGainBps);
+        var xpGained = (craftQuantity * CraftingMasteryProgression.ExperiencePerCraft)
+            .ApplyPositiveBps(blueprintProgressionGainBps);
         mastery.Experience += xpGained;
         mastery.Level = CraftingMasteryProgression.GetLevelForExperience(mastery.Experience);
         mastery.UpdatedAt = DateTimeOffset.UtcNow;

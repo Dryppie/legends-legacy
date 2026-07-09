@@ -13,6 +13,8 @@ import {
   inferEssenceDefinitionId,
 } from '../../../../shared/models/item';
 import {
+  CreatureArchiveDto,
+  EssenceCodexDto,
   EssenceLoadoutDto,
   EssenceLoadoutsDto,
   EssenceMutationResponseDto,
@@ -21,13 +23,15 @@ import {
   SoulArchiveDto,
 } from '../../../../shared/models/essence-system';
 
-type EssenceView = 'archive' | 'absorb';
+type EssenceView = 'archive' | 'absorb' | 'creatures' | 'codex';
 
 @Injectable({ providedIn: 'root' })
 export class EssenceStateService {
   private readonly _activeView = signal<EssenceView>('archive');
   private readonly _archive = signal<SoulArchiveDto | null>(null);
   private readonly _loadouts = signal<EssenceLoadoutsDto | null>(null);
+  private readonly _creatureArchive = signal<CreatureArchiveDto | null>(null);
+  private readonly _codex = signal<EssenceCodexDto | null>(null);
   private readonly _selectedPlayerEssenceId = signal<string | null>(null);
   private readonly _selectedLoadoutId = signal<string | null>(null);
   private readonly _selectedInventoryItemId = signal<string | null>(null);
@@ -40,6 +44,8 @@ export class EssenceStateService {
   readonly activeView = computed(() => this._activeView());
   readonly archive = computed(() => this._archive());
   readonly loadouts = computed(() => this._loadouts());
+  readonly creatureArchive = computed(() => this._creatureArchive());
+  readonly codex = computed(() => this._codex());
   readonly selectedLoadoutId = computed(() => this._selectedLoadoutId());
   readonly draftLoadoutName = computed(() => this._draftLoadoutName());
   readonly draftSlots = computed(() => this._draftSlots());
@@ -52,6 +58,12 @@ export class EssenceStateService {
       .filter(
         (item) => item.itemInstance.itemBase.itemType === ItemType.Essence,
       ),
+  );
+
+  readonly hasAbsorbableInventoryEssences = computed(() =>
+    this.inventoryEssences().some(
+      (item) => !this.isInventoryEssenceAbsorbed(item),
+    ),
   );
 
   readonly absorbedEssenceDefinitionIds = computed(
@@ -172,11 +184,15 @@ export class EssenceStateService {
     forkJoin({
       archive: this.essencesService.getArchive(),
       loadouts: this.essencesService.getLoadouts(),
+      creatureArchive: this.essencesService.getCreatureArchive(),
+      codex: this.essencesService.getCodex(),
     }).subscribe({
-      next: ({ archive, loadouts }) => {
+      next: ({ archive, loadouts, creatureArchive, codex }) => {
         if (requestVersion !== this.resetVersion) return;
         this._archive.set(archive);
         this._loadouts.set(loadouts);
+        this._creatureArchive.set(creatureArchive);
+        this._codex.set(codex);
         this.ensureSelectedEssence(archive);
         this.ensureSelectedLoadout(loadouts);
         this._loading.set(false);
@@ -194,6 +210,8 @@ export class EssenceStateService {
     this._activeView.set('archive');
     this._archive.set(null);
     this._loadouts.set(null);
+    this._creatureArchive.set(null);
+    this._codex.set(null);
     this._selectedPlayerEssenceId.set(null);
     this._selectedLoadoutId.set(null);
     this._selectedInventoryItemId.set(null);
@@ -404,6 +422,26 @@ export class EssenceStateService {
     this._archive.set(response.archive);
     this.inventoryState.setInventory(response.inventoryItems);
     this.ensureSelectedEssence(response.archive);
+    this.refreshCompanionArchives();
+  }
+
+  private refreshCompanionArchives(): void {
+    const requestVersion = this.resetVersion;
+
+    forkJoin({
+      creatureArchive: this.essencesService.getCreatureArchive(),
+      codex: this.essencesService.getCodex(),
+    }).subscribe({
+      next: ({ creatureArchive, codex }) => {
+        if (requestVersion !== this.resetVersion) return;
+        this._creatureArchive.set(creatureArchive);
+        this._codex.set(codex);
+      },
+      error: (error) => {
+        if (requestVersion !== this.resetVersion) return;
+        this._error.set(error?.message ?? 'Failed to refresh Essence records');
+      },
+    });
   }
 
   private refreshLoadouts(): void {

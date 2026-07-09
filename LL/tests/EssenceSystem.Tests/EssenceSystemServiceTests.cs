@@ -5,6 +5,7 @@ using Domain.Components.Attributes;
 using Domain.Models.Achievements;
 using Domain.Models.Attributes;
 using Domain.Models.Attributes.Modifiers;
+using Domain.Models.Bonuses;
 using Domain.Models.CharacterActions.Sessions;
 using Domain.Models.Combat;
 using Domain.Models.Combat.Abilities;
@@ -93,6 +94,29 @@ public sealed class EssenceSystemServiceTests
         Assert.Equal(3, result.DustGained);
         Assert.DoesNotContain(db.InventoryItems, x => x.ItemInstanceId == itemInstanceId);
         Assert.Equal(3, await InventoryQuantityAsync(db, characterId, "soul_dust"));
+    }
+
+    [Fact]
+    public async Task DismantleUnboundEssence_grants_extra_dust_for_duplicate_echo_bonus()
+    {
+        await using var db = CreateDb();
+        var characterId = await SeedCharacterAndInventoryAsync(db);
+        await AddPlayerEssenceAsync(db, characterId, "essence.test");
+        var itemInstanceId = await AddEssenceItemAsync(db, characterId, quantity: 1, dust: 3);
+        var service = CreateService(
+            db,
+            new QueueRandomProvider(0.0),
+            bonusService: new StaticBonusService(new Dictionary<BonusKind, double>
+            {
+                [BonusKind.DuplicateEssenceExtraMaterialChanceBps] = 10000
+            }));
+
+        var result = await service.DismantleUnboundEssenceAsync(characterId, itemInstanceId, CancellationToken.None);
+        await db.SaveChangesAsync();
+
+        Assert.True(result.Succeeded);
+        Assert.Equal(4, result.DustGained);
+        Assert.Equal(4, await InventoryQuantityAsync(db, characterId, "soul_dust"));
     }
 
     [Fact]
@@ -673,6 +697,27 @@ public sealed class EssenceSystemServiceTests
     }
 
     [Fact]
+    public async Task Resonance_failure_gain_uses_echo_memory_bonus()
+    {
+        await using var db = CreateDb();
+        var characterId = await SeedCharacterAndInventoryAsync(db);
+        var service = CreateService(
+            db,
+            new QueueRandomProvider(0.99),
+            bonusService: new StaticBonusService(new Dictionary<BonusKind, double>
+            {
+                [BonusKind.EssencePityProgressionGainBps] = 2500
+            }));
+
+        var failed = await service.RollMonsterEssenceDropAsync(characterId, "monster.test", true, CancellationToken.None);
+        await db.SaveChangesAsync();
+
+        Assert.False(failed.Dropped);
+        Assert.Equal(1.25, failed.ResonanceValue);
+        Assert.Equal(1.25, db.MonsterResonances.Single().ResonanceValue);
+    }
+
+    [Fact]
     public async Task RollEssenceDrops_creates_unbound_item_for_successful_monster_roll()
     {
         await using var db = CreateDb();
@@ -703,7 +748,11 @@ public sealed class EssenceSystemServiceTests
         return new LLDbContext(options);
     }
 
-    private static EssenceSystemService CreateService(LLDbContext db, IRandomProvider? random = null, IEssenceDefinitionRepository? definitions = null)
+    private static EssenceSystemService CreateService(
+        LLDbContext db,
+        IRandomProvider? random = null,
+        IEssenceDefinitionRepository? definitions = null,
+        IBonusService? bonusService = null)
     {
         definitions ??= new FakeDefinitionRepository();
         return new EssenceSystemService(
@@ -716,7 +765,8 @@ public sealed class EssenceSystemServiceTests
             new EssenceLoadoutLimitService(),
             new InventoryItemFactory(),
             random ?? new QueueRandomProvider(0.99),
-            new NoopGameEventOutbox());
+            new NoopGameEventOutbox(),
+            bonusService: bonusService);
     }
 
     private static EssenceDefinition UtilityDefinition() => new()
@@ -937,6 +987,15 @@ public sealed class EssenceSystemServiceTests
         private readonly Queue<double> _values = new(values);
 
         public double NextDouble() => _values.Count == 0 ? 0.99 : _values.Dequeue();
+    }
+
+    private sealed class StaticBonusService(IReadOnlyDictionary<BonusKind, double> bonuses) : IBonusService
+    {
+        public ValueTask<IReadOnlyDictionary<BonusKind, double>> GetAggregatedAsync(
+            Guid characterId,
+            DateTimeOffset now,
+            CancellationToken ct = default) =>
+            ValueTask.FromResult(bonuses);
     }
 
     private sealed class NoopGameEventOutbox : IGameEventOutbox

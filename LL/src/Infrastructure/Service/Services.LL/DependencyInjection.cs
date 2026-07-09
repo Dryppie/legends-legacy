@@ -206,6 +206,7 @@ public static class DependencyInjection
         services.AddScoped<IEssenceCombatLoadoutResolver, EssenceSystemService>();
         services.AddScoped<IEssenceResonanceService, EssenceSystemService>();
         services.AddScoped<IEssenceCatalogService, EssenceCatalogService>();
+        services.AddScoped<ICreatureArchiveService, CreatureArchiveService>();
 
         services.AddScoped<IGuildService, GuildService>();
         services.AddSingleton<IGuildContentValidator, GuildContentValidator>();

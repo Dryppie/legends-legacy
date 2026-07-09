@@ -71,6 +71,37 @@ export interface SoulArchiveDto {
   essenceDust: number;
 }
 
+export interface CreatureArchiveDto {
+  creatures: CreatureArchiveEntryDto[];
+}
+
+export interface CreatureArchiveEntryDto {
+  creatureId: string;
+  name: string;
+  killCount: number;
+  firstDefeatedAtUtc: string;
+  lastDefeatedAtUtc: string;
+  essenceDefinitionId?: string | null;
+  essenceName?: string | null;
+  isEssenceAbsorbed: boolean;
+  tags: string[];
+}
+
+export interface EssenceCodexDto {
+  entries: EssenceCodexEntryDto[];
+}
+
+export interface EssenceCodexEntryDto {
+  id: string;
+  title: string;
+  description: string;
+  benefitText: string;
+  current: number;
+  required: number;
+  isUnlocked: boolean;
+  category: string;
+}
+
 export interface PlayerEssenceDto {
   id: string;
   essenceDefinitionId: string;

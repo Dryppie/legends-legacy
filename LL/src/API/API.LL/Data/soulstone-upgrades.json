@@ -3,20 +3,78 @@
     "id": "essence.resonance",
     "branch": "EssenceArchive",
     "displayName": "Essence Resonance",
-    "description": "Strengthens monster Essence drop chances after the normal resonance calculation.",
+    "description": "Increases monster Essence drop chances by a relative amount.",
     "maxRank": 5,
     "costsByRank": [25, 75, 150, 300, 600],
     "effects": [
       {
         "kind": "EssenceDropRateRelativeBps",
         "unit": "RelativeBasisPoints",
-        "valuesByRank": [300, 600, 1000, 1500, 2500]
+        "valuesByRank": [300, 600, 900, 1200, 1500]
       }
     ],
-    "appliesTo": ["Monster Essence drops", "Idle combat", "Dungeon combat"],
-    "doesNotApplyTo": ["Soulstone drops", "Crafting rewards"],
+    "appliesTo": ["Idle combat Essence drops", "Dungeon combat Essence drops"],
+    "doesNotApplyTo": ["Quest rewards", "Guaranteed rewards", "Shop purchases", "Soulstone drops"],
     "enabled": true,
     "sortOrder": 10
+  },
+  {
+    "id": "essence.echo-memory",
+    "branch": "EssenceArchive",
+    "displayName": "Echo Memory",
+    "description": "Essence bad-luck protection builds faster after eligible failed drop rolls.",
+    "maxRank": 5,
+    "costsByRank": [25, 75, 150, 300, 600],
+    "effects": [
+      {
+        "kind": "EssencePityProgressionGainBps",
+        "unit": "AdditiveMultiplierBasisPoints",
+        "valuesByRank": [500, 1000, 1500, 2000, 2500]
+      }
+    ],
+    "appliesTo": ["Monster Essence resonance buildup"],
+    "doesNotApplyTo": ["Guaranteed rewards", "Shop purchases", "Soulstone drops"],
+    "enabled": true,
+    "sortOrder": 20
+  },
+  {
+    "id": "essence.duplicate-echoes",
+    "branch": "EssenceArchive",
+    "displayName": "Duplicate Echoes",
+    "description": "Dismantling duplicate Essences has a chance to grant extra Essence Dust.",
+    "maxRank": 5,
+    "costsByRank": [25, 75, 150, 300, 600],
+    "effects": [
+      {
+        "kind": "DuplicateEssenceExtraMaterialChanceBps",
+        "unit": "ChanceBasisPoints",
+        "valuesByRank": [200, 400, 600, 800, 1000]
+      }
+    ],
+    "appliesTo": ["Duplicate Essence dismantling"],
+    "doesNotApplyTo": ["Initial Essence drops", "Non-duplicate Essence dismantling"],
+    "enabled": true,
+    "sortOrder": 30
+  },
+  {
+    "id": "essence.archive-focus",
+    "branch": "EssenceArchive",
+    "displayName": "Archive Focus",
+    "description": "Select one discovered monster each day and improve Essence drops from that monster.",
+    "maxRank": 5,
+    "costsByRank": [25, 75, 150, 300, 600],
+    "effects": [
+      {
+        "kind": "FocusedMonsterEssenceDropRateRelativeBps",
+        "unit": "RelativeBasisPoints",
+        "valuesByRank": [500, 1000, 1500, 2000, 2500]
+      }
+    ],
+    "appliesTo": ["Focused monster Essence drops"],
+    "doesNotApplyTo": ["Other monsters", "Guaranteed rewards", "Shop purchases"],
+    "enabled": false,
+    "sortOrder": 40,
+    "frontendHint": "Disabled until archive focus selection state and daily change limits are implemented."
   },
   {
     "id": "combat.battle-lessons",
@@ -29,13 +87,33 @@
       {
         "kind": "CombatExperienceGainBps",
         "unit": "AdditiveMultiplierBasisPoints",
-        "valuesByRank": [250, 500, 750, 1000, 1500]
+        "valuesByRank": [150, 300, 450, 600, 750]
       }
     ],
     "appliesTo": ["Idle combat EXP", "Dungeon combat EXP"],
-    "doesNotApplyTo": ["Gathering EXP", "Crafting EXP"],
+    "doesNotApplyTo": ["Gathering EXP", "Crafting EXP", "PvP"],
     "enabled": true,
     "sortOrder": 110
+  },
+  {
+    "id": "combat.veteran-rhythm",
+    "branch": "CombatProgression",
+    "displayName": "Veteran Rhythm",
+    "description": "Gain bonus combat experience after fighting in the same Area for a while.",
+    "maxRank": 5,
+    "costsByRank": [25, 75, 150, 300, 600],
+    "effects": [
+      {
+        "kind": "AreaCommitmentCombatExperienceGainBps",
+        "unit": "AdditiveMultiplierBasisPoints",
+        "valuesByRank": [100, 200, 300, 400, 500]
+      }
+    ],
+    "appliesTo": ["Idle combat after 30 minutes in the same Area"],
+    "doesNotApplyTo": ["Dungeons", "PvP", "Drops"],
+    "enabled": false,
+    "sortOrder": 120,
+    "frontendHint": "Disabled until idle combat tracks same-area commitment time."
   },
   {
     "id": "combat.survival-notes",
@@ -48,13 +126,13 @@
       {
         "kind": "IdleCombatDefeatExperienceRetentionBps",
         "unit": "AdditiveMultiplierBasisPoints",
-        "valuesByRank": [500, 1000, 1500, 2000, 2500]
+        "valuesByRank": [1000, 2000, 3000, 4000, 5000]
       }
     ],
     "appliesTo": ["Idle combat defeats"],
-    "doesNotApplyTo": ["Dungeon defeats", "Loot", "Cinders"],
+    "doesNotApplyTo": ["Dungeon defeats", "Loot", "PvP"],
     "enabled": true,
-    "sortOrder": 120
+    "sortOrder": 130
   },
   {
     "id": "gathering.careful-harvest",
@@ -67,11 +145,11 @@
       {
         "kind": "GatheringYieldBps",
         "unit": "AdditiveMultiplierBasisPoints",
-        "valuesByRank": [250, 500, 750, 1000, 1500]
+        "valuesByRank": [100, 200, 300, 400, 500]
       }
     ],
     "appliesTo": ["Combat-adjacent gathering loot"],
-    "doesNotApplyTo": ["Combat loot tables", "Dungeon fixed rewards"],
+    "doesNotApplyTo": ["Combat loot tables", "Dungeon fixed rewards", "Shop purchases"],
     "enabled": true,
     "sortOrder": 210
   },
@@ -86,7 +164,7 @@
       {
         "kind": "GatheringExperienceGainBps",
         "unit": "AdditiveMultiplierBasisPoints",
-        "valuesByRank": [250, 500, 750, 1000, 1500]
+        "valuesByRank": [150, 300, 450, 600, 750]
       }
     ],
     "appliesTo": ["Mining EXP", "Woodcutting EXP", "Fishing EXP", "Skinning EXP"],
@@ -98,18 +176,18 @@
     "id": "gathering.rare-node-sense",
     "branch": "Gathering",
     "displayName": "Rare Node Sense",
-    "description": "Improves rare material weighting when gathering nodes roll loot.",
+    "description": "Improves rare material weighting from gathering nodes by a relative amount.",
     "maxRank": 5,
     "costsByRank": [25, 75, 150, 300, 600],
     "effects": [
       {
         "kind": "GatheringRareDropChanceRelativeBps",
         "unit": "RelativeBasisPoints",
-        "valuesByRank": [300, 600, 1000, 1500, 2500]
+        "valuesByRank": [200, 400, 600, 800, 1000]
       }
     ],
     "appliesTo": ["Rare gathering loot weights"],
-    "doesNotApplyTo": ["Monster loot rarity", "Essence drops"],
+    "doesNotApplyTo": ["Normal gathering quantity", "Monster loot rarity", "Shop purchases"],
     "enabled": true,
     "sortOrder": 230
   },
@@ -124,7 +202,7 @@
       {
         "kind": "CraftingExperienceGainBps",
         "unit": "AdditiveMultiplierBasisPoints",
-        "valuesByRank": [250, 500, 750, 1000, 1500]
+        "valuesByRank": [150, 300, 450, 600, 750]
       }
     ],
     "appliesTo": ["Tempering crafting EXP"],
@@ -143,11 +221,11 @@
       {
         "kind": "TemperingNegativeOutcomeReductionBps",
         "unit": "PercentagePointBasisPoints",
-        "valuesByRank": [100, 200, 300, 400, 500]
+        "valuesByRank": [30, 60, 90, 120, 150]
       }
     ],
     "appliesTo": ["Tempering outcome rolls"],
-    "doesNotApplyTo": ["Critical outcome chance", "Crafting material costs"],
+    "doesNotApplyTo": ["Success chance", "Great success chance", "Crafting material costs"],
     "enabled": true,
     "sortOrder": 320
   },
@@ -155,21 +233,79 @@
     "id": "crafting.salvage-instinct",
     "branch": "Crafting",
     "displayName": "Salvage Instinct",
-    "description": "Future node for refunding materials after failed tempering attempts.",
+    "description": "Regular tempering failures can refund part of the material cost.",
     "maxRank": 5,
     "costsByRank": [25, 75, 150, 300, 600],
     "effects": [
       {
         "kind": "TemperingFailMaterialRefundChanceBps",
         "unit": "ChanceBasisPoints",
-        "valuesByRank": [250, 500, 750, 1000, 1500]
+        "valuesByRank": [200, 400, 600, 800, 1000]
       }
     ],
-    "appliesTo": ["Future material refund flow"],
-    "doesNotApplyTo": ["Current tempering"],
+    "appliesTo": ["Regular tempering Fail outcomes"],
+    "doesNotApplyTo": ["Negative outcomes", "Potential refund", "Current tempering flow"],
     "enabled": false,
     "sortOrder": 330,
-    "frontendHint": "Disabled until tempering tracks consumed materials per attempt."
+    "frontendHint": "Disabled until tempering tracks eligible material costs per attempt."
+  },
+  {
+    "id": "crafting.blueprint-study",
+    "branch": "Crafting",
+    "displayName": "Blueprint Study",
+    "description": "Increases recipe mastery progression from crafting items.",
+    "maxRank": 5,
+    "costsByRank": [25, 75, 150, 300, 600],
+    "effects": [
+      {
+        "kind": "BlueprintProgressionGainBps",
+        "unit": "AdditiveMultiplierBasisPoints",
+        "valuesByRank": [200, 400, 600, 800, 1000]
+      }
+    ],
+    "appliesTo": ["Recipe mastery EXP"],
+    "doesNotApplyTo": ["Tempering crafting EXP", "Item quality", "Potential"],
+    "enabled": true,
+    "sortOrder": 340
+  },
+  {
+    "id": "dungeon.sigil-traces",
+    "branch": "Dungeons",
+    "displayName": "Sigil Traces",
+    "description": "Slightly improves idle dungeon Sigil drop discovery by a relative amount.",
+    "maxRank": 5,
+    "costsByRank": [25, 75, 150, 300, 600],
+    "effects": [
+      {
+        "kind": "SigilFragmentDropRateRelativeBps",
+        "unit": "RelativeBasisPoints",
+        "valuesByRank": [150, 300, 450, 600, 750]
+      }
+    ],
+    "appliesTo": ["Idle dungeon Sigil drops"],
+    "doesNotApplyTo": ["Dungeon attempts", "Soulstone drops"],
+    "enabled": true,
+    "sortOrder": 410
+  },
+  {
+    "id": "dungeon.cartographers-eye",
+    "branch": "Dungeons",
+    "displayName": "Cartographer's Eye",
+    "description": "Reveals additional dungeon room information.",
+    "maxRank": 3,
+    "costsByRank": [250, 750, 1500],
+    "effects": [
+      {
+        "kind": "DungeonRoomPreviewTier",
+        "unit": "FlatValue",
+        "valuesByRank": [1, 2, 3]
+      }
+    ],
+    "appliesTo": ["Dungeon room previews"],
+    "doesNotApplyTo": ["Combat stats", "Rewards"],
+    "enabled": false,
+    "sortOrder": 420,
+    "frontendHint": "Disabled until dungeon room preview tiers are supported."
   },
   {
     "id": "dungeon.checkpoint-satchel",
@@ -186,8 +322,48 @@
       }
     ],
     "appliesTo": ["Dungeon checkpoint rest rewards"],
-    "doesNotApplyTo": ["Checkpoint withdraw", "Final dungeon reward multiplier"],
+    "doesNotApplyTo": ["Full-clear final rewards", "Combat stats"],
     "enabled": true,
-    "sortOrder": 410
+    "sortOrder": 430
+  },
+  {
+    "id": "dungeon.reward-lens",
+    "branch": "Dungeons",
+    "displayName": "Reward Lens",
+    "description": "Allows dungeon completion rewards to be steered toward selected categories.",
+    "maxRank": 3,
+    "costsByRank": [250, 750, 1500],
+    "effects": [
+      {
+        "kind": "DungeonRewardFocusTier",
+        "unit": "FlatValue",
+        "valuesByRank": [1, 2, 3]
+      }
+    ],
+    "appliesTo": ["Dungeon completion reward focus"],
+    "doesNotApplyTo": ["Dungeon combat stats", "Soulstone drops"],
+    "enabled": false,
+    "sortOrder": 440,
+    "frontendHint": "Disabled until dungeon reward focus state and reward steering are implemented."
+  },
+  {
+    "id": "convenience.archive-presets",
+    "branch": "AccountConvenience",
+    "displayName": "Archive Presets",
+    "description": "Unlocks saved Soul Archive filter presets.",
+    "maxRank": 3,
+    "costsByRank": [100, 250, 500],
+    "effects": [
+      {
+        "kind": "ArchivePresetSlotCount",
+        "unit": "FlatValue",
+        "valuesByRank": [1, 2, 3]
+      }
+    ],
+    "appliesTo": ["Soul Archive UI"],
+    "doesNotApplyTo": ["Combat power", "Drop rates"],
+    "enabled": false,
+    "sortOrder": 510,
+    "frontendHint": "Disabled until archive preset storage and UI controls are implemented."
   }
 ]

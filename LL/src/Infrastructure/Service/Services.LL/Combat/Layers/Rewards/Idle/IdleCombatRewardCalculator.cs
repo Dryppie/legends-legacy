@@ -106,6 +106,7 @@ public sealed class IdleCombatRewardCalculator : IIdleCombatRewardCalculator
         }
 
         var sigilDrops = await _sigilDropCalculator.RollAsync(
+            facts.CharacterId,
             facts.Area,
             sigilEligibleVictories,
             cancellationToken);

@@ -10,6 +10,8 @@ using Application.UseCases.Essences.Commands.SpendEssenceDust;
 using Application.UseCases.Essences.Commands.UpgradeEssencePotential;
 using Application.UseCases.Essences.Dtos;
 using Application.UseCases.Essences.Queries.GetActiveEssenceLoadout;
+using Application.UseCases.Essences.Queries.GetCreatureArchive;
+using Application.UseCases.Essences.Queries.GetEssenceCodex;
 using Application.UseCases.Essences.Queries.GetEssenceLoadouts;
 using Application.UseCases.Essences.Queries.GetSoulArchive;
 using Common.Primitives;
@@ -22,6 +24,14 @@ public class EssenceController : BaseController
     [HttpGet("archive")]
     public async Task<ActionResult<SoulArchiveDto>> GetArchive() =>
         await Mediator.Send(new GetSoulArchiveQuery(CurrentCharacterGuid));
+
+    [HttpGet("creatures")]
+    public async Task<ActionResult<CreatureArchiveDto>> GetCreatureArchive() =>
+        await Mediator.Send(new GetCreatureArchiveQuery(CurrentCharacterGuid));
+
+    [HttpGet("codex")]
+    public async Task<ActionResult<EssenceCodexDto>> GetCodex() =>
+        await Mediator.Send(new GetEssenceCodexQuery(CurrentCharacterGuid));
 
     [HttpGet("loadouts")]
     public async Task<ActionResult<EssenceLoadoutsDto>> GetLoadouts() =>

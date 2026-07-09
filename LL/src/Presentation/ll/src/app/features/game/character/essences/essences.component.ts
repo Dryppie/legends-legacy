@@ -6,6 +6,8 @@ import { EssenceStateService } from '../../../../core/services/api/essences/esse
 import { DefaultHeaderComponent } from '../../../../shared/components/default-header/default-header.component';
 import { EssenceDescriptionComponent } from '../../../../shared/components/essences/essence-description/essence-description.component';
 import {
+  CreatureArchiveEntryDto,
+  EssenceCodexEntryDto,
   EssenceLoadoutDto,
   PlayerEssenceDto,
 } from '../../../../shared/models/essence-system';
@@ -44,6 +46,7 @@ type ArchiveSort = 'name' | 'level' | 'tier';
 })
 export class EssencesComponent implements OnInit {
   readonly archiveSearch = signal('');
+  readonly creatureSearch = signal('');
   readonly archiveFilter = signal<ArchiveFilter>('all');
   readonly archiveSort = signal<ArchiveSort>('name');
   readonly upgradeDetailsOpen = signal(false);
@@ -113,6 +116,31 @@ export class EssencesComponent implements OnInit {
         }
       });
   });
+
+  readonly filteredCreatures = computed(() => {
+    const search = this.creatureSearch().trim().toLowerCase();
+    const creatures = this.essenceState.creatureArchive()?.creatures ?? [];
+
+    if (!search) return creatures;
+
+    return creatures.filter((creature) =>
+      [
+        creature.name,
+        creature.creatureId,
+        creature.essenceName ?? '',
+        ...creature.tags,
+      ]
+        .join(' ')
+        .toLowerCase()
+        .includes(search),
+    );
+  });
+
+  readonly unlockedCodexEntries = computed(
+    () =>
+      this.essenceState.codex()?.entries.filter((entry) => entry.isUnlocked)
+        .length ?? 0,
+  );
 
   constructor(
     public readonly essenceState: EssenceStateService,
@@ -241,5 +269,33 @@ export class EssencesComponent implements OnInit {
 
   public trackEssence(_: number, essence: PlayerEssenceDto): string {
     return essence.id;
+  }
+
+  public trackCreature(_: number, creature: CreatureArchiveEntryDto): string {
+    return creature.creatureId;
+  }
+
+  public trackCodex(_: number, entry: EssenceCodexEntryDto): string {
+    return entry.id;
+  }
+
+  public progressPercent(current: number, required: number): number {
+    if (required <= 0) return 100;
+    return Math.min(100, Math.round((current / required) * 100));
+  }
+
+  public tagLabel(tag: string): string {
+    const displayPart = tag.split('.').at(-1) ?? tag;
+    return this.formatDisplayLabel(displayPart);
+  }
+
+  private formatDisplayLabel(value: string | null | undefined): string {
+    if (!value) return '';
+
+    return value
+      .replace(/[_-]+/g, ' ')
+      .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
+      .replace(/([A-Z]+)([A-Z][a-z])/g, '$1 $2')
+      .trim();
   }
 }
