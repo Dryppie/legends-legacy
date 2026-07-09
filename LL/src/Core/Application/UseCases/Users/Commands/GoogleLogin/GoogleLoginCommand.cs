@@ -29,10 +29,10 @@ public class GoogleLoginCommandHandler : IRequestHandler<GoogleLoginCommand, Res
         var googleLoginResult = await _google.LoginOrCreateAsync(req.IdToken, cancellationToken);
         if (googleLoginResult == null) return Response<Tokens>.Fail("Gmail validation failed.");
 
-        var (user, isNew) = googleLoginResult;
+        var (user, isNew, characterName) = googleLoginResult;
         // if brand‑new, create a character
         if (isNew)
-            await _publisher.Publish(new UserCreatedEvent(user.Id, user.Username), cancellationToken);
+            await _publisher.Publish(new UserCreatedEvent(user.Id, characterName ?? user.Username), cancellationToken);
 
         var character = await _characterService.GetMyCharacterAsync(user.Id, cancellationToken);
         if (character == null) return Response<Tokens>.Fail("Could not find character.");

@@ -25,7 +25,7 @@ public class UserCreatedEventHandler : INotificationHandler<UserCreatedEvent>
 
     public async Task Handle(UserCreatedEvent userCreatedEvent, CancellationToken cancellationToken)
     {
-        var character = await _characterService.CreateCharacterAsync(userCreatedEvent.UserId, userCreatedEvent.Username, cancellationToken);
+        var character = await _characterService.CreateCharacterAsync(userCreatedEvent.UserId, userCreatedEvent.CharacterName, cancellationToken);
         await _outbox.EnqueueAsync(
             GameEventTypes.CharacterCreated,
             new CharacterCreatedPayload(character.Id),

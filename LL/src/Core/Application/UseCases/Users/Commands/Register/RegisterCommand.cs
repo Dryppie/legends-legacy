@@ -3,13 +3,14 @@ using Application.Interfaces.Services.LL;
 using Application.Interfaces.Services.LL.Entities;
 using Application.MediatR.Markers;
 using Application.UseCases.Users.Events;
+using Application.UseCases.Users;
 using Common.Authorization.Security;
 using Common.Primitives;
 using MediatR;
 
 namespace Application.UseCases.Users.Commands.Register;
 
-public record RegisterCommand(string Username, string Email, string Password) : ICommand<Response<Tokens>>;
+public record RegisterCommand(string CharacterName, string Email, string Password) : ICommand<Response<Tokens>>;
 
 public class RegisterCommandHandler : IRequestHandler<RegisterCommand, Response<Tokens>>
 {
@@ -34,12 +35,25 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, Response<
     {
         try
         {
-            if (request.Username.Length > 26) return Response<Tokens>.Fail("Username is too long.");
+            if (!AuthInputValidator.TryValidateRegistration(
+                    request.CharacterName,
+                    request.Email,
+                    request.Password,
+                    out var input,
+                    out var validationError))
+            {
+                return Response<Tokens>.Fail(validationError);
+            }
 
-            var user = await _userService.RegisterAsync(request.Username, request.Email, request.Password, cancellationToken);
-            if (user == null) return Response<Tokens>.Fail("Email or username is already in use.");
+            if (await _characterService.IsCharacterNameTakenAsync(input.CharacterName, null, cancellationToken))
+            {
+                return Response<Tokens>.Fail("Character name is already in use.");
+            }
 
-            await _publisher.Publish(new UserCreatedEvent(user.Id, user.Username), cancellationToken);
+            var user = await _userService.RegisterAsync(input.CharacterName, input.Email, input.Password, cancellationToken);
+            if (user == null) return Response<Tokens>.Fail("Email is already in use.");
+
+            await _publisher.Publish(new UserCreatedEvent(user.Id, input.CharacterName), cancellationToken);
 
             var character = await _characterService.GetMyCharacterAsync(user.Id, cancellationToken);
             if (character == null) return Response<Tokens>.Fail("Character creation failed during registration.");

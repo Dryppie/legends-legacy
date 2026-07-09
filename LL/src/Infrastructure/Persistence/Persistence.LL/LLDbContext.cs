@@ -46,7 +46,27 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : DbContext(opti
 {
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
+        NormalizeIdentityFields();
         return await base.SaveChangesAsync(cancellationToken);
+    }
+
+    private void NormalizeIdentityFields()
+    {
+        foreach (var entry in ChangeTracker.Entries<AppUser>())
+        {
+            if (entry.State is EntityState.Added or EntityState.Modified)
+            {
+                entry.Entity.NormalizeIdentityFields();
+            }
+        }
+
+        foreach (var entry in ChangeTracker.Entries<Character>())
+        {
+            if (entry.State is EntityState.Added or EntityState.Modified)
+            {
+                entry.Entity.NormalizeName();
+            }
+        }
     }
 
     /// <inheritdoc />

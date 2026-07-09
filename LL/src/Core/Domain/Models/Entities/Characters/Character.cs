@@ -13,6 +13,7 @@ namespace Domain.Models.Entities.Characters;
 public class Character : Entity
 {
     public AppUser User { get; set; } = null!;
+    public string NormalizedName { get; set; } = string.Empty;
     /// <summary>
     /// This should only ever be used in the backend, as it's used for authentication
     /// </summary>
@@ -40,4 +41,12 @@ public class Character : Entity
     //public Guid? GuildId { get; set; }
     public Guild? Guild { get; set; }
     public ICollection<Profession> Professions { get; set; } = [];
+
+    public void NormalizeName()
+    {
+        Name = Name.Trim();
+        NormalizedName = string.IsNullOrWhiteSpace(Name)
+            ? string.Empty
+            : IdentityNormalizer.NormalizeRequired(Name);
+    }
 }

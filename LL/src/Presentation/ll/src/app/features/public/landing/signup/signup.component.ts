@@ -39,6 +39,8 @@ export class SignupComponent {
   @Input() disableLoginLink: boolean = false;
   @Input() headerText1: string = 'Join the adventure and';
   @Input() headerText2: string = 'create your legend!';
+  @Input() usernameLabel: string = 'Character name';
+  @Input() usernameHelp: string | null = null;
 
   registerForm = new FormGroup(
     {
@@ -86,16 +88,16 @@ export class SignupComponent {
   }
 
   register() {
-    const username = this.registerForm.value.username;
+    const characterName = this.registerForm.value.username;
     const email = this.registerForm.value.email;
     const password = this.registerForm.value.password;
     const confirmPassword = this.registerForm.value.confirmPassword;
     if (
-      typeof username === 'string' &&
+      typeof characterName === 'string' &&
       typeof email === 'string' &&
       typeof password === 'string'
     ) {
-      this.authService.register(username, email, password).subscribe({
+      this.authService.register(characterName, email, password).subscribe({
         next: () => {
           this.router.navigateByUrl('/login');
         },
@@ -107,16 +109,16 @@ export class SignupComponent {
   }
 
   convertAcc() {
-    const username = this.registerForm.value.username;
+    const characterName = this.registerForm.value.username;
     const email = this.registerForm.value.email;
     const password = this.registerForm.value.password;
     const confirmPassword = this.registerForm.value.confirmPassword;
     if (
-      typeof username === 'string' &&
+      typeof characterName === 'string' &&
       typeof email === 'string' &&
       typeof password === 'string'
     ) {
-      this.authService.convertGuestToUser(username, email, password).subscribe({
+      this.authService.convertGuestToUser(characterName, email, password).subscribe({
         next: () => {
           // window.location.reload();
         },

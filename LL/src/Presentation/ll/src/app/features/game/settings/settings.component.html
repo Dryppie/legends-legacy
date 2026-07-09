@@ -123,7 +123,7 @@
               <div>
                 <h3 class="font-semibold text-white">Gmail Binding</h3>
                 <p class="ll-copy mt-1">
-                  Connect a Google account for this login.
+                  Connect Google and secure this account.
                 </p>
               </div>
               <span class="ll-badge rounded" [ngClass]="gmailStatusClass()">
@@ -151,7 +151,7 @@
               <div>
                 <h3 class="font-semibold text-white">Email Login</h3>
                 <p class="ll-copy mt-1">
-                  Register the account with an email and password.
+                  Bind email/password. The name field becomes your character name.
                 </p>
               </div>
               <span class="ll-badge rounded" [ngClass]="emailStatusClass()">
@@ -272,6 +272,8 @@
       [convertAccount]="true"
       [prefilledUsername]="character.name"
       [disableLoginLink]="true"
+      [usernameLabel]="'Character name'"
+      [usernameHelp]="'This updates the name other players see for this character.'"
       [headerText1]="'Register your account'"
       [headerText2]="'and continue your legend!'"
     >

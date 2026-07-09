@@ -34,6 +34,7 @@ public interface ICharacterService
     Task<Character?> GetMyCharacterOverviewAsync(Guid characterId, CancellationToken cancellationToken);
     Task<Character?> GetCharacterOverviewByNameAsync(string characterName, CancellationToken cancellationToken);
     Task<Character?> UpdateCharacterNameAsync(Guid userId, string username, CancellationToken cancellationToken);
+    Task<bool> IsCharacterNameTakenAsync(string name, Guid? excludedCharacterId, CancellationToken cancellationToken);
     /// <summary>
     /// Get a bare minimum character, with no includes
     /// </summary>

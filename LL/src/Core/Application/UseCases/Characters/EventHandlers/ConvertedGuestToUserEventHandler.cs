@@ -16,6 +16,6 @@ public class ConvertedGuestToUserEventHandler : INotificationHandler<ConvertedGu
 
     public async Task Handle(ConvertedGuestToUserEvent convertedGuestToUserEvent, CancellationToken cancellationToken)
     {
-        await _characterService.UpdateCharacterNameAsync(convertedGuestToUserEvent.UserId, convertedGuestToUserEvent.Username, cancellationToken);
+        await _characterService.UpdateCharacterNameAsync(convertedGuestToUserEvent.UserId, convertedGuestToUserEvent.CharacterName, cancellationToken);
     }
 }

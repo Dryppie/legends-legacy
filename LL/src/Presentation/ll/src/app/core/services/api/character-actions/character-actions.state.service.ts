@@ -155,7 +155,7 @@ export class CharacterActionsStateService {
     payload: StartCombatActionRequest | StartCraftingActionRequest,
   ): void {
     this.persistence.set(type);
-    let call$: Observable<boolean>;
+    let call$: Observable<boolean | CharacterActionDto>;
 
     let isCombat = false;
     switch (type) {
@@ -178,14 +178,17 @@ export class CharacterActionsStateService {
 
     call$
       .pipe(
-        tap((success) => {
-          if (!success) {
+        tap((result) => {
+          if (!result) {
             this.reset();
           } else {
-            this.startPolling();
             if (isCombat) {
+              this.applyActionUpdate(result as CharacterActionDto);
               this.gameService.startCombat();
             }
+            this.startPolling(
+              isCombat ? (result as CharacterActionDto) : undefined,
+            );
           }
         }),
         catchError((err) => {

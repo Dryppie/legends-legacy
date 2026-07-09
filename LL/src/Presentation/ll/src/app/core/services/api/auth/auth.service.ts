@@ -46,10 +46,12 @@ export class AuthService {
   /* writable signals */
   private readonly _currentCharacter = signal<CharacterDto | null>(null);
   private readonly _isAuthenticated = signal(false);
+  private readonly _userInfo = signal<UserInfoDto | null>(null);
 
   /* public read-only selectors */
   readonly currentCharacter = computed(() => this._currentCharacter());
   readonly isAuthenticated = computed(() => this._isAuthenticated());
+  readonly userInfo = computed(() => this._userInfo());
   public returnUrl = '/';
 
   readonly identity = computed(() => {
@@ -83,6 +85,7 @@ export class AuthService {
 
   private markUnauthenticated() {
     this._currentCharacter.set(null);
+    this._userInfo.set(null);
     this._isAuthenticated.set(false);
     this.event.emitLogout();
   }
@@ -98,6 +101,11 @@ export class AuthService {
 
   refreshCurrentCharacter(): void {
     this.fetchCharacter().subscribe();
+  }
+
+  refreshSessionState(): void {
+    this.fetchCharacter().subscribe({ error: () => undefined });
+    this.getUserInfo().subscribe({ error: () => undefined });
   }
 
   login(email: string, password: string): Observable<void> {
@@ -118,13 +126,13 @@ export class AuthService {
   }
 
   register(
-    username: string,
+    characterName: string,
     email: string,
     password: string,
   ): Observable<void> {
     return this.api
       .post('auth/register', {
-        Username: username,
+        CharacterName: characterName,
         Email: email,
         Password: password,
       })
@@ -175,30 +183,32 @@ export class AuthService {
       .subscribe();
   }
 
-  // bind Google to existing account (new)
-  bindGoogle(idToken: string): void {
-    this.api
+  bindGoogle(idToken: string): Observable<void> {
+    return this.api
       .post('auth/bind-google', idToken)
       .pipe(
-        tap(() => {
+        tap((response) => {
+          const tokens = this.unwrapTokens(response);
+          this.applyAuthenticatedTokens(tokens.accessToken, tokens.accessExpiresAt);
           this.toast.showToast('Google binding success', '', true);
+          this.refreshSessionState();
         }),
+        map(() => void 0),
         catchError((e) => {
-          this.toast.showToast('Google binding error', e.message, false);
+          this.toast.showToast('Google binding error', this.readErrorMessage(e), false);
           return throwError(() => e);
         }),
-      )
-      .subscribe();
+      );
   }
 
   convertGuestToUser(
-    username: string,
+    characterName: string,
     email: string,
     password: string,
   ): Observable<void> {
     return this.api
       .post('auth/convertGuestToUser', {
-        Username: username,
+        CharacterName: characterName,
         Email: email,
         Password: password,
       })
@@ -276,16 +286,22 @@ export class AuthService {
   }
 
   private afterSuccessfulAuth(accessToken: string, accessExpiresAt: number) {
+    this.applyAuthenticatedTokens(accessToken, accessExpiresAt);
+    this.refreshSessionState();
+    this.router.navigateByUrl('/game');
+  }
+
+  private applyAuthenticatedTokens(accessToken: string, accessExpiresAt: number) {
     this.setAccessToken(accessToken, accessExpiresAt);
     this.markAuthenticated();
-    this.router.navigateByUrl('/game');
   }
 
   getUserInfo(): Observable<UserInfoDto> {
     return this.api.get('auth/getUserInfo').pipe(
       map((response) => this.unwrapResponse<UserInfoDto>(response)),
-      catchError(() => {
-        return throwError(() => new Error('Failed to register'));
+      tap((userInfo) => this._userInfo.set(userInfo)),
+      catchError((e) => {
+        return throwError(() => new Error(this.readErrorMessage(e) || 'Failed to load user info'));
       }),
     );
   }
@@ -400,5 +416,9 @@ export class AuthService {
       a.displayPosition === b.displayPosition &&
       a.displayName === b.displayName
     );
+  }
+
+  private readErrorMessage(error: any): string {
+    return error?.errorMessage ?? error?.message ?? 'Request failed';
   }
 }

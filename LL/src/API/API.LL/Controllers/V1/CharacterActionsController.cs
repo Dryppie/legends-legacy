@@ -19,7 +19,7 @@ public class CharacterActionsController : BaseController
         await Mediator.Send(new GetCharacterActionQuery(CurrentCharacterGuid));
 
     [HttpPost("StartCombat")]
-    public async Task<ActionResult<Response<bool>>> StartCombat([FromBody] StartCombatActionRequest request) =>
+    public async Task<ActionResult<Response<CharacterActionDto>>> StartCombat([FromBody] StartCombatActionRequest request) =>
         await Mediator.Send(new StartCombatActionCommand(CurrentCharacterGuid, request.AreaId));
 
     [HttpPost("StartCrafting")]

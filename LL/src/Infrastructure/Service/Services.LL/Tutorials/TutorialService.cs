@@ -6,11 +6,14 @@ using Domain.Models.Attributes;
 using Domain.Models.Attributes.Modifiers;
 using Domain.Models.Combat;
 using Domain.Models.Entities.Characters;
+using Domain.Models.Essences;
 using Domain.Models.Inventories;
 using Domain.Models.Items;
 using Domain.Models.Items.Equipments;
+using Domain.Models.Items.Equipments.Slots;
 using Domain.Models.Tutorials;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Services.LL.Interfaces;
 using Services.LL.Interfaces.Combat.Reward;
 
@@ -26,6 +29,7 @@ public sealed class TutorialService : ITutorialService, ITutorialProgressionServ
     private readonly IGameEventPublisher? _eventPublisher;
     private readonly ITutorialDefinitionProvider _definitionProvider;
     private readonly ITutorialProgressCache _progressCache;
+    private readonly TutorialDebugOptions _debugOptions;
 
     public TutorialService(
         IDbContext context,
@@ -35,7 +39,8 @@ public sealed class TutorialService : ITutorialService, ITutorialProgressionServ
         ILootRewardWriter lootRewardWriter,
         ITutorialDefinitionProvider definitionProvider,
         ITutorialProgressCache progressCache,
-        IGameEventPublisher? eventPublisher = null)
+        IGameEventPublisher? eventPublisher = null,
+        IOptions<TutorialDebugOptions>? debugOptions = null)
     {
         _context = context;
         _itemBases = itemBases;
@@ -45,6 +50,7 @@ public sealed class TutorialService : ITutorialService, ITutorialProgressionServ
         _definitionProvider = definitionProvider;
         _progressCache = progressCache;
         _eventPublisher = eventPublisher;
+        _debugOptions = debugOptions?.Value ?? new TutorialDebugOptions();
     }
 
     public async Task<TutorialState?> GetStateAsync(Guid characterId, CancellationToken cancellationToken)
@@ -404,19 +410,34 @@ public sealed class TutorialService : ITutorialService, ITutorialProgressionServ
 
         if (progress is not null)
         {
+            if (ShouldAutoCompleteNewProgressForDebug() && progress.IsCompleted)
+            {
+                await EnsureDebugTutorialCompletionStateAsync(progress, cancellationToken);
+                if (saveWhenCreated && _context.HasChanges)
+                {
+                    await _context.SaveChangesAsync(cancellationToken);
+                }
+            }
+
             return progress;
         }
 
+        var shouldAutoCompleteForDebug = ShouldAutoCompleteNewProgressForDebug();
         progress = new CharacterTutorialProgress
         {
             CharacterId = characterId,
             TutorialId = TutorialConstants.FirstStepsTutorialId,
-            CurrentStep = await ShouldAutoCompleteForExistingCharacterAsync(characterId, cancellationToken)
+            CurrentStep = shouldAutoCompleteForDebug ||
+                          await ShouldAutoCompleteForExistingCharacterAsync(characterId, cancellationToken)
                 ? TutorialConstants.StepComplete
                 : TutorialConstants.StepDefeatTrainingCreature
         };
 
-        if (progress.CurrentStep == TutorialConstants.StepComplete)
+        if (shouldAutoCompleteForDebug)
+        {
+            await GrantDebugTutorialCompletionAsync(progress, cancellationToken);
+        }
+        else if (progress.CurrentStep == TutorialConstants.StepComplete)
         {
             progress.CompletedAt = DateTimeOffset.UtcNow;
         }
@@ -429,6 +450,262 @@ public sealed class TutorialService : ITutorialService, ITutorialProgressionServ
         }
 
         return progress;
+    }
+
+    private bool ShouldAutoCompleteNewProgressForDebug() =>
+        _debugOptions.IsDevelopment && !_debugOptions.Enabled;
+
+    private async Task GrantDebugTutorialCompletionAsync(
+        CharacterTutorialProgress progress,
+        CancellationToken cancellationToken)
+    {
+        var now = DateTimeOffset.UtcNow;
+        progress.TrainingCombatWonAt ??= now;
+        progress.EssenceAbsorbedAt ??= now;
+        progress.EssenceEquippedAt ??= now;
+        progress.CraftedTierOneEquipmentCount = TutorialConstants.RequiredCraftedEquipmentCount;
+        progress.EquippedTierOneEquipmentCount = TutorialConstants.RequiredEquippedEquipmentCount;
+
+        await EnsureDebugTutorialCompletionStateAsync(progress, cancellationToken);
+        await GrantCompletionRewardAsync(progress, cancellationToken);
+        Complete(progress);
+    }
+
+    private async Task EnsureDebugTutorialCompletionStateAsync(
+        CharacterTutorialProgress progress,
+        CancellationToken cancellationToken)
+    {
+        var tutorialEssence = await EnsureTutorialEssenceAbsorbedAsync(
+            progress.CharacterId,
+            cancellationToken);
+
+        await EnsureTutorialEssenceEquippedAsync(
+            progress.CharacterId,
+            tutorialEssence,
+            cancellationToken);
+
+        var chestEquipped = await EnsureTutorialChestEquippedAsync(
+            progress.CharacterId,
+            cancellationToken);
+
+        var now = DateTimeOffset.UtcNow;
+        progress.TrainingCombatWonAt ??= now;
+        progress.EssenceAbsorbedAt ??= now;
+        progress.EssenceEquippedAt ??= now;
+        progress.TrainingEssenceRewardGranted = true;
+        progress.CraftedTierOneEquipmentCount = TutorialConstants.RequiredCraftedEquipmentCount;
+        progress.EquippedTierOneEquipmentCount = chestEquipped
+            ? TutorialConstants.RequiredEquippedEquipmentCount
+            : progress.EquippedTierOneEquipmentCount;
+    }
+
+    private async Task<PlayerEssence> EnsureTutorialEssenceAbsorbedAsync(
+        Guid characterId,
+        CancellationToken cancellationToken)
+    {
+        var essence = await _context.PlayerEssences
+            .FirstOrDefaultAsync(x =>
+                x.CharacterId == characterId &&
+                x.EssenceDefinitionId == TutorialConstants.TutorialEssenceDefinitionId,
+                cancellationToken);
+
+        if (essence is null)
+        {
+            var now = DateTimeOffset.UtcNow;
+            essence = new PlayerEssence
+            {
+                Id = Guid.NewGuid(),
+                CharacterId = characterId,
+                EssenceDefinitionId = TutorialConstants.TutorialEssenceDefinitionId,
+                NativeRegion = 1,
+                PotentialTier = 1,
+                Level = 1,
+                AbsorbedAt = now,
+                UpdatedAt = now
+            };
+
+            await _context.PlayerEssences.AddAsync(essence, cancellationToken);
+        }
+
+        var unboundTutorialEssences = await _context.InventoryItems
+            .Include(x => x.ItemInstance)
+            .Where(x =>
+                x.InventoryId == characterId &&
+                x.ItemInstance.ItemBaseId == TutorialConstants.TutorialEssenceItemBaseId)
+            .ToListAsync(cancellationToken);
+
+        if (unboundTutorialEssences.Count > 0)
+        {
+            _context.InventoryItems.RemoveRange(unboundTutorialEssences);
+        }
+
+        return essence;
+    }
+
+    private async Task EnsureTutorialEssenceEquippedAsync(
+        Guid characterId,
+        PlayerEssence tutorialEssence,
+        CancellationToken cancellationToken)
+    {
+        var loadouts = await _context.EssenceLoadouts
+            .Include(x => x.Slots)
+            .Where(x => x.CharacterId == characterId)
+            .ToListAsync(cancellationToken);
+
+        var activeLoadout = loadouts.FirstOrDefault(x => x.IsActive) ?? loadouts.FirstOrDefault();
+        if (activeLoadout is null)
+        {
+            activeLoadout = new EssenceLoadout
+            {
+                Id = Guid.NewGuid(),
+                CharacterId = characterId,
+                Name = "Default",
+                IsActive = true,
+                CreatedAt = DateTimeOffset.UtcNow,
+                UpdatedAt = DateTimeOffset.UtcNow
+            };
+
+            await _context.EssenceLoadouts.AddAsync(activeLoadout, cancellationToken);
+            loadouts.Add(activeLoadout);
+        }
+
+        foreach (var loadout in loadouts)
+        {
+            loadout.IsActive = loadout.Id == activeLoadout.Id;
+        }
+
+        activeLoadout.UpdatedAt = DateTimeOffset.UtcNow;
+
+        var duplicateSlots = activeLoadout.Slots
+            .Where(slot =>
+                (slot.SlotIndex == 0 && slot.PlayerEssenceId != tutorialEssence.Id) ||
+                (slot.PlayerEssenceId == tutorialEssence.Id && slot.SlotIndex != 0))
+            .ToList();
+
+        foreach (var duplicateSlot in duplicateSlots)
+        {
+            activeLoadout.Slots.Remove(duplicateSlot);
+            _context.EssenceLoadoutSlots.Remove(duplicateSlot);
+        }
+
+        var slotZero = activeLoadout.Slots.FirstOrDefault(x => x.SlotIndex == 0);
+        if (slotZero is null)
+        {
+            slotZero = new EssenceLoadoutSlot
+            {
+                Id = Guid.NewGuid(),
+                EssenceLoadoutId = activeLoadout.Id,
+                SlotIndex = 0
+            };
+            activeLoadout.Slots.Add(slotZero);
+            await _context.EssenceLoadoutSlots.AddAsync(slotZero, cancellationToken);
+        }
+
+        slotZero.PlayerEssenceId = tutorialEssence.Id;
+        slotZero.PlayerEssence = tutorialEssence;
+    }
+
+    private async Task<bool> EnsureTutorialChestEquippedAsync(
+        Guid characterId,
+        CancellationToken cancellationToken)
+    {
+        await EnsureTutorialEquipmentItemBasesAsync(cancellationToken);
+
+        var chestSlot = await _context.EquipmentSlots
+            .Include(x => x.EquipmentInstance)
+            .FirstOrDefaultAsync(x =>
+                x.EntityId == characterId &&
+                x.EquipmentSlotType == EquipmentSlotType.Chest,
+                cancellationToken);
+
+        if (chestSlot is null)
+        {
+            chestSlot = new EquipmentSlot
+            {
+                EntityId = characterId,
+                EquipmentSlotType = EquipmentSlotType.Chest
+            };
+            await _context.EquipmentSlots.AddAsync(chestSlot, cancellationToken);
+        }
+
+        if (chestSlot.EquipmentInstance?.ItemBaseId == TutorialConstants.TutorialChestItemBaseId)
+        {
+            await RemoveInventoryItemsByBaseIdAsync(
+                characterId,
+                TutorialConstants.TutorialChestItemBaseId,
+                cancellationToken);
+            return true;
+        }
+
+        if (chestSlot.EquipmentInstance is not null)
+        {
+            return false;
+        }
+
+        var inventoryChest = await _context.InventoryItems
+            .Include(x => x.ItemInstance)
+                .ThenInclude(x => x.ItemBase)
+            .FirstOrDefaultAsync(x =>
+                x.InventoryId == characterId &&
+                x.ItemInstance.ItemBaseId == TutorialConstants.TutorialChestItemBaseId,
+                cancellationToken);
+
+        EquipmentInstance chestInstance;
+        if (inventoryChest?.ItemInstance is EquipmentInstance existingChestInstance)
+        {
+            chestInstance = existingChestInstance;
+            _context.InventoryItems.Remove(inventoryChest);
+        }
+        else
+        {
+            var itemBases = await _itemBases.GetItemBasesByIdsAsync(
+                [TutorialConstants.TutorialChestItemBaseId],
+                cancellationToken);
+            if (!itemBases.TryGetValue(TutorialConstants.TutorialChestItemBaseId, out var itemBase) ||
+                itemBase is not EquipmentBase equipmentBase)
+            {
+                throw new InvalidOperationException(
+                    $"Tutorial equipment item '{TutorialConstants.TutorialChestItemBaseId}' does not exist.");
+            }
+
+            chestInstance = new EquipmentInstance
+            {
+                Id = Guid.NewGuid(),
+                ItemBaseId = equipmentBase.Id,
+                ItemBase = equipmentBase,
+                Rarity = equipmentBase.Rarity,
+                Tier = 1
+            };
+
+            await _context.ItemInstances.AddAsync(chestInstance, cancellationToken);
+        }
+
+        chestSlot.EquipmentInstanceId = chestInstance.Id;
+        chestSlot.EquipmentInstance = chestInstance;
+        await RemoveInventoryItemsByBaseIdAsync(
+            characterId,
+            TutorialConstants.TutorialChestItemBaseId,
+            cancellationToken);
+
+        return true;
+    }
+
+    private async Task RemoveInventoryItemsByBaseIdAsync(
+        Guid characterId,
+        string itemBaseId,
+        CancellationToken cancellationToken)
+    {
+        var inventoryItems = await _context.InventoryItems
+            .Include(x => x.ItemInstance)
+            .Where(x =>
+                x.InventoryId == characterId &&
+                x.ItemInstance.ItemBaseId == itemBaseId)
+            .ToListAsync(cancellationToken);
+
+        if (inventoryItems.Count > 0)
+        {
+            _context.InventoryItems.RemoveRange(inventoryItems);
+        }
     }
 
     private async Task<bool> ShouldAutoCompleteForExistingCharacterAsync(Guid characterId, CancellationToken cancellationToken)

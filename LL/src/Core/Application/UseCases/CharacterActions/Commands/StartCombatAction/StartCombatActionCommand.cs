@@ -1,37 +1,41 @@
 using Application.Interfaces.Services.LL.CharacterActions;
 using Application.MediatR.Markers;
+using Application.UseCases.CharacterActions.Dtos.Responses;
+using AutoMapper;
 using Common.Primitives;
 using Domain.Models.CharacterActions;
-using Domain.Models.Tutorials;
 using MediatR;
 
 namespace Application.UseCases.CharacterActions.Commands.StartCombatAction;
-public record StartCombatActionCommand(Guid CharacterId, string AreaId) : ICommand<Response<bool>>;
-public class StartCombatActionCommandHandler : IRequestHandler<StartCombatActionCommand, Response<bool>>
+public record StartCombatActionCommand(Guid CharacterId, string AreaId) : ICommand<Response<CharacterActionDto>>;
+public class StartCombatActionCommandHandler : IRequestHandler<StartCombatActionCommand, Response<CharacterActionDto>>
 {
     private readonly ICharacterActionService _characterActionService;
     private readonly IActionDetailsService _actionDetailsService;
+    private readonly IMapper _mapper;
 
     public StartCombatActionCommandHandler(
         ICharacterActionService characterActionService,
-        IActionDetailsService actionDetailsService)
+        IActionDetailsService actionDetailsService,
+        IMapper mapper)
     {
         _characterActionService = characterActionService;
         _actionDetailsService = actionDetailsService;
+        _mapper = mapper;
     }
 
-    public async Task<Response<bool>> Handle(StartCombatActionCommand request, CancellationToken cancellationToken)
+    public async Task<Response<CharacterActionDto>> Handle(StartCombatActionCommand request, CancellationToken cancellationToken)
     {
         var combatActionDetails = await _actionDetailsService.CreateCombatActionDetailsAsync(request.AreaId, request.CharacterId, cancellationToken);
         if (combatActionDetails == null)
-            return Response<bool>.Fail("Unable to start combat.");
+            return Response<CharacterActionDto>.Fail("Unable to start combat.");
 
         var characterAction = new CharacterAction(request.CharacterId, combatActionDetails);
 
-        var success = await _characterActionService.StartCharacterActionAsync(characterAction, cancellationToken);
+        var startedAction = await _characterActionService.StartCharacterActionAsync(characterAction, cancellationToken);
 
-        return success
-            ? Response<bool>.Success(success)
-            : Response<bool>.Fail("Unable to start combat");
+        return startedAction is not null
+            ? Response<CharacterActionDto>.Success(_mapper.Map<CharacterActionDto>(startedAction))
+            : Response<CharacterActionDto>.Fail("Unable to start combat");
     }
 }

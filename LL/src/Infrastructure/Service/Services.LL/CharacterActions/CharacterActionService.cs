@@ -22,7 +22,7 @@ public class CharacterActionService : ICharacterActionService
         _craftingService = craftingService;
     }
 
-    public async Task<bool> StartCharacterActionAsync(CharacterAction characterAction, CancellationToken cancellationToken)
+    public async Task<CharacterAction?> StartCharacterActionAsync(CharacterAction characterAction, CancellationToken cancellationToken)
     {
         return await _characterActionRepository.StartCharacterActionAsync(characterAction, cancellationToken);
     }

@@ -22,7 +22,7 @@ builder.Services.AddApplication();
 builder.Services.AddCommonServices();
 builder.Services.AddScoped<IGameEventPublisher, NoOpGameEventPublisher>();
 builder.Services.AddScoped<IGameRealtimeBroadcaster, NoOpGameRealtimeBroadcaster>();
-builder.Services.AddServices(config, builder.Environment.ContentRootPath);
+builder.Services.AddServices(config, builder.Environment.ContentRootPath, builder.Environment.IsDevelopment());
 builder.Services.AddAdminDashboardServices();
 builder.Services.AddBackgroundJobInfrastructure(config, builder.Environment);
 

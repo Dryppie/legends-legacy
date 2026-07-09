@@ -9,5 +9,19 @@ public class AppUserConfiguration : IEntityTypeConfiguration<AppUser>
     {
         builder.HasKey(e => e.Id);
         builder.Property(e => e.Id).IsRequired();
+
+        builder.Property(e => e.Username)
+            .HasMaxLength(80)
+            .IsRequired();
+
+        builder.Property(e => e.Email)
+            .HasMaxLength(320);
+
+        builder.Property(e => e.NormalizedEmail)
+            .HasMaxLength(320);
+
+        builder.HasIndex(e => e.NormalizedEmail)
+            .IsUnique()
+            .HasFilter("\"NormalizedEmail\" IS NOT NULL");
     }
 }

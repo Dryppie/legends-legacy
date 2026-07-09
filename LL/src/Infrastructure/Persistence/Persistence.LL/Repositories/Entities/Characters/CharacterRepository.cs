@@ -3,6 +3,7 @@ using Common.Exceptions;
 using Domain.Models.Colosseum;
 using Domain.Models.Entities;
 using Domain.Models.Entities.Characters;
+using Domain.Models.Users;
 using Domain.Models.Items.Equipments.Slots;
 using Microsoft.EntityFrameworkCore;
 using Persistence.LL.QueryProfiles;
@@ -39,6 +40,7 @@ public class CharacterRepository : ICharacterRepository
             },
             Professions = ProfessionsSeederHelper.CreateProfessions(characterId)
         };
+        character.NormalizeName();
 
         SeedEquipmentSlots(character);
         await _context.Characters.AddAsync(character, cancellationToken);
@@ -96,14 +98,28 @@ public class CharacterRepository : ICharacterRepository
 
     public async Task<Character?> UpdateCharacterNameAsync(Guid userId, string username, CancellationToken cancellationToken)
     {
-        var nameTaken = await _context.Characters.AnyAsync(c => c.Name == username && c.UserId != userId, cancellationToken);
+        var normalizedName = IdentityNormalizer.NormalizeRequired(username);
+        var nameTaken = await _context.Characters.AnyAsync(
+            c => c.NormalizedName == normalizedName && c.UserId != userId,
+            cancellationToken);
         if (nameTaken) return null;
 
         var character = await _context.Characters.FirstOrDefaultAsync(c => c.UserId == userId, cancellationToken);
         if (character == null) return null;
 
-        character.Name = username;
+        character.Name = username.Trim();
+        character.NormalizeName();
         return character;
+    }
+
+    public async Task<bool> IsCharacterNameTakenAsync(string name, Guid? excludedCharacterId, CancellationToken cancellationToken)
+    {
+        var normalizedName = IdentityNormalizer.NormalizeOptional(name);
+        if (normalizedName is null) return false;
+
+        return await _context.Characters.AnyAsync(
+            c => c.NormalizedName == normalizedName && (!excludedCharacterId.HasValue || c.Id != excludedCharacterId.Value),
+            cancellationToken);
     }
 
     public async Task<Character?> GetCharacterWithSoulstoneUpgradesAsync(Guid characterId, CancellationToken cancellationToken) =>
@@ -113,8 +129,8 @@ public class CharacterRepository : ICharacterRepository
 
     public async Task<Guid?> GetCharacterIdByNameAsync(string name, CancellationToken cancellationToken) =>
         await _context.Characters
-            .Where(c => c.Name.ToLower() == name.ToLower())
-            .Select(c => c.Id)
+            .Where(c => c.NormalizedName == IdentityNormalizer.NormalizeRequired(name))
+            .Select(c => (Guid?)c.Id)
             .FirstOrDefaultAsync(cancellationToken);
 
     private static void SeedEquipmentSlots(Entity entity)

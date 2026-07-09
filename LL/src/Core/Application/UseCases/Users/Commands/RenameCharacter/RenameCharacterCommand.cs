@@ -5,6 +5,7 @@ using Application.MediatR.Markers;
 using Common.Authorization.Security;
 using Common.Primitives;
 using MediatR;
+using Application.UseCases.Users;
 
 namespace Application.UseCases.Users.Commands.RenameCharacter;
 public record RenameCharacterCommand(Guid UserId, string NewName) : ICommand<Response<Tokens>>;
@@ -21,12 +22,15 @@ public class RenameCharacterCommandHandler : IRequestHandler<RenameCharacterComm
     }
     public async Task<Response<Tokens>> Handle(RenameCharacterCommand request, CancellationToken cancellationToken)
     {
-        if (request.NewName.Length > 26) return Response<Tokens>.Fail("Username is too long.");
+        if (!AuthInputValidator.TryValidateName(request.NewName, "Character name", out var characterName, out var validationError))
+        {
+            return Response<Tokens>.Fail(validationError);
+        }
 
         var user = await _userService.GetUserById(request.UserId, cancellationToken);
         if (user == null || user.IsNameEdited) return Response<Tokens>.Fail("Character has already been renamed once. No more edits are allowed.");
 
-        var character = await _characterService.UpdateCharacterNameAsync(request.UserId, request.NewName, cancellationToken);
+        var character = await _characterService.UpdateCharacterNameAsync(request.UserId, characterName, cancellationToken);
 
         if (character == null) return Response<Tokens>.Fail("Failed to rename character.");
 

@@ -9,6 +9,7 @@ import {
   TutorialState,
 } from '../../../../shared/models/tutorial';
 import { FirstPartyTourService } from '../../client-side/first-party-tour/first-party-tour.service';
+import { EventBusService } from '../../client-side/event-bus/event-bus.service';
 import { GameEventService } from '../../real-time/game-event.service';
 import { TutorialService } from './tutorial.service';
 
@@ -24,6 +25,7 @@ export class TutorialStateService {
   private readonly _loading = signal(false);
   private readonly _error = signal<string | null>(null);
   private hasResumedCurrentStep = false;
+  private lastLogoutCount = 0;
 
   readonly state = computed(() => this._state());
   readonly hasLoaded = computed(() => this._hasLoaded());
@@ -40,6 +42,7 @@ export class TutorialStateService {
     private readonly router: Router,
     private readonly firstPartyTour: FirstPartyTourService,
     private readonly eventService: GameEventService,
+    private readonly eventBus: EventBusService,
   ) {
     this.firstPartyTour.registerStatePredicate(
       TOUR_STATE_TUTORIAL_CRAFTING_READY,
@@ -89,6 +92,21 @@ export class TutorialStateService {
       },
       { allowSignalWrites: true },
     );
+
+    this.lastLogoutCount = this.eventBus.logout();
+
+    effect(
+      () => {
+        const logoutCount = this.eventBus.logout();
+        if (logoutCount === this.lastLogoutCount) {
+          return;
+        }
+
+        this.lastLogoutCount = logoutCount;
+        this.reset();
+      },
+      { allowSignalWrites: true },
+    );
   }
 
   load(options: TutorialLoadOptions = {}): void {
@@ -122,6 +140,15 @@ export class TutorialStateService {
     if (state && !state.isCompleted) {
       this.resumeCurrentStepIfRequested(state, options);
     }
+  }
+
+  reset(): void {
+    this._state.set(null);
+    this._hasLoaded.set(false);
+    this._isCompleted.set(false);
+    this._loading.set(false);
+    this._error.set(null);
+    this.hasResumedCurrentStep = false;
   }
 
   refresh(): void {
