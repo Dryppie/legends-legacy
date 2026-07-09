@@ -1,3 +1,5 @@
+using Domain.Models.Bonuses;
+
 namespace Domain.Models.Essences;
 
 public sealed record SoulArchive(
@@ -26,10 +28,18 @@ public sealed record EssenceCodexEntry(
     string Title,
     string Description,
     string BenefitText,
+    BonusKind BonusKind,
+    double BonusValue,
     int Current,
     int Required,
     bool IsUnlocked,
-    string Category);
+    string Category,
+    IReadOnlyList<EssenceCodexMember> Essences);
+
+public sealed record EssenceCodexMember(
+    string EssenceDefinitionId,
+    string Name,
+    bool IsAbsorbed);
 
 public sealed record PlayerEssenceArchiveEntry(
     PlayerEssence Essence,

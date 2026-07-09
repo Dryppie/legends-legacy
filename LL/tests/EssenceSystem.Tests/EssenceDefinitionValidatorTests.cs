@@ -138,6 +138,36 @@ public sealed class EssenceDefinitionValidatorTests
         Assert.NotEmpty(repository.GetAll());
     }
 
+    [Fact]
+    public void Authored_essence_codex_collection_json_passes_definition_validation()
+    {
+        var options = new JsonSerializerOptions
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            ReadCommentHandling = JsonCommentHandling.Skip,
+            AllowTrailingCommas = true
+        };
+        options.Converters.Add(new JsonStringEnumConverter());
+        var config = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?> { ["Content:Root"] = "Data" })
+            .Build();
+        var contentRoot = FindApiContentRoot();
+        var repository = new JsonEssenceDefinitionRepository(
+            config,
+            contentRoot,
+            options,
+            _validator);
+
+        var provider = new JsonEssenceCodexCollectionDefinitionProvider(
+            config,
+            contentRoot,
+            options,
+            repository);
+
+        Assert.NotEmpty(provider.GetAll());
+        Assert.All(provider.GetAll(), collection => Assert.InRange(collection.EssenceDefinitionIds.Count, 2, 6));
+    }
+
     internal static EssenceDefinition ValidDefinition() => new()
     {
         Id = "essence.test",

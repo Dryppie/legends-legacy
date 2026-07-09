@@ -96,10 +96,19 @@ export interface EssenceCodexEntryDto {
   title: string;
   description: string;
   benefitText: string;
+  bonusKind: string;
+  bonusValue: number;
   current: number;
   required: number;
   isUnlocked: boolean;
   category: string;
+  essences: EssenceCodexMemberDto[];
+}
+
+export interface EssenceCodexMemberDto {
+  essenceDefinitionId: string;
+  name: string;
+  isAbsorbed: boolean;
 }
 
 export interface PlayerEssenceDto {

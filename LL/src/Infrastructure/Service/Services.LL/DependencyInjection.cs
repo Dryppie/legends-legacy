@@ -103,6 +103,7 @@ public static class DependencyInjection
 
         services.AddScoped<IBonusService, BonusService>();
         services.AddScoped<IBonusProvider, SoulstoneBonusProvider>();
+        services.AddScoped<IBonusProvider, EssenceCodexBonusProvider>();
 
         services.AddSingleton<IChampionMarketCatalog>(sp =>
             new JsonChampionMarketCatalog(
@@ -181,6 +182,12 @@ public static class DependencyInjection
                 contentRootPath,
                 sp.GetRequiredService<JsonSerializerOptions>(),
                 sp.GetRequiredService<IEssenceDefinitionValidator>()));
+        services.AddSingleton<IEssenceCodexCollectionDefinitionProvider>(sp =>
+            new JsonEssenceCodexCollectionDefinitionProvider(
+                config,
+                contentRootPath,
+                sp.GetRequiredService<JsonSerializerOptions>(),
+                sp.GetRequiredService<IEssenceDefinitionRepository>()));
         services.AddScoped<IEssenceProgressionService, EssenceProgressionService>();
         services.AddScoped<IEssenceSlotUnlockService, EssenceSlotUnlockService>();
         services.AddScoped<IEssenceLoadoutLimitService, EssenceLoadoutLimitService>();
@@ -206,6 +213,7 @@ public static class DependencyInjection
         services.AddScoped<IEssenceCombatLoadoutResolver, EssenceSystemService>();
         services.AddScoped<IEssenceResonanceService, EssenceSystemService>();
         services.AddScoped<IEssenceCatalogService, EssenceCatalogService>();
+        services.AddScoped<IEssenceCodexCollectionService, EssenceCodexCollectionService>();
         services.AddScoped<ICreatureArchiveService, CreatureArchiveService>();
 
         services.AddScoped<IGuildService, GuildService>();

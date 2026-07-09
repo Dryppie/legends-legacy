@@ -8,6 +8,7 @@ import { EssenceDescriptionComponent } from '../../../../shared/components/essen
 import {
   CreatureArchiveEntryDto,
   EssenceCodexEntryDto,
+  EssenceCodexMemberDto,
   EssenceLoadoutDto,
   PlayerEssenceDto,
 } from '../../../../shared/models/essence-system';
@@ -277,6 +278,10 @@ export class EssencesComponent implements OnInit {
 
   public trackCodex(_: number, entry: EssenceCodexEntryDto): string {
     return entry.id;
+  }
+
+  public trackCodexMember(_: number, member: EssenceCodexMemberDto): string {
+    return member.essenceDefinitionId;
   }
 
   public progressPercent(current: number, required: number): number {

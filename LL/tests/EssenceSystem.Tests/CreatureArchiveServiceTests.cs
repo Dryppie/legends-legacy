@@ -1,4 +1,5 @@
 using Application.Interfaces.Services.LL.Essences;
+using Domain.Models.Bonuses;
 using Domain.Models.Combat.Abilities;
 using Domain.Models.Entities.Creatures;
 using Domain.Models.Essences;
@@ -74,66 +75,71 @@ public sealed class CreatureArchiveServiceTests
     }
 
     [Fact]
-    public async Task GetEssenceCodex_tracks_collection_family_region_and_evolution_milestones()
+    public async Task GetEssenceCodex_reveals_collection_when_one_member_has_been_absorbed()
     {
         await using var db = CreateDb();
         var characterId = Guid.NewGuid();
-        var evolvedEssence = new PlayerEssence
-            {
-                Id = Guid.NewGuid(),
-                CharacterId = characterId,
-                EssenceDefinitionId = "essence.cave_bat",
-                IsEvolved = true
-            };
-
-        db.PlayerEssences.AddRange(
-            evolvedEssence,
-            new PlayerEssence
-            {
-                Id = Guid.NewGuid(),
-                CharacterId = characterId,
-                EssenceDefinitionId = "essence.forest_wolf"
-            },
-            new PlayerEssence
-            {
-                Id = Guid.NewGuid(),
-                CharacterId = characterId,
-                EssenceDefinitionId = "essence.stone_boar"
-            });
-        db.EssenceLoadouts.Add(new EssenceLoadout
+        db.PlayerEssences.Add(new PlayerEssence
         {
             Id = Guid.NewGuid(),
             CharacterId = characterId,
-            Name = "Active",
-            IsActive = true,
-            Slots =
-            [
-                new EssenceLoadoutSlot
-                {
-                    Id = Guid.NewGuid(),
-                    SlotIndex = 0,
-                    PlayerEssenceId = evolvedEssence.Id
-                }
-            ]
+            EssenceDefinitionId = "essence.cave_bat"
         });
         await db.SaveChangesAsync();
         var service = CreateService(db);
 
         var codex = await service.GetEssenceCodexAsync(characterId, CancellationToken.None);
 
-        Assert.All(codex.Entries, entry => Assert.True(entry.IsUnlocked));
-        Assert.Contains(codex.Entries, entry =>
-            entry.Id == "codex.beast-studies-i" &&
-            entry.Current == 3 &&
-            entry.Required == 3);
-        Assert.Contains(codex.Entries, entry =>
-            entry.Id == "codex.regional-survey-i" &&
-            entry.Current == 3 &&
-            entry.Required == 3);
-        Assert.Contains(codex.Entries, entry =>
-            entry.Id == "codex.attunement-practice" &&
-            entry.Current == 1 &&
-            entry.Required == 1);
+        var entry = Assert.Single(codex.Entries);
+        Assert.Equal("codex.collection.beasts", entry.Id);
+        Assert.Equal(1, entry.Current);
+        Assert.Equal(3, entry.Required);
+        Assert.False(entry.IsUnlocked);
+        Assert.Equal(BonusKind.EssenceDropRateRelativeBps, entry.BonusKind);
+        Assert.Equal(50, entry.BonusValue);
+        Assert.Contains(entry.Essences, member => member.EssenceDefinitionId == "essence.cave_bat" && member.IsAbsorbed);
+        Assert.Contains(entry.Essences, member => member.EssenceDefinitionId == "essence.forest_wolf" && !member.IsAbsorbed);
+    }
+
+    [Fact]
+    public async Task GetEssenceCodex_completes_collection_when_all_members_are_absorbed()
+    {
+        await using var db = CreateDb();
+        var characterId = Guid.NewGuid();
+        db.PlayerEssences.AddRange(
+            CreatePlayerEssence(characterId, "essence.cave_bat"),
+            CreatePlayerEssence(characterId, "essence.forest_wolf"),
+            CreatePlayerEssence(characterId, "essence.stone_boar"));
+        await db.SaveChangesAsync();
+        var service = CreateService(db);
+
+        var codex = await service.GetEssenceCodexAsync(characterId, CancellationToken.None);
+
+        var entry = Assert.Single(codex.Entries);
+        Assert.True(entry.IsUnlocked);
+        Assert.Equal(3, entry.Current);
+        Assert.All(entry.Essences, member => Assert.True(member.IsAbsorbed));
+    }
+
+    [Fact]
+    public async Task EssenceCodexBonusProvider_returns_bonus_for_completed_collections()
+    {
+        await using var db = CreateDb();
+        var characterId = Guid.NewGuid();
+        db.PlayerEssences.AddRange(
+            CreatePlayerEssence(characterId, "essence.cave_bat"),
+            CreatePlayerEssence(characterId, "essence.forest_wolf"),
+            CreatePlayerEssence(characterId, "essence.stone_boar"));
+        await db.SaveChangesAsync();
+        var definitions = new FakeDefinitionRepository();
+        var collectionService = CreateCodexCollectionService(db, definitions);
+        var provider = new EssenceCodexBonusProvider(collectionService);
+
+        var bonuses = await provider.GetBonusesAsync(characterId, DateTimeOffset.UtcNow, CancellationToken.None);
+
+        var bonus = Assert.Single(bonuses);
+        Assert.Equal(BonusKind.EssenceDropRateRelativeBps, bonus.Kind);
+        Assert.Equal(50, bonus.Value);
     }
 
     private static LLDbContext CreateDb()
@@ -145,8 +151,50 @@ public sealed class CreatureArchiveServiceTests
         return new LLDbContext(options);
     }
 
-    private static CreatureArchiveService CreateService(LLDbContext db) =>
-        new(db, new FakeDefinitionRepository());
+    private static CreatureArchiveService CreateService(LLDbContext db)
+    {
+        var definitions = new FakeDefinitionRepository();
+        return new(db, definitions, CreateCodexCollectionService(db, definitions));
+    }
+
+    private static EssenceCodexCollectionService CreateCodexCollectionService(
+        LLDbContext db,
+        IEssenceDefinitionRepository definitions) =>
+        new(db, new FakeCollectionDefinitionProvider(), definitions);
+
+    private static PlayerEssence CreatePlayerEssence(Guid characterId, string essenceDefinitionId) =>
+        new()
+        {
+            Id = Guid.NewGuid(),
+            CharacterId = characterId,
+            EssenceDefinitionId = essenceDefinitionId
+        };
+
+    private sealed class FakeCollectionDefinitionProvider : IEssenceCodexCollectionDefinitionProvider
+    {
+        public IReadOnlyList<EssenceCodexCollectionDefinition> GetAll() =>
+        [
+            new()
+            {
+                Id = "codex.collection.beasts",
+                Title = "Beasts",
+                Description = "Absorb the beast study set.",
+                Category = "Creature Families",
+                EssenceDefinitionIds =
+                [
+                    "essence.cave_bat",
+                    "essence.forest_wolf",
+                    "essence.stone_boar"
+                ],
+                Bonus = new EssenceCodexCollectionBonusDefinition
+                {
+                    Kind = BonusKind.EssenceDropRateRelativeBps,
+                    Value = 50,
+                    Description = "+0.5% relative Essence drop chance."
+                }
+            }
+        ];
+    }
 
     private sealed class FakeDefinitionRepository : IEssenceDefinitionRepository
     {

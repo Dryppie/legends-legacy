@@ -691,7 +691,7 @@
       <h2 class="ll-heading">Essence Codex</h2>
       <p class="ll-copy mt-1">
         {{ unlockedCodexEntries() }} /
-        {{ essenceState.codex()?.entries?.length ?? 0 }} entries unlocked
+        {{ essenceState.codex()?.entries?.length ?? 0 }} collections completed
       </p>
     </div>
 
@@ -721,6 +721,28 @@
         <p class="mt-3 text-sm text-zinc-300">{{ entry.description }}</p>
         <p class="mt-2 text-xs text-zinc-400">{{ entry.benefitText }}</p>
 
+        <div class="mt-4 grid gap-2">
+          <div
+            *ngFor="let member of entry.essences; trackBy: trackCodexMember"
+            class="flex items-center justify-between gap-3 rounded border border-light_gray/60 px-2 py-1.5 text-xs"
+          >
+            <span
+              class="min-w-0 truncate"
+              [ngClass]="member.isAbsorbed ? 'text-primary' : 'text-zinc-300'"
+            >
+              {{ member.name }}
+            </span>
+            <span
+              class="ll-badge shrink-0 rounded"
+              [ngClass]="
+                member.isAbsorbed ? 'll-badge-accent' : 'll-badge-muted'
+              "
+            >
+              {{ member.isAbsorbed ? "Absorbed" : "Missing" }}
+            </span>
+          </div>
+        </div>
+
         <div class="mt-4">
           <div class="mb-1 flex items-center justify-between text-xs">
             <span class="text-zinc-400">Progress</span>
@@ -742,7 +764,7 @@
       class="ll-empty-state"
       *ngIf="(essenceState.codex()?.entries?.length ?? 0) === 0"
     >
-      No Codex entries are available yet.
+      Absorb an Essence that belongs to a collection to reveal Codex entries.
     </p>
   </section>
 </div>

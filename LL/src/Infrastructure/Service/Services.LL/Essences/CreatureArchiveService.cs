@@ -10,13 +10,16 @@ public sealed class CreatureArchiveService : ICreatureArchiveService
 {
     private readonly IDbContext _dbContext;
     private readonly IEssenceDefinitionRepository _essenceDefinitions;
+    private readonly IEssenceCodexCollectionService _codexCollections;
 
     public CreatureArchiveService(
         IDbContext dbContext,
-        IEssenceDefinitionRepository essenceDefinitions)
+        IEssenceDefinitionRepository essenceDefinitions,
+        IEssenceCodexCollectionService codexCollections)
     {
         _dbContext = dbContext;
         _essenceDefinitions = essenceDefinitions;
+        _codexCollections = codexCollections;
     }
 
     public async Task RecordDefeatedCreaturesAsync(
@@ -123,66 +126,8 @@ public sealed class CreatureArchiveService : ICreatureArchiveService
 
     public async Task<EssenceCodex> GetEssenceCodexAsync(Guid characterId, CancellationToken cancellationToken)
     {
-        var absorbedDefinitions = await GetAbsorbedEssenceDefinitionsAsync(characterId, cancellationToken);
-        var uniqueCount = absorbedDefinitions.Count;
-        var beastCount = absorbedDefinitions.Count(def => HasTag(def, "Beast"));
-        var nativeRegionCount = absorbedDefinitions
-            .Select(def => def.NativeRegion)
-            .Distinct()
-            .Count();
-        var evolvedCount = await _dbContext.PlayerEssences
-            .Where(x => x.CharacterId == characterId && x.IsEvolved)
-            .CountAsync(cancellationToken);
-        var activeAttunedCount = await _dbContext.EssenceLoadoutSlots
-            .Where(slot =>
-                slot.PlayerEssenceId != null &&
-                slot.EssenceLoadout.CharacterId == characterId &&
-                slot.EssenceLoadout.IsActive)
-            .CountAsync(cancellationToken);
-
-        return new EssenceCodex(
-        [
-            CreateEntry(
-                "codex.first-echo",
-                "First Echo",
-                "Absorb your first Essence into the Soul Archive.",
-                "Unlocks Codex tracking for Essence collection milestones.",
-                uniqueCount,
-                1,
-                "Collection"),
-            CreateEntry(
-                "codex.beast-studies-i",
-                "Beast Studies I",
-                "Archive three Beast-tagged Essences.",
-                "Marks Beast creatures as a studied family in the Codex.",
-                beastCount,
-                3,
-                "Creature Families"),
-            CreateEntry(
-                "codex.regional-survey-i",
-                "Regional Survey I",
-                "Archive Essences from three different native regions.",
-                "Shows regional Essence collection breadth in the Codex.",
-                nativeRegionCount,
-                3,
-                "Regions"),
-            CreateEntry(
-                "codex.attunement-practice",
-                "Attunement Practice",
-                "Place an archived Essence into an active loadout.",
-                "Records that your Soul Archive has been used in an active combat setup.",
-                activeAttunedCount,
-                1,
-                "Loadouts"),
-            CreateEntry(
-                "codex.evolution-notes-i",
-                "Evolution Notes I",
-                "Evolve one archived Essence.",
-                "Records evolved Essence discoveries in the Codex.",
-                evolvedCount,
-                1,
-                "Progression")
-        ]);
+        var entries = await _codexCollections.GetVisibleEntriesAsync(characterId, cancellationToken);
+        return new EssenceCodex(entries);
     }
 
     private async Task<HashSet<string>> GetAbsorbedEssenceDefinitionIdsAsync(Guid characterId, CancellationToken cancellationToken)
@@ -194,41 +139,6 @@ public sealed class CreatureArchiveService : ICreatureArchiveService
             .ToListAsync(cancellationToken);
 
         return ids.ToHashSet(StringComparer.OrdinalIgnoreCase);
-    }
-
-    private async Task<IReadOnlyList<Domain.Models.Essences.Definitions.EssenceDefinition>> GetAbsorbedEssenceDefinitionsAsync(
-        Guid characterId,
-        CancellationToken cancellationToken)
-    {
-        var absorbedIds = await GetAbsorbedEssenceDefinitionIdsAsync(characterId, cancellationToken);
-        return _essenceDefinitions.GetAll()
-            .Where(def => absorbedIds.Contains(def.Id))
-            .ToList();
-    }
-
-    private static EssenceCodexEntry CreateEntry(
-        string id,
-        string title,
-        string description,
-        string benefitText,
-        int current,
-        int required,
-        string category) =>
-        new(
-            id,
-            title,
-            description,
-            benefitText,
-            Math.Clamp(current, 0, required),
-            required,
-            current >= required,
-            category);
-
-    private static bool HasTag(Domain.Models.Essences.Definitions.EssenceDefinition definition, string tag)
-    {
-        return definition.Tags.Any(definitionTag =>
-            definitionTag.Equals(tag, StringComparison.OrdinalIgnoreCase) ||
-            definitionTag.EndsWith($".{tag}", StringComparison.OrdinalIgnoreCase));
     }
 
     private static string FormatCreatureName(string creatureId)
