@@ -17,7 +17,8 @@ public static class CombatRatingCalculator
             Get(attributes, AttributeType.CritChance) * 4 +
             Get(attributes, AttributeType.CritDamage) * 1.5f +
             Get(attributes, AttributeType.ArmorPenetration) * 2 +
-            Get(attributes, AttributeType.MagicPenetration) * 2;
+            Get(attributes, AttributeType.MagicPenetration) * 2 +
+            Get(attributes, AttributeType.AttackSpeed) * 3;
 
         var defense =
             Get(attributes, AttributeType.MaxHealth) * 0.18f +

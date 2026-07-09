@@ -29,6 +29,7 @@ public static class MonsterBaseStats
     public const float BaseCrowdControlResistance = 0.0f;
     public const float BaseSummonPower = 0.0f;
     public const float BaseSummonHealth = 0.0f;
+    public const float BaseAttackSpeed = 0.0f;
 
     public static readonly IReadOnlyDictionary<AttributeType, float> Baseline =
         new Dictionary<AttributeType, float>
@@ -56,5 +57,6 @@ public static class MonsterBaseStats
                 { AttributeType.CrowdControlResistance, BaseCrowdControlResistance },
                 { AttributeType.SummonPower, BaseSummonPower },
                 { AttributeType.SummonHealth, BaseSummonHealth },
+                { AttributeType.AttackSpeed, BaseAttackSpeed },
         };
 }

@@ -27,4 +27,6 @@ export enum AttributeType {
 
   SummonPower = 'SummonPower',
   SummonHealth = 'SummonHealth',
+
+  AttackSpeed = 'AttackSpeed',
 }

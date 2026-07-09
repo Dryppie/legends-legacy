@@ -125,6 +125,7 @@ const ATTRIBUTE_WEIGHTS: Partial<Record<AttributeType, number>> = {
   [AttributeType.CrowdControlResistance]: 2,
   [AttributeType.SummonPower]: 4,
   [AttributeType.SummonHealth]: 0.15,
+  [AttributeType.AttackSpeed]: 3,
 };
 
 function sortAttributes(attributes: AttributeModifier[]): AttributeModifier[] {

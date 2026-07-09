@@ -32,7 +32,9 @@ public static class AttributeCatalog
             [AttributeType.CrowdControlResistance] = new(AttributeType.CrowdControlResistance, "Crowd-control resistance."),
 
             [AttributeType.SummonPower] = new(AttributeType.SummonPower, "Summoned unit damage scaling."),
-            [AttributeType.SummonHealth] = new(AttributeType.SummonHealth, "Summoned unit health scaling.")
+            [AttributeType.SummonHealth] = new(AttributeType.SummonHealth, "Summoned unit health scaling."),
+
+            [AttributeType.AttackSpeed] = new(AttributeType.AttackSpeed, "Basic attack speed percentage.")
         };
 
     public static IReadOnlyCollection<AttributeDefinition> All => [.. Definitions.Values];
