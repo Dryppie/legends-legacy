@@ -148,6 +148,128 @@ public sealed class AbilitySystemTests
     }
 
     [Fact]
+    public void Engine_attack_speed_increases_basic_attack_cadence()
+    {
+        var hasted = CreateCombatant("hasted", CombatTeam.Friendly, []);
+        var baseline = CreateCombatant("baseline", CombatTeam.Hostile, []);
+        hasted.Attributes[AttributeType.AttackSpeed] = 100;
+        var engine = new FastCombatEngine(
+            new Dictionary<string, CompiledStatus>(),
+            new FastCombatEngineOptions(MaxTicks: 61, BasicAttackIntervalTicks: 30));
+
+        var result = engine.Run([hasted], [baseline]);
+
+        Assert.Equal(4, CountBasicAttacks(result, hasted.Id));
+        Assert.Equal(2, CountBasicAttacks(result, baseline.Id));
+    }
+
+    [Fact]
+    public void Engine_attack_speed_decreases_basic_attack_cadence()
+    {
+        var slowed = CreateCombatant("slowed", CombatTeam.Friendly, []);
+        var baseline = CreateCombatant("baseline", CombatTeam.Hostile, []);
+        slowed.Attributes[AttributeType.AttackSpeed] = -50;
+        var engine = new FastCombatEngine(
+            new Dictionary<string, CompiledStatus>(),
+            new FastCombatEngineOptions(MaxTicks: 61, BasicAttackIntervalTicks: 30));
+
+        var result = engine.Run([slowed], [baseline]);
+
+        Assert.Equal(1, CountBasicAttacks(result, slowed.Id));
+        Assert.Equal(2, CountBasicAttacks(result, baseline.Id));
+    }
+
+    [Fact]
+    public void Engine_timed_attack_speed_buff_affects_current_battle_progress()
+    {
+        var hasteStatus = CreateTimedAttackSpeedStatus("status.haste", "effect.haste", 100, 30);
+        var applyHaste = new AbilitySpec
+        {
+            Id = "ability.apply.haste",
+            Kind = AbilitySpecKind.Active,
+            Name = "Apply Haste",
+            CooldownTicks = 100,
+            Effects = [CreateApplyStatusEffect("effect.apply.haste", hasteStatus.Id, AbilityTargetSelector.Self)]
+        };
+        var compiledStatuses = AbilityCompiler.CompileStatuses([hasteStatus]);
+        var compiledAbilities = AbilityCompiler.CompileAbilities([applyHaste]);
+        var friendly = CreateCombatant("friendly", CombatTeam.Friendly, compiledAbilities.Values);
+        var hostile = CreateCombatant("hostile", CombatTeam.Hostile, []);
+        var engine = new FastCombatEngine(
+            compiledStatuses,
+            new FastCombatEngineOptions(MaxTicks: 31, BasicAttackIntervalTicks: 30));
+
+        var result = engine.Run([friendly], [hostile]);
+
+        Assert.Equal(2, CountBasicAttacks(result, friendly.Id));
+        Assert.Equal(0, friendly.GetAttribute(AttributeType.AttackSpeed));
+        Assert.Contains(result.EventLog, x => x.Source == "effect.haste" && x.EventType == EventType.Buff);
+        Assert.Contains(result.EventLog, x => x.Source == "effect.haste" && x.EventType == EventType.BuffExpired);
+    }
+
+    [Fact]
+    public void Engine_timed_attack_speed_debuff_affects_current_battle_progress()
+    {
+        var slowStatus = CreateTimedAttackSpeedStatus("status.slow", "effect.slow", -50, 100);
+        var applySlow = new AbilitySpec
+        {
+            Id = "ability.apply.slow",
+            Kind = AbilitySpecKind.Active,
+            Name = "Apply Slow",
+            CooldownTicks = 100,
+            Effects = [CreateApplyStatusEffect("effect.apply.slow", slowStatus.Id)]
+        };
+        var compiledStatuses = AbilityCompiler.CompileStatuses([slowStatus]);
+        var compiledAbilities = AbilityCompiler.CompileAbilities([applySlow]);
+        var friendly = CreateCombatant("friendly", CombatTeam.Friendly, compiledAbilities.Values);
+        var hostile = CreateCombatant("hostile", CombatTeam.Hostile, []);
+        var engine = new FastCombatEngine(
+            compiledStatuses,
+            new FastCombatEngineOptions(MaxTicks: 61, BasicAttackIntervalTicks: 30));
+
+        var result = engine.Run([friendly], [hostile]);
+
+        Assert.Equal(2, CountBasicAttacks(result, friendly.Id));
+        Assert.Equal(1, CountBasicAttacks(result, hostile.Id));
+        Assert.Contains(result.EventLog, x => x.Source == "effect.slow" && x.EventType == EventType.Debuff);
+    }
+
+    [Fact]
+    public void Engine_stunned_combatants_do_not_gain_basic_attack_progress()
+    {
+        var stunStatus = CreateStunStatus();
+        var compiledStatuses = AbilityCompiler.CompileStatuses([stunStatus]);
+        var friendly = CreateCombatant("friendly", CombatTeam.Friendly, []);
+        var hostile = CreateCombatant("hostile", CombatTeam.Hostile, []);
+        friendly.Statuses.Add(new RuntimeStatus(compiledStatuses[stunStatus.Id], hostile, friendly, 1));
+        var engine = new FastCombatEngine(
+            compiledStatuses,
+            new FastCombatEngineOptions(MaxTicks: 61, BasicAttackIntervalTicks: 30));
+
+        var result = engine.Run([friendly], [hostile]);
+
+        Assert.Equal(1, CountBasicAttacks(result, friendly.Id));
+        Assert.Equal(2, CountBasicAttacks(result, hostile.Id));
+    }
+
+    [Fact]
+    public void Engine_clamps_extreme_attack_speed_rates()
+    {
+        var veryFast = CreateCombatant("very-fast", CombatTeam.Friendly, []);
+        var verySlow = CreateCombatant("very-slow", CombatTeam.Hostile, []);
+        veryFast.Attributes[AttributeType.AttackSpeed] = 1000;
+        verySlow.Attributes[AttributeType.AttackSpeed] = -1000;
+        var engine = new FastCombatEngine(
+            new Dictionary<string, CompiledStatus>(),
+            new FastCombatEngineOptions(MaxTicks: 121, BasicAttackIntervalTicks: 30));
+
+        var result = engine.Run([veryFast], [verySlow]);
+
+        Assert.Equal(16, CountBasicAttacks(result, veryFast.Id));
+        Assert.Equal(1, CountBasicAttacks(result, verySlow.Id));
+    }
+
+    [Fact]
     public void Engine_pays_health_cost_before_using_active_ability()
     {
         var ability = CreateDamageAbility("ability.health.cost", "Family.Test");
@@ -2675,7 +2797,8 @@ public sealed class AbilitySystemTests
                 [AttributeType.MaxHealth] = maxHealth,
                 [AttributeType.Power] = 50,
                 [AttributeType.CritDamage] = 100,
-                [AttributeType.DodgeChance] = dodgeChance
+                [AttributeType.DodgeChance] = dodgeChance,
+                [AttributeType.AttackSpeed] = 0
             },
             abilities,
             ["Role.Test"]);
@@ -2760,6 +2883,7 @@ public sealed class AbilitySystemTests
         attributes[AttributeType.MaxHealth] = 200;
         attributes[AttributeType.Power] = 50;
         attributes[AttributeType.CritDamage] = 100;
+        attributes[AttributeType.AttackSpeed] = 0;
     }
 
     private static AbilitySpec CreateDamageAbility(string id, string tag) =>
@@ -2899,6 +3023,40 @@ public sealed class AbilitySystemTests
                     Attribute = AttributeType.Power,
                     BaseValue = 20,
                     DurationTicks = 2
+                }
+            ]
+        };
+
+    private static StatusSpec CreateTimedAttackSpeedStatus(
+        string statusId,
+        string effectId,
+        int amount,
+        int durationTicks) =>
+        new()
+        {
+            Id = statusId,
+            Name = statusId,
+            StackingPolicy = AbilityStatusStackingPolicy.Refresh,
+            MaxStacks = 1,
+            DurationTicks = durationTicks,
+            Triggers =
+            [
+                new()
+                {
+                    Event = AbilityTriggerEvent.OnStatusApplied,
+                    EffectIds = [effectId]
+                }
+            ],
+            Effects =
+            [
+                new()
+                {
+                    Id = effectId,
+                    Operation = AbilityEffectOperation.ModifyAttribute,
+                    Target = AbilityTargetSelector.EventTarget,
+                    Attribute = AttributeType.AttackSpeed,
+                    BaseValue = amount,
+                    DurationTicks = durationTicks
                 }
             ]
         };

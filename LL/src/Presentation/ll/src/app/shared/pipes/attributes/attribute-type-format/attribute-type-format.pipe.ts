@@ -30,6 +30,8 @@ export function formatAttributeType(value: string): string {
 
     SummonPower: 'Summon Power',
     SummonHealth: 'Summon Health',
+
+    AttackSpeed: 'Attack Speed',
   };
 
   return labels[value] ?? value.replace(/([A-Z])/g, ' $1').trim();
@@ -49,6 +51,7 @@ export function isPercentAttribute(value?: string | null): boolean {
     'Cooldown',
     'StatusResistance',
     'CrowdControlResistance',
+    'AttackSpeed',
   ].includes(value);
 }
 

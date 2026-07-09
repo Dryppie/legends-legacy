@@ -27,6 +27,7 @@ export class SecondaryAttributesPipe implements PipeTransform {
     AttributeType.CrowdControlResistance,
     AttributeType.SummonPower,
     AttributeType.SummonHealth,
+    AttributeType.AttackSpeed,
   ];
 
   transform(values: AttributeDto[], ...args: unknown[]): AttributeDto[] {

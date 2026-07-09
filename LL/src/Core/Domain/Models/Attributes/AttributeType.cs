@@ -28,5 +28,7 @@ public enum AttributeType
     CrowdControlResistance = 20,
 
     SummonPower = 21,
-    SummonHealth = 22
+    SummonHealth = 22,
+
+    AttackSpeed = 23
 }

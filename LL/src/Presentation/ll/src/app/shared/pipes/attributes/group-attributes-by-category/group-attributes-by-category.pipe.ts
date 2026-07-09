@@ -46,6 +46,7 @@ export class GroupAttributesByCategoryPipe implements PipeTransform {
 
     [AttributeType.SummonPower]: AttributeCategory.Summons,
     [AttributeType.SummonHealth]: AttributeCategory.Summons,
+    [AttributeType.AttackSpeed]: AttributeCategory.Offensive,
   };
 
   transform(values: AttributeDto[]): Record<string, AttributeDto[]> {

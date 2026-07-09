@@ -193,6 +193,11 @@
         "entityId": "00000000-0000-0000-0000-000000000001",
         "attributeType": "SummonHealth",
         "value": 0
+      },
+      {
+        "entityId": "00000000-0000-0000-0000-000000000001",
+        "attributeType": "AttackSpeed",
+        "value": 0
       }
     ],
     "baseAttributesDict": {},
@@ -205,7 +210,6 @@
     "id": "00000000-0000-0000-0000-000000000001",
     "name": "Goblin",
     "equipmentSlots": [],
-    "abilityIds": [],
     "isAlive": false,
     "baseCombatAttributes": {},
     "combatAttributes": {},
@@ -406,6 +410,11 @@
       {
         "entityId": "00000000-0000-0000-0000-000000000002",
         "attributeType": "SummonHealth",
+        "value": 0
+      },
+      {
+        "entityId": "00000000-0000-0000-0000-000000000002",
+        "attributeType": "AttackSpeed",
         "value": 0
       }
     ],
@@ -419,7 +428,6 @@
     "id": "00000000-0000-0000-0000-000000000002",
     "name": "Goblin Warrior",
     "equipmentSlots": [],
-    "abilityIds": [],
     "isAlive": false,
     "baseCombatAttributes": {},
     "combatAttributes": {},
@@ -620,6 +628,11 @@
       {
         "entityId": "00000000-0000-0000-0000-000000000003",
         "attributeType": "SummonHealth",
+        "value": 0
+      },
+      {
+        "entityId": "00000000-0000-0000-0000-000000000003",
+        "attributeType": "AttackSpeed",
         "value": 0
       }
     ],
@@ -633,7 +646,6 @@
     "id": "00000000-0000-0000-0000-000000000003",
     "name": "Goblin Archer",
     "equipmentSlots": [],
-    "abilityIds": [],
     "isAlive": false,
     "baseCombatAttributes": {},
     "combatAttributes": {},
@@ -834,6 +846,11 @@
       {
         "entityId": "00000000-0000-0000-0000-000000000004",
         "attributeType": "SummonHealth",
+        "value": 0
+      },
+      {
+        "entityId": "00000000-0000-0000-0000-000000000004",
+        "attributeType": "AttackSpeed",
         "value": 0
       }
     ],
@@ -847,7 +864,6 @@
     "id": "00000000-0000-0000-0000-000000000004",
     "name": "Large Rat",
     "equipmentSlots": [],
-    "abilityIds": [],
     "isAlive": false,
     "baseCombatAttributes": {},
     "combatAttributes": {},
@@ -1048,6 +1064,11 @@
       {
         "entityId": "00000000-0000-0000-0000-000000000005",
         "attributeType": "SummonHealth",
+        "value": 0
+      },
+      {
+        "entityId": "00000000-0000-0000-0000-000000000005",
+        "attributeType": "AttackSpeed",
         "value": 0
       }
     ],
@@ -1061,7 +1082,6 @@
     "id": "00000000-0000-0000-0000-000000000005",
     "name": "Flame Imp",
     "equipmentSlots": [],
-    "abilityIds": [],
     "isAlive": false,
     "baseCombatAttributes": {},
     "combatAttributes": {},
@@ -1262,6 +1282,11 @@
       {
         "entityId": "00000000-0000-0000-0000-000000000006",
         "attributeType": "SummonHealth",
+        "value": 0
+      },
+      {
+        "entityId": "00000000-0000-0000-0000-000000000006",
+        "attributeType": "AttackSpeed",
         "value": 0
       }
     ],
@@ -1275,7 +1300,6 @@
     "id": "00000000-0000-0000-0000-000000000006",
     "name": "Frost Imp",
     "equipmentSlots": [],
-    "abilityIds": [],
     "isAlive": false,
     "baseCombatAttributes": {},
     "combatAttributes": {},
@@ -1476,6 +1500,11 @@
       {
         "entityId": "00000000-0000-0000-0000-000000000007",
         "attributeType": "SummonHealth",
+        "value": 0
+      },
+      {
+        "entityId": "00000000-0000-0000-0000-000000000007",
+        "attributeType": "AttackSpeed",
         "value": 0
       }
     ],
@@ -1489,7 +1518,6 @@
     "id": "00000000-0000-0000-0000-000000000007",
     "name": "Shadow Imp",
     "equipmentSlots": [],
-    "abilityIds": [],
     "isAlive": false,
     "baseCombatAttributes": {},
     "combatAttributes": {},
@@ -1690,6 +1718,11 @@
       {
         "entityId": "00000000-0000-0000-0000-000000000008",
         "attributeType": "SummonHealth",
+        "value": 0
+      },
+      {
+        "entityId": "00000000-0000-0000-0000-000000000008",
+        "attributeType": "AttackSpeed",
         "value": 0
       }
     ],
@@ -1703,7 +1736,6 @@
     "id": "00000000-0000-0000-0000-000000000008",
     "name": "Vampire Bat",
     "equipmentSlots": [],
-    "abilityIds": [],
     "isAlive": false,
     "baseCombatAttributes": {},
     "combatAttributes": {},
@@ -1904,6 +1936,11 @@
       {
         "entityId": "00000000-0000-0000-0000-000000000009",
         "attributeType": "SummonHealth",
+        "value": 0
+      },
+      {
+        "entityId": "00000000-0000-0000-0000-000000000009",
+        "attributeType": "AttackSpeed",
         "value": 0
       }
     ],
@@ -1917,7 +1954,6 @@
     "id": "00000000-0000-0000-0000-000000000009",
     "name": "Blue Slime",
     "equipmentSlots": [],
-    "abilityIds": [],
     "isAlive": false,
     "baseCombatAttributes": {},
     "combatAttributes": {},
@@ -2118,6 +2154,11 @@
       {
         "entityId": "00000000-0000-0000-0000-000000000010",
         "attributeType": "SummonHealth",
+        "value": 0
+      },
+      {
+        "entityId": "00000000-0000-0000-0000-000000000010",
+        "attributeType": "AttackSpeed",
         "value": 0
       }
     ],
@@ -2131,7 +2172,6 @@
     "id": "00000000-0000-0000-0000-000000000010",
     "name": "Brown Slime",
     "equipmentSlots": [],
-    "abilityIds": [],
     "isAlive": false,
     "baseCombatAttributes": {},
     "combatAttributes": {},
@@ -2332,6 +2372,11 @@
       {
         "entityId": "00000000-0000-0000-0000-000000000011",
         "attributeType": "SummonHealth",
+        "value": 0
+      },
+      {
+        "entityId": "00000000-0000-0000-0000-000000000011",
+        "attributeType": "AttackSpeed",
         "value": 0
       }
     ],
@@ -2345,7 +2390,6 @@
     "id": "00000000-0000-0000-0000-000000000011",
     "name": "Green Slime",
     "equipmentSlots": [],
-    "abilityIds": [],
     "isAlive": false,
     "baseCombatAttributes": {},
     "combatAttributes": {},
@@ -2546,6 +2590,11 @@
       {
         "entityId": "00000000-0000-0000-0000-000000000012",
         "attributeType": "SummonHealth",
+        "value": 0
+      },
+      {
+        "entityId": "00000000-0000-0000-0000-000000000012",
+        "attributeType": "AttackSpeed",
         "value": 0
       }
     ],
@@ -2559,7 +2608,6 @@
     "id": "00000000-0000-0000-0000-000000000012",
     "name": "Rainbow Slime",
     "equipmentSlots": [],
-    "abilityIds": [],
     "isAlive": false,
     "baseCombatAttributes": {},
     "combatAttributes": {},
@@ -2760,6 +2808,11 @@
       {
         "entityId": "00000000-0000-0000-0000-000000000013",
         "attributeType": "SummonHealth",
+        "value": 0
+      },
+      {
+        "entityId": "00000000-0000-0000-0000-000000000013",
+        "attributeType": "AttackSpeed",
         "value": 0
       }
     ],
@@ -2773,7 +2826,6 @@
     "id": "00000000-0000-0000-0000-000000000013",
     "name": "Red Slime",
     "equipmentSlots": [],
-    "abilityIds": [],
     "isAlive": false,
     "baseCombatAttributes": {},
     "combatAttributes": {},
@@ -2975,6 +3027,11 @@
         "entityId": "00000000-0000-0000-0000-000000000014",
         "attributeType": "SummonHealth",
         "value": 0
+      },
+      {
+        "entityId": "00000000-0000-0000-0000-000000000014",
+        "attributeType": "AttackSpeed",
+        "value": 0
       }
     ],
     "baseAttributesDict": {},
@@ -2987,7 +3044,6 @@
     "id": "00000000-0000-0000-0000-000000000014",
     "name": "Transparent Slime",
     "equipmentSlots": [],
-    "abilityIds": [],
     "isAlive": false,
     "baseCombatAttributes": {},
     "combatAttributes": {},

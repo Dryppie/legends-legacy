@@ -573,6 +573,7 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
         attributes.TryAdd(AttributeType.MaxHealth, Math.Max(1, combatant.GetAttributeValue(AttributeType.MaxHealth)));
         attributes.TryAdd(AttributeType.Power, combatant.GetAttributeValue(AttributeType.Power));
         attributes.TryAdd(AttributeType.CritDamage, combatant.GetAttributeValue(AttributeType.CritDamage));
+        attributes.TryAdd(AttributeType.AttackSpeed, 0);
 
         if (attributes[AttributeType.MaxHealth] <= 0)
             attributes[AttributeType.MaxHealth] = 100;

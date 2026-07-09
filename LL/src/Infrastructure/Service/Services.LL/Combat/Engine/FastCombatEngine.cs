@@ -14,6 +14,9 @@ public sealed record FastCombatEngineOptions(
 
 public sealed class FastCombatEngine
 {
+    private const float MinimumBasicAttackRate = 0.25f;
+    private const float MaximumBasicAttackRate = 4f;
+
     private readonly IReadOnlyDictionary<string, CompiledStatus> _statusesById;
     private readonly IReadOnlyDictionary<string, CompiledSummon> _summonsById;
     private readonly IReadOnlyDictionary<string, CompiledAbility> _abilitiesById;
@@ -21,7 +24,7 @@ public sealed class FastCombatEngine
     private readonly int _maxTicks;
     private readonly int _basicAttackIntervalTicks;
     private readonly bool _startActiveAbilitiesOnCooldown;
-    private readonly Dictionary<RuntimeCombatant, int> _basicAttackTimers = [];
+    private readonly Dictionary<RuntimeCombatant, float> _basicAttackProgress = [];
     private readonly List<CombatLogItem> _log = [];
     private int _currentTick;
 
@@ -53,7 +56,7 @@ public sealed class FastCombatEngine
         var combatants = friendly.Concat(hostile).ToList();
         foreach (var combatant in combatants)
         {
-            _basicAttackTimers[combatant] = GetBasicAttackIntervalTicks();
+            _basicAttackProgress[combatant] = 0;
             InitializeActiveAbilityCooldowns(combatant);
         }
 
@@ -118,11 +121,15 @@ public sealed class FastCombatEngine
 
     private void TickBasicAttack(RuntimeCombatant actor, IReadOnlyList<RuntimeCombatant> combatants)
     {
-        _basicAttackTimers[actor]--;
-        if (_basicAttackTimers[actor] > 0)
+        var threshold = GetBasicAttackChargeThreshold();
+        var progress = _basicAttackProgress.GetValueOrDefault(actor) + GetBasicAttackRate(actor);
+        if (progress < threshold)
+        {
+            _basicAttackProgress[actor] = progress;
             return;
+        }
 
-        _basicAttackTimers[actor] = GetBasicAttackIntervalTicks();
+        _basicAttackProgress[actor] = progress - threshold;
         if (SelectFirstEnemy(actor, combatants) is not { } target)
             return;
 
@@ -593,13 +600,19 @@ public sealed class FastCombatEngine
 
         var summon = CreateSummonedCombatant(source, effect, summonDefinition, _abilitiesById);
         mutableCombatants.Add(summon);
-        _basicAttackTimers[summon] = GetBasicAttackIntervalTicks();
+        _basicAttackProgress[summon] = 0;
         InitializeActiveAbilityCooldowns(summon);
 
         Log(source, summon, effect.Id, EventType.Summon, 1, $"{source.Name} summoned {summon.Name}.", statsSource, countStatsActivation);
     }
 
-    private int GetBasicAttackIntervalTicks() => Math.Max(1, _basicAttackIntervalTicks);
+    private int GetBasicAttackChargeThreshold() => Math.Max(1, _basicAttackIntervalTicks);
+
+    private static float GetBasicAttackRate(RuntimeCombatant actor)
+    {
+        var rate = 1 + actor.GetAttribute(AttributeType.AttackSpeed) / 100f;
+        return Math.Clamp(rate, MinimumBasicAttackRate, MaximumBasicAttackRate);
+    }
 
     private void InitializeActiveAbilityCooldowns(RuntimeCombatant combatant)
     {
@@ -659,6 +672,7 @@ public sealed class FastCombatEngine
 
         attributes.TryAdd(AttributeType.MaxHealth, 1);
         attributes.TryAdd(AttributeType.Power, 0);
+        attributes.TryAdd(AttributeType.AttackSpeed, 0);
         return attributes;
     }
 

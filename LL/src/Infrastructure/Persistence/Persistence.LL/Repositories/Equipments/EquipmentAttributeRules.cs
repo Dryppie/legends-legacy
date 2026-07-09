@@ -40,6 +40,7 @@ public static class EquipmentAttributeRules
             [AttributeType.CrowdControlResistance] = Percent(min: 2, max: 15),
             [AttributeType.SummonPower] = Percent(min: 4, max: 15),
             [AttributeType.SummonHealth] = Percent(min: 4, max: 15),
+            [AttributeType.AttackSpeed] = Percent(min: 1, max: 8),
         };
     }
 
