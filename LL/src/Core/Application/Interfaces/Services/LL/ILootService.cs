@@ -7,13 +7,11 @@ namespace Application.Interfaces.Services.LL;
 public interface ILootService
 {
     /// <summary>
-    /// Generate soulstone loot
+    /// Generate base soulstone loot for elapsed time.
     /// </summary>
     /// <param name="seconds"></param>
-    /// <param name="dropRate"></param>
-    /// <param name="doubleChance"></param>
     /// <returns></returns>
-    int GenerateSoulstoneLoot(int seconds, double dropRate, double doubleChance);
+    int GenerateSoulstoneLoot(int seconds);
 
     /// <summary>
     /// Generate Gathering Loot based on a lootTable

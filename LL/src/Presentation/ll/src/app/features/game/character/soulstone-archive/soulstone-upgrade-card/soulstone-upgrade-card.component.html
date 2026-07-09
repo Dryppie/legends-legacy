@@ -1,24 +1,24 @@
 <section class="flex flex-col gap-3 pb-4">
   <div class="flex items-end justify-between gap-3">
     <div>
-      <h3 class="ll-heading">{{ upgradeType }} Upgrades</h3>
-      <p class="ll-copy">{{ upgrades.length }} paths</p>
+      <h3 class="ll-heading">{{ title }}</h3>
+      <p class="ll-copy">{{ upgrades.length }} constellations</p>
     </div>
   </div>
 
   <div class="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
     <div
-      class="ll-card flex min-h-48 flex-col justify-between gap-4 p-4"
+      class="ll-card flex min-h-64 flex-col justify-between gap-4 p-4"
       *ngFor="let view of upgrades"
     >
       <div class="flex h-full flex-col justify-between">
         <div class="flex items-start justify-between gap-3">
           <div class="min-w-0">
             <h4 class="ll-heading font-semibold">
-              {{ view.definition.name }}
+              {{ view.displayName }}
             </h4>
             <p class="ll-copy mt-1 leading-relaxed">
-              {{ view.definition.description }}
+              {{ view.description }}
             </p>
           </div>
           <span
@@ -31,9 +31,9 @@
 
         <div class="mt-4 grid gap-2 text-sm">
           <div class="flex items-center justify-between gap-3">
-            <span class="ll-copy">Level</span>
+            <span class="ll-copy">Rank</span>
             <span class="text-primary">
-              {{ view.level }} / {{ view.definition.maxLevel }}
+              {{ view.currentRank }} / {{ view.maxRank }}
             </span>
           </div>
           <div class="ll-progress-track h-1.5">
@@ -42,17 +42,25 @@
               [style.width.%]="progressPercent(view)"
             ></div>
           </div>
-          <div class="flex items-center justify-between gap-3">
+          <div class="grid gap-1">
             <span class="ll-copy">Current</span>
-            <span class="text-primary">{{ currentEffect(view) }}</span>
+            <span class="text-primary">{{ view.currentEffectText }}</span>
           </div>
-          <div class="flex items-center justify-between gap-3">
-            <span class="ll-copy">Per level</span>
-            <span class="text-primary">
-              {{ view.definition.effect.perLevel > 0 ? "+" : ""
-              }}{{ view.definition.effect.perLevel }}%
-            </span>
+          <div class="grid gap-1" *ngIf="view.nextEffectText">
+            <span class="ll-copy">Next</span>
+            <span class="text-primary">{{ view.nextEffectText }}</span>
           </div>
+          <div class="grid gap-1" *ngIf="view.appliesTo.length">
+            <span class="ll-copy">Applies to</span>
+            <span class="text-primary">{{ view.appliesTo.join(", ") }}</span>
+          </div>
+          <div class="grid gap-1" *ngIf="view.doesNotApplyTo.length">
+            <span class="ll-copy">Does not apply to</span>
+            <span class="text-primary">{{ view.doesNotApplyTo.join(", ") }}</span>
+          </div>
+          <p *ngIf="view.disabledReason" class="ll-copy">
+            {{ view.disabledReason }}
+          </p>
         </div>
       </div>
 
@@ -64,7 +72,7 @@
           <div class="text-sm text-primary">
             {{
               view.nextCost == null
-                ? "Max level"
+                ? "Max rank"
                 : view.nextCost + " Soulstones"
             }}
           </div>

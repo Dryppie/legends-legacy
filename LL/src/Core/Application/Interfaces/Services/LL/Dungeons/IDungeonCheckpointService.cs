@@ -5,7 +5,7 @@ namespace Application.Interfaces.Services.LL.Dungeons;
 public interface IDungeonCheckpointService
 {
     IReadOnlyList<DungeonCheckpointChoiceOption> EnsureChoices(DungeonRun run);
-    DungeonCheckpointChoiceResult ApplyChoice(DungeonRun run, RoomInstance room, string choiceId);
+    Task<DungeonCheckpointChoiceResult> ApplyChoiceAsync(DungeonRun run, RoomInstance room, string choiceId, CancellationToken cancellationToken);
 }
 
 public sealed class DungeonCheckpointChoiceResult

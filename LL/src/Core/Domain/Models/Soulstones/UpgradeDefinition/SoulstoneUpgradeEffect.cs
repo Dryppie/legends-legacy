@@ -1,6 +1,6 @@
-namespace Domain.Models.Bonuses;
+namespace Domain.Models.Soulstones.UpgradeDefinition;
 
-public enum BonusKind
+public enum SoulstoneUpgradeEffectKind
 {
     EssenceDropRateRelativeBps,
     EssencePityProgressionGainBps,
@@ -22,3 +22,18 @@ public enum BonusKind
     DungeonRewardFocusTier,
     ArchivePresetSlotCount
 }
+
+public enum SoulstoneUpgradeEffectUnit
+{
+    RelativeBasisPoints,
+    AdditiveMultiplierBasisPoints,
+    ChanceBasisPoints,
+    PercentagePointBasisPoints,
+    FlatValue,
+    Unlock
+}
+
+public sealed record SoulstoneUpgradeEffect(
+    SoulstoneUpgradeEffectKind Kind,
+    SoulstoneUpgradeEffectUnit Unit,
+    IReadOnlyList<int> ValuesByRank);

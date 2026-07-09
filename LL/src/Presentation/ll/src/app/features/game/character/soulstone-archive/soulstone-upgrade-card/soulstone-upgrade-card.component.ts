@@ -14,19 +14,18 @@ import { RegularButtonComponent } from '../../../../../shared/components/custom-
 export class SoulstoneUpgradeCardComponent {
   @Input() character!: CharacterDto;
   @Input() upgrades: SoulstoneUpgradeView[] = [];
-  @Input() upgradeType: string = '';
+  @Input() title = '';
 
   constructor(private readonly soulstoneState: SoulstoneUpgradeStateService) {}
 
-  upgrade(up: SoulstoneUpgradeView): void {
-    this.soulstoneState.upgrade(up.definition.id);
+  upgrade(upgrade: SoulstoneUpgradeView): void {
+    this.soulstoneState.upgrade(upgrade.id);
   }
 
   disablePurchase(upgrade: SoulstoneUpgradeView): boolean {
     return (
-      upgrade.nextCost == null ||
-      upgrade.nextCost > this.character?.soulstones ||
-      this.soulstoneState.isUpgradeLoading(upgrade.definition.id)()
+      !upgrade.canPurchase ||
+      this.soulstoneState.isUpgradeLoading(upgrade.id)()
     );
   }
 
@@ -34,41 +33,33 @@ export class SoulstoneUpgradeCardComponent {
     return this.soulstoneState.loading();
   }
 
-  currentEffect(upgrade: SoulstoneUpgradeView): string {
-    const value = upgrade.level * upgrade.definition.effect.perLevel;
-    return `${value > 0 ? '+' : ''}${value.toFixed(1)}%`;
-  }
-
   progressPercent(upgrade: SoulstoneUpgradeView): number {
-    if (upgrade.definition.maxLevel <= 0) return 100;
-    return Math.min(100, (upgrade.level / upgrade.definition.maxLevel) * 100);
+    if (upgrade.maxRank <= 0) return 100;
+    return Math.min(100, (upgrade.currentRank / upgrade.maxRank) * 100);
   }
 
   statusLabel(upgrade: SoulstoneUpgradeView): string {
-    if (upgrade.nextCost == null) return 'Maxed';
-    if (this.soulstoneState.isUpgradeLoading(upgrade.definition.id)()) {
+    if (this.soulstoneState.isUpgradeLoading(upgrade.id)()) {
       return 'Upgrading';
     }
-    return upgrade.nextCost <= (this.character?.soulstones ?? 0)
-      ? 'Upgradable'
-      : 'Need Soulstones';
+    if (upgrade.currentRank >= upgrade.maxRank) return 'Maxed';
+    if (upgrade.isRegionCapped) return `Region ${upgrade.requiredRegionForNextRank}`;
+    return upgrade.canPurchase ? 'Available' : 'Locked';
   }
 
   statusClass(upgrade: SoulstoneUpgradeView): string {
-    if (upgrade.nextCost == null) {
+    if (upgrade.currentRank >= upgrade.maxRank) {
       return 'll-badge-accent';
     }
 
-    return upgrade.nextCost <= (this.character?.soulstones ?? 0)
-      ? 'll-badge-success'
-      : 'll-badge-muted';
+    return upgrade.canPurchase ? 'll-badge-success' : 'll-badge-muted';
   }
 
   upgradeButtonText(upgrade: SoulstoneUpgradeView): string {
-    if (this.soulstoneState.isUpgradeLoading(upgrade.definition.id)()) {
+    if (this.soulstoneState.isUpgradeLoading(upgrade.id)()) {
       return 'Upgrading';
     }
-    if (upgrade.nextCost == null) return 'Maxed';
-    return 'Upgrade';
+    if (upgrade.currentRank >= upgrade.maxRank) return 'Maxed';
+    return upgrade.nextCost == null ? 'Locked' : `Upgrade`;
   }
 }

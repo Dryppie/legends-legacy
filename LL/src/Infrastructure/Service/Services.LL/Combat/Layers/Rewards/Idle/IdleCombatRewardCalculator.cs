@@ -17,7 +17,6 @@ public sealed class IdleCombatRewardCalculator : IIdleCombatRewardCalculator
     private readonly ILootService _lootService;
     private readonly ICinderRewardCalculator _cinderRewardCalculator;
     private readonly ISoulstoneRewardCalculator _soulstoneRewardCalculator;
-    private readonly IRandomSource _randomSource;
     private readonly IEssenceResonanceService _essenceResonanceService;
     private readonly IIdleDungeonSigilDropCalculator _sigilDropCalculator;
     private readonly ICombatGatheringRewardProcessor _gatheringRewardProcessor;
@@ -27,7 +26,6 @@ public sealed class IdleCombatRewardCalculator : IIdleCombatRewardCalculator
         ILootService lootService,
         ICinderRewardCalculator cinderRewardCalculator,
         ISoulstoneRewardCalculator soulstoneRewardCalculator,
-        IRandomSource randomSource,
         IEssenceResonanceService essenceResonanceService,
         IIdleDungeonSigilDropCalculator sigilDropCalculator,
         ICombatGatheringRewardProcessor gatheringRewardProcessor)
@@ -36,7 +34,6 @@ public sealed class IdleCombatRewardCalculator : IIdleCombatRewardCalculator
         _lootService = lootService;
         _cinderRewardCalculator = cinderRewardCalculator;
         _soulstoneRewardCalculator = soulstoneRewardCalculator;
-        _randomSource = randomSource;
         _essenceResonanceService = essenceResonanceService;
         _sigilDropCalculator = sigilDropCalculator;
         _gatheringRewardProcessor = gatheringRewardProcessor;
@@ -51,9 +48,8 @@ public sealed class IdleCombatRewardCalculator : IIdleCombatRewardCalculator
             facts.RequestedTo,
             cancellationToken);
 
-        var doubleExpChance = factors.Get(BonusKind.CombatDoubleExpChance);
-        var soulstoneDropRate = factors.Get(BonusKind.SoulstoneDropRate);
-        var soulstoneDoubleDropChance = factors.Get(BonusKind.SoulstoneDoubleDropChance);
+        var combatExperienceGainBps = factors.Get(BonusKind.CombatExperienceGainBps);
+        var defeatExperienceRetentionBps = factors.Get(BonusKind.IdleCombatDefeatExperienceRetentionBps);
 
         var encounterOutcomes = new List<IdleEncounterCalculatedOutcome>(facts.Encounters.Count);
         var totalLoot = new List<InventoryItem>();
@@ -86,19 +82,20 @@ public sealed class IdleCombatRewardCalculator : IIdleCombatRewardCalculator
 
                 sigilEligibleVictories++;
 
-                experience = encounter.HostileCreatures.Sum(x => x.ExperienceReward);
-
-                if (_randomSource.NextDouble() < (doubleExpChance / 100d))
-                {
-                    experience *= 2;
-                }
+                experience = encounter.HostileCreatures.Sum(x => x.ExperienceReward).ApplyPositiveBps(combatExperienceGainBps);
 
                 cinders = _cinderRewardCalculator.Calculate(encounter.HostileCreatures);
 
                 totalLoot.AddRange(loot);
-                totalExperience += experience;
                 totalCinders += cinders;
             }
+            else if (defeatExperienceRetentionBps > 0)
+            {
+                var potentialExperience = encounter.HostileCreatures.Sum(x => x.ExperienceReward).ApplyPositiveBps(combatExperienceGainBps);
+                experience = potentialExperience.TakeBpsPortion(defeatExperienceRetentionBps);
+            }
+
+            totalExperience += experience;
 
             encounterOutcomes.Add(new IdleEncounterCalculatedOutcome(
                 EncounterId: encounter.EncounterId,
@@ -145,8 +142,8 @@ public sealed class IdleCombatRewardCalculator : IIdleCombatRewardCalculator
 
         var totalSoulstones = _soulstoneRewardCalculator.Calculate(
             durationInSeconds: (int)Math.Abs(facts.ProcessedDuration.TotalSeconds),
-            dropRatePercent: soulstoneDropRate,
-            doubleDropChancePercent: soulstoneDoubleDropChance);
+            dropRatePercent: 0,
+            doubleDropChancePercent: 0);
 
         return new IdleCombatCalculatedOutcome(
             CharacterId: facts.CharacterId,
@@ -159,4 +156,5 @@ public sealed class IdleCombatRewardCalculator : IIdleCombatRewardCalculator
             GatheringRewards: gatheringRewards,
             EncounterOutcomes: encounterOutcomes);
     }
+
 }

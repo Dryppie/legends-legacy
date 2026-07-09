@@ -180,7 +180,7 @@ public sealed class DungeonEssenceRewardTests
 
     private sealed class EmptyLootService : ILootService
     {
-        public int GenerateSoulstoneLoot(int seconds, double dropRate, double doubleChance) => 0;
+        public int GenerateSoulstoneLoot(int seconds) => 0;
 
         public List<InventoryItem> GenerateGatheringLootAsync(
             LootTable lootTable,

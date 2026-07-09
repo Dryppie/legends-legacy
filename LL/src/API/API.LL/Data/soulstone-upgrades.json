@@ -1,146 +1,193 @@
 [
-  // Combat
   {
-    "id": "combat.essence.drop.rate",
-    "name": "Essence Drop Rate",
-    "maxLevel": 100,
-    "description": "If this increases drop rate by 100%, then an essence with a 1% drop rate is increased to a 2% drop rate.",
-    "cost": {
-      "base": 1,
-      "increment": 1
-    },
-    "effect": {
-      "stat": "CombatEssenceDropRate",
-      "perLevel": 0.5
-    },
-    "type": "Combat"
+    "id": "essence.resonance",
+    "branch": "EssenceArchive",
+    "displayName": "Essence Resonance",
+    "description": "Strengthens monster Essence drop chances after the normal resonance calculation.",
+    "maxRank": 5,
+    "costsByRank": [25, 75, 150, 300, 600],
+    "effects": [
+      {
+        "kind": "EssenceDropRateRelativeBps",
+        "unit": "RelativeBasisPoints",
+        "valuesByRank": [300, 600, 1000, 1500, 2500]
+      }
+    ],
+    "appliesTo": ["Monster Essence drops", "Idle combat", "Dungeon combat"],
+    "doesNotApplyTo": ["Soulstone drops", "Crafting rewards"],
+    "enabled": true,
+    "sortOrder": 10
   },
   {
-    "id": "combat.double.exp.chance",
-    "name": "Double Exp Chance",
-    "maxLevel": 100,
-    "description": "Increases the chance of receiving double the experience from a fight.",
-    "cost": {
-      "base": 1,
-      "increment": 1
-    },
-    "effect": {
-      "stat": "CombatDoubleExpChance",
-      "perLevel": 0.2
-    },
-    "type": "Combat"
-  },
-
-  // Gathering
-  {
-    "id": "gathering.double.drop.chance",
-    "name": "Double Drop Chance",
-    "maxLevel": 100,
-    "description": "Increases the chance of receiving double the loot from a gathering action.",
-    "cost": {
-      "base": 1,
-      "increment": 1
-    },
-    "effect": {
-      "stat": "GatheringDoubleDropChance",
-      "perLevel": 0.1
-    },
-    "type": "Gathering"
+    "id": "combat.battle-lessons",
+    "branch": "CombatProgression",
+    "displayName": "Battle Lessons",
+    "description": "Increases combat experience earned from victorious idle and dungeon encounters.",
+    "maxRank": 5,
+    "costsByRank": [25, 75, 150, 300, 600],
+    "effects": [
+      {
+        "kind": "CombatExperienceGainBps",
+        "unit": "AdditiveMultiplierBasisPoints",
+        "valuesByRank": [250, 500, 750, 1000, 1500]
+      }
+    ],
+    "appliesTo": ["Idle combat EXP", "Dungeon combat EXP"],
+    "doesNotApplyTo": ["Gathering EXP", "Crafting EXP"],
+    "enabled": true,
+    "sortOrder": 110
   },
   {
-    "id": "gathering.double.exp.chance",
-    "name": "Double Exp Chance",
-    "maxLevel": 100,
-    "description": "Increases the chance of receiving double the experience from a gathering action.",
-    "cost": {
-      "base": 1,
-      "increment": 1
-    },
-    "effect": {
-      "stat": "GatheringDoubleExpChance",
-      "perLevel": 0.1
-    },
-    "type": "Gathering"
-  },
-
-  // Crafting
-  {
-    "id": "crafting.double.item.exp.chance",
-    "name": "Double Item Exp Chance",
-    "maxLevel": 100,
-    "description": "Increases the chance of receiving double the experience on an item when performing tempering.",
-    "cost": {
-      "base": 1,
-      "increment": 1
-    },
-    "effect": {
-      "stat": "CraftingDoubleItemExpChance",
-      "perLevel": 0.1
-    },
-    "type": "Crafting"
+    "id": "combat.survival-notes",
+    "branch": "CombatProgression",
+    "displayName": "Survival Notes",
+    "description": "Retains a portion of idle encounter experience when an encounter is lost.",
+    "maxRank": 5,
+    "costsByRank": [25, 75, 150, 300, 600],
+    "effects": [
+      {
+        "kind": "IdleCombatDefeatExperienceRetentionBps",
+        "unit": "AdditiveMultiplierBasisPoints",
+        "valuesByRank": [500, 1000, 1500, 2000, 2500]
+      }
+    ],
+    "appliesTo": ["Idle combat defeats"],
+    "doesNotApplyTo": ["Dungeon defeats", "Loot", "Cinders"],
+    "enabled": true,
+    "sortOrder": 120
   },
   {
-    "id": "crafting.negative.outcome",
-    "name": "Negative Outcome Chance",
-    "maxLevel": 100,
-    "description": "Decreases the chance of performing a negative outcome when tempering by a flat amount.",
-    "cost": {
-      "base": 1,
-      "increment": 1
-    },
-    "effect": {
-      "stat": "CraftingNegativeOutcome",
-      "perLevel": -0.1
-    },
-    "type": "Crafting"
-  },
-
-  // Misc
-  {
-    "id": "misc.soulstone.drop.rate",
-    "name": "Soulstone Drop Rate",
-    "maxLevel": 100,
-    "description": "Increases the drop rate of Soulstones.",
-    "cost": {
-      "base": 1,
-      "increment": 1,
-      "incrementCap": 50
-    },
-    "effect": {
-      "stat": "SoulstoneDropRate",
-      "perLevel": 0.1
-    },
-    "type": "Misc"
+    "id": "gathering.careful-harvest",
+    "branch": "Gathering",
+    "displayName": "Careful Harvest",
+    "description": "Increases gathered material yield from combat-adjacent gathering nodes.",
+    "maxRank": 5,
+    "costsByRank": [25, 75, 150, 300, 600],
+    "effects": [
+      {
+        "kind": "GatheringYieldBps",
+        "unit": "AdditiveMultiplierBasisPoints",
+        "valuesByRank": [250, 500, 750, 1000, 1500]
+      }
+    ],
+    "appliesTo": ["Combat-adjacent gathering loot"],
+    "doesNotApplyTo": ["Combat loot tables", "Dungeon fixed rewards"],
+    "enabled": true,
+    "sortOrder": 210
   },
   {
-    "id": "misc.soulstone.double.drop.chance",
-    "name": "Soulstone Double Drop Chance",
-    "maxLevel": 100,
-    "description": "Increases the chance of receiving double the Soulstones.",
-    "cost": {
-      "base": 1,
-      "increment": 1,
-      "incrementCap": 50
-    },
-    "effect": {
-      "stat": "SoulstoneDoubleDropChance",
-      "perLevel": 0.1
-    },
-    "type": "Misc"
+    "id": "gathering.gathering-lessons",
+    "branch": "Gathering",
+    "displayName": "Gathering Lessons",
+    "description": "Increases gathering profession experience from combat-adjacent gathering.",
+    "maxRank": 5,
+    "costsByRank": [25, 75, 150, 300, 600],
+    "effects": [
+      {
+        "kind": "GatheringExperienceGainBps",
+        "unit": "AdditiveMultiplierBasisPoints",
+        "valuesByRank": [250, 500, 750, 1000, 1500]
+      }
+    ],
+    "appliesTo": ["Mining EXP", "Woodcutting EXP", "Fishing EXP", "Skinning EXP"],
+    "doesNotApplyTo": ["Combat EXP", "Crafting EXP"],
+    "enabled": true,
+    "sortOrder": 220
+  },
+  {
+    "id": "gathering.rare-node-sense",
+    "branch": "Gathering",
+    "displayName": "Rare Node Sense",
+    "description": "Improves rare material weighting when gathering nodes roll loot.",
+    "maxRank": 5,
+    "costsByRank": [25, 75, 150, 300, 600],
+    "effects": [
+      {
+        "kind": "GatheringRareDropChanceRelativeBps",
+        "unit": "RelativeBasisPoints",
+        "valuesByRank": [300, 600, 1000, 1500, 2500]
+      }
+    ],
+    "appliesTo": ["Rare gathering loot weights"],
+    "doesNotApplyTo": ["Monster loot rarity", "Essence drops"],
+    "enabled": true,
+    "sortOrder": 230
+  },
+  {
+    "id": "crafting.crafting-lessons",
+    "branch": "Crafting",
+    "displayName": "Crafting Lessons",
+    "description": "Increases crafting profession experience earned while tempering equipment.",
+    "maxRank": 5,
+    "costsByRank": [25, 75, 150, 300, 600],
+    "effects": [
+      {
+        "kind": "CraftingExperienceGainBps",
+        "unit": "AdditiveMultiplierBasisPoints",
+        "valuesByRank": [250, 500, 750, 1000, 1500]
+      }
+    ],
+    "appliesTo": ["Tempering crafting EXP"],
+    "doesNotApplyTo": ["Recipe mastery EXP", "Gathering EXP"],
+    "enabled": true,
+    "sortOrder": 310
+  },
+  {
+    "id": "crafting.steady-temper",
+    "branch": "Crafting",
+    "displayName": "Steady Temper",
+    "description": "Reduces the percentage-point chance of negative tempering outcomes.",
+    "maxRank": 5,
+    "costsByRank": [25, 75, 150, 300, 600],
+    "effects": [
+      {
+        "kind": "TemperingNegativeOutcomeReductionBps",
+        "unit": "PercentagePointBasisPoints",
+        "valuesByRank": [100, 200, 300, 400, 500]
+      }
+    ],
+    "appliesTo": ["Tempering outcome rolls"],
+    "doesNotApplyTo": ["Critical outcome chance", "Crafting material costs"],
+    "enabled": true,
+    "sortOrder": 320
+  },
+  {
+    "id": "crafting.salvage-instinct",
+    "branch": "Crafting",
+    "displayName": "Salvage Instinct",
+    "description": "Future node for refunding materials after failed tempering attempts.",
+    "maxRank": 5,
+    "costsByRank": [25, 75, 150, 300, 600],
+    "effects": [
+      {
+        "kind": "TemperingFailMaterialRefundChanceBps",
+        "unit": "ChanceBasisPoints",
+        "valuesByRank": [250, 500, 750, 1000, 1500]
+      }
+    ],
+    "appliesTo": ["Future material refund flow"],
+    "doesNotApplyTo": ["Current tempering"],
+    "enabled": false,
+    "sortOrder": 330,
+    "frontendHint": "Disabled until tempering tracks consumed materials per attempt."
+  },
+  {
+    "id": "dungeon.checkpoint-satchel",
+    "branch": "Dungeons",
+    "displayName": "Checkpoint Satchel",
+    "description": "Improves retained unsecured rewards when resting at a dungeon checkpoint.",
+    "maxRank": 5,
+    "costsByRank": [25, 75, 150, 300, 600],
+    "effects": [
+      {
+        "kind": "DungeonRewardRetentionBps",
+        "unit": "AdditiveMultiplierBasisPoints",
+        "valuesByRank": [200, 400, 600, 800, 1000]
+      }
+    ],
+    "appliesTo": ["Dungeon checkpoint rest rewards"],
+    "doesNotApplyTo": ["Checkpoint withdraw", "Final dungeon reward multiplier"],
+    "enabled": true,
+    "sortOrder": 410
   }
-  //{
-  //  "id": "misc.daily.tasks",
-  //  "name": "+Daily Tasks",
-  //  "maxLevel": 3,
-  //  "description": "Increases the amount of daily tasks received upon daily reset.",
-  //  "cost": {
-  //    "base": 50,
-  //    "increment": 50
-  //  },
-  //  "effect": {
-  //    "stat": "DailyTaskSlots",
-  //    "perLevel": 1
-  //  },
-  //  "type": "Misc"
-  //}
 ]

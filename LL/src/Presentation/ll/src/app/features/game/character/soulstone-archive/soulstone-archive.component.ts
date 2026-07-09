@@ -20,29 +20,33 @@ import { SoulstoneUpgradeStateService } from '../../../../core/services/api/soul
 })
 export class SoulstoneArchiveComponent implements OnInit {
   readonly character;
-
-  // Signals exposed from the state service
-  readonly combatUpgrades;
-  readonly gatheringUpgrades;
-  readonly craftingUpgrades;
-  readonly miscUpgrades;
+  readonly branchGroups;
+  resetConfirmationOpen = false;
 
   constructor(
     private readonly state: CharacterStateService,
     private readonly soulstoneState: SoulstoneUpgradeStateService,
   ) {
     this.character = this.state.currentCharacter;
-    this.combatUpgrades = this.soulstoneState.combatUpgrades;
-    this.gatheringUpgrades = this.soulstoneState.gatheringUpgrades;
-    this.craftingUpgrades = this.soulstoneState.craftingUpgrades;
-    this.miscUpgrades = this.soulstoneState.miscUpgrades;
+    this.branchGroups = this.soulstoneState.branchGroups;
   }
 
   ngOnInit(): void {
     this.soulstoneState.load();
   }
 
-  resetSoulstoneUpgrades(): void {
+  openResetConfirmation(): void {
+    if (this.loading() || this.totalUpgradeRanks() === 0) return;
+
+    this.resetConfirmationOpen = true;
+  }
+
+  cancelReset(): void {
+    this.resetConfirmationOpen = false;
+  }
+
+  confirmResetSoulstoneUpgrades(): void {
+    this.resetConfirmationOpen = false;
     this.soulstoneState.reset();
   }
 
@@ -58,35 +62,36 @@ export class SoulstoneArchiveComponent implements OnInit {
     return this.soulstoneState.lastRefund();
   }
 
+  resetRefund(): number {
+    return this.soulstoneState.resetRefund();
+  }
+
   allUpgrades() {
     return this.soulstoneState.upgrades();
   }
 
-  totalUpgradeLevels(): number {
+  totalUpgradeRanks(): number {
     return this.allUpgrades().reduce(
-      (total, upgrade) => total + upgrade.level,
+      (total, upgrade) => total + upgrade.currentRank,
       0,
     );
   }
 
-  maxUpgradeLevels(): number {
+  maxUpgradeRanks(): number {
     return this.allUpgrades().reduce(
-      (total, upgrade) => total + upgrade.definition.maxLevel,
+      (total, upgrade) => total + upgrade.maxRank,
       0,
     );
   }
 
   maxedUpgradeCount(): number {
     return this.allUpgrades().filter(
-      (upgrade) => upgrade.level >= upgrade.definition.maxLevel,
+      (upgrade) => upgrade.currentRank >= upgrade.maxRank,
     ).length;
   }
 
   affordableUpgradeCount(): number {
-    const soulstones = this.character()?.soulstones ?? 0;
-    return this.allUpgrades().filter(
-      (upgrade) => upgrade.nextCost != null && upgrade.nextCost <= soulstones,
-    ).length;
+    return this.allUpgrades().filter((upgrade) => upgrade.canPurchase).length;
   }
 
   summaryCards(): { label: string; value: string | number }[] {
@@ -94,10 +99,10 @@ export class SoulstoneArchiveComponent implements OnInit {
     return [
       { label: 'Available soulstones', value: character?.soulstones ?? 0 },
       {
-        label: 'Levels',
-        value: `${this.totalUpgradeLevels()} / ${this.maxUpgradeLevels()}`,
+        label: 'Ranks',
+        value: `${this.totalUpgradeRanks()} / ${this.maxUpgradeRanks()}`,
       },
-      { label: 'Affordable', value: this.affordableUpgradeCount() },
+      { label: 'Purchasable', value: this.affordableUpgradeCount() },
       { label: 'Maxed', value: this.maxedUpgradeCount() },
     ];
   }

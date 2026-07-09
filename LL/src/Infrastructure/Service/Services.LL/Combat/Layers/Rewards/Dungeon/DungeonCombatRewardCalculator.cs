@@ -17,8 +17,6 @@ internal class DungeonCombatRewardCalculator : IDungeonCombatRewardCalculator
     private readonly IBonusService _bonusService;
     private readonly ILootService _lootService;
     private readonly ICinderRewardCalculator _cinderRewardCalculator;
-    private readonly ISoulstoneRewardCalculator _soulstoneRewardCalculator;
-    private readonly IRandomSource _randomSource;
     private readonly IEssenceResonanceService _essenceResonanceService;
     private readonly ICombatGatheringRewardProcessor _gatheringRewardProcessor;
 
@@ -26,16 +24,12 @@ internal class DungeonCombatRewardCalculator : IDungeonCombatRewardCalculator
         IBonusService bonusService,
         ILootService lootService,
         ICinderRewardCalculator cinderRewardCalculator,
-        ISoulstoneRewardCalculator soulstoneRewardCalculator,
-        IRandomSource randomSource,
         IEssenceResonanceService essenceResonanceService,
         ICombatGatheringRewardProcessor gatheringRewardProcessor)
     {
         _bonusService = bonusService;
         _lootService = lootService;
         _cinderRewardCalculator = cinderRewardCalculator;
-        _soulstoneRewardCalculator = soulstoneRewardCalculator;
-        _randomSource = randomSource;
         _essenceResonanceService = essenceResonanceService;
         _gatheringRewardProcessor = gatheringRewardProcessor;
     }
@@ -49,7 +43,7 @@ internal class DungeonCombatRewardCalculator : IDungeonCombatRewardCalculator
             DateTimeOffset.UtcNow,
             cancellationToken);
 
-        var doubleExpChance = factors.Get(BonusKind.CombatDoubleExpChance);
+        var combatExperienceGainBps = factors.Get(BonusKind.CombatExperienceGainBps);
 
         var encounterOutcomes = new List<DungeonEncounterCalculatedOutcome>(facts.Encounters.Count);
         var totalLoot = new List<InventoryItem>();
@@ -79,12 +73,7 @@ internal class DungeonCombatRewardCalculator : IDungeonCombatRewardCalculator
                     loot = loot.Concat(essenceDrops).ToList();
                 }
 
-                experience = encounter.HostileCreatures.Sum(x => x.ExperienceReward);
-
-                if (_randomSource.NextDouble() < (doubleExpChance / 100d))
-                {
-                    experience *= 2;
-                }
+                experience = encounter.HostileCreatures.Sum(x => x.ExperienceReward).ApplyPositiveBps(combatExperienceGainBps);
 
                 cinders = _cinderRewardCalculator.Calculate(encounter.HostileCreatures);
 
@@ -128,4 +117,5 @@ internal class DungeonCombatRewardCalculator : IDungeonCombatRewardCalculator
             GatheringRewards: gatheringRewards,
             EncounterOutcomes: encounterOutcomes);
     }
+
 }

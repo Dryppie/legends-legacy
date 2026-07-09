@@ -678,7 +678,7 @@ public sealed class DungeonRunService : IDungeonRunService
         DungeonCheckpointChoiceResult result;
         try
         {
-            result = _checkpoints.ApplyChoice(run, room, choiceId);
+            result = await _checkpoints.ApplyChoiceAsync(run, room, choiceId, ct);
         }
         catch (InvalidOperationException)
         {

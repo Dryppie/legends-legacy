@@ -1,5 +1,8 @@
 using Application.Interfaces.Services.LL.Dungeons;
+using Domain.Models.Bonuses;
 using Domain.Models.Dungeons.Runs;
+using Services.LL.Extensions;
+using Services.LL.Interfaces;
 
 namespace Services.LL.Dungeons;
 
@@ -7,13 +10,21 @@ public sealed class DungeonCheckpointService : IDungeonCheckpointService
 {
     private readonly IDungeonPressureService _pressure;
     private readonly IDungeonBoonService _boons;
+    private readonly IBonusService? _bonusService;
 
     public DungeonCheckpointService(
         IDungeonPressureService pressure,
-        IDungeonBoonService boons)
+        IDungeonBoonService boons,
+        IBonusService? bonusService = null)
     {
         _pressure = pressure;
         _boons = boons;
+        _bonusService = bonusService;
+    }
+
+    public DungeonCheckpointChoiceResult ApplyChoice(DungeonRun run, RoomInstance room, string choiceId)
+    {
+        return ApplyChoiceAsync(run, room, choiceId, CancellationToken.None).GetAwaiter().GetResult();
     }
 
     public IReadOnlyList<DungeonCheckpointChoiceOption> EnsureChoices(DungeonRun run)
@@ -55,7 +66,11 @@ public sealed class DungeonCheckpointService : IDungeonCheckpointService
         return run.State.CurrentCheckpointChoices;
     }
 
-    public DungeonCheckpointChoiceResult ApplyChoice(DungeonRun run, RoomInstance room, string choiceId)
+    public async Task<DungeonCheckpointChoiceResult> ApplyChoiceAsync(
+        DungeonRun run,
+        RoomInstance room,
+        string choiceId,
+        CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(run);
         ArgumentNullException.ThrowIfNull(room);
@@ -68,12 +83,19 @@ public sealed class DungeonCheckpointService : IDungeonCheckpointService
             throw new InvalidOperationException("The selected checkpoint choice is not available.");
         }
 
+        var rewardRetentionBps = 0d;
+        if (_bonusService is not null && string.Equals(choice.Id, "rest", StringComparison.OrdinalIgnoreCase))
+        {
+            var factors = await _bonusService.GetAggregatedAsync(run.CharacterId, DateTimeOffset.UtcNow, cancellationToken);
+            rewardRetentionBps = factors.Get(BonusKind.DungeonRewardRetentionBps);
+        }
+
         var outcome = choice.Id switch
         {
             "withdraw" => ApplyWithdraw(run, room),
             "focus" => ApplyFocus(run),
             "push_deeper" => ApplyPushDeeper(run, choice),
-            "rest" => ApplyRest(run, choice),
+            "rest" => ApplyRest(run, choice, rewardRetentionBps),
             _ => throw new InvalidOperationException("The selected checkpoint choice is not supported.")
         };
 
@@ -116,10 +138,10 @@ public sealed class DungeonCheckpointService : IDungeonCheckpointService
         return DungeonCheckpointChoiceOutcome.PushDeeper;
     }
 
-    private DungeonCheckpointChoiceOutcome ApplyRest(DungeonRun run, DungeonCheckpointChoiceOption choice)
+    private DungeonCheckpointChoiceOutcome ApplyRest(DungeonRun run, DungeonCheckpointChoiceOption choice, double rewardRetentionBps)
     {
         _pressure.ApplyPressureDelta(run, choice.PressureDelta);
-        ReduceUnsecuredLoot(run, 0.10m);
+        ReduceUnsecuredLoot(run, 0.10m, rewardRetentionBps);
 
         return DungeonCheckpointChoiceOutcome.Rest;
     }
@@ -129,9 +151,10 @@ public sealed class DungeonCheckpointService : IDungeonCheckpointService
         run.State.Flags[flag] = run.State.Flags.GetValueOrDefault(flag) + amount;
     }
 
-    private static void ReduceUnsecuredLoot(DungeonRun run, decimal percent)
+    private static void ReduceUnsecuredLoot(DungeonRun run, decimal percent, double rewardRetentionBps)
     {
-        var factor = Math.Clamp(1m - percent, 0m, 1m);
+        var baseRetention = 1m - percent;
+        var factor = Math.Clamp(baseRetention * rewardRetentionBps.ToPositiveMultiplierDecimal(), 0m, 1m);
         run.PendingExperience = (int)Math.Floor(run.PendingExperience * factor);
         run.PendingCinders = (int)Math.Floor(run.PendingCinders * factor);
         run.PendingSoulstones = (int)Math.Floor(run.PendingSoulstones * factor);
