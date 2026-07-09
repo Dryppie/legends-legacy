@@ -103,6 +103,11 @@ export class AuthService {
     this.fetchCharacter().subscribe();
   }
 
+  refreshSessionState(): void {
+    this.fetchCharacter().subscribe({ error: () => undefined });
+    this.getUserInfo().subscribe({ error: () => undefined });
+  }
+
   login(email: string, password: string): Observable<void> {
     return this.api
       .post('auth/login', { Email: email, Password: password })
@@ -186,7 +191,7 @@ export class AuthService {
           const tokens = this.unwrapTokens(response);
           this.applyAuthenticatedTokens(tokens.accessToken, tokens.accessExpiresAt);
           this.toast.showToast('Google binding success', '', true);
-          this.getUserInfo().subscribe({ error: () => undefined });
+          this.refreshSessionState();
         }),
         map(() => void 0),
         catchError((e) => {
@@ -282,6 +287,7 @@ export class AuthService {
 
   private afterSuccessfulAuth(accessToken: string, accessExpiresAt: number) {
     this.applyAuthenticatedTokens(accessToken, accessExpiresAt);
+    this.refreshSessionState();
     this.router.navigateByUrl('/game');
   }
 

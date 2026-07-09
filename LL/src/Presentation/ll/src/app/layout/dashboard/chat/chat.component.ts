@@ -143,6 +143,15 @@ export class ChatComponent implements OnInit, OnDestroy {
   ) {
     this.guild = this.guildState.guild;
     this.characterId = this.characterState.currentCharacterId;
+    effect(() => {
+      const userInfo = this.authService.userInfo();
+      if (!userInfo) return;
+
+      this.userInfo = userInfo;
+      this.userInfoLoaded = true;
+      this.chatAccessFailed = false;
+      this.sendError = '';
+    });
     // effect(() => {
     //   const id = this.guild()?.id;
     //   if (id) {
