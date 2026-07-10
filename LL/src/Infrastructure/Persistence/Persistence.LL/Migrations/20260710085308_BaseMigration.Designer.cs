@@ -13,7 +13,7 @@ using Persistence.LL;
 namespace Persistence.LL.Migrations
 {
     [DbContext(typeof(LLDbContext))]
-    [Migration("20260709150125_BaseMigration")]
+    [Migration("20260710085308_BaseMigration")]
     partial class BaseMigration
     {
         /// <inheritdoc />
@@ -1536,6 +1536,12 @@ namespace Persistence.LL.Migrations
                         .IsRequired()
                         .HasMaxLength(128)
                         .HasColumnType("character varying(128)");
+
+                    b.Property<DateTimeOffset?>("EssenceFocusSetAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<long>("EssenceFocusTotalDurationSeconds")
+                        .HasColumnType("bigint");
 
                     b.Property<DateTimeOffset>("FirstDefeatedAtUtc")
                         .HasColumnType("timestamp with time zone");

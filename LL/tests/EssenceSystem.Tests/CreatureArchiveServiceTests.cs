@@ -72,7 +72,38 @@ public sealed class CreatureArchiveServiceTests
         Assert.Equal("Cave Bat Essence", creature.EssenceName);
         Assert.True(creature.IsEssenceAbsorbed);
         Assert.False(creature.IsEssenceFocus);
+        Assert.Equal(0, creature.EssenceFocusTotalDurationSeconds);
+        Assert.Equal(0, creature.CurrentEssenceFocusDurationSeconds);
         Assert.Contains("Species.Beast", creature.Tags);
+    }
+
+    [Fact]
+    public async Task GetCreatureArchive_includes_total_and_current_focus_duration()
+    {
+        await using var db = CreateDb();
+        var characterId = Guid.NewGuid();
+        db.Set<CharacterCreatureArchiveEntry>().Add(new CharacterCreatureArchiveEntry
+        {
+            Id = Guid.NewGuid(),
+            CharacterId = characterId,
+            CreatureDefinitionId = "monster.cave_bat",
+            CreatureName = "Cave Bat",
+            KillCount = 7,
+            IsEssenceFocus = true,
+            EssenceFocusSetAtUtc = DateTimeOffset.UtcNow.AddMinutes(-90),
+            EssenceFocusTotalDurationSeconds = 300,
+            FirstDefeatedAtUtc = DateTimeOffset.UtcNow.AddDays(-1),
+            LastDefeatedAtUtc = DateTimeOffset.UtcNow
+        });
+        await db.SaveChangesAsync();
+        var service = CreateService(db);
+
+        var archive = await service.GetCreatureArchiveAsync(characterId, CancellationToken.None);
+
+        var creature = Assert.Single(archive.Creatures);
+        Assert.True(creature.IsEssenceFocus);
+        Assert.InRange(creature.CurrentEssenceFocusDurationSeconds, 89 * 60, 91 * 60);
+        Assert.InRange(creature.EssenceFocusTotalDurationSeconds, 300 + (89 * 60), 300 + (91 * 60));
     }
 
     [Fact]
@@ -108,12 +139,66 @@ public sealed class CreatureArchiveServiceTests
 
         Assert.Contains(archive.Creatures, creature => creature.CreatureId == "monster.forest_wolf" && creature.IsEssenceFocus);
         Assert.Contains(archive.Creatures, creature => creature.CreatureId == "monster.cave_bat" && !creature.IsEssenceFocus);
+        Assert.False(archive.CanChangeEssenceFocus);
+        Assert.NotNull(archive.EssenceFocusSetAtUtc);
+        Assert.NotNull(archive.EssenceFocusAvailableAtUtc);
         Assert.True(await service.IsEssenceFocusAsync(characterId, "monster.forest_wolf", CancellationToken.None));
         Assert.False(await service.IsEssenceFocusAsync(characterId, "monster.cave_bat", CancellationToken.None));
     }
 
     [Fact]
-    public async Task SetEssenceFocus_with_null_clears_focus()
+    public async Task SetEssenceFocus_blocks_new_target_until_cooldown_expires()
+    {
+        await using var db = CreateDb();
+        var characterId = Guid.NewGuid();
+        db.Set<CharacterCreatureArchiveEntry>().AddRange(
+            new CharacterCreatureArchiveEntry
+            {
+                Id = Guid.NewGuid(),
+                CharacterId = characterId,
+                CreatureDefinitionId = "monster.cave_bat",
+                CreatureName = "Cave Bat",
+                KillCount = 3,
+                FirstDefeatedAtUtc = DateTimeOffset.UtcNow.AddDays(-1),
+                LastDefeatedAtUtc = DateTimeOffset.UtcNow
+            },
+            new CharacterCreatureArchiveEntry
+            {
+                Id = Guid.NewGuid(),
+                CharacterId = characterId,
+                CreatureDefinitionId = "monster.forest_wolf",
+                CreatureName = "Forest Wolf",
+                KillCount = 5,
+                FirstDefeatedAtUtc = DateTimeOffset.UtcNow.AddDays(-1),
+                LastDefeatedAtUtc = DateTimeOffset.UtcNow
+            });
+        await db.SaveChangesAsync();
+        var service = CreateService(db);
+
+        await service.SetEssenceFocusAsync(characterId, "monster.cave_bat", CancellationToken.None);
+        var blocked = await service.SetEssenceFocusAsync(characterId, "monster.forest_wolf", CancellationToken.None);
+
+        Assert.Contains(blocked.Creatures, creature => creature.CreatureId == "monster.cave_bat" && creature.IsEssenceFocus);
+        Assert.Contains(blocked.Creatures, creature => creature.CreatureId == "monster.forest_wolf" && !creature.IsEssenceFocus);
+
+        var caveBat = await db.Set<CharacterCreatureArchiveEntry>()
+            .SingleAsync(entry => entry.CharacterId == characterId && entry.CreatureDefinitionId == "monster.cave_bat");
+        caveBat.EssenceFocusSetAtUtc = DateTimeOffset.UtcNow.AddHours(-25);
+        await db.SaveChangesAsync();
+
+        var changed = await service.SetEssenceFocusAsync(characterId, "monster.forest_wolf", CancellationToken.None);
+
+        Assert.Contains(changed.Creatures, creature => creature.CreatureId == "monster.forest_wolf" && creature.IsEssenceFocus);
+        Assert.Contains(changed.Creatures, creature => creature.CreatureId == "monster.cave_bat" && !creature.IsEssenceFocus);
+        Assert.Contains(changed.Creatures, creature =>
+            creature.CreatureId == "monster.cave_bat" &&
+            creature.EssenceFocusTotalDurationSeconds >= 24 * 60 * 60 &&
+            creature.CurrentEssenceFocusDurationSeconds == 0);
+        Assert.False(changed.CanChangeEssenceFocus);
+    }
+
+    [Fact]
+    public async Task SetEssenceFocus_with_null_keeps_current_focus()
     {
         await using var db = CreateDb();
         var characterId = Guid.NewGuid();
@@ -125,6 +210,7 @@ public sealed class CreatureArchiveServiceTests
             CreatureName = "Cave Bat",
             KillCount = 3,
             IsEssenceFocus = true,
+            EssenceFocusSetAtUtc = DateTimeOffset.UtcNow,
             FirstDefeatedAtUtc = DateTimeOffset.UtcNow.AddDays(-1),
             LastDefeatedAtUtc = DateTimeOffset.UtcNow
         });
@@ -133,8 +219,9 @@ public sealed class CreatureArchiveServiceTests
 
         var archive = await service.SetEssenceFocusAsync(characterId, null, CancellationToken.None);
 
-        Assert.All(archive.Creatures, creature => Assert.False(creature.IsEssenceFocus));
-        Assert.False(await service.IsEssenceFocusAsync(characterId, "monster.cave_bat", CancellationToken.None));
+        Assert.Contains(archive.Creatures, creature => creature.CreatureId == "monster.cave_bat" && creature.IsEssenceFocus);
+        Assert.False(archive.CanChangeEssenceFocus);
+        Assert.True(await service.IsEssenceFocusAsync(characterId, "monster.cave_bat", CancellationToken.None));
     }
 
     [Fact]

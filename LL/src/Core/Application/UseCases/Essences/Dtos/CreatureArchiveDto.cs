@@ -5,10 +5,13 @@ using Domain.Models.Essences;
 namespace Application.UseCases.Essences.Dtos;
 
 public sealed record CreatureArchiveDto(
-    IReadOnlyList<CreatureArchiveEntryDto> Creatures) : IMapFrom<CreatureArchive>
+    IReadOnlyList<CreatureArchiveEntryDto> Creatures,
+    bool CanChangeEssenceFocus,
+    DateTimeOffset? EssenceFocusAvailableAtUtc,
+    DateTimeOffset? EssenceFocusSetAtUtc) : IMapFrom<CreatureArchive>
 {
     public CreatureArchiveDto()
-        : this([])
+        : this([], true, null, null)
     {
     }
 
@@ -25,13 +28,16 @@ public sealed record CreatureArchiveEntryDto(
     DateTimeOffset FirstDefeatedAtUtc,
     DateTimeOffset LastDefeatedAtUtc,
     bool IsEssenceFocus,
+    DateTimeOffset? EssenceFocusSetAtUtc,
+    long EssenceFocusTotalDurationSeconds,
+    long CurrentEssenceFocusDurationSeconds,
     string? EssenceDefinitionId,
     string? EssenceName,
     bool IsEssenceAbsorbed,
     IReadOnlyList<string> Tags) : IMapFrom<CreatureArchiveEntry>
 {
     public CreatureArchiveEntryDto()
-        : this(string.Empty, string.Empty, 0, default, default, false, null, null, false, [])
+        : this(string.Empty, string.Empty, 0, default, default, false, null, 0, 0, null, null, false, [])
     {
     }
 

@@ -110,6 +110,8 @@ namespace Persistence.LL.Migrations
                     CreatureName = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: false),
                     KillCount = table.Column<int>(type: "integer", nullable: false),
                     IsEssenceFocus = table.Column<bool>(type: "boolean", nullable: false),
+                    EssenceFocusSetAtUtc = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
+                    EssenceFocusTotalDurationSeconds = table.Column<long>(type: "bigint", nullable: false),
                     FirstDefeatedAtUtc = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     LastDefeatedAtUtc = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
                 },

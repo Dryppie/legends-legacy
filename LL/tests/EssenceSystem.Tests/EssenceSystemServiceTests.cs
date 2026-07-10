@@ -1033,13 +1033,13 @@ public sealed class EssenceSystemServiceTests
             Task.CompletedTask;
 
         public Task<CreatureArchive> GetCreatureArchiveAsync(Guid characterId, CancellationToken cancellationToken) =>
-            Task.FromResult(new CreatureArchive([]));
+            Task.FromResult(new CreatureArchive([], true, null, null));
 
         public Task<EssenceCodex> GetEssenceCodexAsync(Guid characterId, CancellationToken cancellationToken) =>
             Task.FromResult(new EssenceCodex([]));
 
         public Task<CreatureArchive> SetEssenceFocusAsync(Guid characterId, string? creatureId, CancellationToken cancellationToken) =>
-            Task.FromResult(new CreatureArchive([]));
+            Task.FromResult(new CreatureArchive([], true, null, null));
 
         public Task<bool> IsEssenceFocusAsync(Guid characterId, string creatureId, CancellationToken cancellationToken) =>
             Task.FromResult(creatureId.Equals(focusedCreatureId, StringComparison.OrdinalIgnoreCase));

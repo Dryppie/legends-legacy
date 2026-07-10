@@ -73,6 +73,9 @@ export interface SoulArchiveDto {
 
 export interface CreatureArchiveDto {
   creatures: CreatureArchiveEntryDto[];
+  canChangeEssenceFocus: boolean;
+  essenceFocusAvailableAtUtc?: string | null;
+  essenceFocusSetAtUtc?: string | null;
 }
 
 export interface CreatureArchiveEntryDto {
@@ -82,6 +85,9 @@ export interface CreatureArchiveEntryDto {
   firstDefeatedAtUtc: string;
   lastDefeatedAtUtc: string;
   isEssenceFocus: boolean;
+  essenceFocusSetAtUtc?: string | null;
+  essenceFocusTotalDurationSeconds: number;
+  currentEssenceFocusDurationSeconds: number;
   essenceDefinitionId?: string | null;
   essenceName?: string | null;
   isEssenceAbsorbed: boolean;

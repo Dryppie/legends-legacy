@@ -1534,6 +1534,12 @@ namespace Persistence.LL.Migrations
                         .HasMaxLength(128)
                         .HasColumnType("character varying(128)");
 
+                    b.Property<DateTimeOffset?>("EssenceFocusSetAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<long>("EssenceFocusTotalDurationSeconds")
+                        .HasColumnType("bigint");
+
                     b.Property<DateTimeOffset>("FirstDefeatedAtUtc")
                         .HasColumnType("timestamp with time zone");
 

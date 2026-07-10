@@ -7,7 +7,10 @@ public sealed record SoulArchive(
     int EssenceDust);
 
 public sealed record CreatureArchive(
-    IReadOnlyList<CreatureArchiveEntry> Creatures);
+    IReadOnlyList<CreatureArchiveEntry> Creatures,
+    bool CanChangeEssenceFocus,
+    DateTimeOffset? EssenceFocusAvailableAtUtc,
+    DateTimeOffset? EssenceFocusSetAtUtc);
 
 public sealed record CreatureArchiveEntry(
     string CreatureId,
@@ -16,6 +19,9 @@ public sealed record CreatureArchiveEntry(
     DateTimeOffset FirstDefeatedAtUtc,
     DateTimeOffset LastDefeatedAtUtc,
     bool IsEssenceFocus,
+    DateTimeOffset? EssenceFocusSetAtUtc,
+    long EssenceFocusTotalDurationSeconds,
+    long CurrentEssenceFocusDurationSeconds,
     string? EssenceDefinitionId,
     string? EssenceName,
     bool IsEssenceAbsorbed,

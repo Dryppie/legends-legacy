@@ -20,6 +20,7 @@ import {
   DropdownOption,
   DropdownSelection,
 } from '../../../../shared/components/custom-components/dropdown/dropdown.component';
+import { NotificationIndicatorComponent } from '../../../../shared/components/notification-indicator/notification-indicator.component';
 import { TutorialStateService } from '../../../../core/services/api/tutorial/tutorial-state.service';
 import {
   TUTORIAL_STEP_ABSORB_ESSENCE,
@@ -42,6 +43,7 @@ type ArchiveSort = 'name' | 'level' | 'tier';
     AttributeValueFormatPipe,
     EssencesAbsorbComponent,
     DropdownComponent,
+    NotificationIndicatorComponent,
   ],
   templateUrl: './essences.component.html',
 })
@@ -278,13 +280,40 @@ export class EssencesComponent implements OnInit {
 
   public setEssenceFocus(creature: CreatureArchiveEntryDto): void {
     if (!creature.essenceDefinitionId) return;
-    this.essenceState.setEssenceFocus(
-      creature.isEssenceFocus ? null : creature.creatureId,
+    if (creature.isEssenceFocus || !this.essenceState.canChangeEssenceFocus()) {
+      return;
+    }
+
+    this.essenceState.setEssenceFocus(creature.creatureId);
+  }
+
+  public canSetEssenceFocus(creature: CreatureArchiveEntryDto): boolean {
+    return (
+      !!creature.essenceDefinitionId &&
+      !creature.isEssenceFocus &&
+      this.essenceState.canChangeEssenceFocus()
     );
   }
 
-  public clearEssenceFocus(): void {
-    this.essenceState.setEssenceFocus(null);
+  public essenceFocusStatusText(): string {
+    const archive = this.essenceState.creatureArchive();
+    if (!archive) return 'Loading focus status.';
+    if (this.essenceState.canChangeEssenceFocus()) {
+      return 'You can choose a new target now. After setting one, Focus is locked for 24 hours.';
+    }
+    if (archive.essenceFocusAvailableAtUtc) {
+      return `New target available ${new Date(archive.essenceFocusAvailableAtUtc).toLocaleString()}.`;
+    }
+
+    return 'Focus is locked for 24 hours after choosing a target.';
+  }
+
+  public totalFocusDurationLabel(creature: CreatureArchiveEntryDto): string {
+    return this.formatDuration(this.getLiveTotalFocusDurationSeconds(creature));
+  }
+
+  public currentFocusDurationLabel(creature: CreatureArchiveEntryDto): string {
+    return this.formatDuration(this.getLiveCurrentFocusDurationSeconds(creature));
   }
 
   public trackCodex(_: number, entry: EssenceCodexEntryDto): string {
@@ -310,6 +339,48 @@ export class EssencesComponent implements OnInit {
   public tagLabel(tag: string): string {
     const displayPart = tag.split('.').at(-1) ?? tag;
     return this.formatDisplayLabel(displayPart);
+  }
+
+  private getLiveTotalFocusDurationSeconds(
+    creature: CreatureArchiveEntryDto,
+  ): number {
+    const currentAtLoad = creature.currentEssenceFocusDurationSeconds ?? 0;
+    const completed = Math.max(
+      0,
+      (creature.essenceFocusTotalDurationSeconds ?? 0) - currentAtLoad,
+    );
+
+    return completed + this.getLiveCurrentFocusDurationSeconds(creature);
+  }
+
+  private getLiveCurrentFocusDurationSeconds(
+    creature: CreatureArchiveEntryDto,
+  ): number {
+    if (!creature.isEssenceFocus) return 0;
+
+    const startedAt = creature.essenceFocusSetAtUtc
+      ? new Date(creature.essenceFocusSetAtUtc).getTime()
+      : Number.NaN;
+    if (Number.isNaN(startedAt)) {
+      return creature.currentEssenceFocusDurationSeconds ?? 0;
+    }
+
+    return Math.max(
+      0,
+      Math.floor((this.essenceState.currentTime() - startedAt) / 1000),
+    );
+  }
+
+  private formatDuration(totalSeconds: number): string {
+    const seconds = Math.max(0, Math.floor(totalSeconds));
+    const days = Math.floor(seconds / 86400);
+    const hours = Math.floor((seconds % 86400) / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+
+    if (days > 0) return `${days}d ${hours}h`;
+    if (hours > 0) return `${hours}h ${minutes}m`;
+    if (minutes > 0) return `${minutes}m`;
+    return `${seconds}s`;
   }
 
   private formatDisplayLabel(value: string | null | undefined): string {

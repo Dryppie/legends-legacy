@@ -29,14 +29,22 @@
     </button>
     <button
       type="button"
-      class="ll-button"
+      class="ll-button relative"
       [ngClass]="{
         'll-card-accent text-primary':
           essenceState.activeView() === 'creatures',
+        'border-primary/70 shadow-[0_0_10px_rgba(234,179,8,0.22)]':
+          essenceState.essenceFocusReady() &&
+          essenceState.activeView() !== 'creatures',
       }"
       (click)="essenceState.setActiveView('creatures')"
     >
       Creatures
+      <app-notification-indicator
+        class="absolute -right-1 -top-1"
+        [count]="essenceState.essenceFocusReady() ? 1 : 0"
+        label="Essence Focus ready"
+      ></app-notification-indicator>
     </button>
     <button
       type="button"
@@ -637,17 +645,13 @@
           <p class="mt-2 max-w-3xl text-xs text-zinc-500">
             Focus marks one creature as your current Essence target. Bonuses
             that mention focused monsters only affect Essence drops from this
-            creature, and changing Focus replaces the previous target.
+            creature. After choosing a target, you must wait 24 hours before
+            choosing a different one.
+          </p>
+          <p class="mt-2 text-xs text-primary">
+            {{ essenceFocusStatusText() }}
           </p>
         </div>
-        <button
-          type="button"
-          class="ll-button"
-          [disabled]="!essenceState.focusedCreature()"
-          (click)="clearEssenceFocus()"
-        >
-          Clear Focus
-        </button>
       </div>
     </div>
 
@@ -693,6 +697,21 @@
               {{ creature.lastDefeatedAtUtc | date: "short" }}
             </span>
           </div>
+          <div class="flex items-center justify-between gap-3">
+            <span>Total Focus</span>
+            <span class="text-zinc-300">
+              {{ totalFocusDurationLabel(creature) }}
+            </span>
+          </div>
+          <div
+            *ngIf="creature.isEssenceFocus"
+            class="flex items-center justify-between gap-3"
+          >
+            <span>Current Focus</span>
+            <span class="text-primary">
+              {{ currentFocusDurationLabel(creature) }}
+            </span>
+          </div>
         </div>
 
         <div class="mt-3 rounded border border-light_gray/60 p-2 text-sm">
@@ -724,10 +743,10 @@
         <button
           type="button"
           class="ll-button mt-3 w-full"
-          [disabled]="!creature.essenceDefinitionId"
+          [disabled]="!canSetEssenceFocus(creature)"
           (click)="setEssenceFocus(creature)"
         >
-          {{ creature.isEssenceFocus ? "Clear Focus" : "Set Focus" }}
+          {{ creature.isEssenceFocus ? "Focused" : "Set Focus" }}
         </button>
       </article>
     </div>

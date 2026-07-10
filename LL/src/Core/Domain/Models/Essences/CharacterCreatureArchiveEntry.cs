@@ -8,6 +8,8 @@ public sealed class CharacterCreatureArchiveEntry
     public string CreatureName { get; set; } = string.Empty;
     public int KillCount { get; set; }
     public bool IsEssenceFocus { get; set; }
+    public DateTimeOffset? EssenceFocusSetAtUtc { get; set; }
+    public long EssenceFocusTotalDurationSeconds { get; set; }
     public DateTimeOffset FirstDefeatedAtUtc { get; set; }
     public DateTimeOffset LastDefeatedAtUtc { get; set; }
 }
