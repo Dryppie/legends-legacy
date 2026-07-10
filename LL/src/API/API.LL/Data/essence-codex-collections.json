@@ -14,7 +14,7 @@
         "kind": "EssenceDropRateRelativeBps",
         "value": 50,
         "valuePerCollectionAscensionTier": 10,
-        "description": "+0.5% relative Essence drop chance."
+        "description": "+0.5% Essence drop chance."
       }
     },
     {
@@ -67,7 +67,7 @@
         "kind": "EssenceDropRateRelativeBps",
         "value": 100,
         "valuePerCollectionAscensionTier": 25,
-        "description": "+1% relative Essence drop chance."
+        "description": "+1% Essence drop chance."
       }
     },
     {
@@ -86,7 +86,7 @@
         "kind": "FocusedMonsterEssenceDropRateRelativeBps",
         "value": 75,
         "valuePerCollectionAscensionTier": 15,
-        "description": "+0.75% relative Essence drop chance against focused monsters."
+        "description": "+0.75% Essence drop chance against focused monsters."
       }
     },
     {
