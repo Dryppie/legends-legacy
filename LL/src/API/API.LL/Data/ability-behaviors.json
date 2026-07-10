@@ -302,6 +302,23 @@
     ]
   },
   {
+    "id": "behavior.legacy.training_goblin.training_stab.damage",
+    "abilityId": "ability.essence.legacy.training_goblin.training_stab",
+    "friendlyAbilityIds": [
+      "ability.essence.legacy.training_goblin.training_stab"
+    ],
+    "maxTicks": 1,
+    "expectedLogs": [
+      {
+        "source": "effect.training_stab.damage",
+        "eventType": "Damage",
+        "targetId": "hostile-1",
+        "minCount": 1,
+        "minMagnitude": 10
+      }
+    ]
+  },
+  {
     "id": "behavior.legacy.goblin_warrior.raging_cleave.two_enemy_damage",
     "abilityId": "ability.essence.legacy.goblin_warrior.raging_cleave",
     "friendlyAbilityIds": [
@@ -795,6 +812,28 @@
     "abilityId": "ability.essence.legacy.goblin.pocket_dirt",
     "friendlyAbilityIds": [
       "ability.essence.legacy.goblin.pocket_dirt"
+    ],
+    "hostileAbilityIds": [
+      "ability.essence.legacy.glade_panther.ambush_strike"
+    ],
+    "friendlyStats": {
+      "DodgeChance": 100
+    },
+    "maxTicks": 1,
+    "expectedLogs": [
+      {
+        "source": "effect.debuff.precision",
+        "eventType": "Debuff",
+        "targetId": "hostile-1",
+        "minCount": 1
+      }
+    ]
+  },
+  {
+    "id": "behavior.legacy.training_goblin.pocket_pebbles.dodge_precision_debuff",
+    "abilityId": "ability.essence.legacy.training_goblin.pocket_pebbles",
+    "friendlyAbilityIds": [
+      "ability.essence.legacy.training_goblin.pocket_pebbles"
     ],
     "hostileAbilityIds": [
       "ability.essence.legacy.glade_panther.ambush_strike"

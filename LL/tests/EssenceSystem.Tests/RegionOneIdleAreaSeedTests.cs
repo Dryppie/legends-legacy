@@ -1,8 +1,10 @@
+using Domain.Models.Essences;
 using Domain.Models.Regions;
 using Domain.Models.Regions.Areas;
 using Microsoft.EntityFrameworkCore;
 using Persistence.LL;
 using Persistence.LL.Seeds.Seeding;
+using System.Text.Json;
 
 namespace EssenceSystem.Tests;
 
@@ -104,6 +106,46 @@ public sealed class RegionOneIdleAreaSeedTests
         Assert.Equal(5, areaByName["Wormburrow Depths"].Creatures.Count);
     }
 
+    [Fact]
+    public async Task SeedCreaturesData_has_essence_definition_and_item_base_for_each_seeded_creature()
+    {
+        await using var db = CreateDb();
+
+        await SeedCreatures.SeedCreaturesData(db);
+        await db.SaveChangesAsync();
+
+        var creatures = await db.Creatures.ToListAsync();
+        var dataPath = FindApiDataRoot();
+
+        using var essenceDocument = JsonDocument.Parse(await File.ReadAllTextAsync(Path.Combine(dataPath, "essences.json")));
+        using var itemDocument = JsonDocument.Parse(await File.ReadAllTextAsync(Path.Combine(dataPath, "items.json")));
+
+        var essenceIdsByMonsterId = essenceDocument.RootElement
+            .GetProperty("essences")
+            .EnumerateArray()
+            .ToDictionary(
+                element => element.GetProperty("sourceMonsterId").GetString()!,
+                element => element.GetProperty("id").GetString()!,
+                StringComparer.OrdinalIgnoreCase);
+
+        var essenceItemIds = itemDocument.RootElement
+            .EnumerateArray()
+            .Where(element =>
+                element.TryGetProperty("itemType", out var itemType)
+                && string.Equals(itemType.GetString(), "Essence", StringComparison.OrdinalIgnoreCase))
+            .Select(element => element.GetProperty("id").GetString()!)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var creature in creatures)
+        {
+            var monsterId = CreatureEssenceSource.GetMonsterDefinitionId(creature);
+            Assert.True(
+                essenceIdsByMonsterId.TryGetValue(monsterId, out var essenceId),
+                $"{creature.Name} is missing an essence definition with sourceMonsterId '{monsterId}'.");
+            Assert.Contains($"item.{essenceId}", essenceItemIds);
+        }
+    }
+
     private static LLDbContext CreateDb()
     {
         var options = new DbContextOptionsBuilder<LLDbContext>()
@@ -111,5 +153,20 @@ public sealed class RegionOneIdleAreaSeedTests
             .Options;
 
         return new LLDbContext(options);
+    }
+
+    private static string FindApiDataRoot()
+    {
+        var directory = new DirectoryInfo(AppContext.BaseDirectory);
+        while (directory is not null)
+        {
+            var dataPath = Path.Combine(directory.FullName, "src", "API", "API.LL", "Data");
+            if (File.Exists(Path.Combine(dataPath, "essences.json")) && File.Exists(Path.Combine(dataPath, "items.json")))
+                return dataPath;
+
+            directory = directory.Parent;
+        }
+
+        throw new DirectoryNotFoundException("Could not locate LL/src/API/API.LL/Data/essences.json and items.json from test output directory.");
     }
 }
