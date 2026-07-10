@@ -1,9 +1,11 @@
 using Application.Interfaces.Outbox;
+using Application.Interfaces.Services.LL;
 using Application.Interfaces.Services.LL.Essences;
 using Application.Interfaces.Services.LL.Prophecies;
 using Application.UseCases.Outbox;
 using Application.UseCases.Prophecies.Events;
 using Domain.Models.Attributes.Modifiers;
+using Domain.Models.Bonuses;
 using Domain.Models.Combat.Abilities;
 using Domain.Models.Entities.Creatures;
 using Domain.Models.Essences;
@@ -12,6 +14,7 @@ using Domain.Models.Inventories;
 using Domain.Models.Items;
 using Domain.Models.Items.EssenceItems;
 using MediatR;
+using Services.LL.Extensions;
 using Services.LL.Interfaces;
 
 namespace Services.LL.Essences;
@@ -29,6 +32,8 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
     private readonly IEssenceLoadoutLimitService _loadoutLimits;
     private readonly IInventoryItemFactory _inventoryItemFactory;
     private readonly IRandomProvider _random;
+    private readonly IBonusService? _bonusService;
+    private readonly ICreatureArchiveService? _creatureArchiveService;
     private readonly IPublisher? _publisher;
     private readonly IGameEventOutbox _outbox;
 
@@ -43,7 +48,9 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
         IInventoryItemFactory inventoryItemFactory,
         IRandomProvider random,
         IGameEventOutbox outbox,
-        IPublisher? publisher = null)
+        IPublisher? publisher = null,
+        IBonusService? bonusService = null,
+        ICreatureArchiveService? creatureArchiveService = null)
     {
         _essences = essences;
         _inventory = inventory;
@@ -54,6 +61,8 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
         _loadoutLimits = loadoutLimits;
         _inventoryItemFactory = inventoryItemFactory;
         _random = random;
+        _bonusService = bonusService;
+        _creatureArchiveService = creatureArchiveService;
         _publisher = publisher;
         _outbox = outbox;
     }
@@ -147,6 +156,14 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
             return new(false, "The selected inventory item is not an Unbound Essence.", 0);
 
         var dust = Math.Max(1, essenceItem.DismantleDustAmount);
+        var definitionId = ResolveDefinitionId(essenceItem);
+        if (!string.IsNullOrWhiteSpace(definitionId) &&
+            await _essences.HasPlayerEssenceAsync(characterId, definitionId, cancellationToken) &&
+            await RollsDuplicateEchoBonusAsync(characterId, cancellationToken))
+        {
+            dust++;
+        }
+
         ConsumeInventoryItem(inventoryItem, 1);
         await AddInventoryQuantityAsync(characterId, EssenceDustItemId, dust, cancellationToken);
         return new(true, "Essence dismantled into Essence Dust.", dust);
@@ -464,10 +481,25 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
         }
 
         var bonus = Math.Min(definition.Drop.MaxResonanceBonus, resonance.ResonanceValue * definition.Drop.DropChanceBonusPerResonance);
-        var effective = Math.Clamp(definition.Drop.BaseDropChance + bonus, 0, 1);
+        var factors = _bonusService is null
+            ? new Dictionary<BonusKind, double>()
+            : await _bonusService.GetAggregatedAsync(characterId, DateTimeOffset.UtcNow, cancellationToken);
+        var relativeDropRateBps = factors.Get(BonusKind.EssenceDropRateRelativeBps);
+        if (factors.Get(BonusKind.FocusedMonsterEssenceDropRateRelativeBps) > 0 &&
+            _creatureArchiveService is not null &&
+            await _creatureArchiveService.IsEssenceFocusAsync(characterId, monsterId, cancellationToken))
+        {
+            relativeDropRateBps += factors.Get(BonusKind.FocusedMonsterEssenceDropRateRelativeBps);
+        }
+
+        var pityProgressionGainBps = factors.Get(BonusKind.EssencePityProgressionGainBps);
+        var effective = Math.Clamp(
+            (definition.Drop.BaseDropChance + bonus).ApplyPositiveBps(relativeDropRateBps),
+            0,
+            1);
         var dropped = _random.NextDouble() < effective;
         if (dropped) resonance.ResonanceValue = 0;
-        else resonance.ResonanceValue += definition.Drop.ResonanceGainPerFailedEligibleKill;
+        else resonance.ResonanceValue += definition.Drop.ResonanceGainPerFailedEligibleKill.ApplyPositiveBps(pityProgressionGainBps);
 
         resonance.UpdatedAt = DateTimeOffset.UtcNow;
         return new(dropped, dropped ? definition.Id : null, effective, resonance.ResonanceValue);
@@ -502,6 +534,18 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
 
     private async Task<int> GetInventoryQuantityAsync(Guid characterId, string itemBaseId, CancellationToken cancellationToken) =>
         await _inventory.GetInventoryQuantityAsync(characterId, itemBaseId, cancellationToken);
+
+    private async Task<bool> RollsDuplicateEchoBonusAsync(Guid characterId, CancellationToken cancellationToken)
+    {
+        if (_bonusService is null)
+        {
+            return false;
+        }
+
+        var factors = await _bonusService.GetAggregatedAsync(characterId, DateTimeOffset.UtcNow, cancellationToken);
+        var chanceBps = factors.Get(BonusKind.DuplicateEssenceExtraMaterialChanceBps);
+        return chanceBps > 0 && _random.NextDouble() < Math.Clamp(chanceBps, 0d, 10000d) / 10000d;
+    }
 
     private async Task AddInventoryQuantityAsync(Guid characterId, string itemBaseId, int quantity, CancellationToken cancellationToken)
     {

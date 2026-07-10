@@ -102,21 +102,13 @@ public class CraftingService : ICraftingService
 
         var factors = await _bonusService.GetAggregatedAsync(characterAction.CharacterId, now, cancellationToken);
 
-        var soulstoneDropRate = factors.Get(BonusKind.SoulstoneDropRate);
-        var soulstoneDoubleDropChance = factors.Get(BonusKind.SoulstoneDoubleDropChance);
-        var craftingDoubleItemExpChance = factors.Get(BonusKind.CraftingDoubleItemExpChance);
-        var craftingNegativeOutcome = factors.Get(BonusKind.CraftingNegativeOutcome);
-
-        var temperingBonuses = new Dictionary<TemperingOutcome, double>
-        {
-            { TemperingOutcome.Negative, craftingNegativeOutcome },
-            { TemperingOutcome.Positive, craftingDoubleItemExpChance }
-        };
+        var craftingExperienceGainBps = factors.Get(BonusKind.CraftingExperienceGainBps);
+        var negativeOutcomeReductionBps = factors.Get(BonusKind.TemperingNegativeOutcomeReductionBps);
 
         while (actionsToPerform > 0 && actionDetails.CraftingQueueItems.Count > 0)
         {
             var current = actionDetails.CraftingQueueItems.First();
-            if (!_temperingService.HandleTempering(current, temperingSummary, rng, temperingBonuses))
+            if (!_temperingService.HandleTempering(current, temperingSummary, rng, craftingExperienceGainBps, negativeOutcomeReductionBps))
             {
                 await CompleteCurrentQueueItemAsync(characterAction.CharacterId, actionDetails, current, temperingSummary, completedItems, cancellationToken);
                 continue;
@@ -140,8 +132,6 @@ public class CraftingService : ICraftingService
         temperingSummary.TotalSoulstones = await ProcessSoulstoneDrops(
             characterAction.CharacterId,
             temperingSummary.TotalActions,
-            soulstoneDropRate,
-            soulstoneDoubleDropChance,
             cancellationToken);
         await UpdateCharacterProfessionsAsync(characterAction.CharacterId, temperingSummary, cancellationToken);
         await _outbox.EnqueueAsync(
@@ -392,7 +382,10 @@ public class CraftingService : ICraftingService
                 OccurredAt: craftedAt,
                 IdempotencyKey: $"craft-items:{characterId}:{recipe.Id}:{targetTier}:{created.Count}:{craftedAt:O}"),
             cancellationToken);
-        var xpGained = craftQuantity * CraftingMasteryProgression.ExperiencePerCraft;
+        var blueprintFactors = await _bonusService.GetAggregatedAsync(characterId, DateTimeOffset.UtcNow, cancellationToken);
+        var blueprintProgressionGainBps = blueprintFactors.Get(BonusKind.BlueprintProgressionGainBps);
+        var xpGained = (craftQuantity * CraftingMasteryProgression.ExperiencePerCraft)
+            .ApplyPositiveBps(blueprintProgressionGainBps);
         mastery.Experience += xpGained;
         mastery.Level = CraftingMasteryProgression.GetLevelForExperience(mastery.Experience);
         mastery.UpdatedAt = DateTimeOffset.UtcNow;
@@ -455,10 +448,10 @@ public class CraftingService : ICraftingService
         }
     }
 
-    private async Task<int> ProcessSoulstoneDrops(Guid characterId, int actionsPerformed, double dropRate, double doubleDropChance, CancellationToken cancellationToken)
+    private async Task<int> ProcessSoulstoneDrops(Guid characterId, int actionsPerformed, CancellationToken cancellationToken)
     {
         var durationInSeconds = TemperingConstants.ActionDurationSeconds * actionsPerformed;
-        var soulstonesEarned = _lootService.GenerateSoulstoneLoot(durationInSeconds, dropRate, doubleDropChance);
+        var soulstonesEarned = _lootService.GenerateSoulstoneLoot(durationInSeconds);
         if (soulstonesEarned < 1) return 0;
 
         await _publisher.Publish(new SoulstoneDropEvent(characterId, soulstonesEarned), cancellationToken);

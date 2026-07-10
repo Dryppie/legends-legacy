@@ -1,2 +1,0 @@
-﻿namespace Domain.Models.Soulstones.UpgradeDefinition;
-public record UpgradeEffect(string Stat, double PerLevel);

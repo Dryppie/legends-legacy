@@ -1,13 +1,19 @@
-﻿namespace Domain.Models.Bonuses;
+namespace Domain.Models.Bonuses;
+
 public enum BonusKind
 {
-    CombatEssenceDropRate,
-    CombatDoubleExpChance,
-    CraftingDoubleItemExpChance,
-    CraftingNegativeOutcome,
-    GatheringDoubleDropChance,
-    GatheringDoubleExpChance,
-    SoulstoneDropRate,
-    SoulstoneDoubleDropChance,
-    // add more here…
+    EssenceDropRateRelativeBps,
+    EssencePityProgressionGainBps,
+    DuplicateEssenceExtraMaterialChanceBps,
+    FocusedMonsterEssenceDropRateRelativeBps,
+    CombatExperienceGainBps,
+    IdleCombatDefeatExperienceRetentionBps,
+    GatheringYieldBps,
+    GatheringExperienceGainBps,
+    GatheringRareDropChanceRelativeBps,
+    CraftingExperienceGainBps,
+    TemperingNegativeOutcomeReductionBps,
+    BlueprintProgressionGainBps,
+    SigilFragmentDropRateRelativeBps,
+    DungeonRewardRetentionBps
 }

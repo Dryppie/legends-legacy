@@ -1,10 +1,18 @@
-import { signal, computed, Injectable } from '@angular/core';
+import { signal, computed, effect, Injectable, untracked } from '@angular/core';
 import { finalize } from 'rxjs';
-import { SoulstoneUpgradeType } from '../../../../shared/models/soulstones/soulstone-upgrade-type';
-import { SoulstoneUpgradeView } from '../../../../shared/models/soulstones/soulstone-upgrade-view';
+import {
+  SoulstoneUpgradeBranch,
+  SoulstoneUpgradeMutationResult,
+  SoulstoneUpgradeView,
+} from '../../../../shared/models/soulstones/soulstone-upgrade-view';
 import { SoulstoneUpgradeService } from './soulstone-upgrade.service';
-import { CostCurve } from '../../../../shared/models/soulstones/cost-curve';
 import { CharacterStateService } from '../character/character-state.service';
+
+export interface SoulstoneBranchGroup {
+  branch: SoulstoneUpgradeBranch;
+  title: string;
+  upgrades: SoulstoneUpgradeView[];
+}
 
 @Injectable({
   providedIn: 'root',
@@ -12,173 +20,210 @@ import { CharacterStateService } from '../character/character-state.service';
 export class SoulstoneUpgradeStateService {
   private readonly _upgrades = signal<SoulstoneUpgradeView[]>([]);
   private readonly _loading = signal(false);
+  private readonly _loadedCharacterId = signal<string | null>(null);
+  private readonly _loadingCharacterId = signal<string | null>(null);
   private readonly _error = signal<string | null>(null);
-  private readonly _lastRefund = signal(0); // Optional: Expose latest refund for UI or sync
+  private readonly _lastRefund = signal(0);
   private readonly _upgradeLoading = signal(new Map<string, boolean>());
 
   readonly upgrades = computed(() => this._upgrades());
   readonly loading = computed(() => this._loading());
   readonly error = computed(() => this._error());
   readonly lastRefund = computed(() => this._lastRefund());
+  readonly resetRefund = computed(() =>
+    this._upgrades().reduce((total, upgrade) => total + upgrade.refundValue, 0),
+  );
+  readonly branchGroups = computed(() => this.buildBranchGroups(this._upgrades()));
+
   isUpgradeLoading = (id: string) =>
     computed(() => this._upgradeLoading().get(id) === true);
 
   constructor(
     private readonly service: SoulstoneUpgradeService,
     private readonly characterState: CharacterStateService,
-  ) {}
+  ) {
+    effect(
+      () => {
+        const characterId = this.characterState.currentCharacterId();
 
-  load(): void {
-    if (this._upgrades().length > 0) return;
+        untracked(() => {
+          this._upgradeLoading.set(new Map());
+          this._lastRefund.set(0);
+          this._error.set(null);
+
+          if (!characterId) {
+            this._upgrades.set([]);
+            this._loadedCharacterId.set(null);
+            this._loadingCharacterId.set(null);
+            return;
+          }
+
+          if (characterId !== this._loadedCharacterId()) {
+            this._upgrades.set([]);
+            this.load(true);
+          }
+        });
+      },
+      { allowSignalWrites: true },
+    );
+  }
+
+  load(force = false): void {
+    const characterId = this.characterState.currentCharacterId();
+    if (!characterId) {
+      this._upgrades.set([]);
+      this._loadedCharacterId.set(null);
+      this._loadingCharacterId.set(null);
+      return;
+    }
+
+    if (!force && this._loadedCharacterId() === characterId && this._upgrades().length > 0) {
+      return;
+    }
+
+    if (this._loading() && this._loadingCharacterId() === characterId) return;
 
     this._loading.set(true);
+    this._loadingCharacterId.set(characterId);
+    this._error.set(null);
+    this._lastRefund.set(0);
+
     this.service
       .getSoulstoneUpgrades()
-      .pipe(finalize(() => this._loading.set(false)))
+      .pipe(
+        finalize(() => {
+          if (this._loadingCharacterId() === characterId) {
+            this._loading.set(false);
+            this._loadingCharacterId.set(null);
+          }
+        }),
+      )
       .subscribe({
-        next: (list) => this._upgrades.set(list),
-        error: (err) =>
-          this._error.set(err.message ?? 'Failed to load upgrades'),
+        next: (list) => {
+          if (this.characterState.currentCharacterId() !== characterId) return;
+
+          this._upgrades.set(list);
+          this._loadedCharacterId.set(characterId);
+          this._error.set(null);
+        },
+        error: (err) => {
+          if (this.characterState.currentCharacterId() !== characterId) return;
+
+          this._error.set(err.message ?? 'Failed to load Soulstone constellations.');
+        },
       });
   }
 
   upgrade(id: string): void {
-    const upgrades = this._upgrades();
-    const index = upgrades.findIndex((u) => u.definition.id === id);
-    if (index === -1) return;
-
-    const up = upgrades[index];
-    const cost = up.nextCost;
-    const character = this.characterState.currentCharacter();
-
-    if (!character || cost == null || character.soulstones < cost) return;
+    const upgrade = this._upgrades().find((candidate) => candidate.id === id);
+    const characterId = this.characterState.currentCharacterId();
+    if (!upgrade || !characterId || !upgrade.canPurchase) return;
 
     const map = new Map(this._upgradeLoading());
-    if (map.get(id)) return; // already loading
+    if (map.get(id)) return;
     map.set(id, true);
     this._upgradeLoading.set(map);
+    this._error.set(null);
+    this._lastRefund.set(0);
 
     this.service
       .upgrade(id)
       .pipe(
         finalize(() => {
-          const map = new Map(this._upgradeLoading());
-          map.set(id, false);
-          this._upgradeLoading.set(map);
+          const next = new Map(this._upgradeLoading());
+          next.set(id, false);
+          this._upgradeLoading.set(next);
         }),
       )
       .subscribe({
-        next: (success) => {
-          if (!success) return;
+        next: (result) => this.applyMutationResult(result, characterId),
+        error: (err) => {
+          if (this.characterState.currentCharacterId() !== characterId) return;
 
-          const updated = [...upgrades];
-          const def = up.definition;
-          const nextLevel = up.level + 1;
-
-          let nextCost: number | undefined = cost + def.cost.increment;
-          if (def.cost.incrementCap && nextCost > def.cost.incrementCap)
-            nextCost = def.cost.incrementCap;
-
-          if (nextLevel > def.maxLevel) nextCost = undefined;
-
-          updated[index] = {
-            ...up,
-            level: nextLevel,
-            nextCost,
-          };
-
-          this._upgrades.set(updated);
-
-          this.characterState.updateCharacter({
-            ...character,
-            soulstones: character.soulstones - cost,
-          });
+          this._error.set(err.message ?? 'Upgrade failed.');
+          this.load(true);
         },
-        error: (err) => console.error(`Upgrade '${id}' failed`, err),
       });
   }
 
   reset(): void {
     if (this._loading()) return;
     this._upgradeLoading.set(new Map());
-    const current = this.characterState.currentCharacter();
-    if (!current) return;
-
-    const { refund, newList } = this.computeReset();
+    const characterId = this.characterState.currentCharacterId();
+    if (!characterId) return;
 
     this._loading.set(true);
+    this._loadingCharacterId.set(characterId);
+    this._error.set(null);
+
     this.service
       .resetSoulstoneUpgrades()
-      .pipe(finalize(() => this._loading.set(false)))
+      .pipe(
+        finalize(() => {
+          if (this._loadingCharacterId() === characterId) {
+            this._loading.set(false);
+            this._loadingCharacterId.set(null);
+          }
+        }),
+      )
       .subscribe({
-        next: () => {
-          this._upgrades.set(newList);
-          this._lastRefund.set(refund);
-
-          this.characterState.updateCharacter({
-            ...current,
-            soulstones: current.soulstones + refund,
-          });
-        },
+        next: (result) => this.applyMutationResult(result, characterId),
         error: (err) => {
-          console.error('Reset failed on backend:', err);
-          this._error.set('Reset failed');
+          if (this.characterState.currentCharacterId() !== characterId) return;
+
+          this._error.set(err.message ?? 'Reset failed.');
+          this.load(true);
         },
       });
   }
 
-  private computeReset(): { refund: number; newList: SoulstoneUpgradeView[] } {
-    let refund = 0;
-    const newList = this._upgrades().map((u) => {
-      for (let lvl = 1; lvl <= u.level; lvl++) {
-        refund += costOfLevel(u.definition.cost, lvl);
-      }
+  private applyMutationResult(
+    result: SoulstoneUpgradeMutationResult,
+    characterId: string,
+  ): void {
+    if (this.characterState.currentCharacterId() !== characterId) return;
 
-      return {
-        ...u,
-        level: 0,
-        nextCost: costOfLevel(u.definition.cost, 1),
-      };
+    this._upgrades.set(result.upgrades);
+    this._loadedCharacterId.set(characterId);
+    this._lastRefund.set(result.refundedSoulstones ?? 0);
+    this._error.set(null);
+
+    const latestCharacter = this.characterState.currentCharacter();
+    if (!latestCharacter) return;
+
+    this.characterState.updateCharacter({
+      ...latestCharacter,
+      soulstones: result.soulstones,
     });
-
-    return { refund, newList };
   }
 
-  // --- categorized computed views ---
-  readonly combatUpgrades = computed(() =>
-    this._upgrades().filter(
-      (u) => u.definition.type === SoulstoneUpgradeType.Combat,
-    ),
-  );
-
-  readonly gatheringUpgrades = computed(() =>
-    this._upgrades().filter(
-      (u) => u.definition.type === SoulstoneUpgradeType.Gathering,
-    ),
-  );
-
-  readonly craftingUpgrades = computed(() =>
-    this._upgrades().filter(
-      (u) => u.definition.type === SoulstoneUpgradeType.Crafting,
-    ),
-  );
-
-  readonly miscUpgrades = computed(() =>
-    this._upgrades().filter(
-      (u) => u.definition.type === SoulstoneUpgradeType.Misc,
-    ),
-  );
-}
-
-export function costOfLevel(c: CostCurve, level: number): number {
-  if (level <= 0) throw new RangeError('Level must be >= 1');
-
-  if (c.incrementCap == null) {
-    return c.base + (level - 1) * c.increment;
+  private buildBranchGroups(upgrades: SoulstoneUpgradeView[]): SoulstoneBranchGroup[] {
+    return branchOrder
+      .map((branch) => ({
+        branch,
+        title: branchTitles[branch],
+        upgrades: upgrades
+          .filter((upgrade) => upgrade.branch === branch)
+          .sort((a, b) => a.sortOrder - b.sortOrder || a.displayName.localeCompare(b.displayName)),
+      }))
+      .filter((group) => group.upgrades.length > 0);
   }
-
-  const cap = c.incrementCap;
-  if (level <= cap) return level;
-
-  return cap;
 }
+
+const branchOrder: SoulstoneUpgradeBranch[] = [
+  'EssenceArchive',
+  'CombatProgression',
+  'Gathering',
+  'Crafting',
+  'Dungeons',
+  'AccountConvenience',
+];
+
+const branchTitles: Record<SoulstoneUpgradeBranch, string> = {
+  EssenceArchive: 'Essence & Archive',
+  CombatProgression: 'Combat Progression',
+  Gathering: 'Gathering',
+  Crafting: 'Crafting',
+  Dungeons: 'Dungeons',
+  AccountConvenience: 'Account Convenience',
+};

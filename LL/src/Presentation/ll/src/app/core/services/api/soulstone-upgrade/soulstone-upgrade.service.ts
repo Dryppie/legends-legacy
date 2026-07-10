@@ -1,7 +1,10 @@
 import { Injectable } from '@angular/core';
 import { ApiService } from '../api.service';
 import { catchError, Observable, tap, throwError } from 'rxjs';
-import { SoulstoneUpgradeView } from '../../../../shared/models/soulstones/soulstone-upgrade-view';
+import {
+  SoulstoneUpgradeMutationResult,
+  SoulstoneUpgradeView,
+} from '../../../../shared/models/soulstones/soulstone-upgrade-view';
 
 @Injectable({
   providedIn: 'root',
@@ -18,7 +21,7 @@ export class SoulstoneUpgradeService {
     );
   }
 
-  upgrade(soulstoneUpgradeId: string): Observable<boolean> {
+  upgrade(soulstoneUpgradeId: string): Observable<SoulstoneUpgradeMutationResult> {
     return this.api.post('soulstoneUpgrade/upgrade', soulstoneUpgradeId).pipe(
       tap(() => {}),
       catchError((e) => {
@@ -27,7 +30,7 @@ export class SoulstoneUpgradeService {
     );
   }
 
-  resetSoulstoneUpgrades() {
+  resetSoulstoneUpgrades(): Observable<SoulstoneUpgradeMutationResult> {
     return this.api.post('soulstoneUpgrade/reset').pipe(
       tap(() => {}),
       catchError((e) => {

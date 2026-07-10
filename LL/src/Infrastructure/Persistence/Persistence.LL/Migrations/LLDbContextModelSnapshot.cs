@@ -1515,6 +1515,55 @@ namespace Persistence.LL.Migrations
                     b.UseTphMappingStrategy();
                 });
 
+            modelBuilder.Entity("Domain.Models.Essences.CharacterCreatureArchiveEntry", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("CharacterId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("CreatureDefinitionId")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
+
+                    b.Property<string>("CreatureName")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
+
+                    b.Property<DateTimeOffset?>("EssenceFocusSetAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<long>("EssenceFocusTotalDurationSeconds")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTimeOffset>("FirstDefeatedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsEssenceFocus")
+                        .HasColumnType("boolean");
+
+                    b.Property<int>("KillCount")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTimeOffset>("LastDefeatedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CharacterId");
+
+                    b.HasIndex("CharacterId", "CreatureDefinitionId")
+                        .IsUnique();
+
+                    b.HasIndex("CharacterId", "IsEssenceFocus");
+
+                    b.ToTable("CharacterCreatureArchiveEntries");
+                });
+
             modelBuilder.Entity("Domain.Models.Essences.CreatureResonance", b =>
                 {
                     b.Property<Guid>("Id")

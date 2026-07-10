@@ -21,5 +21,6 @@ public interface ITemperingMechanicsService
     TemperingAttemptResult ApplyTemperingAttempt(
         EquipmentInstance equipment,
         TemperingProfileDefinition profile,
-        Random rng);
+        Random rng,
+        double negativeOutcomeReductionBps = 0);
 }

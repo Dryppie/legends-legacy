@@ -1,23 +1,24 @@
-﻿using Application.Interfaces.Services.LL;
+using Application.Interfaces.Services.LL;
 using Application.MediatR.Markers;
 using Common.Primitives;
+using Domain.Models.Soulstones.UpgradeDefinition;
 using MediatR;
 
 namespace Application.UseCases.Soulstones.Commands.ResetSoulstoneUpgrades;
-public record ResetSoulstoneUpgradesCommand(Guid CharacterId) : ICommand<Response<bool>>;
-public class ResetSoulstoneUpgradesCommandHandler : IRequestHandler<ResetSoulstoneUpgradesCommand, Response<bool>>
+
+public record ResetSoulstoneUpgradesCommand(Guid CharacterId) : ICommand<Response<SoulstoneUpgradeMutationResult>>;
+
+public class ResetSoulstoneUpgradesCommandHandler : IRequestHandler<ResetSoulstoneUpgradesCommand, Response<SoulstoneUpgradeMutationResult>>
 {
-    private readonly ISoulstoneUpgradeService soulstoneUpgradeService;
+    private readonly ISoulstoneUpgradeService _soulstoneUpgradeService;
 
     public ResetSoulstoneUpgradesCommandHandler(ISoulstoneUpgradeService soulstoneUpgradeService)
     {
-        this.soulstoneUpgradeService = soulstoneUpgradeService;
+        _soulstoneUpgradeService = soulstoneUpgradeService;
     }
 
-    public async Task<Response<bool>> Handle(ResetSoulstoneUpgradesCommand request, CancellationToken cancellationToken)
+    public Task<Response<SoulstoneUpgradeMutationResult>> Handle(ResetSoulstoneUpgradesCommand request, CancellationToken cancellationToken)
     {
-        return await soulstoneUpgradeService.ResetSoulstoneUpgradesAsync(request.CharacterId, cancellationToken)
-            ? Response<bool>.Success(true)
-            : Response<bool>.Fail("Failed to reset soulstone upgrades.");
+        return _soulstoneUpgradeService.ResetSoulstoneUpgradesAsync(request.CharacterId, cancellationToken);
     }
 }

@@ -1,0 +1,113 @@
+{
+  "collections": [
+    {
+      "id": "codex.collection.goblin-warband",
+      "title": "Goblin Warband",
+      "description": "Study the common goblin fighting line by absorbing the scout, warrior, and archer Essences.",
+      "category": "Creature Families",
+      "essenceDefinitionIds": [
+        "essence.legacy.goblin",
+        "essence.legacy.goblin_warrior",
+        "essence.legacy.goblin_archer"
+      ],
+      "bonus": {
+        "kind": "EssenceDropRateRelativeBps",
+        "value": 50,
+        "valuePerCollectionAscensionTier": 10,
+        "description": "+0.5% relative Essence drop chance."
+      }
+    },
+    {
+      "id": "codex.collection.vermin-signs",
+      "title": "Vermin Signs",
+      "description": "Compare the instincts of rats and their venom-touched kin.",
+      "category": "Creature Families",
+      "essenceDefinitionIds": [
+        "essence.legacy.large_rat",
+        "essence.legacy.poisonous_rat"
+      ],
+      "bonus": {
+        "kind": "DuplicateEssenceExtraMaterialChanceBps",
+        "value": 75,
+        "valuePerCollectionAscensionTier": 15,
+        "description": "+0.75% chance for extra materials from duplicate Essences."
+      }
+    },
+    {
+      "id": "codex.collection.imp-triad",
+      "title": "Imp Triad",
+      "description": "Bind the volatile pattern shared by flame, frost, and shadow imps.",
+      "category": "Elemental Studies",
+      "essenceDefinitionIds": [
+        "essence.legacy.flame_imp",
+        "essence.legacy.frost_imp",
+        "essence.legacy.shadow_imp"
+      ],
+      "bonus": {
+        "kind": "EssencePityProgressionGainBps",
+        "value": 75,
+        "valuePerCollectionAscensionTier": 15,
+        "description": "+0.75% Essence pity progression gain."
+      }
+    },
+    {
+      "id": "codex.collection.slime-spectrum",
+      "title": "Slime Spectrum",
+      "description": "Complete a six-color survey of slime cores and their strange adaptations.",
+      "category": "Creature Families",
+      "essenceDefinitionIds": [
+        "essence.legacy.blue_slime",
+        "essence.legacy.brown_slime",
+        "essence.legacy.green_slime",
+        "essence.legacy.rainbow_slime",
+        "essence.legacy.red_slime",
+        "essence.legacy.transparent_slime"
+      ],
+      "bonus": {
+        "kind": "EssenceDropRateRelativeBps",
+        "value": 100,
+        "valuePerCollectionAscensionTier": 25,
+        "description": "+1% relative Essence drop chance."
+      }
+    },
+    {
+      "id": "codex.collection.forest-whispers",
+      "title": "Forest Whispers",
+      "description": "Absorb several Essences that carry the hidden patterns of the living woods.",
+      "category": "Regions",
+      "essenceDefinitionIds": [
+        "essence.legacy.enchanted_fairy",
+        "essence.legacy.glade_panther",
+        "essence.legacy.illusion_fox",
+        "essence.legacy.nightshade_blossom",
+        "essence.legacy.pixie"
+      ],
+      "bonus": {
+        "kind": "FocusedMonsterEssenceDropRateRelativeBps",
+        "value": 75,
+        "valuePerCollectionAscensionTier": 15,
+        "description": "+0.75% relative Essence drop chance against focused monsters."
+      }
+    },
+    {
+      "id": "codex.collection.grave-chorus",
+      "title": "Grave Chorus",
+      "description": "Record the shared resonance of restless dead and bone-bound fighters.",
+      "category": "Creature Families",
+      "essenceDefinitionIds": [
+        "essence.legacy.feral_ghoul",
+        "essence.legacy.plague_ghoul",
+        "essence.legacy.ravenous_ghoul",
+        "essence.legacy.skeleton_archer",
+        "essence.legacy.skeleton_mage",
+        "essence.legacy.skeleton_warrior"
+      ],
+      "bonus": {
+        "kind": "DungeonRewardRetentionBps",
+        "value": 50,
+        "valuePerCollectionAscensionTier": 10,
+        "description": "+0.5% dungeon reward retention."
+      }
+    }
+  ]
+}

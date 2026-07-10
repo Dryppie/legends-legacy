@@ -1,11 +1,13 @@
 using Application.Interfaces.Services.LL;
 using Application.Interfaces.Services.LL.Professions;
+using Domain.Models.Bonuses;
 using Domain.Models.Combat;
 using Domain.Models.Inventories;
 using Domain.Models.Items.Equipments.Tools;
 using Domain.Models.Professions;
 using Domain.Models.Professions.Gathering.GatheringNodes;
 using Services.LL.Combat.Layers.Rewards.Models;
+using Services.LL.Extensions;
 using Services.LL.Interfaces;
 using Services.LL.Interfaces.Combat.Reward;
 using Services.LL.Interfaces.Combat.Reward.Idle;
@@ -18,17 +20,20 @@ public sealed class CombatGatheringRewardProcessor : ICombatGatheringRewardProce
     private readonly IRandomSource _randomSource;
     private readonly IProfessionService _professionService;
     private readonly ILevelingService _levelingService;
+    private readonly IBonusService _bonusService;
 
     public CombatGatheringRewardProcessor(
         ILootService lootService,
         IRandomSource randomSource,
         IProfessionService professionService,
-        ILevelingService levelingService)
+        ILevelingService levelingService,
+        IBonusService bonusService)
     {
         _lootService = lootService;
         _randomSource = randomSource;
         _professionService = professionService;
         _levelingService = levelingService;
+        _bonusService = bonusService;
     }
 
     public async Task<IReadOnlyList<GatheringRewardResult>> ProcessAsync(
@@ -57,6 +62,10 @@ public sealed class CombatGatheringRewardProcessor : ICombatGatheringRewardProce
             facts.CharacterId,
             professionType,
             cancellationToken);
+        var factors = await _bonusService.GetAggregatedAsync(facts.CharacterId, DateTimeOffset.UtcNow, cancellationToken);
+        var gatheringYieldBps = factors.Get(BonusKind.GatheringYieldBps);
+        var gatheringExperienceGainBps = factors.Get(BonusKind.GatheringExperienceGainBps);
+        var rareChanceRelativeBps = factors.Get(BonusKind.GatheringRareDropChanceRelativeBps);
 
         var matchingNodes = facts.GatheringNodes
             .Where(node => node.Type == tool.GatheringType)
@@ -75,7 +84,7 @@ public sealed class CombatGatheringRewardProcessor : ICombatGatheringRewardProce
         {
             var nodeSuccessBonus = Math.Max(0d, tool.GetBonus(ToolBonusType.NodeSuccessChancePercent));
             var chance = Math.Clamp(node.ProcChance + (nodeSuccessBonus / 100d), 0d, 1d);
-            var appliedBonusEffects = BuildAppliedBonusEffects(tool, node, nodeSuccessBonus);
+            var appliedBonusEffects = BuildAppliedBonusEffects(tool, node, nodeSuccessBonus, gatheringYieldBps, gatheringExperienceGainBps, rareChanceRelativeBps);
 
             for (var i = 0; i < victories; i++)
             {
@@ -100,7 +109,7 @@ public sealed class CombatGatheringRewardProcessor : ICombatGatheringRewardProce
                     0d,
                     100d) / 100d;
                 var numberOfRolls = 1 + (bonusRollChance > 0d && _randomSource.NextDouble() < bonusRollChance ? 1 : 0);
-                var rareMaterialChance = Math.Max(0d, tool.GetBonus(ToolBonusType.RareMaterialChancePercent));
+                var rareMaterialChance = Math.Max(0d, tool.GetBonus(ToolBonusType.RareMaterialChancePercent)) + Math.Max(0d, rareChanceRelativeBps).ToPercent();
                 var gathered = _lootService.GenerateGatheringLootAsync(
                     node.LootTable,
                     cancellationToken,
@@ -125,7 +134,8 @@ public sealed class CombatGatheringRewardProcessor : ICombatGatheringRewardProce
             }
         }
 
-        await AwardExperienceAsync(profession, results.Sum(x => x.ExperienceGained), cancellationToken);
+        ApplyBatchYieldBonus(results, gatheringYieldBps);
+        await AwardExperienceAsync(profession, results.Sum(x => x.ExperienceGained).ApplyPositiveBps(gatheringExperienceGainBps), cancellationToken);
 
         return results;
     }
@@ -183,7 +193,10 @@ public sealed class CombatGatheringRewardProcessor : ICombatGatheringRewardProce
     private static List<string> BuildAppliedBonusEffects(
         EquippedGatheringTool tool,
         CombatGatheringNode node,
-        double nodeSuccessBonus)
+        double nodeSuccessBonus,
+        double gatheringYieldBps,
+        double gatheringExperienceGainBps,
+        double rareChanceRelativeBps)
     {
         var effects = new List<string>();
 
@@ -193,8 +206,35 @@ public sealed class CombatGatheringRewardProcessor : ICombatGatheringRewardProce
         AddEffect(effects, ToolBonusType.RareMaterialChancePercent, tool.GetBonus(ToolBonusType.RareMaterialChancePercent));
         AddEffect(effects, ToolBonusType.DoubleGatherChancePercent, tool.GetBonus(ToolBonusType.DoubleGatherChancePercent));
         AddEffect(effects, ToolBonusType.BonusRollChancePercent, tool.GetBonus(ToolBonusType.BonusRollChancePercent));
+        AddSoulstoneEffect(effects, "Soulstone yield", gatheringYieldBps);
+        AddSoulstoneEffect(effects, "Soulstone gathering EXP", gatheringExperienceGainBps);
+        AddSoulstoneEffect(effects, "Soulstone rare chance", rareChanceRelativeBps);
 
         return effects;
+    }
+
+    private static void ApplyBatchYieldBonus(IReadOnlyList<GatheringRewardResult> results, double gatheringYieldBps)
+    {
+        if (gatheringYieldBps <= 0)
+        {
+            return;
+        }
+
+        var groups = results
+            .SelectMany(result => result.ItemsGained)
+            .Where(item => item.Quantity > 0)
+            .GroupBy(item => item.ItemInstance.ItemBaseId, StringComparer.OrdinalIgnoreCase);
+
+        foreach (var group in groups)
+        {
+            var extra = group.Sum(item => item.Quantity).CalculateExtraFromBps(gatheringYieldBps);
+            if (extra <= 0)
+            {
+                continue;
+            }
+
+            group.First().Quantity += extra;
+        }
     }
 
     private static void AddEffect(List<string> effects, ToolBonusType bonusType, double amount)
@@ -205,6 +245,16 @@ public sealed class CombatGatheringRewardProcessor : ICombatGatheringRewardProce
         }
 
         effects.Add($"{bonusType}: +{amount:0.##}");
+    }
+
+    private static void AddSoulstoneEffect(List<string> effects, string label, double basisPoints)
+    {
+        if (basisPoints <= 0)
+        {
+            return;
+        }
+
+        effects.Add($"{label}: +{basisPoints.ToPercent():0.##}%");
     }
 
     private static string ResolveNodeName(string nodeId, string nodeName)
