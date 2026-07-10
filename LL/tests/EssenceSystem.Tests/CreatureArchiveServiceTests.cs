@@ -183,7 +183,7 @@ public sealed class CreatureArchiveServiceTests
 
         var caveBat = await db.Set<CharacterCreatureArchiveEntry>()
             .SingleAsync(entry => entry.CharacterId == characterId && entry.CreatureDefinitionId == "monster.cave_bat");
-        caveBat.EssenceFocusSetAtUtc = DateTimeOffset.UtcNow.AddHours(-25);
+        caveBat.EssenceFocusSetAtUtc = DateTimeOffset.UtcNow.AddHours(-9);
         await db.SaveChangesAsync();
 
         var changed = await service.SetEssenceFocusAsync(characterId, "monster.forest_wolf", CancellationToken.None);
@@ -192,7 +192,7 @@ public sealed class CreatureArchiveServiceTests
         Assert.Contains(changed.Creatures, creature => creature.CreatureId == "monster.cave_bat" && !creature.IsEssenceFocus);
         Assert.Contains(changed.Creatures, creature =>
             creature.CreatureId == "monster.cave_bat" &&
-            creature.EssenceFocusTotalDurationSeconds >= 24 * 60 * 60 &&
+            creature.EssenceFocusTotalDurationSeconds >= 8 * 60 * 60 &&
             creature.CurrentEssenceFocusDurationSeconds == 0);
         Assert.False(changed.CanChangeEssenceFocus);
     }

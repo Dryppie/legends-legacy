@@ -8,7 +8,7 @@ namespace Services.LL.Essences;
 
 public sealed class CreatureArchiveService : ICreatureArchiveService
 {
-    private static readonly TimeSpan EssenceFocusCooldown = TimeSpan.FromHours(24);
+    private static readonly TimeSpan EssenceFocusCooldown = TimeSpan.FromHours(8);
 
     private readonly IDbContext _dbContext;
     private readonly IEssenceDefinitionRepository _essenceDefinitions;
