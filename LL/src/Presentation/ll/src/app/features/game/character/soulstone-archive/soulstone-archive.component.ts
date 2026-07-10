@@ -5,6 +5,8 @@ import { SoulstoneUpgradeCardComponent } from './soulstone-upgrade-card/soulston
 import { RegularButtonComponent } from '../../../../shared/components/custom-components/buttons/regular-button/regular-button.component';
 import { CharacterStateService } from '../../../../core/services/api/character/character-state.service';
 import { SoulstoneUpgradeStateService } from '../../../../core/services/api/soulstone-upgrade/soulstone-upgrade.state.service';
+import { TabsComponent } from '../../../../shared/components/custom-components/tabs/tabs.component';
+import { TabComponent } from '../../../../shared/components/custom-components/tabs/tab/tab.component';
 
 @Component({
   selector: 'app-soulstone-archive',
@@ -15,6 +17,8 @@ import { SoulstoneUpgradeStateService } from '../../../../core/services/api/soul
     NgFor,
     SoulstoneUpgradeCardComponent,
     RegularButtonComponent,
+    TabsComponent,
+    TabComponent,
   ],
   templateUrl: './soulstone-archive.component.html',
 })

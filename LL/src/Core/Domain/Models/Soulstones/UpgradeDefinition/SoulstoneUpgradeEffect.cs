@@ -7,20 +7,15 @@ public enum SoulstoneUpgradeEffectKind
     DuplicateEssenceExtraMaterialChanceBps,
     FocusedMonsterEssenceDropRateRelativeBps,
     CombatExperienceGainBps,
-    AreaCommitmentCombatExperienceGainBps,
     IdleCombatDefeatExperienceRetentionBps,
     GatheringYieldBps,
     GatheringExperienceGainBps,
     GatheringRareDropChanceRelativeBps,
     CraftingExperienceGainBps,
     TemperingNegativeOutcomeReductionBps,
-    TemperingFailMaterialRefundChanceBps,
     BlueprintProgressionGainBps,
     SigilFragmentDropRateRelativeBps,
-    DungeonRewardRetentionBps,
-    DungeonRoomPreviewTier,
-    DungeonRewardFocusTier,
-    ArchivePresetSlotCount
+    DungeonRewardRetentionBps
 }
 
 public enum SoulstoneUpgradeEffectUnit

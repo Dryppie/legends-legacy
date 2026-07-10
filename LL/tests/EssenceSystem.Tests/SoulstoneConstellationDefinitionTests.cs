@@ -7,7 +7,7 @@ namespace EssenceSystem.Tests;
 public sealed class SoulstoneConstellationDefinitionTests
 {
     [Fact]
-    public void Catalog_contains_only_supported_active_constellations_and_hidden_future_nodes()
+    public void Catalog_contains_only_supported_active_constellations()
     {
         var definitions = LoadDefinitions();
         var enabledIds = definitions.Where(x => x.Enabled).Select(x => x.Id).ToHashSet(StringComparer.OrdinalIgnoreCase);
@@ -18,6 +18,7 @@ public sealed class SoulstoneConstellationDefinitionTests
                 "essence.resonance",
                 "essence.echo-memory",
                 "essence.duplicate-echoes",
+                "essence.archive-focus",
                 "combat.battle-lessons",
                 "combat.survival-notes",
                 "gathering.careful-harvest",
@@ -34,12 +35,7 @@ public sealed class SoulstoneConstellationDefinitionTests
             expectedEnabledIds.OrderBy(x => x, StringComparer.OrdinalIgnoreCase),
             enabledIds.OrderBy(x => x, StringComparer.OrdinalIgnoreCase));
 
-        Assert.Contains("essence.archive-focus", disabledIds);
-        Assert.Contains("combat.veteran-rhythm", disabledIds);
-        Assert.Contains("crafting.salvage-instinct", disabledIds);
-        Assert.Contains("dungeon.cartographers-eye", disabledIds);
-        Assert.Contains("dungeon.reward-lens", disabledIds);
-        Assert.Contains("convenience.archive-presets", disabledIds);
+        Assert.Empty(disabledIds);
     }
 
     [Fact]
@@ -50,6 +46,7 @@ public sealed class SoulstoneConstellationDefinitionTests
         AssertValues(definitions["essence.resonance"], [300, 600, 900, 1200, 1500]);
         AssertValues(definitions["essence.echo-memory"], [500, 1000, 1500, 2000, 2500]);
         AssertValues(definitions["essence.duplicate-echoes"], [200, 400, 600, 800, 1000]);
+        AssertValues(definitions["essence.archive-focus"], [500, 1000, 1500, 2000, 2500]);
         AssertValues(definitions["combat.battle-lessons"], [150, 300, 450, 600, 750]);
         AssertValues(definitions["combat.survival-notes"], [1000, 2000, 3000, 4000, 5000]);
         AssertValues(definitions["gathering.careful-harvest"], [100, 200, 300, 400, 500]);
@@ -73,6 +70,11 @@ public sealed class SoulstoneConstellationDefinitionTests
         Assert.DoesNotContain("gathering.double.drop.chance", ids);
         Assert.DoesNotContain("gathering.double.exp.chance", ids);
         Assert.DoesNotContain("crafting.double.item.exp.chance", ids);
+        Assert.DoesNotContain("combat.veteran-rhythm", ids);
+        Assert.DoesNotContain("crafting.salvage-instinct", ids);
+        Assert.DoesNotContain("dungeon.cartographers-eye", ids);
+        Assert.DoesNotContain("dungeon.reward-lens", ids);
+        Assert.DoesNotContain("convenience.archive-presets", ids);
     }
 
     private static void AssertValues(SoulstoneUpgradeDefinition definition, int[] expected)

@@ -7,18 +7,13 @@ public enum BonusKind
     DuplicateEssenceExtraMaterialChanceBps,
     FocusedMonsterEssenceDropRateRelativeBps,
     CombatExperienceGainBps,
-    AreaCommitmentCombatExperienceGainBps,
     IdleCombatDefeatExperienceRetentionBps,
     GatheringYieldBps,
     GatheringExperienceGainBps,
     GatheringRareDropChanceRelativeBps,
     CraftingExperienceGainBps,
     TemperingNegativeOutcomeReductionBps,
-    TemperingFailMaterialRefundChanceBps,
     BlueprintProgressionGainBps,
     SigilFragmentDropRateRelativeBps,
-    DungeonRewardRetentionBps,
-    DungeonRoomPreviewTier,
-    DungeonRewardFocusTier,
-    ArchivePresetSlotCount
+    DungeonRewardRetentionBps
 }
