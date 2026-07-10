@@ -1,3 +1,4 @@
+using Domain.Models.Bonuses;
 using Domain.Models.Inventories;
 using Domain.Models.Regions.Areas;
 
@@ -9,5 +10,6 @@ public interface IIdleDungeonSigilDropCalculator
         Guid characterId,
         Area area,
         int eligibleVictories,
-        CancellationToken cancellationToken);
+        CancellationToken cancellationToken,
+        IReadOnlyDictionary<BonusKind, double>? bonusFactors = null);
 }

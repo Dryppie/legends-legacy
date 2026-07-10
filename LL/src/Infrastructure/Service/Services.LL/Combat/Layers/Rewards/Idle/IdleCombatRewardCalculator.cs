@@ -74,7 +74,8 @@ public sealed class IdleCombatRewardCalculator : IIdleCombatRewardCalculator
                     facts.CharacterId,
                     encounter.HostileCreatures,
                     eligible: true,
-                    cancellationToken);
+                    cancellationToken,
+                    factors);
 
                 if (essenceDrops.Count > 0)
                 {
@@ -110,7 +111,8 @@ public sealed class IdleCombatRewardCalculator : IIdleCombatRewardCalculator
             facts.CharacterId,
             facts.Area,
             sigilEligibleVictories,
-            cancellationToken);
+            cancellationToken,
+            factors);
 
         if (sigilDrops.Count > 0)
         {
@@ -131,7 +133,8 @@ public sealed class IdleCombatRewardCalculator : IIdleCombatRewardCalculator
                         node.ProcChance,
                         node.RewardTableId))
                     .ToArray()),
-            cancellationToken);
+            cancellationToken,
+            factors);
 
         var gatheringLoot = gatheringRewards
             .SelectMany(x => x.ItemsGained)

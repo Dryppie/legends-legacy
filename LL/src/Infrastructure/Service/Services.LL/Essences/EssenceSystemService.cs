@@ -470,6 +470,31 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
 
     public async Task<EssenceDropRollResult> RollMonsterEssenceDropAsync(Guid characterId, string monsterId, bool eligible, CancellationToken cancellationToken)
     {
+        if (!eligible || _definitions.GetByMonsterId(monsterId) is null) return new(false, null, 0, 0);
+
+        var factors = await GetBonusFactorsAsync(characterId, DateTimeOffset.UtcNow, cancellationToken);
+
+        async Task<bool> IsEssenceFocusAsync(string candidateMonsterId, CancellationToken ct) =>
+            _creatureArchiveService is not null &&
+            await _creatureArchiveService.IsEssenceFocusAsync(characterId, candidateMonsterId, ct);
+
+        return await RollMonsterEssenceDropAsync(
+            characterId,
+            monsterId,
+            eligible,
+            factors,
+            IsEssenceFocusAsync,
+            cancellationToken);
+    }
+
+    private async Task<EssenceDropRollResult> RollMonsterEssenceDropAsync(
+        Guid characterId,
+        string monsterId,
+        bool eligible,
+        IReadOnlyDictionary<BonusKind, double> factors,
+        Func<string, CancellationToken, Task<bool>> isEssenceFocusAsync,
+        CancellationToken cancellationToken)
+    {
         var definition = _definitions.GetByMonsterId(monsterId);
         if (!eligible || definition is null) return new(false, null, 0, 0);
 
@@ -481,13 +506,9 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
         }
 
         var bonus = Math.Min(definition.Drop.MaxResonanceBonus, resonance.ResonanceValue * definition.Drop.DropChanceBonusPerResonance);
-        var factors = _bonusService is null
-            ? new Dictionary<BonusKind, double>()
-            : await _bonusService.GetAggregatedAsync(characterId, DateTimeOffset.UtcNow, cancellationToken);
         var relativeDropRateBps = factors.Get(BonusKind.EssenceDropRateRelativeBps);
         if (factors.Get(BonusKind.FocusedMonsterEssenceDropRateRelativeBps) > 0 &&
-            _creatureArchiveService is not null &&
-            await _creatureArchiveService.IsEssenceFocusAsync(characterId, monsterId, cancellationToken))
+            await isEssenceFocusAsync(monsterId, cancellationToken))
         {
             relativeDropRateBps += factors.Get(BonusKind.FocusedMonsterEssenceDropRateRelativeBps);
         }
@@ -505,15 +526,52 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
         return new(dropped, dropped ? definition.Id : null, effective, resonance.ResonanceValue);
     }
 
-    public async Task<IReadOnlyList<InventoryItem>> RollEssenceDropsAsync(Guid characterId, IReadOnlyList<Creature> defeatedCreatures, bool eligible, CancellationToken cancellationToken)
+    public async Task<IReadOnlyList<InventoryItem>> RollEssenceDropsAsync(
+        Guid characterId,
+        IReadOnlyList<Creature> defeatedCreatures,
+        bool eligible,
+        CancellationToken cancellationToken,
+        IReadOnlyDictionary<BonusKind, double>? bonusFactors = null)
     {
         var drops = new List<InventoryItem>();
         if (!eligible || defeatedCreatures.Count == 0) return drops;
 
-        foreach (var creature in defeatedCreatures)
+        var monsterIds = defeatedCreatures
+            .Select(CreatureEssenceSource.GetMonsterDefinitionId)
+            .Where(monsterId => _definitions.GetByMonsterId(monsterId) is not null)
+            .ToList();
+
+        if (monsterIds.Count == 0) return drops;
+
+        var factors = bonusFactors ?? await GetBonusFactorsAsync(characterId, DateTimeOffset.UtcNow, cancellationToken);
+        var focusedMonsterIds = new Dictionary<string, bool>(StringComparer.OrdinalIgnoreCase);
+
+        async Task<bool> IsBatchEssenceFocusAsync(string candidateMonsterId, CancellationToken ct)
         {
-            var monsterId = CreatureEssenceSource.GetMonsterDefinitionId(creature);
-            var roll = await RollMonsterEssenceDropAsync(characterId, monsterId, true, cancellationToken);
+            if (_creatureArchiveService is null)
+            {
+                return false;
+            }
+
+            if (focusedMonsterIds.TryGetValue(candidateMonsterId, out var cached))
+            {
+                return cached;
+            }
+
+            var isFocused = await _creatureArchiveService.IsEssenceFocusAsync(characterId, candidateMonsterId, ct);
+            focusedMonsterIds[candidateMonsterId] = isFocused;
+            return isFocused;
+        }
+
+        foreach (var monsterId in monsterIds)
+        {
+            var roll = await RollMonsterEssenceDropAsync(
+                characterId,
+                monsterId,
+                true,
+                factors,
+                IsBatchEssenceFocusAsync,
+                cancellationToken);
             if (!roll.Dropped || string.IsNullOrWhiteSpace(roll.EssenceDefinitionId)) continue;
 
             var itemBaseId = $"item.{roll.EssenceDefinitionId}";
@@ -525,6 +583,14 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
 
         return drops;
     }
+
+    private async ValueTask<IReadOnlyDictionary<BonusKind, double>> GetBonusFactorsAsync(
+        Guid characterId,
+        DateTimeOffset now,
+        CancellationToken cancellationToken) =>
+        _bonusService is null
+            ? new Dictionary<BonusKind, double>()
+            : await _bonusService.GetAggregatedAsync(characterId, now, cancellationToken);
 
     private async Task<List<EssenceLoadoutSlot>> GetActiveSlotsAsync(Guid characterId, CancellationToken cancellationToken) =>
         await _essences.GetActiveSlotsAsync(characterId, cancellationToken);

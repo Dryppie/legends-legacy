@@ -1,3 +1,4 @@
+using Domain.Models.Bonuses;
 using Domain.Models.Combat;
 using Services.LL.Combat.Layers.Rewards.Models;
 
@@ -7,5 +8,6 @@ public interface ICombatGatheringRewardProcessor
 {
     Task<IReadOnlyList<GatheringRewardResult>> ProcessAsync(
         CombatGatheringRewardFacts facts,
-        CancellationToken cancellationToken);
+        CancellationToken cancellationToken,
+        IReadOnlyDictionary<BonusKind, double>? bonusFactors = null);
 }

@@ -762,6 +762,37 @@ public sealed class EssenceSystemServiceTests
         Assert.IsType<EssenceItemInstance>(drops.Single().ItemInstance);
     }
 
+    [Fact]
+    public async Task RollEssenceDrops_reuses_bonus_factors_and_focus_lookups_for_defeated_creature_batch()
+    {
+        await using var db = CreateDb();
+        var characterId = await SeedCharacterAndInventoryAsync(db);
+        var bonusService = new StaticBonusService(new Dictionary<BonusKind, double>
+        {
+            [BonusKind.FocusedMonsterEssenceDropRateRelativeBps] = 5000
+        });
+        var creatureArchiveService = new StaticCreatureArchiveService("monster.test");
+        var service = CreateService(
+            db,
+            new QueueRandomProvider(0.99, 0.99, 0.99),
+            bonusService: bonusService,
+            creatureArchiveService: creatureArchiveService);
+
+        var drops = await service.RollEssenceDropsAsync(
+            characterId,
+            [
+                new Creature { Name = "Test" },
+                new Creature { Name = "Test" },
+                new Creature { Name = "Other" }
+            ],
+            true,
+            CancellationToken.None);
+
+        Assert.Empty(drops);
+        Assert.Equal(1, bonusService.GetAggregatedCallCount);
+        Assert.Equal(2, creatureArchiveService.FocusLookupCount);
+    }
+
     private static LLDbContext CreateDb()
     {
         var options = new DbContextOptionsBuilder<LLDbContext>()
@@ -1016,15 +1047,22 @@ public sealed class EssenceSystemServiceTests
 
     private sealed class StaticBonusService(IReadOnlyDictionary<BonusKind, double> bonuses) : IBonusService
     {
+        public int GetAggregatedCallCount { get; private set; }
+
         public ValueTask<IReadOnlyDictionary<BonusKind, double>> GetAggregatedAsync(
             Guid characterId,
             DateTimeOffset now,
-            CancellationToken ct = default) =>
-            ValueTask.FromResult(bonuses);
+            CancellationToken ct = default)
+        {
+            GetAggregatedCallCount++;
+            return ValueTask.FromResult(bonuses);
+        }
     }
 
     private sealed class StaticCreatureArchiveService(string focusedCreatureId) : ICreatureArchiveService
     {
+        public int FocusLookupCount { get; private set; }
+
         public Task RecordDefeatedCreaturesAsync(
             Guid characterId,
             IReadOnlyCollection<Creature> creatures,
@@ -1041,8 +1079,11 @@ public sealed class EssenceSystemServiceTests
         public Task<CreatureArchive> SetEssenceFocusAsync(Guid characterId, string? creatureId, CancellationToken cancellationToken) =>
             Task.FromResult(new CreatureArchive([], true, null, null));
 
-        public Task<bool> IsEssenceFocusAsync(Guid characterId, string creatureId, CancellationToken cancellationToken) =>
-            Task.FromResult(creatureId.Equals(focusedCreatureId, StringComparison.OrdinalIgnoreCase));
+        public Task<bool> IsEssenceFocusAsync(Guid characterId, string creatureId, CancellationToken cancellationToken)
+        {
+            FocusLookupCount++;
+            return Task.FromResult(creatureId.Equals(focusedCreatureId, StringComparison.OrdinalIgnoreCase));
+        }
     }
 
     private sealed class NoopGameEventOutbox : IGameEventOutbox

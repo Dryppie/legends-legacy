@@ -41,7 +41,8 @@ public sealed class IdleDungeonSigilDropCalculator : IIdleDungeonSigilDropCalcul
         Guid characterId,
         Area area,
         int eligibleVictories,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken,
+        IReadOnlyDictionary<BonusKind, double>? bonusFactors = null)
     {
         if (eligibleVictories <= 0)
         {
@@ -54,7 +55,7 @@ public sealed class IdleDungeonSigilDropCalculator : IIdleDungeonSigilDropCalcul
             return [];
         }
 
-        var factors = await _bonusService.GetAggregatedAsync(characterId, DateTimeOffset.UtcNow, cancellationToken);
+        var factors = bonusFactors ?? await _bonusService.GetAggregatedAsync(characterId, DateTimeOffset.UtcNow, cancellationToken);
         var sigilDropRateBps = factors.Get(BonusKind.SigilFragmentDropRateRelativeBps);
         var dropCount = SamplePoisson(
             (eligibleVictories * SigilDropChancePerIdleAction).ApplyPositiveBps(sigilDropRateBps));

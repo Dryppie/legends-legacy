@@ -67,7 +67,8 @@ internal class DungeonCombatRewardCalculator : IDungeonCombatRewardCalculator
                     facts.CharacterId,
                     encounter.HostileCreatures,
                     eligible: true,
-                    cancellationToken);
+                    cancellationToken,
+                    factors);
 
                 if (essenceDrops.Count > 0)
                 {

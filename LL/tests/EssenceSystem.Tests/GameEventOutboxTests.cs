@@ -6,6 +6,7 @@ using Application.Interfaces.Services.LL.Essences;
 using Application.Interfaces.Services.LL.Tutorials;
 using Application.UseCases.Achievements.Dtos;
 using Application.UseCases.Outbox;
+using Application.UseCases.Prophecies.Events;
 using Domain.Models.CharacterActions;
 using Domain.Models.CharacterActions.CharacterActionDetails;
 using Domain.Models.Achievements;
@@ -215,13 +216,14 @@ public sealed class GameEventOutboxTests
             [],
             []);
         var outbox = new RecordingGameEventOutbox();
+        var publisher = new RecordingPublisher();
         var processor = new IdleCombatOutcomeProcessor(
             new StubIdleCombatRewardFactBuilder(facts),
             new StubIdleCombatRewardCalculator(outcome),
             new StubIdleCombatRewardApplier(),
             new StubIdleCombatSessionFactory(),
             outbox,
-            new NoOpPublisher(),
+            publisher,
             new RecordingCreatureArchiveService());
         var characterAction = new CharacterAction
         {
@@ -258,6 +260,10 @@ public sealed class GameEventOutboxTests
         Assert.Equal(["Goblin", "Wolf", "Goblin"], payload.DefeatedCreatureFamilyKeys);
         Assert.Equal(1, payload.PlayerDefeats);
         Assert.Equal(12, payload.LowestWinningHealthPercent);
+
+        var prophecyBatch = Assert.Single(publisher.Notifications.OfType<ProphecyProgressBatchNotification>());
+        Assert.Equal(6, prophecyBatch.ProgressEvents.Count);
+        Assert.Empty(publisher.Notifications.OfType<ProphecyProgressNotification>());
     }
 
     private static LLDbContext CreateDb()
@@ -374,14 +380,19 @@ public sealed class GameEventOutboxTests
             Task.FromResult(false);
     }
 
-    private sealed class NoOpPublisher : IPublisher
+    private sealed class RecordingPublisher : IPublisher
     {
-        public Task Publish(object notification, CancellationToken cancellationToken = default) =>
-            Task.CompletedTask;
+        public List<object> Notifications { get; } = [];
+
+        public Task Publish(object notification, CancellationToken cancellationToken = default)
+        {
+            Notifications.Add(notification);
+            return Task.CompletedTask;
+        }
 
         public Task Publish<TNotification>(TNotification notification, CancellationToken cancellationToken = default)
             where TNotification : INotification =>
-            Task.CompletedTask;
+            Publish((object)notification, cancellationToken);
     }
 
     private sealed class FirstStepsTutorialDefinitionProvider : ITutorialDefinitionProvider

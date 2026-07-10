@@ -374,7 +374,7 @@ public sealed class CreatureArchiveServiceTests
                     Kind = BonusKind.EssenceDropRateRelativeBps,
                     Value = 50,
                     ValuePerCollectionAscensionTier = 10,
-                    Description = "+0.5% relative Essence drop chance."
+                    Description = "+0.5% Essence drop chance."
                 }
             }
         ];

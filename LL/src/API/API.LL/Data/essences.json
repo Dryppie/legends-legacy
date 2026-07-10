@@ -318,9 +318,9 @@
         }
       ],
       "drop": {
-        "baseDropChance": 0.001,
+        "baseDropChance": 0.0001,
         "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 0.00005,
+        "dropChanceBonusPerResonance": 0.000000160217,
         "maxResonanceBonus": 0.01
       },
       "evolution": {
@@ -356,9 +356,9 @@
         }
       ],
       "drop": {
-        "baseDropChance": 0.001,
+        "baseDropChance": 0.0001,
         "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 0.00005,
+        "dropChanceBonusPerResonance": 0.00000011574075,
         "maxResonanceBonus": 0.01
       },
       "evolution": {
@@ -394,9 +394,9 @@
         }
       ],
       "drop": {
-        "baseDropChance": 0.001,
+        "baseDropChance": 0.0001,
         "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 0.00005,
+        "dropChanceBonusPerResonance": 0.00000160216975,
         "maxResonanceBonus": 0.01
       },
       "evolution": {
@@ -432,9 +432,9 @@
         }
       ],
       "drop": {
-        "baseDropChance": 0.001,
+        "baseDropChance": 0.0001,
         "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 0.00005,
+        "dropChanceBonusPerResonance": 0.0000014018985,
         "maxResonanceBonus": 0.01
       },
       "evolution": {
@@ -469,9 +469,9 @@
         }
       ],
       "drop": {
-        "baseDropChance": 0.001,
+        "baseDropChance": 0.0001,
         "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 0.00005,
+        "dropChanceBonusPerResonance": 0.00000074767925,
         "maxResonanceBonus": 0.01
       },
       "evolution": {
@@ -506,9 +506,9 @@
         }
       ],
       "drop": {
-        "baseDropChance": 0.001,
+        "baseDropChance": 0.0001,
         "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 0.00005,
+        "dropChanceBonusPerResonance": 0.00000018942525,
         "maxResonanceBonus": 0.01
       },
       "evolution": {
@@ -543,9 +543,9 @@
         }
       ],
       "drop": {
-        "baseDropChance": 0.001,
+        "baseDropChance": 0.0001,
         "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 0.00005,
+        "dropChanceBonusPerResonance": 0.0000001957395,
         "maxResonanceBonus": 0.01
       },
       "evolution": {
@@ -580,9 +580,9 @@
         }
       ],
       "drop": {
-        "baseDropChance": 0.001,
+        "baseDropChance": 0.0001,
         "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 0.00005,
+        "dropChanceBonusPerResonance": 0.0000001957395,
         "maxResonanceBonus": 0.01
       },
       "evolution": {
@@ -617,9 +617,9 @@
         }
       ],
       "drop": {
-        "baseDropChance": 0.001,
+        "baseDropChance": 0.0001,
         "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 0.00005,
+        "dropChanceBonusPerResonance": 0.00000065246475,
         "maxResonanceBonus": 0.01
       },
       "evolution": {
@@ -654,9 +654,9 @@
         }
       ],
       "drop": {
-        "baseDropChance": 0.001,
+        "baseDropChance": 0.0001,
         "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 0.00005,
+        "dropChanceBonusPerResonance": 0.00000029360925,
         "maxResonanceBonus": 0.01
       },
       "evolution": {
@@ -691,9 +691,9 @@
         }
       ],
       "drop": {
-        "baseDropChance": 0.001,
+        "baseDropChance": 0.0001,
         "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 0.00005,
+        "dropChanceBonusPerResonance": 0.00000029360925,
         "maxResonanceBonus": 0.01
       },
       "evolution": {
@@ -728,9 +728,9 @@
         }
       ],
       "drop": {
-        "baseDropChance": 0.001,
+        "baseDropChance": 0.0001,
         "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 0.00005,
+        "dropChanceBonusPerResonance": 0.00000029360925,
         "maxResonanceBonus": 0.01
       },
       "evolution": {
@@ -765,9 +765,9 @@
         }
       ],
       "drop": {
-        "baseDropChance": 0.001,
+        "baseDropChance": 0.0001,
         "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 0.00005,
+        "dropChanceBonusPerResonance": 0.00000058721825,
         "maxResonanceBonus": 0.01
       },
       "evolution": {
@@ -802,9 +802,9 @@
         }
       ],
       "drop": {
-        "baseDropChance": 0.001,
+        "baseDropChance": 0.0001,
         "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 0.00005,
+        "dropChanceBonusPerResonance": 0.00000029360925,
         "maxResonanceBonus": 0.01
       },
       "evolution": {
@@ -839,9 +839,9 @@
         }
       ],
       "drop": {
-        "baseDropChance": 0.001,
+        "baseDropChance": 0.0001,
         "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 0.00005,
+        "dropChanceBonusPerResonance": 0.00000058721825,
         "maxResonanceBonus": 0.01
       },
       "evolution": {
@@ -876,9 +876,9 @@
         }
       ],
       "drop": {
-        "baseDropChance": 0.001,
+        "baseDropChance": 0.0001,
         "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 0.00005,
+        "dropChanceBonusPerResonance": 0.00000026424825,
         "maxResonanceBonus": 0.01
       },
       "evolution": {
@@ -913,9 +913,9 @@
         }
       ],
       "drop": {
-        "baseDropChance": 0.001,
+        "baseDropChance": 0.0001,
         "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 0.00005,
+        "dropChanceBonusPerResonance": 0.00000026424825,
         "maxResonanceBonus": 0.01
       },
       "evolution": {
@@ -950,9 +950,9 @@
         }
       ],
       "drop": {
-        "baseDropChance": 0.001,
+        "baseDropChance": 0.0001,
         "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 0.00005,
+        "dropChanceBonusPerResonance": 0.00000026424825,
         "maxResonanceBonus": 0.01
       },
       "evolution": {
@@ -987,9 +987,9 @@
         }
       ],
       "drop": {
-        "baseDropChance": 0.001,
+        "baseDropChance": 0.0001,
         "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 0.00005,
+        "dropChanceBonusPerResonance": 0.0000005284965,
         "maxResonanceBonus": 0.01
       },
       "evolution": {
@@ -1024,9 +1024,9 @@
         }
       ],
       "drop": {
-        "baseDropChance": 0.001,
+        "baseDropChance": 0.0001,
         "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 0.00005,
+        "dropChanceBonusPerResonance": 0.00000026424825,
         "maxResonanceBonus": 0.01
       },
       "evolution": {
@@ -1099,9 +1099,9 @@
         }
       ],
       "drop": {
-        "baseDropChance": 0.001,
+        "baseDropChance": 0.0001,
         "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 0.00005,
+        "dropChanceBonusPerResonance": 0.00000029360925,
         "maxResonanceBonus": 0.01
       },
       "evolution": {
@@ -1136,9 +1136,9 @@
         }
       ],
       "drop": {
-        "baseDropChance": 0.001,
+        "baseDropChance": 0.0001,
         "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 0.00005,
+        "dropChanceBonusPerResonance": 0.00000029360925,
         "maxResonanceBonus": 0.01
       },
       "evolution": {
@@ -1174,9 +1174,9 @@
         }
       ],
       "drop": {
-        "baseDropChance": 0.001,
+        "baseDropChance": 0.0001,
         "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 0.00005,
+        "dropChanceBonusPerResonance": 0.00000029360925,
         "maxResonanceBonus": 0.01
       },
       "evolution": {
@@ -1212,9 +1212,9 @@
         }
       ],
       "drop": {
-        "baseDropChance": 0.001,
+        "baseDropChance": 0.0001,
         "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 0.00005,
+        "dropChanceBonusPerResonance": 0.00000029360925,
         "maxResonanceBonus": 0.01
       },
       "evolution": {
@@ -1250,9 +1250,9 @@
         }
       ],
       "drop": {
-        "baseDropChance": 0.001,
+        "baseDropChance": 0.0001,
         "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 0.00005,
+        "dropChanceBonusPerResonance": 0.00000029360925,
         "maxResonanceBonus": 0.01
       },
       "evolution": {
@@ -1400,9 +1400,9 @@
         }
       ],
       "drop": {
-        "baseDropChance": 0.001,
+        "baseDropChance": 0.0001,
         "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 0.00005,
+        "dropChanceBonusPerResonance": 0.00000029360925,
         "maxResonanceBonus": 0.01
       },
       "evolution": {
@@ -1437,9 +1437,9 @@
         }
       ],
       "drop": {
-        "baseDropChance": 0.001,
+        "baseDropChance": 0.0001,
         "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 0.00005,
+        "dropChanceBonusPerResonance": 0.00000029360925,
         "maxResonanceBonus": 0.01
       },
       "evolution": {
@@ -1474,9 +1474,9 @@
         }
       ],
       "drop": {
-        "baseDropChance": 0.001,
+        "baseDropChance": 0.0001,
         "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 0.00005,
+        "dropChanceBonusPerResonance": 0.00000058721825,
         "maxResonanceBonus": 0.01
       },
       "evolution": {
@@ -1511,9 +1511,9 @@
         }
       ],
       "drop": {
-        "baseDropChance": 0.001,
+        "baseDropChance": 0.0001,
         "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 0.00005,
+        "dropChanceBonusPerResonance": 0.000000391479,
         "maxResonanceBonus": 0.01
       },
       "evolution": {
@@ -1548,9 +1548,9 @@
         }
       ],
       "drop": {
-        "baseDropChance": 0.001,
+        "baseDropChance": 0.0001,
         "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 0.00005,
+        "dropChanceBonusPerResonance": 0.00000029360925,
         "maxResonanceBonus": 0.01
       },
       "evolution": {
@@ -1585,9 +1585,9 @@
         }
       ],
       "drop": {
-        "baseDropChance": 0.001,
+        "baseDropChance": 0.0001,
         "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 0.00005,
+        "dropChanceBonusPerResonance": 0.000000391479,
         "maxResonanceBonus": 0.01
       },
       "evolution": {
@@ -1742,9 +1742,9 @@
         }
       ],
       "drop": {
-        "baseDropChance": 0.001,
+        "baseDropChance": 0.0001,
         "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 0.00005,
+        "dropChanceBonusPerResonance": 0.0000002669175,
         "maxResonanceBonus": 0.01
       },
       "evolution": {
@@ -1781,9 +1781,9 @@
         }
       ],
       "drop": {
-        "baseDropChance": 0.001,
+        "baseDropChance": 0.0001,
         "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 0.00005,
+        "dropChanceBonusPerResonance": 0.00000020972075,
         "maxResonanceBonus": 0.01
       },
       "evolution": {
@@ -1818,9 +1818,9 @@
         }
       ],
       "drop": {
-        "baseDropChance": 0.001,
+        "baseDropChance": 0.0001,
         "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 0.00005,
+        "dropChanceBonusPerResonance": 0.0000002669175,
         "maxResonanceBonus": 0.01
       },
       "evolution": {
@@ -1855,9 +1855,9 @@
         }
       ],
       "drop": {
-        "baseDropChance": 0.001,
+        "baseDropChance": 0.0001,
         "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 0.00005,
+        "dropChanceBonusPerResonance": 0.0000004517065,
         "maxResonanceBonus": 0.01
       },
       "evolution": {
@@ -1892,9 +1892,9 @@
         }
       ],
       "drop": {
-        "baseDropChance": 0.001,
+        "baseDropChance": 0.0001,
         "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 0.00005,
+        "dropChanceBonusPerResonance": 0.000000391479,
         "maxResonanceBonus": 0.01
       },
       "evolution": {
@@ -1929,9 +1929,9 @@
         }
       ],
       "drop": {
-        "baseDropChance": 0.001,
+        "baseDropChance": 0.0001,
         "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 0.00005,
+        "dropChanceBonusPerResonance": 0.0000001957395,
         "maxResonanceBonus": 0.01
       },
       "evolution": {
@@ -1966,9 +1966,9 @@
         }
       ],
       "drop": {
-        "baseDropChance": 0.001,
+        "baseDropChance": 0.0001,
         "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 0.00005,
+        "dropChanceBonusPerResonance": 0.0000001957395,
         "maxResonanceBonus": 0.01
       },
       "evolution": {
@@ -2003,9 +2003,9 @@
         }
       ],
       "drop": {
-        "baseDropChance": 0.001,
+        "baseDropChance": 0.0001,
         "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 0.00005,
+        "dropChanceBonusPerResonance": 0.00000029360925,
         "maxResonanceBonus": 0.01
       },
       "evolution": {
@@ -2040,9 +2040,9 @@
         }
       ],
       "drop": {
-        "baseDropChance": 0.001,
+        "baseDropChance": 0.0001,
         "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 0.00005,
+        "dropChanceBonusPerResonance": 0.00000029360925,
         "maxResonanceBonus": 0.01
       },
       "evolution": {
@@ -2077,9 +2077,9 @@
         }
       ],
       "drop": {
-        "baseDropChance": 0.001,
+        "baseDropChance": 0.0001,
         "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 0.00005,
+        "dropChanceBonusPerResonance": 0.00000016777675,
         "maxResonanceBonus": 0.01
       },
       "evolution": {
@@ -2114,9 +2114,9 @@
         }
       ],
       "drop": {
-        "baseDropChance": 0.001,
+        "baseDropChance": 0.0001,
         "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 0.00005,
+        "dropChanceBonusPerResonance": 0.00000023488725,
         "maxResonanceBonus": 0.01
       },
       "evolution": {
@@ -2151,9 +2151,9 @@
         }
       ],
       "drop": {
-        "baseDropChance": 0.001,
+        "baseDropChance": 0.0001,
         "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 0.00005,
+        "dropChanceBonusPerResonance": 0.00000023488725,
         "maxResonanceBonus": 0.01
       },
       "evolution": {
@@ -2188,9 +2188,9 @@
         }
       ],
       "drop": {
-        "baseDropChance": 0.001,
+        "baseDropChance": 0.0001,
         "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 0.00005,
+        "dropChanceBonusPerResonance": 0.000000391479,
         "maxResonanceBonus": 0.01
       },
       "evolution": {
@@ -2225,9 +2225,9 @@
         }
       ],
       "drop": {
-        "baseDropChance": 0.001,
+        "baseDropChance": 0.0001,
         "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 0.00005,
+        "dropChanceBonusPerResonance": 0.0000001957395,
         "maxResonanceBonus": 0.01
       },
       "evolution": {
@@ -2262,9 +2262,9 @@
         }
       ],
       "drop": {
-        "baseDropChance": 0.001,
+        "baseDropChance": 0.0001,
         "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 0.00005,
+        "dropChanceBonusPerResonance": 0.0000002669175,
         "maxResonanceBonus": 0.01
       },
       "evolution": {
@@ -2299,9 +2299,9 @@
         }
       ],
       "drop": {
-        "baseDropChance": 0.001,
+        "baseDropChance": 0.0001,
         "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 0.00005,
+        "dropChanceBonusPerResonance": 0.0000003262325,
         "maxResonanceBonus": 0.01
       },
       "evolution": {
@@ -2336,9 +2336,9 @@
         }
       ],
       "drop": {
-        "baseDropChance": 0.001,
+        "baseDropChance": 0.0001,
         "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 0.00005,
+        "dropChanceBonusPerResonance": 0.0000003670115,
         "maxResonanceBonus": 0.01
       },
       "evolution": {
@@ -2373,9 +2373,9 @@
         }
       ],
       "drop": {
-        "baseDropChance": 0.001,
+        "baseDropChance": 0.0001,
         "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 0.00005,
+        "dropChanceBonusPerResonance": 0.00000041944175,
         "maxResonanceBonus": 0.01
       },
       "evolution": {

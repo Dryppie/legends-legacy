@@ -47,7 +47,8 @@ public sealed class CombatGatheringRewardProcessor : ICombatGatheringRewardProce
 
     public async Task<IReadOnlyList<GatheringRewardResult>> ProcessAsync(
         CombatGatheringRewardFacts facts,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken,
+        IReadOnlyDictionary<BonusKind, double>? bonusFactors = null)
     {
         var victories = facts.Victories;
         if (victories <= 0 || facts.GatheringNodes.Count == 0)
@@ -71,7 +72,7 @@ public sealed class CombatGatheringRewardProcessor : ICombatGatheringRewardProce
             facts.CharacterId,
             professionType,
             cancellationToken);
-        var factors = await _bonusService.GetAggregatedAsync(facts.CharacterId, DateTimeOffset.UtcNow, cancellationToken);
+        var factors = bonusFactors ?? await _bonusService.GetAggregatedAsync(facts.CharacterId, DateTimeOffset.UtcNow, cancellationToken);
         var gatheringYieldBps = factors.Get(BonusKind.GatheringYieldBps);
         var gatheringExperienceGainBps = factors.Get(BonusKind.GatheringExperienceGainBps);
         var rareChanceRelativeBps = factors.Get(BonusKind.GatheringRareDropChanceRelativeBps);
