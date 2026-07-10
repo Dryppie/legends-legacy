@@ -16,10 +16,15 @@ namespace Persistence.Chat.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    Channel = table.Column<string>(type: "text", nullable: false),
+                    ChannelType = table.Column<int>(type: "integer", nullable: false),
+                    ContextKey = table.Column<string>(type: "text", nullable: false),
                     SenderId = table.Column<Guid>(type: "uuid", nullable: false),
                     SenderName = table.Column<string>(type: "text", nullable: false),
+                    SenderTitleDisplayName = table.Column<string>(type: "text", nullable: true),
                     Body = table.Column<string>(type: "text", nullable: false),
+                    TargetCharacterId = table.Column<Guid>(type: "uuid", nullable: true),
+                    TargetCharacterName = table.Column<string>(type: "text", nullable: true),
+                    TargetCharacterTitleDisplayName = table.Column<string>(type: "text", nullable: true),
                     SentAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>

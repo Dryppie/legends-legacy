@@ -114,6 +114,7 @@ public sealed class CreatureArchiveService : ICreatureArchiveService
                     entry.KillCount,
                     entry.FirstDefeatedAtUtc,
                     entry.LastDefeatedAtUtc,
+                    entry.IsEssenceFocus,
                     definition?.Id,
                     definition?.Name,
                     definition is not null && absorbedIds.Contains(definition.Id),
@@ -122,6 +123,51 @@ public sealed class CreatureArchiveService : ICreatureArchiveService
             .ToList();
 
         return new CreatureArchive(creatures);
+    }
+
+    public async Task<CreatureArchive> SetEssenceFocusAsync(
+        Guid characterId,
+        string? creatureId,
+        CancellationToken cancellationToken)
+    {
+        var entries = await _dbContext.CharacterCreatureArchiveEntries
+            .Where(x => x.CharacterId == characterId)
+            .ToListAsync(cancellationToken);
+
+        foreach (var entry in entries)
+        {
+            entry.IsEssenceFocus = false;
+        }
+
+        if (!string.IsNullOrWhiteSpace(creatureId))
+        {
+            var focusedEntry = entries.FirstOrDefault(entry =>
+                entry.CreatureDefinitionId.Equals(creatureId, StringComparison.OrdinalIgnoreCase));
+
+            if (focusedEntry is not null && _essenceDefinitions.GetByMonsterId(focusedEntry.CreatureDefinitionId) is not null)
+            {
+                focusedEntry.IsEssenceFocus = true;
+            }
+        }
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+        return await GetCreatureArchiveAsync(characterId, cancellationToken);
+    }
+
+    public async Task<bool> IsEssenceFocusAsync(Guid characterId, string creatureId, CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(creatureId))
+        {
+            return false;
+        }
+
+        return await _dbContext.CharacterCreatureArchiveEntries
+            .AnyAsync(
+                x =>
+                    x.CharacterId == characterId &&
+                    x.IsEssenceFocus &&
+                    x.CreatureDefinitionId == creatureId,
+                cancellationToken);
     }
 
     public async Task<EssenceCodex> GetEssenceCodexAsync(Guid characterId, CancellationToken cancellationToken)

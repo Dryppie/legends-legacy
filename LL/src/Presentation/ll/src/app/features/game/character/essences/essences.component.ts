@@ -276,6 +276,17 @@ export class EssencesComponent implements OnInit {
     return creature.creatureId;
   }
 
+  public setEssenceFocus(creature: CreatureArchiveEntryDto): void {
+    if (!creature.essenceDefinitionId) return;
+    this.essenceState.setEssenceFocus(
+      creature.isEssenceFocus ? null : creature.creatureId,
+    );
+  }
+
+  public clearEssenceFocus(): void {
+    this.essenceState.setEssenceFocus(null);
+  }
+
   public trackCodex(_: number, entry: EssenceCodexEntryDto): string {
     return entry.id;
   }

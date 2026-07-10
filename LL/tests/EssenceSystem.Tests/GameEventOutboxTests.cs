@@ -366,6 +366,12 @@ public sealed class GameEventOutboxTests
 
         public Task<EssenceCodex> GetEssenceCodexAsync(Guid characterId, CancellationToken cancellationToken) =>
             Task.FromResult(new EssenceCodex([]));
+
+        public Task<CreatureArchive> SetEssenceFocusAsync(Guid characterId, string? creatureId, CancellationToken cancellationToken) =>
+            Task.FromResult(new CreatureArchive([]));
+
+        public Task<bool> IsEssenceFocusAsync(Guid characterId, string creatureId, CancellationToken cancellationToken) =>
+            Task.FromResult(false);
     }
 
     private sealed class NoOpPublisher : IPublisher

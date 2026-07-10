@@ -24,13 +24,14 @@ public sealed record CreatureArchiveEntryDto(
     int KillCount,
     DateTimeOffset FirstDefeatedAtUtc,
     DateTimeOffset LastDefeatedAtUtc,
+    bool IsEssenceFocus,
     string? EssenceDefinitionId,
     string? EssenceName,
     bool IsEssenceAbsorbed,
     IReadOnlyList<string> Tags) : IMapFrom<CreatureArchiveEntry>
 {
     public CreatureArchiveEntryDto()
-        : this(string.Empty, string.Empty, 0, default, default, null, null, false, [])
+        : this(string.Empty, string.Empty, 0, default, default, false, null, null, false, [])
     {
     }
 

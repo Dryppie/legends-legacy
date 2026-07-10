@@ -30,6 +30,12 @@ export class EssencesService {
     return this.apiService.get('essence/creatures');
   }
 
+  public setEssenceFocus(
+    creatureId: string | null,
+  ): Observable<CreatureArchiveDto> {
+    return this.apiService.post('essence/creatures/focus', { creatureId });
+  }
+
   public getCodex(): Observable<EssenceCodexDto> {
     return this.apiService.get('essence/codex');
   }

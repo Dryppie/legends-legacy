@@ -46,6 +46,12 @@ export class EssenceStateService {
   readonly loadouts = computed(() => this._loadouts());
   readonly creatureArchive = computed(() => this._creatureArchive());
   readonly codex = computed(() => this._codex());
+  readonly focusedCreature = computed(
+    () =>
+      this._creatureArchive()?.creatures.find(
+        (creature) => creature.isEssenceFocus,
+      ) ?? null,
+  );
   readonly selectedLoadoutId = computed(() => this._selectedLoadoutId());
   readonly draftLoadoutName = computed(() => this._draftLoadoutName());
   readonly draftSlots = computed(() => this._draftSlots());
@@ -258,6 +264,14 @@ export class EssenceStateService {
     this.essencesService
       .setFavorite(essence.id, essence.isFavorite)
       .subscribe();
+  }
+
+  setEssenceFocus(creatureId: string | null): void {
+    this.essencesService.setEssenceFocus(creatureId).subscribe({
+      next: (archive) => this._creatureArchive.set(archive),
+      error: (error) =>
+        this._error.set(error?.message ?? 'Failed to update Essence Focus'),
+    });
   }
 
   absorbSelectedInventoryEssence(): Observable<EssenceMutationResponseDto> | null {

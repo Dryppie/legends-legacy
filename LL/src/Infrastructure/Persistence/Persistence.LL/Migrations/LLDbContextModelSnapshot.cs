@@ -1537,6 +1537,9 @@ namespace Persistence.LL.Migrations
                     b.Property<DateTimeOffset>("FirstDefeatedAtUtc")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<bool>("IsEssenceFocus")
+                        .HasColumnType("boolean");
+
                     b.Property<int>("KillCount")
                         .HasColumnType("integer");
 
@@ -1549,6 +1552,8 @@ namespace Persistence.LL.Migrations
 
                     b.HasIndex("CharacterId", "CreatureDefinitionId")
                         .IsUnique();
+
+                    b.HasIndex("CharacterId", "IsEssenceFocus");
 
                     b.ToTable("CharacterCreatureArchiveEntries");
                 });

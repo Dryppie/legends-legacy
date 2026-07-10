@@ -81,6 +81,7 @@ export interface CreatureArchiveEntryDto {
   killCount: number;
   firstDefeatedAtUtc: string;
   lastDefeatedAtUtc: string;
+  isEssenceFocus: boolean;
   essenceDefinitionId?: string | null;
   essenceName?: string | null;
   isEssenceAbsorbed: boolean;

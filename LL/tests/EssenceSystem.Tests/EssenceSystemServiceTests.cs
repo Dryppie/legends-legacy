@@ -718,6 +718,29 @@ public sealed class EssenceSystemServiceTests
     }
 
     [Fact]
+    public async Task Focused_monster_drop_bonus_only_applies_to_focused_creature()
+    {
+        await using var db = CreateDb();
+        var characterId = await SeedCharacterAndInventoryAsync(db);
+        var service = CreateService(
+            db,
+            new QueueRandomProvider(0.6, 0.6),
+            bonusService: new StaticBonusService(new Dictionary<BonusKind, double>
+            {
+                [BonusKind.FocusedMonsterEssenceDropRateRelativeBps] = 5000
+            }),
+            creatureArchiveService: new StaticCreatureArchiveService("monster.test"));
+
+        var focused = await service.RollMonsterEssenceDropAsync(characterId, "monster.test", true, CancellationToken.None);
+        var unfocused = await service.RollMonsterEssenceDropAsync(characterId, "monster.other", true, CancellationToken.None);
+
+        Assert.True(focused.Dropped);
+        Assert.Equal(0.75, focused.EffectiveDropChance);
+        Assert.False(unfocused.Dropped);
+        Assert.Equal(0.5, unfocused.EffectiveDropChance);
+    }
+
+    [Fact]
     public async Task RollEssenceDrops_creates_unbound_item_for_successful_monster_roll()
     {
         await using var db = CreateDb();
@@ -752,7 +775,8 @@ public sealed class EssenceSystemServiceTests
         LLDbContext db,
         IRandomProvider? random = null,
         IEssenceDefinitionRepository? definitions = null,
-        IBonusService? bonusService = null)
+        IBonusService? bonusService = null,
+        ICreatureArchiveService? creatureArchiveService = null)
     {
         definitions ??= new FakeDefinitionRepository();
         return new EssenceSystemService(
@@ -766,7 +790,8 @@ public sealed class EssenceSystemServiceTests
             new InventoryItemFactory(),
             random ?? new QueueRandomProvider(0.99),
             new NoopGameEventOutbox(),
-            bonusService: bonusService);
+            bonusService: bonusService,
+            creatureArchiveService: creatureArchiveService);
     }
 
     private static EssenceDefinition UtilityDefinition() => new()
@@ -996,6 +1021,28 @@ public sealed class EssenceSystemServiceTests
             DateTimeOffset now,
             CancellationToken ct = default) =>
             ValueTask.FromResult(bonuses);
+    }
+
+    private sealed class StaticCreatureArchiveService(string focusedCreatureId) : ICreatureArchiveService
+    {
+        public Task RecordDefeatedCreaturesAsync(
+            Guid characterId,
+            IReadOnlyCollection<Creature> creatures,
+            DateTimeOffset defeatedAtUtc,
+            CancellationToken cancellationToken) =>
+            Task.CompletedTask;
+
+        public Task<CreatureArchive> GetCreatureArchiveAsync(Guid characterId, CancellationToken cancellationToken) =>
+            Task.FromResult(new CreatureArchive([]));
+
+        public Task<EssenceCodex> GetEssenceCodexAsync(Guid characterId, CancellationToken cancellationToken) =>
+            Task.FromResult(new EssenceCodex([]));
+
+        public Task<CreatureArchive> SetEssenceFocusAsync(Guid characterId, string? creatureId, CancellationToken cancellationToken) =>
+            Task.FromResult(new CreatureArchive([]));
+
+        public Task<bool> IsEssenceFocusAsync(Guid characterId, string creatureId, CancellationToken cancellationToken) =>
+            Task.FromResult(creatureId.Equals(focusedCreatureId, StringComparison.OrdinalIgnoreCase));
     }
 
     private sealed class NoopGameEventOutbox : IGameEventOutbox

@@ -47,6 +47,21 @@ namespace Persistence.LL.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "AchievementEventLedgers",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    OutboxMessageId = table.Column<Guid>(type: "uuid", nullable: false),
+                    CharacterId = table.Column<Guid>(type: "uuid", nullable: true),
+                    EventType = table.Column<string>(type: "character varying(160)", maxLength: 160, nullable: false),
+                    ProcessedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AchievementEventLedgers", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "BackgroundJobExecutions",
                 columns: table => new
                 {
@@ -83,6 +98,24 @@ namespace Persistence.LL.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_ChampionMarketPurchases", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "CharacterCreatureArchiveEntries",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    CharacterId = table.Column<Guid>(type: "uuid", nullable: false),
+                    CreatureDefinitionId = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: false),
+                    CreatureName = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: false),
+                    KillCount = table.Column<int>(type: "integer", nullable: false),
+                    IsEssenceFocus = table.Column<bool>(type: "boolean", nullable: false),
+                    FirstDefeatedAtUtc = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    LastDefeatedAtUtc = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_CharacterCreatureArchiveEntries", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -148,6 +181,29 @@ namespace Persistence.LL.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "CharacterTutorialProgresses",
+                columns: table => new
+                {
+                    CharacterId = table.Column<Guid>(type: "uuid", nullable: false),
+                    TutorialId = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    CurrentStep = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    CraftedTierOneEquipmentCount = table.Column<int>(type: "integer", nullable: false),
+                    EquippedTierOneEquipmentCount = table.Column<int>(type: "integer", nullable: false),
+                    TrainingEssenceRewardGranted = table.Column<bool>(type: "boolean", nullable: false),
+                    CompletionRewardGranted = table.Column<bool>(type: "boolean", nullable: false),
+                    TrainingCombatWonAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
+                    EssenceAbsorbedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
+                    EssenceEquippedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
+                    CompletedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
+                    CreatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    UpdatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_CharacterTutorialProgresses", x => new { x.CharacterId, x.TutorialId });
+                });
+
+            migrationBuilder.CreateTable(
                 name: "DungeonCompletionRecords",
                 columns: table => new
                 {
@@ -161,6 +217,25 @@ namespace Persistence.LL.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_DungeonCompletionRecords", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "GameEventOutboxMessages",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    CharacterId = table.Column<Guid>(type: "uuid", nullable: true),
+                    AccountId = table.Column<Guid>(type: "uuid", nullable: true),
+                    EventType = table.Column<string>(type: "character varying(160)", maxLength: 160, nullable: false),
+                    PayloadJson = table.Column<string>(type: "text", nullable: false),
+                    CreatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    AvailableAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
+                    CorrelationId = table.Column<string>(type: "character varying(160)", maxLength: 160, nullable: true),
+                    IdempotencyKey = table.Column<string>(type: "character varying(300)", maxLength: 300, nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_GameEventOutboxMessages", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -554,6 +629,32 @@ namespace Persistence.LL.Migrations
                         name: "FK_EquippedEssenceSnapshots_CharacterSnapshots_CharacterSnapsh~",
                         column: x => x.CharacterSnapshotId,
                         principalTable: "CharacterSnapshots",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "GameEventOutboxDeliveries",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    MessageId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Consumer = table.Column<string>(type: "character varying(120)", maxLength: 120, nullable: false),
+                    Status = table.Column<string>(type: "character varying(40)", maxLength: 40, nullable: false),
+                    Attempts = table.Column<int>(type: "integer", nullable: false),
+                    LastError = table.Column<string>(type: "character varying(4000)", maxLength: 4000, nullable: true),
+                    CreatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    AvailableAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
+                    ProcessingStartedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
+                    ProcessedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_GameEventOutboxDeliveries", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_GameEventOutboxDeliveries_GameEventOutboxMessages_MessageId",
+                        column: x => x.MessageId,
+                        principalTable: "GameEventOutboxMessages",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -1936,6 +2037,17 @@ namespace Persistence.LL.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_AchievementEventLedgers_CharacterId_ProcessedAt",
+                table: "AchievementEventLedgers",
+                columns: new[] { "CharacterId", "ProcessedAt" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AchievementEventLedgers_OutboxMessageId",
+                table: "AchievementEventLedgers",
+                column: "OutboxMessageId",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_ActionDetails_AreaId",
                 table: "ActionDetails",
                 column: "AreaId");
@@ -2015,6 +2127,22 @@ namespace Persistence.LL.Migrations
                 column: "Rating");
 
             migrationBuilder.CreateIndex(
+                name: "IX_CharacterCreatureArchiveEntries_CharacterId",
+                table: "CharacterCreatureArchiveEntries",
+                column: "CharacterId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CharacterCreatureArchiveEntries_CharacterId_CreatureDefinit~",
+                table: "CharacterCreatureArchiveEntries",
+                columns: new[] { "CharacterId", "CreatureDefinitionId" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CharacterCreatureArchiveEntries_CharacterId_IsEssenceFocus",
+                table: "CharacterCreatureArchiveEntries",
+                columns: new[] { "CharacterId", "IsEssenceFocus" });
+
+            migrationBuilder.CreateIndex(
                 name: "IX_CharacterDungeonMasteries_DungeonDefinitionId",
                 table: "CharacterDungeonMasteries",
                 column: "DungeonDefinitionId");
@@ -2024,6 +2152,11 @@ namespace Persistence.LL.Migrations
                 table: "CharacterRecipeUnlocks",
                 columns: new[] { "CharacterId", "RecipeId", "BlueprintId" },
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CharacterTutorialProgresses_CurrentStep",
+                table: "CharacterTutorialProgresses",
+                column: "CurrentStep");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ColosseumMatches_CharacterBId",
@@ -2120,6 +2253,39 @@ namespace Persistence.LL.Migrations
                 name: "IX_ExternalLogins_UserId",
                 table: "ExternalLogins",
                 column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_GameEventOutboxDeliveries_Consumer_Status_AvailableAt",
+                table: "GameEventOutboxDeliveries",
+                columns: new[] { "Consumer", "Status", "AvailableAt" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_GameEventOutboxDeliveries_MessageId_Consumer",
+                table: "GameEventOutboxDeliveries",
+                columns: new[] { "MessageId", "Consumer" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_GameEventOutboxDeliveries_Status_AvailableAt_CreatedAt",
+                table: "GameEventOutboxDeliveries",
+                columns: new[] { "Status", "AvailableAt", "CreatedAt" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_GameEventOutboxMessages_AvailableAt_CreatedAt",
+                table: "GameEventOutboxMessages",
+                columns: new[] { "AvailableAt", "CreatedAt" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_GameEventOutboxMessages_CharacterId_CreatedAt",
+                table: "GameEventOutboxMessages",
+                columns: new[] { "CharacterId", "CreatedAt" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_GameEventOutboxMessages_IdempotencyKey",
+                table: "GameEventOutboxMessages",
+                column: "IdempotencyKey",
+                unique: true,
+                filter: "\"IdempotencyKey\" IS NOT NULL");
 
             migrationBuilder.CreateIndex(
                 name: "IX_GuildActivityLogs_GuildId_CreatedAt",
@@ -2550,6 +2716,9 @@ namespace Persistence.LL.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
+                name: "AchievementEventLedgers");
+
+            migrationBuilder.DropTable(
                 name: "AreaCreature");
 
             migrationBuilder.DropTable(
@@ -2571,6 +2740,9 @@ namespace Persistence.LL.Migrations
                 name: "CharacterArenaProfiles");
 
             migrationBuilder.DropTable(
+                name: "CharacterCreatureArchiveEntries");
+
+            migrationBuilder.DropTable(
                 name: "CharacterDungeonMasteries");
 
             migrationBuilder.DropTable(
@@ -2581,6 +2753,9 @@ namespace Persistence.LL.Migrations
 
             migrationBuilder.DropTable(
                 name: "CharacterSoulstoneUpgrades");
+
+            migrationBuilder.DropTable(
+                name: "CharacterTutorialProgresses");
 
             migrationBuilder.DropTable(
                 name: "ColosseumMatches");
@@ -2608,6 +2783,9 @@ namespace Persistence.LL.Migrations
 
             migrationBuilder.DropTable(
                 name: "ExternalLogins");
+
+            migrationBuilder.DropTable(
+                name: "GameEventOutboxDeliveries");
 
             migrationBuilder.DropTable(
                 name: "GuildActivityLogs");
@@ -2710,6 +2888,9 @@ namespace Persistence.LL.Migrations
 
             migrationBuilder.DropTable(
                 name: "PlayerEssences");
+
+            migrationBuilder.DropTable(
+                name: "GameEventOutboxMessages");
 
             migrationBuilder.DropTable(
                 name: "GuildMissionInstances");

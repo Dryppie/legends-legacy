@@ -15,6 +15,7 @@ public sealed record CreatureArchiveEntry(
     int KillCount,
     DateTimeOffset FirstDefeatedAtUtc,
     DateTimeOffset LastDefeatedAtUtc,
+    bool IsEssenceFocus,
     string? EssenceDefinitionId,
     string? EssenceName,
     bool IsEssenceAbsorbed,

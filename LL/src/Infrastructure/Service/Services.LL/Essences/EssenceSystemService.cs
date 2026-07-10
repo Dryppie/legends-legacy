@@ -33,6 +33,7 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
     private readonly IInventoryItemFactory _inventoryItemFactory;
     private readonly IRandomProvider _random;
     private readonly IBonusService? _bonusService;
+    private readonly ICreatureArchiveService? _creatureArchiveService;
     private readonly IPublisher? _publisher;
     private readonly IGameEventOutbox _outbox;
 
@@ -48,7 +49,8 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
         IRandomProvider random,
         IGameEventOutbox outbox,
         IPublisher? publisher = null,
-        IBonusService? bonusService = null)
+        IBonusService? bonusService = null,
+        ICreatureArchiveService? creatureArchiveService = null)
     {
         _essences = essences;
         _inventory = inventory;
@@ -60,6 +62,7 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
         _inventoryItemFactory = inventoryItemFactory;
         _random = random;
         _bonusService = bonusService;
+        _creatureArchiveService = creatureArchiveService;
         _publisher = publisher;
         _outbox = outbox;
     }
@@ -482,6 +485,13 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
             ? new Dictionary<BonusKind, double>()
             : await _bonusService.GetAggregatedAsync(characterId, DateTimeOffset.UtcNow, cancellationToken);
         var relativeDropRateBps = factors.Get(BonusKind.EssenceDropRateRelativeBps);
+        if (factors.Get(BonusKind.FocusedMonsterEssenceDropRateRelativeBps) > 0 &&
+            _creatureArchiveService is not null &&
+            await _creatureArchiveService.IsEssenceFocusAsync(characterId, monsterId, cancellationToken))
+        {
+            relativeDropRateBps += factors.Get(BonusKind.FocusedMonsterEssenceDropRateRelativeBps);
+        }
+
         var pityProgressionGainBps = factors.Get(BonusKind.EssencePityProgressionGainBps);
         var effective = Math.Clamp(
             (definition.Drop.BaseDropChance + bonus).ApplyPositiveBps(relativeDropRateBps),
