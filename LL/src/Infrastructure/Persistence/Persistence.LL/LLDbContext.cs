@@ -22,7 +22,6 @@ using Domain.Models.Items;
 using Domain.Models.Items.Equipments;
 using Domain.Models.Items.Equipments.Slots;
 using Domain.Models.Items.EssenceItems;
-using Domain.Models.LootTables;
 using Domain.Models.MarketPlaces;
 using Domain.Models.Outbox;
 using Domain.Models.Professions;
@@ -127,10 +126,6 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : DbContext(opti
             .HasValue<CombatActionDetails>(CharacterActionType.Combat)
             .HasValue<CraftingActionDetails>(CharacterActionType.Crafting);
 
-        modelBuilder.Entity<LootTableEntry>()
-            .HasDiscriminator<int>("LootTableType")
-            .HasValue<LootTable>(1)
-            .HasValue<LootTableItem>(2);
     }
 
     private static void SetupSqlite(ModelBuilder builder)
@@ -229,9 +224,6 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : DbContext(opti
 
     public DbSet<ItemBase> ItemBases => Set<ItemBase>();
     public DbSet<ItemInstance> ItemInstances => Set<ItemInstance>();
-    public DbSet<LootTable> LootTables => Set<LootTable>();
-    public DbSet<LootTableItem> LootTableItems => Set<LootTableItem>();
-
     public DbSet<MarketPlaceListing> MarketPlaceListings => Set<MarketPlaceListing>();
     public DbSet<GameEventOutboxMessage> GameEventOutboxMessages => Set<GameEventOutboxMessage>();
     public DbSet<GameEventOutboxDelivery> GameEventOutboxDeliveries => Set<GameEventOutboxDelivery>();

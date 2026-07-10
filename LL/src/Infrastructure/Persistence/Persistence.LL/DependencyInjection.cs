@@ -16,7 +16,6 @@ using Domain.Models.Items;
 using Domain.Models.Items.Equipments;
 using Domain.Models.Items.Equipments.TierPackages;
 using Domain.Models.Leaderboards;
-using Domain.Models.LootTables;
 using Domain.Models.MarketPlaces;
 using Domain.Models.Professions;
 using Domain.Models.Professions.Crafting;
@@ -44,7 +43,6 @@ using Persistence.LL.Repositories.Guilds;
 using Persistence.LL.Repositories.Inventories;
 using Persistence.LL.Repositories.Items;
 using Persistence.LL.Repositories.Leaderboards;
-using Persistence.LL.Repositories.LootTables;
 using Persistence.LL.Repositories.MarketPlaces;
 using Persistence.LL.Repositories.Outbox;
 using Persistence.LL.Repositories.Professions;
@@ -103,7 +101,6 @@ public static class DependencyInjection
 
         services.AddScoped<ILeaderboardRepository, LeaderboardRepository>();
 
-        services.AddScoped<ILootTableRepository, LootTableRepository>();
         services.AddScoped<IInventoryRepository, InventoryRepository>();
         services.AddScoped<IItemBaseRepository, ItemBaseRepository>();
 

@@ -12,6 +12,7 @@ using Application.Interfaces.Services.LL.Items;
 using Application.Interfaces.Services.LL.Prophecies;
 using Application.Interfaces.Services.LL.Professions;
 using Application.Interfaces.Services.LL.Regions;
+using Application.Interfaces.Services.LL.Rewards;
 using Application.Interfaces.Services.LL.Tutorials;
 using Domain.Models.Dungeons;
 using Domain.Models.Dungeons.Runs;
@@ -61,7 +62,6 @@ using Services.LL.JsonDefinitions.Reader;
 using Services.LL.Leaderboards;
 using Services.LL.Levels;
 using Services.LL.Loots;
-using Services.LL.LootTables;
 using Services.LL.MarketPlaces;
 using Services.LL.Outbox;
 using Services.LL.Players;
@@ -71,6 +71,7 @@ using Services.LL.Professions.Craftings;
 using Services.LL.Providers;
 using Services.LL.Regions;
 using Services.LL.Regions.Areas;
+using Services.LL.Rewards;
 using Services.LL.Snapshots;
 using Services.LL.Soulstones;
 using Services.LL.Spawnings;
@@ -227,7 +228,14 @@ public static class DependencyInjection
         services.AddScoped<ILeaderboardService, LeaderboardService>();
 
         services.AddScoped<ILootService, LootService>();
-        services.AddScoped<ILootTableService, LootTableService>();
+        services.AddSingleton<IRewardTableDefinitionValidator, RewardTableDefinitionValidator>();
+        services.AddSingleton<IRewardTableDefinitionProvider>(sp =>
+            new JsonRewardTableDefinitionProvider(
+                config,
+                contentRootPath,
+                sp.GetRequiredService<JsonSerializerOptions>(),
+                sp.GetRequiredService<IRewardTableDefinitionValidator>()));
+        services.AddScoped<IRewardRoller, RewardRoller>();
         services.AddScoped<IInventoryService, InventoryService>();
         services.AddScoped<IInventoryItemFactory, InventoryItemFactory>();
 

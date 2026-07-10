@@ -4,9 +4,8 @@ using Domain.Models.Dungeons;
 using Domain.Models.Dungeons.Definitions.Gathering;
 using Domain.Models.Dungeons.Runs;
 using Domain.Models.Entities.Creatures;
-using Domain.Models.Items;
 using Domain.Models.Items.Equipments.Slots;
-using Domain.Models.LootTables;
+using Domain.Models.Rewards;
 using Services.LL.Combat.Layers.Rewards.Models;
 using Services.LL.Interfaces.Combat.Reward.Dungeon;
 
@@ -17,18 +16,15 @@ public class DungeonCombatRewardFactBuilder : IDungeonCombatRewardFactBuilder
     private readonly IEntityService _entityService;
     private readonly IDungeonRunRepository _dungeonRuns;
     private readonly IDungeonDefinitions _dungeonDefinitions;
-    private readonly IItemBaseRepository _itemBases;
 
     public DungeonCombatRewardFactBuilder(
         IEntityService entityService,
         IDungeonRunRepository dungeonRuns,
-        IDungeonDefinitions dungeonDefinitions,
-        IItemBaseRepository itemBases)
+        IDungeonDefinitions dungeonDefinitions)
     {
         _entityService = entityService;
         _dungeonRuns = dungeonRuns;
         _dungeonDefinitions = dungeonDefinitions;
-        _itemBases = itemBases;
     }
 
     public async Task<DungeonCombatRewardFacts> BuildAsync(
@@ -111,50 +107,19 @@ public class DungeonCombatRewardFactBuilder : IDungeonCombatRewardFactBuilder
         DungeonDefinition dungeon,
         CancellationToken cancellationToken)
     {
-        if (dungeon.GatheringNodes.Count == 0)
-        {
-            return [];
-        }
-
-        var itemIds = dungeon.GatheringNodes
-            .SelectMany(node => node.Loot)
-            .Select(entry => entry.ItemId)
-            .Where(itemId => !string.IsNullOrWhiteSpace(itemId))
-            .Distinct(StringComparer.OrdinalIgnoreCase)
-            .ToArray();
-
-        var itemBases = await _itemBases.GetItemBasesByIdsAsync(itemIds, cancellationToken);
-
-        return dungeon.GatheringNodes
-            .Select(node => ToCombatGatheringNode(node, itemBases))
-            .Where(node => node.LootTable.Entries.Count > 0)
-            .ToArray();
+        return await Task.FromResult(dungeon.GatheringNodes
+            .Select(node => ToCombatGatheringNode(dungeon.Id, node))
+            .Where(node => node.HasRewards)
+            .ToArray());
     }
 
     private static CombatGatheringNode ToCombatGatheringNode(
-        DungeonGatheringNodeDefinition node,
-        IReadOnlyDictionary<string, ItemBase> itemBases)
+        string dungeonDefinitionId,
+        DungeonGatheringNodeDefinition node)
     {
-        var itemEntries = node.Loot
-            .Where(entry => itemBases.ContainsKey(entry.ItemId))
-            .Select(entry => new LootTableItem
-            {
-                Id = Guid.NewGuid(),
-                ItemId = entry.ItemId,
-                Item = itemBases[entry.ItemId],
-                Weight = entry.Weight,
-                MinQuantity = entry.MinQuantity,
-                MaxQuantity = entry.MaxQuantity,
-                IsRare = entry.IsRare
-            })
-            .ToList<LootTableEntry>();
-
-        var itemTable = new LootTable
-        {
-            Id = Guid.NewGuid(),
-            Weight = itemEntries.Sum(entry => Math.Max(0, entry.Weight)),
-            Entries = itemEntries
-        };
+        var rewardTable = string.IsNullOrWhiteSpace(node.RewardTableId)
+            ? BuildInlineRewardTable(dungeonDefinitionId, node)
+            : null;
 
         return new CombatGatheringNode(
             node.Id,
@@ -162,11 +127,52 @@ public class DungeonCombatRewardFactBuilder : IDungeonCombatRewardFactBuilder
             node.Type,
             node.LevelRequirement,
             node.ProcChance,
-            new LootTable
+            RewardTableId: node.RewardTableId,
+            RewardTable: rewardTable);
+    }
+
+    private static RewardTableDefinition? BuildInlineRewardTable(
+        string dungeonDefinitionId,
+        DungeonGatheringNodeDefinition node)
+    {
+        if (node.Loot.Count == 0)
+        {
+            return null;
+        }
+
+        var totalWeight = node.Loot.Sum(entry => Math.Max(0, entry.Weight));
+        var entries = node.Loot
+            .Where(entry => !string.IsNullOrWhiteSpace(entry.ItemId) && entry.Weight > 0)
+            .Select(entry => new RewardEntryDefinition
             {
-                Id = Guid.NewGuid(),
-                Entries = itemEntries.Count == 0 ? [] : [itemTable]
-            });
+                Id = entry.ItemId,
+                ItemId = entry.ItemId,
+                Type = RewardEntryType.Item,
+                Weight = entry.Weight,
+                Quantity = new RewardQuantityRange
+                {
+                    Min = entry.MinQuantity,
+                    Max = entry.MaxQuantity
+                },
+                Tags = entry.IsRare ? ["rare"] : []
+            })
+            .ToList();
+
+        return new RewardTableDefinition
+        {
+            Id = $"reward.dungeon.{dungeonDefinitionId}.gathering.{node.Id}",
+            DisplayName = node.Name,
+            Rolls =
+            [
+                new RewardRollDefinition
+                {
+                    Id = "gathering_weighted_drop",
+                    Type = RewardRollType.WeightedWithNoDrop,
+                    NoDropWeight = Math.Max(0, 100 - totalWeight),
+                    Entries = entries
+                }
+            ]
+        };
     }
 
     private static EquippedGatheringTool? ResolveEquippedTool(DungeonCombatOutcomeContext context)

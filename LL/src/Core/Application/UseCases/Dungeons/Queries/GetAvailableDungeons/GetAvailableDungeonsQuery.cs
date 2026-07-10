@@ -130,7 +130,12 @@ public sealed class GetAvailableDungeonsQueryHandler : IRequestHandler<GetAvaila
                 Id = x.ItemBase.Id,
                 ItemBase = _mapper.Map<ItemBaseDto>(x.ItemBase),
                 Category = x.Category,
-                Source = x.Source
+                Source = x.Source,
+                MinQuantity = x.MinQuantity,
+                MaxQuantity = x.MaxQuantity,
+                DropChancePercent = x.DropChancePercent,
+                CanDropNothing = x.CanDropNothing,
+                NoDropChancePercent = x.NoDropChancePercent
             })
             .ToList();
     }

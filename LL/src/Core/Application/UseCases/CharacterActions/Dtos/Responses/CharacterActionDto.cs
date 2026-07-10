@@ -9,7 +9,6 @@ namespace Application.UseCases.CharacterActions.Dtos.Responses;
 public class CharacterActionDto : IMapFrom<CharacterAction>
 {
     public CharacterActionType CharacterActionType { get; set; }
-    public Guid LootTableId { get; set; }
     public DateTimeOffset UpdatedAt { get; set; }
     public bool IsDeleted { get; set; }
     public CombatSessionDto? CombatSession { get; set; }

@@ -331,6 +331,34 @@ export class DungeonCardComponent implements OnChanges {
     return this.isToolItem(reward);
   }
 
+  rewardQuantityLabel(reward: DungeonPreviewReward): string {
+    const min = reward.minQuantity ?? 1;
+    const max = reward.maxQuantity ?? min;
+
+    return min === max ? `x${min}` : `x${min}-${max}`;
+  }
+
+  rewardChanceLabel(reward: DungeonPreviewReward): string {
+    const chance = reward.dropChancePercent;
+
+    if (chance === null || chance === undefined) {
+      return '';
+    }
+
+    return `${this.formatPercent(chance)} drop`;
+  }
+
+  rewardNoDropLabel(reward: DungeonPreviewReward): string {
+    if (!reward.canDropNothing) {
+      return '';
+    }
+
+    const chance = reward.noDropChancePercent;
+    return chance === null || chance === undefined
+      ? 'Can miss'
+      : `${this.formatPercent(chance)} no drop`;
+  }
+
   trackGatheringNode(_: number, node: DungeonGatheringNodePreview): string {
     return node.id;
   }
@@ -495,6 +523,18 @@ export class DungeonCardComponent implements OnChanges {
     return loot.minQuantity === loot.maxQuantity
       ? `${loot.minQuantity}`
       : `${loot.minQuantity}-${loot.maxQuantity}`;
+  }
+
+  private formatPercent(value: number): string {
+    if (value <= 0) {
+      return '0%';
+    }
+
+    if (value >= 99.95) {
+      return '100%';
+    }
+
+    return value < 10 ? `${value.toFixed(1)}%` : `${Math.round(value)}%`;
   }
 
   formatGatheringType(type: string | null | undefined): string {

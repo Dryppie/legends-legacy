@@ -50,6 +50,11 @@ public sealed class DungeonPreviewRewardDto
     public ItemBaseDto ItemBase { get; set; } = null!;
     public string Category { get; set; } = string.Empty;
     public string Source { get; set; } = string.Empty;
+    public int MinQuantity { get; set; }
+    public int MaxQuantity { get; set; }
+    public double? DropChancePercent { get; set; }
+    public bool CanDropNothing { get; set; }
+    public double? NoDropChancePercent { get; set; }
 }
 
 public sealed class DungeonEntryRequirementDto

@@ -19,7 +19,6 @@ using Domain.Models.Inventories;
 using Domain.Models.Items;
 using Domain.Models.Items.Equipments.Slots;
 using Domain.Models.Items.EssenceItems;
-using Domain.Models.LootTables;
 using Domain.Models.MarketPlaces;
 using Domain.Models.Outbox;
 using Domain.Models.Professions;
@@ -106,9 +105,6 @@ public interface IDbContext
     DbSet<InventoryItem> InventoryItems { get; }
     DbSet<ItemBase> ItemBases { get; }
     DbSet<ItemInstance> ItemInstances { get; }
-    DbSet<LootTable> LootTables { get; }
-    DbSet<LootTableItem> LootTableItems { get; }
-
     DbSet<MarketPlaceListing> MarketPlaceListings { get; }
     DbSet<GameEventOutboxMessage> GameEventOutboxMessages { get; }
     DbSet<GameEventOutboxDelivery> GameEventOutboxDeliveries { get; }

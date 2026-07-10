@@ -5,6 +5,11 @@ import { DungeonKeyItem } from './dungeonKeyItem';
 export interface DungeonPreviewReward extends ItemInstance {
   source?: string;
   category?: string;
+  minQuantity?: number;
+  maxQuantity?: number;
+  dropChancePercent?: number | null;
+  canDropNothing?: boolean;
+  noDropChancePercent?: number | null;
 }
 
 export interface DungeonGatheringLootPreview extends ItemInstance {

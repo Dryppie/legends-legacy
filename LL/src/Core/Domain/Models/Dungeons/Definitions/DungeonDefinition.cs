@@ -21,8 +21,8 @@ public sealed class DungeonDefinition
     public DungeonGrade? RequiredPreviousDungeonGrade { get; set; }
     public List<DungeonEntryCost> EntryCosts { get; set; } = [];
     public DungeonRewardTable RewardTable { get; set; } = new();
-    public Guid? CompletionLootTableId { get; set; }
-    public Guid? TierLootTableId { get; set; }
+    public List<string> CompletionRewardTableIds { get; set; } = [];
+    public List<string> TierRewardTableIds { get; set; } = [];
     public Dictionary<ItemType, double> MonsterLootModifiers { get; set; } = [];
     public DungeonMechanicDefinition Mechanic { get; set; } = new();
     public List<DungeonGatheringNodeDefinition> GatheringNodes { get; set; } = [];
