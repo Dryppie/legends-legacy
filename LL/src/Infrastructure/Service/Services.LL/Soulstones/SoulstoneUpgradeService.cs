@@ -276,7 +276,7 @@ public sealed class SoulstoneUpgradeService : ISoulstoneUpgradeService
 
         return effect.Kind switch
         {
-            SoulstoneUpgradeEffectKind.EssenceDropRateRelativeBps => $"+{percent}% relative Essence drop rate",
+            SoulstoneUpgradeEffectKind.EssenceDropRateRelativeBps => $"+{percent}% Essence drop rate",
             SoulstoneUpgradeEffectKind.EssencePityProgressionGainBps => $"+{percent}% Essence pity progression",
             SoulstoneUpgradeEffectKind.DuplicateEssenceExtraMaterialChanceBps => $"{percent}% duplicate Essence material chance",
             SoulstoneUpgradeEffectKind.FocusedMonsterEssenceDropRateRelativeBps => $"+{percent}% focused monster Essence drop rate",
@@ -284,11 +284,11 @@ public sealed class SoulstoneUpgradeService : ISoulstoneUpgradeService
             SoulstoneUpgradeEffectKind.IdleCombatDefeatExperienceRetentionBps => $"Retain {percent}% idle defeat EXP",
             SoulstoneUpgradeEffectKind.GatheringYieldBps => $"+{percent}% gathered material yield",
             SoulstoneUpgradeEffectKind.GatheringExperienceGainBps => $"+{percent}% gathering EXP",
-            SoulstoneUpgradeEffectKind.GatheringRareDropChanceRelativeBps => $"+{percent}% relative rare gathering chance",
+            SoulstoneUpgradeEffectKind.GatheringRareDropChanceRelativeBps => $"+{percent}% rare gathering chance",
             SoulstoneUpgradeEffectKind.CraftingExperienceGainBps => $"+{percent}% crafting EXP",
             SoulstoneUpgradeEffectKind.TemperingNegativeOutcomeReductionBps => $"-{percent} percentage points negative tempering chance",
             SoulstoneUpgradeEffectKind.BlueprintProgressionGainBps => $"+{percent}% blueprint progression",
-            SoulstoneUpgradeEffectKind.SigilFragmentDropRateRelativeBps => $"+{percent}% relative sigil fragment chance",
+            SoulstoneUpgradeEffectKind.SigilFragmentDropRateRelativeBps => $"+{percent}% sigil fragment chance",
             SoulstoneUpgradeEffectKind.DungeonRewardRetentionBps => $"+{percent}% retained checkpoint rewards",
             _ => $"+{value.ToString(CultureInfo.InvariantCulture)}"
         };
