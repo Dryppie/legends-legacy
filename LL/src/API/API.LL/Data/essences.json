@@ -334,6 +334,44 @@
       "passiveAbilityId": "ability.essence.legacy.goblin.pocket_dirt"
     },
     {
+      "id": "essence.legacy.training_goblin",
+      "sourceMonsterId": "monster.training_goblin",
+      "name": "Training Goblin's Essence",
+      "description": "A recovered legacy essence containing a training goblin's basic cunning.",
+      "rarity": "Common",
+      "tags": [
+        "Species.Goblinoid",
+        "Species.Humanoid",
+        "Role.Controller",
+        "Effect.Ability"
+      ],
+      "attributeBonuses": [
+        {
+          "attribute": "Precision",
+          "baseValue": 1
+        },
+        {
+          "attribute": "DodgeChance",
+          "baseValue": 1
+        }
+      ],
+      "drop": {
+        "baseDropChance": 0.001,
+        "resonanceGainPerFailedEligibleKill": 1,
+        "dropChanceBonusPerResonance": 0.00005,
+        "maxResonanceBonus": 0.01
+      },
+      "evolution": {
+        "id": "evolution.legacy.training_goblin",
+        "name": "Legacy Awakening",
+        "description": "This legacy essence has no special evolution yet.",
+        "requiredAscensionTier": 1,
+        "requiredCatalystItemId": "item.evolution_catalyst.legacy"
+      },
+      "activeAbilityId": "ability.essence.legacy.training_goblin.training_stab",
+      "passiveAbilityId": "ability.essence.legacy.training_goblin.pocket_pebbles"
+    },
+    {
       "id": "essence.legacy.goblin_warrior",
       "sourceMonsterId": "monster.goblin_warrior",
       "name": "Goblin Warrior's Essence",

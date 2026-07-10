@@ -58,9 +58,10 @@ internal class DungeonCombatRewardCalculator : IDungeonCombatRewardCalculator
 
             if (encounter.IsVictory)
             {
-                loot = _lootService.GenerateIdleCombatLootAsync(
+                loot = await _lootService.GenerateIdleCombatLootAsync(
                     encounter.HostileCreatures.Cast<Entity>().ToList(),
-                    facts.MonsterLootModifiers.ToDictionary(x => x.Key, x => x.Value));
+                    facts.MonsterLootModifiers.ToDictionary(x => x.Key, x => x.Value),
+                    cancellationToken);
 
                 var essenceDrops = await _essenceResonanceService.RollEssenceDropsAsync(
                     facts.CharacterId,

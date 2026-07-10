@@ -533,6 +533,72 @@
     ]
   },
   {
+    "id": "ability.essence.legacy.training_goblin.training_stab",
+    "kind": "Active",
+    "name": "Training Stab",
+    "description": "Jab the target with a simple practiced strike.",
+    "owningEssenceId": "essence.legacy.training_goblin",
+    "cooldownTicks": 120,
+    "tags": [
+      "Effect.Ability",
+      "Range.Melee"
+    ],
+    "triggers": [
+      {
+        "event": "OnAbilityUsed",
+        "effectIds": [
+          "effect.training_stab.damage"
+        ]
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.training_stab.damage",
+        "operation": "Damage",
+        "target": "CurrentTarget",
+        "baseValue": 6,
+        "scalingAttribute": "Power",
+        "scalingCoefficient": 0.1,
+        "attackType": "Melee",
+        "damageType": "Physical",
+        "procCoefficient": 1
+      }
+    ]
+  },
+  {
+    "id": "ability.essence.legacy.training_goblin.pocket_pebbles",
+    "kind": "Passive",
+    "name": "Pocket Pebbles",
+    "description": "Whenever you dodge, throw pebbles at the attacker to reduce precision.",
+    "owningEssenceId": "essence.legacy.training_goblin",
+    "cooldownTicks": 0,
+    "tags": [
+      "Trigger.OnDodge",
+      "Effect.Ability"
+    ],
+    "triggers": [
+      {
+        "event": "OnDodge",
+        "effectIds": [
+          "effect.debuff.precision"
+        ]
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.debuff.precision",
+        "operation": "ModifyAttribute",
+        "target": "EventTarget",
+        "attribute": "Precision",
+        "baseValue": -1,
+        "durationTicks": 80,
+        "attackType": "None",
+        "damageType": "None",
+        "procCoefficient": 0.25
+      }
+    ]
+  },
+  {
     "id": "ability.essence.legacy.goblin_warrior.raging_cleave",
     "kind": "Active",
     "name": "Raging Cleave",

@@ -26,4 +26,12 @@
     <ProjectReference Include="..\..\Infrastructure\Service\Services.AdminDashboard\Services.AdminDashboard.csproj" />
     <ProjectReference Include="..\..\Infrastructure\Service\Services.LL\Services.LL.csproj" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="..\..\API\API.LL\Data\**\*">
+      <Link>Data\%(RecursiveDir)%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+  </ItemGroup>
 </Project>

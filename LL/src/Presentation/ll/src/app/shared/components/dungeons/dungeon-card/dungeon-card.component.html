@@ -315,6 +315,25 @@
                           <app-item [item]="reward"></app-item>
                         </ng-template>
                       </span>
+                      <span
+                        class="flex shrink-0 flex-wrap justify-end gap-1 text-[10px]"
+                      >
+                        <span class="ll-item-chip tabular-nums">
+                          {{ rewardQuantityLabel(reward) }}
+                        </span>
+                        <span
+                          *ngIf="rewardChanceLabel(reward)"
+                          class="ll-item-chip ll-item-chip-accent tabular-nums"
+                        >
+                          {{ rewardChanceLabel(reward) }}
+                        </span>
+                        <span
+                          *ngIf="rewardNoDropLabel(reward)"
+                          class="ll-item-chip tabular-nums"
+                        >
+                          {{ rewardNoDropLabel(reward) }}
+                        </span>
+                      </span>
                     </div>
                   </div>
                 </article>

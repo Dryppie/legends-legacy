@@ -65,9 +65,10 @@ public sealed class IdleCombatRewardCalculator : IIdleCombatRewardCalculator
 
             if (encounter.IsVictory)
             {
-                loot = _lootService.GenerateIdleCombatLootAsync(
+                loot = await _lootService.GenerateIdleCombatLootAsync(
                     encounter.HostileCreatures.Cast<Entity>().ToList(),
-                    []);
+                    [],
+                    cancellationToken);
 
                 var essenceDrops = await _essenceResonanceService.RollEssenceDropsAsync(
                     facts.CharacterId,
@@ -128,7 +129,7 @@ public sealed class IdleCombatRewardCalculator : IIdleCombatRewardCalculator
                         node.Type,
                         node.LevelRequirement,
                         node.ProcChance,
-                        node.LootTable))
+                        node.RewardTableId))
                     .ToArray()),
             cancellationToken);
 

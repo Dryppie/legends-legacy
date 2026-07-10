@@ -2,7 +2,6 @@
 using Domain.Models.CharacterActions;
 using Domain.Models.CharacterActions.CharacterActionDetails;
 using Domain.Models.Items.Equipments;
-using Domain.Models.LootTables;
 using Domain.Models.Professions.Crafting;
 using Microsoft.EntityFrameworkCore;
 
@@ -70,10 +69,6 @@ public class CharacterActionRepository : ICharacterActionRepository
             .Include(ca => ca.ActionDetails)
                 .ThenInclude(ad => (ad as CombatActionDetails).Area)
                     .ThenInclude(a => a.GatheringNodes)
-                        .ThenInclude(gn => gn.LootTable)
-                            .ThenInclude(lt => lt.Entries)
-                                .ThenInclude(lt => (lt as LootTable).Entries)
-                                    .ThenInclude(lte => (lte as LootTableItem).Item)
             .Include(ca => ca.ActionDetails)
                 .ThenInclude(ad => (ad as CraftingActionDetails).CraftingQueueItems)
                     .ThenInclude(ci => ci.EquipmentInstance)

@@ -91,6 +91,8 @@ public sealed class DungeonDefinitionValidator : IDungeonDefinitionValidator
                 errors.Add($"{label}: entry cost '{cost.ItemId}' amount must be greater than zero.");
         }
 
+        ValidateRewardTableIds(label, "completionRewardTableIds", dungeon.CompletionRewardTableIds, errors);
+        ValidateRewardTableIds(label, "tierRewardTableIds", dungeon.TierRewardTableIds, errors);
         ValidateRewards(label, "completionRewards", dungeon.RewardTable.CompletionRewards, errors);
         ValidateRewards(label, "bonusRewards", dungeon.RewardTable.BonusRewards, errors);
         ValidateRewards(label, "firstClearRewards", dungeon.RewardTable.FirstClearRewards, errors);
@@ -118,8 +120,8 @@ public sealed class DungeonDefinitionValidator : IDungeonDefinitionValidator
             if (node.LevelRequirement is < 1)
                 errors.Add($"{dungeonId}: gathering node '{node.Id}' levelRequirement must be greater than zero.");
 
-            if (node.Loot.Count == 0)
-                errors.Add($"{dungeonId}: gathering node '{node.Id}' requires at least one loot entry.");
+            if (node.Loot.Count == 0 && string.IsNullOrWhiteSpace(node.RewardTableId))
+                errors.Add($"{dungeonId}: gathering node '{node.Id}' requires either rewardTableId or at least one loot entry.");
 
             foreach (var loot in node.Loot)
             {
@@ -135,6 +137,19 @@ public sealed class DungeonDefinitionValidator : IDungeonDefinitionValidator
                 if (loot.MaxQuantity < loot.MinQuantity)
                     errors.Add($"{dungeonId}: gathering node '{node.Id}' loot '{loot.ItemId}' maxQuantity must be greater than or equal to minQuantity.");
             }
+        }
+    }
+
+    private static void ValidateRewardTableIds(
+        string dungeonId,
+        string section,
+        IReadOnlyCollection<string> rewardTableIds,
+        List<string> errors)
+    {
+        foreach (var id in rewardTableIds)
+        {
+            if (string.IsNullOrWhiteSpace(id))
+                errors.Add($"{dungeonId}: {section} cannot contain empty reward table ids.");
         }
     }
 

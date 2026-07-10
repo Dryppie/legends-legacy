@@ -1631,7 +1631,7 @@ public sealed class AbilitySystemTests
 
         Assert.True(report.IsComplete, string.Join(Environment.NewLine, report.Gaps.Select(x => $"{x.EssenceId} {x.Slot}: {x.Reason}")));
         Assert.Equal(report.RequiredSlotCount, report.CoveredSlotCount);
-        Assert.Equal(120, report.RequiredSlotCount);
+        Assert.Equal(122, report.RequiredSlotCount);
         Assert.Equal(report.EssenceCount, report.RuntimeLoadoutChecks.Count);
         Assert.All(report.RuntimeLoadoutChecks, check =>
         {
@@ -1672,6 +1672,7 @@ public sealed class AbilitySystemTests
         Assert.DoesNotContain(report.Gaps, x => x.EssenceId == "essence.cave_bat");
         Assert.DoesNotContain(report.Gaps, x => x.EssenceId == "essence.necroshade_wraith");
         Assert.DoesNotContain(report.Gaps, x => x.EssenceId == "essence.legacy.goblin");
+        Assert.DoesNotContain(report.Gaps, x => x.EssenceId == "essence.legacy.training_goblin");
         Assert.DoesNotContain(report.Gaps, x => x.EssenceId == "essence.legacy.goblin_warrior");
         Assert.DoesNotContain(report.Gaps, x => x.EssenceId == "essence.legacy.goblin_archer");
         Assert.DoesNotContain(report.Gaps, x => x.EssenceId == "essence.legacy.large_rat");
@@ -1709,6 +1710,8 @@ public sealed class AbilitySystemTests
         Assert.Contains(report.Slots, x => x.EssenceId == "essence.necroshade_wraith" && x.Slot == "Passive" && x.AbilityId == "ability.essence.necroshade_wraith.grave_whisper");
         Assert.Contains(report.Slots, x => x.EssenceId == "essence.legacy.goblin" && x.Slot == "Active" && x.AbilityId == "ability.essence.legacy.goblin.sneak_attack");
         Assert.Contains(report.Slots, x => x.EssenceId == "essence.legacy.goblin" && x.Slot == "Passive" && x.AbilityId == "ability.essence.legacy.goblin.pocket_dirt");
+        Assert.Contains(report.Slots, x => x.EssenceId == "essence.legacy.training_goblin" && x.Slot == "Active" && x.AbilityId == "ability.essence.legacy.training_goblin.training_stab");
+        Assert.Contains(report.Slots, x => x.EssenceId == "essence.legacy.training_goblin" && x.Slot == "Passive" && x.AbilityId == "ability.essence.legacy.training_goblin.pocket_pebbles");
         Assert.Contains(report.Slots, x => x.EssenceId == "essence.legacy.goblin_warrior" && x.Slot == "Active" && x.AbilityId == "ability.essence.legacy.goblin_warrior.raging_cleave");
         Assert.Contains(report.Slots, x => x.EssenceId == "essence.legacy.goblin_warrior" && x.Slot == "Passive" && x.AbilityId == "ability.essence.legacy.goblin_warrior.reckless_assault");
         Assert.Contains(report.Slots, x => x.EssenceId == "essence.legacy.goblin_archer" && x.Slot == "Active" && x.AbilityId == "ability.essence.legacy.goblin_archer.snipers_strike");

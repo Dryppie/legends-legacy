@@ -1,9 +1,10 @@
 ﻿using Application.Interfaces.Services.LL;
+using Application.Interfaces.Services.LL.Rewards;
 using Domain.Models.Entities;
 using Domain.Models.Entities.Creatures;
 using Domain.Models.Inventories;
 using Domain.Models.Items;
-using Domain.Models.LootTables;
+using Domain.Models.Rewards;
 using Services.LL.Interfaces;
 
 namespace Services.LL.Loots;
@@ -11,10 +12,17 @@ public class LootService : ILootService
 {
     private static readonly Random RandomGenerator = new();
     private readonly IInventoryItemFactory _inventoryItemFactory;
+    private readonly IRewardRoller _rewardRoller;
+    private readonly IItemBaseRepository _itemBases;
 
-    public LootService(IInventoryItemFactory inventoryItemFactory)
+    public LootService(
+        IInventoryItemFactory inventoryItemFactory,
+        IRewardRoller rewardRoller,
+        IItemBaseRepository itemBases)
     {
         _inventoryItemFactory = inventoryItemFactory;
+        _rewardRoller = rewardRoller;
+        _itemBases = itemBases;
     }
 
     public int GenerateSoulstoneLoot(int seconds)
@@ -90,135 +98,48 @@ public class LootService : ILootService
         return Math.Sqrt(-2.0 * Math.Log(u1)) * Math.Cos(2.0 * Math.PI * u2);
     }
 
-    public List<InventoryItem> GenerateGatheringLootAsync(
-        LootTable lootTable,
-        CancellationToken cancellationToken,
-        double rareEntryWeightBonusPercent = 0,
-        int numberOfRolls = 1)
+    public async Task<List<InventoryItem>> GenerateIdleCombatLootAsync(
+        List<Entity> entities,
+        Dictionary<ItemType, double> multipliers,
+        CancellationToken cancellationToken)
     {
-        var ctx = new LootContext
-        {
-            Source = LootSource.Gathering,
-            RareEntryWeightBonusPercent = Math.Max(0, rareEntryWeightBonusPercent)
-        };
-        return GetRandomLoot(lootTable, ctx, Math.Max(1, numberOfRolls));
-    }
-
-    public List<InventoryItem> GenerateDungeonLoot(LootTable lootTable, Dictionary<ItemType, double>? multipliers = null)
-    {
-        var ctx = new LootContext
-        {
-            Source = LootSource.Combat,
-            TypeMultipliers = multipliers ?? []
-        };
-
-        return GetRandomLoot(lootTable, ctx);
-    }
-
-    public List<InventoryItem> GenerateIdleCombatLootAsync(List<Entity> entities, Dictionary<ItemType, double> multipliers)
-    {
-        var ctx = new LootContext
-        {
-            Source = LootSource.Combat,
-            TypeMultipliers = multipliers
-        };
+        _ = multipliers;
 
         var total = new List<InventoryItem>();
         foreach (var creature in entities.OfType<Creature>())
         {
-            if (creature.LootTable?.Entries is null || creature.LootTable.Entries.Count == 0)
+            if (!string.IsNullOrWhiteSpace(creature.RewardTableId))
             {
-                continue;
-            }
+                var result = _rewardRoller.Roll(
+                    creature.RewardTableId,
+                    new RewardRollContext("Combat"));
 
-            total.AddRange(GetRandomLoot(creature.LootTable, ctx));
+                total.AddRange(await ConvertRewardItemsAsync(result.Items, cancellationToken));
+            }
         }
 
         return total;
     }
 
-    // TODO: Redo Loot Generation
-    public List<InventoryItem> GetRandomLoot(LootTable lootTable, LootContext ctx, int numberOfRolls = 1)
+    private async Task<List<InventoryItem>> ConvertRewardItemsAsync(
+        IReadOnlyList<ItemRewardResult> items,
+        CancellationToken cancellationToken)
     {
-        var generatedLoot = new List<InventoryItem>();
-
-        for (int i = 0; i < numberOfRolls; i++)
+        if (items.Count == 0)
         {
-
-            var selectedEntry = GetRandomEntryBasedOnWeight([.. lootTable.Entries], ctx);
-
-            if (selectedEntry is LootTableItem lootTableItem)
-            {
-                if (lootTableItem.Item is null)
-                {
-                    continue;
-                }
-
-                generatedLoot.Add(ConvertItemIntoInventoryItem(
-                    lootTableItem.Item,
-                    RollQuantity(lootTableItem)));
-            }
-            else if (selectedEntry is LootTable table)
-            {
-                generatedLoot.AddRange(GetRandomLoot(table, ctx, 1));
-            }
+            return [];
         }
 
-        return generatedLoot;
-    }
+        var itemBases = await _itemBases.GetItemBasesByIdsAsync(
+            items.Select(x => x.ItemId).Distinct(StringComparer.OrdinalIgnoreCase).ToArray(),
+            cancellationToken);
 
-    private LootTableEntry? GetRandomEntryBasedOnWeight(List<LootTableEntry> entries, LootContext ctx)
-    {
-        var weighted = entries
-            .Select(e =>
-            {
-                double mult = 0.0;
-
-                if (e is LootTableItem li
-                    && li.Item is not null
-                    && ctx.TypeMultipliers.TryGetValue(li.Item.ItemType, out var m))
-                    mult = m;
-
-                if (ctx.Source == LootSource.Gathering &&
-                    e is LootTableItem { IsRare: true })
-                {
-                    mult += Math.Max(0, ctx.RareEntryWeightBonusPercent);
-                }
-
-                return (Entry: e, Weight: e.Weight * (1 + (mult / 100)));
-            })
-            .Where(w => w.Weight > 0)
+        return items
+            .Where(item => itemBases.ContainsKey(item.ItemId))
+            .GroupBy(item => item.ItemId, StringComparer.OrdinalIgnoreCase)
+            .SelectMany(group => _inventoryItemFactory.CreateForQuantity(
+                itemBases[group.Key],
+                group.Sum(item => item.Quantity)))
             .ToList();
-
-        if (weighted.Count == 0) return null;
-
-        double effectiveTotal = weighted.Sum(w => w.Weight);
-        double roll = RandomGenerator.NextDouble() * 100;
-
-        if (roll > effectiveTotal)
-            return null;
-
-        double accum = 0;
-        foreach (var (entry, weight) in weighted)
-        {
-            accum += weight;
-            if (roll <= accum)
-                return entry;
-        }
-
-        return null;
-    }
-
-    private static int RollQuantity(LootTableItem item)
-    {
-        var min = Math.Max(1, item.MinQuantity);
-        var max = Math.Max(min, item.MaxQuantity);
-
-        return RandomGenerator.Next(min, max + 1);
-    }
-
-    private InventoryItem ConvertItemIntoInventoryItem(ItemBase item, int quantity)
-    {
-        return _inventoryItemFactory.Create(item, quantity);
     }
 }

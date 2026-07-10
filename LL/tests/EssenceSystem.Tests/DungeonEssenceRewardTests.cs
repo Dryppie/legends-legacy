@@ -1,10 +1,11 @@
 using Application.Interfaces.Services.LL;
 using Application.Interfaces.Services.LL.Dungeons;
+using Application.Interfaces.Services.LL.Rewards;
 using Domain.Models.Dungeons;
 using Domain.Models.Dungeons.Runs;
 using Domain.Models.Inventories;
 using Domain.Models.Items;
-using Domain.Models.LootTables;
+using Domain.Models.Rewards;
 using Microsoft.EntityFrameworkCore;
 using Persistence.LL;
 using Persistence.LL.Repositories.Items;
@@ -34,9 +35,8 @@ public sealed class DungeonEssenceRewardTests
         var applier = new DungeonCompletionRewardApplier(
             new SingleDungeonDefinitions(new DungeonDefinition { Id = "dungeon.tier_1", Tier = 1 }),
             new EmptyDungeonRunRepository(),
-            new EmptyLootTableRepository(),
             new ItemBaseRepository(db),
-            new EmptyLootService(),
+            new EmptyRewardRoller(),
             pendingRewards,
             new InventoryItemFactory(),
             new NoOpDungeonMasteryService());
@@ -66,9 +66,8 @@ public sealed class DungeonEssenceRewardTests
         var applier = new DungeonCompletionRewardApplier(
             new SingleDungeonDefinitions(new DungeonDefinition { Id = "dungeon.region_1", Region = 1, Tier = 1 }),
             new EmptyDungeonRunRepository(),
-            new EmptyLootTableRepository(),
             new ItemBaseRepository(db),
-            new EmptyLootService(),
+            new EmptyRewardRoller(),
             pendingRewards,
             new InventoryItemFactory(),
             new NoOpDungeonMasteryService());
@@ -166,32 +165,9 @@ public sealed class DungeonEssenceRewardTests
                 new Dictionary<string, DungeonMasterySnapshot>(StringComparer.OrdinalIgnoreCase));
     }
 
-    private sealed class EmptyLootTableRepository : ILootTableRepository
+    private sealed class EmptyRewardRoller : IRewardRoller
     {
-        public Task<LootTable> GetLootTableByIdAsync(Guid lootTableId, CancellationToken cancellationToken) =>
-            Task.FromResult(new LootTable { Id = lootTableId });
-
-        public Task<LootTable> GetMonsterLootTableAsync(Guid monsterId, CancellationToken cancellationToken) =>
-            Task.FromResult(new LootTable());
-
-        public Task<LootTable> GetProfessionTaskLootTableAsync(Guid professionTaskId, CancellationToken cancellationToken) =>
-            Task.FromResult(new LootTable());
-    }
-
-    private sealed class EmptyLootService : ILootService
-    {
-        public int GenerateSoulstoneLoot(int seconds) => 0;
-
-        public List<InventoryItem> GenerateGatheringLootAsync(
-            LootTable lootTable,
-            CancellationToken cancellationToken,
-            double rareEntryWeightBonusPercent = 0,
-            int numberOfRolls = 1) => [];
-
-        public List<InventoryItem> GenerateIdleCombatLootAsync(List<Domain.Models.Entities.Entity> enemyCharacters, Dictionary<ItemType, double> multipliers) => [];
-
-        public List<InventoryItem> GenerateDungeonLoot(LootTable lootTable, Dictionary<ItemType, double>? multipliers = null) => [];
-
-        public int GenerateCinderLoot(Dictionary<Guid, int> creatureKills, Dictionary<Guid, int> baseCinderValues, double dropChance = 0.2) => 0;
+        public RewardRollResult Roll(string rewardTableId, RewardRollContext context) => RewardRollResult.Empty;
+        public RewardRollResult Roll(RewardTableDefinition table, RewardRollContext context) => RewardRollResult.Empty;
     }
 }

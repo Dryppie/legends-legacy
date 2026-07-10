@@ -9,5 +9,6 @@ public sealed class DungeonGatheringNodeDefinition
     public GatheringType Type { get; set; }
     public int? LevelRequirement { get; set; }
     public float ProcChance { get; set; } = 1.0f;
+    public string? RewardTableId { get; set; }
     public List<DungeonGatheringLootEntryDefinition> Loot { get; set; } = [];
 }

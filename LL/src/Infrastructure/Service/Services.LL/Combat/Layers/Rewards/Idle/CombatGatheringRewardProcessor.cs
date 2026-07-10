@@ -1,11 +1,14 @@
 using Application.Interfaces.Services.LL;
 using Application.Interfaces.Services.LL.Professions;
+using Application.Interfaces.Services.LL.Rewards;
 using Domain.Models.Bonuses;
 using Domain.Models.Combat;
 using Domain.Models.Inventories;
+using Domain.Models.Items;
 using Domain.Models.Items.Equipments.Tools;
 using Domain.Models.Professions;
 using Domain.Models.Professions.Gathering.GatheringNodes;
+using Domain.Models.Rewards;
 using Services.LL.Combat.Layers.Rewards.Models;
 using Services.LL.Extensions;
 using Services.LL.Interfaces;
@@ -16,20 +19,26 @@ namespace Services.LL.Combat.Layers.Rewards.Idle;
 
 public sealed class CombatGatheringRewardProcessor : ICombatGatheringRewardProcessor
 {
-    private readonly ILootService _lootService;
+    private readonly IRewardRoller _rewardRoller;
+    private readonly IItemBaseRepository _itemBases;
+    private readonly IInventoryItemFactory _inventoryItemFactory;
     private readonly IRandomSource _randomSource;
     private readonly IProfessionService _professionService;
     private readonly ILevelingService _levelingService;
     private readonly IBonusService _bonusService;
 
     public CombatGatheringRewardProcessor(
-        ILootService lootService,
+        IRewardRoller rewardRoller,
+        IItemBaseRepository itemBases,
+        IInventoryItemFactory inventoryItemFactory,
         IRandomSource randomSource,
         IProfessionService professionService,
         ILevelingService levelingService,
         IBonusService bonusService)
     {
-        _lootService = lootService;
+        _rewardRoller = rewardRoller;
+        _itemBases = itemBases;
+        _inventoryItemFactory = inventoryItemFactory;
         _randomSource = randomSource;
         _professionService = professionService;
         _levelingService = levelingService;
@@ -70,7 +79,7 @@ public sealed class CombatGatheringRewardProcessor : ICombatGatheringRewardProce
         var matchingNodes = facts.GatheringNodes
             .Where(node => node.Type == tool.GatheringType)
             .Where(node => node.LevelRequirement is null || node.LevelRequirement <= profession.Level)
-            .Where(node => node.LootTable is { Entries.Count: > 0 })
+            .Where(node => node.HasRewards)
             .ToList();
 
         if (matchingNodes.Count == 0)
@@ -109,9 +118,11 @@ public sealed class CombatGatheringRewardProcessor : ICombatGatheringRewardProce
                     0d,
                     100d) / 100d;
                 var numberOfRolls = 1 + (bonusRollChance > 0d && _randomSource.NextDouble() < bonusRollChance ? 1 : 0);
-                var rareMaterialChance = Math.Max(0d, tool.GetBonus(ToolBonusType.RareMaterialChancePercent)) + Math.Max(0d, rareChanceRelativeBps).ToPercent();
-                var gathered = _lootService.GenerateGatheringLootAsync(
-                    node.LootTable,
+                var rareMaterialChance =
+                    Math.Max(0d, tool.GetBonus(ToolBonusType.RareMaterialChancePercent)) +
+                    Math.Max(0d, rareChanceRelativeBps).ToPercent();
+                var gathered = await GenerateGatheringRewardsAsync(
+                    node,
                     cancellationToken,
                     rareMaterialChance,
                     numberOfRolls);
@@ -138,6 +149,59 @@ public sealed class CombatGatheringRewardProcessor : ICombatGatheringRewardProce
         await AwardExperienceAsync(profession, results.Sum(x => x.ExperienceGained).ApplyPositiveBps(gatheringExperienceGainBps), cancellationToken);
 
         return results;
+    }
+
+    private async Task<List<InventoryItem>> GenerateGatheringRewardsAsync(
+        CombatGatheringNode node,
+        CancellationToken cancellationToken,
+        double rareEntryWeightBonusPercent,
+        int numberOfRolls)
+    {
+        return await GenerateRewardTableLootAsync(
+            node,
+            cancellationToken,
+            rareEntryWeightBonusPercent,
+            numberOfRolls);
+    }
+
+    private async Task<List<InventoryItem>> GenerateRewardTableLootAsync(
+        CombatGatheringNode node,
+        CancellationToken cancellationToken,
+        double rareEntryWeightBonusPercent,
+        int numberOfRolls)
+    {
+        var loot = new List<InventoryItem>();
+        var context = new RewardRollContext(
+            "Gathering",
+            EntryWeightBonusPercentByTag: new Dictionary<string, double>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["rare"] = rareEntryWeightBonusPercent
+            });
+
+        for (var i = 0; i < Math.Max(1, numberOfRolls); i++)
+        {
+            var result = node.RewardTable is not null
+                ? _rewardRoller.Roll(node.RewardTable, context)
+                : _rewardRoller.Roll(node.RewardTableId!, context);
+
+            if (result.Items.Count == 0)
+            {
+                continue;
+            }
+
+            var itemBases = await _itemBases.GetItemBasesByIdsAsync(
+                result.Items.Select(x => x.ItemId).Distinct(StringComparer.OrdinalIgnoreCase).ToArray(),
+                cancellationToken);
+
+            loot.AddRange(result.Items
+                .Where(item => itemBases.ContainsKey(item.ItemId))
+                .GroupBy(item => item.ItemId, StringComparer.OrdinalIgnoreCase)
+                .SelectMany(group => _inventoryItemFactory.CreateForQuantity(
+                    itemBases[group.Key],
+                    group.Sum(item => item.Quantity))));
+        }
+
+        return loot;
     }
 
     private async Task AwardExperienceAsync(
