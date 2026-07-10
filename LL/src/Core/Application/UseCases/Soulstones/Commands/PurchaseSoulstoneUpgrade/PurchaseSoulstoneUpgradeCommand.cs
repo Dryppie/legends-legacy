@@ -1,11 +1,14 @@
-﻿using Application.Interfaces.Services.LL;
+using Application.Interfaces.Services.LL;
 using Application.MediatR.Markers;
 using Common.Primitives;
+using Domain.Models.Soulstones.UpgradeDefinition;
 using MediatR;
 
 namespace Application.UseCases.Soulstones.Commands.PurchaseSoulstoneUpgrade;
-public record PurchaseSoulstoneUpgradeCommand(Guid CharacterId, string SoulstoneUpgradeId) : ICommand<Response<bool>>;
-public class PurchaseSoulstoneUpgradeCommandHandler : IRequestHandler<PurchaseSoulstoneUpgradeCommand, Response<bool>>
+
+public record PurchaseSoulstoneUpgradeCommand(Guid CharacterId, string SoulstoneUpgradeId) : ICommand<Response<SoulstoneUpgradeMutationResult>>;
+
+public class PurchaseSoulstoneUpgradeCommandHandler : IRequestHandler<PurchaseSoulstoneUpgradeCommand, Response<SoulstoneUpgradeMutationResult>>
 {
     private readonly ISoulstoneUpgradeService _soulstoneUpgradeService;
 
@@ -14,10 +17,8 @@ public class PurchaseSoulstoneUpgradeCommandHandler : IRequestHandler<PurchaseSo
         _soulstoneUpgradeService = soulstoneUpgradeService;
     }
 
-    public async Task<Response<bool>> Handle(PurchaseSoulstoneUpgradeCommand request, CancellationToken cancellationToken)
+    public Task<Response<SoulstoneUpgradeMutationResult>> Handle(PurchaseSoulstoneUpgradeCommand request, CancellationToken cancellationToken)
     {
-        return await _soulstoneUpgradeService.PurchaseAsync(request.CharacterId, request.SoulstoneUpgradeId, cancellationToken)
-            ? Response<bool>.Success(true)
-            : Response<bool>.Fail("Could not purchase Soulstone Upgrade");
+        return _soulstoneUpgradeService.PurchaseAsync(request.CharacterId, request.SoulstoneUpgradeId, cancellationToken);
     }
 }

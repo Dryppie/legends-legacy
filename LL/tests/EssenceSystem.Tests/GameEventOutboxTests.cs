@@ -2,6 +2,7 @@ using System.Text.Json;
 using Application.Common.Interfaces;
 using Application.Interfaces.Outbox;
 using Application.Interfaces.Services.LL.Achievements;
+using Application.Interfaces.Services.LL.Essences;
 using Application.Interfaces.Services.LL.Tutorials;
 using Application.UseCases.Achievements.Dtos;
 using Application.UseCases.Outbox;
@@ -11,6 +12,7 @@ using Domain.Models.Achievements;
 using Domain.Models.CharacterActions.Sessions;
 using Domain.Models.Combat;
 using Domain.Models.Entities.Creatures;
+using Domain.Models.Essences;
 using Domain.Models.Items.Equipments;
 using Domain.Models.Outbox;
 using Domain.Models.Regions.Areas;
@@ -219,7 +221,8 @@ public sealed class GameEventOutboxTests
             new StubIdleCombatRewardApplier(),
             new StubIdleCombatSessionFactory(),
             outbox,
-            new NoOpPublisher());
+            new NoOpPublisher(),
+            new RecordingCreatureArchiveService());
         var characterAction = new CharacterAction
         {
             CharacterId = characterId,
@@ -342,6 +345,33 @@ public sealed class GameEventOutboxTests
     private sealed class StubIdleCombatSessionFactory : IIdleCombatSessionFactory
     {
         public CombatSession Create(IdleCombatRewardFacts facts, IdleCombatCalculatedOutcome outcome) => new();
+    }
+
+    private sealed class RecordingCreatureArchiveService : ICreatureArchiveService
+    {
+        public List<Creature> RecordedCreatures { get; } = [];
+
+        public Task RecordDefeatedCreaturesAsync(
+            Guid characterId,
+            IReadOnlyCollection<Creature> creatures,
+            DateTimeOffset defeatedAtUtc,
+            CancellationToken cancellationToken)
+        {
+            RecordedCreatures.AddRange(creatures);
+            return Task.CompletedTask;
+        }
+
+        public Task<CreatureArchive> GetCreatureArchiveAsync(Guid characterId, CancellationToken cancellationToken) =>
+            Task.FromResult(new CreatureArchive([], true, null, null));
+
+        public Task<EssenceCodex> GetEssenceCodexAsync(Guid characterId, CancellationToken cancellationToken) =>
+            Task.FromResult(new EssenceCodex([]));
+
+        public Task<CreatureArchive> SetEssenceFocusAsync(Guid characterId, string? creatureId, CancellationToken cancellationToken) =>
+            Task.FromResult(new CreatureArchive([], true, null, null));
+
+        public Task<bool> IsEssenceFocusAsync(Guid characterId, string creatureId, CancellationToken cancellationToken) =>
+            Task.FromResult(false);
     }
 
     private sealed class NoOpPublisher : IPublisher

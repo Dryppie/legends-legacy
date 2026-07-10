@@ -1,81 +1,102 @@
-﻿using Domain.Models.Soulstones.UpgradeDefinition;
+using Domain.Models.Soulstones.UpgradeDefinition;
 using System.Collections.Concurrent;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace Services.LL.Providers;
-public class SoulstoneUpgradeDefinitionProvider : IDisposable
+
+public sealed class SoulstoneUpgradeDefinitionProvider : IDisposable
 {
+    private static readonly JsonSerializerOptions JsonOptions = new()
+    {
+        PropertyNameCaseInsensitive = true,
+        ReadCommentHandling = JsonCommentHandling.Skip,
+        AllowTrailingCommas = true,
+        Converters = { new JsonStringEnumConverter() }
+    };
+
     private readonly string _filePath;
     private readonly FileSystemWatcher _watcher;
-
-    // concurrent dictionary so readers are never blocked
     private volatile IReadOnlyDictionary<string, SoulstoneUpgradeDefinition> _cache
-        = new Dictionary<string, SoulstoneUpgradeDefinition>();
+        = new Dictionary<string, SoulstoneUpgradeDefinition>(StringComparer.OrdinalIgnoreCase);
 
     public SoulstoneUpgradeDefinitionProvider()
     {
         _filePath = Path.Combine(Directory.GetCurrentDirectory(), "Data", "soulstone-upgrades.json");
-
         Load();
 
-        // hot-reload: watch the directory for changes to upgrades.json
-        _watcher = new FileSystemWatcher(Path.GetDirectoryName(_filePath)!)
+        var directory = Path.GetDirectoryName(_filePath);
+        if (directory is null)
+        {
+            throw new InvalidOperationException("Soulstone upgrade definition path is invalid.");
+        }
+
+        _watcher = new FileSystemWatcher(directory)
         {
             Filter = Path.GetFileName(_filePath),
             NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.Size
         };
-        _watcher.Changed += (_, __) => TryReload();
+        _watcher.Changed += (_, _) => TryReload();
         _watcher.EnableRaisingEvents = true;
     }
 
-    /// All definitions keyed by Id – always the *latest* snapshot.
     public IReadOnlyDictionary<string, SoulstoneUpgradeDefinition> All => _cache;
 
-    /// Reload manually (unit tests or admin endpoint).
     public void Reload() => Load();
-
-    /* ----------------------------------------------------------------- */
-
-    private static readonly JsonSerializerOptions _jsonOptions = new()
-    {
-        PropertyNameCaseInsensitive = true,
-        ReadCommentHandling = JsonCommentHandling.Skip,
-        Converters = { new JsonStringEnumConverter() }
-    };
 
     private void Load()
     {
         if (!File.Exists(_filePath))
         {
-            _cache = new Dictionary<string, SoulstoneUpgradeDefinition>();
-            return;
+            throw new FileNotFoundException("Soulstone upgrade definition file was not found.", _filePath);
         }
 
-        try
+        using var stream = File.OpenRead(_filePath);
+        var defs = JsonSerializer.Deserialize<List<SoulstoneUpgradeDefinition>>(stream, JsonOptions)
+                   ?? throw new InvalidDataException("Soulstone upgrade definition file was empty.");
+
+        Validate(defs);
+
+        _cache = new ConcurrentDictionary<string, SoulstoneUpgradeDefinition>(
+            defs.ToDictionary(d => d.Id, d => d, StringComparer.OrdinalIgnoreCase),
+            StringComparer.OrdinalIgnoreCase);
+    }
+
+    private static void Validate(IReadOnlyList<SoulstoneUpgradeDefinition> defs)
+    {
+        var dupes = defs
+            .GroupBy(d => d.Id, StringComparer.OrdinalIgnoreCase)
+            .Where(g => g.Count() > 1)
+            .Select(g => g.Key)
+            .ToList();
+        if (dupes.Count != 0)
         {
-            using var stream = File.OpenRead(_filePath);
-            var defs = JsonSerializer.Deserialize<List<SoulstoneUpgradeDefinition>>(stream, _jsonOptions)
-                       ?? new List<SoulstoneUpgradeDefinition>();
-
-            // basic sanity check: duplicate Ids?
-            var dupes = defs.GroupBy(d => d.Id).Where(g => g.Count() > 1).Select(g => g.Key).ToList();
-            if (dupes.Count != 0)
-                throw new InvalidDataException($"Duplicate upgrade IDs: {string.Join(',', dupes)}");
-
-            _cache = new ConcurrentDictionary<string, SoulstoneUpgradeDefinition>(
-                         defs.ToDictionary(d => d.Id, d => d),
-                         StringComparer.OrdinalIgnoreCase);
+            throw new InvalidDataException($"Duplicate Soulstone upgrade IDs: {string.Join(", ", dupes)}");
         }
-        catch (Exception ex)
+
+        foreach (var def in defs)
         {
-            // keep old cache so the game can still run
+            if (string.IsNullOrWhiteSpace(def.Id))
+                throw new InvalidDataException("Soulstone upgrade ID is required.");
+            if (string.IsNullOrWhiteSpace(def.DisplayName))
+                throw new InvalidDataException($"Soulstone upgrade '{def.Id}' is missing displayName.");
+            if (def.MaxRank < 1)
+                throw new InvalidDataException($"Soulstone upgrade '{def.Id}' must have maxRank >= 1.");
+            if (def.CostsByRank.Count != def.MaxRank)
+                throw new InvalidDataException($"Soulstone upgrade '{def.Id}' must define one cost per rank.");
+            if (def.CostsByRank.Any(cost => cost < 0))
+                throw new InvalidDataException($"Soulstone upgrade '{def.Id}' has a negative cost.");
+
+            foreach (var effect in def.Effects)
+            {
+                if (effect.ValuesByRank.Count != def.MaxRank)
+                    throw new InvalidDataException($"Soulstone upgrade '{def.Id}' effect '{effect.Kind}' must define one value per rank.");
+            }
         }
     }
 
     private void TryReload()
     {
-        // debounce rapid successive change events (optional; simple timer here)
         Task.Delay(250).ContinueWith(_ => Load());
     }
 

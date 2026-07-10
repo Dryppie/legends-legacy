@@ -12,8 +12,8 @@ using Persistence.Chat;
 namespace Persistence.Chat.Migrations
 {
     [DbContext(typeof(ChatDbContext))]
-    [Migration("20250704163516_AddChatChannels")]
-    partial class AddChatChannels
+    [Migration("20260709150047_BaseMigration")]
+    partial class BaseMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -49,11 +49,20 @@ namespace Persistence.Chat.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<string>("SenderTitleDisplayName")
+                        .HasColumnType("text");
+
                     b.Property<DateTimeOffset>("SentAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<Guid?>("TargetUserId")
+                    b.Property<Guid?>("TargetCharacterId")
                         .HasColumnType("uuid");
+
+                    b.Property<string>("TargetCharacterName")
+                        .HasColumnType("text");
+
+                    b.Property<string>("TargetCharacterTitleDisplayName")
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 

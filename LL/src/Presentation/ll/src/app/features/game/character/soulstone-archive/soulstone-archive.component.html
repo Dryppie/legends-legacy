@@ -3,22 +3,46 @@
     class="flex-none"
     section="Character"
     title="Soulstones"
-    text="Permanent upgrades"
+    text="Permanent constellations"
     icon="character/essences"
   ></app-default-header>
 
   <section class="ll-page-header mr-4 flex flex-col gap-3 sm:mr-6">
     <div class="flex flex-wrap items-start justify-between gap-3">
       <div>
-        <h2 class="ll-heading">Upgrade Archive</h2>
-        <p class="ll-copy">Spend Soulstones on permanent account power.</p>
+        <h2 class="ll-heading">Soulstone Constellations</h2>
+        <p class="ll-copy">Spend Soulstones on permanent branch upgrades.</p>
       </div>
       <app-regular-button
         variant="danger"
-        text="Reset - free"
-        (pressed)="resetSoulstoneUpgrades()"
-        [disabled]="loading() || totalUpgradeLevels() === 0"
+        text="Reset"
+        (pressed)="openResetConfirmation()"
+        [disabled]="loading() || totalUpgradeRanks() === 0"
       ></app-regular-button>
+    </div>
+
+    <div
+      *ngIf="resetConfirmationOpen"
+      class="ll-state ll-state-danger flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
+    >
+      <span>
+        Reset {{ totalUpgradeRanks() }} ranks for
+        {{ resetRefund() }} Soulstones?
+      </span>
+      <span class="flex flex-wrap gap-2">
+        <app-regular-button
+          variant="secondary"
+          text="Cancel"
+          (pressed)="cancelReset()"
+          [disabled]="loading()"
+        ></app-regular-button>
+        <app-regular-button
+          variant="danger"
+          text="Confirm reset"
+          (pressed)="confirmResetSoulstoneUpgrades()"
+          [disabled]="loading()"
+        ></app-regular-button>
+      </span>
     </div>
 
     <div class="grid grid-cols-2 gap-2 xl:grid-cols-4">
@@ -38,31 +62,28 @@
     </p>
   </section>
 
-  <div
-    class="flex flex-col gap-4 overflow-y-auto pr-4 sm:pr-6"
-    *ngIf="combatUpgrades()"
-  >
-    <ng-container *ngIf="character() as character">
-      <app-soulstone-upgrade-card
-        [upgrades]="combatUpgrades()"
-        upgradeType="Combat"
-        [character]="character"
-      ></app-soulstone-upgrade-card>
-      <app-soulstone-upgrade-card
-        [upgrades]="gatheringUpgrades()"
-        upgradeType="Gathering"
-        [character]="character"
-      ></app-soulstone-upgrade-card>
-      <app-soulstone-upgrade-card
-        [upgrades]="craftingUpgrades()"
-        upgradeType="Crafting"
-        [character]="character"
-      ></app-soulstone-upgrade-card>
-      <app-soulstone-upgrade-card
-        [upgrades]="miscUpgrades()"
-        upgradeType="Miscellaneous"
-        [character]="character"
-      ></app-soulstone-upgrade-card>
-    </ng-container>
-  </div>
+  <ng-container *ngIf="character() as character">
+    <app-tabs class="flex min-h-0 flex-1 flex-col overflow-hidden pr-4 sm:pr-6">
+      <app-tab label="All">
+        <div class="flex flex-col gap-4 overflow-y-auto pt-4">
+          <app-soulstone-upgrade-card
+            *ngFor="let group of branchGroups()"
+            [title]="group.title"
+            [upgrades]="group.upgrades"
+            [character]="character"
+          ></app-soulstone-upgrade-card>
+        </div>
+      </app-tab>
+
+      <app-tab *ngFor="let group of branchGroups()" [label]="group.title">
+        <div class="overflow-y-auto pt-4">
+          <app-soulstone-upgrade-card
+            [title]="group.title"
+            [upgrades]="group.upgrades"
+            [character]="character"
+          ></app-soulstone-upgrade-card>
+        </div>
+      </app-tab>
+    </app-tabs>
+  </ng-container>
 </div>

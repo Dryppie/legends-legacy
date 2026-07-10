@@ -71,6 +71,58 @@ export interface SoulArchiveDto {
   essenceDust: number;
 }
 
+export interface CreatureArchiveDto {
+  creatures: CreatureArchiveEntryDto[];
+  canChangeEssenceFocus: boolean;
+  essenceFocusAvailableAtUtc?: string | null;
+  essenceFocusSetAtUtc?: string | null;
+}
+
+export interface CreatureArchiveEntryDto {
+  creatureId: string;
+  name: string;
+  killCount: number;
+  firstDefeatedAtUtc: string;
+  lastDefeatedAtUtc: string;
+  isEssenceFocus: boolean;
+  essenceFocusSetAtUtc?: string | null;
+  essenceFocusTotalDurationSeconds: number;
+  currentEssenceFocusDurationSeconds: number;
+  essenceDefinitionId?: string | null;
+  essenceName?: string | null;
+  isEssenceAbsorbed: boolean;
+  tags: string[];
+}
+
+export interface EssenceCodexDto {
+  entries: EssenceCodexEntryDto[];
+}
+
+export interface EssenceCodexEntryDto {
+  id: string;
+  title: string;
+  description: string;
+  benefitText: string;
+  bonusKind: string;
+  baseBonusValue: number;
+  bonusValue: number;
+  bonusValuePerCollectionAscensionTier: number;
+  collectionAscensionTier: number;
+  maxCollectionAscensionTier: number;
+  current: number;
+  required: number;
+  isUnlocked: boolean;
+  category: string;
+  essences: EssenceCodexMemberDto[];
+}
+
+export interface EssenceCodexMemberDto {
+  essenceDefinitionId: string;
+  name: string;
+  isAbsorbed: boolean;
+  ascensionTier: number;
+}
+
 export interface PlayerEssenceDto {
   id: string;
   essenceDefinitionId: string;

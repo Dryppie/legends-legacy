@@ -25,22 +25,15 @@ public class LootService : ILootService
         _itemBases = itemBases;
     }
 
-    public int GenerateSoulstoneLoot(int seconds, double dropRate, double doubleChance)
+    public int GenerateSoulstoneLoot(int seconds)
     {
         double baseChance = 0.000278; // every 1 hour
                                       // 1/21600 - 0.0000463 // every 6 hour
                                       // 1/43200 - 0.0000232 // every 12 hour
-        double effectiveRate = baseChance * (1 + (dropRate / 100.0));
-        double expectedDrops = seconds * effectiveRate;
+        double expectedDrops = seconds * baseChance;
 
         int earned = SamplePoisson(expectedDrops);
-        if (earned < 1) return 0;
-
-        var rng = Random.Shared;
-        if (earned > 0 && rng.NextDouble() <= doubleChance)
-            earned *= 2;
-
-        return earned;
+        return Math.Max(0, earned);
     }
 
     private static int SamplePoisson(double lambda)

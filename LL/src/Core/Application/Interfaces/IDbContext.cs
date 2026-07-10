@@ -74,6 +74,7 @@ public interface IDbContext
     DbSet<EssenceLoadout> EssenceLoadouts { get; }
     DbSet<EssenceLoadoutSlot> EssenceLoadoutSlots { get; }
     DbSet<CreatureResonance> MonsterResonances { get; }
+    DbSet<CharacterCreatureArchiveEntry> CharacterCreatureArchiveEntries { get; }
 
     DbSet<DungeonRun> DungeonRuns { get; }
     DbSet<RunReward> RunRewards { get; }

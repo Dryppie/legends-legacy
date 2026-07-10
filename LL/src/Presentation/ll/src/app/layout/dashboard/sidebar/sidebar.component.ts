@@ -26,6 +26,7 @@ import {
   NotificationService,
 } from '../../../core/services/client-side/notifications/notification.service';
 import { SidebarNotificationRefreshService } from '../../../core/services/client-side/notifications/sidebar-notification-refresh.service';
+import { EssenceStateService } from '../../../core/services/api/essences/essence-state.service';
 
 @Component({
   selector: 'app-sidebar',
@@ -61,6 +62,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
     private readonly characterState: CharacterStateService,
     private readonly notificationService: NotificationService,
     private readonly sidebarNotificationRefreshService: SidebarNotificationRefreshService,
+    public readonly essenceState: EssenceStateService,
     private readonly router: Router,
   ) {
     effect(() => {
@@ -72,6 +74,11 @@ export class SidebarComponent implements OnInit, OnDestroy {
       untracked(() =>
         this.sidebarNotificationRefreshService.refreshForCharacter(characterId),
       );
+      untracked(() => {
+        if (characterId) {
+          this.essenceState.refreshCreatureArchive();
+        }
+      });
     });
 
     this.currentCharacter = this.characterState.currentCharacter;
@@ -135,6 +142,13 @@ export class SidebarComponent implements OnInit, OnDestroy {
 
   getNotificationCount(itemId: string): number {
     return this.notificationService.count(NOTIFICATION_SURFACE.Sidebar, itemId);
+  }
+
+  getSidebarItemNotificationCount(itemId: string): number {
+    return (
+      this.getNotificationCount(itemId) +
+      (itemId === 'essences' && this.essenceState.essenceFocusReady() ? 1 : 0)
+    );
   }
 
   navigateToAction(): void {

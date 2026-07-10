@@ -13,6 +13,8 @@ import {
   inferEssenceDefinitionId,
 } from '../../../../shared/models/item';
 import {
+  CreatureArchiveDto,
+  EssenceCodexDto,
   EssenceLoadoutDto,
   EssenceLoadoutsDto,
   EssenceMutationResponseDto,
@@ -21,13 +23,17 @@ import {
   SoulArchiveDto,
 } from '../../../../shared/models/essence-system';
 
-type EssenceView = 'archive' | 'absorb';
+type EssenceView = 'archive' | 'absorb' | 'creatures' | 'codex';
 
 @Injectable({ providedIn: 'root' })
 export class EssenceStateService {
   private readonly _activeView = signal<EssenceView>('archive');
   private readonly _archive = signal<SoulArchiveDto | null>(null);
   private readonly _loadouts = signal<EssenceLoadoutsDto | null>(null);
+  private readonly _creatureArchive = signal<CreatureArchiveDto | null>(null);
+  private readonly _codex = signal<EssenceCodexDto | null>(null);
+  private readonly _now = signal(Date.now());
+  private readonly _seenEssenceFocusReadyKey = signal<string | null>(null);
   private readonly _selectedPlayerEssenceId = signal<string | null>(null);
   private readonly _selectedLoadoutId = signal<string | null>(null);
   private readonly _selectedInventoryItemId = signal<string | null>(null);
@@ -38,8 +44,44 @@ export class EssenceStateService {
   private resetVersion = 0;
 
   readonly activeView = computed(() => this._activeView());
+  readonly currentTime = computed(() => this._now());
   readonly archive = computed(() => this._archive());
   readonly loadouts = computed(() => this._loadouts());
+  readonly creatureArchive = computed(() => this._creatureArchive());
+  readonly codex = computed(() => this._codex());
+  readonly focusedCreature = computed(
+    () =>
+      this._creatureArchive()?.creatures.find(
+        (creature) => creature.isEssenceFocus,
+      ) ?? null,
+  );
+  readonly canChangeEssenceFocus = computed(() => {
+    const archive = this._creatureArchive();
+    if (!archive) return false;
+    if (archive.canChangeEssenceFocus) return true;
+
+    const availableAt = this.getUtcTime(archive.essenceFocusAvailableAtUtc);
+    return availableAt !== null && availableAt <= this._now();
+  });
+  private readonly essenceFocusReadyKey = computed(() => {
+    const archive = this._creatureArchive();
+    if (!archive || !this.canChangeEssenceFocus()) return null;
+
+    const hasSelectableTarget = archive.creatures.some(
+      (creature) => !!creature.essenceDefinitionId && !creature.isEssenceFocus,
+    );
+    if (!hasSelectableTarget) return null;
+
+    return (
+      archive.essenceFocusAvailableAtUtc ??
+      archive.essenceFocusSetAtUtc ??
+      'initial'
+    );
+  });
+  readonly essenceFocusReady = computed(() => {
+    const key = this.essenceFocusReadyKey();
+    return key !== null && key !== this._seenEssenceFocusReadyKey();
+  });
   readonly selectedLoadoutId = computed(() => this._selectedLoadoutId());
   readonly draftLoadoutName = computed(() => this._draftLoadoutName());
   readonly draftSlots = computed(() => this._draftSlots());
@@ -52,6 +94,12 @@ export class EssenceStateService {
       .filter(
         (item) => item.itemInstance.itemBase.itemType === ItemType.Essence,
       ),
+  );
+
+  readonly hasAbsorbableInventoryEssences = computed(() =>
+    this.inventoryEssences().some(
+      (item) => !this.isInventoryEssenceAbsorbed(item),
+    ),
   );
 
   readonly absorbedEssenceDefinitionIds = computed(
@@ -150,10 +198,24 @@ export class EssenceStateService {
     private readonly tutorialState: TutorialStateService,
     private readonly eventBus: EventBusService,
   ) {
+    setInterval(() => this._now.set(Date.now()), 60_000);
+
     effect(
       () => {
         if (this.eventBus.logout()) {
           this.reset();
+        }
+      },
+      { allowSignalWrites: true },
+    );
+
+    effect(
+      () => {
+        if (this._activeView() !== 'creatures') return;
+
+        const readyKey = this.essenceFocusReadyKey();
+        if (readyKey) {
+          this._seenEssenceFocusReadyKey.set(readyKey);
         }
       },
       { allowSignalWrites: true },
@@ -172,11 +234,15 @@ export class EssenceStateService {
     forkJoin({
       archive: this.essencesService.getArchive(),
       loadouts: this.essencesService.getLoadouts(),
+      creatureArchive: this.essencesService.getCreatureArchive(),
+      codex: this.essencesService.getCodex(),
     }).subscribe({
-      next: ({ archive, loadouts }) => {
+      next: ({ archive, loadouts, creatureArchive, codex }) => {
         if (requestVersion !== this.resetVersion) return;
         this._archive.set(archive);
         this._loadouts.set(loadouts);
+        this._creatureArchive.set(creatureArchive);
+        this._codex.set(codex);
         this.ensureSelectedEssence(archive);
         this.ensureSelectedLoadout(loadouts);
         this._loading.set(false);
@@ -189,11 +255,28 @@ export class EssenceStateService {
     });
   }
 
+  refreshCreatureArchive(): void {
+    const requestVersion = this.resetVersion;
+
+    this.essencesService.getCreatureArchive().subscribe({
+      next: (creatureArchive) => {
+        if (requestVersion !== this.resetVersion) return;
+        this._creatureArchive.set(creatureArchive);
+      },
+      error: (error) => {
+        if (requestVersion !== this.resetVersion) return;
+        this._error.set(error?.message ?? 'Failed to load Creature Archive');
+      },
+    });
+  }
+
   reset(): void {
     this.resetVersion += 1;
     this._activeView.set('archive');
     this._archive.set(null);
     this._loadouts.set(null);
+    this._creatureArchive.set(null);
+    this._codex.set(null);
     this._selectedPlayerEssenceId.set(null);
     this._selectedLoadoutId.set(null);
     this._selectedInventoryItemId.set(null);
@@ -201,6 +284,7 @@ export class EssenceStateService {
     this._draftSlots.set([]);
     this._loading.set(false);
     this._error.set(null);
+    this._seenEssenceFocusReadyKey.set(null);
   }
 
   selectPlayerEssence(essence: PlayerEssenceDto): void {
@@ -240,6 +324,19 @@ export class EssenceStateService {
     this.essencesService
       .setFavorite(essence.id, essence.isFavorite)
       .subscribe();
+  }
+
+  setEssenceFocus(creatureId: string | null): void {
+    if (creatureId && !this.canChangeEssenceFocus()) {
+      this._error.set('Essence Focus can be changed once every 24 hours.');
+      return;
+    }
+
+    this.essencesService.setEssenceFocus(creatureId).subscribe({
+      next: (archive) => this._creatureArchive.set(archive),
+      error: (error) =>
+        this._error.set(error?.message ?? 'Failed to update Essence Focus'),
+    });
   }
 
   absorbSelectedInventoryEssence(): Observable<EssenceMutationResponseDto> | null {
@@ -404,6 +501,26 @@ export class EssenceStateService {
     this._archive.set(response.archive);
     this.inventoryState.setInventory(response.inventoryItems);
     this.ensureSelectedEssence(response.archive);
+    this.refreshCompanionArchives();
+  }
+
+  private refreshCompanionArchives(): void {
+    const requestVersion = this.resetVersion;
+
+    forkJoin({
+      creatureArchive: this.essencesService.getCreatureArchive(),
+      codex: this.essencesService.getCodex(),
+    }).subscribe({
+      next: ({ creatureArchive, codex }) => {
+        if (requestVersion !== this.resetVersion) return;
+        this._creatureArchive.set(creatureArchive);
+        this._codex.set(codex);
+      },
+      error: (error) => {
+        if (requestVersion !== this.resetVersion) return;
+        this._error.set(error?.message ?? 'Failed to refresh Essence records');
+      },
+    });
   }
 
   private refreshLoadouts(): void {
@@ -459,5 +576,12 @@ export class EssenceStateService {
         (item) => !this.isInventoryEssenceAbsorbed(item),
       )?.itemInstance.id ?? null
     );
+  }
+
+  private getUtcTime(value: string | null | undefined): number | null {
+    if (!value) return null;
+
+    const time = new Date(value).getTime();
+    return Number.isNaN(time) ? null : time;
   }
 }

@@ -6,6 +6,9 @@ import { EssenceStateService } from '../../../../core/services/api/essences/esse
 import { DefaultHeaderComponent } from '../../../../shared/components/default-header/default-header.component';
 import { EssenceDescriptionComponent } from '../../../../shared/components/essences/essence-description/essence-description.component';
 import {
+  CreatureArchiveEntryDto,
+  EssenceCodexEntryDto,
+  EssenceCodexMemberDto,
   EssenceLoadoutDto,
   PlayerEssenceDto,
 } from '../../../../shared/models/essence-system';
@@ -17,6 +20,7 @@ import {
   DropdownOption,
   DropdownSelection,
 } from '../../../../shared/components/custom-components/dropdown/dropdown.component';
+import { NotificationIndicatorComponent } from '../../../../shared/components/notification-indicator/notification-indicator.component';
 import { TutorialStateService } from '../../../../core/services/api/tutorial/tutorial-state.service';
 import {
   TUTORIAL_STEP_ABSORB_ESSENCE,
@@ -39,11 +43,13 @@ type ArchiveSort = 'name' | 'level' | 'tier';
     AttributeValueFormatPipe,
     EssencesAbsorbComponent,
     DropdownComponent,
+    NotificationIndicatorComponent,
   ],
   templateUrl: './essences.component.html',
 })
 export class EssencesComponent implements OnInit {
   readonly archiveSearch = signal('');
+  readonly creatureSearch = signal('');
   readonly archiveFilter = signal<ArchiveFilter>('all');
   readonly archiveSort = signal<ArchiveSort>('name');
   readonly upgradeDetailsOpen = signal(false);
@@ -113,6 +119,31 @@ export class EssencesComponent implements OnInit {
         }
       });
   });
+
+  readonly filteredCreatures = computed(() => {
+    const search = this.creatureSearch().trim().toLowerCase();
+    const creatures = this.essenceState.creatureArchive()?.creatures ?? [];
+
+    if (!search) return creatures;
+
+    return creatures.filter((creature) =>
+      [
+        creature.name,
+        creature.creatureId,
+        creature.essenceName ?? '',
+        ...creature.tags,
+      ]
+        .join(' ')
+        .toLowerCase()
+        .includes(search),
+    );
+  });
+
+  readonly unlockedCodexEntries = computed(
+    () =>
+      this.essenceState.codex()?.entries.filter((entry) => entry.isUnlocked)
+        .length ?? 0,
+  );
 
   constructor(
     public readonly essenceState: EssenceStateService,
@@ -241,5 +272,124 @@ export class EssencesComponent implements OnInit {
 
   public trackEssence(_: number, essence: PlayerEssenceDto): string {
     return essence.id;
+  }
+
+  public trackCreature(_: number, creature: CreatureArchiveEntryDto): string {
+    return creature.creatureId;
+  }
+
+  public setEssenceFocus(creature: CreatureArchiveEntryDto): void {
+    if (!creature.essenceDefinitionId) return;
+    if (creature.isEssenceFocus || !this.essenceState.canChangeEssenceFocus()) {
+      return;
+    }
+
+    this.essenceState.setEssenceFocus(creature.creatureId);
+  }
+
+  public canSetEssenceFocus(creature: CreatureArchiveEntryDto): boolean {
+    return (
+      !!creature.essenceDefinitionId &&
+      !creature.isEssenceFocus &&
+      this.essenceState.canChangeEssenceFocus()
+    );
+  }
+
+  public essenceFocusStatusText(): string {
+    const archive = this.essenceState.creatureArchive();
+    if (!archive) return 'Loading focus status.';
+    if (this.essenceState.canChangeEssenceFocus()) {
+      return 'You can choose a new target now. After setting one, Focus is locked for 24 hours.';
+    }
+    if (archive.essenceFocusAvailableAtUtc) {
+      return `New target available ${new Date(archive.essenceFocusAvailableAtUtc).toLocaleString()}.`;
+    }
+
+    return 'Focus is locked for 24 hours after choosing a target.';
+  }
+
+  public totalFocusDurationLabel(creature: CreatureArchiveEntryDto): string {
+    return this.formatDuration(this.getLiveTotalFocusDurationSeconds(creature));
+  }
+
+  public currentFocusDurationLabel(creature: CreatureArchiveEntryDto): string {
+    return this.formatDuration(this.getLiveCurrentFocusDurationSeconds(creature));
+  }
+
+  public trackCodex(_: number, entry: EssenceCodexEntryDto): string {
+    return entry.id;
+  }
+
+  public trackCodexMember(_: number, member: EssenceCodexMemberDto): string {
+    return member.essenceDefinitionId;
+  }
+
+  public progressPercent(current: number, required: number): number {
+    if (required <= 0) return 100;
+    return Math.min(100, Math.round((current / required) * 100));
+  }
+
+  public bonusValueLabel(entry: EssenceCodexEntryDto): string {
+    const percent = entry.bonusValue / 100;
+    return `${percent.toLocaleString(undefined, {
+      maximumFractionDigits: 2,
+    })}%`;
+  }
+
+  public tagLabel(tag: string): string {
+    const displayPart = tag.split('.').at(-1) ?? tag;
+    return this.formatDisplayLabel(displayPart);
+  }
+
+  private getLiveTotalFocusDurationSeconds(
+    creature: CreatureArchiveEntryDto,
+  ): number {
+    const currentAtLoad = creature.currentEssenceFocusDurationSeconds ?? 0;
+    const completed = Math.max(
+      0,
+      (creature.essenceFocusTotalDurationSeconds ?? 0) - currentAtLoad,
+    );
+
+    return completed + this.getLiveCurrentFocusDurationSeconds(creature);
+  }
+
+  private getLiveCurrentFocusDurationSeconds(
+    creature: CreatureArchiveEntryDto,
+  ): number {
+    if (!creature.isEssenceFocus) return 0;
+
+    const startedAt = creature.essenceFocusSetAtUtc
+      ? new Date(creature.essenceFocusSetAtUtc).getTime()
+      : Number.NaN;
+    if (Number.isNaN(startedAt)) {
+      return creature.currentEssenceFocusDurationSeconds ?? 0;
+    }
+
+    return Math.max(
+      0,
+      Math.floor((this.essenceState.currentTime() - startedAt) / 1000),
+    );
+  }
+
+  private formatDuration(totalSeconds: number): string {
+    const seconds = Math.max(0, Math.floor(totalSeconds));
+    const days = Math.floor(seconds / 86400);
+    const hours = Math.floor((seconds % 86400) / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+
+    if (days > 0) return `${days}d ${hours}h`;
+    if (hours > 0) return `${hours}h ${minutes}m`;
+    if (minutes > 0) return `${minutes}m`;
+    return `${seconds}s`;
+  }
+
+  private formatDisplayLabel(value: string | null | undefined): string {
+    if (!value) return '';
+
+    return value
+      .replace(/[_-]+/g, ' ')
+      .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
+      .replace(/([A-Z]+)([A-Z][a-z])/g, '$1 $2')
+      .trim();
   }
 }
