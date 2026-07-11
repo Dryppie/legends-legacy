@@ -15,7 +15,7 @@ public sealed class JsonDungeonBoonDefinitionProvider : IDungeonBoonDefinitionPr
         JsonSerializerOptions options)
     {
         var contentRoot = config["Content:Root"] ?? "Data";
-        var path = Path.Combine(contentRootPath, contentRoot, "dungeon-boons.json");
+        var path = Path.Combine(contentRootPath, contentRoot, "dungeons", "dungeon-boons.json");
         var document = JsonSerializer.Deserialize<DungeonBoonDefinitionDocument>(
             File.ReadAllText(path),
             options) ?? new();

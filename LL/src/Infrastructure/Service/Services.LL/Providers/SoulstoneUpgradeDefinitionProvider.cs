@@ -22,7 +22,7 @@ public sealed class SoulstoneUpgradeDefinitionProvider : IDisposable
 
     public SoulstoneUpgradeDefinitionProvider()
     {
-        _filePath = Path.Combine(Directory.GetCurrentDirectory(), "Data", "soulstone-upgrades.json");
+        _filePath = Path.Combine(Directory.GetCurrentDirectory(), "Data", "progression", "soulstone-upgrades.json");
         Load();
 
         var directory = Path.GetDirectoryName(_filePath);

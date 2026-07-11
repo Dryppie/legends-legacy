@@ -3123,17 +3123,24 @@ public sealed class AbilitySystemTests
         var directory = new DirectoryInfo(AppContext.BaseDirectory);
         while (directory is not null)
         {
-            var dataPath = Path.Combine(directory.FullName, "src", "API", "API.LL", "Data");
-            var abilityCandidate = Path.Combine(dataPath, "abilities.json");
-            var statusCandidate = Path.Combine(dataPath, "statuses.json");
-            var summonCandidate = Path.Combine(dataPath, "summons.json");
-            if (File.Exists(abilityCandidate) && File.Exists(statusCandidate) && File.Exists(summonCandidate))
-                return Path.Combine(directory.FullName, "src", "API", "API.LL");
+            foreach (var apiPath in new[]
+            {
+                Path.Combine(directory.FullName, "src", "API", "API.LL"),
+                Path.Combine(directory.FullName, "LL", "src", "API", "API.LL")
+            })
+            {
+                var dataPath = Path.Combine(apiPath, "Data");
+                var abilityCandidate = Path.Combine(dataPath, "combat", "abilities.json");
+                var statusCandidate = Path.Combine(dataPath, "combat", "statuses.json");
+                var summonCandidate = Path.Combine(dataPath, "combat", "summons.json");
+                if (File.Exists(abilityCandidate) && File.Exists(statusCandidate) && File.Exists(summonCandidate))
+                    return apiPath;
+            }
 
             directory = directory.Parent;
         }
 
-        throw new DirectoryNotFoundException("Could not locate LL/src/API/API.LL/Data/abilities.json, statuses.json, and summons.json from test output directory.");
+        throw new DirectoryNotFoundException("Could not locate LL/src/API/API.LL/Data/combat/abilities.json, statuses.json, and summons.json from test output directory.");
     }
 
     private sealed class FakeLegacyDefinitionRepository(

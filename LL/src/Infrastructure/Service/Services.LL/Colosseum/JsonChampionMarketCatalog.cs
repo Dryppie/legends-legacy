@@ -15,7 +15,7 @@ public sealed class JsonChampionMarketCatalog : IChampionMarketCatalog
         JsonSerializerOptions options)
     {
         var contentRoot = config["Content:Root"] ?? "Data";
-        var path = Path.Combine(contentRootPath, contentRoot, "champion-market.json");
+        var path = Path.Combine(contentRootPath, contentRoot, "market", "champion-market.json");
         var document = JsonSerializer.Deserialize<ChampionMarketDocument>(
             File.ReadAllText(path),
             options) ?? new();

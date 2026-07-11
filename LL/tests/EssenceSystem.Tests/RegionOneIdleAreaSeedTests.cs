@@ -122,8 +122,8 @@ public sealed class RegionOneIdleAreaSeedTests
         var creatures = await db.Creatures.ToListAsync();
         var dataPath = FindApiDataRoot();
 
-        using var essenceDocument = JsonDocument.Parse(await File.ReadAllTextAsync(Path.Combine(dataPath, "essences.json")));
-        using var itemDocument = JsonDocument.Parse(await File.ReadAllTextAsync(Path.Combine(dataPath, "items.json")));
+        using var essenceDocument = JsonDocument.Parse(await File.ReadAllTextAsync(Path.Combine(dataPath, "essences", "essences.json")));
+        using var itemDocument = JsonDocument.Parse(await File.ReadAllTextAsync(Path.Combine(dataPath, "items", "items.json")));
 
         var essenceIdsByMonsterId = essenceDocument.RootElement
             .GetProperty("essences")
@@ -160,7 +160,7 @@ public sealed class RegionOneIdleAreaSeedTests
         await db.SaveChangesAsync();
 
         var dataPath = FindApiDataRoot();
-        using var essenceDocument = JsonDocument.Parse(await File.ReadAllTextAsync(Path.Combine(dataPath, "essences.json")));
+        using var essenceDocument = JsonDocument.Parse(await File.ReadAllTextAsync(Path.Combine(dataPath, "essences", "essences.json")));
         var tuningByMonsterId = essenceDocument.RootElement
             .GetProperty("essences")
             .EnumerateArray()
@@ -237,14 +237,14 @@ public sealed class RegionOneIdleAreaSeedTests
                 Path.Combine(directory.FullName, "LL", "src", "API", "API.LL", "Data")
             })
             {
-                if (File.Exists(Path.Combine(dataPath, "essences.json")) && File.Exists(Path.Combine(dataPath, "items.json")))
+                if (File.Exists(Path.Combine(dataPath, "essences", "essences.json")) && File.Exists(Path.Combine(dataPath, "items", "items.json")))
                     return dataPath;
             }
 
             directory = directory.Parent;
         }
 
-        throw new DirectoryNotFoundException("Could not locate LL/src/API/API.LL/Data/essences.json and items.json from test output directory.");
+        throw new DirectoryNotFoundException("Could not locate LL/src/API/API.LL/Data/essences/essences.json and items/items.json from test output directory.");
     }
 
     private sealed record EssenceDropTuning(

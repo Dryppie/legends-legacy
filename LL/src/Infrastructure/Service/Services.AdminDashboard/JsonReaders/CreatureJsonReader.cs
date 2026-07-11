@@ -27,7 +27,7 @@ public class CreatureJsonReader
 
     public CreatureJsonReader()
     {
-        _filePath = FindDataFile("creatures.json");
+        _filePath = FindDataFile(Path.Combine("world", "creatures.json"));
         string json;
         lock (FileLock)
         {

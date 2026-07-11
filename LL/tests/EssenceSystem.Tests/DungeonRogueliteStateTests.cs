@@ -565,7 +565,7 @@ public sealed class DungeonRogueliteStateTests
         var contentRoot = FindApiContentRoot();
         var reader = new JsonDefinitionReader<DungeonDefinition>(
             contentRoot,
-            Path.Combine("Data", "dungeons.json"),
+            Path.Combine("Data", "dungeons", "dungeons.json"),
             CreateJsonOptions());
         var definitions = new JsonDungeonDefinitions(reader, new DungeonDefinitionValidator());
 
@@ -1206,7 +1206,7 @@ public sealed class DungeonRogueliteStateTests
 
             foreach (var candidate in candidates)
             {
-                var boonCandidate = Path.Combine(candidate, "Data", "dungeon-boons.json");
+                var boonCandidate = Path.Combine(candidate, "Data", "dungeons", "dungeon-boons.json");
                 if (File.Exists(boonCandidate))
                 {
                     return candidate;
@@ -1216,7 +1216,7 @@ public sealed class DungeonRogueliteStateTests
             directory = directory.Parent;
         }
 
-        throw new DirectoryNotFoundException("Could not locate LL/src/API/API.LL/Data/dungeon-boons.json from test output directory.");
+        throw new DirectoryNotFoundException("Could not locate LL/src/API/API.LL/Data/dungeons/dungeon-boons.json from test output directory.");
     }
 
     private static void InvokeApplyRoomCompletionPressure(DungeonRun run, RoomInstance room)

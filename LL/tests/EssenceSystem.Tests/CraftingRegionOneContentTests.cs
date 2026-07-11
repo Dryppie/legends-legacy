@@ -8,7 +8,7 @@ public sealed class CraftingRegionOneContentTests
     public void RegionOneDungeons_SourceEveryStandardCraftingMaterial()
     {
         var materials = ReadArray("crafting/materials.json");
-        var dungeons = ReadArray("dungeons.json");
+        var dungeons = ReadArray("dungeons/dungeons.json");
 
         var gatheredItemIds = dungeons
             .SelectMany(dungeon => ChildArray(dungeon, "gatheringNodes"))
@@ -31,7 +31,7 @@ public sealed class CraftingRegionOneContentTests
     {
         var materials = ReadArray("crafting/materials.json");
         var blueprints = ReadArray("crafting/blueprints.json");
-        var dungeons = ReadArray("dungeons.json");
+        var dungeons = ReadArray("dungeons/dungeons.json");
 
         var firstClearItemIds = dungeons
             .SelectMany(dungeon => ChildArray(dungeon?["rewardTable"], "firstClearRewards"))
@@ -116,12 +116,12 @@ public sealed class CraftingRegionOneContentTests
     [Fact]
     public void Dungeons_DoNotRewardCompletedEquipmentItems()
     {
-        var items = ReadArray("items.json")
+        var items = ReadArray("items/items.json")
             .ToDictionary(
                 item => item?["id"]?.GetValue<string>() ?? string.Empty,
                 item => item?["itemType"]?.GetValue<string>() ?? string.Empty,
                 StringComparer.OrdinalIgnoreCase);
-        var dungeons = ReadArray("dungeons.json");
+        var dungeons = ReadArray("dungeons/dungeons.json");
 
         var completedEquipmentRewards = dungeons
             .SelectMany(GetDungeonRewardItemIds)
@@ -143,7 +143,7 @@ public sealed class CraftingRegionOneContentTests
             })
             .Where(material => !string.IsNullOrWhiteSpace(material.ItemId) && material.Tier.HasValue)
             .ToDictionary(material => material.ItemId, material => material.Tier!.Value, StringComparer.OrdinalIgnoreCase);
-        var dungeons = ReadArray("dungeons.json");
+        var dungeons = ReadArray("dungeons/dungeons.json");
 
         var invalidRewards = dungeons
             .SelectMany(dungeon =>
@@ -190,8 +190,15 @@ public sealed class CraftingRegionOneContentTests
         var current = new DirectoryInfo(AppContext.BaseDirectory);
         while (current != null)
         {
-            var candidate = Path.Combine(current.FullName, "src", "API", "API.LL", "Data");
-            if (Directory.Exists(candidate)) return candidate;
+            foreach (var candidate in new[]
+            {
+                Path.Combine(current.FullName, "src", "API", "API.LL", "Data"),
+                Path.Combine(current.FullName, "LL", "src", "API", "API.LL", "Data")
+            })
+            {
+                if (Directory.Exists(candidate)) return candidate;
+            }
+
             current = current.Parent;
         }
 

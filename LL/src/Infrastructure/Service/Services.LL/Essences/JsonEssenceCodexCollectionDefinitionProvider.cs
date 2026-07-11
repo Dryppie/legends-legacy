@@ -16,7 +16,7 @@ public sealed class JsonEssenceCodexCollectionDefinitionProvider : IEssenceCodex
         IEssenceDefinitionRepository essenceDefinitions)
     {
         var contentRoot = config["Content:Root"] ?? "Data";
-        var path = Path.Combine(contentRootPath, contentRoot, "essence-codex-collections.json");
+        var path = Path.Combine(contentRootPath, contentRoot, "essences", "essence-codex-collections.json");
         var document = JsonSerializer.Deserialize<EssenceCodexCollectionDefinitionDocument>(
             File.ReadAllText(path),
             options) ?? new();

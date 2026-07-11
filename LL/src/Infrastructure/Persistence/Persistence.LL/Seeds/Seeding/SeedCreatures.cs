@@ -13,8 +13,8 @@ namespace Persistence.LL.Seeds.Seeding;
 
 public static class SeedCreatures
 {
-    private const string CreatureCatalogFileName = "creatures.json";
-    private const string RegionCatalogFileName = "regions.json";
+    private static readonly string CreatureCatalogPath = Path.Combine("world", "creatures.json");
+    private static readonly string RegionCatalogPath = Path.Combine("world", "regions.json");
     private const float FloatTolerance = 0.0001f;
 
     private static readonly JsonSerializerOptions JsonOptions = new()
@@ -54,32 +54,32 @@ public static class SeedCreatures
 
     private static async Task<CreatureSeedContent> LoadContentAsync()
     {
-        var creatureCatalog = await LoadJsonAsync<CreatureSeedCatalog>(CreatureCatalogFileName);
-        var regionCatalog = await LoadJsonAsync<RegionSeedCatalog>(RegionCatalogFileName);
+        var creatureCatalog = await LoadJsonAsync<CreatureSeedCatalog>(CreatureCatalogPath);
+        var regionCatalog = await LoadJsonAsync<RegionSeedCatalog>(RegionCatalogPath);
 
         Validate(creatureCatalog, regionCatalog);
 
         return new CreatureSeedContent(creatureCatalog.Creatures, regionCatalog.Regions);
     }
 
-    private static async Task<T> LoadJsonAsync<T>(string fileName)
+    private static async Task<T> LoadJsonAsync<T>(string relativePath)
     {
-        var path = FindDataFile(fileName);
+        var path = FindDataFile(relativePath);
         var json = await File.ReadAllTextAsync(path);
         return JsonSerializer.Deserialize<T>(json, JsonOptions)
-            ?? throw new InvalidOperationException($"Could not deserialize Data/{fileName}.");
+            ?? throw new InvalidOperationException($"Could not deserialize Data/{relativePath}.");
     }
 
-    private static string FindDataFile(string fileName)
+    private static string FindDataFile(string relativePath)
     {
         var directory = new DirectoryInfo(AppContext.BaseDirectory);
         while (directory is not null)
         {
             foreach (var candidate in new[]
             {
-                Path.Combine(directory.FullName, "Data", fileName),
-                Path.Combine(directory.FullName, "src", "API", "API.LL", "Data", fileName),
-                Path.Combine(directory.FullName, "LL", "src", "API", "API.LL", "Data", fileName)
+                Path.Combine(directory.FullName, "Data", relativePath),
+                Path.Combine(directory.FullName, "src", "API", "API.LL", "Data", relativePath),
+                Path.Combine(directory.FullName, "LL", "src", "API", "API.LL", "Data", relativePath)
             })
             {
                 if (File.Exists(candidate))
@@ -91,14 +91,14 @@ public static class SeedCreatures
             directory = directory.Parent;
         }
 
-        throw new FileNotFoundException($"Could not locate Data/{fileName} from '{AppContext.BaseDirectory}'.");
+        throw new FileNotFoundException($"Could not locate Data/{relativePath} from '{AppContext.BaseDirectory}'.");
     }
 
     private static void Validate(CreatureSeedCatalog creatureCatalog, RegionSeedCatalog regionCatalog)
     {
         if (creatureCatalog.Creatures.Count == 0)
         {
-            throw new InvalidOperationException("Data/creatures.json must contain at least one creature.");
+            throw new InvalidOperationException("Data/world/creatures.json must contain at least one creature.");
         }
 
         var duplicateCreatureIds = creatureCatalog.Creatures
@@ -109,7 +109,7 @@ public static class SeedCreatures
         if (duplicateCreatureIds.Length > 0)
         {
             throw new InvalidOperationException(
-                $"Data/creatures.json contains duplicate creature ids: {string.Join(", ", duplicateCreatureIds)}.");
+                $"Data/world/creatures.json contains duplicate creature ids: {string.Join(", ", duplicateCreatureIds)}.");
         }
 
         var creatureIds = creatureCatalog.Creatures
@@ -121,14 +121,14 @@ public static class SeedCreatures
         {
             if (string.IsNullOrWhiteSpace(region.Name))
             {
-                throw new InvalidOperationException("Data/regions.json contains a region without a name.");
+                throw new InvalidOperationException("Data/world/regions.json contains a region without a name.");
             }
 
             foreach (var area in region.Areas)
             {
                 if (!areaIds.Add(area.Id))
                 {
-                    throw new InvalidOperationException($"Data/regions.json contains duplicate area id '{area.Id}'.");
+                    throw new InvalidOperationException($"Data/world/regions.json contains duplicate area id '{area.Id}'.");
                 }
 
                 if (area.SpawnProbabilities.Count == 0)

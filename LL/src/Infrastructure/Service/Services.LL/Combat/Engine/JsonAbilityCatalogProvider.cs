@@ -14,9 +14,9 @@ public sealed class JsonAbilityCatalogProvider : IAbilityCatalogProvider
         JsonSerializerOptions options)
     {
         var contentRoot = config["Content:Root"] ?? "Data";
-        var abilityPath = Path.Combine(contentRootPath, contentRoot, "abilities.json");
-        var statusPath = Path.Combine(contentRootPath, contentRoot, "statuses.json");
-        var summonPath = Path.Combine(contentRootPath, contentRoot, "summons.json");
+        var abilityPath = Path.Combine(contentRootPath, contentRoot, "combat", "abilities.json");
+        var statusPath = Path.Combine(contentRootPath, contentRoot, "combat", "statuses.json");
+        var summonPath = Path.Combine(contentRootPath, contentRoot, "combat", "summons.json");
 
         var abilities = ReadList<AbilitySpec>(abilityPath, options);
         var statuses = ReadList<StatusSpec>(statusPath, options);

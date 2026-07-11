@@ -21,7 +21,7 @@ public static class DbJsonSeeder
 
     private static async Task SeedBaseItems(IDbContext ctx, JsonSerializerOptions opt)
     {
-        var itemPath = Path.Combine(AppContext.BaseDirectory, "Data", "items.json");
+        var itemPath = Path.Combine(AppContext.BaseDirectory, "Data", "items", "items.json");
         var itemJson = await File.ReadAllTextAsync(itemPath);
         var items = JsonSerializer.Deserialize<List<ItemBase>>(itemJson, opt)!;
         var existingEquipmentById = await ctx.ItemBases

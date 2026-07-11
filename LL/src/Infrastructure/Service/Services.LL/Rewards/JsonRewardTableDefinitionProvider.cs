@@ -17,12 +17,12 @@ public sealed class JsonRewardTableDefinitionProvider : IRewardTableDefinitionPr
         IRewardTableDefinitionValidator validator)
     {
         var contentRoot = config["Content:Root"] ?? "Data";
-        var path = Path.Combine(contentRootPath, contentRoot, "reward-tables.json");
+        var path = Path.Combine(contentRootPath, contentRoot, "rewards", "reward-tables.json");
         var document = JsonSerializer.Deserialize<RewardTableDefinitionDocument>(
             File.ReadAllText(path),
             options) ?? new();
 
-        validator.ThrowIfInvalid(document.RewardTables, LoadItemIds(Path.Combine(contentRootPath, contentRoot, "items.json")));
+        validator.ThrowIfInvalid(document.RewardTables, LoadItemIds(Path.Combine(contentRootPath, contentRoot, "items", "items.json")));
         _definitions = document.RewardTables;
         _byId = _definitions.ToDictionary(x => x.Id, StringComparer.OrdinalIgnoreCase);
     }

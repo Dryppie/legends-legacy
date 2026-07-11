@@ -111,8 +111,8 @@ public sealed class SoulstoneConstellationDefinitionTests
         {
             var candidates = new[]
             {
-                Path.Combine(directory.FullName, "src", "API", "API.LL", "Data", "soulstone-upgrades.json"),
-                Path.Combine(directory.FullName, "LL", "src", "API", "API.LL", "Data", "soulstone-upgrades.json")
+                Path.Combine(directory.FullName, "src", "API", "API.LL", "Data", "progression", "soulstone-upgrades.json"),
+                Path.Combine(directory.FullName, "LL", "src", "API", "API.LL", "Data", "progression", "soulstone-upgrades.json")
             };
 
             foreach (var candidate in candidates)

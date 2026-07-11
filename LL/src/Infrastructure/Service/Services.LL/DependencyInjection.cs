@@ -380,7 +380,7 @@ public static class DependencyInjection
 
             return new JsonDefinitionReader<DungeonDefinition>(
                 basePath: contentRootPath,
-                relativePath: Path.Combine(contentRoot, "dungeons.json"),
+                relativePath: Path.Combine(contentRoot, "dungeons", "dungeons.json"),
                 options: jsonOptions
             );
         });
