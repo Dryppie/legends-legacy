@@ -1442,6 +1442,9 @@ public sealed class DungeonRogueliteStateTests
         public Task<bool> TryConsumeInventoryItemAsync(Guid characterId, Guid itemInstanceId, CancellationToken cancellationToken) =>
             Task.FromResult(false);
 
+        public Task<InventoryItem?> GetInventoryItemAsync(Guid characterId, Guid itemInstanceId, CancellationToken cancellationToken) =>
+            Task.FromResult<InventoryItem?>(null);
+
         public Task<bool> TryRemoveItemsForMarketPlaceListingAsync(
             Guid characterId,
             MarketPlaceListing marketplaceListing,
