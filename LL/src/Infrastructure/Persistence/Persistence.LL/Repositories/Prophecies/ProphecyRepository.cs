@@ -95,6 +95,21 @@ public sealed class ProphecyRepository : IProphecyRepository
                 x.PeriodEnd > occurredAt)
             .ToListAsync(cancellationToken);
 
+    public async Task<IReadOnlyList<PlayerProphecyInstance>> GetAcceptedInstancesForProgressWindowAsync(
+        Guid characterId,
+        DateTimeOffset from,
+        DateTimeOffset to,
+        CancellationToken cancellationToken) =>
+        await _context.PlayerProphecyInstances
+            .Include(x => x.ProphecyDefinition)
+            .Where(x =>
+                x.CharacterId == characterId &&
+                x.Status == ProphecyStatus.Accepted &&
+                x.AcceptedAt <= to &&
+                x.PeriodStart <= to &&
+                x.PeriodEnd > from)
+            .ToListAsync(cancellationToken);
+
     public async Task<IReadOnlyList<PlayerProphecyInstance>> GetRecentInstancesAsync(
         Guid playerId,
         Guid characterId,

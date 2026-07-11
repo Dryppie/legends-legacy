@@ -10,6 +10,7 @@ public interface IProphecyService
     Task<ProphecyOperationResult<WeeklyRevelationClaimResult>> ClaimWeeklyMilestoneAsync(Guid playerId, Guid characterId, int favorRequired, DateTimeOffset now, CancellationToken cancellationToken);
     Task<ProphecyOperationResult<ProphecyCacheOpenResult>> OpenCacheAsync(Guid characterId, string cacheItemId, CancellationToken cancellationToken);
     Task<IReadOnlyList<ProphecyProgressUpdate>> TrackProgressAsync(ProphecyProgressEvent progressEvent, CancellationToken cancellationToken);
+    Task<IReadOnlyList<ProphecyProgressUpdate>> TrackProgressAsync(IReadOnlyList<ProphecyProgressEvent> progressEvents, CancellationToken cancellationToken);
 }
 
 public sealed record ProphecyProgressEvent(

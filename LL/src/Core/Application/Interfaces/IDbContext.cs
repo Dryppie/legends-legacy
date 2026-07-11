@@ -19,7 +19,6 @@ using Domain.Models.Inventories;
 using Domain.Models.Items;
 using Domain.Models.Items.Equipments.Slots;
 using Domain.Models.Items.EssenceItems;
-using Domain.Models.LootTables;
 using Domain.Models.MarketPlaces;
 using Domain.Models.Outbox;
 using Domain.Models.Professions;
@@ -75,6 +74,7 @@ public interface IDbContext
     DbSet<EssenceLoadout> EssenceLoadouts { get; }
     DbSet<EssenceLoadoutSlot> EssenceLoadoutSlots { get; }
     DbSet<CreatureResonance> MonsterResonances { get; }
+    DbSet<CharacterCreatureArchiveEntry> CharacterCreatureArchiveEntries { get; }
 
     DbSet<DungeonRun> DungeonRuns { get; }
     DbSet<RunReward> RunRewards { get; }
@@ -106,9 +106,6 @@ public interface IDbContext
     DbSet<InventoryItem> InventoryItems { get; }
     DbSet<ItemBase> ItemBases { get; }
     DbSet<ItemInstance> ItemInstances { get; }
-    DbSet<LootTable> LootTables { get; }
-    DbSet<LootTableItem> LootTableItems { get; }
-
     DbSet<MarketPlaceListing> MarketPlaceListings { get; }
     DbSet<MarketPlaceBuyOrder> MarketPlaceBuyOrders { get; }
     DbSet<GameEventOutboxMessage> GameEventOutboxMessages { get; }

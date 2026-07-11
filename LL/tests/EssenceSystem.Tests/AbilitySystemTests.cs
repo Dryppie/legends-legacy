@@ -1631,7 +1631,7 @@ public sealed class AbilitySystemTests
 
         Assert.True(report.IsComplete, string.Join(Environment.NewLine, report.Gaps.Select(x => $"{x.EssenceId} {x.Slot}: {x.Reason}")));
         Assert.Equal(report.RequiredSlotCount, report.CoveredSlotCount);
-        Assert.Equal(120, report.RequiredSlotCount);
+        Assert.Equal(122, report.RequiredSlotCount);
         Assert.Equal(report.EssenceCount, report.RuntimeLoadoutChecks.Count);
         Assert.All(report.RuntimeLoadoutChecks, check =>
         {
@@ -1672,6 +1672,7 @@ public sealed class AbilitySystemTests
         Assert.DoesNotContain(report.Gaps, x => x.EssenceId == "essence.cave_bat");
         Assert.DoesNotContain(report.Gaps, x => x.EssenceId == "essence.necroshade_wraith");
         Assert.DoesNotContain(report.Gaps, x => x.EssenceId == "essence.legacy.goblin");
+        Assert.DoesNotContain(report.Gaps, x => x.EssenceId == "essence.legacy.training_goblin");
         Assert.DoesNotContain(report.Gaps, x => x.EssenceId == "essence.legacy.goblin_warrior");
         Assert.DoesNotContain(report.Gaps, x => x.EssenceId == "essence.legacy.goblin_archer");
         Assert.DoesNotContain(report.Gaps, x => x.EssenceId == "essence.legacy.large_rat");
@@ -1709,6 +1710,8 @@ public sealed class AbilitySystemTests
         Assert.Contains(report.Slots, x => x.EssenceId == "essence.necroshade_wraith" && x.Slot == "Passive" && x.AbilityId == "ability.essence.necroshade_wraith.grave_whisper");
         Assert.Contains(report.Slots, x => x.EssenceId == "essence.legacy.goblin" && x.Slot == "Active" && x.AbilityId == "ability.essence.legacy.goblin.sneak_attack");
         Assert.Contains(report.Slots, x => x.EssenceId == "essence.legacy.goblin" && x.Slot == "Passive" && x.AbilityId == "ability.essence.legacy.goblin.pocket_dirt");
+        Assert.Contains(report.Slots, x => x.EssenceId == "essence.legacy.training_goblin" && x.Slot == "Active" && x.AbilityId == "ability.essence.legacy.training_goblin.training_stab");
+        Assert.Contains(report.Slots, x => x.EssenceId == "essence.legacy.training_goblin" && x.Slot == "Passive" && x.AbilityId == "ability.essence.legacy.training_goblin.pocket_pebbles");
         Assert.Contains(report.Slots, x => x.EssenceId == "essence.legacy.goblin_warrior" && x.Slot == "Active" && x.AbilityId == "ability.essence.legacy.goblin_warrior.raging_cleave");
         Assert.Contains(report.Slots, x => x.EssenceId == "essence.legacy.goblin_warrior" && x.Slot == "Passive" && x.AbilityId == "ability.essence.legacy.goblin_warrior.reckless_assault");
         Assert.Contains(report.Slots, x => x.EssenceId == "essence.legacy.goblin_archer" && x.Slot == "Active" && x.AbilityId == "ability.essence.legacy.goblin_archer.snipers_strike");
@@ -3120,17 +3123,24 @@ public sealed class AbilitySystemTests
         var directory = new DirectoryInfo(AppContext.BaseDirectory);
         while (directory is not null)
         {
-            var dataPath = Path.Combine(directory.FullName, "src", "API", "API.LL", "Data");
-            var abilityCandidate = Path.Combine(dataPath, "abilities.json");
-            var statusCandidate = Path.Combine(dataPath, "statuses.json");
-            var summonCandidate = Path.Combine(dataPath, "summons.json");
-            if (File.Exists(abilityCandidate) && File.Exists(statusCandidate) && File.Exists(summonCandidate))
-                return Path.Combine(directory.FullName, "src", "API", "API.LL");
+            foreach (var apiPath in new[]
+            {
+                Path.Combine(directory.FullName, "src", "API", "API.LL"),
+                Path.Combine(directory.FullName, "LL", "src", "API", "API.LL")
+            })
+            {
+                var dataPath = Path.Combine(apiPath, "Data");
+                var abilityCandidate = Path.Combine(dataPath, "combat", "abilities.json");
+                var statusCandidate = Path.Combine(dataPath, "combat", "statuses.json");
+                var summonCandidate = Path.Combine(dataPath, "combat", "summons.json");
+                if (File.Exists(abilityCandidate) && File.Exists(statusCandidate) && File.Exists(summonCandidate))
+                    return apiPath;
+            }
 
             directory = directory.Parent;
         }
 
-        throw new DirectoryNotFoundException("Could not locate LL/src/API/API.LL/Data/abilities.json, statuses.json, and summons.json from test output directory.");
+        throw new DirectoryNotFoundException("Could not locate LL/src/API/API.LL/Data/combat/abilities.json, statuses.json, and summons.json from test output directory.");
     }
 
     private sealed class FakeLegacyDefinitionRepository(

@@ -5,6 +5,7 @@ using Domain.Models.Items.Equipments;
 using Domain.Models.Professions.Crafting;
 using Domain.Models.Professions.Crafting.V2;
 using Microsoft.Extensions.Options;
+using Services.LL.Extensions;
 
 namespace Services.LL.Professions.Craftings;
 
@@ -20,11 +21,12 @@ public sealed class TemperingMechanicsService : ITemperingMechanicsService
     public TemperingAttemptResult ApplyTemperingAttempt(
         EquipmentInstance equipment,
         TemperingProfileDefinition profile,
-        Random rng)
+        Random rng,
+        double negativeOutcomeReductionBps = 0)
     {
         var previousRarity = equipment.Rarity;
         var previousQuality = equipment.Quality;
-        var outcome = RollOutcome(previousRarity, rng);
+        var outcome = RollOutcome(previousRarity, rng, negativeOutcomeReductionBps);
         var upgraded = false;
         var qualityIncreased = false;
 
@@ -98,7 +100,7 @@ public sealed class TemperingMechanicsService : ITemperingMechanicsService
         return TryIncreaseQuality(equipment, previousQuality);
     }
 
-    private TemperingOutcome RollOutcome(Rarity rarity, Random rng)
+    private TemperingOutcome RollOutcome(Rarity rarity, Random rng, double negativeOutcomeReductionBps)
     {
         /* ---------------- probability tables ----------------
         • Critical  : extremely rare, configurable base + additive rarity step
@@ -113,7 +115,7 @@ public sealed class TemperingMechanicsService : ITemperingMechanicsService
             _options.CriticalChanceBase + (_options.CriticalChancePerRarityStep * rarityIndex),
             0d,
             1d);
-        double pNegative = (0.05 + 0.05 * rarityIndex); // (5 + -10 = -5) // 5% → 35%
+        double pNegative = (0.05 + 0.05 * rarityIndex).ReduceChanceByPercentagePointBps(negativeOutcomeReductionBps);
         double pPositive = PositiveChance(rarity);
 
         double roll = rng.NextDouble();

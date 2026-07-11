@@ -1,5 +1,4 @@
-﻿using Application.Common.Interfaces;
-using Application.Interfaces.Services.AdminDashboard;
+﻿using Application.Interfaces.Services.AdminDashboard;
 using Application.UseCases._AdminDashboard.Creatures.Dtos;
 using Domain.Models.Entities.Creatures;
 using Services.AdminDashboard.JsonReaders;

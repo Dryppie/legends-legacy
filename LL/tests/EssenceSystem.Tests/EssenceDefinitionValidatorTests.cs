@@ -138,6 +138,36 @@ public sealed class EssenceDefinitionValidatorTests
         Assert.NotEmpty(repository.GetAll());
     }
 
+    [Fact]
+    public void Authored_essence_codex_collection_json_passes_definition_validation()
+    {
+        var options = new JsonSerializerOptions
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            ReadCommentHandling = JsonCommentHandling.Skip,
+            AllowTrailingCommas = true
+        };
+        options.Converters.Add(new JsonStringEnumConverter());
+        var config = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?> { ["Content:Root"] = "Data" })
+            .Build();
+        var contentRoot = FindApiContentRoot();
+        var repository = new JsonEssenceDefinitionRepository(
+            config,
+            contentRoot,
+            options,
+            _validator);
+
+        var provider = new JsonEssenceCodexCollectionDefinitionProvider(
+            config,
+            contentRoot,
+            options,
+            repository);
+
+        Assert.NotEmpty(provider.GetAll());
+        Assert.All(provider.GetAll(), collection => Assert.InRange(collection.EssenceDefinitionIds.Count, 2, 6));
+    }
+
     internal static EssenceDefinition ValidDefinition() => new()
     {
         Id = "essence.test",
@@ -194,15 +224,22 @@ public sealed class EssenceDefinitionValidatorTests
         var directory = new DirectoryInfo(AppContext.BaseDirectory);
         while (directory is not null)
         {
-            var dataPath = Path.Combine(directory.FullName, "src", "API", "API.LL", "Data");
-            var essenceCandidate = Path.Combine(dataPath, "essences.json");
-            var abilityCandidate = Path.Combine(dataPath, "abilities.json");
-            if (File.Exists(essenceCandidate) && File.Exists(abilityCandidate))
-                return Path.Combine(directory.FullName, "src", "API", "API.LL");
+            foreach (var apiPath in new[]
+            {
+                Path.Combine(directory.FullName, "src", "API", "API.LL"),
+                Path.Combine(directory.FullName, "LL", "src", "API", "API.LL")
+            })
+            {
+                var dataPath = Path.Combine(apiPath, "Data");
+                var essenceCandidate = Path.Combine(dataPath, "essences", "essences.json");
+                var abilityCandidate = Path.Combine(dataPath, "combat", "abilities.json");
+                if (File.Exists(essenceCandidate) && File.Exists(abilityCandidate))
+                    return apiPath;
+            }
 
             directory = directory.Parent;
         }
 
-        throw new DirectoryNotFoundException("Could not locate LL/src/API/API.LL/Data/essences.json and abilities.json from test output directory.");
+        throw new DirectoryNotFoundException("Could not locate LL/src/API/API.LL/Data/essences/essences.json and combat/abilities.json from test output directory.");
     }
 }

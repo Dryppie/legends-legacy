@@ -1,11 +1,11 @@
 using Application.Interfaces.Services.LL;
 using Application.Interfaces.Services.LL.Dungeons;
-using Common.Exceptions;
+using Application.Interfaces.Services.LL.Rewards;
 using Domain.Models.Dungeons.Definitions;
 using Domain.Models.Dungeons.Runs;
 using Domain.Models.Essences;
 using Domain.Models.Items;
-using Domain.Models.LootTables;
+using Domain.Models.Rewards;
 using Services.LL.Interfaces;
 using Services.LL.Interfaces.Combat.Reward.Dungeon;
 
@@ -15,9 +15,8 @@ public sealed class DungeonCompletionRewardApplier : IDungeonCompletionRewardApp
 {
     private readonly IDungeonDefinitions _dungeonDefinitions;
     private readonly IDungeonRunRepository _dungeonRuns;
-    private readonly ILootTableRepository _lootTables;
     private readonly IItemBaseRepository _itemBases;
-    private readonly ILootService _lootService;
+    private readonly IRewardRoller _rewardRoller;
     private readonly IDungeonPendingRewardWriter _pendingRewardWriter;
     private readonly IInventoryItemFactory _inventoryItemFactory;
     private readonly IDungeonMasteryService _mastery;
@@ -25,18 +24,16 @@ public sealed class DungeonCompletionRewardApplier : IDungeonCompletionRewardApp
     public DungeonCompletionRewardApplier(
         IDungeonDefinitions dungeonDefinitions,
         IDungeonRunRepository dungeonRuns,
-        ILootTableRepository lootTables,
         IItemBaseRepository itemBases,
-        ILootService lootService,
+        IRewardRoller rewardRoller,
         IDungeonPendingRewardWriter pendingRewardWriter,
         IInventoryItemFactory inventoryItemFactory,
         IDungeonMasteryService mastery)
     {
         _dungeonDefinitions = dungeonDefinitions;
         _dungeonRuns = dungeonRuns;
-        _lootTables = lootTables;
         _itemBases = itemBases;
-        _lootService = lootService;
+        _rewardRoller = rewardRoller;
         _pendingRewardWriter = pendingRewardWriter;
         _inventoryItemFactory = inventoryItemFactory;
         _mastery = mastery;
@@ -46,22 +43,28 @@ public sealed class DungeonCompletionRewardApplier : IDungeonCompletionRewardApp
     {
         var dungeon = _dungeonDefinitions.GetByKey(run.DungeonDefinitionId);
 
-        if (dungeon.CompletionLootTableId.HasValue)
+        if (dungeon.CompletionRewardTableIds.Count > 0)
         {
-            await RollAndAddAsync(
-                run.Id,
-                dungeon.CompletionLootTableId.Value,
-                "Dungeon Completion",
-                cancellationToken);
+            foreach (var rewardTableId in dungeon.CompletionRewardTableIds)
+            {
+                await RollRewardTableAndAddAsync(
+                    run.Id,
+                    rewardTableId,
+                    "Dungeon Completion",
+                    cancellationToken);
+            }
         }
 
-        if (dungeon.TierLootTableId.HasValue)
+        if (dungeon.TierRewardTableIds.Count > 0)
         {
-            await RollAndAddAsync(
-                run.Id,
-                dungeon.TierLootTableId.Value,
-                $"Tier {dungeon.Tier} Completion",
-                cancellationToken);
+            foreach (var rewardTableId in dungeon.TierRewardTableIds)
+            {
+                await RollRewardTableAndAddAsync(
+                    run.Id,
+                    rewardTableId,
+                    $"Tier {dungeon.Tier} Completion",
+                    cancellationToken);
+            }
         }
 
         await AddItemGrantsAsync(
@@ -81,47 +84,71 @@ public sealed class DungeonCompletionRewardApplier : IDungeonCompletionRewardApp
             cancellationToken);
     }
 
-    private async Task RollAndAddAsync(
+    private async Task RollRewardTableAndAddAsync(
         Guid dungeonRunId,
-        Guid lootTableId,
+        string rewardTableId,
         string source,
         CancellationToken cancellationToken)
     {
-        var lootTable = await TryGetLootTableAsync(
-            lootTableId,
+        var result = _rewardRoller.Roll(
+            rewardTableId,
+            new RewardRollContext(source));
+
+        await AddRewardRollResultAsync(
+            dungeonRunId,
+            result,
+            source,
             cancellationToken);
-        if (lootTable is null)
+    }
+
+    private async Task AddRewardRollResultAsync(
+        Guid dungeonRunId,
+        RewardRollResult result,
+        string source,
+        CancellationToken cancellationToken)
+    {
+        if (result.Cinders > 0 || result.Soulstones > 0 || result.Experience > 0)
+        {
+            var run = await _dungeonRuns.GetDungeonRunByDungeonIdAsync(dungeonRunId, cancellationToken);
+            if (run is not null)
+            {
+                run.PendingCinders += result.Cinders;
+                run.PendingSoulstones += result.Soulstones;
+                run.PendingExperience += result.Experience;
+                await _dungeonRuns.UpdateDungeonRunAsync(run, cancellationToken);
+            }
+        }
+
+        if (result.Items.Count == 0)
         {
             return;
         }
 
-        var loot = _lootService.GenerateDungeonLoot(lootTable);
+        var itemIds = result.Items
+            .Select(x => x.ItemId)
+            .Where(x => !string.IsNullOrWhiteSpace(x))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+        var itemBases = await _itemBases.GetItemBasesByIdsAsync(itemIds, cancellationToken);
+
+        var loot = result.Items
+            .Where(item => itemBases.ContainsKey(item.ItemId))
+            .GroupBy(item => item.ItemId, StringComparer.OrdinalIgnoreCase)
+            .SelectMany(group => _inventoryItemFactory.CreateForQuantity(
+                itemBases[group.Key],
+                group.Sum(item => item.Quantity)))
+            .ToList();
+
+        if (loot.Count == 0)
+        {
+            return;
+        }
 
         await _pendingRewardWriter.AddLootAsync(
             dungeonRunId,
             loot,
             source,
             cancellationToken);
-    }
-
-    private async Task<LootTable?> TryGetLootTableAsync(Guid lootTableId, CancellationToken cancellationToken)
-    {
-        try
-        {
-            return await _lootTables.GetLootTableByIdAsync(lootTableId, cancellationToken);
-        }
-        catch (InvalidOperationException)
-        {
-            return null;
-        }
-        catch (KeyNotFoundException)
-        {
-            return null;
-        }
-        catch (NotFoundException)
-        {
-            return null;
-        }
     }
 
     private async Task AddMonsterCoreRewardsAsync(

@@ -19,8 +19,8 @@ public sealed class JsonEssenceDefinitionRepository : IEssenceDefinitionReposito
         IEssenceDefinitionValidator essenceValidator)
     {
         var contentRoot = config["Content:Root"] ?? "Data";
-        var essencePath = Path.Combine(contentRootPath, contentRoot, "essences.json");
-        var abilityPath = Path.Combine(contentRootPath, contentRoot, "abilities.json");
+        var essencePath = Path.Combine(contentRootPath, contentRoot, "essences", "essences.json");
+        var abilityPath = Path.Combine(contentRootPath, contentRoot, "combat", "abilities.json");
         var essenceJson = File.ReadAllText(essencePath);
         var abilityJson = File.ReadAllText(abilityPath);
         var document = JsonSerializer.Deserialize<EssenceDefinitionDocument>(essenceJson, options) ?? new();

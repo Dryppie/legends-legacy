@@ -21,6 +21,12 @@ public interface IProphecyRepository
         DateTimeOffset occurredAt,
         CancellationToken cancellationToken);
 
+    Task<IReadOnlyList<PlayerProphecyInstance>> GetAcceptedInstancesForProgressWindowAsync(
+        Guid characterId,
+        DateTimeOffset from,
+        DateTimeOffset to,
+        CancellationToken cancellationToken);
+
     Task<IReadOnlyList<PlayerProphecyInstance>> GetRecentInstancesAsync(
         Guid playerId,
         Guid characterId,

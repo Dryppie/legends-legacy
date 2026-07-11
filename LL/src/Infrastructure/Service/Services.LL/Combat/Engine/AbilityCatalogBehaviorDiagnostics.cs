@@ -58,7 +58,7 @@ public sealed class AbilityCatalogBehaviorDiagnostics : IAbilityCatalogBehaviorD
     private IReadOnlyList<AbilityBehaviorScenario> ReadManifest()
     {
         var contentRoot = _config["Content:Root"] ?? "Data";
-        var path = Path.Combine(_contentRootPath, contentRoot, "ability-behaviors.json");
+        var path = Path.Combine(_contentRootPath, contentRoot, "combat", "ability-behaviors.json");
         if (!File.Exists(path))
             throw new FileNotFoundException($"Could not find ability behavior manifest '{path}'.", path);
 

@@ -1,7 +1,6 @@
 ﻿using Domain.Models.Entities;
 using Domain.Models.Entities.Creatures;
 using Domain.Models.Items.Equipments;
-using Domain.Models.LootTables;
 using Microsoft.EntityFrameworkCore;
 
 namespace Persistence.LL.QueryProfiles;
@@ -28,9 +27,5 @@ public static class EntityQueryProfiles
             .Include(e => (e as Creature)!.StatOverrides);
 
     public static IQueryable<Entity> CombatReadyWithLoot(this IQueryable<Entity> q)
-        => q.CombatReady()
-            .Include(e => (e as Creature)!.LootTable)
-                .ThenInclude(lt => lt.Entries)
-                    .ThenInclude(lt => (lt as LootTable)!.Entries)
-                        .ThenInclude(lte => (lte as LootTableItem)!.Item);
+        => q.CombatReady();
 }

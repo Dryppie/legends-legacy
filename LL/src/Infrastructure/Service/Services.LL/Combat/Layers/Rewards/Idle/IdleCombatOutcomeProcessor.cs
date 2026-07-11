@@ -1,4 +1,5 @@
 using Application.Interfaces.Outbox;
+using Application.Interfaces.Services.LL.Essences;
 using Application.Interfaces.Services.LL.Prophecies;
 using Application.UseCases.Outbox;
 using Application.UseCases.Prophecies.Events;
@@ -22,6 +23,7 @@ public sealed class IdleCombatOutcomeProcessor : ICombatOutcomeProcessor
     private readonly IIdleCombatSessionFactory _sessionFactory;
     private readonly IPublisher _publisher;
     private readonly IGameEventOutbox _outbox;
+    private readonly ICreatureArchiveService _creatureArchiveService;
 
     public IdleCombatOutcomeProcessor(
         IIdleCombatRewardFactBuilder factBuilder,
@@ -29,7 +31,8 @@ public sealed class IdleCombatOutcomeProcessor : ICombatOutcomeProcessor
         IIdleCombatRewardApplier applier,
         IIdleCombatSessionFactory sessionFactory,
         IGameEventOutbox outbox,
-        IPublisher publisher)
+        IPublisher publisher,
+        ICreatureArchiveService creatureArchiveService)
     {
         _factBuilder = factBuilder;
         _calculator = calculator;
@@ -37,6 +40,7 @@ public sealed class IdleCombatOutcomeProcessor : ICombatOutcomeProcessor
         _sessionFactory = sessionFactory;
         _publisher = publisher;
         _outbox = outbox;
+        _creatureArchiveService = creatureArchiveService;
     }
 
     public CombatMode Mode => CombatMode.Idle;
@@ -50,10 +54,32 @@ public sealed class IdleCombatOutcomeProcessor : ICombatOutcomeProcessor
         var facts = await _factBuilder.BuildAsync(context, cancellationToken);
         var calculatedOutcome = await _calculator.CalculateAsync(facts, cancellationToken);
         await _applier.ApplyAsync(facts, calculatedOutcome, cancellationToken);
+        await RecordCreatureArchiveProgressAsync(facts, cancellationToken);
         await PublishProphecyProgressAsync(facts, calculatedOutcome, cancellationToken);
         await EnqueueOutboxProgressAsync(facts, cancellationToken);
 
         return _sessionFactory.Create(facts, calculatedOutcome);
+    }
+
+    private async Task RecordCreatureArchiveProgressAsync(
+        IdleCombatRewardFacts facts,
+        CancellationToken cancellationToken)
+    {
+        var defeatedCreatures = facts.Encounters
+            .Where(x => x.IsVictory)
+            .SelectMany(x => x.HostileCreatures)
+            .ToList();
+
+        if (defeatedCreatures.Count == 0)
+        {
+            return;
+        }
+
+        await _creatureArchiveService.RecordDefeatedCreaturesAsync(
+            facts.CharacterId,
+            defeatedCreatures,
+            facts.ProcessedUntil,
+            cancellationToken);
     }
 
     private Task EnqueueOutboxProgressAsync(IdleCombatRewardFacts facts, CancellationToken cancellationToken)
@@ -107,32 +133,34 @@ public sealed class IdleCombatOutcomeProcessor : ICombatOutcomeProcessor
         IdleCombatCalculatedOutcome outcome,
         CancellationToken cancellationToken)
     {
+        var progressEvents = new List<ProphecyProgressEvent>();
+
         foreach (var encounter in facts.Encounters)
         {
             if (encounter.IsVictory)
             {
-                await _publisher.Publish(new ProphecyProgressNotification(new ProphecyProgressEvent(
+                progressEvents.Add(new ProphecyProgressEvent(
                     facts.CharacterId,
                     encounter.StartedAt,
                     ProphecyProgressKind.EncounterWon,
-                    EnemyCount: encounter.HostileCreatures.Count)), cancellationToken);
+                    EnemyCount: encounter.HostileCreatures.Count));
 
                 foreach (var creature in encounter.HostileCreatures)
                 {
-                    await _publisher.Publish(new ProphecyProgressNotification(new ProphecyProgressEvent(
+                    progressEvents.Add(new ProphecyProgressEvent(
                         facts.CharacterId,
                         encounter.StartedAt,
                         ProphecyProgressKind.CreatureDefeated,
-                        CreatureDefinitionId: creature.Id.ToString())), cancellationToken);
+                        CreatureDefinitionId: creature.Id.ToString()));
                 }
             }
             else
             {
-                await _publisher.Publish(new ProphecyProgressNotification(new ProphecyProgressEvent(
+                progressEvents.Add(new ProphecyProgressEvent(
                     facts.CharacterId,
                     encounter.StartedAt,
                     ProphecyProgressKind.EncounterLost,
-                    EnemyCount: encounter.HostileCreatures.Count)), cancellationToken);
+                    EnemyCount: encounter.HostileCreatures.Count));
             }
         }
 
@@ -144,21 +172,26 @@ public sealed class IdleCombatOutcomeProcessor : ICombatOutcomeProcessor
                 continue;
             }
 
-            await _publisher.Publish(new ProphecyProgressNotification(new ProphecyProgressEvent(
+            progressEvents.Add(new ProphecyProgressEvent(
                 facts.CharacterId,
                 outcome.ProcessedUntil,
                 ProphecyProgressKind.ResourceGathered,
                 amount,
-                Profession: gathered.ToolType.ToString())), cancellationToken);
+                Profession: gathered.ToolType.ToString()));
         }
 
         if (outcome.TotalLoot.Count > 0)
         {
-            await _publisher.Publish(new ProphecyProgressNotification(new ProphecyProgressEvent(
+            progressEvents.Add(new ProphecyProgressEvent(
                 facts.CharacterId,
                 outcome.ProcessedUntil,
                 ProphecyProgressKind.TreasureProgress,
-                outcome.TotalLoot.Count)), cancellationToken);
+                outcome.TotalLoot.Count));
+        }
+
+        if (progressEvents.Count > 0)
+        {
+            await _publisher.Publish(new ProphecyProgressBatchNotification(progressEvents), cancellationToken);
         }
     }
 

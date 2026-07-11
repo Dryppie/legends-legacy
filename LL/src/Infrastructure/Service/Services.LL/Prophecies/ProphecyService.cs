@@ -258,15 +258,51 @@ public sealed class ProphecyService : IProphecyService
 
     public async Task<IReadOnlyList<ProphecyProgressUpdate>> TrackProgressAsync(
         ProphecyProgressEvent progressEvent,
+        CancellationToken cancellationToken) =>
+        await TrackProgressAsync([progressEvent], cancellationToken);
+
+    public async Task<IReadOnlyList<ProphecyProgressUpdate>> TrackProgressAsync(
+        IReadOnlyList<ProphecyProgressEvent> progressEvents,
         CancellationToken cancellationToken)
     {
-        var active = await _repository.GetAcceptedInstancesForProgressAsync(
-            progressEvent.CharacterId,
-            progressEvent.OccurredAt,
+        if (progressEvents.Count == 0)
+        {
+            return [];
+        }
+
+        var characterIds = progressEvents
+            .Select(x => x.CharacterId)
+            .Distinct()
+            .ToArray();
+
+        if (characterIds.Length != 1)
+        {
+            throw new InvalidOperationException("Prophecy progress batches must target a single character.");
+        }
+
+        var from = progressEvents.Min(x => x.OccurredAt);
+        var to = progressEvents.Max(x => x.OccurredAt);
+        var active = await _repository.GetAcceptedInstancesForProgressWindowAsync(
+            characterIds[0],
+            from,
+            to,
             cancellationToken);
 
         var updates = new List<ProphecyProgressUpdate>();
-        foreach (var prophecy in active)
+        foreach (var progressEvent in progressEvents.OrderBy(x => x.OccurredAt))
+        {
+            AddProgressUpdates(active, progressEvent, updates);
+        }
+
+        return updates;
+    }
+
+    private void AddProgressUpdates(
+        IEnumerable<PlayerProphecyInstance> active,
+        ProphecyProgressEvent progressEvent,
+        List<ProphecyProgressUpdate> updates)
+    {
+        foreach (var prophecy in active.Where(x => IsActiveForProgress(x, progressEvent.OccurredAt)))
         {
             var previousValue = prophecy.CurrentValue;
             if (!TryApplyProgress(prophecy, progressEvent))
@@ -295,9 +331,13 @@ public sealed class ProphecyService : IProphecyService
                 Math.Max(0, prophecy.CurrentValue - previousValue),
                 completed));
         }
-
-        return updates;
     }
+
+    private static bool IsActiveForProgress(PlayerProphecyInstance prophecy, DateTimeOffset occurredAt) =>
+        prophecy.Status == ProphecyStatus.Accepted &&
+        prophecy.AcceptedAt <= occurredAt &&
+        prophecy.PeriodStart <= occurredAt &&
+        prophecy.PeriodEnd > occurredAt;
 
     private async Task<IReadOnlyList<PlayerProphecyInstance>> EnsureDailyInstancesAsync(
         IReadOnlyList<ProphecyDefinition> definitions,

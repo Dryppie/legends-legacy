@@ -1515,6 +1515,55 @@ namespace Persistence.LL.Migrations
                     b.UseTphMappingStrategy();
                 });
 
+            modelBuilder.Entity("Domain.Models.Essences.CharacterCreatureArchiveEntry", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("CharacterId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("CreatureDefinitionId")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
+
+                    b.Property<string>("CreatureName")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
+
+                    b.Property<DateTimeOffset?>("EssenceFocusSetAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<long>("EssenceFocusTotalDurationSeconds")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTimeOffset>("FirstDefeatedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsEssenceFocus")
+                        .HasColumnType("boolean");
+
+                    b.Property<int>("KillCount")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTimeOffset>("LastDefeatedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CharacterId");
+
+                    b.HasIndex("CharacterId", "CreatureDefinitionId")
+                        .IsUnique();
+
+                    b.HasIndex("CharacterId", "IsEssenceFocus");
+
+                    b.ToTable("CharacterCreatureArchiveEntries");
+                });
+
             modelBuilder.Entity("Domain.Models.Essences.CreatureResonance", b =>
                 {
                     b.Property<Guid>("Id")
@@ -2281,32 +2330,6 @@ namespace Persistence.LL.Migrations
                     b.UseTphMappingStrategy();
                 });
 
-            modelBuilder.Entity("Domain.Models.LootTables.LootTableEntry", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid?>("LootTableId")
-                        .HasColumnType("uuid");
-
-                    b.Property<int>("LootTableType")
-                        .HasColumnType("integer");
-
-                    b.Property<float>("Weight")
-                        .HasColumnType("real");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("LootTableId");
-
-                    b.ToTable("LootTableEntry");
-
-                    b.HasDiscriminator<int>("LootTableType");
-
-                    b.UseTphMappingStrategy();
-                });
-
             modelBuilder.Entity("Domain.Models.MarketPlaces.MarketPlaceBuyOrder", b =>
                 {
                     b.Property<Guid>("Id")
@@ -2844,9 +2867,6 @@ namespace Persistence.LL.Migrations
                     b.Property<int?>("LevelRequirement")
                         .HasColumnType("integer");
 
-                    b.Property<Guid>("LootTableId")
-                        .HasColumnType("uuid");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text");
@@ -2854,14 +2874,15 @@ namespace Persistence.LL.Migrations
                     b.Property<float>("ProcChance")
                         .HasColumnType("real");
 
+                    b.Property<string>("RewardTableId")
+                        .HasColumnType("text");
+
                     b.Property<int>("Type")
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
 
                     b.HasIndex("AreaId");
-
-                    b.HasIndex("LootTableId");
 
                     b.ToTable("AreaGatheringNode");
                 });
@@ -3299,13 +3320,11 @@ namespace Persistence.LL.Migrations
                     b.Property<int>("ExperienceReward")
                         .HasColumnType("integer");
 
-                    b.Property<Guid>("LootTableId")
-                        .HasColumnType("uuid");
+                    b.Property<string>("RewardTableId")
+                        .HasColumnType("text");
 
                     b.Property<int>("Tier")
                         .HasColumnType("integer");
-
-                    b.HasIndex("LootTableId");
 
                     b.HasDiscriminator().HasValue(3);
                 });
@@ -3423,35 +3442,6 @@ namespace Persistence.LL.Migrations
                     b.HasBaseType("Domain.Models.Items.ItemInstance");
 
                     b.HasDiscriminator().HasValue(3);
-                });
-
-            modelBuilder.Entity("Domain.Models.LootTables.LootTable", b =>
-                {
-                    b.HasBaseType("Domain.Models.LootTables.LootTableEntry");
-
-                    b.HasDiscriminator().HasValue(1);
-                });
-
-            modelBuilder.Entity("Domain.Models.LootTables.LootTableItem", b =>
-                {
-                    b.HasBaseType("Domain.Models.LootTables.LootTableEntry");
-
-                    b.Property<bool>("IsRare")
-                        .HasColumnType("boolean");
-
-                    b.Property<string>("ItemId")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<int>("MaxQuantity")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("MinQuantity")
-                        .HasColumnType("integer");
-
-                    b.HasIndex("ItemId");
-
-                    b.HasDiscriminator().HasValue(2);
                 });
 
             modelBuilder.Entity("Domain.Models.Achievements.PlayerAchievementProgress", b =>
@@ -3997,14 +3987,6 @@ namespace Persistence.LL.Migrations
                     b.Navigation("ItemBase");
                 });
 
-            modelBuilder.Entity("Domain.Models.LootTables.LootTableEntry", b =>
-                {
-                    b.HasOne("Domain.Models.LootTables.LootTable", null)
-                        .WithMany("Entries")
-                        .HasForeignKey("LootTableId")
-                        .OnDelete(DeleteBehavior.Restrict);
-                });
-
             modelBuilder.Entity("Domain.Models.MarketPlaces.MarketPlaceBuyOrder", b =>
                 {
                     b.HasOne("Domain.Models.Items.ItemBase", "ItemBase")
@@ -4105,15 +4087,7 @@ namespace Persistence.LL.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Domain.Models.LootTables.LootTable", "LootTable")
-                        .WithMany()
-                        .HasForeignKey("LootTableId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.Navigation("Area");
-
-                    b.Navigation("LootTable");
                 });
 
             modelBuilder.Entity("Domain.Models.Snapshots.EntityAttributeSnapshot", b =>
@@ -4199,28 +4173,6 @@ namespace Persistence.LL.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Domain.Models.Entities.Creatures.Creature", b =>
-                {
-                    b.HasOne("Domain.Models.LootTables.LootTable", "LootTable")
-                        .WithMany()
-                        .HasForeignKey("LootTableId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("LootTable");
-                });
-
-            modelBuilder.Entity("Domain.Models.LootTables.LootTableItem", b =>
-                {
-                    b.HasOne("Domain.Models.Items.ItemBase", "Item")
-                        .WithMany("LootTablesItems")
-                        .HasForeignKey("ItemId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Item");
-                });
-
             modelBuilder.Entity("Domain.Models.CharacterActions.CharacterAction", b =>
                 {
                     b.Navigation("ActionDetails");
@@ -4284,8 +4236,6 @@ namespace Persistence.LL.Migrations
             modelBuilder.Entity("Domain.Models.Items.ItemBase", b =>
                 {
                     b.Navigation("ItemInstances");
-
-                    b.Navigation("LootTablesItems");
                 });
 
             modelBuilder.Entity("Domain.Models.Outbox.GameEventOutboxMessage", b =>
@@ -4372,11 +4322,6 @@ namespace Persistence.LL.Migrations
                     b.Navigation("InstanceModifiers");
 
                     b.Navigation("ToolAffixes");
-                });
-
-            modelBuilder.Entity("Domain.Models.LootTables.LootTable", b =>
-                {
-                    b.Navigation("Entries");
                 });
 #pragma warning restore 612, 618
         }

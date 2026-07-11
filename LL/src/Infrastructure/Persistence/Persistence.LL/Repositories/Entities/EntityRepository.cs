@@ -3,7 +3,6 @@ using Common.Exceptions;
 using Domain.Models.Entities;
 using Domain.Models.Entities.Creatures;
 using Domain.Models.Items.Equipments;
-using Domain.Models.LootTables;
 using Microsoft.EntityFrameworkCore;
 
 namespace Persistence.LL.Repositories.Entities;
@@ -34,13 +33,6 @@ public class EntityRepository : IEntityRepository
             .Include(e => e.EquipmentSlots)
                 .ThenInclude(es => (es.EquipmentInstance.ItemBase as EquipmentBase).ToolBonuses)
             .Include(e => (e as Creature)!.StatOverrides)
-            .Include(e => (e as Creature).LootTable)
-                .ThenInclude(lt => lt.Entries)
-                    .ThenInclude(lte => (lte as LootTableItem).Item)
-            .Include(e => (e as Creature).LootTable)
-                .ThenInclude(lt => lt.Entries)
-                    .ThenInclude(lt => (lt as LootTable).Entries)
-                        .ThenInclude(lte => (lte as LootTableItem).Item)
             .Where(e => entityIds.Contains(e.Id))
             .ToListAsync(cancellationToken);
 

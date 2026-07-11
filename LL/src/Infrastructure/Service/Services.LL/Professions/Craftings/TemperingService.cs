@@ -3,6 +3,7 @@ using Domain.Models.CharacterActions.Sessions;
 using Domain.Models.Items;
 using Domain.Models.Professions.Crafting;
 using Domain.Models.Professions.Crafting.V2;
+using Services.LL.Extensions;
 using Services.LL.Interfaces;
 
 namespace Services.LL.Professions.Craftings;
@@ -27,7 +28,12 @@ public class TemperingService : ITemperingService
                (current.EquipmentInstance.Potential ?? 0) >= TemperingConstants.PotentialCost;
     }
 
-    public bool HandleTempering(CraftingQueueItem current, TemperingSummary temperingSummary, Random rng, Dictionary<TemperingOutcome, double> temperingBonuses)
+    public bool HandleTempering(
+        CraftingQueueItem current,
+        TemperingSummary temperingSummary,
+        Random rng,
+        double craftingExperienceGainBps,
+        double negativeOutcomeReductionBps)
     {
         var profile = GetQueuedProfile(current);
         if (profile == null ||
@@ -37,7 +43,7 @@ public class TemperingService : ITemperingService
 
         var wasMasterpiece = current.EquipmentInstance.IsMasterpiece;
         var wasLevelingItem = current.EquipmentInstance.IsLevelingItem;
-        var result = _temperingMechanics.ApplyTemperingAttempt(current.EquipmentInstance, profile, rng);
+        var result = _temperingMechanics.ApplyTemperingAttempt(current.EquipmentInstance, profile, rng, negativeOutcomeReductionBps);
         if (result.Outcome == TemperingOutcome.Negative)
         {
             temperingSummary.CursedOutcomes++;
@@ -58,14 +64,12 @@ public class TemperingService : ITemperingService
             temperingSummary.QualityIncreases++;
         }
 
-        temperingBonuses.TryGetValue(TemperingOutcome.Positive, out var doubleProfessionExperienceChance);
         var experience = result.Outcome switch
         {
             TemperingOutcome.Critical => 100,
             _ => 1,
         };
-        if (rng.NextDouble() < doubleProfessionExperienceChance / 100)
-            experience *= 2;
+        experience = experience.ApplyPositiveBps(craftingExperienceGainBps);
 
         AllocateExpBasedOnCraftingProfession(temperingSummary, experience, current.CraftType);
         return true;
@@ -80,4 +84,5 @@ public class TemperingService : ITemperingService
     {
         temperingSummary.CraftingExperience += experience;
     }
+
 }

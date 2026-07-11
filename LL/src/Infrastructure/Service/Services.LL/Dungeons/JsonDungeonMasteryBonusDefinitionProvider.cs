@@ -15,7 +15,7 @@ public sealed class JsonDungeonMasteryBonusDefinitionProvider : IDungeonMasteryB
         JsonSerializerOptions options)
     {
         var contentRoot = config["Content:Root"] ?? "Data";
-        var path = Path.Combine(contentRootPath, contentRoot, "dungeon-mastery-bonuses.json");
+        var path = Path.Combine(contentRootPath, contentRoot, "dungeons", "dungeon-mastery-bonuses.json");
         var document = JsonSerializer.Deserialize<DungeonMasteryBonusDefinitionDocument>(
             File.ReadAllText(path),
             options) ?? new();

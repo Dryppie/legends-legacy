@@ -1,8 +1,57 @@
+using Domain.Models.Bonuses;
+
 namespace Domain.Models.Essences;
 
 public sealed record SoulArchive(
     IReadOnlyList<PlayerEssenceArchiveEntry> Essences,
     int EssenceDust);
+
+public sealed record CreatureArchive(
+    IReadOnlyList<CreatureArchiveEntry> Creatures,
+    bool CanChangeEssenceFocus,
+    DateTimeOffset? EssenceFocusAvailableAtUtc,
+    DateTimeOffset? EssenceFocusSetAtUtc);
+
+public sealed record CreatureArchiveEntry(
+    string CreatureId,
+    string Name,
+    int KillCount,
+    DateTimeOffset FirstDefeatedAtUtc,
+    DateTimeOffset LastDefeatedAtUtc,
+    bool IsEssenceFocus,
+    DateTimeOffset? EssenceFocusSetAtUtc,
+    long EssenceFocusTotalDurationSeconds,
+    long CurrentEssenceFocusDurationSeconds,
+    string? EssenceDefinitionId,
+    string? EssenceName,
+    bool IsEssenceAbsorbed,
+    IReadOnlyList<string> Tags);
+
+public sealed record EssenceCodex(
+    IReadOnlyList<EssenceCodexEntry> Entries);
+
+public sealed record EssenceCodexEntry(
+    string Id,
+    string Title,
+    string Description,
+    string BenefitText,
+    BonusKind BonusKind,
+    double BaseBonusValue,
+    double BonusValue,
+    double BonusValuePerCollectionAscensionTier,
+    int CollectionAscensionTier,
+    int MaxCollectionAscensionTier,
+    int Current,
+    int Required,
+    bool IsUnlocked,
+    string Category,
+    IReadOnlyList<EssenceCodexMember> Essences);
+
+public sealed record EssenceCodexMember(
+    string EssenceDefinitionId,
+    string Name,
+    bool IsAbsorbed,
+    int AscensionTier);
 
 public sealed record PlayerEssenceArchiveEntry(
     PlayerEssence Essence,

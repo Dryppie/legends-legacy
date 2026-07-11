@@ -15,7 +15,7 @@ public sealed class JsonDungeonEventDefinitionProvider : IDungeonEventDefinition
         JsonSerializerOptions options)
     {
         var contentRoot = config["Content:Root"] ?? "Data";
-        var path = Path.Combine(contentRootPath, contentRoot, "dungeon-events.json");
+        var path = Path.Combine(contentRootPath, contentRoot, "dungeons", "dungeon-events.json");
         var document = JsonSerializer.Deserialize<DungeonEventDefinitionDocument>(
             File.ReadAllText(path),
             options) ?? new();

@@ -1,11 +1,18 @@
-﻿namespace Domain.Models.Soulstones.UpgradeDefinition;
-public record SoulstoneUpgradeDefinition
-(
+namespace Domain.Models.Soulstones.UpgradeDefinition;
+
+public sealed record SoulstoneUpgradeDefinition(
     string Id,
-    string Name,
-    int MaxLevel,
+    SoulstoneUpgradeBranch Branch,
+    string DisplayName,
     string Description,
-    CostCurve Cost,
-    UpgradeEffect Effect,
-    SoulstoneUpgradeType Type
-);
+    int MaxRank,
+    IReadOnlyList<int> CostsByRank,
+    IReadOnlyList<SoulstoneUpgradeEffect> Effects,
+    IReadOnlyList<string> AppliesTo,
+    IReadOnlyList<string> DoesNotApplyTo,
+    bool Enabled = true,
+    int SortOrder = 0,
+    string? IconKey = null,
+    IReadOnlyList<string>? RequiresUpgradeIds = null,
+    string? FrontendHint = null,
+    bool IsConvenienceUpgrade = false);

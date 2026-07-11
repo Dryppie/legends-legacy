@@ -27,7 +27,7 @@ public sealed class JsonGuildContentProvider : IGuildContentProvider
     {
         validator ??= new GuildContentValidator();
         var contentRoot = config["Content:Root"] ?? "Data";
-        var path = Path.Combine(contentRootPath, contentRoot, "guild-content.json");
+        var path = Path.Combine(contentRootPath, contentRoot, "guilds", "guild-content.json");
         if (!File.Exists(path))
         {
             Apply(Validate(GuildContentDefaults.Document, validator));

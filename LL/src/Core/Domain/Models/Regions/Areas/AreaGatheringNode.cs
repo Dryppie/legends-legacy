@@ -1,5 +1,4 @@
 using System.Text.Json.Serialization;
-using Domain.Models.LootTables;
 using Domain.Models.Professions.Gathering.GatheringNodes;
 
 namespace Domain.Models.Regions.Areas;
@@ -14,5 +13,5 @@ public class AreaGatheringNode
     public GatheringType Type { get; set; }
     public int? LevelRequirement { get; set; }
     public float ProcChance { get; set; } = 1.0f;
-    public LootTable LootTable { get; set; } = null!;
+    public string? RewardTableId { get; set; }
 }

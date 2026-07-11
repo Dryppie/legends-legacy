@@ -1,3 +1,4 @@
+using Application.Interfaces.Services.LL.Essences;
 using Application.Interfaces.Services.LL.Prophecies;
 using Application.UseCases.Prophecies.Events;
 using Domain.Models.CharacterActions.Sessions;
@@ -17,19 +18,22 @@ internal class DungeonCombatOutcomeProcessor : ICombatOutcomeProcessor
     private readonly IDungeonCombatRewardApplier _applier;
     private readonly IDungeonCombatSessionFactory _sessionFactory;
     private readonly IPublisher _publisher;
+    private readonly ICreatureArchiveService _creatureArchiveService;
 
     public DungeonCombatOutcomeProcessor(
         IDungeonCombatRewardFactBuilder factBuilder,
         IDungeonCombatRewardCalculator calculator,
         IDungeonCombatRewardApplier applier,
         IDungeonCombatSessionFactory sessionFactory,
-        IPublisher publisher)
+        IPublisher publisher,
+        ICreatureArchiveService creatureArchiveService)
     {
         _factBuilder = factBuilder;
         _calculator = calculator;
         _applier = applier;
         _sessionFactory = sessionFactory;
         _publisher = publisher;
+        _creatureArchiveService = creatureArchiveService;
     }
 
     public CombatMode Mode => CombatMode.Dungeon;
@@ -43,9 +47,31 @@ internal class DungeonCombatOutcomeProcessor : ICombatOutcomeProcessor
         var facts = await _factBuilder.BuildAsync(context, cancellationToken);
         var calculatedOutcome = await _calculator.CalculateAsync(facts, cancellationToken);
         await _applier.ApplyAsync(facts, calculatedOutcome, cancellationToken);
+        await RecordCreatureArchiveProgressAsync(facts, cancellationToken);
         await PublishProphecyProgressAsync(facts, calculatedOutcome, cancellationToken);
 
         return _sessionFactory.Create(facts, calculatedOutcome);
+    }
+
+    private async Task RecordCreatureArchiveProgressAsync(
+        DungeonCombatRewardFacts facts,
+        CancellationToken cancellationToken)
+    {
+        var defeatedCreatures = facts.Encounters
+            .Where(x => x.IsVictory)
+            .SelectMany(x => x.HostileCreatures)
+            .ToList();
+
+        if (defeatedCreatures.Count == 0)
+        {
+            return;
+        }
+
+        await _creatureArchiveService.RecordDefeatedCreaturesAsync(
+            facts.CharacterId,
+            defeatedCreatures,
+            DateTimeOffset.UtcNow,
+            cancellationToken);
     }
 
     private async Task PublishProphecyProgressAsync(

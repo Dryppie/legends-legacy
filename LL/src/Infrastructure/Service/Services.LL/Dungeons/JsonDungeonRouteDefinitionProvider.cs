@@ -16,7 +16,7 @@ public sealed class JsonDungeonRouteDefinitionProvider : IDungeonRouteDefinition
         JsonSerializerOptions options)
     {
         var contentRoot = config["Content:Root"] ?? "Data";
-        var path = Path.Combine(contentRootPath, contentRoot, "dungeon-routes.json");
+        var path = Path.Combine(contentRootPath, contentRoot, "dungeons", "dungeon-routes.json");
         var document = JsonSerializer.Deserialize<DungeonRouteDefinitionDocument>(
             File.ReadAllText(path),
             options) ?? new();

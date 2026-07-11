@@ -1,0 +1,266 @@
+{
+  "rewardTables": [
+    {
+      "id": "reward.dungeon.tier.1",
+      "displayName": "Dungeon Tier 1 Loot",
+      "rolls": [
+        {
+          "id": "tier_1_weighted_drop",
+          "type": "WeightedWithNoDrop",
+          "noDropWeight": 48,
+          "entries": [
+            { "id": "advancement_stone", "type": "Item", "itemId": "advancement_stone", "weight": 32 },
+            { "id": "pickaxe", "type": "Item", "itemId": "pickaxe", "weight": 5 },
+            { "id": "woodcutting_hatchet", "type": "Item", "itemId": "woodcutting_hatchet", "weight": 5 },
+            { "id": "fishing_rod", "type": "Item", "itemId": "fishing_rod", "weight": 4 },
+            { "id": "skinning_knife", "type": "Item", "itemId": "skinning_knife", "weight": 4 },
+            { "id": "rare_pickaxe", "type": "Item", "itemId": "rare_pickaxe", "weight": 1, "tags": [ "rare", "tool" ] },
+            { "id": "rare_hatchet", "type": "Item", "itemId": "rare_hatchet", "weight": 1, "tags": [ "rare", "tool" ] }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "reward.dungeon.tier.2",
+      "displayName": "Dungeon Tier 2 Loot",
+      "rolls": [
+        {
+          "id": "tier_2_weighted_drop",
+          "type": "WeightedWithNoDrop",
+          "noDropWeight": 53,
+          "entries": [
+            { "id": "advancement_stone", "type": "Item", "itemId": "advancement_stone", "weight": 25 },
+            { "id": "rare_pickaxe", "type": "Item", "itemId": "rare_pickaxe", "weight": 4, "tags": [ "rare", "tool" ] },
+            { "id": "rare_hatchet", "type": "Item", "itemId": "rare_hatchet", "weight": 4, "tags": [ "rare", "tool" ] },
+            { "id": "rare_fishing_rod", "type": "Item", "itemId": "rare_fishing_rod", "weight": 4, "tags": [ "rare", "tool" ] },
+            { "id": "rare_skinning_knife", "type": "Item", "itemId": "rare_skinning_knife", "weight": 4, "tags": [ "rare", "tool" ] },
+            { "id": "epic_pickaxe", "type": "Item", "itemId": "epic_pickaxe", "weight": 1.5, "tags": [ "rare", "tool" ] },
+            { "id": "epic_hatchet", "type": "Item", "itemId": "epic_hatchet", "weight": 1.5, "tags": [ "rare", "tool" ] },
+            { "id": "epic_fishing_rod", "type": "Item", "itemId": "epic_fishing_rod", "weight": 1.5, "tags": [ "rare", "tool" ] },
+            { "id": "epic_skinning_knife", "type": "Item", "itemId": "epic_skinning_knife", "weight": 1.5, "tags": [ "rare", "tool" ] }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "reward.dungeon.tier.3",
+      "displayName": "Dungeon Tier 3 Loot",
+      "rolls": [
+        {
+          "id": "tier_3_weighted_drop",
+          "type": "WeightedWithNoDrop",
+          "noDropWeight": 54.2,
+          "entries": [
+            { "id": "advancement_stone", "type": "Item", "itemId": "advancement_stone", "weight": 18 },
+            { "id": "epic_pickaxe", "type": "Item", "itemId": "epic_pickaxe", "weight": 4, "tags": [ "rare", "tool" ] },
+            { "id": "epic_hatchet", "type": "Item", "itemId": "epic_hatchet", "weight": 4, "tags": [ "rare", "tool" ] },
+            { "id": "epic_fishing_rod", "type": "Item", "itemId": "epic_fishing_rod", "weight": 4, "tags": [ "rare", "tool" ] },
+            { "id": "epic_skinning_knife", "type": "Item", "itemId": "epic_skinning_knife", "weight": 4, "tags": [ "rare", "tool" ] },
+            { "id": "unique_pickaxe", "type": "Item", "itemId": "unique_pickaxe", "weight": 2, "tags": [ "rare", "tool" ] },
+            { "id": "unique_hatchet", "type": "Item", "itemId": "unique_hatchet", "weight": 2, "tags": [ "rare", "tool" ] },
+            { "id": "unique_fishing_rod", "type": "Item", "itemId": "unique_fishing_rod", "weight": 2, "tags": [ "rare", "tool" ] },
+            { "id": "unique_skinning_knife", "type": "Item", "itemId": "unique_skinning_knife", "weight": 2, "tags": [ "rare", "tool" ] },
+            { "id": "legendary_pickaxe", "type": "Item", "itemId": "legendary_pickaxe", "weight": 0.75, "tags": [ "rare", "tool" ] },
+            { "id": "legendary_hatchet", "type": "Item", "itemId": "legendary_hatchet", "weight": 0.75, "tags": [ "rare", "tool" ] },
+            { "id": "legendary_fishing_rod", "type": "Item", "itemId": "legendary_fishing_rod", "weight": 0.75, "tags": [ "rare", "tool" ] },
+            { "id": "legendary_skinning_knife", "type": "Item", "itemId": "legendary_skinning_knife", "weight": 0.75, "tags": [ "rare", "tool" ] },
+            { "id": "legacy_pickaxe", "type": "Item", "itemId": "legacy_pickaxe", "weight": 0.2, "tags": [ "rare", "tool" ] },
+            { "id": "legacy_hatchet", "type": "Item", "itemId": "legacy_hatchet", "weight": 0.2, "tags": [ "rare", "tool" ] },
+            { "id": "legacy_fishing_rod", "type": "Item", "itemId": "legacy_fishing_rod", "weight": 0.2, "tags": [ "rare", "tool" ] },
+            { "id": "legacy_skinning_knife", "type": "Item", "itemId": "legacy_skinning_knife", "weight": 0.2, "tags": [ "rare", "tool" ] }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "reward.dungeon.goblin_mines.completion",
+      "displayName": "Goblin Mines I Completion Loot",
+      "rolls": [
+        {
+          "id": "completion_weighted_drop",
+          "type": "WeightedWithNoDrop",
+          "noDropWeight": 75.25,
+          "entries": [
+            { "id": "blueprint_fury", "type": "Item", "itemId": "blueprint_fury", "weight": 10 },
+            { "id": "pickaxe", "type": "Item", "itemId": "pickaxe", "weight": 8 },
+            { "id": "fishing_rod", "type": "Item", "itemId": "fishing_rod", "weight": 5 },
+            { "id": "rare_pickaxe", "type": "Item", "itemId": "rare_pickaxe", "weight": 1, "tags": [ "rare", "tool" ] },
+            { "id": "rare_fishing_rod", "type": "Item", "itemId": "rare_fishing_rod", "weight": 0.75, "tags": [ "rare", "tool" ] }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "reward.dungeon.goblin_mines_ii.completion",
+      "displayName": "Goblin Mines II Completion Loot",
+      "rolls": [
+        {
+          "id": "completion_weighted_drop",
+          "type": "WeightedWithNoDrop",
+          "noDropWeight": 84.1,
+          "entries": [
+            { "id": "rare_pickaxe", "type": "Item", "itemId": "rare_pickaxe", "weight": 7, "tags": [ "rare", "tool" ] },
+            { "id": "rare_fishing_rod", "type": "Item", "itemId": "rare_fishing_rod", "weight": 5, "tags": [ "rare", "tool" ] },
+            { "id": "epic_pickaxe", "type": "Item", "itemId": "epic_pickaxe", "weight": 2, "tags": [ "rare", "tool" ] },
+            { "id": "epic_fishing_rod", "type": "Item", "itemId": "epic_fishing_rod", "weight": 1.5, "tags": [ "rare", "tool" ] },
+            { "id": "unique_pickaxe", "type": "Item", "itemId": "unique_pickaxe", "weight": 0.4, "tags": [ "rare", "tool" ] }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "reward.dungeon.goblin_mines_iii.completion",
+      "displayName": "Goblin Mines III Completion Loot",
+      "rolls": [
+        {
+          "id": "completion_weighted_drop",
+          "type": "WeightedWithNoDrop",
+          "noDropWeight": 82.8,
+          "entries": [
+            { "id": "epic_pickaxe", "type": "Item", "itemId": "epic_pickaxe", "weight": 7, "tags": [ "rare", "tool" ] },
+            { "id": "epic_fishing_rod", "type": "Item", "itemId": "epic_fishing_rod", "weight": 5, "tags": [ "rare", "tool" ] },
+            { "id": "unique_pickaxe", "type": "Item", "itemId": "unique_pickaxe", "weight": 2.5, "tags": [ "rare", "tool" ] },
+            { "id": "unique_fishing_rod", "type": "Item", "itemId": "unique_fishing_rod", "weight": 1.75, "tags": [ "rare", "tool" ] },
+            { "id": "legendary_pickaxe", "type": "Item", "itemId": "legendary_pickaxe", "weight": 0.75, "tags": [ "rare", "tool" ] },
+            { "id": "legacy_pickaxe", "type": "Item", "itemId": "legacy_pickaxe", "weight": 0.2, "tags": [ "rare", "tool" ] }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "reward.dungeon.forgotten_catacombs.completion",
+      "displayName": "Forgotten Catacombs I Completion Loot",
+      "rolls": [
+        {
+          "id": "completion_weighted_drop",
+          "type": "WeightedWithNoDrop",
+          "noDropWeight": 86.25,
+          "entries": [
+            { "id": "skinning_knife", "type": "Item", "itemId": "skinning_knife", "weight": 8 },
+            { "id": "fishing_rod", "type": "Item", "itemId": "fishing_rod", "weight": 4 },
+            { "id": "rare_skinning_knife", "type": "Item", "itemId": "rare_skinning_knife", "weight": 1, "tags": [ "rare", "tool" ] },
+            { "id": "rare_fishing_rod", "type": "Item", "itemId": "rare_fishing_rod", "weight": 0.75, "tags": [ "rare", "tool" ] }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "reward.dungeon.forgotten_catacombs_ii.completion",
+      "displayName": "Forgotten Catacombs II Completion Loot",
+      "rolls": [
+        {
+          "id": "completion_weighted_drop",
+          "type": "WeightedWithNoDrop",
+          "noDropWeight": 85.35,
+          "entries": [
+            { "id": "rare_skinning_knife", "type": "Item", "itemId": "rare_skinning_knife", "weight": 7, "tags": [ "rare", "tool" ] },
+            { "id": "rare_fishing_rod", "type": "Item", "itemId": "rare_fishing_rod", "weight": 4, "tags": [ "rare", "tool" ] },
+            { "id": "epic_skinning_knife", "type": "Item", "itemId": "epic_skinning_knife", "weight": 2, "tags": [ "rare", "tool" ] },
+            { "id": "epic_fishing_rod", "type": "Item", "itemId": "epic_fishing_rod", "weight": 1.25, "tags": [ "rare", "tool" ] },
+            { "id": "unique_skinning_knife", "type": "Item", "itemId": "unique_skinning_knife", "weight": 0.4, "tags": [ "rare", "tool" ] }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "reward.dungeon.forgotten_catacombs_iii.completion",
+      "displayName": "Forgotten Catacombs III Completion Loot",
+      "rolls": [
+        {
+          "id": "completion_weighted_drop",
+          "type": "WeightedWithNoDrop",
+          "noDropWeight": 84.05,
+          "entries": [
+            { "id": "epic_skinning_knife", "type": "Item", "itemId": "epic_skinning_knife", "weight": 7, "tags": [ "rare", "tool" ] },
+            { "id": "epic_fishing_rod", "type": "Item", "itemId": "epic_fishing_rod", "weight": 4, "tags": [ "rare", "tool" ] },
+            { "id": "unique_skinning_knife", "type": "Item", "itemId": "unique_skinning_knife", "weight": 2.5, "tags": [ "rare", "tool" ] },
+            { "id": "unique_fishing_rod", "type": "Item", "itemId": "unique_fishing_rod", "weight": 1.5, "tags": [ "rare", "tool" ] },
+            { "id": "legendary_skinning_knife", "type": "Item", "itemId": "legendary_skinning_knife", "weight": 0.75, "tags": [ "rare", "tool" ] },
+            { "id": "legacy_skinning_knife", "type": "Item", "itemId": "legacy_skinning_knife", "weight": 0.2, "tags": [ "rare", "tool" ] }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "reward.dungeon.hives_abyss.completion",
+      "displayName": "Hive's Abyss I Completion Loot",
+      "rolls": [
+        {
+          "id": "completion_weighted_drop",
+          "type": "WeightedWithNoDrop",
+          "noDropWeight": 85.25,
+          "entries": [
+            { "id": "woodcutting_hatchet", "type": "Item", "itemId": "woodcutting_hatchet", "weight": 8 },
+            { "id": "skinning_knife", "type": "Item", "itemId": "skinning_knife", "weight": 5 },
+            { "id": "rare_hatchet", "type": "Item", "itemId": "rare_hatchet", "weight": 1, "tags": [ "rare", "tool" ] },
+            { "id": "rare_skinning_knife", "type": "Item", "itemId": "rare_skinning_knife", "weight": 0.75, "tags": [ "rare", "tool" ] }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "reward.dungeon.hives_abyss_ii.completion",
+      "displayName": "Hive's Abyss II Completion Loot",
+      "rolls": [
+        {
+          "id": "completion_weighted_drop",
+          "type": "WeightedWithNoDrop",
+          "noDropWeight": 84.1,
+          "entries": [
+            { "id": "rare_hatchet", "type": "Item", "itemId": "rare_hatchet", "weight": 7, "tags": [ "rare", "tool" ] },
+            { "id": "rare_skinning_knife", "type": "Item", "itemId": "rare_skinning_knife", "weight": 5, "tags": [ "rare", "tool" ] },
+            { "id": "epic_hatchet", "type": "Item", "itemId": "epic_hatchet", "weight": 2, "tags": [ "rare", "tool" ] },
+            { "id": "epic_skinning_knife", "type": "Item", "itemId": "epic_skinning_knife", "weight": 1.5, "tags": [ "rare", "tool" ] },
+            { "id": "unique_hatchet", "type": "Item", "itemId": "unique_hatchet", "weight": 0.4, "tags": [ "rare", "tool" ] }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "reward.dungeon.hives_abyss_iii.completion",
+      "displayName": "Hive's Abyss III Completion Loot",
+      "rolls": [
+        {
+          "id": "completion_weighted_drop",
+          "type": "WeightedWithNoDrop",
+          "noDropWeight": 82.8,
+          "entries": [
+            { "id": "epic_hatchet", "type": "Item", "itemId": "epic_hatchet", "weight": 7, "tags": [ "rare", "tool" ] },
+            { "id": "epic_skinning_knife", "type": "Item", "itemId": "epic_skinning_knife", "weight": 5, "tags": [ "rare", "tool" ] },
+            { "id": "unique_hatchet", "type": "Item", "itemId": "unique_hatchet", "weight": 2.5, "tags": [ "rare", "tool" ] },
+            { "id": "unique_skinning_knife", "type": "Item", "itemId": "unique_skinning_knife", "weight": 1.75, "tags": [ "rare", "tool" ] },
+            { "id": "legendary_hatchet", "type": "Item", "itemId": "legendary_hatchet", "weight": 0.75, "tags": [ "rare", "tool" ] },
+            { "id": "legacy_hatchet", "type": "Item", "itemId": "legacy_hatchet", "weight": 0.2, "tags": [ "rare", "tool" ] }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "reward.gathering.blood_grove.bloodwood_tree",
+      "displayName": "Blood Grove Bloodwood Tree",
+      "rolls": [
+        {
+          "id": "woodcutting_material",
+          "type": "Weighted",
+          "entries": [
+            {
+              "id": "bloodwood",
+              "type": "Item",
+              "itemId": "bloodwood",
+              "weight": 45,
+              "quantity": { "min": 1, "max": 3 }
+            },
+            {
+              "id": "living_bark",
+              "type": "Item",
+              "itemId": "living_bark",
+              "weight": 15,
+              "quantity": { "min": 1, "max": 1 },
+              "tags": [ "rare" ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

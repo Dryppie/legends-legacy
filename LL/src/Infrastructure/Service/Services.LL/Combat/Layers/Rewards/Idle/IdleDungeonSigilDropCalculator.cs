@@ -1,7 +1,9 @@
 using Application.Interfaces.Services.LL.Dungeons;
+using Domain.Models.Bonuses;
 using Domain.Models.Inventories;
 using Domain.Models.Items;
 using Domain.Models.Regions.Areas;
+using Services.LL.Extensions;
 using Services.LL.Interfaces;
 using Services.LL.Interfaces.Combat.Reward;
 using Services.LL.Interfaces.Combat.Reward.Idle;
@@ -14,6 +16,7 @@ public sealed class IdleDungeonSigilDropCalculator : IIdleDungeonSigilDropCalcul
     private readonly IItemBaseRepository _itemBases;
     private readonly IRandomSource _randomSource;
     private readonly IInventoryItemFactory _inventoryItemFactory;
+    private readonly IBonusService _bonusService;
 
     private const int IdleActionsPerDay = 24 * 60 * 60 / 10;
     private const double TargetSigilDropsPerDay = 2d;
@@ -24,18 +27,22 @@ public sealed class IdleDungeonSigilDropCalculator : IIdleDungeonSigilDropCalcul
         IDungeonDefinitions dungeons,
         IItemBaseRepository itemBases,
         IRandomSource randomSource,
-        IInventoryItemFactory inventoryItemFactory)
+        IInventoryItemFactory inventoryItemFactory,
+        IBonusService bonusService)
     {
         _dungeons = dungeons;
         _itemBases = itemBases;
         _randomSource = randomSource;
         _inventoryItemFactory = inventoryItemFactory;
+        _bonusService = bonusService;
     }
 
     public async Task<IReadOnlyList<InventoryItem>> RollAsync(
+        Guid characterId,
         Area area,
         int eligibleVictories,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken,
+        IReadOnlyDictionary<BonusKind, double>? bonusFactors = null)
     {
         if (eligibleVictories <= 0)
         {
@@ -48,7 +55,10 @@ public sealed class IdleDungeonSigilDropCalculator : IIdleDungeonSigilDropCalcul
             return [];
         }
 
-        var dropCount = SamplePoisson(eligibleVictories * SigilDropChancePerIdleAction);
+        var factors = bonusFactors ?? await _bonusService.GetAggregatedAsync(characterId, DateTimeOffset.UtcNow, cancellationToken);
+        var sigilDropRateBps = factors.Get(BonusKind.SigilFragmentDropRateRelativeBps);
+        var dropCount = SamplePoisson(
+            (eligibleVictories * SigilDropChancePerIdleAction).ApplyPositiveBps(sigilDropRateBps));
         if (dropCount <= 0)
         {
             return [];

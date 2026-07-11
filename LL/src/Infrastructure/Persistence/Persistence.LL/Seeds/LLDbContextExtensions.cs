@@ -4,6 +4,7 @@ using Domain.Models.CharacterActions.CharacterActionDetails;
 using Domain.Models.Colosseum;
 using Domain.Models.Entities;
 using Domain.Models.Entities.Characters;
+using Domain.Models.Essences;
 using Domain.Models.Inventories;
 using Domain.Models.Items;
 using Domain.Models.Items.Equipments;
@@ -58,6 +59,16 @@ public static class LLDbContextExtensions
         ("blueprint_venom_touched_sword", 3),
         ("blueprint_hivefang_dagger", 3),
     ];
+    private static readonly (Guid PlayerEssenceId, string EssenceDefinitionId)[] AdminStarterEssences =
+    [
+        (Guid.Parse("00000000-0000-0000-2000-000000000001"), "essence.goblin_ambusher"),
+        (Guid.Parse("00000000-0000-0000-2000-000000000002"), "essence.skeleton_guardian"),
+        (Guid.Parse("00000000-0000-0000-2000-000000000003"), "essence.fire_ant"),
+        (Guid.Parse("00000000-0000-0000-2000-000000000004"), "essence.cave_bat"),
+        (Guid.Parse("00000000-0000-0000-2000-000000000005"), "essence.necroshade_wraith"),
+    ];
+    private static readonly Guid AdminStarterEssenceLoadoutId = Guid.Parse("00000000-0000-0000-3000-000000000001");
+    private const string AdminStarterEssenceLoadoutName = "Admin Starter";
 
     public static async Task SeedData(this LLDbContext context, IPasswordHasher<AppUser> hasher, bool seedLocalGuestAccounts = false)
     {
@@ -91,6 +102,11 @@ public static class LLDbContextExtensions
 
 #if DEBUG
         if (await SeedAdminStarterTools(context))
+        {
+            await context.SaveChangesAsync();
+        }
+
+        if (await SeedAdminEssenceLoadout(context))
         {
             await context.SaveChangesAsync();
         }
@@ -489,6 +505,120 @@ public static class LLDbContextExtensions
                 ItemInstanceId = itemInstance.Id,
                 Quantity = desiredQuantity
             });
+            changed = true;
+        }
+
+        return changed;
+    }
+
+    private static async Task<bool> SeedAdminEssenceLoadout(LLDbContext context)
+    {
+        var adminCharacterId = Guid.Parse(CHARACTER_GUID);
+        var hasAdminCharacter = await context.Characters
+            .AnyAsync(character => character.Id == adminCharacterId);
+
+        if (!hasAdminCharacter)
+        {
+            return false;
+        }
+
+        var now = DateTimeOffset.UtcNow;
+        var changed = false;
+        var existingEssences = await context.PlayerEssences
+            .Where(essence => essence.CharacterId == adminCharacterId)
+            .ToListAsync();
+        var essencesByDefinitionId = existingEssences
+            .ToDictionary(essence => essence.EssenceDefinitionId, StringComparer.OrdinalIgnoreCase);
+
+        foreach (var (playerEssenceId, essenceDefinitionId) in AdminStarterEssences)
+        {
+            if (essencesByDefinitionId.ContainsKey(essenceDefinitionId))
+            {
+                continue;
+            }
+
+            var essence = new PlayerEssence
+            {
+                Id = playerEssenceId,
+                CharacterId = adminCharacterId,
+                EssenceDefinitionId = essenceDefinitionId,
+                NativeRegion = 1,
+                PotentialTier = 1,
+                Level = 1,
+                AbsorbedAt = now,
+                UpdatedAt = now
+            };
+
+            await context.PlayerEssences.AddAsync(essence);
+            essencesByDefinitionId[essenceDefinitionId] = essence;
+            changed = true;
+        }
+
+        var loadout = await context.EssenceLoadouts
+            .Include(existingLoadout => existingLoadout.Slots)
+            .FirstOrDefaultAsync(existingLoadout =>
+                existingLoadout.CharacterId == adminCharacterId &&
+                existingLoadout.Name == AdminStarterEssenceLoadoutName);
+        var hasActiveLoadout = await context.EssenceLoadouts
+            .AnyAsync(existingLoadout =>
+                existingLoadout.CharacterId == adminCharacterId &&
+                existingLoadout.IsActive);
+
+        if (loadout is null)
+        {
+            loadout = new EssenceLoadout
+            {
+                Id = AdminStarterEssenceLoadoutId,
+                CharacterId = adminCharacterId,
+                Name = AdminStarterEssenceLoadoutName,
+                IsActive = !hasActiveLoadout,
+                CreatedAt = now,
+                UpdatedAt = now
+            };
+
+            await context.EssenceLoadouts.AddAsync(loadout);
+            changed = true;
+        }
+        else if (!hasActiveLoadout)
+        {
+            loadout.IsActive = true;
+            loadout.UpdatedAt = now;
+            changed = true;
+        }
+
+        var desiredSlots = AdminStarterEssences
+            .Select((seed, slotIndex) => new
+            {
+                SlotIndex = slotIndex,
+                PlayerEssenceId = essencesByDefinitionId[seed.EssenceDefinitionId].Id
+            })
+            .ToList();
+
+        var existingSlots = loadout.Slots
+            .OrderBy(slot => slot.SlotIndex)
+            .ToList();
+        var slotsMatch = existingSlots.Count == desiredSlots.Count &&
+                         existingSlots.Zip(desiredSlots).All(pair =>
+                             pair.First.SlotIndex == pair.Second.SlotIndex &&
+                             pair.First.PlayerEssenceId == pair.Second.PlayerEssenceId);
+
+        if (!slotsMatch)
+        {
+            context.EssenceLoadoutSlots.RemoveRange(existingSlots);
+            loadout.Slots.Clear();
+
+            var slots = desiredSlots
+                .Select(slot => new EssenceLoadoutSlot
+                {
+                    Id = Guid.NewGuid(),
+                    EssenceLoadoutId = loadout.Id,
+                    SlotIndex = slot.SlotIndex,
+                    PlayerEssenceId = slot.PlayerEssenceId
+                })
+                .ToList();
+
+            await context.EssenceLoadoutSlots.AddRangeAsync(slots);
+            loadout.UpdatedAt = now;
             changed = true;
         }
 
