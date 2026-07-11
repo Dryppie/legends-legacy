@@ -233,6 +233,7 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : DbContext(opti
     public DbSet<LootTableItem> LootTableItems => Set<LootTableItem>();
 
     public DbSet<MarketPlaceListing> MarketPlaceListings => Set<MarketPlaceListing>();
+    public DbSet<MarketPlaceBuyOrder> MarketPlaceBuyOrders => Set<MarketPlaceBuyOrder>();
     public DbSet<GameEventOutboxMessage> GameEventOutboxMessages => Set<GameEventOutboxMessage>();
     public DbSet<GameEventOutboxDelivery> GameEventOutboxDeliveries => Set<GameEventOutboxDelivery>();
 

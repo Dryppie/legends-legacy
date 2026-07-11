@@ -110,6 +110,7 @@ public interface IDbContext
     DbSet<LootTableItem> LootTableItems { get; }
 
     DbSet<MarketPlaceListing> MarketPlaceListings { get; }
+    DbSet<MarketPlaceBuyOrder> MarketPlaceBuyOrders { get; }
     DbSet<GameEventOutboxMessage> GameEventOutboxMessages { get; }
     DbSet<GameEventOutboxDelivery> GameEventOutboxDeliveries { get; }
     //DbSet<Party> Parties { get; }

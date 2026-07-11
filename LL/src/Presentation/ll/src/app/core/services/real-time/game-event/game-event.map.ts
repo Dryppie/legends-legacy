@@ -12,6 +12,9 @@ import { LootReceivedMsg } from '../loot/loot-received';
 import { MarketListingSoldMsg } from '../market/market-listing-sold';
 import { MarketListingCreatedMsg } from '../market/market-listing-created';
 import { MarketListingCanceledMsg } from '../market/market-listing-canceled';
+import { MarketBuyOrderCreatedMsg } from '../market/market-buy-order-created';
+import { MarketBuyOrderFulfilledMsg } from '../market/market-buy-order-fulfilled';
+import { MarketBuyOrderCanceledMsg } from '../market/market-buy-order-canceled';
 import { SoulstoneDropMsg } from '../character/soulstone-drop';
 import { CharacterLevelUpMsg } from '../character/character-level-up';
 import { ArenaBattleCompletedMsg } from '../colosseum/arena-battle-completed';
@@ -35,6 +38,9 @@ export const gameEventNames = [
   'MarketListingSoldMsg',
   'MarketListingCreatedMsg',
   'MarketListingCanceledMsg',
+  'MarketBuyOrderCreatedMsg',
+  'MarketBuyOrderFulfilledMsg',
+  'MarketBuyOrderCanceledMsg',
   'SoulstoneDropMsg',
   'CharacterLevelUpMsg',
   'ArenaBattleCompletedMsg',
@@ -68,6 +74,9 @@ export interface GameEventMap {
   MarketListingSoldMsg: MarketListingSoldMsg;
   MarketListingCreatedMsg: MarketListingCreatedMsg;
   MarketListingCanceledMsg: MarketListingCanceledMsg;
+  MarketBuyOrderCreatedMsg: MarketBuyOrderCreatedMsg;
+  MarketBuyOrderFulfilledMsg: MarketBuyOrderFulfilledMsg;
+  MarketBuyOrderCanceledMsg: MarketBuyOrderCanceledMsg;
   SoulstoneDropMsg: SoulstoneDropMsg;
   CharacterLevelUpMsg: CharacterLevelUpMsg;
   ArenaBattleCompletedMsg: ArenaBattleCompletedMsg;

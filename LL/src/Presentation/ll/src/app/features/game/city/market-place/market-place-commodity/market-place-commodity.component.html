@@ -39,9 +39,24 @@
                 (pressed)="sellSelectedCommodity()"
               />
               <app-regular-button
+                text="Fill Bid"
+                [disabled]="!canFillBuyOrder()"
+                (pressed)="fillSelectedBuyOrder()"
+              />
+              <app-regular-button
                 text="Buy"
                 [disabled]="!canBuy()"
                 (pressed)="buySelectedCommodity()"
+              />
+              <app-regular-button
+                text="Bid"
+                [disabled]="!canPlaceBuyOrder()"
+                (pressed)="placeBuyOrder()"
+              />
+              <app-regular-button
+                text="Cancel Bid"
+                [disabled]="!canCancelBuyOrder()"
+                (pressed)="cancelSelectedBuyOrder()"
               />
             </div>
           </div>
@@ -75,7 +90,8 @@
                 commodity.base.name
               }}</span>
               <span class="shrink-0 text-xs text-zinc-300">
-                {{ commodity.listedQuantity | numberFormat }} listed
+                {{ commodity.listedQuantity | numberFormat }} listed /
+                {{ commodity.buyOrderQuantity | numberFormat }} wanted
               </span>
             </button>
           </div>
@@ -120,14 +136,29 @@
 
     <section class="flex h-full w-full flex-col">
       <h2 class="ll-heading mb-2">Buy Orders</h2>
-      <div class="ll-table-header grid grid-cols-2 rounded-b-none">
+      <div class="ll-table-header grid grid-cols-3 rounded-b-none">
         <label>Quantity</label>
+        <label>Mine</label>
         <label class="justify-self-end">Unit price</label>
       </div>
 
       <div class="ll-panel flex-1 overflow-y-auto rounded-t-none border-t-0">
-        <p class="ll-empty-state mt-8">
-          Buy orders need backend support before they can persist.
+        <button
+          type="button"
+          *ngFor="let row of buyOrderRows(); trackBy: trackBuyOrderRow"
+          (click)="selectBuyOrder(row)"
+          class="ll-table-row grid w-full grid-cols-3 text-left"
+          [ngClass]="{ 'bg-primary/20': row.unitPrice === selectedBuyPrice() }"
+        >
+          <span>{{ row.quantity | numberFormat }}</span>
+          <span>{{ row.ownQuantity | numberFormat }}</span>
+          <span class="justify-self-end text-primary">
+            {{ row.unitPrice | numberFormat }}
+          </span>
+        </button>
+
+        <p *ngIf="!buyOrderRows().length" class="ll-empty-state mt-8">
+          No buy orders for this item.
         </p>
       </div>
     </section>
