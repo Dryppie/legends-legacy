@@ -1,9 +1,14 @@
+using Application.Interfaces.Services.LL.Dungeons;
 using Application.Interfaces.Services.LL.Essences;
 using Domain.Models.Bonuses;
 using Domain.Models.Combat.Abilities;
+using Domain.Models.Dungeons;
+using Domain.Models.Dungeons.Definitions.Rooms;
 using Domain.Models.Entities.Creatures;
 using Domain.Models.Essences;
 using Domain.Models.Essences.Definitions;
+using Domain.Models.Regions;
+using Domain.Models.Regions.Areas;
 using Microsoft.EntityFrameworkCore;
 using Persistence.LL;
 using Services.LL.Essences;
@@ -76,6 +81,71 @@ public sealed class CreatureArchiveServiceTests
         Assert.Equal(0, creature.EssenceFocusTotalDurationSeconds);
         Assert.Equal(0, creature.CurrentEssenceFocusDurationSeconds);
         Assert.Contains("Species.Beast", creature.Tags);
+    }
+
+    [Fact]
+    public async Task GetCreatureArchive_includes_area_and_dungeon_locations()
+    {
+        await using var db = CreateDb();
+        var characterId = Guid.NewGuid();
+        var creatureEntityId = Guid.NewGuid();
+        db.Creatures.Add(new Creature
+        {
+            Id = creatureEntityId,
+            Name = "Vampire Bat",
+            ImagePath = "vampire_bat"
+        });
+        db.Regions.Add(new Region
+        {
+            Id = 1,
+            Name = "Shenic",
+            Areas =
+            [
+                new Area
+                {
+                    Id = "blood_grove",
+                    Name = "Blood Grove",
+                    Creatures =
+                    [
+                        new AreaCreature
+                        {
+                            AreaId = "blood_grove",
+                            CreatureId = creatureEntityId,
+                            WeightedSpawnRate = 1
+                        }
+                    ]
+                }
+            ]
+        });
+        db.Set<CharacterCreatureArchiveEntry>().Add(new CharacterCreatureArchiveEntry
+        {
+            Id = Guid.NewGuid(),
+            CharacterId = characterId,
+            CreatureDefinitionId = "monster.vampire_bat",
+            CreatureName = "Vampire Bat",
+            KillCount = 1,
+            FirstDefeatedAtUtc = DateTimeOffset.UtcNow,
+            LastDefeatedAtUtc = DateTimeOffset.UtcNow
+        });
+        await db.SaveChangesAsync();
+        var service = CreateService(db);
+
+        var archive = await service.GetCreatureArchiveAsync(characterId, CancellationToken.None);
+
+        var creature = Assert.Single(archive.Creatures);
+        Assert.Contains(creature.Locations, location =>
+            location.RegionId == 1 &&
+            location.RegionName == "Shenic" &&
+            location.SourceType == "Area" &&
+            location.SourceId == "blood_grove" &&
+            location.SourceName == "Blood Grove");
+        Assert.Contains(creature.Locations, location =>
+            location.RegionId == 1 &&
+            location.RegionName == "Shenic" &&
+            location.SourceType == "Dungeon" &&
+            location.SourceId == "bat_cave" &&
+            location.SourceName == "Bat Cave");
+        Assert.Single(creature.Locations, location => location.SourceType == "Dungeon");
     }
 
     [Fact]
@@ -393,7 +463,8 @@ public sealed class CreatureArchiveServiceTests
             db,
             definitions,
             lootTables,
-            CreateCodexCollectionService(db, definitions, lootTables));
+            CreateCodexCollectionService(db, definitions, lootTables),
+            new FakeDungeonDefinitions());
     }
 
     private static EssenceCodexCollectionService CreateCodexCollectionService(
@@ -509,5 +580,45 @@ public sealed class CreatureArchiveServiceTests
         public CreatureEssenceLootTableDefinition? GetByEssenceDefinitionId(string essenceDefinitionId) =>
             _tables.FirstOrDefault(table => table.Variants.Any(variant =>
                 variant.EssenceDefinitionId.Equals(essenceDefinitionId, StringComparison.OrdinalIgnoreCase)));
+    }
+
+    private sealed class FakeDungeonDefinitions : IDungeonDefinitions
+    {
+        private readonly IReadOnlyList<DungeonDefinition> _definitions =
+        [
+            new()
+            {
+                Id = "bat_cave",
+                Name = "Bat Cave I",
+                Region = 1,
+                Rooms =
+                [
+                    new RoomDefinition
+                    {
+                        Type = RoomType.Combat,
+                        EncounterIds = ["cave_bat"]
+                    }
+                ]
+            },
+            new()
+            {
+                Id = "bat_cave_ii",
+                Name = "Bat Cave II",
+                Region = 1,
+                Rooms =
+                [
+                    new RoomDefinition
+                    {
+                        Type = RoomType.Combat,
+                        EncounterIds = ["giant_bat"]
+                    }
+                ]
+            }
+        ];
+
+        public DungeonDefinition GetByKey(string key) =>
+            _definitions.Single(definition => definition.Id.Equals(key, StringComparison.OrdinalIgnoreCase));
+
+        public IReadOnlyList<DungeonDefinition> GetAll() => _definitions;
     }
 }

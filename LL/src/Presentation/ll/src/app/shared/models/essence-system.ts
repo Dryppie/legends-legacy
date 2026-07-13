@@ -81,7 +81,16 @@ export interface CreatureArchiveEntryDto {
   essenceFocusTotalDurationSeconds: number;
   currentEssenceFocusDurationSeconds: number;
   essences: CreatureArchiveEssenceEntryDto[];
+  locations: CreatureArchiveLocationDto[];
   tags: string[];
+}
+
+export interface CreatureArchiveLocationDto {
+  regionId: number;
+  regionName: string;
+  sourceType: 'Area' | 'Dungeon';
+  sourceId: string;
+  sourceName: string;
 }
 
 export interface CreatureArchiveEssenceEntryDto {

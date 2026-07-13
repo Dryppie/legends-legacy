@@ -23,7 +23,15 @@ public sealed record CreatureArchiveEntry(
     long EssenceFocusTotalDurationSeconds,
     long CurrentEssenceFocusDurationSeconds,
     IReadOnlyList<CreatureArchiveEssenceEntry> Essences,
+    IReadOnlyList<CreatureArchiveLocation> Locations,
     IReadOnlyList<string> Tags);
+
+public sealed record CreatureArchiveLocation(
+    int RegionId,
+    string RegionName,
+    string SourceType,
+    string SourceId,
+    string SourceName);
 
 public sealed record CreatureArchiveEssenceEntry(
     string EssenceDefinitionId,

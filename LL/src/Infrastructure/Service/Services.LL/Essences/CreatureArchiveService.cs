@@ -1,5 +1,8 @@
 using Application.Common.Interfaces;
+using Application.Interfaces.Services.LL.Dungeons;
 using Application.Interfaces.Services.LL.Essences;
+using Domain.Models.Dungeons.Definitions;
+using Domain.Models.Dungeons.Definitions.Encounters;
 using Domain.Models.Entities.Creatures;
 using Domain.Models.Essences;
 using Domain.Models.Essences.Definitions;
@@ -15,17 +18,20 @@ public sealed class CreatureArchiveService : ICreatureArchiveService
     private readonly IEssenceDefinitionRepository _essenceDefinitions;
     private readonly ICreatureEssenceLootTableRepository _creatureEssenceLootTables;
     private readonly IEssenceCodexCollectionService _codexCollections;
+    private readonly IDungeonDefinitions _dungeonDefinitions;
 
     public CreatureArchiveService(
         IDbContext dbContext,
         IEssenceDefinitionRepository essenceDefinitions,
         ICreatureEssenceLootTableRepository creatureEssenceLootTables,
-        IEssenceCodexCollectionService codexCollections)
+        IEssenceCodexCollectionService codexCollections,
+        IDungeonDefinitions dungeonDefinitions)
     {
         _dbContext = dbContext;
         _essenceDefinitions = essenceDefinitions;
         _creatureEssenceLootTables = creatureEssenceLootTables;
         _codexCollections = codexCollections;
+        _dungeonDefinitions = dungeonDefinitions;
     }
 
     public async Task RecordDefeatedCreaturesAsync(
@@ -107,6 +113,7 @@ public sealed class CreatureArchiveService : ICreatureArchiveService
             .ThenBy(x => x.CreatureName)
             .ToListAsync(cancellationToken);
         var absorbedIds = await GetAbsorbedEssenceDefinitionIdsAsync(characterId, cancellationToken);
+        var locationsByCreatureId = await GetCreatureLocationsAsync(cancellationToken);
         var now = DateTimeOffset.UtcNow;
         var lastFocusSetAt = GetLastEssenceFocusSetAt(entries);
         var focusAvailableAt = GetEssenceFocusAvailableAt(lastFocusSetAt);
@@ -142,11 +149,95 @@ public sealed class CreatureArchiveService : ICreatureArchiveService
                             absorbedIds.Contains(definition.Id),
                             definition.Tags))
                         .ToList(),
+                    locationsByCreatureId.GetValueOrDefault(entry.CreatureDefinitionId, []),
                     definitions.SelectMany(x => x.Tags).Distinct(StringComparer.OrdinalIgnoreCase).ToList());
             })
             .ToList();
 
         return new CreatureArchive(creatures, canChangeFocus, focusAvailableAt, lastFocusSetAt);
+    }
+
+    private async Task<IReadOnlyDictionary<string, IReadOnlyList<CreatureArchiveLocation>>> GetCreatureLocationsAsync(
+        CancellationToken cancellationToken)
+    {
+        var regions = await _dbContext.Regions
+            .AsNoTracking()
+            .Include(region => region.Areas)
+            .ThenInclude(area => area.Creatures)
+            .ToListAsync(cancellationToken);
+        var creatureNamesById = await _dbContext.Creatures
+            .AsNoTracking()
+            .ToDictionaryAsync(creature => creature.Id, creature => creature.Name, cancellationToken);
+        var locations = new Dictionary<string, List<CreatureArchiveLocation>>(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var region in regions)
+        {
+            foreach (var area in region.Areas)
+            {
+                foreach (var areaCreature in area.Creatures)
+                {
+                    if (!creatureNamesById.TryGetValue(areaCreature.CreatureId, out var creatureName))
+                        continue;
+
+                    AddLocation(
+                        locations,
+                        CreatureEssenceSource.GetMonsterDefinitionId(creatureName),
+                        new CreatureArchiveLocation(region.Id, region.Name, "Area", area.Id, area.Name));
+                }
+            }
+        }
+
+        var regionNamesById = regions.ToDictionary(region => region.Id, region => region.Name);
+        foreach (var dungeon in _dungeonDefinitions.GetAll())
+        {
+            var regionName = regionNamesById.GetValueOrDefault(dungeon.Region, $"Region {dungeon.Region}");
+            foreach (var encounterId in dungeon.Rooms
+                         .SelectMany(room => room.EncounterIds)
+                         .Where(id => !string.IsNullOrWhiteSpace(id))
+                         .Distinct(StringComparer.OrdinalIgnoreCase))
+            {
+                AddLocation(
+                    locations,
+                    DungeonEncounterIdentity.ToMonsterDefinitionId(encounterId),
+                    new CreatureArchiveLocation(
+                        dungeon.Region,
+                        regionName,
+                        "Dungeon",
+                        DungeonDefinitionIdentity.GetFamilyId(dungeon.Id),
+                        DungeonDefinitionIdentity.GetFamilyTitle(dungeon.Name)));
+            }
+        }
+
+        return locations.ToDictionary(
+            item => item.Key,
+            item => (IReadOnlyList<CreatureArchiveLocation>)item.Value
+                .OrderBy(location => location.RegionId)
+                .ThenBy(location => location.SourceType)
+                .ThenBy(location => location.SourceName)
+                .ToList(),
+            StringComparer.OrdinalIgnoreCase);
+    }
+
+    private static void AddLocation(
+        IDictionary<string, List<CreatureArchiveLocation>> locations,
+        string creatureId,
+        CreatureArchiveLocation location)
+    {
+        if (!locations.TryGetValue(creatureId, out var creatureLocations))
+        {
+            creatureLocations = [];
+            locations[creatureId] = creatureLocations;
+        }
+
+        if (creatureLocations.Any(existing =>
+                existing.RegionId == location.RegionId &&
+                existing.SourceType.Equals(location.SourceType, StringComparison.OrdinalIgnoreCase) &&
+                existing.SourceId.Equals(location.SourceId, StringComparison.OrdinalIgnoreCase)))
+        {
+            return;
+        }
+
+        creatureLocations.Add(location);
     }
 
     public async Task<CreatureArchive> SetEssenceFocusAsync(

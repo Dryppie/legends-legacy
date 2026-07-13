@@ -5,20 +5,6 @@ namespace Services.LL.Combat.Layers.Orchestration.Dungeon;
 
 public sealed class DungeonEncounterParticipantResolver : IDungeonEncounterParticipantResolver
 {
-    private static readonly IReadOnlyDictionary<string, string> EncounterKeyAliases =
-        new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-        {
-            ["skeleton"] = "skeleton_warrior",
-            ["poisonous_rat"] = "large_rat",
-            ["cave_bat"] = "vampire_bat",
-            ["giant_bat"] = "vampire_bat",
-            ["necroshade_wraith"] = "specter",
-            ["goblin_shaman"] = "hobgoblin",
-            ["queens_guard_ant"] = "ant_worker",
-            ["ant_queen"] = "fire_ant",
-            ["ant_king"] = "fire_ant"
-        };
-
     private readonly ICreatureService _repository;
 
     public DungeonEncounterParticipantResolver(ICreatureService repository)
@@ -30,7 +16,7 @@ public sealed class DungeonEncounterParticipantResolver : IDungeonEncounterParti
     {
         var normalizedKeys = enemyCreatureKeys
             .Where(key => !string.IsNullOrWhiteSpace(key))
-            .Select(NormalizeEncounterKey)
+            .Select(Domain.Models.Dungeons.Definitions.Encounters.DungeonEncounterIdentity.NormalizeCreatureKey)
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .ToArray();
 
@@ -43,7 +29,4 @@ public sealed class DungeonEncounterParticipantResolver : IDungeonEncounterParti
 
         return resolved;
     }
-
-    private static string NormalizeEncounterKey(string key) =>
-        EncounterKeyAliases.GetValueOrDefault(key, key);
 }

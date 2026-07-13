@@ -29,6 +29,7 @@ import {
 
 type ArchiveFilter = 'all' | 'favorites' | 'attuned' | 'inactive';
 type ArchiveSort = 'name' | 'level' | 'tier';
+type CreatureSourceFilter = 'all' | 'Area' | 'Dungeon';
 
 @Component({
   selector: 'app-essences',
@@ -50,6 +51,8 @@ type ArchiveSort = 'name' | 'level' | 'tier';
 export class EssencesComponent implements OnInit {
   readonly archiveSearch = signal('');
   readonly creatureSearch = signal('');
+  readonly creatureRegionFilter = signal('all');
+  readonly creatureSourceFilter = signal<CreatureSourceFilter>('all');
   readonly archiveFilter = signal<ArchiveFilter>('all');
   readonly archiveSort = signal<ArchiveSort>('name');
   readonly upgradeDetailsOpen = signal(false);
@@ -65,6 +68,12 @@ export class EssencesComponent implements OnInit {
     { label: 'Name', value: 'name' },
     { label: 'Level', value: 'level' },
     { label: 'Tier', value: 'tier' },
+  ];
+
+  readonly creatureSourceOptions: readonly DropdownOption<CreatureSourceFilter>[] = [
+    { label: 'Areas and dungeons', value: 'all' },
+    { label: 'Areas', value: 'Area' },
+    { label: 'Dungeons', value: 'Dungeon' },
   ];
 
   readonly filteredArchiveEssences = computed(() => {
@@ -122,21 +131,53 @@ export class EssencesComponent implements OnInit {
 
   readonly filteredCreatures = computed(() => {
     const search = this.creatureSearch().trim().toLowerCase();
+    const region = this.creatureRegionFilter();
+    const source = this.creatureSourceFilter();
     const creatures = this.essenceState.creatureArchive()?.creatures ?? [];
 
-    if (!search) return creatures;
+    return creatures.filter((creature) => {
+      const matchesLocation = creature.locations.some(
+        (location) =>
+          (region === 'all' || location.regionId.toString() === region) &&
+          (source === 'all' || location.sourceType === source),
+      );
+      if ((region !== 'all' || source !== 'all') && !matchesLocation) {
+        return false;
+      }
 
-    return creatures.filter((creature) =>
-      [
+      if (!search) return true;
+
+      return [
         creature.name,
         creature.creatureId,
         ...creature.essences.map((essence) => essence.name),
+        ...creature.locations.flatMap((location) => [
+          location.regionName,
+          location.sourceType,
+          location.sourceName,
+        ]),
         ...creature.tags,
       ]
         .join(' ')
         .toLowerCase()
-        .includes(search),
-    );
+        .includes(search);
+    });
+  });
+
+  readonly creatureRegionOptions = computed<readonly DropdownOption<string>[]>(() => {
+    const regions = new Map<number, string>();
+    for (const creature of this.essenceState.creatureArchive()?.creatures ?? []) {
+      for (const location of creature.locations) {
+        regions.set(location.regionId, location.regionName);
+      }
+    }
+
+    return [
+      { label: 'All regions', value: 'all' },
+      ...[...regions.entries()]
+        .sort(([left], [right]) => left - right)
+        .map(([id, name]) => ({ label: name, value: id.toString() })),
+    ];
   });
 
   readonly unlockedCodexEntries = computed(
@@ -169,6 +210,18 @@ export class EssencesComponent implements OnInit {
 
   public ngOnInit(): void {
     this.essenceState.refresh();
+  }
+
+  public setCreatureRegionFilter(
+    selection: DropdownSelection<string>,
+  ): void {
+    this.creatureRegionFilter.set(selection.main);
+  }
+
+  public setCreatureSourceFilter(
+    selection: DropdownSelection<CreatureSourceFilter>,
+  ): void {
+    this.creatureSourceFilter.set(selection.main);
   }
 
   public selectPlayerEssence(essence: PlayerEssenceDto): void {
