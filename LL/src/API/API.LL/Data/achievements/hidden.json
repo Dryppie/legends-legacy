@@ -2,7 +2,7 @@
   {
     "key": "combat.one_health_wonder",
     "name": "One Health Wonder",
-    "description": "Win a combat encounter with 1% Health or less remaining.",
+    "description": "Win a combat encounter with {number}% Health or less remaining.",
     "category": "Hidden",
     "type": "Hidden",
     "scope": "Character",
@@ -41,7 +41,7 @@
   {
     "key": "dungeon.trap_magnet",
     "name": "Trap Magnet",
-    "description": "Trigger 25 dungeon traps.",
+    "description": "Trigger {number} dungeon traps.",
     "category": "Hidden",
     "type": "Hidden",
     "scope": "Account",
@@ -49,7 +49,7 @@
     "rarity": "Renowned",
     "requirementType": "DungeonTrapsTriggered",
     "requirementTarget": null,
-    "requirementAmount": 25,
+    "requirementAmount": 250,
     "points": 25,
     "hint": "Some people find treasure. You find problems.",
     "isRepeatable": false,
@@ -60,7 +60,7 @@
   {
     "key": "crafting.tempered",
     "name": "Potential's End",
-    "description": "Create a high-quality item with less than 10 Potential remaining.",
+    "description": "Create a high-quality item with less than {number} Potential remaining.",
     "category": "Hidden",
     "type": "Hidden",
     "scope": "Account",
@@ -73,14 +73,14 @@
     "hint": "Push an item to its limit.",
     "isRepeatable": false,
     "isActive": true,
-    "sortOrder": 42,
+    "sortOrder": 44,
     "playerSystemMessageTemplate": "Achievement unlocked: {achievementName} (+{points} points).",
     "globalSystemMessageTemplate": "{characterName} unlocked {achievementName} (+{points} points)."
   },
   {
     "key": "crafting.cursed_hands",
     "name": "Cursed Hands",
-    "description": "Trigger 25 cursed crafting outcomes.",
+    "description": "Trigger {number} cursed crafting outcomes.",
     "category": "Hidden",
     "type": "Hidden",
     "scope": "Account",
@@ -88,18 +88,18 @@
     "rarity": "Renowned",
     "requirementType": "CursedCraftingOutcomes",
     "requirementTarget": null,
-    "requirementAmount": 25,
+    "requirementAmount": 250,
     "points": 25,
     "hint": "Some tools remember every mistake.",
     "isRepeatable": false,
     "isActive": true,
-    "sortOrder": 43,
+    "sortOrder": 45,
     "playerSystemMessageTemplate": "Achievement unlocked: {achievementName} (+{points} points)."
   },
   {
     "key": "colosseum.comeback",
     "name": "Comeback",
-    "description": "Win a Colosseum battle after a losing streak of 5 or more.",
+    "description": "Win a Colosseum battle after a losing streak of {number} or more.",
     "category": "Hidden",
     "type": "Hidden",
     "scope": "Character",
@@ -112,7 +112,7 @@
     "hint": "Lose, learn, return stronger.",
     "isRepeatable": false,
     "isActive": true,
-    "sortOrder": 51,
+    "sortOrder": 53,
     "playerSystemMessageTemplate": "Achievement unlocked: {achievementName} (+{points} points)."
   }
 ]

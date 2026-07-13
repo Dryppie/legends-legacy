@@ -21,7 +21,7 @@
   {
     "key": "essence.soulbound",
     "name": "Soulbound",
-    "description": "Equip 10 Essences at once.",
+    "description": "Equip {number} Essences at once.",
     "category": "Essences",
     "type": "Milestone",
     "scope": "Character",
@@ -40,7 +40,7 @@
   {
     "key": "essence.soul_collector_1",
     "name": "Soul Collector I",
-    "description": "Add 10 unique Essences to the Soul Archive.",
+    "description": "Add {number} unique Essences to the Soul Archive.",
     "category": "Essences",
     "type": "Collection",
     "scope": "Account",
@@ -59,7 +59,7 @@
   {
     "key": "essence.soul_collector_2",
     "name": "Soul Collector II",
-    "description": "Add 50 unique Essences to the Soul Archive.",
+    "description": "Add {number} unique Essences to the Soul Archive.",
     "category": "Essences",
     "type": "Collection",
     "scope": "Account",
@@ -78,7 +78,7 @@
   {
     "key": "essence.archivist",
     "name": "Archivist",
-    "description": "Add 100 unique Essences to the Soul Archive.",
+    "description": "Add {number} unique Essences to the Soul Archive.",
     "category": "Essences",
     "type": "Collection",
     "scope": "Account",
@@ -98,7 +98,7 @@
   {
     "key": "essence.master_archivist",
     "name": "Master Archivist",
-    "description": "Add 250 unique Essences to the Soul Archive.",
+    "description": "Add {number} unique Essences to the Soul Archive.",
     "category": "Essences",
     "type": "Collection",
     "scope": "Account",
@@ -118,7 +118,7 @@
   {
     "key": "essence.living_archive",
     "name": "Living Archive",
-    "description": "Add 500 unique Essences to the Soul Archive.",
+    "description": "Add {number} unique Essences to the Soul Archive.",
     "category": "Essences",
     "type": "Collection",
     "scope": "Account",
@@ -157,7 +157,7 @@
   {
     "key": "essence.paragon",
     "name": "Essence Paragon",
-    "description": "Ascend 10 Essences to Tier 3.",
+    "description": "Ascend {number} Essences to Tier 3.",
     "category": "Essences",
     "type": "Mastery",
     "scope": "Account",

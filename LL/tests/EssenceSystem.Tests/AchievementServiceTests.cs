@@ -8,6 +8,7 @@ using Domain.Models.Items.Equipments;
 using Domain.Models.Professions.Crafting;
 using Microsoft.EntityFrameworkCore;
 using Persistence.LL;
+using Persistence.LL.Repositories.Achievements;
 using Services.LL.Achievements;
 
 namespace EssenceSystem.Tests;
@@ -24,7 +25,7 @@ public sealed class AchievementServiceTests
         SeedAchievement(db, "combat.test", AchievementRequirementType.MonstersDefeated, 2, points: 10);
         SeedTitle(db, "title.test", "combat.test", TitleScope.Account);
         await db.SaveChangesAsync();
-        var service = new AchievementService(db);
+        var service = CreateService(db);
 
         var first = await service.AddProgressAsync(accountId, characterId, AchievementRequirementType.MonstersDefeated);
         var second = await service.AddProgressAsync(accountId, characterId, AchievementRequirementType.MonstersDefeated);
@@ -57,7 +58,7 @@ public sealed class AchievementServiceTests
             AchievementScope.Character);
         SeedTitle(db, "title.duelist", "colosseum.duelist", TitleScope.Character);
         await db.SaveChangesAsync();
-        var service = new AchievementService(db);
+        var service = CreateService(db);
 
         Assert.Null(await service.EquipTitleAsync(
             accountId,
@@ -112,7 +113,7 @@ public sealed class AchievementServiceTests
             visibility: AchievementVisibility.Obscured,
             hint: "Obscured hint");
         await db.SaveChangesAsync();
-        var service = new AchievementService(db);
+        var service = CreateService(db);
 
         var masked = await service.GetAchievementsAsync(accountId, characterId, new(), CancellationToken.None);
 
@@ -127,6 +128,35 @@ public sealed class AchievementServiceTests
         var revealed = await service.GetAchievementsAsync(accountId, characterId, new(), CancellationToken.None);
 
         Assert.Equal("Hidden Test", Assert.Single(revealed, x => x.Key == "hidden.test").Name);
+    }
+
+    [Fact]
+    public async Task Descriptions_resolve_number_from_achievement_requirement_amount()
+    {
+        await using var db = CreateDbContext();
+        var accountId = Guid.NewGuid();
+        var characterId = Guid.NewGuid();
+        SeedCharacter(db, accountId, characterId);
+        SeedAchievement(
+            db,
+            "combat.template",
+            AchievementRequirementType.MonstersDefeated,
+            12345,
+            description: "Defeat {number} monsters.");
+        SeedTitle(
+            db,
+            "title.template",
+            "combat.template",
+            TitleScope.Account,
+            "Earned by defeating {number} monsters.");
+        await db.SaveChangesAsync();
+        var service = CreateService(db);
+
+        var achievement = Assert.Single(await service.GetAchievementsAsync(accountId, characterId, new(), CancellationToken.None));
+        var title = Assert.Single(await service.GetTitlesAsync(accountId, characterId, new(), CancellationToken.None));
+
+        Assert.Equal("Defeat 12,345 monsters.", achievement.Description);
+        Assert.Equal("Earned by defeating 12,345 monsters.", title.Description);
     }
 
     [Theory]
@@ -171,7 +201,7 @@ public sealed class AchievementServiceTests
         SeedAchievement(db, "colosseum.complete", AchievementRequirementType.ColosseumBattlesCompleted, 1, AchievementScope.Character);
         SeedAchievement(db, "colosseum.win", AchievementRequirementType.ColosseumBattlesWon, 1, AchievementScope.Character);
         await db.SaveChangesAsync();
-        var service = new AchievementService(db);
+        var service = CreateService(db);
 
         await service.RecordColosseumBattleAsync(characterId, sameAccountOpponentId, BattleOutcome.Victory, 1000, 1200, CancellationToken.None);
         await service.RecordColosseumBattleAsync(characterId, validOpponentId, BattleOutcome.Victory, 1000, 1200, CancellationToken.None);
@@ -194,7 +224,7 @@ public sealed class AchievementServiceTests
         SeedAchievement(db, "dungeon.deathless", AchievementRequirementType.DungeonCompletedWithoutDefeat, 1, AchievementScope.Character);
         SeedAchievement(db, "dungeon.no_retreat", AchievementRequirementType.DungeonCompletedWithoutCheckpointRetreat, 1, AchievementScope.Character);
         await db.SaveChangesAsync();
-        var service = new AchievementService(db);
+        var service = CreateService(db);
 
         await service.RecordDungeonRunCompletedAsync(characterId, "test_dungeon", false, false, [], CancellationToken.None);
         await service.RecordDungeonRunCompletedAsync(characterId, "test_dungeon", true, false, [], CancellationToken.None);
@@ -220,7 +250,7 @@ public sealed class AchievementServiceTests
         SeedAchievement(db, "combat.low_health", AchievementRequirementType.WinCombatBelowHealthPercent, 5, AchievementScope.Character);
         SeedAchievement(db, "combat.one_percent", AchievementRequirementType.WinCombatBelowHealthPercent, 1, AchievementScope.Character);
         await db.SaveChangesAsync();
-        var service = new AchievementService(db);
+        var service = CreateService(db);
 
         await service.RecordIdleCombatAsync(
             characterId,
@@ -259,7 +289,7 @@ public sealed class AchievementServiceTests
             category: AchievementCategory.Hidden,
             visibility: AchievementVisibility.Hidden);
         await db.SaveChangesAsync();
-        var service = new AchievementService(db);
+        var service = CreateService(db);
 
         await service.RecordColosseumBattleAsync(characterId, opponentId, BattleOutcome.Victory, 1000, 1000, CancellationToken.None);
         await service.RecordColosseumBattleAsync(characterId, opponentId, BattleOutcome.Defeat, 1000, 1000, CancellationToken.None);
@@ -294,7 +324,7 @@ public sealed class AchievementServiceTests
         SeedAchievement(db, "essence.ascend", AchievementRequirementType.EssencesAscended, 1, category: AchievementCategory.Essences);
         SeedAchievement(db, "essence.tier3", AchievementRequirementType.EssencesAscendedToTier, 2, category: AchievementCategory.Essences, target: "3");
         await db.SaveChangesAsync();
-        var service = new AchievementService(db);
+        var service = CreateService(db);
 
         await service.RecordEssenceAbsorbedAsync(characterId, 3, ["Beast"], CancellationToken.None);
         await service.RecordEssenceLoadoutSavedAsync(characterId, 2, CancellationToken.None);
@@ -324,7 +354,7 @@ public sealed class AchievementServiceTests
         SeedAchievement(db, "craft.cursed", AchievementRequirementType.CursedCraftingOutcomes, 2, category: AchievementCategory.Hidden, visibility: AchievementVisibility.Hidden);
         SeedAchievement(db, "craft.low_potential", AchievementRequirementType.HighQualityItemCraftedBelowPotential, 10, category: AchievementCategory.Hidden, visibility: AchievementVisibility.Hidden);
         await db.SaveChangesAsync();
-        var service = new AchievementService(db);
+        var service = CreateService(db);
         var setItem = new EquipmentInstance { Id = Guid.NewGuid(), RecipeId = "sword", AffinityTags = ["set:ember"] };
         var normalItem = new EquipmentInstance { Id = Guid.NewGuid(), RecipeId = "ring" };
         var completedItem = new EquipmentInstance
@@ -366,7 +396,7 @@ public sealed class AchievementServiceTests
             new CharacterRecipeUnlock { CharacterId = characterId, RecipeId = "sword", BlueprintId = "ember" },
             new CharacterRecipeUnlock { CharacterId = characterId, RecipeId = "ring", BlueprintId = "moon" });
         await db.SaveChangesAsync();
-        var service = new AchievementService(db);
+        var service = CreateService(db);
 
         var result = await service.RecalculateProgressAsync(accountId, characterId, CancellationToken.None);
         await db.SaveChangesAsync();
@@ -401,6 +431,9 @@ public sealed class AchievementServiceTests
         });
     }
 
+    private static AchievementService CreateService(LLDbContext db) =>
+        new(new AchievementRepository(db));
+
     private static AchievementDefinition SeedAchievement(
         LLDbContext db,
         string key,
@@ -411,14 +444,15 @@ public sealed class AchievementServiceTests
         AchievementVisibility visibility = AchievementVisibility.Visible,
         int points = 5,
         string? target = null,
-        string? hint = null)
+        string? hint = null,
+        string? description = null)
     {
         var achievement = new AchievementDefinition
         {
             Id = Guid.NewGuid(),
             Key = key,
             Name = ToTitle(key),
-            Description = $"{ToTitle(key)} description",
+            Description = description ?? $"{ToTitle(key)} description",
             Hint = hint,
             Category = category,
             Type = visibility == AchievementVisibility.Hidden ? AchievementType.Hidden : AchievementType.Milestone,
@@ -442,14 +476,15 @@ public sealed class AchievementServiceTests
         LLDbContext db,
         string key,
         string sourceAchievementKey,
-        TitleScope scope)
+        TitleScope scope,
+        string description = "Duelist title")
     {
         db.TitleDefinitions.Add(new TitleDefinition
         {
             Id = Guid.NewGuid(),
             Key = key,
             Name = "Duelist",
-            Description = "Duelist title",
+            Description = description,
             Category = AchievementCategory.Colosseum,
             Rarity = TitleRarity.Common,
             Scope = scope,

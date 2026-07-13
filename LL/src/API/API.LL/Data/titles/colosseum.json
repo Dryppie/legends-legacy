@@ -2,7 +2,7 @@
   {
     "key": "title.duelist",
     "name": "Duelist",
-    "description": "Earned by winning 25 Colosseum battles.",
+    "description": "Earned by winning {number} Colosseum battles.",
     "category": "Colosseum",
     "rarity": "Renowned",
     "scope": "Character",
@@ -14,9 +14,9 @@
   {
     "key": "title.arena_blooded",
     "name": "Arena-Blooded",
-    "description": "Earned by winning 250 Colosseum battles.",
+    "description": "Earned by winning {number} Colosseum battles.",
     "category": "Colosseum",
-    "rarity": "Exalted",
+    "rarity": "Mythic",
     "scope": "Character",
     "sourceAchievementKey": "colosseum.arena_blooded",
     "isHiddenUntilUnlocked": false,
@@ -26,7 +26,7 @@
   {
     "key": "title.giant_slayer",
     "name": "Giant Slayer",
-    "description": "Earned by defeating a Colosseum opponent at least 200 rating above you.",
+    "description": "Earned by defeating a Colosseum opponent at least {number} rating above you.",
     "category": "Colosseum",
     "rarity": "Exalted",
     "scope": "Character",
@@ -38,7 +38,7 @@
   {
     "key": "title.undefeated",
     "name": "Undefeated",
-    "description": "Earned by winning 10 Colosseum battles in a row.",
+    "description": "Earned by winning {number} Colosseum battles in a row.",
     "category": "Colosseum",
     "rarity": "Exalted",
     "scope": "Character",
@@ -50,9 +50,9 @@
   {
     "key": "title.challenger",
     "name": "Challenger",
-    "description": "Earned by completing 100 Colosseum battles.",
+    "description": "Earned by completing {number} Colosseum battles.",
     "category": "Colosseum",
-    "rarity": "Renowned",
+    "rarity": "Exalted",
     "scope": "Character",
     "sourceAchievementKey": "colosseum.challenger",
     "isHiddenUntilUnlocked": false,

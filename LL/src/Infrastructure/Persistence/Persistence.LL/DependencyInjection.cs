@@ -1,5 +1,6 @@
 ﻿using Application.Common.Interfaces;
 using Application.Interfaces.Outbox;
+using Domain.Models.Achievements;
 using Domain.Models.Attributes;
 using Domain.Models.CharacterActions;
 using Domain.Models.Colosseum;
@@ -30,6 +31,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Persistence.LL.BackgroundJobs;
+using Persistence.LL.Repositories.Achievements;
 using Persistence.LL.Repositories.Attributes;
 using Persistence.LL.Repositories.CharacterActions;
 using Persistence.LL.Repositories.Colosseum;
@@ -82,6 +84,7 @@ public static class DependencyInjection
         services.AddScoped<IAreaRepository, AreaRepository>();
 
         services.AddScoped<IAttributeRepository, AttributeRepository>();
+        services.AddScoped<IAchievementRepository, AchievementRepository>();
         services.AddScoped<ICharacterRepository, CharacterRepository>();
         services.AddScoped<ICharacterActionRepository, CharacterActionRepository>();
         services.AddScoped<ICreatureRepository, CreatureRepository>();

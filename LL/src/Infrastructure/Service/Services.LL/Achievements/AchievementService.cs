@@ -1,4 +1,3 @@
-using Application.Common.Interfaces;
 using Application.Interfaces.Services.LL.Achievements;
 using Application.Interfaces.WebSockets;
 using Application.UseCases.Achievements.Dtos;
@@ -9,7 +8,7 @@ using Domain.Models.Combat;
 using Domain.Models.Entities.Characters;
 using Domain.Models.Items;
 using Domain.Models.Items.Equipments;
-using Microsoft.EntityFrameworkCore;
+using System.Globalization;
 
 namespace Services.LL.Achievements;
 
@@ -30,16 +29,16 @@ public sealed class AchievementService : IAchievementService
         (10, "Living Legend", 15000)
     ];
 
-    private readonly IDbContext _db;
+    private readonly IAchievementRepository _repository;
     private readonly IGameEventPublisher? _eventPublisher;
     private readonly IAchievementSystemChatPublisher? _systemChatPublisher;
 
     public AchievementService(
-        IDbContext db,
+        IAchievementRepository repository,
         IGameEventPublisher? eventPublisher = null,
         IAchievementSystemChatPublisher? systemChatPublisher = null)
     {
-        _db = db;
+        _repository = repository;
         _eventPublisher = eventPublisher;
         _systemChatPublisher = systemChatPublisher;
     }
@@ -49,8 +48,7 @@ public sealed class AchievementService : IAchievementService
         var achievements = await GetAchievementsAsync(accountId, characterId, new AchievementFilters(), cancellationToken);
         var totalPoints = await GetTotalAchievementPointsAsync(accountId, cancellationToken);
         var renown = CalculateLegacyRenown(totalPoints);
-        var totalTitles = await _db.PlayerTitleUnlocks
-            .CountAsync(x => x.AccountId == accountId, cancellationToken);
+        var totalTitles = await _repository.CountTitleUnlocksAsync(accountId, cancellationToken);
 
         var available = achievements.Where(x => x.Visibility != AchievementVisibility.Hidden || x.IsCompleted).ToList();
 
@@ -93,21 +91,11 @@ public sealed class AchievementService : IAchievementService
         AchievementFilters filters,
         CancellationToken cancellationToken)
     {
-        var definitions = await _db.AchievementDefinitions
-            .AsNoTracking()
-            .Where(x => x.IsActive)
-            .OrderBy(x => x.SortOrder)
-            .ToListAsync(cancellationToken);
-
-        var progress = await _db.PlayerAchievementProgresses
-            .AsNoTracking()
-            .Where(x => x.AccountId == accountId && (x.CharacterId == null || x.CharacterId == characterId))
-            .ToListAsync(cancellationToken);
-
-        var titlesByAchievement = await _db.TitleDefinitions
-            .AsNoTracking()
+        var definitions = await _repository.GetActiveDefinitionsAsync(cancellationToken);
+        var progress = await _repository.GetProgressesAsync(accountId, characterId, cancellationToken);
+        var titlesByAchievement = (await _repository.GetActiveTitlesAsync(cancellationToken))
             .Where(x => x.SourceAchievementKey != null)
-            .ToDictionaryAsync(x => x.SourceAchievementKey!, StringComparer.OrdinalIgnoreCase, cancellationToken);
+            .ToDictionary(x => x.SourceAchievementKey!, StringComparer.OrdinalIgnoreCase);
 
         var progressByDefinition = progress
             .GroupBy(x => x.AchievementDefinitionId)
@@ -135,21 +123,13 @@ public sealed class AchievementService : IAchievementService
         TitleFilters filters,
         CancellationToken cancellationToken)
     {
-        var character = await _db.Characters
-            .AsNoTracking()
-            .FirstOrDefaultAsync(x => x.Id == characterId && x.UserId == accountId, cancellationToken);
+        var character = await _repository.GetCharacterAsync(accountId, characterId, cancellationToken);
 
         var characterName = character?.Name ?? "Character";
-        var titles = await _db.TitleDefinitions
-            .AsNoTracking()
-            .Where(x => x.IsActive)
-            .OrderBy(x => x.SortOrder)
-            .ToListAsync(cancellationToken);
-
-        var unlocks = await _db.PlayerTitleUnlocks
-            .AsNoTracking()
-            .Where(x => x.AccountId == accountId && (x.CharacterId == null || x.CharacterId == characterId))
-            .ToListAsync(cancellationToken);
+        var titles = await _repository.GetActiveTitlesAsync(cancellationToken);
+        var requirementAmountsByAchievement = (await _repository.GetActiveDefinitionsAsync(cancellationToken))
+            .ToDictionary(x => x.Key, x => x.RequirementAmount, StringComparer.OrdinalIgnoreCase);
+        var unlocks = await _repository.GetTitleUnlocksAsync(accountId, characterId, cancellationToken);
 
         var unlockByTitle = unlocks
             .GroupBy(x => x.TitleDefinitionId)
@@ -163,7 +143,8 @@ public sealed class AchievementService : IAchievementService
                 var displayPosition = isEquipped
                     ? character!.EquippedTitleDisplayPosition
                     : TitleDisplayPosition.Prefix;
-                return MapTitle(title, unlock, isEquipped, characterName, displayPosition);
+                requirementAmountsByAchievement.TryGetValue(title.SourceAchievementKey ?? string.Empty, out var requirementAmount);
+                return MapTitle(title, unlock, isEquipped, characterName, displayPosition, requirementAmount);
             })
             .Where(x => filters.Category is null || x.Category == filters.Category)
             .Where(x => filters.Rarity is null || x.Rarity == filters.Rarity)
@@ -180,25 +161,20 @@ public sealed class AchievementService : IAchievementService
         CancellationToken cancellationToken)
     {
         titleKey = titleKey.Trim();
-        var title = await _db.TitleDefinitions
-            .FirstOrDefaultAsync(x => x.Key == titleKey && x.IsActive, cancellationToken);
+        var title = await _repository.GetActiveTitleByKeyAsync(titleKey, cancellationToken);
         if (title is null)
         {
             return null;
         }
 
-        var character = await _db.Characters
-            .FirstOrDefaultAsync(x => x.Id == characterId && x.UserId == accountId, cancellationToken);
+        var character = await _repository.GetCharacterAsync(accountId, characterId, cancellationToken);
         if (character is null)
         {
             return null;
         }
 
-        var isUnlocked = await _db.PlayerTitleUnlocks.AnyAsync(
-            x => x.AccountId == accountId &&
-                x.TitleDefinitionId == title.Id &&
-                (x.CharacterId == null || x.CharacterId == characterId),
-            cancellationToken);
+        var unlocks = await _repository.GetTitleUnlocksAsync(accountId, characterId, cancellationToken);
+        var isUnlocked = unlocks.Any(x => x.TitleDefinitionId == title.Id);
         if (!isUnlocked)
         {
             return null;
@@ -211,8 +187,7 @@ public sealed class AchievementService : IAchievementService
 
     public async Task UnequipTitleAsync(Guid accountId, Guid characterId, CancellationToken cancellationToken)
     {
-        var character = await _db.Characters
-            .FirstOrDefaultAsync(x => x.Id == characterId && x.UserId == accountId, cancellationToken);
+        var character = await _repository.GetCharacterAsync(accountId, characterId, cancellationToken);
         if (character is not null)
         {
             character.EquippedTitleDefinitionId = null;
@@ -264,10 +239,7 @@ public sealed class AchievementService : IAchievementService
             return [];
         }
 
-        var definitions = await _db.AchievementDefinitions
-            .Where(x => x.IsActive && x.RequirementType == requirementType)
-            .OrderBy(x => x.SortOrder)
-            .ToListAsync(cancellationToken);
+        var definitions = (await _repository.GetActiveDefinitionsAsync(requirementType, cancellationToken)).ToList();
 
         definitions = definitions
             .Where(x => TargetMatches(x.RequirementTarget, requirementTarget))
@@ -332,23 +304,22 @@ public sealed class AchievementService : IAchievementService
         int opponentRatingBefore,
         CancellationToken cancellationToken)
     {
-        var accountIds = await _db.Characters
-            .Where(x => x.Id == characterId || x.Id == opponentCharacterId)
-            .Select(x => new { x.Id, x.UserId })
-            .ToListAsync(cancellationToken);
+        var accountIds = await _repository.GetAccountIdsForCharactersAsync(
+            [characterId, opponentCharacterId],
+            cancellationToken);
 
-        var actor = accountIds.FirstOrDefault(x => x.Id == characterId);
-        var opponent = accountIds.FirstOrDefault(x => x.Id == opponentCharacterId);
-        if (actor is null || opponent is null || actor.UserId == opponent.UserId)
+        if (!accountIds.TryGetValue(characterId, out var actorAccountId) ||
+            !accountIds.TryGetValue(opponentCharacterId, out var opponentAccountId) ||
+            actorAccountId == opponentAccountId)
         {
             return;
         }
 
-        await AddProgressAsync(actor.UserId, characterId, AchievementRequirementType.ColosseumBattlesCompleted, cancellationToken: cancellationToken);
+        await AddProgressAsync(actorAccountId, characterId, AchievementRequirementType.ColosseumBattlesCompleted, cancellationToken: cancellationToken);
         if (outcome == BattleOutcome.Victory)
         {
             var losingStreak = await GetProgressAmountAsync(
-                actor.UserId,
+                actorAccountId,
                 characterId,
                 AchievementRequirementType.WinColosseumAfterLosingStreak,
                 null,
@@ -358,7 +329,7 @@ public sealed class AchievementService : IAchievementService
             if (losingStreak > 0)
             {
                 await AddProgressAsync(
-                    actor.UserId,
+                    actorAccountId,
                     characterId,
                     AchievementRequirementType.WinColosseumAfterLosingStreak,
                     losingStreak,
@@ -366,7 +337,7 @@ public sealed class AchievementService : IAchievementService
                     cancellationToken: cancellationToken);
 
                 await SetProgressAmountAsync(
-                    actor.UserId,
+                    actorAccountId,
                     characterId,
                     AchievementRequirementType.WinColosseumAfterLosingStreak,
                     0,
@@ -375,14 +346,14 @@ public sealed class AchievementService : IAchievementService
                     cancellationToken);
             }
 
-            await AddProgressAsync(actor.UserId, characterId, AchievementRequirementType.ColosseumBattlesWon, cancellationToken: cancellationToken);
-            await AddProgressAsync(actor.UserId, characterId, AchievementRequirementType.ColosseumWinStreak, cancellationToken: cancellationToken);
+            await AddProgressAsync(actorAccountId, characterId, AchievementRequirementType.ColosseumBattlesWon, cancellationToken: cancellationToken);
+            await AddProgressAsync(actorAccountId, characterId, AchievementRequirementType.ColosseumWinStreak, cancellationToken: cancellationToken);
 
             var ratingDifference = opponentRatingBefore - characterRatingBefore;
             if (ratingDifference > 0)
             {
                 await AddProgressAsync(
-                    actor.UserId,
+                    actorAccountId,
                     characterId,
                     AchievementRequirementType.DefeatColosseumOpponentRatingAbove,
                     ratingDifference,
@@ -393,7 +364,7 @@ public sealed class AchievementService : IAchievementService
         else
         {
             await SetProgressAmountAsync(
-                actor.UserId,
+                actorAccountId,
                 characterId,
                 AchievementRequirementType.ColosseumWinStreak,
                 0,
@@ -404,7 +375,7 @@ public sealed class AchievementService : IAchievementService
             if (outcome == BattleOutcome.Defeat)
             {
                 var currentLosingStreak = await GetProgressAmountAsync(
-                    actor.UserId,
+                    actorAccountId,
                     characterId,
                     AchievementRequirementType.WinColosseumAfterLosingStreak,
                     null,
@@ -412,7 +383,7 @@ public sealed class AchievementService : IAchievementService
                     cancellationToken: cancellationToken);
 
                 await SetProgressAmountAsync(
-                    actor.UserId,
+                    actorAccountId,
                     characterId,
                     AchievementRequirementType.WinColosseumAfterLosingStreak,
                     currentLosingStreak + 1,
@@ -425,10 +396,7 @@ public sealed class AchievementService : IAchievementService
 
     public async Task RecordDungeonRunStartedAsync(Guid characterId, CancellationToken cancellationToken)
     {
-        var accountId = await _db.Characters
-            .Where(x => x.Id == characterId)
-            .Select(x => x.UserId)
-            .FirstOrDefaultAsync(cancellationToken);
+        var accountId = await _repository.GetAccountIdForCharacterAsync(characterId, cancellationToken);
         if (accountId == Guid.Empty)
         {
             return;
@@ -449,10 +417,7 @@ public sealed class AchievementService : IAchievementService
         IReadOnlyCollection<string> defeatedBossKeys,
         CancellationToken cancellationToken)
     {
-        var accountId = await _db.Characters
-            .Where(x => x.Id == characterId)
-            .Select(x => x.UserId)
-            .FirstOrDefaultAsync(cancellationToken);
+        var accountId = await _repository.GetAccountIdForCharacterAsync(characterId, cancellationToken);
         if (accountId == Guid.Empty)
         {
             return;
@@ -746,9 +711,7 @@ public sealed class AchievementService : IAchievementService
         Guid characterId,
         CancellationToken cancellationToken)
     {
-        var character = await _db.Characters
-            .AsNoTracking()
-            .FirstOrDefaultAsync(x => x.Id == characterId && x.UserId == accountId, cancellationToken);
+        var character = await _repository.GetCharacterAsync(accountId, characterId, cancellationToken);
         if (character is null)
         {
             return null;
@@ -808,14 +771,10 @@ public sealed class AchievementService : IAchievementService
     }
 
     private async Task<Guid> GetAccountIdForCharacterAsync(Guid characterId, CancellationToken cancellationToken) =>
-        await _db.Characters
-            .Where(x => x.Id == characterId)
-            .Select(x => x.UserId)
-            .FirstOrDefaultAsync(cancellationToken);
+        await _repository.GetAccountIdForCharacterAsync(characterId, cancellationToken);
 
     private async Task<int> CountCompletedAchievementsAsync(Guid accountId, CancellationToken cancellationToken) =>
-        await _db.PlayerAchievementProgresses
-            .CountAsync(x => x.AccountId == accountId && x.IsCompleted, cancellationToken);
+        await _repository.CountCompletedAchievementsAsync(accountId, cancellationToken);
 
     private async Task RecalculateEssenceProgressAsync(
         Guid accountId,
@@ -823,10 +782,7 @@ public sealed class AchievementService : IAchievementService
         List<AchievementUnlockDto> unlocks,
         CancellationToken cancellationToken)
     {
-        var essences = await _db.PlayerEssences
-            .AsNoTracking()
-            .Where(x => x.CharacterId == characterId)
-            .ToListAsync(cancellationToken);
+        var essences = await _repository.GetPlayerEssencesAsync(characterId, cancellationToken);
 
         var uniqueEssenceCount = essences
             .Select(x => x.EssenceDefinitionId)
@@ -868,10 +824,7 @@ public sealed class AchievementService : IAchievementService
                 cancellationToken: cancellationToken));
         }
 
-        var equippedEssenceCount = await _db.EssenceLoadoutSlots
-            .AsNoTracking()
-            .Where(x => x.PlayerEssenceId != null && x.EssenceLoadout.CharacterId == characterId && x.EssenceLoadout.IsActive)
-            .CountAsync(cancellationToken);
+        var equippedEssenceCount = await _repository.GetEquippedEssenceCountAsync(characterId, cancellationToken);
 
         unlocks.AddRange(await AddProgressCoreAsync(
             accountId,
@@ -889,13 +842,7 @@ public sealed class AchievementService : IAchievementService
         List<AchievementUnlockDto> unlocks,
         CancellationToken cancellationToken)
     {
-        var blueprintUnlocks = await _db.CharacterRecipeUnlocks
-            .AsNoTracking()
-            .Where(x => x.CharacterId == characterId)
-            .Select(x => x.BlueprintId)
-            .Where(x => x != string.Empty)
-            .Distinct()
-            .CountAsync(cancellationToken);
+        var blueprintUnlocks = await _repository.GetBlueprintUnlockCountAsync(characterId, cancellationToken);
 
         unlocks.AddRange(await AddProgressCoreAsync(
             accountId,
@@ -906,13 +853,7 @@ public sealed class AchievementService : IAchievementService
             syncLegacyProgress: false,
             cancellationToken: cancellationToken));
 
-        var equipment = await _db.ItemInstances
-            .AsNoTracking()
-            .OfType<EquipmentInstance>()
-            .Where(item => _db.InventoryItems.Any(inventoryItem =>
-                inventoryItem.InventoryId == characterId &&
-                inventoryItem.ItemInstanceId == item.Id))
-            .ToListAsync(cancellationToken);
+        var equipment = await _repository.GetOwnedEquipmentAsync(characterId, cancellationToken);
 
         var craftedItems = equipment
             .Where(x => !string.IsNullOrWhiteSpace(x.RecipeId))
@@ -958,10 +899,7 @@ public sealed class AchievementService : IAchievementService
         List<AchievementUnlockDto> unlocks,
         CancellationToken cancellationToken)
     {
-        var completions = await _db.DungeonCompletionRecords
-            .AsNoTracking()
-            .Where(x => x.CharacterId == characterId)
-            .ToListAsync(cancellationToken);
+        var completions = await _repository.GetDungeonCompletionsAsync(characterId, cancellationToken);
 
         var totalCompletions = completions.Sum(x => x.CompletionCount);
         unlocks.AddRange(await AddProgressCoreAsync(
@@ -993,11 +931,7 @@ public sealed class AchievementService : IAchievementService
         List<AchievementUnlockDto> unlocks,
         CancellationToken cancellationToken)
     {
-        var matches = await _db.ColosseumMatches
-            .AsNoTracking()
-            .Where(x => x.CharacterAId == characterId || x.CharacterBId == characterId)
-            .OrderBy(x => x.PlayedAt)
-            .ToListAsync(cancellationToken);
+        var matches = await _repository.GetColosseumMatchesAsync(characterId, cancellationToken);
 
         if (matches.Count == 0)
         {
@@ -1008,11 +942,7 @@ public sealed class AchievementService : IAchievementService
             .Select(match => match.CharacterAId == characterId ? match.CharacterBId : match.CharacterAId)
             .Distinct()
             .ToList();
-        var opponentAccountIds = await _db.Characters
-            .AsNoTracking()
-            .Where(x => opponentIds.Contains(x.Id))
-            .Select(x => new { x.Id, x.UserId })
-            .ToDictionaryAsync(x => x.Id, x => x.UserId, cancellationToken);
+        var opponentAccountIds = await _repository.GetAccountIdsForCharactersAsync(opponentIds, cancellationToken);
 
         var validMatches = matches
             .Where(match =>
@@ -1086,10 +1016,7 @@ public sealed class AchievementService : IAchievementService
         int? seasonId,
         CancellationToken cancellationToken)
     {
-        var definitions = await _db.AchievementDefinitions
-            .AsNoTracking()
-            .Where(x => x.IsActive && x.RequirementType == requirementType)
-            .ToListAsync(cancellationToken);
+        var definitions = await _repository.GetActiveDefinitionsAsync(requirementType, cancellationToken);
 
         var definition = definitions.FirstOrDefault(x => TargetMatches(x.RequirementTarget, requirementTarget));
         if (definition is null)
@@ -1099,23 +1026,13 @@ public sealed class AchievementService : IAchievementService
 
         var scopedCharacterId = definition.Scope == AchievementScope.Character ? characterId : null;
         var scopedSeasonId = definition.Scope == AchievementScope.Seasonal ? seasonId : null;
-        var local = _db.PlayerAchievementProgresses.Local.FirstOrDefault(
-            x => x.AccountId == accountId &&
-                x.CharacterId == scopedCharacterId &&
-                x.AchievementDefinitionId == definition.Id &&
-                x.SeasonId == scopedSeasonId);
-        if (local is not null)
-        {
-            return local.CurrentAmount;
-        }
-
-        return await _db.PlayerAchievementProgresses
-            .Where(x => x.AccountId == accountId &&
-                x.CharacterId == scopedCharacterId &&
-                x.AchievementDefinitionId == definition.Id &&
-                x.SeasonId == scopedSeasonId)
-            .Select(x => x.CurrentAmount)
-            .FirstOrDefaultAsync(cancellationToken);
+        var progress = await _repository.GetProgressAsync(
+            accountId,
+            scopedCharacterId,
+            definition.Id,
+            scopedSeasonId,
+            cancellationToken);
+        return progress?.CurrentAmount ?? 0;
     }
 
     private async Task SetProgressAmountAsync(
@@ -1127,9 +1044,7 @@ public sealed class AchievementService : IAchievementService
         int? seasonId,
         CancellationToken cancellationToken)
     {
-        var definitions = await _db.AchievementDefinitions
-            .Where(x => x.IsActive && x.RequirementType == requirementType)
-            .ToListAsync(cancellationToken);
+        var definitions = await _repository.GetActiveDefinitionsAsync(requirementType, cancellationToken);
 
         var now = DateTimeOffset.UtcNow;
         foreach (var definition in definitions.Where(x => TargetMatches(x.RequirementTarget, requirementTarget)))
@@ -1165,9 +1080,9 @@ public sealed class AchievementService : IAchievementService
             return [];
         }
 
-        var definitions = await _db.AchievementDefinitions
-            .Where(x => x.IsActive && x.RequirementType == AchievementRequirementType.WinCombatBelowHealthPercent)
-            .ToListAsync(cancellationToken);
+        var definitions = await _repository.GetActiveDefinitionsAsync(
+            AchievementRequirementType.WinCombatBelowHealthPercent,
+            cancellationToken);
 
         var now = DateTimeOffset.UtcNow;
         var unlocks = new List<AchievementUnlockDto>();
@@ -1205,21 +1120,11 @@ public sealed class AchievementService : IAchievementService
         DateTimeOffset now,
         CancellationToken cancellationToken)
     {
-        var local = _db.PlayerAchievementProgresses.Local.FirstOrDefault(
-            x => x.AccountId == accountId &&
-                x.CharacterId == characterId &&
-                x.AchievementDefinitionId == definition.Id &&
-                x.SeasonId == seasonId);
-        if (local is not null)
-        {
-            return local;
-        }
-
-        var progress = await _db.PlayerAchievementProgresses.FirstOrDefaultAsync(
-            x => x.AccountId == accountId &&
-                x.CharacterId == characterId &&
-                x.AchievementDefinitionId == definition.Id &&
-                x.SeasonId == seasonId,
+        var progress = await _repository.GetProgressAsync(
+            accountId,
+            characterId,
+            definition.Id,
+            seasonId,
             cancellationToken);
 
         if (progress is not null)
@@ -1238,7 +1143,7 @@ public sealed class AchievementService : IAchievementService
             CreatedAt = now,
             UpdatedAt = now
         };
-        await _db.PlayerAchievementProgresses.AddAsync(progress, cancellationToken);
+        await _repository.AddProgressAsync(progress, cancellationToken);
         return progress;
     }
 
@@ -1262,11 +1167,7 @@ public sealed class AchievementService : IAchievementService
 
         var titleUnlock = await UnlockTitleRewardAsync(progress, definition, completedByCharacterId, now, cancellationToken);
         var characterName = completedByCharacterId.HasValue
-            ? await _db.Characters
-                .AsNoTracking()
-                .Where(x => x.Id == completedByCharacterId.Value)
-                .Select(x => x.Name)
-                .FirstOrDefaultAsync(cancellationToken)
+            ? await _repository.GetCharacterNameAsync(completedByCharacterId.Value, cancellationToken)
             : null;
         var titleName = titleUnlock?.TitleDefinition.Name;
 
@@ -1300,25 +1201,18 @@ public sealed class AchievementService : IAchievementService
         DateTimeOffset now,
         CancellationToken cancellationToken)
     {
-        var title = await _db.TitleDefinitions.FirstOrDefaultAsync(
-            x => x.IsActive && x.SourceAchievementKey == definition.Key,
-            cancellationToken);
+        var title = await _repository.GetActiveTitleBySourceAchievementKeyAsync(definition.Key, cancellationToken);
         if (title is null)
         {
             return null;
         }
 
         var characterId = title.Scope == TitleScope.Character ? completedByCharacterId : null;
-        var exists = _db.PlayerTitleUnlocks.Local.Any(
-            x => x.AccountId == progress.AccountId &&
-                x.CharacterId == characterId &&
-                x.TitleDefinitionId == title.Id &&
-                x.SeasonId == progress.SeasonId) ||
-            await _db.PlayerTitleUnlocks.AnyAsync(
-            x => x.AccountId == progress.AccountId &&
-                x.CharacterId == characterId &&
-                x.TitleDefinitionId == title.Id &&
-                x.SeasonId == progress.SeasonId,
+        var exists = await _repository.HasTitleUnlockAsync(
+            progress.AccountId,
+            characterId,
+            title.Id,
+            progress.SeasonId,
             cancellationToken);
         if (exists)
         {
@@ -1336,7 +1230,7 @@ public sealed class AchievementService : IAchievementService
             UnlockedByAchievementDefinitionId = definition.Id,
             SeasonId = progress.SeasonId
         };
-        await _db.PlayerTitleUnlocks.AddAsync(unlock, cancellationToken);
+        await _repository.AddTitleUnlockAsync(unlock, cancellationToken);
         return unlock;
     }
 
@@ -1371,9 +1265,9 @@ public sealed class AchievementService : IAchievementService
             return [];
         }
 
-        var definitions = await _db.AchievementDefinitions
-            .Where(x => x.IsActive && x.RequirementType == AchievementRequirementType.HighQualityItemCraftedBelowPotential)
-            .ToListAsync(cancellationToken);
+        var definitions = await _repository.GetActiveDefinitionsAsync(
+            AchievementRequirementType.HighQualityItemCraftedBelowPotential,
+            cancellationToken);
 
         var now = DateTimeOffset.UtcNow;
         var unlocks = new List<AchievementUnlockDto>();
@@ -1404,14 +1298,7 @@ public sealed class AchievementService : IAchievementService
     }
 
     private async Task<int> GetTotalAchievementPointsAsync(Guid accountId, CancellationToken cancellationToken) =>
-        await _db.PlayerAchievementProgresses
-            .Where(x => x.AccountId == accountId && x.IsCompleted)
-            .Join(
-                _db.AchievementDefinitions,
-                progress => progress.AchievementDefinitionId,
-                definition => definition.Id,
-                (_, definition) => definition.Points)
-            .SumAsync(cancellationToken);
+        await _repository.GetTotalAchievementPointsAsync(accountId, cancellationToken);
 
     private async Task PublishUnlockAnnouncementsAsync(
         Guid? characterId,
@@ -1497,7 +1384,9 @@ public sealed class AchievementService : IAchievementService
         {
             Key = definition.Key,
             Name = definition.Name,
-            Description = obscured ? definition.Hint ?? "The exact requirement is unknown." : definition.Description,
+            Description = obscured
+                ? definition.Hint ?? "The exact requirement is unknown."
+                : FormatDescription(definition.Description, definition.RequirementAmount),
             Hint = definition.Hint,
             Category = definition.Category,
             Type = definition.Type,
@@ -1522,7 +1411,8 @@ public sealed class AchievementService : IAchievementService
         PlayerTitleUnlock? unlock,
         bool isEquipped,
         string characterName,
-        TitleDisplayPosition displayPosition)
+        TitleDisplayPosition displayPosition,
+        long requirementAmount)
     {
         var unlocked = unlock is not null;
         var hidden = title.IsHiddenUntilUnlocked && !unlocked;
@@ -1532,7 +1422,9 @@ public sealed class AchievementService : IAchievementService
         {
             Key = title.Key,
             Name = name,
-            Description = hidden ? "Unlock this title to reveal its source." : title.Description,
+            Description = hidden
+                ? "Unlock this title to reveal its source."
+                : FormatDescription(title.Description, requirementAmount),
             Category = title.Category,
             Rarity = title.Rarity,
             DisplayPosition = displayPosition,
@@ -1558,6 +1450,12 @@ public sealed class AchievementService : IAchievementService
         DisplayPosition = displayPosition,
         DisplayName = TitleDisplayFormatter.Format(characterName, title.Name, displayPosition)
     };
+
+    private static string FormatDescription(string description, long requirementAmount) =>
+        description.Replace(
+            "{number}",
+            requirementAmount.ToString("N0", CultureInfo.InvariantCulture),
+            StringComparison.Ordinal);
 
     private static bool MatchesSearch(AchievementDto achievement, string? search)
     {

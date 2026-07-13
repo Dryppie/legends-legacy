@@ -2,9 +2,9 @@
   {
     "key": "title.deep_delver",
     "name": "Deep Delver",
-    "description": "Earned by clearing 100 total dungeons.",
+    "description": "Earned by clearing {number} total dungeons.",
     "category": "Dungeons",
-    "rarity": "Exalted",
+    "rarity": "Mythic",
     "scope": "Account",
     "sourceAchievementKey": "dungeon.deep_delver",
     "isHiddenUntilUnlocked": false,

@@ -2,7 +2,7 @@
   {
     "key": "title.one_health_wonder",
     "name": "One Health Wonder",
-    "description": "Earned by winning a combat encounter with 1% Health or less remaining.",
+    "description": "Earned by winning a combat encounter with {number}% Health or less remaining.",
     "category": "Hidden",
     "rarity": "Exalted",
     "scope": "Character",

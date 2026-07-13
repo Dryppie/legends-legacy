@@ -21,7 +21,7 @@
   {
     "key": "general.adventurer",
     "name": "Adventurer",
-    "description": "Reach character level 10.",
+    "description": "Reach character level {number}.",
     "category": "General",
     "type": "Milestone",
     "scope": "Character",
@@ -40,7 +40,7 @@
   {
     "key": "general.veteran",
     "name": "Veteran",
-    "description": "Reach character level 50.",
+    "description": "Reach character level {number}.",
     "category": "General",
     "type": "Milestone",
     "scope": "Character",

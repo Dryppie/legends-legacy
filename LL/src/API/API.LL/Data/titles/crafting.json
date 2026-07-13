@@ -14,7 +14,7 @@
   {
     "key": "title.master_smith",
     "name": "Master Smith",
-    "description": "Earned by crafting 25 Masterpieces.",
+    "description": "Earned by crafting {number} Masterpieces.",
     "category": "Crafting",
     "rarity": "Exalted",
     "scope": "Account",
@@ -26,7 +26,7 @@
   {
     "key": "title.blueprint_scholar",
     "name": "Blueprint Scholar",
-    "description": "Earned by unlocking 50 Blueprints.",
+    "description": "Earned by unlocking {number} Blueprints.",
     "category": "Crafting",
     "rarity": "Exalted",
     "scope": "Account",
