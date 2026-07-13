@@ -3,7 +3,7 @@
     "id": "essence.resonance",
     "branch": "EssenceArchive",
     "displayName": "Essence Resonance",
-    "description": "Increases monster Essence drop chances.",
+    "description": "Increases creature Essence drop chances.",
     "maxRank": 5,
     "costsByRank": [25, 75, 150, 300, 600],
     "effects": [
@@ -32,7 +32,7 @@
         "valuesByRank": [500, 1000, 1500, 2000, 2500]
       }
     ],
-    "appliesTo": ["Monster Essence resonance buildup"],
+    "appliesTo": ["Creature Essence resonance buildup"],
     "doesNotApplyTo": ["Guaranteed rewards", "Shop purchases", "Soulstone drops"],
     "enabled": true,
     "sortOrder": 20
@@ -60,7 +60,7 @@
     "id": "essence.archive-focus",
     "branch": "EssenceArchive",
     "displayName": "Archive Focus",
-    "description": "Select one discovered monster every 8 hours and improve Essence drops from that monster.",
+    "description": "Selected Creature Focus has increased essence drop rate.",
     "maxRank": 5,
     "costsByRank": [25, 75, 150, 300, 600],
     "effects": [
@@ -70,8 +70,8 @@
         "valuesByRank": [500, 1000, 1500, 2000, 2500]
       }
     ],
-    "appliesTo": ["Focused monster Essence drops"],
-    "doesNotApplyTo": ["Other monsters", "Guaranteed rewards", "Shop purchases"],
+    "appliesTo": ["Focused Creature Essence drops"],
+    "doesNotApplyTo": ["Other creatures", "Guaranteed rewards", "Shop purchases"],
     "enabled": true,
     "sortOrder": 40
   },
@@ -166,7 +166,7 @@
       }
     ],
     "appliesTo": ["Rare gathering loot weights"],
-    "doesNotApplyTo": ["Normal gathering quantity", "Monster loot rarity", "Shop purchases"],
+    "doesNotApplyTo": ["Normal gathering quantity", "Creature loot rarity", "Shop purchases"],
     "enabled": true,
     "sortOrder": 230
   },
