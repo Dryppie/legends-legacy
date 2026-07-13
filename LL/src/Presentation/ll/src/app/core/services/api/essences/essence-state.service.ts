@@ -68,7 +68,7 @@ export class EssenceStateService {
     if (!archive || !this.canChangeEssenceFocus()) return null;
 
     const hasSelectableTarget = archive.creatures.some(
-      (creature) => !!creature.essenceDefinitionId && !creature.isEssenceFocus,
+      (creature) => creature.essences.length > 0 && !creature.isEssenceFocus,
     );
     if (!hasSelectableTarget) return null;
 
@@ -178,6 +178,17 @@ export class EssenceStateService {
     return new Set(essenceIds).size !== essenceIds.length;
   });
 
+  readonly hasDuplicateDraftCreatureSources = computed(() => {
+    const creatureIds = this._draftSlots()
+      .filter((playerEssenceId): playerEssenceId is string => !!playerEssenceId)
+      .map((playerEssenceId) =>
+        this.getCreatureIdForPlayerEssence(playerEssenceId),
+      )
+      .filter((creatureId): creatureId is string => !!creatureId);
+
+    return new Set(creatureIds).size !== creatureIds.length;
+  });
+
   readonly canSaveDraft = computed(() => {
     const name = this._draftLoadoutName().trim();
     const loadouts = this._loadouts();
@@ -187,7 +198,10 @@ export class EssenceStateService {
     const canCreate = loadouts.loadouts.length < loadouts.limit;
 
     return (
-      !!name && !this.hasDuplicateDraftEssences() && (!!selectedId || canCreate)
+      !!name &&
+      !this.hasDuplicateDraftEssences() &&
+      !this.hasDuplicateDraftCreatureSources() &&
+      (!!selectedId || canCreate)
     );
   });
 
@@ -328,7 +342,7 @@ export class EssenceStateService {
 
   setEssenceFocus(creatureId: string | null): void {
     if (creatureId && !this.canChangeEssenceFocus()) {
-      this._error.set('Essence Focus can be changed once every 24 hours.');
+      this._error.set('Essence Focus can be changed once every 8 hours.');
       return;
     }
 
@@ -411,18 +425,40 @@ export class EssenceStateService {
     const nextPlayerEssenceId = playerEssenceId || null;
 
     if (nextPlayerEssenceId) {
-      const previousSlotIndex = slots.findIndex(
-        (slotPlayerEssenceId, index) =>
-          index !== slotIndex && slotPlayerEssenceId === nextPlayerEssenceId,
-      );
-
-      if (previousSlotIndex >= 0) {
-        slots[previousSlotIndex] = null;
-      }
+      const nextCreatureId =
+        this.getCreatureIdForPlayerEssence(nextPlayerEssenceId);
+      slots.forEach((slotPlayerEssenceId, index) => {
+        if (
+          index !== slotIndex &&
+          (slotPlayerEssenceId === nextPlayerEssenceId ||
+            (!!nextCreatureId &&
+              !!slotPlayerEssenceId &&
+              this.getCreatureIdForPlayerEssence(slotPlayerEssenceId) ===
+                nextCreatureId))
+        ) {
+          slots[index] = null;
+        }
+      });
     }
 
     slots[slotIndex] = nextPlayerEssenceId;
     this._draftSlots.set(slots);
+  }
+
+  canAssignEssenceToDraftSlot(
+    slotIndex: number,
+    playerEssenceId: string,
+  ): boolean {
+    if (this._draftSlots()[slotIndex] === playerEssenceId) return true;
+
+    const creatureId = this.getCreatureIdForPlayerEssence(playerEssenceId);
+    return this._draftSlots().every((assignedId, index) =>
+      index === slotIndex ||
+      !assignedId ||
+      (assignedId !== playerEssenceId &&
+        (!creatureId ||
+          this.getCreatureIdForPlayerEssence(assignedId) !== creatureId)),
+    );
   }
 
   saveDraftLoadout(): void {
@@ -562,6 +598,21 @@ export class EssenceStateService {
       );
       return slot?.playerEssenceId ?? null;
     });
+  }
+
+  private getCreatureIdForPlayerEssence(playerEssenceId: string): string | null {
+    const definitionId = this._archive()?.essences.find(
+      (essence) => essence.id === playerEssenceId,
+    )?.essenceDefinitionId;
+    if (!definitionId) return null;
+
+    return (
+      this._creatureArchive()?.creatures.find((creature) =>
+        creature.essences.some(
+          (essence) => essence.essenceDefinitionId === definitionId,
+        ),
+      )?.creatureId ?? null
+    );
   }
 
   private getEssenceDefinitionId(inventoryItem: InventoryItem): string {

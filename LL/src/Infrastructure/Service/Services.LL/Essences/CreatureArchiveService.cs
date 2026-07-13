@@ -2,6 +2,7 @@ using Application.Common.Interfaces;
 using Application.Interfaces.Services.LL.Essences;
 using Domain.Models.Entities.Creatures;
 using Domain.Models.Essences;
+using Domain.Models.Essences.Definitions;
 using Microsoft.EntityFrameworkCore;
 
 namespace Services.LL.Essences;
@@ -12,15 +13,18 @@ public sealed class CreatureArchiveService : ICreatureArchiveService
 
     private readonly IDbContext _dbContext;
     private readonly IEssenceDefinitionRepository _essenceDefinitions;
+    private readonly ICreatureEssenceLootTableRepository _creatureEssenceLootTables;
     private readonly IEssenceCodexCollectionService _codexCollections;
 
     public CreatureArchiveService(
         IDbContext dbContext,
         IEssenceDefinitionRepository essenceDefinitions,
+        ICreatureEssenceLootTableRepository creatureEssenceLootTables,
         IEssenceCodexCollectionService codexCollections)
     {
         _dbContext = dbContext;
         _essenceDefinitions = essenceDefinitions;
+        _creatureEssenceLootTables = creatureEssenceLootTables;
         _codexCollections = codexCollections;
     }
 
@@ -111,7 +115,14 @@ public sealed class CreatureArchiveService : ICreatureArchiveService
         var creatures = entries
             .Select(entry =>
             {
-                var definition = _essenceDefinitions.GetByMonsterId(entry.CreatureDefinitionId);
+                var definitions = (_creatureEssenceLootTables
+                    .GetByCreatureId(entry.CreatureDefinitionId)?
+                    .Variants
+                    .Select(x => _essenceDefinitions.GetById(x.EssenceDefinitionId))
+                    .Where(x => x is not null)
+                    .Cast<EssenceDefinition>()
+                    .DistinctBy(x => x.Id, StringComparer.OrdinalIgnoreCase)
+                    .ToList()) ?? [];
                 return new CreatureArchiveEntry(
                     entry.CreatureDefinitionId,
                     string.IsNullOrWhiteSpace(entry.CreatureName)
@@ -124,10 +135,14 @@ public sealed class CreatureArchiveService : ICreatureArchiveService
                     entry.EssenceFocusSetAtUtc,
                     GetTotalEssenceFocusDurationSeconds(entry, now),
                     GetCurrentEssenceFocusDurationSeconds(entry, now),
-                    definition?.Id,
-                    definition?.Name,
-                    definition is not null && absorbedIds.Contains(definition.Id),
-                    definition?.Tags ?? []);
+                    definitions
+                        .Select(definition => new CreatureArchiveEssenceEntry(
+                            definition.Id,
+                            definition.Name,
+                            absorbedIds.Contains(definition.Id),
+                            definition.Tags))
+                        .ToList(),
+                    definitions.SelectMany(x => x.Tags).Distinct(StringComparer.OrdinalIgnoreCase).ToList());
             })
             .ToList();
 
@@ -150,7 +165,7 @@ public sealed class CreatureArchiveService : ICreatureArchiveService
 
         var focusedEntry = entries.FirstOrDefault(entry =>
             entry.CreatureDefinitionId.Equals(creatureId, StringComparison.OrdinalIgnoreCase));
-        if (focusedEntry is null || _essenceDefinitions.GetByMonsterId(focusedEntry.CreatureDefinitionId) is null)
+        if (focusedEntry is null || _creatureEssenceLootTables.GetByCreatureId(focusedEntry.CreatureDefinitionId) is null)
         {
             return await GetCreatureArchiveAsync(characterId, cancellationToken);
         }

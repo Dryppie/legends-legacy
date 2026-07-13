@@ -73,7 +73,7 @@ public interface IDbContext
     DbSet<PlayerEssence> PlayerEssences { get; }
     DbSet<EssenceLoadout> EssenceLoadouts { get; }
     DbSet<EssenceLoadoutSlot> EssenceLoadoutSlots { get; }
-    DbSet<CreatureResonance> MonsterResonances { get; }
+    DbSet<CreatureResonance> CreatureResonances { get; }
     DbSet<CharacterCreatureArchiveEntry> CharacterCreatureArchiveEntries { get; }
 
     DbSet<DungeonRun> DungeonRuns { get; }

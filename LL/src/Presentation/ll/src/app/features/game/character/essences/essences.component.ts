@@ -130,7 +130,7 @@ export class EssencesComponent implements OnInit {
       [
         creature.name,
         creature.creatureId,
-        creature.essenceName ?? '',
+        ...creature.essences.map((essence) => essence.name),
         ...creature.tags,
       ]
         .join(' ')
@@ -214,16 +214,15 @@ export class EssencesComponent implements OnInit {
   public draftSlotDropdownOptions(
     slotIndex: number,
   ): DropdownOption<string | null>[] {
-    const draftSlots = this.essenceState.draftSlots();
-
     return [
       { label: 'Empty', value: null },
       ...this.essenceState.essenceOptions().map((essence) => ({
         label: essence.name,
         value: essence.id,
-        disabled:
-          draftSlots.includes(essence.id) &&
-          draftSlots[slotIndex] !== essence.id,
+        disabled: !this.essenceState.canAssignEssenceToDraftSlot(
+          slotIndex,
+          essence.id,
+        ),
       })),
     ];
   }
@@ -260,6 +259,9 @@ export class EssencesComponent implements OnInit {
     if (this.essenceState.hasDuplicateDraftEssences()) {
       return 'Each Essence can only be assigned once.';
     }
+    if (this.essenceState.hasDuplicateDraftCreatureSources()) {
+      return 'Only one Essence from each creature can be active.';
+    }
     if (
       !this.essenceState.selectedLoadoutId() &&
       (this.essenceState.loadouts()?.loadouts?.length ?? 0) >=
@@ -279,7 +281,7 @@ export class EssencesComponent implements OnInit {
   }
 
   public setEssenceFocus(creature: CreatureArchiveEntryDto): void {
-    if (!creature.essenceDefinitionId) return;
+    if (creature.essences.length === 0) return;
     if (creature.isEssenceFocus || !this.essenceState.canChangeEssenceFocus()) {
       return;
     }
@@ -289,7 +291,7 @@ export class EssencesComponent implements OnInit {
 
   public canSetEssenceFocus(creature: CreatureArchiveEntryDto): boolean {
     return (
-      !!creature.essenceDefinitionId &&
+      creature.essences.length > 0 &&
       !creature.isEssenceFocus &&
       this.essenceState.canChangeEssenceFocus()
     );
@@ -299,13 +301,13 @@ export class EssencesComponent implements OnInit {
     const archive = this.essenceState.creatureArchive();
     if (!archive) return 'Loading focus status.';
     if (this.essenceState.canChangeEssenceFocus()) {
-      return 'You can choose a new target now. After setting one, Focus is locked for 24 hours.';
+      return 'You can choose a new target now. After setting one, Focus is locked for 8 hours.';
     }
     if (archive.essenceFocusAvailableAtUtc) {
       return `New target available ${new Date(archive.essenceFocusAvailableAtUtc).toLocaleString()}.`;
     }
 
-    return 'Focus is locked for 24 hours after choosing a target.';
+    return 'Focus is locked for 8 hours after choosing a target.';
   }
 
   public totalFocusDurationLabel(creature: CreatureArchiveEntryDto): string {

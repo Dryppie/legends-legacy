@@ -4,7 +4,6 @@ import { FormsModule } from '@angular/forms';
 import { finalize } from 'rxjs';
 import { EssenceCatalogService } from '../../core/services/api/essences/essence-catalog.service';
 import {
-  EssenceCatalogAbility,
   EssenceCatalogArea,
   EssenceCatalogEffect,
   EssenceCatalogMonster,
@@ -71,14 +70,6 @@ export class EssenceCatalogComponent implements OnInit {
     return this.selectedArea?.monsters.find((monster) => monster.id === this.selectedMonsterId) ?? null;
   }
 
-  get selectedActiveAbility(): EssenceCatalogAbility | null {
-    return this.selectedMonster?.essence?.activeAbility ?? null;
-  }
-
-  get selectedPassiveAbility(): EssenceCatalogAbility | null {
-    return this.selectedMonster?.essence?.passiveAbility ?? null;
-  }
-
   trackRegion(_: number, region: EssenceCatalogRegion): string {
     return region.id;
   }
@@ -97,10 +88,6 @@ export class EssenceCatalogComponent implements OnInit {
 
   trackEffect(_: number, effect: EssenceCatalogEffect): string {
     return effect.id;
-  }
-
-  formatChance(value: number): string {
-    return `${(value * 100).toFixed(2)}%`;
   }
 
   formatEffectValue(effect: EssenceCatalogEffect): string {

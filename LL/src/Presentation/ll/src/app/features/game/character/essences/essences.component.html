@@ -645,7 +645,7 @@
           <p class="mt-2 max-w-3xl text-xs text-zinc-500">
             Focus marks one creature as your current Essence target. Bonuses
             that mention focused monsters only affect Essence drops from this
-            creature. After choosing a target, you must wait 24 hours before
+            creature. After choosing a target, you must wait 8 hours before
             choosing a different one.
           </p>
           <p class="mt-2 text-xs text-primary">
@@ -715,19 +715,20 @@
         </div>
 
         <div class="mt-3 rounded border border-light_gray/60 p-2 text-sm">
-          <div class="flex items-center justify-between gap-3">
-            <span class="text-zinc-400">Essence</span>
-            <span
-              class="text-right"
-              [ngClass]="
-                creature.isEssenceAbsorbed ? 'text-primary' : 'text-zinc-300'
-              "
-            >
-              {{ creature.essenceName || "Unknown" }}
+          <div class="mb-1 text-zinc-400">Essence variants</div>
+          <div
+            *ngFor="let essence of creature.essences"
+            class="flex items-center justify-between gap-3 py-1"
+          >
+            <span [ngClass]="essence.isAbsorbed ? 'text-primary' : 'text-zinc-300'">
+              {{ essence.name }}
+            </span>
+            <span class="text-xs text-zinc-500">
+              {{ essence.isAbsorbed ? "Archived" : "Not archived" }}
             </span>
           </div>
-          <p class="mt-1 text-xs text-zinc-500">
-            {{ creature.isEssenceAbsorbed ? "Archived" : "Not archived" }}
+          <p *ngIf="creature.essences.length === 0" class="text-xs text-zinc-500">
+            No Essence variants
           </p>
         </div>
 

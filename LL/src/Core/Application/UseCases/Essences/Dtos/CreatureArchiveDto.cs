@@ -31,18 +31,33 @@ public sealed record CreatureArchiveEntryDto(
     DateTimeOffset? EssenceFocusSetAtUtc,
     long EssenceFocusTotalDurationSeconds,
     long CurrentEssenceFocusDurationSeconds,
-    string? EssenceDefinitionId,
-    string? EssenceName,
-    bool IsEssenceAbsorbed,
+    IReadOnlyList<CreatureArchiveEssenceEntryDto> Essences,
     IReadOnlyList<string> Tags) : IMapFrom<CreatureArchiveEntry>
 {
     public CreatureArchiveEntryDto()
-        : this(string.Empty, string.Empty, 0, default, default, false, null, 0, 0, null, null, false, [])
+        : this(string.Empty, string.Empty, 0, default, default, false, null, 0, 0, [], [])
     {
     }
 
     public void Mapping(Profile profile)
     {
         profile.CreateMap<CreatureArchiveEntry, CreatureArchiveEntryDto>();
+    }
+}
+
+public sealed record CreatureArchiveEssenceEntryDto(
+    string EssenceDefinitionId,
+    string Name,
+    bool IsAbsorbed,
+    IReadOnlyList<string> Tags) : IMapFrom<CreatureArchiveEssenceEntry>
+{
+    public CreatureArchiveEssenceEntryDto()
+        : this(string.Empty, string.Empty, false, [])
+    {
+    }
+
+    public void Mapping(Profile profile)
+    {
+        profile.CreateMap<CreatureArchiveEssenceEntry, CreatureArchiveEssenceEntryDto>();
     }
 }

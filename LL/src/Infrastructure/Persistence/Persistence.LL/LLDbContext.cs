@@ -185,7 +185,7 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : DbContext(opti
     public DbSet<PlayerEssence> PlayerEssences => Set<PlayerEssence>();
     public DbSet<EssenceLoadout> EssenceLoadouts => Set<EssenceLoadout>();
     public DbSet<EssenceLoadoutSlot> EssenceLoadoutSlots => Set<EssenceLoadoutSlot>();
-    public DbSet<CreatureResonance> MonsterResonances => Set<CreatureResonance>();
+    public DbSet<CreatureResonance> CreatureResonances => Set<CreatureResonance>();
     public DbSet<CharacterCreatureArchiveEntry> CharacterCreatureArchiveEntries => Set<CharacterCreatureArchiveEntry>();
 
     public DbSet<DungeonRun> DungeonRuns => Set<DungeonRun>();

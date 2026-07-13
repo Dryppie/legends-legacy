@@ -66,7 +66,10 @@ public sealed class AbilityCatalogCoverageAnalyzer : IAbilityCatalogCoverageAnal
         EssenceDefinition essence,
         AbilityCatalog catalog)
     {
-        var abilityIds = catalog.AbilityIdsByOwningEssence.GetValueOrDefault(essence.Id) ?? [];
+        var abilityIds = new[] { essence.ActiveAbilityId, essence.PassiveAbilityId }
+            .Where(id => !string.IsNullOrWhiteSpace(id) && catalog.AbilitiesById.ContainsKey(id))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
         if (abilityIds.Count == 0)
         {
             return new AbilityCatalogRuntimeLoadoutCheck(
@@ -76,7 +79,7 @@ public sealed class AbilityCatalogCoverageAnalyzer : IAbilityCatalogCoverageAnal
                 Outcome: null,
                 Duration: 0,
                 EventCount: 0,
-                Failure: $"No abilities are owned by essence '{essence.Id}'.");
+                Failure: $"No referenced abilities resolve for essence '{essence.Id}'.");
         }
 
         try
@@ -150,7 +153,7 @@ public sealed class AbilityCatalogCoverageAnalyzer : IAbilityCatalogCoverageAnal
             && catalog.AbilitiesById.TryGetValue(referencedAbilityId, out var current)
                 ? current
                 : null;
-        var selected = owned.Count == 1 ? owned[0] : currentReference;
+        var selected = currentReference ?? (owned.Count == 1 ? owned[0] : null);
         var kindMatches = selected?.Kind == expectedKind;
 
         slots.Add(new AbilityCatalogSlotCoverage(
@@ -158,17 +161,28 @@ public sealed class AbilityCatalogCoverageAnalyzer : IAbilityCatalogCoverageAnal
             slot,
             referencedAbilityId,
             selected?.Id,
-            owned.Count > 0,
+            selected is not null,
             currentReference is not null,
             kindMatches));
 
-        if (owned.Count == 0)
+        if (currentReference is null)
         {
-            gaps.Add(new AbilityCatalogCoverageGap(
-                essence.Id,
-                slot,
-                referencedAbilityId,
-                $"No {expectedKind} ability is owned by essence '{essence.Id}'."));
+            if (owned.Count == 0)
+            {
+                gaps.Add(new AbilityCatalogCoverageGap(
+                    essence.Id,
+                    slot,
+                    referencedAbilityId,
+                    $"No {expectedKind} ability resolves for essence '{essence.Id}'."));
+            }
+            else if (owned.Count > 1)
+            {
+                gaps.Add(new AbilityCatalogCoverageGap(
+                    essence.Id,
+                    slot,
+                    referencedAbilityId,
+                    $"Multiple {expectedKind} abilities are owned by essence '{essence.Id}': {string.Join(", ", owned.Select(x => x.Id))}."));
+            }
             return;
         }
 
@@ -181,13 +195,13 @@ public sealed class AbilityCatalogCoverageAnalyzer : IAbilityCatalogCoverageAnal
                 $"Multiple {expectedKind} abilities are owned by essence '{essence.Id}': {string.Join(", ", owned.Select(x => x.Id))}."));
         }
 
-        foreach (var ability in owned.Where(x => x.Kind != expectedKind))
+        if (!kindMatches)
         {
             gaps.Add(new AbilityCatalogCoverageGap(
                 essence.Id,
                 slot,
                 referencedAbilityId,
-                $"Ability '{ability.Id}' has kind '{ability.Kind}' but slot expects '{expectedKind}'."));
+                $"Ability '{selected!.Id}' has kind '{selected.Kind}' but slot expects '{expectedKind}'."));
         }
     }
 }

@@ -8,6 +8,5 @@ public interface IEssenceDefinitionRepository
     IReadOnlyList<EssenceDefinition> GetAll();
     IReadOnlyList<AbilitySpec> GetAllAbilities();
     EssenceDefinition? GetById(string essenceDefinitionId);
-    EssenceDefinition? GetByMonsterId(string monsterId);
     AbilitySpec? GetAbilityById(string abilityId);
 }

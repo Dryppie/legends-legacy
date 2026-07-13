@@ -67,10 +67,11 @@ public sealed class CreatureArchiveServiceTests
         var archive = await service.GetCreatureArchiveAsync(characterId, CancellationToken.None);
 
         var creature = Assert.Single(archive.Creatures);
+        var essence = Assert.Single(creature.Essences);
         Assert.Equal("Cave Bat", creature.Name);
-        Assert.Equal("essence.cave_bat", creature.EssenceDefinitionId);
-        Assert.Equal("Cave Bat Essence", creature.EssenceName);
-        Assert.True(creature.IsEssenceAbsorbed);
+        Assert.Equal("essence.cave_bat", essence.EssenceDefinitionId);
+        Assert.Equal("Cave Bat Essence", essence.Name);
+        Assert.True(essence.IsAbsorbed);
         Assert.False(creature.IsEssenceFocus);
         Assert.Equal(0, creature.EssenceFocusTotalDurationSeconds);
         Assert.Equal(0, creature.CurrentEssenceFocusDurationSeconds);
@@ -333,7 +334,11 @@ public sealed class CreatureArchiveServiceTests
     private static CreatureArchiveService CreateService(LLDbContext db)
     {
         var definitions = new FakeDefinitionRepository();
-        return new(db, definitions, CreateCodexCollectionService(db, definitions));
+        return new(
+            db,
+            definitions,
+            new FakeCreatureEssenceLootTableRepository(definitions),
+            CreateCodexCollectionService(db, definitions));
     }
 
     private static EssenceCodexCollectionService CreateCodexCollectionService(
@@ -395,10 +400,6 @@ public sealed class CreatureArchiveServiceTests
             _definitions.FirstOrDefault(definition =>
                 definition.Id.Equals(essenceDefinitionId, StringComparison.OrdinalIgnoreCase));
 
-        public EssenceDefinition? GetByMonsterId(string monsterId) =>
-            _definitions.FirstOrDefault(definition =>
-                definition.SourceMonsterId.Equals(monsterId, StringComparison.OrdinalIgnoreCase));
-
         public AbilitySpec? GetAbilityById(string abilityId) => null;
 
         public IReadOnlyList<AbilitySpec> GetAllAbilities() => [];
@@ -416,5 +417,37 @@ public sealed class CreatureArchiveServiceTests
                 NativeRegion = nativeRegion,
                 Tags = ["Species.Beast"]
             };
+    }
+
+    private sealed class FakeCreatureEssenceLootTableRepository(
+        IEssenceDefinitionRepository definitions) : ICreatureEssenceLootTableRepository
+    {
+        private readonly IReadOnlyList<CreatureEssenceLootTableDefinition> _tables = definitions
+            .GetAll()
+            .GroupBy(definition => definition.SourceMonsterId, StringComparer.OrdinalIgnoreCase)
+            .Select(group => new CreatureEssenceLootTableDefinition
+            {
+                CreatureId = group.Key,
+                BaseDropChance = 0.5,
+                PassiveAbilityId = group.First().PassiveAbilityId,
+                Variants = group
+                    .Select(definition => new CreatureEssenceVariantDefinition
+                    {
+                        EssenceDefinitionId = definition.Id,
+                        ActiveAbilityId = definition.ActiveAbilityId,
+                        Weight = 1
+                    })
+                    .ToList()
+            })
+            .ToList();
+
+        public IReadOnlyList<CreatureEssenceLootTableDefinition> GetAll() => _tables;
+
+        public CreatureEssenceLootTableDefinition? GetByCreatureId(string creatureId) =>
+            _tables.FirstOrDefault(x => x.CreatureId.Equals(creatureId, StringComparison.OrdinalIgnoreCase));
+
+        public CreatureEssenceLootTableDefinition? GetByEssenceDefinitionId(string essenceDefinitionId) =>
+            _tables.FirstOrDefault(table => table.Variants.Any(variant =>
+                variant.EssenceDefinitionId.Equals(essenceDefinitionId, StringComparison.OrdinalIgnoreCase)));
     }
 }

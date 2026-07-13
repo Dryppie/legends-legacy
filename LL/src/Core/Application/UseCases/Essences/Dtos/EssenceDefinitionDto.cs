@@ -1,3 +1,6 @@
+using Application.Common.Mappings;
+using AutoMapper;
+using Domain.Models.Essences.Definitions;
 using Domain.Models.Items;
 
 namespace Application.UseCases.Essences.Dtos;
@@ -12,5 +15,33 @@ public sealed record EssenceDefinitionDto(
     IReadOnlyList<EssenceAttributeBonusDto> AttributeBonuses,
     EssenceAbilityDto ActiveAbility,
     EssenceAbilityDto PassiveAbility,
-    EssenceEvolutionDto Evolution,
-    EssenceDropDto Drop);
+    EssenceEvolutionDto Evolution) : IMapFrom<EssenceDefinition>
+{
+    public EssenceDefinitionDto()
+        : this(
+            string.Empty,
+            string.Empty,
+            string.Empty,
+            string.Empty,
+            default,
+            new Dictionary<string, IReadOnlyList<string>>(),
+            [],
+            EmptyAbility(),
+            EmptyAbility(),
+            new EssenceEvolutionDto(string.Empty, string.Empty, string.Empty, 0, string.Empty, []))
+    {
+    }
+
+    public void Mapping(Profile profile)
+    {
+        profile.CreateMap<EssenceDefinition, EssenceDefinitionDto>()
+            .ForMember(destination => destination.TagsByCategory, options =>
+                options.MapFrom(source => GroupTags(source.Tags)));
+    }
+
+    private static EssenceAbilityDto EmptyAbility() =>
+        new(string.Empty, string.Empty, string.Empty, string.Empty, 0, string.Empty, [], []);
+
+    private static IReadOnlyDictionary<string, IReadOnlyList<string>> GroupTags(IEnumerable<string> tags) =>
+        tags.GroupBy(EssenceTagCatalog.GetCategory).ToDictionary(x => x.Key, x => (IReadOnlyList<string>)x.Order().ToList());
+}

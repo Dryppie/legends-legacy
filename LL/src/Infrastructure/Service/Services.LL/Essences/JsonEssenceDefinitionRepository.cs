@@ -49,9 +49,6 @@ public sealed class JsonEssenceDefinitionRepository : IEssenceDefinitionReposito
     public EssenceDefinition? GetById(string essenceDefinitionId) =>
         _definitions.FirstOrDefault(x => x.Id.Equals(essenceDefinitionId, StringComparison.OrdinalIgnoreCase));
 
-    public EssenceDefinition? GetByMonsterId(string monsterId) =>
-        _definitions.FirstOrDefault(x => x.SourceMonsterId.Equals(monsterId, StringComparison.OrdinalIgnoreCase));
-
     public AbilitySpec? GetAbilityById(string abilityId) =>
         _abilities.TryGetValue(abilityId, out var ability) ? ability : null;
 

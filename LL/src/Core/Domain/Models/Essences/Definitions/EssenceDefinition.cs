@@ -21,7 +21,6 @@ public sealed class EssenceDefinition
     public AbilitySpec ActiveAbility { get; set; } = new();
     [JsonIgnore]
     public AbilitySpec PassiveAbility { get; set; } = new();
-    public EssenceDropDefinition Drop { get; set; } = new();
     public EssenceAscensionDefinition Ascension { get; set; } = new();
     public EssenceEvolutionDefinition Evolution { get; set; } = new();
 }

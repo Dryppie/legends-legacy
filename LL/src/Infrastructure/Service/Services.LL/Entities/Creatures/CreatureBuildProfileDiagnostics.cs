@@ -13,16 +13,16 @@ namespace Services.LL.Entities.Creatures;
 public sealed class CreatureBuildProfileDiagnostics : ICreatureBuildProfileDiagnostics
 {
     private readonly ICreatureScaler _creatureScaler;
-    private readonly IEssenceDefinitionRepository _essenceDefinitions;
+    private readonly ICreatureEssenceLootTableRepository _creatureEssenceLootTables;
     private readonly ICreatureRepository _creatures;
 
     public CreatureBuildProfileDiagnostics(
         ICreatureScaler creatureScaler,
-        IEssenceDefinitionRepository essenceDefinitions,
+        ICreatureEssenceLootTableRepository creatureEssenceLootTables,
         ICreatureRepository creatures)
     {
         _creatureScaler = creatureScaler;
-        _essenceDefinitions = essenceDefinitions;
+        _creatureEssenceLootTables = creatureEssenceLootTables;
         _creatures = creatures;
     }
 
@@ -32,7 +32,7 @@ public sealed class CreatureBuildProfileDiagnostics : ICreatureBuildProfileDiagn
         _creatureScaler.ApplyScaling(clone, area);
 
         var sourceMonsterId = CreatureEssenceSource.GetMonsterDefinitionId(clone);
-        var essenceDefinition = _essenceDefinitions.GetByMonsterId(sourceMonsterId);
+        var essenceVariant = _creatureEssenceLootTables.GetByCreatureId(sourceMonsterId)?.Variants.FirstOrDefault();
         var finalAttributes = clone.BaseAttributesDict.ToDictionary(
             kvp => kvp.Key,
             kvp => kvp.Value);
@@ -41,8 +41,8 @@ public sealed class CreatureBuildProfileDiagnostics : ICreatureBuildProfileDiagn
             clone.Id,
             clone.Name,
             sourceMonsterId,
-            essenceDefinition is not null,
-            essenceDefinition?.Id,
+            essenceVariant is not null,
+            essenceVariant?.EssenceDefinitionId,
             Math.Max(1, area.DifficultyTier),
             clone.Archetype,
             clone.DamageProfile,

@@ -71,24 +71,24 @@ public sealed class EssenceRepository : IEssenceRepository
     public async Task AddPlayerEssenceAsync(PlayerEssence essence, CancellationToken cancellationToken) =>
         await _context.PlayerEssences.AddAsync(essence, cancellationToken);
 
-    public async Task<CreatureResonance?> GetMonsterResonanceAsync(Guid characterId, string creatureId, CancellationToken cancellationToken)
+    public async Task<CreatureResonance?> GetCreatureResonanceAsync(Guid characterId, string creatureId, CancellationToken cancellationToken)
     {
-        var trackedResonance = _context.MonsterResonances.Local.FirstOrDefault(x =>
+        var trackedResonance = _context.CreatureResonances.Local.FirstOrDefault(x =>
             x.CharacterId == characterId &&
             x.CreatureId == creatureId);
 
-        return trackedResonance ?? await _context.MonsterResonances
+        return trackedResonance ?? await _context.CreatureResonances
             .FirstOrDefaultAsync(x => x.CharacterId == characterId && x.CreatureId == creatureId, cancellationToken);
     }
 
-    public async Task AddMonsterResonanceAsync(CreatureResonance resonance, CancellationToken cancellationToken)
+    public async Task AddCreatureResonanceAsync(CreatureResonance resonance, CancellationToken cancellationToken)
     {
-        var alreadyTracked = _context.MonsterResonances.Local.Any(x =>
+        var alreadyTracked = _context.CreatureResonances.Local.Any(x =>
             x.CharacterId == resonance.CharacterId &&
             x.CreatureId == resonance.CreatureId);
 
         if (!alreadyTracked)
-            await _context.MonsterResonances.AddAsync(resonance, cancellationToken);
+            await _context.CreatureResonances.AddAsync(resonance, cancellationToken);
     }
 
     public async Task<EssenceLoadout?> GetLoadoutWithSlotsAsync(Guid characterId, Guid loadoutId, CancellationToken cancellationToken) =>

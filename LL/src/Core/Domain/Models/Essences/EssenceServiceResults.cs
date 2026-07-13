@@ -22,9 +22,13 @@ public sealed record CreatureArchiveEntry(
     DateTimeOffset? EssenceFocusSetAtUtc,
     long EssenceFocusTotalDurationSeconds,
     long CurrentEssenceFocusDurationSeconds,
-    string? EssenceDefinitionId,
-    string? EssenceName,
-    bool IsEssenceAbsorbed,
+    IReadOnlyList<CreatureArchiveEssenceEntry> Essences,
+    IReadOnlyList<string> Tags);
+
+public sealed record CreatureArchiveEssenceEntry(
+    string EssenceDefinitionId,
+    string Name,
+    bool IsAbsorbed,
     IReadOnlyList<string> Tags);
 
 public sealed record EssenceCodex(

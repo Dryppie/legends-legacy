@@ -10,15 +10,18 @@ public sealed class EssenceCatalogService : IEssenceCatalogService
 {
     private readonly IItemBaseRepository _itemBases;
     private readonly IEssenceDefinitionRepository _essenceDefinitions;
+    private readonly ICreatureEssenceLootTableRepository _creatureEssenceLootTables;
     private readonly IAbilityCatalogProvider _catalogProvider;
 
     public EssenceCatalogService(
         IItemBaseRepository itemBases,
         IEssenceDefinitionRepository essenceDefinitions,
+        ICreatureEssenceLootTableRepository creatureEssenceLootTables,
         IAbilityCatalogProvider catalogProvider)
     {
         _itemBases = itemBases;
         _essenceDefinitions = essenceDefinitions;
+        _creatureEssenceLootTables = creatureEssenceLootTables;
         _catalogProvider = catalogProvider;
     }
 
@@ -26,14 +29,6 @@ public sealed class EssenceCatalogService : IEssenceCatalogService
     {
         var catalog = _catalogProvider.GetCatalog();
         var itemIdByEssenceId = await _itemBases.GetEssenceItemBaseIdsByDefinitionIdAsync(cancellationToken);
-        var essenceByMonsterId = _essenceDefinitions.GetAll()
-            .Where(x => !string.IsNullOrWhiteSpace(x.SourceMonsterId))
-            .GroupBy(x => x.SourceMonsterId, StringComparer.OrdinalIgnoreCase)
-            .ToDictionary(
-                x => x.Key,
-                x => x.First(),
-                StringComparer.OrdinalIgnoreCase);
-
         var areas = BuildRegionOneSources()
             .GroupBy(x => new { x.AreaId, x.AreaName, x.SourceType, x.Tier })
             .Select(group => new EssenceCatalogArea(
@@ -42,7 +37,7 @@ public sealed class EssenceCatalogService : IEssenceCatalogService
                 group.Key.SourceType,
                 group.Key.Tier,
                 group
-                    .Select(entry => BuildMonster(entry, essenceByMonsterId, itemIdByEssenceId, catalog))
+                    .Select(entry => BuildMonster(entry, itemIdByEssenceId, catalog))
                     .OrderBy(x => x.Name)
                     .ToList()))
             .OrderBy(x => GetSourceSortOrder(x.SourceType))
@@ -56,14 +51,19 @@ public sealed class EssenceCatalogService : IEssenceCatalogService
         ]);
     }
 
-    private static EssenceCatalogMonster BuildMonster(
+    private EssenceCatalogMonster BuildMonster(
         EssenceCatalogSourceEntry entry,
-        IReadOnlyDictionary<string, EssenceDefinition> essenceByMonsterId,
         IReadOnlyDictionary<string, string> itemIdByEssenceId,
         AbilityCatalog catalog)
     {
         var monsterId = $"monster.{entry.CreatureKey}";
-        essenceByMonsterId.TryGetValue(monsterId, out var essence);
+        var essences = (_creatureEssenceLootTables.GetByCreatureId(monsterId)?.Variants ?? [])
+            .Select(x => _essenceDefinitions.GetById(x.EssenceDefinitionId))
+            .Where(x => x is not null)
+            .Cast<EssenceDefinition>()
+            .DistinctBy(x => x.Id, StringComparer.OrdinalIgnoreCase)
+            .Select(essence => BuildEssence(essence, itemIdByEssenceId, catalog))
+            .ToList();
 
         return new EssenceCatalogMonster(
             monsterId,
@@ -72,9 +72,7 @@ public sealed class EssenceCatalogService : IEssenceCatalogService
             entry.SourceType,
             entry.AreaName,
             entry.Tier,
-            essence is null
-                ? null
-                : BuildEssence(essence, itemIdByEssenceId, catalog));
+            essences);
     }
 
     private static EssenceCatalogEssence BuildEssence(
@@ -96,11 +94,6 @@ public sealed class EssenceCatalogService : IEssenceCatalogService
             essence.AttributeBonuses
                 .Select(x => new EssenceCatalogAttributeBonus(x.Attribute.ToString(), x.BaseValue))
                 .ToList(),
-            new EssenceCatalogDrop(
-                essence.Drop.BaseDropChance,
-                essence.Drop.ResonanceGainPerFailedEligibleKill,
-                essence.Drop.DropChanceBonusPerResonance,
-                essence.Drop.MaxResonanceBonus),
             activeAbility is null ? null : BuildAbility(activeAbility),
             passiveAbility is null ? null : BuildAbility(passiveAbility));
     }

@@ -187,6 +187,12 @@ public static class DependencyInjection
                 contentRootPath,
                 sp.GetRequiredService<JsonSerializerOptions>(),
                 sp.GetRequiredService<IEssenceDefinitionValidator>()));
+        services.AddSingleton<ICreatureEssenceLootTableRepository>(sp =>
+            new JsonCreatureEssenceLootTableRepository(
+                config,
+                contentRootPath,
+                sp.GetRequiredService<JsonSerializerOptions>(),
+                sp.GetRequiredService<IEssenceDefinitionRepository>()));
         services.AddSingleton<IEssenceCodexCollectionDefinitionProvider>(sp =>
             new JsonEssenceCodexCollectionDefinitionProvider(
                 config,

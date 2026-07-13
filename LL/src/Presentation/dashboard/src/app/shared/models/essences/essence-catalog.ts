@@ -23,7 +23,7 @@ export interface EssenceCatalogMonster {
   sourceType: string;
   sourceName: string;
   tier: string;
-  essence: EssenceCatalogEssence | null;
+  essences: EssenceCatalogEssence[];
 }
 
 export interface EssenceCatalogEssence {
@@ -34,7 +34,6 @@ export interface EssenceCatalogEssence {
   itemId: string | null;
   tags: string[];
   attributeBonuses: EssenceCatalogAttributeBonus[];
-  drop: EssenceCatalogDrop;
   activeAbility: EssenceCatalogAbility | null;
   passiveAbility: EssenceCatalogAbility | null;
 }
@@ -42,13 +41,6 @@ export interface EssenceCatalogEssence {
 export interface EssenceCatalogAttributeBonus {
   attribute: string;
   baseValue: number;
-}
-
-export interface EssenceCatalogDrop {
-  baseDropChance: number;
-  resonanceGainPerFailedEligibleKill: number;
-  dropChanceBonusPerResonance: number;
-  maxResonanceBonus: number;
 }
 
 export interface EssenceCatalogAbility {

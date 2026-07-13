@@ -13,18 +13,6 @@ namespace Services.LL.Soulstones;
 
 public sealed class SoulstoneUpgradeService : ISoulstoneUpgradeService
 {
-    private static readonly IReadOnlySet<string> LegacyUpgradeIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
-    {
-        "combat.essence.drop.rate",
-        "combat.double.exp.chance",
-        "gathering.double.drop.chance",
-        "gathering.double.exp.chance",
-        "crafting.double.item.exp.chance",
-        "crafting.negative.outcome",
-        "misc.soulstone.drop.rate",
-        "misc.soulstone.double.drop.chance"
-    };
-
     private readonly ICharacterService _characterService;
     private readonly SoulstoneUpgradeDefinitionProvider _provider;
     private readonly IDbContext _dbContext;
@@ -61,9 +49,9 @@ public sealed class SoulstoneUpgradeService : ISoulstoneUpgradeService
         }
 
         var defs = _provider.All;
-        if (!defs.TryGetValue(upgradeId, out var def) || LegacyUpgradeIds.Contains(upgradeId))
+        if (!defs.TryGetValue(upgradeId, out var def))
         {
-            return Response<SoulstoneUpgradeMutationResult>.Fail("This legacy Soulstone upgrade is no longer purchasable. Reset your Soulstones to refund old ranks.");
+            return Response<SoulstoneUpgradeMutationResult>.Fail("Soulstone constellation upgrade was not found.");
         }
 
         if (!def.Enabled)
@@ -162,7 +150,6 @@ public sealed class SoulstoneUpgradeService : ISoulstoneUpgradeService
     private List<SoulstoneUpgradeView> BuildViews(Character character)
     {
         var levels = character.CharacterSoulstoneUpgrades
-            .Where(u => !LegacyUpgradeIds.Contains(u.SoulstoneUpgradeDefinitionId))
             .GroupBy(u => u.SoulstoneUpgradeDefinitionId, StringComparer.OrdinalIgnoreCase)
             .ToDictionary(g => g.Key, g => g.Max(x => x.Level), StringComparer.OrdinalIgnoreCase);
 
@@ -230,23 +217,7 @@ public sealed class SoulstoneUpgradeService : ISoulstoneUpgradeService
             return def.CostsByRank.Take(Math.Min(rank, def.MaxRank)).Sum();
         }
 
-        return GetLegacyRefund(upgrade.SoulstoneUpgradeDefinitionId, rank);
-    }
-
-    private static int GetLegacyRefund(string upgradeId, int level)
-    {
-        if (!LegacyUpgradeIds.Contains(upgradeId))
-        {
-            return 0;
-        }
-
-        var cappedCost = upgradeId.StartsWith("misc.soulstone.", StringComparison.OrdinalIgnoreCase);
-        if (!cappedCost || level <= 50)
-        {
-            return level * (level + 1) / 2;
-        }
-
-        return 1275 + ((level - 50) * 50);
+        return 0;
     }
 
     private static string? GetMissingRequirement(SoulstoneUpgradeDefinition def, Character character)

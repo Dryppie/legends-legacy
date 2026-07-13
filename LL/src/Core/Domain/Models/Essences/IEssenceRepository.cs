@@ -14,8 +14,8 @@ public interface IEssenceRepository
     Task<bool> HasPlayerEssenceAsync(Guid characterId, string essenceDefinitionId, CancellationToken cancellationToken);
     Task<int> CountOwnedPlayerEssencesAsync(Guid characterId, IReadOnlyCollection<Guid> playerEssenceIds, CancellationToken cancellationToken);
     Task AddPlayerEssenceAsync(PlayerEssence essence, CancellationToken cancellationToken);
-    Task<CreatureResonance?> GetMonsterResonanceAsync(Guid characterId, string creatureId, CancellationToken cancellationToken);
-    Task AddMonsterResonanceAsync(CreatureResonance resonance, CancellationToken cancellationToken);
+    Task<CreatureResonance?> GetCreatureResonanceAsync(Guid characterId, string creatureId, CancellationToken cancellationToken);
+    Task AddCreatureResonanceAsync(CreatureResonance resonance, CancellationToken cancellationToken);
 
     Task<EssenceLoadout?> GetLoadoutWithSlotsAsync(Guid characterId, Guid loadoutId, CancellationToken cancellationToken);
     Task<List<EssenceLoadout>> GetLoadoutsWithSlotsAsync(Guid characterId, CancellationToken cancellationToken);

@@ -17,6 +17,7 @@ public class CombatEntity
     public string Name { get; set; } = string.Empty;
     public string ImagePath { get; set; } = string.Empty;
     public string SourceMonsterId { get; set; } = string.Empty;
+    public List<string> NativeAbilityIds { get; set; } = [];
     public HashSet<string> Tags { get; set; } = new(StringComparer.OrdinalIgnoreCase);
 
     public int NextBasicAttackIn = 300; // TODO: Turn 300 into a Constant somewhere, as it is also stored in the CombatSimulator class
@@ -173,6 +174,7 @@ public class CombatEntity
         SourceMonsterId = entity.SourceMonsterId;
         Tags = new HashSet<string>(entity.Tags, StringComparer.OrdinalIgnoreCase);
         EquippedEssences = [.. entity.EquippedEssences];
+        NativeAbilityIds = [.. entity.NativeAbilityIds];
         HasEquippedEssenceSnapshot = entity.HasEquippedEssenceSnapshot;
         Level = entity.Level;
         IsSummoned = entity.IsSummoned;

@@ -11,9 +11,6 @@ namespace EssenceSystem.Tests;
 public sealed class RegionOneIdleAreaSeedTests
 {
     private const double AreaEssenceBaseDropChance = 0.0001;
-    private const double AreaEssenceMaxResonanceBonus = 0.01;
-    private const double AreaEssenceFarmDaysToCap = 10;
-    private const double IdleEncounterCadenceSeconds = 10;
 
     [Fact]
     public async Task SeedCreaturesData_creates_tutorial_area_and_ten_region_one_idle_areas_without_goblin_mines()
@@ -122,15 +119,19 @@ public sealed class RegionOneIdleAreaSeedTests
         var creatures = await db.Creatures.ToListAsync();
         var dataPath = FindApiDataRoot();
 
-        using var essenceDocument = JsonDocument.Parse(await File.ReadAllTextAsync(Path.Combine(dataPath, "essences", "essences.json")));
+        using var lootTableDocument = JsonDocument.Parse(await File.ReadAllTextAsync(Path.Combine(dataPath, "world", "creature-essence-loot-tables.json")));
         using var itemDocument = JsonDocument.Parse(await File.ReadAllTextAsync(Path.Combine(dataPath, "items", "items.json")));
 
-        var essenceIdsByMonsterId = essenceDocument.RootElement
-            .GetProperty("essences")
+        var essenceIdsByMonsterId = lootTableDocument.RootElement
+            .GetProperty("creatures")
             .EnumerateArray()
             .ToDictionary(
-                element => element.GetProperty("sourceMonsterId").GetString()!,
                 element => element.GetProperty("id").GetString()!,
+                element => element
+                    .GetProperty("essenceLootTable")
+                    .GetProperty("variants")[0]
+                    .GetProperty("essenceDefinitionId")
+                    .GetString()!,
                 StringComparer.OrdinalIgnoreCase);
 
         var essenceItemIds = itemDocument.RootElement
@@ -146,13 +147,13 @@ public sealed class RegionOneIdleAreaSeedTests
             var monsterId = CreatureEssenceSource.GetMonsterDefinitionId(creature);
             Assert.True(
                 essenceIdsByMonsterId.TryGetValue(monsterId, out var essenceId),
-                $"{creature.Name} is missing an essence definition with sourceMonsterId '{monsterId}'.");
+                $"{creature.Name} is missing a creature Essence loot table for '{monsterId}'.");
             Assert.Contains($"item.{essenceId}", essenceItemIds);
         }
     }
 
     [Fact]
-    public async Task Seeded_area_creature_essences_use_ten_day_area_farming_drop_tuning()
+    public async Task Seeded_area_creature_essences_use_shared_resonance_drop_tuning()
     {
         await using var db = CreateDb();
 
@@ -161,19 +162,22 @@ public sealed class RegionOneIdleAreaSeedTests
 
         var dataPath = FindApiDataRoot();
         using var essenceDocument = JsonDocument.Parse(await File.ReadAllTextAsync(Path.Combine(dataPath, "essences", "essences.json")));
-        var tuningByMonsterId = essenceDocument.RootElement
+        using var lootTableDocument = JsonDocument.Parse(await File.ReadAllTextAsync(Path.Combine(dataPath, "world", "creature-essence-loot-tables.json")));
+        var essenceElements = essenceDocument.RootElement
             .GetProperty("essences")
             .EnumerateArray()
+            .ToList();
+        Assert.All(essenceElements, element => Assert.False(element.TryGetProperty("drop", out _)));
+
+        var tuningByMonsterId = lootTableDocument.RootElement
+            .GetProperty("creatures")
+            .EnumerateArray()
             .ToDictionary(
-                element => element.GetProperty("sourceMonsterId").GetString()!,
+                element => element.GetProperty("id").GetString()!,
                 element =>
                 {
-                    var drop = element.GetProperty("drop");
-                    return new EssenceDropTuning(
-                        drop.GetProperty("baseDropChance").GetDouble(),
-                        drop.GetProperty("resonanceGainPerFailedEligibleKill").GetDouble(),
-                        drop.GetProperty("dropChanceBonusPerResonance").GetDouble(),
-                        drop.GetProperty("maxResonanceBonus").GetDouble());
+                    var lootTable = element.GetProperty("essenceLootTable");
+                    return new CreatureEssenceLootTuning(lootTable.GetProperty("baseDropChance").GetDouble());
                 },
                 StringComparer.OrdinalIgnoreCase);
 
@@ -182,29 +186,16 @@ public sealed class RegionOneIdleAreaSeedTests
             .Include(area => area.Creatures)
             .Where(area => area.Creatures.Count > 0)
             .ToListAsync();
-        var farmWindowEncounterCount = AreaEssenceFarmDaysToCap * 24 * 60 * 60 / IdleEncounterCadenceSeconds;
 
         foreach (var area in areas)
         {
-            var expectedMonstersPerEncounter = ExpectedMonsterCount(area.SpawnProbabilities);
-            var totalCreatureWeight = area.Creatures.Sum(creature => creature.WeightedSpawnRate);
-
             foreach (var areaCreature in area.Creatures)
             {
                 var creature = creaturesById[areaCreature.CreatureId];
                 var monsterId = CreatureEssenceSource.GetMonsterDefinitionId(creature);
                 var tuning = tuningByMonsterId[monsterId];
-                var spawnShare = areaCreature.WeightedSpawnRate / totalCreatureWeight;
-                var expectedEligibleKills = farmWindowEncounterCount * expectedMonstersPerEncounter * spawnShare;
-                var expectedBonusPerFailedKill = AreaEssenceMaxResonanceBonus / expectedEligibleKills;
 
                 Assert.Equal(AreaEssenceBaseDropChance, tuning.BaseDropChance);
-                Assert.Equal(1, tuning.ResonanceGainPerFailedEligibleKill);
-                Assert.Equal(AreaEssenceMaxResonanceBonus, tuning.MaxResonanceBonus);
-                Assert.InRange(
-                    tuning.DropChanceBonusPerResonance,
-                    expectedBonusPerFailedKill * 0.999999,
-                    expectedBonusPerFailedKill * 1.000001);
             }
         }
     }
@@ -216,14 +207,6 @@ public sealed class RegionOneIdleAreaSeedTests
             .Options;
 
         return new LLDbContext(options);
-    }
-
-    private static double ExpectedMonsterCount(IReadOnlyList<float> spawnProbabilities)
-    {
-        var totalWeight = spawnProbabilities.Sum();
-        return spawnProbabilities
-            .Select((weight, index) => (index + 1) * weight / totalWeight)
-            .Sum();
     }
 
     private static string FindApiDataRoot()
@@ -247,9 +230,5 @@ public sealed class RegionOneIdleAreaSeedTests
         throw new DirectoryNotFoundException("Could not locate LL/src/API/API.LL/Data/essences/essences.json and items/items.json from test output directory.");
     }
 
-    private sealed record EssenceDropTuning(
-        double BaseDropChance,
-        double ResonanceGainPerFailedEligibleKill,
-        double DropChanceBonusPerResonance,
-        double MaxResonanceBonus);
+    private sealed record CreatureEssenceLootTuning(double BaseDropChance);
 }

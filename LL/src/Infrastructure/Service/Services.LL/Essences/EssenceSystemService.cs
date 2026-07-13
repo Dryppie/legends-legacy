@@ -27,6 +27,7 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
     private readonly IInventoryRepository _inventory;
     private readonly IItemBaseRepository _itemBases;
     private readonly IEssenceDefinitionRepository _definitions;
+    private readonly ICreatureEssenceLootTableRepository _creatureEssenceLootTables;
     private readonly IEssenceProgressionService _progression;
     private readonly IEssenceSlotUnlockService _slotUnlocks;
     private readonly IEssenceLoadoutLimitService _loadoutLimits;
@@ -42,6 +43,7 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
         IInventoryRepository inventory,
         IItemBaseRepository itemBases,
         IEssenceDefinitionRepository definitions,
+        ICreatureEssenceLootTableRepository creatureEssenceLootTables,
         IEssenceProgressionService progression,
         IEssenceSlotUnlockService slotUnlocks,
         IEssenceLoadoutLimitService loadoutLimits,
@@ -56,6 +58,7 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
         _inventory = inventory;
         _itemBases = itemBases;
         _definitions = definitions;
+        _creatureEssenceLootTables = creatureEssenceLootTables;
         _progression = progression;
         _slotUnlocks = slotUnlocks;
         _loadoutLimits = loadoutLimits;
@@ -284,6 +287,8 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
         var essenceIds = normalizedSlots.Select(x => x.PlayerEssenceId!.Value).ToList();
         var ownedCount = await _essences.CountOwnedPlayerEssencesAsync(characterId, essenceIds, cancellationToken);
         if (ownedCount != essenceIds.Count) throw new InvalidOperationException("A loadout can only use absorbed Essences.");
+        if (!await HasUniqueCreatureSourcesAsync(characterId, essenceIds, cancellationToken))
+            throw new InvalidOperationException("A loadout cannot attune more than one Essence from the same creature.");
 
         EssenceLoadout? loadout = null;
         if (request.Id.HasValue)
@@ -339,6 +344,8 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
         var essenceIds = selected.Slots.Where(x => x.PlayerEssenceId.HasValue).Select(x => x.PlayerEssenceId!.Value).ToList();
         var ownedCount = await _essences.CountOwnedPlayerEssencesAsync(characterId, essenceIds, cancellationToken);
         if (ownedCount != essenceIds.Count) return Fail("Loadout references an Essence that is no longer absorbed.");
+        if (!await HasUniqueCreatureSourcesAsync(characterId, essenceIds, cancellationToken))
+            return Fail("A loadout cannot attune more than one Essence from the same creature.");
 
         foreach (var loadout in loadouts) loadout.IsActive = loadout.Id == loadoutId;
         await _outbox.EnqueueAsync(
@@ -351,6 +358,27 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
             null,
             cancellationToken);
         return Ok("Essence loadout activated.");
+    }
+
+    private async Task<bool> HasUniqueCreatureSourcesAsync(
+        Guid characterId,
+        IReadOnlyCollection<Guid> playerEssenceIds,
+        CancellationToken cancellationToken)
+    {
+        if (playerEssenceIds.Count < 2)
+            return true;
+
+        var selectedIds = playerEssenceIds.ToHashSet();
+        var creatureIds = (await _essences.GetPlayerEssencesAsync(characterId, cancellationToken))
+            .Where(essence => selectedIds.Contains(essence.Id))
+            .Select(essence => _creatureEssenceLootTables
+                .GetByEssenceDefinitionId(essence.EssenceDefinitionId)?
+                .CreatureId)
+            .Where(creatureId => !string.IsNullOrWhiteSpace(creatureId))
+            .Cast<string>()
+            .ToList();
+
+        return creatureIds.Distinct(StringComparer.OrdinalIgnoreCase).Count() == creatureIds.Count;
     }
 
     public async Task<EssenceOperationResult> DeleteLoadoutAsync(Guid characterId, Guid loadoutId, CancellationToken cancellationToken)
@@ -470,7 +498,7 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
 
     public async Task<EssenceDropRollResult> RollMonsterEssenceDropAsync(Guid characterId, string monsterId, bool eligible, CancellationToken cancellationToken)
     {
-        if (!eligible || _definitions.GetByMonsterId(monsterId) is null) return new(false, null, 0, 0);
+        if (!eligible || _creatureEssenceLootTables.GetByCreatureId(monsterId) is null) return new(false, null, 0, 0);
 
         var factors = await GetBonusFactorsAsync(characterId, DateTimeOffset.UtcNow, cancellationToken);
 
@@ -495,17 +523,19 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
         Func<string, CancellationToken, Task<bool>> isEssenceFocusAsync,
         CancellationToken cancellationToken)
     {
-        var definition = _definitions.GetByMonsterId(monsterId);
-        if (!eligible || definition is null) return new(false, null, 0, 0);
+        var lootTable = _creatureEssenceLootTables.GetByCreatureId(monsterId);
+        if (!eligible || lootTable is null) return new(false, null, 0, 0);
 
-        var resonance = await _essences.GetMonsterResonanceAsync(characterId, monsterId, cancellationToken);
+        var resonance = await _essences.GetCreatureResonanceAsync(characterId, monsterId, cancellationToken);
         if (resonance is null)
         {
             resonance = new CreatureResonance { Id = Guid.NewGuid(), CharacterId = characterId, CreatureId = monsterId };
-            await _essences.AddMonsterResonanceAsync(resonance, cancellationToken);
+            await _essences.AddCreatureResonanceAsync(resonance, cancellationToken);
         }
 
-        var bonus = Math.Min(definition.Drop.MaxResonanceBonus, resonance.ResonanceValue * definition.Drop.DropChanceBonusPerResonance);
+        var bonus = Math.Min(
+            CreatureResonanceConstants.MaximumDropChanceBonus,
+            resonance.ResonanceValue * CreatureResonanceConstants.DropChanceBonusPerPoint);
         var relativeDropRateBps = factors.Get(BonusKind.EssenceDropRateRelativeBps);
         if (factors.Get(BonusKind.FocusedMonsterEssenceDropRateRelativeBps) > 0 &&
             await isEssenceFocusAsync(monsterId, cancellationToken))
@@ -515,15 +545,16 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
 
         var pityProgressionGainBps = factors.Get(BonusKind.EssencePityProgressionGainBps);
         var effective = Math.Clamp(
-            (definition.Drop.BaseDropChance + bonus).ApplyPositiveBps(relativeDropRateBps),
+            (lootTable.BaseDropChance + bonus).ApplyPositiveBps(relativeDropRateBps),
             0,
             1);
         var dropped = _random.NextDouble() < effective;
+        var essenceDefinitionId = dropped ? RollEssenceDefinitionId(lootTable) : null;
         if (dropped) resonance.ResonanceValue = 0;
-        else resonance.ResonanceValue += definition.Drop.ResonanceGainPerFailedEligibleKill.ApplyPositiveBps(pityProgressionGainBps);
+        else resonance.ResonanceValue += CreatureResonanceConstants.GainPerFailedEligibleKill.ApplyPositiveBps(pityProgressionGainBps);
 
         resonance.UpdatedAt = DateTimeOffset.UtcNow;
-        return new(dropped, dropped ? definition.Id : null, effective, resonance.ResonanceValue);
+        return new(dropped, essenceDefinitionId, effective, resonance.ResonanceValue);
     }
 
     public async Task<IReadOnlyList<InventoryItem>> RollEssenceDropsAsync(
@@ -538,7 +569,7 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
 
         var monsterIds = defeatedCreatures
             .Select(CreatureEssenceSource.GetMonsterDefinitionId)
-            .Where(monsterId => _definitions.GetByMonsterId(monsterId) is not null)
+            .Where(monsterId => _creatureEssenceLootTables.GetByCreatureId(monsterId) is not null)
             .ToList();
 
         if (monsterIds.Count == 0) return drops;
@@ -582,6 +613,21 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
         }
 
         return drops;
+    }
+
+    private string RollEssenceDefinitionId(CreatureEssenceLootTableDefinition lootTable)
+    {
+        var totalWeight = lootTable.Variants.Sum(x => x.Weight);
+        var roll = _random.NextDouble() * totalWeight;
+
+        foreach (var variant in lootTable.Variants)
+        {
+            roll -= variant.Weight;
+            if (roll < 0)
+                return variant.EssenceDefinitionId;
+        }
+
+        return lootTable.Variants[^1].EssenceDefinitionId;
     }
 
     private async ValueTask<IReadOnlyDictionary<BonusKind, double>> GetBonusFactorsAsync(

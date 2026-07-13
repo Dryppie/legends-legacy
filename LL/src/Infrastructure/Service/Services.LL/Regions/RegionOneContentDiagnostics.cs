@@ -15,6 +15,7 @@ public sealed class RegionOneContentDiagnostics : IRegionOneContentDiagnostics
     private readonly IAreaRepository _areas;
     private readonly IItemBaseRepository _itemBases;
     private readonly IEssenceDefinitionRepository _essenceDefinitions;
+    private readonly ICreatureEssenceLootTableRepository _creatureEssenceLootTables;
     private readonly IAbilityCatalogProvider _catalogProvider;
     private readonly IAbilityCatalogBehaviorDiagnostics _behaviorDiagnostics;
     private readonly IDungeonDefinitions _dungeonDefinitions;
@@ -24,6 +25,7 @@ public sealed class RegionOneContentDiagnostics : IRegionOneContentDiagnostics
         IAreaRepository areas,
         IItemBaseRepository itemBases,
         IEssenceDefinitionRepository essenceDefinitions,
+        ICreatureEssenceLootTableRepository creatureEssenceLootTables,
         IAbilityCatalogProvider catalogProvider,
         IAbilityCatalogBehaviorDiagnostics behaviorDiagnostics,
         IDungeonDefinitions dungeonDefinitions)
@@ -32,6 +34,7 @@ public sealed class RegionOneContentDiagnostics : IRegionOneContentDiagnostics
         _areas = areas;
         _itemBases = itemBases;
         _essenceDefinitions = essenceDefinitions;
+        _creatureEssenceLootTables = creatureEssenceLootTables;
         _catalogProvider = catalogProvider;
         _behaviorDiagnostics = behaviorDiagnostics;
         _dungeonDefinitions = dungeonDefinitions;
@@ -60,7 +63,13 @@ public sealed class RegionOneContentDiagnostics : IRegionOneContentDiagnostics
         foreach (var entry in manifest)
         {
             creaturesByKey.TryGetValue(entry.CreatureKey, out var creature);
-            var essence = _essenceDefinitions.GetByMonsterId($"monster.{entry.CreatureKey}");
+            var firstVariant = _creatureEssenceLootTables
+                .GetByCreatureId($"monster.{entry.CreatureKey}")?
+                .Variants
+                .FirstOrDefault();
+            var essence = firstVariant is null
+                ? null
+                : _essenceDefinitions.GetById(firstVariant.EssenceDefinitionId);
             var activeAbilityResolved = !string.IsNullOrWhiteSpace(essence?.ActiveAbilityId)
                 && catalog.AbilitiesById.ContainsKey(essence.ActiveAbilityId);
             var passiveAbilityResolved = !string.IsNullOrWhiteSpace(essence?.PassiveAbilityId)

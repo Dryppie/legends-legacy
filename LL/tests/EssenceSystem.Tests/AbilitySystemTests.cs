@@ -977,6 +977,36 @@ public sealed class AbilitySystemTests
     }
 
     [Fact]
+    public void Json_creature_essence_loot_tables_resolve_all_authored_essences()
+    {
+        var definitions = new JsonEssenceDefinitionRepository(
+            CreateConfig(),
+            FindApiContentRoot(),
+            CreateJsonOptions(),
+            new EssenceDefinitionValidator());
+        var lootTables = new JsonCreatureEssenceLootTableRepository(
+            CreateConfig(),
+            FindApiContentRoot(),
+            CreateJsonOptions(),
+            definitions);
+
+        Assert.Equal(definitions.GetAll().Count, lootTables.GetAll().Sum(x => x.Variants.Count));
+        Assert.All(lootTables.GetAll(), table =>
+        {
+            Assert.InRange(table.BaseDropChance, double.Epsilon, 1);
+            Assert.Equal(AbilitySpecKind.Passive, definitions.GetAbilityById(table.PassiveAbilityId)?.Kind);
+            Assert.NotEmpty(table.Variants);
+            Assert.All(table.Variants, variant =>
+            {
+                var essence = Assert.IsType<EssenceDefinition>(definitions.GetById(variant.EssenceDefinitionId));
+                Assert.Equal(table.PassiveAbilityId, essence.PassiveAbilityId);
+                Assert.Equal(variant.ActiveAbilityId, essence.ActiveAbilityId);
+                Assert.Same(table, lootTables.GetByEssenceDefinitionId(variant.EssenceDefinitionId));
+            });
+        });
+    }
+
+    [Fact]
     public void Balance_simulator_ranks_random_essence_combinations()
     {
         var provider = new JsonAbilityCatalogProvider(
@@ -3152,7 +3182,6 @@ public sealed class AbilitySystemTests
         public EssenceDefinition? GetById(string essenceDefinitionId) =>
             essences?.FirstOrDefault(x => x.Id.Equals(essenceDefinitionId, StringComparison.OrdinalIgnoreCase));
 
-        public EssenceDefinition? GetByMonsterId(string monsterId) => null;
         public AbilitySpec? GetAbilityById(string abilityId) =>
             abilities.FirstOrDefault(x => x.Id.Equals(abilityId, StringComparison.OrdinalIgnoreCase));
     }

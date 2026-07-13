@@ -11,7 +11,6 @@ export interface EssenceDefinitionDto {
   activeAbility: EssenceAbilityDto;
   passiveAbility: EssenceAbilityDto;
   evolution: EssenceEvolutionDto;
-  drop: EssenceDropDto;
 }
 
 export interface EssenceAttributeBonusDto {
@@ -59,13 +58,6 @@ export interface EssenceEvolutionDto {
   addsTags: string[];
 }
 
-export interface EssenceDropDto {
-  baseDropChance: number;
-  resonanceGainPerFailedEligibleKill: number;
-  dropChanceBonusPerResonance: number;
-  maxResonanceBonus: number;
-}
-
 export interface SoulArchiveDto {
   essences: PlayerEssenceDto[];
   essenceDust: number;
@@ -88,9 +80,14 @@ export interface CreatureArchiveEntryDto {
   essenceFocusSetAtUtc?: string | null;
   essenceFocusTotalDurationSeconds: number;
   currentEssenceFocusDurationSeconds: number;
-  essenceDefinitionId?: string | null;
-  essenceName?: string | null;
-  isEssenceAbsorbed: boolean;
+  essences: CreatureArchiveEssenceEntryDto[];
+  tags: string[];
+}
+
+export interface CreatureArchiveEssenceEntryDto {
+  essenceDefinitionId: string;
+  name: string;
+  isAbsorbed: boolean;
   tags: string[];
 }
 

@@ -27,12 +27,6 @@
           "baseValue": 1
         }
       ],
-      "drop": {
-        "baseDropChance": 0.001,
-        "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 0.00005,
-        "maxResonanceBonus": 0.01
-      },
       "evolution": {
         "id": "evolution.goblin_ambusher.pack_opportunist",
         "name": "Pack Opportunist",
@@ -84,12 +78,6 @@
           "baseValue": 1
         }
       ],
-      "drop": {
-        "baseDropChance": 0.001,
-        "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 0.00005,
-        "maxResonanceBonus": 0.01
-      },
       "evolution": {
         "id": "evolution.skeleton_guardian.ossified_sentinel",
         "name": "Ossified Sentinel",
@@ -142,12 +130,6 @@
           "baseValue": 2
         }
       ],
-      "drop": {
-        "baseDropChance": 0.0012,
-        "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 0.00004,
-        "maxResonanceBonus": 0.01
-      },
       "evolution": {
         "id": "evolution.fire_ant.hiveflame_instinct",
         "name": "Hiveflame Instinct",
@@ -202,12 +184,6 @@
           "baseValue": 1
         }
       ],
-      "drop": {
-        "baseDropChance": 0.0015,
-        "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 0.00004,
-        "maxResonanceBonus": 0.01
-      },
       "evolution": {
         "id": "evolution.cave_bat.echo_hunter",
         "name": "Echo Hunter",
@@ -262,12 +238,6 @@
           "baseValue": 3
         }
       ],
-      "drop": {
-        "baseDropChance": 0.0008,
-        "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 0.00005,
-        "maxResonanceBonus": 0.012
-      },
       "evolution": {
         "id": "evolution.necroshade_wraith.hollow_dominion",
         "name": "Hollow Dominion",
@@ -317,12 +287,6 @@
           "baseValue": 1
         }
       ],
-      "drop": {
-        "baseDropChance": 0.0001,
-        "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 0.000000160217,
-        "maxResonanceBonus": 0.01
-      },
       "evolution": {
         "id": "evolution.legacy.goblin",
         "name": "Legacy Awakening",
@@ -355,12 +319,6 @@
           "baseValue": 1
         }
       ],
-      "drop": {
-        "baseDropChance": 0.0001,
-        "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 0.00000011574075,
-        "maxResonanceBonus": 0.01
-      },
       "evolution": {
         "id": "evolution.legacy.training_goblin",
         "name": "Legacy Awakening",
@@ -393,12 +351,6 @@
           "baseValue": 2
         }
       ],
-      "drop": {
-        "baseDropChance": 0.0001,
-        "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 0.00000160216975,
-        "maxResonanceBonus": 0.01
-      },
       "evolution": {
         "id": "evolution.legacy.goblin_warrior",
         "name": "Legacy Awakening",
@@ -431,12 +383,6 @@
           "baseValue": 2
         }
       ],
-      "drop": {
-        "baseDropChance": 0.0001,
-        "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 0.0000014018985,
-        "maxResonanceBonus": 0.01
-      },
       "evolution": {
         "id": "evolution.legacy.goblin_archer",
         "name": "Legacy Awakening",
@@ -468,12 +414,6 @@
           "baseValue": 20
         }
       ],
-      "drop": {
-        "baseDropChance": 0.0001,
-        "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 0.00000074767925,
-        "maxResonanceBonus": 0.01
-      },
       "evolution": {
         "id": "evolution.legacy.large_rat",
         "name": "Legacy Awakening",
@@ -505,12 +445,6 @@
           "baseValue": 2
         }
       ],
-      "drop": {
-        "baseDropChance": 0.0001,
-        "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 0.00000018942525,
-        "maxResonanceBonus": 0.01
-      },
       "evolution": {
         "id": "evolution.legacy.flame_imp",
         "name": "Legacy Awakening",
@@ -542,12 +476,6 @@
           "baseValue": 1
         }
       ],
-      "drop": {
-        "baseDropChance": 0.0001,
-        "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 0.0000001957395,
-        "maxResonanceBonus": 0.01
-      },
       "evolution": {
         "id": "evolution.legacy.frost_imp",
         "name": "Legacy Awakening",
@@ -579,12 +507,6 @@
           "baseValue": 1
         }
       ],
-      "drop": {
-        "baseDropChance": 0.0001,
-        "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 0.0000001957395,
-        "maxResonanceBonus": 0.01
-      },
       "evolution": {
         "id": "evolution.legacy.shadow_imp",
         "name": "Legacy Awakening",
@@ -616,12 +538,6 @@
           "baseValue": 1
         }
       ],
-      "drop": {
-        "baseDropChance": 0.0001,
-        "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 0.00000065246475,
-        "maxResonanceBonus": 0.01
-      },
       "evolution": {
         "id": "evolution.legacy.vampire_bat",
         "name": "Legacy Awakening",
@@ -653,12 +569,6 @@
           "baseValue": 1
         }
       ],
-      "drop": {
-        "baseDropChance": 0.0001,
-        "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 0.00000029360925,
-        "maxResonanceBonus": 0.01
-      },
       "evolution": {
         "id": "evolution.legacy.blue_slime",
         "name": "Legacy Awakening",
@@ -690,12 +600,6 @@
           "baseValue": 2
         }
       ],
-      "drop": {
-        "baseDropChance": 0.0001,
-        "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 0.00000029360925,
-        "maxResonanceBonus": 0.01
-      },
       "evolution": {
         "id": "evolution.legacy.brown_slime",
         "name": "Legacy Awakening",
@@ -727,12 +631,6 @@
           "baseValue": 2
         }
       ],
-      "drop": {
-        "baseDropChance": 0.0001,
-        "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 0.00000029360925,
-        "maxResonanceBonus": 0.01
-      },
       "evolution": {
         "id": "evolution.legacy.green_slime",
         "name": "Legacy Awakening",
@@ -764,12 +662,6 @@
           "baseValue": 2
         }
       ],
-      "drop": {
-        "baseDropChance": 0.0001,
-        "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 0.00000058721825,
-        "maxResonanceBonus": 0.01
-      },
       "evolution": {
         "id": "evolution.legacy.rainbow_slime",
         "name": "Legacy Awakening",
@@ -801,12 +693,6 @@
           "baseValue": 1
         }
       ],
-      "drop": {
-        "baseDropChance": 0.0001,
-        "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 0.00000029360925,
-        "maxResonanceBonus": 0.01
-      },
       "evolution": {
         "id": "evolution.legacy.red_slime",
         "name": "Legacy Awakening",
@@ -838,12 +724,6 @@
           "baseValue": 1
         }
       ],
-      "drop": {
-        "baseDropChance": 0.0001,
-        "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 0.00000058721825,
-        "maxResonanceBonus": 0.01
-      },
       "evolution": {
         "id": "evolution.legacy.transparent_slime",
         "name": "Legacy Awakening",
@@ -875,12 +755,6 @@
           "baseValue": 1
         }
       ],
-      "drop": {
-        "baseDropChance": 0.0001,
-        "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 0.00000026424825,
-        "maxResonanceBonus": 0.01
-      },
       "evolution": {
         "id": "evolution.legacy.enchanted_fairy",
         "name": "Legacy Awakening",
@@ -912,12 +786,6 @@
           "baseValue": 1
         }
       ],
-      "drop": {
-        "baseDropChance": 0.0001,
-        "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 0.00000026424825,
-        "maxResonanceBonus": 0.01
-      },
       "evolution": {
         "id": "evolution.legacy.glade_panther",
         "name": "Legacy Awakening",
@@ -949,12 +817,6 @@
           "baseValue": 2
         }
       ],
-      "drop": {
-        "baseDropChance": 0.0001,
-        "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 0.00000026424825,
-        "maxResonanceBonus": 0.01
-      },
       "evolution": {
         "id": "evolution.legacy.illusion_fox",
         "name": "Legacy Awakening",
@@ -986,12 +848,6 @@
           "baseValue": 1
         }
       ],
-      "drop": {
-        "baseDropChance": 0.0001,
-        "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 0.0000005284965,
-        "maxResonanceBonus": 0.01
-      },
       "evolution": {
         "id": "evolution.legacy.nightshade_blossom",
         "name": "Legacy Awakening",
@@ -1023,12 +879,6 @@
           "baseValue": 1
         }
       ],
-      "drop": {
-        "baseDropChance": 0.0001,
-        "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 0.00000026424825,
-        "maxResonanceBonus": 0.01
-      },
       "evolution": {
         "id": "evolution.legacy.pixie",
         "name": "Legacy Awakening",
@@ -1061,12 +911,6 @@
           "baseValue": 1
         }
       ],
-      "drop": {
-        "baseDropChance": 0.001,
-        "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 0.00005,
-        "maxResonanceBonus": 0.01
-      },
       "evolution": {
         "id": "evolution.legacy.hobgoblin",
         "name": "Legacy Awakening",
@@ -1098,12 +942,6 @@
           "baseValue": 1
         }
       ],
-      "drop": {
-        "baseDropChance": 0.0001,
-        "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 0.00000029360925,
-        "maxResonanceBonus": 0.01
-      },
       "evolution": {
         "id": "evolution.legacy.moss_lizard",
         "name": "Legacy Awakening",
@@ -1135,12 +973,6 @@
           "baseValue": 1
         }
       ],
-      "drop": {
-        "baseDropChance": 0.0001,
-        "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 0.00000029360925,
-        "maxResonanceBonus": 0.01
-      },
       "evolution": {
         "id": "evolution.legacy.spider",
         "name": "Legacy Awakening",
@@ -1173,12 +1005,6 @@
           "baseValue": 1
         }
       ],
-      "drop": {
-        "baseDropChance": 0.0001,
-        "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 0.00000029360925,
-        "maxResonanceBonus": 0.01
-      },
       "evolution": {
         "id": "evolution.legacy.treant_sapling",
         "name": "Legacy Awakening",
@@ -1211,12 +1037,6 @@
           "baseValue": 1
         }
       ],
-      "drop": {
-        "baseDropChance": 0.0001,
-        "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 0.00000029360925,
-        "maxResonanceBonus": 0.01
-      },
       "evolution": {
         "id": "evolution.legacy.venomous_snake",
         "name": "Legacy Awakening",
@@ -1249,12 +1069,6 @@
           "baseValue": 1
         }
       ],
-      "drop": {
-        "baseDropChance": 0.0001,
-        "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 0.00000029360925,
-        "maxResonanceBonus": 0.01
-      },
       "evolution": {
         "id": "evolution.legacy.viper",
         "name": "Legacy Awakening",
@@ -1287,12 +1101,6 @@
           "baseValue": 1
         }
       ],
-      "drop": {
-        "baseDropChance": 0.001,
-        "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 0.00005,
-        "maxResonanceBonus": 0.01
-      },
       "evolution": {
         "id": "evolution.legacy.goblin_shaman",
         "name": "Legacy Awakening",
@@ -1325,12 +1133,6 @@
           "baseValue": 1
         }
       ],
-      "drop": {
-        "baseDropChance": 0.001,
-        "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 0.00005,
-        "maxResonanceBonus": 0.01
-      },
       "evolution": {
         "id": "evolution.legacy.poisonous_rat",
         "name": "Legacy Awakening",
@@ -1362,12 +1164,6 @@
           "baseValue": 2
         }
       ],
-      "drop": {
-        "baseDropChance": 0.001,
-        "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 0.00005,
-        "maxResonanceBonus": 0.01
-      },
       "evolution": {
         "id": "evolution.legacy.giant_bat",
         "name": "Legacy Awakening",
@@ -1399,12 +1195,6 @@
           "baseValue": 2
         }
       ],
-      "drop": {
-        "baseDropChance": 0.0001,
-        "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 0.00000029360925,
-        "maxResonanceBonus": 0.01
-      },
       "evolution": {
         "id": "evolution.legacy.feral_ghoul",
         "name": "Legacy Awakening",
@@ -1436,12 +1226,6 @@
           "baseValue": 1
         }
       ],
-      "drop": {
-        "baseDropChance": 0.0001,
-        "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 0.00000029360925,
-        "maxResonanceBonus": 0.01
-      },
       "evolution": {
         "id": "evolution.legacy.plague_ghoul",
         "name": "Legacy Awakening",
@@ -1473,12 +1257,6 @@
           "baseValue": 1
         }
       ],
-      "drop": {
-        "baseDropChance": 0.0001,
-        "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 0.00000058721825,
-        "maxResonanceBonus": 0.01
-      },
       "evolution": {
         "id": "evolution.legacy.ravenous_ghoul",
         "name": "Legacy Awakening",
@@ -1510,12 +1288,6 @@
           "baseValue": 2
         }
       ],
-      "drop": {
-        "baseDropChance": 0.0001,
-        "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 0.000000391479,
-        "maxResonanceBonus": 0.01
-      },
       "evolution": {
         "id": "evolution.legacy.skeleton_archer",
         "name": "Legacy Awakening",
@@ -1547,12 +1319,6 @@
           "baseValue": 2
         }
       ],
-      "drop": {
-        "baseDropChance": 0.0001,
-        "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 0.00000029360925,
-        "maxResonanceBonus": 0.01
-      },
       "evolution": {
         "id": "evolution.legacy.skeleton_mage",
         "name": "Legacy Awakening",
@@ -1584,12 +1350,6 @@
           "baseValue": 1
         }
       ],
-      "drop": {
-        "baseDropChance": 0.0001,
-        "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 0.000000391479,
-        "maxResonanceBonus": 0.01
-      },
       "evolution": {
         "id": "evolution.legacy.skeleton_warrior",
         "name": "Legacy Awakening",
@@ -1623,12 +1383,6 @@
           "baseValue": 1
         }
       ],
-      "drop": {
-        "baseDropChance": 0.001,
-        "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 0.00005,
-        "maxResonanceBonus": 0.01
-      },
       "evolution": {
         "id": "evolution.ant_worker",
         "name": "Legacy Awakening",
@@ -1662,12 +1416,6 @@
           "baseValue": 2
         }
       ],
-      "drop": {
-        "baseDropChance": 0.001,
-        "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 0.00005,
-        "maxResonanceBonus": 0.01
-      },
       "evolution": {
         "id": "evolution.forest_spirit",
         "name": "Legacy Awakening",
@@ -1702,12 +1450,6 @@
           "baseValue": 1
         }
       ],
-      "drop": {
-        "baseDropChance": 0.001,
-        "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 0.00005,
-        "maxResonanceBonus": 0.01
-      },
       "evolution": {
         "id": "evolution.wood_nymph",
         "name": "Legacy Awakening",
@@ -1741,12 +1483,6 @@
           "baseValue": 3
         }
       ],
-      "drop": {
-        "baseDropChance": 0.0001,
-        "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 0.0000002669175,
-        "maxResonanceBonus": 0.01
-      },
       "evolution": {
         "id": "evolution.giant_spider",
         "name": "Legacy Awakening",
@@ -1780,12 +1516,6 @@
           "baseValue": 1
         }
       ],
-      "drop": {
-        "baseDropChance": 0.0001,
-        "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 0.00000020972075,
-        "maxResonanceBonus": 0.01
-      },
       "evolution": {
         "id": "evolution.venomous_spiderling",
         "name": "Legacy Awakening",
@@ -1817,12 +1547,6 @@
           "baseValue": 2
         }
       ],
-      "drop": {
-        "baseDropChance": 0.0001,
-        "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 0.0000002669175,
-        "maxResonanceBonus": 0.01
-      },
       "evolution": {
         "id": "evolution.blackjaw_spider",
         "name": "Legacy Awakening",
@@ -1854,12 +1578,6 @@
           "baseValue": 1
         }
       ],
-      "drop": {
-        "baseDropChance": 0.0001,
-        "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 0.0000004517065,
-        "maxResonanceBonus": 0.01
-      },
       "evolution": {
         "id": "evolution.raven",
         "name": "Legacy Awakening",
@@ -1891,12 +1609,6 @@
           "baseValue": 1
         }
       ],
-      "drop": {
-        "baseDropChance": 0.0001,
-        "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 0.000000391479,
-        "maxResonanceBonus": 0.01
-      },
       "evolution": {
         "id": "evolution.widow_stalker",
         "name": "Legacy Awakening",
@@ -1928,12 +1640,6 @@
           "baseValue": 2
         }
       ],
-      "drop": {
-        "baseDropChance": 0.0001,
-        "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 0.0000001957395,
-        "maxResonanceBonus": 0.01
-      },
       "evolution": {
         "id": "evolution.scarecrow",
         "name": "Legacy Awakening",
@@ -1965,12 +1671,6 @@
           "baseValue": 1
         }
       ],
-      "drop": {
-        "baseDropChance": 0.0001,
-        "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 0.0000001957395,
-        "maxResonanceBonus": 0.01
-      },
       "evolution": {
         "id": "evolution.lost_soul",
         "name": "Legacy Awakening",
@@ -2002,12 +1702,6 @@
           "baseValue": 1
         }
       ],
-      "drop": {
-        "baseDropChance": 0.0001,
-        "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 0.00000029360925,
-        "maxResonanceBonus": 0.01
-      },
       "evolution": {
         "id": "evolution.apparition",
         "name": "Legacy Awakening",
@@ -2039,12 +1733,6 @@
           "baseValue": 2
         }
       ],
-      "drop": {
-        "baseDropChance": 0.0001,
-        "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 0.00000029360925,
-        "maxResonanceBonus": 0.01
-      },
       "evolution": {
         "id": "evolution.specter",
         "name": "Legacy Awakening",
@@ -2076,12 +1764,6 @@
           "baseValue": 1
         }
       ],
-      "drop": {
-        "baseDropChance": 0.0001,
-        "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 0.00000016777675,
-        "maxResonanceBonus": 0.01
-      },
       "evolution": {
         "id": "evolution.zombie",
         "name": "Legacy Awakening",
@@ -2113,12 +1795,6 @@
           "baseValue": 1
         }
       ],
-      "drop": {
-        "baseDropChance": 0.0001,
-        "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 0.00000023488725,
-        "maxResonanceBonus": 0.01
-      },
       "evolution": {
         "id": "evolution.half_zombie",
         "name": "Legacy Awakening",
@@ -2150,12 +1826,6 @@
           "baseValue": 2
         }
       ],
-      "drop": {
-        "baseDropChance": 0.0001,
-        "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 0.00000023488725,
-        "maxResonanceBonus": 0.01
-      },
       "evolution": {
         "id": "evolution.undead",
         "name": "Legacy Awakening",
@@ -2187,12 +1857,6 @@
           "baseValue": 2
         }
       ],
-      "drop": {
-        "baseDropChance": 0.0001,
-        "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 0.000000391479,
-        "maxResonanceBonus": 0.01
-      },
       "evolution": {
         "id": "evolution.blood_zombie",
         "name": "Legacy Awakening",
@@ -2224,12 +1888,6 @@
           "baseValue": 3
         }
       ],
-      "drop": {
-        "baseDropChance": 0.0001,
-        "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 0.0000001957395,
-        "maxResonanceBonus": 0.01
-      },
       "evolution": {
         "id": "evolution.giant_worm",
         "name": "Legacy Awakening",
@@ -2261,12 +1919,6 @@
           "baseValue": 1
         }
       ],
-      "drop": {
-        "baseDropChance": 0.0001,
-        "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 0.0000002669175,
-        "maxResonanceBonus": 0.01
-      },
       "evolution": {
         "id": "evolution.burrowed_horror",
         "name": "Legacy Awakening",
@@ -2298,12 +1950,6 @@
           "baseValue": 1
         }
       ],
-      "drop": {
-        "baseDropChance": 0.0001,
-        "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 0.0000003262325,
-        "maxResonanceBonus": 0.01
-      },
       "evolution": {
         "id": "evolution.cave_leech",
         "name": "Legacy Awakening",
@@ -2335,12 +1981,6 @@
           "baseValue": 1
         }
       ],
-      "drop": {
-        "baseDropChance": 0.0001,
-        "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 0.0000003670115,
-        "maxResonanceBonus": 0.01
-      },
       "evolution": {
         "id": "evolution.stonejaw_grub",
         "name": "Legacy Awakening",
@@ -2372,12 +2012,6 @@
           "baseValue": 2
         }
       ],
-      "drop": {
-        "baseDropChance": 0.0001,
-        "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 0.00000041944175,
-        "maxResonanceBonus": 0.01
-      },
       "evolution": {
         "id": "evolution.deep_burrower",
         "name": "Legacy Awakening",

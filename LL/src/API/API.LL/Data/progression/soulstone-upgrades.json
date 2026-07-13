@@ -60,7 +60,7 @@
     "id": "essence.archive-focus",
     "branch": "EssenceArchive",
     "displayName": "Archive Focus",
-    "description": "Select one discovered monster each day and improve Essence drops from that monster.",
+    "description": "Select one discovered monster every 8 hours and improve Essence drops from that monster.",
     "maxRank": 5,
     "costsByRank": [25, 75, 150, 300, 600],
     "effects": [

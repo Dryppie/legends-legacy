@@ -15,15 +15,18 @@ public class CombatSetupService : ICombatSetupService
     private readonly ICreatureScaler _creatureScaler;
     private readonly IEssenceCombatLoadoutResolver _essenceCombatLoadoutResolver;
     private readonly IEssenceDefinitionRepository _essenceDefinitions;
+    private readonly ICreatureEssenceLootTableRepository _creatureEssenceLootTables;
 
     public CombatSetupService(
         ICreatureScaler creatureScaler,
         IEssenceCombatLoadoutResolver essenceCombatLoadoutResolver,
-        IEssenceDefinitionRepository essenceDefinitions)
+        IEssenceDefinitionRepository essenceDefinitions,
+        ICreatureEssenceLootTableRepository creatureEssenceLootTables)
     {
         _creatureScaler = creatureScaler;
         _essenceCombatLoadoutResolver = essenceCombatLoadoutResolver;
         _essenceDefinitions = essenceDefinitions;
+        _creatureEssenceLootTables = creatureEssenceLootTables;
     }
 
     public List<CombatEntity> CreatePlayerCombatEntities(List<Entity> entities)
@@ -57,8 +60,19 @@ public class CombatSetupService : ICombatSetupService
                 };
                 var monsterId = CreatureEssenceSource.GetMonsterDefinitionId(creature);
                 combatEntity.SourceMonsterId = monsterId;
-                if (_essenceDefinitions.GetByMonsterId(monsterId) is { } essenceDefinition)
-                    combatEntity.Tags = new HashSet<string>(essenceDefinition.Tags, StringComparer.OrdinalIgnoreCase);
+                if (_creatureEssenceLootTables.GetByCreatureId(monsterId) is { } lootTable)
+                {
+                    combatEntity.NativeAbilityIds = lootTable.Variants
+                        .Select(x => x.ActiveAbilityId)
+                        .Prepend(lootTable.PassiveAbilityId)
+                        .Distinct(StringComparer.OrdinalIgnoreCase)
+                        .ToList();
+                    combatEntity.Tags = lootTable.Variants
+                        .Select(x => _essenceDefinitions.GetById(x.EssenceDefinitionId))
+                        .Where(x => x is not null)
+                        .SelectMany(x => x!.Tags)
+                        .ToHashSet(StringComparer.OrdinalIgnoreCase);
+                }
 
                 combatEntities.Add(combatEntity);
             }
@@ -130,8 +144,11 @@ public class CombatSetupService : ICombatSetupService
         if (entity.HasEquippedEssenceSnapshot)
             return Task.FromResult(_essenceCombatLoadoutResolver.Resolve(entity.OriginalId, entity.EquippedEssences));
 
-        if (!string.IsNullOrWhiteSpace(entity.SourceMonsterId)
-            && _essenceDefinitions.GetByMonsterId(entity.SourceMonsterId) is { } essenceDefinition)
+        var firstVariant = string.IsNullOrWhiteSpace(entity.SourceMonsterId)
+            ? null
+            : _creatureEssenceLootTables.GetByCreatureId(entity.SourceMonsterId)?.Variants.FirstOrDefault();
+        if (firstVariant is not null
+            && _essenceDefinitions.GetById(firstVariant.EssenceDefinitionId) is { } essenceDefinition)
         {
             var monsterEssence = new PlayerEssence
             {

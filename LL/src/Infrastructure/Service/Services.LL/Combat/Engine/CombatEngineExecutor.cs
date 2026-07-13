@@ -30,11 +30,11 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
         cancellationToken.ThrowIfCancellationRequested();
 
         var catalog = _catalogProvider.GetCatalog();
-        var equippedEssenceIds = runtime.FriendlyParticipants
+        var abilityIds = runtime.FriendlyParticipants
             .Concat(runtime.HostileParticipants)
-            .SelectMany(participant => GetEquippedEssenceIds(participant.Combatant))
+            .SelectMany(participant => GetCombatantAbilityIds(participant.Combatant, catalog))
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
-        var abilitySpecs = SelectAbilitySpecsForEssencesAndSummons(catalog, equippedEssenceIds).ToList();
+        var abilitySpecs = SelectAbilitySpecsAndSummons(catalog, abilityIds).ToList();
         var summonIds = SelectSummonIds(abilitySpecs).ToHashSet(StringComparer.OrdinalIgnoreCase);
         var compiledAbilities = AbilityCompiler.CompileAbilities(abilitySpecs);
         var compiledStatuses = AbilityCompiler.CompileStatuses(catalog.Statuses);
@@ -102,11 +102,10 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
 
         foreach (var essence in combatant.EquippedEssences)
         {
-            if (string.IsNullOrWhiteSpace(essence.EssenceDefinitionId)
-                || !catalog.AbilityIdsByOwningEssence.TryGetValue(essence.EssenceDefinitionId, out var abilityIds))
+            if (string.IsNullOrWhiteSpace(essence.EssenceDefinitionId))
                 continue;
 
-            foreach (var abilityId in abilityIds)
+            foreach (var abilityId in GetAbilityIdsForEssence(essence.EssenceDefinitionId, catalog))
             {
                 if (!selected.Add(abilityId))
                     continue;
@@ -121,12 +120,20 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
             }
         }
 
-        foreach (var essenceId in GetTaggedEssenceIds(combatant.Tags))
+        foreach (var abilityId in combatant.NativeAbilityIds)
         {
-            if (!catalog.AbilityIdsByOwningEssence.TryGetValue(essenceId, out var abilityIds))
+            if (!selected.Add(abilityId) || !catalog.AbilitiesById.TryGetValue(abilityId, out var baseSpec))
                 continue;
 
-            foreach (var abilityId in abilityIds)
+            var modifiedSpec = ApplyTemporaryAbilityModifiers(baseSpec, combatant, catalog);
+            yield return ReferenceEquals(baseSpec, modifiedSpec)
+                ? compiledAbilities[abilityId]
+                : AbilityCompiler.CompileAbility(modifiedSpec);
+        }
+
+        foreach (var essenceId in GetTaggedEssenceIds(combatant.Tags))
+        {
+            foreach (var abilityId in GetAbilityIdsForEssence(essenceId, catalog))
             {
                 if (!selected.Add(abilityId))
                     continue;
@@ -140,19 +147,20 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
         }
     }
 
-    private static IEnumerable<AbilitySpec> SelectAbilitySpecsForEssencesAndSummons(
+    private static IEnumerable<AbilitySpec> SelectAbilitySpecsAndSummons(
         AbilityCatalog catalog,
-        IEnumerable<string> essenceIds)
+        IEnumerable<string> initialAbilityIds)
     {
         var selected = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-        var queue = new Queue<string>(SelectAbilityIdsForEssences(catalog, essenceIds));
+        var queue = new Queue<string>(initialAbilityIds);
 
         while (queue.TryDequeue(out var abilityId))
         {
             if (!selected.Add(abilityId))
                 continue;
 
-            var ability = catalog.AbilitiesById[abilityId];
+            if (!catalog.AbilitiesById.TryGetValue(abilityId, out var ability))
+                continue;
             yield return ability;
 
             foreach (var summonId in SelectSummonIds([ability]))
@@ -522,23 +530,42 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
             .Where(effect => effect.Operation == AbilityEffectOperation.Summon && !string.IsNullOrWhiteSpace(effect.SummonId))
             .Select(effect => effect.SummonId!);
 
-    private static IEnumerable<string> SelectAbilityIdsForEssences(
-        AbilityCatalog catalog,
-        IEnumerable<string> essenceIds)
+    private IEnumerable<string> GetCombatantAbilityIds(CombatEntity combatant, AbilityCatalog catalog)
     {
         var selected = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
-        foreach (var essenceId in essenceIds)
+        foreach (var abilityId in combatant.NativeAbilityIds)
         {
-            if (!catalog.AbilityIdsByOwningEssence.TryGetValue(essenceId, out var abilityIds))
-                continue;
+            if (selected.Add(abilityId))
+                yield return abilityId;
+        }
 
-            foreach (var abilityId in abilityIds)
+        foreach (var essenceId in GetEquippedEssenceIds(combatant))
+        {
+            foreach (var abilityId in GetAbilityIdsForEssence(essenceId, catalog))
             {
                 if (selected.Add(abilityId))
                     yield return abilityId;
             }
         }
+    }
+
+    private IEnumerable<string> GetAbilityIdsForEssence(string essenceId, AbilityCatalog catalog)
+    {
+        if (_essenceDefinitions?.GetById(essenceId) is { } definition)
+        {
+            if (!string.IsNullOrWhiteSpace(definition.ActiveAbilityId))
+                yield return definition.ActiveAbilityId;
+            if (!string.IsNullOrWhiteSpace(definition.PassiveAbilityId))
+                yield return definition.PassiveAbilityId;
+            yield break;
+        }
+
+        if (!catalog.AbilityIdsByOwningEssence.TryGetValue(essenceId, out var abilityIds))
+            yield break;
+
+        foreach (var abilityId in abilityIds)
+            yield return abilityId;
     }
 
     private static IEnumerable<string> GetEquippedEssenceIds(CombatEntity combatant)

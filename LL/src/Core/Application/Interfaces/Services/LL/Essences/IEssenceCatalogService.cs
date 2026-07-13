@@ -27,7 +27,7 @@ public sealed record EssenceCatalogMonster(
     string SourceType,
     string SourceName,
     string Tier,
-    EssenceCatalogEssence? Essence);
+    IReadOnlyList<EssenceCatalogEssence> Essences);
 
 public sealed record EssenceCatalogEssence(
     string Id,
@@ -37,19 +37,12 @@ public sealed record EssenceCatalogEssence(
     string? ItemId,
     IReadOnlyList<string> Tags,
     IReadOnlyList<EssenceCatalogAttributeBonus> AttributeBonuses,
-    EssenceCatalogDrop Drop,
     EssenceCatalogAbility? ActiveAbility,
     EssenceCatalogAbility? PassiveAbility);
 
 public sealed record EssenceCatalogAttributeBonus(
     string Attribute,
     double BaseValue);
-
-public sealed record EssenceCatalogDrop(
-    double BaseDropChance,
-    double ResonanceGainPerFailedEligibleKill,
-    double DropChanceBonusPerResonance,
-    double MaxResonanceBonus);
 
 public sealed record EssenceCatalogAbility(
     string Id,

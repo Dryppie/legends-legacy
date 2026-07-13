@@ -138,6 +138,71 @@ public sealed class EssenceSystemServiceTests
     }
 
     [Fact]
+    public async Task Loadouts_allow_one_essence_per_creature_and_revalidate_on_activation()
+    {
+        await using var db = CreateDb();
+        var characterId = await SeedCharacterAndInventoryAsync(db, level: 20);
+        var firstVariantId = await AddPlayerEssenceAsync(db, characterId, "essence.test");
+        var secondVariantId = await AddPlayerEssenceAsync(db, characterId, "essence.alternate");
+        var otherCreatureId = await AddPlayerEssenceAsync(db, characterId, "essence.other");
+        var lootTables = new StaticCreatureEssenceLootTableRepository(
+        [
+            new CreatureEssenceLootTableDefinition
+            {
+                CreatureId = "monster.test",
+                BaseDropChance = 0.5,
+                PassiveAbilityId = "essence.test.passive",
+                Variants =
+                [
+                    new() { EssenceDefinitionId = "essence.test", ActiveAbilityId = "essence.test.active" },
+                    new() { EssenceDefinitionId = "essence.alternate", ActiveAbilityId = "essence.alternate.active" }
+                ]
+            },
+            CreateLootTable("monster.other", "essence.other")
+        ]);
+        var service = CreateService(db, creatureEssenceLootTables: lootTables);
+
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            service.SaveLoadoutAsync(
+                characterId,
+                new SaveEssenceLoadoutRequest(null, "Same creature", [new(0, firstVariantId), new(1, secondVariantId)]),
+                CancellationToken.None));
+
+        var allowedSavedLoadout = new EssenceLoadout
+        {
+            Id = Guid.NewGuid(),
+            CharacterId = characterId,
+            Name = "Different creatures",
+            Slots =
+            [
+                new() { Id = Guid.NewGuid(), SlotIndex = 0, PlayerEssenceId = firstVariantId },
+                new() { Id = Guid.NewGuid(), SlotIndex = 1, PlayerEssenceId = otherCreatureId }
+            ]
+        };
+        var invalidSavedLoadout = new EssenceLoadout
+        {
+            Id = Guid.NewGuid(),
+            CharacterId = characterId,
+            Name = "Legacy invalid",
+            Slots =
+            [
+                new() { Id = Guid.NewGuid(), SlotIndex = 0, PlayerEssenceId = firstVariantId },
+                new() { Id = Guid.NewGuid(), SlotIndex = 1, PlayerEssenceId = secondVariantId }
+            ]
+        };
+        db.EssenceLoadouts.AddRange(allowedSavedLoadout, invalidSavedLoadout);
+        await db.SaveChangesAsync();
+
+        var allowedActivation = await service.ActivateLoadoutAsync(characterId, allowedSavedLoadout.Id, CancellationToken.None);
+        var activation = await service.ActivateLoadoutAsync(characterId, invalidSavedLoadout.Id, CancellationToken.None);
+
+        Assert.Contains("same creature", exception.Message, StringComparison.OrdinalIgnoreCase);
+        Assert.True(allowedActivation.Succeeded);
+        Assert.False(activation.Succeeded);
+        Assert.Contains("same creature", activation.Message, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
     public async Task Only_attuned_essences_contribute_bonuses_and_gain_combat_xp()
     {
         await using var db = CreateDb();
@@ -297,7 +362,8 @@ public sealed class EssenceSystemServiceTests
         var service = new CombatSetupService(
             new NoopCreatureScaler(),
             new EmptyEssenceCombatLoadoutResolver(),
-            new SingleDefinitionRepository(definition));
+            new SingleDefinitionRepository(definition),
+            new StaticCreatureEssenceLootTableRepository([CreateLootTable("monster.utility_beast", definition.Id)]));
 
         var entities = service.CreateCreatureCombatEntities([new Creature { Name = "Utility Beast" }], new Area());
 
@@ -305,6 +371,35 @@ public sealed class EssenceSystemServiceTests
         Assert.Equal("monster.utility_beast", entity.SourceMonsterId);
         Assert.Contains("Species.Beast", entity.Tags);
         Assert.Contains("Role.Support", entity.Tags);
+    }
+
+    [Fact]
+    public void CreateCreatureCombatEntities_uses_one_shared_passive_and_every_active_variant()
+    {
+        var definitions = new FakeDefinitionRepository();
+        var lootTable = new CreatureEssenceLootTableDefinition
+        {
+            CreatureId = "monster.test",
+            BaseDropChance = 0.5,
+            PassiveAbilityId = "essence.test.passive",
+            Variants =
+            [
+                new() { EssenceDefinitionId = "essence.test", ActiveAbilityId = "essence.test.active", Weight = 1 },
+                new() { EssenceDefinitionId = "essence.alternate", ActiveAbilityId = "essence.alternate.active", Weight = 1 }
+            ]
+        };
+        var service = new CombatSetupService(
+            new NoopCreatureScaler(),
+            new EmptyEssenceCombatLoadoutResolver(),
+            definitions,
+            new StaticCreatureEssenceLootTableRepository([lootTable]));
+
+        var entity = Assert.Single(service.CreateCreatureCombatEntities([new Creature { Name = "Test" }], new Area()));
+
+        Assert.Equal(3, entity.NativeAbilityIds.Count);
+        Assert.Contains("essence.test.passive", entity.NativeAbilityIds);
+        Assert.Contains("essence.test.active", entity.NativeAbilityIds);
+        Assert.Contains("essence.alternate.active", entity.NativeAbilityIds);
     }
 
     [Fact]
@@ -316,7 +411,8 @@ public sealed class EssenceSystemServiceTests
         var service = new CombatSetupService(
             new NoopCreatureScaler(),
             essenceService,
-            new SingleDefinitionRepository(definition));
+            new SingleDefinitionRepository(definition),
+            new StaticCreatureEssenceLootTableRepository([CreateLootTable("monster.utility_beast", definition.Id)]));
         var creature = new Creature { Name = "Utility Beast", Level = 4, Tier = 4 };
         var combatEntity = service.CreateCreatureCombatEntities([creature], new Area()).Single();
 
@@ -580,7 +676,8 @@ public sealed class EssenceSystemServiceTests
         var setup = new CombatSetupService(
             new NoopCreatureScaler(),
             essenceService,
-            new FakeDefinitionRepository());
+            new FakeDefinitionRepository(),
+            new StaticCreatureEssenceLootTableRepository([]));
         var combatEntity = setup.CreatePlayerCombatEntities([character]).Single();
 
         await setup.PrepareEntitiesForCombat([combatEntity]);
@@ -690,10 +787,11 @@ public sealed class EssenceSystemServiceTests
         await db.SaveChangesAsync();
 
         Assert.False(failed.Dropped);
-        Assert.Equal(1, failed.ResonanceValue);
+        Assert.Equal(CreatureResonanceConstants.GainPerFailedEligibleKill, failed.ResonanceValue);
         Assert.True(dropped.Dropped);
+        Assert.Equal(0.5 + CreatureResonanceConstants.DropChanceBonusPerPoint, dropped.EffectiveDropChance);
         Assert.Equal(0, dropped.ResonanceValue);
-        Assert.Equal(0, db.MonsterResonances.Single().ResonanceValue);
+        Assert.Equal(0, db.CreatureResonances.Single().ResonanceValue);
     }
 
     [Fact]
@@ -713,8 +811,37 @@ public sealed class EssenceSystemServiceTests
         await db.SaveChangesAsync();
 
         Assert.False(failed.Dropped);
-        Assert.Equal(1.25, failed.ResonanceValue);
-        Assert.Equal(1.25, db.MonsterResonances.Single().ResonanceValue);
+        var expectedResonance = CreatureResonanceConstants.GainPerFailedEligibleKill * 1.25;
+        Assert.Equal(expectedResonance, failed.ResonanceValue);
+        Assert.Equal(expectedResonance, db.CreatureResonances.Single().ResonanceValue);
+    }
+
+    [Fact]
+    public async Task Resonance_drop_chance_bonus_reaches_its_shared_cap_after_twelve_thousand_failed_kills()
+    {
+        await using var db = CreateDb();
+        var characterId = await SeedCharacterAndInventoryAsync(db);
+        db.CreatureResonances.Add(new CreatureResonance
+        {
+            Id = Guid.NewGuid(),
+            CharacterId = characterId,
+            CreatureId = "monster.test",
+            ResonanceValue = CreatureResonanceConstants.FailedEligibleKillsToMaximumBonus - 1
+        });
+        await db.SaveChangesAsync();
+        var service = CreateService(db, new QueueRandomProvider(0.99, 0.99));
+
+        var finalProgressionRoll = await service.RollMonsterEssenceDropAsync(characterId, "monster.test", true, CancellationToken.None);
+        var cappedRoll = await service.RollMonsterEssenceDropAsync(characterId, "monster.test", true, CancellationToken.None);
+
+        Assert.False(finalProgressionRoll.Dropped);
+        Assert.Equal(CreatureResonanceConstants.FailedEligibleKillsToMaximumBonus, finalProgressionRoll.ResonanceValue);
+        Assert.Equal(
+            0.5 + CreatureResonanceConstants.MaximumDropChanceBonus - CreatureResonanceConstants.DropChanceBonusPerPoint,
+            finalProgressionRoll.EffectiveDropChance,
+            precision: 12);
+        Assert.False(cappedRoll.Dropped);
+        Assert.Equal(0.5 + CreatureResonanceConstants.MaximumDropChanceBonus, cappedRoll.EffectiveDropChance, precision: 12);
     }
 
     [Fact]
@@ -763,6 +890,40 @@ public sealed class EssenceSystemServiceTests
     }
 
     [Fact]
+    public async Task Successful_creature_drop_uses_weighted_essence_loot_table()
+    {
+        await using var db = CreateDb();
+        var characterId = await SeedCharacterAndInventoryAsync(db);
+        var lootTables = new StaticCreatureEssenceLootTableRepository(
+        [
+            new CreatureEssenceLootTableDefinition
+            {
+                CreatureId = "monster.test",
+                BaseDropChance = 1,
+                PassiveAbilityId = "essence.test.passive",
+                Variants =
+                [
+                    new() { EssenceDefinitionId = "essence.test", ActiveAbilityId = "essence.test.active", Weight = 1 },
+                    new() { EssenceDefinitionId = "essence.alternate", ActiveAbilityId = "essence.alternate.active", Weight = 3 }
+                ]
+            }
+        ]);
+        var service = CreateService(
+            db,
+            new QueueRandomProvider(0, 0.9),
+            creatureEssenceLootTables: lootTables);
+
+        var result = await service.RollMonsterEssenceDropAsync(
+            characterId,
+            "monster.test",
+            true,
+            CancellationToken.None);
+
+        Assert.True(result.Dropped);
+        Assert.Equal("essence.alternate", result.EssenceDefinitionId);
+    }
+
+    [Fact]
     public async Task RollEssenceDrops_reuses_bonus_factors_and_focus_lookups_for_defeated_creature_batch()
     {
         await using var db = CreateDb();
@@ -806,15 +967,22 @@ public sealed class EssenceSystemServiceTests
         LLDbContext db,
         IRandomProvider? random = null,
         IEssenceDefinitionRepository? definitions = null,
+        ICreatureEssenceLootTableRepository? creatureEssenceLootTables = null,
         IBonusService? bonusService = null,
         ICreatureArchiveService? creatureArchiveService = null)
     {
         definitions ??= new FakeDefinitionRepository();
+        creatureEssenceLootTables ??= new StaticCreatureEssenceLootTableRepository(
+        [
+            CreateLootTable("monster.test", "essence.test"),
+            CreateLootTable("monster.other", "essence.other")
+        ]);
         return new EssenceSystemService(
             new EssenceRepository(db),
             new InventoryRepository(db),
             new ItemBaseRepository(db),
             definitions,
+            creatureEssenceLootTables,
             new EssenceProgressionService(),
             new EssenceSlotUnlockService(),
             new EssenceLoadoutLimitService(),
@@ -824,6 +992,15 @@ public sealed class EssenceSystemServiceTests
             bonusService: bonusService,
             creatureArchiveService: creatureArchiveService);
     }
+
+    private static CreatureEssenceLootTableDefinition CreateLootTable(string creatureId, string essenceDefinitionId) =>
+        new()
+        {
+            CreatureId = creatureId,
+            BaseDropChance = 0.5,
+            PassiveAbilityId = $"{essenceDefinitionId}.passive",
+            Variants = [new() { EssenceDefinitionId = essenceDefinitionId, ActiveAbilityId = $"{essenceDefinitionId}.active", Weight = 1 }]
+        };
 
     private static EssenceDefinition UtilityDefinition() => new()
     {
@@ -936,6 +1113,7 @@ public sealed class EssenceSystemServiceTests
         private readonly IReadOnlyList<EssenceDefinition> _definitions =
         [
             CreateDefinition("essence.test", "monster.test"),
+            CreateDefinition("essence.alternate", "monster.test", "essence.test.passive"),
             CreateDefinition("essence.other", "monster.other")
         ];
 
@@ -944,9 +1122,6 @@ public sealed class EssenceSystemServiceTests
         public EssenceDefinition? GetById(string essenceDefinitionId) =>
             _definitions.FirstOrDefault(x => x.Id.Equals(essenceDefinitionId, StringComparison.OrdinalIgnoreCase));
 
-        public EssenceDefinition? GetByMonsterId(string monsterId) =>
-            _definitions.FirstOrDefault(x => x.SourceMonsterId.Equals(monsterId, StringComparison.OrdinalIgnoreCase));
-
         public AbilitySpec? GetAbilityById(string abilityId) =>
             _definitions.SelectMany(x => new[] { x.ActiveAbility, x.PassiveAbility })
                 .FirstOrDefault(x => x.Id.Equals(abilityId, StringComparison.OrdinalIgnoreCase));
@@ -954,13 +1129,13 @@ public sealed class EssenceSystemServiceTests
         public IReadOnlyList<AbilitySpec> GetAllAbilities() =>
             _definitions.SelectMany(x => new[] { x.ActiveAbility, x.PassiveAbility }).ToList();
 
-        public static EssenceDefinition CreateDefinition(string id, string monsterId) => new()
+        public static EssenceDefinition CreateDefinition(string id, string monsterId, string? passiveAbilityId = null) => new()
         {
             Id = id,
             SourceMonsterId = monsterId,
             Name = id,
             ActiveAbilityId = $"{id}.active",
-            PassiveAbilityId = $"{id}.passive",
+            PassiveAbilityId = passiveAbilityId ?? $"{id}.passive",
             Tags = ["Species.Beast", "Role.Offensive"],
             AttributeBonuses =
             [
@@ -981,7 +1156,7 @@ public sealed class EssenceSystemServiceTests
             },
             PassiveAbility = new AbilitySpec
             {
-                Id = $"{id}.passive",
+                Id = passiveAbilityId ?? $"{id}.passive",
                 Kind = AbilitySpecKind.Passive,
                 Name = "Passive",
                 Tags = ["Trigger.OnHit"],
@@ -996,15 +1171,21 @@ public sealed class EssenceSystemServiceTests
                 RequiredCatalystItemId = "item.evolution_catalyst.test",
                 AddsTags = ["Mechanic.Execute"],
                 ActiveAbilityModifiers = [new() { Target = "effect.damage.main", Operation = "AddMultiplier", Value = 0.5 }]
-            },
-            Drop = new EssenceDropDefinition
-            {
-                BaseDropChance = 0.5,
-                ResonanceGainPerFailedEligibleKill = 1,
-                DropChanceBonusPerResonance = 0.25,
-                MaxResonanceBonus = 0.25
             }
         };
+    }
+
+    private sealed class StaticCreatureEssenceLootTableRepository(
+        IReadOnlyList<CreatureEssenceLootTableDefinition> tables) : ICreatureEssenceLootTableRepository
+    {
+        public IReadOnlyList<CreatureEssenceLootTableDefinition> GetAll() => tables;
+
+        public CreatureEssenceLootTableDefinition? GetByCreatureId(string creatureId) =>
+            tables.FirstOrDefault(x => x.CreatureId.Equals(creatureId, StringComparison.OrdinalIgnoreCase));
+
+        public CreatureEssenceLootTableDefinition? GetByEssenceDefinitionId(string essenceDefinitionId) =>
+            tables.FirstOrDefault(table => table.Variants.Any(variant =>
+                variant.EssenceDefinitionId.Equals(essenceDefinitionId, StringComparison.OrdinalIgnoreCase)));
     }
 
     private sealed class SingleDefinitionRepository(EssenceDefinition definition) : IEssenceDefinitionRepository
@@ -1012,8 +1193,6 @@ public sealed class EssenceSystemServiceTests
         public IReadOnlyList<EssenceDefinition> GetAll() => [definition];
         public EssenceDefinition? GetById(string essenceDefinitionId) =>
             definition.Id.Equals(essenceDefinitionId, StringComparison.OrdinalIgnoreCase) ? definition : null;
-        public EssenceDefinition? GetByMonsterId(string monsterId) =>
-            definition.SourceMonsterId.Equals(monsterId, StringComparison.OrdinalIgnoreCase) ? definition : null;
         public AbilitySpec? GetAbilityById(string abilityId) =>
             new[] { definition.ActiveAbility, definition.PassiveAbility }
                 .FirstOrDefault(x => x.Id.Equals(abilityId, StringComparison.OrdinalIgnoreCase));
