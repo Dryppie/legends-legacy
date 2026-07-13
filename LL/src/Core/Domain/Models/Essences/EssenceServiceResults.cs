@@ -52,8 +52,9 @@ public sealed record EssenceCodexEntry(
     IReadOnlyList<EssenceCodexMember> Essences);
 
 public sealed record EssenceCodexMember(
-    string EssenceDefinitionId,
+    string? EssenceDefinitionId,
     string Name,
+    bool IsDiscovered,
     bool IsAbsorbed,
     int AscensionTier);
 

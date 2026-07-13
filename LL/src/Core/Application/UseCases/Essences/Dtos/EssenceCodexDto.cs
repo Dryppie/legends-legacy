@@ -48,13 +48,14 @@ public sealed record EssenceCodexEntryDto(
 }
 
 public sealed record EssenceCodexMemberDto(
-    string EssenceDefinitionId,
+    string? EssenceDefinitionId,
     string Name,
+    bool IsDiscovered,
     bool IsAbsorbed,
     int AscensionTier) : IMapFrom<EssenceCodexMember>
 {
     public EssenceCodexMemberDto()
-        : this(string.Empty, string.Empty, false, 0)
+        : this(null, string.Empty, false, false, 0)
     {
     }
 

@@ -11,24 +11,27 @@ public sealed class EssenceCodexCollectionService : IEssenceCodexCollectionServi
     private readonly IDbContext _dbContext;
     private readonly IEssenceCodexCollectionDefinitionProvider _collectionDefinitions;
     private readonly IEssenceDefinitionRepository _essenceDefinitions;
+    private readonly ICreatureEssenceLootTableRepository _creatureEssenceLootTables;
 
     public EssenceCodexCollectionService(
         IDbContext dbContext,
         IEssenceCodexCollectionDefinitionProvider collectionDefinitions,
-        IEssenceDefinitionRepository essenceDefinitions)
+        IEssenceDefinitionRepository essenceDefinitions,
+        ICreatureEssenceLootTableRepository creatureEssenceLootTables)
     {
         _dbContext = dbContext;
         _collectionDefinitions = collectionDefinitions;
         _essenceDefinitions = essenceDefinitions;
+        _creatureEssenceLootTables = creatureEssenceLootTables;
     }
 
     public async Task<IReadOnlyList<EssenceCodexEntry>> GetVisibleEntriesAsync(Guid characterId, CancellationToken cancellationToken)
     {
         var absorbedEssences = await GetAbsorbedEssencesAsync(characterId, cancellationToken);
+        var discoveredCreatureIds = await GetDiscoveredCreatureIdsAsync(characterId, cancellationToken);
 
         return _collectionDefinitions.GetAll()
-            .Where(collection => collection.EssenceDefinitionIds.Any(absorbedEssences.ContainsKey))
-            .Select(collection => CreateEntry(collection, absorbedEssences))
+            .Select(collection => CreateEntry(collection, absorbedEssences, discoveredCreatureIds))
             .OrderBy(entry => entry.IsUnlocked ? 0 : 1)
             .ThenBy(entry => entry.Category)
             .ThenBy(entry => entry.Title)
@@ -54,18 +57,36 @@ public sealed class EssenceCodexCollectionService : IEssenceCodexCollectionServi
                 StringComparer.OrdinalIgnoreCase);
     }
 
+    private async Task<IReadOnlySet<string>> GetDiscoveredCreatureIdsAsync(
+        Guid characterId,
+        CancellationToken cancellationToken)
+    {
+        var creatureIds = await _dbContext.CharacterCreatureArchiveEntries
+            .Where(x => x.CharacterId == characterId)
+            .Select(x => x.CreatureDefinitionId)
+            .Distinct()
+            .ToListAsync(cancellationToken);
+
+        return creatureIds.ToHashSet(StringComparer.OrdinalIgnoreCase);
+    }
+
     private EssenceCodexEntry CreateEntry(
         EssenceCodexCollectionDefinition collection,
-        IReadOnlyDictionary<string, int> absorbedEssences)
+        IReadOnlyDictionary<string, int> absorbedEssences,
+        IReadOnlySet<string> discoveredCreatureIds)
     {
         var members = collection.EssenceDefinitionIds
             .Select(id =>
             {
                 var definition = _essenceDefinitions.GetById(id);
                 var isAbsorbed = absorbedEssences.TryGetValue(id, out var ascensionTier);
+                var sourceCreatureId = _creatureEssenceLootTables.GetByEssenceDefinitionId(id)?.CreatureId;
+                var isDiscovered = isAbsorbed ||
+                    sourceCreatureId is not null && discoveredCreatureIds.Contains(sourceCreatureId);
                 return new EssenceCodexMember(
-                    id,
-                    definition?.Name ?? FormatEssenceName(id),
+                    isDiscovered ? id : null,
+                    isDiscovered ? definition?.Name ?? FormatEssenceName(id) : "Undiscovered Essence",
+                    isDiscovered,
                     isAbsorbed,
                     isAbsorbed ? ascensionTier : 0);
             })

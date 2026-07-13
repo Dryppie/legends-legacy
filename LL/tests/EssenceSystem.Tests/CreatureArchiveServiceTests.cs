@@ -226,7 +226,57 @@ public sealed class CreatureArchiveServiceTests
     }
 
     [Fact]
-    public async Task GetEssenceCodex_reveals_collection_when_one_member_has_been_absorbed()
+    public async Task GetEssenceCodex_lists_unstarted_collections_with_hidden_members()
+    {
+        await using var db = CreateDb();
+        var service = CreateService(db);
+
+        var codex = await service.GetEssenceCodexAsync(Guid.NewGuid(), CancellationToken.None);
+
+        var entry = Assert.Single(codex.Entries);
+        Assert.Equal("codex.collection.beasts", entry.Id);
+        Assert.Equal(0, entry.Current);
+        Assert.Equal(3, entry.Required);
+        Assert.False(entry.IsUnlocked);
+        Assert.All(entry.Essences, member =>
+        {
+            Assert.False(member.IsDiscovered);
+            Assert.False(member.IsAbsorbed);
+            Assert.Null(member.EssenceDefinitionId);
+            Assert.Equal("Undiscovered Essence", member.Name);
+        });
+    }
+
+    [Fact]
+    public async Task GetEssenceCodex_reveals_members_after_their_creature_is_defeated()
+    {
+        await using var db = CreateDb();
+        var characterId = Guid.NewGuid();
+        db.Set<CharacterCreatureArchiveEntry>().Add(new CharacterCreatureArchiveEntry
+        {
+            Id = Guid.NewGuid(),
+            CharacterId = characterId,
+            CreatureDefinitionId = "monster.cave_bat",
+            CreatureName = "Cave Bat",
+            KillCount = 1,
+            FirstDefeatedAtUtc = DateTimeOffset.UtcNow,
+            LastDefeatedAtUtc = DateTimeOffset.UtcNow
+        });
+        await db.SaveChangesAsync();
+        var service = CreateService(db);
+
+        var codex = await service.GetEssenceCodexAsync(characterId, CancellationToken.None);
+
+        var entry = Assert.Single(codex.Entries);
+        var discovered = Assert.Single(entry.Essences, member => member.IsDiscovered);
+        Assert.Equal("essence.cave_bat", discovered.EssenceDefinitionId);
+        Assert.Equal("Cave Bat Essence", discovered.Name);
+        Assert.False(discovered.IsAbsorbed);
+        Assert.Equal(2, entry.Essences.Count(member => !member.IsDiscovered));
+    }
+
+    [Fact]
+    public async Task GetEssenceCodex_reveals_absorbed_member_without_creature_archive_history()
     {
         await using var db = CreateDb();
         var characterId = Guid.NewGuid();
@@ -251,8 +301,12 @@ public sealed class CreatureArchiveServiceTests
         Assert.Equal(50, entry.BonusValue);
         Assert.Equal(0, entry.CollectionAscensionTier);
         Assert.Equal(10, entry.BonusValuePerCollectionAscensionTier);
-        Assert.Contains(entry.Essences, member => member.EssenceDefinitionId == "essence.cave_bat" && member.IsAbsorbed && member.AscensionTier == 0);
-        Assert.Contains(entry.Essences, member => member.EssenceDefinitionId == "essence.forest_wolf" && !member.IsAbsorbed);
+        Assert.Contains(entry.Essences, member =>
+            member.EssenceDefinitionId == "essence.cave_bat" &&
+            member.IsDiscovered &&
+            member.IsAbsorbed &&
+            member.AscensionTier == 0);
+        Assert.Equal(2, entry.Essences.Count(member => !member.IsDiscovered && !member.IsAbsorbed));
     }
 
     [Fact]
@@ -334,17 +388,23 @@ public sealed class CreatureArchiveServiceTests
     private static CreatureArchiveService CreateService(LLDbContext db)
     {
         var definitions = new FakeDefinitionRepository();
+        var lootTables = new FakeCreatureEssenceLootTableRepository(definitions);
         return new(
             db,
             definitions,
-            new FakeCreatureEssenceLootTableRepository(definitions),
-            CreateCodexCollectionService(db, definitions));
+            lootTables,
+            CreateCodexCollectionService(db, definitions, lootTables));
     }
 
     private static EssenceCodexCollectionService CreateCodexCollectionService(
         LLDbContext db,
-        IEssenceDefinitionRepository definitions) =>
-        new(db, new FakeCollectionDefinitionProvider(), definitions);
+        IEssenceDefinitionRepository definitions,
+        ICreatureEssenceLootTableRepository? lootTables = null) =>
+        new(
+            db,
+            new FakeCollectionDefinitionProvider(),
+            definitions,
+            lootTables ?? new FakeCreatureEssenceLootTableRepository(definitions));
 
     private static PlayerEssence CreatePlayerEssence(
         Guid characterId,

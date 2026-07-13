@@ -796,7 +796,9 @@
 
         <div class="mt-3 rounded border border-light_gray/60 p-2 text-xs">
           <div class="flex items-center justify-between gap-3">
-            <span class="text-zinc-400">Current bonus</span>
+            <span class="text-zinc-400">
+              {{ entry.isUnlocked ? "Current bonus" : "Unlock bonus" }}
+            </span>
             <span class="text-primary">{{ bonusValueLabel(entry) }}</span>
           </div>
           <div class="mt-1 flex items-center justify-between gap-3">
@@ -813,10 +815,19 @@
           <div
             *ngFor="let member of entry.essences; trackBy: trackCodexMember"
             class="flex items-center justify-between gap-3 rounded border border-light_gray/60 px-2 py-1.5 text-xs"
+            [ngClass]="{
+              'border-dashed opacity-70': !member.isDiscovered,
+            }"
           >
             <span
               class="min-w-0 truncate"
-              [ngClass]="member.isAbsorbed ? 'text-primary' : 'text-zinc-300'"
+              [ngClass]="
+                member.isAbsorbed
+                  ? 'text-primary'
+                  : member.isDiscovered
+                    ? 'text-zinc-300'
+                    : 'italic text-zinc-500'
+              "
             >
               {{ member.name }}
             </span>
@@ -829,7 +840,9 @@
               {{
                 member.isAbsorbed
                   ? "Asc " + member.ascensionTier
-                  : "Missing"
+                  : member.isDiscovered
+                    ? "Missing"
+                    : "Unknown"
               }}
             </span>
           </div>
@@ -856,7 +869,7 @@
       class="ll-empty-state"
       *ngIf="(essenceState.codex()?.entries?.length ?? 0) === 0"
     >
-      Absorb an Essence that belongs to a collection to reveal Codex entries.
+      No Essence Codex collections are configured.
     </p>
   </section>
 </div>

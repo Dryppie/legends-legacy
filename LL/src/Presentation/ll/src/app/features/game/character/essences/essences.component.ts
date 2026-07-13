@@ -322,8 +322,8 @@ export class EssencesComponent implements OnInit {
     return entry.id;
   }
 
-  public trackCodexMember(_: number, member: EssenceCodexMemberDto): string {
-    return member.essenceDefinitionId;
+  public trackCodexMember(index: number, member: EssenceCodexMemberDto): string {
+    return member.essenceDefinitionId ?? `undiscovered-${index}`;
   }
 
   public progressPercent(current: number, required: number): number {

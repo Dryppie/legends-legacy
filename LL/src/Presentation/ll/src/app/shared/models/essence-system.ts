@@ -114,8 +114,9 @@ export interface EssenceCodexEntryDto {
 }
 
 export interface EssenceCodexMemberDto {
-  essenceDefinitionId: string;
+  essenceDefinitionId: string | null;
   name: string;
+  isDiscovered: boolean;
   isAbsorbed: boolean;
   ascensionTier: number;
 }
