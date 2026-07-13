@@ -25,7 +25,6 @@ public class CombatEntity
                                         // Start at 300. Whenever it is equal to or lower than 0, perform the attack.
                                         // If you increase attack speed by 100%, BasicAttackSpeed goes from 10 to 20,
                                         // and thust counting down faster to the next attack each tick
-    public int NextRecoveryIn = 500; // This defines when the character regenerates health.
     public ICollection<EntityAttribute> BaseAttributes { get; set; } = [];
     public float CurrentHealth { get; private set; }
     public float CurrentBarrier { get; private set; }
@@ -162,7 +161,6 @@ public class CombatEntity
         Name = entity.Name;
         ImagePath = entity.ImagePath;
         NextBasicAttackIn = entity.NextBasicAttackIn;
-        NextRecoveryIn = entity.NextRecoveryIn;
         Equipment = entity.Equipment.Select(e => e).ToList();
         TemporaryModifiers = entity.TemporaryModifiers.Select(tm => tm).ToList();
         TemporaryAbilityModifiers = entity.TemporaryAbilityModifiers.Select(tm => tm).ToList();

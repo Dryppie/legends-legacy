@@ -16,6 +16,7 @@ public sealed class FastCombatEngine
 {
     private const float MinimumBasicAttackRate = 0.25f;
     private const float MaximumBasicAttackRate = 4f;
+    private const int HealthRegenerationIntervalTicks = 50;
 
     private readonly IReadOnlyDictionary<string, CompiledStatus> _statusesById;
     private readonly IReadOnlyDictionary<string, CompiledSummon> _summonsById;
@@ -25,6 +26,7 @@ public sealed class FastCombatEngine
     private readonly int _basicAttackIntervalTicks;
     private readonly bool _startActiveAbilitiesOnCooldown;
     private readonly Dictionary<RuntimeCombatant, float> _basicAttackProgress = [];
+    private readonly Dictionary<RuntimeCombatant, int> _healthRegenerationProgress = [];
     private readonly List<CombatLogItem> _log = [];
     private int _currentTick;
 
@@ -57,6 +59,7 @@ public sealed class FastCombatEngine
         foreach (var combatant in combatants)
         {
             _basicAttackProgress[combatant] = 0;
+            _healthRegenerationProgress[combatant] = 0;
             InitializeActiveAbilityCooldowns(combatant);
         }
 
@@ -79,6 +82,7 @@ public sealed class FastCombatEngine
 
             TickEffects(combatants);
             TickStatuses(combatants);
+            TickHealthRegeneration(combatants);
 
             foreach (var combatant in combatants)
                 combatant.Tick();
@@ -601,6 +605,7 @@ public sealed class FastCombatEngine
         var summon = CreateSummonedCombatant(source, effect, summonDefinition, _abilitiesById);
         mutableCombatants.Add(summon);
         _basicAttackProgress[summon] = 0;
+        _healthRegenerationProgress[summon] = 0;
         InitializeActiveAbilityCooldowns(summon);
 
         Log(source, summon, effect.Id, EventType.Summon, 1, $"{source.Name} summoned {summon.Name}.", statsSource, countStatsActivation);
@@ -770,6 +775,39 @@ public sealed class FastCombatEngine
 
                 ExpireStatus(status.Source, combatant, status, combatants);
             }
+        }
+    }
+
+    private void TickHealthRegeneration(IReadOnlyList<RuntimeCombatant> combatants)
+    {
+        foreach (var combatant in combatants.Where(x => x.IsAlive))
+        {
+            var progress = _healthRegenerationProgress.GetValueOrDefault(combatant) + 1;
+            if (progress < HealthRegenerationIntervalTicks)
+            {
+                _healthRegenerationProgress[combatant] = progress;
+                continue;
+            }
+
+            _healthRegenerationProgress[combatant] = 0;
+
+            var regeneration = Math.Max(0, combatant.GetAttribute(AttributeType.HealthRegeneration));
+            if (regeneration <= 0 || combatant.Health >= combatant.GetAttribute(AttributeType.MaxHealth))
+                continue;
+
+            var healthBefore = combatant.Health;
+            combatant.AdjustHealth(regeneration);
+            var restored = Math.Max(0, (int)Math.Round(combatant.Health - healthBefore));
+            if (restored <= 0)
+                continue;
+
+            Log(
+                combatant,
+                combatant,
+                "Health Regeneration",
+                EventType.HealthRegeneration,
+                restored,
+                $"{combatant.Name} regenerated {restored} health.");
         }
     }
 

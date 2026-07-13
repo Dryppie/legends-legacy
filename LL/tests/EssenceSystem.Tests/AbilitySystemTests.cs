@@ -270,6 +270,60 @@ public sealed class AbilitySystemTests
     }
 
     [Fact]
+    public void Engine_regenerates_health_every_five_seconds_regardless_of_spirit()
+    {
+        var lowSpirit = CreateCombatant("low-spirit", CombatTeam.Friendly, []);
+        var highSpirit = CreateCombatant("high-spirit", CombatTeam.Friendly, []);
+        var hostile = CreateCombatant("hostile", CombatTeam.Hostile, []);
+        lowSpirit.Attributes[AttributeType.HealthRegeneration] = 3;
+        lowSpirit.Attributes[AttributeType.Spirit] = 0;
+        highSpirit.Attributes[AttributeType.HealthRegeneration] = 3;
+        highSpirit.Attributes[AttributeType.Spirit] = 1_000;
+        lowSpirit.AdjustHealth(-20);
+        highSpirit.AdjustHealth(-20);
+        var engine = new FastCombatEngine(
+            new Dictionary<string, CompiledStatus>(),
+            new FastCombatEngineOptions(MaxTicks: 100, BasicAttackIntervalTicks: 1_000));
+
+        var result = engine.Run([lowSpirit, highSpirit], [hostile]);
+
+        Assert.Equal(186, lowSpirit.Health);
+        Assert.Equal(186, highSpirit.Health);
+
+        var lowSpiritRegeneration = result.EventLog
+            .Where(x => x.EventType == EventType.HealthRegeneration && x.TargetId == lowSpirit.Id)
+            .ToList();
+        var highSpiritRegeneration = result.EventLog
+            .Where(x => x.EventType == EventType.HealthRegeneration && x.TargetId == highSpirit.Id)
+            .ToList();
+
+        Assert.Equal([49, 99], lowSpiritRegeneration.Select(x => x.Timestamp));
+        Assert.Equal([49, 99], highSpiritRegeneration.Select(x => x.Timestamp));
+        Assert.All(lowSpiritRegeneration, x => Assert.Equal(3, x.Magnitude));
+        Assert.All(highSpiritRegeneration, x => Assert.Equal(3, x.Magnitude));
+    }
+
+    [Fact]
+    public void Engine_caps_health_regeneration_at_maximum_health()
+    {
+        var friendly = CreateCombatant("friendly", CombatTeam.Friendly, []);
+        var hostile = CreateCombatant("hostile", CombatTeam.Hostile, []);
+        friendly.Attributes[AttributeType.HealthRegeneration] = 3;
+        friendly.AdjustHealth(-1);
+        var engine = new FastCombatEngine(
+            new Dictionary<string, CompiledStatus>(),
+            new FastCombatEngineOptions(MaxTicks: 50, BasicAttackIntervalTicks: 1_000));
+
+        var result = engine.Run([friendly], [hostile]);
+
+        Assert.Equal(200, friendly.Health);
+        var regeneration = Assert.Single(result.EventLog, x =>
+            x.EventType == EventType.HealthRegeneration && x.TargetId == friendly.Id);
+        Assert.Equal(1, regeneration.Magnitude);
+        Assert.Equal(200, regeneration.CombatEntity!.Health);
+    }
+
+    [Fact]
     public void Engine_pays_health_cost_before_using_active_ability()
     {
         var ability = CreateDamageAbility("ability.health.cost", "Family.Test");
