@@ -556,9 +556,17 @@ public sealed class ProphecyService : IProphecyService
             case ProphecyObjectiveType.ResolveDungeonEvents when progressEvent.Kind == ProphecyProgressKind.DungeonEventResolved:
             case ProphecyObjectiveType.GainEssenceXp when progressEvent.Kind == ProphecyProgressKind.EssenceXpGained:
             case ProphecyObjectiveType.EssenceArchivedOrFed when progressEvent.Kind == ProphecyProgressKind.EssenceArchived:
-            case ProphecyObjectiveType.GatherResources when progressEvent.Kind == ProphecyProgressKind.ResourceGathered:
             case ProphecyObjectiveType.TemperItems when progressEvent.Kind == ProphecyProgressKind.ItemTempered:
             case ProphecyObjectiveType.TreasureProgress when progressEvent.Kind == ProphecyProgressKind.TreasureProgress:
+                prophecy.CurrentValue += Math.Max(1, progressEvent.Amount);
+                return true;
+
+            case ProphecyObjectiveType.GatherResources when progressEvent.Kind == ProphecyProgressKind.ResourceGathered:
+                if (!MeetsGatheringRequirements(prophecy.ObjectiveParameterSnapshotJson, progressEvent.Profession))
+                {
+                    return false;
+                }
+
                 prophecy.CurrentValue += Math.Max(1, progressEvent.Amount);
                 return true;
 
@@ -993,6 +1001,24 @@ public sealed class ProphecyService : IProphecyService
         return enemyCount.Value >= minimumElement.GetInt32();
     }
 
+    private static bool MeetsGatheringRequirements(string parameterJson, string? profession)
+    {
+        try
+        {
+            var parameters = JsonSerializer.Deserialize<GatheringObjectiveParameters>(
+                string.IsNullOrWhiteSpace(parameterJson) ? "{}" : parameterJson,
+                JsonOptions);
+            var requiredProfession = parameters?.RequiredProfession?.Trim();
+
+            return string.IsNullOrWhiteSpace(requiredProfession) ||
+                string.Equals(requiredProfession, profession?.Trim(), StringComparison.OrdinalIgnoreCase);
+        }
+        catch (JsonException)
+        {
+            return false;
+        }
+    }
+
     private static void ExpireOldUnfinished(IReadOnlyList<PlayerProphecyInstance> instances, DateTimeOffset now)
     {
         foreach (var instance in instances.Where(x => x.PeriodEnd <= now && x.Status is ProphecyStatus.Offered or ProphecyStatus.Accepted or ProphecyStatus.Declined))
@@ -1070,6 +1096,11 @@ public sealed class ProphecyService : IProphecyService
     {
         var hash = SHA256.HashData(Encoding.UTF8.GetBytes(value));
         return BitConverter.ToInt32(hash, 0);
+    }
+
+    private sealed class GatheringObjectiveParameters
+    {
+        public string? RequiredProfession { get; set; }
     }
 
     private sealed record WeightedProphecyCacheReward(int Weight, ProphecyRewardSnapshot Reward);
