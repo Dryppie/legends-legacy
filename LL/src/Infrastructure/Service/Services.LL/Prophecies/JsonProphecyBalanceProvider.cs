@@ -23,6 +23,7 @@ public sealed class JsonProphecyBalanceProvider : IProphecyBalanceProvider
         var rewardDocument = Read<RewardDocument>(Path.Combine(path, "rewards.json"), options);
         var revelationDocument = Read<WeeklyRevelationDocument>(Path.Combine(path, "weekly-revelation.json"), options);
         var cacheDocument = Read<CacheDocument>(Path.Combine(path, "caches.json"), options);
+        var economyDocument = Read<EconomyDocument>(Path.Combine(path, "economy.json"), options);
 
         _catalog = new ProphecyBalanceCatalog
         {
@@ -30,7 +31,8 @@ public sealed class JsonProphecyBalanceProvider : IProphecyBalanceProvider
             RewardProfiles = rewardDocument.Profiles,
             FavorRewards = revelationDocument.FavorRewards,
             WeeklyMilestones = revelationDocument.Milestones,
-            Caches = cacheDocument.Caches
+            Caches = cacheDocument.Caches,
+            Economy = economyDocument.Economy
         };
 
         ThrowIfInvalid(_catalog, definitionProvider.GetAll());
@@ -140,6 +142,16 @@ public sealed class JsonProphecyBalanceProvider : IProphecyBalanceProvider
             .Select(x => $"{x.Owner}:{x.CacheItemId}")
             .ToList();
         ThrowIfAny(missingCacheReferences, "Prophecy rewards reference missing cache definitions");
+
+        var economy = catalog.Economy;
+        if (economy.DailyRerollLimit < 1 ||
+            economy.PaidRerollCosts.Count != economy.DailyRerollLimit - 1 ||
+            economy.PaidRerollCosts.Any(x => x <= 0) ||
+            economy.SigilForgeCost <= 0)
+        {
+            throw new InvalidOperationException("Prophecy economy settings contain invalid limits, prices, or conversion values.");
+        }
+
     }
 
     private static bool IsValidReward(ProphecyRewardSnapshot reward) =>
@@ -148,7 +160,6 @@ public sealed class JsonProphecyBalanceProvider : IProphecyBalanceProvider
         reward.EssenceExperience >= 0 &&
         reward.Soulstones >= 0 &&
         reward.SigilFragments >= 0 &&
-        reward.AscensionStoneFragments >= 0 &&
         reward.PropheticFavor >= 0 &&
         reward.FateEcho >= 0 &&
         reward.Items.All(x => !string.IsNullOrWhiteSpace(x.ItemId) && x.Quantity > 0);
@@ -193,5 +204,10 @@ public sealed class JsonProphecyBalanceProvider : IProphecyBalanceProvider
     private sealed class CacheDocument
     {
         public List<ProphecyCacheDefinition> Caches { get; set; } = [];
+    }
+
+    private sealed class EconomyDocument
+    {
+        public ProphecyEconomySettings Economy { get; set; } = new();
     }
 }

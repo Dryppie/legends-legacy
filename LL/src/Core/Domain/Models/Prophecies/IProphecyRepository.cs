@@ -49,6 +49,27 @@ public interface IProphecyRepository
         DateTimeOffset usedAt,
         CancellationToken cancellationToken);
 
+    Task<DailyProphecyRerollState?> GetDailyRerollStateAsync(
+        Guid playerId,
+        Guid characterId,
+        DateTimeOffset periodStart,
+        CancellationToken cancellationToken) =>
+        Task.FromResult<DailyProphecyRerollState?>(null);
+
+    Task AddDailyRerollStateAsync(
+        DailyProphecyRerollState state,
+        CancellationToken cancellationToken) => Task.CompletedTask;
+
+    Task<bool> TrySpendFateEchoAsync(
+        Guid characterId,
+        long amount,
+        CancellationToken cancellationToken);
+
+    Task<bool> TrySpendSigilFragmentsAsync(
+        Guid characterId,
+        long amount,
+        CancellationToken cancellationToken);
+
     Task<WeeklyRevelationProgress?> GetWeeklyProgressAsync(
         Guid playerId,
         Guid characterId,

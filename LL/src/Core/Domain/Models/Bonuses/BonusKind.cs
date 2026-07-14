@@ -14,6 +14,6 @@ public enum BonusKind
     CraftingExperienceGainBps,
     TemperingNegativeOutcomeReductionBps,
     BlueprintProgressionGainBps,
-    SigilFragmentDropRateRelativeBps,
+    DungeonSigilDropRateRelativeBps,
     DungeonRewardRetentionBps
 }

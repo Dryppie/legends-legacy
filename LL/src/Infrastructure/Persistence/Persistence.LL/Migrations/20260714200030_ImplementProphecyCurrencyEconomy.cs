@@ -11,11 +11,9 @@ namespace Persistence.LL.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<int>(
-                name: "ProphecyCurrencyConversionVersion",
-                table: "Entities",
-                type: "integer",
-                nullable: true);
+            migrationBuilder.DropColumn(
+                name: "AscensionStoneFragments",
+                table: "Entities");
 
             migrationBuilder.CreateTable(
                 name: "DailyProphecyRerollStates",
@@ -51,9 +49,11 @@ namespace Persistence.LL.Migrations
             migrationBuilder.DropTable(
                 name: "DailyProphecyRerollStates");
 
-            migrationBuilder.DropColumn(
-                name: "ProphecyCurrencyConversionVersion",
-                table: "Entities");
+            migrationBuilder.AddColumn<long>(
+                name: "AscensionStoneFragments",
+                table: "Entities",
+                type: "bigint",
+                nullable: true);
         }
     }
 }

@@ -120,6 +120,13 @@
     </ng-container>
 
     <ng-template #dungeonList>
+      <section class="ll-panel mb-2 flex flex-wrap items-center justify-between gap-3 p-4">
+        <div>
+          <div class="ll-eyebrow">Missing a dungeon sigil?</div>
+          <p class="ll-copy mt-1">Use Sigil Fragments to assemble a chosen accessible sigil.</p>
+        </div>
+        <a class="ll-button" routerLink="/game/prophecies">Open Sigil Forge</a>
+      </section>
       <div *ngFor="let dungeon of dungeons()">
         <app-dungeon-card
           [previewData]="dungeon"

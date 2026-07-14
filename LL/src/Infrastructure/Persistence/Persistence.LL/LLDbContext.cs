@@ -253,6 +253,7 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : DbContext(opti
     public DbSet<ProphecyDefinition> ProphecyDefinitions => Set<ProphecyDefinition>();
     public DbSet<PlayerProphecyInstance> PlayerProphecyInstances => Set<PlayerProphecyInstance>();
     public DbSet<WeeklyRevelationProgress> WeeklyRevelationProgress => Set<WeeklyRevelationProgress>();
+    public DbSet<DailyProphecyRerollState> DailyProphecyRerollStates => Set<DailyProphecyRerollState>();
 
     public DbSet<Region> Regions => Set<Region>();
 

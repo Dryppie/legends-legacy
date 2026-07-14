@@ -13,7 +13,7 @@ using Persistence.LL;
 namespace Persistence.LL.Migrations
 {
     [DbContext(typeof(LLDbContext))]
-    [Migration("20260714194224_ImplementProphecyCurrencyEconomy")]
+    [Migration("20260714200030_ImplementProphecyCurrencyEconomy")]
     partial class ImplementProphecyCurrencyEconomy
     {
         /// <inheritdoc />
@@ -3310,9 +3310,6 @@ namespace Persistence.LL.Migrations
                 {
                     b.HasBaseType("Domain.Models.Entities.Entity");
 
-                    b.Property<long>("AscensionStoneFragments")
-                        .HasColumnType("bigint");
-
                     b.Property<long>("Cinders")
                         .HasColumnType("bigint");
 
@@ -3338,9 +3335,6 @@ namespace Persistence.LL.Migrations
                         .IsRequired()
                         .HasMaxLength(80)
                         .HasColumnType("character varying(80)");
-
-                    b.Property<int>("ProphecyCurrencyConversionVersion")
-                        .HasColumnType("integer");
 
                     b.Property<long>("SigilFragments")
                         .HasColumnType("bigint");

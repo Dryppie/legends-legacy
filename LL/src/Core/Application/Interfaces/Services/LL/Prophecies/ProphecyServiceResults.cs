@@ -5,6 +5,13 @@ namespace Application.Interfaces.Services.LL.Prophecies;
 public sealed record PropheciesOverview(
     DateTimeOffset ServerTime,
     int DailyRerollsRemaining,
+    int DailyRerollsUsed,
+    int DailyRerollLimit,
+    int? NextDailyRerollCost,
+    long FateEcho,
+    long SigilFragments,
+    int SigilForgeCost,
+    IReadOnlyList<ProphecySigilForgeOption> SigilForgeOptions,
     IReadOnlyList<PlayerProphecyInstance> DailyProphecies,
     PlayerProphecyInstance? ActiveDailyProphecy,
     PlayerProphecyInstance GreaterProphecy,
@@ -12,6 +19,17 @@ public sealed record PropheciesOverview(
     IReadOnlyList<PlayerProphecyInstance> RecentProphecies,
     IReadOnlyList<WeeklyRevelationMilestone> WeeklyMilestones,
     IReadOnlyList<ProphecyCacheInventory> Caches);
+
+public sealed record ProphecySigilForgeOption(
+    string SigilItemId,
+    string SigilName,
+    string DungeonName,
+    int OwnedQuantity);
+
+public sealed record ProphecySigilForgeResult(
+    string SigilItemId,
+    int InventoryQuantity,
+    long SigilFragmentsRemaining);
 
 public sealed record WeeklyRevelationMilestone(
     int FavorRequired,

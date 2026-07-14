@@ -176,6 +176,52 @@ public sealed class ProphecyRepository : IProphecyRepository
         return updated == 1;
     }
 
+    public async Task<DailyProphecyRerollState?> GetDailyRerollStateAsync(
+        Guid playerId,
+        Guid characterId,
+        DateTimeOffset periodStart,
+        CancellationToken cancellationToken)
+    {
+        var local = _context.DailyProphecyRerollStates.Local.FirstOrDefault(x =>
+            x.PlayerId == playerId &&
+            x.CharacterId == characterId &&
+            x.PeriodStart == periodStart);
+        return local ?? await _context.DailyProphecyRerollStates.FirstOrDefaultAsync(x =>
+            x.PlayerId == playerId &&
+            x.CharacterId == characterId &&
+            x.PeriodStart == periodStart,
+            cancellationToken);
+    }
+
+    public async Task AddDailyRerollStateAsync(
+        DailyProphecyRerollState state,
+        CancellationToken cancellationToken) =>
+        await _context.DailyProphecyRerollStates.AddAsync(state, cancellationToken);
+
+    public async Task<bool> TrySpendFateEchoAsync(
+        Guid characterId,
+        long amount,
+        CancellationToken cancellationToken)
+    {
+        return await _context.Characters
+            .Where(x => x.Id == characterId && x.FateEcho >= amount)
+            .ExecuteUpdateAsync(
+                setters => setters.SetProperty(x => x.FateEcho, x => x.FateEcho - amount),
+                cancellationToken) == 1;
+    }
+
+    public async Task<bool> TrySpendSigilFragmentsAsync(
+        Guid characterId,
+        long amount,
+        CancellationToken cancellationToken)
+    {
+        return await _context.Characters
+            .Where(x => x.Id == characterId && x.SigilFragments >= amount)
+            .ExecuteUpdateAsync(
+                setters => setters.SetProperty(x => x.SigilFragments, x => x.SigilFragments - amount),
+                cancellationToken) == 1;
+    }
+
     public async Task<WeeklyRevelationProgress?> GetWeeklyProgressAsync(
         Guid playerId,
         Guid characterId,

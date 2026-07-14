@@ -272,9 +272,6 @@ public class GuildShopService : IGuildShopService
             case GuildShopRewardType.SigilFragments:
                 character.SigilFragments += reward.Amount;
                 break;
-            case GuildShopRewardType.AscensionStoneFragments:
-                character.AscensionStoneFragments += reward.Amount;
-                break;
             case GuildShopRewardType.Item:
                 await ApplyItemRewardAsync(character.Id, reward, cancellationToken);
                 break;

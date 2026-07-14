@@ -5,6 +5,13 @@ import { ApiService } from '../api.service';
 export interface PropheciesOverviewDto {
   serverTime: string;
   dailyRerollsRemaining: number;
+  dailyRerollsUsed: number;
+  dailyRerollLimit: number;
+  nextDailyRerollCost?: number | null;
+  fateEcho: number;
+  sigilFragments: number;
+  sigilForgeCost: number;
+  sigilForgeOptions: ProphecySigilForgeOptionDto[];
   dailyProphecies: ProphecyInstanceDto[];
   activeDailyProphecy?: ProphecyInstanceDto | null;
   greaterProphecy: ProphecyInstanceDto;
@@ -19,6 +26,19 @@ export interface ProphecyCacheInventoryDto {
   description: string;
   quantity: number;
   possibleRewards: string[];
+}
+
+export interface ProphecySigilForgeOptionDto {
+  sigilItemId: string;
+  sigilName: string;
+  dungeonName: string;
+  ownedQuantity: number;
+}
+
+export interface ProphecySigilForgeResponseDto {
+  sigilItemId: string;
+  inventoryQuantity: number;
+  sigilFragmentsRemaining: number;
 }
 
 export interface ProphecyInstanceDto {
@@ -65,7 +85,6 @@ export interface ProphecyRewardSnapshotDto {
   essenceExperience: number;
   soulstones: number;
   sigilFragments: number;
-  ascensionStoneFragments: number;
   propheticFavor: number;
   fateEcho: number;
   cacheItemId?: string | null;
@@ -126,6 +145,10 @@ export class ProphecyService {
 
   rerollProphecy(id: string): Observable<PropheciesOverviewDto> {
     return this.api.post(`prophecies/${id}/reroll`);
+  }
+
+  assembleSigil(sigilItemId: string): Observable<ProphecySigilForgeResponseDto> {
+    return this.api.post('prophecies/sigil-forge/assemble', { sigilItemId });
   }
 
   claimProphecy(id: string): Observable<ProphecyClaimResponseDto> {

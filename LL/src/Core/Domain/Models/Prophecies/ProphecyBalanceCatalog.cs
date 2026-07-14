@@ -9,6 +9,16 @@ public sealed class ProphecyBalanceCatalog
     public IReadOnlyList<ProphecyFavorReward> FavorRewards { get; init; } = [];
     public IReadOnlyList<ProphecyWeeklyMilestoneDefinition> WeeklyMilestones { get; init; } = [];
     public IReadOnlyList<ProphecyCacheDefinition> Caches { get; init; } = [];
+    public ProphecyEconomySettings Economy { get; init; } = new();
+}
+
+public sealed class ProphecyEconomySettings
+{
+    public bool PaidRerollsEnabled { get; set; } = true;
+    public bool SigilForgeEnabled { get; set; } = true;
+    public int DailyRerollLimit { get; set; } = 3;
+    public List<int> PaidRerollCosts { get; set; } = [40, 80];
+    public int SigilForgeCost { get; set; } = 25;
 }
 
 public sealed class ProphecyTargetProfile

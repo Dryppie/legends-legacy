@@ -616,6 +616,18 @@ public sealed class ProphecyServiceTests
             CancellationToken cancellationToken) =>
             Task.FromResult(true);
 
+        public Task<bool> TrySpendFateEchoAsync(
+            Guid characterId,
+            long amount,
+            CancellationToken cancellationToken) =>
+            throw new NotSupportedException();
+
+        public Task<bool> TrySpendSigilFragmentsAsync(
+            Guid characterId,
+            long amount,
+            CancellationToken cancellationToken) =>
+            throw new NotSupportedException();
+
         public Task<WeeklyRevelationProgress?> GetWeeklyProgressAsync(
             Guid playerId,
             Guid characterId,

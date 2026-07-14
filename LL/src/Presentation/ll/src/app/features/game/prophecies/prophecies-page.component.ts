@@ -18,6 +18,7 @@ import {
   ProphecyInstanceDto,
   ProphecyRewardSnapshotDto,
   ProphecyService,
+  ProphecySigilForgeOptionDto,
   WeeklyRevelationMilestoneDto,
 } from '../../../core/services/api/prophecies/prophecy.service';
 import { ProphecyNotificationService } from '../../../core/services/api/prophecies/prophecy-notification.service';
@@ -90,6 +91,7 @@ export class PropheciesPageComponent implements OnInit, OnDestroy {
 
   readonly dailyProphecies = computed(() => this.overview()?.dailyProphecies ?? []);
   readonly dailyRerollsRemaining = computed(() => this.overview()?.dailyRerollsRemaining ?? 0);
+  readonly sigilForgeOptions = computed(() => this.overview()?.sigilForgeOptions ?? []);
   readonly activeDailyProphecy = computed(() => this.overview()?.activeDailyProphecy ?? null);
   readonly greaterProphecy = computed(() => this.overview()?.greaterProphecy ?? null);
   readonly weeklyRevelation = computed(() => this.overview()?.weeklyRevelation ?? null);
@@ -200,7 +202,8 @@ export class PropheciesPageComponent implements OnInit, OnDestroy {
   }
 
   reroll(prophecy: ProphecyInstanceDto): void {
-    if (this.loading() || !this.canReroll(prophecy)) return;
+    if (this.loading() || !this.canReroll(prophecy) || !this.canAffordReroll()) return;
+    const cost = this.overview()?.nextDailyRerollCost ?? 0;
     this.loading.set(true);
     this.error.set(null);
     this.message.set(null);
@@ -210,13 +213,48 @@ export class PropheciesPageComponent implements OnInit, OnDestroy {
         this.overview.set(overview);
         this.syncNotificationCount();
         this.message.set('Daily prophecy rerolled.');
-        this.toast.showToast('Prophecy rerolled', 'Your daily reroll has been used.', true);
+        this.toast.showToast(
+          'Prophecy rerolled',
+          cost > 0 ? `${cost} Fate Echo spent.` : 'Your free daily reroll has been used.',
+          true,
+        );
         this.loading.set(false);
       },
       error: (error) => {
         const message = error?.message ?? 'Failed to reroll prophecy.';
         this.error.set(message);
         this.toast.showToast('Reroll failed', message, false);
+        this.loading.set(false);
+      },
+    });
+  }
+
+  assembleSigil(option: ProphecySigilForgeOptionDto): void {
+    const current = this.overview();
+    if (!current || this.loading() || current.sigilFragments < current.sigilForgeCost) return;
+
+    this.loading.set(true);
+    this.error.set(null);
+    this.message.set(null);
+    this.prophecyService.assembleSigil(option.sigilItemId).subscribe({
+      next: (response) => {
+        this.overview.update((overview) => overview ? {
+          ...overview,
+          sigilFragments: response.sigilFragmentsRemaining,
+          sigilForgeOptions: overview.sigilForgeOptions.map((item) =>
+            item.sigilItemId === response.sigilItemId
+              ? { ...item, ownedQuantity: response.inventoryQuantity }
+              : item,
+          ),
+        } : overview);
+        this.message.set(`${option.sigilName} assembled.`);
+        this.toast.showToast('Sigil assembled', option.sigilName, true);
+        this.loading.set(false);
+      },
+      error: (error) => {
+        const message = error?.message ?? 'Failed to assemble sigil.';
+        this.error.set(message);
+        this.toast.showToast('Sigil Forge failed', message, false);
         this.loading.set(false);
       },
     });
@@ -392,9 +430,29 @@ export class PropheciesPageComponent implements OnInit, OnDestroy {
   }
 
   canReroll(prophecy: ProphecyInstanceDto): boolean {
+    const overview = this.overview();
     return prophecy.status === 'Offered' &&
       !this.activeDailyProphecy() &&
-      this.dailyRerollsRemaining() > 0;
+      !!overview &&
+      overview.dailyRerollsUsed < overview.dailyRerollLimit;
+  }
+
+  canAffordReroll(): boolean {
+    const overview = this.overview();
+    if (!overview || overview.nextDailyRerollCost == null) return false;
+    return overview.fateEcho >= overview.nextDailyRerollCost;
+  }
+
+  rerollButtonLabel(): string {
+    const cost = this.overview()?.nextDailyRerollCost;
+    return cost ? `Reroll · ${cost} Fate Echo` : 'Free Reroll';
+  }
+
+  rerollButtonTitle(): string {
+    const cost = this.overview()?.nextDailyRerollCost;
+    if (cost == null) return 'The daily reroll limit has been reached.';
+    if (cost === 0) return 'Replace this offer using today\'s free reroll.';
+    return `Replace this offer for ${cost} Fate Echo.`;
   }
 
   canClaim(prophecy: ProphecyInstanceDto): boolean {
@@ -495,9 +553,11 @@ export class PropheciesPageComponent implements OnInit, OnDestroy {
   }
 
   dailyRerollLabel(): string {
-    if (this.dailyRerollsRemaining() <= 0) return 'Reroll used';
+    const overview = this.overview();
+    if (!overview || overview.dailyRerollsUsed >= overview.dailyRerollLimit) return 'Reroll limit reached';
     if (this.activeDailyProphecy()) return 'Reroll closed';
-    return '1 reroll available';
+    if (overview.nextDailyRerollCost === 0) return 'Free reroll available';
+    return `Next reroll: ${overview.nextDailyRerollCost} Fate Echo`;
   }
 
   milestoneActionLabel(milestone: WeeklyRevelationMilestoneDto): string {
@@ -513,7 +573,6 @@ export class PropheciesPageComponent implements OnInit, OnDestroy {
     this.addReward(items, 'essenceExperience', reward.essenceExperience, 'Essence XP', 'Essence', 'EX');
     this.addReward(items, 'soulstones', reward.soulstones, 'Soulstones', 'Currency', 'So');
     this.addReward(items, 'sigilFragments', reward.sigilFragments, 'Sigil Fragments', 'Dungeon', 'Sf');
-    this.addReward(items, 'ascensionStoneFragments', reward.ascensionStoneFragments, 'Ascension Fragments', 'Dungeon', 'Af');
     this.addReward(items, 'propheticFavor', reward.propheticFavor, 'Prophetic Favor', 'Weekly', 'Fa');
     this.addReward(items, 'fateEcho', reward.fateEcho, 'Fate Echo', 'Prophecy', 'Fe');
 
@@ -576,6 +635,10 @@ export class PropheciesPageComponent implements OnInit, OnDestroy {
 
   trackById(index: number, value: { id?: string; favorRequired?: number }): string {
     return value.id ?? `${value.favorRequired ?? index}`;
+  }
+
+  trackBySigil(_index: number, value: ProphecySigilForgeOptionDto): string {
+    return value.sigilItemId;
   }
 
   trackByCacheId(index: number, value: ProphecyCacheInventoryDto): string {

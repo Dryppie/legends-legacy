@@ -1,5 +1,6 @@
 using Application.Interfaces.Services.LL;
 using Application.Interfaces.Services.LL.Entities;
+using Application.Interfaces.Services.LL.Dungeons;
 using Application.Interfaces.Services.LL.Prophecies;
 using Domain.Models.Entities;
 using Domain.Models.Inventories;
@@ -26,6 +27,8 @@ public sealed class ProphecyService : IProphecyService
     private readonly IInventoryService _inventoryService;
     private readonly IInventoryRepository _inventoryRepository;
     private readonly IItemBaseRepository _itemBases;
+    private readonly IDungeonDefinitions? _dungeonDefinitions;
+    private readonly IDungeonAccessPolicy? _dungeonAccess;
 
     public ProphecyService(
         IProphecyDefinitionProvider definitionProvider,
@@ -36,7 +39,9 @@ public sealed class ProphecyService : IProphecyService
         ILevelingService levelingService,
         IInventoryService inventoryService,
         IInventoryRepository inventoryRepository,
-        IItemBaseRepository itemBases)
+        IItemBaseRepository itemBases,
+        IDungeonDefinitions? dungeonDefinitions = null,
+        IDungeonAccessPolicy? dungeonAccess = null)
     {
         _definitions = definitionProvider.GetAll();
         _balance = balanceProvider.GetCatalog();
@@ -47,6 +52,8 @@ public sealed class ProphecyService : IProphecyService
         _inventoryService = inventoryService;
         _inventoryRepository = inventoryRepository;
         _itemBases = itemBases;
+        _dungeonDefinitions = dungeonDefinitions;
+        _dungeonAccess = dungeonAccess;
     }
 
     public async Task<PropheciesOverview> GetOverviewAsync(
@@ -55,6 +62,9 @@ public sealed class ProphecyService : IProphecyService
         DateTimeOffset now,
         CancellationToken cancellationToken)
     {
+        var character = _characterService is null
+            ? null
+            : await GetOwnedCharacterAsync(playerId, characterId, cancellationToken);
         var definitions = await _repository.SyncDefinitionsAsync(_definitions, cancellationToken);
 
         var dailyPeriod = GetDailyPeriod(now);
@@ -90,10 +100,27 @@ public sealed class ProphecyService : IProphecyService
         recent = recent.Where(x => !currentIds.Contains(x.Id)).ToList();
         var weeklyMilestones = CreateWeeklyMilestones(weekly);
         var caches = await GetCacheInventoryAsync(characterId, cancellationToken);
+        var rerollState = await EnsureDailyRerollStateAsync(
+            playerId,
+            characterId,
+            dailyPeriod.Start,
+            dailyPeriod.End,
+            daily,
+            now,
+            cancellationToken);
+        var forgeOptions = await GetSigilForgeOptionsAsync(characterId, cancellationToken);
+        var nextRerollCost = GetNextRerollCost(rerollState.RerollsUsed);
 
         return new PropheciesOverview(
             now,
-            daily.Any(x => x.DailyRerollUsedAt.HasValue) ? 0 : 1,
+            rerollState.RerollsUsed == 0 ? 1 : 0,
+            rerollState.RerollsUsed,
+            _balance.Economy.DailyRerollLimit,
+            nextRerollCost,
+            character?.FateEcho ?? 0,
+            character?.SigilFragments ?? 0,
+            _balance.Economy.SigilForgeCost,
+            forgeOptions,
             daily,
             daily.FirstOrDefault(IsAcceptedOrLater),
             greater,
@@ -165,9 +192,9 @@ public sealed class ProphecyService : IProphecyService
             return ProphecyOperationResult<PropheciesOverview>.Fail("Only an offered prophecy can be rerolled before making the daily choice.");
         }
 
-        if (overview.DailyRerollsRemaining <= 0)
+        if (overview.DailyRerollsUsed >= overview.DailyRerollLimit)
         {
-            return ProphecyOperationResult<PropheciesOverview>.Fail("The daily prophecy reroll has already been used.");
+            return ProphecyOperationResult<PropheciesOverview>.Fail("The daily prophecy reroll limit has been reached.");
         }
 
         var definitions = await _repository.SyncDefinitionsAsync(_definitions, cancellationToken);
@@ -178,8 +205,18 @@ public sealed class ProphecyService : IProphecyService
             prophecy.PeriodStart - DailyOfferHistoryWindow,
             prophecy.PeriodStart,
             cancellationToken);
+        var rerollState = await EnsureDailyRerollStateAsync(
+            playerId,
+            characterId,
+            prophecy.PeriodStart,
+            prophecy.PeriodEnd,
+            overview.DailyProphecies,
+            now,
+            cancellationToken);
+        var shownDefinitionIds = ReadDefinitionHistory(rerollState.ShownDefinitionIdsJson);
         var excludedDefinitionIds = overview.DailyProphecies
             .Select(x => x.ProphecyDefinitionId)
+            .Concat(shownDefinitionIds)
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
         var excludedCategories = overview.DailyProphecies
             .Where(x => x.Id != prophecy.Id)
@@ -204,24 +241,131 @@ public sealed class ProphecyService : IProphecyService
             return ProphecyOperationResult<PropheciesOverview>.Fail("No alternative prophecy is available for this slot.");
         }
 
-        var consumed = await _repository.TryConsumeDailyRerollAsync(
-            playerId,
-            characterId,
-            prophecy.PeriodStart,
-            now,
-            cancellationToken);
-        if (!consumed)
+        var rerollCost = GetNextRerollCost(rerollState.RerollsUsed);
+        if (rerollCost is null)
         {
-            return ProphecyOperationResult<PropheciesOverview>.Fail("The daily prophecy reroll has already been used.");
+            return ProphecyOperationResult<PropheciesOverview>.Fail("The daily prophecy reroll limit has been reached.");
+        }
+
+        if (rerollCost == 0)
+        {
+            var consumed = await _repository.TryConsumeDailyRerollAsync(
+                playerId,
+                characterId,
+                prophecy.PeriodStart,
+                now,
+                cancellationToken);
+            if (!consumed)
+            {
+                return ProphecyOperationResult<PropheciesOverview>.Fail("The free daily prophecy reroll has already been used.");
+            }
+        }
+        else
+        {
+            if (!_balance.Economy.PaidRerollsEnabled)
+            {
+                return ProphecyOperationResult<PropheciesOverview>.Fail("Paid prophecy rerolls are currently disabled.");
+            }
+
+            var character = await GetOwnedCharacterAsync(playerId, characterId, cancellationToken);
+            if (character is null)
+            {
+                return ProphecyOperationResult<PropheciesOverview>.Fail("Character was not found.");
+            }
+
+            if (character.FateEcho < rerollCost.Value)
+            {
+                return ProphecyOperationResult<PropheciesOverview>.Fail($"This reroll requires {rerollCost.Value} Fate Echo.");
+            }
+
+            var spent = await _repository.TrySpendFateEchoAsync(
+                characterId,
+                rerollCost.Value,
+                cancellationToken);
+            if (!spent)
+            {
+                return ProphecyOperationResult<PropheciesOverview>.Fail($"This reroll requires {rerollCost.Value} Fate Echo.");
+            }
+
+            character.FateEcho -= rerollCost.Value;
+            _entityService.UpdateEntities([character]);
+            rerollState.FateEchoSpent += rerollCost.Value;
         }
 
         var rerollAnchor = overview.DailyProphecies.First(x => x.SlotType == ProphecySlotType.Steady);
         rerollAnchor.DailyRerollUsedAt = now;
+        rerollState.RerollsUsed++;
+        rerollState.UpdatedAt = now;
+        rerollState.RowVersion++;
+        shownDefinitionIds.Add(replacement.Id);
+        rerollState.ShownDefinitionIdsJson = JsonSerializer.Serialize(shownDefinitionIds, JsonOptions);
         prophecy.RerolledFromDefinitionId = prophecy.ProphecyDefinitionId;
         ReplaceOfferDefinition(prophecy, replacement, now);
 
+        var remainingFateEcho = overview.FateEcho - rerollCost.Value;
+        var nextCost = GetNextRerollCost(rerollState.RerollsUsed);
+
         return ProphecyOperationResult<PropheciesOverview>.Success(
-            overview with { DailyRerollsRemaining = 0 });
+            overview with
+            {
+                DailyRerollsRemaining = 0,
+                DailyRerollsUsed = rerollState.RerollsUsed,
+                NextDailyRerollCost = nextCost,
+                FateEcho = remainingFateEcho
+            });
+    }
+
+    public async Task<ProphecyOperationResult<ProphecySigilForgeResult>> AssembleSigilAsync(
+        Guid playerId,
+        Guid characterId,
+        string sigilItemId,
+        DateTimeOffset now,
+        CancellationToken cancellationToken)
+    {
+        if (!_balance.Economy.SigilForgeEnabled)
+        {
+            return ProphecyOperationResult<ProphecySigilForgeResult>.Fail("The Sigil Forge is currently disabled.");
+        }
+
+        var character = await GetOwnedCharacterAsync(playerId, characterId, cancellationToken);
+        if (character is null)
+        {
+            return ProphecyOperationResult<ProphecySigilForgeResult>.Fail("Character was not found.");
+        }
+
+        var options = await GetSigilForgeOptionsAsync(characterId, cancellationToken);
+        var option = options.FirstOrDefault(x =>
+            x.SigilItemId.Equals(sigilItemId, StringComparison.OrdinalIgnoreCase));
+        if (option is null)
+        {
+            return ProphecyOperationResult<ProphecySigilForgeResult>.Fail("That dungeon sigil is not currently accessible.");
+        }
+
+        var cost = _balance.Economy.SigilForgeCost;
+        if (character.SigilFragments < cost)
+        {
+            return ProphecyOperationResult<ProphecySigilForgeResult>.Fail($"Assembling this sigil requires {cost} Sigil Fragments.");
+        }
+
+        var spent = await _repository.TrySpendSigilFragmentsAsync(characterId, cost, cancellationToken);
+        if (!spent)
+        {
+            return ProphecyOperationResult<ProphecySigilForgeResult>.Fail($"Assembling this sigil requires {cost} Sigil Fragments.");
+        }
+
+        character.SigilFragments -= cost;
+        _entityService.UpdateEntities([character]);
+
+        var reward = new ProphecyRewardSnapshot
+        {
+            Items = [new RewardItemSnapshot { ItemId = option.SigilItemId, Quantity = 1 }]
+        };
+        await ApplyRewardAsync(characterId, reward, cancellationToken);
+
+        return ProphecyOperationResult<ProphecySigilForgeResult>.Success(new ProphecySigilForgeResult(
+            option.SigilItemId,
+            option.OwnedQuantity + 1,
+            character.SigilFragments));
     }
 
     public async Task<ProphecyOperationResult<ProphecyClaimResult>> ClaimAsync(
@@ -722,7 +866,6 @@ public sealed class ProphecyService : IProphecyService
             reward.Soulstones <= 0 &&
             reward.CharacterExperience <= 0 &&
             reward.SigilFragments <= 0 &&
-            reward.AscensionStoneFragments <= 0 &&
             reward.FateEcho <= 0 &&
             !HasInventoryReward(reward))
         {
@@ -740,7 +883,6 @@ public sealed class ProphecyService : IProphecyService
             character.Cinders += reward.Cinders;
             character.Soulstones += reward.Soulstones;
             character.SigilFragments += reward.SigilFragments;
-            character.AscensionStoneFragments += reward.AscensionStoneFragments;
             character.FateEcho += reward.FateEcho;
 
             if (reward.CharacterExperience > 0)
@@ -858,7 +1000,6 @@ public sealed class ProphecyService : IProphecyService
         reward.Soulstones > 0 ||
         reward.CharacterExperience > 0 ||
         reward.SigilFragments > 0 ||
-        reward.AscensionStoneFragments > 0 ||
         reward.FateEcho > 0;
 
     private static bool HasInventoryReward(ProphecyRewardSnapshot reward) =>
@@ -884,6 +1025,139 @@ public sealed class ProphecyService : IProphecyService
 
     private IReadOnlyList<ItemBase> CreateCacheItemBases() =>
         _balance.Caches.Select(CreateCacheItemBase).ToList();
+
+    private async Task<Domain.Models.Entities.Characters.Character?> GetOwnedCharacterAsync(
+        Guid playerId,
+        Guid characterId,
+        CancellationToken cancellationToken)
+    {
+        if (_characterService is null)
+        {
+            return null;
+        }
+
+        var character = await _characterService.GetCharacterByCharacterIdAsync(characterId, cancellationToken);
+        return character?.UserId == playerId ? character : null;
+    }
+
+    private async Task<DailyProphecyRerollState> EnsureDailyRerollStateAsync(
+        Guid playerId,
+        Guid characterId,
+        DateTimeOffset periodStart,
+        DateTimeOffset periodEnd,
+        IReadOnlyList<PlayerProphecyInstance> daily,
+        DateTimeOffset now,
+        CancellationToken cancellationToken)
+    {
+        var state = await _repository.GetDailyRerollStateAsync(
+            playerId,
+            characterId,
+            periodStart,
+            cancellationToken);
+        if (state is not null)
+        {
+            return state;
+        }
+
+        state = new DailyProphecyRerollState
+        {
+            Id = Guid.NewGuid(),
+            PlayerId = playerId,
+            CharacterId = characterId,
+            PeriodStart = periodStart,
+            PeriodEnd = periodEnd,
+            RerollsUsed = daily.Any(x => x.DailyRerollUsedAt.HasValue) ? 1 : 0,
+            ShownDefinitionIdsJson = JsonSerializer.Serialize(
+                daily.Select(x => x.ProphecyDefinitionId).Distinct(StringComparer.OrdinalIgnoreCase),
+                JsonOptions),
+            CreatedAt = now,
+            UpdatedAt = now
+        };
+        await _repository.AddDailyRerollStateAsync(state, cancellationToken);
+        return state;
+    }
+
+    private int? GetNextRerollCost(int rerollsUsed)
+    {
+        if (rerollsUsed >= _balance.Economy.DailyRerollLimit)
+        {
+            return null;
+        }
+
+        return rerollsUsed == 0
+            ? 0
+            : _balance.Economy.PaidRerollCosts[rerollsUsed - 1];
+    }
+
+    private static HashSet<string> ReadDefinitionHistory(string json)
+    {
+        try
+        {
+            return (JsonSerializer.Deserialize<List<string>>(json, JsonOptions) ?? [])
+                .Where(x => !string.IsNullOrWhiteSpace(x))
+                .ToHashSet(StringComparer.OrdinalIgnoreCase);
+        }
+        catch (JsonException)
+        {
+            return new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        }
+    }
+
+    private async Task<IReadOnlyList<ProphecySigilForgeOption>> GetSigilForgeOptionsAsync(
+        Guid characterId,
+        CancellationToken cancellationToken)
+    {
+        if (!_balance.Economy.SigilForgeEnabled || _dungeonDefinitions is null || _dungeonAccess is null)
+        {
+            return [];
+        }
+
+        var combatRating = await _characterService.GetCombatRatingAsync(characterId, cancellationToken);
+        var accessible = new List<(string SigilItemId, string DungeonName)>();
+        foreach (var group in _dungeonDefinitions.GetAll()
+                     .Where(x => !string.IsNullOrWhiteSpace(x.SigilItemId))
+                     .GroupBy(x => x.SigilItemId, StringComparer.OrdinalIgnoreCase))
+        {
+            foreach (var dungeon in group.OrderBy(x => x.Grade).ThenBy(x => x.Tier))
+            {
+                var access = await _dungeonAccess.EvaluateForSigilForgeAsync(
+                    characterId,
+                    dungeon,
+                    combatRating,
+                    cancellationToken);
+                if (!access.CanEnter)
+                {
+                    continue;
+                }
+
+                accessible.Add((group.Key, dungeon.Name));
+                break;
+            }
+        }
+
+        if (accessible.Count == 0)
+        {
+            return [];
+        }
+
+        var itemBases = await _itemBases.GetItemBasesByIdsAsync(
+            accessible.Select(x => x.SigilItemId).ToList(),
+            cancellationToken);
+        var result = new List<ProphecySigilForgeOption>();
+        foreach (var option in accessible.OrderBy(x => x.DungeonName, StringComparer.OrdinalIgnoreCase))
+        {
+            var name = itemBases.TryGetValue(option.SigilItemId, out var itemBase)
+                ? itemBase.Name
+                : option.SigilItemId;
+            result.Add(new ProphecySigilForgeOption(
+                option.SigilItemId,
+                name,
+                option.DungeonName,
+                await _inventoryRepository.GetInventoryQuantityAsync(characterId, option.SigilItemId, cancellationToken)));
+        }
+
+        return result;
+    }
 
     private static ItemBase CreateCacheItemBase(ProphecyCacheDefinition definition) =>
         new()
@@ -971,7 +1245,6 @@ public sealed class ProphecyService : IProphecyService
         target.EssenceExperience += reward.EssenceExperience;
         target.Soulstones += reward.Soulstones;
         target.SigilFragments += reward.SigilFragments;
-        target.AscensionStoneFragments += reward.AscensionStoneFragments;
         target.PropheticFavor += reward.PropheticFavor;
         target.FateEcho += reward.FateEcho;
 
@@ -1002,7 +1275,6 @@ public sealed class ProphecyService : IProphecyService
             EssenceExperience = reward.EssenceExperience,
             Soulstones = reward.Soulstones,
             SigilFragments = reward.SigilFragments,
-            AscensionStoneFragments = reward.AscensionStoneFragments,
             PropheticFavor = reward.PropheticFavor,
             FateEcho = reward.FateEcho,
             CacheItemId = reward.CacheItemId,

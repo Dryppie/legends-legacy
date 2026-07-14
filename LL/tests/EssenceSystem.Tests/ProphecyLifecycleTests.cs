@@ -1,5 +1,8 @@
 using System.Text.Json;
 using Application.Interfaces.Services.LL.Prophecies;
+using Application.Interfaces.Services.LL.Entities;
+using Domain.Models.Entities;
+using Domain.Models.Entities.Characters;
 using Domain.Models.Prophecies;
 using Services.LL.Prophecies;
 
@@ -117,6 +120,61 @@ public sealed class ProphecyLifecycleTests
     }
 
     [Fact]
+    public async Task RerollAsync_charges_escalating_Fate_Echo_after_the_free_use()
+    {
+        var fixture = CreateFixture();
+        var overview = await fixture.Service.GetOverviewAsync(
+            fixture.PlayerId,
+            fixture.CharacterId,
+            Now,
+            CancellationToken.None);
+        var selected = overview.DailyProphecies.Single(x => x.SlotType == ProphecySlotType.Steady);
+
+        var free = await fixture.Service.RerollAsync(
+            fixture.PlayerId, fixture.CharacterId, selected.Id, Now.AddMinutes(1), CancellationToken.None);
+        var second = await fixture.Service.RerollAsync(
+            fixture.PlayerId, fixture.CharacterId, selected.Id, Now.AddMinutes(2), CancellationToken.None);
+        var third = await fixture.Service.RerollAsync(
+            fixture.PlayerId, fixture.CharacterId, selected.Id, Now.AddMinutes(3), CancellationToken.None);
+        var overLimit = await fixture.Service.RerollAsync(
+            fixture.PlayerId, fixture.CharacterId, selected.Id, Now.AddMinutes(4), CancellationToken.None);
+
+        Assert.True(free.Succeeded);
+        Assert.True(second.Succeeded);
+        Assert.True(third.Succeeded);
+        Assert.False(overLimit.Succeeded);
+        Assert.Equal(0, fixture.Character.FateEcho);
+        Assert.Equal(3, third.Value?.DailyRerollsUsed);
+        Assert.Null(third.Value?.NextDailyRerollCost);
+        Assert.Equal(120, fixture.Repository.RerollStates.Single().FateEchoSpent);
+    }
+
+    [Fact]
+    public async Task RerollAsync_does_not_change_offer_or_balance_when_Fate_Echo_is_insufficient()
+    {
+        var fixture = CreateFixture();
+        fixture.Character.FateEcho = 39;
+        var overview = await fixture.Service.GetOverviewAsync(
+            fixture.PlayerId,
+            fixture.CharacterId,
+            Now,
+            CancellationToken.None);
+        var selected = overview.DailyProphecies.Single(x => x.SlotType == ProphecySlotType.Steady);
+        var free = await fixture.Service.RerollAsync(
+            fixture.PlayerId, fixture.CharacterId, selected.Id, Now.AddMinutes(1), CancellationToken.None);
+        var definitionAfterFreeUse = selected.ProphecyDefinitionId;
+
+        var paid = await fixture.Service.RerollAsync(
+            fixture.PlayerId, fixture.CharacterId, selected.Id, Now.AddMinutes(2), CancellationToken.None);
+
+        Assert.True(free.Succeeded);
+        Assert.False(paid.Succeeded);
+        Assert.Equal(39, fixture.Character.FateEcho);
+        Assert.Equal(definitionAfterFreeUse, selected.ProphecyDefinitionId);
+        Assert.Equal(1, fixture.Repository.RerollStates.Single().RerollsUsed);
+    }
+
+    [Fact]
     public async Task GetOverviewAsync_creates_new_daily_instances_after_utc_rollover()
     {
         var fixture = CreateFixture();
@@ -143,24 +201,33 @@ public sealed class ProphecyLifecycleTests
         var characterId = Guid.NewGuid();
         var definitions = CreateDefinitions();
         var repository = new LifecycleRepository(definitions);
+        var character = new Character
+        {
+            Id = characterId,
+            UserId = playerId,
+            Name = "Oracle",
+            FateEcho = 120,
+        };
         var service = new ProphecyService(
             new DefinitionProvider(definitions),
             new BalanceProvider(),
             repository,
-            null!,
-            null!,
+            new CharacterService(character),
+            new EntityService(),
             null!,
             null!,
             null!,
             null!);
 
-        return new Fixture(playerId, characterId, repository, service);
+        return new Fixture(playerId, characterId, character, repository, service);
     }
 
     private static IReadOnlyList<ProphecyDefinition> CreateDefinitions() =>
     [
         Definition("daily.steady.combat", ProphecyScope.Daily, ProphecySlotType.Steady, ProphecyCategory.Combat),
         Definition("daily.steady.dungeon", ProphecyScope.Daily, ProphecySlotType.Steady, ProphecyCategory.Dungeon),
+        Definition("daily.steady.survival", ProphecyScope.Daily, ProphecySlotType.Steady, ProphecyCategory.Survival),
+        Definition("daily.steady.treasure", ProphecyScope.Daily, ProphecySlotType.Steady, ProphecyCategory.Treasure),
         Definition("daily.focused", ProphecyScope.Daily, ProphecySlotType.Focused, ProphecyCategory.Essence),
         Definition("daily.ominous", ProphecyScope.Daily, ProphecySlotType.Ominous, ProphecyCategory.Gathering),
         Definition("weekly.greater", ProphecyScope.Weekly, ProphecySlotType.Greater, ProphecyCategory.Combat)
@@ -193,6 +260,7 @@ public sealed class ProphecyLifecycleTests
     private sealed record Fixture(
         Guid PlayerId,
         Guid CharacterId,
+        Character Character,
         LifecycleRepository Repository,
         ProphecyService Service);
 
@@ -257,6 +325,7 @@ public sealed class ProphecyLifecycleTests
     {
         public List<PlayerProphecyInstance> Instances { get; } = [];
         public List<WeeklyRevelationProgress> WeeklyProgress { get; } = [];
+        public List<DailyProphecyRerollState> RerollStates { get; } = [];
         public int RerollConsumeCount { get; private set; }
 
         public Task<IReadOnlyList<ProphecyDefinition>> GetEnabledDefinitionsAsync(CancellationToken cancellationToken) =>
@@ -381,6 +450,34 @@ public sealed class ProphecyLifecycleTests
             return Task.FromResult(true);
         }
 
+        public Task<DailyProphecyRerollState?> GetDailyRerollStateAsync(
+            Guid playerId,
+            Guid characterId,
+            DateTimeOffset periodStart,
+            CancellationToken cancellationToken) =>
+            Task.FromResult(RerollStates.FirstOrDefault(x =>
+                x.PlayerId == playerId && x.CharacterId == characterId && x.PeriodStart == periodStart));
+
+        public Task AddDailyRerollStateAsync(
+            DailyProphecyRerollState state,
+            CancellationToken cancellationToken)
+        {
+            RerollStates.Add(state);
+            return Task.CompletedTask;
+        }
+
+        public Task<bool> TrySpendFateEchoAsync(
+            Guid characterId,
+            long amount,
+            CancellationToken cancellationToken) =>
+            Task.FromResult(true);
+
+        public Task<bool> TrySpendSigilFragmentsAsync(
+            Guid characterId,
+            long amount,
+            CancellationToken cancellationToken) =>
+            Task.FromResult(true);
+
         public Task<WeeklyRevelationProgress?> GetWeeklyProgressAsync(
             Guid playerId,
             Guid characterId,
@@ -398,5 +495,32 @@ public sealed class ProphecyLifecycleTests
             WeeklyProgress.Add(progress);
             return Task.CompletedTask;
         }
+    }
+
+    private sealed class EntityService : IEntityService
+    {
+        public Task<List<Entity>> GetEntitiesByIdsForCombatAsync(List<Guid> entityIds, CancellationToken cancellationToken) =>
+            throw new NotSupportedException();
+
+        public void UpdateEntities(List<Entity> playerCharacters)
+        {
+        }
+    }
+
+    private sealed class CharacterService(Character character) : ICharacterService
+    {
+        public Task<Character?> GetCharacterByCharacterIdAsync(Guid characterId, CancellationToken cancellationToken) =>
+            Task.FromResult<Character?>(character.Id == characterId ? character : null);
+
+        public Task<int> GetCombatRatingAsync(Guid characterId, CancellationToken cancellationToken) => Task.FromResult(0);
+        public Task<Character> CreateCharacterAsync(Guid userId, string username, CancellationToken cancellationToken) => throw new NotSupportedException();
+        public Task<Character?> GetMyCharacterAsync(Guid currentUserId, CancellationToken cancellationToken) => throw new NotSupportedException();
+        public Task<Character?> GetMyCharacterOverviewAsync(Guid characterId, CancellationToken cancellationToken) => throw new NotSupportedException();
+        public Task<Character?> GetCharacterOverviewByNameAsync(string characterName, CancellationToken cancellationToken) => throw new NotSupportedException();
+        public Task<Character?> UpdateCharacterNameAsync(Guid userId, string username, CancellationToken cancellationToken) => throw new NotSupportedException();
+        public Task<bool> IsCharacterNameTakenAsync(string name, Guid? excludedCharacterId, CancellationToken cancellationToken) => throw new NotSupportedException();
+        public Task<Character?> GetBaseCharacterByIdAsync(Guid characterId, CancellationToken cancellationToken) => throw new NotSupportedException();
+        public Task<Character?> GetCharacterWithSoulstoneUpgradesAsync(Guid characterId, CancellationToken cancellationToken) => throw new NotSupportedException();
+        public Task<Guid?> GetCharacterIdByNameAsync(string name, CancellationToken cancellationToken) => throw new NotSupportedException();
     }
 }

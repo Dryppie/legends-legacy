@@ -26,7 +26,6 @@ public class Character : Entity
     public long Soulstones { get; set; } = 0;
     public long FateEcho { get; set; } = 0;
     public long SigilFragments { get; set; } = 0;
-    public long AscensionStoneFragments { get; set; } = 0;
     public long GuildFavor { get; set; } = 0;
     public long GuildHonors { get; set; } = 0;
     public ICollection<CharacterSoulstoneUpgrade> CharacterSoulstoneUpgrades { get; set; } = [];

@@ -32,6 +32,9 @@ public sealed class ProphecyBalanceProviderTests
         Assert.Equal(4, catalog.Caches.Count);
         Assert.Equal(1, catalog.FavorRewards.Single(x => x.Scope == ProphecyScope.Daily).Amount);
         Assert.Equal(2, catalog.FavorRewards.Single(x => x.Scope == ProphecyScope.Weekly).Amount);
+        Assert.Equal([40, 80], catalog.Economy.PaidRerollCosts);
+        Assert.Equal(3, catalog.Economy.DailyRerollLimit);
+        Assert.Equal(25, catalog.Economy.SigilForgeCost);
         Assert.All(catalog.Caches, cache =>
         {
             Assert.True(cache.Rolls > 0);
@@ -46,7 +49,6 @@ public sealed class ProphecyBalanceProviderTests
 
         var weeklyDungeon = catalog.RewardProfiles.Single(x => x.Id == "Weekly.Dungeon.Rare");
         Assert.Equal(14, weeklyDungeon.Reward.SigilFragments);
-        Assert.Equal(0, weeklyDungeon.Reward.AscensionStoneFragments);
         Assert.Contains(weeklyDungeon.Reward.Items, x => x.ItemId == "item.monster_core.lesser" && x.Quantity == 1);
         Assert.Equal("greater_prophecy_cache", weeklyDungeon.Reward.CacheItemId);
     }
