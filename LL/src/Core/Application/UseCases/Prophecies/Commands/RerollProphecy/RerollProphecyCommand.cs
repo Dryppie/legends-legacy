@@ -9,8 +9,7 @@ namespace Application.UseCases.Prophecies.Commands.RerollProphecy;
 
 public sealed record RerollProphecyCommand(
     Guid PlayerId,
-    Guid CharacterId,
-    Guid ProphecyId) : ICommand<Response<PropheciesOverviewDto>>;
+    Guid CharacterId) : ICommand<Response<PropheciesOverviewDto>>;
 
 public sealed class RerollProphecyCommandHandler : IRequestHandler<RerollProphecyCommand, Response<PropheciesOverviewDto>>
 {
@@ -30,7 +29,6 @@ public sealed class RerollProphecyCommandHandler : IRequestHandler<RerollProphec
         var result = await _prophecyService.RerollAsync(
             request.PlayerId,
             request.CharacterId,
-            request.ProphecyId,
             DateTimeOffset.UtcNow,
             cancellationToken);
 

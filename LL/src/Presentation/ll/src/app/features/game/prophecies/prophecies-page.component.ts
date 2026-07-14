@@ -201,27 +201,27 @@ export class PropheciesPageComponent implements OnInit, OnDestroy {
     });
   }
 
-  reroll(prophecy: ProphecyInstanceDto): void {
-    if (this.loading() || !this.canReroll(prophecy) || !this.canAffordReroll()) return;
+  rerollDailyProphecies(): void {
+    if (this.loading() || !this.canReroll() || !this.canAffordReroll()) return;
     const cost = this.overview()?.nextDailyRerollCost ?? 0;
     this.loading.set(true);
     this.error.set(null);
     this.message.set(null);
 
-    this.prophecyService.rerollProphecy(prophecy.id).subscribe({
+    this.prophecyService.rerollDailyProphecies().subscribe({
       next: (overview) => {
         this.overview.set(overview);
         this.syncNotificationCount();
-        this.message.set('Daily prophecy rerolled.');
+        this.message.set('Daily prophecies rerolled.');
         this.toast.showToast(
-          'Prophecy rerolled',
+          'Prophecies rerolled',
           cost > 0 ? `${cost} Fate Echo spent.` : 'Your free daily reroll has been used.',
           true,
         );
         this.loading.set(false);
       },
       error: (error) => {
-        const message = error?.message ?? 'Failed to reroll prophecy.';
+        const message = error?.message ?? 'Failed to reroll daily prophecies.';
         this.error.set(message);
         this.toast.showToast('Reroll failed', message, false);
         this.loading.set(false);
@@ -429,9 +429,10 @@ export class PropheciesPageComponent implements OnInit, OnDestroy {
     return prophecy.status === 'Offered' && !this.activeDailyProphecy();
   }
 
-  canReroll(prophecy: ProphecyInstanceDto): boolean {
+  canReroll(): boolean {
     const overview = this.overview();
-    return prophecy.status === 'Offered' &&
+    return this.dailyProphecies().length === 3 &&
+      this.dailyProphecies().every((prophecy) => prophecy.status === 'Offered') &&
       !this.activeDailyProphecy() &&
       !!overview &&
       overview.dailyRerollsUsed < overview.dailyRerollLimit;
@@ -445,14 +446,7 @@ export class PropheciesPageComponent implements OnInit, OnDestroy {
 
   rerollButtonLabel(): string {
     const cost = this.overview()?.nextDailyRerollCost;
-    return cost ? `Reroll · ${cost} Fate Echo` : 'Free Reroll';
-  }
-
-  rerollButtonTitle(): string {
-    const cost = this.overview()?.nextDailyRerollCost;
-    if (cost == null) return 'The daily reroll limit has been reached.';
-    if (cost === 0) return 'Replace this offer using today\'s free reroll.';
-    return `Replace this offer for ${cost} Fate Echo.`;
+    return cost ? `Reroll All · ${cost} Fate Echo` : 'Reroll All · Free';
   }
 
   canClaim(prophecy: ProphecyInstanceDto): boolean {
@@ -550,14 +544,6 @@ export class PropheciesPageComponent implements OnInit, OnDestroy {
   dailyResetText(): string {
     const periodEnd = this.dailyProphecies()[0]?.periodEnd;
     return periodEnd ? this.timeRemaining(periodEnd) : 'Soon';
-  }
-
-  dailyRerollLabel(): string {
-    const overview = this.overview();
-    if (!overview || overview.dailyRerollsUsed >= overview.dailyRerollLimit) return 'Reroll limit reached';
-    if (this.activeDailyProphecy()) return 'Reroll closed';
-    if (overview.nextDailyRerollCost === 0) return 'Free reroll available';
-    return `Next reroll: ${overview.nextDailyRerollCost} Fate Echo`;
   }
 
   milestoneActionLabel(milestone: WeeklyRevelationMilestoneDto): string {

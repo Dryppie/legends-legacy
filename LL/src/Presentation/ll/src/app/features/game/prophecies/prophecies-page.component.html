@@ -220,9 +220,15 @@
           <h2 class="ll-heading text-xl">Choose One</h2>
         </div>
         <div class="flex flex-wrap items-center gap-2">
-          <div class="ll-badge">
-            {{ dailyRerollLabel() }}
-          </div>
+          <button
+            *ngIf="canReroll()"
+            type="button"
+            class="ll-button"
+            (click)="rerollDailyProphecies()"
+            [disabled]="loading() || !canAffordReroll()"
+          >
+            {{ rerollButtonLabel() }}
+          </button>
           <div class="ll-badge">Resets in {{ dailyResetText() }}</div>
         </div>
       </div>
@@ -343,16 +349,6 @@
                 [disabled]="loading()"
               >
                 Accept
-              </button>
-              <button
-                *ngIf="canReroll(prophecy)"
-                type="button"
-                class="ll-button"
-                (click)="reroll(prophecy)"
-                [disabled]="loading() || !canAffordReroll()"
-                [title]="rerollButtonTitle()"
-              >
-                {{ rerollButtonLabel() }}
               </button>
               <button
                 *ngIf="canClaim(prophecy)"

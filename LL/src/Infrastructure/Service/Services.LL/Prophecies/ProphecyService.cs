@@ -175,21 +175,19 @@ public sealed class ProphecyService : IProphecyService
     public async Task<ProphecyOperationResult<PropheciesOverview>> RerollAsync(
         Guid playerId,
         Guid characterId,
-        Guid prophecyId,
         DateTimeOffset now,
         CancellationToken cancellationToken)
     {
         var overview = await GetOverviewAsync(playerId, characterId, now, cancellationToken);
-        var prophecy = overview.DailyProphecies.FirstOrDefault(x => x.Id == prophecyId);
-
-        if (prophecy is null)
+        if (overview.DailyProphecies.Count != 3)
         {
-            return ProphecyOperationResult<PropheciesOverview>.Fail("Prophecy was not found for the current daily period.");
+            return ProphecyOperationResult<PropheciesOverview>.Fail("The complete daily prophecy set is not available.");
         }
 
-        if (prophecy.Status != ProphecyStatus.Offered || overview.ActiveDailyProphecy is not null)
+        if (overview.ActiveDailyProphecy is not null ||
+            overview.DailyProphecies.Any(x => x.Status != ProphecyStatus.Offered))
         {
-            return ProphecyOperationResult<PropheciesOverview>.Fail("Only an offered prophecy can be rerolled before making the daily choice.");
+            return ProphecyOperationResult<PropheciesOverview>.Fail("Daily prophecies can only be rerolled before making the daily choice.");
         }
 
         if (overview.DailyRerollsUsed >= overview.DailyRerollLimit)
@@ -198,47 +196,62 @@ public sealed class ProphecyService : IProphecyService
         }
 
         var definitions = await _repository.SyncDefinitionsAsync(_definitions, cancellationToken);
+        var periodStart = overview.DailyProphecies[0].PeriodStart;
+        var periodEnd = overview.DailyProphecies[0].PeriodEnd;
         var recentDefinitionIds = await _repository.GetRecentDefinitionIdsAsync(
             playerId,
             characterId,
             ProphecyScope.Daily,
-            prophecy.PeriodStart - DailyOfferHistoryWindow,
-            prophecy.PeriodStart,
+            periodStart - DailyOfferHistoryWindow,
+            periodStart,
             cancellationToken);
         var rerollState = await EnsureDailyRerollStateAsync(
             playerId,
             characterId,
-            prophecy.PeriodStart,
-            prophecy.PeriodEnd,
+            periodStart,
+            periodEnd,
             overview.DailyProphecies,
             now,
             cancellationToken);
         var shownDefinitionIds = ReadDefinitionHistory(rerollState.ShownDefinitionIdsJson);
-        var excludedDefinitionIds = overview.DailyProphecies
+        var currentDefinitionIds = overview.DailyProphecies
             .Select(x => x.ProphecyDefinitionId)
-            .Concat(shownDefinitionIds)
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
-        var excludedCategories = overview.DailyProphecies
-            .Where(x => x.Id != prophecy.Id)
-            .Select(GetDefinition)
-            .Where(x => x is not null)
-            .Select(x => x!.Category)
-            .ToHashSet();
+        var hardExcludedDefinitionIds = new HashSet<string>(currentDefinitionIds, StringComparer.OrdinalIgnoreCase);
+        var excludedCategories = new HashSet<ProphecyCategory>();
+        var replacements = new List<(PlayerProphecyInstance Prophecy, ProphecyDefinition Definition)>();
 
-        var replacement = ProphecyOfferSelector.Pick(
-            definitions,
-            ProphecyScope.Daily,
-            prophecy.SlotType,
-            characterId,
-            prophecy.PeriodStart,
-            $"reroll:{prophecy.Id:N}",
-            excludedDefinitionIds,
-            excludedCategories,
-            recentDefinitionIds);
-
-        if (replacement is null || replacement.Id.Equals(prophecy.ProphecyDefinitionId, StringComparison.OrdinalIgnoreCase))
+        foreach (var prophecy in overview.DailyProphecies.OrderBy(x => x.SlotType))
         {
-            return ProphecyOperationResult<PropheciesOverview>.Fail("No alternative prophecy is available for this slot.");
+            var eligibleDefinitions = definitions
+                .Where(x => !hardExcludedDefinitionIds.Contains(x.Id))
+                .ToList();
+            var replacement = ProphecyOfferSelector.Pick(
+                eligibleDefinitions,
+                ProphecyScope.Daily,
+                prophecy.SlotType,
+                characterId,
+                periodStart,
+                $"reroll-set:{rerollState.RerollsUsed + 1}:{prophecy.SlotType}",
+                shownDefinitionIds,
+                excludedCategories,
+                recentDefinitionIds);
+
+            if (replacement is null)
+            {
+                return ProphecyOperationResult<PropheciesOverview>.Fail(
+                    "No complete alternative set of daily prophecies is available.");
+            }
+
+            replacements.Add((prophecy, replacement));
+            hardExcludedDefinitionIds.Add(replacement.Id);
+            excludedCategories.Add(replacement.Category);
+        }
+
+        if (replacements.Count != overview.DailyProphecies.Count)
+        {
+            return ProphecyOperationResult<PropheciesOverview>.Fail(
+                "No complete alternative set of daily prophecies is available.");
         }
 
         var rerollCost = GetNextRerollCost(rerollState.RerollsUsed);
@@ -252,7 +265,7 @@ public sealed class ProphecyService : IProphecyService
             var consumed = await _repository.TryConsumeDailyRerollAsync(
                 playerId,
                 characterId,
-                prophecy.PeriodStart,
+                periodStart,
                 now,
                 cancellationToken);
             if (!consumed)
@@ -297,10 +310,13 @@ public sealed class ProphecyService : IProphecyService
         rerollState.RerollsUsed++;
         rerollState.UpdatedAt = now;
         rerollState.RowVersion++;
-        shownDefinitionIds.Add(replacement.Id);
+        foreach (var (prophecy, replacement) in replacements)
+        {
+            shownDefinitionIds.Add(replacement.Id);
+            prophecy.RerolledFromDefinitionId = prophecy.ProphecyDefinitionId;
+            ReplaceOfferDefinition(prophecy, replacement, now);
+        }
         rerollState.ShownDefinitionIdsJson = JsonSerializer.Serialize(shownDefinitionIds, JsonOptions);
-        prophecy.RerolledFromDefinitionId = prophecy.ProphecyDefinitionId;
-        ReplaceOfferDefinition(prophecy, replacement, now);
 
         var remainingFateEcho = overview.FateEcho - rerollCost.Value;
         var nextCost = GetNextRerollCost(rerollState.RerollsUsed);

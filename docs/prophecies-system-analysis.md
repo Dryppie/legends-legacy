@@ -125,7 +125,7 @@ flowchart LR
 - Accepting one sets it to `Accepted` and sets the other offered choices to `Declined`.
 - A second daily cannot be accepted once any current daily is accepted, completed, or claimed.
 - Progress before `AcceptedAt` does not count.
-- One offered daily can be rerolled before acceptance; the single free use resets with the UTC daily period. Acceptance still cannot be reversed.
+- All three offered dailies can be rerolled together before acceptance; the single free use resets with the UTC daily period. Acceptance still cannot be reversed.
 
 ### Weekly behavior
 
@@ -239,9 +239,9 @@ Benefits:
 
 ### Daily reroll
 
-Every character receives one free reroll per UTC daily period. It can replace any still-offered daily prophecy before a choice is accepted. The replacement keeps the same instance ID and slot, but refreshes the definition, target, objective parameters, progress, and reward snapshots. The replaced definition ID is retained for audit/history suppression.
+Every character receives one free reroll per UTC daily period. It replaces the complete set of three still-offered daily prophecies before a choice is accepted. Each replacement keeps the same instance ID and slot, but refreshes the definition, target, objective parameters, progress, and reward snapshots. The three replaced definition IDs are retained for audit/history suppression.
 
-The Steady instance acts as the period's reroll anchor. Consumption uses a conditional database update that succeeds only while `DailyRerollUsedAt` is null, so concurrent requests and multiple API replicas cannot consume two rerolls. The service selects an actual alternative before consuming the use; a slot with no alternative returns an error without wasting it.
+The Steady instance acts as the period's reroll anchor. Consumption uses a conditional database update that succeeds only while `DailyRerollUsedAt` is null, so concurrent requests and multiple API replicas cannot consume two free rerolls. The service resolves alternatives for all three slots before consuming the use; an incomplete replacement set returns an error without charging or partially changing the offers.
 
 Limitations:
 
@@ -524,7 +524,7 @@ All endpoints are authorized and use the current user's character context:
 | ------ | -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
 | GET    | `/api/v1/prophecies`                         | Synchronize definitions, ensure current instances and weekly progress, reconcile targets/completion, return overview/history/caches. |
 | POST   | `/api/v1/prophecies/{id}/accept`             | Accept one current daily and decline the other offers.                                                                               |
-| POST   | `/api/v1/prophecies/{id}/reroll`             | Replace one offered daily before acceptance, consuming the period's single reroll.                                                    |
+| POST   | `/api/v1/prophecies/reroll`                  | Replace all three offered dailies before acceptance, consuming one free or paid reroll.                                               |
 | POST   | `/api/v1/prophecies/{id}/claim`              | Apply a completed prophecy reward and update weekly favor.                                                                           |
 | POST   | `/api/v1/prophecies/weekly-revelation/claim` | Claim the milestone identified by required favor.                                                                                    |
 | POST   | `/api/v1/prophecies/caches/open`             | Consume one owned cache and grant rolled rewards.                                                                                    |
@@ -681,7 +681,7 @@ Targets, direct reward profiles, Favor awards, Weekly Revelation milestones, cac
 
 #### 10. Offers were repetitive and lacked player agency — resolved 2026-07-14
 
-Generation now suppresses duplicate definitions, repeated categories, and recent offers through progressively relaxed candidate pools, preserving deterministic weighted selection when authored slot constraints are tight. Each character also receives one atomically consumed daily reroll that must be used before acceptance. Personalized accessibility remains a separate concern under pain point 6: level, feature, dungeon, and profession eligibility metadata is still not enforced.
+Generation now suppresses duplicate definitions, repeated categories, and recent offers through progressively relaxed candidate pools, preserving deterministic weighted selection when authored slot constraints are tight. Each character also receives one atomically consumed free daily set reroll, followed by configured paid set rerolls, all of which must be used before acceptance. Personalized accessibility remains a separate concern under pain point 6: level, feature, dungeon, and profession eligibility metadata is still not enforced.
 
 ### Priority 3: maintainability, performance, and UX
 
@@ -703,7 +703,7 @@ Notification handlers mutate tracked EF entities but do not explicitly save. Thi
 
 #### 15. Dedicated test coverage was insufficient — resolved baseline 2026-07-14
 
-The focused Prophecy suite now protects every implemented objective matcher, positive and negative parameter constraints, unique-creature and defeat-then-win state, chronological aggregation, exact acceptance/period boundaries, stable generation snapshots, UTC rollover, daily acceptance and decline behavior, actual reroll consumption and replay rejection, delayed Favor attribution, direct-claim replay protection, milestone unlock and single-claim rules, DTO guidance, deterministic offer selection, cache table structure and positive weights, persistence ownership/history scoping, and authenticated controller claim propagation. This establishes a maintainable regression baseline for the implemented system. True multi-replica races, relational unique-conflict behavior, stochastic cache distribution, and dedicated Angular component rendering still require higher-level environments and remain in the test strategy rather than being treated as unit-test coverage gaps.
+The focused Prophecy suite now protects every implemented objective matcher, positive and negative parameter constraints, unique-creature and defeat-then-win state, chronological aggregation, exact acceptance/period boundaries, stable generation snapshots, UTC rollover, daily acceptance and decline behavior, three-offer set rerolls, escalating spend and reroll limits, delayed Favor attribution, direct-claim replay protection, milestone unlock and single-claim rules, DTO guidance, deterministic offer selection, cache table structure and positive weights, persistence ownership/history scoping, and authenticated controller claim propagation. This establishes a maintainable regression baseline for the implemented system. True multi-replica races, relational unique-conflict behavior, stochastic cache distribution, and dedicated Angular component rendering still require higher-level environments and remain in the test strategy rather than being treated as unit-test coverage gaps.
 
 ## Recommended Direction
 
@@ -737,7 +737,7 @@ The focused Prophecy suite now protects every implemented objective matcher, pos
 3. ~~Exclude duplicate definitions across a day's slots.~~ Completed with definition and category-aware candidate pools.
 4. ~~Add recent-history suppression so the same objective does not repeat too often.~~ Completed with seven-day daily and 28-day Greater lookbacks that relax when necessary.
 5. Give slots clearer mechanical identities rather than relying only on authored lists.
-6. ~~Consider one limited reroll or allow choice replacement before any progress is earned.~~ Every character now has one free reroll per UTC daily period, usable before acceptance.
+6. ~~Consider one limited reroll or allow choice replacement before any progress is earned.~~ Every character now has one free complete-set reroll per UTC daily period, usable before acceptance.
 7. Monitor completion rates after the new nine-available/seven-required Favor balance and tune the Greater objective or capstone if it still produces excessive drop-off.
 8. Use Prophecies to encourage relevant variety, not simply volume: older unmastered dungeons, unused Essence families, underleveled professions, or guild-aligned activity.
 

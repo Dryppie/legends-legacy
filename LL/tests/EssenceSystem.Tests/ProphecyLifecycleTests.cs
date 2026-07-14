@@ -85,7 +85,7 @@ public sealed class ProphecyLifecycleTests
     }
 
     [Fact]
-    public async Task RerollAsync_replaces_an_offer_and_consumes_the_daily_use_once()
+    public async Task RerollAsync_replaces_all_three_offers_and_consumes_one_daily_use()
     {
         var fixture = CreateFixture();
         var overview = await fixture.Service.GetOverviewAsync(
@@ -93,29 +93,25 @@ public sealed class ProphecyLifecycleTests
             fixture.CharacterId,
             Now,
             CancellationToken.None);
-        var selected = overview.DailyProphecies.Single(x => x.SlotType == ProphecySlotType.Steady);
-        var originalDefinitionId = selected.ProphecyDefinitionId;
+        var originalDefinitionIds = overview.DailyProphecies.ToDictionary(
+            x => x.Id,
+            x => x.ProphecyDefinitionId);
 
         var result = await fixture.Service.RerollAsync(
             fixture.PlayerId,
             fixture.CharacterId,
-            selected.Id,
             Now.AddMinutes(1),
-            CancellationToken.None);
-        var otherOffer = overview.DailyProphecies.Single(x => x.SlotType == ProphecySlotType.Focused);
-        var replay = await fixture.Service.RerollAsync(
-            fixture.PlayerId,
-            fixture.CharacterId,
-            otherOffer.Id,
-            Now.AddMinutes(2),
             CancellationToken.None);
 
         Assert.True(result.Succeeded);
-        Assert.NotEqual(originalDefinitionId, selected.ProphecyDefinitionId);
-        Assert.Equal(originalDefinitionId, selected.RerolledFromDefinitionId);
+        Assert.All(overview.DailyProphecies, prophecy =>
+        {
+            Assert.NotEqual(originalDefinitionIds[prophecy.Id], prophecy.ProphecyDefinitionId);
+            Assert.Equal(originalDefinitionIds[prophecy.Id], prophecy.RerolledFromDefinitionId);
+        });
+        Assert.Equal(3, overview.DailyProphecies.Select(x => x.ProphecyDefinitionId).Distinct().Count());
         Assert.Equal(0, result.Value?.DailyRerollsRemaining);
-        Assert.Equal(1, fixture.Repository.RerollConsumeCount);
-        Assert.False(replay.Succeeded);
+        Assert.Equal(1, result.Value?.DailyRerollsUsed);
         Assert.Equal(1, fixture.Repository.RerollConsumeCount);
     }
 
@@ -128,16 +124,14 @@ public sealed class ProphecyLifecycleTests
             fixture.CharacterId,
             Now,
             CancellationToken.None);
-        var selected = overview.DailyProphecies.Single(x => x.SlotType == ProphecySlotType.Steady);
-
         var free = await fixture.Service.RerollAsync(
-            fixture.PlayerId, fixture.CharacterId, selected.Id, Now.AddMinutes(1), CancellationToken.None);
+            fixture.PlayerId, fixture.CharacterId, Now.AddMinutes(1), CancellationToken.None);
         var second = await fixture.Service.RerollAsync(
-            fixture.PlayerId, fixture.CharacterId, selected.Id, Now.AddMinutes(2), CancellationToken.None);
+            fixture.PlayerId, fixture.CharacterId, Now.AddMinutes(2), CancellationToken.None);
         var third = await fixture.Service.RerollAsync(
-            fixture.PlayerId, fixture.CharacterId, selected.Id, Now.AddMinutes(3), CancellationToken.None);
+            fixture.PlayerId, fixture.CharacterId, Now.AddMinutes(3), CancellationToken.None);
         var overLimit = await fixture.Service.RerollAsync(
-            fixture.PlayerId, fixture.CharacterId, selected.Id, Now.AddMinutes(4), CancellationToken.None);
+            fixture.PlayerId, fixture.CharacterId, Now.AddMinutes(4), CancellationToken.None);
 
         Assert.True(free.Succeeded);
         Assert.True(second.Succeeded);
@@ -159,19 +153,54 @@ public sealed class ProphecyLifecycleTests
             fixture.CharacterId,
             Now,
             CancellationToken.None);
-        var selected = overview.DailyProphecies.Single(x => x.SlotType == ProphecySlotType.Steady);
         var free = await fixture.Service.RerollAsync(
-            fixture.PlayerId, fixture.CharacterId, selected.Id, Now.AddMinutes(1), CancellationToken.None);
-        var definitionAfterFreeUse = selected.ProphecyDefinitionId;
+            fixture.PlayerId, fixture.CharacterId, Now.AddMinutes(1), CancellationToken.None);
+        var definitionsAfterFreeUse = overview.DailyProphecies.ToDictionary(
+            x => x.Id,
+            x => x.ProphecyDefinitionId);
 
         var paid = await fixture.Service.RerollAsync(
-            fixture.PlayerId, fixture.CharacterId, selected.Id, Now.AddMinutes(2), CancellationToken.None);
+            fixture.PlayerId, fixture.CharacterId, Now.AddMinutes(2), CancellationToken.None);
 
         Assert.True(free.Succeeded);
         Assert.False(paid.Succeeded);
         Assert.Equal(39, fixture.Character.FateEcho);
-        Assert.Equal(definitionAfterFreeUse, selected.ProphecyDefinitionId);
+        Assert.All(overview.DailyProphecies, prophecy =>
+            Assert.Equal(definitionsAfterFreeUse[prophecy.Id], prophecy.ProphecyDefinitionId));
         Assert.Equal(1, fixture.Repository.RerollStates.Single().RerollsUsed);
+    }
+
+    [Fact]
+    public async Task RerollAsync_does_not_consume_or_partially_replace_when_a_complete_set_is_unavailable()
+    {
+        var fixture = CreateFixture(
+        [
+            Definition("daily.steady.only", ProphecyScope.Daily, ProphecySlotType.Steady, ProphecyCategory.Combat),
+            Definition("daily.focused.only", ProphecyScope.Daily, ProphecySlotType.Focused, ProphecyCategory.Essence),
+            Definition("daily.ominous.only", ProphecyScope.Daily, ProphecySlotType.Ominous, ProphecyCategory.Gathering),
+            Definition("weekly.greater", ProphecyScope.Weekly, ProphecySlotType.Greater, ProphecyCategory.Combat)
+        ]);
+        var overview = await fixture.Service.GetOverviewAsync(
+            fixture.PlayerId,
+            fixture.CharacterId,
+            Now,
+            CancellationToken.None);
+        var originalDefinitionIds = overview.DailyProphecies.ToDictionary(
+            x => x.Id,
+            x => x.ProphecyDefinitionId);
+
+        var result = await fixture.Service.RerollAsync(
+            fixture.PlayerId,
+            fixture.CharacterId,
+            Now.AddMinutes(1),
+            CancellationToken.None);
+
+        Assert.False(result.Succeeded);
+        Assert.Equal(120, fixture.Character.FateEcho);
+        Assert.Equal(0, fixture.Repository.RerollConsumeCount);
+        Assert.Equal(0, fixture.Repository.RerollStates.Single().RerollsUsed);
+        Assert.All(overview.DailyProphecies, prophecy =>
+            Assert.Equal(originalDefinitionIds[prophecy.Id], prophecy.ProphecyDefinitionId));
     }
 
     [Fact]
@@ -195,11 +224,11 @@ public sealed class ProphecyLifecycleTests
         Assert.Equal(7, fixture.Repository.Instances.Count);
     }
 
-    private static Fixture CreateFixture()
+    private static Fixture CreateFixture(IReadOnlyList<ProphecyDefinition>? definitions = null)
     {
         var playerId = Guid.NewGuid();
         var characterId = Guid.NewGuid();
-        var definitions = CreateDefinitions();
+        definitions ??= CreateDefinitions();
         var repository = new LifecycleRepository(definitions);
         var character = new Character
         {
@@ -229,7 +258,9 @@ public sealed class ProphecyLifecycleTests
         Definition("daily.steady.survival", ProphecyScope.Daily, ProphecySlotType.Steady, ProphecyCategory.Survival),
         Definition("daily.steady.treasure", ProphecyScope.Daily, ProphecySlotType.Steady, ProphecyCategory.Treasure),
         Definition("daily.focused", ProphecyScope.Daily, ProphecySlotType.Focused, ProphecyCategory.Essence),
+        Definition("daily.focused.dungeon", ProphecyScope.Daily, ProphecySlotType.Focused, ProphecyCategory.Dungeon),
         Definition("daily.ominous", ProphecyScope.Daily, ProphecySlotType.Ominous, ProphecyCategory.Gathering),
+        Definition("daily.ominous.survival", ProphecyScope.Daily, ProphecySlotType.Ominous, ProphecyCategory.Survival),
         Definition("weekly.greater", ProphecyScope.Weekly, ProphecySlotType.Greater, ProphecyCategory.Combat)
     ];
 

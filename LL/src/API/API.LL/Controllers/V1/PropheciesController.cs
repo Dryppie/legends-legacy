@@ -23,9 +23,9 @@ public sealed class PropheciesController : BaseController
     public async Task<ActionResult<Response<PropheciesOverviewDto>>> Accept(Guid id) =>
         await Mediator.Send(new AcceptProphecyCommand(CurrentUserId, CurrentCharacterGuid, id));
 
-    [HttpPost("{id:guid}/reroll")]
-    public async Task<ActionResult<Response<PropheciesOverviewDto>>> Reroll(Guid id) =>
-        await Mediator.Send(new RerollProphecyCommand(CurrentUserId, CurrentCharacterGuid, id));
+    [HttpPost("reroll")]
+    public async Task<ActionResult<Response<PropheciesOverviewDto>>> Reroll() =>
+        await Mediator.Send(new RerollProphecyCommand(CurrentUserId, CurrentCharacterGuid));
 
     public sealed record AssembleSigilRequest(string SigilItemId);
 

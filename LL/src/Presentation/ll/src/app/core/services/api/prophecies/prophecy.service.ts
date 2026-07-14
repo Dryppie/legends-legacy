@@ -143,8 +143,8 @@ export class ProphecyService {
     return this.api.post(`prophecies/${id}/accept`);
   }
 
-  rerollProphecy(id: string): Observable<PropheciesOverviewDto> {
-    return this.api.post(`prophecies/${id}/reroll`);
+  rerollDailyProphecies(): Observable<PropheciesOverviewDto> {
+    return this.api.post('prophecies/reroll');
   }
 
   assembleSigil(sigilItemId: string): Observable<ProphecySigilForgeResponseDto> {
