@@ -30,6 +30,7 @@ import {
 type ArchiveFilter = 'all' | 'favorites' | 'attuned' | 'inactive';
 type ArchiveSort = 'name' | 'level' | 'tier';
 type CreatureSourceFilter = 'all' | 'Area' | 'Dungeon';
+type CreatureEssenceFilter = 'all' | 'found' | 'not-found';
 
 @Component({
   selector: 'app-essences',
@@ -53,6 +54,7 @@ export class EssencesComponent implements OnInit {
   readonly creatureSearch = signal('');
   readonly creatureRegionFilter = signal('all');
   readonly creatureSourceFilter = signal<CreatureSourceFilter>('all');
+  readonly creatureEssenceFilter = signal<CreatureEssenceFilter>('all');
   readonly archiveFilter = signal<ArchiveFilter>('all');
   readonly archiveSort = signal<ArchiveSort>('name');
   readonly upgradeDetailsOpen = signal(false);
@@ -70,11 +72,19 @@ export class EssencesComponent implements OnInit {
     { label: 'Tier', value: 'tier' },
   ];
 
-  readonly creatureSourceOptions: readonly DropdownOption<CreatureSourceFilter>[] = [
-    { label: 'Areas and dungeons', value: 'all' },
-    { label: 'Areas', value: 'Area' },
-    { label: 'Dungeons', value: 'Dungeon' },
-  ];
+  readonly creatureSourceOptions: readonly DropdownOption<CreatureSourceFilter>[] =
+    [
+      { label: 'Areas and dungeons', value: 'all' },
+      { label: 'Areas', value: 'Area' },
+      { label: 'Dungeons', value: 'Dungeon' },
+    ];
+
+  readonly creatureEssenceOptions: readonly DropdownOption<CreatureEssenceFilter>[] =
+    [
+      { label: 'All', value: 'all' },
+      { label: 'Found', value: 'found' },
+      { label: 'Not found', value: 'not-found' },
+    ];
 
   readonly filteredArchiveEssences = computed(() => {
     const search = this.archiveSearch().trim().toLowerCase();
@@ -133,6 +143,7 @@ export class EssencesComponent implements OnInit {
     const search = this.creatureSearch().trim().toLowerCase();
     const region = this.creatureRegionFilter();
     const source = this.creatureSourceFilter();
+    const essenceFilter = this.creatureEssenceFilter();
     const creatures = this.essenceState.creatureArchive()?.creatures ?? [];
 
     return creatures.filter((creature) => {
@@ -144,6 +155,12 @@ export class EssencesComponent implements OnInit {
       if ((region !== 'all' || source !== 'all') && !matchesLocation) {
         return false;
       }
+
+      const hasFoundEssence = creature.essences.some(
+        (essence) => essence.isAbsorbed,
+      );
+      if (essenceFilter === 'found' && !hasFoundEssence) return false;
+      if (essenceFilter === 'not-found' && hasFoundEssence) return false;
 
       if (!search) return true;
 
@@ -164,21 +181,24 @@ export class EssencesComponent implements OnInit {
     });
   });
 
-  readonly creatureRegionOptions = computed<readonly DropdownOption<string>[]>(() => {
-    const regions = new Map<number, string>();
-    for (const creature of this.essenceState.creatureArchive()?.creatures ?? []) {
-      for (const location of creature.locations) {
-        regions.set(location.regionId, location.regionName);
+  readonly creatureRegionOptions = computed<readonly DropdownOption<string>[]>(
+    () => {
+      const regions = new Map<number, string>();
+      for (const creature of this.essenceState.creatureArchive()?.creatures ??
+        []) {
+        for (const location of creature.locations) {
+          regions.set(location.regionId, location.regionName);
+        }
       }
-    }
 
-    return [
-      { label: 'All regions', value: 'all' },
-      ...[...regions.entries()]
-        .sort(([left], [right]) => left - right)
-        .map(([id, name]) => ({ label: name, value: id.toString() })),
-    ];
-  });
+      return [
+        { label: 'All regions', value: 'all' },
+        ...[...regions.entries()]
+          .sort(([left], [right]) => left - right)
+          .map(([id, name]) => ({ label: name, value: id.toString() })),
+      ];
+    },
+  );
 
   readonly unlockedCodexEntries = computed(
     () =>
@@ -212,9 +232,7 @@ export class EssencesComponent implements OnInit {
     this.essenceState.refresh();
   }
 
-  public setCreatureRegionFilter(
-    selection: DropdownSelection<string>,
-  ): void {
+  public setCreatureRegionFilter(selection: DropdownSelection<string>): void {
     this.creatureRegionFilter.set(selection.main);
   }
 
@@ -222,6 +240,12 @@ export class EssencesComponent implements OnInit {
     selection: DropdownSelection<CreatureSourceFilter>,
   ): void {
     this.creatureSourceFilter.set(selection.main);
+  }
+
+  public setCreatureEssenceFilter(
+    selection: DropdownSelection<CreatureEssenceFilter>,
+  ): void {
+    this.creatureEssenceFilter.set(selection.main);
   }
 
   public selectPlayerEssence(essence: PlayerEssenceDto): void {
@@ -368,14 +392,19 @@ export class EssencesComponent implements OnInit {
   }
 
   public currentFocusDurationLabel(creature: CreatureArchiveEntryDto): string {
-    return this.formatDuration(this.getLiveCurrentFocusDurationSeconds(creature));
+    return this.formatDuration(
+      this.getLiveCurrentFocusDurationSeconds(creature),
+    );
   }
 
   public trackCodex(_: number, entry: EssenceCodexEntryDto): string {
     return entry.id;
   }
 
-  public trackCodexMember(index: number, member: EssenceCodexMemberDto): string {
+  public trackCodexMember(
+    index: number,
+    member: EssenceCodexMemberDto,
+  ): string {
     return member.essenceDefinitionId ?? `undiscovered-${index}`;
   }
 

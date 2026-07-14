@@ -619,7 +619,7 @@
           {{ essenceState.creatureArchive()?.creatures?.length ?? 0 }} creatures
         </p>
       </div>
-      <div class="grid w-full gap-2 sm:grid-cols-3 lg:w-auto">
+      <div class="grid w-full gap-2 sm:grid-cols-2 lg:w-auto lg:grid-cols-4">
         <label class="ll-field">
           <span class="ll-label">Region</span>
           <app-dropdown
@@ -643,6 +643,19 @@
             [options]="creatureSourceOptions"
             [selectedValue]="creatureSourceFilter()"
             (selection)="setCreatureSourceFilter($event)"
+          ></app-dropdown>
+        </label>
+
+        <label class="ll-field">
+          <span class="ll-label">Essence</span>
+          <app-dropdown
+            class="block w-full"
+            appearance="field"
+            label="All"
+            [value]="creatureEssenceFilter()"
+            [options]="creatureEssenceOptions"
+            [selectedValue]="creatureEssenceFilter()"
+            (selection)="setCreatureEssenceFilter($event)"
           ></app-dropdown>
         </label>
 
