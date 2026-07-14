@@ -38,4 +38,9 @@ public sealed class ProphecySigilForgeOptionDto : IMapFrom<ProphecySigilForgeOpt
     public string SigilName { get; set; } = string.Empty;
     public string DungeonName { get; set; } = string.Empty;
     public int OwnedQuantity { get; set; }
+
+    public void Mapping(Profile profile)
+    {
+        profile.CreateMap<ProphecySigilForgeOption, ProphecySigilForgeOptionDto>();
+    }
 }

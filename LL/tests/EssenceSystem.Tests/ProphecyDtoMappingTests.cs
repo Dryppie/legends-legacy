@@ -1,4 +1,5 @@
 using Application.Common.Mappings;
+using Application.Interfaces.Services.LL.Prophecies;
 using Application.UseCases.Prophecies.Dtos;
 using AutoMapper;
 using Domain.Models.Prophecies;
@@ -57,6 +58,23 @@ public sealed class ProphecyDtoMappingTests
 
         Assert.Equal("Fight Groups", dto.Guidance.ActionLabel);
         Assert.Contains("at least 3 enemies", dto.Guidance.Hint);
+    }
+
+    [Fact]
+    public void ProphecySigilForgeOptionDto_maps_all_overview_fields()
+    {
+        var option = new ProphecySigilForgeOption(
+            "item.sigil.goblin",
+            "Goblin Sigil",
+            "Goblin Warrens",
+            3);
+
+        var dto = CreateMapper().Map<ProphecySigilForgeOptionDto>(option);
+
+        Assert.Equal(option.SigilItemId, dto.SigilItemId);
+        Assert.Equal(option.SigilName, dto.SigilName);
+        Assert.Equal(option.DungeonName, dto.DungeonName);
+        Assert.Equal(option.OwnedQuantity, dto.OwnedQuantity);
     }
 
     private static PlayerProphecyInstance CreateInstance(string objectiveType) =>
