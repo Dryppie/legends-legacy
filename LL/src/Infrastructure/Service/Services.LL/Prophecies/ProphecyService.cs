@@ -7,17 +7,18 @@ using Domain.Models.Items;
 using Domain.Models.Prophecies;
 using Services.LL.Interfaces;
 using System.Security.Cryptography;
-using System.Text;
 using System.Text.Json;
 
 namespace Services.LL.Prophecies;
 
 public sealed class ProphecyService : IProphecyService
 {
+    private static readonly TimeSpan DailyOfferHistoryWindow = TimeSpan.FromDays(7);
+    private static readonly TimeSpan WeeklyOfferHistoryWindow = TimeSpan.FromDays(28);
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
-    private static readonly IReadOnlyDictionary<string, IReadOnlyList<WeightedProphecyCacheReward>> CacheRewardTables = CreateCacheRewardTables();
 
     private readonly IReadOnlyList<ProphecyDefinition> _definitions;
+    private readonly ProphecyBalanceCatalog _balance;
     private readonly IProphecyRepository _repository;
     private readonly ICharacterService _characterService;
     private readonly IEntityService _entityService;
@@ -28,6 +29,7 @@ public sealed class ProphecyService : IProphecyService
 
     public ProphecyService(
         IProphecyDefinitionProvider definitionProvider,
+        IProphecyBalanceProvider balanceProvider,
         IProphecyRepository repository,
         ICharacterService characterService,
         IEntityService entityService,
@@ -37,6 +39,7 @@ public sealed class ProphecyService : IProphecyService
         IItemBaseRepository itemBases)
     {
         _definitions = definitionProvider.GetAll();
+        _balance = balanceProvider.GetCatalog();
         _repository = repository;
         _characterService = characterService;
         _entityService = entityService;
@@ -90,6 +93,7 @@ public sealed class ProphecyService : IProphecyService
 
         return new PropheciesOverview(
             now,
+            daily.Any(x => x.DailyRerollUsedAt.HasValue) ? 0 : 1,
             daily,
             daily.FirstOrDefault(IsAcceptedOrLater),
             greater,
@@ -141,6 +145,85 @@ public sealed class ProphecyService : IProphecyService
         return ProphecyOperationResult<PropheciesOverview>.Success(overview with { ActiveDailyProphecy = prophecy });
     }
 
+    public async Task<ProphecyOperationResult<PropheciesOverview>> RerollAsync(
+        Guid playerId,
+        Guid characterId,
+        Guid prophecyId,
+        DateTimeOffset now,
+        CancellationToken cancellationToken)
+    {
+        var overview = await GetOverviewAsync(playerId, characterId, now, cancellationToken);
+        var prophecy = overview.DailyProphecies.FirstOrDefault(x => x.Id == prophecyId);
+
+        if (prophecy is null)
+        {
+            return ProphecyOperationResult<PropheciesOverview>.Fail("Prophecy was not found for the current daily period.");
+        }
+
+        if (prophecy.Status != ProphecyStatus.Offered || overview.ActiveDailyProphecy is not null)
+        {
+            return ProphecyOperationResult<PropheciesOverview>.Fail("Only an offered prophecy can be rerolled before making the daily choice.");
+        }
+
+        if (overview.DailyRerollsRemaining <= 0)
+        {
+            return ProphecyOperationResult<PropheciesOverview>.Fail("The daily prophecy reroll has already been used.");
+        }
+
+        var definitions = await _repository.SyncDefinitionsAsync(_definitions, cancellationToken);
+        var recentDefinitionIds = await _repository.GetRecentDefinitionIdsAsync(
+            playerId,
+            characterId,
+            ProphecyScope.Daily,
+            prophecy.PeriodStart - DailyOfferHistoryWindow,
+            prophecy.PeriodStart,
+            cancellationToken);
+        var excludedDefinitionIds = overview.DailyProphecies
+            .Select(x => x.ProphecyDefinitionId)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+        var excludedCategories = overview.DailyProphecies
+            .Where(x => x.Id != prophecy.Id)
+            .Select(GetDefinition)
+            .Where(x => x is not null)
+            .Select(x => x!.Category)
+            .ToHashSet();
+
+        var replacement = ProphecyOfferSelector.Pick(
+            definitions,
+            ProphecyScope.Daily,
+            prophecy.SlotType,
+            characterId,
+            prophecy.PeriodStart,
+            $"reroll:{prophecy.Id:N}",
+            excludedDefinitionIds,
+            excludedCategories,
+            recentDefinitionIds);
+
+        if (replacement is null || replacement.Id.Equals(prophecy.ProphecyDefinitionId, StringComparison.OrdinalIgnoreCase))
+        {
+            return ProphecyOperationResult<PropheciesOverview>.Fail("No alternative prophecy is available for this slot.");
+        }
+
+        var consumed = await _repository.TryConsumeDailyRerollAsync(
+            playerId,
+            characterId,
+            prophecy.PeriodStart,
+            now,
+            cancellationToken);
+        if (!consumed)
+        {
+            return ProphecyOperationResult<PropheciesOverview>.Fail("The daily prophecy reroll has already been used.");
+        }
+
+        var rerollAnchor = overview.DailyProphecies.First(x => x.SlotType == ProphecySlotType.Steady);
+        rerollAnchor.DailyRerollUsedAt = now;
+        prophecy.RerolledFromDefinitionId = prophecy.ProphecyDefinitionId;
+        ReplaceOfferDefinition(prophecy, replacement, now);
+
+        return ProphecyOperationResult<PropheciesOverview>.Success(
+            overview with { DailyRerollsRemaining = 0 });
+    }
+
     public async Task<ProphecyOperationResult<ProphecyClaimResult>> ClaimAsync(
         Guid playerId,
         Guid characterId,
@@ -167,15 +250,20 @@ public sealed class ProphecyService : IProphecyService
             return ProphecyOperationResult<ProphecyClaimResult>.Fail("Only completed prophecies can be claimed.");
         }
 
-        var weeklyPeriod = GetWeeklyPeriod(now);
-        var weekly = await EnsureWeeklyProgressAsync(playerId, characterId, weeklyPeriod.Start, weeklyPeriod.End, now, cancellationToken);
         var reward = ReadReward(prophecy.RewardSnapshotJson);
+        reward.PropheticFavor = GetPropheticFavorReward(prophecy.Scope);
+        var weeklyPeriod = reward.PropheticFavor > 0
+            ? GetWeeklyPeriod(prophecy.PeriodStart)
+            : GetWeeklyPeriod(now);
+        var weekly = await EnsureWeeklyProgressAsync(playerId, characterId, weeklyPeriod.Start, weeklyPeriod.End, now, cancellationToken);
 
         await ApplyRewardAsync(characterId, reward, cancellationToken);
 
         if (reward.PropheticFavor > 0)
         {
-            weekly.PropheticFavor = Math.Min(7, weekly.PropheticFavor + reward.PropheticFavor);
+            weekly.PropheticFavor = Math.Min(
+                _balance.WeeklyMilestones.Max(x => x.FavorRequired),
+                weekly.PropheticFavor + reward.PropheticFavor);
             weekly.UpdatedAt = now;
         }
 
@@ -196,7 +284,8 @@ public sealed class ProphecyService : IProphecyService
         var weeklyPeriod = GetWeeklyPeriod(now);
         var weekly = await EnsureWeeklyProgressAsync(playerId, characterId, weeklyPeriod.Start, weeklyPeriod.End, now, cancellationToken);
 
-        if (favorRequired is not (3 or 5 or 7))
+        var milestone = _balance.WeeklyMilestones.FirstOrDefault(x => x.FavorRequired == favorRequired);
+        if (milestone is null)
         {
             return ProphecyOperationResult<WeeklyRevelationClaimResult>.Fail("Unknown weekly revelation milestone.");
         }
@@ -211,7 +300,7 @@ public sealed class ProphecyService : IProphecyService
             return ProphecyOperationResult<WeeklyRevelationClaimResult>.Fail("This weekly milestone has already been claimed.");
         }
 
-        var reward = CreateWeeklyMilestoneReward(favorRequired);
+        var reward = CloneReward(milestone.Reward);
         await ApplyRewardAsync(characterId, reward, cancellationToken);
 
         SetMilestoneClaimed(weekly, favorRequired);
@@ -226,13 +315,15 @@ public sealed class ProphecyService : IProphecyService
         string cacheItemId,
         CancellationToken cancellationToken)
     {
-        var cache = CreateCacheItemBases()
-            .FirstOrDefault(x => x.Id.Equals(cacheItemId, StringComparison.OrdinalIgnoreCase));
+        var cacheDefinition = _balance.Caches
+            .FirstOrDefault(x => x.ItemId.Equals(cacheItemId, StringComparison.OrdinalIgnoreCase));
 
-        if (cache is null)
+        if (cacheDefinition is null)
         {
             return ProphecyOperationResult<ProphecyCacheOpenResult>.Fail("Unknown prophecy cache.");
         }
+
+        var cache = CreateCacheItemBase(cacheDefinition);
 
         await EnsureCacheItemBasesAsync([cache.Id], cancellationToken);
 
@@ -288,19 +379,33 @@ public sealed class ProphecyService : IProphecyService
             to,
             cancellationToken);
 
-        var updates = new List<ProphecyProgressUpdate>();
+        var initialValues = new Dictionary<Guid, int>();
+        var changedProphecies = new List<PlayerProphecyInstance>();
         foreach (var progressEvent in progressEvents.OrderBy(x => x.OccurredAt))
         {
-            AddProgressUpdates(active, progressEvent, updates);
+            ApplyProgress(active, progressEvent, initialValues, changedProphecies);
         }
 
-        return updates;
+        return changedProphecies
+            .Select(prophecy => new ProphecyProgressUpdate(
+                characterIds[0],
+                prophecy.Id,
+                prophecy.ProphecyDefinition?.Title ?? prophecy.ProphecyDefinitionId,
+                prophecy.Scope.ToString(),
+                prophecy.SlotType.ToString(),
+                prophecy.Status.ToString(),
+                prophecy.CurrentValue,
+                prophecy.TargetValue,
+                Math.Max(0, prophecy.CurrentValue - initialValues[prophecy.Id]),
+                prophecy.Status == ProphecyStatus.Completed))
+            .ToList();
     }
 
-    private void AddProgressUpdates(
+    private void ApplyProgress(
         IEnumerable<PlayerProphecyInstance> active,
         ProphecyProgressEvent progressEvent,
-        List<ProphecyProgressUpdate> updates)
+        IDictionary<Guid, int> initialValues,
+        ICollection<PlayerProphecyInstance> changedProphecies)
     {
         foreach (var prophecy in active.Where(x => IsActiveForProgress(x, progressEvent.OccurredAt)))
         {
@@ -310,26 +415,17 @@ public sealed class ProphecyService : IProphecyService
                 continue;
             }
 
-            var completed = false;
             if (prophecy.CurrentValue >= prophecy.TargetValue)
             {
                 prophecy.CurrentValue = prophecy.TargetValue;
                 prophecy.Status = ProphecyStatus.Completed;
                 prophecy.CompletedAt = progressEvent.OccurredAt;
-                completed = true;
             }
 
-            updates.Add(new ProphecyProgressUpdate(
-                progressEvent.CharacterId,
-                prophecy.Id,
-                prophecy.ProphecyDefinition?.Title ?? prophecy.ProphecyDefinitionId,
-                prophecy.Scope.ToString(),
-                prophecy.SlotType.ToString(),
-                prophecy.Status.ToString(),
-                prophecy.CurrentValue,
-                prophecy.TargetValue,
-                Math.Max(0, prophecy.CurrentValue - previousValue),
-                completed));
+            if (initialValues.TryAdd(prophecy.Id, previousValue))
+            {
+                changedProphecies.Add(prophecy);
+            }
         }
     }
 
@@ -362,6 +458,21 @@ public sealed class ProphecyService : IProphecyService
         }
 
         var existingSlots = existing.Select(x => x.SlotType).ToHashSet();
+        var excludedDefinitionIds = existing
+            .Select(x => x.ProphecyDefinitionId)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+        var excludedCategories = existing
+            .Select(GetDefinition)
+            .Where(x => x is not null)
+            .Select(x => x!.Category)
+            .ToHashSet();
+        var recentDefinitionIds = await _repository.GetRecentDefinitionIdsAsync(
+            playerId,
+            characterId,
+            ProphecyScope.Daily,
+            periodStart - DailyOfferHistoryWindow,
+            periodStart,
+            cancellationToken);
         var generated = new List<PlayerProphecyInstance>();
 
         foreach (var slot in new[] { ProphecySlotType.Steady, ProphecySlotType.Focused, ProphecySlotType.Ominous })
@@ -371,16 +482,30 @@ public sealed class ProphecyService : IProphecyService
                 continue;
             }
 
+            var definition = ProphecyOfferSelector.Pick(
+                definitions,
+                ProphecyScope.Daily,
+                slot,
+                characterId,
+                periodStart,
+                "initial",
+                excludedDefinitionIds,
+                excludedCategories,
+                recentDefinitionIds) ??
+                throw new InvalidOperationException($"No enabled daily prophecy definition is available for slot {slot}.");
+
             generated.Add(CreateInstance(
                 playerId,
                 characterId,
-                PickDefinition(definitions, ProphecyScope.Daily, slot, characterId, periodStart),
+                definition,
                 ProphecyScope.Daily,
                 slot,
                 ProphecyStatus.Offered,
                 periodStart,
                 periodEnd,
                 now));
+            excludedDefinitionIds.Add(definition.Id);
+            excludedCategories.Add(definition.Category);
         }
 
         await _repository.AddInstancesAsync(generated, cancellationToken);
@@ -410,10 +535,27 @@ public sealed class ProphecyService : IProphecyService
             return greater;
         }
 
+        var recentDefinitionIds = await _repository.GetRecentDefinitionIdsAsync(
+            playerId,
+            characterId,
+            ProphecyScope.Weekly,
+            periodStart - WeeklyOfferHistoryWindow,
+            periodStart,
+            cancellationToken);
+        var definition = ProphecyOfferSelector.Pick(
+            definitions,
+            ProphecyScope.Weekly,
+            ProphecySlotType.Greater,
+            characterId,
+            periodStart,
+            "initial",
+            recentDefinitionIds: recentDefinitionIds) ??
+            throw new InvalidOperationException("No enabled weekly prophecy definition is available for the Greater slot.");
+
         greater = CreateInstance(
             playerId,
             characterId,
-            PickDefinition(definitions, ProphecyScope.Weekly, ProphecySlotType.Greater, characterId, periodStart),
+            definition,
             ProphecyScope.Weekly,
             ProphecySlotType.Greater,
             ProphecyStatus.Accepted,
@@ -454,7 +596,7 @@ public sealed class ProphecyService : IProphecyService
         return progress;
     }
 
-    private static PlayerProphecyInstance CreateInstance(
+    private PlayerProphecyInstance CreateInstance(
         Guid playerId,
         Guid characterId,
         ProphecyDefinition definition,
@@ -486,39 +628,25 @@ public sealed class ProphecyService : IProphecyService
         };
     }
 
-    private ProphecyDefinition PickDefinition(
-        IReadOnlyList<ProphecyDefinition> definitions,
-        ProphecyScope scope,
-        ProphecySlotType slot,
-        Guid characterId,
-        DateTimeOffset periodStart)
+    private void ReplaceOfferDefinition(
+        PlayerProphecyInstance instance,
+        ProphecyDefinition definition,
+        DateTimeOffset now)
     {
-        var slotName = slot.ToString();
-        var candidates = definitions
-            .Where(x => x.IsEnabled && x.Scope == scope && x.AllowedSlots.Contains(slotName))
-            .ToList();
-
-        if (candidates.Count == 0)
-        {
-            candidates = definitions
-                .Where(x => x.IsEnabled && x.Scope == scope && x.Category == ProphecyCategory.Combat)
-                .ToList();
-        }
-
-        var totalWeight = candidates.Sum(x => Math.Max(1, x.Weight));
-        var roll = Math.Abs(GetStableInt($"{characterId:N}:{periodStart:O}:{slotName}:{scope}")) % totalWeight;
-
-        foreach (var candidate in candidates)
-        {
-            roll -= Math.Max(1, candidate.Weight);
-            if (roll < 0)
-            {
-                return candidate;
-            }
-        }
-
-        return candidates[0];
+        instance.ProphecyDefinitionId = definition.Id;
+        instance.ProphecyDefinition = definition;
+        instance.GeneratedAt = now;
+        instance.TargetValue = GetTargetValue(definition);
+        instance.CurrentValue = 0;
+        instance.ObjectiveParameterSnapshotJson = definition.ObjectiveParameterJson;
+        instance.ProgressJson = "{}";
+        instance.RewardSnapshotJson = JsonSerializer.Serialize(CreateRewardSnapshot(definition), JsonOptions);
     }
+
+    private ProphecyDefinition? GetDefinition(PlayerProphecyInstance instance) =>
+        instance.ProphecyDefinition ??
+        _definitions.FirstOrDefault(x =>
+            x.Id.Equals(instance.ProphecyDefinitionId, StringComparison.OrdinalIgnoreCase));
 
     private bool TryApplyProgress(PlayerProphecyInstance prophecy, ProphecyProgressEvent progressEvent)
     {
@@ -712,11 +840,14 @@ public sealed class ProphecyService : IProphecyService
         var result = new List<ProphecyCacheInventory>();
         foreach (var definition in definitions)
         {
+            var cacheDefinition = _balance.Caches.First(x =>
+                x.ItemId.Equals(definition.Id, StringComparison.OrdinalIgnoreCase));
             result.Add(new ProphecyCacheInventory(
                 definition.Id,
                 definition.Name,
                 definition.Description,
-                await _inventoryRepository.GetInventoryQuantityAsync(characterId, definition.Id, cancellationToken)));
+                await _inventoryRepository.GetInventoryQuantityAsync(characterId, definition.Id, cancellationToken),
+                cacheDefinition.PreviewRewards));
         }
 
         return result;
@@ -751,24 +882,19 @@ public sealed class ProphecyService : IProphecyService
         return grants;
     }
 
-    private static IReadOnlyList<ItemBase> CreateCacheItemBases() =>
-    [
-        Cache("greater_prophecy_cache", "Greater Prophecy Cache", "A sealed cache earned by fulfilling a weekly Greater Prophecy.", Rarity.Rare),
-        Cache("revelation_cache_small", "Small Revelation Cache", "A small cache granted by the Weekly Revelation.", Rarity.Uncommon),
-        Cache("revelation_cache_greater", "Greater Revelation Cache", "A greater cache granted by the Weekly Revelation.", Rarity.Rare),
-        Cache("revelation_cache_perfect_week", "Perfect Week Revelation Cache", "A rare cache for completing the Weekly Revelation.", Rarity.Epic)
-    ];
+    private IReadOnlyList<ItemBase> CreateCacheItemBases() =>
+        _balance.Caches.Select(CreateCacheItemBase).ToList();
 
-    private static ItemBase Cache(string id, string name, string description, Rarity rarity) =>
+    private static ItemBase CreateCacheItemBase(ProphecyCacheDefinition definition) =>
         new()
         {
-            Id = id,
-            Name = name,
-            Description = description,
+            Id = definition.ItemId,
+            Name = definition.Title,
+            Description = definition.Description,
             Stackable = true,
             IsBound = true,
             ItemType = ItemType.Resource,
-            Rarity = rarity
+            Rarity = definition.Rarity
         };
 
     private static ProphecyRewardSnapshot ReadReward(string json) =>
@@ -777,85 +903,51 @@ public sealed class ProphecyService : IProphecyService
     private static ProphecyProgressSnapshot ReadProgress(string json) =>
         JsonSerializer.Deserialize<ProphecyProgressSnapshot>(json, JsonOptions) ?? new ProphecyProgressSnapshot();
 
-    private static ProphecyRewardSnapshot CreateRewardSnapshot(ProphecyDefinition definition)
+    private ProphecyRewardSnapshot CreateRewardSnapshot(ProphecyDefinition definition)
     {
-        var difficulty = definition.Difficulty switch
-        {
-            ProphecyDifficulty.Common => 1,
-            ProphecyDifficulty.Uncommon => 2,
-            ProphecyDifficulty.Rare => 3,
-            ProphecyDifficulty.Epic => 4,
-            _ => 1
-        };
-        var weekly = definition.Scope == ProphecyScope.Weekly;
-        var categoryBonus = definition.Category is ProphecyCategory.Dungeon ? 1 : 0;
-
-        return new ProphecyRewardSnapshot
-        {
-            Cinders = weekly ? 300 + difficulty * 250 : 60 + difficulty * 45,
-            CharacterExperience = weekly ? 200 + difficulty * 130 : 30 + difficulty * 25,
-            Soulstones = weekly ? difficulty : difficulty >= 3 ? 1 : 0,
-            SigilFragments = definition.Category == ProphecyCategory.Dungeon ? (weekly ? 8 + difficulty * 2 : 2 + categoryBonus) : 0,
-            AscensionStoneFragments = definition.Category == ProphecyCategory.Dungeon ? (weekly ? 5 + difficulty : categoryBonus) : 0,
-            PropheticFavor = weekly ? 0 : 1,
-            FateEcho = weekly ? 18 + difficulty * 8 : 4 + difficulty * 3,
-            CacheItemId = weekly ? "greater_prophecy_cache" : null
-        };
+        var profile = _balance.RewardProfiles.First(x =>
+            x.Id.Equals(definition.RewardProfileId, StringComparison.OrdinalIgnoreCase));
+        return CloneReward(profile.Reward);
     }
 
-    private static ProphecyRewardSnapshot CreateWeeklyMilestoneReward(int favorRequired) =>
-        favorRequired switch
-        {
-            3 => new ProphecyRewardSnapshot { Cinders = 150, Soulstones = 1, FateEcho = 10, CacheItemId = "revelation_cache_small" },
-            5 => new ProphecyRewardSnapshot { Cinders = 350, Soulstones = 2, FateEcho = 20, CacheItemId = "revelation_cache_greater" },
-            7 => new ProphecyRewardSnapshot { Cinders = 750, Soulstones = 5, FateEcho = 35, CacheItemId = "revelation_cache_perfect_week" },
-            _ => new ProphecyRewardSnapshot()
-        };
+    private IReadOnlyList<WeeklyRevelationMilestone> CreateWeeklyMilestones(WeeklyRevelationProgress progress) =>
+        _balance.WeeklyMilestones
+            .OrderBy(x => x.FavorRequired)
+            .Select(x => CreateWeeklyMilestone(progress, x))
+            .ToList();
 
-    private static IReadOnlyList<WeeklyRevelationMilestone> CreateWeeklyMilestones(WeeklyRevelationProgress progress) =>
-    [
-        CreateWeeklyMilestone(progress, 3, "Small Revelation Cache"),
-        CreateWeeklyMilestone(progress, 5, "Greater Revelation Cache"),
-        CreateWeeklyMilestone(progress, 7, "Perfect Week Bonus")
-    ];
+    private int GetPropheticFavorReward(ProphecyScope scope) =>
+        _balance.FavorRewards.First(x => x.Scope == scope).Amount;
 
     private static WeeklyRevelationMilestone CreateWeeklyMilestone(
         WeeklyRevelationProgress progress,
-        int favorRequired,
-        string title) =>
+        ProphecyWeeklyMilestoneDefinition definition) =>
         new(
-            favorRequired,
-            title,
-            progress.PropheticFavor >= favorRequired,
-            IsMilestoneClaimed(progress, favorRequired),
-            CreateWeeklyMilestoneReward(favorRequired));
+            definition.FavorRequired,
+            definition.Title,
+            progress.PropheticFavor >= definition.FavorRequired,
+            IsMilestoneClaimed(progress, definition.FavorRequired),
+            CloneReward(definition.Reward));
 
-    private static ProphecyRewardSnapshot CreateCacheOpenReward(string cacheItemId)
+    private ProphecyRewardSnapshot CreateCacheOpenReward(string cacheItemId)
     {
-        if (!CacheRewardTables.TryGetValue(cacheItemId, out var table) || table.Count == 0)
+        var cache = _balance.Caches.FirstOrDefault(x =>
+            x.ItemId.Equals(cacheItemId, StringComparison.OrdinalIgnoreCase));
+        if (cache is null || cache.Rewards.Count == 0)
         {
             return new ProphecyRewardSnapshot();
         }
 
-        var rolls = cacheItemId switch
-        {
-            "revelation_cache_small" => 2,
-            "revelation_cache_greater" => 3,
-            "revelation_cache_perfect_week" => 4,
-            "greater_prophecy_cache" => 3,
-            _ => 1
-        };
-
         var reward = new ProphecyRewardSnapshot();
-        for (var i = 0; i < rolls; i++)
+        for (var i = 0; i < cache.Rolls; i++)
         {
-            AddReward(reward, RollCacheReward(table));
+            AddReward(reward, RollCacheReward(cache.Rewards));
         }
 
         return reward;
     }
 
-    private static ProphecyRewardSnapshot RollCacheReward(IReadOnlyList<WeightedProphecyCacheReward> table)
+    private static ProphecyRewardSnapshot RollCacheReward(IReadOnlyList<ProphecyCacheRewardEntry> table)
     {
         var totalWeight = table.Sum(x => Math.Max(1, x.Weight));
         var roll = RandomNumberGenerator.GetInt32(totalWeight);
@@ -894,96 +986,32 @@ public sealed class ProphecyService : IProphecyService
         }
     }
 
-    private static IReadOnlyDictionary<string, IReadOnlyList<WeightedProphecyCacheReward>> CreateCacheRewardTables() =>
-        new Dictionary<string, IReadOnlyList<WeightedProphecyCacheReward>>(StringComparer.OrdinalIgnoreCase)
-        {
-            ["revelation_cache_small"] =
-            [
-                CacheReward(45, cinders: 80),
-                CacheReward(30, fateEcho: 6),
-                CacheReward(15, cinders: 120, fateEcho: 4),
-                CacheReward(10, soulstones: 1)
-            ],
-            ["revelation_cache_greater"] =
-            [
-                CacheReward(35, cinders: 150, fateEcho: 8),
-                CacheReward(25, soulstones: 1, fateEcho: 10),
-                CacheReward(25, sigilFragments: 2, cinders: 100),
-                CacheReward(10, ascensionStoneFragments: 1, fateEcho: 12),
-                CacheReward(5, soulstones: 2, sigilFragments: 3)
-            ],
-            ["revelation_cache_perfect_week"] =
-            [
-                CacheReward(30, cinders: 275, fateEcho: 18),
-                CacheReward(25, soulstones: 2, sigilFragments: 3),
-                CacheReward(20, ascensionStoneFragments: 2, fateEcho: 16),
-                CacheReward(15, cinders: 450, soulstones: 1),
-                CacheReward(10, soulstones: 3, sigilFragments: 5, ascensionStoneFragments: 2)
-            ],
-            ["greater_prophecy_cache"] =
-            [
-                CacheReward(35, cinders: 225, fateEcho: 14),
-                CacheReward(25, soulstones: 1, sigilFragments: 2),
-                CacheReward(20, cinders: 325, soulstones: 1),
-                CacheReward(15, ascensionStoneFragments: 1, fateEcho: 18),
-                CacheReward(5, soulstones: 2, sigilFragments: 4, ascensionStoneFragments: 1)
-            ]
-        };
-
-    private static WeightedProphecyCacheReward CacheReward(
-        int weight,
-        long cinders = 0,
-        int characterExperience = 0,
-        int essenceExperience = 0,
-        int soulstones = 0,
-        int sigilFragments = 0,
-        int ascensionStoneFragments = 0,
-        int propheticFavor = 0,
-        int fateEcho = 0) =>
-        new(
-            weight,
-            new ProphecyRewardSnapshot
-            {
-                Cinders = cinders,
-                CharacterExperience = characterExperience,
-                EssenceExperience = essenceExperience,
-                Soulstones = soulstones,
-                SigilFragments = sigilFragments,
-                AscensionStoneFragments = ascensionStoneFragments,
-                PropheticFavor = propheticFavor,
-                FateEcho = fateEcho
-            });
-
-    private static int GetTargetValue(ProphecyDefinition definition)
+    private int GetTargetValue(ProphecyDefinition definition)
     {
-        var weekly = definition.Scope == ProphecyScope.Weekly;
-        var scale = definition.Difficulty switch
-        {
-            ProphecyDifficulty.Common => 1,
-            ProphecyDifficulty.Uncommon => 2,
-            ProphecyDifficulty.Rare => 3,
-            ProphecyDifficulty.Epic => 4,
-            _ => 1
-        };
-
-        return definition.ObjectiveType switch
-        {
-            ProphecyObjectiveType.KillCreatures => weekly ? 300 + scale * 100 : 35 + scale * 15,
-            ProphecyObjectiveType.KillDifferentCreatureTypes => weekly ? 18 + scale * 8 : 4 + scale * 2,
-            ProphecyObjectiveType.WinEncounters => weekly ? 140 + scale * 50 : 18 + scale * 8,
-            ProphecyObjectiveType.ClearDungeonRooms => weekly ? 80 + scale * 30 : 8 + scale * 4,
-            ProphecyObjectiveType.CompleteDungeons => weekly ? 8 + scale * 4 : 1 + scale,
-            ProphecyObjectiveType.ResolveDungeonEvents => weekly ? 25 + scale * 10 : 4 + scale * 3,
-            ProphecyObjectiveType.GainEssenceXp => weekly ? 2500 + scale * 1000 : 350 + scale * 150,
-            ProphecyObjectiveType.EssenceArchivedOrFed => weekly ? 5 + scale * 2 : 1 + scale,
-            ProphecyObjectiveType.GatherResources => weekly ? 280 + scale * 90 : 35 + scale * 15,
-            ProphecyObjectiveType.TemperItems => weekly ? 45 + scale * 15 : 6 + scale * 3,
-            ProphecyObjectiveType.SpendPotential => weekly ? 260 + scale * 80 : 35 + scale * 15,
-            ProphecyObjectiveType.TreasureProgress => 100,
-            ProphecyObjectiveType.MeaningfulDefeatThenWins => weekly ? 30 + scale * 12 : 6 + scale * 3,
-            _ => weekly ? 120 : 25
-        };
+        var profile = _balance.Targets.First(x =>
+            x.Scope == definition.Scope &&
+            x.ObjectiveType.Equals(definition.ObjectiveType, StringComparison.Ordinal));
+        return profile.GetValue(definition.Difficulty);
     }
+
+    private static ProphecyRewardSnapshot CloneReward(ProphecyRewardSnapshot reward) =>
+        new()
+        {
+            Cinders = reward.Cinders,
+            CharacterExperience = reward.CharacterExperience,
+            EssenceExperience = reward.EssenceExperience,
+            Soulstones = reward.Soulstones,
+            SigilFragments = reward.SigilFragments,
+            AscensionStoneFragments = reward.AscensionStoneFragments,
+            PropheticFavor = reward.PropheticFavor,
+            FateEcho = reward.FateEcho,
+            CacheItemId = reward.CacheItemId,
+            Items = reward.Items.Select(x => new RewardItemSnapshot
+            {
+                ItemId = x.ItemId,
+                Quantity = x.Quantity
+            }).ToList()
+        };
 
     private static bool MeetsMinimumEnemyCount(string parameterJson, int? enemyCount)
     {
@@ -992,31 +1020,24 @@ public sealed class ProphecyService : IProphecyService
             return true;
         }
 
-        using var doc = JsonDocument.Parse(string.IsNullOrWhiteSpace(parameterJson) ? "{}" : parameterJson);
-        if (!doc.RootElement.TryGetProperty("minimumEnemyCount", out var minimumElement) || minimumElement.ValueKind == JsonValueKind.Null)
+        if (!ProphecyObjectiveParameters.TryParse(parameterJson, out var parameters))
         {
-            return true;
+            return false;
         }
 
-        return enemyCount.Value >= minimumElement.GetInt32();
+        return parameters.MinimumEnemyCount is null || enemyCount.Value >= parameters.MinimumEnemyCount.Value;
     }
 
     private static bool MeetsGatheringRequirements(string parameterJson, string? profession)
     {
-        try
-        {
-            var parameters = JsonSerializer.Deserialize<GatheringObjectiveParameters>(
-                string.IsNullOrWhiteSpace(parameterJson) ? "{}" : parameterJson,
-                JsonOptions);
-            var requiredProfession = parameters?.RequiredProfession?.Trim();
-
-            return string.IsNullOrWhiteSpace(requiredProfession) ||
-                string.Equals(requiredProfession, profession?.Trim(), StringComparison.OrdinalIgnoreCase);
-        }
-        catch (JsonException)
+        if (!ProphecyObjectiveParameters.TryParse(parameterJson, out var parameters))
         {
             return false;
         }
+
+        var requiredProfession = parameters.RequiredProfession?.Trim();
+        return string.IsNullOrWhiteSpace(requiredProfession) ||
+            string.Equals(requiredProfession, profession?.Trim(), StringComparison.OrdinalIgnoreCase);
     }
 
     private static void ExpireOldUnfinished(IReadOnlyList<PlayerProphecyInstance> instances, DateTimeOffset now)
@@ -1092,16 +1113,4 @@ public sealed class ProphecyService : IProphecyService
         return (start, start.AddDays(7));
     }
 
-    private static int GetStableInt(string value)
-    {
-        var hash = SHA256.HashData(Encoding.UTF8.GetBytes(value));
-        return BitConverter.ToInt32(hash, 0);
-    }
-
-    private sealed class GatheringObjectiveParameters
-    {
-        public string? RequiredProfession { get; set; }
-    }
-
-    private sealed record WeightedProphecyCacheReward(int Weight, ProphecyRewardSnapshot Reward);
 }

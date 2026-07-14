@@ -1,0 +1,63 @@
+{
+  "caches": [
+    {
+      "itemId": "greater_prophecy_cache",
+      "title": "Greater Prophecy Cache",
+      "description": "A sealed cache earned by fulfilling a weekly Greater Prophecy.",
+      "rarity": "Rare",
+      "rolls": 3,
+      "previewRewards": [ "Cinders", "Soulstones", "Fate Echo", "Sigil Fragments", "Ascension Fragments" ],
+      "rewards": [
+        { "weight": 35, "reward": { "cinders": 225, "fateEcho": 14 } },
+        { "weight": 25, "reward": { "soulstones": 1, "sigilFragments": 2 } },
+        { "weight": 20, "reward": { "cinders": 325, "soulstones": 1 } },
+        { "weight": 15, "reward": { "ascensionStoneFragments": 1, "fateEcho": 18 } },
+        { "weight": 5, "reward": { "soulstones": 2, "sigilFragments": 4, "ascensionStoneFragments": 1 } }
+      ]
+    },
+    {
+      "itemId": "revelation_cache_small",
+      "title": "Small Revelation Cache",
+      "description": "A small cache granted by the Weekly Revelation.",
+      "rarity": "Uncommon",
+      "rolls": 2,
+      "previewRewards": [ "Cinders", "Soulstones", "Fate Echo" ],
+      "rewards": [
+        { "weight": 45, "reward": { "cinders": 80 } },
+        { "weight": 30, "reward": { "fateEcho": 6 } },
+        { "weight": 15, "reward": { "cinders": 120, "fateEcho": 4 } },
+        { "weight": 10, "reward": { "soulstones": 1 } }
+      ]
+    },
+    {
+      "itemId": "revelation_cache_greater",
+      "title": "Greater Revelation Cache",
+      "description": "A greater cache granted by the Weekly Revelation.",
+      "rarity": "Rare",
+      "rolls": 3,
+      "previewRewards": [ "Cinders", "Soulstones", "Fate Echo", "Sigil Fragments", "Ascension Fragments" ],
+      "rewards": [
+        { "weight": 35, "reward": { "cinders": 150, "fateEcho": 8 } },
+        { "weight": 25, "reward": { "soulstones": 1, "fateEcho": 10 } },
+        { "weight": 25, "reward": { "sigilFragments": 2, "cinders": 100 } },
+        { "weight": 10, "reward": { "ascensionStoneFragments": 1, "fateEcho": 12 } },
+        { "weight": 5, "reward": { "soulstones": 2, "sigilFragments": 3 } }
+      ]
+    },
+    {
+      "itemId": "revelation_cache_perfect_week",
+      "title": "Perfect Week Revelation Cache",
+      "description": "A rare cache for completing the Weekly Revelation.",
+      "rarity": "Epic",
+      "rolls": 4,
+      "previewRewards": [ "Cinders", "Soulstones", "Fate Echo", "Sigil Fragments", "Ascension Fragments" ],
+      "rewards": [
+        { "weight": 30, "reward": { "cinders": 275, "fateEcho": 18 } },
+        { "weight": 25, "reward": { "soulstones": 2, "sigilFragments": 3 } },
+        { "weight": 20, "reward": { "ascensionStoneFragments": 2, "fateEcho": 16 } },
+        { "weight": 15, "reward": { "cinders": 450, "soulstones": 1 } },
+        { "weight": 10, "reward": { "soulstones": 3, "sigilFragments": 5, "ascensionStoneFragments": 2 } }
+      ]
+    }
+  ]
+}

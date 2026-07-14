@@ -22,7 +22,7 @@ This is a code analysis, not a live economy or player-behavior study. Statements
 
 ## Executive Assessment
 
-Prophecies are an implemented daily/weekly objective and retention system. The player receives three deterministic daily offers, chooses one, and also receives one automatically accepted weekly Greater Prophecy. Normal play emits progress events into the accepted daily and weekly objectives. Completed prophecies grant direct rewards; claimed daily prophecies also grant one point of weekly Prophetic Favor. Favor unlocks cumulative rewards at 3, 5, and 7 points, and several rewards arrive as inventory-backed caches that the player opens for randomized currency bundles.
+Prophecies are an implemented daily/weekly objective and retention system. The player receives three deterministic daily offers, chooses one, and also receives one automatically accepted weekly Greater Prophecy. Normal play emits progress events into the accepted daily and weekly objectives. Completed prophecies grant direct rewards; a claimed daily grants one point of weekly Prophetic Favor and a claimed Greater Prophecy grants two. Favor unlocks cumulative rewards at 3, 5, and 7 points, and several rewards arrive as inventory-backed caches that the player opens for randomized currency bundles.
 
 The system's strongest quality is that it acts as connective tissue rather than an isolated minigame. Combat, dungeons, gathering rewards, crafting, and Essences all feed it. It can tell players what to do today, send them toward underused features, and add a short-session purpose to an idle RPG loop.
 
@@ -31,12 +31,12 @@ Its current maturity is best described as a strong end-to-end MVP with important
 - The full vertical slice exists: authored content, persistence, generation, acceptance, progress, claims, milestones, inventory caches, API, realtime messages, notifications, and a substantial Angular page.
 - Reward snapshots and objective-parameter snapshots protect some generated-instance history from later content changes.
 - Deterministic weighted generation is cheap, reproducible, and suitable for a solo developer.
-- Several fields that imply a richer data-driven system are not enforced: player level, required features, tags, reward profile IDs, gathering profession filters, and resource IDs.
+- Several fields that imply richer eligibility are not enforced: player level, required features, and tags. Reward profile and cache resource IDs are now validated against the Prophecy balance catalog.
 - Progress is delivered through direct MediatR notifications rather than a durable, idempotent event pipeline. This creates retry, concurrency, and pre-commit realtime risks.
-- Period rollover is lazy and incomplete. Old accepted/offered instances are not actually expired, and a completed old daily can grant favor to the week in which it is claimed rather than the week it belonged to.
-- The 7-favor reward requires seven daily claims in a seven-day week, creating perfect-attendance pressure with no buffer.
+- Period rollover is lazy and incomplete. Old accepted/offered instances are not actually expired, and delayed direct-reward claim expiry remains undefined.
+- The weekly Favor track now offers nine points across seven daily claims and one Greater Prophecy claim, so the 7-point capstone permits two missed daily claims when the weekly is completed.
 - Fate Echo, Sigil Fragments, and Ascension Stone Fragments are sources without implemented sinks in the inspected code.
-- Dedicated automated coverage is almost absent; one existing test verifies idle combat emits a batched prophecy notification.
+- Dedicated automated coverage remains limited: focused gathering-matcher tests now exist, and one earlier test verifies idle combat emits a batched prophecy notification.
 
 The recommendation is to keep the system and harden it, not replace it. Its role in the game is valuable. The next investment should make progress trustworthy, selection eligible and varied, rewards economically meaningful, and weekly participation less brittle.
 
@@ -54,10 +54,10 @@ Only one can be accepted. Accepting it permanently declines the other two for th
 
 ### 2. A weekly retention spine
 
-The weekly Greater Prophecy progresses alongside daily play. Separately, daily claims produce Prophetic Favor for the Weekly Revelation track. This creates two overlapping weekly goals:
+The weekly Greater Prophecy progresses alongside daily play. Daily and Greater claims both produce Prophetic Favor for the Weekly Revelation track. This creates two overlapping weekly goals:
 
 - Complete the activity-based Greater Prophecy.
-- Claim enough daily prophecies to unlock favor milestones at 3, 5, and 7.
+- Combine one-point daily claims with the Greater Prophecy's two points to unlock Favor milestones at 3, 5, and 7.
 
 The result is a clear return cadence: one daily choice, one weekly objective, and a visible weekly reward ladder.
 
@@ -110,7 +110,7 @@ flowchart LR
     E --> F["Matching progress events update accepted prophecies"]
     F --> G["Claim completed prophecy"]
     G --> H["Receive currencies, XP, and possibly a cache"]
-    G --> I["Daily claim adds 1 Prophetic Favor"]
+    G --> I["Daily claim adds 1 Favor; Greater claim adds 2"]
     I --> J["Claim cumulative milestones at 3, 5, and 7 Favor"]
     H --> K["Open owned cache"]
     J --> K
@@ -125,16 +125,17 @@ flowchart LR
 - Accepting one sets it to `Accepted` and sets the other offered choices to `Declined`.
 - A second daily cannot be accepted once any current daily is accepted, completed, or claimed.
 - Progress before `AcceptedAt` does not count.
-- There is no reroll or choice reversal.
+- One offered daily can be rerolled before acceptance; the single free use resets with the UTC daily period. Acceptance still cannot be reversed.
 
 ### Weekly behavior
 
 - The weekly period begins Monday at 00:00 UTC and ends seven days later.
 - One `Greater` instance is generated and accepted automatically.
 - Weekly Revelation progress is stored separately from the Greater Prophecy.
-- Each claimed daily reward contains one `PropheticFavor`.
+- Each claimed daily grants one `PropheticFavor`; claiming the Greater Prophecy grants two.
 - Favor is capped at 7.
 - Milestones unlock at 3, 5, and 7 and are cumulative; claiming one does not spend favor.
+- There are nine available Favor points per full week, so completing the Greater Prophecy permits two missed daily claims while still reaching the capstone.
 
 ### Claim and cache behavior
 
@@ -180,7 +181,7 @@ There are no weekly Treasure, Archive/feed, Potential-spending, group-encounter,
 | Focused |                         12 |                     845 |
 | Ominous |                         10 |                     585 |
 
-A definition may belong to multiple slots. Selection does not exclude a definition already selected for another slot, so the three offers can contain duplicate objective definitions.
+A definition may belong to multiple slots. Selection now excludes definitions already chosen for another slot whenever an alternative exists, and it prefers distinct categories across the three daily offers.
 
 ## Generation and Selection
 
@@ -198,11 +199,12 @@ Startup validation currently checks:
 - Objective types are known.
 - Weights are positive.
 
+The separate balance-catalog validator also checks target coverage, reward-profile coverage and scope, Favor consistency, non-negative rewards, fixed persisted milestone thresholds, cache metadata and roll weights, duplicate IDs, and cache references.
+
 It does not validate:
 
 - The schema or values inside `ObjectiveParameterJson`.
 - Whether an objective's parameters are supported by its matcher.
-- Reward profile IDs against an actual reward profile catalog.
 - Feature names or tag names.
 - Whether every slot has an eligible definition.
 - Whether level bounds are coherent.
@@ -226,23 +228,30 @@ Selection filters by:
 - Daily or weekly scope.
 - Whether `AllowedSlots` contains the current slot name.
 
-It then hashes character ID, period start, slot, and scope with SHA-256, converts part of the hash to an integer, and uses that as a deterministic weighted roll. A character therefore receives stable offers for a given period and slot.
+It then builds progressively relaxed candidate pools and performs a deterministic weighted roll. The preferred pool excludes definitions already selected today, categories already represented today, and definitions seen during the recent-history window. Recent-history suppression is relaxed first, then category diversity, then definition uniqueness only when the authored slot pool has no alternative. The final roll hashes character ID, period start, slot, scope, and an initial/reroll salt with SHA-256.
 
 Benefits:
 
-- Refreshing cannot reroll offers.
+- Refreshing cannot reroll offers; rerolling is an explicit persisted action.
 - No random state needs to be persisted before instance creation.
 - Selection is easy to reproduce from inputs.
 - Different characters generally receive different pools.
 
+### Daily reroll
+
+Every character receives one free reroll per UTC daily period. It can replace any still-offered daily prophecy before a choice is accepted. The replacement keeps the same instance ID and slot, but refreshes the definition, target, objective parameters, progress, and reward snapshots. The replaced definition ID is retained for audit/history suppression.
+
+The Steady instance acts as the period's reroll anchor. Consumption uses a conditional database update that succeeds only while `DailyRerollUsedAt` is null, so concurrent requests and multiple API replicas cannot consume two rerolls. The service selects an actual alternative before consuming the use; a slot with no alternative returns an error without wasting it.
+
 Limitations:
 
 - `MinPlayerLevel`, `MaxPlayerLevel`, `RequiredFeatures`, `RequiredTags`, and `ExcludedTags` are persisted but never consulted.
-- `RewardProfileId` does not affect rewards.
-- The system does not exclude duplicate definitions or categories across daily slots.
-- It does not consider recent history, neglected content, available dungeons, profession state, or player preferences.
+- `RewardProfileId` selects a validated server-owned reward package, but eligibility metadata still does not influence that package.
+- Definition and category repetition are suppressed where each slot's authored pool allows it.
+- Daily definitions seen in the prior seven days and Greater definitions seen in the prior 28 days are suppressed where alternatives exist.
+- It still does not consider neglected content, available dungeons, profession state, or player preferences.
 - If a slot has no candidates, it falls back to any enabled combat definition of the same scope. If that is also empty, target selection fails rather than producing a controlled configuration error.
-- `Math.Abs` is applied to a signed hash integer. The extremely rare `int.MinValue` result would throw.
+- Selection uses an unsigned hash value, avoiding the former `Math.Abs(int.MinValue)` edge case.
 
 ### Instance snapshots
 
@@ -256,8 +265,8 @@ At generation, a `PlayerProphecyInstance` stores:
 
 This is a sound idea: a generated contract should not change arbitrarily after a balance deploy. The protection is incomplete:
 
-- Rewards and objective parameters are snapshotted.
-- Target is stored, but `RebalanceTargetIfHigher` raises offered or accepted targets whenever the current hard-coded formula is higher. Targets are never lowered.
+- Rewards and objective parameters are snapshotted. Prophetic Favor is the deliberate exception: claim-time scope rules normalize it to one for dailies and two for Greater Prophecies so instances generated before the balance change behave consistently.
+- Target is stored, but `RebalanceTargetIfHigher` raises offered or accepted targets whenever the current catalog value is higher. Targets are never lowered.
 - Title, flavor text, objective text, category, difficulty, and objective type are read from the current joined definition, so history presentation can change after content edits.
 
 ## Objective Semantics and Integrations
@@ -272,7 +281,7 @@ This is a sound idea: a generated contract should not change arbitrarily after a
 | `ResolveDungeonEvents`       | Dungeon action execution                   | Adds one for `EventResolved`.                                                                         | Checkpoint resolution does not count as an event.                                                                                                                                                                        |
 | `GainEssenceXp`              | `EssenceSystemService`                     | Adds total XP granted across all active Essence slots.                                                | Equipping more active Essences can multiply counted XP relative to the base combat XP award.                                                                                                                             |
 | `EssenceArchivedOrFed`       | `EssenceSystemService`                     | Adds one when an unbound Essence is absorbed into the Archive.                                        | No separate feed event was found; the label promises “archive or feed,” while only absorb/archive is wired.                                                                                                              |
-| `GatherResources`            | Idle and dungeon combat gathering rewards  | Adds the sum of quantities from successful gathering reward results.                                  | `requiredProfession` is authored for ore, wood, and fish but never checked. Any gathered profession progresses any of the three daily definitions. `Profession` and `ResourceId` event fields are unused by the matcher. |
+| `GatherResources`            | Idle and dungeon combat gathering rewards  | Adds the sum of quantities from successful gathering reward results when the event profession matches the optional authored `requiredProfession`. | Profession matching is case-insensitive and malformed parameters fail closed. `ResourceId` remains unused by the matcher. |
 | `TemperItems`                | Idle crafting/tempering                    | Adds total tempering actions.                                                                         | It measures attempts, not distinct items.                                                                                                                                                                                |
 | `SpendPotential`             | Idle crafting/tempering                    | Adds `TotalActions` as Potential spent.                                                               | Negative outcomes can consume an additional Potential point, so actual Potential spent can exceed prophecy progress.                                                                                                     |
 | `TreasureProgress`           | Idle and dungeon combat outcome processors | Adds `TotalLoot.Count`.                                                                               | This counts inventory reward entries/stacks, not item quantity, rarity, value, boss cache, or explicit treasure value.                                                                                                   |
@@ -304,19 +313,15 @@ Idle combat builds one batch containing:
 - One gathering event per successful gathering reward result.
 - One treasure event if any loot entries were generated.
 
-The prophecy service loads active instances once for the batch. This is materially better than one database query per offline encounter.
-
-However, the service still creates one progress update per matching prophecy per input event. A large offline result can therefore produce many realtime messages and many progress toasts rather than one aggregate update per prophecy.
+The prophecy service loads active instances once for the batch, processes the events chronologically, and returns at most one update per affected prophecy. The aggregate update contains the total amount gained, final state, and completion flag, while the stored completion timestamp remains the time of the event that crossed the target. A large offline result therefore has a bounded query and realtime cost rather than scaling its output with every encounter or creature.
 
 #### Dungeon combat and dungeon actions
 
-Dungeon combat emits individual notifications rather than one batch. Each won encounter, defeated creature, gathering result, and loot result can trigger a separate active-instance query.
-
-Dungeon action execution separately emits room, event, and completion progress. Dungeon play therefore integrates richly with Prophecies, but it also has the chattiest backend path.
+Dungeon combat collects encounter, creature, gathering, and loot progress into one notification batch. Dungeon action execution similarly batches room, event, and completion progress. Combat resolution and action resolution remain separate producer boundaries, but each boundary now performs one active-instance query and emits at most one realtime update per affected prophecy.
 
 #### Crafting
 
-One completed idle crafting processing pass emits two notifications when actions occurred:
+One completed idle crafting processing pass emits one batch containing two progress events when actions occurred:
 
 - `ItemTempered` with total actions.
 - `PotentialSpent` with the same total actions.
@@ -334,7 +339,7 @@ The service accepts an optional publisher, which makes the integration less expl
 
 ## Target Scaling
 
-Targets are hard-coded in `ProphecyService.GetTargetValue`; the authored content cannot set or select a target profile. The table below shows the formula output by difficulty, whether or not every combination currently appears in JSON.
+Targets are loaded from `Data/prophecies/targets.json`. Each scope/objective pair has an explicit value for all four difficulties, and startup validation rejects a live definition without a matching target profile. The table below shows the current authored values, whether or not every combination currently appears in the offer definitions.
 
 | Objective              | Daily Common / Uncommon / Rare / Epic | Weekly Common / Uncommon / Rare / Epic |
 | ---------------------- | ------------------------------------- | -------------------------------------- |
@@ -354,7 +359,7 @@ Targets are hard-coded in `ProphecyService.GetTargetValue`; the authored content
 
 Implications:
 
-- Difficulty drives both target and reward, but the balance lives in code rather than content.
+- Difficulty drives both target and reward, with both values now authored in server-owned JSON catalogs.
 - Treasure difficulty currently changes rewards without changing the target.
 - Raising a formula can increase an already accepted target on the next overview request; lowering it does not reduce existing targets.
 - Targets are global and do not scale with character level, action speed, dungeon access, or profession efficiency.
@@ -363,7 +368,7 @@ Implications:
 
 ### Direct prophecy rewards
 
-`RewardProfileId` is authored and required, but it is not resolved. Rewards are generated entirely from scope, difficulty, and whether the category is Dungeon.
+`RewardProfileId` now resolves an explicit package in `Data/prophecies/rewards.json`. Startup validation rejects missing profiles, scope mismatches, negative values, broken cache references, and profile Favor that differs from the configured Daily or Weekly amount.
 
 #### Daily base reward
 
@@ -378,16 +383,18 @@ Daily Dungeon rewards additionally grant 3 Sigil Fragments and 1 Ascension Stone
 
 #### Weekly base reward
 
-| Difficulty | Cinders | Character XP | Soulstones | Fate Echo | Cache                  |
-| ---------- | ------: | -----------: | ---------: | --------: | ---------------------- |
-| Common     |     550 |          330 |          1 |        26 | Greater Prophecy Cache |
-| Uncommon   |     800 |          460 |          2 |        34 | Greater Prophecy Cache |
-| Rare       |   1,050 |          590 |          3 |        42 | Greater Prophecy Cache |
-| Epic       |   1,300 |          720 |          4 |        50 | Greater Prophecy Cache |
+| Difficulty | Cinders | Character XP | Soulstones | Fate Echo | Prophetic Favor | Cache                  |
+| ---------- | ------: | -----------: | ---------: | --------: | ---------------: | ---------------------- |
+| Common     |     550 |          330 |          1 |        26 |                2 | Greater Prophecy Cache |
+| Uncommon   |     800 |          460 |          2 |        34 |                2 | Greater Prophecy Cache |
+| Rare       |   1,050 |          590 |          3 |        42 |                2 | Greater Prophecy Cache |
+| Epic       |   1,300 |          720 |          4 |        50 |                2 | Greater Prophecy Cache |
 
 Weekly Dungeon rewards additionally grant `8 + difficulty × 2` Sigil Fragments and `5 + difficulty` Ascension Stone Fragments.
 
 ### Weekly Revelation milestones
+
+Favor awards and milestone titles/rewards are loaded from `Data/prophecies/weekly-revelation.json`. Thresholds remain restricted to 3, 5, and 7 because the persistence model stores three explicit claim flags.
 
 | Favor | Direct reward                           | Cache                         |
 | ----: | --------------------------------------- | ----------------------------- |
@@ -395,11 +402,11 @@ Weekly Dungeon rewards additionally grant `8 + difficulty × 2` Sigil Fragments 
 |     5 | 350 Cinders, 2 Soulstones, 20 Fate Echo | Greater Revelation Cache      |
 |     7 | 750 Cinders, 5 Soulstones, 35 Fate Echo | Perfect Week Revelation Cache |
 
-Because the milestones are cumulative, a perfect week grants all three milestone packages.
+Because the milestones are cumulative, reaching seven Favor grants access to all three milestone packages. Five daily claims plus the Greater Prophecy are sufficient.
 
 ### Cache behavior
 
-Each cache performs independent weighted rolls with replacement:
+Cache metadata, preview labels, roll counts, and weighted rewards are loaded from `Data/prophecies/caches.json`. Each cache performs independent weighted rolls with replacement:
 
 - Small Revelation Cache: 2 rolls.
 - Greater Revelation Cache: 3 rolls.
@@ -419,7 +426,7 @@ These are averages, not guarantees. Repeated entries may be rolled more than onc
 
 ### Reward strengths
 
-- Reward snapshots prevent most generated prophecy payouts from changing after generation.
+- Reward snapshots prevent most generated prophecy payouts from changing after generation; the scope-defined Favor amount is normalized at claim time.
 - Claims and cache opening use the command transaction, so inventory consumption and character grants normally commit together.
 - Cache items are bound, avoiding marketplace transfer and some economy abuse.
 - Direct XP passes through the leveling service.
@@ -431,13 +438,11 @@ These are averages, not guarantees. Repeated entries may be rolled more than onc
 
 2. **`EssenceExperience` is modeled but not applied.** It exists in reward snapshots and DTOs, but `ApplyRewardAsync` neither recognizes it in its early-return condition nor grants it. Current generated rewards leave it at zero, so this is latent rather than an active loss.
 
-3. **Reward profile IDs are decorative.** Content authors may reasonably expect `Daily.Combat.Common` and similar IDs to select tunable reward packages, but the implementation ignores them.
+3. **The former reward-catalog gap is resolved.** Definitions now resolve real reward profiles, and cache behavior is authored in validated JSON.
 
-4. **Cache tables are hard-coded.** They cannot be tuned through the content data and cannot grant arbitrary item loot without code changes.
+4. **The former cache-preview drift is resolved.** The API returns preview labels from the server-owned cache catalog; the client no longer maps cache IDs to contents.
 
-5. **Frontend cache previews have drifted.** The client hard-codes possible cache contents. It omits the Small Cache's Soulstone possibility and the Greater Revelation Cache's Ascension Fragment possibility even though the backend can roll them.
-
-6. **The 7-favor milestone has no missed-day buffer.** Since only one daily can be claimed per day and each grants one favor, the final milestone requires all seven days. That can turn a helpful retention loop into mandatory homework or make the reward feel lost after one missed day.
+5. **The former 7-favor attendance pressure is resolved.** Seven daily claims plus two Favor from the Greater Prophecy create nine available points. A player who completes the weekly objective can miss two daily claims and still reach the capstone.
 
 ## Persistence Model
 
@@ -463,6 +468,7 @@ Stores the per-character generated contract:
 - Period and lifecycle timestamps.
 - Target and current value.
 - Objective, progress, and reward JSON snapshots.
+- Daily reroll usage timestamp and the replaced definition ID when applicable.
 - A `RowVersion` concurrency-token property.
 
 Indexes support period lookups and status lookups. A unique index prevents two instances for the same player, character, scope, period start, and slot.
@@ -506,17 +512,9 @@ Consequences:
 - Recent-history queries exclude `Offered` and `Accepted`, so these stale rows are invisible to the player.
 - The status model suggests a cleaner lifecycle than the implementation currently provides.
 
-Completed instances are not checked for claim expiry. A completed prophecy can be claimed after its period ends if its ID is submitted.
+Completed instances are not checked for claim expiry. A completed prophecy can be claimed after its period ends if its ID is submitted, so its direct rewards remain claimable.
 
-More importantly, daily favor is applied to `GetWeeklyPeriod(now)` at claim time. It is not tied to the daily prophecy's own period. A delayed claim can therefore credit a different week from the one in which the daily was generated and completed. The current page does not put old history entries in its Ready panel, which reduces casual exposure, but the API behavior still permits it.
-
-This should become an explicit product rule:
-
-- Either claims expire with the prophecy period.
-- Or rewards remain claimable but favor is credited to the prophecy's containing week.
-- Or delayed claims are allowed to grant current favor intentionally, in which case the UI and economy should treat them as bankable favor tokens.
-
-The current behavior is implicit and exploitable rather than clearly designed.
+Prophetic Favor is now credited to the weekly period containing the prophecy's own `PeriodStart`. A delayed prophecy claim therefore cannot advance a later week's participation track. If the original week has ended, its Favor may no longer be usable because milestone claims operate on the current week only. Whether delayed direct rewards should eventually expire remains an explicit product decision.
 
 ## API and Application Layer
 
@@ -526,6 +524,7 @@ All endpoints are authorized and use the current user's character context:
 | ------ | -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
 | GET    | `/api/v1/prophecies`                         | Synchronize definitions, ensure current instances and weekly progress, reconcile targets/completion, return overview/history/caches. |
 | POST   | `/api/v1/prophecies/{id}/accept`             | Accept one current daily and decline the other offers.                                                                               |
+| POST   | `/api/v1/prophecies/{id}/reroll`             | Replace one offered daily before acceptance, consuming the period's single reroll.                                                    |
 | POST   | `/api/v1/prophecies/{id}/claim`              | Apply a completed prophecy reward and update weekly favor.                                                                           |
 | POST   | `/api/v1/prophecies/weekly-revelation/claim` | Claim the milestone identified by required favor.                                                                                    |
 | POST   | `/api/v1/prophecies/caches/open`             | Consume one owned cache and grant rolled rewards.                                                                                    |
@@ -558,11 +557,9 @@ The realtime publish happens inside the notification handler before the outer co
 
 The same transaction uses an EF execution strategy that may retry. External realtime side effects inside the retried delegate can be published more than once.
 
-### Volume concern
+### Volume behavior
 
-Idle batching reduces database loads, but it does not aggregate output updates. A batch with hundreds of creature events can generate hundreds of `ProphecyProgressedMsg` messages and toasts until the matching prophecies complete. Dungeon combat is less efficient because it publishes individual MediatR notifications, each potentially causing its own database query.
-
-The desired unit for player feedback is usually one aggregate update per prophecy per resolved offline/action batch, not one toast per underlying kill.
+Idle combat, dungeon combat, dungeon action resolution, and tempering now publish progress in producer-level batches. The service performs one active-instance lookup per batch and collapses all matching input events into at most one `ProphecyProgressedMsg` per affected prophecy. Feedback therefore scales with the small number of active prophecies rather than with kills, encounters, or crafting actions. Combat resolution and its enclosing dungeon action can still form two bounded batches because they are independent producer boundaries.
 
 ### Sidebar notification behavior
 
@@ -606,6 +603,7 @@ The Prophecies page is a substantial standalone Angular component with a corresp
 - Rewards are previewed before acceptance.
 - Current progress and reset timers are visible.
 - Completed objectives stop showing “continue” guidance.
+- Active objectives show server-owned action labels and hints, including snapshotted requirements such as Mining-only gathering or minimum encounter size.
 - CDK connected overlays avoid clipped reward tooltips.
 - Owned caches are hidden when quantity is zero, reducing empty-state noise.
 - Recent history reinforces continuity and previous activity.
@@ -615,8 +613,6 @@ The Prophecies page is a substantial standalone Angular component with a corresp
 - The system does not explain that accepting one daily irreversibly declines the others before the player clicks.
 - The distinction between the Greater Prophecy and Weekly Revelation may be cognitively expensive: both are weekly, both grant caches, but they progress differently.
 - The page shows category and difficulty but not why an offer is appropriate for this character.
-- Guidance is hard-coded by objective type and cannot express parameters such as the intended gathering profession.
-- Cache content previews are client-maintained and already inaccurate.
 - The component and template are large enough that content formatting, reward logic, realtime state, overlays, navigation guidance, and action orchestration are all mixed in one feature component.
 - A global `loading` flag disables every action while any request is running, which is simple but can make the page feel locked during unrelated operations.
 - The client synthesizes `completedAt` with its local current time on realtime completion instead of using the server's actual completion timestamp.
@@ -625,16 +621,16 @@ The Prophecies page is a substantial standalone Angular component with a corresp
 
 | System                | Direction                   | Strength          | Notes                                                                                                                      |
 | --------------------- | --------------------------- | ----------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| Idle combat           | Combat → Prophecies         | Strong            | Wins, losses, creatures, gathering rewards, and loot; batch input but unaggregated output.                                 |
-| Dungeon combat        | Combat → Prophecies         | Strong but chatty | Same combat facts as idle mode, emitted as individual notifications.                                                       |
+| Idle combat           | Combat → Prophecies         | Strong            | Wins, losses, creatures, gathering rewards, and loot are processed in one batch with one output per affected prophecy.     |
+| Dungeon combat        | Combat → Prophecies         | Strong            | Same combat facts as idle mode, collected into one producer-level batch.                                                   |
 | Dungeon exploration   | Dungeons → Prophecies       | Strong            | Rooms, event rooms, checkpoints, and full completions.                                                                     |
 | Crafting/tempering    | Crafting → Prophecies       | Medium            | Attempts and approximate Potential spending; no recipe, item, rarity, or result filters.                                   |
 | Essences              | Essences → Prophecies       | Medium            | Active-slot XP and Archive absorption; “feed” behavior not found.                                                          |
-| Gathering             | Combat rewards → Prophecies | Partial           | Only gathering results from combat processors were found; authored profession filters are ignored.                         |
+| Gathering             | Combat rewards → Prophecies | Partial           | Only gathering results from combat processors were found; authored profession filters are enforced.                        |
 | Inventory             | Bidirectional               | Strong            | Prophecies create bound cache items; cache opening consumes them.                                                          |
 | Character progression | Prophecies → Character      | Strong            | Cinders, Soulstones, character XP, and three fragment/echo balances.                                                       |
 | Leveling              | Prophecies → Leveling       | Strong            | Character XP runs through level recalculation.                                                                             |
-| Realtime              | Prophecies → UI             | Medium            | Immediate feedback, but published before commit and potentially high-volume.                                               |
+| Realtime              | Prophecies → UI             | Medium            | Immediate aggregated feedback, but still published before commit.                                                         |
 | Sidebar notifications | Prophecies → Navigation     | Medium            | Good actionable badge, but refresh is not globally realtime.                                                               |
 | Guild shop            | Shared economy              | Weak/indirect     | Guild rewards can also grant prophecy-adjacent currencies; no prophecy progress from guild activity and no currency sinks. |
 | Achievements          | Nominal only                | Weak              | `AchievementCategory.Prophecies` exists, but no prophecy achievement content or completion event integration was found.    |
@@ -645,13 +641,13 @@ The Prophecies page is a substantial standalone Angular component with a corresp
 
 ### Priority 1: correctness and exploit resistance
 
-#### 1. Authored gathering constraints are ignored
+#### 1. Authored gathering constraints were ignored — resolved 2026-07-14
 
-Mining, woodcutting, and fishing definitions all use `requiredProfession`, and producers populate `Profession`, but the matcher counts every `ResourceGathered` event for all gathering prophecies. This is a current player-visible correctness bug, not only missing extensibility.
+Mining, woodcutting, and fishing definitions use `requiredProfession`, and producers populate `Profession`. The matcher now requires those values to match before adding progress. Unrestricted gathering definitions still accept every profession, comparisons are case-insensitive and whitespace-tolerant, and malformed gathering parameters fail closed. Focused automated coverage protects matching, mismatching, unrestricted, missing-profession, and malformed-parameter cases.
 
-#### 2. Favor belongs to claim time, not prophecy time
+#### 2. Favor belonged to claim time, not prophecy time — resolved 2026-07-14
 
-Old completed daily prophecies can grant favor to a later week through the API. This undermines the meaning of a weekly participation track and creates a banked-claim exploit.
+Claims that award Prophetic Favor now load or create the week containing the prophecy's own period and credit that row. Delayed direct rewards remain claimable, but they cannot advance a later week's participation track. A focused cross-week regression test protects this attribution rule. Claim-expiry policy remains separate and unresolved.
 
 #### 3. Progress has no idempotency contract
 
@@ -671,21 +667,21 @@ Progress messages are sent before transaction commit. A rollback leaves the clie
 
 Definitions can be offered regardless of level, unlocked features, available dungeons, Essence access, profession readiness, or recent play. A new player can receive an objective they cannot reasonably complete.
 
-#### 7. The perfect-week requirement is brittle
+#### 7. The perfect-week requirement was brittle — resolved 2026-07-14
 
-Seven favor requires seven daily claims. There is no catch-up day, bonus source, reroll, or grace period. This maximizes FOMO and makes the best reward disappear after one missed day.
+Daily claims grant one Favor and the Greater Prophecy grants two, providing nine available points against the seven-point cap. A player can miss two daily claims and still reach the capstone by completing the weekly objective. The existing “Perfect Week” capstone label is now a legacy tier name rather than a literal attendance requirement.
 
 #### 8. Prophecy-adjacent currencies have no purpose yet
 
 Fate Echo and both fragment balances accumulate without sinks in current code. This weakens reward comprehension and contributes to currency sprawl.
 
-#### 9. The system is only superficially data-driven
+#### 9. Balance content was only superficially data-driven — resolved 2026-07-14
 
-Content files control presentation and weighted eligibility, but target formulas, reward formulas, milestone rewards, cache items, cache rolls, matching behavior, and frontend cache previews are hard-coded. `RewardProfileId` gives a false impression of a reward catalog.
+Targets, direct reward profiles, Favor awards, Weekly Revelation milestones, cache item metadata, roll counts, weighted cache rewards, and cache-preview labels now live in four validated server-owned JSON files. `RewardProfileId` resolves an actual package. Generated prophecies still snapshot targets and rewards, so later tuning does not rewrite completed contracts; the existing target-rebalance rule only raises active old targets. Objective matching remains typed application behavior because it interprets gameplay events rather than representing balance data.
 
-#### 10. Offers can be repetitive or inaccessible
+#### 10. Offers were repetitive and lacked player agency — resolved 2026-07-14
 
-There is no duplicate exclusion, category balancing, recent-history suppression, or personalized weighting. One acceptance permanently discards two offers, and there is no reroll.
+Generation now suppresses duplicate definitions, repeated categories, and recent offers through progressively relaxed candidate pools, preserving deterministic weighted selection when authored slot constraints are tight. Each character also receives one atomically consumed daily reroll that must be used before acceptance. Personalized accessibility remains a separate concern under pain point 6: level, feature, dungeon, and profession eligibility metadata is still not enforced.
 
 ### Priority 3: maintainability, performance, and UX
 
@@ -693,21 +689,21 @@ There is no duplicate exclusion, category balancing, recent-history suppression,
 
 Old offered and accepted instances are not expired and do not appear in history. This complicates analytics, support, and future lifecycle features.
 
-#### 12. Event output is too granular
+#### 12. Event output was too granular — resolved 2026-07-14
 
-Large idle sessions and dungeon combats can create many database lookups, websocket messages, and toasts. Batching exists at one input boundary but not end-to-end.
+Idle combat, dungeon combat, dungeon action resolution, and tempering now use producer-level progress batches. The service loads active instances once, processes the batch chronologically, and returns one aggregate update per affected prophecy with its total gain and final completion state. This bounds database lookups, websocket messages, and toasts by producer batches and active prophecies rather than underlying kills or actions.
 
-#### 13. Frontend/backend duplication has already drifted
+#### 13. Frontend/backend objective guidance was duplicated — resolved 2026-07-14
 
-Cache contents and objective guidance are maintained separately in TypeScript from the server's actual rules. The displayed cache possibilities are already incomplete.
+`ProphecyInstanceDto` now includes server-owned guidance with an abstract destination, action label, and player-facing hint. The mapping covers every objective family and reads the instance's snapshotted parameters, so requirements such as a specific gathering profession or minimum enemy count are explained consistently with progress rules. Angular no longer switches on objective type; it only maps the abstract destination to a presentation-owned route and renders the supplied action and hint.
 
 #### 14. Progress persistence depends on ambient command behavior
 
 Notification handlers mutate tracked EF entities but do not explicitly save. This works when invoked inside a command transaction, but a future producer that publishes from a background or non-command scope may emit realtime updates without durable progress unless the caller saves.
 
-#### 15. Dedicated test coverage is insufficient
+#### 15. Dedicated test coverage was insufficient — resolved baseline 2026-07-14
 
-No focused tests were found for generation, deterministic weighting, duplicate selection, eligibility, acceptance, period boundaries, objective matching, claim idempotency, favor attribution, milestone claims, cache distributions, concurrency, API ownership, or frontend rendering.
+The focused Prophecy suite now protects every implemented objective matcher, positive and negative parameter constraints, unique-creature and defeat-then-win state, chronological aggregation, exact acceptance/period boundaries, stable generation snapshots, UTC rollover, daily acceptance and decline behavior, actual reroll consumption and replay rejection, delayed Favor attribution, direct-claim replay protection, milestone unlock and single-claim rules, DTO guidance, deterministic offer selection, cache table structure and positive weights, persistence ownership/history scoping, and authenticated controller claim propagation. This establishes a maintainable regression baseline for the implemented system. True multi-replica races, relational unique-conflict behavior, stochastic cache distribution, and dedicated Angular component rendering still require higher-level environments and remain in the test strategy rather than being treated as unit-test coverage gaps.
 
 ## Recommended Direction
 
@@ -716,43 +712,43 @@ No focused tests were found for generation, deterministic weighting, duplicate s
 1. Introduce a durable gameplay progress envelope with a unique event ID, character ID, occurred-at time, type, amount, and typed dimensions.
 2. Process prophecy progress idempotently. Store processed event IDs or derive stable idempotency keys from the originating action/outbox event.
 3. Publish realtime updates only after the transaction commits, ideally through the existing game-event outbox pattern.
-4. Aggregate a gameplay batch into at most one update per affected prophecy, including total amount gained and final completion state.
-5. Batch dungeon combat notifications as idle combat already does.
+4. ~~Aggregate a gameplay batch into at most one update per affected prophecy, including total amount gained and final completion state.~~ Completed in the progress service while preserving chronological completion timestamps.
+5. ~~Batch dungeon combat notifications as idle combat already does.~~ Dungeon combat, dungeon action resolution, and tempering now use the same batch notification path.
 6. Replace or configure `RowVersion` with a real database-generated concurrency token, or use atomic SQL increments/row locks for counters.
 7. Handle unique conflicts during lazy generation with reload-and-return or database upsert semantics.
-8. Define claim-period rules and bind Prophetic Favor to the intended weekly period.
+8. Define whether delayed direct rewards expire. Prophetic Favor is now bound to the prophecy's containing week.
 9. Reconcile expired instances explicitly during period initialization or a lightweight scheduled cleanup.
 
 ### Phase 2: make content truly data-driven
 
 1. Replace stringly `ObjectiveParameterJson` matching with validated typed parameter contracts per objective type.
-2. Enforce profession, resource, creature, region, dungeon, tier, enemy-count, and feature filters where authored.
+2. Extend the enforced gathering-profession pattern to resource, creature, region, dungeon, tier, enemy-count, and feature filters where authored.
 3. Validate every objective parameter document at startup.
-4. Move target profiles out of `GetTargetValue` into content or a reusable balance catalog.
-5. Implement real reward profiles and resolve `RewardProfileId`.
-6. Move weekly milestones and cache roll tables into server-owned data.
-7. Return cache content/odds-preview metadata from the API so the client does not duplicate reward truth.
+4. ~~Move target profiles out of `GetTargetValue` into content or a reusable balance catalog.~~ Completed with `targets.json`.
+5. ~~Implement real reward profiles and resolve `RewardProfileId`.~~ Completed with `rewards.json`.
+6. ~~Move weekly milestones and cache roll tables into server-owned data.~~ Completed with `weekly-revelation.json` and `caches.json`.
+7. ~~Return cache content/odds-preview metadata from the API so the client does not duplicate reward truth.~~ Preview labels are now returned by the API; numeric odds remain an optional future UX enhancement.
 8. Either implement `EssenceExperience` reward application or remove it until supported.
 
 ### Phase 3: improve selection and retention design
 
 1. Build a selection context from character level, unlocked features, accessible dungeons, profession state, and relevant inventory/loadout state.
 2. Enforce the existing level/feature/tag metadata.
-3. Exclude duplicate definitions across a day's slots.
-4. Add recent-history suppression so the same objective does not repeat too often.
+3. ~~Exclude duplicate definitions across a day's slots.~~ Completed with definition and category-aware candidate pools.
+4. ~~Add recent-history suppression so the same objective does not repeat too often.~~ Completed with seven-day daily and 28-day Greater lookbacks that relax when necessary.
 5. Give slots clearer mechanical identities rather than relying only on authored lists.
-6. Consider one limited reroll or allow choice replacement before any progress is earned.
-7. Add a buffer to the weekly track: for example, 7 favor available from 8–9 opportunities, or place the main capstone at 6 with a smaller perfect-week cosmetic bonus at 7.
+6. ~~Consider one limited reroll or allow choice replacement before any progress is earned.~~ Every character now has one free reroll per UTC daily period, usable before acceptance.
+7. Monitor completion rates after the new nine-available/seven-required Favor balance and tune the Greater objective or capstone if it still produces excessive drop-off.
 8. Use Prophecies to encourage relevant variety, not simply volume: older unmastered dungeons, unused Essence families, underleveled professions, or guild-aligned activity.
 
 ### Phase 4: complete the economy and presentation
 
-1. Give Fate Echo a clear sink tied to prophecy agency, such as rerolls, targeted category weighting, catch-up, or deterministic cache conversion.
+1. Give Fate Echo a clear sink tied to prophecy agency, such as additional rerolls beyond the free daily use, targeted category weighting, catch-up, or deterministic cache conversion.
 2. Connect Sigil and Ascension fragments to an existing dungeon/Essence progression sink, or consolidate them with already meaningful resources.
 3. Explain the relationship among daily prophecy, Greater Prophecy, Prophetic Favor, Weekly Revelation, and caches in a short onboarding panel.
 4. Warn that accepting a daily declines the other two.
 5. Move the realtime listener for actionable completion into a global prophecy state service so sidebar badges update anywhere in the game.
-6. Aggregate progress feedback and reserve toasts for meaningful thresholds or completion.
+6. ~~Aggregate progress feedback.~~ Output is now one update and toast per affected prophecy per producer batch; reserving toasts only for thresholds or completion remains an optional UX refinement.
 7. Split the large Angular component into server-state orchestration, reward presentation, weekly rail, prophecy card, and cache components only when active feature work justifies it.
 
 ## Suggested Test Strategy
@@ -764,7 +760,7 @@ No focused tests were found for generation, deterministic weighting, duplicate s
 - Deterministic selection and weighted boundary cases.
 - Eligibility filtering and duplicate exclusion.
 - Daily and weekly UTC boundaries.
-- Delayed claims and favor attribution.
+- Additional delayed-claim and weekly-boundary cases.
 - Milestone unlock/claim rules.
 - Cache table weights and roll counts using an injectable RNG abstraction.
 - Reward application, including missing item-base failures and Essence XP behavior.
@@ -819,6 +815,6 @@ These metrics are necessary before a meaningful economy and target-balancing pas
 
 Prophecies are one of the more strategically useful systems in Legends Legacy because they connect rather than compete with the game's main loops. They provide daily choice, weekly continuity, cross-feature guidance, immediate progress feedback, and layered rewards. The thematic framing also fits the game better than a generic checklist would.
 
-The implementation is complete enough to retain and iterate on, but not yet robust enough to treat as a trusted long-term live-ops foundation. The most urgent work is not more definitions. It is to fix constraint enforcement, period and favor semantics, idempotency, concurrency, and post-commit delivery. After that, the system should become genuinely data-driven and use player eligibility/history to produce varied, achievable offers. Finally, its currencies and perfect-week design need an economy and retention pass.
+The implementation is complete enough to retain and iterate on, but not yet robust enough to treat as a trusted long-term live-ops foundation. Its core balance is now genuinely data-driven; the most urgent remaining work is constraint enforcement, idempotency, concurrency, and post-commit delivery. After that, player eligibility/history should drive varied, achievable offers. Finally, its currencies still need an economy pass, and the revised weekly buffer should be validated against player completion data.
 
 If those changes are made, Prophecies can become the game's primary daily guidance layer: a lightweight mechanism that helps players discover depth, revisit relevant content, and make purposeful choices without feeling like mandatory chores.

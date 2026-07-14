@@ -264,6 +264,12 @@ public static class DependencyInjection
                 config,
                 contentRootPath,
                 sp.GetRequiredService<JsonSerializerOptions>()));
+        services.AddSingleton<IProphecyBalanceProvider>(sp =>
+            new JsonProphecyBalanceProvider(
+                config,
+                contentRootPath,
+                sp.GetRequiredService<JsonSerializerOptions>(),
+                sp.GetRequiredService<IProphecyDefinitionProvider>()));
         services.AddScoped<IProphecyService, ProphecyService>();
 
         services.AddScoped<ISoulstoneUpgradeService, SoulstoneUpgradeService>();

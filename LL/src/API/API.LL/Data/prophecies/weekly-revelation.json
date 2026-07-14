@@ -1,0 +1,23 @@
+{
+  "favorRewards": [
+    { "scope": "Daily", "amount": 1 },
+    { "scope": "Weekly", "amount": 2 }
+  ],
+  "milestones": [
+    {
+      "favorRequired": 3,
+      "title": "Small Revelation Cache",
+      "reward": { "cinders": 150, "soulstones": 1, "fateEcho": 10, "cacheItemId": "revelation_cache_small" }
+    },
+    {
+      "favorRequired": 5,
+      "title": "Greater Revelation Cache",
+      "reward": { "cinders": 350, "soulstones": 2, "fateEcho": 20, "cacheItemId": "revelation_cache_greater" }
+    },
+    {
+      "favorRequired": 7,
+      "title": "Perfect Week Bonus",
+      "reward": { "cinders": 750, "soulstones": 5, "fateEcho": 35, "cacheItemId": "revelation_cache_perfect_week" }
+    }
+  ]
+}

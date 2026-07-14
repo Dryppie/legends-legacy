@@ -4,6 +4,7 @@ import { ApiService } from '../api.service';
 
 export interface PropheciesOverviewDto {
   serverTime: string;
+  dailyRerollsRemaining: number;
   dailyProphecies: ProphecyInstanceDto[];
   activeDailyProphecy?: ProphecyInstanceDto | null;
   greaterProphecy: ProphecyInstanceDto;
@@ -17,6 +18,7 @@ export interface ProphecyCacheInventoryDto {
   title: string;
   description: string;
   quantity: number;
+  possibleRewards: string[];
 }
 
 export interface ProphecyInstanceDto {
@@ -31,6 +33,7 @@ export interface ProphecyInstanceDto {
   category: string;
   difficulty: string;
   objectiveType: string;
+  guidance: ProphecyGuidanceDto;
   periodStart: string;
   periodEnd: string;
   generatedAt: string;
@@ -40,6 +43,20 @@ export interface ProphecyInstanceDto {
   targetValue: number;
   currentValue: number;
   reward: ProphecyRewardSnapshotDto;
+}
+
+export type ProphecyGuidanceDestination =
+  | 'WorldCombat'
+  | 'Dungeons'
+  | 'Essences'
+  | 'SoulArchive'
+  | 'Gathering'
+  | 'Crafting';
+
+export interface ProphecyGuidanceDto {
+  destination: ProphecyGuidanceDestination;
+  actionLabel: string;
+  hint: string;
 }
 
 export interface ProphecyRewardSnapshotDto {
@@ -105,6 +122,10 @@ export class ProphecyService {
 
   acceptProphecy(id: string): Observable<PropheciesOverviewDto> {
     return this.api.post(`prophecies/${id}/accept`);
+  }
+
+  rerollProphecy(id: string): Observable<PropheciesOverviewDto> {
+    return this.api.post(`prophecies/${id}/reroll`);
   }
 
   claimProphecy(id: string): Observable<ProphecyClaimResponseDto> {

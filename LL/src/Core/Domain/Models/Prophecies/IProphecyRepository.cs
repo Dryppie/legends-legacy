@@ -34,6 +34,21 @@ public interface IProphecyRepository
         int limit,
         CancellationToken cancellationToken);
 
+    Task<IReadOnlySet<string>> GetRecentDefinitionIdsAsync(
+        Guid playerId,
+        Guid characterId,
+        ProphecyScope scope,
+        DateTimeOffset since,
+        DateTimeOffset before,
+        CancellationToken cancellationToken);
+
+    Task<bool> TryConsumeDailyRerollAsync(
+        Guid playerId,
+        Guid characterId,
+        DateTimeOffset periodStart,
+        DateTimeOffset usedAt,
+        CancellationToken cancellationToken);
+
     Task<WeeklyRevelationProgress?> GetWeeklyProgressAsync(
         Guid playerId,
         Guid characterId,

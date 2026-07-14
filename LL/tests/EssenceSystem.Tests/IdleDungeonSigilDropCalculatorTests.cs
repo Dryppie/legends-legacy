@@ -56,7 +56,7 @@ public sealed class IdleDungeonSigilDropCalculatorTests
             new InventoryItemFactory(),
             new StaticBonusService(new Dictionary<BonusKind, double>
             {
-                [BonusKind.SigilFragmentDropRateRelativeBps] = sigilTraceBonusBps
+                [BonusKind.DungeonSigilDropRateRelativeBps] = sigilTraceBonusBps
             }));
     }
 

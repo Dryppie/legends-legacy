@@ -171,7 +171,12 @@
           <div class="ll-eyebrow">Daily Prophecies</div>
           <h2 class="ll-heading text-xl">Choose One</h2>
         </div>
-        <div class="ll-badge">Resets in {{ dailyResetText() }}</div>
+        <div class="flex flex-wrap items-center gap-2">
+          <div class="ll-badge">
+            {{ dailyRerollLabel() }}
+          </div>
+          <div class="ll-badge">Resets in {{ dailyResetText() }}</div>
+        </div>
       </div>
 
       <div class="grid gap-3 lg:grid-cols-3">
@@ -274,6 +279,13 @@
               </div>
             </div>
 
+            <p
+              *ngIf="canContinue(prophecy)"
+              class="text-xs leading-relaxed text-zinc-400"
+            >
+              {{ prophecy.guidance.hint }}
+            </p>
+
             <div class="flex flex-wrap gap-2">
               <button
                 *ngIf="canAccept(prophecy)"
@@ -285,6 +297,16 @@
                 Accept
               </button>
               <button
+                *ngIf="canReroll(prophecy)"
+                type="button"
+                class="ll-button"
+                (click)="reroll(prophecy)"
+                [disabled]="loading()"
+                title="Replace this offer. You have one reroll per day."
+              >
+                Reroll
+              </button>
+              <button
                 *ngIf="canClaim(prophecy)"
                 type="button"
                 class="ll-button"
@@ -293,15 +315,13 @@
               >
                 Claim
               </button>
-              <ng-container *ngIf="guidance(prophecy) as guide">
-                <a
-                  *ngIf="canContinue(prophecy)"
-                  class="ll-button"
-                  [routerLink]="guide.route"
-                >
-                  {{ guide.cta }}
-                </a>
-              </ng-container>
+              <a
+                *ngIf="canContinue(prophecy)"
+                class="ll-button"
+                [routerLink]="guidanceRoute(prophecy)"
+              >
+                {{ prophecy.guidance.actionLabel }}
+              </a>
             </div>
           </div>
         </article>
@@ -505,6 +525,13 @@
             </div>
           </div>
 
+          <p
+            *ngIf="canContinue(greater)"
+            class="text-xs leading-relaxed text-zinc-400"
+          >
+            {{ greater.guidance.hint }}
+          </p>
+
           <div class="flex flex-wrap gap-2">
             <button
               *ngIf="canClaim(greater)"
@@ -515,15 +542,13 @@
             >
               Claim
             </button>
-            <ng-container *ngIf="guidance(greater) as guide">
-              <a
-                *ngIf="canContinue(greater)"
-                class="ll-button"
-                [routerLink]="guide.route"
-              >
-                {{ guide.cta }}
-              </a>
-            </ng-container>
+            <a
+              *ngIf="canContinue(greater)"
+              class="ll-button"
+              [routerLink]="guidanceRoute(greater)"
+            >
+              {{ greater.guidance.actionLabel }}
+            </a>
             <span
               *ngIf="greater.status === 'Claimed'"
               class="py-1 text-xs text-zinc-400"

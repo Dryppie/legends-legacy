@@ -10,6 +10,7 @@ public sealed class PlayerProphecyInstanceConfiguration : IEntityTypeConfigurati
     {
         builder.HasKey(x => x.Id);
         builder.Property(x => x.ProphecyDefinitionId).HasMaxLength(128).IsRequired();
+        builder.Property(x => x.RerolledFromDefinitionId).HasMaxLength(128);
         builder.Property(x => x.ObjectiveParameterSnapshotJson).HasColumnType("jsonb").HasDefaultValue("{}");
         builder.Property(x => x.ProgressJson).HasColumnType("jsonb").HasDefaultValue("{}");
         builder.Property(x => x.RewardSnapshotJson).HasColumnType("jsonb").HasDefaultValue("{}");

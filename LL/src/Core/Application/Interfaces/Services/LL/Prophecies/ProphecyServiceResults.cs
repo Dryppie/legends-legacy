@@ -4,6 +4,7 @@ namespace Application.Interfaces.Services.LL.Prophecies;
 
 public sealed record PropheciesOverview(
     DateTimeOffset ServerTime,
+    int DailyRerollsRemaining,
     IReadOnlyList<PlayerProphecyInstance> DailyProphecies,
     PlayerProphecyInstance? ActiveDailyProphecy,
     PlayerProphecyInstance GreaterProphecy,
@@ -23,7 +24,8 @@ public sealed record ProphecyCacheInventory(
     string ItemId,
     string Title,
     string Description,
-    int Quantity);
+    int Quantity,
+    IReadOnlyList<string> PossibleRewards);
 
 public sealed record ProphecyOperationResult<T>(bool Succeeded, string? Error, T? Value)
 {

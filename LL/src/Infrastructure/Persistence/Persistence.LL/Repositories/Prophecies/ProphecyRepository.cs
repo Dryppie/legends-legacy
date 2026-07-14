@@ -128,6 +128,54 @@ public sealed class ProphecyRepository : IProphecyRepository
             .Take(limit)
             .ToListAsync(cancellationToken);
 
+    public async Task<IReadOnlySet<string>> GetRecentDefinitionIdsAsync(
+        Guid playerId,
+        Guid characterId,
+        ProphecyScope scope,
+        DateTimeOffset since,
+        DateTimeOffset before,
+        CancellationToken cancellationToken)
+    {
+        var instances = await _context.PlayerProphecyInstances
+            .AsNoTracking()
+            .Where(x =>
+                x.PlayerId == playerId &&
+                x.CharacterId == characterId &&
+                x.Scope == scope &&
+                x.GeneratedAt >= since &&
+                x.GeneratedAt < before)
+            .Select(x => new { x.ProphecyDefinitionId, x.RerolledFromDefinitionId })
+            .ToListAsync(cancellationToken);
+
+        return instances
+            .SelectMany(x => new[] { x.ProphecyDefinitionId, x.RerolledFromDefinitionId })
+            .Where(x => !string.IsNullOrWhiteSpace(x))
+            .Select(x => x!)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+    }
+
+    public async Task<bool> TryConsumeDailyRerollAsync(
+        Guid playerId,
+        Guid characterId,
+        DateTimeOffset periodStart,
+        DateTimeOffset usedAt,
+        CancellationToken cancellationToken)
+    {
+        var updated = await _context.PlayerProphecyInstances
+            .Where(x =>
+                x.PlayerId == playerId &&
+                x.CharacterId == characterId &&
+                x.Scope == ProphecyScope.Daily &&
+                x.PeriodStart == periodStart &&
+                x.SlotType == ProphecySlotType.Steady &&
+                x.DailyRerollUsedAt == null)
+            .ExecuteUpdateAsync(
+                setters => setters.SetProperty(x => x.DailyRerollUsedAt, usedAt),
+                cancellationToken);
+
+        return updated == 1;
+    }
+
     public async Task<WeeklyRevelationProgress?> GetWeeklyProgressAsync(
         Guid playerId,
         Guid characterId,

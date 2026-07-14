@@ -1,0 +1,26 @@
+{
+  "profiles": [
+    { "id": "Daily.Combat.Common", "scope": "Daily", "reward": { "cinders": 105, "characterExperience": 55, "propheticFavor": 1, "fateEcho": 7 } },
+    { "id": "Daily.Combat.Uncommon", "scope": "Daily", "reward": { "cinders": 150, "characterExperience": 80, "propheticFavor": 1, "fateEcho": 10 } },
+    { "id": "Daily.Combat.Rare", "scope": "Daily", "reward": { "cinders": 195, "characterExperience": 105, "soulstones": 1, "propheticFavor": 1, "fateEcho": 13 } },
+    { "id": "Daily.Crafting.Common", "scope": "Daily", "reward": { "cinders": 105, "characterExperience": 55, "propheticFavor": 1, "fateEcho": 7 } },
+    { "id": "Daily.Crafting.Uncommon", "scope": "Daily", "reward": { "cinders": 150, "characterExperience": 80, "propheticFavor": 1, "fateEcho": 10 } },
+    { "id": "Daily.Dungeon.Uncommon", "scope": "Daily", "reward": { "cinders": 150, "characterExperience": 80, "sigilFragments": 3, "ascensionStoneFragments": 1, "propheticFavor": 1, "fateEcho": 10 } },
+    { "id": "Daily.Dungeon.Rare", "scope": "Daily", "reward": { "cinders": 195, "characterExperience": 105, "soulstones": 1, "sigilFragments": 3, "ascensionStoneFragments": 1, "propheticFavor": 1, "fateEcho": 13 } },
+    { "id": "Daily.Essence.Common", "scope": "Daily", "reward": { "cinders": 105, "characterExperience": 55, "propheticFavor": 1, "fateEcho": 7 } },
+    { "id": "Daily.Essence.Rare", "scope": "Daily", "reward": { "cinders": 195, "characterExperience": 105, "soulstones": 1, "propheticFavor": 1, "fateEcho": 13 } },
+    { "id": "Daily.Gathering.Common", "scope": "Daily", "reward": { "cinders": 105, "characterExperience": 55, "propheticFavor": 1, "fateEcho": 7 } },
+    { "id": "Daily.Survival.Rare", "scope": "Daily", "reward": { "cinders": 195, "characterExperience": 105, "soulstones": 1, "propheticFavor": 1, "fateEcho": 13 } },
+    { "id": "Daily.Treasure.Uncommon", "scope": "Daily", "reward": { "cinders": 150, "characterExperience": 80, "propheticFavor": 1, "fateEcho": 10 } },
+    { "id": "Daily.Treasure.Rare", "scope": "Daily", "reward": { "cinders": 195, "characterExperience": 105, "soulstones": 1, "propheticFavor": 1, "fateEcho": 13 } },
+
+    { "id": "Weekly.Combat.Uncommon", "scope": "Weekly", "reward": { "cinders": 800, "characterExperience": 460, "soulstones": 2, "propheticFavor": 2, "fateEcho": 34, "cacheItemId": "greater_prophecy_cache" } },
+    { "id": "Weekly.Combat.Rare", "scope": "Weekly", "reward": { "cinders": 1050, "characterExperience": 590, "soulstones": 3, "propheticFavor": 2, "fateEcho": 42, "cacheItemId": "greater_prophecy_cache" } },
+    { "id": "Weekly.Crafting.Uncommon", "scope": "Weekly", "reward": { "cinders": 800, "characterExperience": 460, "soulstones": 2, "propheticFavor": 2, "fateEcho": 34, "cacheItemId": "greater_prophecy_cache" } },
+    { "id": "Weekly.Dungeon.Uncommon", "scope": "Weekly", "reward": { "cinders": 800, "characterExperience": 460, "soulstones": 2, "sigilFragments": 12, "ascensionStoneFragments": 7, "propheticFavor": 2, "fateEcho": 34, "cacheItemId": "greater_prophecy_cache" } },
+    { "id": "Weekly.Dungeon.Rare", "scope": "Weekly", "reward": { "cinders": 1050, "characterExperience": 590, "soulstones": 3, "sigilFragments": 14, "ascensionStoneFragments": 8, "propheticFavor": 2, "fateEcho": 42, "cacheItemId": "greater_prophecy_cache" } },
+    { "id": "Weekly.Essence.Uncommon", "scope": "Weekly", "reward": { "cinders": 800, "characterExperience": 460, "soulstones": 2, "propheticFavor": 2, "fateEcho": 34, "cacheItemId": "greater_prophecy_cache" } },
+    { "id": "Weekly.Gathering.Uncommon", "scope": "Weekly", "reward": { "cinders": 800, "characterExperience": 460, "soulstones": 2, "propheticFavor": 2, "fateEcho": 34, "cacheItemId": "greater_prophecy_cache" } },
+    { "id": "Weekly.Survival.Epic", "scope": "Weekly", "reward": { "cinders": 1300, "characterExperience": 720, "soulstones": 4, "propheticFavor": 2, "fateEcho": 50, "cacheItemId": "greater_prophecy_cache" } }
+  ]
+}

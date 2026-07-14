@@ -3,6 +3,7 @@ using Application.UseCases.Prophecies.Commands.ClaimProphecy;
 using Application.UseCases.Prophecies.Commands.ClaimWeeklyRevelationMilestone;
 using Application.UseCases.Prophecies.Commands.GetPropheciesOverview;
 using Application.UseCases.Prophecies.Commands.OpenProphecyCache;
+using Application.UseCases.Prophecies.Commands.RerollProphecy;
 using Application.UseCases.Prophecies.Dtos;
 using Common.Primitives;
 using Microsoft.AspNetCore.Authorization;
@@ -20,6 +21,10 @@ public sealed class PropheciesController : BaseController
     [HttpPost("{id:guid}/accept")]
     public async Task<ActionResult<Response<PropheciesOverviewDto>>> Accept(Guid id) =>
         await Mediator.Send(new AcceptProphecyCommand(CurrentUserId, CurrentCharacterGuid, id));
+
+    [HttpPost("{id:guid}/reroll")]
+    public async Task<ActionResult<Response<PropheciesOverviewDto>>> Reroll(Guid id) =>
+        await Mediator.Send(new RerollProphecyCommand(CurrentUserId, CurrentCharacterGuid, id));
 
     [HttpPost("{id:guid}/claim")]
     public async Task<ActionResult<Response<ProphecyClaimResponseDto>>> Claim(Guid id) =>

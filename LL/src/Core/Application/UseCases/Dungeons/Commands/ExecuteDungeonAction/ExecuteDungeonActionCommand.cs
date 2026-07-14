@@ -61,32 +61,38 @@ public class ExecuteDungeonActionCommandHandler : IRequestHandler<ExecuteDungeon
         CancellationToken cancellationToken)
     {
         var now = DateTimeOffset.UtcNow;
+        var progressEvents = new List<ProphecyProgressEvent>();
 
         if (outcome is DungeonActionOutcome.CombatVictory
             or DungeonActionOutcome.EventResolved
             or DungeonActionOutcome.CheckpointResolved
             or DungeonActionOutcome.RunCompleted)
         {
-            await _publisher.Publish(new ProphecyProgressNotification(new ProphecyProgressEvent(
+            progressEvents.Add(new ProphecyProgressEvent(
                 characterId,
                 now,
-                ProphecyProgressKind.DungeonRoomCleared)), cancellationToken);
+                ProphecyProgressKind.DungeonRoomCleared));
         }
 
         if (outcome == DungeonActionOutcome.EventResolved)
         {
-            await _publisher.Publish(new ProphecyProgressNotification(new ProphecyProgressEvent(
+            progressEvents.Add(new ProphecyProgressEvent(
                 characterId,
                 now,
-                ProphecyProgressKind.DungeonEventResolved)), cancellationToken);
+                ProphecyProgressKind.DungeonEventResolved));
         }
 
         if (outcome == DungeonActionOutcome.RunCompleted)
         {
-            await _publisher.Publish(new ProphecyProgressNotification(new ProphecyProgressEvent(
+            progressEvents.Add(new ProphecyProgressEvent(
                 characterId,
                 now,
-                ProphecyProgressKind.DungeonCompleted)), cancellationToken);
+                ProphecyProgressKind.DungeonCompleted));
+        }
+
+        if (progressEvents.Count > 0)
+        {
+            await _publisher.Publish(new ProphecyProgressBatchNotification(progressEvents), cancellationToken);
         }
     }
 }
