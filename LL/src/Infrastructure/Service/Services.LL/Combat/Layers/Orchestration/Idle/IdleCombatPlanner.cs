@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Options;
 using Services.LL.CharacterActions;
 using Services.LL.Combat.Layers.Orchestration.Models;
 using Services.LL.Interfaces.Combat.Orchestration;
@@ -6,19 +7,27 @@ namespace Services.LL.Combat.Layers.Orchestration.Idle;
 
 public sealed class IdleCombatPlanner : IIdleCombatPlanner
 {
-    private static readonly TimeSpan EncounterCadence = TimeSpan.FromSeconds(10);
-
     private readonly ISpawningService _spawningService;
+    private readonly IdleCombatProgressionOptions _options;
+    private readonly TimeSpan _encounterCadence;
+    private readonly TimeSpan _maximumOfflineDuration;
 
-    public IdleCombatPlanner(ISpawningService spawningService)
+    public IdleCombatPlanner(
+        ISpawningService spawningService,
+        IOptions<IdleCombatProgressionOptions> options)
     {
         _spawningService = spawningService;
+        _options = options.Value;
+        _encounterCadence = TimeSpan.FromSeconds(_options.EncounterCadenceSeconds);
+        _maximumOfflineDuration = TimeSpan.FromHours(_options.MaximumOfflineHours);
     }
 
     public IdleCombatPlan CreatePlan(IdleCombatOrchestrationRequest request)
     {
-        var from = request.NextEncounterAt;
         var to = request.Now;
+        var from = request.NextEncounterAt > to - _maximumOfflineDuration
+            ? request.NextEncounterAt
+            : to - _maximumOfflineDuration;
         var action = request.ActionDetails;
 
         if (from > to)
@@ -28,22 +37,25 @@ public sealed class IdleCombatPlanner : IIdleCombatPlanner
                 From: from,
                 RequestedTo: to,
                 ExecutableUntil: from,
-                EncounterCadence: EncounterCadence,
+                EncounterCadence: _encounterCadence,
                 PlayerEntityIds: [.. action.CharacterTeam],
                 Area: action.Area,
                 PlannedEncounterCount: 0);
         }
 
         var elapsed = to - from;
-        var plannedEncounterCount = 1 + (int)(elapsed.Ticks / EncounterCadence.Ticks);
-        var executableUntil = from.AddTicks(plannedEncounterCount * EncounterCadence.Ticks);
+        var dueEncounterCount = 1 + (long)(elapsed.Ticks / _encounterCadence.Ticks);
+        var plannedEncounterCount = (int)Math.Min(
+            dueEncounterCount,
+            _options.MaximumEncountersPerProcessingBatch);
+        var executableUntil = from.AddTicks(plannedEncounterCount * _encounterCadence.Ticks);
 
         return new IdleCombatPlan(
             CharacterId: request.CharacterId,
             From: from,
             RequestedTo: to,
             ExecutableUntil: executableUntil,
-            EncounterCadence: EncounterCadence,
+            EncounterCadence: _encounterCadence,
             PlayerEntityIds: [.. action.CharacterTeam],
             Area: action.Area,
             PlannedEncounterCount: plannedEncounterCount);

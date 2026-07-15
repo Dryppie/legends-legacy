@@ -236,7 +236,7 @@
     "costsByRank": [25, 75, 150, 300, 600],
     "effects": [
       {
-        "kind": "SigilFragmentDropRateRelativeBps",
+        "kind": "DungeonSigilDropRateRelativeBps",
         "unit": "RelativeBasisPoints",
         "valuesByRank": [150, 300, 450, 600, 750]
       }

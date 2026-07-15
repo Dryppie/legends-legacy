@@ -53,9 +53,6 @@ export class CreaturesComponent implements OnInit {
     let formControls: any = {};
 
     formControls['level'] = new FormControl(creature.level);
-    formControls['experienceReward'] = new FormControl(
-      creature.experienceReward,
-    );
     formControls['name'] = new FormControl(creature.name);
 
     this.attributeKeys.forEach((key) => {
@@ -79,8 +76,6 @@ export class CreaturesComponent implements OnInit {
       }));
 
       this.selectedCreature.level = this.creatureForm.value.level;
-      this.selectedCreature.experienceReward =
-        this.creatureForm.value.experienceReward;
       this.selectedCreature.baseAttributes = updatedAttributes;
 
       this.creatureService.updateCreature(this.createNewCreature()).subscribe();
@@ -98,7 +93,6 @@ export class CreaturesComponent implements OnInit {
       id: this.selectedCreature!.id,
       name: this.creatureForm.value.name, // make sure you have a 'name' control in your form
       level: this.creatureForm.value.level,
-      experienceReward: this.creatureForm.value.experienceReward,
       baseAttributes: attributes,
     };
 

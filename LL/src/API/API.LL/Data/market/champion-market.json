@@ -77,8 +77,8 @@
     },
     {
       "id": "cache.sigil_fragments",
-      "name": "Sigil Fragment Cache",
-      "description": "A weekly capped cache of dungeon sigil value.",
+      "name": "Cinder Vanguard Cache",
+      "description": "A weekly capped cache containing 150 Cinders.",
       "category": "Weekly Cache",
       "gloryCost": 80,
       "weeklyPurchaseLimit": 3,
@@ -92,8 +92,8 @@
     },
     {
       "id": "cache.ascension_stone_shards",
-      "name": "Ascension Stone Shard Cache",
-      "description": "A weekly capped ascension cache paid out as Soulstones.",
+      "name": "Soulstone Reliquary",
+      "description": "A weekly capped reliquary containing 20 Soulstones.",
       "category": "Weekly Cache",
       "gloryCost": 150,
       "weeklyPurchaseLimit": 1,

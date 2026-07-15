@@ -14,7 +14,7 @@ public enum SoulstoneUpgradeEffectKind
     CraftingExperienceGainBps,
     TemperingNegativeOutcomeReductionBps,
     BlueprintProgressionGainBps,
-    SigilFragmentDropRateRelativeBps,
+    DungeonSigilDropRateRelativeBps,
     DungeonRewardRetentionBps
 }
 

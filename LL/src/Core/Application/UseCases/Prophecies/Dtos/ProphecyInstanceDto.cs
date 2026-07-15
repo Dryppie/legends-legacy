@@ -17,6 +17,7 @@ public sealed class ProphecyInstanceDto : IMapFrom<PlayerProphecyInstance>
     public string Category { get; set; } = string.Empty;
     public string Difficulty { get; set; } = string.Empty;
     public string ObjectiveType { get; set; } = string.Empty;
+    public ProphecyGuidanceDto Guidance { get; set; } = new();
     public DateTimeOffset PeriodStart { get; set; }
     public DateTimeOffset PeriodEnd { get; set; }
     public DateTimeOffset GeneratedAt { get; set; }
@@ -41,6 +42,7 @@ public sealed class ProphecyInstanceDto : IMapFrom<PlayerProphecyInstance>
             .ForMember(dest => dest.Category, opt => opt.MapFrom(src => ProphecyMappingHelpers.Definition(src).Category.ToString()))
             .ForMember(dest => dest.Difficulty, opt => opt.MapFrom(src => ProphecyMappingHelpers.Definition(src).Difficulty.ToString()))
             .ForMember(dest => dest.ObjectiveType, opt => opt.MapFrom(src => ProphecyMappingHelpers.Definition(src).ObjectiveType))
+            .ForMember(dest => dest.Guidance, opt => opt.MapFrom(src => src))
             .ForMember(dest => dest.Reward, opt => opt.MapFrom((src, _, _, context) =>
                 context.Mapper.Map<ProphecyRewardSnapshotDto>(ProphecyMappingHelpers.ReadReward(src.RewardSnapshotJson))));
     }

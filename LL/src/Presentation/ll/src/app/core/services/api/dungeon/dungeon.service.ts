@@ -3,7 +3,9 @@ import { Observable, catchError, throwError } from 'rxjs';
 import { ApiService } from '../api.service';
 import { StartDungeonRequest } from '../../../../shared/models/requestDtos/dungeons/startDungeonRequest';
 import { CombatSessionDto } from '../../../../shared/models/Dtos/combatResultDto';
-import { DungeonPreviewData } from '../../../../shared/models/Dtos/dungeons/dungeonPreviewData';
+import {
+  DungeonHubData,
+} from '../../../../shared/models/Dtos/dungeons/dungeonPreviewData';
 import { DungeonRecordsData } from '../../../../shared/models/Dtos/dungeons/dungeonRecordsData';
 import { InventoryItem } from '../../../../shared/models/inventoryItem';
 import { CharacterDto } from '../../../../shared/models/Dtos/characterDto';
@@ -227,6 +229,14 @@ export interface StartDungeonRunResponse {
   inventoryItems?: InventoryItem[] | null;
 }
 
+export interface DungeonSigilAssemblyResponse {
+  dungeonId: string;
+  sigilItemId: string;
+  sigilName: string;
+  inventoryQuantity: number;
+  sigilFragmentsRemaining: number;
+}
+
 export enum DungeonActionOutcome {
   None = 0,
   CombatVictory = 1,
@@ -243,11 +253,17 @@ export enum DungeonActionOutcome {
 export class DungeonService {
   constructor(private readonly api: ApiService) {}
 
-  getAvailableDungeons(): Observable<DungeonPreviewData[]> {
+  getAvailableDungeons(): Observable<DungeonHubData> {
     return this.api.get('dungeon/getAvailableDungeons').pipe(
       catchError(() => {
         return throwError(() => new Error('Failed to get available dungeons'));
       }),
+    );
+  }
+
+  assembleSigil(dungeonId: string): Observable<DungeonSigilAssemblyResponse> {
+    return this.api.post(`dungeon/${encodeURIComponent(dungeonId)}/assemble-sigil`).pipe(
+      catchError((error) => throwError(() => error)),
     );
   }
 

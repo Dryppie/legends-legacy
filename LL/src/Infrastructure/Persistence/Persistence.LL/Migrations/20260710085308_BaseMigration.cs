@@ -1057,8 +1057,7 @@ namespace Persistence.LL.Migrations
                     DefenseProfile = table.Column<int>(type: "integer", nullable: true),
                     LootTableId = table.Column<Guid>(type: "uuid", nullable: true),
                     BaseLevel = table.Column<int>(type: "integer", nullable: true),
-                    Tier = table.Column<int>(type: "integer", nullable: true),
-                    ExperienceReward = table.Column<int>(type: "integer", nullable: true)
+                    Tier = table.Column<int>(type: "integer", nullable: true)
                 },
                 constraints: table =>
                 {

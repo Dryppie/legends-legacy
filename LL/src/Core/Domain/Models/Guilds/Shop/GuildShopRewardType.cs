@@ -6,7 +6,6 @@ public enum GuildShopRewardType
     Soulstones,
     FateEcho,
     SigilFragments,
-    AscensionStoneFragments,
     Item,
     Title
 }

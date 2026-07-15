@@ -29,6 +29,7 @@ interface RewardGroup {
 }
 
 interface EntryRequirementPreview {
+  itemId: string;
   name: string;
   ownedAmount: number;
   requiredAmount: number;
@@ -76,7 +77,7 @@ export class DungeonCardComponent implements OnChanges {
   selectedTab = signal<DungeonDetailTab>('rewards');
 
   constructor(
-    private readonly dungeonState: DungeonStateService,
+    readonly dungeonState: DungeonStateService,
     private readonly router: Router,
   ) {}
 
@@ -209,6 +210,57 @@ export class DungeonCardComponent implements OnChanges {
     return this.selectedPreviewData().entryRequirements ?? [];
   }
 
+  selectedSigilRequirement(): EntryRequirementPreview | null {
+    const selected = this.selectedPreviewData();
+    if (!selected.sigilItemId) {
+      return null;
+    }
+
+    return (
+      this.selectedEntryRequirements().find(
+        (requirement) => requirement.itemId === selected.sigilItemId,
+      ) ?? null
+    );
+  }
+
+  shouldShowSigilAssembly(): boolean {
+    const requirement = this.selectedSigilRequirement();
+    return (
+      this.dungeonState.sigilAssemblyEnabled() &&
+      !!requirement &&
+      requirement.ownedAmount < requirement.requiredAmount
+    );
+  }
+
+  canAssembleSelectedSigil(): boolean {
+    return (
+      !this.dungeonState.loading() &&
+      !!this.selectedPreviewData().canAssembleSigil &&
+      this.dungeonState.sigilFragments() >=
+        this.dungeonState.sigilAssemblyCost()
+    );
+  }
+
+  assembleSelectedSigil(): void {
+    if (!this.canAssembleSelectedSigil()) return;
+    this.dungeonState.assembleSigil(this.selectedPreviewData().id);
+  }
+
+  sigilAssemblyBlockingMessage(): string {
+    const accessRequirements =
+      this.selectedPreviewData().sigilAssemblyMissingRequirements ?? [];
+    if (accessRequirements.length) {
+      return accessRequirements.join(' · ');
+    }
+
+    const missing =
+      this.dungeonState.sigilAssemblyCost() -
+      this.dungeonState.sigilFragments();
+    return missing > 0
+      ? `Earn ${missing} more Sigil Fragments to assemble this sigil.`
+      : '';
+  }
+
   selectedHasMissingEntryRequirements(): boolean {
     return this.selectedEntryRequirements().some(
       (requirement) => requirement.ownedAmount < requirement.requiredAmount,
@@ -338,27 +390,6 @@ export class DungeonCardComponent implements OnChanges {
     return min === max ? `x${min}` : `x${min}-${max}`;
   }
 
-  rewardChanceLabel(reward: DungeonPreviewReward): string {
-    const chance = reward.dropChancePercent;
-
-    if (chance === null || chance === undefined) {
-      return '';
-    }
-
-    return `${this.formatPercent(chance)} drop`;
-  }
-
-  rewardNoDropLabel(reward: DungeonPreviewReward): string {
-    if (!reward.canDropNothing) {
-      return '';
-    }
-
-    const chance = reward.noDropChancePercent;
-    return chance === null || chance === undefined
-      ? 'Can miss'
-      : `${this.formatPercent(chance)} no drop`;
-  }
-
   trackGatheringNode(_: number, node: DungeonGatheringNodePreview): string {
     return node.id;
   }
@@ -430,7 +461,9 @@ export class DungeonCardComponent implements OnChanges {
   }
 
   selectedMasteryNextExperience(): number | null {
-    return this.selectedPreviewData().mastery?.experienceRequiredForNextLevel ?? null;
+    return (
+      this.selectedPreviewData().mastery?.experienceRequiredForNextLevel ?? null
+    );
   }
 
   selectedMasteryCompletionCount(): number {
@@ -445,7 +478,10 @@ export class DungeonCardComponent implements OnChanges {
 
     return Math.max(
       0,
-      Math.min(100, Math.round((this.selectedMasteryExperience() / next) * 100)),
+      Math.min(
+        100,
+        Math.round((this.selectedMasteryExperience() / next) * 100),
+      ),
     );
   }
 
@@ -462,7 +498,9 @@ export class DungeonCardComponent implements OnChanges {
   }
 
   masteryExperienceLabel(): string {
-    return this.formatMasteryExperienceLabel(this.selectedPreviewData().mastery);
+    return this.formatMasteryExperienceLabel(
+      this.selectedPreviewData().mastery,
+    );
   }
 
   private formatMasteryExperienceLabel(
@@ -471,9 +509,7 @@ export class DungeonCardComponent implements OnChanges {
     const experience = mastery?.experience ?? 0;
     const next = mastery?.experienceRequiredForNextLevel ?? null;
 
-    return next
-      ? `${experience} / ${next} XP`
-      : `${experience} XP`;
+    return next ? `${experience} / ${next} XP` : `${experience} XP`;
   }
 
   private activeMasteryBonuses(
@@ -488,8 +524,9 @@ export class DungeonCardComponent implements OnChanges {
     return (
       (mastery?.bonuses ?? [])
         .filter((bonus) => !bonus.isActive)
-        .sort((first, second) => first.requiredLevel - second.requiredLevel)[0] ??
-      null
+        .sort(
+          (first, second) => first.requiredLevel - second.requiredLevel,
+        )[0] ?? null
     );
   }
 
@@ -523,18 +560,6 @@ export class DungeonCardComponent implements OnChanges {
     return loot.minQuantity === loot.maxQuantity
       ? `${loot.minQuantity}`
       : `${loot.minQuantity}-${loot.maxQuantity}`;
-  }
-
-  private formatPercent(value: number): string {
-    if (value <= 0) {
-      return '0%';
-    }
-
-    if (value >= 99.95) {
-      return '100%';
-    }
-
-    return value < 10 ? `${value.toFixed(1)}%` : `${Math.round(value)}%`;
   }
 
   formatGatheringType(type: string | null | undefined): string {

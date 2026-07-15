@@ -1591,7 +1591,7 @@ namespace Persistence.LL.Migrations
                     b.HasIndex("CharacterId", "CreatureId")
                         .IsUnique();
 
-                    b.ToTable("MonsterResonances");
+                    b.ToTable("MonsterResonances", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Models.Essences.EssenceLoadout", b =>
@@ -2596,6 +2596,54 @@ namespace Persistence.LL.Migrations
                     b.ToTable("Professions");
                 });
 
+            modelBuilder.Entity("Domain.Models.Prophecies.DailyProphecyRerollState", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("CharacterId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<long>("FateEchoSpent")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTimeOffset>("PeriodEnd")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset>("PeriodStart")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("PlayerId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("RerollsUsed")
+                        .HasColumnType("integer");
+
+                    b.Property<long>("RowVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("ShownDefinitionIdsJson")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("jsonb")
+                        .HasDefaultValue("[]");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PlayerId", "CharacterId", "PeriodStart")
+                        .IsUnique();
+
+                    b.ToTable("DailyProphecyRerollStates");
+                });
+
             modelBuilder.Entity("Domain.Models.Prophecies.PlayerProphecyInstance", b =>
                 {
                     b.Property<Guid>("Id")
@@ -2616,6 +2664,9 @@ namespace Persistence.LL.Migrations
 
                     b.Property<int>("CurrentValue")
                         .HasColumnType("integer");
+
+                    b.Property<DateTimeOffset?>("DailyRerollUsedAt")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTimeOffset>("GeneratedAt")
                         .HasColumnType("timestamp with time zone");
@@ -3252,9 +3303,6 @@ namespace Persistence.LL.Migrations
                 {
                     b.HasBaseType("Domain.Models.Entities.Entity");
 
-                    b.Property<long>("AscensionStoneFragments")
-                        .HasColumnType("bigint");
-
                     b.Property<long>("Cinders")
                         .HasColumnType("bigint");
 
@@ -3264,8 +3312,8 @@ namespace Persistence.LL.Migrations
                     b.Property<int>("EquippedTitleDisplayPosition")
                         .HasColumnType("integer");
 
-                    b.Property<float>("Experience")
-                        .HasColumnType("real");
+                    b.Property<long>("Experience")
+                        .HasColumnType("bigint");
 
                     b.Property<long>("FateEcho")
                         .HasColumnType("bigint");
@@ -3315,9 +3363,6 @@ namespace Persistence.LL.Migrations
                         .HasColumnType("integer");
 
                     b.Property<int>("DefenseProfile")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("ExperienceReward")
                         .HasColumnType("integer");
 
                     b.Property<string>("RewardTableId")

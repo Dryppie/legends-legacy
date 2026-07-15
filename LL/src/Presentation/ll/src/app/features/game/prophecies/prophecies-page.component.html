@@ -164,6 +164,20 @@
       </div>
     </section>
 
+    <section>
+      <article class="ll-panel bg-texture bg-auto p-4">
+        <div class="ll-eyebrow">Prophecy Agency</div>
+        <div class="mt-2 flex items-baseline justify-between gap-3">
+          <h2 class="ll-heading text-lg">Fate Echo</h2>
+          <span class="ll-heading text-2xl">{{ data.fateEcho }}</span>
+        </div>
+        <p class="mt-2 text-xs text-zinc-400">
+          Spend Fate Echo to replace unwanted daily Prophecy offers after the free reroll.
+        </p>
+      </article>
+
+    </section>
+
     <div class="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto overscroll-contain pr-2 sm:pr-4">
     <section class="ll-panel bg-texture bg-auto p-4">
       <div class="mb-3 flex flex-wrap items-center justify-between gap-3">
@@ -171,7 +185,18 @@
           <div class="ll-eyebrow">Daily Prophecies</div>
           <h2 class="ll-heading text-xl">Choose One</h2>
         </div>
-        <div class="ll-badge">Resets in {{ dailyResetText() }}</div>
+        <div class="flex flex-wrap items-center gap-2">
+          <button
+            *ngIf="canReroll()"
+            type="button"
+            class="ll-button"
+            (click)="rerollDailyProphecies()"
+            [disabled]="loading() || !canAffordReroll()"
+          >
+            {{ rerollButtonLabel() }}
+          </button>
+          <div class="ll-badge">Resets in {{ dailyResetText() }}</div>
+        </div>
       </div>
 
       <div class="grid gap-3 lg:grid-cols-3">
@@ -274,6 +299,13 @@
               </div>
             </div>
 
+            <p
+              *ngIf="canContinue(prophecy)"
+              class="text-xs leading-relaxed text-zinc-400"
+            >
+              {{ prophecy.guidance.hint }}
+            </p>
+
             <div class="flex flex-wrap gap-2">
               <button
                 *ngIf="canAccept(prophecy)"
@@ -293,15 +325,13 @@
               >
                 Claim
               </button>
-              <ng-container *ngIf="guidance(prophecy) as guide">
-                <a
-                  *ngIf="canContinue(prophecy)"
-                  class="ll-button"
-                  [routerLink]="guide.route"
-                >
-                  {{ guide.cta }}
-                </a>
-              </ng-container>
+              <a
+                *ngIf="canContinue(prophecy)"
+                class="ll-button"
+                [routerLink]="guidanceRoute(prophecy)"
+              >
+                {{ prophecy.guidance.actionLabel }}
+              </a>
             </div>
           </div>
         </article>
@@ -505,6 +535,13 @@
             </div>
           </div>
 
+          <p
+            *ngIf="canContinue(greater)"
+            class="text-xs leading-relaxed text-zinc-400"
+          >
+            {{ greater.guidance.hint }}
+          </p>
+
           <div class="flex flex-wrap gap-2">
             <button
               *ngIf="canClaim(greater)"
@@ -515,15 +552,13 @@
             >
               Claim
             </button>
-            <ng-container *ngIf="guidance(greater) as guide">
-              <a
-                *ngIf="canContinue(greater)"
-                class="ll-button"
-                [routerLink]="guide.route"
-              >
-                {{ guide.cta }}
-              </a>
-            </ng-container>
+            <a
+              *ngIf="canContinue(greater)"
+              class="ll-button"
+              [routerLink]="guidanceRoute(greater)"
+            >
+              {{ greater.guidance.actionLabel }}
+            </a>
             <span
               *ngIf="greater.status === 'Claimed'"
               class="py-1 text-xs text-zinc-400"
@@ -535,53 +570,6 @@
       </div>
     </section>
 
-    <section
-      *ngIf="recentProphecies().length > 0"
-      class="ll-panel bg-texture bg-auto p-4"
-    >
-      <div class="mb-3">
-        <div class="ll-eyebrow">Recent Omens</div>
-        <h2 class="ll-heading text-xl">History</h2>
-      </div>
-
-      <div class="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-        <article
-          *ngFor="let prophecy of recentProphecies(); trackBy: trackById"
-          class="ll-card flex min-h-[170px] flex-col gap-3"
-        >
-          <div class="flex items-start justify-between gap-2">
-            <div class="min-w-0">
-              <div class="ll-eyebrow">
-                {{ prophecy.scope }} {{ prophecy.slotType }}
-              </div>
-              <h3 class="ll-heading text-base">{{ prophecy.title }}</h3>
-            </div>
-            <span [ngClass]="[statusClasses(prophecy), 'shrink-0']">{{
-              prophecyStatusLabel(prophecy)
-            }}</span>
-          </div>
-
-          <div>
-            <div class="mb-1 flex justify-between text-xs text-zinc-400">
-              <span>Progress</span>
-              <span
-                >{{ prophecy.currentValue }} / {{ prophecy.targetValue }}</span
-              >
-            </div>
-            <div class="ll-progress-track">
-              <div
-                class="ll-progress-bar"
-                [style.width.%]="progressPercent(prophecy)"
-              ></div>
-            </div>
-          </div>
-
-          <div class="mt-auto truncate text-xs text-zinc-400">
-            {{ rewardSummary(prophecy.reward) }}
-          </div>
-        </article>
-      </div>
-    </section>
     </div>
   </ng-container>
 </div>

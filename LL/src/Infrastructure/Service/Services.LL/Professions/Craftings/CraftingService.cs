@@ -469,18 +469,20 @@ public class CraftingService : ICraftingService
             return;
         }
 
-        await _publisher.Publish(new ProphecyProgressNotification(new ProphecyProgressEvent(
-            characterId,
-            occurredAt,
-            ProphecyProgressKind.ItemTempered,
-            temperingSummary.TotalActions)), cancellationToken);
-
-        await _publisher.Publish(new ProphecyProgressNotification(new ProphecyProgressEvent(
-            characterId,
-            occurredAt,
-            ProphecyProgressKind.PotentialSpent,
-            temperingSummary.TotalActions,
-            PotentialSpent: temperingSummary.TotalActions)), cancellationToken);
+        await _publisher.Publish(new ProphecyProgressBatchNotification(
+        [
+            new ProphecyProgressEvent(
+                characterId,
+                occurredAt,
+                ProphecyProgressKind.ItemTempered,
+                temperingSummary.TotalActions),
+            new ProphecyProgressEvent(
+                characterId,
+                occurredAt,
+                ProphecyProgressKind.PotentialSpent,
+                temperingSummary.TotalActions,
+                PotentialSpent: temperingSummary.TotalActions)
+        ]), cancellationToken);
     }
 
     private async Task UpdateCharacterProfessionsAsync(Guid characterId, TemperingSummary temperingSummary, CancellationToken cancellationToken)

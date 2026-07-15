@@ -1,0 +1,7 @@
+{
+  "economy": {
+    "paidRerollsEnabled": true,
+    "dailyRerollLimit": 3,
+    "paidRerollCosts": [40, 80]
+  }
+}

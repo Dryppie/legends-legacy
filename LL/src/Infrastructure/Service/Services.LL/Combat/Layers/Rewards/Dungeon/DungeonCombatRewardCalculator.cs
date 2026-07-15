@@ -1,4 +1,5 @@
 using Application.Interfaces.Services.LL;
+using Application.Interfaces.Services.LL.Dungeons;
 using Application.Interfaces.Services.LL.Essences;
 using Domain.Models.Bonuses;
 using Domain.Models.Entities;
@@ -16,20 +17,20 @@ internal class DungeonCombatRewardCalculator : IDungeonCombatRewardCalculator
 {
     private readonly IBonusService _bonusService;
     private readonly ILootService _lootService;
-    private readonly ICinderRewardCalculator _cinderRewardCalculator;
+    private readonly IDungeonRewardBalanceProvider _rewardBalance;
     private readonly IEssenceResonanceService _essenceResonanceService;
     private readonly ICombatGatheringRewardProcessor _gatheringRewardProcessor;
 
     public DungeonCombatRewardCalculator(
         IBonusService bonusService,
         ILootService lootService,
-        ICinderRewardCalculator cinderRewardCalculator,
+        IDungeonRewardBalanceProvider rewardBalance,
         IEssenceResonanceService essenceResonanceService,
         ICombatGatheringRewardProcessor gatheringRewardProcessor)
     {
         _bonusService = bonusService;
         _lootService = lootService;
-        _cinderRewardCalculator = cinderRewardCalculator;
+        _rewardBalance = rewardBalance;
         _essenceResonanceService = essenceResonanceService;
         _gatheringRewardProcessor = gatheringRewardProcessor;
     }
@@ -44,6 +45,7 @@ internal class DungeonCombatRewardCalculator : IDungeonCombatRewardCalculator
             cancellationToken);
 
         var combatExperienceGainBps = factors.Get(BonusKind.CombatExperienceGainBps);
+        var baseReward = _rewardBalance.GetEncounterReward(facts.DungeonTier, facts.RoomType);
 
         var encounterOutcomes = new List<DungeonEncounterCalculatedOutcome>(facts.Encounters.Count);
         var totalLoot = new List<InventoryItem>();
@@ -75,9 +77,8 @@ internal class DungeonCombatRewardCalculator : IDungeonCombatRewardCalculator
                     loot = loot.Concat(essenceDrops).ToList();
                 }
 
-                experience = encounter.HostileCreatures.Sum(x => x.ExperienceReward).ApplyPositiveBps(combatExperienceGainBps);
-
-                cinders = _cinderRewardCalculator.Calculate(encounter.HostileCreatures);
+                experience = baseReward.Experience.ApplyPositiveBps(combatExperienceGainBps);
+                cinders = baseReward.Cinders;
 
                 totalLoot.AddRange(loot);
                 totalExperience += experience;

@@ -4,11 +4,15 @@ import { ApiService } from '../api.service';
 
 export interface PropheciesOverviewDto {
   serverTime: string;
+  dailyRerollsRemaining: number;
+  dailyRerollsUsed: number;
+  dailyRerollLimit: number;
+  nextDailyRerollCost?: number | null;
+  fateEcho: number;
   dailyProphecies: ProphecyInstanceDto[];
   activeDailyProphecy?: ProphecyInstanceDto | null;
   greaterProphecy: ProphecyInstanceDto;
   weeklyRevelation: WeeklyRevelationProgressDto;
-  recentProphecies: ProphecyInstanceDto[];
   caches: ProphecyCacheInventoryDto[];
 }
 
@@ -17,6 +21,7 @@ export interface ProphecyCacheInventoryDto {
   title: string;
   description: string;
   quantity: number;
+  possibleRewards: string[];
 }
 
 export interface ProphecyInstanceDto {
@@ -31,6 +36,7 @@ export interface ProphecyInstanceDto {
   category: string;
   difficulty: string;
   objectiveType: string;
+  guidance: ProphecyGuidanceDto;
   periodStart: string;
   periodEnd: string;
   generatedAt: string;
@@ -42,13 +48,26 @@ export interface ProphecyInstanceDto {
   reward: ProphecyRewardSnapshotDto;
 }
 
+export type ProphecyGuidanceDestination =
+  | 'WorldCombat'
+  | 'Dungeons'
+  | 'Essences'
+  | 'SoulArchive'
+  | 'Gathering'
+  | 'Crafting';
+
+export interface ProphecyGuidanceDto {
+  destination: ProphecyGuidanceDestination;
+  actionLabel: string;
+  hint: string;
+}
+
 export interface ProphecyRewardSnapshotDto {
   cinders: number;
   characterExperience: number;
   essenceExperience: number;
   soulstones: number;
   sigilFragments: number;
-  ascensionStoneFragments: number;
   propheticFavor: number;
   fateEcho: number;
   cacheItemId?: string | null;
@@ -105,6 +124,10 @@ export class ProphecyService {
 
   acceptProphecy(id: string): Observable<PropheciesOverviewDto> {
     return this.api.post(`prophecies/${id}/accept`);
+  }
+
+  rerollDailyProphecies(): Observable<PropheciesOverviewDto> {
+    return this.api.post('prophecies/reroll');
   }
 
   claimProphecy(id: string): Observable<ProphecyClaimResponseDto> {

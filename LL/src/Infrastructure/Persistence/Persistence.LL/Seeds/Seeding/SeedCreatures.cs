@@ -174,7 +174,6 @@ public static class SeedCreatures
 
             changed |= SetIfChanged(existing.Name, seed.Name, value => existing.Name = value);
             changed |= SetIfChanged(existing.ImagePath, seed.ImagePath, value => existing.ImagePath = value);
-            changed |= SetIfChanged(existing.ExperienceReward, seed.ExperienceReward, value => existing.ExperienceReward = value);
             changed |= SetIfChanged(existing.Archetype, seed.Archetype, value => existing.Archetype = value);
             changed |= SetIfChanged(existing.DamageProfile, seed.DamageProfile, value => existing.DamageProfile = value);
             changed |= SetIfChanged(existing.DefenseProfile, seed.DefenseProfile, value => existing.DefenseProfile = value);
@@ -193,7 +192,6 @@ public static class SeedCreatures
             Id = seed.Id,
             Name = seed.Name,
             ImagePath = seed.ImagePath,
-            ExperienceReward = seed.ExperienceReward,
             Archetype = seed.Archetype,
             DamageProfile = seed.DamageProfile,
             DefenseProfile = seed.DefenseProfile,
@@ -468,7 +466,6 @@ public static class SeedCreatures
         public Guid Id { get; set; }
         public string Name { get; set; } = string.Empty;
         public string ImagePath { get; set; } = string.Empty;
-        public int ExperienceReward { get; set; }
         public CreatureArchetype Archetype { get; set; } = CreatureArchetype.Balanced;
         public DamageProfile DamageProfile { get; set; } = DamageProfile.Hybrid;
         public DefenseProfile DefenseProfile { get; set; } = DefenseProfile.Balanced;

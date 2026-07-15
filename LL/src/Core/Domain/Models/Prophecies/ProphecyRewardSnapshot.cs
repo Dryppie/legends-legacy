@@ -7,7 +7,6 @@ public sealed class ProphecyRewardSnapshot
     public long EssenceExperience { get; set; }
     public int Soulstones { get; set; }
     public int SigilFragments { get; set; }
-    public int AscensionStoneFragments { get; set; }
     public int PropheticFavor { get; set; }
     public int FateEcho { get; set; }
     public string? CacheItemId { get; set; }

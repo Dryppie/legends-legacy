@@ -1,5 +1,6 @@
 using Application.Interfaces.Services.LL;
 using Application.Interfaces.Services.LL.Essences;
+using Application.Interfaces.Services.LL.Regions;
 using Domain.Models.Bonuses;
 using Domain.Models.Entities;
 using Domain.Models.Inventories;
@@ -15,28 +16,28 @@ public sealed class IdleCombatRewardCalculator : IIdleCombatRewardCalculator
 {
     private readonly IBonusService _bonusService;
     private readonly ILootService _lootService;
-    private readonly ICinderRewardCalculator _cinderRewardCalculator;
     private readonly ISoulstoneRewardCalculator _soulstoneRewardCalculator;
     private readonly IEssenceResonanceService _essenceResonanceService;
     private readonly IIdleDungeonSigilDropCalculator _sigilDropCalculator;
     private readonly ICombatGatheringRewardProcessor _gatheringRewardProcessor;
+    private readonly IAreaExperienceBalanceProvider _areaExperienceBalance;
 
     public IdleCombatRewardCalculator(
         IBonusService bonusService,
         ILootService lootService,
-        ICinderRewardCalculator cinderRewardCalculator,
         ISoulstoneRewardCalculator soulstoneRewardCalculator,
         IEssenceResonanceService essenceResonanceService,
         IIdleDungeonSigilDropCalculator sigilDropCalculator,
-        ICombatGatheringRewardProcessor gatheringRewardProcessor)
+        ICombatGatheringRewardProcessor gatheringRewardProcessor,
+        IAreaExperienceBalanceProvider areaExperienceBalance)
     {
         _bonusService = bonusService;
         _lootService = lootService;
-        _cinderRewardCalculator = cinderRewardCalculator;
         _soulstoneRewardCalculator = soulstoneRewardCalculator;
         _essenceResonanceService = essenceResonanceService;
         _sigilDropCalculator = sigilDropCalculator;
         _gatheringRewardProcessor = gatheringRewardProcessor;
+        _areaExperienceBalance = areaExperienceBalance;
     }
 
     public async Task<IdleCombatCalculatedOutcome> CalculateAsync(
@@ -59,6 +60,14 @@ public sealed class IdleCombatRewardCalculator : IIdleCombatRewardCalculator
 
         foreach (var encounter in facts.Encounters.OrderBy(x => x.Sequence))
         {
+            var creatureCount = encounter.HostileCreatures.Count;
+            var areaBaseExperience = _areaExperienceBalance.CalculateEncounterExperience(
+                facts.Area.Id,
+                creatureCount);
+            var areaBaseCinders = _areaExperienceBalance.CalculateEncounterCinders(
+                facts.Area.Id,
+                creatureCount);
+            var bonusAdjustedExperience = areaBaseExperience.ApplyPositiveBps(combatExperienceGainBps);
             var experience = 0;
             var cinders = 0;
             IReadOnlyList<InventoryItem> loot = Array.Empty<InventoryItem>();
@@ -84,17 +93,16 @@ public sealed class IdleCombatRewardCalculator : IIdleCombatRewardCalculator
 
                 sigilEligibleVictories++;
 
-                experience = encounter.HostileCreatures.Sum(x => x.ExperienceReward).ApplyPositiveBps(combatExperienceGainBps);
+                experience = bonusAdjustedExperience;
 
-                cinders = _cinderRewardCalculator.Calculate(encounter.HostileCreatures);
+                cinders = areaBaseCinders;
 
                 totalLoot.AddRange(loot);
                 totalCinders += cinders;
             }
             else if (defeatExperienceRetentionBps > 0)
             {
-                var potentialExperience = encounter.HostileCreatures.Sum(x => x.ExperienceReward).ApplyPositiveBps(combatExperienceGainBps);
-                experience = potentialExperience.TakeBpsPortion(defeatExperienceRetentionBps);
+                experience = bonusAdjustedExperience.TakeBpsPortion(defeatExperienceRetentionBps);
             }
 
             totalExperience += experience;
@@ -102,6 +110,9 @@ public sealed class IdleCombatRewardCalculator : IIdleCombatRewardCalculator
             encounterOutcomes.Add(new IdleEncounterCalculatedOutcome(
                 EncounterId: encounter.EncounterId,
                 Sequence: encounter.Sequence,
+                CreatureCount: creatureCount,
+                AreaBaseExperience: areaBaseExperience,
+                BonusAdjustedExperience: bonusAdjustedExperience,
                 ExperienceGained: experience,
                 CindersGained: cinders,
                 Loot: loot));

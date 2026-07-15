@@ -32,6 +32,7 @@ using Services.LL.Combat;
 using Services.LL.Combat.Layers.Orchestration;
 using Services.LL.Combat.Layers.Orchestration.Dungeon;
 using Services.LL.Combat.Layers.Orchestration.Idle;
+using Services.LL.Combat.Layers.Orchestration.Models;
 using Services.LL.Combat.Layers.Resolution;
 using Services.LL.Combat.Layers.Resolution.Dungeon;
 using Services.LL.Combat.Layers.Resolution.Idle;
@@ -93,6 +94,16 @@ public static class DependencyInjection
         services.AddScoped<IRegionService, RegionService>();
         services.AddScoped<IAreaService, AreaService>();
         services.AddScoped<IRegionOneContentDiagnostics, RegionOneContentDiagnostics>();
+        services.AddSingleton<IAreaExperienceBalanceProvider>(sp =>
+            new JsonAreaExperienceBalanceProvider(
+                config,
+                contentRootPath,
+                sp.GetRequiredService<JsonSerializerOptions>()));
+        services.AddSingleton<IDungeonRewardBalanceProvider>(sp =>
+            new JsonDungeonRewardBalanceProvider(
+                config,
+                contentRootPath,
+                sp.GetRequiredService<JsonSerializerOptions>()));
 
         services.AddScoped<IAttributeService, AttributeService>();
         services.AddScoped<IAchievementService, AchievementService>();
@@ -109,6 +120,15 @@ public static class DependencyInjection
         services.AddScoped<IBonusService, BonusService>();
         services.AddScoped<IBonusProvider, SoulstoneBonusProvider>();
         services.AddScoped<IBonusProvider, EssenceCodexBonusProvider>();
+        services.AddOptions<IdleCombatProgressionOptions>()
+            .Configure(options => config.GetSection(IdleCombatProgressionOptions.SectionName).Bind(options))
+            .Validate(
+                options => options.EncounterCadenceSeconds > 0 &&
+                           options.MaximumOfflineHours > 0 &&
+                           options.MaximumEncountersPerProcessingBatch > 0 &&
+                           options.ReferenceWinRateBasisPoints is > 0 and <= 10_000,
+                "Idle combat progression settings are invalid.")
+            .ValidateOnStart();
 
         services.AddSingleton<IChampionMarketCatalog>(sp =>
             new JsonChampionMarketCatalog(
@@ -147,6 +167,12 @@ public static class DependencyInjection
         services.AddScoped<DungeonRunFactory>();
         services.AddScoped<IDungeonRunService, DungeonRunService>();
         services.AddScoped<IDungeonAccessPolicy, DungeonAccessPolicy>();
+        services.AddSingleton<IDungeonSigilAssemblySettingsProvider>(sp =>
+            new JsonDungeonSigilAssemblySettingsProvider(
+                config,
+                contentRootPath,
+                sp.GetRequiredService<JsonSerializerOptions>()));
+        services.AddScoped<IDungeonSigilAssemblyService, DungeonSigilAssemblyService>();
         services.AddScoped<IDungeonPreviewRewardService, DungeonPreviewRewardService>();
         services.AddSingleton<IDungeonMasteryBonusDefinitionProvider>(sp =>
             new JsonDungeonMasteryBonusDefinitionProvider(
@@ -240,6 +266,11 @@ public static class DependencyInjection
         services.AddScoped<IGuildShopService, GuildShopService>();
 
         services.AddScoped<ILevelingService, LevelingService>();
+        services.AddSingleton<ICharacterExperienceProgressionProvider>(sp =>
+            new JsonCharacterExperienceProgressionProvider(
+                config,
+                contentRootPath,
+                sp.GetRequiredService<JsonSerializerOptions>()));
         services.AddScoped<ILeaderboardService, LeaderboardService>();
 
         services.AddScoped<ILootService, LootService>();
@@ -264,6 +295,13 @@ public static class DependencyInjection
                 config,
                 contentRootPath,
                 sp.GetRequiredService<JsonSerializerOptions>()));
+        services.AddSingleton<IProphecyBalanceProvider>(sp =>
+            new JsonProphecyBalanceProvider(
+                config,
+                contentRootPath,
+                sp.GetRequiredService<JsonSerializerOptions>(),
+                sp.GetRequiredService<IProphecyDefinitionProvider>()));
+        services.AddSingleton<IProphecyRewardResolver, ProphecyRewardResolver>();
         services.AddScoped<IProphecyService, ProphecyService>();
 
         services.AddScoped<ISoulstoneUpgradeService, SoulstoneUpgradeService>();
@@ -328,7 +366,6 @@ public static class DependencyInjection
         services.AddScoped<ICombatantFactory, CombatantFactory>();
 
         // Outcome layer
-        services.AddScoped<ICinderRewardCalculator, DefaultIdleCinderRewardCalculator>();
         services.AddScoped<ICombatOutcomeCoordinator, CombatOutcomeCoordinator>();
         services.AddScoped<ICombatOutcomeProcessor, IdleCombatOutcomeProcessor>();
         services.AddScoped<ICombatOutcomeProcessor, DungeonCombatOutcomeProcessor>();

@@ -58,7 +58,6 @@ public class CreatureJsonReader
             if (seed is not null)
             {
                 seed.Name = creatureToUpdate.Name;
-                seed.ExperienceReward = creatureToUpdate.ExperienceReward;
                 seed.BaseLevel = creatureToUpdate.Level;
             }
 
@@ -82,7 +81,6 @@ public class CreatureJsonReader
             Id = seed.Id,
             Name = seed.Name,
             ImagePath = seed.ImagePath,
-            ExperienceReward = seed.ExperienceReward,
             Archetype = seed.Archetype,
             DamageProfile = seed.DamageProfile,
             DefenseProfile = seed.DefenseProfile,
@@ -171,7 +169,6 @@ public class CreatureJsonReader
         public Guid Id { get; set; }
         public string Name { get; set; } = string.Empty;
         public string ImagePath { get; set; } = string.Empty;
-        public int ExperienceReward { get; set; }
         public CreatureArchetype Archetype { get; set; } = CreatureArchetype.Balanced;
         public DamageProfile DamageProfile { get; set; } = DamageProfile.Hybrid;
         public DefenseProfile DefenseProfile { get; set; } = DefenseProfile.Balanced;

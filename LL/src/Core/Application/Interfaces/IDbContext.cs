@@ -124,6 +124,7 @@ public interface IDbContext
     DbSet<ProphecyDefinition> ProphecyDefinitions { get; }
     DbSet<PlayerProphecyInstance> PlayerProphecyInstances { get; }
     DbSet<WeeklyRevelationProgress> WeeklyRevelationProgress { get; }
+    DbSet<DailyProphecyRerollState> DailyProphecyRerollStates { get; }
     DbSet<Region> Regions { get; }
 
     // Snapshots

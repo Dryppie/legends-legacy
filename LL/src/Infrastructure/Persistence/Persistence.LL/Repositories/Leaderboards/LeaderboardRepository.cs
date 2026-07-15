@@ -27,7 +27,7 @@ public class LeaderboardRepository : ILeaderboardRepository
                 CharacterId = c.Id,
                 CharacterName = c.Name,
                 Level = c.Level,
-                Experience = (int)c.Experience,
+                Experience = c.Experience,
                 Rank = index + 1,
             })
             .ToList();
@@ -87,7 +87,7 @@ public class LeaderboardRepository : ILeaderboardRepository
                     CharacterId = x.Character.Id,
                     CharacterName = x.Character.Name,
                     Level = x.Profession.Level,
-                    Experience = (int)x.Profession.Experience,
+                    Experience = (long)x.Profession.Experience,
                     Rank = index + 1,
                 })
                 .ToList();

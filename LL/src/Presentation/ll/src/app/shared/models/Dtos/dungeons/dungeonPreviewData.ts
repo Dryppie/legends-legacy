@@ -70,6 +70,10 @@ export interface DungeonPreviewData {
   canEnter?: boolean;
   missingRequirements?: string[];
   entryRequirements?: DungeonEntryRequirement[];
+  sigilItemId?: string | null;
+  sigilName?: string | null;
+  canAssembleSigil?: boolean;
+  sigilAssemblyMissingRequirements?: string[];
   requiredPreviousDungeonId?: string | null;
   heroImage: string;
   lore: string;
@@ -85,4 +89,11 @@ export interface DungeonPreviewData {
   gatheringNodes?: DungeonGatheringNodePreview[];
   unlockedDifficulties: DungeonDifficulty[];
   difficultyVariants?: Partial<Record<DungeonDifficulty, DungeonPreviewData>>;
+}
+
+export interface DungeonHubData {
+  sigilFragments: number;
+  sigilAssemblyEnabled: boolean;
+  sigilAssemblyCost: number;
+  dungeons: DungeonPreviewData[];
 }

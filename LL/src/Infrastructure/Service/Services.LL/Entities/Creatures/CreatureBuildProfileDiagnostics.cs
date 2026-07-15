@@ -109,7 +109,6 @@ public sealed class CreatureBuildProfileDiagnostics : ICreatureBuildProfileDiagn
             Level = creature.Level,
             BaseLevel = creature.BaseLevel,
             Tier = creature.Tier,
-            ExperienceReward = creature.ExperienceReward,
             RewardTableId = creature.RewardTableId,
             Archetype = creature.Archetype,
             DamageProfile = creature.DamageProfile,

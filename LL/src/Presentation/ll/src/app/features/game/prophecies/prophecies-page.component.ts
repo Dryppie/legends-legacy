@@ -14,6 +14,7 @@ import { ProphecyProgressedMsg } from '../../../core/services/real-time/propheci
 import {
   PropheciesOverviewDto,
   ProphecyCacheInventoryDto,
+  ProphecyGuidanceDestination,
   ProphecyInstanceDto,
   ProphecyRewardSnapshotDto,
   ProphecyService,
@@ -29,12 +30,6 @@ interface RewardDisplayItem {
   marker: string;
 }
 
-interface ProphecyGuidance {
-  route: string[];
-  cta: string;
-  hint: string;
-}
-
 @Component({
   selector: 'app-prophecies-page',
   standalone: true,
@@ -42,6 +37,14 @@ interface ProphecyGuidance {
   templateUrl: './prophecies-page.component.html',
 })
 export class PropheciesPageComponent implements OnInit, OnDestroy {
+  private readonly guidanceRoutes: Record<ProphecyGuidanceDestination, string[]> = {
+    WorldCombat: ['/game/world/shenic'],
+    Dungeons: ['/game/world/dungeon'],
+    Essences: ['/game/character/essences'],
+    SoulArchive: ['/game/character/soulstone-archive'],
+    Gathering: ['/game/world/shenic'],
+    Crafting: ['/game/professions/crafting'],
+  };
   readonly overview = signal<PropheciesOverviewDto | null>(null);
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
@@ -86,10 +89,10 @@ export class PropheciesPageComponent implements OnInit, OnDestroy {
   hoveredWeeklyMilestoneFavor: number | null = null;
 
   readonly dailyProphecies = computed(() => this.overview()?.dailyProphecies ?? []);
+  readonly dailyRerollsRemaining = computed(() => this.overview()?.dailyRerollsRemaining ?? 0);
   readonly activeDailyProphecy = computed(() => this.overview()?.activeDailyProphecy ?? null);
   readonly greaterProphecy = computed(() => this.overview()?.greaterProphecy ?? null);
   readonly weeklyRevelation = computed(() => this.overview()?.weeklyRevelation ?? null);
-  readonly recentProphecies = computed(() => this.overview()?.recentProphecies ?? []);
   readonly caches = computed(() => this.overview()?.caches ?? []);
   readonly ownedCaches = computed(() => this.caches().filter((cache) => cache.quantity > 0));
   readonly readyProphecies = computed(() => {
@@ -195,6 +198,34 @@ export class PropheciesPageComponent implements OnInit, OnDestroy {
     });
   }
 
+  rerollDailyProphecies(): void {
+    if (this.loading() || !this.canReroll() || !this.canAffordReroll()) return;
+    const cost = this.overview()?.nextDailyRerollCost ?? 0;
+    this.loading.set(true);
+    this.error.set(null);
+    this.message.set(null);
+
+    this.prophecyService.rerollDailyProphecies().subscribe({
+      next: (overview) => {
+        this.overview.set(overview);
+        this.syncNotificationCount();
+        this.message.set('Daily prophecies rerolled.');
+        this.toast.showToast(
+          'Prophecies rerolled',
+          cost > 0 ? `${cost} Fate Echo spent.` : 'Your free daily reroll has been used.',
+          true,
+        );
+        this.loading.set(false);
+      },
+      error: (error) => {
+        const message = error?.message ?? 'Failed to reroll daily prophecies.';
+        this.error.set(message);
+        this.toast.showToast('Reroll failed', message, false);
+        this.loading.set(false);
+      },
+    });
+  }
+
   claim(prophecy: ProphecyInstanceDto): void {
     if (this.loading()) return;
     this.loading.set(true);
@@ -219,10 +250,6 @@ export class PropheciesPageComponent implements OnInit, OnDestroy {
                 ? response.prophecy
                 : current.greaterProphecy,
             weeklyRevelation: response.weeklyRevelation,
-            recentProphecies: [
-              response.prophecy,
-              ...current.recentProphecies.filter((item) => item.id !== response.prophecy.id),
-            ].slice(0, 12),
           });
         }
         this.syncNotificationCount();
@@ -364,6 +391,26 @@ export class PropheciesPageComponent implements OnInit, OnDestroy {
     return prophecy.status === 'Offered' && !this.activeDailyProphecy();
   }
 
+  canReroll(): boolean {
+    const overview = this.overview();
+    return this.dailyProphecies().length === 3 &&
+      this.dailyProphecies().every((prophecy) => prophecy.status === 'Offered') &&
+      !this.activeDailyProphecy() &&
+      !!overview &&
+      overview.dailyRerollsUsed < overview.dailyRerollLimit;
+  }
+
+  canAffordReroll(): boolean {
+    const overview = this.overview();
+    if (!overview || overview.nextDailyRerollCost == null) return false;
+    return overview.fateEcho >= overview.nextDailyRerollCost;
+  }
+
+  rerollButtonLabel(): string {
+    const cost = this.overview()?.nextDailyRerollCost;
+    return cost ? `Reroll All · ${cost} Fate Echo` : 'Reroll All · Free';
+  }
+
   canClaim(prophecy: ProphecyInstanceDto): boolean {
     return prophecy.status !== 'Claimed' &&
       prophecy.status !== 'Declined' &&
@@ -474,7 +521,6 @@ export class PropheciesPageComponent implements OnInit, OnDestroy {
     this.addReward(items, 'essenceExperience', reward.essenceExperience, 'Essence XP', 'Essence', 'EX');
     this.addReward(items, 'soulstones', reward.soulstones, 'Soulstones', 'Currency', 'So');
     this.addReward(items, 'sigilFragments', reward.sigilFragments, 'Sigil Fragments', 'Dungeon', 'Sf');
-    this.addReward(items, 'ascensionStoneFragments', reward.ascensionStoneFragments, 'Ascension Fragments', 'Dungeon', 'Af');
     this.addReward(items, 'propheticFavor', reward.propheticFavor, 'Prophetic Favor', 'Weekly', 'Fa');
     this.addReward(items, 'fateEcho', reward.fateEcho, 'Fate Echo', 'Prophecy', 'Fe');
 
@@ -503,18 +549,7 @@ export class PropheciesPageComponent implements OnInit, OnDestroy {
   }
 
   cacheContents(cache: ProphecyCacheInventoryDto): string[] {
-    switch (cache.itemId) {
-      case 'revelation_cache_small':
-        return ['Cinders', 'Fate Echo'];
-      case 'revelation_cache_greater':
-        return ['Cinders', 'Soulstones', 'Fate Echo', 'Sigil Fragments'];
-      case 'revelation_cache_perfect_week':
-        return ['Cinders', 'Soulstones', 'Fate Echo', 'Sigil Fragments', 'Ascension Fragments'];
-      case 'greater_prophecy_cache':
-        return ['Cinders', 'Soulstones', 'Fate Echo', 'Sigil Fragments', 'Ascension Fragments'];
-      default:
-        return ['Prophecy rewards'];
-    }
+    return cache.possibleRewards?.length ? cache.possibleRewards : ['Prophecy rewards'];
   }
 
   timeRemaining(end: string): string {
@@ -527,60 +562,8 @@ export class PropheciesPageComponent implements OnInit, OnDestroy {
     return `${hours}h ${minutes}m`;
   }
 
-  guidance(prophecy: ProphecyInstanceDto): ProphecyGuidance {
-    switch (prophecy.objectiveType) {
-      case 'ClearDungeonRooms':
-      case 'CompleteDungeons':
-      case 'ResolveDungeonEvents':
-        return {
-          route: ['/game/world/dungeon'],
-          cta: 'Run Dungeons',
-          hint: 'Progress this by entering dungeons and resolving rooms.',
-        };
-      case 'GainEssenceXp':
-        return {
-          route: ['/game/character/essences'],
-          cta: 'Train Essences',
-          hint: 'Equip or absorb essences, then keep earning Essence XP.',
-        };
-      case 'EssenceArchivedOrFed':
-        return {
-          route: ['/game/character/soulstone-archive'],
-          cta: 'Open Archive',
-          hint: 'Archive or feed essences to move this prophecy forward.',
-        };
-      case 'GatherResources':
-        return {
-          route: ['/game/world/shenic'],
-          cta: 'Gather Resources',
-          hint: 'Gathering rewards from world activity count toward this.',
-        };
-      case 'TemperItems':
-      case 'SpendPotential':
-        return {
-          route: ['/game/professions/crafting'],
-          cta: 'Temper Gear',
-          hint: 'Use crafting and tempering actions to spend potential.',
-        };
-      case 'TreasureProgress':
-        return {
-          route: ['/game/world/dungeon'],
-          cta: 'Seek Treasure',
-          hint: 'Combat loot, dungeon treasure, and boss caches build this.',
-        };
-      case 'MeaningfulDefeatThenWins':
-        return {
-          route: ['/game/world/shenic'],
-          cta: 'Return To Battle',
-          hint: 'After a meaningful loss, win qualifying encounters.',
-        };
-      default:
-        return {
-          route: ['/game/world/shenic'],
-          cta: 'Fight Encounters',
-          hint: 'Win qualifying combat encounters in the world.',
-        };
-    }
+  guidanceRoute(prophecy: ProphecyInstanceDto): string[] {
+    return this.guidanceRoutes[prophecy.guidance.destination] ?? this.guidanceRoutes.WorldCombat;
   }
 
   statusClasses(prophecy: ProphecyInstanceDto): string {

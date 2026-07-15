@@ -80,33 +80,34 @@ internal class DungeonCombatOutcomeProcessor : ICombatOutcomeProcessor
         CancellationToken cancellationToken)
     {
         var now = DateTimeOffset.UtcNow;
+        var progressEvents = new List<ProphecyProgressEvent>();
 
         foreach (var encounter in facts.Encounters)
         {
             if (encounter.IsVictory)
             {
-                await _publisher.Publish(new ProphecyProgressNotification(new ProphecyProgressEvent(
+                progressEvents.Add(new ProphecyProgressEvent(
                     facts.CharacterId,
                     now,
                     ProphecyProgressKind.EncounterWon,
-                    EnemyCount: encounter.HostileCreatures.Count)), cancellationToken);
+                    EnemyCount: encounter.HostileCreatures.Count));
 
                 foreach (var creature in encounter.HostileCreatures)
                 {
-                    await _publisher.Publish(new ProphecyProgressNotification(new ProphecyProgressEvent(
+                    progressEvents.Add(new ProphecyProgressEvent(
                         facts.CharacterId,
                         now,
                         ProphecyProgressKind.CreatureDefeated,
-                        CreatureDefinitionId: creature.Id.ToString())), cancellationToken);
+                        CreatureDefinitionId: creature.Id.ToString()));
                 }
             }
             else
             {
-                await _publisher.Publish(new ProphecyProgressNotification(new ProphecyProgressEvent(
+                progressEvents.Add(new ProphecyProgressEvent(
                     facts.CharacterId,
                     now,
                     ProphecyProgressKind.EncounterLost,
-                    EnemyCount: encounter.HostileCreatures.Count)), cancellationToken);
+                    EnemyCount: encounter.HostileCreatures.Count));
             }
         }
 
@@ -118,21 +119,26 @@ internal class DungeonCombatOutcomeProcessor : ICombatOutcomeProcessor
                 continue;
             }
 
-            await _publisher.Publish(new ProphecyProgressNotification(new ProphecyProgressEvent(
+            progressEvents.Add(new ProphecyProgressEvent(
                 facts.CharacterId,
                 now,
                 ProphecyProgressKind.ResourceGathered,
                 amount,
-                Profession: gathered.ToolType.ToString())), cancellationToken);
+                Profession: gathered.ToolType.ToString()));
         }
 
         if (outcome.TotalLoot.Count > 0)
         {
-            await _publisher.Publish(new ProphecyProgressNotification(new ProphecyProgressEvent(
+            progressEvents.Add(new ProphecyProgressEvent(
                 facts.CharacterId,
                 now,
                 ProphecyProgressKind.TreasureProgress,
-                outcome.TotalLoot.Count)), cancellationToken);
+                outcome.TotalLoot.Count));
+        }
+
+        if (progressEvents.Count > 0)
+        {
+            await _publisher.Publish(new ProphecyProgressBatchNotification(progressEvents), cancellationToken);
         }
     }
 

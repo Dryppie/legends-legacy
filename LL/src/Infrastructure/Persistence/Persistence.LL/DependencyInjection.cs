@@ -6,6 +6,7 @@ using Domain.Models.CharacterActions;
 using Domain.Models.Colosseum;
 using Domain.Models.Colosseum.Tournaments;
 using Domain.Models.Dungeons.Mastery;
+using Domain.Models.Dungeons;
 using Domain.Models.Dungeons.Runs;
 using Domain.Models.Entities;
 using Domain.Models.Entities.Characters;
@@ -94,6 +95,7 @@ public static class DependencyInjection
         services.AddScoped<ITournamentGroundsRepository, TournamentGroundsRepository>();
 
         services.AddScoped<IDungeonRunRepository, DungeonRunRepository>();
+        services.AddScoped<IDungeonSigilAssemblyRepository, DungeonSigilAssemblyRepository>();
         services.AddScoped<ICharacterDungeonMasteryRepository, CharacterDungeonMasteryRepository>();
 
         services.AddScoped<IEntityRepository, EntityRepository>();

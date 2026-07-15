@@ -20,6 +20,7 @@ public sealed class PlayerProphecyInstance
     public DateTimeOffset? AcceptedAt { get; set; }
     public DateTimeOffset? CompletedAt { get; set; }
     public DateTimeOffset? ClaimedAt { get; set; }
+    public DateTimeOffset? DailyRerollUsedAt { get; set; }
 
     public int TargetValue { get; set; }
     public int CurrentValue { get; set; }

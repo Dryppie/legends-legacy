@@ -1,0 +1,88 @@
+{
+  "scaling": {
+    "cinderGrowthBasisPointsPerCharacterLevel": 100,
+    "cinderGrowthCapBasisPoints": 20000,
+    "cinderRoundingIncrement": 5
+  },
+  "profiles": [
+    {
+      "id": "Daily.Common",
+      "scope": "Daily",
+      "difficulty": "Common",
+      "characterExperience": { "nextLevelBasisPoints": 400 },
+      "minimumCinders": 105,
+      "flatReward": { "sigilFragments": 2, "fateEcho": 7 }
+    },
+    {
+      "id": "Daily.Uncommon",
+      "scope": "Daily",
+      "difficulty": "Uncommon",
+      "characterExperience": { "nextLevelBasisPoints": 500 },
+      "minimumCinders": 150,
+      "flatReward": { "sigilFragments": 2, "fateEcho": 10 }
+    },
+    {
+      "id": "Daily.Rare",
+      "scope": "Daily",
+      "difficulty": "Rare",
+      "characterExperience": { "nextLevelBasisPoints": 600 },
+      "minimumCinders": 195,
+      "flatReward": { "soulstones": 1, "sigilFragments": 2, "fateEcho": 13 }
+    },
+    {
+      "id": "Weekly.Uncommon",
+      "scope": "Weekly",
+      "difficulty": "Uncommon",
+      "characterExperience": { "nextLevelBasisPoints": 2500 },
+      "minimumCinders": 800,
+      "flatReward": { "soulstones": 2, "sigilFragments": 5, "fateEcho": 34, "cacheItemId": "greater_prophecy_cache" }
+    },
+    {
+      "id": "Weekly.Rare",
+      "scope": "Weekly",
+      "difficulty": "Rare",
+      "characterExperience": { "nextLevelBasisPoints": 3000 },
+      "minimumCinders": 1050,
+      "flatReward": { "soulstones": 3, "sigilFragments": 5, "fateEcho": 42, "cacheItemId": "greater_prophecy_cache" }
+    },
+    {
+      "id": "Weekly.Epic",
+      "scope": "Weekly",
+      "difficulty": "Epic",
+      "characterExperience": { "nextLevelBasisPoints": 3500 },
+      "minimumCinders": 1300,
+      "flatReward": { "soulstones": 4, "sigilFragments": 5, "fateEcho": 50, "cacheItemId": "greater_prophecy_cache" }
+    }
+  ],
+  "categoryPackages": [
+    {
+      "scope": "Daily",
+      "category": "Dungeon",
+      "levelScaledItems": [
+        { "minLevel": 1, "maxLevel": 29, "itemId": "soul_dust", "quantity": 10 },
+        { "minLevel": 30, "maxLevel": 59, "itemId": "soul_dust", "quantity": 20 },
+        { "minLevel": 60, "itemId": "soul_dust", "quantity": 40 }
+      ]
+    },
+    {
+      "scope": "Weekly",
+      "category": "Dungeon",
+      "difficulty": "Uncommon",
+      "levelScaledItems": [
+        { "minLevel": 1, "maxLevel": 29, "itemId": "item.monster_core.lesser", "quantity": 1 },
+        { "minLevel": 30, "maxLevel": 59, "itemId": "item.monster_core.greater", "quantity": 1 },
+        { "minLevel": 60, "itemId": "item.monster_core.primal", "quantity": 1 }
+      ]
+    },
+    {
+      "scope": "Weekly",
+      "category": "Dungeon",
+      "difficulty": "Rare",
+      "levelScaledItems": [
+        { "minLevel": 1, "maxLevel": 29, "itemId": "item.monster_core.lesser", "quantity": 1 },
+        { "minLevel": 30, "maxLevel": 59, "itemId": "item.monster_core.greater", "quantity": 1 },
+        { "minLevel": 60, "itemId": "item.monster_core.primal", "quantity": 1 }
+      ]
+    }
+  ]
+}

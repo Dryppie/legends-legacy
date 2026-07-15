@@ -27,11 +27,27 @@ public interface IProphecyRepository
         DateTimeOffset to,
         CancellationToken cancellationToken);
 
-    Task<IReadOnlyList<PlayerProphecyInstance>> GetRecentInstancesAsync(
+    Task<bool> TryConsumeDailyRerollAsync(
         Guid playerId,
         Guid characterId,
-        DateTimeOffset since,
-        int limit,
+        DateTimeOffset periodStart,
+        DateTimeOffset usedAt,
+        CancellationToken cancellationToken);
+
+    Task<DailyProphecyRerollState?> GetDailyRerollStateAsync(
+        Guid playerId,
+        Guid characterId,
+        DateTimeOffset periodStart,
+        CancellationToken cancellationToken) =>
+        Task.FromResult<DailyProphecyRerollState?>(null);
+
+    Task AddDailyRerollStateAsync(
+        DailyProphecyRerollState state,
+        CancellationToken cancellationToken) => Task.CompletedTask;
+
+    Task<bool> TrySpendFateEchoAsync(
+        Guid characterId,
+        long amount,
         CancellationToken cancellationToken);
 
     Task<WeeklyRevelationProgress?> GetWeeklyProgressAsync(

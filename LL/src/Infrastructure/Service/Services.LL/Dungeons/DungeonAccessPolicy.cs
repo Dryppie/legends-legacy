@@ -27,6 +27,21 @@ public sealed class DungeonAccessPolicy : IDungeonAccessPolicy
         DungeonDefinition dungeon,
         int currentCombatRating,
         CancellationToken cancellationToken)
+        => await EvaluateAsync(characterId, dungeon, currentCombatRating, ignoredEntryCostItemId: null, cancellationToken);
+
+    public async Task<DungeonAccessResult> EvaluateForSigilAssemblyAsync(
+        Guid characterId,
+        DungeonDefinition dungeon,
+        int currentCombatRating,
+        CancellationToken cancellationToken) =>
+        await EvaluateAsync(characterId, dungeon, currentCombatRating, dungeon.SigilItemId, cancellationToken);
+
+    private async Task<DungeonAccessResult> EvaluateAsync(
+        Guid characterId,
+        DungeonDefinition dungeon,
+        int currentCombatRating,
+        string? ignoredEntryCostItemId,
+        CancellationToken cancellationToken)
     {
         var missingRequirements = new List<string>();
         var entryRequirements = await GetEntryRequirementsAsync(
@@ -43,7 +58,7 @@ public sealed class DungeonAccessPolicy : IDungeonAccessPolicy
             missingRequirements.Add("Complete the previous difficulty first.");
         }
 
-        AddMissingEntryCosts(entryRequirements, missingRequirements);
+        AddMissingEntryCosts(entryRequirements, missingRequirements, ignoredEntryCostItemId);
 
         return new DungeonAccessResult(
             missingRequirements.Count == 0,
@@ -96,9 +111,12 @@ public sealed class DungeonAccessPolicy : IDungeonAccessPolicy
 
     private static void AddMissingEntryCosts(
         IReadOnlyList<DungeonEntryRequirementResult> entryRequirements,
-        List<string> missingRequirements)
+        List<string> missingRequirements,
+        string? ignoredEntryCostItemId)
     {
-        foreach (var requirement in entryRequirements.Where(x => x.OwnedAmount < x.RequiredAmount))
+        foreach (var requirement in entryRequirements.Where(x =>
+                     x.OwnedAmount < x.RequiredAmount &&
+                     !x.ItemId.Equals(ignoredEntryCostItemId, StringComparison.OrdinalIgnoreCase)))
         {
             missingRequirements.Add(
                 $"Requires {requirement.RequiredAmount} {requirement.Name} ({requirement.OwnedAmount}/{requirement.RequiredAmount}).");

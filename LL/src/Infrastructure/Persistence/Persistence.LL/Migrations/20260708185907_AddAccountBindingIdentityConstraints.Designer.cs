@@ -3262,9 +3262,6 @@ namespace Persistence.LL.Migrations
                     b.Property<int>("DefenseProfile")
                         .HasColumnType("integer");
 
-                    b.Property<int>("ExperienceReward")
-                        .HasColumnType("integer");
-
                     b.Property<Guid>("LootTableId")
                         .HasColumnType("uuid");
 

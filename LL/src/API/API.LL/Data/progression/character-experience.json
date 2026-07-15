@@ -1,0 +1,8 @@
+{
+  "characterLevelCurve": {
+    "baseExperience": 100,
+    "linearExperiencePerLevel": 0,
+    "quadraticExperiencePerLevelSquared": 93,
+    "roundingIncrement": 25
+  }
+}

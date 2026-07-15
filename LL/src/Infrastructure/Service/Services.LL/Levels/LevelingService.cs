@@ -1,4 +1,5 @@
 using Application.UseCases.Characters.Events;
+using Application.Interfaces.Services.LL.Entities;
 using Domain.Helpers.Constants;
 using Domain.Models.Attributes;
 using Domain.Models.Entities.Characters;
@@ -10,23 +11,27 @@ namespace Services.LL.Levels;
 public class LevelingService : ILevelingService
 {
     private readonly IPublisher _publisher;
+    private readonly ICharacterExperienceProgressionProvider _experienceProgression;
     
-    public LevelingService(IPublisher publisher)
+    public LevelingService(
+        IPublisher publisher,
+        ICharacterExperienceProgressionProvider experienceProgression)
     {
         _publisher = publisher;
+        _experienceProgression = experienceProgression;
     }
 
     public async Task UpdateCharacterLevel(Character character, CancellationToken cancellationToken)
     {
-        var xpRequired = EntityLevelConstants.XP_REQUIRED(character.Level);
+        var xpRequired = _experienceProgression.GetRequiredExperience(character.Level);
 
         while (character.Experience >= xpRequired)
         {
-            character.Level++;
+            character.Level = checked(character.Level + 1);
             character.Experience -= xpRequired;
 
             // After leveling up and adjusting current experience, calculate whether there's enough experience left for more level ups
-            xpRequired = EntityLevelConstants.XP_REQUIRED(character.Level);
+            xpRequired = _experienceProgression.GetRequiredExperience(character.Level);
 
             LevelUpPrimaryAttributes(character);
 

@@ -110,23 +110,61 @@ public sealed class ProphecyRepository : IProphecyRepository
                 x.PeriodEnd > from)
             .ToListAsync(cancellationToken);
 
-    public async Task<IReadOnlyList<PlayerProphecyInstance>> GetRecentInstancesAsync(
+    public async Task<bool> TryConsumeDailyRerollAsync(
         Guid playerId,
         Guid characterId,
-        DateTimeOffset since,
-        int limit,
-        CancellationToken cancellationToken) =>
-        await _context.PlayerProphecyInstances
-            .Include(x => x.ProphecyDefinition)
+        DateTimeOffset periodStart,
+        DateTimeOffset usedAt,
+        CancellationToken cancellationToken)
+    {
+        var updated = await _context.PlayerProphecyInstances
             .Where(x =>
                 x.PlayerId == playerId &&
                 x.CharacterId == characterId &&
-                x.GeneratedAt >= since &&
-                x.Status != ProphecyStatus.Offered &&
-                x.Status != ProphecyStatus.Accepted)
-            .OrderByDescending(x => x.ClaimedAt ?? x.CompletedAt ?? x.AcceptedAt ?? x.GeneratedAt)
-            .Take(limit)
-            .ToListAsync(cancellationToken);
+                x.Scope == ProphecyScope.Daily &&
+                x.PeriodStart == periodStart &&
+                x.SlotType == ProphecySlotType.Steady &&
+                x.DailyRerollUsedAt == null)
+            .ExecuteUpdateAsync(
+                setters => setters.SetProperty(x => x.DailyRerollUsedAt, usedAt),
+                cancellationToken);
+
+        return updated == 1;
+    }
+
+    public async Task<DailyProphecyRerollState?> GetDailyRerollStateAsync(
+        Guid playerId,
+        Guid characterId,
+        DateTimeOffset periodStart,
+        CancellationToken cancellationToken)
+    {
+        var local = _context.DailyProphecyRerollStates.Local.FirstOrDefault(x =>
+            x.PlayerId == playerId &&
+            x.CharacterId == characterId &&
+            x.PeriodStart == periodStart);
+        return local ?? await _context.DailyProphecyRerollStates.FirstOrDefaultAsync(x =>
+            x.PlayerId == playerId &&
+            x.CharacterId == characterId &&
+            x.PeriodStart == periodStart,
+            cancellationToken);
+    }
+
+    public async Task AddDailyRerollStateAsync(
+        DailyProphecyRerollState state,
+        CancellationToken cancellationToken) =>
+        await _context.DailyProphecyRerollStates.AddAsync(state, cancellationToken);
+
+    public async Task<bool> TrySpendFateEchoAsync(
+        Guid characterId,
+        long amount,
+        CancellationToken cancellationToken)
+    {
+        return await _context.Characters
+            .Where(x => x.Id == characterId && x.FateEcho >= amount)
+            .ExecuteUpdateAsync(
+                setters => setters.SetProperty(x => x.FateEcho, x => x.FateEcho - amount),
+                cancellationToken) == 1;
+    }
 
     public async Task<WeeklyRevelationProgress?> GetWeeklyProgressAsync(
         Guid playerId,
