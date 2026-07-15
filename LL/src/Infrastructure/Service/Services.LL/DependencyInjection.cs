@@ -32,6 +32,7 @@ using Services.LL.Combat;
 using Services.LL.Combat.Layers.Orchestration;
 using Services.LL.Combat.Layers.Orchestration.Dungeon;
 using Services.LL.Combat.Layers.Orchestration.Idle;
+using Services.LL.Combat.Layers.Orchestration.Models;
 using Services.LL.Combat.Layers.Resolution;
 using Services.LL.Combat.Layers.Resolution.Dungeon;
 using Services.LL.Combat.Layers.Resolution.Idle;
@@ -93,6 +94,11 @@ public static class DependencyInjection
         services.AddScoped<IRegionService, RegionService>();
         services.AddScoped<IAreaService, AreaService>();
         services.AddScoped<IRegionOneContentDiagnostics, RegionOneContentDiagnostics>();
+        services.AddSingleton<IAreaExperienceBalanceProvider>(sp =>
+            new JsonAreaExperienceBalanceProvider(
+                config,
+                contentRootPath,
+                sp.GetRequiredService<JsonSerializerOptions>()));
 
         services.AddScoped<IAttributeService, AttributeService>();
         services.AddScoped<IAchievementService, AchievementService>();
@@ -115,6 +121,15 @@ public static class DependencyInjection
                 options => options.RewardBasisPointsOfCreatureExperience > 0 &&
                            options.MinimumCindersPerVictory >= 0,
                 "Combat Cinder reward settings are invalid.")
+            .ValidateOnStart();
+        services.AddOptions<IdleCombatProgressionOptions>()
+            .Configure(options => config.GetSection(IdleCombatProgressionOptions.SectionName).Bind(options))
+            .Validate(
+                options => options.EncounterCadenceSeconds > 0 &&
+                           options.MaximumOfflineHours > 0 &&
+                           options.MaximumEncountersPerProcessingBatch > 0 &&
+                           options.ReferenceWinRateBasisPoints is > 0 and <= 10_000,
+                "Idle combat progression settings are invalid.")
             .ValidateOnStart();
 
         services.AddSingleton<IChampionMarketCatalog>(sp =>
@@ -253,6 +268,11 @@ public static class DependencyInjection
         services.AddScoped<IGuildShopService, GuildShopService>();
 
         services.AddScoped<ILevelingService, LevelingService>();
+        services.AddSingleton<ICharacterExperienceProgressionProvider>(sp =>
+            new JsonCharacterExperienceProgressionProvider(
+                config,
+                contentRootPath,
+                sp.GetRequiredService<JsonSerializerOptions>()));
         services.AddScoped<ILeaderboardService, LeaderboardService>();
 
         services.AddScoped<ILootService, LootService>();

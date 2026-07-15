@@ -83,7 +83,6 @@ public sealed class JsonProphecyBalanceProvider : IProphecyBalanceProvider
 
         var invalidProfiles = catalog.RewardProfiles
             .Where(x => string.IsNullOrWhiteSpace(x.Id) ||
-                        x.CharacterExperience.Minimum <= 0 ||
                         x.CharacterExperience.NextLevelBasisPoints <= 0 ||
                         x.MinimumCinders < 0 ||
                         !IsValidReward(x.FlatReward) ||

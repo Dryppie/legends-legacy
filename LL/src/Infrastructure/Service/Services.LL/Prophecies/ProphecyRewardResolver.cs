@@ -17,10 +17,11 @@ public sealed class ProphecyRewardResolver : IProphecyRewardResolver
         var profile = _balance.RewardProfiles.First(x =>
             x.Id.Equals(definition.RewardProfileId, StringComparison.OrdinalIgnoreCase));
 
-        var scaledExperience = (long)Math.Round(
-            (double)context.ExperienceRequiredForNextLevel * profile.CharacterExperience.NextLevelBasisPoints / 10_000d,
-            MidpointRounding.AwayFromZero);
-        var characterExperience = Math.Max(profile.CharacterExperience.Minimum, scaledExperience);
+        var characterExperience = context.ExperienceRequiredForNextLevel <= 0
+            ? 0
+            : Math.Max(1, checked((long)Math.Round(
+                (decimal)context.ExperienceRequiredForNextLevel * profile.CharacterExperience.NextLevelBasisPoints / 10_000m,
+                MidpointRounding.AwayFromZero)));
         var uncappedGrowthBasisPoints = (long)Math.Max(0, context.CharacterLevel - 1) *
                                         _balance.RewardScaling.CinderGrowthBasisPointsPerCharacterLevel;
         var growthBasisPoints = Math.Min(

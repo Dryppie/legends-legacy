@@ -51,8 +51,20 @@ public sealed class ProphecyBalanceProviderTests
         Assert.Contains("Soulstones", smallCache.PreviewRewards);
 
         var weeklyRare = catalog.RewardProfiles.Single(x => x.Id == "Weekly.Rare");
-        Assert.Equal(4000, weeklyRare.CharacterExperience.NextLevelBasisPoints);
+        Assert.Equal(3000, weeklyRare.CharacterExperience.NextLevelBasisPoints);
         Assert.Equal("greater_prophecy_cache", weeklyRare.FlatReward.CacheItemId);
+
+        var shares = catalog.RewardProfiles.ToDictionary(
+            x => x.Id,
+            x => x.CharacterExperience.NextLevelBasisPoints);
+        Assert.Equal(400, shares["Daily.Common"]);
+        Assert.Equal(500, shares["Daily.Uncommon"]);
+        Assert.Equal(600, shares["Daily.Rare"]);
+        Assert.Equal(2500, shares["Weekly.Uncommon"]);
+        Assert.Equal(3000, shares["Weekly.Rare"]);
+        Assert.Equal(3500, shares["Weekly.Epic"]);
+        Assert.Equal(4500, 5 * shares["Daily.Common"] + shares["Weekly.Uncommon"]);
+        Assert.Equal(6500, 5 * shares["Daily.Rare"] + shares["Weekly.Epic"]);
 
         Assert.All(catalog.RewardProfiles.Where(x => x.Scope == ProphecyScope.Daily),
             profile => Assert.Equal(2, profile.FlatReward.SigilFragments));

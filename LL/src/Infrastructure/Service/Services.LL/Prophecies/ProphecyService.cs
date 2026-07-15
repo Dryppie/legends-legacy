@@ -1,7 +1,6 @@
 using Application.Interfaces.Services.LL;
 using Application.Interfaces.Services.LL.Entities;
 using Application.Interfaces.Services.LL.Prophecies;
-using Domain.Helpers.Constants;
 using Domain.Models.Entities;
 using Domain.Models.Inventories;
 using Domain.Models.Items;
@@ -21,6 +20,7 @@ public sealed class ProphecyService : IProphecyService
     private readonly IReadOnlyList<ProphecyDefinition> _definitions;
     private readonly ProphecyBalanceCatalog _balance;
     private readonly IProphecyRewardResolver _rewardResolver;
+    private readonly ICharacterExperienceProgressionProvider _experienceProgression;
     private readonly IProphecyRepository _repository;
     private readonly ICharacterService _characterService;
     private readonly IEntityService _entityService;
@@ -33,6 +33,7 @@ public sealed class ProphecyService : IProphecyService
         IProphecyDefinitionProvider definitionProvider,
         IProphecyBalanceProvider balanceProvider,
         IProphecyRewardResolver rewardResolver,
+        ICharacterExperienceProgressionProvider experienceProgression,
         IProphecyRepository repository,
         ICharacterService characterService,
         IEntityService entityService,
@@ -44,6 +45,7 @@ public sealed class ProphecyService : IProphecyService
         _definitions = definitionProvider.GetAll();
         _balance = balanceProvider.GetCatalog();
         _rewardResolver = rewardResolver;
+        _experienceProgression = experienceProgression;
         _repository = repository;
         _characterService = characterService;
         _entityService = entityService;
@@ -1084,10 +1086,10 @@ public sealed class ProphecyService : IProphecyService
     private static ProphecyProgressSnapshot ReadProgress(string json) =>
         JsonSerializer.Deserialize<ProphecyProgressSnapshot>(json, JsonOptions) ?? new ProphecyProgressSnapshot();
 
-    private static ProphecyRewardContext CreateRewardContext(int characterLevel)
+    private ProphecyRewardContext CreateRewardContext(int characterLevel)
     {
         var level = Math.Max(1, characterLevel);
-        return new ProphecyRewardContext(level, EntityLevelConstants.XP_REQUIRED(level));
+        return new ProphecyRewardContext(level, _experienceProgression.GetRequiredExperience(level));
     }
 
     private IReadOnlyList<WeeklyRevelationMilestone> CreateWeeklyMilestones(WeeklyRevelationProgress progress) =>

@@ -242,6 +242,7 @@ public sealed class ProphecyLifecycleTests
             new DefinitionProvider(definitions),
             balanceProvider,
             new ProphecyRewardResolver(balanceProvider),
+            new ExperienceProgressionProvider(),
             repository,
             new CharacterService(character),
             new EntityService(),
@@ -302,6 +303,11 @@ public sealed class ProphecyLifecycleTests
         public IReadOnlyList<ProphecyDefinition> GetAll() => definitions;
     }
 
+    private sealed class ExperienceProgressionProvider : ICharacterExperienceProgressionProvider
+    {
+        public long GetRequiredExperience(int level) => 125;
+    }
+
     private sealed class BalanceProvider : IProphecyBalanceProvider
     {
         public ProphecyBalanceCatalog GetCatalog() => new()
@@ -318,7 +324,7 @@ public sealed class ProphecyLifecycleTests
                     Id = "Daily.Test",
                     Scope = ProphecyScope.Daily,
                     Difficulty = ProphecyDifficulty.Common,
-                    CharacterExperience = new ProphecyScaledAmount { Minimum = 1, NextLevelBasisPoints = 1 },
+                    CharacterExperience = new ProphecyScaledAmount { NextLevelBasisPoints = 1 },
                     MinimumCinders = 10
                 },
                 new ProphecyRewardProfile
@@ -326,7 +332,7 @@ public sealed class ProphecyLifecycleTests
                     Id = "Weekly.Test",
                     Scope = ProphecyScope.Weekly,
                     Difficulty = ProphecyDifficulty.Common,
-                    CharacterExperience = new ProphecyScaledAmount { Minimum = 1, NextLevelBasisPoints = 1 },
+                    CharacterExperience = new ProphecyScaledAmount { NextLevelBasisPoints = 1 },
                     MinimumCinders = 20
                 }
             ],

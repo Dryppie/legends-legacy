@@ -19,9 +19,9 @@ public class Character : Entity
     /// </summary>
     public Guid UserId { get; set; }
     public CharacterAction? CharacterAction { get; set; }
-    public float Experience { get; set; } = 0;
+    public long Experience { get; set; } = 0;
     [NotMapped]
-    public float ExperienceUntilNextLevel { get; set; }
+    public long ExperienceUntilNextLevel { get; set; }
     public long Cinders { get; set; } = 0;
     public long Soulstones { get; set; } = 0;
     public long FateEcho { get; set; } = 0;

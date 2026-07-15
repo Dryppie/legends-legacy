@@ -64,7 +64,6 @@ public sealed class ProphecyRewardProfile
 
 public sealed class ProphecyScaledAmount
 {
-    public long Minimum { get; set; }
     public int NextLevelBasisPoints { get; set; }
 }
 

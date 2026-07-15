@@ -9,7 +9,7 @@
       "id": "Daily.Common",
       "scope": "Daily",
       "difficulty": "Common",
-      "characterExperience": { "minimum": 55, "nextLevelBasisPoints": 400 },
+      "characterExperience": { "nextLevelBasisPoints": 400 },
       "minimumCinders": 105,
       "flatReward": { "sigilFragments": 2, "fateEcho": 7 }
     },
@@ -17,7 +17,7 @@
       "id": "Daily.Uncommon",
       "scope": "Daily",
       "difficulty": "Uncommon",
-      "characterExperience": { "minimum": 80, "nextLevelBasisPoints": 600 },
+      "characterExperience": { "nextLevelBasisPoints": 500 },
       "minimumCinders": 150,
       "flatReward": { "sigilFragments": 2, "fateEcho": 10 }
     },
@@ -25,7 +25,7 @@
       "id": "Daily.Rare",
       "scope": "Daily",
       "difficulty": "Rare",
-      "characterExperience": { "minimum": 105, "nextLevelBasisPoints": 800 },
+      "characterExperience": { "nextLevelBasisPoints": 600 },
       "minimumCinders": 195,
       "flatReward": { "soulstones": 1, "sigilFragments": 2, "fateEcho": 13 }
     },
@@ -33,7 +33,7 @@
       "id": "Weekly.Uncommon",
       "scope": "Weekly",
       "difficulty": "Uncommon",
-      "characterExperience": { "minimum": 460, "nextLevelBasisPoints": 3000 },
+      "characterExperience": { "nextLevelBasisPoints": 2500 },
       "minimumCinders": 800,
       "flatReward": { "soulstones": 2, "sigilFragments": 5, "fateEcho": 34, "cacheItemId": "greater_prophecy_cache" }
     },
@@ -41,7 +41,7 @@
       "id": "Weekly.Rare",
       "scope": "Weekly",
       "difficulty": "Rare",
-      "characterExperience": { "minimum": 590, "nextLevelBasisPoints": 4000 },
+      "characterExperience": { "nextLevelBasisPoints": 3000 },
       "minimumCinders": 1050,
       "flatReward": { "soulstones": 3, "sigilFragments": 5, "fateEcho": 42, "cacheItemId": "greater_prophecy_cache" }
     },
@@ -49,7 +49,7 @@
       "id": "Weekly.Epic",
       "scope": "Weekly",
       "difficulty": "Epic",
-      "characterExperience": { "minimum": 720, "nextLevelBasisPoints": 5000 },
+      "characterExperience": { "nextLevelBasisPoints": 3500 },
       "minimumCinders": 1300,
       "flatReward": { "soulstones": 4, "sigilFragments": 5, "fateEcho": 50, "cacheItemId": "greater_prophecy_cache" }
     }

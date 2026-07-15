@@ -9,4 +9,4 @@ public interface IProphecyRewardResolver
 
 public readonly record struct ProphecyRewardContext(
     int CharacterLevel,
-    int ExperienceRequiredForNextLevel);
+    long ExperienceRequiredForNextLevel);

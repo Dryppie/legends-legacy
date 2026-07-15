@@ -10,8 +10,8 @@ public class CharacterDto : IMapFrom<Character>
     public Guid Id { get; set; }
     public string Name { get; set; } = string.Empty;
     public int Level { get; set; }
-    public int Experience { get; set; }
-    public float ExperienceUntilNextLevel { get; set; }
+    public long Experience { get; set; }
+    public long ExperienceUntilNextLevel { get; set; }
     public long Cinders { get; set; } = 0;
     public long Soulstones { get; set; } = 0;
     public long FateEcho { get; set; } = 0;

@@ -7,13 +7,13 @@ namespace EssenceSystem.Tests;
 public sealed class ProphecyRewardResolverTests
 {
     [Fact]
-    public void Resolve_preserves_configured_floor_for_early_characters()
+    public void Resolve_uses_percentage_scaling_for_early_characters()
     {
         var resolver = new ProphecyRewardResolver(new BalanceProvider(CreateCatalog()));
 
-        var reward = resolver.Resolve(DailyRare(ProphecyCategory.Combat), new ProphecyRewardContext(1, 100));
+        var reward = resolver.Resolve(DailyRare(ProphecyCategory.Combat), new ProphecyRewardContext(1, 125));
 
-        Assert.Equal(105, reward.CharacterExperience);
+        Assert.Equal(8, reward.CharacterExperience);
         Assert.Equal(195, reward.Cinders);
         Assert.Equal(1, reward.Soulstones);
         Assert.Equal(2, reward.SigilFragments);
@@ -28,7 +28,7 @@ public sealed class ProphecyRewardResolverTests
 
         var reward = resolver.Resolve(DailyRare(ProphecyCategory.Combat), new ProphecyRewardContext(50, 10_725));
 
-        Assert.Equal(858, reward.CharacterExperience);
+        Assert.Equal(644, reward.CharacterExperience);
         Assert.Equal(290, reward.Cinders);
         Assert.Equal(1, reward.Soulstones);
         Assert.Equal(13, reward.FateEcho);
@@ -41,8 +41,18 @@ public sealed class ProphecyRewardResolverTests
 
         var reward = resolver.Resolve(DailyRare(ProphecyCategory.Combat), new ProphecyRewardContext(500, 1_000_000));
 
-        Assert.Equal(80_000, reward.CharacterExperience);
+        Assert.Equal(60_000, reward.CharacterExperience);
         Assert.Equal(585, reward.Cinders);
+    }
+
+    [Fact]
+    public void Resolve_continues_granting_scaled_experience_above_level_100()
+    {
+        var resolver = new ProphecyRewardResolver(new BalanceProvider(CreateCatalog()));
+
+        var reward = resolver.Resolve(DailyRare(ProphecyCategory.Combat), new ProphecyRewardContext(101, 754_975));
+
+        Assert.Equal(45_299, reward.CharacterExperience);
     }
 
     [Fact]
@@ -84,8 +94,7 @@ public sealed class ProphecyRewardResolverTests
                 Difficulty = ProphecyDifficulty.Rare,
                 CharacterExperience = new ProphecyScaledAmount
                 {
-                    Minimum = 105,
-                    NextLevelBasisPoints = 800
+                    NextLevelBasisPoints = 600
                 },
                 MinimumCinders = 195,
                 FlatReward = new ProphecyRewardSnapshot

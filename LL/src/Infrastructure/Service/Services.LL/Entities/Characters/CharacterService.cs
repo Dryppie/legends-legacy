@@ -1,7 +1,6 @@
 using Application.Interfaces.Services.LL.Entities;
 using Application.Interfaces.Services.LL.Essences;
 using Domain.Components.Attributes;
-using Domain.Helpers.Constants;
 using Domain.Models.Entities.Characters;
 
 namespace Services.LL.Entities.Characters;
@@ -10,29 +9,36 @@ public class CharacterService : ICharacterService
 {
     private readonly ICharacterRepository _characterRepository;
     private readonly IEssenceBonusProvider _essenceBonusProvider;
+    private readonly ICharacterExperienceProgressionProvider _experienceProgression;
 
     public CharacterService(
         ICharacterRepository characterRepository,
-        IEssenceBonusProvider essenceBonusProvider)
+        IEssenceBonusProvider essenceBonusProvider,
+        ICharacterExperienceProgressionProvider experienceProgression)
     {
         _characterRepository = characterRepository;
         _essenceBonusProvider = essenceBonusProvider;
+        _experienceProgression = experienceProgression;
     }
 
-    public async Task<Character> CreateCharacterAsync(Guid userId, string username, CancellationToken cancellationToken) =>
-        await _characterRepository.CreateCharacterAsync(userId, username, cancellationToken);
+    public async Task<Character> CreateCharacterAsync(Guid userId, string username, CancellationToken cancellationToken)
+    {
+        var character = await _characterRepository.CreateCharacterAsync(userId, username, cancellationToken);
+        SetExperienceRequirement(character);
+        return character;
+    }
 
     public async Task<Character?> GetMyCharacterAsync(Guid currentUserId, CancellationToken cancellationToken)
     {
         var character = await _characterRepository.GetCharacterByUserIdAsync(currentUserId, cancellationToken);
-        if (character != null) character.ExperienceUntilNextLevel = EntityLevelConstants.XP_REQUIRED(character.Level);
+        SetExperienceRequirement(character);
         return character;
     }
 
     public async Task<Character?> GetCharacterByCharacterIdAsync(Guid characterId, CancellationToken cancellationToken)
     {
         var character = await _characterRepository.GetCharacterByCharacterIdAsync(characterId, cancellationToken);
-        if (character != null) character.ExperienceUntilNextLevel = EntityLevelConstants.XP_REQUIRED(character.Level);
+        SetExperienceRequirement(character);
         return character;
     }
 
@@ -41,6 +47,7 @@ public class CharacterService : ICharacterService
         var character = await _characterRepository.GetCharacterOverviewByCharacterIdAsync(currentUserId, cancellationToken);
         if (character == null) return null;
 
+        SetExperienceRequirement(character);
         var essenceModifiers = GetLoadedEssenceModifiers(character);
         AttributeCalculator.CalculateBaseAttributes(character, essenceModifiers);
         return character;
@@ -51,22 +58,35 @@ public class CharacterService : ICharacterService
         var character = await _characterRepository.GetCharacterOverviewByCharacterNameAsync(characterName, cancellationToken);
         if (character == null) return null;
 
+        SetExperienceRequirement(character);
         var essenceModifiers = GetLoadedEssenceModifiers(character);
         AttributeCalculator.CalculateBaseAttributes(character, essenceModifiers);
         return character;
     }
 
-    public async Task<Character?> GetBaseCharacterByIdAsync(Guid characterId, CancellationToken cancellationToken) =>
-        await _characterRepository.GetBaseCharacterByIdAsync(characterId, cancellationToken);
+    public async Task<Character?> GetBaseCharacterByIdAsync(Guid characterId, CancellationToken cancellationToken)
+    {
+        var character = await _characterRepository.GetBaseCharacterByIdAsync(characterId, cancellationToken);
+        SetExperienceRequirement(character);
+        return character;
+    }
 
-    public async Task<Character?> UpdateCharacterNameAsync(Guid userId, string username, CancellationToken cancellationToken) =>
-        await _characterRepository.UpdateCharacterNameAsync(userId, username, cancellationToken);
+    public async Task<Character?> UpdateCharacterNameAsync(Guid userId, string username, CancellationToken cancellationToken)
+    {
+        var character = await _characterRepository.UpdateCharacterNameAsync(userId, username, cancellationToken);
+        SetExperienceRequirement(character);
+        return character;
+    }
 
     public async Task<bool> IsCharacterNameTakenAsync(string name, Guid? excludedCharacterId, CancellationToken cancellationToken) =>
         await _characterRepository.IsCharacterNameTakenAsync(name, excludedCharacterId, cancellationToken);
 
-    public async Task<Character?> GetCharacterWithSoulstoneUpgradesAsync(Guid characterId, CancellationToken cancellationToken) =>
-        await _characterRepository.GetCharacterWithSoulstoneUpgradesAsync(characterId, cancellationToken);
+    public async Task<Character?> GetCharacterWithSoulstoneUpgradesAsync(Guid characterId, CancellationToken cancellationToken)
+    {
+        var character = await _characterRepository.GetCharacterWithSoulstoneUpgradesAsync(characterId, cancellationToken);
+        SetExperienceRequirement(character);
+        return character;
+    }
 
     public async Task<Guid?> GetCharacterIdByNameAsync(string name, CancellationToken cancellationToken) =>
         await _characterRepository.GetCharacterIdByNameAsync(name, cancellationToken);
@@ -89,5 +109,13 @@ public class CharacterService : ICharacterService
                 .Select(x => x.PlayerEssence)
                 .Where(x => x is not null)
                 .Cast<Domain.Models.Essences.PlayerEssence>());
+    }
+
+    private void SetExperienceRequirement(Character? character)
+    {
+        if (character is not null)
+        {
+            character.ExperienceUntilNextLevel = _experienceProgression.GetRequiredExperience(character.Level);
+        }
     }
 }

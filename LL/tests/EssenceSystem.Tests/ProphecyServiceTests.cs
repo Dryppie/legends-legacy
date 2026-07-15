@@ -1,4 +1,5 @@
 using System.Text.Json;
+using Application.Interfaces.Services.LL.Entities;
 using Application.Interfaces.Services.LL.Prophecies;
 using Domain.Models.Prophecies;
 using Services.LL.Prophecies;
@@ -504,6 +505,7 @@ public sealed class ProphecyServiceTests
             new EmptyDefinitionProvider(),
             new TestBalanceProvider(),
             null!,
+            new ExperienceProgressionProvider(),
             repository,
             null!,
             null!,
@@ -515,6 +517,11 @@ public sealed class ProphecyServiceTests
     private sealed class EmptyDefinitionProvider : IProphecyDefinitionProvider
     {
         public IReadOnlyList<ProphecyDefinition> GetAll() => [];
+    }
+
+    private sealed class ExperienceProgressionProvider : ICharacterExperienceProgressionProvider
+    {
+        public long GetRequiredExperience(int level) => 125;
     }
 
     private sealed class TestBalanceProvider : IProphecyBalanceProvider
