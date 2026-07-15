@@ -38,6 +38,18 @@ public sealed class ProphecyBalanceProviderTests
         Assert.Equal(2, catalog.FavorRewards.Single(x => x.Scope == ProphecyScope.Weekly).Amount);
         Assert.Equal([40, 80], catalog.Economy.PaidRerollCosts);
         Assert.Equal(3, catalog.Economy.DailyRerollLimit);
+
+        var targets = catalog.Targets.ToDictionary(
+            x => (x.Scope, x.ObjectiveType),
+            x => x.Values);
+        Assert.Equal(300, targets[(ProphecyScope.Daily, ProphecyObjectiveType.WinEncounters)].Common);
+        Assert.Equal(900, targets[(ProphecyScope.Daily, ProphecyObjectiveType.WinEncounters)].Rare);
+        Assert.Equal(300, targets[(ProphecyScope.Daily, ProphecyObjectiveType.KillCreatures)].Common);
+        Assert.Equal(900, targets[(ProphecyScope.Daily, ProphecyObjectiveType.KillCreatures)].Rare);
+        Assert.Equal(360, targets[(ProphecyScope.Daily, ProphecyObjectiveType.TemperItems)].Common);
+        Assert.Equal(21_600, targets[(ProphecyScope.Weekly, ProphecyObjectiveType.TemperItems)].Uncommon);
+        Assert.Equal(35_000, targets[(ProphecyScope.Weekly, ProphecyObjectiveType.KillCreatures)].Uncommon);
+        Assert.Equal(14, targets[(ProphecyScope.Weekly, ProphecyObjectiveType.CompleteDungeons)].Rare);
         Assert.All(catalog.Caches, cache =>
         {
             Assert.True(cache.Rolls > 0);
@@ -66,6 +78,19 @@ public sealed class ProphecyBalanceProviderTests
         Assert.Equal(4500, 5 * shares["Daily.Common"] + shares["Weekly.Uncommon"]);
         Assert.Equal(6500, 5 * shares["Daily.Rare"] + shares["Weekly.Epic"]);
 
+        var cinderFloors = catalog.RewardProfiles.ToDictionary(
+            x => x.Id,
+            x => x.MinimumCinders);
+        Assert.Equal(1_000, cinderFloors["Daily.Common"]);
+        Assert.Equal(1_250, cinderFloors["Daily.Uncommon"]);
+        Assert.Equal(1_500, cinderFloors["Daily.Rare"]);
+        Assert.Equal(8_000, cinderFloors["Weekly.Uncommon"]);
+        Assert.Equal(10_000, cinderFloors["Weekly.Rare"]);
+        Assert.Equal(12_000, cinderFloors["Weekly.Epic"]);
+        Assert.Equal([1_000L, 2_500L, 5_000L], catalog.WeeklyMilestones
+            .OrderBy(x => x.FavorRequired)
+            .Select(x => x.Reward.Cinders));
+
         Assert.All(catalog.RewardProfiles.Where(x => x.Scope == ProphecyScope.Daily),
             profile => Assert.Equal(2, profile.FlatReward.SigilFragments));
         Assert.All(catalog.RewardProfiles.Where(x => x.Scope == ProphecyScope.Weekly),
@@ -81,6 +106,15 @@ public sealed class ProphecyBalanceProviderTests
         Assert.InRange(expectedWeeklyFragments, 23, 25);
         Assert.Equal(24.05, expectedWeeklyFragments, precision: 2);
 
+        var expectedCacheCinders = new[]
+        {
+            "greater_prophecy_cache",
+            "revelation_cache_small",
+            "revelation_cache_greater",
+            "revelation_cache_perfect_week"
+        }.Sum(cacheId => ExpectedCinders(catalog.Caches.Single(x => x.ItemId == cacheId)));
+        Assert.Equal(9_262.5, expectedCacheCinders, precision: 1);
+
         var weeklyDungeon = catalog.CategoryRewardPackages.Single(x =>
             x.Scope == ProphecyScope.Weekly &&
             x.Category == ProphecyCategory.Dungeon &&
@@ -94,6 +128,14 @@ public sealed class ProphecyBalanceProviderTests
         var totalWeight = cache.Rewards.Sum(x => x.Weight);
         var expectedPerRoll = cache.Rewards.Sum(x =>
             (double)x.Weight / totalWeight * x.Reward.SigilFragments);
+        return cache.Rolls * expectedPerRoll;
+    }
+
+    private static double ExpectedCinders(ProphecyCacheDefinition cache)
+    {
+        var totalWeight = cache.Rewards.Sum(x => x.Weight);
+        var expectedPerRoll = cache.Rewards.Sum(x =>
+            (double)x.Weight / totalWeight * x.Reward.Cinders);
         return cache.Rolls * expectedPerRoll;
     }
 }

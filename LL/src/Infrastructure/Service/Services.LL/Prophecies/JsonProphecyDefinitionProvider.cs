@@ -131,6 +131,16 @@ public sealed class JsonProphecyDefinitionProvider : IProphecyDefinitionProvider
         {
             throw new InvalidOperationException("Prophecy definition weights must be greater than zero: " + string.Join(", ", invalidWeights));
         }
+
+        var invalidLevelRanges = definitions
+            .Where(x => x.MinPlayerLevel < 1 || x.MaxPlayerLevel < x.MinPlayerLevel)
+            .Select(x => x.Id)
+            .ToList();
+
+        if (invalidLevelRanges.Count > 0)
+        {
+            throw new InvalidOperationException("Prophecy definitions contain invalid player level ranges: " + string.Join(", ", invalidLevelRanges));
+        }
     }
 
     private sealed class ProphecyDefinitionDocument

@@ -79,10 +79,32 @@ public sealed class ProphecyOfferSelectorTests
         Assert.Equal(first?.Id, second?.Id);
     }
 
+    [Fact]
+    public void Pick_excludes_definitions_above_the_character_level()
+    {
+        var definitions = new[]
+        {
+            Definition("level-one", ProphecyCategory.Combat, minPlayerLevel: 1),
+            Definition("level-five", ProphecyCategory.Combat, minPlayerLevel: 5)
+        };
+
+        var result = ProphecyOfferSelector.Pick(
+            definitions,
+            ProphecyScope.Daily,
+            ProphecySlotType.Focused,
+            CharacterId,
+            PeriodStart,
+            "level-filter",
+            characterLevel: 1);
+
+        Assert.Equal("level-one", result?.Id);
+    }
+
     private static ProphecyDefinition Definition(
         string id,
         ProphecyCategory category,
-        int weight = 100) =>
+        int weight = 100,
+        int minPlayerLevel = 1) =>
         new()
         {
             Id = id,
@@ -90,6 +112,7 @@ public sealed class ProphecyOfferSelectorTests
             Category = category,
             IsEnabled = true,
             Weight = weight,
+            MinPlayerLevel = minPlayerLevel,
             AllowedSlots = [ProphecySlotType.Focused.ToString()]
         };
 }

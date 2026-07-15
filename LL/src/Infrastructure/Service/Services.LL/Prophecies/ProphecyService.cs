@@ -81,11 +81,9 @@ public sealed class ProphecyService : IProphecyService
 
         foreach (var prophecy in daily)
         {
-            RebalanceTargetIfHigher(prophecy);
             MarkCompletedIfTargetReached(prophecy, now);
         }
 
-        RebalanceTargetIfHigher(greater);
         MarkCompletedIfTargetReached(greater, now);
 
         var weeklyMilestones = CreateWeeklyMilestones(weekly);
@@ -218,7 +216,8 @@ public sealed class ProphecyService : IProphecyService
                 periodStart,
                 $"reroll-set:{rerollState.RerollsUsed + 1}:{prophecy.SlotType}",
                 shownDefinitionIds,
-                excludedCategories);
+                excludedCategories,
+                character.Level);
 
             if (replacement is null)
             {
@@ -325,7 +324,6 @@ public sealed class ProphecyService : IProphecyService
             return ProphecyOperationResult<ProphecyClaimResult>.Fail("This prophecy has already been claimed.");
         }
 
-        RebalanceTargetIfHigher(prophecy);
         MarkCompletedIfTargetReached(prophecy, now);
 
         if (prophecy.Status != ProphecyStatus.Completed)
@@ -567,7 +565,8 @@ public sealed class ProphecyService : IProphecyService
                 periodStart,
                 "initial",
                 excludedDefinitionIds,
-                excludedCategories) ??
+                excludedCategories,
+                rewardContext.CharacterLevel) ??
                 throw new InvalidOperationException($"No enabled daily prophecy definition is available for slot {slot}.");
 
             generated.Add(CreateInstance(
@@ -619,7 +618,8 @@ public sealed class ProphecyService : IProphecyService
             ProphecySlotType.Greater,
             characterId,
             periodStart,
-            "initial") ??
+            "initial",
+            characterLevel: rewardContext.CharacterLevel) ??
             throw new InvalidOperationException("No enabled weekly prophecy definition is available for the Greater slot.");
 
         greater = CreateInstance(
@@ -1194,24 +1194,6 @@ public sealed class ProphecyService : IProphecyService
 
     private static bool IsAcceptedOrLater(PlayerProphecyInstance instance) =>
         instance.Status is ProphecyStatus.Accepted or ProphecyStatus.Completed or ProphecyStatus.Claimed;
-
-    private void RebalanceTargetIfHigher(PlayerProphecyInstance instance)
-    {
-        if (instance.Status is not (ProphecyStatus.Offered or ProphecyStatus.Accepted))
-        {
-            return;
-        }
-
-        var definition = instance.ProphecyDefinition ??
-            _definitions.FirstOrDefault(x => x.Id.Equals(instance.ProphecyDefinitionId, StringComparison.OrdinalIgnoreCase));
-
-        if (definition is null)
-        {
-            return;
-        }
-
-        instance.TargetValue = Math.Max(instance.TargetValue, GetTargetValue(definition));
-    }
 
     private static void MarkCompletedIfTargetReached(PlayerProphecyInstance instance, DateTimeOffset now)
     {

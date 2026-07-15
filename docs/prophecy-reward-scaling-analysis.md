@@ -2,9 +2,7 @@
 
 ## Purpose
 
-Prophecy rewards currently use fixed, category-specific snapshots. That makes the system easy to read at low level, but it also makes rewards lose relevance as character progression accelerates and creates duplicated balance data for rewards that are mostly identical.
-
-This document defines a scalable reward model that preserves Prophecies' role as a reliable side objective without turning them into the dominant source of every currency.
+Prophecy rewards resolve from data-driven cadence and difficulty profiles into concrete snapshots. This document describes the implemented scaling model and its balance targets, including the Cinder rebalance against the area's hourly reward budget.
 
 ## What the current rewards do
 
@@ -12,24 +10,24 @@ Every generated Prophecy stores a concrete `ProphecyRewardSnapshot`. Claiming re
 
 The existing direct reward profiles contain:
 
-| Cadence and rarity | Cinders | Character XP | Soulstones | Fate Echo | Favor |
-| ------------------ | ------: | -----------: | ---------: | --------: | ----: |
-| Daily Common       |     105 |           55 |          0 |         7 |     1 |
-| Daily Uncommon     |     150 |           80 |          0 |        10 |     1 |
-| Daily Rare         |     195 |          105 |          1 |        13 |     1 |
-| Weekly Uncommon    |     800 |          460 |          2 |        34 |     2 |
-| Weekly Rare        |   1,050 |          590 |          3 |        42 |     2 |
-| Weekly Epic        |   1,300 |          720 |          4 |        50 |     2 |
+| Cadence and rarity | Base Cinders | Character XP | Soulstones | Fate Echo | Favor |
+| ------------------ | -----------: | ------------ | ---------: | --------: | ----: |
+| Daily Common       |        1,000 | 4% next level |          0 |         7 |     1 |
+| Daily Uncommon     |        1,250 | 5% next level |          0 |        10 |     1 |
+| Daily Rare         |        1,500 | 6% next level |          1 |        13 |     1 |
+| Weekly Uncommon    |        8,000 | 25% next level |         2 |        34 |     2 |
+| Weekly Rare        |       10,000 | 30% next level |         3 |        42 |     2 |
+| Weekly Epic        |       12,000 | 35% next level |         4 |        50 |     2 |
 
 Dungeon Prophecies add Soul Dust to daily rewards and a Monster Core to weekly rewards. Weekly Prophecies additionally grant a Greater Prophecy Cache.
 
-Weekly Revelation milestones at 3, 5, and 7 Favor add another layer of fixed currency and cache rewards. With five completed dailies and the weekly Prophecy, a complete week currently produces roughly 3,947–4,897 Cinders, 735–1,245 character XP, 17–24 Soulstones, and 216–261 Fate Echo before category-specific rewards. Cache values are ranges because their contents are rolled when opened.
+Weekly Revelation milestones at 3, 5, and 7 Favor add another layer of fixed currency and cache rewards. At level 1, five completed dailies, the weekly Prophecy, all milestone rewards, and the expected value of all four caches produce approximately 30,763–37,263 Cinders. Actual cache results vary because their contents are rolled when opened.
 
 ## Pain points and risks
 
-### Fixed XP becomes irrelevant
+### Percentage XP can outgrow available content
 
-Character level requirements grow while Prophecy XP remains fixed. The same Rare daily that is meaningful early on becomes negligible later. This weakens the system's promise that a Prophecy is worth diverting normal play to complete.
+Character XP stays relevant because it is a percentage of the next-level requirement. If area and dungeon difficulty tiers stop expanding while levels remain unlimited, Prophecy XP eventually represents more combat hours than intended. New content tiers must continue raising normal-play XP, or Prophecy XP will need a time-value cap.
 
 ### Cinders need bounded progression
 
@@ -49,7 +47,7 @@ Only Dungeon profiles currently add a distinctive package. A category-specific b
 
 ### Cache rewards have delayed, opaque value
 
-The cache system is supplemental and randomized. Scaling both direct rewards and cache tables at the same time would make the economy harder to reason about and test. Cache contents should remain fixed during the first scaling pass.
+The cache system is supplemental and randomized. Its fixed Cinder values are therefore balanced and tested by expected value across all rolls, while the UI should continue showing the possible reward types rather than exact probabilities.
 
 ### Unused reward fields create false flexibility
 
@@ -63,7 +61,7 @@ The cache system is supplemental and randomized. Scaling both direct rewards and
 - Target 23–25 Sigil Fragments from a complete Prophecy week without requiring a Dungeon-category offer.
 - Represent cadence/difficulty rewards once and category additions separately.
 - Keep all balance values in JSON and validate them at startup.
-- Preserve current low-level rewards as minimum floors.
+- Anchor the weakest daily Cinder reward to at least one hour of tier-0 area farming.
 - Avoid database and frontend contract changes.
 
 ## Proposed reward model
@@ -72,19 +70,19 @@ The cache system is supplemental and randomized. Scaling both direct rewards and
 
 The core recipe owns scalable XP, a minimum Cinder floor, and flat currencies. Categories no longer need duplicate copies of the same recipe.
 
-| Recipe          | XP as a share of next-level requirement | Minimum XP | Minimum Cinders |
-| --------------- | --------------------------------------: | ---------: | --------------: |
-| Daily Common    |                                      4% |         55 |             105 |
-| Daily Uncommon  |                                      6% |         80 |             150 |
-| Daily Rare      |                                      8% |        105 |             195 |
-| Weekly Uncommon |                                     30% |        460 |             800 |
-| Weekly Rare     |                                     40% |        590 |           1,050 |
-| Weekly Epic     |                                     50% |        720 |           1,300 |
+| Recipe          | XP as a share of next-level requirement | Base Cinders | Tier-0 time value |
+| --------------- | --------------------------------------: | -----------: | ----------------: |
+| Daily Common    |                                      4% |        1,000 |            1.00 h |
+| Daily Uncommon  |                                      5% |        1,250 |            1.25 h |
+| Daily Rare      |                                      6% |        1,500 |            1.50 h |
+| Weekly Uncommon |                                     25% |        8,000 |            8.00 h |
+| Weekly Rare     |                                     30% |       10,000 |           10.00 h |
+| Weekly Epic     |                                     35% |       12,000 |           12.00 h |
 
 The resolved character XP is:
 
 ```text
-resolved XP = max(minimum XP, round(next-level XP requirement × basis points / 10,000))
+resolved XP = max(1, round(next-level XP requirement × basis points / 10,000))
 ```
 
 Basis points are used in JSON so percentages are exact integer configuration values and do not depend on locale-sensitive decimal parsing.
@@ -98,7 +96,11 @@ growth basis points = min(20,000, (character level - 1) × 100)
 resolved Cinders = round-to-5(minimum Cinders × (10,000 + growth basis points) / 10,000)
 ```
 
-The per-level growth, cap, and rounding increment are global JSON settings. Character XP continues to scale as a percentage of the next level, but Cinders are deliberately decoupled from that quadratic curve.
+The per-level growth, cap, and rounding increment are global JSON settings. Character XP continues to scale as a percentage of the next level, but Cinders are deliberately decoupled from that quadratic curve. The 1,000-Cinder Common daily floor matches the tier-0 area's configured 1,000 Cinders per hour; higher difficulties and weekly cadence add explicit premiums.
+
+### Weekly Revelation and cache Cinder budget
+
+The three Revelation milestones grant 1,000, 2,500, and 5,000 Cinders. The four caches earned during a completed five-day Revelation track contain 9,262.5 expected Cinders in total. Combined with direct quest rewards, a level-1 completed track is worth approximately 30.8–37.3 tier-0 farming hours. This remains below one quarter of a full 168-hour farming week and becomes a smaller share as higher area tiers unlock.
 
 ### 3. Flat and stepped rewards remain controlled
 
@@ -181,21 +183,21 @@ Startup should fail when:
 
 Failing at startup is preferable to silently generating a malformed permanent snapshot.
 
-## Scope of the first implementation
+## Implemented scope
 
 Included:
 
-- scalable direct character XP and Cinders;
+- scalable direct character XP and Cinders with time-anchored floors;
 - consolidated cadence/difficulty recipes;
 - category packages with level-banded items;
 - generation and full-set reroll integration;
 - startup validation and resolver tests;
-- stable persisted snapshots.
+- stable persisted snapshots;
+- rebalanced fixed Revelation milestone and cache Cinder values.
 
 Not included:
 
-- scaling cache roll tables;
-- changing Weekly Revelation milestone values;
+- level-scaling cache roll tables;
 - adding Essence XP rewards;
 - retroactively rewriting existing snapshots;
 - database schema or API DTO changes;

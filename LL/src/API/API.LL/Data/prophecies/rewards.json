@@ -10,7 +10,7 @@
       "scope": "Daily",
       "difficulty": "Common",
       "characterExperience": { "nextLevelBasisPoints": 400 },
-      "minimumCinders": 105,
+      "minimumCinders": 1000,
       "flatReward": { "sigilFragments": 2, "fateEcho": 7 }
     },
     {
@@ -18,7 +18,7 @@
       "scope": "Daily",
       "difficulty": "Uncommon",
       "characterExperience": { "nextLevelBasisPoints": 500 },
-      "minimumCinders": 150,
+      "minimumCinders": 1250,
       "flatReward": { "sigilFragments": 2, "fateEcho": 10 }
     },
     {
@@ -26,7 +26,7 @@
       "scope": "Daily",
       "difficulty": "Rare",
       "characterExperience": { "nextLevelBasisPoints": 600 },
-      "minimumCinders": 195,
+      "minimumCinders": 1500,
       "flatReward": { "soulstones": 1, "sigilFragments": 2, "fateEcho": 13 }
     },
     {
@@ -34,7 +34,7 @@
       "scope": "Weekly",
       "difficulty": "Uncommon",
       "characterExperience": { "nextLevelBasisPoints": 2500 },
-      "minimumCinders": 800,
+      "minimumCinders": 8000,
       "flatReward": { "soulstones": 2, "sigilFragments": 5, "fateEcho": 34, "cacheItemId": "greater_prophecy_cache" }
     },
     {
@@ -42,7 +42,7 @@
       "scope": "Weekly",
       "difficulty": "Rare",
       "characterExperience": { "nextLevelBasisPoints": 3000 },
-      "minimumCinders": 1050,
+      "minimumCinders": 10000,
       "flatReward": { "soulstones": 3, "sigilFragments": 5, "fateEcho": 42, "cacheItemId": "greater_prophecy_cache" }
     },
     {
@@ -50,7 +50,7 @@
       "scope": "Weekly",
       "difficulty": "Epic",
       "characterExperience": { "nextLevelBasisPoints": 3500 },
-      "minimumCinders": 1300,
+      "minimumCinders": 12000,
       "flatReward": { "soulstones": 4, "sigilFragments": 5, "fateEcho": 50, "cacheItemId": "greater_prophecy_cache" }
     }
   ],

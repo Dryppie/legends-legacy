@@ -7,17 +7,17 @@
     {
       "favorRequired": 3,
       "title": "Small Revelation Cache",
-      "reward": { "cinders": 150, "soulstones": 1, "fateEcho": 10, "cacheItemId": "revelation_cache_small" }
+      "reward": { "cinders": 1000, "soulstones": 1, "fateEcho": 10, "cacheItemId": "revelation_cache_small" }
     },
     {
       "favorRequired": 5,
       "title": "Greater Revelation Cache",
-      "reward": { "cinders": 350, "soulstones": 2, "fateEcho": 20, "cacheItemId": "revelation_cache_greater" }
+      "reward": { "cinders": 2500, "soulstones": 2, "fateEcho": 20, "cacheItemId": "revelation_cache_greater" }
     },
     {
       "favorRequired": 7,
       "title": "Perfect Week Bonus",
-      "reward": { "cinders": 750, "soulstones": 5, "fateEcho": 35, "cacheItemId": "revelation_cache_perfect_week" }
+      "reward": { "cinders": 5000, "soulstones": 5, "fateEcho": 35, "cacheItemId": "revelation_cache_perfect_week" }
     }
   ]
 }

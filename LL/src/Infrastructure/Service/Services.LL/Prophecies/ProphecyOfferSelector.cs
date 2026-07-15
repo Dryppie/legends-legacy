@@ -14,17 +14,18 @@ public static class ProphecyOfferSelector
         DateTimeOffset periodStart,
         string selectionSalt,
         IReadOnlySet<string>? excludedDefinitionIds = null,
-        IReadOnlySet<ProphecyCategory>? excludedCategories = null)
+        IReadOnlySet<ProphecyCategory>? excludedCategories = null,
+        int characterLevel = 1)
     {
         var slotName = slot.ToString();
         var candidates = definitions
-            .Where(x => x.IsEnabled && x.Scope == scope && x.AllowedSlots.Contains(slotName))
+            .Where(x => IsEligible(x, scope, characterLevel) && x.AllowedSlots.Contains(slotName))
             .ToList();
 
         if (candidates.Count == 0)
         {
             candidates = definitions
-                .Where(x => x.IsEnabled && x.Scope == scope && x.Category == ProphecyCategory.Combat)
+                .Where(x => IsEligible(x, scope, characterLevel) && x.Category == ProphecyCategory.Combat)
                 .ToList();
         }
 
@@ -49,6 +50,12 @@ public static class ProphecyOfferSelector
             selectionPool,
             $"{characterId:N}:{periodStart:O}:{slotName}:{scope}:{selectionSalt}");
     }
+
+    private static bool IsEligible(ProphecyDefinition definition, ProphecyScope scope, int characterLevel) =>
+        definition.IsEnabled &&
+        definition.Scope == scope &&
+        definition.MinPlayerLevel <= characterLevel &&
+        (definition.MaxPlayerLevel is null || characterLevel <= definition.MaxPlayerLevel.Value);
 
     private static IReadOnlyList<ProphecyDefinition> FirstNonEmpty(
         params IEnumerable<ProphecyDefinition>[] pools)

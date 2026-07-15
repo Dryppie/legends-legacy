@@ -14,7 +14,7 @@ public sealed class ProphecyRewardResolverTests
         var reward = resolver.Resolve(DailyRare(ProphecyCategory.Combat), new ProphecyRewardContext(1, 125));
 
         Assert.Equal(8, reward.CharacterExperience);
-        Assert.Equal(195, reward.Cinders);
+        Assert.Equal(1_500, reward.Cinders);
         Assert.Equal(1, reward.Soulstones);
         Assert.Equal(2, reward.SigilFragments);
         Assert.Equal(13, reward.FateEcho);
@@ -29,7 +29,7 @@ public sealed class ProphecyRewardResolverTests
         var reward = resolver.Resolve(DailyRare(ProphecyCategory.Combat), new ProphecyRewardContext(50, 10_725));
 
         Assert.Equal(644, reward.CharacterExperience);
-        Assert.Equal(290, reward.Cinders);
+        Assert.Equal(2_235, reward.Cinders);
         Assert.Equal(1, reward.Soulstones);
         Assert.Equal(13, reward.FateEcho);
     }
@@ -42,7 +42,7 @@ public sealed class ProphecyRewardResolverTests
         var reward = resolver.Resolve(DailyRare(ProphecyCategory.Combat), new ProphecyRewardContext(500, 1_000_000));
 
         Assert.Equal(60_000, reward.CharacterExperience);
-        Assert.Equal(585, reward.Cinders);
+        Assert.Equal(4_500, reward.Cinders);
     }
 
     [Fact]
@@ -96,7 +96,7 @@ public sealed class ProphecyRewardResolverTests
                 {
                     NextLevelBasisPoints = 600
                 },
-                MinimumCinders = 195,
+                MinimumCinders = 1_500,
                 FlatReward = new ProphecyRewardSnapshot
                 {
                     Soulstones = 1,

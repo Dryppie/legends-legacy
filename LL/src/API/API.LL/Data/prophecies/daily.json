@@ -36,6 +36,7 @@
       "difficulty": "Uncommon",
       "objectiveType": "KillDifferentCreatureTypes",
       "rewardProfileId": "Daily.Uncommon",
+      "minPlayerLevel": 5,
       "weight": 75,
       "allowedSlots": [ "Focused", "Ominous" ]
     },
@@ -50,6 +51,7 @@
       "objectiveType": "WinEncounters",
       "objectiveParameterJson": "{\"minimumEnemyCount\":2}",
       "rewardProfileId": "Daily.Rare",
+      "minPlayerLevel": 5,
       "weight": 70,
       "allowedSlots": [ "Ominous" ]
     },

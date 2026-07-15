@@ -23,6 +23,7 @@
       "difficulty": "Rare",
       "objectiveType": "KillDifferentCreatureTypes",
       "rewardProfileId": "Weekly.Rare",
+      "minPlayerLevel": 45,
       "weight": 80,
       "allowedSlots": [ "Greater" ]
     },

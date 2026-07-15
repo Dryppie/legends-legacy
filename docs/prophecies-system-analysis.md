@@ -266,7 +266,7 @@ At generation, a `PlayerProphecyInstance` stores:
 This is a sound idea: a generated contract should not change arbitrarily after a balance deploy. The protection is incomplete:
 
 - Rewards and objective parameters are snapshotted. Prophetic Favor is the deliberate exception: claim-time scope rules normalize it to one for dailies and two for Greater Prophecies so instances generated before the balance change behave consistently.
-- Target is stored, but `RebalanceTargetIfHigher` raises offered or accepted targets whenever the current catalog value is higher. Targets are never lowered.
+- Target is resolved when an offer is generated and remains stable for that offer. Balance changes affect newly generated or rerolled offers rather than rewriting an accepted objective.
 - Title, flavor text, objective text, category, difficulty, and objective type are read from the current joined definition, so history presentation can change after content edits.
 
 ## Objective Semantics and Integrations
@@ -677,7 +677,7 @@ Fate Echo and both fragment balances accumulate without sinks in current code. T
 
 #### 9. Balance content was only superficially data-driven — resolved 2026-07-14
 
-Targets, direct reward profiles, Favor awards, Weekly Revelation milestones, cache item metadata, roll counts, weighted cache rewards, and cache-preview labels now live in four validated server-owned JSON files. `RewardProfileId` resolves an actual package. Generated prophecies still snapshot targets and rewards, so later tuning does not rewrite completed contracts; the existing target-rebalance rule only raises active old targets. Objective matching remains typed application behavior because it interprets gameplay events rather than representing balance data.
+Targets, direct reward profiles, Favor awards, Weekly Revelation milestones, cache item metadata, roll counts, weighted cache rewards, and cache-preview labels now live in validated server-owned JSON files. `RewardProfileId` resolves an actual package. Generated prophecies snapshot targets and rewards, so later tuning does not rewrite accepted objectives. Objective matching remains typed application behavior because it interprets gameplay events rather than representing balance data.
 
 #### 10. Offers were repetitive and lacked player agency — resolved 2026-07-14
 

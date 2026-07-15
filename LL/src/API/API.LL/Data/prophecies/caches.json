@@ -8,9 +8,9 @@
       "rolls": 3,
       "previewRewards": [ "Cinders", "Soulstones", "Fate Echo", "Sigil Fragments", "Soul Dust", "Lesser Monster Cores" ],
       "rewards": [
-        { "weight": 35, "reward": { "cinders": 225, "fateEcho": 14 } },
+        { "weight": 35, "reward": { "cinders": 1500, "fateEcho": 14 } },
         { "weight": 25, "reward": { "soulstones": 1, "sigilFragments": 2 } },
-        { "weight": 20, "reward": { "cinders": 325, "soulstones": 1 } },
+        { "weight": 20, "reward": { "cinders": 2500, "soulstones": 1 } },
         { "weight": 15, "reward": { "fateEcho": 18, "items": [{ "itemId": "soul_dust", "quantity": 10 }] } },
         { "weight": 5, "reward": { "soulstones": 2, "sigilFragments": 4, "items": [{ "itemId": "item.monster_core.lesser", "quantity": 1 }] } }
       ]
@@ -23,9 +23,9 @@
       "rolls": 2,
       "previewRewards": [ "Cinders", "Soulstones", "Fate Echo" ],
       "rewards": [
-        { "weight": 45, "reward": { "cinders": 80 } },
+        { "weight": 45, "reward": { "cinders": 500 } },
         { "weight": 30, "reward": { "fateEcho": 6 } },
-        { "weight": 15, "reward": { "cinders": 120, "fateEcho": 4 } },
+        { "weight": 15, "reward": { "cinders": 750, "fateEcho": 4 } },
         { "weight": 10, "reward": { "soulstones": 1 } }
       ]
     },
@@ -37,9 +37,9 @@
       "rolls": 3,
       "previewRewards": [ "Cinders", "Soulstones", "Fate Echo", "Sigil Fragments", "Soul Dust" ],
       "rewards": [
-        { "weight": 35, "reward": { "cinders": 150, "fateEcho": 8 } },
+        { "weight": 35, "reward": { "cinders": 1000, "fateEcho": 8 } },
         { "weight": 25, "reward": { "soulstones": 1, "fateEcho": 10 } },
-        { "weight": 25, "reward": { "sigilFragments": 2, "cinders": 100 } },
+        { "weight": 25, "reward": { "sigilFragments": 2, "cinders": 750 } },
         { "weight": 10, "reward": { "fateEcho": 12, "items": [{ "itemId": "soul_dust", "quantity": 10 }] } },
         { "weight": 5, "reward": { "soulstones": 2, "sigilFragments": 3 } }
       ]
@@ -52,10 +52,10 @@
       "rolls": 4,
       "previewRewards": [ "Cinders", "Soulstones", "Fate Echo", "Sigil Fragments", "Lesser Monster Cores" ],
       "rewards": [
-        { "weight": 30, "reward": { "cinders": 275, "fateEcho": 18 } },
+        { "weight": 30, "reward": { "cinders": 1750, "fateEcho": 18 } },
         { "weight": 25, "reward": { "soulstones": 2, "sigilFragments": 3 } },
         { "weight": 20, "reward": { "fateEcho": 16, "items": [{ "itemId": "item.monster_core.lesser", "quantity": 1 }] } },
-        { "weight": 15, "reward": { "cinders": 450, "soulstones": 1 } },
+        { "weight": 15, "reward": { "cinders": 3000, "soulstones": 1 } },
         { "weight": 10, "reward": { "soulstones": 3, "sigilFragments": 5, "items": [{ "itemId": "item.monster_core.lesser", "quantity": 1 }] } }
       ]
     }
