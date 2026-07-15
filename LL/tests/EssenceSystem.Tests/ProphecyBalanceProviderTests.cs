@@ -29,7 +29,8 @@ public sealed class ProphecyBalanceProviderTests
         Assert.Equal(26, catalog.Targets.Count);
         Assert.Equal(6, catalog.RewardProfiles.Count);
         Assert.Equal(3, catalog.CategoryRewardPackages.Count);
-        Assert.Equal(1.8, catalog.RewardScaling.CindersPerCharacterExperience);
+        Assert.Equal(100, catalog.RewardScaling.CinderGrowthBasisPointsPerCharacterLevel);
+        Assert.Equal(20000, catalog.RewardScaling.CinderGrowthCapBasisPoints);
         Assert.Equal(5, catalog.RewardScaling.CinderRoundingIncrement);
         Assert.Equal(3, catalog.WeeklyMilestones.Count);
         Assert.Equal(4, catalog.Caches.Count);
@@ -53,12 +54,34 @@ public sealed class ProphecyBalanceProviderTests
         Assert.Equal(4000, weeklyRare.CharacterExperience.NextLevelBasisPoints);
         Assert.Equal("greater_prophecy_cache", weeklyRare.FlatReward.CacheItemId);
 
+        Assert.All(catalog.RewardProfiles.Where(x => x.Scope == ProphecyScope.Daily),
+            profile => Assert.Equal(2, profile.FlatReward.SigilFragments));
+        Assert.All(catalog.RewardProfiles.Where(x => x.Scope == ProphecyScope.Weekly),
+            profile => Assert.Equal(5, profile.FlatReward.SigilFragments));
+
+        var expectedWeeklyFragments = 5 * 2 + 5 + new[]
+        {
+            "greater_prophecy_cache",
+            "revelation_cache_small",
+            "revelation_cache_greater",
+            "revelation_cache_perfect_week"
+        }.Sum(cacheId => ExpectedSigilFragments(catalog.Caches.Single(x => x.ItemId == cacheId)));
+        Assert.InRange(expectedWeeklyFragments, 23, 25);
+        Assert.Equal(24.05, expectedWeeklyFragments, precision: 2);
+
         var weeklyDungeon = catalog.CategoryRewardPackages.Single(x =>
             x.Scope == ProphecyScope.Weekly &&
             x.Category == ProphecyCategory.Dungeon &&
             x.Difficulty == ProphecyDifficulty.Rare);
-        Assert.Equal(14, weeklyDungeon.Reward.SigilFragments);
         Assert.Contains(weeklyDungeon.LevelScaledItems,
             x => x.MinLevel == 60 && x.ItemId == "item.monster_core.primal" && x.Quantity == 1);
+    }
+
+    private static double ExpectedSigilFragments(ProphecyCacheDefinition cache)
+    {
+        var totalWeight = cache.Rewards.Sum(x => x.Weight);
+        var expectedPerRoll = cache.Rewards.Sum(x =>
+            (double)x.Weight / totalWeight * x.Reward.SigilFragments);
+        return cache.Rolls * expectedPerRoll;
     }
 }

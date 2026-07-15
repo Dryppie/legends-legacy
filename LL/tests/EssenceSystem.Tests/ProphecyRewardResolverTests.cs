@@ -16,6 +16,7 @@ public sealed class ProphecyRewardResolverTests
         Assert.Equal(105, reward.CharacterExperience);
         Assert.Equal(195, reward.Cinders);
         Assert.Equal(1, reward.Soulstones);
+        Assert.Equal(2, reward.SigilFragments);
         Assert.Equal(13, reward.FateEcho);
         Assert.Equal(1, reward.PropheticFavor);
     }
@@ -28,9 +29,20 @@ public sealed class ProphecyRewardResolverTests
         var reward = resolver.Resolve(DailyRare(ProphecyCategory.Combat), new ProphecyRewardContext(50, 10_725));
 
         Assert.Equal(858, reward.CharacterExperience);
-        Assert.Equal(1_545, reward.Cinders);
+        Assert.Equal(290, reward.Cinders);
         Assert.Equal(1, reward.Soulstones);
         Assert.Equal(13, reward.FateEcho);
+    }
+
+    [Fact]
+    public void Resolve_caps_cinder_growth_independently_from_experience_growth()
+    {
+        var resolver = new ProphecyRewardResolver(new BalanceProvider(CreateCatalog()));
+
+        var reward = resolver.Resolve(DailyRare(ProphecyCategory.Combat), new ProphecyRewardContext(500, 1_000_000));
+
+        Assert.Equal(80_000, reward.CharacterExperience);
+        Assert.Equal(585, reward.Cinders);
     }
 
     [Fact]
@@ -40,7 +52,7 @@ public sealed class ProphecyRewardResolverTests
 
         var reward = resolver.Resolve(DailyRare(ProphecyCategory.Dungeon), new ProphecyRewardContext(45, 10_725));
 
-        Assert.Equal(3, reward.SigilFragments);
+        Assert.Equal(5, reward.SigilFragments);
         var dust = Assert.Single(reward.Items);
         Assert.Equal("soul_dust", dust.ItemId);
         Assert.Equal(20, dust.Quantity);
@@ -59,7 +71,8 @@ public sealed class ProphecyRewardResolverTests
     {
         RewardScaling = new ProphecyRewardScalingSettings
         {
-            CindersPerCharacterExperience = 1.8,
+            CinderGrowthBasisPointsPerCharacterLevel = 100,
+            CinderGrowthCapBasisPoints = 20000,
             CinderRoundingIncrement = 5
         },
         RewardProfiles =
@@ -75,7 +88,12 @@ public sealed class ProphecyRewardResolverTests
                     NextLevelBasisPoints = 800
                 },
                 MinimumCinders = 195,
-                FlatReward = new ProphecyRewardSnapshot { Soulstones = 1, FateEcho = 13 }
+                FlatReward = new ProphecyRewardSnapshot
+                {
+                    Soulstones = 1,
+                    SigilFragments = 2,
+                    FateEcho = 13
+                }
             }
         ],
         CategoryRewardPackages =

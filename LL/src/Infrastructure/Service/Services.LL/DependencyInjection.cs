@@ -109,6 +109,13 @@ public static class DependencyInjection
         services.AddScoped<IBonusService, BonusService>();
         services.AddScoped<IBonusProvider, SoulstoneBonusProvider>();
         services.AddScoped<IBonusProvider, EssenceCodexBonusProvider>();
+        services.AddOptions<CombatCinderRewardOptions>()
+            .Configure(options => config.GetSection("Combat:CinderRewards").Bind(options))
+            .Validate(
+                options => options.RewardBasisPointsOfCreatureExperience > 0 &&
+                           options.MinimumCindersPerVictory >= 0,
+                "Combat Cinder reward settings are invalid.")
+            .ValidateOnStart();
 
         services.AddSingleton<IChampionMarketCatalog>(sp =>
             new JsonChampionMarketCatalog(
@@ -276,6 +283,7 @@ public static class DependencyInjection
                 contentRootPath,
                 sp.GetRequiredService<JsonSerializerOptions>(),
                 sp.GetRequiredService<IProphecyDefinitionProvider>()));
+        services.AddSingleton<IProphecyRewardResolver, ProphecyRewardResolver>();
         services.AddScoped<IProphecyService, ProphecyService>();
 
         services.AddScoped<ISoulstoneUpgradeService, SoulstoneUpgradeService>();

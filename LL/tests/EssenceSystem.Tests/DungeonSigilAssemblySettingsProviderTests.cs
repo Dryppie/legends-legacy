@@ -24,6 +24,6 @@ public sealed class DungeonSigilAssemblySettingsProviderTests
         var settings = provider.GetSettings();
 
         Assert.True(settings.Enabled);
-        Assert.Equal(25, settings.FragmentCost);
+        Assert.Equal(10, settings.FragmentCost);
     }
 }

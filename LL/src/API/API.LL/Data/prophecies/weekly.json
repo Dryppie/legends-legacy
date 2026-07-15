@@ -9,7 +9,7 @@
       "category": "Combat",
       "difficulty": "Uncommon",
       "objectiveType": "KillCreatures",
-      "rewardProfileId": "Weekly.Combat.Uncommon",
+      "rewardProfileId": "Weekly.Uncommon",
       "weight": 100,
       "allowedSlots": [ "Greater" ]
     },
@@ -22,7 +22,7 @@
       "category": "Combat",
       "difficulty": "Rare",
       "objectiveType": "KillDifferentCreatureTypes",
-      "rewardProfileId": "Weekly.Combat.Rare",
+      "rewardProfileId": "Weekly.Rare",
       "weight": 80,
       "allowedSlots": [ "Greater" ]
     },
@@ -35,7 +35,7 @@
       "category": "Dungeon",
       "difficulty": "Rare",
       "objectiveType": "CompleteDungeons",
-      "rewardProfileId": "Weekly.Dungeon.Rare",
+      "rewardProfileId": "Weekly.Rare",
       "weight": 75,
       "allowedSlots": [ "Greater" ]
     },
@@ -48,7 +48,7 @@
       "category": "Dungeon",
       "difficulty": "Uncommon",
       "objectiveType": "ClearDungeonRooms",
-      "rewardProfileId": "Weekly.Dungeon.Uncommon",
+      "rewardProfileId": "Weekly.Uncommon",
       "weight": 90,
       "allowedSlots": [ "Greater" ]
     },
@@ -61,7 +61,7 @@
       "category": "Essence",
       "difficulty": "Uncommon",
       "objectiveType": "GainEssenceXp",
-      "rewardProfileId": "Weekly.Essence.Uncommon",
+      "rewardProfileId": "Weekly.Uncommon",
       "weight": 85,
       "allowedSlots": [ "Greater" ]
     },
@@ -74,7 +74,7 @@
       "category": "Gathering",
       "difficulty": "Uncommon",
       "objectiveType": "GatherResources",
-      "rewardProfileId": "Weekly.Gathering.Uncommon",
+      "rewardProfileId": "Weekly.Uncommon",
       "weight": 80,
       "allowedSlots": [ "Greater" ]
     },
@@ -87,7 +87,7 @@
       "category": "Crafting",
       "difficulty": "Uncommon",
       "objectiveType": "TemperItems",
-      "rewardProfileId": "Weekly.Crafting.Uncommon",
+      "rewardProfileId": "Weekly.Uncommon",
       "weight": 80,
       "allowedSlots": [ "Greater" ]
     },
@@ -100,7 +100,7 @@
       "category": "Survival",
       "difficulty": "Epic",
       "objectiveType": "MeaningfulDefeatThenWins",
-      "rewardProfileId": "Weekly.Survival.Epic",
+      "rewardProfileId": "Weekly.Epic",
       "weight": 45,
       "allowedSlots": [ "Greater" ]
     }

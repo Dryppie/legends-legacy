@@ -28,7 +28,9 @@ public sealed class JsonProphecyBalanceProvider : IProphecyBalanceProvider
         _catalog = new ProphecyBalanceCatalog
         {
             Targets = targetDocument.Targets,
+            RewardScaling = rewardDocument.Scaling,
             RewardProfiles = rewardDocument.Profiles,
+            CategoryRewardPackages = rewardDocument.CategoryPackages,
             FavorRewards = revelationDocument.FavorRewards,
             WeeklyMilestones = revelationDocument.Milestones,
             Caches = cacheDocument.Caches,
@@ -49,6 +51,9 @@ public sealed class JsonProphecyBalanceProvider : IProphecyBalanceProvider
     {
         ThrowIfDuplicates(catalog.Targets, x => $"{x.Scope}:{x.ObjectiveType}", "target profiles");
         ThrowIfDuplicates(catalog.RewardProfiles, x => x.Id, "reward profiles");
+        ThrowIfDuplicates(catalog.CategoryRewardPackages,
+            x => $"{x.Scope}:{x.Category}:{x.Difficulty?.ToString() ?? "Any"}",
+            "category reward packages");
         ThrowIfDuplicates(catalog.FavorRewards, x => x.Scope.ToString(), "favor rewards");
         ThrowIfDuplicates(catalog.WeeklyMilestones, x => x.FavorRequired.ToString(), "weekly milestones");
         ThrowIfDuplicates(catalog.Caches, x => x.ItemId, "cache definitions");
@@ -69,11 +74,24 @@ public sealed class JsonProphecyBalanceProvider : IProphecyBalanceProvider
             .ToList();
         ThrowIfAny(missingTargets, "Prophecy definitions reference missing target profiles");
 
+        if (catalog.RewardScaling.CinderGrowthBasisPointsPerCharacterLevel < 0 ||
+            catalog.RewardScaling.CinderGrowthCapBasisPoints < 0 ||
+            catalog.RewardScaling.CinderRoundingIncrement <= 0)
+        {
+            throw new InvalidOperationException("Prophecy Cinder scaling values are invalid.");
+        }
+
         var invalidProfiles = catalog.RewardProfiles
-            .Where(x => string.IsNullOrWhiteSpace(x.Id) || !IsValidReward(x.Reward))
+            .Where(x => string.IsNullOrWhiteSpace(x.Id) ||
+                        x.CharacterExperience.Minimum <= 0 ||
+                        x.CharacterExperience.NextLevelBasisPoints <= 0 ||
+                        x.MinimumCinders < 0 ||
+                        !IsValidReward(x.FlatReward) ||
+                        HasScalableValues(x.FlatReward))
             .Select(x => string.IsNullOrWhiteSpace(x.Id) ? "<missing id>" : x.Id)
             .ToList();
-        ThrowIfAny(invalidProfiles, "Prophecy reward profiles require an id and non-negative rewards");
+        ThrowIfAny(invalidProfiles,
+            "Prophecy reward profiles require an id, positive XP scaling, non-negative Cinders, and flat-only rewards");
 
         var missingProfiles = definitions
             .Where(definition => !catalog.RewardProfiles.Any(profile =>
@@ -89,10 +107,20 @@ public sealed class JsonProphecyBalanceProvider : IProphecyBalanceProvider
                 Profile = catalog.RewardProfiles.FirstOrDefault(profile =>
                     string.Equals(profile.Id, definition.RewardProfileId, StringComparison.OrdinalIgnoreCase))
             })
-            .Where(x => x.Profile is not null && x.Profile.Scope != x.Definition.Scope)
+            .Where(x => x.Profile is not null &&
+                        (x.Profile.Scope != x.Definition.Scope || x.Profile.Difficulty != x.Definition.Difficulty))
             .Select(x => $"{x.Definition.Id}:{x.Definition.RewardProfileId}")
             .ToList();
-        ThrowIfAny(mismatchedScopes, "Prophecy definitions and reward profiles must use the same scope");
+        ThrowIfAny(mismatchedScopes, "Prophecy definitions and reward profiles must use the same scope and difficulty");
+
+        var invalidCategoryPackages = catalog.CategoryRewardPackages
+            .Where(package => !IsValidReward(package.Reward) ||
+                              HasScalableValues(package.Reward) ||
+                              HasInvalidLevelBands(package.LevelScaledItems))
+            .Select(x => $"{x.Scope}:{x.Category}:{x.Difficulty?.ToString() ?? "Any"}")
+            .ToList();
+        ThrowIfAny(invalidCategoryPackages,
+            "Prophecy category packages require flat-only rewards and valid, non-overlapping item level bands");
 
         var favorByScope = catalog.FavorRewards.ToDictionary(x => x.Scope, x => x.Amount);
         var missingFavorScopes = Enum.GetValues<ProphecyScope>()
@@ -100,13 +128,6 @@ public sealed class JsonProphecyBalanceProvider : IProphecyBalanceProvider
             .Select(x => x.ToString())
             .ToList();
         ThrowIfAny(missingFavorScopes, "Prophecy favor rewards require a positive value for every scope");
-
-        var mismatchedFavor = catalog.RewardProfiles
-            .Where(profile => favorByScope.TryGetValue(profile.Scope, out var amount) &&
-                              profile.Reward.PropheticFavor != amount)
-            .Select(x => x.Id)
-            .ToList();
-        ThrowIfAny(mismatchedFavor, "Prophecy reward profile favor must match the configured scope reward");
 
         var thresholds = catalog.WeeklyMilestones.Select(x => x.FavorRequired).Order().ToArray();
         if (!thresholds.SequenceEqual(PersistedMilestoneThresholds))
@@ -135,7 +156,9 @@ public sealed class JsonProphecyBalanceProvider : IProphecyBalanceProvider
         ThrowIfAny(invalidCaches, "Prophecy caches require metadata, previews, positive rolls, and valid weighted rewards");
 
         var cacheIds = catalog.Caches.Select(x => x.ItemId).ToHashSet(StringComparer.OrdinalIgnoreCase);
-        var missingCacheReferences = catalog.RewardProfiles.Select(x => (Owner: x.Id, CacheItemId: x.Reward.CacheItemId))
+        var missingCacheReferences = catalog.RewardProfiles.Select(x => (Owner: x.Id, CacheItemId: x.FlatReward.CacheItemId))
+            .Concat(catalog.CategoryRewardPackages.Select(x =>
+                (Owner: $"{x.Scope}:{x.Category}:{x.Difficulty?.ToString() ?? "Any"}", CacheItemId: x.Reward.CacheItemId)))
             .Concat(catalog.WeeklyMilestones.Select(x => (Owner: $"milestone:{x.FavorRequired}", CacheItemId: x.Reward.CacheItemId)))
             .Concat(catalog.Caches.SelectMany(cache => cache.Rewards.Select(x => (Owner: $"cache:{cache.ItemId}", CacheItemId: x.Reward.CacheItemId))))
             .Where(x => !string.IsNullOrWhiteSpace(x.CacheItemId) && !cacheIds.Contains(x.CacheItemId))
@@ -162,6 +185,30 @@ public sealed class JsonProphecyBalanceProvider : IProphecyBalanceProvider
         reward.PropheticFavor >= 0 &&
         reward.FateEcho >= 0 &&
         reward.Items.All(x => !string.IsNullOrWhiteSpace(x.ItemId) && x.Quantity > 0);
+
+    private static bool HasScalableValues(ProphecyRewardSnapshot reward) =>
+        reward.Cinders != 0 ||
+        reward.CharacterExperience != 0 ||
+        reward.EssenceExperience != 0 ||
+        reward.PropheticFavor != 0;
+
+    private static bool HasInvalidLevelBands(IReadOnlyList<ProphecyLevelScaledItemReward> bands)
+    {
+        if (bands.Any(x => x.MinLevel < 1 ||
+                           x.MaxLevel < x.MinLevel ||
+                           string.IsNullOrWhiteSpace(x.ItemId) ||
+                           x.Quantity <= 0))
+        {
+            return true;
+        }
+
+        return bands
+            .GroupBy(x => x.ItemId, StringComparer.OrdinalIgnoreCase)
+            .Any(group => group.Any(candidate => group.Any(other =>
+                !ReferenceEquals(candidate, other) &&
+                candidate.MinLevel <= (other.MaxLevel ?? int.MaxValue) &&
+                other.MinLevel <= (candidate.MaxLevel ?? int.MaxValue))));
+    }
 
     private static void ThrowIfDuplicates<T>(
         IEnumerable<T> values,
@@ -191,7 +238,9 @@ public sealed class JsonProphecyBalanceProvider : IProphecyBalanceProvider
 
     private sealed class RewardDocument
     {
+        public ProphecyRewardScalingSettings Scaling { get; set; } = new();
         public List<ProphecyRewardProfile> Profiles { get; set; } = [];
+        public List<ProphecyCategoryRewardPackage> CategoryPackages { get; set; } = [];
     }
 
     private sealed class WeeklyRevelationDocument

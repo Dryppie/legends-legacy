@@ -9,7 +9,7 @@
       "category": "Combat",
       "difficulty": "Common",
       "objectiveType": "KillCreatures",
-      "rewardProfileId": "Daily.Combat.Common",
+      "rewardProfileId": "Daily.Common",
       "weight": 120,
       "allowedSlots": [ "Steady" ]
     },
@@ -22,7 +22,7 @@
       "category": "Combat",
       "difficulty": "Uncommon",
       "objectiveType": "KillCreatures",
-      "rewardProfileId": "Daily.Combat.Uncommon",
+      "rewardProfileId": "Daily.Uncommon",
       "weight": 90,
       "allowedSlots": [ "Steady", "Focused" ]
     },
@@ -35,7 +35,7 @@
       "category": "Combat",
       "difficulty": "Uncommon",
       "objectiveType": "KillDifferentCreatureTypes",
-      "rewardProfileId": "Daily.Combat.Uncommon",
+      "rewardProfileId": "Daily.Uncommon",
       "weight": 75,
       "allowedSlots": [ "Focused", "Ominous" ]
     },
@@ -49,7 +49,7 @@
       "difficulty": "Rare",
       "objectiveType": "WinEncounters",
       "objectiveParameterJson": "{\"minimumEnemyCount\":2}",
-      "rewardProfileId": "Daily.Combat.Rare",
+      "rewardProfileId": "Daily.Rare",
       "weight": 70,
       "allowedSlots": [ "Ominous" ]
     },
@@ -62,7 +62,7 @@
       "category": "Combat",
       "difficulty": "Common",
       "objectiveType": "WinEncounters",
-      "rewardProfileId": "Daily.Combat.Common",
+      "rewardProfileId": "Daily.Common",
       "weight": 90,
       "allowedSlots": [ "Steady" ]
     },
@@ -75,7 +75,7 @@
       "category": "Dungeon",
       "difficulty": "Uncommon",
       "objectiveType": "ClearDungeonRooms",
-      "rewardProfileId": "Daily.Dungeon.Uncommon",
+      "rewardProfileId": "Daily.Uncommon",
       "weight": 85,
       "allowedSlots": [ "Focused", "Ominous" ]
     },
@@ -88,7 +88,7 @@
       "category": "Dungeon",
       "difficulty": "Rare",
       "objectiveType": "CompleteDungeons",
-      "rewardProfileId": "Daily.Dungeon.Rare",
+      "rewardProfileId": "Daily.Rare",
       "weight": 55,
       "allowedSlots": [ "Ominous" ]
     },
@@ -101,7 +101,7 @@
       "category": "Dungeon",
       "difficulty": "Uncommon",
       "objectiveType": "ResolveDungeonEvents",
-      "rewardProfileId": "Daily.Dungeon.Uncommon",
+      "rewardProfileId": "Daily.Uncommon",
       "weight": 60,
       "allowedSlots": [ "Focused" ]
     },
@@ -114,7 +114,7 @@
       "category": "Essence",
       "difficulty": "Common",
       "objectiveType": "GainEssenceXp",
-      "rewardProfileId": "Daily.Essence.Common",
+      "rewardProfileId": "Daily.Common",
       "weight": 80,
       "allowedSlots": [ "Steady", "Focused" ]
     },
@@ -127,7 +127,7 @@
       "category": "Essence",
       "difficulty": "Rare",
       "objectiveType": "EssenceArchivedOrFed",
-      "rewardProfileId": "Daily.Essence.Rare",
+      "rewardProfileId": "Daily.Rare",
       "weight": 35,
       "allowedSlots": [ "Focused", "Ominous" ]
     },
@@ -140,7 +140,7 @@
       "category": "Treasure",
       "difficulty": "Uncommon",
       "objectiveType": "TreasureProgress",
-      "rewardProfileId": "Daily.Treasure.Uncommon",
+      "rewardProfileId": "Daily.Uncommon",
       "weight": 75,
       "allowedSlots": [ "Steady", "Focused" ]
     },
@@ -154,7 +154,7 @@
       "difficulty": "Common",
       "objectiveType": "GatherResources",
       "objectiveParameterJson": "{\"requiredProfession\":\"Mining\"}",
-      "rewardProfileId": "Daily.Gathering.Common",
+      "rewardProfileId": "Daily.Common",
       "weight": 70,
       "allowedSlots": [ "Focused" ]
     },
@@ -168,7 +168,7 @@
       "difficulty": "Common",
       "objectiveType": "GatherResources",
       "objectiveParameterJson": "{\"requiredProfession\":\"Woodcutting\"}",
-      "rewardProfileId": "Daily.Gathering.Common",
+      "rewardProfileId": "Daily.Common",
       "weight": 70,
       "allowedSlots": [ "Focused" ]
     },
@@ -182,7 +182,7 @@
       "difficulty": "Common",
       "objectiveType": "GatherResources",
       "objectiveParameterJson": "{\"requiredProfession\":\"Fishing\"}",
-      "rewardProfileId": "Daily.Gathering.Common",
+      "rewardProfileId": "Daily.Common",
       "weight": 70,
       "allowedSlots": [ "Focused" ]
     },
@@ -195,7 +195,7 @@
       "category": "Crafting",
       "difficulty": "Common",
       "objectiveType": "TemperItems",
-      "rewardProfileId": "Daily.Crafting.Common",
+      "rewardProfileId": "Daily.Common",
       "weight": 75,
       "allowedSlots": [ "Focused" ]
     },
@@ -208,7 +208,7 @@
       "category": "Crafting",
       "difficulty": "Uncommon",
       "objectiveType": "SpendPotential",
-      "rewardProfileId": "Daily.Crafting.Uncommon",
+      "rewardProfileId": "Daily.Uncommon",
       "weight": 60,
       "allowedSlots": [ "Focused", "Ominous" ]
     },
@@ -221,7 +221,7 @@
       "category": "Survival",
       "difficulty": "Rare",
       "objectiveType": "MeaningfulDefeatThenWins",
-      "rewardProfileId": "Daily.Survival.Rare",
+      "rewardProfileId": "Daily.Rare",
       "weight": 65,
       "allowedSlots": [ "Ominous" ]
     },
@@ -234,7 +234,7 @@
       "category": "Combat",
       "difficulty": "Rare",
       "objectiveType": "KillCreatures",
-      "rewardProfileId": "Daily.Combat.Rare",
+      "rewardProfileId": "Daily.Rare",
       "weight": 50,
       "allowedSlots": [ "Ominous" ]
     },
@@ -247,7 +247,7 @@
       "category": "Treasure",
       "difficulty": "Rare",
       "objectiveType": "TreasureProgress",
-      "rewardProfileId": "Daily.Treasure.Rare",
+      "rewardProfileId": "Daily.Rare",
       "weight": 45,
       "allowedSlots": [ "Ominous" ]
     },
@@ -260,7 +260,7 @@
       "category": "Essence",
       "difficulty": "Rare",
       "objectiveType": "GainEssenceXp",
-      "rewardProfileId": "Daily.Essence.Rare",
+      "rewardProfileId": "Daily.Rare",
       "weight": 45,
       "allowedSlots": [ "Ominous" ]
     }

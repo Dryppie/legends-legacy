@@ -1,6 +1,7 @@
 using Application.Interfaces.Services.LL;
 using Application.Interfaces.Services.LL.Entities;
 using Application.Interfaces.Services.LL.Prophecies;
+using Domain.Helpers.Constants;
 using Domain.Models.Entities;
 using Domain.Models.Inventories;
 using Domain.Models.Items;
@@ -19,6 +20,7 @@ public sealed class ProphecyService : IProphecyService
 
     private readonly IReadOnlyList<ProphecyDefinition> _definitions;
     private readonly ProphecyBalanceCatalog _balance;
+    private readonly IProphecyRewardResolver _rewardResolver;
     private readonly IProphecyRepository _repository;
     private readonly ICharacterService _characterService;
     private readonly IEntityService _entityService;
@@ -30,6 +32,7 @@ public sealed class ProphecyService : IProphecyService
     public ProphecyService(
         IProphecyDefinitionProvider definitionProvider,
         IProphecyBalanceProvider balanceProvider,
+        IProphecyRewardResolver rewardResolver,
         IProphecyRepository repository,
         ICharacterService characterService,
         IEntityService entityService,
@@ -40,6 +43,7 @@ public sealed class ProphecyService : IProphecyService
     {
         _definitions = definitionProvider.GetAll();
         _balance = balanceProvider.GetCatalog();
+        _rewardResolver = rewardResolver;
         _repository = repository;
         _characterService = characterService;
         _entityService = entityService;
@@ -62,9 +66,10 @@ public sealed class ProphecyService : IProphecyService
 
         var dailyPeriod = GetDailyPeriod(now);
         var weeklyPeriod = GetWeeklyPeriod(now);
+        var rewardContext = CreateRewardContext(character?.Level ?? 1);
 
-        var daily = await EnsureDailyInstancesAsync(definitions, playerId, characterId, dailyPeriod.Start, dailyPeriod.End, now, cancellationToken);
-        var greater = await EnsureGreaterProphecyAsync(definitions, playerId, characterId, weeklyPeriod.Start, weeklyPeriod.End, now, cancellationToken);
+        var daily = await EnsureDailyInstancesAsync(definitions, playerId, characterId, dailyPeriod.Start, dailyPeriod.End, now, rewardContext, cancellationToken);
+        var greater = await EnsureGreaterProphecyAsync(definitions, playerId, characterId, weeklyPeriod.Start, weeklyPeriod.End, now, rewardContext, cancellationToken);
         var weekly = await EnsureWeeklyProgressAsync(playerId, characterId, weeklyPeriod.Start, weeklyPeriod.End, now, cancellationToken);
         var recent = await _repository.GetRecentInstancesAsync(
             playerId,
@@ -185,6 +190,12 @@ public sealed class ProphecyService : IProphecyService
         }
 
         var definitions = await _repository.SyncDefinitionsAsync(_definitions, cancellationToken);
+        var character = await GetOwnedCharacterAsync(playerId, characterId, cancellationToken);
+        if (character is null)
+        {
+            return ProphecyOperationResult<PropheciesOverview>.Fail("Character was not found.");
+        }
+        var rewardContext = CreateRewardContext(character.Level);
         var periodStart = overview.DailyProphecies[0].PeriodStart;
         var periodEnd = overview.DailyProphecies[0].PeriodEnd;
         var recentDefinitionIds = await _repository.GetRecentDefinitionIdsAsync(
@@ -269,12 +280,6 @@ public sealed class ProphecyService : IProphecyService
                 return ProphecyOperationResult<PropheciesOverview>.Fail("Paid prophecy rerolls are currently disabled.");
             }
 
-            var character = await GetOwnedCharacterAsync(playerId, characterId, cancellationToken);
-            if (character is null)
-            {
-                return ProphecyOperationResult<PropheciesOverview>.Fail("Character was not found.");
-            }
-
             if (character.FateEcho < rerollCost.Value)
             {
                 return ProphecyOperationResult<PropheciesOverview>.Fail($"This reroll requires {rerollCost.Value} Fate Echo.");
@@ -303,7 +308,7 @@ public sealed class ProphecyService : IProphecyService
         {
             shownDefinitionIds.Add(replacement.Id);
             prophecy.RerolledFromDefinitionId = prophecy.ProphecyDefinitionId;
-            ReplaceOfferDefinition(prophecy, replacement, now);
+            ReplaceOfferDefinition(prophecy, replacement, now, rewardContext);
         }
         rerollState.ShownDefinitionIdsJson = JsonSerializer.Serialize(shownDefinitionIds, JsonOptions);
 
@@ -538,6 +543,7 @@ public sealed class ProphecyService : IProphecyService
         DateTimeOffset periodStart,
         DateTimeOffset periodEnd,
         DateTimeOffset now,
+        ProphecyRewardContext rewardContext,
         CancellationToken cancellationToken)
     {
         var existing = await _repository.GetInstancesForPeriodAsync(
@@ -599,7 +605,8 @@ public sealed class ProphecyService : IProphecyService
                 ProphecyStatus.Offered,
                 periodStart,
                 periodEnd,
-                now));
+                now,
+                rewardContext));
             excludedDefinitionIds.Add(definition.Id);
             excludedCategories.Add(definition.Category);
         }
@@ -615,6 +622,7 @@ public sealed class ProphecyService : IProphecyService
         DateTimeOffset periodStart,
         DateTimeOffset periodEnd,
         DateTimeOffset now,
+        ProphecyRewardContext rewardContext,
         CancellationToken cancellationToken)
     {
         var existing = await _repository.GetInstancesForPeriodAsync(
@@ -657,7 +665,8 @@ public sealed class ProphecyService : IProphecyService
             ProphecyStatus.Accepted,
             periodStart,
             periodEnd,
-            now);
+            now,
+            rewardContext);
         greater.AcceptedAt = now;
 
         await _repository.AddInstancesAsync([greater], cancellationToken);
@@ -701,7 +710,8 @@ public sealed class ProphecyService : IProphecyService
         ProphecyStatus status,
         DateTimeOffset periodStart,
         DateTimeOffset periodEnd,
-        DateTimeOffset now)
+        DateTimeOffset now,
+        ProphecyRewardContext rewardContext)
     {
         var target = GetTargetValue(definition);
         return new PlayerProphecyInstance
@@ -720,14 +730,15 @@ public sealed class ProphecyService : IProphecyService
             TargetValue = target,
             ObjectiveParameterSnapshotJson = definition.ObjectiveParameterJson,
             ProgressJson = "{}",
-            RewardSnapshotJson = JsonSerializer.Serialize(CreateRewardSnapshot(definition), JsonOptions)
+            RewardSnapshotJson = JsonSerializer.Serialize(_rewardResolver.Resolve(definition, rewardContext), JsonOptions)
         };
     }
 
     private void ReplaceOfferDefinition(
         PlayerProphecyInstance instance,
         ProphecyDefinition definition,
-        DateTimeOffset now)
+        DateTimeOffset now,
+        ProphecyRewardContext rewardContext)
     {
         instance.ProphecyDefinitionId = definition.Id;
         instance.ProphecyDefinition = definition;
@@ -736,7 +747,7 @@ public sealed class ProphecyService : IProphecyService
         instance.CurrentValue = 0;
         instance.ObjectiveParameterSnapshotJson = definition.ObjectiveParameterJson;
         instance.ProgressJson = "{}";
-        instance.RewardSnapshotJson = JsonSerializer.Serialize(CreateRewardSnapshot(definition), JsonOptions);
+        instance.RewardSnapshotJson = JsonSerializer.Serialize(_rewardResolver.Resolve(definition, rewardContext), JsonOptions);
     }
 
     private ProphecyDefinition? GetDefinition(PlayerProphecyInstance instance) =>
@@ -1073,11 +1084,10 @@ public sealed class ProphecyService : IProphecyService
     private static ProphecyProgressSnapshot ReadProgress(string json) =>
         JsonSerializer.Deserialize<ProphecyProgressSnapshot>(json, JsonOptions) ?? new ProphecyProgressSnapshot();
 
-    private ProphecyRewardSnapshot CreateRewardSnapshot(ProphecyDefinition definition)
+    private static ProphecyRewardContext CreateRewardContext(int characterLevel)
     {
-        var profile = _balance.RewardProfiles.First(x =>
-            x.Id.Equals(definition.RewardProfileId, StringComparison.OrdinalIgnoreCase));
-        return CloneReward(profile.Reward);
+        var level = Math.Max(1, characterLevel);
+        return new ProphecyRewardContext(level, EntityLevelConstants.XP_REQUIRED(level));
     }
 
     private IReadOnlyList<WeeklyRevelationMilestone> CreateWeeklyMilestones(WeeklyRevelationProgress progress) =>
