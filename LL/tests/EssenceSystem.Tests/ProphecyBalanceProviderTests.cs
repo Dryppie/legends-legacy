@@ -27,7 +27,7 @@ public sealed class ProphecyBalanceProviderTests
 
         var catalog = provider.GetCatalog();
         Assert.Equal(26, catalog.Targets.Count);
-        Assert.Equal(6, catalog.RewardProfiles.Count);
+        Assert.Equal(7, catalog.RewardProfiles.Count);
         Assert.Equal(3, catalog.CategoryRewardPackages.Count);
         Assert.Equal(100, catalog.RewardScaling.CinderGrowthBasisPointsPerCharacterLevel);
         Assert.Equal(20000, catalog.RewardScaling.CinderGrowthCapBasisPoints);
@@ -47,6 +47,7 @@ public sealed class ProphecyBalanceProviderTests
         Assert.Equal(300, targets[(ProphecyScope.Daily, ProphecyObjectiveType.KillCreatures)].Common);
         Assert.Equal(900, targets[(ProphecyScope.Daily, ProphecyObjectiveType.KillCreatures)].Rare);
         Assert.Equal(360, targets[(ProphecyScope.Daily, ProphecyObjectiveType.TemperItems)].Common);
+        Assert.Equal(1, targets[(ProphecyScope.Daily, ProphecyObjectiveType.AbsorbEssence)].Epic);
         Assert.Equal(21_600, targets[(ProphecyScope.Weekly, ProphecyObjectiveType.TemperItems)].Uncommon);
         Assert.Equal(35_000, targets[(ProphecyScope.Weekly, ProphecyObjectiveType.KillCreatures)].Uncommon);
         Assert.Equal(14, targets[(ProphecyScope.Weekly, ProphecyObjectiveType.CompleteDungeons)].Rare);
@@ -72,6 +73,7 @@ public sealed class ProphecyBalanceProviderTests
         Assert.Equal(400, shares["Daily.Common"]);
         Assert.Equal(500, shares["Daily.Uncommon"]);
         Assert.Equal(600, shares["Daily.Rare"]);
+        Assert.Equal(700, shares["Daily.Epic"]);
         Assert.Equal(2500, shares["Weekly.Uncommon"]);
         Assert.Equal(3000, shares["Weekly.Rare"]);
         Assert.Equal(3500, shares["Weekly.Epic"]);
@@ -84,6 +86,7 @@ public sealed class ProphecyBalanceProviderTests
         Assert.Equal(1_000, cinderFloors["Daily.Common"]);
         Assert.Equal(1_250, cinderFloors["Daily.Uncommon"]);
         Assert.Equal(1_500, cinderFloors["Daily.Rare"]);
+        Assert.Equal(1_750, cinderFloors["Daily.Epic"]);
         Assert.Equal(8_000, cinderFloors["Weekly.Uncommon"]);
         Assert.Equal(10_000, cinderFloors["Weekly.Rare"]);
         Assert.Equal(12_000, cinderFloors["Weekly.Epic"]);

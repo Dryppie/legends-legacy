@@ -30,6 +30,14 @@
       "flatReward": { "soulstones": 1, "sigilFragments": 2, "fateEcho": 13 }
     },
     {
+      "id": "Daily.Epic",
+      "scope": "Daily",
+      "difficulty": "Epic",
+      "characterExperience": { "nextLevelBasisPoints": 700 },
+      "minimumCinders": 1750,
+      "flatReward": { "soulstones": 2, "sigilFragments": 2, "fateEcho": 16 }
+    },
+    {
       "id": "Weekly.Uncommon",
       "scope": "Weekly",
       "difficulty": "Uncommon",

@@ -182,11 +182,12 @@ public sealed class IdleCombatOutcomeProcessor : ICombatOutcomeProcessor
 
         if (outcome.TotalLoot.Count > 0)
         {
+            var treasureProgress = outcome.TotalLoot.Sum(item => Math.Max(1, item.Quantity));
             progressEvents.Add(new ProphecyProgressEvent(
                 facts.CharacterId,
                 outcome.ProcessedUntil,
                 ProphecyProgressKind.TreasureProgress,
-                outcome.TotalLoot.Count));
+                treasureProgress));
         }
 
         if (progressEvents.Count > 0)

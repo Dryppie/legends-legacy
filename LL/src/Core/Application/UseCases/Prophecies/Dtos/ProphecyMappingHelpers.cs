@@ -45,10 +45,10 @@ internal static class ProphecyMappingHelpers
                 ProphecyGuidanceDestination.Essences,
                 "Train Essences",
                 "Equip or absorb Essences, then earn Essence XP."),
-            ProphecyObjectiveType.EssenceArchivedOrFed => CreateGuidance(
+            ProphecyObjectiveType.AbsorbEssence => CreateGuidance(
                 ProphecyGuidanceDestination.SoulArchive,
                 "Open Archive",
-                "Archive or feed Essences to progress this prophecy."),
+                "Absorb one new Unbound Essence into the Soul Archive."),
             ProphecyObjectiveType.GatherResources => CreateGatheringGuidance(parameters.RequiredProfession),
             ProphecyObjectiveType.TemperItems => CreateGuidance(
                 ProphecyGuidanceDestination.Crafting,
@@ -61,7 +61,7 @@ internal static class ProphecyMappingHelpers
             ProphecyObjectiveType.TreasureProgress => CreateGuidance(
                 ProphecyGuidanceDestination.Dungeons,
                 "Seek Treasure",
-                "Combat loot, dungeon treasure, and boss caches build Treasure Progress."),
+                "Items found during world and dungeon combat progress this prophecy."),
             ProphecyObjectiveType.MeaningfulDefeatThenWins => CreateGuidance(
                 ProphecyGuidanceDestination.WorldCombat,
                 "Return To Battle",

@@ -105,7 +105,7 @@ public sealed class ProphecyServiceTests
     [InlineData(ProphecyObjectiveType.CompleteDungeons, ProphecyProgressKind.DungeonCompleted)]
     [InlineData(ProphecyObjectiveType.ResolveDungeonEvents, ProphecyProgressKind.DungeonEventResolved)]
     [InlineData(ProphecyObjectiveType.GainEssenceXp, ProphecyProgressKind.EssenceXpGained)]
-    [InlineData(ProphecyObjectiveType.EssenceArchivedOrFed, ProphecyProgressKind.EssenceArchived)]
+    [InlineData(ProphecyObjectiveType.AbsorbEssence, ProphecyProgressKind.EssenceAbsorbed)]
     [InlineData(ProphecyObjectiveType.TemperItems, ProphecyProgressKind.ItemTempered)]
     [InlineData(ProphecyObjectiveType.SpendPotential, ProphecyProgressKind.PotentialSpent)]
     [InlineData(ProphecyObjectiveType.TreasureProgress, ProphecyProgressKind.TreasureProgress)]

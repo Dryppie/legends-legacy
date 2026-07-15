@@ -164,91 +164,335 @@
       </div>
     </section>
 
-    <section>
-      <article class="ll-panel bg-texture bg-auto p-4">
-        <div class="ll-eyebrow">Prophecy Agency</div>
-        <div class="mt-2 flex items-baseline justify-between gap-3">
-          <h2 class="ll-heading text-lg">Fate Echo</h2>
-          <span class="ll-heading text-2xl">{{ data.fateEcho }}</span>
-        </div>
-        <p class="mt-2 text-xs text-zinc-400">
-          Spend Fate Echo to replace unwanted daily Prophecy offers after the free reroll.
-        </p>
-      </article>
-
-    </section>
-
-    <div class="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto overscroll-contain pr-2 sm:pr-4">
-    <section class="ll-panel bg-texture bg-auto p-4">
-      <div class="mb-3 flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <div class="ll-eyebrow">Daily Prophecies</div>
-          <h2 class="ll-heading text-xl">Choose One</h2>
-        </div>
-        <div class="flex flex-wrap items-center gap-2">
-          <button
-            *ngIf="canReroll()"
-            type="button"
-            class="ll-button"
-            (click)="rerollDailyProphecies()"
-            [disabled]="loading() || !canAffordReroll()"
-          >
-            {{ rerollButtonLabel() }}
-          </button>
-          <div class="ll-badge">Resets in {{ dailyResetText() }}</div>
-        </div>
-      </div>
-
-      <div class="grid gap-3 lg:grid-cols-3">
-        <article
-          *ngFor="let prophecy of dailyProphecies(); trackBy: trackById"
-          class="ll-card flex min-h-[240px] flex-col gap-3 overflow-visible p-4"
-          [ngClass]="{
-            'll-card-accent':
-              prophecy.status === 'Accepted' || prophecy.status === 'Completed',
-            'opacity-60':
-              prophecy.status === 'Declined' || prophecy.status === 'Expired',
-          }"
-        >
-          <div class="flex items-start justify-between gap-2">
-            <div class="min-w-0">
-              <div class="ll-eyebrow">{{ prophecy.slotType }} Prophecy</div>
-              <h3 class="ll-heading text-base">{{ prophecy.title }}</h3>
-            </div>
-            <span [ngClass]="[statusClasses(prophecy), 'shrink-0']">{{
-              prophecyStatusLabel(prophecy)
-            }}</span>
-          </div>
-
-          <div class="flex flex-wrap gap-2 text-xs">
-            <span class="ll-badge">{{ prophecy.category }}</span>
-            <span class="ll-badge">{{ prophecy.difficulty }}</span>
-          </div>
-
-          <p class="text-sm text-white">{{ prophecy.objectiveText }}</p>
-
+    <div
+      class="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto overscroll-contain pr-2 sm:pr-4"
+    >
+      <section class="ll-panel bg-texture bg-auto p-4">
+        <div class="mb-3 flex flex-wrap items-center justify-between gap-3">
           <div>
-            <div class="mb-1 flex justify-between text-xs text-zinc-400">
-              <span>Progress</span>
-              <span
-                >{{ prophecy.currentValue }} / {{ prophecy.targetValue }}</span
-              >
+            <div class="ll-eyebrow">Daily Prophecies</div>
+            <h2 class="ll-heading text-xl">Choose One</h2>
+          </div>
+          <div
+            class="flex flex-wrap divide-x divide-primary/20 overflow-hidden rounded border border-primary/25 bg-black/20"
+          >
+            <div
+              class="flex h-8 items-center gap-2 whitespace-nowrap px-3 text-[11px] font-semibold uppercase tracking-wide text-zinc-400"
+            >
+              <span>Fate Echo</span>
+              <span class="text-primary">{{ data.fateEcho }}</span>
             </div>
+            <button
+              *ngIf="canReroll()"
+              type="button"
+              class="h-8 whitespace-nowrap bg-primary/10 px-3 text-[11px] font-semibold uppercase tracking-wide text-primary transition-colors hover:bg-primary/20 disabled:cursor-not-allowed disabled:opacity-45"
+              (click)="rerollDailyProphecies()"
+              [disabled]="loading() || !canAffordReroll()"
+            >
+              {{ rerollButtonLabel() }}
+            </button>
+            <div
+              class="flex h-8 items-center whitespace-nowrap px-3 text-[11px] font-semibold uppercase tracking-wide text-zinc-400"
+            >
+              Resets in {{ dailyResetText() }}
+            </div>
+          </div>
+        </div>
+
+        <div class="grid gap-3 lg:grid-cols-3">
+          <article
+            *ngFor="let prophecy of dailyProphecies(); trackBy: trackById"
+            class="ll-card flex min-h-[240px] flex-col gap-3 overflow-visible p-4"
+            [ngClass]="{
+              'll-card-accent':
+                prophecy.status === 'Accepted' ||
+                prophecy.status === 'Completed',
+              'opacity-60':
+                prophecy.status === 'Declined' || prophecy.status === 'Expired',
+            }"
+          >
+            <div class="flex items-start justify-between gap-2">
+              <div class="min-w-0">
+                <div class="ll-eyebrow">{{ prophecy.slotType }} Prophecy</div>
+                <h3 class="ll-heading text-base">{{ prophecy.title }}</h3>
+              </div>
+              <span [ngClass]="[statusClasses(prophecy), 'shrink-0']">{{
+                prophecyStatusLabel(prophecy)
+              }}</span>
+            </div>
+
+            <div class="flex flex-wrap gap-2 text-xs">
+              <span class="ll-badge">{{ prophecy.category }}</span>
+              <span class="ll-badge">{{ prophecy.difficulty }}</span>
+            </div>
+
+            <p class="text-sm text-white">{{ prophecy.objectiveText }}</p>
+
+            <div>
+              <div class="mb-1 flex justify-between text-xs text-zinc-400">
+                <span>Progress</span>
+                <span
+                  >{{ prophecy.currentValue }} /
+                  {{ prophecy.targetValue }}</span
+                >
+              </div>
+              <div class="ll-progress-track">
+                <div
+                  class="ll-progress-bar"
+                  [style.width.%]="progressPercent(prophecy)"
+                ></div>
+              </div>
+            </div>
+
+            <div class="mt-auto space-y-3">
+              <div>
+                <div class="ll-stat-label mb-1">Reward</div>
+                <div class="flex flex-wrap gap-1">
+                  <span
+                    *ngFor="
+                      let reward of rewardPreview(prophecy.reward);
+                      trackBy: trackRewardItem
+                    "
+                    class="rounded border border-primary/20 bg-primary/10 px-2 py-1 text-[11px] text-zinc-200"
+                  >
+                    {{ reward.amount }} {{ reward.label }}
+                  </span>
+                  <span
+                    *ngIf="rewardOverflowCount(prophecy.reward) > 0"
+                    #rewardOverflowOrigin="cdkOverlayOrigin"
+                    cdkOverlayOrigin
+                    class="rounded border border-zinc-700 bg-black/20 px-2 py-1 text-[11px] text-zinc-400"
+                    (mouseenter)="showRewardOverflow(prophecy.id)"
+                    (mouseleave)="hideRewardOverflow(prophecy.id)"
+                  >
+                    +{{ rewardOverflowCount(prophecy.reward) }}
+
+                    <ng-template
+                      cdkConnectedOverlay
+                      [cdkConnectedOverlayOrigin]="rewardOverflowOrigin"
+                      [cdkConnectedOverlayOpen]="
+                        isRewardOverflowOpen(prophecy.id)
+                      "
+                      [cdkConnectedOverlayPositions]="rewardTooltipPositions"
+                      [cdkConnectedOverlayPush]="true"
+                      [cdkConnectedOverlayViewportMargin]="12"
+                    >
+                      <div
+                        class="w-56 max-w-[calc(100vw-2rem)] rounded border border-primary/40 bg-black/95 p-3 text-left shadow-lg"
+                      >
+                        <span class="ll-stat-label mb-2 block"
+                          >More Rewards</span
+                        >
+                        <span
+                          *ngFor="
+                            let reward of rewardOverflowItems(prophecy.reward);
+                            trackBy: trackRewardItem
+                          "
+                          class="flex items-center justify-between gap-2 py-1 text-xs text-zinc-300"
+                        >
+                          <span>{{ reward.label }}</span>
+                          <span class="font-semibold text-primary"
+                            >x{{ reward.amount }}</span
+                          >
+                        </span>
+                      </div>
+                    </ng-template>
+                  </span>
+                </div>
+              </div>
+
+              <p
+                *ngIf="canContinue(prophecy)"
+                class="text-xs leading-relaxed text-zinc-400"
+              >
+                {{ prophecy.guidance.hint }}
+              </p>
+
+              <div class="flex flex-wrap gap-2">
+                <button
+                  *ngIf="canAccept(prophecy)"
+                  type="button"
+                  class="ll-button"
+                  (click)="accept(prophecy)"
+                  [disabled]="loading()"
+                >
+                  Accept
+                </button>
+                <button
+                  *ngIf="canClaim(prophecy)"
+                  type="button"
+                  class="ll-button"
+                  (click)="claim(prophecy)"
+                  [disabled]="loading()"
+                >
+                  Claim
+                </button>
+                <a
+                  *ngIf="canContinue(prophecy)"
+                  class="ll-button"
+                  [routerLink]="guidanceRoute(prophecy)"
+                >
+                  {{ prophecy.guidance.actionLabel }}
+                </a>
+              </div>
+            </div>
+          </article>
+        </div>
+
+        <div
+          *ngIf="readyClaimCount() > 0"
+          class="mt-4 border-t border-primary/10 pt-4"
+        >
+          <div class="mb-3 flex items-center justify-between gap-3">
+            <div>
+              <div class="ll-eyebrow">Ready</div>
+              <h2 class="ll-heading text-lg">Claim Rewards</h2>
+            </div>
+            <span class="ll-badge-accent">{{ readyClaimCount() }}</span>
+          </div>
+
+          <div class="grid gap-2 md:grid-cols-2">
+            <article
+              *ngFor="let prophecy of readyProphecies(); trackBy: trackById"
+              class="ll-list-row flex items-center justify-between gap-3 px-3 py-2"
+            >
+              <div class="min-w-0">
+                <div class="ll-stat-label">{{ prophecy.scope }} Prophecy</div>
+                <div class="truncate text-sm text-white">
+                  {{ prophecy.title }}
+                </div>
+                <div class="truncate text-xs text-zinc-400">
+                  {{ rewardSummary(prophecy.reward) }}
+                </div>
+              </div>
+              <button
+                type="button"
+                class="ll-button shrink-0"
+                (click)="claim(prophecy)"
+                [disabled]="loading()"
+              >
+                Claim
+              </button>
+            </article>
+
+            <article
+              *ngFor="let milestone of readyMilestones(); trackBy: trackById"
+              class="ll-list-row flex items-center justify-between gap-3 px-3 py-2"
+            >
+              <div class="min-w-0">
+                <div class="ll-stat-label">
+                  {{ milestone.favorRequired }} Favor
+                </div>
+                <div class="truncate text-sm text-white">
+                  {{ milestone.title }}
+                </div>
+                <div class="truncate text-xs text-zinc-400">
+                  {{ rewardSummary(milestone.reward) }}
+                </div>
+              </div>
+              <button
+                type="button"
+                class="ll-button shrink-0"
+                (click)="claimMilestone(milestone)"
+                [disabled]="loading()"
+              >
+                Claim
+              </button>
+            </article>
+          </div>
+        </div>
+
+        <div
+          *ngIf="ownedCaches().length > 0"
+          class="mt-4 border-t border-primary/10 pt-4"
+        >
+          <div class="mb-3">
+            <div class="ll-eyebrow">Caches</div>
+            <h2 class="ll-heading text-lg">Unopened Rewards</h2>
+          </div>
+
+          <div class="grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
+            <article
+              *ngFor="let cache of ownedCaches(); trackBy: trackByCacheId"
+              class="ll-card flex min-h-[120px] flex-col gap-2 p-3"
+            >
+              <div class="flex items-start justify-between gap-3">
+                <div class="min-w-0">
+                  <div class="ll-stat-label">{{ cache.quantity }} Owned</div>
+                  <h3 class="truncate text-sm font-semibold text-white">
+                    {{ cache.title }}
+                  </h3>
+                </div>
+                <span class="ll-badge shrink-0">x{{ cache.quantity }}</span>
+              </div>
+
+              <div class="flex flex-wrap gap-1">
+                <span
+                  *ngFor="
+                    let reward of cacheContents(cache);
+                    trackBy: trackByLabel
+                  "
+                  class="rounded border border-primary/15 bg-primary/10 px-2 py-1 text-[11px] text-zinc-300"
+                >
+                  {{ reward }}
+                </span>
+              </div>
+
+              <button
+                type="button"
+                class="ll-button mt-auto self-start"
+                (click)="openCache(cache)"
+                [disabled]="loading() || cache.quantity <= 0"
+              >
+                Open
+              </button>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section
+        *ngIf="greaterProphecy() as greater"
+        class="ll-panel bg-texture bg-auto p-4"
+      >
+        <div class="mb-3 flex flex-wrap items-start justify-between gap-3">
+          <div class="min-w-0">
+            <div class="ll-eyebrow">{{ greaterProphecyLabel(greater) }}</div>
+            <h2 class="ll-heading text-xl">{{ greater.title }}</h2>
+            <p class="ll-copy">{{ greater.objectiveText }}</p>
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <span class="ll-badge">{{ greater.category }}</span>
+            <span class="ll-badge">{{ greater.difficulty }}</span>
+            <span class="ll-badge"
+              >Ends in {{ timeRemaining(greater.periodEnd) }}</span
+            >
+          </div>
+        </div>
+
+        <div class="grid gap-3 lg:grid-cols-[minmax(0,1fr)_300px]">
+          <div>
             <div class="ll-progress-track">
               <div
                 class="ll-progress-bar"
-                [style.width.%]="progressPercent(prophecy)"
+                [style.width.%]="progressPercent(greater)"
               ></div>
+            </div>
+            <div class="mt-2 flex justify-between text-xs text-zinc-400">
+              <span
+                >{{ greater.currentValue }} / {{ greater.targetValue }}</span
+              >
+              <span>{{ progressPercent(greater) }}%</span>
             </div>
           </div>
 
-          <div class="mt-auto space-y-3">
+          <div class="space-y-3">
             <div>
               <div class="ll-stat-label mb-1">Reward</div>
               <div class="flex flex-wrap gap-1">
                 <span
                   *ngFor="
-                    let reward of rewardPreview(prophecy.reward);
+                    let reward of rewardPreview(greater.reward, 5);
                     trackBy: trackRewardItem
                   "
                   class="rounded border border-primary/20 bg-primary/10 px-2 py-1 text-[11px] text-zinc-200"
@@ -256,21 +500,19 @@
                   {{ reward.amount }} {{ reward.label }}
                 </span>
                 <span
-                  *ngIf="rewardOverflowCount(prophecy.reward) > 0"
-                  #rewardOverflowOrigin="cdkOverlayOrigin"
+                  *ngIf="rewardOverflowCount(greater.reward, 5) > 0"
+                  #greaterRewardOverflowOrigin="cdkOverlayOrigin"
                   cdkOverlayOrigin
                   class="rounded border border-zinc-700 bg-black/20 px-2 py-1 text-[11px] text-zinc-400"
-                  (mouseenter)="showRewardOverflow(prophecy.id)"
-                  (mouseleave)="hideRewardOverflow(prophecy.id)"
+                  (mouseenter)="showRewardOverflow(greater.id)"
+                  (mouseleave)="hideRewardOverflow(greater.id)"
                 >
-                  +{{ rewardOverflowCount(prophecy.reward) }}
+                  +{{ rewardOverflowCount(greater.reward, 5) }}
 
                   <ng-template
                     cdkConnectedOverlay
-                    [cdkConnectedOverlayOrigin]="rewardOverflowOrigin"
-                    [cdkConnectedOverlayOpen]="
-                      isRewardOverflowOpen(prophecy.id)
-                    "
+                    [cdkConnectedOverlayOrigin]="greaterRewardOverflowOrigin"
+                    [cdkConnectedOverlayOpen]="isRewardOverflowOpen(greater.id)"
                     [cdkConnectedOverlayPositions]="rewardTooltipPositions"
                     [cdkConnectedOverlayPush]="true"
                     [cdkConnectedOverlayViewportMargin]="12"
@@ -278,12 +520,10 @@
                     <div
                       class="w-56 max-w-[calc(100vw-2rem)] rounded border border-primary/40 bg-black/95 p-3 text-left shadow-lg"
                     >
-                      <span class="ll-stat-label mb-2 block"
-                        >More Rewards</span
-                      >
+                      <span class="ll-stat-label mb-2 block">More Rewards</span>
                       <span
                         *ngFor="
-                          let reward of rewardOverflowItems(prophecy.reward);
+                          let reward of rewardOverflowItems(greater.reward, 5);
                           trackBy: trackRewardItem
                         "
                         class="flex items-center justify-between gap-2 py-1 text-xs text-zinc-300"
@@ -300,276 +540,39 @@
             </div>
 
             <p
-              *ngIf="canContinue(prophecy)"
+              *ngIf="canContinue(greater)"
               class="text-xs leading-relaxed text-zinc-400"
             >
-              {{ prophecy.guidance.hint }}
+              {{ greater.guidance.hint }}
             </p>
 
             <div class="flex flex-wrap gap-2">
               <button
-                *ngIf="canAccept(prophecy)"
+                *ngIf="canClaim(greater)"
                 type="button"
                 class="ll-button"
-                (click)="accept(prophecy)"
-                [disabled]="loading()"
-              >
-                Accept
-              </button>
-              <button
-                *ngIf="canClaim(prophecy)"
-                type="button"
-                class="ll-button"
-                (click)="claim(prophecy)"
+                (click)="claim(greater)"
                 [disabled]="loading()"
               >
                 Claim
               </button>
               <a
-                *ngIf="canContinue(prophecy)"
+                *ngIf="canContinue(greater)"
                 class="ll-button"
-                [routerLink]="guidanceRoute(prophecy)"
+                [routerLink]="guidanceRoute(greater)"
               >
-                {{ prophecy.guidance.actionLabel }}
+                {{ greater.guidance.actionLabel }}
               </a>
-            </div>
-          </div>
-        </article>
-      </div>
-
-      <div
-        *ngIf="readyClaimCount() > 0"
-        class="mt-4 border-t border-primary/10 pt-4"
-      >
-        <div class="mb-3 flex items-center justify-between gap-3">
-          <div>
-            <div class="ll-eyebrow">Ready</div>
-            <h2 class="ll-heading text-lg">Claim Rewards</h2>
-          </div>
-          <span class="ll-badge-accent">{{ readyClaimCount() }}</span>
-        </div>
-
-        <div class="grid gap-2 md:grid-cols-2">
-          <article
-            *ngFor="let prophecy of readyProphecies(); trackBy: trackById"
-            class="ll-list-row flex items-center justify-between gap-3 px-3 py-2"
-          >
-            <div class="min-w-0">
-              <div class="ll-stat-label">{{ prophecy.scope }} Prophecy</div>
-              <div class="truncate text-sm text-white">
-                {{ prophecy.title }}
-              </div>
-              <div class="truncate text-xs text-zinc-400">
-                {{ rewardSummary(prophecy.reward) }}
-              </div>
-            </div>
-            <button
-              type="button"
-              class="ll-button shrink-0"
-              (click)="claim(prophecy)"
-              [disabled]="loading()"
-            >
-              Claim
-            </button>
-          </article>
-
-          <article
-            *ngFor="let milestone of readyMilestones(); trackBy: trackById"
-            class="ll-list-row flex items-center justify-between gap-3 px-3 py-2"
-          >
-            <div class="min-w-0">
-              <div class="ll-stat-label">
-                {{ milestone.favorRequired }} Favor
-              </div>
-              <div class="truncate text-sm text-white">
-                {{ milestone.title }}
-              </div>
-              <div class="truncate text-xs text-zinc-400">
-                {{ rewardSummary(milestone.reward) }}
-              </div>
-            </div>
-            <button
-              type="button"
-              class="ll-button shrink-0"
-              (click)="claimMilestone(milestone)"
-              [disabled]="loading()"
-            >
-              Claim
-            </button>
-          </article>
-        </div>
-      </div>
-
-      <div
-        *ngIf="ownedCaches().length > 0"
-        class="mt-4 border-t border-primary/10 pt-4"
-      >
-        <div class="mb-3">
-          <div class="ll-eyebrow">Caches</div>
-          <h2 class="ll-heading text-lg">Unopened Rewards</h2>
-        </div>
-
-        <div class="grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
-          <article
-            *ngFor="let cache of ownedCaches(); trackBy: trackByCacheId"
-            class="ll-card flex min-h-[120px] flex-col gap-2 p-3"
-          >
-            <div class="flex items-start justify-between gap-3">
-              <div class="min-w-0">
-                <div class="ll-stat-label">{{ cache.quantity }} Owned</div>
-                <h3 class="truncate text-sm font-semibold text-white">
-                  {{ cache.title }}
-                </h3>
-              </div>
-              <span class="ll-badge shrink-0">x{{ cache.quantity }}</span>
-            </div>
-
-            <div class="flex flex-wrap gap-1">
               <span
-                *ngFor="
-                  let reward of cacheContents(cache);
-                  trackBy: trackByLabel
-                "
-                class="rounded border border-primary/15 bg-primary/10 px-2 py-1 text-[11px] text-zinc-300"
+                *ngIf="greater.status === 'Claimed'"
+                class="py-1 text-xs text-zinc-400"
               >
-                {{ reward }}
-              </span>
-            </div>
-
-            <button
-              type="button"
-              class="ll-button mt-auto self-start"
-              (click)="openCache(cache)"
-              [disabled]="loading() || cache.quantity <= 0"
-            >
-              Open
-            </button>
-          </article>
-        </div>
-      </div>
-    </section>
-
-    <section
-      *ngIf="greaterProphecy() as greater"
-      class="ll-panel bg-texture bg-auto p-4"
-    >
-      <div class="mb-3 flex flex-wrap items-start justify-between gap-3">
-        <div class="min-w-0">
-          <div class="ll-eyebrow">{{ greaterProphecyLabel(greater) }}</div>
-          <h2 class="ll-heading text-xl">{{ greater.title }}</h2>
-          <p class="ll-copy">{{ greater.objectiveText }}</p>
-        </div>
-        <div class="flex flex-wrap gap-2">
-          <span class="ll-badge">{{ greater.category }}</span>
-          <span class="ll-badge">{{ greater.difficulty }}</span>
-          <span class="ll-badge"
-            >Ends in {{ timeRemaining(greater.periodEnd) }}</span
-          >
-        </div>
-      </div>
-
-      <div class="grid gap-3 lg:grid-cols-[minmax(0,1fr)_300px]">
-        <div>
-          <div class="ll-progress-track">
-            <div
-              class="ll-progress-bar"
-              [style.width.%]="progressPercent(greater)"
-            ></div>
-          </div>
-          <div class="mt-2 flex justify-between text-xs text-zinc-400">
-            <span>{{ greater.currentValue }} / {{ greater.targetValue }}</span>
-            <span>{{ progressPercent(greater) }}%</span>
-          </div>
-        </div>
-
-        <div class="space-y-3">
-          <div>
-            <div class="ll-stat-label mb-1">Reward</div>
-            <div class="flex flex-wrap gap-1">
-              <span
-                *ngFor="
-                  let reward of rewardPreview(greater.reward, 5);
-                  trackBy: trackRewardItem
-                "
-                class="rounded border border-primary/20 bg-primary/10 px-2 py-1 text-[11px] text-zinc-200"
-              >
-                {{ reward.amount }} {{ reward.label }}
-              </span>
-              <span
-                *ngIf="rewardOverflowCount(greater.reward, 5) > 0"
-                #greaterRewardOverflowOrigin="cdkOverlayOrigin"
-                cdkOverlayOrigin
-                class="rounded border border-zinc-700 bg-black/20 px-2 py-1 text-[11px] text-zinc-400"
-                (mouseenter)="showRewardOverflow(greater.id)"
-                (mouseleave)="hideRewardOverflow(greater.id)"
-              >
-                +{{ rewardOverflowCount(greater.reward, 5) }}
-
-                <ng-template
-                  cdkConnectedOverlay
-                  [cdkConnectedOverlayOrigin]="greaterRewardOverflowOrigin"
-                  [cdkConnectedOverlayOpen]="isRewardOverflowOpen(greater.id)"
-                  [cdkConnectedOverlayPositions]="rewardTooltipPositions"
-                  [cdkConnectedOverlayPush]="true"
-                  [cdkConnectedOverlayViewportMargin]="12"
-                >
-                  <div
-                    class="w-56 max-w-[calc(100vw-2rem)] rounded border border-primary/40 bg-black/95 p-3 text-left shadow-lg"
-                  >
-                    <span class="ll-stat-label mb-2 block">More Rewards</span>
-                    <span
-                      *ngFor="
-                        let reward of rewardOverflowItems(greater.reward, 5);
-                        trackBy: trackRewardItem
-                      "
-                      class="flex items-center justify-between gap-2 py-1 text-xs text-zinc-300"
-                    >
-                      <span>{{ reward.label }}</span>
-                      <span class="font-semibold text-primary"
-                        >x{{ reward.amount }}</span
-                      >
-                    </span>
-                  </div>
-                </ng-template>
+                Reward claimed
               </span>
             </div>
           </div>
-
-          <p
-            *ngIf="canContinue(greater)"
-            class="text-xs leading-relaxed text-zinc-400"
-          >
-            {{ greater.guidance.hint }}
-          </p>
-
-          <div class="flex flex-wrap gap-2">
-            <button
-              *ngIf="canClaim(greater)"
-              type="button"
-              class="ll-button"
-              (click)="claim(greater)"
-              [disabled]="loading()"
-            >
-              Claim
-            </button>
-            <a
-              *ngIf="canContinue(greater)"
-              class="ll-button"
-              [routerLink]="guidanceRoute(greater)"
-            >
-              {{ greater.guidance.actionLabel }}
-            </a>
-            <span
-              *ngIf="greater.status === 'Claimed'"
-              class="py-1 text-xs text-zinc-400"
-            >
-              Reward claimed
-            </span>
-          </div>
         </div>
-      </div>
-    </section>
-
+      </section>
     </div>
   </ng-container>
 </div>

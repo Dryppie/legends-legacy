@@ -19,7 +19,7 @@ public sealed class ProphecyDtoMappingTests
     [InlineData(ProphecyObjectiveType.CompleteDungeons, ProphecyGuidanceDestination.Dungeons, "Run Dungeons")]
     [InlineData(ProphecyObjectiveType.ResolveDungeonEvents, ProphecyGuidanceDestination.Dungeons, "Run Dungeons")]
     [InlineData(ProphecyObjectiveType.GainEssenceXp, ProphecyGuidanceDestination.Essences, "Train Essences")]
-    [InlineData(ProphecyObjectiveType.EssenceArchivedOrFed, ProphecyGuidanceDestination.SoulArchive, "Open Archive")]
+    [InlineData(ProphecyObjectiveType.AbsorbEssence, ProphecyGuidanceDestination.SoulArchive, "Open Archive")]
     [InlineData(ProphecyObjectiveType.GatherResources, ProphecyGuidanceDestination.Gathering, "Gather Resources")]
     [InlineData(ProphecyObjectiveType.TemperItems, ProphecyGuidanceDestination.Crafting, "Temper Gear")]
     [InlineData(ProphecyObjectiveType.SpendPotential, ProphecyGuidanceDestination.Crafting, "Temper Gear")]

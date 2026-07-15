@@ -756,7 +756,7 @@ public sealed class ProphecyService : IProphecyService
             case ProphecyObjectiveType.CompleteDungeons when progressEvent.Kind == ProphecyProgressKind.DungeonCompleted:
             case ProphecyObjectiveType.ResolveDungeonEvents when progressEvent.Kind == ProphecyProgressKind.DungeonEventResolved:
             case ProphecyObjectiveType.GainEssenceXp when progressEvent.Kind == ProphecyProgressKind.EssenceXpGained:
-            case ProphecyObjectiveType.EssenceArchivedOrFed when progressEvent.Kind == ProphecyProgressKind.EssenceArchived:
+            case ProphecyObjectiveType.AbsorbEssence when progressEvent.Kind == ProphecyProgressKind.EssenceAbsorbed:
             case ProphecyObjectiveType.TemperItems when progressEvent.Kind == ProphecyProgressKind.ItemTempered:
             case ProphecyObjectiveType.TreasureProgress when progressEvent.Kind == ProphecyProgressKind.TreasureProgress:
                 prophecy.CurrentValue += Math.Max(1, progressEvent.Amount);

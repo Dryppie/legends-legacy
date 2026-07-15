@@ -34,7 +34,7 @@ public enum ProphecyProgressKind
     DungeonCompleted = 5,
     DungeonEventResolved = 6,
     EssenceXpGained = 7,
-    EssenceArchived = 8,
+    EssenceAbsorbed = 8,
     ResourceGathered = 9,
     ItemTempered = 10,
     PotentialSpent = 11,

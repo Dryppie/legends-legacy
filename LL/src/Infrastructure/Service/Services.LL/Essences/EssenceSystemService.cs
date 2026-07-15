@@ -135,7 +135,7 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
             await _publisher.Publish(new ProphecyProgressNotification(new ProphecyProgressEvent(
                 characterId,
                 DateTimeOffset.UtcNow,
-                ProphecyProgressKind.EssenceArchived)), cancellationToken);
+                ProphecyProgressKind.EssenceAbsorbed)), cancellationToken);
         }
 
         await _outbox.EnqueueAsync(

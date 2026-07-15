@@ -129,11 +129,12 @@ internal class DungeonCombatOutcomeProcessor : ICombatOutcomeProcessor
 
         if (outcome.TotalLoot.Count > 0)
         {
+            var treasureProgress = outcome.TotalLoot.Sum(item => Math.Max(1, item.Quantity));
             progressEvents.Add(new ProphecyProgressEvent(
                 facts.CharacterId,
                 now,
                 ProphecyProgressKind.TreasureProgress,
-                outcome.TotalLoot.Count));
+                treasureProgress));
         }
 
         if (progressEvents.Count > 0)

@@ -16,7 +16,7 @@ public sealed class JsonProphecyDefinitionProvider : IProphecyDefinitionProvider
         ProphecyObjectiveType.CompleteDungeons,
         ProphecyObjectiveType.ResolveDungeonEvents,
         ProphecyObjectiveType.GainEssenceXp,
-        ProphecyObjectiveType.EssenceArchivedOrFed,
+        ProphecyObjectiveType.AbsorbEssence,
         ProphecyObjectiveType.GatherResources,
         ProphecyObjectiveType.TemperItems,
         ProphecyObjectiveType.SpendPotential,
