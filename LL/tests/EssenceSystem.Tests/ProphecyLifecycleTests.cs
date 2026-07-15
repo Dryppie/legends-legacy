@@ -237,9 +237,11 @@ public sealed class ProphecyLifecycleTests
             Name = "Oracle",
             FateEcho = 120,
         };
+        var balanceProvider = new BalanceProvider();
         var service = new ProphecyService(
             new DefinitionProvider(definitions),
-            new BalanceProvider(),
+            balanceProvider,
+            new ProphecyRewardResolver(balanceProvider),
             repository,
             new CharacterService(character),
             new EntityService(),
@@ -315,13 +317,17 @@ public sealed class ProphecyLifecycleTests
                 {
                     Id = "Daily.Test",
                     Scope = ProphecyScope.Daily,
-                    Reward = new ProphecyRewardSnapshot { Cinders = 10 }
+                    Difficulty = ProphecyDifficulty.Common,
+                    CharacterExperience = new ProphecyScaledAmount { Minimum = 1, NextLevelBasisPoints = 1 },
+                    MinimumCinders = 10
                 },
                 new ProphecyRewardProfile
                 {
                     Id = "Weekly.Test",
                     Scope = ProphecyScope.Weekly,
-                    Reward = new ProphecyRewardSnapshot { Cinders = 20 }
+                    Difficulty = ProphecyDifficulty.Common,
+                    CharacterExperience = new ProphecyScaledAmount { Minimum = 1, NextLevelBasisPoints = 1 },
+                    MinimumCinders = 20
                 }
             ],
             FavorRewards =

@@ -503,6 +503,7 @@ public sealed class ProphecyServiceTests
         new(
             new EmptyDefinitionProvider(),
             new TestBalanceProvider(),
+            null!,
             repository,
             null!,
             null!,

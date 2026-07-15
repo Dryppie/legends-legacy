@@ -27,7 +27,10 @@ public sealed class ProphecyBalanceProviderTests
 
         var catalog = provider.GetCatalog();
         Assert.Equal(26, catalog.Targets.Count);
-        Assert.Equal(21, catalog.RewardProfiles.Count);
+        Assert.Equal(6, catalog.RewardProfiles.Count);
+        Assert.Equal(3, catalog.CategoryRewardPackages.Count);
+        Assert.Equal(1.8, catalog.RewardScaling.CindersPerCharacterExperience);
+        Assert.Equal(5, catalog.RewardScaling.CinderRoundingIncrement);
         Assert.Equal(3, catalog.WeeklyMilestones.Count);
         Assert.Equal(4, catalog.Caches.Count);
         Assert.Equal(1, catalog.FavorRewards.Single(x => x.Scope == ProphecyScope.Daily).Amount);
@@ -46,9 +49,16 @@ public sealed class ProphecyBalanceProviderTests
         Assert.Equal(2, smallCache.Rolls);
         Assert.Contains("Soulstones", smallCache.PreviewRewards);
 
-        var weeklyDungeon = catalog.RewardProfiles.Single(x => x.Id == "Weekly.Dungeon.Rare");
+        var weeklyRare = catalog.RewardProfiles.Single(x => x.Id == "Weekly.Rare");
+        Assert.Equal(4000, weeklyRare.CharacterExperience.NextLevelBasisPoints);
+        Assert.Equal("greater_prophecy_cache", weeklyRare.FlatReward.CacheItemId);
+
+        var weeklyDungeon = catalog.CategoryRewardPackages.Single(x =>
+            x.Scope == ProphecyScope.Weekly &&
+            x.Category == ProphecyCategory.Dungeon &&
+            x.Difficulty == ProphecyDifficulty.Rare);
         Assert.Equal(14, weeklyDungeon.Reward.SigilFragments);
-        Assert.Contains(weeklyDungeon.Reward.Items, x => x.ItemId == "item.monster_core.lesser" && x.Quantity == 1);
-        Assert.Equal("greater_prophecy_cache", weeklyDungeon.Reward.CacheItemId);
+        Assert.Contains(weeklyDungeon.LevelScaledItems,
+            x => x.MinLevel == 60 && x.ItemId == "item.monster_core.primal" && x.Quantity == 1);
     }
 }
