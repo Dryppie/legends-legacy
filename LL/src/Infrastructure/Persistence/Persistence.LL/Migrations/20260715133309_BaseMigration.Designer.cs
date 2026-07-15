@@ -13,7 +13,7 @@ using Persistence.LL;
 namespace Persistence.LL.Migrations
 {
     [DbContext(typeof(LLDbContext))]
-    [Migration("20260710085308_BaseMigration")]
+    [Migration("20260715133309_BaseMigration")]
     partial class BaseMigration
     {
         /// <inheritdoc />
@@ -1594,7 +1594,7 @@ namespace Persistence.LL.Migrations
                     b.HasIndex("CharacterId", "CreatureId")
                         .IsUnique();
 
-                    b.ToTable("MonsterResonances");
+                    b.ToTable("MonsterResonances", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Models.Essences.EssenceLoadout", b =>
@@ -2333,30 +2333,41 @@ namespace Persistence.LL.Migrations
                     b.UseTphMappingStrategy();
                 });
 
-            modelBuilder.Entity("Domain.Models.LootTables.LootTableEntry", b =>
+            modelBuilder.Entity("Domain.Models.MarketPlaces.MarketPlaceBuyOrder", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<Guid?>("LootTableId")
+                    b.Property<Guid>("BuyerId")
                         .HasColumnType("uuid");
 
-                    b.Property<int>("LootTableType")
+                    b.Property<string>("BuyerName")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("ItemBaseId")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
+
+                    b.Property<int>("Quantity")
                         .HasColumnType("integer");
 
-                    b.Property<float>("Weight")
-                        .HasColumnType("real");
+                    b.Property<long>("UnitPrice")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("LootTableId");
+                    b.HasIndex("BuyerId");
 
-                    b.ToTable("LootTableEntry");
+                    b.HasIndex("ItemBaseId", "UnitPrice", "CreatedAt");
 
-                    b.HasDiscriminator<int>("LootTableType");
-
-                    b.UseTphMappingStrategy();
+                    b.ToTable("MarketPlaceBuyOrders");
                 });
 
             modelBuilder.Entity("Domain.Models.MarketPlaces.MarketPlaceListing", b =>
@@ -2588,6 +2599,54 @@ namespace Persistence.LL.Migrations
                     b.ToTable("Professions");
                 });
 
+            modelBuilder.Entity("Domain.Models.Prophecies.DailyProphecyRerollState", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("CharacterId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<long>("FateEchoSpent")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTimeOffset>("PeriodEnd")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset>("PeriodStart")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("PlayerId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("RerollsUsed")
+                        .HasColumnType("integer");
+
+                    b.Property<long>("RowVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("ShownDefinitionIdsJson")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("jsonb")
+                        .HasDefaultValue("[]");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PlayerId", "CharacterId", "PeriodStart")
+                        .IsUnique();
+
+                    b.ToTable("DailyProphecyRerollStates");
+                });
+
             modelBuilder.Entity("Domain.Models.Prophecies.PlayerProphecyInstance", b =>
                 {
                     b.Property<Guid>("Id")
@@ -2608,6 +2667,9 @@ namespace Persistence.LL.Migrations
 
                     b.Property<int>("CurrentValue")
                         .HasColumnType("integer");
+
+                    b.Property<DateTimeOffset?>("DailyRerollUsedAt")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTimeOffset>("GeneratedAt")
                         .HasColumnType("timestamp with time zone");
@@ -2859,9 +2921,6 @@ namespace Persistence.LL.Migrations
                     b.Property<int?>("LevelRequirement")
                         .HasColumnType("integer");
 
-                    b.Property<Guid>("LootTableId")
-                        .HasColumnType("uuid");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text");
@@ -2869,14 +2928,15 @@ namespace Persistence.LL.Migrations
                     b.Property<float>("ProcChance")
                         .HasColumnType("real");
 
+                    b.Property<string>("RewardTableId")
+                        .HasColumnType("text");
+
                     b.Property<int>("Type")
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
 
                     b.HasIndex("AreaId");
-
-                    b.HasIndex("LootTableId");
 
                     b.ToTable("AreaGatheringNode");
                 });
@@ -3103,7 +3163,8 @@ namespace Persistence.LL.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Email")
-                        .HasColumnType("text");
+                        .HasMaxLength(320)
+                        .HasColumnType("character varying(320)");
 
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("boolean");
@@ -3114,6 +3175,10 @@ namespace Persistence.LL.Migrations
                     b.Property<bool>("IsNameEdited")
                         .HasColumnType("boolean");
 
+                    b.Property<string>("NormalizedEmail")
+                        .HasMaxLength(320)
+                        .HasColumnType("character varying(320)");
+
                     b.Property<string>("PasswordHash")
                         .HasColumnType("text");
 
@@ -3122,9 +3187,14 @@ namespace Persistence.LL.Migrations
 
                     b.Property<string>("Username")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(80)
+                        .HasColumnType("character varying(80)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("NormalizedEmail")
+                        .IsUnique()
+                        .HasFilter("\"NormalizedEmail\" IS NOT NULL");
 
                     b.ToTable("Users");
                 });
@@ -3236,9 +3306,6 @@ namespace Persistence.LL.Migrations
                 {
                     b.HasBaseType("Domain.Models.Entities.Entity");
 
-                    b.Property<long>("AscensionStoneFragments")
-                        .HasColumnType("bigint");
-
                     b.Property<long>("Cinders")
                         .HasColumnType("bigint");
 
@@ -3248,8 +3315,8 @@ namespace Persistence.LL.Migrations
                     b.Property<int>("EquippedTitleDisplayPosition")
                         .HasColumnType("integer");
 
-                    b.Property<float>("Experience")
-                        .HasColumnType("real");
+                    b.Property<long>("Experience")
+                        .HasColumnType("bigint");
 
                     b.Property<long>("FateEcho")
                         .HasColumnType("bigint");
@@ -3259,6 +3326,11 @@ namespace Persistence.LL.Migrations
 
                     b.Property<long>("GuildHonors")
                         .HasColumnType("bigint");
+
+                    b.Property<string>("NormalizedName")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("character varying(80)");
 
                     b.Property<long>("SigilFragments")
                         .HasColumnType("bigint");
@@ -3270,6 +3342,10 @@ namespace Persistence.LL.Migrations
                         .HasColumnType("uuid");
 
                     b.HasIndex("EquippedTitleDefinitionId");
+
+                    b.HasIndex("NormalizedName")
+                        .IsUnique()
+                        .HasFilter("\"EntityType\" = 1 AND \"NormalizedName\" IS NOT NULL");
 
                     b.HasIndex("UserId");
 
@@ -3292,13 +3368,11 @@ namespace Persistence.LL.Migrations
                     b.Property<int>("DefenseProfile")
                         .HasColumnType("integer");
 
-                    b.Property<Guid>("LootTableId")
-                        .HasColumnType("uuid");
+                    b.Property<string>("RewardTableId")
+                        .HasColumnType("text");
 
                     b.Property<int>("Tier")
                         .HasColumnType("integer");
-
-                    b.HasIndex("LootTableId");
 
                     b.HasDiscriminator().HasValue(3);
                 });
@@ -3416,35 +3490,6 @@ namespace Persistence.LL.Migrations
                     b.HasBaseType("Domain.Models.Items.ItemInstance");
 
                     b.HasDiscriminator().HasValue(3);
-                });
-
-            modelBuilder.Entity("Domain.Models.LootTables.LootTable", b =>
-                {
-                    b.HasBaseType("Domain.Models.LootTables.LootTableEntry");
-
-                    b.HasDiscriminator().HasValue(1);
-                });
-
-            modelBuilder.Entity("Domain.Models.LootTables.LootTableItem", b =>
-                {
-                    b.HasBaseType("Domain.Models.LootTables.LootTableEntry");
-
-                    b.Property<bool>("IsRare")
-                        .HasColumnType("boolean");
-
-                    b.Property<string>("ItemId")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<int>("MaxQuantity")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("MinQuantity")
-                        .HasColumnType("integer");
-
-                    b.HasIndex("ItemId");
-
-                    b.HasDiscriminator().HasValue(2);
                 });
 
             modelBuilder.Entity("Domain.Models.Achievements.PlayerAchievementProgress", b =>
@@ -3990,12 +4035,15 @@ namespace Persistence.LL.Migrations
                     b.Navigation("ItemBase");
                 });
 
-            modelBuilder.Entity("Domain.Models.LootTables.LootTableEntry", b =>
+            modelBuilder.Entity("Domain.Models.MarketPlaces.MarketPlaceBuyOrder", b =>
                 {
-                    b.HasOne("Domain.Models.LootTables.LootTable", null)
-                        .WithMany("Entries")
-                        .HasForeignKey("LootTableId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                    b.HasOne("Domain.Models.Items.ItemBase", "ItemBase")
+                        .WithMany()
+                        .HasForeignKey("ItemBaseId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("ItemBase");
                 });
 
             modelBuilder.Entity("Domain.Models.MarketPlaces.MarketPlaceListing", b =>
@@ -4087,15 +4135,7 @@ namespace Persistence.LL.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Domain.Models.LootTables.LootTable", "LootTable")
-                        .WithMany()
-                        .HasForeignKey("LootTableId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.Navigation("Area");
-
-                    b.Navigation("LootTable");
                 });
 
             modelBuilder.Entity("Domain.Models.Snapshots.EntityAttributeSnapshot", b =>
@@ -4181,28 +4221,6 @@ namespace Persistence.LL.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Domain.Models.Entities.Creatures.Creature", b =>
-                {
-                    b.HasOne("Domain.Models.LootTables.LootTable", "LootTable")
-                        .WithMany()
-                        .HasForeignKey("LootTableId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("LootTable");
-                });
-
-            modelBuilder.Entity("Domain.Models.LootTables.LootTableItem", b =>
-                {
-                    b.HasOne("Domain.Models.Items.ItemBase", "Item")
-                        .WithMany("LootTablesItems")
-                        .HasForeignKey("ItemId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Item");
-                });
-
             modelBuilder.Entity("Domain.Models.CharacterActions.CharacterAction", b =>
                 {
                     b.Navigation("ActionDetails");
@@ -4266,8 +4284,6 @@ namespace Persistence.LL.Migrations
             modelBuilder.Entity("Domain.Models.Items.ItemBase", b =>
                 {
                     b.Navigation("ItemInstances");
-
-                    b.Navigation("LootTablesItems");
                 });
 
             modelBuilder.Entity("Domain.Models.Outbox.GameEventOutboxMessage", b =>
@@ -4354,11 +4370,6 @@ namespace Persistence.LL.Migrations
                     b.Navigation("InstanceModifiers");
 
                     b.Navigation("ToolAffixes");
-                });
-
-            modelBuilder.Entity("Domain.Models.LootTables.LootTable", b =>
-                {
-                    b.Navigation("Entries");
                 });
 #pragma warning restore 612, 618
         }

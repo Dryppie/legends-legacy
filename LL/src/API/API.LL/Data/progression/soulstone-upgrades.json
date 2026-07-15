@@ -22,7 +22,7 @@
     "id": "essence.echo-memory",
     "branch": "EssenceArchive",
     "displayName": "Echo Memory",
-    "description": "Essence bad-luck protection builds faster after eligible failed drop rolls.",
+    "description": "Essence bad-luck protection builds faster after failed drop rolls.",
     "maxRank": 5,
     "costsByRank": [25, 75, 150, 300, 600],
     "effects": [
