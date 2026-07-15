@@ -51,21 +51,32 @@ public sealed class JsonAreaExperienceBalanceProvider : IAreaExperienceBalancePr
     }
 
     public decimal GetTargetExperiencePerHour(string areaId) => GetRate(areaId).TargetExperiencePerHour;
+    public decimal GetTargetCindersPerHour(string areaId) => GetRate(areaId).TargetCindersPerHour;
 
     public int CalculateEncounterExperience(string areaId, int creatureCount)
+        => CalculateEncounterValue(areaId, creatureCount, GetRate(areaId).ExperiencePerCreature, "XP");
+
+    public int CalculateEncounterCinders(string areaId, int creatureCount)
+        => CalculateEncounterValue(areaId, creatureCount, GetRate(areaId).CindersPerCreature, "Cinders");
+
+    private static int CalculateEncounterValue(
+        string areaId,
+        int creatureCount,
+        decimal valuePerCreature,
+        string rewardName)
     {
         if (creatureCount <= 0)
         {
             throw new ArgumentOutOfRangeException(nameof(creatureCount), "An encounter must contain a creature.");
         }
 
-        var experience = GetRate(areaId).ExperiencePerCreature * creatureCount;
-        if (experience > int.MaxValue)
+        var value = valuePerCreature * creatureCount;
+        if (value > int.MaxValue)
         {
-            throw new OverflowException($"Encounter XP for area '{areaId}' exceeds the supported range.");
+            throw new OverflowException($"Encounter {rewardName} for area '{areaId}' exceeds the supported range.");
         }
 
-        return decimal.ToInt32(decimal.Round(experience, 0, MidpointRounding.AwayFromZero));
+        return decimal.ToInt32(decimal.Round(value, 0, MidpointRounding.AwayFromZero));
     }
 
     private static T Read<T>(string path, JsonSerializerOptions options) where T : new() =>
@@ -117,23 +128,34 @@ public sealed class JsonAreaExperienceBalanceProvider : IAreaExperienceBalancePr
             .Select((probability, index) => probability * (index + 1))
             .Sum() / probabilityTotal;
         var targetExperiencePerHour = settings.BaseExperiencePerHour;
+        var targetCindersPerHour = settings.BaseCindersPerHour;
         for (var tier = 0; tier < area.DifficultyTier; tier++)
         {
             targetExperiencePerHour = checked(
                 targetExperiencePerHour * settings.DifficultyTierMultiplier);
+            targetCindersPerHour = checked(
+                targetCindersPerHour * settings.DifficultyTierMultiplier);
         }
 
         var encountersPerHour = 3_600m / encounterCadenceSeconds;
         var experiencePerCreature = targetExperiencePerHour /
                                     encountersPerHour /
                                     expectedCreatureCount;
+        var cindersPerCreature = targetCindersPerHour /
+                                 encountersPerHour /
+                                 expectedCreatureCount;
 
-        return new AreaExperienceRate(targetExperiencePerHour, experiencePerCreature);
+        return new AreaExperienceRate(
+            targetExperiencePerHour,
+            targetCindersPerHour,
+            experiencePerCreature,
+            cindersPerCreature);
     }
 
     private static void ValidateSettings(AreaExperienceSettings settings, int encounterCadenceSeconds)
     {
         if (settings.BaseExperiencePerHour <= 0 ||
+            settings.BaseCindersPerHour <= 0 ||
             settings.DifficultyTierMultiplier < 1 ||
             encounterCadenceSeconds <= 0)
         {
@@ -183,10 +205,13 @@ public sealed class JsonAreaExperienceBalanceProvider : IAreaExperienceBalancePr
     private sealed class AreaExperienceSettings
     {
         public decimal BaseExperiencePerHour { get; set; }
+        public decimal BaseCindersPerHour { get; set; }
         public decimal DifficultyTierMultiplier { get; set; }
     }
 
     private sealed record AreaExperienceRate(
         decimal TargetExperiencePerHour,
-        decimal ExperiencePerCreature);
+        decimal TargetCindersPerHour,
+        decimal ExperiencePerCreature,
+        decimal CindersPerCreature);
 }

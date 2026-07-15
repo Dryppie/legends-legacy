@@ -3234,9 +3234,6 @@ namespace Persistence.LL.Migrations
                     b.Property<int>("DefenseProfile")
                         .HasColumnType("integer");
 
-                    b.Property<int>("ExperienceReward")
-                        .HasColumnType("integer");
-
                     b.Property<string>("RewardTableId")
                         .HasColumnType("text");
 

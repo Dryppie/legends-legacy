@@ -58,12 +58,13 @@ The same formula continues beyond level 100. Character XP storage is 64-bit, and
 
 ## Area XP throughput
 
-Area XP settings live in `LL/src/API/API.LL/Data/progression/area-experience.json`:
+Area XP and Cinder settings live in `LL/src/API/API.LL/Data/progression/area-experience.json`:
 
 ```json
 {
   "areaExperience": {
     "baseExperiencePerHour": 10000,
+    "baseCindersPerHour": 1000,
     "difficultyTierMultiplier": 1.08
   }
 }
@@ -73,27 +74,28 @@ An area's nominal perfect-victory throughput is:
 
 ```text
 target XP/hour = 10,000 × 1.08 ^ difficulty tier
+target Cinders/hour = 1,000 × 1.08 ^ difficulty tier
 ```
 
 Difficulty zero is the 10,000 XP/hour baseline. The current progression tiers produce:
 
-| Difficulty tier | Nominal XP/hour |
-| --------------: | --------------: |
-| 0 | 10,000 |
-| 1 | 10,800 |
-| 2 | 11,664 |
-| 3 | 12,597 |
-| 4 | 13,605 |
-| 5 | 14,693 |
-| 6 | 15,869 |
-| 7 | 17,138 |
-| 8 | 18,509 |
-| 9 | 19,990 |
-| 10 | 21,589 |
+| Difficulty tier | Nominal XP/hour | Nominal Cinders/hour |
+| --------------: | --------------: | -------------------: |
+| 0 | 10,000 | 1,000 |
+| 1 | 10,800 | 1,080 |
+| 2 | 11,664 | 1,166 |
+| 3 | 12,597 | 1,260 |
+| 4 | 13,605 | 1,360 |
+| 5 | 14,693 | 1,469 |
+| 6 | 15,869 | 1,587 |
+| 7 | 17,138 | 1,714 |
+| 8 | 18,509 | 1,851 |
+| 9 | 19,990 | 1,999 |
+| 10 | 21,589 | 2,159 |
 
-These values are before victory rate and character combat-XP bonuses.
+These values are before victory rate and character combat-XP bonuses. Combat-XP bonuses do not multiply Cinders.
 
-The region API exposes the resolved values through `GET /api/v1/region/area-experience`. Area cards display `Base XP: {value}/hr`; the frontend does not receive or reproduce the tier formula, spawn normalization, or creature XP calculation.
+The reward provider resolves these values server-side. The frontend does not reproduce the tier formula, spawn normalization, or encounter reward calculation.
 
 ## Expected group-size normalization
 
@@ -105,19 +107,33 @@ For an area's spawn probabilities:
 expected creature count = Σ(group size × normalized probability)
 XP per creature = target XP/hour ÷ 360 ÷ expected creature count
 encounter XP = round(XP per creature × actual creature count)
+Cinders per creature = target Cinders/hour ÷ 360 ÷ expected creature count
+encounter Cinders = round(Cinders per creature × actual creature count)
 ```
 
-The implementation calculates the full `XP per creature × actual creature count` value and rounds the encounter once. This avoids rounding every creature independently.
+The implementation calculates the complete encounter value and rounds once for each reward. This avoids rounding every creature independently.
 
 Consequences:
 
-- An area with fewer expected creatures gives more XP per individual creature.
-- An area with more expected creatures divides its hourly budget across those creatures.
-- Actual larger encounters still grant proportionally more XP than smaller encounters in the same area.
+- An area with fewer expected creatures gives more XP and Cinders per individual creature.
+- An area with more expected creatures divides both hourly budgets across those creatures.
+- Actual larger encounters still grant proportionally more rewards than smaller encounters in the same area.
 - Over many encounters, an area's nominal output remains close to its tier target, with a small difference possible from integer encounter rounding.
-- The same creature can grant different character XP in different areas because character XP belongs to the area encounter, not the creature definition.
+- The same creature can grant different character XP and Cinders in different areas because both rewards belong to the area encounter.
 
-Creature `ExperienceReward` remains available to systems that have not adopted area throughput, including the current dungeon and Cinder calculations. It no longer affects idle-area character XP.
+Creatures no longer contain `ExperienceReward`. Dungeon character XP and Cinders use their own dungeon-tier and room-type progression model from `dungeon-rewards.json`.
+
+## Dungeon reward progression
+
+Dungeon rewards are encounter-based rather than hourly:
+
+```text
+tier reward = base encounter reward × 1.40 ^ (dungeon tier - 1)
+miniboss = tier reward × 1.50
+boss = tier reward × 2.50
+```
+
+The tier-1 base is 2,500 XP and 100 Cinders per victorious combat encounter. This makes two or three daily dungeon runs a meaningful supplement without treating a dungeon as another 24-hour idle source.
 
 ## Reward order
 

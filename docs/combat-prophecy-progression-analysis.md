@@ -1,169 +1,140 @@
-# Creature, Character, and Prophecy Progression Analysis
+# Location, Character, and Prophecy Progression Analysis
 
-## Scope and assumptions
+## Current reward ownership
 
-This analysis compares idle-combat creature XP and Cinder rewards with character level requirements and the scalable Prophecy rewards.
+Character XP and Cinders are owned by the activity that creates the encounter, not by the defeated creature.
 
-The combat model assumes:
+- Areas budget rewards per hour from area difficulty and expected encounter size.
+- Dungeons budget rewards per victorious combat encounter from dungeon tier and room type.
+- Prophecies scale XP with the character level curve and Cinders with their bounded reward recipe.
+- Creature definitions own combat identity, stats, loot, and Essence relationships. They do not contain XP or Cinder values.
 
-- one encounter every 10 seconds, or 360 encounters per hour;
-- every encounter is won;
-- no combat XP bonuses or defeat-retention bonuses;
-- one character receives the XP, with no party split;
-- creatures and group sizes follow the committed region weights;
-- only direct combat Cinders are included, not item drops, dungeons, Guild rewards, caches, or Marketplace activity.
+This separation prevents a creature reused in multiple areas or dungeons from forcing those activities to share progression rates.
 
-Real earnings are lower when the character loses and can be higher with progression bonuses.
+## Area rewards
 
-## Current combat reward flow
+Area settings live in `LL/src/API/API.LL/Data/progression/area-experience.json`:
 
-The idle planner schedules one encounter immediately when due and then one every 10 seconds. On victory, character XP is the sum of the defeated creatures' `ExperienceReward` values.
-
-Before this rebalance, the shared combat Cinder calculator granted:
-
-```text
-Cinders = sum of defeated creature XP × 10
+```json
+{
+  "areaExperience": {
+    "baseExperiencePerHour": 10000,
+    "baseCindersPerHour": 1000,
+    "difficultyTierMultiplier": 1.08
+  }
+}
 ```
 
-This happened on every victory. Cinders were therefore not a conventional chance-based drop: they were a guaranteed reward worth ten times the encounter's XP.
+Nominal perfect-victory throughput is:
 
-At 360 encounters per hour, even a single 4-XP Goblin produced 14,400 Cinders per hour before group spawns. Late-region groups produced well above 100,000 per hour.
+```text
+XP/hour = 10,000 × 1.08 ^ area difficulty tier
+Cinders/hour = 1,000 × 1.08 ^ area difficulty tier
+```
 
-## Creature and area progression
+Both rewards are divided by 360 encounters per hour and the area's expected creature count. The actual encounter then receives the per-creature budget multiplied by its actual creature count and rounded once.
 
-Most areas after Lumo Ruins use group probabilities `[0.03, 0.969, 0.001]`, which means an average of 1.971 creatures per encounter. Creature selection is independently weighted for every spawned slot.
+```text
+expected creatures = Σ(group size × normalized group probability)
+reward per creature = target reward/hour ÷ 360 ÷ expected creatures
+encounter reward = round(reward per creature × actual creatures)
+```
 
-The following values are expected values from the committed creature, region, group-size, and spawn-weight data:
+Nominal targets therefore remain a constant 10:1 XP-to-Cinder ratio across tiers. Integer rounding is more visible for Cinders because each encounter grants only a few units; long-run realized Cinders can differ modestly from the nominal target.
 
-| Area              | Unlock | Creatures/encounter | XP/encounter | XP/hour | Minutes for one level at unlock | Old Cinders/hour | Rebalanced Cinders/hour |
-| ----------------- | -----: | ------------------: | -----------: | ------: | ------------------------------: | ---------------: | ----------------------: |
-| Training Area     |      1 |               1.000 |         1.00 |     360 |                            17.3 |            3,600 |                     360 |
-| Lumo Ruins        |      1 |               1.032 |         4.51 |   1,624 |                             3.8 |           16,235 |                     396 |
-| Blood Grove       |      5 |               1.971 |        12.18 |   4,385 |                             2.8 |           43,851 |                   1,072 |
-| Crystal Creek     |     10 |               1.971 |        20.30 |   7,308 |                             4.3 |           73,085 |                   1,547 |
-| Twilight Clearing |     15 |               1.971 |        26.94 |   9,697 |                             6.5 |           96,973 |                   2,111 |
-| Oak Thicket       |     20 |               1.971 |        19.71 |   7,096 |                            15.2 |           70,956 |                   1,563 |
-| Old Forest        |     25 |               1.971 |        34.89 |  12,559 |                            13.2 |          125,592 |                   2,653 |
-| Bleak Orchard     |     30 |               1.971 |        38.04 |  13,695 |                            17.2 |          136,945 |                   2,882 |
-| Rotting Hamlet    |     35 |               1.971 |        40.01 |  14,404 |                            22.1 |          144,041 |                   3,022 |
-| Wormburrow Depths |     40 |               1.971 |        45.33 |  16,320 |                            25.4 |          163,199 |                   3,411 |
-| Forgotten Ruins   |     45 |               1.971 |        34.30 |  12,346 |                            42.3 |          123,463 |                   2,605 |
+| Area | Tier | Nominal XP/hour | Nominal Cinders/hour |
+| --- | ---: | ---: | ---: |
+| Training Area | 0 | 10,000 | 1,000 |
+| Lumo Ruins | 1 | 10,800 | 1,080 |
+| Blood Grove | 2 | 11,664 | 1,166 |
+| Crystal Creek | 3 | 12,597 | 1,260 |
+| Twilight Clearing | 4 | 13,605 | 1,360 |
+| Oak Thicket | 5 | 14,693 | 1,469 |
+| Old Forest | 6 | 15,869 | 1,587 |
+| Bleak Orchard | 7 | 17,138 | 1,714 |
+| Rotting Hamlet | 8 | 18,509 | 1,851 |
+| Wormburrow Depths | 9 | 19,990 | 1,999 |
+| Forgotten Ruins | 10 | 21,589 | 2,159 |
 
-### Content irregularities
+Victory rate affects both rewards. Combat-XP bonuses and defeat-retention bonuses affect XP only; they do not multiply Cinders.
 
-XP throughput is not monotonic:
+## Dungeon rewards
 
-- Oak Thicket unlocks after Twilight Clearing but drops expected XP/hour by about 27%.
-- Forgotten Ruins is the highest-level area but drops expected XP/hour by about 24% compared with Wormburrow Depths.
-- Twilight Clearing's creature weights total `0.9`, although the spawning code normalizes the values and therefore still selects correctly.
+Dungeon settings live in `LL/src/API/API.LL/Data/progression/dungeon-rewards.json`. Dungeons deliberately use encounter budgets rather than hourly budgets because players run approximately two or three dungeons per day.
 
-These are content-balance discontinuities rather than errors in the XP writer. Players optimizing progression may remain in an earlier area if they can win it reliably. This rebalance does not change creature XP because doing so would alter character, Essence, and potentially objective pacing simultaneously.
+```text
+base tier-1 combat encounter = 2,500 XP + 100 Cinders
+tier reward = base reward × 1.40 ^ (dungeon tier - 1)
+miniboss reward = tier reward × 1.50
+boss reward = tier reward × 2.50
+```
+
+| Tier | Combat encounter | Miniboss | Boss |
+| ---: | ---: | ---: | ---: |
+| 1 | 2,500 XP / 100 Cinders | 3,750 / 150 | 6,250 / 250 |
+| 2 | 3,500 XP / 140 Cinders | 5,250 / 210 | 8,750 / 350 |
+| 3 | 4,900 XP / 196 Cinders | 7,350 / 294 | 12,250 / 490 |
+
+With the current 10–16 room definitions, 80% normal-combat room weighting, one miniboss, one boss, and one checkpoint, a representative successful run grants approximately:
+
+| Dungeon tier | Approximate XP/run | Approximate combat Cinders/run |
+| ---: | ---: | ---: |
+| 1 | 26,000–28,000 | 1,040–1,120 |
+| 2 | 39,000–42,000 | 1,570–1,680 |
+| 3 | 59,000–67,000 | 2,350–2,670 |
+
+These estimates exclude event rewards, route rewards, completion tables, mastery multipliers, losses, and checkpoint penalties. They describe only victorious combat encounters.
 
 ## Character XP curve
 
-For levels 1–100, the current formula simplifies to:
+The unlimited character curve is data-driven in `character-experience.json`:
 
 ```text
-XP required for next level = floor(100 + 4.25 × level²)
+XP required for next level = round-to-25(100 + 93 × level²)
 ```
 
 Representative requirements are:
 
 | Level | XP for next level |
-| ----: | ----------------: |
-|     1 |               104 |
-|    10 |               525 |
-|    20 |             1,800 |
-|    30 |             3,925 |
-|    40 |             6,900 |
-|    45 |             8,706 |
-|    60 |            15,400 |
-|   100 |            42,600 |
+| ---: | ---: |
+| 1 | 200 |
+| 20 | 37,300 |
+| 40 | 148,900 |
+| 60 | 334,900 |
+| 80 | 595,300 |
+| 100 | 930,100 |
 
-The requirement is quadratic while creature XP rises only modestly and stops receiving new area content after level 45. Level time therefore expands from a few minutes early on to about 42 minutes at the level-45 unlock area. If a level-100 character remains in Forgotten Ruins, one level takes roughly 3.45 hours at a 100% win rate.
-
-If the character always uses the highest-XP unlocked area, including remaining in an earlier area when a later unlock is worse, the optimistic cumulative timeline is:
-
-| Reached level | Continuous perfect-combat time |
-| ------------: | -----------------------------: |
-|             5 |                     0.32 hours |
-|            10 |                     0.69 hours |
-|            20 |                     1.87 hours |
-|            30 |                     4.26 hours |
-|            40 |                     7.95 hours |
-|            45 |                    10.28 hours |
-|            60 |                    21.00 hours |
-|           100 |        88.47 hours / 3.69 days |
-
-This is an upper-bound throughput model, but it shows that always-on 10-second combat can compress the entire current progression range into a small number of real days. That is an XP pacing concern separate from the Cinder multiplier and should be addressed with an explicit target for online/offline progression before changing creature XP values.
-
-The curve has coefficient changes after level 100 because it uses `ceil(level / 100)` internally. That behavior is outside the current region-content range and should be reviewed before content is extended significantly beyond level 100.
+The curve continues beyond level 100 and is stored as 64-bit character experience. Area throughput, 24-hour offline processing, and the expected victory-rate model target roughly two months to reach level 100.
 
 ## Prophecy comparison
 
-Prophecy character XP is intentionally expressed as a share of the next-level requirement:
-
-- Daily Common/Uncommon/Rare: 4% / 6% / 8% of a level, with minimum floors.
-- Weekly Uncommon/Rare/Epic: 30% / 40% / 50% of a level, with minimum floors.
-
-This keeps Prophecy XP relevant even when combat level time expands. At level 45:
-
-- a Rare daily grants 696 XP, equivalent to about 3.4 minutes of perfect Forgotten Ruins combat;
-- a Rare weekly grants 3,482 XP, equivalent to about 16.9 minutes of that combat;
-- the corresponding old Cinder rewards were 1,255 and 6,270;
-- combat itself produced about 123,463 Cinders per hour, making those rewards worth only 0.6 and 3.0 minutes of combat Cinders.
-
-Both Cinder systems were anchored to XP, but at different multipliers: combat used `10×`, while high-level Prophecies used `1.8×`. More importantly, Prophecy Cinders inherited the quadratic next-level XP curve and therefore grew from hundreds to tens of thousands even though the authored minimum rewards and most Cinder sinks did not.
-
-The XP floors are extremely generous before the percentage calculation overtakes them:
-
-| Level |     Daily Common | Daily Uncommon | Daily Rare | Weekly Uncommon | Weekly Rare | Weekly Epic |
-| ----: | ---------------: | -------------: | ---------: | --------------: | ----------: | ----------: |
-|     1 | 52.9% of a level |          76.9% |     101.0% |          442.3% |      567.3% |      692.3% |
-|    10 |            10.5% |          15.2% |      20.0% |           87.6% |      112.4% |      137.1% |
-|   20+ |               4% |             6% |         8% |             30% |         40% |         50% |
-
-From level 20 onward, five dailies plus the weekly contribute between 50% and 90% of one level. At the first few levels, the fixed floors can award several complete levels, particularly from the weekly Prophecy. This implementation leaves XP unchanged because the requested corrective action is Cinder inflation; the early XP floors should be reviewed separately rather than being altered as a side effect of the currency rebalance.
-
-## Implemented rebalance
-
-### Combat Cinders
-
-Combat now grants 20% of the defeated group's creature XP, rounded up, with a minimum of one Cinder for a victory that has positive creature XP:
+Prophecy XP remains a percentage of the next-level requirement, while Prophecy Cinders use a slow bounded level multiplier. This keeps Prophecy rewards relevant without allowing their Cinders to inherit the quadratic XP curve.
 
 ```text
-Cinders = max(1, ceil(sum of defeated creature XP × 20%))
+Prophecy Cinder growth = min(+200%, +1% per character level after level 1)
 ```
 
-The percentage and minimum are configuration values under `Combat:CinderRewards`. The same shared calculator is used by idle and dungeon combat.
+Area Cinders are now predictable enough to compare against Prophecy recipes: nominal area Cinders are always 10% of nominal area XP before integer rounding, while Prophecy Cinders remain discrete cadence rewards.
 
-This reduces expected region income from approximately 16,235–163,199 Cinders/hour to 396–3,411 Cinders/hour. The result still rises with harder creatures and larger groups, but it no longer gives ten currency units for every XP point every ten seconds.
+## Content-authoring rules
 
-### Prophecy Cinders
+When adding an area:
 
-Prophecy Cinders no longer derive from resolved character XP. Each recipe keeps its existing minimum, grows by 1% of that minimum per character level after level 1, rounds to the nearest five, and caps at +200%:
+1. Assign a unique difficulty tier.
+2. Author group-size probabilities and creature weights for combat variety.
+3. Do not tune creature data to alter XP or Cinders.
+4. Expect both area reward targets to grow by `1.08` per tier.
 
-```text
-growth basis points = min(20,000, (character level - 1) × 100)
-Cinders = round-to-5(minimum Cinders × (10,000 + growth basis points) / 10,000)
-```
+When adding a dungeon:
 
-| Level |  Daily Common old → new |    Daily Rare old → new |     Weekly Rare old → new |
-| ----: | ----------------------: | ----------------------: | ------------------------: |
-|     1 |               105 → 105 |               195 → 195 |             1,050 → 1,050 |
-|    20 |               130 → 125 |               260 → 230 |             1,295 → 1,250 |
-|    30 |               285 → 135 |               565 → 250 |             2,825 → 1,355 |
-|    45 |               625 → 150 |             1,255 → 280 |             6,270 → 1,510 |
-|    60 |             1,110 → 165 |             2,220 → 310 |            11,090 → 1,670 |
-|   100 |             3,065 → 210 |             6,135 → 390 |            30,670 → 2,090 |
-|  201+ | unbounded → 315 maximum | unbounded → 585 maximum | unbounded → 3,150 maximum |
+1. Assign its progression tier on the dungeon definition.
+2. Tune room count and room-type composition deliberately because each victorious combat room pays a reward.
+3. Change global dungeon bases, tier growth, or room multipliers in `dungeon-rewards.json` rather than changing creatures.
+4. Account for route, event, completion, and mastery rewards separately from combat rewards.
 
-At level 45, the rebalanced Rare daily's 280 Cinders represent about 6.5 minutes of Forgotten Ruins combat Cinders, while its XP represents about 3.4 minutes of combat XP. Prophecies therefore remain a noticeable currency bonus without replacing combat as the primary repeatable source.
+## Remaining risks
 
-## Risks and follow-up work
-
-- Existing Cinder balances and authored Marketplace prices were accumulated under a much more generous source. No legacy balance conversion is included.
-- Long-duration idle combat still produces meaningful currency because 360 encounters occur every hour. Observe daily rather than per-encounter totals.
-- Oak Thicket and Forgotten Ruins should be separately retuned if each new area is intended to improve XP/hour.
-- The level formula's behavior at century boundaries deserves its own review before raising the practical level/content ceiling.
-- Cinder sinks should be measured after the source reduction before their prices are lowered. Changing sources and sinks simultaneously would make the result difficult to evaluate.
+- Per-encounter integer rounding is proportionally significant for low Cinder values. Measure realized hourly income in telemetry rather than assuming the nominal target is exact.
+- Dungeon event and completion Cinders remain separate sources and can make total run income exceed the combat-only estimates.
+- Marketplace and crafting prices should be evaluated against daily income after this source change.
+- Existing local balances and database columns are not converted. A recreated local database uses the new schema without `Creature.ExperienceReward`.

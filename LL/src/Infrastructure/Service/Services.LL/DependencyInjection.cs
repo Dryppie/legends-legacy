@@ -99,6 +99,11 @@ public static class DependencyInjection
                 config,
                 contentRootPath,
                 sp.GetRequiredService<JsonSerializerOptions>()));
+        services.AddSingleton<IDungeonRewardBalanceProvider>(sp =>
+            new JsonDungeonRewardBalanceProvider(
+                config,
+                contentRootPath,
+                sp.GetRequiredService<JsonSerializerOptions>()));
 
         services.AddScoped<IAttributeService, AttributeService>();
         services.AddScoped<IAchievementService, AchievementService>();
@@ -115,13 +120,6 @@ public static class DependencyInjection
         services.AddScoped<IBonusService, BonusService>();
         services.AddScoped<IBonusProvider, SoulstoneBonusProvider>();
         services.AddScoped<IBonusProvider, EssenceCodexBonusProvider>();
-        services.AddOptions<CombatCinderRewardOptions>()
-            .Configure(options => config.GetSection("Combat:CinderRewards").Bind(options))
-            .Validate(
-                options => options.RewardBasisPointsOfCreatureExperience > 0 &&
-                           options.MinimumCindersPerVictory >= 0,
-                "Combat Cinder reward settings are invalid.")
-            .ValidateOnStart();
         services.AddOptions<IdleCombatProgressionOptions>()
             .Configure(options => config.GetSection(IdleCombatProgressionOptions.SectionName).Bind(options))
             .Validate(
@@ -368,7 +366,6 @@ public static class DependencyInjection
         services.AddScoped<ICombatantFactory, CombatantFactory>();
 
         // Outcome layer
-        services.AddScoped<ICinderRewardCalculator, DefaultIdleCinderRewardCalculator>();
         services.AddScoped<ICombatOutcomeCoordinator, CombatOutcomeCoordinator>();
         services.AddScoped<ICombatOutcomeProcessor, IdleCombatOutcomeProcessor>();
         services.AddScoped<ICombatOutcomeProcessor, DungeonCombatOutcomeProcessor>();

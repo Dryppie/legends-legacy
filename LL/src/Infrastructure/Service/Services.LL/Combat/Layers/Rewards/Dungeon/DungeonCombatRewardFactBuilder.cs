@@ -2,6 +2,7 @@ using Application.Interfaces.Services.LL.Entities;
 using Application.Interfaces.Services.LL.Dungeons;
 using Domain.Models.Dungeons;
 using Domain.Models.Dungeons.Definitions.Gathering;
+using Domain.Models.Dungeons.Definitions.Rooms;
 using Domain.Models.Dungeons.Runs;
 using Domain.Models.Entities.Creatures;
 using Domain.Models.Items.Equipments.Slots;
@@ -91,11 +92,16 @@ public class DungeonCombatRewardFactBuilder : IDungeonCombatRewardFactBuilder
         var gatheringNodes = dungeon is null
             ? []
             : await BuildGatheringNodesAsync(dungeon, cancellationToken);
+        var roomType = run?.Rooms.FirstOrDefault(x =>
+            x.RoomIndex == context.OrchestrationRequest.CurrentRoomIndex)?.Type ?? RoomType.Unknown;
 
         return new DungeonCombatRewardFacts(
             DungeonRunId: context.DungeonRunId,
             CharacterId: context.CharacterId,
             CurrentRoomIndex: context.OrchestrationRequest.CurrentRoomIndex,
+            DungeonTier: dungeon?.Tier ?? throw new InvalidOperationException(
+                $"Dungeon definition for run '{context.DungeonRunId}' could not be resolved."),
+            RoomType: roomType,
             MonsterLootModifiers: monsterLootModifiers,
             PlayerEntityIds: [.. context.PlayerEntityIds],
             EquippedTool: ResolveEquippedTool(context),

@@ -4,378 +4,324 @@
       "id": "00000000-0000-0000-0000-000000000001",
       "name": "Goblin",
       "imagePath": "goblin",
-      "experienceReward": 4,
       "archetype": "Balanced"
     },
     {
       "id": "00000000-0000-0000-0000-000000000002",
       "name": "Goblin Warrior",
       "imagePath": "goblin_warrior",
-      "experienceReward": 6,
       "archetype": "Bruiser"
     },
     {
       "id": "00000000-0000-0000-0000-000000000003",
       "name": "Goblin Archer",
       "imagePath": "goblin_archer",
-      "experienceReward": 5,
       "archetype": "DPS"
     },
     {
       "id": "00000000-0000-0000-0000-000000000004",
       "name": "Large Rat",
       "imagePath": "large_rat",
-      "experienceReward": 5,
       "archetype": "Tank"
     },
     {
       "id": "00000000-0000-0000-0000-000000000005",
       "name": "Flame Imp",
       "imagePath": "flame_imp",
-      "experienceReward": 6,
       "archetype": "Balanced"
     },
     {
       "id": "00000000-0000-0000-0000-000000000006",
       "name": "Frost Imp",
       "imagePath": "frost_imp",
-      "experienceReward": 6,
       "archetype": "Balanced"
     },
     {
       "id": "00000000-0000-0000-0000-000000000007",
       "name": "Shadow Imp",
       "imagePath": "shadow_imp",
-      "experienceReward": 6,
       "archetype": "Balanced"
     },
     {
       "id": "00000000-0000-0000-0000-000000000008",
       "name": "Vampire Bat",
       "imagePath": "vampire_bat",
-      "experienceReward": 8,
       "archetype": "Balanced"
     },
     {
       "id": "00000000-0000-0000-0000-000000000009",
       "name": "Blue Slime",
       "imagePath": "blue_slime",
-      "experienceReward": 10,
       "archetype": "Balanced"
     },
     {
       "id": "00000000-0000-0000-0000-000000000010",
       "name": "Brown Slime",
       "imagePath": "brown_slime",
-      "experienceReward": 10,
       "archetype": "Balanced"
     },
     {
       "id": "00000000-0000-0000-0000-000000000011",
       "name": "Green Slime",
       "imagePath": "green_slime",
-      "experienceReward": 10,
       "archetype": "Balanced"
     },
     {
       "id": "00000000-0000-0000-0000-000000000012",
       "name": "Rainbow Slime",
       "imagePath": "rainbow_slime",
-      "experienceReward": 12,
       "archetype": "Balanced"
     },
     {
       "id": "00000000-0000-0000-0000-000000000013",
       "name": "Red Slime",
       "imagePath": "red_slime",
-      "experienceReward": 10,
       "archetype": "Balanced"
     },
     {
       "id": "00000000-0000-0000-0000-000000000014",
       "name": "Transparent Slime",
       "imagePath": "transparent_slime",
-      "experienceReward": 11,
       "archetype": "Balanced"
     },
     {
       "id": "00000000-0000-0000-0000-000000000015",
       "name": "Enchanted Fairy",
       "imagePath": "enchanted_fairy",
-      "experienceReward": 14,
       "archetype": "Balanced"
     },
     {
       "id": "00000000-0000-0000-0000-000000000016",
       "name": "Glade Panther",
       "imagePath": "glade_panther",
-      "experienceReward": 14,
       "archetype": "Balanced"
     },
     {
       "id": "00000000-0000-0000-0000-000000000017",
       "name": "Illusion Fox",
       "imagePath": "illusion_fox",
-      "experienceReward": 14,
       "archetype": "Balanced"
     },
     {
       "id": "00000000-0000-0000-0000-000000000018",
       "name": "Nightshade Blossom",
       "imagePath": "nightshade_blossom",
-      "experienceReward": 15,
       "archetype": "Balanced"
     },
     {
       "id": "00000000-0000-0000-0000-000000000019",
       "name": "Pixie",
       "imagePath": "pixie",
-      "experienceReward": 12,
       "archetype": "Balanced"
     },
     {
       "id": "00000000-0000-0000-0000-000000000020",
       "name": "Hobgoblin",
       "imagePath": "hobgoblin",
-      "experienceReward": 20,
       "archetype": "Balanced"
     },
     {
       "id": "00000000-0000-0000-0000-000000000021",
       "name": "Moss Lizard",
       "imagePath": "moss_lizard",
-      "experienceReward": 8,
       "archetype": "Balanced"
     },
     {
       "id": "00000000-0000-0000-0000-000000000022",
       "name": "Spider",
       "imagePath": "spider",
-      "experienceReward": 9,
       "archetype": "Balanced"
     },
     {
       "id": "00000000-0000-0000-0000-000000000023",
       "name": "Treant Sapling",
       "imagePath": "treant_sapling",
-      "experienceReward": 10,
       "archetype": "Balanced"
     },
     {
       "id": "00000000-0000-0000-0000-000000000024",
       "name": "Venomous Snake",
       "imagePath": "venomous_snake",
-      "experienceReward": 11,
       "archetype": "Balanced"
     },
     {
       "id": "00000000-0000-0000-0000-000000000025",
       "name": "Viper",
       "imagePath": "viper",
-      "experienceReward": 12,
       "archetype": "Balanced"
     },
     {
       "id": "00000000-0000-0000-0000-000000000026",
       "name": "Feral Ghoul",
       "imagePath": "feral_ghoul",
-      "experienceReward": 15,
       "archetype": "Balanced"
     },
     {
       "id": "00000000-0000-0000-0000-000000000027",
       "name": "Plague Ghoul",
       "imagePath": "plague_ghoul",
-      "experienceReward": 16,
       "archetype": "Balanced"
     },
     {
       "id": "00000000-0000-0000-0000-000000000028",
       "name": "Ravenous Ghoul",
       "imagePath": "ravenous_ghoul",
-      "experienceReward": 17,
       "archetype": "Balanced"
     },
     {
       "id": "00000000-0000-0000-0000-000000000029",
       "name": "Skeleton Archer",
       "imagePath": "skeleton_archer",
-      "experienceReward": 18,
       "archetype": "Balanced"
     },
     {
       "id": "00000000-0000-0000-0000-000000000030",
       "name": "Skeleton Mage",
       "imagePath": "skeleton_mage",
-      "experienceReward": 19,
       "archetype": "Balanced"
     },
     {
       "id": "00000000-0000-0000-0000-000000000031",
       "name": "Skeleton Warrior",
       "imagePath": "skeleton_warrior",
-      "experienceReward": 20,
       "archetype": "Balanced"
     },
     {
       "id": "00000000-0000-0000-0000-000000000032",
       "name": "Ant Worker",
       "imagePath": "ant_worker",
-      "experienceReward": 8,
       "archetype": "Support"
     },
     {
       "id": "00000000-0000-0000-0000-000000000033",
       "name": "Fire Ant",
       "imagePath": "fire_ant",
-      "experienceReward": 9,
       "archetype": "DPS"
     },
     {
       "id": "00000000-0000-0000-0000-000000000034",
       "name": "Forest Spirit",
       "imagePath": "forest_spirit",
-      "experienceReward": 18,
       "archetype": "Support"
     },
     {
       "id": "00000000-0000-0000-0000-000000000035",
       "name": "Wood Nymph",
       "imagePath": "wood_nymph",
-      "experienceReward": 18,
       "archetype": "Support"
     },
     {
       "id": "00000000-0000-0000-0000-000000000036",
       "name": "Giant Spider",
       "imagePath": "giant_spider",
-      "experienceReward": 18,
       "archetype": "Bruiser"
     },
     {
       "id": "00000000-0000-0000-0000-000000000037",
       "name": "Venomous Spiderling",
       "imagePath": "venomous_spiderling",
-      "experienceReward": 16,
       "archetype": "Balanced"
     },
     {
       "id": "00000000-0000-0000-0000-000000000038",
       "name": "Blackjaw Spider",
       "imagePath": "blackjaw_spider",
-      "experienceReward": 19,
       "archetype": "Bruiser"
     },
     {
       "id": "00000000-0000-0000-0000-000000000039",
       "name": "Raven",
       "imagePath": "raven",
-      "experienceReward": 16,
       "archetype": "Balanced"
     },
     {
       "id": "00000000-0000-0000-0000-000000000040",
       "name": "Scarecrow",
       "imagePath": "scarecrow",
-      "experienceReward": 19,
       "archetype": "Hazard"
     },
     {
       "id": "00000000-0000-0000-0000-000000000041",
       "name": "Lost Soul",
       "imagePath": "lost_soul",
-      "experienceReward": 18,
       "archetype": "Support"
     },
     {
       "id": "00000000-0000-0000-0000-000000000042",
       "name": "Apparition",
       "imagePath": "apparition",
-      "experienceReward": 20,
       "archetype": "Hazard"
     },
     {
       "id": "00000000-0000-0000-0000-000000000043",
       "name": "Specter",
       "imagePath": "specter",
-      "experienceReward": 21,
       "archetype": "DPS"
     },
     {
       "id": "00000000-0000-0000-0000-000000000044",
       "name": "Zombie",
       "imagePath": "zombie",
-      "experienceReward": 20,
       "archetype": "Tank"
     },
     {
       "id": "00000000-0000-0000-0000-000000000045",
       "name": "Half Zombie",
       "imagePath": "half_zombie",
-      "experienceReward": 19,
       "archetype": "Balanced"
     },
     {
       "id": "00000000-0000-0000-0000-000000000046",
       "name": "Undead",
       "imagePath": "undead",
-      "experienceReward": 21,
       "archetype": "Bruiser"
     },
     {
       "id": "00000000-0000-0000-0000-000000000047",
       "name": "Blood Zombie",
       "imagePath": "blood_zombie",
-      "experienceReward": 22,
       "archetype": "Tank"
     },
     {
       "id": "00000000-0000-0000-0000-000000000048",
       "name": "Giant Worm",
       "imagePath": "giant_worm",
-      "experienceReward": 23,
       "archetype": "Bruiser"
     },
     {
       "id": "00000000-0000-0000-0000-000000000049",
       "name": "Burrowed Horror",
       "imagePath": "burrowed_horror",
-      "experienceReward": 24,
       "archetype": "DPS"
     },
     {
       "id": "00000000-0000-0000-0000-000000000050",
       "name": "Cave Leech",
       "imagePath": "cave_leech",
-      "experienceReward": 22,
       "archetype": "Support"
     },
     {
       "id": "00000000-0000-0000-0000-000000000051",
       "name": "Widow Stalker",
       "imagePath": "widow_stalker",
-      "experienceReward": 20,
       "archetype": "DPS"
     },
     {
       "id": "00000000-0000-0000-0000-000000000052",
       "name": "Stonejaw Grub",
       "imagePath": "stonejaw_grub",
-      "experienceReward": 21,
       "archetype": "Tank"
     },
     {
       "id": "00000000-0000-0000-0000-000000000053",
       "name": "Deep Burrower",
       "imagePath": "deep_burrower",
-      "experienceReward": 25,
       "archetype": "Bruiser"
     },
     {
       "id": "00000000-0000-0000-0000-000000000054",
       "name": "Training Goblin",
       "imagePath": "goblin",
-      "experienceReward": 1,
       "archetype": "Balanced",
       "statOverrides": [
         {

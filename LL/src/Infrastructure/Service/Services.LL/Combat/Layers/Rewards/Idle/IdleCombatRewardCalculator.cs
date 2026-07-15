@@ -16,7 +16,6 @@ public sealed class IdleCombatRewardCalculator : IIdleCombatRewardCalculator
 {
     private readonly IBonusService _bonusService;
     private readonly ILootService _lootService;
-    private readonly ICinderRewardCalculator _cinderRewardCalculator;
     private readonly ISoulstoneRewardCalculator _soulstoneRewardCalculator;
     private readonly IEssenceResonanceService _essenceResonanceService;
     private readonly IIdleDungeonSigilDropCalculator _sigilDropCalculator;
@@ -26,7 +25,6 @@ public sealed class IdleCombatRewardCalculator : IIdleCombatRewardCalculator
     public IdleCombatRewardCalculator(
         IBonusService bonusService,
         ILootService lootService,
-        ICinderRewardCalculator cinderRewardCalculator,
         ISoulstoneRewardCalculator soulstoneRewardCalculator,
         IEssenceResonanceService essenceResonanceService,
         IIdleDungeonSigilDropCalculator sigilDropCalculator,
@@ -35,7 +33,6 @@ public sealed class IdleCombatRewardCalculator : IIdleCombatRewardCalculator
     {
         _bonusService = bonusService;
         _lootService = lootService;
-        _cinderRewardCalculator = cinderRewardCalculator;
         _soulstoneRewardCalculator = soulstoneRewardCalculator;
         _essenceResonanceService = essenceResonanceService;
         _sigilDropCalculator = sigilDropCalculator;
@@ -67,6 +64,9 @@ public sealed class IdleCombatRewardCalculator : IIdleCombatRewardCalculator
             var areaBaseExperience = _areaExperienceBalance.CalculateEncounterExperience(
                 facts.Area.Id,
                 creatureCount);
+            var areaBaseCinders = _areaExperienceBalance.CalculateEncounterCinders(
+                facts.Area.Id,
+                creatureCount);
             var bonusAdjustedExperience = areaBaseExperience.ApplyPositiveBps(combatExperienceGainBps);
             var experience = 0;
             var cinders = 0;
@@ -95,7 +95,7 @@ public sealed class IdleCombatRewardCalculator : IIdleCombatRewardCalculator
 
                 experience = bonusAdjustedExperience;
 
-                cinders = _cinderRewardCalculator.Calculate(encounter.HostileCreatures);
+                cinders = areaBaseCinders;
 
                 totalLoot.AddRange(loot);
                 totalCinders += cinders;

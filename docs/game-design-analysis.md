@@ -133,7 +133,7 @@ Enemy selection:
 
 Victory rewards:
 
-- XP from defeated hostile creature experience rewards.
+- XP from the area's tier-based encounter reward budget.
 - Cinders via `DefaultIdleCinderRewardCalculator`.
 - Soulstones via `PoissonSoulstoneRewardCalculator` for idle; dungeon combat currently grants a flat 5 soulstones in `DungeonCombatRewardCalculator.cs`.
 - Loot through `LootService`.

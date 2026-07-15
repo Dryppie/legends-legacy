@@ -1,0 +1,15 @@
+{
+  "dungeonRewards": {
+    "baseExperiencePerEncounter": 2500,
+    "baseCindersPerEncounter": 100,
+    "tierMultiplier": 1.4,
+    "roomMultipliers": {
+      "Unknown": 1.0,
+      "Combat": 1.0,
+      "Event": 1.0,
+      "MiniBoss": 1.5,
+      "Checkpoint": 1.0,
+      "Boss": 2.5
+    }
+  }
+}

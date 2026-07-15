@@ -1,6 +1,7 @@
 {
   "areaExperience": {
     "baseExperiencePerHour": 10000,
+    "baseCindersPerHour": 1000,
     "difficultyTierMultiplier": 1.08
   }
 }

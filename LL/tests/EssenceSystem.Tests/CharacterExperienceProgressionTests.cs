@@ -1,6 +1,7 @@
 using Application.Interfaces.Services.LL.Entities;
 using Application.UseCases.Characters.Events;
 using Domain.Models.Entities.Characters;
+using Domain.Models.Dungeons.Definitions.Rooms;
 using Domain.Models.Progression;
 using Domain.Models.Professions;
 using Domain.Helpers.Constants;
@@ -8,7 +9,7 @@ using MediatR;
 using Microsoft.Extensions.Configuration;
 using Services.LL.Levels;
 using Services.LL.Regions;
-using Services.LL.Combat.Layers.Rewards.Idle;
+using Services.LL.Dungeons;
 using System.Text.Json;
 
 namespace EssenceSystem.Tests;
@@ -112,7 +113,7 @@ public sealed class CharacterExperienceProgressionTests
     }
 
     [Fact]
-    public void Area_experience_uses_the_difficulty_curve_and_normalizes_for_expected_group_size()
+    public void Area_rewards_use_the_same_difficulty_curve_and_normalize_for_expected_group_size()
     {
         var provider = CreateAreaExperienceProvider();
 
@@ -120,14 +121,41 @@ public sealed class CharacterExperienceProgressionTests
         Assert.Equal(10_800m, provider.GetTargetExperiencePerHour("region_01_area_01"));
         Assert.Equal(11_664m, provider.GetTargetExperiencePerHour("region_01_area_02"));
         Assert.Equal(21_589.24997272786698240000m, provider.GetTargetExperiencePerHour("region_01_area_07"));
+        Assert.Equal(1_000m, provider.GetTargetCindersPerHour("tutorial_area_training_grounds"));
+        Assert.Equal(1_080m, provider.GetTargetCindersPerHour("region_01_area_01"));
+        Assert.Equal(1_166.4m, provider.GetTargetCindersPerHour("region_01_area_02"));
+        Assert.Equal(2_158.924997272786698240000m, provider.GetTargetCindersPerHour("region_01_area_07"));
 
         Assert.Equal(29, provider.CalculateEncounterExperience("region_01_area_01", 1));
         Assert.Equal(16, provider.CalculateEncounterExperience("region_01_area_02", 1));
         Assert.Equal(87, provider.CalculateEncounterExperience("region_01_area_01", 3));
         Assert.Equal(49, provider.CalculateEncounterExperience("region_01_area_02", 3));
+        Assert.Equal(3, provider.CalculateEncounterCinders("region_01_area_01", 1));
+        Assert.Equal(2, provider.CalculateEncounterCinders("region_01_area_02", 1));
+        Assert.Equal(9, provider.CalculateEncounterCinders("region_01_area_01", 3));
+        Assert.Equal(5, provider.CalculateEncounterCinders("region_01_area_02", 3));
         Assert.Throws<KeyNotFoundException>(() =>
             provider.CalculateEncounterExperience("unknown-area", 1));
     }
+
+    [Fact]
+    public void Dungeon_rewards_scale_by_tier_and_room_type_independently_from_creatures()
+    {
+        var provider = new JsonDungeonRewardBalanceProvider(
+            CreateConfiguration(),
+            FindApiRoot(),
+            new JsonSerializerOptions(JsonSerializerDefaults.Web));
+
+        Assert.Equal((2_500, 100), ToTuple(provider.GetEncounterReward(1, RoomType.Combat)));
+        Assert.Equal((5_250, 210), ToTuple(provider.GetEncounterReward(2, RoomType.MiniBoss)));
+        Assert.Equal((12_250, 490), ToTuple(provider.GetEncounterReward(3, RoomType.Boss)));
+        Assert.Throws<ArgumentOutOfRangeException>(() =>
+            provider.GetEncounterReward(0, RoomType.Combat));
+    }
+
+    private static (int Experience, int Cinders) ToTuple(
+        Application.Interfaces.Services.LL.Dungeons.DungeonEncounterReward reward) =>
+        (reward.Experience, reward.Cinders);
 
     private static JsonCharacterExperienceProgressionProvider CreateProgressionProvider()
     {

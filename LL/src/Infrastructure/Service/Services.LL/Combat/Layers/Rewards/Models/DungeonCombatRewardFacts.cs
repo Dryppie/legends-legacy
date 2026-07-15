@@ -1,3 +1,4 @@
+using Domain.Models.Dungeons.Definitions.Rooms;
 using Domain.Models.Items;
 
 namespace Services.LL.Combat.Layers.Rewards.Models;
@@ -6,6 +7,8 @@ public sealed record DungeonCombatRewardFacts(
     Guid DungeonRunId,
     Guid CharacterId,
     int CurrentRoomIndex,
+    int DungeonTier,
+    RoomType RoomType,
     IReadOnlyDictionary<ItemType, double> MonsterLootModifiers,
     IReadOnlyList<Guid> PlayerEntityIds,
     EquippedGatheringTool? EquippedTool,

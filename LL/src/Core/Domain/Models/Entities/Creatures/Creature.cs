@@ -16,7 +16,6 @@ public class Creature : Entity
     public string? RewardTableId { get; set; }
     public int BaseLevel { get; set; } = 1;
     public int Tier { get; set; } = 1;
-    public int ExperienceReward {  get; set; }
     public ICollection<StatOverride> StatOverrides { get; set; } = [];
     //public ICollection<ElementAffinity> ElementAffinities { get; set; } = [];
 
