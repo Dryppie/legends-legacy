@@ -13,7 +13,6 @@ public sealed record PropheciesOverview(
     PlayerProphecyInstance? ActiveDailyProphecy,
     PlayerProphecyInstance GreaterProphecy,
     WeeklyRevelationProgress WeeklyRevelation,
-    IReadOnlyList<PlayerProphecyInstance> RecentProphecies,
     IReadOnlyList<WeeklyRevelationMilestone> WeeklyMilestones,
     IReadOnlyList<ProphecyCacheInventory> Caches);
 

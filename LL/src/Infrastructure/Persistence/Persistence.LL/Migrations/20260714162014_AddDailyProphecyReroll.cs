@@ -16,13 +16,6 @@ namespace Persistence.LL.Migrations
                 table: "PlayerProphecyInstances",
                 type: "timestamp with time zone",
                 nullable: true);
-
-            migrationBuilder.AddColumn<string>(
-                name: "RerolledFromDefinitionId",
-                table: "PlayerProphecyInstances",
-                type: "character varying(128)",
-                maxLength: 128,
-                nullable: true);
         }
 
         /// <inheritdoc />
@@ -30,10 +23,6 @@ namespace Persistence.LL.Migrations
         {
             migrationBuilder.DropColumn(
                 name: "DailyRerollUsedAt",
-                table: "PlayerProphecyInstances");
-
-            migrationBuilder.DropColumn(
-                name: "RerolledFromDefinitionId",
                 table: "PlayerProphecyInstances");
         }
     }

@@ -16,7 +16,6 @@ public sealed class PropheciesOverviewDto : IMapFrom<PropheciesOverview>
     public ProphecyInstanceDto? ActiveDailyProphecy { get; set; }
     public ProphecyInstanceDto GreaterProphecy { get; set; } = new();
     public WeeklyRevelationProgressDto WeeklyRevelation { get; set; } = new();
-    public List<ProphecyInstanceDto> RecentProphecies { get; set; } = [];
     public List<ProphecyCacheInventoryDto> Caches { get; set; } = [];
 
     public void Mapping(Profile profile)

@@ -40,44 +40,6 @@ public sealed class ProphecyRepositoryTests
         Assert.Null(wrongCharacter);
     }
 
-    [Fact]
-    public async Task Recent_queries_are_scoped_and_include_rerolled_definition_history()
-    {
-        await using var db = CreateDb();
-        var claimed = CreateInstance("claimed", ProphecyStatus.Claimed);
-        claimed.RerolledFromDefinitionId = "original.offer";
-        claimed.ClaimedAt = Now;
-        var offered = CreateInstance("offered", ProphecyStatus.Offered, claimed.PlayerId, claimed.CharacterId);
-        var otherCharacter = CreateInstance("other", ProphecyStatus.Claimed, claimed.PlayerId, Guid.NewGuid());
-        db.ProphecyDefinitions.AddRange(
-            claimed.ProphecyDefinition!,
-            offered.ProphecyDefinition!,
-            otherCharacter.ProphecyDefinition!);
-        db.PlayerProphecyInstances.AddRange(claimed, offered, otherCharacter);
-        await db.SaveChangesAsync();
-        var repository = new ProphecyRepository(db);
-
-        var recent = await repository.GetRecentInstancesAsync(
-            claimed.PlayerId,
-            claimed.CharacterId,
-            Now.AddDays(-1),
-            10,
-            CancellationToken.None);
-        var definitionIds = await repository.GetRecentDefinitionIdsAsync(
-            claimed.PlayerId,
-            claimed.CharacterId,
-            ProphecyScope.Daily,
-            Now.AddDays(-1),
-            Now.AddDays(1),
-            CancellationToken.None);
-
-        Assert.Equal(claimed.Id, Assert.Single(recent).Id);
-        Assert.Contains(claimed.ProphecyDefinitionId, definitionIds);
-        Assert.Contains("original.offer", definitionIds);
-        Assert.Contains(offered.ProphecyDefinitionId, definitionIds);
-        Assert.DoesNotContain(otherCharacter.ProphecyDefinitionId, definitionIds);
-    }
-
     private static PlayerProphecyInstance CreateInstance(
         string id,
         ProphecyStatus status,

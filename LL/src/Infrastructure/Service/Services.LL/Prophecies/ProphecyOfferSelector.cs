@@ -14,8 +14,7 @@ public static class ProphecyOfferSelector
         DateTimeOffset periodStart,
         string selectionSalt,
         IReadOnlySet<string>? excludedDefinitionIds = null,
-        IReadOnlySet<ProphecyCategory>? excludedCategories = null,
-        IReadOnlySet<string>? recentDefinitionIds = null)
+        IReadOnlySet<ProphecyCategory>? excludedCategories = null)
     {
         var slotName = slot.ToString();
         var candidates = definitions
@@ -36,20 +35,14 @@ public static class ProphecyOfferSelector
 
         excludedDefinitionIds ??= EmptyDefinitionIds;
         excludedCategories ??= EmptyCategories;
-        recentDefinitionIds ??= EmptyDefinitionIds;
 
         var uniqueCandidates = candidates
             .Where(x => !excludedDefinitionIds.Contains(x.Id))
             .ToList();
 
         var selectionPool = FirstNonEmpty(
-            uniqueCandidates.Where(x =>
-                !excludedCategories.Contains(x.Category) &&
-                !recentDefinitionIds.Contains(x.Id)),
             uniqueCandidates.Where(x => !excludedCategories.Contains(x.Category)),
-            uniqueCandidates.Where(x => !recentDefinitionIds.Contains(x.Id)),
             uniqueCandidates,
-            candidates.Where(x => !recentDefinitionIds.Contains(x.Id)),
             candidates);
 
         return PickWeighted(

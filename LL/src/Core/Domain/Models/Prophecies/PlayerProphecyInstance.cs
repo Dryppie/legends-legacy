@@ -22,8 +22,6 @@ public sealed class PlayerProphecyInstance
     public DateTimeOffset? ClaimedAt { get; set; }
     public DateTimeOffset? DailyRerollUsedAt { get; set; }
 
-    public string? RerolledFromDefinitionId { get; set; }
-
     public int TargetValue { get; set; }
     public int CurrentValue { get; set; }
 

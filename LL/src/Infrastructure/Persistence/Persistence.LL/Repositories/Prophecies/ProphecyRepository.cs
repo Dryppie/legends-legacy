@@ -110,50 +110,6 @@ public sealed class ProphecyRepository : IProphecyRepository
                 x.PeriodEnd > from)
             .ToListAsync(cancellationToken);
 
-    public async Task<IReadOnlyList<PlayerProphecyInstance>> GetRecentInstancesAsync(
-        Guid playerId,
-        Guid characterId,
-        DateTimeOffset since,
-        int limit,
-        CancellationToken cancellationToken) =>
-        await _context.PlayerProphecyInstances
-            .Include(x => x.ProphecyDefinition)
-            .Where(x =>
-                x.PlayerId == playerId &&
-                x.CharacterId == characterId &&
-                x.GeneratedAt >= since &&
-                x.Status != ProphecyStatus.Offered &&
-                x.Status != ProphecyStatus.Accepted)
-            .OrderByDescending(x => x.ClaimedAt ?? x.CompletedAt ?? x.AcceptedAt ?? x.GeneratedAt)
-            .Take(limit)
-            .ToListAsync(cancellationToken);
-
-    public async Task<IReadOnlySet<string>> GetRecentDefinitionIdsAsync(
-        Guid playerId,
-        Guid characterId,
-        ProphecyScope scope,
-        DateTimeOffset since,
-        DateTimeOffset before,
-        CancellationToken cancellationToken)
-    {
-        var instances = await _context.PlayerProphecyInstances
-            .AsNoTracking()
-            .Where(x =>
-                x.PlayerId == playerId &&
-                x.CharacterId == characterId &&
-                x.Scope == scope &&
-                x.GeneratedAt >= since &&
-                x.GeneratedAt < before)
-            .Select(x => new { x.ProphecyDefinitionId, x.RerolledFromDefinitionId })
-            .ToListAsync(cancellationToken);
-
-        return instances
-            .SelectMany(x => new[] { x.ProphecyDefinitionId, x.RerolledFromDefinitionId })
-            .Where(x => !string.IsNullOrWhiteSpace(x))
-            .Select(x => x!)
-            .ToHashSet(StringComparer.OrdinalIgnoreCase);
-    }
-
     public async Task<bool> TryConsumeDailyRerollAsync(
         Guid playerId,
         Guid characterId,

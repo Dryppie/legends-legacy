@@ -13,8 +13,6 @@ namespace Services.LL.Prophecies;
 
 public sealed class ProphecyService : IProphecyService
 {
-    private static readonly TimeSpan DailyOfferHistoryWindow = TimeSpan.FromDays(7);
-    private static readonly TimeSpan WeeklyOfferHistoryWindow = TimeSpan.FromDays(28);
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
 
     private readonly IReadOnlyList<ProphecyDefinition> _definitions;
@@ -73,12 +71,6 @@ public sealed class ProphecyService : IProphecyService
         var daily = await EnsureDailyInstancesAsync(definitions, playerId, characterId, dailyPeriod.Start, dailyPeriod.End, now, rewardContext, cancellationToken);
         var greater = await EnsureGreaterProphecyAsync(definitions, playerId, characterId, weeklyPeriod.Start, weeklyPeriod.End, now, rewardContext, cancellationToken);
         var weekly = await EnsureWeeklyProgressAsync(playerId, characterId, weeklyPeriod.Start, weeklyPeriod.End, now, cancellationToken);
-        var recent = await _repository.GetRecentInstancesAsync(
-            playerId,
-            characterId,
-            now.AddDays(-14),
-            12,
-            cancellationToken);
 
         ExpireOldUnfinished(daily, now);
         if (greater.Status is ProphecyStatus.Offered)
@@ -96,8 +88,6 @@ public sealed class ProphecyService : IProphecyService
         RebalanceTargetIfHigher(greater);
         MarkCompletedIfTargetReached(greater, now);
 
-        var currentIds = daily.Select(x => x.Id).Append(greater.Id).ToHashSet();
-        recent = recent.Where(x => !currentIds.Contains(x.Id)).ToList();
         var weeklyMilestones = CreateWeeklyMilestones(weekly);
         var caches = await GetCacheInventoryAsync(characterId, cancellationToken);
         var rerollState = await EnsureDailyRerollStateAsync(
@@ -121,7 +111,6 @@ public sealed class ProphecyService : IProphecyService
             daily.FirstOrDefault(IsAcceptedOrLater),
             greater,
             weekly,
-            recent,
             weeklyMilestones,
             caches);
     }
@@ -200,13 +189,6 @@ public sealed class ProphecyService : IProphecyService
         var rewardContext = CreateRewardContext(character.Level);
         var periodStart = overview.DailyProphecies[0].PeriodStart;
         var periodEnd = overview.DailyProphecies[0].PeriodEnd;
-        var recentDefinitionIds = await _repository.GetRecentDefinitionIdsAsync(
-            playerId,
-            characterId,
-            ProphecyScope.Daily,
-            periodStart - DailyOfferHistoryWindow,
-            periodStart,
-            cancellationToken);
         var rerollState = await EnsureDailyRerollStateAsync(
             playerId,
             characterId,
@@ -215,7 +197,7 @@ public sealed class ProphecyService : IProphecyService
             overview.DailyProphecies,
             now,
             cancellationToken);
-        var shownDefinitionIds = ReadDefinitionHistory(rerollState.ShownDefinitionIdsJson);
+        var shownDefinitionIds = ReadShownDefinitionIds(rerollState.ShownDefinitionIdsJson);
         var currentDefinitionIds = overview.DailyProphecies
             .Select(x => x.ProphecyDefinitionId)
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
@@ -236,8 +218,7 @@ public sealed class ProphecyService : IProphecyService
                 periodStart,
                 $"reroll-set:{rerollState.RerollsUsed + 1}:{prophecy.SlotType}",
                 shownDefinitionIds,
-                excludedCategories,
-                recentDefinitionIds);
+                excludedCategories);
 
             if (replacement is null)
             {
@@ -309,7 +290,6 @@ public sealed class ProphecyService : IProphecyService
         foreach (var (prophecy, replacement) in replacements)
         {
             shownDefinitionIds.Add(replacement.Id);
-            prophecy.RerolledFromDefinitionId = prophecy.ProphecyDefinitionId;
             ReplaceOfferDefinition(prophecy, replacement, now, rewardContext);
         }
         rerollState.ShownDefinitionIdsJson = JsonSerializer.Serialize(shownDefinitionIds, JsonOptions);
@@ -570,13 +550,6 @@ public sealed class ProphecyService : IProphecyService
             .Where(x => x is not null)
             .Select(x => x!.Category)
             .ToHashSet();
-        var recentDefinitionIds = await _repository.GetRecentDefinitionIdsAsync(
-            playerId,
-            characterId,
-            ProphecyScope.Daily,
-            periodStart - DailyOfferHistoryWindow,
-            periodStart,
-            cancellationToken);
         var generated = new List<PlayerProphecyInstance>();
 
         foreach (var slot in new[] { ProphecySlotType.Steady, ProphecySlotType.Focused, ProphecySlotType.Ominous })
@@ -594,8 +567,7 @@ public sealed class ProphecyService : IProphecyService
                 periodStart,
                 "initial",
                 excludedDefinitionIds,
-                excludedCategories,
-                recentDefinitionIds) ??
+                excludedCategories) ??
                 throw new InvalidOperationException($"No enabled daily prophecy definition is available for slot {slot}.");
 
             generated.Add(CreateInstance(
@@ -641,21 +613,13 @@ public sealed class ProphecyService : IProphecyService
             return greater;
         }
 
-        var recentDefinitionIds = await _repository.GetRecentDefinitionIdsAsync(
-            playerId,
-            characterId,
-            ProphecyScope.Weekly,
-            periodStart - WeeklyOfferHistoryWindow,
-            periodStart,
-            cancellationToken);
         var definition = ProphecyOfferSelector.Pick(
             definitions,
             ProphecyScope.Weekly,
             ProphecySlotType.Greater,
             characterId,
             periodStart,
-            "initial",
-            recentDefinitionIds: recentDefinitionIds) ??
+            "initial") ??
             throw new InvalidOperationException("No enabled weekly prophecy definition is available for the Greater slot.");
 
         greater = CreateInstance(
@@ -1054,7 +1018,7 @@ public sealed class ProphecyService : IProphecyService
             : _balance.Economy.PaidRerollCosts[rerollsUsed - 1];
     }
 
-    private static HashSet<string> ReadDefinitionHistory(string json)
+    private static HashSet<string> ReadShownDefinitionIds(string json)
     {
         try
         {

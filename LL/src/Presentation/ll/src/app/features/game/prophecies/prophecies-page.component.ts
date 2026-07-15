@@ -93,7 +93,6 @@ export class PropheciesPageComponent implements OnInit, OnDestroy {
   readonly activeDailyProphecy = computed(() => this.overview()?.activeDailyProphecy ?? null);
   readonly greaterProphecy = computed(() => this.overview()?.greaterProphecy ?? null);
   readonly weeklyRevelation = computed(() => this.overview()?.weeklyRevelation ?? null);
-  readonly recentProphecies = computed(() => this.overview()?.recentProphecies ?? []);
   readonly caches = computed(() => this.overview()?.caches ?? []);
   readonly ownedCaches = computed(() => this.caches().filter((cache) => cache.quantity > 0));
   readonly readyProphecies = computed(() => {
@@ -251,10 +250,6 @@ export class PropheciesPageComponent implements OnInit, OnDestroy {
                 ? response.prophecy
                 : current.greaterProphecy,
             weeklyRevelation: response.weeklyRevelation,
-            recentProphecies: [
-              response.prophecy,
-              ...current.recentProphecies.filter((item) => item.id !== response.prophecy.id),
-            ].slice(0, 12),
           });
         }
         this.syncNotificationCount();

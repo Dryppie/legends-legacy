@@ -93,6 +93,8 @@ Difficulty zero is the 10,000 XP/hour baseline. The current progression tiers pr
 
 These values are before victory rate and character combat-XP bonuses.
 
+The region API exposes the resolved values through `GET /api/v1/region/area-experience`. Area cards display `Base XP: {value}/hr`; the frontend does not receive or reproduce the tier formula, spawn normalization, or creature XP calculation.
+
 ## Expected group-size normalization
 
 At the configured ten-second cadence, idle combat schedules 360 encounters per hour.

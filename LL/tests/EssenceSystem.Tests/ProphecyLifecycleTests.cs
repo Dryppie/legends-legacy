@@ -107,7 +107,6 @@ public sealed class ProphecyLifecycleTests
         Assert.All(overview.DailyProphecies, prophecy =>
         {
             Assert.NotEqual(originalDefinitionIds[prophecy.Id], prophecy.ProphecyDefinitionId);
-            Assert.Equal(originalDefinitionIds[prophecy.Id], prophecy.RerolledFromDefinitionId);
         });
         Assert.Equal(3, overview.DailyProphecies.Select(x => x.ProphecyDefinitionId).Distinct().Count());
         Assert.Equal(0, result.Value?.DailyRerollsRemaining);
@@ -433,41 +432,6 @@ public sealed class ProphecyLifecycleTests
             DateTimeOffset to,
             CancellationToken cancellationToken) =>
             GetAcceptedInstancesForProgressAsync(characterId, to, cancellationToken);
-
-        public Task<IReadOnlyList<PlayerProphecyInstance>> GetRecentInstancesAsync(
-            Guid playerId,
-            Guid characterId,
-            DateTimeOffset since,
-            int limit,
-            CancellationToken cancellationToken) =>
-            Task.FromResult<IReadOnlyList<PlayerProphecyInstance>>(Instances
-                .Where(x =>
-                    x.PlayerId == playerId &&
-                    x.CharacterId == characterId &&
-                    x.GeneratedAt >= since &&
-                    x.Status is not (ProphecyStatus.Offered or ProphecyStatus.Accepted))
-                .OrderByDescending(x => x.GeneratedAt)
-                .Take(limit)
-                .ToList());
-
-        public Task<IReadOnlySet<string>> GetRecentDefinitionIdsAsync(
-            Guid playerId,
-            Guid characterId,
-            ProphecyScope scope,
-            DateTimeOffset since,
-            DateTimeOffset before,
-            CancellationToken cancellationToken) =>
-            Task.FromResult<IReadOnlySet<string>>(Instances
-                .Where(x =>
-                    x.PlayerId == playerId &&
-                    x.CharacterId == characterId &&
-                    x.Scope == scope &&
-                    x.GeneratedAt >= since &&
-                    x.GeneratedAt < before)
-                .SelectMany(x => new[] { x.ProphecyDefinitionId, x.RerolledFromDefinitionId })
-                .Where(x => !string.IsNullOrWhiteSpace(x))
-                .Select(x => x!)
-                .ToHashSet(StringComparer.OrdinalIgnoreCase));
 
         public Task<bool> TryConsumeDailyRerollAsync(
             Guid playerId,

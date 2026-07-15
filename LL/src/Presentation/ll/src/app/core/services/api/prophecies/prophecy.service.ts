@@ -13,7 +13,6 @@ export interface PropheciesOverviewDto {
   activeDailyProphecy?: ProphecyInstanceDto | null;
   greaterProphecy: ProphecyInstanceDto;
   weeklyRevelation: WeeklyRevelationProgressDto;
-  recentProphecies: ProphecyInstanceDto[];
   caches: ProphecyCacheInventoryDto[];
 }
 

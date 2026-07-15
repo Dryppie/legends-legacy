@@ -27,21 +27,6 @@ public interface IProphecyRepository
         DateTimeOffset to,
         CancellationToken cancellationToken);
 
-    Task<IReadOnlyList<PlayerProphecyInstance>> GetRecentInstancesAsync(
-        Guid playerId,
-        Guid characterId,
-        DateTimeOffset since,
-        int limit,
-        CancellationToken cancellationToken);
-
-    Task<IReadOnlySet<string>> GetRecentDefinitionIdsAsync(
-        Guid playerId,
-        Guid characterId,
-        ProphecyScope scope,
-        DateTimeOffset since,
-        DateTimeOffset before,
-        CancellationToken cancellationToken);
-
     Task<bool> TryConsumeDailyRerollAsync(
         Guid playerId,
         Guid characterId,

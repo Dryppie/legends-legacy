@@ -599,23 +599,6 @@ public sealed class ProphecyServiceTests
             CancellationToken cancellationToken) =>
             throw new NotSupportedException();
 
-        public Task<IReadOnlyList<PlayerProphecyInstance>> GetRecentInstancesAsync(
-            Guid playerId,
-            Guid characterId,
-            DateTimeOffset since,
-            int limit,
-            CancellationToken cancellationToken) =>
-            throw new NotSupportedException();
-
-        public Task<IReadOnlySet<string>> GetRecentDefinitionIdsAsync(
-            Guid playerId,
-            Guid characterId,
-            ProphecyScope scope,
-            DateTimeOffset since,
-            DateTimeOffset before,
-            CancellationToken cancellationToken) =>
-            Task.FromResult<IReadOnlySet<string>>(new HashSet<string>(StringComparer.OrdinalIgnoreCase));
-
         public Task<bool> TryConsumeDailyRerollAsync(
             Guid playerId,
             Guid characterId,
