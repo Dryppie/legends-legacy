@@ -12,9 +12,9 @@ using MediatR;
 
 namespace Application.UseCases.Dungeons.Queries.GetAvailableDungeons;
 
-public record GetAvailableDungeonsQuery(Guid CharacterId) : IQuery<List<DungeonPreviewDto>>;
+public record GetAvailableDungeonsQuery(Guid CharacterId) : IQuery<DungeonHubDto>;
 
-public sealed class GetAvailableDungeonsQueryHandler : IRequestHandler<GetAvailableDungeonsQuery, List<DungeonPreviewDto>>
+public sealed class GetAvailableDungeonsQueryHandler : IRequestHandler<GetAvailableDungeonsQuery, DungeonHubDto>
 {
     private readonly IDungeonDefinitions _dungeonDefinitions;
     private readonly IDungeonAccessPolicy _dungeonAccess;
@@ -23,6 +23,7 @@ public sealed class GetAvailableDungeonsQueryHandler : IRequestHandler<GetAvaila
     private readonly IDungeonRunService _dungeonRuns;
     private readonly IDungeonMasteryService _mastery;
     private readonly IItemBaseRepository _itemBases;
+    private readonly IDungeonSigilAssemblySettingsProvider _sigilAssemblySettings;
     private readonly IMapper _mapper;
 
     public GetAvailableDungeonsQueryHandler(
@@ -33,6 +34,7 @@ public sealed class GetAvailableDungeonsQueryHandler : IRequestHandler<GetAvaila
         IDungeonRunService dungeonRuns,
         IDungeonMasteryService mastery,
         IItemBaseRepository itemBases,
+        IDungeonSigilAssemblySettingsProvider sigilAssemblySettings,
         IMapper mapper)
     {
         _dungeonDefinitions = dungeonDefinitions;
@@ -42,10 +44,11 @@ public sealed class GetAvailableDungeonsQueryHandler : IRequestHandler<GetAvaila
         _dungeonRuns = dungeonRuns;
         _mastery = mastery;
         _itemBases = itemBases;
+        _sigilAssemblySettings = sigilAssemblySettings;
         _mapper = mapper;
     }
 
-    public async Task<List<DungeonPreviewDto>> Handle(
+    public async Task<DungeonHubDto> Handle(
         GetAvailableDungeonsQuery request,
         CancellationToken cancellationToken)
     {
@@ -70,6 +73,7 @@ public sealed class GetAvailableDungeonsQueryHandler : IRequestHandler<GetAvaila
             request.CharacterId,
             dungeons.Select(x => x.Id).ToArray(),
             cancellationToken);
+        var sigilSettings = _sigilAssemblySettings.GetSettings();
 
         foreach (var dungeon in dungeons)
         {
@@ -80,6 +84,15 @@ public sealed class GetAvailableDungeonsQueryHandler : IRequestHandler<GetAvaila
                 dungeon,
                 combatRating,
                 cancellationToken);
+            var sigilAssemblyAccess = string.IsNullOrWhiteSpace(dungeon.SigilItemId)
+                ? null
+                : await _dungeonAccess.EvaluateForSigilAssemblyAsync(
+                    request.CharacterId,
+                    dungeon,
+                    combatRating,
+                    cancellationToken);
+            var sigilRequirement = access.EntryRequirements.FirstOrDefault(x =>
+                x.ItemId.Equals(dungeon.SigilItemId, StringComparison.OrdinalIgnoreCase));
 
             previews.Add(new DungeonPreviewDto
             {
@@ -103,6 +116,10 @@ public sealed class GetAvailableDungeonsQueryHandler : IRequestHandler<GetAvaila
                         OwnedAmount = x.OwnedAmount
                     })
                     .ToList(),
+                SigilItemId = string.IsNullOrWhiteSpace(dungeon.SigilItemId) ? null : dungeon.SigilItemId,
+                SigilName = sigilRequirement?.Name,
+                CanAssembleSigil = sigilSettings.Enabled && sigilAssemblyAccess?.CanEnter == true,
+                SigilAssemblyMissingRequirements = sigilAssemblyAccess?.MissingRequirements.ToList() ?? [],
                 RequiredPreviousDungeonId = dungeon.RequiredPreviousDungeonId,
                 MinRooms = dungeon.MinRooms,
                 MaxRooms = dungeon.MaxRooms,
@@ -113,7 +130,13 @@ public sealed class GetAvailableDungeonsQueryHandler : IRequestHandler<GetAvaila
             });
         }
 
-        return previews;
+        return new DungeonHubDto
+        {
+            SigilFragments = character?.SigilFragments ?? 0,
+            SigilAssemblyEnabled = sigilSettings.Enabled,
+            SigilAssemblyCost = sigilSettings.FragmentCost,
+            Dungeons = previews
+        };
     }
 
     private async Task<List<DungeonPreviewRewardDto>> MapRewardsAsync(

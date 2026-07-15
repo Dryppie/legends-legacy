@@ -1,3 +1,4 @@
+using Application.UseCases.Dungeons.Commands.AssembleDungeonSigil;
 using Application.UseCases.Dungeons.Commands.ClaimDungeonRewards;
 using Application.UseCases.Dungeons.Commands.DismissFailedDungeonRun;
 using Application.UseCases.Dungeons.Commands.ExecuteDungeonAction;
@@ -22,8 +23,12 @@ public class DungeonController : BaseController
         await Mediator.Send(new GetDungeonRunQuery(CurrentCharacterGuid));
 
     [HttpGet("GetAvailableDungeons")]
-    public async Task<ActionResult<List<DungeonPreviewDto>>> GetAvailableDungeons() =>
+    public async Task<ActionResult<DungeonHubDto>> GetAvailableDungeons() =>
         await Mediator.Send(new GetAvailableDungeonsQuery(CurrentCharacterGuid));
+
+    [HttpPost("{dungeonId}/assemble-sigil")]
+    public async Task<ActionResult<Response<DungeonSigilAssemblyResponseDto>>> AssembleSigil(string dungeonId) =>
+        await Mediator.Send(new AssembleDungeonSigilCommand(CurrentCharacterGuid, dungeonId));
 
     [HttpGet("GetDungeonRecords/{familyId}")]
     public async Task<ActionResult<DungeonRecordsDto>> GetDungeonRecords(string familyId) =>

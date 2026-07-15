@@ -9,9 +9,6 @@ export interface PropheciesOverviewDto {
   dailyRerollLimit: number;
   nextDailyRerollCost?: number | null;
   fateEcho: number;
-  sigilFragments: number;
-  sigilForgeCost: number;
-  sigilForgeOptions: ProphecySigilForgeOptionDto[];
   dailyProphecies: ProphecyInstanceDto[];
   activeDailyProphecy?: ProphecyInstanceDto | null;
   greaterProphecy: ProphecyInstanceDto;
@@ -26,19 +23,6 @@ export interface ProphecyCacheInventoryDto {
   description: string;
   quantity: number;
   possibleRewards: string[];
-}
-
-export interface ProphecySigilForgeOptionDto {
-  sigilItemId: string;
-  sigilName: string;
-  dungeonName: string;
-  ownedQuantity: number;
-}
-
-export interface ProphecySigilForgeResponseDto {
-  sigilItemId: string;
-  inventoryQuantity: number;
-  sigilFragmentsRemaining: number;
 }
 
 export interface ProphecyInstanceDto {
@@ -145,10 +129,6 @@ export class ProphecyService {
 
   rerollDailyProphecies(): Observable<PropheciesOverviewDto> {
     return this.api.post('prophecies/reroll');
-  }
-
-  assembleSigil(sigilItemId: string): Observable<ProphecySigilForgeResponseDto> {
-    return this.api.post('prophecies/sigil-forge/assemble', { sigilItemId });
   }
 
   claimProphecy(id: string): Observable<ProphecyClaimResponseDto> {

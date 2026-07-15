@@ -34,7 +34,6 @@ public sealed class ProphecyBalanceProviderTests
         Assert.Equal(2, catalog.FavorRewards.Single(x => x.Scope == ProphecyScope.Weekly).Amount);
         Assert.Equal([40, 80], catalog.Economy.PaidRerollCosts);
         Assert.Equal(3, catalog.Economy.DailyRerollLimit);
-        Assert.Equal(25, catalog.Economy.SigilForgeCost);
         Assert.All(catalog.Caches, cache =>
         {
             Assert.True(cache.Rolls > 0);

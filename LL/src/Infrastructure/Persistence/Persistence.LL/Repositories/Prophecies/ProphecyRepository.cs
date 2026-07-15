@@ -210,18 +210,6 @@ public sealed class ProphecyRepository : IProphecyRepository
                 cancellationToken) == 1;
     }
 
-    public async Task<bool> TrySpendSigilFragmentsAsync(
-        Guid characterId,
-        long amount,
-        CancellationToken cancellationToken)
-    {
-        return await _context.Characters
-            .Where(x => x.Id == characterId && x.SigilFragments >= amount)
-            .ExecuteUpdateAsync(
-                setters => setters.SetProperty(x => x.SigilFragments, x => x.SigilFragments - amount),
-                cancellationToken) == 1;
-    }
-
     public async Task<WeeklyRevelationProgress?> GetWeeklyProgressAsync(
         Guid playerId,
         Guid characterId,

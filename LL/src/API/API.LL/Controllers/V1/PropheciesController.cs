@@ -1,5 +1,4 @@
 using Application.UseCases.Prophecies.Commands.AcceptProphecy;
-using Application.UseCases.Prophecies.Commands.AssembleProphecySigil;
 using Application.UseCases.Prophecies.Commands.ClaimProphecy;
 using Application.UseCases.Prophecies.Commands.ClaimWeeklyRevelationMilestone;
 using Application.UseCases.Prophecies.Commands.GetPropheciesOverview;
@@ -26,12 +25,6 @@ public sealed class PropheciesController : BaseController
     [HttpPost("reroll")]
     public async Task<ActionResult<Response<PropheciesOverviewDto>>> Reroll() =>
         await Mediator.Send(new RerollProphecyCommand(CurrentUserId, CurrentCharacterGuid));
-
-    public sealed record AssembleSigilRequest(string SigilItemId);
-
-    [HttpPost("sigil-forge/assemble")]
-    public async Task<ActionResult<Response<ProphecySigilForgeResponseDto>>> AssembleSigil(AssembleSigilRequest request) =>
-        await Mediator.Send(new AssembleProphecySigilCommand(CurrentUserId, CurrentCharacterGuid, request.SigilItemId));
 
     [HttpPost("{id:guid}/claim")]
     public async Task<ActionResult<Response<ProphecyClaimResponseDto>>> Claim(Guid id) =>

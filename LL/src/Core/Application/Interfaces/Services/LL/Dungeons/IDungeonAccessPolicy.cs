@@ -10,7 +10,7 @@ public interface IDungeonAccessPolicy
         int currentCombatRating,
         CancellationToken cancellationToken);
 
-    Task<DungeonAccessResult> EvaluateForSigilForgeAsync(
+    Task<DungeonAccessResult> EvaluateForSigilAssemblyAsync(
         Guid characterId,
         DungeonDefinition dungeon,
         int currentCombatRating,

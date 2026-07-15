@@ -11,7 +11,6 @@ import {
 } from '../../../../../shared/models/Dtos/dungeons/dungeonRecordsData';
 import { finalize } from 'rxjs/operators';
 import { CharacterTagComponent } from '../../../../../shared/components/character/character-tag/character-tag.component';
-import { RouterLink } from '@angular/router';
 
 type DungeonLeaderboardMode = 'firstClears' | 'mostClears' | 'recentClears';
 
@@ -67,7 +66,7 @@ const dungeonPresentation: Record<string, Partial<DungeonPreviewData>> = {
 @Component({
   selector: 'app-dungeons',
   standalone: true,
-  imports: [DungeonCardComponent, NgFor, NgIf, NgClass, CharacterTagComponent, RouterLink],
+  imports: [DungeonCardComponent, NgFor, NgIf, NgClass, CharacterTagComponent],
   templateUrl: './dungeons.component.html',
 })
 export class DungeonsComponent {

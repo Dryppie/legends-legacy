@@ -1,6 +1,5 @@
 using Application.Interfaces.Services.LL;
 using Application.Interfaces.Services.LL.Entities;
-using Application.Interfaces.Services.LL.Dungeons;
 using Application.Interfaces.Services.LL.Prophecies;
 using Domain.Models.Entities;
 using Domain.Models.Inventories;
@@ -27,8 +26,6 @@ public sealed class ProphecyService : IProphecyService
     private readonly IInventoryService _inventoryService;
     private readonly IInventoryRepository _inventoryRepository;
     private readonly IItemBaseRepository _itemBases;
-    private readonly IDungeonDefinitions? _dungeonDefinitions;
-    private readonly IDungeonAccessPolicy? _dungeonAccess;
 
     public ProphecyService(
         IProphecyDefinitionProvider definitionProvider,
@@ -39,9 +36,7 @@ public sealed class ProphecyService : IProphecyService
         ILevelingService levelingService,
         IInventoryService inventoryService,
         IInventoryRepository inventoryRepository,
-        IItemBaseRepository itemBases,
-        IDungeonDefinitions? dungeonDefinitions = null,
-        IDungeonAccessPolicy? dungeonAccess = null)
+        IItemBaseRepository itemBases)
     {
         _definitions = definitionProvider.GetAll();
         _balance = balanceProvider.GetCatalog();
@@ -52,8 +47,6 @@ public sealed class ProphecyService : IProphecyService
         _inventoryService = inventoryService;
         _inventoryRepository = inventoryRepository;
         _itemBases = itemBases;
-        _dungeonDefinitions = dungeonDefinitions;
-        _dungeonAccess = dungeonAccess;
     }
 
     public async Task<PropheciesOverview> GetOverviewAsync(
@@ -108,7 +101,6 @@ public sealed class ProphecyService : IProphecyService
             daily,
             now,
             cancellationToken);
-        var forgeOptions = await GetSigilForgeOptionsAsync(characterId, cancellationToken);
         var nextRerollCost = GetNextRerollCost(rerollState.RerollsUsed);
 
         return new PropheciesOverview(
@@ -118,9 +110,6 @@ public sealed class ProphecyService : IProphecyService
             _balance.Economy.DailyRerollLimit,
             nextRerollCost,
             character?.FateEcho ?? 0,
-            character?.SigilFragments ?? 0,
-            _balance.Economy.SigilForgeCost,
-            forgeOptions,
             daily,
             daily.FirstOrDefault(IsAcceptedOrLater),
             greater,
@@ -329,59 +318,6 @@ public sealed class ProphecyService : IProphecyService
                 NextDailyRerollCost = nextCost,
                 FateEcho = remainingFateEcho
             });
-    }
-
-    public async Task<ProphecyOperationResult<ProphecySigilForgeResult>> AssembleSigilAsync(
-        Guid playerId,
-        Guid characterId,
-        string sigilItemId,
-        DateTimeOffset now,
-        CancellationToken cancellationToken)
-    {
-        if (!_balance.Economy.SigilForgeEnabled)
-        {
-            return ProphecyOperationResult<ProphecySigilForgeResult>.Fail("The Sigil Forge is currently disabled.");
-        }
-
-        var character = await GetOwnedCharacterAsync(playerId, characterId, cancellationToken);
-        if (character is null)
-        {
-            return ProphecyOperationResult<ProphecySigilForgeResult>.Fail("Character was not found.");
-        }
-
-        var options = await GetSigilForgeOptionsAsync(characterId, cancellationToken);
-        var option = options.FirstOrDefault(x =>
-            x.SigilItemId.Equals(sigilItemId, StringComparison.OrdinalIgnoreCase));
-        if (option is null)
-        {
-            return ProphecyOperationResult<ProphecySigilForgeResult>.Fail("That dungeon sigil is not currently accessible.");
-        }
-
-        var cost = _balance.Economy.SigilForgeCost;
-        if (character.SigilFragments < cost)
-        {
-            return ProphecyOperationResult<ProphecySigilForgeResult>.Fail($"Assembling this sigil requires {cost} Sigil Fragments.");
-        }
-
-        var spent = await _repository.TrySpendSigilFragmentsAsync(characterId, cost, cancellationToken);
-        if (!spent)
-        {
-            return ProphecyOperationResult<ProphecySigilForgeResult>.Fail($"Assembling this sigil requires {cost} Sigil Fragments.");
-        }
-
-        character.SigilFragments -= cost;
-        _entityService.UpdateEntities([character]);
-
-        var reward = new ProphecyRewardSnapshot
-        {
-            Items = [new RewardItemSnapshot { ItemId = option.SigilItemId, Quantity = 1 }]
-        };
-        await ApplyRewardAsync(characterId, reward, cancellationToken);
-
-        return ProphecyOperationResult<ProphecySigilForgeResult>.Success(new ProphecySigilForgeResult(
-            option.SigilItemId,
-            option.OwnedQuantity + 1,
-            character.SigilFragments));
     }
 
     public async Task<ProphecyOperationResult<ProphecyClaimResult>> ClaimAsync(
@@ -1117,62 +1053,6 @@ public sealed class ProphecyService : IProphecyService
         {
             return new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         }
-    }
-
-    private async Task<IReadOnlyList<ProphecySigilForgeOption>> GetSigilForgeOptionsAsync(
-        Guid characterId,
-        CancellationToken cancellationToken)
-    {
-        if (!_balance.Economy.SigilForgeEnabled || _dungeonDefinitions is null || _dungeonAccess is null)
-        {
-            return [];
-        }
-
-        var combatRating = await _characterService.GetCombatRatingAsync(characterId, cancellationToken);
-        var accessible = new List<(string SigilItemId, string DungeonName)>();
-        foreach (var group in _dungeonDefinitions.GetAll()
-                     .Where(x => !string.IsNullOrWhiteSpace(x.SigilItemId))
-                     .GroupBy(x => x.SigilItemId, StringComparer.OrdinalIgnoreCase))
-        {
-            foreach (var dungeon in group.OrderBy(x => x.Grade).ThenBy(x => x.Tier))
-            {
-                var access = await _dungeonAccess.EvaluateForSigilForgeAsync(
-                    characterId,
-                    dungeon,
-                    combatRating,
-                    cancellationToken);
-                if (!access.CanEnter)
-                {
-                    continue;
-                }
-
-                accessible.Add((group.Key, dungeon.Name));
-                break;
-            }
-        }
-
-        if (accessible.Count == 0)
-        {
-            return [];
-        }
-
-        var itemBases = await _itemBases.GetItemBasesByIdsAsync(
-            accessible.Select(x => x.SigilItemId).ToList(),
-            cancellationToken);
-        var result = new List<ProphecySigilForgeOption>();
-        foreach (var option in accessible.OrderBy(x => x.DungeonName, StringComparer.OrdinalIgnoreCase))
-        {
-            var name = itemBases.TryGetValue(option.SigilItemId, out var itemBase)
-                ? itemBase.Name
-                : option.SigilItemId;
-            result.Add(new ProphecySigilForgeOption(
-                option.SigilItemId,
-                name,
-                option.DungeonName,
-                await _inventoryRepository.GetInventoryQuantityAsync(characterId, option.SigilItemId, cancellationToken)));
-        }
-
-        return result;
     }
 
     private static ItemBase CreateCacheItemBase(ProphecyCacheDefinition definition) =>

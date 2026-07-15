@@ -622,12 +622,6 @@ public sealed class ProphecyServiceTests
             CancellationToken cancellationToken) =>
             throw new NotSupportedException();
 
-        public Task<bool> TrySpendSigilFragmentsAsync(
-            Guid characterId,
-            long amount,
-            CancellationToken cancellationToken) =>
-            throw new NotSupportedException();
-
         public Task<WeeklyRevelationProgress?> GetWeeklyProgressAsync(
             Guid playerId,
             Guid characterId,

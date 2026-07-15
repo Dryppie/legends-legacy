@@ -147,6 +147,12 @@ public static class DependencyInjection
         services.AddScoped<DungeonRunFactory>();
         services.AddScoped<IDungeonRunService, DungeonRunService>();
         services.AddScoped<IDungeonAccessPolicy, DungeonAccessPolicy>();
+        services.AddSingleton<IDungeonSigilAssemblySettingsProvider>(sp =>
+            new JsonDungeonSigilAssemblySettingsProvider(
+                config,
+                contentRootPath,
+                sp.GetRequiredService<JsonSerializerOptions>()));
+        services.AddScoped<IDungeonSigilAssemblyService, DungeonSigilAssemblyService>();
         services.AddScoped<IDungeonPreviewRewardService, DungeonPreviewRewardService>();
         services.AddSingleton<IDungeonMasteryBonusDefinitionProvider>(sp =>
             new JsonDungeonMasteryBonusDefinitionProvider(

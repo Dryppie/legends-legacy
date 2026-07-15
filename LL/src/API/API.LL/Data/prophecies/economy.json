@@ -1,9 +1,7 @@
 {
   "economy": {
     "paidRerollsEnabled": true,
-    "sigilForgeEnabled": true,
     "dailyRerollLimit": 3,
-    "paidRerollCosts": [40, 80],
-    "sigilForgeCost": 25
+    "paidRerollCosts": [40, 80]
   }
 }

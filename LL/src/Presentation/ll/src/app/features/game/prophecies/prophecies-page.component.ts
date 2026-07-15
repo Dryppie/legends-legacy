@@ -18,7 +18,6 @@ import {
   ProphecyInstanceDto,
   ProphecyRewardSnapshotDto,
   ProphecyService,
-  ProphecySigilForgeOptionDto,
   WeeklyRevelationMilestoneDto,
 } from '../../../core/services/api/prophecies/prophecy.service';
 import { ProphecyNotificationService } from '../../../core/services/api/prophecies/prophecy-notification.service';
@@ -91,7 +90,6 @@ export class PropheciesPageComponent implements OnInit, OnDestroy {
 
   readonly dailyProphecies = computed(() => this.overview()?.dailyProphecies ?? []);
   readonly dailyRerollsRemaining = computed(() => this.overview()?.dailyRerollsRemaining ?? 0);
-  readonly sigilForgeOptions = computed(() => this.overview()?.sigilForgeOptions ?? []);
   readonly activeDailyProphecy = computed(() => this.overview()?.activeDailyProphecy ?? null);
   readonly greaterProphecy = computed(() => this.overview()?.greaterProphecy ?? null);
   readonly weeklyRevelation = computed(() => this.overview()?.weeklyRevelation ?? null);
@@ -224,37 +222,6 @@ export class PropheciesPageComponent implements OnInit, OnDestroy {
         const message = error?.message ?? 'Failed to reroll daily prophecies.';
         this.error.set(message);
         this.toast.showToast('Reroll failed', message, false);
-        this.loading.set(false);
-      },
-    });
-  }
-
-  assembleSigil(option: ProphecySigilForgeOptionDto): void {
-    const current = this.overview();
-    if (!current || this.loading() || current.sigilFragments < current.sigilForgeCost) return;
-
-    this.loading.set(true);
-    this.error.set(null);
-    this.message.set(null);
-    this.prophecyService.assembleSigil(option.sigilItemId).subscribe({
-      next: (response) => {
-        this.overview.update((overview) => overview ? {
-          ...overview,
-          sigilFragments: response.sigilFragmentsRemaining,
-          sigilForgeOptions: overview.sigilForgeOptions.map((item) =>
-            item.sigilItemId === response.sigilItemId
-              ? { ...item, ownedQuantity: response.inventoryQuantity }
-              : item,
-          ),
-        } : overview);
-        this.message.set(`${option.sigilName} assembled.`);
-        this.toast.showToast('Sigil assembled', option.sigilName, true);
-        this.loading.set(false);
-      },
-      error: (error) => {
-        const message = error?.message ?? 'Failed to assemble sigil.';
-        this.error.set(message);
-        this.toast.showToast('Sigil Forge failed', message, false);
         this.loading.set(false);
       },
     });
@@ -621,10 +588,6 @@ export class PropheciesPageComponent implements OnInit, OnDestroy {
 
   trackById(index: number, value: { id?: string; favorRequired?: number }): string {
     return value.id ?? `${value.favorRequired ?? index}`;
-  }
-
-  trackBySigil(_index: number, value: ProphecySigilForgeOptionDto): string {
-    return value.sigilItemId;
   }
 
   trackByCacheId(index: number, value: ProphecyCacheInventoryDto): string {

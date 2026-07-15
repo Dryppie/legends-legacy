@@ -503,12 +503,6 @@ public sealed class ProphecyLifecycleTests
             CancellationToken cancellationToken) =>
             Task.FromResult(true);
 
-        public Task<bool> TrySpendSigilFragmentsAsync(
-            Guid characterId,
-            long amount,
-            CancellationToken cancellationToken) =>
-            Task.FromResult(true);
-
         public Task<WeeklyRevelationProgress?> GetWeeklyProgressAsync(
             Guid playerId,
             Guid characterId,

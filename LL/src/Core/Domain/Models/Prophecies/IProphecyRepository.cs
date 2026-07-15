@@ -65,11 +65,6 @@ public interface IProphecyRepository
         long amount,
         CancellationToken cancellationToken);
 
-    Task<bool> TrySpendSigilFragmentsAsync(
-        Guid characterId,
-        long amount,
-        CancellationToken cancellationToken);
-
     Task<WeeklyRevelationProgress?> GetWeeklyProgressAsync(
         Guid playerId,
         Guid characterId,

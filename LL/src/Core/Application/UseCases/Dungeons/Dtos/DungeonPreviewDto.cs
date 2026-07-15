@@ -3,6 +3,14 @@ using Domain.Models.Dungeons.Definitions;
 
 namespace Application.UseCases.Dungeons.Dtos;
 
+public sealed class DungeonHubDto
+{
+    public long SigilFragments { get; set; }
+    public bool SigilAssemblyEnabled { get; set; }
+    public int SigilAssemblyCost { get; set; }
+    public List<DungeonPreviewDto> Dungeons { get; set; } = [];
+}
+
 public sealed class DungeonPreviewDto
 {
     public string Id { get; set; } = string.Empty;
@@ -17,6 +25,10 @@ public sealed class DungeonPreviewDto
     public bool CanEnter { get; set; }
     public List<string> MissingRequirements { get; set; } = [];
     public List<DungeonEntryRequirementDto> EntryRequirements { get; set; } = [];
+    public string? SigilItemId { get; set; }
+    public string? SigilName { get; set; }
+    public bool CanAssembleSigil { get; set; }
+    public List<string> SigilAssemblyMissingRequirements { get; set; } = [];
     public string? RequiredPreviousDungeonId { get; set; }
     public int MinRooms { get; set; }
     public int MaxRooms { get; set; }

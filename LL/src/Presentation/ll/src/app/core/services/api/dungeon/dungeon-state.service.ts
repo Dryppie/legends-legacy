@@ -19,6 +19,7 @@ import { GameEventService } from '../../real-time/game-event.service';
 import { InventoryStateService } from '../inventory/inventory-state.service';
 import { CharacterStateService } from '../character/character-state.service';
 import { isGameRealtimeEnabled } from '../../real-time/game-realtime/game-realtime-feature';
+import { ToastService } from '../../client-side/components/toast/toast.service';
 
 @Injectable({
   providedIn: 'root',
@@ -32,6 +33,9 @@ export class DungeonStateService {
   private readonly _combatSession = signal<CombatSessionDto | null>(null);
   private readonly _lastOutcome = signal<DungeonActionOutcome | null>(null);
   private readonly _message = signal<string | null>(null);
+  private readonly _sigilFragments = signal(0);
+  private readonly _sigilAssemblyEnabled = signal(false);
+  private readonly _sigilAssemblyCost = signal(0);
 
   /* ─────────── public, read-only selectors ─────────── */
   readonly lastOutcome = computed(() => this._lastOutcome());
@@ -41,6 +45,9 @@ export class DungeonStateService {
   readonly activeDungeon = computed(() => this._activeDungeon());
   readonly loading = computed(() => this._loading());
   readonly error = computed(() => this._error());
+  readonly sigilFragments = computed(() => this._sigilFragments());
+  readonly sigilAssemblyEnabled = computed(() => this._sigilAssemblyEnabled());
+  readonly sigilAssemblyCost = computed(() => this._sigilAssemblyCost());
 
   readonly hasActiveDungeon = computed(() => !!this._activeDungeon());
   readonly hasAvailableDungeons = computed(() => this._dungeons().length > 0);
@@ -51,6 +58,7 @@ export class DungeonStateService {
     private readonly eventService: GameEventService,
     private readonly inventoryState: InventoryStateService,
     private readonly characterState: CharacterStateService,
+    private readonly toast: ToastService,
   ) {
     this.refresh();
 
@@ -86,10 +94,46 @@ export class DungeonStateService {
 
   loadAvailableDungeons(): void {
     this.service.getAvailableDungeons().subscribe({
-      next: (dungeons) => this._dungeons.set(dungeons),
+      next: (hub) => {
+        this._dungeons.set(hub.dungeons);
+        this._sigilFragments.set(hub.sigilFragments);
+        this._sigilAssemblyEnabled.set(hub.sigilAssemblyEnabled);
+        this._sigilAssemblyCost.set(hub.sigilAssemblyCost);
+      },
       error: (e) =>
         this._error.set(e.message ?? 'Failed to load available dungeons'),
     });
+  }
+
+  assembleSigil(dungeonId: string): void {
+    if (this._loading()) return;
+
+    this._loading.set(true);
+    this._error.set(null);
+    this.service
+      .assembleSigil(dungeonId)
+      .pipe(finalize(() => this._loading.set(false)))
+      .subscribe({
+        next: (response) => {
+          this._sigilFragments.set(response.sigilFragmentsRemaining);
+          const character = this.characterState.currentCharacter();
+          if (character) {
+            this.characterState.updateCharacter({
+              ...character,
+              sigilFragments: response.sigilFragmentsRemaining,
+            });
+          }
+          this.inventoryState.load(true);
+          this.toast.showToast('Sigil assembled', response.sigilName, true);
+          this.loadAvailableDungeons();
+        },
+        error: (error) => {
+          const message =
+            error?.errorMessage ?? error?.message ?? 'Failed to assemble sigil';
+          this._error.set(message);
+          this.toast.showToast('Sigil assembly failed', message, false);
+        },
+      });
   }
 
   getDungeonRecords(familyId: string): Observable<DungeonRecordsData> {

@@ -13,7 +13,7 @@ namespace EssenceSystem.Tests;
 public sealed class DungeonAccessPolicyTests
 {
     [Fact]
-    public async Task Sigil_forge_access_ignores_only_the_sigil_being_assembled()
+    public async Task Sigil_assembly_access_ignores_only_the_sigil_being_assembled()
     {
         await using var db = CreateDb();
         db.ItemBases.Add(new ItemBase
@@ -40,11 +40,11 @@ public sealed class DungeonAccessPolicyTests
         };
 
         var normal = await policy.EvaluateAsync(Guid.NewGuid(), dungeon, 0, CancellationToken.None);
-        var forge = await policy.EvaluateForSigilForgeAsync(Guid.NewGuid(), dungeon, 0, CancellationToken.None);
+        var assembly = await policy.EvaluateForSigilAssemblyAsync(Guid.NewGuid(), dungeon, 0, CancellationToken.None);
 
         Assert.False(normal.CanEnter);
-        Assert.True(forge.CanEnter);
-        Assert.Single(forge.EntryRequirements);
+        Assert.True(assembly.CanEnter);
+        Assert.Single(assembly.EntryRequirements);
     }
 
     private static LLDbContext CreateDb()

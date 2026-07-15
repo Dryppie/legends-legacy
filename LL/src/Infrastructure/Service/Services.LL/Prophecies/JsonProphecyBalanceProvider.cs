@@ -146,8 +146,7 @@ public sealed class JsonProphecyBalanceProvider : IProphecyBalanceProvider
         var economy = catalog.Economy;
         if (economy.DailyRerollLimit < 1 ||
             economy.PaidRerollCosts.Count != economy.DailyRerollLimit - 1 ||
-            economy.PaidRerollCosts.Any(x => x <= 0) ||
-            economy.SigilForgeCost <= 0)
+            economy.PaidRerollCosts.Any(x => x <= 0))
         {
             throw new InvalidOperationException("Prophecy economy settings contain invalid limits, prices, or conversion values.");
         }

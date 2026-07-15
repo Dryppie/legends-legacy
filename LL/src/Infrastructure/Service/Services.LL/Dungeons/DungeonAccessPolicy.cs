@@ -29,7 +29,7 @@ public sealed class DungeonAccessPolicy : IDungeonAccessPolicy
         CancellationToken cancellationToken)
         => await EvaluateAsync(characterId, dungeon, currentCombatRating, ignoredEntryCostItemId: null, cancellationToken);
 
-    public async Task<DungeonAccessResult> EvaluateForSigilForgeAsync(
+    public async Task<DungeonAccessResult> EvaluateForSigilAssemblyAsync(
         Guid characterId,
         DungeonDefinition dungeon,
         int currentCombatRating,

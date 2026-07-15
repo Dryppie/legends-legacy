@@ -7,7 +7,6 @@ public interface IProphecyService
     Task<PropheciesOverview> GetOverviewAsync(Guid playerId, Guid characterId, DateTimeOffset now, CancellationToken cancellationToken);
     Task<ProphecyOperationResult<PropheciesOverview>> AcceptAsync(Guid playerId, Guid characterId, Guid prophecyId, DateTimeOffset now, CancellationToken cancellationToken);
     Task<ProphecyOperationResult<PropheciesOverview>> RerollAsync(Guid playerId, Guid characterId, DateTimeOffset now, CancellationToken cancellationToken);
-    Task<ProphecyOperationResult<ProphecySigilForgeResult>> AssembleSigilAsync(Guid playerId, Guid characterId, string sigilItemId, DateTimeOffset now, CancellationToken cancellationToken);
     Task<ProphecyOperationResult<ProphecyClaimResult>> ClaimAsync(Guid playerId, Guid characterId, Guid prophecyId, DateTimeOffset now, CancellationToken cancellationToken);
     Task<ProphecyOperationResult<WeeklyRevelationClaimResult>> ClaimWeeklyMilestoneAsync(Guid playerId, Guid characterId, int favorRequired, DateTimeOffset now, CancellationToken cancellationToken);
     Task<ProphecyOperationResult<ProphecyCacheOpenResult>> OpenCacheAsync(Guid characterId, string cacheItemId, CancellationToken cancellationToken);

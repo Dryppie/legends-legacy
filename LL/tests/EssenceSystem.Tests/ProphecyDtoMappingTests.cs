@@ -1,5 +1,7 @@
 using Application.Common.Mappings;
 using Application.Interfaces.Services.LL.Prophecies;
+using Application.Interfaces.Services.LL.Dungeons;
+using Application.UseCases.Dungeons.Dtos;
 using Application.UseCases.Prophecies.Dtos;
 using AutoMapper;
 using Domain.Models.Prophecies;
@@ -61,20 +63,22 @@ public sealed class ProphecyDtoMappingTests
     }
 
     [Fact]
-    public void ProphecySigilForgeOptionDto_maps_all_overview_fields()
+    public void DungeonSigilAssemblyResponseDto_maps_all_result_fields()
     {
-        var option = new ProphecySigilForgeOption(
+        var result = new DungeonSigilAssemblyResult(
+            "goblin_mines.grade_1",
             "item.sigil.goblin",
             "Goblin Sigil",
-            "Goblin Warrens",
-            3);
+            3,
+            75);
 
-        var dto = CreateMapper().Map<ProphecySigilForgeOptionDto>(option);
+        var dto = CreateMapper().Map<DungeonSigilAssemblyResponseDto>(result);
 
-        Assert.Equal(option.SigilItemId, dto.SigilItemId);
-        Assert.Equal(option.SigilName, dto.SigilName);
-        Assert.Equal(option.DungeonName, dto.DungeonName);
-        Assert.Equal(option.OwnedQuantity, dto.OwnedQuantity);
+        Assert.Equal(result.DungeonId, dto.DungeonId);
+        Assert.Equal(result.SigilItemId, dto.SigilItemId);
+        Assert.Equal(result.SigilName, dto.SigilName);
+        Assert.Equal(result.InventoryQuantity, dto.InventoryQuantity);
+        Assert.Equal(result.SigilFragmentsRemaining, dto.SigilFragmentsRemaining);
     }
 
     private static PlayerProphecyInstance CreateInstance(string objectiveType) =>
