@@ -57,8 +57,32 @@ public sealed class IdleCombatRewardCalculator : IIdleCombatRewardCalculator
         var totalExperience = 0;
         var totalCinders = 0;
         var sigilEligibleVictories = 0;
+        var orderedEncounters = facts.Encounters.OrderBy(x => x.Sequence).ToArray();
+        var victoriousEncounters = orderedEncounters.Where(x => x.IsVictory).ToArray();
+        var combatLootByEncounterId = new Dictionary<Guid, IReadOnlyList<InventoryItem>>();
 
-        foreach (var encounter in facts.Encounters.OrderBy(x => x.Sequence))
+        if (victoriousEncounters.Length > 0)
+        {
+            await _essenceResonanceService.PrepareEssenceDropsAsync(
+                facts.CharacterId,
+                victoriousEncounters.SelectMany(x => x.HostileCreatures).ToArray(),
+                factors.Get(BonusKind.FocusedMonsterEssenceDropRateRelativeBps) > 0,
+                cancellationToken);
+
+            var lootGroups = await _lootService.GenerateIdleCombatLootBatchAsync(
+                victoriousEncounters
+                    .Select(encounter => (IReadOnlyList<Entity>)encounter.HostileCreatures.Cast<Entity>().ToArray())
+                    .ToArray(),
+                [],
+                cancellationToken);
+
+            for (var index = 0; index < victoriousEncounters.Length; index++)
+            {
+                combatLootByEncounterId[victoriousEncounters[index].EncounterId] = lootGroups[index];
+            }
+        }
+
+        foreach (var encounter in orderedEncounters)
         {
             var creatureCount = encounter.HostileCreatures.Count;
             var areaBaseExperience = _areaExperienceBalance.CalculateEncounterExperience(
@@ -74,10 +98,7 @@ public sealed class IdleCombatRewardCalculator : IIdleCombatRewardCalculator
 
             if (encounter.IsVictory)
             {
-                loot = await _lootService.GenerateIdleCombatLootAsync(
-                    encounter.HostileCreatures.Cast<Entity>().ToList(),
-                    [],
-                    cancellationToken);
+                loot = combatLootByEncounterId[encounter.EncounterId];
 
                 var essenceDrops = await _essenceResonanceService.RollEssenceDropsAsync(
                     facts.CharacterId,

@@ -12,7 +12,9 @@ public sealed record IdleCombatOrchestrationDetails(
 {
     public CombatMode Mode => CombatMode.Idle;
 
-    public bool FullyProcessed => ProcessedUntil >= RequestedTo;
+    // ProcessedUntil is the next encounter due time. If it equals RequestedTo,
+    // that boundary encounter is still due and must be processed.
+    public bool FullyProcessed => ProcessedUntil > RequestedTo;
 
     public TimeSpan ProcessedDuration => ProcessedUntil - From;
 }

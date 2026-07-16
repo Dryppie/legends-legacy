@@ -103,36 +103,55 @@ public class LootService : ILootService
         Dictionary<ItemType, double> multipliers,
         CancellationToken cancellationToken)
     {
-        _ = multipliers;
+        var batch = await GenerateIdleCombatLootBatchAsync(
+            [entities],
+            multipliers,
+            cancellationToken);
 
-        var total = new List<InventoryItem>();
-        foreach (var creature in entities.OfType<Creature>())
-        {
-            if (!string.IsNullOrWhiteSpace(creature.RewardTableId))
-            {
-                var result = _rewardRoller.Roll(
-                    creature.RewardTableId,
-                    new RewardRollContext("Combat"));
-
-                total.AddRange(await ConvertRewardItemsAsync(result.Items, cancellationToken));
-            }
-        }
-
-        return total;
+        return batch[0].ToList();
     }
 
-    private async Task<List<InventoryItem>> ConvertRewardItemsAsync(
-        IReadOnlyList<ItemRewardResult> items,
+    public async Task<IReadOnlyList<IReadOnlyList<InventoryItem>>> GenerateIdleCombatLootBatchAsync(
+        IReadOnlyList<IReadOnlyList<Entity>> enemyGroups,
+        Dictionary<ItemType, double> multipliers,
         CancellationToken cancellationToken)
+    {
+        _ = multipliers;
+
+        var rollsByGroup = enemyGroups
+            .Select(group => group
+                .OfType<Creature>()
+                .Where(creature => !string.IsNullOrWhiteSpace(creature.RewardTableId))
+                .Select(creature => _rewardRoller.Roll(
+                    creature.RewardTableId!,
+                    new RewardRollContext("Combat")).Items)
+                .ToArray())
+            .ToArray();
+
+        var itemIds = rollsByGroup
+            .SelectMany(group => group)
+            .SelectMany(items => items)
+            .Select(item => item.ItemId)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToArray();
+
+        var itemBases = await _itemBases.GetItemBasesByIdsAsync(itemIds, cancellationToken);
+
+        return rollsByGroup
+            .Select(group => (IReadOnlyList<InventoryItem>)group
+                .SelectMany(items => ConvertRewardItems(items, itemBases))
+                .ToList())
+            .ToArray();
+    }
+
+    private List<InventoryItem> ConvertRewardItems(
+        IReadOnlyList<ItemRewardResult> items,
+        IReadOnlyDictionary<string, ItemBase> itemBases)
     {
         if (items.Count == 0)
         {
             return [];
         }
-
-        var itemBases = await _itemBases.GetItemBasesByIdsAsync(
-            items.Select(x => x.ItemId).Distinct(StringComparer.OrdinalIgnoreCase).ToArray(),
-            cancellationToken);
 
         return items
             .Where(item => itemBases.ContainsKey(item.ItemId))

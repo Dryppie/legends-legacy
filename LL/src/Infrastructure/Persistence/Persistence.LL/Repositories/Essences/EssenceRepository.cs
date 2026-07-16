@@ -81,6 +81,30 @@ public sealed class EssenceRepository : IEssenceRepository
             .FirstOrDefaultAsync(x => x.CharacterId == characterId && x.CreatureId == creatureId, cancellationToken);
     }
 
+    public async Task<IReadOnlyList<CreatureResonance>> GetCreatureResonancesAsync(
+        Guid characterId,
+        IReadOnlyCollection<string> creatureIds,
+        CancellationToken cancellationToken)
+    {
+        if (creatureIds.Count == 0)
+        {
+            return [];
+        }
+
+        var persisted = await _context.CreatureResonances
+            .Where(x => x.CharacterId == characterId && creatureIds.Contains(x.CreatureId))
+            .ToListAsync(cancellationToken);
+        var persistedIds = persisted
+            .Select(x => x.CreatureId)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+        var tracked = _context.CreatureResonances.Local
+            .Where(x => x.CharacterId == characterId &&
+                        creatureIds.Contains(x.CreatureId, StringComparer.OrdinalIgnoreCase) &&
+                        !persistedIds.Contains(x.CreatureId));
+
+        return [.. persisted, .. tracked];
+    }
+
     public async Task AddCreatureResonanceAsync(CreatureResonance resonance, CancellationToken cancellationToken)
     {
         var alreadyTracked = _context.CreatureResonances.Local.Any(x =>

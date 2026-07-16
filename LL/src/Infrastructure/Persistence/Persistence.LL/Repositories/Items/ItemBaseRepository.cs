@@ -90,14 +90,20 @@ public class ItemBaseRepository : IItemBaseRepository
             return;
         }
 
-        foreach (var itemId in itemIds.Where(x => !string.IsNullOrWhiteSpace(x)).Distinct(StringComparer.OrdinalIgnoreCase))
+        var normalizedItemIds = itemIds
+            .Where(x => !string.IsNullOrWhiteSpace(x))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToArray();
+
+        if (normalizedItemIds.Length == 0)
         {
-            await _context.ExecuteSqlRawAsync(
-                """UPDATE "ItemBases" SET "ItemType" = {0} WHERE "Id" = {1} AND "ItemType" = {2}""",
-                cancellationToken,
-                (int)ItemType.Resource,
-                itemId,
-                (int)ItemType.Consumable);
+            return;
         }
+
+        await _context.ItemBases
+            .Where(x => normalizedItemIds.Contains(x.Id) && x.ItemType == ItemType.Consumable)
+            .ExecuteUpdateAsync(
+                setters => setters.SetProperty(x => x.ItemType, ItemType.Resource),
+                cancellationToken);
     }
 }

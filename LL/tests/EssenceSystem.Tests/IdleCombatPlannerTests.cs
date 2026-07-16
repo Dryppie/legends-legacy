@@ -57,7 +57,7 @@ public sealed class IdleCombatPlannerTests
     {
         var now = DateTimeOffset.Parse("2026-06-23T12:00:00Z");
         var action = CreateCombatAction(now.AddHours(-48));
-        var planner = CreatePlanner(maximumBatchSize: 10_000);
+        var planner = CreatePlanner();
 
         var plan = planner.CreatePlan(new IdleCombatOrchestrationRequest(action, now));
 
@@ -66,28 +66,26 @@ public sealed class IdleCombatPlannerTests
     }
 
     [Fact]
-    public void CreatePlan_caps_each_processing_batch_and_preserves_remaining_catch_up_time()
+    public void CreatePlan_processes_all_due_encounters_in_one_plan()
     {
         var firstEncounterAt = DateTimeOffset.Parse("2026-06-23T10:00:00Z");
         var now = firstEncounterAt.AddHours(2);
         var action = CreateCombatAction(firstEncounterAt);
-        var planner = CreatePlanner(maximumBatchSize: 500);
+        var planner = CreatePlanner();
 
         var plan = planner.CreatePlan(new IdleCombatOrchestrationRequest(action, now));
 
-        Assert.Equal(500, plan.PlannedEncounterCount);
-        Assert.Equal(firstEncounterAt.AddSeconds(5_000), plan.ExecutableUntil);
-        Assert.True(plan.ExecutableUntil < now);
+        Assert.Equal(721, plan.PlannedEncounterCount);
+        Assert.Equal(now.AddSeconds(10), plan.ExecutableUntil);
     }
 
-    private static IdleCombatPlanner CreatePlanner(int maximumBatchSize = 500) =>
+    private static IdleCombatPlanner CreatePlanner() =>
         new(
             new FakeSpawningService(),
             Options.Create(new IdleCombatProgressionOptions
             {
                 EncounterCadenceSeconds = 10,
                 MaximumOfflineHours = 24,
-                MaximumEncountersPerProcessingBatch = maximumBatchSize,
                 ReferenceWinRateBasisPoints = 8_500
             }));
 

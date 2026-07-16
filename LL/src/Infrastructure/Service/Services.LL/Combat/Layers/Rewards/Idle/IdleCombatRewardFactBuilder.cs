@@ -1,4 +1,3 @@
-using Application.Interfaces.Services.LL.Entities;
 using Domain.Models.Entities.Creatures;
 using Domain.Models.Items.Equipments.Slots;
 using Services.LL.Combat.Layers.Rewards.Models;
@@ -8,14 +7,7 @@ namespace Services.LL.Combat.Layers.Rewards.Idle;
 
 public sealed class IdleCombatRewardFactBuilder : IIdleCombatRewardFactBuilder
 {
-    private readonly IEntityService _entityService;
-
-    public IdleCombatRewardFactBuilder(IEntityService entityService)
-    {
-        _entityService = entityService;
-    }
-
-    public async Task<IdleCombatRewardFacts> BuildAsync(
+    public Task<IdleCombatRewardFacts> BuildAsync(
         IdleCombatOutcomeContext context,
         CancellationToken cancellationToken)
     {
@@ -26,16 +18,22 @@ public sealed class IdleCombatRewardFactBuilder : IIdleCombatRewardFactBuilder
             .ToList();
 
         var hostileCreaturesById = new Dictionary<Guid, Creature>();
-
         if (hostileSourceIds.Count > 0)
         {
-            var hostileEntities = await _entityService.GetEntitiesByIdsForCombatAsync(
-                hostileSourceIds,
-                cancellationToken);
+            var sourceEntitiesById = context.OrchestrationResult.SourceEntitiesById
+                ?? throw new InvalidOperationException(
+                    "Idle combat orchestration did not provide its preloaded source entities.");
 
-            hostileCreaturesById = hostileEntities
-                .OfType<Creature>()
-                .ToDictionary(x => x.Id);
+            foreach (var hostileSourceId in hostileSourceIds)
+            {
+                if (!sourceEntitiesById.TryGetValue(hostileSourceId, out var entity) || entity is not Creature creature)
+                {
+                    throw new InvalidOperationException(
+                        $"Hostile creature '{hostileSourceId}' was not available in the idle source catalog.");
+                }
+
+                hostileCreaturesById[hostileSourceId] = creature;
+            }
         }
 
         var encounterFacts = context.Encounters
@@ -69,7 +67,7 @@ public sealed class IdleCombatRewardFactBuilder : IIdleCombatRewardFactBuilder
             })
             .ToArray();
 
-        return new IdleCombatRewardFacts(
+        return Task.FromResult(new IdleCombatRewardFacts(
             CharacterId: context.CharacterId,
             From: context.Details.From,
             RequestedTo: context.Details.RequestedTo,
@@ -78,7 +76,7 @@ public sealed class IdleCombatRewardFactBuilder : IIdleCombatRewardFactBuilder
             Area: context.Area,
             PlayerEntityIds: [.. context.PlayerEntityIds],
             EquippedTool: ResolveEquippedTool(context),
-            Encounters: encounterFacts);
+            Encounters: encounterFacts));
     }
 
     private static EquippedGatheringTool? ResolveEquippedTool(IdleCombatOutcomeContext context)

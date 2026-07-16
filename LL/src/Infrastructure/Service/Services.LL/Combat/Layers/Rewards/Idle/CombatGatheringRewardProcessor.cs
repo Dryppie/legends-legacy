@@ -89,6 +89,7 @@ public sealed class CombatGatheringRewardProcessor : ICombatGatheringRewardProce
         }
 
         var results = new List<GatheringRewardResult>();
+        var pendingRewards = new List<PendingGatheringReward>();
 
         foreach (var node in matchingNodes)
         {
@@ -122,29 +123,32 @@ public sealed class CombatGatheringRewardProcessor : ICombatGatheringRewardProce
                 var rareMaterialChance =
                     Math.Max(0d, tool.GetBonus(ToolBonusType.RareMaterialChancePercent)) +
                     Math.Max(0d, rareChanceRelativeBps).ToPercent();
-                var gathered = await GenerateGatheringRewardsAsync(
+                var rewardRolls = RollGatheringRewards(
                     node,
-                    cancellationToken,
                     rareMaterialChance,
                     numberOfRolls);
-
-                ApplyToolBonuses(gathered, tool, node);
-
-                results.Add(new GatheringRewardResult
+                var result = new GatheringRewardResult
                 {
                     ToolType = tool.GatheringType,
                     NodeId = node.Id,
                     NodeName = ResolveNodeName(node.Id, node.Name),
                     ToolName = tool.Name,
                     ToolRarity = tool.Rarity,
-                    Success = gathered.Count > 0,
                     ExperienceGained = 1,
-                    ItemsGained = gathered,
                     AppliedBonusEffects = appliedBonusEffects,
-                    Message = gathered.Count > 0 ? null : "No resources gathered."
-                });
+                };
+
+                results.Add(result);
+                pendingRewards.Add(new PendingGatheringReward(
+                    result,
+                    rewardRolls,
+                    rewardRolls.Count == 0
+                        ? ToolBonusPlan.None
+                        : CreateToolBonusPlan(tool, node)));
             }
         }
+
+        await MaterializePendingRewardsAsync(pendingRewards, cancellationToken);
 
         ApplyBatchYieldBonus(results, gatheringYieldBps);
         await AwardExperienceAsync(profession, results.Sum(x => x.ExperienceGained).ApplyPositiveBps(gatheringExperienceGainBps), cancellationToken);
@@ -152,26 +156,12 @@ public sealed class CombatGatheringRewardProcessor : ICombatGatheringRewardProce
         return results;
     }
 
-    private async Task<List<InventoryItem>> GenerateGatheringRewardsAsync(
+    private IReadOnlyList<IReadOnlyList<ItemRewardResult>> RollGatheringRewards(
         CombatGatheringNode node,
-        CancellationToken cancellationToken,
         double rareEntryWeightBonusPercent,
         int numberOfRolls)
     {
-        return await GenerateRewardTableLootAsync(
-            node,
-            cancellationToken,
-            rareEntryWeightBonusPercent,
-            numberOfRolls);
-    }
-
-    private async Task<List<InventoryItem>> GenerateRewardTableLootAsync(
-        CombatGatheringNode node,
-        CancellationToken cancellationToken,
-        double rareEntryWeightBonusPercent,
-        int numberOfRolls)
-    {
-        var loot = new List<InventoryItem>();
+        var rolls = new List<IReadOnlyList<ItemRewardResult>>();
         var context = new RewardRollContext(
             "Gathering",
             EntryWeightBonusPercentByTag: new Dictionary<string, double>(StringComparer.OrdinalIgnoreCase)
@@ -190,19 +180,40 @@ public sealed class CombatGatheringRewardProcessor : ICombatGatheringRewardProce
                 continue;
             }
 
-            var itemBases = await _itemBases.GetItemBasesByIdsAsync(
-                result.Items.Select(x => x.ItemId).Distinct(StringComparer.OrdinalIgnoreCase).ToArray(),
-                cancellationToken);
-
-            loot.AddRange(result.Items
-                .Where(item => itemBases.ContainsKey(item.ItemId))
-                .GroupBy(item => item.ItemId, StringComparer.OrdinalIgnoreCase)
-                .SelectMany(group => _inventoryItemFactory.CreateForQuantity(
-                    itemBases[group.Key],
-                    group.Sum(item => item.Quantity))));
+            rolls.Add(result.Items);
         }
 
-        return loot;
+        return rolls;
+    }
+
+    private async Task MaterializePendingRewardsAsync(
+        IReadOnlyList<PendingGatheringReward> pendingRewards,
+        CancellationToken cancellationToken)
+    {
+        var itemIds = pendingRewards
+            .SelectMany(pending => pending.RewardRolls)
+            .SelectMany(roll => roll)
+            .Select(item => item.ItemId)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToArray();
+        var itemBases = await _itemBases.GetItemBasesByIdsAsync(itemIds, cancellationToken);
+
+        foreach (var pending in pendingRewards)
+        {
+            var gathered = pending.RewardRolls
+                .SelectMany(roll => roll
+                    .Where(item => itemBases.ContainsKey(item.ItemId))
+                    .GroupBy(item => item.ItemId, StringComparer.OrdinalIgnoreCase)
+                    .SelectMany(group => _inventoryItemFactory.CreateForQuantity(
+                        itemBases[group.Key],
+                        group.Sum(item => item.Quantity))))
+                .ToList();
+
+            ApplyToolBonusPlan(gathered, pending.ToolBonusPlan);
+            pending.Result.ItemsGained = gathered;
+            pending.Result.Success = gathered.Count > 0;
+            pending.Result.Message = gathered.Count > 0 ? null : "No resources gathered.";
+        }
     }
 
     private async Task AwardExperienceAsync(
@@ -222,33 +233,35 @@ public sealed class CombatGatheringRewardProcessor : ICombatGatheringRewardProce
         _professionService.UpdateProfessionLevel([profession]);
     }
 
-    private void ApplyToolBonuses(
-        List<InventoryItem> gathered,
+    private ToolBonusPlan CreateToolBonusPlan(
         EquippedGatheringTool tool,
         CombatGatheringNode node)
     {
-        if (gathered.Count == 0)
-        {
-            return;
-        }
-
         var yieldBonus =
             Math.Max(0d, tool.GetBonus(ToolBonusType.GatheringYieldPercent)) +
             Math.Max(0d, tool.GetBonus(ToolBonusType.SpecificNodeYieldPercent, node.Id));
         var yieldMultiplier = 1d + yieldBonus / 100d;
-
-        foreach (var item in gathered)
-        {
-            item.Quantity = Math.Max(0, (int)Math.Round(Math.Max(0, item.Quantity) * yieldMultiplier));
-        }
-
         var doubleChance = Math.Clamp(
             Math.Max(0d, tool.GetBonus(ToolBonusType.DoubleGatherChancePercent)),
             0d,
             100d) / 100d;
-        if (doubleChance > 0d && _randomSource.NextDouble() < doubleChance)
+
+        return new ToolBonusPlan(
+            yieldMultiplier,
+            doubleChance > 0d && _randomSource.NextDouble() < doubleChance);
+    }
+
+    private static void ApplyToolBonusPlan(
+        List<InventoryItem> gathered,
+        ToolBonusPlan plan)
+    {
+        foreach (var item in gathered)
         {
-            foreach (var item in gathered)
+            item.Quantity = Math.Max(
+                0,
+                (int)Math.Round(Math.Max(0, item.Quantity) * plan.YieldMultiplier));
+
+            if (plan.DoubleYield)
             {
                 item.Quantity = Math.Max(0, item.Quantity * 2);
             }
@@ -340,4 +353,14 @@ public sealed class CombatGatheringRewardProcessor : ICombatGatheringRewardProce
         GatheringType.Skinning => ProfessionType.Skinning,
         _ => ProfessionType.None
     };
+
+    private sealed record PendingGatheringReward(
+        GatheringRewardResult Result,
+        IReadOnlyList<IReadOnlyList<ItemRewardResult>> RewardRolls,
+        ToolBonusPlan ToolBonusPlan);
+
+    private sealed record ToolBonusPlan(double YieldMultiplier, bool DoubleYield)
+    {
+        public static ToolBonusPlan None { get; } = new(1, false);
+    }
 }

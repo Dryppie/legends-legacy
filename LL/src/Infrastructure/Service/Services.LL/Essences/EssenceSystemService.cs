@@ -37,6 +37,10 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
     private readonly ICreatureArchiveService? _creatureArchiveService;
     private readonly IPublisher? _publisher;
     private readonly IGameEventOutbox _outbox;
+    private readonly Dictionary<Guid, string?> _essenceFocusCache = [];
+    private readonly Dictionary<Guid, Dictionary<string, CreatureResonance>> _resonanceCache = [];
+    private readonly Dictionary<string, ItemBase> _essenceItemBaseCache = new(StringComparer.OrdinalIgnoreCase);
+    private readonly HashSet<string> _missingEssenceItemBaseIds = new(StringComparer.OrdinalIgnoreCase);
 
     public EssenceSystemService(
         IEssenceRepository essences,
@@ -502,17 +506,78 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
 
         var factors = await GetBonusFactorsAsync(characterId, DateTimeOffset.UtcNow, cancellationToken);
 
-        async Task<bool> IsEssenceFocusAsync(string candidateMonsterId, CancellationToken ct) =>
-            _creatureArchiveService is not null &&
-            await _creatureArchiveService.IsEssenceFocusAsync(characterId, candidateMonsterId, ct);
-
         return await RollMonsterEssenceDropAsync(
             characterId,
             monsterId,
             eligible,
             factors,
-            IsEssenceFocusAsync,
+            (candidateMonsterId, ct) => IsEssenceFocusAsync(characterId, candidateMonsterId, ct),
             cancellationToken);
+    }
+
+    public async Task PrepareEssenceDropsAsync(
+        Guid characterId,
+        IReadOnlyList<Creature> defeatedCreatures,
+        bool loadEssenceFocus,
+        CancellationToken cancellationToken)
+    {
+        var monsterIds = defeatedCreatures
+            .Select(CreatureEssenceSource.GetMonsterDefinitionId)
+            .Where(monsterId => _creatureEssenceLootTables.GetByCreatureId(monsterId) is not null)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToArray();
+
+        if (monsterIds.Length == 0)
+        {
+            return;
+        }
+
+        var resonances = await _essences.GetCreatureResonancesAsync(
+            characterId,
+            monsterIds,
+            cancellationToken);
+        var resonanceByCreature = GetOrCreateResonanceCache(characterId);
+        foreach (var resonance in resonances)
+        {
+            resonanceByCreature[resonance.CreatureId] = resonance;
+        }
+
+        foreach (var monsterId in monsterIds.Where(id => !resonanceByCreature.ContainsKey(id)))
+        {
+            var resonance = new CreatureResonance
+            {
+                Id = Guid.NewGuid(),
+                CharacterId = characterId,
+                CreatureId = monsterId
+            };
+            await _essences.AddCreatureResonanceAsync(resonance, cancellationToken);
+            resonanceByCreature[monsterId] = resonance;
+        }
+
+        if (loadEssenceFocus && !_essenceFocusCache.ContainsKey(characterId))
+        {
+            _essenceFocusCache[characterId] = _creatureArchiveService is null
+                ? null
+                : await _creatureArchiveService.GetEssenceFocusCreatureIdAsync(characterId, cancellationToken);
+        }
+
+        var possibleItemBaseIds = monsterIds
+            .Select(_creatureEssenceLootTables.GetByCreatureId)
+            .Where(table => table is not null)
+            .SelectMany(table => table!.Variants)
+            .Select(variant => $"item.{variant.EssenceDefinitionId}")
+            .Where(itemBaseId => !_essenceItemBaseCache.ContainsKey(itemBaseId))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToArray();
+        var itemBases = await _itemBases.GetItemBasesByIdsAsync(possibleItemBaseIds, cancellationToken);
+        foreach (var (itemBaseId, itemBase) in itemBases)
+        {
+            _essenceItemBaseCache[itemBaseId] = itemBase;
+        }
+        foreach (var missingItemBaseId in possibleItemBaseIds.Where(id => !itemBases.ContainsKey(id)))
+        {
+            _missingEssenceItemBaseIds.Add(missingItemBaseId);
+        }
     }
 
     private async Task<EssenceDropRollResult> RollMonsterEssenceDropAsync(
@@ -526,12 +591,18 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
         var lootTable = _creatureEssenceLootTables.GetByCreatureId(monsterId);
         if (!eligible || lootTable is null) return new(false, null, 0, 0);
 
-        var resonance = await _essences.GetCreatureResonanceAsync(characterId, monsterId, cancellationToken);
+        var resonanceByCreature = GetOrCreateResonanceCache(characterId);
+        if (!resonanceByCreature.TryGetValue(monsterId, out var resonance))
+        {
+            resonance = await _essences.GetCreatureResonanceAsync(characterId, monsterId, cancellationToken);
+        }
+
         if (resonance is null)
         {
             resonance = new CreatureResonance { Id = Guid.NewGuid(), CharacterId = characterId, CreatureId = monsterId };
             await _essences.AddCreatureResonanceAsync(resonance, cancellationToken);
         }
+        resonanceByCreature[monsterId] = resonance;
 
         var bonus = Math.Min(
             CreatureResonanceConstants.MaximumDropChanceBonus,
@@ -575,25 +646,6 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
         if (monsterIds.Count == 0) return drops;
 
         var factors = bonusFactors ?? await GetBonusFactorsAsync(characterId, DateTimeOffset.UtcNow, cancellationToken);
-        var focusedMonsterIds = new Dictionary<string, bool>(StringComparer.OrdinalIgnoreCase);
-
-        async Task<bool> IsBatchEssenceFocusAsync(string candidateMonsterId, CancellationToken ct)
-        {
-            if (_creatureArchiveService is null)
-            {
-                return false;
-            }
-
-            if (focusedMonsterIds.TryGetValue(candidateMonsterId, out var cached))
-            {
-                return cached;
-            }
-
-            var isFocused = await _creatureArchiveService.IsEssenceFocusAsync(characterId, candidateMonsterId, ct);
-            focusedMonsterIds[candidateMonsterId] = isFocused;
-            return isFocused;
-        }
-
         foreach (var monsterId in monsterIds)
         {
             var roll = await RollMonsterEssenceDropAsync(
@@ -601,18 +653,60 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
                 monsterId,
                 true,
                 factors,
-                IsBatchEssenceFocusAsync,
+                (candidateMonsterId, ct) => IsEssenceFocusAsync(characterId, candidateMonsterId, ct),
                 cancellationToken);
             if (!roll.Dropped || string.IsNullOrWhiteSpace(roll.EssenceDefinitionId)) continue;
 
             var itemBaseId = $"item.{roll.EssenceDefinitionId}";
-            var itemBases = await _itemBases.GetItemBasesByIdsAsync([itemBaseId], cancellationToken);
-            if (!itemBases.TryGetValue(itemBaseId, out var itemBase)) continue;
+            if (_missingEssenceItemBaseIds.Contains(itemBaseId)) continue;
+
+            if (!_essenceItemBaseCache.TryGetValue(itemBaseId, out var itemBase))
+            {
+                var itemBases = await _itemBases.GetItemBasesByIdsAsync([itemBaseId], cancellationToken);
+                if (!itemBases.TryGetValue(itemBaseId, out itemBase))
+                {
+                    _missingEssenceItemBaseIds.Add(itemBaseId);
+                    continue;
+                }
+                _essenceItemBaseCache[itemBaseId] = itemBase;
+            }
 
             drops.Add(_inventoryItemFactory.Create(itemBase, 1, characterId));
         }
 
         return drops;
+    }
+
+    private async Task<bool> IsEssenceFocusAsync(
+        Guid characterId,
+        string creatureId,
+        CancellationToken cancellationToken)
+    {
+        if (_creatureArchiveService is null)
+        {
+            return false;
+        }
+
+        if (!_essenceFocusCache.TryGetValue(characterId, out var focusedCreatureId))
+        {
+            focusedCreatureId = await _creatureArchiveService.GetEssenceFocusCreatureIdAsync(
+                characterId,
+                cancellationToken);
+            _essenceFocusCache[characterId] = focusedCreatureId;
+        }
+
+        return string.Equals(focusedCreatureId, creatureId, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private Dictionary<string, CreatureResonance> GetOrCreateResonanceCache(Guid characterId)
+    {
+        if (!_resonanceCache.TryGetValue(characterId, out var resonanceByCreature))
+        {
+            resonanceByCreature = new Dictionary<string, CreatureResonance>(StringComparer.OrdinalIgnoreCase);
+            _resonanceCache[characterId] = resonanceByCreature;
+        }
+
+        return resonanceByCreature;
     }
 
     private string RollEssenceDefinitionId(CreatureEssenceLootTableDefinition lootTable)

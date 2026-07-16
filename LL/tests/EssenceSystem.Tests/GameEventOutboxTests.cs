@@ -376,6 +376,9 @@ public sealed class GameEventOutboxTests
         public Task<CreatureArchive> SetEssenceFocusAsync(Guid characterId, string? creatureId, CancellationToken cancellationToken) =>
             Task.FromResult(new CreatureArchive([], true, null, null));
 
+        public Task<string?> GetEssenceFocusCreatureIdAsync(Guid characterId, CancellationToken cancellationToken) =>
+            Task.FromResult<string?>(null);
+
         public Task<bool> IsEssenceFocusAsync(Guid characterId, string creatureId, CancellationToken cancellationToken) =>
             Task.FromResult(false);
     }

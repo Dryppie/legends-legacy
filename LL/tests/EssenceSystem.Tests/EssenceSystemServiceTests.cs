@@ -951,7 +951,51 @@ public sealed class EssenceSystemServiceTests
 
         Assert.Empty(drops);
         Assert.Equal(1, bonusService.GetAggregatedCallCount);
-        Assert.Equal(2, creatureArchiveService.FocusLookupCount);
+        Assert.Equal(0, creatureArchiveService.FocusLookupCount);
+        Assert.Equal(1, creatureArchiveService.FocusIdLookupCount);
+    }
+
+    [Fact]
+    public async Task RollEssenceDrops_reuses_focus_lookups_across_batches_in_the_same_scope()
+    {
+        await using var db = CreateDb();
+        var characterId = await SeedCharacterAndInventoryAsync(db);
+        var bonusService = new StaticBonusService(new Dictionary<BonusKind, double>
+        {
+            [BonusKind.FocusedMonsterEssenceDropRateRelativeBps] = 5000
+        });
+        var creatureArchiveService = new StaticCreatureArchiveService("monster.test");
+        var service = CreateService(
+            db,
+            new QueueRandomProvider(0.99, 0.99, 0.99, 0.99, 0.99, 0.99),
+            bonusService: bonusService,
+            creatureArchiveService: creatureArchiveService);
+        Creature[] defeatedCreatures =
+        [
+            new Creature { Name = "Test" },
+            new Creature { Name = "Test" },
+            new Creature { Name = "Other" }
+        ];
+
+        await service.PrepareEssenceDropsAsync(
+            characterId,
+            defeatedCreatures,
+            loadEssenceFocus: true,
+            CancellationToken.None);
+        await service.RollEssenceDropsAsync(
+            characterId,
+            defeatedCreatures,
+            true,
+            CancellationToken.None);
+        await service.RollEssenceDropsAsync(
+            characterId,
+            defeatedCreatures,
+            true,
+            CancellationToken.None);
+
+        Assert.Equal(0, creatureArchiveService.FocusLookupCount);
+        Assert.Equal(1, creatureArchiveService.FocusIdLookupCount);
+        Assert.Equal(2, db.CreatureResonances.Local.Count);
     }
 
     private static LLDbContext CreateDb()
@@ -1241,6 +1285,7 @@ public sealed class EssenceSystemServiceTests
     private sealed class StaticCreatureArchiveService(string focusedCreatureId) : ICreatureArchiveService
     {
         public int FocusLookupCount { get; private set; }
+        public int FocusIdLookupCount { get; private set; }
 
         public Task RecordDefeatedCreaturesAsync(
             Guid characterId,
@@ -1257,6 +1302,12 @@ public sealed class EssenceSystemServiceTests
 
         public Task<CreatureArchive> SetEssenceFocusAsync(Guid characterId, string? creatureId, CancellationToken cancellationToken) =>
             Task.FromResult(new CreatureArchive([], true, null, null));
+
+        public Task<string?> GetEssenceFocusCreatureIdAsync(Guid characterId, CancellationToken cancellationToken)
+        {
+            FocusIdLookupCount++;
+            return Task.FromResult<string?>(focusedCreatureId);
+        }
 
         public Task<bool> IsEssenceFocusAsync(Guid characterId, string creatureId, CancellationToken cancellationToken)
         {

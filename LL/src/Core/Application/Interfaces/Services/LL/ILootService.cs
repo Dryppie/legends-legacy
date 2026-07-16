@@ -21,5 +21,9 @@ public interface ILootService
         List<Entity> enemyCharacters,
         Dictionary<ItemType, double> multipliers,
         CancellationToken cancellationToken);
+    Task<IReadOnlyList<IReadOnlyList<InventoryItem>>> GenerateIdleCombatLootBatchAsync(
+        IReadOnlyList<IReadOnlyList<Entity>> enemyGroups,
+        Dictionary<ItemType, double> multipliers,
+        CancellationToken cancellationToken);
     int GenerateCinderLoot(Dictionary<Guid, int> creatureKills, Dictionary<Guid, int> baseCinderValues, double dropChance = 0.2);
 }

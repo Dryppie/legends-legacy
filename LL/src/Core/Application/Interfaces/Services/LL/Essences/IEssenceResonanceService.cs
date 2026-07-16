@@ -6,6 +6,11 @@ using Domain.Models.Inventories;
 
 public interface IEssenceResonanceService
 {
+    Task PrepareEssenceDropsAsync(
+        Guid characterId,
+        IReadOnlyList<Creature> defeatedCreatures,
+        bool loadEssenceFocus,
+        CancellationToken cancellationToken);
     Task<EssenceDropRollResult> RollMonsterEssenceDropAsync(Guid characterId, string monsterId, bool eligible, CancellationToken cancellationToken);
     Task<IReadOnlyList<InventoryItem>> RollEssenceDropsAsync(
         Guid characterId,

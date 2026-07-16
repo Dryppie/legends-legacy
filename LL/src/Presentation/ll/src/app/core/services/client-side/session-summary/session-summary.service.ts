@@ -13,13 +13,13 @@ export class SessionSummaryService {
 
   loadCombatSince(session: CombatSessionDto | undefined) {
     if (!session?.combatSummary) return;
-    if (session.combatSummary.totalBattles <= 2) return;
+    if (session.combatSummary.totalBattles <= 5) return;
     this.combatSession.set(session);
   }
 
   loadCraftingSince(session: TemperingSessionDto) {
     if (!session?.temperingSummary) return;
-    if (session.temperingSummary.totalActions <= 10) return;
+    if (session.temperingSummary.totalActions <= 5) return;
     this.temperingSession.set(session);
   }
 

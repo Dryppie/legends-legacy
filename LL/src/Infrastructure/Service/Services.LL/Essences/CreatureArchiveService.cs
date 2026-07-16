@@ -306,6 +306,14 @@ public sealed class CreatureArchiveService : ICreatureArchiveService
                 cancellationToken);
     }
 
+    public async Task<string?> GetEssenceFocusCreatureIdAsync(
+        Guid characterId,
+        CancellationToken cancellationToken) =>
+        await _dbContext.CharacterCreatureArchiveEntries
+            .Where(x => x.CharacterId == characterId && x.IsEssenceFocus)
+            .Select(x => x.CreatureDefinitionId)
+            .FirstOrDefaultAsync(cancellationToken);
+
     public async Task<EssenceCodex> GetEssenceCodexAsync(Guid characterId, CancellationToken cancellationToken)
     {
         var entries = await _codexCollections.GetVisibleEntriesAsync(characterId, cancellationToken);
