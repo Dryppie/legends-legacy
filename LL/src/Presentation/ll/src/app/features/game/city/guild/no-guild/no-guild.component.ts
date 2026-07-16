@@ -10,6 +10,8 @@ import { GuildStateService } from '../../../../../core/services/api/guild/guild-
   templateUrl: './no-guild.component.html',
 })
 export class NoGuildComponent {
+  private readonly minimumGuildNameLength = 3;
+
   /* ─────────── read data from the state ─────────── */
   readonly guilds;
   readonly guildInvites = computed(() =>
@@ -22,6 +24,9 @@ export class NoGuildComponent {
   /* ─────────── local UI state ─────────── */
   showModal = signal(false);
   guildName = signal('');
+  readonly isGuildNameValid = computed(
+    () => this.guildName().trim().length >= this.minimumGuildNameLength,
+  );
 
   constructor(private readonly guildState: GuildStateService) {
     this.guilds = guildState.allGuilds;
@@ -38,7 +43,7 @@ export class NoGuildComponent {
 
   create(): void {
     const name = this.guildName().trim();
-    if (!name) return;
+    if (!this.isGuildNameValid()) return;
 
     this.guildState.create(name);
     this.closeModal();
