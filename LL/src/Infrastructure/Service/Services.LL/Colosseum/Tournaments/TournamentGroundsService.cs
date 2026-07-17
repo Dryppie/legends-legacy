@@ -320,7 +320,7 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
                 {
                     CharacterId = group.Key,
                     CharacterName = characterNames.GetValueOrDefault(group.Key, "Unknown"),
-                    Points = group.Sum(p => CalculateTournamentPoints(p.FinalPlacement)),
+                    Points = group.Sum(p => TournamentScoring.CalculatePoints(p.FinalPlacement)),
                     TournamentsEntered = group.Count(),
                     Championships = group.Count(p => p.FinalPlacement == 1),
                     FinalistFinishes = group.Count(p => p.FinalPlacement <= 2),
@@ -1519,19 +1519,6 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
             Soulstones = tier.Soulstones,
             Status = TournamentRewardStatus.Unclaimed,
             CreatedAtUtc = now
-        };
-    }
-
-    private static int CalculateTournamentPoints(int? placement)
-    {
-        return placement switch
-        {
-            1 => 100,
-            2 => 60,
-            <= 4 => 35,
-            <= 8 => 20,
-            null => 0,
-            _ => 10
         };
     }
 

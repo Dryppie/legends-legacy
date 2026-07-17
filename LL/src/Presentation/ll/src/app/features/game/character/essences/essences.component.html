@@ -6,57 +6,13 @@
     icon="character/essences"
   ></app-default-header>
 
-  <div class="flex flex-wrap gap-2 rounded-lg" data-tour="essence-view-tabs">
-    <button
-      type="button"
-      class="ll-button"
-      [ngClass]="{
-        'll-card-accent text-primary': essenceState.activeView() === 'archive',
-      }"
-      (click)="essenceState.setActiveView('archive')"
-    >
-      Archive
-    </button>
-    <button
-      type="button"
-      class="ll-button"
-      [ngClass]="{
-        'll-card-accent text-primary': essenceState.activeView() === 'absorb',
-      }"
-      (click)="essenceState.setActiveView('absorb')"
-    >
-      Absorb
-    </button>
-    <button
-      type="button"
-      class="ll-button relative"
-      [ngClass]="{
-        'll-card-accent text-primary':
-          essenceState.activeView() === 'creatures',
-        'border-primary/70 shadow-[0_0_10px_rgba(234,179,8,0.22)]':
-          essenceState.essenceFocusReady() &&
-          essenceState.activeView() !== 'creatures',
-      }"
-      (click)="essenceState.setActiveView('creatures')"
-    >
-      Creatures
-      <app-notification-indicator
-        class="absolute -right-1 -top-1"
-        [count]="essenceState.essenceFocusReady() ? 1 : 0"
-        label="Essence Focus ready"
-      ></app-notification-indicator>
-    </button>
-    <button
-      type="button"
-      class="ll-button"
-      [ngClass]="{
-        'll-card-accent text-primary': essenceState.activeView() === 'codex',
-      }"
-      (click)="essenceState.setActiveView('codex')"
-    >
-      Codex
-    </button>
-  </div>
+  <app-navigation-tabs
+    data-tour="essence-view-tabs"
+    [tabs]="viewTabs()"
+    [activeKey]="essenceState.activeView()"
+    ariaLabel="Soul Archive views"
+    (tabSelected)="selectView($event)"
+  ></app-navigation-tabs>
 
   <div *ngIf="essenceState.error()" class="ll-state ll-state-danger">
     {{ essenceState.error() }}
@@ -153,7 +109,9 @@
               {{ essence.name }}
             </span>
             <span class="ll-badge shrink-0 rounded text-zinc-300">
-              L{{ essence.level }} P{{ essence.potentialTier }} A{{ essence.ascensionTier }}
+              L{{ essence.level }} P{{ essence.potentialTier }} A{{
+                essence.ascensionTier
+              }}
             </span>
           </div>
           <div class="mt-2 flex items-center justify-between gap-3 text-xs">
@@ -487,10 +445,13 @@
             <h2 class="ll-heading">Loadouts</h2>
             <p class="ll-copy">
               <ng-container
-                *ngIf="essenceState.loadouts() as loadouts; else loadoutsPending"
+                *ngIf="
+                  essenceState.loadouts() as loadouts;
+                  else loadoutsPending
+                "
               >
-                {{ loadouts.loadouts.length }}/{{ loadouts.limit }}
-                saved | {{ loadouts.unlockedSlots }} slots available
+                {{ loadouts.loadouts.length }}/{{ loadouts.limit }} saved |
+                {{ loadouts.unlockedSlots }} slots available
               </ng-container>
               <ng-template #loadoutsPending>
                 Loading loadout slots...
@@ -570,7 +531,10 @@
           {{ saveHint }}
         </p>
 
-        <div class="mt-3 flex flex-wrap gap-2" data-tour="essence-loadout-actions">
+        <div
+          class="mt-3 flex flex-wrap gap-2"
+          data-tour="essence-loadout-actions"
+        >
           <button
             type="button"
             class="ll-button"
@@ -678,7 +642,12 @@
         <div>
           <h3 class="font-semibold text-primary">Essence Focus</h3>
           <p class="mt-1 text-xs text-zinc-400">
-            <ng-container *ngIf="essenceState.focusedCreature() as focusedCreature; else noEssenceFocus">
+            <ng-container
+              *ngIf="
+                essenceState.focusedCreature() as focusedCreature;
+                else noEssenceFocus
+              "
+            >
               {{ focusedCreature.name }} increases the value of focused monster
               Essence drop bonuses.
             </ng-container>
@@ -758,7 +727,10 @@
           </div>
         </div>
 
-        <div class="mt-3 flex flex-wrap gap-1" *ngIf="creature.locations.length > 0">
+        <div
+          class="mt-3 flex flex-wrap gap-1"
+          *ngIf="creature.locations.length > 0"
+        >
           <span
             *ngFor="let location of creature.locations | slice: 0 : 3"
             class="ll-badge rounded text-zinc-300"
@@ -780,14 +752,19 @@
             *ngFor="let essence of creature.essences"
             class="flex items-center justify-between gap-3 py-1"
           >
-            <span [ngClass]="essence.isAbsorbed ? 'text-primary' : 'text-zinc-300'">
+            <span
+              [ngClass]="essence.isAbsorbed ? 'text-primary' : 'text-zinc-300'"
+            >
               {{ essence.name }}
             </span>
             <span class="text-xs text-zinc-500">
               {{ essence.isAbsorbed ? "Archived" : "Not archived" }}
             </span>
           </div>
-          <p *ngIf="creature.essences.length === 0" class="text-xs text-zinc-500">
+          <p
+            *ngIf="creature.essences.length === 0"
+            class="text-xs text-zinc-500"
+          >
             No Essence variants
           </p>
         </div>
@@ -831,7 +808,10 @@
 
     <div class="grid gap-3 md:grid-cols-2">
       <article
-        *ngFor="let entry of essenceState.codex()?.entries ?? []; trackBy: trackCodex"
+        *ngFor="
+          let entry of essenceState.codex()?.entries ?? [];
+          trackBy: trackCodex
+        "
         class="ll-card p-3"
         [ngClass]="{
           'border-primary bg-primary/10': entry.isUnlocked,
@@ -844,9 +824,7 @@
           </div>
           <span
             class="ll-badge shrink-0 rounded"
-            [ngClass]="
-              entry.isUnlocked ? 'll-badge-accent' : 'll-badge-muted'
-            "
+            [ngClass]="entry.isUnlocked ? 'll-badge-accent' : 'll-badge-muted'"
           >
             {{ entry.isUnlocked ? "Unlocked" : "Locked" }}
           </span>

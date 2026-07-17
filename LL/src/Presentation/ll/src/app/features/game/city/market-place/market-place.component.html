@@ -55,20 +55,26 @@
     ></app-market-place-commodity>
 
     <ng-template #instanceMarket>
-      <app-tabs class="flex h-full min-h-0 flex-col">
-        <app-tab label="Buy">
-          <app-market-place-buy
-            [itemType]="selectedItemType().main"
-            class="h-full overflow-y-auto"
-          ></app-market-place-buy>
-        </app-tab>
-        <app-tab label="Sell">
-          <app-market-place-sell
-            [itemType]="selectedItemType().main"
-            class="h-full overflow-y-auto"
-          ></app-market-place-sell>
-        </app-tab>
-      </app-tabs>
+      <div class="flex h-full min-h-0 flex-col">
+        <app-navigation-tabs
+          class="flex-none"
+          [tabs]="tradeTabs"
+          [activeKey]="activeTradeTab()"
+          ariaLabel="Marketplace actions"
+          (tabSelected)="selectTradeTab($event)"
+        ></app-navigation-tabs>
+
+        <app-market-place-buy
+          *ngIf="activeTradeTab() === 'buy'"
+          [itemType]="selectedItemType().main"
+          class="min-h-0 flex-1 overflow-y-auto"
+        ></app-market-place-buy>
+        <app-market-place-sell
+          *ngIf="activeTradeTab() === 'sell'"
+          [itemType]="selectedItemType().main"
+          class="min-h-0 flex-1 overflow-y-auto"
+        ></app-market-place-sell>
+      </div>
     </ng-template>
   </div>
 </div>

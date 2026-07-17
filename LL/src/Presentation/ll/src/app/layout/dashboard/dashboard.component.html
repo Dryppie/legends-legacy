@@ -74,10 +74,14 @@
                     ></span>
                     <div class="min-w-0">
                       <p class="font-bold">
-                        {{ bootstrapError() ? 'Game state unavailable' : 'Entering the game' }}
+                        {{
+                          bootstrapError()
+                            ? "Game state unavailable"
+                            : "Entering the game"
+                        }}
                       </p>
                       <p class="ll-copy text-xs">
-                        {{ bootstrapError() || 'Loading character, tutorial, and current action.' }}
+                        {{ bootstrapError() || "Loading game data." }}
                       </p>
                     </div>
                   </div>

@@ -44,6 +44,9 @@ export class DropdownComponent<T = unknown> implements OnDestroy {
   /** List of sub‑options. Empty → act as a simple button. */
   @Input() subOptions: readonly string[] = [];
 
+  /** Optional detail shown beside every string sub-option. */
+  @Input() subOptionDetail: string | null = '0';
+
   /** Optional selectable options. When provided, this behaves like a normal dropdown field. */
   @Input() options: readonly DropdownOption<T>[] = [];
 
@@ -235,7 +238,11 @@ export class DropdownComponent<T = unknown> implements OnDestroy {
   }
 
   tourOptionMarker(option: DropdownOption<T>): string | null {
-    if (option.disabled || option.value === null || option.value === undefined) {
+    if (
+      option.disabled ||
+      option.value === null ||
+      option.value === undefined
+    ) {
       return null;
     }
 
