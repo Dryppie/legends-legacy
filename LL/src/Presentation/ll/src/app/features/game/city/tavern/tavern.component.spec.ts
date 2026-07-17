@@ -171,6 +171,22 @@ describe('TavernComponent', () => {
     expect(fixture.nativeElement.textContent).toContain('#51');
   });
 
+  it('renders the top three as distinct, labelled podium positions', () => {
+    const podiumEntries = [
+      ...fixture.nativeElement.querySelectorAll('[data-testid="podium-entry"]'),
+    ] as HTMLElement[];
+
+    expect(podiumEntries.map((entry) => entry.dataset['podiumRank'])).toEqual([
+      '1',
+      '2',
+      '3',
+    ]);
+    expect(podiumEntries[0].textContent).toContain('Champion');
+    expect(podiumEntries[1].textContent).toContain('Runner-up');
+    expect(podiumEntries[2].textContent).toContain('Third place');
+    expect(podiumEntries[0].getAttribute('aria-label')).toBe('Rank 1: First');
+  });
+
   it('uses the configured participant label and viewer participant id', () => {
     const guildBoard = createBoard();
     guildBoard.participantLabel = 'Guild';
