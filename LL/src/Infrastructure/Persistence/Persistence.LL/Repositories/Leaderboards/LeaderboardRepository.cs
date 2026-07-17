@@ -1,10 +1,13 @@
-﻿using Application.Common.Interfaces;
+using Application.Common.Interfaces;
+using Domain.Models.Colosseum.Tournaments;
+using Domain.Models.Guilds.Missions;
 using Domain.Models.Leaderboards;
 using Domain.Models.Professions;
 using Microsoft.EntityFrameworkCore;
 
 namespace Persistence.LL.Repositories.Leaderboards;
-public class LeaderboardRepository : ILeaderboardRepository
+
+public sealed class LeaderboardRepository : ILeaderboardRepository
 {
     private readonly IDbContext _context;
 
@@ -13,127 +16,538 @@ public class LeaderboardRepository : ILeaderboardRepository
         _context = context;
     }
 
-    public async Task<Leaderboard> GetLeaderboardAsync(Guid characterId, CancellationToken cancellationToken)
+    public async Task<LeaderboardBoard> GetLeaderboardAsync(
+        Guid characterId,
+        string boardKey,
+        int limit,
+        string? cursor,
+        string? search,
+        CancellationToken cancellationToken)
     {
-        var characters = await _context.Characters
-        .Include(c => c.Professions)
-        .ToListAsync(cancellationToken);
+        var normalizedKey = boardKey.Trim().ToLowerInvariant();
+        if (!LeaderboardBoardKey.All.Contains(normalizedKey))
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(boardKey),
+                boardKey,
+                "Unknown leaderboard board key.");
+        }
 
-        var combatLeaderboard = characters
-            .OrderByDescending(c => c.Level)
-            .ThenByDescending(c => c.Experience)
-            .Select((c, index) => new LeaderboardEntry
+        var now = DateTimeOffset.UtcNow;
+        var definition = GetDefinition(normalizedKey);
+        var scores = definition.Profession is { } profession
+            ? await GetProfessionScoresAsync(profession, cancellationToken)
+            : normalizedKey switch
             {
-                CharacterId = c.Id,
-                CharacterName = c.Name,
-                Level = c.Level,
-                Experience = c.Experience,
-                Rank = index + 1,
-            })
+                LeaderboardBoardKey.SoulArchiveCompletion =>
+                    await GetSoulArchiveScoresAsync(cancellationToken),
+                LeaderboardBoardKey.AchievementRenown =>
+                    await GetAchievementRenownScoresAsync(cancellationToken),
+                LeaderboardBoardKey.DungeonMastery =>
+                    await GetDungeonMasteryScoresAsync(cancellationToken),
+                LeaderboardBoardKey.MostDungeonClears =>
+                    await GetMostDungeonClearsScoresAsync(cancellationToken),
+                LeaderboardBoardKey.ArenaRating =>
+                    await GetArenaRatingScoresAsync(cancellationToken),
+                LeaderboardBoardKey.TournamentPoints =>
+                    await GetTournamentPointsScoresAsync(now, cancellationToken),
+                LeaderboardBoardKey.WeeklyGuildContribution =>
+                    await GetWeeklyGuildContributionScoresAsync(now, cancellationToken),
+                LeaderboardBoardKey.GuildRenown =>
+                    await GetGuildRenownScoresAsync(cancellationToken),
+                _ => await GetCharacterScoresAsync(normalizedKey, cancellationToken)
+            };
+        var ranked = LeaderboardRanking.Rank(scores).ToList();
+        var viewerParticipantId = definition.IsGuildBoard
+            ? await GetViewerGuildIdAsync(characterId, cancellationToken)
+            : characterId;
+        var viewer = viewerParticipantId is { } participantId
+            ? ranked.FirstOrDefault(x => x.ParticipantId == participantId)
+            : null;
+        var normalizedSearch = string.IsNullOrWhiteSpace(search)
+            ? null
+            : search.Trim();
+        var searchMatch = normalizedSearch is null
+            ? null
+            : FindParticipant(ranked, normalizedSearch);
+        var pageStartIndex = GetPageStartIndex(
+            ranked,
+            normalizedKey,
+            limit,
+            cursor,
+            searchMatch);
+        var entries = ranked
+            .Skip(pageStartIndex)
+            .Take(limit)
             .ToList();
+        var previousCursor = pageStartIndex > 0 && entries.Count > 0
+            ? LeaderboardCursor.Encode(
+                normalizedKey,
+                LeaderboardCursorDirection.Before,
+                entries[0].ParticipantId)
+            : null;
+        var nextCursor = pageStartIndex + entries.Count < ranked.Count && entries.Count > 0
+            ? LeaderboardCursor.Encode(
+                normalizedKey,
+                LeaderboardCursorDirection.After,
+                entries[^1].ParticipantId)
+            : null;
 
-        var combatTop50 = combatLeaderboard.Take(50).ToList();
-
-        if (!combatTop50.Any(c => c.CharacterId == characterId))
+        return new LeaderboardBoard
         {
-            var requesterEntry = combatLeaderboard.FirstOrDefault(c => c.CharacterId == characterId);
-            if (requesterEntry != null)
-                combatTop50.Add(requesterEntry);
-        }
-
-        var wealthLeaderboard = characters
-            .OrderByDescending(c => c.Cinders)
-            .Select((c, index) => new LeaderboardEntry
-            {
-                CharacterId = c.Id,
-                CharacterName = c.Name,
-                Level = (int)c.Cinders,
-                Rank = index + 1,
-            })
-            .ToList();
-
-        var wealthTop50 = wealthLeaderboard.Take(50).ToList();
-
-        if (!wealthTop50.Any(c => c.CharacterId == characterId))
-        {
-            var requesterEntry = wealthLeaderboard.FirstOrDefault(c => c.CharacterId == characterId);
-            if (requesterEntry != null)
-                wealthTop50.Add(requesterEntry);
-        }
-
-        var professions = new[]
-        {
-            ProfessionType.Crafting,
-            ProfessionType.Mining,
-            ProfessionType.Woodcutting,
-            ProfessionType.Fishing,
-            ProfessionType.Skinning
-        };
-        var professionLeaderboards = new Dictionary<string, List<LeaderboardEntry>>();
-
-        foreach (var profession in professions)
-        {
-            var professionLeaderboard = characters
-                .Where(c => c.Professions.Any(p => p.ProfessionType == profession))
-                .Select(c => new
-                {
-                    Character = c,
-                    Profession = c.Professions.First(p => p.ProfessionType == profession)
-                })
-                .OrderByDescending(x => x.Profession.Level)
-                .ThenByDescending(c => c.Profession.Experience)
-                .Select((x, index) => new LeaderboardEntry
-                {
-                    CharacterId = x.Character.Id,
-                    CharacterName = x.Character.Name,
-                    Level = x.Profession.Level,
-                    Experience = (long)x.Profession.Experience,
-                    Rank = index + 1,
-                })
-                .ToList();
-
-            var top50 = professionLeaderboard.Take(50).ToList();
-
-            if (!top50.Any(c => c.CharacterId == characterId))
-            {
-                var requesterEntry = professionLeaderboard.FirstOrDefault(c => c.CharacterId == characterId);
-                if (requesterEntry != null)
-                    top50.Add(requesterEntry);
-            }
-
-            professionLeaderboards[profession.ToString()] = top50;
-        }
-
-        var totalLevelLeaderboard = characters
-            .Select(c => new
-            {
-                Character = c,
-                TotalLevel = c.Level + c.Professions.Sum(p => p.Level)
-            })
-            .OrderByDescending(x => x.TotalLevel)
-            .Select((x, index) => new LeaderboardEntry
-            {
-                CharacterId = x.Character.Id,
-                CharacterName = x.Character.Name,
-                Level = x.TotalLevel,
-                Rank = index + 1,
-            })
-            .ToList();
-
-        var totalLevelTop50 = totalLevelLeaderboard.Take(50).ToList();
-        if (!totalLevelTop50.Any(c => c.CharacterId == characterId))
-        {
-            var requesterEntry = totalLevelLeaderboard.FirstOrDefault(c => c.CharacterId == characterId);
-            if (requesterEntry != null)
-                totalLevelTop50.Add(requesterEntry);
-        }
-
-        return new Leaderboard
-        {
-            Combat = combatTop50,
-            Wealth = wealthTop50,
-            Professions = professionLeaderboards,
-            TotalLevel = totalLevelTop50
+            Key = definition.Key,
+            Category = definition.Category,
+            Title = definition.Title,
+            Description = definition.Description,
+            ParticipantLabel = definition.ParticipantLabel,
+            MetricLabel = definition.MetricLabel,
+            SecondaryMetricLabel = definition.SecondaryMetricLabel,
+            PeriodLabel = definition.PeriodLabel,
+            UpdatedAt = now,
+            TotalParticipants = ranked.Count,
+            PageStartRank = entries.FirstOrDefault()?.Rank ?? 0,
+            PageEndRank = entries.LastOrDefault()?.Rank ?? 0,
+            PreviousCursor = previousCursor,
+            NextCursor = nextCursor,
+            SearchQuery = normalizedSearch,
+            SearchMatch = searchMatch,
+            IsViewerRanked = viewer is not null,
+            ViewerUnrankedReason = GetViewerUnrankedReason(
+                viewer,
+                definition.UnrankedReason),
+            Entries = entries,
+            ViewerEntry = viewer
         };
     }
+
+    private static LeaderboardBoardEntry? FindParticipant(
+        IReadOnlyList<LeaderboardBoardEntry> ranked,
+        string search)
+    {
+        return ranked.FirstOrDefault(entry =>
+                entry.ParticipantName.Equals(search, StringComparison.OrdinalIgnoreCase))
+            ?? ranked.FirstOrDefault(entry =>
+                entry.ParticipantName.StartsWith(search, StringComparison.OrdinalIgnoreCase))
+            ?? ranked.FirstOrDefault(entry =>
+                entry.ParticipantName.Contains(search, StringComparison.OrdinalIgnoreCase));
+    }
+
+    private static int GetPageStartIndex(
+        IReadOnlyList<LeaderboardBoardEntry> ranked,
+        string boardKey,
+        int limit,
+        string? cursor,
+        LeaderboardBoardEntry? searchMatch)
+    {
+        if (searchMatch is not null)
+        {
+            return ((searchMatch.Rank - 1) / limit) * limit;
+        }
+
+        if (!LeaderboardCursor.TryDecode(boardKey, cursor, out var position))
+        {
+            return 0;
+        }
+
+        var anchorIndex = -1;
+        for (var index = 0; index < ranked.Count; index++)
+        {
+            if (ranked[index].ParticipantId == position.AnchorParticipantId)
+            {
+                anchorIndex = index;
+                break;
+            }
+        }
+
+        if (anchorIndex < 0)
+        {
+            return 0;
+        }
+
+        return position.Direction == LeaderboardCursorDirection.After
+            ? Math.Min(anchorIndex + 1, ranked.Count)
+            : Math.Max(0, anchorIndex - limit);
+    }
+
+    private async Task<List<LeaderboardScore>> GetCharacterScoresAsync(
+        string boardKey,
+        CancellationToken cancellationToken)
+    {
+        var query = _context.Characters.AsNoTracking();
+
+        if (boardKey == LeaderboardBoardKey.CombatLevel)
+        {
+            return await query
+                .Select(x => new LeaderboardScore(
+                    x.Id,
+                    x.Name,
+                    x.Level,
+                    x.Experience))
+                .ToListAsync(cancellationToken);
+        }
+
+        return await query
+            .Select(x => new LeaderboardScore(
+                x.Id,
+                x.Name,
+                x.Level + x.Professions.Sum(p => p.Level),
+                null))
+            .ToListAsync(cancellationToken);
+    }
+
+    private async Task<List<LeaderboardScore>> GetProfessionScoresAsync(
+        ProfessionType profession,
+        CancellationToken cancellationToken)
+    {
+        return await _context.Characters
+            .AsNoTracking()
+            .SelectMany(
+                character => character.Professions
+                    .Where(characterProfession => characterProfession.ProfessionType == profession),
+                (character, characterProfession) => new LeaderboardScore(
+                    character.Id,
+                    character.Name,
+                    characterProfession.Level,
+                    (long)characterProfession.Experience))
+            .ToListAsync(cancellationToken);
+    }
+
+    private async Task<List<LeaderboardScore>> GetSoulArchiveScoresAsync(
+        CancellationToken cancellationToken)
+    {
+        return await _context.Characters
+            .AsNoTracking()
+            .Select(character => new LeaderboardScore(
+                character.Id,
+                character.Name,
+                _context.PlayerEssences.LongCount(
+                    essence => essence.CharacterId == character.Id),
+                null))
+            .ToListAsync(cancellationToken);
+    }
+
+    private async Task<List<LeaderboardScore>> GetAchievementRenownScoresAsync(
+        CancellationToken cancellationToken)
+    {
+        return await _context.Characters
+            .AsNoTracking()
+            .Select(character => new LeaderboardScore(
+                character.Id,
+                character.Name,
+                _context.PlayerAchievementProgresses
+                    .Where(progress =>
+                        progress.AccountId == character.UserId &&
+                        progress.IsCompleted)
+                    .Join(
+                        _context.AchievementDefinitions,
+                        progress => progress.AchievementDefinitionId,
+                        definition => definition.Id,
+                        (_, definition) => (long?)definition.Points)
+                    .Sum() ?? 0,
+                _context.PlayerAchievementProgresses.LongCount(
+                    progress =>
+                        progress.AccountId == character.UserId &&
+                        progress.IsCompleted)))
+            .ToListAsync(cancellationToken);
+    }
+
+    private async Task<List<LeaderboardScore>> GetDungeonMasteryScoresAsync(
+        CancellationToken cancellationToken)
+    {
+        return await _context.Characters
+            .AsNoTracking()
+            .Where(character => _context.CharacterDungeonMasteries.Any(
+                mastery => mastery.CharacterId == character.Id))
+            .Select(character => new LeaderboardScore(
+                character.Id,
+                character.Name,
+                _context.CharacterDungeonMasteries
+                    .Where(mastery => mastery.CharacterId == character.Id)
+                    .Sum(mastery => (long?)mastery.Level) ?? 0,
+                _context.CharacterDungeonMasteries
+                    .Where(mastery => mastery.CharacterId == character.Id)
+                    .Sum(mastery => (long?)mastery.Experience) ?? 0))
+            .ToListAsync(cancellationToken);
+    }
+
+    private async Task<List<LeaderboardScore>> GetMostDungeonClearsScoresAsync(
+        CancellationToken cancellationToken)
+    {
+        return await _context.Characters
+            .AsNoTracking()
+            .Where(character => _context.DungeonCompletionRecords.Any(
+                completion => completion.CharacterId == character.Id))
+            .Select(character => new LeaderboardScore(
+                character.Id,
+                character.Name,
+                _context.DungeonCompletionRecords
+                    .Where(completion => completion.CharacterId == character.Id)
+                    .Sum(completion => (long?)completion.CompletionCount) ?? 0,
+                _context.DungeonCompletionRecords.LongCount(
+                    completion => completion.CharacterId == character.Id)))
+            .ToListAsync(cancellationToken);
+    }
+
+    private async Task<List<LeaderboardScore>> GetWeeklyGuildContributionScoresAsync(
+        DateTimeOffset now,
+        CancellationToken cancellationToken)
+    {
+        var weekKey = GetGuildWeekKey(now);
+        return await _context.GuildMemberContributionPeriods
+            .AsNoTracking()
+            .Where(period =>
+                period.PeriodType == GuildMissionPeriodType.Weekly &&
+                period.PeriodKey == weekKey &&
+                (period.ContributionScore > 0 ||
+                    period.WeeklyMissionContribution > 0 ||
+                    period.OrdersCompleted > 0))
+            .Join(
+                _context.Characters.AsNoTracking(),
+                period => period.CharacterId,
+                character => character.Id,
+                (period, character) => new LeaderboardScore(
+                    character.Id,
+                    character.Name,
+                    period.ContributionScore,
+                    period.WeeklyMissionContribution))
+            .ToListAsync(cancellationToken);
+    }
+
+    private async Task<List<LeaderboardScore>> GetArenaRatingScoresAsync(
+        CancellationToken cancellationToken)
+    {
+        return await _context.CharacterArenaProfiles
+            .AsNoTracking()
+            .Join(
+                _context.Characters.AsNoTracking(),
+                profile => profile.CharacterId,
+                character => character.Id,
+                (profile, character) => new LeaderboardScore(
+                    character.Id,
+                    character.Name,
+                    profile.Rating,
+                    profile.LifetimeHighestRating))
+            .ToListAsync(cancellationToken);
+    }
+
+    private async Task<List<LeaderboardScore>> GetTournamentPointsScoresAsync(
+        DateTimeOffset now,
+        CancellationToken cancellationToken)
+    {
+        var seasonStart = new DateTimeOffset(
+            now.Year,
+            now.Month,
+            1,
+            0,
+            0,
+            0,
+            TimeSpan.Zero);
+        var seasonEnd = seasonStart.AddMonths(1);
+        var placements = await _context.TournamentParticipants
+            .AsNoTracking()
+            .Where(participant =>
+                participant.Tournament.Status == TournamentStatus.Completed &&
+                participant.Tournament.CompletedAtUtc >= seasonStart &&
+                participant.Tournament.CompletedAtUtc < seasonEnd &&
+                participant.FinalPlacement.HasValue)
+            .Select(participant => new
+            {
+                participant.CharacterId,
+                Placement = participant.FinalPlacement!.Value,
+                CompletedAt = participant.Tournament.CompletedAtUtc!.Value
+            })
+            .ToListAsync(cancellationToken);
+
+        if (placements.Count == 0)
+        {
+            return [];
+        }
+
+        var characterIds = placements
+            .Select(placement => placement.CharacterId)
+            .Distinct()
+            .ToList();
+        var characterNames = await _context.Characters
+            .AsNoTracking()
+            .Where(character => characterIds.Contains(character.Id))
+            .Select(character => new { character.Id, character.Name })
+            .ToDictionaryAsync(
+                character => character.Id,
+                character => character.Name,
+                cancellationToken);
+
+        return placements
+            .GroupBy(placement => placement.CharacterId)
+            .Select(group =>
+            {
+                var bestPlacement = group.Min(placement => placement.Placement);
+                var latestCompletion = group.Max(placement => placement.CompletedAt);
+                return new LeaderboardScore(
+                    group.Key,
+                    characterNames.GetValueOrDefault(group.Key, "Unknown"),
+                    group.Sum(placement =>
+                        TournamentScoring.CalculatePoints(placement.Placement)),
+                    group.LongCount(placement => placement.Placement == 1),
+                    -bestPlacement,
+                    latestCompletion.UtcDateTime.Ticks);
+            })
+            .ToList();
+    }
+
+    private async Task<List<LeaderboardScore>> GetGuildRenownScoresAsync(
+        CancellationToken cancellationToken)
+    {
+        return await _context.Guilds
+            .AsNoTracking()
+            .Select(guild => new LeaderboardScore(
+                guild.Id,
+                guild.Name,
+                guild.GuildLevel,
+                guild.GuildXp))
+            .ToListAsync(cancellationToken);
+    }
+
+    private async Task<Guid?> GetViewerGuildIdAsync(
+        Guid characterId,
+        CancellationToken cancellationToken)
+    {
+        return await _context.GuildMembers
+            .AsNoTracking()
+            .Where(member => member.CharacterId == characterId)
+            .Select(member => (Guid?)member.GuildId)
+            .SingleOrDefaultAsync(cancellationToken);
+    }
+
+    private static string GetGuildWeekKey(DateTimeOffset now)
+    {
+        var utcDate = now.UtcDateTime.Date;
+        var daysSinceMonday =
+            ((int)utcDate.DayOfWeek - (int)DayOfWeek.Monday + 7) % 7;
+        return utcDate.AddDays(-daysSinceMonday).ToString("yyyyMMdd");
+    }
+
+    private static string? GetViewerUnrankedReason(
+        LeaderboardBoardEntry? viewer,
+        string? unrankedReason)
+    {
+        return viewer is null
+            ? unrankedReason ?? "No ranking is available for this character yet."
+            : null;
+    }
+
+    private static BoardDefinition GetDefinition(string boardKey) => boardKey switch
+    {
+        LeaderboardBoardKey.TotalLevel => new(
+            boardKey,
+            "Overall",
+            "Total Level",
+            "Combined combat and profession levels across your character.",
+            "Total level",
+            null),
+        LeaderboardBoardKey.CombatLevel => new(
+            boardKey,
+            "Overall",
+            "Combat Level",
+            "The realm's most experienced adventurers.",
+            "Combat level",
+            "Experience"),
+        LeaderboardBoardKey.SoulArchiveCompletion => new(
+            boardKey,
+            "Overall",
+            "Soul Archive Completion",
+            "The realm's most dedicated Essence collectors.",
+            "Essences collected",
+            null),
+        LeaderboardBoardKey.AchievementRenown => new(
+            boardKey,
+            "Overall",
+            "Achievement Renown",
+            "Recognition earned by completing achievements across the realm.",
+            "Achievement points",
+            "Achievements completed"),
+        LeaderboardBoardKey.DungeonMastery => new(
+            boardKey,
+            "PvE",
+            "Dungeon Mastery",
+            "Combined mastery earned across every dungeon.",
+            "Mastery levels",
+            "Mastery experience",
+            UnrankedReason: "Complete a dungeon to begin earning Dungeon Mastery."),
+        LeaderboardBoardKey.MostDungeonClears => new(
+            boardKey,
+            "PvE",
+            "Most Dungeon Clears",
+            "The realm's most persistent dungeon delvers.",
+            "Dungeon clears",
+            "Dungeons completed",
+            UnrankedReason: "Complete a dungeon to earn a place on this leaderboard."),
+        LeaderboardBoardKey.ArenaRating => new(
+            boardKey,
+            "PvP",
+            "Arena Rating",
+            "The realm's highest-rated Colosseum contenders.",
+            "Arena rating",
+            "Lifetime highest",
+            UnrankedReason: "Enter the Colosseum to establish an Arena Rating.",
+            PeriodLabel: "Current standings"),
+        LeaderboardBoardKey.TournamentPoints => new(
+            boardKey,
+            "PvP",
+            "Tournament Points",
+            "Points earned from completed Colosseum tournaments during the current month.",
+            "Tournament points",
+            "Championships",
+            UnrankedReason: "Complete a tournament this month to earn Tournament Points.",
+            PeriodLabel: "Current month"),
+        LeaderboardBoardKey.WeeklyGuildContribution => new(
+            boardKey,
+            "Guilds",
+            "Weekly Guild Contribution",
+            "The characters contributing most to their guild this week.",
+            "Contribution score",
+            "Mission contribution",
+            UnrankedReason: "Contribute to a guild activity this week to earn a place.",
+            PeriodLabel: "Current week"),
+        LeaderboardBoardKey.GuildRenown => new(
+            boardKey,
+            "Guilds",
+            "Guild Renown",
+            "The realm's most established guilds.",
+            "Guild level",
+            "Guild experience",
+            UnrankedReason: "Join a guild to see its standing.",
+            ParticipantLabel: "Guild",
+            IsGuildBoard: true),
+        LeaderboardBoardKey.Crafting => ProfessionDefinition(boardKey, ProfessionType.Crafting),
+        LeaderboardBoardKey.Mining => ProfessionDefinition(boardKey, ProfessionType.Mining),
+        LeaderboardBoardKey.Woodcutting => ProfessionDefinition(boardKey, ProfessionType.Woodcutting),
+        LeaderboardBoardKey.Fishing => ProfessionDefinition(boardKey, ProfessionType.Fishing),
+        LeaderboardBoardKey.Skinning => ProfessionDefinition(boardKey, ProfessionType.Skinning),
+        _ => throw new ArgumentOutOfRangeException(nameof(boardKey), boardKey, null)
+    };
+
+    private static BoardDefinition ProfessionDefinition(
+        string boardKey,
+        ProfessionType profession) => new(
+            boardKey,
+            "Professions",
+            profession.ToString(),
+            $"The realm's most accomplished {profession.ToString().ToLowerInvariant()} specialists.",
+            "Level",
+            "Experience",
+            profession,
+            $"Start {profession} to earn a place on this leaderboard.");
+
+    private sealed record BoardDefinition(
+        string Key,
+        string Category,
+        string Title,
+        string Description,
+        string MetricLabel,
+        string? SecondaryMetricLabel,
+        ProfessionType? Profession = null,
+        string? UnrankedReason = null,
+        string ParticipantLabel = "Character",
+        string PeriodLabel = "All-time",
+        bool IsGuildBoard = false);
 }

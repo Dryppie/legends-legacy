@@ -23,7 +23,7 @@ import {
   SoulArchiveDto,
 } from '../../../../shared/models/essence-system';
 
-type EssenceView = 'archive' | 'absorb' | 'creatures' | 'codex';
+export type EssenceView = 'archive' | 'absorb' | 'creatures' | 'codex';
 
 @Injectable({ providedIn: 'root' })
 export class EssenceStateService {
@@ -452,12 +452,13 @@ export class EssenceStateService {
     if (this._draftSlots()[slotIndex] === playerEssenceId) return true;
 
     const creatureId = this.getCreatureIdForPlayerEssence(playerEssenceId);
-    return this._draftSlots().every((assignedId, index) =>
-      index === slotIndex ||
-      !assignedId ||
-      (assignedId !== playerEssenceId &&
-        (!creatureId ||
-          this.getCreatureIdForPlayerEssence(assignedId) !== creatureId)),
+    return this._draftSlots().every(
+      (assignedId, index) =>
+        index === slotIndex ||
+        !assignedId ||
+        (assignedId !== playerEssenceId &&
+          (!creatureId ||
+            this.getCreatureIdForPlayerEssence(assignedId) !== creatureId)),
     );
   }
 
@@ -600,7 +601,9 @@ export class EssenceStateService {
     });
   }
 
-  private getCreatureIdForPlayerEssence(playerEssenceId: string): string | null {
+  private getCreatureIdForPlayerEssence(
+    playerEssenceId: string,
+  ): string | null {
     const definitionId = this._archive()?.essences.find(
       (essence) => essence.id === playerEssenceId,
     )?.essenceDefinitionId;

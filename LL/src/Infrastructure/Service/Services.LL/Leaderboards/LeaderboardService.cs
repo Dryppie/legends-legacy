@@ -11,8 +11,20 @@ public class LeaderboardService : ILeaderboardService
         _leaderboardRepository = leaderboardRepository;
     }
 
-    public async Task<Leaderboard> GetLeaderboardAsync(Guid characterId, CancellationToken cancellationToken)
+    public async Task<LeaderboardBoard> GetLeaderboardAsync(
+        Guid characterId,
+        string boardKey,
+        int limit,
+        string? cursor,
+        string? search,
+        CancellationToken cancellationToken)
     {
-        return await _leaderboardRepository.GetLeaderboardAsync(characterId, cancellationToken);
+        return await _leaderboardRepository.GetLeaderboardAsync(
+            characterId,
+            boardKey,
+            Math.Clamp(limit, 10, 100),
+            cursor,
+            search?.Trim(),
+            cancellationToken);
     }
 }

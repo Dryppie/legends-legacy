@@ -666,6 +666,18 @@
     opacity: 0.45;
   }
 
+  .ll-button-primary {
+    border-color: var(--ll-color-primary);
+    background: var(--ll-color-primary);
+    color: #080808;
+    font-weight: var(--ll-weight-semibold);
+  }
+
+  .ll-button-primary:hover:not(:disabled) {
+    background: var(--ll-color-primary);
+    color: #080808;
+  }
+
   .ll-input,
   .ll-select {
     border: 1px solid var(--ll-color-border);

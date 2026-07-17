@@ -1,54 +1,96 @@
 import { computed, Injectable, signal } from '@angular/core';
 import { finalize } from 'rxjs';
-import { Leaderboard } from '../../../../shared/models/Dtos/leaderboard/leaderboard';
+import { LeaderboardBoard } from '../../../../shared/models/Dtos/leaderboard/leaderboard';
 import { LeaderboardService } from './leaderboard.service';
 
-@Injectable({
-  providedIn: 'root',
-})
+@Injectable({ providedIn: 'root' })
 export class LeaderboardStateService {
-  private readonly _leaderboard = signal<Leaderboard | null>(null);
+  private readonly _board = signal<LeaderboardBoard | null>(null);
+  private readonly _activeKey = signal<string | null>(null);
   private readonly _loading = signal(false);
   private readonly _error = signal<string | null>(null);
+  private currentCursor: string | null = null;
+  private currentSearch: string | null = null;
+  private requestSequence = 0;
 
-  /* ---------- public, read-only signals ---------- */
-  readonly leaderboard = computed(() => this._leaderboard());
+  readonly board = computed(() => this._board());
+  readonly activeKey = computed(() => this._activeKey());
   readonly loading = computed(() => this._loading());
+  readonly refreshing = computed(
+    () => this._loading() && this._board() !== null,
+  );
   readonly error = computed(() => this._error());
-  readonly hasLoaded = computed(() => this._leaderboard() !== null);
 
-  constructor(private leaderboardService: LeaderboardService) {
-    this.load();
+  constructor(private readonly leaderboardService: LeaderboardService) {}
+
+  load(boardKey: string, force = false): void {
+    if (!force && this._activeKey() === boardKey && this._board()) return;
+
+    const isChangingBoard = this._activeKey() !== boardKey;
+    this.request(boardKey, null, null, isChangingBoard);
   }
 
-  load(): void {
-    if (this._leaderboard()) return; // already cached
-    this.refresh();
+  loadPage(cursor: string): void {
+    const boardKey = this._activeKey();
+    if (boardKey && cursor) this.request(boardKey, cursor, null, false);
+  }
+
+  jumpToParticipant(search: string): void {
+    const boardKey = this._activeKey();
+    if (!boardKey) return;
+
+    const normalizedSearch = search.trim();
+    this.request(
+      boardKey,
+      null,
+      normalizedSearch.length > 0 ? normalizedSearch : null,
+      false,
+    );
+  }
+
+  clearJump(): void {
+    const boardKey = this._activeKey();
+    if (boardKey) this.request(boardKey, null, null, false);
   }
 
   refresh(): void {
-    if (this._loading()) return;
-
-    this._loading.set(true);
-
-    this.leaderboardService
-      .getLeaderboard()
-      .pipe(finalize(() => this._loading.set(false)))
-      .subscribe({
-        next: (data) => this._leaderboard.set(data),
-        error: (err) =>
-          this._error.set(err.message ?? 'Failed to load leaderboard'),
-      });
+    const boardKey = this._activeKey();
+    if (boardKey) {
+      this.request(boardKey, this.currentCursor, this.currentSearch, false);
+    }
   }
 
-  /** Ready-made selectors for convenience */
-  readonly topTotal = computed(() => this._leaderboard()?.totalLevel ?? []);
-  readonly topCombat = computed(() => this._leaderboard()?.combat ?? []);
-  readonly topWealth = computed(() => this._leaderboard()?.wealth ?? []);
-  readonly topProfessions = computed(
-    () => this._leaderboard()?.professions ?? {},
-  );
+  private request(
+    boardKey: string,
+    cursor: string | null,
+    search: string | null,
+    clearBoard: boolean,
+  ): void {
+    const requestId = ++this.requestSequence;
+    this._activeKey.set(boardKey);
+    this.currentCursor = cursor;
+    this.currentSearch = search;
+    this._error.set(null);
+    this._loading.set(true);
+    if (clearBoard) this._board.set(null);
 
-  byProfession = (key: string) =>
-    computed(() => this._leaderboard()?.professions?.[key] ?? []);
+    this.leaderboardService
+      .getLeaderboard(boardKey, cursor, search)
+      .pipe(
+        finalize(() => {
+          if (requestId === this.requestSequence) this._loading.set(false);
+        }),
+      )
+      .subscribe({
+        next: (board) => {
+          if (requestId === this.requestSequence) this._board.set(board);
+        },
+        error: (error) => {
+          if (requestId !== this.requestSequence) return;
+          this._error.set(
+            error.errorMessage ?? error.message ?? 'Failed to load leaderboard',
+          );
+        },
+      });
+  }
 }

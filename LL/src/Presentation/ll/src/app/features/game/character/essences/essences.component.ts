@@ -2,7 +2,14 @@ import { CommonModule } from '@angular/common';
 import { ScrollingModule } from '@angular/cdk/scrolling';
 import { Component, computed, effect, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { EssenceStateService } from '../../../../core/services/api/essences/essence-state.service';
+import {
+  EssenceStateService,
+  EssenceView,
+} from '../../../../core/services/api/essences/essence-state.service';
+import {
+  NavigationTab,
+  NavigationTabsComponent,
+} from '../../../../shared/components/custom-components/tabs/navigation-tabs/navigation-tabs.component';
 import { DefaultHeaderComponent } from '../../../../shared/components/default-header/default-header.component';
 import { EssenceDescriptionComponent } from '../../../../shared/components/essences/essence-description/essence-description.component';
 import {
@@ -20,7 +27,6 @@ import {
   DropdownOption,
   DropdownSelection,
 } from '../../../../shared/components/custom-components/dropdown/dropdown.component';
-import { NotificationIndicatorComponent } from '../../../../shared/components/notification-indicator/notification-indicator.component';
 import { TutorialStateService } from '../../../../core/services/api/tutorial/tutorial-state.service';
 import {
   TUTORIAL_STEP_ABSORB_ESSENCE,
@@ -41,11 +47,11 @@ type CreatureEssenceFilter = 'all' | 'found' | 'not-found';
     FormsModule,
     DefaultHeaderComponent,
     EssenceDescriptionComponent,
+    NavigationTabsComponent,
     AttributeTypeFormatPipe,
     AttributeValueFormatPipe,
     EssencesAbsorbComponent,
     DropdownComponent,
-    NotificationIndicatorComponent,
   ],
   templateUrl: './essences.component.html',
 })
@@ -58,6 +64,17 @@ export class EssencesComponent implements OnInit {
   readonly archiveFilter = signal<ArchiveFilter>('all');
   readonly archiveSort = signal<ArchiveSort>('name');
   readonly upgradeDetailsOpen = signal(false);
+  readonly viewTabs = computed<readonly NavigationTab[]>(() => [
+    { key: 'archive', label: 'Archive' },
+    { key: 'absorb', label: 'Absorb' },
+    {
+      key: 'creatures',
+      label: 'Creatures',
+      badgeCount: this.essenceState.essenceFocusReady() ? 1 : 0,
+      badgeLabel: 'Essence Focus ready',
+    },
+    { key: 'codex', label: 'Codex' },
+  ]);
 
   readonly archiveFilters: { label: string; value: ArchiveFilter }[] = [
     { label: 'All', value: 'all' },
@@ -230,6 +247,16 @@ export class EssencesComponent implements OnInit {
 
   public ngOnInit(): void {
     this.essenceState.refresh();
+  }
+
+  public selectView(view: string): void {
+    switch (view) {
+      case 'archive':
+      case 'absorb':
+      case 'creatures':
+      case 'codex':
+        this.essenceState.setActiveView(view as EssenceView);
+    }
   }
 
   public setCreatureRegionFilter(selection: DropdownSelection<string>): void {

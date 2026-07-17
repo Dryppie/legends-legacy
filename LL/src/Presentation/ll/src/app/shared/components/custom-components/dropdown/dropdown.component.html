@@ -51,7 +51,9 @@
       (keydown)="onSubOptionKeydown($event, sub)"
     >
       <span>{{ sub }}</span>
-      <span class="text-primary">0</span>
+      <span *ngIf="subOptionDetail !== null" class="text-primary">
+        {{ subOptionDetail }}
+      </span>
     </li>
   </ul>
 </ng-template>
