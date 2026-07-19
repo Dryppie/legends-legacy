@@ -10,7 +10,7 @@ import {
   signal,
 } from '@angular/core';
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
-import { concatMap, from, Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 import { toSignal } from '@angular/core/rxjs-interop';
 import {
   debounceTime,
@@ -65,6 +65,7 @@ interface CommodityBuyOrderRow {
 type CommodityCatalogStatus = 'all' | 'active' | 'owned';
 type CommodityCatalogSort = 'activity' | 'name' | 'ask';
 type MobileOrderBook = 'sell' | 'buy';
+type MarketTicketSide = 'buy' | 'sell';
 
 @Component({
   selector: 'app-market-place-commodity',
@@ -107,6 +108,7 @@ export class MarketPlaceCommodityComponent implements OnInit {
   readonly catalogSort = signal<CommodityCatalogSort>('activity');
   readonly mobileDetailOpen = signal(false);
   readonly mobileOrderBook = signal<MobileOrderBook>('sell');
+  readonly ticketSide = signal<MarketTicketSide>('buy');
 
   readonly quantityCtrl = new FormControl<number>(1, {
     validators: [Validators.required, Validators.min(1)],
@@ -441,6 +443,12 @@ export class MarketPlaceCommodityComponent implements OnInit {
     return 'Place buy order';
   });
 
+  readonly sellOrderActionLabel = computed(() => {
+    if (this.hasOwnSellListingsForSelectedItem()) return 'Cancel sell order';
+    if (this.hasOwnBuyOrdersForSelectedItem()) return 'Cancel buy order';
+    return 'List for sale';
+  });
+
   readonly bestSellPrice = computed(() => {
     return this.selectedCommodity()?.bestSellPrice ?? null;
   });
@@ -494,9 +502,12 @@ export class MarketPlaceCommodityComponent implements OnInit {
         this._itemType();
         this._subcategory();
         this.selectedCommodityId();
+        const ticketSide = this.ticketSide();
         this.quantityCtrl.setValue(1, { emitEvent: false });
         this.unitPriceCtrl.setValue(
-          this.bestSellPrice() ?? this.bestBuyPrice(),
+          ticketSide === 'buy'
+            ? (this.bestSellPrice() ?? this.bestBuyPrice())
+            : (this.bestBuyPrice() ?? this.bestSellPrice()),
           {
             emitEvent: false,
           },
@@ -629,6 +640,9 @@ export class MarketPlaceCommodityComponent implements OnInit {
 
   setMobileOrderBook(orderBook: MobileOrderBook): void {
     this.mobileOrderBook.set(orderBook);
+    if (orderBook === 'sell') {
+      this.ticketSide.set('buy');
+    }
     const selectedPrice =
       orderBook === 'sell'
         ? this.selectedSellPrice()
@@ -645,11 +659,19 @@ export class MarketPlaceCommodityComponent implements OnInit {
 
   submitMobileOrder(): void {
     if (this.mobileOrderBook() === 'buy') {
-      this.submitBuyOrderAction();
+      if (this.ticketSide() === 'sell') {
+        this.submitSellOrderAction();
+      } else {
+        this.submitBuyOrderAction();
+      }
       return;
     }
 
     this.buySelectedCommodity();
+  }
+
+  setTicketSide(side: MarketTicketSide): void {
+    this.ticketSide.set(side);
   }
 
   submitBuyOrderAction(): void {
@@ -659,6 +681,15 @@ export class MarketPlaceCommodityComponent implements OnInit {
     }
 
     this.placeBuyOrder();
+  }
+
+  submitSellOrderAction(): void {
+    if (this.hasOwnOrderForSelectedItem()) {
+      this.cancelActiveOrderForSelectedItem();
+      return;
+    }
+
+    this.sellSelectedCommodity();
   }
 
   setCatalogStatus(value: string): void {
@@ -711,6 +742,12 @@ export class MarketPlaceCommodityComponent implements OnInit {
     }
 
     return total + remaining * limitPrice;
+  }
+
+  ticketOrderValue(): number {
+    if (this.ticketSide() === 'buy') return this.buyOrderCommitment();
+
+    return (this.quantityCtrl.value ?? 0) * (this.unitPriceCtrl.value ?? 0);
   }
 
   sellSelectedCommodity(): void {
@@ -773,46 +810,14 @@ export class MarketPlaceCommodityComponent implements OnInit {
 
   fillSelectedBuyOrder(): void {
     const item = this.selectedInventoryItem();
-    const selectedPrice = this.selectedBuyPrice();
-    if (
-      !item ||
-      selectedPrice === null ||
-      this.quantityCtrl.invalid ||
-      this.unitPriceCtrl.invalid
-    )
-      return;
-
-    let remaining = this.quantityCtrl.value!;
-    const characterId = this.currentCharacterId();
-    const plan = this.buyOrderRows()
-      .filter((row) => row.unitPrice === selectedPrice)
-      .flatMap((row) =>
-        row.orders
-          .filter((order) => order.buyerId !== characterId)
-          .slice()
-          .sort((a, b) =>
-            a.createdAt.toString().localeCompare(b.createdAt.toString()),
-          ),
-      )
-      .map((order) => {
-        const quantity = Math.min(remaining, order.quantity);
-        remaining -= quantity;
-        return { order, quantity };
-      })
-      .filter((sale) => sale.quantity > 0);
-
-    if (remaining > 0 || plan.length === 0) return;
+    if (!item || !this.canFillBuyOrder()) return;
 
     this.placingOrder.set(true);
-    from(plan)
-      .pipe(
-        concatMap((sale) =>
-          this.marketplaceState.fulfillBuyOrder(
-            sale.order.id,
-            item.itemInstance.id,
-            sale.quantity,
-          ),
-        ),
+    this.marketplaceState
+      .sellCommodity(
+        item.itemInstance.id,
+        this.quantityCtrl.value!,
+        this.unitPriceCtrl.value!,
       )
       .subscribe({
         error: (error) => {
@@ -855,8 +860,10 @@ export class MarketPlaceCommodityComponent implements OnInit {
       !!this.selectedCommodity() &&
       !!this.selectedInventoryItem() &&
       !this.hasOwnBuyOrdersForSelectedItem() &&
+      !this.hasOwnSellListingsForSelectedItem() &&
       !this.quantityCtrl.invalid &&
       !this.unitPriceCtrl.invalid &&
+      (this.quantityCtrl.value ?? 0) > 0 &&
       (this.quantityCtrl.value ?? 0) <= this.ownedQuantity()
     );
   }
@@ -882,6 +889,20 @@ export class MarketPlaceCommodityComponent implements OnInit {
       : this.canPlaceBuyOrder();
   }
 
+  canSubmitSellOrderAction(): boolean {
+    return this.hasOwnOrderForSelectedItem()
+      ? !this.placingOrder()
+      : this.canSell();
+  }
+
+  canSubmitMobileOrder(): boolean {
+    if (this.mobileOrderBook() === 'sell') return this.canBuy();
+
+    return this.ticketSide() === 'buy'
+      ? this.canSubmitBuyOrderAction()
+      : this.canSubmitSellOrderAction();
+  }
+
   canBuy(): boolean {
     return (
       !this.placingOrder() &&
@@ -901,6 +922,7 @@ export class MarketPlaceCommodityComponent implements OnInit {
       !!this.selectedCommodity() &&
       !!this.selectedInventoryItem() &&
       !this.quantityCtrl.invalid &&
+      !this.unitPriceCtrl.invalid &&
       (this.quantityCtrl.value ?? 0) > 0 &&
       (this.quantityCtrl.value ?? 0) <= this.ownedQuantity() &&
       this.availableBuyOrderQuantity() >= (this.quantityCtrl.value ?? 0)
@@ -953,12 +975,12 @@ export class MarketPlaceCommodityComponent implements OnInit {
   }
 
   private availableBuyOrderQuantity(): number {
-    const selectedPrice = this.selectedBuyPrice();
-    if (selectedPrice === null) return 0;
+    const minimumUnitPrice = this.unitPriceCtrl.value;
+    if (!minimumUnitPrice) return 0;
 
     const characterId = this.currentCharacterId();
     return this.buyOrderRows()
-      .filter((row) => row.unitPrice === selectedPrice)
+      .filter((row) => row.unitPrice >= minimumUnitPrice)
       .flatMap((row) => row.orders)
       .filter((order) => order.buyerId !== characterId)
       .reduce((sum, order) => sum + order.quantity, 0);
