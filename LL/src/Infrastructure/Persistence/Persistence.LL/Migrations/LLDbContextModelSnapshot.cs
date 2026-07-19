@@ -2347,6 +2347,9 @@ namespace Persistence.LL.Migrations
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<DateTimeOffset>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<string>("ItemBaseId")
                         .IsRequired()
                         .HasMaxLength(128)
@@ -2362,6 +2365,8 @@ namespace Persistence.LL.Migrations
 
                     b.HasIndex("BuyerId");
 
+                    b.HasIndex("ExpiresAt");
+
                     b.HasIndex("ItemBaseId", "UnitPrice", "CreatedAt");
 
                     b.ToTable("MarketPlaceBuyOrders");
@@ -2376,6 +2381,9 @@ namespace Persistence.LL.Migrations
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<DateTimeOffset>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<Guid>("ItemInstanceId")
                         .HasColumnType("uuid");
 
@@ -2387,16 +2395,72 @@ namespace Persistence.LL.Migrations
 
                     b.Property<string>("SellerName")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
 
                     b.Property<long>("UnitPrice")
                         .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
+                    b.HasIndex("ExpiresAt");
+
                     b.HasIndex("ItemInstanceId");
 
+                    b.HasIndex("SellerId");
+
+                    b.HasIndex("UnitPrice", "CreatedAt");
+
                     b.ToTable("MarketPlaceListings");
+                });
+
+            modelBuilder.Entity("Domain.Models.MarketPlaces.MarketPlaceOrder", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("BuyerId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ItemBaseId")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
+
+                    b.Property<Guid?>("ItemInstanceId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("PurchasedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("integer");
+
+                    b.Property<long>("SellerFee")
+                        .HasColumnType("bigint");
+
+                    b.Property<Guid>("SellerId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Source")
+                        .HasColumnType("integer");
+
+                    b.Property<long>("TotalPrice")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("UnitPrice")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BuyerId", "PurchasedAt");
+
+                    b.HasIndex("ItemBaseId", "PurchasedAt");
+
+                    b.HasIndex("SellerId", "PurchasedAt");
+
+                    b.ToTable("MarketPlaceOrders");
                 });
 
             modelBuilder.Entity("Domain.Models.Outbox.GameEventOutboxDelivery", b =>
@@ -4052,6 +4116,17 @@ namespace Persistence.LL.Migrations
                         .IsRequired();
 
                     b.Navigation("ItemInstance");
+                });
+
+            modelBuilder.Entity("Domain.Models.MarketPlaces.MarketPlaceOrder", b =>
+                {
+                    b.HasOne("Domain.Models.Items.ItemBase", "ItemBase")
+                        .WithMany()
+                        .HasForeignKey("ItemBaseId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("ItemBase");
                 });
 
             modelBuilder.Entity("Domain.Models.Outbox.GameEventOutboxDelivery", b =>

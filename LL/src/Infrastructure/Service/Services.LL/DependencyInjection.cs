@@ -284,6 +284,20 @@ public static class DependencyInjection
         services.AddScoped<IInventoryService, InventoryService>();
         services.AddScoped<IInventoryItemFactory, InventoryItemFactory>();
 
+        services.AddOptions<MarketPlaceOptions>()
+            .Bind(config.GetSection(MarketPlaceOptions.SectionName))
+            .Validate(options =>
+                    options.MaximumListingsPerCharacter > 0 &&
+                    options.MaximumBuyOrdersPerCharacter > 0 &&
+                    options.MaximumStackQuantity > 0 &&
+                    options.MaximumUnitPrice > 0 &&
+                    options.SellerFeeBasisPoints is >= 0 and <= 10_000 &&
+                    options.MinimumSellerFee >= 0 &&
+                    options.OrderLifetimeDays > 0 &&
+                    options.ExpirationSweepIntervalMinutes > 0 &&
+                    options.ExpirationBatchSize > 0,
+                "Marketplace settings are invalid.")
+            .ValidateOnStart();
         services.AddScoped<IMarketPlaceService, MarketPlaceService>();
 
         services.AddScoped<IProfessionService, ProfessionService>();

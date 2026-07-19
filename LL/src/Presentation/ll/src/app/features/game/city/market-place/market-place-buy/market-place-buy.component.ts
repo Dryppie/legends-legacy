@@ -47,6 +47,7 @@ import { EquipmentSlotType } from '../../../../../shared/models/Dtos/equipment-s
 import { getSlotTypeFromEquipmentType } from '../../../../../shared/utils/equipment/equipment.utils';
 import { InventoryItem } from '../../../../../shared/models/inventoryItem';
 import { EquipmentType } from '../../../../../shared/models/enums/equipmentType';
+import { ItemQuality } from '../../../../../shared/models/enums/itemQuality';
 import { AttributeModifier } from '../../../../../shared/models/Dtos/attributesDto';
 import { CharacterStateService } from '../../../../../core/services/api/character/character-state.service';
 import {
@@ -119,7 +120,25 @@ export class MarketPlaceBuyComponent implements OnInit {
   );
 
   readonly rarity = signal<string>('');
+  readonly equipmentType = signal<string>('');
+  readonly quality = signal<string>('');
   readonly priceSort = signal<'' | 'asc' | 'desc'>('');
+  readonly minimumTierCtrl = new FormControl<number | null>(null, {
+    validators: [Validators.min(1)],
+  });
+  readonly minimumPotentialCtrl = new FormControl<number | null>(null, {
+    validators: [Validators.min(0)],
+  });
+  readonly minimumTier = toSignal(
+    this.minimumTierCtrl.valueChanges.pipe(startWith(this.minimumTierCtrl.value)),
+    { initialValue: null },
+  );
+  readonly minimumPotential = toSignal(
+    this.minimumPotentialCtrl.valueChanges.pipe(
+      startWith(this.minimumPotentialCtrl.value),
+    ),
+    { initialValue: null },
+  );
 
   readonly rarities = [
     'Common',
@@ -133,6 +152,17 @@ export class MarketPlaceBuyComponent implements OnInit {
   readonly rarityOptions: DropdownOption<string>[] = [
     { label: 'Any rarity', value: '' },
     ...this.rarities.map((rarity) => ({ label: rarity, value: rarity })),
+  ];
+  readonly equipmentTypeOptions: DropdownOption<string>[] = [
+    { label: 'Any slot', value: '' },
+    ...Object.values(EquipmentType).map((value) => ({
+      label: new EquipmentTypePipe().transform(value),
+      value,
+    })),
+  ];
+  readonly qualityOptions: DropdownOption<string>[] = [
+    { label: 'Any quality', value: '' },
+    ...Object.values(ItemQuality).map((value) => ({ label: value, value })),
   ];
 
   /** Selected listing shown inside confirmation modal */
@@ -164,6 +194,40 @@ export class MarketPlaceBuyComponent implements OnInit {
         }
         return l.itemInstance.itemBase.rarity === this.rarity();
       });
+    }
+
+    if (this.selectedItemType() === ItemType.Equipment) {
+      if (this.equipmentType()) {
+        items = items.filter(
+          (listing) =>
+            (listing.itemInstance as EquipmentInstance).equipmentBase
+              .equipmentType === this.equipmentType(),
+        );
+      }
+
+      if (this.quality()) {
+        items = items.filter(
+          (listing) =>
+            (listing.itemInstance as EquipmentInstance).quality === this.quality(),
+        );
+      }
+
+      const minimumTier = this.minimumTier();
+      if (minimumTier !== null) {
+        items = items.filter(
+          (listing) =>
+            (listing.itemInstance as EquipmentInstance).tier >= minimumTier,
+        );
+      }
+
+      const minimumPotential = this.minimumPotential();
+      if (minimumPotential !== null) {
+        items = items.filter(
+          (listing) =>
+            ((listing.itemInstance as EquipmentInstance).potential ?? 0) >=
+            minimumPotential,
+        );
+      }
     }
 
     /* 4️⃣ Sort */
@@ -373,11 +437,24 @@ export class MarketPlaceBuyComponent implements OnInit {
   resetFilters() {
     this.searchCtrl.reset();
     this.rarity.set('');
+    this.equipmentType.set('');
+    this.quality.set('');
+    this.minimumTierCtrl.reset();
+    this.minimumPotentialCtrl.reset();
     this.priceSort.set('');
   }
 
   setRaritySelection(selection: DropdownSelection<unknown>) {
     this.rarity.set(selection.main as string);
+  }
+
+
+  setEquipmentTypeSelection(selection: DropdownSelection<unknown>) {
+    this.equipmentType.set(selection.main as string);
+  }
+
+  setQualitySelection(selection: DropdownSelection<unknown>) {
+    this.quality.set(selection.main as string);
   }
 
   selectListing(listing: MarketPlaceListing) {

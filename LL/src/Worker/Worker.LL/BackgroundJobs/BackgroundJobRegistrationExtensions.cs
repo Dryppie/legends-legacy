@@ -11,6 +11,29 @@ public static class BackgroundJobRegistrationExtensions
     {
         RegisterSmokeJob(q, configuration, environment);
         RegisterTournamentGroundsProgressionJob(q, configuration, environment);
+        RegisterMarketplaceOrderExpirationJob(q, configuration);
+    }
+
+    private static void RegisterMarketplaceOrderExpirationJob(
+        IServiceCollectionQuartzConfigurator q,
+        IConfiguration configuration)
+    {
+        var intervalMinutes = Math.Max(
+            1,
+            configuration.GetValue<int?>("Marketplace:ExpirationSweepIntervalMinutes") ?? 5);
+
+        q.AddJob<MarketplaceOrderExpirationJob>(job => job
+            .WithIdentity(BackgroundJobNames.AuctionExpirationSettlement, BackgroundJobGroups.Economy)
+            .StoreDurably()
+            .RequestRecovery());
+
+        q.AddTrigger(trigger => trigger
+            .WithIdentity("economy.marketplace-expiration.trigger", BackgroundJobGroups.Economy)
+            .ForJob(BackgroundJobNames.AuctionExpirationSettlement, BackgroundJobGroups.Economy)
+            .WithSimpleSchedule(schedule => schedule
+                .WithIntervalInMinutes(intervalMinutes)
+                .RepeatForever()
+                .WithMisfireHandlingInstructionNextWithRemainingCount()));
     }
 
     private static void RegisterSmokeJob(

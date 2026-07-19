@@ -48,9 +48,25 @@ public class CreateMarketPlaceBuyOrderCommandHandler : IRequestHandler<CreateMar
 
         var response = _mapper.Map<CreateMarketPlaceBuyOrderResponseDto>(result);
 
-        await _eventPublisher.PublishAsync(
-            new Audience.World(),
-            new MarketBuyOrderCreatedMsg(response.BuyOrder));
+        foreach (var fill in result.Fills)
+        {
+            await _eventPublisher.PublishAsync(
+                new Audience.World(),
+                new MarketListingSoldMsg(
+                    fill.ListingId,
+                    fill.SellerId,
+                    fill.Quantity,
+                    fill.TotalPrice,
+                    fill.SellerCinders,
+                    _mapper.Map<MarketPlaceListingDto?>(fill.RemainingListing)));
+        }
+
+        if (response.BuyOrder != null)
+        {
+            await _eventPublisher.PublishAsync(
+                new Audience.World(),
+                new MarketBuyOrderCreatedMsg(response.BuyOrder));
+        }
 
         return Response<CreateMarketPlaceBuyOrderResponseDto>.Success(response);
     }

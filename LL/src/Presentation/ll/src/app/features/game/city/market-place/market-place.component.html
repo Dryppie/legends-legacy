@@ -1,74 +1,109 @@
 <div class="ll-page-stack pr-4 sm:pr-6">
-  <div class="ll-page-header relative isolate flex flex-none flex-col">
-    <div class="flex flex-wrap items-end justify-between gap-3">
-      <div class="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-        <h1 class="ll-heading text-2xl uppercase sm:text-3xl">Marketplace</h1>
-      </div>
+  <section
+    class="ll-panel flex h-full min-h-0 flex-col overflow-hidden"
+    [class.marketplace-mobile-detail]="mobileDetailOpen()"
+  >
+    <header
+      class="marketplace-header flex flex-none flex-wrap items-center justify-between gap-4 border-b border-light_gray px-5 py-4 sm:px-6"
+    >
+      <h1 class="ll-heading text-2xl uppercase sm:text-3xl">Marketplace</h1>
 
-      <div class="ll-copy text-sm text-zinc-200">
-        You have
-        <span class="text-primary">
+      <div
+        class="ll-card flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-zinc-300"
+      >
+        <span>You have</span>
+        <strong class="text-primary">
           {{ characterState.currentCharacter()?.cinders ?? 0 | numberFormat }}
-        </span>
-        Cinders
+        </strong>
+        <span class="text-zinc-400">Cinders</span>
+      </div>
+    </header>
+
+    <div
+      class="marketplace-navigation flex flex-none gap-3 border-b border-light_gray px-4 py-3 lg:px-5"
+    >
+      <app-market-place-filter
+        *ngIf="mode() !== 'orders'"
+        (categoryChanged)="onCategoryChanged($event)"
+      ></app-market-place-filter>
+
+      <div class="marketplace-mode-nav ll-segmented justify-stretch">
+        <button
+          type="button"
+          class="ll-segmented-button flex-1"
+          [class.ll-segmented-button-active]="mode() === 'browse'"
+          [attr.aria-pressed]="mode() === 'browse'"
+          (click)="setMode('browse')"
+        >
+          Browse
+        </button>
+        <button
+          type="button"
+          class="ll-segmented-button flex-1"
+          [class.ll-segmented-button-active]="mode() === 'sell'"
+          [attr.aria-pressed]="mode() === 'sell'"
+          (click)="setMode('sell')"
+        >
+          Sell
+        </button>
+        <button
+          type="button"
+          class="ll-segmented-button flex flex-1 items-center justify-center gap-2 whitespace-nowrap"
+          [class.ll-segmented-button-active]="mode() === 'orders'"
+          [attr.aria-pressed]="mode() === 'orders'"
+          (click)="setMode('orders')"
+        >
+          My Orders
+          <span
+            class="inline-flex min-w-5 items-center justify-center rounded-full bg-primary px-1.5 py-0.5 text-xs font-semibold text-black"
+          >
+            {{
+              marketplaceState.myListings().length +
+                marketplaceState.myBuyOrders().length
+            }}
+          </span>
+        </button>
       </div>
     </div>
 
-    <app-market-place-filter
-      class="pb-3 sm:pt-3"
-      (itemTypeChanged)="onItemTypeChanged($event)"
-    ></app-market-place-filter>
+    <div class="flex min-h-0 flex-1 flex-col overflow-hidden">
+      <ng-container [ngSwitch]="mode()">
+        <ng-container *ngSwitchCase="'browse'">
+          <app-market-place-commodity
+            *ngIf="
+              selectedMarket().itemType === ItemType.Resource ||
+                selectedMarket().itemType === ItemType.Consumable ||
+                selectedMarket().itemType === ItemType.Essence;
+              else exactItemMarket
+            "
+            [itemType]="selectedMarket().itemType"
+            [subcategory]="selectedMarket().subcategory"
+            [category]="selectedMarket().id"
+            (mobileDetailChanged)="onMobileDetailChanged($event)"
+            class="flex h-full min-h-0"
+          ></app-market-place-commodity>
 
-    <div class="ll-card min-h-8 rounded-b-none px-3 py-2 text-primary">
-      <ng-container [ngSwitch]="selectedItemType().main">
-        <app-market-place-generic
-          *ngSwitchCase="ItemType.Consumable"
-        ></app-market-place-generic>
-        <app-market-place-resources
-          *ngSwitchCase="ItemType.Resource"
-          [resource]="selectedItemType().sub"
-        ></app-market-place-resources>
-        <app-market-place-essences
-          *ngSwitchCase="ItemType.Essence"
-          [essenceListings]="marketplaceState.essences"
-        ></app-market-place-essences>
-        <app-market-place-equipment
-          *ngSwitchCase="ItemType.Equipment"
-          [equipmentListings]="marketplaceState.equipment"
-        ></app-market-place-equipment>
+          <ng-template #exactItemMarket>
+            <app-market-place-buy
+              [itemType]="selectedMarket().itemType"
+              class="h-full overflow-y-auto p-4"
+            ></app-market-place-buy>
+          </ng-template>
+        </ng-container>
+
+        <app-market-place-sell
+          *ngSwitchCase="'sell'"
+          [itemType]="selectedMarket().itemType"
+          [category]="selectedMarket().id"
+          [subcategory]="selectedMarket().subcategory"
+          class="h-full overflow-y-auto p-4"
+        ></app-market-place-sell>
+
+        <app-market-place-orders
+          *ngSwitchCase="'orders'"
+          class="h-full overflow-y-auto p-4"
+        ></app-market-place-orders>
       </ng-container>
     </div>
-  </div>
-
-  <div
-    class="ll-panel flex h-full min-h-0 flex-1 flex-col overflow-hidden rounded-t-none px-3"
-  >
-    <app-market-place-commodity
-      *ngIf="
-        selectedItemType().main === ItemType.Resource ||
-          selectedItemType().main === ItemType.Consumable;
-        else instanceMarket
-      "
-      [itemType]="selectedItemType().main"
-      [subcategory]="selectedItemType().sub"
-      class="flex h-full overflow-y-auto"
-    ></app-market-place-commodity>
-
-    <ng-template #instanceMarket>
-      <app-tabs class="flex h-full min-h-0 flex-col">
-        <app-tab label="Buy">
-          <app-market-place-buy
-            [itemType]="selectedItemType().main"
-            class="h-full overflow-y-auto"
-          ></app-market-place-buy>
-        </app-tab>
-        <app-tab label="Sell">
-          <app-market-place-sell
-            [itemType]="selectedItemType().main"
-            class="h-full overflow-y-auto"
-          ></app-market-place-sell>
-        </app-tab>
-      </app-tabs>
-    </ng-template>
-  </div>
+  </section>
 </div>

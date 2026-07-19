@@ -9,4 +9,5 @@ export interface MarketPlaceListing {
   quantity: number;
   unitPrice: number;
   createdAt: Date;
+  expiresAt: Date;
 }

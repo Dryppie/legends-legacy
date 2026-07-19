@@ -60,6 +60,8 @@ public class BuyoutMarketPlaceListingCommandHandler : IRequestHandler<BuyoutMark
             ListingId = result.ListingId,
             RemainingListing = remainingListing,
             PurchasedItem = _mapper.Map<InventoryItemDto>(result.PurchasedItem),
+            PurchasedQuantity = result.Quantity,
+            TotalPrice = result.TotalPrice,
             BuyerCinders = result.BuyerCinders
         });
     }

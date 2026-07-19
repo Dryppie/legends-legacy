@@ -1,4 +1,7 @@
-<div class="ll-toolbar overflow-visible p-1">
+<nav
+  class="flex flex-wrap items-center gap-1 overflow-visible"
+  aria-label="Marketplace categories"
+>
   <app-dropdown
     *ngFor="let tab of tabs"
     [value]="tab.itemType"
@@ -7,4 +10,4 @@
     [selected]="selectedTabId() === tab.id"
     (selection)="onSelection(tab, $event)"
   />
-</div>
+</nav>

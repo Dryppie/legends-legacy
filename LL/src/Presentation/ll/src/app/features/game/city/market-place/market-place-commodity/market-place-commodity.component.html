@@ -1,24 +1,190 @@
-<div class="flex h-full w-full flex-col gap-3 overflow-hidden py-3 text-white">
-  <div class="grid gap-4">
-    <section class="ll-panel p-3">
-      <ng-container *ngIf="commodities().length; else noCommodity">
-        <div class="mb-3 flex flex-wrap items-end justify-between gap-3">
-          <div>
-            <h2 class="ll-heading">{{ marketName() }}</h2>
-            <span class="ll-copy">
-              You have {{ ownedQuantity() | numberFormat }}
+<div
+  class="market-layout grid h-full min-h-0 w-full text-white"
+  [class.market-detail-open]="mobileDetailOpen()"
+>
+  <aside class="market-catalogue flex min-h-80 flex-col p-4">
+    <div
+      class="market-catalogue-heading mb-4 flex items-end justify-between gap-3"
+    >
+      <div class="min-w-0">
+        <span class="ll-eyebrow block">Catalogue</span>
+        <h2 class="ll-heading mt-1 truncate text-lg uppercase">
+          {{ catalogueHeading() }}
+        </h2>
+      </div>
+      <span class="ll-helper whitespace-nowrap">
+        {{ filteredCommodities().length }} /
+        {{ commodities().length }}
+      </span>
+    </div>
+
+    <label class="market-catalogue-search ll-field">
+      <span class="sr-only">Search catalogue</span>
+      <input
+        type="search"
+        [formControl]="catalogSearchCtrl"
+        placeholder="Search catalogue..."
+        class="ll-input ll-input-compact w-full"
+      />
+    </label>
+
+    <div class="market-catalogue-controls mt-2 grid grid-cols-2 gap-2">
+      <label class="ll-field">
+        <span class="sr-only">Catalogue status</span>
+        <select
+          class="ll-input ll-input-compact w-full"
+          [value]="catalogStatus()"
+          (change)="setCatalogStatus($any($event.target).value)"
+        >
+          <option value="all">All items</option>
+          <option value="active">Active</option>
+          <option value="owned">Owned</option>
+        </select>
+      </label>
+
+      <label class="ll-field">
+        <span class="sr-only">Catalogue sorting</span>
+        <select
+          class="ll-input ll-input-compact w-full"
+          [value]="catalogSort()"
+          (change)="setCatalogSort($any($event.target).value)"
+        >
+          <option value="activity">Activity</option>
+          <option value="name">Name</option>
+          <option value="ask">Lowest ask</option>
+        </select>
+      </label>
+    </div>
+
+    <div class="market-catalogue-list mt-4 min-h-0 flex-1 overflow-y-auto pr-1">
+      <button
+        type="button"
+        *ngFor="let commodity of filteredCommodities(); trackBy: trackCommodity"
+        (click)="selectCommodity(commodity)"
+        class="group mb-1 grid w-full grid-cols-[minmax(0,1fr)_auto] gap-3 rounded-md border border-transparent px-3 py-2 text-left transition-colors hover:border-primary/30 hover:bg-white/5"
+        [ngClass]="{
+          'border-primary/60 bg-primary/10 shadow-[inset_3px_0_0_var(--ll-color-primary)]':
+            commodity.base.id === selectedCommodity()?.base?.id,
+        }"
+        [attr.aria-pressed]="
+          commodity.base.id === selectedCommodity()?.base?.id
+        "
+      >
+        <span class="min-w-0">
+          <span
+            class="block truncate text-sm font-medium group-hover:text-primary"
+            [class.text-primary]="
+              commodity.base.id === selectedCommodity()?.base?.id
+            "
+          >
+            {{ commodityDisplayName(commodity) }}
+          </span>
+          <span class="ll-helper block truncate">
+            Owned {{ commodity.ownedQuantity | numberFormat }}
+          </span>
+        </span>
+
+        <span class="self-center text-right text-xs">
+          <ng-container
+            *ngIf="
+              commodity.bestSellPrice !== null ||
+                commodity.bestBuyPrice !== null;
+              else noMarket
+            "
+          >
+            <strong class="block text-primary">
+              {{ commodityDisplayPrice(commodity) | numberFormat }}
+            </strong>
+            <span class="ll-helper">
+              {{ commodity.bestSellPrice === null ? "bid" : "ask" }}
             </span>
+          </ng-container>
+          <ng-template #noMarket>
+            <span class="ll-helper whitespace-nowrap">No market</span>
+          </ng-template>
+        </span>
+      </button>
+
+      <p
+        *ngIf="!filteredCommodities().length"
+        class="py-8 text-center text-sm text-zinc-500"
+      >
+        No catalogue items match these filters.
+      </p>
+    </div>
+  </aside>
+
+  <main class="market-main min-h-0 overflow-y-auto">
+    <ng-container *ngIf="selectedCommodity() as selected; else noCommodity">
+      <div
+        class="market-detail-content flex min-h-full flex-col gap-5 p-4 sm:p-5 lg:p-6"
+      >
+        <header class="market-mobile-detail-header">
+          <button
+            type="button"
+            class="flex min-w-0 items-center gap-2 text-left text-primary"
+            (click)="closeMobileDetail()"
+          >
+            <span class="text-2xl leading-none" aria-hidden="true">‹</span>
+            <span class="font-display truncate uppercase">
+              {{ catalogueTitle() }}
+            </span>
+          </button>
+          <span
+            class="ll-card whitespace-nowrap px-2.5 py-1 text-xs text-primary"
+          >
+            {{ currentCinders() | numberFormat }}
+          </span>
+        </header>
+
+        <section class="market-hero grid flex-none gap-5">
+          <div
+            class="market-item-card ll-page-header flex min-w-0 flex-col justify-center p-5"
+          >
+            <span class="ll-eyebrow text-primary">
+              {{ catalogueTitle() }}
+            </span>
+            <h2 class="ll-heading mt-1 text-2xl sm:text-3xl">
+              {{ commodityDisplayName(selected) }}
+            </h2>
+            <p
+              class="ll-copy mt-2 max-w-2xl text-sm"
+              *ngIf="selected.base.description"
+            >
+              {{ selected.base.description }}
+            </p>
+
+            <div class="mt-4 flex flex-wrap gap-2">
+              <span class="ll-card px-2.5 py-1 text-xs text-zinc-400">
+                Owned
+                <strong class="ml-1 text-white">
+                  {{ ownedQuantity() | numberFormat }}
+                </strong>
+              </span>
+              <span class="ll-card px-2.5 py-1 text-xs text-zinc-400">
+                <strong class="text-white">
+                  {{ selected.listedQuantity | numberFormat }}
+                </strong>
+                listed
+              </span>
+              <span class="ll-card px-2.5 py-1 text-xs text-zinc-400">
+                <strong class="text-white">
+                  {{ selected.buyOrderQuantity | numberFormat }}
+                </strong>
+                wanted
+              </span>
+            </div>
           </div>
 
-          <div class="flex flex-wrap items-end gap-3">
-            <div class="flex flex-wrap items-end gap-3">
+          <aside class="market-desktop-ticket ll-panel p-4">
+            <div class="grid grid-cols-2 gap-3">
               <label class="ll-field">
                 <span class="ll-label">Quantity</span>
                 <input
                   type="number"
                   min="1"
                   [formControl]="quantityCtrl"
-                  class="ll-input ll-input-compact no-spinner w-32 text-right"
+                  class="ll-input no-spinner w-full text-right"
                 />
               </label>
 
@@ -28,139 +194,295 @@
                   type="number"
                   min="1"
                   [formControl]="unitPriceCtrl"
-                  class="ll-input ll-input-compact no-spinner w-32 text-right"
+                  class="ll-input no-spinner w-full text-right"
                 />
               </label>
             </div>
-            <div class="flex flex-wrap items-end gap-3">
-              <app-regular-button
-                text="Sell"
-                [disabled]="!canSell()"
-                (pressed)="sellSelectedCommodity()"
-              />
-              <app-regular-button
-                text="Fill Bid"
-                [disabled]="!canFillBuyOrder()"
-                (pressed)="fillSelectedBuyOrder()"
-              />
-              <app-regular-button
-                text="Buy"
+
+            <div class="mt-3 grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                class="ll-button bg-primary font-semibold text-black hover:bg-primary hover:text-black disabled:bg-transparent disabled:text-zinc-400"
                 [disabled]="!canBuy()"
-                (pressed)="buySelectedCommodity()"
-              />
-              <app-regular-button
-                text="Bid"
-                [disabled]="!canPlaceBuyOrder()"
-                (pressed)="placeBuyOrder()"
-              />
-              <app-regular-button
-                text="Cancel Bid"
-                [disabled]="!canCancelBuyOrder()"
-                (pressed)="cancelSelectedBuyOrder()"
-              />
+                (click)="buySelectedCommodity()"
+              >
+                {{ selectedSellOrderIsOwn() ? "Your sell order" : "Buy now" }}
+              </button>
+              <button
+                type="button"
+                class="ll-button text-primary"
+                [disabled]="!canSubmitBuyOrderAction()"
+                (click)="submitBuyOrderAction()"
+              >
+                {{ buyOrderActionLabel() }}
+              </button>
+            </div>
+
+            <div class="ll-helper mt-3 text-right">
+              Total
+              <strong class="ml-1 text-primary">
+                {{ buyOrderCommitment() | numberFormat }}
+              </strong>
+              Cinders
+            </div>
+
+            <p
+              *ngIf="
+                hasOwnSellListingsForSelectedItem() ||
+                hasOwnBuyOrdersForSelectedItem()
+              "
+              class="ll-helper mt-3 text-primary"
+            >
+              You have an active
+              {{
+                hasOwnSellListingsForSelectedItem() ? "sell order" : "buy order"
+              }}
+              for this item. Cancel it here to place a different order.
+            </p>
+          </aside>
+        </section>
+
+        <section
+          class="market-stats grid flex-none gap-2"
+          aria-label="Market statistics"
+        >
+          <div class="ll-card px-3 py-3">
+            <span class="ll-label block">Last trade</span>
+            <strong class="mt-1 block font-mono text-lg text-primary">
+              {{
+                lastTradePrice() === undefined
+                  ? "—"
+                  : (lastTradePrice() | numberFormat)
+              }}
+            </strong>
+          </div>
+          <div class="ll-card px-3 py-3">
+            <span class="ll-label block">7-day median</span>
+            <strong class="mt-1 block font-mono text-lg text-primary">
+              {{
+                medianPrice7Days() === undefined
+                  ? "—"
+                  : (medianPrice7Days() | numberFormat)
+              }}
+            </strong>
+          </div>
+          <div class="ll-card px-3 py-3">
+            <span class="ll-label block">24-hour volume</span>
+            <strong class="mt-1 block font-mono text-lg">
+              {{ marketSummary()?.tradeVolume24Hours ?? 0 | numberFormat }}
+            </strong>
+          </div>
+          <div class="ll-card px-3 py-3">
+            <span class="ll-label block">Current spread</span>
+            <strong class="mt-1 block font-mono text-lg">
+              {{ spread() === null ? "—" : (spreadValue() | numberFormat) }}
+            </strong>
+          </div>
+        </section>
+
+        <div class="market-mobile-order-tabs ll-segmented">
+          <button
+            type="button"
+            class="ll-segmented-button flex-1"
+            [class.ll-segmented-button-active]="mobileOrderBook() === 'sell'"
+            [attr.aria-pressed]="mobileOrderBook() === 'sell'"
+            (click)="setMobileOrderBook('sell')"
+          >
+            Sell orders {{ sellOrderRows().length }}
+          </button>
+          <button
+            type="button"
+            class="ll-segmented-button flex-1"
+            [class.ll-segmented-button-active]="mobileOrderBook() === 'buy'"
+            [attr.aria-pressed]="mobileOrderBook() === 'buy'"
+            (click)="setMobileOrderBook('buy')"
+          >
+            Buy orders {{ buyOrderRows().length }}
+          </button>
+        </div>
+
+        <section
+          class="market-orderbooks grid min-h-[25rem] flex-1 gap-5"
+          [class.market-show-sell-orders]="mobileOrderBook() === 'sell'"
+          [class.market-show-buy-orders]="mobileOrderBook() === 'buy'"
+        >
+          <div class="market-sell-orders flex min-h-72 flex-col">
+            <div class="mb-2 flex items-center justify-between gap-3">
+              <h3 class="ll-heading text-lg uppercase">Sell Orders</h3>
+              <span class="ll-helper">Lowest first</span>
+            </div>
+            <div class="ll-table-header grid grid-cols-2 rounded-b-none">
+              <span>Quantity</span>
+              <span class="justify-self-end">Unit price</span>
+            </div>
+
+            <div
+              class="ll-panel min-h-0 flex-1 overflow-y-auto rounded-t-none border-t-0"
+            >
+              <button
+                type="button"
+                *ngFor="let row of sellOrderRows(); trackBy: trackOrderRow"
+                (click)="selectSellOrder(row)"
+                class="ll-table-row relative grid w-full grid-cols-2 overflow-hidden text-left"
+                [ngClass]="{
+                  'bg-primary/15': row.unitPrice === selectedSellPrice(),
+                }"
+              >
+                <span class="relative flex items-baseline gap-2 font-mono">
+                  <span>{{ row.quantity | numberFormat }}</span>
+                  <small
+                    *ngIf="row.ownQuantity > 0"
+                    class="font-sans text-[0.65rem] text-zinc-500"
+                  >
+                    {{ row.ownQuantity | numberFormat }} yours
+                  </small>
+                </span>
+                <strong
+                  class="relative justify-self-end font-mono text-primary"
+                >
+                  {{ row.unitPrice | numberFormat }}
+                </strong>
+              </button>
+
+              <div
+                *ngIf="!sellOrderRows().length"
+                class="flex h-full min-h-56 flex-col items-center justify-center px-6 text-center"
+              >
+                <span class="ll-heading text-lg"
+                  >No one is selling this yet</span
+                >
+                <p class="ll-copy mt-2 max-w-xs">
+                  Switch to Buy orders to name your price, or list one from your
+                  inventory in Sell mode.
+                </p>
+              </div>
             </div>
           </div>
-        </div>
 
-        <div class="ll-helper">
-          Total:
-          <span class="text-primary">
-            {{
-              (quantityCtrl.value ?? 0) * (unitPriceCtrl.value ?? 0)
-                | numberFormat
-            }}
-          </span>
-          Cinders
-        </div>
+          <div class="market-buy-orders flex min-h-72 flex-col">
+            <div class="mb-2 flex items-center justify-between gap-3">
+              <h3 class="ll-heading text-lg uppercase">Buy Orders</h3>
+              <span class="ll-helper">Highest first</span>
+            </div>
+            <div class="ll-table-header grid grid-cols-3 rounded-b-none">
+              <span>Quantity</span>
+              <span>Mine</span>
+              <span class="justify-self-end">Unit price</span>
+            </div>
 
-        <div *ngIf="commodities().length > 1" class="mt-4">
-          <h3 class="ll-label mb-2">Commodities</h3>
-          <div class="grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
+            <div
+              class="ll-panel min-h-0 flex-1 overflow-y-auto rounded-t-none border-t-0"
+            >
+              <button
+                type="button"
+                *ngFor="let row of buyOrderRows(); trackBy: trackBuyOrderRow"
+                (click)="selectBuyOrder(row)"
+                class="ll-table-row relative grid w-full grid-cols-3 overflow-hidden text-left"
+                [ngClass]="{
+                  'bg-primary/15': row.unitPrice === selectedBuyPrice(),
+                }"
+              >
+                <span class="relative font-mono">
+                  {{ row.quantity | numberFormat }}
+                </span>
+                <span class="relative font-mono">
+                  {{ row.ownQuantity | numberFormat }}
+                </span>
+                <strong
+                  class="relative justify-self-end font-mono text-primary"
+                >
+                  {{ row.unitPrice | numberFormat }}
+                </strong>
+              </button>
+
+              <div
+                *ngIf="!buyOrderRows().length"
+                class="flex h-full min-h-56 flex-col items-center justify-center px-6 text-center"
+              >
+                <span class="ll-heading text-lg">No buy orders yet</span>
+                <p class="ll-copy mt-2 max-w-xs">
+                  Name your price and the market will match you when a seller
+                  lists.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <footer class="market-mobile-buybar">
+          <div
+            *ngIf="mobileOrderBook() === 'buy'"
+            class="mb-3 flex items-end gap-2"
+          >
+            <label class="ll-field min-w-0 flex-1">
+              <span class="ll-label">Your unit price</span>
+              <input
+                type="number"
+                min="1"
+                [formControl]="unitPriceCtrl"
+                class="ll-input no-spinner w-full text-right"
+              />
+            </label>
+          </div>
+
+          <div class="grid grid-cols-[6.5rem_minmax(0,1fr)] gap-2">
+            <div class="ll-segmented grid grid-cols-3 p-1">
+              <button
+                type="button"
+                class="ll-segmented-button px-2"
+                aria-label="Decrease quantity"
+                (click)="adjustMobileQuantity(-1)"
+              >
+                −
+              </button>
+              <span class="self-center text-center font-mono text-primary">
+                {{ quantityCtrl.value ?? 1 }}
+              </span>
+              <button
+                type="button"
+                class="ll-segmented-button px-2 text-primary"
+                aria-label="Increase quantity"
+                (click)="adjustMobileQuantity(1)"
+              >
+                +
+              </button>
+            </div>
+
             <button
               type="button"
-              *ngFor="let commodity of commodities(); trackBy: trackCommodity"
-              (click)="selectCommodity(commodity)"
-              class="ll-card flex items-center justify-between gap-3 px-3 py-2 text-left transition-colors hover:border-primary/70 hover:bg-primary/10"
-              [ngClass]="{
-                'border-primary bg-primary/15 text-primary':
-                  commodity.base.id === selectedCommodity()?.base?.id,
-              }"
+              class="ll-button bg-primary font-semibold text-black disabled:bg-transparent disabled:text-zinc-400"
+              [disabled]="
+                mobileOrderBook() === 'buy'
+                  ? !canSubmitBuyOrderAction()
+                  : !canBuy()
+              "
+              (click)="submitMobileOrder()"
             >
-              <span class="min-w-0 truncate text-sm">{{
-                commodity.base.name
-              }}</span>
-              <span class="shrink-0 text-xs text-zinc-300">
-                {{ commodity.listedQuantity | numberFormat }} listed /
-                {{ commodity.buyOrderQuantity | numberFormat }} wanted
+              <span class="block">
+                {{
+                  mobileOrderBook() === "buy"
+                    ? buyOrderActionLabel()
+                    : selectedSellOrderIsOwn()
+                      ? "Your sell order"
+                      : "Buy now"
+                }}
+              </span>
+              <span class="block text-[0.65rem] font-normal">
+                {{ buyOrderCommitment() | numberFormat }}
+                Cinders
               </span>
             </button>
           </div>
-        </div>
-      </ng-container>
+        </footer>
+      </div>
+    </ng-container>
 
-      <ng-template #noCommodity>
+    <ng-template #noCommodity>
+      <section class="flex h-full min-h-72 items-center justify-center p-6">
         <p class="ll-empty-state">
-          No orders or inventory match the selected market.
+          No items are available in this marketplace category.
         </p>
-      </ng-template>
-    </section>
-  </div>
-
-  <div class="flex h-full flex-1 flex-col gap-4 overflow-y-auto xl:flex-row">
-    <section class="flex h-full w-full flex-col">
-      <h2 class="ll-heading mb-2">Sell Orders</h2>
-      <div class="ll-table-header grid grid-cols-2 rounded-b-none">
-        <label>Quantity</label>
-        <label class="justify-self-end">Unit price</label>
-      </div>
-
-      <div class="ll-panel flex-1 overflow-y-auto rounded-t-none border-t-0">
-        <button
-          type="button"
-          *ngFor="let row of sellOrderRows(); trackBy: trackOrderRow"
-          (click)="selectSellOrder(row)"
-          class="ll-table-row grid w-full grid-cols-2 text-left"
-          [ngClass]="{ 'bg-primary/20': row.unitPrice === selectedSellPrice() }"
-        >
-          <span>{{ row.quantity | numberFormat }}</span>
-          <span class="justify-self-end text-primary">
-            {{ row.unitPrice | numberFormat }}
-          </span>
-        </button>
-
-        <p *ngIf="!sellOrderRows().length" class="ll-empty-state mt-8">
-          No sell orders for this item.
-        </p>
-      </div>
-    </section>
-
-    <section class="flex h-full w-full flex-col">
-      <h2 class="ll-heading mb-2">Buy Orders</h2>
-      <div class="ll-table-header grid grid-cols-3 rounded-b-none">
-        <label>Quantity</label>
-        <label>Mine</label>
-        <label class="justify-self-end">Unit price</label>
-      </div>
-
-      <div class="ll-panel flex-1 overflow-y-auto rounded-t-none border-t-0">
-        <button
-          type="button"
-          *ngFor="let row of buyOrderRows(); trackBy: trackBuyOrderRow"
-          (click)="selectBuyOrder(row)"
-          class="ll-table-row grid w-full grid-cols-3 text-left"
-          [ngClass]="{ 'bg-primary/20': row.unitPrice === selectedBuyPrice() }"
-        >
-          <span>{{ row.quantity | numberFormat }}</span>
-          <span>{{ row.ownQuantity | numberFormat }}</span>
-          <span class="justify-self-end text-primary">
-            {{ row.unitPrice | numberFormat }}
-          </span>
-        </button>
-
-        <p *ngIf="!buyOrderRows().length" class="ll-empty-state mt-8">
-          No buy orders for this item.
-        </p>
-      </div>
-    </section>
-  </div>
+      </section>
+    </ng-template>
+  </main>
 </div>

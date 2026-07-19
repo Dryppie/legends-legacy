@@ -13,6 +13,8 @@ public sealed class FulfillMarketPlaceBuyOrderResponseDto : IMapFrom<FulfillMark
     public InventoryItemDto? RemainingSellerInventoryItem { get; init; }
     public required Guid SoldItemInstanceId { get; init; }
     public required int SoldQuantity { get; init; }
+    public required long TotalPrice { get; init; }
+    public required long SellerFee { get; init; }
     public required long SellerCinders { get; init; }
 
     public void Mapping(Profile profile)

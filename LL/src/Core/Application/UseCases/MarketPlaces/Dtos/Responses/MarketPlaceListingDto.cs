@@ -12,6 +12,8 @@ public class MarketPlaceListingDto : IMapFrom<MarketPlaceListing>
     public ItemInstanceDto ItemInstance { get; set; } = null!;
     public int Quantity { get; set; }
     public long UnitPrice { get; set; }
+    public DateTimeOffset CreatedAt { get; set; }
+    public DateTimeOffset ExpiresAt { get; set; }
     public void Mapping(Profile profile)
     {
         profile.CreateMap<MarketPlaceListing, MarketPlaceListingDto>();

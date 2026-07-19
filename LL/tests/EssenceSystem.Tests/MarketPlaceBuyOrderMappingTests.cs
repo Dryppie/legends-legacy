@@ -41,7 +41,7 @@ public sealed class MarketPlaceBuyOrderMappingTests
         };
 
         var createDto = mapper.Map<CreateMarketPlaceBuyOrderResponseDto>(
-            new CreateMarketPlaceBuyOrderResult(buyOrder, 500));
+            new CreateMarketPlaceBuyOrderResult(buyOrder, [], 0, 0, 500));
         var fulfillDto = mapper.Map<FulfillMarketPlaceBuyOrderResponseDto>(
             new FulfillMarketPlaceBuyOrderResult(
                 buyOrder.Id,
@@ -52,11 +52,14 @@ public sealed class MarketPlaceBuyOrderMappingTests
                 buyOrder,
                 2,
                 24,
+                1,
                 524));
         var cancelDto = mapper.Map<CancelMarketPlaceBuyOrderResponseDto>(
             new CancelMarketPlaceBuyOrderResult(buyOrder.Id, 548));
 
-        Assert.Equal(buyOrder.Id, createDto.BuyOrder.Id);
+        Assert.Equal(buyOrder.Id, Assert.IsType<MarketPlaceBuyOrderDto>(createDto.BuyOrder).Id);
+        Assert.Equal(0, createDto.FilledQuantity);
+        Assert.Equal(0, createDto.FilledTotalPrice);
         Assert.Equal(500, createDto.BuyerCinders);
         Assert.Equal(itemInstanceId, fulfillDto.SoldItemInstanceId);
         Assert.Equal(2, fulfillDto.SoldQuantity);
