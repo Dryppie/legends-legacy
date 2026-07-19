@@ -33,7 +33,7 @@ import {
   TUTORIAL_STEP_EQUIP_ESSENCE,
 } from '../../../../shared/models/tutorial';
 
-type ArchiveFilter = 'all' | 'favorites' | 'attuned' | 'inactive';
+type ArchiveFilter = 'all' | 'favorites' | 'attuned' | 'ready';
 type ArchiveSort = 'name' | 'level' | 'tier';
 type CreatureSourceFilter = 'all' | 'Area' | 'Dungeon';
 type CreatureEssenceFilter = 'all' | 'found' | 'not-found';
@@ -54,6 +54,7 @@ type CreatureEssenceFilter = 'all' | 'found' | 'not-found';
     DropdownComponent,
   ],
   templateUrl: './essences.component.html',
+  styleUrls: ['./essences.component.scss'],
 })
 export class EssencesComponent implements OnInit {
   readonly archiveSearch = signal('');
@@ -80,7 +81,7 @@ export class EssencesComponent implements OnInit {
     { label: 'All', value: 'all' },
     { label: 'Favorites', value: 'favorites' },
     { label: 'Attuned', value: 'attuned' },
-    { label: 'Inactive', value: 'inactive' },
+    { label: 'Ready', value: 'ready' },
   ];
 
   readonly archiveSorts: { label: string; value: ArchiveSort }[] = [
@@ -119,9 +120,10 @@ export class EssencesComponent implements OnInit {
           return false;
         }
         if (
-          filter === 'inactive' &&
-          essence.attunedSlot !== null &&
-          essence.attunedSlot !== undefined
+          filter === 'ready' &&
+          !essence.canUpgradePotential &&
+          !essence.canAscend &&
+          !essence.canEvolve
         ) {
           return false;
         }
@@ -315,27 +317,78 @@ export class EssencesComponent implements OnInit {
     this.archiveSort.set(selection.main as ArchiveSort);
   }
 
-  public draftSlotDropdownOptions(
-    slotIndex: number,
-  ): DropdownOption<string | null>[] {
-    return [
-      { label: 'Empty', value: null },
-      ...this.essenceState.essenceOptions().map((essence) => ({
-        label: essence.name,
-        value: essence.id,
-        disabled: !this.essenceState.canAssignEssenceToDraftSlot(
-          slotIndex,
-          essence.id,
-        ),
-      })),
-    ];
+  public toggleEssenceSlot(essence: PlayerEssenceDto): void {
+    const equippedSlot = this.equippedDraftSlot(essence);
+    if (equippedSlot !== null) {
+      this.essenceState.setDraftSlot(equippedSlot, null);
+      return;
+    }
+
+    const slotIndex = this.nextEquipSlot(essence);
+    if (slotIndex === null) return;
+
+    this.essenceState.setDraftSlot(slotIndex, essence.id);
   }
 
-  public setDraftSlotFromDropdown(
-    slotIndex: number,
-    selection: DropdownSelection<unknown>,
-  ): void {
-    this.essenceState.setDraftSlot(slotIndex, selection.main as string | null);
+  public canToggleEssenceSlot(essence: PlayerEssenceDto): boolean {
+    return (
+      this.equippedDraftSlot(essence) !== null ||
+      this.nextEquipSlot(essence) !== null
+    );
+  }
+
+  public nextEquipSlot(essence: PlayerEssenceDto): number | null {
+    if (this.equippedDraftSlot(essence) !== null) return null;
+
+    return (
+      this.essenceState
+        .slotIndexes()
+        .find(
+          (slotIndex) =>
+            !this.essenceState.draftSlots()[slotIndex] &&
+            this.essenceState.canAssignEssenceToDraftSlot(
+              slotIndex,
+              essence.id,
+            ),
+        ) ?? null
+    );
+  }
+
+  public equipButtonText(essence: PlayerEssenceDto): string {
+    const equippedSlot = this.equippedDraftSlot(essence);
+    if (equippedSlot !== null) return `Remove from Slot ${equippedSlot + 1}`;
+    if (!this.essenceState.loadouts()) return 'Loading slots';
+    if (this.essenceState.slotIndexes().length === 0) {
+      return 'No slots unlocked';
+    }
+    if (this.essenceState.draftSlots().every(Boolean)) {
+      return 'No empty slots';
+    }
+    if (this.nextEquipSlot(essence) === null) {
+      return 'Creature already equipped';
+    }
+
+    return 'Equip to slot';
+  }
+
+  public draftSlotEssence(slotIndex: number): PlayerEssenceDto | null {
+    const essenceId = this.essenceState.draftSlots()[slotIndex];
+    if (!essenceId) return null;
+
+    return (
+      this.essenceState
+        .essenceOptions()
+        .find((essence) => essence.id === essenceId) ?? null
+    );
+  }
+
+  public clearDraftSlot(slotIndex: number): void {
+    this.essenceState.setDraftSlot(slotIndex, null);
+  }
+
+  public equippedDraftSlot(essence: PlayerEssenceDto): number | null {
+    const slotIndex = this.essenceState.draftSlots().indexOf(essence.id);
+    return slotIndex >= 0 ? slotIndex : null;
   }
 
   public toggleUpgradeDetails(): void {
