@@ -1,0 +1,53 @@
+<header
+  *ngIf="currentCharacter() as character"
+  class="ll-panel flex min-h-12 w-full flex-wrap items-center gap-x-3 gap-y-2 rounded-none bg-texture px-3 py-2 sm:rounded-b-md sm:px-4"
+>
+  <div class="flex min-w-0 items-baseline gap-2">
+    <strong
+      class="max-w-[12ch] truncate text-sm uppercase tracking-wide text-primary [font-family:var(--ll-font-display)] sm:max-w-[18ch] sm:text-base"
+    >
+      {{ character.name }}
+    </strong>
+    <span
+      class="shrink-0 text-[10px] uppercase tracking-wide text-[var(--ll-color-text-muted)]"
+    >
+      Lv. {{ character.level }}
+    </span>
+  </div>
+
+  <div class="flex min-w-0 items-center gap-2">
+    <button
+      type="button"
+      class="ll-currency-pill h-7 min-h-0 max-w-[11rem] px-2.5 text-[10px] sm:text-xs"
+      title="Toggle abbreviated currency values"
+      (click)="toggleFormat()"
+    >
+      <span class="truncate">
+        {{
+          useShortFormat
+            ? (character.cinders | shortNumber)
+            : (character.cinders | numberFormat)
+        }}
+        Cinders
+      </span>
+    </button>
+
+    <button
+      type="button"
+      class="ll-currency-pill h-7 min-h-0 max-w-[11rem] px-2.5 text-[10px] sm:text-xs"
+      title="Toggle abbreviated currency values"
+      (click)="toggleFormat()"
+    >
+      <span class="truncate">
+        {{
+          useShortFormat
+            ? (character.soulstones | shortNumber)
+            : (character.soulstones | numberFormat)
+        }}
+        Soulstones
+      </span>
+    </button>
+  </div>
+
+  <app-current-dungeon class="contents"></app-current-dungeon>
+</header>

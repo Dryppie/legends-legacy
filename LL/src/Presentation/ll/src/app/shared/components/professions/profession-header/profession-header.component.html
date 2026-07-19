@@ -3,7 +3,10 @@
 >
   <div class="flex w-full items-center justify-between text-white">
     <div class="flex items-center gap-6">
-      <app-profession-icon [image]="icon"></app-profession-icon>
+      <app-profession-icon
+        [decorated]="!icon.startsWith('sidebar/')"
+        [image]="icon"
+      ></app-profession-icon>
       <div class="flex items-center gap-2 sm:flex-col sm:items-start sm:gap-0">
         <span>Lv. {{ level }}</span>
         <h2 class="text-primary">

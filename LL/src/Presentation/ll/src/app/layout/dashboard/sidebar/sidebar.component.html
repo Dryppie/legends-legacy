@@ -1,4 +1,7 @@
-<aside class="ll-sidebar-shell">
+<aside
+  class="ll-sidebar-shell"
+  [class.ll-sidebar-shell-compact]="sidebarLayout() === 'compact'"
+>
   <div class="ll-sidebar-panel bg-texture bg-auto">
     <div
       class="flex h-12 items-center justify-between border-b border-primary/15 px-4 sm:hidden"
@@ -14,56 +17,22 @@
       </button>
     </div>
 
-    <div
-      class="flex flex-col gap-2 border-b border-primary/10 p-3 sm:border-b-0 sm:p-2"
-    >
-      <div
-        *ngIf="currentCharacter() as character"
-        class="grid grid-cols-2 gap-2 sm:hidden"
-      >
-        <button type="button" class="ll-currency-pill" (click)="toggleFormat()">
-          <span class="truncate text-primary">
-            {{
-              useShortFormat
-                ? (character.cinders | shortNumber)
-                : (character.cinders | numberFormat)
-            }}
-            Cinders
-          </span>
-        </button>
-
-        <button type="button" class="ll-currency-pill" (click)="toggleFormat()">
-          <span class="truncate text-primary">
-            {{
-              useShortFormat
-                ? (character.soulstones | shortNumber)
-                : (character.soulstones | numberFormat)
-            }}
-            Soulstones
-          </span>
-        </button>
-      </div>
-
-      <div class="flex flex-col">
-        <app-current-action
-          *ngIf="displayCurrentAction"
-          class="hidden w-full sm:block"
-          (click)="navigateToAction(); toggleSidebar()"
-        ></app-current-action>
-        <app-current-dungeon></app-current-dungeon>
-      </div>
-    </div>
+    <app-current-action
+      *ngIf="displayCurrentAction"
+      class="hidden w-full border-b border-primary/10 p-2 sm:block"
+      [class.ll-sidebar-detailed-only]="sidebarLayout() === 'compact'"
+      (click)="navigateToAction(); toggleSidebar()"
+    ></app-current-action>
 
     <div
       class="flex flex-1 flex-col gap-0.5 overflow-y-auto overscroll-contain px-2 py-2 sm:border-t-0"
+      [class.ll-sidebar-detailed-only]="sidebarLayout() === 'compact'"
     >
       <div
         *ngFor="let section of sections; trackBy: trackSection"
         class="border-b border-primary/10 pb-1 last:border-b-0"
       >
-        <div
-          class="ll-section-label px-2 pb-1 pt-2.5 first:pt-1"
-        >
+        <div class="ll-section-label px-2 pb-1 pt-2.5 first:pt-1">
           {{ section.label }}
         </div>
         <div class="flex flex-col gap-0.5">
@@ -82,6 +51,59 @@
             </app-sidebar-item>
           </div>
         </div>
+      </div>
+    </div>
+
+    <div
+      *ngIf="sidebarLayout() === 'compact'"
+      class="ll-sidebar-compact-nav hidden min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain sm:flex"
+    >
+      <button
+        *ngIf="displayCurrentAction; else compactCrest"
+        type="button"
+        class="group flex min-h-[4.5rem] shrink-0 flex-col items-center justify-center gap-1 border-b border-[var(--ll-color-border)] px-1 py-2 text-primary transition-colors hover:bg-[var(--ll-color-primary-soft)]"
+        title="Go to current action"
+        (click)="navigateToAction()"
+      >
+        <span
+          class="relative flex h-9 w-9 items-center justify-center rounded-full border border-[var(--ll-color-border)] bg-[var(--ll-color-surface-soft)]"
+        >
+          <span aria-hidden="true">✦</span>
+          <span
+            class="absolute right-0 top-0 h-2 w-2 rounded-full bg-[var(--ll-color-success)]"
+            aria-hidden="true"
+          ></span>
+        </span>
+        <span class="text-[9px] uppercase tracking-[0.12em]">Action</span>
+      </button>
+
+      <ng-template #compactCrest>
+        <div
+          class="flex min-h-[4.5rem] shrink-0 items-center justify-center border-b border-[var(--ll-color-border)]"
+          aria-hidden="true"
+        >
+          <span
+            class="flex h-10 w-10 items-center justify-center rounded-full border border-[var(--ll-color-border)] bg-[var(--ll-color-surface-soft)] text-primary"
+          >
+            ✦
+          </span>
+        </div>
+      </ng-template>
+
+      <div
+        *ngFor="let section of sections; trackBy: trackSection"
+        class="flex flex-col border-b border-primary/10 py-1 last:border-b-0"
+      >
+        <app-sidebar-item
+          *ngFor="let item of section.items; trackBy: trackItem"
+          class="block w-full"
+          [item]="item"
+          [compact]="true"
+          [routerLink]="item.route"
+          [isActive]="isItemActive(item.route)"
+          [notificationCount]="getSidebarItemNotificationCount(item.id)"
+          (click)="onNavigate()"
+        ></app-sidebar-item>
       </div>
     </div>
   </div>

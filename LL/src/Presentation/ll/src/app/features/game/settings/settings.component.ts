@@ -10,6 +10,14 @@ import { FormsModule } from '@angular/forms';
 import { RegularButtonComponent } from '../../../shared/components/custom-components/buttons/regular-button/regular-button.component';
 import { GuildStateService } from '../../../core/services/api/guild/guild-state.service';
 import { DefaultHeaderComponent } from '../../../shared/components/default-header/default-header.component';
+import {
+  ChatLayout,
+  ChatLayoutPreferenceService,
+} from '../../../core/services/client-side/chat-layout/chat-layout-preference.service';
+import {
+  SidebarLayout,
+  SidebarLayoutPreferenceService,
+} from '../../../core/services/client-side/sidebar-layout/sidebar-layout-preference.service';
 
 @Component({
   selector: 'app-settings',
@@ -35,15 +43,21 @@ export class SettingsComponent {
 
   readonly currentCharacter;
   public readonly guild;
+  readonly chatLayout;
+  readonly sidebarLayout;
 
   constructor(
     private authService: AuthService,
     private googleService: GoogleAuthService,
     private readonly characterService: CharacterService,
     private readonly guildState: GuildStateService,
+    private readonly chatLayoutPreference: ChatLayoutPreferenceService,
+    private readonly sidebarLayoutPreference: SidebarLayoutPreferenceService,
   ) {
     this.guild = guildState.guild;
     this.currentCharacter = this.authService.currentCharacter;
+    this.chatLayout = this.chatLayoutPreference.layout;
+    this.sidebarLayout = this.sidebarLayoutPreference.layout;
 
     effect(() => {
       this.userInfo = this.authService.userInfo();
@@ -60,6 +74,14 @@ export class SettingsComponent {
 
   logout() {
     this.authService.logout();
+  }
+
+  setChatLayout(layout: ChatLayout): void {
+    this.chatLayoutPreference.setLayout(layout);
+  }
+
+  setSidebarLayout(layout: SidebarLayout): void {
+    this.sidebarLayoutPreference.setLayout(layout);
   }
 
   convertToRegistered() {

@@ -1,4 +1,5 @@
 using API.LL;
+using API.LL.Common;
 using API.LL.HostedServices;
 using Application;
 using Asp.Versioning;
@@ -29,6 +30,7 @@ config
     .AddEnvironmentVariables();
 
 builder.Services.AddHttpContextAccessor();
+builder.Services.AddSingleton<RefreshTokenRotationCoordinator>();
 // Add services to the container.
 builder.Services.AddControllers().AddJsonOptions(options =>
 {

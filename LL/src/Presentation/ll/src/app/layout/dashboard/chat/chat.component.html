@@ -1,47 +1,159 @@
-<div
-  class="flex h-full w-full flex-col justify-between bg-texture sm:w-96 xl:rounded-tl-md 2xl:w-[430px]"
->
-  <div class="relative flex h-full flex-col overflow-hidden">
-    <div class="flex flex-wrap items-center gap-2 border-b border-primary p-2">
-      <ng-container *ngFor="let room of visibleRooms">
+<ng-container *ngIf="!collapsible || !collapsed; else collapsedChat">
+  <div
+    class="flex h-full w-full min-w-0 flex-col overflow-hidden bg-[var(--ll-color-surface-strong)] bg-texture text-[var(--ll-color-text)]"
+    [ngClass]="
+      drawer
+        ? 'rounded-lg border border-[var(--ll-color-border-strong)] shadow-[var(--ll-shadow-md)]'
+        : 'border-l border-[var(--ll-color-border)]'
+    "
+  >
+    <header class="shrink-0 border-b border-[var(--ll-color-border)]">
+      <div class="flex h-12 items-center justify-between gap-3 px-3">
+        <div class="flex min-w-0 items-center gap-2">
+          <h2
+            class="shrink-0 text-base uppercase tracking-wide text-primary [font-family:var(--ll-font-display)]"
+          >
+            Chat
+          </h2>
+          <span
+            class="h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--ll-color-success)]"
+            aria-hidden="true"
+          ></span>
+          <span class="truncate text-[10px] text-[var(--ll-color-text-muted)]">
+            {{ onlinePlayerLabel }}
+          </span>
+        </div>
+
+        <div *ngIf="collapsible" class="flex shrink-0 items-center gap-1.5">
+          <button
+            *ngIf="drawer"
+            type="button"
+            class="group flex h-7 w-7 items-center justify-center rounded-md border border-[var(--ll-color-border)] bg-[var(--ll-color-surface-soft)] text-primary transition-all hover:border-[var(--ll-color-border-strong)] hover:bg-[var(--ll-color-primary-soft)]"
+            [attr.aria-label]="
+              drawerTall ? 'Use standard chat height' : 'Double the chat height'
+            "
+            [attr.aria-pressed]="drawerTall"
+            [title]="
+              drawerTall ? 'Use standard chat height' : 'Double the chat height'
+            "
+            (click)="toggleDrawerHeight()"
+          >
+            <svg
+              class="h-4 w-4 transition-transform duration-150 group-hover:scale-110"
+              viewBox="0 0 16 16"
+              fill="none"
+              aria-hidden="true"
+            >
+              <path
+                *ngIf="!drawerTall"
+                d="M8 6V2m0 0L5.5 4.5M8 2l2.5 2.5M8 10v4m0 0-2.5-2.5M8 14l2.5-2.5"
+                stroke="currentColor"
+                stroke-width="1.25"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+              <path
+                *ngIf="drawerTall"
+                d="M8 2v4m0 0L5.5 3.5M8 6l2.5-2.5M8 14v-4m0 0-2.5 2.5M8 10l2.5 2.5"
+                stroke="currentColor"
+                stroke-width="1.25"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </button>
+
+          <button
+            type="button"
+            class="group flex h-7 w-7 items-center justify-center rounded-md border border-[var(--ll-color-border)] bg-[var(--ll-color-surface-soft)] text-primary transition-all hover:border-[var(--ll-color-border-strong)] hover:bg-[var(--ll-color-primary-soft)]"
+            aria-label="Collapse chat"
+            title="Collapse chat"
+            (click)="toggleCollapsed()"
+          >
+            <svg
+              *ngIf="drawer; else dockedCollapseIcon"
+              class="h-3.5 w-3.5 transition-transform duration-150 group-hover:translate-y-0.5"
+              viewBox="0 0 16 16"
+              fill="none"
+              aria-hidden="true"
+            >
+              <path
+                d="m4 6 4 4 4-4"
+                stroke="currentColor"
+                stroke-width="1.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+            <ng-template #dockedCollapseIcon>
+              <span class="text-lg leading-none" aria-hidden="true">»</span>
+            </ng-template>
+          </button>
+        </div>
+
         <button
-          class="flex items-center justify-between gap-1 whitespace-nowrap text-nowrap rounded border border-zinc-300/30 px-2 py-1 text-sm text-neutral-300 hover:bg-zinc-300/30"
+          *ngIf="!collapsible"
+          type="button"
+          class="flex h-7 w-7 shrink-0 items-center justify-center rounded border border-[var(--ll-color-border)] text-sm text-primary transition-colors hover:border-[var(--ll-color-border-strong)] hover:bg-[var(--ll-color-primary-soft)] xl:hidden"
+          aria-label="Close chat"
+          (click)="close.emit()"
+        >
+          ×
+        </button>
+      </div>
+
+      <nav
+        #channelScroller
+        class="ll-scrollbar-none flex cursor-grab touch-pan-y gap-1.5 overflow-x-auto px-3 pb-2 active:cursor-grabbing"
+        aria-label="Chat channels"
+        (pointerdown)="onChannelPointerDown($event)"
+        (pointermove)="onChannelPointerMove($event)"
+        (pointerup)="onChannelPointerEnd($event)"
+        (pointercancel)="onChannelPointerEnd($event)"
+      >
+        <button
+          *ngFor="let room of visibleRooms"
+          type="button"
+          class="shrink-0 whitespace-nowrap rounded-full border border-[var(--ll-color-border)] bg-[var(--ll-color-surface-soft)] px-2.5 py-1 text-[10px] tracking-wide text-[var(--ll-color-text-muted)] transition-colors hover:border-[var(--ll-color-border-strong)] hover:bg-[var(--ll-color-primary-soft)] hover:text-primary"
           [ngClass]="{
-            'bg-primary/30 hover:bg-primary/40':
+            'border-[var(--ll-color-border-strong)] bg-[var(--ll-color-primary-soft)] text-primary':
               activeRoomKey === room.contextKey &&
               activeRoomType === room.channelType,
           }"
-          (click)="setChannel(room.channelType, room.contextKey)"
+          [attr.aria-pressed]="
+            activeRoomKey === room.contextKey &&
+            activeRoomType === room.channelType
+          "
+          (click)="
+            selectChannelFromPointer($event, room.channelType, room.contextKey)
+          "
         >
           {{ room.label }}
         </button>
-      </ng-container>
-      <button
-        class="hover:text-gold/70 p-1 px-2 text-xs uppercase text-white xl:hidden"
-        aria-label="Close chat"
-        (click)="close.emit()"
-      >
-        x
-      </button>
-    </div>
+      </nav>
+    </header>
 
     <section
-      class="flex flex-col gap-0.5 overflow-y-auto px-2 py-2 text-white"
+      class="flex min-h-0 flex-1 flex-col gap-0.5 overflow-y-auto px-3 py-2"
       appStickyScroll
+      aria-live="polite"
     >
       <ng-container *ngIf="filteredMessages as messages">
         <article
-          *ngFor="let m of messages"
-          class="group rounded-sm border-l-2 bg-black/10 px-2 py-1.5 transition-colors hover:bg-white/[0.06]"
+          *ngFor="let m of messages; let first = first"
+          class="group rounded-sm border-l-2 bg-[var(--ll-color-surface-soft)] px-2 py-1.5 transition-colors hover:bg-[var(--ll-color-primary-soft)]"
+          [class.mt-auto]="first"
           [ngClass]="messageRowClasses(m)"
         >
           <div class="flex min-w-0 flex-wrap items-center gap-x-1.5 gap-y-0.5">
-            <time class="text-[11px] leading-4 text-zinc-500">
+            <time
+              class="text-[10px] leading-4 text-[var(--ll-color-text-subtle)]"
+            >
               {{ m.sentAt | date: "shortTime" }}
             </time>
 
             <span
-              class="rounded border px-1.5 py-0.5 text-[10px] font-semibold uppercase leading-none tracking-normal"
+              class="rounded border px-1.5 py-0.5 text-[9px] font-semibold uppercase leading-none tracking-normal"
               [ngClass]="channelBadgeClasses(m)"
             >
               {{ channelLabel(m) }}
@@ -50,7 +162,7 @@
             <ng-container *ngIf="m.channelType === 'System'; else playerSender">
               <span
                 *ngIf="m.senderName !== channelLabel(m)"
-                class="text-xs font-semibold text-zinc-300"
+                class="text-xs font-semibold text-[var(--ll-color-text-muted)]"
               >
                 {{ m.senderName }}
               </span>
@@ -60,7 +172,9 @@
               <ng-container
                 *ngIf="m.channelType === 'Whisper'; else normalSender"
               >
-                <span class="text-[11px] uppercase text-zinc-500">
+                <span
+                  class="text-[10px] uppercase text-[var(--ll-color-text-subtle)]"
+                >
                   {{ m.senderId === characterId() ? "to" : "from" }}
                 </span>
                 <app-character-tag
@@ -81,10 +195,11 @@
           </div>
 
           <p
-            class="mt-0.5 break-words text-sm leading-5"
+            class="mt-0.5 break-words text-xs leading-5"
             [ngClass]="{
-              'italic text-zinc-300': m.channelType === 'System',
-              'text-zinc-100': m.channelType !== 'System',
+              'italic text-[var(--ll-color-text-muted)]':
+                m.channelType === 'System',
+              'text-[var(--ll-color-text)]': m.channelType !== 'System',
             }"
           >
             {{ m.body }}
@@ -92,43 +207,119 @@
         </article>
       </ng-container>
     </section>
-    <div
-      *ngIf="draft.length > 160"
-      class="absolute bottom-0 place-self-end bg-transparent pr-4 text-sm text-rose-700"
+
+    <footer
+      class="relative shrink-0 border-t border-[var(--ll-color-border)] bg-[var(--ll-color-surface-strong)] p-2"
     >
-      <div>{{ draft.length }}/200 characters</div>
-    </div>
-  </div>
-  <div class="bg-black/40 p-1">
-    <div class="flex">
-      <input
-        #chatInput
-        type="text"
-        [placeholder]="chatPlaceholder"
-        class="w-full rounded-md bg-transparent p-3 text-primary placeholder:text-zinc-300 disabled:cursor-not-allowed disabled:text-zinc-500 disabled:placeholder:text-zinc-500"
-        [(ngModel)]="draft"
-        (ngModelChange)="onDraftChange()"
-        (keydown.enter)="send()"
-        maxlength="200"
-        [disabled]="!canWriteChat"
-      />
-      <app-regular-button
-        class="p-1"
-        (pressed)="send()"
-        text="Send"
-        [disabled]="!canWriteChat || !draft.trim()"
-      />
-    </div>
-    <p *ngIf="isGuestAccount" class="px-3 pb-2 text-xs text-zinc-400">
-      <a
-        routerLink="/game/settings"
-        class="text-primary underline decoration-primary/40 underline-offset-2 hover:text-primary/80"
-        >Bind email or Gmail in Settings</a
+      <div
+        *ngIf="draft.length > 160"
+        class="absolute -top-6 right-3 text-[10px] text-[var(--ll-color-danger)]"
       >
-      for access.
-    </p>
-    <p *ngIf="sendError" class="px-3 pb-2 text-xs text-rose-400">
-      {{ sendError }}
-    </p>
+        {{ draft.length }}/200
+      </div>
+      <div class="flex gap-2">
+        <input
+          #chatInput
+          type="text"
+          [placeholder]="chatPlaceholder"
+          class="ll-input min-w-0 flex-1 text-xs disabled:cursor-not-allowed disabled:text-[var(--ll-color-text-subtle)] disabled:placeholder:text-[var(--ll-color-text-subtle)]"
+          [(ngModel)]="draft"
+          (ngModelChange)="onDraftChange()"
+          (keydown.enter)="send()"
+          maxlength="200"
+          [disabled]="!canWriteChat"
+        />
+        <app-regular-button
+          class="shrink-0"
+          (pressed)="send()"
+          text="Send"
+          [disabled]="!canWriteChat || !draft.trim()"
+        />
+      </div>
+      <p
+        *ngIf="isGuestAccount"
+        class="px-1 pt-2 text-[10px] text-[var(--ll-color-text-muted)]"
+      >
+        <a
+          routerLink="/game/settings"
+          class="text-primary underline decoration-primary/40 underline-offset-2 hover:text-primary/80"
+          >Bind email or Gmail in Settings</a
+        >
+        for access.
+      </p>
+      <p
+        *ngIf="sendError"
+        class="px-1 pt-2 text-[10px] text-[var(--ll-color-danger)]"
+      >
+        {{ sendError }}
+      </p>
+    </footer>
   </div>
-</div>
+</ng-container>
+
+<ng-template #collapsedChat>
+  <button
+    *ngIf="drawer; else collapsedRail"
+    type="button"
+    class="group flex h-full w-full items-center justify-between gap-3 rounded-lg border border-[var(--ll-color-border-strong)] bg-[var(--ll-color-surface-strong)] bg-texture px-3 text-primary shadow-[var(--ll-shadow-md)] transition-colors hover:border-primary hover:bg-[var(--ll-color-primary-soft)]"
+    aria-label="Expand chat"
+    title="Expand chat"
+    (click)="toggleCollapsed()"
+  >
+    <span class="flex min-w-0 items-center gap-2">
+      <span
+        class="shrink-0 text-sm uppercase tracking-wide [font-family:var(--ll-font-display)]"
+      >
+        Chat
+      </span>
+      <span
+        class="h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--ll-color-success)]"
+        aria-hidden="true"
+      ></span>
+      <span class="truncate text-[10px] text-[var(--ll-color-text-muted)]">
+        {{ onlinePlayerLabel }}
+      </span>
+    </span>
+    <svg
+      class="h-3.5 w-3.5 shrink-0 text-primary/80 transition-transform duration-150 group-hover:-translate-y-0.5"
+      viewBox="0 0 16 16"
+      fill="none"
+      aria-hidden="true"
+    >
+      <path
+        d="m4 10 4-4 4 4"
+        stroke="currentColor"
+        stroke-width="1.5"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      />
+    </svg>
+  </button>
+</ng-template>
+
+<ng-template #collapsedRail>
+  <button
+    type="button"
+    class="group flex h-full w-full flex-col items-center gap-3 border-l border-[var(--ll-color-border)] bg-[var(--ll-color-surface-strong)] bg-texture px-2 py-3 text-primary transition-colors hover:bg-[var(--ll-color-primary-soft)]"
+    aria-label="Expand chat"
+    title="Expand chat"
+    (click)="toggleCollapsed()"
+  >
+    <span
+      class="flex h-7 w-7 items-center justify-center rounded border border-[var(--ll-color-border)] text-lg leading-none transition-colors group-hover:border-[var(--ll-color-border-strong)] group-hover:bg-[var(--ll-color-primary-soft)]"
+      aria-hidden="true"
+    >
+      «
+    </span>
+    <span
+      class="text-xs uppercase tracking-[0.28em] [font-family:var(--ll-font-display)] [text-orientation:upright] [writing-mode:vertical-rl]"
+    >
+      Chat
+    </span>
+    <span
+      class="h-1.5 w-1.5 rounded-full bg-[var(--ll-color-success)]"
+      aria-hidden="true"
+    ></span>
+    <span class="sr-only">{{ onlinePlayerLabel }}</span>
+  </button>
+</ng-template>

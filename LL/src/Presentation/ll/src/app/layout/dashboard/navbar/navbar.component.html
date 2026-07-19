@@ -72,6 +72,7 @@
             (itemTapped)="activeNavbar(button.label)"
           ></app-navbutton>
           <button
+            *ngIf="showChatButton"
             type="button"
             class="ll-mobile-nav-button border-l border-primary/10 bg-primary/10 sm:hidden"
             (click)="chatTapped.emit()"

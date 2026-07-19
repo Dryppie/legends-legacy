@@ -2,7 +2,7 @@ import { Component, effect, HostListener, OnInit, Signal } from '@angular/core';
 import { SidebarComponent } from './sidebar/sidebar.component';
 import { Router, RouterOutlet } from '@angular/router';
 import { NavbarComponent } from './navbar/navbar.component';
-import { AsyncPipe, NgIf } from '@angular/common';
+import { AsyncPipe, NgClass, NgIf } from '@angular/common';
 import { Observable } from 'rxjs';
 import { GameService } from '../../core/services/client-side/game/game.service';
 import { CombatComponent } from '../../shared/components/combat/combat.component';
@@ -13,6 +13,8 @@ import { CharacterActionsStateService } from '../../core/services/api/character-
 import { CharacterActionType } from '../../shared/models/enums/characterActionType';
 import { TutorialQuestComponent } from './tutorial-quest/tutorial-quest.component';
 import { GameBootstrapStateService } from '../../core/services/api/game-bootstrap/game-bootstrap-state.service';
+import { ChatLayoutPreferenceService } from '../../core/services/client-side/chat-layout/chat-layout-preference.service';
+import { GameHeaderComponent } from './game-header/game-header.component';
 
 @Component({
   selector: 'app-dashboard',
@@ -22,12 +24,14 @@ import { GameBootstrapStateService } from '../../core/services/api/game-bootstra
     SidebarComponent,
     NavbarComponent,
     NgIf,
+    NgClass,
     AsyncPipe,
     CombatComponent,
     ChatComponent,
     LootTrackerComponent,
     CurrentActionComponent,
     TutorialQuestComponent,
+    GameHeaderComponent,
   ],
   templateUrl: './dashboard.component.html',
 })
@@ -36,6 +40,8 @@ export class DashboardComponent implements OnInit {
   isScreenSmall = false;
   isScreenLarge = false;
   isChatOpenDesktop = true; // open by default on ≥ lg
+  isFloatingDrawerOpen = false;
+  isFloatingDrawerTall = false;
   isFloatingChatOpen = false;
   displayCurrentAction = false;
   isResolvingAction = false;
@@ -43,16 +49,19 @@ export class DashboardComponent implements OnInit {
   readonly bootstrapLoaded: Signal<boolean>;
   readonly bootstrapLoading: Signal<boolean>;
   readonly bootstrapError: Signal<string | null>;
+  readonly chatLayout;
 
   constructor(
     private readonly gameService: GameService,
     private readonly state: CharacterActionsStateService,
     private readonly router: Router,
     private readonly bootstrapState: GameBootstrapStateService,
+    private readonly chatLayoutPreference: ChatLayoutPreferenceService,
   ) {
     this.bootstrapLoaded = this.bootstrapState.loaded;
     this.bootstrapLoading = this.bootstrapState.loading;
     this.bootstrapError = this.bootstrapState.error;
+    this.chatLayout = this.chatLayoutPreference.layout;
 
     effect(() => {
       this.displayCurrentAction = this.state.displayCurrentAction();
@@ -103,6 +112,11 @@ export class DashboardComponent implements OnInit {
   }
 
   toggleChat(): void {
+    if (this.chatLayout() === 'floating') {
+      this.isFloatingDrawerOpen = !this.isFloatingDrawerOpen;
+      return;
+    }
+
     if (this.isScreenLarge) {
       this.isChatOpenDesktop = !this.isChatOpenDesktop;
       return;
@@ -114,6 +128,7 @@ export class DashboardComponent implements OnInit {
 
   openSidebar() {
     this.isFloatingChatOpen = false;
+    this.isFloatingDrawerOpen = false;
     this.isSidebarOpen = true;
   }
 

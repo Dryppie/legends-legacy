@@ -1,5 +1,13 @@
-<div class="relative flex h-8 w-8 items-center justify-center sm:h-14 sm:w-14">
-  <img src="icons/professions/Circle.svg" class="absolute sm:scale-150" />
-  <img src="icons/professions/Ornaments.svg" class="absolute sm:scale-150" />
-  <img src="icons/{{ image }}.svg" class="absolute sm:scale-150" />
+<div class="relative flex h-8 w-8 items-center justify-center sm:h-10 sm:w-10">
+  <img
+    *ngIf="decorated"
+    src="icons/professions/Circle.svg"
+    class="absolute sm:scale-150"
+  />
+  <img
+    *ngIf="decorated"
+    src="icons/professions/Ornaments.svg"
+    class="absolute sm:scale-150"
+  />
+  <img src="icons/{{ image }}.svg" class="absolute" />
 </div>

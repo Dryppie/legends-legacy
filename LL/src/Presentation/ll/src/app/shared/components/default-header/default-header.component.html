@@ -1,7 +1,8 @@
 <div class="flex min-h-12 w-full items-center text-white">
   <div class="flex min-w-0 items-center gap-3 sm:gap-4">
     <app-profession-icon
-      class="hidden scale-75 sm:block"
+      class="hidden sm:block"
+      [decorated]="!icon.startsWith('sidebar/')"
       [image]="icon"
     ></app-profession-icon>
     <div class="min-w-0">

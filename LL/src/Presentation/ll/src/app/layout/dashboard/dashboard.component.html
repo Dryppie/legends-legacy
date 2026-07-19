@@ -1,7 +1,7 @@
 <div class="ll-app-frame">
   <div class="flex h-full min-h-0 w-full flex-auto flex-col">
     <div
-      class="flex min-h-0 flex-1 flex-col overflow-hidden sm:order-2 sm:flex-row sm:gap-4"
+      class="flex min-h-0 flex-1 flex-col gap-1 overflow-hidden sm:order-2 sm:flex-row sm:gap-2"
     >
       <div
         *ngIf="isSidebarOpen && isScreenSmall"
@@ -19,8 +19,9 @@
         ></app-sidebar>
       </nav>
       <div
-        class="flex min-h-0 w-full flex-1 flex-col space-y-4 overflow-hidden"
+        class="flex min-h-0 w-full flex-1 flex-col gap-1 overflow-hidden sm:gap-2"
       >
+        <app-game-header class="block shrink-0"></app-game-header>
         <div class="relative min-h-0 w-full flex-1 overflow-hidden sm:pr-4">
           <div
             class="ll-game-surface absolute inset-y-0 left-0 right-0 sm:right-4 xl:right-0"
@@ -100,23 +101,53 @@
         </div>
       </div>
       <div
-        *ngIf="isChatOpenDesktop && isScreenLarge"
-        class="hidden h-full flex-col xl:flex"
+        *ngIf="isScreenLarge && chatLayout() === 'docked'"
+        class="hidden h-full shrink-0 flex-col overflow-hidden transition-[width] duration-200 xl:flex"
+        [ngClass]="isChatOpenDesktop ? 'w-96 2xl:w-[430px]' : 'w-12'"
       >
-        <app-chat class="h-full"></app-chat>
-        <app-loot-tracker></app-loot-tracker>
+        <app-chat
+          class="block min-h-0 flex-1"
+          [collapsible]="true"
+          [collapsed]="!isChatOpenDesktop"
+          (collapsedChange)="isChatOpenDesktop = !$event"
+        ></app-chat>
+        <app-loot-tracker *ngIf="isChatOpenDesktop"></app-loot-tracker>
       </div>
     </div>
     <app-navbar
       (itemTapped)="openSidebar()"
       (chatTapped)="toggleChat()"
       [isScreenSmall]="isScreenSmall"
-      class="sm:order-1 sm:pb-2"
+      [showChatButton]="chatLayout() === 'docked'"
+      class="order-3 block shrink-0 sm:hidden"
     ></app-navbar>
   </div>
 </div>
 
+<aside
+  *ngIf="chatLayout() === 'floating' && !(isScreenSmall && isSidebarOpen)"
+  class="fixed bottom-20 left-3 right-3 z-40 max-h-[calc(100dvh-6rem)] overflow-hidden rounded-lg shadow-2xl shadow-black/70 transition-[height] duration-200 sm:bottom-4 sm:left-auto sm:right-4 sm:max-h-[calc(100dvh-2rem)] sm:w-[22rem] 2xl:right-6 2xl:w-96"
+  [ngClass]="
+    isFloatingDrawerOpen
+      ? isFloatingDrawerTall
+        ? 'h-[56rem]'
+        : 'h-[28rem]'
+      : 'h-12'
+  "
+>
+  <app-chat
+    class="block h-full w-full"
+    [collapsible]="true"
+    [collapsed]="!isFloatingDrawerOpen"
+    [drawer]="true"
+    [drawerTall]="isFloatingDrawerTall"
+    (collapsedChange)="isFloatingDrawerOpen = !$event"
+    (drawerTallChange)="isFloatingDrawerTall = $event"
+  ></app-chat>
+</aside>
+
 <button
+  *ngIf="chatLayout() === 'docked'"
   type="button"
   class="ll-floating-panel-trigger fixed bottom-4 right-6 z-40 hidden sm:flex xl:hidden"
   (click)="toggleChat()"
@@ -129,13 +160,13 @@
 </button>
 
 <div
-  *ngIf="isFloatingChatOpen && !isScreenLarge"
+  *ngIf="chatLayout() === 'docked' && isFloatingChatOpen && !isScreenLarge"
   class="ll-screen-overlay fixed inset-0 z-40 xl:hidden"
   (click)="toggleChat()"
 ></div>
 
 <aside
-  *ngIf="!isScreenLarge"
+  *ngIf="chatLayout() === 'docked' && !isScreenLarge"
   class="fixed inset-y-0 right-0 z-50 h-full w-[min(20rem,85vw)] transform transition-transform duration-200 sm:w-[min(24rem,85vw)] xl:hidden"
   [class.translate-x-0]="isFloatingChatOpen"
   [class.translate-x-full]="!isFloatingChatOpen"
