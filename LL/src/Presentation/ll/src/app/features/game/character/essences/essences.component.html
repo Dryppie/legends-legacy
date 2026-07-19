@@ -1,4 +1,4 @@
-<div class="ll-page-stack sm:gap-4">
+<div class="ll-page-stack soul-archive-page">
   <app-default-header
     section="Character"
     [text]="essenceState.archiveText()"
@@ -29,10 +29,10 @@
 
   <div
     *ngIf="essenceState.activeView() === 'archive'"
-    class="grid min-h-0 flex-1 gap-4 overflow-y-auto xl:grid-cols-[360px_minmax(0,1fr)] xl:overflow-hidden"
+    class="ll-panel soul-archive-workspace"
   >
     <section
-      class="ll-panel flex h-[50vh] min-h-0 flex-col overflow-hidden p-3 xl:h-full"
+      class="ll-panel soul-archive-list flex min-h-0 flex-col overflow-hidden p-3"
       data-tour="essence-archive-list"
     >
       <div
@@ -88,7 +88,7 @@
       </div>
 
       <cdk-virtual-scroll-viewport
-        [itemSize]="72"
+        [itemSize]="84"
         class="h-[420px] min-h-0 xl:h-auto xl:flex-1"
       >
         <button
@@ -101,13 +101,26 @@
           [ngClass]="{
             'll-card-accent shadow-inner':
               essenceState.selected()?.id === essence.id,
+            'soul-essence-favorite': essence.isFavorite,
           }"
+          [attr.aria-label]="
+            essence.name + (essence.isFavorite ? ', favorited' : '')
+          "
           (click)="selectPlayerEssence(essence)"
         >
           <div class="flex items-center justify-between gap-3">
-            <span class="min-w-0 truncate font-semibold text-primary">
-              {{ essence.name }}
-            </span>
+            <div class="flex min-w-0 items-center gap-1.5">
+              <span
+                *ngIf="essence.isFavorite"
+                class="soul-favorite-star"
+                aria-hidden="true"
+              >
+                ★
+              </span>
+              <span class="min-w-0 truncate font-semibold text-primary">
+                {{ essence.name }}
+              </span>
+            </div>
             <span class="ll-badge shrink-0 rounded text-zinc-300">
               L{{ essence.level }} P{{ essence.potentialTier }} A{{
                 essence.ascensionTier
@@ -145,8 +158,11 @@
       </p>
     </section>
 
-    <div class="grid min-h-0 gap-4 xl:overflow-y-auto">
-      <section class="ll-panel p-4" *ngIf="essenceState.selected() as essence">
+    <div class="soul-archive-columns">
+      <section
+        class="ll-panel soul-archive-detail p-4"
+        *ngIf="essenceState.selected() as essence"
+      >
         <div
           class="flex flex-wrap items-start justify-between gap-3 border-b border-light_gray/70 pb-4"
         >
@@ -186,9 +202,30 @@
               </span>
             </div>
           </div>
-          <button type="button" class="ll-button" (click)="favorite(essence)">
-            {{ essence.isFavorite ? "Unfavorite" : "Favorite" }}
-          </button>
+          <div class="flex flex-wrap gap-2">
+            <button
+              type="button"
+              class="ll-button"
+              [class.ll-button-primary]="equippedDraftSlot(essence) === null"
+              [class.soul-equip-button-remove]="
+                equippedDraftSlot(essence) !== null
+              "
+              data-tour="essence-equip-selected"
+              [disabled]="!canToggleEssenceSlot(essence)"
+              (click)="toggleEssenceSlot(essence)"
+            >
+              {{ equipButtonText(essence) }}
+            </button>
+            <button
+              type="button"
+              class="ll-button soul-favorite-button"
+              [class.soul-favorite-button-active]="essence.isFavorite"
+              [attr.aria-pressed]="essence.isFavorite"
+              (click)="favorite(essence)"
+            >
+              ★ {{ essence.isFavorite ? "Favorited" : "Favorite" }}
+            </button>
+          </div>
         </div>
 
         <div class="mt-4 grid gap-3 md:grid-cols-2">
@@ -261,7 +298,7 @@
 
           <div
             *ngIf="upgradeDetailsOpen()"
-            class="grid gap-3 border-t border-light_gray/60 p-3 lg:grid-cols-3"
+            class="grid gap-3 border-t border-light_gray/60 p-3"
           >
             <article class="ll-card p-3">
               <div class="flex items-start justify-between gap-3">
@@ -409,12 +446,16 @@
         </section>
 
         <div class="mt-4 flex flex-wrap gap-2">
-          <button type="button" class="ll-button" (click)="spendDust(essence)">
+          <button
+            type="button"
+            class="ll-button soul-action-button"
+            (click)="spendDust(essence)"
+          >
             Spend 1 Dust
           </button>
           <button
             type="button"
-            class="ll-button"
+            class="ll-button ll-button-primary soul-action-button"
             [disabled]="!essence.canUpgradePotential"
             (click)="upgradePotential(essence)"
           >
@@ -422,7 +463,7 @@
           </button>
           <button
             type="button"
-            class="ll-button"
+            class="ll-button soul-action-button"
             [disabled]="!essence.canAscend"
             (click)="ascend(essence)"
           >
@@ -430,7 +471,7 @@
           </button>
           <button
             type="button"
-            class="ll-button"
+            class="ll-button soul-action-button"
             [disabled]="!essence.canEvolve"
             (click)="evolve(essence)"
           >
@@ -439,10 +480,13 @@
         </div>
       </section>
 
-      <section class="ll-panel p-3" data-tour="essence-loadouts">
+      <section
+        class="ll-panel soul-archive-loadout p-3"
+        data-tour="essence-loadouts"
+      >
         <div class="mb-3 flex items-center justify-between gap-3">
           <div>
-            <h2 class="ll-heading">Loadouts</h2>
+            <h2 class="ll-heading">Loadout</h2>
             <p class="ll-copy">
               <ng-container
                 *ngIf="
@@ -450,8 +494,7 @@
                   else loadoutsPending
                 "
               >
-                {{ loadouts.loadouts.length }}/{{ loadouts.limit }} saved |
-                {{ loadouts.unlockedSlots }} slots available
+                {{ loadouts.loadouts.length }} / {{ loadouts.limit }} saved
               </ng-container>
               <ng-template #loadoutsPending>
                 Loading loadout slots...
@@ -463,7 +506,7 @@
             class="ll-button px-2 py-1 text-xs"
             (click)="essenceState.newLoadout()"
           >
-            New
+            + New
           </button>
         </div>
 
@@ -471,7 +514,7 @@
           <button
             *ngFor="let loadout of essenceState.loadouts()?.loadouts ?? []"
             type="button"
-            class="ll-card px-3 py-2 text-left text-sm text-white transition-colors hover:border-primary hover:bg-zinc-300/10"
+            class="ll-card soul-loadout-choice px-3 py-2 text-left text-sm text-white transition-colors hover:border-primary hover:bg-zinc-300/10"
             [ngClass]="{
               'border-primary bg-primary/10':
                 essenceState.selectedLoadoutId() === loadout.id,
@@ -508,22 +551,40 @@
 
         <div class="grid gap-2" data-tour="essence-loadout-slots">
           <div
-            class="ll-field"
+            class="soul-loadout-slot"
             *ngFor="let slotIndex of essenceState.slotIndexes()"
           >
-            <span class="ll-label">Slot {{ slotIndex + 1 }}</span>
-            <app-dropdown
-              class="block w-full"
-              appearance="field"
-              label="Empty"
-              [value]="essenceState.draftSlots()[slotIndex]"
-              [options]="draftSlotDropdownOptions(slotIndex)"
-              [selectedValue]="essenceState.draftSlots()[slotIndex]"
-              tourButtonId="essence-loadout-slot-field"
-              tourMenuId="essence-loadout-slot-menu"
-              tourOptionId="essence-loadout-slot-option"
-              (selection)="setDraftSlotFromDropdown(slotIndex, $event)"
-            ></app-dropdown>
+            <span class="soul-loadout-slot-index">
+              Slot {{ slotIndex + 1 }}
+            </span>
+            <ng-container
+              *ngIf="
+                draftSlotEssence(slotIndex) as slottedEssence;
+                else emptyLoadoutSlot
+              "
+            >
+              <span class="soul-loadout-slot-name">
+                {{ slottedEssence.name }}
+              </span>
+              <button
+                type="button"
+                class="soul-loadout-remove"
+                [attr.aria-label]="
+                  'Remove ' +
+                  slottedEssence.name +
+                  ' from slot ' +
+                  (slotIndex + 1)
+                "
+                (click)="clearDraftSlot(slotIndex)"
+              >
+                Remove
+              </button>
+            </ng-container>
+            <ng-template #emptyLoadoutSlot>
+              <span class="soul-loadout-slot-name soul-loadout-slot-name-empty">
+                Empty slot
+              </span>
+            </ng-template>
           </div>
         </div>
 

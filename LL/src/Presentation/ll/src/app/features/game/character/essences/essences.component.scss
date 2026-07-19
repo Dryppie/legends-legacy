@@ -1,0 +1,225 @@
+:host {
+  display: block;
+  min-height: 0;
+  height: 100%;
+}
+
+.soul-archive-page {
+  gap: 4;
+  overflow: hidden;
+}
+
+.soul-archive-workspace {
+  display: grid;
+  min-height: 0;
+  flex: 1;
+  overflow: hidden;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.soul-archive-list,
+.soul-archive-detail,
+.soul-archive-loadout {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.soul-archive-list {
+  height: 30rem;
+  padding: 1rem;
+}
+
+.soul-archive-columns {
+  display: grid;
+  min-height: 0;
+  gap: 1rem;
+  padding: 1rem;
+}
+
+.soul-archive-detail,
+.soul-archive-loadout {
+  min-height: 0;
+}
+
+.soul-archive-detail {
+  overflow-y: auto;
+}
+
+.soul-essence-favorite {
+  border-color: rgba(249, 220, 160, 0.55);
+  background: linear-gradient(90deg, rgba(249, 220, 160, 0.12), transparent 42%),
+    var(--ll-color-surface-soft);
+  box-shadow:
+    inset 3px 0 0 rgba(249, 220, 160, 0.85),
+    0 0 0 1px rgba(249, 220, 160, 0.04);
+}
+
+.soul-favorite-star {
+  flex: none;
+  color: #ffda7a;
+  font-size: 0.8rem;
+}
+
+.soul-favorite-button {
+  min-width: 6.75rem;
+}
+
+.soul-favorite-button-active {
+  border-color: rgba(249, 220, 160, 0.72);
+  background: rgba(249, 220, 160, 0.16);
+  color: #ffe5a3;
+  box-shadow:
+    inset 0 0 0 1px rgba(249, 220, 160, 0.1),
+    0 0 0.75rem rgba(249, 220, 160, 0.1);
+}
+
+.soul-equip-button-remove {
+  border-color: rgba(255, 119, 130, 0.48);
+  background: var(--ll-color-danger-soft);
+  color: var(--ll-color-danger);
+}
+
+.soul-action-button {
+  min-width: 7.6rem;
+  min-height: 2.45rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.soul-loadout-choice {
+  min-height: 2.5rem;
+  border-color: rgba(249, 220, 160, 0.25);
+  font-family: var(--ll-font-display);
+  color: var(--ll-color-primary);
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.soul-loadout-slot {
+  display: grid;
+  min-height: 4rem;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.35rem 0.65rem;
+  padding: 0.65rem 0.7rem;
+  border: 1px solid rgba(109, 109, 109, 0.42);
+  border-radius: 0.5rem;
+  background: rgba(15, 18, 21, 0.78);
+}
+
+.soul-loadout-slot-index {
+  grid-column: 1 / -1;
+  justify-self: start;
+  flex: none;
+  padding: 0.25rem 0.4rem;
+  border: 1px solid rgba(249, 220, 160, 0.28);
+  border-radius: 0.25rem;
+  background: rgba(249, 220, 160, 0.08);
+  color: var(--ll-color-primary);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.soul-loadout-slot-name {
+  grid-column: 1;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--ll-color-text);
+  font-family: var(--ll-font-body);
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.soul-loadout-slot-name-empty {
+  color: var(--ll-color-text-muted);
+  font-weight: 400;
+}
+
+.soul-loadout-remove {
+  grid-column: 2;
+  flex: none;
+  color: var(--ll-color-text-muted);
+  font-size: 0.625rem;
+  text-transform: uppercase;
+  transition: color 150ms ease;
+}
+
+.soul-loadout-remove:hover {
+  color: var(--ll-color-danger);
+}
+
+@media (min-width: 66rem) {
+  .soul-archive-workspace {
+    grid-template-columns: 21rem minmax(27rem, 1fr) 18rem;
+  }
+
+  .soul-archive-list {
+    height: 100%;
+    border-right: 1px solid rgba(249, 220, 160, 0.12);
+  }
+
+  .soul-archive-columns {
+    display: contents;
+  }
+
+  .soul-archive-detail {
+    grid-column: 2;
+    padding: 1.2rem 1.5rem;
+    border-right: 1px solid rgba(249, 220, 160, 0.12);
+  }
+
+  .soul-archive-loadout {
+    grid-column: 3;
+    overflow-y: auto;
+    padding: 1.2rem 1rem;
+  }
+
+  .soul-archive-list cdk-virtual-scroll-viewport {
+    height: auto;
+    flex: 1;
+  }
+}
+
+@media (max-width: 65.999rem) {
+  .soul-archive-workspace {
+    display: block;
+    overflow-y: auto;
+  }
+
+  .soul-archive-columns {
+    display: flex;
+    min-height: auto;
+    flex-direction: column;
+  }
+
+  .soul-archive-detail,
+  .soul-archive-loadout {
+    overflow: visible;
+  }
+}
+
+@media (max-width: 47.999rem) {
+  .soul-archive-header {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 0.65rem;
+    padding: 0.75rem;
+  }
+
+  .soul-archive-list {
+    height: 20rem;
+  }
+
+  .soul-archive-columns {
+    padding: 0.75rem;
+  }
+}

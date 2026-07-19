@@ -13,15 +13,12 @@
   },
   {
     "kind": "click",
-    "element": "[data-tour=essence-loadout-slot-field]",
-    "includeSelectors": ["[data-tour=essence-loadout-slot-menu]"],
+    "element": "[data-tour=essence-equip-selected]",
+    "actionSelector": "[data-tour=essence-equip-selected]",
+    "waitForEnabled": true,
     "targetTimeoutMs": 5000,
-    "advanceOn": {
-      "event": "pointerdown",
-      "selector": "[data-tour=essence-loadout-slot-option]"
-    },
     "title": "3. Slots",
-    "description": "Place the Goblin Essence into an empty slot.",
+    "description": "Equip the selected Goblin Essence into the first available slot.",
     "position": "left"
   },
   {
