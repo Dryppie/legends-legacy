@@ -1,0 +1,38 @@
+<div
+  *ngIf="tabs.length > 1"
+  class="ll-segmented ll-scrollbar-none flex w-full flex-nowrap gap-1 overflow-x-auto overscroll-x-contain p-1 sm:flex-wrap sm:overflow-visible"
+  [ngClass]="{
+    'min-h-12': appearance === 'primary',
+    'min-h-10 bg-black/20': appearance === 'compact',
+  }"
+  [attr.aria-label]="ariaLabel"
+  role="tablist"
+>
+  <button
+    #tabButton
+    *ngFor="let tab of tabs; let index = index"
+    type="button"
+    class="ll-segmented-button relative min-w-max flex-none"
+    [ngClass]="{
+      'll-segmented-button-active': activeKey === tab.key,
+      'min-h-10 px-4 py-2 text-sm': appearance === 'primary',
+      'min-h-8 px-3 py-1.5 text-xs': appearance === 'compact',
+      'sm:flex-1': stretch,
+      'cursor-not-allowed opacity-45': tab.disabled,
+    }"
+    [disabled]="tab.disabled"
+    [attr.aria-selected]="activeKey === tab.key"
+    [attr.tabindex]="activeKey === tab.key ? 0 : -1"
+    role="tab"
+    (click)="select(tab)"
+    (keydown)="onTabKeydown($event, index)"
+  >
+    {{ tab.label }}
+    <app-notification-indicator
+      *ngIf="tab.badgeCount"
+      class="absolute right-1 top-1"
+      [count]="tab.badgeCount"
+      [label]="tab.badgeLabel ?? tab.label"
+    ></app-notification-indicator>
+  </button>
+</div>

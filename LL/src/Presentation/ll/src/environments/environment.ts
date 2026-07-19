@@ -1,4 +1,4 @@
-const env = (window as any).env;
+const env = (window as any).env ?? {};
 export const environment = {
   environment: env.environment as 'dev' | 'test' | 'prod',
   apiBaseUrl: env.apiBaseUrl,

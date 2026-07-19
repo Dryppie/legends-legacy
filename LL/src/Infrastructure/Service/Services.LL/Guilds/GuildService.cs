@@ -6,6 +6,7 @@ using Domain.Models.Guilds;
 namespace Services.LL.Guilds;
 public class GuildService : IGuildService
 {
+    private const int MinimumGuildNameLength = 3;
     private readonly IGuildRepository _guildRepository;
 
     public GuildService(IGuildRepository guildRepository)
@@ -14,8 +15,14 @@ public class GuildService : IGuildService
     }
 
     #region guild
-    public async Task<bool> CreateAsync(Guid characterId, string name, CancellationToken cancellationToken) => 
-        await _guildRepository.CreateAsync(characterId, name, cancellationToken);
+    public async Task<bool> CreateAsync(Guid characterId, string name, CancellationToken cancellationToken)
+    {
+        var normalizedName = name?.Trim();
+        if (string.IsNullOrEmpty(normalizedName) || normalizedName.Length < MinimumGuildNameLength)
+            return false;
+
+        return await _guildRepository.CreateAsync(characterId, normalizedName, cancellationToken);
+    }
 
     public async Task<Guild?> GetMyGuildAsync(Guid characterId, CancellationToken cancellationToken) =>
         await _guildRepository.GetMyGuildAsync(characterId, cancellationToken);

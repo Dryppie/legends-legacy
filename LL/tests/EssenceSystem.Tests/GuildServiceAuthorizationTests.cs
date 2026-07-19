@@ -3,6 +3,35 @@ using Services.LL.Guilds;
 
 public sealed class GuildServiceAuthorizationTests
 {
+    [Theory]
+    [InlineData("")]
+    [InlineData("A")]
+    [InlineData("AB")]
+    [InlineData("  AB  ")]
+    public async Task CreateAsync_ReturnsFalse_WhenTrimmedNameIsShorterThanThreeCharacters(string name)
+    {
+        var repository = new FakeGuildRepository();
+        var service = new GuildService(repository);
+
+        var result = await service.CreateAsync(Guid.NewGuid(), name, CancellationToken.None);
+
+        Assert.False(result);
+        Assert.False(repository.CreateCalled);
+    }
+
+    [Fact]
+    public async Task CreateAsync_TrimsAndForwardsName_WhenNameHasAtLeastThreeCharacters()
+    {
+        var repository = new FakeGuildRepository();
+        var service = new GuildService(repository);
+
+        var result = await service.CreateAsync(Guid.NewGuid(), "  ABC  ", CancellationToken.None);
+
+        Assert.True(result);
+        Assert.True(repository.CreateCalled);
+        Assert.Equal("ABC", repository.CreatedGuildName);
+    }
+
     [Fact]
     public async Task InviteAsync_ReturnsFalse_WhenRequestedGuildDoesNotMatchMemberGuild()
     {
@@ -88,11 +117,17 @@ public sealed class GuildServiceAuthorizationTests
     private sealed class FakeGuildRepository : IGuildRepository
     {
         public GuildMember? Member { get; init; }
+        public bool CreateCalled { get; private set; }
+        public string? CreatedGuildName { get; private set; }
         public bool InviteCalled { get; private set; }
         public bool InviteByNameCalled { get; private set; }
 
-        public Task<bool> CreateAsync(Guid characterId, string name, CancellationToken cancellationToken) =>
-            Task.FromResult(true);
+        public Task<bool> CreateAsync(Guid characterId, string name, CancellationToken cancellationToken)
+        {
+            CreateCalled = true;
+            CreatedGuildName = name;
+            return Task.FromResult(true);
+        }
 
         public Task<bool> InviteAsync(Guid currentCharacterId, Guid guildId, Guid invitedCharacterId, CancellationToken cancellationToken)
         {
