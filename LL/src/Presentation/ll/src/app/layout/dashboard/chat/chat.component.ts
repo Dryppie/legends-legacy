@@ -3,6 +3,7 @@ import {
   ElementRef,
   effect,
   EventEmitter,
+  Input,
   OnDestroy,
   OnInit,
   Output,
@@ -13,7 +14,7 @@ import {
   ChatMessageDto,
   ChatService,
 } from '../../../core/services/ll-chat/chat-service/chat.service';
-import { Subscription } from 'rxjs';
+import { catchError, of, Subscription, switchMap, timer } from 'rxjs';
 import { DatePipe, NgClass, NgFor, NgIf } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
@@ -24,6 +25,7 @@ import { CharacterStateService } from '../../../core/services/api/character/char
 import { CharacterTagComponent } from '../../../shared/components/character/character-tag/character-tag.component';
 import { AuthService } from '../../../core/services/api/auth/auth.service';
 import { UserInfoDto } from '../../../shared/models/Dtos/userInfoDto';
+import { PlayerService } from '../../../core/services/api/players/player.service';
 
 interface ChatRoom {
   label: string;
@@ -49,8 +51,16 @@ interface ChatRoom {
   templateUrl: './chat.component.html',
 })
 export class ChatComponent implements OnInit, OnDestroy {
+  @Input() collapsible = false;
+  @Input() collapsed = false;
+  @Input() drawer = false;
+  @Input() drawerTall = false;
   @Output() close = new EventEmitter<void>();
+  @Output() collapsedChange = new EventEmitter<boolean>();
+  @Output() drawerTallChange = new EventEmitter<boolean>();
   @ViewChild('chatInput') chatInput?: ElementRef<HTMLInputElement>;
+  @ViewChild('channelScroller')
+  channelScroller?: ElementRef<HTMLElement>;
   ChatChannelType = ChatChannelType;
   public activeChannel: {
     type: ChatChannelType;
@@ -63,11 +73,6 @@ export class ChatComponent implements OnInit, OnDestroy {
   readonly availableRooms: ChatRoom[] = [
     { label: 'All', contextKey: 'all', channelType: ChatChannelType.General },
     {
-      label: 'Whisper',
-      contextKey: 'whisper',
-      channelType: ChatChannelType.Whisper,
-    },
-    {
       label: 'General',
       contextKey: 'general',
       channelType: ChatChannelType.General,
@@ -77,6 +82,11 @@ export class ChatComponent implements OnInit, OnDestroy {
       contextKey: 'guild',
       channelType: ChatChannelType.Guild,
       requiresGuild: true,
+    },
+    {
+      label: 'Whisper',
+      contextKey: 'whisper',
+      channelType: ChatChannelType.Whisper,
     },
     {
       label: 'Trade',
@@ -103,7 +113,12 @@ export class ChatComponent implements OnInit, OnDestroy {
   userInfo: UserInfoDto | null = null;
   userInfoLoaded = false;
   chatAccessFailed = false;
+  onlinePlayers = 1;
   private sub = new Subscription();
+  private channelDragPointerId: number | null = null;
+  private channelDragStartX = 0;
+  private channelDragStartScrollLeft = 0;
+  private channelDragMoved = false;
 
   get activeRoomKey(): string {
     return this.activeChannel.contextKey;
@@ -135,11 +150,16 @@ export class ChatComponent implements OnInit, OnDestroy {
       : 'Register your account to write in chat';
   }
 
+  get onlinePlayerLabel(): string {
+    return `${this.onlinePlayers} online`;
+  }
+
   constructor(
     public chat: ChatService,
     private readonly guildState: GuildStateService,
     private readonly characterState: CharacterStateService,
     private readonly authService: AuthService,
+    private readonly playerService: PlayerService,
   ) {
     this.guild = this.guildState.guild;
     this.characterId = this.characterState.currentCharacterId;
@@ -161,6 +181,21 @@ export class ChatComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    this.sub.add(
+      timer(0, 1000 * 60 * 2)
+        .pipe(
+          switchMap(() =>
+            this.playerService
+              .getOnlinePlayerCount()
+              .pipe(catchError(() => of(null))),
+          ),
+        )
+        .subscribe((count) => {
+          if (count !== null) {
+            this.onlinePlayers = Math.max(1, count);
+          }
+        }),
+    );
     this.sub.add(
       this.chat.messages$.subscribe((m) => {
         this.messages = m;
@@ -205,6 +240,76 @@ export class ChatComponent implements OnInit, OnDestroy {
     this.activeChannel = { type, contextKey };
   }
 
+  onChannelPointerDown(event: PointerEvent): void {
+    if (event.pointerType === 'mouse' && event.button !== 0) return;
+
+    const scroller = this.channelScroller?.nativeElement;
+    if (!scroller) return;
+
+    this.channelDragPointerId = event.pointerId;
+    this.channelDragStartX = event.clientX;
+    this.channelDragStartScrollLeft = scroller.scrollLeft;
+    this.channelDragMoved = false;
+  }
+
+  onChannelPointerMove(event: PointerEvent): void {
+    if (this.channelDragPointerId !== event.pointerId) return;
+
+    const scroller = this.channelScroller?.nativeElement;
+    if (!scroller) return;
+
+    const distance = event.clientX - this.channelDragStartX;
+    if (Math.abs(distance) > 3 && !this.channelDragMoved) {
+      this.channelDragMoved = true;
+      scroller.setPointerCapture(event.pointerId);
+    }
+
+    if (!this.channelDragMoved) return;
+
+    event.preventDefault();
+    scroller.scrollLeft = this.channelDragStartScrollLeft - distance;
+  }
+
+  onChannelPointerEnd(event: PointerEvent): void {
+    if (this.channelDragPointerId !== event.pointerId) return;
+
+    const scroller = this.channelScroller?.nativeElement;
+    if (scroller?.hasPointerCapture(event.pointerId)) {
+      scroller.releasePointerCapture(event.pointerId);
+    }
+
+    this.channelDragPointerId = null;
+    setTimeout(() => {
+      this.channelDragMoved = false;
+    });
+  }
+
+  selectChannelFromPointer(
+    event: MouseEvent,
+    type: ChatChannelType,
+    contextKey: string,
+  ): void {
+    if (this.channelDragMoved) {
+      event.preventDefault();
+      event.stopPropagation();
+      return;
+    }
+
+    this.setChannel(type, contextKey);
+  }
+
+  toggleCollapsed(): void {
+    if (!this.collapsible) return;
+
+    this.collapsedChange.emit(!this.collapsed);
+  }
+
+  toggleDrawerHeight(): void {
+    if (!this.drawer) return;
+
+    this.drawerTallChange.emit(!this.drawerTall);
+  }
+
   get filteredMessages(): ChatMessageDto[] {
     if (this.activeRoomKey === 'all') {
       return this.messages;
@@ -242,34 +347,34 @@ export class ChatComponent implements OnInit, OnDestroy {
   channelBadgeClasses(message: ChatMessageDto): string {
     switch (message.channelType) {
       case ChatChannelType.Trade:
-        return 'border-emerald-400/30 bg-emerald-400/10 text-emerald-300';
+        return 'll-badge-warning';
       case ChatChannelType.Help:
-        return 'border-sky-400/30 bg-sky-400/10 text-sky-300';
+        return 'll-badge-info';
       case ChatChannelType.Guild:
-        return 'border-rose-400/30 bg-rose-400/10 text-rose-300';
+        return 'll-badge-accent';
       case ChatChannelType.Whisper:
-        return 'border-fuchsia-400/30 bg-fuchsia-400/10 text-fuchsia-300';
+        return 'll-badge-accent';
       case ChatChannelType.System:
-        return 'border-zinc-400/25 bg-zinc-400/10 text-zinc-300';
+        return 'll-badge-muted';
       default:
-        return 'border-primary/30 bg-primary/10 text-primary';
+        return 'll-badge-accent';
     }
   }
 
   messageRowClasses(message: ChatMessageDto): string {
     switch (message.channelType) {
       case ChatChannelType.Trade:
-        return 'border-l-emerald-400/40';
+        return 'border-l-[var(--ll-color-warning)]';
       case ChatChannelType.Help:
-        return 'border-l-sky-400/40';
+        return 'border-l-[var(--ll-color-info)]';
       case ChatChannelType.Guild:
-        return 'border-l-rose-400/40';
+        return 'border-l-[var(--ll-color-primary)]';
       case ChatChannelType.Whisper:
-        return 'border-l-fuchsia-400/50 bg-fuchsia-950/10';
+        return 'border-l-[var(--ll-color-primary-strong)] bg-[var(--ll-color-primary-soft)]';
       case ChatChannelType.System:
-        return 'border-l-zinc-400/40 bg-zinc-900/20';
+        return 'border-l-[var(--ll-color-text-subtle)] bg-[var(--ll-color-surface-soft)]';
       default:
-        return 'border-l-primary/40';
+        return 'border-l-[var(--ll-color-border-strong)]';
     }
   }
 
@@ -319,7 +424,7 @@ export class ChatComponent implements OnInit, OnDestroy {
         ? 'Register your account before writing in chat.'
         : this.chatAccessFailed
           ? 'Unable to verify chat access.'
-        : 'Chat access is still loading.';
+          : 'Chat access is still loading.';
       return;
     }
 

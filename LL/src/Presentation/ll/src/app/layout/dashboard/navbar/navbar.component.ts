@@ -29,6 +29,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
   @Output() itemTapped = new EventEmitter<void>();
   @Output() chatTapped = new EventEmitter<void>();
   @Input() isScreenSmall!: boolean;
+  @Input() showChatButton = true;
   showList = false;
   activeLabel = 'Character';
   navButtons = [

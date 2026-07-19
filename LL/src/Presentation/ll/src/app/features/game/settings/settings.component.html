@@ -84,6 +84,72 @@
       </div>
     </section>
 
+    <section class="ll-panel mt-4 p-4">
+      <div class="border-b border-light_gray/70 pb-3">
+        <p class="ll-eyebrow">Interface</p>
+        <h2 class="ll-heading mt-1 text-xl">Chat Layout</h2>
+        <p class="ll-copy mt-1">
+          Choose how chat uses your game space on every screen size.
+        </p>
+      </div>
+
+      <div class="mt-4 grid gap-3 md:grid-cols-2">
+        <button
+          type="button"
+          class="ll-card flex items-start justify-between gap-4 p-4 text-left transition hover:border-primary/60"
+          [ngClass]="{
+            'border-primary/60 bg-primary/[0.08]': chatLayout() === 'docked',
+          }"
+          [attr.aria-pressed]="chatLayout() === 'docked'"
+          (click)="setChatLayout('docked')"
+        >
+          <span>
+            <span class="block font-semibold text-white">Docked sidebar</span>
+            <span class="ll-copy mt-1 block">
+              Keep chat beside the game on large screens and use a slide-over on
+              smaller screens.
+            </span>
+          </span>
+          <span
+            class="ll-badge shrink-0 rounded"
+            [ngClass]="
+              chatLayout() === 'docked' ? 'll-badge-success' : 'll-badge-muted'
+            "
+          >
+            {{ chatLayout() === "docked" ? "Active" : "Select" }}
+          </span>
+        </button>
+
+        <button
+          type="button"
+          class="ll-card flex items-start justify-between gap-4 p-4 text-left transition hover:border-primary/60"
+          [ngClass]="{
+            'border-primary/60 bg-primary/[0.08]': chatLayout() === 'floating',
+          }"
+          [attr.aria-pressed]="chatLayout() === 'floating'"
+          (click)="setChatLayout('floating')"
+        >
+          <span>
+            <span class="block font-semibold text-white">Floating drawer</span>
+            <span class="ll-copy mt-1 block">
+              Overlay chat above the game and collapse it to a responsive title
+              bar.
+            </span>
+          </span>
+          <span
+            class="ll-badge shrink-0 rounded"
+            [ngClass]="
+              chatLayout() === 'floating'
+                ? 'll-badge-success'
+                : 'll-badge-muted'
+            "
+          >
+            {{ chatLayout() === "floating" ? "Active" : "Select" }}
+          </span>
+        </button>
+      </div>
+    </section>
+
     <div class="mt-4 grid gap-4 xl:grid-cols-[minmax(0,1fr)_24rem]">
       <section class="ll-panel p-4">
         <div class="border-b border-light_gray/70 pb-3">
@@ -151,7 +217,8 @@
               <div>
                 <h3 class="font-semibold text-white">Email Login</h3>
                 <p class="ll-copy mt-1">
-                  Bind email/password. The name field becomes your character name.
+                  Bind email/password. The name field becomes your character
+                  name.
                 </p>
               </div>
               <span class="ll-badge rounded" [ngClass]="emailStatusClass()">
@@ -273,7 +340,9 @@
       [prefilledUsername]="character.name"
       [disableLoginLink]="true"
       [usernameLabel]="'Character name'"
-      [usernameHelp]="'This updates the name other players see for this character.'"
+      [usernameHelp]="
+        'This updates the name other players see for this character.'
+      "
       [headerText1]="'Register your account'"
       [headerText2]="'and continue your legend!'"
     >
