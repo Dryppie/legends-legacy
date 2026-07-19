@@ -1,53 +1,56 @@
-<ng-container *ngIf="hasActiveDungeon()">
-  <div
-    routerLink="world/dungeon"
-    class="mt-2 rounded-md border border-primary/25 bg-black/30 px-3 py-2 shadow-sm"
+<a
+  *ngIf="hasActiveDungeon()"
+  routerLink="/game/world/dungeon"
+  class="group flex min-h-8 w-full min-w-0 items-center gap-2 rounded-full border border-[var(--ll-color-border-strong)] bg-[var(--ll-color-primary-soft)] px-3 py-1.5 text-xs transition-colors hover:border-primary hover:bg-primary/15 sm:ml-auto sm:w-auto sm:max-w-[24rem]"
+  [attr.aria-label]="
+    statusLabel() + ': ' + dungeonTitle() + ', ' + progressText()
+  "
+>
+  <span
+    class="h-1.5 w-1.5 shrink-0 rounded-full"
+    [ngClass]="statusDotClasses()"
+    aria-hidden="true"
+  ></span>
+
+  <span
+    class="shrink-0 text-[10px] font-semibold uppercase tracking-wide text-[var(--ll-color-text-muted)]"
   >
-    <div class="flex items-start gap-3">
-      <div class="min-w-0 flex-1">
-        <div class="flex items-center gap-2">
-          <span
-            class="inline-flex rounded-full border border-primary/20 bg-primary/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-primary"
-          >
-            {{ statusLabel() }}
-          </span>
+    {{ statusLabel() }}
+  </span>
 
-          <span
-            *ngIf="loading()"
-            class="text-[10px] uppercase tracking-wide text-secondary"
-          >
-            Updating...
-          </span>
-        </div>
+  <span
+    class="hidden text-[var(--ll-color-text-subtle)] sm:inline"
+    aria-hidden="true"
+  >
+    ·
+  </span>
 
-        <div class="mt-1 truncate text-sm font-semibold text-primary">
-          {{ dungeonTitle() }}
-        </div>
+  <strong class="min-w-0 truncate font-medium text-primary">
+    {{ dungeonTitle() }}
+  </strong>
 
-        <div class="mt-0.5 flex items-center gap-1 text-xs text-secondary">
-          <span>{{ progressText() }}</span>
-          <span>•</span>
-          <span>{{ roomTypeLabel() }}</span>
-        </div>
+  <span class="shrink-0 text-[var(--ll-color-text-muted)]">
+    · {{ progressText() }}
+  </span>
 
-        <div
-          class="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-white/5"
-          aria-hidden="true"
-        >
-          <div
-            class="h-full bg-primary transition-all duration-300"
-            [style.width.%]="progressPercent()"
-          ></div>
-        </div>
-      </div>
+  <span
+    *ngIf="loading()"
+    class="h-1.5 w-1.5 shrink-0 animate-pulse rounded-full bg-primary"
+    title="Updating dungeon"
+  ></span>
 
-      <div
-        class="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-primary/30 bg-primary/10 text-sm text-primary"
-      >
-        <app-dungeon-room-icon
-          [type]="currentRoom()?.type"
-        ></app-dungeon-room-icon>
-      </div>
-    </div>
-  </div>
-</ng-container>
+  <svg
+    class="h-3.5 w-3.5 shrink-0 text-primary/70 transition-transform group-hover:translate-x-0.5"
+    viewBox="0 0 16 16"
+    fill="none"
+    aria-hidden="true"
+  >
+    <path
+      d="m6 3 5 5-5 5"
+      stroke="currentColor"
+      stroke-width="1.5"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    />
+  </svg>
+</a>

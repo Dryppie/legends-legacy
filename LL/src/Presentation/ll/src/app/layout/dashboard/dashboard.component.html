@@ -1,7 +1,7 @@
 <div class="ll-app-frame">
   <div class="flex h-full min-h-0 w-full flex-auto flex-col">
     <div
-      class="flex min-h-0 flex-1 flex-col overflow-hidden sm:order-2 sm:flex-row sm:gap-4"
+      class="flex min-h-0 flex-1 flex-col gap-1 overflow-hidden sm:order-2 sm:flex-row sm:gap-2"
     >
       <div
         *ngIf="isSidebarOpen && isScreenSmall"
@@ -19,8 +19,9 @@
         ></app-sidebar>
       </nav>
       <div
-        class="flex min-h-0 w-full flex-1 flex-col space-y-4 overflow-hidden"
+        class="flex min-h-0 w-full flex-1 flex-col gap-1 overflow-hidden sm:gap-2"
       >
+        <app-game-header class="block shrink-0"></app-game-header>
         <div class="relative min-h-0 w-full flex-1 overflow-hidden sm:pr-4">
           <div
             class="ll-game-surface absolute inset-y-0 left-0 right-0 sm:right-4 xl:right-0"
@@ -118,7 +119,7 @@
       (chatTapped)="toggleChat()"
       [isScreenSmall]="isScreenSmall"
       [showChatButton]="chatLayout() === 'docked'"
-      class="sm:order-1 sm:pb-2"
+      class="order-3 block shrink-0 sm:hidden"
     ></app-navbar>
   </div>
 </div>

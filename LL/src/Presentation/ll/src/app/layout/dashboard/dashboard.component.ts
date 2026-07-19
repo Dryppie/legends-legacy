@@ -14,6 +14,7 @@ import { CharacterActionType } from '../../shared/models/enums/characterActionTy
 import { TutorialQuestComponent } from './tutorial-quest/tutorial-quest.component';
 import { GameBootstrapStateService } from '../../core/services/api/game-bootstrap/game-bootstrap-state.service';
 import { ChatLayoutPreferenceService } from '../../core/services/client-side/chat-layout/chat-layout-preference.service';
+import { GameHeaderComponent } from './game-header/game-header.component';
 
 @Component({
   selector: 'app-dashboard',
@@ -30,6 +31,7 @@ import { ChatLayoutPreferenceService } from '../../core/services/client-side/cha
     LootTrackerComponent,
     CurrentActionComponent,
     TutorialQuestComponent,
+    GameHeaderComponent,
   ],
   templateUrl: './dashboard.component.html',
 })

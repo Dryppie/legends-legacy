@@ -16,11 +16,8 @@ import { GameService } from '../../../core/services/client-side/game/game.servic
 import { CurrentActionComponent } from '../../../shared/components/current-action/current-action.component';
 import { CharacterActionsStateService } from '../../../core/services/api/character-actions/character-actions.state.service';
 import { CharacterActionType } from '../../../shared/models/enums/characterActionType';
-import { ShortNumberPipe } from '../../../shared/pipes/number-format/short-number.pipe';
-import { NumberFormatPipe } from '../../../shared/pipes/number-format/number-format.pipe';
 import { CharacterStateService } from '../../../core/services/api/character/character-state.service';
 import { SidebarSection } from '../../../shared/models/sidebar-item';
-import { CurrentDungeonComponent } from '../../../shared/components/current-dungeon/current-dungeon.component';
 import {
   NOTIFICATION_SURFACE,
   NotificationService,
@@ -38,9 +35,6 @@ import { GuildStateService } from '../../../core/services/api/guild/guild-state.
     SidebarItemComponent,
     RouterLink,
     CurrentActionComponent,
-    ShortNumberPipe,
-    NumberFormatPipe,
-    CurrentDungeonComponent,
   ],
   templateUrl: './sidebar.component.html',
 })
@@ -52,9 +46,6 @@ export class SidebarComponent implements OnInit, OnDestroy {
   sections: SidebarSection[] = [];
   activeUrl = '';
   displayCurrentAction = false;
-  useShortFormat = false;
-
-  readonly currentCharacter;
 
   constructor(
     private readonly sidebarService: SidebarService,
@@ -82,14 +73,9 @@ export class SidebarComponent implements OnInit, OnDestroy {
         }
       });
     });
-
-    this.currentCharacter = this.characterState.currentCharacter;
   }
 
   ngOnInit(): void {
-    const savedFormat = localStorage.getItem('useShortFormat');
-    this.useShortFormat = savedFormat === 'true';
-
     this.activeUrl = this.router.url;
 
     this.sidebarService
@@ -114,11 +100,6 @@ export class SidebarComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
-  }
-
-  toggleFormat(): void {
-    this.useShortFormat = !this.useShortFormat;
-    localStorage.setItem('useShortFormat', this.useShortFormat.toString());
   }
 
   toggleSidebar(): void {

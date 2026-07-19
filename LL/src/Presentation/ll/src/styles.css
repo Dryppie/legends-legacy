@@ -119,7 +119,6 @@
     display: flex;
     height: 100%;
     width: 100%;
-    border-right: 1px solid var(--ll-color-border-strong);
     background: rgba(0, 0, 0, 0.85);
     box-shadow: var(--ll-shadow-md);
   }
@@ -127,7 +126,6 @@
   @media (min-width: 40rem) {
     .ll-sidebar-shell {
       width: 20rem;
-      border-right: 0;
       background: transparent;
       box-shadow: none;
     }
@@ -139,6 +137,7 @@
     flex: 1 1 auto;
     flex-direction: column;
     overflow: hidden;
+    border-right: 1px solid var(--ll-color-border);
     background: linear-gradient(
         180deg,
         rgba(255, 255, 255, 0.02),
@@ -151,7 +150,6 @@
   @media (min-width: 40rem) {
     .ll-sidebar-panel {
       margin-top: 1px;
-      border-top-right-radius: var(--ll-radius-md);
     }
   }
 

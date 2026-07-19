@@ -14,45 +14,11 @@
       </button>
     </div>
 
-    <div
-      class="flex flex-col gap-2 border-b border-primary/10 p-3 sm:border-b-0 sm:p-2"
-    >
-      <div
-        *ngIf="currentCharacter() as character"
-        class="grid grid-cols-2 gap-2 sm:hidden"
-      >
-        <button type="button" class="ll-currency-pill" (click)="toggleFormat()">
-          <span class="truncate text-primary">
-            {{
-              useShortFormat
-                ? (character.cinders | shortNumber)
-                : (character.cinders | numberFormat)
-            }}
-            Cinders
-          </span>
-        </button>
-
-        <button type="button" class="ll-currency-pill" (click)="toggleFormat()">
-          <span class="truncate text-primary">
-            {{
-              useShortFormat
-                ? (character.soulstones | shortNumber)
-                : (character.soulstones | numberFormat)
-            }}
-            Soulstones
-          </span>
-        </button>
-      </div>
-
-      <div class="flex flex-col">
-        <app-current-action
-          *ngIf="displayCurrentAction"
-          class="hidden w-full sm:block"
-          (click)="navigateToAction(); toggleSidebar()"
-        ></app-current-action>
-        <app-current-dungeon></app-current-dungeon>
-      </div>
-    </div>
+    <app-current-action
+      *ngIf="displayCurrentAction"
+      class="hidden w-full border-b border-primary/10 p-2 sm:block"
+      (click)="navigateToAction(); toggleSidebar()"
+    ></app-current-action>
 
     <div
       class="flex flex-1 flex-col gap-0.5 overflow-y-auto overscroll-contain px-2 py-2 sm:border-t-0"
@@ -61,9 +27,7 @@
         *ngFor="let section of sections; trackBy: trackSection"
         class="border-b border-primary/10 pb-1 last:border-b-0"
       >
-        <div
-          class="ll-section-label px-2 pb-1 pt-2.5 first:pt-1"
-        >
+        <div class="ll-section-label px-2 pb-1 pt-2.5 first:pt-1">
           {{ section.label }}
         </div>
         <div class="flex flex-col gap-0.5">
