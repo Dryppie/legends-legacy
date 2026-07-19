@@ -14,6 +14,10 @@ import {
   ChatLayout,
   ChatLayoutPreferenceService,
 } from '../../../core/services/client-side/chat-layout/chat-layout-preference.service';
+import {
+  SidebarLayout,
+  SidebarLayoutPreferenceService,
+} from '../../../core/services/client-side/sidebar-layout/sidebar-layout-preference.service';
 
 @Component({
   selector: 'app-settings',
@@ -40,6 +44,7 @@ export class SettingsComponent {
   readonly currentCharacter;
   public readonly guild;
   readonly chatLayout;
+  readonly sidebarLayout;
 
   constructor(
     private authService: AuthService,
@@ -47,10 +52,12 @@ export class SettingsComponent {
     private readonly characterService: CharacterService,
     private readonly guildState: GuildStateService,
     private readonly chatLayoutPreference: ChatLayoutPreferenceService,
+    private readonly sidebarLayoutPreference: SidebarLayoutPreferenceService,
   ) {
     this.guild = guildState.guild;
     this.currentCharacter = this.authService.currentCharacter;
     this.chatLayout = this.chatLayoutPreference.layout;
+    this.sidebarLayout = this.sidebarLayoutPreference.layout;
 
     effect(() => {
       this.userInfo = this.authService.userInfo();
@@ -71,6 +78,10 @@ export class SettingsComponent {
 
   setChatLayout(layout: ChatLayout): void {
     this.chatLayoutPreference.setLayout(layout);
+  }
+
+  setSidebarLayout(layout: SidebarLayout): void {
+    this.sidebarLayoutPreference.setLayout(layout);
   }
 
   convertToRegistered() {

@@ -6,4 +6,5 @@ public sealed class JwtOptions
     public string SigningKey { get; init; } = default!;
     public int AccessMinutes { get; init; } = 30;
     public int RefreshDays { get; init; } = 30;
+    public int RefreshReuseGraceSeconds { get; init; } = 5;
 }

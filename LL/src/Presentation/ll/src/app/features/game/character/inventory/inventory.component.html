@@ -4,7 +4,7 @@
       section="Character"
       title="Inventory"
       [text]="inventoryCountLabel"
-      icon="character/inventory"
+      icon="sidebar/character/inventory"
     ></app-default-header>
 
     <div class="flex items-center gap-2">
@@ -119,7 +119,10 @@
         </div>
       </div>
 
-      <div class="min-h-0 flex-1 overflow-y-auto p-2" data-tour="inventory-items">
+      <div
+        class="min-h-0 flex-1 overflow-y-auto p-2"
+        data-tour="inventory-items"
+      >
         <div
           *ngIf="!filteredItems.length"
           class="ll-empty-state h-full min-h-60"

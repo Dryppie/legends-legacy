@@ -25,6 +25,7 @@ import {
 import { SidebarNotificationRefreshService } from '../../../core/services/client-side/notifications/sidebar-notification-refresh.service';
 import { EssenceStateService } from '../../../core/services/api/essences/essence-state.service';
 import { GuildStateService } from '../../../core/services/api/guild/guild-state.service';
+import { SidebarLayoutPreferenceService } from '../../../core/services/client-side/sidebar-layout/sidebar-layout-preference.service';
 
 @Component({
   selector: 'app-sidebar',
@@ -46,6 +47,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
   sections: SidebarSection[] = [];
   activeUrl = '';
   displayCurrentAction = false;
+  readonly sidebarLayout;
 
   constructor(
     private readonly sidebarService: SidebarService,
@@ -56,8 +58,11 @@ export class SidebarComponent implements OnInit, OnDestroy {
     private readonly sidebarNotificationRefreshService: SidebarNotificationRefreshService,
     public readonly essenceState: EssenceStateService,
     public readonly guildState: GuildStateService,
+    private readonly sidebarLayoutPreference: SidebarLayoutPreferenceService,
     private readonly router: Router,
   ) {
+    this.sidebarLayout = this.sidebarLayoutPreference.layout;
+
     effect(() => {
       this.displayCurrentAction = this.state.displayCurrentAction();
     });

@@ -1,5 +1,6 @@
 ﻿using API.LL.Controllers;
 using Application.UseCases.Authorization.Commands.CreateNewTokens;
+using API.LL.Common;
 using Application.UseCases.Authorization.Commands.Logout;
 using Application.UseCases.Authorization.Queries.ValidateToken;
 using Application.UseCases.Users.Commands.BindGoogle;
@@ -36,10 +37,14 @@ public class AuthController : BaseController
     private const string RefreshTokenCookie = "RefreshToken";
     private const string RefreshCookieCsrfHeader = "X-LL-Refresh-Request";
     private readonly IWebHostEnvironment _env;
+    private readonly RefreshTokenRotationCoordinator _refreshTokenRotation;
 
-    public AuthController(IWebHostEnvironment env)
+    public AuthController(
+        IWebHostEnvironment env,
+        RefreshTokenRotationCoordinator refreshTokenRotation)
     {
         _env = env;
+        _refreshTokenRotation = refreshTokenRotation;
     }
 
     [HttpPost("register")]
@@ -159,7 +164,9 @@ public class AuthController : BaseController
 
         try
         {
-            var result = await Mediator.Send(new CreateNewTokensCommand(refresh));
+            var result = await _refreshTokenRotation.ExecuteAsync(
+                refresh,
+                () => Mediator.Send(new CreateNewTokensCommand(refresh)));
 
             if (result.Data is null) return BadRequest(result);
 
