@@ -10,6 +10,7 @@ import { NumberFormatPipe } from '../../../../shared/pipes/number-format/number-
 import { MarketPlaceCommodityComponent } from './market-place-commodity/market-place-commodity.component';
 import { MarketPlaceOrdersComponent } from './market-place-orders/market-place-orders.component';
 import { MarketCategorySelection } from '../../../../shared/models/market-category';
+import { DefaultHeaderComponent } from '../../../../shared/components/default-header/default-header.component';
 
 type MarketPlaceMode = 'browse' | 'sell' | 'orders';
 
@@ -26,6 +27,7 @@ type MarketPlaceMode = 'browse' | 'sell' | 'orders';
     NgIf,
     NgSwitch,
     NgSwitchCase,
+    DefaultHeaderComponent,
   ],
   templateUrl: './market-place.component.html',
   styleUrl: './market-place.component.css',

@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, Signal } from '@angular/core';
 import { TabComponent } from '../../../../../shared/components/custom-components/tabs/tab/tab.component';
 import { GuildInfoComponent } from './guild-info/guild-info.component';
 import { Guild } from '../../../../../shared/models/Dtos/guild/guild';
@@ -33,8 +33,11 @@ import { NumberFormatPipe } from '../../../../../shared/pipes/number-format/numb
 })
 export class InAGuildComponent {
   @Input() guild!: Guild;
+  readonly claimableDailyOrderCount: Signal<number>;
 
-  constructor(private state: GuildStateService) {}
+  constructor(private state: GuildStateService) {
+    this.claimableDailyOrderCount = this.state.claimableDailyOrderCount;
+  }
 
   inviteCharacterByName($event: string) {
     const invite: InviteToGuild = {

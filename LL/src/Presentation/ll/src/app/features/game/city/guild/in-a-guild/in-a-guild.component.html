@@ -52,7 +52,11 @@
     <app-tab label="Buildings">
       <app-guild-buildings class="h-full overflow-hidden"></app-guild-buildings>
     </app-tab>
-    <app-tab label="Missions">
+    <app-tab
+      label="Missions"
+      [notificationCount]="claimableDailyOrderCount()"
+      notificationLabel="Daily guild order ready to claim"
+    >
       <app-guild-missions class="h-full overflow-hidden"></app-guild-missions>
     </app-tab>
     <app-tab label="Shop">

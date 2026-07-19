@@ -27,6 +27,7 @@ import {
 } from '../../../core/services/client-side/notifications/notification.service';
 import { SidebarNotificationRefreshService } from '../../../core/services/client-side/notifications/sidebar-notification-refresh.service';
 import { EssenceStateService } from '../../../core/services/api/essences/essence-state.service';
+import { GuildStateService } from '../../../core/services/api/guild/guild-state.service';
 
 @Component({
   selector: 'app-sidebar',
@@ -63,6 +64,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
     private readonly notificationService: NotificationService,
     private readonly sidebarNotificationRefreshService: SidebarNotificationRefreshService,
     public readonly essenceState: EssenceStateService,
+    public readonly guildState: GuildStateService,
     private readonly router: Router,
   ) {
     effect(() => {
@@ -147,7 +149,8 @@ export class SidebarComponent implements OnInit, OnDestroy {
   getSidebarItemNotificationCount(itemId: string): number {
     return (
       this.getNotificationCount(itemId) +
-      (itemId === 'essences' && this.essenceState.essenceFocusReady() ? 1 : 0)
+      (itemId === 'essences' && this.essenceState.essenceFocusReady() ? 1 : 0) +
+      (itemId === 'guild' ? this.guildState.claimableDailyOrderCount() : 0)
     );
   }
 

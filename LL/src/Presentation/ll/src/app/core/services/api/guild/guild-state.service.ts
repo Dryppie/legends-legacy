@@ -85,6 +85,11 @@ export class GuildStateService {
   readonly error = computed(() => this._error());
   readonly isInGuild = computed(() => !!this._guild());
   readonly hasInvites = computed(() => this._invites().length > 0);
+  readonly claimableDailyOrderCount = computed(
+    () =>
+      this._missions()?.personalOrders.filter((order) => order.canClaimReward)
+        .length ?? 0,
+  );
   readonly guildNotificationCount = computed(() =>
     this.notificationService.count(
       NOTIFICATION_SURFACE.Sidebar,

@@ -1,24 +1,19 @@
 <div class="ll-page-stack pr-4 sm:pr-6">
+  <app-default-header
+    class="marketplace-header flex-none"
+    section="City"
+    title="Marketplace"
+    [text]="
+      (characterState.currentCharacter()?.cinders ?? 0 | numberFormat) +
+      ' Cinders'
+    "
+    icon="city/temple"
+  ></app-default-header>
+
   <section
     class="ll-panel flex h-full min-h-0 flex-col overflow-hidden"
     [class.marketplace-mobile-detail]="mobileDetailOpen()"
   >
-    <header
-      class="marketplace-header flex flex-none flex-wrap items-center justify-between gap-4 border-b border-light_gray px-5 py-4 sm:px-6"
-    >
-      <h1 class="ll-heading text-2xl uppercase sm:text-3xl">Marketplace</h1>
-
-      <div
-        class="ll-card flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-zinc-300"
-      >
-        <span>You have</span>
-        <strong class="text-primary">
-          {{ characterState.currentCharacter()?.cinders ?? 0 | numberFormat }}
-        </strong>
-        <span class="text-zinc-400">Cinders</span>
-      </div>
-    </header>
-
     <div
       class="marketplace-navigation flex flex-none gap-3 border-b border-light_gray px-4 py-3 lg:px-5"
     >

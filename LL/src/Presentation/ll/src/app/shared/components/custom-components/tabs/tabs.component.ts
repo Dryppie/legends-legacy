@@ -8,11 +8,18 @@ import {
 } from '@angular/core';
 import { NgClass, NgFor, NgIf, NgTemplateOutlet } from '@angular/common';
 import { TabComponent } from './tab/tab.component';
+import { NotificationIndicatorComponent } from '../../notification-indicator/notification-indicator.component';
 
 @Component({
   selector: 'app-tabs',
   standalone: true,
-  imports: [NgFor, NgIf, NgTemplateOutlet, NgClass],
+  imports: [
+    NgFor,
+    NgIf,
+    NgTemplateOutlet,
+    NgClass,
+    NotificationIndicatorComponent,
+  ],
   templateUrl: './tabs.component.html',
 })
 export class TabsComponent implements AfterContentInit {

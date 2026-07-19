@@ -8,6 +8,7 @@ import {
   OnInit,
   Output,
   signal,
+  untracked,
 } from '@angular/core';
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Observable } from 'rxjs';
@@ -502,7 +503,7 @@ export class MarketPlaceCommodityComponent implements OnInit {
         this._itemType();
         this._subcategory();
         this.selectedCommodityId();
-        const ticketSide = this.ticketSide();
+        const ticketSide = untracked(() => this.ticketSide());
         this.quantityCtrl.setValue(1, { emitEvent: false });
         this.unitPriceCtrl.setValue(
           ticketSide === 'buy'

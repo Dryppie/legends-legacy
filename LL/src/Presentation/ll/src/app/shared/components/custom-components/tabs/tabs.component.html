@@ -7,7 +7,7 @@
   <button
     type="button"
     *ngFor="let pane of panes; let i = index"
-    class="ll-segmented-button min-w-max flex-none sm:flex-1"
+    class="ll-segmented-button relative min-w-max flex-none sm:flex-1"
     [ngClass]="{ 'll-segmented-button-active': activeIndex() === i }"
     [attr.aria-selected]="activeIndex() === i"
     [attr.tabindex]="activeIndex() === i ? 0 : -1"
@@ -16,6 +16,12 @@
     (keydown)="onTabKeydown($event, i)"
   >
     {{ pane.label }}
+    <app-notification-indicator
+      *ngIf="pane.notificationCount"
+      class="absolute right-1 top-1"
+      [count]="pane.notificationCount"
+      [label]="pane.notificationLabel || pane.label"
+    ></app-notification-indicator>
   </button>
 </div>
 
