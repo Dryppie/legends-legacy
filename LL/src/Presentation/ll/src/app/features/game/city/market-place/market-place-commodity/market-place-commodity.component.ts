@@ -3,23 +3,41 @@ import {
   Component,
   computed,
   effect,
+  EventEmitter,
   Input,
   OnInit,
+  Output,
   signal,
 } from '@angular/core';
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
-import { concatMap, from } from 'rxjs';
+import { Observable } from 'rxjs';
+import { toSignal } from '@angular/core/rxjs-interop';
+import {
+  debounceTime,
+  distinctUntilChanged,
+  map,
+  startWith,
+} from 'rxjs/operators';
 
 import { CharacterService } from '../../../../../core/services/api/character/character.service';
 import { InventoryStateService } from '../../../../../core/services/api/inventory/inventory-state.service';
 import { MarketplaceStateService } from '../../../../../core/services/api/market-place/market-place-state.service';
-import { RegularButtonComponent } from '../../../../../shared/components/custom-components/buttons/regular-button/regular-button.component';
+import {
+  MarketPlaceItemSummary,
+  MarketPlaceService,
+} from '../../../../../core/services/api/market-place/market-place.service';
 import { MarketPlaceListing } from '../../../../../shared/models/Dtos/market-place/market-place-listing';
 import { MarketPlaceBuyOrder } from '../../../../../shared/models/Dtos/market-place/market-place-buy-order';
 import { ItemBase } from '../../../../../shared/models/item';
 import { InventoryItem } from '../../../../../shared/models/inventoryItem';
 import { ItemType } from '../../../../../shared/models/enums/itemType';
 import { NumberFormatPipe } from '../../../../../shared/pipes/number-format/number-format.pipe';
+import { MarketCategoryId } from '../../../../../shared/models/market-category';
+import {
+  getMarketplaceResourceSortRank,
+  isMarketplaceBlueprintResource,
+  matchesMarketplaceResourceSubcategory,
+} from '../../../../../shared/utils/market-place/market-place-category.utils';
 
 interface Commodity {
   base: ItemBase;
@@ -33,6 +51,7 @@ interface Commodity {
 interface CommodityOrderRow {
   unitPrice: number;
   quantity: number;
+  ownQuantity: number;
   listings: MarketPlaceListing[];
 }
 
@@ -43,52 +62,53 @@ interface CommodityBuyOrderRow {
   orders: MarketPlaceBuyOrder[];
 }
 
+type CommodityCatalogStatus = 'all' | 'active' | 'owned';
+type CommodityCatalogSort = 'activity' | 'name' | 'ask';
+type MobileOrderBook = 'sell' | 'buy';
+type MarketTicketSide = 'buy' | 'sell';
+
 @Component({
   selector: 'app-market-place-commodity',
   standalone: true,
-  imports: [
-    CommonModule,
-    ReactiveFormsModule,
-    RegularButtonComponent,
-    NumberFormatPipe,
-  ],
+  imports: [CommonModule, ReactiveFormsModule, NumberFormatPipe],
   templateUrl: './market-place-commodity.component.html',
+  styleUrl: './market-place-commodity.component.css',
 })
 export class MarketPlaceCommodityComponent implements OnInit {
-  private readonly resourceFamilyItemIds = new Map<string, string[]>([
-    ['metal', ['ore']],
-    ['wood', ['wood']],
-    ['hide', ['rawhide']],
-    ['crystal', ['crystalline_powder']],
-    ['stone', ['rough_stone']],
-    ['fiber', ['woven_fiber']],
-    ['bone', ['bone_fragments']],
-    ['chitin', ['ant_chitin']],
-    ['resin', ['hive_resin']],
-    ['oil', ['murky_fish_oil']],
-  ]);
-  private readonly specialMaterialItemIds = new Set([
-    'venom_gland',
-    'royal_chitin_plate',
-    'hive_ichor',
-  ]);
   private readonly _itemType = signal<ItemType>(ItemType.Resource);
   private readonly _subcategory = signal<string | null>(null);
+  private readonly _category = signal<MarketCategoryId>('resources');
 
   @Input({ required: true })
   set itemType(value: ItemType) {
     this._itemType.set(value);
+    this.resetMobileView();
   }
 
   @Input()
   set subcategory(value: string | null) {
     this._subcategory.set(value);
+    this.resetMobileView();
   }
+
+  @Input({ required: true })
+  set category(value: MarketCategoryId) {
+    this._category.set(value);
+    this.resetMobileView();
+  }
+
+  @Output() readonly mobileDetailChanged = new EventEmitter<boolean>();
 
   readonly selectedSellPrice = signal<number | null>(null);
   readonly selectedBuyPrice = signal<number | null>(null);
   readonly selectedCommodityId = signal<string | null>(null);
   readonly placingOrder = signal(false);
+  readonly marketSummary = signal<MarketPlaceItemSummary | null>(null);
+  readonly catalogStatus = signal<CommodityCatalogStatus>('all');
+  readonly catalogSort = signal<CommodityCatalogSort>('activity');
+  readonly mobileDetailOpen = signal(false);
+  readonly mobileOrderBook = signal<MobileOrderBook>('sell');
+  readonly ticketSide = signal<MarketTicketSide>('buy');
 
   readonly quantityCtrl = new FormControl<number>(1, {
     validators: [Validators.required, Validators.min(1)],
@@ -96,6 +116,19 @@ export class MarketPlaceCommodityComponent implements OnInit {
   readonly unitPriceCtrl = new FormControl<number | null>(null, {
     validators: [Validators.required, Validators.min(1)],
   });
+  readonly catalogSearchCtrl = new FormControl<string>('', {
+    nonNullable: true,
+    validators: [Validators.maxLength(64)],
+  });
+  readonly catalogSearch = toSignal(
+    this.catalogSearchCtrl.valueChanges.pipe(
+      startWith(this.catalogSearchCtrl.value),
+      debounceTime(150),
+      map((value) => value.trim().toLowerCase()),
+      distinctUntilChanged(),
+    ),
+    { initialValue: '' },
+  );
 
   readonly currentCharacterId = computed(() =>
     this.characterService.currentCharacterId(),
@@ -124,6 +157,19 @@ export class MarketPlaceCommodityComponent implements OnInit {
 
   readonly commodities = computed(() => {
     const byBase = new Map<string, Commodity>();
+
+    for (const base of this.marketplaceState.catalog()) {
+      if (!this.matchesCommodityBase(base)) continue;
+
+      byBase.set(base.id, {
+        base,
+        ownedQuantity: 0,
+        listedQuantity: 0,
+        buyOrderQuantity: 0,
+        bestSellPrice: null,
+        bestBuyPrice: null,
+      });
+    }
 
     for (const item of this.inventory()) {
       const base = item.itemInstance.itemBase;
@@ -170,13 +216,13 @@ export class MarketPlaceCommodityComponent implements OnInit {
 
     return [...byBase.values()].sort((a, b) => {
       const blueprintRank =
-        Number(this.isBlueprintResource(b.base)) -
-        Number(this.isBlueprintResource(a.base));
+        Number(isMarketplaceBlueprintResource(b.base)) -
+        Number(isMarketplaceBlueprintResource(a.base));
       if (blueprintRank !== 0) return blueprintRank;
 
       const tierRank =
-        this.getResourceFamilySortRank(a.base) -
-        this.getResourceFamilySortRank(b.base);
+        getMarketplaceResourceSortRank(a.base, this._subcategory()) -
+        getMarketplaceResourceSortRank(b.base, this._subcategory());
       if (tierRank !== 0) return tierRank;
 
       return a.base.name.localeCompare(b.base.name);
@@ -194,6 +240,79 @@ export class MarketPlaceCommodityComponent implements OnInit {
     );
   });
 
+  readonly filteredCommodities = computed(() => {
+    const query = this.catalogSearch();
+    const status = this.catalogStatus();
+    const sort = this.catalogSort();
+    let commodities = this.commodities().filter((commodity) => {
+      if (
+        query &&
+        !commodity.base.name.toLowerCase().includes(query) &&
+        !commodity.base.description?.toLowerCase().includes(query)
+      ) {
+        return false;
+      }
+
+      if (status === 'active') {
+        return commodity.listedQuantity > 0 || commodity.buyOrderQuantity > 0;
+      }
+
+      if (status === 'owned') {
+        return commodity.ownedQuantity > 0;
+      }
+
+      return true;
+    });
+
+    commodities = commodities.slice().sort((a, b) => {
+      if (sort === 'name') {
+        return a.base.name.localeCompare(b.base.name);
+      }
+
+      if (sort === 'ask') {
+        const aPrice = a.bestSellPrice ?? Number.MAX_SAFE_INTEGER;
+        const bPrice = b.bestSellPrice ?? Number.MAX_SAFE_INTEGER;
+        return aPrice - bPrice || a.base.name.localeCompare(b.base.name);
+      }
+
+      const aActivity = a.listedQuantity + a.buyOrderQuantity;
+      const bActivity = b.listedQuantity + b.buyOrderQuantity;
+      return bActivity - aActivity || a.base.name.localeCompare(b.base.name);
+    });
+
+    return commodities;
+  });
+
+  readonly catalogueTitle = computed(() => {
+    switch (this._category()) {
+      case 'blueprints':
+        return 'Blueprint catalogue';
+      case 'catalysts':
+        return 'Catalyst catalogue';
+      case 'essences':
+        return 'Essence catalogue';
+      case 'consumables':
+        return `${this._subcategory() ?? 'Consumable'} catalogue`;
+      default:
+        return `${this._subcategory() ?? 'Resource'} market`;
+    }
+  });
+
+  readonly catalogueHeading = computed(() => {
+    switch (this._category()) {
+      case 'blueprints':
+        return 'Blueprints';
+      case 'catalysts':
+        return 'Catalysts';
+      case 'essences':
+        return 'Essences';
+      case 'consumables':
+        return this._subcategory() ?? 'Consumables';
+      default:
+        return this._subcategory() ?? 'Resources';
+    }
+  });
+
   readonly selectedListings = computed(() => {
     const selected = this.selectedCommodity();
     if (!selected) return [];
@@ -207,7 +326,9 @@ export class MarketPlaceCommodityComponent implements OnInit {
     const selected = this.selectedCommodity();
     if (!selected) return [];
 
-    return this.buyOrders().filter((order) => order.itemBase.id === selected.base.id);
+    return this.buyOrders().filter(
+      (order) => order.itemBase.id === selected.base.id,
+    );
   });
 
   readonly marketName = computed(() => {
@@ -231,15 +352,19 @@ export class MarketPlaceCommodityComponent implements OnInit {
 
   readonly sellOrderRows = computed(() => {
     const grouped = new Map<number, CommodityOrderRow>();
+    const characterId = this.currentCharacterId();
     for (const listing of this.selectedListings()) {
       const existing = grouped.get(listing.unitPrice);
       if (existing) {
         existing.quantity += listing.quantity;
+        existing.ownQuantity +=
+          listing.sellerId === characterId ? listing.quantity : 0;
         existing.listings.push(listing);
       } else {
         grouped.set(listing.unitPrice, {
           unitPrice: listing.unitPrice,
           quantity: listing.quantity,
+          ownQuantity: listing.sellerId === characterId ? listing.quantity : 0,
           listings: [listing],
         });
       }
@@ -255,7 +380,8 @@ export class MarketPlaceCommodityComponent implements OnInit {
       const existing = grouped.get(order.unitPrice);
       if (existing) {
         existing.quantity += order.quantity;
-        existing.ownQuantity += order.buyerId === characterId ? order.quantity : 0;
+        existing.ownQuantity +=
+          order.buyerId === characterId ? order.quantity : 0;
         existing.orders.push(order);
       } else {
         grouped.set(order.unitPrice, {
@@ -274,6 +400,55 @@ export class MarketPlaceCommodityComponent implements OnInit {
     () => this.selectedCommodity()?.ownedQuantity ?? 0,
   );
 
+  readonly ownSellListingForSelectedItem = computed(() => {
+    const itemBaseId = this.selectedCommodity()?.base.id;
+    if (!itemBaseId) return null;
+
+    return (
+      this.marketplaceState
+        .myListings()
+        .find((listing) => listing.itemInstance.itemBase.id === itemBaseId) ??
+      null
+    );
+  });
+
+  readonly ownBuyOrderForSelectedItem = computed(() => {
+    const itemBaseId = this.selectedCommodity()?.base.id;
+    if (!itemBaseId) return null;
+
+    return (
+      this.marketplaceState
+        .myBuyOrders()
+        .find((order) => order.itemBaseId === itemBaseId) ?? null
+    );
+  });
+
+  readonly hasOwnSellListingsForSelectedItem = computed(
+    () => this.ownSellListingForSelectedItem() !== null,
+  );
+
+  readonly hasOwnBuyOrdersForSelectedItem = computed(
+    () => this.ownBuyOrderForSelectedItem() !== null,
+  );
+
+  readonly hasOwnOrderForSelectedItem = computed(
+    () =>
+      this.hasOwnSellListingsForSelectedItem() ||
+      this.hasOwnBuyOrdersForSelectedItem(),
+  );
+
+  readonly buyOrderActionLabel = computed(() => {
+    if (this.hasOwnSellListingsForSelectedItem()) return 'Cancel sell order';
+    if (this.hasOwnBuyOrdersForSelectedItem()) return 'Cancel buy order';
+    return 'Place buy order';
+  });
+
+  readonly sellOrderActionLabel = computed(() => {
+    if (this.hasOwnSellListingsForSelectedItem()) return 'Cancel sell order';
+    if (this.hasOwnBuyOrdersForSelectedItem()) return 'Cancel buy order';
+    return 'List for sale';
+  });
+
   readonly bestSellPrice = computed(() => {
     return this.selectedCommodity()?.bestSellPrice ?? null;
   });
@@ -282,23 +457,83 @@ export class MarketPlaceCommodityComponent implements OnInit {
     return this.selectedCommodity()?.bestBuyPrice ?? null;
   });
 
+  readonly selectedSellOrderIsOwn = computed(() => {
+    const selectedPrice = this.selectedSellPrice();
+    const characterId = this.currentCharacterId();
+    if (selectedPrice === null || !characterId) return false;
+
+    const selectedRow = this.sellOrderRows().find(
+      (row) => row.unitPrice === selectedPrice,
+    );
+    return (
+      !!selectedRow?.ownQuantity &&
+      this.purchasableSellQuantityAtOrBelow(selectedPrice) === 0
+    );
+  });
+
+  readonly spread = computed(() => {
+    const summary = this.marketSummary();
+    if (
+      !summary ||
+      summary.lowestSellUnitPrice === null ||
+      summary.highestBuyUnitPrice === null
+    ) {
+      return null;
+    }
+
+    return summary.lowestSellUnitPrice - summary.highestBuyUnitPrice;
+  });
+  readonly spreadValue = computed(() => this.spread() ?? undefined);
+  readonly lastTradePrice = computed(
+    () => this.marketSummary()?.lastTradeUnitPrice ?? undefined,
+  );
+  readonly medianPrice7Days = computed(
+    () => this.marketSummary()?.medianUnitPrice7Days ?? undefined,
+  );
+
   constructor(
     private readonly inventoryState: InventoryStateService,
     private readonly marketplaceState: MarketplaceStateService,
     private readonly characterService: CharacterService,
+    private readonly marketplaceService: MarketPlaceService,
   ) {
     effect(
       () => {
         this._itemType();
         this._subcategory();
         this.selectedCommodityId();
+        const ticketSide = this.ticketSide();
         this.quantityCtrl.setValue(1, { emitEvent: false });
         this.unitPriceCtrl.setValue(
-          this.bestSellPrice() ?? this.bestBuyPrice(),
+          ticketSide === 'buy'
+            ? (this.bestSellPrice() ?? this.bestBuyPrice())
+            : (this.bestBuyPrice() ?? this.bestSellPrice()),
           {
             emitEvent: false,
           },
         );
+      },
+      { allowSignalWrites: true },
+    );
+
+    effect(
+      () => {
+        const itemBaseId = this.selectedCommodity()?.base.id;
+        this.marketplaceState.listings();
+        this.marketplaceState.buyOrders();
+        if (!itemBaseId) {
+          this.marketSummary.set(null);
+          return;
+        }
+
+        this.marketplaceService.getSummary(itemBaseId).subscribe({
+          next: (summary) => {
+            if (this.selectedCommodity()?.base.id === summary.itemBaseId) {
+              this.marketSummary.set(summary);
+            }
+          },
+          error: () => this.marketSummary.set(null),
+        });
       },
       { allowSignalWrites: true },
     );
@@ -338,7 +573,7 @@ export class MarketPlaceCommodityComponent implements OnInit {
           !current ||
           !this.sellOrderRows().some((row) => row.unitPrice === current)
         ) {
-          this.selectSellOrder(firstSellOrder);
+          this.selectSellOrder(firstSellOrder, false);
         }
       },
       { allowSignalWrites: true },
@@ -358,7 +593,7 @@ export class MarketPlaceCommodityComponent implements OnInit {
           !current ||
           !this.buyOrderRows().some((row) => row.unitPrice === current)
         ) {
-          this.selectBuyOrder(firstBuyOrder);
+          this.selectBuyOrder(firstBuyOrder, false);
         }
       },
       { allowSignalWrites: true },
@@ -370,24 +605,152 @@ export class MarketPlaceCommodityComponent implements OnInit {
     this.marketplaceState.load();
   }
 
-  selectSellOrder(row: CommodityOrderRow): void {
+  selectSellOrder(row: CommodityOrderRow, updateQuantity = true): void {
     this.selectedSellPrice.set(row.unitPrice);
     this.unitPriceCtrl.setValue(row.unitPrice, { emitEvent: false });
+    if (updateQuantity) {
+      const cumulativeQuantity = this.purchasableSellQuantityAtOrBelow(
+        row.unitPrice,
+      );
+      this.quantityCtrl.setValue(
+        cumulativeQuantity > 0 ? cumulativeQuantity : row.quantity,
+      );
+    }
   }
 
-  selectBuyOrder(row: CommodityBuyOrderRow): void {
+  selectBuyOrder(row: CommodityBuyOrderRow, updateQuantity = true): void {
     this.selectedBuyPrice.set(row.unitPrice);
     this.unitPriceCtrl.setValue(row.unitPrice, { emitEvent: false });
+    if (updateQuantity) {
+      this.quantityCtrl.setValue(row.quantity);
+    }
   }
 
   selectCommodity(commodity: Commodity): void {
     this.selectedCommodityId.set(commodity.base.id);
+    this.mobileDetailOpen.set(true);
+    this.mobileOrderBook.set('sell');
+    this.mobileDetailChanged.emit(true);
+  }
+
+  closeMobileDetail(): void {
+    this.mobileDetailOpen.set(false);
+    this.mobileDetailChanged.emit(false);
+  }
+
+  setMobileOrderBook(orderBook: MobileOrderBook): void {
+    this.mobileOrderBook.set(orderBook);
+    const selectedPrice =
+      orderBook === 'sell'
+        ? this.selectedSellPrice()
+        : (this.selectedBuyPrice() ??
+          this.bestBuyPrice() ??
+          this.bestSellPrice());
+    this.unitPriceCtrl.setValue(selectedPrice, { emitEvent: false });
+  }
+
+  adjustMobileQuantity(delta: number): void {
+    const quantity = Math.max(1, (this.quantityCtrl.value ?? 1) + delta);
+    this.quantityCtrl.setValue(quantity);
+  }
+
+  submitMobileOrder(): void {
+    if (this.ticketSide() === 'sell') {
+      this.submitSellOrderAction();
+      return;
+    }
+
+    if (this.mobileOrderBook() === 'buy') {
+      this.submitBuyOrderAction();
+      return;
+    }
+
+    this.buySelectedCommodity();
+  }
+
+  setTicketSide(side: MarketTicketSide): void {
+    this.ticketSide.set(side);
+  }
+
+  submitBuyOrderAction(): void {
+    if (this.hasOwnOrderForSelectedItem()) {
+      this.cancelActiveOrderForSelectedItem();
+      return;
+    }
+
+    this.placeBuyOrder();
+  }
+
+  submitSellOrderAction(): void {
+    if (this.hasOwnOrderForSelectedItem()) {
+      this.cancelActiveOrderForSelectedItem();
+      return;
+    }
+
+    this.sellSelectedCommodity();
+  }
+
+  setCatalogStatus(value: string): void {
+    if (value === 'all' || value === 'active' || value === 'owned') {
+      this.catalogStatus.set(value);
+    }
+  }
+
+  setCatalogSort(value: string): void {
+    if (value === 'activity' || value === 'name' || value === 'ask') {
+      this.catalogSort.set(value);
+    }
+  }
+
+  commodityDisplayName(commodity: Commodity): string {
+    return this._category() === 'blueprints'
+      ? commodity.base.name.replace(/^Blueprint:\s*/i, '')
+      : commodity.base.name;
+  }
+
+  commodityDisplayPrice(commodity: Commodity): number | undefined {
+    return commodity.bestSellPrice ?? commodity.bestBuyPrice ?? undefined;
+  }
+
+  buyOrderCommitment(): number {
+    const quantity = this.quantityCtrl.value ?? 0;
+    const limitPrice = this.unitPriceCtrl.value ?? 0;
+    if (quantity <= 0 || limitPrice <= 0) return 0;
+
+    const characterId = this.currentCharacterId();
+    let remaining = quantity;
+    let total = 0;
+    const eligibleListings = this.selectedListings()
+      .filter(
+        (listing) =>
+          listing.sellerId !== characterId && listing.unitPrice <= limitPrice,
+      )
+      .slice()
+      .sort(
+        (a, b) =>
+          a.unitPrice - b.unitPrice ||
+          a.createdAt.toString().localeCompare(b.createdAt.toString()),
+      );
+
+    for (const listing of eligibleListings) {
+      const fillQuantity = Math.min(remaining, listing.quantity);
+      total += fillQuantity * listing.unitPrice;
+      remaining -= fillQuantity;
+      if (remaining === 0) break;
+    }
+
+    return total + remaining * limitPrice;
+  }
+
+  ticketOrderValue(): number {
+    if (this.ticketSide() === 'buy') return this.buyOrderCommitment();
+
+    return (this.quantityCtrl.value ?? 0) * (this.unitPriceCtrl.value ?? 0);
   }
 
   sellSelectedCommodity(): void {
     const item = this.selectedInventoryItem();
-    if (!item || this.quantityCtrl.invalid || this.unitPriceCtrl.invalid)
-      return;
+    if (!item || !this.canSell()) return;
 
     const quantity = this.quantityCtrl.value!;
     const unitPrice = this.unitPriceCtrl.value!;
@@ -405,8 +768,7 @@ export class MarketPlaceCommodityComponent implements OnInit {
 
   placeBuyOrder(): void {
     const selected = this.selectedCommodity();
-    if (!selected || this.quantityCtrl.invalid || this.unitPriceCtrl.invalid)
-      return;
+    if (!selected || !this.canPlaceBuyOrder()) return;
 
     const quantity = this.quantityCtrl.value!;
     const unitPrice = this.unitPriceCtrl.value!;
@@ -424,37 +786,16 @@ export class MarketPlaceCommodityComponent implements OnInit {
   }
 
   buySelectedCommodity(): void {
-    if (this.quantityCtrl.invalid || this.unitPriceCtrl.invalid) return;
-
-    let remaining = this.quantityCtrl.value!;
-    const maxUnitPrice = this.unitPriceCtrl.value!;
-    const plan = this.sellOrderRows()
-      .filter((row) => row.unitPrice <= maxUnitPrice)
-      .flatMap((row) =>
-        row.listings
-          .slice()
-          .sort((a, b) =>
-            a.createdAt.toString().localeCompare(b.createdAt.toString()),
-          ),
-      )
-      .map((listing) => {
-        const quantity = Math.min(remaining, listing.quantity);
-        remaining -= quantity;
-        return { listing, quantity };
-      })
-      .filter((purchase) => purchase.quantity > 0);
-
-    if (remaining > 0 || plan.length === 0) return;
+    const commodity = this.selectedCommodity();
+    if (!commodity || this.quantityCtrl.invalid || this.unitPriceCtrl.invalid)
+      return;
 
     this.placingOrder.set(true);
-    from(plan)
-      .pipe(
-        concatMap((purchase) =>
-          this.marketplaceState.buyoutListing(
-            purchase.listing.id,
-            purchase.quantity,
-          ),
-        ),
+    this.marketplaceState
+      .buyCommodity(
+        commodity.base.id,
+        this.quantityCtrl.value!,
+        this.unitPriceCtrl.value!,
       )
       .subscribe({
         error: (error) => {
@@ -467,46 +808,14 @@ export class MarketPlaceCommodityComponent implements OnInit {
 
   fillSelectedBuyOrder(): void {
     const item = this.selectedInventoryItem();
-    const selectedPrice = this.selectedBuyPrice();
-    if (
-      !item ||
-      selectedPrice === null ||
-      this.quantityCtrl.invalid ||
-      this.unitPriceCtrl.invalid
-    )
-      return;
-
-    let remaining = this.quantityCtrl.value!;
-    const characterId = this.currentCharacterId();
-    const plan = this.buyOrderRows()
-      .filter((row) => row.unitPrice === selectedPrice)
-      .flatMap((row) =>
-        row.orders
-          .filter((order) => order.buyerId !== characterId)
-          .slice()
-          .sort((a, b) =>
-            a.createdAt.toString().localeCompare(b.createdAt.toString()),
-          ),
-      )
-      .map((order) => {
-        const quantity = Math.min(remaining, order.quantity);
-        remaining -= quantity;
-        return { order, quantity };
-      })
-      .filter((sale) => sale.quantity > 0);
-
-    if (remaining > 0 || plan.length === 0) return;
+    if (!item || !this.canFillBuyOrder()) return;
 
     this.placingOrder.set(true);
-    from(plan)
-      .pipe(
-        concatMap((sale) =>
-          this.marketplaceState.fulfillBuyOrder(
-            sale.order.id,
-            item.itemInstance.id,
-            sale.quantity,
-          ),
-        ),
+    this.marketplaceState
+      .sellCommodity(
+        item.itemInstance.id,
+        this.quantityCtrl.value!,
+        this.unitPriceCtrl.value!,
       )
       .subscribe({
         error: (error) => {
@@ -517,23 +826,24 @@ export class MarketPlaceCommodityComponent implements OnInit {
       });
   }
 
-  cancelSelectedBuyOrder(): void {
-    const selectedPrice = this.selectedBuyPrice();
-    const characterId = this.currentCharacterId();
-    if (selectedPrice === null || !characterId) return;
-
-    const order = this.selectedBuyOrders()
-      .filter(
-        (buyOrder) =>
-          buyOrder.unitPrice === selectedPrice &&
-          buyOrder.buyerId === characterId,
-      )
-      .sort((a, b) => a.createdAt.toString().localeCompare(b.createdAt.toString()))[0];
-
-    if (!order) return;
+  cancelActiveOrderForSelectedItem(): void {
+    if (this.placingOrder()) return;
 
     this.placingOrder.set(true);
-    this.marketplaceState.cancelBuyOrder(order.id).subscribe({
+    const sellListing = this.ownSellListingForSelectedItem();
+    const buyOrder = this.ownBuyOrderForSelectedItem();
+    const cancellation: Observable<unknown> | null = sellListing
+      ? this.marketplaceState.cancelListing(sellListing.id)
+      : buyOrder
+        ? this.marketplaceState.cancelBuyOrder(buyOrder.id)
+        : null;
+
+    if (!cancellation) {
+      this.placingOrder.set(false);
+      return;
+    }
+
+    cancellation.subscribe({
       error: (error) => {
         console.error(error);
         this.placingOrder.set(false);
@@ -547,18 +857,23 @@ export class MarketPlaceCommodityComponent implements OnInit {
       !this.placingOrder() &&
       !!this.selectedCommodity() &&
       !!this.selectedInventoryItem() &&
+      !this.hasOwnBuyOrdersForSelectedItem() &&
+      !this.hasOwnSellListingsForSelectedItem() &&
       !this.quantityCtrl.invalid &&
       !this.unitPriceCtrl.invalid &&
+      (this.quantityCtrl.value ?? 0) > 0 &&
       (this.quantityCtrl.value ?? 0) <= this.ownedQuantity()
     );
   }
 
   canPlaceBuyOrder(): boolean {
-    const total = (this.quantityCtrl.value ?? 0) * (this.unitPriceCtrl.value ?? 0);
+    const total = this.buyOrderCommitment();
 
     return (
       !this.placingOrder() &&
       !!this.selectedCommodity() &&
+      !this.hasOwnSellListingsForSelectedItem() &&
+      !this.hasOwnBuyOrdersForSelectedItem() &&
       !this.quantityCtrl.invalid &&
       !this.unitPriceCtrl.invalid &&
       total > 0 &&
@@ -566,14 +881,36 @@ export class MarketPlaceCommodityComponent implements OnInit {
     );
   }
 
+  canSubmitBuyOrderAction(): boolean {
+    return this.hasOwnOrderForSelectedItem()
+      ? !this.placingOrder()
+      : this.canPlaceBuyOrder();
+  }
+
+  canSubmitSellOrderAction(): boolean {
+    return this.hasOwnOrderForSelectedItem()
+      ? !this.placingOrder()
+      : this.canSell();
+  }
+
+  canSubmitMobileOrder(): boolean {
+    if (this.ticketSide() === 'sell') return this.canSubmitSellOrderAction();
+
+    return this.mobileOrderBook() === 'buy'
+      ? this.canSubmitBuyOrderAction()
+      : this.canBuy();
+  }
+
   canBuy(): boolean {
     return (
       !this.placingOrder() &&
       !!this.selectedCommodity() &&
+      !this.selectedSellOrderIsOwn() &&
       !this.quantityCtrl.invalid &&
       !this.unitPriceCtrl.invalid &&
       (this.quantityCtrl.value ?? 0) > 0 &&
-      this.availableAtOrderPrice() >= (this.quantityCtrl.value ?? 0)
+      this.availableAtOrderPrice() >= (this.quantityCtrl.value ?? 0) &&
+      this.buyOrderCommitment() <= this.currentCinders()
     );
   }
 
@@ -583,19 +920,10 @@ export class MarketPlaceCommodityComponent implements OnInit {
       !!this.selectedCommodity() &&
       !!this.selectedInventoryItem() &&
       !this.quantityCtrl.invalid &&
+      !this.unitPriceCtrl.invalid &&
       (this.quantityCtrl.value ?? 0) > 0 &&
       (this.quantityCtrl.value ?? 0) <= this.ownedQuantity() &&
       this.availableBuyOrderQuantity() >= (this.quantityCtrl.value ?? 0)
-    );
-  }
-
-  canCancelBuyOrder(): boolean {
-    const selectedPrice = this.selectedBuyPrice();
-    const characterId = this.currentCharacterId();
-    if (selectedPrice === null || !characterId) return false;
-
-    return this.selectedBuyOrders().some(
-      (order) => order.unitPrice === selectedPrice && order.buyerId === characterId,
     );
   }
 
@@ -618,64 +946,39 @@ export class MarketPlaceCommodityComponent implements OnInit {
       base.itemType === this._itemType() &&
       base.stackable &&
       (!subcategory ||
-        this.matchesResourceGroup(base, normalizedSubcategory) ||
+        matchesMarketplaceResourceSubcategory(base, normalizedSubcategory) ||
         name === normalizedSubcategory)
     );
   }
 
-  private matchesResourceGroup(
-    base: ItemBase,
-    subcategory: string | undefined,
-  ): boolean {
-    if (base.itemType !== ItemType.Resource || !subcategory) return false;
-
-    switch (subcategory) {
-      case 'blueprints':
-        return this.isBlueprintResource(base);
-      case 'catalysts':
-        return this.specialMaterialItemIds.has(base.id);
-      default:
-        return this.resourceFamilyItemIds.get(subcategory)?.includes(base.id) ??
-          false;
-    }
-  }
-
-  private getResourceFamilySortRank(base: ItemBase): number {
-    const subcategory = this._subcategory()?.toLowerCase();
-    if (!subcategory) return Number.MAX_SAFE_INTEGER;
-
-    const familyIds =
-      subcategory === 'catalysts'
-        ? [...this.specialMaterialItemIds]
-        : this.resourceFamilyItemIds.get(subcategory);
-    const index = familyIds?.indexOf(base.id) ?? -1;
-
-    return index === -1 ? Number.MAX_SAFE_INTEGER : index;
-  }
-
-  private isBlueprintResource(base: ItemBase): boolean {
-    return (
-      base.itemType === ItemType.Resource &&
-      (base.id.toLowerCase().startsWith('blueprint_') ||
-        base.name.toLowerCase().startsWith('blueprint:'))
-    );
+  private resetMobileView(): void {
+    this.mobileDetailOpen.set(false);
+    this.mobileOrderBook.set('sell');
   }
 
   private availableAtOrderPrice(): number {
     const price = this.unitPriceCtrl.value;
     if (!price) return 0;
+
+    return this.purchasableSellQuantityAtOrBelow(price);
+  }
+
+  private purchasableSellQuantityAtOrBelow(unitPrice: number): number {
+    const characterId = this.currentCharacterId();
     return this.sellOrderRows()
-      .filter((row) => row.unitPrice <= price)
-      .reduce((sum, row) => sum + row.quantity, 0);
+      .filter((row) => row.unitPrice <= unitPrice)
+      .flatMap((row) => row.listings)
+      .filter((listing) => listing.sellerId !== characterId)
+      .reduce((sum, listing) => sum + listing.quantity, 0);
   }
 
   private availableBuyOrderQuantity(): number {
-    const selectedPrice = this.selectedBuyPrice();
-    if (selectedPrice === null) return 0;
+    const minimumUnitPrice = this.unitPriceCtrl.value;
+    if (!minimumUnitPrice) return 0;
 
     const characterId = this.currentCharacterId();
     return this.buyOrderRows()
-      .filter((row) => row.unitPrice === selectedPrice)
+      .filter((row) => row.unitPrice >= minimumUnitPrice)
       .flatMap((row) => row.orders)
       .filter((order) => order.buyerId !== characterId)
       .reduce((sum, order) => sum + order.quantity, 0);

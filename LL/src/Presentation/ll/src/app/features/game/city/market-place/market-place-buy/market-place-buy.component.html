@@ -3,7 +3,7 @@
 >
   <section class="flex min-h-0 flex-col overflow-hidden">
     <div class="mb-3 flex items-baseline justify-between gap-3">
-      <h2 class="ll-heading text-xl uppercase">Buy Orders</h2>
+      <h2 class="ll-heading text-xl uppercase">Listings</h2>
       <span class="ll-eyebrow">
         {{ filteredListings().length }} listings found
       </span>
@@ -24,6 +24,42 @@
         [selectedValue]="rarity()"
         (selection)="setRaritySelection($event)"
       ></app-dropdown>
+
+      <ng-container *ngIf="selectedItemType() === 'Equipment'">
+        <app-dropdown
+          label="Any slot"
+          [value]="equipmentType()"
+          [options]="equipmentTypeOptions"
+          [selectedValue]="equipmentType()"
+          (selection)="setEquipmentTypeSelection($event)"
+        ></app-dropdown>
+
+        <app-dropdown
+          label="Any quality"
+          [value]="quality()"
+          [options]="qualityOptions"
+          [selectedValue]="quality()"
+          (selection)="setQualitySelection($event)"
+        ></app-dropdown>
+
+        <input
+          type="number"
+          min="1"
+          [formControl]="minimumTierCtrl"
+          placeholder="Min tier"
+          aria-label="Minimum equipment tier"
+          class="ll-input ll-input-compact no-spinner w-24"
+        />
+
+        <input
+          type="number"
+          min="0"
+          [formControl]="minimumPotentialCtrl"
+          placeholder="Min potential"
+          aria-label="Minimum equipment potential"
+          class="ll-input ll-input-compact no-spinner w-28"
+        />
+      </ng-container>
 
       <button
         type="button"

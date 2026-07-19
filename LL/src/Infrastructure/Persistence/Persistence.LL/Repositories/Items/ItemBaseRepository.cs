@@ -15,6 +15,16 @@ public class ItemBaseRepository : IItemBaseRepository
         _context = context;
     }
 
+    public async Task<List<ItemBase>> GetTradableItemBasesAsync(CancellationToken cancellationToken) =>
+        await _context.ItemBases
+            .AsNoTracking()
+            .Include(x => (x as EquipmentBase)!.AttributeModifiers)
+            .Include(x => (x as EquipmentBase)!.ToolBonuses)
+            .Where(x => !x.IsBound)
+            .OrderBy(x => x.ItemType)
+            .ThenBy(x => x.Name)
+            .ToListAsync(cancellationToken);
+
     public async Task<IReadOnlyDictionary<string, ItemBase>> GetItemBasesByIdsAsync(
         IReadOnlyCollection<string> itemIds,
         CancellationToken cancellationToken)

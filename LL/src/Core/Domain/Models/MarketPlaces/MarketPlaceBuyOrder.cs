@@ -12,4 +12,5 @@ public class MarketPlaceBuyOrder
     public int Quantity { get; set; }
     public long UnitPrice { get; set; }
     public DateTimeOffset CreatedAt { get; set; }
+    public DateTimeOffset ExpiresAt { get; set; }
 }

@@ -9,4 +9,5 @@ export interface MarketPlaceBuyOrder {
   quantity: number;
   unitPrice: number;
   createdAt: Date;
+  expiresAt: Date;
 }

@@ -1,0 +1,36 @@
+:host {
+  container-type: inline-size;
+  display: block;
+  height: 100%;
+  min-height: 0;
+  width: 100%;
+}
+
+.marketplace-navigation {
+  flex-direction: column;
+}
+
+.marketplace-mode-nav {
+  margin-left: 0;
+  width: 100%;
+}
+
+@container (max-width: 33.99rem) {
+  .marketplace-mobile-detail .marketplace-header,
+  .marketplace-mobile-detail .marketplace-navigation {
+    display: none;
+  }
+}
+
+@container (min-width: 60rem) {
+  .marketplace-navigation {
+    align-items: center;
+    flex-direction: row;
+    justify-content: space-between;
+  }
+
+  .marketplace-mode-nav {
+    margin-left: auto;
+    width: auto;
+  }
+}

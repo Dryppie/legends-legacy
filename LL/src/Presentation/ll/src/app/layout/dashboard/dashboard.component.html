@@ -26,15 +26,15 @@
             class="ll-game-surface absolute inset-y-0 left-0 right-0 sm:right-4 xl:right-0"
           ></div>
           <main
-            class="relative flex h-full min-h-0 w-full flex-auto flex-col gap-2 overflow-hidden pt-4 sm:rounded-md sm:pt-6 2xl:rounded-b-none"
+            class="relative flex h-full min-h-0 w-full flex-auto flex-col gap-2 overflow-hidden pt-2 sm:rounded-md sm:pt-6 2xl:rounded-b-none"
           >
             <div
-              class="flex h-full min-h-0 w-full flex-col overflow-hidden pb-4 pl-4 sm:pb-6 sm:pl-6"
+              class="flex h-full min-h-0 w-full flex-col overflow-hidden pb-2 pl-2 sm:pb-6 sm:pl-6"
             >
               <ng-container *ngIf="bootstrapLoaded(); else bootstrapPending">
                 <app-current-action
                   *ngIf="displayCurrentAction"
-                  class="mb-2 block shrink-0 pr-4 sm:hidden"
+                  class="mb-2 block shrink-0 pr-2 sm:hidden"
                   (click)="navigateToAction()"
                 ></app-current-action>
                 <div

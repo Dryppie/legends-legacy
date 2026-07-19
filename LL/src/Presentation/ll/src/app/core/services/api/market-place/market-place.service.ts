@@ -9,23 +9,47 @@ import { BuyoutMarketPlaceListingRequest } from '../../../../shared/models/reque
 import { FulfillMarketPlaceBuyOrderRequest } from '../../../../shared/models/requestDtos/market-place/fulfill-market-place-buy-order-request';
 import { ToastService } from '../../client-side/components/toast/toast.service';
 import { InventoryItem } from '../../../../shared/models/inventoryItem';
+import { ItemBase } from '../../../../shared/models/item';
+import { MarketPlaceOrder } from '../../../../shared/models/Dtos/market-place/market-place-order';
 
 export interface BuyoutMarketPlaceListingResponse {
   listingId: string;
   remainingListing: MarketPlaceListing | null;
   purchasedItem: InventoryItem;
+  purchasedQuantity: number;
+  totalPrice: number;
   buyerCinders: number;
 }
 
+export interface BuyCommodityResponse {
+  filledQuantity: number;
+  totalPrice: number;
+  buyerCinders: number;
+}
+
+export interface SellCommodityResponse {
+  filledQuantity: number;
+  totalPrice: number;
+  sellerFees: number;
+  sellerCinders: number;
+  remainingInventoryItem: InventoryItem | null;
+}
+
 export interface CreateMarketPlaceListingResponse {
-  listing: MarketPlaceListing;
+  listing: MarketPlaceListing | null;
   listedItemInstanceId: string;
   listedQuantity: number;
+  filledQuantity: number;
+  filledTotalPrice: number;
+  sellerFees: number;
+  sellerCinders: number;
   remainingInventoryItem: InventoryItem | null;
 }
 
 export interface CreateMarketPlaceBuyOrderResponse {
-  buyOrder: MarketPlaceBuyOrder;
+  buyOrder: MarketPlaceBuyOrder | null;
+  filledQuantity: number;
+  filledTotalPrice: number;
   buyerCinders: number;
 }
 
@@ -36,6 +60,8 @@ export interface FulfillMarketPlaceBuyOrderResponse {
   remainingSellerInventoryItem: InventoryItem | null;
   soldItemInstanceId: string;
   soldQuantity: number;
+  totalPrice: number;
+  sellerFee: number;
   sellerCinders: number;
 }
 
@@ -47,6 +73,17 @@ export interface CancelMarketPlaceBuyOrderResponse {
 export interface CancelMarketPlaceListingResponse {
   listingId: string;
   returnedItem: InventoryItem;
+}
+
+export interface MarketPlaceItemSummary {
+  itemBaseId: string;
+  lowestSellUnitPrice: number | null;
+  totalSellQuantity: number;
+  highestBuyUnitPrice: number | null;
+  totalBuyQuantity: number;
+  lastTradeUnitPrice: number | null;
+  medianUnitPrice7Days: number | null;
+  tradeVolume24Hours: number;
 }
 
 @Injectable({
@@ -72,6 +109,32 @@ export class MarketPlaceService {
         return throwError(() => new Error('Failed to get inventory'));
       }),
     );
+  }
+
+  getCatalog(): Observable<ItemBase[]> {
+    return this.api.get('marketplace/catalog').pipe(
+      catchError(() => {
+        return throwError(() => new Error('Failed to get marketplace catalog'));
+      }),
+    );
+  }
+
+  getHistory(take = 50): Observable<MarketPlaceOrder[]> {
+    return this.api.get(`marketplace/history?take=${take}`).pipe(
+      catchError(() => {
+        return throwError(() => new Error('Failed to get marketplace history'));
+      }),
+    );
+  }
+
+  getSummary(itemBaseId: string): Observable<MarketPlaceItemSummary> {
+    return this.api
+      .get(`marketplace/summary/${encodeURIComponent(itemBaseId)}`)
+      .pipe(
+        catchError(() => {
+          return throwError(() => new Error('Failed to get market summary'));
+        }),
+      );
   }
 
   getBuyOrders(): Observable<MarketPlaceBuyOrder[]> {
@@ -110,6 +173,42 @@ export class MarketPlaceService {
         return throwError(() => new Error('Failed to buy listing'));
       }),
     );
+  }
+
+  buyCommodity(
+    itemBaseId: string,
+    quantity: number,
+    maximumUnitPrice: number,
+  ): Observable<BuyCommodityResponse> {
+    return this.api
+      .post('marketplace/buyCommodity', {
+        itemBaseId,
+        quantity,
+        maximumUnitPrice,
+      })
+      .pipe(
+        catchError(() => {
+          return throwError(() => new Error('Failed to buy commodity'));
+        }),
+      );
+  }
+
+  sellCommodity(
+    itemInstanceId: string,
+    quantity: number,
+    minimumUnitPrice: number,
+  ): Observable<SellCommodityResponse> {
+    return this.api
+      .post('marketplace/sellCommodity', {
+        itemInstanceId,
+        quantity,
+        minimumUnitPrice,
+      })
+      .pipe(
+        catchError(() => {
+          return throwError(() => new Error('Failed to sell commodity'));
+        }),
+      );
   }
 
   fulfillBuyOrder(

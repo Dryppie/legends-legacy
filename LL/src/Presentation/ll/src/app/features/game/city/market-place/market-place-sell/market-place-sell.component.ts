@@ -21,6 +21,7 @@ import { RegularButtonComponent } from '../../../../../shared/components/custom-
 import {
   EquipmentInstance,
   EssenceItem,
+  ItemBase,
 } from '../../../../../shared/models/item';
 import { MarketplaceStateService } from '../../../../../core/services/api/market-place/market-place-state.service';
 import { MarketPlaceListing } from '../../../../../shared/models/Dtos/market-place/market-place-listing';
@@ -31,6 +32,12 @@ import { ItemComponent } from '../../../../../shared/components/item/item.compon
 import { formatAttributeType } from '../../../../../shared/pipes/attributes/attribute-type-format/attribute-type-format.pipe';
 import { formatAttributeValue } from '../../../../../shared/pipes/attributes/attribute-value-format/attribute-value-format.pipe';
 import { ItemType } from '../../../../../shared/models/enums/itemType';
+import { MarketCategoryId } from '../../../../../shared/models/market-category';
+import {
+  isMarketplaceBlueprintResource,
+  MARKETPLACE_CATALYST_ITEM_IDS,
+  matchesMarketplaceResourceSubcategory,
+} from '../../../../../shared/utils/market-place/market-place-category.utils';
 
 @Component({
   selector: 'app-market-place-sell',
@@ -50,6 +57,8 @@ import { ItemType } from '../../../../../shared/models/enums/itemType';
 export class MarketPlaceSellComponent implements OnInit {
   readonly myListings = signal<MarketPlaceListing[]>([]);
   readonly selectedItemType = signal<ItemType | null>(null);
+  readonly selectedCategory = signal<MarketCategoryId>('resources');
+  readonly selectedSubcategory = signal<string | null>(null);
 
   readonly pendingItem = signal<InventoryItem | null>(null);
   selectedItemId: string = '';
@@ -57,6 +66,20 @@ export class MarketPlaceSellComponent implements OnInit {
   @Input()
   set itemType(value: ItemType | null) {
     this.selectedItemType.set(value);
+    this.pendingItem.set(null);
+    this.selectedItemId = '';
+  }
+
+  @Input({ required: true })
+  set category(value: MarketCategoryId) {
+    this.selectedCategory.set(value);
+    this.pendingItem.set(null);
+    this.selectedItemId = '';
+  }
+
+  @Input()
+  set subcategory(value: string | null) {
+    this.selectedSubcategory.set(value);
     this.pendingItem.set(null);
     this.selectedItemId = '';
   }
@@ -74,6 +97,7 @@ export class MarketPlaceSellComponent implements OnInit {
     private readonly marketplaceState: MarketplaceStateService,
   ) {
     this.inventoryState.load();
+    this.marketplaceState.load();
     effect(() => {
       const pi = this.pendingItem();
       if (!pi) return;
@@ -152,34 +176,131 @@ export class MarketPlaceSellComponent implements OnInit {
     return pi.itemInstance.itemBase.stackable ? pi.quantity : 1;
   };
 
+  readonly grossTotal = () =>
+    (this.priceCtrl.value ?? 0) * (this.qtyCtrl.value ?? 0);
+
+  readonly estimatedFee = () =>
+    this.grossTotal() > 0
+      ? Math.max(1, Math.ceil(this.grossTotal() * 0.03))
+      : 0;
+
+  readonly estimatedProceeds = () =>
+    Math.max(0, this.grossTotal() - this.estimatedFee());
+
   readonly displayedMyListings = computed(() => {
     const itemType = this.selectedItemType();
     if (!itemType) return this.myListings();
     return this.myListings().filter(
-      (listing) => listing.itemInstance.itemBase.itemType === itemType,
+      (listing) =>
+        listing.itemInstance.itemBase.itemType === itemType &&
+        this.matchesSelectedCategory(listing.itemInstance.itemBase),
     );
+  });
+
+  readonly matchingBuyOrders = computed(() => {
+    const pending = this.pendingItem();
+    if (!pending?.itemInstance.itemBase.stackable) return [];
+
+    const ownOrderIds = new Set(
+      this.marketplaceState.myBuyOrders().map((order) => order.id),
+    );
+    return this.marketplaceState
+      .buyOrders()
+      .filter(
+        (order) =>
+          order.itemBaseId === pending.itemInstance.itemBase.id &&
+          !ownOrderIds.has(order.id),
+      )
+      .sort(
+        (a, b) =>
+          b.unitPrice - a.unitPrice ||
+          a.createdAt.toString().localeCompare(b.createdAt.toString()),
+      );
+  });
+
+  readonly bestBuyOrderPrice = computed(
+    () => this.matchingBuyOrders()[0]?.unitPrice ?? null,
+  );
+
+  readonly hasOwnBuyOrderForPendingItem = computed(() => {
+    const itemBaseId = this.pendingItem()?.itemInstance.itemBase.id;
+    if (!itemBaseId) return false;
+
+    return this.marketplaceState
+      .myBuyOrders()
+      .some((order) => order.itemBaseId === itemBaseId);
+  });
+
+  readonly hasOwnSellListingForPendingItem = computed(() => {
+    const base = this.pendingItem()?.itemInstance.itemBase;
+    if (!base?.stackable) return false;
+
+    return this.marketplaceState
+      .myListings()
+      .some((listing) => listing.itemInstance.itemBase.id === base.id);
   });
 
   selectItem(item: InventoryItem) {
     this.pendingItem.set(item);
     this.selectedItemId = item.itemInstance.id;
+    this.priceCtrl.setValue(this.bestBuyOrderPrice(), { emitEvent: false });
   }
 
   listItem() {
-    if (this.priceCtrl.invalid || this.qtyCtrl.invalid || !this.pendingItem())
-      return;
+    if (!this.canCreateListing()) return;
 
     const qty = this.qtyCtrl.value!;
     const unitPrice = this.priceCtrl.value!;
     const item = this.pendingItem()!;
 
+    this.marketplaceState.createListing(item, qty, unitPrice).subscribe(() => {
+      this.pendingItem.set(null);
+      this.priceCtrl.reset();
+      this.qtyCtrl.reset();
+    });
+  }
+
+  sellNow(): void {
+    const item = this.pendingItem();
+    if (!item || !this.canSellNow()) return;
+
     this.marketplaceState
-      .createListing(item, qty, unitPrice)
+      .sellCommodity(
+        item.itemInstance.id,
+        this.qtyCtrl.value!,
+        this.priceCtrl.value!,
+      )
       .subscribe(() => {
         this.pendingItem.set(null);
         this.priceCtrl.reset();
-        this.qtyCtrl.reset();
+        this.qtyCtrl.setValue(1);
       });
+  }
+
+  canSellNow(): boolean {
+    const quantity = this.qtyCtrl.value ?? 0;
+    const minimumPrice = this.priceCtrl.value ?? 0;
+    if (
+      !this.pendingItem()?.itemInstance.itemBase.stackable ||
+      this.qtyCtrl.invalid ||
+      this.priceCtrl.invalid
+    )
+      return false;
+
+    const demand = this.matchingBuyOrders()
+      .filter((order) => order.unitPrice >= minimumPrice)
+      .reduce((sum, order) => sum + order.quantity, 0);
+    return quantity > 0 && demand >= quantity;
+  }
+
+  canCreateListing(): boolean {
+    return (
+      !!this.pendingItem() &&
+      !this.hasOwnBuyOrderForPendingItem() &&
+      !this.hasOwnSellListingForPendingItem() &&
+      !this.priceCtrl.invalid &&
+      !this.qtyCtrl.invalid
+    );
   }
 
   cancelListing(listing: MarketPlaceListing) {
@@ -220,20 +341,32 @@ export class MarketPlaceSellComponent implements OnInit {
   }
 
   get filteredItems(): InventoryItem[] {
+    let items: InventoryItem[];
+
     switch (this.selectedItemType()) {
       case ItemType.Equipment:
-        return this.inventoryState.equipment();
+        items = this.inventoryState.equipment();
+        break;
 
       case ItemType.Essence:
-        return this.inventoryState.essences();
+        items = this.inventoryState.essences();
+        break;
 
       case ItemType.Resource:
-        return this.inventoryState.materials();
+        items = this.inventoryState.materials();
+        break;
 
       default:
+        items = this.itemsForActiveTab();
         break;
     }
 
+    return items.filter((item) =>
+      this.matchesSelectedCategory(item.itemInstance.itemBase),
+    );
+  }
+
+  private itemsForActiveTab(): InventoryItem[] {
     switch (this.activeTab) {
       case 'All':
         return this.inventoryState.items();
@@ -257,6 +390,9 @@ export class MarketPlaceSellComponent implements OnInit {
   }
 
   get inventoryTitle(): string {
+    if (this.selectedCategory() === 'blueprints') return 'Blueprints';
+    if (this.selectedCategory() === 'catalysts') return 'Catalysts';
+
     switch (this.selectedItemType()) {
       case ItemType.Equipment:
         return 'Equipment';
@@ -267,6 +403,25 @@ export class MarketPlaceSellComponent implements OnInit {
       default:
         return 'Inventory';
     }
+  }
+
+  private matchesSelectedCategory(base: ItemBase): boolean {
+    if (this.selectedCategory() === 'blueprints') {
+      return isMarketplaceBlueprintResource(base);
+    }
+
+    if (this.selectedCategory() === 'catalysts') {
+      return MARKETPLACE_CATALYST_ITEM_IDS.has(base.id);
+    }
+
+    if (this.selectedCategory() === 'resources') {
+      return matchesMarketplaceResourceSubcategory(
+        base,
+        this.selectedSubcategory(),
+      );
+    }
+
+    return true;
   }
 
   trackByItem = (_: number, item: InventoryItem) => item.id;

@@ -11,6 +11,7 @@ public class MarketPlaceBuyOrderConfiguration : IEntityTypeConfiguration<MarketP
         builder.HasKey(x => x.Id);
         builder.HasIndex(x => new { x.ItemBaseId, x.UnitPrice, x.CreatedAt });
         builder.HasIndex(x => x.BuyerId);
+        builder.HasIndex(x => x.ExpiresAt);
         builder.Property(x => x.BuyerName).HasMaxLength(64);
         builder.Property(x => x.ItemBaseId).HasMaxLength(128);
 

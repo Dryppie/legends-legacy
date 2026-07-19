@@ -15,18 +15,15 @@ public record CreateMarketPlaceListingCommand(Guid CharacterId, CreateMarketPlac
 public class CreateMarketPlaceListingCommandHandler : IRequestHandler<CreateMarketPlaceListingCommand, Response<CreateMarketPlaceListingResponseDto>>
 {
     private readonly IMarketPlaceService _marketPlaceService;
-    private readonly IInventoryService _inventoryService;
     private readonly IGameEventPublisher _eventPublisher;
     private readonly IMapper _mapper;
 
     public CreateMarketPlaceListingCommandHandler(
         IMarketPlaceService marketPlaceService,
-        IInventoryService inventoryService,
         IGameEventPublisher eventPublisher,
         IMapper mapper)
     {
         _marketPlaceService = marketPlaceService;
-        _inventoryService = inventoryService;
         _eventPublisher = eventPublisher;
         _mapper = mapper;
     }
@@ -43,24 +40,42 @@ public class CreateMarketPlaceListingCommandHandler : IRequestHandler<CreateMark
             CreatedAt = DateTimeOffset.UtcNow
         };
 
-        var listing = await _marketPlaceService.CreateMarketPlaceListingAsync(request.CharacterId, marketPlaceListing, cancellationToken);
-        if (listing == null) return Response<CreateMarketPlaceListingResponseDto>.Fail("Failed to create marketplace listing.");
+        var result = await _marketPlaceService.CreateMarketPlaceListingAsync(request.CharacterId, marketPlaceListing, cancellationToken);
+        if (result == null) return Response<CreateMarketPlaceListingResponseDto>.Fail("Failed to create marketplace listing.");
 
-        var dto = _mapper.Map<MarketPlaceListingDto>(listing);
-        var inventory = await _inventoryService.GetInventoryByIdAsync(request.CharacterId, cancellationToken);
-        var remainingInventoryItem = inventory?.InventoryItems
-            .FirstOrDefault(item => item.ItemInstanceId == request.Listing.ItemInstanceId);
+        foreach (var fill in result.Fills)
+        {
+            await _eventPublisher.PublishAsync(
+                new Audience.World(),
+                new MarketBuyOrderFulfilledMsg(
+                    fill.BuyOrderId,
+                    fill.BuyerId,
+                    fill.SellerId,
+                    fill.Quantity,
+                    fill.TotalPrice,
+                    fill.SellerCinders,
+                    _mapper.Map<InventoryItemDto>(fill.PurchasedItem),
+                    _mapper.Map<MarketPlaceBuyOrderDto?>(fill.RemainingBuyOrder)));
+        }
 
-        await _eventPublisher.PublishAsync(
-            new Audience.World(),
-            new MarketListingCreatedMsg(dto));
+        var listing = _mapper.Map<MarketPlaceListingDto?>(result.Listing);
+        if (listing != null)
+        {
+            await _eventPublisher.PublishAsync(
+                new Audience.World(),
+                new MarketListingCreatedMsg(listing));
+        }
 
         return Response<CreateMarketPlaceListingResponseDto>.Success(new CreateMarketPlaceListingResponseDto
         {
-            Listing = dto,
+            Listing = listing,
             ListedItemInstanceId = request.Listing.ItemInstanceId,
-            ListedQuantity = request.Listing.Quantity,
-            RemainingInventoryItem = _mapper.Map<InventoryItemDto?>(remainingInventoryItem)
+            ListedQuantity = result.Listing?.Quantity ?? 0,
+            FilledQuantity = result.FilledQuantity,
+            FilledTotalPrice = result.FilledTotalPrice,
+            SellerFees = result.SellerFees,
+            SellerCinders = result.SellerCinders,
+            RemainingInventoryItem = _mapper.Map<InventoryItemDto?>(result.RemainingSellerInventoryItem)
         });
     }
 }

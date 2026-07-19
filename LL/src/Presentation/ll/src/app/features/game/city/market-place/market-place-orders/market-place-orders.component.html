@@ -1,0 +1,108 @@
+<div class="flex h-full min-h-0 flex-col gap-4 overflow-y-auto py-3 text-white">
+  <div class="flex flex-wrap items-baseline justify-between gap-3">
+    <div>
+      <h2 class="ll-heading text-xl uppercase">My Orders</h2>
+      <p class="ll-copy mt-1">Manage active listings and escrowed buy orders.</p>
+    </div>
+    <span class="ll-eyebrow">
+      {{ marketplaceState.myListings().length }} sell ·
+      {{ marketplaceState.myBuyOrders().length }} buy
+    </span>
+  </div>
+
+  <section>
+    <div class="mb-2 flex items-baseline justify-between gap-3">
+      <h3 class="ll-heading uppercase">Sell listings</h3>
+      <span class="ll-helper">{{ marketplaceState.myListings().length }}/10 slots</span>
+    </div>
+    <div class="ll-panel overflow-hidden">
+      <div
+        *ngFor="let listing of marketplaceState.myListings(); trackBy: trackListing"
+        class="ll-table-row grid grid-cols-[minmax(0,1fr)_auto_auto_auto_auto] items-center gap-3"
+      >
+        <app-item [item]="listing.itemInstance"></app-item>
+        <span class="ll-helper">Expires {{ listing.expiresAt | date: 'MMM d, HH:mm' }}</span>
+        <span class="text-sm">x{{ listing.quantity | numberFormat }}</span>
+        <span class="text-sm text-primary">
+          {{ listing.unitPrice | numberFormat }} each
+        </span>
+        <app-regular-button
+          text="Cancel"
+          (pressed)="cancelListing(listing)"
+        ></app-regular-button>
+      </div>
+      <p
+        *ngIf="!marketplaceState.myListings().length"
+        class="ll-empty-state my-6"
+      >
+        You have no active sell listings.
+      </p>
+    </div>
+  </section>
+
+  <section>
+    <div class="mb-2 flex items-baseline justify-between gap-3">
+      <h3 class="ll-heading uppercase">Buy orders</h3>
+      <span class="ll-helper">{{ marketplaceState.myBuyOrders().length }}/10 slots</span>
+    </div>
+    <div class="ll-panel overflow-hidden">
+      <div
+        *ngFor="let order of marketplaceState.myBuyOrders(); trackBy: trackBuyOrder"
+        class="ll-table-row grid grid-cols-[minmax(0,1fr)_auto_auto_auto_auto] items-center gap-3"
+      >
+        <div class="min-w-0">
+          <p class="truncate text-sm text-white">{{ order.itemBase.name }}</p>
+          <p class="ll-helper">{{ order.itemBase.rarity }}</p>
+        </div>
+        <span class="ll-helper">Expires {{ order.expiresAt | date: 'MMM d, HH:mm' }}</span>
+        <span class="text-sm">x{{ order.quantity | numberFormat }}</span>
+        <span class="text-sm text-primary">
+          {{ order.unitPrice | numberFormat }} each
+        </span>
+        <app-regular-button
+          text="Cancel"
+          (pressed)="cancelBuyOrder(order)"
+        ></app-regular-button>
+      </div>
+      <p
+        *ngIf="!marketplaceState.myBuyOrders().length"
+        class="ll-empty-state my-6"
+      >
+        You have no active buy orders.
+      </p>
+    </div>
+  </section>
+
+  <section>
+    <div class="mb-2 flex items-baseline justify-between gap-3">
+      <h3 class="ll-heading uppercase">Recent trades</h3>
+      <span class="ll-helper">Last {{ marketplaceState.history().length }}</span>
+    </div>
+    <div class="ll-panel overflow-hidden">
+      <div
+        *ngFor="let trade of marketplaceState.history()"
+        class="ll-table-row grid grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-3"
+      >
+        <div class="min-w-0">
+          <p class="truncate text-sm text-white">{{ trade.itemBase.name }}</p>
+          <p class="ll-helper">
+            {{ trade.buyerId === characterState.currentCharacterId() ? 'Bought' : 'Sold' }}
+            · x{{ trade.quantity | numberFormat }}
+          </p>
+        </div>
+        <span class="text-sm text-primary">
+          {{ trade.unitPrice | numberFormat }} each
+        </span>
+        <span class="text-sm">
+          {{ trade.totalPrice | numberFormat }} total
+        </span>
+      </div>
+      <p
+        *ngIf="!marketplaceState.history().length"
+        class="ll-empty-state my-6"
+      >
+        Completed trades will appear here.
+      </p>
+    </div>
+  </section>
+</div>

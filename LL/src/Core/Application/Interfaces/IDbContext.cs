@@ -108,6 +108,7 @@ public interface IDbContext
     DbSet<ItemInstance> ItemInstances { get; }
     DbSet<MarketPlaceListing> MarketPlaceListings { get; }
     DbSet<MarketPlaceBuyOrder> MarketPlaceBuyOrders { get; }
+    DbSet<MarketPlaceOrder> MarketPlaceOrders { get; }
     DbSet<GameEventOutboxMessage> GameEventOutboxMessages { get; }
     DbSet<GameEventOutboxDelivery> GameEventOutboxDeliveries { get; }
     //DbSet<Party> Parties { get; }

@@ -1,0 +1,262 @@
+:host {
+  container-type: inline-size;
+  display: flex;
+  height: 100%;
+  min-height: 0;
+  width: 100%;
+}
+
+.market-layout {
+  grid-template-columns: minmax(0, 1fr);
+  overflow: hidden;
+}
+
+.market-catalogue {
+  min-height: 0;
+}
+
+.market-catalogue-search {
+  order: 1;
+}
+
+.market-catalogue-heading {
+  margin-bottom: 0.5rem;
+  margin-top: 1.25rem;
+  order: 2;
+}
+
+.market-catalogue-controls {
+  display: none;
+}
+
+.market-catalogue-list {
+  margin-top: 0;
+  order: 3;
+}
+
+.market-catalogue-list > button {
+  border-bottom: 1px solid var(--ll-color-border);
+  border-radius: 0;
+  margin-bottom: 0;
+  padding-bottom: 0.85rem;
+  padding-top: 0.85rem;
+}
+
+.market-main {
+  container: market-main / inline-size;
+  display: none;
+}
+
+.market-detail-open .market-catalogue {
+  display: none;
+}
+
+.market-detail-open .market-main {
+  display: block;
+}
+
+.market-item-card {
+  min-height: 0;
+  padding: 1rem;
+}
+
+.market-hero,
+.market-orderbooks {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.market-detail-content {
+  gap: 1rem;
+  padding: 0.75rem 1rem 0;
+}
+
+.market-mobile-detail-header {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+}
+
+.market-desktop-ticket {
+  display: none;
+}
+
+.market-stats {
+  gap: 0.4rem;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.market-stats .ll-card {
+  min-width: 0;
+  padding: 0.6rem 0.45rem;
+}
+
+.market-stats .ll-label {
+  font-size: 0.55rem;
+  white-space: nowrap;
+}
+
+.market-stats strong {
+  font-size: 0.9rem;
+}
+
+.market-mobile-order-tabs {
+  display: flex;
+  width: 100%;
+}
+
+.market-orderbooks {
+  min-height: 22rem;
+}
+
+.market-sell-orders > :first-child,
+.market-buy-orders > :first-child {
+  display: none;
+}
+
+.market-orderbooks .market-sell-orders,
+.market-orderbooks .market-buy-orders {
+  display: none;
+}
+
+.market-orderbooks.market-show-sell-orders .market-sell-orders,
+.market-orderbooks.market-show-buy-orders .market-buy-orders {
+  display: flex;
+}
+
+.market-mobile-buybar {
+  background: var(--ll-color-bg-deep);
+  border-top: 1px solid var(--ll-color-border);
+  bottom: 0;
+  box-shadow: 0 -0.75rem 1.5rem rgba(0, 0, 0, 0.4);
+  display: block;
+  margin-left: -1rem;
+  margin-right: -1rem;
+  padding: 0.75rem 1rem calc(0.75rem + env(safe-area-inset-bottom));
+  position: sticky;
+  z-index: 20;
+}
+
+@container (min-width: 34rem) {
+  .market-layout {
+    grid-template-columns: 13rem minmax(0, 1fr);
+  }
+
+  .market-catalogue,
+  .market-detail-open .market-catalogue {
+    border-right: 1px solid var(--ll-color-border);
+    display: flex;
+    min-height: 0;
+  }
+
+  .market-catalogue-search {
+    order: initial;
+  }
+
+  .market-catalogue-heading {
+    margin-bottom: 1rem;
+    margin-top: 0;
+    order: initial;
+  }
+
+  .market-catalogue-controls {
+    display: grid;
+  }
+
+  .market-catalogue-list {
+    margin-top: 1rem;
+    order: initial;
+  }
+
+  .market-catalogue-list > button {
+    border-bottom-color: transparent;
+    border-radius: 0.375rem;
+    margin-bottom: 0.25rem;
+    padding-bottom: 0.5rem;
+    padding-top: 0.5rem;
+  }
+
+  .market-main,
+  .market-detail-open .market-main {
+    display: block;
+  }
+
+  .market-detail-content {
+    gap: 1.25rem;
+    padding: 1.5rem;
+  }
+
+  .market-mobile-detail-header,
+  .market-mobile-order-tabs,
+  .market-mobile-buybar {
+    display: none;
+  }
+
+  .market-desktop-ticket {
+    display: block;
+  }
+
+  .market-item-card {
+    min-height: 10rem;
+    padding: 1.25rem;
+  }
+
+  .market-stats {
+    gap: 0.5rem;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .market-stats .ll-card {
+    padding: 0.75rem;
+  }
+
+  .market-stats .ll-label {
+    font-size: var(--ll-text-xs);
+  }
+
+  .market-stats strong {
+    font-size: 1.125rem;
+  }
+
+  .market-orderbooks {
+    min-height: 25rem;
+  }
+
+  .market-sell-orders > :first-child,
+  .market-buy-orders > :first-child {
+    display: flex;
+  }
+
+  .market-orderbooks .market-sell-orders,
+  .market-orderbooks .market-buy-orders {
+    display: flex;
+  }
+}
+
+@container (min-width: 64rem) {
+  .market-layout {
+    grid-template-columns: 18rem minmax(0, 1fr);
+  }
+}
+
+@container market-main (min-width: 27rem) {
+  .market-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@container market-main (min-width: 46rem) {
+  .market-hero {
+    grid-template-columns: minmax(0, 1fr) 18.5rem;
+  }
+
+  .market-orderbooks {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    min-height: 0;
+  }
+}
+
+@container market-main (min-width: 54rem) {
+  .market-stats {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}

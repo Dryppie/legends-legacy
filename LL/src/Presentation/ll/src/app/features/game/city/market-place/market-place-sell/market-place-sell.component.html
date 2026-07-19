@@ -80,23 +80,71 @@
             <span class="ll-helper">Cinders</span>
           </div>
 
+          <p *ngIf="p.itemInstance.itemBase.stackable" class="ll-helper">
+            Best current buy order:
+            <span
+              *ngIf="bestBuyOrderPrice() as bestPrice; else noBuyOrder"
+              class="text-primary"
+            >
+              {{ bestPrice | numberFormat }} Cinders
+            </span>
+            <ng-template #noBuyOrder>None</ng-template>
+          </p>
+
           <div
-            class="flex items-center justify-between border-t border-primary/20 pt-3"
+            class="grid grid-cols-2 gap-1 border-t border-primary/20 pt-3 text-sm"
           >
-            <h3 class="text-primary">Total</h3>
-            <span class="text-base text-white">
-              {{ (priceCtrl.value ?? 0) * (qtyCtrl.value ?? 0) | number }}
-              Cinders
+            <span class="text-zinc-500">Gross</span>
+            <span class="text-right text-white"
+              >{{ grossTotal() | number }} Cinders</span
+            >
+            <span class="text-zinc-500">Marketplace fee (3%)</span>
+            <span class="text-right text-rose-300"
+              >−{{ estimatedFee() | number }} Cinders</span
+            >
+            <h3 class="text-primary">You receive</h3>
+            <span class="text-right text-base text-primary">
+              {{ estimatedProceeds() | number }} Cinders
             </span>
           </div>
 
-          <app-regular-button
-            class="w-full justify-self-end"
-            text="List"
-            fullWidth
-            [disabled]="priceCtrl.invalid || qtyCtrl.invalid"
-            (pressed)="listItem()"
-          />
+          <p
+            *ngIf="hasOwnBuyOrderForPendingItem()"
+            class="ll-helper text-primary"
+          >
+            Cancel your buy order for this item before creating a sell listing.
+          </p>
+
+          <p
+            *ngIf="hasOwnSellListingForPendingItem()"
+            class="ll-helper text-primary"
+          >
+            You already have a sell listing for this item. Cancel it from My
+            Orders before creating another.
+          </p>
+
+          <div class="grid gap-2 sm:grid-cols-2">
+            <app-regular-button
+              *ngIf="p.itemInstance.itemBase.stackable"
+              text="Sell now"
+              fullWidth
+              [disabled]="!canSellNow()"
+              (pressed)="sellNow()"
+            />
+            <app-regular-button
+              class="w-full justify-self-end"
+              [text]="
+                hasOwnBuyOrderForPendingItem()
+                  ? 'Cancel buy order'
+                  : hasOwnSellListingForPendingItem()
+                    ? 'Already listed'
+                    : 'Create listing'
+              "
+              fullWidth
+              [disabled]="!canCreateListing()"
+              (pressed)="listItem()"
+            />
+          </div>
         </div>
       </ng-container>
 
