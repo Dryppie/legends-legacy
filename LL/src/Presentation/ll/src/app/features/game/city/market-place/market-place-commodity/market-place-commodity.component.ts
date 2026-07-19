@@ -640,9 +640,6 @@ export class MarketPlaceCommodityComponent implements OnInit {
 
   setMobileOrderBook(orderBook: MobileOrderBook): void {
     this.mobileOrderBook.set(orderBook);
-    if (orderBook === 'sell') {
-      this.ticketSide.set('buy');
-    }
     const selectedPrice =
       orderBook === 'sell'
         ? this.selectedSellPrice()
@@ -658,12 +655,13 @@ export class MarketPlaceCommodityComponent implements OnInit {
   }
 
   submitMobileOrder(): void {
+    if (this.ticketSide() === 'sell') {
+      this.submitSellOrderAction();
+      return;
+    }
+
     if (this.mobileOrderBook() === 'buy') {
-      if (this.ticketSide() === 'sell') {
-        this.submitSellOrderAction();
-      } else {
-        this.submitBuyOrderAction();
-      }
+      this.submitBuyOrderAction();
       return;
     }
 
@@ -896,11 +894,11 @@ export class MarketPlaceCommodityComponent implements OnInit {
   }
 
   canSubmitMobileOrder(): boolean {
-    if (this.mobileOrderBook() === 'sell') return this.canBuy();
+    if (this.ticketSide() === 'sell') return this.canSubmitSellOrderAction();
 
-    return this.ticketSide() === 'buy'
+    return this.mobileOrderBook() === 'buy'
       ? this.canSubmitBuyOrderAction()
-      : this.canSubmitSellOrderAction();
+      : this.canBuy();
   }
 
   canBuy(): boolean {

@@ -464,8 +464,13 @@
 
         <footer class="market-mobile-buybar">
           <div
-            *ngIf="mobileOrderBook() === 'buy'"
-            class="mb-3 grid grid-cols-2 items-end gap-2"
+            class="mb-3 grid items-end gap-2"
+            [class.grid-cols-1]="
+              mobileOrderBook() === 'sell' && ticketSide() === 'buy'
+            "
+            [class.grid-cols-2]="
+              mobileOrderBook() === 'buy' || ticketSide() === 'sell'
+            "
           >
             <div class="ll-segmented flex">
               <button
@@ -488,7 +493,10 @@
               </button>
             </div>
 
-            <label class="ll-field min-w-0 flex-1">
+            <label
+              *ngIf="mobileOrderBook() === 'buy' || ticketSide() === 'sell'"
+              class="ll-field min-w-0 flex-1"
+            >
               <span class="ll-label">Your unit price</span>
               <input
                 type="number"
@@ -530,18 +538,19 @@
             >
               <span class="block">
                 {{
-                  mobileOrderBook() === "buy"
-                    ? ticketSide() === "buy"
+                  ticketSide() === "sell"
+                    ? sellOrderActionLabel()
+                    : mobileOrderBook() === "buy"
                       ? buyOrderActionLabel()
-                      : sellOrderActionLabel()
-                    : selectedSellOrderIsOwn()
-                      ? "Your sell order"
-                      : "Buy now"
+                      : selectedSellOrderIsOwn()
+                        ? "Your sell order"
+                        : "Buy now"
                 }}
               </span>
               <span
                 *ngIf="
-                  mobileOrderBook() === 'sell' || !hasOwnOrderForSelectedItem()
+                  !hasOwnOrderForSelectedItem() ||
+                  (ticketSide() === 'buy' && mobileOrderBook() === 'sell')
                 "
                 class="block text-[0.65rem] font-normal"
               >
