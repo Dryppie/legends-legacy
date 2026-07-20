@@ -260,7 +260,7 @@ public sealed class SoulstoneUpgradeService : ISoulstoneUpgradeService
             SoulstoneUpgradeEffectKind.TemperingNegativeOutcomeReductionBps => $"-{percent} percentage points negative tempering chance",
             SoulstoneUpgradeEffectKind.BlueprintProgressionGainBps => $"+{percent}% blueprint progression",
             SoulstoneUpgradeEffectKind.DungeonSigilDropRateRelativeBps => $"+{percent}% dungeon sigil chance",
-            SoulstoneUpgradeEffectKind.DungeonRewardRetentionBps => $"+{percent}% retained checkpoint rewards",
+            SoulstoneUpgradeEffectKind.DungeonRewardRetentionBps => $"+{percent}% retained Rest Site rewards",
             _ => $"+{value.ToString(CultureInfo.InvariantCulture)}"
         };
     }

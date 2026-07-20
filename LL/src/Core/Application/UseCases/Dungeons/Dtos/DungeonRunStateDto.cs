@@ -10,12 +10,11 @@ public sealed class DungeonRunStateDto : IMapFrom<DungeonRunState>
 {
     public Dictionary<string, int> Flags { get; set; } = [];
     public DungeonLootBagDto SecuredLoot { get; set; } = new();
-    public DungeonLootBagDto UnsecuredLoot { get; set; } = new();
+    public DungeonLootBagDto PendingLoot { get; set; } = new();
     public List<DungeonMapNodeDto> MapNodes { get; set; } = [];
     public List<int> TraversedRoomIndexes { get; set; } = [];
     public List<DungeonRouteOptionDto> CurrentRouteOptions { get; set; } = [];
     public List<DungeonEventChoiceOptionDto> CurrentEventChoices { get; set; } = [];
-    public List<DungeonCheckpointChoiceOptionDto> CurrentCheckpointChoices { get; set; } = [];
     public List<DungeonBossModifierDto> CurrentBossModifiers { get; set; } = [];
     public List<DungeonMasteryAwardReasonDto> MasteryAwardReasons { get; set; } = [];
     public int Vigor { get; set; } = 100;
@@ -23,9 +22,7 @@ public sealed class DungeonRunStateDto : IMapFrom<DungeonRunState>
     public List<DungeonVigorThresholdDto> VigorThresholds { get; set; } = [];
     public int CurrentSection { get; set; } = 1;
     public int TotalSections { get; set; } = 1;
-    public int WardstonesReached { get; set; }
-    public bool WardstoneBoonChosen { get; set; }
-    public bool ExtractionLocked { get; set; }
+    public int RestSitesVisited { get; set; }
     public string LastConsequence { get; set; } = string.Empty;
     public DateTimeOffset ExpiresAt { get; set; }
     public List<DungeonVigorChangeDto> VigorHistory { get; set; } = [];
@@ -111,7 +108,7 @@ public sealed class DungeonFailureAnalysisDto : IMapFrom<DungeonFailureAnalysis>
     public string PrimaryCause { get; set; } = string.Empty;
     public string Explanation { get; set; } = string.Empty;
     public List<string> Suggestions { get; set; } = [];
-    public DungeonLootBagDto LostRunLoot { get; set; } = new();
+    public DungeonLootBagDto LostPendingLoot { get; set; } = new();
 
     public void Mapping(Profile profile) =>
         profile.CreateMap<DungeonFailureAnalysis, DungeonFailureAnalysisDto>();
@@ -173,18 +170,6 @@ public sealed class DungeonEventChoiceOptionDto : IMapFrom<DungeonEventChoiceOpt
 
     public void Mapping(Profile profile) =>
         profile.CreateMap<DungeonEventChoiceOption, DungeonEventChoiceOptionDto>();
-}
-
-public sealed class DungeonCheckpointChoiceOptionDto : IMapFrom<DungeonCheckpointChoiceOption>
-{
-    public string Id { get; set; } = string.Empty;
-    public string Label { get; set; } = string.Empty;
-    public string Description { get; set; } = string.Empty;
-    public int VigorDelta { get; set; }
-    public string Kind { get; set; } = string.Empty;
-
-    public void Mapping(Profile profile) =>
-        profile.CreateMap<DungeonCheckpointChoiceOption, DungeonCheckpointChoiceOptionDto>();
 }
 
 public sealed class DungeonBossModifierDto : IMapFrom<DungeonBossModifier>

@@ -7,7 +7,8 @@ public enum DungeonActionOutcome
     CombatVictory = 1,
     CombatDefeat = 2,
     EventResolved = 3,
-    CheckpointResolved = 4,
-    RunAbandoned = 5,
-    RunCompleted = 6
+    RestSiteResolved = 4,
+    RunRetreated = 5,
+    RunCompleted = 6,
+    RunFailed = 7
 }

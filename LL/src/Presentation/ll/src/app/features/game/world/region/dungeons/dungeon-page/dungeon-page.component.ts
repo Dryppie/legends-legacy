@@ -1,13 +1,46 @@
-import { ConnectedPosition, OverlayModule } from '@angular/cdk/overlay';
-import { Component, computed, inject } from '@angular/core';
-import { DungeonStateService } from '../../../../../../core/services/api/dungeon/dungeon-state.service';
-import { NgClass, NgFor, NgIf } from '@angular/common';
-import { RegularButtonComponent } from '../../../../../../shared/components/custom-components/buttons/regular-button/regular-button.component';
-import { CombatStateService } from '../../../../../../core/state/combat-state/combat-state.service';
-import { CombatComponent } from '../../../../../../shared/components/combat/combat.component';
-import { BattleType } from '../../../../../../core/state/combat-state/combatState';
+import { DecimalPipe, NgClass, NgFor, NgIf } from '@angular/common';
+import {
+  Component,
+  ElementRef,
+  ViewChild,
+  computed,
+  effect,
+  inject,
+  signal,
+} from '@angular/core';
 import { Router } from '@angular/router';
+import {
+  DungeonMapNode,
+  DungeonRouteOption,
+  RoomInstance,
+} from '../../../../../../core/services/api/dungeon/dungeon.service';
+import { DungeonStateService } from '../../../../../../core/services/api/dungeon/dungeon-state.service';
+import { CombatStateService } from '../../../../../../core/state/combat-state/combat-state.service';
+import { BattleType } from '../../../../../../core/state/combat-state/combatState';
+import { CombatComponent } from '../../../../../../shared/components/combat/combat.component';
 import { DungeonRoomIconComponent } from '../../../../../../shared/components/dungeons/dungeon-room-icon/dungeon-room-icon.component';
+
+interface DungeonGraphNode {
+  roomIndex: number;
+  depth: number;
+  lane: number;
+  x: number;
+  y: number;
+  room: RoomInstance | null;
+  route: DungeonRouteOption | null;
+}
+
+interface DungeonGraphEdge {
+  key: string;
+  fromRoomIndex: number;
+  toRoomIndex: number;
+  x1: number;
+  y1: number;
+  x2: number;
+  y2: number;
+  isTraversed: boolean;
+  isAvailable: boolean;
+}
 
 @Component({
   selector: 'app-dungeon-page',
@@ -16,660 +49,534 @@ import { DungeonRoomIconComponent } from '../../../../../../shared/components/du
     NgIf,
     NgFor,
     NgClass,
-    RegularButtonComponent,
+    DecimalPipe,
     CombatComponent,
     DungeonRoomIconComponent,
-    OverlayModule,
   ],
   templateUrl: './dungeon-page.component.html',
+  styleUrl: './dungeon-page.component.scss',
 })
 export class DungeonPageComponent {
   readonly dungeonState = inject(DungeonStateService);
   readonly combatStateService = inject(CombatStateService);
   private readonly router = inject(Router);
 
-  battleType = BattleType.Dungeon;
+  private dungeonMapScrollElement?: ElementRef<HTMLDivElement>;
 
+  @ViewChild('dungeonMapScroll')
+  private set dungeonMapScroll(
+    element: ElementRef<HTMLDivElement> | undefined,
+  ) {
+    this.dungeonMapScrollElement = element;
+
+    const roomIndex = this.activeDungeon()?.currentRoomIndex;
+    if (element && roomIndex !== undefined) {
+      requestAnimationFrame(() => this.scrollMapToRoom(roomIndex));
+    }
+  }
+
+  private lastFollowedRoomIndex: number | null = null;
+  private pendingRoomIndex: number | null = null;
+
+  readonly battleType = BattleType.Dungeon;
   readonly activeDungeon = this.dungeonState.activeDungeon;
   readonly loading = this.dungeonState.loading;
   readonly error = this.dungeonState.error;
   readonly message = this.dungeonState.message;
-  readonly hasActiveDungeon = this.dungeonState.hasActiveDungeon;
-
-  readonly totalRooms = computed(
-    () => this.activeDungeon()?.rooms?.length ?? 0,
-  );
-
-  readonly currentRoomZeroBasedIndex = computed(() => {
-    const run = this.activeDungeon();
-    const total = run?.rooms?.length ?? 0;
-
-    if (!run || total <= 0) return 0;
-    return Math.min(Math.max(0, run.currentRoomIndex ?? 0), total - 1);
-  });
-
-  readonly currentRoomNumber = computed(() => {
-    const total = this.totalRooms();
-    if (total <= 0) return 0;
-
-    return this.currentRoomZeroBasedIndex() + 1;
-  });
 
   readonly currentRoom = computed(() => {
     const run = this.activeDungeon();
-    if (!run?.rooms?.length) return null;
-    return run.rooms[this.currentRoomZeroBasedIndex()] ?? null;
+    if (!run) return null;
+    return (
+      run.rooms.find((room) => room.index === run.currentRoomIndex) ?? null
+    );
   });
 
-  readonly nextRoom = computed(() => {
+  readonly mapNodes = computed<DungeonMapNode[]>(() => {
     const run = this.activeDungeon();
-    if (!run?.rooms?.length) return null;
-    return run.rooms[this.currentRoomZeroBasedIndex() + 1] ?? null;
-  });
+    if (!run) return [];
 
-  readonly progressPercent = computed(() => {
-    const total = this.totalRooms();
-    const current = this.currentRoomNumber();
-
-    if (total <= 0) return 0;
-    if (this.activeDungeon()?.status === 'Completed') return 100;
-    if (this.activeDungeon()?.status === 'Withdrawn') {
-      return Math.min(100, Math.round((current / total) * 100));
+    if (run.state?.mapNodes?.length) {
+      return [...run.state.mapNodes].sort(
+        (left, right) =>
+          left.depth - right.depth ||
+          left.lane - right.lane ||
+          left.roomIndex - right.roomIndex,
+      );
     }
 
-    return Math.min(100, Math.round((current / total) * 100));
+    return [];
   });
 
-  readonly dungeonTitle = computed(() => {
-    const run = this.activeDungeon();
-    return run?.dungeonDefinitionName ?? 'Dungeon';
-  });
-
-  readonly dungeonStatus = computed(() => {
-    return this.activeDungeon()?.status ?? 'Unknown';
-  });
-
-  readonly isCombatRoom = computed(() => {
-    const type = this.currentRoom()?.type;
-    return type === 'Combat' || type === 'MiniBoss' || type === 'Boss';
-  });
-
-  readonly isEventRoom = computed(() => {
-    return this.currentRoom()?.type === 'Event';
-  });
-
-  readonly isCheckpointRoom = computed(() => {
-    return this.currentRoom()?.type === 'Checkpoint';
-  });
-
-  readonly runState = computed(() => this.activeDungeon()?.state ?? null);
-
-  readonly pressureValue = computed(() => this.runState()?.pressure ?? 0);
-
-  readonly pressureMax = computed(
-    () => this.runState()?.mechanicMaxValue ?? 100,
+  readonly hasPlayableMap = computed(
+    () => this.mapNodes().length > 0 && this.graphNodes().length > 0,
   );
 
-  readonly pressurePercent = computed(() => {
-    const max = Math.max(1, this.pressureMax());
-    return Math.min(100, Math.round((this.pressureValue() / max) * 100));
+  readonly totalDepths = computed(() => {
+    const nodes = this.mapNodes();
+    return nodes.length ? Math.max(...nodes.map((node) => node.depth)) + 1 : 0;
   });
 
-  readonly rewardMultiplierLabel = computed(() => {
-    const multiplier = this.runState()?.rewardMultiplierPercent ?? 100;
-    return `x${(multiplier / 100).toFixed(2)}`;
+  readonly currentDepth = computed(() => {
+    const run = this.activeDungeon();
+    if (!run) return 0;
+    return (
+      this.mapNodes().find((node) => node.roomIndex === run.currentRoomIndex)
+        ?.depth ?? 0
+    );
+  });
+
+  readonly currentDepthNumber = computed(() => {
+    if (!this.totalDepths()) return 0;
+    return Math.min(this.totalDepths(), this.currentDepth() + 1);
   });
 
   readonly routeOptions = computed(
-    () => this.runState()?.currentRouteOptions ?? [],
+    () => this.activeDungeon()?.state?.currentRouteOptions ?? [],
   );
-
   readonly eventChoices = computed(
-    () => this.runState()?.currentEventChoices ?? [],
+    () => this.activeDungeon()?.state?.currentEventChoices ?? [],
+  );
+  readonly vigorThresholdsExpanded = signal(false);
+  readonly currentVigorThreshold = computed(() => {
+    const state = this.activeDungeon()?.state;
+    if (!state) return null;
+
+    return (
+      state.vigorThresholds.find((threshold) => threshold.isCurrent) ??
+      state.vigorThresholds.find(
+        (threshold) => threshold.state === state.vigorState,
+      ) ??
+      state.vigorThresholds[0] ??
+      null
+    );
+  });
+  readonly otherVigorThresholds = computed(() => {
+    const current = this.currentVigorThreshold();
+    return (
+      this.activeDungeon()?.state?.vigorThresholds.filter(
+        (threshold) => threshold !== current,
+      ) ?? []
+    );
+  });
+  readonly graphWidth = computed(() =>
+    Math.max(760, (this.totalDepths() - 1) * 154 + 140),
+  );
+  readonly graphHeight = 470;
+
+  readonly graphNodes = computed<DungeonGraphNode[]>(() => {
+    const run = this.activeDungeon();
+    if (!run) return [];
+    const routes = this.routeOptions();
+
+    return this.mapNodes().map((node) => ({
+      ...node,
+      x: 70 + node.depth * 154,
+      y: this.graphHeight / 2 + node.lane * 104,
+      room: run.rooms.find((room) => room.index === node.roomIndex) ?? null,
+      route: routes.find((route) => route.roomIndex === node.roomIndex) ?? null,
+    }));
+  });
+
+  constructor() {
+    effect(() => {
+      const roomIndex = this.activeDungeon()?.currentRoomIndex ?? null;
+      this.graphNodes();
+
+      if (
+        roomIndex === null ||
+        roomIndex === this.lastFollowedRoomIndex ||
+        roomIndex === this.pendingRoomIndex
+      ) {
+        return;
+      }
+
+      this.pendingRoomIndex = roomIndex;
+      requestAnimationFrame(() => this.scrollMapToRoom(roomIndex));
+    });
+  }
+
+  private scrollMapToRoom(roomIndex: number): void {
+    const viewport = this.dungeonMapScrollElement?.nativeElement;
+    const node = this.graphNodes().find(
+      (candidate) => candidate.roomIndex === roomIndex,
+    );
+
+    if (!viewport || !node) {
+      this.pendingRoomIndex = null;
+      return;
+    }
+
+    const maxScrollLeft = Math.max(
+      0,
+      viewport.scrollWidth - viewport.clientWidth,
+    );
+    const targetScrollLeft = Math.min(
+      maxScrollLeft,
+      Math.max(0, node.x - viewport.clientWidth * 0.35),
+    );
+    const behavior = this.lastFollowedRoomIndex === null ? 'auto' : 'smooth';
+
+    viewport.scrollTo({
+      left: targetScrollLeft,
+      behavior,
+    });
+
+    this.lastFollowedRoomIndex = roomIndex;
+    this.pendingRoomIndex = null;
+  }
+
+  readonly graphEdges = computed<DungeonGraphEdge[]>(() => {
+    const nodes = this.graphNodes();
+    const nodeByRoom = new Map(nodes.map((node) => [node.roomIndex, node]));
+    const traversed = this.activeDungeon()?.state?.traversedRoomIndexes ?? [];
+    const routes = this.routeOptions();
+    const edges: DungeonGraphEdge[] = [];
+
+    for (const source of nodes) {
+      const mapNode = this.mapNodes().find(
+        (node) => node.roomIndex === source.roomIndex,
+      );
+      for (const targetRoomIndex of mapNode?.nextRoomIndexes ?? []) {
+        const target = nodeByRoom.get(targetRoomIndex);
+        if (!target) continue;
+
+        const targetPathIndex = traversed.indexOf(targetRoomIndex);
+        edges.push({
+          key: `${source.roomIndex}:${targetRoomIndex}`,
+          fromRoomIndex: source.roomIndex,
+          toRoomIndex: targetRoomIndex,
+          x1: source.x,
+          y1: source.y,
+          x2: target.x,
+          y2: target.y,
+          isTraversed:
+            targetPathIndex > 0 &&
+            traversed[targetPathIndex - 1] === source.roomIndex,
+          isAvailable:
+            source.roomIndex === this.activeDungeon()?.currentRoomIndex &&
+            routes.some((route) => route.roomIndex === targetRoomIndex),
+        });
+      }
+    }
+
+    return edges;
+  });
+
+  readonly dungeonTitle = computed(
+    () => this.activeDungeon()?.dungeonDefinitionName ?? 'Dungeon',
   );
 
-  readonly checkpointChoices = computed(
-    () => this.runState()?.currentCheckpointChoices ?? [],
-  );
+  readonly phaseLabel = computed(() => {
+    const run = this.activeDungeon();
+    if (!run) return 'No active run';
+    if (run.status === 'Completed') return 'Dungeon cleared';
+    if (run.status === 'Retreated') return 'Loot secured';
+    if (run.status === 'Failed') return 'Run failed';
+    if (run.state.currentSection)
+      return `Section ${run.state.currentSection}`;
+    if (this.routeOptions().length) return 'Room cleared';
+    return 'Exploring';
+  });
 
-  readonly boonChoices = computed(
-    () => this.runState()?.currentBoonChoices ?? [],
-  );
+  readonly decisionEyebrow = computed(() => {
+    if (this.routeOptions().length) return 'Choose your path';
+    if (this.eventChoices().length) return 'Choose an outcome';
+    if (this.currentRoom()?.type === 'RestSite') return 'Rest Site';
+    return this.getRoomTypeLabel(this.currentRoom()?.type);
+  });
 
-  readonly activeBoonIds = computed(() => this.runState()?.activeBoonIds ?? []);
+  readonly decisionTitle = computed(() => {
+    const run = this.activeDungeon();
+    if (!run) return 'No active dungeon';
+    if (run.status === 'Completed') return 'Dungeon complete';
+    if (run.status === 'Retreated') return 'Pending Loot secured';
+    if (run.status === 'Failed') return 'The expedition ended';
+    if (this.routeOptions().length) return 'The dungeon branches ahead';
+    if (this.eventChoices().length)
+      return this.getEventTitle(this.currentRoom()?.eventOutcome);
+    if (this.currentRoom()?.type === 'RestSite') return 'Catch your breath';
+    return this.currentRoomTitle();
+  });
 
-  readonly activeBoonSummaries = computed(
-    () => this.runState()?.activeBoonSummaries ?? [],
-  );
+  readonly decisionDescription = computed(() => {
+    const run = this.activeDungeon();
+    const room = this.currentRoom();
+    if (!run) return 'Choose a dungeon from the world map to begin.';
+    if (this.loading()) return 'Resolving your last dungeon action...';
+    if (run.status === 'Completed')
+      return 'The boss is defeated. Claim the rewards and return to the world.';
+    if (run.status === 'Retreated')
+      return 'Everything earned during this run is ready to claim.';
+    if (run.status === 'Failed')
+      return 'Pending Loot was lost. Leave this run to begin another expedition.';
+    if (this.routeOptions().length)
+      return 'Choose with full knowledge of the likely Vigor toll, rewards, and effect on the final boss.';
+    if (this.eventChoices().length)
+      return this.getEventDescription(room?.eventOutcome);
+    if (!room) return 'Preparing the next room.';
 
-  readonly activeBoonEffectSummaries = computed(
-    () => this.runState()?.activeBoonEffectSummaries ?? [],
-  );
-  readonly boonTooltipPositions: ConnectedPosition[] = [
-    {
-      originX: 'start',
-      originY: 'bottom',
-      overlayX: 'start',
-      overlayY: 'top',
-      offsetY: 8,
-    },
-    {
-      originX: 'end',
-      originY: 'bottom',
-      overlayX: 'end',
-      overlayY: 'top',
-      offsetY: 8,
-    },
-    {
-      originX: 'start',
-      originY: 'top',
-      overlayX: 'start',
-      overlayY: 'bottom',
-      offsetY: -8,
-    },
-    {
-      originX: 'end',
-      originY: 'top',
-      overlayX: 'end',
-      overlayY: 'bottom',
-      offsetY: -8,
-    },
-  ];
-  hoveredBoonId: string | null = null;
-
-  readonly bossModifiers = computed(
-    () => this.runState()?.currentBossModifiers ?? [],
-  );
+    switch (room.type) {
+      case 'Combat':
+        return 'Defeat the enemies here to reveal the next paths.';
+      case 'MiniBoss':
+        return 'An elite guardian blocks this route. Victory offers stronger rewards.';
+      case 'Boss':
+        return 'Defeat the dungeon boss to complete the expedition.';
+      case 'RestSite':
+        return 'Rest here to recover 15 Vigor before moving deeper.';
+      case 'Hazard':
+        return 'Overcome this authored hazard to alter a boss Aspect.';
+      case 'Cache':
+        return 'Add these rewards to your Pending Loot, then continue.';
+      case 'Event':
+        return this.getEventDescription(room.eventOutcome);
+      default:
+        return 'Resolve this room to continue.';
+    }
+  });
 
   readonly primaryActionLabel = computed(() => {
     const run = this.activeDungeon();
     const room = this.currentRoom();
-
     if (!run || !room || this.loading()) return null;
-
-    if (run.status === 'Completed' || run.status === 'Withdrawn')
+    if (run.status === 'Completed' || run.status === 'Retreated')
       return 'Claim Rewards';
-    if (run.status === 'Failed') return null;
-
-    if (this.boonChoices().length) return null;
-    if (this.routeOptions().length) return null;
-    if (room.type === 'Event' && this.eventChoices().length) return null;
+    if (run.status === 'Failed') return 'Leave Dungeon';
+    if (this.routeOptions().length || this.eventChoices().length)
+      return null;
 
     switch (room.type) {
       case 'Combat':
       case 'MiniBoss':
       case 'Boss':
-        return 'Fight';
-
-      case 'Checkpoint':
-        return 'Continue';
-
+        return 'Begin Combat';
+      case 'Hazard':
+      case 'Cache':
+      case 'OmenSite':
+        return 'Resolve Encounter';
+      case 'RestSite':
+        return 'Rest · +15 Vigor';
       case 'Event':
-        return room.status === 'Active' ? 'Accept' : 'Inspect';
-
+        return room.status === 'Active' ? 'Accept Event' : 'Inspect Event';
       default:
         return null;
     }
   });
 
-  readonly canLeave = computed(() => {
-    const run = this.activeDungeon();
-    if (!run) return false;
-    if (this.loading()) return false;
-
-    return run.status !== 'Completed' && run.status !== 'Withdrawn';
-  });
-
-  readonly canClaimRewards = computed(() => {
-    const run = this.activeDungeon();
-    if (!run) return false;
-    if (this.loading()) return false;
-
-    return run.status === 'Completed' || run.status === 'Withdrawn';
-  });
-
-  readonly isFailedRun = computed(() => {
-    return this.activeDungeon()?.status === 'Failed';
-  });
-
-  readonly isRewardClaimRun = computed(() => {
-    const status = this.activeDungeon()?.status;
-    return status === 'Completed' || status === 'Withdrawn';
-  });
-
-  readonly rewardSummaryTitle = computed(() => {
-    return this.activeDungeon()?.status === 'Withdrawn'
-      ? 'Rewards Secured'
-      : 'Dungeon Complete';
-  });
-
-  readonly runStateDescription = computed(() => {
-    const run = this.activeDungeon();
-    if (!run) return 'No active dungeon run found.';
-
-    switch (run.status) {
-      case 'Completed':
-        return 'The dungeon is cleared. Claim your rewards to return to the world.';
-      case 'Withdrawn':
-        return 'You withdrew at a checkpoint. Your secured rewards are ready to claim.';
-      case 'Failed':
-        return 'The run has ended. Leave the dungeon to start a fresh attempt.';
-      default:
-        return 'Advance room by room. Checkpoints secure rewards.';
-    }
-  });
-
-  readonly currentRoomTitle = computed(() => {
-    const room = this.currentRoom();
-    if (!room) return 'Preparing';
-
-    if (room.type === 'Event') {
-      return this.getEventTitle(room.eventOutcome);
-    }
-
-    return this.getRoomTypeLabel(room.type);
-  });
-
-  readonly isChoosingBoon = computed(() => this.boonChoices().length > 0);
-
-  readonly isChoosingRoute = computed(
-    () => !this.isChoosingBoon() && this.routeOptions().length > 0,
+  readonly canRetreat = computed(
+    () => this.activeDungeon()?.status === 'Active' && !this.loading(),
   );
 
-  readonly activeRunPhaseLabel = computed(() => {
-    if (this.isChoosingBoon()) return 'Run Choice';
-    if (this.isChoosingRoute()) return 'Room Cleared';
-
-    return 'Current Room';
+  readonly pendingCurrencyRewards = computed(() => {
+    const run = this.activeDungeon();
+    return [
+      { label: 'Cinders', value: run?.pendingCinders ?? 0 },
+      { label: 'Experience', value: run?.pendingExperience ?? 0 },
+      { label: 'Soulstones', value: run?.pendingSoulstones ?? 0 },
+    ];
   });
 
-  readonly activeRunTitle = computed(() => {
-    if (this.isChoosingBoon()) return 'Choose a Boon';
-    if (this.isChoosingRoute()) return 'Choose a Route';
+  readonly pendingRewards = computed(
+    () => this.activeDungeon()?.pendingRewards ?? [],
+  );
+
+  readonly clearedRoomCount = computed(
+    () =>
+      this.activeDungeon()?.rooms.filter((room) => room.status === 'Completed')
+        .length ?? 0,
+  );
+
+  readonly failureTitle = computed(
+    () =>
+      this.activeDungeon()?.state?.failureAnalysis?.primaryCause ||
+      'The expedition was defeated',
+  );
+
+  readonly failureExplanation = computed(
+    () =>
+      this.activeDungeon()?.state?.failureAnalysis?.explanation ||
+      'The party could not overcome the final encounter. Pending Loot was lost.',
+  );
+
+  readonly failureLocation = computed(() => {
+    const run = this.activeDungeon();
+    if (!run) return 'Unknown';
+
+    const analysis = run.state?.failureAnalysis;
+    if (analysis?.location) {
+      return analysis.section > 0
+        ? `${analysis.location} · Section ${analysis.section}`
+        : analysis.location;
+    }
 
     return this.currentRoomTitle();
   });
 
-  readonly showCurrentRoomIcon = computed(() => !this.isChoosingRoute());
+  readonly failureSuggestions = computed(
+    () =>
+      this.activeDungeon()?.state?.failureAnalysis?.suggestions ?? [
+        'Use Rest Sites before committing to the next Section.',
+        'Choose routes that remove or weaken dangerous Boss Aspects.',
+      ],
+  );
 
-  readonly currentDecisionText = computed(() => {
-    const run = this.activeDungeon();
-    const room = this.currentRoom();
-
-    if (!run) return 'Choose a dungeon from the world map to begin.';
-    if (this.loading()) return 'Resolving your last dungeon action...';
-
-    if (run.status === 'Completed' || run.status === 'Withdrawn') {
-      return 'Claiming rewards returns them to your character and closes this run.';
-    }
-
-    if (run.status === 'Failed') {
-      return 'Leave the failed run before entering another dungeon.';
-    }
-
-    if (!room) return 'Preparing the next room.';
-
-    if (this.boonChoices().length) {
-      return 'Choose one temporary boon to shape the rest of this expedition.';
-    }
-
-    if (this.routeOptions().length) {
-      return 'Choose a route into the next room.';
-    }
-
-    switch (room.type) {
-      case 'Combat':
-        return 'Start the fight to clear this room and reveal the next step.';
-      case 'MiniBoss':
-        return 'This tougher enemy blocks progress. Win to keep the run moving.';
-      case 'Boss':
-        return 'Defeat the boss to complete the dungeon and unlock the final reward claim.';
-      case 'Checkpoint':
-        return 'Continue to push deeper, or withdraw now to secure your pending rewards.';
-      case 'Event':
-        return `${this.getEventDescription(room.eventOutcome)} ${
-          room.status === 'Active'
-            ? 'Accept it, or ignore it and move on.'
-            : 'Inspect the result to continue.'
-        }`;
-      default:
-        return 'Resolve this room to continue the run.';
-    }
-  });
-
-  readonly showCurrentRoomEncounters = computed(() => {
-    const room = this.currentRoom();
-
-    return (
-      this.isCombatRoom() &&
-      room?.status === 'Active' &&
-      (room.encounterIds?.length ?? 0) > 0
-    );
-  });
-
-  readonly pendingCurrencyRewards = computed(() => {
-    const run = this.activeDungeon();
-
+  readonly failedCurrencyRewards = computed(() => {
+    const lost = this.activeDungeon()?.state?.failureAnalysis?.lostPendingLoot;
     return [
-      {
-        label: 'Experience',
-        value: run?.pendingExperience ?? 0,
-      },
-      {
-        label: 'Cinders',
-        value: run?.pendingCinders ?? 0,
-      },
-      {
-        label: 'Soulstones',
-        value: run?.pendingSoulstones ?? 0,
-      },
+      { label: 'Cinders', value: lost?.cinders ?? 0 },
+      { label: 'Experience', value: lost?.experience ?? 0 },
+      { label: 'Soulstones', value: lost?.soulstones ?? 0 },
     ];
   });
 
-  readonly pendingRewards = computed(() => {
-    return this.activeDungeon()?.pendingRewards ?? [];
+  readonly failedItemRewards = computed(() => {
+    const items =
+      this.activeDungeon()?.state?.failureAnalysis?.lostPendingLoot?.items ?? {};
+    return Object.entries(items)
+      .filter(([, quantity]) => quantity > 0)
+      .map(([id, quantity]) => ({ id, quantity }));
   });
 
-  readonly completedRooms = computed(() => {
+  readonly vigorPercent = computed(
+    () => this.activeDungeon()?.state?.vigor ?? 100,
+  );
+
+  readonly statusNote = computed(() => {
     const run = this.activeDungeon();
-    if (!run?.rooms?.length) return [];
-    if (run.status === 'Completed') return run.rooms;
-    if (run.status === 'Withdrawn') {
-      return run.rooms.slice(0, run.currentRoomIndex + 1);
-    }
-
-    const currentIndex = run.currentRoomIndex ?? 0;
-    return run.rooms.slice(0, currentIndex);
-  });
-
-  readonly upcomingRooms = computed(() => {
-    const run = this.activeDungeon();
-    if (!run?.rooms?.length) return [];
-    if (run.status === 'Completed') return [];
-    if (run.status === 'Withdrawn') return [];
-
-    const currentIndex = this.currentRoomZeroBasedIndex();
-    return run.rooms.slice(currentIndex + 1);
-  });
-
-  readonly clearedRooms = computed(() => {
-    const run = this.activeDungeon();
-    if (!run?.rooms?.length) return 0;
-    if (run.status === 'Completed') return run.rooms.length;
-    if (run.status === 'Withdrawn') {
-      return Math.min(run.rooms.length, run.currentRoomIndex + 1);
-    }
-
-    return Math.max(0, this.currentRoomZeroBasedIndex());
-  });
-
-  readonly failedRoom = computed(() => {
-    const run = this.activeDungeon();
-    if (run?.status !== 'Failed' || !run.rooms?.length) return null;
-
-    return run.rooms[this.currentRoomZeroBasedIndex()] ?? null;
-  });
-
-  readonly defeatedEncounters = computed(() => {
-    return this.completedRooms().flatMap((room) => room.encounterIds ?? []);
-  });
-
-  readonly canExecutePrimaryAction = computed(() => {
-    const run = this.activeDungeon();
-    const room = this.currentRoom();
-
-    if (!run) return false;
-    if (this.loading()) return false;
-    if (run.status === 'Failed') return false;
-
-    if (run.status === 'Completed' || run.status === 'Withdrawn') {
-      return this.canClaimRewards();
-    }
-
-    if (!room) return false;
-    if (this.boonChoices().length) return false;
-    if (this.routeOptions().length) return false;
-    if (room.type === 'Event' && this.eventChoices().length) return false;
-
-    return true;
+    if (!run) return '';
+    if (run.status === 'Completed') return 'Boss defeated';
+    if (run.status === 'Retreated') return 'Rewards secured';
+    if (run.status === 'Failed') return 'Pending Loot lost';
+    if (this.routeOptions().length) return 'choose your path';
+    return this.currentRoomTitle();
   });
 
   executePrimaryAction(): void {
     const run = this.activeDungeon();
     const room = this.currentRoom();
-
     if (!run || this.loading()) return;
 
-    if (run.status === 'Completed' || run.status === 'Withdrawn') {
+    if (run.status === 'Completed' || run.status === 'Retreated') {
       this.claimDungeonRewards();
       return;
     }
-
+    if (run.status === 'Failed') {
+      this.dismissFailedDungeonRun();
+      return;
+    }
     if (!room) return;
-    if (this.boonChoices().length) return;
-    if (this.routeOptions().length) return;
-    if (room.type === 'Event' && this.eventChoices().length) return;
 
     switch (room.type) {
       case 'Combat':
       case 'MiniBoss':
       case 'Boss':
-        this.startCombat();
-        return;
-
-      case 'Checkpoint':
-        this.continueAtCheckpoint();
-        return;
-
+        this.dungeonState.fight();
+        break;
+      case 'Hazard':
+      case 'Cache':
+      case 'OmenSite':
+        this.dungeonState.chooseEventAction('continue');
+        break;
+      case 'RestSite':
+        this.dungeonState.restAtSite();
+        break;
       case 'Event':
-        this.handleEventRoom();
-        return;
-
-      default:
-        return;
+        this.dungeonState.chooseEventAction(
+          room.status === 'Active' ? 'event.accept' : 'event.inspect',
+        );
+        break;
     }
   }
 
-  startCombat(): void {
-    const room = this.currentRoom();
-    if (!room || !this.isCombatRoom()) return;
-
-    this.dungeonState.fight();
-  }
-
-  continueAtCheckpoint(): void {
-    const room = this.currentRoom();
-    if (!room || room.type !== 'Checkpoint') return;
-    if (this.boonChoices().length) return;
-
-    this.dungeonState.continueAtCheckpoint();
-  }
-
-  withdrawAtCheckpoint(): void {
-    const room = this.currentRoom();
-    if (!room || room.type !== 'Checkpoint') return;
-    if (this.boonChoices().length) return;
-
-    this.dungeonState.withdraw();
-  }
-
-  handleEventRoom(): void {
-    const room = this.currentRoom();
-    if (!room || room.type !== 'Event') return;
-    if (this.boonChoices().length) return;
-    if (this.eventChoices().length) return;
-
-    this.dungeonState.chooseEventAction(
-      room.status === 'Active' ? 'event.accept' : 'event.inspect',
-    );
-  }
-
-  chooseEventAction(actionId: string, payload?: unknown): void {
-    const room = this.currentRoom();
-    if (!room || room.type !== 'Event') return;
-    if (this.boonChoices().length) return;
-    if (this.eventChoices().length) return;
-
-    this.dungeonState.chooseEventAction(actionId, payload);
-  }
-
-  chooseRoute(routeOptionId: string): void {
-    if (!routeOptionId || this.loading()) return;
-    if (this.boonChoices().length) return;
-
-    this.dungeonState.chooseRoute(routeOptionId);
-  }
-
-  chooseBoon(boonId: string): void {
-    if (!boonId || this.loading()) return;
-
-    this.dungeonState.chooseBoon(boonId);
-  }
-
-  showBoonTooltip(boonId: string): void {
-    this.hoveredBoonId = boonId;
-  }
-
-  hideBoonTooltip(boonId: string): void {
-    if (this.hoveredBoonId === boonId) {
-      this.hoveredBoonId = null;
-    }
-  }
-
-  isBoonTooltipOpen(boonId: string): boolean {
-    return this.hoveredBoonId === boonId;
+  chooseMapNode(node: DungeonGraphNode): void {
+    if (!node.route || this.loading()) return;
+    this.dungeonState.chooseRoute(node.route.id);
   }
 
   chooseEventChoice(choiceId: string): void {
-    const room = this.currentRoom();
-    if (
-      !choiceId ||
-      !room ||
-      room.type !== 'Event' ||
-      this.loading() ||
-      this.boonChoices().length ||
-      this.routeOptions().length
-    )
-      return;
-
+    if (!choiceId || this.loading()) return;
     this.dungeonState.chooseEventChoice(choiceId);
   }
 
-  chooseCheckpointChoice(choiceId: string): void {
-    const room = this.currentRoom();
-    if (
-      !choiceId ||
-      !room ||
-      room.type !== 'Checkpoint' ||
-      this.loading() ||
-      this.boonChoices().length ||
-      this.routeOptions().length
-    )
-      return;
-
-    this.dungeonState.chooseCheckpoint(choiceId);
-  }
-
-  leaveDungeon(): void {
-    if (!this.canLeave()) return;
-    this.dungeonState.leaveDungeon();
-  }
-
-  dismissFailedDungeonRun(): void {
-    const run = this.activeDungeon();
-    if (!run || run.status !== 'Failed' || this.loading()) return;
-
-    this.dungeonState.dismissFailedDungeonRun(() => {
-      void this.router.navigate(['/game/world/shenic']);
-    });
+  retreatAndSecureLoot(): void {
+    if (!this.canRetreat()) return;
+    this.dungeonState.retreat();
   }
 
   claimDungeonRewards(): void {
-    if (!this.canClaimRewards()) return;
     this.dungeonState.claimDungeonRewards(() => {
       void this.router.navigate(['/game/world/shenic']);
     });
   }
 
-  formatEncounterName(value: string | null | undefined): string {
-    if (!value) return 'Unknown';
-    return value
-      .replace(/_/g, ' ')
-      .replace(/\b\w/g, (char) => char.toUpperCase());
-  }
-
-  formatRewardSource(value: string | null | undefined): string {
-    if (!value) return 'Unknown source';
-
-    return value
-      .replace(/:/g, ' ')
-      .replace(/-/g, ' ')
-      .replace(/\b\w/g, (char) => char.toUpperCase());
-  }
-
-  formatBoonName(value: string | null | undefined): string {
-    return this.formatEncounterName(value);
-  }
-
-  formatPressureDelta(value: number | null | undefined): string {
-    const delta = value ?? 0;
-    if (delta > 0) return `+${delta}`;
-    return `${delta}`;
-  }
-
-  formatRewardMultiplierDelta(value: number | null | undefined): string {
-    const delta = value ?? 0;
-    if (delta > 0) return `+${delta}%`;
-    if (delta < 0) return `${delta}%`;
-    return '0%';
-  }
-
-  formatBossModifierAmount(
-    amount: number | null | undefined,
-    modifierType: string | null | undefined,
-  ): string {
-    const value = amount ?? 0;
-    const prefix = value > 0 ? '+' : '';
-    return modifierType === 'Flat' ? `${prefix}${value}` : `${prefix}${value}%`;
+  dismissFailedDungeonRun(): void {
+    this.dungeonState.dismissFailedDungeonRun(() => {
+      void this.router.navigate(['/game/world/shenic']);
+    });
   }
 
   refresh(): void {
     this.dungeonState.refresh();
   }
 
-  trackByIndex(index: number): number {
-    return index;
+  toggleVigorThresholds(event: MouseEvent): void {
+    const expanded = !this.vigorThresholdsExpanded();
+    this.vigorThresholdsExpanded.set(expanded);
+
+    if (!expanded && event.currentTarget instanceof HTMLElement) {
+      event.currentTarget.blur();
+    }
+  }
+
+  skipBattle(): void {
+    this.dungeonState.skipDungeonMatch();
+  }
+
+  isCurrentNode(node: DungeonGraphNode): boolean {
+    return node.roomIndex === this.activeDungeon()?.currentRoomIndex;
+  }
+
+  isTraversedNode(node: DungeonGraphNode): boolean {
+    return (
+      this.activeDungeon()?.state?.traversedRoomIndexes?.includes(
+        node.roomIndex,
+      ) ?? false
+    );
+  }
+
+  nodeClass(node: DungeonGraphNode): string {
+    if (node.route) return 'dungeon-node--available';
+    if (this.isCurrentNode(node)) return 'dungeon-node--current';
+    if (node.room?.status === 'Completed' || this.isTraversedNode(node))
+      return 'dungeon-node--cleared';
+    if (node.room?.type === 'Boss') return 'dungeon-node--boss';
+    return 'dungeon-node--pending';
   }
 
   getRoomTypeLabel(type: string | null | undefined): string {
     switch (type) {
-      case 'Combat':
-        return 'Combat';
       case 'MiniBoss':
-        return 'Mini Boss';
-      case 'Boss':
-        return 'Boss';
-      case 'Event':
-        return 'Event';
-      case 'Checkpoint':
-        return 'Checkpoint';
+        return 'Miniboss';
+      case 'RestSite':
+        return 'Rest Site';
+      case 'Unknown':
+        return 'Unknown';
       default:
         return type || 'Unknown';
     }
   }
 
-  getRoomStateClasses(index: number): string {
-    const current = this.currentRoomZeroBasedIndex();
-
-    if (index < current) {
-      return 'll-card-accent opacity-60';
-    }
-
-    if (index === current) {
-      return 'll-card-accent shadow-[0_0_0_1px_rgba(249,220,160,0.22)]';
-    }
-
-    return 'll-card';
+  currentRoomTitle(): string {
+    const room = this.currentRoom();
+    if (!room) return 'Preparing';
+    const node = this.mapNodes().find(
+      (candidate) => candidate.roomIndex === room.index,
+    );
+    if (node?.displayName) return node.displayName;
+    return room.type === 'Event'
+      ? this.getEventTitle(room.eventOutcome)
+      : this.getRoomTypeLabel(room.type);
   }
 
   getEventTitle(outcome: string | null | undefined): string {
@@ -690,19 +597,38 @@ export class DungeonPageComponent {
   getEventDescription(outcome: string | null | undefined): string {
     switch (outcome) {
       case 'ExtraCombat':
-        return 'Noise in the dark suggests enemies are nearby. Accepting draws them into a fight.';
+        return 'Noise in the dark suggests enemies are nearby.';
       case 'TreasureRoom':
-        return 'A concealed cache promises extra Cinders, Soulstones, and Monster Core fragments.';
+        return 'A concealed cache promises extra Pending Loot.';
       case 'Shrine':
-        return 'A quiet shrine offers a small pulse of experience and Soulstones.';
+        return 'A quiet shrine offers power at an uncertain price.';
       case 'Trap':
-        return 'The room is dangerous. Accepting risks some of your pending Cinders.';
+        return 'The mechanism may hide an opportunity—or a costly trap.';
       default:
         return 'A strange event unfolds.';
     }
   }
 
-  skipBattle() {
-    this.dungeonState.skipDungeonMatch();
+  formatDelta(value: number): string {
+    return value > 0 ? `+${value}` : `${value}`;
+  }
+
+  formatRewardSource(value: string | null | undefined): string {
+    if (!value) return 'Dungeon';
+    return value
+      .replace(/[:_-]/g, ' ')
+      .replace(/\b\w/g, (character) => character.toUpperCase());
+  }
+
+  trackByIndex(index: number): number {
+    return index;
+  }
+
+  trackNode(_: number, node: DungeonGraphNode): number {
+    return node.roomIndex;
+  }
+
+  trackEdge(_: number, edge: DungeonGraphEdge): string {
+    return edge.key;
   }
 }

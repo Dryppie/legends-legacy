@@ -527,7 +527,7 @@ public sealed class GameEventOutboxTests
             Guid characterId,
             string dungeonDefinitionId,
             bool completedWithoutDefeat,
-            bool completedWithoutCheckpointRetreat,
+            bool completedWithoutRetreat,
             IReadOnlyCollection<string> defeatedBossKeys,
             CancellationToken cancellationToken) =>
             Task.CompletedTask;

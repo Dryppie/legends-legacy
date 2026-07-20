@@ -141,7 +141,7 @@
         ]
       }
     ],
-    "hasCheckpoint": true,
+    "hasRestSites": true,
     "minRooms": 10,
     "maxRooms": 12,
     "rooms": [
@@ -308,7 +308,7 @@
         ]
       }
     ],
-    "hasCheckpoint": true,
+    "hasRestSites": true,
     "minRooms": 11,
     "maxRooms": 13,
     "rooms": [
@@ -475,7 +475,7 @@
         ]
       }
     ],
-    "hasCheckpoint": true,
+    "hasRestSites": true,
     "minRooms": 12,
     "maxRooms": 14,
     "rooms": [
@@ -542,7 +542,7 @@
     "monsterLootModifiers": {
       "Essence": 15
     },
-    "hasCheckpoint": true,
+    "hasRestSites": true,
     "minRooms": 11,
     "maxRooms": 13,
     "rooms": [
@@ -701,7 +701,7 @@
     "monsterLootModifiers": {
       "Essence": 15
     },
-    "hasCheckpoint": true,
+    "hasRestSites": true,
     "minRooms": 12,
     "maxRooms": 14,
     "rooms": [
@@ -871,7 +871,7 @@
     "monsterLootModifiers": {
       "Essence": 15
     },
-    "hasCheckpoint": true,
+    "hasRestSites": true,
     "minRooms": 13,
     "maxRooms": 15,
     "rooms": [
@@ -1034,7 +1034,7 @@
     "monsterLootModifiers": {
       "Essence": 15
     },
-    "hasCheckpoint": true,
+    "hasRestSites": true,
     "minRooms": 12,
     "maxRooms": 14,
     "rooms": [
@@ -1202,7 +1202,7 @@
     "monsterLootModifiers": {
       "Essence": 15
     },
-    "hasCheckpoint": true,
+    "hasRestSites": true,
     "minRooms": 13,
     "maxRooms": 15,
     "rooms": [
@@ -1372,7 +1372,7 @@
     "monsterLootModifiers": {
       "Essence": 15
     },
-    "hasCheckpoint": true,
+    "hasRestSites": true,
     "minRooms": 14,
     "maxRooms": 16,
     "rooms": [

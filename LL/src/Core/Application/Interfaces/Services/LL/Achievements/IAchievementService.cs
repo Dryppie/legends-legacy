@@ -40,7 +40,7 @@ public interface IAchievementService
         Guid characterId,
         string dungeonDefinitionId,
         bool completedWithoutDefeat,
-        bool completedWithoutCheckpointRetreat,
+        bool completedWithoutRetreat,
         IReadOnlyCollection<string> defeatedBossKeys,
         CancellationToken cancellationToken);
     Task RecordIdleCombatAsync(

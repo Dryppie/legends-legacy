@@ -90,7 +90,7 @@ public sealed class DungeonRunRewardClaimer : IDungeonRunRewardClaimer
 
     private static DungeonLootBag GetClaimableRewards(DungeonRun run)
     {
-        if (run.Status == DungeonRunStatus.Withdrawn && HasLoot(run.State?.SecuredLoot))
+        if (run.Status == DungeonRunStatus.Retreated && HasLoot(run.State?.SecuredLoot))
         {
             return run.State!.SecuredLoot;
         }

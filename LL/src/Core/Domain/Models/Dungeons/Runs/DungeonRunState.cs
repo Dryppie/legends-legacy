@@ -10,12 +10,11 @@ public sealed class DungeonRunState
     public Guid RunId { get; set; }
     public Dictionary<string, int> Flags { get; set; } = new(StringComparer.OrdinalIgnoreCase);
     public DungeonLootBag SecuredLoot { get; set; } = new();
-    public DungeonLootBag UnsecuredLoot { get; set; } = new();
+    public DungeonLootBag PendingLoot { get; set; } = new();
     public List<DungeonMapNode> MapNodes { get; set; } = [];
     public List<int> TraversedRoomIndexes { get; set; } = [];
     public List<DungeonRouteOption> CurrentRouteOptions { get; set; } = [];
     public List<DungeonEventChoiceOption> CurrentEventChoices { get; set; } = [];
-    public List<DungeonCheckpointChoiceOption> CurrentCheckpointChoices { get; set; } = [];
     public List<DungeonBossModifier> CurrentBossModifiers { get; set; } = [];
     public List<DungeonMasteryAwardReason> MasteryAwardReasons { get; set; } = [];
     public int Vigor { get; set; } = 100;
@@ -23,10 +22,7 @@ public sealed class DungeonRunState
     public List<DungeonVigorThreshold> VigorThresholds { get; set; } = [];
     public int CurrentSection { get; set; } = 1;
     public int TotalSections { get; set; } = 1;
-    public int WardstonesReached { get; set; }
-    public bool WardstoneBoonChosen { get; set; }
-    public List<string> WardstoneBoonIdsChosen { get; set; } = [];
-    public bool ExtractionLocked { get; set; }
+    public int RestSitesVisited { get; set; }
     public string LastConsequence { get; set; } = string.Empty;
     public DateTimeOffset ExpiresAt { get; set; }
     public List<DungeonVigorChange> VigorHistory { get; set; } = [];
@@ -99,7 +95,7 @@ public sealed class DungeonFailureAnalysis
     public string PrimaryCause { get; set; } = string.Empty;
     public string Explanation { get; set; } = string.Empty;
     public List<string> Suggestions { get; set; } = [];
-    public DungeonLootBag LostRunLoot { get; set; } = new();
+    public DungeonLootBag LostPendingLoot { get; set; } = new();
 }
 
 public sealed class DungeonLootBag
@@ -139,15 +135,6 @@ public sealed class DungeonEventChoiceOption
     public bool GrantsLoot { get; set; }
     public int AmbushChancePercent { get; set; }
     public bool RevealsHiddenRoute { get; set; }
-}
-
-public sealed class DungeonCheckpointChoiceOption
-{
-    public string Id { get; set; } = string.Empty;
-    public string Label { get; set; } = string.Empty;
-    public string Description { get; set; } = string.Empty;
-    public int VigorDelta { get; set; }
-    public string Kind { get; set; } = "Boon";
 }
 
 public sealed class DungeonBossModifier

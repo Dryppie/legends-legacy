@@ -46,7 +46,7 @@ public sealed class DungeonDtoMappingTests
                 {
                     Id = Guid.NewGuid(),
                     RoomIndex = 1,
-                    Type = RoomType.Checkpoint
+                    Type = RoomType.RestSite
                 }
             ],
             State = new DungeonRunState
@@ -65,13 +65,13 @@ public sealed class DungeonDtoMappingTests
                     },
                     new DungeonMapNode
                     {
-                        Id = "wardstone",
+                        Id = "rest-site",
                         RoomIndex = 1,
                         Depth = 1,
                         Section = 1
                     }
                 ],
-                UnsecuredLoot = new DungeonLootBag
+                PendingLoot = new DungeonLootBag
                 {
                     Cinders = 25,
                     Items = new Dictionary<string, int> { ["ore"] = 2 }
@@ -90,7 +90,7 @@ public sealed class DungeonDtoMappingTests
                 {
                     Location = "Test Room",
                     Section = 2,
-                    LostRunLoot = new DungeonLootBag { Soulstones = 3 }
+                    LostPendingLoot = new DungeonLootBag { Soulstones = 3 }
                 }
             }
         };
@@ -100,12 +100,12 @@ public sealed class DungeonDtoMappingTests
         Assert.Equal(2, dto.TotalRooms);
         Assert.Equal(2, dto.State.CurrentSection);
         Assert.Equal(4, dto.State.TotalSections);
-        Assert.Equal(25, dto.State.UnsecuredLoot.Cinders);
-        Assert.Equal(2, dto.State.UnsecuredLoot.Items["ore"]);
+        Assert.Equal(25, dto.State.PendingLoot.Cinders);
+        Assert.Equal(2, dto.State.PendingLoot.Items["ore"]);
         Assert.Equal("Power", Assert.Single(dto.State.CurrentBossModifiers).AttributeType);
         Assert.Equal("Additive", dto.State.CurrentBossModifiers[0].ModifierType);
-        Assert.Equal(3, dto.State.FailureAnalysis?.LostRunLoot.Soulstones);
-        Assert.Equal("wardstone", dto.State.MapNodes[1].Id);
+        Assert.Equal(3, dto.State.FailureAnalysis?.LostPendingLoot.Soulstones);
+        Assert.Equal("rest-site", dto.State.MapNodes[1].Id);
         Assert.Equal("ore", Assert.Single(dto.PendingRewards).ItemId);
     }
 

@@ -47,7 +47,7 @@ public sealed class DungeonRouteService : IDungeonRouteService
                         ? Math.Max(0, node.VigorCostMin - 2)
                         : node.VigorCostMin;
                     var vigorCostMax = widenForecast
-                        ? Math.Min(25, node.VigorCostMax + 2)
+                        ? Math.Min(35, node.VigorCostMax + 2)
                         : node.VigorCostMax;
                     return new DungeonRouteOption
                     {
@@ -57,9 +57,9 @@ public sealed class DungeonRouteService : IDungeonRouteService
                         RoomType = room.Type,
                         RiskLevel = node.VigorCostMax switch
                         {
-                            >= 16 => 4,
-                            >= 13 => 3,
-                            >= 8 => 2,
+                            >= 28 => 4,
+                            >= 22 => 3,
+                            >= 15 => 2,
                             _ => 1
                         },
                         VigorCostMin = vigorCostMin,

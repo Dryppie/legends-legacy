@@ -6,6 +6,8 @@ namespace Services.LL.Dungeons;
 
 public sealed class DungeonVigorService : IDungeonVigorService
 {
+    public const int RestSiteRecovery = 15;
+
     public int ApplyCombatToll(DungeonRun run, RoomInstance room, CombatResult result)
     {
         ArgumentNullException.ThrowIfNull(result);
@@ -19,23 +21,30 @@ public sealed class DungeonVigorService : IDungeonVigorService
             .Sum(stats => Math.Max(0, stats.DamageTaken));
         var damagePercent = damageTaken * 100d / maxHealth;
         var downedMembers = result.PlayerTeam.Count(entity => entity.Health <= 0);
+        var node = run.State.MapNodes
+            .FirstOrDefault(candidate => candidate.RoomIndex == room.RoomIndex);
+        var minimumToll = node is not null && node.VigorCostMin > 0
+            ? node.VigorCostMin
+            : 12;
+        var maximumToll = node is not null && node.VigorCostMax >= minimumToll
+            ? node.VigorCostMax
+            : Math.Max(minimumToll, 22);
+        var performanceToll = (int)Math.Round(
+            (maximumToll - minimumToll) * Math.Clamp(damagePercent / 100d, 0d, 1d),
+            MidpointRounding.AwayFromZero);
         var omenModifier = run.State.ActiveOmens.Sum(omen => omen.CombatTollModifier);
-        var preparedReduction = run.State.Flags.Remove("wardstone_prepared") ? 3 : 0;
-        var toll = 3
-            + (int)Math.Round(0.15d * damagePercent, MidpointRounding.AwayFromZero)
-            + (downedMembers * 8)
-            + omenModifier
-            - preparedReduction;
+        var toll = minimumToll
+            + performanceToll
+            + (downedMembers * 6)
+            + omenModifier;
 
-        return Apply(run, room, -Math.Clamp(toll, 0, 25), "Combat toll");
+        return Apply(run, room, -Math.Clamp(toll, 0, 35), "Combat toll");
     }
 
     public int ApplyHazardToll(DungeonRun run, RoomInstance room, int baseToll)
     {
-        var tier = GetTier(run.DungeonDefinitionId);
-        var tierOneReduction = tier == 1 ? (int)Math.Round(baseToll * .25d, MidpointRounding.AwayFromZero) : 0;
         var omenModifier = run.State.ActiveOmens.Sum(omen => omen.HazardTollModifier);
-        var toll = Math.Clamp(baseToll - tierOneReduction + omenModifier, 0, 25);
+        var toll = Math.Clamp(baseToll + omenModifier, 0, 35);
         return Apply(run, room, -toll, "Hazard toll");
     }
 
@@ -43,19 +52,11 @@ public sealed class DungeonVigorService : IDungeonVigorService
         Apply(
             run,
             room,
-            Math.Clamp(amount, -25, 25),
+            Math.Clamp(amount, -35, 25),
             string.IsNullOrWhiteSpace(reason) ? "Event consequence" : reason);
 
-    public int RecoverAtWardstone(DungeonRun run, RoomInstance room)
-    {
-        var recovery = GetTier(run.DungeonDefinitionId) switch
-        {
-            1 => 20,
-            3 => 10,
-            _ => 15
-        };
-        return Apply(run, room, recovery, "Wardstone recovery");
-    }
+    public int RecoverAtRestSite(DungeonRun run, RoomInstance room) =>
+        Apply(run, room, RestSiteRecovery, "Rest Site recovery");
 
     public void RefreshState(DungeonRun run)
     {

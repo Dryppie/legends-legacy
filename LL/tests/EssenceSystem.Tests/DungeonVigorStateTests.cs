@@ -70,7 +70,7 @@ public sealed class DungeonVigorStateTests
         {
             var authored = run.State.MapNodes.Single(node => node.RoomIndex == route.RoomIndex);
             Assert.Equal(Math.Max(0, authored.VigorCostMin - 2), route.VigorCostMin);
-            Assert.Equal(Math.Min(25, authored.VigorCostMax + 2), route.VigorCostMax);
+            Assert.Equal(Math.Min(35, authored.VigorCostMax + 2), route.VigorCostMax);
         });
         Assert.Equal(8, run.State.MapNodes.Single(node => node.RoomIndex == 1).VigorCostMin);
     }
@@ -100,34 +100,30 @@ public sealed class DungeonVigorStateTests
 
         var applied = service.ApplyEventChange(run, room, -80, "Break the seal");
 
-        Assert.Equal(-25, applied);
-        Assert.Equal(75, run.State.Vigor);
+        Assert.Equal(-35, applied);
+        Assert.Equal(65, run.State.Vigor);
         var history = Assert.Single(run.State.VigorHistory);
         Assert.Equal("Break the seal", history.Reason);
-        Assert.Equal(75, history.VigorAfter);
+        Assert.Equal(65, history.VigorAfter);
         Assert.Equal("Steady", run.State.VigorState);
     }
 
     [Fact]
-    public async Task Prepare_can_only_be_selected_once_but_recover_can_repeat()
+    public void Rest_site_recovery_is_fixed_clamped_and_recorded()
     {
         var run = CreateRun();
         var room = run.Rooms[0];
-        room.Type = RoomType.Checkpoint;
-        var service = new DungeonCheckpointService(new DungeonVigorService());
+        room.Type = RoomType.RestSite;
+        run.State.Vigor = 92;
+        var service = new DungeonVigorService();
 
-        await service.ApplyChoiceAsync(run, room, "prepare", CancellationToken.None);
-        run.State.WardstoneBoonChosen = false;
+        var recovered = service.RecoverAtRestSite(run, room);
 
-        var secondWardstoneChoices = service.EnsureChoices(run);
-        Assert.DoesNotContain(secondWardstoneChoices, choice => choice.Id == "prepare");
-        Assert.Contains(secondWardstoneChoices, choice => choice.Id == "recover");
-
-        await service.ApplyChoiceAsync(run, room, "recover", CancellationToken.None);
-        run.State.WardstoneBoonChosen = false;
-
-        Assert.Contains(service.EnsureChoices(run), choice => choice.Id == "recover");
-        Assert.Equal(2, run.State.WardstoneBoonIdsChosen.Count);
+        Assert.Equal(8, recovered);
+        Assert.Equal(100, run.State.Vigor);
+        var history = Assert.Single(run.State.VigorHistory);
+        Assert.Equal("Rest Site recovery", history.Reason);
+        Assert.Equal(100, history.VigorAfter);
     }
 
     [Fact]
@@ -135,6 +131,15 @@ public sealed class DungeonVigorStateTests
     {
         var run = CreateRun();
         var room = run.Rooms[0];
+        run.State.MapNodes =
+        [
+            new DungeonMapNode
+            {
+                RoomIndex = room.RoomIndex,
+                VigorCostMin = 12,
+                VigorCostMax = 22
+            }
+        ];
         var playerId = Guid.NewGuid().ToString();
         var result = new CombatResult
         {
@@ -156,8 +161,8 @@ public sealed class DungeonVigorStateTests
 
         var applied = new DungeonVigorService().ApplyCombatToll(run, room, result);
 
-        Assert.Equal(-11, applied);
-        Assert.Equal(89, run.State.Vigor);
+        Assert.Equal(-17, applied);
+        Assert.Equal(83, run.State.Vigor);
     }
 
     [Fact]
@@ -216,7 +221,7 @@ public sealed class DungeonVigorStateTests
         Assert.All(delves.GetAll(), delve =>
         {
             var sections = delve.Nodes
-                .Where(node => node.RoomType == RoomType.Checkpoint)
+                .Where(node => node.RoomType == RoomType.RestSite)
                 .Select(node => node.Section)
                 .Order()
                 .ToList();
@@ -225,7 +230,7 @@ public sealed class DungeonVigorStateTests
         Assert.Equal(
             [2, 3, 4],
             delves.GetAll()
-                .Select(delve => delve.Nodes.Count(node => node.RoomType == RoomType.Checkpoint))
+                .Select(delve => delve.Nodes.Count(node => node.RoomType == RoomType.RestSite))
                 .Order()
                 .ToArray());
         Assert.Contains(
@@ -252,7 +257,7 @@ public sealed class DungeonVigorStateTests
             var loaded = provider.GetForDungeon(definition.DungeonDefinitionIds[0]);
             Assert.Equal(
                 sectionCount,
-                loaded.Nodes.Count(node => node.RoomType == RoomType.Checkpoint));
+                loaded.Nodes.Count(node => node.RoomType == RoomType.RestSite));
         });
     }
 
@@ -264,7 +269,7 @@ public sealed class DungeonVigorStateTests
         WithTemporaryDelveCatalog(definition, provider =>
         {
             var loaded = provider.GetForDungeon(definition.DungeonDefinitionIds[0]);
-            Assert.Single(loaded.Nodes, node => node.RoomType == RoomType.Checkpoint);
+            Assert.Single(loaded.Nodes, node => node.RoomType == RoomType.RestSite);
         });
     }
 
@@ -394,21 +399,21 @@ public sealed class DungeonVigorStateTests
             }
 
             depth++;
-            var wardstoneIndex = definition.Nodes.Count;
+            var restSiteIndex = definition.Nodes.Count;
             definition.Nodes.Add(new DungeonDelveNodeDefinition
             {
-                Id = $"wardstone-{section}",
-                DisplayName = $"Wardstone {section}",
-                RoomType = RoomType.Checkpoint,
+                Id = $"rest-site-{section}",
+                DisplayName = $"Rest Site {section}",
+                RoomType = RoomType.RestSite,
                 Depth = depth,
                 Section = section
             });
             foreach (var nodeIndex in finalRow)
             {
-                definition.Nodes[nodeIndex].NextRoomIndexes = [wardstoneIndex];
+                definition.Nodes[nodeIndex].NextRoomIndexes = [restSiteIndex];
             }
 
-            anchorIndex = wardstoneIndex;
+            anchorIndex = restSiteIndex;
         }
 
         depth++;

@@ -12,8 +12,7 @@ export enum DungeonRunStatus {
   Active = 'Active',
   Completed = 'Completed',
   Failed = 'Failed',
-  Withdrawn = 'Withdrawn',
-  Abandoned = 'Abandoned',
+  Retreated = 'Retreated',
   RewardsClaimed = 'RewardsClaimed',
 }
 
@@ -26,7 +25,7 @@ export enum RoomType {
   Treasure = 'Treasure',
   Shrine = 'Shrine',
   Trap = 'Trap',
-  Checkpoint = 'Checkpoint',
+  RestSite = 'RestSite',
   Entrance = 'Entrance',
   Elite = 'Elite',
   Hazard = 'Hazard',
@@ -76,12 +75,11 @@ export interface DungeonRun {
 export interface DungeonRunState {
   flags: Record<string, number>;
   securedLoot: DungeonLootBag;
-  unsecuredLoot: DungeonLootBag;
+  pendingLoot: DungeonLootBag;
   mapNodes: DungeonMapNode[];
   traversedRoomIndexes: number[];
   currentRouteOptions: DungeonRouteOption[];
   currentEventChoices: DungeonEventChoiceOption[];
-  currentCheckpointChoices: DungeonCheckpointChoiceOption[];
   currentBossModifiers: DungeonBossModifier[];
   masteryAwardReasons: DungeonMasteryAwardReason[];
   vigor: number;
@@ -89,9 +87,7 @@ export interface DungeonRunState {
   vigorThresholds: DungeonVigorThreshold[];
   currentSection: number;
   totalSections: number;
-  wardstonesReached: number;
-  wardstoneBoonChosen: boolean;
-  extractionLocked: boolean;
+  restSitesVisited: number;
   lastConsequence: string;
   expiresAt: string;
   vigorHistory: DungeonVigorChange[];
@@ -153,7 +149,7 @@ export interface DungeonFailureAnalysis {
   primaryCause: string;
   explanation: string;
   suggestions: string[];
-  lostRunLoot: DungeonLootBag;
+  lostPendingLoot: DungeonLootBag;
 }
 
 export interface DungeonLootBag {
@@ -196,14 +192,6 @@ export interface DungeonEventChoiceOption {
   grantsLoot: boolean;
   ambushChancePercent: number;
   revealsHiddenRoute: boolean;
-}
-
-export interface DungeonCheckpointChoiceOption {
-  id: string;
-  label: string;
-  description: string;
-  vigorDelta: number;
-  kind: 'Boon' | 'Decision';
 }
 
 export interface DungeonBossModifier {
@@ -266,9 +254,10 @@ export enum DungeonActionOutcome {
   CombatVictory = 1,
   CombatDefeat = 2,
   EventResolved = 3,
-  CheckpointResolved = 4,
-  RunAbandoned = 5,
+  RestSiteResolved = 4,
+  RunRetreated = 5,
   RunCompleted = 6,
+  RunFailed = 7,
 }
 
 @Injectable({
@@ -324,14 +313,6 @@ export class DungeonService {
     return this.api.post(`dungeon/executeAction/${runId}`, request).pipe(
       catchError(() => {
         return throwError(() => new Error('Failed to progress dungeon'));
-      }),
-    );
-  }
-
-  leaveDungeon(): Observable<void> {
-    return this.api.post('dungeon/leaveDungeon').pipe(
-      catchError(() => {
-        return throwError(() => new Error('Failed to leave dungeon'));
       }),
     );
   }

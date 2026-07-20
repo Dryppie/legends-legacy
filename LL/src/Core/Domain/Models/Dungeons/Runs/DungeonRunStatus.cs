@@ -5,7 +5,6 @@ public enum DungeonRunStatus
     Active = 0,
     Completed = 1,
     Failed = 2,
-    Withdrawn = 3,
-    Abandoned = 4,
+    Retreated = 3,
     RewardsClaimed = 5
 }

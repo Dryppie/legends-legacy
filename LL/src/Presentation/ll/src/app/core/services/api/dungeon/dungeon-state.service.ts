@@ -192,7 +192,7 @@ export class DungeonStateService {
     this.executeAction('fight');
   }
 
-  continueAtCheckpoint(): void {
+  restAtSite(): void {
     this.executeAction('continue');
   }
 
@@ -200,20 +200,12 @@ export class DungeonStateService {
     this.executeAction('choose_route', { routeOptionId });
   }
 
-  chooseCheckpoint(choice: string): void {
-    this.executeAction('checkpoint_choice', { choice });
-  }
-
   chooseEventChoice(choiceId: string): void {
     this.executeAction('event_choice', { choiceId });
   }
 
-  withdraw(): void {
-    this.executeAction('withdraw');
-  }
-
-  leaveDungeon(): void {
-    this.executeAction('leave');
+  retreat(): void {
+    this.executeAction('retreat');
   }
 
   chooseEventAction(actionId: string, payload?: unknown): void {

@@ -28,7 +28,7 @@ public sealed class SoulstoneConstellationDefinitionTests
                 "crafting.steady-temper",
                 "crafting.blueprint-study",
                 "dungeon.sigil-traces",
-                "dungeon.checkpoint-satchel"
+                "dungeon.rest-site-satchel"
         ];
 
         Assert.Equal(
@@ -56,7 +56,7 @@ public sealed class SoulstoneConstellationDefinitionTests
         AssertValues(definitions["crafting.steady-temper"], [30, 60, 90, 120, 150]);
         AssertValues(definitions["crafting.blueprint-study"], [200, 400, 600, 800, 1000]);
         AssertValues(definitions["dungeon.sigil-traces"], [150, 300, 450, 600, 750]);
-        AssertValues(definitions["dungeon.checkpoint-satchel"], [200, 400, 600, 800, 1000]);
+        AssertValues(definitions["dungeon.rest-site-satchel"], [200, 400, 600, 800, 1000]);
     }
 
     [Fact]

@@ -38,10 +38,28 @@
     <path d="M12 14.8h.01" />
   </ng-container>
 
-  <ng-container *ngSwitchCase="'Checkpoint'">
-    <path d="M5 20V7.5L12 4l7 3.5V20" />
-    <path d="M8 20v-6h8v6" />
-    <path d="M9 9.5h6" />
+  <ng-container *ngSwitchCase="'RestSite'">
+    <path d="M5 19h14" />
+    <path d="m7 19 5-11 5 11" />
+    <path d="M9.5 14h5" />
+    <path d="M12 4v4" />
+  </ng-container>
+
+  <ng-container *ngSwitchCase="'Entrance'">
+    <path d="M5 20V9l7-5 7 5v11" />
+    <path d="M9 20v-7h6v7" />
+  </ng-container>
+
+  <ng-container *ngSwitchCase="'Hazard'">
+    <path d="m12 3 9 17H3L12 3Z" />
+    <path d="M12 9v5" />
+    <path d="M12 17h.01" />
+  </ng-container>
+
+  <ng-container *ngSwitchCase="'Cache'">
+    <path d="M4 9h16v11H4z" />
+    <path d="M3 6h18v3H3z" />
+    <path d="M12 9v11" />
   </ng-container>
 
   <ng-container *ngSwitchDefault>

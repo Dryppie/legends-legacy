@@ -1,7 +1,7 @@
 <ng-container
   *ngIf="
     combatStateService.getIsCombatActive(battleType)() as isCombatActive;
-    else showNonCombat
+    else showDungeon
   "
 >
   <app-combat
@@ -11,796 +11,534 @@
   ></app-combat>
 </ng-container>
 
-<ng-template #showNonCombat>
-  <div class="ll-page-stack">
-    <section class="ll-page-header mr-4 sm:mr-6">
-      <div class="ll-header-row">
-        <div class="min-w-0">
-          <div class="ll-eyebrow">Dungeon Run</div>
-          <div class="mt-1 flex min-w-0 flex-wrap items-center gap-3">
-            <h1 class="ll-heading truncate text-2xl">
-              {{ dungeonTitle() }}
-            </h1>
-            <span class="ll-badge ll-badge-accent">
-              {{ dungeonStatus() }}
-            </span>
+<ng-template #showDungeon>
+  <div
+    class="dungeon-shell ll-panel bg-texture"
+    *ngIf="activeDungeon() as run; else emptyState"
+  >
+    <header class="dungeon-header">
+      <div>
+        <div class="dungeon-eyebrow ll-eyebrow">Dungeon run</div>
+        <h1 class="ll-heading">{{ dungeonTitle() }}</h1>
+      </div>
+
+      <div class="dungeon-header__actions">
+        <div class="dungeon-depth">
+          Depth <strong>{{ currentDepthNumber() }}</strong> of
+          {{ totalDepths() }}
+          <span>·</span>
+          <b>{{ phaseLabel() }}</b>
+          <span class="dungeon-status-note"> - {{ statusNote() }}</span>
+        </div>
+        <button
+          class="dungeon-button dungeon-button--danger ll-button"
+          type="button"
+          *ngIf="canRetreat()"
+          [disabled]="loading()"
+          (click)="retreatAndSecureLoot()"
+        >
+          Retreat &amp; Secure Loot
+        </button>
+      </div>
+    </header>
+
+    <div class="dungeon-error ll-state ll-state-danger" *ngIf="error()">
+      <span>{{ error() }}</span>
+      <button type="button" (click)="refresh()">Retry</button>
+    </div>
+
+    <div class="dungeon-message ll-state" *ngIf="message()">
+      {{ message() }}
+    </div>
+
+    <main
+      class="dungeon-failure"
+      *ngIf="run.status === 'Failed'; else activeRun"
+    >
+      <section class="dungeon-failure__summary ll-panel ll-panel-strong">
+        <div class="dungeon-failure__mark" aria-hidden="true">×</div>
+        <div class="dungeon-failure__eyebrow ll-eyebrow">Expedition ended</div>
+        <h2>{{ failureTitle() }}</h2>
+        <p class="dungeon-failure__explanation">
+          {{ failureExplanation() }}
+        </p>
+
+        <div class="dungeon-failure__facts">
+          <div>
+            <span>Final location</span>
+            <strong>{{ failureLocation() }}</strong>
           </div>
-          <p class="ll-copy mt-1 max-w-3xl">
-            {{ runStateDescription() }}
-          </p>
+          <div>
+            <span>Rooms cleared</span>
+            <strong>{{ clearedRoomCount() }}</strong>
+          </div>
+          <div>
+            <span>Final Vigor</span>
+            <strong>{{ run.state.vigor }} · {{ run.state.vigorState }}</strong>
+          </div>
+        </div>
+
+        <div
+          class="dungeon-failure__guidance"
+          *ngIf="failureSuggestions().length"
+        >
+          <div class="dungeon-sidebar__eyebrow ll-eyebrow">For next time</div>
+          <ul>
+            <li
+              *ngFor="
+                let suggestion of failureSuggestions();
+                trackBy: trackByIndex
+              "
+            >
+              {{ suggestion }}
+            </li>
+          </ul>
         </div>
 
         <button
+          class="dungeon-button dungeon-button--primary ll-button ll-button-primary"
           type="button"
-          class="ll-button"
           [disabled]="loading()"
-          (click)="refresh()"
+          (click)="dismissFailedDungeonRun()"
         >
-          Refresh
+          Return to World
         </button>
-      </div>
+      </section>
 
-      <div class="mt-4">
-        <div class="mb-2 flex items-center justify-between text-xs">
-          <span class="ll-eyebrow">Run Progress</span>
-          <span class="text-primary">
-            Room {{ currentRoomNumber() }} / {{ totalRooms() }}
-          </span>
-        </div>
-        <div class="ll-progress-track">
+      <aside class="dungeon-failure__loot ll-panel">
+        <div class="dungeon-sidebar__eyebrow ll-eyebrow">Lost Pending Loot</div>
+        <p>This Pending Loot was lost when the expedition ended.</p>
+
+        <div class="dungeon-currency-grid">
           <div
-            class="ll-progress-bar"
-            [style.width.%]="progressPercent()"
-          ></div>
-        </div>
-      </div>
-
-      <div
-        *ngIf="runState() as state"
-        class="mt-4 grid gap-3 text-left md:grid-cols-2"
-      >
-        <div class="ll-card px-4 py-3">
-          <div class="mb-2 flex items-center justify-between gap-3">
-            <span class="ll-eyebrow">{{ state.mechanicDisplayName }}</span>
-            <span class="text-sm text-primary">
-              {{ state.pressure }} / {{ state.mechanicMaxValue }}
-            </span>
-          </div>
-          <div class="ll-progress-track">
-            <div
-              class="ll-progress-bar"
-              [style.width.%]="pressurePercent()"
-            ></div>
-          </div>
-          <div
-            *ngIf="state.currentMechanicThresholds?.length"
-            class="mt-2 flex flex-wrap gap-1"
-          >
-            <span
-              *ngFor="
-                let threshold of state.currentMechanicThresholds;
-                trackBy: trackByIndex
-              "
-              class="ll-badge rounded text-[0.65rem]"
-            >
-              {{ threshold.description || threshold.id }}
-            </span>
-          </div>
-        </div>
-
-        <div class="ll-card px-4 py-3">
-          <div class="ll-eyebrow">Reward Multiplier</div>
-          <div class="ll-heading mt-1 text-xl">
-            {{ rewardMultiplierLabel() }}
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <div
-      *ngIf="hasActiveDungeon(); else noActiveDungeonRun"
-      class="grid min-h-0 flex-1 gap-4 overflow-hidden pr-4 xl:grid-cols-[minmax(0,1fr)_21rem] xl:pr-6"
-    >
-      <div
-        class="ll-panel ll-panel-strong order-1 flex min-h-[28rem] flex-col gap-4 overflow-y-auto p-5 text-center xl:p-6"
-      >
-        <div *ngIf="loading()" class="ll-state">
-          Resolving dungeon action...
-        </div>
-
-        <div *ngIf="error() as errorMessage" class="ll-state ll-state-danger">
-          {{ errorMessage }}
-        </div>
-
-        <div *ngIf="message() as actionMessage" class="ll-state ll-state-muted">
-          {{ actionMessage }}
-        </div>
-
-        <ng-container *ngIf="isFailedRun(); else nonFailedRunPanel">
-          <div class="ll-icon-orb ll-card-danger ll-text-danger mx-auto">x</div>
-
-          <div class="ll-eyebrow">Dungeon Failed</div>
-
-          <h2 class="ll-heading text-3xl">{{ dungeonTitle() }} ended</h2>
-
-          <p class="ll-copy mx-auto max-w-lg">
-            Your run ended in room {{ currentRoomNumber() }} of
-            {{ totalRooms() }}. Review what you cleared, then leave the dungeon
-            to start fresh.
-          </p>
-          <p class="ll-copy mx-auto max-w-lg">
-            {{ currentDecisionText() }}
-          </p>
-
-          <div
-            class="mx-auto grid w-full max-w-2xl gap-3 text-left md:grid-cols-2"
-          >
-            <div class="ll-stat-card">
-              <div class="ll-stat-label">Rooms Cleared</div>
-              <div class="ll-stat-value">
-                {{ clearedRooms() }}/{{ totalRooms() }}
-              </div>
-            </div>
-
-            <div class="ll-stat-card">
-              <div class="ll-stat-label">Monsters Defeated</div>
-              <div class="ll-stat-value">
-                {{ defeatedEncounters().length }}
-              </div>
-            </div>
-          </div>
-
-          <div class="ll-card mx-auto w-full max-w-2xl p-4 text-left">
-            <div class="ll-eyebrow mb-3">Run Summary</div>
-
-            <div class="space-y-2">
-              <div
-                *ngFor="let room of completedRooms(); trackBy: trackByIndex"
-                class="ll-list-row"
-              >
-                <span class="flex items-center text-primary">
-                  <span class="min-w-3">{{ room.index + 1 }}</span>
-                  <app-dungeon-room-icon
-                    class="mx-2 text-base"
-                    [type]="room.type"
-                  ></app-dungeon-room-icon>
-                  {{ getRoomTypeLabel(room.type) }}
-                </span>
-                <span class="text-xs text-secondary">Cleared</span>
-              </div>
-
-              <div
-                *ngIf="failedRoom() as room"
-                class="ll-list-row ll-list-row-danger"
-              >
-                <span class="ll-text-danger flex items-center">
-                  <span class="min-w-3">{{ room.index + 1 }}</span>
-                  <app-dungeon-room-icon
-                    class="mx-2 text-base"
-                    [type]="room.type"
-                  ></app-dungeon-room-icon>
-                  {{ getRoomTypeLabel(room.type) }}
-                </span>
-                <span class="ll-text-danger text-xs">Failed here</span>
-              </div>
-            </div>
-
-            <div
-              *ngIf="defeatedEncounters().length"
-              class="mt-4 border-t border-white/10 pt-4"
-            >
-              <div class="ll-eyebrow mb-2">Defeated Encounters</div>
-
-              <div class="flex flex-wrap gap-2">
-                <span
-                  *ngFor="let encounterId of defeatedEncounters()"
-                  class="ll-badge ll-badge-accent rounded"
-                >
-                  {{ formatEncounterName(encounterId) }}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          <div class="flex items-center justify-center gap-3">
-            <app-regular-button
-              variant="danger"
-              text="Leave Dungeon"
-              [disabled]="loading()"
-              (pressed)="dismissFailedDungeonRun()"
-            />
-          </div>
-        </ng-container>
-
-        <ng-template #nonFailedRunPanel>
-          <ng-container *ngIf="isRewardClaimRun(); else activeRunPanel">
-            <div class="ll-icon-orb mx-auto">
-              <app-dungeon-room-icon
-                [type]="
-                  activeDungeon()?.status === 'Completed'
-                    ? 'Boss'
-                    : 'Checkpoint'
-                "
-              ></app-dungeon-room-icon>
-            </div>
-
-            <div class="ll-eyebrow">
-              {{ rewardSummaryTitle() }}
-            </div>
-
-            <h2 class="ll-heading text-3xl">{{ dungeonTitle() }} ended</h2>
-
-            <p class="ll-copy mx-auto max-w-lg">
-              Review the rewards earned during this run before claiming them.
-            </p>
-
-            <div
-              class="mx-auto grid w-full max-w-2xl gap-3 text-left md:grid-cols-3"
-            >
-              <div
-                *ngFor="let reward of pendingCurrencyRewards()"
-                class="ll-stat-card"
-              >
-                <div class="ll-stat-label">
-                  {{ reward.label }}
-                </div>
-                <div class="ll-stat-value">
-                  {{ reward.value }}
-                </div>
-              </div>
-            </div>
-
-            <div class="ll-card mx-auto w-full max-w-2xl p-4 text-left">
-              <div class="ll-eyebrow mb-3">Rewards</div>
-
-              <div
-                *ngIf="pendingRewards().length; else noPendingRewards"
-                class="space-y-2"
-              >
-                <div
-                  *ngFor="let reward of pendingRewards(); trackBy: trackByIndex"
-                  class="ll-list-row"
-                >
-                  <div>
-                    <div class="text-primary">
-                      {{ reward.name || formatEncounterName(reward.itemId) }}
-                    </div>
-                    <div class="text-xs text-secondary">
-                      {{ reward.itemType }} •
-                      {{ formatRewardSource(reward.source) }}
-                    </div>
-                  </div>
-
-                  <span class="text-primary">x{{ reward.quantity }}</span>
-                </div>
-              </div>
-
-              <ng-template #noPendingRewards>
-                <p class="ll-copy">No item rewards earned.</p>
-              </ng-template>
-            </div>
-
-            <div class="ll-card mx-auto w-full max-w-2xl p-4 text-left">
-              <div class="ll-eyebrow mb-3">Run Summary</div>
-
-              <div class="space-y-2">
-                <div
-                  *ngFor="let room of completedRooms(); trackBy: trackByIndex"
-                  class="ll-list-row"
-                >
-                  <span class="flex items-center text-primary">
-                    <span class="min-w-3">{{ room.index + 1 }}</span>
-                    <app-dungeon-room-icon
-                      class="mx-2 text-base"
-                      [type]="room.type"
-                    ></app-dungeon-room-icon>
-                    {{ getRoomTypeLabel(room.type) }}
-                  </span>
-                  <span class="text-xs text-secondary">Cleared</span>
-                </div>
-              </div>
-            </div>
-
-            <div
-              *ngIf="activeDungeon()?.state?.masteryAwardReasons?.length"
-              class="ll-card mx-auto w-full max-w-2xl p-4 text-left"
-            >
-              <div class="ll-eyebrow mb-3">Mastery XP</div>
-
-              <div class="space-y-2">
-                <div
-                  *ngFor="
-                    let reason of activeDungeon()?.state?.masteryAwardReasons;
-                    trackBy: trackByIndex
-                  "
-                  class="ll-list-row"
-                >
-                  <span class="text-primary">{{ reason.description }}</span>
-                  <span class="text-primary">+{{ reason.experience }}</span>
-                </div>
-              </div>
-            </div>
-
-            <div class="flex items-center justify-center gap-3">
-              <app-regular-button
-                text="Claim Rewards"
-                [disabled]="!canClaimRewards()"
-                (pressed)="claimDungeonRewards()"
-              />
-            </div>
-          </ng-container>
-        </ng-template>
-
-        <ng-template #activeRunPanel>
-          <div class="flex justify-center">
-            <div class="ll-card ll-card-accent p-2">
-              <div class="flex gap-2 overflow-x-auto">
-                <div
-                  *ngFor="
-                    let room of activeDungeon()?.rooms;
-                    let i = index;
-                    trackBy: trackByIndex
-                  "
-                  class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border text-primary"
-                  [ngClass]="getRoomStateClasses(i)"
-                >
-                  <app-dungeon-room-icon
-                    class="text-base"
-                    [type]="room.type"
-                  ></app-dungeon-room-icon>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div *ngIf="showCurrentRoomIcon()" class="ll-icon-orb mx-auto">
-            <app-dungeon-room-icon
-              [type]="currentRoom()?.type"
-            ></app-dungeon-room-icon>
-          </div>
-
-          <div class="ll-eyebrow">{{ activeRunPhaseLabel() }}</div>
-
-          <h2 class="ll-heading text-3xl">
-            {{ activeRunTitle() }}
-          </h2>
-
-          <div
-            *ngIf="showCurrentRoomEncounters()"
-            class="ll-card mx-auto max-w-xl p-4 text-left"
-          >
-            <div class="ll-eyebrow mb-2">Encounters</div>
-
-            <div class="flex flex-wrap gap-2">
-              <span
-                *ngFor="let encounterId of currentRoom()?.encounterIds"
-                class="ll-badge ll-badge-accent rounded"
-              >
-                {{ formatEncounterName(encounterId) }}
-              </span>
-            </div>
-          </div>
-
-          <div
-            *ngIf="bossModifiers().length"
-            class="ll-card mx-auto w-full max-w-xl p-4 text-left"
-          >
-            <div class="ll-eyebrow mb-2">Boss Effects</div>
-
-            <div class="space-y-2">
-              <div
-                *ngFor="let modifier of bossModifiers(); trackBy: trackByIndex"
-                class="ll-list-row"
-              >
-                <div class="min-w-0">
-                  <div class="text-primary">
-                    {{ modifier.name }}
-                  </div>
-                  <div class="text-xs text-secondary">
-                    {{ modifier.source }} · {{ modifier.description }}
-                  </div>
-                </div>
-                <span
-                  class="shrink-0 text-sm"
-                  [ngClass]="
-                    modifier.isHelpfulToPlayer
-                      ? 'text-emerald-300'
-                      : 'text-primary'
-                  "
-                >
-                  {{ modifier.attributeType }}
-                  {{
-                    formatBossModifierAmount(
-                      modifier.amount,
-                      modifier.modifierType
-                    )
-                  }}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          <div
-            *ngIf="!boonChoices().length && routeOptions().length"
-            class="mx-auto w-full max-w-2xl text-left"
-          >
-            <div class="ll-eyebrow mb-2">Next Routes</div>
-            <div class="grid gap-3 md:grid-cols-3">
-              <button
-                *ngFor="let route of routeOptions(); trackBy: trackByIndex"
-                type="button"
-                class="ll-card ll-card-accent px-3 py-3 text-left transition hover:border-primary/50 disabled:opacity-60"
-                [disabled]="loading()"
-                (click)="chooseRoute(route.id)"
-              >
-                <div class="flex items-center justify-between gap-2">
-                  <span class="font-semibold text-primary">
-                    {{ route.displayName }}
-                  </span>
-                  <app-dungeon-room-icon
-                    class="text-base"
-                    [type]="route.roomType"
-                  ></app-dungeon-room-icon>
-                </div>
-                <div class="mt-2 text-xs text-secondary">
-                  {{ getRoomTypeLabel(route.roomType) }} · Risk
-                  {{ route.riskLevel }} ·
-                  {{ runState()?.mechanicDisplayName || "Pressure" }}
-                  {{ formatPressureDelta(route.pressureDelta) }}
-                </div>
-                <div
-                  *ngIf="route.possibleRewards?.length"
-                  class="mt-2 flex flex-wrap gap-1"
-                >
-                  <span
-                    *ngFor="let reward of route.possibleRewards"
-                    class="ll-badge rounded text-[0.65rem]"
-                  >
-                    {{ reward }}
-                  </span>
-                </div>
-              </button>
-            </div>
-          </div>
-
-          <div
-            *ngIf="
-              !boonChoices().length &&
-              !routeOptions().length &&
-              eventChoices().length
+            *ngFor="
+              let reward of failedCurrencyRewards();
+              trackBy: trackByIndex
             "
-            class="mx-auto w-full max-w-2xl text-left"
           >
-            <div class="ll-eyebrow mb-2">Event Choices</div>
-            <div class="grid gap-3 md:grid-cols-3">
-              <button
-                *ngFor="let choice of eventChoices(); trackBy: trackByIndex"
-                type="button"
-                class="ll-card px-3 py-3 text-left transition hover:border-primary/50 disabled:opacity-60"
-                [disabled]="
-                  loading() || (choice.missingRequirements?.length ?? 0)
-                "
-                (click)="chooseEventChoice(choice.id)"
-              >
-                <div class="font-semibold text-primary">
-                  {{ choice.label }}
-                </div>
-                <p class="mt-1 text-xs text-secondary">
-                  {{ choice.description }}
-                </p>
-                <div class="mt-2 text-xs text-primary">
-                  {{ runState()?.mechanicDisplayName || "Pressure" }}
-                  {{ formatPressureDelta(choice.pressureDelta) }}
-                  <span *ngIf="choice.ambushChancePercent">
-                    · Ambush {{ choice.ambushChancePercent }}%
-                  </span>
-                  <span *ngIf="choice.grantsBoonChoice"> · Boon choice </span>
-                  <span *ngIf="choice.grantsLoot"> · Loot </span>
-                  <span *ngIf="choice.revealsHiddenRoute">
-                    · Reveals route
-                  </span>
-                </div>
-                <div
-                  *ngIf="choice.missingRequirements?.length"
-                  class="mt-2 text-[0.7rem] text-danger"
-                >
-                  {{ (choice.missingRequirements ?? []).join(" · ") }}
-                </div>
-              </button>
-            </div>
+            <strong>{{ reward.value | number }}</strong>
+            <span>{{ reward.label }}</span>
           </div>
+        </div>
 
+        <div class="dungeon-item-list" *ngIf="failedItemRewards().length">
           <div
-            *ngIf="
-              !boonChoices().length &&
-              !routeOptions().length &&
-              checkpointChoices().length
-            "
-            class="mx-auto w-full max-w-2xl text-left"
+            *ngFor="let reward of failedItemRewards(); trackBy: trackByIndex"
           >
-            <div class="ll-eyebrow mb-2">Checkpoint Choices</div>
-            <div class="grid gap-3 md:grid-cols-2">
-              <button
-                *ngFor="
-                  let choice of checkpointChoices();
-                  trackBy: trackByIndex
-                "
-                type="button"
-                class="ll-card px-3 py-3 text-left transition hover:border-primary/50 disabled:opacity-60"
-                [disabled]="loading()"
-                (click)="chooseCheckpointChoice(choice.id)"
+            <span>
+              <strong>{{ formatRewardSource(reward.id) }}</strong>
+              <small>Lost item</small>
+            </span>
+            <b>×{{ reward.quantity }}</b>
+          </div>
+        </div>
+
+        <div class="dungeon-failure__notice">
+          Previously secured rewards are unaffected.
+        </div>
+      </aside>
+    </main>
+
+    <ng-template #activeRun>
+      <main
+        class="dungeon-invalid-map"
+        *ngIf="!hasPlayableMap(); else playableRun"
+      >
+        <section class="dungeon-invalid-map__card ll-panel ll-panel-strong">
+          <div class="dungeon-invalid-map__mark" aria-hidden="true">!</div>
+          <div class="ll-eyebrow">Dungeon map unavailable</div>
+          <h2>This run has no authored layout</h2>
+          <p>
+            The server did not include the dungeon graph required to continue
+            this expedition safely. Refresh once after the API has restarted. If
+            the map is still unavailable, retreat from this empty run and begin a new
+            one.
+          </p>
+          <button
+            class="dungeon-button dungeon-button--primary ll-button ll-button-primary"
+            type="button"
+            [disabled]="loading()"
+            (click)="refresh()"
+          >
+            Refresh Map
+          </button>
+        </section>
+      </main>
+
+      <ng-template #playableRun>
+        <main class="dungeon-layout">
+          <section class="dungeon-map-panel">
+            <div class="dungeon-map-scroll" #dungeonMapScroll>
+              <div
+                class="dungeon-map"
+                [style.width.px]="graphWidth()"
+                [style.height.px]="graphHeight"
               >
-                <div class="font-semibold text-primary">
-                  {{ choice.label }}
-                </div>
-                <p class="mt-1 text-xs text-secondary">
-                  {{ choice.description }}
-                </p>
-                <div class="mt-2 text-xs text-primary">
-                  {{ runState()?.mechanicDisplayName || "Pressure" }}
-                  {{ formatPressureDelta(choice.pressureDelta) }}
-                  <span *ngIf="choice.rewardMultiplierDeltaPercent">
-                    · Rewards
-                    {{
-                      formatRewardMultiplierDelta(
-                        choice.rewardMultiplierDeltaPercent
-                      )
+                <svg
+                  class="dungeon-edges"
+                  [attr.width]="graphWidth()"
+                  [attr.height]="graphHeight"
+                  [attr.viewBox]="'0 0 ' + graphWidth() + ' ' + graphHeight"
+                  aria-hidden="true"
+                >
+                  <line
+                    *ngFor="let edge of graphEdges(); trackBy: trackEdge"
+                    [attr.x1]="edge.x1"
+                    [attr.y1]="edge.y1"
+                    [attr.x2]="edge.x2"
+                    [attr.y2]="edge.y2"
+                    [ngClass]="{
+                      'dungeon-edge--traversed': edge.isTraversed,
+                      'dungeon-edge--available': edge.isAvailable,
+                    }"
+                  ></line>
+                </svg>
+
+                <button
+                  *ngFor="let node of graphNodes(); trackBy: trackNode"
+                  class="dungeon-node"
+                  type="button"
+                  [class.dungeon-node--clickable]="!!node.route"
+                  [ngClass]="nodeClass(node)"
+                  [attr.data-room-type]="node.room?.type || 'Unknown'"
+                  [style.left.px]="node.x"
+                  [style.top.px]="node.y"
+                  [disabled]="!node.route || loading()"
+                  [attr.aria-label]="
+                    node.route
+                      ? 'Choose ' +
+                        node.route.displayName +
+                        ', ' +
+                        getRoomTypeLabel(node.room?.type)
+                      : getRoomTypeLabel(node.room?.type)
+                  "
+                  [attr.title]="
+                    node.route
+                      ? node.route.displayName +
+                        ' · ' +
+                        node.route.forecast +
+                        ' · Vigor ' +
+                        node.route.vigorCostMin +
+                        '–' +
+                        node.route.vigorCostMax
+                      : null
+                  "
+                  (click)="chooseMapNode(node)"
+                >
+                  <span class="dungeon-node__circle">
+                    <span
+                      class="dungeon-node__check"
+                      *ngIf="
+                        (node.room?.status === 'Completed' &&
+                          !isCurrentNode(node)) ||
+                          (isTraversedNode(node) && !isCurrentNode(node));
+                        else roomIcon
+                      "
+                      >✓</span
+                    >
+                    <ng-template #roomIcon>
+                      <app-dungeon-room-icon
+                        [type]="node.room?.type"
+                      ></app-dungeon-room-icon>
+                    </ng-template>
+                  </span>
+                  <span class="dungeon-node__label">
+                    {{ getRoomTypeLabel(node.room?.type) }}
+                  </span>
+                  <span class="dungeon-node__route" *ngIf="node.route">
+                    {{ node.route.displayName }}
+                  </span>
+                  <span class="dungeon-node__route-cost" *ngIf="node.route">
+                    Vigor {{ node.route.vigorCostMin }}–{{
+                      node.route.vigorCostMax
                     }}
                   </span>
-                </div>
-              </button>
+                </button>
+              </div>
             </div>
-          </div>
 
-          <div
-            *ngIf="boonChoices().length"
-            class="mx-auto w-full max-w-2xl text-left"
-          >
-            <div class="ll-eyebrow mb-2">Choose a Boon</div>
-            <div class="grid gap-3 md:grid-cols-3">
-              <button
-                *ngFor="let boon of boonChoices(); trackBy: trackByIndex"
-                type="button"
-                class="ll-card ll-card-accent px-3 py-3 text-left transition hover:border-primary/50 disabled:opacity-60"
-                [disabled]="loading()"
-                (click)="chooseBoon(boon.id)"
-              >
-                <div class="font-semibold text-primary">
-                  {{ boon.name }}
-                </div>
-                <div class="mt-1 text-xs text-secondary">
-                  {{ boon.rarity }}
-                </div>
-                <div
-                  *ngIf="boon.effectSummaries?.length"
-                  class="mt-3 flex flex-wrap gap-1"
+            <aside
+              class="dungeon-decision ll-panel ll-panel-strong"
+              *ngIf="!routeOptions().length"
+            >
+              <div class="dungeon-decision__eyebrow">
+                {{ decisionEyebrow() }}
+              </div>
+              <h2>{{ decisionTitle() }}</h2>
+              <p>{{ decisionDescription() }}</p>
+
+              <div class="dungeon-choice-list" *ngIf="eventChoices().length">
+                <button
+                  class="ll-card"
+                  type="button"
+                  *ngFor="let choice of eventChoices(); trackBy: trackByIndex"
+                  [disabled]="
+                    loading() || (choice.missingRequirements?.length ?? 0) > 0
+                  "
+                  (click)="chooseEventChoice(choice.id)"
                 >
-                  <span
+                  <span>{{ choice.label }}</span>
+                  <small>{{ choice.description }}</small>
+                </button>
+              </div>
+
+              <button
+                class="dungeon-button dungeon-button--primary ll-button ll-button-primary"
+                type="button"
+                *ngIf="primaryActionLabel() as actionLabel"
+                [disabled]="loading()"
+                (click)="executePrimaryAction()"
+              >
+                {{ actionLabel }}
+              </button>
+            </aside>
+
+            <footer class="dungeon-legend" aria-label="Dungeon room legend">
+              <span class="legend-combat">⚔ Combat</span>
+              <span class="legend-elite">☠ Elite</span>
+              <span class="legend-hazard">△ Hazard</span>
+              <span class="legend-cache">▣ Cache</span>
+              <span class="legend-event">✦ Event</span>
+              <span class="legend-rest">♥ Rest</span>
+              <span class="legend-boss">♛ Boss</span>
+            </footer>
+          </section>
+
+          <aside class="dungeon-sidebar">
+            <section class="dungeon-sidebar__section">
+              <div class="dungeon-sidebar__eyebrow ll-eyebrow">Expedition</div>
+
+              <div class="dungeon-meter-row">
+                <div>
+                  <strong>Vigor · {{ run.state.vigorState }}</strong>
+                  <span>{{ run.state.vigor }}/100</span>
+                </div>
+                <div class="dungeon-meter">
+                  <span [style.width.%]="vigorPercent()"></span>
+                </div>
+              </div>
+
+              <div class="dungeon-stat-row">
+                <span>Current Section</span>
+                <strong>
+                  {{ run.state.currentSection }} of
+                  {{ run.state.totalSections }}
+                </strong>
+              </div>
+              <div class="dungeon-stat-row">
+                <span>Rooms cleared</span>
+                <strong>{{ clearedRoomCount() }}</strong>
+              </div>
+
+              <div
+                class="dungeon-vigor-thresholds"
+                [class.dungeon-vigor-thresholds--expanded]="
+                  vigorThresholdsExpanded()
+                "
+                *ngIf="run.state.vigorThresholds.length"
+              >
+                <div class="dungeon-vigor-thresholds__header">
+                  <div class="dungeon-sidebar__eyebrow ll-eyebrow">
+                    Current threshold
+                  </div>
+                  <button
+                    class="dungeon-vigor-thresholds__toggle"
+                    type="button"
+                    aria-label="Show all Vigor thresholds"
+                    aria-controls="dungeon-vigor-threshold-details"
+                    [attr.aria-expanded]="vigorThresholdsExpanded()"
+                    [attr.title]="
+                      vigorThresholdsExpanded()
+                        ? 'Hide all Vigor thresholds'
+                        : 'Show all Vigor thresholds'
+                    "
+                    (click)="toggleVigorThresholds($event)"
+                  >
+                    ?
+                  </button>
+                </div>
+
+                <div
+                  class="dungeon-vigor-threshold dungeon-vigor-threshold--current"
+                  *ngIf="currentVigorThreshold() as threshold"
+                  tabindex="0"
+                >
+                  <div>
+                    <strong>{{ threshold.state }}</strong>
+                    <span>
+                      {{
+                        threshold.minimumVigor === threshold.maximumVigor
+                          ? threshold.minimumVigor
+                          : threshold.minimumVigor +
+                            "–" +
+                            threshold.maximumVigor
+                      }}
+                    </span>
+                  </div>
+                  <p>{{ threshold.summary }}</p>
+                  <ul>
+                    <li
+                      *ngFor="
+                        let effect of threshold.effects;
+                        trackBy: trackByIndex
+                      "
+                    >
+                      {{ effect }}
+                    </li>
+                  </ul>
+                </div>
+
+                <div
+                  class="dungeon-vigor-thresholds__popover ll-panel ll-panel-strong"
+                  id="dungeon-vigor-threshold-details"
+                >
+                  <div class="dungeon-sidebar__eyebrow ll-eyebrow">
+                    Other thresholds
+                  </div>
+                  <div
+                    class="dungeon-vigor-threshold"
                     *ngFor="
-                      let effect of boon.effectSummaries;
+                      let threshold of otherVigorThresholds();
                       trackBy: trackByIndex
                     "
-                    class="ll-badge ll-badge-accent rounded text-[0.65rem]"
                   >
-                    {{ effect }}
-                  </span>
-                </div>
-                <p class="mt-2 text-xs text-secondary">
-                  {{ boon.description }}
-                </p>
-              </button>
-            </div>
-          </div>
-
-          <div class="flex flex-wrap items-center justify-center gap-3">
-            <app-regular-button
-              *ngIf="primaryActionLabel()"
-              [text]="primaryActionLabel()!"
-              [disabled]="!canExecutePrimaryAction()"
-              (pressed)="executePrimaryAction()"
-            />
-
-            <app-regular-button
-              *ngIf="
-                isCheckpointRoom() &&
-                canLeave() &&
-                !checkpointChoices().length &&
-                !boonChoices().length
-              "
-              variant="secondary"
-              text="Withdraw"
-              [disabled]="!canLeave()"
-              (pressed)="withdrawAtCheckpoint()"
-            />
-
-            <app-regular-button
-              *ngIf="
-                isEventRoom() &&
-                currentRoom()?.status === 'Active' &&
-                !eventChoices().length &&
-                !boonChoices().length
-              "
-              variant="secondary"
-              text="Ignore"
-              [disabled]="loading()"
-              (pressed)="chooseEventAction('event.ignore')"
-            />
-          </div>
-        </ng-template>
-      </div>
-
-      <aside class="order-2 min-h-full">
-        <section class="ll-panel h-full p-4">
-          <div class="mb-4 border-b border-light_gray/60 pb-3">
-            <div class="ll-eyebrow">Run Spoils</div>
-            <h2 class="ll-heading mt-1">Pending Rewards</h2>
-          </div>
-          <div *ngIf="!isFailedRun() && !isRewardClaimRun()" class="space-y-3">
-            <div *ngIf="activeBoonSummaries().length">
-              <div class="ll-eyebrow mb-2">Temporary Boons</div>
-              <div class="flex flex-wrap gap-2">
-                <div
-                  *ngFor="
-                    let boon of activeBoonSummaries();
-                    trackBy: trackByIndex
-                  "
-                  #boonOrigin="cdkOverlayOrigin"
-                  cdkOverlayOrigin
-                  class="inline-flex"
-                  (mouseenter)="showBoonTooltip(boon.id)"
-                  (mouseleave)="hideBoonTooltip(boon.id)"
-                >
-                  <span class="ll-badge ll-badge-accent rounded">
-                    {{ boon.name }}
-                    <span *ngIf="boon.count > 1">x{{ boon.count }}</span>
-                  </span>
-
-                  <ng-template
-                    cdkConnectedOverlay
-                    [cdkConnectedOverlayOrigin]="boonOrigin"
-                    [cdkConnectedOverlayOpen]="isBoonTooltipOpen(boon.id)"
-                    [cdkConnectedOverlayPositions]="boonTooltipPositions"
-                    [cdkConnectedOverlayPush]="true"
-                    [cdkConnectedOverlayViewportMargin]="12"
-                  >
-                    <div
-                      class="w-72 max-w-[calc(100vw-2rem)] rounded border border-primary/50 bg-black/95 px-3 py-2 text-left text-[11px] text-zinc-200 shadow-lg"
-                    >
-                      <div class="flex items-start justify-between gap-2">
-                        <div class="min-w-0">
-                          <div
-                            class="truncate text-sm font-semibold text-primary"
-                          >
-                            {{ boon.name }}
-                            <span *ngIf="boon.count > 1"
-                              >x{{ boon.count }}</span
-                            >
-                          </div>
-                          <div class="text-[0.65rem] uppercase text-secondary">
-                            {{ boon.rarity }}
-                          </div>
-                        </div>
-                      </div>
-
-                      <div
-                        *ngIf="boon.effectSummaries?.length"
-                        class="mt-2 flex flex-wrap gap-1"
+                    <div>
+                      <strong>{{ threshold.state }}</strong>
+                      <span>
+                        {{
+                          threshold.minimumVigor === threshold.maximumVigor
+                            ? threshold.minimumVigor
+                            : threshold.minimumVigor +
+                              "–" +
+                              threshold.maximumVigor
+                        }}
+                      </span>
+                    </div>
+                    <p>{{ threshold.summary }}</p>
+                    <ul>
+                      <li
+                        *ngFor="
+                          let effect of threshold.effects;
+                          trackBy: trackByIndex
+                        "
                       >
-                        <span
-                          *ngFor="
-                            let effect of boon.effectSummaries;
-                            trackBy: trackByIndex
-                          "
-                          class="ll-badge rounded text-[0.65rem]"
-                        >
-                          {{ effect }}
-                        </span>
-                      </div>
-
-                      <p class="mt-2 text-xs text-secondary">
-                        {{ boon.description }}
-                      </p>
-                    </div>
-                  </ng-template>
-                </div>
-              </div>
-            </div>
-
-            <div *ngIf="activeBoonEffectSummaries().length">
-              <div class="ll-eyebrow mb-2">Current Buffs</div>
-              <div class="grid gap-2 text-left">
-                <div
-                  *ngFor="
-                    let effect of activeBoonEffectSummaries();
-                    trackBy: trackByIndex
-                  "
-                  class="ll-card px-3 py-2"
-                >
-                  <div class="flex items-center justify-between gap-2">
-                    <div class="min-w-0">
-                      <div class="truncate text-sm text-primary">
-                        {{ effect.label }}
-                      </div>
-                      <div class="text-[0.65rem] uppercase text-secondary">
-                        {{ effect.category }}
-                      </div>
-                    </div>
-                    <div class="shrink-0 font-serif text-lg text-primary">
-                      {{ effect.value }}
-                    </div>
+                        {{ effect }}
+                      </li>
+                    </ul>
                   </div>
                 </div>
               </div>
-            </div>
 
-            <div class="ll-eyebrow mb-2">Currency</div>
-
-            <div class="grid gap-2 text-left">
-              <div
-                *ngFor="let reward of pendingCurrencyRewards()"
-                class="ll-card px-3 py-2"
-              >
-                <div class="ll-stat-label">
-                  {{ reward.label }}
-                </div>
-                <div class="ll-heading text-lg">
-                  {{ reward.value }}
+              <div class="dungeon-effects" *ngIf="run.state.activeOmens.length">
+                <div
+                  class="dungeon-effect"
+                  *ngFor="
+                    let omen of run.state.activeOmens;
+                    trackBy: trackByIndex
+                  "
+                >
+                  <span>{{ omen.name }}</span>
+                  <small>{{ omen.description }}</small>
                 </div>
               </div>
-            </div>
 
-            <div class="mt-3 border-t border-white/10 pt-3">
-              <div class="ll-eyebrow mb-2">Items</div>
+              <div class="dungeon-effects" *ngIf="run.state.bossAspects.length">
+                <div
+                  class="dungeon-effect"
+                  *ngFor="
+                    let aspect of run.state.bossAspects;
+                    trackBy: trackByIndex
+                  "
+                >
+                  <span
+                    [class.dungeon-aspect--removed]="aspect.state === 'Removed'"
+                  >
+                    {{ aspect.name }} · {{ aspect.state }}
+                  </span>
+                  <small>{{ aspect.stateReason || aspect.description }}</small>
+                </div>
+              </div>
+            </section>
 
-              <div
-                *ngIf="pendingRewards().length; else noPendingItems"
-                class="space-y-2"
-              >
+            <section class="dungeon-sidebar__section dungeon-loot">
+              <div class="dungeon-sidebar__eyebrow ll-eyebrow">
+                Pending Loot
+              </div>
+
+              <div class="dungeon-currency-grid">
+                <div
+                  *ngFor="
+                    let reward of pendingCurrencyRewards();
+                    trackBy: trackByIndex
+                  "
+                >
+                  <strong>{{ reward.value | number }}</strong>
+                  <span>{{ reward.label }}</span>
+                </div>
+              </div>
+
+              <div class="dungeon-item-list" *ngIf="pendingRewards().length">
                 <div
                   *ngFor="let reward of pendingRewards(); trackBy: trackByIndex"
-                  class="ll-card ll-card-accent px-2 py-2 text-left text-sm"
                 >
-                  <div class="flex items-center justify-between gap-2">
-                    <span class="min-w-0 truncate text-primary">
-                      {{ reward.name || formatEncounterName(reward.itemId) }}
-                    </span>
-
-                    <span class="shrink-0 text-primary">
-                      x{{ reward.quantity }}
-                    </span>
-                  </div>
-
-                  <div
-                    class="mt-1 flex items-center justify-between gap-2 text-xs text-secondary"
-                  >
-                    <span>{{ reward.itemType }}</span>
-                    <span>{{ formatRewardSource(reward.source) }}</span>
-                  </div>
+                  <span>
+                    <strong>{{ reward.name }}</strong>
+                    <small>{{ formatRewardSource(reward.source) }}</small>
+                  </span>
+                  <b>×{{ reward.quantity }}</b>
                 </div>
               </div>
 
-              <ng-template #noPendingItems>
-                <p class="ll-copy">No item drops yet.</p>
-              </ng-template>
-            </div>
-          </div>
-        </section>
-      </aside>
-    </div>
+              <p class="dungeon-empty-loot" *ngIf="!pendingRewards().length">
+                Item drops collected during the run will appear here.
+              </p>
+            </section>
 
-    <ng-template #noActiveDungeonRun>
-      <div
-        class="ll-panel mr-4 flex min-h-0 flex-1 items-center justify-center p-6 text-center sm:mr-6"
-      >
-        <div class="max-w-md">
-          <div class="ll-eyebrow">No Active Run</div>
-          <h2 class="ll-heading mt-2">Choose a dungeon to begin</h2>
-          <p class="ll-copy mt-2">
-            Active dungeon decisions, pending rewards, and room progress will
-            appear here once a run has started.
-          </p>
-        </div>
-      </div>
+            <section
+              class="dungeon-sidebar__section"
+              *ngIf="run.state.failureAnalysis as analysis"
+            >
+              <div class="dungeon-sidebar__eyebrow ll-eyebrow">
+                Failure analysis
+              </div>
+              <h3>{{ analysis.primaryCause }}</h3>
+              <p>{{ analysis.location }} · Section {{ analysis.section }}</p>
+              <p>{{ analysis.explanation }}</p>
+              <div class="dungeon-stat-row">
+                <span>Lost Pending Loot</span>
+                <strong>
+                  {{ analysis.lostPendingLoot.cinders | number }} Cinders ·
+                  {{ analysis.lostPendingLoot.experience | number }} XP
+                </strong>
+              </div>
+              <div
+                class="dungeon-effect"
+                *ngFor="
+                  let suggestion of analysis.suggestions;
+                  trackBy: trackByIndex
+                "
+              >
+                <small>{{ suggestion }}</small>
+              </div>
+            </section>
+
+            <div class="dungeon-warning ll-card ll-card-warning">
+              Pending Loot is lost on failure. Retreat at any time to secure it.
+            </div>
+          </aside>
+        </main>
+      </ng-template>
     </ng-template>
+  </div>
+</ng-template>
+
+<ng-template #emptyState>
+  <div class="dungeon-empty ll-panel bg-texture">
+    <div class="dungeon-eyebrow ll-eyebrow">No active run</div>
+    <h2 class="ll-heading">Choose a dungeon to begin</h2>
+    <p>Your generated dungeon map and Pending Loot will appear here.</p>
+    <button class="dungeon-button ll-button" (click)="refresh()">
+      Refresh
+    </button>
   </div>
 </ng-template>

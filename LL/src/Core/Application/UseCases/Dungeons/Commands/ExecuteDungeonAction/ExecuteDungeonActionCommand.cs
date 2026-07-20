@@ -1,7 +1,6 @@
 using Application.Interfaces.Services.LL.Dungeons;
 using Application.Interfaces.Services.LL.Prophecies;
 using Application.MediatR.Markers;
-using Application.UseCases.CharacterActions.Dtos.Responses.CombatDtos;
 using Application.UseCases.Dungeons.Dtos;
 using Application.UseCases.Prophecies.Events;
 using AutoMapper;
@@ -44,13 +43,7 @@ public class ExecuteDungeonActionCommandHandler : IRequestHandler<ExecuteDungeon
 
         await PublishProphecyProgressAsync(request.CharacterId, result.Outcome, cancellationToken);
 
-        var response = new ExecuteDungeonActionResponseDto
-        {
-            Run = _mapper.Map<DungeonRunDto>(result.Run),
-            Outcome = _mapper.Map<DungeonActionOutcomeDto>(result.Outcome),
-            CombatSession = result.CombatSession is null ? null : _mapper.Map<CombatSessionDto>(result.CombatSession),
-            Message = result.Message
-        };
+        var response = _mapper.Map<ExecuteDungeonActionResponseDto>(result);
 
         return Response<ExecuteDungeonActionResponseDto>.Success(response);
     }
@@ -65,7 +58,7 @@ public class ExecuteDungeonActionCommandHandler : IRequestHandler<ExecuteDungeon
 
         if (outcome is DungeonActionOutcome.CombatVictory
             or DungeonActionOutcome.EventResolved
-            or DungeonActionOutcome.CheckpointResolved
+            or DungeonActionOutcome.RestSiteResolved
             or DungeonActionOutcome.RunCompleted)
         {
             progressEvents.Add(new ProphecyProgressEvent(

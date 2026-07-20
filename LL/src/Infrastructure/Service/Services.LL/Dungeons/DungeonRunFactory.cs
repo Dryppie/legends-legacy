@@ -48,7 +48,7 @@ public sealed class DungeonRunFactory
                 VigorState = "Steady",
                 CurrentSection = 1,
                 TotalSections = delve.Nodes
-                    .Where(node => node.RoomType == RoomType.Checkpoint)
+                    .Where(node => node.RoomType == RoomType.RestSite)
                     .Select(node => node.Section)
                     .Distinct()
                     .Count(),
@@ -137,7 +137,7 @@ public sealed class DungeonRunFactory
     {
         foreach (var room in rooms)
         {
-            if (room.Type == RoomType.Checkpoint)
+            if (room.Type == RoomType.RestSite)
                 continue;
 
             if (room.Type is RoomType.Entrance or RoomType.Hazard or RoomType.Cache or RoomType.OmenSite)
@@ -246,7 +246,7 @@ public sealed class DungeonRunFactory
         }
 
         // For other room types, encounters usually aren't applicable
-        // (Checkpoint, Treasure, Shrine, Trap, Event, etc.)
+        // (RestSite, Treasure, Shrine, Trap, Event, etc.)
         return [];
     }
 

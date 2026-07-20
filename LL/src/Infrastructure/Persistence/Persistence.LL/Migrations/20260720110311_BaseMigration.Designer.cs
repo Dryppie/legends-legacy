@@ -13,8 +13,8 @@ using Persistence.LL;
 namespace Persistence.LL.Migrations
 {
     [DbContext(typeof(LLDbContext))]
-    [Migration("20260716191424_MarketplaceOrderExpiration")]
-    partial class MarketplaceOrderExpiration
+    [Migration("20260720110311_BaseMigration")]
+    partial class BaseMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -1388,7 +1388,7 @@ namespace Persistence.LL.Migrations
                     b.Property<int>("Status")
                         .HasColumnType("integer");
 
-                    b.Property<bool>("UsedCheckpointRetreat")
+                    b.Property<bool>("UsedRetreat")
                         .HasColumnType("boolean");
 
                     b.HasKey("Id");

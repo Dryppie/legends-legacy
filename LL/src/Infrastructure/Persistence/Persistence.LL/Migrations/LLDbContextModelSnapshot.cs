@@ -1385,7 +1385,7 @@ namespace Persistence.LL.Migrations
                     b.Property<int>("Status")
                         .HasColumnType("integer");
 
-                    b.Property<bool>("UsedCheckpointRetreat")
+                    b.Property<bool>("UsedRetreat")
                         .HasColumnType("boolean");
 
                     b.HasKey("Id");

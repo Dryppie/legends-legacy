@@ -58,7 +58,7 @@ Use these before creating new local Tailwind combinations for common panels, car
     <div>
       <div class="ll-eyebrow">Dungeon Run</div>
       <h1 class="ll-heading text-2xl">Crypt of Embers</h1>
-      <p class="ll-copy">Advance room by room. Checkpoints secure rewards.</p>
+      <p class="ll-copy">Advance room by room. Retreat when you need to secure Pending Loot.</p>
     </div>
     <button type="button" class="ll-button">Refresh</button>
   </div>

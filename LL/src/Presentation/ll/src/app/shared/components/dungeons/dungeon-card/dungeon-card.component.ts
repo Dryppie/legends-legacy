@@ -13,7 +13,6 @@ import { DungeonStateService } from '../../../../core/services/api/dungeon/dunge
 import {
   DungeonGatheringNodePreview,
   DungeonMastery,
-  DungeonMasteryBonusPreview,
   DungeonPreviewData,
   DungeonPreviewReward,
 } from '../../../models/Dtos/dungeons/dungeonPreviewData';
@@ -444,14 +443,6 @@ export class DungeonCardComponent implements OnChanges {
     return this.formatMasteryExperienceLabel(this.previewData.mastery);
   }
 
-  previewActiveMasteryBonuses(): DungeonMasteryBonusPreview[] {
-    return this.activeMasteryBonuses(this.previewData.mastery);
-  }
-
-  previewNextMasteryBonus(): DungeonMasteryBonusPreview | null {
-    return this.nextMasteryBonus(this.previewData.mastery);
-  }
-
   selectedMasteryLevel(): number {
     return this.selectedPreviewData().mastery?.level ?? 0;
   }
@@ -485,18 +476,6 @@ export class DungeonCardComponent implements OnChanges {
     );
   }
 
-  selectedMasteryBonuses(): DungeonMasteryBonusPreview[] {
-    return this.selectedPreviewData().mastery?.bonuses ?? [];
-  }
-
-  selectedActiveMasteryBonuses(): DungeonMasteryBonusPreview[] {
-    return this.activeMasteryBonuses(this.selectedPreviewData().mastery);
-  }
-
-  selectedNextMasteryBonus(): DungeonMasteryBonusPreview | null {
-    return this.nextMasteryBonus(this.selectedPreviewData().mastery);
-  }
-
   masteryExperienceLabel(): string {
     return this.formatMasteryExperienceLabel(
       this.selectedPreviewData().mastery,
@@ -510,28 +489,6 @@ export class DungeonCardComponent implements OnChanges {
     const next = mastery?.experienceRequiredForNextLevel ?? null;
 
     return next ? `${experience} / ${next} XP` : `${experience} XP`;
-  }
-
-  private activeMasteryBonuses(
-    mastery: DungeonMastery | null | undefined,
-  ): DungeonMasteryBonusPreview[] {
-    return (mastery?.bonuses ?? []).filter((bonus) => bonus.isActive);
-  }
-
-  private nextMasteryBonus(
-    mastery: DungeonMastery | null | undefined,
-  ): DungeonMasteryBonusPreview | null {
-    return (
-      (mastery?.bonuses ?? [])
-        .filter((bonus) => !bonus.isActive)
-        .sort(
-          (first, second) => first.requiredLevel - second.requiredLevel,
-        )[0] ?? null
-    );
-  }
-
-  trackMasteryBonus(_: number, bonus: DungeonMasteryBonusPreview): string {
-    return bonus.id;
   }
 
   previewGatheringTypes(): string[] {

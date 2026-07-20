@@ -570,7 +570,7 @@ namespace Persistence.LL.Migrations
                     PendingCinders = table.Column<int>(type: "integer", nullable: false),
                     PendingSoulstones = table.Column<int>(type: "integer", nullable: false),
                     DeathsDuringRun = table.Column<int>(type: "integer", nullable: false),
-                    UsedCheckpointRetreat = table.Column<bool>(type: "boolean", nullable: false),
+                    UsedRetreat = table.Column<bool>(type: "boolean", nullable: false),
                     CreatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     CompletedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
                     RewardsClaimedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true)
@@ -748,13 +748,41 @@ namespace Persistence.LL.Migrations
                     ItemBaseId = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: false),
                     Quantity = table.Column<int>(type: "integer", nullable: false),
                     UnitPrice = table.Column<long>(type: "bigint", nullable: false),
-                    CreatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
+                    CreatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    ExpiresAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_MarketPlaceBuyOrders", x => x.Id);
                     table.ForeignKey(
                         name: "FK_MarketPlaceBuyOrders_ItemBases_ItemBaseId",
+                        column: x => x.ItemBaseId,
+                        principalTable: "ItemBases",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "MarketPlaceOrders",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    SellerId = table.Column<Guid>(type: "uuid", nullable: false),
+                    BuyerId = table.Column<Guid>(type: "uuid", nullable: false),
+                    ItemBaseId = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: false),
+                    ItemInstanceId = table.Column<Guid>(type: "uuid", nullable: true),
+                    Quantity = table.Column<int>(type: "integer", nullable: false),
+                    UnitPrice = table.Column<long>(type: "bigint", nullable: false),
+                    TotalPrice = table.Column<long>(type: "bigint", nullable: false),
+                    SellerFee = table.Column<long>(type: "bigint", nullable: false),
+                    Source = table.Column<int>(type: "integer", nullable: false),
+                    PurchasedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_MarketPlaceOrders", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_MarketPlaceOrders_ItemBases_ItemBaseId",
                         column: x => x.ItemBaseId,
                         principalTable: "ItemBases",
                         principalColumn: "Id",
@@ -1046,11 +1074,12 @@ namespace Persistence.LL.Migrations
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     SellerId = table.Column<Guid>(type: "uuid", nullable: false),
-                    SellerName = table.Column<string>(type: "text", nullable: false),
+                    SellerName = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: false),
                     ItemInstanceId = table.Column<Guid>(type: "uuid", nullable: false),
                     Quantity = table.Column<int>(type: "integer", nullable: false),
                     UnitPrice = table.Column<long>(type: "bigint", nullable: false),
-                    CreatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
+                    CreatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    ExpiresAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -2407,14 +2436,49 @@ namespace Persistence.LL.Migrations
                 column: "BuyerId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_MarketPlaceBuyOrders_ExpiresAt",
+                table: "MarketPlaceBuyOrders",
+                column: "ExpiresAt");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_MarketPlaceBuyOrders_ItemBaseId_UnitPrice_CreatedAt",
                 table: "MarketPlaceBuyOrders",
                 columns: new[] { "ItemBaseId", "UnitPrice", "CreatedAt" });
 
             migrationBuilder.CreateIndex(
+                name: "IX_MarketPlaceListings_ExpiresAt",
+                table: "MarketPlaceListings",
+                column: "ExpiresAt");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_MarketPlaceListings_ItemInstanceId",
                 table: "MarketPlaceListings",
                 column: "ItemInstanceId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_MarketPlaceListings_SellerId",
+                table: "MarketPlaceListings",
+                column: "SellerId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_MarketPlaceListings_UnitPrice_CreatedAt",
+                table: "MarketPlaceListings",
+                columns: new[] { "UnitPrice", "CreatedAt" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_MarketPlaceOrders_BuyerId_PurchasedAt",
+                table: "MarketPlaceOrders",
+                columns: new[] { "BuyerId", "PurchasedAt" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_MarketPlaceOrders_ItemBaseId_PurchasedAt",
+                table: "MarketPlaceOrders",
+                columns: new[] { "ItemBaseId", "PurchasedAt" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_MarketPlaceOrders_SellerId_PurchasedAt",
+                table: "MarketPlaceOrders",
+                columns: new[] { "SellerId", "PurchasedAt" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_MonsterResonances_CharacterId",
@@ -2849,6 +2913,9 @@ namespace Persistence.LL.Migrations
 
             migrationBuilder.DropTable(
                 name: "MarketPlaceListings");
+
+            migrationBuilder.DropTable(
+                name: "MarketPlaceOrders");
 
             migrationBuilder.DropTable(
                 name: "MonsterResonances");

@@ -181,7 +181,6 @@ public static class DependencyInjection
                 contentRootPath,
                 sp.GetRequiredService<JsonSerializerOptions>()));
         services.AddScoped<IDungeonRouteService, DungeonRouteService>();
-        services.AddScoped<IDungeonCheckpointService, DungeonCheckpointService>();
         services.AddSingleton<IDungeonEventDefinitionProvider>(sp =>
             new JsonDungeonEventDefinitionProvider(
                 config,

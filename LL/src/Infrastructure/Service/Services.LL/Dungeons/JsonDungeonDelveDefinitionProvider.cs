@@ -49,8 +49,8 @@ public sealed class JsonDungeonDelveDefinitionProvider : IDungeonDelveDefinition
                 throw new InvalidOperationException($"Delve '{definition.Id}' must contain exactly one Entrance node.");
             if (definition.Nodes.Count(node => node.RoomType == RoomType.Boss) != 1)
                 throw new InvalidOperationException($"Delve '{definition.Id}' must contain exactly one boss.");
-            if (definition.Nodes.All(node => node.RoomType != RoomType.Checkpoint))
-                throw new InvalidOperationException($"Delve '{definition.Id}' must contain at least one Section ending in a Wardstone.");
+            if (definition.Nodes.All(node => node.RoomType != RoomType.RestSite))
+                throw new InvalidOperationException($"Delve '{definition.Id}' must contain at least one Section ending in a Rest Site.");
             if (definition.Omens.Count is < 4 or > 6)
                 throw new InvalidOperationException($"Delve '{definition.Id}' must author an Omen pool of four to six entries.");
 
@@ -79,23 +79,23 @@ public sealed class JsonDungeonDelveDefinitionProvider : IDungeonDelveDefinition
         var indexedNodes = definition.Nodes
             .Select((node, index) => new IndexedNode(index, node))
             .ToList();
-        var wardstones = indexedNodes
-            .Where(entry => entry.Node.RoomType == RoomType.Checkpoint)
+        var restSites = indexedNodes
+            .Where(entry => entry.Node.RoomType == RoomType.RestSite)
             .OrderBy(entry => entry.Node.Depth)
             .ToList();
-        var sectionNumbers = wardstones
+        var sectionNumbers = restSites
             .Select(entry => entry.Node.Section)
             .Order()
             .ToList();
-        var expectedSections = Enumerable.Range(1, wardstones.Count).ToList();
+        var expectedSections = Enumerable.Range(1, restSites.Count).ToList();
 
         if (!sectionNumbers.SequenceEqual(expectedSections))
         {
             throw new InvalidOperationException(
-                $"Delve '{definition.Id}' must number its Wardstone Sections consecutively from 1.");
+                $"Delve '{definition.Id}' must number its Rest Site Sections consecutively from 1.");
         }
 
-        if (definition.Nodes.Any(node => node.Section < 1 || node.Section > wardstones.Count))
+        if (definition.Nodes.Any(node => node.Section < 1 || node.Section > restSites.Count))
         {
             throw new InvalidOperationException(
                 $"Delve '{definition.Id}' contains a node outside its authored Section range.");
@@ -107,23 +107,23 @@ public sealed class JsonDungeonDelveDefinitionProvider : IDungeonDelveDefinition
             throw new InvalidOperationException($"Delve '{definition.Id}' Entrance must be in Section 1.");
         }
 
-        for (var section = 1; section <= wardstones.Count; section++)
+        for (var section = 1; section <= restSites.Count; section++)
         {
             var anchor = section == 1
                 ? entrance
-                : wardstones.Single(entry => entry.Node.Section == section - 1);
-            var wardstone = wardstones.Single(entry => entry.Node.Section == section);
+                : restSites.Single(entry => entry.Node.Section == section - 1);
+            var restSite = restSites.Single(entry => entry.Node.Section == section);
 
-            if (wardstone.Node.Depth <= anchor.Node.Depth)
+            if (restSite.Node.Depth <= anchor.Node.Depth)
             {
                 throw new InvalidOperationException(
-                    $"Delve '{definition.Id}' Section {section} Wardstone must appear after its starting node.");
+                    $"Delve '{definition.Id}' Section {section} Rest Site must appear after its starting node.");
             }
 
             var misplacedNodes = indexedNodes
                 .Where(entry =>
                     entry.Node.Depth > anchor.Node.Depth &&
-                    entry.Node.Depth <= wardstone.Node.Depth &&
+                    entry.Node.Depth <= restSite.Node.Depth &&
                     entry.Node.Section != section)
                 .ToList();
             if (misplacedNodes.Count > 0)
@@ -136,7 +136,7 @@ public sealed class JsonDungeonDelveDefinitionProvider : IDungeonDelveDefinition
                 .Where(entry =>
                     entry.Node.Section == section &&
                     entry.Node.Depth > anchor.Node.Depth &&
-                    entry.Node.Depth < wardstone.Node.Depth)
+                    entry.Node.Depth < restSite.Node.Depth)
                 .GroupBy(entry => entry.Node.Depth)
                 .OrderBy(group => group.Key)
                 .Select(group => group.ToList())
@@ -145,7 +145,7 @@ public sealed class JsonDungeonDelveDefinitionProvider : IDungeonDelveDefinition
             if (rows.Count is < 1 or > 2)
             {
                 throw new InvalidOperationException(
-                    $"Delve '{definition.Id}' Section {section} must contain one or two encounter rows before its Wardstone.");
+                    $"Delve '{definition.Id}' Section {section} must contain one or two encounter rows before its Rest Site.");
             }
 
             if (rows.Any(row => row.Count is < 1 or > 3))
@@ -160,17 +160,17 @@ public sealed class JsonDungeonDelveDefinitionProvider : IDungeonDelveDefinition
                 if (row[0].Node.Depth != expectedDepth)
                 {
                     throw new InvalidOperationException(
-                        $"Delve '{definition.Id}' Section {section} encounter rows and Wardstone must use consecutive depths.");
+                        $"Delve '{definition.Id}' Section {section} encounter rows and Rest Site must use consecutive depths.");
                 }
 
                 expectedDepth++;
             }
 
-            if (wardstone.Node.Depth != expectedDepth ||
-                indexedNodes.Count(entry => entry.Node.Depth == wardstone.Node.Depth) != 1)
+            if (restSite.Node.Depth != expectedDepth ||
+                indexedNodes.Count(entry => entry.Node.Depth == restSite.Node.Depth) != 1)
             {
                 throw new InvalidOperationException(
-                    $"Delve '{definition.Id}' Section {section} must end with a lone Wardstone immediately after its encounter rows.");
+                    $"Delve '{definition.Id}' Section {section} must end with a lone Rest Site immediately after its encounter rows.");
             }
 
             var firstRowIndexes = rows[0].Select(entry => entry.Index).ToHashSet();
@@ -186,7 +186,7 @@ public sealed class JsonDungeonDelveDefinitionProvider : IDungeonDelveDefinition
                 var row = rows[rowIndex];
                 var allowedTargets = rowIndex + 1 < rows.Count
                     ? rows[rowIndex + 1].Select(entry => entry.Index).ToHashSet()
-                    : [wardstone.Index];
+                    : [restSite.Index];
                 var usedTargets = new HashSet<int>();
 
                 foreach (var entry in row)
@@ -195,7 +195,7 @@ public sealed class JsonDungeonDelveDefinitionProvider : IDungeonDelveDefinition
                         entry.Node.NextRoomIndexes.Any(target => !allowedTargets.Contains(target)))
                     {
                         throw new InvalidOperationException(
-                            $"Delve '{definition.Id}' Section {section} routes must advance to the next row or its Wardstone.");
+                            $"Delve '{definition.Id}' Section {section} routes must advance to the next row or its Rest Site.");
                     }
 
                     usedTargets.UnionWith(entry.Node.NextRoomIndexes);
@@ -204,24 +204,24 @@ public sealed class JsonDungeonDelveDefinitionProvider : IDungeonDelveDefinition
                 if (!usedTargets.SetEquals(allowedTargets))
                 {
                     throw new InvalidOperationException(
-                        $"Delve '{definition.Id}' Section {section} contains an unreachable encounter node or Wardstone.");
+                        $"Delve '{definition.Id}' Section {section} contains an unreachable encounter node or Rest Site.");
                 }
             }
         }
 
-        var finalWardstone = wardstones[^1];
+        var finalRestSite = restSites[^1];
         var boss = indexedNodes.Single(entry => entry.Node.RoomType == RoomType.Boss);
-        if (boss.Node.Depth <= finalWardstone.Node.Depth ||
-            boss.Node.Section != wardstones.Count ||
+        if (boss.Node.Depth <= finalRestSite.Node.Depth ||
+            boss.Node.Section != restSites.Count ||
             boss.Node.NextRoomIndexes.Count > 0)
         {
             throw new InvalidOperationException(
-                $"Delve '{definition.Id}' boss must be terminal and appear after the final Section's Wardstone.");
+                $"Delve '{definition.Id}' boss must be terminal and appear after the final Section's Rest Site.");
         }
 
         if (indexedNodes.Any(entry =>
-                entry.Node.Depth > finalWardstone.Node.Depth &&
-                entry.Node.Section != wardstones.Count))
+                entry.Node.Depth > finalRestSite.Node.Depth &&
+                entry.Node.Section != restSites.Count))
         {
             throw new InvalidOperationException(
                 $"Delve '{definition.Id}' boss approach must remain associated with the final Section.");
