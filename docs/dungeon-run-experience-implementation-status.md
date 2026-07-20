@@ -38,13 +38,16 @@ These decisions are already made and should not be reopened accidentally.
 | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Run subdivisions     | Call them **Sections**, never Legs.                                                                                                               |
 | Section count        | Dungeons can have different numbers of Sections. Three is not a universal rule.                                                                   |
-| Section shape        | A Section can fan into up to three nodes, optionally fan into up to three more nodes, and then reconverge.                                        |
+| Section shape        | A Section contains one to three encounter rows, with one to three nodes per row, before reconverging at a Rest Site.                             |
 | Recovery nodes       | Use **Rest Sites**, never Wardstones or checkpoints.                                                                                              |
 | Rest effect          | A Rest Site restores **15 Vigor**.                                                                                                                |
+| Playable room scope  | For now, authored dungeons may contain only Entrance, Combat, MiniBoss, Rest Site, and Boss rooms. Hazard, Cache, Event, and Omen Site nodes are disabled. |
+| Run modifiers        | Omens and Boss Aspects are disabled. Dungeon difficulty comes from authored encounters, Vigor attrition, and Vigor thresholds.                    |
 | Safe exit            | A player can **Retreat & Secure Loot** at any active dungeon decision point. Retreat is not restricted to Rest Sites.                             |
 | Rewards at risk      | Call them **Pending Loot**, never Pack, Run Loot, Unbanked Loot, or Unsecured Loot.                                                               |
 | Route selection      | Players select an available route by clicking or tapping its map node. Do not restore the large choice overlay.                                   |
 | Route automation     | The server must never automatically pick a branch.                                                                                                |
+| Layout variation     | Each run uses its seed to shuffle encounter lanes and regenerate safe adjacent-row connections. Sections, Depths, Rest Sites, and Boss placement remain authored. |
 | Map progression      | The map automatically scrolls as the run advances.                                                                                                |
 | Node visibility      | Cleared nodes, the current node, and available choices are opaque. Unreached nodes remain subdued.                                                |
 | Node colors          | Revealed nodes use the same semantic colors as the map legend.                                                                                    |
@@ -71,17 +74,17 @@ The word `Pack` may still exist in unrelated combat terminology such as an enemy
 
 ## 3. Product Vision
 
-A dungeon is a short, authored expedition with a visible branching map, persistent Vigor attrition, route-dependent boss preparation, and Pending Loot that remains at risk until completion or retreat.
+A dungeon is a short, authored expedition with a visible branching map, persistent Vigor attrition, combat encounters of different difficulty, and Pending Loot that remains at risk until completion or retreat.
 
 The player should:
 
 1. Read the available routes.
-2. Compare their Vigor costs and boss consequences.
+2. Compare their Vigor costs and encounter difficulty.
 3. Select a node directly on the map.
 4. Resolve an automated combat or authored non-combat encounter.
 5. See exactly what changed.
 6. Decide whether to continue, rest when a Rest Site is reached, or retreat and secure Pending Loot.
-7. Reach a boss shaped partly by the route taken.
+7. Reach and defeat the final Boss.
 
 The system is server-authoritative. The browser presents state and decisions; it does not own run progression.
 
@@ -89,10 +92,9 @@ The system is server-authoritative. The browser presents state and decisions; it
 
 - **Decisions happen between fights.** Dungeon combat remains automated.
 - **Vigor makes costly victories matter.** Battle HP and cooldowns may reset, but Vigor persists.
-- **Routes present honest tradeoffs.** The immediate Vigor cost, likely rewards, and boss consequence should be visible before selection.
-- **The boss reflects the route.** Minibosses, hazards, and special actions can remove or weaken Boss Aspects.
+- **Routes present honest tradeoffs.** The immediate Vigor cost, encounter type, and likely rewards should be visible before selection.
 - **Different builds prefer different paths.** There should not be one universally correct route.
-- **Failure is understandable.** The game should explain whether the run failed because of Vigor, a Boss Aspect, party readiness, composition, or raw combat performance.
+- **Failure is understandable.** The game should explain whether the run failed because of Vigor, party readiness, composition, or raw combat performance.
 - **Runs are interruptible.** Refreshing or leaving the page must not silently advance or destroy a run.
 - **New dungeons are data-driven.** New content should use the shared framework instead of requiring bespoke dungeon services.
 
@@ -148,8 +150,6 @@ The player can retreat whenever an active run is waiting for input, including:
 
 - A route choice.
 - A combat-node start decision.
-- An event choice.
-- A hazard, cache, or Omen Site action.
 - A Rest Site.
 - A boss start decision.
 
@@ -179,8 +179,9 @@ A Section is authored using this grammar:
 1. The Entrance or previous Rest Site feeds the Section.
 2. The first encounter row contains one to three nodes.
 3. A second encounter row may contain one to three nodes.
-4. Routes reconverge at one Rest Site.
-5. The Rest Site restores 15 Vigor and leads into the next Section.
+4. A third encounter row may contain one to three nodes.
+5. Routes reconverge at one Rest Site.
+6. The Rest Site restores 15 Vigor and leads into the next Section.
 
 The final Section's Rest Site may lead into a fixed boss approach and then the Boss.
 
@@ -196,12 +197,32 @@ flowchart LR
     A2 --> B3["Optional Row 2C"]
     A3 --> B2
     A3 --> B3
-    B1 --> R["Rest Site"]
-    B2 --> R
-    B3 --> R
+    B1 --> C1["Optional Row 3A"]
+    B1 --> C2["Optional Row 3B"]
+    B2 --> C1
+    B2 --> C2
+    B2 --> C3["Optional Row 3C"]
+    B3 --> C2
+    B3 --> C3
+    C1 --> R["Rest Site"]
+    C2 --> R
+    C3 --> R
 ```
 
-Rows do not need to contain the maximum number of nodes. One-, two-, and three-choice Sections are all valid.
+Sections may contain one, two, or three encounter rows. Rows do not need to contain the maximum number of nodes.
+
+### Seeded runtime variation
+
+When a run is created:
+
+1. Encounter nodes within each multi-node Depth row are shuffled among that row's authored lane values.
+2. Connections are cleared and regenerated between each pair of adjacent Depth rows.
+3. A lone source fans into every node of the next row.
+4. A multi-node row reconverges when the next row contains only one node.
+5. Between two multi-node rows, every source receives at least one exit, every target receives at least one entrance, and at least one additional branch is added.
+6. Generated connections never skip a Depth, backtrack, exceed three exits, create an unreachable node, or create a node that cannot reach the Boss.
+
+The run seed fully determines this result. Generated `MapNodes` are persisted, so refresh and resume retain the exact same layout.
 
 ### Depth versus room count
 
@@ -215,31 +236,28 @@ Rows do not need to contain the maximum number of nodes. One-, two-, and three-c
 
 ## 6. Encounter Taxonomy
 
-The domain supports these room types:
+The engine retains scaffolding for additional room types, but the playable catalog is intentionally restricted to Entrance, Combat, MiniBoss, Rest Site, and Boss. Catalog validation rejects Hazard, Cache, Event, and Omen Site nodes.
 
 | Room type  | Intended purpose                                                                          | Current implementation                                                             |
 | ---------- | ----------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
 | `Entrance` | Starting node and first route origin.                                                     | Implemented.                                                                       |
 | `Combat`   | Standard automated encounter and baseline Vigor toll.                                     | Implemented and used in all live maps.                                             |
 | `Elite`    | Clearly telegraphed harder encounter with better value or a strategic consequence.        | Enum exists; live maps still use `Combat` nodes tagged `Elite`.                    |
-| `MiniBoss` | Named encounter that removes or weakens a linked Boss Aspect.                             | Implemented and used once per live dungeon.                                        |
-| `Hazard`   | Non-combat authored Vigor toll, ideally affected by expedition tags.                      | Implemented; tag-aware alternatives are missing.                                   |
-| `Cache`    | Optional or route-linked Pending Loot opportunity.                                        | Implemented as a fixed reward action; richer guarded/trapped variants are missing. |
-| `Event`    | Authored choice affecting Vigor, Pending Loot, flags, routes, combat, or Aspects.         | Choice engine and data exist; live maps contain no Event nodes.                    |
-| `OmenSite` | Information encounter that reveals routes, Omens, or Boss Aspects, optionally for a cost. | Type and UI support exist; meaningful behavior and live nodes are missing.         |
+| `MiniBoss` | Named, more demanding combat encounter.                                                   | Implemented and used once per live dungeon.                                        |
+| `Hazard`   | Deferred non-combat encounter.                                                            | Disabled in playable dungeon definitions.                                          |
+| `Cache`    | Deferred non-combat reward encounter.                                                     | Disabled in playable dungeon definitions.                                          |
+| `Event`    | Deferred authored choice.                                                                 | Disabled in playable dungeon definitions; dormant engine scaffolding remains.      |
+| `OmenSite` | Deferred information encounter.                                                          | Disabled in playable dungeon definitions.                                          |
 | `RestSite` | Restores 15 Vigor and separates Sections.                                                 | Implemented and used after every current Section.                                  |
-| `Boss`     | Final automated encounter using the run's remaining Boss Aspects.                         | Implemented.                                                                       |
+| `Boss`     | Final automated encounter.                                                                | Implemented.                                                                       |
 
 ### Encounter authoring rules
 
 - Costs and consequences must be visible before committing.
 - An Elite must be identifiable as an Elite before selection.
-- A Hazard must always have a tagless resolution, even when tags improve it.
-- A Cache should create a meaningful risk/reward decision rather than being free value on every route.
-- An Event must have at least two materially different choices.
-- No Event should be “free reward” versus “nothing.”
-- A MiniBoss must be linked to a real boss consequence.
+- A MiniBoss must be clearly named and forecast as a more demanding encounter.
 - A Rest Site does not offer boons, extraction locks, or checkpoint choices.
+- Hazard, Cache, Event, and Omen Site nodes must not be authored until this product decision is explicitly revisited.
 
 ---
 
@@ -269,26 +287,29 @@ performanceToll =
     interpolate from authored minimum to authored maximum
     using clamped damagePercent from 0% to 100%
 
-combatToll =
+rawCombatToll =
     authored minimum
     + performanceToll
     + 6 per downed party member
-    + active Omen combat modifiers
 
-final combat toll = clamp(combatToll, 0, 35)
+scaledCombatToll = round(rawCombatToll × 0.85)
+
+final combat toll =
+    clamp(scaledCombatToll, 0, 35)
 ```
 
-Fallback range when authored data is absent:
+Fallback authored range when authored data is absent:
 
 - Minimum: 12.
 - Maximum: 22.
+
+The 15% combat-toll reduction is also applied to route forecasts, so the UI remains aligned with the server calculation. The fallback range is effectively 10–19 Vigor before downed-member modifiers.
 
 Damage taken may exceed total maximum health when healing extends a fight, but the interpolation input is currently clamped at 100%.
 
 ### Other Vigor changes
 
-- Hazard toll: authored cost plus active Omen modifier, clamped to 0–35.
-- Event change: clamped to -35/+25.
+- Hazard and Event Vigor paths remain dormant engine scaffolding and are not reachable from playable catalogs.
 - Rest Site recovery: +15.
 - Every change records:
   - Room index.
@@ -320,7 +341,7 @@ The API returns the full threshold list and marks the current threshold. The fro
 - A post-node animation explaining the exact Vigor change and its cause.
 - A combat toll estimate while combat is resolving, if the combat pipeline can expose it safely.
 
-The first four are implemented. The projected segment, consequence animation, and live toll estimate are not.
+The first four are implemented. The Vigor bar uses a fixed red-to-yellow-to-green scale and masks its depleted portion, so its visible endpoint reflects the current value instead of rescaling the gradient. The projected segment, consequence animation, and live toll estimate are not.
 
 ### Tuning goals
 
@@ -330,7 +351,7 @@ Exact numbers should be telemetry-driven, but the desired behavior is:
 - A player who repeatedly takes high-cost routes and performs poorly can reach 0 before the Boss.
 - Rest Sites help but do not erase all previous mistakes.
 - Vigor-0 failures should be meaningful without becoming the dominant failure outcome.
-- Boss losses should remain common enough that Boss Aspects and preparation matter.
+- Boss losses should remain common enough that final encounters feel consequential.
 
 ---
 
@@ -419,7 +440,6 @@ Every available route should expose:
 - Room type.
 - Vigor cost range.
 - Forecast text.
-- Boss consequence.
 - Relevant tags.
 - Possible Pending Loot.
 - Requirements or missing requirements.
@@ -449,76 +469,33 @@ Future Scout and knowledge systems should refine information without changing th
 
 ---
 
-## 11. Omens
+## 11. Disabled Run Modifiers
 
-An Omen is a seeded, authored run modifier.
-
-### Required model
-
-- Each dungeon authors a pool of four to six Omens.
-- Omens contain complete player-facing rules text.
-- Omens alter route value without replacing authored geography.
-- Tiers I–II use one Omen.
-- Tier III uses two Omens.
-- Omens can modify combat and hazard Vigor tolls.
-- Future Omens may affect encounters, Elites, information, or Boss Aspects, but effects must remain explicit.
+Omens and Boss Aspects are outside the current simplified dungeon scope.
 
 ### Current state
 
-- All three live dungeon families author four Omens.
-- Tiers I–II select one.
-- Tier III selects two.
-- Current effects are integer combat/hazard toll modifiers.
-- Omens are displayed in the expedition sidebar.
-- Daily cadence, pre-run display, mild Tier-I pools, and richer effects are not implemented in this run-focused system.
+- Live delve definitions do not author Omens or Boss Aspects.
+- New runs do not initialize either modifier system.
+- Existing run state is cleared when it is loaded so legacy modifiers cannot affect Vigor or Boss combat invisibly.
+- The expedition sidebar ends after the current Vigor threshold; Pending Loot is the next section.
+- Catalog validation rejects reintroduced Omen pools, Boss Aspect definitions, and node-to-Aspect links.
+- Domain and DTO models remain as dormant scaffolding and can be removed separately if permanent schema cleanup is desired.
 
 ---
 
-## 12. Boss Aspects and Boss Gate
+## 12. Boss Encounter
 
-The Boss should be the culmination of the route.
+The Boss is a direct final automated encounter. It does not currently receive route-shaped Boss Aspects or a separate Boss Gate.
 
-### Required Aspect categories
+Before starting the Boss, the existing map node communicates:
 
-Each boss should normally have:
+- Boss name.
+- Encounter type.
+- Authored Vigor forecast.
+- The option to enter combat by selecting the node.
 
-- One fixed identity Aspect.
-- One route-linked Aspect.
-- One miniboss-linked Aspect.
-- One Tier-III-only Aspect.
-- Optionally, an Unrevealed Aspect at higher tiers once the knowledge system exists.
-
-### Required behavior
-
-- Route actions can remove or weaken linked Aspects.
-- Defeating a linked MiniBoss can remove or weaken its Aspect.
-- Removed Aspects do not affect combat.
-- Weakened Aspects apply a reduced, clearly described effect.
-- Active Aspects apply real boss mechanics or modifiers.
-- The UI states why each Aspect is Active, Weakened, Removed, or Unrevealed.
-
-### Current state
-
-- All live bosses have fixed, route, miniboss, and Tier-III Aspect definitions.
-- Route and MiniBoss outcomes can mark linked Aspects Removed.
-- Active Aspects become hostile attribute modifiers in combat.
-- Removed Aspects stop applying.
-- `CurrentBossModifiers` is exposed.
-- Aspect-specific abilities, phases, Weakened behavior, Unrevealed state, permanent discovery, and a full Boss Gate readiness presentation are missing.
-
-### Desired Boss Gate
-
-Before starting the Boss, show:
-
-- Boss name and portrait.
-- Final Aspect list.
-- State and reason for every Aspect.
-- Current Vigor and threshold consequence.
-- Wounded/Out party members once those systems exist.
-- Honest readiness guidance.
-- Buttons to fight or retreat.
-
-Retreat remains allowed because there is no lock-in extraction rule.
+Retreat remains available because there is no lock-in extraction rule.
 
 ---
 
@@ -535,10 +512,10 @@ Each companion should contribute:
 
 | Tag       | Intended effect                                                                   |
 | --------- | --------------------------------------------------------------------------------- |
-| `Scout`   | Exact or tighter route forecasts, free Omen Site reveals, and better information. |
+| `Scout`   | Exact or tighter route forecasts and better information.                          |
 | `Medic`   | Small post-combat Vigor recovery and stronger treatment options.                  |
 | `Warden`  | Negates or reduces environmental hazard tolls and dungeon-family debuffs.         |
-| `Breaker` | Unlocks forceful hazard/event options that can also weaken Boss Aspects.          |
+| `Breaker` | Improves authored Elite or MiniBoss interactions.                                 |
 
 Rules:
 
@@ -567,13 +544,15 @@ Desired behavior:
 - A Wounded companion downed again becomes `Out`.
 - Out companions do not participate for the rest of the run.
 - Medic/event treatment can clear Wounded when explicitly authored.
-- These states persist in the run and appear in forecasts, the sidebar, Boss Gate, results, and failure analysis.
+- These states persist in the run and appear in forecasts, the sidebar, results, and failure analysis.
 
 Current implementation only adds 6 Vigor loss for each downed party member. It does not persist Wounded or Out.
 
 ---
 
-## 14. Events, Omen Sites, and Caches
+## 14. Deferred Events, Omen Sites, Hazards, and Caches
+
+The concepts in this section are retained only as possible future direction. They are not part of the current playable dungeon scope and must not be added to authored dungeon graphs without a new product decision.
 
 ### Events
 
@@ -582,7 +561,7 @@ Every Event should:
 - Belong to the dungeon's fiction.
 - Present at least two meaningful choices.
 - Display numeric costs and benefits.
-- Use Vigor, Pending Loot, expedition tags, flags, routes, combat, Wounds, or Boss Aspects.
+- Use Vigor, Pending Loot, expedition tags, flags, routes, combat, or Wounds.
 - Avoid a universally correct free-reward choice.
 - Resolve server-side and persist its result.
 
@@ -600,12 +579,7 @@ Current authored event catalogs exist, but no live graph contains an Event node.
 
 ### Omen Sites
 
-An Omen Site should let the player exchange a small cost or opportunity for information such as:
-
-- Reveal an Unrevealed Boss Aspect.
-- Reveal exact composition of future nodes.
-- Reveal the exact Omen interaction on a route.
-- Receive the reveal free or improved with Scout.
+An Omen Site would need a newly approved purpose before returning to live content. The existing room type and frontend label are dormant scaffolding.
 
 The room type and frontend label exist. Meaningful server behavior and live content do not.
 
@@ -619,7 +593,6 @@ Desired variants:
 - Guarded combat.
 - Trapped Vigor cost.
 - Tag-resolved interaction.
-- Omen-modified Cache.
 - Optional Cache that can be skipped.
 
 Every Cache should sharpen the decision between continuing with more Pending Loot at risk and retreating safely.
@@ -632,7 +605,7 @@ Every Cache should sharpen the decision between continuing with more Pending Loo
 
 - Combat remains server-authoritative and automated.
 - Selecting a combat node prepares or begins the standard dungeon combat flow.
-- Active Omens, Boss Aspects, and Vigor threshold effects are applied before combat.
+- Vigor threshold effects are applied before combat.
 - Victory:
   - Applies the combat Vigor toll.
   - Adds Pending Loot.
@@ -650,11 +623,9 @@ Every Cache should sharpen the decision between continuing with more Pending Loo
 
 - Standard dungeon combat orchestration is integrated.
 - Exhausted starts party members at 90% maximum health.
-- Omens modify Vigor tolls.
-- Boss Aspects apply attribute modifiers.
 - Combat result statistics drive the Vigor toll.
 - The frontend hands off to the existing combat viewer.
-- Live toll estimation, Wounded/Out persistence, Aspect-specific combat mechanics, and fully verified mid-combat resume are missing.
+- Live toll estimation, Wounded/Out persistence, and fully verified mid-combat resume are missing.
 
 ---
 
@@ -673,7 +644,6 @@ Every failed run should answer:
 Desired cause categories:
 
 - `Stat Gap`
-- `Aspect Unanswered`
 - `Attrition`
 - `Composition`
 - `Combat Readiness`
@@ -683,12 +653,11 @@ Potential evidence:
 
 - Party power versus the dungeon's tier band.
 - Vigor and threshold on entry.
-- Damage dealt by a Boss Aspect.
 - Damage absorbed by shields or summons.
 - Party damage margins.
 - Wounded or Out companions.
 - Tagless hazard tolls paid earlier.
-- Remaining route and missed Aspect-removal opportunities.
+- Remaining route opportunities.
 
 ### Current failure result
 
@@ -718,7 +687,6 @@ Dedicated result presentation should eventually include:
 - Pending Loot secured.
 - Completion rewards, when applicable.
 - Mastery award breakdown.
-- Boss Aspect outcomes.
 - Wounded/Out summary.
 - Per-dungeon records or notable bests.
 
@@ -780,7 +748,6 @@ The active dungeon screen should follow the established Legends Legacy design sy
 - `Depth X of Y`.
 - `Section X of Y`.
 - Current node/status note.
-- **Retreat & Secure Loot** button while the run is actively waiting for input.
 
 ### Expedition sidebar
 
@@ -789,25 +756,23 @@ The active dungeon screen should follow the established Legends Legacy design sy
 - Expandable threshold reference.
 - Current Section and total Sections.
 - Cleared rooms.
-- Active Omens.
-- Boss Aspects and their states.
 - Pending Loot.
-- Warning that Pending Loot is lost on failure and can be secured by retreat.
+- Bottom warning that Pending Loot is lost on failure.
+- **Retreat & Secure Loot** action inside that warning while the run is actively waiting for input. It must not share the combat summary's **Close Summary** screen position.
 
 ### Encounter panel
 
 - Current node name and type.
 - Clear action label.
 - Forecast and Vigor cost.
-- Event choices when applicable.
 - Rest action at Rest Sites.
 - Boss readiness information before the Boss.
 
 ### Current implementation
 
-The map, scrolling, node states, semantic colors, direct node selection, Vigor UI, threshold expansion, Section progress, Omens, Aspects, Pending Loot, Rest Site action, retreat button, combat handoff, invalid-map recovery, and failure screen are implemented.
+The seeded map variation, scrolling, node states, semantic colors, direct node selection, Vigor UI, threshold expansion, Section progress, Pending Loot, Rest Site action, retreat button, combat handoff, invalid-map recovery, and failure screen are implemented.
 
-The consequence strip, projected toll, rich Boss Gate, companion state, dedicated success/retreat results, and live toll feedback are missing.
+The consequence strip, projected toll, companion state, richer success/retreat results, and live toll feedback are missing.
 
 ---
 
@@ -816,31 +781,28 @@ The consequence strip, projected toll, rich Boss Gate, companion state, dedicate
 ### Current implemented tier differences
 
 - Existing enemy and reward scaling from dungeon definitions.
-- One Omen in Tiers I–II.
-- Two Omens in Tier III.
 - Tier III Exhausted threshold begins at 30 instead of 25.
-- Tier-III-only Boss Aspect.
 
 ### Desired future tier differences
 
 | Dimension | Tier I                                                      | Tier II                                          | Tier III                                                   |
 | --------- | ----------------------------------------------------------- | ------------------------------------------------ | ---------------------------------------------------------- |
 | Learning  | More complete information and forgiving consequences.       | Baseline authored experience.                    | Tighter information and more interacting pressure.         |
-| Omens     | One from a milder subset.                                   | One from full pool.                              | Two from full pool.                                        |
-| Aspects   | Removable Aspects may begin Weakened; no Unrevealed Aspect. | Full Aspect behavior; possible Unrevealed state. | Full set plus Tier-III Aspect.                             |
 | Routes    | Forgiving authored costs.                                   | Baseline.                                        | Controlled authored variance, never procedural generation. |
-| Elites    | Fewer.                                                      | Baseline.                                        | More or Omen-empowered.                                    |
+| Elites    | Fewer.                                                      | Baseline.                                        | More or stronger Elite formations.                         |
 | Vigor     | More forgiving authored costs.                              | Baseline.                                        | Tighter authored costs and Exhausted at 30.                |
 
 Rest Sites currently restore 15 at all tiers. Do not reintroduce tier-specific Rest Site recovery unless a new balancing decision is made.
 
 ### Replayability principles
 
-- Geography is learnable.
-- Omens, tier, build, party tags, combat performance, and Pending Loot reprioritize routes.
-- Controlled variance can swap authored positions or options; it should not generate a random maze.
-- New Omens and Events are the cheapest content-refresh tools.
-- No route should become correct for every build and every Omen.
+- The authored Section/Depth structure and encounter roster are learnable.
+- Tier, build, party tags, combat performance, and Pending Loot reprioritize routes.
+- Each run deterministically shuffles encounter lanes and selects safe connections between adjacent rows from its seed.
+- Every generated node remains reachable from the Entrance and able to reach the Boss.
+- Controlled variance must not change Section count, row sizes, Rest Site placement, or Boss placement.
+- New combat formations and authored route layouts are the cheapest content-refresh tools.
+- No route should become correct for every build.
 
 ---
 
@@ -857,12 +819,9 @@ A dungeon definition should eventually describe:
 | Core hazard            | Environmental Vigor pressure and tag interactions.           |
 | Attrition profile      | Expected split between combat, hazard, and event Vigor loss. |
 | Section count          | Authored number of Sections.                                 |
-| Section graph          | Up to two rows of up to three nodes, then Rest Site.         |
+| Section graph          | One to three rows of up to three nodes, then Rest Site.      |
 | Encounter nodes        | Room types, depths, lanes, routes, costs, tags, and rewards. |
-| Omen pool              | Four to six authored Omens.                                  |
-| Event pool             | Four to six authored Events.                                 |
-| MiniBoss function      | Encounter and linked Boss Aspect.                            |
-| Boss Aspects           | Fixed, route-linked, MiniBoss-linked, and Tier-III.          |
+| MiniBoss function      | Named, more demanding combat encounter.                      |
 | Useful expedition tags | Scout, Medic, Warden, and Breaker interactions.              |
 | Tier deltas            | Authored differences per tier.                               |
 | Telegraphing           | Forecasts, bestiary text, and failure explanations.          |
@@ -873,14 +832,12 @@ A dungeon definition should eventually describe:
 - `displayName`
 - `roomType`
 - `depth`
-- `lane`
+- `lane` (authored row slot; encounter nodes are shuffled among the row's slots per run)
 - `section`
-- `nextRoomIndexes`
+- `nextRoomIndexes` (authored validation graph; runtime edges are regenerated between adjacent Depth rows)
 - `forecast`
 - `vigorCostMin`
 - `vigorCostMax`
-- `bossConsequence`
-- `bossAspectId`
 - `tags`
 
 ### Required validation
@@ -889,18 +846,18 @@ A dungeon definition should eventually describe:
 - Exactly one Entrance.
 - Exactly one terminal Boss.
 - Consecutive Sections.
+- Consecutive Depths beginning at zero.
 - One Rest Site per Section under the current grammar.
-- One or two encounter rows per Section.
+- One to three encounter rows per Section.
 - One to three nodes per row.
+- Unique lanes within each Depth row.
 - No node branches to more than three nodes.
 - No backtracking.
-- All references point to existing nodes and Aspects.
+- All route references point to existing nodes.
 - Every node is reachable from the Entrance.
 - Every node can reach the Boss.
-- Omen pool contains four to six entries.
-- Every Aspect is fixed or has a real in-run lever.
-- Every hazard has a tagless resolution once tags exist.
-- Every Event contains meaningful tradeoffs.
+- Omen pools, Boss Aspect definitions, and node-to-Aspect links are rejected.
+- Every node uses one of the currently allowed playable room types.
 - Expected Vigor pressure is simulated before content ships.
 
 ---
@@ -909,31 +866,34 @@ A dungeon definition should eventually describe:
 
 The current authored layouts are:
 
-| Dungeon family      | Nodes | Depths | Sections | Rest Sites | Combat | Hazard | Cache | MiniBoss | Boss | Live Event/Omen Site |
-| ------------------- | ----: | -----: | -------: | ---------: | -----: | -----: | ----: | -------: | ---: | -------------------: |
-| Goblin Mines        |    19 |     11 |        3 |          3 |      6 |      4 |     3 |        1 |    1 |                    0 |
-| Forgotten Catacombs |    16 |      9 |        2 |          2 |      6 |      3 |     2 |        1 |    1 |                    0 |
-| Hives Abyss         |    22 |     13 |        4 |          4 |      7 |      5 |     3 |        1 |    1 |                    0 |
+| Dungeon family      | Nodes | Depths | Sections | Rest Sites | Combat | MiniBoss | Boss |
+| ------------------- | ----: | -----: | -------: | ---------: | -----: | -------: | ---: |
+| Goblin Mines        |    22 |     12 |        3 |          3 |     16 |        1 |    1 |
+| Forgotten Catacombs |    19 |     10 |        2 |          2 |     14 |        1 |    1 |
+| Hives Abyss         |    25 |     14 |        4 |          4 |     18 |        1 |    1 |
 
-Each layout is reused by its Tier II and Tier III definition IDs through prefix matching.
+Each dungeon family reuses the same authored node roster, Depth skeleton, and Section structure across tiers through prefix matching. On every new run, the seed deterministically shuffles encounter nodes between the authored lanes and regenerates connections between adjacent Depth rows. Rest Sites and the Boss remain fixed anchors.
+
+Every live dungeon now contains one mandatory three-row Section:
+
+- Goblin Mines Section 2.
+- Forgotten Catacombs Section 2.
+- Hives Abyss Section 3.
 
 ### Current Vigor ranges
 
 - Goblin Mines:
-  - Combat commonly 10–25.
-  - MiniBoss 16–28.
-  - Boss 18–32.
-  - Hazards commonly 14–25.
+  - Effective Combat forecast commonly 9–21.
+  - Effective MiniBoss forecast 14–24.
+  - Effective Boss forecast 15–27.
 - Forgotten Catacombs:
-  - Combat commonly 10–25.
-  - MiniBoss 16–29.
-  - Boss 18–32.
-  - Hazards commonly 14–25.
+  - Effective Combat forecast commonly 9–21.
+  - Effective MiniBoss forecast 14–25.
+  - Effective Boss forecast 15–27.
 - Hives Abyss:
-  - Combat commonly 11–28.
-  - MiniBoss 17–30.
-  - Boss 20–34.
-  - Hazards commonly 15–27.
+  - Effective Combat forecast commonly 9–24.
+  - Effective MiniBoss forecast 14–26.
+  - Effective Boss forecast 17–29.
 
 These ranges intentionally make Vigor 0 possible when expensive routes are combined with poor combat performance.
 
@@ -970,20 +930,20 @@ Important DTOs:
 - `DungeonEventChoiceOptionDto`
 - `DungeonVigorThresholdDto`
 - `DungeonVigorChangeDto`
-- `DungeonOmenDto`
-- `DungeonBossAspectDto`
+- `DungeonOmenDto` (dormant compatibility model)
+- `DungeonBossAspectDto` (dormant compatibility model)
 - `DungeonFailureAnalysisDto`
 - `ExecuteDungeonActionResponseDto`
 
 ### Services
 
-- `DungeonRunFactory`: creates state, rooms, Omens, Aspects, and Sections.
+- `DungeonRunFactory`: creates state and rooms, then applies seeded lane/connection variation to the authored Section skeleton.
 - `DungeonRunService`: owns run actions and progression.
 - `DungeonVigorService`: Vigor loss, recovery, state, and history.
 - `DungeonRouteService`: route forecasts and pending choices.
 - `JsonDungeonDelveDefinitionProvider`: loads and validates authored layouts.
 - `DungeonEventChoiceService`: authored event choice behavior.
-- `DungeonBossModifierService`: converts active Aspects to combat modifiers.
+- `DungeonBossModifierService`: dormant compatibility service; live runs have no Aspect input.
 - `DungeonRunRewardClaimer`: claims completed or retreated rewards.
 
 The old checkpoint interface and service were removed.
@@ -1005,12 +965,10 @@ The old checkpoint interface and service were removed.
 | -------------- | ------------------- | ----------------------------------------------------------------------------------- |
 | `fight`        | None                | Resolve a combat-capable current room.                                              |
 | `choose_route` | `{ routeOptionId }` | Select an available map node.                                                       |
-| `event_choice` | `{ choiceId }`      | Resolve an authored Event choice.                                                   |
+| `event_choice` | `{ choiceId }`      | Dormant compatibility for the deferred Event engine; not emitted by playable runs. |
 | `retreat`      | None                | Secure Pending Loot and end the run as Retreated.                                   |
-| `continue`     | None                | Currently used by the frontend at a Rest Site and accepted by several simple nodes. |
-| `rest`         | None                | Accepted by the Rest Site backend but not currently sent by the frontend.           |
-
-Recommended cleanup: make `rest` the canonical frontend Rest Site action and reserve `continue` for generic non-Rest progression.
+| `continue`     | None                | Accepted for generic non-Rest progression.                                          |
+| `rest`         | None                | Canonical Rest Site action used by the frontend.                                    |
 
 ---
 
@@ -1025,54 +983,48 @@ Recommended cleanup: make `rest` the canonical frontend Rest Site action and res
 | Retreat anywhere              | Secure Pending Loot at active decisions           | Backend and active-page button implemented    | Implemented                  |
 | Direct node selection         | Tap available node                                | Implemented                                   | Implemented                  |
 | Map auto-scroll               | Follow current progression                        | Implemented                                   | Implemented                  |
+| Seeded layout variation       | Vary lanes/routes without invalid graphs          | Deterministic lane and adjacent-row edge generation | Implemented              |
 | Node opacity/colors           | Cleared/current/available visible; future subdued | Implemented                                   | Implemented                  |
 | Depth and Section progress    | Correct distinct concepts                         | Implemented                                   | Implemented                  |
 | Vigor history                 | Persist amount, result, and reason                | Implemented                                   | Implemented                  |
 | Vigor thresholds              | Backend contract and expandable UI                | Implemented                                   | Implemented                  |
-| Harder Vigor economy          | Reaching 0 must be credible                       | Increased ranges and cap implemented          | Implemented; needs telemetry |
+| Vigor economy                 | Reaching 0 must remain credible                   | Authored ranges use a 15% combat-toll reduction | Implemented; needs telemetry |
 | Pending Loot terminology      | Consistent domain/DTO/UI wording                  | Implemented in dungeon system                 | Implemented                  |
 | Completion and retreat claims | Correct claimable rewards                         | Implemented                                   | Implemented                  |
-| Omens                         | Seeded modifiers and UI                           | Basic combat/hazard modifiers implemented     | Partial                      |
-| Boss Aspects                  | Route-shaped boss mechanics                       | Attribute modifiers and removal implemented   | Partial                      |
+| Omens                         | Outside current simplified dungeon scope          | Disabled in content, runtime, and UI           | Deferred                     |
+| Boss Aspects                  | Outside current simplified dungeon scope          | Disabled in content, runtime, and UI           | Deferred                     |
 | Elite room type               | Distinct authored Elite behavior                  | Enum exists; live content uses tags           | Partial                      |
-| Events                        | Meaningful authored live decisions                | Engine exists; no live Event nodes            | Partial                      |
-| Omen Sites                    | Information encounter                             | Type/UI only                                  | Missing                      |
+| Events                        | Meaningful authored live decisions                | Disabled by current product scope              | Deferred                     |
+| Omen Sites                    | Information encounter                             | Disabled by current product scope              | Deferred                     |
 | Companion tags                | Scout/Medic/Warden/Breaker                        | Not implemented                               | Missing                      |
 | Point member                  | Lightweight expedition stance                     | Not implemented                               | Missing                      |
 | Wounded/Out                   | Persistent companion consequences                 | Only downed-member Vigor toll exists          | Missing                      |
 | Consequence strip             | Explain every result before continuing            | State message exists; rich UI missing         | Partial                      |
 | Live/projected toll           | Show likely/accruing Vigor                        | Route ranges exist; projected/live UI missing | Partial                      |
-| Boss Gate                     | Full readiness and Aspect panel                   | Sidebar Aspects exist; full gate missing      | Partial                      |
+| Boss Gate                     | Outside current simplified dungeon scope          | Direct Boss-node selection is implemented      | Deferred                     |
 | Failure intelligence          | Evidence-ranked causes                            | Broad static analysis implemented             | Partial                      |
-| Completion/retreat results    | Dedicated summary and Vigor curve                 | Reward claiming only                          | Missing                      |
+| Completion/retreat results    | Dedicated summary and Vigor curve                 | Basic post-claim reward summary implemented   | Partial                      |
 | Resume experience             | Clear resume and restored context                 | Persistence exists; dedicated UX missing      | Partial                      |
 | Automatic expiry              | Background/load-time failure and warnings         | Action-time expiry only                       | Partial                      |
-| Knowledge progression         | Persistent discovered routes/Aspects              | Not implemented                               | Missing                      |
-| Controlled Tier variance      | Authored higher-tier changes                      | Basic Omen/Aspect thresholds only             | Partial                      |
+| Knowledge progression         | Persistent discovered routes                      | Not implemented                               | Missing                      |
+| Controlled Tier variance      | Authored higher-tier changes                      | Enemy/reward scaling and Vigor threshold vary | Partial                      |
 | Telemetry                     | Route/Vigor/failure/retreat metrics               | Not implemented as a complete system          | Missing                      |
 
 ---
 
 ## 24. Known Technical and Product Gaps
 
-1. `restAtSite()` sends `continue` instead of the canonical `rest` action.
-2. Pending rewards exist both as `DungeonRun` scalar/entity fields and as a state snapshot.
-3. Elite has a domain enum but live authored Elites are still `Combat` nodes with an `Elite` tag.
-4. Events are implemented but absent from live maps.
-5. Omen Sites can be displayed but do not perform their intended function.
-6. Route forecasts are not Scout-, tag-, or knowledge-aware.
-7. Hazard resolution is not Warden- or Breaker-aware.
-8. Boss Aspects are attribute modifiers rather than distinctive mechanics.
-9. Aspect `Weakened` and `Unrevealed` states do not have complete behavior.
-10. The Boss Gate lacks party-condition and evidence-based readiness guidance.
-11. Downed members affect Vigor but do not become Wounded or Out.
-12. The rich consequence strip and Vigor projection are missing.
-13. Failure suggestions are broad and static.
-14. Completion and retreat lack dedicated result screens.
-15. Expiry is only processed on the next action.
-16. Combat rejoin has not been verified end to end.
-17. There is no account-wide dungeon knowledge model.
-18. There is no complete dungeon-specific telemetry.
+1. Pending rewards exist both as `DungeonRun` scalar/entity fields and as a state snapshot.
+2. Elite has a domain enum but live authored Elites are still `Combat` nodes with an `Elite` tag.
+3. Route forecasts are not Scout-, tag-, or knowledge-aware.
+4. Downed members affect Vigor but do not become Wounded or Out.
+5. The rich consequence strip and Vigor projection are missing.
+6. Failure suggestions are broad and static.
+7. Completion and retreat have a basic claimed-reward summary, but still lack route, Section, Vigor-curve, and mastery details.
+8. Expiry is only processed on the next action.
+9. Combat rejoin has not been verified end to end.
+10. There is no account-wide dungeon knowledge model.
+11. There is no complete dungeon-specific telemetry.
 
 ---
 
@@ -1092,8 +1044,7 @@ Work:
   - Securing currencies and items.
   - Forfeiting completion rewards.
   - Rest Site +15 recovery and Section advancement.
-  - Vigor reaching 0 from combat, hazard, and Event resolution.
-- Change the frontend Rest Site action from `continue` to `rest`.
+  - Vigor reaching 0 from standard, Miniboss, and Boss combat resolution.
 - Assert all live definitions pass graph validation.
 - Add a test that no dungeon source/DTO/UI field reintroduces checkpoint or reward legacy terminology.
 - Run the complete relevant dungeon test suite.
@@ -1111,7 +1062,7 @@ Goal: make the new, harsher Vigor economy understandable.
 Work:
 
 - Return a structured consequence object instead of relying only on `LastConsequence`.
-- Include Vigor before/after, exact cause, Pending Loot delta, Aspect delta, and companion delta placeholders.
+- Include Vigor before/after, exact cause, Pending Loot delta, and companion delta placeholders.
 - Add the post-node consequence strip.
 - Add a projected Vigor segment for hovered/selected routes.
 - Make the consequence visible after refresh.
@@ -1151,11 +1102,11 @@ Work:
 
 - Scout tightens forecasts and reveals information.
 - Medic applies authored post-combat recovery and treatment interactions.
-- Warden reduces/negates authored hazards.
-- Breaker unlocks authored hazard/Event alternatives and Aspect changes.
+- Warden reduces an authored subset of combat Vigor tolls.
+- Breaker improves authored Elite or Miniboss combat interactions.
 - Point amplifies a defined subset of tag behavior.
-- Add explicit tagless fallback resolutions.
-- Show resolved tag effects on route and Event choices.
+- Add explicit tagless fallback combat routes.
+- Show resolved tag effects on combat route choices.
 
 Acceptance criteria:
 
@@ -1163,42 +1114,13 @@ Acceptance criteria:
 - No route is impossible without a tag.
 - Forecasts accurately reflect the current expedition.
 
-### Next 5 — Live Events, Omen Sites, and true Elites
+### Deferred slice — Events, Omen Sites, Hazards, and Caches
 
-Goal: use the encounter framework that already exists.
+This slice is not part of the active roadmap. The engine scaffolding can remain dormant, but these node types must not return to playable dungeon catalogs unless the simplified combat-only product direction is explicitly revisited.
 
-Work:
+### Deferred slice — Omens, Boss Aspects, and Boss Gate
 
-- Add Event nodes to live dungeon graphs.
-- Remove or rewrite obsolete Event flags.
-- Implement Omen Site information choices and costs.
-- Add Omen Site nodes to suitable higher-tier/live layouts.
-- Author true `Elite` nodes or define one intentional, consistent Elite representation.
-- Expand Caches into optional guarded/trapped/tag-aware variants.
-
-Acceptance criteria:
-
-- Every live dungeon contains at least one meaningful authored Event opportunity.
-- At least one dungeon uses an Omen Site.
-- Elite behavior and preview are distinct and tested.
-
-### Next 6 — Boss Gate and full Aspect behavior
-
-Goal: make route decisions visibly shape the final encounter.
-
-Work:
-
-- Implement Active, Weakened, Removed, and Unrevealed Aspect behavior.
-- Add Aspect-specific abilities or combat hooks where appropriate.
-- Build the full Boss Gate panel.
-- Add readiness guidance based on Vigor, party condition, and active Aspects.
-- Add persistent Aspect discovery/knowledge.
-
-Acceptance criteria:
-
-- Two different routes can produce observably different versions of the same Boss.
-- The Boss Gate explains every difference.
-- Retreat remains available.
+These modifier systems are not part of the active roadmap. Their model and DTO scaffolding may remain dormant, but live content, runtime effects, and sidebar presentation must stay disabled unless the simplified product direction is explicitly revisited.
 
 ### Next 7 — Results and failure intelligence
 
@@ -1206,8 +1128,8 @@ Goal: make outcomes teach the player.
 
 Work:
 
-- Add dedicated Completed and Retreated result screens.
-- Show route, Sections, Vigor curve, secured rewards, mastery, and Aspect outcomes.
+- Expand the basic Completed and Retreated reward summary into the full result experience.
+- Show route, Sections, Vigor curve, secured rewards, and mastery.
 - Capture evidence for failure analysis.
 - Rank causes.
 - Generate two specific suggestions.
@@ -1215,7 +1137,7 @@ Work:
 
 Acceptance criteria:
 
-- A player can tell whether the failure was Vigor, stats, route, composition, or an Aspect.
+- A player can tell whether the failure was Vigor, stats, route, or composition.
 - Completion and retreat have clear, distinct reward summaries.
 
 ### Next 8 — Tier depth, knowledge, and replayability
@@ -1224,18 +1146,15 @@ Goal: make mastery transfer upward without turning maps procedural.
 
 Work:
 
-- Tier-I weakened Aspect rules.
-- Tier-I mild Omen subset.
 - Tier-III controlled authored variation.
 - Tier-III Elite/route pressure.
-- Account-wide route and Aspect knowledge.
+- Account-wide route knowledge.
 - Bestiary integration.
-- Evaluate Omen cadence separately from the run system.
 
 Acceptance criteria:
 
 - Higher tiers feel mechanically tighter, not merely numerically larger.
-- Geography remains authored and learnable.
+- The authored structure remains recognizable while each run offers a different valid route graph.
 
 ### Next 9 — Resume, expiry, and telemetry
 
@@ -1247,7 +1166,7 @@ Work:
 - Add expiry warnings.
 - Add first-class Resume Dungeon UI.
 - Verify combat rejoin.
-- Record route picks, Vigor curves, retreat points, failure causes, Aspect states, tag usage, and result outcomes.
+- Record route picks, Vigor curves, retreat points, failure causes, tag usage, and result outcomes.
 
 Acceptance criteria:
 
@@ -1269,11 +1188,8 @@ Track:
 - Vigor-0 failure share.
 - Retreat rate and retreat Depth.
 - Pending Loot secured by retreat.
-- Route pick rate split by Omen, build, and expedition tags.
+- Route pick rate split by build and expedition tags.
 - MiniBoss participation rate.
-- Boss Aspect state at attempt and victory.
-- Event choice distribution.
-- Cache take/skip rate.
 - Companion/tag concentration.
 - Resume and expiry rates.
 
@@ -1295,12 +1211,11 @@ Healthy directional targets:
 | Vigor is irrelevant               | High-value routes and poor combat must create real attrition; monitor Vigor curves.       |
 | Vigor snowballs unfairly          | Keep threshold penalties limited, show costs, fail at breakpoints, and preserve retreat.  |
 | Rest Sites erase attrition        | Keep recovery fixed at 15 unless telemetry justifies a change; tune authored costs first. |
-| One route dominates               | Require each path to be correct for some build, Omen, or Vigor state; track pick rates.   |
+| One route dominates               | Require each path to be correct for some build or Vigor state; track pick rates.          |
 | Tags become mandatory keys        | Always author tagless resolutions.                                                        |
-| Dungeons become automatic         | Never auto-pick routes or Events.                                                         |
+| Dungeons become automatic         | Never auto-pick combat routes.                                                             |
 | Dungeons become random mazes      | Use authored controlled variance only.                                                    |
 | UI hides the decision             | Keep choices on the map and avoid large overlays.                                         |
-| Boss route consequences feel fake | Aspects must cause observable combat differences.                                         |
 | Retreat becomes free completion   | Retreat secures Pending Loot but never grants completion rewards.                         |
 | Terminology drifts                | Use Sections, Rest Sites, Retreated, and Pending Loot in domain, DTOs, data, and UI.      |
 
@@ -1410,9 +1325,8 @@ If no new product direction is supplied, the next chat should begin with **Next 
 The first concrete implementation slice should be:
 
 1. Add direct automated coverage for retreat and Rest Site progression.
-2. Make `rest` the canonical Rest Site action.
-3. Verify Pending Loot securing/claiming for currencies and items.
-4. Verify Vigor-0 failure at each supported resolution type.
-5. Re-run backend and Angular verification.
+2. Verify Pending Loot securing/claiming for currencies and items.
+3. Verify Vigor-0 failure at each supported resolution type.
+4. Re-run backend and Angular verification.
 
 Do not start the companion/tag system until the current foundation is covered well enough that later changes cannot silently break retreat, reward security, or Section advancement.
