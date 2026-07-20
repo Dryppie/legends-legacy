@@ -154,9 +154,6 @@ public sealed class DungeonEssenceRewardTests
                 [],
                 AlreadyAwarded: false));
 
-        public Task ApplyStartBonusesAsync(DungeonRun run, CancellationToken cancellationToken) =>
-            Task.CompletedTask;
-
         public Task<IReadOnlyDictionary<string, DungeonMasterySnapshot>> GetMasteryByDungeonAsync(
             Guid characterId,
             IReadOnlyCollection<string> dungeonDefinitionIds,

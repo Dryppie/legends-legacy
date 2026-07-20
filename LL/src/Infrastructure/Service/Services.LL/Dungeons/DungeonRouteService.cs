@@ -1,26 +1,11 @@
 using Application.Interfaces.Services.LL.Dungeons;
 using Domain.Models.Dungeons.Definitions.Rooms;
-using Domain.Models.Dungeons.Definitions.Routes;
 using Domain.Models.Dungeons.Runs;
 
 namespace Services.LL.Dungeons;
 
 public sealed class DungeonRouteService : IDungeonRouteService
 {
-    private readonly IDungeonRouteDefinitionProvider _routeDefinitions;
-
-    private sealed record RouteTemplate(
-        string Name,
-        int RiskLevel,
-        int PressureDelta,
-        string[] Tags,
-        string[] PossibleRewards);
-
-    public DungeonRouteService(IDungeonRouteDefinitionProvider routeDefinitions)
-    {
-        _routeDefinitions = routeDefinitions;
-    }
-
     public IReadOnlyList<DungeonRouteOption> GenerateRouteOptions(DungeonRun run)
     {
         ArgumentNullException.ThrowIfNull(run);
@@ -38,17 +23,63 @@ public sealed class DungeonRouteService : IDungeonRouteService
             return [];
         }
 
-        var nextRoomIndex = run.CurrentRoomIndex + 1;
-        var nextRoom = run.Rooms.FirstOrDefault(x => x.RoomIndex == nextRoomIndex);
-        if (nextRoom is null || nextRoom.Type == RoomType.Boss)
+        var currentNode = run.State.MapNodes
+            .FirstOrDefault(node => node.RoomIndex == run.CurrentRoomIndex);
+        if (currentNode is not null)
         {
-            return [];
+            var targetRooms = currentNode.NextRoomIndexes
+                .Select(index => run.Rooms.FirstOrDefault(room => room.RoomIndex == index))
+                .Where(room => room is not null)
+                .Cast<RoomInstance>()
+                .ToList();
+
+            if (targetRooms.Count <= 1)
+            {
+                return [];
+            }
+
+            var widenForecast = run.State.VigorState is "Strained" or "Exhausted";
+            var graphOptions = targetRooms
+                .Select(room =>
+                {
+                    var node = run.State.MapNodes.First(candidate => candidate.RoomIndex == room.RoomIndex);
+                    var vigorCostMin = widenForecast
+                        ? Math.Max(0, node.VigorCostMin - 2)
+                        : node.VigorCostMin;
+                    var vigorCostMax = widenForecast
+                        ? Math.Min(25, node.VigorCostMax + 2)
+                        : node.VigorCostMax;
+                    return new DungeonRouteOption
+                    {
+                        Id = $"route:{room.RoomIndex}:{node.Id}",
+                        RoomIndex = room.RoomIndex,
+                        DisplayName = string.IsNullOrWhiteSpace(node.DisplayName) ? node.Id : node.DisplayName,
+                        RoomType = room.Type,
+                        RiskLevel = node.VigorCostMax switch
+                        {
+                            >= 16 => 4,
+                            >= 13 => 3,
+                            >= 8 => 2,
+                            _ => 1
+                        },
+                        VigorCostMin = vigorCostMin,
+                        VigorCostMax = vigorCostMax,
+                        Forecast = node.Forecast,
+                        BossConsequence = node.BossConsequence,
+                        Tags = node.Tags.ToList(),
+                        PossibleRewards = node.Tags
+                            .Where(tag => tag is "Loot" or "Cache")
+                            .Select(_ => "Pending Loot")
+                            .Distinct()
+                            .ToList()
+                    };
+                })
+                .ToList();
+            run.State.CurrentRouteOptions = graphOptions;
+            return graphOptions;
         }
 
-        var seed = CreateRoomSeed(run.Seed, nextRoom.RoomIndex, run.State.Pressure);
-        var options = CreateOptionsForRoom(run, nextRoom, new Random(seed));
-        run.State.CurrentRouteOptions = options;
-        return options;
+        return [];
     }
 
     public DungeonRouteOption ChooseRoute(DungeonRun run, string routeOptionId)
@@ -64,6 +95,10 @@ public sealed class DungeonRouteService : IDungeonRouteService
         }
 
         run.CurrentRoomIndex = route.RoomIndex;
+        if (!run.State.TraversedRoomIndexes.Contains(route.RoomIndex))
+        {
+            run.State.TraversedRoomIndexes.Add(route.RoomIndex);
+        }
         run.State.CurrentRouteOptions.Clear();
         if (route.Id.StartsWith("hidden:", StringComparison.OrdinalIgnoreCase))
         {
@@ -72,93 +107,5 @@ public sealed class DungeonRouteService : IDungeonRouteService
         }
 
         return route;
-    }
-
-    private List<DungeonRouteOption> CreateOptionsForRoom(DungeonRun run, RoomInstance room, Random random)
-    {
-        var authored = _routeDefinitions.GetDefinitions(run.DungeonDefinitionId, room.Type);
-        if (authored.Count > 0)
-        {
-            return authored
-                .OrderBy(_ => random.Next())
-                .Take(room.Type == RoomType.Checkpoint ? 2 : 3)
-                .Select(definition => ToOption(room, definition))
-                .ToList();
-        }
-
-        return CreateFallbackOptionsForRoom(room, random);
-    }
-
-    private static List<DungeonRouteOption> CreateFallbackOptionsForRoom(RoomInstance room, Random random)
-    {
-        List<RouteTemplate> templates = room.Type switch
-        {
-            RoomType.Event =>
-            [
-                new("Glittering Side Passage", 2, 8, ["event", "loot"], ["Treasure", "Boons"]),
-                new("Collapsed Service Tunnel", 2, 4, ["event", "mystery"], ["Pressure relief"]),
-                new("Echoing Detour", 3, 12, ["event", "danger"], ["Better rewards"])
-            ],
-            RoomType.MiniBoss =>
-            [
-                new("Lookout Post", 3, 12, ["elite", "boon"], ["Boon chance"]),
-                new("Guarded Shortcut", 3, 8, ["elite"], ["Unsecured loot"]),
-                new("Reckless Ambush", 4, 15, ["elite", "greedy"], ["Improved rewards"])
-            ],
-            RoomType.Checkpoint =>
-            [
-                new("Quiet Camp", 1, 0, ["checkpoint", "safe"], []),
-                new("Restless Camp", 2, 4, ["checkpoint"], ["Focus opportunity"])
-            ],
-            _ =>
-            [
-                new("Narrow Tunnel", 1, 4, ["combat", "safe"], []),
-                new("Loot-Strewn Passage", 2, 8, ["combat", "loot"], ["Extra cinders"]),
-                new("Patrolled Hall", 3, 12, ["combat", "danger"], ["Better rewards"])
-            ]
-        };
-
-        return templates
-            .OrderBy(_ => random.Next())
-            .Take(room.Type == RoomType.Checkpoint ? 2 : 3)
-            .Select((template, index) => new DungeonRouteOption
-            {
-                Id = $"route:{room.RoomIndex}:{index + 1}",
-                RoomIndex = room.RoomIndex,
-                DisplayName = template.Name,
-                RoomType = room.Type,
-                RiskLevel = template.RiskLevel,
-                PressureDelta = template.PressureDelta,
-                Tags = template.Tags.ToList(),
-                PossibleRewards = template.PossibleRewards.ToList(),
-                IsUnknown = template.Tags.Contains("mystery")
-            })
-            .ToList();
-    }
-
-    private static DungeonRouteOption ToOption(RoomInstance room, DungeonRouteDefinition definition) => new()
-    {
-        Id = $"route:{room.RoomIndex}:{definition.Id}",
-        RoomIndex = room.RoomIndex,
-        DisplayName = definition.DisplayName,
-        RoomType = room.Type,
-        RiskLevel = definition.RiskLevel,
-        PressureDelta = definition.PressureDelta,
-        IsUnknown = definition.IsUnknown,
-        Tags = definition.Tags.ToList(),
-        PossibleRewards = definition.PossibleRewards.ToList(),
-        Requirements = definition.Requirements.ToList()
-    };
-
-    private static int CreateRoomSeed(int runSeed, int roomIndex, int pressure)
-    {
-        unchecked
-        {
-            var seed = runSeed;
-            seed = (seed * 397) ^ roomIndex;
-            seed = (seed * 397) ^ pressure;
-            seed = (seed * 397) ^ 71;
-            return seed;
-        }
     }
 }

@@ -16,8 +16,8 @@ public sealed class DungeonCheckpointChoiceResult
 
 public enum DungeonCheckpointChoiceOutcome
 {
-    Withdraw = 0,
-    Focus = 1,
-    PushDeeper = 2,
-    Rest = 3
+    Extract = 0,
+    Recover = 1,
+    Prepare = 2,
+    Continue = 3
 }

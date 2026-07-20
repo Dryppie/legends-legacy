@@ -7,7 +7,6 @@ public static class DungeonActionConstants
     public const string Withdraw = "withdraw";
     public const string Leave = "leave";
     public const string ChooseRoute = "choose_route";
-    public const string ChooseBoon = "choose_boon";
     public const string CheckpointChoice = "checkpoint_choice";
     public const string EventChoice = "event_choice";
 

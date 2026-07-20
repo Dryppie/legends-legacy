@@ -200,10 +200,6 @@ export class DungeonStateService {
     this.executeAction('choose_route', { routeOptionId });
   }
 
-  chooseBoon(boonId: string): void {
-    this.executeAction('choose_boon', { boonId });
-  }
-
   chooseCheckpoint(choice: string): void {
     this.executeAction('checkpoint_choice', { choice });
   }

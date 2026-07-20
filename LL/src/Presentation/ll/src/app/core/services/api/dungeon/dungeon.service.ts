@@ -3,9 +3,7 @@ import { Observable, catchError, throwError } from 'rxjs';
 import { ApiService } from '../api.service';
 import { StartDungeonRequest } from '../../../../shared/models/requestDtos/dungeons/startDungeonRequest';
 import { CombatSessionDto } from '../../../../shared/models/Dtos/combatResultDto';
-import {
-  DungeonHubData,
-} from '../../../../shared/models/Dtos/dungeons/dungeonPreviewData';
+import { DungeonHubData } from '../../../../shared/models/Dtos/dungeons/dungeonPreviewData';
 import { DungeonRecordsData } from '../../../../shared/models/Dtos/dungeons/dungeonRecordsData';
 import { InventoryItem } from '../../../../shared/models/inventoryItem';
 import { CharacterDto } from '../../../../shared/models/Dtos/characterDto';
@@ -29,6 +27,11 @@ export enum RoomType {
   Shrine = 'Shrine',
   Trap = 'Trap',
   Checkpoint = 'Checkpoint',
+  Entrance = 'Entrance',
+  Elite = 'Elite',
+  Hazard = 'Hazard',
+  Cache = 'Cache',
+  OmenSite = 'OmenSite',
 }
 
 export enum RoomInstanceStatus {
@@ -71,24 +74,86 @@ export interface DungeonRun {
 }
 
 export interface DungeonRunState {
-  pressure: number;
-  mechanicId: string;
-  mechanicDisplayName: string;
-  mechanicMaxValue: number;
-  rewardMultiplierPercent: number;
-  activeBoonIds: string[];
-  activeBoonSummaries: DungeonActiveBoonSummary[];
-  activeBoonEffectSummaries: DungeonBoonEffectSummary[];
   flags: Record<string, number>;
   securedLoot: DungeonLootBag;
   unsecuredLoot: DungeonLootBag;
+  mapNodes: DungeonMapNode[];
+  traversedRoomIndexes: number[];
   currentRouteOptions: DungeonRouteOption[];
   currentEventChoices: DungeonEventChoiceOption[];
   currentCheckpointChoices: DungeonCheckpointChoiceOption[];
-  currentBoonChoices: DungeonBoonChoiceOption[];
   currentBossModifiers: DungeonBossModifier[];
-  currentMechanicThresholds: DungeonMechanicThresholdState[];
   masteryAwardReasons: DungeonMasteryAwardReason[];
+  vigor: number;
+  vigorState: string;
+  vigorThresholds: DungeonVigorThreshold[];
+  currentSection: number;
+  totalSections: number;
+  wardstonesReached: number;
+  wardstoneBoonChosen: boolean;
+  extractionLocked: boolean;
+  lastConsequence: string;
+  expiresAt: string;
+  vigorHistory: DungeonVigorChange[];
+  activeOmens: DungeonOmen[];
+  bossAspects: DungeonBossAspect[];
+  failureAnalysis?: DungeonFailureAnalysis | null;
+}
+
+export interface DungeonVigorThreshold {
+  state: string;
+  minimumVigor: number;
+  maximumVigor: number;
+  summary: string;
+  effects: string[];
+  isCurrent: boolean;
+}
+
+export interface DungeonMapNode {
+  id: string;
+  displayName: string;
+  roomIndex: number;
+  depth: number;
+  lane: number;
+  section: number;
+  forecast: string;
+  vigorCostMin: number;
+  vigorCostMax: number;
+  bossConsequence: string;
+  bossAspectId: string;
+  tags: string[];
+  nextRoomIndexes: number[];
+}
+
+export interface DungeonVigorChange {
+  roomIndex: number;
+  amount: number;
+  vigorAfter: number;
+  reason: string;
+}
+
+export interface DungeonOmen {
+  id: string;
+  name: string;
+  description: string;
+}
+
+export interface DungeonBossAspect {
+  id: string;
+  name: string;
+  description: string;
+  source: string;
+  state: 'Active' | 'Weakened' | 'Removed';
+  stateReason: string;
+}
+
+export interface DungeonFailureAnalysis {
+  location: string;
+  section: number;
+  primaryCause: string;
+  explanation: string;
+  suggestions: string[];
+  lostRunLoot: DungeonLootBag;
 }
 
 export interface DungeonLootBag {
@@ -110,7 +175,10 @@ export interface DungeonRouteOption {
   displayName: string;
   roomType: RoomType;
   riskLevel: number;
-  pressureDelta: number;
+  vigorCostMin: number;
+  vigorCostMax: number;
+  forecast: string;
+  bossConsequence: string;
   isUnknown: boolean;
   tags: string[];
   possibleRewards: string[];
@@ -121,12 +189,10 @@ export interface DungeonEventChoiceOption {
   id: string;
   label: string;
   description: string;
-  pressureDelta: number;
-  rewardMultiplierDeltaPercent: number;
+  vigorDelta: number;
   addFlags: string[];
   removeFlags: string[];
   missingRequirements?: string[];
-  grantsBoonChoice: boolean;
   grantsLoot: boolean;
   ambushChancePercent: number;
   revealsHiddenRoute: boolean;
@@ -136,43 +202,8 @@ export interface DungeonCheckpointChoiceOption {
   id: string;
   label: string;
   description: string;
-  pressureDelta: number;
-  rewardMultiplierDeltaPercent: number;
-}
-
-export interface DungeonBoonChoiceOption {
-  id: string;
-  familyId: string;
-  familyName: string;
-  name: string;
-  description: string;
-  rarity: string;
-  tier: number;
-  currentStacks: number;
-  maxStacks: number;
-  currentFamilyStacks: number;
-  maxFamilyStacks: number;
-  effectSummaries: string[];
-}
-
-export interface DungeonActiveBoonSummary {
-  id: string;
-  familyId: string;
-  familyName: string;
-  name: string;
-  description: string;
-  rarity: string;
-  tier: number;
-  count: number;
-  maxFamilyStacks: number;
-  effectSummaries: string[];
-}
-
-export interface DungeonBoonEffectSummary {
-  id: string;
-  label: string;
-  value: string;
-  category: string;
+  vigorDelta: number;
+  kind: 'Boon' | 'Decision';
 }
 
 export interface DungeonBossModifier {
@@ -184,13 +215,6 @@ export interface DungeonBossModifier {
   amount: number;
   modifierType: string;
   isHelpfulToPlayer: boolean;
-}
-
-export interface DungeonMechanicThresholdState {
-  id: string;
-  value: number;
-  description: string;
-  rewardMultiplierBonusPercent: number;
 }
 
 export interface RunReward {
@@ -262,9 +286,9 @@ export class DungeonService {
   }
 
   assembleSigil(dungeonId: string): Observable<DungeonSigilAssemblyResponse> {
-    return this.api.post(`dungeon/${encodeURIComponent(dungeonId)}/assemble-sigil`).pipe(
-      catchError((error) => throwError(() => error)),
-    );
+    return this.api
+      .post(`dungeon/${encodeURIComponent(dungeonId)}/assemble-sigil`)
+      .pipe(catchError((error) => throwError(() => error)));
   }
 
   getDungeonRecords(familyId: string): Observable<DungeonRecordsData> {
@@ -283,7 +307,9 @@ export class DungeonService {
     );
   }
 
-  startDungeon(request: StartDungeonRequest): Observable<StartDungeonRunResponse> {
+  startDungeon(
+    request: StartDungeonRequest,
+  ): Observable<StartDungeonRunResponse> {
     return this.api.post('dungeon/startDungeon', request).pipe(
       catchError(() => {
         return throwError(() => new Error('Failed to start dungeon'));

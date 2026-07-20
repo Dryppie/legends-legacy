@@ -18,5 +18,4 @@ public interface IDungeonRunService
     Task<DungeonRun?> StartRunAsync(Guid characterId, string dungeonDefinitionId, CancellationToken cancellationToken);
     //Task<DungeonRun> WithdrawAsync(Guid runId, CancellationToken ct);
     //Task<DungeonRun> SelectTreasureOptionAsync(Guid runId, int optionIndex, CancellationToken ct);
-    //Task<DungeonRun> SelectShrineBlessingAsync(Guid runId, Guid blessingId, CancellationToken ct);
 }

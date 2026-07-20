@@ -1,30 +1,15 @@
 using Application.Interfaces.Services.LL.Dungeons;
-using Domain.Models.Bonuses;
 using Domain.Models.Dungeons.Runs;
-using Services.LL.Extensions;
-using Services.LL.Interfaces;
 
 namespace Services.LL.Dungeons;
 
 public sealed class DungeonCheckpointService : IDungeonCheckpointService
 {
-    private readonly IDungeonPressureService _pressure;
-    private readonly IDungeonBoonService _boons;
-    private readonly IBonusService? _bonusService;
+    private readonly IDungeonVigorService _vigor;
 
-    public DungeonCheckpointService(
-        IDungeonPressureService pressure,
-        IDungeonBoonService boons,
-        IBonusService? bonusService = null)
+    public DungeonCheckpointService(IDungeonVigorService vigor)
     {
-        _pressure = pressure;
-        _boons = boons;
-        _bonusService = bonusService;
-    }
-
-    public DungeonCheckpointChoiceResult ApplyChoice(DungeonRun run, RoomInstance room, string choiceId)
-    {
-        return ApplyChoiceAsync(run, room, choiceId, CancellationToken.None).GetAwaiter().GetResult();
+        _vigor = vigor;
     }
 
     public IReadOnlyList<DungeonCheckpointChoiceOption> EnsureChoices(DungeonRun run)
@@ -32,140 +17,121 @@ public sealed class DungeonCheckpointService : IDungeonCheckpointService
         ArgumentNullException.ThrowIfNull(run);
         run.State ??= new DungeonRunState { RunId = run.Id };
 
+        if (run.State.WardstoneBoonChosen)
+        {
+            run.State.CurrentCheckpointChoices =
+            [
+                new()
+                {
+                    Id = "continue",
+                    Label = "Continue",
+                    Description = run.State.CurrentSection >= run.State.TotalSections
+                        ? "Lock extraction at this Wardstone and approach the boss."
+                        : "Lock extraction at this Wardstone and enter the next Section.",
+                    Kind = "Decision"
+                },
+                new()
+                {
+                    Id = "extract",
+                    Label = "Extract",
+                    Description = "End the delve safely and keep all Pending Loot.",
+                    Kind = "Decision"
+                }
+            ];
+            return run.State.CurrentCheckpointChoices;
+        }
+
         run.State.CurrentCheckpointChoices =
         [
             new()
             {
-                Id = "withdraw",
-                Label = "Withdraw",
-                Description = "End the dungeon safely and keep your pending rewards."
-            },
-            new()
-            {
-                Id = "focus",
-                Label = "Focus",
-                Description = "Choose one temporary boon for the rest of this run."
-            },
-            new()
-            {
-                Id = "push_deeper",
-                Label = "Push Deeper",
-                Description = "Increase danger and improve the final reward multiplier.",
-                PressureDelta = 15,
-                RewardMultiplierDeltaPercent = 20
-            },
-            new()
-            {
-                Id = "rest",
-                Label = "Rest",
-                Description = "Reduce pressure, losing a small amount of unsecured loot.",
-                PressureDelta = -10
+                Id = "recover",
+                Label = "Recover",
+                Description = "Restore Vigor based on delve tier.",
+                VigorDelta = GetRecovery(run.DungeonDefinitionId),
+                Kind = "Boon"
             }
         ];
+        if (!run.State.WardstoneBoonIdsChosen.Contains("prepare", StringComparer.OrdinalIgnoreCase))
+        {
+            run.State.CurrentCheckpointChoices.Add(
+                new()
+                {
+                    Id = "prepare",
+                    Label = "Prepare",
+                    Description = "Reduce the next combat Vigor toll by 3.",
+                    Kind = "Boon"
+                });
+        }
 
         return run.State.CurrentCheckpointChoices;
     }
 
-    public async Task<DungeonCheckpointChoiceResult> ApplyChoiceAsync(
+    public Task<DungeonCheckpointChoiceResult> ApplyChoiceAsync(
         DungeonRun run,
         RoomInstance room,
         string choiceId,
         CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(run);
-        ArgumentNullException.ThrowIfNull(room);
-
         var choice = EnsureChoices(run)
-            .FirstOrDefault(x => string.Equals(x.Id, choiceId, StringComparison.OrdinalIgnoreCase));
-
-        if (choice is null)
-        {
-            throw new InvalidOperationException("The selected checkpoint choice is not available.");
-        }
-
-        var rewardRetentionBps = 0d;
-        if (_bonusService is not null && string.Equals(choice.Id, "rest", StringComparison.OrdinalIgnoreCase))
-        {
-            var factors = await _bonusService.GetAggregatedAsync(run.CharacterId, DateTimeOffset.UtcNow, cancellationToken);
-            rewardRetentionBps = factors.Get(BonusKind.DungeonRewardRetentionBps);
-        }
+            .FirstOrDefault(candidate => string.Equals(candidate.Id, choiceId, StringComparison.OrdinalIgnoreCase))
+            ?? throw new InvalidOperationException("The selected Wardstone choice is not available.");
 
         var outcome = choice.Id switch
         {
-            "withdraw" => ApplyWithdraw(run, room),
-            "focus" => ApplyFocus(run),
-            "push_deeper" => ApplyPushDeeper(run, choice),
-            "rest" => ApplyRest(run, choice, rewardRetentionBps),
-            _ => throw new InvalidOperationException("The selected checkpoint choice is not supported.")
+            "recover" => ApplyRecover(run, room),
+            "prepare" => ApplyPrepare(run),
+            "continue" => ApplyContinue(run),
+            "extract" => ApplyExtract(run, room),
+            _ => throw new InvalidOperationException("The selected Wardstone choice is not supported.")
         };
 
-        return new DungeonCheckpointChoiceResult
-        {
-            Choice = choice,
-            Outcome = outcome
-        };
+        EnsureChoices(run);
+        return Task.FromResult(new DungeonCheckpointChoiceResult { Choice = choice, Outcome = outcome });
     }
 
-    private static DungeonCheckpointChoiceOutcome ApplyWithdraw(DungeonRun run, RoomInstance room)
+    private DungeonCheckpointChoiceOutcome ApplyRecover(DungeonRun run, RoomInstance room)
+    {
+        _vigor.RecoverAtWardstone(run, room);
+        run.State.WardstoneBoonChosen = true;
+        run.State.WardstoneBoonIdsChosen.Add("recover");
+        return DungeonCheckpointChoiceOutcome.Recover;
+    }
+
+    private static DungeonCheckpointChoiceOutcome ApplyPrepare(DungeonRun run)
+    {
+        run.State.Flags["wardstone_prepared"] = 1;
+        run.State.WardstoneBoonChosen = true;
+        run.State.WardstoneBoonIdsChosen.Add("prepare");
+        run.State.LastConsequence = "Prepared: the next combat Vigor toll is reduced by 3.";
+        return DungeonCheckpointChoiceOutcome.Prepare;
+    }
+
+    private static DungeonCheckpointChoiceOutcome ApplyContinue(DungeonRun run)
+    {
+        run.State.ExtractionLocked = true;
+        run.State.LastConsequence = "Extraction locked. The party continues deeper.";
+        return DungeonCheckpointChoiceOutcome.Continue;
+    }
+
+    private static DungeonCheckpointChoiceOutcome ApplyExtract(DungeonRun run, RoomInstance room)
     {
         run.Status = DungeonRunStatus.Withdrawn;
         run.CompletedAt = DateTimeOffset.UtcNow;
+        run.UsedCheckpointRetreat = true;
         room.Status = RoomInstanceStatus.Completed;
-        run.State.CurrentCheckpointChoices.Clear();
         run.State.SecuredLoot = CreateLootBagFromRun(run);
         run.State.UnsecuredLoot = new DungeonLootBag();
-
-        return DungeonCheckpointChoiceOutcome.Withdraw;
+        run.State.LastConsequence = "Extracted safely. Pending Loot is secured.";
+        return DungeonCheckpointChoiceOutcome.Extract;
     }
 
-    private DungeonCheckpointChoiceOutcome ApplyFocus(DungeonRun run)
-    {
-        run.State.CurrentCheckpointChoices.Clear();
-        if (_boons.GenerateBoonChoices(run).Count > 0)
-        {
-            AddFlag(run, "pending_boon_completes_room", 1);
-        }
-
-        return DungeonCheckpointChoiceOutcome.Focus;
-    }
-
-    private DungeonCheckpointChoiceOutcome ApplyPushDeeper(DungeonRun run, DungeonCheckpointChoiceOption choice)
-    {
-        AddFlag(run, "checkpoint_pushes", 1);
-        AddFlag(run, "reward_multiplier_bonus_pct", choice.RewardMultiplierDeltaPercent);
-        _pressure.ApplyPressureDelta(run, choice.PressureDelta);
-
-        return DungeonCheckpointChoiceOutcome.PushDeeper;
-    }
-
-    private DungeonCheckpointChoiceOutcome ApplyRest(DungeonRun run, DungeonCheckpointChoiceOption choice, double rewardRetentionBps)
-    {
-        _pressure.ApplyPressureDelta(run, choice.PressureDelta);
-        ReduceUnsecuredLoot(run, 0.10m, rewardRetentionBps);
-
-        return DungeonCheckpointChoiceOutcome.Rest;
-    }
-
-    private static void AddFlag(DungeonRun run, string flag, int amount)
-    {
-        run.State.Flags[flag] = run.State.Flags.GetValueOrDefault(flag) + amount;
-    }
-
-    private static void ReduceUnsecuredLoot(DungeonRun run, decimal percent, double rewardRetentionBps)
-    {
-        var baseRetention = 1m - percent;
-        var factor = Math.Clamp(baseRetention * rewardRetentionBps.ToPositiveMultiplierDecimal(), 0m, 1m);
-        run.PendingExperience = (int)Math.Floor(run.PendingExperience * factor);
-        run.PendingCinders = (int)Math.Floor(run.PendingCinders * factor);
-        run.PendingSoulstones = (int)Math.Floor(run.PendingSoulstones * factor);
-
-        foreach (var reward in run.PendingRewards)
-        {
-            reward.Quantity = (int)Math.Floor(reward.Quantity * factor);
-        }
-
-        run.State.UnsecuredLoot = CreateLootBagFromRun(run);
-    }
+    private static int GetRecovery(string dungeonId) =>
+        dungeonId.EndsWith("_iii", StringComparison.OrdinalIgnoreCase)
+            ? 10
+            : dungeonId.EndsWith("_ii", StringComparison.OrdinalIgnoreCase)
+                ? 15
+                : 20;
 
     private static DungeonLootBag CreateLootBagFromRun(DungeonRun run)
     {
@@ -175,15 +141,10 @@ public sealed class DungeonCheckpointService : IDungeonCheckpointService
             Cinders = run.PendingCinders,
             Soulstones = run.PendingSoulstones
         };
-
-        foreach (var reward in run.PendingRewards)
+        foreach (var reward in run.PendingRewards.Where(reward => reward.Quantity > 0))
         {
-            if (!string.IsNullOrWhiteSpace(reward.ItemId) && reward.Quantity > 0)
-            {
-                bag.Items[reward.ItemId] = bag.Items.GetValueOrDefault(reward.ItemId) + reward.Quantity;
-            }
+            bag.Items[reward.ItemId] = bag.Items.GetValueOrDefault(reward.ItemId) + reward.Quantity;
         }
-
         return bag;
     }
 }

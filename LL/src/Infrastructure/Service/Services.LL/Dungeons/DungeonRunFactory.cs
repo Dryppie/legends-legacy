@@ -1,4 +1,5 @@
 ﻿using Domain.Models.Dungeons;
+using Domain.Models.Dungeons.Definitions;
 using Domain.Models.Dungeons.Definitions.Events;
 using Application.Interfaces.Services.LL.Dungeons;
 using Domain.Models.Dungeons.Definitions.Rooms;
@@ -11,19 +12,24 @@ public sealed class DungeonRunFactory
 {
     private readonly IDungeonDefinitions _dungeons;
     private readonly ICharacterSnapshotService _snapshotService;
+    private readonly IDungeonDelveDefinitionProvider _delves;
 
-    public DungeonRunFactory(IDungeonDefinitions dungeons, ICharacterSnapshotService snapshots)
+    public DungeonRunFactory(
+        IDungeonDefinitions dungeons,
+        ICharacterSnapshotService snapshots,
+        IDungeonDelveDefinitionProvider delves)
     {
         _dungeons = dungeons;
         _snapshotService = snapshots;
+        _delves = delves;
     }
 
     public async Task<DungeonRun> CreateAsync(Guid characterId, string dungeonDefinitionId, int seed, CancellationToken ct)
     {
         var dungeon = _dungeons.GetByKey(dungeonDefinitionId);
+        var delve = _delves.GetForDungeon(dungeonDefinitionId);
         var snapshot = await _snapshotService.CreateAsync(characterId, ct);
 
-        // You can enforce access rules here if desired (key, recommended power, etc.)
         var rand = new Random(seed);
 
         var run = new DungeonRun
@@ -38,111 +44,103 @@ public sealed class DungeonRunFactory
             CurrentRoomIndex = 0,
             State = new DungeonRunState
             {
-                MechanicId = string.IsNullOrWhiteSpace(dungeon.Mechanic?.Id)
-                    ? "pressure"
-                    : dungeon.Mechanic.Id,
-                MechanicDisplayName = string.IsNullOrWhiteSpace(dungeon.Mechanic?.DisplayName)
-                    ? "Pressure"
-                    : dungeon.Mechanic.DisplayName,
-                MechanicMaxValue = Math.Max(1, dungeon.Mechanic?.MaxValue ?? 100),
-                Pressure = Math.Clamp(dungeon.Mechanic?.InitialValue ?? 0, 0, Math.Max(1, dungeon.Mechanic?.MaxValue ?? 100)),
-                RewardMultiplierPercent = 100
+                Vigor = 100,
+                VigorState = "Steady",
+                CurrentSection = 1,
+                TotalSections = delve.Nodes
+                    .Where(node => node.RoomType == RoomType.Checkpoint)
+                    .Select(node => node.Section)
+                    .Distinct()
+                    .Count(),
+                ExpiresAt = DateTimeOffset.UtcNow.AddHours(48)
             },
             CreatedAt = DateTimeOffset.UtcNow
         };
         run.State.RunId = run.Id;
 
-        // Initialize floor states (no event outcome yet)
-        run.Rooms = CreateDungeonRooms(dungeon, rand);
-
-
+        var layout = CreateDungeonLayout(delve);
+        run.Rooms = layout.Rooms;
+        run.State.MapNodes = layout.Nodes;
+        run.State.TraversedRoomIndexes = layout.Nodes.Count == 0 ? [] : [layout.Nodes[0].RoomIndex];
+        run.Rooms[0].Status = RoomInstanceStatus.Completed;
+        InitializeDelveState(run, dungeon, delve, rand);
         HydrateRooms(dungeon, run.Rooms, rand);
-        // Apply base modifiers into run.ActiveModifiers (params copied for safety)
-        //foreach (var m in dungeon.BaseModifiers)
-        //{
-        //    run.ActiveModifiers.Add(new RunModifier
-        //    {
-        //        ModifierDefinitionId = m.Id,
-        //        Key = m.Key,
-        //        Params = m.Params.ToDictionary(kvp => kvp.Key, kvp => kvp.Value),
-        //        ExpiresAfterFloorIndex = null
-        //    });
-        //}
-
-        // Optional: store initial snapshot-derived flags, etc.
-        //run.Flags.PassedCheckpoint = false;
-
         return run;
     }
 
-    private static List<RoomInstance> CreateDungeonRooms(DungeonDefinition dungeon, Random rand)
+    private static DungeonLayout CreateDungeonLayout(DungeonDelveDefinition delve)
     {
-        var rooms = new List<RoomInstance>();
-        int totalRooms = rand.Next(dungeon.MinRooms, dungeon.MaxRooms + 1);
-        var types = new RoomType[totalRooms];
-
-        // Boss is always last
-        types[totalRooms - 1] = RoomType.Boss;
-
-        // Checkpoint (optional):
-        int? checkpointIndex = null;
-        if (dungeon.HasCheckpoint)
+        var nodes = delve.Nodes.Select((definition, index) => new DungeonMapNode
         {
-            // There must be a checkpoint before the boss
-            types[totalRooms - 2] = RoomType.Checkpoint;
-        }
-
-        // MiniBoss (optional): only if dungeon has miniboss encounters
-        int? miniBossIndex = null;
-        bool hasMiniboss = dungeon.Rooms.Any(r => r.Type == RoomType.MiniBoss);
-        if (hasMiniboss)
+            Id = definition.Id,
+            DisplayName = definition.DisplayName,
+            RoomIndex = index,
+            Depth = definition.Depth,
+            Lane = definition.Lane,
+            Section = definition.Section,
+            Forecast = definition.Forecast,
+            VigorCostMin = definition.VigorCostMin,
+            VigorCostMax = definition.VigorCostMax,
+            BossConsequence = definition.BossConsequence,
+            BossAspectId = definition.BossAspectId,
+            Tags = definition.Tags.ToList(),
+            NextRoomIndexes = definition.NextRoomIndexes.ToList()
+        }).ToList();
+        var rooms = delve.Nodes.Select((definition, index) => new RoomInstance
         {
-            // Prefer after checkpoint if it exists; otherwise somewhere before boss.
-            int start = 2; // first two rooms can not be miniboss
-            int end = totalRooms - (checkpointIndex.HasValue ? 3 : 2); // Can not appear in boss room, or endpoint before boss if there's one
-            //if (start <= end)
-            //{
-            miniBossIndex = rand.Next(start, end + 1);
-
-            //    // Avoid landing on checkpoint (if start==checkpoint+1 it's fine, but just in case)
-            //    if (checkpointIndex.HasValue && miniBossIndex.Value == checkpointIndex.Value)
-            //        miniBossIndex = null;
-            //}
-
-            if (miniBossIndex.HasValue)
-                types[miniBossIndex.Value] = RoomType.MiniBoss;
-        }
-        const int combatWeight = 80;
-        const int eventWeight = 20;
-
-        for (int i = 0; i < totalRooms; i++)
-        {
-            if (types[i] != default) continue; // already assigned (Boss/Checkpoint/MiniBoss)
-
-            types[i] = RollWeighted(rand, (RoomType.Combat, combatWeight), (RoomType.Event, eventWeight));
-        }
-
-        // 3) Emit RoomInstance list
-        for (int i = 0; i < totalRooms; i++)
-        {
-            rooms.Add(new RoomInstance
-            {
-                RoomIndex = i,
-                Type = types[i],
-                Status = RoomInstanceStatus.Pending
-            });
-        }
-
-        return rooms;
+            RoomIndex = index,
+            Type = definition.RoomType,
+            Status = RoomInstanceStatus.Pending
+        }).ToList();
+        return new DungeonLayout(rooms, nodes);
     }
+
+    private sealed record DungeonLayout(List<RoomInstance> Rooms, List<DungeonMapNode> Nodes);
+    private static void InitializeDelveState(
+        DungeonRun run,
+        DungeonDefinition dungeon,
+        DungeonDelveDefinition delve,
+        Random random)
+    {
+        run.State.ActiveOmens = delve.Omens.Select(omen => new DungeonOmen
+        {
+            Id = omen.Id,
+            Name = omen.Name,
+            Description = omen.Description,
+            CombatTollModifier = omen.CombatTollModifier,
+            HazardTollModifier = omen.HazardTollModifier
+        }).ToList();
+
+        var tier = dungeon.Id.EndsWith("_iii", StringComparison.OrdinalIgnoreCase) ? 3
+            : dungeon.Id.EndsWith("_ii", StringComparison.OrdinalIgnoreCase) ? 2 : 1;
+        run.State.ActiveOmens = run.State.ActiveOmens
+            .OrderBy(_ => random.Next())
+            .Take(tier == 3 ? 2 : 1)
+            .ToList();
+
+        run.State.BossAspects = delve.BossAspects
+        .Where(aspect => aspect.MinimumTier <= tier)
+        .Select(aspect => new DungeonBossAspect
+        {
+            Id = aspect.Id,
+            Name = aspect.Name,
+            Description = aspect.Description,
+            Source = aspect.Source,
+            AttributeType = aspect.AttributeType,
+            Amount = aspect.Amount,
+            ModifierType = aspect.ModifierType
+        }).ToList();
+    }
+
 
     private static void HydrateRooms(DungeonDefinition dungeon, List<RoomInstance> rooms, Random rand)
     {
         foreach (var room in rooms)
         {
-            // For Checkpoint you might not need a template at all,
-            // but if you *do* want checkpoint variants later, keep it consistent.
             if (room.Type == RoomType.Checkpoint)
+                continue;
+
+            if (room.Type is RoomType.Entrance or RoomType.Hazard or RoomType.Cache or RoomType.OmenSite)
                 continue;
 
             if (room.Type == RoomType.Event)
@@ -153,8 +151,6 @@ public sealed class DungeonRunFactory
 
             var template = PickRoomVariantByType(dungeon, room.Type, rand);
 
-            // If you want to record which variant got chosen (highly recommended),
-            // add a field like room.TemplateIndex or room.TemplateHash later.
             HydrateRoomFromTemplate(room, template, rand);
         }
     }
@@ -179,7 +175,8 @@ public sealed class DungeonRunFactory
         ArgumentNullException.ThrowIfNull(template);
         ArgumentNullException.ThrowIfNull(rand);
 
-        if (template.Type != roomType)
+        var usesCombatFallback = roomType == RoomType.MiniBoss && template.Type == RoomType.Combat;
+        if (template.Type != roomType && !usesCombatFallback)
             throw new InvalidOperationException(
                 $"Template type mismatch. Expected '{roomType}', got '{template.Type}'.");
 
@@ -202,7 +199,23 @@ public sealed class DungeonRunFactory
         if (pool.Count == 0)
             throw new InvalidOperationException($"Room template for '{roomType}' only contained empty encounter ids.");
 
-        // MiniBoss/Boss: take all authored monsters
+        // Catalogs without a dedicated miniboss variant use a full combat squad
+        // while keeping the authored node a Miniboss.
+        if (usesCombatFallback)
+        {
+            var count = Math.Min(3, pool.Count);
+            var result = new List<string>(count);
+            for (var index = 0; index < count; index++)
+            {
+                var pick = rand.Next(pool.Count);
+                result.Add(pool[pick]);
+                pool.RemoveAt(pick);
+            }
+
+            return result;
+        }
+
+        // Authored MiniBoss/Boss compositions are taken as-is.
         if (roomType is RoomType.MiniBoss or RoomType.Boss)
             return [.. pool];
 
@@ -263,30 +276,18 @@ public sealed class DungeonRunFactory
         room.EventOutcome = eventTable.Outcomes[^1].Type;
     }
 
-    private static RoomType RollWeighted(Random rand, params (RoomType type, int weight)[] options)
-    {
-        var total = options.Sum(x => Math.Max(0, x.weight));
-        if (total <= 0)
-            return options[0].type;
-
-        var roll = rand.Next(1, total + 1);
-        var accumulated = 0;
-
-        foreach (var (type, weight) in options)
-        {
-            accumulated += Math.Max(0, weight);
-            if (roll <= accumulated)
-                return type;
-        }
-
-        return options[^1].type;
-    }
-
     private static RoomDefinition PickRoomVariantByType(DungeonDefinition dungeon, RoomType type, Random rand)
     {
         var pool = dungeon.Rooms
             .Where(r => r.Type == type)
             .ToList();
+
+        if (pool.Count == 0 && type == RoomType.MiniBoss)
+        {
+            pool = dungeon.Rooms
+                .Where(room => room.Type == RoomType.Combat)
+                .ToList();
+        }
 
         if (pool.Count == 0)
             throw new InvalidOperationException($"Dungeon '{dungeon.Id}' has no RoomDefinition variants for type '{type}'.");

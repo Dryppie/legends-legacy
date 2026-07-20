@@ -1,0 +1,121 @@
+{
+  "delves": [
+    {
+      "id": "goblin-mines-waypoint-delve",
+      "dungeonDefinitionIds": ["goblin_mines"],
+      "nodes": [
+        { "id": "entrance", "displayName": "Minehead", "roomType": "Entrance", "depth": 0, "lane": 0, "section": 1, "nextRoomIndexes": [1, 2, 3], "forecast": "Three passages descend into the workings." },
+        { "id": "powder-run", "displayName": "Powder Run", "roomType": "Hazard", "depth": 1, "lane": -1, "section": 1, "nextRoomIndexes": [4], "forecast": "Cross unstable charges and strip the Warden's plating.", "vigorCostMin": 8, "vigorCostMax": 12, "bossConsequence": "Disarm the boss's Blast Armor.", "bossAspectId": "blast_armor", "tags": ["Hazard", "Aspect"] },
+        { "id": "guard-post", "displayName": "Guard Post", "roomType": "Combat", "depth": 1, "lane": 0, "section": 1, "nextRoomIndexes": [4, 5], "forecast": "A direct skirmish with better spoils.", "vigorCostMin": 4, "vigorCostMax": 10, "bossConsequence": "Blast Armor remains intact.", "tags": ["Skirmish", "Loot"] },
+        { "id": "prospector-cache", "displayName": "Prospector Cache", "roomType": "Cache", "depth": 1, "lane": 1, "section": 1, "nextRoomIndexes": [5], "forecast": "An abandoned survey camp holds Pending Loot.", "tags": ["Cache", "Loot"] },
+        { "id": "ore-gallery", "displayName": "Ore Gallery", "roomType": "Combat", "depth": 2, "lane": -1, "section": 1, "nextRoomIndexes": [6], "forecast": "Goblin patrols hold the upper gallery.", "vigorCostMin": 4, "vigorCostMax": 12, "tags": ["Skirmish"] },
+        { "id": "blasting-chamber", "displayName": "Blasting Chamber", "roomType": "Hazard", "depth": 2, "lane": 1, "section": 1, "nextRoomIndexes": [6], "forecast": "Live fuses make the lower passage costly.", "vigorCostMin": 7, "vigorCostMax": 13, "tags": ["Hazard"] },
+        { "id": "wardstone-one", "displayName": "Upper Wardstone", "roomType": "Checkpoint", "depth": 3, "lane": 0, "section": 1, "nextRoomIndexes": [7, 8], "forecast": "Recover, extract, or descend into the foundry." },
+
+        { "id": "foreman", "displayName": "Foreman's Redoubt", "roomType": "MiniBoss", "depth": 4, "lane": -1, "section": 2, "nextRoomIndexes": [9, 10], "forecast": "Defeat the Foreman to cut off the Warden's reinforcements.", "vigorCostMin": 6, "vigorCostMax": 16, "bossConsequence": "Remove Reinforcements from the boss.", "bossAspectId": "reinforcements", "tags": ["Miniboss", "Aspect"] },
+        { "id": "supply-cache", "displayName": "Smuggler Cache", "roomType": "Cache", "depth": 4, "lane": 1, "section": 2, "nextRoomIndexes": [10, 11], "forecast": "Take safe Pending Loot while the Foreman survives.", "bossConsequence": "Reinforcements remain active.", "tags": ["Cache", "Loot"] },
+        { "id": "deep-shaft", "displayName": "Deep Shaft", "roomType": "Combat", "depth": 5, "lane": -1, "section": 2, "nextRoomIndexes": [12], "forecast": "Veteran guards protect the lift controls.", "vigorCostMin": 5, "vigorCostMax": 14, "tags": ["Elite"] },
+        { "id": "collapsed-lift", "displayName": "Collapsed Lift", "roomType": "Hazard", "depth": 5, "lane": 0, "section": 2, "nextRoomIndexes": [12], "forecast": "Climb through a broken ore lift.", "vigorCostMin": 8, "vigorCostMax": 15, "tags": ["Hazard"] },
+        { "id": "smelter-floor", "displayName": "Smelter Floor", "roomType": "Combat", "depth": 5, "lane": 1, "section": 2, "nextRoomIndexes": [12], "forecast": "Foundry crews defend the hot route.", "vigorCostMin": 5, "vigorCostMax": 13, "tags": ["Skirmish", "Loot"] },
+        { "id": "wardstone-two", "displayName": "Foundry Wardstone", "roomType": "Checkpoint", "depth": 6, "lane": 0, "section": 2, "nextRoomIndexes": [13, 14, 15], "forecast": "Recover, extract, or enter the Warden's domain." },
+
+        { "id": "kings-toll", "displayName": "King's Toll", "roomType": "Combat", "depth": 7, "lane": -1, "section": 3, "nextRoomIndexes": [16], "forecast": "The Warden's chosen demand blood.", "vigorCostMin": 6, "vigorCostMax": 15, "tags": ["Elite"] },
+        { "id": "armory-cache", "displayName": "Armory Cache", "roomType": "Cache", "depth": 7, "lane": 0, "section": 3, "nextRoomIndexes": [16], "forecast": "Raid the armory before confronting its owner.", "tags": ["Cache", "Loot"] },
+        { "id": "war-drums", "displayName": "War Drum Gallery", "roomType": "Hazard", "depth": 7, "lane": 1, "section": 3, "nextRoomIndexes": [16], "forecast": "Silence the alarm under a visible Vigor toll.", "vigorCostMin": 8, "vigorCostMax": 14, "tags": ["Hazard"] },
+        { "id": "wardstone-three", "displayName": "Final Wardstone", "roomType": "Checkpoint", "depth": 8, "lane": 0, "section": 3, "nextRoomIndexes": [17], "forecast": "The final recovery, extraction, and Boss Gate." },
+        { "id": "throne-tunnel", "displayName": "Throne Tunnel", "roomType": "Combat", "depth": 9, "lane": 0, "section": 3, "nextRoomIndexes": [18], "forecast": "The last defenders bar the throne.", "vigorCostMin": 5, "vigorCostMax": 15, "tags": ["Skirmish"] },
+        { "id": "boss", "displayName": "Hobgoblin Warden", "roomType": "Boss", "depth": 10, "lane": 0, "section": 3, "nextRoomIndexes": [], "forecast": "The final encounter.", "vigorCostMin": 6, "vigorCostMax": 20, "tags": ["Boss"] }
+      ],
+      "omens": [
+        { "id": "bad_air", "name": "Bad Air", "description": "Combat tolls are slightly harsher.", "combatTollModifier": 1 },
+        { "id": "loose_stone", "name": "Loose Stone", "description": "Hazards bite deeper.", "hazardTollModifier": 2 },
+        { "id": "long_fuse", "name": "Long Fuse", "description": "Violent fights exact a heavier toll.", "combatTollModifier": 2 },
+        { "id": "clear_vein", "name": "Clear Vein", "description": "Hazard routes are slightly easier to read.", "hazardTollModifier": -1 }
+      ],
+      "bossAspects": [
+        { "id": "warden_fury", "name": "Warden's Fury", "description": "The Warden enters battle prepared.", "source": "Fixed", "attributeType": "Power", "amount": 8, "modifierType": "Additive" },
+        { "id": "blast_armor", "name": "Blast Armor", "description": "Powder plating protects the Warden.", "source": "Route", "attributeType": "Armor", "amount": 10, "modifierType": "Additive" },
+        { "id": "reinforcements", "name": "Reinforcements", "description": "The Foreman supplies extra guards.", "source": "Miniboss", "attributeType": "MaxHealth", "amount": 15, "modifierType": "Additive" },
+        { "id": "tier_three_malice", "name": "Delve Malice", "description": "Tier III empowers the final foe.", "source": "Tier III", "attributeType": "Power", "amount": 7, "modifierType": "Additive", "minimumTier": 3 }
+      ]
+    },
+    {
+      "id": "forgotten-catacombs-waypoint-delve",
+      "dungeonDefinitionIds": ["forgotten_catacombs"],
+      "nodes": [
+        { "id": "entrance", "displayName": "Sepulchral Gate", "roomType": "Entrance", "depth": 0, "lane": 0, "section": 1, "nextRoomIndexes": [1, 2, 3], "forecast": "Three funerary passages open beyond the gate." },
+        { "id": "reliquary", "displayName": "Sealed Reliquary", "roomType": "Hazard", "depth": 1, "lane": -1, "section": 1, "nextRoomIndexes": [4, 5], "forecast": "Break the curse seals at a Vigor cost.", "vigorCostMin": 9, "vigorCostMax": 13, "bossConsequence": "Remove the Wraith's Curse Shroud.", "bossAspectId": "curse_shroud", "tags": ["Hazard", "Aspect"] },
+        { "id": "ossuary", "displayName": "Ossuary Walk", "roomType": "Combat", "depth": 1, "lane": 0, "section": 1, "nextRoomIndexes": [4, 6], "forecast": "A direct fight among the bones.", "vigorCostMin": 4, "vigorCostMax": 11, "bossConsequence": "Curse Shroud remains intact.", "tags": ["Skirmish", "Loot"] },
+        { "id": "forgotten-offerings", "displayName": "Forgotten Offerings", "roomType": "Cache", "depth": 1, "lane": 1, "section": 1, "nextRoomIndexes": [5, 6], "forecast": "Dust-covered offerings can be taken safely.", "tags": ["Cache", "Loot"] },
+        { "id": "mourning-hall", "displayName": "Mourning Hall", "roomType": "Combat", "depth": 2, "lane": -1, "section": 1, "nextRoomIndexes": [7], "forecast": "Restless shades bar the vaulted hall.", "vigorCostMin": 4, "vigorCostMax": 12, "tags": ["Skirmish"] },
+        { "id": "bone-dust-chamber", "displayName": "Bone-Dust Chamber", "roomType": "Hazard", "depth": 2, "lane": 0, "section": 1, "nextRoomIndexes": [7], "forecast": "A choking cloud fills the shortest route.", "vigorCostMin": 7, "vigorCostMax": 13, "tags": ["Hazard"] },
+        { "id": "crypt-watch", "displayName": "Crypt Watch", "roomType": "Combat", "depth": 2, "lane": 1, "section": 1, "nextRoomIndexes": [7], "forecast": "Sepulchral sentries guard the lower stair.", "vigorCostMin": 5, "vigorCostMax": 12, "tags": ["Skirmish"] },
+        { "id": "wardstone-one", "displayName": "Nave Wardstone", "roomType": "Checkpoint", "depth": 3, "lane": 0, "section": 1, "nextRoomIndexes": [8, 9], "forecast": "Recover, extract, or enter the sealed crypt." },
+
+        { "id": "bone-keeper", "displayName": "Bone Keeper", "roomType": "MiniBoss", "depth": 4, "lane": -1, "section": 2, "nextRoomIndexes": [10, 11], "forecast": "Break the Wraith's spirit host at its source.", "vigorCostMin": 7, "vigorCostMax": 17, "bossConsequence": "Remove Spirit Host from the boss.", "bossAspectId": "spirit_host", "tags": ["Miniboss", "Aspect"] },
+        { "id": "grave-cache", "displayName": "Grave Cache", "roomType": "Cache", "depth": 4, "lane": 1, "section": 2, "nextRoomIndexes": [11, 12], "forecast": "Claim rich Pending Loot while the host survives.", "bossConsequence": "Spirit Host remains active.", "tags": ["Cache", "Loot"] },
+        { "id": "black-nave", "displayName": "Black Nave", "roomType": "Combat", "depth": 5, "lane": -1, "section": 2, "nextRoomIndexes": [13], "forecast": "An elite spectral guard holds the nave.", "vigorCostMin": 5, "vigorCostMax": 14, "tags": ["Elite"] },
+        { "id": "spirit-well", "displayName": "Spirit Well", "roomType": "Hazard", "depth": 5, "lane": 0, "section": 2, "nextRoomIndexes": [13], "forecast": "Cross a well of grasping souls.", "vigorCostMin": 8, "vigorCostMax": 15, "tags": ["Hazard"] },
+        { "id": "cenotaph-guard", "displayName": "Cenotaph Guard", "roomType": "Combat", "depth": 5, "lane": 1, "section": 2, "nextRoomIndexes": [13], "forecast": "The Wraith's honor guard protects the inner seal.", "vigorCostMin": 6, "vigorCostMax": 15, "tags": ["Elite"] },
+        { "id": "wardstone-two", "displayName": "Final Wardstone", "roomType": "Checkpoint", "depth": 6, "lane": 0, "section": 2, "nextRoomIndexes": [14], "forecast": "The final recovery, extraction, and Boss Gate." },
+        { "id": "veil-crossing", "displayName": "Veil Crossing", "roomType": "Combat", "depth": 7, "lane": 0, "section": 2, "nextRoomIndexes": [15], "forecast": "The last dead gather where the veil is thinnest.", "vigorCostMin": 5, "vigorCostMax": 15, "tags": ["Skirmish"] },
+        { "id": "boss", "displayName": "The Bound Wraith", "roomType": "Boss", "depth": 8, "lane": 0, "section": 2, "nextRoomIndexes": [], "forecast": "The final encounter.", "vigorCostMin": 6, "vigorCostMax": 20, "tags": ["Boss"] }
+      ],
+      "omens": [
+        { "id": "restless_dead", "name": "Restless Dead", "description": "Combat tolls are slightly harsher.", "combatTollModifier": 1 },
+        { "id": "thin_veil", "name": "Thin Veil", "description": "Hazards bite deeper.", "hazardTollModifier": 2 },
+        { "id": "soul_echo", "name": "Soul Echo", "description": "Violent fights exact a heavier toll.", "combatTollModifier": 2 },
+        { "id": "consecrated_dust", "name": "Consecrated Dust", "description": "Hazard routes are slightly easier to read.", "hazardTollModifier": -1 }
+      ],
+      "bossAspects": [
+        { "id": "grave_might", "name": "Grave Might", "description": "A fixed surge of spectral power.", "source": "Fixed", "attributeType": "Power", "amount": 8, "modifierType": "Additive" },
+        { "id": "curse_shroud", "name": "Curse Shroud", "description": "The Wraith is protected by a sealed curse.", "source": "Route", "attributeType": "Resistance", "amount": 10, "modifierType": "Additive" },
+        { "id": "spirit_host", "name": "Spirit Host", "description": "Bound spirits reinforce the Wraith.", "source": "Miniboss", "attributeType": "MaxHealth", "amount": 15, "modifierType": "Additive" },
+        { "id": "tier_three_malice", "name": "Delve Malice", "description": "Tier III empowers the final foe.", "source": "Tier III", "attributeType": "Power", "amount": 7, "modifierType": "Additive", "minimumTier": 3 }
+      ]
+    },
+    {
+      "id": "hives-abyss-waypoint-delve",
+      "dungeonDefinitionIds": ["hives_abyss"],
+      "nodes": [
+        { "id": "entrance", "displayName": "Chitin Breach", "roomType": "Entrance", "depth": 0, "lane": 0, "section": 1, "nextRoomIndexes": [1, 2, 3], "forecast": "The breach divides into three living tunnels." },
+        { "id": "spore-duct", "displayName": "Spore Duct", "roomType": "Hazard", "depth": 1, "lane": -1, "section": 1, "nextRoomIndexes": [4], "forecast": "Burn the spores and strip the Matriarch's veil.", "vigorCostMin": 10, "vigorCostMax": 14, "bossConsequence": "Remove the Matriarch's Spore Veil.", "bossAspectId": "spore_veil", "tags": ["Hazard", "Aspect"] },
+        { "id": "brood-channel", "displayName": "Brood Channel", "roomType": "Combat", "depth": 1, "lane": 0, "section": 1, "nextRoomIndexes": [4, 5], "forecast": "Fight through a feeding swarm.", "vigorCostMin": 5, "vigorCostMax": 12, "bossConsequence": "Spore Veil remains intact.", "tags": ["Skirmish", "Loot"] },
+        { "id": "jelly-pocket", "displayName": "Jelly Pocket", "roomType": "Cache", "depth": 1, "lane": 1, "section": 1, "nextRoomIndexes": [5], "forecast": "Harvest an exposed pocket of royal jelly.", "tags": ["Cache", "Loot"] },
+        { "id": "resin-vault", "displayName": "Resin Vault", "roomType": "Combat", "depth": 2, "lane": -1, "section": 1, "nextRoomIndexes": [6], "forecast": "A dense knot of defenders guards the vault.", "vigorCostMin": 5, "vigorCostMax": 13, "tags": ["Skirmish"] },
+        { "id": "molt-chute", "displayName": "Molt Chute", "roomType": "Hazard", "depth": 2, "lane": 1, "section": 1, "nextRoomIndexes": [6], "forecast": "Descend through caustic discarded shells.", "vigorCostMin": 8, "vigorCostMax": 14, "tags": ["Hazard"] },
+        { "id": "wardstone-one", "displayName": "Breach Wardstone", "roomType": "Checkpoint", "depth": 3, "lane": 0, "section": 1, "nextRoomIndexes": [7, 8, 9], "forecast": "Recover, extract, or enter the nursery." },
+
+        { "id": "nursery-swarm", "displayName": "Nursery Swarm", "roomType": "Combat", "depth": 4, "lane": -1, "section": 2, "nextRoomIndexes": [10], "forecast": "Young drones gather in overwhelming numbers.", "vigorCostMin": 5, "vigorCostMax": 13, "tags": ["Skirmish"] },
+        { "id": "drone-cache", "displayName": "Drone Cache", "roomType": "Cache", "depth": 4, "lane": 0, "section": 2, "nextRoomIndexes": [10], "forecast": "Unattended provisions can be harvested.", "tags": ["Cache", "Loot"] },
+        { "id": "acid-sluice", "displayName": "Acid Sluice", "roomType": "Hazard", "depth": 4, "lane": 1, "section": 2, "nextRoomIndexes": [10], "forecast": "A flooded channel offers the fastest descent.", "vigorCostMin": 9, "vigorCostMax": 15, "tags": ["Hazard"] },
+        { "id": "wardstone-two", "displayName": "Nursery Wardstone", "roomType": "Checkpoint", "depth": 5, "lane": 0, "section": 2, "nextRoomIndexes": [11, 12], "forecast": "Recover, extract, or descend toward the heart." },
+
+        { "id": "brood-guard", "displayName": "Brood Guard", "roomType": "MiniBoss", "depth": 6, "lane": -1, "section": 3, "nextRoomIndexes": [13, 14], "forecast": "Kill the Brood Guard to silence the Matriarch's call.", "vigorCostMin": 7, "vigorCostMax": 18, "bossConsequence": "Remove Brood Call from the boss.", "bossAspectId": "brood_call", "tags": ["Miniboss", "Aspect"] },
+        { "id": "royal-jelly", "displayName": "Royal Jelly Cache", "roomType": "Cache", "depth": 6, "lane": 1, "section": 3, "nextRoomIndexes": [14, 15], "forecast": "Take rare materials while the Brood Guard survives.", "bossConsequence": "Brood Call remains active.", "tags": ["Cache", "Loot"] },
+        { "id": "heart-chamber", "displayName": "Heart Chamber", "roomType": "Combat", "depth": 7, "lane": -1, "section": 3, "nextRoomIndexes": [16], "forecast": "Elite defenders guard the pulsing hive core.", "vigorCostMin": 6, "vigorCostMax": 15, "tags": ["Elite"] },
+        { "id": "pheromone-maze", "displayName": "Pheromone Maze", "roomType": "Hazard", "depth": 7, "lane": 0, "section": 3, "nextRoomIndexes": [16], "forecast": "Conflicting scents obscure the safe route.", "vigorCostMin": 8, "vigorCostMax": 15, "tags": ["Hazard"] },
+        { "id": "egg-vault", "displayName": "Egg Vault", "roomType": "Combat", "depth": 7, "lane": 1, "section": 3, "nextRoomIndexes": [16], "forecast": "A royal clutch is defended without retreat.", "vigorCostMin": 6, "vigorCostMax": 16, "tags": ["Elite", "Loot"] },
+        { "id": "wardstone-three", "displayName": "Heart Wardstone", "roomType": "Checkpoint", "depth": 8, "lane": 0, "section": 3, "nextRoomIndexes": [17, 18], "forecast": "Recover, extract, or enter the royal chambers." },
+
+        { "id": "queen-road", "displayName": "Queen's Road", "roomType": "Combat", "depth": 9, "lane": -1, "section": 4, "nextRoomIndexes": [19], "forecast": "The last swarm gathers on the royal road.", "vigorCostMin": 5, "vigorCostMax": 16, "tags": ["Skirmish"] },
+        { "id": "royal-molt", "displayName": "Royal Molt", "roomType": "Hazard", "depth": 9, "lane": 1, "section": 4, "nextRoomIndexes": [19], "forecast": "Cut through the Matriarch's corrosive old shell.", "vigorCostMin": 9, "vigorCostMax": 16, "tags": ["Hazard"] },
+        { "id": "wardstone-four", "displayName": "Final Wardstone", "roomType": "Checkpoint", "depth": 10, "lane": 0, "section": 4, "nextRoomIndexes": [20], "forecast": "The final recovery, extraction, and Boss Gate." },
+        { "id": "throne-nest", "displayName": "Throne Nest", "roomType": "Combat", "depth": 11, "lane": 0, "section": 4, "nextRoomIndexes": [21], "forecast": "Royal defenders crowd the Matriarch's nest.", "vigorCostMin": 6, "vigorCostMax": 17, "tags": ["Elite"] },
+        { "id": "boss", "displayName": "Hive Matriarch", "roomType": "Boss", "depth": 12, "lane": 0, "section": 4, "nextRoomIndexes": [], "forecast": "The final encounter.", "vigorCostMin": 7, "vigorCostMax": 22, "tags": ["Boss"] }
+      ],
+      "omens": [
+        { "id": "feeding_frenzy", "name": "Feeding Frenzy", "description": "Combat tolls are slightly harsher.", "combatTollModifier": 1 },
+        { "id": "caustic_air", "name": "Caustic Air", "description": "Hazards bite deeper.", "hazardTollModifier": 2 },
+        { "id": "dense_brood", "name": "Dense Brood", "description": "Violent fights exact a heavier toll.", "combatTollModifier": 2 },
+        { "id": "dry_tunnels", "name": "Dry Tunnels", "description": "Hazard routes are slightly easier to read.", "hazardTollModifier": -1 }
+      ],
+      "bossAspects": [
+        { "id": "royal_fury", "name": "Royal Fury", "description": "The Matriarch attacks with royal ferocity.", "source": "Fixed", "attributeType": "Power", "amount": 8, "modifierType": "Additive" },
+        { "id": "spore_veil", "name": "Spore Veil", "description": "Dense spores harden the Matriarch's shell.", "source": "Route", "attributeType": "Resistance", "amount": 10, "modifierType": "Additive" },
+        { "id": "brood_call", "name": "Brood Call", "description": "The Matriarch is reinforced by its brood.", "source": "Miniboss", "attributeType": "MaxHealth", "amount": 15, "modifierType": "Additive" },
+        { "id": "tier_three_malice", "name": "Delve Malice", "description": "Tier III empowers the final foe.", "source": "Tier III", "attributeType": "Power", "amount": 7, "modifierType": "Additive", "minimumTier": 3 }
+      ]
+    }
+  ]
+}

@@ -171,7 +171,7 @@
     { "id": "683a9d85-8d9c-4750-b9c7-e89f8b2b9b61", "key": "weekly.dungeon_vanguard", "name": "Dungeon Vanguard", "description": "Complete dungeon runs together as a guild.", "category": "Dungeon", "metric": "DungeonsCompleted", "baseTarget": 12 }
   ],
   "dailyOrders": [
-    { "id": "8d7a12db-39eb-44f0-8c66-3ba79b606ca2", "key": "daily.creatures_defeated", "name": "Cull the Wilds", "description": "Defeat 100 creatures while in a guild.", "category": "Combat", "metric": "CreaturesDefeated", "baseTarget": 100 },
+    { "id": "8d7a12db-39eb-44f0-8c66-3ba79b606ca2", "key": "daily.creatures_defeated", "name": "Cull the Wilds", "description": "Defeat 100 creatures.", "category": "Combat", "metric": "CreaturesDefeated", "baseTarget": 100 },
     { "id": "ff235b05-d721-4d96-b603-609c8abed319", "key": "daily.dungeon_rooms", "name": "Scout the Depths", "description": "Clear 5 dungeon rooms.", "category": "Dungeon", "metric": "DungeonRoomsCleared", "baseTarget": 5 },
     { "id": "c4ec6549-2bdc-4c7d-8494-6a5d8fbe7df2", "key": "daily.tempering_actions", "name": "Temper the Arsenal", "description": "Complete 20 tempering actions.", "category": "Crafting", "metric": "TemperingActionsCompleted", "baseTarget": 20 },
     { "id": "73254589-f56f-470b-9944-aa4d3a03322e", "key": "daily.items_crafted", "name": "Stock the Workshop", "description": "Craft 5 items.", "category": "Crafting", "metric": "ItemsCrafted", "baseTarget": 5 }

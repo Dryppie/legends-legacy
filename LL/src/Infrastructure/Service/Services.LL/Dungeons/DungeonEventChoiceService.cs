@@ -6,15 +6,15 @@ namespace Services.LL.Dungeons;
 
 public sealed class DungeonEventChoiceService : IDungeonEventChoiceService
 {
-    private readonly IDungeonPressureService _pressure;
     private readonly IDungeonEventDefinitionProvider _definitions;
+    private readonly IDungeonVigorService _vigor;
 
     public DungeonEventChoiceService(
-        IDungeonPressureService pressure,
-        IDungeonEventDefinitionProvider definitions)
+        IDungeonEventDefinitionProvider definitions,
+        IDungeonVigorService vigor)
     {
-        _pressure = pressure;
         _definitions = definitions;
+        _vigor = vigor;
     }
 
     public IReadOnlyList<DungeonEventChoiceOption> EnsureChoices(
@@ -72,14 +72,11 @@ public sealed class DungeonEventChoiceService : IDungeonEventChoiceService
             run.State.Flags.Remove(flag);
         }
 
-        if (choice.RewardMultiplierDeltaPercent != 0)
+        if (choice.VigorDelta != 0)
         {
-            AddFlag(run, "reward_multiplier_bonus_pct", choice.RewardMultiplierDeltaPercent);
-        }
-
-        if (choice.PressureDelta != 0)
-        {
-            _pressure.ApplyPressureDelta(run, choice.PressureDelta);
+            var room = run.Rooms.FirstOrDefault(candidate => candidate.RoomIndex == run.CurrentRoomIndex)
+                ?? throw new InvalidOperationException("The current event room could not be found.");
+            _vigor.ApplyEventChange(run, room, choice.VigorDelta, choice.Label);
         }
 
         if (choice.AmbushChancePercent > 0 && RollsAmbush(run, choice))
@@ -106,12 +103,10 @@ public sealed class DungeonEventChoiceService : IDungeonEventChoiceService
             Id = choice.Id,
             Label = choice.Label,
             Description = choice.Description,
-            PressureDelta = choice.PressureDelta,
-            RewardMultiplierDeltaPercent = choice.RewardMultiplierDeltaPercent,
+            VigorDelta = choice.VigorDelta,
             AddFlags = choice.AddFlags.ToList(),
             RemoveFlags = choice.RemoveFlags.ToList(),
             MissingRequirements = missingRequirements,
-            GrantsBoonChoice = choice.GrantsBoonChoice,
             GrantsLoot = choice.GrantsLoot,
             AmbushChancePercent = Math.Clamp(choice.AmbushChancePercent, 0, 100),
             RevealsHiddenRoute = choice.RevealsHiddenRoute
@@ -164,7 +159,6 @@ public sealed class DungeonEventChoiceService : IDungeonEventChoiceService
             "opened_reliquary" => "Open Reliquary",
             "sealed_reliquary" => "Seal Reliquary",
             "bound_spirit_power" => "Bind Spirit Power",
-            "sacrificed_loot_for_boon" => "Sacrifice Loot",
             "boss_reinforcements_reduced" => "Reduce Boss Reinforcements",
             _ => string.Join(
                 ' ',

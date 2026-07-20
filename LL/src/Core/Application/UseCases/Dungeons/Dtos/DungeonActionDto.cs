@@ -1,5 +1,6 @@
 ﻿using Application.Common.Mappings;
 using Domain.Models.Dungeons;
+using AutoMapper;
 
 namespace Application.UseCases.Dungeons.Dtos;
 
@@ -10,4 +11,7 @@ public class DungeonActionDto : IMapFrom<DungeonAction>
     public string Style { get; set; } = "primary";
     public bool Disabled { get; set; }
     public string? Description { get; set; }
+
+    public void Mapping(Profile profile) =>
+        profile.CreateMap<DungeonAction, DungeonActionDto>();
 }

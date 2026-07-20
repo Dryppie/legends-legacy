@@ -1,4 +1,7 @@
+using Application.Common.Mappings;
+using Application.Interfaces.Services.LL.Dungeons;
 using Application.UseCases.Items.Dtos;
+using AutoMapper;
 using Domain.Models.Dungeons.Definitions;
 
 namespace Application.UseCases.Dungeons.Dtos;
@@ -39,24 +42,18 @@ public sealed class DungeonPreviewDto
     public List<DungeonGatheringNodePreviewDto> GatheringNodes { get; set; } = [];
 }
 
-public sealed class DungeonMasteryDto
+public sealed class DungeonMasteryDto : IMapFrom<DungeonMasterySnapshot>
 {
     public long Experience { get; set; }
     public int Level { get; set; }
     public int? ExperienceRequiredForNextLevel { get; set; }
     public int CompletionCount { get; set; }
-    public List<DungeonMasteryBonusPreviewDto> Bonuses { get; set; } = [];
+
+    public void Mapping(Profile profile) =>
+        profile.CreateMap<DungeonMasterySnapshot, DungeonMasteryDto>();
 }
 
-public sealed class DungeonMasteryBonusPreviewDto
-{
-    public string Id { get; set; } = string.Empty;
-    public int RequiredLevel { get; set; }
-    public string Description { get; set; } = string.Empty;
-    public bool IsActive { get; set; }
-}
-
-public sealed class DungeonPreviewRewardDto
+public sealed class DungeonPreviewRewardDto : IMapFrom<DungeonPreviewReward>
 {
     public string Id { get; set; } = string.Empty;
     public ItemBaseDto ItemBase { get; set; } = null!;
@@ -67,14 +64,25 @@ public sealed class DungeonPreviewRewardDto
     public double? DropChancePercent { get; set; }
     public bool CanDropNothing { get; set; }
     public double? NoDropChancePercent { get; set; }
+
+    public void Mapping(Profile profile)
+    {
+        profile.CreateMap<DungeonPreviewReward, DungeonPreviewRewardDto>()
+            .ForMember(
+                destination => destination.Id,
+                options => options.MapFrom(source => source.ItemBase.Id));
+    }
 }
 
-public sealed class DungeonEntryRequirementDto
+public sealed class DungeonEntryRequirementDto : IMapFrom<DungeonEntryRequirementResult>
 {
     public string ItemId { get; set; } = string.Empty;
     public string Name { get; set; } = string.Empty;
     public int RequiredAmount { get; set; }
     public int OwnedAmount { get; set; }
+
+    public void Mapping(Profile profile) =>
+        profile.CreateMap<DungeonEntryRequirementResult, DungeonEntryRequirementDto>();
 }
 
 public sealed class DungeonGatheringNodePreviewDto
