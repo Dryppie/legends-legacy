@@ -817,6 +817,15 @@
   margin-top: var(--ll-space-3);
 }
 
+.dungeon-item-list--inventory {
+  gap: 0;
+}
+
+.dungeon-item-list--inventory app-inventory-item {
+  display: block;
+  min-width: 0;
+}
+
 .dungeon-item-list > div {
   display: flex;
   align-items: center;

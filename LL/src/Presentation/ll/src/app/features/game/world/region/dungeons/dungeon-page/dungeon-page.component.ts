@@ -22,6 +22,7 @@ import { CombatStateService } from '../../../../../../core/state/combat-state/co
 import { BattleType } from '../../../../../../core/state/combat-state/combatState';
 import { CombatComponent } from '../../../../../../shared/components/combat/combat.component';
 import { DungeonRoomIconComponent } from '../../../../../../shared/components/dungeons/dungeon-room-icon/dungeon-room-icon.component';
+import { InventoryItemComponent } from '../../../../../../shared/components/inventory-item/inventory-item.component';
 import { InventoryItem } from '../../../../../../shared/models/inventoryItem';
 
 interface DungeonGraphNode extends DungeonMapNode {
@@ -58,6 +59,7 @@ interface DungeonRewardResult {
     DecimalPipe,
     CombatComponent,
     DungeonRoomIconComponent,
+    InventoryItemComponent,
   ],
   templateUrl: './dungeon-page.component.html',
   styleUrl: './dungeon-page.component.scss',
@@ -534,14 +536,6 @@ export class DungeonPageComponent {
   returnToWorldAfterClaim(): void {
     this.claimedRewardResult.set(null);
     void this.router.navigate(['/game/world/shenic']);
-  }
-
-  claimedItemName(item: InventoryItem): string {
-    return item.itemInstance.displayName || item.itemInstance.itemBase.name;
-  }
-
-  claimedItemType(item: InventoryItem): string {
-    return item.itemInstance.itemBase.itemType;
   }
 
   dismissFailedDungeonRun(): void {

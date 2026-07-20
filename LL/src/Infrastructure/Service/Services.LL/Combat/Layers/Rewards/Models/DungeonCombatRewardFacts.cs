@@ -9,6 +9,7 @@ public sealed record DungeonCombatRewardFacts(
     int CurrentRoomIndex,
     int DungeonTier,
     RoomType RoomType,
+    string? FeaturedEssenceMonsterDefinitionId,
     IReadOnlyDictionary<ItemType, double> MonsterLootModifiers,
     IReadOnlyList<Guid> PlayerEntityIds,
     EquippedGatheringTool? EquippedTool,

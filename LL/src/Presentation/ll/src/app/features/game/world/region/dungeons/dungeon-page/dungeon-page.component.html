@@ -95,21 +95,16 @@
           </div>
 
           <div
-            class="dungeon-item-list"
+            class="dungeon-item-list dungeon-item-list--inventory"
             *ngIf="rewardResult.claimedLoot.length"
           >
-            <div
+            <app-inventory-item
               *ngFor="
                 let item of rewardResult.claimedLoot;
                 trackBy: trackByIndex
               "
-            >
-              <span>
-                <strong>{{ claimedItemName(item) }}</strong>
-                <small>{{ claimedItemType(item) }}</small>
-              </span>
-              <b>×{{ item.quantity }}</b>
-            </div>
+              [inventoryItem]="item"
+            ></app-inventory-item>
           </div>
 
           <div

@@ -1,6 +1,7 @@
 using Application.Interfaces.Services.LL.Entities;
 using Application.Interfaces.Services.LL.Dungeons;
 using Domain.Models.Dungeons;
+using Domain.Models.Dungeons.Definitions.Encounters;
 using Domain.Models.Dungeons.Definitions.Gathering;
 using Domain.Models.Dungeons.Definitions.Rooms;
 using Domain.Models.Dungeons.Runs;
@@ -92,8 +93,16 @@ public class DungeonCombatRewardFactBuilder : IDungeonCombatRewardFactBuilder
         var gatheringNodes = dungeon is null
             ? []
             : await BuildGatheringNodesAsync(dungeon, cancellationToken);
-        var roomType = run?.Rooms.FirstOrDefault(x =>
-            x.RoomIndex == context.OrchestrationRequest.CurrentRoomIndex)?.Type ?? RoomType.Unknown;
+        var room = run?.Rooms.FirstOrDefault(x =>
+            x.RoomIndex == context.OrchestrationRequest.CurrentRoomIndex);
+        var roomType = room?.Type ?? RoomType.Unknown;
+        var featuredEssenceMonsterDefinitionId =
+            roomType is RoomType.MiniBoss or RoomType.Boss
+                ? room?.EncounterIds
+                    .Where(id => !string.IsNullOrWhiteSpace(id))
+                    .Select(DungeonEncounterIdentity.ToMonsterDefinitionId)
+                    .FirstOrDefault()
+                : null;
 
         return new DungeonCombatRewardFacts(
             DungeonRunId: context.DungeonRunId,
@@ -102,6 +111,7 @@ public class DungeonCombatRewardFactBuilder : IDungeonCombatRewardFactBuilder
             DungeonTier: dungeon?.Tier ?? throw new InvalidOperationException(
                 $"Dungeon definition for run '{context.DungeonRunId}' could not be resolved."),
             RoomType: roomType,
+            FeaturedEssenceMonsterDefinitionId: featuredEssenceMonsterDefinitionId,
             MonsterLootModifiers: monsterLootModifiers,
             PlayerEntityIds: [.. context.PlayerEntityIds],
             EquippedTool: ResolveEquippedTool(context),

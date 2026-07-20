@@ -1,8 +1,14 @@
 using Application.Interfaces.Services.LL;
 using Application.Interfaces.Services.LL.Dungeons;
+using Application.Interfaces.Services.LL.Essences;
 using Application.Interfaces.Services.LL.Rewards;
+using Domain.Models.Bonuses;
+using Domain.Models.Combat;
 using Domain.Models.Dungeons;
+using Domain.Models.Dungeons.Definitions.Rooms;
 using Domain.Models.Dungeons.Runs;
+using Domain.Models.Entities;
+using Domain.Models.Entities.Creatures;
 using Domain.Models.Inventories;
 using Domain.Models.Items;
 using Domain.Models.Rewards;
@@ -12,6 +18,8 @@ using Persistence.LL.Repositories.Items;
 using Services.LL.Combat.Layers.Rewards.Dungeon;
 using Services.LL.Combat.Layers.Rewards.Models;
 using Services.LL.Inventories;
+using Services.LL.Interfaces;
+using Services.LL.Interfaces.Combat.Reward.Idle;
 using Services.LL.Interfaces.Combat.Reward.Dungeon;
 
 namespace EssenceSystem.Tests;
@@ -78,6 +86,55 @@ public sealed class DungeonEssenceRewardTests
         var reward = Assert.Single(batch.Loot);
         Assert.Equal("item.essence_potential_core.region_1", reward.ItemInstance.ItemBaseId);
         Assert.InRange(reward.Quantity, 1, 3);
+    }
+
+    [Theory]
+    [InlineData(RoomType.MiniBoss)]
+    [InlineData(RoomType.Boss)]
+    public async Task Dungeon_boss_essence_multipliers_only_apply_to_featured_monster(RoomType roomType)
+    {
+        var featuredMonster = new Creature { Id = Guid.NewGuid(), Name = "Specter" };
+        var supportingMonster = new Creature { Id = Guid.NewGuid(), Name = "Skeleton Warrior" };
+        var essenceResonance = new CapturingEssenceResonanceService();
+        var calculator = new DungeonCombatRewardCalculator(
+            new EmptyBonusService(),
+            new EmptyLootService(),
+            new EmptyDungeonRewardBalanceProvider(),
+            essenceResonance,
+            new EmptyGatheringRewardProcessor());
+        var encounter = new DungeonEncounterRewardFacts(
+            EncounterId: Guid.NewGuid(),
+            Outcome: BattleOutcome.Victory,
+            HostileSourceEntityIds: [featuredMonster.Id, supportingMonster.Id],
+            HostileCreatures: [featuredMonster, supportingMonster],
+            CombatResult: new CombatResult { Outcome = BattleOutcome.Victory });
+        var facts = new DungeonCombatRewardFacts(
+            DungeonRunId: Guid.NewGuid(),
+            CharacterId: Guid.NewGuid(),
+            CurrentRoomIndex: 1,
+            DungeonTier: 1,
+            RoomType: roomType,
+            FeaturedEssenceMonsterDefinitionId: "monster.specter",
+            MonsterLootModifiers: new Dictionary<ItemType, double>(),
+            PlayerEntityIds: [],
+            EquippedTool: null,
+            GatheringNodes: [],
+            Encounters: [encounter]);
+
+        await calculator.CalculateAsync(facts, CancellationToken.None);
+
+        var boostedRoll = Assert.Single(
+            essenceResonance.Rolls,
+            roll => roll.Modifiers is not null);
+        Assert.Equal(featuredMonster.Id, Assert.Single(boostedRoll.Creatures).Id);
+        Assert.Equal(10, boostedRoll.Modifiers!.DropChanceMultiplier);
+        Assert.Equal(1_000, boostedRoll.Modifiers.PityProgressionMultiplier);
+        Assert.Equal(10, boostedRoll.Modifiers.ResonanceCapMultiplier);
+
+        var standardRoll = Assert.Single(
+            essenceResonance.Rolls,
+            roll => roll.Modifiers is null);
+        Assert.Equal(supportingMonster.Id, Assert.Single(standardRoll.Creatures).Id);
     }
 
     private static LLDbContext CreateDb()
@@ -166,5 +223,85 @@ public sealed class DungeonEssenceRewardTests
     {
         public RewardRollResult Roll(string rewardTableId, RewardRollContext context) => RewardRollResult.Empty;
         public RewardRollResult Roll(RewardTableDefinition table, RewardRollContext context) => RewardRollResult.Empty;
+    }
+
+    private sealed class EmptyBonusService : IBonusService
+    {
+        public ValueTask<IReadOnlyDictionary<BonusKind, double>> GetAggregatedAsync(
+            Guid characterId,
+            DateTimeOffset now,
+            CancellationToken ct = default) =>
+            ValueTask.FromResult<IReadOnlyDictionary<BonusKind, double>>(
+                new Dictionary<BonusKind, double>());
+    }
+
+    private sealed class EmptyLootService : ILootService
+    {
+        public int GenerateSoulstoneLoot(int seconds) => 0;
+
+        public Task<List<InventoryItem>> GenerateIdleCombatLootAsync(
+            List<Entity> enemyCharacters,
+            Dictionary<ItemType, double> multipliers,
+            CancellationToken cancellationToken) => Task.FromResult(new List<InventoryItem>());
+
+        public Task<IReadOnlyList<IReadOnlyList<InventoryItem>>> GenerateIdleCombatLootBatchAsync(
+            IReadOnlyList<IReadOnlyList<Entity>> enemyGroups,
+            Dictionary<ItemType, double> multipliers,
+            CancellationToken cancellationToken) =>
+            Task.FromResult<IReadOnlyList<IReadOnlyList<InventoryItem>>>([]);
+
+        public int GenerateCinderLoot(
+            Dictionary<Guid, int> creatureKills,
+            Dictionary<Guid, int> baseCinderValues,
+            double dropChance = 0.2) => 0;
+    }
+
+    private sealed class EmptyDungeonRewardBalanceProvider : IDungeonRewardBalanceProvider
+    {
+        public DungeonEncounterReward GetEncounterReward(int dungeonTier, RoomType roomType) => new(0, 0);
+    }
+
+    private sealed class CapturingEssenceResonanceService : IEssenceResonanceService
+    {
+        public List<CapturedEssenceRoll> Rolls { get; } = [];
+
+        public Task PrepareEssenceDropsAsync(
+            Guid characterId,
+            IReadOnlyList<Creature> defeatedCreatures,
+            bool loadEssenceFocus,
+            CancellationToken cancellationToken) => Task.CompletedTask;
+
+        public Task<EssenceDropRollResult> RollMonsterEssenceDropAsync(
+            Guid characterId,
+            string monsterId,
+            bool eligible,
+            CancellationToken cancellationToken,
+            EssenceDropRollModifiers? modifiers = null) =>
+            Task.FromResult(new EssenceDropRollResult(false, null, 0, 0));
+
+        public Task<IReadOnlyList<InventoryItem>> RollEssenceDropsAsync(
+            Guid characterId,
+            IReadOnlyList<Creature> defeatedCreatures,
+            bool eligible,
+            CancellationToken cancellationToken,
+            IReadOnlyDictionary<BonusKind, double>? bonusFactors = null,
+            EssenceDropRollModifiers? modifiers = null)
+        {
+            Rolls.Add(new CapturedEssenceRoll(defeatedCreatures, modifiers));
+            return Task.FromResult<IReadOnlyList<InventoryItem>>([]);
+        }
+    }
+
+    private sealed record CapturedEssenceRoll(
+        IReadOnlyList<Creature> Creatures,
+        EssenceDropRollModifiers? Modifiers);
+
+    private sealed class EmptyGatheringRewardProcessor : ICombatGatheringRewardProcessor
+    {
+        public Task<IReadOnlyList<GatheringRewardResult>> ProcessAsync(
+            CombatGatheringRewardFacts facts,
+            CancellationToken cancellationToken,
+            IReadOnlyDictionary<BonusKind, double>? bonusFactors = null) =>
+            Task.FromResult<IReadOnlyList<GatheringRewardResult>>([]);
     }
 }

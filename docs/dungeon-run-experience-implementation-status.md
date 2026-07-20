@@ -256,6 +256,7 @@ The engine retains scaffolding for additional room types, but the playable catal
 - Costs and consequences must be visible before committing.
 - An Elite must be identifiable as an Elite before selection.
 - A MiniBoss must be clearly named and forecast as a more demanding encounter.
+- The first-authored creature in each MiniBoss and Boss composition is the featured monster. Only that monster uses 10x Essence drop chance, 1000x failed-roll resonance gain, and 10x the normal resonance drop-chance cap; supporting monsters use standard values.
 - A Rest Site does not offer boons, extraction locks, or checkpoint choices.
 - Hazard, Cache, Event, and Omen Site nodes must not be authored until this product decision is explicitly revisited.
 

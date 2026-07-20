@@ -181,7 +181,6 @@ describe('DungeonPageComponent', () => {
       { label: 'Soulstones', value: 3 },
     ]);
     expect(component.rewardResultTitle()).toBe('The dungeon spoils are yours');
-    expect(component.claimedItemName(claimedItem)).toBe('Runed Goblin Blade');
     expect(router.navigate).not.toHaveBeenCalled();
 
     component.returnToWorldAfterClaim();

@@ -845,6 +845,59 @@ public sealed class EssenceSystemServiceTests
     }
 
     [Fact]
+    public async Task Essence_drop_roll_modifiers_multiply_effective_drop_chance()
+    {
+        await using var db = CreateDb();
+        var characterId = await SeedCharacterAndInventoryAsync(db);
+        var lootTable = CreateLootTable("monster.test", "essence.test");
+        lootTable.BaseDropChance = 0.01;
+        var service = CreateService(
+            db,
+            new QueueRandomProvider(0.05, 0),
+            creatureEssenceLootTables: new StaticCreatureEssenceLootTableRepository([lootTable]));
+
+        var result = await service.RollMonsterEssenceDropAsync(
+            characterId,
+            "monster.test",
+            true,
+            CancellationToken.None,
+            new EssenceDropRollModifiers(DropChanceMultiplier: 10));
+
+        Assert.True(result.Dropped);
+        Assert.Equal(0.1, result.EffectiveDropChance, precision: 12);
+    }
+
+    [Fact]
+    public async Task Essence_drop_roll_modifiers_multiply_pity_gain_and_resonance_cap()
+    {
+        await using var db = CreateDb();
+        var characterId = await SeedCharacterAndInventoryAsync(db);
+        var startingResonance = CreatureResonanceConstants.FailedEligibleKillsToMaximumBonus * 10;
+        db.CreatureResonances.Add(new CreatureResonance
+        {
+            Id = Guid.NewGuid(),
+            CharacterId = characterId,
+            CreatureId = "monster.test",
+            ResonanceValue = startingResonance
+        });
+        await db.SaveChangesAsync();
+        var service = CreateService(db, new QueueRandomProvider(0.99));
+
+        var result = await service.RollMonsterEssenceDropAsync(
+            characterId,
+            "monster.test",
+            true,
+            CancellationToken.None,
+            new EssenceDropRollModifiers(
+                PityProgressionMultiplier: 1_000,
+                ResonanceCapMultiplier: 10));
+
+        Assert.False(result.Dropped);
+        Assert.Equal(0.5 + (CreatureResonanceConstants.MaximumDropChanceBonus * 10), result.EffectiveDropChance, precision: 12);
+        Assert.Equal(startingResonance + 1_000, result.ResonanceValue);
+    }
+
+    [Fact]
     public async Task Focused_monster_drop_bonus_only_applies_to_focused_creature()
     {
         await using var db = CreateDb();
