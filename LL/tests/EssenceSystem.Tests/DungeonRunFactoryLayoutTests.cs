@@ -1,0 +1,247 @@
+using Application.Interfaces.Services.LL.Dungeons;
+using Domain.Models.Dungeons;
+using Domain.Models.Dungeons.Definitions;
+using Domain.Models.Dungeons.Definitions.Rooms;
+using Domain.Models.Dungeons.Runs;
+using Domain.Models.Snapshots;
+using Services.LL.Dungeons;
+using Services.LL.Interfaces;
+
+namespace EssenceSystem.Tests;
+
+public sealed class DungeonRunFactoryLayoutTests
+{
+    [Fact]
+    public async Task Same_seed_reproduces_the_same_layout()
+    {
+        var factory = CreateFactory();
+
+        var first = await factory.CreateAsync(Guid.NewGuid(), "layout_test", 73, CancellationToken.None);
+        var second = await factory.CreateAsync(Guid.NewGuid(), "layout_test", 73, CancellationToken.None);
+
+        Assert.Equal(LayoutSignature(first), LayoutSignature(second));
+    }
+
+    [Fact]
+    public async Task Different_seeds_vary_both_lanes_and_connections()
+    {
+        var factory = CreateFactory();
+        var laneSignatures = new HashSet<string>(StringComparer.Ordinal);
+        var routeSignatures = new HashSet<string>(StringComparer.Ordinal);
+
+        for (var seed = 0; seed < 32; seed++)
+        {
+            var run = await factory.CreateAsync(Guid.NewGuid(), "layout_test", seed, CancellationToken.None);
+            laneSignatures.Add(string.Join(
+                "|",
+                run.State.MapNodes.Select(node => $"{node.RoomIndex}:{node.Lane}")));
+            routeSignatures.Add(string.Join(
+                "|",
+                run.State.MapNodes.Select(node =>
+                    $"{node.RoomIndex}>{string.Join(",", node.NextRoomIndexes)}")));
+        }
+
+        Assert.True(laneSignatures.Count >= 8);
+        Assert.True(routeSignatures.Count >= 8);
+    }
+
+    [Fact]
+    public async Task Generated_layouts_remain_reachable_and_advance_one_depth_at_a_time()
+    {
+        var factory = CreateFactory();
+
+        for (var seed = 0; seed < 100; seed++)
+        {
+            var run = await factory.CreateAsync(Guid.NewGuid(), "layout_test", seed, CancellationToken.None);
+            var nodes = run.State.MapNodes;
+            var byIndex = nodes.ToDictionary(node => node.RoomIndex);
+            var rows = nodes
+                .GroupBy(node => node.Depth)
+                .OrderBy(row => row.Key)
+                .ToList();
+
+            Assert.All(rows, row =>
+            {
+                Assert.InRange(row.Count(), 1, 3);
+                Assert.Equal(row.Count(), row.Select(node => node.Lane).Distinct().Count());
+            });
+
+            for (var rowIndex = 0; rowIndex < rows.Count - 1; rowIndex++)
+            {
+                var sourceRow = rows[rowIndex].ToList();
+                var targetRow = rows[rowIndex + 1].ToList();
+                var targetIndexes = targetRow.Select(node => node.RoomIndex).ToHashSet();
+
+                Assert.All(sourceRow, source =>
+                {
+                    Assert.InRange(source.NextRoomIndexes.Count, 1, 3);
+                    Assert.All(
+                        source.NextRoomIndexes,
+                        target => Assert.Contains(target, targetIndexes));
+                });
+                Assert.True(targetIndexes.SetEquals(
+                    sourceRow.SelectMany(source => source.NextRoomIndexes)));
+            }
+
+            var boss = Assert.Single(nodes, node =>
+                run.Rooms.Single(room => room.RoomIndex == node.RoomIndex).Type == RoomType.Boss);
+            Assert.Empty(boss.NextRoomIndexes);
+            Assert.Equal(nodes.Count, Traverse([0], index => byIndex[index].NextRoomIndexes).Count);
+
+            var incoming = nodes.ToDictionary(node => node.RoomIndex, _ => new List<int>());
+            foreach (var source in nodes)
+            {
+                foreach (var target in source.NextRoomIndexes)
+                {
+                    incoming[target].Add(source.RoomIndex);
+                }
+            }
+
+            Assert.Equal(
+                nodes.Count,
+                Traverse([boss.RoomIndex], index => incoming[index]).Count);
+        }
+    }
+
+    private static DungeonRunFactory CreateFactory()
+    {
+        var dungeon = new DungeonDefinition
+        {
+            Id = "layout_test",
+            Name = "Layout Test",
+            Rooms =
+            [
+                new RoomDefinition
+                {
+                    Type = RoomType.Combat,
+                    EncounterIds = ["enemy-a", "enemy-b", "enemy-c"]
+                },
+                new RoomDefinition
+                {
+                    Type = RoomType.MiniBoss,
+                    EncounterIds = ["miniboss"]
+                },
+                new RoomDefinition
+                {
+                    Type = RoomType.Boss,
+                    EncounterIds = ["boss"]
+                }
+            ]
+        };
+        var delve = CreateDelve();
+        return new DungeonRunFactory(
+            new StaticDungeonDefinitions(dungeon),
+            new StaticSnapshotService(),
+            new StaticDelveProvider(delve));
+    }
+
+    private static DungeonDelveDefinition CreateDelve() => new()
+    {
+        Id = "layout-test-delve",
+        DungeonDefinitionIds = ["layout_test"],
+        Nodes =
+        [
+            Node("entrance", RoomType.Entrance, 0, 0, 1, [1, 2, 3]),
+            Node("miniboss", RoomType.MiniBoss, 1, -1, 1, [4]),
+            Node("combat-1", RoomType.Combat, 1, 0, 1, [4, 5]),
+            Node("combat-2", RoomType.Combat, 1, 1, 1, [5, 6]),
+            Node("combat-3", RoomType.Combat, 2, -1, 1, [7]),
+            Node("combat-4", RoomType.Combat, 2, 0, 1, [8]),
+            Node("combat-5", RoomType.Combat, 2, 1, 1, [9]),
+            Node("combat-6", RoomType.Combat, 3, -1, 1, [10]),
+            Node("combat-7", RoomType.Combat, 3, 0, 1, [10]),
+            Node("combat-8", RoomType.Combat, 3, 1, 1, [10]),
+            Node("rest-1", RoomType.RestSite, 4, 0, 1, [11, 12, 13]),
+            Node("combat-9", RoomType.Combat, 5, -1, 2, [14]),
+            Node("combat-10", RoomType.Combat, 5, 0, 2, [14]),
+            Node("combat-11", RoomType.Combat, 5, 1, 2, [14]),
+            Node("rest-2", RoomType.RestSite, 6, 0, 2, [15]),
+            Node("approach", RoomType.Combat, 7, 0, 2, [16]),
+            Node("boss", RoomType.Boss, 8, 0, 2, [])
+        ]
+    };
+
+    private static DungeonDelveNodeDefinition Node(
+        string id,
+        RoomType roomType,
+        int depth,
+        int lane,
+        int section,
+        List<int> nextRoomIndexes) => new()
+        {
+            Id = id,
+            DisplayName = id,
+            RoomType = roomType,
+            Depth = depth,
+            Lane = lane,
+            Section = section,
+            NextRoomIndexes = nextRoomIndexes,
+            VigorCostMin = roomType is RoomType.Combat or RoomType.MiniBoss or RoomType.Boss ? 10 : 0,
+            VigorCostMax = roomType is RoomType.Combat or RoomType.MiniBoss or RoomType.Boss ? 20 : 0
+        };
+
+    private static string LayoutSignature(DungeonRun run) => string.Join(
+        "|",
+        run.State.MapNodes.Select(node =>
+            $"{node.RoomIndex}:{node.Lane}>{string.Join(",", node.NextRoomIndexes)}"));
+
+    private static HashSet<int> Traverse(
+        IEnumerable<int> starts,
+        Func<int, IEnumerable<int>> getNext)
+    {
+        var visited = new HashSet<int>();
+        var pending = new Queue<int>(starts);
+        while (pending.TryDequeue(out var current))
+        {
+            if (!visited.Add(current))
+            {
+                continue;
+            }
+
+            foreach (var next in getNext(current))
+            {
+                pending.Enqueue(next);
+            }
+        }
+
+        return visited;
+    }
+
+    private sealed class StaticDungeonDefinitions(DungeonDefinition dungeon) : IDungeonDefinitions
+    {
+        public DungeonDefinition GetByKey(string key) =>
+            key == dungeon.Id ? dungeon : throw new KeyNotFoundException(key);
+
+        public IReadOnlyList<DungeonDefinition> GetAll() => [dungeon];
+    }
+
+    private sealed class StaticDelveProvider(DungeonDelveDefinition delve)
+        : IDungeonDelveDefinitionProvider
+    {
+        public DungeonDelveDefinition GetForDungeon(string dungeonDefinitionId) =>
+            dungeonDefinitionId == delve.DungeonDefinitionIds[0]
+                ? delve
+                : throw new KeyNotFoundException(dungeonDefinitionId);
+
+        public IReadOnlyList<DungeonDelveDefinition> GetAll() => [delve];
+    }
+
+    private sealed class StaticSnapshotService : ICharacterSnapshotService
+    {
+        public Task<CharacterSnapshot> CreateAsync(Guid characterId, CancellationToken ct) =>
+            Task.FromResult(new CharacterSnapshot
+            {
+                Id = Guid.NewGuid(),
+                CharacterId = characterId,
+                Name = "Tester"
+            });
+
+        public Task<CharacterSnapshot?> GetSnapshotByCharacterIdAsync(
+            Guid characterId,
+            CancellationToken ct) => Task.FromResult<CharacterSnapshot?>(null);
+
+        public Task<CharacterSnapshot?> GetSnapshotByIdAsync(
+            Guid snapshotId,
+            CancellationToken ct) => Task.FromResult<CharacterSnapshot?>(null);
+    }
+}

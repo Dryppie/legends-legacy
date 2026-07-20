@@ -193,7 +193,7 @@ export class DungeonStateService {
   }
 
   restAtSite(): void {
-    this.executeAction('continue');
+    this.executeAction('rest');
   }
 
   chooseRoute(routeOptionId: string): void {
@@ -212,7 +212,9 @@ export class DungeonStateService {
     this.executeAction(actionId, payload);
   }
 
-  claimDungeonRewards(onSuccess?: () => void): void {
+  claimDungeonRewards(
+    onSuccess?: (response: ClaimDungeonRewardsResponse) => void,
+  ): void {
     if (this._loading()) return;
 
     this._loading.set(true);
@@ -224,7 +226,7 @@ export class DungeonStateService {
       .subscribe({
         next: (response) => {
           this.applyClaimDungeonRewards(response);
-          onSuccess?.();
+          onSuccess?.(response);
           this.loadAvailableDungeons();
         },
         error: (e) =>
@@ -259,11 +261,16 @@ export class DungeonStateService {
     );
   }
 
-  private applyClaimDungeonRewards(response: ClaimDungeonRewardsResponse): void {
+  private applyClaimDungeonRewards(
+    response: ClaimDungeonRewardsResponse,
+  ): void {
     this._activeDungeon.set(response.activeRun);
     if (isGameRealtimeEnabled()) return;
 
-    this.inventoryState.setInventory(response.inventoryItems, response.claimedLoot);
+    this.inventoryState.setInventory(
+      response.inventoryItems,
+      response.claimedLoot,
+    );
     this.characterState.updateCharacter(response.character);
   }
 

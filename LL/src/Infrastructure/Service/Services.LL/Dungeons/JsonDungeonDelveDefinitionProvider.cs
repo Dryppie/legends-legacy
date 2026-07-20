@@ -8,6 +8,15 @@ namespace Services.LL.Dungeons;
 
 public sealed class JsonDungeonDelveDefinitionProvider : IDungeonDelveDefinitionProvider
 {
+    private static readonly HashSet<RoomType> PlayableRoomTypes =
+    [
+        RoomType.Entrance,
+        RoomType.Combat,
+        RoomType.MiniBoss,
+        RoomType.RestSite,
+        RoomType.Boss
+    ];
+
     private readonly IReadOnlyList<DungeonDelveDefinition> _definitions;
 
     public JsonDungeonDelveDefinitionProvider(
@@ -51,8 +60,28 @@ public sealed class JsonDungeonDelveDefinitionProvider : IDungeonDelveDefinition
                 throw new InvalidOperationException($"Delve '{definition.Id}' must contain exactly one boss.");
             if (definition.Nodes.All(node => node.RoomType != RoomType.RestSite))
                 throw new InvalidOperationException($"Delve '{definition.Id}' must contain at least one Section ending in a Rest Site.");
-            if (definition.Omens.Count is < 4 or > 6)
-                throw new InvalidOperationException($"Delve '{definition.Id}' must author an Omen pool of four to six entries.");
+            if (definition.Omens.Count > 0 ||
+                definition.BossAspects.Count > 0 ||
+                definition.Nodes.Any(node =>
+                    !string.IsNullOrWhiteSpace(node.BossAspectId) ||
+                    !string.IsNullOrWhiteSpace(node.BossConsequence)))
+            {
+                throw new InvalidOperationException(
+                    $"Delve '{definition.Id}' contains disabled Omen or Boss Aspect content.");
+            }
+
+            var unsupportedRoomTypes = definition.Nodes
+                .Select(node => node.RoomType)
+                .Where(roomType => !PlayableRoomTypes.Contains(roomType))
+                .Distinct()
+                .Order()
+                .ToList();
+            if (unsupportedRoomTypes.Count > 0)
+            {
+                throw new InvalidOperationException(
+                    $"Delve '{definition.Id}' contains disabled room types: {string.Join(", ", unsupportedRoomTypes)}. " +
+                    "Only Entrance, Combat, MiniBoss, RestSite, and Boss rooms are currently supported.");
+            }
 
             if (definition.Nodes.Any(node => node.NextRoomIndexes.Count > 3))
                 throw new InvalidOperationException($"Delve '{definition.Id}' nodes may branch to at most three other nodes.");
@@ -65,12 +94,35 @@ public sealed class JsonDungeonDelveDefinitionProvider : IDungeonDelveDefinition
             if (definition.Nodes.SelectMany(node => node.NextRoomIndexes).Any(index => !indexes.Contains(index)))
                 throw new InvalidOperationException($"Delve '{definition.Id}' contains a route to a missing node.");
 
+            ValidateDepthRows(definition);
             ValidateSections(definition);
             ValidateReachability(definition);
+        }
+    }
 
-            var aspectIds = definition.BossAspects.Select(aspect => aspect.Id).ToHashSet(StringComparer.OrdinalIgnoreCase);
-            if (definition.Nodes.Any(node => !string.IsNullOrWhiteSpace(node.BossAspectId) && !aspectIds.Contains(node.BossAspectId)))
-                throw new InvalidOperationException($"Delve '{definition.Id}' contains a route linked to a missing boss Aspect.");
+    private static void ValidateDepthRows(DungeonDelveDefinition definition)
+    {
+        var rows = definition.Nodes
+            .GroupBy(node => node.Depth)
+            .OrderBy(row => row.Key)
+            .ToList();
+        var expectedDepths = Enumerable.Range(0, rows.Count);
+        if (!rows.Select(row => row.Key).SequenceEqual(expectedDepths))
+        {
+            throw new InvalidOperationException(
+                $"Delve '{definition.Id}' must use consecutive Depths beginning at zero.");
+        }
+
+        if (rows.Any(row => row.Count() is < 1 or > 3))
+        {
+            throw new InvalidOperationException(
+                $"Delve '{definition.Id}' Depth rows may contain at most three nodes.");
+        }
+
+        if (rows.Any(row => row.Select(node => node.Lane).Distinct().Count() != row.Count()))
+        {
+            throw new InvalidOperationException(
+                $"Delve '{definition.Id}' nodes in the same Depth must use unique lanes.");
         }
     }
 
@@ -142,10 +194,10 @@ public sealed class JsonDungeonDelveDefinitionProvider : IDungeonDelveDefinition
                 .Select(group => group.ToList())
                 .ToList();
 
-            if (rows.Count is < 1 or > 2)
+            if (rows.Count is < 1 or > 3)
             {
                 throw new InvalidOperationException(
-                    $"Delve '{definition.Id}' Section {section} must contain one or two encounter rows before its Rest Site.");
+                    $"Delve '{definition.Id}' Section {section} must contain one to three encounter rows before its Rest Site.");
             }
 
             if (rows.Any(row => row.Count is < 1 or > 3))

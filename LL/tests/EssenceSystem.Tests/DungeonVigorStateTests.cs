@@ -69,8 +69,12 @@ public sealed class DungeonVigorStateTests
         Assert.All(routes, route =>
         {
             var authored = run.State.MapNodes.Single(node => node.RoomIndex == route.RoomIndex);
-            Assert.Equal(Math.Max(0, authored.VigorCostMin - 2), route.VigorCostMin);
-            Assert.Equal(Math.Min(35, authored.VigorCostMax + 2), route.VigorCostMax);
+            Assert.Equal(
+                Math.Max(0, DungeonVigorService.ScaleCombatToll(authored.VigorCostMin) - 2),
+                route.VigorCostMin);
+            Assert.Equal(
+                Math.Min(35, DungeonVigorService.ScaleCombatToll(authored.VigorCostMax) + 2),
+                route.VigorCostMax);
         });
         Assert.Equal(8, run.State.MapNodes.Single(node => node.RoomIndex == 1).VigorCostMin);
     }
@@ -86,8 +90,12 @@ public sealed class DungeonVigorStateTests
         Assert.All(routes, route =>
         {
             var authored = run.State.MapNodes.Single(node => node.RoomIndex == route.RoomIndex);
-            Assert.Equal(authored.VigorCostMin, route.VigorCostMin);
-            Assert.Equal(authored.VigorCostMax, route.VigorCostMax);
+            Assert.Equal(
+                DungeonVigorService.ScaleCombatToll(authored.VigorCostMin),
+                route.VigorCostMin);
+            Assert.Equal(
+                DungeonVigorService.ScaleCombatToll(authored.VigorCostMax),
+                route.VigorCostMax);
         });
     }
 
@@ -140,6 +148,10 @@ public sealed class DungeonVigorStateTests
                 VigorCostMax = 22
             }
         ];
+        run.State.ActiveOmens =
+        [
+            new DungeonOmen { Id = "legacy-omen", CombatTollModifier = 10 }
+        ];
         var playerId = Guid.NewGuid().ToString();
         var result = new CombatResult
         {
@@ -161,8 +173,8 @@ public sealed class DungeonVigorStateTests
 
         var applied = new DungeonVigorService().ApplyCombatToll(run, room, result);
 
-        Assert.Equal(-17, applied);
-        Assert.Equal(83, run.State.Vigor);
+        Assert.Equal(-14, applied);
+        Assert.Equal(86, run.State.Vigor);
     }
 
     [Fact]
@@ -220,12 +232,36 @@ public sealed class DungeonVigorStateTests
         Assert.NotEmpty(delves.GetAll());
         Assert.All(delves.GetAll(), delve =>
         {
-            var sections = delve.Nodes
+            Assert.Empty(delve.Omens);
+            Assert.Empty(delve.BossAspects);
+            Assert.All(delve.Nodes, node =>
+            {
+                Assert.True(string.IsNullOrWhiteSpace(node.BossAspectId));
+                Assert.True(string.IsNullOrWhiteSpace(node.BossConsequence));
+            });
+
+            var restSites = delve.Nodes
                 .Where(node => node.RoomType == RoomType.RestSite)
-                .Select(node => node.Section)
-                .Order()
+                .OrderBy(node => node.Section)
                 .ToList();
+            var sections = restSites.Select(node => node.Section).ToList();
             Assert.Equal(Enumerable.Range(1, sections.Count), sections);
+
+            var encounterRowCounts = restSites
+                .Select((restSite, index) =>
+                {
+                    var anchorDepth = index == 0 ? 0 : restSites[index - 1].Depth;
+                    return delve.Nodes
+                        .Where(node =>
+                            node.Section == restSite.Section &&
+                            node.Depth > anchorDepth &&
+                            node.Depth < restSite.Depth)
+                        .Select(node => node.Depth)
+                        .Distinct()
+                        .Count();
+                })
+                .ToList();
+            Assert.Contains(3, encounterRowCounts);
         });
         Assert.Equal(
             [2, 3, 4],
@@ -236,6 +272,18 @@ public sealed class DungeonVigorStateTests
         Assert.Contains(
             delves.GetAll().SelectMany(delve => delve.Nodes.GroupBy(node => node.Depth)),
             row => row.Count() == 3);
+        Assert.All(
+            delves.GetAll().SelectMany(delve => delve.Nodes),
+            node => Assert.Contains(
+                node.RoomType,
+                new[]
+                {
+                    RoomType.Entrance,
+                    RoomType.Combat,
+                    RoomType.MiniBoss,
+                    RoomType.RestSite,
+                    RoomType.Boss
+                }));
         Assert.NotEmpty(events.GetAll());
 
         var eventJson = File.ReadAllText(Path.Combine(apiRoot, "Data", "dungeons", "dungeon-events.json"));
@@ -274,6 +322,45 @@ public sealed class DungeonVigorStateTests
     }
 
     [Fact]
+    public void Delve_provider_accepts_three_encounter_rows_in_a_section()
+    {
+        var definition = CreateSectionedDelve(
+            sectionCount: 1,
+            firstRowCount: 2,
+            secondRowCount: 2,
+            thirdRowCount: 2);
+
+        WithTemporaryDelveCatalog(definition, provider =>
+        {
+            var loaded = provider.GetForDungeon(definition.DungeonDefinitionIds[0]);
+            var restSiteDepth = loaded.Nodes.Single(node => node.RoomType == RoomType.RestSite).Depth;
+            var encounterRows = loaded.Nodes
+                .Where(node => node.Depth > 0 && node.Depth < restSiteDepth)
+                .Select(node => node.Depth)
+                .Distinct()
+                .Count();
+
+            Assert.Equal(3, encounterRows);
+        });
+    }
+
+    [Fact]
+    public void Delve_provider_rejects_more_than_three_encounter_rows_in_a_section()
+    {
+        var definition = CreateSectionedDelve(
+            sectionCount: 1,
+            firstRowCount: 1,
+            secondRowCount: 1,
+            thirdRowCount: 1,
+            fourthRowCount: 1);
+
+        var exception = Assert.Throws<InvalidOperationException>(() =>
+            WithTemporaryDelveCatalog(definition, _ => { }));
+
+        Assert.Contains("one to three encounter rows", exception.Message, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
     public void Delve_provider_rejects_more_than_three_nodes_in_a_section_row()
     {
         var definition = CreateSectionedDelve(sectionCount: 1, firstRowCount: 4, secondRowCount: 1);
@@ -282,6 +369,71 @@ public sealed class DungeonVigorStateTests
             WithTemporaryDelveCatalog(definition, _ => { }));
 
         Assert.Contains("at most three", exception.Message, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public void Delve_provider_rejects_duplicate_lanes_in_a_depth()
+    {
+        var definition = CreateSectionedDelve(sectionCount: 1, firstRowCount: 2, secondRowCount: 1);
+        definition.Nodes[2].Lane = definition.Nodes[1].Lane;
+
+        var exception = Assert.Throws<InvalidOperationException>(() =>
+            WithTemporaryDelveCatalog(definition, _ => { }));
+
+        Assert.Contains("unique lanes", exception.Message, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public void Delve_provider_rejects_nonconsecutive_depths()
+    {
+        var definition = CreateSectionedDelve(sectionCount: 1, firstRowCount: 1, secondRowCount: 0);
+        definition.Nodes[1].Depth = 2;
+
+        var exception = Assert.Throws<InvalidOperationException>(() =>
+            WithTemporaryDelveCatalog(definition, _ => { }));
+
+        Assert.Contains("consecutive Depths", exception.Message, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Theory]
+    [InlineData(RoomType.Hazard)]
+    [InlineData(RoomType.Cache)]
+    [InlineData(RoomType.Event)]
+    [InlineData(RoomType.OmenSite)]
+    public void Delve_provider_rejects_disabled_room_types(RoomType roomType)
+    {
+        var definition = CreateSectionedDelve(sectionCount: 1, firstRowCount: 1, secondRowCount: 0);
+        definition.Nodes[1].RoomType = roomType;
+
+        var exception = Assert.Throws<InvalidOperationException>(() =>
+            WithTemporaryDelveCatalog(definition, _ => { }));
+
+        Assert.Contains("disabled room types", exception.Message, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains(roomType.ToString(), exception.Message, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public void Delve_provider_rejects_disabled_omen_content()
+    {
+        var definition = CreateSectionedDelve(sectionCount: 1, firstRowCount: 1, secondRowCount: 0);
+        definition.Omens.Add(new DungeonDelveOmenDefinition { Id = "legacy-omen" });
+
+        var exception = Assert.Throws<InvalidOperationException>(() =>
+            WithTemporaryDelveCatalog(definition, _ => { }));
+
+        Assert.Contains("disabled Omen or Boss Aspect content", exception.Message);
+    }
+
+    [Fact]
+    public void Delve_provider_rejects_disabled_boss_aspect_content()
+    {
+        var definition = CreateSectionedDelve(sectionCount: 1, firstRowCount: 1, secondRowCount: 0);
+        definition.BossAspects.Add(new DungeonDelveAspectDefinition { Id = "legacy-aspect" });
+
+        var exception = Assert.Throws<InvalidOperationException>(() =>
+            WithTemporaryDelveCatalog(definition, _ => { }));
+
+        Assert.Contains("disabled Omen or Boss Aspect content", exception.Message);
     }
 
     private static DungeonRun CreateRun(string dungeonId = "test_dungeon") => new()
@@ -314,7 +466,7 @@ public sealed class DungeonVigorStateTests
         run.Rooms[0].Status = RoomInstanceStatus.Completed;
         run.Rooms.AddRange(
         [
-            new RoomInstance { Id = Guid.NewGuid(), RoomIndex = 1, Type = RoomType.Hazard },
+            new RoomInstance { Id = Guid.NewGuid(), RoomIndex = 1, Type = RoomType.Combat },
             new RoomInstance { Id = Guid.NewGuid(), RoomIndex = 2, Type = RoomType.Combat }
         ]);
         run.State.MapNodes =
@@ -346,19 +498,14 @@ public sealed class DungeonVigorStateTests
     private static DungeonDelveDefinition CreateSectionedDelve(
         int sectionCount,
         int firstRowCount,
-        int secondRowCount)
+        int secondRowCount,
+        int thirdRowCount = 0,
+        int fourthRowCount = 0)
     {
         var definition = new DungeonDelveDefinition
         {
             Id = $"test-{sectionCount}-section-delve",
             DungeonDefinitionIds = [$"test_{sectionCount}_sections"],
-            Omens =
-            [
-                new() { Id = "omen-1", Name = "Omen 1" },
-                new() { Id = "omen-2", Name = "Omen 2" },
-                new() { Id = "omen-3", Name = "Omen 3" },
-                new() { Id = "omen-4", Name = "Omen 4" }
-            ],
             Nodes =
             [
                 new()
@@ -376,26 +523,47 @@ public sealed class DungeonVigorStateTests
         var depth = 0;
         for (var section = 1; section <= sectionCount; section++)
         {
-            depth++;
-            var firstRow = Enumerable.Range(0, firstRowCount)
-                .Select(lane => AddNode(definition, $"s{section}-r1-{lane}", depth, lane, section))
-                .ToList();
-            definition.Nodes[anchorIndex].NextRoomIndexes = firstRow;
-
-            var finalRow = firstRow;
-            if (secondRowCount > 0)
+            List<int>? previousRow = null;
+            var rowCounts = new[]
             {
-                depth++;
-                var secondRow = Enumerable.Range(0, secondRowCount)
-                    .Select(lane => AddNode(definition, $"s{section}-r2-{lane}", depth, lane, section))
-                    .ToList();
-                for (var index = 0; index < firstRow.Count; index++)
+                firstRowCount,
+                secondRowCount,
+                thirdRowCount,
+                fourthRowCount
+            };
+
+            for (var rowIndex = 0; rowIndex < rowCounts.Length; rowIndex++)
+            {
+                var rowCount = rowCounts[rowIndex];
+                if (rowCount <= 0)
                 {
-                    definition.Nodes[firstRow[index]].NextRoomIndexes =
-                        [secondRow[index % secondRow.Count]];
+                    continue;
                 }
 
-                finalRow = secondRow;
+                depth++;
+                var row = Enumerable.Range(0, rowCount)
+                    .Select(lane => AddNode(
+                        definition,
+                        $"s{section}-r{rowIndex + 1}-{lane}",
+                        depth,
+                        lane,
+                        section))
+                    .ToList();
+
+                if (previousRow is null)
+                {
+                    definition.Nodes[anchorIndex].NextRoomIndexes = row;
+                }
+                else
+                {
+                    for (var index = 0; index < previousRow.Count; index++)
+                    {
+                        definition.Nodes[previousRow[index]].NextRoomIndexes =
+                            [row[index % row.Count]];
+                    }
+                }
+
+                previousRow = row;
             }
 
             depth++;
@@ -408,7 +576,7 @@ public sealed class DungeonVigorStateTests
                 Depth = depth,
                 Section = section
             });
-            foreach (var nodeIndex in finalRow)
+            foreach (var nodeIndex in previousRow ?? [])
             {
                 definition.Nodes[nodeIndex].NextRoomIndexes = [restSiteIndex];
             }

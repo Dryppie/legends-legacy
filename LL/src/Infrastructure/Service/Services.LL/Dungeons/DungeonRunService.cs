@@ -935,6 +935,10 @@ public sealed class DungeonRunService : IDungeonRunService
         run.State.VigorHistory ??= [];
         run.State.ActiveOmens ??= [];
         run.State.BossAspects ??= [];
+        run.State.CurrentBossModifiers ??= [];
+        run.State.ActiveOmens.Clear();
+        run.State.BossAspects.Clear();
+        run.State.CurrentBossModifiers.Clear();
         NormalizeSections(run);
         if (run.State.TraversedRoomIndexes.Count == 0)
         {

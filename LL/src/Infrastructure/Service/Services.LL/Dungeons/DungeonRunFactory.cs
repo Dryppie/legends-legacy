@@ -30,7 +30,8 @@ public sealed class DungeonRunFactory
         var delve = _delves.GetForDungeon(dungeonDefinitionId);
         var snapshot = await _snapshotService.CreateAsync(characterId, ct);
 
-        var rand = new Random(seed);
+        var layoutRandom = new Random(seed);
+        var encounterRandom = new Random(seed);
 
         var run = new DungeonRun
         {
@@ -58,17 +59,18 @@ public sealed class DungeonRunFactory
         };
         run.State.RunId = run.Id;
 
-        var layout = CreateDungeonLayout(delve);
+        var layout = CreateDungeonLayout(delve, layoutRandom);
         run.Rooms = layout.Rooms;
         run.State.MapNodes = layout.Nodes;
         run.State.TraversedRoomIndexes = layout.Nodes.Count == 0 ? [] : [layout.Nodes[0].RoomIndex];
         run.Rooms[0].Status = RoomInstanceStatus.Completed;
-        InitializeDelveState(run, dungeon, delve, rand);
-        HydrateRooms(dungeon, run.Rooms, rand);
+        HydrateRooms(dungeon, run.Rooms, encounterRandom);
         return run;
     }
 
-    private static DungeonLayout CreateDungeonLayout(DungeonDelveDefinition delve)
+    private static DungeonLayout CreateDungeonLayout(
+        DungeonDelveDefinition delve,
+        Random random)
     {
         var nodes = delve.Nodes.Select((definition, index) => new DungeonMapNode
         {
@@ -92,46 +94,129 @@ public sealed class DungeonRunFactory
             Type = definition.RoomType,
             Status = RoomInstanceStatus.Pending
         }).ToList();
+
+        RandomizeLayout(nodes, rooms, random);
         return new DungeonLayout(rooms, nodes);
     }
 
     private sealed record DungeonLayout(List<RoomInstance> Rooms, List<DungeonMapNode> Nodes);
-    private static void InitializeDelveState(
-        DungeonRun run,
-        DungeonDefinition dungeon,
-        DungeonDelveDefinition delve,
+
+    private static void RandomizeLayout(
+        List<DungeonMapNode> nodes,
+        IReadOnlyList<RoomInstance> rooms,
         Random random)
     {
-        run.State.ActiveOmens = delve.Omens.Select(omen => new DungeonOmen
-        {
-            Id = omen.Id,
-            Name = omen.Name,
-            Description = omen.Description,
-            CombatTollModifier = omen.CombatTollModifier,
-            HazardTollModifier = omen.HazardTollModifier
-        }).ToList();
-
-        var tier = dungeon.Id.EndsWith("_iii", StringComparison.OrdinalIgnoreCase) ? 3
-            : dungeon.Id.EndsWith("_ii", StringComparison.OrdinalIgnoreCase) ? 2 : 1;
-        run.State.ActiveOmens = run.State.ActiveOmens
-            .OrderBy(_ => random.Next())
-            .Take(tier == 3 ? 2 : 1)
+        var rows = nodes
+            .GroupBy(node => node.Depth)
+            .OrderBy(group => group.Key)
+            .Select(group => group.OrderBy(node => node.RoomIndex).ToList())
             .ToList();
 
-        run.State.BossAspects = delve.BossAspects
-        .Where(aspect => aspect.MinimumTier <= tier)
-        .Select(aspect => new DungeonBossAspect
+        foreach (var row in rows.Where(row => row.Count > 1))
         {
-            Id = aspect.Id,
-            Name = aspect.Name,
-            Description = aspect.Description,
-            Source = aspect.Source,
-            AttributeType = aspect.AttributeType,
-            Amount = aspect.Amount,
-            ModifierType = aspect.ModifierType
-        }).ToList();
+            var encounterNodes = row
+                .Where(node => rooms[node.RoomIndex].Type is RoomType.Combat or RoomType.MiniBoss)
+                .ToList();
+            if (encounterNodes.Count != row.Count)
+            {
+                continue;
+            }
+
+            var lanes = encounterNodes.Select(node => node.Lane).ToList();
+            Shuffle(lanes, random);
+            for (var index = 0; index < encounterNodes.Count; index++)
+            {
+                encounterNodes[index].Lane = lanes[index];
+            }
+        }
+
+        foreach (var node in nodes)
+        {
+            node.NextRoomIndexes.Clear();
+        }
+
+        for (var rowIndex = 0; rowIndex + 1 < rows.Count; rowIndex++)
+        {
+            ConnectRows(rows[rowIndex], rows[rowIndex + 1], random);
+        }
     }
 
+    private static void ConnectRows(
+        IReadOnlyList<DungeonMapNode> sourceRow,
+        IReadOnlyList<DungeonMapNode> targetRow,
+        Random random)
+    {
+        if (sourceRow.Count == 1)
+        {
+            sourceRow[0].NextRoomIndexes = targetRow
+                .OrderBy(node => node.Lane)
+                .ThenBy(node => node.RoomIndex)
+                .Select(node => node.RoomIndex)
+                .ToList();
+            return;
+        }
+
+        if (targetRow.Count == 1)
+        {
+            foreach (var source in sourceRow)
+            {
+                source.NextRoomIndexes = [targetRow[0].RoomIndex];
+            }
+
+            return;
+        }
+
+        var shuffledSources = sourceRow.ToList();
+        var shuffledTargets = targetRow.ToList();
+        Shuffle(shuffledSources, random);
+        Shuffle(shuffledTargets, random);
+
+        for (var index = 0; index < shuffledSources.Count; index++)
+        {
+            shuffledSources[index].NextRoomIndexes.Add(
+                shuffledTargets[index % shuffledTargets.Count].RoomIndex);
+        }
+
+        for (var index = shuffledSources.Count; index < shuffledTargets.Count; index++)
+        {
+            shuffledSources[index % shuffledSources.Count].NextRoomIndexes.Add(
+                shuffledTargets[index].RoomIndex);
+        }
+
+        var additionalEdges = (
+                from source in sourceRow
+                from target in targetRow
+                where !source.NextRoomIndexes.Contains(target.RoomIndex)
+                select (Source: source, Target: target))
+            .ToList();
+        Shuffle(additionalEdges, random);
+
+        var extraEdgeCount = random.Next(
+            1,
+            Math.Min(sourceRow.Count, additionalEdges.Count) + 1);
+        foreach (var edge in additionalEdges.Take(extraEdgeCount))
+        {
+            edge.Source.NextRoomIndexes.Add(edge.Target.RoomIndex);
+        }
+
+        foreach (var source in sourceRow)
+        {
+            source.NextRoomIndexes = source.NextRoomIndexes
+                .Distinct()
+                .OrderBy(index => targetRow.Single(node => node.RoomIndex == index).Lane)
+                .ThenBy(index => index)
+                .ToList();
+        }
+    }
+
+    private static void Shuffle<T>(IList<T> values, Random random)
+    {
+        for (var index = values.Count - 1; index > 0; index--)
+        {
+            var swapIndex = random.Next(index + 1);
+            (values[index], values[swapIndex]) = (values[swapIndex], values[index]);
+        }
+    }
 
     private static void HydrateRooms(DungeonDefinition dungeon, List<RoomInstance> rooms, Random rand)
     {

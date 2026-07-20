@@ -7,6 +7,7 @@ namespace Services.LL.Dungeons;
 public sealed class DungeonVigorService : IDungeonVigorService
 {
     public const int RestSiteRecovery = 15;
+    public const double CombatTollMultiplier = 0.85d;
 
     public int ApplyCombatToll(DungeonRun run, RoomInstance room, CombatResult result)
     {
@@ -32,19 +33,22 @@ public sealed class DungeonVigorService : IDungeonVigorService
         var performanceToll = (int)Math.Round(
             (maximumToll - minimumToll) * Math.Clamp(damagePercent / 100d, 0d, 1d),
             MidpointRounding.AwayFromZero);
-        var omenModifier = run.State.ActiveOmens.Sum(omen => omen.CombatTollModifier);
-        var toll = minimumToll
+        var combatToll = minimumToll
             + performanceToll
-            + (downedMembers * 6)
-            + omenModifier;
+            + (downedMembers * 6);
+        var toll = ScaleCombatToll(combatToll);
 
         return Apply(run, room, -Math.Clamp(toll, 0, 35), "Combat toll");
     }
 
+    public static int ScaleCombatToll(int toll) =>
+        (int)Math.Round(
+            Math.Max(0, toll) * CombatTollMultiplier,
+            MidpointRounding.AwayFromZero);
+
     public int ApplyHazardToll(DungeonRun run, RoomInstance room, int baseToll)
     {
-        var omenModifier = run.State.ActiveOmens.Sum(omen => omen.HazardTollModifier);
-        var toll = Math.Clamp(baseToll + omenModifier, 0, 35);
+        var toll = Math.Clamp(baseToll, 0, 35);
         return Apply(run, room, -toll, "Hazard toll");
     }
 

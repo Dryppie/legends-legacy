@@ -12,395 +12,443 @@
 </ng-container>
 
 <ng-template #showDungeon>
-  <div
-    class="dungeon-shell ll-panel bg-texture"
-    *ngIf="activeDungeon() as run; else emptyState"
+  <ng-container
+    *ngIf="claimedRewardResult() as rewardResult; else dungeonRunState"
   >
-    <header class="dungeon-header">
-      <div>
-        <div class="dungeon-eyebrow ll-eyebrow">Dungeon run</div>
-        <h1 class="ll-heading">{{ dungeonTitle() }}</h1>
-      </div>
+    <div class="dungeon-shell ll-panel bg-texture">
+      <header class="dungeon-header">
+        <div>
+          <div class="dungeon-eyebrow ll-eyebrow">Dungeon rewards</div>
+          <h1 class="ll-heading">
+            {{ rewardResult.run.dungeonDefinitionName }}
+          </h1>
+        </div>
 
-      <div class="dungeon-header__actions">
         <div class="dungeon-depth">
-          Depth <strong>{{ currentDepthNumber() }}</strong> of
-          {{ totalDepths() }}
-          <span>·</span>
-          <b>{{ phaseLabel() }}</b>
-          <span class="dungeon-status-note"> - {{ statusNote() }}</span>
+          Expedition
+          <strong>
+            {{
+              rewardResult.run.status === "Retreated"
+                ? "Retreated"
+                : "Completed"
+            }}
+          </strong>
         </div>
-        <button
-          class="dungeon-button dungeon-button--danger ll-button"
-          type="button"
-          *ngIf="canRetreat()"
-          [disabled]="loading()"
-          (click)="retreatAndSecureLoot()"
-        >
-          Retreat &amp; Secure Loot
-        </button>
-      </div>
-    </header>
+      </header>
 
-    <div class="dungeon-error ll-state ll-state-danger" *ngIf="error()">
-      <span>{{ error() }}</span>
-      <button type="button" (click)="refresh()">Retry</button>
-    </div>
+      <main class="dungeon-result dungeon-result--success">
+        <section class="dungeon-result__summary ll-panel ll-panel-strong">
+          <div class="dungeon-result__mark" aria-hidden="true">✓</div>
+          <div class="dungeon-result__eyebrow ll-eyebrow">Rewards claimed</div>
+          <h2>{{ rewardResultTitle() }}</h2>
+          <p class="dungeon-result__explanation">
+            {{ rewardResultExplanation() }}
+          </p>
 
-    <div class="dungeon-message ll-state" *ngIf="message()">
-      {{ message() }}
-    </div>
-
-    <main
-      class="dungeon-failure"
-      *ngIf="run.status === 'Failed'; else activeRun"
-    >
-      <section class="dungeon-failure__summary ll-panel ll-panel-strong">
-        <div class="dungeon-failure__mark" aria-hidden="true">×</div>
-        <div class="dungeon-failure__eyebrow ll-eyebrow">Expedition ended</div>
-        <h2>{{ failureTitle() }}</h2>
-        <p class="dungeon-failure__explanation">
-          {{ failureExplanation() }}
-        </p>
-
-        <div class="dungeon-failure__facts">
-          <div>
-            <span>Final location</span>
-            <strong>{{ failureLocation() }}</strong>
+          <div class="dungeon-result__facts">
+            <div>
+              <span>Outcome</span>
+              <strong>
+                {{
+                  rewardResult.run.status === "Retreated"
+                    ? "Safe retreat"
+                    : "Dungeon cleared"
+                }}
+              </strong>
+            </div>
+            <div>
+              <span>Rooms cleared</span>
+              <strong>{{ claimedRoomCount() }}</strong>
+            </div>
+            <div>
+              <span>Final Vigor</span>
+              <strong>
+                {{ rewardResult.run.state.vigor }} ·
+                {{ rewardResult.run.state.vigorState }}
+              </strong>
+            </div>
           </div>
-          <div>
-            <span>Rooms cleared</span>
-            <strong>{{ clearedRoomCount() }}</strong>
-          </div>
-          <div>
-            <span>Final Vigor</span>
-            <strong>{{ run.state.vigor }} · {{ run.state.vigorState }}</strong>
-          </div>
-        </div>
 
-        <div
-          class="dungeon-failure__guidance"
-          *ngIf="failureSuggestions().length"
-        >
-          <div class="dungeon-sidebar__eyebrow ll-eyebrow">For next time</div>
-          <ul>
-            <li
+          <button
+            class="dungeon-button dungeon-button--primary ll-button ll-button-primary"
+            type="button"
+            (click)="returnToWorldAfterClaim()"
+          >
+            Return to World
+          </button>
+        </section>
+
+        <aside class="dungeon-result__loot ll-panel">
+          <div class="dungeon-sidebar__eyebrow ll-eyebrow">Secured Loot</div>
+          <p>These rewards have been added to your character.</p>
+
+          <div class="dungeon-currency-grid">
+            <div
               *ngFor="
-                let suggestion of failureSuggestions();
+                let reward of claimedCurrencyRewards();
                 trackBy: trackByIndex
               "
             >
-              {{ suggestion }}
-            </li>
-          </ul>
+              <strong>{{ reward.value | number }}</strong>
+              <span>{{ reward.label }}</span>
+            </div>
+          </div>
+
+          <div
+            class="dungeon-item-list"
+            *ngIf="rewardResult.claimedLoot.length"
+          >
+            <div
+              *ngFor="
+                let item of rewardResult.claimedLoot;
+                trackBy: trackByIndex
+              "
+            >
+              <span>
+                <strong>{{ claimedItemName(item) }}</strong>
+                <small>{{ claimedItemType(item) }}</small>
+              </span>
+              <b>×{{ item.quantity }}</b>
+            </div>
+          </div>
+
+          <div
+            class="dungeon-result__notice"
+            *ngIf="!rewardResult.claimedLoot.length"
+          >
+            No item drops were earned during this expedition.
+          </div>
+        </aside>
+      </main>
+    </div>
+  </ng-container>
+
+  <ng-template #dungeonRunState>
+    <div
+      class="dungeon-shell ll-panel bg-texture"
+      *ngIf="activeDungeon() as run; else emptyState"
+    >
+      <header class="dungeon-header">
+        <div>
+          <div class="dungeon-eyebrow ll-eyebrow">Dungeon run</div>
+          <h1 class="ll-heading">{{ dungeonTitle() }}</h1>
         </div>
 
-        <button
-          class="dungeon-button dungeon-button--primary ll-button ll-button-primary"
-          type="button"
-          [disabled]="loading()"
-          (click)="dismissFailedDungeonRun()"
-        >
-          Return to World
-        </button>
-      </section>
-
-      <aside class="dungeon-failure__loot ll-panel">
-        <div class="dungeon-sidebar__eyebrow ll-eyebrow">Lost Pending Loot</div>
-        <p>This Pending Loot was lost when the expedition ended.</p>
-
-        <div class="dungeon-currency-grid">
-          <div
-            *ngFor="
-              let reward of failedCurrencyRewards();
-              trackBy: trackByIndex
-            "
-          >
-            <strong>{{ reward.value | number }}</strong>
-            <span>{{ reward.label }}</span>
+        <div class="dungeon-header__actions">
+          <div class="dungeon-depth">
+            Depth <strong>{{ currentDepthNumber() }}</strong> of
+            {{ totalDepths() }}
+            <span>·</span>
+            <b>{{ phaseLabel() }}</b>
+            <span class="dungeon-status-note"> - {{ statusNote() }}</span>
           </div>
         </div>
+      </header>
 
-        <div class="dungeon-item-list" *ngIf="failedItemRewards().length">
-          <div
-            *ngFor="let reward of failedItemRewards(); trackBy: trackByIndex"
-          >
-            <span>
-              <strong>{{ formatRewardSource(reward.id) }}</strong>
-              <small>Lost item</small>
-            </span>
-            <b>×{{ reward.quantity }}</b>
-          </div>
-        </div>
+      <div class="dungeon-error ll-state ll-state-danger" *ngIf="error()">
+        <span>{{ error() }}</span>
+        <button type="button" (click)="refresh()">Retry</button>
+      </div>
 
-        <div class="dungeon-failure__notice">
-          Previously secured rewards are unaffected.
-        </div>
-      </aside>
-    </main>
+      <div class="dungeon-message ll-state" *ngIf="message()">
+        {{ message() }}
+      </div>
 
-    <ng-template #activeRun>
       <main
-        class="dungeon-invalid-map"
-        *ngIf="!hasPlayableMap(); else playableRun"
+        class="dungeon-result dungeon-result--failure"
+        *ngIf="run.status === 'Failed'; else activeRun"
       >
-        <section class="dungeon-invalid-map__card ll-panel ll-panel-strong">
-          <div class="dungeon-invalid-map__mark" aria-hidden="true">!</div>
-          <div class="ll-eyebrow">Dungeon map unavailable</div>
-          <h2>This run has no authored layout</h2>
-          <p>
-            The server did not include the dungeon graph required to continue
-            this expedition safely. Refresh once after the API has restarted. If
-            the map is still unavailable, retreat from this empty run and begin a new
-            one.
+        <section class="dungeon-result__summary ll-panel ll-panel-strong">
+          <div class="dungeon-result__mark" aria-hidden="true">×</div>
+          <div class="dungeon-result__eyebrow ll-eyebrow">Expedition ended</div>
+          <h2>{{ failureTitle() }}</h2>
+          <p class="dungeon-result__explanation">
+            {{ failureExplanation() }}
           </p>
+
+          <div class="dungeon-result__facts">
+            <div>
+              <span>Final location</span>
+              <strong>{{ failureLocation() }}</strong>
+            </div>
+            <div>
+              <span>Rooms cleared</span>
+              <strong>{{ clearedRoomCount() }}</strong>
+            </div>
+            <div>
+              <span>Final Vigor</span>
+              <strong
+                >{{ run.state.vigor }} · {{ run.state.vigorState }}</strong
+              >
+            </div>
+          </div>
+
+          <div
+            class="dungeon-result__guidance"
+            *ngIf="failureSuggestions().length"
+          >
+            <div class="dungeon-sidebar__eyebrow ll-eyebrow">For next time</div>
+            <ul>
+              <li
+                *ngFor="
+                  let suggestion of failureSuggestions();
+                  trackBy: trackByIndex
+                "
+              >
+                {{ suggestion }}
+              </li>
+            </ul>
+          </div>
+
           <button
             class="dungeon-button dungeon-button--primary ll-button ll-button-primary"
             type="button"
             [disabled]="loading()"
-            (click)="refresh()"
+            (click)="dismissFailedDungeonRun()"
           >
-            Refresh Map
+            Return to World
           </button>
         </section>
+
+        <aside class="dungeon-result__loot ll-panel">
+          <div class="dungeon-sidebar__eyebrow ll-eyebrow">
+            Lost Pending Loot
+          </div>
+          <p>This Pending Loot was lost when the expedition ended.</p>
+
+          <div class="dungeon-currency-grid">
+            <div
+              *ngFor="
+                let reward of failedCurrencyRewards();
+                trackBy: trackByIndex
+              "
+            >
+              <strong>{{ reward.value | number }}</strong>
+              <span>{{ reward.label }}</span>
+            </div>
+          </div>
+
+          <div class="dungeon-item-list" *ngIf="failedItemRewards().length">
+            <div
+              *ngFor="let reward of failedItemRewards(); trackBy: trackByIndex"
+            >
+              <span>
+                <strong>{{ formatRewardSource(reward.id) }}</strong>
+                <small>Lost item</small>
+              </span>
+              <b>×{{ reward.quantity }}</b>
+            </div>
+          </div>
+
+          <div class="dungeon-result__notice">
+            Previously secured rewards are unaffected.
+          </div>
+        </aside>
       </main>
 
-      <ng-template #playableRun>
-        <main class="dungeon-layout">
-          <section class="dungeon-map-panel">
-            <div class="dungeon-map-scroll" #dungeonMapScroll>
-              <div
-                class="dungeon-map"
-                [style.width.px]="graphWidth()"
-                [style.height.px]="graphHeight"
-              >
-                <svg
-                  class="dungeon-edges"
-                  [attr.width]="graphWidth()"
-                  [attr.height]="graphHeight"
-                  [attr.viewBox]="'0 0 ' + graphWidth() + ' ' + graphHeight"
-                  aria-hidden="true"
-                >
-                  <line
-                    *ngFor="let edge of graphEdges(); trackBy: trackEdge"
-                    [attr.x1]="edge.x1"
-                    [attr.y1]="edge.y1"
-                    [attr.x2]="edge.x2"
-                    [attr.y2]="edge.y2"
-                    [ngClass]="{
-                      'dungeon-edge--traversed': edge.isTraversed,
-                      'dungeon-edge--available': edge.isAvailable,
-                    }"
-                  ></line>
-                </svg>
-
-                <button
-                  *ngFor="let node of graphNodes(); trackBy: trackNode"
-                  class="dungeon-node"
-                  type="button"
-                  [class.dungeon-node--clickable]="!!node.route"
-                  [ngClass]="nodeClass(node)"
-                  [attr.data-room-type]="node.room?.type || 'Unknown'"
-                  [style.left.px]="node.x"
-                  [style.top.px]="node.y"
-                  [disabled]="!node.route || loading()"
-                  [attr.aria-label]="
-                    node.route
-                      ? 'Choose ' +
-                        node.route.displayName +
-                        ', ' +
-                        getRoomTypeLabel(node.room?.type)
-                      : getRoomTypeLabel(node.room?.type)
-                  "
-                  [attr.title]="
-                    node.route
-                      ? node.route.displayName +
-                        ' · ' +
-                        node.route.forecast +
-                        ' · Vigor ' +
-                        node.route.vigorCostMin +
-                        '–' +
-                        node.route.vigorCostMax
-                      : null
-                  "
-                  (click)="chooseMapNode(node)"
-                >
-                  <span class="dungeon-node__circle">
-                    <span
-                      class="dungeon-node__check"
-                      *ngIf="
-                        (node.room?.status === 'Completed' &&
-                          !isCurrentNode(node)) ||
-                          (isTraversedNode(node) && !isCurrentNode(node));
-                        else roomIcon
-                      "
-                      >✓</span
-                    >
-                    <ng-template #roomIcon>
-                      <app-dungeon-room-icon
-                        [type]="node.room?.type"
-                      ></app-dungeon-room-icon>
-                    </ng-template>
-                  </span>
-                  <span class="dungeon-node__label">
-                    {{ getRoomTypeLabel(node.room?.type) }}
-                  </span>
-                  <span class="dungeon-node__route" *ngIf="node.route">
-                    {{ node.route.displayName }}
-                  </span>
-                  <span class="dungeon-node__route-cost" *ngIf="node.route">
-                    Vigor {{ node.route.vigorCostMin }}–{{
-                      node.route.vigorCostMax
-                    }}
-                  </span>
-                </button>
-              </div>
-            </div>
-
-            <aside
-              class="dungeon-decision ll-panel ll-panel-strong"
-              *ngIf="!routeOptions().length"
+      <ng-template #activeRun>
+        <main
+          class="dungeon-invalid-map"
+          *ngIf="!hasPlayableMap(); else playableRun"
+        >
+          <section class="dungeon-invalid-map__card ll-panel ll-panel-strong">
+            <div class="dungeon-invalid-map__mark" aria-hidden="true">!</div>
+            <div class="ll-eyebrow">Dungeon map unavailable</div>
+            <h2>This run has no authored layout</h2>
+            <p>
+              The server did not include the dungeon graph required to continue
+              this expedition safely. Refresh once after the API has restarted.
+              If the map is still unavailable, retreat from this empty run and
+              begin a new one.
+            </p>
+            <button
+              class="dungeon-button dungeon-button--primary ll-button ll-button-primary"
+              type="button"
+              [disabled]="loading()"
+              (click)="refresh()"
             >
-              <div class="dungeon-decision__eyebrow">
-                {{ decisionEyebrow() }}
-              </div>
-              <h2>{{ decisionTitle() }}</h2>
-              <p>{{ decisionDescription() }}</p>
-
-              <div class="dungeon-choice-list" *ngIf="eventChoices().length">
-                <button
-                  class="ll-card"
-                  type="button"
-                  *ngFor="let choice of eventChoices(); trackBy: trackByIndex"
-                  [disabled]="
-                    loading() || (choice.missingRequirements?.length ?? 0) > 0
-                  "
-                  (click)="chooseEventChoice(choice.id)"
-                >
-                  <span>{{ choice.label }}</span>
-                  <small>{{ choice.description }}</small>
-                </button>
-              </div>
-
-              <button
-                class="dungeon-button dungeon-button--primary ll-button ll-button-primary"
-                type="button"
-                *ngIf="primaryActionLabel() as actionLabel"
-                [disabled]="loading()"
-                (click)="executePrimaryAction()"
-              >
-                {{ actionLabel }}
-              </button>
-            </aside>
-
-            <footer class="dungeon-legend" aria-label="Dungeon room legend">
-              <span class="legend-combat">⚔ Combat</span>
-              <span class="legend-elite">☠ Elite</span>
-              <span class="legend-hazard">△ Hazard</span>
-              <span class="legend-cache">▣ Cache</span>
-              <span class="legend-event">✦ Event</span>
-              <span class="legend-rest">♥ Rest</span>
-              <span class="legend-boss">♛ Boss</span>
-            </footer>
+              Refresh Map
+            </button>
           </section>
+        </main>
 
-          <aside class="dungeon-sidebar">
-            <section class="dungeon-sidebar__section">
-              <div class="dungeon-sidebar__eyebrow ll-eyebrow">Expedition</div>
-
-              <div class="dungeon-meter-row">
-                <div>
-                  <strong>Vigor · {{ run.state.vigorState }}</strong>
-                  <span>{{ run.state.vigor }}/100</span>
-                </div>
-                <div class="dungeon-meter">
-                  <span [style.width.%]="vigorPercent()"></span>
-                </div>
-              </div>
-
-              <div class="dungeon-stat-row">
-                <span>Current Section</span>
-                <strong>
-                  {{ run.state.currentSection }} of
-                  {{ run.state.totalSections }}
-                </strong>
-              </div>
-              <div class="dungeon-stat-row">
-                <span>Rooms cleared</span>
-                <strong>{{ clearedRoomCount() }}</strong>
-              </div>
-
-              <div
-                class="dungeon-vigor-thresholds"
-                [class.dungeon-vigor-thresholds--expanded]="
-                  vigorThresholdsExpanded()
-                "
-                *ngIf="run.state.vigorThresholds.length"
-              >
-                <div class="dungeon-vigor-thresholds__header">
-                  <div class="dungeon-sidebar__eyebrow ll-eyebrow">
-                    Current threshold
-                  </div>
-                  <button
-                    class="dungeon-vigor-thresholds__toggle"
-                    type="button"
-                    aria-label="Show all Vigor thresholds"
-                    aria-controls="dungeon-vigor-threshold-details"
-                    [attr.aria-expanded]="vigorThresholdsExpanded()"
-                    [attr.title]="
-                      vigorThresholdsExpanded()
-                        ? 'Hide all Vigor thresholds'
-                        : 'Show all Vigor thresholds'
-                    "
-                    (click)="toggleVigorThresholds($event)"
-                  >
-                    ?
-                  </button>
-                </div>
-
+        <ng-template #playableRun>
+          <main class="dungeon-layout">
+            <section class="dungeon-map-panel">
+              <div class="dungeon-map-scroll" #dungeonMapScroll>
                 <div
-                  class="dungeon-vigor-threshold dungeon-vigor-threshold--current"
-                  *ngIf="currentVigorThreshold() as threshold"
-                  tabindex="0"
+                  class="dungeon-map"
+                  [style.width.px]="graphWidth()"
+                  [style.height.px]="graphHeight"
                 >
-                  <div>
-                    <strong>{{ threshold.state }}</strong>
-                    <span>
-                      {{
-                        threshold.minimumVigor === threshold.maximumVigor
-                          ? threshold.minimumVigor
-                          : threshold.minimumVigor +
-                            "–" +
-                            threshold.maximumVigor
+                  <svg
+                    class="dungeon-edges"
+                    [attr.width]="graphWidth()"
+                    [attr.height]="graphHeight"
+                    [attr.viewBox]="'0 0 ' + graphWidth() + ' ' + graphHeight"
+                    aria-hidden="true"
+                  >
+                    <line
+                      *ngFor="let edge of graphEdges(); trackBy: trackEdge"
+                      [attr.x1]="edge.x1"
+                      [attr.y1]="edge.y1"
+                      [attr.x2]="edge.x2"
+                      [attr.y2]="edge.y2"
+                      [ngClass]="{
+                        'dungeon-edge--traversed': edge.isTraversed,
+                        'dungeon-edge--available': edge.isAvailable,
+                      }"
+                    ></line>
+                  </svg>
+
+                  <button
+                    *ngFor="let node of graphNodes(); trackBy: trackNode"
+                    class="dungeon-node"
+                    type="button"
+                    [class.dungeon-node--clickable]="isMapNodeActionable(node)"
+                    [ngClass]="nodeClass(node)"
+                    [attr.data-room-type]="node.room?.type || 'Unknown'"
+                    [style.left.px]="node.x"
+                    [style.top.px]="node.y"
+                    [disabled]="!isMapNodeActionable(node) || loading()"
+                    [attr.aria-label]="mapNodeAriaLabel(node)"
+                    [attr.title]="mapNodeTitle(node)"
+                    (click)="chooseMapNode(node)"
+                  >
+                    <span class="dungeon-node__circle">
+                      <span
+                        class="dungeon-node__check"
+                        *ngIf="
+                          (node.room?.status === 'Completed' &&
+                            !isCurrentNode(node)) ||
+                            (isTraversedNode(node) && !isCurrentNode(node));
+                          else roomIcon
+                        "
+                        >✓</span
+                      >
+                      <ng-template #roomIcon>
+                        <app-dungeon-room-icon
+                          [type]="node.room?.type"
+                        ></app-dungeon-room-icon>
+                      </ng-template>
+                    </span>
+                    <span class="dungeon-node__label">
+                      {{ getRoomTypeLabel(node.room?.type) }}
+                    </span>
+                    <span class="dungeon-node__route" *ngIf="node.route">
+                      {{ node.route.displayName }}
+                    </span>
+                    <span class="dungeon-node__route-cost" *ngIf="node.route">
+                      Vigor {{ node.route.vigorCostMin }}–{{
+                        node.route.vigorCostMax
                       }}
                     </span>
+                  </button>
+                </div>
+              </div>
+
+              <aside
+                class="dungeon-decision ll-panel ll-panel-strong"
+                *ngIf="
+                  !routeOptions().length && !currentRoomUsesDirectNodeAction()
+                "
+              >
+                <div class="dungeon-decision__eyebrow">
+                  {{ decisionEyebrow() }}
+                </div>
+                <h2>{{ decisionTitle() }}</h2>
+                <p>{{ decisionDescription() }}</p>
+
+                <button
+                  class="dungeon-button dungeon-button--primary ll-button ll-button-primary"
+                  type="button"
+                  *ngIf="primaryActionLabel() as actionLabel"
+                  [disabled]="loading()"
+                  (click)="executePrimaryAction()"
+                >
+                  {{ actionLabel }}
+                </button>
+              </aside>
+
+              <footer class="dungeon-legend" aria-label="Dungeon room legend">
+                <span class="legend-combat">⚔ Combat</span>
+                <span class="legend-miniboss">☠ Miniboss</span>
+                <span class="legend-rest">♥ Rest Site</span>
+                <span class="legend-boss">♛ Boss</span>
+              </footer>
+            </section>
+
+            <aside class="dungeon-sidebar">
+              <section class="dungeon-sidebar__section">
+                <div class="dungeon-sidebar__eyebrow ll-eyebrow">
+                  Expedition
+                </div>
+
+                <div class="dungeon-meter-row">
+                  <div>
+                    <strong>Vigor · {{ run.state.vigorState }}</strong>
+                    <span>{{ run.state.vigor }}/100</span>
                   </div>
-                  <p>{{ threshold.summary }}</p>
-                  <ul>
-                    <li
-                      *ngFor="
-                        let effect of threshold.effects;
-                        trackBy: trackByIndex
-                      "
-                    >
-                      {{ effect }}
-                    </li>
-                  </ul>
+                  <div
+                    class="dungeon-meter"
+                    role="progressbar"
+                    aria-label="Expedition Vigor"
+                    aria-valuemin="0"
+                    aria-valuemax="100"
+                    [attr.aria-valuenow]="vigorPercent()"
+                  >
+                    <span
+                      class="dungeon-meter__fill"
+                      aria-hidden="true"
+                      [style.clip-path]="vigorGradientClipPath()"
+                    ></span>
+                  </div>
+                </div>
+
+                <div class="dungeon-stat-row">
+                  <span>Current Section</span>
+                  <strong>
+                    {{ run.state.currentSection }} of
+                    {{ run.state.totalSections }}
+                  </strong>
+                </div>
+                <div class="dungeon-stat-row">
+                  <span>Rooms cleared</span>
+                  <strong>{{ clearedRoomCount() }}</strong>
                 </div>
 
                 <div
-                  class="dungeon-vigor-thresholds__popover ll-panel ll-panel-strong"
-                  id="dungeon-vigor-threshold-details"
+                  class="dungeon-vigor-thresholds"
+                  [class.dungeon-vigor-thresholds--expanded]="
+                    vigorThresholdsExpanded()
+                  "
+                  *ngIf="run.state.vigorThresholds.length"
                 >
-                  <div class="dungeon-sidebar__eyebrow ll-eyebrow">
-                    Other thresholds
+                  <div class="dungeon-vigor-thresholds__header">
+                    <div class="dungeon-sidebar__eyebrow ll-eyebrow">
+                      Current threshold
+                    </div>
+                    <button
+                      class="dungeon-vigor-thresholds__toggle"
+                      type="button"
+                      aria-label="Show all Vigor thresholds"
+                      aria-controls="dungeon-vigor-threshold-details"
+                      [attr.aria-expanded]="vigorThresholdsExpanded()"
+                      [attr.title]="
+                        vigorThresholdsExpanded()
+                          ? 'Hide all Vigor thresholds'
+                          : 'Show all Vigor thresholds'
+                      "
+                      (click)="toggleVigorThresholds($event)"
+                    >
+                      ?
+                    </button>
                   </div>
+
                   <div
-                    class="dungeon-vigor-threshold"
-                    *ngFor="
-                      let threshold of otherVigorThresholds();
-                      trackBy: trackByIndex
-                    "
+                    class="dungeon-vigor-threshold dungeon-vigor-threshold--current"
+                    *ngIf="currentVigorThreshold() as threshold"
+                    tabindex="0"
                   >
                     <div>
                       <strong>{{ threshold.state }}</strong>
@@ -426,110 +474,135 @@
                       </li>
                     </ul>
                   </div>
-                </div>
-              </div>
 
-              <div class="dungeon-effects" *ngIf="run.state.activeOmens.length">
-                <div
-                  class="dungeon-effect"
-                  *ngFor="
-                    let omen of run.state.activeOmens;
-                    trackBy: trackByIndex
-                  "
-                >
-                  <span>{{ omen.name }}</span>
-                  <small>{{ omen.description }}</small>
-                </div>
-              </div>
-
-              <div class="dungeon-effects" *ngIf="run.state.bossAspects.length">
-                <div
-                  class="dungeon-effect"
-                  *ngFor="
-                    let aspect of run.state.bossAspects;
-                    trackBy: trackByIndex
-                  "
-                >
-                  <span
-                    [class.dungeon-aspect--removed]="aspect.state === 'Removed'"
+                  <div
+                    class="dungeon-vigor-thresholds__popover ll-panel ll-panel-strong"
+                    id="dungeon-vigor-threshold-details"
                   >
-                    {{ aspect.name }} · {{ aspect.state }}
-                  </span>
-                  <small>{{ aspect.stateReason || aspect.description }}</small>
+                    <div class="dungeon-sidebar__eyebrow ll-eyebrow">
+                      Other thresholds
+                    </div>
+                    <div
+                      class="dungeon-vigor-threshold"
+                      *ngFor="
+                        let threshold of otherVigorThresholds();
+                        trackBy: trackByIndex
+                      "
+                    >
+                      <div>
+                        <strong>{{ threshold.state }}</strong>
+                        <span>
+                          {{
+                            threshold.minimumVigor === threshold.maximumVigor
+                              ? threshold.minimumVigor
+                              : threshold.minimumVigor +
+                                "–" +
+                                threshold.maximumVigor
+                          }}
+                        </span>
+                      </div>
+                      <p>{{ threshold.summary }}</p>
+                      <ul>
+                        <li
+                          *ngFor="
+                            let effect of threshold.effects;
+                            trackBy: trackByIndex
+                          "
+                        >
+                          {{ effect }}
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </section>
+              </section>
 
-            <section class="dungeon-sidebar__section dungeon-loot">
-              <div class="dungeon-sidebar__eyebrow ll-eyebrow">
-                Pending Loot
-              </div>
+              <section class="dungeon-sidebar__section dungeon-loot">
+                <div class="dungeon-sidebar__eyebrow ll-eyebrow">
+                  Pending Loot
+                </div>
 
-              <div class="dungeon-currency-grid">
+                <div class="dungeon-currency-grid">
+                  <div
+                    *ngFor="
+                      let reward of pendingCurrencyRewards();
+                      trackBy: trackByIndex
+                    "
+                  >
+                    <strong>{{ reward.value | number }}</strong>
+                    <span>{{ reward.label }}</span>
+                  </div>
+                </div>
+
+                <div class="dungeon-item-list" *ngIf="pendingRewards().length">
+                  <div
+                    *ngFor="
+                      let reward of pendingRewards();
+                      trackBy: trackByIndex
+                    "
+                  >
+                    <span>
+                      <strong>{{ reward.name }}</strong>
+                      <small>{{ formatRewardSource(reward.source) }}</small>
+                    </span>
+                    <b>×{{ reward.quantity }}</b>
+                  </div>
+                </div>
+
+                <p class="dungeon-empty-loot" *ngIf="!pendingRewards().length">
+                  Item drops collected during the run will appear here.
+                </p>
+              </section>
+
+              <section
+                class="dungeon-sidebar__section"
+                *ngIf="run.state.failureAnalysis as analysis"
+              >
+                <div class="dungeon-sidebar__eyebrow ll-eyebrow">
+                  Failure analysis
+                </div>
+                <h3>{{ analysis.primaryCause }}</h3>
+                <p>{{ analysis.location }} · Section {{ analysis.section }}</p>
+                <p>{{ analysis.explanation }}</p>
+                <div class="dungeon-stat-row">
+                  <span>Lost Pending Loot</span>
+                  <strong>
+                    {{ analysis.lostPendingLoot.cinders | number }} Cinders ·
+                    {{ analysis.lostPendingLoot.experience | number }} XP
+                  </strong>
+                </div>
                 <div
+                  class="dungeon-failure-suggestion"
                   *ngFor="
-                    let reward of pendingCurrencyRewards();
+                    let suggestion of analysis.suggestions;
                     trackBy: trackByIndex
                   "
                 >
-                  <strong>{{ reward.value | number }}</strong>
-                  <span>{{ reward.label }}</span>
+                  {{ suggestion }}
                 </div>
-              </div>
+              </section>
 
-              <div class="dungeon-item-list" *ngIf="pendingRewards().length">
-                <div
-                  *ngFor="let reward of pendingRewards(); trackBy: trackByIndex"
+              <div class="dungeon-warning ll-card ll-card-warning mt-2 pt-2">
+                <p>
+                  Pending Loot is lost on failure. Retreat at any time to secure
+                  it.
+                </p>
+                <button
+                  *ngIf="canRetreat()"
+                  class="dungeon-button dungeon-button--danger ll-button"
+                  type="button"
+                  [disabled]="loading()"
+                  (click)="retreatAndSecureLoot()"
                 >
-                  <span>
-                    <strong>{{ reward.name }}</strong>
-                    <small>{{ formatRewardSource(reward.source) }}</small>
-                  </span>
-                  <b>×{{ reward.quantity }}</b>
-                </div>
+                  Retreat &amp; Secure Loot
+                </button>
               </div>
-
-              <p class="dungeon-empty-loot" *ngIf="!pendingRewards().length">
-                Item drops collected during the run will appear here.
-              </p>
-            </section>
-
-            <section
-              class="dungeon-sidebar__section"
-              *ngIf="run.state.failureAnalysis as analysis"
-            >
-              <div class="dungeon-sidebar__eyebrow ll-eyebrow">
-                Failure analysis
-              </div>
-              <h3>{{ analysis.primaryCause }}</h3>
-              <p>{{ analysis.location }} · Section {{ analysis.section }}</p>
-              <p>{{ analysis.explanation }}</p>
-              <div class="dungeon-stat-row">
-                <span>Lost Pending Loot</span>
-                <strong>
-                  {{ analysis.lostPendingLoot.cinders | number }} Cinders ·
-                  {{ analysis.lostPendingLoot.experience | number }} XP
-                </strong>
-              </div>
-              <div
-                class="dungeon-effect"
-                *ngFor="
-                  let suggestion of analysis.suggestions;
-                  trackBy: trackByIndex
-                "
-              >
-                <small>{{ suggestion }}</small>
-              </div>
-            </section>
-
-            <div class="dungeon-warning ll-card ll-card-warning">
-              Pending Loot is lost on failure. Retreat at any time to secure it.
-            </div>
-          </aside>
-        </main>
+            </aside>
+          </main>
+        </ng-template>
       </ng-template>
-    </ng-template>
-  </div>
+    </div>
+  </ng-template>
 </ng-template>
 
 <ng-template #emptyState>
