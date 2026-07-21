@@ -36,12 +36,30 @@ public class CreatureRepository : ICreatureRepository
 
     public async Task<List<Guid>> GetCreaturesByKey(IReadOnlyList<string> creatureKeys, CancellationToken cancellationToken)
     {
-        var creatures = await _context.Creatures
-            .Where(c => creatureKeys.Contains(c.ImagePath))
-            .Select(c => c.Id)
+        var uniqueKeys = creatureKeys
+            .Where(key => !string.IsNullOrWhiteSpace(key))
+            .Select(key => key.Trim())
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToArray();
+
+        var candidates = await _context.Creatures
+            .Where(creature => uniqueKeys.Contains(creature.ImagePath))
+            .Select(creature => new { creature.Id, creature.ImagePath })
             .ToListAsync(cancellationToken);
 
-        return creatures;
+        var idsByKey = candidates
+            .GroupBy(creature => creature.ImagePath, StringComparer.OrdinalIgnoreCase)
+            .ToDictionary(
+                group => group.Key,
+                group => group.Min(creature => creature.Id),
+                StringComparer.OrdinalIgnoreCase);
+
+        return creatureKeys
+            .Where(key => !string.IsNullOrWhiteSpace(key))
+            .Select(key => key.Trim())
+            .Where(idsByKey.ContainsKey)
+            .Select(key => idsByKey[key])
+            .ToList();
     }
 
     public Task<Creature> UpdateCreatureAsync(CancellationToken cancellationToken)

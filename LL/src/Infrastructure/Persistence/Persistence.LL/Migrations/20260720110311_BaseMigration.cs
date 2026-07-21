@@ -1005,7 +1005,6 @@ namespace Persistence.LL.Migrations
                     Type = table.Column<int>(type: "integer", nullable: false),
                     Status = table.Column<int>(type: "integer", nullable: false),
                     EncounterIds = table.Column<List<string>>(type: "text[]", nullable: false),
-                    EventOutcome = table.Column<int>(type: "integer", nullable: true),
                     DungeonRunId = table.Column<Guid>(type: "uuid", nullable: true)
                 },
                 constraints: table =>

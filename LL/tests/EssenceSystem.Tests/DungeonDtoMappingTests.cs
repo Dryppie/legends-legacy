@@ -2,8 +2,6 @@ using Application.Common.Mappings;
 using Application.Interfaces.Services.LL.Dungeons;
 using Application.UseCases.Dungeons.Dtos;
 using AutoMapper;
-using Domain.Models.Attributes;
-using Domain.Models.Attributes.Modifiers;
 using Domain.Models.Dungeons.Definitions.Rooms;
 using Domain.Models.Dungeons.Runs;
 using Domain.Models.Items;
@@ -76,16 +74,6 @@ public sealed class DungeonDtoMappingTests
                     Cinders = 25,
                     Items = new Dictionary<string, int> { ["ore"] = 2 }
                 },
-                CurrentBossModifiers =
-                [
-                    new DungeonBossModifier
-                    {
-                        Id = "power",
-                        AttributeType = AttributeType.Power,
-                        ModifierType = ModifierType.Additive,
-                        Amount = 5
-                    }
-                ],
                 FailureAnalysis = new DungeonFailureAnalysis
                 {
                     Location = "Test Room",
@@ -102,8 +90,6 @@ public sealed class DungeonDtoMappingTests
         Assert.Equal(4, dto.State.TotalSections);
         Assert.Equal(25, dto.State.PendingLoot.Cinders);
         Assert.Equal(2, dto.State.PendingLoot.Items["ore"]);
-        Assert.Equal("Power", Assert.Single(dto.State.CurrentBossModifiers).AttributeType);
-        Assert.Equal("Additive", dto.State.CurrentBossModifiers[0].ModifierType);
         Assert.Equal(3, dto.State.FailureAnalysis?.LostPendingLoot.Soulstones);
         Assert.Equal("rest-site", dto.State.MapNodes[1].Id);
         Assert.Equal("ore", Assert.Single(dto.PendingRewards).ItemId);
@@ -142,7 +128,7 @@ public sealed class DungeonDtoMappingTests
             new ExecuteDungeonActionResult
             {
                 Run = new DungeonRun(),
-                Outcome = DungeonActionOutcome.EventResolved,
+                Outcome = DungeonActionOutcome.RestSiteResolved,
                 Message = "Invalid"
             });
 
@@ -154,7 +140,7 @@ public sealed class DungeonDtoMappingTests
         Assert.Equal(2, requirement.OwnedAmount);
         Assert.Equal("ore", reward.Id);
         Assert.Equal("Ore", reward.ItemBase.Name);
-        Assert.Equal(DungeonActionOutcomeDto.EventResolved, actionResponse.Outcome);
+        Assert.Equal(DungeonActionOutcomeDto.RestSiteResolved, actionResponse.Outcome);
         Assert.Equal("Invalid", actionResponse.Message);
     }
 

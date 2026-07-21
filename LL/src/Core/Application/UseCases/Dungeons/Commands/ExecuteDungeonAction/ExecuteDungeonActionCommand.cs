@@ -57,7 +57,6 @@ public class ExecuteDungeonActionCommandHandler : IRequestHandler<ExecuteDungeon
         var progressEvents = new List<ProphecyProgressEvent>();
 
         if (outcome is DungeonActionOutcome.CombatVictory
-            or DungeonActionOutcome.EventResolved
             or DungeonActionOutcome.RestSiteResolved
             or DungeonActionOutcome.RunCompleted)
         {
@@ -65,14 +64,6 @@ public class ExecuteDungeonActionCommandHandler : IRequestHandler<ExecuteDungeon
                 characterId,
                 now,
                 ProphecyProgressKind.DungeonRoomCleared));
-        }
-
-        if (outcome == DungeonActionOutcome.EventResolved)
-        {
-            progressEvents.Add(new ProphecyProgressEvent(
-                characterId,
-                now,
-                ProphecyProgressKind.DungeonEventResolved));
         }
 
         if (outcome == DungeonActionOutcome.RunCompleted)

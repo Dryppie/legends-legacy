@@ -66,14 +66,7 @@ public sealed class DungeonRouteService : IDungeonRouteService
                         },
                         VigorCostMin = vigorCostMin,
                         VigorCostMax = vigorCostMax,
-                        Forecast = node.Forecast,
-                        BossConsequence = node.BossConsequence,
-                        Tags = node.Tags.ToList(),
-                        PossibleRewards = node.Tags
-                            .Where(tag => tag is "Loot" or "Cache")
-                            .Select(_ => "Pending Loot")
-                            .Distinct()
-                            .ToList()
+                        Forecast = node.Forecast
                     };
                 })
                 .ToList();
@@ -102,12 +95,6 @@ public sealed class DungeonRouteService : IDungeonRouteService
             run.State.TraversedRoomIndexes.Add(route.RoomIndex);
         }
         run.State.CurrentRouteOptions.Clear();
-        if (route.Id.StartsWith("hidden:", StringComparison.OrdinalIgnoreCase))
-        {
-            run.State.Flags["hidden_route_taken"] = run.State.Flags.GetValueOrDefault("hidden_route_taken") + 1;
-            run.State.Flags.Remove("hidden_route_revealed");
-        }
-
         return route;
     }
 }

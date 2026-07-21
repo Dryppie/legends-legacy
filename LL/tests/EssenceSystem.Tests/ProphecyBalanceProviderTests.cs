@@ -26,7 +26,7 @@ public sealed class ProphecyBalanceProviderTests
         var provider = new JsonProphecyBalanceProvider(configuration, apiRoot, options, definitions);
 
         var catalog = provider.GetCatalog();
-        Assert.Equal(26, catalog.Targets.Count);
+        Assert.Equal(24, catalog.Targets.Count);
         Assert.Equal(7, catalog.RewardProfiles.Count);
         Assert.Equal(3, catalog.CategoryRewardPackages.Count);
         Assert.Equal(100, catalog.RewardScaling.CinderGrowthBasisPointsPerCharacterLevel);

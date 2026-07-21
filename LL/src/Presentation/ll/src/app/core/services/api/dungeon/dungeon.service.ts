@@ -21,16 +21,8 @@ export enum RoomType {
   Combat = 'Combat',
   MiniBoss = 'MiniBoss',
   Boss = 'Boss',
-  Event = 'Event',
-  Treasure = 'Treasure',
-  Shrine = 'Shrine',
-  Trap = 'Trap',
   RestSite = 'RestSite',
   Entrance = 'Entrance',
-  Elite = 'Elite',
-  Hazard = 'Hazard',
-  Cache = 'Cache',
-  OmenSite = 'OmenSite',
 }
 
 export enum RoomInstanceStatus {
@@ -39,20 +31,12 @@ export enum RoomInstanceStatus {
   Completed = 'Completed',
 }
 
-export enum EventOutcomeType {
-  ExtraCombat = 'ExtraCombat',
-  TreasureRoom = 'TreasureRoom',
-  Shrine = 'Shrine',
-  Trap = 'Trap',
-}
-
 export interface RoomInstance {
   id: string;
   index: number;
   type: RoomType;
   status: RoomInstanceStatus;
   encounterIds: string[];
-  eventOutcome?: EventOutcomeType | null;
 }
 
 export interface DungeonRun {
@@ -73,14 +57,11 @@ export interface DungeonRun {
 }
 
 export interface DungeonRunState {
-  flags: Record<string, number>;
   securedLoot: DungeonLootBag;
   pendingLoot: DungeonLootBag;
   mapNodes: DungeonMapNode[];
   traversedRoomIndexes: number[];
   currentRouteOptions: DungeonRouteOption[];
-  currentEventChoices: DungeonEventChoiceOption[];
-  currentBossModifiers: DungeonBossModifier[];
   masteryAwardReasons: DungeonMasteryAwardReason[];
   vigor: number;
   vigorState: string;
@@ -91,8 +72,6 @@ export interface DungeonRunState {
   lastConsequence: string;
   expiresAt: string;
   vigorHistory: DungeonVigorChange[];
-  activeOmens: DungeonOmen[];
-  bossAspects: DungeonBossAspect[];
   failureAnalysis?: DungeonFailureAnalysis | null;
 }
 
@@ -115,9 +94,6 @@ export interface DungeonMapNode {
   forecast: string;
   vigorCostMin: number;
   vigorCostMax: number;
-  bossConsequence: string;
-  bossAspectId: string;
-  tags: string[];
   nextRoomIndexes: number[];
 }
 
@@ -126,21 +102,6 @@ export interface DungeonVigorChange {
   amount: number;
   vigorAfter: number;
   reason: string;
-}
-
-export interface DungeonOmen {
-  id: string;
-  name: string;
-  description: string;
-}
-
-export interface DungeonBossAspect {
-  id: string;
-  name: string;
-  description: string;
-  source: string;
-  state: 'Active' | 'Weakened' | 'Removed';
-  stateReason: string;
 }
 
 export interface DungeonFailureAnalysis {
@@ -174,35 +135,6 @@ export interface DungeonRouteOption {
   vigorCostMin: number;
   vigorCostMax: number;
   forecast: string;
-  bossConsequence: string;
-  isUnknown: boolean;
-  tags: string[];
-  possibleRewards: string[];
-  requirements: string[];
-}
-
-export interface DungeonEventChoiceOption {
-  id: string;
-  label: string;
-  description: string;
-  vigorDelta: number;
-  addFlags: string[];
-  removeFlags: string[];
-  missingRequirements?: string[];
-  grantsLoot: boolean;
-  ambushChancePercent: number;
-  revealsHiddenRoute: boolean;
-}
-
-export interface DungeonBossModifier {
-  id: string;
-  name: string;
-  description: string;
-  source: string;
-  attributeType: string;
-  amount: number;
-  modifierType: string;
-  isHelpfulToPlayer: boolean;
 }
 
 export interface RunReward {
@@ -253,7 +185,6 @@ export enum DungeonActionOutcome {
   None = 0,
   CombatVictory = 1,
   CombatDefeat = 2,
-  EventResolved = 3,
   RestSiteResolved = 4,
   RunRetreated = 5,
   RunCompleted = 6,

@@ -17,7 +17,6 @@ public sealed class ProphecyDtoMappingTests
     [InlineData(ProphecyObjectiveType.WinEncounters, ProphecyGuidanceDestination.WorldCombat, "Fight Encounters")]
     [InlineData(ProphecyObjectiveType.ClearDungeonRooms, ProphecyGuidanceDestination.Dungeons, "Run Dungeons")]
     [InlineData(ProphecyObjectiveType.CompleteDungeons, ProphecyGuidanceDestination.Dungeons, "Run Dungeons")]
-    [InlineData(ProphecyObjectiveType.ResolveDungeonEvents, ProphecyGuidanceDestination.Dungeons, "Run Dungeons")]
     [InlineData(ProphecyObjectiveType.GainEssenceXp, ProphecyGuidanceDestination.Essences, "Train Essences")]
     [InlineData(ProphecyObjectiveType.AbsorbEssence, ProphecyGuidanceDestination.SoulArchive, "Open Archive")]
     [InlineData(ProphecyObjectiveType.GatherResources, ProphecyGuidanceDestination.Gathering, "Gather Resources")]

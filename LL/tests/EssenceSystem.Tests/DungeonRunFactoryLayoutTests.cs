@@ -103,6 +103,104 @@ public sealed class DungeonRunFactoryLayoutTests
         }
     }
 
+    [Fact]
+    public async Task Authored_boss_composition_preserves_repeated_creatures()
+    {
+        var dungeon = new DungeonDefinition
+        {
+            Id = "boss_composition_test",
+            Name = "Boss Composition Test",
+            Rooms =
+            [
+                new RoomDefinition
+                {
+                    Type = RoomType.Boss,
+                    EncounterIds = ["hobgoblin", "goblin_shaman", "goblin_shaman", "goblin_archer"]
+                }
+            ]
+        };
+        var delve = new DungeonDelveDefinition
+        {
+            Id = "boss-composition-test-delve",
+            DungeonDefinitionIds = [dungeon.Id],
+            Nodes =
+            [
+                Node("entrance", RoomType.Entrance, 0, 0, 1, [1]),
+                Node("boss", RoomType.Boss, 1, 0, 1, [])
+            ]
+        };
+        var factory = new DungeonRunFactory(
+            new StaticDungeonDefinitions(dungeon),
+            new StaticSnapshotService(),
+            new StaticDelveProvider(delve));
+
+        var run = await factory.CreateAsync(Guid.NewGuid(), dungeon.Id, 42, CancellationToken.None);
+
+        var boss = Assert.Single(run.Rooms, room => room.Type == RoomType.Boss);
+        Assert.Equal(
+            ["hobgoblin", "goblin_shaman", "goblin_shaman", "goblin_archer"],
+            boss.EncounterIds);
+    }
+
+    [Fact]
+    public async Task Regular_combat_selects_two_to_four_creatures_when_available()
+    {
+        var factory = CreateFactory();
+        var observedCounts = new HashSet<int>();
+
+        for (var seed = 0; seed < 50; seed++)
+        {
+            var run = await factory.CreateAsync(Guid.NewGuid(), "layout_test", seed, CancellationToken.None);
+            var combatRooms = run.Rooms.Where(room => room.Type == RoomType.Combat).ToList();
+
+            Assert.All(combatRooms, room => Assert.InRange(room.EncounterIds.Count, 2, 4));
+            observedCounts.UnionWith(combatRooms.Select(room => room.EncounterIds.Count));
+        }
+
+        Assert.Contains(2, observedCounts);
+        Assert.Contains(4, observedCounts);
+    }
+
+    [Fact]
+    public async Task Regular_combat_clamps_selection_to_a_smaller_pool()
+    {
+        var dungeon = new DungeonDefinition
+        {
+            Id = "small_pool_test",
+            Name = "Small Pool Test",
+            Rooms =
+            [
+                new RoomDefinition
+                {
+                    Type = RoomType.Combat,
+                    EncounterIds = ["only-enemy"]
+                },
+                new RoomDefinition
+                {
+                    Type = RoomType.MiniBoss,
+                    EncounterIds = ["miniboss"]
+                },
+                new RoomDefinition
+                {
+                    Type = RoomType.Boss,
+                    EncounterIds = ["boss"]
+                }
+            ]
+        };
+        var delve = CreateDelve();
+        delve.DungeonDefinitionIds = [dungeon.Id];
+        var factory = new DungeonRunFactory(
+            new StaticDungeonDefinitions(dungeon),
+            new StaticSnapshotService(),
+            new StaticDelveProvider(delve));
+
+        var run = await factory.CreateAsync(Guid.NewGuid(), dungeon.Id, 42, CancellationToken.None);
+
+        Assert.All(
+            run.Rooms.Where(room => room.Type == RoomType.Combat),
+            room => Assert.Equal(["only-enemy"], room.EncounterIds));
+    }
+
     private static DungeonRunFactory CreateFactory()
     {
         var dungeon = new DungeonDefinition
@@ -114,7 +212,7 @@ public sealed class DungeonRunFactoryLayoutTests
                 new RoomDefinition
                 {
                     Type = RoomType.Combat,
-                    EncounterIds = ["enemy-a", "enemy-b", "enemy-c"]
+                    EncounterIds = ["enemy-a", "enemy-b", "enemy-c", "enemy-d", "enemy-e"]
                 },
                 new RoomDefinition
                 {

@@ -60,16 +60,6 @@ public sealed class JsonDungeonDelveDefinitionProvider : IDungeonDelveDefinition
                 throw new InvalidOperationException($"Delve '{definition.Id}' must contain exactly one boss.");
             if (definition.Nodes.All(node => node.RoomType != RoomType.RestSite))
                 throw new InvalidOperationException($"Delve '{definition.Id}' must contain at least one Section ending in a Rest Site.");
-            if (definition.Omens.Count > 0 ||
-                definition.BossAspects.Count > 0 ||
-                definition.Nodes.Any(node =>
-                    !string.IsNullOrWhiteSpace(node.BossAspectId) ||
-                    !string.IsNullOrWhiteSpace(node.BossConsequence)))
-            {
-                throw new InvalidOperationException(
-                    $"Delve '{definition.Id}' contains disabled Omen or Boss Aspect content.");
-            }
-
             var unsupportedRoomTypes = definition.Nodes
                 .Select(node => node.RoomType)
                 .Where(roomType => !PlayableRoomTypes.Contains(roomType))

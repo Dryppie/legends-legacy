@@ -218,7 +218,6 @@ function createRun(roomType: RoomType): DungeonRun {
     pendingSoulstones: 0,
     pendingRewards: [],
     state: {
-      flags: {},
       securedLoot: {
         experience: 0,
         cinders: 0,
@@ -244,16 +243,11 @@ function createRun(roomType: RoomType): DungeonRun {
             : 'Defeat the enemies here.',
           vigorCostMin: 0,
           vigorCostMax: 0,
-          bossConsequence: '',
-          bossAspectId: '',
-          tags: [],
           nextRoomIndexes: [4],
         },
       ],
       traversedRoomIndexes: [3],
       currentRouteOptions: [],
-      currentEventChoices: [],
-      currentBossModifiers: [],
       masteryAwardReasons: [],
       vigor: 68,
       vigorState: 'Steady',
@@ -264,8 +258,6 @@ function createRun(roomType: RoomType): DungeonRun {
       lastConsequence: '',
       expiresAt: new Date().toISOString(),
       vigorHistory: [],
-      activeOmens: [],
-      bossAspects: [],
     },
     createdAt: new Date().toISOString(),
   };

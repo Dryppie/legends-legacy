@@ -41,8 +41,8 @@ These decisions are already made and should not be reopened accidentally.
 | Section shape        | A Section contains one to three encounter rows, with one to three nodes per row, before reconverging at a Rest Site.                             |
 | Recovery nodes       | Use **Rest Sites**, never Wardstones or checkpoints.                                                                                              |
 | Rest effect          | A Rest Site restores **15 Vigor**.                                                                                                                |
-| Playable room scope  | For now, authored dungeons may contain only Entrance, Combat, MiniBoss, Rest Site, and Boss rooms. Hazard, Cache, Event, and Omen Site nodes are disabled. |
-| Run modifiers        | Omens and Boss Aspects are disabled. Dungeon difficulty comes from authored encounters, Vigor attrition, and Vigor thresholds.                    |
+| Playable room scope  | Authored dungeons may contain only Entrance, Combat, MiniBoss, Rest Site, and Boss rooms. Hazard, Cache, Event, Elite, and Omen Site types have been removed. |
+| Run modifiers        | Omens and Boss Aspects have been removed. Dungeon difficulty comes from authored encounters, Vigor attrition, and Vigor thresholds.                    |
 | Safe exit            | A player can **Retreat & Secure Loot** at any active dungeon decision point. Retreat is not restricted to Rest Sites.                             |
 | Rewards at risk      | Call them **Pending Loot**, never Pack, Run Loot, Unbanked Loot, or Unsecured Loot.                                                               |
 | Route selection      | Players select an available route by clicking or tapping its map node. Do not restore the large choice overlay.                                   |
@@ -236,29 +236,23 @@ The run seed fully determines this result. Generated `MapNodes` are persisted, s
 
 ## 6. Encounter Taxonomy
 
-The engine retains scaffolding for additional room types, but the playable catalog is intentionally restricted to Entrance, Combat, MiniBoss, Rest Site, and Boss. Catalog validation rejects Hazard, Cache, Event, and Omen Site nodes.
+The engine supports only Entrance, Combat, MiniBoss, Rest Site, and Boss. Removed room types have no enum values, runtime branches, DTO contracts, icons, or authored data.
 
 | Room type  | Intended purpose                                                                          | Current implementation                                                             |
 | ---------- | ----------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
 | `Entrance` | Starting node and first route origin.                                                     | Implemented.                                                                       |
 | `Combat`   | Standard automated encounter and baseline Vigor toll.                                     | Implemented and used in all live maps.                                             |
-| `Elite`    | Clearly telegraphed harder encounter with better value or a strategic consequence.        | Enum exists; live maps still use `Combat` nodes tagged `Elite`.                    |
-| `MiniBoss` | Named, more demanding combat encounter.                                                   | Implemented and used once per live dungeon.                                        |
-| `Hazard`   | Deferred non-combat encounter.                                                            | Disabled in playable dungeon definitions.                                          |
-| `Cache`    | Deferred non-combat reward encounter.                                                     | Disabled in playable dungeon definitions.                                          |
-| `Event`    | Deferred authored choice.                                                                 | Disabled in playable dungeon definitions; dormant engine scaffolding remains.      |
-| `OmenSite` | Deferred information encounter.                                                          | Disabled in playable dungeon definitions.                                          |
+| `MiniBoss` | Named, more demanding combat encounter.                                                   | Implemented; individual dungeons may omit it.                                      |
 | `RestSite` | Restores 15 Vigor and separates Sections.                                                 | Implemented and used after every current Section.                                  |
 | `Boss`     | Final automated encounter.                                                                | Implemented.                                                                       |
 
 ### Encounter authoring rules
 
 - Costs and consequences must be visible before committing.
-- An Elite must be identifiable as an Elite before selection.
 - A MiniBoss must be clearly named and forecast as a more demanding encounter.
 - The first-authored creature in each MiniBoss and Boss composition is the featured monster. Only that monster uses 10x Essence drop chance, 1000x failed-roll resonance gain, and 10x the normal resonance drop-chance cap; supporting monsters use standard values.
 - A Rest Site does not offer boons, extraction locks, or checkpoint choices.
-- Hazard, Cache, Event, and Omen Site nodes must not be authored until this product decision is explicitly revisited.
+- Any future room type requires a new product decision and a new end-to-end implementation; there is no dormant compatibility engine to reactivate.
 
 ---
 
@@ -310,7 +304,6 @@ Damage taken may exceed total maximum health when healing extends a fight, but t
 
 ### Other Vigor changes
 
-- Hazard and Event Vigor paths remain dormant engine scaffolding and are not reachable from playable catalogs.
 - Rest Site recovery: +15.
 - Every change records:
   - Room index.
@@ -470,18 +463,16 @@ Future Scout and knowledge systems should refine information without changing th
 
 ---
 
-## 11. Disabled Run Modifiers
+## 11. Removed Run Modifiers
 
-Omens and Boss Aspects are outside the current simplified dungeon scope.
+Omens and Boss Aspects are outside the current simplified dungeon scope and their legacy implementation has been deleted.
 
 ### Current state
 
-- Live delve definitions do not author Omens or Boss Aspects.
-- New runs do not initialize either modifier system.
-- Existing run state is cleared when it is loaded so legacy modifiers cannot affect Vigor or Boss combat invisibly.
+- Delve definitions cannot author Omens, Boss Aspects, or node-to-Aspect links because those fields no longer exist.
+- Run state, DTOs, combat orchestration, dependency injection, and persistence contain no modifier compatibility fields.
 - The expedition sidebar ends after the current Vigor threshold; Pending Loot is the next section.
-- Catalog validation rejects reintroduced Omen pools, Boss Aspect definitions, and node-to-Aspect links.
-- Domain and DTO models remain as dormant scaffolding and can be removed separately if permanent schema cleanup is desired.
+- Reintroducing either system would require a new schema and implementation rather than reviving dormant branches.
 
 ---
 
@@ -551,9 +542,9 @@ Current implementation only adds 6 Vigor loss for each downed party member. It d
 
 ---
 
-## 14. Deferred Events, Omen Sites, Hazards, and Caches
+## 14. Removed Events, Omen Sites, Hazards, and Caches
 
-The concepts in this section are retained only as possible future direction. They are not part of the current playable dungeon scope and must not be added to authored dungeon graphs without a new product decision.
+These concepts are not part of the current playable dungeon scope. Their former enums, services, action IDs, DTOs, UI icons, content files, persistence fields, and prophecy objective have been removed. Any future version must be designed and implemented cleanly from the current model.
 
 ### Events
 
@@ -566,27 +557,15 @@ Every Event should:
 - Avoid a universally correct free-reward choice.
 - Resolve server-side and persist its result.
 
-The current event engine supports:
-
-- Choice IDs and descriptions.
-- Vigor deltas.
-- Add/remove flags.
-- Requirements.
-- Pending Loot.
-- Ambush conversion.
-- Lightweight hidden-route reveal.
-
-Current authored event catalogs exist, but no live graph contains an Event node.
+No event engine or authored event catalog remains.
 
 ### Omen Sites
 
-An Omen Site would need a newly approved purpose before returning to live content. The existing room type and frontend label are dormant scaffolding.
-
-The room type and frontend label exist. Meaningful server behavior and live content do not.
+An Omen Site would need a newly approved purpose and a new implementation before returning.
 
 ### Caches
 
-Current Caches grant fixed Cinders and experience to Pending Loot.
+No Cache room behavior remains.
 
 Desired variants:
 
@@ -928,11 +907,8 @@ Important DTOs:
 - `DungeonRunStateDto`
 - `DungeonMapNodeDto`
 - `DungeonRouteOptionDto`
-- `DungeonEventChoiceOptionDto`
 - `DungeonVigorThresholdDto`
 - `DungeonVigorChangeDto`
-- `DungeonOmenDto` (dormant compatibility model)
-- `DungeonBossAspectDto` (dormant compatibility model)
 - `DungeonFailureAnalysisDto`
 - `ExecuteDungeonActionResponseDto`
 
@@ -943,8 +919,6 @@ Important DTOs:
 - `DungeonVigorService`: Vigor loss, recovery, state, and history.
 - `DungeonRouteService`: route forecasts and pending choices.
 - `JsonDungeonDelveDefinitionProvider`: loads and validates authored layouts.
-- `DungeonEventChoiceService`: authored event choice behavior.
-- `DungeonBossModifierService`: dormant compatibility service; live runs have no Aspect input.
 - `DungeonRunRewardClaimer`: claims completed or retreated rewards.
 
 The old checkpoint interface and service were removed.
@@ -966,9 +940,7 @@ The old checkpoint interface and service were removed.
 | -------------- | ------------------- | ----------------------------------------------------------------------------------- |
 | `fight`        | None                | Resolve a combat-capable current room.                                              |
 | `choose_route` | `{ routeOptionId }` | Select an available map node.                                                       |
-| `event_choice` | `{ choiceId }`      | Dormant compatibility for the deferred Event engine; not emitted by playable runs. |
 | `retreat`      | None                | Secure Pending Loot and end the run as Retreated.                                   |
-| `continue`     | None                | Accepted for generic non-Rest progression.                                          |
 | `rest`         | None                | Canonical Rest Site action used by the frontend.                                    |
 
 ---
@@ -992,11 +964,11 @@ The old checkpoint interface and service were removed.
 | Vigor economy                 | Reaching 0 must remain credible                   | Authored ranges use a 15% combat-toll reduction | Implemented; needs telemetry |
 | Pending Loot terminology      | Consistent domain/DTO/UI wording                  | Implemented in dungeon system                 | Implemented                  |
 | Completion and retreat claims | Correct claimable rewards                         | Implemented                                   | Implemented                  |
-| Omens                         | Outside current simplified dungeon scope          | Disabled in content, runtime, and UI           | Deferred                     |
-| Boss Aspects                  | Outside current simplified dungeon scope          | Disabled in content, runtime, and UI           | Deferred                     |
-| Elite room type               | Distinct authored Elite behavior                  | Enum exists; live content uses tags           | Partial                      |
-| Events                        | Meaningful authored live decisions                | Disabled by current product scope              | Deferred                     |
-| Omen Sites                    | Information encounter                             | Disabled by current product scope              | Deferred                     |
+| Omens                         | Outside current simplified dungeon scope          | Removed from content, runtime, DTOs, and UI    | Removed                      |
+| Boss Aspects                  | Outside current simplified dungeon scope          | Removed from content, runtime, DTOs, and UI    | Removed                      |
+| Elite room type               | Outside current simplified dungeon scope          | Removed; named Combat rooms provide variation  | Removed                      |
+| Events                        | Outside current simplified dungeon scope          | Removed end-to-end                             | Removed                      |
+| Omen Sites                    | Outside current simplified dungeon scope          | Removed end-to-end                             | Removed                      |
 | Companion tags                | Scout/Medic/Warden/Breaker                        | Not implemented                               | Missing                      |
 | Point member                  | Lightweight expedition stance                     | Not implemented                               | Missing                      |
 | Wounded/Out                   | Persistent companion consequences                 | Only downed-member Vigor toll exists          | Missing                      |
@@ -1104,7 +1076,7 @@ Work:
 - Scout tightens forecasts and reveals information.
 - Medic applies authored post-combat recovery and treatment interactions.
 - Warden reduces an authored subset of combat Vigor tolls.
-- Breaker improves authored Elite or Miniboss combat interactions.
+- Breaker improves authored MiniBoss or Boss combat interactions.
 - Point amplifies a defined subset of tag behavior.
 - Add explicit tagless fallback combat routes.
 - Show resolved tag effects on combat route choices.
@@ -1117,11 +1089,11 @@ Acceptance criteria:
 
 ### Deferred slice — Events, Omen Sites, Hazards, and Caches
 
-This slice is not part of the active roadmap. The engine scaffolding can remain dormant, but these node types must not return to playable dungeon catalogs unless the simplified combat-only product direction is explicitly revisited.
+This slice is not part of the active roadmap. No engine scaffolding remains; these concepts require a new end-to-end design if the simplified combat-only direction is explicitly revisited.
 
 ### Deferred slice — Omens, Boss Aspects, and Boss Gate
 
-These modifier systems are not part of the active roadmap. Their model and DTO scaffolding may remain dormant, but live content, runtime effects, and sidebar presentation must stay disabled unless the simplified product direction is explicitly revisited.
+These modifier systems are not part of the active roadmap. Their former model, DTO, runtime, and content scaffolding has been removed; reintroduction requires a new design.
 
 ### Next 7 — Results and failure intelligence
 
@@ -1243,15 +1215,12 @@ Healthy directional targets:
 - `LL/src/Infrastructure/Service/Services.LL/Dungeons/DungeonVigorService.cs`
 - `LL/src/Infrastructure/Service/Services.LL/Dungeons/DungeonRouteService.cs`
 - `LL/src/Infrastructure/Service/Services.LL/Dungeons/JsonDungeonDelveDefinitionProvider.cs`
-- `LL/src/Infrastructure/Service/Services.LL/Dungeons/DungeonEventChoiceService.cs`
-- `LL/src/Infrastructure/Service/Services.LL/Dungeons/DungeonBossModifierService.cs`
 - `LL/src/Infrastructure/Service/Services.LL/Combat/Layers/Rewards/Dungeon/DungeonRunRewardClaimer.cs`
 
 ### API and content
 
 - `LL/src/API/API.LL/Controllers/V1/DungeonController.cs`
 - `LL/src/API/API.LL/Data/dungeons/dungeon-delves.json`
-- `LL/src/API/API.LL/Data/dungeons/dungeon-events.json`
 - `LL/src/API/API.LL/Data/dungeons/dungeons.json`
 - `LL/src/API/API.LL/Data/progression/dungeon-rewards.json`
 

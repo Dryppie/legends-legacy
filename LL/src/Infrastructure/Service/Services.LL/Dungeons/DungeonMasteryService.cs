@@ -10,17 +10,6 @@ public sealed class DungeonMasteryService : IDungeonMasteryService
     private const int MaxLevel = 10;
     private const int BossDefeatExperience = 50;
     private const int MiniBossDefeatExperience = 25;
-    private const int OptionalObjectiveExperience = 25;
-
-    private static readonly string[] OptionalObjectiveFlags =
-    [
-        "searched_deep_treasure",
-        "cleansed_shrine",
-        "revealed_hidden_route",
-        "saved_miner",
-        "opened_reliquary"
-    ];
-
     private static readonly int[] LevelThresholds =
     [
         100,
@@ -190,19 +179,6 @@ public sealed class DungeonMasteryService : IDungeonMasteryService
                 Id = "miniboss_defeated",
                 Description = "Miniboss defeated",
                 Experience = miniBossExperience
-            });
-        }
-
-        var optionalObjectiveExperience = run.State is null
-            ? 0
-            : OptionalObjectiveFlags.Count(flag => run.State.Flags.GetValueOrDefault(flag) > 0) * OptionalObjectiveExperience;
-        if (optionalObjectiveExperience > 0)
-        {
-            reasons.Add(new DungeonMasteryAwardReason
-            {
-                Id = "optional_objectives",
-                Description = "Optional objectives completed",
-                Experience = optionalObjectiveExperience
             });
         }
 

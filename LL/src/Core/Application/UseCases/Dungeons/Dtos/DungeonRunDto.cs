@@ -60,9 +60,6 @@ public class DungeonRunDto : IMapFrom<DungeonRun>
                                 Type = room.Type,
                                 Status = room.Status,
                                 EncounterIds = room.EncounterIds?.ToList() ?? [],
-                                EventOutcome = room.Status == RoomInstanceStatus.Pending
-                                    ? null
-                                    : room.EventOutcome,
                                 IsHidden = false
                             };
                         }
@@ -74,7 +71,6 @@ public class DungeonRunDto : IMapFrom<DungeonRun>
                             Type = RoomType.Unknown,
                             Status = room.Status,
                             EncounterIds = [],
-                            EventOutcome = null,
                             IsHidden = true
                         };
                     })

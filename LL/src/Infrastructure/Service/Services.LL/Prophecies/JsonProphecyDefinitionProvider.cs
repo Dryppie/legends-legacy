@@ -14,7 +14,6 @@ public sealed class JsonProphecyDefinitionProvider : IProphecyDefinitionProvider
         ProphecyObjectiveType.WinEncounters,
         ProphecyObjectiveType.ClearDungeonRooms,
         ProphecyObjectiveType.CompleteDungeons,
-        ProphecyObjectiveType.ResolveDungeonEvents,
         ProphecyObjectiveType.GainEssenceXp,
         ProphecyObjectiveType.AbsorbEssence,
         ProphecyObjectiveType.GatherResources,

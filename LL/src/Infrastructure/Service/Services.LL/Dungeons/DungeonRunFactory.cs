@@ -1,6 +1,5 @@
 ﻿using Domain.Models.Dungeons;
 using Domain.Models.Dungeons.Definitions;
-using Domain.Models.Dungeons.Definitions.Events;
 using Application.Interfaces.Services.LL.Dungeons;
 using Domain.Models.Dungeons.Definitions.Rooms;
 using Domain.Models.Dungeons.Runs;
@@ -83,9 +82,6 @@ public sealed class DungeonRunFactory
             Forecast = definition.Forecast,
             VigorCostMin = definition.VigorCostMin,
             VigorCostMax = definition.VigorCostMax,
-            BossConsequence = definition.BossConsequence,
-            BossAspectId = definition.BossAspectId,
-            Tags = definition.Tags.ToList(),
             NextRoomIndexes = definition.NextRoomIndexes.ToList()
         }).ToList();
         var rooms = delve.Nodes.Select((definition, index) => new RoomInstance
@@ -225,14 +221,8 @@ public sealed class DungeonRunFactory
             if (room.Type == RoomType.RestSite)
                 continue;
 
-            if (room.Type is RoomType.Entrance or RoomType.Hazard or RoomType.Cache or RoomType.OmenSite)
+            if (room.Type == RoomType.Entrance)
                 continue;
-
-            if (room.Type == RoomType.Event)
-            {
-                ResolveEventFromTemplate(room, rand);
-                continue;
-            }
 
             var template = PickRoomVariantByType(dungeon, room.Type, rand);
 
@@ -260,63 +250,36 @@ public sealed class DungeonRunFactory
         ArgumentNullException.ThrowIfNull(template);
         ArgumentNullException.ThrowIfNull(rand);
 
-        var usesCombatFallback = roomType == RoomType.MiniBoss && template.Type == RoomType.Combat;
-        if (template.Type != roomType && !usesCombatFallback)
+        if (template.Type != roomType)
             throw new InvalidOperationException(
                 $"Template type mismatch. Expected '{roomType}', got '{template.Type}'.");
 
         if (template.EncounterIds is null || template.EncounterIds.Count == 0)
             throw new InvalidOperationException($"Room template for '{roomType}' has no encounters.");
 
-        // Sanitize + de-dup while preserving order (important for authored boss compositions)
-        var pool = new List<string>(template.EncounterIds.Count);
-        var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var authoredEncounters = template.EncounterIds
+            .Where(id => !string.IsNullOrWhiteSpace(id))
+            .Select(id => id.Trim())
+            .ToList();
 
-        foreach (var id in template.EncounterIds)
-        {
-            if (string.IsNullOrWhiteSpace(id)) continue;
-
-            var trimmed = id.Trim();
-            if (seen.Add(trimmed))
-                pool.Add(trimmed);
-        }
-
-        if (pool.Count == 0)
+        if (authoredEncounters.Count == 0)
             throw new InvalidOperationException($"Room template for '{roomType}' only contained empty encounter ids.");
 
-        // Catalogs without a dedicated miniboss variant use a full combat squad
-        // while keeping the authored node a Miniboss.
-        if (usesCombatFallback)
-        {
-            var count = Math.Min(3, pool.Count);
-            var result = new List<string>(count);
-            for (var index = 0; index < count; index++)
-            {
-                var pick = rand.Next(pool.Count);
-                result.Add(pool[pick]);
-                pool.RemoveAt(pick);
-            }
-
-            return result;
-        }
-
-        // Authored MiniBoss/Boss compositions are taken as-is.
+        // Authored MiniBoss/Boss compositions preserve order and repeated creatures.
         if (roomType is RoomType.MiniBoss or RoomType.Boss)
-            return [.. pool];
+            return authoredEncounters;
 
-        // Regular Combat: pick a random number of monsters from the pool
+        // Combat templates are random-selection pools, so duplicate keys add no value.
+        var pool = authoredEncounters
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        // Regular Combat: pick 2-4 monsters when the authored pool allows it.
         if (roomType == RoomType.Combat)
         {
-            // Decide how many to pick.
-            // Opinionated defaults:
-            // - If pool has 1 => always 1
-            // - If pool has 2 => pick 1..2
-            // - If pool >=3 => pick 1..min(3, pool.Count) (prevents silly 8-mob rooms early)
-            int maxPick =
-                pool.Count <= 2 ? pool.Count :
-                Math.Min(3, pool.Count);
-
-            int countToPick = rand.Next(1, maxPick + 1);
+            var minPick = Math.Min(2, pool.Count);
+            var maxPick = Math.Min(4, pool.Count);
+            var countToPick = rand.Next(minPick, maxPick + 1);
 
             // Sample without replacement
             var result = new List<string>(countToPick);
@@ -330,35 +293,7 @@ public sealed class DungeonRunFactory
             return result;
         }
 
-        // For other room types, encounters usually aren't applicable
-        // (RestSite, Treasure, Shrine, Trap, Event, etc.)
         return [];
-    }
-
-    private static void ResolveEventFromTemplate(RoomInstance room, Random rand)
-    {
-        var eventTable = new EventTableDefinition();
-        var totalWeight = eventTable.Outcomes.Sum(x => Math.Max(0, x.Weight));
-        if (totalWeight <= 0)
-        {
-            room.EventOutcome = EventOutcomeType.TreasureRoom;
-            return;
-        }
-
-        var roll = rand.Next(1, totalWeight + 1);
-        var accumulated = 0;
-
-        foreach (var outcome in eventTable.Outcomes)
-        {
-            accumulated += Math.Max(0, outcome.Weight);
-            if (roll <= accumulated)
-            {
-                room.EventOutcome = outcome.Type;
-                return;
-            }
-        }
-
-        room.EventOutcome = eventTable.Outcomes[^1].Type;
     }
 
     private static RoomDefinition PickRoomVariantByType(DungeonDefinition dungeon, RoomType type, Random rand)
@@ -366,13 +301,6 @@ public sealed class DungeonRunFactory
         var pool = dungeon.Rooms
             .Where(r => r.Type == type)
             .ToList();
-
-        if (pool.Count == 0 && type == RoomType.MiniBoss)
-        {
-            pool = dungeon.Rooms
-                .Where(room => room.Type == RoomType.Combat)
-                .ToList();
-        }
 
         if (pool.Count == 0)
             throw new InvalidOperationException($"Dungeon '{dungeon.Id}' has no RoomDefinition variants for type '{type}'.");

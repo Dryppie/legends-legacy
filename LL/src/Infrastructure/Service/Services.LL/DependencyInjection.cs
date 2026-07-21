@@ -59,6 +59,7 @@ using Services.LL.Interfaces.Combat.Reward.Idle;
 using Services.LL.Inventories;
 using Services.LL.Items;
 using Services.LL.JsonDefinitions;
+using Services.LL.JsonDefinitions.Dungeons;
 using Services.LL.JsonDefinitions.Reader;
 using Services.LL.Leaderboards;
 using Services.LL.Levels;
@@ -181,14 +182,6 @@ public static class DependencyInjection
                 contentRootPath,
                 sp.GetRequiredService<JsonSerializerOptions>()));
         services.AddScoped<IDungeonRouteService, DungeonRouteService>();
-        services.AddSingleton<IDungeonEventDefinitionProvider>(sp =>
-            new JsonDungeonEventDefinitionProvider(
-                config,
-                contentRootPath,
-                sp.GetRequiredService<JsonSerializerOptions>()));
-        services.AddScoped<IDungeonEventChoiceService, DungeonEventChoiceService>();
-        services.AddScoped<IDungeonBossModifierService, DungeonBossModifierService>();
-
         services.AddScoped<IEntityService, EntityService>();
         services.AddScoped<IEquipmentSlotService, EquipmentSlotService>();
 
@@ -337,7 +330,7 @@ public static class DependencyInjection
 
         services.AddSingleton<SoulstoneUpgradeDefinitionProvider>();
 
-        services.AddJsonDefinitionReader(config, contentRootPath);
+        services.AddJsonDungeonDefinitions(config, contentRootPath);
 
         return services;
     }
@@ -395,7 +388,7 @@ public static class DependencyInjection
         });
     }
 
-    private static void AddJsonDefinitionReader(this IServiceCollection services, IConfiguration config, string contentRootPath)
+    private static void AddJsonDungeonDefinitions(this IServiceCollection services, IConfiguration config, string contentRootPath)
     {
         services.AddSingleton(_ =>
         {
@@ -421,7 +414,7 @@ public static class DependencyInjection
             var jsonOptions = sp.GetRequiredService<JsonSerializerOptions>();
             var contentRoot = config["Content:Root"] ?? "Data";
 
-            return new JsonDefinitionReader<DungeonDefinition>(
+            return new JsonDocumentReader<DungeonCatalogDocument>(
                 basePath: contentRootPath,
                 relativePath: Path.Combine(contentRoot, "dungeons", "dungeons.json"),
                 options: jsonOptions
@@ -429,6 +422,8 @@ public static class DependencyInjection
         });
 
         // 3) Provider used by your domain/services (stable seam for future DB migration)
+        services.AddSingleton<DungeonCatalogValidator>();
+        services.AddSingleton<DungeonDefinitionMaterializer>();
         services.AddSingleton<IDungeonDefinitionValidator, DungeonDefinitionValidator>();
         services.AddSingleton<IDungeonDefinitions, JsonDungeonDefinitions>();
     }

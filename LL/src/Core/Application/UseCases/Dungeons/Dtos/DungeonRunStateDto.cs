@@ -8,14 +8,11 @@ namespace Application.UseCases.Dungeons.Dtos;
 
 public sealed class DungeonRunStateDto : IMapFrom<DungeonRunState>
 {
-    public Dictionary<string, int> Flags { get; set; } = [];
     public DungeonLootBagDto SecuredLoot { get; set; } = new();
     public DungeonLootBagDto PendingLoot { get; set; } = new();
     public List<DungeonMapNodeDto> MapNodes { get; set; } = [];
     public List<int> TraversedRoomIndexes { get; set; } = [];
     public List<DungeonRouteOptionDto> CurrentRouteOptions { get; set; } = [];
-    public List<DungeonEventChoiceOptionDto> CurrentEventChoices { get; set; } = [];
-    public List<DungeonBossModifierDto> CurrentBossModifiers { get; set; } = [];
     public List<DungeonMasteryAwardReasonDto> MasteryAwardReasons { get; set; } = [];
     public int Vigor { get; set; } = 100;
     public string VigorState { get; set; } = "Steady";
@@ -26,8 +23,6 @@ public sealed class DungeonRunStateDto : IMapFrom<DungeonRunState>
     public string LastConsequence { get; set; } = string.Empty;
     public DateTimeOffset ExpiresAt { get; set; }
     public List<DungeonVigorChangeDto> VigorHistory { get; set; } = [];
-    public List<DungeonOmenDto> ActiveOmens { get; set; } = [];
-    public List<DungeonBossAspectDto> BossAspects { get; set; } = [];
     public DungeonFailureAnalysisDto? FailureAnalysis { get; set; }
 
     public void Mapping(Profile profile) =>
@@ -58,9 +53,6 @@ public sealed class DungeonMapNodeDto : IMapFrom<DungeonMapNode>
     public string Forecast { get; set; } = string.Empty;
     public int VigorCostMin { get; set; }
     public int VigorCostMax { get; set; }
-    public string BossConsequence { get; set; } = string.Empty;
-    public string BossAspectId { get; set; } = string.Empty;
-    public List<string> Tags { get; set; } = [];
     public List<int> NextRoomIndexes { get; set; } = [];
 
     public void Mapping(Profile profile) =>
@@ -76,29 +68,6 @@ public sealed class DungeonVigorChangeDto : IMapFrom<DungeonVigorChange>
 
     public void Mapping(Profile profile) =>
         profile.CreateMap<DungeonVigorChange, DungeonVigorChangeDto>();
-}
-
-public sealed class DungeonOmenDto : IMapFrom<DungeonOmen>
-{
-    public string Id { get; set; } = string.Empty;
-    public string Name { get; set; } = string.Empty;
-    public string Description { get; set; } = string.Empty;
-
-    public void Mapping(Profile profile) =>
-        profile.CreateMap<DungeonOmen, DungeonOmenDto>();
-}
-
-public sealed class DungeonBossAspectDto : IMapFrom<DungeonBossAspect>
-{
-    public string Id { get; set; } = string.Empty;
-    public string Name { get; set; } = string.Empty;
-    public string Description { get; set; } = string.Empty;
-    public string Source { get; set; } = string.Empty;
-    public string State { get; set; } = string.Empty;
-    public string StateReason { get; set; } = string.Empty;
-
-    public void Mapping(Profile profile) =>
-        profile.CreateMap<DungeonBossAspect, DungeonBossAspectDto>();
 }
 
 public sealed class DungeonFailureAnalysisDto : IMapFrom<DungeonFailureAnalysis>
@@ -145,52 +114,7 @@ public sealed class DungeonRouteOptionDto : IMapFrom<DungeonRouteOption>
     public int VigorCostMin { get; set; }
     public int VigorCostMax { get; set; }
     public string Forecast { get; set; } = string.Empty;
-    public string BossConsequence { get; set; } = string.Empty;
-    public bool IsUnknown { get; set; }
-    public List<string> Tags { get; set; } = [];
-    public List<string> PossibleRewards { get; set; } = [];
-    public List<string> Requirements { get; set; } = [];
 
     public void Mapping(Profile profile) =>
         profile.CreateMap<DungeonRouteOption, DungeonRouteOptionDto>();
-}
-
-public sealed class DungeonEventChoiceOptionDto : IMapFrom<DungeonEventChoiceOption>
-{
-    public string Id { get; set; } = string.Empty;
-    public string Label { get; set; } = string.Empty;
-    public string Description { get; set; } = string.Empty;
-    public int VigorDelta { get; set; }
-    public List<string> AddFlags { get; set; } = [];
-    public List<string> RemoveFlags { get; set; } = [];
-    public List<string> MissingRequirements { get; set; } = [];
-    public bool GrantsLoot { get; set; }
-    public int AmbushChancePercent { get; set; }
-    public bool RevealsHiddenRoute { get; set; }
-
-    public void Mapping(Profile profile) =>
-        profile.CreateMap<DungeonEventChoiceOption, DungeonEventChoiceOptionDto>();
-}
-
-public sealed class DungeonBossModifierDto : IMapFrom<DungeonBossModifier>
-{
-    public string Id { get; set; } = string.Empty;
-    public string Name { get; set; } = string.Empty;
-    public string Description { get; set; } = string.Empty;
-    public string Source { get; set; } = string.Empty;
-    public string AttributeType { get; set; } = string.Empty;
-    public float Amount { get; set; }
-    public string ModifierType { get; set; } = string.Empty;
-    public bool IsHelpfulToPlayer { get; set; }
-
-    public void Mapping(Profile profile)
-    {
-        profile.CreateMap<DungeonBossModifier, DungeonBossModifierDto>()
-            .ForMember(
-                destination => destination.AttributeType,
-                options => options.MapFrom(source => source.AttributeType.ToString()))
-            .ForMember(
-                destination => destination.ModifierType,
-                options => options.MapFrom(source => source.ModifierType.ToString()));
-    }
 }

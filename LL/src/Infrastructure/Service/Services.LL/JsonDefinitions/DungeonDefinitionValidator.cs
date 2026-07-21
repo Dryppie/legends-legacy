@@ -168,12 +168,15 @@ public sealed class DungeonDefinitionValidator : IDungeonDefinitionValidator
             if (encounterIds.Count == 0)
                 errors.Add($"{dungeonId}: room '{room.Type}' requires at least one encounter id.");
 
-            var duplicates = encounterIds
-                .GroupBy(x => x, StringComparer.OrdinalIgnoreCase)
-                .Where(x => x.Count() > 1)
-                .Select(x => x.Key);
+            if (room.Type == RoomType.Combat)
+            {
+                var duplicates = encounterIds
+                    .GroupBy(x => x, StringComparer.OrdinalIgnoreCase)
+                    .Where(x => x.Count() > 1)
+                    .Select(x => x.Key);
 
-            errors.AddRange(duplicates.Select(id => $"{dungeonId}: room '{room.Type}' has duplicate encounter id '{id}'."));
+                errors.AddRange(duplicates.Select(id => $"{dungeonId}: room '{room.Type}' has duplicate encounter id '{id}'."));
+            }
         }
     }
 

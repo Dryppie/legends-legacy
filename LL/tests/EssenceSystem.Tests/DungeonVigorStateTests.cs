@@ -1,7 +1,6 @@
 using Application.Interfaces.Services.LL.Dungeons;
 using Domain.Models.Combat;
 using Domain.Models.Dungeons.Definitions;
-using Domain.Models.Dungeons.Definitions.Events;
 using Domain.Models.Dungeons.Definitions.Rooms;
 using Domain.Models.Dungeons.Runs;
 using Microsoft.Extensions.Configuration;
@@ -100,23 +99,6 @@ public sealed class DungeonVigorStateTests
     }
 
     [Fact]
-    public void Event_vigor_change_is_clamped_recorded_and_refreshes_thresholds()
-    {
-        var run = CreateRun();
-        var room = run.Rooms[0];
-        var service = new DungeonVigorService();
-
-        var applied = service.ApplyEventChange(run, room, -80, "Break the seal");
-
-        Assert.Equal(-35, applied);
-        Assert.Equal(65, run.State.Vigor);
-        var history = Assert.Single(run.State.VigorHistory);
-        Assert.Equal("Break the seal", history.Reason);
-        Assert.Equal(65, history.VigorAfter);
-        Assert.Equal("Steady", run.State.VigorState);
-    }
-
-    [Fact]
     public void Rest_site_recovery_is_fixed_clamped_and_recorded()
     {
         var run = CreateRun();
@@ -148,10 +130,6 @@ public sealed class DungeonVigorStateTests
                 VigorCostMax = 22
             }
         ];
-        run.State.ActiveOmens =
-        [
-            new DungeonOmen { Id = "legacy-omen", CombatTollModifier = 10 }
-        ];
         var playerId = Guid.NewGuid().ToString();
         var result = new CombatResult
         {
@@ -178,40 +156,7 @@ public sealed class DungeonVigorStateTests
     }
 
     [Fact]
-    public void Event_choice_applies_authored_vigor_delta()
-    {
-        var run = CreateRun();
-        var definitions = new StaticEventDefinitions(
-        [
-            new DungeonEventDefinition
-            {
-                Id = "test",
-                DungeonDefinitionIds = ["test_dungeon"],
-                OutcomeType = EventOutcomeType.Trap,
-                Choices =
-                [
-                    new DungeonEventChoiceDefinition
-                    {
-                        Id = "cross",
-                        Label = "Cross",
-                        Description = "Cross the trapped hall.",
-                        VigorDelta = -8
-                    }
-                ]
-            }
-        ]);
-        var service = new DungeonEventChoiceService(definitions, new DungeonVigorService());
-        service.EnsureChoices(run, EventOutcomeType.Trap);
-
-        var choice = service.ApplyChoiceState(run, "cross");
-
-        Assert.Equal(-8, choice.VigorDelta);
-        Assert.Equal(92, run.State.Vigor);
-        Assert.Equal(-8, Assert.Single(run.State.VigorHistory).Amount);
-    }
-
-    [Fact]
-    public void Authored_delve_and_event_catalogs_use_the_vigor_contract()
+    public void Authored_delve_catalogs_use_the_vigor_contract()
     {
         var apiRoot = FindApiRoot();
         var configuration = new ConfigurationBuilder()
@@ -227,19 +172,10 @@ public sealed class DungeonVigorStateTests
         options.Converters.Add(new JsonStringEnumConverter());
 
         var delves = new JsonDungeonDelveDefinitionProvider(configuration, apiRoot, options);
-        var events = new JsonDungeonEventDefinitionProvider(configuration, apiRoot, options);
 
         Assert.NotEmpty(delves.GetAll());
         Assert.All(delves.GetAll(), delve =>
         {
-            Assert.Empty(delve.Omens);
-            Assert.Empty(delve.BossAspects);
-            Assert.All(delve.Nodes, node =>
-            {
-                Assert.True(string.IsNullOrWhiteSpace(node.BossAspectId));
-                Assert.True(string.IsNullOrWhiteSpace(node.BossConsequence));
-            });
-
             var restSites = delve.Nodes
                 .Where(node => node.RoomType == RoomType.RestSite)
                 .OrderBy(node => node.Section)
@@ -284,12 +220,6 @@ public sealed class DungeonVigorStateTests
                     RoomType.RestSite,
                     RoomType.Boss
                 }));
-        Assert.NotEmpty(events.GetAll());
-
-        var eventJson = File.ReadAllText(Path.Combine(apiRoot, "Data", "dungeons", "dungeon-events.json"));
-        Assert.DoesNotContain("pressureDelta", eventJson, StringComparison.OrdinalIgnoreCase);
-        Assert.DoesNotContain("grantsBoonChoice", eventJson, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("\"vigorDelta\"", eventJson, StringComparison.OrdinalIgnoreCase);
     }
 
     [Theory]
@@ -396,11 +326,8 @@ public sealed class DungeonVigorStateTests
     }
 
     [Theory]
-    [InlineData(RoomType.Hazard)]
-    [InlineData(RoomType.Cache)]
-    [InlineData(RoomType.Event)]
-    [InlineData(RoomType.OmenSite)]
-    public void Delve_provider_rejects_disabled_room_types(RoomType roomType)
+    [InlineData(RoomType.Unknown)]
+    public void Delve_provider_rejects_unsupported_room_types(RoomType roomType)
     {
         var definition = CreateSectionedDelve(sectionCount: 1, firstRowCount: 1, secondRowCount: 0);
         definition.Nodes[1].RoomType = roomType;
@@ -410,30 +337,6 @@ public sealed class DungeonVigorStateTests
 
         Assert.Contains("disabled room types", exception.Message, StringComparison.OrdinalIgnoreCase);
         Assert.Contains(roomType.ToString(), exception.Message, StringComparison.OrdinalIgnoreCase);
-    }
-
-    [Fact]
-    public void Delve_provider_rejects_disabled_omen_content()
-    {
-        var definition = CreateSectionedDelve(sectionCount: 1, firstRowCount: 1, secondRowCount: 0);
-        definition.Omens.Add(new DungeonDelveOmenDefinition { Id = "legacy-omen" });
-
-        var exception = Assert.Throws<InvalidOperationException>(() =>
-            WithTemporaryDelveCatalog(definition, _ => { }));
-
-        Assert.Contains("disabled Omen or Boss Aspect content", exception.Message);
-    }
-
-    [Fact]
-    public void Delve_provider_rejects_disabled_boss_aspect_content()
-    {
-        var definition = CreateSectionedDelve(sectionCount: 1, firstRowCount: 1, secondRowCount: 0);
-        definition.BossAspects.Add(new DungeonDelveAspectDefinition { Id = "legacy-aspect" });
-
-        var exception = Assert.Throws<InvalidOperationException>(() =>
-            WithTemporaryDelveCatalog(definition, _ => { }));
-
-        Assert.Contains("disabled Omen or Boss Aspect content", exception.Message);
     }
 
     private static DungeonRun CreateRun(string dungeonId = "test_dungeon") => new()
@@ -658,18 +561,4 @@ public sealed class DungeonVigorStateTests
         }
     }
 
-    private sealed class StaticEventDefinitions(IReadOnlyList<DungeonEventDefinition> definitions)
-        : IDungeonEventDefinitionProvider
-    {
-        public IReadOnlyList<DungeonEventDefinition> GetAll() => definitions;
-
-        public DungeonEventDefinition GetDefinition(
-            string dungeonDefinitionId,
-            EventOutcomeType outcomeType) =>
-            definitions.Single(definition =>
-                definition.OutcomeType == outcomeType &&
-                definition.DungeonDefinitionIds.Contains(
-                    dungeonDefinitionId,
-                    StringComparer.OrdinalIgnoreCase));
-    }
 }

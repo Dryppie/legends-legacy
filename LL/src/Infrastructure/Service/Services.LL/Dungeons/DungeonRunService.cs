@@ -1,15 +1,13 @@
-﻿using Application.Interfaces.Services.LL.Dungeons;
+using Application.Interfaces.Services.LL.Dungeons;
 using Domain.Helpers.Constants;
 using Application.Interfaces.Services.LL.Guilds;
 using Domain.Models.Combat;
 using Domain.Models.Dungeons;
 using Domain.Models.Dungeons.Definitions;
-using Domain.Models.Dungeons.Definitions.Events;
 using Domain.Models.Dungeons.Definitions.Rooms;
 using Domain.Models.Dungeons.Runs;
 using Domain.Models.Guilds.Missions;
 using Domain.Models.Inventories;
-using Domain.Models.Items;
 using Domain.Models.Snapshots;
 using Domain.Models.Attributes;
 using Domain.Models.Attributes.Modifiers;
@@ -32,12 +30,9 @@ public sealed class DungeonRunService : IDungeonRunService
     private readonly IDungeonRunRewardClaimer _rewardClaimer;
     private readonly IDungeonCompletionRewardApplier _completionRewardApplier;
     private readonly IDungeonDefinitions _dungeons;
-    private readonly IItemBaseRepository _itemBases;
     private readonly IInventoryRepository _inventory;
     private readonly IDungeonVigorService _vigor;
     private readonly IDungeonRouteService _routes;
-    private readonly IDungeonEventChoiceService _events;
-    private readonly IDungeonBossModifierService _bossModifiers;
     private readonly IGuildMissionService _guildMissionService;
 
     public DungeonRunService(
@@ -49,12 +44,9 @@ public sealed class DungeonRunService : IDungeonRunService
         IDungeonRunRewardClaimer rewardClaimer,
         IDungeonCompletionRewardApplier completionRewardApplier,
         IDungeonDefinitions dungeons,
-        IItemBaseRepository itemBases,
         IInventoryRepository inventory,
         IDungeonVigorService vigor,
         IDungeonRouteService routes,
-        IDungeonEventChoiceService events,
-        IDungeonBossModifierService bossModifiers,
         IGuildMissionService guildMissionService)
     {
         _dungeonRuns = dungeonRuns;
@@ -65,12 +57,9 @@ public sealed class DungeonRunService : IDungeonRunService
         _rewardClaimer = rewardClaimer;
         _completionRewardApplier = completionRewardApplier;
         _dungeons = dungeons;
-        _itemBases = itemBases;
         _inventory = inventory;
         _vigor = vigor;
         _routes = routes;
-        _events = events;
-        _bossModifiers = bossModifiers;
         _guildMissionService = guildMissionService;
     }
 
@@ -254,16 +243,8 @@ public sealed class DungeonRunService : IDungeonRunService
 
                 return await ExecuteCombatRoomAction(run, snapshot, room, actionId, payload, ct);
 
-            case RoomType.Event:
-                return await ExecuteEventRoomAction(run, room, actionId, payload, ct);
-
             case RoomType.RestSite:
                 return await ExecuteRestSiteRoomAction(run, room, actionId, ct);
-
-            case RoomType.Hazard:
-            case RoomType.Cache:
-            case RoomType.OmenSite:
-                return await ExecuteDelveNodeAction(run, room, actionId, ct);
 
             default:
                 return null;
@@ -311,125 +292,9 @@ public sealed class DungeonRunService : IDungeonRunService
         };
     }
 
-    private async Task<ExecuteDungeonActionResult?> ExecuteDelveNodeAction(
-        DungeonRun run,
-        RoomInstance room,
-        string actionId,
-        CancellationToken ct)
-    {
-        if (actionId is not ("continue" or "accept" or DungeonActionConstants.EventAccept))
-        {
-            return null;
-        }
-
-        var node = run.State.MapNodes.First(candidate => candidate.RoomIndex == room.RoomIndex);
-        if (room.Type == RoomType.Hazard)
-        {
-            var baseToll = node.VigorCostMin == node.VigorCostMax
-                ? node.VigorCostMin
-                : new Random(CreateRoomSeed(run.Seed, room.RoomIndex, 83))
-                    .Next(node.VigorCostMin, node.VigorCostMax + 1);
-            _vigor.ApplyHazardToll(run, room, baseToll);
-            ResolveLinkedAspect(run, node.BossAspectId, "Removed", $"{node.DisplayName} was overcome.");
-        }
-        else if (room.Type == RoomType.Cache)
-        {
-            var dungeon = _dungeons.GetByKey(run.DungeonDefinitionId);
-            var cinders = Math.Max(30, dungeon.Tier * 45);
-            var experience = Math.Max(20, dungeon.Tier * 30);
-            run.PendingCinders += cinders;
-            run.PendingExperience += experience;
-            run.State.PendingLoot.Cinders += cinders;
-            run.State.PendingLoot.Experience += experience;
-            run.State.LastConsequence = $"Cache secured: +{cinders} Cinders and +{experience} XP added to Pending Loot.";
-        }
-
-        CompleteRoom(run, room);
-        await RecordDungeonProgressContributionAsync(run, room, ct);
-        if (run.State.Vigor <= 0)
-        {
-            FailRun(run, room, "Attrition", "Vigor was spent at the end of the encounter.");
-            return new ExecuteDungeonActionResult
-            {
-                Run = run,
-                Outcome = DungeonActionOutcome.CombatDefeat,
-                Message = "The party is Spent. The delve ends and Pending Loot is lost."
-            };
-        }
-
-        MoveToNextRoom(run);
-        return new ExecuteDungeonActionResult
-        {
-            Run = run,
-            Outcome = DungeonActionOutcome.EventResolved,
-            Message = run.State.LastConsequence
-        };
-    }
-
-    private async Task<ExecuteDungeonActionResult?> ExecuteEventRoomAction(DungeonRun run, RoomInstance room, string actionId, object? payload, CancellationToken ct)
-    {
-        var dungeon = _dungeons.GetByKey(run.DungeonDefinitionId);
-        room.EventOutcome ??= RollEventOutcome(run, room);
-
-        switch (actionId.ToLowerInvariant())
-        {
-            case DungeonActionConstants.EventChoice:
-                return await ApplyEventChoiceAsync(run, dungeon, room, payload, ct);
-
-            case DungeonActionConstants.EventInspect:
-                room.Status = RoomInstanceStatus.Active;
-                _events.EnsureChoices(run, dungeon.Id, room.EventOutcome.Value);
-                return new ExecuteDungeonActionResult
-                {
-                    Run = run,
-                    Outcome = DungeonActionOutcome.EventResolved,
-                    Message = GetEventInspectMessage(room.EventOutcome.Value)
-                };
-
-            case DungeonActionConstants.EventAccept:
-                if (_events.EnsureChoices(run, dungeon.Id, room.EventOutcome.Value).Count > 0)
-                {
-                    room.Status = RoomInstanceStatus.Active;
-                    return new ExecuteDungeonActionResult
-                    {
-                        Run = run,
-                        Outcome = DungeonActionOutcome.EventResolved,
-                        Message = GetEventInspectMessage(room.EventOutcome.Value)
-                    };
-                }
-
-                return await AcceptEventAsync(run, dungeon, room, ct);
-
-            case DungeonActionConstants.EventIgnore:
-                CompleteRoom(run, room);
-                MoveToNextRoom(run);
-                await RecordDungeonProgressContributionAsync(run, room, ct);
-                await ApplyCompletionRewardsIfNeeded(run, ct);
-
-                return new ExecuteDungeonActionResult
-                {
-                    Run = run,
-                    Outcome = run.Status == DungeonRunStatus.Completed
-                        ? DungeonActionOutcome.RunCompleted
-                        : DungeonActionOutcome.EventResolved,
-                    Message = "You leave the event untouched and move deeper into the dungeon."
-                };
-
-            default:
-                throw new InvalidOperationException(
-                    $"Action '{actionId}' is not valid for room type '{room.Type}'.");
-        }
-    }
-
     private async Task<ExecuteDungeonActionResult> ResolveCombatRoom(DungeonRun run, CharacterSnapshot snapshot, RoomInstance room, CancellationToken ct)
     {
         room.Status = RoomInstanceStatus.Active;
-        var dungeon = _dungeons.GetByKey(run.DungeonDefinitionId);
-        run.State.CurrentBossModifiers = _bossModifiers.GetActiveBossModifiers(run, dungeon, room).ToList();
-        var enemyAttributeModifiers = room.Type == RoomType.Boss
-            ? _bossModifiers.GetActiveBossAttributeModifiers(run, dungeon, room)
-            : [];
-
         var playerModifiers = new List<AttributeModifierBase>();
         if (run.State.VigorState == "Exhausted")
         {
@@ -444,7 +309,7 @@ public sealed class DungeonRunService : IDungeonRunService
             EnemyCreatureKeys: room.EncounterIds,
             RunAttributeModifiers: playerModifiers,
             RunAbilityModifiers: [],
-            EnemyAttributeModifiers: enemyAttributeModifiers);
+            EnemyAttributeModifiers: []);
 
         var orchestrationResult = await _orchestrationCoordinator.OrchestrateAsync(
             orchestrationRequest,
@@ -462,11 +327,6 @@ public sealed class DungeonRunService : IDungeonRunService
         if (combatSession.CombatResult.Outcome == BattleOutcome.Victory)
         {
             _vigor.ApplyCombatToll(run, room, combatSession.CombatResult);
-            if (room.Type == RoomType.MiniBoss)
-            {
-                var node = run.State.MapNodes.FirstOrDefault(candidate => candidate.RoomIndex == room.RoomIndex);
-                ResolveLinkedAspect(run, node?.BossAspectId, "Removed", $"{node?.DisplayName ?? "The miniboss"} was defeated.");
-            }
             CompleteRoom(run, room);
             await RecordDungeonProgressContributionAsync(run, room, ct);
             if (run.State.Vigor <= 0)
@@ -486,9 +346,7 @@ public sealed class DungeonRunService : IDungeonRunService
         else
         {
             FailRun(run, room,
-                room.Type == RoomType.Boss && run.State.BossAspects.Any(aspect => aspect.State == "Active")
-                    ? "Aspect Unanswered"
-                    : "Combat Readiness",
+                "Combat Readiness",
                 room.Type == RoomType.Boss
                     ? "The final encounter overwhelmed the party."
                     : "The party was defeated before reaching the next Rest Site.");
@@ -501,98 +359,6 @@ public sealed class DungeonRunService : IDungeonRunService
             Outcome = outcome,
             CombatSession = combatSession
         };
-    }
-
-    private async Task<ExecuteDungeonActionResult> AcceptEventAsync(
-        DungeonRun run,
-        DungeonDefinition dungeon,
-        RoomInstance room,
-        CancellationToken ct)
-    {
-        room.Status = RoomInstanceStatus.Active;
-
-        switch (room.EventOutcome ?? EventOutcomeType.TreasureRoom)
-        {
-            case EventOutcomeType.ExtraCombat:
-                room.Type = RoomType.Combat;
-                room.EncounterIds = ResolveExtraCombatEncounters(run, dungeon, room);
-
-                return new ExecuteDungeonActionResult
-                {
-                    Run = run,
-                    Outcome = DungeonActionOutcome.EventResolved,
-                    Message = "The disturbance draws enemies into your path."
-                };
-
-            case EventOutcomeType.TreasureRoom:
-                await AddTreasureEventRewardsAsync(run, dungeon, room, ct);
-                CompleteRoom(run, room);
-                MoveToNextRoom(run);
-                await RecordDungeonProgressContributionAsync(run, room, ct);
-                await ApplyCompletionRewardsIfNeeded(run, ct);
-
-                return new ExecuteDungeonActionResult
-                {
-                    Run = run,
-                    Outcome = run.Status == DungeonRunStatus.Completed
-                        ? DungeonActionOutcome.RunCompleted
-                        : DungeonActionOutcome.EventResolved,
-                    Message = "You secure the hidden cache."
-                };
-
-            case EventOutcomeType.Shrine:
-                run.PendingSoulstones += Math.Max(1, dungeon.Tier);
-                run.PendingExperience += Math.Max(10, dungeon.Tier * 15);
-                run.State.PendingLoot.Soulstones += Math.Max(1, dungeon.Tier);
-                run.State.PendingLoot.Experience += Math.Max(10, dungeon.Tier * 15);
-                CompleteRoom(run, room);
-                MoveToNextRoom(run);
-                await RecordDungeonProgressContributionAsync(run, room, ct);
-                await ApplyCompletionRewardsIfNeeded(run, ct);
-
-                return new ExecuteDungeonActionResult
-                {
-                    Run = run,
-                    Outcome = run.Status == DungeonRunStatus.Completed
-                        ? DungeonActionOutcome.RunCompleted
-                        : DungeonActionOutcome.EventResolved,
-                    Message = "The shrine answers with a quiet pulse of power."
-                };
-
-            case EventOutcomeType.Trap:
-                var lostCinders = Math.Min(run.PendingCinders, Math.Max(10, dungeon.Tier * 20));
-                run.PendingCinders -= lostCinders;
-                run.State.PendingLoot.Cinders = Math.Max(0, run.State.PendingLoot.Cinders - lostCinders);
-                _vigor.ApplyHazardToll(run, room, 10);
-                CompleteRoom(run, room);
-                if (run.State.Vigor <= 0)
-                {
-                    FailRun(run, room, "Attrition", "Vigor was spent while resolving the trap.");
-                    return new ExecuteDungeonActionResult
-                    {
-                        Run = run,
-                        Outcome = DungeonActionOutcome.CombatDefeat,
-                        Message = "The party is Spent. The delve ends and the Pending Loot is lost."
-                    };
-                }
-                MoveToNextRoom(run);
-                await RecordDungeonProgressContributionAsync(run, room, ct);
-                await ApplyCompletionRewardsIfNeeded(run, ct);
-
-                return new ExecuteDungeonActionResult
-                {
-                    Run = run,
-                    Outcome = run.Status == DungeonRunStatus.Completed
-                        ? DungeonActionOutcome.RunCompleted
-                        : DungeonActionOutcome.EventResolved,
-                    Message = lostCinders > 0
-                        ? $"The trap snaps shut. You lose {lostCinders} pending Cinders."
-                        : "The trap snaps shut, but you had no pending Cinders to lose."
-                };
-
-            default:
-                throw new InvalidOperationException($"Unhandled dungeon event outcome '{room.EventOutcome}'.");
-        }
     }
 
     private async Task<ExecuteDungeonActionResult?> ExecuteChooseRouteActionAsync(
@@ -617,238 +383,12 @@ public sealed class DungeonRunService : IDungeonRunService
                 : await ResolveCombatRoom(run, snapshot, room, ct);
         }
 
-        if (room.Type is RoomType.Hazard or RoomType.Cache or RoomType.OmenSite)
-        {
-            return await ExecuteDelveNodeAction(run, room, "continue", ct);
-        }
-
         return new ExecuteDungeonActionResult
         {
             Run = run,
             Outcome = DungeonActionOutcome.None,
             Message = $"{route.DisplayName} chosen. {route.Forecast}"
         };
-    }
-
-    private async Task<ExecuteDungeonActionResult?> ApplyEventChoiceAsync(
-        DungeonRun run,
-        DungeonDefinition dungeon,
-        RoomInstance room,
-        object? payload,
-        CancellationToken ct)
-    {
-        if (!TryGetPayloadString(payload, "choiceId", out var choiceId))
-        {
-            return null;
-        }
-
-        room.Status = RoomInstanceStatus.Active;
-        var eventOutcome = room.EventOutcome ?? EventOutcomeType.TreasureRoom;
-        _events.EnsureChoices(run, dungeon.Id, eventOutcome);
-        DungeonEventChoiceOption choice;
-        try
-        {
-            choice = _events.ApplyChoiceState(run, choiceId);
-        }
-        catch (InvalidOperationException)
-        {
-            run.State.CurrentEventChoices.Clear();
-            _events.EnsureChoices(run, dungeon.Id, eventOutcome);
-
-            try
-            {
-                choice = _events.ApplyChoiceState(run, choiceId);
-            }
-            catch (InvalidOperationException)
-            {
-                return new ExecuteDungeonActionResult
-                {
-                    Run = run,
-                    Outcome = DungeonActionOutcome.None,
-                    Message = "That event choice is no longer available."
-                };
-            }
-        }
-
-        if (choice.AmbushChancePercent > 0 &&
-            run.State.Flags.GetValueOrDefault("event_ambush_triggered") > 0)
-        {
-            run.State.Flags.Remove("event_ambush_triggered");
-            room.Type = RoomType.Combat;
-            room.EncounterIds = ResolveExtraCombatEncounters(run, dungeon, room);
-            run.State.CurrentEventChoices.Clear();
-
-            return new ExecuteDungeonActionResult
-            {
-                Run = run,
-                Outcome = DungeonActionOutcome.EventResolved,
-                Message = "The event erupts into an ambush."
-            };
-        }
-
-        if (run.State.Vigor <= 0)
-        {
-            FailRun(run, room, "Attrition", "Vigor was spent while resolving the event.");
-            return new ExecuteDungeonActionResult
-            {
-                Run = run,
-                Outcome = DungeonActionOutcome.CombatDefeat,
-                Message = "The party is Spent. The delve ends and the Pending Loot is lost."
-            };
-        }
-
-        if (choice.GrantsLoot)
-        {
-            await AddChoiceLootAsync(run, dungeon, room, choice.Id, ct);
-        }
-
-        if (choice.Id == "sacrifice_loot")
-        {
-            ReducePendingLoot(run, 0.15m);
-        }
-
-        if (choice.Id == "engage_patrol")
-        {
-            room.Type = RoomType.Combat;
-            room.EncounterIds = ResolveExtraCombatEncounters(run, dungeon, room);
-            run.State.CurrentEventChoices.Clear();
-
-            return new ExecuteDungeonActionResult
-            {
-                Run = run,
-                Outcome = DungeonActionOutcome.EventResolved,
-                Message = "The route turns into a fight."
-            };
-        }
-
-        run.State.CurrentEventChoices.Clear();
-        CompleteRoom(run, room);
-        MoveToNextRoom(run);
-        await RecordDungeonProgressContributionAsync(run, room, ct);
-        if (choice.RevealsHiddenRoute)
-        {
-            AddHiddenRouteOption(run);
-        }
-
-        await ApplyCompletionRewardsIfNeeded(run, ct);
-
-        return new ExecuteDungeonActionResult
-        {
-            Run = run,
-            Outcome = run.Status == DungeonRunStatus.Completed
-                ? DungeonActionOutcome.RunCompleted
-                : DungeonActionOutcome.EventResolved,
-            Message = choice.Description
-        };
-    }
-
-    private static EventOutcomeType RollEventOutcome(DungeonRun run, RoomInstance room)
-    {
-        var eventTable = new EventTableDefinition();
-        var totalWeight = eventTable.Outcomes.Sum(x => Math.Max(0, x.Weight));
-        if (totalWeight <= 0)
-            return EventOutcomeType.TreasureRoom;
-
-        var rand = new Random(CreateRoomSeed(run.Seed, room.RoomIndex, 17));
-        var roll = rand.Next(1, totalWeight + 1);
-        var accumulated = 0;
-
-        foreach (var outcome in eventTable.Outcomes)
-        {
-            accumulated += Math.Max(0, outcome.Weight);
-            if (roll <= accumulated)
-                return outcome.Type;
-        }
-
-        return eventTable.Outcomes[^1].Type;
-    }
-
-    private static string GetEventInspectMessage(EventOutcomeType outcome) =>
-        outcome switch
-        {
-            EventOutcomeType.ExtraCombat => "Tracks and echoes suggest an enemy patrol is close.",
-            EventOutcomeType.TreasureRoom => "You find the edge of a hidden cache.",
-            EventOutcomeType.Shrine => "A worn shrine hums with stored power.",
-            EventOutcomeType.Trap => "The room is tense with pressure plates and old wire.",
-            _ => "Something waits in the room."
-        };
-
-    private async Task AddTreasureEventRewardsAsync(
-        DungeonRun run,
-        DungeonDefinition dungeon,
-        RoomInstance room,
-        CancellationToken cancellationToken)
-    {
-        var cinders = Math.Max(20, dungeon.Tier * 35);
-        var soulstones = Math.Max(1, (int)dungeon.Grade);
-
-        run.PendingCinders += cinders;
-        run.PendingSoulstones += soulstones;
-        run.State.PendingLoot.Cinders += cinders;
-        run.State.PendingLoot.Soulstones += soulstones;
-
-        var itemId = DungeonRewardCatalog.GetMonsterCoreRewardItemIds(dungeon.Grade).FirstOrDefault();
-        if (string.IsNullOrWhiteSpace(itemId))
-            return;
-
-        var itemBases = await _itemBases.GetItemBasesByIdsAsync([itemId], cancellationToken);
-        if (!itemBases.TryGetValue(itemId, out var itemBase))
-            return;
-
-        await _dungeonRuns.AddPendingRewardAsync(run, new RunReward
-        {
-            ItemId = itemBase.Id,
-            Name = itemBase.Name,
-            ItemType = itemBase.ItemType,
-            Quantity = Math.Max(1, (int)dungeon.Grade),
-            Source = $"event:treasure:room:{room.RoomIndex + 1}"
-        }, cancellationToken);
-        run.State.PendingLoot.Items[itemBase.Id] =
-            run.State.PendingLoot.Items.GetValueOrDefault(itemBase.Id) + Math.Max(1, (int)dungeon.Grade);
-    }
-
-    private static List<string> ResolveExtraCombatEncounters(DungeonRun run, DungeonDefinition dungeon, RoomInstance room)
-    {
-        var template = dungeon.Rooms
-            .Where(x => x.Type == RoomType.Combat && x.EncounterIds.Count > 0)
-            .OrderByDescending(x => x.Weight)
-            .FirstOrDefault();
-
-        if (template is null)
-            throw new InvalidOperationException($"Dungeon '{dungeon.Id}' has no combat room template for event combat.");
-
-        var pool = template.EncounterIds
-            .Where(x => !string.IsNullOrWhiteSpace(x))
-            .Select(x => x.Trim())
-            .Distinct(StringComparer.OrdinalIgnoreCase)
-            .ToList();
-
-        if (pool.Count == 0)
-            throw new InvalidOperationException($"Dungeon '{dungeon.Id}' has no valid combat encounters for event combat.");
-
-        var rand = new Random(CreateRoomSeed(run.Seed, room.RoomIndex, 31));
-        var count = Math.Min(pool.Count, rand.Next(1, Math.Min(3, pool.Count) + 1));
-        var result = new List<string>(count);
-
-        for (var i = 0; i < count; i++)
-        {
-            var index = rand.Next(pool.Count);
-            result.Add(pool[index]);
-            pool.RemoveAt(index);
-        }
-
-        return result;
-    }
-
-    private static int CreateRoomSeed(int runSeed, int roomIndex, int salt)
-    {
-        unchecked
-        {
-            var seed = runSeed;
-            seed = (seed * 397) ^ roomIndex;
-            seed = (seed * 397) ^ salt;
-            return seed;
-        }
     }
 
     private void MoveToNextRoom(DungeonRun run)
@@ -866,7 +406,6 @@ public sealed class DungeonRunService : IDungeonRunService
             return;
         }
 
-        run.State.CurrentEventChoices.Clear();
         if (_routes.GenerateRouteOptions(run).Count > 0)
         {
             return;
@@ -878,7 +417,6 @@ public sealed class DungeonRunService : IDungeonRunService
         {
             run.State.TraversedRoomIndexes.Add(nextRoomIndex);
         }
-        EnsureCurrentRoomChoices(run);
     }
 
     private async Task ApplyCompletionRewardsIfNeeded(DungeonRun run, CancellationToken cancellationToken)
@@ -933,12 +471,6 @@ public sealed class DungeonRunService : IDungeonRunService
         run.State.MapNodes ??= [];
         run.State.TraversedRoomIndexes ??= [];
         run.State.VigorHistory ??= [];
-        run.State.ActiveOmens ??= [];
-        run.State.BossAspects ??= [];
-        run.State.CurrentBossModifiers ??= [];
-        run.State.ActiveOmens.Clear();
-        run.State.BossAspects.Clear();
-        run.State.CurrentBossModifiers.Clear();
         NormalizeSections(run);
         if (run.State.TraversedRoomIndexes.Count == 0)
         {
@@ -955,112 +487,7 @@ public sealed class DungeonRunService : IDungeonRunService
     {
         var route = _routes.ChooseRoute(run, routeOptionId);
 
-        EnsureCurrentRoomChoices(run);
         return route;
-    }
-
-    private static void AddHiddenRouteOption(DungeonRun run)
-    {
-        if (run.Status != DungeonRunStatus.Active)
-        {
-            return;
-        }
-
-        var targetRoute = run.State.CurrentRouteOptions.FirstOrDefault();
-        var targetRoomIndex = targetRoute?.RoomIndex ?? GetNextRoomIndexes(run).FirstOrDefault(-1);
-        var targetRoom = run.Rooms.FirstOrDefault(x => x.RoomIndex == targetRoomIndex);
-        if (targetRoom is null)
-        {
-            return;
-        }
-
-        var hiddenRouteId = $"hidden:{targetRoom.RoomIndex}";
-        if (run.State.CurrentRouteOptions.Any(x => x.Id == hiddenRouteId))
-        {
-            return;
-        }
-
-        run.State.CurrentRouteOptions.Insert(0, new DungeonRouteOption
-        {
-            Id = hiddenRouteId,
-            RoomIndex = targetRoom.RoomIndex,
-            DisplayName = "Hidden Passage",
-            RoomType = targetRoom.Type,
-            RiskLevel = 1,
-            VigorCostMin = 0,
-            VigorCostMax = 0,
-            IsUnknown = false,
-            Tags = ["Hidden", "Shortcut"],
-            PossibleRewards = ["Secret cache", "Safer path"],
-            Requirements = ["Revealed by event"]
-        });
-    }
-
-    private void EnsureCurrentRoomChoices(DungeonRun run)
-    {
-        if (run.Status != DungeonRunStatus.Active)
-        {
-            ClearDecisionState(run);
-            return;
-        }
-
-        var currentRoom = GetCurrentRoom(run);
-        var dungeon = _dungeons.GetByKey(run.DungeonDefinitionId);
-        run.State.CurrentBossModifiers = _bossModifiers.GetActiveBossModifiers(run, dungeon, currentRoom).ToList();
-
-        run.State.CurrentEventChoices.Clear();
-        if (currentRoom.Type == RoomType.Event && currentRoom.Status == RoomInstanceStatus.Active)
-        {
-            currentRoom.EventOutcome ??= RollEventOutcome(run, currentRoom);
-            _events.EnsureChoices(run, dungeon.Id, currentRoom.EventOutcome.Value);
-        }
-    }
-
-    private async Task AddChoiceLootAsync(
-        DungeonRun run,
-        DungeonDefinition dungeon,
-        RoomInstance room,
-        string choiceId,
-        CancellationToken cancellationToken)
-    {
-        var multiplier = choiceId == "search_deeper" ? 2 : 1;
-        var cinders = Math.Max(20, dungeon.Tier * 30) * multiplier;
-        var soulstones = choiceId == "search_deeper" ? Math.Max(1, dungeon.Tier) : 0;
-
-        run.PendingCinders += cinders;
-        run.PendingSoulstones += soulstones;
-        run.State.PendingLoot.Cinders += cinders;
-        run.State.PendingLoot.Soulstones += soulstones;
-
-        if (choiceId == "take_supplies" || choiceId == "search_deeper")
-        {
-            await AddTreasureEventRewardsAsync(run, dungeon, room, cancellationToken);
-        }
-    }
-
-    private static void AddFlag(DungeonRun run, string flag, int amount)
-    {
-        if (string.IsNullOrWhiteSpace(flag))
-        {
-            return;
-        }
-
-        run.State.Flags[flag] = run.State.Flags.GetValueOrDefault(flag) + amount;
-    }
-
-    private static void ReducePendingLoot(DungeonRun run, decimal percent)
-    {
-        var factor = Math.Clamp(1m - percent, 0m, 1m);
-        run.PendingExperience = (int)Math.Floor(run.PendingExperience * factor);
-        run.PendingCinders = (int)Math.Floor(run.PendingCinders * factor);
-        run.PendingSoulstones = (int)Math.Floor(run.PendingSoulstones * factor);
-
-        foreach (var reward in run.PendingRewards)
-        {
-            reward.Quantity = (int)Math.Floor(reward.Quantity * factor);
-        }
-
-        run.State.PendingLoot = CreateLootBagFromRun(run);
     }
 
     private static DungeonLootBag CreateLootBagFromRun(DungeonRun run)
@@ -1091,25 +518,6 @@ public sealed class DungeonRunService : IDungeonRunService
             run.State.CurrentSection + 1);
     }
 
-    private static void ResolveLinkedAspect(DungeonRun run, string? aspectId, string state, string reason)
-    {
-        if (string.IsNullOrWhiteSpace(aspectId))
-        {
-            return;
-        }
-
-        var aspect = run.State.BossAspects
-            .FirstOrDefault(candidate => string.Equals(candidate.Id, aspectId, StringComparison.OrdinalIgnoreCase));
-        if (aspect is null)
-        {
-            return;
-        }
-
-        aspect.State = state;
-        aspect.StateReason = reason;
-        run.State.LastConsequence = $"{aspect.Name}: {state}. {reason}";
-    }
-
     private static void FailRun(DungeonRun run, RoomInstance room, string cause, string explanation)
     {
         var lostPendingLoot = CreateLootBagFromRun(run);
@@ -1123,11 +531,6 @@ public sealed class DungeonRunService : IDungeonRunService
             LostPendingLoot = lostPendingLoot,
             Suggestions = cause switch
             {
-                "Aspect Unanswered" =>
-                [
-                    "Choose the route that removes or weakens a boss Aspect.",
-                    "Retreat and secure Pending Loot before attempting the boss while Strained."
-                ],
                 "Attrition" =>
                 [
                     "Use each Rest Site before entering the next Section.",
@@ -1193,8 +596,6 @@ public sealed class DungeonRunService : IDungeonRunService
     private static void ClearDecisionState(DungeonRun run)
     {
         run.State.CurrentRouteOptions.Clear();
-        run.State.CurrentEventChoices.Clear();
-        run.State.CurrentBossModifiers.Clear();
     }
 
     private static List<int> GetNextRoomIndexes(DungeonRun run)

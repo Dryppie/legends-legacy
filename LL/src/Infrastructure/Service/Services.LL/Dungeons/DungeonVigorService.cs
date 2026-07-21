@@ -46,19 +46,6 @@ public sealed class DungeonVigorService : IDungeonVigorService
             Math.Max(0, toll) * CombatTollMultiplier,
             MidpointRounding.AwayFromZero);
 
-    public int ApplyHazardToll(DungeonRun run, RoomInstance room, int baseToll)
-    {
-        var toll = Math.Clamp(baseToll, 0, 35);
-        return Apply(run, room, -toll, "Hazard toll");
-    }
-
-    public int ApplyEventChange(DungeonRun run, RoomInstance room, int amount, string reason) =>
-        Apply(
-            run,
-            room,
-            Math.Clamp(amount, -35, 25),
-            string.IsNullOrWhiteSpace(reason) ? "Event consequence" : reason);
-
     public int RecoverAtRestSite(DungeonRun run, RoomInstance room) =>
         Apply(run, room, RestSiteRecovery, "Rest Site recovery");
 

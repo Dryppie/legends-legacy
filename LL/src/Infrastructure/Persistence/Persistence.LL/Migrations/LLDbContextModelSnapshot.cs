@@ -1408,9 +1408,6 @@ namespace Persistence.LL.Migrations
                         .IsRequired()
                         .HasColumnType("text[]");
 
-                    b.Property<int?>("EventOutcome")
-                        .HasColumnType("integer");
-
                     b.Property<int>("RoomIndex")
                         .HasColumnType("integer");
 

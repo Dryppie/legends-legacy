@@ -147,7 +147,7 @@ public sealed class DungeonCombatResolutionSessionFactory : IDungeonCombatResolu
     {
         var templates = new Dictionary<Guid, CombatEntity>();
 
-        foreach (var hostileId in hostileIds)
+        foreach (var hostileId in hostileIds.Distinct())
         {
             if (sourceEntitiesById[hostileId] is not Creature creature)
             {

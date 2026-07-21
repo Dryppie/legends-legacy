@@ -1,6 +1,5 @@
 using Application.Common.Mappings;
 using AutoMapper;
-using Domain.Models.Dungeons.Definitions.Events;
 using Domain.Models.Dungeons.Definitions.Rooms;
 using Domain.Models.Dungeons.Runs;
 
@@ -13,7 +12,6 @@ public class RoomInstanceDto : IMapFrom<RoomInstance>
     public RoomType Type { get; set; }
     public RoomInstanceStatus Status { get; set; }
     public List<string> EncounterIds { get; set; } = [];
-    public EventOutcomeType? EventOutcome { get; set; }
     public bool IsHidden { get; set; }
 
     public void Mapping(Profile profile)

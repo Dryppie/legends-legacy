@@ -200,16 +200,8 @@ export class DungeonStateService {
     this.executeAction('choose_route', { routeOptionId });
   }
 
-  chooseEventChoice(choiceId: string): void {
-    this.executeAction('event_choice', { choiceId });
-  }
-
   retreat(): void {
     this.executeAction('retreat');
-  }
-
-  chooseEventAction(actionId: string, payload?: unknown): void {
-    this.executeAction(actionId, payload);
   }
 
   claimDungeonRewards(
