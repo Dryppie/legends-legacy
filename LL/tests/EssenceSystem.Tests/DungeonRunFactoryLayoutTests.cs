@@ -65,6 +65,10 @@ public sealed class DungeonRunFactoryLayoutTests
                 Assert.InRange(row.Count(), 1, 3);
                 Assert.Equal(row.Count(), row.Select(node => node.Lane).Distinct().Count());
             });
+            Assert.Equal(run.Rooms.Count, nodes.Count);
+            Assert.Equal(
+                Enumerable.Range(0, run.Rooms.Count),
+                run.Rooms.Select(room => room.RoomIndex));
 
             for (var rowIndex = 0; rowIndex < rows.Count - 1; rowIndex++)
             {
@@ -101,6 +105,104 @@ public sealed class DungeonRunFactoryLayoutTests
                 nodes.Count,
                 Traverse([boss.RoomIndex], index => incoming[index]).Count);
         }
+    }
+
+    [Fact]
+    public async Task Generated_combat_rows_favor_two_nodes_over_one()
+    {
+        var factory = CreateFactory();
+        var observedWidths = new Dictionary<int, int>();
+
+        for (var seed = 0; seed < 500; seed++)
+        {
+            var run = await factory.CreateAsync(Guid.NewGuid(), "layout_test", seed, CancellationToken.None);
+            var roomTypes = run.Rooms.ToDictionary(room => room.RoomIndex, room => room.Type);
+            var combatRows = run.State.MapNodes
+                .GroupBy(node => node.Depth)
+                .Where(row => row.All(node => roomTypes[node.RoomIndex] == RoomType.Combat));
+
+            foreach (var row in combatRows)
+            {
+                observedWidths[row.Count()] = observedWidths.GetValueOrDefault(row.Count()) + 1;
+            }
+        }
+
+        Assert.True(observedWidths.GetValueOrDefault(1) < observedWidths.GetValueOrDefault(2));
+        Assert.True(observedWidths.GetValueOrDefault(3) > 0);
+    }
+
+    [Fact]
+    public async Task Configured_rest_sites_are_optional_combat_choices()
+    {
+        var factory = CreateFactory(restSiteCount: 2);
+        var run = await factory.CreateAsync(Guid.NewGuid(), "layout_test", 73, CancellationToken.None);
+        var nodes = run.State.MapNodes;
+
+        var restSites = run.Rooms
+            .Where(room => room.Type == RoomType.RestSite)
+            .ToList();
+        Assert.Equal(2, restSites.Count);
+
+        foreach (var restSite in restSites)
+        {
+            var restNode = nodes.Single(node => node.RoomIndex == restSite.RoomIndex);
+            var choiceRow = nodes.Where(node => node.Depth == restNode.Depth).ToList();
+
+            Assert.Equal(2, choiceRow.Count);
+            Assert.Contains(choiceRow, node =>
+                run.Rooms[node.RoomIndex].Type == RoomType.Combat);
+
+            var choiceIndexes = choiceRow.Select(node => node.RoomIndex).ToHashSet();
+            var previousRow = nodes
+                .Where(node => node.Depth == restNode.Depth - 1)
+                .ToList();
+            Assert.NotEmpty(previousRow);
+            Assert.All(previousRow, node =>
+                Assert.True(choiceIndexes.SetEquals(node.NextRoomIndexes)));
+
+            var combatAlternative = choiceRow.Single(node =>
+                run.Rooms[node.RoomIndex].Type == RoomType.Combat);
+            Assert.Equal(restNode.NextRoomIndexes, combatAlternative.NextRoomIndexes);
+        }
+    }
+
+    [Fact]
+    public async Task Rest_site_count_controls_how_many_authored_slots_are_activated()
+    {
+        var factory = CreateFactory(restSiteCount: 1);
+
+        var first = await factory.CreateAsync(Guid.NewGuid(), "layout_test", 73, CancellationToken.None);
+        var second = await factory.CreateAsync(Guid.NewGuid(), "layout_test", 73, CancellationToken.None);
+
+        Assert.Single(first.Rooms, room => room.Type == RoomType.RestSite);
+        Assert.Equal(LayoutSignature(first), LayoutSignature(second));
+        Assert.Equal(
+            first.Rooms.Select(room => room.Type),
+            second.Rooms.Select(room => room.Type));
+    }
+
+    [Fact]
+    public async Task Zero_rest_sites_turns_all_authored_slots_into_combat()
+    {
+        var factory = CreateFactory(restSiteCount: 0);
+
+        var run = await factory.CreateAsync(Guid.NewGuid(), "layout_test", 73, CancellationToken.None);
+
+        Assert.DoesNotContain(run.Rooms, room => room.Type == RoomType.RestSite);
+        Assert.All(
+            run.Rooms.Where(room => room.Type == RoomType.Combat),
+            room => Assert.NotEmpty(room.EncounterIds));
+    }
+
+    [Fact]
+    public async Task Rest_site_count_cannot_exceed_the_authored_slot_count()
+    {
+        var factory = CreateFactory(restSiteCount: 3);
+
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            factory.CreateAsync(Guid.NewGuid(), "layout_test", 73, CancellationToken.None));
+
+        Assert.Contains("only provides 2 Rest Site slots", exception.Message);
     }
 
     [Fact]
@@ -168,6 +270,7 @@ public sealed class DungeonRunFactoryLayoutTests
         {
             Id = "small_pool_test",
             Name = "Small Pool Test",
+            RestSiteCount = 2,
             Rooms =
             [
                 new RoomDefinition
@@ -201,12 +304,13 @@ public sealed class DungeonRunFactoryLayoutTests
             room => Assert.Equal(["only-enemy"], room.EncounterIds));
     }
 
-    private static DungeonRunFactory CreateFactory()
+    private static DungeonRunFactory CreateFactory(int restSiteCount = 2)
     {
         var dungeon = new DungeonDefinition
         {
             Id = "layout_test",
             Name = "Layout Test",
+            RestSiteCount = restSiteCount,
             Rooms =
             [
                 new RoomDefinition

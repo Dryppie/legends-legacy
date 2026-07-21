@@ -25,7 +25,7 @@ public sealed class DungeonDefinition
     public List<string> TierRewardTableIds { get; set; } = [];
     public Dictionary<ItemType, double> MonsterLootModifiers { get; set; } = [];
     public List<DungeonGatheringNodeDefinition> GatheringNodes { get; set; } = [];
-    public bool HasRestSites { get; set; } = true;
+    public int RestSiteCount { get; set; }
     public int MinRooms { get; set; }
     public int MaxRooms { get; set; }
     public List<RoomDefinition> Rooms { get; set; } = [];

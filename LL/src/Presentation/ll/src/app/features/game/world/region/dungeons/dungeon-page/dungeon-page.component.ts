@@ -49,6 +49,11 @@ interface DungeonRewardResult {
   claimedLoot: InventoryItem[];
 }
 
+interface DungeonVigorForecast {
+  minimum: number;
+  maximum: number;
+}
+
 @Component({
   selector: 'app-dungeon-page',
   standalone: true,
@@ -596,6 +601,10 @@ export class DungeonPageComponent {
   }
 
   mapNodeAriaLabel(node: DungeonGraphNode): string {
+    if (node.room?.type === 'RestSite') {
+      return `Rest at ${node.displayName} and recover 15 Vigor`;
+    }
+
     if (node.route) {
       return `Choose ${node.route.displayName}, ${this.getRoomTypeLabel(node.room?.type)}`;
     }
@@ -604,21 +613,54 @@ export class DungeonPageComponent {
       return this.getRoomTypeLabel(node.room?.type);
     }
 
-    if (node.room?.type === 'RestSite') {
-      return 'Rest at Rest Site and recover 15 Vigor';
-    }
-
     return `Begin combat at ${node.displayName}`;
   }
 
   mapNodeTitle(node: DungeonGraphNode): string | null {
+    if (node.room?.type === 'RestSite') {
+      return `${node.displayName} · Rest · +15 Vigor`;
+    }
+
     if (node.route) {
       return `${node.route.displayName} · ${node.route.forecast} · Vigor ${node.route.vigorCostMin}–${node.route.vigorCostMax}`;
     }
 
     if (!this.isCurrentRoomActionNode(node)) return null;
 
-    return node.room?.type === 'RestSite' ? 'Rest · +15 Vigor' : 'Begin Combat';
+    return 'Begin Combat';
+  }
+
+  mapNodeVigorForecast(node: DungeonGraphNode): DungeonVigorForecast | null {
+    if (node.room?.type !== 'Combat' && node.room?.type !== 'MiniBoss') {
+      return null;
+    }
+
+    if (node.route) {
+      return {
+        minimum: node.route.vigorCostMin,
+        maximum: node.route.vigorCostMax,
+      };
+    }
+
+    const authoredMinimum = node.vigorCostMin > 0 ? node.vigorCostMin : 12;
+    const authoredMaximum =
+      node.vigorCostMax >= authoredMinimum
+        ? node.vigorCostMax
+        : Math.max(authoredMinimum, 22);
+    const widenForecast =
+      this.activeDungeon()?.state?.vigorState === 'Strained' ||
+      this.activeDungeon()?.state?.vigorState === 'Exhausted';
+    const scaledMinimum = this.scaleVigorForecast(authoredMinimum);
+    const scaledMaximum = this.scaleVigorForecast(authoredMaximum);
+
+    return {
+      minimum: widenForecast ? Math.max(0, scaledMinimum - 2) : scaledMinimum,
+      maximum: widenForecast ? Math.min(35, scaledMaximum + 2) : scaledMaximum,
+    };
+  }
+
+  private scaleVigorForecast(value: number): number {
+    return Math.round(Math.max(0, value) * 0.85);
   }
 
   private isDirectNodeActionRoomType(type: string | null | undefined): boolean {

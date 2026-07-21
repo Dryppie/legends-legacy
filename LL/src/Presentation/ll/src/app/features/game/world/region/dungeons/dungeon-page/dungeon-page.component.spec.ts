@@ -56,9 +56,11 @@ describe('DungeonPageComponent', () => {
 
     expect(component.isMapNodeActionable(node)).toBeTrue();
     expect(component.mapNodeAriaLabel(node)).toBe(
-      'Rest at Rest Site and recover 15 Vigor',
+      'Rest at Upper Rest Site and recover 15 Vigor',
     );
-    expect(component.mapNodeTitle(node)).toBe('Rest · +15 Vigor');
+    expect(component.mapNodeTitle(node)).toBe(
+      'Upper Rest Site · Rest · +15 Vigor',
+    );
 
     component.chooseMapNode(node);
 
@@ -88,6 +90,55 @@ describe('DungeonPageComponent', () => {
       expect(dungeonState.restAtSite).not.toHaveBeenCalled();
     });
   }
+
+  for (const roomType of [RoomType.Combat, RoomType.MiniBoss]) {
+    it(`shows a Vigor forecast for every ${roomType} node`, () => {
+      const run = createRun(roomType);
+      run.state.mapNodes[0].vigorCostMin = 12;
+      run.state.mapNodes[0].vigorCostMax = 22;
+      activeDungeon.set(run);
+      const component = TestBed.runInInjectionContext(
+        () => new DungeonPageComponent(),
+      );
+
+      expect(component.mapNodeVigorForecast(component.graphNodes()[0])).toEqual(
+        {
+          minimum: 10,
+          maximum: 19,
+        },
+      );
+    });
+  }
+
+  it('does not show a Vigor forecast for Boss nodes', () => {
+    const run = createRun(RoomType.Boss);
+    run.state.mapNodes[0].vigorCostMin = 20;
+    run.state.mapNodes[0].vigorCostMax = 30;
+    activeDungeon.set(run);
+    const component = TestBed.runInInjectionContext(
+      () => new DungeonPageComponent(),
+    );
+
+    expect(
+      component.mapNodeVigorForecast(component.graphNodes()[0]),
+    ).toBeNull();
+  });
+
+  it('widens non-route Vigor forecasts when the expedition is fatigued', () => {
+    const run = createRun(RoomType.Combat);
+    run.state.vigorState = 'Strained';
+    run.state.mapNodes[0].vigorCostMin = 12;
+    run.state.mapNodes[0].vigorCostMax = 22;
+    activeDungeon.set(run);
+    const component = TestBed.runInInjectionContext(
+      () => new DungeonPageComponent(),
+    );
+
+    expect(component.mapNodeVigorForecast(component.graphNodes()[0])).toEqual({
+      minimum: 8,
+      maximum: 21,
+    });
+  });
 
   it('does not make a completed Rest Site actionable', () => {
     const run = createRestSiteRun();

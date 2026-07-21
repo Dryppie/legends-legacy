@@ -38,7 +38,7 @@ These decisions are already made and should not be reopened accidentally.
 | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Run subdivisions     | Call them **Sections**, never Legs.                                                                                                               |
 | Section count        | Dungeons can have different numbers of Sections. Three is not a universal rule.                                                                   |
-| Section shape        | A Section contains one to three encounter rows, with one to three nodes per row, before reconverging at a Rest Site.                             |
+| Section shape        | A Section contains one to three encounter rows, followed by an authored transition slot that may become a Rest-versus-Combat choice.             |
 | Recovery nodes       | Use **Rest Sites**, never Wardstones or checkpoints.                                                                                              |
 | Rest effect          | A Rest Site restores **15 Vigor**.                                                                                                                |
 | Playable room scope  | Authored dungeons may contain only Entrance, Combat, MiniBoss, Rest Site, and Boss rooms. Hazard, Cache, Event, Elite, and Omen Site types have been removed. |
@@ -47,7 +47,7 @@ These decisions are already made and should not be reopened accidentally.
 | Rewards at risk      | Call them **Pending Loot**, never Pack, Run Loot, Unbanked Loot, or Unsecured Loot.                                                               |
 | Route selection      | Players select an available route by clicking or tapping its map node. Do not restore the large choice overlay.                                   |
 | Route automation     | The server must never automatically pick a branch.                                                                                                |
-| Layout variation     | Each run uses its seed to shuffle encounter lanes and regenerate safe adjacent-row connections. Sections, Depths, Rest Sites, and Boss placement remain authored. |
+| Layout variation     | Each run uses its seed to select configured Rest Site slots, shuffle lanes, and regenerate safe adjacent-row connections. Sections, Depths, and Boss placement remain authored. |
 | Map progression      | The map automatically scrolls as the run advances.                                                                                                |
 | Node visibility      | Cleared nodes, the current node, and available choices are opaque. Unreached nodes remain subdued.                                                |
 | Node colors          | Revealed nodes use the same semantic colors as the map legend.                                                                                    |
@@ -83,7 +83,7 @@ The player should:
 3. Select a node directly on the map.
 4. Resolve an automated combat or authored non-combat encounter.
 5. See exactly what changed.
-6. Decide whether to continue, rest when a Rest Site is reached, or retreat and secure Pending Loot.
+6. Decide whether to push through an optional Combat route, take an available Rest Site, or retreat and secure Pending Loot.
 7. Reach and defeat the final Boss.
 
 The system is server-authoritative. The browser presents state and decisions; it does not own run progression.
@@ -127,7 +127,8 @@ flowchart TD
     D -->|"Node cleared"| E["Consequence recorded"]
     E --> G{"Next position"}
     G -->|"More routes"| B
-    G -->|"Rest Site"| H["Rest<br/>+15 Vigor"]
+    G -->|"Rest Site route"| H["Rest immediately<br/>+15 Vigor"]
+    G -->|"Combat route"| B
     H --> G
     G -->|"Boss"| I["Boss encounter"]
     I -->|"Victory"| V["Completed<br/>Pending Loot + completion rewards secured"]
@@ -150,7 +151,7 @@ The player can retreat whenever an active run is waiting for input, including:
 
 - A route choice.
 - A combat-node start decision.
-- A Rest Site.
+- A Rest-versus-Combat route choice before either option resolves.
 - A boss start decision.
 
 Retreat during a server-side combat resolution is not required. Once combat has resolved and the run is waiting again, retreat must be available.
@@ -176,18 +177,19 @@ Retreat during a server-side combat resolution is not required. Once combat has 
 
 A Section is authored using this grammar:
 
-1. The Entrance or previous Rest Site feeds the Section.
+1. The Entrance or previous Section transition feeds the Section.
 2. The first encounter row contains one to three nodes.
 3. A second encounter row may contain one to three nodes.
 4. A third encounter row may contain one to three nodes.
-5. Routes reconverge at one Rest Site.
-6. The Rest Site restores 15 Vigor and leads into the next Section.
+5. The Section ends at an authored transition slot.
+6. When that slot is activated by the dungeon's `restSiteCount`, it becomes a Rest-versus-Combat row whose paths reconverge immediately afterward.
+7. The Rest route restores 15 Vigor and grants no combat rewards; the Combat route risks Vigor for another encounter's rewards.
 
-The final Section's Rest Site may lead into a fixed boss approach and then the Boss.
+The final Section transition may lead into a fixed boss approach and then the Boss.
 
 ```mermaid
 flowchart LR
-    S["Entrance or previous Rest Site"] --> A1["Row 1A"]
+    S["Entrance or previous transition"] --> A1["Row 1A"]
     S --> A2["Row 1B"]
     S --> A3["Row 1C"]
     A1 --> B1["Optional Row 2A"]
@@ -204,9 +206,14 @@ flowchart LR
     B2 --> C3["Optional Row 3C"]
     B3 --> C2
     B3 --> C3
-    C1 --> R["Rest Site"]
+    C1 --> R["Rest Site<br/>+15 Vigor"]
+    C1 --> P["Push deeper<br/>Combat rewards"]
     C2 --> R
+    C2 --> P
     C3 --> R
+    C3 --> P
+    R --> N["Next Section"]
+    P --> N
 ```
 
 Sections may contain one, two, or three encounter rows. Rows do not need to contain the maximum number of nodes.
@@ -215,12 +222,14 @@ Sections may contain one, two, or three encounter rows. Rows do not need to cont
 
 When a run is created:
 
-1. Encounter nodes within each multi-node Depth row are shuffled among that row's authored lane values.
-2. Connections are cleared and regenerated between each pair of adjacent Depth rows.
-3. A lone source fans into every node of the next row.
-4. A multi-node row reconverges when the next row contains only one node.
-5. Between two multi-node rows, every source receives at least one exit, every target receives at least one entrance, and at least one additional branch is added.
-6. Generated connections never skip a Depth, backtrack, exceed three exits, create an unreachable node, or create a node that cannot reach the Boss.
+1. Combat-only rows use their authored nodes as a candidate pool. Two-node rows resolve to one node 20% of the time and two nodes 80% of the time; rows with three candidates resolve to one, two, or three nodes with 15%, 55%, and 30% weights respectively.
+2. The family-level `restSiteCount` selects that many authored Rest Site slots using the run seed.
+3. Each selected slot keeps its Rest Site and gains a Combat sibling; each unselected slot becomes Combat-only.
+4. Encounter nodes within each multi-node Depth row are shuffled among that row's authored lane values.
+5. Connections are cleared and regenerated between each pair of adjacent Depth rows.
+6. Every route entering a Rest-versus-Combat row can select either option, and both options expose the same following row.
+7. Other multi-node rows guarantee at least one exit per source and one entrance per target, with controlled extra connections.
+8. Generated connections never skip a Depth, backtrack, exceed three exits, create an unreachable node, or create a node that cannot reach the Boss.
 
 The run seed fully determines this result. Generated `MapNodes` are persisted, so refresh and resume retain the exact same layout.
 
@@ -243,7 +252,7 @@ The engine supports only Entrance, Combat, MiniBoss, Rest Site, and Boss. Remove
 | `Entrance` | Starting node and first route origin.                                                     | Implemented.                                                                       |
 | `Combat`   | Standard automated encounter and baseline Vigor toll.                                     | Implemented and used in all live maps.                                             |
 | `MiniBoss` | Named, more demanding combat encounter.                                                   | Implemented; individual dungeons may omit it.                                      |
-| `RestSite` | Restores 15 Vigor and separates Sections.                                                 | Implemented and used after every current Section.                                  |
+| `RestSite` | Optional route that restores 15 Vigor instead of granting another Combat reward.          | Implemented through dungeon-configured seeded Rest Site slots.                     |
 | `Boss`     | Final automated encounter.                                                                | Implemented.                                                                       |
 
 ### Encounter authoring rules
@@ -355,9 +364,11 @@ Exact numbers should be telemetry-driven, but the desired behavior is:
 
 - Replace the old Wardstone/checkpoint concept completely.
 - Restore exactly 15 Vigor.
-- Are authored nodes in the map.
+- Originate from authored transition slots selected up to the dungeon family's `restSiteCount`.
+- Always appear beside a Combat alternative that grants normal encounter rewards.
+- Are available from every incoming route to that transition row.
 - Complete once used.
-- Advance the run after resting.
+- Resolve immediately when selected and advance the run after resting.
 - Count toward Section progress.
 - Use the Rest semantic color and camp icon.
 - Do not contain boon selection.
@@ -454,8 +465,8 @@ Every available route should expose:
 Currently:
 
 - Rooms at or before the current Depth plus one Depth ahead are revealed.
-- Rest Sites and the Boss remain visible.
-- Other future rooms are returned as `Unknown`.
+- Future Rest Sites follow the same fog-of-war rule as Combat and MiniBoss rooms.
+- The Boss remains visible; other future rooms are returned as `Unknown`.
 - Available nodes are opaque and interactive.
 - Unreached nodes are transparent/subdued.
 
@@ -780,7 +791,7 @@ Rest Sites currently restore 15 at all tiers. Do not reintroduce tier-specific R
 - Tier, build, party tags, combat performance, and Pending Loot reprioritize routes.
 - Each run deterministically shuffles encounter lanes and selects safe connections between adjacent rows from its seed.
 - Every generated node remains reachable from the Entrance and able to reach the Boss.
-- Controlled variance must not change Section count, row sizes, Rest Site placement, or Boss placement.
+- Controlled variance must not change Section count, the configured Rest Site count, or Boss placement. The seed may select among authored Rest Site slots.
 - New combat formations and authored route layouts are the cheapest content-refresh tools.
 - No route should become correct for every build.
 
@@ -799,7 +810,8 @@ A dungeon definition should eventually describe:
 | Core hazard            | Environmental Vigor pressure and tag interactions.           |
 | Attrition profile      | Expected split between combat, hazard, and event Vigor loss. |
 | Section count          | Authored number of Sections.                                 |
-| Section graph          | One to three rows of up to three nodes, then Rest Site.      |
+| Section graph          | One to three encounter rows, then a transition slot.         |
+| Rest Site count        | Family-level number of transition slots activated per run.   |
 | Encounter nodes        | Room types, depths, lanes, routes, costs, tags, and rewards. |
 | MiniBoss function      | Named, more demanding combat encounter.                      |
 | Useful expedition tags | Scout, Medic, Warden, and Breaker interactions.              |
@@ -827,7 +839,10 @@ A dungeon definition should eventually describe:
 - Exactly one terminal Boss.
 - Consecutive Sections.
 - Consecutive Depths beginning at zero.
-- One Rest Site per Section under the current grammar.
+- One authored Rest Site candidate slot per Section under the current grammar.
+- `restSiteCount` is required, non-negative, and cannot exceed the delve's candidate-slot count.
+- Each activated Rest Site row also contains a Combat alternative.
+- Every incoming route can reach both choices, and both choices expose the same following row.
 - One to three encounter rows per Section.
 - One to three nodes per row.
 - Unique lanes within each Depth row.
@@ -844,15 +859,15 @@ A dungeon definition should eventually describe:
 
 ## 21. Current Live Dungeon Content
 
-The current authored layouts are:
+The current authored layouts and configured recovery counts are:
 
-| Dungeon family      | Nodes | Depths | Sections | Rest Sites | Combat | MiniBoss | Boss |
-| ------------------- | ----: | -----: | -------: | ---------: | -----: | -------: | ---: |
-| Goblin Mines        |    22 |     12 |        3 |          3 |     16 |        1 |    1 |
-| Forgotten Catacombs |    19 |     10 |        2 |          2 |     14 |        1 |    1 |
-| Hives Abyss         |    25 |     14 |        4 |          4 |     18 |        1 |    1 |
+| Dungeon family       | Authored nodes | Depths | Sections | Rest slots | Active Rest Sites | Base Combat | MiniBoss | Boss |
+| -------------------- | -------------: | -----: | -------: | ---------: | ----------------: | ----------: | -------: | ---: |
+| Goblin Mines         |             22 |     12 |        3 |          3 |                 2 |          17 |        0 |    1 |
+| Forgotten Catacombs  |             19 |     10 |        2 |          2 |                 1 |          14 |        1 |    1 |
+| Hives Abyss          |             25 |     14 |        4 |          4 |                 3 |          18 |        1 |    1 |
 
-Each dungeon family reuses the same authored node roster, Depth skeleton, and Section structure across tiers through prefix matching. On every new run, the seed deterministically shuffles encounter nodes between the authored lanes and regenerates connections between adjacent Depth rows. Rest Sites and the Boss remain fixed anchors.
+Each dungeon family reuses the same authored node roster, Depth skeleton, Section structure, and `restSiteCount` across tiers through prefix matching. On every new run, the seed selects the configured number of candidate slots, adds one Combat alternative beside every active Rest Site, converts unused slots to Combat, shuffles eligible lanes, and regenerates connections between adjacent Depth rows. The Boss remains a fixed anchor.
 
 Every live dungeon now contains one mandatory three-row Section:
 
@@ -952,7 +967,7 @@ The old checkpoint interface and service were removed.
 | Server-authoritative run      | All progression and outcomes owned by server      | Implemented                                   | Implemented                  |
 | Variable Sections             | Per-dungeon Section count                         | 2, 3, and 4 Section layouts live              | Implemented                  |
 | Up to three choices per row   | Authored one-to-three-node rows                   | Implemented and validated                     | Implemented                  |
-| Rest Sites                    | +15 Vigor, no checkpoint choices                  | Implemented                                   | Implemented                  |
+| Rest Sites                    | Configured optional +15 route versus Combat rewards | Seeded count and paired Combat choice implemented | Implemented               |
 | Retreat anywhere              | Secure Pending Loot at active decisions           | Backend and active-page button implemented    | Implemented                  |
 | Direct node selection         | Tap available node                                | Implemented                                   | Implemented                  |
 | Map auto-scroll               | Follow current progression                        | Implemented                                   | Implemented                  |
@@ -1016,7 +1031,7 @@ Work:
   - Retreat at each supported room decision.
   - Securing currencies and items.
   - Forfeiting completion rewards.
-  - Rest Site +15 recovery and Section advancement.
+  - Rest Site +15 recovery, one-click route resolution, greedy Combat alternative, and Section advancement on either path.
   - Vigor reaching 0 from standard, Miniboss, and Boss combat resolution.
 - Assert all live definitions pass graph validation.
 - Add a test that no dungeon source/DTO/UI field reintroduces checkpoint or reward legacy terminology.
@@ -1183,7 +1198,7 @@ Healthy directional targets:
 | --------------------------------- | ----------------------------------------------------------------------------------------- |
 | Vigor is irrelevant               | High-value routes and poor combat must create real attrition; monitor Vigor curves.       |
 | Vigor snowballs unfairly          | Keep threshold penalties limited, show costs, fail at breakpoints, and preserve retreat.  |
-| Rest Sites erase attrition        | Keep recovery fixed at 15 unless telemetry justifies a change; tune authored costs first. |
+| Rest Sites erase attrition        | Keep recovery fixed at 15, cap their configured count, and make each replace a Combat reward opportunity. |
 | One route dominates               | Require each path to be correct for some build or Vigor state; track pick rates.          |
 | Tags become mandatory keys        | Always author tagless resolutions.                                                        |
 | Dungeons become automatic         | Never auto-pick combat routes.                                                             |
@@ -1246,11 +1261,12 @@ Healthy directional targets:
 
 ## 29. Current Verification Baseline
 
-The Rest Site/retreat/Vigor implementation was previously verified with:
+The optional Rest Site/retreat/Vigor implementation is currently verified with:
 
 - Angular development build.
-- Isolated API build with zero errors.
-- 50 focused dungeon/DTO/achievement/outbox/Soulstone tests.
+- 12 focused Angular dungeon-page specs.
+- 43 focused dungeon catalog, layout, Vigor, and DTO tests.
+- 480 full backend tests.
 - Source search confirming checkpoint/Wardstone and old Pending Loot terminology were absent from the dungeon application code.
 
 The repository still contains existing nullable/compiler warnings unrelated to the dungeon feature.

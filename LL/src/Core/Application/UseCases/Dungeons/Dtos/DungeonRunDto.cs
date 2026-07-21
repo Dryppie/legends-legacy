@@ -48,10 +48,9 @@ public class DungeonRunDto : IMapFrom<DungeonRun>
                         var isRevealed = currentDepth.HasValue && node is not null
                             ? node.Depth <= currentDepth.Value + 1
                             : room.RoomIndex <= src.CurrentRoomIndex;
-                        var isRestSite = room.Type == RoomType.RestSite;
                         var isBoss = room.Type == RoomType.Boss;
 
-                        if (isRevealed || isRestSite || isBoss)
+                        if (isRevealed || isBoss)
                         {
                             return new RoomInstanceDto
                             {

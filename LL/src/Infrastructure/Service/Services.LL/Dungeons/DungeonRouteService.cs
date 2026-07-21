@@ -90,6 +90,15 @@ public sealed class DungeonRouteService : IDungeonRouteService
         }
 
         run.CurrentRoomIndex = route.RoomIndex;
+        var selectedNode = run.State.MapNodes
+            .FirstOrDefault(node => node.RoomIndex == route.RoomIndex);
+        if (selectedNode is not null)
+        {
+            run.State.CurrentSection = Math.Clamp(
+                selectedNode.Section,
+                1,
+                Math.Max(1, run.State.TotalSections));
+        }
         if (!run.State.TraversedRoomIndexes.Contains(route.RoomIndex))
         {
             run.State.TraversedRoomIndexes.Add(route.RoomIndex);

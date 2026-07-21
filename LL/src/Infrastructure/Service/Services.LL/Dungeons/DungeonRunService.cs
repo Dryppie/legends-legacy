@@ -277,7 +277,7 @@ public sealed class DungeonRunService : IDungeonRunService
 
         _vigor.RecoverAtRestSite(run, room);
         CompleteRoom(run, room);
-        AdvanceFromRestSite(run);
+        run.State.RestSitesVisited++;
         MoveToNextRoom(run);
         await RecordDungeonProgressContributionAsync(run, room, ct);
         await ApplyCompletionRewardsIfNeeded(run, ct);
@@ -383,6 +383,11 @@ public sealed class DungeonRunService : IDungeonRunService
                 : await ResolveCombatRoom(run, snapshot, room, ct);
         }
 
+        if (room.Type == RoomType.RestSite)
+        {
+            return await ExecuteRestSiteRoomAction(run, room, DungeonActionConstants.Rest, ct);
+        }
+
         return new ExecuteDungeonActionResult
         {
             Run = run,
@@ -413,6 +418,7 @@ public sealed class DungeonRunService : IDungeonRunService
 
         var nextRoomIndex = nextRoomIndexes[0];
         run.CurrentRoomIndex = nextRoomIndex;
+        SetCurrentSectionFromRoom(run, nextRoomIndex);
         if (!run.State.TraversedRoomIndexes.Contains(nextRoomIndex))
         {
             run.State.TraversedRoomIndexes.Add(nextRoomIndex);
@@ -510,14 +516,6 @@ public sealed class DungeonRunService : IDungeonRunService
         return bag;
     }
 
-    private static void AdvanceFromRestSite(DungeonRun run)
-    {
-        run.State.RestSitesVisited++;
-        run.State.CurrentSection = Math.Min(
-            Math.Max(1, run.State.TotalSections),
-            run.State.CurrentSection + 1);
-    }
-
     private static void FailRun(DungeonRun run, RoomInstance room, string cause, string explanation)
     {
         var lostPendingLoot = CreateLootBagFromRun(run);
@@ -533,7 +531,7 @@ public sealed class DungeonRunService : IDungeonRunService
             {
                 "Attrition" =>
                 [
-                    "Use each Rest Site before entering the next Section.",
+                    "Take a Rest Site route before the next difficult encounter when Vigor is low.",
                     "Choose lower-toll routes while Vigor is Strained or Exhausted."
                 ],
                 "Abandonment" =>
@@ -565,24 +563,19 @@ public sealed class DungeonRunService : IDungeonRunService
     {
         var state = run.State;
 
-        var authoredSectionCount = state.MapNodes
-            .Where(node => run.Rooms.Any(room =>
-                room.RoomIndex == node.RoomIndex &&
-                room.Type == RoomType.RestSite))
-            .Select(node => node.Section)
-            .Where(section => section > 0)
-            .Distinct()
-            .Count();
-        var totalSections = Math.Max(1, authoredSectionCount);
+        var totalSections = Math.Max(
+            1,
+            state.MapNodes
+                .Where(node => node.Section > 0)
+                .Select(node => node.Section)
+                .DefaultIfEmpty(1)
+                .Max());
         state.TotalSections = totalSections;
 
         var currentNodeSection = state.MapNodes
             .FirstOrDefault(node => node.RoomIndex == run.CurrentRoomIndex)
             ?.Section ?? 1;
-        state.CurrentSection = Math.Clamp(
-            state.CurrentSection > 0 ? state.CurrentSection : currentNodeSection,
-            1,
-            totalSections);
+        state.CurrentSection = Math.Clamp(currentNodeSection, 1, totalSections);
 
         if (state.FailureAnalysis is not null)
         {
@@ -596,6 +589,17 @@ public sealed class DungeonRunService : IDungeonRunService
     private static void ClearDecisionState(DungeonRun run)
     {
         run.State.CurrentRouteOptions.Clear();
+    }
+
+    private static void SetCurrentSectionFromRoom(DungeonRun run, int roomIndex)
+    {
+        var section = run.State.MapNodes
+            .FirstOrDefault(node => node.RoomIndex == roomIndex)
+            ?.Section ?? run.State.CurrentSection;
+        run.State.CurrentSection = Math.Clamp(
+            section,
+            1,
+            Math.Max(1, run.State.TotalSections));
     }
 
     private static List<int> GetNextRoomIndexes(DungeonRun run)

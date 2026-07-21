@@ -64,7 +64,7 @@ Inheritance should exist only at the content-loading boundary. Domain and gamepl
 
 ```json
 {
-  "schemaVersion": 2,
+  "schemaVersion": 3,
   "families": [
     {
       "id": "goblin_mines",
@@ -77,7 +77,7 @@ Inheritance should exist only at the content-loading boundary. Domain and gamepl
       "monsterLootModifiers": {
         "Essence": 25
       },
-      "hasRestSites": true,
+      "restSiteCount": 2,
       "roomTemplates": [
         {
           "id": "combat.main",
@@ -165,7 +165,7 @@ Author a value at family level when it normally describes the dungeon rather tha
 - `sigilItemId` and `entryCosts`.
 - Area or quest requirements shared by the family.
 - `monsterLootModifiers`.
-- `hasRestSites`.
+- `restSiteCount`, which activates that many authored Rest Site slots per seeded run.
 - `roomTemplates`.
 - Default completion-reward conventions, if introduced later.
 
@@ -257,6 +257,7 @@ Validate the authoring document before or during materialization:
 - Each family has at least one difficulty and difficulty numbers are unique.
 - Difficulty ordering is deterministic.
 - Every room-template ID is unique within its family.
+- `restSiteCount` is explicitly authored and cannot be negative.
 - Every Combat, Miniboss, and Boss template has at least one encounter.
 - Every Miniboss and Boss template has exactly one featured encounter and it exists in that template.
 - Difficulty definitions cannot contain room or encounter overrides.
@@ -273,7 +274,7 @@ The catalog was migrated atomically instead of permanently supporting two format
 
 1. Added the authoring models, materializer, and authoring validator.
 2. Converted Goblin Mines, Forgotten Catacombs, and the retired Hives content into families.
-3. Changed `JsonDungeonDefinitions` to load schema version 2.
+3. Changed `JsonDungeonDefinitions` to load schema version 3; this revision replaces `hasRestSites` with the required `restSiteCount` generation contract.
 4. Kept the existing runtime `DungeonDefinition`, `IDungeonDefinitions`, DTOs, and consumers unchanged.
 5. Removed the old top-level-array reader path.
 6. Added materialization, encounter-sharing, collection-isolation, override-rejection, and content regression tests.

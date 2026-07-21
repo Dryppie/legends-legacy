@@ -24,7 +24,7 @@ public sealed class DungeonFamilyDefinition
     public string? RequiredQuestId { get; set; }
     public List<DungeonEntryCost> EntryCosts { get; set; } = [];
     public Dictionary<ItemType, double> MonsterLootModifiers { get; set; } = [];
-    public bool HasRestSites { get; set; } = true;
+    public int RestSiteCount { get; set; } = -1;
     public List<DungeonRoomTemplateDefinition> RoomTemplates { get; set; } = [];
     public List<DungeonDifficultyDefinition> Difficulties { get; set; } = [];
 }

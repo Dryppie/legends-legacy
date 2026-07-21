@@ -333,9 +333,18 @@
                     <span class="dungeon-node__route" *ngIf="node.route">
                       {{ node.route.displayName }}
                     </span>
-                    <span class="dungeon-node__route-cost" *ngIf="node.route">
-                      Vigor {{ node.route.vigorCostMin }}–{{
-                        node.route.vigorCostMax
+                    <span
+                      class="dungeon-node__route-cost"
+                      *ngIf="node.room?.type === 'RestSite'"
+                    >
+                      Rest · +15 Vigor
+                    </span>
+                    <span
+                      class="dungeon-node__route-cost"
+                      *ngIf="mapNodeVigorForecast(node) as vigorForecast"
+                    >
+                      Vigor {{ vigorForecast.minimum }}–{{
+                        vigorForecast.maximum
                       }}
                     </span>
                   </button>

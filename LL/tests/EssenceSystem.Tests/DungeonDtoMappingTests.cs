@@ -144,6 +144,53 @@ public sealed class DungeonDtoMappingTests
         Assert.Equal("Invalid", actionResponse.Message);
     }
 
+    [Fact]
+    public void Dungeon_run_mapping_hides_future_rest_sites_but_keeps_the_boss_visible()
+    {
+        var run = new DungeonRun
+        {
+            CurrentRoomIndex = 0,
+            Rooms =
+            [
+                new RoomInstance
+                {
+                    RoomIndex = 0,
+                    Type = RoomType.Combat,
+                    Status = RoomInstanceStatus.Active
+                },
+                new RoomInstance
+                {
+                    RoomIndex = 1,
+                    Type = RoomType.RestSite
+                },
+                new RoomInstance
+                {
+                    RoomIndex = 2,
+                    Type = RoomType.Boss
+                }
+            ],
+            State = new DungeonRunState
+            {
+                MapNodes =
+                [
+                    new DungeonMapNode { RoomIndex = 0, Depth = 0, Section = 1 },
+                    new DungeonMapNode { RoomIndex = 1, Depth = 2, Section = 1 },
+                    new DungeonMapNode { RoomIndex = 2, Depth = 3, Section = 1 }
+                ]
+            }
+        };
+
+        var dto = CreateMapper().Map<DungeonRunDto>(run);
+
+        var restSite = dto.Rooms.Single(room => room.Index == 1);
+        Assert.Equal(RoomType.Unknown, restSite.Type);
+        Assert.True(restSite.IsHidden);
+
+        var boss = dto.Rooms.Single(room => room.Index == 2);
+        Assert.Equal(RoomType.Boss, boss.Type);
+        Assert.False(boss.IsHidden);
+    }
+
     private static IMapper CreateMapper()
     {
         var configuration = new MapperConfiguration(

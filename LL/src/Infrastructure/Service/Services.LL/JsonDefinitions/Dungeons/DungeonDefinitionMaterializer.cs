@@ -46,7 +46,7 @@ public sealed class DungeonDefinitionMaterializer(DungeonCatalogValidator catalo
                 TierRewardTableIds = [$"reward.dungeon.tier.{difficulty.Difficulty}"],
                 MonsterLootModifiers = family.MonsterLootModifiers.ToDictionary(x => x.Key, x => x.Value),
                 GatheringNodes = difficulty.GatheringNodes.Select(Clone).ToList(),
-                HasRestSites = family.HasRestSites,
+                RestSiteCount = family.RestSiteCount,
                 MinRooms = difficulty.MinRooms,
                 MaxRooms = difficulty.MaxRooms,
                 Rooms = family.RoomTemplates.Select(MaterializeRoom).ToList()

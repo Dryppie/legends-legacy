@@ -5,7 +5,7 @@ namespace Services.LL.JsonDefinitions.Dungeons;
 
 public sealed class DungeonCatalogValidator
 {
-    private const int SupportedSchemaVersion = 2;
+    private const int SupportedSchemaVersion = 3;
 
     public IReadOnlyList<string> Validate(DungeonCatalogDocument document)
     {
@@ -59,6 +59,9 @@ public sealed class DungeonCatalogValidator
 
         if (family.Difficulties.Count == 0)
             errors.Add($"{familyLabel}: at least one difficulty is required.");
+
+        if (family.RestSiteCount < 0)
+            errors.Add($"{familyLabel}: restSiteCount must be specified and cannot be negative.");
 
         AddDuplicateErrors(
             family.RoomTemplates.Select(x => x.Id),

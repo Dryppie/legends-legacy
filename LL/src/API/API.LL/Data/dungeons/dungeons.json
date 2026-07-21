@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 2,
+  "schemaVersion": 3,
   "families": [
     {
       "id": "goblin_mines",
@@ -15,7 +15,7 @@
       "monsterLootModifiers": {
         "Essence": 25
       },
-      "hasRestSites": true,
+      "restSiteCount": 2,
       "roomTemplates": [
         {
           "id": "combat.1",
@@ -438,7 +438,7 @@
       "monsterLootModifiers": {
         "Essence": 15
       },
-      "hasRestSites": true,
+      "restSiteCount": 1,
       "roomTemplates": [
         {
           "id": "combat.1",
@@ -820,7 +820,7 @@
       "monsterLootModifiers": {
         "Essence": 15
       },
-      "hasRestSites": true,
+      "restSiteCount": 3,
       "roomTemplates": [
         {
           "id": "combat.1",

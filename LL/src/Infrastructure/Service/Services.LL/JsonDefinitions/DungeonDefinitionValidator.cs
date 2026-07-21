@@ -63,6 +63,9 @@ public sealed class DungeonDefinitionValidator : IDungeonDefinitionValidator
         if (dungeon.MaxRooms < dungeon.MinRooms)
             errors.Add($"{label}: maxRooms must be greater than or equal to minRooms.");
 
+        if (dungeon.RestSiteCount < 0)
+            errors.Add($"{label}: restSiteCount cannot be negative.");
+
         if (!string.IsNullOrWhiteSpace(dungeon.RequiredPreviousDungeonId)
             && !definitionsById.ContainsKey(dungeon.RequiredPreviousDungeonId))
         {

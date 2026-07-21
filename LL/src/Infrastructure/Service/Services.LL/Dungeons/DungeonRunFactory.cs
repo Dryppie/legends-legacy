@@ -27,6 +27,7 @@ public sealed class DungeonRunFactory
     {
         var dungeon = _dungeons.GetByKey(dungeonDefinitionId);
         var delve = _delves.GetForDungeon(dungeonDefinitionId);
+        ValidateRestSiteCount(dungeon, delve);
         var snapshot = await _snapshotService.CreateAsync(characterId, ct);
 
         var layoutRandom = new Random(seed);
@@ -47,18 +48,14 @@ public sealed class DungeonRunFactory
                 Vigor = 100,
                 VigorState = "Steady",
                 CurrentSection = 1,
-                TotalSections = delve.Nodes
-                    .Where(node => node.RoomType == RoomType.RestSite)
-                    .Select(node => node.Section)
-                    .Distinct()
-                    .Count(),
+                TotalSections = Math.Max(1, delve.Nodes.Max(node => node.Section)),
                 ExpiresAt = DateTimeOffset.UtcNow.AddHours(48)
             },
             CreatedAt = DateTimeOffset.UtcNow
         };
         run.State.RunId = run.Id;
 
-        var layout = CreateDungeonLayout(delve, layoutRandom);
+        var layout = CreateDungeonLayout(delve, dungeon.RestSiteCount, layoutRandom);
         run.Rooms = layout.Rooms;
         run.State.MapNodes = layout.Nodes;
         run.State.TraversedRoomIndexes = layout.Nodes.Count == 0 ? [] : [layout.Nodes[0].RoomIndex];
@@ -69,9 +66,11 @@ public sealed class DungeonRunFactory
 
     private static DungeonLayout CreateDungeonLayout(
         DungeonDelveDefinition delve,
+        int restSiteCount,
         Random random)
     {
-        var nodes = delve.Nodes.Select((definition, index) => new DungeonMapNode
+        var selectedDefinitions = SelectEncounterNodes(delve.Nodes, random);
+        var nodes = selectedDefinitions.Select((definition, index) => new DungeonMapNode
         {
             Id = definition.Id,
             DisplayName = definition.DisplayName,
@@ -82,20 +81,177 @@ public sealed class DungeonRunFactory
             Forecast = definition.Forecast,
             VigorCostMin = definition.VigorCostMin,
             VigorCostMax = definition.VigorCostMax,
-            NextRoomIndexes = definition.NextRoomIndexes.ToList()
+            NextRoomIndexes = []
         }).ToList();
-        var rooms = delve.Nodes.Select((definition, index) => new RoomInstance
+        var rooms = selectedDefinitions.Select((definition, index) => new RoomInstance
         {
             RoomIndex = index,
             Type = definition.RoomType,
             Status = RoomInstanceStatus.Pending
         }).ToList();
 
+        ConfigureRestSiteChoices(nodes, rooms, restSiteCount, random);
         RandomizeLayout(nodes, rooms, random);
         return new DungeonLayout(rooms, nodes);
     }
 
     private sealed record DungeonLayout(List<RoomInstance> Rooms, List<DungeonMapNode> Nodes);
+
+    private static List<DungeonDelveNodeDefinition> SelectEncounterNodes(
+        IReadOnlyList<DungeonDelveNodeDefinition> definitions,
+        Random random)
+    {
+        var selected = new HashSet<DungeonDelveNodeDefinition>();
+
+        foreach (var row in definitions.GroupBy(node => node.Depth))
+        {
+            var candidates = row.ToList();
+            if (candidates.Count <= 1 || candidates.Any(node => node.RoomType != RoomType.Combat))
+            {
+                selected.UnionWith(candidates);
+                continue;
+            }
+
+            var targetCount = RollEncounterRowWidth(candidates.Count, random);
+            Shuffle(candidates, random);
+            selected.UnionWith(candidates.Take(targetCount));
+        }
+
+        return definitions.Where(selected.Contains).ToList();
+    }
+
+    private static int RollEncounterRowWidth(int maximumWidth, Random random)
+    {
+        if (maximumWidth <= 1)
+        {
+            return maximumWidth;
+        }
+
+        var roll = random.NextDouble();
+        if (maximumWidth == 2)
+        {
+            return roll < 0.20d ? 1 : 2;
+        }
+
+        return roll switch
+        {
+            < 0.15d => 1,
+            < 0.70d => 2,
+            _ => Math.Min(3, maximumWidth)
+        };
+    }
+
+    private static void ValidateRestSiteCount(
+        DungeonDefinition dungeon,
+        DungeonDelveDefinition delve)
+    {
+        if (dungeon.RestSiteCount < 0)
+        {
+            throw new InvalidOperationException(
+                $"Dungeon '{dungeon.Id}' cannot have a negative Rest Site count.");
+        }
+
+        var availableSlots = delve.Nodes.Count(node => node.RoomType == RoomType.RestSite);
+        if (dungeon.RestSiteCount > availableSlots)
+        {
+            throw new InvalidOperationException(
+                $"Dungeon '{dungeon.Id}' requests {dungeon.RestSiteCount} Rest Sites, " +
+                $"but delve '{delve.Id}' only provides {availableSlots} Rest Site slots.");
+        }
+    }
+
+    private static void ConfigureRestSiteChoices(
+        List<DungeonMapNode> nodes,
+        List<RoomInstance> rooms,
+        int restSiteCount,
+        Random random)
+    {
+        var restSiteSlots = nodes
+            .Where(node => rooms[node.RoomIndex].Type == RoomType.RestSite)
+            .OrderBy(node => node.RoomIndex)
+            .ToList();
+        var selectedSlots = restSiteSlots.ToList();
+        Shuffle(selectedSlots, random);
+        var selectedRoomIndexes = selectedSlots
+            .Take(restSiteCount)
+            .Select(node => node.RoomIndex)
+            .ToHashSet();
+
+        foreach (var restSite in restSiteSlots)
+        {
+            var (minimumVigorCost, maximumVigorCost) = GetSectionCombatCost(
+                restSite.Section,
+                nodes,
+                rooms);
+            var combatDisplayName = GetCombatAlternativeDisplayName(restSite.DisplayName);
+
+            if (!selectedRoomIndexes.Contains(restSite.RoomIndex))
+            {
+                var room = rooms[restSite.RoomIndex];
+                room.Type = RoomType.Combat;
+                restSite.DisplayName = combatDisplayName;
+                restSite.Forecast = "Fight through another encounter for additional rewards.";
+                restSite.VigorCostMin = minimumVigorCost;
+                restSite.VigorCostMax = maximumVigorCost;
+                continue;
+            }
+
+            var restSiteLane = random.Next(2) == 0 ? -1 : 1;
+            restSite.Lane = restSiteLane;
+            var combatRoomIndex = rooms.Count;
+            nodes.Add(new DungeonMapNode
+            {
+                Id = $"{restSite.Id}-combat",
+                DisplayName = combatDisplayName,
+                RoomIndex = combatRoomIndex,
+                Depth = restSite.Depth,
+                Lane = -restSiteLane,
+                Section = restSite.Section,
+                Forecast = "Fight through another encounter for additional rewards.",
+                VigorCostMin = minimumVigorCost,
+                VigorCostMax = maximumVigorCost
+            });
+            rooms.Add(new RoomInstance
+            {
+                RoomIndex = combatRoomIndex,
+                Type = RoomType.Combat,
+                Status = RoomInstanceStatus.Pending
+            });
+        }
+    }
+
+    private static (int Minimum, int Maximum) GetSectionCombatCost(
+        int section,
+        IReadOnlyCollection<DungeonMapNode> nodes,
+        IReadOnlyList<RoomInstance> rooms)
+    {
+        var sectionCombatNodes = nodes
+            .Where(node =>
+                node.Section == section &&
+                rooms[node.RoomIndex].Type == RoomType.Combat &&
+                node.VigorCostMin > 0 &&
+                node.VigorCostMax >= node.VigorCostMin)
+            .ToList();
+
+        if (sectionCombatNodes.Count == 0)
+        {
+            return (12, 22);
+        }
+
+        return (
+            (int)Math.Round(sectionCombatNodes.Average(node => node.VigorCostMin), MidpointRounding.AwayFromZero),
+            (int)Math.Round(sectionCombatNodes.Average(node => node.VigorCostMax), MidpointRounding.AwayFromZero));
+    }
+
+    private static string GetCombatAlternativeDisplayName(string restSiteDisplayName)
+    {
+        var location = restSiteDisplayName
+            .Replace("Rest Site", string.Empty, StringComparison.OrdinalIgnoreCase)
+            .Trim();
+        return string.IsNullOrWhiteSpace(location)
+            ? "Guarded Passage"
+            : $"{location} Guard";
+    }
 
     private static void RandomizeLayout(
         List<DungeonMapNode> nodes,
@@ -133,15 +289,32 @@ public sealed class DungeonRunFactory
 
         for (var rowIndex = 0; rowIndex + 1 < rows.Count; rowIndex++)
         {
-            ConnectRows(rows[rowIndex], rows[rowIndex + 1], random);
+            ConnectRows(rows[rowIndex], rows[rowIndex + 1], rooms, random);
         }
     }
 
     private static void ConnectRows(
         IReadOnlyList<DungeonMapNode> sourceRow,
         IReadOnlyList<DungeonMapNode> targetRow,
+        IReadOnlyList<RoomInstance> rooms,
         Random random)
     {
+        if (sourceRow.Concat(targetRow).Any(node =>
+                rooms[node.RoomIndex].Type == RoomType.RestSite))
+        {
+            var targetIndexes = targetRow
+                .OrderBy(node => node.Lane)
+                .ThenBy(node => node.RoomIndex)
+                .Select(node => node.RoomIndex)
+                .ToList();
+            foreach (var source in sourceRow)
+            {
+                source.NextRoomIndexes = targetIndexes.ToList();
+            }
+
+            return;
+        }
+
         if (sourceRow.Count == 1)
         {
             sourceRow[0].NextRoomIndexes = targetRow
