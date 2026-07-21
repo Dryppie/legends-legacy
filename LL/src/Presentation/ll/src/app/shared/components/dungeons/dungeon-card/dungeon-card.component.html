@@ -38,18 +38,40 @@
         </div>
 
         <div class="mt-3 flex flex-wrap items-center justify-end gap-1.5">
-          <span class="group/mastery relative inline-flex">
+          <span
+            #previewMasteryOrigin="cdkOverlayOrigin"
+            cdkOverlayOrigin
+            class="inline-flex"
+            (mouseenter)="previewMasteryTooltipOpen.set(true)"
+            (mouseleave)="previewMasteryTooltipOpen.set(false)"
+          >
             <span class="ll-item-chip ll-item-chip-accent">
               Mastery Lv. {{ previewMasteryLevel() }}
             </span>
-            <span
-              class="pointer-events-none absolute bottom-full right-0 z-20 mb-2 w-72 max-w-[calc(100vw-2rem)] rounded border border-primary/50 bg-black/95 px-3 py-2 text-left text-[11px] text-zinc-200 opacity-0 shadow-lg transition group-hover/mastery:opacity-100"
+
+            <ng-template
+              cdkConnectedOverlay
+              [cdkConnectedOverlayOrigin]="previewMasteryOrigin"
+              [cdkConnectedOverlayOpen]="previewMasteryTooltipOpen()"
+              [cdkConnectedOverlayPositions]="masteryTooltipPositions"
+              [cdkConnectedOverlayPush]="true"
+              [cdkConnectedOverlayViewportMargin]="12"
+              (detach)="previewMasteryTooltipOpen.set(false)"
             >
-              <span class="ll-eyebrow block text-[9px]">Mastery XP</span>
-              <span class="mt-1 block font-serif text-sm text-primary">
-                {{ previewMasteryExperienceLabel() }}
-              </span>
-            </span>
+              <div
+                class="pointer-events-none w-80 max-w-[calc(100vw-2rem)] rounded border border-primary/50 bg-black/95 px-3 py-2 text-left text-[11px] text-zinc-200 shadow-lg"
+              >
+                <ng-container
+                  *ngTemplateOutlet="
+                    masteryTooltip;
+                    context: {
+                      $implicit: previewData.mastery,
+                      xpLabel: previewMasteryExperienceLabel(),
+                    }
+                  "
+                ></ng-container>
+              </div>
+            </ng-template>
           </span>
           <span
             *ngFor="let type of previewGatheringTypes()"
@@ -144,9 +166,9 @@
           </div>
 
           <div class="ll-stat-card px-3 py-2">
-            <span class="ll-stat-label"> Nodes </span>
+            <span class="ll-stat-label"> Gathering Types </span>
             <span class="ml-2 font-serif text-lg text-white">
-              {{ selectedGatheringNodes().length || "None" }}
+              {{ selectedGatheringTypes().length || "None" }}
             </span>
           </div>
 
@@ -157,19 +179,44 @@
             </span>
           </div>
 
-          <div class="ll-stat-card group/mastery relative px-3 py-2">
+          <div
+            #selectedMasteryOrigin="cdkOverlayOrigin"
+            cdkOverlayOrigin
+            class="ll-stat-card px-3 py-2"
+            tabindex="0"
+            (mouseenter)="selectedMasteryTooltipOpen.set(true)"
+            (mouseleave)="selectedMasteryTooltipOpen.set(false)"
+            (focusin)="selectedMasteryTooltipOpen.set(true)"
+            (focusout)="selectedMasteryTooltipOpen.set(false)"
+          >
             <span class="ll-stat-label"> Mastery </span>
             <span class="ml-2 font-serif text-lg text-white">
               Lv. {{ selectedMasteryLevel() }}
             </span>
-            <span
-              class="pointer-events-none absolute bottom-full left-0 z-20 mb-2 w-72 max-w-[calc(100vw-2rem)] rounded border border-primary/50 bg-black/95 px-3 py-2 text-left text-[11px] text-zinc-200 opacity-0 shadow-lg transition group-hover/mastery:opacity-100"
+
+            <ng-template
+              cdkConnectedOverlay
+              [cdkConnectedOverlayOrigin]="selectedMasteryOrigin"
+              [cdkConnectedOverlayOpen]="selectedMasteryTooltipOpen()"
+              [cdkConnectedOverlayPositions]="masteryTooltipPositions"
+              [cdkConnectedOverlayPush]="true"
+              [cdkConnectedOverlayViewportMargin]="12"
+              (detach)="selectedMasteryTooltipOpen.set(false)"
             >
-              <span class="ll-eyebrow block text-[9px]">Mastery XP</span>
-              <span class="mt-1 block font-serif text-sm text-primary">
-                {{ masteryExperienceLabel() }}
-              </span>
-            </span>
+              <div
+                class="pointer-events-none w-80 max-w-[calc(100vw-2rem)] rounded border border-primary/50 bg-black/95 px-3 py-2 text-left text-[11px] text-zinc-200 shadow-lg"
+              >
+                <ng-container
+                  *ngTemplateOutlet="
+                    masteryTooltip;
+                    context: {
+                      $implicit: selectedPreviewData().mastery,
+                      xpLabel: masteryExperienceLabel(),
+                    }
+                  "
+                ></ng-container>
+              </div>
+            </ng-template>
           </div>
         </div>
 
@@ -352,6 +399,40 @@
                   </div>
                 </article>
 
+                <article class="ll-card min-w-0 px-3 py-3">
+                  <div class="flex items-center justify-between gap-3">
+                    <div class="ll-eyebrow">Mastery Benefits</div>
+                    <span class="text-xs text-secondary">
+                      {{ selectedMasteryLevel() }} / 10 unlocked
+                    </span>
+                  </div>
+
+                  <div class="mt-3 grid gap-2 sm:grid-cols-2">
+                    <div
+                      *ngFor="
+                        let benefit of selectedMasteryBenefitLevels();
+                        trackBy: trackMasteryBenefit
+                      "
+                      class="flex min-w-0 gap-3 rounded border bg-black/20 px-3 py-2"
+                      [ngClass]="masteryBenefitClass(benefit)"
+                    >
+                      <span
+                        class="ll-item-chip h-fit shrink-0"
+                        [class.ll-item-chip-accent]="
+                          isMasteryBenefitUnlocked(benefit)
+                        "
+                      >
+                        Lv. {{ benefit.level }}
+                      </span>
+                      <div class="min-w-0">
+                        <div class="text-sm text-white">{{ benefit.name }}</div>
+                        <div class="mt-0.5 text-xs leading-5 text-secondary">
+                          {{ benefit.description }}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </article>
               </div>
             </div>
           </div>
@@ -513,4 +594,44 @@
       </aside>
     </div>
   </div>
+</ng-template>
+
+<ng-template #masteryTooltip let-mastery let-xpLabel="xpLabel">
+  <span class="ll-eyebrow block text-[9px]">Mastery XP</span>
+  <span class="mt-1 block font-serif text-sm text-primary">
+    {{ xpLabel }}
+  </span>
+
+  <span class="my-2 block border-t border-white/10"></span>
+  <span class="ll-eyebrow block text-[9px]">Current Bonuses</span>
+  <span
+    *ngIf="masteryCurrentBonuses(mastery).length; else noMasteryBonuses"
+    class="mt-1 block space-y-1"
+  >
+    <span
+      *ngFor="
+        let bonus of masteryCurrentBonuses(mastery);
+        trackBy: trackMasteryBonus
+      "
+      class="block text-zinc-200"
+    >
+      <span class="mr-1 text-primary">•</span>{{ bonus.label }}
+    </span>
+  </span>
+  <ng-template #noMasteryBonuses>
+    <span class="mt-1 block text-zinc-400">No bonuses unlocked yet.</span>
+  </ng-template>
+
+  <span class="my-2 block border-t border-white/10"></span>
+  <ng-container *ngIf="masteryNextBenefit(mastery) as next; else masteryMaxed">
+    <span class="ll-eyebrow block text-[9px]">Next · Lv. {{ next.level }}</span>
+    <span class="mt-1 block text-white">{{ next.name }}</span>
+    <span class="mt-0.5 block leading-4 text-zinc-300">
+      {{ next.description }}
+    </span>
+  </ng-container>
+  <ng-template #masteryMaxed>
+    <span class="ll-eyebrow block text-[9px]">Mastery Complete</span>
+    <span class="mt-1 block text-primary">All benefits unlocked.</span>
+  </ng-template>
 </ng-template>

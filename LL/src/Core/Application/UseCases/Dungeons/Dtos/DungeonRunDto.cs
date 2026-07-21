@@ -1,6 +1,7 @@
 ﻿using Application.Common.Mappings;
 using AutoMapper;
 using Domain.Models.Dungeons.Definitions.Rooms;
+using Domain.Models.Dungeons.Mastery;
 using Domain.Models.Dungeons.Runs;
 
 namespace Application.UseCases.Dungeons.Dtos;
@@ -40,13 +41,16 @@ public class DungeonRunDto : IMapFrom<DungeonRun>
             {
                 var currentDepth = src.State?.MapNodes
                     .FirstOrDefault(node => node.RoomIndex == src.CurrentRoomIndex)?.Depth;
+                var visibilityRows = 1 + DungeonMasteryBenefits
+                    .Resolve(src.State?.MasteryLevelAtStart ?? 0)
+                    .AdditionalVisibilityRows;
 
                 return src.Rooms
                     .Select(room =>
                     {
                         var node = src.State?.MapNodes.FirstOrDefault(candidate => candidate.RoomIndex == room.RoomIndex);
                         var isRevealed = currentDepth.HasValue && node is not null
-                            ? node.Depth <= currentDepth.Value + 1
+                            ? node.Depth <= currentDepth.Value + visibilityRows
                             : room.RoomIndex <= src.CurrentRoomIndex;
                         var isBoss = room.Type == RoomType.Boss;
 

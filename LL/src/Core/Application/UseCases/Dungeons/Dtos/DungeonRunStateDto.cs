@@ -8,6 +8,8 @@ namespace Application.UseCases.Dungeons.Dtos;
 
 public sealed class DungeonRunStateDto : IMapFrom<DungeonRunState>
 {
+    public int MasteryLevelAtStart { get; set; }
+    public DungeonMasteryBenefitSummaryDto MasteryBenefits { get; set; } = DungeonMasteryBenefitSummaryDto.FromLevel(0);
     public DungeonLootBagDto SecuredLoot { get; set; } = new();
     public DungeonLootBagDto PendingLoot { get; set; } = new();
     public List<DungeonMapNodeDto> MapNodes { get; set; } = [];
@@ -26,7 +28,9 @@ public sealed class DungeonRunStateDto : IMapFrom<DungeonRunState>
     public DungeonFailureAnalysisDto? FailureAnalysis { get; set; }
 
     public void Mapping(Profile profile) =>
-        profile.CreateMap<DungeonRunState, DungeonRunStateDto>();
+        profile.CreateMap<DungeonRunState, DungeonRunStateDto>()
+            .AfterMap((source, destination) =>
+                destination.MasteryBenefits = DungeonMasteryBenefitSummaryDto.FromLevel(source.MasteryLevelAtStart));
 }
 
 public sealed class DungeonVigorThresholdDto : IMapFrom<DungeonVigorThreshold>

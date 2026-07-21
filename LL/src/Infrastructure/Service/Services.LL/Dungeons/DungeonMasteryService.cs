@@ -7,7 +7,6 @@ namespace Services.LL.Dungeons;
 
 public sealed class DungeonMasteryService : IDungeonMasteryService
 {
-    private const int MaxLevel = 10;
     private const int BossDefeatExperience = 50;
     private const int MiniBossDefeatExperience = 25;
     private static readonly int[] LevelThresholds =
@@ -44,7 +43,7 @@ public sealed class DungeonMasteryService : IDungeonMasteryService
             level++;
         }
 
-        return Math.Clamp(level, 0, MaxLevel);
+        return Math.Clamp(level, 0, DungeonMasteryBenefits.MaxLevel);
     }
 
     public int? GetExperienceRequiredForNextLevel(int level)
@@ -54,7 +53,7 @@ public sealed class DungeonMasteryService : IDungeonMasteryService
             level = 0;
         }
 
-        return level >= MaxLevel ? null : LevelThresholds[level];
+        return level >= DungeonMasteryBenefits.MaxLevel ? null : LevelThresholds[level];
     }
 
     public async Task<DungeonMasteryAwardResult> AwardCompletionAsync(

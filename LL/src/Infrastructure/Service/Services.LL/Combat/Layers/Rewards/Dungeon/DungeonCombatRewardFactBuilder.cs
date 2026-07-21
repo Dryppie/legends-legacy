@@ -5,6 +5,7 @@ using Domain.Models.Dungeons.Definitions.Encounters;
 using Domain.Models.Dungeons.Definitions.Gathering;
 using Domain.Models.Dungeons.Definitions.Rooms;
 using Domain.Models.Dungeons.Runs;
+using Domain.Models.Dungeons.Mastery;
 using Domain.Models.Entities.Creatures;
 using Domain.Models.Items.Equipments.Slots;
 using Domain.Models.Rewards;
@@ -92,7 +93,10 @@ public class DungeonCombatRewardFactBuilder : IDungeonCombatRewardFactBuilder
         var monsterLootModifiers = dungeon?.MonsterLootModifiers ?? [];
         var gatheringNodes = dungeon is null
             ? []
-            : await BuildGatheringNodesAsync(dungeon, cancellationToken);
+            : await BuildGatheringNodesAsync(
+                dungeon,
+                run?.State?.MasteryLevelAtStart ?? 0,
+                cancellationToken);
         var room = run?.Rooms.FirstOrDefault(x =>
             x.RoomIndex == context.OrchestrationRequest.CurrentRoomIndex);
         var roomType = room?.Type ?? RoomType.Unknown;
@@ -121,17 +125,23 @@ public class DungeonCombatRewardFactBuilder : IDungeonCombatRewardFactBuilder
 
     private async Task<IReadOnlyList<CombatGatheringNode>> BuildGatheringNodesAsync(
         DungeonDefinition dungeon,
+        int masteryLevel,
         CancellationToken cancellationToken)
     {
+        var gatheringChanceBonus = DungeonMasteryBenefits
+            .Resolve(masteryLevel)
+            .GatheringProcChanceBonus;
+
         return await Task.FromResult(dungeon.GatheringNodes
-            .Select(node => ToCombatGatheringNode(dungeon.Id, node))
+            .Select(node => ToCombatGatheringNode(dungeon.Id, node, gatheringChanceBonus))
             .Where(node => node.HasRewards)
             .ToArray());
     }
 
     private static CombatGatheringNode ToCombatGatheringNode(
         string dungeonDefinitionId,
-        DungeonGatheringNodeDefinition node)
+        DungeonGatheringNodeDefinition node,
+        double gatheringChanceBonus)
     {
         var rewardTable = string.IsNullOrWhiteSpace(node.RewardTableId)
             ? BuildInlineRewardTable(dungeonDefinitionId, node)
@@ -142,7 +152,7 @@ public class DungeonCombatRewardFactBuilder : IDungeonCombatRewardFactBuilder
             node.Name,
             node.Type,
             node.LevelRequirement,
-            node.ProcChance,
+            (float)Math.Clamp(node.ProcChance + gatheringChanceBonus, 0d, 1d),
             RewardTableId: node.RewardTableId,
             RewardTable: rewardTable);
     }

@@ -3,6 +3,7 @@ using Application.Interfaces.Services.LL.Dungeons;
 using Application.UseCases.Items.Dtos;
 using AutoMapper;
 using Domain.Models.Dungeons.Definitions;
+using Domain.Models.Dungeons.Mastery;
 
 namespace Application.UseCases.Dungeons.Dtos;
 
@@ -48,9 +49,52 @@ public sealed class DungeonMasteryDto : IMapFrom<DungeonMasterySnapshot>
     public int Level { get; set; }
     public int? ExperienceRequiredForNextLevel { get; set; }
     public int CompletionCount { get; set; }
+    public DungeonMasteryBenefitSummaryDto Benefits { get; set; } = DungeonMasteryBenefitSummaryDto.FromLevel(0);
+    public List<DungeonMasteryBenefitLevelDto> BenefitLevels { get; set; } =
+        DungeonMasteryBenefits.Definitions.Select(DungeonMasteryBenefitLevelDto.FromDefinition).ToList();
 
     public void Mapping(Profile profile) =>
-        profile.CreateMap<DungeonMasterySnapshot, DungeonMasteryDto>();
+        profile.CreateMap<DungeonMasterySnapshot, DungeonMasteryDto>()
+            .AfterMap((source, destination) =>
+                destination.Benefits = DungeonMasteryBenefitSummaryDto.FromLevel(source.Level));
+}
+
+public sealed class DungeonMasteryBenefitSummaryDto
+{
+    public int AdditionalVisibilityRows { get; set; }
+    public int RestSiteVigorBonus { get; set; }
+    public double GatheringProcChanceBonus { get; set; }
+    public int CombatVigorCostReduction { get; set; }
+    public int CompletionCurrencyBonusPercent { get; set; }
+
+    public static DungeonMasteryBenefitSummaryDto FromLevel(int level)
+    {
+        var benefits = DungeonMasteryBenefits.Resolve(level);
+        return new DungeonMasteryBenefitSummaryDto
+        {
+            AdditionalVisibilityRows = benefits.AdditionalVisibilityRows,
+            RestSiteVigorBonus = benefits.RestSiteVigorBonus,
+            GatheringProcChanceBonus = benefits.GatheringProcChanceBonus,
+            CombatVigorCostReduction = benefits.CombatVigorCostReduction,
+            CompletionCurrencyBonusPercent = benefits.CompletionCurrencyBonusPercent
+        };
+    }
+}
+
+public sealed class DungeonMasteryBenefitLevelDto
+{
+    public int Level { get; set; }
+    public string Id { get; set; } = string.Empty;
+    public string Name { get; set; } = string.Empty;
+    public string Description { get; set; } = string.Empty;
+
+    public static DungeonMasteryBenefitLevelDto FromDefinition(DungeonMasteryBenefitDefinition definition) => new()
+    {
+        Level = definition.Level,
+        Id = definition.Id,
+        Name = definition.Name,
+        Description = definition.Description
+    };
 }
 
 public sealed class DungeonPreviewRewardDto : IMapFrom<DungeonPreviewReward>

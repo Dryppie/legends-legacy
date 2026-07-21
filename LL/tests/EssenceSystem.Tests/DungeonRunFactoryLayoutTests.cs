@@ -108,10 +108,15 @@ public sealed class DungeonRunFactoryLayoutTests
     }
 
     [Fact]
-    public async Task Generated_combat_rows_favor_two_nodes_over_one()
+    public async Task Generated_combat_rows_make_single_node_rows_uncommon()
     {
         var factory = CreateFactory();
         var observedWidths = new Dictionary<int, int>();
+        var randomizedDepths = CreateDelve().Nodes
+            .GroupBy(node => node.Depth)
+            .Where(row => row.Count() > 1 && row.All(node => node.RoomType == RoomType.Combat))
+            .Select(row => row.Key)
+            .ToHashSet();
 
         for (var seed = 0; seed < 500; seed++)
         {
@@ -119,7 +124,9 @@ public sealed class DungeonRunFactoryLayoutTests
             var roomTypes = run.Rooms.ToDictionary(room => room.RoomIndex, room => room.Type);
             var combatRows = run.State.MapNodes
                 .GroupBy(node => node.Depth)
-                .Where(row => row.All(node => roomTypes[node.RoomIndex] == RoomType.Combat));
+                .Where(row =>
+                    randomizedDepths.Contains(row.Key) &&
+                    row.All(node => roomTypes[node.RoomIndex] == RoomType.Combat));
 
             foreach (var row in combatRows)
             {
@@ -127,7 +134,9 @@ public sealed class DungeonRunFactoryLayoutTests
             }
         }
 
-        Assert.True(observedWidths.GetValueOrDefault(1) < observedWidths.GetValueOrDefault(2));
+        var totalRows = observedWidths.Values.Sum();
+        Assert.True(observedWidths.GetValueOrDefault(1) <= totalRows * 0.12d);
+        Assert.True(observedWidths.GetValueOrDefault(1) * 2 < observedWidths.GetValueOrDefault(2));
         Assert.True(observedWidths.GetValueOrDefault(3) > 0);
     }
 

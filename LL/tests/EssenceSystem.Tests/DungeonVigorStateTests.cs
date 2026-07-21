@@ -116,6 +116,24 @@ public sealed class DungeonVigorStateTests
         Assert.Equal(100, history.VigorAfter);
     }
 
+    [Theory]
+    [InlineData(0, 15)]
+    [InlineData(2, 17)]
+    [InlineData(7, 19)]
+    public void Rest_site_recovery_applies_mastery_bonus(int masteryLevel, int expectedRecovery)
+    {
+        var run = CreateRun();
+        run.State.MasteryLevelAtStart = masteryLevel;
+        run.State.Vigor = 50;
+        var room = run.Rooms[0];
+        room.Type = RoomType.RestSite;
+
+        var recovered = new DungeonVigorService().RecoverAtRestSite(run, room);
+
+        Assert.Equal(expectedRecovery, recovered);
+        Assert.Equal(50 + expectedRecovery, run.State.Vigor);
+    }
+
     [Fact]
     public void Combat_vigor_toll_uses_damage_percent()
     {
@@ -153,6 +171,48 @@ public sealed class DungeonVigorStateTests
 
         Assert.Equal(-14, applied);
         Assert.Equal(86, run.State.Vigor);
+    }
+
+    [Theory]
+    [InlineData(0, -14)]
+    [InlineData(4, -13)]
+    [InlineData(9, -12)]
+    public void Combat_vigor_toll_applies_mastery_reduction(int masteryLevel, int expectedToll)
+    {
+        var run = CreateRun();
+        run.State.MasteryLevelAtStart = masteryLevel;
+        var room = run.Rooms[0];
+        run.State.MapNodes =
+        [
+            new DungeonMapNode
+            {
+                RoomIndex = room.RoomIndex,
+                VigorCostMin = 12,
+                VigorCostMax = 22
+            }
+        ];
+        var playerId = Guid.NewGuid().ToString();
+        var result = new CombatResult
+        {
+            PlayerTeam =
+            [
+                new SimpleCombatEntity
+                {
+                    Id = playerId,
+                    Name = "Hero",
+                    MaxHealth = 100,
+                    Health = 50
+                }
+            ],
+            EntityStats =
+            [
+                new EntityStats(playerId, "Hero", [], DamageTaken: 50, Team: "Player")
+            ]
+        };
+
+        var applied = new DungeonVigorService().ApplyCombatToll(run, room, result);
+
+        Assert.Equal(expectedToll, applied);
     }
 
     [Fact]

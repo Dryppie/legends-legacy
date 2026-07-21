@@ -130,12 +130,12 @@ public sealed class DungeonRunFactory
         var roll = random.NextDouble();
         if (maximumWidth == 2)
         {
-            return roll < 0.20d ? 1 : 2;
+            return roll < 0.10d ? 1 : 2;
         }
 
         return roll switch
         {
-            < 0.15d => 1,
+            < 0.075d => 1,
             < 0.70d => 2,
             _ => Math.Min(3, maximumWidth)
         };

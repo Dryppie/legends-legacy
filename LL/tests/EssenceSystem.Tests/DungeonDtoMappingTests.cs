@@ -137,6 +137,9 @@ public sealed class DungeonDtoMappingTests
         Assert.Equal("Hero", leaderboardEntry.CharacterName);
         Assert.Equal(now, leaderboardEntry.LastClearedAt);
         Assert.Equal(120, mastery.Experience);
+        Assert.Equal(10, mastery.BenefitLevels.Count);
+        Assert.Equal(1, mastery.Benefits.AdditionalVisibilityRows);
+        Assert.Equal(0.05d, mastery.Benefits.GatheringProcChanceBonus, 3);
         Assert.Equal(2, requirement.OwnedAmount);
         Assert.Equal("ore", reward.Id);
         Assert.Equal("Ore", reward.ItemBase.Name);
@@ -189,6 +192,44 @@ public sealed class DungeonDtoMappingTests
         var boss = dto.Rooms.Single(room => room.Index == 2);
         Assert.Equal(RoomType.Boss, boss.Type);
         Assert.False(boss.IsHidden);
+    }
+
+    [Theory]
+    [InlineData(0, 1, true, true)]
+    [InlineData(1, 2, false, true)]
+    [InlineData(6, 3, false, false)]
+    public void Dungeon_run_mapping_uses_mastery_visibility_rows(
+        int masteryLevel,
+        int expectedVisibleDepth,
+        bool expectedDepthTwoHidden,
+        bool expectedDepthThreeHidden)
+    {
+        var run = new DungeonRun
+        {
+            CurrentRoomIndex = 0,
+            Rooms = Enumerable.Range(0, 4)
+                .Select(index => new RoomInstance
+                {
+                    RoomIndex = index,
+                    Type = RoomType.Combat,
+                    Status = index == 0 ? RoomInstanceStatus.Active : RoomInstanceStatus.Pending
+                })
+                .ToList(),
+            State = new DungeonRunState
+            {
+                MasteryLevelAtStart = masteryLevel,
+                MapNodes = Enumerable.Range(0, 4)
+                    .Select(index => new DungeonMapNode { RoomIndex = index, Depth = index })
+                    .ToList()
+            }
+        };
+
+        var dto = CreateMapper().Map<DungeonRunDto>(run);
+
+        Assert.False(dto.Rooms.Single(room => room.Index == expectedVisibleDepth).IsHidden);
+        Assert.Equal(expectedDepthTwoHidden, dto.Rooms.Single(room => room.Index == 2).IsHidden);
+        Assert.Equal(expectedDepthThreeHidden, dto.Rooms.Single(room => room.Index == 3).IsHidden);
+        Assert.Equal(masteryLevel, dto.State.MasteryLevelAtStart);
     }
 
     private static IMapper CreateMapper()

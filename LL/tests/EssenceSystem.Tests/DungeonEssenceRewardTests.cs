@@ -26,6 +26,91 @@ namespace EssenceSystem.Tests;
 
 public sealed class DungeonEssenceRewardTests
 {
+    [Theory]
+    [InlineData(5, 11)]
+    [InlineData(10, 11)]
+    public async Task Dungeon_completion_applies_mastery_currency_bonus(
+        int masteryLevel,
+        int expectedCurrency)
+    {
+        await using var db = CreateDb();
+        var run = new DungeonRun
+        {
+            Id = Guid.NewGuid(),
+            CharacterId = Guid.NewGuid(),
+            DungeonDefinitionId = "mastered_dungeon",
+            State = new DungeonRunState { MasteryLevelAtStart = masteryLevel }
+        };
+        var definition = new DungeonDefinition
+        {
+            Id = run.DungeonDefinitionId,
+            Region = 0,
+            Tier = 1,
+            CompletionRewardTableIds = ["reward.dungeon.mastered.completion"]
+        };
+        var rewardRoller = new CurrencyRewardRoller();
+        var applier = new DungeonCompletionRewardApplier(
+            new SingleDungeonDefinitions(definition),
+            new EmptyDungeonRunRepository(run),
+            new ItemBaseRepository(db),
+            rewardRoller,
+            new CapturingDungeonPendingRewardWriter(),
+            new InventoryItemFactory(),
+            new NoOpDungeonMasteryService());
+
+        await applier.ApplyAsync(run, CancellationToken.None);
+
+        Assert.Single(rewardRoller.RewardTableIds);
+        Assert.Equal(expectedCurrency, run.PendingCinders);
+        Assert.Equal(expectedCurrency, run.PendingSoulstones);
+    }
+
+    [Theory]
+    [InlineData(1, 9, 10, false, 50)]
+    [InlineData(2, 9, 10, false, 100)]
+    [InlineData(3, 9, 10, false, 200)]
+    [InlineData(1, 10, 10, false, 0)]
+    [InlineData(1, 9, 10, true, 0)]
+    [InlineData(1, 8, 9, false, 0)]
+    public async Task Dungeon_completion_awards_fixed_soulstones_only_when_level_ten_is_first_reached(
+        int dungeonTier,
+        int previousLevel,
+        int awardedLevel,
+        bool alreadyAwarded,
+        int expectedMasterySoulstones)
+    {
+        await using var db = CreateDb();
+        var run = new DungeonRun
+        {
+            Id = Guid.NewGuid(),
+            CharacterId = Guid.NewGuid(),
+            DungeonDefinitionId = "mastered_dungeon",
+            State = new DungeonRunState { MasteryLevelAtStart = previousLevel }
+        };
+        var definition = new DungeonDefinition
+        {
+            Id = run.DungeonDefinitionId,
+            Region = 0,
+            Tier = dungeonTier,
+            CompletionRewardTableIds = ["reward.dungeon.mastered.completion"]
+        };
+        var rewardRoller = new CurrencyRewardRoller();
+        var applier = new DungeonCompletionRewardApplier(
+            new SingleDungeonDefinitions(definition),
+            new EmptyDungeonRunRepository(run),
+            new ItemBaseRepository(db),
+            rewardRoller,
+            new CapturingDungeonPendingRewardWriter(),
+            new InventoryItemFactory(),
+            new FixedDungeonMasteryService(previousLevel, awardedLevel, alreadyAwarded));
+
+        await applier.ApplyAsync(run, CancellationToken.None);
+
+        Assert.Single(rewardRoller.RewardTableIds);
+        Assert.Equal(11, run.PendingCinders);
+        Assert.Equal(11 + expectedMasterySoulstones, run.PendingSoulstones);
+    }
+
     [Fact]
     public async Task Dungeon_completion_awards_monster_core_for_essence_ascension_tier()
     {
@@ -178,13 +263,14 @@ public sealed class DungeonEssenceRewardTests
 
     private sealed record CapturedLootBatch(string Source, IReadOnlyList<InventoryItem> Loot);
 
-    private sealed class EmptyDungeonRunRepository : IDungeonRunRepository
+    private sealed class EmptyDungeonRunRepository(DungeonRun? run = null) : IDungeonRunRepository
     {
         public Task<bool> CreateDungeonRunAsync(DungeonRun dungeonRun, CancellationToken cancellationToken) => Task.FromResult(true);
         public Task<bool> DeleteDungeonRunAsync(DungeonRun dungeonRun, CancellationToken cancellationToken) => Task.FromResult(true);
         public Task<bool> AddPendingRewardAsync(DungeonRun dungeonRun, RunReward reward, CancellationToken cancellationToken) => Task.FromResult(true);
         public Task<DungeonRun?> GetDungeonRunByCharacterIdAsync(Guid characterId, CancellationToken cancellationToken) => Task.FromResult<DungeonRun?>(null);
-        public Task<DungeonRun?> GetDungeonRunByDungeonIdAsync(Guid dungeonId, CancellationToken cancellationToken) => Task.FromResult<DungeonRun?>(null);
+        public Task<DungeonRun?> GetDungeonRunByDungeonIdAsync(Guid dungeonId, CancellationToken cancellationToken) =>
+            Task.FromResult(run?.Id == dungeonId ? run : null);
         public Task<bool> HasActiveDungeonRunAsync(Guid characterId, CancellationToken cancellationToken) => Task.FromResult(false);
         public Task<IReadOnlyList<DungeonCompletionRecord>> GetCompletionRecordsAsync(Guid characterId, IReadOnlyCollection<string> dungeonDefinitionIds, CancellationToken cancellationToken) => Task.FromResult<IReadOnlyList<DungeonCompletionRecord>>([]);
         public Task<IReadOnlyList<DungeonCompletionLeaderboardEntry>> GetCompletionLeaderboardAsync(IReadOnlyCollection<string> dungeonDefinitionIds, CancellationToken cancellationToken) => Task.FromResult<IReadOnlyList<DungeonCompletionLeaderboardEntry>>([]);
@@ -223,6 +309,49 @@ public sealed class DungeonEssenceRewardTests
     {
         public RewardRollResult Roll(string rewardTableId, RewardRollContext context) => RewardRollResult.Empty;
         public RewardRollResult Roll(RewardTableDefinition table, RewardRollContext context) => RewardRollResult.Empty;
+    }
+
+    private sealed class FixedDungeonMasteryService(
+        int previousLevel,
+        int level,
+        bool alreadyAwarded) : IDungeonMasteryService
+    {
+        public int CalculateLevel(long experience) => level;
+        public int? GetExperienceRequiredForNextLevel(int currentLevel) => null;
+
+        public Task<DungeonMasteryAwardResult> AwardCompletionAsync(
+            DungeonRun run,
+            CancellationToken cancellationToken) =>
+            Task.FromResult(new DungeonMasteryAwardResult(
+                run.DungeonDefinitionId,
+                0,
+                0,
+                previousLevel,
+                level,
+                0,
+                [],
+                alreadyAwarded));
+
+        public Task<IReadOnlyDictionary<string, DungeonMasterySnapshot>> GetMasteryByDungeonAsync(
+            Guid characterId,
+            IReadOnlyCollection<string> dungeonDefinitionIds,
+            CancellationToken cancellationToken) =>
+            Task.FromResult<IReadOnlyDictionary<string, DungeonMasterySnapshot>>(
+                new Dictionary<string, DungeonMasterySnapshot>(StringComparer.OrdinalIgnoreCase));
+    }
+
+    private sealed class CurrencyRewardRoller : IRewardRoller
+    {
+        public List<string> RewardTableIds { get; } = [];
+
+        public RewardRollResult Roll(string rewardTableId, RewardRollContext context)
+        {
+            RewardTableIds.Add(rewardTableId);
+            return new RewardRollResult([], 10, 10, 0, []);
+        }
+
+        public RewardRollResult Roll(RewardTableDefinition table, RewardRollContext context) =>
+            Roll(table.Id, context);
     }
 
     private sealed class EmptyBonusService : IBonusService

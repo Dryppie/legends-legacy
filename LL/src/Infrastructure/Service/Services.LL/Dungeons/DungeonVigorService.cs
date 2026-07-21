@@ -1,6 +1,7 @@
 using Application.Interfaces.Services.LL.Dungeons;
 using Domain.Models.Combat;
 using Domain.Models.Dungeons.Runs;
+using Domain.Models.Dungeons.Mastery;
 
 namespace Services.LL.Dungeons;
 
@@ -36,7 +37,8 @@ public sealed class DungeonVigorService : IDungeonVigorService
         var combatToll = minimumToll
             + performanceToll
             + (downedMembers * 6);
-        var toll = ScaleCombatToll(combatToll);
+        var masteryBenefits = DungeonMasteryBenefits.Resolve(run.State.MasteryLevelAtStart);
+        var toll = Math.Max(0, ScaleCombatToll(combatToll) - masteryBenefits.CombatVigorCostReduction);
 
         return Apply(run, room, -Math.Clamp(toll, 0, 35), "Combat toll");
     }
@@ -46,8 +48,15 @@ public sealed class DungeonVigorService : IDungeonVigorService
             Math.Max(0, toll) * CombatTollMultiplier,
             MidpointRounding.AwayFromZero);
 
-    public int RecoverAtRestSite(DungeonRun run, RoomInstance room) =>
-        Apply(run, room, RestSiteRecovery, "Rest Site recovery");
+    public int RecoverAtRestSite(DungeonRun run, RoomInstance room)
+    {
+        var masteryBenefits = DungeonMasteryBenefits.Resolve(run.State.MasteryLevelAtStart);
+        return Apply(
+            run,
+            room,
+            RestSiteRecovery + masteryBenefits.RestSiteVigorBonus,
+            "Rest Site recovery");
+    }
 
     public void RefreshState(DungeonRun run)
     {

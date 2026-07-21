@@ -34,6 +34,7 @@ public sealed class DungeonRunService : IDungeonRunService
     private readonly IDungeonVigorService _vigor;
     private readonly IDungeonRouteService _routes;
     private readonly IGuildMissionService _guildMissionService;
+    private readonly IDungeonMasteryService _mastery;
 
     public DungeonRunService(
         IDungeonRunRepository dungeonRuns,
@@ -47,7 +48,8 @@ public sealed class DungeonRunService : IDungeonRunService
         IInventoryRepository inventory,
         IDungeonVigorService vigor,
         IDungeonRouteService routes,
-        IGuildMissionService guildMissionService)
+        IGuildMissionService guildMissionService,
+        IDungeonMasteryService mastery)
     {
         _dungeonRuns = dungeonRuns;
         _characterSnapshots = characterSnapshots;
@@ -61,6 +63,7 @@ public sealed class DungeonRunService : IDungeonRunService
         _vigor = vigor;
         _routes = routes;
         _guildMissionService = guildMissionService;
+        _mastery = mastery;
     }
 
     public async Task<DungeonRun?> GetDungeonRunAsync(Guid characterId, CancellationToken cancellationToken)
@@ -142,6 +145,13 @@ public sealed class DungeonRunService : IDungeonRunService
         var seed = Random.Shared.Next(int.MinValue, int.MaxValue);
 
         var run = await _factory.CreateAsync(characterId, dungeonDefinitionId, seed, ct);
+        var masteryByDungeon = await _mastery.GetMasteryByDungeonAsync(
+            characterId,
+            [dungeonDefinitionId],
+            ct);
+        run.State.MasteryLevelAtStart = masteryByDungeon.TryGetValue(dungeonDefinitionId, out var mastery)
+            ? mastery.Level
+            : 0;
         _vigor.RefreshState(run);
         _routes.GenerateRouteOptions(run);
 

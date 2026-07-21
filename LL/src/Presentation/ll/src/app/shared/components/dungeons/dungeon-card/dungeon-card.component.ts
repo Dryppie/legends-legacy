@@ -7,12 +7,13 @@ import {
   signal,
 } from '@angular/core';
 import { RegularButtonComponent } from '../../custom-components/buttons/regular-button/regular-button.component';
-import { NgClass, NgFor, NgIf } from '@angular/common';
+import { NgClass, NgFor, NgIf, NgTemplateOutlet } from '@angular/common';
 import { ItemComponent } from '../../item/item.component';
 import { DungeonStateService } from '../../../../core/services/api/dungeon/dungeon-state.service';
 import {
   DungeonGatheringNodePreview,
   DungeonMastery,
+  DungeonMasteryBenefitLevel,
   DungeonPreviewData,
   DungeonPreviewReward,
 } from '../../../models/Dtos/dungeons/dungeonPreviewData';
@@ -21,6 +22,7 @@ import { Router } from '@angular/router';
 import { Equipment } from '../../../models/item';
 import { EquipmentType } from '../../../models/enums/equipmentType';
 import { BaseItemComponent } from '../../base-item/base-item.component';
+import { ConnectedPosition, OverlayModule } from '@angular/cdk/overlay';
 
 interface RewardGroup {
   title: string;
@@ -34,6 +36,11 @@ interface EntryRequirementPreview {
   requiredAmount: number;
 }
 
+interface MasteryBonusDisplay {
+  id: string;
+  label: string;
+}
+
 type DungeonDetailTab = 'rewards' | 'gathering' | 'mastery';
 
 @Component({
@@ -43,6 +50,8 @@ type DungeonDetailTab = 'rewards' | 'gathering' | 'mastery';
     NgIf,
     NgFor,
     NgClass,
+    NgTemplateOutlet,
+    OverlayModule,
     RegularButtonComponent,
     ItemComponent,
     BaseItemComponent,
@@ -74,6 +83,38 @@ export class DungeonCardComponent implements OnChanges {
   showPreview = signal(false);
   difficulty = signal<DungeonDifficulty>(DungeonDifficulty.Normal);
   selectedTab = signal<DungeonDetailTab>('rewards');
+  readonly previewMasteryTooltipOpen = signal(false);
+  readonly selectedMasteryTooltipOpen = signal(false);
+  readonly masteryTooltipPositions: ConnectedPosition[] = [
+    {
+      originX: 'center',
+      originY: 'top',
+      overlayX: 'center',
+      overlayY: 'bottom',
+      offsetY: -8,
+    },
+    {
+      originX: 'center',
+      originY: 'bottom',
+      overlayX: 'center',
+      overlayY: 'top',
+      offsetY: 8,
+    },
+    {
+      originX: 'start',
+      originY: 'top',
+      overlayX: 'start',
+      overlayY: 'bottom',
+      offsetY: -8,
+    },
+    {
+      originX: 'end',
+      originY: 'top',
+      overlayX: 'end',
+      overlayY: 'bottom',
+      offsetY: -8,
+    },
+  ];
 
   constructor(
     readonly dungeonState: DungeonStateService,
@@ -109,6 +150,8 @@ export class DungeonCardComponent implements OnChanges {
   }
 
   togglePreview() {
+    this.previewMasteryTooltipOpen.set(false);
+    this.selectedMasteryTooltipOpen.set(false);
     this.showPreview.set(!this.showPreview());
   }
 
@@ -459,6 +502,83 @@ export class DungeonCardComponent implements OnChanges {
 
   selectedMasteryCompletionCount(): number {
     return this.selectedPreviewData().mastery?.completionCount ?? 0;
+  }
+
+  selectedMasteryBenefitLevels(): DungeonMasteryBenefitLevel[] {
+    return this.selectedPreviewData().mastery?.benefitLevels ?? [];
+  }
+
+  masteryCurrentBonuses(
+    mastery: DungeonMastery | null | undefined,
+  ): MasteryBonusDisplay[] {
+    const benefits = mastery?.benefits;
+    if (!benefits) return [];
+
+    const bonuses: MasteryBonusDisplay[] = [];
+    if (benefits.additionalVisibilityRows > 0) {
+      const rows = benefits.additionalVisibilityRows;
+      bonuses.push({
+        id: 'visibility',
+        label: `+${rows} visibility ${rows === 1 ? 'row' : 'rows'}`,
+      });
+    }
+    if (benefits.restSiteVigorBonus > 0) {
+      bonuses.push({
+        id: 'rest',
+        label: `+${benefits.restSiteVigorBonus} Vigor from Rest Sites`,
+      });
+    }
+    if (benefits.gatheringProcChanceBonus > 0) {
+      bonuses.push({
+        id: 'gathering',
+        label: `+${Math.round(benefits.gatheringProcChanceBonus * 100)} percentage points to gathering chance`,
+      });
+    }
+    if (benefits.combatVigorCostReduction > 0) {
+      bonuses.push({
+        id: 'combat-vigor',
+        label: `-${benefits.combatVigorCostReduction} Vigor from combat costs`,
+      });
+    }
+    if (benefits.completionCurrencyBonusPercent > 0) {
+      bonuses.push({
+        id: 'completion-currency',
+        label: `+${benefits.completionCurrencyBonusPercent}% completion Cinders and Soulstones`,
+      });
+    }
+    return bonuses;
+  }
+
+  masteryNextBenefit(
+    mastery: DungeonMastery | null | undefined,
+  ): DungeonMasteryBenefitLevel | null {
+    const currentLevel = mastery?.level ?? 0;
+    return (
+      mastery?.benefitLevels?.find((benefit) => benefit.level > currentLevel) ??
+      null
+    );
+  }
+
+  trackMasteryBonus(_: number, bonus: MasteryBonusDisplay): string {
+    return bonus.id;
+  }
+
+  isMasteryBenefitUnlocked(benefit: DungeonMasteryBenefitLevel): boolean {
+    return this.selectedMasteryLevel() >= benefit.level;
+  }
+
+  masteryBenefitClass(
+    benefit: DungeonMasteryBenefitLevel,
+  ): Record<string, boolean> {
+    const unlocked = this.isMasteryBenefitUnlocked(benefit);
+    return {
+      'll-card-accent border-primary/40': unlocked,
+      'border-white/10 opacity-60': !unlocked,
+    };
+  }
+
+  trackMasteryBenefit(_: number, benefit: DungeonMasteryBenefitLevel): string {
+    return benefit.id;
   }
 
   selectedMasteryProgressPercent(): number {

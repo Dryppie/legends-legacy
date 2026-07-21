@@ -337,7 +337,7 @@
                       class="dungeon-node__route-cost"
                       *ngIf="node.room?.type === 'RestSite'"
                     >
-                      Rest · +15 Vigor
+                      Rest · +{{ restSiteRecovery() }} Vigor
                     </span>
                     <span
                       class="dungeon-node__route-cost"

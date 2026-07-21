@@ -329,7 +329,7 @@ export class DungeonPageComponent {
       case 'Boss':
         return 'Defeat the dungeon boss to complete the expedition.';
       case 'RestSite':
-        return 'Rest here to recover 15 Vigor before moving deeper.';
+        return `Rest here to recover ${this.restSiteRecovery()} Vigor before moving deeper.`;
       default:
         return 'Resolve this room to continue.';
     }
@@ -602,7 +602,7 @@ export class DungeonPageComponent {
 
   mapNodeAriaLabel(node: DungeonGraphNode): string {
     if (node.room?.type === 'RestSite') {
-      return `Rest at ${node.displayName} and recover 15 Vigor`;
+      return `Rest at ${node.displayName} and recover ${this.restSiteRecovery()} Vigor`;
     }
 
     if (node.route) {
@@ -618,7 +618,7 @@ export class DungeonPageComponent {
 
   mapNodeTitle(node: DungeonGraphNode): string | null {
     if (node.room?.type === 'RestSite') {
-      return `${node.displayName} · Rest · +15 Vigor`;
+      return `${node.displayName} · Rest · +${this.restSiteRecovery()} Vigor`;
     }
 
     if (node.route) {
@@ -660,7 +660,16 @@ export class DungeonPageComponent {
   }
 
   private scaleVigorForecast(value: number): number {
-    return Math.round(Math.max(0, value) * 0.85);
+    const reduction =
+      this.activeDungeon()?.state?.masteryBenefits?.combatVigorCostReduction ??
+      0;
+    return Math.max(0, Math.round(Math.max(0, value) * 0.85) - reduction);
+  }
+
+  restSiteRecovery(): number {
+    const bonus =
+      this.activeDungeon()?.state?.masteryBenefits?.restSiteVigorBonus ?? 0;
+    return 15 + bonus;
   }
 
   private isDirectNodeActionRoomType(type: string | null | undefined): boolean {

@@ -7,6 +7,7 @@ import { DungeonHubData } from '../../../../shared/models/Dtos/dungeons/dungeonP
 import { DungeonRecordsData } from '../../../../shared/models/Dtos/dungeons/dungeonRecordsData';
 import { InventoryItem } from '../../../../shared/models/inventoryItem';
 import { CharacterDto } from '../../../../shared/models/Dtos/characterDto';
+import { DungeonMasteryBenefitSummary } from '../../../../shared/models/Dtos/dungeons/dungeonPreviewData';
 
 export enum DungeonRunStatus {
   Active = 'Active',
@@ -57,6 +58,8 @@ export interface DungeonRun {
 }
 
 export interface DungeonRunState {
+  masteryLevelAtStart?: number;
+  masteryBenefits?: DungeonMasteryBenefitSummary;
   securedLoot: DungeonLootBag;
   pendingLoot: DungeonLootBag;
   mapNodes: DungeonMapNode[];
