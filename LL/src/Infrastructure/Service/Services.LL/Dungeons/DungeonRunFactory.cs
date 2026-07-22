@@ -30,6 +30,26 @@ public sealed class DungeonRunFactory
         ValidateRestSiteCount(dungeon, delve);
         var snapshot = await _snapshotService.CreateAsync(characterId, ct);
 
+        return CreateRun(characterId, snapshot.Id, dungeon, delve, seed);
+    }
+
+    public DungeonRun CreateForSimulation(string dungeonDefinitionId, int seed)
+    {
+        var dungeon = _dungeons.GetByKey(dungeonDefinitionId);
+        var delve = _delves.GetForDungeon(dungeonDefinitionId);
+        ValidateRestSiteCount(dungeon, delve);
+
+        return CreateRun(Guid.Empty, null, dungeon, delve, seed);
+    }
+
+    private static DungeonRun CreateRun(
+        Guid characterId,
+        Guid? snapshotId,
+        DungeonDefinition dungeon,
+        DungeonDelveDefinition delve,
+        int seed)
+    {
+
         var layoutRandom = new Random(seed);
         var encounterRandom = new Random(seed);
 
@@ -37,8 +57,8 @@ public sealed class DungeonRunFactory
         {
             Id = Guid.NewGuid(),
             CharacterId = characterId,
-            CharacterSnapshotId = snapshot.Id,
-            DungeonDefinitionId = dungeonDefinitionId,
+            CharacterSnapshotId = snapshotId,
+            DungeonDefinitionId = dungeon.Id,
             DungeonDefinitionName = dungeon.Name,
             Seed = seed,
             Status = DungeonRunStatus.Active,

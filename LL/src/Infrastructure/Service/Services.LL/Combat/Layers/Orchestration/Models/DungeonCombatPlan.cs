@@ -8,6 +8,7 @@ public sealed record DungeonCombatPlan(
     Guid DungeonRunId,
     Guid CharacterId,
     CharacterSnapshot CharacterSnapshot,
+    int DungeonTier,
     IReadOnlyList<Guid> PlayerEntityIds,
     IReadOnlyList<Guid> EnemySourceEntityIds,
     IReadOnlyList<AttributeModifierBase> RunAttributeModifiers,

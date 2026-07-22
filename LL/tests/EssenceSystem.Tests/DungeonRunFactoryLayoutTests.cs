@@ -23,6 +23,18 @@ public sealed class DungeonRunFactoryLayoutTests
     }
 
     [Fact]
+    public void Simulation_layout_does_not_require_a_persisted_character_snapshot()
+    {
+        var run = CreateFactory().CreateForSimulation("layout_test", 73);
+
+        Assert.Equal(Guid.Empty, run.CharacterId);
+        Assert.Null(run.CharacterSnapshotId);
+        Assert.NotEmpty(run.Rooms);
+        Assert.NotEmpty(run.State.MapNodes);
+        Assert.Equal(73, run.Seed);
+    }
+
+    [Fact]
     public async Task Different_seeds_vary_both_lanes_and_connections()
     {
         var factory = CreateFactory();

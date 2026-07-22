@@ -316,6 +316,7 @@ public sealed class DungeonRunService : IDungeonRunService
             CharacterId: snapshot.CharacterId,
             CharacterSnapshot: snapshot,
             CurrentRoomIndex: run.CurrentRoomIndex,
+            DungeonTier: _dungeons.GetByKey(run.DungeonDefinitionId).Tier,
             EnemyCreatureKeys: room.EncounterIds,
             RunAttributeModifiers: playerModifiers,
             RunAbilityModifiers: [],

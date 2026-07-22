@@ -9,6 +9,11 @@ import {
   AbilityBalanceSimulationRequest,
   RegionOneContentDiagnosticReport,
 } from '../../../../shared/models/diagnostics/ability-catalog-diagnostics';
+import {
+  DungeonSimulationOptions,
+  DungeonSimulationReport,
+  DungeonSimulationRequest,
+} from '../../../../shared/models/diagnostics/dungeon-simulation';
 
 @Injectable({
   providedIn: 'root',
@@ -35,6 +40,19 @@ export class DiagnosticsService {
   public runAbilityBalanceSimulation(
     request: AbilityBalanceSimulationRequest,
   ): Observable<AbilityBalanceSimulationReport> {
-    return this.apiService.post('diagnostics/ability-balance-simulation', request);
+    return this.apiService.post(
+      'diagnostics/ability-balance-simulation',
+      request,
+    );
+  }
+
+  public getDungeonSimulationOptions(): Observable<DungeonSimulationOptions> {
+    return this.apiService.get('diagnostics/dungeon-simulation-options');
+  }
+
+  public runDungeonSimulation(
+    request: DungeonSimulationRequest,
+  ): Observable<DungeonSimulationReport> {
+    return this.apiService.post('diagnostics/dungeon-simulation', request);
   }
 }

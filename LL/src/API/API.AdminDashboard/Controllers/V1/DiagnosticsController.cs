@@ -7,6 +7,8 @@ using Application.UseCases._AdminDashboard.Diagnostics.Queries.GetAbilityCatalog
 using Application.UseCases._AdminDashboard.Diagnostics.Queries.GetCreatureBuildProfileDiagnostics;
 using Application.UseCases._AdminDashboard.Diagnostics.Queries.GetRegionOneContentDiagnostics;
 using Application.UseCases._AdminDashboard.Diagnostics.Queries.RunAbilityBalanceSimulation;
+using Application.UseCases._AdminDashboard.Diagnostics.Queries.RunDungeonSimulation;
+using Application.Interfaces.Services.LL.Dungeons;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.AdminDashboard.Controllers.V1;
@@ -48,6 +50,19 @@ public class DiagnosticsController : BaseController
         [FromBody] AbilityBalanceSimulationRequest request)
     {
         return await Mediator.Send(new RunAbilityBalanceSimulationQuery(request));
+    }
+
+    [HttpGet("dungeon-simulation-options")]
+    public async Task<ActionResult<DungeonSimulationOptions>> GetDungeonSimulationOptions()
+    {
+        return await Mediator.Send(new GetDungeonSimulationOptionsQuery());
+    }
+
+    [HttpPost("dungeon-simulation")]
+    public async Task<ActionResult<DungeonSimulationReport>> RunDungeonSimulation(
+        [FromBody] DungeonSimulationRequest request)
+    {
+        return await Mediator.Send(new RunDungeonSimulationQuery(request));
     }
 
 }

@@ -20,9 +20,18 @@ public sealed class SoulstoneUpgradeDefinitionProvider : IDisposable
     private volatile IReadOnlyDictionary<string, SoulstoneUpgradeDefinition> _cache
         = new Dictionary<string, SoulstoneUpgradeDefinition>(StringComparer.OrdinalIgnoreCase);
 
-    public SoulstoneUpgradeDefinitionProvider()
+    public SoulstoneUpgradeDefinitionProvider(string contentRootPath)
     {
-        _filePath = Path.Combine(Directory.GetCurrentDirectory(), "Data", "progression", "soulstone-upgrades.json");
+        if (string.IsNullOrWhiteSpace(contentRootPath))
+        {
+            throw new ArgumentException("A content root path is required.", nameof(contentRootPath));
+        }
+
+        _filePath = Path.Combine(
+            Path.GetFullPath(contentRootPath),
+            "Data",
+            "progression",
+            "soulstone-upgrades.json");
         Load();
 
         var directory = Path.GetDirectoryName(_filePath);

@@ -73,7 +73,7 @@ public sealed class DungeonCombatResolutionSessionFactory : IDungeonCombatResolu
         var hostileTemplates = BuildHostileTemplates(
             hostileIds,
             sourceEntitiesById,
-            new Area() { DifficultyTier = 1 },
+            new Area { DifficultyTier = plan.DungeonTier },
             plan.EnemyAttributeModifiers);
 
         await _combatSetupService.PrepareEntitiesForCombat(
