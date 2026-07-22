@@ -12,7 +12,6 @@ import { Router, RouterLink, NavigationEnd } from '@angular/router';
 import { filter, Subject, takeUntil } from 'rxjs';
 import { SidebarItemComponent } from './sidebar-item/sidebar-item.component';
 import { SidebarService } from '../../../core/services/client-side/sidebar/sidebar.service';
-import { GameService } from '../../../core/services/client-side/game/game.service';
 import { CurrentActionComponent } from '../../../shared/components/current-action/current-action.component';
 import { CharacterActionsStateService } from '../../../core/services/api/character-actions/character-actions.state.service';
 import { CharacterActionType } from '../../../shared/models/enums/characterActionType';
@@ -51,7 +50,6 @@ export class SidebarComponent implements OnInit, OnDestroy {
 
   constructor(
     private readonly sidebarService: SidebarService,
-    private readonly gameService: GameService,
     private readonly state: CharacterActionsStateService,
     private readonly characterState: CharacterStateService,
     private readonly notificationService: NotificationService,
@@ -112,7 +110,6 @@ export class SidebarComponent implements OnInit, OnDestroy {
   }
 
   onNavigate(): void {
-    this.gameService.hideCombat();
     this.itemTapped.emit();
   }
 
@@ -147,7 +144,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
     const actionType = action.characterActionType;
 
     if (actionType === CharacterActionType.Combat) {
-      this.gameService.showCombat();
+      this.router.navigate(['/game/combat']);
       return;
     }
 

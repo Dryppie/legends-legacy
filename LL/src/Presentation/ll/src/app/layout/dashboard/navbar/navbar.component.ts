@@ -16,7 +16,6 @@ import { NumberFormatPipe } from '../../../shared/pipes/number-format/number-for
 import { ShortNumberPipe } from '../../../shared/pipes/number-format/short-number.pipe';
 import { CharacterActionsStateService } from '../../../core/services/api/character-actions/character-actions.state.service';
 import { Router } from '@angular/router';
-import { GameService } from '../../../core/services/client-side/game/game.service';
 import { CharacterActionType } from '../../../shared/models/enums/characterActionType';
 
 @Component({
@@ -68,7 +67,6 @@ export class NavbarComponent implements OnInit, OnDestroy {
     private authService: AuthService,
     private readonly playerService: PlayerService,
     private readonly state: CharacterActionsStateService,
-    private readonly gameService: GameService,
     private readonly router: Router,
   ) {
     this.currentCharacter = this.authService.currentCharacter;
@@ -122,7 +120,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
     const actionType = action.characterActionType;
 
     if (actionType === CharacterActionType.Combat) {
-      this.gameService.showCombat();
+      this.router.navigate(['/game/combat']);
       return;
     }
 

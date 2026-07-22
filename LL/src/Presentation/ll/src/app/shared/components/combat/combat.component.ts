@@ -26,10 +26,12 @@ import { BattleType } from '../../../core/state/combat-state/combatState';
 import { CharacterActionsStateService } from '../../../core/services/api/character-actions/character-actions.state.service';
 import { CombatEntityStatsComponent } from './combat-entity-stats/combat-entity-stats.component';
 import { FirstPartyTourService } from '../../../core/services/client-side/first-party-tour/first-party-tour.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-combat',
   standalone: true,
+  host: { class: 'flex h-full min-h-0 w-full' },
   imports: [
     NgClass,
     NgIf,
@@ -78,6 +80,7 @@ export class CombatComponent implements OnInit, OnDestroy {
     private readonly gameService: GameService,
     public readonly combatStateService: CombatStateService,
     private readonly tour: FirstPartyTourService,
+    private readonly router: Router,
   ) {
     this.currentAction = this.characterActionService.currentAction;
 
@@ -222,14 +225,17 @@ export class CombatComponent implements OnInit, OnDestroy {
     this.isStoppingCombat = true;
     this.stopCombatButtonText = 'Stopping combat..';
     this.characterActionService.stopAction();
-    // If we're seeing the "You're already in combat screen", and click to stop combat from there, it should call all the stop logic
-    if (!this.displayCombat) this.stopCombat();
+    this.gameService.endCombat();
+    this.router.navigate(['/game/world']);
   }
 
   stopCombat() {
     this.subscriptions.unsubscribe();
     this.gameService.endCombat();
     this.characterActionService.clear();
+    if (this.battleType === BattleType.IdleCombat) {
+      this.router.navigate(['/game/world']);
+    }
   }
 
   private updateCharacter(

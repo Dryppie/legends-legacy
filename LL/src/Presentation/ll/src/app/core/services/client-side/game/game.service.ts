@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import { NavigationEnd, Router } from '@angular/router';
 import { BehaviorSubject } from 'rxjs';
 import { CombatLogService } from '../combat/combat-log/combat-log.service';
 
@@ -10,25 +9,7 @@ export class GameService {
   private combatActiveSubject = new BehaviorSubject<boolean>(false);
   combatActive$ = this.combatActiveSubject.asObservable();
 
-  // Handles whether to display the combat screen
-  private combatVisibleSubject = new BehaviorSubject<boolean>(false);
-  combatVisible$ = this.combatVisibleSubject.asObservable();
-
-  constructor(
-    private router: Router,
-    private combatLogService: CombatLogService,
-  ) {
-    this.router.events.subscribe((event) => {
-      if (event instanceof NavigationEnd) {
-        this.hideCombat();
-      }
-    });
-  }
-
-  startCombat() {
-    this.resumeCombat();
-    this.showCombat();
-  }
+  constructor(private combatLogService: CombatLogService) {}
 
   resumeCombat() {
     this.combatActiveSubject.next(true);
@@ -36,15 +17,6 @@ export class GameService {
 
   endCombat() {
     this.combatActiveSubject.next(false);
-    this.hideCombat();
     this.combatLogService.clear();
-  }
-
-  showCombat() {
-    this.combatVisibleSubject.next(true);
-  }
-
-  hideCombat() {
-    this.combatVisibleSubject.next(false);
   }
 }

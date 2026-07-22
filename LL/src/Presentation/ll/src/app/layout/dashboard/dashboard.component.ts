@@ -2,10 +2,7 @@ import { Component, effect, HostListener, OnInit, Signal } from '@angular/core';
 import { SidebarComponent } from './sidebar/sidebar.component';
 import { Router, RouterOutlet } from '@angular/router';
 import { NavbarComponent } from './navbar/navbar.component';
-import { AsyncPipe, NgClass, NgIf } from '@angular/common';
-import { Observable } from 'rxjs';
-import { GameService } from '../../core/services/client-side/game/game.service';
-import { CombatComponent } from '../../shared/components/combat/combat.component';
+import { NgClass, NgIf } from '@angular/common';
 import { ChatComponent } from './chat/chat.component';
 import { LootTrackerComponent } from './loot-tracker/loot-tracker.component';
 import { CurrentActionComponent } from '../../shared/components/current-action/current-action.component';
@@ -25,8 +22,6 @@ import { GameHeaderComponent } from './game-header/game-header.component';
     NavbarComponent,
     NgIf,
     NgClass,
-    AsyncPipe,
-    CombatComponent,
     ChatComponent,
     LootTrackerComponent,
     CurrentActionComponent,
@@ -45,14 +40,12 @@ export class DashboardComponent implements OnInit {
   isFloatingChatOpen = false;
   displayCurrentAction = false;
   isResolvingAction = false;
-  combatVisible$!: Observable<boolean>;
   readonly bootstrapLoaded: Signal<boolean>;
   readonly bootstrapLoading: Signal<boolean>;
   readonly bootstrapError: Signal<string | null>;
   readonly chatLayout;
 
   constructor(
-    private readonly gameService: GameService,
     private readonly state: CharacterActionsStateService,
     private readonly router: Router,
     private readonly bootstrapState: GameBootstrapStateService,
@@ -74,7 +67,6 @@ export class DashboardComponent implements OnInit {
 
   ngOnInit() {
     this.checkScreenSize();
-    this.combatVisible$ = this.gameService.combatVisible$;
     this.bootstrapState.load().subscribe({
       error: () => undefined,
     });
@@ -145,7 +137,7 @@ export class DashboardComponent implements OnInit {
     const actionType = action.characterActionType;
 
     if (actionType === CharacterActionType.Combat) {
-      this.gameService.showCombat();
+      this.router.navigate(['/game/combat']);
       return;
     }
 

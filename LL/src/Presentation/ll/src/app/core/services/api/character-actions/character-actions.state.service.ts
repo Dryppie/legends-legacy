@@ -21,6 +21,7 @@ import { GameService } from '../../client-side/game/game.service';
 import { CombatService } from '../../client-side/combat/combat.service';
 import { InventoryStateService } from '../inventory/inventory-state.service';
 import { EventBusService } from '../../client-side/event-bus/event-bus.service';
+import { Router } from '@angular/router';
 
 export type IdleCombatPhase =
   | 'idle'
@@ -89,6 +90,7 @@ export class CharacterActionsStateService {
     private readonly combatService: CombatService,
     private readonly inventoryState: InventoryStateService,
     private readonly eventBus: EventBusService,
+    private readonly router: Router,
   ) {
     // When action changes, route to handler + update display
     effect(() => {
@@ -100,14 +102,14 @@ export class CharacterActionsStateService {
       switch (action.characterActionType) {
         case CharacterActionType.Combat:
           queueMicrotask(() => {
-            if (!action.combatSession?.combatResult) return;
+            if (action.isDeleted || !action.combatSession?.combatResult) return;
             this._loadingCombat.set(false);
             this.combatHandler.handle(action);
             this._idleCombatPhase.set('active');
             this.gameService.resumeCombat();
             if (this.openCombatWhenHydrated) {
               this.openCombatWhenHydrated = false;
-              this.gameService.showCombat();
+              this.router.navigate(['/game/combat']);
             }
           });
           break;
@@ -312,7 +314,6 @@ export class CharacterActionsStateService {
       setTimeout(() => {
         this._showAction.set(false);
         this.combatService.clearAllCombat();
-        this.gameService.hideCombat();
         this._currentAction.set(null);
         this.hide();
       }, updatedAt - now);

@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { DashboardComponent } from './dashboard.component';
+import { CombatComponent } from '../../shared/components/combat/combat.component';
 
 export const DASHBOARD_ROUTES: Routes = [
   {
@@ -10,6 +11,10 @@ export const DASHBOARD_ROUTES: Routes = [
         path: '',
         redirectTo: 'character',
         pathMatch: 'full',
+      },
+      {
+        path: 'combat',
+        component: CombatComponent,
       },
       {
         path: 'character',
