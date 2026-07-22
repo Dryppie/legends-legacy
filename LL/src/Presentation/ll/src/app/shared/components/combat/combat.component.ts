@@ -8,10 +8,8 @@ import {
   Output,
   signal,
 } from '@angular/core';
-import { CombatAvatarComponent } from './combat-avatar/combat-avatar.component';
-import { CombatOverviewComponent } from './combat-overview/combat-overview.component';
-import { CombatEvent, EventType } from '../../models/Dtos/combatEventDto';
-import { NgClass, NgFor, NgIf } from '@angular/common';
+import { CombatEvent } from '../../models/Dtos/combatEventDto';
+import { NgClass, NgIf } from '@angular/common';
 import {
   BattleOutcome,
   CombatResultDto,
@@ -34,9 +32,7 @@ import { FirstPartyTourService } from '../../../core/services/client-side/first-
   selector: 'app-combat',
   standalone: true,
   imports: [
-    CombatAvatarComponent,
     NgClass,
-    NgFor,
     NgIf,
     CountdownComponent,
     MiniButtonComponent,
@@ -137,8 +133,6 @@ export class CombatComponent implements OnInit, OnDestroy {
       const result = this.combatStateService.getCombatResult(type)();
       if (result?.playerTeam.length) {
         this.displayCombat = true;
-        this.setupCombat();
-
         this.syncCharactersFromResult(result);
       }
     });
@@ -265,10 +259,6 @@ export class CombatComponent implements OnInit, OnDestroy {
     this.characterActionService.clear();
   }
 
-  setupCombat() {
-    this.resetTeamSelections();
-  }
-
   private updateCharacter(
     combatEntity: SimpleCombatEntityDto | null | undefined,
   ) {
@@ -288,38 +278,12 @@ export class CombatComponent implements OnInit, OnDestroy {
     );
   }
 
-  private resetTeamSelections(): void {
-    this.selectedPlayerCharacterIndex = 0;
-    this.selectedEnemyCharacterIndex = 0;
-  }
-
-  /// Selectable characters
-
-  selectedPlayerCharacterIndex: number = 0;
-  selectedEnemyCharacterIndex: number = 0;
-
-  get selectedPlayerCharacter() {
-    return this.playerCharacters[this.selectedPlayerCharacterIndex];
-  }
-
-  get selectedEnemyCharacter() {
-    return this.enemyCharacters[this.selectedEnemyCharacterIndex];
-  }
-
-  focusCharacter(team: 'player' | 'enemy', index: number) {
-    if (team === 'player') {
-      this.selectedPlayerCharacterIndex = index;
-    } else {
-      this.selectedEnemyCharacterIndex = index;
-    }
-  }
-
   battleTitle(): string {
     if (this.isLoading) return 'Resolving Combat';
 
     if (this.battleType === BattleType.IdleCombat) {
       const areaName = this.currentAction()?.combatActionDetails?.area?.name;
-      return areaName ? `Shenic - ${areaName}` : 'Idle Battle';
+      return areaName ? `Shenic — ${areaName}` : 'Idle Battle';
     }
 
     if (this.battleType === BattleType.Dungeon) return 'Dungeon Battle';
@@ -327,26 +291,6 @@ export class CombatComponent implements OnInit, OnDestroy {
     if (this.battleType === BattleType.Training) return 'Training Battle';
 
     return 'Battle';
-  }
-
-  teamSelectorClass(
-    team: 'player' | 'enemy',
-    index: number,
-  ): Record<string, boolean> {
-    const selected =
-      team === 'player'
-        ? this.selectedPlayerCharacterIndex === index
-        : this.selectedEnemyCharacterIndex === index;
-
-    return {
-      'll-card-accent text-primary': selected && team === 'player',
-      'll-card-danger text-danger': selected && team === 'enemy',
-      'text-white': !selected,
-    };
-  }
-
-  teamMemberLabel(entity: SimpleCombatEntityDto, index: number): string {
-    return entity.name || `Unit ${index + 1}`;
   }
 
   flavorMessages: string[] = [

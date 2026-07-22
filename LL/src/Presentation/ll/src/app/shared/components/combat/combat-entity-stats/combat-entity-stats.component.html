@@ -1,122 +1,193 @@
-<div
-  class="ll-panel flex h-full min-h-0 flex-col overflow-hidden p-3 text-white"
->
-  <div class="flex h-full min-h-0 flex-col gap-2">
-    <!-- Player and Enemy team -->
-    <div class="grid gap-2 sm:grid-cols-2">
-      <div class="min-w-0">
+<div class="flex h-full min-h-0 w-full flex-col overflow-hidden text-white">
+  <div class="min-h-0 flex-1 overflow-y-auto pt-3">
+    <div class="overflow-x-auto rounded border border-white/10">
+      <div class="min-w-[58rem]">
         <div
-          class="ll-scrollbar-none flex max-w-full gap-2 overscroll-x-contain"
+          class="grid grid-cols-[7rem_minmax(12rem,2fr)_minmax(16rem,1.3fr)_6rem_6rem_6rem] items-center gap-3 bg-white/[0.035] px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-primary"
         >
-          <button
-            type="button"
-            *ngFor="let entity of playerParticipants"
-            (click)="selectEntity(entity.id)"
-            [ngClass]="{
-              'll-card-accent text-primary': selectedEntityId === entity.id,
-            }"
-            class="ll-button flex min-w-0 max-w-48 shrink-0 items-center px-2 py-1 text-sm"
-            [attr.title]="entity.name"
-          >
-            <span class="truncate">{{ entity.name }}</span>
-          </button>
+          <div>Side</div>
+          <div>Unit</div>
+          <div>HP</div>
+          <div class="text-right">Current</div>
+          <div class="text-right">Dmg done</div>
+          <div class="text-right">Dmg taken</div>
         </div>
-      </div>
 
-      <div class="min-w-0">
-        <div
-          class="ll-scrollbar-none flex max-w-full gap-2 overscroll-x-contain sm:justify-end"
+        <ng-container
+          *ngFor="
+            let participant of playerParticipants.concat(enemyParticipants)
+          "
         >
           <button
             type="button"
-            *ngFor="let entity of enemyParticipants"
-            (click)="selectEntity(entity.id)"
+            (click)="selectEntity(participant.id)"
+            class="grid w-full grid-cols-[7rem_minmax(12rem,2fr)_minmax(16rem,1.3fr)_6rem_6rem_6rem] items-center gap-3 border-t border-white/[0.07] px-4 py-2.5 text-left transition-colors hover:bg-white/[0.04]"
             [ngClass]="{
-              'll-card-danger text-danger': selectedEntityId === entity.id,
+              'bg-primary/[0.055]': selectedEntityId === participant.id,
+              'opacity-45': isDefeated(participant.entity),
             }"
-            class="ll-button flex min-w-0 max-w-48 shrink-0 items-center px-2 py-1 text-sm"
-            data-tour="enemy-combat-stats"
-            [attr.title]="entity.name"
+            [attr.data-tour]="
+              participant.team === 'Hostile' ? 'enemy-combat-stats' : null
+            "
+            [attr.aria-pressed]="selectedEntityId === participant.id"
           >
-            <span class="truncate">{{ entity.name }}</span>
+            <span
+              class="text-[10px] font-semibold uppercase tracking-[0.14em]"
+              [ngClass]="
+                participant.team === 'Friendly' ? 'text-primary' : 'text-danger'
+              "
+            >
+              {{ participant.team === 'Friendly' ? 'Yours' : 'Enemy' }}
+            </span>
+
+            <span class="min-w-0 truncate font-semibold text-white">
+              {{ participant.name }}
+              <span
+                *ngIf="isDefeated(participant.entity)"
+                class="ml-1 text-[10px] uppercase tracking-wider text-danger"
+              >
+                Defeated
+              </span>
+            </span>
+
+            <span
+              class="relative h-2 overflow-hidden rounded-full border border-white/10 bg-black/40"
+            >
+              <span
+                class="absolute inset-y-0 left-0 rounded-full transition-[width] duration-300"
+                [ngClass]="
+                  participant.team === 'Friendly'
+                    ? 'bg-primary/70'
+                    : 'bg-danger/65'
+                "
+                [style.width.%]="healthPercentage(participant.entity)"
+              ></span>
+              <span
+                *ngIf="participant.entity.barrier > 0"
+                class="bg-info/70 absolute inset-y-0 left-0 rounded-full"
+                [style.width.%]="barrierPercentage(participant.entity)"
+              ></span>
+            </span>
+
+            <span class="text-right font-semibold">
+              {{ participant.entity.health | number }}/{{
+                participant.entity.maxHealth | number
+              }}
+            </span>
+            <span class="text-right font-semibold text-primary">
+              {{ statsFor(participant.id)?.damageDone ?? 0 | number }}
+            </span>
+            <span class="text-right font-semibold text-danger">
+              {{ statsFor(participant.id)?.damageTaken ?? 0 | number }}
+            </span>
           </button>
-        </div>
+        </ng-container>
       </div>
     </div>
 
     <ng-container *ngIf="selectedStats as stats">
       <div
-        class="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto rounded"
+        class="mt-3 flex min-h-0 flex-col gap-3"
         data-tour="your-combat-stats"
       >
-        <div class="ll-stat-label">{{ selectedEntityName }}</div>
         <div
-          class="grid gap-2 text-sm text-white md:grid-cols-3"
-          data-tour="current-combat-summary"
+          class="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between"
         >
-          <div class="ll-card p-3">
-            <div class="ll-stat-label">Damage</div>
-            <div class="mt-2 flex flex-col gap-1 text-primary">
-              <span>
-                Done:
-                <span class="font-semibold text-white">
-                  {{ stats.damageDone | number }}</span
-                >
-              </span>
-              <span>
-                Taken:
-                <span class="font-semibold text-white">
-                  {{ stats.damageTaken | number }}</span
-                >
-              </span>
-            </div>
-          </div>
-          <div class="ll-card p-3">
-            <div class="ll-stat-label">Healing</div>
-            <div class="mt-2 flex flex-col gap-1 text-primary">
-              <span>
-                Done:
-                <span class="font-semibold text-white">
-                  {{ stats.healingDone | number }}</span
-                >
-              </span>
-              <span>
-                Received:
-                <span class="font-semibold text-white">
-                  {{ stats.healingReceived | number }}</span
-                >
-              </span>
-            </div>
-          </div>
-          <div class="ll-card p-3">
-            <div class="ll-stat-label">Regeneration</div>
-            <div class="mt-2 text-primary">
-              Health:
-              <span class="font-semibold text-white">
-                {{ stats.healthRegenerated | number }}</span
+          <div class="flex min-w-0 flex-wrap items-center gap-2">
+            <span
+              class="mr-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-primary"
+            >
+              {{ selectedEntityName }} totals
+            </span>
+            <span class="ll-card px-3 py-1.5 text-xs text-secondary">
+              Healing done
+              <strong class="ml-1 text-white">{{
+                stats.healingDone | number
+              }}</strong>
+            </span>
+            <span class="ll-card px-3 py-1.5 text-xs text-secondary">
+              Healing received
+              <strong class="ml-1 text-white">{{
+                stats.healingReceived | number
+              }}</strong>
+            </span>
+            <span class="ll-card px-3 py-1.5 text-xs text-secondary">
+              Regeneration
+              <strong class="ml-1 text-white"
+                >{{ stats.healthRegenerated | number }} hp</strong
               >
-            </div>
+            </span>
+          </div>
+
+          <div class="ll-scrollbar-none flex max-w-full gap-2 overflow-x-auto">
+            <button
+              type="button"
+              *ngFor="
+                let entity of playerParticipants.concat(enemyParticipants)
+              "
+              (click)="selectEntity(entity.id)"
+              class="ll-button min-w-0 max-w-48 shrink-0 px-3 py-1.5 text-xs"
+              [ngClass]="{
+                'll-card-accent text-primary':
+                  selectedEntityId === entity.id && entity.team === 'Friendly',
+                'll-card-danger text-danger':
+                  selectedEntityId === entity.id && entity.team === 'Hostile',
+              }"
+              [attr.title]="entity.name"
+            >
+              <span class="block truncate">{{ entity.name }}</span>
+            </button>
           </div>
         </div>
-        <div class="min-w-0 overflow-x-auto text-left text-sm">
-          <div class="ll-table-header grid grid-cols-5 rounded-t">
-            <div class="col-start-1 col-end-3">Ability</div>
-            <div>Uses / Procs</div>
-            <div>Damage</div>
-            <div>Healing</div>
-          </div>
-          <div class="ll-card overflow-hidden rounded-t-none">
+
+        <div
+          class="min-w-0 overflow-x-auto rounded border border-white/10 text-left text-sm"
+          data-tour="current-combat-summary"
+        >
+          <div class="min-w-[42rem]">
+            <div
+              class="grid grid-cols-[minmax(15rem,1fr)_9rem_8rem_8rem] gap-3 bg-white/[0.035] px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-primary"
+            >
+              <div>Ability</div>
+              <div class="text-right">Uses / Procs</div>
+              <div class="text-right">Damage</div>
+              <div class="text-right">Healing</div>
+            </div>
             <ng-container *ngFor="let ability of stats.abilities">
               <div
                 *ngIf="ability.name"
-                class="ll-table-row grid grid-cols-5 p-1"
+                class="grid grid-cols-[minmax(15rem,1fr)_9rem_8rem_8rem] gap-3 border-t border-white/[0.07] px-4 py-2 text-xs transition-colors hover:bg-white/[0.035]"
               >
-                <div class="col-start-1 col-end-3">{{ ability.name }}</div>
-                <div>{{ ability.uses | number }}</div>
-                <div>{{ ability.totalDamage | number }}</div>
-                <div>{{ ability.totalHealing | number }}</div>
+                <div class="font-medium text-white">{{ ability.name }}</div>
+                <div class="text-right text-secondary">
+                  {{ ability.uses | number }}
+                </div>
+                <div
+                  class="text-right font-semibold"
+                  [ngClass]="
+                    ability.totalDamage > 0 ? 'text-primary' : 'text-light_gray'
+                  "
+                >
+                  {{ ability.totalDamage | number }}
+                </div>
+                <div
+                  class="text-right font-semibold"
+                  [ngClass]="
+                    ability.totalHealing > 0
+                      ? 'text-success'
+                      : 'text-light_gray'
+                  "
+                >
+                  {{ ability.totalHealing | number }}
+                </div>
               </div>
             </ng-container>
+            <div
+              *ngIf="stats.abilities.length === 0"
+              class="border-t border-white/[0.07] px-4 py-5 text-center text-xs text-light_gray"
+            >
+              No ability activity recorded for this unit.
+            </div>
           </div>
         </div>
       </div>

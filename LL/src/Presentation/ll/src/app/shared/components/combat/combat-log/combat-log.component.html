@@ -1,13 +1,8 @@
-<section
+<p
   data-tour="current-combat-summary"
-  class="flex gap-2 p-2"
+  class="ll-copy whitespace-nowrap text-xs"
   *ngIf="stats() as s"
 >
-  <app-combat-stats-card label="Wins" [value]="s.wins"></app-combat-stats-card>
-  <app-combat-stats-card
-    label="Losses"
-    [value]="s.losses"
-  ></app-combat-stats-card>
-  <!-- <app-combat-stats-card label="Gold" [value]="s.gold"></app-combat-stats-card> -->
-  <app-combat-stats-card label="XP" [value]="s.xp"></app-combat-stats-card>
-</section>
+  Idle combat · {{ s.wins | number }} W / {{ s.losses | number }} L ·
+  <span class="font-semibold text-primary">{{ s.xp | number }} XP</span>
+</p>
