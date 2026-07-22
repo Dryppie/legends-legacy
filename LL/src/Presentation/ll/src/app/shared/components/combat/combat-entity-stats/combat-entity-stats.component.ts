@@ -112,19 +112,27 @@ export class CombatEntityStatsComponent implements OnChanges {
     return 'Sort by ' + column + ' ' + nextDirection;
   }
 
-  averageDamage(ability: AbilityStats): number {
-    if (ability.uses <= 0 || ability.totalDamage <= 0) return 0;
-    return ability.totalDamage / ability.uses;
+  averagePrimaryOutput(ability: AbilityStats): number {
+    if (ability.uses <= 0) return 0;
+    return this.primaryOutputTotal(ability) / ability.uses;
   }
 
-  averageHealing(ability: AbilityStats): number {
-    if (ability.uses <= 0 || ability.totalHealing <= 0) return 0;
-    return ability.totalHealing / ability.uses;
+  abilityBarPercentage(ability: AbilityStats): number {
+    const maximum = Math.max(
+      0,
+      ...(this.selectedStats?.abilities ?? []).map((item) =>
+        this.primaryOutputTotal(item),
+      ),
+    );
+    if (maximum <= 0) return 0;
+    return (this.primaryOutputTotal(ability) / maximum) * 100;
   }
 
-  averageBarrier(ability: AbilityStats): number {
-    if (ability.uses <= 0 || ability.totalBarrier <= 0) return 0;
-    return ability.totalBarrier / ability.uses;
+  abilityBarClass(ability: AbilityStats): string {
+    if (ability.totalDamage > 0) return 'bg-primary/65';
+    if (ability.totalHealing > 0) return 'bg-success/65';
+    if (ability.totalBarrier > 0) return 'bg-[#8ecbff]/55';
+    return 'bg-white/10';
   }
 
   abilityCategory(ability: AbilityStats): string {
@@ -274,5 +282,11 @@ export class CombatEntityStatsComponent implements OnChanges {
       default:
         return ability.totalDamage ?? 0;
     }
+  }
+
+  private primaryOutputTotal(ability: AbilityStats): number {
+    if (ability.totalDamage > 0) return ability.totalDamage;
+    if (ability.totalHealing > 0) return ability.totalHealing;
+    return ability.totalBarrier ?? 0;
   }
 }
