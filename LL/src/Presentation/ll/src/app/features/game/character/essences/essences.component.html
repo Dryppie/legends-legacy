@@ -697,7 +697,11 @@
     </div>
 
     <div
-      class="mb-4 rounded border border-light_gray/70 bg-black/20 p-3 text-sm"
+      class="mb-4 rounded border border-light_gray/70 bg-black/20 p-3 text-sm transition-all duration-300"
+      [ngClass]="{
+        'essence-focus-notification-highlight':
+          essenceState.highlightEssenceFocus(),
+      }"
     >
       <div class="flex flex-wrap items-center justify-between gap-3">
         <div>

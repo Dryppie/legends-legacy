@@ -34,6 +34,7 @@ export class EssenceStateService {
   private readonly _codex = signal<EssenceCodexDto | null>(null);
   private readonly _now = signal(Date.now());
   private readonly _seenEssenceFocusReadyKey = signal<string | null>(null);
+  private readonly _highlightEssenceFocus = signal(false);
   private readonly _selectedPlayerEssenceId = signal<string | null>(null);
   private readonly _selectedLoadoutId = signal<string | null>(null);
   private readonly _selectedInventoryItemId = signal<string | null>(null);
@@ -82,6 +83,9 @@ export class EssenceStateService {
     const key = this.essenceFocusReadyKey();
     return key !== null && key !== this._seenEssenceFocusReadyKey();
   });
+  readonly highlightEssenceFocus = computed(() =>
+    this._highlightEssenceFocus(),
+  );
   readonly selectedLoadoutId = computed(() => this._selectedLoadoutId());
   readonly draftLoadoutName = computed(() => this._draftLoadoutName());
   readonly draftSlots = computed(() => this._draftSlots());
@@ -225,10 +229,14 @@ export class EssenceStateService {
 
     effect(
       () => {
-        if (this._activeView() !== 'creatures') return;
+        if (this._activeView() !== 'creatures') {
+          this._highlightEssenceFocus.set(false);
+          return;
+        }
 
         const readyKey = this.essenceFocusReadyKey();
-        if (readyKey) {
+        if (readyKey && readyKey !== this._seenEssenceFocusReadyKey()) {
+          this._highlightEssenceFocus.set(true);
           this._seenEssenceFocusReadyKey.set(readyKey);
         }
       },
@@ -299,6 +307,7 @@ export class EssenceStateService {
     this._loading.set(false);
     this._error.set(null);
     this._seenEssenceFocusReadyKey.set(null);
+    this._highlightEssenceFocus.set(false);
   }
 
   selectPlayerEssence(essence: PlayerEssenceDto): void {
