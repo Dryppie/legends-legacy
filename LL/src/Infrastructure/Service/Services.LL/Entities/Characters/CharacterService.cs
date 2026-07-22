@@ -1,5 +1,7 @@
 using Application.Interfaces.Services.LL.Entities;
 using Application.Interfaces.Services.LL.Essences;
+using Application.Interfaces.Services.LL.PowerRatings;
+using Domain.Components.Attributes;
 using Domain.Models.Entities.Characters;
 
 namespace Services.LL.Entities.Characters;
@@ -7,16 +9,19 @@ namespace Services.LL.Entities.Characters;
 public class CharacterService : ICharacterService
 {
     private readonly ICharacterRepository _characterRepository;
-    private readonly ICombatRatingService _combatRatings;
+    private readonly IEssenceCombatLoadoutResolver _essenceLoadouts;
+    private readonly IPowerRatingService _powerRatings;
     private readonly ICharacterExperienceProgressionProvider _experienceProgression;
 
     public CharacterService(
         ICharacterRepository characterRepository,
-        ICombatRatingService combatRatings,
+        IEssenceCombatLoadoutResolver essenceLoadouts,
+        IPowerRatingService powerRatings,
         ICharacterExperienceProgressionProvider experienceProgression)
     {
         _characterRepository = characterRepository;
-        _combatRatings = combatRatings;
+        _essenceLoadouts = essenceLoadouts;
+        _powerRatings = powerRatings;
         _experienceProgression = experienceProgression;
     }
 
@@ -47,7 +52,7 @@ public class CharacterService : ICharacterService
         if (character == null) return null;
 
         SetExperienceRequirement(character);
-        ApplyCombatRating(character);
+        ApplyCombatAttributes(character);
         return character;
     }
 
@@ -57,7 +62,7 @@ public class CharacterService : ICharacterService
         if (character == null) return null;
 
         SetExperienceRequirement(character);
-        ApplyCombatRating(character);
+        ApplyCombatAttributes(character);
         return character;
     }
 
@@ -88,15 +93,13 @@ public class CharacterService : ICharacterService
     public async Task<Guid?> GetCharacterIdByNameAsync(string name, CancellationToken cancellationToken) =>
         await _characterRepository.GetCharacterIdByNameAsync(name, cancellationToken);
 
-    public async Task<int> GetCombatRatingAsync(Guid characterId, CancellationToken cancellationToken)
+    public async Task<int> GetPowerAsync(Guid characterId, CancellationToken cancellationToken)
     {
-        var character = await GetMyCharacterOverviewAsync(characterId, cancellationToken);
-        return character is null
-            ? 0
-            : character.CombatRating.Total;
+        var power = await _powerRatings.GetCharacterRatingAsync(characterId, cancellationToken);
+        return power.State == PowerAnalysisState.Available ? power.Overall : 0;
     }
 
-    private void ApplyCombatRating(Character character)
+    private void ApplyCombatAttributes(Character character)
     {
         var activeLoadout = character.EssenceLoadouts.FirstOrDefault(x => x.IsActive);
         var equippedEssences = activeLoadout?.Slots
@@ -104,20 +107,8 @@ public class CharacterService : ICharacterService
             .Where(x => x is not null)
             .Cast<Domain.Models.Essences.PlayerEssence>()
             .ToList() ?? [];
-        var equipmentModifiers = character.EquipmentSlots
-            .Where(slot => slot.EquipmentInstance is not null)
-            .SelectMany(slot => slot.EquipmentInstance!.AttributeModifiers)
-            .Cast<Domain.Models.Attributes.Modifiers.AttributeModifierBase>()
-            .ToList();
-        var projection = _combatRatings.Calculate(
-            character.BaseAttributes.ToDictionary(x => x.AttributeType, x => x.Value),
-            equipmentModifiers,
-            equippedEssences);
-
-        character.BaseCombatAttributes.Clear();
-        foreach (var (attribute, value) in projection.Attributes)
-            character.BaseCombatAttributes[attribute] = value;
-        character.CombatRating = projection.Breakdown;
+        var loadout = _essenceLoadouts.Resolve(character.Id, equippedEssences);
+        AttributeCalculator.CalculateBaseAttributes(character, loadout.AttributeModifiers);
     }
 
     private void SetExperienceRequirement(Character? character)

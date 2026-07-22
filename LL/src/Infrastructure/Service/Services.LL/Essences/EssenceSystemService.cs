@@ -497,12 +497,7 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
             characterId,
             essences,
             attributeModifiers,
-            tags,
-            essences
-                .Select(essence => essence.EssenceDefinitionId)
-                .Distinct(StringComparer.OrdinalIgnoreCase)
-                .Select(essenceId => _definitions.GetById(essenceId)?.AbilityCombatRating ?? 0)
-                .Sum());
+            tags);
     }
 
     public async Task<EssenceDropRollResult> RollMonsterEssenceDropAsync(

@@ -14,15 +14,10 @@ public sealed class DungeonVigorService : IDungeonVigorService
     {
         ArgumentNullException.ThrowIfNull(result);
 
-        var playerIds = result.PlayerTeam
-            .Select(entity => entity.Id)
-            .ToHashSet(StringComparer.OrdinalIgnoreCase);
         var maxHealth = Math.Max(1, result.PlayerTeam.Sum(entity => Math.Max(0, entity.MaxHealth)));
-        var damageTaken = result.EntityStats
-            .Where(stats => playerIds.Contains(stats.EntityId))
-            .Sum(stats => Math.Max(0, stats.DamageTaken));
-        var damagePercent = damageTaken * 100d / maxHealth;
-        var downedMembers = result.PlayerTeam.Count(entity => entity.Health <= 0);
+        var remainingHealth = result.PlayerTeam.Sum(entity =>
+            Math.Clamp(entity.Health, 0, Math.Max(0, entity.MaxHealth)));
+        var missingHealthPercent = 1d - remainingHealth / (double)maxHealth;
         var node = run.State.MapNodes
             .FirstOrDefault(candidate => candidate.RoomIndex == room.RoomIndex);
         var minimumToll = node is not null && node.VigorCostMin > 0
@@ -32,11 +27,9 @@ public sealed class DungeonVigorService : IDungeonVigorService
             ? node.VigorCostMax
             : Math.Max(minimumToll, 22);
         var performanceToll = (int)Math.Round(
-            (maximumToll - minimumToll) * Math.Clamp(damagePercent / 100d, 0d, 1d),
+            (maximumToll - minimumToll) * Math.Clamp(missingHealthPercent, 0d, 1d),
             MidpointRounding.AwayFromZero);
-        var combatToll = minimumToll
-            + performanceToll
-            + (downedMembers * 6);
+        var combatToll = minimumToll + performanceToll;
         var masteryBenefits = DungeonMasteryBenefits.Resolve(run.State.MasteryLevelAtStart);
         var toll = Math.Max(0, ScaleCombatToll(combatToll) - masteryBenefits.CombatVigorCostReduction);
 

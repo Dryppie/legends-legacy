@@ -1,5 +1,6 @@
 using Application.Common.Mappings;
 using Application.Interfaces.Services.LL.Essences;
+using Application.Interfaces.Services.LL.PowerRatings;
 using Application.UseCases.Achievements.Dtos;
 using Application.UseCases.Essences.Dtos;
 using AutoMapper;
@@ -15,7 +16,7 @@ public class CharacterOverviewDto : IMapFrom<Character>
     public Guid Id { get; set; }
     public string Name { get; set; } = string.Empty;
     public int Level { get; set; }
-    public int CombatRating { get; set; }
+    public PowerRatingSnapshot? Power { get; set; }
     public List<EntityAttribute> BaseAttributes { get; set; } = [];
     public List<EntityAttribute> BaseCombatAttributes { get; set; } = [];
     public EssenceLoadoutDto? ActiveEssenceLoadout { get; set; }
@@ -44,7 +45,6 @@ public sealed class CharacterOverviewConverter : ITypeConverter<Character, Chara
             Id = source.Id,
             Name = source.Name,
             Level = source.Level,
-            CombatRating = source.CombatRating.Total,
             BaseAttributes = source.BaseAttributes.ToList(),
             BaseCombatAttributes = source.BaseCombatAttributes.Select(kvp => new EntityAttribute
             {

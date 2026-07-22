@@ -3,6 +3,8 @@ using Application.UseCases.Characters.Queries.GetCharacter;
 using Application.UseCases.Characters.Queries.GetCharacterIdByName;
 using Application.UseCases.Characters.Queries.GetCharacterOverview;
 using Application.UseCases.Characters.Queries.GetCharacterOverviewByName;
+using Application.UseCases.Characters.Queries.GetPowerRating;
+using Application.Interfaces.Services.LL.PowerRatings;
 using Common.Primitives;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -19,6 +21,10 @@ public class CharacterController : BaseController
     [HttpGet("Overview")]
     public async Task<ActionResult<Response<CharacterOverviewDto>>> Overview() =>
         await Mediator.Send(new GetCharacterOverviewQuery(CurrentCharacterGuid));
+
+    [HttpGet("Power")]
+    public async Task<ActionResult<PowerRatingSnapshot>> Power() =>
+        await Mediator.Send(new GetPowerRatingQuery(CurrentCharacterGuid));
 
     [HttpGet("Search")]
     public async Task<ActionResult<Response<CharacterOverviewDto>>> Search([FromQuery] string name)

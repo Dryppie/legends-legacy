@@ -74,8 +74,10 @@ export interface DungeonPreviewData {
   title: string;
   difficulty?: DungeonDifficulty;
   grade?: string;
-  recommendedCombatRating?: number;
-  currentCombatRating?: number;
+  currentPartyPower?: number;
+  recommendedPartyPower?: number | null;
+  powerRecommendationLowConfidence?: boolean;
+  powerRecommendationUnavailable?: boolean;
   canEnter?: boolean;
   missingRequirements?: string[];
   entryRequirements?: DungeonEntryRequirement[];

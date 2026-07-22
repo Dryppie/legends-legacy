@@ -24,15 +24,15 @@ public sealed class DungeonCatalogTests
 
         var expected = new[]
         {
-            new ExpectedDungeon("goblin_mines", "Goblin Mines I", DungeonGrade.GradeI, 4500, 10, 12, 2, null),
-            new ExpectedDungeon("goblin_mines_ii", "Goblin Mines II", DungeonGrade.GradeII, 22500, 11, 13, 2, "goblin_mines"),
-            new ExpectedDungeon("goblin_mines_iii", "Goblin Mines III", DungeonGrade.GradeIII, 112500, 12, 14, 2, "goblin_mines_ii"),
-            new ExpectedDungeon("forgotten_catacombs", "Forgotten Catacombs I", DungeonGrade.GradeI, 400, 11, 13, 1, null),
-            new ExpectedDungeon("forgotten_catacombs_ii", "Forgotten Catacombs II", DungeonGrade.GradeII, 2000, 12, 14, 1, "forgotten_catacombs"),
-            new ExpectedDungeon("forgotten_catacombs_iii", "Forgotten Catacombs III", DungeonGrade.GradeIII, 10000, 13, 15, 1, "forgotten_catacombs_ii"),
-            new ExpectedDungeon("hives_abyss", "The Hive's Abyss I", DungeonGrade.GradeI, 650, 12, 14, 3, null),
-            new ExpectedDungeon("hives_abyss_ii", "The Hive's Abyss II", DungeonGrade.GradeII, 3250, 13, 15, 3, "hives_abyss"),
-            new ExpectedDungeon("hives_abyss_iii", "The Hive's Abyss III", DungeonGrade.GradeIII, 16250, 14, 16, 3, "hives_abyss_ii")
+            new ExpectedDungeon("goblin_mines", "Goblin Mines I", DungeonGrade.GradeI, 10, 12, 2, null),
+            new ExpectedDungeon("goblin_mines_ii", "Goblin Mines II", DungeonGrade.GradeII, 11, 13, 2, "goblin_mines"),
+            new ExpectedDungeon("goblin_mines_iii", "Goblin Mines III", DungeonGrade.GradeIII, 12, 14, 2, "goblin_mines_ii"),
+            new ExpectedDungeon("forgotten_catacombs", "Forgotten Catacombs I", DungeonGrade.GradeI, 11, 13, 1, null),
+            new ExpectedDungeon("forgotten_catacombs_ii", "Forgotten Catacombs II", DungeonGrade.GradeII, 12, 14, 1, "forgotten_catacombs"),
+            new ExpectedDungeon("forgotten_catacombs_iii", "Forgotten Catacombs III", DungeonGrade.GradeIII, 13, 15, 1, "forgotten_catacombs_ii"),
+            new ExpectedDungeon("hives_abyss", "The Hive's Abyss I", DungeonGrade.GradeI, 12, 14, 3, null),
+            new ExpectedDungeon("hives_abyss_ii", "The Hive's Abyss II", DungeonGrade.GradeII, 13, 15, 3, "hives_abyss"),
+            new ExpectedDungeon("hives_abyss_iii", "The Hive's Abyss III", DungeonGrade.GradeIII, 14, 16, 3, "hives_abyss_ii")
         };
 
         Assert.Collection(
@@ -149,7 +149,6 @@ public sealed class DungeonCatalogTests
                     {
                       "id": "example",
                       "difficulty": 1,
-                      "recommendedCombatRating": 1,
                       "minRooms": 1,
                       "maxRooms": 1,
                       "roomTemplates": []
@@ -204,7 +203,6 @@ public sealed class DungeonCatalogTests
         Assert.Equal(expected.Name, actual.Name);
         Assert.Equal(expected.Grade, actual.Grade);
         Assert.Equal((int)expected.Grade, actual.Tier);
-        Assert.Equal(expected.RecommendedCombatRating, actual.RecommendedCombatRating);
         Assert.Equal(expected.MinRooms, actual.MinRooms);
         Assert.Equal(expected.MaxRooms, actual.MaxRooms);
         Assert.Equal(expected.RestSiteCount, actual.RestSiteCount);
@@ -238,7 +236,6 @@ public sealed class DungeonCatalogTests
         string Id,
         string Name,
         DungeonGrade Grade,
-        int RecommendedCombatRating,
         int MinRooms,
         int MaxRooms,
         int RestSiteCount,

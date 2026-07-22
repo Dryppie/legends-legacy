@@ -32,9 +32,17 @@
           <span class="ll-stat-label text-[10px] text-zinc-300/80">
             Recommended Power
           </span>
-          <span class="font-serif text-2xl font-semibold text-primary">
-            {{ previewData.recommendedCombatRating ?? 0 }}
+          <span
+            *ngIf="previewData.recommendedPartyPower as recommended; else previewRecommendationPending"
+            class="font-serif text-2xl font-semibold text-primary"
+          >
+            {{ recommended | number }}
           </span>
+          <ng-template #previewRecommendationPending>
+            <span class="text-xs text-zinc-400">
+              {{ previewData.powerRecommendationUnavailable ? "Unavailable" : "Calibrating…" }}
+            </span>
+          </ng-template>
         </div>
 
         <div class="mt-3 flex flex-wrap items-center justify-end gap-1.5">
@@ -476,36 +484,46 @@
           </div>
         </section>
 
-        <section class="ll-card mt-4 p-3">
+        <section
+          class="ll-card mt-4 p-3"
+          title="This is a general recommendation calibrated from several simulated party profiles. Vigor, build matchups, and room composition still affect a run."
+        >
           <div class="flex items-center justify-between gap-3">
-            <div class="ll-eyebrow">Power Check</div>
-            <span
-              class="ll-badge rounded"
-              [ngClass]="checkStatusClass(meetsRecommendedRating())"
-            >
-              {{ meetsRecommendedRating() ? "Ready" : "Risky" }}
+            <div class="ll-eyebrow">Dungeon Power</div>
+            <span class="ll-badge rounded" [ngClass]="powerComparisonClass()">
+              {{ powerComparisonLabel() }}
             </span>
           </div>
 
           <div class="mt-3 grid grid-cols-2 gap-2 text-sm">
             <div>
-              <div class="ll-stat-label">Your Power</div>
-              <div
-                class="mt-1 font-serif text-xl tabular-nums"
-                [class.text-primary]="meetsRecommendedRating()"
-                [class.text-amber-200]="!meetsRecommendedRating()"
-              >
-                {{ selectedCurrentCombatRating() }}
+              <div class="ll-stat-label">Your Party Power</div>
+              <div class="mt-1 font-serif text-xl tabular-nums text-primary">
+                {{ selectedPartyPower() | number }}
               </div>
             </div>
 
             <div>
-              <div class="ll-stat-label">Recommended</div>
-              <div class="mt-1 font-serif text-xl tabular-nums text-white">
-                {{ selectedRecommendedCombatRating() }}
-              </div>
+              <div class="ll-stat-label">Recommended Power</div>
+              <ng-container *ngIf="selectedRecommendedPartyPower() as recommended; else recommendationPending">
+                <div class="mt-1 font-serif text-xl tabular-nums text-white">
+                  {{ recommended | number }}
+                </div>
+                <div class="mt-1 text-[10px] text-zinc-500">
+                  General simulated benchmark
+                </div>
+              </ng-container>
+              <ng-template #recommendationPending>
+                <div class="mt-1 text-xs text-zinc-400">
+                  {{ recommendationPendingLabel() }}
+                </div>
+              </ng-template>
             </div>
           </div>
+
+          <p class="mt-3 border-t border-light_gray/40 pt-3 text-xs leading-5 text-zinc-400">
+            Advisory only — remaining health and Vigor determine how far the party can travel.
+          </p>
         </section>
 
         <section class="ll-card mt-3 p-3">

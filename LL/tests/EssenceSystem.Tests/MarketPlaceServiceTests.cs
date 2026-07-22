@@ -851,6 +851,6 @@ public sealed class MarketPlaceServiceTests
         public Task<Character?> GetBaseCharacterByIdAsync(Guid characterId, CancellationToken cancellationToken) => throw new NotSupportedException();
         public Task<Character?> GetCharacterWithSoulstoneUpgradesAsync(Guid characterId, CancellationToken cancellationToken) => throw new NotSupportedException();
         public Task<Guid?> GetCharacterIdByNameAsync(string name, CancellationToken cancellationToken) => throw new NotSupportedException();
-        public Task<int> GetCombatRatingAsync(Guid characterId, CancellationToken cancellationToken) => throw new NotSupportedException();
+        public Task<int> GetPowerAsync(Guid characterId, CancellationToken cancellationToken) => throw new NotSupportedException();
     }
 }

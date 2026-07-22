@@ -418,6 +418,7 @@ public sealed class DungeonRunService : IDungeonRunService
             run.State.SecuredLoot = CreateLootBagFromRun(run);
             run.State.PendingLoot = new DungeonLootBag();
             run.State.LastConsequence = "Delve completed. Pending Loot and completion rewards are secured.";
+            UpdatePowerPredictionOutcome(run, true, null);
             ClearDecisionState(run);
             return;
         }
@@ -567,6 +568,7 @@ public sealed class DungeonRunService : IDungeonRunService
         room.Status = RoomInstanceStatus.Completed;
         run.CompletedAt = DateTimeOffset.UtcNow;
         run.State.LastConsequence = $"{cause}: Pending Loot was lost.";
+        UpdatePowerPredictionOutcome(run, false, cause);
         ClearDecisionState(run);
     }
 
@@ -636,6 +638,7 @@ public sealed class DungeonRunService : IDungeonRunService
         run.State.SecuredLoot = CreateLootBagFromRun(run);
         run.State.PendingLoot = new DungeonLootBag();
         run.State.LastConsequence = "Retreated safely. Pending Loot is secured.";
+        UpdatePowerPredictionOutcome(run, false, "Retreat");
         ClearDecisionState(run);
 
         return new ExecuteDungeonActionResult
@@ -644,6 +647,25 @@ public sealed class DungeonRunService : IDungeonRunService
             Outcome = DungeonActionOutcome.RunRetreated,
             Message = "You retreated and secured the Pending Loot."
         };
+    }
+
+    private static void UpdatePowerPredictionOutcome(
+        DungeonRun run,
+        bool completed,
+        string? failureReason)
+    {
+        if (run.State.PowerPrediction is not { } prediction)
+            return;
+
+        prediction.ActualCompleted = completed;
+        prediction.FurthestRoomReached = run.State.TraversedRoomIndexes.DefaultIfEmpty(run.CurrentRoomIndex).Max();
+        prediction.CheckpointReached = run.Rooms.Any(room =>
+            room.Type == RoomType.RestSite &&
+            run.State.TraversedRoomIndexes.Contains(room.RoomIndex));
+        prediction.RunDurationSeconds = (int)Math.Max(
+            0,
+            ((run.CompletedAt ?? DateTimeOffset.UtcNow) - run.CreatedAt).TotalSeconds);
+        prediction.FailureReason = failureReason;
     }
 
     private static bool TryGetPayloadString(object? payload, string propertyName, out string value)

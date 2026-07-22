@@ -8,6 +8,8 @@ import { DungeonRecordsData } from '../../../../shared/models/Dtos/dungeons/dung
 import { InventoryItem } from '../../../../shared/models/inventoryItem';
 import { CharacterDto } from '../../../../shared/models/Dtos/characterDto';
 import { DungeonMasteryBenefitSummary } from '../../../../shared/models/Dtos/dungeons/dungeonPreviewData';
+import { DungeonReadinessResult } from '../../../../shared/models/Dtos/powerRating';
+import { DungeonDifficulty } from '../../../../shared/models/enums/dungeonDifficulty';
 
 export enum DungeonRunStatus {
   Active = 'Active',
@@ -15,6 +17,14 @@ export enum DungeonRunStatus {
   Failed = 'Failed',
   Retreated = 'Retreated',
   RewardsClaimed = 'RewardsClaimed',
+}
+
+export interface DungeonPowerRecommendationsResponse {
+  calibrationComplete: boolean;
+  recommendations: Record<
+    string,
+    { recommendedPartyPower: number; lowConfidence: boolean }
+  >;
 }
 
 export enum RoomType {
@@ -206,6 +216,22 @@ export class DungeonService {
         return throwError(() => new Error('Failed to get available dungeons'));
       }),
     );
+  }
+
+  getPowerRecommendations(): Observable<DungeonPowerRecommendationsResponse> {
+    return this.api
+      .get('dungeon/powerRecommendations')
+      .pipe(catchError((error) => throwError(() => error)));
+  }
+
+  getReadiness(
+    dungeonId: string,
+    dungeonTier: DungeonDifficulty,
+    companionIds: string[] = [],
+  ): Observable<DungeonReadinessResult> {
+    return this.api
+      .post('dungeon/readiness', { dungeonId, dungeonTier, companionIds })
+      .pipe(catchError((error) => throwError(() => error)));
   }
 
   assembleSigil(dungeonId: string): Observable<DungeonSigilAssemblyResponse> {

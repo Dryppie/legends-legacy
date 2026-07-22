@@ -7,7 +7,7 @@ import {
   signal,
 } from '@angular/core';
 import { RegularButtonComponent } from '../../custom-components/buttons/regular-button/regular-button.component';
-import { NgClass, NgFor, NgIf, NgTemplateOutlet } from '@angular/common';
+import { DecimalPipe, NgClass, NgFor, NgIf, NgTemplateOutlet } from '@angular/common';
 import { ItemComponent } from '../../item/item.component';
 import { DungeonStateService } from '../../../../core/services/api/dungeon/dungeon-state.service';
 import {
@@ -51,6 +51,7 @@ type DungeonDetailTab = 'rewards' | 'gathering' | 'mastery';
     NgFor,
     NgClass,
     NgTemplateOutlet,
+    DecimalPipe,
     OverlayModule,
     RegularButtonComponent,
     ItemComponent,
@@ -229,10 +230,6 @@ export class DungeonCardComponent implements OnChanges {
       return 'Cannot enter';
     }
 
-    if (!this.meetsRecommendedRating()) {
-      return 'Power too low';
-    }
-
     return 'Locked';
   }
 
@@ -340,26 +337,49 @@ export class DungeonCardComponent implements OnChanges {
       return this.selectedMissingRequirements().join(' · ');
     }
 
-    if (!this.meetsRecommendedRating()) {
-      return `Recommended Power ${this.selectedRecommendedCombatRating()}, your Power ${this.selectedCurrentCombatRating()}.`;
-    }
-
     return 'This dungeon difficulty is locked or unavailable.';
   }
 
-  selectedCurrentCombatRating(): number {
-    return this.selectedPreviewData().currentCombatRating ?? 0;
+  selectedPartyPower(): number {
+    return this.selectedPreviewData().currentPartyPower ?? 0;
   }
 
-  selectedRecommendedCombatRating(): number {
-    return this.selectedPreviewData().recommendedCombatRating ?? 0;
+  selectedRecommendedPartyPower(): number | null {
+    return this.selectedPreviewData().recommendedPartyPower ?? null;
   }
 
-  meetsRecommendedRating(): boolean {
-    return (
-      this.selectedCurrentCombatRating() >=
-      this.selectedRecommendedCombatRating()
-    );
+  recommendationPendingLabel(): string {
+    return this.selectedPreviewData().powerRecommendationUnavailable
+      ? 'Unavailable'
+      : 'Calibrating…';
+  }
+
+  powerComparisonLabel(): string {
+    const recommended = this.selectedRecommendedPartyPower();
+    if (!recommended) {
+      return this.selectedPreviewData().powerRecommendationUnavailable
+        ? 'Unavailable'
+        : 'Calibrating';
+    }
+
+    if (this.selectedPreviewData().powerRecommendationLowConfidence) {
+      return 'Matchup sensitive';
+    }
+
+    const ratio = this.selectedPartyPower() / recommended;
+    if (ratio >= 1.1) return 'Above recommendation';
+    if (ratio >= 0.9) return 'Near recommendation';
+    return 'Below recommendation';
+  }
+
+  powerComparisonClass(): string {
+    const recommended = this.selectedRecommendedPartyPower();
+    if (!recommended) return 'll-badge-muted';
+    if (this.selectedPreviewData().powerRecommendationLowConfidence)
+      return 'll-badge-warning';
+    return this.selectedPartyPower() >= recommended * 0.9
+      ? 'll-badge-accent'
+      : 'll-badge-warning';
   }
 
   entryRequirementClass(requirement: EntryRequirementPreview): string {

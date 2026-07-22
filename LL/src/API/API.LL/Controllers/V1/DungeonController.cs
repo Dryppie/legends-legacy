@@ -7,6 +7,8 @@ using Application.UseCases.Dungeons.Dtos;
 using Application.UseCases.Dungeons.Queries.GetAvailableDungeons;
 using Application.UseCases.Dungeons.Queries.GetDungeonRecords;
 using Application.UseCases.Dungeons.Queries.GetDungeonRun;
+using Application.UseCases.Dungeons.Queries.GetDungeonReadiness;
+using Application.Interfaces.Services.LL.PowerRatings;
 using Common.Primitives;
 using Domain.Models.Dungeons.Definitions;
 using Microsoft.AspNetCore.Authorization;
@@ -18,6 +20,14 @@ namespace API.LL.Controllers.V1;
 [Authorize]
 public class DungeonController : BaseController
 {
+    public sealed record DungeonPowerRecommendationsResponse(
+        bool CalibrationComplete,
+        IReadOnlyDictionary<string, DungeonPowerRecommendationSummary> Recommendations);
+
+    public sealed record DungeonPowerRecommendationSummary(
+        int RecommendedPartyPower,
+        bool LowConfidence);
+
     [HttpGet("GetActiveDungeon")]
     public async Task<ActionResult<DungeonRunDto?>> GetActiveDungeon() =>
         await Mediator.Send(new GetDungeonRunQuery(CurrentCharacterGuid));
@@ -25,6 +35,19 @@ public class DungeonController : BaseController
     [HttpGet("GetAvailableDungeons")]
     public async Task<ActionResult<DungeonHubDto>> GetAvailableDungeons() =>
         await Mediator.Send(new GetAvailableDungeonsQuery(CurrentCharacterGuid));
+
+    [HttpGet("PowerRecommendations")]
+    public ActionResult<DungeonPowerRecommendationsResponse> GetPowerRecommendations(
+        [FromServices] IDungeonPowerRecommendationStore recommendationStore) =>
+        Ok(new DungeonPowerRecommendationsResponse(
+            recommendationStore.IsCalibrationComplete,
+            recommendationStore.GetAll().ToDictionary(
+                recommendation => recommendation.Key,
+                recommendation => new DungeonPowerRecommendationSummary(
+                    recommendation.Value.RecommendedPartyPower,
+                    recommendation.Value.Confidence == PowerRatingConfidence.Low ||
+                    recommendation.Value.State == PowerAnalysisState.LowConfidence),
+                StringComparer.OrdinalIgnoreCase)));
 
     [HttpPost("{dungeonId}/assemble-sigil")]
     public async Task<ActionResult<Response<DungeonSigilAssemblyResponseDto>>> AssembleSigil(string dungeonId) =>
@@ -35,6 +58,21 @@ public class DungeonController : BaseController
         await Mediator.Send(new GetDungeonRecordsQuery(familyId));
 
     public record StartDungeonRequest(string DungeonId, DungeonTier DungeonTier);
+
+    public sealed record DungeonReadinessRequest(
+        string DungeonId,
+        DungeonTier DungeonTier,
+        IReadOnlyList<Guid>? CompanionIds);
+
+    [HttpPost("Readiness")]
+    public async Task<ActionResult<DungeonReadinessResult>> GetReadiness(
+        [FromBody] DungeonReadinessRequest request) =>
+        await Mediator.Send(new GetDungeonReadinessQuery(
+            CurrentCharacterGuid,
+            request.DungeonId,
+            request.DungeonTier,
+            request.CompanionIds ?? []));
+
     [HttpPost("StartDungeon")]
     public async Task<ActionResult<Response<StartDungeonRunResponseDto>>> StartDungeon([FromBody] StartDungeonRequest startDungeonRequest) =>
         await Mediator.Send(new StartDungeonRunCommand(CurrentCharacterGuid, startDungeonRequest.DungeonId, startDungeonRequest.DungeonTier));

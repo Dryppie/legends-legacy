@@ -19,20 +19,11 @@
     </div>
 
     <div class="ll-stat-card min-w-56 px-4 py-3 text-right">
-      <div class="ll-stat-label">Estimated power</div>
-      <div class="ll-stat-value" [class.opacity-60]="ratingLoading">
-        {{ estimatedCombatRating | number }}
-      </div>
-      <div class="ll-helper mt-1 text-xs">
-        {{ combatRating.baseAndEquipment | number }} base/equipment ·
-        {{ combatRating.essenceAttributes >= 0 ? "+" : ""
-        }}{{ combatRating.essenceAttributes | number }} essence stats · +{{
-          combatRating.essenceAbilities | number
-        }}
-        abilities
-      </div>
+      <div class="ll-stat-label">Simulation mode</div>
+      <div class="ll-stat-value">Isolated</div>
+      <div class="ll-helper mt-1 text-xs">No rewards, costs, or persisted combat state</div>
       <div *ngIf="selectedDungeon as dungeon" class="ll-helper mt-1">
-        {{ dungeon.recommendedCombatRating | number }} recommended
+        {{ dungeon.difficulty }} · Tier {{ dungeon.tier }}
       </div>
     </div>
   </header>
@@ -127,9 +118,7 @@
               Unequipped level-one values match a completely new character.
             </p>
           </div>
-          <span class="ll-badge ll-badge-accent">
-            Power {{ estimatedCombatRating | number }}
-          </span>
+          <span class="ll-badge ll-badge-accent">Raw combat inputs</span>
         </div>
 
         <div class="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -150,7 +139,6 @@
               name="level"
               min="1"
               [(ngModel)]="request.character.level"
-              (ngModelChange)="scheduleCombatRatingRefresh()"
             />
           </label>
 
@@ -183,7 +171,6 @@
               [name]="stat.key"
               [min]="stat.min"
               [(ngModel)]="$any(request.character)[stat.key]"
-              (ngModelChange)="scheduleCombatRatingRefresh()"
             />
           </label>
         </div>
@@ -291,9 +278,6 @@
             <small class="ll-text-subtle block truncate">{{
               essence.id
             }}</small>
-            <small class="ll-text-subtle block">
-              +{{ essence.abilityCombatRating | number }} ability power
-            </small>
           </span>
         </label>
       </div>
@@ -363,18 +347,9 @@
         }}</strong>
       </div>
       <div class="ll-stat-card p-3">
-        <div class="ll-stat-label">Power / recommended</div>
-        <strong class="mt-2 block text-xl"
-          >{{ result.simulatedCombatRating | number }} /
-          {{ result.recommendedCombatRating | number }}</strong
-        >
-        <small class="ll-text-subtle mt-1 block">
-          {{ result.combatRatingBreakdown.baseAndEquipment | number }} base ·
-          {{ result.combatRatingBreakdown.essenceAttributes >= 0 ? "+" : ""
-          }}{{ result.combatRatingBreakdown.essenceAttributes | number }} stats
-          · +{{ result.combatRatingBreakdown.essenceAbilities | number }}
-          abilities
-        </small>
+        <div class="ll-stat-label">Simulation samples</div>
+        <strong class="mt-2 block text-xl">{{ result.requestedRuns | number }}</strong>
+        <small class="ll-text-subtle mt-1 block">Deterministic seed suite beginning at {{ result.randomSeed }}</small>
       </div>
     </div>
 

@@ -24,8 +24,9 @@ public sealed class DungeonPreviewDto
     public string Difficulty { get; set; } = string.Empty;
     public int Tier { get; set; }
     public string Grade { get; set; } = string.Empty;
-    public int RecommendedCombatRating { get; set; }
-    public int CurrentCombatRating { get; set; }
+    public int CurrentPartyPower { get; set; }
+    public int? RecommendedPartyPower { get; set; }
+    public bool PowerRecommendationLowConfidence { get; set; }
     public bool CanEnter { get; set; }
     public List<string> MissingRequirements { get; set; } = [];
     public List<DungeonEntryRequirementDto> EntryRequirements { get; set; } = [];

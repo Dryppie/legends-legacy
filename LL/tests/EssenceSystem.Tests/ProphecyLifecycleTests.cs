@@ -513,7 +513,7 @@ public sealed class ProphecyLifecycleTests
         public Task<Character?> GetCharacterByCharacterIdAsync(Guid characterId, CancellationToken cancellationToken) =>
             Task.FromResult<Character?>(character.Id == characterId ? character : null);
 
-        public Task<int> GetCombatRatingAsync(Guid characterId, CancellationToken cancellationToken) => Task.FromResult(0);
+        public Task<int> GetPowerAsync(Guid characterId, CancellationToken cancellationToken) => Task.FromResult(0);
         public Task<Character> CreateCharacterAsync(Guid userId, string username, CancellationToken cancellationToken) => throw new NotSupportedException();
         public Task<Character?> GetMyCharacterAsync(Guid currentUserId, CancellationToken cancellationToken) => throw new NotSupportedException();
         public Task<Character?> GetMyCharacterOverviewAsync(Guid characterId, CancellationToken cancellationToken) => throw new NotSupportedException();

@@ -13,6 +13,7 @@ using Services.LL.Combat.Layers.Orchestration.Models;
 using Services.LL.Combat.Layers.Resolution.Models;
 using Services.LL.Combat.Engine;
 using Services.LL.Essences;
+using Services.LL.Interfaces.Combat.Resolution;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -862,6 +863,84 @@ public sealed class AbilitySystemTests
 
         Assert.Single(result.EventLog, x => x.Source == "effect.one.use.guard" && x.EventType == EventType.RestoreBarrier);
         Assert.Equal(3, friendly.Barrier);
+    }
+
+    [Fact]
+    public void Engine_reserves_internal_cooldown_before_nested_heal_events()
+    {
+        var abilities = AbilityCompiler.CompileAbilities(
+        [
+            new AbilitySpec
+            {
+                Id = "ability.self.wound.for.heal.chain",
+                Kind = AbilitySpecKind.Active,
+                Name = "Self Wound",
+                Triggers = [new() { Event = AbilityTriggerEvent.OnAbilityUsed, EffectIds = ["effect.self.wound.for.heal.chain"] }],
+                Effects =
+                [
+                    new()
+                    {
+                        Id = "effect.self.wound.for.heal.chain",
+                        Operation = AbilityEffectOperation.Damage,
+                        Target = AbilityTargetSelector.Self,
+                        BaseValue = 100
+                    }
+                ]
+            },
+            new AbilitySpec
+            {
+                Id = "ability.initial.heal",
+                Kind = AbilitySpecKind.Active,
+                Name = "Initial Heal",
+                Triggers = [new() { Event = AbilityTriggerEvent.OnAbilityUsed, EffectIds = ["effect.initial.heal"] }],
+                Effects =
+                [
+                    new()
+                    {
+                        Id = "effect.initial.heal",
+                        Operation = AbilityEffectOperation.Heal,
+                        Target = AbilityTargetSelector.Self,
+                        BaseValue = 20
+                    }
+                ]
+            },
+            new AbilitySpec
+            {
+                Id = "ability.nested.heal.guard",
+                Kind = AbilitySpecKind.Passive,
+                Name = "Nested Heal Guard",
+                Triggers =
+                [
+                    new()
+                    {
+                        Event = AbilityTriggerEvent.OnHeal,
+                        InternalCooldownTicks = 1,
+                        EffectIds = ["effect.nested.heal.guard"]
+                    }
+                ],
+                Effects =
+                [
+                    new()
+                    {
+                        Id = "effect.nested.heal.guard",
+                        Operation = AbilityEffectOperation.Heal,
+                        Target = AbilityTargetSelector.Self,
+                        BaseValue = 1
+                    }
+                ]
+            }
+        ]);
+        var friendly = CreateCombatant("friendly", CombatTeam.Friendly, abilities.Values);
+        var hostile = CreateCombatant("hostile", CombatTeam.Hostile, []);
+        var engine = new FastCombatEngine(
+            new Dictionary<string, CompiledStatus>(),
+            new FastCombatEngineOptions(MaxTicks: 1));
+
+        var result = engine.Run([friendly], [hostile]);
+
+        Assert.Single(result.EventLog, entry =>
+            entry.Source == "effect.nested.heal.guard" && entry.EventType == EventType.Heal);
+        Assert.Equal(121, friendly.Health);
     }
 
     [Fact]
@@ -2681,6 +2760,31 @@ public sealed class AbilitySystemTests
 
         Assert.Equal(lastHostileSnapshot.Health, runtime.HostileParticipants.Single().Combatant.GetCurrentHealthValue());
         Assert.Equal(lastHostileSnapshot.Barrier, runtime.HostileParticipants.Single().Combatant.GetCurrentBarrierValue());
+    }
+
+    [Fact]
+    public async Task Combat_engine_simulation_returns_final_team_health_snapshots()
+    {
+        var runtime = CreateTrainingEncounterRuntime(out _, out _, CombatMode.Dungeon);
+        var provider = new JsonAbilityCatalogProvider(
+            CreateConfig(),
+            FindApiContentRoot(),
+            CreateJsonOptions());
+        var executor = new CombatEngineExecutor(provider);
+
+        var result = await executor.ExecuteSimulationAsync(
+            runtime,
+            new CombatSimulationOptions(1337, 6000),
+            CancellationToken.None);
+
+        var friendly = Assert.Single(result.PlayerTeam);
+        var hostile = Assert.Single(result.EnemyTeam);
+        Assert.Equal("friendly-slot", friendly.Id);
+        Assert.Equal("hostile-slot", hostile.Id);
+        Assert.True(friendly.MaxHealth > 0);
+        Assert.True(hostile.MaxHealth > 0);
+        Assert.InRange(friendly.Health, 0, friendly.MaxHealth);
+        Assert.InRange(hostile.Health, 0, hostile.MaxHealth);
     }
 
     [Theory]

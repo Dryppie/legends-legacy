@@ -144,7 +144,7 @@ public sealed class AccountBindingTests
         public Task<Guid?> GetCharacterIdByNameAsync(string name, CancellationToken cancellationToken) =>
             throw new NotSupportedException();
 
-        public Task<int> GetCombatRatingAsync(Guid characterId, CancellationToken cancellationToken) =>
+        public Task<int> GetPowerAsync(Guid characterId, CancellationToken cancellationToken) =>
             throw new NotSupportedException();
     }
 }

@@ -4,8 +4,7 @@ public sealed record DungeonAccessResult(
     bool CanEnter,
     IReadOnlyList<string> MissingRequirements,
     IReadOnlyList<DungeonEntryRequirementResult> EntryRequirements,
-    int CurrentCombatRating,
-    int RecommendedCombatRating);
+    int CurrentPartyPower);
 
 public sealed record DungeonEntryRequirementResult(
     string ItemId,

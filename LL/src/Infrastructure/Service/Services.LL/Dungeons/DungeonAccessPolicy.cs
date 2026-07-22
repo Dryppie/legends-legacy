@@ -25,21 +25,21 @@ public sealed class DungeonAccessPolicy : IDungeonAccessPolicy
     public async Task<DungeonAccessResult> EvaluateAsync(
         Guid characterId,
         DungeonDefinition dungeon,
-        int currentCombatRating,
+        int currentPartyPower,
         CancellationToken cancellationToken)
-        => await EvaluateAsync(characterId, dungeon, currentCombatRating, ignoredEntryCostItemId: null, cancellationToken);
+        => await EvaluateAsync(characterId, dungeon, currentPartyPower, ignoredEntryCostItemId: null, cancellationToken);
 
     public async Task<DungeonAccessResult> EvaluateForSigilAssemblyAsync(
         Guid characterId,
         DungeonDefinition dungeon,
-        int currentCombatRating,
+        int currentPartyPower,
         CancellationToken cancellationToken) =>
-        await EvaluateAsync(characterId, dungeon, currentCombatRating, dungeon.SigilItemId, cancellationToken);
+        await EvaluateAsync(characterId, dungeon, currentPartyPower, dungeon.SigilItemId, cancellationToken);
 
     private async Task<DungeonAccessResult> EvaluateAsync(
         Guid characterId,
         DungeonDefinition dungeon,
-        int currentCombatRating,
+        int currentPartyPower,
         string? ignoredEntryCostItemId,
         CancellationToken cancellationToken)
     {
@@ -64,8 +64,7 @@ public sealed class DungeonAccessPolicy : IDungeonAccessPolicy
             missingRequirements.Count == 0,
             missingRequirements,
             entryRequirements,
-            currentCombatRating,
-            dungeon.RecommendedCombatRating);
+            currentPartyPower);
     }
 
     private async Task<IReadOnlyList<DungeonEntryRequirementResult>> GetEntryRequirementsAsync(

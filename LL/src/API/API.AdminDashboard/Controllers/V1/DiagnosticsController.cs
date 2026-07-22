@@ -5,17 +5,22 @@ using Application.UseCases._AdminDashboard.Diagnostics.Queries.GetAbilityCatalog
 using Application.UseCases._AdminDashboard.Diagnostics.Queries.GetAbilityCatalogCoverage;
 using Application.UseCases._AdminDashboard.Diagnostics.Queries.GetAbilityCatalogDiagnostics;
 using Application.UseCases._AdminDashboard.Diagnostics.Queries.GetCreatureBuildProfileDiagnostics;
+using Application.UseCases._AdminDashboard.Diagnostics.Queries.GetDungeonPowerDiagnostics;
+using Application.Interfaces.Services.LL.PowerRatings;
 using Application.UseCases._AdminDashboard.Diagnostics.Queries.GetRegionOneContentDiagnostics;
 using Application.UseCases._AdminDashboard.Diagnostics.Queries.RunAbilityBalanceSimulation;
 using Application.UseCases._AdminDashboard.Diagnostics.Queries.RunDungeonSimulation;
 using Application.Interfaces.Services.LL.Dungeons;
 using Microsoft.AspNetCore.Mvc;
-using Domain.Components.Attributes;
 
 namespace API.AdminDashboard.Controllers.V1;
 
 public class DiagnosticsController : BaseController
 {
+    [HttpGet("dungeon-power")]
+    public async Task<ActionResult<IReadOnlyList<DungeonPowerDiagnostic>>> GetDungeonPowerDiagnostics() =>
+        Ok(await Mediator.Send(new GetDungeonPowerDiagnosticsQuery()));
+
     [HttpGet("ability-catalog")]
     public async Task<ActionResult<AbilityCatalogDiagnosticReport>> GetAbilityCatalogDiagnostics()
     {
@@ -64,13 +69,6 @@ public class DiagnosticsController : BaseController
         [FromBody] DungeonSimulationRequest request)
     {
         return await Mediator.Send(new RunDungeonSimulationQuery(request));
-    }
-
-    [HttpPost("dungeon-simulation-combat-rating")]
-    public async Task<ActionResult<CombatRatingBreakdown>> GetDungeonSimulationCombatRating(
-        [FromBody] DungeonSimulationCharacter character)
-    {
-        return await Mediator.Send(new GetDungeonSimulationCombatRatingQuery(character));
     }
 
 }
