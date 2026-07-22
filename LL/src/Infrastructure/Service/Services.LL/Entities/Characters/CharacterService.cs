@@ -95,7 +95,7 @@ public class CharacterService : ICharacterService
 
     public async Task<int> GetPowerAsync(Guid characterId, CancellationToken cancellationToken)
     {
-        var power = await _powerRatings.GetCharacterRatingAsync(characterId, cancellationToken);
+        var power = await _powerRatings.GetCharacterOverallRatingAsync(characterId, cancellationToken);
         return power.State == PowerAnalysisState.Available ? power.Overall : 0;
     }
 

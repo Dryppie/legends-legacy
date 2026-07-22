@@ -11,7 +11,8 @@ public sealed class PowerRatingService : IPowerRatingService
     private readonly PowerBuildSnapshotFactory _snapshots;
     private readonly PowerAnalysisSimulationRunner _simulations;
     private readonly ILogger<PowerRatingService> _logger;
-    private static readonly ConcurrentDictionary<string, PowerRatingSnapshot> Cache = new(StringComparer.Ordinal);
+    private static readonly ConcurrentDictionary<string, PowerRatingSnapshot> FullRatingCache = new(StringComparer.Ordinal);
+    private static readonly ConcurrentDictionary<string, OverallPowerRating> OverallRatingCache = new(StringComparer.Ordinal);
 
     public PowerRatingService(
         PowerBuildSnapshotFactory snapshots,
@@ -21,6 +22,50 @@ public sealed class PowerRatingService : IPowerRatingService
         _snapshots = snapshots;
         _simulations = simulations;
         _logger = logger;
+    }
+
+    public async Task<OverallPowerRating> GetCharacterOverallRatingAsync(
+        Guid characterId,
+        CancellationToken cancellationToken)
+    {
+        var build = await _snapshots.CreateAsync(characterId, DungeonPartySelection.Solo, cancellationToken);
+        if (build is null)
+        {
+            return OverallUnavailable(
+                PowerAnalysisState.InsufficientCombatData,
+                "The character combat snapshot could not be built.");
+        }
+
+        var key = CreateCacheKey(build.Fingerprint);
+        if (OverallRatingCache.TryGetValue(key, out var cached))
+            return cached;
+        if (FullRatingCache.TryGetValue(key, out var fullRating))
+            return StoreOverallRating(key, ToOverallRating(fullRating));
+
+        try
+        {
+            var overall = ToDisplayPower(await FindHighestIntensityAsync(
+                build,
+                PowerBenchmarkScenario.Overall,
+                cancellationToken));
+            return StoreOverallRating(
+                key,
+                new OverallPowerRating(overall, PowerAnalysisState.Available));
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (Exception exception)
+        {
+            _logger.LogError(
+                exception,
+                "Overall Power calculation failed for fingerprint {BuildFingerprint}.",
+                build.Fingerprint);
+            return OverallUnavailable(
+                PowerAnalysisState.CalculationFailed,
+                "Power analysis could not be completed.");
+        }
     }
 
     public Task<PowerRatingSnapshot> GetCharacterRatingAsync(
@@ -44,18 +89,16 @@ public sealed class PowerRatingService : IPowerRatingService
         if (build is null)
             return Unavailable(PowerAnalysisState.InsufficientCombatData, "The character combat snapshot could not be built.");
 
-        var key = string.Join(':',
-            PowerRatingAlgorithm.Version,
-            PowerRatingAlgorithm.CombatRulesVersion,
-            PowerRatingAlgorithm.BenchmarkDefinitionVersion,
-            PowerRatingAlgorithm.RatingSeedSetVersion,
-            build.Fingerprint);
-        if (Cache.TryGetValue(key, out var cached))
+        var key = CreateCacheKey(build.Fingerprint);
+        if (FullRatingCache.TryGetValue(key, out var cached))
             return cached;
 
         try
         {
-            var overall = await FindHighestIntensityAsync(build, PowerBenchmarkScenario.Overall, cancellationToken);
+            var overall = OverallRatingCache.TryGetValue(key, out var overallRating) &&
+                          overallRating.State == PowerAnalysisState.Available
+                ? overallRating.Overall / PowerAnalysisSimulationRunner.DisplayPowerPerIntensity
+                : await FindHighestIntensityAsync(build, PowerBenchmarkScenario.Overall, cancellationToken);
             var singleTarget = await FindHighestIntensityAsync(build, PowerBenchmarkScenario.SingleTarget, cancellationToken);
             var multiTarget = await FindHighestIntensityAsync(build, PowerBenchmarkScenario.MultiTarget, cancellationToken);
             var physical = await FindHighestIntensityAsync(build, PowerBenchmarkScenario.PhysicalDurability, cancellationToken);
@@ -81,7 +124,8 @@ public sealed class PowerRatingService : IPowerRatingService
                 DateTimeOffset.UtcNow,
                 PowerRatingConfidence.Medium,
                 PowerAnalysisState.Available);
-            StoreInCache(key, result);
+            StoreFullRating(key, result);
+            StoreOverallRating(key, ToOverallRating(result));
             return result;
         }
         catch (OperationCanceledException)
@@ -165,12 +209,35 @@ public sealed class PowerRatingService : IPowerRatingService
     private static int ToDisplayPower(int intensity) =>
         intensity * PowerAnalysisSimulationRunner.DisplayPowerPerIntensity;
 
-    private static void StoreInCache(string key, PowerRatingSnapshot result)
+    private static string CreateCacheKey(string fingerprint) =>
+        string.Join(':',
+            PowerRatingAlgorithm.Version,
+            PowerRatingAlgorithm.CombatRulesVersion,
+            PowerRatingAlgorithm.BenchmarkDefinitionVersion,
+            PowerRatingAlgorithm.RatingSeedSetVersion,
+            fingerprint);
+
+    private static void StoreFullRating(string key, PowerRatingSnapshot result)
     {
-        if (Cache.Count >= MaximumCacheEntries)
-            Cache.Clear();
-        Cache[key] = result;
+        if (FullRatingCache.Count >= MaximumCacheEntries)
+            FullRatingCache.Clear();
+        FullRatingCache[key] = result;
     }
+
+    private static OverallPowerRating StoreOverallRating(string key, OverallPowerRating result)
+    {
+        if (OverallRatingCache.Count >= MaximumCacheEntries)
+            OverallRatingCache.Clear();
+        OverallRatingCache[key] = result;
+        return result;
+    }
+
+    private static OverallPowerRating ToOverallRating(PowerRatingSnapshot result) =>
+        new(result.Overall, result.State, result.StatusMessage);
+
+    private static OverallPowerRating OverallUnavailable(
+        PowerAnalysisState state,
+        string message) => new(0, state, message);
 
     private static PowerRatingSnapshot Unavailable(
         PowerAnalysisState state,

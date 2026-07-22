@@ -16,7 +16,7 @@ public class CharacterOverviewDto : IMapFrom<Character>
     public Guid Id { get; set; }
     public string Name { get; set; } = string.Empty;
     public int Level { get; set; }
-    public PowerRatingSnapshot? Power { get; set; }
+    public OverallPowerRating? Power { get; set; }
     public List<EntityAttribute> BaseAttributes { get; set; } = [];
     public List<EntityAttribute> BaseCombatAttributes { get; set; } = [];
     public EssenceLoadoutDto? ActiveEssenceLoadout { get; set; }

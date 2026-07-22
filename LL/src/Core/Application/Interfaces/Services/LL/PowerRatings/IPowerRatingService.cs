@@ -43,6 +43,11 @@ public sealed record PowerRatingSnapshot(
     PowerAnalysisState State,
     string? StatusMessage = null);
 
+public sealed record OverallPowerRating(
+    int Overall,
+    PowerAnalysisState State,
+    string? StatusMessage = null);
+
 public sealed record DungeonPartySelection(IReadOnlyList<Guid> CompanionIds)
 {
     public static DungeonPartySelection Solo { get; } = new([]);
@@ -50,6 +55,10 @@ public sealed record DungeonPartySelection(IReadOnlyList<Guid> CompanionIds)
 
 public interface IPowerRatingService
 {
+    Task<OverallPowerRating> GetCharacterOverallRatingAsync(
+        Guid characterId,
+        CancellationToken cancellationToken);
+
     Task<PowerRatingSnapshot> GetCharacterRatingAsync(
         Guid characterId,
         CancellationToken cancellationToken);

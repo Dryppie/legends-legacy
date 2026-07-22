@@ -30,7 +30,6 @@ import { ActivatedRoute, Router } from '@angular/router';
 })
 export class CharacterOverviewComponent {
   readonly AttributeType = AttributeType;
-  readonly powerExpanded = signal(false);
   searchValue = signal('');
   private readonly searchedCharacter = signal<CharacterOverviewDto | null>(
     null,
@@ -235,19 +234,5 @@ export class CharacterOverviewComponent {
 
   get totalLoadoutSlots(): number {
     return this.character()?.activeEssenceLoadout?.slots.length ?? 0;
-  }
-
-  powerProfile(character: CharacterOverviewDto): { label: string; value: number }[] {
-    const power = character.power;
-    if (!power) return [];
-
-    return [
-      { label: 'Single Target', value: power.singleTargetOffense },
-      { label: 'Area Damage', value: power.multiTargetOffense },
-      { label: 'Physical Durability', value: power.physicalDurability },
-      { label: 'Magical Durability', value: power.magicalDurability },
-      { label: 'Sustain', value: power.sustain },
-      { label: 'Control / Utility', value: power.controlUtility },
-    ];
   }
 }

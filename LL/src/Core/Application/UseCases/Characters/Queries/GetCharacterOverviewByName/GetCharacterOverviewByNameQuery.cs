@@ -35,7 +35,7 @@ public sealed class GetCharacterOverviewByNameQueryHandler : IRequestHandler<Get
             return Response<CharacterOverviewDto>.Fail("Failed to get character overview.");
 
         var dto = _mapper.Map<CharacterOverviewDto>(character);
-        dto.Power = await _powerRatings.GetCharacterRatingAsync(character.Id, cancellationToken);
+        dto.Power = await _powerRatings.GetCharacterOverallRatingAsync(character.Id, cancellationToken);
         return Response<CharacterOverviewDto>.Success(dto);
     }
 }

@@ -61,7 +61,7 @@ public sealed class GetAvailableDungeonsQueryHandler : IRequestHandler<GetAvaila
     {
         var previews = new List<DungeonPreviewDto>();
         var character = await _characters.GetMyCharacterOverviewAsync(request.CharacterId, cancellationToken);
-        var power = await _powerRatings.GetCharacterRatingAsync(request.CharacterId, cancellationToken);
+        var power = await _powerRatings.GetCharacterOverallRatingAsync(request.CharacterId, cancellationToken);
         var currentPartyPower = power.State is PowerAnalysisState.Available or PowerAnalysisState.LowConfidence
             ? power.Overall
             : 0;

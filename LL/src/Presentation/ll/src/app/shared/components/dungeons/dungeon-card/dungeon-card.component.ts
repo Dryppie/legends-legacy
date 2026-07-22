@@ -7,7 +7,13 @@ import {
   signal,
 } from '@angular/core';
 import { RegularButtonComponent } from '../../custom-components/buttons/regular-button/regular-button.component';
-import { DecimalPipe, NgClass, NgFor, NgIf, NgTemplateOutlet } from '@angular/common';
+import {
+  DecimalPipe,
+  NgClass,
+  NgFor,
+  NgIf,
+  NgTemplateOutlet,
+} from '@angular/common';
 import { ItemComponent } from '../../item/item.component';
 import { DungeonStateService } from '../../../../core/services/api/dungeon/dungeon-state.service';
 import {
@@ -352,24 +358,6 @@ export class DungeonCardComponent implements OnChanges {
     return this.selectedPreviewData().powerRecommendationUnavailable
       ? 'Unavailable'
       : 'Calibrating…';
-  }
-
-  powerComparisonLabel(): string {
-    const recommended = this.selectedRecommendedPartyPower();
-    if (!recommended) {
-      return this.selectedPreviewData().powerRecommendationUnavailable
-        ? 'Unavailable'
-        : 'Calibrating';
-    }
-
-    if (this.selectedPreviewData().powerRecommendationLowConfidence) {
-      return 'Matchup sensitive';
-    }
-
-    const ratio = this.selectedPartyPower() / recommended;
-    if (ratio >= 1.1) return 'Above recommendation';
-    if (ratio >= 0.9) return 'Near recommendation';
-    return 'Below recommendation';
   }
 
   powerComparisonClass(): string {

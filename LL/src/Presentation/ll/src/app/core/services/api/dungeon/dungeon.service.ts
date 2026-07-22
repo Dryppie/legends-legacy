@@ -8,8 +8,6 @@ import { DungeonRecordsData } from '../../../../shared/models/Dtos/dungeons/dung
 import { InventoryItem } from '../../../../shared/models/inventoryItem';
 import { CharacterDto } from '../../../../shared/models/Dtos/characterDto';
 import { DungeonMasteryBenefitSummary } from '../../../../shared/models/Dtos/dungeons/dungeonPreviewData';
-import { DungeonReadinessResult } from '../../../../shared/models/Dtos/powerRating';
-import { DungeonDifficulty } from '../../../../shared/models/enums/dungeonDifficulty';
 
 export enum DungeonRunStatus {
   Active = 'Active',
@@ -221,16 +219,6 @@ export class DungeonService {
   getPowerRecommendations(): Observable<DungeonPowerRecommendationsResponse> {
     return this.api
       .get('dungeon/powerRecommendations')
-      .pipe(catchError((error) => throwError(() => error)));
-  }
-
-  getReadiness(
-    dungeonId: string,
-    dungeonTier: DungeonDifficulty,
-    companionIds: string[] = [],
-  ): Observable<DungeonReadinessResult> {
-    return this.api
-      .post('dungeon/readiness', { dungeonId, dungeonTier, companionIds })
       .pipe(catchError((error) => throwError(() => error)));
   }
 

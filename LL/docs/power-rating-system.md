@@ -11,11 +11,13 @@ Power is now derived from deterministic runs through the production `FastCombatE
 - `PowerBuildSnapshotFactory` loads the server-owned character, active equipment, and active Essence loadout. It prepares the same `CombatEntity` used by gameplay and computes a SHA-256 fingerprint from combat-relevant inputs.
 - `CombatEngineExecutor.ExecuteSimulationAsync` uses the production compiler and resolver with an explicit seed and tick limit. It does not synchronize results back to source `CombatEntity` instances.
 - `PowerAnalysisSimulationRunner` owns dedicated neutral benchmark combatants, canonical parties, fixed seeds, and isolated full-dungeon simulations. Active abilities begin on cooldown exactly as they do in production combat.
-- `PowerRatingService` performs an exponential search followed by binary search for the highest successful benchmark intensity. Results are cached by fingerprint and all material algorithm versions.
+- `PowerRatingService` performs an exponential search followed by binary search for the highest successful benchmark intensity. The character overview and ordinary dungeon access checks request only Overall Power; the full component suite is calculated only for the explicit detailed rating/readiness paths. Overall and full results are cached separately by fingerprint and all material algorithm versions.
 - `DungeonPowerAnalyzer` finds the minimum intensity at which each canonical party profile reaches the named 72% target. The balanced profile sets the general recommendation; specialized profiles provide the diagnostic range and confidence.
 - `DungeonReadinessService` directly simulates the selected build through generated dungeon routes. The recommendation ratio is explanatory only; completion probability comes from dungeon simulations.
 
 Overall Power comes only from the neutral mixed benchmark. Its enemies scale both health and incoming physical/magical pressure, and a successful result must retain at least 50% party health. This prevents a nearly-dead damage-race victory from being presented as dungeon-ready strength. Profile values are independent scenario results and must not be added together.
+
+The player-facing character overview displays only Overall Power. Component benchmark results remain internal to the detailed rating and dungeon-readiness API paths.
 
 ## Benchmarks and scale
 

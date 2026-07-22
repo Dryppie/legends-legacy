@@ -58,7 +58,7 @@ public class StartDungeonRunCommandHandler : IRequestHandler<StartDungeonRunComm
         if (character is null)
             return Response<StartDungeonRunResponseDto>.Fail("Character was not found.");
 
-        var power = await _powerRatings.GetCharacterRatingAsync(request.CharacterId, cancellationToken);
+        var power = await _powerRatings.GetCharacterOverallRatingAsync(request.CharacterId, cancellationToken);
         var currentPartyPower = power.State == PowerAnalysisState.Available ? power.Overall : 0;
         var access = await _dungeonAccess.EvaluateAsync(
             request.CharacterId,
