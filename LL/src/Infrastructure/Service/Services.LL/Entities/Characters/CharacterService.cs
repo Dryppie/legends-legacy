@@ -96,7 +96,7 @@ public class CharacterService : ICharacterService
         var character = await GetMyCharacterOverviewAsync(characterId, cancellationToken);
         return character is null
             ? 0
-            : CombatRatingCalculator.Calculate(character.BaseCombatAttributes, character.Level);
+            : CombatRatingCalculator.Calculate(character.BaseCombatAttributes);
     }
 
     private IReadOnlyList<Domain.Models.Attributes.Modifiers.AttributeModifierBase> GetLoadedEssenceModifiers(Character character)

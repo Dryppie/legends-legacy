@@ -169,7 +169,7 @@ export class DungeonSimulatorComponent implements OnInit {
           this.attribute(attributes, 'ArmorPenetration') * 2 +
           this.attribute(attributes, 'MagicPenetration') * 2 +
           this.attribute(attributes, 'AttackSpeed') * 3 +
-          this.attribute(attributes, 'MaxHealth') * 0.18 +
+          this.attribute(attributes, 'MaxHealth') * 1.8 +
           this.attribute(attributes, 'Armor') * 4 +
           this.attribute(attributes, 'Resistance') * 4 +
           this.attribute(attributes, 'DodgeChance') * 5 +
@@ -182,8 +182,7 @@ export class DungeonSimulatorComponent implements OnInit {
           this.attribute(attributes, 'StatusResistance') * 2 +
           this.attribute(attributes, 'CrowdControlResistance') * 2 +
           this.attribute(attributes, 'SummonPower') * 4 +
-          this.attribute(attributes, 'SummonHealth') * 0.15 +
-          Math.max(1, this.request.character.level) * 10,
+          this.attribute(attributes, 'SummonHealth') * 0.15,
       ),
     );
   }

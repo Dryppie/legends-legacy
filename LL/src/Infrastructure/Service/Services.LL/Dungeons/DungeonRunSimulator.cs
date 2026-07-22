@@ -19,6 +19,7 @@ using Domain.Models.Professions.Crafting.V2;
 using Domain.Models.Regions.Areas;
 using Microsoft.Extensions.Options;
 using Services.LL.Combat.Layers.Orchestration.Models;
+using Services.LL.Combat.Layers.Resolution.Dungeon;
 using Services.LL.Combat.Layers.Resolution.Models;
 using Services.LL.Professions.Craftings;
 using Services.LL.Interfaces;
@@ -336,7 +337,10 @@ public sealed class DungeonRunSimulator : IDungeonRunSimulator
 
         var hostiles = _combatSetup.CreateCreatureCombatEntities(
             [.. creatureEntities],
-            new Area { DifficultyTier = Math.Max(1, dungeonTier) });
+            new Area { DifficultyTier = 1 });
+        foreach (var hostile in hostiles)
+            DungeonEnemyDifficultyScaling.Apply(hostile, dungeonTier);
+
         await _combatSetup.PrepareEntitiesForCombat([player, .. hostiles]);
 
         var slots = new List<CombatParticipantSlot>
@@ -407,7 +411,7 @@ public sealed class DungeonRunSimulator : IDungeonRunSimulator
             CreateAttributeDictionary(character),
             equipmentModifiers);
 
-        return CombatRatingCalculator.Calculate(attributes, character.Level);
+        return CombatRatingCalculator.Calculate(attributes);
     }
 
     private static Dictionary<AttributeType, float> CreateAttributeDictionary(

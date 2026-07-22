@@ -51,7 +51,7 @@ public class StartDungeonRunCommandHandler : IRequestHandler<StartDungeonRunComm
         if (character is null)
             return Response<StartDungeonRunResponseDto>.Fail("Character was not found.");
 
-        var combatRating = CombatRatingCalculator.Calculate(character.BaseCombatAttributes, character.Level);
+        var combatRating = CombatRatingCalculator.Calculate(character.BaseCombatAttributes);
         var access = await _dungeonAccess.EvaluateAsync(
             request.CharacterId,
             dungeonDefinition,

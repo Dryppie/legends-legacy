@@ -56,7 +56,7 @@ public sealed class GetAvailableDungeonsQueryHandler : IRequestHandler<GetAvaila
         var character = await _characters.GetMyCharacterOverviewAsync(request.CharacterId, cancellationToken);
         var combatRating = character is null
             ? 0
-            : Domain.Components.Attributes.CombatRatingCalculator.Calculate(character.BaseCombatAttributes, character.Level);
+            : Domain.Components.Attributes.CombatRatingCalculator.Calculate(character.BaseCombatAttributes);
 
         var dungeons = _dungeonDefinitions.GetAll()
             .OrderBy(x => DungeonDefinitionIdentity.GetFamilyId(x.Id))
