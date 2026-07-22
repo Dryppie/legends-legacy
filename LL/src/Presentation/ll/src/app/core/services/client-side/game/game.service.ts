@@ -26,8 +26,12 @@ export class GameService {
   }
 
   startCombat() {
-    this.combatActiveSubject.next(true);
+    this.resumeCombat();
     this.showCombat();
+  }
+
+  resumeCombat() {
+    this.combatActiveSubject.next(true);
   }
 
   endCombat() {

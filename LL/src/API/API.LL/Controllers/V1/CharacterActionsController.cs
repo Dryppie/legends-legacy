@@ -1,6 +1,7 @@
 using Application.UseCases.CharacterActions.Commands.DeleteCharacterAction;
 using Application.UseCases.CharacterActions.Commands.StartCombatAction;
 using Application.UseCases.CharacterActions.Commands.StartCraftingAction;
+using Application.UseCases.CharacterActions.Commands.ResolveCharacterAction;
 using Application.UseCases.CharacterActions.Dtos.Responses;
 using Application.UseCases.CharacterActions.Queries.GetCharacterAction;
 using Common.Primitives;
@@ -17,6 +18,10 @@ public class CharacterActionsController : BaseController
     [HttpGet]
     public async Task<ActionResult<Response<CharacterActionDto?>>> Get() =>
         await Mediator.Send(new GetCharacterActionQuery(CurrentCharacterGuid));
+
+    [HttpPost("Resolve")]
+    public async Task<ActionResult<Response<CharacterActionDto?>>> Resolve() =>
+        await Mediator.Send(new ResolveCharacterActionCommand(CurrentCharacterGuid));
 
     [HttpPost("StartCombat")]
     public async Task<ActionResult<Response<CharacterActionDto>>> StartCombat([FromBody] StartCombatActionRequest request) =>

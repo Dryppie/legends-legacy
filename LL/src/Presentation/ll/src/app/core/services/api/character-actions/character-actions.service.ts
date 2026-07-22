@@ -17,6 +17,16 @@ export class CharacterActionsService {
     return this.api.get('CharacterActions');
   }
 
+  resolveCurrentAction(): Observable<CharacterActionDto | null> {
+    return this.api
+      .post('CharacterActions/Resolve', {})
+      .pipe(
+        map((response) =>
+          this.unwrapNullableResponse<CharacterActionDto>(response),
+        ),
+      );
+  }
+
   startCombat(data: StartCombatActionRequest): Observable<CharacterActionDto> {
     return this.api
       .post('CharacterActions/StartCombat', data)
@@ -47,5 +57,25 @@ export class CharacterActionsService {
     }
 
     return response as T;
+  }
+
+  private unwrapNullableResponse<T>(
+    response: T | null | ApiResponse<T | null>,
+  ): T | null {
+    if (
+      response &&
+      typeof response === 'object' &&
+      'isSuccess' in response &&
+      'data' in response
+    ) {
+      const apiResponse = response as ApiResponse<T | null>;
+      if (!apiResponse.isSuccess) {
+        throw new Error(apiResponse.errorMessage ?? 'Request failed');
+      }
+
+      return apiResponse.data;
+    }
+
+    return response as T | null;
   }
 }

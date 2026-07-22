@@ -19,6 +19,11 @@ public interface ICharacterActionService
     public Task<CharacterAction?> GetCharacterActionAsync(Guid characterId, CancellationToken cancellationToken);
 
     /// <summary>
+    /// Reads the current action without resolving elapsed work or applying rewards.
+    /// </summary>
+    public Task<CharacterAction?> PeekCharacterActionAsync(Guid characterId, CancellationToken cancellationToken);
+
+    /// <summary>
     /// Delete a character's current action
     /// </summary>
     /// <param name="characterId"></param>

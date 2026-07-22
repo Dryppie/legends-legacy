@@ -1,5 +1,5 @@
 using Application.MediatR.Markers;
-using Application.UseCases.CharacterActions.Queries.GetCharacterAction;
+using Application.UseCases.CharacterActions.Commands.ResolveCharacterAction;
 using Application.UseCases.Characters.Queries.GetCharacter;
 using Application.UseCases.GameBootstrap.Dtos;
 using Application.UseCases.Tutorials.Queries.GetTutorialState;
@@ -44,7 +44,7 @@ public sealed class GetGameBootstrapQueryHandler
             cancellationToken);
 
         var currentActionResponse = await _sender.Send(
-            new GetCharacterActionQuery(request.CharacterId),
+            new ResolveCharacterActionCommand(request.CharacterId),
             cancellationToken);
 
         if (!currentActionResponse.IsSuccess)

@@ -5,17 +5,22 @@
   >
     <div class="ll-panel w-full max-w-xl p-6">
       <p class="ll-eyebrow">
-        {{ isLoading ? 'Offline Progress' : 'Combat Queued' }}
+        {{ isLoading ? 'Offline Progress' : 'Idle Combat' }}
       </p>
       <h2 class="ll-heading mt-2 text-2xl">
-        {{ isLoading ? 'Resolving Combat' : 'Next Fight Begins Soon' }}
+        {{ isLoading ? 'Resolving Combat' : 'Combat Is Ongoing' }}
       </h2>
       <p *ngIf="isLoading" class="ll-copy mt-3">
         Resolving stored combat and rewards.
       </p>
-      <div *ngIf="!isLoading" class="mt-4 text-lg font-bold text-white">
-        <app-countdown [targetDate]="nextCombatIn!"></app-countdown>
-      </div>
+      <ng-container *ngIf="!isLoading">
+        <p class="ll-copy mt-3">
+          The next completed encounter will appear here.
+        </p>
+        <div class="mt-4 text-lg font-bold text-white">
+          <app-countdown [targetDate]="nextCombatIn!"></app-countdown>
+        </div>
+      </ng-container>
 
       <p
         *ngIf="flavorTextVisible"

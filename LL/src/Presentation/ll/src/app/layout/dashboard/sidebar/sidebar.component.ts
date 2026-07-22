@@ -145,10 +145,8 @@ export class SidebarComponent implements OnInit, OnDestroy {
     if (!action) return;
 
     const actionType = action.characterActionType;
-    const now = Date.now();
-    const updatedAt = new Date(action.updatedAt ?? 0).getTime();
 
-    if (updatedAt > now) {
+    if (actionType === CharacterActionType.Combat) {
       this.gameService.showCombat();
       return;
     }

@@ -16,6 +16,15 @@ public class CharacterActionDto : IMapFrom<CharacterAction>
     public CombatActionDetails? CombatActionDetails { get; set; }
     public CraftingActionDetailsDto? CraftingActionDetails { get; set; }
 
+    // Revision is derived from persisted encounter boundaries, so it remains stable
+    // across repeated reads and requires no additional database state.
+    public string Revision => string.Join(':',
+        CombatSession?.CombatResult?.StartedAt.UtcDateTime.Ticks ?? UpdatedAt.UtcDateTime.Ticks,
+        UpdatedAt.UtcDateTime.Ticks,
+        IsDeleted);
+
+    public DateTimeOffset NextResolutionAt => UpdatedAt;
+
     public void Mapping(Profile profile)
     {
         profile.CreateMap<CharacterAction, CharacterActionDto>()

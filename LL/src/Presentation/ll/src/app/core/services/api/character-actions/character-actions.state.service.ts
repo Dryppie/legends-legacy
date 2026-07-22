@@ -22,6 +22,14 @@ import { CombatService } from '../../client-side/combat/combat.service';
 import { InventoryStateService } from '../inventory/inventory-state.service';
 import { EventBusService } from '../../client-side/event-bus/event-bus.service';
 
+export type IdleCombatPhase =
+  | 'idle'
+  | 'starting'
+  | 'active'
+  | 'resolving'
+  | 'stopping'
+  | 'error';
+
 @Injectable({ providedIn: 'root' })
 export class CharacterActionsStateService {
   private readonly _showAction = signal(false);
@@ -35,6 +43,8 @@ export class CharacterActionsStateService {
 
   private readonly _loadingActionRefresh = signal(false);
   readonly loadingActionRefresh = computed(() => this._loadingActionRefresh());
+  private readonly _idleCombatPhase = signal<IdleCombatPhase>('idle');
+  readonly idleCombatPhase = computed(() => this._idleCombatPhase());
   private activeActionRefreshes = 0;
   private actionRefreshLoadingTimeout: ReturnType<typeof setTimeout> | null =
     null;
@@ -42,6 +52,7 @@ export class CharacterActionsStateService {
   private readonly _startTime = signal<number | null>(null);
   private readonly _tickingDuration = signal<number>(0);
   private resetVersion = 0;
+  private openCombatWhenHydrated = false;
   readonly tickingDuration = computed(() => {
     const ms = this._tickingDuration();
     const sec = Math.floor(ms / 1000) % 60;
@@ -89,8 +100,15 @@ export class CharacterActionsStateService {
       switch (action.characterActionType) {
         case CharacterActionType.Combat:
           queueMicrotask(() => {
+            if (!action.combatSession?.combatResult) return;
             this._loadingCombat.set(false);
             this.combatHandler.handle(action);
+            this._idleCombatPhase.set('active');
+            this.gameService.resumeCombat();
+            if (this.openCombatWhenHydrated) {
+              this.openCombatWhenHydrated = false;
+              this.gameService.showCombat();
+            }
           });
           break;
         case CharacterActionType.Crafting:
@@ -125,6 +143,7 @@ export class CharacterActionsStateService {
   }
 
   initializeFromBootstrap(action: CharacterActionDto | null): void {
+    this.openCombatWhenHydrated = false;
     this.startPolling(action);
   }
 
@@ -135,10 +154,11 @@ export class CharacterActionsStateService {
     this.polling.start(
       () =>
         this.trackActionRefresh(
-          this.actionsService.getCurrentAction().pipe(
+          this.resolveCurrentActionRequest().pipe(
             catchError((err) => {
               console.error('[Polling] Failed to fetch current action', err);
-              return of(null);
+              this._idleCombatPhase.set('error');
+              return of(this._currentAction());
             }),
           ),
         ),
@@ -161,6 +181,8 @@ export class CharacterActionsStateService {
     switch (type) {
       case CharacterActionType.Combat:
         this._loadingCombat.set(true);
+        this._idleCombatPhase.set('starting');
+        this.openCombatWhenHydrated = true;
         call$ = this.actionsService.startCombat(
           payload as StartCombatActionRequest,
         );
@@ -184,7 +206,6 @@ export class CharacterActionsStateService {
           } else {
             if (isCombat) {
               this.applyActionUpdate(result as CharacterActionDto);
-              this.gameService.startCombat();
             }
             this.startPolling(
               isCombat ? (result as CharacterActionDto) : undefined,
@@ -193,6 +214,7 @@ export class CharacterActionsStateService {
         }),
         catchError((err) => {
           console.error('Failed to start action', err);
+          if (isCombat) this._idleCombatPhase.set('error');
           this.reset();
           return of(false);
         }),
@@ -202,6 +224,7 @@ export class CharacterActionsStateService {
 
   stopAction(): void {
     const wasCraftingAction = this.isCraftingAction();
+    if (this.isCombatAction()) this._idleCombatPhase.set('stopping');
     this.handleDeletionOfCurrentAction();
 
     this.actionsService
@@ -262,6 +285,8 @@ export class CharacterActionsStateService {
     }
     this._loadingActionRefresh.set(false);
     this._loadingCombat.set(false);
+    this._idleCombatPhase.set('idle');
+    this.openCombatWhenHydrated = false;
     this._showAction.set(false);
     this._currentAction.set(null);
   }
@@ -298,18 +323,15 @@ export class CharacterActionsStateService {
     this._showAction.set(false);
   }
 
-  applyRealtimeIdleCombat(action: CharacterActionDto): void {
-    this.applyActionUpdate(action);
-  }
-
   refreshCurrentAction(): void {
     const requestVersion = this.resetVersion;
 
     this.trackActionRefresh(
-      this.actionsService.getCurrentAction().pipe(
+      this.resolveCurrentActionRequest().pipe(
         catchError((err) => {
           console.error('[Manual Refresh] Failed to fetch current action', err);
-          return of(null);
+          this._idleCombatPhase.set('error');
+          return of(this._currentAction());
         }),
       ),
     ).subscribe((action) => {
@@ -319,12 +341,15 @@ export class CharacterActionsStateService {
   }
 
   private applyActionUpdate(action: CharacterActionDto | null): void {
-    const currentKey = this.getActionUpdateKey(this._currentAction());
+    const current = this._currentAction();
+    const currentKey = this.getActionUpdateKey(current);
     const nextKey = this.getActionUpdateKey(action);
 
     if (currentKey && nextKey && currentKey === nextKey) {
       return;
     }
+
+    if (current && action && this.isOlderUpdate(current, action)) return;
 
     this._currentAction.set(action);
     if (action) {
@@ -334,8 +359,39 @@ export class CharacterActionsStateService {
     }
   }
 
+  private isOlderUpdate(
+    current: CharacterActionDto,
+    candidate: CharacterActionDto,
+  ): boolean {
+    if (current.characterActionType !== candidate.characterActionType) {
+      return false;
+    }
+
+    const currentBoundary = new Date(
+      current.nextResolutionAt ?? current.updatedAt,
+    ).getTime();
+    const candidateBoundary = new Date(
+      candidate.nextResolutionAt ?? candidate.updatedAt,
+    ).getTime();
+
+    if (candidateBoundary < currentBoundary) return true;
+
+    // A concurrent/early resolver can legitimately report that no new encounter
+    // was due. Never let that less-hydrated response replace the encounter that
+    // is already on screen at the same boundary.
+    return (
+      candidateBoundary === currentBoundary &&
+      !!current.combatSession?.combatResult &&
+      !candidate.combatSession?.combatResult
+    );
+  }
+
   private getActionUpdateKey(action: CharacterActionDto | null): string | null {
     if (!action) return null;
+
+    if (action.revision) {
+      return `${action.characterActionType}|${action.revision}|${action.isDeleted}`;
+    }
 
     const combat = action.combatSession?.combatResult;
     if (combat) {
@@ -385,6 +441,22 @@ export class CharacterActionsStateService {
         }
 
         this._loadingActionRefresh.set(false);
+      }),
+    );
+  }
+
+  private resolveCurrentActionRequest(): Observable<CharacterActionDto | null> {
+    if (
+      this._currentAction()?.characterActionType === CharacterActionType.Combat
+    ) {
+      this._idleCombatPhase.set('resolving');
+    }
+
+    return this.actionsService.resolveCurrentAction().pipe(
+      tap((action) => {
+        if (action?.combatSession?.combatResult) {
+          this._idleCombatPhase.set('active');
+        }
       }),
     );
   }

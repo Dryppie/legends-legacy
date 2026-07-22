@@ -1,6 +1,5 @@
-import { Injectable, Injector, NgZone, inject } from '@angular/core';
+import { Injectable, Injector, inject } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { CharacterActionsStateService } from '../../api/character-actions/character-actions.state.service';
 import { CharacterStateService } from '../../api/character/character-state.service';
 import { InventoryStateService } from '../../api/inventory/inventory-state.service';
 import { GameRealtimeDiagnostics } from './game-realtime-diagnostics.service';
@@ -8,7 +7,6 @@ import {
   CharacterSnapshot,
   DungeonRewardsClaimed,
   GameRealtimeEnvelope,
-  IdleCombatProcessed,
   InventorySnapshot,
   LootReceived,
   gameRealtimeEventNames,
@@ -24,13 +22,9 @@ export class GameRealtimeEventRegistry {
   private readonly connection = inject(GameRealtimeConnection);
   private readonly diagnostics = inject(GameRealtimeDiagnostics);
   private readonly injector = inject(Injector);
-  private readonly zone = inject(NgZone);
   private readonly handlers = new Map<string, Handler>();
   private registered = false;
   private subscription?: Subscription;
-  private pendingIdleEnvelope: GameRealtimeEnvelope<IdleCombatProcessed> | null =
-    null;
-  private idleBatchScheduled = false;
 
   initialize(): void {
     if (!isGameRealtimeEnabled() || this.registered) return;
@@ -47,8 +41,6 @@ export class GameRealtimeEventRegistry {
     this.subscription?.unsubscribe();
     this.subscription = undefined;
     this.handlers.clear();
-    this.pendingIdleEnvelope = null;
-    this.idleBatchScheduled = false;
     this.registered = false;
   }
 
@@ -78,28 +70,6 @@ export class GameRealtimeEventRegistry {
       this.injector.get(CharacterStateService).updateCharacter(payload.character);
     });
 
-    this.addHandler(gameRealtimeEventNames.idleCombatProcessed, (envelope) => {
-      this.pendingIdleEnvelope = envelope as GameRealtimeEnvelope<IdleCombatProcessed>;
-      if (this.idleBatchScheduled) return;
-
-      this.idleBatchScheduled = true;
-      this.zone.runOutsideAngular(() => {
-        setTimeout(() => {
-          const pending = this.pendingIdleEnvelope;
-          this.pendingIdleEnvelope = null;
-          this.idleBatchScheduled = false;
-          if (!pending) return;
-
-          this.zone.run(() => {
-            const payload = pending.payload;
-            this.injector.get(GameRealtimeStore).setIdleAction(payload.action);
-            this.injector
-              .get(CharacterActionsStateService)
-              .applyRealtimeIdleCombat(payload.action);
-          });
-        }, 0);
-      });
-    });
   }
 
   private addHandler(eventName: string, handler: Handler): void {

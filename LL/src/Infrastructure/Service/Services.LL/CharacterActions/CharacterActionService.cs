@@ -24,8 +24,24 @@ public class CharacterActionService : ICharacterActionService
 
     public async Task<CharacterAction?> StartCharacterActionAsync(CharacterAction characterAction, CancellationToken cancellationToken)
     {
-        return await _characterActionRepository.StartCharacterActionAsync(characterAction, cancellationToken);
+        var startedAction = await _characterActionRepository.StartCharacterActionAsync(characterAction, cancellationToken);
+
+        // A combat action is immediately due for its first encounter. Resolve it in the
+        // same transaction so clients never receive an unhydrated combat shell.
+        if (startedAction?.ActionDetails is CombatActionDetails)
+        {
+            startedAction.CombatSession = await HandleCombatActionAsync(
+                startedAction,
+                DateTimeOffset.UtcNow,
+                cancellationToken);
+            _characterActionRepository.UpdateCharacterAction(startedAction);
+        }
+
+        return startedAction;
     }
+
+    public Task<CharacterAction?> PeekCharacterActionAsync(Guid characterId, CancellationToken cancellationToken) =>
+        _characterActionRepository.GetCharacterActionAsync(characterId, cancellationToken);
 
     public async Task<bool> DeleteCharacterActionAsync(Guid characterId, CancellationToken cancellationToken)
     {

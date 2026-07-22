@@ -24,7 +24,6 @@ import { MiniButtonComponent } from '../custom-components/buttons/mini-button/mi
 import { CombatLogComponent } from './combat-log/combat-log.component';
 import { BattleType } from '../../../core/state/combat-state/combatState';
 import { CharacterActionsStateService } from '../../../core/services/api/character-actions/character-actions.state.service';
-import { toSignal } from '@angular/core/rxjs-interop';
 import { CombatEntityStatsComponent } from './combat-entity-stats/combat-entity-stats.component';
 import { FirstPartyTourService } from '../../../core/services/client-side/first-party-tour/first-party-tour.service';
 
@@ -90,15 +89,11 @@ export class CombatComponent implements OnInit, OnDestroy {
       this.isLoading = isStartingCombatSig() || isRefreshingActionSig();
     });
 
-    const isCombatActiveSig = toSignal(this.gameService.combatActive$, {
-      initialValue: false,
-    });
-
     effect(() => {
       const type = this.battleTypeSignal();
       this.displayCombat =
         type === BattleType.IdleCombat
-          ? isCombatActiveSig()
+          ? !!this.combatStateService.getCombatResult(type)()?.playerTeam.length
           : this.combatStateService.getIsCombatActive(type)();
     });
 
@@ -132,7 +127,6 @@ export class CombatComponent implements OnInit, OnDestroy {
       const type = this.battleTypeSignal();
       const result = this.combatStateService.getCombatResult(type)();
       if (result?.playerTeam.length) {
-        this.displayCombat = true;
         this.syncCharactersFromResult(result);
       }
     });
@@ -170,29 +164,6 @@ export class CombatComponent implements OnInit, OnDestroy {
     //     },
     //   );
     // this.subscriptions.add(isLoadingSub);
-
-    this.playerCharacters = [
-      {
-        name: '',
-        id: '',
-        imagePath: '',
-        health: 100,
-        maxHealth: 100,
-        barrier: 0,
-        level: 1,
-      },
-    ];
-    this.enemyCharacters = [
-      {
-        name: '',
-        id: '',
-        imagePath: '',
-        health: 100,
-        maxHealth: 100,
-        barrier: 0,
-        level: 1,
-      },
-    ];
 
     this.pickRandomFlavorText();
     this.flavorIntervalId = setInterval(

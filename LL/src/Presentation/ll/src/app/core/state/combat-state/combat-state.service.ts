@@ -15,9 +15,6 @@ import { CombatEvent } from '../../../shared/models/Dtos/combatEventDto';
 import { EventBusService } from '../../services/client-side/event-bus/event-bus.service';
 import { BattleType, CombatState } from './combatState';
 
-@Injectable({
-  providedIn: 'root',
-})
 @Injectable({ providedIn: 'root' })
 export class CombatStateService {
   private readonly maxCombatEvents = 500;
@@ -107,6 +104,24 @@ export class CombatStateService {
 
   setEntityStats(type: BattleType, entityStats: EntityStats[]) {
     this.patchState(type, { entityStats });
+  }
+
+  commitEncounter(
+    type: BattleType,
+    result: CombatResultDto,
+    nextCombat: Date,
+  ): void {
+    this.lastEventsLength[type] = 0;
+    this.ensureState(type).set({
+      playerCharacters: result.playerTeam,
+      enemyCharacters: result.enemyTeam,
+      combatEvents: [],
+      combatResult: result,
+      combatOutcome: null,
+      nextCombat,
+      isCombatActive: true,
+      entityStats: result.entityStats,
+    });
   }
 
   getLastEventsLength(type: BattleType): number {

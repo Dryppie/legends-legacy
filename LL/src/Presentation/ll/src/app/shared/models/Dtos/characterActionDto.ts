@@ -8,6 +8,8 @@ export interface CharacterActionDto {
   characterActionType: CharacterActionType;
   lootTableId: string;
   updatedAt: Date;
+  nextResolutionAt: Date;
+  revision: string;
   isDeleted: boolean;
   temperingSession?: TemperingSessionDto;
   combatSession?: CombatSessionDto;

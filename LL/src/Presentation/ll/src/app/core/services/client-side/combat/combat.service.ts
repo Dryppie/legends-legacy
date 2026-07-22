@@ -1,5 +1,5 @@
 import { effect, Injectable } from '@angular/core';
-import { delay, of, Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { CharacterActionDto } from '../../../../shared/models/Dtos/characterActionDto';
 import { CombatStateService } from '../../../state/combat-state/combat-state.service';
 import { EventBusService } from '../event-bus/event-bus.service';
@@ -71,18 +71,17 @@ export class CombatService {
     if (!combatResult) return;
     combatResult.battleType = BattleType.IdleCombat;
 
-    this.combatStateService.setNextCombatIn(
-      combatResult.battleType,
-      characterAction.updatedAt,
+    this.combatEndSubscriptions.get(BattleType.IdleCombat)?.unsubscribe();
+    this.combatEndSubscriptions.delete(BattleType.IdleCombat);
+
+    // Replace the complete encounter snapshot in one signal write. The previous
+    // encounter stays visible until this fully hydrated result is available.
+    this.combatStateService.commitEncounter(
+      BattleType.IdleCombat,
+      combatResult,
+      characterAction.nextResolutionAt ?? characterAction.updatedAt,
     );
-
-    this.combatStateService.resetCombatStateForNextBattle(
-      combatResult.battleType,
-    );
-
-    this.combatStateService.setCombatActive(combatResult.battleType, true);
-
-    this.simulateFight(combatResult);
+    this.levelingService.gainExperience(combatResult.experienceGained);
   }
 
   simulateFight(combatResult: CombatResultDto) {
@@ -102,29 +101,6 @@ export class CombatService {
       return;
     }
 
-    const combatStartTime = new Date(combatAction.startedAt).getTime();
-    const now = Date.now();
-
-    const combatDurationMs = combatAction.duration * 100;
-    const remainingDuration =
-      combatStartTime + 10000 /* combatDurationMs + 3000 */ - now;
-    const minimumDisplayMs = type === BattleType.IdleCombat ? 0 : 3000;
-
-    const onComplete = (finalResult: CombatResultDto) => {
-      // Defensive: skip execution if combat was deactivated
-      if (!this.combatStateService.getIsCombatActive(type)()) return;
-
-      this.combatStateService.setCombatOutcome(type, finalResult.outcome);
-      this.handleCombatComplete(finalResult);
-    };
-
-    const complete$ = of(combatAction).pipe(
-      delay(Math.max(minimumDisplayMs, remainingDuration)),
-    );
-
-    const sub = complete$.subscribe(onComplete);
-
-    this.combatEndSubscriptions.set(type, sub);
   }
 
   skipCurrentColosseum(): void {
