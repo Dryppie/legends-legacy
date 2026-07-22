@@ -1,6 +1,7 @@
 using Application.Interfaces.Services.LL.Dungeons;
 using Application.Interfaces.Services.LL.Entities;
 using Application.Interfaces.Services.LL.Essences;
+using Application.Interfaces.Services.LL.Professions;
 using Domain.Components.Attributes;
 using Domain.Models.Attributes;
 using Domain.Models.Attributes.Modifiers;
@@ -12,9 +13,14 @@ using Domain.Models.Entities;
 using Domain.Models.Entities.Characters;
 using Domain.Models.Entities.Creatures;
 using Domain.Models.Essences;
+using Domain.Models.Items;
+using Domain.Models.Items.Equipments;
+using Domain.Models.Professions.Crafting.V2;
 using Domain.Models.Regions.Areas;
+using Microsoft.Extensions.Options;
 using Services.LL.Combat.Layers.Orchestration.Models;
 using Services.LL.Combat.Layers.Resolution.Models;
+using Services.LL.Professions.Craftings;
 using Services.LL.Interfaces;
 using Services.LL.Interfaces.Combat.Resolution;
 using AdminCreatureService = Application.Interfaces.Services.AdminDashboard.ICreatureService;
@@ -24,6 +30,18 @@ namespace Services.LL.Dungeons;
 public sealed class DungeonRunSimulator : IDungeonRunSimulator
 {
     private const int MaximumRuns = 500;
+    private static readonly IReadOnlyList<SimulationEquipmentSlot> SimulationEquipmentSlots =
+    [
+        new("Head", "Head", EquipmentType.Head),
+        new("Chest", "Chest", EquipmentType.Chest),
+        new("Legs", "Legs", EquipmentType.Legs),
+        new("Ring", "Ring", EquipmentType.Ring),
+        new("Necklace", "Necklace", EquipmentType.Necklace),
+        new("Relic", "Relic", EquipmentType.Relic),
+        new("MainHand", "Main hand", EquipmentType.OneHanded),
+        new("OffHand", "Off hand", EquipmentType.OffHand)
+    ];
+
     private readonly IDungeonDefinitions _dungeons;
     private readonly IEssenceDefinitionRepository _essences;
     private readonly DungeonRunFactory _runFactory;
@@ -33,6 +51,8 @@ public sealed class DungeonRunSimulator : IDungeonRunSimulator
     private readonly ICombatEngineExecutor _combatEngine;
     private readonly ICombatEncounterResultFactory _resultFactory;
     private readonly IDungeonVigorService _vigor;
+    private readonly ICraftingDefinitionProvider _craftingDefinitions;
+    private readonly CraftingBalanceOptions _craftingBalance;
 
     public DungeonRunSimulator(
         IDungeonDefinitions dungeons,
@@ -43,7 +63,9 @@ public sealed class DungeonRunSimulator : IDungeonRunSimulator
         ICombatSetupService combatSetup,
         ICombatEngineExecutor combatEngine,
         ICombatEncounterResultFactory resultFactory,
-        IDungeonVigorService vigor)
+        IDungeonVigorService vigor,
+        ICraftingDefinitionProvider craftingDefinitions,
+        IOptions<CraftingBalanceOptions> craftingBalance)
     {
         _dungeons = dungeons;
         _essences = essences;
@@ -54,6 +76,8 @@ public sealed class DungeonRunSimulator : IDungeonRunSimulator
         _combatEngine = combatEngine;
         _resultFactory = resultFactory;
         _vigor = vigor;
+        _craftingDefinitions = craftingDefinitions;
+        _craftingBalance = craftingBalance.Value;
     }
 
     public DungeonSimulationOptions GetOptions() => new(
@@ -72,6 +96,19 @@ public sealed class DungeonRunSimulator : IDungeonRunSimulator
         _essences.GetAll()
             .OrderBy(essence => essence.Name, StringComparer.OrdinalIgnoreCase)
             .Select(essence => new DungeonSimulationEssenceOption(essence.Id, essence.Name))
+            .ToList(),
+        SimulationEquipmentSlots
+            .Select(slot => new DungeonSimulationEquipmentSlotOption(
+                slot.Id,
+                slot.Name,
+                GetEquipmentAttributeBonuses(slot.EquipmentType)
+                    .ToDictionary(pair => pair.Key.ToString(), pair => pair.Value)))
+            .ToList(),
+        Enum.GetValues<Rarity>()
+            .Select(rarity => new DungeonSimulationEquipmentRarityOption(
+                rarity.ToString(),
+                rarity.ToString(),
+                GetRarityMultiplier(rarity)))
             .ToList());
 
     public async Task<DungeonSimulationReport> RunAsync(
@@ -254,6 +291,7 @@ public sealed class DungeonRunSimulator : IDungeonRunSimulator
         var character = CreateCharacter(characterConfiguration);
         var player = new CombatEntity(character)
         {
+            Equipment = CreateSimulationEquipment(characterConfiguration.Equipment),
             EquippedEssences = characterConfiguration.EssenceIds
                 .Distinct(StringComparer.OrdinalIgnoreCase)
                 .Select(essenceId => new PlayerEssence
@@ -360,20 +398,32 @@ public sealed class DungeonRunSimulator : IDungeonRunSimulator
             .ToList()
     };
 
-    private static int CalculateCombatRating(DungeonSimulationCharacter character) =>
-        CombatRatingCalculator.Calculate(CreateAttributeDictionary(character), character.Level);
+    private int CalculateCombatRating(DungeonSimulationCharacter character)
+    {
+        var equipmentModifiers = CreateSimulationEquipment(character.Equipment)
+            .SelectMany(item => item.AttributeModifiers)
+            .ToList();
+        var attributes = AttributeCalculator.CalculateProjectedAttributes(
+            CreateAttributeDictionary(character),
+            equipmentModifiers);
+
+        return CombatRatingCalculator.Calculate(attributes, character.Level);
+    }
 
     private static Dictionary<AttributeType, float> CreateAttributeDictionary(
         DungeonSimulationCharacter character) => new()
     {
         [AttributeType.MaxHealth] = character.MaxHealth,
         [AttributeType.Power] = character.Power,
+        [AttributeType.Fortitude] = character.Fortitude,
+        [AttributeType.Spirit] = character.Spirit,
         [AttributeType.Armor] = character.Armor,
         [AttributeType.Resistance] = character.Resistance,
         [AttributeType.Precision] = character.Precision,
         [AttributeType.CritChance] = character.CritChance,
         [AttributeType.CritDamage] = character.CritDamage,
-        [AttributeType.AttackSpeed] = character.AttackSpeed
+        [AttributeType.AttackSpeed] = character.AttackSpeed,
+        [AttributeType.HealthRegeneration] = character.HealthRegeneration
     };
 
     private static int SelectNextRoom(
@@ -409,18 +459,97 @@ public sealed class DungeonRunSimulator : IDungeonRunSimulator
         Level = Math.Clamp(character.Level, 1, 1000),
         MaxHealth = Math.Clamp(character.MaxHealth, 1, 10_000_000),
         Power = Math.Clamp(character.Power, 0, 1_000_000),
+        Fortitude = Math.Clamp(character.Fortitude, 0, 1_000_000),
+        Spirit = Math.Clamp(character.Spirit, 0, 1_000_000),
         Armor = Math.Clamp(character.Armor, 0, 1_000_000),
         Resistance = Math.Clamp(character.Resistance, 0, 1_000_000),
         Precision = Math.Clamp(character.Precision, 0, 1_000_000),
         CritChance = Math.Clamp(character.CritChance, 0, 100),
         CritDamage = Math.Clamp(character.CritDamage, 0, 1000),
         AttackSpeed = Math.Clamp(character.AttackSpeed, 0, 1000),
-        EssenceIds = character.EssenceIds
+        HealthRegeneration = Math.Clamp(character.HealthRegeneration, 0, 1_000_000),
+        EssenceIds = (character.EssenceIds ?? [])
             .Where(id => !string.IsNullOrWhiteSpace(id))
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .Take(10)
-            .ToList()
+            .ToList(),
+        Equipment = NormalizeEquipment(character.Equipment)
     };
+
+    private static DungeonSimulationEquipment NormalizeEquipment(DungeonSimulationEquipment? equipment)
+    {
+        var rarity = Enum.TryParse<Rarity>(equipment?.Rarity, true, out var parsedRarity)
+            ? parsedRarity
+            : Rarity.Common;
+        var validSlots = SimulationEquipmentSlots
+            .Select(slot => slot.Id)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+        var equippedSlots = (equipment?.EquippedSlots ?? [])
+            .Where(validSlots.Contains)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        return new DungeonSimulationEquipment(rarity.ToString(), equippedSlots);
+    }
+
+    private List<EquipmentInstance> CreateSimulationEquipment(DungeonSimulationEquipment? configuration)
+    {
+        var normalized = NormalizeEquipment(configuration);
+        var equippedSlotIds = normalized.EquippedSlots.ToHashSet(StringComparer.OrdinalIgnoreCase);
+        var rarity = Enum.Parse<Rarity>(normalized.Rarity);
+
+        return SimulationEquipmentSlots
+            .Where(slot => equippedSlotIds.Contains(slot.Id))
+            .Select(slot =>
+            {
+                var itemBaseId = $"simulation.{slot.Id.ToLowerInvariant()}";
+                var itemBase = new EquipmentBase
+                {
+                    Id = itemBaseId,
+                    Name = $"Simulated {slot.Name}",
+                    EquipmentType = slot.EquipmentType,
+                    Rarity = Rarity.Common,
+                    AttributeModifiers = GetEquipmentAttributeBonuses(slot.EquipmentType)
+                        .Select(pair => new ItemAttributeModifier(pair.Key, pair.Value)
+                        {
+                            ItemBaseId = itemBaseId
+                        })
+                        .ToList()
+                };
+
+                return new EquipmentInstance
+                {
+                    Id = Guid.NewGuid(),
+                    ItemBaseId = itemBaseId,
+                    ItemBase = itemBase,
+                    Rarity = rarity,
+                    Tier = 1
+                };
+            })
+            .ToList();
+    }
+
+    private IReadOnlyDictionary<AttributeType, float> GetEquipmentAttributeBonuses(EquipmentType equipmentType)
+    {
+        var recipe = _craftingDefinitions.GetRecipes().FirstOrDefault(candidate =>
+            candidate.RecipeType == RecipeType.Base &&
+            candidate.OutputItemType == equipmentType);
+        if (recipe is null)
+            throw new InvalidOperationException($"No base crafting recipe exists for simulated {equipmentType} equipment.");
+
+        var profile = recipe.BaseStatProfileOverride ?? recipe.BaseStatProfile;
+        var budget = _craftingBalance.GetTierPowerBudget(1) *
+                     _craftingBalance.GetSlotBudgetWeight(equipmentType);
+
+        return profile
+            .Where(pair => pair.Value > 0)
+            .ToDictionary(
+                pair => pair.Key,
+                pair => (float)Math.Max(1, Math.Round(budget * pair.Value)));
+    }
+
+    private static float GetRarityMultiplier(Rarity rarity) =>
+        new EquipmentInstance { Rarity = rarity }.Boost;
 
     private static string NormalizeRouteStrategy(string? strategy) =>
         strategy?.Trim().ToLowerInvariant() switch
@@ -440,4 +569,9 @@ public sealed class DungeonRunSimulator : IDungeonRunSimulator
         2 => "Veteran",
         _ => "Champion"
     };
+
+    private sealed record SimulationEquipmentSlot(
+        string Id,
+        string Name,
+        EquipmentType EquipmentType);
 }

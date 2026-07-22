@@ -10,7 +10,9 @@ public interface IDungeonRunSimulator
 
 public sealed record DungeonSimulationOptions(
     IReadOnlyList<DungeonSimulationDungeonOption> Dungeons,
-    IReadOnlyList<DungeonSimulationEssenceOption> Essences);
+    IReadOnlyList<DungeonSimulationEssenceOption> Essences,
+    IReadOnlyList<DungeonSimulationEquipmentSlotOption> EquipmentSlots,
+    IReadOnlyList<DungeonSimulationEquipmentRarityOption> EquipmentRarities);
 
 public sealed record DungeonSimulationDungeonOption(
     string Id,
@@ -21,6 +23,16 @@ public sealed record DungeonSimulationDungeonOption(
     int RecommendedCombatRating);
 
 public sealed record DungeonSimulationEssenceOption(string Id, string Name);
+
+public sealed record DungeonSimulationEquipmentSlotOption(
+    string Id,
+    string Name,
+    IReadOnlyDictionary<string, float> AttributeBonuses);
+
+public sealed record DungeonSimulationEquipmentRarityOption(
+    string Id,
+    string Name,
+    float Multiplier);
 
 public sealed record DungeonSimulationRequest(
     string DungeonDefinitionId,
@@ -35,13 +47,21 @@ public sealed record DungeonSimulationCharacter(
     int Level,
     float MaxHealth,
     float Power,
+    float Fortitude,
+    float Spirit,
     float Armor,
     float Resistance,
     float Precision,
     float CritChance,
     float CritDamage,
     float AttackSpeed,
-    IReadOnlyList<string> EssenceIds);
+    float HealthRegeneration,
+    IReadOnlyList<string> EssenceIds,
+    DungeonSimulationEquipment? Equipment);
+
+public sealed record DungeonSimulationEquipment(
+    string Rarity,
+    IReadOnlyList<string> EquippedSlots);
 
 public sealed record DungeonSimulationReport(
     string DungeonDefinitionId,

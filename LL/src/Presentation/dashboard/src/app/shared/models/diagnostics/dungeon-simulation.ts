@@ -1,6 +1,8 @@
 export interface DungeonSimulationOptions {
   dungeons: DungeonSimulationDungeonOption[];
   essences: DungeonSimulationEssenceOption[];
+  equipmentSlots: DungeonSimulationEquipmentSlotOption[];
+  equipmentRarities: DungeonSimulationEquipmentRarityOption[];
 }
 
 export interface DungeonSimulationDungeonOption {
@@ -17,18 +19,39 @@ export interface DungeonSimulationEssenceOption {
   name: string;
 }
 
+export interface DungeonSimulationEquipmentSlotOption {
+  id: string;
+  name: string;
+  attributeBonuses: Record<string, number>;
+}
+
+export interface DungeonSimulationEquipmentRarityOption {
+  id: string;
+  name: string;
+  multiplier: number;
+}
+
+export interface DungeonSimulationEquipment {
+  rarity: string;
+  equippedSlots: string[];
+}
+
 export interface DungeonSimulationCharacter {
   name: string;
   level: number;
   maxHealth: number;
   power: number;
+  fortitude: number;
+  spirit: number;
   armor: number;
   resistance: number;
   precision: number;
   critChance: number;
   critDamage: number;
   attackSpeed: number;
+  healthRegeneration: number;
   essenceIds: string[];
+  equipment: DungeonSimulationEquipment;
 }
 
 export interface DungeonSimulationRequest {

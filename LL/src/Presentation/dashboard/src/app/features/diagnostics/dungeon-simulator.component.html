@@ -116,7 +116,7 @@
           <div>
             <h2 class="text-lg font-semibold text-primary">Character stats</h2>
             <p class="ll-helper mt-1">
-              Values are entered as final base combat stats.
+              Unequipped level-one values match a completely new character.
             </p>
           </div>
           <span class="ll-badge ll-badge-accent">
@@ -151,12 +151,19 @@
               let stat of [
                 { key: 'maxHealth', label: 'Max Health', min: 1 },
                 { key: 'power', label: 'Power', min: 0 },
+                { key: 'fortitude', label: 'Fortitude', min: 0 },
+                { key: 'spirit', label: 'Spirit', min: 0 },
                 { key: 'armor', label: 'Armor', min: 0 },
                 { key: 'resistance', label: 'Resistance', min: 0 },
                 { key: 'precision', label: 'Precision', min: 0 },
                 { key: 'critChance', label: 'Crit Chance', min: 0 },
                 { key: 'critDamage', label: 'Crit Damage', min: 0 },
                 { key: 'attackSpeed', label: 'Attack Speed', min: 0 },
+                {
+                  key: 'healthRegeneration',
+                  label: 'Health Regeneration',
+                  min: 0,
+                },
               ]
             "
           >
@@ -169,6 +176,68 @@
               [(ngModel)]="$any(request.character)[stat.key]"
             />
           </label>
+        </div>
+      </section>
+
+      <section class="ll-panel bg-texture p-5">
+        <div class="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <h2 class="text-lg font-semibold text-primary">Equipment</h2>
+            <p class="ll-helper mt-1 max-w-xl">
+              Toggle the occupied slots. Items use deterministic tier-one
+              crafting profiles, and every equipped item uses the selected
+              rarity.
+            </p>
+          </div>
+          <button
+            type="button"
+            class="ll-button px-3 py-1 text-xs"
+            (click)="clearEquipment()"
+          >
+            Unequip all
+          </button>
+        </div>
+
+        <div class="mt-4 grid gap-4 lg:grid-cols-[14rem_minmax(0,1fr)]">
+          <label class="ll-field">
+            <span class="ll-label">Item rarity</span>
+            <app-dropdown
+              class="block w-full"
+              appearance="field"
+              label="Select rarity"
+              [value]="request.character.equipment.rarity"
+              [selectedValue]="request.character.equipment.rarity"
+              [options]="equipmentRarityDropdownOptions"
+              (selection)="selectEquipmentRarity($event)"
+            />
+            <span class="ll-helper">
+              Applies to every selected equipment slot.
+            </span>
+          </label>
+
+          <div class="grid gap-2 sm:grid-cols-2">
+            <label
+              *ngFor="
+                let slot of options.equipmentSlots;
+                trackBy: trackEquipmentSlot
+              "
+              class="ll-checkbox cursor-pointer items-start"
+            >
+              <input
+                type="checkbox"
+                [checked]="isEquipmentSlotSelected(slot.id)"
+                (change)="
+                  toggleEquipmentSlot(slot.id, $any($event.target).checked)
+                "
+              />
+              <span class="min-w-0">
+                <strong class="block text-sm">{{ slot.name }}</strong>
+                <small class="ll-text-subtle mt-1 block leading-relaxed">
+                  {{ equipmentBonusSummary(slot) }}
+                </small>
+              </span>
+            </label>
+          </div>
         </div>
       </section>
     </div>

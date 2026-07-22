@@ -5,6 +5,7 @@ import { finalize } from 'rxjs';
 import { DiagnosticsService } from '../../core/services/api/diagnostics/diagnostics.service';
 import {
   DungeonSimulationDungeonOption,
+  DungeonSimulationEquipmentSlotOption,
   DungeonSimulationOptions,
   DungeonSimulationReport,
   DungeonSimulationRequest,
@@ -46,17 +47,24 @@ export class DungeonSimulatorComponent implements OnInit {
     masteryLevel: 0,
     routeStrategy: 'Random',
     character: {
-      name: 'Simulated Character',
-      level: 10,
-      maxHealth: 500,
-      power: 50,
-      armor: 20,
-      resistance: 20,
-      precision: 20,
-      critChance: 5,
+      name: 'New Character',
+      level: 1,
+      maxHealth: 100,
+      power: 10,
+      fortitude: 10,
+      spirit: 10,
+      armor: 0,
+      resistance: 0,
+      precision: 10,
+      critChance: 0,
       critDamage: 100,
-      attackSpeed: 10,
+      attackSpeed: 0,
+      healthRegeneration: 2,
       essenceIds: [],
+      equipment: {
+        rarity: 'Common',
+        equippedSlots: [],
+      },
     },
   };
 
@@ -122,6 +130,18 @@ export class DungeonSimulatorComponent implements OnInit {
     this.request.routeStrategy = selection.main;
   }
 
+  get equipmentRarityDropdownOptions(): readonly DropdownOption<string>[] {
+    return (this.options?.equipmentRarities ?? []).map((rarity) => ({
+      label: rarity.name,
+      value: rarity.id,
+      detail: `×${rarity.multiplier.toFixed(2)}`,
+    }));
+  }
+
+  selectEquipmentRarity(selection: DropdownSelection<string>): void {
+    this.request.character.equipment.rarity = selection.main;
+  }
+
   get filteredEssences() {
     const filter = this.essenceFilter.trim().toLowerCase();
     const essences = this.options?.essences ?? [];
@@ -135,21 +155,61 @@ export class DungeonSimulatorComponent implements OnInit {
   }
 
   get estimatedCombatRating(): number {
-    const character = this.request.character;
+    const attributes = this.effectiveAttributes;
     return Math.max(
       0,
       Math.round(
-        character.power * 8 +
-          character.precision * 8 +
-          character.critChance * 4 +
-          character.critDamage * 1.5 +
-          character.attackSpeed * 3 +
-          character.maxHealth * 0.18 +
-          character.armor * 4 +
-          character.resistance * 4 +
-          Math.max(1, character.level) * 10,
+        this.attribute(attributes, 'Power') * 8 +
+          this.attribute(attributes, 'Fortitude') * 8 +
+          this.attribute(attributes, 'Precision') * 8 +
+          this.attribute(attributes, 'Spirit') * 5 +
+          this.attribute(attributes, 'WeaponDamage') * 18 +
+          this.attribute(attributes, 'CritChance') * 4 +
+          this.attribute(attributes, 'CritDamage') * 1.5 +
+          this.attribute(attributes, 'ArmorPenetration') * 2 +
+          this.attribute(attributes, 'MagicPenetration') * 2 +
+          this.attribute(attributes, 'AttackSpeed') * 3 +
+          this.attribute(attributes, 'MaxHealth') * 0.18 +
+          this.attribute(attributes, 'Armor') * 4 +
+          this.attribute(attributes, 'Resistance') * 4 +
+          this.attribute(attributes, 'DodgeChance') * 5 +
+          this.attribute(attributes, 'BlockChance') * 3 +
+          this.attribute(attributes, 'DamageReduction') * 7 +
+          this.attribute(attributes, 'HealingPowerPercent') * 2 +
+          this.attribute(attributes, 'HealthRegeneration') * 8 +
+          this.attribute(attributes, 'LifeSteal') * 4 +
+          this.attribute(attributes, 'Cooldown') * 3 +
+          this.attribute(attributes, 'StatusResistance') * 2 +
+          this.attribute(attributes, 'CrowdControlResistance') * 2 +
+          this.attribute(attributes, 'SummonPower') * 4 +
+          this.attribute(attributes, 'SummonHealth') * 0.15 +
+          Math.max(1, this.request.character.level) * 10,
       ),
     );
+  }
+
+  isEquipmentSlotSelected(slotId: string): boolean {
+    return this.request.character.equipment.equippedSlots.includes(slotId);
+  }
+
+  toggleEquipmentSlot(slotId: string, checked: boolean): void {
+    const selected = new Set(this.request.character.equipment.equippedSlots);
+    checked ? selected.add(slotId) : selected.delete(slotId);
+    this.request.character.equipment.equippedSlots = [...selected];
+  }
+
+  clearEquipment(): void {
+    this.request.character.equipment.equippedSlots = [];
+  }
+
+  equipmentBonusSummary(slot: DungeonSimulationEquipmentSlotOption): string {
+    const multiplier = this.selectedEquipmentRarityMultiplier;
+    return Object.entries(slot.attributeBonuses)
+      .map(
+        ([attribute, value]) =>
+          `+${Math.ceil(value * multiplier)} ${this.formatAttributeName(attribute)}`,
+      )
+      .join(' · ');
   }
 
   isEssenceSelected(essenceId: string): boolean {
@@ -174,7 +234,60 @@ export class DungeonSimulatorComponent implements OnInit {
     return essence.id;
   }
 
+  trackEquipmentSlot(
+    _: number,
+    slot: DungeonSimulationEquipmentSlotOption,
+  ): string {
+    return slot.id;
+  }
+
   trackRun(_: number, run: { runNumber: number }): number {
     return run.runNumber;
+  }
+
+  private get selectedEquipmentRarityMultiplier(): number {
+    return (
+      this.options?.equipmentRarities?.find(
+        (rarity) => rarity.id === this.request.character.equipment.rarity,
+      )?.multiplier ?? 1
+    );
+  }
+
+  private get effectiveAttributes(): Record<string, number> {
+    const character = this.request.character;
+    const attributes: Record<string, number> = {
+      MaxHealth: character.maxHealth,
+      Power: character.power,
+      Fortitude: character.fortitude,
+      Spirit: character.spirit,
+      Armor: character.armor,
+      Resistance: character.resistance,
+      Precision: character.precision,
+      CritChance: character.critChance,
+      CritDamage: character.critDamage,
+      AttackSpeed: character.attackSpeed,
+      HealthRegeneration: character.healthRegeneration,
+    };
+    const equippedSlots = new Set(character.equipment.equippedSlots);
+    const multiplier = this.selectedEquipmentRarityMultiplier;
+
+    for (const slot of this.options?.equipmentSlots ?? []) {
+      if (!equippedSlots.has(slot.id)) continue;
+
+      for (const [attribute, value] of Object.entries(slot.attributeBonuses)) {
+        attributes[attribute] =
+          (attributes[attribute] ?? 0) + Math.ceil(value * multiplier);
+      }
+    }
+
+    return attributes;
+  }
+
+  private attribute(attributes: Record<string, number>, name: string): number {
+    return attributes[name] ?? 0;
+  }
+
+  private formatAttributeName(attribute: string): string {
+    return attribute.replace(/([a-z])([A-Z])/g, '$1 $2');
   }
 }
