@@ -179,6 +179,7 @@ export class CombatComponent implements OnInit, OnDestroy {
         health: 100,
         maxHealth: 100,
         barrier: 0,
+        level: 1,
       },
     ];
     this.enemyCharacters = [
@@ -189,6 +190,7 @@ export class CombatComponent implements OnInit, OnDestroy {
         health: 100,
         maxHealth: 100,
         barrier: 0,
+        level: 1,
       },
     ];
 

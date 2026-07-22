@@ -7,8 +7,9 @@ public class SimpleCombatEntity
     public int Health { get; set; }
     public int MaxHealth { get; set; }
     public int Barrier { get; set; }
+    public int Level { get; set; } = 1;
 
-    public SimpleCombatEntity(string id, string name, string imagePath, int maxHealth, int barrier)
+    public SimpleCombatEntity(string id, string name, string imagePath, int maxHealth, int barrier, int level = 1)
     {
         Id = id;
         Name = name;
@@ -16,6 +17,7 @@ public class SimpleCombatEntity
         Health = maxHealth;
         MaxHealth = maxHealth;
         Barrier = barrier;
+        Level = Math.Max(1, level);
     }
 
     public SimpleCombatEntity() { }

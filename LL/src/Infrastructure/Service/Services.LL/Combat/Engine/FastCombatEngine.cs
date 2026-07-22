@@ -463,7 +463,16 @@ public sealed class FastCombatEngine
         target.AdjustHealth(-pendingHealthDamage);
         var healthDamage = Math.Max(0, (int)Math.Round(healthBefore - target.Health));
 
-        Log(source, target, sourceName, EventType.Damage, healthDamage, $"{source.Name} dealt {healthDamage} {damageType} damage to {target.Name}.", statsSource, countStatsActivation);
+        Log(
+            source,
+            target,
+            sourceName,
+            EventType.Damage,
+            healthDamage,
+            $"{source.Name} dealt {healthDamage} {damageType} damage to {target.Name}.",
+            statsSource,
+            countStatsActivation,
+            (int)absorbed);
         Publish(new CombatEvent(AbilityTriggerEvent.OnHit, source, target, null), combatants);
         PublishAttackTypeEvents(source, target, attackType, combatants);
         Publish(new CombatEvent(AbilityTriggerEvent.OnDamaged, target, source, null), combatants);
@@ -1000,7 +1009,8 @@ public sealed class FastCombatEngine
         int magnitude,
         string details,
         string? statsSource = null,
-        bool countsAsActivation = false)
+        bool countsAsActivation = false,
+        int barrierAbsorbed = 0)
     {
         _log.Add(new CombatLogItem
         {
@@ -1012,6 +1022,7 @@ public sealed class FastCombatEngine
             Timestamp = _currentTick,
             EventType = eventType,
             Magnitude = magnitude,
+            BarrierAbsorbed = barrierAbsorbed,
             Details = details,
             CombatEntity = target is null
                 ? null

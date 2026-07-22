@@ -12,4 +12,6 @@ public sealed record EntityStats(
     int SelfDamageTaken = 0,
     int AlliedDamageDone = 0,
     int AlliedDamageTaken = 0,
-    string Team = "");
+    string Team = "",
+    int BarrierGenerated = 0,
+    int DamageBlocked = 0);

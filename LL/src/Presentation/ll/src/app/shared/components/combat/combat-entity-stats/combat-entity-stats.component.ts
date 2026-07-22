@@ -1,11 +1,15 @@
 import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import {
+  AbilityStats,
   EntityStats,
   SimpleCombatEntityDto,
 } from '../../../models/Dtos/combatResultDto';
 import { DecimalPipe, NgClass, NgFor, NgIf } from '@angular/common';
+import { RegularButtonComponent } from '../../custom-components/buttons/regular-button/regular-button.component';
 
 type CombatTeamName = 'Friendly' | 'Hostile';
+type AbilitySortColumn = 'uses' | 'damage' | 'healing' | 'barrier';
+type SortDirection = 'asc' | 'desc';
 type StatsParticipant = {
   id: string;
   name: string;
@@ -16,7 +20,7 @@ type StatsParticipant = {
 @Component({
   selector: 'app-combat-entity-stats',
   standalone: true,
-  imports: [NgIf, NgFor, NgClass, DecimalPipe],
+  imports: [NgIf, NgFor, NgClass, DecimalPipe, RegularButtonComponent],
   templateUrl: './combat-entity-stats.component.html',
 })
 export class CombatEntityStatsComponent implements OnChanges {
@@ -27,6 +31,8 @@ export class CombatEntityStatsComponent implements OnChanges {
   selectedStats: EntityStats | null = null;
   selectedEntityId: string = '';
   selectedEntityName: string = '';
+  abilitySortColumn: AbilitySortColumn = 'damage';
+  abilitySortDirection: SortDirection = 'desc';
 
   playerParticipants: StatsParticipant[] = [];
   enemyParticipants: StatsParticipant[] = [];
@@ -71,10 +77,79 @@ export class CombatEntityStatsComponent implements OnChanges {
 
   barrierPercentage(entity: SimpleCombatEntityDto): number {
     if (entity.maxHealth <= 0) return 0;
+    const availableWidth = 100 - this.healthPercentage(entity);
     return Math.max(
       0,
-      Math.min(100, (entity.barrier / entity.maxHealth) * 100),
+      Math.min(availableWidth, (entity.barrier / entity.maxHealth) * 100),
     );
+  }
+
+  barrierStartPercentage(entity: SimpleCombatEntityDto): number {
+    return this.healthPercentage(entity);
+  }
+
+  sortAbilities(column: AbilitySortColumn): void {
+    if (this.abilitySortColumn === column) {
+      this.abilitySortDirection =
+        this.abilitySortDirection === 'desc' ? 'asc' : 'desc';
+      return;
+    }
+
+    this.abilitySortColumn = column;
+    this.abilitySortDirection = 'desc';
+  }
+
+  sortIndicator(column: AbilitySortColumn): string {
+    if (this.abilitySortColumn !== column) return '';
+    return this.abilitySortDirection === 'desc' ? '↓' : '↑';
+  }
+
+  sortAriaLabel(column: AbilitySortColumn): string {
+    const nextDirection =
+      this.abilitySortColumn === column && this.abilitySortDirection === 'desc'
+        ? 'ascending'
+        : 'descending';
+    return 'Sort by ' + column + ' ' + nextDirection;
+  }
+
+  averageDamage(ability: AbilityStats): number {
+    if (ability.uses <= 0 || ability.totalDamage <= 0) return 0;
+    return ability.totalDamage / ability.uses;
+  }
+
+  averageHealing(ability: AbilityStats): number {
+    if (ability.uses <= 0 || ability.totalHealing <= 0) return 0;
+    return ability.totalHealing / ability.uses;
+  }
+
+  averageBarrier(ability: AbilityStats): number {
+    if (ability.uses <= 0 || ability.totalBarrier <= 0) return 0;
+    return ability.totalBarrier / ability.uses;
+  }
+
+  abilityCategory(ability: AbilityStats): string {
+    if (ability.totalDamage > 0) return 'Attack';
+    if (ability.totalHealing > 0) return 'Healing';
+    if (ability.totalBarrier > 0) return 'Barrier';
+    return 'Utility';
+  }
+
+  abilityCategoryClass(ability: AbilityStats): string {
+    if (ability.totalDamage > 0) return 'border-primary/60 text-primary';
+    if (ability.totalHealing > 0) return 'border-success/60 ll-text-success';
+    if (ability.totalBarrier > 0) return 'border-[#8ecbff]/60 ll-text-info';
+    return 'border-white/20 text-secondary';
+  }
+
+  get sortedAbilities(): AbilityStats[] {
+    const direction = this.abilitySortDirection === 'asc' ? 1 : -1;
+    return [...(this.selectedStats?.abilities ?? [])].sort((left, right) => {
+      const difference =
+        this.abilitySortValue(left) - this.abilitySortValue(right);
+      return difference === 0
+        ? left.name.localeCompare(right.name)
+        : difference * direction;
+    });
   }
 
   isDefeated(entity: SimpleCombatEntityDto): boolean {
@@ -135,6 +210,7 @@ export class CombatEntityStatsComponent implements OnChanges {
           health: 0,
           maxHealth: 0,
           barrier: 0,
+          level: 1,
         };
         participants.set(stats.entityId, {
           id: stats.entityId,
@@ -182,6 +258,21 @@ export class CombatEntityStatsComponent implements OnChanges {
       alliedDamageDone: 0,
       alliedDamageTaken: 0,
       team: '',
+      barrierGenerated: 0,
+      damageBlocked: 0,
     };
+  }
+
+  private abilitySortValue(ability: AbilityStats): number {
+    switch (this.abilitySortColumn) {
+      case 'uses':
+        return ability.uses ?? 0;
+      case 'healing':
+        return ability.totalHealing ?? 0;
+      case 'barrier':
+        return ability.totalBarrier ?? 0;
+      default:
+        return ability.totalDamage ?? 0;
+    }
   }
 }

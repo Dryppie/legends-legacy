@@ -106,6 +106,9 @@ public sealed class AbilitySystemTests
         Assert.Equal(15, friendly.Barrier);
         Assert.Contains(result.EventLog, x => x.EventType == EventType.Damage && x.Source == "effect.damage");
         Assert.Contains(result.EventLog, x => x.EventType == EventType.RestoreBarrier && x.Source == "effect.barrier");
+        var friendlyStats = result.EntityStats.Single(x => x.EntityId == friendly.Id);
+        Assert.Equal(15, friendlyStats.BarrierGenerated);
+        Assert.Equal(15, friendlyStats.Abilities.Single(x => x.Name == barrier.Name).TotalBarrier);
     }
 
     [Fact]

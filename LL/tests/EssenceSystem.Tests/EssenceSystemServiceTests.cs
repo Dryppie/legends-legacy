@@ -550,6 +550,45 @@ public sealed class EssenceSystemServiceTests
     }
 
     [Fact]
+    public void Combat_stats_tracks_barrier_generation_and_absorbed_damage()
+    {
+        var aggregator = new CombatStatsAggregator();
+
+        var stats = aggregator.Aggregate(
+        [
+            new CombatLogItem
+            {
+                ActorId = "player",
+                TargetId = "player",
+                Source = "effect.barrier",
+                StatsSource = "Bone Bulwark",
+                EventType = EventType.RestoreBarrier,
+                Magnitude = 20
+            },
+            new CombatLogItem
+            {
+                ActorId = "enemy",
+                TargetId = "player",
+                Source = "Claw",
+                EventType = EventType.Damage,
+                Magnitude = 7,
+                BarrierAbsorbed = 13
+            }
+        ],
+        new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["player"] = "Friendly",
+            ["enemy"] = "Hostile"
+        });
+
+        var player = stats.Single(x => x.EntityId == "player");
+        Assert.Equal(20, player.BarrierGenerated);
+        Assert.Equal(13, player.DamageBlocked);
+        Assert.Equal(7, player.DamageTaken);
+        Assert.Equal(20, player.Abilities.Single(x => x.Name == "Bone Bulwark").TotalBarrier);
+    }
+
+    [Fact]
     public void Combat_stats_separates_self_damage_from_opponent_damage()
     {
         var aggregator = new CombatStatsAggregator();

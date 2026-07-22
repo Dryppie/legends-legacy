@@ -9,6 +9,7 @@ public class CombatLogItem
     public string TargetId { get; set; } = string.Empty;
     public EventType EventType { get; set; }
     public int Magnitude { get; set; }
+    public int BarrierAbsorbed { get; set; }
     public string Details { get; set; } = string.Empty;
     public SimpleCombatEntity? CombatEntity { get; set; }
 }

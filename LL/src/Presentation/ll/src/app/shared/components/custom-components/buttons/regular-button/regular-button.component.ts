@@ -18,6 +18,9 @@ export class RegularButtonComponent {
   /** Visual palette variant – extend with more (e.g. outline, ghost, link) as needed. */
   @Input() variant: 'primary' | 'secondary' | 'danger' = 'primary';
 
+  /** Highlights toggle-like buttons and exposes their pressed state when set. */
+  @Input() active: boolean | null = null;
+
   private _fullWidth = false;
   @Input()
   set fullWidth(value: boolean | string) {
@@ -42,9 +45,15 @@ export class RegularButtonComponent {
     }[this.variant];
 
     const disabledStyles = 'text-zinc-300 opacity-50';
+    const activeStyles =
+      this.active === true
+        ? this.variant === 'danger'
+          ? 'border-[rgba(255,154,162,0.36)] bg-[var(--ll-color-danger-soft)]'
+          : 'border-[var(--ll-color-border-strong)] bg-[var(--ll-color-primary-soft)]'
+        : '';
     const width = this.fullWidth ? 'w-full' : '';
 
-    return `${palette} ${width} ${this.disabled ? disabledStyles : ''}`;
+    return `${palette} ${activeStyles} ${width} ${this.disabled ? disabledStyles : ''}`;
   }
 
   /** Emit `pressed` only when not disabled, preventing propagation otherwise. */

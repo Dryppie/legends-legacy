@@ -307,7 +307,6 @@
                     [style.top.px]="node.y"
                     [disabled]="!isMapNodeActionable(node) || loading()"
                     [attr.aria-label]="mapNodeAriaLabel(node)"
-                    [attr.title]="mapNodeTitle(node)"
                     (click)="chooseMapNode(node)"
                   >
                     <span class="dungeon-node__circle">
@@ -438,11 +437,6 @@
                       aria-label="Show all Vigor thresholds"
                       aria-controls="dungeon-vigor-threshold-details"
                       [attr.aria-expanded]="vigorThresholdsExpanded()"
-                      [attr.title]="
-                        vigorThresholdsExpanded()
-                          ? 'Hide all Vigor thresholds'
-                          : 'Show all Vigor thresholds'
-                      "
                       (click)="toggleVigorThresholds($event)"
                     >
                       ?

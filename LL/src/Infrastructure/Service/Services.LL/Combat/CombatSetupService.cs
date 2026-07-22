@@ -128,7 +128,8 @@ public class CombatSetupService : ICombatSetupService
                 entity.Name,
                 entity.ImagePath,
                 entity.GetAttributeValue(AttributeType.MaxHealth),
-                entity.GetCurrentBarrierValue())
+                entity.GetCurrentBarrierValue(),
+                entity.Level)
             {
                 Health = entity.GetCurrentHealthValue()
             };

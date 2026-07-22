@@ -4,6 +4,7 @@
   [ngClass]="buttonClasses"
   [disabled]="disabled"
   [attr.aria-disabled]="disabled"
+  [attr.aria-pressed]="active"
   (click)="onClick($event)"
 >
   <!-- Use provided text or fallback to projected content so consumers can slot icons etc. -->

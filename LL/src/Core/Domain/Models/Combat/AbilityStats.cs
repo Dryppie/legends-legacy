@@ -9,4 +9,5 @@ public sealed record AbilityStats(
     int Summons = 0,
     int Stuns = 0,
     int SelfDamage = 0,
-    int AlliedDamage = 0);
+    int AlliedDamage = 0,
+    int TotalBarrier = 0);

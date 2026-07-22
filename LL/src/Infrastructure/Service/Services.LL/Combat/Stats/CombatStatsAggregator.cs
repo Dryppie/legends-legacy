@@ -52,6 +52,9 @@ public sealed class CombatStatsAggregator : ICombatStatsAggregator
                 case EventType.HealthRegeneration:
                     entity.HealthRegenerated += item.Magnitude;
                     break;
+                case EventType.RestoreBarrier:
+                    entity.BarrierGenerated += item.Magnitude;
+                    break;
             }
 
             // ----- ability context -----------------------------------------------
@@ -91,6 +94,13 @@ public sealed class CombatStatsAggregator : ICombatStatsAggregator
                         healAbility.Crits++;
                     break;
 
+                case EventType.RestoreBarrier:
+                    if (string.IsNullOrWhiteSpace(statsSource))
+                        break;
+
+                    entity.GetOrAddAbility(statsSource).TotalBarrier += item.Magnitude;
+                    break;
+
                 case EventType.Summon:
                     if (string.IsNullOrWhiteSpace(statsSource))
                         break;
@@ -112,6 +122,7 @@ public sealed class CombatStatsAggregator : ICombatStatsAggregator
                 target.SetName(item.CombatEntity?.Name);
                 if (item.EventType == EventType.Damage || item.EventType == EventType.DamageOverTime || item.EventType == EventType.DamageCrit)
                 {
+                    target.DamageBlocked += item.BarrierAbsorbed;
                     if (relationship == DamageTargetRelationship.Opponent)
                         target.DamageTaken += item.Magnitude;
                     else if (relationship == DamageTargetRelationship.Self)
@@ -167,6 +178,7 @@ public sealed class WorkEntity
     public string Team { get; private set; } = string.Empty;
     public int DamageDone, DamageTaken, HealingDone, HealingReceived, HealthRegenerated;
     public int SelfDamageDone, SelfDamageTaken, AlliedDamageDone, AlliedDamageTaken;
+    public int BarrierGenerated, DamageBlocked;
 
     private readonly Dictionary<string, WorkAbility> _abilities = new(StringComparer.Ordinal);
     private string? _firstEntityName;
@@ -195,7 +207,9 @@ public sealed class WorkEntity
     public EntityStats ToImmutable() =>
         new(Id, Name, _abilities.Values
             .Select(a => a.ToImmutable())
-            .OrderByDescending(a => Math.Max(Math.Max(a.TotalDamage, a.TotalHealing), Math.Max(a.SelfDamage, a.AlliedDamage)))
+            .OrderByDescending(a => Math.Max(
+                Math.Max(a.TotalDamage, a.TotalHealing),
+                Math.Max(a.TotalBarrier, Math.Max(a.SelfDamage, a.AlliedDamage))))
             .ToList(),
         DamageDone,
         DamageTaken,
@@ -206,15 +220,17 @@ public sealed class WorkEntity
         SelfDamageTaken,
         AlliedDamageDone,
         AlliedDamageTaken,
-        Team);
+        Team,
+        BarrierGenerated,
+        DamageBlocked);
 }
 
 public sealed class WorkAbility
 {
     public string Name { get; }
-    public int TotalDamage, TotalHealing, Uses, Hits, Crits, Summons, Stuns, SelfDamage, AlliedDamage;
+    public int TotalDamage, TotalHealing, Uses, Hits, Crits, Summons, Stuns, SelfDamage, AlliedDamage, TotalBarrier;
 
     public WorkAbility(string name) => Name = name;
 
-    public AbilityStats ToImmutable() => new(Name, TotalDamage, TotalHealing, Uses, Hits, Crits, Summons, Stuns, SelfDamage, AlliedDamage);
+    public AbilityStats ToImmutable() => new(Name, TotalDamage, TotalHealing, Uses, Hits, Crits, Summons, Stuns, SelfDamage, AlliedDamage, TotalBarrier);
 }
