@@ -9,6 +9,8 @@ type CombatTeamName = 'Friendly' | 'Hostile';
 type StatsParticipant = {
   id: string;
   name: string;
+  team: CombatTeamName;
+  entity: SimpleCombatEntityDto;
 };
 
 @Component({
@@ -39,7 +41,10 @@ export class CombatEntityStatsComponent implements OnChanges {
         'Friendly',
         this.playerTeam,
       );
-      this.enemyParticipants = this.buildParticipants('Hostile', this.enemyTeam);
+      this.enemyParticipants = this.buildParticipants(
+        'Hostile',
+        this.enemyTeam,
+      );
       this.refreshSelection();
     }
   }
@@ -55,11 +60,37 @@ export class CombatEntityStatsComponent implements OnChanges {
     this.selectedEntityName = entity?.name ?? '';
   }
 
+  statsFor(id: string): EntityStats | null {
+    return this.entityStats?.find((stats) => stats.entityId === id) ?? null;
+  }
+
+  healthPercentage(entity: SimpleCombatEntityDto): number {
+    if (entity.maxHealth <= 0) return 0;
+    return Math.max(0, Math.min(100, (entity.health / entity.maxHealth) * 100));
+  }
+
+  barrierPercentage(entity: SimpleCombatEntityDto): number {
+    if (entity.maxHealth <= 0) return 0;
+    return Math.max(
+      0,
+      Math.min(100, (entity.barrier / entity.maxHealth) * 100),
+    );
+  }
+
+  isDefeated(entity: SimpleCombatEntityDto): boolean {
+    return entity.health <= 0;
+  }
+
   private refreshSelection(): void {
-    const participants = [...this.playerParticipants, ...this.enemyParticipants];
+    const participants = [
+      ...this.playerParticipants,
+      ...this.enemyParticipants,
+    ];
     if (
       this.selectedEntityId &&
-      participants.some((participant) => participant.id === this.selectedEntityId)
+      participants.some(
+        (participant) => participant.id === this.selectedEntityId,
+      )
     ) {
       this.selectEntity(this.selectedEntityId);
       return;
@@ -84,7 +115,12 @@ export class CombatEntityStatsComponent implements OnChanges {
 
     for (const entity of visibleTeam) {
       if (!entity.id) continue;
-      participants.set(entity.id, { id: entity.id, name: entity.name });
+      participants.set(entity.id, {
+        id: entity.id,
+        name: entity.name,
+        team,
+        entity,
+      });
     }
 
     for (const stats of this.entityStats ?? []) {
@@ -92,9 +128,19 @@ export class CombatEntityStatsComponent implements OnChanges {
         continue;
 
       if (!participants.has(stats.entityId)) {
-        participants.set(stats.entityId, {
+        const entity: SimpleCombatEntityDto = {
           id: stats.entityId,
           name: stats.entityName || stats.entityId,
+          imagePath: '',
+          health: 0,
+          maxHealth: 0,
+          barrier: 0,
+        };
+        participants.set(stats.entityId, {
+          id: stats.entityId,
+          name: entity.name,
+          team,
+          entity,
         });
       }
     }
@@ -111,8 +157,7 @@ export class CombatEntityStatsComponent implements OnChanges {
   ): boolean {
     if (stats.team?.toLowerCase() === team.toLowerCase()) return true;
     return (
-      !stats.team &&
-      visibleTeam.some((entity) => entity.id === stats.entityId)
+      !stats.team && visibleTeam.some((entity) => entity.id === stats.entityId)
     );
   }
 

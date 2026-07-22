@@ -5,10 +5,10 @@
   >
     <div class="ll-panel w-full max-w-xl p-6">
       <p class="ll-eyebrow">
-        {{ isLoading ? "Offline Progress" : "Combat Queued" }}
+        {{ isLoading ? 'Offline Progress' : 'Combat Queued' }}
       </p>
       <h2 class="ll-heading mt-2 text-2xl">
-        {{ isLoading ? "Resolving Combat" : "Next Fight Begins Soon" }}
+        {{ isLoading ? 'Resolving Combat' : 'Next Fight Begins Soon' }}
       </h2>
       <p *ngIf="isLoading" class="ll-copy mt-3">
         Resolving stored combat and rewards.
@@ -36,142 +36,46 @@
 
   <div
     *ngIf="displayCombat"
-    class="flex h-full w-full flex-col gap-4 overflow-y-auto overscroll-contain pb-24 pr-4 lg:overflow-hidden lg:pb-0 lg:pr-6"
+    class="flex h-full w-full flex-col overflow-y-auto overscroll-contain pb-24 pr-2 sm:pr-6 lg:overflow-hidden lg:pb-0"
   >
-    <div
-      class="ll-panel flex w-full flex-col gap-4 p-4 xl:flex-row xl:items-center xl:justify-between"
+    <section
+      class="ll-panel ll-panel-strong flex min-h-full w-full flex-col overflow-hidden px-4 py-4 sm:px-6 lg:h-full lg:min-h-0"
     >
-      <div class="min-w-0">
-        <p class="ll-eyebrow">
-          {{ battleType === "IdleCombat" ? "Idle Combat" : "Battle" }}
-        </p>
-        <h2 class="ll-heading mt-1 text-2xl">
-          {{ battleTitle() }}
-        </h2>
-      </div>
+      <header
+        class="flex shrink-0 flex-col gap-4 border-b border-primary/40 pb-3 sm:flex-row sm:items-center sm:justify-between"
+      >
+        <div class="flex min-w-0 flex-wrap items-baseline gap-x-4 gap-y-1">
+          <h2 class="ll-heading truncate text-2xl uppercase tracking-tight">
+            {{ battleTitle() }}
+          </h2>
+          <app-combat-log
+            *ngIf="battleType === 'IdleCombat'"
+            class="max-w-full"
+          ></app-combat-log>
+          <span
+            *ngIf="outcome && battleType !== 'IdleCombat'"
+            class="ll-badge"
+            [ngClass]="outcomeBadgeClass()"
+          >
+            {{ outcome }}
+          </span>
+        </div>
 
-      <div class="flex flex-wrap items-center gap-3">
-        <app-combat-log
-          *ngIf="battleType === 'IdleCombat'"
-          class="max-w-full"
-        ></app-combat-log>
-        <span
-          *ngIf="outcome && battleType !== 'IdleCombat'"
-          class="ll-badge rounded px-3 py-2 text-sm"
-          [ngClass]="outcomeBadgeClass()"
-        >
-          {{ outcome }}
-        </span>
         <app-mini-button
-          class="mt-2"
+          class="block shrink-0 self-start sm:self-auto"
           [text]="combatActionButtonText()"
           [disabled]="isStoppingCombat"
-          [width]="battleType === 'IdleCombat' ? '88px' : '132px'"
+          [width]="battleType === 'IdleCombat' ? '72px' : '132px'"
           (click)="onStopOrSkip()"
         ></app-mini-button>
-      </div>
-    </div>
+      </header>
 
-    <div
-      class="grid w-full shrink-0 gap-4 lg:grid-cols-2 lg:gap-6 lg:overflow-visible"
-    >
-      <div class="ll-card flex flex-col gap-3 p-3">
-        <div class="flex items-center justify-between gap-3">
-          <p class="ll-eyebrow">Your Side</p>
-          <p class="ll-copy text-xs">
-            {{ playerCharacters.length }} unit{{
-              playerCharacters.length === 1 ? "" : "s"
-            }}
-          </p>
-        </div>
-
-        <div class="flex flex-wrap gap-2">
-          <ng-container
-            *ngFor="let character of playerCharacters; let i = index"
-          >
-            <button
-              type="button"
-              (click)="focusCharacter('player', i)"
-              class="ll-button min-h-9 min-w-0 text-left text-xs font-bold"
-              [ngClass]="teamSelectorClass('player', i)"
-              [attr.aria-label]="'Focus ' + teamMemberLabel(character, i)"
-            >
-              {{ teamMemberLabel(character, i) }}
-            </button>
-          </ng-container>
-        </div>
-
-        <app-combat-avatar
-          class="w-full"
-          [imagePath]="selectedPlayerCharacter.imagePath"
-          *ngIf="selectedPlayerCharacter"
-          [name]="selectedPlayerCharacter.name"
-          [hp]="selectedPlayerCharacter.health"
-          [maxHp]="selectedPlayerCharacter.maxHealth"
-          [barrier]="selectedPlayerCharacter.barrier"
-          [isLoading]="isLoading"
-        ></app-combat-avatar>
-      </div>
-
-      <div class="ll-card flex flex-col gap-3 p-3">
-        <div class="flex items-center justify-between gap-3">
-          <p class="ll-eyebrow">Enemy Side</p>
-          <p class="ll-copy text-xs">
-            {{ enemyCharacters.length }} unit{{
-              enemyCharacters.length === 1 ? "" : "s"
-            }}
-          </p>
-        </div>
-
-        <div class="flex flex-wrap gap-2">
-          <ng-container
-            *ngFor="let character of enemyCharacters; let i = index"
-          >
-            <button
-              type="button"
-              (click)="focusCharacter('enemy', i)"
-              class="ll-button min-h-9 min-w-0 text-left text-xs font-bold"
-              [ngClass]="teamSelectorClass('enemy', i)"
-              [attr.aria-label]="'Focus ' + teamMemberLabel(character, i)"
-            >
-              {{ teamMemberLabel(character, i) }}
-            </button>
-          </ng-container>
-        </div>
-
-        <app-combat-avatar
-          class="w-full"
-          [imagePath]="selectedEnemyCharacter.imagePath"
-          *ngIf="selectedEnemyCharacter"
-          [name]="selectedEnemyCharacter.name"
-          [hp]="selectedEnemyCharacter.health"
-          [maxHp]="selectedEnemyCharacter.maxHealth"
-          [barrier]="selectedEnemyCharacter.barrier"
-          [isLoading]="isLoading"
-        ></app-combat-avatar>
-      </div>
-    </div>
-
-    <div
-      class="flex min-h-[18rem] w-full shrink-0 overflow-hidden lg:min-h-0 lg:flex-1"
-    >
       <app-combat-entity-stats
-        class="h-full w-full"
+        class="flex min-h-0 w-full flex-1"
         [playerTeam]="playerCharacters"
         [enemyTeam]="enemyCharacters"
         [entityStats]="entityStats"
       ></app-combat-entity-stats>
-    </div>
-    <!-- <div class="flex h-full w-full overflow-hidden">
-      <app-combat-overview
-        *ngIf="combatStateService.getCombatEvents(battleType)() as combatEvents"
-        [combatEvents]="combatEvents"
-        [isLoading]="isLoading"
-        [isStoppingCombat]="isStoppingCombat"
-        (stopCombatEvent)="onStopOrSkip()"
-        [battleType]="battleType"
-        class="h-full w-full"
-      ></app-combat-overview>
-    </div> -->
+    </section>
   </div>
 </div>
