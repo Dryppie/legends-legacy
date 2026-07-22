@@ -1,4 +1,5 @@
 using Application.Interfaces.Services.LL.Dungeons;
+using Domain.Components.Attributes;
 using MediatR;
 
 namespace Application.UseCases._AdminDashboard.Diagnostics.Queries.RunDungeonSimulation;
@@ -41,4 +42,26 @@ public sealed class RunDungeonSimulationQueryHandler
         RunDungeonSimulationQuery request,
         CancellationToken cancellationToken) =>
         _simulator.RunAsync(request.Request, cancellationToken);
+}
+
+public sealed record GetDungeonSimulationCombatRatingQuery(DungeonSimulationCharacter Character)
+    : IRequest<CombatRatingBreakdown>;
+
+public sealed class GetDungeonSimulationCombatRatingQueryHandler
+    : IRequestHandler<GetDungeonSimulationCombatRatingQuery, CombatRatingBreakdown>
+{
+    private readonly IDungeonRunSimulator _simulator;
+
+    public GetDungeonSimulationCombatRatingQueryHandler(IDungeonRunSimulator simulator)
+    {
+        _simulator = simulator;
+    }
+
+    public Task<CombatRatingBreakdown> Handle(
+        GetDungeonSimulationCombatRatingQuery request,
+        CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        return Task.FromResult(_simulator.GetCombatRating(request.Character));
+    }
 }

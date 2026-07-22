@@ -10,6 +10,7 @@ using Application.UseCases._AdminDashboard.Diagnostics.Queries.RunAbilityBalance
 using Application.UseCases._AdminDashboard.Diagnostics.Queries.RunDungeonSimulation;
 using Application.Interfaces.Services.LL.Dungeons;
 using Microsoft.AspNetCore.Mvc;
+using Domain.Components.Attributes;
 
 namespace API.AdminDashboard.Controllers.V1;
 
@@ -63,6 +64,13 @@ public class DiagnosticsController : BaseController
         [FromBody] DungeonSimulationRequest request)
     {
         return await Mediator.Send(new RunDungeonSimulationQuery(request));
+    }
+
+    [HttpPost("dungeon-simulation-combat-rating")]
+    public async Task<ActionResult<CombatRatingBreakdown>> GetDungeonSimulationCombatRating(
+        [FromBody] DungeonSimulationCharacter character)
+    {
+        return await Mediator.Send(new GetDungeonSimulationCombatRatingQuery(character));
     }
 
 }

@@ -1311,7 +1311,7 @@ public sealed class EssenceSystemServiceTests
             Task.FromResult(Resolve(characterId, []));
 
         public EssenceCombatLoadout Resolve(Guid characterId, IEnumerable<PlayerEssence> equippedEssences) =>
-            new(characterId, equippedEssences.ToList(), [], new HashSet<string>(StringComparer.OrdinalIgnoreCase));
+            new(characterId, equippedEssences.ToList(), [], new HashSet<string>(StringComparer.OrdinalIgnoreCase), 0);
     }
 
     private sealed class QueueRandomProvider(params double[] values) : IRandomProvider

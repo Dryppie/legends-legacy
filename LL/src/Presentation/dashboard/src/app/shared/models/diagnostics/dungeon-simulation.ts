@@ -17,6 +17,14 @@ export interface DungeonSimulationDungeonOption {
 export interface DungeonSimulationEssenceOption {
   id: string;
   name: string;
+  abilityCombatRating: number;
+}
+
+export interface CombatRatingBreakdown {
+  baseAndEquipment: number;
+  essenceAttributes: number;
+  essenceAbilities: number;
+  total: number;
 }
 
 export interface DungeonSimulationEquipmentSlotOption {
@@ -70,6 +78,7 @@ export interface DungeonSimulationReport {
   tier: number;
   recommendedCombatRating: number;
   simulatedCombatRating: number;
+  combatRatingBreakdown: CombatRatingBreakdown;
   requestedRuns: number;
   completedRuns: number;
   failedRuns: number;

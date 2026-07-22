@@ -15,6 +15,7 @@ public sealed class EssenceDefinition
     public Rarity Rarity { get; set; }
     public List<string> Tags { get; set; } = [];
     public List<EssenceAttributeBonusDefinition> AttributeBonuses { get; set; } = [];
+    public int AbilityCombatRating { get; set; }
     public string ActiveAbilityId { get; set; } = string.Empty;
     public string PassiveAbilityId { get; set; } = string.Empty;
     [JsonIgnore]

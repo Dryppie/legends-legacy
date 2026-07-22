@@ -228,6 +228,7 @@ public static class DependencyInjection
         services.AddScoped<IEssenceBonusProvider, EssenceSystemService>();
         services.AddScoped<IEssenceAbilityProvider, EssenceSystemService>();
         services.AddScoped<IEssenceCombatLoadoutResolver, EssenceSystemService>();
+        services.AddScoped<ICombatRatingService, CombatRatingService>();
         services.AddScoped<IEssenceResonanceService, EssenceSystemService>();
         services.AddScoped<IEssenceCatalogService, EssenceCatalogService>();
         services.AddScoped<IEssenceCodexCollectionService, EssenceCodexCollectionService>();

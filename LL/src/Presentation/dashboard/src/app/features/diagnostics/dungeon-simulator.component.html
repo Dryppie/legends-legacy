@@ -18,10 +18,18 @@
       </p>
     </div>
 
-    <div class="ll-stat-card min-w-40 px-4 py-3 text-right">
+    <div class="ll-stat-card min-w-56 px-4 py-3 text-right">
       <div class="ll-stat-label">Estimated power</div>
-      <div class="ll-stat-value">
+      <div class="ll-stat-value" [class.opacity-60]="ratingLoading">
         {{ estimatedCombatRating | number }}
+      </div>
+      <div class="ll-helper mt-1 text-xs">
+        {{ combatRating.baseAndEquipment | number }} base/equipment ·
+        {{ combatRating.essenceAttributes >= 0 ? "+" : ""
+        }}{{ combatRating.essenceAttributes | number }} essence stats · +{{
+          combatRating.essenceAbilities | number
+        }}
+        abilities
       </div>
       <div *ngIf="selectedDungeon as dungeon" class="ll-helper mt-1">
         {{ dungeon.recommendedCombatRating | number }} recommended
@@ -142,6 +150,7 @@
               name="level"
               min="1"
               [(ngModel)]="request.character.level"
+              (ngModelChange)="scheduleCombatRatingRefresh()"
             />
           </label>
 
@@ -174,6 +183,7 @@
               [name]="stat.key"
               [min]="stat.min"
               [(ngModel)]="$any(request.character)[stat.key]"
+              (ngModelChange)="scheduleCombatRatingRefresh()"
             />
           </label>
         </div>
@@ -281,6 +291,9 @@
             <small class="ll-text-subtle block truncate">{{
               essence.id
             }}</small>
+            <small class="ll-text-subtle block">
+              +{{ essence.abilityCombatRating | number }} ability power
+            </small>
           </span>
         </label>
       </div>
@@ -355,6 +368,13 @@
           >{{ result.simulatedCombatRating | number }} /
           {{ result.recommendedCombatRating | number }}</strong
         >
+        <small class="ll-text-subtle mt-1 block">
+          {{ result.combatRatingBreakdown.baseAndEquipment | number }} base ·
+          {{ result.combatRatingBreakdown.essenceAttributes >= 0 ? "+" : ""
+          }}{{ result.combatRatingBreakdown.essenceAttributes | number }} stats
+          · +{{ result.combatRatingBreakdown.essenceAbilities | number }}
+          abilities
+        </small>
       </div>
     </div>
 

@@ -45,6 +45,7 @@ public sealed class DungeonRunSimulator : IDungeonRunSimulator
 
     private readonly IDungeonDefinitions _dungeons;
     private readonly IEssenceDefinitionRepository _essences;
+    private readonly ICombatRatingService _combatRatings;
     private readonly DungeonRunFactory _runFactory;
     private readonly AdminCreatureService _creatures;
     private readonly IEntityService _entities;
@@ -58,6 +59,7 @@ public sealed class DungeonRunSimulator : IDungeonRunSimulator
     public DungeonRunSimulator(
         IDungeonDefinitions dungeons,
         IEssenceDefinitionRepository essences,
+        ICombatRatingService combatRatings,
         DungeonRunFactory runFactory,
         AdminCreatureService creatures,
         IEntityService entities,
@@ -70,6 +72,7 @@ public sealed class DungeonRunSimulator : IDungeonRunSimulator
     {
         _dungeons = dungeons;
         _essences = essences;
+        _combatRatings = combatRatings;
         _runFactory = runFactory;
         _creatures = creatures;
         _entities = entities;
@@ -96,7 +99,10 @@ public sealed class DungeonRunSimulator : IDungeonRunSimulator
             .ToList(),
         _essences.GetAll()
             .OrderBy(essence => essence.Name, StringComparer.OrdinalIgnoreCase)
-            .Select(essence => new DungeonSimulationEssenceOption(essence.Id, essence.Name))
+            .Select(essence => new DungeonSimulationEssenceOption(
+                essence.Id,
+                essence.Name,
+                essence.AbilityCombatRating))
             .ToList(),
         SimulationEquipmentSlots
             .Select(slot => new DungeonSimulationEquipmentSlotOption(
@@ -143,7 +149,7 @@ public sealed class DungeonRunSimulator : IDungeonRunSimulator
         }
 
         var completed = results.Count(result => result.Completed);
-        var simulatedRating = CalculateCombatRating(character);
+        var ratingBreakdown = GetCombatRating(character);
 
         return new DungeonSimulationReport(
             dungeon.Id,
@@ -151,7 +157,8 @@ public sealed class DungeonRunSimulator : IDungeonRunSimulator
             GetDifficultyName(dungeon.Tier),
             dungeon.Tier,
             dungeon.RecommendedCombatRating,
-            simulatedRating,
+            ratingBreakdown.Total,
+            ratingBreakdown,
             runCount,
             completed,
             runCount - completed,
@@ -293,16 +300,7 @@ public sealed class DungeonRunSimulator : IDungeonRunSimulator
         var player = new CombatEntity(character)
         {
             Equipment = CreateSimulationEquipment(characterConfiguration.Equipment),
-            EquippedEssences = characterConfiguration.EssenceIds
-                .Distinct(StringComparer.OrdinalIgnoreCase)
-                .Select(essenceId => new PlayerEssence
-                {
-                    Id = Guid.NewGuid(),
-                    CharacterId = character.Id,
-                    EssenceDefinitionId = essenceId,
-                    Level = Math.Max(1, character.Level)
-                })
-                .ToList(),
+            EquippedEssences = CreateSimulationEssences(characterConfiguration, character.Id),
             HasEquippedEssenceSnapshot = true
         };
 
@@ -402,17 +400,32 @@ public sealed class DungeonRunSimulator : IDungeonRunSimulator
             .ToList()
     };
 
-    private int CalculateCombatRating(DungeonSimulationCharacter character)
+    public CombatRatingBreakdown GetCombatRating(DungeonSimulationCharacter character)
     {
+        character = NormalizeCharacter(character);
         var equipmentModifiers = CreateSimulationEquipment(character.Equipment)
             .SelectMany(item => item.AttributeModifiers)
             .ToList();
-        var attributes = AttributeCalculator.CalculateProjectedAttributes(
+        var projection = _combatRatings.Calculate(
             CreateAttributeDictionary(character),
-            equipmentModifiers);
+            equipmentModifiers,
+            CreateSimulationEssences(character, Guid.Empty));
 
-        return CombatRatingCalculator.Calculate(attributes);
+        return projection.Breakdown;
     }
+
+    private static List<PlayerEssence> CreateSimulationEssences(
+        DungeonSimulationCharacter character,
+        Guid characterId) => character.EssenceIds
+        .Distinct(StringComparer.OrdinalIgnoreCase)
+        .Select(essenceId => new PlayerEssence
+        {
+            Id = Guid.NewGuid(),
+            CharacterId = characterId,
+            EssenceDefinitionId = essenceId,
+            Level = Math.Max(1, character.Level)
+        })
+        .ToList();
 
     private static Dictionary<AttributeType, float> CreateAttributeDictionary(
         DungeonSimulationCharacter character) => new()

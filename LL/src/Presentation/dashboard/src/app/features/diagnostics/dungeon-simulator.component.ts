@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { finalize } from 'rxjs';
 import { DiagnosticsService } from '../../core/services/api/diagnostics/diagnostics.service';
@@ -9,6 +9,7 @@ import {
   DungeonSimulationOptions,
   DungeonSimulationReport,
   DungeonSimulationRequest,
+  CombatRatingBreakdown,
 } from '../../shared/models/diagnostics/dungeon-simulation';
 import {
   DropdownComponent,
@@ -22,8 +23,10 @@ import {
   imports: [CommonModule, FormsModule, DropdownComponent],
   templateUrl: './dungeon-simulator.component.html',
 })
-export class DungeonSimulatorComponent implements OnInit {
+export class DungeonSimulatorComponent implements OnInit, OnDestroy {
   private readonly numberFormatter = new Intl.NumberFormat();
+  private ratingRefreshTimer: ReturnType<typeof setTimeout> | null = null;
+  private ratingRequestId = 0;
 
   readonly routeDropdownOptions: readonly DropdownOption<
     DungeonSimulationRequest['routeStrategy']
@@ -39,6 +42,13 @@ export class DungeonSimulatorComponent implements OnInit {
   simulating = false;
   error: string | null = null;
   essenceFilter = '';
+  ratingLoading = false;
+  combatRating: CombatRatingBreakdown = {
+    baseAndEquipment: 0,
+    essenceAttributes: 0,
+    essenceAbilities: 0,
+    total: 0,
+  };
 
   request: DungeonSimulationRequest = {
     dungeonDefinitionId: '',
@@ -80,11 +90,17 @@ export class DungeonSimulatorComponent implements OnInit {
           this.options = options;
           this.request.dungeonDefinitionId =
             this.request.dungeonDefinitionId || options.dungeons[0]?.id || '';
+          this.scheduleCombatRatingRefresh(0);
         },
         error: (error: Error) => {
           this.error = error.message || 'Unable to load simulator options.';
         },
       });
+  }
+
+  ngOnDestroy(): void {
+    if (this.ratingRefreshTimer !== null) clearTimeout(this.ratingRefreshTimer);
+    this.ratingRequestId++;
   }
 
   runSimulation(): void {
@@ -97,7 +113,10 @@ export class DungeonSimulatorComponent implements OnInit {
       .runDungeonSimulation(this.request)
       .pipe(finalize(() => (this.simulating = false)))
       .subscribe({
-        next: (report) => (this.report = report),
+        next: (report) => {
+          this.report = report;
+          this.combatRating = report.combatRatingBreakdown;
+        },
         error: (error: Error) => {
           this.error = error.message || 'Dungeon simulation failed.';
         },
@@ -140,6 +159,7 @@ export class DungeonSimulatorComponent implements OnInit {
 
   selectEquipmentRarity(selection: DropdownSelection<string>): void {
     this.request.character.equipment.rarity = selection.main;
+    this.scheduleCombatRatingRefresh();
   }
 
   get filteredEssences() {
@@ -155,36 +175,34 @@ export class DungeonSimulatorComponent implements OnInit {
   }
 
   get estimatedCombatRating(): number {
-    const attributes = this.effectiveAttributes;
-    return Math.max(
-      0,
-      Math.round(
-        this.attribute(attributes, 'Power') * 8 +
-          this.attribute(attributes, 'Fortitude') * 8 +
-          this.attribute(attributes, 'Precision') * 8 +
-          this.attribute(attributes, 'Spirit') * 5 +
-          this.attribute(attributes, 'WeaponDamage') * 18 +
-          this.attribute(attributes, 'CritChance') * 4 +
-          this.attribute(attributes, 'CritDamage') * 1.5 +
-          this.attribute(attributes, 'ArmorPenetration') * 2 +
-          this.attribute(attributes, 'MagicPenetration') * 2 +
-          this.attribute(attributes, 'AttackSpeed') * 3 +
-          this.attribute(attributes, 'MaxHealth') * 1.8 +
-          this.attribute(attributes, 'Armor') * 4 +
-          this.attribute(attributes, 'Resistance') * 4 +
-          this.attribute(attributes, 'DodgeChance') * 5 +
-          this.attribute(attributes, 'BlockChance') * 3 +
-          this.attribute(attributes, 'DamageReduction') * 7 +
-          this.attribute(attributes, 'HealingPowerPercent') * 2 +
-          this.attribute(attributes, 'HealthRegeneration') * 8 +
-          this.attribute(attributes, 'LifeSteal') * 4 +
-          this.attribute(attributes, 'Cooldown') * 3 +
-          this.attribute(attributes, 'StatusResistance') * 2 +
-          this.attribute(attributes, 'CrowdControlResistance') * 2 +
-          this.attribute(attributes, 'SummonPower') * 4 +
-          this.attribute(attributes, 'SummonHealth') * 0.15,
-      ),
+    return this.combatRating.total;
+  }
+
+  scheduleCombatRatingRefresh(delay = 180): void {
+    if (!this.options) return;
+    if (this.ratingRefreshTimer !== null) clearTimeout(this.ratingRefreshTimer);
+    this.ratingRefreshTimer = setTimeout(
+      () => this.refreshCombatRating(),
+      delay,
     );
+  }
+
+  private refreshCombatRating(): void {
+    this.ratingRefreshTimer = null;
+    const requestId = ++this.ratingRequestId;
+    this.ratingLoading = true;
+    this.diagnostics
+      .getDungeonSimulationCombatRating(this.request.character)
+      .pipe(
+        finalize(() => {
+          if (requestId === this.ratingRequestId) this.ratingLoading = false;
+        }),
+      )
+      .subscribe({
+        next: (rating) => {
+          if (requestId === this.ratingRequestId) this.combatRating = rating;
+        },
+      });
   }
 
   isEquipmentSlotSelected(slotId: string): boolean {
@@ -195,10 +213,12 @@ export class DungeonSimulatorComponent implements OnInit {
     const selected = new Set(this.request.character.equipment.equippedSlots);
     checked ? selected.add(slotId) : selected.delete(slotId);
     this.request.character.equipment.equippedSlots = [...selected];
+    this.scheduleCombatRatingRefresh();
   }
 
   clearEquipment(): void {
     this.request.character.equipment.equippedSlots = [];
+    this.scheduleCombatRatingRefresh();
   }
 
   equipmentBonusSummary(slot: DungeonSimulationEquipmentSlotOption): string {
@@ -219,10 +239,12 @@ export class DungeonSimulatorComponent implements OnInit {
     const selected = new Set(this.request.character.essenceIds);
     checked ? selected.add(essenceId) : selected.delete(essenceId);
     this.request.character.essenceIds = [...selected];
+    this.scheduleCombatRatingRefresh();
   }
 
   clearEssences(): void {
     this.request.character.essenceIds = [];
+    this.scheduleCombatRatingRefresh();
   }
 
   trackDungeon(_: number, dungeon: DungeonSimulationDungeonOption): string {
@@ -250,40 +272,6 @@ export class DungeonSimulatorComponent implements OnInit {
         (rarity) => rarity.id === this.request.character.equipment.rarity,
       )?.multiplier ?? 1
     );
-  }
-
-  private get effectiveAttributes(): Record<string, number> {
-    const character = this.request.character;
-    const attributes: Record<string, number> = {
-      MaxHealth: character.maxHealth,
-      Power: character.power,
-      Fortitude: character.fortitude,
-      Spirit: character.spirit,
-      Armor: character.armor,
-      Resistance: character.resistance,
-      Precision: character.precision,
-      CritChance: character.critChance,
-      CritDamage: character.critDamage,
-      AttackSpeed: character.attackSpeed,
-      HealthRegeneration: character.healthRegeneration,
-    };
-    const equippedSlots = new Set(character.equipment.equippedSlots);
-    const multiplier = this.selectedEquipmentRarityMultiplier;
-
-    for (const slot of this.options?.equipmentSlots ?? []) {
-      if (!equippedSlots.has(slot.id)) continue;
-
-      for (const [attribute, value] of Object.entries(slot.attributeBonuses)) {
-        attributes[attribute] =
-          (attributes[attribute] ?? 0) + Math.ceil(value * multiplier);
-      }
-    }
-
-    return attributes;
-  }
-
-  private attribute(attributes: Record<string, number>, name: string): number {
-    return attributes[name] ?? 0;
   }
 
   private formatAttributeName(attribute: string): string {

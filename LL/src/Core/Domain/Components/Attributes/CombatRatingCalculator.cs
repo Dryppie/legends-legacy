@@ -46,3 +46,11 @@ public static class CombatRatingCalculator
     private static float Get(IReadOnlyDictionary<AttributeType, float> attributes, AttributeType type) =>
         attributes.GetValueOrDefault(type);
 }
+
+public sealed record CombatRatingBreakdown(
+    int BaseAndEquipment,
+    int EssenceAttributes,
+    int EssenceAbilities)
+{
+    public int Total => Math.Max(0, BaseAndEquipment + EssenceAttributes + EssenceAbilities);
+}
