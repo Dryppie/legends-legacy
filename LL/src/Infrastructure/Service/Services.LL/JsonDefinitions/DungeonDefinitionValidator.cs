@@ -63,6 +63,9 @@ public sealed class DungeonDefinitionValidator : IDungeonDefinitionValidator
         if (dungeon.MaxRooms < dungeon.MinRooms)
             errors.Add($"{label}: maxRooms must be greater than or equal to minRooms.");
 
+        if (dungeon.RestSiteCount < 0)
+            errors.Add($"{label}: restSiteCount cannot be negative.");
+
         if (!string.IsNullOrWhiteSpace(dungeon.RequiredPreviousDungeonId)
             && !definitionsById.ContainsKey(dungeon.RequiredPreviousDungeonId))
         {
@@ -168,12 +171,15 @@ public sealed class DungeonDefinitionValidator : IDungeonDefinitionValidator
             if (encounterIds.Count == 0)
                 errors.Add($"{dungeonId}: room '{room.Type}' requires at least one encounter id.");
 
-            var duplicates = encounterIds
-                .GroupBy(x => x, StringComparer.OrdinalIgnoreCase)
-                .Where(x => x.Count() > 1)
-                .Select(x => x.Key);
+            if (room.Type == RoomType.Combat)
+            {
+                var duplicates = encounterIds
+                    .GroupBy(x => x, StringComparer.OrdinalIgnoreCase)
+                    .Where(x => x.Count() > 1)
+                    .Select(x => x.Key);
 
-            errors.AddRange(duplicates.Select(id => $"{dungeonId}: room '{room.Type}' has duplicate encounter id '{id}'."));
+                errors.AddRange(duplicates.Select(id => $"{dungeonId}: room '{room.Type}' has duplicate encounter id '{id}'."));
+            }
         }
     }
 

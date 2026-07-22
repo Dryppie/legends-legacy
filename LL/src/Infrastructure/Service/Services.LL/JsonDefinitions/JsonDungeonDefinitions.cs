@@ -1,4 +1,5 @@
 ﻿using Domain.Models.Dungeons;
+using Services.LL.JsonDefinitions.Dungeons;
 using Services.LL.JsonDefinitions.Reader;
 using Application.Interfaces.Services.LL.Dungeons;
 
@@ -16,11 +17,13 @@ public sealed class JsonDungeonDefinitions : IDungeonDefinitions
     private readonly Dictionary<string, DungeonDefinition> _byId;
 
     public JsonDungeonDefinitions(
-        JsonDefinitionReader<DungeonDefinition> reader,
+        JsonDocumentReader<DungeonCatalogDocument> reader,
+        DungeonDefinitionMaterializer materializer,
         IDungeonDefinitionValidator validator)
     {
-        validator.ThrowIfInvalid(reader.All);
-        _byId = reader.All
+        var definitions = materializer.Materialize(reader.Value);
+        validator.ThrowIfInvalid(definitions);
+        _byId = definitions
             .Where(d => !RetiredDungeonIds.Contains(d.Id))
             .ToDictionary(d => d.Id, d => d, StringComparer.OrdinalIgnoreCase);
     }

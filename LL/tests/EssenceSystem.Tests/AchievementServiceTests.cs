@@ -222,7 +222,7 @@ public sealed class AchievementServiceTests
         SeedCharacter(db, accountId, characterId);
         SeedAchievement(db, "dungeon.complete", AchievementRequirementType.DungeonRunsCompleted, 1, AchievementScope.Character);
         SeedAchievement(db, "dungeon.deathless", AchievementRequirementType.DungeonCompletedWithoutDefeat, 1, AchievementScope.Character);
-        SeedAchievement(db, "dungeon.no_retreat", AchievementRequirementType.DungeonCompletedWithoutCheckpointRetreat, 1, AchievementScope.Character);
+        SeedAchievement(db, "dungeon.no_retreat", AchievementRequirementType.DungeonCompletedWithoutRetreat, 1, AchievementScope.Character);
         await db.SaveChangesAsync();
         var service = CreateService(db);
 

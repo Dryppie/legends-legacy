@@ -9,6 +9,7 @@ public sealed record DungeonCombatOrchestrationRequest(
     Guid CharacterId,
     CharacterSnapshot CharacterSnapshot,
     int CurrentRoomIndex,
+    int DungeonTier,
     IReadOnlyList<string> EnemyCreatureKeys,
     IReadOnlyList<AttributeModifierBase>? RunAttributeModifiers = null,
     IReadOnlyList<EssenceAbilityModifierDefinition>? RunAbilityModifiers = null,

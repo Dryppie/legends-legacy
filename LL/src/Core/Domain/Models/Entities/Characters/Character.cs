@@ -8,6 +8,7 @@ using Domain.Models.Professions;
 using Domain.Models.Soulstones;
 using Domain.Models.Users;
 using System.ComponentModel.DataAnnotations.Schema;
+using Domain.Components.Attributes;
 
 namespace Domain.Models.Entities.Characters;
 public class Character : Entity
@@ -22,6 +23,8 @@ public class Character : Entity
     public long Experience { get; set; } = 0;
     [NotMapped]
     public long ExperienceUntilNextLevel { get; set; }
+    [NotMapped]
+    public CombatRatingBreakdown CombatRating { get; set; } = new(0, 0, 0);
     public long Cinders { get; set; } = 0;
     public long Soulstones { get; set; } = 0;
     public long FateEcho { get; set; } = 0;

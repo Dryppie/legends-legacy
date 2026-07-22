@@ -8,6 +8,7 @@ using Services.AdminDashboard;
 using Services.LL;
 using Services.LL.Validation;
 using RealTime.LL;
+using System.Net;
 using System.Security.Claims;
 using System.Text;
 
@@ -74,17 +75,17 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 builder.Services.AddAuthorizationBuilder()
     .AddPolicy("AdminDashboard", policy =>
     {
-        var allowedEmails = config.GetSection("AdminDashboard:AllowedEmails").Get<string[]>()
-            ?? ["admin@hotmail.com"];
-
-        policy.RequireAuthenticatedUser();
         policy.RequireAssertion(context =>
         {
-            var email = context.User.FindFirstValue(System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Email)
-                ?? context.User.FindFirstValue(ClaimTypes.Email);
+            var remoteAddress = context.Resource switch
+            {
+                HttpContext httpContext => httpContext.Connection.RemoteIpAddress,
+                Microsoft.AspNetCore.Mvc.Filters.AuthorizationFilterContext filterContext =>
+                    filterContext.HttpContext.Connection.RemoteIpAddress,
+                _ => null
+            };
 
-            return !string.IsNullOrWhiteSpace(email)
-                && allowedEmails.Contains(email, StringComparer.OrdinalIgnoreCase);
+            return remoteAddress is not null && IPAddress.IsLoopback(remoteAddress);
         });
     });
 

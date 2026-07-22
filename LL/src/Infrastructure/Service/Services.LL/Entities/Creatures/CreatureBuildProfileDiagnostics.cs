@@ -47,7 +47,7 @@ public sealed class CreatureBuildProfileDiagnostics : ICreatureBuildProfileDiagn
             clone.Archetype,
             clone.DamageProfile,
             clone.DefenseProfile,
-            CombatRatingCalculator.Calculate(finalAttributes, clone.Level),
+            CombatRatingCalculator.Calculate(finalAttributes),
             finalAttributes);
     }
 

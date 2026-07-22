@@ -806,10 +806,7 @@ Critical
 | Essences                |                     60 | `LL/src/API/API.LL/Data/essences.json`          | Strong collection depth                       | Milestones and build archetype clarity.         |
 | Abilities               |                    124 | `LL/src/API/API.LL/Data/abilities.json`         | High breadth                                  | Balance explainability.                         |
 | Ability behaviors       |                    129 | `LL/src/API/API.LL/Data/ability-behaviors.json` | Strong technical depth                        | Automated outlier checks.                       |
-| Dungeons                |                      9 | `LL/src/API/API.LL/Data/dungeons.json`          | Good count, but depth depends on room choices | Fully polished signature dungeon.               |
-| Dungeon routes          |                     22 | `dungeon-routes.json`                           | Good flavor                                   | More mechanical differentiation.                |
-| Dungeon events          |                      8 | `dungeon-events.json`                           | Useful base                                   | More unique family-specific events.             |
-| Dungeon boons           |                     45 | `dungeon-boons.json`                            | Strong roguelite support                      | Better UI impact previews.                      |
+| Dungeons                |                      9 | `LL/src/API/API.LL/Data/dungeons/dungeons.json` | Streamlined combat, miniboss, rest, and boss runs | More encounter and dungeon-family variety.   |
 | Dungeon mastery bonuses |                     10 | `dungeon-mastery-bonuses.json`                  | Good start                                    | Long-term mastery goals.                        |
 | Guild buildings         |                      3 | `guild-building-upgrades.json`                  | Thin                                          | More cooperative sinks after guild loop exists. |
 | Soulstone upgrades      |                     27 | `soulstone-upgrades.json`                       | Good vertical progression                     | Build path recommendations.                     |

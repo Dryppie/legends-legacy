@@ -41,6 +41,7 @@ public sealed class DungeonCombatOrchestrator : ICombatOrchestrator
             dungeonRunId: dungeonRequest.DungeonRunId,
             characterId: dungeonRequest.CharacterId,
             characterSnapshot: dungeonRequest.CharacterSnapshot,
+            dungeonTier: dungeonRequest.DungeonTier,
             playerEntityIds: [dungeonRequest.CharacterId],
             enemySourceEntityIds: resolvedParticipants,
             runAttributeModifiers: dungeonRequest.RunAttributeModifiers,

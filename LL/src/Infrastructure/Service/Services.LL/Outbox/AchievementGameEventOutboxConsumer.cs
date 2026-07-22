@@ -188,7 +188,7 @@ public sealed class AchievementGameEventOutboxConsumer(
             payload.CharacterId,
             payload.DungeonDefinitionId,
             payload.CompletedWithoutDefeat,
-            payload.CompletedWithoutCheckpointRetreat,
+            payload.CompletedWithoutRetreat,
             payload.DefeatedBossKeys,
             cancellationToken);
 

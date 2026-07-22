@@ -35,19 +35,28 @@ export interface DungeonRecord {
   totalClears: number;
 }
 
-export interface DungeonMasteryBonusPreview {
-  id: string;
-  requiredLevel: number;
-  description: string;
-  isActive: boolean;
-}
-
 export interface DungeonMastery {
   experience: number;
   level: number;
   experienceRequiredForNextLevel?: number | null;
   completionCount: number;
-  bonuses: DungeonMasteryBonusPreview[];
+  benefits?: DungeonMasteryBenefitSummary;
+  benefitLevels?: DungeonMasteryBenefitLevel[];
+}
+
+export interface DungeonMasteryBenefitSummary {
+  additionalVisibilityRows: number;
+  restSiteVigorBonus: number;
+  gatheringProcChanceBonus: number;
+  combatVigorCostReduction: number;
+  completionCurrencyBonusPercent: number;
+}
+
+export interface DungeonMasteryBenefitLevel {
+  level: number;
+  id: string;
+  name: string;
+  description: string;
 }
 
 export interface DungeonEntryRequirement {

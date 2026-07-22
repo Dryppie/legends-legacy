@@ -413,7 +413,7 @@ public sealed class AchievementService : IAchievementService
         Guid characterId,
         string dungeonDefinitionId,
         bool completedWithoutDefeat,
-        bool completedWithoutCheckpointRetreat,
+        bool completedWithoutRetreat,
         IReadOnlyCollection<string> defeatedBossKeys,
         CancellationToken cancellationToken)
     {
@@ -430,9 +430,9 @@ public sealed class AchievementService : IAchievementService
             await AddProgressAsync(accountId, characterId, AchievementRequirementType.DungeonCompletedWithoutDefeat, cancellationToken: cancellationToken);
         }
 
-        if (completedWithoutCheckpointRetreat)
+        if (completedWithoutRetreat)
         {
-            await AddProgressAsync(accountId, characterId, AchievementRequirementType.DungeonCompletedWithoutCheckpointRetreat, cancellationToken: cancellationToken);
+            await AddProgressAsync(accountId, characterId, AchievementRequirementType.DungeonCompletedWithoutRetreat, cancellationToken: cancellationToken);
         }
 
         foreach (var bossKey in defeatedBossKeys)

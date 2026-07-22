@@ -54,7 +54,7 @@ public sealed record DungeonRunCompletedPayload(
     Guid CharacterId,
     string DungeonDefinitionId,
     bool CompletedWithoutDefeat,
-    bool CompletedWithoutCheckpointRetreat,
+    bool CompletedWithoutRetreat,
     IReadOnlyCollection<string> DefeatedBossKeys);
 
 public sealed record ColosseumBattleCompletedPayload(

@@ -20,17 +20,13 @@ public sealed class DungeonRun
     public List<RoomInstance> Rooms { get; set; } = [];
     public DungeonRunState State { get; set; } = new();
 
-    //public List<RunModifier> ActiveModifiers { get; set; } = []; // run-wide active
-    //public List<RunBlessing> AppliedBlessings { get; set; } = [];
-
-    //public RunFlags Flags { get; set; } = new();
 
     public int PendingExperience { get; set; }
     public int PendingCinders { get; set; }
     public int PendingSoulstones { get; set; }
     public List<RunReward> PendingRewards { get; set; } = [];
     public int DeathsDuringRun { get; set; }
-    public bool UsedCheckpointRetreat { get; set; }
+    public bool UsedRetreat { get; set; }
 
     public DateTimeOffset CreatedAt { get; set; }
     public DateTimeOffset? CompletedAt { get; set; }

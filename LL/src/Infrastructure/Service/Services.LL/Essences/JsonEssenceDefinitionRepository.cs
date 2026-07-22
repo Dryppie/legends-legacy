@@ -36,6 +36,7 @@ public sealed class JsonEssenceDefinitionRepository : IEssenceDefinitionReposito
                 x => x.Key,
                 x => _abilities[x.Single().Id],
                 new EssenceSlotComparer());
+        ApplyAbilityCombatRatings(document);
         ResolveAbilityReferences(document.Essences);
         essenceValidator.ThrowIfInvalid(document.Essences);
         _definitions = document.Essences;
@@ -87,9 +88,32 @@ public sealed class JsonEssenceDefinitionRepository : IEssenceDefinitionReposito
         }
     }
 
+    private static void ApplyAbilityCombatRatings(EssenceDefinitionDocument document)
+    {
+        var ratings = document.AbilityCombatRatings.ToDictionary(
+            pair => pair.Key,
+            pair => pair.Value,
+            StringComparer.OrdinalIgnoreCase);
+        var definitionIds = document.Essences
+            .Select(x => x.Id)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+        var unknownIds = ratings.Keys
+            .Where(id => !definitionIds.Contains(id))
+            .ToList();
+        if (unknownIds.Count > 0)
+            throw new InvalidOperationException("Unknown Essence combat rating ids: " + string.Join(", ", unknownIds));
+
+        foreach (var essence in document.Essences)
+        {
+            if (ratings.TryGetValue(essence.Id, out var rating))
+                essence.AbilityCombatRating = rating;
+        }
+    }
+
     private sealed class EssenceDefinitionDocument
     {
         public List<EssenceDefinition> Essences { get; set; } = [];
+        public Dictionary<string, int> AbilityCombatRatings { get; set; } = new(StringComparer.OrdinalIgnoreCase);
     }
 
     private sealed class EssenceSlotComparer : IEqualityComparer<(string EssenceId, AbilitySpecKind Kind)>

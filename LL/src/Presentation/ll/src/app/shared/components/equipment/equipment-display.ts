@@ -106,7 +106,7 @@ const ATTRIBUTE_WEIGHTS: Partial<Record<AttributeType, number>> = {
   [AttributeType.Fortitude]: 8,
   [AttributeType.Precision]: 8,
   [AttributeType.Spirit]: 5,
-  [AttributeType.MaxHealth]: 0.18,
+  [AttributeType.MaxHealth]: 1.8,
   [AttributeType.WeaponDamage]: 18,
   [AttributeType.Armor]: 4,
   [AttributeType.Resistance]: 4,

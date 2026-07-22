@@ -56,7 +56,7 @@ public sealed class GetAvailableDungeonsQueryHandler : IRequestHandler<GetAvaila
         var character = await _characters.GetMyCharacterOverviewAsync(request.CharacterId, cancellationToken);
         var combatRating = character is null
             ? 0
-            : Domain.Components.Attributes.CombatRatingCalculator.Calculate(character.BaseCombatAttributes, character.Level);
+            : character.CombatRating.Total;
 
         var dungeons = _dungeonDefinitions.GetAll()
             .OrderBy(x => DungeonDefinitionIdentity.GetFamilyId(x.Id))
@@ -107,15 +107,7 @@ public sealed class GetAvailableDungeonsQueryHandler : IRequestHandler<GetAvaila
                 CurrentCombatRating = access.CurrentCombatRating,
                 CanEnter = access.CanEnter,
                 MissingRequirements = [.. access.MissingRequirements],
-                EntryRequirements = access.EntryRequirements
-                    .Select(x => new DungeonEntryRequirementDto
-                    {
-                        ItemId = x.ItemId,
-                        Name = x.Name,
-                        RequiredAmount = x.RequiredAmount,
-                        OwnedAmount = x.OwnedAmount
-                    })
-                    .ToList(),
+                EntryRequirements = _mapper.Map<List<DungeonEntryRequirementDto>>(access.EntryRequirements),
                 SigilItemId = string.IsNullOrWhiteSpace(dungeon.SigilItemId) ? null : dungeon.SigilItemId,
                 SigilName = sigilRequirement?.Name,
                 CanAssembleSigil = sigilSettings.Enabled && sigilAssemblyAccess?.CanEnter == true,
@@ -147,20 +139,7 @@ public sealed class GetAvailableDungeonsQueryHandler : IRequestHandler<GetAvaila
             dungeon,
             cancellationToken);
 
-        return rewards
-            .Select(x => new DungeonPreviewRewardDto
-            {
-                Id = x.ItemBase.Id,
-                ItemBase = _mapper.Map<ItemBaseDto>(x.ItemBase),
-                Category = x.Category,
-                Source = x.Source,
-                MinQuantity = x.MinQuantity,
-                MaxQuantity = x.MaxQuantity,
-                DropChancePercent = x.DropChancePercent,
-                CanDropNothing = x.CanDropNothing,
-                NoDropChancePercent = x.NoDropChancePercent
-            })
-            .ToList();
+        return _mapper.Map<List<DungeonPreviewRewardDto>>(rewards);
     }
 
     private async Task<List<DungeonGatheringNodePreviewDto>> MapGatheringNodesAsync(
@@ -213,45 +192,18 @@ public sealed class GetAvailableDungeonsQueryHandler : IRequestHandler<GetAvaila
         };
     }
 
-    private static DungeonRecordDto MapRecord(DungeonCompletionRecord? record)
+    private DungeonRecordDto MapRecord(DungeonCompletionRecord? record)
     {
-        if (record is null)
-        {
-            return new DungeonRecordDto();
-        }
-
-        return new DungeonRecordDto
-        {
-            HasCleared = true,
-            FirstClearedAt = record.FirstCompletedAt,
-            LastClearedAt = record.LastCompletedAt,
-            TotalClears = record.CompletionCount
-        };
+        return record is null
+            ? new DungeonRecordDto()
+            : _mapper.Map<DungeonRecordDto>(record);
     }
 
-    private static DungeonMasteryDto MapMastery(DungeonMasterySnapshot? mastery)
+    private DungeonMasteryDto MapMastery(DungeonMasterySnapshot? mastery)
     {
-        if (mastery is null)
-        {
-            return new DungeonMasteryDto();
-        }
-
-        return new DungeonMasteryDto
-        {
-            Experience = mastery.Experience,
-            Level = mastery.Level,
-            ExperienceRequiredForNextLevel = mastery.ExperienceRequiredForNextLevel,
-            CompletionCount = mastery.CompletionCount,
-            Bonuses = mastery.Bonuses
-                .Select(x => new DungeonMasteryBonusPreviewDto
-                {
-                    Id = x.Id,
-                    RequiredLevel = x.RequiredLevel,
-                    Description = x.Description,
-                    IsActive = x.IsActive
-                })
-                .ToList()
-        };
+        return mastery is null
+            ? new DungeonMasteryDto()
+            : _mapper.Map<DungeonMasteryDto>(mastery);
     }
 
     private static string FormatGrade(Domain.Models.Dungeons.Definitions.DungeonGrade grade) =>

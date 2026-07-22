@@ -46,6 +46,17 @@ public sealed class EssenceDefinitionValidatorTests
     }
 
     [Fact]
+    public void Validate_rejects_missing_ability_combat_rating()
+    {
+        var definition = ValidDefinition();
+        definition.AbilityCombatRating = 0;
+
+        var errors = _validator.Validate([definition]);
+
+        Assert.Contains(errors, error => error.Contains("abilityCombatRating", StringComparison.OrdinalIgnoreCase));
+    }
+
+    [Fact]
     public void Validate_rejects_active_and_passive_ability_kind_mismatches()
     {
         var definition = ValidDefinition();
@@ -136,6 +147,7 @@ public sealed class EssenceDefinitionValidatorTests
             _validator);
 
         Assert.NotEmpty(repository.GetAll());
+        Assert.All(repository.GetAll(), definition => Assert.True(definition.AbilityCombatRating > 0));
     }
 
     [Fact]
@@ -173,6 +185,7 @@ public sealed class EssenceDefinitionValidatorTests
         Id = "essence.test",
         SourceMonsterId = "monster.test",
         Name = "Test Essence",
+        AbilityCombatRating = 100,
         ActiveAbilityId = "active.test",
         PassiveAbilityId = "passive.test",
         Tags = ["Species.Beast", "Role.Offensive"],

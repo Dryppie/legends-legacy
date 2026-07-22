@@ -4,7 +4,7 @@ namespace Domain.Components.Attributes;
 
 public static class CombatRatingCalculator
 {
-    public static int Calculate(IReadOnlyDictionary<AttributeType, float> attributes, int characterLevel)
+    public static int Calculate(IReadOnlyDictionary<AttributeType, float> attributes)
     {
         var primary =
             Get(attributes, AttributeType.Power) * 8 +
@@ -21,7 +21,7 @@ public static class CombatRatingCalculator
             Get(attributes, AttributeType.AttackSpeed) * 3;
 
         var defense =
-            Get(attributes, AttributeType.MaxHealth) * 0.18f +
+            Get(attributes, AttributeType.MaxHealth) * 1.8f +
             Get(attributes, AttributeType.Armor) * 4 +
             Get(attributes, AttributeType.Resistance) * 4 +
             Get(attributes, AttributeType.DodgeChance) * 5 +
@@ -40,11 +40,17 @@ public static class CombatRatingCalculator
             Get(attributes, AttributeType.SummonPower) * 4 +
             Get(attributes, AttributeType.SummonHealth) * 0.15f;
 
-        var level = Math.Max(1, characterLevel) * 10;
-
-        return Math.Max(0, (int)MathF.Round(primary + offense + defense + recovery + utility + level));
+        return Math.Max(0, (int)MathF.Round(primary + offense + defense + recovery + utility));
     }
 
     private static float Get(IReadOnlyDictionary<AttributeType, float> attributes, AttributeType type) =>
         attributes.GetValueOrDefault(type);
+}
+
+public sealed record CombatRatingBreakdown(
+    int BaseAndEquipment,
+    int EssenceAttributes,
+    int EssenceAbilities)
+{
+    public int Total => Math.Max(0, BaseAndEquipment + EssenceAttributes + EssenceAbilities);
 }

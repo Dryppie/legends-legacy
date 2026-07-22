@@ -3,6 +3,7 @@ using Application.Interfaces.Services.LL.Dungeons;
 using Application.Interfaces.Services.LL.Rewards;
 using Domain.Models.Dungeons.Definitions;
 using Domain.Models.Dungeons.Runs;
+using Domain.Models.Dungeons.Mastery;
 using Domain.Models.Essences;
 using Domain.Models.Items;
 using Domain.Models.Rewards;
@@ -42,6 +43,7 @@ public sealed class DungeonCompletionRewardApplier : IDungeonCompletionRewardApp
     public async Task ApplyAsync(DungeonRun run, CancellationToken cancellationToken)
     {
         var dungeon = _dungeonDefinitions.GetByKey(run.DungeonDefinitionId);
+        var masteryBenefits = DungeonMasteryBenefits.Resolve(run.State?.MasteryLevelAtStart ?? 0);
 
         if (dungeon.CompletionRewardTableIds.Count > 0)
         {
@@ -51,6 +53,7 @@ public sealed class DungeonCompletionRewardApplier : IDungeonCompletionRewardApp
                     run.Id,
                     rewardTableId,
                     "Dungeon Completion",
+                    masteryBenefits.CompletionCurrencyBonusPercent,
                     cancellationToken);
             }
         }
@@ -63,6 +66,7 @@ public sealed class DungeonCompletionRewardApplier : IDungeonCompletionRewardApp
                     run.Id,
                     rewardTableId,
                     $"Tier {dungeon.Tier} Completion",
+                    masteryBenefits.CompletionCurrencyBonusPercent,
                     cancellationToken);
             }
         }
@@ -76,7 +80,23 @@ public sealed class DungeonCompletionRewardApplier : IDungeonCompletionRewardApp
         await AddPotentialCoreRewardsAsync(run.Id, dungeon.Region, dungeon.Grade, cancellationToken);
         await AddMonsterCoreRewardsAsync(run.Id, dungeon.Grade, cancellationToken);
         await AddFirstCompletionRewardsIfNeededAsync(run, dungeon, cancellationToken);
-        await _mastery.AwardCompletionAsync(run, cancellationToken);
+        var masteryAward = await _mastery.AwardCompletionAsync(run, cancellationToken);
+        if (!masteryAward.AlreadyAwarded &&
+            masteryAward.PreviousLevel < DungeonMasteryBenefits.MaxLevel &&
+            masteryAward.Level >= DungeonMasteryBenefits.MaxLevel)
+        {
+            await AddRewardRollResultAsync(
+                run.Id,
+                new RewardRollResult(
+                    [],
+                    Cinders: 0,
+                    Soulstones: GetMasterySoulstoneReward(dungeon.Tier),
+                    Experience: 0,
+                    Trace: []),
+                "Mastery 10 Soulstones",
+                cancellationToken);
+        }
+
         await _dungeonRuns.MarkDungeonCompletedAsync(
             run.CharacterId,
             run.DungeonDefinitionId,
@@ -88,17 +108,56 @@ public sealed class DungeonCompletionRewardApplier : IDungeonCompletionRewardApp
         Guid dungeonRunId,
         string rewardTableId,
         string source,
+        int completionCurrencyBonusPercent,
         CancellationToken cancellationToken)
     {
         var result = _rewardRoller.Roll(
             rewardTableId,
             new RewardRollContext(source));
 
+        result = ApplyCompletionCurrencyBonus(result, completionCurrencyBonusPercent);
+
         await AddRewardRollResultAsync(
             dungeonRunId,
             result,
             source,
             cancellationToken);
+    }
+
+    private static int GetMasterySoulstoneReward(int dungeonTier) => dungeonTier switch
+    {
+        1 => 50,
+        2 => 100,
+        _ => 200
+    };
+
+    private static RewardRollResult ApplyCompletionCurrencyBonus(
+        RewardRollResult result,
+        int bonusPercent)
+    {
+        if (bonusPercent <= 0)
+        {
+            return result;
+        }
+
+        return result with
+        {
+            Cinders = AddPercentageBonus(result.Cinders, bonusPercent),
+            Soulstones = AddPercentageBonus(result.Soulstones, bonusPercent)
+        };
+    }
+
+    private static int AddPercentageBonus(int value, int bonusPercent)
+    {
+        if (value <= 0)
+        {
+            return value;
+        }
+
+        var bonus = Math.Max(1, (int)Math.Round(
+            value * bonusPercent / 100d,
+            MidpointRounding.AwayFromZero));
+        return checked(value + bonus);
     }
 
     private async Task AddRewardRollResultAsync(

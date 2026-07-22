@@ -16,7 +16,6 @@ public static class DungeonEncounterIdentity
             ["cave_bat"] = "vampire_bat",
             ["giant_bat"] = "vampire_bat",
             ["necroshade_wraith"] = "specter",
-            ["goblin_shaman"] = "hobgoblin",
             ["queens_guard_ant"] = "ant_worker",
             ["ant_queen"] = "fire_ant",
             ["ant_king"] = "fire_ant"

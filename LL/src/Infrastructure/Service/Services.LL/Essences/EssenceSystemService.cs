@@ -497,10 +497,20 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
             characterId,
             essences,
             attributeModifiers,
-            tags);
+            tags,
+            essences
+                .Select(essence => essence.EssenceDefinitionId)
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .Select(essenceId => _definitions.GetById(essenceId)?.AbilityCombatRating ?? 0)
+                .Sum());
     }
 
-    public async Task<EssenceDropRollResult> RollMonsterEssenceDropAsync(Guid characterId, string monsterId, bool eligible, CancellationToken cancellationToken)
+    public async Task<EssenceDropRollResult> RollMonsterEssenceDropAsync(
+        Guid characterId,
+        string monsterId,
+        bool eligible,
+        CancellationToken cancellationToken,
+        EssenceDropRollModifiers? modifiers = null)
     {
         if (!eligible || _creatureEssenceLootTables.GetByCreatureId(monsterId) is null) return new(false, null, 0, 0);
 
@@ -512,7 +522,8 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
             eligible,
             factors,
             (candidateMonsterId, ct) => IsEssenceFocusAsync(characterId, candidateMonsterId, ct),
-            cancellationToken);
+            cancellationToken,
+            modifiers ?? new EssenceDropRollModifiers());
     }
 
     public async Task PrepareEssenceDropsAsync(
@@ -586,7 +597,8 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
         bool eligible,
         IReadOnlyDictionary<BonusKind, double> factors,
         Func<string, CancellationToken, Task<bool>> isEssenceFocusAsync,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken,
+        EssenceDropRollModifiers modifiers)
     {
         var lootTable = _creatureEssenceLootTables.GetByCreatureId(monsterId);
         if (!eligible || lootTable is null) return new(false, null, 0, 0);
@@ -604,8 +616,10 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
         }
         resonanceByCreature[monsterId] = resonance;
 
+        var maximumDropChanceBonus =
+            CreatureResonanceConstants.MaximumDropChanceBonus * modifiers.ResonanceCapMultiplier;
         var bonus = Math.Min(
-            CreatureResonanceConstants.MaximumDropChanceBonus,
+            maximumDropChanceBonus,
             resonance.ResonanceValue * CreatureResonanceConstants.DropChanceBonusPerPoint);
         var relativeDropRateBps = factors.Get(BonusKind.EssenceDropRateRelativeBps);
         if (factors.Get(BonusKind.FocusedMonsterEssenceDropRateRelativeBps) > 0 &&
@@ -616,13 +630,16 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
 
         var pityProgressionGainBps = factors.Get(BonusKind.EssencePityProgressionGainBps);
         var effective = Math.Clamp(
-            (lootTable.BaseDropChance + bonus).ApplyPositiveBps(relativeDropRateBps),
+            (lootTable.BaseDropChance + bonus).ApplyPositiveBps(relativeDropRateBps) *
+            modifiers.DropChanceMultiplier,
             0,
             1);
         var dropped = _random.NextDouble() < effective;
         var essenceDefinitionId = dropped ? RollEssenceDefinitionId(lootTable) : null;
         if (dropped) resonance.ResonanceValue = 0;
-        else resonance.ResonanceValue += CreatureResonanceConstants.GainPerFailedEligibleKill.ApplyPositiveBps(pityProgressionGainBps);
+        else resonance.ResonanceValue +=
+            CreatureResonanceConstants.GainPerFailedEligibleKill.ApplyPositiveBps(pityProgressionGainBps) *
+            modifiers.PityProgressionMultiplier;
 
         resonance.UpdatedAt = DateTimeOffset.UtcNow;
         return new(dropped, essenceDefinitionId, effective, resonance.ResonanceValue);
@@ -633,7 +650,8 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
         IReadOnlyList<Creature> defeatedCreatures,
         bool eligible,
         CancellationToken cancellationToken,
-        IReadOnlyDictionary<BonusKind, double>? bonusFactors = null)
+        IReadOnlyDictionary<BonusKind, double>? bonusFactors = null,
+        EssenceDropRollModifiers? modifiers = null)
     {
         var drops = new List<InventoryItem>();
         if (!eligible || defeatedCreatures.Count == 0) return drops;
@@ -646,6 +664,7 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
         if (monsterIds.Count == 0) return drops;
 
         var factors = bonusFactors ?? await GetBonusFactorsAsync(characterId, DateTimeOffset.UtcNow, cancellationToken);
+        var rollModifiers = modifiers ?? new EssenceDropRollModifiers();
         foreach (var monsterId in monsterIds)
         {
             var roll = await RollMonsterEssenceDropAsync(
@@ -654,7 +673,8 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
                 true,
                 factors,
                 (candidateMonsterId, ct) => IsEssenceFocusAsync(characterId, candidateMonsterId, ct),
-                cancellationToken);
+                cancellationToken,
+                rollModifiers);
             if (!roll.Dropped || string.IsNullOrWhiteSpace(roll.EssenceDefinitionId)) continue;
 
             var itemBaseId = $"item.{roll.EssenceDefinitionId}";

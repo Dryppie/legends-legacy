@@ -8,7 +8,7 @@ public sealed class CraftingRegionOneContentTests
     public void RegionOneDungeons_SourceEveryStandardCraftingMaterial()
     {
         var materials = ReadArray("crafting/materials.json");
-        var dungeons = ReadArray("dungeons/dungeons.json");
+        var dungeons = ReadDungeonDifficulties();
 
         var gatheredItemIds = dungeons
             .SelectMany(dungeon => ChildArray(dungeon, "gatheringNodes"))
@@ -31,7 +31,7 @@ public sealed class CraftingRegionOneContentTests
     {
         var materials = ReadArray("crafting/materials.json");
         var blueprints = ReadArray("crafting/blueprints.json");
-        var dungeons = ReadArray("dungeons/dungeons.json");
+        var dungeons = ReadDungeonDifficulties();
 
         var firstClearItemIds = dungeons
             .SelectMany(dungeon => ChildArray(dungeon?["rewardTable"], "firstClearRewards"))
@@ -121,7 +121,7 @@ public sealed class CraftingRegionOneContentTests
                 item => item?["id"]?.GetValue<string>() ?? string.Empty,
                 item => item?["itemType"]?.GetValue<string>() ?? string.Empty,
                 StringComparer.OrdinalIgnoreCase);
-        var dungeons = ReadArray("dungeons/dungeons.json");
+        var dungeons = ReadDungeonDifficulties();
 
         var completedEquipmentRewards = dungeons
             .SelectMany(GetDungeonRewardItemIds)
@@ -143,12 +143,12 @@ public sealed class CraftingRegionOneContentTests
             })
             .Where(material => !string.IsNullOrWhiteSpace(material.ItemId) && material.Tier.HasValue)
             .ToDictionary(material => material.ItemId, material => material.Tier!.Value, StringComparer.OrdinalIgnoreCase);
-        var dungeons = ReadArray("dungeons/dungeons.json");
+        var dungeons = ReadDungeonDifficulties();
 
         var invalidRewards = dungeons
             .SelectMany(dungeon =>
             {
-                var dungeonTier = dungeon?["tier"]?.GetValue<int>() ?? 1;
+                var dungeonTier = dungeon?["difficulty"]?.GetValue<int>() ?? 1;
                 return GetDungeonRewardItemIds(dungeon)
                     .Where(itemId => materialTierByItemId.TryGetValue(itemId, out var materialTier) &&
                                      materialTier > dungeonTier)
@@ -166,6 +166,18 @@ public sealed class CraftingRegionOneContentTests
         var json = File.ReadAllText(path);
         return JsonNode.Parse(json)?.AsArray()
             ?? throw new InvalidOperationException($"Unable to parse JSON array '{path}'.");
+    }
+
+    private static IReadOnlyList<JsonNode?> ReadDungeonDifficulties()
+    {
+        var dataRoot = FindDataRoot();
+        var path = Path.Combine(dataRoot, "dungeons", "dungeons.json");
+        var document = JsonNode.Parse(File.ReadAllText(path))
+            ?? throw new InvalidOperationException($"Unable to parse dungeon catalog '{path}'.");
+
+        return ChildArray(document, "families")
+            .SelectMany(family => ChildArray(family, "difficulties"))
+            .ToList();
     }
 
     private static IEnumerable<JsonNode?> ChildArray(JsonNode? node, string propertyName) =>

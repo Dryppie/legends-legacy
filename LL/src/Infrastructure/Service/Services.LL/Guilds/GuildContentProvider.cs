@@ -456,7 +456,7 @@ internal static class GuildContentDefaults
 
     private static readonly GuildMissionDefinition[] DailyOrderDefinitions =
     [
-        new(Guid.Parse("8d7a12db-39eb-44f0-8c66-3ba79b606ca2"), "daily.creatures_defeated", "Cull the Wilds", "Defeat 100 creatures while in a guild.", GuildMissionCategory.Combat, GuildContributionMetric.CreaturesDefeated, 100),
+        new(Guid.Parse("8d7a12db-39eb-44f0-8c66-3ba79b606ca2"), "daily.creatures_defeated", "Cull the Wilds", "Defeat 100 creatures.", GuildMissionCategory.Combat, GuildContributionMetric.CreaturesDefeated, 100),
         new(Guid.Parse("ff235b05-d721-4d96-b603-609c8abed319"), "daily.dungeon_rooms", "Scout the Depths", "Clear 5 dungeon rooms.", GuildMissionCategory.Dungeon, GuildContributionMetric.DungeonRoomsCleared, 5),
         new(Guid.Parse("c4ec6549-2bdc-4c7d-8494-6a5d8fbe7df2"), "daily.tempering_actions", "Temper the Arsenal", "Complete 20 tempering actions.", GuildMissionCategory.Crafting, GuildContributionMetric.TemperingActionsCompleted, 20),
         new(Guid.Parse("73254589-f56f-470b-9944-aa4d3a03322e"), "daily.items_crafted", "Stock the Workshop", "Craft 5 items.", GuildMissionCategory.Crafting, GuildContributionMetric.ItemsCrafted, 5)

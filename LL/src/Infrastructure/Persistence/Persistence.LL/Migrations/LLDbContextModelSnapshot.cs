@@ -1385,7 +1385,7 @@ namespace Persistence.LL.Migrations
                     b.Property<int>("Status")
                         .HasColumnType("integer");
 
-                    b.Property<bool>("UsedCheckpointRetreat")
+                    b.Property<bool>("UsedRetreat")
                         .HasColumnType("boolean");
 
                     b.HasKey("Id");
@@ -1407,9 +1407,6 @@ namespace Persistence.LL.Migrations
                     b.PrimitiveCollection<List<string>>("EncounterIds")
                         .IsRequired()
                         .HasColumnType("text[]");
-
-                    b.Property<int?>("EventOutcome")
-                        .HasColumnType("integer");
 
                     b.Property<int>("RoomIndex")
                         .HasColumnType("integer");

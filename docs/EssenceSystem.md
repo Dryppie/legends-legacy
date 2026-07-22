@@ -150,6 +150,8 @@ baseDropChance + min(maxResonanceBonus, resonanceValue * dropChanceBonusPerReson
 
 On drop, resonance resets. Resonance is capped and does not guarantee drops unless a definition explicitly configures a 100% effective chance.
 
+The featured creature in a dungeon MiniBoss or Boss encounter uses encounter-specific Essence tuning: 10x effective drop chance, 1000x resonance gain after a failed eligible roll, and 10x the normal maximum resonance drop-chance bonus. Supporting monsters in the same room use standard Essence tuning, as do ordinary and idle combat. MiniBoss and Boss encounter compositions author the featured creature first.
+
 ## Combat Integration
 
 Combat setup asks the Essence bonus provider for active loadout modifiers and applies only those modifiers to combat attributes.

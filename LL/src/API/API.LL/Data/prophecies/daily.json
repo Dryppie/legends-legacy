@@ -95,19 +95,6 @@
       "allowedSlots": [ "Ominous" ]
     },
     {
-      "id": "daily.dungeon.events",
-      "title": "A Hidden Room Will Answer",
-      "flavorText": "The dungeon keeps secrets only from the impatient.",
-      "objectiveText": "Resolve {target} dungeon event rooms.",
-      "scope": "Daily",
-      "category": "Dungeon",
-      "difficulty": "Uncommon",
-      "objectiveType": "ResolveDungeonEvents",
-      "rewardProfileId": "Daily.Uncommon",
-      "weight": 60,
-      "allowedSlots": [ "Focused" ]
-    },
-    {
       "id": "daily.essence.xp",
       "title": "A Sleeping Soul Will Stir",
       "flavorText": "Power rests inside the silent soul. Wake it.",

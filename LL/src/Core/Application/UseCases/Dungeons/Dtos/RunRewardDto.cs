@@ -1,4 +1,5 @@
 using Application.Common.Mappings;
+using AutoMapper;
 using Domain.Models.Dungeons.Runs;
 using Domain.Models.Items;
 
@@ -11,4 +12,7 @@ public class RunRewardDto : IMapFrom<RunReward>
     public ItemType ItemType { get; set; }
     public int Quantity { get; set; }
     public string Source { get; set; } = string.Empty;
+
+    public void Mapping(Profile profile) =>
+        profile.CreateMap<RunReward, RunRewardDto>();
 }

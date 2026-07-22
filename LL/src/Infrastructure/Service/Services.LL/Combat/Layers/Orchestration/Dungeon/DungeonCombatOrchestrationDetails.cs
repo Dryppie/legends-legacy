@@ -16,7 +16,7 @@ public sealed record DungeonCombatOrchestrationDetails(
 public enum DungeonProgressionStatus
 {
     Active = 1,
-    CheckpointReached = 2,
+    RestSiteReached = 2,
     RoomCleared = 3,
     RunCompleted = 4,
     Failed = 5,

@@ -1,0 +1,69 @@
+<button
+  #dropdownButton
+  #dropdownOrigin="cdkOverlayOrigin"
+  cdkOverlayOrigin
+  type="button"
+  class="flex w-full items-center justify-between gap-2 whitespace-nowrap px-3 text-left text-sm transition-colors"
+  [ngClass]="buttonClasses"
+  [attr.aria-expanded]="hasOptions ? open() : null"
+  [attr.aria-haspopup]="hasOptions ? 'listbox' : null"
+  [attr.aria-controls]="open() && hasOptions ? menuId : null"
+  (click)="onButtonClick()"
+  (keydown)="onDropdownKeydown($event)"
+>
+  <span class="min-w-0 truncate">{{ displayLabel }}</span>
+  <svg
+    *ngIf="hasOptions"
+    class="h-3 w-3 shrink-0 text-primary/80 transition-transform duration-200"
+    [ngClass]="{ 'rotate-180': open() }"
+    viewBox="0 0 16 16"
+    fill="currentColor"
+    aria-hidden="true"
+  >
+    <path d="M3.2 5.5 8 10.3l4.8-4.8L14 6.7l-6 6-6-6z" />
+  </svg>
+</button>
+
+<ng-template
+  cdkConnectedOverlay
+  [cdkConnectedOverlayOrigin]="dropdownOrigin"
+  [cdkConnectedOverlayOpen]="open() && hasOptions"
+  [cdkConnectedOverlayPositions]="dropdownPositions"
+  [cdkConnectedOverlayPush]="true"
+  [cdkConnectedOverlayViewportMargin]="8"
+>
+  <ul
+    [id]="menuId"
+    class="max-h-72 overflow-y-auto rounded border border-light_gray bg-texture py-1 shadow-xl shadow-black/60"
+    [style.width.px]="dropdownButton.offsetWidth"
+    role="listbox"
+    (click)="$event.stopPropagation()"
+    (keydown)="onDropdownKeydown($event)"
+  >
+    <li
+      *ngFor="let option of options; let optionIndex = index"
+      class="ll-dropdown-option grid cursor-pointer grid-cols-[minmax(0,1fr)_auto] gap-4 px-3 py-2 text-sm transition-colors"
+      [ngClass]="{
+        'll-dropdown-option-hovered':
+          isOptionHovered(optionIndex) && !option.disabled,
+        'll-dropdown-option-selected':
+          isOptionSelected(option) && !isOptionHovered(optionIndex),
+        'll-dropdown-option-disabled': option.disabled,
+      }"
+      role="option"
+      [attr.aria-selected]="isOptionSelected(option)"
+      [attr.aria-disabled]="option.disabled || null"
+      [attr.tabindex]="option.disabled ? -1 : 0"
+      (pointerdown)="onOptionPointerDown($event, option)"
+      (pointerenter)="onOptionPointerEnter(optionIndex)"
+      (pointerleave)="onOptionPointerLeave(optionIndex)"
+      (click)="onOptionClick(option)"
+      (keydown)="onOptionKeydown($event, option)"
+    >
+      <span class="min-w-0 truncate">{{ option.label }}</span>
+      <span *ngIf="option.detail" class="whitespace-nowrap text-primary">
+        {{ option.detail }}
+      </span>
+    </li>
+  </ul>
+</ng-template>

@@ -247,10 +247,10 @@
     "sortOrder": 410
   },
   {
-    "id": "dungeon.checkpoint-satchel",
+    "id": "dungeon.rest-site-satchel",
     "branch": "Dungeons",
-    "displayName": "Checkpoint Satchel",
-    "description": "Improves retained unsecured rewards when resting at a dungeon checkpoint.",
+    "displayName": "Rest Site Satchel",
+    "description": "Improves retained rewards when resting at a dungeon Rest Site.",
     "maxRank": 5,
     "costsByRank": [25, 75, 150, 300, 600],
     "effects": [
@@ -260,7 +260,7 @@
         "valuesByRank": [200, 400, 600, 800, 1000]
       }
     ],
-    "appliesTo": ["Dungeon checkpoint rest rewards"],
+    "appliesTo": ["Dungeon Rest Site rewards"],
     "doesNotApplyTo": ["Full-clear final rewards", "Combat stats"],
     "enabled": true,
     "sortOrder": 430

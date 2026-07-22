@@ -37,10 +37,6 @@ internal static class ProphecyMappingHelpers
                 ProphecyGuidanceDestination.Dungeons,
                 "Run Dungeons",
                 "Complete full dungeon runs to progress this prophecy."),
-            ProphecyObjectiveType.ResolveDungeonEvents => CreateGuidance(
-                ProphecyGuidanceDestination.Dungeons,
-                "Run Dungeons",
-                "Find and resolve dungeon event rooms to progress this prophecy."),
             ProphecyObjectiveType.GainEssenceXp => CreateGuidance(
                 ProphecyGuidanceDestination.Essences,
                 "Train Essences",

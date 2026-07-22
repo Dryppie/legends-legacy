@@ -192,39 +192,21 @@ export class DungeonStateService {
     this.executeAction('fight');
   }
 
-  continueAtCheckpoint(): void {
-    this.executeAction('continue');
+  restAtSite(): void {
+    this.executeAction('rest');
   }
 
   chooseRoute(routeOptionId: string): void {
     this.executeAction('choose_route', { routeOptionId });
   }
 
-  chooseBoon(boonId: string): void {
-    this.executeAction('choose_boon', { boonId });
+  retreat(): void {
+    this.executeAction('retreat');
   }
 
-  chooseCheckpoint(choice: string): void {
-    this.executeAction('checkpoint_choice', { choice });
-  }
-
-  chooseEventChoice(choiceId: string): void {
-    this.executeAction('event_choice', { choiceId });
-  }
-
-  withdraw(): void {
-    this.executeAction('withdraw');
-  }
-
-  leaveDungeon(): void {
-    this.executeAction('leave');
-  }
-
-  chooseEventAction(actionId: string, payload?: unknown): void {
-    this.executeAction(actionId, payload);
-  }
-
-  claimDungeonRewards(onSuccess?: () => void): void {
+  claimDungeonRewards(
+    onSuccess?: (response: ClaimDungeonRewardsResponse) => void,
+  ): void {
     if (this._loading()) return;
 
     this._loading.set(true);
@@ -236,7 +218,7 @@ export class DungeonStateService {
       .subscribe({
         next: (response) => {
           this.applyClaimDungeonRewards(response);
-          onSuccess?.();
+          onSuccess?.(response);
           this.loadAvailableDungeons();
         },
         error: (e) =>
@@ -271,11 +253,16 @@ export class DungeonStateService {
     );
   }
 
-  private applyClaimDungeonRewards(response: ClaimDungeonRewardsResponse): void {
+  private applyClaimDungeonRewards(
+    response: ClaimDungeonRewardsResponse,
+  ): void {
     this._activeDungeon.set(response.activeRun);
     if (isGameRealtimeEnabled()) return;
 
-    this.inventoryState.setInventory(response.inventoryItems, response.claimedLoot);
+    this.inventoryState.setInventory(
+      response.inventoryItems,
+      response.claimedLoot,
+    );
     this.characterState.updateCharacter(response.character);
   }
 

@@ -17,11 +17,10 @@ public sealed class DungeonEncounterParticipantResolver : IDungeonEncounterParti
         var normalizedKeys = enemyCreatureKeys
             .Where(key => !string.IsNullOrWhiteSpace(key))
             .Select(Domain.Models.Dungeons.Definitions.Encounters.DungeonEncounterIdentity.NormalizeCreatureKey)
-            .Distinct(StringComparer.OrdinalIgnoreCase)
             .ToArray();
 
         var resolved = await _repository.GetCreaturesByKey(normalizedKeys, cancellationToken);
-        if (normalizedKeys.Length > 0 && resolved.Count < normalizedKeys.Length)
+        if (resolved.Count != normalizedKeys.Length)
         {
             throw new InvalidOperationException(
                 $"Dungeon encounter could not resolve creature keys: {string.Join(", ", normalizedKeys)}.");

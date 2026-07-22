@@ -7,26 +7,8 @@ namespace Services.LL.Dungeons;
 
 public sealed class DungeonMasteryService : IDungeonMasteryService
 {
-    public const string MasteryLevelFlag = "mastery_level";
-    public const string MasteryRewardBonusFlag = "mastery_reward_bonus_pct";
-    public const string RewardMultiplierBonusFlag = "reward_multiplier_bonus_pct";
-    public const string StartBonusAppliedFlag = "mastery_start_bonus_applied";
-
-    private const int MaxLevel = 10;
     private const int BossDefeatExperience = 50;
     private const int MiniBossDefeatExperience = 25;
-    private const int OptionalObjectiveExperience = 25;
-    private const int HighPressureExperience = 25;
-
-    private static readonly string[] OptionalObjectiveFlags =
-    [
-        "searched_deep_treasure",
-        "cleansed_shrine",
-        "revealed_hidden_route",
-        "saved_miner",
-        "opened_reliquary"
-    ];
-
     private static readonly int[] LevelThresholds =
     [
         100,
@@ -42,14 +24,10 @@ public sealed class DungeonMasteryService : IDungeonMasteryService
     ];
 
     private readonly ICharacterDungeonMasteryRepository _masteries;
-    private readonly IDungeonMasteryBonusDefinitionProvider _bonusDefinitions;
 
-    public DungeonMasteryService(
-        ICharacterDungeonMasteryRepository masteries,
-        IDungeonMasteryBonusDefinitionProvider bonusDefinitions)
+    public DungeonMasteryService(ICharacterDungeonMasteryRepository masteries)
     {
         _masteries = masteries;
-        _bonusDefinitions = bonusDefinitions;
     }
 
     public int CalculateLevel(long experience)
@@ -65,7 +43,7 @@ public sealed class DungeonMasteryService : IDungeonMasteryService
             level++;
         }
 
-        return Math.Clamp(level, 0, MaxLevel);
+        return Math.Clamp(level, 0, DungeonMasteryBenefits.MaxLevel);
     }
 
     public int? GetExperienceRequiredForNextLevel(int level)
@@ -75,7 +53,7 @@ public sealed class DungeonMasteryService : IDungeonMasteryService
             level = 0;
         }
 
-        return level >= MaxLevel ? null : LevelThresholds[level];
+        return level >= DungeonMasteryBenefits.MaxLevel ? null : LevelThresholds[level];
     }
 
     public async Task<DungeonMasteryAwardResult> AwardCompletionAsync(
@@ -137,55 +115,6 @@ public sealed class DungeonMasteryService : IDungeonMasteryService
             AlreadyAwarded: false);
     }
 
-    public async Task ApplyStartBonusesAsync(
-        DungeonRun run,
-        CancellationToken cancellationToken)
-    {
-        run.State ??= new DungeonRunState { RunId = run.Id };
-
-        if (run.State.Flags.GetValueOrDefault(StartBonusAppliedFlag) > 0)
-        {
-            return;
-        }
-
-        var mastery = await _masteries.GetAsync(
-            run.CharacterId,
-            run.DungeonDefinitionId,
-            cancellationToken);
-
-        var level = mastery?.Level ?? 0;
-        if (level <= 0)
-        {
-            return;
-        }
-
-        run.State.Flags[StartBonusAppliedFlag] = 1;
-        run.State.Flags[MasteryLevelFlag] = level;
-
-        var activeBonuses = _bonusDefinitions.GetAll()
-            .Where(x => level >= x.RequiredLevel)
-            .ToList();
-        var rewardBonusPercent = activeBonuses.Sum(x => x.RewardMultiplierBonusPercent);
-
-        foreach (var bonus in activeBonuses)
-        {
-            foreach (var flag in bonus.AddFlags)
-            {
-                run.State.Flags[flag] = 1;
-            }
-        }
-
-        if (rewardBonusPercent > 0)
-        {
-            run.State.Flags[MasteryRewardBonusFlag] = rewardBonusPercent;
-            run.State.Flags[RewardMultiplierBonusFlag] =
-                run.State.Flags.GetValueOrDefault(RewardMultiplierBonusFlag) + rewardBonusPercent;
-        }
-
-        var baseMultiplier = Math.Max(100, run.State.RewardMultiplierPercent);
-        run.State.RewardMultiplierPercent = baseMultiplier + run.State.Flags.GetValueOrDefault(RewardMultiplierBonusFlag);
-    }
-
     public async Task<IReadOnlyDictionary<string, DungeonMasterySnapshot>> GetMasteryByDungeonAsync(
         Guid characterId,
         IReadOnlyCollection<string> dungeonDefinitionIds,
@@ -213,17 +142,7 @@ public sealed class DungeonMasteryService : IDungeonMasteryService
             mastery.Experience,
             mastery.Level,
             GetExperienceRequiredForNextLevel(mastery.Level),
-            mastery.CompletionCount,
-            GetBonuses(mastery.Level));
-
-    private IReadOnlyList<DungeonMasteryBonusDto> GetBonuses(int level) =>
-        _bonusDefinitions.GetAll()
-            .Select(x => new DungeonMasteryBonusDto(
-                x.Id,
-                x.RequiredLevel,
-                x.Description,
-                level >= x.RequiredLevel))
-            .ToList();
+            mastery.CompletionCount);
 
     private static IReadOnlyList<DungeonMasteryAwardReason> CalculateCompletionExperienceReasons(DungeonRun run)
     {
@@ -259,37 +178,6 @@ public sealed class DungeonMasteryService : IDungeonMasteryService
                 Id = "miniboss_defeated",
                 Description = "Miniboss defeated",
                 Experience = miniBossExperience
-            });
-        }
-
-        var optionalObjectiveExperience = run.State is null
-            ? 0
-            : OptionalObjectiveFlags.Count(flag => run.State.Flags.GetValueOrDefault(flag) > 0) * OptionalObjectiveExperience;
-        if (optionalObjectiveExperience > 0)
-        {
-            reasons.Add(new DungeonMasteryAwardReason
-            {
-                Id = "optional_objectives",
-                Description = "Optional objectives completed",
-                Experience = optionalObjectiveExperience
-            });
-        }
-
-        var pressureExperience = run.State is null
-            ? 0
-            : run.State.Pressure switch
-            {
-                >= 100 => HighPressureExperience * 2,
-                >= 75 => HighPressureExperience,
-                _ => 0
-            };
-        if (pressureExperience > 0)
-        {
-            reasons.Add(new DungeonMasteryAwardReason
-            {
-                Id = "high_pressure_completion",
-                Description = "High-pressure completion",
-                Experience = pressureExperience
             });
         }
 

@@ -59,6 +59,11 @@ public static class LLDbContextExtensions
         ("blueprint_venom_touched_sword", 3),
         ("blueprint_hivefang_dagger", 3),
     ];
+    private static readonly (string ItemBaseId, int Quantity)[] AdminDungeonSigils =
+    [
+        ("sigil_goblin_mines", 3),
+        ("sigil_forgotten_catacombs", 3),
+    ];
     private static readonly (Guid PlayerEssenceId, string EssenceDefinitionId)[] AdminStarterEssences =
     [
         (Guid.Parse("00000000-0000-0000-2000-000000000001"), "essence.goblin_ambusher"),
@@ -112,6 +117,11 @@ public static class LLDbContextExtensions
         }
 
         if (await SeedAdminCraftingTestKit(context))
+        {
+            await context.SaveChangesAsync();
+        }
+
+        if (await SeedAdminDungeonSigils(context))
         {
             await context.SaveChangesAsync();
         }
@@ -479,6 +489,80 @@ public static class LLDbContextExtensions
 
         var changed = false;
         foreach (var (itemBaseId, desiredQuantity) in AdminCraftingTestKit)
+        {
+            if (existingByItemBaseId.TryGetValue(itemBaseId, out var matchingItems))
+            {
+                var currentQuantity = matchingItems.Sum(item => item.Quantity);
+                if (currentQuantity < desiredQuantity)
+                {
+                    matchingItems[0].Quantity += desiredQuantity - currentQuantity;
+                    changed = true;
+                }
+
+                continue;
+            }
+
+            var itemInstance = new ItemInstance
+            {
+                Id = Guid.NewGuid(),
+                ItemBaseId = itemBaseId
+            };
+
+            await context.ItemInstances.AddAsync(itemInstance);
+            await context.InventoryItems.AddAsync(new InventoryItem
+            {
+                InventoryId = adminCharacterId,
+                ItemInstanceId = itemInstance.Id,
+                Quantity = desiredQuantity
+            });
+            changed = true;
+        }
+
+        return changed;
+    }
+
+    private static async Task<bool> SeedAdminDungeonSigils(LLDbContext context)
+    {
+        var adminCharacterId = Guid.Parse(CHARACTER_GUID);
+        var hasAdminInventory = await context.Inventories
+            .AnyAsync(inventory => inventory.CharacterId == adminCharacterId);
+
+        if (!hasAdminInventory)
+        {
+            return false;
+        }
+
+        var sigilItemBaseIds = AdminDungeonSigils
+            .Select(item => item.ItemBaseId)
+            .ToArray();
+
+        var seededItemBaseIds = await context.ItemBases
+            .Where(itemBase => sigilItemBaseIds.Contains(itemBase.Id))
+            .Select(itemBase => itemBase.Id)
+            .ToListAsync();
+
+        var missingItemBaseIds = sigilItemBaseIds
+            .Except(seededItemBaseIds)
+            .ToArray();
+
+        if (missingItemBaseIds.Length > 0)
+        {
+            throw new InvalidOperationException(
+                $"Admin dungeon sigil item bases were not seeded: {string.Join(", ", missingItemBaseIds)}");
+        }
+
+        var existingItems = await context.InventoryItems
+            .Include(inventoryItem => inventoryItem.ItemInstance)
+            .Where(inventoryItem => inventoryItem.InventoryId == adminCharacterId)
+            .Where(inventoryItem => sigilItemBaseIds.Contains(inventoryItem.ItemInstance.ItemBaseId))
+            .ToListAsync();
+
+        var existingByItemBaseId = existingItems
+            .GroupBy(item => item.ItemInstance.ItemBaseId)
+            .ToDictionary(group => group.Key, group => group.ToList(), StringComparer.OrdinalIgnoreCase);
+
+        var changed = false;
+        foreach (var (itemBaseId, desiredQuantity) in AdminDungeonSigils)
         {
             if (existingByItemBaseId.TryGetValue(itemBaseId, out var matchingItems))
             {

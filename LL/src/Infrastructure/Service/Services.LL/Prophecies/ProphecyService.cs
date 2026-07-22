@@ -754,7 +754,6 @@ public sealed class ProphecyService : IProphecyService
 
             case ProphecyObjectiveType.ClearDungeonRooms when progressEvent.Kind == ProphecyProgressKind.DungeonRoomCleared:
             case ProphecyObjectiveType.CompleteDungeons when progressEvent.Kind == ProphecyProgressKind.DungeonCompleted:
-            case ProphecyObjectiveType.ResolveDungeonEvents when progressEvent.Kind == ProphecyProgressKind.DungeonEventResolved:
             case ProphecyObjectiveType.GainEssenceXp when progressEvent.Kind == ProphecyProgressKind.EssenceXpGained:
             case ProphecyObjectiveType.AbsorbEssence when progressEvent.Kind == ProphecyProgressKind.EssenceAbsorbed:
             case ProphecyObjectiveType.TemperItems when progressEvent.Kind == ProphecyProgressKind.ItemTempered:

@@ -1,6 +1,7 @@
 using Application.Interfaces.Services.LL.Dungeons;
 using Application.MediatR.Markers;
 using Application.UseCases.Dungeons.Dtos;
+using AutoMapper;
 using Domain.Models.Dungeons.Definitions;
 using Domain.Models.Dungeons.Runs;
 using MediatR;
@@ -13,13 +14,16 @@ public sealed class GetDungeonRecordsQueryHandler : IRequestHandler<GetDungeonRe
 {
     private readonly IDungeonDefinitions _dungeonDefinitions;
     private readonly IDungeonRunService _dungeonRuns;
+    private readonly IMapper _mapper;
 
     public GetDungeonRecordsQueryHandler(
         IDungeonDefinitions dungeonDefinitions,
-        IDungeonRunService dungeonRuns)
+        IDungeonRunService dungeonRuns,
+        IMapper mapper)
     {
         _dungeonDefinitions = dungeonDefinitions;
         _dungeonRuns = dungeonRuns;
+        _mapper = mapper;
     }
 
     public async Task<DungeonRecordsDto> Handle(
@@ -67,19 +71,15 @@ public sealed class GetDungeonRecordsQueryHandler : IRequestHandler<GetDungeonRe
             : null;
     }
 
-    private static List<DungeonRecordEntryDto> MapRecords(IReadOnlyList<DungeonCompletionLeaderboardEntry>? entries) =>
-        entries?
-            .OrderBy(x => x.FirstCompletedAt)
-            .ThenByDescending(x => x.CompletionCount)
-            .Select(x => new DungeonRecordEntryDto
-            {
-                CharacterId = x.CharacterId,
-                CharacterName = x.CharacterName,
-                FirstClearedAt = x.FirstCompletedAt,
-                LastClearedAt = x.LastCompletedAt,
-                TotalClears = x.CompletionCount
-            })
+    private List<DungeonRecordEntryDto> MapRecords(IReadOnlyList<DungeonCompletionLeaderboardEntry>? entries)
+    {
+        var orderedEntries = entries?
+            .OrderBy(entry => entry.FirstCompletedAt)
+            .ThenByDescending(entry => entry.CompletionCount)
             .ToList() ?? [];
+
+        return _mapper.Map<List<DungeonRecordEntryDto>>(orderedEntries);
+    }
 
     private static string FormatGrade(DungeonGrade grade) =>
         grade switch

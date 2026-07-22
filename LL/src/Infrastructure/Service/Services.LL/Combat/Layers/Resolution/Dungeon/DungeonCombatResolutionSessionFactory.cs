@@ -73,7 +73,7 @@ public sealed class DungeonCombatResolutionSessionFactory : IDungeonCombatResolu
         var hostileTemplates = BuildHostileTemplates(
             hostileIds,
             sourceEntitiesById,
-            new Area() { DifficultyTier = 1 },
+            plan.DungeonTier,
             plan.EnemyAttributeModifiers);
 
         await _combatSetupService.PrepareEntitiesForCombat(
@@ -142,12 +142,12 @@ public sealed class DungeonCombatResolutionSessionFactory : IDungeonCombatResolu
     private Dictionary<Guid, CombatEntity> BuildHostileTemplates(
         IReadOnlyCollection<Guid> hostileIds,
         Dictionary<Guid, Entity> sourceEntitiesById,
-        Area area,
+        int dungeonTier,
         IReadOnlyList<Domain.Models.Attributes.Modifiers.AttributeModifierBase> enemyAttributeModifiers)
     {
         var templates = new Dictionary<Guid, CombatEntity>();
 
-        foreach (var hostileId in hostileIds)
+        foreach (var hostileId in hostileIds.Distinct())
         {
             if (sourceEntitiesById[hostileId] is not Creature creature)
             {
@@ -156,8 +156,10 @@ public sealed class DungeonCombatResolutionSessionFactory : IDungeonCombatResolu
             }
 
             var template = _combatSetupService
-                .CreateCreatureCombatEntities([creature], area)
+                .CreateCreatureCombatEntities([creature], new Area { DifficultyTier = 1 })
                 .Single();
+
+            DungeonEnemyDifficultyScaling.Apply(template, dungeonTier);
 
             foreach (var modifier in enemyAttributeModifiers)
             {

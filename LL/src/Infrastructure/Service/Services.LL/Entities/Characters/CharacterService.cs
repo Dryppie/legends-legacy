@@ -1,6 +1,5 @@
 using Application.Interfaces.Services.LL.Entities;
 using Application.Interfaces.Services.LL.Essences;
-using Domain.Components.Attributes;
 using Domain.Models.Entities.Characters;
 
 namespace Services.LL.Entities.Characters;
@@ -8,16 +7,16 @@ namespace Services.LL.Entities.Characters;
 public class CharacterService : ICharacterService
 {
     private readonly ICharacterRepository _characterRepository;
-    private readonly IEssenceBonusProvider _essenceBonusProvider;
+    private readonly ICombatRatingService _combatRatings;
     private readonly ICharacterExperienceProgressionProvider _experienceProgression;
 
     public CharacterService(
         ICharacterRepository characterRepository,
-        IEssenceBonusProvider essenceBonusProvider,
+        ICombatRatingService combatRatings,
         ICharacterExperienceProgressionProvider experienceProgression)
     {
         _characterRepository = characterRepository;
-        _essenceBonusProvider = essenceBonusProvider;
+        _combatRatings = combatRatings;
         _experienceProgression = experienceProgression;
     }
 
@@ -48,8 +47,7 @@ public class CharacterService : ICharacterService
         if (character == null) return null;
 
         SetExperienceRequirement(character);
-        var essenceModifiers = GetLoadedEssenceModifiers(character);
-        AttributeCalculator.CalculateBaseAttributes(character, essenceModifiers);
+        ApplyCombatRating(character);
         return character;
     }
 
@@ -59,8 +57,7 @@ public class CharacterService : ICharacterService
         if (character == null) return null;
 
         SetExperienceRequirement(character);
-        var essenceModifiers = GetLoadedEssenceModifiers(character);
-        AttributeCalculator.CalculateBaseAttributes(character, essenceModifiers);
+        ApplyCombatRating(character);
         return character;
     }
 
@@ -96,19 +93,31 @@ public class CharacterService : ICharacterService
         var character = await GetMyCharacterOverviewAsync(characterId, cancellationToken);
         return character is null
             ? 0
-            : CombatRatingCalculator.Calculate(character.BaseCombatAttributes, character.Level);
+            : character.CombatRating.Total;
     }
 
-    private IReadOnlyList<Domain.Models.Attributes.Modifiers.AttributeModifierBase> GetLoadedEssenceModifiers(Character character)
+    private void ApplyCombatRating(Character character)
     {
         var activeLoadout = character.EssenceLoadouts.FirstOrDefault(x => x.IsActive);
-        if (activeLoadout is null) return [];
+        var equippedEssences = activeLoadout?.Slots
+            .Select(x => x.PlayerEssence)
+            .Where(x => x is not null)
+            .Cast<Domain.Models.Essences.PlayerEssence>()
+            .ToList() ?? [];
+        var equipmentModifiers = character.EquipmentSlots
+            .Where(slot => slot.EquipmentInstance is not null)
+            .SelectMany(slot => slot.EquipmentInstance!.AttributeModifiers)
+            .Cast<Domain.Models.Attributes.Modifiers.AttributeModifierBase>()
+            .ToList();
+        var projection = _combatRatings.Calculate(
+            character.BaseAttributes.ToDictionary(x => x.AttributeType, x => x.Value),
+            equipmentModifiers,
+            equippedEssences);
 
-        return _essenceBonusProvider.GetAttunedAttributeModifiers(
-            activeLoadout.Slots
-                .Select(x => x.PlayerEssence)
-                .Where(x => x is not null)
-                .Cast<Domain.Models.Essences.PlayerEssence>());
+        character.BaseCombatAttributes.Clear();
+        foreach (var (attribute, value) in projection.Attributes)
+            character.BaseCombatAttributes[attribute] = value;
+        character.CombatRating = projection.Breakdown;
     }
 
     private void SetExperienceRequirement(Character? character)

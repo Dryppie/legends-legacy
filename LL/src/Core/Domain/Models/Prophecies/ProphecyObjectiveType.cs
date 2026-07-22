@@ -7,7 +7,6 @@ public static class ProphecyObjectiveType
     public const string WinEncounters = nameof(WinEncounters);
     public const string ClearDungeonRooms = nameof(ClearDungeonRooms);
     public const string CompleteDungeons = nameof(CompleteDungeons);
-    public const string ResolveDungeonEvents = nameof(ResolveDungeonEvents);
     public const string GainEssenceXp = nameof(GainEssenceXp);
     public const string AbsorbEssence = nameof(AbsorbEssence);
     public const string GatherResources = nameof(GatherResources);

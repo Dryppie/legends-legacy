@@ -44,7 +44,7 @@ public sealed class CharacterOverviewConverter : ITypeConverter<Character, Chara
             Id = source.Id,
             Name = source.Name,
             Level = source.Level,
-            CombatRating = CombatRatingCalculator.Calculate(source.BaseCombatAttributes, source.Level),
+            CombatRating = source.CombatRating.Total,
             BaseAttributes = source.BaseAttributes.ToList(),
             BaseCombatAttributes = source.BaseCombatAttributes.Select(kvp => new EntityAttribute
             {

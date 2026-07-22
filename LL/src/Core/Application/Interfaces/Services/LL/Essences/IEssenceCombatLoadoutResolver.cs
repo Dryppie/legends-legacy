@@ -13,4 +13,5 @@ public sealed record EssenceCombatLoadout(
     Guid CharacterId,
     IReadOnlyList<PlayerEssence> EquippedEssences,
     IReadOnlyList<AttributeModifierBase> AttributeModifiers,
-    IReadOnlySet<string> Tags);
+    IReadOnlySet<string> Tags,
+    int AbilityCombatRating);

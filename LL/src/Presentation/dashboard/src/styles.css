@@ -1,4 +1,7 @@
 /* You can add global styles to this file, and also import other style files */
+@import "@angular/cdk/overlay-prebuilt.css";
+@import "./styles/tokens.css";
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -17,6 +20,16 @@
   html {
     -ms-overflow-style: none;
     scrollbar-width: none;
+  }
+
+  .no-spinner::-webkit-inner-spin-button,
+  .no-spinner::-webkit-outer-spin-button {
+    margin: 0;
+    appearance: none;
+  }
+
+  .no-spinner {
+    -moz-appearance: textfield;
   }
 }
 
@@ -40,6 +53,237 @@
 }
 
 @layer components {
+  .ll-page-header {
+    border: 1px solid var(--ll-color-border);
+    border-radius: var(--ll-radius-md);
+    background: linear-gradient(
+        to right,
+        rgba(73, 46, 37, 0.14) 0%,
+        rgba(52, 35, 33, 0.28) 34%,
+        rgba(20, 19, 27, 0.42) 72%,
+        rgba(25, 31, 47, 0.18) 100%
+      ),
+      url("assets/core/texture.png");
+    padding: var(--ll-space-4);
+    box-shadow: var(--ll-shadow-sm);
+  }
+
+  .ll-panel {
+    border: 1px solid var(--ll-color-border);
+    border-radius: var(--ll-radius-md);
+    background: var(--ll-color-surface);
+    box-shadow: var(--ll-shadow-sm);
+  }
+
+  .ll-card {
+    border: 1px solid var(--ll-color-border);
+    border-radius: var(--ll-radius-sm);
+    background: var(--ll-color-surface-soft);
+  }
+
+  .ll-card-danger {
+    border-color: rgba(255, 154, 162, 0.36);
+    background: var(--ll-color-danger-soft);
+  }
+
+  .ll-stat-card {
+    border: 1px solid var(--ll-color-border);
+    border-radius: var(--ll-radius-sm);
+    background: var(--ll-color-surface-soft);
+    padding: var(--ll-space-4);
+  }
+
+  .ll-stat-label,
+  .ll-label {
+    color: var(--ll-color-text-muted);
+    font-size: var(--ll-text-xs);
+    font-weight: var(--ll-weight-semibold);
+    line-height: var(--ll-leading-tight);
+    text-transform: uppercase;
+  }
+
+  .ll-stat-value {
+    margin-top: var(--ll-space-2);
+    color: var(--ll-color-primary);
+    font-family: var(--ll-font-display);
+    font-size: var(--ll-text-2xl);
+    font-weight: var(--ll-weight-bold);
+    line-height: var(--ll-leading-tight);
+  }
+
+  .ll-field {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    gap: var(--ll-space-1);
+  }
+
+  .ll-helper {
+    color: var(--ll-color-text-muted);
+    font-size: var(--ll-text-xs);
+    line-height: var(--ll-leading-normal);
+  }
+
+  .ll-input,
+  .ll-select {
+    border: 1px solid var(--ll-color-border);
+    border-radius: var(--ll-radius-sm);
+    background: rgba(0, 0, 0, 0.36);
+    padding: var(--ll-space-2) var(--ll-space-3);
+    color: var(--ll-color-text);
+    font-size: var(--ll-text-sm);
+    line-height: var(--ll-leading-tight);
+    outline: none;
+    transition:
+      border-color 150ms ease,
+      box-shadow 150ms ease;
+  }
+
+  .ll-input::placeholder {
+    color: var(--ll-color-text-subtle);
+  }
+
+  .ll-input:focus,
+  .ll-select:focus {
+    border-color: var(--ll-color-primary);
+    box-shadow: var(--ll-shadow-focus);
+  }
+
+  .ll-button {
+    border: 1px solid var(--ll-color-border);
+    border-radius: var(--ll-radius-sm);
+    padding: var(--ll-space-2) var(--ll-space-3);
+    color: var(--ll-color-text);
+    font-size: var(--ll-text-sm);
+    line-height: var(--ll-leading-tight);
+    transition:
+      border-color 150ms ease,
+      background-color 150ms ease,
+      color 150ms ease,
+      transform 150ms ease;
+  }
+
+  .ll-button:hover:not(:disabled) {
+    border-color: var(--ll-color-primary);
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--ll-color-primary);
+    transform: translateY(-1px);
+  }
+
+  .ll-button:disabled {
+    cursor: not-allowed;
+    opacity: 0.45;
+  }
+
+  .ll-button-primary {
+    border-color: var(--ll-color-primary);
+    background: var(--ll-color-primary);
+    color: #080808;
+    font-weight: var(--ll-weight-semibold);
+  }
+
+  .ll-button-primary:hover:not(:disabled) {
+    background: var(--ll-color-primary);
+    color: #080808;
+  }
+
+  .ll-checkbox {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    gap: var(--ll-space-2);
+    border: 1px solid var(--ll-color-border);
+    border-radius: var(--ll-radius-sm);
+    background: var(--ll-color-surface-soft);
+    padding: var(--ll-space-2) var(--ll-space-3);
+    color: var(--ll-color-text);
+    font-size: var(--ll-text-sm);
+    line-height: var(--ll-leading-tight);
+  }
+
+  .ll-checkbox input[type="checkbox"] {
+    height: 1rem;
+    width: 1rem;
+    flex: none;
+    accent-color: var(--ll-color-primary);
+  }
+
+  .ll-checkbox:hover {
+    border-color: var(--ll-color-border-strong);
+    background: rgba(255, 255, 255, 0.08);
+  }
+
+  .ll-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--ll-color-border);
+    border-radius: var(--ll-radius-full);
+    padding: var(--ll-space-1) var(--ll-space-3);
+    color: var(--ll-color-text);
+    font-size: var(--ll-text-xs);
+    font-weight: var(--ll-weight-semibold);
+    line-height: var(--ll-leading-tight);
+    text-transform: uppercase;
+  }
+
+  .ll-badge-accent {
+    border-color: var(--ll-color-border-strong);
+    background: var(--ll-color-primary-soft);
+    color: var(--ll-color-primary);
+  }
+
+  .ll-empty-state {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--ll-color-border);
+    border-radius: var(--ll-radius-md);
+    background: var(--ll-color-surface-soft);
+    padding: var(--ll-space-6);
+    color: var(--ll-color-text-muted);
+    text-align: center;
+  }
+
+  .ll-text-muted {
+    color: var(--ll-color-text-muted);
+  }
+
+  .ll-text-subtle {
+    color: var(--ll-color-text-subtle);
+  }
+
+  .ll-text-success {
+    color: var(--ll-color-success);
+  }
+
+  .ll-text-warning {
+    color: var(--ll-color-warning);
+  }
+
+  .ll-text-danger {
+    color: var(--ll-color-danger);
+  }
+
+  .ll-dropdown-option {
+    color: rgb(212 212 216);
+  }
+
+  .ll-dropdown-option-hovered {
+    background: rgba(249, 220, 160, 0.18);
+    color: white;
+  }
+
+  .ll-dropdown-option-selected {
+    background: rgba(249, 220, 160, 0.18);
+    color: #f9dca0;
+  }
+
+  .ll-dropdown-option-disabled {
+    cursor: not-allowed;
+    opacity: 0.45;
+  }
+
   .primary-gradient {
     @apply text-transparent;
     background: linear-gradient(to bottom, #feefd0, #fcd587);

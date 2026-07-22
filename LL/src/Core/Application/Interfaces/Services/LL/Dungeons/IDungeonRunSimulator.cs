@@ -1,0 +1,107 @@
+namespace Application.Interfaces.Services.LL.Dungeons;
+
+using Domain.Components.Attributes;
+
+public interface IDungeonRunSimulator
+{
+    DungeonSimulationOptions GetOptions();
+    CombatRatingBreakdown GetCombatRating(DungeonSimulationCharacter character);
+    Task<DungeonSimulationReport> RunAsync(
+        DungeonSimulationRequest request,
+        CancellationToken cancellationToken);
+}
+
+public sealed record DungeonSimulationOptions(
+    IReadOnlyList<DungeonSimulationDungeonOption> Dungeons,
+    IReadOnlyList<DungeonSimulationEssenceOption> Essences,
+    IReadOnlyList<DungeonSimulationEquipmentSlotOption> EquipmentSlots,
+    IReadOnlyList<DungeonSimulationEquipmentRarityOption> EquipmentRarities);
+
+public sealed record DungeonSimulationDungeonOption(
+    string Id,
+    string FamilyId,
+    string Name,
+    string Difficulty,
+    int Tier,
+    int RecommendedCombatRating);
+
+public sealed record DungeonSimulationEssenceOption(string Id, string Name, int AbilityCombatRating);
+
+public sealed record DungeonSimulationEquipmentSlotOption(
+    string Id,
+    string Name,
+    IReadOnlyDictionary<string, float> AttributeBonuses);
+
+public sealed record DungeonSimulationEquipmentRarityOption(
+    string Id,
+    string Name,
+    float Multiplier);
+
+public sealed record DungeonSimulationRequest(
+    string DungeonDefinitionId,
+    int RunCount,
+    int RandomSeed,
+    int MasteryLevel,
+    string RouteStrategy,
+    DungeonSimulationCharacter Character);
+
+public sealed record DungeonSimulationCharacter(
+    string Name,
+    int Level,
+    float MaxHealth,
+    float Power,
+    float Fortitude,
+    float Spirit,
+    float Armor,
+    float Resistance,
+    float Precision,
+    float CritChance,
+    float CritDamage,
+    float AttackSpeed,
+    float HealthRegeneration,
+    IReadOnlyList<string> EssenceIds,
+    DungeonSimulationEquipment? Equipment);
+
+public sealed record DungeonSimulationEquipment(
+    string Rarity,
+    IReadOnlyList<string> EquippedSlots);
+
+public sealed record DungeonSimulationReport(
+    string DungeonDefinitionId,
+    string DungeonName,
+    string Difficulty,
+    int Tier,
+    int RecommendedCombatRating,
+    int SimulatedCombatRating,
+    CombatRatingBreakdown CombatRatingBreakdown,
+    int RequestedRuns,
+    int CompletedRuns,
+    int FailedRuns,
+    double ClearRate,
+    double AverageFinalVigor,
+    double AverageRoomsCleared,
+    int RandomSeed,
+    string RouteStrategy,
+    IReadOnlyList<DungeonSimulationRunResult> Runs);
+
+public sealed record DungeonSimulationRunResult(
+    int RunNumber,
+    int Seed,
+    bool Completed,
+    string Outcome,
+    int FinalVigor,
+    int RoomsCleared,
+    int TotalCombatTicks,
+    IReadOnlyList<DungeonSimulationRoomResult> Rooms);
+
+public sealed record DungeonSimulationRoomResult(
+    int RoomIndex,
+    string Name,
+    string RoomType,
+    string Outcome,
+    int VigorBefore,
+    int VigorAfter,
+    int VigorChange,
+    int CombatTicks,
+    int DamageTaken,
+    IReadOnlyList<string> Enemies);

@@ -12,10 +12,6 @@ public interface IDungeonMasteryService
         DungeonRun run,
         CancellationToken cancellationToken);
 
-    Task ApplyStartBonusesAsync(
-        DungeonRun run,
-        CancellationToken cancellationToken);
-
     Task<IReadOnlyDictionary<string, DungeonMasterySnapshot>> GetMasteryByDungeonAsync(
         Guid characterId,
         IReadOnlyCollection<string> dungeonDefinitionIds,
@@ -40,11 +36,4 @@ public sealed record DungeonMasterySnapshot(
     long Experience,
     int Level,
     int? ExperienceRequiredForNextLevel,
-    int CompletionCount,
-    IReadOnlyList<DungeonMasteryBonusDto> Bonuses);
-
-public sealed record DungeonMasteryBonusDto(
-    string Id,
-    int RequiredLevel,
-    string Description,
-    bool IsActive);
+    int CompletionCount);

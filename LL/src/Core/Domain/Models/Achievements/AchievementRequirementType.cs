@@ -21,7 +21,7 @@ public enum AchievementRequirementType
     SpecificDungeonCompleted = 16,
     SpecificDungeonBossDefeated = 17,
     DungeonCompletedWithoutDefeat = 18,
-    DungeonCompletedWithoutCheckpointRetreat = 19,
+    DungeonCompletedWithoutRetreat = 19,
     DungeonTrapsTriggered = 20,
     ItemsCrafted = 21,
     ItemsTempered = 22,

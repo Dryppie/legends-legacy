@@ -16,23 +16,20 @@ export class CurrentDungeonComponent {
   readonly hasActiveDungeon = this.dungeonState.hasActiveDungeon;
   readonly loading = this.dungeonState.loading;
 
-  readonly totalRooms = computed(() => {
-    return this.activeDungeon()?.rooms?.length ?? 0;
+  readonly totalDepths = computed(() => {
+    const nodes = this.activeDungeon()?.state?.mapNodes ?? [];
+    return nodes.length ? Math.max(...nodes.map((node) => node.depth)) + 1 : 0;
   });
 
-  readonly currentRoomIndex = computed(() => {
+  readonly currentDepthNumber = computed(() => {
     const run = this.activeDungeon();
-    const total = run?.rooms?.length ?? 0;
-
+    const total = this.totalDepths();
     if (!run || total <= 0) return 0;
-    return Math.min(Math.max(0, run.currentRoomIndex ?? 0), total - 1);
-  });
 
-  readonly currentRoomNumber = computed(() => {
-    const total = this.totalRooms();
-    if (total <= 0) return 0;
-
-    return this.currentRoomIndex() + 1;
+    const depth =
+      run.state.mapNodes.find((node) => node.roomIndex === run.currentRoomIndex)
+        ?.depth ?? 0;
+    return Math.min(total, Math.max(1, depth + 1));
   });
 
   readonly dungeonTitle = computed(() => {
@@ -56,7 +53,10 @@ export class CurrentDungeonComponent {
 
   readonly progressText = computed(() => {
     if (!this.hasActiveDungeon()) return '';
-    return `Room ${this.currentRoomNumber()} / ${this.totalRooms()}`;
+    const total = this.totalDepths();
+    return total > 0
+      ? `Depth ${this.currentDepthNumber()} / ${total}`
+      : 'Map unavailable';
   });
 
   readonly statusDotClasses = computed(() => {
