@@ -26,7 +26,6 @@ public sealed class GetAvailableDungeonsQueryHandler : IRequestHandler<GetAvaila
     private readonly IItemBaseRepository _itemBases;
     private readonly IDungeonSigilAssemblySettingsProvider _sigilAssemblySettings;
     private readonly IMapper _mapper;
-    private readonly IPowerRatingService _powerRatings;
     private readonly IDungeonPowerRecommendationStore _powerRecommendations;
 
     public GetAvailableDungeonsQueryHandler(
@@ -38,7 +37,6 @@ public sealed class GetAvailableDungeonsQueryHandler : IRequestHandler<GetAvaila
         IDungeonMasteryService mastery,
         IItemBaseRepository itemBases,
         IDungeonSigilAssemblySettingsProvider sigilAssemblySettings,
-        IPowerRatingService powerRatings,
         IDungeonPowerRecommendationStore powerRecommendations,
         IMapper mapper)
     {
@@ -51,7 +49,6 @@ public sealed class GetAvailableDungeonsQueryHandler : IRequestHandler<GetAvaila
         _itemBases = itemBases;
         _sigilAssemblySettings = sigilAssemblySettings;
         _mapper = mapper;
-        _powerRatings = powerRatings;
         _powerRecommendations = powerRecommendations;
     }
 
@@ -61,10 +58,6 @@ public sealed class GetAvailableDungeonsQueryHandler : IRequestHandler<GetAvaila
     {
         var previews = new List<DungeonPreviewDto>();
         var character = await _characters.GetMyCharacterOverviewAsync(request.CharacterId, cancellationToken);
-        var power = await _powerRatings.GetCharacterOverallRatingAsync(request.CharacterId, cancellationToken);
-        var currentPartyPower = power.State is PowerAnalysisState.Available or PowerAnalysisState.LowConfidence
-            ? power.Overall
-            : 0;
 
         var dungeons = _dungeonDefinitions.GetAll()
             .OrderBy(x => DungeonDefinitionIdentity.GetFamilyId(x.Id))
@@ -91,14 +84,12 @@ public sealed class GetAvailableDungeonsQueryHandler : IRequestHandler<GetAvaila
             var access = await _dungeonAccess.EvaluateAsync(
                 request.CharacterId,
                 dungeon,
-                currentPartyPower,
                 cancellationToken);
             var sigilAssemblyAccess = string.IsNullOrWhiteSpace(dungeon.SigilItemId)
                 ? null
                 : await _dungeonAccess.EvaluateForSigilAssemblyAsync(
                     request.CharacterId,
                     dungeon,
-                    currentPartyPower,
                     cancellationToken);
             var sigilRequirement = access.EntryRequirements.FirstOrDefault(x =>
                 x.ItemId.Equals(dungeon.SigilItemId, StringComparison.OrdinalIgnoreCase));
@@ -112,7 +103,6 @@ public sealed class GetAvailableDungeonsQueryHandler : IRequestHandler<GetAvaila
                 Difficulty = FormatDifficulty(dungeon.Grade),
                 Tier = dungeon.Tier,
                 Grade = FormatGrade(dungeon.Grade),
-                CurrentPartyPower = access.CurrentPartyPower,
                 RecommendedPartyPower = powerRecommendation?.RecommendedPartyPower,
                 PowerRecommendationLowConfidence = powerRecommendation is not null &&
                     (powerRecommendation.Confidence == PowerRatingConfidence.Low ||

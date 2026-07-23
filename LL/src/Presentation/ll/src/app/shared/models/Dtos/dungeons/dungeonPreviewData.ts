@@ -74,7 +74,6 @@ export interface DungeonPreviewData {
   title: string;
   difficulty?: DungeonDifficulty;
   grade?: string;
-  currentPartyPower?: number;
   recommendedPartyPower?: number | null;
   powerRecommendationLowConfidence?: boolean;
   powerRecommendationUnavailable?: boolean;

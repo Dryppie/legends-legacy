@@ -11,6 +11,7 @@ import {
 } from '../../../../../shared/models/Dtos/dungeons/dungeonRecordsData';
 import { finalize } from 'rxjs/operators';
 import { CharacterTagComponent } from '../../../../../shared/components/character/character-tag/character-tag.component';
+import { CharacterStateService } from '../../../../../core/services/api/character/character-state.service';
 
 type DungeonLeaderboardMode = 'firstClears' | 'mostClears' | 'recentClears';
 
@@ -102,7 +103,12 @@ export class DungeonsComponent {
     this.groupDifficultyVariants(this.dungeonState.dungeons()),
   );
 
-  constructor(private readonly dungeonState: DungeonStateService) {}
+  constructor(
+    private readonly dungeonState: DungeonStateService,
+    characterState: CharacterStateService,
+  ) {
+    characterState.refreshIfDirty();
+  }
 
   openRecords(dungeon: DungeonPreviewData): void {
     this.selectedRecordsDungeon.set(dungeon);

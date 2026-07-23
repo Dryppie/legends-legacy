@@ -29,6 +29,7 @@ import { Equipment } from '../../../models/item';
 import { EquipmentType } from '../../../models/enums/equipmentType';
 import { BaseItemComponent } from '../../base-item/base-item.component';
 import { ConnectedPosition, OverlayModule } from '@angular/cdk/overlay';
+import { CharacterStateService } from '../../../../core/services/api/character/character-state.service';
 
 interface RewardGroup {
   title: string;
@@ -125,6 +126,7 @@ export class DungeonCardComponent implements OnChanges {
 
   constructor(
     readonly dungeonState: DungeonStateService,
+    private readonly characterState: CharacterStateService,
     private readonly router: Router,
   ) {}
 
@@ -159,6 +161,9 @@ export class DungeonCardComponent implements OnChanges {
   togglePreview() {
     this.previewMasteryTooltipOpen.set(false);
     this.selectedMasteryTooltipOpen.set(false);
+    if (!this.showPreview()) {
+      this.characterState.refreshIfDirty();
+    }
     this.showPreview.set(!this.showPreview());
   }
 
@@ -346,8 +351,9 @@ export class DungeonCardComponent implements OnChanges {
     return 'This dungeon difficulty is locked or unavailable.';
   }
 
-  selectedPartyPower(): number {
-    return this.selectedPreviewData().currentPartyPower ?? 0;
+  selectedPartyPower(): number | null {
+    const power = this.characterState.overview()?.power;
+    return power?.state === 'Available' ? power.overall : null;
   }
 
   selectedRecommendedPartyPower(): number | null {
@@ -362,10 +368,11 @@ export class DungeonCardComponent implements OnChanges {
 
   powerComparisonClass(): string {
     const recommended = this.selectedRecommendedPartyPower();
-    if (!recommended) return 'll-badge-muted';
+    const partyPower = this.selectedPartyPower();
+    if (!recommended || partyPower === null) return 'll-badge-muted';
     if (this.selectedPreviewData().powerRecommendationLowConfidence)
       return 'll-badge-warning';
-    return this.selectedPartyPower() >= recommended * 0.9
+    return partyPower >= recommended * 0.9
       ? 'll-badge-accent'
       : 'll-badge-warning';
   }

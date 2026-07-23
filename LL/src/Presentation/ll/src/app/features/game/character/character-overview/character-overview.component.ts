@@ -193,6 +193,7 @@ export class CharacterOverviewComponent {
   }
 
   private showCurrentCharacter(): void {
+    this.characterState.refreshIfDirty();
     this.searchErrorMessage.set('');
     this.searchedCharacter.set(null);
     this.viewedCharacterName.set(

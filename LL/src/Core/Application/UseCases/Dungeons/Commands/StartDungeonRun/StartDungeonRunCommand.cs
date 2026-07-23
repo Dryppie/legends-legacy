@@ -27,7 +27,6 @@ public class StartDungeonRunCommandHandler : IRequestHandler<StartDungeonRunComm
     private readonly IInventoryService _inventoryService;
     private readonly IGameEventOutbox _outbox;
     private readonly IPowerPredictionTelemetryBuffer _powerTelemetry;
-    private readonly IPowerRatingService _powerRatings;
 
     public StartDungeonRunCommandHandler(
         IMapper mapper,
@@ -37,8 +36,7 @@ public class StartDungeonRunCommandHandler : IRequestHandler<StartDungeonRunComm
         ICharacterService characters,
         IInventoryService inventoryService,
         IGameEventOutbox outbox,
-        IPowerPredictionTelemetryBuffer powerTelemetry,
-        IPowerRatingService powerRatings)
+        IPowerPredictionTelemetryBuffer powerTelemetry)
     {
         _mapper = mapper;
         _dungeonRunService = dungeonRunService;
@@ -48,7 +46,6 @@ public class StartDungeonRunCommandHandler : IRequestHandler<StartDungeonRunComm
         _inventoryService = inventoryService;
         _outbox = outbox;
         _powerTelemetry = powerTelemetry;
-        _powerRatings = powerRatings;
     }
 
     public async Task<Response<StartDungeonRunResponseDto>> Handle(StartDungeonRunCommand request, CancellationToken cancellationToken)
@@ -58,12 +55,9 @@ public class StartDungeonRunCommandHandler : IRequestHandler<StartDungeonRunComm
         if (character is null)
             return Response<StartDungeonRunResponseDto>.Fail("Character was not found.");
 
-        var power = await _powerRatings.GetCharacterOverallRatingAsync(request.CharacterId, cancellationToken);
-        var currentPartyPower = power.State == PowerAnalysisState.Available ? power.Overall : 0;
         var access = await _dungeonAccess.EvaluateAsync(
             request.CharacterId,
             dungeonDefinition,
-            currentPartyPower,
             cancellationToken);
 
         if (!access.CanEnter)

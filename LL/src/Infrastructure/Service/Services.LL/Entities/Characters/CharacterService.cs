@@ -1,6 +1,5 @@
 using Application.Interfaces.Services.LL.Entities;
 using Application.Interfaces.Services.LL.Essences;
-using Application.Interfaces.Services.LL.PowerRatings;
 using Domain.Components.Attributes;
 using Domain.Models.Entities.Characters;
 
@@ -10,18 +9,15 @@ public class CharacterService : ICharacterService
 {
     private readonly ICharacterRepository _characterRepository;
     private readonly IEssenceCombatLoadoutResolver _essenceLoadouts;
-    private readonly IPowerRatingService _powerRatings;
     private readonly ICharacterExperienceProgressionProvider _experienceProgression;
 
     public CharacterService(
         ICharacterRepository characterRepository,
         IEssenceCombatLoadoutResolver essenceLoadouts,
-        IPowerRatingService powerRatings,
         ICharacterExperienceProgressionProvider experienceProgression)
     {
         _characterRepository = characterRepository;
         _essenceLoadouts = essenceLoadouts;
-        _powerRatings = powerRatings;
         _experienceProgression = experienceProgression;
     }
 
@@ -92,12 +88,6 @@ public class CharacterService : ICharacterService
 
     public async Task<Guid?> GetCharacterIdByNameAsync(string name, CancellationToken cancellationToken) =>
         await _characterRepository.GetCharacterIdByNameAsync(name, cancellationToken);
-
-    public async Task<int> GetPowerAsync(Guid characterId, CancellationToken cancellationToken)
-    {
-        var power = await _powerRatings.GetCharacterOverallRatingAsync(characterId, cancellationToken);
-        return power.State == PowerAnalysisState.Available ? power.Overall : 0;
-    }
 
     private void ApplyCombatAttributes(Character character)
     {

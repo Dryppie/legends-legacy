@@ -7,12 +7,10 @@ public interface IDungeonAccessPolicy
     Task<DungeonAccessResult> EvaluateAsync(
         Guid characterId,
         DungeonDefinition dungeon,
-        int currentPartyPower,
         CancellationToken cancellationToken);
 
     Task<DungeonAccessResult> EvaluateForSigilAssemblyAsync(
         Guid characterId,
         DungeonDefinition dungeon,
-        int currentPartyPower,
         CancellationToken cancellationToken);
 }

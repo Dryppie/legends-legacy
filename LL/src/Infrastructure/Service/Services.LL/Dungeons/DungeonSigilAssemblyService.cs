@@ -43,11 +43,9 @@ public sealed class DungeonSigilAssemblyService(
             return DungeonSigilAssemblyOperationResult.Fail("Character was not found.");
         }
 
-        var partyPower = await characters.GetPowerAsync(characterId, cancellationToken);
         var access = await dungeonAccess.EvaluateForSigilAssemblyAsync(
             characterId,
             dungeon,
-            partyPower,
             cancellationToken);
         if (!access.CanEnter)
         {

@@ -17,7 +17,9 @@ Power is now derived from deterministic runs through the production `FastCombatE
 
 Overall Power comes only from the neutral mixed benchmark. Its enemies scale both health and incoming physical/magical pressure, and a successful result must retain at least 50% party health. This prevents a nearly-dead damage-race victory from being presented as dungeon-ready strength. Profile values are independent scenario results and must not be added together.
 
-The player-facing character overview displays only Overall Power. Component benchmark results remain internal to the detailed rating and dungeon-readiness API paths.
+The player-facing character overview displays only Overall Power. Dungeon preview cards read that same reactive character-overview value instead of carrying a copied Power value in each dungeon response. Component benchmark results remain internal to the detailed rating and dungeon-readiness API paths.
+
+Successful equipment changes and combat-relevant Essence mutations mark the shared character overview as dirty. The next visit to the current-character overview or dungeon list, or the next dungeon-preview open, refreshes it once. Successful refreshes clear the flag; failed or superseded refreshes leave it dirty for a later retry.
 
 ## Benchmarks and scale
 
