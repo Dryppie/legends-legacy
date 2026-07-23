@@ -8,6 +8,7 @@ namespace Application.UseCases.Crafting.Dtos;
 
 public sealed record CraftItemsResult(
     string RecipeId,
+    string? BlueprintId,
     int TargetTier,
     IReadOnlyList<InventoryItem> CreatedItems,
     IReadOnlyDictionary<ItemQuality, int> QualityCounts,
@@ -17,6 +18,7 @@ public sealed record CraftItemsResult(
 public sealed class CraftItemsResultDto : IMapFrom<CraftItemsResult>
 {
     public string RecipeId { get; init; } = string.Empty;
+    public string? BlueprintId { get; init; }
     public int TargetTier { get; init; }
     public IReadOnlyList<Guid> CreatedItemIds { get; init; } = [];
     public IReadOnlyList<InventoryItemDto> CreatedItems { get; init; } = [];

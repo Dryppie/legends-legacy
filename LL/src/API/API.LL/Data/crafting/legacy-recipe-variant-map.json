@@ -1,0 +1,295 @@
+{
+  "version": 2,
+  "policy": "Existing equipment maps to its concrete recipe by physical ItemBaseId and retains canonical Blueprint provenance. Existing entitlements unlock the reusable Blueprint globally.",
+  "structuralItemMappings": [
+    {
+      "legacyBaseRecipeId": "recipe_head_armor",
+      "itemBaseId": "heavy_helm",
+      "legacyFormId": "heavy_helm",
+      "recipeId": "recipe.armor.head.heavy_helm"
+    },
+    {
+      "legacyBaseRecipeId": "recipe_head_armor",
+      "itemBaseId": "medium_helm",
+      "legacyFormId": "medium_helm",
+      "recipeId": "recipe.armor.head.medium_helm"
+    },
+    {
+      "legacyBaseRecipeId": "recipe_head_armor",
+      "itemBaseId": "light_hood",
+      "legacyFormId": "light_hood",
+      "recipeId": "recipe.armor.head.light_hood"
+    },
+    {
+      "legacyBaseRecipeId": "recipe_head_armor",
+      "itemBaseId": "cloth_cowl",
+      "legacyFormId": "cloth_cowl",
+      "recipeId": "recipe.armor.head.cloth_cowl"
+    },
+    {
+      "legacyBaseRecipeId": "recipe_chest_armor",
+      "itemBaseId": "heavy_breastplate",
+      "legacyFormId": "heavy_breastplate",
+      "recipeId": "recipe.armor.chest.heavy_breastplate"
+    },
+    {
+      "legacyBaseRecipeId": "recipe_chest_armor",
+      "itemBaseId": "medium_mail",
+      "legacyFormId": "medium_mail",
+      "recipeId": "recipe.armor.chest.medium_mail"
+    },
+    {
+      "legacyBaseRecipeId": "recipe_chest_armor",
+      "itemBaseId": "light_vest",
+      "legacyFormId": "light_vest",
+      "recipeId": "recipe.armor.chest.light_vest"
+    },
+    {
+      "legacyBaseRecipeId": "recipe_chest_armor",
+      "itemBaseId": "cloth_robe",
+      "legacyFormId": "cloth_robe",
+      "recipeId": "recipe.armor.chest.cloth_robe"
+    },
+    {
+      "legacyBaseRecipeId": "recipe_leg_armor",
+      "itemBaseId": "heavy_legplates",
+      "legacyFormId": "heavy_legplates",
+      "recipeId": "recipe.armor.legs.heavy_legplates"
+    },
+    {
+      "legacyBaseRecipeId": "recipe_leg_armor",
+      "itemBaseId": "medium_greaves",
+      "legacyFormId": "medium_greaves",
+      "recipeId": "recipe.armor.legs.medium_greaves"
+    },
+    {
+      "legacyBaseRecipeId": "recipe_leg_armor",
+      "itemBaseId": "light_leggings",
+      "legacyFormId": "light_legwraps",
+      "recipeId": "recipe.armor.legs.light_legwraps"
+    },
+    {
+      "legacyBaseRecipeId": "recipe_leg_armor",
+      "itemBaseId": "cloth_pants",
+      "legacyFormId": "cloth_pants",
+      "recipeId": "recipe.armor.legs.cloth_pants"
+    },
+    {
+      "legacyBaseRecipeId": "recipe_ring",
+      "itemBaseId": "band",
+      "legacyFormId": "band",
+      "recipeId": "recipe.jewelry.ring.band"
+    },
+    {
+      "legacyBaseRecipeId": "recipe_necklace",
+      "itemBaseId": "amulet",
+      "legacyFormId": "amulet",
+      "recipeId": "recipe.jewelry.necklace.amulet"
+    },
+    {
+      "legacyBaseRecipeId": "recipe_necklace",
+      "itemBaseId": "charm",
+      "legacyFormId": "charm",
+      "recipeId": "recipe.jewelry.necklace.charm"
+    },
+    {
+      "legacyBaseRecipeId": "recipe_necklace",
+      "itemBaseId": "talisman",
+      "legacyFormId": "talisman",
+      "recipeId": "recipe.jewelry.necklace.talisman"
+    },
+    {
+      "legacyBaseRecipeId": "recipe_relic",
+      "itemBaseId": "vial",
+      "legacyFormId": "vial",
+      "recipeId": "recipe.jewelry.relic.vial"
+    },
+    {
+      "legacyBaseRecipeId": "recipe_relic",
+      "itemBaseId": "heart",
+      "legacyFormId": "heart",
+      "recipeId": "recipe.jewelry.relic.heart"
+    },
+    {
+      "legacyBaseRecipeId": "recipe_relic",
+      "itemBaseId": "totem",
+      "legacyFormId": "totem",
+      "recipeId": "recipe.jewelry.relic.totem"
+    },
+    {
+      "legacyBaseRecipeId": "recipe_one_handed_weapon",
+      "itemBaseId": "shortsword",
+      "legacyFormId": "shortsword",
+      "recipeId": "recipe.weapon.one_handed.shortsword"
+    },
+    {
+      "legacyBaseRecipeId": "recipe_one_handed_weapon",
+      "itemBaseId": "dagger",
+      "legacyFormId": "dagger",
+      "recipeId": "recipe.weapon.one_handed.dagger"
+    },
+    {
+      "legacyBaseRecipeId": "recipe_one_handed_weapon",
+      "itemBaseId": "hatchet",
+      "legacyFormId": "hand_axe",
+      "recipeId": "recipe.weapon.one_handed.hand_axe"
+    },
+    {
+      "legacyBaseRecipeId": "recipe_one_handed_weapon",
+      "itemBaseId": "mace",
+      "legacyFormId": "mace",
+      "recipeId": "recipe.weapon.one_handed.mace"
+    },
+    {
+      "legacyBaseRecipeId": "recipe_one_handed_weapon",
+      "itemBaseId": "wand",
+      "legacyFormId": "wand",
+      "recipeId": "recipe.weapon.one_handed.wand"
+    },
+    {
+      "legacyBaseRecipeId": "recipe_two_handed_weapon",
+      "itemBaseId": "greatsword",
+      "legacyFormId": "greatsword",
+      "recipeId": "recipe.weapon.two_handed.greatsword"
+    },
+    {
+      "legacyBaseRecipeId": "recipe_two_handed_weapon",
+      "itemBaseId": "battle_axe",
+      "legacyFormId": "battle_axe",
+      "recipeId": "recipe.weapon.two_handed.battle_axe"
+    },
+    {
+      "legacyBaseRecipeId": "recipe_two_handed_weapon",
+      "itemBaseId": "maul",
+      "legacyFormId": "maul",
+      "recipeId": "recipe.weapon.two_handed.maul"
+    },
+    {
+      "legacyBaseRecipeId": "recipe_two_handed_weapon",
+      "itemBaseId": "spear",
+      "legacyFormId": "spear",
+      "recipeId": "recipe.weapon.two_handed.spear"
+    },
+    {
+      "legacyBaseRecipeId": "recipe_two_handed_weapon",
+      "itemBaseId": "staff",
+      "legacyFormId": "staff",
+      "recipeId": "recipe.weapon.two_handed.staff"
+    },
+    {
+      "legacyBaseRecipeId": "recipe_two_handed_weapon",
+      "itemBaseId": "longbow",
+      "legacyFormId": "longbow",
+      "recipeId": "recipe.weapon.two_handed.longbow"
+    },
+    {
+      "legacyBaseRecipeId": "recipe_two_handed_weapon",
+      "itemBaseId": "crossbow",
+      "legacyFormId": "crossbow",
+      "recipeId": "recipe.weapon.two_handed.crossbow"
+    },
+    {
+      "legacyBaseRecipeId": "recipe_two_handed_weapon",
+      "itemBaseId": "gauntlets",
+      "legacyFormId": "gauntlets",
+      "recipeId": "recipe.weapon.two_handed.gauntlets"
+    },
+    {
+      "legacyBaseRecipeId": "recipe_offhand",
+      "itemBaseId": "towershield",
+      "legacyFormId": "towershield",
+      "recipeId": "recipe.offhand.towershield"
+    },
+    {
+      "legacyBaseRecipeId": "recipe_offhand",
+      "itemBaseId": "Spiritward",
+      "legacyFormId": "spiritward",
+      "recipeId": "recipe.offhand.spiritward"
+    },
+    {
+      "legacyBaseRecipeId": "recipe_offhand",
+      "itemBaseId": "grimoire",
+      "legacyFormId": "grimoire",
+      "recipeId": "recipe.offhand.grimoire"
+    }
+  ],
+  "canonicalBlueprintMappings": [
+    {
+      "legacyBlueprintId": "blueprint_fury",
+      "legacyRecipeVariantId": "variant.jewelry.ring.fury",
+      "blueprintId": "blueprint_fury",
+      "recipeId": "recipe.jewelry.ring.band",
+      "canonicalItemBaseId": "band"
+    },
+    {
+      "legacyBlueprintId": "blueprint_arcane",
+      "legacyRecipeVariantId": "variant.jewelry.ring.arcane",
+      "blueprintId": "blueprint_arcane",
+      "recipeId": "recipe.jewelry.ring.band",
+      "canonicalItemBaseId": "band"
+    },
+    {
+      "legacyBlueprintId": "blueprint_execution",
+      "legacyRecipeVariantId": "variant.jewelry.ring.execution",
+      "blueprintId": "blueprint_execution",
+      "recipeId": "recipe.jewelry.ring.band",
+      "canonicalItemBaseId": "band"
+    },
+    {
+      "legacyBlueprintId": "blueprint_aegis",
+      "legacyRecipeVariantId": "variant.jewelry.necklace.aegis",
+      "blueprintId": "blueprint_aegis",
+      "recipeId": "recipe.jewelry.necklace.amulet",
+      "canonicalItemBaseId": "amulet"
+    },
+    {
+      "legacyBlueprintId": "blueprint_warden",
+      "legacyRecipeVariantId": "variant.jewelry.necklace.warden",
+      "blueprintId": "blueprint_warden",
+      "recipeId": "recipe.jewelry.necklace.charm",
+      "canonicalItemBaseId": "charm"
+    },
+    {
+      "legacyBlueprintId": "blueprint_endurance",
+      "legacyRecipeVariantId": "variant.jewelry.necklace.endurance",
+      "blueprintId": "blueprint_endurance",
+      "recipeId": "recipe.jewelry.necklace.talisman",
+      "canonicalItemBaseId": "talisman"
+    },
+    {
+      "legacyBlueprintId": "blueprint_phoenix",
+      "legacyRecipeVariantId": "variant.jewelry.relic.phoenix",
+      "blueprintId": "blueprint_phoenix",
+      "recipeId": "recipe.jewelry.relic.vial",
+      "canonicalItemBaseId": "vial"
+    },
+    {
+      "legacyBlueprintId": "blueprint_spirit",
+      "legacyRecipeVariantId": "variant.jewelry.relic.spirit",
+      "blueprintId": "blueprint_spirit",
+      "recipeId": "recipe.jewelry.relic.heart",
+      "canonicalItemBaseId": "heart"
+    },
+    {
+      "legacyBlueprintId": "blueprint_primal",
+      "legacyRecipeVariantId": "variant.jewelry.relic.primal",
+      "blueprintId": "blueprint_primal",
+      "recipeId": "recipe.jewelry.relic.totem",
+      "canonicalItemBaseId": "totem"
+    },
+    {
+      "legacyBlueprintId": "blueprint_venom",
+      "legacyRecipeVariantId": "variant.weapon.one_handed.venom_touched_sword",
+      "blueprintId": "blueprint_venom",
+      "recipeId": "recipe.weapon.one_handed.shortsword",
+      "canonicalItemBaseId": "shortsword"
+    },
+    {
+      "legacyBlueprintId": "blueprint_hive",
+      "legacyRecipeVariantId": "variant.weapon.one_handed.hivefang_dagger",
+      "blueprintId": "blueprint_hive",
+      "recipeId": "recipe.weapon.one_handed.dagger",
+      "canonicalItemBaseId": "dagger"
+    }
+  ]
+}

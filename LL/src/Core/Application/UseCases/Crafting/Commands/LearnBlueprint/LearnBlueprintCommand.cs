@@ -7,7 +7,7 @@ using MediatR;
 
 namespace Application.UseCases.Crafting.Commands.LearnBlueprint;
 
-public record LearnBlueprintCommand(Guid CharacterId, Guid BlueprintItemInstanceId, string RecipeId) : ICommand<Response<LearnBlueprintResultDto>>;
+public record LearnBlueprintCommand(Guid CharacterId, Guid BlueprintItemInstanceId) : ICommand<Response<LearnBlueprintResultDto>>;
 
 public class LearnBlueprintCommandHandler : IRequestHandler<LearnBlueprintCommand, Response<LearnBlueprintResultDto>>
 {
@@ -25,7 +25,6 @@ public class LearnBlueprintCommandHandler : IRequestHandler<LearnBlueprintComman
         var result = await _craftingService.LearnBlueprintAsync(
             request.CharacterId,
             request.BlueprintItemInstanceId,
-            request.RecipeId,
             cancellationToken);
 
         return result.IsSuccess

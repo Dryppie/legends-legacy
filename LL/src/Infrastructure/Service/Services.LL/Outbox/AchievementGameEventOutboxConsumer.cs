@@ -211,11 +211,9 @@ public sealed class AchievementGameEventOutboxConsumer(
             Rarity = item.Rarity,
             Quality = item.Quality,
             Potential = item.Potential,
-            RecipeId = item.RecipeId,
             BaseRecipeId = item.BaseRecipeId,
             BlueprintId = item.BlueprintId,
             AffinityTags = item.AffinityTags.ToList(),
-            SpecialModifiers = item.SpecialModifiers.ToList(),
             IsMasterpiece = item.IsMasterpiece
         };
 

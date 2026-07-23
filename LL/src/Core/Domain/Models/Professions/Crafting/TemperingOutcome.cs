@@ -3,6 +3,5 @@ public enum TemperingOutcome
 {
     Critical,
     Positive,
-    Neutral,
-    Negative
+    Neutral
 }

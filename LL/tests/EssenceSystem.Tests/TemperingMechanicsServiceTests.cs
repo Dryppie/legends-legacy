@@ -1,5 +1,4 @@
 using Domain.Models.Attributes;
-using Domain.Models.Attributes.Modifiers;
 using Domain.Models.Items;
 using Domain.Models.Items.Equipments;
 using Domain.Models.Professions.Crafting;
@@ -12,111 +11,71 @@ namespace EssenceSystem.Tests;
 public sealed class TemperingMechanicsServiceTests
 {
     [Fact]
-    public void ApplyTemperingAttempt_WhenRarityDoesNotIncrease_DoesNotAddInstanceModifier()
+    public void PositiveAttemptImprovesExactlyOneProfileStatAndConsumesOnePotential()
     {
-        var service = new TemperingMechanicsService();
         var equipment = CreateEquipment();
-        var profile = CreateProfile();
+        var result = new TemperingMechanicsService()
+            .ApplyTemperingAttempt(equipment, CreateProfile(), new FixedRandom(0.5d));
 
-        var result = service.ApplyTemperingAttempt(equipment, profile, new FixedRandom(0.50d));
-
-        Assert.False(result.RarityUpgraded);
-        Assert.Equal(Rarity.Common, equipment.Rarity);
-        Assert.Equal(0, equipment.ItemXp);
+        Assert.Equal(TemperingOutcome.Positive, result.Outcome);
+        Assert.Equal(AttributeType.Armor, result.ImprovedStat);
+        Assert.Single(equipment.InstanceModifiers);
         Assert.Equal(9, equipment.Potential);
-        Assert.Empty(equipment.InstanceModifiers);
+        Assert.Equal(1, equipment.TemperingProgress);
+        Assert.Equal(1, equipment.ItemXp);
     }
 
     [Fact]
-    public void ApplyTemperingAttempt_WhenRarityIncreases_AddsRarityUpgradeReward()
+    public void NeutralAttemptIsNonDestructiveAndConsumesOnlyOnePotential()
     {
-        var service = new TemperingMechanicsService();
+        var equipment = CreateEquipment();
+        var result = new TemperingMechanicsService(Options.Create(new CraftingBalanceOptions
+        {
+            CriticalChanceBase = 0d,
+            CriticalChancePerRarityStep = 0d
+        })).ApplyTemperingAttempt(equipment, CreateProfile(), new FixedRandom(0.01d));
+
+        Assert.Equal(TemperingOutcome.Neutral, result.Outcome);
+        Assert.Null(result.ImprovedStat);
+        Assert.Empty(equipment.InstanceModifiers);
+        Assert.Equal(9, equipment.Potential);
+        Assert.Equal(0, equipment.ItemXp);
+    }
+
+    [Fact]
+    public void TenthImprovementUpgradesRarity()
+    {
         var equipment = CreateEquipment();
         equipment.ItemXp = 9;
-        var profile = CreateProfile();
 
-        var result = service.ApplyTemperingAttempt(equipment, profile, new FixedRandom(0.01d));
+        var result = new TemperingMechanicsService()
+            .ApplyTemperingAttempt(equipment, CreateProfile(), new FixedRandom(0.5d));
 
         Assert.True(result.RarityUpgraded);
         Assert.Equal(Rarity.Uncommon, equipment.Rarity);
         Assert.Equal(0, equipment.ItemXp);
-        var modifier = Assert.Single(equipment.InstanceModifiers);
-        Assert.Equal(AttributeType.Armor, modifier.AttributeType);
-        Assert.Equal(4, modifier.Amount);
     }
 
     [Fact]
-    public void ApplyTemperingAttempt_WhenQualityIncreaseRollSucceeds_IncreasesQualityWithoutRestoringPotential()
+    public void CriticalQualityIncreaseDoesNotRestorePotential()
     {
-        var service = new TemperingMechanicsService(Options.Create(new CraftingBalanceOptions
-        {
-            CriticalChanceBase = 1d,
-            CriticalChancePerRarityStep = 0d,
-            CriticalLevelingItemChance = 0d
-        }));
         var equipment = CreateEquipment();
         equipment.Quality = ItemQuality.Fine;
         equipment.MaxPotential = 10;
-        equipment.InstanceModifiers.Add(new InstanceAttributeModifier(AttributeType.Armor, 100));
-        var profile = CreateProfile();
-
-        var result = service.ApplyTemperingAttempt(equipment, profile, new FixedRandom(0.01d));
-
-        Assert.Equal(TemperingOutcome.Critical, result.Outcome);
-        Assert.True(result.QualityIncreased);
-        Assert.False(equipment.IsLevelingItem);
-        Assert.Equal(ItemQuality.Fine, result.PreviousQuality);
-        Assert.Equal(ItemQuality.Exceptional, result.NewQuality);
-        Assert.Equal(ItemQuality.Exceptional, equipment.Quality);
-        Assert.Equal(9, equipment.Potential);
-        Assert.Equal(10, equipment.MaxPotential);
-        Assert.Equal(104, equipment.InstanceModifiers.Single().Amount);
-    }
-
-    [Fact]
-    public void ApplyTemperingAttempt_WhenQualityAlreadyMaximum_DoesNotIncreaseQuality()
-    {
         var service = new TemperingMechanicsService(Options.Create(new CraftingBalanceOptions
         {
             CriticalChanceBase = 1d,
             CriticalChancePerRarityStep = 0d,
             CriticalLevelingItemChance = 0d
         }));
-        var equipment = CreateEquipment();
-        equipment.Quality = ItemQuality.Masterwork;
-        var profile = CreateProfile();
 
-        var result = service.ApplyTemperingAttempt(equipment, profile, new FixedRandom(0.01d));
-
-        Assert.False(result.QualityIncreased);
-        Assert.Null(result.PreviousQuality);
-        Assert.Null(result.NewQuality);
-        Assert.Equal(ItemQuality.Masterwork, equipment.Quality);
-        Assert.Equal(9, equipment.Potential);
-    }
-
-    [Fact]
-    public void ApplyTemperingAttempt_WhenCriticalRollChoosesLevelingItem_DoesNotIncreaseQuality()
-    {
-        var service = new TemperingMechanicsService(Options.Create(new CraftingBalanceOptions
-        {
-            CriticalChanceBase = 1d,
-            CriticalChancePerRarityStep = 0d,
-            CriticalLevelingItemChance = 1d
-        }));
-        var equipment = CreateEquipment();
-        equipment.Quality = ItemQuality.Fine;
-        var profile = CreateProfile();
-
-        var result = service.ApplyTemperingAttempt(equipment, profile, new FixedRandom(0.01d));
+        var result = service.ApplyTemperingAttempt(equipment, CreateProfile(), new FixedRandom(0.5d));
 
         Assert.Equal(TemperingOutcome.Critical, result.Outcome);
-        Assert.True(equipment.IsLevelingItem);
-        Assert.False(result.QualityIncreased);
-        Assert.Null(result.PreviousQuality);
-        Assert.Null(result.NewQuality);
-        Assert.Equal(ItemQuality.Fine, equipment.Quality);
+        Assert.True(result.QualityIncreased);
+        Assert.Equal(ItemQuality.Exceptional, equipment.Quality);
         Assert.Equal(9, equipment.Potential);
+        Assert.Equal(10, equipment.MaxPotential);
     }
 
     private static EquipmentInstance CreateEquipment() => new()
@@ -135,39 +94,24 @@ public sealed class TemperingMechanicsServiceTests
 
     private static TemperingProfileDefinition CreateProfile() => new()
     {
-        Id = "armor_fortification",
-        Name = "Armor Fortification",
-        StatImprovementPool =
+        Id = "profile.test",
+        Name = "Test",
+        Stats =
         [
-            new WeightedStatDefinition
+            new TemperingStatWeightDefinition
             {
-                Stat = AttributeType.Fortitude,
-                Weight = 100
-            }
-        ],
-        ResolvedAffixPool =
-        [
-            new WeightedAffixDefinition
-            {
-                Id = "armor",
-                Name = "Armor",
-                MinRarity = Rarity.Uncommon,
+                Stat = AttributeType.Armor,
                 Weight = 100,
-                StatModifier = new WeightedStatDefinition
-                {
-                    Stat = AttributeType.Armor,
-                    Weight = 2
-                }
+                Category = TemperingStatCategory.Primary,
+                CanIntroduce = true,
+                CanIncrease = true,
+                MaxBudgetShare = 1d
             }
         ]
     };
 
-    private sealed class FixedRandom(double nextDouble) : Random
+    private sealed class FixedRandom(double value) : Random
     {
-        public override double NextDouble() => nextDouble;
-
-        public override int Next(int maxValue) => 0;
-
-        public override int Next(int minValue, int maxValue) => minValue;
+        public override double NextDouble() => value;
     }
 }

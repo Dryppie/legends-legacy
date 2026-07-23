@@ -7,7 +7,12 @@ using MediatR;
 
 namespace Application.UseCases.Crafting.Commands.CraftItems;
 
-public record CraftItemsCommand(Guid CharacterId, string RecipeId, string? FormId, string? BlueprintId, int TargetTier, int Quantity) : ICommand<Response<CraftItemsResultDto>>;
+public record CraftItemsCommand(
+    Guid CharacterId,
+    string RecipeId,
+    string? BlueprintId,
+    int TargetTier,
+    int Quantity) : ICommand<Response<CraftItemsResultDto>>;
 
 public class CraftItemsCommandHandler : IRequestHandler<CraftItemsCommand, Response<CraftItemsResultDto>>
 {
@@ -25,7 +30,6 @@ public class CraftItemsCommandHandler : IRequestHandler<CraftItemsCommand, Respo
         var result = await _craftingService.CraftItemsAsync(
             request.CharacterId,
             request.RecipeId,
-            request.FormId,
             request.BlueprintId,
             request.TargetTier,
             request.Quantity,

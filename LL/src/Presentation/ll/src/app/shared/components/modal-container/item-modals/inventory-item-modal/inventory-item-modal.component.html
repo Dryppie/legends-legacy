@@ -2,7 +2,6 @@
   <div class="flex w-full items-center justify-center pb-2">
     <h2 class="ll-heading text-xl">{{ itemName }}</h2>
   </div>
-
   <div class="border-t border-primary/20 pb-3"></div>
 
   <div class="flex flex-col gap-4">
@@ -14,74 +13,42 @@
       <div class="ll-copy mt-3">Quantity: {{ inventoryItem.quantity }}</div>
     </div>
 
-    <div *ngIf="isBlueprint" class="ll-card p-3">
-      <h3 class="ll-heading text-base">Apply To</h3>
-
-      <div *ngIf="isLoadingOptions()" class="ll-copy mt-2">
-        Loading recipe options...
+    <div *ngIf="blueprint as metadata" class="ll-card p-3">
+      <h3 class="ll-heading text-base">Reusable Blueprint</h3>
+      <div class="mt-3 font-semibold text-white">
+        {{ metadata.name }}
       </div>
-
-      <div
-        *ngIf="!isLoadingOptions() && learningOptions().length === 0"
-        class="ll-state mt-3"
-      >
-        No available recipes for this blueprint.
+      <div class="ll-copy mt-1">
+        {{ metadata.description }}
       </div>
-
-      <div
-        *ngIf="!isLoadingOptions() && learningOptions().length > 0"
-        class="mt-3 flex flex-wrap gap-2"
-      >
-        <button
-          *ngFor="let option of learningOptions(); trackBy: trackByRecipeId"
-          type="button"
-          class="ll-button"
-          [class.ll-card-accent]="selectedRecipeId() === option.recipeId"
-          [class.text-primary]="selectedRecipeId() === option.recipeId"
-          (click)="selectRecipe(option.recipeId)"
+      <div class="ll-copy mt-1">
+        Permanent unlock for {{ metadata.compatibleRecipeCount }} compatible
+        recipes.
+      </div>
+      <div class="ll-copy mt-2 text-xs text-secondary">
+        Source: {{ metadata.sourceType || "Unknown" }}
+        <ng-container *ngIf="metadata.sourceId">
+          · {{ metadata.sourceId }}</ng-container
         >
-          {{ option.recipeName }}
-        </button>
       </div>
-
-      <div
-        *ngIf="selectedRecipeId() as recipeId"
-        class="ll-copy mt-3"
-      >
-        <ng-container
-          *ngFor="let option of learningOptions(); trackBy: trackByRecipeId"
-        >
-          <span *ngIf="option.recipeId === recipeId">
-            Applies to
-            {{
-              option.compatibleFormNames.length > 0
-                ? option.compatibleFormNames.join(', ')
-                : option.recipeName
-            }}.
-          </span>
-        </ng-container>
-      </div>
+      <div class="ll-state mt-3">Learning consumes one physical Blueprint.</div>
     </div>
 
-    <div *ngIf="error() as errorMessage" class="ll-state ll-state-danger">
-      {{ errorMessage }}
+    <div *ngIf="error() as message" class="ll-state ll-state-danger">
+      {{ message }}
     </div>
-
-    <div class="flex place-items-end justify-end gap-2">
+    <div class="flex justify-end gap-2">
       <button type="button" (click)="close.emit()" class="ll-button">
         Close
       </button>
-
       <button
-        *ngIf="isBlueprint"
+        *ngIf="blueprint"
         type="button"
         class="ll-button"
-        [disabled]="
-          isLearning() || isLoadingOptions() || learningOptions().length === 0
-        "
+        [disabled]="isLearning()"
         (click)="learnBlueprint()"
       >
-        {{ isLearning() ? 'Learning...' : 'Learn Blueprint' }}
+        {{ isLearning() ? "Learning..." : "Learn Blueprint" }}
       </button>
     </div>
   </div>

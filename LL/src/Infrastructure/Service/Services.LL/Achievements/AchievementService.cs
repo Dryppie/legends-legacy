@@ -856,7 +856,7 @@ public sealed class AchievementService : IAchievementService
         var equipment = await _repository.GetOwnedEquipmentAsync(characterId, cancellationToken);
 
         var craftedItems = equipment
-            .Where(x => !string.IsNullOrWhiteSpace(x.RecipeId))
+            .Where(x => !string.IsNullOrWhiteSpace(x.BaseRecipeId))
             .ToList();
 
         unlocks.AddRange(await AddProgressCoreAsync(
@@ -1499,9 +1499,7 @@ public sealed class AchievementService : IAchievementService
 
     private static bool IsSetItem(EquipmentInstance item) =>
         item.AffinityTags.Any(IsSetTag) ||
-        item.SpecialModifiers.Any(IsSetTag) ||
         item.BlueprintId?.Contains("set", StringComparison.OrdinalIgnoreCase) == true ||
-        item.RecipeId?.Contains("set", StringComparison.OrdinalIgnoreCase) == true ||
         item.BaseRecipeId?.Contains("set", StringComparison.OrdinalIgnoreCase) == true;
 
     private static bool IsSetTag(string value) =>

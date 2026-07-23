@@ -2,665 +2,737 @@
   {
     "id": "blueprint_fury",
     "name": "Blueprint: Fury",
-    "blueprintFamily": "Fury",
-    "unlocksRecipeId": "recipe_ring",
+    "description": "Applies the Fury design to a compatible recipe.",
     "itemId": "blueprint_fury",
+    "nameFormat": "{BaseName} of Fury",
+    "requiredRecipeTags": [],
+    "anyRecipeTags": [
+      "Weapon",
+      "Accessory",
+      "Relic"
+    ],
+    "excludedRecipeTags": [],
+    "compatibleRecipeIds": [],
+    "statProfileInfluence": 0.4,
+    "statProfile": {
+      "Power": 0.35,
+      "CritChance": 0.3,
+      "WeaponDamage": 0.2,
+      "AttackSpeed": 0.15
+    },
+    "temperingProfile": {
+      "id": "blueprint_fury.tempering",
+      "name": "Fury Tempering",
+      "stats": [
+        {
+          "stat": "Power",
+          "weight": 35,
+          "category": "Primary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.4,
+          "minimumTier": 1
+        },
+        {
+          "stat": "CritChance",
+          "weight": 30,
+          "category": "Primary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.35,
+          "minimumTier": 1
+        },
+        {
+          "stat": "WeaponDamage",
+          "weight": 20,
+          "category": "Secondary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.3,
+          "minimumTier": 1
+        },
+        {
+          "stat": "AttackSpeed",
+          "weight": 15,
+          "category": "Secondary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.3,
+          "minimumTier": 1
+        }
+      ]
+    },
+    "behaviorModifiers": {
+      "handedness": "",
+      "attackCategory": "",
+      "rangeCategory": "",
+      "basicAttackIntervalMultiplier": 1,
+      "basicAttackDamageMultiplier": 1,
+      "role": ""
+    },
+    "additionalMaterialRequirements": [],
     "sourceType": "Dungeon",
     "sourceId": "goblin_mines",
-    "allowedBaseRecipeIds": [
-      "recipe_ring",
-      "recipe_one_handed_weapon",
-      "recipe_two_handed_weapon",
-      "recipe_chest_armor"
-    ],
-    "allowedRecipeTags": [
-      "OneHanded",
-      "Axe",
-      "Gauntlets",
-      "MediumArmor",
-      "Ring"
-    ],
-    "outputNameTemplate": "{BlueprintName} {FormName}",
-    "specialOutputNames": [
-      {
-        "baseRecipeId": "recipe_ring",
-        "formId": "band",
-        "outputName": "Band of Fury"
-      }
-    ],
     "tags": [
       "Fury",
       "Physical",
       "Crit",
       "Aggression"
     ],
-    "specialResourceRequirements": [],
-    "temperingProfile": {
-      "id": "blueprint_fury_tempering_profile",
-      "name": "Fury Tempering",
-      "statImprovementPool": [
-        {
-          "stat": "WeaponDamage",
-          "weight": 35
-        },
-        {
-          "stat": "CritChance",
-          "weight": 25
-        },
-        {
-          "stat": "CritDamage",
-          "weight": 25
-        },
-        {
-          "stat": "Fortitude",
-          "weight": 15
-        }
-      ],
-      "affixPool": [
-        {
-          "id": "affix_fury_damage",
-          "weight": 35
-        },
-        {
-          "id": "affix_fury_crit",
-          "weight": 20
-        }
-      ],
-      "specialModifierPool": [
-        {
-          "id": "special_battle_trance",
-          "weight": 10
-        }
-      ]
-    }
+    "enabled": true
   },
   {
     "id": "blueprint_arcane",
     "name": "Blueprint: Arcane",
-    "blueprintFamily": "Arcane",
-    "unlocksRecipeId": "recipe_ring",
+    "description": "Applies the Arcane design to a compatible recipe.",
     "itemId": "blueprint_arcane",
+    "nameFormat": "Arcane {BaseName}",
+    "requiredRecipeTags": [],
+    "anyRecipeTags": [
+      "Weapon",
+      "OffHand",
+      "Accessory",
+      "Relic"
+    ],
+    "excludedRecipeTags": [],
+    "compatibleRecipeIds": [],
+    "statProfileInfluence": 0.4,
+    "statProfile": {
+      "Spirit": 0.35,
+      "MagicPenetration": 0.25,
+      "Cooldown": 0.2,
+      "Precision": 0.2
+    },
+    "temperingProfile": {
+      "id": "blueprint_arcane.tempering",
+      "name": "Arcane Tempering",
+      "stats": [
+        {
+          "stat": "Spirit",
+          "weight": 35,
+          "category": "Primary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.4,
+          "minimumTier": 1
+        },
+        {
+          "stat": "MagicPenetration",
+          "weight": 25,
+          "category": "Primary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.35,
+          "minimumTier": 1
+        },
+        {
+          "stat": "Cooldown",
+          "weight": 20,
+          "category": "Secondary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.3,
+          "minimumTier": 1
+        },
+        {
+          "stat": "Precision",
+          "weight": 20,
+          "category": "Secondary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.3,
+          "minimumTier": 1
+        }
+      ]
+    },
+    "behaviorModifiers": {
+      "handedness": "",
+      "attackCategory": "",
+      "rangeCategory": "",
+      "basicAttackIntervalMultiplier": 1,
+      "basicAttackDamageMultiplier": 1,
+      "role": ""
+    },
+    "additionalMaterialRequirements": [],
     "sourceType": "Dungeon",
     "sourceId": "goblin_mines",
-    "allowedBaseRecipeIds": [
-      "recipe_ring",
-      "recipe_one_handed_weapon",
-      "recipe_two_handed_weapon",
-      "recipe_offhand",
-      "recipe_head_armor",
-      "recipe_chest_armor",
-      "recipe_leg_armor"
-    ],
-    "allowedRecipeTags": [
-      "Wand",
-      "Staff",
-      "Grimoire",
-      "ClothArmor",
-      "Ring",
-      "Magic"
-    ],
-    "outputNameTemplate": "{BlueprintName} {FormName}",
-    "specialOutputNames": [
-      {
-        "baseRecipeId": "recipe_ring",
-        "formId": "band",
-        "outputName": "Band of Arcane"
-      }
-    ],
     "tags": [
       "Arcane",
       "Magic",
       "SpellPower",
       "Cooldown"
     ],
-    "specialResourceRequirements": [],
-    "temperingProfile": {
-      "id": "blueprint_arcane_tempering_profile",
-      "name": "Arcane Tempering",
-      "statImprovementPool": [
-        {
-          "stat": "Spirit",
-          "weight": 35
-        },
-        {
-          "stat": "Cooldown",
-          "weight": 25
-        },
-        {
-          "stat": "MagicPenetration",
-          "weight": 20
-        },
-        {
-          "stat": "Resistance",
-          "weight": 20
-        }
-      ],
-      "affixPool": [
-        {
-          "id": "affix_spirit_focus",
-          "weight": 35
-        },
-        {
-          "id": "affix_cooldown",
-          "weight": 25
-        }
-      ],
-      "specialModifierPool": [
-        {
-          "id": "special_arcane_cycle",
-          "weight": 10
-        }
-      ]
-    }
+    "enabled": true
   },
   {
     "id": "blueprint_execution",
     "name": "Blueprint: Execution",
-    "blueprintFamily": "Execution",
-    "unlocksRecipeId": "recipe_ring",
+    "description": "Applies the Execution design to a compatible recipe.",
     "itemId": "blueprint_execution",
+    "nameFormat": "{BaseName} of Execution",
+    "requiredRecipeTags": [],
+    "anyRecipeTags": [
+      "Weapon",
+      "Accessory",
+      "Relic"
+    ],
+    "excludedRecipeTags": [],
+    "compatibleRecipeIds": [],
+    "statProfileInfluence": 0.4,
+    "statProfile": {
+      "CritDamage": 0.35,
+      "Precision": 0.3,
+      "CritChance": 0.2,
+      "WeaponDamage": 0.15
+    },
+    "temperingProfile": {
+      "id": "blueprint_execution.tempering",
+      "name": "Execution Tempering",
+      "stats": [
+        {
+          "stat": "CritDamage",
+          "weight": 35,
+          "category": "Primary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.4,
+          "minimumTier": 1
+        },
+        {
+          "stat": "Precision",
+          "weight": 30,
+          "category": "Primary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.35,
+          "minimumTier": 1
+        },
+        {
+          "stat": "CritChance",
+          "weight": 20,
+          "category": "Secondary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.3,
+          "minimumTier": 1
+        },
+        {
+          "stat": "WeaponDamage",
+          "weight": 15,
+          "category": "Secondary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.3,
+          "minimumTier": 1
+        }
+      ]
+    },
+    "behaviorModifiers": {
+      "handedness": "",
+      "attackCategory": "",
+      "rangeCategory": "",
+      "basicAttackIntervalMultiplier": 1,
+      "basicAttackDamageMultiplier": 1,
+      "role": ""
+    },
+    "additionalMaterialRequirements": [],
     "sourceType": "Dungeon",
     "sourceId": "goblin_mines",
-    "allowedBaseRecipeIds": [
-      "recipe_ring",
-      "recipe_one_handed_weapon",
-      "recipe_two_handed_weapon"
-    ],
-    "allowedRecipeTags": [
-      "Blade",
-      "Crit",
-      "Precision",
-      "Ring",
-      "Ranged"
-    ],
-    "outputNameTemplate": "{BlueprintName} {FormName}",
-    "specialOutputNames": [
-      {
-        "baseRecipeId": "recipe_ring",
-        "formId": "band",
-        "outputName": "Band of Execution"
-      }
-    ],
     "tags": [
       "Execution",
       "Crit",
       "Precision",
       "Damage"
     ],
-    "specialResourceRequirements": [],
-    "temperingProfile": {
-      "id": "blueprint_execution_tempering_profile",
-      "name": "Execution Tempering",
-      "statImprovementPool": [
-        {
-          "stat": "Precision",
-          "weight": 35
-        },
-        {
-          "stat": "CritChance",
-          "weight": 25
-        },
-        {
-          "stat": "ArmorPenetration",
-          "weight": 25
-        },
-        {
-          "stat": "CritDamage",
-          "weight": 15
-        }
-      ],
-      "affixPool": [
-        {
-          "id": "affix_ranged_precision",
-          "weight": 35
-        },
-        {
-          "id": "affix_armor_penetration",
-          "weight": 25
-        },
-        {
-          "id": "affix_crit_chance",
-          "weight": 20
-        }
-      ],
-      "specialModifierPool": [
-        {
-          "id": "special_deadeye",
-          "weight": 10
-        }
-      ]
-    }
+    "enabled": true
   },
   {
     "id": "blueprint_aegis",
     "name": "Blueprint: Aegis",
-    "blueprintFamily": "Aegis",
-    "unlocksRecipeId": "recipe_necklace",
+    "description": "Applies the Aegis design to a compatible recipe.",
     "itemId": "blueprint_aegis",
+    "nameFormat": "Aegis {BaseName}",
+    "requiredRecipeTags": [],
+    "anyRecipeTags": [
+      "Armor",
+      "OffHand",
+      "Accessory",
+      "Relic"
+    ],
+    "excludedRecipeTags": [],
+    "compatibleRecipeIds": [],
+    "statProfileInfluence": 0.4,
+    "statProfile": {
+      "Armor": 0.35,
+      "Resistance": 0.3,
+      "MaxHealth": 0.2,
+      "DamageReduction": 0.15
+    },
+    "temperingProfile": {
+      "id": "blueprint_aegis.tempering",
+      "name": "Aegis Tempering",
+      "stats": [
+        {
+          "stat": "Armor",
+          "weight": 35,
+          "category": "Primary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.4,
+          "minimumTier": 1
+        },
+        {
+          "stat": "Resistance",
+          "weight": 30,
+          "category": "Primary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.35,
+          "minimumTier": 1
+        },
+        {
+          "stat": "MaxHealth",
+          "weight": 20,
+          "category": "Secondary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.3,
+          "minimumTier": 1
+        },
+        {
+          "stat": "DamageReduction",
+          "weight": 15,
+          "category": "Secondary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.3,
+          "minimumTier": 1
+        }
+      ]
+    },
+    "behaviorModifiers": {
+      "handedness": "",
+      "attackCategory": "",
+      "rangeCategory": "",
+      "basicAttackIntervalMultiplier": 1,
+      "basicAttackDamageMultiplier": 1,
+      "role": ""
+    },
+    "additionalMaterialRequirements": [],
     "sourceType": "Dungeon",
     "sourceId": "forgotten_catacombs",
-    "allowedBaseRecipeIds": [
-      "recipe_necklace",
-      "recipe_offhand",
-      "recipe_head_armor",
-      "recipe_chest_armor",
-      "recipe_leg_armor"
-    ],
-    "allowedRecipeTags": [
-      "HeavyArmor",
-      "Shield",
-      "Necklace",
-      "Defensive",
-      "Barrier"
-    ],
-    "outputNameTemplate": "{BlueprintName} {FormName}",
-    "specialOutputNames": [
-      {
-        "baseRecipeId": "recipe_necklace",
-        "formId": "amulet",
-        "outputName": "Amulet of Aegis"
-      }
-    ],
     "tags": [
       "Aegis",
       "Defensive",
       "Barrier",
       "PhysicalDefense"
     ],
-    "specialResourceRequirements": [],
-    "temperingProfile": {
-      "id": "blueprint_aegis_tempering_profile",
-      "name": "Aegis Tempering",
-      "statImprovementPool": [
-        {
-          "stat": "BlockChance",
-          "weight": 35
-        },
-        {
-          "stat": "Armor",
-          "weight": 30
-        },
-        {
-          "stat": "DamageReduction",
-          "weight": 25
-        },
-        {
-          "stat": "Resistance",
-          "weight": 10
-        }
-      ],
-      "affixPool": [
-        {
-          "id": "affix_block_chance",
-          "weight": 35
-        },
-        {
-          "id": "affix_damage_reduction",
-          "weight": 25
-        },
-        {
-          "id": "affix_armor",
-          "weight": 20
-        }
-      ],
-      "specialModifierPool": [
-        {
-          "id": "special_unbroken_guard",
-          "weight": 10
-        }
-      ]
-    }
+    "enabled": true
   },
   {
     "id": "blueprint_warden",
     "name": "Blueprint: Warden",
-    "blueprintFamily": "Warden",
-    "unlocksRecipeId": "recipe_necklace",
+    "description": "Applies the Warden design to a compatible recipe.",
     "itemId": "blueprint_warden",
+    "nameFormat": "Warden's {BaseName}",
+    "requiredRecipeTags": [],
+    "anyRecipeTags": [
+      "Armor",
+      "OffHand",
+      "Accessory",
+      "Relic"
+    ],
+    "excludedRecipeTags": [],
+    "compatibleRecipeIds": [],
+    "statProfileInfluence": 0.4,
+    "statProfile": {
+      "MaxHealth": 0.35,
+      "CrowdControlResistance": 0.25,
+      "Fortitude": 0.2,
+      "HealthRegeneration": 0.2
+    },
+    "temperingProfile": {
+      "id": "blueprint_warden.tempering",
+      "name": "Warden Tempering",
+      "stats": [
+        {
+          "stat": "MaxHealth",
+          "weight": 35,
+          "category": "Primary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.4,
+          "minimumTier": 1
+        },
+        {
+          "stat": "CrowdControlResistance",
+          "weight": 25,
+          "category": "Primary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.35,
+          "minimumTier": 1
+        },
+        {
+          "stat": "Fortitude",
+          "weight": 20,
+          "category": "Secondary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.3,
+          "minimumTier": 1
+        },
+        {
+          "stat": "HealthRegeneration",
+          "weight": 20,
+          "category": "Secondary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.3,
+          "minimumTier": 1
+        }
+      ]
+    },
+    "behaviorModifiers": {
+      "handedness": "",
+      "attackCategory": "",
+      "rangeCategory": "",
+      "basicAttackIntervalMultiplier": 1,
+      "basicAttackDamageMultiplier": 1,
+      "role": ""
+    },
+    "additionalMaterialRequirements": [],
     "sourceType": "Dungeon",
     "sourceId": "hives_abyss",
-    "allowedBaseRecipeIds": [
-      "recipe_necklace",
-      "recipe_offhand",
-      "recipe_chest_armor"
-    ],
-    "allowedRecipeTags": [
-      "Necklace",
-      "Ward",
-      "MediumArmor",
-      "Support",
-      "Nature"
-    ],
-    "outputNameTemplate": "{BlueprintName} {FormName}",
-    "specialOutputNames": [
-      {
-        "baseRecipeId": "recipe_necklace",
-        "formId": "charm",
-        "outputName": "Charm of the Warden"
-      }
-    ],
     "tags": [
       "Warden",
       "Support",
       "Sustain",
       "Nature"
     ],
-    "specialResourceRequirements": [],
-    "temperingProfile": {
-      "id": "blueprint_warden_tempering_profile",
-      "name": "Warden Tempering",
-      "statImprovementPool": [
-        {
-          "stat": "Resistance",
-          "weight": 30
-        },
-        {
-          "stat": "Spirit",
-          "weight": 25
-        },
-        {
-          "stat": "HealthRegeneration",
-          "weight": 25
-        },
-        {
-          "stat": "Fortitude",
-          "weight": 20
-        }
-      ],
-      "affixPool": [
-        {
-          "id": "affix_grave_resistance",
-          "weight": 30
-        },
-        {
-          "id": "affix_spirit",
-          "weight": 25
-        },
-        {
-          "id": "affix_fortitude",
-          "weight": 20
-        }
-      ],
-      "specialModifierPool": [
-        {
-          "id": "special_restless_ward",
-          "weight": 10
-        }
-      ]
-    }
+    "enabled": true
   },
   {
     "id": "blueprint_endurance",
     "name": "Blueprint: Endurance",
-    "blueprintFamily": "Endurance",
-    "unlocksRecipeId": "recipe_necklace",
+    "description": "Applies the Endurance design to a compatible recipe.",
     "itemId": "blueprint_endurance",
+    "nameFormat": "{BaseName} of Endurance",
+    "requiredRecipeTags": [],
+    "anyRecipeTags": [
+      "Armor",
+      "Accessory",
+      "Relic"
+    ],
+    "excludedRecipeTags": [],
+    "compatibleRecipeIds": [],
+    "statProfileInfluence": 0.4,
+    "statProfile": {
+      "HealthRegeneration": 0.35,
+      "MaxHealth": 0.3,
+      "Fortitude": 0.2,
+      "Spirit": 0.15
+    },
+    "temperingProfile": {
+      "id": "blueprint_endurance.tempering",
+      "name": "Endurance Tempering",
+      "stats": [
+        {
+          "stat": "HealthRegeneration",
+          "weight": 35,
+          "category": "Primary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.4,
+          "minimumTier": 1
+        },
+        {
+          "stat": "MaxHealth",
+          "weight": 30,
+          "category": "Primary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.35,
+          "minimumTier": 1
+        },
+        {
+          "stat": "Fortitude",
+          "weight": 20,
+          "category": "Secondary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.3,
+          "minimumTier": 1
+        },
+        {
+          "stat": "Spirit",
+          "weight": 15,
+          "category": "Secondary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.3,
+          "minimumTier": 1
+        }
+      ]
+    },
+    "behaviorModifiers": {
+      "handedness": "",
+      "attackCategory": "",
+      "rangeCategory": "",
+      "basicAttackIntervalMultiplier": 1,
+      "basicAttackDamageMultiplier": 1,
+      "role": ""
+    },
+    "additionalMaterialRequirements": [],
     "sourceType": "Dungeon",
     "sourceId": "forgotten_catacombs",
-    "allowedBaseRecipeIds": [
-      "recipe_necklace",
-      "recipe_head_armor",
-      "recipe_chest_armor",
-      "recipe_leg_armor"
-    ],
-    "allowedRecipeTags": [
-      "Necklace",
-      "HeavyArmor",
-      "MediumArmor",
-      "Endurance",
-      "Sustain"
-    ],
-    "outputNameTemplate": "{BlueprintName} {FormName}",
-    "specialOutputNames": [
-      {
-        "baseRecipeId": "recipe_necklace",
-        "formId": "talisman",
-        "outputName": "Talisman of Endurance"
-      }
-    ],
     "tags": [
       "Endurance",
       "Sustain",
       "MaxHealth"
     ],
-    "specialResourceRequirements": [],
-    "temperingProfile": {
-      "id": "blueprint_endurance_tempering_profile",
-      "name": "Endurance Tempering",
-      "statImprovementPool": [
-        {
-          "stat": "MaxHealth",
-          "weight": 35
-        },
-        {
-          "stat": "Fortitude",
-          "weight": 30
-        },
-        {
-          "stat": "Armor",
-          "weight": 20
-        },
-        {
-          "stat": "DamageReduction",
-          "weight": 15
-        }
-      ],
-      "affixPool": [
-        {
-          "id": "affix_fortitude",
-          "weight": 30
-        },
-        {
-          "id": "affix_armor",
-          "weight": 25
-        },
-        {
-          "id": "affix_damage_reduction_heavy",
-          "weight": 20
-        }
-      ],
-      "specialModifierPool": [
-        {
-          "id": "special_unbroken_guard",
-          "weight": 10
-        }
-      ]
-    }
+    "enabled": true
   },
   {
     "id": "blueprint_phoenix",
     "name": "Blueprint: Phoenix",
-    "blueprintFamily": "Phoenix",
-    "unlocksRecipeId": "recipe_relic",
+    "description": "Applies the Phoenix design to a compatible recipe.",
     "itemId": "blueprint_phoenix",
+    "nameFormat": "Phoenix {BaseName}",
+    "requiredRecipeTags": [],
+    "anyRecipeTags": [
+      "Armor",
+      "Weapon",
+      "Accessory",
+      "Relic"
+    ],
+    "excludedRecipeTags": [],
+    "compatibleRecipeIds": [],
+    "statProfileInfluence": 0.4,
+    "statProfile": {
+      "HealthRegeneration": 0.35,
+      "HealingPowerPercent": 0.25,
+      "MaxHealth": 0.2,
+      "StatusResistance": 0.2
+    },
+    "temperingProfile": {
+      "id": "blueprint_phoenix.tempering",
+      "name": "Phoenix Tempering",
+      "stats": [
+        {
+          "stat": "HealthRegeneration",
+          "weight": 35,
+          "category": "Primary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.4,
+          "minimumTier": 1
+        },
+        {
+          "stat": "HealingPowerPercent",
+          "weight": 25,
+          "category": "Primary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.35,
+          "minimumTier": 1
+        },
+        {
+          "stat": "MaxHealth",
+          "weight": 20,
+          "category": "Secondary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.3,
+          "minimumTier": 1
+        },
+        {
+          "stat": "StatusResistance",
+          "weight": 20,
+          "category": "Secondary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.3,
+          "minimumTier": 1
+        }
+      ]
+    },
+    "behaviorModifiers": {
+      "handedness": "",
+      "attackCategory": "",
+      "rangeCategory": "",
+      "basicAttackIntervalMultiplier": 1,
+      "basicAttackDamageMultiplier": 1,
+      "role": ""
+    },
+    "additionalMaterialRequirements": [],
     "sourceType": "Dungeon",
     "sourceId": "forgotten_catacombs",
-    "allowedBaseRecipeIds": [
-      "recipe_relic",
-      "recipe_chest_armor",
-      "recipe_two_handed_weapon"
-    ],
-    "allowedRecipeTags": [
-      "Relic",
-      "Vial",
-      "Recovery",
-      "Fire",
-      "Support"
-    ],
-    "outputNameTemplate": "{BlueprintName} {FormName}",
-    "specialOutputNames": [
-      {
-        "baseRecipeId": "recipe_relic",
-        "formId": "vial",
-        "outputName": "Phoenix Vial"
-      }
-    ],
     "tags": [
       "Phoenix",
       "Fire",
       "Recovery",
       "Support"
     ],
-    "specialResourceRequirements": [],
-    "temperingProfile": {
-      "id": "blueprint_phoenix_tempering_profile",
-      "name": "Phoenix Tempering",
-      "statImprovementPool": [
-        {
-          "stat": "HealthRegeneration",
-          "weight": 35
-        },
-        {
-          "stat": "Spirit",
-          "weight": 25
-        },
-        {
-          "stat": "Power",
-          "weight": 20
-        },
-        {
-          "stat": "StatusResistance",
-          "weight": 20
-        }
-      ],
-      "affixPool": [
-        {
-          "id": "affix_spirit",
-          "weight": 30
-        },
-        {
-          "id": "affix_power",
-          "weight": 25
-        },
-        {
-          "id": "affix_status_resistance",
-          "weight": 20
-        }
-      ],
-      "specialModifierPool": [
-        {
-          "id": "special_arcane_cycle",
-          "weight": 10
-        }
-      ]
-    }
+    "enabled": true
   },
   {
     "id": "blueprint_spirit",
     "name": "Blueprint: Spirit",
-    "blueprintFamily": "Spirit",
-    "unlocksRecipeId": "recipe_relic",
+    "description": "Applies the Spirit design to a compatible recipe.",
     "itemId": "blueprint_spirit",
+    "nameFormat": "Spirit {BaseName}",
+    "requiredRecipeTags": [],
+    "anyRecipeTags": [
+      "Armor",
+      "Weapon",
+      "OffHand",
+      "Accessory",
+      "Relic"
+    ],
+    "excludedRecipeTags": [],
+    "compatibleRecipeIds": [],
+    "statProfileInfluence": 0.4,
+    "statProfile": {
+      "Spirit": 0.35,
+      "Resistance": 0.25,
+      "Cooldown": 0.2,
+      "HealthRegeneration": 0.2
+    },
+    "temperingProfile": {
+      "id": "blueprint_spirit.tempering",
+      "name": "Spirit Tempering",
+      "stats": [
+        {
+          "stat": "Spirit",
+          "weight": 35,
+          "category": "Primary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.4,
+          "minimumTier": 1
+        },
+        {
+          "stat": "Resistance",
+          "weight": 25,
+          "category": "Primary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.35,
+          "minimumTier": 1
+        },
+        {
+          "stat": "Cooldown",
+          "weight": 20,
+          "category": "Secondary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.3,
+          "minimumTier": 1
+        },
+        {
+          "stat": "HealthRegeneration",
+          "weight": 20,
+          "category": "Secondary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.3,
+          "minimumTier": 1
+        }
+      ]
+    },
+    "behaviorModifiers": {
+      "handedness": "",
+      "attackCategory": "",
+      "rangeCategory": "",
+      "basicAttackIntervalMultiplier": 1,
+      "basicAttackDamageMultiplier": 1,
+      "role": ""
+    },
+    "additionalMaterialRequirements": [],
     "sourceType": "Dungeon",
     "sourceId": "forgotten_catacombs",
-    "allowedBaseRecipeIds": [
-      "recipe_relic",
-      "recipe_offhand",
-      "recipe_head_armor",
-      "recipe_chest_armor",
-      "recipe_leg_armor"
-    ],
-    "allowedRecipeTags": [
-      "Relic",
-      "Heart",
-      "Ward",
-      "ClothArmor",
-      "Spirit",
-      "Support"
-    ],
-    "outputNameTemplate": "{BlueprintName} {FormName}",
-    "specialOutputNames": [
-      {
-        "baseRecipeId": "recipe_relic",
-        "formId": "heart",
-        "outputName": "Spirit Heart"
-      }
-    ],
     "tags": [
       "Spirit",
       "Support",
       "Mana",
       "MagicDefense"
     ],
-    "specialResourceRequirements": [],
-    "temperingProfile": {
-      "id": "blueprint_spirit_tempering_profile",
-      "name": "Spirit Tempering",
-      "statImprovementPool": [
-        {
-          "stat": "Spirit",
-          "weight": 35
-        },
-        {
-          "stat": "Resistance",
-          "weight": 25
-        },
-        {
-          "stat": "StatusResistance",
-          "weight": 25
-        },
-        {
-          "stat": "HealthRegeneration",
-          "weight": 15
-        }
-      ],
-      "affixPool": [
-        {
-          "id": "affix_spirit_focus",
-          "weight": 35
-        },
-        {
-          "id": "affix_grave_resistance",
-          "weight": 25
-        },
-        {
-          "id": "affix_status_grave",
-          "weight": 20
-        }
-      ],
-      "specialModifierPool": [
-        {
-          "id": "special_restless_ward",
-          "weight": 10
-        }
-      ]
-    }
+    "enabled": true
   },
   {
     "id": "blueprint_primal",
     "name": "Blueprint: Primal",
-    "blueprintFamily": "Primal",
-    "unlocksRecipeId": "recipe_relic",
+    "description": "Applies the Primal design to a compatible recipe.",
     "itemId": "blueprint_primal",
-    "sourceType": "Dungeon",
-    "sourceId": "hives_abyss",
-    "allowedBaseRecipeIds": [
-      "recipe_relic",
-      "recipe_two_handed_weapon",
-      "recipe_chest_armor"
+    "nameFormat": "Primal {BaseName}",
+    "requiredRecipeTags": [],
+    "anyRecipeTags": [
+      "Weapon",
+      "OffHand",
+      "Accessory",
+      "Relic"
     ],
-    "allowedRecipeTags": [
-      "Relic",
-      "Totem",
-      "Summon",
-      "Nature",
-      "GreatWeapon"
-    ],
-    "outputNameTemplate": "{BlueprintName} {FormName}",
-    "specialOutputNames": [
-      {
-        "baseRecipeId": "recipe_relic",
-        "formId": "totem",
-        "outputName": "Primal Totem"
-      }
-    ],
-    "tags": [
-      "Primal",
-      "Nature",
-      "Summon",
-      "BuildDefining"
-    ],
-    "specialResourceRequirements": [
+    "excludedRecipeTags": [],
+    "compatibleRecipeIds": [],
+    "statProfileInfluence": 0.4,
+    "statProfile": {
+      "SummonPower": 0.35,
+      "SummonHealth": 0.3,
+      "Fortitude": 0.2,
+      "Power": 0.15
+    },
+    "temperingProfile": {
+      "id": "blueprint_primal.tempering",
+      "name": "Primal Tempering",
+      "stats": [
+        {
+          "stat": "SummonPower",
+          "weight": 35,
+          "category": "Primary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.4,
+          "minimumTier": 1
+        },
+        {
+          "stat": "SummonHealth",
+          "weight": 30,
+          "category": "Primary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.35,
+          "minimumTier": 1
+        },
+        {
+          "stat": "Fortitude",
+          "weight": 20,
+          "category": "Secondary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.3,
+          "minimumTier": 1
+        },
+        {
+          "stat": "Power",
+          "weight": 15,
+          "category": "Secondary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.3,
+          "minimumTier": 1
+        }
+      ]
+    },
+    "behaviorModifiers": {
+      "handedness": "",
+      "attackCategory": "",
+      "rangeCategory": "",
+      "basicAttackIntervalMultiplier": 1,
+      "basicAttackDamageMultiplier": 1,
+      "role": ""
+    },
+    "additionalMaterialRequirements": [
       {
         "type": "SpecialResource",
         "itemId": "hive_ichor",
@@ -668,85 +740,86 @@
         "amountPerTier": 0
       }
     ],
-    "temperingProfile": {
-      "id": "blueprint_primal_tempering_profile",
-      "name": "Primal Tempering",
-      "statImprovementPool": [
-        {
-          "stat": "SummonPower",
-          "weight": 35
-        },
-        {
-          "stat": "SummonHealth",
-          "weight": 35
-        },
-        {
-          "stat": "Fortitude",
-          "weight": 15
-        },
-        {
-          "stat": "Power",
-          "weight": 15
-        }
-      ],
-      "affixPool": [
-        {
-          "id": "affix_summon_power",
-          "weight": 35
-        },
-        {
-          "id": "affix_summon_health",
-          "weight": 20
-        }
-      ],
-      "specialModifierPool": [
-        {
-          "id": "special_wild_bond",
-          "weight": 10
-        }
-      ]
-    }
+    "sourceType": "Dungeon",
+    "sourceId": "hives_abyss",
+    "tags": [
+      "Primal",
+      "Nature",
+      "Summon",
+      "BuildDefining"
+    ],
+    "enabled": true
   },
   {
     "id": "blueprint_venom",
     "name": "Blueprint: Venom",
-    "blueprintFamily": "Venom",
-    "unlocksRecipeId": "recipe_one_handed_weapon",
+    "description": "Applies the Venom design to a compatible recipe.",
     "itemId": "blueprint_venom_touched_sword",
-    "sourceType": "Dungeon",
-    "sourceId": "hives_abyss",
-    "allowedBaseRecipeIds": [
-      "recipe_one_handed_weapon",
-      "recipe_two_handed_weapon",
-      "recipe_head_armor",
-      "recipe_chest_armor",
-      "recipe_leg_armor",
-      "recipe_ring",
-      "recipe_relic"
+    "nameFormat": "Venom-Touched {BaseName}",
+    "requiredRecipeTags": [
+      "Weapon"
     ],
-    "allowedRecipeTags": [
-      "Blade",
-      "Ranged",
-      "LightArmor",
-      "Ring",
-      "Relic",
-      "Poison"
-    ],
-    "outputNameTemplate": "{BlueprintName} {FormName}",
-    "specialOutputNames": [
-      {
-        "baseRecipeId": "recipe_one_handed_weapon",
-        "formId": "shortsword",
-        "outputName": "Venom-Touched Sword"
-      }
-    ],
-    "tags": [
-      "Venom",
-      "Poison",
-      "Status",
-      "DamageOverTime"
-    ],
-    "specialResourceRequirements": [
+    "anyRecipeTags": [],
+    "excludedRecipeTags": [],
+    "compatibleRecipeIds": [],
+    "statProfileInfluence": 0.4,
+    "statProfile": {
+      "Precision": 0.3,
+      "LifeSteal": 0.25,
+      "CritChance": 0.25,
+      "AttackSpeed": 0.2
+    },
+    "temperingProfile": {
+      "id": "blueprint_venom.tempering",
+      "name": "Venom Tempering",
+      "stats": [
+        {
+          "stat": "Precision",
+          "weight": 30,
+          "category": "Primary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.4,
+          "minimumTier": 1
+        },
+        {
+          "stat": "LifeSteal",
+          "weight": 25,
+          "category": "Primary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.35,
+          "minimumTier": 1
+        },
+        {
+          "stat": "CritChance",
+          "weight": 25,
+          "category": "Secondary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.3,
+          "minimumTier": 1
+        },
+        {
+          "stat": "AttackSpeed",
+          "weight": 20,
+          "category": "Secondary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.3,
+          "minimumTier": 1
+        }
+      ]
+    },
+    "behaviorModifiers": {
+      "handedness": "",
+      "attackCategory": "",
+      "rangeCategory": "",
+      "basicAttackIntervalMultiplier": 1,
+      "basicAttackDamageMultiplier": 1,
+      "role": ""
+    },
+    "additionalMaterialRequirements": [
       {
         "type": "SpecialResource",
         "itemId": "venom_gland",
@@ -754,84 +827,87 @@
         "amountPerTier": 0
       }
     ],
-    "temperingProfile": {
-      "id": "blueprint_venom_tempering_profile",
-      "name": "Venom Tempering",
-      "statImprovementPool": [
-        {
-          "stat": "Precision",
-          "weight": 30
-        },
-        {
-          "stat": "CritChance",
-          "weight": 20
-        },
-        {
-          "stat": "LifeSteal",
-          "weight": 30
-        },
-        {
-          "stat": "StatusResistance",
-          "weight": 20
-        }
-      ],
-      "affixPool": [
-        {
-          "id": "affix_venom_edge",
-          "weight": 45
-        },
-        {
-          "id": "affix_status_chance",
-          "weight": 25
-        }
-      ],
-      "specialModifierPool": [
-        {
-          "id": "special_poison_critical",
-          "weight": 10
-        }
-      ]
-    }
+    "sourceType": "Dungeon",
+    "sourceId": "hives_abyss",
+    "tags": [
+      "Venom",
+      "Poison",
+      "Status",
+      "DamageOverTime"
+    ],
+    "enabled": true
   },
   {
     "id": "blueprint_hive",
     "name": "Blueprint: Hive",
-    "blueprintFamily": "Hive",
-    "unlocksRecipeId": "recipe_one_handed_weapon",
+    "description": "Applies the Hive design to a compatible recipe.",
     "itemId": "blueprint_hivefang_dagger",
-    "sourceType": "Dungeon",
-    "sourceId": "hives_abyss",
-    "allowedBaseRecipeIds": [
-      "recipe_one_handed_weapon",
-      "recipe_two_handed_weapon",
-      "recipe_head_armor",
-      "recipe_chest_armor",
-      "recipe_leg_armor",
-      "recipe_offhand"
+    "nameFormat": "Hivefang {BaseName}",
+    "requiredRecipeTags": [
+      "Weapon",
+      "Dagger"
     ],
-    "allowedRecipeTags": [
-      "Chitin",
-      "Resin",
-      "Dagger",
-      "LightArmor",
-      "Shield",
-      "Poison"
-    ],
-    "outputNameTemplate": "Hive{FormName}",
-    "specialOutputNames": [
-      {
-        "baseRecipeId": "recipe_one_handed_weapon",
-        "formId": "dagger",
-        "outputName": "Hivefang Dagger"
-      }
-    ],
-    "tags": [
-      "Hive",
-      "Chitin",
-      "Resin",
-      "Poison"
-    ],
-    "specialResourceRequirements": [
+    "anyRecipeTags": [],
+    "excludedRecipeTags": [],
+    "compatibleRecipeIds": [],
+    "statProfileInfluence": 0.4,
+    "statProfile": {
+      "AttackSpeed": 0.3,
+      "StatusResistance": 0.25,
+      "Precision": 0.25,
+      "LifeSteal": 0.2
+    },
+    "temperingProfile": {
+      "id": "blueprint_hive.tempering",
+      "name": "Hive Tempering",
+      "stats": [
+        {
+          "stat": "AttackSpeed",
+          "weight": 30,
+          "category": "Primary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.4,
+          "minimumTier": 1
+        },
+        {
+          "stat": "StatusResistance",
+          "weight": 25,
+          "category": "Primary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.35,
+          "minimumTier": 1
+        },
+        {
+          "stat": "Precision",
+          "weight": 25,
+          "category": "Secondary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.3,
+          "minimumTier": 1
+        },
+        {
+          "stat": "LifeSteal",
+          "weight": 20,
+          "category": "Secondary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.3,
+          "minimumTier": 1
+        }
+      ]
+    },
+    "behaviorModifiers": {
+      "handedness": "",
+      "attackCategory": "",
+      "rangeCategory": "",
+      "basicAttackIntervalMultiplier": 1,
+      "basicAttackDamageMultiplier": 1,
+      "role": ""
+    },
+    "additionalMaterialRequirements": [
       {
         "type": "SpecialResource",
         "itemId": "royal_chitin_plate",
@@ -839,43 +915,14 @@
         "amountPerTier": 0
       }
     ],
-    "temperingProfile": {
-      "id": "blueprint_hive_tempering_profile",
-      "name": "Hive Tempering",
-      "statImprovementPool": [
-        {
-          "stat": "Armor",
-          "weight": 30
-        },
-        {
-          "stat": "Precision",
-          "weight": 25
-        },
-        {
-          "stat": "StatusResistance",
-          "weight": 25
-        },
-        {
-          "stat": "LifeSteal",
-          "weight": 20
-        }
-      ],
-      "affixPool": [
-        {
-          "id": "affix_hive_lacquer",
-          "weight": 35
-        },
-        {
-          "id": "affix_hive_instinct",
-          "weight": 20
-        }
-      ],
-      "specialModifierPool": [
-        {
-          "id": "special_swarm_shell",
-          "weight": 10
-        }
-      ]
-    }
+    "sourceType": "Dungeon",
+    "sourceId": "hives_abyss",
+    "tags": [
+      "Hive",
+      "Chitin",
+      "Resin",
+      "Poison"
+    ],
+    "enabled": true
   }
 ]

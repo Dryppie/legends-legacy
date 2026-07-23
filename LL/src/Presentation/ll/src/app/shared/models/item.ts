@@ -20,8 +20,9 @@ export interface EquipmentInstance extends ItemInstance {
   displayName: string;
   rarity: Rarity;
   quality: ItemQuality;
-  recipeId?: string | null;
   baseRecipeId?: string | null;
+  blueprintId?: string | null;
+  craftingDesign?: EquipmentCraftingDesignMetadata | null;
   tier: number;
   equipmentBase: Equipment;
   potential?: number;
@@ -34,7 +35,6 @@ export interface EquipmentInstance extends ItemInstance {
   toolAffixes: ToolBonusModifier[];
   effectiveToolBonuses: ToolBonusModifier[];
   affinityTags: string[];
-  specialModifiers: string[];
 }
 
 export interface ItemBase {
@@ -45,6 +45,33 @@ export interface ItemBase {
   description: string;
   stackable: boolean;
   isBound?: boolean;
+  blueprint?: BlueprintItemMetadata | null;
+}
+
+export interface BlueprintItemMetadata {
+  blueprintId: string;
+  name: string;
+  description: string;
+  requiredRecipeTags: string[];
+  anyRecipeTags: string[];
+  compatibleRecipeCount: number;
+  sourceType?: string | null;
+  sourceId?: string | null;
+}
+
+export interface EquipmentCraftingDesignMetadata {
+  recipeId: string;
+  blueprintId?: string | null;
+  name: string;
+  description: string;
+  handedness: string;
+  attackCategory: string;
+  rangeCategory: string;
+  basicAttackIntervalMultiplier: number;
+  basicAttackDamageMultiplier: number;
+  role: string;
+  primaryTemperingStats: string[];
+  secondaryTemperingStats: string[];
 }
 
 export interface Equipment extends ItemBase {

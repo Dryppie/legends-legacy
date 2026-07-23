@@ -166,11 +166,7 @@ public class EquipmentSlotRepository : IEquipmentSlotRepository
                     if (mainHand is null || offHand is null)
                         return false;
 
-                    // Unequip both hands if occupied, unless it's a two-handed. Because that'll just return two items to the inventory
-                    if (mainHand.EquipmentInstance?.EquipmentBase.EquipmentType != EquipmentType.TwoHanded)
-                        UnequipSlotAsync(offHand, inventory);
-
-                    UnequipSlotAsync(mainHand, inventory);
+                    UnequipHandSlots(mainHand, offHand, inventory);
                     Equip(equipmentInstance, mainHand);
                     Equip(equipmentInstance, offHand);
                     break;
@@ -198,10 +194,8 @@ public class EquipmentSlotRepository : IEquipmentSlotRepository
                         else
                         {
                             if (mainHand.EquipmentInstance.EquipmentBase.EquipmentType == EquipmentType.TwoHanded)
-                            {
-                                offHand.EquipmentInstanceId = null;
-                                offHand.EquipmentInstance = null;
-                            }
+                                UnequipHandSlots(mainHand, offHand, inventory);
+
                             // Fall back to replacing mainhand if both are occupied
                             UnequipSlotAsync(mainHand, inventory);
                             Equip(equipmentInstance, mainHand);
@@ -210,11 +204,8 @@ public class EquipmentSlotRepository : IEquipmentSlotRepository
                     else // if slotType is specified, replace that specific slot
                     {
                         if (mainHand.EquipmentInstance?.EquipmentBase.EquipmentType == EquipmentType.TwoHanded)
-                        {
-                            UnequipSlotAsync(mainHand, inventory);
-                            offHand.EquipmentInstanceId = null;
-                            offHand.EquipmentInstance = null;
-                        }
+                            UnequipHandSlots(mainHand, offHand, inventory);
+
                         // Fall back to replacing mainhand if both are occupied
                         if (slotType == EquipmentSlotType.OffHand)
                         {
@@ -239,13 +230,9 @@ public class EquipmentSlotRepository : IEquipmentSlotRepository
                     if (offHand is null || mainHand is null)
                         return false;
 
-                    // Block if main-hand is a two-hander
                     var mainHandItem = mainHand.EquipmentInstance;
                     if (mainHandItem != null && mainHandItem.EquipmentBase.EquipmentType == EquipmentType.TwoHanded)
-                    {
-                        mainHand.EquipmentInstanceId = null;
-                        mainHand.EquipmentInstance = null;
-                    }
+                        UnequipHandSlots(mainHand, offHand, inventory);
 
                     UnequipSlotAsync(offHand, inventory);
                     Equip(equipmentInstance, offHand);
@@ -305,6 +292,26 @@ public class EquipmentSlotRepository : IEquipmentSlotRepository
 
         slot.EquipmentInstanceId = null;
         slot.EquipmentInstance = null;
+    }
+
+    private static void UnequipHandSlots(
+        EquipmentSlot mainHand,
+        EquipmentSlot offHand,
+        Inventory inventory)
+    {
+        var equippedItems = new[] { mainHand.EquipmentInstance, offHand.EquipmentInstance }
+            .Where(item => item is not null)
+            .Cast<EquipmentInstance>()
+            .DistinctBy(item => item.Id)
+            .ToList();
+
+        foreach (var equippedItem in equippedItems)
+            AddItemToInventory(inventory, equippedItem);
+
+        mainHand.EquipmentInstanceId = null;
+        mainHand.EquipmentInstance = null;
+        offHand.EquipmentInstanceId = null;
+        offHand.EquipmentInstance = null;
     }
 
     private static void AddItemToInventory(Inventory inventory, EquipmentInstance item)

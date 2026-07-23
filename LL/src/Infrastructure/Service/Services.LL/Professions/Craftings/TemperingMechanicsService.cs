@@ -11,6 +11,7 @@ namespace Services.LL.Professions.Craftings;
 
 public sealed class TemperingMechanicsService : ITemperingMechanicsService
 {
+    private const int XpPerRarity = 10;
     private readonly CraftingBalanceOptions _options;
 
     public TemperingMechanicsService(IOptions<CraftingBalanceOptions>? options = null)
@@ -24,30 +25,37 @@ public sealed class TemperingMechanicsService : ITemperingMechanicsService
         Random rng,
         double negativeOutcomeReductionBps = 0)
     {
+        if ((equipment.Potential ?? 0) < TemperingConstants.PotentialCost)
+            throw new InvalidOperationException("Equipment does not have enough Potential.");
+
         var previousRarity = equipment.Rarity;
         var previousQuality = equipment.Quality;
         var outcome = RollOutcome(previousRarity, rng, negativeOutcomeReductionBps);
-        var upgraded = false;
         var qualityIncreased = false;
+        var rarityUpgraded = false;
+        Domain.Models.Attributes.AttributeType? improvedStat = null;
+        float? previousValue = null;
+        float? newValue = null;
 
-        switch (outcome)
+        if (outcome is TemperingOutcome.Positive or TemperingOutcome.Critical)
         {
-            case TemperingOutcome.Critical:
-                qualityIncreased = HandleCriticalOutcome(equipment, previousQuality, rng);
-                break;
+            var improvement = TryApplyDirectedImprovement(equipment, profile, rng);
+            if (improvement is null)
+            {
+                outcome = TemperingOutcome.Neutral;
+            }
+            else
+            {
+                improvedStat = improvement.Stat;
+                previousValue = improvement.PreviousValue;
+                newValue = improvement.NewValue;
+                equipment.TemperingProgress++;
+                equipment.ItemXp++;
+                rarityUpgraded = ApplyRarityProgress(equipment);
 
-            case TemperingOutcome.Positive:
-                upgraded = HandlePositiveOutcome(equipment, profile, rng);
-                break;
-
-            case TemperingOutcome.Negative:
-                HandleNegativeOutcome(equipment, rng);
-                break;
-
-            case TemperingOutcome.Neutral:
-            default:
-                // nothing happens
-                break;
+                if (outcome == TemperingOutcome.Critical)
+                    qualityIncreased = HandleCriticalOutcome(equipment, previousQuality, rng);
+            }
         }
 
         equipment.Potential -= TemperingConstants.PotentialCost;
@@ -58,34 +66,86 @@ public sealed class TemperingMechanicsService : ITemperingMechanicsService
             TemperingConstants.PotentialCost,
             previousRarity,
             equipment.Rarity,
-            upgraded,
+            rarityUpgraded,
             qualityIncreased,
             qualityIncreased ? previousQuality : null,
-            qualityIncreased ? equipment.Quality : null);
+            qualityIncreased ? equipment.Quality : null,
+            improvedStat,
+            previousValue,
+            newValue);
     }
 
-    private static bool HandlePositiveOutcome(EquipmentInstance equipment, TemperingProfileDefinition profile, Random rng)
+    private static DirectedImprovement? TryApplyDirectedImprovement(
+        EquipmentInstance equipment,
+        TemperingProfileDefinition profile,
+        Random rng)
     {
-        var experience = 1;
+        var currentByStat = equipment.InstanceModifiers
+            .GroupBy(modifier => modifier.AttributeType)
+            .ToDictionary(group => group.Key, group => group.Sum(modifier => modifier.Amount));
+        var budgetByStat = currentByStat.ToDictionary(
+            pair => pair.Key,
+            pair => Math.Max(0d, pair.Value) * EquipmentStatBudgetCatalog.Get(pair.Key).CostPerPoint);
+        var totalBudget = Math.Max(1d, budgetByStat.Values.Sum());
+        var totalProfileWeight = profile.Stats.Sum(stat => Math.Max(0d, stat.Weight));
 
-        equipment.ItemXp += experience;
+        var candidates = profile.Stats
+            .Select(stat =>
+            {
+                var exists = currentByStat.TryGetValue(stat.Stat, out var currentValue);
+                var rule = EquipmentStatBudgetCatalog.Get(stat.Stat);
+                var currentBudget = budgetByStat.GetValueOrDefault(stat.Stat);
+                var currentShare = currentBudget / totalBudget;
+                var targetShare = stat.Weight / totalProfileWeight;
+                var cap = stat.MaxBudgetShare ?? 1d;
 
-        return TryUpgradeRarity(equipment, profile, rng);
-    }
+                if ((!exists && !stat.CanIntroduce) ||
+                    (exists && !stat.CanIncrease) ||
+                    stat.MinimumTier > equipment.Tier ||
+                    currentValue >= rule.HardCap ||
+                    currentShare >= cap)
+                {
+                    return null;
+                }
 
-    private static void HandleNegativeOutcome(EquipmentInstance equipment, Random rng)
-    {
-        // 1 extra point of Potential is consumed (if available) and XP is reduced by one
-        if (rng.NextDouble() < 0.8)
+                var deficitMultiplier = 1d + (Math.Max(targetShare - currentShare, 0d) * 4d);
+                var continuationMultiplier = exists ? 1.15d : 1d;
+                var categoryMultiplier = stat.Category == TemperingStatCategory.Primary ? 1.25d : 1d;
+                var capMultiplier = Math.Max(0.05d, 1d - (currentShare / cap));
+                var effectiveWeight = stat.Weight * deficitMultiplier * continuationMultiplier *
+                                      categoryMultiplier * capMultiplier;
+                return new WeightedCandidate(stat, effectiveWeight);
+            })
+            .Where(candidate => candidate is not null && candidate.EffectiveWeight > 0)
+            .Select(candidate => candidate!)
+            .ToList();
+
+        if (candidates.Count == 0)
+            return null;
+
+        var selected = PickWeighted(candidates, candidate => candidate.EffectiveWeight, rng);
+        var selectedRule = EquipmentStatBudgetCatalog.Get(selected.Definition.Stat);
+        var previous = currentByStat.GetValueOrDefault(selected.Definition.Stat);
+        var rollBudget = Math.Max(1d, equipment.Tier * 2d);
+        var increase = (float)Math.Max(1d, Math.Round(rollBudget / selectedRule.CostPerPoint));
+        increase = Math.Min(increase, selectedRule.HardCap - previous);
+        if (increase <= 0)
+            return null;
+
+        var existingModifier = equipment.InstanceModifiers
+            .FirstOrDefault(modifier => modifier.AttributeType == selected.Definition.Stat);
+        if (existingModifier == null)
         {
-            if (equipment.Potential > 0)
-                equipment.Potential--;
+            equipment.InstanceModifiers.Add(new InstanceAttributeModifier(
+                selected.Definition.Stat,
+                increase));
         }
         else
         {
-            if (equipment.ItemXp > 0)
-                equipment.ItemXp--;
+            existingModifier.Amount += increase;
         }
+
+        return new DirectedImprovement(selected.Definition.Stat, previous, previous + increase);
     }
 
     private bool HandleCriticalOutcome(EquipmentInstance equipment, ItemQuality previousQuality, Random rng)
@@ -97,87 +157,61 @@ public sealed class TemperingMechanicsService : ITemperingMechanicsService
             return false;
         }
 
-        return TryIncreaseQuality(equipment, previousQuality);
-    }
-
-    private TemperingOutcome RollOutcome(Rarity rarity, Random rng, double negativeOutcomeReductionBps)
-    {
-        /* ---------------- probability tables ----------------
-        • Critical  : extremely rare, configurable base + additive rarity step
-        • Negative  : 5 % base  +5 % per rarity step
-        • Positive  : See PositiveChance()
-        • Neutral   : remainder
-        ----------------------------------------------------- */
-
-        int rarityIndex = (int)rarity; // Common = 0 … Legacy = 6
-
-        double pCritical = Math.Clamp(
-            _options.CriticalChanceBase + (_options.CriticalChancePerRarityStep * rarityIndex),
-            0d,
-            1d);
-        double pNegative = (0.05 + 0.05 * rarityIndex).ReduceChanceByPercentagePointBps(negativeOutcomeReductionBps);
-        double pPositive = PositiveChance(rarity);
-
-        double roll = rng.NextDouble();
-        if (roll < pCritical) return TemperingOutcome.Critical;
-        roll -= pCritical;
-
-        if (roll < pPositive) return TemperingOutcome.Positive;
-        roll -= pPositive;
-
-        if (roll < pNegative) return TemperingOutcome.Negative;
-        return TemperingOutcome.Neutral;
-    }
-
-    private static double PositiveChance(Rarity rarity)
-    {
-        return rarity switch
-        {
-            Rarity.Common => 0.06,
-            Rarity.Uncommon => 0.03,
-            Rarity.Rare => 0.015,
-            Rarity.Epic => 0.005,
-            Rarity.Unique => 0.001,
-            _ => 0
-        };
-    }
-
-    private static bool TryUpgradeRarity(EquipmentInstance equipment, TemperingProfileDefinition profile, Random rng)
-    {
-        const int XpPerTier = 10;
-        var upgraded = false;
-
-        while (equipment.ItemXp >= XpPerTier && equipment.Rarity < Rarity.Legacy)
-        {
-            equipment.ItemXp -= XpPerTier;
-            equipment.Rarity = equipment.Rarity + 1;        // next tier
-            ApplyRarityUpgradeReward(equipment, profile, rng);
-            upgraded = true;
-        }
-
-        return upgraded;
-    }
-
-    private bool TryIncreaseQuality(EquipmentInstance equipment, ItemQuality previousQuality)
-    {
         var nextQuality = GetNextQuality(previousQuality);
-        if (nextQuality == null) return false;
+        if (nextQuality == null)
+            return false;
 
         equipment.Quality = nextQuality.Value;
         ApplyQualityStatMultiplierChange(equipment, previousQuality, nextQuality.Value);
         return true;
     }
 
-    private void ApplyQualityStatMultiplierChange(EquipmentInstance equipment, ItemQuality previousQuality, ItemQuality newQuality)
+    private TemperingOutcome RollOutcome(Rarity rarity, Random rng, double neutralOutcomeReductionBps)
+    {
+        var rarityIndex = (int)rarity;
+        var criticalChance = Math.Clamp(
+            _options.CriticalChanceBase + (_options.CriticalChancePerRarityStep * rarityIndex),
+            0d,
+            1d);
+        var neutralChance = 0.05d.ReduceChanceByPercentagePointBps(neutralOutcomeReductionBps);
+        var roll = rng.NextDouble();
+        if (roll < criticalChance)
+            return TemperingOutcome.Critical;
+        return roll < criticalChance + neutralChance
+            ? TemperingOutcome.Neutral
+            : TemperingOutcome.Positive;
+    }
+
+    private static bool ApplyRarityProgress(EquipmentInstance equipment)
+    {
+        var upgraded = false;
+        while (equipment.ItemXp >= XpPerRarity && equipment.Rarity < Rarity.Legacy)
+        {
+            equipment.ItemXp -= XpPerRarity;
+            equipment.Rarity++;
+            upgraded = true;
+        }
+
+        return upgraded;
+    }
+
+    private void ApplyQualityStatMultiplierChange(
+        EquipmentInstance equipment,
+        ItemQuality previousQuality,
+        ItemQuality newQuality)
     {
         var previousMultiplier = _options.GetQualityStatMultiplier(previousQuality);
         var newMultiplier = _options.GetQualityStatMultiplier(newQuality);
-        if (previousMultiplier <= 0 || newMultiplier <= 0) return;
+        if (previousMultiplier <= 0 || newMultiplier <= 0)
+            return;
 
         var ratio = newMultiplier / previousMultiplier;
         foreach (var modifier in equipment.InstanceModifiers)
         {
-            modifier.Amount = (float)Math.Max(1d, Math.Round(modifier.Amount * ratio));
+            var hardCap = EquipmentStatBudgetCatalog.Get(modifier.AttributeType).HardCap;
+            modifier.Amount = (float)Math.Min(
+                hardCap,
+                Math.Max(1d, Math.Round(modifier.Amount * ratio)));
         }
     }
 
@@ -190,41 +224,26 @@ public sealed class TemperingMechanicsService : ITemperingMechanicsService
             : null;
     }
 
-    private static void ApplyRarityUpgradeReward(EquipmentInstance equipment, TemperingProfileDefinition profile, Random rng)
+    private static T PickWeighted<T>(IReadOnlyList<T> items, Func<T, double> weightSelector, Random rng)
     {
-        var affix = PickWeighted(
-            profile.ResolvedAffixPool.Where(x => equipment.Rarity >= x.MinRarity).ToList(),
-            x => x.Weight,
-            rng);
-        if (affix != null)
-        {
-            equipment.InstanceModifiers.Add(new InstanceAttributeModifier(
-                affix.StatModifier.Stat,
-                Math.Max(1, affix.StatModifier.Weight * equipment.Tier),
-                ModifierType.Flat));
-        }
-
-        var special = PickWeighted(
-            profile.ResolvedSpecialModifierPool.Where(x => equipment.Rarity >= x.MinRarity).ToList(),
-            x => x.Weight,
-            rng);
-        if (special != null && equipment.SpecialModifiers.All(x => x != special.Id))
-            equipment.SpecialModifiers.Add(special.Id);
-    }
-
-    private static T? PickWeighted<T>(IReadOnlyList<T> items, Func<T, int> weightSelector, Random rng)
-        where T : class
-    {
-        var totalWeight = items.Sum(x => Math.Max(0, weightSelector(x)));
-        if (totalWeight <= 0) return null;
-
-        var roll = rng.Next(1, totalWeight + 1);
+        var totalWeight = items.Sum(item => Math.Max(0d, weightSelector(item)));
+        var roll = rng.NextDouble() * totalWeight;
         foreach (var item in items)
         {
-            roll -= Math.Max(0, weightSelector(item));
-            if (roll <= 0) return item;
+            roll -= Math.Max(0d, weightSelector(item));
+            if (roll <= 0)
+                return item;
         }
 
-        return items.LastOrDefault();
+        return items[^1];
     }
+
+    private sealed record WeightedCandidate(
+        TemperingStatWeightDefinition Definition,
+        double EffectiveWeight);
+
+    private sealed record DirectedImprovement(
+        Domain.Models.Attributes.AttributeType Stat,
+        float PreviousValue,
+        float NewValue);
 }

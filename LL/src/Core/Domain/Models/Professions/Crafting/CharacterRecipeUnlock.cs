@@ -4,7 +4,6 @@ public class CharacterRecipeUnlock
 {
     public Guid Id { get; set; } = Guid.NewGuid();
     public Guid CharacterId { get; set; }
-    public string RecipeId { get; set; } = string.Empty;
     public string BlueprintId { get; set; } = string.Empty;
     public DateTimeOffset UnlockedAt { get; set; } = DateTimeOffset.UtcNow;
 }

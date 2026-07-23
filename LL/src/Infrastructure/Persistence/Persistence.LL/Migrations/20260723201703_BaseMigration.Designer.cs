@@ -13,7 +13,7 @@ using Persistence.LL;
 namespace Persistence.LL.Migrations
 {
     [DbContext(typeof(LLDbContext))]
-    [Migration("20260720110311_BaseMigration")]
+    [Migration("20260723201703_BaseMigration")]
     partial class BaseMigration
     {
         /// <inheritdoc />
@@ -1301,6 +1301,44 @@ namespace Persistence.LL.Migrations
                     b.HasIndex("DungeonDefinitionId");
 
                     b.ToTable("CharacterDungeonMasteries");
+                });
+
+            modelBuilder.Entity("Domain.Models.Dungeons.PowerRatings.DungeonPowerRecommendationCacheEntry", b =>
+                {
+                    b.Property<string>("DungeonId")
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
+
+                    b.Property<int>("AlgorithmVersion")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("BenchmarkDefinitionVersion")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("CombatRulesVersion")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("DungeonContentHash")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
+
+                    b.Property<int>("DungeonTier")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("RecommendationJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<int>("RecommendationSeedSetVersion")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTimeOffset>("UpdatedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("DungeonId");
+
+                    b.ToTable("DungeonPowerRecommendationCacheEntries");
                 });
 
             modelBuilder.Entity("Domain.Models.Dungeons.Runs.DungeonCompletionRecord", b =>
@@ -2598,17 +2636,12 @@ namespace Persistence.LL.Migrations
                     b.Property<Guid>("CharacterId")
                         .HasColumnType("uuid");
 
-                    b.Property<string>("RecipeId")
-                        .IsRequired()
-                        .HasMaxLength(128)
-                        .HasColumnType("character varying(128)");
-
                     b.Property<DateTimeOffset>("UnlockedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CharacterId", "RecipeId", "BlueprintId")
+                    b.HasIndex("CharacterId", "BlueprintId")
                         .IsUnique();
 
                     b.ToTable("CharacterRecipeUnlocks");
@@ -3501,10 +3534,12 @@ namespace Persistence.LL.Migrations
                         .HasColumnType("text[]");
 
                     b.Property<string>("BaseRecipeId")
-                        .HasColumnType("text");
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
 
                     b.Property<string>("BlueprintId")
-                        .HasColumnType("text");
+                        .HasMaxLength(160)
+                        .HasColumnType("character varying(160)");
 
                     b.Property<string>("CraftedName")
                         .HasColumnType("text");
@@ -3530,18 +3565,17 @@ namespace Persistence.LL.Migrations
                     b.Property<int>("Rarity")
                         .HasColumnType("integer");
 
-                    b.Property<string>("RecipeId")
-                        .HasColumnType("text");
-
-                    b.PrimitiveCollection<List<string>>("SpecialModifiers")
-                        .IsRequired()
-                        .HasColumnType("text[]");
-
                     b.Property<int>("TemperingProgress")
                         .HasColumnType("integer");
 
                     b.Property<int>("Tier")
                         .HasColumnType("integer");
+
+                    b.Property<uint>("Version")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("xid")
+                        .HasColumnName("xmin");
 
                     b.HasDiscriminator().HasValue(0);
                 });

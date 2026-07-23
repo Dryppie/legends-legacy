@@ -35,31 +35,14 @@ public class CraftingRepository : ICraftingRepository
         return queueItem?.EquipmentInstance;
     }
 
-    public async Task<IReadOnlySet<string>> GetUnlockedRecipeIdsAsync(Guid characterId, CancellationToken cancellationToken)
+    public async Task<IReadOnlySet<string>> GetUnlockedBlueprintIdsAsync(Guid characterId, CancellationToken cancellationToken)
     {
         var unlocks = await _dbContext.CharacterRecipeUnlocks
             .Where(x => x.CharacterId == characterId)
-            .Select(x => x.RecipeId)
+            .Select(x => x.BlueprintId)
             .ToListAsync(cancellationToken);
 
         return unlocks.ToHashSet(StringComparer.OrdinalIgnoreCase);
-    }
-
-    public async Task<IReadOnlyDictionary<string, IReadOnlySet<string>>> GetUnlockedBlueprintIdsByRecipeIdAsync(Guid characterId, CancellationToken cancellationToken)
-    {
-        var unlocks = await _dbContext.CharacterRecipeUnlocks
-            .Where(x => x.CharacterId == characterId)
-            .Select(x => new { x.RecipeId, x.BlueprintId })
-            .ToListAsync(cancellationToken);
-
-        return unlocks
-            .GroupBy(x => x.RecipeId, StringComparer.OrdinalIgnoreCase)
-            .ToDictionary(
-                group => group.Key,
-                group => (IReadOnlySet<string>)group
-                    .Select(x => x.BlueprintId)
-                    .ToHashSet(StringComparer.OrdinalIgnoreCase),
-                StringComparer.OrdinalIgnoreCase);
     }
 
     public async Task<IReadOnlyDictionary<string, int>> GetRecipeMasteryLevelsAsync(Guid characterId, CancellationToken cancellationToken) =>
@@ -73,16 +56,10 @@ public class CraftingRepository : ICraftingRepository
             .OrderBy(x => x.RecipeId)
             .ToListAsync(cancellationToken);
 
-    public async Task<bool> HasRecipeUnlockAsync(Guid characterId, string recipeId, CancellationToken cancellationToken) =>
+    public async Task<bool> HasBlueprintUnlockAsync(Guid characterId, string blueprintId, CancellationToken cancellationToken) =>
         await _dbContext.CharacterRecipeUnlocks
-            .AnyAsync(x => x.CharacterId == characterId && x.RecipeId == recipeId, cancellationToken);
-
-    public async Task<bool> HasBlueprintUnlockAsync(Guid characterId, string recipeId, string blueprintId, CancellationToken cancellationToken) =>
-        await _dbContext.CharacterRecipeUnlocks
-            .AnyAsync(x =>
-                x.CharacterId == characterId &&
-                x.RecipeId == recipeId &&
-                x.BlueprintId == blueprintId,
+            .AnyAsync(
+                x => x.CharacterId == characterId && x.BlueprintId == blueprintId,
                 cancellationToken);
 
     public void AddRecipeUnlock(CharacterRecipeUnlock unlock) =>

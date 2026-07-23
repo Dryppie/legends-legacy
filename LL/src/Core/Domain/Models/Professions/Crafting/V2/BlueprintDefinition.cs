@@ -1,19 +1,26 @@
+using Domain.Models.Attributes;
+
 namespace Domain.Models.Professions.Crafting.V2;
 
 public sealed class BlueprintDefinition
 {
     public string Id { get; init; } = string.Empty;
     public string Name { get; init; } = string.Empty;
-    public string? BlueprintFamily { get; init; }
-    public string UnlocksRecipeId { get; init; } = string.Empty;
-    public string? ItemId { get; init; }
+    public string Description { get; init; } = string.Empty;
+    public string ItemId { get; init; } = string.Empty;
+    public string NameFormat { get; init; } = "{BlueprintName} {BaseName}";
+    public IReadOnlyList<string> RequiredRecipeTags { get; init; } = [];
+    public IReadOnlyList<string> AnyRecipeTags { get; init; } = [];
+    public IReadOnlyList<string> ExcludedRecipeTags { get; init; } = [];
+    public IReadOnlyList<string> CompatibleRecipeIds { get; init; } = [];
+    public double StatProfileInfluence { get; init; } = 0.4d;
+    public IReadOnlyDictionary<AttributeType, double> StatProfile { get; init; } =
+        new Dictionary<AttributeType, double>();
+    public TemperingProfileDefinition TemperingProfile { get; init; } = new();
+    public EquipmentBehaviorDefinition BehaviorModifiers { get; init; } = new();
+    public IReadOnlyList<MaterialRequirementDefinition> AdditionalMaterialRequirements { get; init; } = [];
     public string? SourceType { get; init; }
     public string? SourceId { get; init; }
-    public IReadOnlyList<string> AllowedBaseRecipeIds { get; init; } = [];
-    public IReadOnlyList<string> AllowedRecipeTags { get; init; } = [];
-    public string? OutputNameTemplate { get; init; }
-    public IReadOnlyList<BlueprintOutputNameDefinition> SpecialOutputNames { get; init; } = [];
-    public IReadOnlyList<MaterialRequirementDefinition> SpecialResourceRequirements { get; init; } = [];
     public IReadOnlyList<string> Tags { get; init; } = [];
-    public TemperingProfileDefinition? TemperingProfile { get; init; }
+    public bool Enabled { get; init; } = true;
 }

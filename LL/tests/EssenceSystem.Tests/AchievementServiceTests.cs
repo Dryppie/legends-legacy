@@ -355,12 +355,12 @@ public sealed class AchievementServiceTests
         SeedAchievement(db, "craft.low_potential", AchievementRequirementType.HighQualityItemCraftedBelowPotential, 10, category: AchievementCategory.Hidden, visibility: AchievementVisibility.Hidden);
         await db.SaveChangesAsync();
         var service = CreateService(db);
-        var setItem = new EquipmentInstance { Id = Guid.NewGuid(), RecipeId = "sword", AffinityTags = ["set:ember"] };
-        var normalItem = new EquipmentInstance { Id = Guid.NewGuid(), RecipeId = "ring" };
+        var setItem = new EquipmentInstance { Id = Guid.NewGuid(), BaseRecipeId = "recipe.weapon.sword", AffinityTags = ["set:ember"] };
+        var normalItem = new EquipmentInstance { Id = Guid.NewGuid(), BaseRecipeId = "recipe.jewelry.ring" };
         var completedItem = new EquipmentInstance
         {
             Id = Guid.NewGuid(),
-            RecipeId = "sword",
+            BaseRecipeId = "recipe.weapon.sword",
             Quality = ItemQuality.Exceptional,
             Potential = 9
         };
@@ -393,8 +393,8 @@ public sealed class AchievementServiceTests
         SeedAchievement(db, "general.level", AchievementRequirementType.CharacterLevelReached, 10, AchievementScope.Character, AchievementCategory.General);
         SeedAchievement(db, "craft.blueprints", AchievementRequirementType.BlueprintsUnlocked, 2, category: AchievementCategory.Crafting);
         db.CharacterRecipeUnlocks.AddRange(
-            new CharacterRecipeUnlock { CharacterId = characterId, RecipeId = "sword", BlueprintId = "ember" },
-            new CharacterRecipeUnlock { CharacterId = characterId, RecipeId = "ring", BlueprintId = "moon" });
+            new CharacterRecipeUnlock { CharacterId = characterId, BlueprintId = "ember" },
+            new CharacterRecipeUnlock { CharacterId = characterId, BlueprintId = "moon" });
         await db.SaveChangesAsync();
         var service = CreateService(db);
 

@@ -2,7 +2,6 @@ using Application.UseCases.CharacterActions.Commands.StartCraftingAction;
 using Application.UseCases.Crafting.Commands.CraftItems;
 using Application.UseCases.Crafting.Commands.LearnBlueprint;
 using Application.UseCases.Crafting.Dtos;
-using Application.UseCases.Crafting.Queries.GetBlueprintLearningOptions;
 using Application.UseCases.Crafting.Queries.GetCraftingRecipes;
 using Application.UseCases.Crafting.Queries.GetRecipeMasteries;
 using Application.UseCases.Professions.Commands.RemoveCraftingQueueItem;
@@ -20,7 +19,12 @@ public class CraftingController : BaseController
 
     [HttpPost("craft")]
     public async Task<ActionResult<Response<CraftItemsResultDto>>> CraftItems([FromBody] CraftItemsRequestDto request) =>
-        await Mediator.Send(new CraftItemsCommand(CurrentCharacterGuid, request.RecipeId, request.FormId, request.BlueprintId, request.TargetTier, request.Quantity));
+        await Mediator.Send(new CraftItemsCommand(
+            CurrentCharacterGuid,
+            request.RecipeId,
+            request.BlueprintId,
+            request.TargetTier,
+            request.Quantity));
 
     [HttpGet("mastery")]
     public async Task<ActionResult<Response<IReadOnlyList<RecipeMasteryDto>>>> GetMastery() =>
@@ -28,11 +32,7 @@ public class CraftingController : BaseController
 
     [HttpPost("blueprints/learn")]
     public async Task<ActionResult<Response<LearnBlueprintResultDto>>> LearnBlueprint([FromBody] LearnBlueprintRequestDto request) =>
-        await Mediator.Send(new LearnBlueprintCommand(CurrentCharacterGuid, request.BlueprintItemInstanceId, request.RecipeId));
-
-    [HttpGet("blueprints/{blueprintItemInstanceId:guid}/learning-options")]
-    public async Task<ActionResult<Response<IReadOnlyList<BlueprintLearningOptionDto>>>> GetBlueprintLearningOptions([FromRoute] Guid blueprintItemInstanceId) =>
-        await Mediator.Send(new GetBlueprintLearningOptionsQuery(CurrentCharacterGuid, blueprintItemInstanceId));
+        await Mediator.Send(new LearnBlueprintCommand(CurrentCharacterGuid, request.BlueprintItemInstanceId));
 
     [HttpPost("RemoveCraftingQueueItem")]
     public async Task<ActionResult<Response<RemoveCraftingQueueItemResponseDto>>> RemoveCraftingQueueItem([FromBody] string queueItemId) =>

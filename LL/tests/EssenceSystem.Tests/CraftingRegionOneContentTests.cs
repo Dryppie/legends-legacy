@@ -66,50 +66,27 @@ public sealed class CraftingRegionOneContentTests
     }
 
     [Fact]
-    public void CraftingV2_HasTemperingProfilesOnBlueprintsAndBaseRecipes()
+    public void CraftingV2_RecipesAndBlueprintsDefineComposableTemperingProfiles()
     {
-        var baseRecipes = ReadArray("crafting/base-recipes.json");
+        var recipes = ReadArray("crafting/base-recipes.json");
         var blueprints = ReadArray("crafting/blueprints.json");
 
-        Assert.All(baseRecipes, recipe => Assert.NotNull(recipe?["temperingProfile"]));
-        Assert.All(blueprints, blueprint => Assert.NotNull(blueprint?["temperingProfile"]));
+        Assert.All(recipes, recipe => Assert.NotEmpty(ChildArray(recipe?["temperingProfile"], "stats")));
+        Assert.All(blueprints, blueprint => Assert.NotEmpty(ChildArray(blueprint?["temperingProfile"], "stats")));
     }
 
     [Fact]
-    public void CraftingV2_TemperingProfiles_UseExternalModifierCatalogs()
+    public void CraftingV2_DoesNotUseLegacyAffixOrSpecialModifierCatalogs()
     {
-        var baseRecipes = ReadArray("crafting/base-recipes.json");
-        var blueprints = ReadArray("crafting/blueprints.json");
-        var affixes = ReadArray("crafting/affixes.json");
-        var specialModifiers = ReadArray("crafting/special-modifiers.json");
+        var dataRoot = FindDataRoot();
+        Assert.False(File.Exists(Path.Combine(dataRoot, "crafting", "affixes.json")));
+        Assert.False(File.Exists(Path.Combine(dataRoot, "crafting", "special-modifiers.json")));
 
-        Assert.True(affixes.Count >= 30);
-        Assert.True(specialModifiers.Count >= 9);
-
-        var affixIds = affixes
-            .Select(affix => affix?["id"]?.GetValue<string>() ?? string.Empty)
-            .ToHashSet(StringComparer.OrdinalIgnoreCase);
-        var specialModifierIds = specialModifiers
-            .Select(modifier => modifier?["id"]?.GetValue<string>() ?? string.Empty)
-            .ToHashSet(StringComparer.OrdinalIgnoreCase);
-
-        foreach (var profile in baseRecipes.Select(x => x?["temperingProfile"]).Concat(blueprints.Select(x => x?["temperingProfile"])))
+        foreach (var definition in ReadArray("crafting/base-recipes.json").Concat(ReadArray("crafting/blueprints.json")))
         {
-            Assert.NotNull(profile);
-
-            foreach (var affixRef in ChildArray(profile, "affixPool"))
-            {
-                Assert.Contains(affixRef?["id"]?.GetValue<string>() ?? string.Empty, affixIds);
-                Assert.False(affixRef?.AsObject().ContainsKey("name") == true);
-                Assert.False(affixRef?.AsObject().ContainsKey("statModifier") == true);
-            }
-
-            foreach (var specialModifierRef in ChildArray(profile, "specialModifierPool"))
-            {
-                Assert.Contains(specialModifierRef?["id"]?.GetValue<string>() ?? string.Empty, specialModifierIds);
-                Assert.False(specialModifierRef?.AsObject().ContainsKey("name") == true);
-                Assert.False(specialModifierRef?.AsObject().ContainsKey("statModifier") == true);
-            }
+            var profile = definition?["temperingProfile"];
+            Assert.False(profile!.AsObject().ContainsKey("affixPool"));
+            Assert.False(profile.AsObject().ContainsKey("specialModifierPool"));
         }
     }
 
@@ -130,6 +107,37 @@ public sealed class CraftingRegionOneContentTests
             .ToList();
 
         Assert.Empty(completedEquipmentRewards);
+    }
+
+    [Fact]
+    public void RewardTablesDoNotDropFinishedNonToolEquipment()
+    {
+        var items = ReadArray("items/items.json")
+            .ToDictionary(
+                item => item!["id"]!.GetValue<string>(),
+                item => new
+                {
+                    ItemType = item!["itemType"]!.GetValue<string>(),
+                    EquipmentType = item["equipmentType"]?.GetValue<string>()
+                },
+                StringComparer.OrdinalIgnoreCase);
+        var rewardDocument = ReadDocument("rewards/reward-tables.json");
+        var rewardItemIds = ChildArray(rewardDocument, "rewardTables")
+            .SelectMany(table => ChildArray(table, "rolls"))
+            .SelectMany(roll => ChildArray(roll, "entries"))
+            .Select(entry => entry?["itemId"]?.GetValue<string>())
+            .Where(itemId => !string.IsNullOrWhiteSpace(itemId))
+            .Select(itemId => itemId!);
+
+        var invalid = rewardItemIds
+            .Where(itemId =>
+                items.TryGetValue(itemId, out var item) &&
+                item.ItemType.Equals("Equipment", StringComparison.OrdinalIgnoreCase) &&
+                !string.Equals(item.EquipmentType, "Tool", StringComparison.OrdinalIgnoreCase) &&
+                !itemId.StartsWith("tutorial_", StringComparison.OrdinalIgnoreCase))
+            .ToList();
+
+        Assert.Empty(invalid);
     }
 
     [Fact]
@@ -166,6 +174,14 @@ public sealed class CraftingRegionOneContentTests
         var json = File.ReadAllText(path);
         return JsonNode.Parse(json)?.AsArray()
             ?? throw new InvalidOperationException($"Unable to parse JSON array '{path}'.");
+    }
+
+    private static JsonNode ReadDocument(string relativePath)
+    {
+        var dataRoot = FindDataRoot();
+        var path = Path.Combine(dataRoot, relativePath.Replace('/', Path.DirectorySeparatorChar));
+        return JsonNode.Parse(File.ReadAllText(path))
+            ?? throw new InvalidOperationException($"Unable to parse JSON document '{path}'.");
     }
 
     private static IReadOnlyList<JsonNode?> ReadDungeonDifficulties()

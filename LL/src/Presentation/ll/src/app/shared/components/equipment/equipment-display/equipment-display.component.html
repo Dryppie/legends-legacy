@@ -26,6 +26,34 @@
     {{ data.description }}
   </p>
 
+  <div *ngIf="data.craftingDesign as design" class="ll-item-detail-section">
+    <div class="ll-item-meta">Crafting Design</div>
+    <div class="mt-1 font-medium text-white">{{ design.name }}</div>
+    <p *ngIf="design.description" class="mt-1 text-xs text-secondary">
+      {{ design.description }}
+    </p>
+    <div class="mt-2 flex flex-wrap gap-2">
+      <span *ngIf="design.handedness" class="ll-item-chip">{{
+        design.handedness
+      }}</span>
+      <span *ngIf="design.rangeCategory" class="ll-item-chip">{{
+        design.rangeCategory
+      }}</span>
+      <span *ngIf="design.attackCategory" class="ll-item-chip">{{
+        design.attackCategory
+      }}</span>
+      <span *ngIf="design.role" class="ll-item-chip ll-item-chip-accent">{{
+        design.role
+      }}</span>
+    </div>
+    <div class="mt-2 text-xs text-secondary">
+      Tempering: {{ design.primaryTemperingStats.join(", ") }}
+      <ng-container *ngIf="design.secondaryTemperingStats.length">
+        · Secondary: {{ design.secondaryTemperingStats.join(", ") }}
+      </ng-container>
+    </div>
+  </div>
+
   <div *ngIf="hasToolDetails" class="ll-card p-3">
     <div class="flex items-center justify-between gap-3">
       <div class="ll-item-meta">Tool Affixes</div>

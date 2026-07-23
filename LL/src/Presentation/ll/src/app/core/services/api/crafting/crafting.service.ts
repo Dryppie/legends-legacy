@@ -1,13 +1,19 @@
 import { Injectable } from '@angular/core';
 import { HttpParams } from '@angular/common/http';
 import { ApiService } from '../api.service';
-import { BehaviorSubject, catchError, map, Observable, Subject, throwError } from 'rxjs';
+import {
+  BehaviorSubject,
+  catchError,
+  map,
+  Observable,
+  Subject,
+  throwError,
+} from 'rxjs';
 import { InventoryItem } from '../../../../shared/models/inventoryItem';
 import { CraftingQueueItem } from '../../../../shared/models/profession';
 import { ToastService } from '../../client-side/components/toast/toast.service';
 import { CharacterActionDto } from '../../../../shared/models/Dtos/characterActionDto';
 import {
-  BlueprintLearningOption,
   CraftingRecipe,
   CraftItemsRequest,
   CraftItemsResult,
@@ -25,7 +31,8 @@ export interface RemoveCraftingQueueItemResponse {
 })
 export class CraftingService {
   private readonly queueSubject = new BehaviorSubject<CraftingQueueItem[]>([]);
-  private readonly blueprintLearnedSubject = new Subject<LearnBlueprintResult>();
+  private readonly blueprintLearnedSubject =
+    new Subject<LearnBlueprintResult>();
   /** Observable that callers (components, other services) can subscribe to */
   readonly craftingQueue$ = this.queueSubject.asObservable();
   readonly blueprintLearned$ = this.blueprintLearnedSubject.asObservable();
@@ -64,16 +71,15 @@ export class CraftingService {
 
   public learnBlueprint(
     blueprintItemInstanceId: string,
-    recipeId: string,
   ): Observable<LearnBlueprintResult> {
     return this.api
-      .post('Crafting/blueprints/learn', { blueprintItemInstanceId, recipeId })
+      .post('Crafting/blueprints/learn', { blueprintItemInstanceId })
       .pipe(
         map((response) => {
           const result = this.unwrapResponse<LearnBlueprintResult>(response);
           this.blueprintLearnedSubject.next(result);
           this.toast.showToast(
-            `Learned ${result.unlockedRecipeName}`,
+            `Learned ${result.blueprintName} for ${result.compatibleRecipeCount} compatible recipes`,
             'success',
             true,
             'tr',
@@ -88,32 +94,13 @@ export class CraftingService {
       );
   }
 
-  public getBlueprintLearningOptions(
-    blueprintItemInstanceId: string,
-  ): Observable<BlueprintLearningOption[]> {
-    return this.api
-      .get(`Crafting/blueprints/${blueprintItemInstanceId}/learning-options`)
-      .pipe(
-        map((response) =>
-          this.unwrapResponse<BlueprintLearningOption[]>(response),
-        ),
-        catchError((err) =>
-          throwError(
-            () =>
-              new Error(
-                err.message ?? 'Failed to load blueprint learning options',
-              ),
-          ),
-        ),
-      );
-  }
-
-  removeItemFromQueue(
-    queueItem: { id: string },
-  ): Observable<RemoveCraftingQueueItemResponse> {
+  removeItemFromQueue(queueItem: {
+    id: string;
+  }): Observable<RemoveCraftingQueueItemResponse> {
     return this.api.post('Crafting/RemoveCraftingQueueItem', queueItem.id).pipe(
       map((response) => {
-        const result = this.unwrapResponse<RemoveCraftingQueueItemResponse>(response);
+        const result =
+          this.unwrapResponse<RemoveCraftingQueueItemResponse>(response);
         this.toast.showToast('Removed item from queue', 'success', true, 'tr');
         return result;
       }),

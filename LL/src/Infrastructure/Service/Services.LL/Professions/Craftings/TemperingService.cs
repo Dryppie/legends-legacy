@@ -44,11 +44,6 @@ public class TemperingService : ITemperingService
         var wasMasterpiece = current.EquipmentInstance.IsMasterpiece;
         var wasLevelingItem = current.EquipmentInstance.IsLevelingItem;
         var result = _temperingMechanics.ApplyTemperingAttempt(current.EquipmentInstance, profile, rng, negativeOutcomeReductionBps);
-        if (result.Outcome == TemperingOutcome.Negative)
-        {
-            temperingSummary.CursedOutcomes++;
-        }
-
         if (!wasMasterpiece && current.EquipmentInstance.IsMasterpiece)
         {
             temperingSummary.Masterpieces++;

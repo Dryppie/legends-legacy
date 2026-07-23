@@ -159,7 +159,6 @@ namespace Persistence.LL.Migrations
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     CharacterId = table.Column<Guid>(type: "uuid", nullable: false),
-                    RecipeId = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: false),
                     BlueprintId = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: false),
                     UnlockedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
                 },
@@ -240,6 +239,25 @@ namespace Persistence.LL.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_DungeonCompletionRecords", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "DungeonPowerRecommendationCacheEntries",
+                columns: table => new
+                {
+                    DungeonId = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: false),
+                    DungeonTier = table.Column<int>(type: "integer", nullable: false),
+                    DungeonContentHash = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: false),
+                    AlgorithmVersion = table.Column<int>(type: "integer", nullable: false),
+                    CombatRulesVersion = table.Column<int>(type: "integer", nullable: false),
+                    BenchmarkDefinitionVersion = table.Column<int>(type: "integer", nullable: false),
+                    RecommendationSeedSetVersion = table.Column<int>(type: "integer", nullable: false),
+                    RecommendationJson = table.Column<string>(type: "jsonb", nullable: false),
+                    UpdatedAtUtc = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_DungeonPowerRecommendationCacheEntries", x => x.DungeonId);
                 });
 
             migrationBuilder.CreateTable(
@@ -713,19 +731,18 @@ namespace Persistence.LL.Migrations
                     ItemType = table.Column<int>(type: "integer", nullable: false),
                     Rarity = table.Column<int>(type: "integer", nullable: true),
                     Quality = table.Column<int>(type: "integer", nullable: true),
-                    RecipeId = table.Column<string>(type: "text", nullable: true),
-                    BaseRecipeId = table.Column<string>(type: "text", nullable: true),
-                    BlueprintId = table.Column<string>(type: "text", nullable: true),
+                    BaseRecipeId = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: true),
+                    BlueprintId = table.Column<string>(type: "character varying(160)", maxLength: 160, nullable: true),
                     CraftedName = table.Column<string>(type: "text", nullable: true),
                     Tier = table.Column<int>(type: "integer", nullable: true),
                     Potential = table.Column<int>(type: "integer", nullable: true),
                     MaxPotential = table.Column<int>(type: "integer", nullable: true),
                     TemperingProgress = table.Column<int>(type: "integer", nullable: true),
+                    xmin = table.Column<uint>(type: "xid", rowVersion: true, nullable: true),
                     ItemXp = table.Column<int>(type: "integer", nullable: true),
                     IsMasterpiece = table.Column<bool>(type: "boolean", nullable: true),
                     IsLevelingItem = table.Column<bool>(type: "boolean", nullable: true),
-                    AffinityTags = table.Column<List<string>>(type: "text[]", nullable: true),
-                    SpecialModifiers = table.Column<List<string>>(type: "text[]", nullable: true)
+                    AffinityTags = table.Column<List<string>>(type: "text[]", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -2176,9 +2193,9 @@ namespace Persistence.LL.Migrations
                 column: "DungeonDefinitionId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_CharacterRecipeUnlocks_CharacterId_RecipeId_BlueprintId",
+                name: "IX_CharacterRecipeUnlocks_CharacterId_BlueprintId",
                 table: "CharacterRecipeUnlocks",
-                columns: new[] { "CharacterId", "RecipeId", "BlueprintId" },
+                columns: new[] { "CharacterId", "BlueprintId" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
@@ -2846,6 +2863,9 @@ namespace Persistence.LL.Migrations
 
             migrationBuilder.DropTable(
                 name: "DungeonCompletionRecords");
+
+            migrationBuilder.DropTable(
+                name: "DungeonPowerRecommendationCacheEntries");
 
             migrationBuilder.DropTable(
                 name: "EntityAttributes");

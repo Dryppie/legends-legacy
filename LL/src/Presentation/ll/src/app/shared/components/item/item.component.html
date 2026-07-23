@@ -32,6 +32,25 @@
       {{ item.itemBase.description }}
     </p>
 
+    <div
+      *ngIf="item.itemBase.blueprint as blueprint"
+      class="ll-item-detail-section"
+    >
+      <div class="ll-item-meta">Blueprint</div>
+      <div class="mt-1 font-medium text-white">
+        {{ blueprint.name }}
+      </div>
+      <div class="mt-1 text-xs text-secondary">
+        Applies to {{ blueprint.compatibleRecipeCount }} compatible recipes.
+      </div>
+      <div class="mt-1 text-xs text-secondary">
+        {{ blueprint.sourceType || "Unknown source" }}
+        <ng-container *ngIf="blueprint.sourceId">
+          · {{ blueprint.sourceId }}</ng-container
+        >
+      </div>
+    </div>
+
     <div class="ll-item-detail-section flex flex-wrap gap-2">
       <span *ngIf="item.itemBase.stackable" class="ll-item-chip">
         Stackable

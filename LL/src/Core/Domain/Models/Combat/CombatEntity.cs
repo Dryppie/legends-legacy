@@ -5,6 +5,7 @@ using Domain.Models.Entities;
 using Domain.Models.Essences;
 using Domain.Models.Essences.Definitions;
 using Domain.Models.Items.Equipments;
+using Domain.Models.Items.Equipments.Slots;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Domain.Models.Combat;
@@ -30,6 +31,8 @@ public class CombatEntity
     public float CurrentBarrier { get; private set; }
     public bool IsAlive => CurrentHealth > 0;
     public List<EquipmentInstance> Equipment { get; set; } = [];
+    public EquipmentInstance? MainHandEquipment { get; set; }
+    public EquipmentInstance? OffHandEquipment { get; set; }
     public List<PlayerEssence> EquippedEssences { get; set; } = [];
     public bool HasEquippedEssenceSnapshot { get; set; }
     public Dictionary<AttributeType, float> BaseCombatAttributes { get; } = [];
@@ -51,7 +54,17 @@ public class CombatEntity
         CurrentHealth = entity.CombatAttributes.GetValueOrDefault(
             AttributeType.MaxHealth,
             entity.BaseCombatAttributes.GetValueOrDefault(AttributeType.MaxHealth));
-        Equipment = entity.EquipmentSlots.Where(es => es.EquipmentInstance != null).Select(es => es.EquipmentInstance!).ToList();
+        Equipment = entity.EquipmentSlots
+            .Where(es => es.EquipmentInstance != null)
+            .Select(es => es.EquipmentInstance!)
+            .DistinctBy(equipment => equipment.Id)
+            .ToList();
+        MainHandEquipment = entity.EquipmentSlots
+            .FirstOrDefault(slot => slot.EquipmentSlotType == EquipmentSlotType.MainHand)
+            ?.EquipmentInstance;
+        OffHandEquipment = entity.EquipmentSlots
+            .FirstOrDefault(slot => slot.EquipmentSlotType == EquipmentSlotType.OffHand)
+            ?.EquipmentInstance;
         Level = entity.Level;
     }
 
@@ -162,6 +175,8 @@ public class CombatEntity
         ImagePath = entity.ImagePath;
         NextBasicAttackIn = entity.NextBasicAttackIn;
         Equipment = entity.Equipment.Select(e => e).ToList();
+        MainHandEquipment = entity.MainHandEquipment;
+        OffHandEquipment = entity.OffHandEquipment;
         TemporaryModifiers = entity.TemporaryModifiers.Select(tm => tm).ToList();
         TemporaryAbilityModifiers = entity.TemporaryAbilityModifiers.Select(tm => tm).ToList();
         BaseAttributes = [.. entity.BaseAttributes];

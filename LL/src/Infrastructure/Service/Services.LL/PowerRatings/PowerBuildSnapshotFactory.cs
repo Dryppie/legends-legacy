@@ -96,9 +96,6 @@ public sealed class PowerBuildSnapshotFactory
                     .Append(':').Append(modifier.Amount.ToString("R", CultureInfo.InvariantCulture));
             }
 
-            foreach (var special in item.SpecialModifiers.Order(StringComparer.Ordinal))
-                value.Append(":special:").Append(special);
-
             foreach (var affinity in item.AffinityTags.Order(StringComparer.Ordinal))
                 value.Append(":affinity:").Append(affinity);
         }

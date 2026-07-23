@@ -7,6 +7,7 @@ import { Rarity } from '../../models/enums/rarity';
 import {
   Equipment,
   EquipmentInstance,
+  EquipmentCraftingDesignMetadata,
   ToolBonusModifier,
 } from '../../models/item';
 
@@ -34,6 +35,7 @@ export interface EquipmentDisplay {
 
   // Instance-only
   potential?: number;
+  craftingDesign?: EquipmentCraftingDesignMetadata | null;
 }
 
 export function mapEquipmentToDisplay(
@@ -96,6 +98,7 @@ export function mapInstanceToDisplay(
     attackSpeed: base.attackSpeed,
 
     potential: inst.potential,
+    craftingDesign: inst.craftingDesign,
   };
 }
 

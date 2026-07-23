@@ -76,9 +76,7 @@ public sealed record OutboxEquipmentItemPayload(
     Rarity Rarity,
     ItemQuality Quality,
     int? Potential,
-    string? RecipeId,
     string? BaseRecipeId,
     string? BlueprintId,
     IReadOnlyCollection<string> AffinityTags,
-    IReadOnlyCollection<string> SpecialModifiers,
     bool IsMasterpiece);

@@ -66,7 +66,7 @@
   {
     "id": "sigil_hives_abyss",
     "name": "Hive Sigil",
-    "description": "A sigil used to open a run into The Hive\u0027s Abyss.",
+    "description": "A sigil used to open a run into The Hive's Abyss.",
     "itemType": "Resource",
     "rarity": "Common",
     "equipmentType": "Head",
@@ -513,7 +513,7 @@
   },
   {
     "id": "item.essence.legacy.goblin",
-    "name": "Unbound Goblin\u0027s Essence",
+    "name": "Unbound Goblin's Essence",
     "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
     "itemType": "Essence",
     "rarity": "Common",
@@ -529,7 +529,7 @@
   },
   {
     "id": "item.essence.legacy.training_goblin",
-    "name": "Unbound Training Goblin\u0027s Essence",
+    "name": "Unbound Training Goblin's Essence",
     "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
     "itemType": "Essence",
     "rarity": "Common",
@@ -545,7 +545,7 @@
   },
   {
     "id": "item.essence.legacy.goblin_warrior",
-    "name": "Unbound Goblin Warrior\u0027s Essence",
+    "name": "Unbound Goblin Warrior's Essence",
     "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
     "itemType": "Essence",
     "rarity": "Common",
@@ -561,7 +561,7 @@
   },
   {
     "id": "item.essence.legacy.goblin_archer",
-    "name": "Unbound Goblin Archer\u0027s Essence",
+    "name": "Unbound Goblin Archer's Essence",
     "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
     "itemType": "Essence",
     "rarity": "Common",
@@ -577,7 +577,7 @@
   },
   {
     "id": "item.essence.legacy.large_rat",
-    "name": "Unbound Large Rat\u0027s Essence",
+    "name": "Unbound Large Rat's Essence",
     "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
     "itemType": "Essence",
     "rarity": "Common",
@@ -593,7 +593,7 @@
   },
   {
     "id": "item.essence.legacy.flame_imp",
-    "name": "Unbound Flame Imp\u0027s Essence",
+    "name": "Unbound Flame Imp's Essence",
     "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
     "itemType": "Essence",
     "rarity": "Uncommon",
@@ -609,7 +609,7 @@
   },
   {
     "id": "item.essence.legacy.moss_lizard",
-    "name": "Unbound Moss Lizard\u0027s Essence",
+    "name": "Unbound Moss Lizard's Essence",
     "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
     "itemType": "Essence",
     "rarity": "Common",
@@ -625,7 +625,7 @@
   },
   {
     "id": "item.essence.legacy.spider",
-    "name": "Unbound Spider\u0027s Essence",
+    "name": "Unbound Spider's Essence",
     "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
     "itemType": "Essence",
     "rarity": "Common",
@@ -641,7 +641,7 @@
   },
   {
     "id": "item.essence.legacy.treant_sapling",
-    "name": "Unbound Treant Sapling\u0027s Essence",
+    "name": "Unbound Treant Sapling's Essence",
     "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
     "itemType": "Essence",
     "rarity": "Common",
@@ -657,7 +657,7 @@
   },
   {
     "id": "item.essence.legacy.venomous_snake",
-    "name": "Unbound Venomous Snake\u0027s Essence",
+    "name": "Unbound Venomous Snake's Essence",
     "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
     "itemType": "Essence",
     "rarity": "Uncommon",
@@ -673,7 +673,7 @@
   },
   {
     "id": "item.essence.legacy.viper",
-    "name": "Unbound Viper\u0027s Essence",
+    "name": "Unbound Viper's Essence",
     "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
     "itemType": "Essence",
     "rarity": "Uncommon",
@@ -689,7 +689,7 @@
   },
   {
     "id": "item.essence.legacy.goblin_shaman",
-    "name": "Unbound Goblin Shaman\u0027s Essence",
+    "name": "Unbound Goblin Shaman's Essence",
     "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
     "itemType": "Essence",
     "rarity": "Uncommon",
@@ -705,7 +705,7 @@
   },
   {
     "id": "item.essence.legacy.poisonous_rat",
-    "name": "Unbound Poisonous Rat\u0027s Essence",
+    "name": "Unbound Poisonous Rat's Essence",
     "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
     "itemType": "Essence",
     "rarity": "Uncommon",
@@ -721,7 +721,7 @@
   },
   {
     "id": "item.essence.legacy.giant_bat",
-    "name": "Unbound Giant Bat\u0027s Essence",
+    "name": "Unbound Giant Bat's Essence",
     "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
     "itemType": "Essence",
     "rarity": "Uncommon",
@@ -737,7 +737,7 @@
   },
   {
     "id": "item.essence.legacy.frost_imp",
-    "name": "Unbound Frost Imp\u0027s Essence",
+    "name": "Unbound Frost Imp's Essence",
     "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
     "itemType": "Essence",
     "rarity": "Uncommon",
@@ -753,7 +753,7 @@
   },
   {
     "id": "item.essence.legacy.shadow_imp",
-    "name": "Unbound Shadow Imp\u0027s Essence",
+    "name": "Unbound Shadow Imp's Essence",
     "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
     "itemType": "Essence",
     "rarity": "Uncommon",
@@ -769,7 +769,7 @@
   },
   {
     "id": "item.essence.legacy.vampire_bat",
-    "name": "Unbound Vampire Bat\u0027s Essence",
+    "name": "Unbound Vampire Bat's Essence",
     "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
     "itemType": "Essence",
     "rarity": "Uncommon",
@@ -785,7 +785,7 @@
   },
   {
     "id": "item.essence.legacy.blue_slime",
-    "name": "Unbound Blue Slime\u0027s Essence",
+    "name": "Unbound Blue Slime's Essence",
     "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
     "itemType": "Essence",
     "rarity": "Common",
@@ -801,7 +801,7 @@
   },
   {
     "id": "item.essence.legacy.brown_slime",
-    "name": "Unbound Brown Slime\u0027s Essence",
+    "name": "Unbound Brown Slime's Essence",
     "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
     "itemType": "Essence",
     "rarity": "Common",
@@ -817,7 +817,7 @@
   },
   {
     "id": "item.essence.legacy.green_slime",
-    "name": "Unbound Green Slime\u0027s Essence",
+    "name": "Unbound Green Slime's Essence",
     "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
     "itemType": "Essence",
     "rarity": "Common",
@@ -833,7 +833,7 @@
   },
   {
     "id": "item.essence.legacy.rainbow_slime",
-    "name": "Unbound Rainbow Slime\u0027s Essence",
+    "name": "Unbound Rainbow Slime's Essence",
     "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
     "itemType": "Essence",
     "rarity": "Rare",
@@ -849,7 +849,7 @@
   },
   {
     "id": "item.essence.legacy.red_slime",
-    "name": "Unbound Red Slime\u0027s Essence",
+    "name": "Unbound Red Slime's Essence",
     "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
     "itemType": "Essence",
     "rarity": "Common",
@@ -865,7 +865,7 @@
   },
   {
     "id": "item.essence.legacy.transparent_slime",
-    "name": "Unbound Transparent Slime\u0027s Essence",
+    "name": "Unbound Transparent Slime's Essence",
     "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
     "itemType": "Essence",
     "rarity": "Uncommon",
@@ -881,7 +881,7 @@
   },
   {
     "id": "item.essence.legacy.enchanted_fairy",
-    "name": "Unbound Enchanted Fairy\u0027s Essence",
+    "name": "Unbound Enchanted Fairy's Essence",
     "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
     "itemType": "Essence",
     "rarity": "Rare",
@@ -897,7 +897,7 @@
   },
   {
     "id": "item.essence.legacy.glade_panther",
-    "name": "Unbound Glade Panther\u0027s Essence",
+    "name": "Unbound Glade Panther's Essence",
     "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
     "itemType": "Essence",
     "rarity": "Rare",
@@ -913,7 +913,7 @@
   },
   {
     "id": "item.essence.legacy.illusion_fox",
-    "name": "Unbound Illusion Fox\u0027s Essence",
+    "name": "Unbound Illusion Fox's Essence",
     "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
     "itemType": "Essence",
     "rarity": "Rare",
@@ -929,7 +929,7 @@
   },
   {
     "id": "item.essence.legacy.nightshade_blossom",
-    "name": "Unbound Nightshade Blossom\u0027s Essence",
+    "name": "Unbound Nightshade Blossom's Essence",
     "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
     "itemType": "Essence",
     "rarity": "Rare",
@@ -945,7 +945,7 @@
   },
   {
     "id": "item.essence.legacy.pixie",
-    "name": "Unbound Pixie\u0027s Essence",
+    "name": "Unbound Pixie's Essence",
     "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
     "itemType": "Essence",
     "rarity": "Rare",
@@ -961,7 +961,7 @@
   },
   {
     "id": "item.essence.legacy.hobgoblin",
-    "name": "Unbound Hobgoblin\u0027s Essence",
+    "name": "Unbound Hobgoblin's Essence",
     "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
     "itemType": "Essence",
     "rarity": "Rare",
@@ -977,7 +977,7 @@
   },
   {
     "id": "item.essence.legacy.feral_ghoul",
-    "name": "Unbound Feral Ghoul\u0027s Essence",
+    "name": "Unbound Feral Ghoul's Essence",
     "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
     "itemType": "Essence",
     "rarity": "Uncommon",
@@ -993,7 +993,7 @@
   },
   {
     "id": "item.essence.legacy.plague_ghoul",
-    "name": "Unbound Plague Ghoul\u0027s Essence",
+    "name": "Unbound Plague Ghoul's Essence",
     "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
     "itemType": "Essence",
     "rarity": "Uncommon",
@@ -1009,7 +1009,7 @@
   },
   {
     "id": "item.essence.legacy.ravenous_ghoul",
-    "name": "Unbound Ravenous Ghoul\u0027s Essence",
+    "name": "Unbound Ravenous Ghoul's Essence",
     "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
     "itemType": "Essence",
     "rarity": "Rare",
@@ -1025,7 +1025,7 @@
   },
   {
     "id": "item.essence.legacy.skeleton_archer",
-    "name": "Unbound Skeleton Archer\u0027s Essence",
+    "name": "Unbound Skeleton Archer's Essence",
     "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
     "itemType": "Essence",
     "rarity": "Uncommon",
@@ -1041,7 +1041,7 @@
   },
   {
     "id": "item.essence.legacy.skeleton_mage",
-    "name": "Unbound Skeleton Mage\u0027s Essence",
+    "name": "Unbound Skeleton Mage's Essence",
     "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
     "itemType": "Essence",
     "rarity": "Rare",
@@ -1057,7 +1057,7 @@
   },
   {
     "id": "item.essence.legacy.skeleton_warrior",
-    "name": "Unbound Skeleton Warrior\u0027s Essence",
+    "name": "Unbound Skeleton Warrior's Essence",
     "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
     "itemType": "Essence",
     "rarity": "Uncommon",
@@ -2870,7 +2870,7 @@
   },
   {
     "id": "item.essence.ant_worker",
-    "name": "Unbound Ant Worker\u0027s Essence",
+    "name": "Unbound Ant Worker's Essence",
     "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
     "itemType": "Essence",
     "rarity": "Common",
@@ -2886,7 +2886,7 @@
   },
   {
     "id": "item.essence.forest_spirit",
-    "name": "Unbound Forest Spirit\u0027s Essence",
+    "name": "Unbound Forest Spirit's Essence",
     "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
     "itemType": "Essence",
     "rarity": "Rare",
@@ -2902,7 +2902,7 @@
   },
   {
     "id": "item.essence.wood_nymph",
-    "name": "Unbound Wood Nymph\u0027s Essence",
+    "name": "Unbound Wood Nymph's Essence",
     "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
     "itemType": "Essence",
     "rarity": "Rare",
@@ -2918,7 +2918,7 @@
   },
   {
     "id": "item.essence.giant_spider",
-    "name": "Unbound Giant Spider\u0027s Essence",
+    "name": "Unbound Giant Spider's Essence",
     "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
     "itemType": "Essence",
     "rarity": "Rare",
@@ -2934,7 +2934,7 @@
   },
   {
     "id": "item.essence.venomous_spiderling",
-    "name": "Unbound Venomous Spiderling\u0027s Essence",
+    "name": "Unbound Venomous Spiderling's Essence",
     "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
     "itemType": "Essence",
     "rarity": "Uncommon",
@@ -3047,7 +3047,7 @@
   {
     "id": "blueprint_venom_touched_sword",
     "name": "Blueprint: Venom-Touched Sword",
-    "description": "Unlocks the Venom-Touched Sword crafting variant.",
+    "description": "Permanently unlocks the Venom design for compatible weapon recipes.",
     "itemType": "Resource",
     "rarity": "Rare",
     "equipmentType": "Head",
@@ -3063,7 +3063,7 @@
   {
     "id": "blueprint_hivefang_dagger",
     "name": "Blueprint: Hivefang Dagger",
-    "description": "Unlocks the Hivefang Dagger crafting variant.",
+    "description": "Permanently unlocks the Hive design for Dagger recipes.",
     "itemType": "Resource",
     "rarity": "Rare",
     "equipmentType": "Head",
@@ -3079,7 +3079,7 @@
   {
     "id": "blueprint_fury",
     "name": "Blueprint: Fury",
-    "description": "Unlocks fury-themed crafting outcomes for compatible forms.",
+    "description": "Permanently unlocks the Fury design for compatible jewelry recipes.",
     "itemType": "Resource",
     "rarity": "Rare",
     "equipmentType": "Head",
@@ -3095,7 +3095,7 @@
   {
     "id": "blueprint_arcane",
     "name": "Blueprint: Arcane",
-    "description": "Unlocks arcane-themed crafting outcomes for compatible forms.",
+    "description": "Permanently unlocks the Arcane design for compatible jewelry recipes.",
     "itemType": "Resource",
     "rarity": "Rare",
     "equipmentType": "Head",
@@ -3111,7 +3111,7 @@
   {
     "id": "blueprint_execution",
     "name": "Blueprint: Execution",
-    "description": "Unlocks execution-themed crafting outcomes for compatible forms.",
+    "description": "Permanently unlocks the Execution design for compatible jewelry recipes.",
     "itemType": "Resource",
     "rarity": "Rare",
     "equipmentType": "Head",
@@ -3127,7 +3127,7 @@
   {
     "id": "blueprint_aegis",
     "name": "Blueprint: Aegis",
-    "description": "Unlocks aegis-themed crafting outcomes for compatible forms.",
+    "description": "Permanently unlocks the Aegis design for compatible jewelry recipes.",
     "itemType": "Resource",
     "rarity": "Rare",
     "equipmentType": "Head",
@@ -3143,7 +3143,7 @@
   {
     "id": "blueprint_warden",
     "name": "Blueprint: Warden",
-    "description": "Unlocks warden-themed crafting outcomes for compatible forms.",
+    "description": "Permanently unlocks the Warden design for compatible jewelry recipes.",
     "itemType": "Resource",
     "rarity": "Rare",
     "equipmentType": "Head",
@@ -3159,7 +3159,7 @@
   {
     "id": "blueprint_endurance",
     "name": "Blueprint: Endurance",
-    "description": "Unlocks endurance-themed crafting outcomes for compatible forms.",
+    "description": "Permanently unlocks the Endurance design for compatible jewelry recipes.",
     "itemType": "Resource",
     "rarity": "Rare",
     "equipmentType": "Head",
@@ -3175,7 +3175,7 @@
   {
     "id": "blueprint_phoenix",
     "name": "Blueprint: Phoenix",
-    "description": "Unlocks phoenix-themed crafting outcomes for compatible forms.",
+    "description": "Permanently unlocks the Phoenix design for compatible jewelry recipes.",
     "itemType": "Resource",
     "rarity": "Rare",
     "equipmentType": "Head",
@@ -3191,7 +3191,7 @@
   {
     "id": "blueprint_spirit",
     "name": "Blueprint: Spirit",
-    "description": "Unlocks spirit-themed crafting outcomes for compatible forms.",
+    "description": "Permanently unlocks the Spirit design for compatible jewelry recipes.",
     "itemType": "Resource",
     "rarity": "Rare",
     "equipmentType": "Head",
@@ -3207,7 +3207,7 @@
   {
     "id": "blueprint_primal",
     "name": "Blueprint: Primal",
-    "description": "Unlocks primal-themed crafting outcomes for compatible forms.",
+    "description": "Permanently unlocks the Primal design for compatible jewelry recipes.",
     "itemType": "Resource",
     "rarity": "Rare",
     "equipmentType": "Head",
@@ -3222,7 +3222,7 @@
   },
   {
     "id": "item.essence.blackjaw_spider",
-    "name": "Unbound Blackjaw Spider\u0027s Essence",
+    "name": "Unbound Blackjaw Spider's Essence",
     "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
     "itemType": "Essence",
     "rarity": "Uncommon",
@@ -3238,7 +3238,7 @@
   },
   {
     "id": "item.essence.raven",
-    "name": "Unbound Raven\u0027s Essence",
+    "name": "Unbound Raven's Essence",
     "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
     "itemType": "Essence",
     "rarity": "Common",
@@ -3254,7 +3254,7 @@
   },
   {
     "id": "item.essence.widow_stalker",
-    "name": "Unbound Widow Stalker\u0027s Essence",
+    "name": "Unbound Widow Stalker's Essence",
     "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
     "itemType": "Essence",
     "rarity": "Uncommon",
@@ -3270,7 +3270,7 @@
   },
   {
     "id": "item.essence.scarecrow",
-    "name": "Unbound Scarecrow\u0027s Essence",
+    "name": "Unbound Scarecrow's Essence",
     "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
     "itemType": "Essence",
     "rarity": "Uncommon",
@@ -3286,7 +3286,7 @@
   },
   {
     "id": "item.essence.lost_soul",
-    "name": "Unbound Lost Soul\u0027s Essence",
+    "name": "Unbound Lost Soul's Essence",
     "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
     "itemType": "Essence",
     "rarity": "Uncommon",
@@ -3302,7 +3302,7 @@
   },
   {
     "id": "item.essence.apparition",
-    "name": "Unbound Apparition\u0027s Essence",
+    "name": "Unbound Apparition's Essence",
     "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
     "itemType": "Essence",
     "rarity": "Uncommon",
@@ -3318,7 +3318,7 @@
   },
   {
     "id": "item.essence.specter",
-    "name": "Unbound Specter\u0027s Essence",
+    "name": "Unbound Specter's Essence",
     "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
     "itemType": "Essence",
     "rarity": "Rare",
@@ -3334,7 +3334,7 @@
   },
   {
     "id": "item.essence.zombie",
-    "name": "Unbound Zombie\u0027s Essence",
+    "name": "Unbound Zombie's Essence",
     "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
     "itemType": "Essence",
     "rarity": "Common",
@@ -3350,7 +3350,7 @@
   },
   {
     "id": "item.essence.half_zombie",
-    "name": "Unbound Half Zombie\u0027s Essence",
+    "name": "Unbound Half Zombie's Essence",
     "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
     "itemType": "Essence",
     "rarity": "Common",
@@ -3366,7 +3366,7 @@
   },
   {
     "id": "item.essence.undead",
-    "name": "Unbound Undead\u0027s Essence",
+    "name": "Unbound Undead's Essence",
     "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
     "itemType": "Essence",
     "rarity": "Uncommon",
@@ -3382,7 +3382,7 @@
   },
   {
     "id": "item.essence.blood_zombie",
-    "name": "Unbound Blood Zombie\u0027s Essence",
+    "name": "Unbound Blood Zombie's Essence",
     "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
     "itemType": "Essence",
     "rarity": "Rare",
@@ -3398,7 +3398,7 @@
   },
   {
     "id": "item.essence.giant_worm",
-    "name": "Unbound Giant Worm\u0027s Essence",
+    "name": "Unbound Giant Worm's Essence",
     "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
     "itemType": "Essence",
     "rarity": "Rare",
@@ -3414,7 +3414,7 @@
   },
   {
     "id": "item.essence.burrowed_horror",
-    "name": "Unbound Burrowed Horror\u0027s Essence",
+    "name": "Unbound Burrowed Horror's Essence",
     "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
     "itemType": "Essence",
     "rarity": "Rare",
@@ -3430,7 +3430,7 @@
   },
   {
     "id": "item.essence.cave_leech",
-    "name": "Unbound Cave Leech\u0027s Essence",
+    "name": "Unbound Cave Leech's Essence",
     "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
     "itemType": "Essence",
     "rarity": "Uncommon",
@@ -3446,7 +3446,7 @@
   },
   {
     "id": "item.essence.stonejaw_grub",
-    "name": "Unbound Stonejaw Grub\u0027s Essence",
+    "name": "Unbound Stonejaw Grub's Essence",
     "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
     "itemType": "Essence",
     "rarity": "Uncommon",
@@ -3462,7 +3462,7 @@
   },
   {
     "id": "item.essence.deep_burrower",
-    "name": "Unbound Deep Burrower\u0027s Essence",
+    "name": "Unbound Deep Burrower's Essence",
     "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
     "itemType": "Essence",
     "rarity": "Rare",
