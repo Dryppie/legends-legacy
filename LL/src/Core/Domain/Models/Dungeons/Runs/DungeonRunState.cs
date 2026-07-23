@@ -23,6 +23,24 @@ public sealed class DungeonRunState
     public DateTimeOffset ExpiresAt { get; set; }
     public List<DungeonVigorChange> VigorHistory { get; set; } = [];
     public DungeonFailureAnalysis? FailureAnalysis { get; set; }
+    public DungeonPowerPredictionTelemetry? PowerPrediction { get; set; }
+}
+
+public sealed class DungeonPowerPredictionTelemetry
+{
+    public int AlgorithmVersion { get; set; }
+    public string BuildFingerprintHash { get; set; } = string.Empty;
+    public int PartyPower { get; set; }
+    public int RecommendedPartyPower { get; set; }
+    public string DungeonContentHash { get; set; } = string.Empty;
+    public string PredictedReadinessBand { get; set; } = string.Empty;
+    public decimal PredictedCompletionLowerBound { get; set; }
+    public decimal PredictedCompletionUpperBound { get; set; }
+    public bool? ActualCompleted { get; set; }
+    public int FurthestRoomReached { get; set; }
+    public bool CheckpointReached { get; set; }
+    public int? RunDurationSeconds { get; set; }
+    public string? FailureReason { get; set; }
 }
 
 public sealed class DungeonMapNode

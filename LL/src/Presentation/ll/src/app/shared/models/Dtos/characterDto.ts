@@ -1,5 +1,6 @@
 import { AttributeDto } from './attributesDto';
 import { EssenceLoadoutDto } from '../essence-system';
+import { OverallPowerRating } from './powerRating';
 
 export interface CharacterDto {
   id: string;
@@ -21,7 +22,7 @@ export interface CharacterOverviewDto {
   id: string;
   name: string;
   level: number;
-  combatRating: number;
+  power?: OverallPowerRating | null;
   baseAttributes: AttributeDto[];
   baseCombatAttributes: AttributeDto[];
   activeEssenceLoadout?: EssenceLoadoutDto | null;

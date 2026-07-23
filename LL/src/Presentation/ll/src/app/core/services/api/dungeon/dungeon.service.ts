@@ -17,6 +17,14 @@ export enum DungeonRunStatus {
   RewardsClaimed = 'RewardsClaimed',
 }
 
+export interface DungeonPowerRecommendationsResponse {
+  calibrationComplete: boolean;
+  recommendations: Record<
+    string,
+    { recommendedPartyPower: number; lowConfidence: boolean }
+  >;
+}
+
 export enum RoomType {
   Unknown = 'Unknown',
   Combat = 'Combat',
@@ -206,6 +214,12 @@ export class DungeonService {
         return throwError(() => new Error('Failed to get available dungeons'));
       }),
     );
+  }
+
+  getPowerRecommendations(): Observable<DungeonPowerRecommendationsResponse> {
+    return this.api
+      .get('dungeon/powerRecommendations')
+      .pipe(catchError((error) => throwError(() => error)));
   }
 
   assembleSigil(dungeonId: string): Observable<DungeonSigilAssemblyResponse> {

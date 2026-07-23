@@ -7,6 +7,7 @@ using Domain.Models.CharacterActions.CharacterActionDetails;
 using Domain.Models.Colosseum;
 using Domain.Models.Colosseum.Tournaments;
 using Domain.Models.Dungeons.Mastery;
+using Domain.Models.Dungeons.PowerRatings;
 using Domain.Models.Dungeons.Runs;
 using Domain.Models.Entities;
 using Domain.Models.Entities.Characters;
@@ -192,6 +193,7 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : DbContext(opti
     public DbSet<RunReward> RunRewards => Set<RunReward>();
     public DbSet<DungeonCompletionRecord> DungeonCompletionRecords => Set<DungeonCompletionRecord>();
     public DbSet<CharacterDungeonMastery> CharacterDungeonMasteries => Set<CharacterDungeonMastery>();
+    public DbSet<DungeonPowerRecommendationCacheEntry> DungeonPowerRecommendationCacheEntries => Set<DungeonPowerRecommendationCacheEntry>();
 
     // Effects
 

@@ -44,7 +44,6 @@
         {
           "id": "goblin_mines",
           "difficulty": 1,
-          "recommendedCombatRating": 4500,
           "minRooms": 10,
           "maxRooms": 12,
           "rewardTable": {
@@ -171,7 +170,6 @@
         {
           "id": "goblin_mines_ii",
           "difficulty": 2,
-          "recommendedCombatRating": 22500,
           "minRooms": 11,
           "maxRooms": 13,
           "rewardTable": {
@@ -298,7 +296,6 @@
         {
           "id": "goblin_mines_iii",
           "difficulty": 3,
-          "recommendedCombatRating": 112500,
           "minRooms": 12,
           "maxRooms": 14,
           "rewardTable": {
@@ -499,7 +496,6 @@
         {
           "id": "forgotten_catacombs",
           "difficulty": 1,
-          "recommendedCombatRating": 400,
           "minRooms": 11,
           "maxRooms": 13,
           "rewardTable": {
@@ -598,7 +594,6 @@
         {
           "id": "forgotten_catacombs_ii",
           "difficulty": 2,
-          "recommendedCombatRating": 2000,
           "minRooms": 12,
           "maxRooms": 14,
           "rewardTable": {
@@ -697,7 +692,6 @@
         {
           "id": "forgotten_catacombs_iii",
           "difficulty": 3,
-          "recommendedCombatRating": 10000,
           "minRooms": 13,
           "maxRooms": 15,
           "rewardTable": {
@@ -870,7 +864,6 @@
         {
           "id": "hives_abyss",
           "difficulty": 1,
-          "recommendedCombatRating": 650,
           "minRooms": 12,
           "maxRooms": 14,
           "rewardTable": {
@@ -969,7 +962,6 @@
         {
           "id": "hives_abyss_ii",
           "difficulty": 2,
-          "recommendedCombatRating": 3250,
           "minRooms": 13,
           "maxRooms": 15,
           "rewardTable": {
@@ -1086,7 +1078,6 @@
         {
           "id": "hives_abyss_iii",
           "difficulty": 3,
-          "recommendedCombatRating": 16250,
           "minRooms": 14,
           "maxRooms": 16,
           "rewardTable": {

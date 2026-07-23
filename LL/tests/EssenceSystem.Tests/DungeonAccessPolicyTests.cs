@@ -39,8 +39,8 @@ public sealed class DungeonAccessPolicyTests
             EntryCosts = [new DungeonEntryCost { ItemId = "sigil_test", Amount = 1 }]
         };
 
-        var normal = await policy.EvaluateAsync(Guid.NewGuid(), dungeon, 0, CancellationToken.None);
-        var assembly = await policy.EvaluateForSigilAssemblyAsync(Guid.NewGuid(), dungeon, 0, CancellationToken.None);
+        var normal = await policy.EvaluateAsync(Guid.NewGuid(), dungeon, CancellationToken.None);
+        var assembly = await policy.EvaluateForSigilAssemblyAsync(Guid.NewGuid(), dungeon, CancellationToken.None);
 
         Assert.False(normal.CanEnter);
         Assert.True(assembly.CanEnter);

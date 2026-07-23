@@ -1,6 +1,5 @@
 using Application.Interfaces.Services.LL.Essences;
 using Application.Interfaces.Services.LL.Entities;
-using Domain.Components.Attributes;
 using Domain.Models.Attributes;
 using Domain.Models.Entities.Creatures;
 using Domain.Models.Entities.Creatures.Templates;
@@ -47,7 +46,6 @@ public sealed class CreatureBuildProfileDiagnostics : ICreatureBuildProfileDiagn
             clone.Archetype,
             clone.DamageProfile,
             clone.DefenseProfile,
-            CombatRatingCalculator.Calculate(finalAttributes),
             finalAttributes);
     }
 
@@ -67,9 +65,6 @@ public sealed class CreatureBuildProfileDiagnostics : ICreatureBuildProfileDiagn
 
                 if (!diagnostic.EssenceDefinitionResolved)
                     warnings.Add($"{diagnostic.CreatureName} in {area.Name}: source '{diagnostic.SourceMonsterId}' does not resolve an Essence definition.");
-
-                if (diagnostic.CombatRating <= 0)
-                    errors.Add($"{diagnostic.CreatureName} in {area.Name}: generated Combat Rating is {diagnostic.CombatRating}.");
 
                 if (diagnostic.FinalAttributes.GetValueOrDefault(AttributeType.MaxHealth) <= 0)
                     errors.Add($"{diagnostic.CreatureName} in {area.Name}: generated Max Health is missing or zero.");

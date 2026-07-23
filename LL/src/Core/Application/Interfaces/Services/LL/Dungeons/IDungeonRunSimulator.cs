@@ -1,11 +1,8 @@
 namespace Application.Interfaces.Services.LL.Dungeons;
 
-using Domain.Components.Attributes;
-
 public interface IDungeonRunSimulator
 {
     DungeonSimulationOptions GetOptions();
-    CombatRatingBreakdown GetCombatRating(DungeonSimulationCharacter character);
     Task<DungeonSimulationReport> RunAsync(
         DungeonSimulationRequest request,
         CancellationToken cancellationToken);
@@ -22,10 +19,9 @@ public sealed record DungeonSimulationDungeonOption(
     string FamilyId,
     string Name,
     string Difficulty,
-    int Tier,
-    int RecommendedCombatRating);
+    int Tier);
 
-public sealed record DungeonSimulationEssenceOption(string Id, string Name, int AbilityCombatRating);
+public sealed record DungeonSimulationEssenceOption(string Id, string Name);
 
 public sealed record DungeonSimulationEquipmentSlotOption(
     string Id,
@@ -71,9 +67,6 @@ public sealed record DungeonSimulationReport(
     string DungeonName,
     string Difficulty,
     int Tier,
-    int RecommendedCombatRating,
-    int SimulatedCombatRating,
-    CombatRatingBreakdown CombatRatingBreakdown,
     int RequestedRuns,
     int CompletedRuns,
     int FailedRuns,

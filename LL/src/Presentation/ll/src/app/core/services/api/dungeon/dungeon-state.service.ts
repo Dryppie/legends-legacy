@@ -6,6 +6,7 @@ import {
   DismissFailedDungeonRunResponse,
   DungeonRun,
   DungeonService,
+  DungeonPowerRecommendationsResponse,
   ExecuteDungeonActionResponse,
   StartDungeonRunResponse,
 } from './dungeon.service';
@@ -14,7 +15,15 @@ import { DungeonRecordsData } from '../../../../shared/models/Dtos/dungeons/dung
 import { DungeonDifficulty } from '../../../../shared/models/enums/dungeonDifficulty';
 import { CombatSessionDto } from '../../../../shared/models/Dtos/combatResultDto';
 import { CombatService } from '../../client-side/combat/combat.service';
-import { Observable } from 'rxjs';
+import {
+  Observable,
+  Subscription,
+  catchError,
+  of,
+  switchMap,
+  take,
+  timer,
+} from 'rxjs';
 import { GameEventService } from '../../real-time/game-event.service';
 import { InventoryStateService } from '../inventory/inventory-state.service';
 import { CharacterStateService } from '../character/character-state.service';
@@ -36,6 +45,7 @@ export class DungeonStateService {
   private readonly _sigilFragments = signal(0);
   private readonly _sigilAssemblyEnabled = signal(false);
   private readonly _sigilAssemblyCost = signal(0);
+  private recommendationPolling: Subscription | null = null;
 
   /* ─────────── public, read-only selectors ─────────── */
   readonly lastOutcome = computed(() => this._lastOutcome());
@@ -99,10 +109,69 @@ export class DungeonStateService {
         this._sigilFragments.set(hub.sigilFragments);
         this._sigilAssemblyEnabled.set(hub.sigilAssemblyEnabled);
         this._sigilAssemblyCost.set(hub.sigilAssemblyCost);
+        this.startRecommendationPolling();
       },
       error: (e) =>
         this._error.set(e.message ?? 'Failed to load available dungeons'),
     });
+  }
+
+  private startRecommendationPolling(): void {
+    this.recommendationPolling?.unsubscribe();
+    this.recommendationPolling = null;
+
+    if (
+      !this._dungeons().some(
+        (dungeon) => dungeon.recommendedPartyPower == null,
+      )
+    ) {
+      return;
+    }
+
+    this.recommendationPolling = timer(1_000, 5_000)
+      .pipe(
+        switchMap(() =>
+          this.service
+            .getPowerRecommendations()
+            .pipe(
+              catchError(() =>
+                of({
+                  calibrationComplete: false,
+                  recommendations: {},
+                } as DungeonPowerRecommendationsResponse),
+              ),
+            ),
+        ),
+        take(120),
+      )
+      .subscribe((response) => {
+        this._dungeons.update((dungeons) =>
+          dungeons.map((dungeon) => {
+            const recommendation = response.recommendations[dungeon.id];
+            if (recommendation !== undefined) {
+              return {
+                ...dungeon,
+                recommendedPartyPower: recommendation.recommendedPartyPower,
+                powerRecommendationLowConfidence: recommendation.lowConfidence,
+                powerRecommendationUnavailable: false,
+              };
+            }
+
+            return response.calibrationComplete
+              ? { ...dungeon, powerRecommendationUnavailable: true }
+              : dungeon;
+          }),
+        );
+
+        if (response.calibrationComplete ||
+          !this._dungeons().some(
+            (dungeon) => dungeon.recommendedPartyPower == null,
+          )
+        ) {
+          this.recommendationPolling?.unsubscribe();
+          this.recommendationPolling = null;
+        }
+      });
   }
 
   assembleSigil(dungeonId: string): void {

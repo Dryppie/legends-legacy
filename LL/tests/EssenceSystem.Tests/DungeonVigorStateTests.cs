@@ -135,7 +135,7 @@ public sealed class DungeonVigorStateTests
     }
 
     [Fact]
-    public void Combat_vigor_toll_uses_damage_percent()
+    public void Combat_vigor_toll_uses_remaining_health_percent()
     {
         var run = CreateRun();
         var room = run.Rooms[0];
@@ -171,6 +171,77 @@ public sealed class DungeonVigorStateTests
 
         Assert.Equal(-14, applied);
         Assert.Equal(86, run.State.Vigor);
+    }
+
+    [Fact]
+    public void Combat_vigor_toll_ignores_damage_healed_before_combat_ends()
+    {
+        var run = CreateRun();
+        var room = run.Rooms[0];
+        run.State.MapNodes =
+        [
+            new DungeonMapNode
+            {
+                RoomIndex = room.RoomIndex,
+                VigorCostMin = 12,
+                VigorCostMax = 22
+            }
+        ];
+        var playerId = Guid.NewGuid().ToString();
+        var result = new CombatResult
+        {
+            PlayerTeam =
+            [
+                new SimpleCombatEntity
+                {
+                    Id = playerId,
+                    Name = "Hero",
+                    MaxHealth = 100,
+                    Health = 100
+                }
+            ],
+            EntityStats =
+            [
+                new EntityStats(playerId, "Hero", [], DamageTaken: 500, Team: "Player")
+            ]
+        };
+
+        var applied = new DungeonVigorService().ApplyCombatToll(run, room, result);
+
+        Assert.Equal(-10, applied);
+        Assert.Equal(90, run.State.Vigor);
+    }
+
+    [Fact]
+    public void Combat_vigor_toll_is_the_same_for_equal_remaining_health()
+    {
+        var firstRun = CreateRun();
+        var secondRun = CreateRun();
+        var firstRoom = firstRun.Rooms[0];
+        var secondRoom = secondRun.Rooms[0];
+        firstRun.State.MapNodes = [new DungeonMapNode { RoomIndex = firstRoom.RoomIndex, VigorCostMin = 12, VigorCostMax = 22 }];
+        secondRun.State.MapNodes = [new DungeonMapNode { RoomIndex = secondRoom.RoomIndex, VigorCostMin = 12, VigorCostMax = 22 }];
+
+        static CombatResult ResultWith(int damageTaken) => new()
+        {
+            PlayerTeam =
+            [
+                new SimpleCombatEntity
+                {
+                    Id = "hero",
+                    Name = "Hero",
+                    MaxHealth = 100,
+                    Health = 40
+                }
+            ],
+            EntityStats = [new EntityStats("hero", "Hero", [], damageTaken, Team: "Player")]
+        };
+
+        var firstToll = new DungeonVigorService().ApplyCombatToll(firstRun, firstRoom, ResultWith(60));
+        var secondToll = new DungeonVigorService().ApplyCombatToll(secondRun, secondRoom, ResultWith(600));
+
+        Assert.Equal(firstToll, secondToll);
+        Assert.Equal(-15, firstToll);
     }
 
     [Theory]

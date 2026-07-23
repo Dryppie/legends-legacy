@@ -11,20 +11,11 @@ export interface DungeonSimulationDungeonOption {
   name: string;
   difficulty: string;
   tier: number;
-  recommendedCombatRating: number;
 }
 
 export interface DungeonSimulationEssenceOption {
   id: string;
   name: string;
-  abilityCombatRating: number;
-}
-
-export interface CombatRatingBreakdown {
-  baseAndEquipment: number;
-  essenceAttributes: number;
-  essenceAbilities: number;
-  total: number;
 }
 
 export interface DungeonSimulationEquipmentSlotOption {
@@ -76,9 +67,6 @@ export interface DungeonSimulationReport {
   dungeonName: string;
   difficulty: string;
   tier: number;
-  recommendedCombatRating: number;
-  simulatedCombatRating: number;
-  combatRatingBreakdown: CombatRatingBreakdown;
   requestedRuns: number;
   completedRuns: number;
   failedRuns: number;

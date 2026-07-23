@@ -13,5 +13,4 @@ public sealed record CreatureBuildProfileDiagnostic(
     CreatureArchetype Archetype,
     DamageProfile DamageProfile,
     DefenseProfile DefenseProfile,
-    int CombatRating,
     IReadOnlyDictionary<AttributeType, float> FinalAttributes);

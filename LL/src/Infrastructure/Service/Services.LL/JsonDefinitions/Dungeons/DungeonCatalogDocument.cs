@@ -34,7 +34,6 @@ public sealed class DungeonDifficultyDefinition
 {
     public string Id { get; set; } = string.Empty;
     public int Difficulty { get; set; }
-    public int RecommendedCombatRating { get; set; }
     public int MinRooms { get; set; }
     public int MaxRooms { get; set; }
     public DungeonRewardTable RewardTable { get; set; } = new();

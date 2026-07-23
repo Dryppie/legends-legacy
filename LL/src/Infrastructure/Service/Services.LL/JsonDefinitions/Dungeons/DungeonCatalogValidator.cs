@@ -101,9 +101,6 @@ public sealed class DungeonCatalogValidator
                     errors.Add($"{difficultyLabel}: id does not belong to family '{familyLabel}'.");
             }
 
-            if (difficulty.RecommendedCombatRating < 0)
-                errors.Add($"{difficultyLabel}: recommendedCombatRating cannot be negative.");
-
             if (difficulty.MinRooms <= 0)
                 errors.Add($"{difficultyLabel}: minRooms must be greater than zero.");
 

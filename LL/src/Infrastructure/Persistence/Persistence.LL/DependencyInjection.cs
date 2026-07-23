@@ -1,5 +1,6 @@
 ﻿using Application.Common.Interfaces;
 using Application.Interfaces.Outbox;
+using Application.Interfaces.Services.LL.PowerRatings;
 using Domain.Models.Achievements;
 using Domain.Models.Attributes;
 using Domain.Models.CharacterActions;
@@ -97,6 +98,7 @@ public static class DependencyInjection
         services.AddScoped<IDungeonRunRepository, DungeonRunRepository>();
         services.AddScoped<IDungeonSigilAssemblyRepository, DungeonSigilAssemblyRepository>();
         services.AddScoped<ICharacterDungeonMasteryRepository, CharacterDungeonMasteryRepository>();
+        services.AddScoped<IDungeonPowerRecommendationRepository, DungeonPowerRecommendationRepository>();
 
         services.AddScoped<IEntityRepository, EntityRepository>();
         services.AddScoped<IEquipmentSlotRepository, EquipmentSlotRepository>();

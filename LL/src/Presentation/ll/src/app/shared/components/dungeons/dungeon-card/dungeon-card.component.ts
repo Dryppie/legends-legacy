@@ -7,7 +7,13 @@ import {
   signal,
 } from '@angular/core';
 import { RegularButtonComponent } from '../../custom-components/buttons/regular-button/regular-button.component';
-import { NgClass, NgFor, NgIf, NgTemplateOutlet } from '@angular/common';
+import {
+  DecimalPipe,
+  NgClass,
+  NgFor,
+  NgIf,
+  NgTemplateOutlet,
+} from '@angular/common';
 import { ItemComponent } from '../../item/item.component';
 import { DungeonStateService } from '../../../../core/services/api/dungeon/dungeon-state.service';
 import {
@@ -23,6 +29,7 @@ import { Equipment } from '../../../models/item';
 import { EquipmentType } from '../../../models/enums/equipmentType';
 import { BaseItemComponent } from '../../base-item/base-item.component';
 import { ConnectedPosition, OverlayModule } from '@angular/cdk/overlay';
+import { CharacterStateService } from '../../../../core/services/api/character/character-state.service';
 
 interface RewardGroup {
   title: string;
@@ -51,6 +58,7 @@ type DungeonDetailTab = 'rewards' | 'gathering' | 'mastery';
     NgFor,
     NgClass,
     NgTemplateOutlet,
+    DecimalPipe,
     OverlayModule,
     RegularButtonComponent,
     ItemComponent,
@@ -118,6 +126,7 @@ export class DungeonCardComponent implements OnChanges {
 
   constructor(
     readonly dungeonState: DungeonStateService,
+    private readonly characterState: CharacterStateService,
     private readonly router: Router,
   ) {}
 
@@ -152,6 +161,9 @@ export class DungeonCardComponent implements OnChanges {
   togglePreview() {
     this.previewMasteryTooltipOpen.set(false);
     this.selectedMasteryTooltipOpen.set(false);
+    if (!this.showPreview()) {
+      this.characterState.refreshIfDirty();
+    }
     this.showPreview.set(!this.showPreview());
   }
 
@@ -227,10 +239,6 @@ export class DungeonCardComponent implements OnChanges {
 
     if (this.selectedMissingRequirements().length) {
       return 'Cannot enter';
-    }
-
-    if (!this.meetsRecommendedRating()) {
-      return 'Power too low';
     }
 
     return 'Locked';
@@ -340,26 +348,33 @@ export class DungeonCardComponent implements OnChanges {
       return this.selectedMissingRequirements().join(' · ');
     }
 
-    if (!this.meetsRecommendedRating()) {
-      return `Recommended Power ${this.selectedRecommendedCombatRating()}, your Power ${this.selectedCurrentCombatRating()}.`;
-    }
-
     return 'This dungeon difficulty is locked or unavailable.';
   }
 
-  selectedCurrentCombatRating(): number {
-    return this.selectedPreviewData().currentCombatRating ?? 0;
+  selectedPartyPower(): number | null {
+    const power = this.characterState.overview()?.power;
+    return power?.state === 'Available' ? power.overall : null;
   }
 
-  selectedRecommendedCombatRating(): number {
-    return this.selectedPreviewData().recommendedCombatRating ?? 0;
+  selectedRecommendedPartyPower(): number | null {
+    return this.selectedPreviewData().recommendedPartyPower ?? null;
   }
 
-  meetsRecommendedRating(): boolean {
-    return (
-      this.selectedCurrentCombatRating() >=
-      this.selectedRecommendedCombatRating()
-    );
+  recommendationPendingLabel(): string {
+    return this.selectedPreviewData().powerRecommendationUnavailable
+      ? 'Unavailable'
+      : 'Calibrating…';
+  }
+
+  powerComparisonClass(): string {
+    const recommended = this.selectedRecommendedPartyPower();
+    const partyPower = this.selectedPartyPower();
+    if (!recommended || partyPower === null) return 'll-badge-muted';
+    if (this.selectedPreviewData().powerRecommendationLowConfidence)
+      return 'll-badge-warning';
+    return partyPower >= recommended * 0.9
+      ? 'll-badge-accent'
+      : 'll-badge-warning';
   }
 
   entryRequirementClass(requirement: EntryRequirementPreview): string {

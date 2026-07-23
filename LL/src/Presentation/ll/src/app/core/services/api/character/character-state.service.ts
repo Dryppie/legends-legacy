@@ -1,4 +1,4 @@
-import { Injectable, signal, computed, effect } from '@angular/core';
+import { Injectable, signal, computed, effect, untracked } from '@angular/core';
 import { finalize } from 'rxjs';
 import {
   CharacterOverviewDto,
@@ -13,9 +13,13 @@ import { GameEventDeduper } from '../../real-time/game-event/game-event-consumer
 export class CharacterStateService {
   /* ─────────── writable signals ─────────── */
   private readonly _overview = signal<CharacterOverviewDto | null>(null);
+  private readonly _overviewDirty = signal(false);
   private readonly _loading = signal(false);
   private readonly _error = signal<string | null>(null);
   private readonly eventDeduper = new GameEventDeduper();
+  private dirtyVersion = 0;
+  private activeRefreshDirtyVersion: number | null = null;
+  private refreshAfterCurrentRequest = false;
 
   /* ─────────── public, read-only selectors ─────────── */
   /** Current character comes straight from AuthService, no copy needed */
@@ -25,6 +29,7 @@ export class CharacterStateService {
   );
 
   readonly overview = computed(() => this._overview());
+  readonly overviewDirty = computed(() => this._overviewDirty());
   readonly loading = computed(() => this._loading());
   readonly error = computed(() => this._error());
   readonly hasData = computed(() => !!this._overview());
@@ -40,8 +45,11 @@ export class CharacterStateService {
         const id = this.currentCharacterId();
         if (!id) {
           this._overview.set(null);
+          this._overviewDirty.set(false);
+          this.dirtyVersion = 0;
           return;
         }
+        this.markOverviewDirty();
         this.refresh(); // writes _loading, _overview
       },
       { allowSignalWrites: true },
@@ -104,22 +112,68 @@ export class CharacterStateService {
 
   /** Get the latest overview from the backend */
   refresh(): void {
-    if (!this.currentCharacterId()) return; // nothing to load
+    if (!untracked(() => this.currentCharacterId())) return; // nothing to load
+    if (untracked(() => this._loading())) {
+      this.refreshAfterCurrentRequest = true;
+      return;
+    }
 
     this._loading.set(true);
+    this.refreshAfterCurrentRequest = false;
+    const requestDirtyVersion = this.dirtyVersion;
+    this.activeRefreshDirtyVersion = requestDirtyVersion;
 
     this.service
       .getCharacterOverview()
-      .pipe(finalize(() => this._loading.set(false)))
+      .pipe(
+        finalize(() => {
+          this._loading.set(false);
+          this.activeRefreshDirtyVersion = null;
+          if (this.refreshAfterCurrentRequest) {
+            this.refreshAfterCurrentRequest = false;
+            this.refresh();
+          }
+        }),
+      )
       .subscribe({
-        next: (ov) => this._overview.set(ov),
-        error: (e) => this._error.set(e.message ?? 'Failed to load character'),
+        next: (ov) => {
+          this._overview.set(ov);
+          this._error.set(null);
+          if (requestDirtyVersion === this.dirtyVersion) {
+            this._overviewDirty.set(false);
+          }
+        },
+        error: (e) => {
+          this._overviewDirty.set(true);
+          this._error.set(e.message ?? 'Failed to load character');
+        },
       });
+  }
+
+  markOverviewDirty(): void {
+    this.dirtyVersion += 1;
+    this._overviewDirty.set(true);
+  }
+
+  refreshIfDirty(): void {
+    const needsRefresh = untracked(
+      () => this._overviewDirty() || !this._overview(),
+    );
+    if (!needsRefresh) return;
+
+    if (untracked(() => this._loading())) {
+      if (this.activeRefreshDirtyVersion !== this.dirtyVersion) {
+        this.refreshAfterCurrentRequest = true;
+      }
+      return;
+    }
+    this.refresh();
   }
 
   /** Optimistic cache update (optional helper) */
   setOverview(ov: CharacterOverviewDto): void {
     this._overview.set(ov);
+    this._overviewDirty.set(false);
   }
 
   /** Forward the change to AuthService */

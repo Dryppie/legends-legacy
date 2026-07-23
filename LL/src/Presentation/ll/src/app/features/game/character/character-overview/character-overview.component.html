@@ -72,12 +72,21 @@
             </article>
 
             <article
-              class="ll-stat-card ll-card-accent relative overflow-hidden xl:col-span-1"
+              class="ll-stat-card ll-card-accent relative overflow-hidden text-left xl:col-span-1"
+              title="Power is an estimate based on deterministic combat simulations. Matchups and randomness still matter."
             >
               <div class="relative">
                 <div class="ll-stat-label">Combat Rating</div>
                 <div class="ll-heading mt-1 text-3xl leading-none">
-                  {{ characterOverview.combatRating }}
+                  <ng-container
+                    *ngIf="
+                      characterOverview.power?.state === 'Available';
+                      else powerUnavailable
+                    "
+                  >
+                    {{ characterOverview.power?.overall | number }}
+                  </ng-container>
+                  <ng-template #powerUnavailable>Unavailable</ng-template>
                 </div>
               </div>
             </article>

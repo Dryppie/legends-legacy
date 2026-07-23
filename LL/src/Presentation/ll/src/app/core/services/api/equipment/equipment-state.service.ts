@@ -11,6 +11,7 @@ import {
 } from './equipment.service';
 import { InventoryStateService } from '../inventory/inventory-state.service';
 import { EventBusService } from '../../client-side/event-bus/event-bus.service';
+import { CharacterStateService } from '../character/character-state.service';
 
 @Injectable({ providedIn: 'root' })
 export class EquipmentStateService {
@@ -30,6 +31,7 @@ export class EquipmentStateService {
     private readonly equipmentService: EquipmentService,
     private readonly inventoryState: InventoryStateService,
     private readonly eventBus: EventBusService,
+    private readonly characterState: CharacterStateService,
   ) {
     this.load();
 
@@ -115,5 +117,6 @@ export class EquipmentStateService {
   private applyEquipmentChange(response: EquipmentChangeResponse): void {
     this._equipmentSlots.set(response.equipmentSlots);
     this.inventoryState.setInventory(response.inventoryItems);
+    this.characterState.markOverviewDirty();
   }
 }

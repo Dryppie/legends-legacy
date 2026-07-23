@@ -1,4 +1,4 @@
-import { NgFor, NgIf } from '@angular/common';
+import { DecimalPipe, NgFor, NgIf } from '@angular/common';
 import { Component, computed, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { catchError, EMPTY, finalize, skip } from 'rxjs';
@@ -24,6 +24,7 @@ import { ActivatedRoute, Router } from '@angular/router';
     RegularButtonComponent,
     AttributeTypeFormatPipe,
     AttributeValueFormatPipe,
+    DecimalPipe,
   ],
   templateUrl: './character-overview.component.html',
 })
@@ -192,6 +193,7 @@ export class CharacterOverviewComponent {
   }
 
   private showCurrentCharacter(): void {
+    this.characterState.refreshIfDirty();
     this.searchErrorMessage.set('');
     this.searchedCharacter.set(null);
     this.viewedCharacterName.set(

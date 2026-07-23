@@ -25,21 +25,18 @@ public sealed class DungeonAccessPolicy : IDungeonAccessPolicy
     public async Task<DungeonAccessResult> EvaluateAsync(
         Guid characterId,
         DungeonDefinition dungeon,
-        int currentCombatRating,
         CancellationToken cancellationToken)
-        => await EvaluateAsync(characterId, dungeon, currentCombatRating, ignoredEntryCostItemId: null, cancellationToken);
+        => await EvaluateAsync(characterId, dungeon, ignoredEntryCostItemId: null, cancellationToken);
 
     public async Task<DungeonAccessResult> EvaluateForSigilAssemblyAsync(
         Guid characterId,
         DungeonDefinition dungeon,
-        int currentCombatRating,
         CancellationToken cancellationToken) =>
-        await EvaluateAsync(characterId, dungeon, currentCombatRating, dungeon.SigilItemId, cancellationToken);
+        await EvaluateAsync(characterId, dungeon, dungeon.SigilItemId, cancellationToken);
 
     private async Task<DungeonAccessResult> EvaluateAsync(
         Guid characterId,
         DungeonDefinition dungeon,
-        int currentCombatRating,
         string? ignoredEntryCostItemId,
         CancellationToken cancellationToken)
     {
@@ -63,9 +60,7 @@ public sealed class DungeonAccessPolicy : IDungeonAccessPolicy
         return new DungeonAccessResult(
             missingRequirements.Count == 0,
             missingRequirements,
-            entryRequirements,
-            currentCombatRating,
-            dungeon.RecommendedCombatRating);
+            entryRequirements);
     }
 
     private async Task<IReadOnlyList<DungeonEntryRequirementResult>> GetEntryRequirementsAsync(

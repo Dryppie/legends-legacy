@@ -162,7 +162,6 @@ public class CreatureScaler : ICreatureScaler
 
     //private static void ApplyRubberBanding(Creature creature, Area ctx, int effectiveD)
     //{
-    //    var combatRating = ctx.PlayerCombatRating;
     //    var min = ctx.Area.TargetPsMin;
     //    var max = ctx.Area.TargetPsMax;
 

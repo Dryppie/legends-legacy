@@ -3,9 +3,7 @@ namespace Application.Interfaces.Services.LL.Dungeons;
 public sealed record DungeonAccessResult(
     bool CanEnter,
     IReadOnlyList<string> MissingRequirements,
-    IReadOnlyList<DungeonEntryRequirementResult> EntryRequirements,
-    int CurrentCombatRating,
-    int RecommendedCombatRating);
+    IReadOnlyList<DungeonEntryRequirementResult> EntryRequirements);
 
 public sealed record DungeonEntryRequirementResult(
     string ItemId,

@@ -53,7 +53,10 @@ public sealed class FastCombatEngine
         _startActiveAbilitiesOnCooldown = resolved.StartActiveAbilitiesOnCooldown;
     }
 
-    public CombatResult Run(IReadOnlyList<RuntimeCombatant> friendly, IReadOnlyList<RuntimeCombatant> hostile)
+    public CombatResult Run(
+        IReadOnlyList<RuntimeCombatant> friendly,
+        IReadOnlyList<RuntimeCombatant> hostile,
+        CancellationToken cancellationToken = default)
     {
         var combatants = friendly.Concat(hostile).ToList();
         foreach (var combatant in combatants)
@@ -69,6 +72,9 @@ public sealed class FastCombatEngine
                && HasLivingTeam(combatants, CombatTeam.Friendly)
                && HasLivingTeam(combatants, CombatTeam.Hostile))
         {
+            if ((_currentTick & 63) == 0)
+                cancellationToken.ThrowIfCancellationRequested();
+
             foreach (var combatant in combatants.Where(x => x.IsAlive).ToList())
             {
                 if (IsActionBlocked(combatant) || !HasLivingOpponent(combatant, combatants))
@@ -253,6 +259,7 @@ public sealed class FastCombatEngine
                         if (!ability.CanUseTrigger(trigger) || !ConditionsPass(trigger.Conditions, combatant, combatEvent))
                             continue;
 
+                        ability.StartTriggerCooldown(trigger);
                         ExecuteTrigger(
                             trigger,
                             combatant,
@@ -261,7 +268,6 @@ public sealed class FastCombatEngine
                             ability.CanUseEffect,
                             ability.MarkEffectUsed,
                             countStatsActivation: ability.Definition.Kind == AbilitySpecKind.Passive);
-                        ability.StartTriggerCooldown(trigger);
                     }
                 }
             }
@@ -286,6 +292,7 @@ public sealed class FastCombatEngine
                     if (!status.CanUseTrigger(trigger) || !ConditionsPass(trigger.Conditions, status.Source, combatEvent))
                         continue;
 
+                    status.StartTriggerCooldown(trigger);
                     ExecuteTrigger(
                         trigger,
                         status.Source,
@@ -295,7 +302,6 @@ public sealed class FastCombatEngine
                         status.MarkEffectUsed,
                         status.StatsSource,
                         countStatsActivation: false);
-                    status.StartTriggerCooldown(trigger);
                 }
             }
         }
@@ -329,11 +335,10 @@ public sealed class FastCombatEngine
                     continue;
 
                 var countThisActivation = countStatsActivation && !activationCounted;
+                markEffectUsed(effect);
                 ExecuteEffect(effect, source, target, combatants, statsSourceOverride, countThisActivation);
                 if (countThisActivation)
                     activationCounted = true;
-
-                markEffectUsed(effect);
             }
         }
     }

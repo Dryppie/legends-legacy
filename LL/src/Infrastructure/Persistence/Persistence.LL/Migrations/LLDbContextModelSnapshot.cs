@@ -1300,6 +1300,44 @@ namespace Persistence.LL.Migrations
                     b.ToTable("CharacterDungeonMasteries");
                 });
 
+            modelBuilder.Entity("Domain.Models.Dungeons.PowerRatings.DungeonPowerRecommendationCacheEntry", b =>
+                {
+                    b.Property<string>("DungeonId")
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
+
+                    b.Property<int>("AlgorithmVersion")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("BenchmarkDefinitionVersion")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("CombatRulesVersion")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("DungeonContentHash")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
+
+                    b.Property<int>("DungeonTier")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("RecommendationJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<int>("RecommendationSeedSetVersion")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTimeOffset>("UpdatedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("DungeonId");
+
+                    b.ToTable("DungeonPowerRecommendationCacheEntries");
+                });
+
             modelBuilder.Entity("Domain.Models.Dungeons.Runs.DungeonCompletionRecord", b =>
                 {
                     b.Property<Guid>("Id")

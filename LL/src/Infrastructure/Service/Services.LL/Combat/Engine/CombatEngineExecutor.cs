@@ -27,14 +27,66 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
         CombatEncounterRuntime runtime,
         CancellationToken cancellationToken)
     {
+        var execution = await ExecuteCoreAsync(
+            runtime,
+            new CombatSimulationOptions(1337, 6000, StartActiveAbilitiesOnCooldown: true),
+            cancellationToken);
+        SyncCombatEntityState(runtime.FriendlyParticipants, execution.Friendly);
+        SyncCombatEntityState(runtime.HostileParticipants, execution.Hostile);
+        execution.Result.StartedAt = runtime.Plan.StartsAt;
+        return execution.Result;
+    }
+
+    public async Task<CombatResult> ExecuteSimulationAsync(
+        CombatEncounterRuntime runtime,
+        CombatSimulationOptions options,
+        CancellationToken cancellationToken)
+    {
+        var execution = await ExecuteCoreAsync(runtime, options, cancellationToken);
+        PopulatePostCombatTeams(execution.Result, execution.Friendly, execution.Hostile);
+        execution.Result.StartedAt = runtime.Plan.StartsAt;
+        return execution.Result;
+    }
+
+    private static void PopulatePostCombatTeams(
+        CombatResult result,
+        IReadOnlyList<RuntimeCombatant> friendly,
+        IReadOnlyList<RuntimeCombatant> hostile)
+    {
+        result.PlayerTeam = friendly.Select(CreateSimpleCombatEntity).ToList();
+        result.EnemyTeam = hostile.Select(CreateSimpleCombatEntity).ToList();
+    }
+
+    private static SimpleCombatEntity CreateSimpleCombatEntity(RuntimeCombatant combatant) => new()
+    {
+        Id = combatant.Id,
+        Name = combatant.Name,
+        ImagePath = combatant.ImagePath,
+        MaxHealth = (int)combatant.GetAttribute(AttributeType.MaxHealth),
+        Health = (int)combatant.Health,
+        Barrier = (int)combatant.Barrier
+    };
+
+    private Task<ExecutionResult> ExecuteCoreAsync(
+        CombatEncounterRuntime runtime,
+        CombatSimulationOptions options,
+        CancellationToken cancellationToken)
+    {
         cancellationToken.ThrowIfCancellationRequested();
 
         var catalog = _catalogProvider.GetCatalog();
+        var supplementalAbilities = (options.SupplementalAbilities ?? [])
+            .ToDictionary(x => x.Id, StringComparer.OrdinalIgnoreCase);
         var abilityIds = runtime.FriendlyParticipants
             .Concat(runtime.HostileParticipants)
             .SelectMany(participant => GetCombatantAbilityIds(participant.Combatant, catalog))
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
-        var abilitySpecs = SelectAbilitySpecsAndSummons(catalog, abilityIds).ToList();
+        foreach (var supplementalId in runtime.AllCombatants
+                     .SelectMany(x => x.NativeAbilityIds)
+                     .Where(supplementalAbilities.ContainsKey))
+            abilityIds.Add(supplementalId);
+
+        var abilitySpecs = SelectAbilitySpecsAndSummons(catalog, supplementalAbilities, abilityIds).ToList();
         var summonIds = SelectSummonIds(abilitySpecs).ToHashSet(StringComparer.OrdinalIgnoreCase);
         var compiledAbilities = AbilityCompiler.CompileAbilities(abilitySpecs);
         var compiledStatuses = AbilityCompiler.CompileStatuses(catalog.Statuses);
@@ -50,13 +102,13 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
             compiledStatuses,
             compiledSummons,
             compiledAbilities,
-            new FastCombatEngineOptions(StartActiveAbilitiesOnCooldown: true));
-        var result = engine.Run(friendly, hostile);
-        SyncCombatEntityState(runtime.FriendlyParticipants, friendly);
-        SyncCombatEntityState(runtime.HostileParticipants, hostile);
-        result.StartedAt = runtime.Plan.StartsAt;
-
-        return result;
+            new FastCombatEngineOptions(
+                options.MaxTicks,
+                BasicAttackIntervalTicks: options.BasicAttackIntervalTicks,
+                RandomSeed: options.RandomSeed,
+                StartActiveAbilitiesOnCooldown: options.StartActiveAbilitiesOnCooldown));
+        var result = engine.Run(friendly, hostile, cancellationToken);
+        return Task.FromResult(new ExecutionResult(result, friendly, hostile));
     }
 
     private static void SyncCombatEntityState(
@@ -122,8 +174,15 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
 
         foreach (var abilityId in combatant.NativeAbilityIds)
         {
-            if (!selected.Add(abilityId) || !catalog.AbilitiesById.TryGetValue(abilityId, out var baseSpec))
+            if (!selected.Add(abilityId))
                 continue;
+
+            if (!catalog.AbilitiesById.TryGetValue(abilityId, out var baseSpec))
+            {
+                if (compiledAbilities.TryGetValue(abilityId, out var supplemental))
+                    yield return supplemental;
+                continue;
+            }
 
             var modifiedSpec = ApplyTemporaryAbilityModifiers(baseSpec, combatant, catalog);
             yield return ReferenceEquals(baseSpec, modifiedSpec)
@@ -149,6 +208,7 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
 
     private static IEnumerable<AbilitySpec> SelectAbilitySpecsAndSummons(
         AbilityCatalog catalog,
+        IReadOnlyDictionary<string, AbilitySpec> supplementalAbilities,
         IEnumerable<string> initialAbilityIds)
     {
         var selected = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
@@ -159,7 +219,8 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
             if (!selected.Add(abilityId))
                 continue;
 
-            if (!catalog.AbilitiesById.TryGetValue(abilityId, out var ability))
+            if (!catalog.AbilitiesById.TryGetValue(abilityId, out var ability)
+                && !supplementalAbilities.TryGetValue(abilityId, out ability))
                 continue;
             yield return ability;
 
@@ -607,4 +668,9 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
 
         return attributes;
     }
+
+    private sealed record ExecutionResult(
+        CombatResult Result,
+        IReadOnlyList<RuntimeCombatant> Friendly,
+        IReadOnlyList<RuntimeCombatant> Hostile);
 }

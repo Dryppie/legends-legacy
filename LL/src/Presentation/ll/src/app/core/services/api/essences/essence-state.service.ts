@@ -5,6 +5,7 @@ import { TutorialStateService } from '../tutorial/tutorial-state.service';
 import { EssencesService } from './essences.service';
 import { EssenceItemViewService } from './essence-item-view.service';
 import { EventBusService } from '../../client-side/event-bus/event-bus.service';
+import { CharacterStateService } from '../character/character-state.service';
 import { Essence } from '../../../../shared/models/essence';
 import { ItemType } from '../../../../shared/models/enums/itemType';
 import { InventoryItem } from '../../../../shared/models/inventoryItem';
@@ -215,6 +216,7 @@ export class EssenceStateService {
     private readonly essenceItemView: EssenceItemViewService,
     private readonly tutorialState: TutorialStateService,
     private readonly eventBus: EventBusService,
+    private readonly characterState: CharacterStateService,
   ) {
     setInterval(() => this._now.set(Date.now()), 60_000);
 
@@ -487,6 +489,9 @@ export class EssenceStateService {
 
     save.subscribe((loadout) => {
       this._selectedLoadoutId.set(loadout.id);
+      if (loadout.isActive) {
+        this.characterState.markOverviewDirty();
+      }
       this.refresh();
     });
   }
@@ -495,6 +500,7 @@ export class EssenceStateService {
     const id = this._selectedLoadoutId();
     if (!id) return;
     this.essencesService.activateLoadout(id).subscribe(() => {
+      this.characterState.markOverviewDirty();
       this.refresh();
       this.tutorialState.refreshAfterOutboxProgress();
     });
@@ -503,8 +509,12 @@ export class EssenceStateService {
   deleteSelectedLoadout(): void {
     const id = this._selectedLoadoutId();
     if (!id) return;
+    const deletesActiveLoadout = this.selectedLoadout()?.isActive === true;
     this.essencesService.deleteLoadout(id).subscribe(() => {
       this._selectedLoadoutId.set(null);
+      if (deletesActiveLoadout) {
+        this.characterState.markOverviewDirty();
+      }
       this.refresh();
     });
   }
@@ -546,6 +556,7 @@ export class EssenceStateService {
   private applyEssenceMutation(response: EssenceMutationResponseDto): void {
     this._archive.set(response.archive);
     this.inventoryState.setInventory(response.inventoryItems);
+    this.characterState.markOverviewDirty();
     this.ensureSelectedEssence(response.archive);
     this.refreshCompanionArchives();
   }

@@ -13,8 +13,6 @@ import {
   DungeonSimulationOptions,
   DungeonSimulationReport,
   DungeonSimulationRequest,
-  DungeonSimulationCharacter,
-  CombatRatingBreakdown,
 } from '../../../../shared/models/diagnostics/dungeon-simulation';
 
 @Injectable({
@@ -58,12 +56,4 @@ export class DiagnosticsService {
     return this.apiService.post('diagnostics/dungeon-simulation', request);
   }
 
-  public getDungeonSimulationCombatRating(
-    character: DungeonSimulationCharacter,
-  ): Observable<CombatRatingBreakdown> {
-    return this.apiService.post(
-      'diagnostics/dungeon-simulation-combat-rating',
-      character,
-    );
-  }
 }
