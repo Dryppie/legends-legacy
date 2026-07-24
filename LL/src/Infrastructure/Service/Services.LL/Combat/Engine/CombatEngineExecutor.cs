@@ -1,10 +1,13 @@
 using Application.Interfaces.Services.LL.Essences;
+using Application.Interfaces.Services.LL.Professions;
 using Domain.Models.Attributes;
 using Domain.Models.Combat;
 using Domain.Models.Combat.Abilities;
 using Domain.Models.Entities.Characters;
 using Domain.Models.Essences;
 using Domain.Models.Essences.Definitions;
+using Domain.Models.Damages;
+using Domain.Models.Professions.Crafting.V2;
 using Services.LL.Combat.Layers.Resolution.Models;
 using Services.LL.Interfaces.Combat.Resolution;
 
@@ -14,13 +17,16 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
 {
     private readonly IAbilityCatalogProvider _catalogProvider;
     private readonly IEssenceDefinitionRepository? _essenceDefinitions;
+    private readonly ICraftingDefinitionProvider? _craftingDefinitions;
 
     public CombatEngineExecutor(
         IAbilityCatalogProvider catalogProvider,
-        IEssenceDefinitionRepository? essenceDefinitions = null)
+        IEssenceDefinitionRepository? essenceDefinitions = null,
+        ICraftingDefinitionProvider? craftingDefinitions = null)
     {
         _catalogProvider = catalogProvider;
         _essenceDefinitions = essenceDefinitions;
+        _craftingDefinitions = craftingDefinitions;
     }
 
     public async Task<CombatResult> ExecuteAsync(
@@ -133,6 +139,7 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
         IReadOnlyDictionary<string, CompiledAbility> compiledAbilities)
     {
         var abilities = CreateCombatantAbilities(combatant, catalog, compiledAbilities).ToList();
+        var behavior = ResolveBasicAttackBehavior(combatant);
 
         return new RuntimeCombatant(
             combatant.Id,
@@ -142,7 +149,41 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
             abilities,
             combatant.Tags,
             combatant.ImagePath,
-            combatant.IsSummoned);
+            combatant.IsSummoned,
+            basicAttackIntervalMultiplier: behavior.IntervalMultiplier,
+            basicAttackDamageMultiplier: behavior.DamageMultiplier,
+            basicAttackType: behavior.AttackType,
+            basicAttackDamageType: behavior.DamageType);
+    }
+
+    private BasicAttackBehavior ResolveBasicAttackBehavior(CombatEntity combatant)
+    {
+        if (_craftingDefinitions is null || combatant.MainHandEquipment is null)
+            return BasicAttackBehavior.Default;
+        if (string.IsNullOrWhiteSpace(combatant.MainHandEquipment.BaseRecipeId))
+            return BasicAttackBehavior.Default;
+
+        var recipe = _craftingDefinitions.GetRecipe(combatant.MainHandEquipment.BaseRecipeId);
+        var blueprint = string.IsNullOrWhiteSpace(combatant.MainHandEquipment.BlueprintId)
+            ? null
+            : _craftingDefinitions.GetBlueprint(combatant.MainHandEquipment.BlueprintId);
+        if (recipe is null ||
+            (!string.IsNullOrWhiteSpace(combatant.MainHandEquipment.BlueprintId) && blueprint is null))
+            return BasicAttackBehavior.Default;
+        var behavior = EquipmentCraftingDesignComposer.Compose(recipe, blueprint).Behavior;
+
+        var attackType = behavior.RangeCategory.Equals("Ranged", StringComparison.OrdinalIgnoreCase)
+            ? AttackType.Ranged
+            : AttackType.Melee;
+        var damageType = behavior.AttackCategory.Equals("Magical", StringComparison.OrdinalIgnoreCase)
+            ? DamageType.Magical
+            : DamageType.Physical;
+
+        return new BasicAttackBehavior(
+            behavior.BasicAttackIntervalMultiplier,
+            behavior.BasicAttackDamageMultiplier,
+            attackType,
+            damageType);
     }
 
     private IEnumerable<CompiledAbility> CreateCombatantAbilities(
@@ -673,4 +714,14 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
         CombatResult Result,
         IReadOnlyList<RuntimeCombatant> Friendly,
         IReadOnlyList<RuntimeCombatant> Hostile);
+
+    private sealed record BasicAttackBehavior(
+        double IntervalMultiplier,
+        double DamageMultiplier,
+        AttackType AttackType,
+        DamageType DamageType)
+    {
+        public static BasicAttackBehavior Default { get; } =
+            new(1d, 1d, AttackType.Melee, DamageType.Physical);
+    }
 }

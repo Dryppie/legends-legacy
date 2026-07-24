@@ -17,11 +17,7 @@ public class CraftingRequirementResolver : ICraftingRequirementResolver
         int targetTier,
         IReadOnlyList<MaterialRequirementDefinition>? additionalRequirements = null)
     {
-        var baseRequirements = recipe.RecipeType == RecipeType.Variant && recipe.InheritBaseMaterialRequirements
-            ? _definitionProvider.GetRecipe(recipe.BaseRecipeId ?? string.Empty)?.MaterialRequirements ?? []
-            : recipe.MaterialRequirements;
-
-        var requirements = baseRequirements
+        var requirements = recipe.MaterialRequirements
             .Concat(recipe.AdditionalMaterialRequirements)
             .Concat(recipe.SpecialResourceRequirements)
             .Concat(additionalRequirements ?? []);

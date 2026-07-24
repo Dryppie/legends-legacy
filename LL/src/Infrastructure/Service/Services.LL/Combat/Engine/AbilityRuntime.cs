@@ -305,7 +305,11 @@ public sealed class RuntimeCombatant
         string imagePath = "",
         bool isSummoned = false,
         int summonDurationTicks = 0,
-        RuntimeCombatant? summonOwner = null)
+        RuntimeCombatant? summonOwner = null,
+        double basicAttackIntervalMultiplier = 1d,
+        double basicAttackDamageMultiplier = 1d,
+        AttackType basicAttackType = AttackType.Melee,
+        DamageType basicAttackDamageType = DamageType.Physical)
     {
         Id = id;
         Name = name;
@@ -318,6 +322,10 @@ public sealed class RuntimeCombatant
         IsSummoned = isSummoned;
         RemainingSummonDurationTicks = summonDurationTicks;
         SummonOwner = summonOwner;
+        BasicAttackIntervalMultiplier = Math.Max(0.1d, basicAttackIntervalMultiplier);
+        BasicAttackDamageMultiplier = Math.Max(0.1d, basicAttackDamageMultiplier);
+        BasicAttackType = basicAttackType;
+        BasicAttackDamageType = basicAttackDamageType;
         RebuildTriggerIndex();
     }
 
@@ -336,6 +344,10 @@ public sealed class RuntimeCombatant
     public bool IsSummoned { get; }
     public int RemainingSummonDurationTicks { get; private set; }
     public RuntimeCombatant? SummonOwner { get; }
+    public double BasicAttackIntervalMultiplier { get; }
+    public double BasicAttackDamageMultiplier { get; }
+    public AttackType BasicAttackType { get; }
+    public DamageType BasicAttackDamageType { get; }
     public bool IsAlive => Health > 0;
 
     public float GetAttribute(AttributeType attributeType) =>

@@ -2634,7 +2634,6 @@ namespace Persistence.LL.Migrations
                         .HasColumnType("uuid");
 
                     b.Property<string>("RecipeId")
-                        .IsRequired()
                         .HasMaxLength(128)
                         .HasColumnType("character varying(128)");
 
@@ -3536,10 +3535,12 @@ namespace Persistence.LL.Migrations
                         .HasColumnType("text[]");
 
                     b.Property<string>("BaseRecipeId")
-                        .HasColumnType("text");
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
 
                     b.Property<string>("BlueprintId")
-                        .HasColumnType("text");
+                        .HasMaxLength(160)
+                        .HasColumnType("character varying(160)");
 
                     b.Property<string>("CraftedName")
                         .HasColumnType("text");
@@ -3565,18 +3566,17 @@ namespace Persistence.LL.Migrations
                     b.Property<int>("Rarity")
                         .HasColumnType("integer");
 
-                    b.Property<string>("RecipeId")
-                        .HasColumnType("text");
-
-                    b.PrimitiveCollection<List<string>>("SpecialModifiers")
-                        .IsRequired()
-                        .HasColumnType("text[]");
-
                     b.Property<int>("TemperingProgress")
                         .HasColumnType("integer");
 
                     b.Property<int>("Tier")
                         .HasColumnType("integer");
+
+                    b.Property<uint>("Version")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("xid")
+                        .HasColumnName("xmin");
 
                     b.HasDiscriminator().HasValue(0);
                 });

@@ -85,8 +85,7 @@ public sealed class CharacterActionFlowTests
         public Task<TemperingSession> PerformIdleCrafting(CharacterAction characterAction, int actionsToPerform, CancellationToken cancellationToken) => throw new NotSupportedException();
         public Task<bool> RemoveCraftingQueueItemsAsync(Guid characterId, List<Guid> queueItemIds, CancellationToken cancellationToken) => throw new NotSupportedException();
         public Task<Response<IReadOnlyList<CraftingRecipeDto>>> GetCraftingRecipesAsync(Guid characterId, int targetTier, CancellationToken cancellationToken) => throw new NotSupportedException();
-        public Task<Response<IReadOnlyList<BlueprintLearningOptionDto>>> GetBlueprintLearningOptionsAsync(Guid characterId, Guid blueprintItemInstanceId, CancellationToken cancellationToken) => throw new NotSupportedException();
         public Task<Response<LearnBlueprintResult>> LearnBlueprintAsync(Guid characterId, Guid blueprintItemInstanceId, string recipeId, CancellationToken cancellationToken) => throw new NotSupportedException();
-        public Task<Response<CraftItemsResult>> CraftItemsAsync(Guid characterId, string recipeId, string? formId, string? blueprintId, int targetTier, int quantity, CancellationToken cancellationToken) => throw new NotSupportedException();
+        public Task<Response<CraftItemsResult>> CraftItemsAsync(Guid characterId, string recipeId, string? blueprintId, int targetTier, int quantity, CancellationToken cancellationToken) => throw new NotSupportedException();
     }
 }

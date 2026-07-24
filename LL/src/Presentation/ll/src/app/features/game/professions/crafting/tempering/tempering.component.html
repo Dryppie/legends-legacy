@@ -32,8 +32,11 @@
           >
             Queue Tempering
           </button>
-          <span *ngIf="!canTemper()" class="ml-2 text-rose-500">
-            Not enough Potential
+          <span
+            *ngIf="selectedIneligibilityReason() as reason"
+            class="ml-2 text-rose-500"
+          >
+            {{ reason }}
           </span>
         </div>
       </ng-container>
@@ -176,9 +179,31 @@
       >
         <app-item [item]="item.itemInstance"></app-item>
       </div>
+      <p
+        *ngIf="unavailableEquipmentCount()"
+        class="px-1 pt-1 text-xs text-secondary"
+      >
+        {{ unavailableEquipmentCount() }} other equipment
+        {{ unavailableEquipmentCount() === 1 ? "item is" : "items are" }}
+        unavailable because it has no Potential, has reached Legacy rarity, or
+        predates the current recipe system.
+      </p>
     </ng-container>
     <ng-template #noItemsToTemper>
-      <p class="ll-empty-state mt-4">You have no available items to temper.</p>
+      <p
+        *ngIf="equipmentInventory().length; else noEquipment"
+        class="ll-empty-state mt-4"
+      >
+        Your {{ equipmentInventory().length }} equipment
+        {{ equipmentInventory().length === 1 ? "item is" : "items are" }}
+        currently unavailable. Tempering requires remaining Potential and a
+        current base recipe, and cannot be applied beyond Legacy rarity.
+      </p>
+      <ng-template #noEquipment>
+        <p class="ll-empty-state mt-4">
+          You have no equipment in your inventory to temper.
+        </p>
+      </ng-template>
     </ng-template>
   </div>
 </div>

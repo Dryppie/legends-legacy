@@ -1,5 +1,6 @@
 using Domain.Models.Attributes;
 using Domain.Models.Items.Equipments;
+using Domain.Models.Professions.Crafting;
 
 namespace Domain.Models.Professions.Crafting.V2;
 
@@ -7,24 +8,23 @@ public sealed class CraftingRecipeDefinition
 {
     public string Id { get; init; } = string.Empty;
     public string Name { get; init; } = string.Empty;
-    public RecipeType RecipeType { get; init; } = RecipeType.Base;
-    public string? BaseRecipeId { get; init; }
+    public string Description { get; init; } = string.Empty;
+    public string Icon { get; init; } = string.Empty;
+    public CraftType Category { get; init; }
     public string? RecipeFamily { get; init; }
     public EquipmentType? Slot { get; init; }
     public string OutputItemId { get; init; } = string.Empty;
     public EquipmentType OutputItemType { get; init; }
+    public bool Enabled { get; init; } = true;
     public TierRangeDefinition TierRange { get; init; } = new();
-    public IReadOnlyList<CraftingRecipeFormDefinition> Forms { get; init; } = [];
-    public bool InheritBaseMaterialRequirements { get; init; } = true;
     public IReadOnlyList<MaterialRequirementDefinition> MaterialRequirements { get; init; } = [];
     public IReadOnlyList<MaterialRequirementDefinition> AdditionalMaterialRequirements { get; init; } = [];
     public IReadOnlyList<MaterialRequirementDefinition> SpecialResourceRequirements { get; init; } = [];
-    public IReadOnlyDictionary<AttributeType, double> BaseStatProfile { get; init; } = new Dictionary<AttributeType, double>();
-    public IReadOnlyDictionary<AttributeType, double>? BaseStatProfileOverride { get; init; }
     public IReadOnlyList<string> AffinityTags { get; init; } = [];
-    public IReadOnlyList<string> DefaultTemperingTags { get; init; } = [];
     public IReadOnlyList<string> Tags { get; init; } = [];
-    public string? OutputNameTemplate { get; init; }
-    public string? BlueprintId { get; init; }
-    public TemperingProfileDefinition? TemperingProfile { get; init; }
+    public int MinimumProfessionLevel { get; init; }
+    public EquipmentBehaviorDefinition Behavior { get; init; } = new();
+    public IReadOnlyDictionary<AttributeType, double> InitialStatProfile { get; init; } =
+        new Dictionary<AttributeType, double>();
+    public TemperingProfileDefinition TemperingProfile { get; init; } = new();
 }

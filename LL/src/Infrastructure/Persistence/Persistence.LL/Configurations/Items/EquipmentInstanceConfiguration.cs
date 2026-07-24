@@ -7,6 +7,10 @@ public class EquipmentInstanceConfiguration : ItemInstanceConfiguration, IEntity
 {
     public void Configure(EntityTypeBuilder<EquipmentInstance> b)
     {
+        b.Property(e => e.BaseRecipeId).HasMaxLength(128);
+        b.Property(e => e.BlueprintId).HasMaxLength(160);
+        b.Property(e => e.Version).IsRowVersion();
+
         // If you keep it as a separate entity (not owned):
         b.HasMany(e => e.InstanceModifiers)
          .WithOne()

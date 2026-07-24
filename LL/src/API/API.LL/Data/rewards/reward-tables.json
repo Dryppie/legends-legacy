@@ -82,6 +82,8 @@
           "noDropWeight": 75.25,
           "entries": [
             { "id": "blueprint_fury", "type": "Item", "itemId": "blueprint_fury", "weight": 10 },
+            { "id": "blueprint_arcane", "type": "Item", "itemId": "blueprint_arcane", "weight": 5 },
+            { "id": "blueprint_execution", "type": "Item", "itemId": "blueprint_execution", "weight": 5 },
             { "id": "pickaxe", "type": "Item", "itemId": "pickaxe", "weight": 8 },
             { "id": "fishing_rod", "type": "Item", "itemId": "fishing_rod", "weight": 5 },
             { "id": "rare_pickaxe", "type": "Item", "itemId": "rare_pickaxe", "weight": 1, "tags": [ "rare", "tool" ] },
@@ -136,6 +138,10 @@
           "type": "WeightedWithNoDrop",
           "noDropWeight": 86.25,
           "entries": [
+            { "id": "blueprint_aegis", "type": "Item", "itemId": "blueprint_aegis", "weight": 4 },
+            { "id": "blueprint_endurance", "type": "Item", "itemId": "blueprint_endurance", "weight": 4 },
+            { "id": "blueprint_phoenix", "type": "Item", "itemId": "blueprint_phoenix", "weight": 4 },
+            { "id": "blueprint_spirit", "type": "Item", "itemId": "blueprint_spirit", "weight": 4 },
             { "id": "skinning_knife", "type": "Item", "itemId": "skinning_knife", "weight": 8 },
             { "id": "fishing_rod", "type": "Item", "itemId": "fishing_rod", "weight": 4 },
             { "id": "rare_skinning_knife", "type": "Item", "itemId": "rare_skinning_knife", "weight": 1, "tags": [ "rare", "tool" ] },
@@ -190,6 +196,10 @@
           "type": "WeightedWithNoDrop",
           "noDropWeight": 85.25,
           "entries": [
+            { "id": "blueprint_warden", "type": "Item", "itemId": "blueprint_warden", "weight": 4 },
+            { "id": "blueprint_primal", "type": "Item", "itemId": "blueprint_primal", "weight": 4 },
+            { "id": "blueprint_venom", "type": "Item", "itemId": "blueprint_venom_touched_sword", "weight": 4 },
+            { "id": "blueprint_hive", "type": "Item", "itemId": "blueprint_hivefang_dagger", "weight": 4 },
             { "id": "woodcutting_hatchet", "type": "Item", "itemId": "woodcutting_hatchet", "weight": 8 },
             { "id": "skinning_knife", "type": "Item", "itemId": "skinning_knife", "weight": 5 },
             { "id": "rare_hatchet", "type": "Item", "itemId": "rare_hatchet", "weight": 1, "tags": [ "rare", "tool" ] },

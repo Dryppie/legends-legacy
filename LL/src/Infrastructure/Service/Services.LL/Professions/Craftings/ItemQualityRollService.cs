@@ -30,6 +30,19 @@ public class ItemQualityRollService : IItemQualityRollService
         return ItemQuality.Masterwork;
     }
 
+    public IReadOnlyDictionary<ItemQuality, double> GetQualityChances(int masteryLevel)
+    {
+        var odds = ResolveOdds(Math.Clamp(masteryLevel, 0, 100));
+        return new Dictionary<ItemQuality, double>
+        {
+            [ItemQuality.Crude] = odds.Crude,
+            [ItemQuality.Standard] = odds.Standard,
+            [ItemQuality.Fine] = odds.Fine,
+            [ItemQuality.Exceptional] = odds.Exceptional,
+            [ItemQuality.Masterwork] = odds.Masterwork
+        };
+    }
+
     private static QualityOdds ResolveOdds(int masteryLevel)
     {
         var lower = OddsByMastery[0];

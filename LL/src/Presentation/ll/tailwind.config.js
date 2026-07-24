@@ -35,7 +35,7 @@ module.exports = {
         light_gray: "#6D6D6D",
         danger: "#ff7782",
         success: "#41f1b6",
-        warning: "ffbb55",
+        warning: "#ffbb55",
         white: "#fff",
         info_dark: "#7d8da1",
         info_light: "#dce1eb",

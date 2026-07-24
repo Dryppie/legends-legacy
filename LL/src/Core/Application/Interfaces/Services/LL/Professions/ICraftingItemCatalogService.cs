@@ -5,4 +5,7 @@ namespace Application.Interfaces.Services.LL.Professions;
 public interface ICraftingItemCatalogService
 {
     Task<EquipmentBase?> GetCraftableEquipmentBaseAsync(string itemBaseId, CancellationToken cancellationToken);
+    Task<IReadOnlyDictionary<string, EquipmentBase>> GetCraftableEquipmentBasesAsync(
+        IReadOnlyCollection<string> itemBaseIds,
+        CancellationToken cancellationToken);
 }

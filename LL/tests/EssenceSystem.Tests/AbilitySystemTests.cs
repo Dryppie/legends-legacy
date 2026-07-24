@@ -168,6 +168,40 @@ public sealed class AbilitySystemTests
     }
 
     [Fact]
+    public void Engine_applies_recipe_variant_basic_attack_behavior()
+    {
+        var variantWeapon = new RuntimeCombatant(
+            "variant-weapon",
+            "Variant Weapon",
+            CombatTeam.Friendly,
+            new Dictionary<AttributeType, float>
+            {
+                [AttributeType.MaxHealth] = 500,
+                [AttributeType.Power] = 100
+            },
+            [],
+            basicAttackIntervalMultiplier: 0.5d,
+            basicAttackDamageMultiplier: 2d,
+            basicAttackType: AttackType.Ranged,
+            basicAttackDamageType: DamageType.Magical);
+        var baseline = CreateCombatant("baseline", CombatTeam.Hostile, []);
+        var engine = new FastCombatEngine(
+            new Dictionary<string, CompiledStatus>(),
+            new FastCombatEngineOptions(MaxTicks: 61, BasicAttackIntervalTicks: 30));
+
+        var result = engine.Run([variantWeapon], [baseline]);
+
+        Assert.Equal(4, CountBasicAttacks(result, variantWeapon.Id));
+        Assert.Equal(2, CountBasicAttacks(result, baseline.Id));
+        Assert.All(
+            result.EventLog.Where(log =>
+                log.ActorId == variantWeapon.Id &&
+                log.Source == "Basic Attack" &&
+                log.EventType == EventType.Damage),
+            log => Assert.Equal(22, log.Magnitude));
+    }
+
+    [Fact]
     public void Engine_attack_speed_decreases_basic_attack_cadence()
     {
         var slowed = CreateCombatant("slowed", CombatTeam.Friendly, []);

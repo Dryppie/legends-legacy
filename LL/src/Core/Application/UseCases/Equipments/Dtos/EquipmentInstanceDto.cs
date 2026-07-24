@@ -12,9 +12,9 @@ public class EquipmentInstanceDto : ItemInstanceDto, IMapFrom<EquipmentInstance>
     public string DisplayName { get; set; } = string.Empty;
     public Rarity Rarity { get; set; } = Rarity.Common;
     public ItemQuality Quality { get; set; } = ItemQuality.Standard;
-    public string? RecipeId { get; set; }
     public string? BaseRecipeId { get; set; }
     public string? BlueprintId { get; set; }
+    public EquipmentCraftingDesignMetadataDto? CraftingDesign { get; set; }
     public string? CraftedName { get; set; }
     public int Tier { get; set; } = 1;
     public int? Potential { get; set; } = null;
@@ -28,9 +28,11 @@ public class EquipmentInstanceDto : ItemInstanceDto, IMapFrom<EquipmentInstance>
     public List<ToolBonusModifier> ToolAffixes { get; set; } = [];
     public IReadOnlyList<ToolBonusModifier> EffectiveToolBonuses { get; set; } = [];
     public List<string> AffinityTags { get; set; } = [];
-    public List<string> SpecialModifiers { get; set; } = [];
     public void Mapping(Profile profile)
     {
-        profile.CreateMap<EquipmentInstance, EquipmentInstanceDto>();
+        profile.CreateMap<EquipmentInstance, EquipmentInstanceDto>()
+            .ForMember(
+                destination => destination.CraftingDesign,
+                options => options.MapFrom<EquipmentCraftingDesignMetadataResolver>());
     }
 }

@@ -3,7 +3,6 @@ using Application.Interfaces.Services.LL.Prophecies;
 using Application.Interfaces.Services.LL.Guilds;
 using Application.Interfaces.Outbox;
 using Application.Interfaces.Services.LL.Professions;
-using Application.UseCases.Crafting;
 using Application.UseCases.Crafting.Dtos;
 using Application.UseCases.Outbox;
 using Application.UseCases.Prophecies.Events;
@@ -178,54 +177,36 @@ public class CraftingService : ICraftingService
 
     public async Task<Response<IReadOnlyList<CraftingRecipeDto>>> GetCraftingRecipesAsync(Guid characterId, int targetTier, CancellationToken cancellationToken)
     {
-        var unlocked = await _progressionService.GetUnlockedRecipeIdsAsync(characterId, cancellationToken);
-        var unlockedBlueprintsByRecipe = await _progressionService.GetUnlockedBlueprintIdsByRecipeIdAsync(characterId, cancellationToken);
+        var blueprintUnlocks = await _progressionService.GetBlueprintUnlocksAsync(characterId, cancellationToken);
         var masteries = await _progressionService.GetRecipeMasteryLevelsAsync(characterId, cancellationToken);
         var ownedByItemId = await GetOwnedItemQuantitiesAsync(characterId, cancellationToken);
+        var recipeDefinitions = _definitions.GetRecipes();
+        var itemBases = await _itemCatalogService.GetCraftableEquipmentBasesAsync(
+            recipeDefinitions
+                .Where(recipe => recipe.Enabled)
+                .Select(recipe => recipe.OutputItemId)
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList(),
+            cancellationToken);
+        var craftingLevel = await _professionService.GetProfessionLevelAsync(
+            characterId,
+            ProfessionType.Crafting,
+            cancellationToken);
 
-        var recipes = _definitions.GetRecipes()
-            .Where(x => x.RecipeType == RecipeType.Base || unlocked.Contains(x.Id))
+        var recipes = recipeDefinitions
             .Select(recipe => ToRecipeDto(
                 recipe,
                 targetTier,
                 masteries.GetValueOrDefault(recipe.Id),
                 ownedByItemId,
-                unlockedBlueprintsByRecipe))
-            .OrderBy(x => x.BaseRecipeId)
-            .ThenBy(x => x.RecipeType)
+                GetUnlockedBlueprintIdsForRecipe(blueprintUnlocks, recipe.Id),
+                itemBases,
+                craftingLevel))
+            .OrderBy(x => x.Category)
             .ThenBy(x => x.Name)
             .ToList();
 
         return Response<IReadOnlyList<CraftingRecipeDto>>.Success(recipes);
-    }
-
-    public async Task<Response<IReadOnlyList<BlueprintLearningOptionDto>>> GetBlueprintLearningOptionsAsync(
-        Guid characterId,
-        Guid blueprintItemInstanceId,
-        CancellationToken cancellationToken)
-    {
-        var inventory = await _inventoryService.GetInventoryByIdAsync(characterId, cancellationToken);
-        var inventoryItem = inventory?.InventoryItems.FirstOrDefault(x => x.ItemInstanceId == blueprintItemInstanceId);
-        if (inventoryItem == null) return Response<IReadOnlyList<BlueprintLearningOptionDto>>.Fail("Blueprint item was not found.");
-
-        var blueprint = _definitions.GetBlueprintByItemId(inventoryItem.ItemInstance.ItemBaseId);
-        if (blueprint == null) return Response<IReadOnlyList<BlueprintLearningOptionDto>>.Fail("Item is not a learnable blueprint.");
-
-        var usesCompatibilityUnlock = UsesCompatibilityUnlock(blueprint);
-        var unlockedRecipeIds = await _progressionService.GetUnlockedRecipeIdsAsync(characterId, cancellationToken);
-        var unlockedBlueprintsByRecipe = await _progressionService.GetUnlockedBlueprintIdsByRecipeIdAsync(characterId, cancellationToken);
-
-        var options = _definitions.GetRecipes()
-            .Where(recipe => usesCompatibilityUnlock
-                ? recipe.RecipeType == RecipeType.Base
-                : recipe.Id.Equals(blueprint.UnlocksRecipeId, StringComparison.OrdinalIgnoreCase))
-            .Select(recipe => TryCreateBlueprintLearningOption(recipe, blueprint, usesCompatibilityUnlock, unlockedRecipeIds, unlockedBlueprintsByRecipe))
-            .Where(option => option != null)
-            .Select(option => option!)
-            .OrderBy(option => option.RecipeName)
-            .ToList();
-
-        return Response<IReadOnlyList<BlueprintLearningOptionDto>>.Success(options);
     }
 
     public async Task<Response<LearnBlueprintResult>> LearnBlueprintAsync(
@@ -239,26 +220,39 @@ public class CraftingService : ICraftingService
         if (inventoryItem == null) return Response<LearnBlueprintResult>.Fail("Blueprint item was not found.");
 
         var blueprint = _definitions.GetBlueprintByItemId(inventoryItem.ItemInstance.ItemBaseId);
-        if (blueprint == null) return Response<LearnBlueprintResult>.Fail("Item is not a learnable blueprint.");
+        if (blueprint is not { Enabled: true })
+            return Response<LearnBlueprintResult>.Fail("Item is not a learnable Blueprint.");
 
-        var usesCompatibilityUnlock = UsesCompatibilityUnlock(blueprint);
-        var requestedRecipeId = recipeId.Trim();
-        var unlockRecipeId = usesCompatibilityUnlock ? requestedRecipeId : blueprint.UnlocksRecipeId;
-        if (string.IsNullOrWhiteSpace(unlockRecipeId))
-            return Response<LearnBlueprintResult>.Fail("Select a recipe for this blueprint.");
+        var recipe = _definitions.GetRecipe(recipeId);
+        if (recipe is not { Enabled: true })
+            return Response<LearnBlueprintResult>.Fail("Recipe does not exist.");
+        if (!EquipmentCraftingDesignComposer.IsCompatible(recipe, blueprint))
+            return Response<LearnBlueprintResult>.Fail("Blueprint is not compatible with the selected recipe.");
 
-        var recipe = _definitions.GetRecipe(unlockRecipeId);
-        if (recipe == null) return Response<LearnBlueprintResult>.Fail("Blueprint unlock target does not exist.");
+        if (await _progressionService.HasBlueprintUnlockAsync(
+                characterId,
+                recipe.Id,
+                blueprint.Id,
+                cancellationToken))
+        {
+            return Response<LearnBlueprintResult>.Fail(
+                $"Blueprint is already learned for {recipe.Name}.");
+        }
 
-        var validationError = ValidateBlueprintUnlockTarget(blueprint, recipe, requestedRecipeId, usesCompatibilityUnlock);
-        if (validationError != null) return Response<LearnBlueprintResult>.Fail(validationError);
+        if (!await _inventoryService.TryConsumeInventoryItemAsync(characterId, blueprintItemInstanceId, cancellationToken))
+            return Response<LearnBlueprintResult>.Fail("Blueprint item could not be consumed.");
 
-        var unlocked = usesCompatibilityUnlock
-            ? await _progressionService.TryUnlockBlueprintForRecipeAsync(characterId, recipe.Id, blueprint.Id, cancellationToken)
-            : await _progressionService.TryUnlockRecipeAsync(characterId, recipe.Id, blueprint.Id, cancellationToken);
-        if (!unlocked) return Response<LearnBlueprintResult>.Fail("Blueprint is already known for this recipe.");
+        var unlocked = await _progressionService.TryUnlockBlueprintAsync(
+            characterId,
+            recipe.Id,
+            blueprint.Id,
+            cancellationToken);
+        if (!unlocked)
+        {
+            throw new InvalidOperationException(
+                $"Concurrent Blueprint learning detected for Blueprint '{blueprint.Id}' and recipe '{recipe.Id}'.");
+        }
 
-        await _inventoryService.TryConsumeInventoryItemAsync(characterId, blueprintItemInstanceId, cancellationToken);
         await _outbox.EnqueueAsync(
             GameEventTypes.BlueprintUnlocked,
             new BlueprintUnlockedPayload(characterId),
@@ -266,13 +260,16 @@ public class CraftingService : ICraftingService
             null,
             cancellationToken);
 
-        return Response<LearnBlueprintResult>.Success(new LearnBlueprintResult(blueprint.Id, recipe.Id, recipe.Name));
+        return Response<LearnBlueprintResult>.Success(new LearnBlueprintResult(
+            blueprint.Id,
+            blueprint.Name,
+            recipe.Id,
+            recipe.Name));
     }
 
     public async Task<Response<CraftItemsResult>> CraftItemsAsync(
         Guid characterId,
         string recipeId,
-        string? formId,
         string? blueprintId,
         int targetTier,
         int quantity,
@@ -280,32 +277,49 @@ public class CraftingService : ICraftingService
     {
         var craftQuantity = Math.Clamp(quantity, 1, 100);
         var recipe = _definitions.GetRecipe(recipeId);
-        if (recipe == null) return Response<CraftItemsResult>.Fail("Recipe does not exist.");
-        if (targetTier < recipe.TierRange.Min || targetTier > recipe.TierRange.Max)
-            return Response<CraftItemsResult>.Fail("Recipe cannot be crafted at the selected tier.");
+        if (recipe is not { Enabled: true })
+            return Response<CraftItemsResult>.Fail("Recipe does not exist.");
 
-        if (recipe.RecipeType == RecipeType.Variant)
+        BlueprintDefinition? blueprint = null;
+        if (!string.IsNullOrWhiteSpace(blueprintId))
         {
-            var hasUnlock = await _progressionService.HasRecipeUnlockAsync(characterId, recipe.Id, cancellationToken);
-            if (!hasUnlock) return Response<CraftItemsResult>.Fail("Recipe variant is locked.");
+            blueprint = _definitions.GetBlueprint(blueprintId);
+            if (blueprint is not { Enabled: true })
+                return Response<CraftItemsResult>.Fail("Blueprint does not exist.");
+            if (!EquipmentCraftingDesignComposer.IsCompatible(recipe, blueprint))
+                return Response<CraftItemsResult>.Fail("Blueprint is not compatible with the selected recipe.");
+
+            var hasUnlock = await _progressionService.HasBlueprintUnlockAsync(
+                characterId,
+                recipe.Id,
+                blueprint.Id,
+                cancellationToken);
+            if (!hasUnlock)
+                return Response<CraftItemsResult>.Fail("Blueprint is locked.");
         }
 
-        var form = ResolveForm(recipe, formId);
-        if (recipe.Forms.Count > 0 && form == null)
-            return Response<CraftItemsResult>.Fail("Recipe form does not exist.");
+        var design = EquipmentCraftingDesignComposer.Compose(recipe, blueprint);
 
-        var blueprint = await ResolveCraftingBlueprintAsync(characterId, recipe, form, blueprintId, cancellationToken);
-        if (blueprint.Error != null) return Response<CraftItemsResult>.Fail(blueprint.Error);
-
-        var outputItemId = form?.OutputItemId ?? recipe.OutputItemId;
-        var itemBase = await _itemCatalogService.GetCraftableEquipmentBaseAsync(outputItemId, cancellationToken);
+        if (targetTier < recipe.TierRange.Min || targetTier > recipe.TierRange.Max)
+            return Response<CraftItemsResult>.Fail("Recipe cannot be crafted at the selected tier.");
+        var itemBase = await _itemCatalogService.GetCraftableEquipmentBaseAsync(recipe.OutputItemId, cancellationToken);
         if (itemBase == null) return Response<CraftItemsResult>.Fail("Recipe output item does not exist.");
         if (itemBase.EquipmentType == EquipmentType.Tool) return Response<CraftItemsResult>.Fail("Tools cannot be crafted.");
+        if (itemBase.EquipmentType != recipe.OutputItemType)
+            return Response<CraftItemsResult>.Fail("Recipe output slot is invalid.");
+
         var professionType = ResolveCraftingProfession(itemBase.EquipmentType);
         if (professionType == ProfessionType.None)
             return Response<CraftItemsResult>.Fail("Recipe output does not map to a crafting profession.");
 
-        var resolvedCosts = _requirementResolver.ResolveCosts(recipe, targetTier, blueprint.Value?.SpecialResourceRequirements);
+        var craftingLevel = await _professionService.GetProfessionLevelAsync(characterId, professionType, cancellationToken);
+        if (craftingLevel < recipe.MinimumProfessionLevel)
+            return Response<CraftItemsResult>.Fail($"Crafting level {recipe.MinimumProfessionLevel} is required.");
+
+        var resolvedCosts = _requirementResolver.ResolveCosts(
+            recipe,
+            targetTier,
+            design.AdditionalMaterialRequirements);
         var tierValidationError = ValidateTierDefiningMaterialCosts(resolvedCosts, targetTier);
         if (tierValidationError != null) return Response<CraftItemsResult>.Fail(tierValidationError);
 
@@ -320,7 +334,6 @@ public class CraftingService : ICraftingService
         if (!removedMaterials) return Response<CraftItemsResult>.Fail("Not enough materials.");
 
         var mastery = await _progressionService.GetOrCreateRecipeMasteryAsync(characterId, recipe.Id, cancellationToken);
-        var craftingLevel = await _professionService.GetProfessionLevelAsync(characterId, professionType, cancellationToken);
         var rng = Random.Shared;
         var created = new List<InventoryItem>();
         var qualityCounts = new Dictionary<ItemQuality, int>();
@@ -336,21 +349,17 @@ public class CraftingService : ICraftingService
                 Id = Guid.NewGuid(),
                 ItemBaseId = itemBase.Id,
                 ItemBase = itemBase,
-                RecipeId = recipe.Id,
-                BaseRecipeId = recipe.BaseRecipeId ?? recipe.Id,
-                BlueprintId = blueprint.Value?.Id,
-                CraftedName = blueprint.Value == null
-                    ? null
-                    : CraftingBlueprintRules.ResolveOutputName(blueprint.Value, recipe, form, itemBase.Name),
+                BaseRecipeId = recipe.Id,
+                BlueprintId = blueprint?.Id,
+                CraftedName = design.Name,
                 Tier = targetTier,
                 Rarity = Rarity.Common,
                 Quality = quality,
                 Potential = potential,
                 MaxPotential = potential,
                 TemperingProgress = 0,
-                AffinityTags = [.. recipe.AffinityTags.Concat(form?.Tags ?? []).Concat(blueprint.Value?.Tags ?? [])],
-                SpecialModifiers = [],
-                InstanceModifiers = [.. _statRollService.RollBaseStats(itemBase, recipe, targetTier, quality, rng)]
+                AffinityTags = [.. design.Tags],
+                InstanceModifiers = [.. _statRollService.RollBaseStats(itemBase, design, targetTier, quality, rng)]
             };
 
             created.Add(new InventoryItem
@@ -392,6 +401,7 @@ public class CraftingService : ICraftingService
 
         return Response<CraftItemsResult>.Success(new CraftItemsResult(
             recipe.Id,
+            blueprint?.Id,
             targetTier,
             created,
             qualityCounts,
@@ -504,52 +514,192 @@ public class CraftingService : ICraftingService
             ?? new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
     }
 
+    private static IReadOnlySet<string> GetUnlockedBlueprintIdsForRecipe(
+        IReadOnlyList<CharacterRecipeUnlock> unlocks,
+        string recipeId) =>
+        unlocks
+            .Where(unlock =>
+                unlock.RecipeId == null ||
+                unlock.RecipeId.Equals(recipeId, StringComparison.OrdinalIgnoreCase))
+            .Select(unlock => unlock.BlueprintId)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
     private CraftingRecipeDto ToRecipeDto(
         CraftingRecipeDefinition recipe,
         int targetTier,
         int masteryLevel,
         IReadOnlyDictionary<string, int> ownedByItemId,
-        IReadOnlyDictionary<string, IReadOnlySet<string>> unlockedBlueprintsByRecipe)
+        IReadOnlySet<string> unlockedBlueprintIds,
+        IReadOnlyDictionary<string, EquipmentBase> itemBases,
+        int craftingLevel)
     {
         var tier = Math.Clamp(targetTier, recipe.TierRange.Min, recipe.TierRange.Max);
         var costs = MapMaterialCosts(_requirementResolver.ResolveCosts(recipe, tier), ownedByItemId);
-        var blueprintOptions = _definitions.GetBlueprints()
-            .Where(blueprint =>
-                unlockedBlueprintsByRecipe.TryGetValue(recipe.Id, out var blueprintIds) &&
-                blueprintIds.Contains(blueprint.Id))
-            .Select(blueprint => ToBlueprintOption(recipe, blueprint, tier, ownedByItemId))
-            .Where(option => option != null)
-            .Select(option => option!)
-            .OrderBy(option => option.Name)
-            .ToList();
+        itemBases.TryGetValue(recipe.OutputItemId, out var itemBase);
+        var baseDesign = EquipmentCraftingDesignComposer.Compose(recipe, null);
+        var blueprints = _definitions.GetBlueprints()
+            .Where(blueprint => EquipmentCraftingDesignComposer.IsCompatible(recipe, blueprint))
+            .OrderBy(blueprint => blueprint.Name)
+            .Select(blueprint =>
+            {
+                var design = EquipmentCraftingDesignComposer.Compose(recipe, blueprint);
+                var (primary, secondary, summary) = DescribeTemperingProfile(design.TemperingProfile);
+                var blueprintCosts = MapMaterialCosts(
+                    _requirementResolver.ResolveCosts(recipe, tier, design.AdditionalMaterialRequirements),
+                    ownedByItemId);
 
-        return _mapper.Map<CraftingRecipeDto>(recipe, opt =>
+                return new CraftingBlueprintDto
+                {
+                    Id = blueprint.Id,
+                    ItemId = blueprint.ItemId,
+                    Name = blueprint.Name,
+                    Description = blueprint.Description,
+                    CraftedItemName = design.Name,
+                    IsLearned = unlockedBlueprintIds.Contains(blueprint.Id),
+                    SourceType = blueprint.SourceType,
+                    SourceId = blueprint.SourceId,
+                    Behavior = design.Behavior,
+                    InitialStatProfile = design.InitialStatProfile,
+                    BlueprintStatProfile = blueprint.StatProfile,
+                    StatProfileInfluence = blueprint.StatProfileInfluence,
+                    PrimaryTemperingStats = primary,
+                    SecondaryTemperingStats = secondary,
+                    TemperingProfileSummary = summary,
+                    Tags = design.Tags,
+                    MaterialCosts = blueprintCosts,
+                    ItemPreview = itemBase == null
+                        ? null
+                        : BuildItemPreview(
+                            itemBase,
+                            design,
+                            tier,
+                            masteryLevel,
+                            craftingLevel)
+                };
+            })
+            .ToList();
+        var (basePrimary, baseSecondary, baseSummary) = DescribeTemperingProfile(baseDesign.TemperingProfile);
+
+        return new CraftingRecipeDto
         {
-            opt.Items["CurrentMasteryLevel"] = masteryLevel;
-            opt.Items["Blueprints"] = blueprintOptions;
-            opt.Items["MaterialCosts"] = costs;
-        });
+            Id = recipe.Id,
+            Name = recipe.Name,
+            Description = recipe.Description,
+            Icon = recipe.Icon,
+            Category = recipe.Category,
+            OutputItemId = recipe.OutputItemId,
+            OutputItemType = recipe.OutputItemType,
+            MinTier = recipe.TierRange.Min,
+            MaxTier = recipe.TierRange.Max,
+            CurrentMasteryLevel = masteryLevel,
+            MinimumProfessionLevel = recipe.MinimumProfessionLevel,
+            Behavior = baseDesign.Behavior,
+            InitialStatProfile = baseDesign.InitialStatProfile,
+            PrimaryTemperingStats = basePrimary,
+            SecondaryTemperingStats = baseSecondary,
+            TemperingProfileSummary = baseSummary,
+            AffinityTags = recipe.AffinityTags,
+            Tags = baseDesign.Tags,
+            MaterialCosts = costs,
+            ItemPreview = itemBase == null
+                ? null
+                : BuildItemPreview(itemBase, baseDesign, tier, masteryLevel, craftingLevel),
+            Blueprints = blueprints
+        };
     }
 
-    private CraftingBlueprintOptionDto? ToBlueprintOption(
-        CraftingRecipeDefinition recipe,
-        BlueprintDefinition blueprint,
+    private CraftingItemPreviewDto BuildItemPreview(
+        EquipmentBase itemBase,
+        EquipmentCraftingDesign design,
         int tier,
-        IReadOnlyDictionary<string, int> ownedByItemId)
+        int masteryLevel,
+        int craftingLevel)
     {
-        var compatibleFormIds = CraftingBlueprintRules.GetCompatibleFormIds(blueprint, recipe);
-        var compatibleWithoutForms = recipe.Forms.Count == 0 && CraftingBlueprintRules.IsCompatible(blueprint, recipe, null);
-        if (!compatibleWithoutForms && compatibleFormIds.Count == 0) return null;
+        var qualityChances = _qualityRollService.GetQualityChances(masteryLevel)
+            .Where(x => x.Value > 0d)
+            .OrderBy(x => x.Key)
+            .ToList();
+        var possibleQualities = qualityChances.Select(x => x.Key).ToList();
+        var craftedRanges = _statRollService.GetBaseStatRanges(
+                itemBase,
+                design,
+                tier,
+                possibleQualities)
+            .ToDictionary(x => x.AttributeType);
+        var baseAmounts = itemBase.AttributeModifiers
+            .GroupBy(x => x.AttributeType)
+            .ToDictionary(x => x.Key, x => x.Sum(modifier => modifier.Amount));
+        var attributes = baseAmounts.Keys
+            .Concat(craftedRanges.Keys)
+            .Distinct()
+            .OrderBy(x => x)
+            .Select(attributeType =>
+            {
+                craftedRanges.TryGetValue(attributeType, out var crafted);
+                return new CraftingAttributePreviewDto
+                {
+                    AttributeType = attributeType,
+                    BaseAmount = baseAmounts.GetValueOrDefault(attributeType),
+                    MinimumCraftedAmount = crafted?.MinimumAmount ?? 0,
+                    MaximumCraftedAmount = crafted?.MaximumAmount ?? 0
+                };
+            })
+            .ToList();
+        var potentialValues = possibleQualities
+            .Select(quality => _potentialService.CalculateStartingPotential(
+                itemBase,
+                tier,
+                quality,
+                masteryLevel,
+                craftingLevel))
+            .ToList();
 
-        var materialCosts = MapMaterialCosts(
-            _requirementResolver.ResolveCosts(recipe, tier, blueprint.SpecialResourceRequirements),
-            ownedByItemId);
-
-        return _mapper.Map<CraftingBlueprintOptionDto>(blueprint, opt =>
+        return new CraftingItemPreviewDto
         {
-            opt.Items["CompatibleFormIds"] = compatibleFormIds;
-            opt.Items["MaterialCosts"] = materialCosts;
-        });
+            Name = design.Name,
+            Description = string.IsNullOrWhiteSpace(itemBase.Description)
+                ? design.Description
+                : itemBase.Description,
+            EquipmentType = itemBase.EquipmentType,
+            Rarity = itemBase.Rarity,
+            Tier = tier,
+            Attributes = attributes,
+            QualityChances = qualityChances
+                .Select(x => new CraftingQualityChanceDto
+                {
+                    Quality = x.Key,
+                    ChancePercent = x.Value
+                })
+                .ToList(),
+            MinimumStartingPotential = potentialValues.Min(),
+            MaximumStartingPotential = potentialValues.Max(),
+            Magnitude = itemBase.Magnitude,
+            MagnitudeRange = itemBase.MagnitudeRange,
+            AttackSpeed = itemBase.AttackSpeed,
+            ScalingAttribute = itemBase.ScalingAttribute,
+            ScalingAmount = itemBase.ScalingAmount
+        };
+    }
+
+    private static (IReadOnlyList<string> Primary, IReadOnlyList<string> Secondary, string Summary)
+        DescribeTemperingProfile(TemperingProfileDefinition profile)
+    {
+        var primary = profile.Stats
+            .Where(stat => stat.Category == TemperingStatCategory.Primary)
+            .OrderByDescending(stat => stat.Weight)
+            .Select(stat => stat.Stat.ToString())
+            .ToList();
+        var secondary = profile.Stats
+            .Where(stat => stat.Category == TemperingStatCategory.Secondary)
+            .OrderByDescending(stat => stat.Weight)
+            .Select(stat => stat.Stat.ToString())
+            .ToList();
+        var summary = primary.Count == 0
+            ? $"Can develop {string.Join(", ", secondary)}."
+            : secondary.Count == 0
+                ? $"Favors {string.Join(", ", primary)}."
+                : $"Favors {string.Join(", ", primary)}. Can also develop {string.Join(", ", secondary)}.";
+        return (primary, secondary, summary);
     }
 
     private IReadOnlyList<CraftingMaterialCostDto> MapMaterialCosts(
@@ -558,76 +708,6 @@ public class CraftingService : ICraftingService
     {
         return _mapper.Map<IReadOnlyList<CraftingMaterialCostDto>>(costs, opt =>
             opt.Items["OwnedByItemId"] = ownedByItemId);
-    }
-
-    private BlueprintLearningOptionDto? TryCreateBlueprintLearningOption(
-        CraftingRecipeDefinition recipe,
-        BlueprintDefinition blueprint,
-        bool usesCompatibilityUnlock,
-        IReadOnlySet<string> unlockedRecipeIds,
-        IReadOnlyDictionary<string, IReadOnlySet<string>> unlockedBlueprintsByRecipe)
-    {
-        if (!usesCompatibilityUnlock && unlockedRecipeIds.Contains(recipe.Id)) return null;
-
-        if (unlockedBlueprintsByRecipe.TryGetValue(recipe.Id, out var blueprintIds) &&
-            blueprintIds.Contains(blueprint.Id))
-        {
-            return null;
-        }
-
-        var compatibleFormIds = usesCompatibilityUnlock
-            ? CraftingBlueprintRules.GetCompatibleFormIds(blueprint, recipe)
-            : recipe.Forms.Select(form => form.FormId).ToList();
-
-        if (usesCompatibilityUnlock)
-        {
-            var compatibleWithoutForms = recipe.Forms.Count == 0 && CraftingBlueprintRules.IsCompatible(blueprint, recipe, null);
-            if (!compatibleWithoutForms && compatibleFormIds.Count == 0) return null;
-        }
-
-        var compatibleFormNames = recipe.Forms
-            .Where(form => compatibleFormIds.Contains(form.FormId, StringComparer.OrdinalIgnoreCase))
-            .Select(form => form.DisplayName)
-            .ToList();
-
-        return _mapper.Map<BlueprintLearningOptionDto>(recipe, opt =>
-        {
-            opt.Items["CompatibleFormIds"] = compatibleFormIds;
-            opt.Items["CompatibleFormNames"] = compatibleFormNames;
-        });
-    }
-
-    private static string? ValidateBlueprintUnlockTarget(
-        BlueprintDefinition blueprint,
-        CraftingRecipeDefinition recipe,
-        string requestedRecipeId,
-        bool usesCompatibilityUnlock)
-    {
-        if (usesCompatibilityUnlock)
-        {
-            if (recipe.RecipeType != RecipeType.Base)
-                return "Blueprints can only be applied to base recipes.";
-
-            var compatibleFormIds = CraftingBlueprintRules.GetCompatibleFormIds(blueprint, recipe);
-            var compatibleWithoutForms = recipe.Forms.Count == 0 && CraftingBlueprintRules.IsCompatible(blueprint, recipe, null);
-            if (!compatibleWithoutForms && compatibleFormIds.Count == 0)
-                return "Blueprint is not compatible with this recipe.";
-        }
-        else if (!string.IsNullOrWhiteSpace(requestedRecipeId) &&
-                 !requestedRecipeId.Equals(blueprint.UnlocksRecipeId, StringComparison.OrdinalIgnoreCase))
-        {
-            return "Blueprint cannot unlock the selected recipe.";
-        }
-
-        return null;
-    }
-
-    private static CraftingRecipeFormDefinition? ResolveForm(CraftingRecipeDefinition recipe, string? formId)
-    {
-        if (recipe.Forms.Count == 0) return null;
-        if (string.IsNullOrWhiteSpace(formId)) return recipe.Forms[0];
-
-        return recipe.Forms.FirstOrDefault(x => x.FormId.Equals(formId, StringComparison.OrdinalIgnoreCase));
     }
 
     private static ProfessionType ResolveCraftingProfession(EquipmentType equipmentType)
@@ -662,35 +742,6 @@ public class CraftingService : ICraftingService
         return null;
     }
 
-    private async Task<(BlueprintDefinition? Value, string? Error)> ResolveCraftingBlueprintAsync(
-        Guid characterId,
-        CraftingRecipeDefinition recipe,
-        CraftingRecipeFormDefinition? form,
-        string? blueprintId,
-        CancellationToken cancellationToken)
-    {
-        var requestedBlueprintId = string.IsNullOrWhiteSpace(blueprintId)
-            ? recipe.BlueprintId
-            : blueprintId;
-        if (string.IsNullOrWhiteSpace(requestedBlueprintId)) return (null, null);
-
-        var blueprint = _definitions.GetBlueprint(requestedBlueprintId);
-        if (blueprint == null) return (null, "Blueprint does not exist.");
-
-        var hasUnlock = await _progressionService.HasBlueprintUnlockAsync(characterId, recipe.Id, blueprint.Id, cancellationToken);
-        if (!hasUnlock) return (null, "Blueprint is locked.");
-
-        if (!CraftingBlueprintRules.IsCompatible(blueprint, recipe, form))
-            return (null, "Blueprint is not compatible with this recipe form.");
-
-        return (blueprint, null);
-    }
-
-    private static bool UsesCompatibilityUnlock(BlueprintDefinition blueprint)
-    {
-        return blueprint.AllowedBaseRecipeIds.Count > 0 || blueprint.AllowedRecipeTags.Count > 0;
-    }
-
     private static OutboxEquipmentItemPayload ToOutboxEquipmentItem(EquipmentInstance item) =>
         new(
             item.ItemBaseId,
@@ -698,10 +749,8 @@ public class CraftingService : ICraftingService
             item.Rarity,
             item.Quality,
             item.Potential,
-            item.RecipeId,
             item.BaseRecipeId,
             item.BlueprintId,
             item.AffinityTags,
-            item.SpecialModifiers,
             item.IsMasterpiece);
 }

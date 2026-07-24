@@ -7,7 +7,10 @@ using MediatR;
 
 namespace Application.UseCases.Crafting.Commands.LearnBlueprint;
 
-public record LearnBlueprintCommand(Guid CharacterId, Guid BlueprintItemInstanceId, string RecipeId) : ICommand<Response<LearnBlueprintResultDto>>;
+public record LearnBlueprintCommand(
+    Guid CharacterId,
+    Guid BlueprintItemInstanceId,
+    string RecipeId) : ICommand<Response<LearnBlueprintResultDto>>;
 
 public class LearnBlueprintCommandHandler : IRequestHandler<LearnBlueprintCommand, Response<LearnBlueprintResultDto>>
 {

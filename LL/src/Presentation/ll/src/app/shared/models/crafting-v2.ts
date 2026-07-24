@@ -1,11 +1,8 @@
 import { InventoryItem } from './inventoryItem';
+import { AttributeType } from './enums/attributeType';
 import { ItemQuality } from './enums/itemQuality';
 import { EquipmentType } from './enums/equipmentType';
-
-export enum RecipeType {
-  Base = 'Base',
-  Variant = 'Variant',
-}
+import { Rarity } from './enums/rarity';
 
 export interface CraftingMaterialCost {
   itemId: string;
@@ -15,53 +12,93 @@ export interface CraftingMaterialCost {
   owned: number;
 }
 
+export interface EquipmentBehavior {
+  handedness: string;
+  attackCategory: string;
+  rangeCategory: string;
+  basicAttackIntervalMultiplier: number;
+  basicAttackDamageMultiplier: number;
+  role: string;
+}
+
+export interface CraftingAttributePreview {
+  attributeType: AttributeType;
+  baseAmount: number;
+  minimumCraftedAmount: number;
+  maximumCraftedAmount: number;
+  minimumTotalAmount: number;
+  maximumTotalAmount: number;
+}
+
+export interface CraftingQualityChance {
+  quality: ItemQuality;
+  chancePercent: number;
+}
+
+export interface CraftingItemPreview {
+  name: string;
+  description: string;
+  equipmentType: EquipmentType;
+  rarity: Rarity;
+  tier: number;
+  attributes: CraftingAttributePreview[];
+  qualityChances: CraftingQualityChance[];
+  minimumStartingPotential: number;
+  maximumStartingPotential: number;
+  magnitude: number;
+  magnitudeRange: number;
+  attackSpeed: number;
+  scalingAttribute: AttributeType;
+  scalingAmount: number;
+}
+
+export interface CraftingBlueprint {
+  id: string;
+  itemId: string;
+  name: string;
+  description: string;
+  craftedItemName: string;
+  isLearned: boolean;
+  isLocked: boolean;
+  sourceType?: string | null;
+  sourceId?: string | null;
+  behavior: EquipmentBehavior;
+  initialStatProfile: Record<string, number>;
+  blueprintStatProfile?: Record<string, number>;
+  primaryTemperingStats: string[];
+  secondaryTemperingStats: string[];
+  temperingProfileSummary: string;
+  tags: string[];
+  materialCosts: CraftingMaterialCost[];
+  itemPreview?: CraftingItemPreview | null;
+}
+
 export interface CraftingRecipe {
   id: string;
   name: string;
-  recipeType: RecipeType;
-  baseRecipeId: string;
+  description: string;
+  icon: string;
+  category: string;
   outputItemId: string;
   outputItemType: EquipmentType;
-  forms: CraftingRecipeForm[];
-  blueprints: CraftingBlueprintOption[];
   minTier: number;
   maxTier: number;
   currentMasteryLevel: number;
+  minimumProfessionLevel: number;
+  behavior: EquipmentBehavior;
+  initialStatProfile: Record<string, number>;
+  primaryTemperingStats: string[];
+  secondaryTemperingStats: string[];
+  temperingProfileSummary: string;
   affinityTags: string[];
-  baseStatProfile: Record<string, number>;
-  materialCosts: CraftingMaterialCost[];
-}
-
-export interface CraftingBlueprintOption {
-  id: string;
-  name: string;
-  blueprintFamily?: string | null;
-  outputNameTemplate: string;
-  specialOutputNames: CraftingBlueprintOutputName[];
-  compatibleFormIds: string[];
   tags: string[];
   materialCosts: CraftingMaterialCost[];
-}
-
-export interface CraftingBlueprintOutputName {
-  baseRecipeId: string;
-  formId: string;
-  outputName: string;
-}
-
-export interface CraftingRecipeForm {
-  formId: string;
-  displayName: string;
-  outputItemId: string;
-  outputItemType: EquipmentType;
-  armorWeight?: string | null;
-  statProfileId?: string | null;
-  tags: string[];
+  itemPreview?: CraftingItemPreview | null;
+  blueprints: CraftingBlueprint[];
 }
 
 export interface CraftItemsRequest {
   recipeId: string;
-  formId?: string | null;
   blueprintId?: string | null;
   targetTier: number;
   quantity: number;
@@ -69,6 +106,7 @@ export interface CraftItemsRequest {
 
 export interface CraftItemsResult {
   recipeId: string;
+  blueprintId?: string | null;
   targetTier: number;
   createdItemIds: string[];
   createdItems: InventoryItem[];
@@ -79,14 +117,7 @@ export interface CraftItemsResult {
 
 export interface LearnBlueprintResult {
   blueprintId: string;
-  unlockedRecipeId: string;
-  unlockedRecipeName: string;
-}
-
-export interface BlueprintLearningOption {
+  blueprintName: string;
   recipeId: string;
   recipeName: string;
-  outputItemType: EquipmentType;
-  compatibleFormIds: string[];
-  compatibleFormNames: string[];
 }

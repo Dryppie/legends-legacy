@@ -13,7 +13,7 @@
     <app-tabs class="flex h-full flex-col overflow-hidden">
       <app-tab label="Crafting">
         <app-regular-crafting
-          class="overflow-hidden"
+          class="block min-h-0 flex-1 overflow-hidden"
           [recipes]="recipes"
           [inventory]="inventory"
           [characterProfession]="characterProfession"
@@ -21,8 +21,8 @@
       </app-tab>
       <app-tab label="Tempering">
         <app-tempering
-          class="overflow-hidden"
-          [inventory]="inventoryEquipment"
+          class="block min-h-0 flex-1 overflow-hidden"
+          [inventory]="inventory"
         ></app-tempering>
       </app-tab>
     </app-tabs>

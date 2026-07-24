@@ -64,11 +64,7 @@ public class TemperingService : ITemperingService
             temperingSummary.QualityIncreases++;
         }
 
-        var experience = result.Outcome switch
-        {
-            TemperingOutcome.Critical => 100,
-            _ => 1,
-        };
+        var experience = 1;
         experience = experience.ApplyPositiveBps(craftingExperienceGainBps);
 
         AllocateExpBasedOnCraftingProfession(temperingSummary, experience, current.CraftType);

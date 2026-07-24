@@ -1,25 +1,36 @@
-import { NgFor, NgIf } from '@angular/common';
-import { Component, EventEmitter, Input, OnInit, Output, signal } from '@angular/core';
+import { NgIf } from '@angular/common';
+import {
+  Component,
+  EventEmitter,
+  Input,
+  OnInit,
+  Output,
+  signal,
+} from '@angular/core';
 import { CraftingService } from '../../../../../core/services/api/crafting/crafting.service';
 import { InventoryStateService } from '../../../../../core/services/api/inventory/inventory-state.service';
-import { BlueprintLearningOption } from '../../../../models/crafting-v2';
 import { InventoryItem } from '../../../../models/inventoryItem';
+import {
+  DropdownComponent,
+  DropdownOption,
+  DropdownSelection,
+} from '../../../custom-components/dropdown/dropdown.component';
 import { ItemComponent } from '../../../item/item.component';
 
 @Component({
-    selector: 'app-inventory-item-modal',
-    imports: [NgFor, NgIf, ItemComponent],
-    templateUrl: './inventory-item-modal.component.html'
+  selector: 'app-inventory-item-modal',
+  imports: [NgIf, DropdownComponent, ItemComponent],
+  templateUrl: './inventory-item-modal.component.html',
 })
 export class InventoryItemModalComponent implements OnInit {
   @Input({ required: true }) inventoryItem!: InventoryItem;
   @Output() close = new EventEmitter<void>();
-
   readonly isLearning = signal(false);
-  readonly isLoadingOptions = signal(false);
+  readonly isLoadingRecipes = signal(false);
+  readonly hasLoadedRecipes = signal(false);
   readonly error = signal<string | null>(null);
-  readonly learningOptions = signal<BlueprintLearningOption[]>([]);
-  readonly selectedRecipeId = signal<string | null>(null);
+  readonly selectedRecipeId = signal('');
+  private readonly availableRecipeIds = signal<ReadonlySet<string>>(new Set());
 
   constructor(
     private readonly craftingService: CraftingService,
@@ -33,36 +44,33 @@ export class InventoryItemModalComponent implements OnInit {
     );
   }
 
-  get isBlueprint(): boolean {
-    const itemBase = this.inventoryItem.itemInstance.itemBase;
-    return (
-      itemBase.id.toLowerCase().startsWith('blueprint_') ||
-      itemBase.name.toLowerCase().startsWith('blueprint:')
-    );
+  get blueprint() {
+    return this.inventoryItem.itemInstance.itemBase.blueprint ?? null;
+  }
+
+  get compatibleRecipeOptions(): readonly DropdownOption<string>[] {
+    const availableRecipeIds = this.availableRecipeIds();
+    return (this.blueprint?.compatibleRecipes ?? [])
+      .filter((recipe) => availableRecipeIds.has(recipe.id))
+      .map((recipe) => ({
+        label: recipe.name,
+        value: recipe.id,
+      }));
   }
 
   ngOnInit(): void {
-    if (this.isBlueprint) {
-      this.loadBlueprintLearningOptions();
-    }
+    this.loadAvailableRecipes();
   }
 
-  selectRecipe(recipeId: string): void {
-    this.selectedRecipeId.set(recipeId);
+  selectRecipe(selection: DropdownSelection<string>): void {
+    this.selectedRecipeId.set(selection.main);
   }
 
   learnBlueprint(): void {
-    if (!this.isBlueprint || this.isLearning()) return;
-
     const recipeId = this.selectedRecipeId();
-    if (!recipeId) {
-      this.error.set('Select a recipe for this blueprint.');
-      return;
-    }
-
+    if (!this.blueprint || !recipeId || this.isLearning()) return;
     this.isLearning.set(true);
     this.error.set(null);
-
     this.craftingService
       .learnBlueprint(this.inventoryItem.itemInstance.id, recipeId)
       .subscribe({
@@ -80,28 +88,47 @@ export class InventoryItemModalComponent implements OnInit {
       });
   }
 
-  trackByRecipeId(_: number, option: BlueprintLearningOption): string {
-    return option.recipeId;
-  }
+  private loadAvailableRecipes(): void {
+    const blueprint = this.blueprint;
+    if (!blueprint) {
+      this.hasLoadedRecipes.set(true);
+      return;
+    }
 
-  private loadBlueprintLearningOptions(): void {
-    this.isLoadingOptions.set(true);
-    this.error.set(null);
+    const compatibleRecipeIds = new Set(
+      blueprint.compatibleRecipes.map((recipe) => recipe.id),
+    );
+    this.isLoadingRecipes.set(true);
+    this.craftingService.getRecipes().subscribe({
+      next: (recipes) => {
+        const availableRecipeIds = new Set(
+          recipes
+            .filter(
+              (recipe) =>
+                compatibleRecipeIds.has(recipe.id) &&
+                recipe.blueprints.some(
+                  (candidate) =>
+                    candidate.id === blueprint.blueprintId &&
+                    !candidate.isLearned,
+                ),
+            )
+            .map((recipe) => recipe.id),
+        );
 
-    this.craftingService
-      .getBlueprintLearningOptions(this.inventoryItem.itemInstance.id)
-      .subscribe({
-        next: (options) => {
-          this.learningOptions.set(options);
-          this.selectedRecipeId.set(options[0]?.recipeId ?? null);
-          this.isLoadingOptions.set(false);
-        },
-        error: (err) => {
-          this.error.set(
-            err.message ?? 'Failed to load blueprint learning options.',
-          );
-          this.isLoadingOptions.set(false);
-        },
-      });
+        this.availableRecipeIds.set(availableRecipeIds);
+        this.selectedRecipeId.set(
+          blueprint.compatibleRecipes.find((recipe) =>
+            availableRecipeIds.has(recipe.id),
+          )?.id ?? '',
+        );
+        this.isLoadingRecipes.set(false);
+        this.hasLoadedRecipes.set(true);
+      },
+      error: (err) => {
+        this.error.set(err.message ?? 'Failed to load available base recipes.');
+        this.isLoadingRecipes.set(false);
+        this.hasLoadedRecipes.set(true);
+      },
+    });
   }
 }

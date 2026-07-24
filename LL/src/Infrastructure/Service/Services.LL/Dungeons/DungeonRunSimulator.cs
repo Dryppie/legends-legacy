@@ -524,12 +524,12 @@ public sealed class DungeonRunSimulator : IDungeonRunSimulator
     private IReadOnlyDictionary<AttributeType, float> GetEquipmentAttributeBonuses(EquipmentType equipmentType)
     {
         var recipe = _craftingDefinitions.GetRecipes().FirstOrDefault(candidate =>
-            candidate.RecipeType == RecipeType.Base &&
+            candidate.Enabled &&
             candidate.OutputItemType == equipmentType);
         if (recipe is null)
-            throw new InvalidOperationException($"No base crafting recipe exists for simulated {equipmentType} equipment.");
+            throw new InvalidOperationException($"No crafting recipe exists for simulated {equipmentType} equipment.");
 
-        var profile = recipe.BaseStatProfileOverride ?? recipe.BaseStatProfile;
+        var profile = recipe.InitialStatProfile;
         var budget = _craftingBalance.GetTierPowerBudget(1) *
                      _craftingBalance.GetSlotBudgetWeight(equipmentType);
 

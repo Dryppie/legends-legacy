@@ -15,28 +15,18 @@ public sealed class TemperingProfileResolver : ITemperingProfileResolver
 
     public TemperingProfileDefinition? ResolveFor(EquipmentInstance equipment)
     {
-        if (equipment.EquipmentBase.EquipmentType == EquipmentType.Tool)
-            return null;
-
-        if (!string.IsNullOrWhiteSpace(equipment.BlueprintId))
+        if (equipment.EquipmentBase.EquipmentType == EquipmentType.Tool ||
+            string.IsNullOrWhiteSpace(equipment.BaseRecipeId))
         {
-            var blueprintProfile = _definitions.GetBlueprint(equipment.BlueprintId)?.TemperingProfile;
-            if (blueprintProfile != null)
-                return blueprintProfile;
+            return null;
         }
 
-        var recipeProfile = ResolveRecipeProfile(equipment.RecipeId);
-        if (recipeProfile != null)
-            return recipeProfile;
-
-        return ResolveRecipeProfile(equipment.BaseRecipeId);
-    }
-
-    private TemperingProfileDefinition? ResolveRecipeProfile(string? recipeId)
-    {
-        if (string.IsNullOrWhiteSpace(recipeId))
-            return null;
-
-        return _definitions.GetRecipe(recipeId)?.TemperingProfile;
+        var recipe = _definitions.GetRecipe(equipment.BaseRecipeId);
+        var blueprint = string.IsNullOrWhiteSpace(equipment.BlueprintId)
+            ? null
+            : _definitions.GetBlueprint(equipment.BlueprintId);
+        return recipe is null || (!string.IsNullOrWhiteSpace(equipment.BlueprintId) && blueprint is null)
+            ? null
+            : EquipmentCraftingDesignComposer.Compose(recipe, blueprint).TemperingProfile;
     }
 }

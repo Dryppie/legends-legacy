@@ -7,7 +7,6 @@ public class EquipmentInstance : ItemInstance
 {
     public Rarity Rarity { get; set; } = Rarity.Common;
     public ItemQuality Quality { get; set; } = ItemQuality.Standard;
-    public string? RecipeId { get; set; }
     public string? BaseRecipeId { get; set; }
     public string? BlueprintId { get; set; }
     public string? CraftedName { get; set; }
@@ -15,6 +14,7 @@ public class EquipmentInstance : ItemInstance
     public int? Potential { get; set; } = null;
     public int? MaxPotential { get; set; } = null;
     public int TemperingProgress { get; set; } = 0;
+    public uint Version { get; set; }
     public int ItemXp { get; set; } = 0;
     public bool IsMasterpiece { get; set; } = false;
     public bool IsLevelingItem { get; set; } = false;
@@ -38,7 +38,6 @@ public class EquipmentInstance : ItemInstance
     public List<InstanceAttributeModifier> InstanceModifiers { get; set; } = [];
     public List<ToolBonusModifier> ToolAffixes { get; set; } = [];
     public List<string> AffinityTags { get; set; } = [];
-    public List<string> SpecialModifiers { get; set; } = [];
 
     [NotMapped]
     public List<AttributeModifierBase> AttributeModifiers =>

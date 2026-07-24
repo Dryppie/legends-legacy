@@ -1,11 +1,15 @@
 [
   {
-    "id": "recipe_head_armor",
-    "name": "Head Armor",
-    "recipeType": "Base",
+    "id": "recipe.armor.head.heavy_helm",
+    "name": "Heavy Helm",
+    "description": "Craft a Heavy Helm.",
+    "icon": "heavy_helm",
+    "category": "ArmorForging",
     "recipeFamily": "Armor",
     "slot": "Head",
+    "outputItemId": "heavy_helm",
     "outputItemType": "Head",
+    "enabled": true,
     "tierRange": {
       "min": 1,
       "max": 1
@@ -24,130 +28,424 @@
         "amountPerTier": 1
       }
     ],
-    "baseStatProfile": {
-      "Armor": 0.45,
-      "Fortitude": 0.3,
-      "MaxHealth": 0.25
-    },
+    "additionalMaterialRequirements": [],
+    "specialResourceRequirements": [],
     "affinityTags": [
       "Armor",
-      "Head"
-    ],
-    "defaultTemperingTags": [
-      "Armor",
-      "Head"
+      "Head",
+      "HeavyArmor",
+      "Defensive",
+      "PhysicalDefense",
+      "Block",
+      "Guard",
+      "Barrier",
+      "Threat"
     ],
     "tags": [
       "Armor",
-      "Head"
+      "Head",
+      "HeavyArmor",
+      "Defensive",
+      "PhysicalDefense",
+      "Block",
+      "Guard",
+      "Barrier",
+      "Threat"
     ],
-    "forms": [
-      {
-        "formId": "heavy_helm",
-        "displayName": "Heavy Helm",
-        "outputItemId": "heavy_helm",
-        "outputItemType": "Head",
-        "armorWeight": "Heavy",
-        "statProfileId": "armor_heavy",
-        "tags": [
-          "Armor",
-          "HeavyArmor",
-          "Defensive",
-          "PhysicalDefense",
-          "Block",
-          "Guard",
-          "Barrier",
-          "Threat"
-        ]
-      },
-      {
-        "formId": "medium_helm",
-        "displayName": "Medium Helm",
-        "outputItemId": "medium_helm",
-        "outputItemType": "Head",
-        "armorWeight": "Medium",
-        "statProfileId": "armor_medium",
-        "tags": [
-          "Armor",
-          "MediumArmor",
-          "Bruiser",
-          "BalancedDefense",
-          "Endurance",
-          "Physical"
-        ]
-      },
-      {
-        "formId": "light_hood",
-        "displayName": "Light Hood",
-        "outputItemId": "light_hood",
-        "outputItemType": "Head",
-        "armorWeight": "Light",
-        "statProfileId": "armor_light",
-        "tags": [
-          "Armor",
-          "LightArmor",
-          "Dodge",
-          "Crit",
-          "Speed",
-          "Precision",
-          "Poison"
-        ]
-      },
-      {
-        "formId": "cloth_cowl",
-        "displayName": "Cloth Cowl",
-        "outputItemId": "cloth_cowl",
-        "outputItemType": "Head",
-        "armorWeight": "Cloth",
-        "statProfileId": "armor_cloth",
-        "tags": [
-          "Armor",
-          "ClothArmor",
-          "Magic",
-          "Mana",
-          "Cooldown",
-          "Support",
-          "MagicDefense"
-        ]
-      }
-    ],
+    "minimumProfessionLevel": 1,
+    "behavior": {
+      "handedness": "",
+      "attackCategory": "",
+      "rangeCategory": "",
+      "basicAttackIntervalMultiplier": 1,
+      "basicAttackDamageMultiplier": 1,
+      "role": "Heavy"
+    },
+    "initialStatProfile": {
+      "Armor": 0.35,
+      "MaxHealth": 0.3,
+      "Fortitude": 0.2,
+      "CrowdControlResistance": 0.15
+    },
     "temperingProfile": {
-      "id": "recipe_head_armor_tempering_profile",
-      "name": "Armor Tempering",
-      "statImprovementPool": [
+      "id": "recipe.armor.head.heavy_helm.tempering",
+      "name": "Heavy Helm Tempering",
+      "stats": [
         {
           "stat": "Armor",
-          "weight": 45
-        },
-        {
-          "stat": "Fortitude",
-          "weight": 35
+          "weight": 35,
+          "category": "Primary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.4,
+          "minimumTier": 1
         },
         {
           "stat": "MaxHealth",
-          "weight": 20
-        }
-      ],
-      "affixPool": [
-        {
-          "id": "affix_armor",
-          "weight": 45
+          "weight": 30,
+          "category": "Primary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.35,
+          "minimumTier": 1
         },
         {
-          "id": "affix_fortitude",
-          "weight": 35
+          "stat": "Fortitude",
+          "weight": 20,
+          "category": "Secondary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.3,
+          "minimumTier": 1
+        },
+        {
+          "stat": "CrowdControlResistance",
+          "weight": 15,
+          "category": "Secondary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.3,
+          "minimumTier": 1
         }
-      ],
-      "specialModifierPool": []
+      ]
     }
   },
   {
-    "id": "recipe_chest_armor",
-    "name": "Chest Armor",
-    "recipeType": "Base",
+    "id": "recipe.armor.head.medium_helm",
+    "name": "Medium Helm",
+    "description": "Craft a Medium Helm.",
+    "icon": "medium_helm",
+    "category": "ArmorForging",
+    "recipeFamily": "Armor",
+    "slot": "Head",
+    "outputItemId": "medium_helm",
+    "outputItemType": "Head",
+    "enabled": true,
+    "tierRange": {
+      "min": 1,
+      "max": 1
+    },
+    "materialRequirements": [
+      {
+        "type": "TieredMaterial",
+        "family": "Metal",
+        "baseAmount": 8,
+        "amountPerTier": 3
+      },
+      {
+        "type": "TieredMaterial",
+        "family": "Hide",
+        "baseAmount": 4,
+        "amountPerTier": 1
+      }
+    ],
+    "additionalMaterialRequirements": [],
+    "specialResourceRequirements": [],
+    "affinityTags": [
+      "Armor",
+      "Head",
+      "MediumArmor",
+      "Bruiser",
+      "BalancedDefense",
+      "Endurance",
+      "Physical"
+    ],
+    "tags": [
+      "Armor",
+      "Head",
+      "MediumArmor",
+      "Bruiser",
+      "BalancedDefense",
+      "Endurance",
+      "Physical"
+    ],
+    "minimumProfessionLevel": 1,
+    "behavior": {
+      "handedness": "",
+      "attackCategory": "",
+      "rangeCategory": "",
+      "basicAttackIntervalMultiplier": 1,
+      "basicAttackDamageMultiplier": 1,
+      "role": "Medium"
+    },
+    "initialStatProfile": {
+      "MaxHealth": 0.3,
+      "Armor": 0.25,
+      "Precision": 0.25,
+      "Fortitude": 0.2
+    },
+    "temperingProfile": {
+      "id": "recipe.armor.head.medium_helm.tempering",
+      "name": "Medium Helm Tempering",
+      "stats": [
+        {
+          "stat": "MaxHealth",
+          "weight": 30,
+          "category": "Primary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.4,
+          "minimumTier": 1
+        },
+        {
+          "stat": "Armor",
+          "weight": 25,
+          "category": "Primary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.35,
+          "minimumTier": 1
+        },
+        {
+          "stat": "Precision",
+          "weight": 25,
+          "category": "Secondary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.3,
+          "minimumTier": 1
+        },
+        {
+          "stat": "Fortitude",
+          "weight": 20,
+          "category": "Secondary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.3,
+          "minimumTier": 1
+        }
+      ]
+    }
+  },
+  {
+    "id": "recipe.armor.head.light_hood",
+    "name": "Light Hood",
+    "description": "Craft a Light Hood.",
+    "icon": "light_hood",
+    "category": "ArmorForging",
+    "recipeFamily": "Armor",
+    "slot": "Head",
+    "outputItemId": "light_hood",
+    "outputItemType": "Head",
+    "enabled": true,
+    "tierRange": {
+      "min": 1,
+      "max": 1
+    },
+    "materialRequirements": [
+      {
+        "type": "TieredMaterial",
+        "family": "Metal",
+        "baseAmount": 8,
+        "amountPerTier": 3
+      },
+      {
+        "type": "TieredMaterial",
+        "family": "Hide",
+        "baseAmount": 4,
+        "amountPerTier": 1
+      }
+    ],
+    "additionalMaterialRequirements": [],
+    "specialResourceRequirements": [],
+    "affinityTags": [
+      "Armor",
+      "Head",
+      "LightArmor",
+      "Dodge",
+      "Crit",
+      "Speed",
+      "Precision",
+      "Poison"
+    ],
+    "tags": [
+      "Armor",
+      "Head",
+      "LightArmor",
+      "Dodge",
+      "Crit",
+      "Speed",
+      "Precision",
+      "Poison"
+    ],
+    "minimumProfessionLevel": 1,
+    "behavior": {
+      "handedness": "",
+      "attackCategory": "",
+      "rangeCategory": "",
+      "basicAttackIntervalMultiplier": 1,
+      "basicAttackDamageMultiplier": 1,
+      "role": "Light"
+    },
+    "initialStatProfile": {
+      "DodgeChance": 0.3,
+      "Precision": 0.25,
+      "AttackSpeed": 0.25,
+      "StatusResistance": 0.2
+    },
+    "temperingProfile": {
+      "id": "recipe.armor.head.light_hood.tempering",
+      "name": "Light Hood Tempering",
+      "stats": [
+        {
+          "stat": "DodgeChance",
+          "weight": 30,
+          "category": "Primary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.4,
+          "minimumTier": 1
+        },
+        {
+          "stat": "Precision",
+          "weight": 25,
+          "category": "Primary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.35,
+          "minimumTier": 1
+        },
+        {
+          "stat": "AttackSpeed",
+          "weight": 25,
+          "category": "Secondary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.3,
+          "minimumTier": 1
+        },
+        {
+          "stat": "StatusResistance",
+          "weight": 20,
+          "category": "Secondary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.3,
+          "minimumTier": 1
+        }
+      ]
+    }
+  },
+  {
+    "id": "recipe.armor.head.cloth_cowl",
+    "name": "Cloth Cowl",
+    "description": "Craft a Cloth Cowl.",
+    "icon": "cloth_cowl",
+    "category": "ArmorForging",
+    "recipeFamily": "Armor",
+    "slot": "Head",
+    "outputItemId": "cloth_cowl",
+    "outputItemType": "Head",
+    "enabled": true,
+    "tierRange": {
+      "min": 1,
+      "max": 1
+    },
+    "materialRequirements": [
+      {
+        "type": "TieredMaterial",
+        "family": "Metal",
+        "baseAmount": 8,
+        "amountPerTier": 3
+      },
+      {
+        "type": "TieredMaterial",
+        "family": "Hide",
+        "baseAmount": 4,
+        "amountPerTier": 1
+      }
+    ],
+    "additionalMaterialRequirements": [],
+    "specialResourceRequirements": [],
+    "affinityTags": [
+      "Armor",
+      "Head",
+      "ClothArmor",
+      "Magic",
+      "Mana",
+      "Cooldown",
+      "Support",
+      "MagicDefense"
+    ],
+    "tags": [
+      "Armor",
+      "Head",
+      "ClothArmor",
+      "Magic",
+      "Mana",
+      "Cooldown",
+      "Support",
+      "MagicDefense"
+    ],
+    "minimumProfessionLevel": 1,
+    "behavior": {
+      "handedness": "",
+      "attackCategory": "",
+      "rangeCategory": "",
+      "basicAttackIntervalMultiplier": 1,
+      "basicAttackDamageMultiplier": 1,
+      "role": "Cloth"
+    },
+    "initialStatProfile": {
+      "Spirit": 0.35,
+      "Resistance": 0.25,
+      "Cooldown": 0.2,
+      "MaxHealth": 0.2
+    },
+    "temperingProfile": {
+      "id": "recipe.armor.head.cloth_cowl.tempering",
+      "name": "Cloth Cowl Tempering",
+      "stats": [
+        {
+          "stat": "Spirit",
+          "weight": 35,
+          "category": "Primary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.4,
+          "minimumTier": 1
+        },
+        {
+          "stat": "Resistance",
+          "weight": 25,
+          "category": "Primary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.35,
+          "minimumTier": 1
+        },
+        {
+          "stat": "Cooldown",
+          "weight": 20,
+          "category": "Secondary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.3,
+          "minimumTier": 1
+        },
+        {
+          "stat": "MaxHealth",
+          "weight": 20,
+          "category": "Secondary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.3,
+          "minimumTier": 1
+        }
+      ]
+    }
+  },
+  {
+    "id": "recipe.armor.chest.heavy_breastplate",
+    "name": "Heavy Breastplate",
+    "description": "Craft a Heavy Breastplate.",
+    "icon": "heavy_breastplate",
+    "category": "ArmorForging",
     "recipeFamily": "Armor",
     "slot": "Chest",
+    "outputItemId": "heavy_breastplate",
     "outputItemType": "Chest",
+    "enabled": true,
     "tierRange": {
       "min": 1,
       "max": 1
@@ -166,130 +464,424 @@
         "amountPerTier": 2
       }
     ],
-    "baseStatProfile": {
-      "Armor": 0.5,
-      "Fortitude": 0.25,
-      "MaxHealth": 0.25
-    },
+    "additionalMaterialRequirements": [],
+    "specialResourceRequirements": [],
     "affinityTags": [
       "Armor",
-      "Chest"
-    ],
-    "defaultTemperingTags": [
-      "Armor",
-      "Chest"
+      "Chest",
+      "HeavyArmor",
+      "Defensive",
+      "PhysicalDefense",
+      "Block",
+      "Guard",
+      "Barrier",
+      "Threat"
     ],
     "tags": [
       "Armor",
-      "Chest"
+      "Chest",
+      "HeavyArmor",
+      "Defensive",
+      "PhysicalDefense",
+      "Block",
+      "Guard",
+      "Barrier",
+      "Threat"
     ],
-    "forms": [
-      {
-        "formId": "heavy_breastplate",
-        "displayName": "Heavy Breastplate",
-        "outputItemId": "heavy_breastplate",
-        "outputItemType": "Chest",
-        "armorWeight": "Heavy",
-        "statProfileId": "armor_heavy",
-        "tags": [
-          "Armor",
-          "HeavyArmor",
-          "Defensive",
-          "PhysicalDefense",
-          "Block",
-          "Guard",
-          "Barrier",
-          "Threat"
-        ]
-      },
-      {
-        "formId": "medium_mail",
-        "displayName": "Medium Mail",
-        "outputItemId": "medium_mail",
-        "outputItemType": "Chest",
-        "armorWeight": "Medium",
-        "statProfileId": "armor_medium",
-        "tags": [
-          "Armor",
-          "MediumArmor",
-          "Bruiser",
-          "BalancedDefense",
-          "Endurance",
-          "Physical"
-        ]
-      },
-      {
-        "formId": "light_vest",
-        "displayName": "Light Vest",
-        "outputItemId": "light_vest",
-        "outputItemType": "Chest",
-        "armorWeight": "Light",
-        "statProfileId": "armor_light",
-        "tags": [
-          "Armor",
-          "LightArmor",
-          "Dodge",
-          "Crit",
-          "Speed",
-          "Precision",
-          "Poison"
-        ]
-      },
-      {
-        "formId": "cloth_robe",
-        "displayName": "Cloth Robe",
-        "outputItemId": "cloth_robe",
-        "outputItemType": "Chest",
-        "armorWeight": "Cloth",
-        "statProfileId": "armor_cloth",
-        "tags": [
-          "Armor",
-          "ClothArmor",
-          "Magic",
-          "Mana",
-          "Cooldown",
-          "Support",
-          "MagicDefense"
-        ]
-      }
-    ],
+    "minimumProfessionLevel": 1,
+    "behavior": {
+      "handedness": "",
+      "attackCategory": "",
+      "rangeCategory": "",
+      "basicAttackIntervalMultiplier": 1,
+      "basicAttackDamageMultiplier": 1,
+      "role": "Heavy"
+    },
+    "initialStatProfile": {
+      "Armor": 0.35,
+      "MaxHealth": 0.3,
+      "Fortitude": 0.2,
+      "CrowdControlResistance": 0.15
+    },
     "temperingProfile": {
-      "id": "recipe_chest_armor_tempering_profile",
-      "name": "Armor Tempering",
-      "statImprovementPool": [
+      "id": "recipe.armor.chest.heavy_breastplate.tempering",
+      "name": "Heavy Breastplate Tempering",
+      "stats": [
         {
           "stat": "Armor",
-          "weight": 45
-        },
-        {
-          "stat": "Fortitude",
-          "weight": 35
+          "weight": 35,
+          "category": "Primary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.4,
+          "minimumTier": 1
         },
         {
           "stat": "MaxHealth",
-          "weight": 20
-        }
-      ],
-      "affixPool": [
-        {
-          "id": "affix_armor",
-          "weight": 45
+          "weight": 30,
+          "category": "Primary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.35,
+          "minimumTier": 1
         },
         {
-          "id": "affix_fortitude",
-          "weight": 35
+          "stat": "Fortitude",
+          "weight": 20,
+          "category": "Secondary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.3,
+          "minimumTier": 1
+        },
+        {
+          "stat": "CrowdControlResistance",
+          "weight": 15,
+          "category": "Secondary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.3,
+          "minimumTier": 1
         }
-      ],
-      "specialModifierPool": []
+      ]
     }
   },
   {
-    "id": "recipe_leg_armor",
-    "name": "Leg Armor",
-    "recipeType": "Base",
+    "id": "recipe.armor.chest.medium_mail",
+    "name": "Medium Mail",
+    "description": "Craft a Medium Mail.",
+    "icon": "medium_mail",
+    "category": "ArmorForging",
+    "recipeFamily": "Armor",
+    "slot": "Chest",
+    "outputItemId": "medium_mail",
+    "outputItemType": "Chest",
+    "enabled": true,
+    "tierRange": {
+      "min": 1,
+      "max": 1
+    },
+    "materialRequirements": [
+      {
+        "type": "TieredMaterial",
+        "family": "Metal",
+        "baseAmount": 14,
+        "amountPerTier": 5
+      },
+      {
+        "type": "TieredMaterial",
+        "family": "Hide",
+        "baseAmount": 6,
+        "amountPerTier": 2
+      }
+    ],
+    "additionalMaterialRequirements": [],
+    "specialResourceRequirements": [],
+    "affinityTags": [
+      "Armor",
+      "Chest",
+      "MediumArmor",
+      "Bruiser",
+      "BalancedDefense",
+      "Endurance",
+      "Physical"
+    ],
+    "tags": [
+      "Armor",
+      "Chest",
+      "MediumArmor",
+      "Bruiser",
+      "BalancedDefense",
+      "Endurance",
+      "Physical"
+    ],
+    "minimumProfessionLevel": 1,
+    "behavior": {
+      "handedness": "",
+      "attackCategory": "",
+      "rangeCategory": "",
+      "basicAttackIntervalMultiplier": 1,
+      "basicAttackDamageMultiplier": 1,
+      "role": "Medium"
+    },
+    "initialStatProfile": {
+      "MaxHealth": 0.3,
+      "Armor": 0.25,
+      "Precision": 0.25,
+      "Fortitude": 0.2
+    },
+    "temperingProfile": {
+      "id": "recipe.armor.chest.medium_mail.tempering",
+      "name": "Medium Mail Tempering",
+      "stats": [
+        {
+          "stat": "MaxHealth",
+          "weight": 30,
+          "category": "Primary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.4,
+          "minimumTier": 1
+        },
+        {
+          "stat": "Armor",
+          "weight": 25,
+          "category": "Primary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.35,
+          "minimumTier": 1
+        },
+        {
+          "stat": "Precision",
+          "weight": 25,
+          "category": "Secondary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.3,
+          "minimumTier": 1
+        },
+        {
+          "stat": "Fortitude",
+          "weight": 20,
+          "category": "Secondary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.3,
+          "minimumTier": 1
+        }
+      ]
+    }
+  },
+  {
+    "id": "recipe.armor.chest.light_vest",
+    "name": "Light Vest",
+    "description": "Craft a Light Vest.",
+    "icon": "light_vest",
+    "category": "ArmorForging",
+    "recipeFamily": "Armor",
+    "slot": "Chest",
+    "outputItemId": "light_vest",
+    "outputItemType": "Chest",
+    "enabled": true,
+    "tierRange": {
+      "min": 1,
+      "max": 1
+    },
+    "materialRequirements": [
+      {
+        "type": "TieredMaterial",
+        "family": "Metal",
+        "baseAmount": 14,
+        "amountPerTier": 5
+      },
+      {
+        "type": "TieredMaterial",
+        "family": "Hide",
+        "baseAmount": 6,
+        "amountPerTier": 2
+      }
+    ],
+    "additionalMaterialRequirements": [],
+    "specialResourceRequirements": [],
+    "affinityTags": [
+      "Armor",
+      "Chest",
+      "LightArmor",
+      "Dodge",
+      "Crit",
+      "Speed",
+      "Precision",
+      "Poison"
+    ],
+    "tags": [
+      "Armor",
+      "Chest",
+      "LightArmor",
+      "Dodge",
+      "Crit",
+      "Speed",
+      "Precision",
+      "Poison"
+    ],
+    "minimumProfessionLevel": 1,
+    "behavior": {
+      "handedness": "",
+      "attackCategory": "",
+      "rangeCategory": "",
+      "basicAttackIntervalMultiplier": 1,
+      "basicAttackDamageMultiplier": 1,
+      "role": "Light"
+    },
+    "initialStatProfile": {
+      "DodgeChance": 0.3,
+      "Precision": 0.25,
+      "AttackSpeed": 0.25,
+      "StatusResistance": 0.2
+    },
+    "temperingProfile": {
+      "id": "recipe.armor.chest.light_vest.tempering",
+      "name": "Light Vest Tempering",
+      "stats": [
+        {
+          "stat": "DodgeChance",
+          "weight": 30,
+          "category": "Primary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.4,
+          "minimumTier": 1
+        },
+        {
+          "stat": "Precision",
+          "weight": 25,
+          "category": "Primary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.35,
+          "minimumTier": 1
+        },
+        {
+          "stat": "AttackSpeed",
+          "weight": 25,
+          "category": "Secondary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.3,
+          "minimumTier": 1
+        },
+        {
+          "stat": "StatusResistance",
+          "weight": 20,
+          "category": "Secondary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.3,
+          "minimumTier": 1
+        }
+      ]
+    }
+  },
+  {
+    "id": "recipe.armor.chest.cloth_robe",
+    "name": "Cloth Robe",
+    "description": "Craft a Cloth Robe.",
+    "icon": "cloth_robe",
+    "category": "ArmorForging",
+    "recipeFamily": "Armor",
+    "slot": "Chest",
+    "outputItemId": "cloth_robe",
+    "outputItemType": "Chest",
+    "enabled": true,
+    "tierRange": {
+      "min": 1,
+      "max": 1
+    },
+    "materialRequirements": [
+      {
+        "type": "TieredMaterial",
+        "family": "Metal",
+        "baseAmount": 14,
+        "amountPerTier": 5
+      },
+      {
+        "type": "TieredMaterial",
+        "family": "Hide",
+        "baseAmount": 6,
+        "amountPerTier": 2
+      }
+    ],
+    "additionalMaterialRequirements": [],
+    "specialResourceRequirements": [],
+    "affinityTags": [
+      "Armor",
+      "Chest",
+      "ClothArmor",
+      "Magic",
+      "Mana",
+      "Cooldown",
+      "Support",
+      "MagicDefense"
+    ],
+    "tags": [
+      "Armor",
+      "Chest",
+      "ClothArmor",
+      "Magic",
+      "Mana",
+      "Cooldown",
+      "Support",
+      "MagicDefense"
+    ],
+    "minimumProfessionLevel": 1,
+    "behavior": {
+      "handedness": "",
+      "attackCategory": "",
+      "rangeCategory": "",
+      "basicAttackIntervalMultiplier": 1,
+      "basicAttackDamageMultiplier": 1,
+      "role": "Cloth"
+    },
+    "initialStatProfile": {
+      "Spirit": 0.35,
+      "Resistance": 0.25,
+      "Cooldown": 0.2,
+      "MaxHealth": 0.2
+    },
+    "temperingProfile": {
+      "id": "recipe.armor.chest.cloth_robe.tempering",
+      "name": "Cloth Robe Tempering",
+      "stats": [
+        {
+          "stat": "Spirit",
+          "weight": 35,
+          "category": "Primary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.4,
+          "minimumTier": 1
+        },
+        {
+          "stat": "Resistance",
+          "weight": 25,
+          "category": "Primary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.35,
+          "minimumTier": 1
+        },
+        {
+          "stat": "Cooldown",
+          "weight": 20,
+          "category": "Secondary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.3,
+          "minimumTier": 1
+        },
+        {
+          "stat": "MaxHealth",
+          "weight": 20,
+          "category": "Secondary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.3,
+          "minimumTier": 1
+        }
+      ]
+    }
+  },
+  {
+    "id": "recipe.armor.legs.heavy_legplates",
+    "name": "Heavy Legplates",
+    "description": "Craft a Heavy Legplates.",
+    "icon": "heavy_legplates",
+    "category": "ArmorForging",
     "recipeFamily": "Armor",
     "slot": "Legs",
+    "outputItemId": "heavy_legplates",
     "outputItemType": "Legs",
+    "enabled": true,
     "tierRange": {
       "min": 1,
       "max": 1
@@ -308,138 +900,424 @@
         "amountPerTier": 2
       }
     ],
-    "baseStatProfile": {
-      "Armor": 0.45,
-      "DodgeChance": 0.25,
-      "Fortitude": 0.3
-    },
+    "additionalMaterialRequirements": [],
+    "specialResourceRequirements": [],
     "affinityTags": [
       "Armor",
-      "Legs"
-    ],
-    "defaultTemperingTags": [
-      "Armor",
-      "Legs"
+      "Legs",
+      "HeavyArmor",
+      "Defensive",
+      "PhysicalDefense",
+      "Block",
+      "Guard",
+      "Barrier",
+      "Threat"
     ],
     "tags": [
       "Armor",
-      "Legs"
+      "Legs",
+      "HeavyArmor",
+      "Defensive",
+      "PhysicalDefense",
+      "Block",
+      "Guard",
+      "Barrier",
+      "Threat"
     ],
-    "forms": [
-      {
-        "formId": "heavy_legplates",
-        "displayName": "Heavy Legplates",
-        "outputItemId": "heavy_legplates",
-        "outputItemType": "Legs",
-        "armorWeight": "Heavy",
-        "statProfileId": "armor_heavy",
-        "tags": [
-          "Armor",
-          "HeavyArmor",
-          "Defensive",
-          "PhysicalDefense",
-          "Block",
-          "Guard",
-          "Barrier",
-          "Threat"
-        ]
-      },
-      {
-        "formId": "medium_greaves",
-        "displayName": "Medium Greaves",
-        "outputItemId": "medium_greaves",
-        "outputItemType": "Legs",
-        "armorWeight": "Medium",
-        "statProfileId": "armor_medium",
-        "tags": [
-          "Armor",
-          "MediumArmor",
-          "Bruiser",
-          "BalancedDefense",
-          "Endurance",
-          "Physical"
-        ]
-      },
-      {
-        "formId": "light_legwraps",
-        "displayName": "Light Legwraps",
-        "outputItemId": "light_leggings",
-        "outputItemType": "Legs",
-        "armorWeight": "Light",
-        "statProfileId": "armor_light",
-        "tags": [
-          "Armor",
-          "LightArmor",
-          "Dodge",
-          "Crit",
-          "Speed",
-          "Precision",
-          "Poison"
-        ]
-      },
-      {
-        "formId": "cloth_pants",
-        "displayName": "Cloth Pants",
-        "outputItemId": "cloth_pants",
-        "outputItemType": "Legs",
-        "armorWeight": "Cloth",
-        "statProfileId": "armor_cloth",
-        "tags": [
-          "Armor",
-          "ClothArmor",
-          "Magic",
-          "Mana",
-          "Cooldown",
-          "Support",
-          "MagicDefense"
-        ]
-      }
-    ],
+    "minimumProfessionLevel": 1,
+    "behavior": {
+      "handedness": "",
+      "attackCategory": "",
+      "rangeCategory": "",
+      "basicAttackIntervalMultiplier": 1,
+      "basicAttackDamageMultiplier": 1,
+      "role": "Heavy"
+    },
+    "initialStatProfile": {
+      "Armor": 0.35,
+      "MaxHealth": 0.3,
+      "Fortitude": 0.2,
+      "CrowdControlResistance": 0.15
+    },
     "temperingProfile": {
-      "id": "recipe_leg_armor_tempering_profile",
-      "name": "Armor Tempering",
-      "statImprovementPool": [
+      "id": "recipe.armor.legs.heavy_legplates.tempering",
+      "name": "Heavy Legplates Tempering",
+      "stats": [
         {
           "stat": "Armor",
-          "weight": 35
-        },
-        {
-          "stat": "DodgeChance",
-          "weight": 25
-        },
-        {
-          "stat": "Fortitude",
-          "weight": 25
+          "weight": 35,
+          "category": "Primary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.4,
+          "minimumTier": 1
         },
         {
           "stat": "MaxHealth",
-          "weight": 15
-        }
-      ],
-      "affixPool": [
-        {
-          "id": "affix_armor",
-          "weight": 35
+          "weight": 30,
+          "category": "Primary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.35,
+          "minimumTier": 1
         },
         {
-          "id": "affix_fortitude",
-          "weight": 25
+          "stat": "Fortitude",
+          "weight": 20,
+          "category": "Secondary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.3,
+          "minimumTier": 1
         },
         {
-          "id": "affix_dodge_chance",
-          "weight": 15
+          "stat": "CrowdControlResistance",
+          "weight": 15,
+          "category": "Secondary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.3,
+          "minimumTier": 1
         }
-      ],
-      "specialModifierPool": []
+      ]
     }
   },
   {
-    "id": "recipe_ring",
+    "id": "recipe.armor.legs.medium_greaves",
+    "name": "Medium Greaves",
+    "description": "Craft a Medium Greaves.",
+    "icon": "medium_greaves",
+    "category": "ArmorForging",
+    "recipeFamily": "Armor",
+    "slot": "Legs",
+    "outputItemId": "medium_greaves",
+    "outputItemType": "Legs",
+    "enabled": true,
+    "tierRange": {
+      "min": 1,
+      "max": 1
+    },
+    "materialRequirements": [
+      {
+        "type": "TieredMaterial",
+        "family": "Metal",
+        "baseAmount": 10,
+        "amountPerTier": 4
+      },
+      {
+        "type": "TieredMaterial",
+        "family": "Hide",
+        "baseAmount": 5,
+        "amountPerTier": 2
+      }
+    ],
+    "additionalMaterialRequirements": [],
+    "specialResourceRequirements": [],
+    "affinityTags": [
+      "Armor",
+      "Legs",
+      "MediumArmor",
+      "Bruiser",
+      "BalancedDefense",
+      "Endurance",
+      "Physical"
+    ],
+    "tags": [
+      "Armor",
+      "Legs",
+      "MediumArmor",
+      "Bruiser",
+      "BalancedDefense",
+      "Endurance",
+      "Physical"
+    ],
+    "minimumProfessionLevel": 1,
+    "behavior": {
+      "handedness": "",
+      "attackCategory": "",
+      "rangeCategory": "",
+      "basicAttackIntervalMultiplier": 1,
+      "basicAttackDamageMultiplier": 1,
+      "role": "Medium"
+    },
+    "initialStatProfile": {
+      "MaxHealth": 0.3,
+      "Armor": 0.25,
+      "Precision": 0.25,
+      "Fortitude": 0.2
+    },
+    "temperingProfile": {
+      "id": "recipe.armor.legs.medium_greaves.tempering",
+      "name": "Medium Greaves Tempering",
+      "stats": [
+        {
+          "stat": "MaxHealth",
+          "weight": 30,
+          "category": "Primary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.4,
+          "minimumTier": 1
+        },
+        {
+          "stat": "Armor",
+          "weight": 25,
+          "category": "Primary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.35,
+          "minimumTier": 1
+        },
+        {
+          "stat": "Precision",
+          "weight": 25,
+          "category": "Secondary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.3,
+          "minimumTier": 1
+        },
+        {
+          "stat": "Fortitude",
+          "weight": 20,
+          "category": "Secondary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.3,
+          "minimumTier": 1
+        }
+      ]
+    }
+  },
+  {
+    "id": "recipe.armor.legs.light_legwraps",
+    "name": "Light Legwraps",
+    "description": "Craft a Light Legwraps.",
+    "icon": "light_leggings",
+    "category": "ArmorForging",
+    "recipeFamily": "Armor",
+    "slot": "Legs",
+    "outputItemId": "light_leggings",
+    "outputItemType": "Legs",
+    "enabled": true,
+    "tierRange": {
+      "min": 1,
+      "max": 1
+    },
+    "materialRequirements": [
+      {
+        "type": "TieredMaterial",
+        "family": "Metal",
+        "baseAmount": 10,
+        "amountPerTier": 4
+      },
+      {
+        "type": "TieredMaterial",
+        "family": "Hide",
+        "baseAmount": 5,
+        "amountPerTier": 2
+      }
+    ],
+    "additionalMaterialRequirements": [],
+    "specialResourceRequirements": [],
+    "affinityTags": [
+      "Armor",
+      "Legs",
+      "LightArmor",
+      "Dodge",
+      "Crit",
+      "Speed",
+      "Precision",
+      "Poison"
+    ],
+    "tags": [
+      "Armor",
+      "Legs",
+      "LightArmor",
+      "Dodge",
+      "Crit",
+      "Speed",
+      "Precision",
+      "Poison"
+    ],
+    "minimumProfessionLevel": 1,
+    "behavior": {
+      "handedness": "",
+      "attackCategory": "",
+      "rangeCategory": "",
+      "basicAttackIntervalMultiplier": 1,
+      "basicAttackDamageMultiplier": 1,
+      "role": "Light"
+    },
+    "initialStatProfile": {
+      "DodgeChance": 0.3,
+      "Precision": 0.25,
+      "AttackSpeed": 0.25,
+      "StatusResistance": 0.2
+    },
+    "temperingProfile": {
+      "id": "recipe.armor.legs.light_legwraps.tempering",
+      "name": "Light Legwraps Tempering",
+      "stats": [
+        {
+          "stat": "DodgeChance",
+          "weight": 30,
+          "category": "Primary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.4,
+          "minimumTier": 1
+        },
+        {
+          "stat": "Precision",
+          "weight": 25,
+          "category": "Primary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.35,
+          "minimumTier": 1
+        },
+        {
+          "stat": "AttackSpeed",
+          "weight": 25,
+          "category": "Secondary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.3,
+          "minimumTier": 1
+        },
+        {
+          "stat": "StatusResistance",
+          "weight": 20,
+          "category": "Secondary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.3,
+          "minimumTier": 1
+        }
+      ]
+    }
+  },
+  {
+    "id": "recipe.armor.legs.cloth_pants",
+    "name": "Cloth Pants",
+    "description": "Craft a Cloth Pants.",
+    "icon": "cloth_pants",
+    "category": "ArmorForging",
+    "recipeFamily": "Armor",
+    "slot": "Legs",
+    "outputItemId": "cloth_pants",
+    "outputItemType": "Legs",
+    "enabled": true,
+    "tierRange": {
+      "min": 1,
+      "max": 1
+    },
+    "materialRequirements": [
+      {
+        "type": "TieredMaterial",
+        "family": "Metal",
+        "baseAmount": 10,
+        "amountPerTier": 4
+      },
+      {
+        "type": "TieredMaterial",
+        "family": "Hide",
+        "baseAmount": 5,
+        "amountPerTier": 2
+      }
+    ],
+    "additionalMaterialRequirements": [],
+    "specialResourceRequirements": [],
+    "affinityTags": [
+      "Armor",
+      "Legs",
+      "ClothArmor",
+      "Magic",
+      "Mana",
+      "Cooldown",
+      "Support",
+      "MagicDefense"
+    ],
+    "tags": [
+      "Armor",
+      "Legs",
+      "ClothArmor",
+      "Magic",
+      "Mana",
+      "Cooldown",
+      "Support",
+      "MagicDefense"
+    ],
+    "minimumProfessionLevel": 1,
+    "behavior": {
+      "handedness": "",
+      "attackCategory": "",
+      "rangeCategory": "",
+      "basicAttackIntervalMultiplier": 1,
+      "basicAttackDamageMultiplier": 1,
+      "role": "Cloth"
+    },
+    "initialStatProfile": {
+      "Spirit": 0.35,
+      "Resistance": 0.25,
+      "Cooldown": 0.2,
+      "MaxHealth": 0.2
+    },
+    "temperingProfile": {
+      "id": "recipe.armor.legs.cloth_pants.tempering",
+      "name": "Cloth Pants Tempering",
+      "stats": [
+        {
+          "stat": "Spirit",
+          "weight": 35,
+          "category": "Primary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.4,
+          "minimumTier": 1
+        },
+        {
+          "stat": "Resistance",
+          "weight": 25,
+          "category": "Primary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.35,
+          "minimumTier": 1
+        },
+        {
+          "stat": "Cooldown",
+          "weight": 20,
+          "category": "Secondary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.3,
+          "minimumTier": 1
+        },
+        {
+          "stat": "MaxHealth",
+          "weight": 20,
+          "category": "Secondary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.3,
+          "minimumTier": 1
+        }
+      ]
+    }
+  },
+  {
+    "id": "recipe.jewelry.ring.band",
     "name": "Ring",
-    "recipeType": "Base",
+    "description": "Craft a Ring.",
+    "icon": "band",
+    "category": "JewelryCrafting",
     "recipeFamily": "Accessory",
     "slot": "Ring",
+    "outputItemId": "band",
     "outputItemType": "Ring",
+    "enabled": true,
     "tierRange": {
       "min": 1,
       "max": 1
@@ -458,87 +1336,91 @@
         "amountPerTier": 1
       }
     ],
-    "baseStatProfile": {
-      "Power": 0.35,
-      "Precision": 0.25,
-      "CritChance": 0.2,
-      "CritDamage": 0.2
-    },
+    "additionalMaterialRequirements": [],
+    "specialResourceRequirements": [],
     "affinityTags": [
       "Accessory",
       "Ring",
       "OffensiveScaling",
-      "StatusScaling"
-    ],
-    "defaultTemperingTags": [
-      "Accessory",
+      "StatusScaling",
       "Ring"
     ],
     "tags": [
       "Accessory",
       "Ring",
       "OffensiveScaling",
-      "StatusScaling"
+      "StatusScaling",
+      "Ring"
     ],
-    "forms": [
-      {
-        "formId": "band",
-        "displayName": "Band",
-        "outputItemId": "band",
-        "outputItemType": "Ring",
-        "statProfileId": "ring_band",
-        "tags": [
-          "Accessory",
-          "Ring",
-          "Band"
-        ]
-      }
-    ],
+    "minimumProfessionLevel": 1,
+    "behavior": {
+      "handedness": "",
+      "attackCategory": "",
+      "rangeCategory": "",
+      "basicAttackIntervalMultiplier": 1,
+      "basicAttackDamageMultiplier": 1,
+      "role": ""
+    },
+    "initialStatProfile": {
+      "Power": 0.3,
+      "CritChance": 0.25,
+      "Precision": 0.25,
+      "AttackSpeed": 0.2
+    },
     "temperingProfile": {
-      "id": "recipe_ring_tempering_profile",
+      "id": "recipe.jewelry.ring.band.tempering",
       "name": "Ring Tempering",
-      "statImprovementPool": [
+      "stats": [
         {
           "stat": "Power",
-          "weight": 30
-        },
-        {
-          "stat": "Precision",
-          "weight": 25
+          "weight": 30,
+          "category": "Primary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.4,
+          "minimumTier": 1
         },
         {
           "stat": "CritChance",
-          "weight": 25
+          "weight": 25,
+          "category": "Primary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.35,
+          "minimumTier": 1
         },
         {
-          "stat": "CritDamage",
-          "weight": 20
+          "stat": "Precision",
+          "weight": 25,
+          "category": "Secondary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.3,
+          "minimumTier": 1
+        },
+        {
+          "stat": "AttackSpeed",
+          "weight": 20,
+          "category": "Secondary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.3,
+          "minimumTier": 1
         }
-      ],
-      "affixPool": [
-        {
-          "id": "affix_power",
-          "weight": 35
-        },
-        {
-          "id": "affix_precision",
-          "weight": 30
-        },
-        {
-          "id": "affix_crit_chance",
-          "weight": 20
-        }
-      ],
-      "specialModifierPool": []
+      ]
     }
   },
   {
-    "id": "recipe_necklace",
-    "name": "Necklace",
-    "recipeType": "Base",
+    "id": "recipe.jewelry.necklace.amulet",
+    "name": "Amulet",
+    "description": "Craft a Amulet.",
+    "icon": "amulet",
+    "category": "JewelryCrafting",
     "recipeFamily": "Accessory",
     "slot": "Necklace",
+    "outputItemId": "amulet",
     "outputItemType": "Necklace",
+    "enabled": true,
     "tierRange": {
       "min": 1,
       "max": 1
@@ -557,114 +1439,93 @@
         "amountPerTier": 1
       }
     ],
-    "baseStatProfile": {
-      "MaxHealth": 0.35,
-      "Fortitude": 0.25,
-      "Spirit": 0.2,
-      "Resistance": 0.2
-    },
+    "additionalMaterialRequirements": [],
+    "specialResourceRequirements": [],
     "affinityTags": [
       "Accessory",
       "Necklace",
       "Survival",
-      "Sustain"
-    ],
-    "defaultTemperingTags": [
-      "Accessory",
-      "Necklace"
+      "Sustain",
+      "Amulet",
+      "Defensive"
     ],
     "tags": [
       "Accessory",
       "Necklace",
       "Survival",
-      "Sustain"
+      "Sustain",
+      "Amulet",
+      "Defensive"
     ],
-    "forms": [
-      {
-        "formId": "amulet",
-        "displayName": "Amulet",
-        "outputItemId": "amulet",
-        "outputItemType": "Necklace",
-        "statProfileId": "necklace_amulet",
-        "tags": [
-          "Accessory",
-          "Necklace",
-          "Amulet",
-          "Defensive"
-        ]
-      },
-      {
-        "formId": "charm",
-        "displayName": "Charm",
-        "outputItemId": "charm",
-        "outputItemType": "Necklace",
-        "statProfileId": "necklace_charm",
-        "tags": [
-          "Accessory",
-          "Necklace",
-          "Charm",
-          "Warden"
-        ]
-      },
-      {
-        "formId": "talisman",
-        "displayName": "Talisman",
-        "outputItemId": "talisman",
-        "outputItemType": "Necklace",
-        "statProfileId": "necklace_talisman",
-        "tags": [
-          "Accessory",
-          "Necklace",
-          "Talisman",
-          "Endurance"
-        ]
-      }
-    ],
+    "minimumProfessionLevel": 1,
+    "behavior": {
+      "handedness": "",
+      "attackCategory": "",
+      "rangeCategory": "",
+      "basicAttackIntervalMultiplier": 1,
+      "basicAttackDamageMultiplier": 1,
+      "role": ""
+    },
+    "initialStatProfile": {
+      "MaxHealth": 0.3,
+      "Resistance": 0.25,
+      "Fortitude": 0.25,
+      "HealthRegeneration": 0.2
+    },
     "temperingProfile": {
-      "id": "recipe_necklace_tempering_profile",
-      "name": "Necklace Tempering",
-      "statImprovementPool": [
+      "id": "recipe.jewelry.necklace.amulet.tempering",
+      "name": "Amulet Tempering",
+      "stats": [
         {
           "stat": "MaxHealth",
-          "weight": 30
-        },
-        {
-          "stat": "Fortitude",
-          "weight": 25
-        },
-        {
-          "stat": "Spirit",
-          "weight": 25
+          "weight": 30,
+          "category": "Primary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.4,
+          "minimumTier": 1
         },
         {
           "stat": "Resistance",
-          "weight": 20
-        }
-      ],
-      "affixPool": [
-        {
-          "id": "affix_fortitude",
-          "weight": 30
+          "weight": 25,
+          "category": "Primary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.35,
+          "minimumTier": 1
         },
         {
-          "id": "affix_spirit",
-          "weight": 25
+          "stat": "Fortitude",
+          "weight": 25,
+          "category": "Secondary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.3,
+          "minimumTier": 1
         },
         {
-          "id": "affix_grave_resistance",
-          "weight": 20
+          "stat": "HealthRegeneration",
+          "weight": 20,
+          "category": "Secondary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.3,
+          "minimumTier": 1
         }
-      ],
-      "specialModifierPool": []
+      ]
     }
   },
   {
-    "id": "recipe_relic",
+    "id": "recipe.jewelry.relic.vial",
     "name": "Relic",
-    "recipeType": "Base",
+    "description": "Craft a Relic.",
+    "icon": "vial",
+    "category": "JewelryCrafting",
     "recipeFamily": "Relic",
     "slot": "Relic",
+    "outputItemId": "vial",
     "outputItemType": "Relic",
+    "enabled": true,
     "tierRange": {
       "min": 1,
       "max": 1
@@ -683,113 +1544,89 @@
         "amountPerTier": 1
       }
     ],
-    "baseStatProfile": {
-      "Spirit": 0.35,
-      "Power": 0.25,
-      "SummonPower": 0.2,
-      "Cooldown": 0.2
-    },
+    "additionalMaterialRequirements": [],
+    "specialResourceRequirements": [],
     "affinityTags": [
       "Relic",
-      "BuildDefining"
-    ],
-    "defaultTemperingTags": [
-      "Relic"
+      "BuildDefining",
+      "Relic",
+      "Recovery"
     ],
     "tags": [
       "Relic",
-      "BuildDefining"
+      "BuildDefining",
+      "Relic",
+      "Recovery"
     ],
-    "forms": [
-      {
-        "formId": "vial",
-        "displayName": "Vial",
-        "outputItemId": "vial",
-        "outputItemType": "Relic",
-        "statProfileId": "relic_vial",
-        "tags": [
-          "Relic",
-          "Vial",
-          "Recovery"
-        ]
-      },
-      {
-        "formId": "heart",
-        "displayName": "Heart",
-        "outputItemId": "heart",
-        "outputItemType": "Relic",
-        "statProfileId": "relic_heart",
-        "tags": [
-          "Relic",
-          "Heart",
-          "Spirit",
-          "Mana"
-        ]
-      },
-      {
-        "formId": "totem",
-        "displayName": "Totem",
-        "outputItemId": "totem",
-        "outputItemType": "Relic",
-        "statProfileId": "relic_totem",
-        "tags": [
-          "Relic",
-          "Totem",
-          "Primal",
-          "Summon"
-        ]
-      }
-    ],
+    "minimumProfessionLevel": 1,
+    "behavior": {
+      "handedness": "",
+      "attackCategory": "",
+      "rangeCategory": "",
+      "basicAttackIntervalMultiplier": 1,
+      "basicAttackDamageMultiplier": 1,
+      "role": ""
+    },
+    "initialStatProfile": {
+      "Spirit": 0.3,
+      "HealthRegeneration": 0.25,
+      "StatusResistance": 0.25,
+      "MaxHealth": 0.2
+    },
     "temperingProfile": {
-      "id": "recipe_relic_tempering_profile",
+      "id": "recipe.jewelry.relic.vial.tempering",
       "name": "Relic Tempering",
-      "statImprovementPool": [
+      "stats": [
         {
           "stat": "Spirit",
-          "weight": 35
+          "weight": 30,
+          "category": "Primary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.4,
+          "minimumTier": 1
         },
         {
-          "stat": "Power",
-          "weight": 25
+          "stat": "HealthRegeneration",
+          "weight": 25,
+          "category": "Primary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.35,
+          "minimumTier": 1
         },
         {
-          "stat": "SummonPower",
-          "weight": 20
+          "stat": "StatusResistance",
+          "weight": 25,
+          "category": "Secondary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.3,
+          "minimumTier": 1
         },
         {
-          "stat": "Cooldown",
-          "weight": 20
-        }
-      ],
-      "affixPool": [
-        {
-          "id": "affix_spirit_focus",
-          "weight": 35
-        },
-        {
-          "id": "affix_power",
-          "weight": 25
-        },
-        {
-          "id": "affix_cooldown",
-          "weight": 20
-        }
-      ],
-      "specialModifierPool": [
-        {
-          "id": "special_arcane_cycle",
-          "weight": 10
+          "stat": "MaxHealth",
+          "weight": 20,
+          "category": "Secondary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.3,
+          "minimumTier": 1
         }
       ]
     }
   },
   {
-    "id": "recipe_one_handed_weapon",
-    "name": "One-Handed Weapon",
-    "recipeType": "Base",
+    "id": "recipe.weapon.one_handed.shortsword",
+    "name": "Shortsword",
+    "description": "Craft a Shortsword.",
+    "icon": "shortsword",
+    "category": "WeaponSmithing",
     "recipeFamily": "Weapon",
     "slot": "OneHanded",
+    "outputItemId": "shortsword",
     "outputItemType": "OneHanded",
+    "enabled": true,
     "tierRange": {
       "min": 1,
       "max": 1
@@ -808,155 +1645,525 @@
         "amountPerTier": 1
       }
     ],
-    "baseStatProfile": {
-      "WeaponDamage": 0.5,
-      "Precision": 0.25,
-      "CritChance": 0.15,
-      "ArmorPenetration": 0.1
-    },
+    "additionalMaterialRequirements": [],
+    "specialResourceRequirements": [],
     "affinityTags": [
       "Weapon",
       "MainHand",
-      "OneHanded"
-    ],
-    "defaultTemperingTags": [
-      "Weapon",
-      "OneHanded"
+      "OneHanded",
+      "Melee",
+      "Blade",
+      "Balanced"
     ],
     "tags": [
       "Weapon",
       "MainHand",
       "OneHanded",
-      "Melee"
+      "Melee",
+      "Blade",
+      "Balanced"
     ],
-    "forms": [
-      {
-        "formId": "shortsword",
-        "displayName": "Shortsword",
-        "outputItemId": "shortsword",
-        "outputItemType": "OneHanded",
-        "statProfileId": "one_handed_blade_balanced",
-        "tags": [
-          "Weapon",
-          "MainHand",
-          "OneHanded",
-          "Melee",
-          "Blade",
-          "Balanced"
-        ]
-      },
-      {
-        "formId": "dagger",
-        "displayName": "Dagger",
-        "outputItemId": "dagger",
-        "outputItemType": "OneHanded",
-        "statProfileId": "one_handed_dagger",
-        "tags": [
-          "Weapon",
-          "MainHand",
-          "OneHanded",
-          "Melee",
-          "Blade",
-          "Dagger",
-          "Finesse",
-          "Crit",
-          "Poison"
-        ]
-      },
-      {
-        "formId": "hand_axe",
-        "displayName": "Hand Axe",
-        "outputItemId": "hatchet",
-        "outputItemType": "OneHanded",
-        "statProfileId": "one_handed_axe",
-        "tags": [
-          "Weapon",
-          "MainHand",
-          "OneHanded",
-          "Melee",
-          "Axe",
-          "Bleed",
-          "Aggression"
-        ]
-      },
-      {
-        "formId": "mace",
-        "displayName": "Mace",
-        "outputItemId": "mace",
-        "outputItemType": "OneHanded",
-        "statProfileId": "one_handed_mace",
-        "tags": [
-          "Weapon",
-          "MainHand",
-          "OneHanded",
-          "Melee",
-          "Mace",
-          "ArmorBreak",
-          "Stun"
-        ]
-      },
-      {
-        "formId": "wand",
-        "displayName": "Wand",
-        "outputItemId": "wand",
-        "outputItemType": "OneHanded",
-        "statProfileId": "one_handed_wand",
-        "tags": [
-          "Weapon",
-          "MainHand",
-          "OneHanded",
-          "Wand",
-          "Magic",
-          "SpellPower"
-        ]
-      }
-    ],
+    "minimumProfessionLevel": 1,
+    "behavior": {
+      "handedness": "OneHanded",
+      "attackCategory": "Physical",
+      "rangeCategory": "Melee",
+      "basicAttackIntervalMultiplier": 1,
+      "basicAttackDamageMultiplier": 1,
+      "role": ""
+    },
+    "initialStatProfile": {
+      "Precision": 0.3,
+      "WeaponDamage": 0.3,
+      "CritChance": 0.2,
+      "AttackSpeed": 0.2
+    },
     "temperingProfile": {
-      "id": "recipe_one_handed_weapon_tempering_profile",
-      "name": "Weapon Tempering",
-      "statImprovementPool": [
-        {
-          "stat": "WeaponDamage",
-          "weight": 50
-        },
+      "id": "recipe.weapon.one_handed.shortsword.tempering",
+      "name": "Shortsword Tempering",
+      "stats": [
         {
           "stat": "Precision",
-          "weight": 25
+          "weight": 30,
+          "category": "Primary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.4,
+          "minimumTier": 1
+        },
+        {
+          "stat": "WeaponDamage",
+          "weight": 30,
+          "category": "Primary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.35,
+          "minimumTier": 1
         },
         {
           "stat": "CritChance",
-          "weight": 25
-        }
-      ],
-      "affixPool": [
-        {
-          "id": "affix_weapon_damage",
-          "weight": 50
+          "weight": 20,
+          "category": "Secondary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.3,
+          "minimumTier": 1
         },
         {
-          "id": "affix_precision",
-          "weight": 30
-        },
-        {
-          "id": "affix_crit_chance",
-          "weight": 20
-        }
-      ],
-      "specialModifierPool": [
-        {
-          "id": "special_decisive_edge",
-          "weight": 10
+          "stat": "AttackSpeed",
+          "weight": 20,
+          "category": "Secondary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.3,
+          "minimumTier": 1
         }
       ]
     }
   },
   {
-    "id": "recipe_two_handed_weapon",
-    "name": "Two-Handed Weapon",
-    "recipeType": "Base",
+    "id": "recipe.weapon.one_handed.dagger",
+    "name": "Dagger",
+    "description": "Craft a Dagger.",
+    "icon": "dagger",
+    "category": "WeaponSmithing",
+    "recipeFamily": "Weapon",
+    "slot": "OneHanded",
+    "outputItemId": "dagger",
+    "outputItemType": "OneHanded",
+    "enabled": true,
+    "tierRange": {
+      "min": 1,
+      "max": 1
+    },
+    "materialRequirements": [
+      {
+        "type": "TieredMaterial",
+        "family": "Metal",
+        "baseAmount": 10,
+        "amountPerTier": 4
+      },
+      {
+        "type": "TieredMaterial",
+        "family": "Wood",
+        "baseAmount": 3,
+        "amountPerTier": 1
+      }
+    ],
+    "additionalMaterialRequirements": [],
+    "specialResourceRequirements": [],
+    "affinityTags": [
+      "Weapon",
+      "MainHand",
+      "OneHanded",
+      "Melee",
+      "Blade",
+      "Dagger",
+      "Finesse",
+      "Crit",
+      "Poison"
+    ],
+    "tags": [
+      "Weapon",
+      "MainHand",
+      "OneHanded",
+      "Melee",
+      "Blade",
+      "Dagger",
+      "Finesse",
+      "Crit",
+      "Poison"
+    ],
+    "minimumProfessionLevel": 1,
+    "behavior": {
+      "handedness": "OneHanded",
+      "attackCategory": "Physical",
+      "rangeCategory": "Melee",
+      "basicAttackIntervalMultiplier": 0.75,
+      "basicAttackDamageMultiplier": 0.78,
+      "role": ""
+    },
+    "initialStatProfile": {
+      "AttackSpeed": 0.3,
+      "CritChance": 0.25,
+      "Precision": 0.25,
+      "WeaponDamage": 0.2
+    },
+    "temperingProfile": {
+      "id": "recipe.weapon.one_handed.dagger.tempering",
+      "name": "Dagger Tempering",
+      "stats": [
+        {
+          "stat": "AttackSpeed",
+          "weight": 30,
+          "category": "Primary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.4,
+          "minimumTier": 1
+        },
+        {
+          "stat": "CritChance",
+          "weight": 25,
+          "category": "Primary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.35,
+          "minimumTier": 1
+        },
+        {
+          "stat": "Precision",
+          "weight": 25,
+          "category": "Secondary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.3,
+          "minimumTier": 1
+        },
+        {
+          "stat": "WeaponDamage",
+          "weight": 20,
+          "category": "Secondary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.3,
+          "minimumTier": 1
+        }
+      ]
+    }
+  },
+  {
+    "id": "recipe.weapon.one_handed.hand_axe",
+    "name": "Hand Axe",
+    "description": "Craft a Hand Axe.",
+    "icon": "hatchet",
+    "category": "WeaponSmithing",
+    "recipeFamily": "Weapon",
+    "slot": "OneHanded",
+    "outputItemId": "hatchet",
+    "outputItemType": "OneHanded",
+    "enabled": true,
+    "tierRange": {
+      "min": 1,
+      "max": 1
+    },
+    "materialRequirements": [
+      {
+        "type": "TieredMaterial",
+        "family": "Metal",
+        "baseAmount": 10,
+        "amountPerTier": 4
+      },
+      {
+        "type": "TieredMaterial",
+        "family": "Wood",
+        "baseAmount": 3,
+        "amountPerTier": 1
+      }
+    ],
+    "additionalMaterialRequirements": [],
+    "specialResourceRequirements": [],
+    "affinityTags": [
+      "Weapon",
+      "MainHand",
+      "OneHanded",
+      "Melee",
+      "Axe",
+      "Bleed",
+      "Aggression"
+    ],
+    "tags": [
+      "Weapon",
+      "MainHand",
+      "OneHanded",
+      "Melee",
+      "Axe",
+      "Bleed",
+      "Aggression"
+    ],
+    "minimumProfessionLevel": 1,
+    "behavior": {
+      "handedness": "OneHanded",
+      "attackCategory": "Physical",
+      "rangeCategory": "Melee",
+      "basicAttackIntervalMultiplier": 1,
+      "basicAttackDamageMultiplier": 1,
+      "role": ""
+    },
+    "initialStatProfile": {
+      "WeaponDamage": 0.35,
+      "CritDamage": 0.25,
+      "ArmorPenetration": 0.2,
+      "Precision": 0.2
+    },
+    "temperingProfile": {
+      "id": "recipe.weapon.one_handed.hand_axe.tempering",
+      "name": "Hand Axe Tempering",
+      "stats": [
+        {
+          "stat": "WeaponDamage",
+          "weight": 35,
+          "category": "Primary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.4,
+          "minimumTier": 1
+        },
+        {
+          "stat": "CritDamage",
+          "weight": 25,
+          "category": "Primary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.35,
+          "minimumTier": 1
+        },
+        {
+          "stat": "ArmorPenetration",
+          "weight": 20,
+          "category": "Secondary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.3,
+          "minimumTier": 1
+        },
+        {
+          "stat": "Precision",
+          "weight": 20,
+          "category": "Secondary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.3,
+          "minimumTier": 1
+        }
+      ]
+    }
+  },
+  {
+    "id": "recipe.weapon.one_handed.mace",
+    "name": "Mace",
+    "description": "Craft a Mace.",
+    "icon": "mace",
+    "category": "WeaponSmithing",
+    "recipeFamily": "Weapon",
+    "slot": "OneHanded",
+    "outputItemId": "mace",
+    "outputItemType": "OneHanded",
+    "enabled": true,
+    "tierRange": {
+      "min": 1,
+      "max": 1
+    },
+    "materialRequirements": [
+      {
+        "type": "TieredMaterial",
+        "family": "Metal",
+        "baseAmount": 10,
+        "amountPerTier": 4
+      },
+      {
+        "type": "TieredMaterial",
+        "family": "Wood",
+        "baseAmount": 3,
+        "amountPerTier": 1
+      }
+    ],
+    "additionalMaterialRequirements": [],
+    "specialResourceRequirements": [],
+    "affinityTags": [
+      "Weapon",
+      "MainHand",
+      "OneHanded",
+      "Melee",
+      "Mace",
+      "ArmorBreak",
+      "Stun"
+    ],
+    "tags": [
+      "Weapon",
+      "MainHand",
+      "OneHanded",
+      "Melee",
+      "Mace",
+      "ArmorBreak",
+      "Stun"
+    ],
+    "minimumProfessionLevel": 1,
+    "behavior": {
+      "handedness": "OneHanded",
+      "attackCategory": "Physical",
+      "rangeCategory": "Melee",
+      "basicAttackIntervalMultiplier": 1.25,
+      "basicAttackDamageMultiplier": 1.22,
+      "role": ""
+    },
+    "initialStatProfile": {
+      "WeaponDamage": 0.35,
+      "ArmorPenetration": 0.3,
+      "Power": 0.2,
+      "Precision": 0.15
+    },
+    "temperingProfile": {
+      "id": "recipe.weapon.one_handed.mace.tempering",
+      "name": "Mace Tempering",
+      "stats": [
+        {
+          "stat": "WeaponDamage",
+          "weight": 35,
+          "category": "Primary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.4,
+          "minimumTier": 1
+        },
+        {
+          "stat": "ArmorPenetration",
+          "weight": 30,
+          "category": "Primary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.35,
+          "minimumTier": 1
+        },
+        {
+          "stat": "Power",
+          "weight": 20,
+          "category": "Secondary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.3,
+          "minimumTier": 1
+        },
+        {
+          "stat": "Precision",
+          "weight": 15,
+          "category": "Secondary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.3,
+          "minimumTier": 1
+        }
+      ]
+    }
+  },
+  {
+    "id": "recipe.weapon.one_handed.wand",
+    "name": "Wand",
+    "description": "Craft a Wand.",
+    "icon": "wand",
+    "category": "WeaponSmithing",
+    "recipeFamily": "Weapon",
+    "slot": "OneHanded",
+    "outputItemId": "wand",
+    "outputItemType": "OneHanded",
+    "enabled": true,
+    "tierRange": {
+      "min": 1,
+      "max": 1
+    },
+    "materialRequirements": [
+      {
+        "type": "TieredMaterial",
+        "family": "Metal",
+        "baseAmount": 10,
+        "amountPerTier": 4
+      },
+      {
+        "type": "TieredMaterial",
+        "family": "Wood",
+        "baseAmount": 3,
+        "amountPerTier": 1
+      }
+    ],
+    "additionalMaterialRequirements": [],
+    "specialResourceRequirements": [],
+    "affinityTags": [
+      "Weapon",
+      "MainHand",
+      "OneHanded",
+      "Wand",
+      "Magic",
+      "SpellPower",
+      "Melee"
+    ],
+    "tags": [
+      "Weapon",
+      "MainHand",
+      "OneHanded",
+      "Melee",
+      "Wand",
+      "Magic",
+      "SpellPower"
+    ],
+    "minimumProfessionLevel": 1,
+    "behavior": {
+      "handedness": "OneHanded",
+      "attackCategory": "Magical",
+      "rangeCategory": "Ranged",
+      "basicAttackIntervalMultiplier": 1,
+      "basicAttackDamageMultiplier": 1,
+      "role": ""
+    },
+    "initialStatProfile": {
+      "Spirit": 0.35,
+      "MagicPenetration": 0.25,
+      "Precision": 0.2,
+      "AttackSpeed": 0.2
+    },
+    "temperingProfile": {
+      "id": "recipe.weapon.one_handed.wand.tempering",
+      "name": "Wand Tempering",
+      "stats": [
+        {
+          "stat": "Spirit",
+          "weight": 35,
+          "category": "Primary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.4,
+          "minimumTier": 1
+        },
+        {
+          "stat": "MagicPenetration",
+          "weight": 25,
+          "category": "Primary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.35,
+          "minimumTier": 1
+        },
+        {
+          "stat": "Precision",
+          "weight": 20,
+          "category": "Secondary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.3,
+          "minimumTier": 1
+        },
+        {
+          "stat": "AttackSpeed",
+          "weight": 20,
+          "category": "Secondary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.3,
+          "minimumTier": 1
+        }
+      ]
+    }
+  },
+  {
+    "id": "recipe.weapon.two_handed.greatsword",
+    "name": "Greatsword",
+    "description": "Craft a Greatsword.",
+    "icon": "greatsword",
+    "category": "WeaponSmithing",
     "recipeFamily": "Weapon",
     "slot": "TwoHanded",
+    "outputItemId": "greatsword",
     "outputItemType": "TwoHanded",
+    "enabled": true,
     "tierRange": {
       "min": 1,
       "max": 1
@@ -975,196 +2182,828 @@
         "amountPerTier": 2
       }
     ],
-    "baseStatProfile": {
-      "WeaponDamage": 0.55,
-      "Power": 0.2,
-      "Precision": 0.15,
-      "ArmorPenetration": 0.1
-    },
+    "additionalMaterialRequirements": [],
+    "specialResourceRequirements": [],
     "affinityTags": [
       "Weapon",
-      "TwoHanded"
-    ],
-    "defaultTemperingTags": [
-      "Weapon",
-      "TwoHanded"
+      "TwoHanded",
+      "GreatWeapon",
+      "Blade",
+      "Cleave",
+      "Balanced"
     ],
     "tags": [
       "Weapon",
-      "TwoHanded"
+      "TwoHanded",
+      "GreatWeapon",
+      "Blade",
+      "Cleave",
+      "Balanced"
     ],
-    "forms": [
-      {
-        "formId": "greatsword",
-        "displayName": "Greatsword",
-        "outputItemId": "greatsword",
-        "outputItemType": "TwoHanded",
-        "statProfileId": "two_handed_greatsword",
-        "tags": [
-          "Weapon",
-          "TwoHanded",
-          "GreatWeapon",
-          "Blade",
-          "Cleave",
-          "Balanced"
-        ]
-      },
-      {
-        "formId": "battle_axe",
-        "displayName": "Battle Axe",
-        "outputItemId": "battle_axe",
-        "outputItemType": "TwoHanded",
-        "statProfileId": "two_handed_battle_axe",
-        "tags": [
-          "Weapon",
-          "TwoHanded",
-          "GreatWeapon",
-          "Axe",
-          "Crit",
-          "Bleed"
-        ]
-      },
-      {
-        "formId": "maul",
-        "displayName": "Maul",
-        "outputItemId": "maul",
-        "outputItemType": "TwoHanded",
-        "statProfileId": "two_handed_maul",
-        "tags": [
-          "Weapon",
-          "TwoHanded",
-          "GreatWeapon",
-          "Mace",
-          "Stagger",
-          "BlockBreak"
-        ]
-      },
-      {
-        "formId": "spear",
-        "displayName": "Spear",
-        "outputItemId": "spear",
-        "outputItemType": "TwoHanded",
-        "statProfileId": "two_handed_spear",
-        "tags": [
-          "Weapon",
-          "TwoHanded",
-          "Polearm",
-          "Reach",
-          "Precision",
-          "AntiBoss"
-        ]
-      },
-      {
-        "formId": "staff",
-        "displayName": "Staff",
-        "outputItemId": "staff",
-        "outputItemType": "TwoHanded",
-        "statProfileId": "two_handed_staff",
-        "tags": [
-          "Weapon",
-          "TwoHanded",
-          "Staff",
-          "Caster",
-          "Support",
-          "Magic"
-        ]
-      },
-      {
-        "formId": "longbow",
-        "displayName": "Longbow",
-        "outputItemId": "longbow",
-        "outputItemType": "TwoHanded",
-        "statProfileId": "two_handed_longbow",
-        "tags": [
-          "Weapon",
-          "TwoHanded",
-          "Ranged",
-          "Bow",
-          "SustainedDamage",
-          "Precision"
-        ]
-      },
-      {
-        "formId": "crossbow",
-        "displayName": "Crossbow",
-        "outputItemId": "crossbow",
-        "outputItemType": "TwoHanded",
-        "statProfileId": "two_handed_crossbow",
-        "tags": [
-          "Weapon",
-          "TwoHanded",
-          "Ranged",
-          "Crossbow",
-          "Burst",
-          "ArmorPenetration"
-        ]
-      },
-      {
-        "formId": "gauntlets",
-        "displayName": "Gauntlets",
-        "outputItemId": "gauntlets",
-        "outputItemType": "TwoHanded",
-        "statProfileId": "two_handed_gauntlets",
-        "tags": [
-          "Weapon",
-          "TwoHanded",
-          "Gauntlets",
-          "Brawler",
-          "Combo",
-          "Multihit"
-        ]
-      }
-    ],
+    "minimumProfessionLevel": 1,
+    "behavior": {
+      "handedness": "TwoHanded",
+      "attackCategory": "Physical",
+      "rangeCategory": "Melee",
+      "basicAttackIntervalMultiplier": 1,
+      "basicAttackDamageMultiplier": 1,
+      "role": ""
+    },
+    "initialStatProfile": {
+      "WeaponDamage": 0.35,
+      "Precision": 0.25,
+      "CritChance": 0.2,
+      "CritDamage": 0.2
+    },
     "temperingProfile": {
-      "id": "recipe_two_handed_weapon_tempering_profile",
-      "name": "Weapon Tempering",
-      "statImprovementPool": [
+      "id": "recipe.weapon.two_handed.greatsword.tempering",
+      "name": "Greatsword Tempering",
+      "stats": [
         {
           "stat": "WeaponDamage",
-          "weight": 45
-        },
-        {
-          "stat": "Power",
-          "weight": 25
+          "weight": 35,
+          "category": "Primary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.4,
+          "minimumTier": 1
         },
         {
           "stat": "Precision",
-          "weight": 20
+          "weight": 25,
+          "category": "Primary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.35,
+          "minimumTier": 1
         },
         {
-          "stat": "ArmorPenetration",
-          "weight": 10
-        }
-      ],
-      "affixPool": [
-        {
-          "id": "affix_weapon_damage",
-          "weight": 45
+          "stat": "CritChance",
+          "weight": 20,
+          "category": "Secondary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.3,
+          "minimumTier": 1
         },
         {
-          "id": "affix_precision",
-          "weight": 25
-        },
-        {
-          "id": "affix_armor_penetration",
-          "weight": 15
-        }
-      ],
-      "specialModifierPool": [
-        {
-          "id": "special_decisive_edge",
-          "weight": 10
+          "stat": "CritDamage",
+          "weight": 20,
+          "category": "Secondary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.3,
+          "minimumTier": 1
         }
       ]
     }
   },
   {
-    "id": "recipe_offhand",
-    "name": "Offhand",
-    "recipeType": "Base",
+    "id": "recipe.weapon.two_handed.battle_axe",
+    "name": "Battle Axe",
+    "description": "Craft a Battle Axe.",
+    "icon": "battle_axe",
+    "category": "WeaponSmithing",
+    "recipeFamily": "Weapon",
+    "slot": "TwoHanded",
+    "outputItemId": "battle_axe",
+    "outputItemType": "TwoHanded",
+    "enabled": true,
+    "tierRange": {
+      "min": 1,
+      "max": 1
+    },
+    "materialRequirements": [
+      {
+        "type": "TieredMaterial",
+        "family": "Metal",
+        "baseAmount": 16,
+        "amountPerTier": 6
+      },
+      {
+        "type": "TieredMaterial",
+        "family": "Wood",
+        "baseAmount": 6,
+        "amountPerTier": 2
+      }
+    ],
+    "additionalMaterialRequirements": [],
+    "specialResourceRequirements": [],
+    "affinityTags": [
+      "Weapon",
+      "TwoHanded",
+      "GreatWeapon",
+      "Axe",
+      "Crit",
+      "Bleed"
+    ],
+    "tags": [
+      "Weapon",
+      "TwoHanded",
+      "GreatWeapon",
+      "Axe",
+      "Crit",
+      "Bleed"
+    ],
+    "minimumProfessionLevel": 1,
+    "behavior": {
+      "handedness": "TwoHanded",
+      "attackCategory": "Physical",
+      "rangeCategory": "Melee",
+      "basicAttackIntervalMultiplier": 1,
+      "basicAttackDamageMultiplier": 1,
+      "role": ""
+    },
+    "initialStatProfile": {
+      "WeaponDamage": 0.35,
+      "CritDamage": 0.25,
+      "ArmorPenetration": 0.2,
+      "Precision": 0.2
+    },
+    "temperingProfile": {
+      "id": "recipe.weapon.two_handed.battle_axe.tempering",
+      "name": "Battle Axe Tempering",
+      "stats": [
+        {
+          "stat": "WeaponDamage",
+          "weight": 35,
+          "category": "Primary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.4,
+          "minimumTier": 1
+        },
+        {
+          "stat": "CritDamage",
+          "weight": 25,
+          "category": "Primary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.35,
+          "minimumTier": 1
+        },
+        {
+          "stat": "ArmorPenetration",
+          "weight": 20,
+          "category": "Secondary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.3,
+          "minimumTier": 1
+        },
+        {
+          "stat": "Precision",
+          "weight": 20,
+          "category": "Secondary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.3,
+          "minimumTier": 1
+        }
+      ]
+    }
+  },
+  {
+    "id": "recipe.weapon.two_handed.maul",
+    "name": "Maul",
+    "description": "Craft a Maul.",
+    "icon": "maul",
+    "category": "WeaponSmithing",
+    "recipeFamily": "Weapon",
+    "slot": "TwoHanded",
+    "outputItemId": "maul",
+    "outputItemType": "TwoHanded",
+    "enabled": true,
+    "tierRange": {
+      "min": 1,
+      "max": 1
+    },
+    "materialRequirements": [
+      {
+        "type": "TieredMaterial",
+        "family": "Metal",
+        "baseAmount": 16,
+        "amountPerTier": 6
+      },
+      {
+        "type": "TieredMaterial",
+        "family": "Wood",
+        "baseAmount": 6,
+        "amountPerTier": 2
+      }
+    ],
+    "additionalMaterialRequirements": [],
+    "specialResourceRequirements": [],
+    "affinityTags": [
+      "Weapon",
+      "TwoHanded",
+      "GreatWeapon",
+      "Mace",
+      "Stagger",
+      "BlockBreak"
+    ],
+    "tags": [
+      "Weapon",
+      "TwoHanded",
+      "GreatWeapon",
+      "Mace",
+      "Stagger",
+      "BlockBreak"
+    ],
+    "minimumProfessionLevel": 1,
+    "behavior": {
+      "handedness": "TwoHanded",
+      "attackCategory": "Physical",
+      "rangeCategory": "Melee",
+      "basicAttackIntervalMultiplier": 1.25,
+      "basicAttackDamageMultiplier": 1.22,
+      "role": ""
+    },
+    "initialStatProfile": {
+      "WeaponDamage": 0.35,
+      "ArmorPenetration": 0.3,
+      "Power": 0.2,
+      "Precision": 0.15
+    },
+    "temperingProfile": {
+      "id": "recipe.weapon.two_handed.maul.tempering",
+      "name": "Maul Tempering",
+      "stats": [
+        {
+          "stat": "WeaponDamage",
+          "weight": 35,
+          "category": "Primary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.4,
+          "minimumTier": 1
+        },
+        {
+          "stat": "ArmorPenetration",
+          "weight": 30,
+          "category": "Primary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.35,
+          "minimumTier": 1
+        },
+        {
+          "stat": "Power",
+          "weight": 20,
+          "category": "Secondary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.3,
+          "minimumTier": 1
+        },
+        {
+          "stat": "Precision",
+          "weight": 15,
+          "category": "Secondary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.3,
+          "minimumTier": 1
+        }
+      ]
+    }
+  },
+  {
+    "id": "recipe.weapon.two_handed.spear",
+    "name": "Spear",
+    "description": "Craft a Spear.",
+    "icon": "spear",
+    "category": "WeaponSmithing",
+    "recipeFamily": "Weapon",
+    "slot": "TwoHanded",
+    "outputItemId": "spear",
+    "outputItemType": "TwoHanded",
+    "enabled": true,
+    "tierRange": {
+      "min": 1,
+      "max": 1
+    },
+    "materialRequirements": [
+      {
+        "type": "TieredMaterial",
+        "family": "Metal",
+        "baseAmount": 16,
+        "amountPerTier": 6
+      },
+      {
+        "type": "TieredMaterial",
+        "family": "Wood",
+        "baseAmount": 6,
+        "amountPerTier": 2
+      }
+    ],
+    "additionalMaterialRequirements": [],
+    "specialResourceRequirements": [],
+    "affinityTags": [
+      "Weapon",
+      "TwoHanded",
+      "Polearm",
+      "Reach",
+      "Precision",
+      "AntiBoss"
+    ],
+    "tags": [
+      "Weapon",
+      "TwoHanded",
+      "Polearm",
+      "Reach",
+      "Precision",
+      "AntiBoss"
+    ],
+    "minimumProfessionLevel": 1,
+    "behavior": {
+      "handedness": "TwoHanded",
+      "attackCategory": "Physical",
+      "rangeCategory": "Melee",
+      "basicAttackIntervalMultiplier": 1,
+      "basicAttackDamageMultiplier": 1,
+      "role": ""
+    },
+    "initialStatProfile": {
+      "Precision": 0.3,
+      "ArmorPenetration": 0.25,
+      "WeaponDamage": 0.25,
+      "CritChance": 0.2
+    },
+    "temperingProfile": {
+      "id": "recipe.weapon.two_handed.spear.tempering",
+      "name": "Spear Tempering",
+      "stats": [
+        {
+          "stat": "Precision",
+          "weight": 30,
+          "category": "Primary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.4,
+          "minimumTier": 1
+        },
+        {
+          "stat": "ArmorPenetration",
+          "weight": 25,
+          "category": "Primary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.35,
+          "minimumTier": 1
+        },
+        {
+          "stat": "WeaponDamage",
+          "weight": 25,
+          "category": "Secondary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.3,
+          "minimumTier": 1
+        },
+        {
+          "stat": "CritChance",
+          "weight": 20,
+          "category": "Secondary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.3,
+          "minimumTier": 1
+        }
+      ]
+    }
+  },
+  {
+    "id": "recipe.weapon.two_handed.staff",
+    "name": "Staff",
+    "description": "Craft a Staff.",
+    "icon": "staff",
+    "category": "WeaponSmithing",
+    "recipeFamily": "Weapon",
+    "slot": "TwoHanded",
+    "outputItemId": "staff",
+    "outputItemType": "TwoHanded",
+    "enabled": true,
+    "tierRange": {
+      "min": 1,
+      "max": 1
+    },
+    "materialRequirements": [
+      {
+        "type": "TieredMaterial",
+        "family": "Metal",
+        "baseAmount": 16,
+        "amountPerTier": 6
+      },
+      {
+        "type": "TieredMaterial",
+        "family": "Wood",
+        "baseAmount": 6,
+        "amountPerTier": 2
+      }
+    ],
+    "additionalMaterialRequirements": [],
+    "specialResourceRequirements": [],
+    "affinityTags": [
+      "Weapon",
+      "TwoHanded",
+      "Staff",
+      "Caster",
+      "Support",
+      "Magic"
+    ],
+    "tags": [
+      "Weapon",
+      "TwoHanded",
+      "Staff",
+      "Caster",
+      "Support",
+      "Magic"
+    ],
+    "minimumProfessionLevel": 1,
+    "behavior": {
+      "handedness": "TwoHanded",
+      "attackCategory": "Magical",
+      "rangeCategory": "Ranged",
+      "basicAttackIntervalMultiplier": 1,
+      "basicAttackDamageMultiplier": 1,
+      "role": ""
+    },
+    "initialStatProfile": {
+      "Spirit": 0.35,
+      "MagicPenetration": 0.25,
+      "Cooldown": 0.2,
+      "Precision": 0.2
+    },
+    "temperingProfile": {
+      "id": "recipe.weapon.two_handed.staff.tempering",
+      "name": "Staff Tempering",
+      "stats": [
+        {
+          "stat": "Spirit",
+          "weight": 35,
+          "category": "Primary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.4,
+          "minimumTier": 1
+        },
+        {
+          "stat": "MagicPenetration",
+          "weight": 25,
+          "category": "Primary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.35,
+          "minimumTier": 1
+        },
+        {
+          "stat": "Cooldown",
+          "weight": 20,
+          "category": "Secondary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.3,
+          "minimumTier": 1
+        },
+        {
+          "stat": "Precision",
+          "weight": 20,
+          "category": "Secondary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.3,
+          "minimumTier": 1
+        }
+      ]
+    }
+  },
+  {
+    "id": "recipe.weapon.two_handed.longbow",
+    "name": "Longbow",
+    "description": "Craft a Longbow.",
+    "icon": "longbow",
+    "category": "WeaponSmithing",
+    "recipeFamily": "Weapon",
+    "slot": "TwoHanded",
+    "outputItemId": "longbow",
+    "outputItemType": "TwoHanded",
+    "enabled": true,
+    "tierRange": {
+      "min": 1,
+      "max": 1
+    },
+    "materialRequirements": [
+      {
+        "type": "TieredMaterial",
+        "family": "Metal",
+        "baseAmount": 16,
+        "amountPerTier": 6
+      },
+      {
+        "type": "TieredMaterial",
+        "family": "Wood",
+        "baseAmount": 6,
+        "amountPerTier": 2
+      }
+    ],
+    "additionalMaterialRequirements": [],
+    "specialResourceRequirements": [],
+    "affinityTags": [
+      "Weapon",
+      "TwoHanded",
+      "Ranged",
+      "Bow",
+      "SustainedDamage",
+      "Precision"
+    ],
+    "tags": [
+      "Weapon",
+      "TwoHanded",
+      "Ranged",
+      "Bow",
+      "SustainedDamage",
+      "Precision"
+    ],
+    "minimumProfessionLevel": 1,
+    "behavior": {
+      "handedness": "TwoHanded",
+      "attackCategory": "Physical",
+      "rangeCategory": "Ranged",
+      "basicAttackIntervalMultiplier": 1,
+      "basicAttackDamageMultiplier": 1,
+      "role": ""
+    },
+    "initialStatProfile": {
+      "Precision": 0.3,
+      "WeaponDamage": 0.3,
+      "CritChance": 0.2,
+      "ArmorPenetration": 0.2
+    },
+    "temperingProfile": {
+      "id": "recipe.weapon.two_handed.longbow.tempering",
+      "name": "Longbow Tempering",
+      "stats": [
+        {
+          "stat": "Precision",
+          "weight": 30,
+          "category": "Primary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.4,
+          "minimumTier": 1
+        },
+        {
+          "stat": "WeaponDamage",
+          "weight": 30,
+          "category": "Primary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.35,
+          "minimumTier": 1
+        },
+        {
+          "stat": "CritChance",
+          "weight": 20,
+          "category": "Secondary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.3,
+          "minimumTier": 1
+        },
+        {
+          "stat": "ArmorPenetration",
+          "weight": 20,
+          "category": "Secondary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.3,
+          "minimumTier": 1
+        }
+      ]
+    }
+  },
+  {
+    "id": "recipe.weapon.two_handed.crossbow",
+    "name": "Crossbow",
+    "description": "Craft a Crossbow.",
+    "icon": "crossbow",
+    "category": "WeaponSmithing",
+    "recipeFamily": "Weapon",
+    "slot": "TwoHanded",
+    "outputItemId": "crossbow",
+    "outputItemType": "TwoHanded",
+    "enabled": true,
+    "tierRange": {
+      "min": 1,
+      "max": 1
+    },
+    "materialRequirements": [
+      {
+        "type": "TieredMaterial",
+        "family": "Metal",
+        "baseAmount": 16,
+        "amountPerTier": 6
+      },
+      {
+        "type": "TieredMaterial",
+        "family": "Wood",
+        "baseAmount": 6,
+        "amountPerTier": 2
+      }
+    ],
+    "additionalMaterialRequirements": [],
+    "specialResourceRequirements": [],
+    "affinityTags": [
+      "Weapon",
+      "TwoHanded",
+      "Ranged",
+      "Crossbow",
+      "Burst",
+      "ArmorPenetration"
+    ],
+    "tags": [
+      "Weapon",
+      "TwoHanded",
+      "Ranged",
+      "Crossbow",
+      "Burst",
+      "ArmorPenetration"
+    ],
+    "minimumProfessionLevel": 1,
+    "behavior": {
+      "handedness": "TwoHanded",
+      "attackCategory": "Physical",
+      "rangeCategory": "Ranged",
+      "basicAttackIntervalMultiplier": 1.25,
+      "basicAttackDamageMultiplier": 1.22,
+      "role": ""
+    },
+    "initialStatProfile": {
+      "WeaponDamage": 0.35,
+      "ArmorPenetration": 0.3,
+      "CritDamage": 0.2,
+      "Precision": 0.15
+    },
+    "temperingProfile": {
+      "id": "recipe.weapon.two_handed.crossbow.tempering",
+      "name": "Crossbow Tempering",
+      "stats": [
+        {
+          "stat": "WeaponDamage",
+          "weight": 35,
+          "category": "Primary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.4,
+          "minimumTier": 1
+        },
+        {
+          "stat": "ArmorPenetration",
+          "weight": 30,
+          "category": "Primary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.35,
+          "minimumTier": 1
+        },
+        {
+          "stat": "CritDamage",
+          "weight": 20,
+          "category": "Secondary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.3,
+          "minimumTier": 1
+        },
+        {
+          "stat": "Precision",
+          "weight": 15,
+          "category": "Secondary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.3,
+          "minimumTier": 1
+        }
+      ]
+    }
+  },
+  {
+    "id": "recipe.weapon.two_handed.gauntlets",
+    "name": "Gauntlets",
+    "description": "Craft a Gauntlets.",
+    "icon": "gauntlets",
+    "category": "WeaponSmithing",
+    "recipeFamily": "Weapon",
+    "slot": "TwoHanded",
+    "outputItemId": "gauntlets",
+    "outputItemType": "TwoHanded",
+    "enabled": true,
+    "tierRange": {
+      "min": 1,
+      "max": 1
+    },
+    "materialRequirements": [
+      {
+        "type": "TieredMaterial",
+        "family": "Metal",
+        "baseAmount": 16,
+        "amountPerTier": 6
+      },
+      {
+        "type": "TieredMaterial",
+        "family": "Wood",
+        "baseAmount": 6,
+        "amountPerTier": 2
+      }
+    ],
+    "additionalMaterialRequirements": [],
+    "specialResourceRequirements": [],
+    "affinityTags": [
+      "Weapon",
+      "TwoHanded",
+      "Gauntlets",
+      "Brawler",
+      "Combo",
+      "Multihit"
+    ],
+    "tags": [
+      "Weapon",
+      "TwoHanded",
+      "Gauntlets",
+      "Brawler",
+      "Combo",
+      "Multihit"
+    ],
+    "minimumProfessionLevel": 1,
+    "behavior": {
+      "handedness": "TwoHanded",
+      "attackCategory": "Physical",
+      "rangeCategory": "Melee",
+      "basicAttackIntervalMultiplier": 0.75,
+      "basicAttackDamageMultiplier": 0.78,
+      "role": ""
+    },
+    "initialStatProfile": {
+      "AttackSpeed": 0.35,
+      "Precision": 0.25,
+      "WeaponDamage": 0.2,
+      "CritChance": 0.2
+    },
+    "temperingProfile": {
+      "id": "recipe.weapon.two_handed.gauntlets.tempering",
+      "name": "Gauntlets Tempering",
+      "stats": [
+        {
+          "stat": "AttackSpeed",
+          "weight": 35,
+          "category": "Primary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.4,
+          "minimumTier": 1
+        },
+        {
+          "stat": "Precision",
+          "weight": 25,
+          "category": "Primary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.35,
+          "minimumTier": 1
+        },
+        {
+          "stat": "WeaponDamage",
+          "weight": 20,
+          "category": "Secondary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.3,
+          "minimumTier": 1
+        },
+        {
+          "stat": "CritChance",
+          "weight": 20,
+          "category": "Secondary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.3,
+          "minimumTier": 1
+        }
+      ]
+    }
+  },
+  {
+    "id": "recipe.offhand.towershield",
+    "name": "Towershield",
+    "description": "Craft a Towershield.",
+    "icon": "towershield",
+    "category": "WeaponSmithing",
     "recipeFamily": "Offhand",
     "slot": "OffHand",
+    "outputItemId": "towershield",
     "outputItemType": "OffHand",
+    "enabled": true,
     "tierRange": {
       "min": 1,
       "max": 1
@@ -1183,112 +3022,290 @@
         "amountPerTier": 1
       }
     ],
-    "baseStatProfile": {
-      "BlockChance": 0.35,
-      "Resistance": 0.25,
-      "Spirit": 0.2,
-      "Armor": 0.2
-    },
+    "additionalMaterialRequirements": [],
+    "specialResourceRequirements": [],
     "affinityTags": [
-      "OffHand"
-    ],
-    "defaultTemperingTags": [
-      "OffHand"
+      "OffHand",
+      "Shield",
+      "Block",
+      "Guard",
+      "Defensive",
+      "PhysicalDefense"
     ],
     "tags": [
-      "OffHand"
+      "OffHand",
+      "Shield",
+      "Block",
+      "Guard",
+      "Defensive",
+      "PhysicalDefense"
     ],
-    "forms": [
-      {
-        "formId": "towershield",
-        "displayName": "Towershield",
-        "outputItemId": "towershield",
-        "outputItemType": "OffHand",
-        "statProfileId": "offhand_towershield",
-        "tags": [
-          "OffHand",
-          "Shield",
-          "Block",
-          "Guard",
-          "Defensive",
-          "PhysicalDefense"
-        ]
-      },
-      {
-        "formId": "spiritward",
-        "displayName": "Spiritward",
-        "outputItemId": "Spiritward",
-        "outputItemType": "OffHand",
-        "statProfileId": "offhand_spiritward",
-        "tags": [
-          "OffHand",
-          "Ward",
-          "MagicDefense",
-          "Barrier",
-          "Spirit",
-          "Support",
-          "Summon"
-        ]
-      },
-      {
-        "formId": "grimoire",
-        "displayName": "Grimoire",
-        "outputItemId": "grimoire",
-        "outputItemType": "OffHand",
-        "statProfileId": "offhand_grimoire",
-        "tags": [
-          "OffHand",
-          "Grimoire",
-          "SpellPower",
-          "Cooldown",
-          "Control",
-          "Magic"
-        ]
-      }
-    ],
+    "minimumProfessionLevel": 1,
+    "behavior": {
+      "handedness": "OffHand",
+      "attackCategory": "",
+      "rangeCategory": "",
+      "basicAttackIntervalMultiplier": 1,
+      "basicAttackDamageMultiplier": 1,
+      "role": "Towershield"
+    },
+    "initialStatProfile": {
+      "BlockChance": 0.35,
+      "Armor": 0.3,
+      "MaxHealth": 0.2,
+      "CrowdControlResistance": 0.15
+    },
     "temperingProfile": {
-      "id": "recipe_offhand_tempering_profile",
-      "name": "Offhand Tempering",
-      "statImprovementPool": [
+      "id": "recipe.offhand.towershield.tempering",
+      "name": "Towershield Tempering",
+      "stats": [
         {
           "stat": "BlockChance",
-          "weight": 30
-        },
-        {
-          "stat": "Resistance",
-          "weight": 25
-        },
-        {
-          "stat": "Spirit",
-          "weight": 25
+          "weight": 35,
+          "category": "Primary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.4,
+          "minimumTier": 1
         },
         {
           "stat": "Armor",
-          "weight": 20
+          "weight": 30,
+          "category": "Primary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.35,
+          "minimumTier": 1
+        },
+        {
+          "stat": "MaxHealth",
+          "weight": 20,
+          "category": "Secondary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.3,
+          "minimumTier": 1
+        },
+        {
+          "stat": "CrowdControlResistance",
+          "weight": 15,
+          "category": "Secondary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.3,
+          "minimumTier": 1
         }
-      ],
-      "affixPool": [
+      ]
+    }
+  },
+  {
+    "id": "recipe.offhand.spiritward",
+    "name": "Spiritward",
+    "description": "Craft a Spiritward.",
+    "icon": "Spiritward",
+    "category": "WeaponSmithing",
+    "recipeFamily": "Offhand",
+    "slot": "OffHand",
+    "outputItemId": "Spiritward",
+    "outputItemType": "OffHand",
+    "enabled": true,
+    "tierRange": {
+      "min": 1,
+      "max": 1
+    },
+    "materialRequirements": [
+      {
+        "type": "TieredMaterial",
+        "family": "Metal",
+        "baseAmount": 8,
+        "amountPerTier": 3
+      },
+      {
+        "type": "TieredMaterial",
+        "family": "Crystal",
+        "baseAmount": 4,
+        "amountPerTier": 1
+      }
+    ],
+    "additionalMaterialRequirements": [],
+    "specialResourceRequirements": [],
+    "affinityTags": [
+      "OffHand",
+      "Ward",
+      "MagicDefense",
+      "Barrier",
+      "Spirit",
+      "Support",
+      "Summon"
+    ],
+    "tags": [
+      "OffHand",
+      "Ward",
+      "MagicDefense",
+      "Barrier",
+      "Spirit",
+      "Support",
+      "Summon"
+    ],
+    "minimumProfessionLevel": 1,
+    "behavior": {
+      "handedness": "OffHand",
+      "attackCategory": "",
+      "rangeCategory": "",
+      "basicAttackIntervalMultiplier": 1,
+      "basicAttackDamageMultiplier": 1,
+      "role": "Spiritward"
+    },
+    "initialStatProfile": {
+      "Resistance": 0.35,
+      "HealthRegeneration": 0.25,
+      "Spirit": 0.2,
+      "MaxHealth": 0.2
+    },
+    "temperingProfile": {
+      "id": "recipe.offhand.spiritward.tempering",
+      "name": "Spiritward Tempering",
+      "stats": [
         {
-          "id": "affix_block_chance",
-          "weight": 30
+          "stat": "Resistance",
+          "weight": 35,
+          "category": "Primary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.4,
+          "minimumTier": 1
         },
         {
-          "id": "affix_grave_resistance",
-          "weight": 25
+          "stat": "HealthRegeneration",
+          "weight": 25,
+          "category": "Primary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.35,
+          "minimumTier": 1
         },
         {
-          "id": "affix_spirit",
-          "weight": 25
+          "stat": "Spirit",
+          "weight": 20,
+          "category": "Secondary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.3,
+          "minimumTier": 1
         },
         {
-          "id": "affix_armor",
-          "weight": 20
+          "stat": "MaxHealth",
+          "weight": 20,
+          "category": "Secondary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.3,
+          "minimumTier": 1
         }
-      ],
-      "specialModifierPool": [
+      ]
+    }
+  },
+  {
+    "id": "recipe.offhand.grimoire",
+    "name": "Grimoire",
+    "description": "Craft a Grimoire.",
+    "icon": "grimoire",
+    "category": "WeaponSmithing",
+    "recipeFamily": "Offhand",
+    "slot": "OffHand",
+    "outputItemId": "grimoire",
+    "outputItemType": "OffHand",
+    "enabled": true,
+    "tierRange": {
+      "min": 1,
+      "max": 1
+    },
+    "materialRequirements": [
+      {
+        "type": "TieredMaterial",
+        "family": "Metal",
+        "baseAmount": 8,
+        "amountPerTier": 3
+      },
+      {
+        "type": "TieredMaterial",
+        "family": "Crystal",
+        "baseAmount": 4,
+        "amountPerTier": 1
+      }
+    ],
+    "additionalMaterialRequirements": [],
+    "specialResourceRequirements": [],
+    "affinityTags": [
+      "OffHand",
+      "Grimoire",
+      "SpellPower",
+      "Cooldown",
+      "Control",
+      "Magic"
+    ],
+    "tags": [
+      "OffHand",
+      "Grimoire",
+      "SpellPower",
+      "Cooldown",
+      "Control",
+      "Magic"
+    ],
+    "minimumProfessionLevel": 1,
+    "behavior": {
+      "handedness": "OffHand",
+      "attackCategory": "",
+      "rangeCategory": "",
+      "basicAttackIntervalMultiplier": 1,
+      "basicAttackDamageMultiplier": 1,
+      "role": "Grimoire"
+    },
+    "initialStatProfile": {
+      "Spirit": 0.35,
+      "MagicPenetration": 0.25,
+      "Precision": 0.2,
+      "Cooldown": 0.2
+    },
+    "temperingProfile": {
+      "id": "recipe.offhand.grimoire.tempering",
+      "name": "Grimoire Tempering",
+      "stats": [
         {
-          "id": "special_unbroken_guard",
-          "weight": 10
+          "stat": "Spirit",
+          "weight": 35,
+          "category": "Primary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.4,
+          "minimumTier": 1
+        },
+        {
+          "stat": "MagicPenetration",
+          "weight": 25,
+          "category": "Primary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.35,
+          "minimumTier": 1
+        },
+        {
+          "stat": "Precision",
+          "weight": 20,
+          "category": "Secondary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.3,
+          "minimumTier": 1
+        },
+        {
+          "stat": "Cooldown",
+          "weight": 20,
+          "category": "Secondary",
+          "canIntroduce": true,
+          "canIncrease": true,
+          "maxBudgetShare": 0.3,
+          "minimumTier": 1
         }
       ]
     }
