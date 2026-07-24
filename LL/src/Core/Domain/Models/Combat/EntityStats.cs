@@ -14,4 +14,31 @@ public sealed record EntityStats(
     int AlliedDamageTaken = 0,
     string Team = "",
     int BarrierGenerated = 0,
-    int DamageBlocked = 0);
+    int DamageBlocked = 0,
+    int IncomingRawDamage = 0,
+    int AvoidedDamage = 0,
+    int AvoidedAttacks = 0,
+    int TypedMitigationPrevented = 0,
+    int PhysicalMitigationPrevented = 0,
+    int MagicalMitigationPrevented = 0,
+    int BlockPrevented = 0,
+    int DamageReductionPrevented = 0,
+    int DamageAmplified = 0,
+    int FinalHealthDamage = 0)
+{
+    public int AccountedIncomingDamage =>
+        AvoidedDamage
+        + TypedMitigationPrevented
+        + BlockPrevented
+        + DamageReductionPrevented
+        + DamageBlocked
+        + FinalHealthDamage;
+
+    public bool TypedMitigationTelemetryReconciles =>
+        TypedMitigationPrevented
+        == PhysicalMitigationPrevented + MagicalMitigationPrevented;
+
+    public bool PreventionTelemetryReconciles =>
+        IncomingRawDamage + DamageAmplified == AccountedIncomingDamage
+        && TypedMitigationTelemetryReconciles;
+}

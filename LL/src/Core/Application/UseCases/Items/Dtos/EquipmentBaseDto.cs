@@ -15,7 +15,6 @@ public class EquipmentBaseDto : ItemBaseDto, IMapFrom<EquipmentBase>
     public GatheringType? GatheringType { get; set; }
     public double ItemBudget { get; set; }
     public int ItemBudgetTier { get; set; }
-    public int BalanceVersion { get; set; }
 
     public void Mapping(Profile profile)
     {
@@ -27,9 +26,6 @@ public class EquipmentBaseDto : ItemBaseDto, IMapFrom<EquipmentBase>
                     EquipmentStatBudgetCatalog.MinimumTier)))
             .ForMember(
                 destination => destination.ItemBudgetTier,
-                options => options.MapFrom(_ => EquipmentStatBudgetCatalog.MinimumTier))
-            .ForMember(
-                destination => destination.BalanceVersion,
-                options => options.MapFrom(_ => EquipmentBudgetEvaluator.BalanceVersion));
+                options => options.MapFrom(_ => EquipmentStatBudgetCatalog.MinimumTier));
     }
 }

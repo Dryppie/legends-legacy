@@ -36,6 +36,7 @@ public enum AttributeBalanceFindingKind
     AggregateCapWaste,
     SummonCalibrationMismatch,
     HandCalibrationMismatch,
+    CraftingCombatPeerMismatch,
     BalanceVersionBlocked
 }
 
@@ -48,6 +49,7 @@ public enum EquipmentLoadoutComparisonPurpose
 public sealed record AttributeBalanceAnalysisReport(
     int BalanceVersion,
     int CombatRulesVersion,
+    IReadOnlyCollection<AttributeDefinition> AttributeDefinitions,
     IReadOnlyList<int> Tiers,
     IReadOnlyList<int> Seeds,
     double MarginalBudgetFraction,
@@ -57,6 +59,8 @@ public sealed record AttributeBalanceAnalysisReport(
     IReadOnlyList<EquipmentLoadoutComparison> LoadoutComparisons,
     IReadOnlyList<SummonCalibrationComparison> SummonCalibrations,
     IReadOnlyList<HandCalibrationComparison> HandCalibrations,
+    IReadOnlyList<CraftingCombatPeerComparison> CraftingCombatPeers,
+    CraftingCatalogConstraintReport CraftingCatalogConstraints,
     EquipmentBalanceCalibrationGate CalibrationGate,
     IReadOnlyList<AttributeBalanceFinding> Findings);
 
@@ -81,15 +85,41 @@ public sealed record AttributeScenarioMeasurement(
     double RelativeGainConfidenceLowPercent,
     double RelativeGainConfidenceHighPercent);
 
+public enum AttributePeerComparisonGroup
+{
+    PrimaryIdentity,
+    Offense,
+    Crit,
+    Defense,
+    Sustain,
+    Penetration
+}
+
+public enum AttributePeerComparisonIntent
+{
+    StrictPeer,
+    GeneralistVersusSpecialist,
+    PrimaryVersusDerivedBasket
+}
+
 public sealed record EqualBudgetAttributeComparison(
+    string Id,
+    AttributePeerComparisonGroup Group,
+    AttributePeerComparisonIntent Intent,
     int Tier,
     AttributeBalanceScenario Scenario,
-    AttributeType FirstAttribute,
-    AttributeType SecondAttribute,
+    string Context,
+    bool IsReleaseGate,
+    string FirstLabel,
+    string SecondLabel,
+    AttributeType? FirstAttribute,
+    AttributeType? SecondAttribute,
     double Budget,
+    double TolerancePercentagePoints,
     double FirstRelativeGainPercent,
     double SecondRelativeGainPercent,
-    double DifferencePercentagePoints);
+    double DifferencePercentagePoints,
+    bool Passed);
 
 public sealed record EquipmentLoadoutMeasurement(
     string Id,
@@ -98,11 +128,22 @@ public sealed record EquipmentLoadoutMeasurement(
     double TargetBudget,
     double SpentBudget,
     double UnspentBudget,
+    double AggregateRedistributedBudget,
     double RelevantScenarioUtilityIndex,
     IReadOnlyDictionary<AttributeType, double> AttributePoints,
+    IReadOnlyDictionary<AttributeType, double> PreRedistributionAttributePoints,
     IReadOnlyList<AttributeType> AttributesOverSingleStatCap,
+    IReadOnlyList<EquipmentAggregateCapMeasurement> AggregateCapsBeforeRedistribution,
     IReadOnlyList<EquipmentAggregateCapMeasurement> AggregateCaps,
+    IReadOnlyList<EquipmentLoadoutAllocationRecommendation> AllocationRecommendations,
     IReadOnlyList<EquipmentLoadoutScenarioMeasurement> Scenarios);
+
+public sealed record EquipmentLoadoutAllocationRecommendation(
+    AttributeType Attribute,
+    double CurrentBudgetSharePercent,
+    double CandidateBudgetSharePercent,
+    double PointChange,
+    double BudgetChange);
 
 public sealed record EquipmentAggregateCapMeasurement(
     AttributeType Attribute,
@@ -134,6 +175,15 @@ public sealed record EquipmentLoadoutOutput(
     double HealthRegeneration,
     double BarrierGenerated,
     double BarrierAbsorbed,
+    double IncomingRawDamage,
+    double AvoidedDamage,
+    double TypedMitigationPrevented,
+    double PhysicalMitigationPrevented,
+    double MagicalMitigationPrevented,
+    double BlockPrevented,
+    double DamageReductionPrevented,
+    double DamageAmplified,
+    double FinalHealthDamage,
     double DamageTaken,
     double RemainingHealth,
     double DurationTicks,
@@ -202,15 +252,81 @@ public sealed record HandCalibrationComparison(
     EquipmentLoadoutOutput DualWieldOutput,
     EquipmentLoadoutOutput TwoHandedOutput);
 
+public enum CraftingCombatPeerGroup
+{
+    HandConfiguration,
+    Shield,
+    ArmorFamily,
+    Blueprint
+}
+
+public sealed record CraftingCombatPeerComparison(
+    string Id,
+    CraftingCombatPeerGroup Group,
+    int Tier,
+    AttributeBalanceScenario Scenario,
+    string FirstDesignId,
+    string SecondDesignId,
+    double FirstSpentBudget,
+    double SecondSpentBudget,
+    IReadOnlyDictionary<AttributeType, double> FirstAttributePoints,
+    IReadOnlyDictionary<AttributeType, double> SecondAttributePoints,
+    double FirstUtilityPerHundredBudget,
+    double SecondUtilityPerHundredBudget,
+    double DifferencePercent,
+    double TolerancePercent,
+    bool IsReleaseGate,
+    bool Passed,
+    EquipmentLoadoutOutput FirstOutput,
+    EquipmentLoadoutOutput SecondOutput);
+
+public sealed record CraftingCatalogConstraintReport(
+    int CandidateBalanceVersion,
+    bool ProductionActive,
+    int RecipesAnalyzed,
+    int BlueprintsAnalyzed,
+    int ComposedDesignsAnalyzed,
+    int LoadoutsAnalyzed,
+    int ProductionLoadoutsOverCap,
+    int ReferenceLoadoutsOverCap,
+    int ProductionLoadoutsWithUnspentBudget,
+    int ReferenceLoadoutsWithUnspentBudget,
+    IReadOnlyList<CraftingCatalogStatConstraintSummary> StatSummaries,
+    IReadOnlyList<CraftingCatalogLoadoutConstraintMeasurement> WorstProductionLoadouts);
+
+public sealed record CraftingCatalogStatConstraintSummary(
+    AttributeType Attribute,
+    int ProductionViolationCount,
+    int ReferenceViolationCount,
+    double MaximumProductionExcessPoints,
+    double MaximumReferenceExcessPoints);
+
+public sealed record CraftingCatalogLoadoutConstraintMeasurement(
+    string Id,
+    int Tier,
+    string ArmorFamily,
+    string HandConfiguration,
+    string? BlueprintId,
+    double TargetBudget,
+    double ProductionSpentBudget,
+    double ReferenceSpentBudget,
+    double ProductionMaximumWastedBudgetPercent,
+    double ReferenceMaximumWastedBudgetPercent,
+    IReadOnlyList<AttributeType> ProductionAttributesOverCap,
+    IReadOnlyList<AttributeType> ReferenceAttributesOverCap);
+
 public sealed record EquipmentBalanceCalibrationGate(
     double SummonTolerancePercent,
     double HandTolerancePercent,
     double AggregateCapWasteTolerancePercent,
     bool OverflowRedistributionActive,
     bool AggregateCapUtilizationPassed,
+    bool CandidateAggregateCapUtilizationPassed,
+    bool EqualBudgetPeerMatrixPassed,
     bool SummonCalibrationPassed,
     bool HandCalibrationPassed,
-    bool ReadyForBalanceVersion3,
+    bool CraftingCombatPeerMatrixPassed,
+    bool ActiveProfilePassed,
     IReadOnlyList<string> Blockers);
 
 public sealed record AttributeBalanceFinding(

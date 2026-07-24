@@ -1,9 +1,11 @@
 using Application.Interfaces.Services.LL.Balance;
 using Application.Interfaces.Services.LL.PowerRatings;
+using Application.Interfaces.Services.LL.Professions;
 using Domain.Models.Attributes;
 using Domain.Models.Combat;
 using Domain.Models.Combat.Abilities;
 using Domain.Models.Damages;
+using Domain.Models.Items.Equipments;
 using Domain.Models.Professions.Crafting.V2;
 using Microsoft.Extensions.Options;
 using Services.LL.Combat.Engine;
@@ -16,13 +18,17 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
     private const double MarginalBudgetFraction = 0.10d;
     private const double InertThresholdPercent = 0.05d;
     private const double CostWarningThreshold = 0.20d;
-    private const double EqualBudgetWarningThresholdPercentagePoints = 10d;
+    private const double StrictPeerTolerancePercentagePoints = 10d;
+    private const double GeneralistPeerTolerancePercentagePoints = 20d;
+    private const double PrimaryBasketTolerancePercentagePoints = 0.1d;
     private const double LoadoutWarningThresholdPercent = 20d;
     private const double SummonCalibrationTolerancePercent = 20d;
     private const double HandCalibrationTolerancePercent = 20d;
+    private const double CraftingCombatPeerTolerancePercent = 20d;
+    private const double CraftingArmorFamilyTolerancePercent = 30d;
     private const double AggregateCapWasteTolerancePercent = 1d;
     private const int NominalSummonDurationTicks = 100;
-    private const int NominalRoleAbilityCooldownTicks = 70;
+    private const int NominalRoleAbilityCooldownTicks = NominalSummonDurationTicks;
     private const int NominalSummonStrikeCooldownTicks = 24;
     private const int NominalSummonBasicAttackIntervalTicks = 20;
     private const int NominalSummonPowerBase = 10;
@@ -31,6 +37,10 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
     private const float NominalSummonWeaponDamageCoefficient = 0.1f;
     private const int NominalSummonStrikeBase = 8;
     private const float NominalSummonStrikePowerCoefficient = 0.55f;
+    private const string RepresentativeFastWeaponRecipeId =
+        "recipe.weapon.one_handed.dagger";
+    private const string RepresentativeSlowWeaponRecipeId =
+        "recipe.weapon.two_handed.maul";
 
     private static readonly IReadOnlyList<int> ReferenceTiers = Array.AsReadOnly([1, 5, 10]);
     private static readonly IReadOnlyList<int> DeterministicSeeds =
@@ -39,6 +49,365 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
         Array.AsReadOnly([90, 180, 600]);
     private static readonly IReadOnlyList<double> StandardEquipmentSlotWeights =
         Array.AsReadOnly([0.85d, 1.15d, 0.95d, 0.45d, 0.60d, 0.75d]);
+    private static readonly EqualBudgetBenchmarkContext LowCritContext =
+        new(
+            "low crit investment",
+            new Dictionary<AttributeType, double>
+            {
+                [AttributeType.CritChance] = 10d,
+                [AttributeType.CritDamage] = 50d
+            },
+            OpponentDefenseMultiplier: 1d);
+    private static readonly EqualBudgetBenchmarkContext MediumCritContext =
+        new(
+            "medium crit investment",
+            new Dictionary<AttributeType, double>
+            {
+                [AttributeType.CritChance] = 40d,
+                [AttributeType.CritDamage] = 125d
+            },
+            OpponentDefenseMultiplier: 1d);
+    private static readonly EqualBudgetBenchmarkContext NearCapCritContext =
+        new(
+            "near-cap crit investment",
+            new Dictionary<AttributeType, double>
+            {
+                [AttributeType.CritChance] = 65d,
+                [AttributeType.CritDamage] = 200d
+            },
+            OpponentDefenseMultiplier: 1d);
+    private static readonly EqualBudgetBenchmarkContext LowDefenseContext =
+        new(
+            "25% reference defense",
+            new Dictionary<AttributeType, double>(),
+            OpponentDefenseMultiplier: 0.25d);
+    private static readonly EqualBudgetBenchmarkContext HighDefenseContext =
+        new(
+            "300% reference defense",
+            new Dictionary<AttributeType, double>(),
+            OpponentDefenseMultiplier: 3d);
+    private static readonly IReadOnlyList<EqualBudgetPeerSpec> EqualBudgetPeerSpecs =
+        Array.AsReadOnly<EqualBudgetPeerSpec>(
+        [
+            PrimaryBasketPeer(
+                "fortitude-basket-physical",
+                AttributeBalanceScenario.PhysicalPressure,
+                AttributeType.Fortitude),
+            PrimaryBasketPeer(
+                "fortitude-basket-magical",
+                AttributeBalanceScenario.MagicalPressure,
+                AttributeType.Fortitude),
+            PrimaryBasketPeer(
+                "fortitude-basket-mixed",
+                AttributeBalanceScenario.MixedPressure,
+                AttributeType.Fortitude),
+            PrimaryBasketPeer(
+                "precision-basket-physical",
+                AttributeBalanceScenario.PhysicalOffense,
+                AttributeType.Precision),
+            PrimaryBasketPeer(
+                "precision-basket-magical",
+                AttributeBalanceScenario.MagicalOffense,
+                AttributeType.Precision),
+            PrimaryBasketPeer(
+                "precision-basket-periodic",
+                AttributeBalanceScenario.PeriodicOffense,
+                AttributeType.Precision),
+            PrimaryBasketPeer(
+                "spirit-basket-healing",
+                AttributeBalanceScenario.HealingSustain,
+                AttributeType.Spirit),
+            PrimaryBasketPeer(
+                "spirit-basket-long-sustain",
+                AttributeBalanceScenario.LongSustain,
+                AttributeType.Spirit),
+            PrimaryBasketPeer(
+                "spirit-basket-status",
+                AttributeBalanceScenario.StatusResilience,
+                AttributeType.Spirit),
+            PrimaryBasketPeer(
+                "spirit-basket-crowd-control",
+                AttributeBalanceScenario.CrowdControlResilience,
+                AttributeType.Spirit),
+            PrimaryBasketPeer(
+                "spirit-basket-summon",
+                AttributeBalanceScenario.SummonOffense,
+                AttributeType.Spirit),
+            StrictPeer(
+                "power-weapon-damage-physical",
+                AttributePeerComparisonGroup.Offense,
+                AttributeBalanceScenario.PhysicalOffense,
+                AttributeType.Power,
+                AttributeType.WeaponDamage),
+            StrictPeer(
+                "power-weapon-damage-magical",
+                AttributePeerComparisonGroup.Offense,
+                AttributeBalanceScenario.MagicalOffense,
+                AttributeType.Power,
+                AttributeType.WeaponDamage),
+            GeneralistPeer(
+                "power-attack-speed",
+                AttributePeerComparisonGroup.Offense,
+                AttributeBalanceScenario.PhysicalOffense,
+                AttributeType.Power,
+                AttributeType.AttackSpeed),
+            ContextPeer(
+                "crit-chance-crit-damage-low",
+                AttributePeerComparisonGroup.Crit,
+                AttributeBalanceScenario.PhysicalOffense,
+                AttributeType.CritChance,
+                AttributeType.CritDamage,
+                LowCritContext,
+                AttributePeerComparisonIntent.StrictPeer,
+                StrictPeerTolerancePercentagePoints,
+                budgetFraction: 0.01d),
+            ContextPeer(
+                "crit-chance-crit-damage-medium",
+                AttributePeerComparisonGroup.Crit,
+                AttributeBalanceScenario.PhysicalOffense,
+                AttributeType.CritChance,
+                AttributeType.CritDamage,
+                MediumCritContext,
+                AttributePeerComparisonIntent.StrictPeer,
+                StrictPeerTolerancePercentagePoints,
+                budgetFraction: 0.01d),
+            ContextPeer(
+                "crit-chance-crit-damage-near-cap",
+                AttributePeerComparisonGroup.Crit,
+                AttributeBalanceScenario.PhysicalOffense,
+                AttributeType.CritChance,
+                AttributeType.CritDamage,
+                NearCapCritContext,
+                AttributePeerComparisonIntent.StrictPeer,
+                StrictPeerTolerancePercentagePoints,
+                budgetFraction: 0.01d),
+            StrictPeer(
+                "max-health-armor",
+                AttributePeerComparisonGroup.Defense,
+                AttributeBalanceScenario.PhysicalPressure,
+                AttributeType.MaxHealth,
+                AttributeType.Armor,
+                budgetFraction: MarginalBudgetFraction),
+            StrictPeer(
+                "max-health-resistance",
+                AttributePeerComparisonGroup.Defense,
+                AttributeBalanceScenario.MagicalPressure,
+                AttributeType.MaxHealth,
+                AttributeType.Resistance,
+                budgetFraction: MarginalBudgetFraction),
+            GeneralistPeer(
+                "max-health-dodge",
+                AttributePeerComparisonGroup.Defense,
+                AttributeBalanceScenario.PhysicalPressure,
+                AttributeType.MaxHealth,
+                AttributeType.DodgeChance),
+            GeneralistPeer(
+                "max-health-block",
+                AttributePeerComparisonGroup.Defense,
+                AttributeBalanceScenario.PhysicalPressure,
+                AttributeType.MaxHealth,
+                AttributeType.BlockChance),
+            GeneralistPeer(
+                "max-health-damage-reduction",
+                AttributePeerComparisonGroup.Defense,
+                AttributeBalanceScenario.MixedPressure,
+                AttributeType.MaxHealth,
+                AttributeType.DamageReduction),
+            GeneralistPeer(
+                "max-health-armor-burst",
+                AttributePeerComparisonGroup.Defense,
+                AttributeBalanceScenario.BurstPressure,
+                AttributeType.MaxHealth,
+                AttributeType.Armor),
+            GeneralistPeer(
+                "max-health-dodge-burst",
+                AttributePeerComparisonGroup.Defense,
+                AttributeBalanceScenario.BurstPressure,
+                AttributeType.MaxHealth,
+                AttributeType.DodgeChance),
+            GeneralistPeer(
+                "max-health-block-burst",
+                AttributePeerComparisonGroup.Defense,
+                AttributeBalanceScenario.BurstPressure,
+                AttributeType.MaxHealth,
+                AttributeType.BlockChance),
+            GeneralistPeer(
+                "max-health-damage-reduction-burst",
+                AttributePeerComparisonGroup.Defense,
+                AttributeBalanceScenario.BurstPressure,
+                AttributeType.MaxHealth,
+                AttributeType.DamageReduction),
+            GeneralistPeer(
+                "healing-power-health-regeneration",
+                AttributePeerComparisonGroup.Sustain,
+                AttributeBalanceScenario.HealingSustain,
+                AttributeType.HealingPowerPercent,
+                AttributeType.HealthRegeneration),
+            GeneralistPeer(
+                "health-regeneration-life-steal",
+                AttributePeerComparisonGroup.Sustain,
+                AttributeBalanceScenario.LongSustain,
+                AttributeType.HealthRegeneration,
+                AttributeType.LifeSteal),
+            ContextPeer(
+                "armor-penetration-weapon-damage-low-defense",
+                AttributePeerComparisonGroup.Penetration,
+                AttributeBalanceScenario.PhysicalOffense,
+                AttributeType.ArmorPenetration,
+                AttributeType.WeaponDamage,
+                LowDefenseContext,
+                AttributePeerComparisonIntent.GeneralistVersusSpecialist,
+                GeneralistPeerTolerancePercentagePoints),
+            ContextPeer(
+                "armor-penetration-weapon-damage-high-defense",
+                AttributePeerComparisonGroup.Penetration,
+                AttributeBalanceScenario.PhysicalOffense,
+                AttributeType.ArmorPenetration,
+                AttributeType.WeaponDamage,
+                HighDefenseContext,
+                AttributePeerComparisonIntent.GeneralistVersusSpecialist,
+                GeneralistPeerTolerancePercentagePoints,
+                isReleaseGate: false),
+            ContextPeer(
+                "magic-penetration-power-low-defense",
+                AttributePeerComparisonGroup.Penetration,
+                AttributeBalanceScenario.MagicalOffense,
+                AttributeType.MagicPenetration,
+                AttributeType.Power,
+                LowDefenseContext,
+                AttributePeerComparisonIntent.GeneralistVersusSpecialist,
+                GeneralistPeerTolerancePercentagePoints),
+            ContextPeer(
+                "magic-penetration-power-high-defense",
+                AttributePeerComparisonGroup.Penetration,
+                AttributeBalanceScenario.MagicalOffense,
+                AttributeType.MagicPenetration,
+                AttributeType.Power,
+                HighDefenseContext,
+                AttributePeerComparisonIntent.GeneralistVersusSpecialist,
+                GeneralistPeerTolerancePercentagePoints,
+                isReleaseGate: false)
+        ]);
+    private static readonly IReadOnlyList<CraftingCombatPeerSpec> CraftingCombatPeerSpecs =
+        Array.AsReadOnly<CraftingCombatPeerSpec>(
+        [
+            CraftingPeer(
+                "balanced-dual-greatsword",
+                CraftingCombatPeerGroup.HandConfiguration,
+                AttributeBalanceScenario.PhysicalOffense,
+                "Medium",
+                "dual:recipe.weapon.one_handed.shortsword",
+                null,
+                "Medium",
+                "two-handed:recipe.weapon.two_handed.greatsword",
+                null),
+            CraftingPeer(
+                "fast-dual-gauntlets",
+                CraftingCombatPeerGroup.HandConfiguration,
+                AttributeBalanceScenario.PhysicalOffense,
+                "Light",
+                "dual:recipe.weapon.one_handed.dagger",
+                null,
+                "Light",
+                "two-handed:recipe.weapon.two_handed.gauntlets",
+                null),
+            CraftingPeer(
+                "penetration-dual-battle-axe",
+                CraftingCombatPeerGroup.HandConfiguration,
+                AttributeBalanceScenario.PhysicalOffense,
+                "Medium",
+                "dual:recipe.weapon.one_handed.hand_axe",
+                null,
+                "Medium",
+                "two-handed:recipe.weapon.two_handed.battle_axe",
+                null),
+            CraftingPeer(
+                "tower-shield-aegis-warden",
+                CraftingCombatPeerGroup.Shield,
+                AttributeBalanceScenario.MixedPressure,
+                "Heavy",
+                "one-off:recipe.weapon.one_handed.shortsword+recipe.offhand.towershield",
+                "blueprint_aegis",
+                "Heavy",
+                "one-off:recipe.weapon.one_handed.shortsword+recipe.offhand.towershield",
+                "blueprint_warden"),
+            CraftingPeer(
+                "heavy-medium-physical-defense",
+                CraftingCombatPeerGroup.ArmorFamily,
+                AttributeBalanceScenario.PhysicalPressure,
+                "Heavy",
+                "one-off:recipe.weapon.one_handed.shortsword+recipe.offhand.towershield",
+                null,
+                "Medium",
+                "one-off:recipe.weapon.one_handed.shortsword+recipe.offhand.towershield",
+                null,
+                CraftingArmorFamilyTolerancePercent,
+                isReleaseGate: false),
+            CraftingPeer(
+                "medium-light-physical-offense",
+                CraftingCombatPeerGroup.ArmorFamily,
+                AttributeBalanceScenario.PhysicalOffense,
+                "Medium",
+                "dual:recipe.weapon.one_handed.shortsword",
+                null,
+                "Light",
+                "dual:recipe.weapon.one_handed.shortsword",
+                null,
+                CraftingArmorFamilyTolerancePercent,
+                isReleaseGate: false),
+            CraftingPeer(
+                "fury-execution",
+                CraftingCombatPeerGroup.Blueprint,
+                AttributeBalanceScenario.PhysicalOffense,
+                "Medium",
+                "dual:recipe.weapon.one_handed.shortsword",
+                "blueprint_fury",
+                "Medium",
+                "dual:recipe.weapon.one_handed.shortsword",
+                "blueprint_execution"),
+            CraftingPeer(
+                "arcane-spirit",
+                CraftingCombatPeerGroup.Blueprint,
+                AttributeBalanceScenario.MagicalOffense,
+                "Cloth",
+                "two-handed:recipe.weapon.two_handed.staff",
+                "blueprint_arcane",
+                "Cloth",
+                "two-handed:recipe.weapon.two_handed.staff",
+                "blueprint_spirit",
+                isReleaseGate: false),
+            CraftingPeer(
+                "endurance-phoenix",
+                CraftingCombatPeerGroup.Blueprint,
+                AttributeBalanceScenario.HealingSustain,
+                "Cloth",
+                "one-off:recipe.weapon.one_handed.wand+recipe.offhand.spiritward",
+                "blueprint_endurance",
+                "Cloth",
+                "one-off:recipe.weapon.one_handed.wand+recipe.offhand.spiritward",
+                "blueprint_phoenix"),
+            CraftingPeer(
+                "venom-hive",
+                CraftingCombatPeerGroup.Blueprint,
+                AttributeBalanceScenario.LongSustain,
+                "Light",
+                "dual:recipe.weapon.one_handed.dagger",
+                "blueprint_venom",
+                "Light",
+                "dual:recipe.weapon.one_handed.dagger",
+                "blueprint_hive"),
+            CraftingPeer(
+                "spirit-primal",
+                CraftingCombatPeerGroup.Blueprint,
+                AttributeBalanceScenario.SummonOffense,
+                "Cloth",
+                "two-handed:recipe.weapon.two_handed.staff",
+                "blueprint_spirit",
+                "Cloth",
+                "two-handed:recipe.weapon.two_handed.staff",
+                "blueprint_primal",
+                isReleaseGate: false)
+        ]);
 
     private static readonly IReadOnlyDictionary<AttributeType, AttributeBalanceScenario[]> RelevantScenarios =
         new Dictionary<AttributeType, AttributeBalanceScenario[]>
@@ -315,10 +684,14 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
         AbilityCompiler.CompileAbilities(CreateAbilitySpecs());
 
     private readonly CraftingBalanceOptions _craftingBalance;
+    private readonly ICraftingDefinitionProvider _craftingDefinitions;
 
-    public AttributeMarginalValueAnalyzer(IOptions<CraftingBalanceOptions> craftingBalance)
+    public AttributeMarginalValueAnalyzer(
+        IOptions<CraftingBalanceOptions> craftingBalance,
+        ICraftingDefinitionProvider craftingDefinitions)
     {
         _craftingBalance = craftingBalance.Value;
+        _craftingDefinitions = craftingDefinitions;
     }
 
     public AttributeBalanceAnalysisReport Analyze(CancellationToken cancellationToken)
@@ -392,7 +765,14 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
         var loadoutComparisons = CreateLoadoutComparisons(loadouts);
         var summonCalibrations = AnalyzeSummonCalibration(cancellationToken);
         var handCalibrations = AnalyzeHandCalibration(cancellationToken);
-        var calibrationGate = CreateCalibrationGate(loadouts, summonCalibrations, handCalibrations);
+        var craftingCombatPeers = AnalyzeCraftingCombatPeers(cancellationToken);
+        var craftingCatalogConstraints = AnalyzeCraftingCatalogConstraints(cancellationToken);
+        var calibrationGate = CreateCalibrationGate(
+            equalBudgetComparisons,
+            loadouts,
+            summonCalibrations,
+            handCalibrations,
+            craftingCombatPeers);
         var findings = CreateFindings(
             measurements,
             equalBudgetComparisons,
@@ -400,11 +780,13 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
             loadoutComparisons,
             summonCalibrations,
             handCalibrations,
+            craftingCombatPeers,
             calibrationGate);
 
         return new AttributeBalanceAnalysisReport(
             EquipmentBudgetEvaluator.BalanceVersion,
             PowerRatingAlgorithm.CombatRulesVersion,
+            AttributeCatalog.All,
             ReferenceTiers,
             DeterministicSeeds,
             MarginalBudgetFraction,
@@ -414,6 +796,8 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
             loadoutComparisons,
             summonCalibrations,
             handCalibrations,
+            craftingCombatPeers,
+            craftingCatalogConstraints,
             calibrationGate,
             findings);
     }
@@ -423,13 +807,34 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
         AttributeBalanceScenario scenario,
         AttributeType? modifiedAttribute,
         double pointDelta,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken) =>
+        MeasureScenario(
+            tier,
+            scenario,
+            modifiedAttribute is { } attribute && pointDelta > 0
+                ? new Dictionary<AttributeType, double> { [attribute] = pointDelta }
+                : new Dictionary<AttributeType, double>(),
+            cancellationToken,
+            benchmarkContext: null);
+
+    private ScenarioSample MeasureScenario(
+        int tier,
+        AttributeBalanceScenario scenario,
+        IReadOnlyDictionary<AttributeType, double> pointDeltas,
+        CancellationToken cancellationToken,
+        EqualBudgetBenchmarkContext? benchmarkContext = null)
     {
         var scores = new List<double>(DeterministicSeeds.Count);
         foreach (var seed in DeterministicSeeds)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            scores.Add(RunScenario(tier, scenario, modifiedAttribute, pointDelta, seed, cancellationToken));
+            scores.Add(RunScenario(
+                tier,
+                scenario,
+                pointDeltas,
+                seed,
+                cancellationToken,
+                benchmarkContext));
         }
 
         return new ScenarioSample(scores.Average(), scores);
@@ -438,13 +843,19 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
     private static double RunScenario(
         int tier,
         AttributeBalanceScenario scenario,
-        AttributeType? modifiedAttribute,
-        double pointDelta,
+        IReadOnlyDictionary<AttributeType, double> pointDeltas,
         int seed,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken,
+        EqualBudgetBenchmarkContext? benchmarkContext)
     {
         var friendlyAttributes = CreateReferenceAttributes(tier);
-        if (modifiedAttribute is { } attribute && pointDelta > 0)
+        if (benchmarkContext is not null)
+        {
+            foreach (var (attribute, value) in benchmarkContext.ReferenceAttributeOverrides)
+                friendlyAttributes[attribute] = (float)value;
+        }
+
+        foreach (var (attribute, pointDelta) in pointDeltas.Where(x => x.Value > 0))
             ApplyAttributeDelta(friendlyAttributes, attribute, (float)pointDelta);
 
         return ExecuteScenario(
@@ -459,7 +870,9 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
                 ? DamageType.Magical
                 : DamageType.Physical,
             seed,
-            cancellationToken).Utility.Total;
+            cancellationToken,
+            opponentDefenseMultiplier:
+                benchmarkContext?.OpponentDefenseMultiplier ?? 1d).Utility.Total;
     }
 
     private static ScenarioOutcome ExecuteScenario(
@@ -473,7 +886,8 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
         DamageType basicAttackDamageType,
         int seed,
         CancellationToken cancellationToken,
-        int? maxTicksOverride = null)
+        int? maxTicksOverride = null,
+        double opponentDefenseMultiplier = 1d)
     {
         var friendly = new RuntimeCombatant(
             "balance-friendly",
@@ -490,7 +904,7 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
             "balance-hostile",
             "Reference Opponent",
             CombatTeam.Hostile,
-            CreateOpponentAttributes(tier, scenario),
+            CreateOpponentAttributes(tier, scenario, opponentDefenseMultiplier),
             SelectHostileAbilities(scenario),
             ["Role.Balance.Target"],
             basicAttackDamageType: scenario == AttributeBalanceScenario.MagicalPressure
@@ -525,15 +939,20 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
             Healing: friendlyStats.Sum(x => x.HealingDone),
             HealthRegeneration: friendlyStats.Sum(x => x.HealthRegenerated),
             BarrierGenerated: friendlyStats.Sum(x => x.BarrierGenerated),
-            BarrierAbsorbed: result.EventLog
-                .Where(x => friendlyIds.Contains(x.TargetId))
-                .Sum(x => x.BarrierAbsorbed),
+            BarrierAbsorbed: friendlyStats.Sum(x => x.DamageBlocked),
+            IncomingRawDamage: friendlyStats.Sum(x => x.IncomingRawDamage),
+            AvoidedDamage: friendlyStats.Sum(x => x.AvoidedDamage),
+            TypedMitigationPrevented: friendlyStats.Sum(x => x.TypedMitigationPrevented),
+            PhysicalMitigationPrevented: friendlyStats.Sum(x => x.PhysicalMitigationPrevented),
+            MagicalMitigationPrevented: friendlyStats.Sum(x => x.MagicalMitigationPrevented),
+            BlockPrevented: friendlyStats.Sum(x => x.BlockPrevented),
+            DamageReductionPrevented: friendlyStats.Sum(x => x.DamageReductionPrevented),
+            DamageAmplified: friendlyStats.Sum(x => x.DamageAmplified),
+            FinalHealthDamage: friendlyStats.Sum(x => x.FinalHealthDamage),
             DamageTaken: friendlyStats.Sum(x => x.DamageTaken),
             RemainingHealth: friendly.Health,
             DurationTicks: result.Duration,
-            AvoidedAttacks: result.EventLog.Count(x =>
-                x.EventType == EventType.Miss
-                && friendlyIds.Contains(x.TargetId)),
+            AvoidedAttacks: friendlyStats.Sum(x => x.AvoidedAttacks),
             SummonsCreated: summonActivity.SummonsCreated,
             AverageActiveSummons: summonActivity.AverageActiveSummons,
             SummonUptimePercent: summonActivity.UptimePercent);
@@ -643,6 +1062,7 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
                 AllAbilities["balance.physical-strike"],
                 AllAbilities["balance.summon"]
             ],
+            AttributeBalanceScenario.LongSustain => [AllAbilities["balance.physical-strike"]],
             _ => []
         };
 
@@ -698,7 +1118,8 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
 
     private static Dictionary<AttributeType, float> CreateOpponentAttributes(
         int tier,
-        AttributeBalanceScenario scenario)
+        AttributeBalanceScenario scenario,
+        double defenseMultiplier = 1d)
     {
         var pressureScenario = scenario is
             AttributeBalanceScenario.PhysicalPressure or
@@ -726,8 +1147,8 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
             [AttributeType.MaxHealth] = pressureScenario ? 1_000_000 : 2_000_000,
             [AttributeType.Power] = 8 + tier * 6,
             [AttributeType.WeaponDamage] = weaponDamage,
-            [AttributeType.Armor] = tier * 12,
-            [AttributeType.Resistance] = tier * 12,
+            [AttributeType.Armor] = (float)(tier * 12 * Math.Max(0d, defenseMultiplier)),
+            [AttributeType.Resistance] = (float)(tier * 12 * Math.Max(0d, defenseMultiplier)),
             [AttributeType.CritChance] = 0,
             [AttributeType.CritDamage] = 50,
             [AttributeType.AttackSpeed] = 0
@@ -845,10 +1266,14 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
                 Round(item.Allocation.TargetBudget),
                 Round(item.Allocation.SpentBudget),
                 Round(item.Allocation.TargetBudget - item.Allocation.SpentBudget),
+                Round(item.Allocation.AggregateRedistributedBudget),
                 Round(relevantScenarioUtilityIndex),
                 item.Allocation.Points,
+                item.Allocation.PreRedistributionPoints,
                 item.Allocation.AttributesOverSingleStatCap,
-                CreateAggregateCapMeasurements(item.Allocation, item.Profile),
+                CreateAggregateCapMeasurements(item.Allocation, item.Profile, beforeRedistribution: true),
+                CreateAggregateCapMeasurements(item.Allocation, item.Profile, beforeRedistribution: false),
+                CreateAllocationRecommendations(item.Allocation),
                 scenarioMeasurements.OrderBy(x => x.Scenario).ToList()));
         }
 
@@ -863,6 +1288,15 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
             Round(outcomes.Average(x => x.Output.HealthRegeneration)),
             Round(outcomes.Average(x => x.Output.BarrierGenerated)),
             Round(outcomes.Average(x => x.Output.BarrierAbsorbed)),
+            Round(outcomes.Average(x => x.Output.IncomingRawDamage)),
+            Round(outcomes.Average(x => x.Output.AvoidedDamage)),
+            Round(outcomes.Average(x => x.Output.TypedMitigationPrevented)),
+            Round(outcomes.Average(x => x.Output.PhysicalMitigationPrevented)),
+            Round(outcomes.Average(x => x.Output.MagicalMitigationPrevented)),
+            Round(outcomes.Average(x => x.Output.BlockPrevented)),
+            Round(outcomes.Average(x => x.Output.DamageReductionPrevented)),
+            Round(outcomes.Average(x => x.Output.DamageAmplified)),
+            Round(outcomes.Average(x => x.Output.FinalHealthDamage)),
             Round(outcomes.Average(x => x.Output.DamageTaken)),
             Round(outcomes.Average(x => x.Output.RemainingHealth)),
             Round(outcomes.Average(x => x.Output.DurationTicks)),
@@ -889,9 +1323,10 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
             summonerProfile.SlotWeights,
             new Dictionary<AttributeType, double>
             {
-                [AttributeType.Power] = 0.30d,
-                [AttributeType.Precision] = 0.20d,
-                [AttributeType.WeaponDamage] = 0.20d,
+                [AttributeType.Power] = 0.25d,
+                [AttributeType.Fortitude] = 0.20d,
+                [AttributeType.Precision] = 0.15d,
+                [AttributeType.WeaponDamage] = 0.10d,
                 [AttributeType.CritChance] = 0.10d,
                 [AttributeType.CritDamage] = 0.10d,
                 [AttributeType.Cooldown] = 0.10d
@@ -1019,6 +1454,13 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
     private IReadOnlyList<HandCalibrationComparison> AnalyzeHandCalibration(
         CancellationToken cancellationToken)
     {
+        var recipes = _craftingDefinitions.GetRecipes();
+        var fastWeaponBehavior = recipes
+            .Single(x => x.Id == RepresentativeFastWeaponRecipeId)
+            .Behavior;
+        var slowWeaponBehavior = recipes
+            .Single(x => x.Id == RepresentativeSlowWeaponRecipeId)
+            .Behavior;
         var comparisons = new List<HandCalibrationComparison>();
         foreach (var tier in ReferenceTiers)
         {
@@ -1034,13 +1476,21 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
                     var dualProfile = CreateMatchedHandProfile(
                         "matched-dual-wield",
                         [.. StandardEquipmentSlotWeights, 0.85d, 0.85d],
-                        equalBehavior ? 1d : 0.75d,
-                        equalBehavior ? 1d : 0.78d);
+                        equalBehavior
+                            ? 1d
+                            : fastWeaponBehavior.BasicAttackIntervalMultiplier,
+                        equalBehavior
+                            ? 1d
+                            : fastWeaponBehavior.BasicAttackDamageMultiplier);
                     var twoHandedProfile = CreateMatchedHandProfile(
                         "matched-two-handed",
                         [.. StandardEquipmentSlotWeights, equalBudget ? 1.70d : 1.40d],
-                        equalBehavior ? 1d : 1.25d,
-                        equalBehavior ? 1d : 1.22d);
+                        equalBehavior
+                            ? 1d
+                            : slowWeaponBehavior.BasicAttackIntervalMultiplier,
+                        equalBehavior
+                            ? 1d
+                            : slowWeaponBehavior.BasicAttackDamageMultiplier);
                     var dualAllocation = CreateLoadoutAllocation(tier, dualProfile);
                     var twoHandedAllocation = CreateLoadoutAllocation(tier, twoHandedProfile);
                     var dualOutput = RunCalibrationOutput(
@@ -1082,6 +1532,506 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
         }
 
         return comparisons;
+    }
+
+    private IReadOnlyList<CraftingCombatPeerComparison> AnalyzeCraftingCombatPeers(
+        CancellationToken cancellationToken)
+    {
+        var recipes = _craftingDefinitions.GetRecipes()
+            .Where(x => x.Enabled && x.OutputItemType != EquipmentType.Tool)
+            .OrderBy(x => x.Id, StringComparer.Ordinal)
+            .ToList();
+        var blueprints = _craftingDefinitions.GetBlueprints()
+            .Where(x => x.Enabled)
+            .OrderBy(x => x.Id, StringComparer.Ordinal)
+            .ToList();
+        var templates = CreateCatalogLoadoutTemplates(recipes, blueprints);
+        var comparisons = new List<CraftingCombatPeerComparison>(
+            ReferenceTiers.Count * CraftingCombatPeerSpecs.Count);
+
+        foreach (var tier in ReferenceTiers)
+        {
+            foreach (var spec in CraftingCombatPeerSpecs)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                var firstTemplate = FindCatalogTemplate(
+                    templates,
+                    spec.FirstArmorFamily,
+                    spec.FirstHandConfiguration,
+                    spec.FirstBlueprintId);
+                var secondTemplate = FindCatalogTemplate(
+                    templates,
+                    spec.SecondArmorFamily,
+                    spec.SecondHandConfiguration,
+                    spec.SecondBlueprintId);
+                var first = CreateCatalogCombatAllocation(tier, firstTemplate);
+                var second = CreateCatalogCombatAllocation(tier, secondTemplate);
+                var firstOutcomes = MeasureCatalogCombatScenario(
+                    tier,
+                    spec.Scenario,
+                    first,
+                    cancellationToken);
+                var secondOutcomes = MeasureCatalogCombatScenario(
+                    tier,
+                    spec.Scenario,
+                    second,
+                    cancellationToken);
+                var firstUtility = CalculateUtilityPerHundredBudget(
+                    AverageUtility(firstOutcomes).Total,
+                    first.SpentBudget);
+                var secondUtility = CalculateUtilityPerHundredBudget(
+                    AverageUtility(secondOutcomes).Total,
+                    second.SpentBudget);
+                var difference = CalculateSymmetricDifference(firstUtility, secondUtility);
+
+                comparisons.Add(new CraftingCombatPeerComparison(
+                    spec.Id,
+                    spec.Group,
+                    tier,
+                    spec.Scenario,
+                    first.Id,
+                    second.Id,
+                    Round(first.SpentBudget),
+                    Round(second.SpentBudget),
+                    first.Points.ToDictionary(x => x.Key, x => Round(x.Value)),
+                    second.Points.ToDictionary(x => x.Key, x => Round(x.Value)),
+                    Round(firstUtility),
+                    Round(secondUtility),
+                    Round(difference),
+                    spec.TolerancePercent,
+                    spec.IsReleaseGate,
+                    Math.Abs(difference) <= spec.TolerancePercent,
+                    AverageOutput(firstOutcomes),
+                    AverageOutput(secondOutcomes)));
+            }
+        }
+
+        return comparisons;
+    }
+
+    private static CatalogLoadoutTemplate FindCatalogTemplate(
+        IReadOnlyList<CatalogLoadoutTemplate> templates,
+        string armorFamily,
+        string handConfiguration,
+        string? blueprintId) =>
+        templates.Single(x =>
+            x.ArmorFamily.Equals(armorFamily, StringComparison.OrdinalIgnoreCase)
+            && x.HandConfiguration.Equals(handConfiguration, StringComparison.OrdinalIgnoreCase)
+            && string.Equals(
+                x.Blueprint?.Id,
+                blueprintId,
+                StringComparison.OrdinalIgnoreCase));
+
+    private CatalogCombatAllocation CreateCatalogCombatAllocation(
+        int tier,
+        CatalogLoadoutTemplate template)
+    {
+        var designs = template.Recipes
+            .Select(recipe => EquipmentCraftingDesignComposer.Compose(
+                recipe,
+                template.Blueprint is not null
+                && EquipmentCraftingDesignComposer.IsCompatible(recipe, template.Blueprint)
+                    ? template.Blueprint
+                    : null))
+            .ToList();
+        var mainHandIndex = template.Recipes
+            .Select((recipe, index) => (recipe, index))
+            .First(x => x.recipe.Id.Equals(
+                template.MainHandRecipeId,
+                StringComparison.OrdinalIgnoreCase))
+            .index;
+        var mainHandBehavior = designs[mainHandIndex].Behavior;
+        var slotWeights = template.Recipes
+            .Select(recipe => _craftingBalance.GetSlotBudgetWeight(recipe.OutputItemType))
+            .ToList();
+        var expectedLoadoutWeight =
+            _craftingBalance.GetMaximumCombatLoadoutBudgetWeight();
+        var tierBudget = _craftingBalance.GetTierPowerBudget(tier);
+        var baselineAttributes = CreateReferenceAttributes(tier);
+        var points = new Dictionary<AttributeType, double>();
+        var spentBudget = 0d;
+
+        for (var index = 0; index < designs.Count; index++)
+        {
+            var itemBudget = tierBudget * slotWeights[index];
+            var constraints = EquipmentConstraintProfile.CreateItemConstraints(
+                baselineAttributes,
+                slotWeights[index],
+                expectedLoadoutWeight,
+                EquipmentConstraintProfile.MinimumSupportedBasicAttackIntervalMultiplier);
+            var allocation = EquipmentBudgetAllocator.AllocateConstrained(
+                tier,
+                itemBudget,
+                designs[index].InitialStatProfile,
+                constraints,
+                EquipmentConstraintProfile.GetOverflowWeights(designs[index]),
+                perItemCapMultiplier:
+                    EquipmentConstraintProfile.GetPerItemCapMultiplier(slotWeights[index]));
+            AddPoints(points, allocation.AddedPoints);
+            spentBudget += allocation.SpentBudget;
+        }
+
+        var attributes = CreateReferenceAttributes(tier);
+        foreach (var (attribute, pointDelta) in points)
+            ApplyAttributeDelta(attributes, attribute, (float)pointDelta);
+
+        return new CatalogCombatAllocation(
+            $"{template.ArmorFamily}|{template.HandConfiguration}|" +
+            $"{template.Blueprint?.Id ?? "base"}",
+            spentBudget,
+            points,
+            attributes,
+            mainHandBehavior.BasicAttackIntervalMultiplier,
+            mainHandBehavior.BasicAttackDamageMultiplier,
+            mainHandBehavior.RangeCategory.Equals("Ranged", StringComparison.OrdinalIgnoreCase)
+                ? AttackType.Ranged
+                : AttackType.Melee,
+            mainHandBehavior.AttackCategory.Equals("Magical", StringComparison.OrdinalIgnoreCase)
+                ? DamageType.Magical
+                : DamageType.Physical);
+    }
+
+    private static IReadOnlyList<ScenarioOutcome> MeasureCatalogCombatScenario(
+        int tier,
+        AttributeBalanceScenario scenario,
+        CatalogCombatAllocation allocation,
+        CancellationToken cancellationToken)
+    {
+        var outcomes = new List<ScenarioOutcome>(DeterministicSeeds.Count);
+        foreach (var seed in DeterministicSeeds)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            outcomes.Add(ExecuteScenario(
+                tier,
+                scenario,
+                new Dictionary<AttributeType, float>(allocation.Attributes),
+                SelectFriendlyAbilities(scenario),
+                allocation.BasicAttackIntervalMultiplier,
+                allocation.BasicAttackDamageMultiplier,
+                allocation.BasicAttackType,
+                allocation.BasicAttackDamageType,
+                seed,
+                cancellationToken));
+        }
+
+        return outcomes;
+    }
+
+    private static double CalculateUtilityPerHundredBudget(
+        double utility,
+        double spentBudget) =>
+        spentBudget <= 0 ? 0 : utility / spentBudget * 100d;
+
+    private CraftingCatalogConstraintReport AnalyzeCraftingCatalogConstraints(
+        CancellationToken cancellationToken)
+    {
+        var recipes = _craftingDefinitions.GetRecipes()
+            .Where(x => x.Enabled && x.OutputItemType != EquipmentType.Tool)
+            .OrderBy(x => x.Id, StringComparer.Ordinal)
+            .ToList();
+        var blueprints = _craftingDefinitions.GetBlueprints()
+            .Where(x => x.Enabled)
+            .OrderBy(x => x.Id, StringComparer.Ordinal)
+            .ToList();
+        var templates = CreateCatalogLoadoutTemplates(recipes, blueprints);
+        var measurements = new List<CatalogShadowWork>(templates.Count * ReferenceTiers.Count);
+
+        foreach (var tier in ReferenceTiers)
+        {
+            foreach (var template in templates)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                measurements.Add(MeasureCatalogShadowLoadout(tier, template));
+            }
+        }
+
+        var statSummaries = EquipmentStatBudgetCatalog.Attributes
+            .Where(attribute => AttributeCatalog.TryGetEffectiveCharacterCap(
+                attribute,
+                basicAttackIntervalMultiplier: 1d,
+                out _))
+            .Order()
+            .Select(attribute => new CraftingCatalogStatConstraintSummary(
+                attribute,
+                measurements.Count(x => x.CurrentCaps.Any(cap =>
+                    cap.Attribute == attribute && cap.ExcessPoints > 0.001d)),
+                measurements.Count(x => x.ShadowCaps.Any(cap =>
+                    cap.Attribute == attribute && cap.ExcessPoints > 0.001d)),
+                Round(measurements
+                    .SelectMany(x => x.CurrentCaps)
+                    .Where(x => x.Attribute == attribute)
+                    .Select(x => x.ExcessPoints)
+                    .DefaultIfEmpty(0d)
+                    .Max()),
+                Round(measurements
+                    .SelectMany(x => x.ShadowCaps)
+                    .Where(x => x.Attribute == attribute)
+                    .Select(x => x.ExcessPoints)
+                    .DefaultIfEmpty(0d)
+                    .Max())))
+            .ToList();
+        var worstCurrentLoadouts = measurements
+            .Where(x => x.CurrentAttributesOverCap.Count > 0 || x.CurrentUnspentBudget > 0.01d)
+            .OrderByDescending(x => x.CurrentMaximumWastedBudgetPercent)
+            .ThenBy(x => x.Id, StringComparer.Ordinal)
+            .Take(20)
+            .Select(x => new CraftingCatalogLoadoutConstraintMeasurement(
+                x.Id,
+                x.Tier,
+                x.ArmorFamily,
+                x.HandConfiguration,
+                x.BlueprintId,
+                Round(x.TargetBudget),
+                Round(x.CurrentSpentBudget),
+                Round(x.ShadowSpentBudget),
+                Round(x.CurrentMaximumWastedBudgetPercent),
+                Round(x.ShadowMaximumWastedBudgetPercent),
+                x.CurrentAttributesOverCap,
+                x.ShadowAttributesOverCap))
+            .ToList();
+        var composedDesignCount = recipes.Count
+            + recipes.Sum(recipe => blueprints.Count(blueprint =>
+                EquipmentCraftingDesignComposer.IsCompatible(recipe, blueprint)));
+        return new CraftingCatalogConstraintReport(
+            EquipmentConstraintProfile.BalanceVersion,
+            EquipmentConstraintProfile.ProductionActive,
+            recipes.Count,
+            blueprints.Count,
+            composedDesignCount,
+            measurements.Count,
+            measurements.Count(x => x.CurrentAttributesOverCap.Count > 0),
+            measurements.Count(x => x.ShadowAttributesOverCap.Count > 0),
+            measurements.Count(x => x.CurrentUnspentBudget > 0.01d),
+            measurements.Count(x => x.ShadowUnspentBudget > 0.01d),
+            statSummaries,
+            worstCurrentLoadouts);
+    }
+
+    private CatalogShadowWork MeasureCatalogShadowLoadout(
+        int tier,
+        CatalogLoadoutTemplate template)
+    {
+        var designs = template.Recipes
+            .Select(recipe => EquipmentCraftingDesignComposer.Compose(
+                recipe,
+                template.Blueprint is not null
+                && EquipmentCraftingDesignComposer.IsCompatible(recipe, template.Blueprint)
+                    ? template.Blueprint
+                    : null))
+            .ToList();
+        var mainHandIndex = template.Recipes
+            .Select((recipe, index) => (recipe, index))
+            .First(x => x.recipe.Id.Equals(
+                template.MainHandRecipeId,
+                StringComparison.OrdinalIgnoreCase))
+            .index;
+        var basicAttackIntervalMultiplier =
+            designs[mainHandIndex].Behavior.BasicAttackIntervalMultiplier;
+        var slotWeights = template.Recipes
+            .Select(recipe => _craftingBalance.GetSlotBudgetWeight(recipe.OutputItemType))
+            .ToList();
+        var expectedLoadoutWeight = slotWeights.Sum();
+        var tierBudget = _craftingBalance.GetTierPowerBudget(tier);
+        var targetBudget = tierBudget * expectedLoadoutWeight;
+        var baselineAttributes = CreateReferenceAttributes(tier);
+        var currentPoints = new Dictionary<AttributeType, double>();
+        var shadowPoints = new Dictionary<AttributeType, double>();
+        var currentSpentBudget = 0d;
+        var shadowSpentBudget = 0d;
+
+        for (var index = 0; index < designs.Count; index++)
+        {
+            var itemBudget = tierBudget * slotWeights[index];
+            var productionConstraints = EquipmentConstraintProfile.CreateItemConstraints(
+                baselineAttributes,
+                slotWeights[index],
+                _craftingBalance.GetMaximumCombatLoadoutBudgetWeight(),
+                EquipmentConstraintProfile.MinimumSupportedBasicAttackIntervalMultiplier);
+            var current = EquipmentBudgetAllocator.AllocateConstrained(
+                tier,
+                itemBudget,
+                designs[index].InitialStatProfile,
+                productionConstraints,
+                EquipmentConstraintProfile.GetOverflowWeights(designs[index]),
+                perItemCapMultiplier:
+                    EquipmentConstraintProfile.GetPerItemCapMultiplier(slotWeights[index]));
+            var candidateConstraints = EquipmentConstraintProfile.CreateItemConstraints(
+                baselineAttributes,
+                slotWeights[index],
+                expectedLoadoutWeight,
+                basicAttackIntervalMultiplier);
+            var shadow = EquipmentBudgetAllocator.AllocateConstrained(
+                tier,
+                itemBudget,
+                designs[index].InitialStatProfile,
+                candidateConstraints,
+                EquipmentConstraintProfile.GetOverflowWeights(designs[index]),
+                perItemCapMultiplier:
+                    EquipmentConstraintProfile.GetPerItemCapMultiplier(slotWeights[index]));
+
+            AddPoints(currentPoints, current.AddedPoints);
+            AddPoints(shadowPoints, shadow.AddedPoints);
+            currentSpentBudget += current.SpentBudget;
+            shadowSpentBudget += shadow.SpentBudget;
+        }
+
+        var currentCaps = CalculateCatalogCapResults(
+            tier,
+            targetBudget,
+            currentPoints,
+            basicAttackIntervalMultiplier);
+        var shadowCaps = CalculateCatalogCapResults(
+            tier,
+            targetBudget,
+            shadowPoints,
+            basicAttackIntervalMultiplier);
+
+        return new CatalogShadowWork(
+            $"{template.ArmorFamily}|{template.HandConfiguration}|" +
+            $"{template.Blueprint?.Id ?? "base"}|t{tier}",
+            tier,
+            template.ArmorFamily,
+            template.HandConfiguration,
+            template.Blueprint?.Id,
+            targetBudget,
+            currentSpentBudget,
+            shadowSpentBudget,
+            Math.Max(0d, targetBudget - currentSpentBudget),
+            Math.Max(0d, targetBudget - shadowSpentBudget),
+            currentCaps,
+            shadowCaps);
+    }
+
+    private static IReadOnlyList<CatalogLoadoutTemplate> CreateCatalogLoadoutTemplates(
+        IReadOnlyList<CraftingRecipeDefinition> recipes,
+        IReadOnlyList<BlueprintDefinition> blueprints)
+    {
+        var armorSets = recipes
+            .Where(x => x.OutputItemType is
+                EquipmentType.Head or EquipmentType.Chest or EquipmentType.Legs)
+            .GroupBy(x => x.Behavior.Role, StringComparer.OrdinalIgnoreCase)
+            .Where(group =>
+                group.Count(x => x.OutputItemType == EquipmentType.Head) == 1
+                && group.Count(x => x.OutputItemType == EquipmentType.Chest) == 1
+                && group.Count(x => x.OutputItemType == EquipmentType.Legs) == 1)
+            .OrderBy(group => group.Key, StringComparer.Ordinal)
+            .Select(group => (
+                Family: group.Key,
+                Recipes: group.OrderBy(x => x.OutputItemType).ToList()))
+            .ToList();
+        var jewelry = recipes
+            .Where(x => x.OutputItemType is
+                EquipmentType.Ring or EquipmentType.Necklace or EquipmentType.Relic)
+            .OrderBy(x => x.OutputItemType)
+            .ToList();
+        var oneHanded = recipes
+            .Where(x => x.OutputItemType == EquipmentType.OneHanded)
+            .OrderBy(x => x.Id, StringComparer.Ordinal)
+            .ToList();
+        var twoHanded = recipes
+            .Where(x => x.OutputItemType == EquipmentType.TwoHanded)
+            .OrderBy(x => x.Id, StringComparer.Ordinal)
+            .ToList();
+        var offHands = recipes
+            .Where(x => x.OutputItemType == EquipmentType.OffHand)
+            .OrderBy(x => x.Id, StringComparer.Ordinal)
+            .ToList();
+        var handConfigurations = new List<CatalogHandConfiguration>();
+        handConfigurations.AddRange(twoHanded.Select(recipe =>
+            new CatalogHandConfiguration(
+                $"two-handed:{recipe.Id}",
+                [recipe],
+                recipe.Id)));
+        handConfigurations.AddRange(oneHanded.Select(recipe =>
+            new CatalogHandConfiguration(
+                $"dual:{recipe.Id}",
+                [recipe, recipe],
+                recipe.Id)));
+        handConfigurations.AddRange(
+            oneHanded.SelectMany(mainHand => offHands.Select(offHand =>
+                new CatalogHandConfiguration(
+                    $"one-off:{mainHand.Id}+{offHand.Id}",
+                    [mainHand, offHand],
+                    mainHand.Id))));
+
+        var templates = new List<CatalogLoadoutTemplate>();
+        foreach (var armorSet in armorSets)
+        {
+            foreach (var handConfiguration in handConfigurations)
+            {
+                var loadoutRecipes = armorSet.Recipes
+                    .Concat(jewelry)
+                    .Concat(handConfiguration.Recipes)
+                    .ToList();
+                templates.Add(new CatalogLoadoutTemplate(
+                    armorSet.Family,
+                    handConfiguration.Id,
+                    loadoutRecipes,
+                    handConfiguration.MainHandRecipeId,
+                    null));
+                foreach (var blueprint in blueprints.Where(blueprint =>
+                             loadoutRecipes.Any(recipe =>
+                                 EquipmentCraftingDesignComposer.IsCompatible(
+                                     recipe,
+                                     blueprint))))
+                {
+                    templates.Add(new CatalogLoadoutTemplate(
+                        armorSet.Family,
+                        handConfiguration.Id,
+                        loadoutRecipes,
+                        handConfiguration.MainHandRecipeId,
+                        blueprint));
+                }
+            }
+        }
+
+        return templates;
+    }
+
+    private static IReadOnlyList<CatalogCapResult> CalculateCatalogCapResults(
+        int tier,
+        double targetBudget,
+        IReadOnlyDictionary<AttributeType, double> points,
+        double basicAttackIntervalMultiplier)
+    {
+        var attributes = CreateReferenceAttributes(tier);
+        foreach (var (attribute, pointDelta) in points)
+            ApplyAttributeDelta(attributes, attribute, (float)pointDelta);
+
+        return EquipmentStatBudgetCatalog.Attributes
+            .Order()
+            .Where(attribute => AttributeCatalog.TryGetEffectiveCharacterCap(
+                attribute,
+                basicAttackIntervalMultiplier,
+                out _))
+            .Select(attribute =>
+            {
+                AttributeCatalog.TryGetEffectiveCharacterCap(
+                    attribute,
+                    basicAttackIntervalMultiplier,
+                    out var effectiveCap);
+                var excessPoints = Math.Max(
+                    0d,
+                    attributes.GetValueOrDefault(attribute) - effectiveCap);
+                var equivalentWastedBudget =
+                    excessPoints * EquipmentStatBudgetCatalog.Get(attribute, tier).CostPerPoint;
+                return new CatalogCapResult(
+                    attribute,
+                    excessPoints,
+                    targetBudget <= 0
+                        ? 0
+                        : equivalentWastedBudget / targetBudget * 100d);
+            })
+            .ToList();
+    }
+
+    private static void AddPoints(
+        IDictionary<AttributeType, double> target,
+        IReadOnlyDictionary<AttributeType, double> source)
+    {
+        foreach (var (attribute, points) in source)
+            target[attribute] =
+                (target.TryGetValue(attribute, out var current) ? current : 0d) + points;
     }
 
     private static EquipmentLoadoutProfile CreateMatchedHandProfile(
@@ -1153,11 +2103,20 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
         modified <= 0 ? 0 : (modified - baseline) / modified * 100d;
 
     private static EquipmentBalanceCalibrationGate CreateCalibrationGate(
+        IReadOnlyList<EqualBudgetAttributeComparison> equalBudgetComparisons,
         IReadOnlyList<EquipmentLoadoutMeasurement> loadouts,
         IReadOnlyList<SummonCalibrationComparison> summonCalibrations,
-        IReadOnlyList<HandCalibrationComparison> handCalibrations)
+        IReadOnlyList<HandCalibrationComparison> handCalibrations,
+        IReadOnlyList<CraftingCombatPeerComparison> craftingCombatPeers)
     {
+        var equalBudgetFailures = equalBudgetComparisons
+            .Where(x => x.IsReleaseGate && !x.Passed)
+            .ToList();
         var aggregateCapFailures = loadouts
+            .Where(x => x.AggregateCapsBeforeRedistribution.Any(cap =>
+                cap.WastedTargetBudgetPercent > AggregateCapWasteTolerancePercent))
+            .ToList();
+        var candidateAggregateCapFailures = loadouts
             .Where(x => x.AggregateCaps.Any(cap =>
                 cap.WastedTargetBudgetPercent > AggregateCapWasteTolerancePercent))
             .ToList();
@@ -1169,12 +2128,22 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
                 x.Mode == HandCalibrationMode.RepresentativeFundingAndBehavior
                 && Math.Abs(x.DifferencePercent) > HandCalibrationTolerancePercent)
             .ToList();
+        var craftingCombatPeerFailures = craftingCombatPeers
+            .Where(x => x.IsReleaseGate && !x.Passed)
+            .ToList();
         var blockers = new List<string>();
         if (aggregateCapFailures.Count > 0)
         {
             blockers.Add(
                 $"{aggregateCapFailures.Count} loadouts waste more than " +
                 $"{AggregateCapWasteTolerancePercent:0.##}% of target budget at aggregate combat caps.");
+        }
+
+        if (equalBudgetFailures.Count > 0)
+        {
+            blockers.Add(
+                $"{equalBudgetFailures.Count} equal-budget peer comparisons exceed " +
+                "their approved tolerances.");
         }
 
         if (summonFailures.Count > 0)
@@ -1191,15 +2160,25 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
                 $"{HandCalibrationTolerancePercent:0.##}%.");
         }
 
+        if (craftingCombatPeerFailures.Count > 0)
+        {
+            blockers.Add(
+                $"{craftingCombatPeerFailures.Count} real crafting combat peer comparisons exceed " +
+                "their approved tolerances.");
+        }
+
         return new EquipmentBalanceCalibrationGate(
             SummonCalibrationTolerancePercent,
             HandCalibrationTolerancePercent,
             AggregateCapWasteTolerancePercent,
             OverflowRedistributionActive: true,
             AggregateCapUtilizationPassed: aggregateCapFailures.Count == 0,
+            CandidateAggregateCapUtilizationPassed: candidateAggregateCapFailures.Count == 0,
+            EqualBudgetPeerMatrixPassed: equalBudgetFailures.Count == 0,
             SummonCalibrationPassed: summonFailures.Count == 0,
             HandCalibrationPassed: handFailures.Count == 0,
-            ReadyForBalanceVersion3: blockers.Count == 0,
+            CraftingCombatPeerMatrixPassed: craftingCombatPeerFailures.Count == 0,
+            ActiveProfilePassed: blockers.Count == 0,
             blockers);
     }
 
@@ -1207,49 +2186,231 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
     {
         var tierBudget = _craftingBalance.GetTierPowerBudget(tier);
         var targetBudget = tierBudget * profile.SlotWeights.Sum();
-        var attributes = CreateReferenceAttributes(tier);
-        var points = new Dictionary<AttributeType, double>();
+        var preRedistributionAttributes = CreateReferenceAttributes(tier);
+        var preRedistributionPoints = new Dictionary<AttributeType, double>();
         var overCap = new HashSet<AttributeType>();
-        var spentBudget = 0d;
 
         foreach (var slotWeight in profile.SlotWeights)
         {
             var slotBudget = tierBudget * slotWeight;
-            var allocation = EquipmentBudgetAllocator.Allocate(
+            var constraints = EquipmentConstraintProfile.CreateItemConstraints(
+                preRedistributionAttributes,
+                slotWeight,
+                _craftingBalance.GetMaximumCombatLoadoutBudgetWeight(),
+                EquipmentConstraintProfile.MinimumSupportedBasicAttackIntervalMultiplier);
+            var allocation = EquipmentBudgetAllocator.AllocateConstrained(
                 tier,
                 slotBudget,
                 profile.BudgetShares,
-                roundToWholePoints: false);
+                constraints,
+                profile.BudgetShares,
+                perItemCapMultiplier:
+                    EquipmentConstraintProfile.GetPerItemCapMultiplier(slotWeight));
             foreach (var (attribute, pointDelta) in allocation.AddedPoints)
             {
-                points[attribute] = points.GetValueOrDefault(attribute) + pointDelta;
+                preRedistributionPoints[attribute] =
+                    preRedistributionPoints.GetValueOrDefault(attribute) + pointDelta;
             }
 
-            spentBudget += allocation.SpentBudget;
             overCap.UnionWith(allocation.CappedAttributes);
         }
 
-        foreach (var (attribute, pointDelta) in points)
+        foreach (var (attribute, pointDelta) in preRedistributionPoints)
+            ApplyAttributeDelta(preRedistributionAttributes, attribute, (float)pointDelta);
+
+        var (candidatePoints, spentBudget) = AllocateAggregateCappedPoints(
+            tier,
+            targetBudget,
+            profile);
+        var attributes = CreateReferenceAttributes(tier);
+        foreach (var (attribute, pointDelta) in candidatePoints)
             ApplyAttributeDelta(attributes, attribute, (float)pointDelta);
+        var aggregateRedistributedBudget = preRedistributionPoints
+            .Select(entry =>
+            {
+                var rule = EquipmentStatBudgetCatalog.Get(entry.Key, tier);
+                var removedPoints = Math.Max(
+                    0d,
+                    entry.Value - candidatePoints.GetValueOrDefault(entry.Key));
+                return removedPoints * rule.CostPerPoint;
+            })
+            .Sum();
 
         return new LoadoutAllocation(
             tier,
             targetBudget,
             spentBudget,
             attributes,
-            points.ToDictionary(x => x.Key, x => Round(x.Value)),
+            candidatePoints.ToDictionary(x => x.Key, x => Round(x.Value)),
+            preRedistributionAttributes,
+            preRedistributionPoints.ToDictionary(x => x.Key, x => Round(x.Value)),
+            aggregateRedistributedBudget,
             overCap.Order().ToList());
     }
 
+    private static (Dictionary<AttributeType, double> Points, double SpentBudget)
+        AllocateAggregateCappedPoints(
+            int tier,
+            double targetBudget,
+            EquipmentLoadoutProfile profile)
+    {
+        const double tolerance = 0.000001d;
+        var baselineAttributes = CreateReferenceAttributes(tier);
+        var points = profile.BudgetShares.Keys.ToDictionary(x => x, _ => 0d);
+        var activeWeights = profile.BudgetShares
+            .Where(x => x.Value > 0 && EquipmentStatBudgetCatalog.IsKnown(x.Key))
+            .OrderBy(x => x.Key)
+            .ToDictionary(x => x.Key, x => x.Value);
+        var remainingBudget = targetBudget;
+        var slotCount = profile.SlotWeights.Count;
+
+        for (var iteration = 0;
+             iteration < EquipmentStatBudgetCatalog.Attributes.Count * 2
+             && remainingBudget > tolerance
+             && activeWeights.Count > 0;
+             iteration++)
+        {
+            var totalWeight = activeWeights.Values.Sum();
+            if (totalWeight <= tolerance)
+                break;
+
+            var proposedPoints = activeWeights.ToDictionary(
+                entry => entry.Key,
+                entry =>
+                    remainingBudget
+                    * entry.Value
+                    / totalWeight
+                    / EquipmentConstraintProfile.GetCostPerPoint(
+                        entry.Key,
+                        tier));
+            var scale = 1d;
+
+            foreach (var (attribute, proposedPointDelta) in proposedPoints)
+            {
+                var aggregatePerItemCapacity =
+                    EquipmentStatBudgetCatalog.Get(attribute, tier).PerItemHardCap * slotCount;
+                if (proposedPointDelta > tolerance)
+                {
+                    scale = Math.Min(
+                        scale,
+                        Math.Max(0d, aggregatePerItemCapacity - points[attribute])
+                        / proposedPointDelta);
+                }
+            }
+
+            foreach (var cappedAttribute in EquipmentStatBudgetCatalog.Attributes.Order())
+            {
+                if (!AttributeCatalog.TryGetEffectiveCharacterCap(
+                        cappedAttribute,
+                        profile.BasicAttackIntervalMultiplier,
+                        out var effectiveCap))
+                {
+                    continue;
+                }
+
+                var currentValue = CalculateAggregateAttributeValue(
+                    cappedAttribute,
+                    baselineAttributes,
+                    points);
+                var proposedIncrease = proposedPoints.Sum(entry =>
+                    entry.Value
+                    * GetDirectOrPrimaryContribution(entry.Key, cappedAttribute));
+                if (proposedIncrease <= tolerance)
+                    continue;
+
+                scale = Math.Min(
+                    scale,
+                    Math.Max(0d, effectiveCap - currentValue) / proposedIncrease);
+            }
+
+            scale = Math.Clamp(scale, 0d, 1d);
+            var spentThisIteration = 0d;
+            foreach (var (attribute, proposedPointDelta) in proposedPoints)
+            {
+                var addedPoints = proposedPointDelta * scale;
+                points[attribute] += addedPoints;
+                spentThisIteration +=
+                    addedPoints
+                    * EquipmentConstraintProfile.GetCostPerPoint(
+                        attribute,
+                        tier);
+            }
+
+            remainingBudget = Math.Max(0d, remainingBudget - spentThisIteration);
+            if (scale >= 1d - tolerance)
+                break;
+
+            var blockedAttributes = new HashSet<AttributeType>();
+            foreach (var attribute in activeWeights.Keys)
+            {
+                var aggregatePerItemCapacity =
+                    EquipmentStatBudgetCatalog.Get(attribute, tier).PerItemHardCap * slotCount;
+                if (points[attribute] >= aggregatePerItemCapacity - tolerance)
+                    blockedAttributes.Add(attribute);
+            }
+
+            foreach (var cappedAttribute in EquipmentStatBudgetCatalog.Attributes.Order())
+            {
+                if (!AttributeCatalog.TryGetEffectiveCharacterCap(
+                        cappedAttribute,
+                        profile.BasicAttackIntervalMultiplier,
+                        out var effectiveCap)
+                    || CalculateAggregateAttributeValue(
+                        cappedAttribute,
+                        baselineAttributes,
+                        points) < effectiveCap - tolerance)
+                {
+                    continue;
+                }
+
+                foreach (var attribute in activeWeights.Keys.Where(attribute =>
+                             GetDirectOrPrimaryContribution(attribute, cappedAttribute) > 0))
+                {
+                    blockedAttributes.Add(attribute);
+                }
+            }
+
+            if (blockedAttributes.Count == 0)
+                break;
+
+            foreach (var attribute in blockedAttributes)
+                activeWeights.Remove(attribute);
+        }
+
+        return (points, targetBudget - remainingBudget);
+    }
+
+    private static double CalculateAggregateAttributeValue(
+        AttributeType attribute,
+        IReadOnlyDictionary<AttributeType, float> baselineAttributes,
+        IReadOnlyDictionary<AttributeType, double> equipmentPoints) =>
+        baselineAttributes.GetValueOrDefault(attribute)
+        + equipmentPoints.Sum(entry =>
+            entry.Value * GetDirectOrPrimaryContribution(entry.Key, attribute));
+
+    private static double GetDirectOrPrimaryContribution(
+        AttributeType source,
+        AttributeType target) =>
+        source == target
+            ? 1d
+            : AttributeCombatRules.GetContributionPerPoint(source, target);
+
     private static IReadOnlyList<EquipmentAggregateCapMeasurement> CreateAggregateCapMeasurements(
         LoadoutAllocation allocation,
-        EquipmentLoadoutProfile profile)
+        EquipmentLoadoutProfile profile,
+        bool beforeRedistribution)
     {
         var baselineAttributes = CreateReferenceAttributes(allocation.Tier);
+        var attributes = beforeRedistribution
+            ? allocation.PreRedistributionAttributes
+            : allocation.Attributes;
+        var points = beforeRedistribution
+            ? allocation.PreRedistributionPoints
+            : allocation.Points;
         var measurements = new List<EquipmentAggregateCapMeasurement>();
         foreach (var attribute in EquipmentStatBudgetCatalog.Attributes.Order())
         {
-            if (!AttributeCombatRules.TryGetEffectiveCharacterCap(
+            if (!AttributeCatalog.TryGetEffectiveCharacterCap(
                     attribute,
                     profile.BasicAttackIntervalMultiplier,
                     out var effectiveCap))
@@ -1258,10 +2419,10 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
             }
 
             var baselineValue = baselineAttributes.GetValueOrDefault(attribute);
-            var directEquipmentPoints = allocation.Points.GetValueOrDefault(attribute);
-            var primaryContributionPoints = allocation.Points.Sum(entry =>
+            var directEquipmentPoints = points.GetValueOrDefault(attribute);
+            var primaryContributionPoints = points.Sum(entry =>
                 entry.Value * AttributeCombatRules.GetContributionPerPoint(entry.Key, attribute));
-            var totalValue = allocation.Attributes.GetValueOrDefault(attribute);
+            var totalValue = attributes.GetValueOrDefault(attribute);
             var excessPoints = Math.Max(0d, totalValue - effectiveCap);
             var directEquipmentExcessPoints = Math.Min(directEquipmentPoints, excessPoints);
             var equivalentWastedBudget =
@@ -1285,6 +2446,39 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
         }
 
         return measurements;
+    }
+
+    private static IReadOnlyList<EquipmentLoadoutAllocationRecommendation>
+        CreateAllocationRecommendations(LoadoutAllocation allocation)
+    {
+        var attributes = allocation.PreRedistributionPoints.Keys
+            .Union(allocation.Points.Keys)
+            .Order()
+            .ToList();
+        return attributes.Select(attribute =>
+        {
+            var rule = EquipmentStatBudgetCatalog.Get(attribute, allocation.Tier);
+            var currentBudget =
+                allocation.PreRedistributionPoints.GetValueOrDefault(attribute)
+                * rule.CostPerPoint;
+            var candidateBudget =
+                allocation.Points.GetValueOrDefault(attribute)
+                * EquipmentConstraintProfile.GetCostPerPoint(
+                    attribute,
+                    allocation.Tier);
+            return new EquipmentLoadoutAllocationRecommendation(
+                attribute,
+                allocation.TargetBudget <= 0
+                    ? 0
+                    : Round(currentBudget / allocation.TargetBudget * 100d),
+                allocation.TargetBudget <= 0
+                    ? 0
+                    : Round(candidateBudget / allocation.TargetBudget * 100d),
+                Round(
+                    allocation.Points.GetValueOrDefault(attribute)
+                    - allocation.PreRedistributionPoints.GetValueOrDefault(attribute)),
+                Round(candidateBudget - currentBudget));
+        }).ToList();
     }
 
     private static double CalculateNominalSummonLifetimeDamage(double ownerPower)
@@ -1370,23 +2564,15 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
         var comparisons = new List<EqualBudgetAttributeComparison>();
         foreach (var tier in ReferenceTiers)
         {
-            var budget = _craftingBalance.GetTierPowerBudget(tier) * MarginalBudgetFraction;
-            comparisons.Add(Compare(
-                tier,
-                AttributeBalanceScenario.PhysicalPressure,
-                AttributeType.MaxHealth,
-                AttributeType.Armor,
-                budget,
-                baselineCache,
-                cancellationToken));
-            comparisons.Add(Compare(
-                tier,
-                AttributeBalanceScenario.MagicalPressure,
-                AttributeType.MaxHealth,
-                AttributeType.Resistance,
-                budget,
-                baselineCache,
-                cancellationToken));
+            foreach (var spec in EqualBudgetPeerSpecs)
+            {
+                comparisons.Add(Compare(
+                    tier,
+                    spec,
+                    _craftingBalance.GetTierPowerBudget(tier) * spec.BudgetFraction,
+                    baselineCache,
+                    cancellationToken));
+            }
         }
 
         return comparisons;
@@ -1394,23 +2580,91 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
 
     private EqualBudgetAttributeComparison Compare(
         int tier,
-        AttributeBalanceScenario scenario,
-        AttributeType first,
-        AttributeType second,
+        EqualBudgetPeerSpec spec,
         double budget,
         IDictionary<(int Tier, AttributeBalanceScenario Scenario), ScenarioSample> baselineCache,
         CancellationToken cancellationToken)
     {
-        if (!baselineCache.TryGetValue((tier, scenario), out var baseline))
+        ScenarioSample baseline;
+        if (spec.BenchmarkContext is null)
         {
-            baseline = MeasureScenario(tier, scenario, null, 0, cancellationToken);
-            baselineCache.Add((tier, scenario), baseline);
+            if (baselineCache.TryGetValue((tier, spec.Scenario), out var cachedBaseline))
+            {
+                baseline = cachedBaseline;
+            }
+            else
+            {
+                baseline = MeasureScenario(tier, spec.Scenario, null, 0, cancellationToken);
+                baselineCache.Add((tier, spec.Scenario), baseline);
+            }
+        }
+        else
+        {
+            baseline = MeasureScenario(
+                tier,
+                spec.Scenario,
+                new Dictionary<AttributeType, double>(),
+                cancellationToken,
+                spec.BenchmarkContext);
         }
 
-        var firstDelta = CalculateAffordablePointDelta(tier, first, budget);
-        var secondDelta = CalculateAffordablePointDelta(tier, second, budget);
-        var firstScore = MeasureScenario(tier, scenario, first, firstDelta, cancellationToken);
-        var secondScore = MeasureScenario(tier, scenario, second, secondDelta, cancellationToken);
+        var referenceAttributes = CreateReferenceAttributes(tier);
+        if (spec.BenchmarkContext is not null)
+        {
+            foreach (var (attribute, value) in spec.BenchmarkContext.ReferenceAttributeOverrides)
+                referenceAttributes[attribute] = (float)value;
+        }
+
+        var firstDelta = CalculateAffordablePointDelta(
+            tier,
+            spec.FirstAttribute,
+            budget,
+            referenceAttributes.GetValueOrDefault(spec.FirstAttribute));
+        IReadOnlyDictionary<AttributeType, double> firstPointDeltas =
+            new Dictionary<AttributeType, double>
+            {
+                [spec.FirstAttribute] = firstDelta
+            };
+        IReadOnlyDictionary<AttributeType, double> secondPointDeltas;
+        string secondLabel;
+        if (spec.DerivedBasketPrimary is { } basketPrimary)
+        {
+            secondPointDeltas = AttributeCombatRules.PrimaryContributions
+                .Where(x => x.PrimaryAttribute == basketPrimary)
+                .OrderBy(x => x.DerivedAttribute)
+                .ToDictionary(
+                    x => x.DerivedAttribute,
+                    x => firstDelta * x.ContributionPerPoint);
+            secondLabel = $"{basketPrimary} derived basket";
+        }
+        else
+        {
+            var secondAttribute = spec.SecondAttribute
+                ?? throw new InvalidOperationException(
+                    $"Peer comparison '{spec.Id}' has no second investment.");
+            secondPointDeltas = new Dictionary<AttributeType, double>
+            {
+                [secondAttribute] = CalculateAffordablePointDelta(
+                    tier,
+                    secondAttribute,
+                    budget,
+                    referenceAttributes.GetValueOrDefault(secondAttribute))
+            };
+            secondLabel = secondAttribute.ToString();
+        }
+
+        var firstScore = MeasureScenario(
+            tier,
+            spec.Scenario,
+            firstPointDeltas,
+            cancellationToken,
+            spec.BenchmarkContext);
+        var secondScore = MeasureScenario(
+            tier,
+            spec.Scenario,
+            secondPointDeltas,
+            cancellationToken,
+            spec.BenchmarkContext);
         var firstGain = baseline.Scores
             .Zip(
                 firstScore.Scores,
@@ -1421,23 +2675,149 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
                 secondScore.Scores,
                 (baselineScore, modifiedScore) => CalculateRelativeGain(baselineScore, modifiedScore))
             .Average();
+        var difference = firstGain - secondGain;
 
         return new EqualBudgetAttributeComparison(
+            spec.Id,
+            spec.Group,
+            spec.Intent,
             tier,
+            spec.Scenario,
+            spec.BenchmarkContext?.Label ?? "reference baseline",
+            spec.IsReleaseGate,
+            spec.FirstAttribute.ToString(),
+            secondLabel,
+            spec.FirstAttribute,
+            spec.SecondAttribute,
+            Round(budget),
+            spec.TolerancePercentagePoints,
+            Round(firstGain),
+            Round(secondGain),
+            Round(difference),
+            Math.Abs(difference) <= spec.TolerancePercentagePoints);
+    }
+
+    private static EqualBudgetPeerSpec StrictPeer(
+        string id,
+        AttributePeerComparisonGroup group,
+        AttributeBalanceScenario scenario,
+        AttributeType first,
+        AttributeType second,
+        double budgetFraction = 0.02d) =>
+        new(
+            id,
+            group,
+            AttributePeerComparisonIntent.StrictPeer,
             scenario,
             first,
             second,
-            Round(budget),
-            Round(firstGain),
-            Round(secondGain),
-            Round(firstGain - secondGain));
-    }
+            null,
+            null,
+            true,
+            budgetFraction,
+            StrictPeerTolerancePercentagePoints);
 
-    private static double CalculateAffordablePointDelta(int tier, AttributeType attribute, double budget)
+    private static EqualBudgetPeerSpec GeneralistPeer(
+        string id,
+        AttributePeerComparisonGroup group,
+        AttributeBalanceScenario scenario,
+        AttributeType first,
+        AttributeType second,
+        double budgetFraction = 0.02d) =>
+        new(
+            id,
+            group,
+            AttributePeerComparisonIntent.GeneralistVersusSpecialist,
+            scenario,
+            first,
+            second,
+            null,
+            null,
+            true,
+            budgetFraction,
+            GeneralistPeerTolerancePercentagePoints);
+
+    private static EqualBudgetPeerSpec PrimaryBasketPeer(
+        string id,
+        AttributeBalanceScenario scenario,
+        AttributeType primary,
+        double budgetFraction = 0.02d) =>
+        new(
+            id,
+            AttributePeerComparisonGroup.PrimaryIdentity,
+            AttributePeerComparisonIntent.PrimaryVersusDerivedBasket,
+            scenario,
+            primary,
+            null,
+            primary,
+            null,
+            true,
+            budgetFraction,
+            PrimaryBasketTolerancePercentagePoints);
+
+    private static EqualBudgetPeerSpec ContextPeer(
+        string id,
+        AttributePeerComparisonGroup group,
+        AttributeBalanceScenario scenario,
+        AttributeType first,
+        AttributeType second,
+        EqualBudgetBenchmarkContext context,
+        AttributePeerComparisonIntent intent,
+        double tolerancePercentagePoints,
+        bool isReleaseGate = true,
+        double budgetFraction = 0.02d) =>
+        new(
+            id,
+            group,
+            intent,
+            scenario,
+            first,
+            second,
+            null,
+            context,
+            isReleaseGate,
+            budgetFraction,
+            tolerancePercentagePoints);
+
+    private static CraftingCombatPeerSpec CraftingPeer(
+        string id,
+        CraftingCombatPeerGroup group,
+        AttributeBalanceScenario scenario,
+        string firstArmorFamily,
+        string firstHandConfiguration,
+        string? firstBlueprintId,
+        string secondArmorFamily,
+        string secondHandConfiguration,
+        string? secondBlueprintId,
+        double tolerancePercent = CraftingCombatPeerTolerancePercent,
+        bool isReleaseGate = true) =>
+        new(
+            id,
+            group,
+            scenario,
+            firstArmorFamily,
+            firstHandConfiguration,
+            firstBlueprintId,
+            secondArmorFamily,
+            secondHandConfiguration,
+            secondBlueprintId,
+            tolerancePercent,
+            isReleaseGate);
+
+    private static double CalculateAffordablePointDelta(
+        int tier,
+        AttributeType attribute,
+        double budget,
+        double? baselineOverride = null)
     {
         var rule = EquipmentStatBudgetCatalog.Get(attribute, tier);
-        var baseline = CreateReferenceAttributes(tier).GetValueOrDefault(attribute);
-        return Math.Max(0, Math.Min(budget / rule.CostPerPoint, rule.PerItemHardCap - baseline));
+        var baseline = baselineOverride
+            ?? CreateReferenceAttributes(tier).GetValueOrDefault(attribute);
+        return Math.Max(
+            0,
+            Math.Min(
+                budget / EquipmentConstraintProfile.GetCostPerPoint(attribute, tier),
+                rule.PerItemHardCap - baseline));
     }
 
     private static List<AttributeMarginalValueMeasurement> AddSuggestedCosts(
@@ -1475,6 +2855,7 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
         IReadOnlyList<EquipmentLoadoutComparison> loadoutComparisons,
         IReadOnlyList<SummonCalibrationComparison> summonCalibrations,
         IReadOnlyList<HandCalibrationComparison> handCalibrations,
+        IReadOnlyList<CraftingCombatPeerComparison> craftingCombatPeers,
         EquipmentBalanceCalibrationGate calibrationGate)
     {
         var findings = new List<AttributeBalanceFinding>();
@@ -1519,16 +2900,16 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
             }
         }
 
-        foreach (var comparison in comparisons.Where(x =>
-                     Math.Abs(x.DifferencePercentagePoints) > EqualBudgetWarningThresholdPercentagePoints))
+        foreach (var comparison in comparisons.Where(x => !x.Passed))
         {
             findings.Add(new AttributeBalanceFinding(
                 AttributeBalanceFindingKind.EqualBudgetMismatch,
                 comparison.Tier,
                 null,
-                $"{comparison.FirstAttribute} and {comparison.SecondAttribute} differ by " +
+                $"{comparison.Id}: {comparison.FirstLabel} and {comparison.SecondLabel} differ by " +
                 $"{Math.Abs(comparison.DifferencePercentagePoints):0.##} percentage points in " +
-                $"{comparison.Scenario} at equal budget."));
+                $"{comparison.Scenario} at equal budget; tolerance is " +
+                $"{comparison.TolerancePercentagePoints:0.##}."));
         }
 
         foreach (var loadout in loadouts.Where(x =>
@@ -1545,7 +2926,7 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
 
         foreach (var loadout in loadouts)
         {
-            foreach (var cap in loadout.AggregateCaps.Where(x =>
+            foreach (var cap in loadout.AggregateCapsBeforeRedistribution.Where(x =>
                          x.WastedTargetBudgetPercent > AggregateCapWasteTolerancePercent))
             {
                 findings.Add(new AttributeBalanceFinding(
@@ -1595,7 +2976,19 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
                 $"{comparison.DurationTicks} ticks."));
         }
 
-        if (!calibrationGate.ReadyForBalanceVersion3)
+        foreach (var comparison in craftingCombatPeers.Where(x => !x.Passed))
+        {
+            findings.Add(new AttributeBalanceFinding(
+                AttributeBalanceFindingKind.CraftingCombatPeerMismatch,
+                comparison.Tier,
+                null,
+                $"{comparison.Id}: {comparison.FirstDesignId} and " +
+                $"{comparison.SecondDesignId} differ by " +
+                $"{Math.Abs(comparison.DifferencePercent):0.##}% in " +
+                $"{comparison.Scenario}; tolerance is {comparison.TolerancePercent:0.##}%."));
+        }
+
+        if (!calibrationGate.ActiveProfilePassed)
         {
             findings.Add(new AttributeBalanceFinding(
                 AttributeBalanceFindingKind.BalanceVersionBlocked,
@@ -1639,6 +3032,37 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
     private static double Round(double value) =>
         Math.Round(value, 4, MidpointRounding.AwayFromZero);
 
+    private sealed record EqualBudgetPeerSpec(
+        string Id,
+        AttributePeerComparisonGroup Group,
+        AttributePeerComparisonIntent Intent,
+        AttributeBalanceScenario Scenario,
+        AttributeType FirstAttribute,
+        AttributeType? SecondAttribute,
+        AttributeType? DerivedBasketPrimary,
+        EqualBudgetBenchmarkContext? BenchmarkContext,
+        bool IsReleaseGate,
+        double BudgetFraction,
+        double TolerancePercentagePoints);
+
+    private sealed record EqualBudgetBenchmarkContext(
+        string Label,
+        IReadOnlyDictionary<AttributeType, double> ReferenceAttributeOverrides,
+        double OpponentDefenseMultiplier);
+
+    private sealed record CraftingCombatPeerSpec(
+        string Id,
+        CraftingCombatPeerGroup Group,
+        AttributeBalanceScenario Scenario,
+        string FirstArmorFamily,
+        string FirstHandConfiguration,
+        string? FirstBlueprintId,
+        string SecondArmorFamily,
+        string SecondHandConfiguration,
+        string? SecondBlueprintId,
+        double TolerancePercent,
+        bool IsReleaseGate);
+
     private sealed record ScenarioSample(double Mean, IReadOnlyList<double> Scores);
 
     private sealed record ScenarioOutcome(
@@ -1673,6 +3097,9 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
         double SpentBudget,
         Dictionary<AttributeType, float> Attributes,
         IReadOnlyDictionary<AttributeType, double> Points,
+        Dictionary<AttributeType, float> PreRedistributionAttributes,
+        IReadOnlyDictionary<AttributeType, double> PreRedistributionPoints,
+        double AggregateRedistributedBudget,
         IReadOnlyList<AttributeType> AttributesOverSingleStatCap);
 
     private sealed record LoadoutAnalysisWork(
@@ -1680,6 +3107,60 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
         EquipmentLoadoutProfile Profile,
         LoadoutAllocation Allocation,
         IReadOnlyDictionary<AttributeBalanceScenario, LoadoutScenarioSample> Samples);
+
+    private sealed record CatalogHandConfiguration(
+        string Id,
+        IReadOnlyList<CraftingRecipeDefinition> Recipes,
+        string MainHandRecipeId);
+
+    private sealed record CatalogLoadoutTemplate(
+        string ArmorFamily,
+        string HandConfiguration,
+        IReadOnlyList<CraftingRecipeDefinition> Recipes,
+        string MainHandRecipeId,
+        BlueprintDefinition? Blueprint);
+
+    private sealed record CatalogCombatAllocation(
+        string Id,
+        double SpentBudget,
+        IReadOnlyDictionary<AttributeType, double> Points,
+        IReadOnlyDictionary<AttributeType, float> Attributes,
+        double BasicAttackIntervalMultiplier,
+        double BasicAttackDamageMultiplier,
+        AttackType BasicAttackType,
+        DamageType BasicAttackDamageType);
+
+    private sealed record CatalogCapResult(
+        AttributeType Attribute,
+        double ExcessPoints,
+        double WastedBudgetPercent);
+
+    private sealed record CatalogShadowWork(
+        string Id,
+        int Tier,
+        string ArmorFamily,
+        string HandConfiguration,
+        string? BlueprintId,
+        double TargetBudget,
+        double CurrentSpentBudget,
+        double ShadowSpentBudget,
+        double CurrentUnspentBudget,
+        double ShadowUnspentBudget,
+        IReadOnlyList<CatalogCapResult> CurrentCaps,
+        IReadOnlyList<CatalogCapResult> ShadowCaps)
+    {
+        public double CurrentMaximumWastedBudgetPercent =>
+            CurrentCaps.Select(x => x.WastedBudgetPercent).DefaultIfEmpty(0d).Max();
+
+        public double ShadowMaximumWastedBudgetPercent =>
+            ShadowCaps.Select(x => x.WastedBudgetPercent).DefaultIfEmpty(0d).Max();
+
+        public IReadOnlyList<AttributeType> CurrentAttributesOverCap =>
+            CurrentCaps.Where(x => x.ExcessPoints > 0.001d).Select(x => x.Attribute).ToList();
+
+        public IReadOnlyList<AttributeType> ShadowAttributesOverCap =>
+            ShadowCaps.Where(x => x.ExcessPoints > 0.001d).Select(x => x.Attribute).ToList();
+    }
 
     private static IReadOnlyList<AbilitySpec> CreateAbilitySpecs() =>
     [
@@ -1729,7 +3210,7 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
                 {
                     Id = "balance.area-pressure.effect",
                     Operation = AbilityEffectOperation.Damage,
-                    Target = AbilityTargetSelector.AllEnemies,
+                    Target = AbilityTargetSelector.SummonedEnemies,
                     BaseValue = 12,
                     ScalingAttribute = AttributeType.Power,
                     ScalingCoefficient = 0.5f,

@@ -1,5 +1,5 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import { isPercentAttribute } from '../attribute-type-format/attribute-type-format.pipe';
+import { getAttributeDefinition } from '../../../models/attribute-definition';
 
 export function formatAttributeValue(
   value: number | null | undefined,
@@ -8,9 +8,11 @@ export function formatAttributeValue(
 ): string {
   const amount = value ?? 0;
   const sign = signed && amount > 0 ? '+' : '';
-  const suffix = isPercentAttribute(attribute) ? '%' : '';
+  const definition = getAttributeDefinition(attribute);
+  const suffix = definition?.displaySuffix ?? '';
+  const precision = definition?.displayPrecision ?? 2;
 
-  return `${sign}${formatNumber(amount)}${suffix}`;
+  return `${sign}${formatNumber(amount, precision)}${suffix}`;
 }
 
 @Pipe({
@@ -27,8 +29,8 @@ export class AttributeValueFormatPipe implements PipeTransform {
   }
 }
 
-function formatNumber(value: number): string {
+function formatNumber(value: number, precision: number): string {
   return Number.isInteger(value)
     ? `${value}`
-    : value.toFixed(2).replace(/\.?0+$/, '');
+    : value.toFixed(precision).replace(/\.?0+$/, '');
 }

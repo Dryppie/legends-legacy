@@ -192,20 +192,20 @@
     ],
     "excludedRecipeTags": [],
     "compatibleRecipeIds": [],
-    "statProfileInfluence": 0.4,
+    "statProfileInfluence": 0.2,
     "statProfile": {
-      "CritDamage": 0.35,
-      "Precision": 0.3,
+      "Power": 0.4,
+      "CritDamage": 0.1,
       "CritChance": 0.2,
-      "WeaponDamage": 0.15
+      "WeaponDamage": 0.3
     },
     "temperingProfile": {
       "id": "blueprint_execution.tempering",
       "name": "Execution Tempering",
       "stats": [
         {
-          "stat": "CritDamage",
-          "weight": 35,
+          "stat": "Power",
+          "weight": 40,
           "category": "Primary",
           "canIntroduce": true,
           "canIncrease": true,
@@ -213,8 +213,8 @@
           "minimumTier": 1
         },
         {
-          "stat": "Precision",
-          "weight": 30,
+          "stat": "CritDamage",
+          "weight": 10,
           "category": "Primary",
           "canIntroduce": true,
           "canIncrease": true,
@@ -232,7 +232,7 @@
         },
         {
           "stat": "WeaponDamage",
-          "weight": 15,
+          "weight": 30,
           "category": "Secondary",
           "canIntroduce": true,
           "canIncrease": true,
@@ -284,9 +284,9 @@
     "compatibleRecipeIds": [],
     "statProfileInfluence": 0.4,
     "statProfile": {
-      "Armor": 0.35,
-      "Resistance": 0.3,
-      "MaxHealth": 0.2,
+      "Armor": 0.25,
+      "Resistance": 0.25,
+      "MaxHealth": 0.35,
       "DamageReduction": 0.15
     },
     "temperingProfile": {
@@ -295,7 +295,7 @@
       "stats": [
         {
           "stat": "Armor",
-          "weight": 35,
+          "weight": 25,
           "category": "Primary",
           "canIntroduce": true,
           "canIncrease": true,
@@ -304,7 +304,7 @@
         },
         {
           "stat": "Resistance",
-          "weight": 30,
+          "weight": 25,
           "category": "Primary",
           "canIntroduce": true,
           "canIncrease": true,
@@ -313,7 +313,7 @@
         },
         {
           "stat": "MaxHealth",
-          "weight": 20,
+          "weight": 35,
           "category": "Secondary",
           "canIntroduce": true,
           "canIncrease": true,

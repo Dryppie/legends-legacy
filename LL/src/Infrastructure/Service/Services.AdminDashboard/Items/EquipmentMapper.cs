@@ -14,12 +14,7 @@ public static class EquipmentMapper
         EquipmentType = r.EquipmentType,
         AttributeModifiers = r.AttributeModifiers.Select(a => a.ToDto()).ToList(),
         ToolBonuses = r.ToolBonuses,
-        AttackSpeed = r.AttackSpeed,
-        Magnitude = r.Magnitude,
-        MagnitudeRange = r.MagnitudeRange,
-        GatheringType = r.GatheringType,
-        ScalingAttribute = r.ScalingAttribute,
-        ScalingAmount = r.ScalingAmount
+        GatheringType = r.GatheringType
     };
 
     public static EquipmentBase ToEntity(this EquipmentToJsonDto dto) => new()
@@ -33,11 +28,6 @@ public static class EquipmentMapper
         EquipmentType = dto.EquipmentType,
         AttributeModifiers = dto.AttributeModifiers.Select(a => a.ToEntity()).ToList(),
         ToolBonuses = dto.ToolBonuses,
-        AttackSpeed = dto.AttackSpeed,
-        Magnitude = dto.Magnitude,
-        MagnitudeRange = dto.MagnitudeRange,
-        GatheringType = dto.GatheringType,
-        ScalingAttribute = dto.ScalingAttribute,
-        ScalingAmount = dto.ScalingAmount,
+        GatheringType = dto.GatheringType
     };
 }

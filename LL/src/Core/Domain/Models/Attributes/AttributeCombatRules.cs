@@ -110,7 +110,7 @@ public static class AttributeCombatRules
         var reductionPercent = Math.Clamp(
             cooldownReductionPercent,
             0,
-            CooldownReductionCapPercent);
+            AttributeCatalog.GetFixedCap(AttributeType.Cooldown));
         var reducedTicks = authoredTicks * (100d - reductionPercent) / 100d;
         return Math.Max(1, (int)Math.Ceiling(reducedTicks - 1e-9d));
     }
@@ -133,29 +133,11 @@ public static class AttributeCombatRules
     public static bool TryGetEffectiveCharacterCap(
         AttributeType attributeType,
         double basicAttackIntervalMultiplier,
-        out float cap)
-    {
-        cap = attributeType switch
-        {
-            AttributeType.CritChance => CritChanceCapPercent,
-            AttributeType.DodgeChance => DodgeChanceCapPercent,
-            AttributeType.BlockChance => BlockChanceCapPercent,
-            AttributeType.DamageReduction => DamageReductionCapPercent,
-            AttributeType.LifeSteal => LifeStealCapPercent,
-            AttributeType.Cooldown => CooldownReductionCapPercent,
-            AttributeType.AttackSpeed =>
-                CalculateUsefulAttackSpeedCapPercent(basicAttackIntervalMultiplier),
-            _ => 0
-        };
-        return attributeType is
-            AttributeType.CritChance or
-            AttributeType.DodgeChance or
-            AttributeType.BlockChance or
-            AttributeType.DamageReduction or
-            AttributeType.LifeSteal or
-            AttributeType.Cooldown or
-            AttributeType.AttackSpeed;
-    }
+        out float cap) =>
+        AttributeCatalog.TryGetEffectiveCharacterCap(
+            attributeType,
+            basicAttackIntervalMultiplier,
+            out cap);
 
     private static float GetValue(
         IDictionary<AttributeType, float> attributes,

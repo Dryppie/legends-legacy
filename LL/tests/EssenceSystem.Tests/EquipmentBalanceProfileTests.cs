@@ -4,6 +4,7 @@ using Domain.Models.Items;
 using Domain.Models.Items.Equipments;
 using Domain.Models.Professions.Crafting.V2;
 using Microsoft.Extensions.Options;
+using Services.LL.Combat.Engine;
 using Services.LL.Professions.Craftings;
 
 namespace EssenceSystem.Tests;
@@ -114,7 +115,30 @@ public sealed class EquipmentBalanceProfileTests
         Assert.Equal(54d, EquipmentBudgetEvaluator.Evaluate(modifiers, tier: 1));
         Assert.Equal(102d, EquipmentBudgetEvaluator.Evaluate(modifiers, tier: 5));
         Assert.Equal(137d, EquipmentBudgetEvaluator.Evaluate(modifiers, tier: 10));
-        Assert.Equal(2, EquipmentBudgetEvaluator.BalanceVersion);
+        Assert.Equal(3, EquipmentBudgetEvaluator.BalanceVersion);
+    }
+
+    [Fact]
+    public void Equipment_balance_exposes_only_the_active_profile_and_canonical_item_surface()
+    {
+        Assert.DoesNotContain(
+            typeof(EquipmentStatBudgetCatalog).GetMethods(),
+            method => method.Name == nameof(EquipmentStatBudgetCatalog.Get)
+                      && method.GetParameters().Length == 3);
+        Assert.Null(typeof(EquipmentInstance).GetProperty("BalanceVersion"));
+        Assert.Null(typeof(FastCombatEngineOptions).GetProperty("SummonsEnterReady"));
+
+        foreach (var removedProperty in new[]
+                 {
+                     "AttackSpeed",
+                     "Magnitude",
+                     "MagnitudeRange",
+                     "ScalingAttribute",
+                     "ScalingAmount"
+                 })
+        {
+            Assert.Null(typeof(EquipmentBase).GetProperty(removedProperty));
+        }
     }
 
     [Fact]
@@ -275,6 +299,146 @@ public sealed class EquipmentBalanceProfileTests
             Math.Abs(evaluatedBudget - expectedBudget),
             0,
             maximumRoundingError + 0.01d);
+    }
+
+    [Fact]
+    public void Constrained_allocator_shares_a_combat_cap_between_direct_and_primary_stats()
+    {
+        var weights = new Dictionary<AttributeType, double>
+        {
+            [AttributeType.Precision] = 0.50d,
+            [AttributeType.CritChance] = 0.25d,
+            [AttributeType.Power] = 0.25d
+        };
+        EquipmentLinearBudgetConstraint[] constraints =
+        [
+            new(AttributeType.CritChance, MaximumAddedValue: 10d)
+        ];
+
+        var allocation = EquipmentBudgetAllocator.AllocateConstrained(
+            tier: 10,
+            budget: 100d,
+            weights,
+            constraints);
+        var critContribution =
+            allocation.AddedPoints.GetValueOrDefault(AttributeType.CritChance)
+            + allocation.AddedPoints.GetValueOrDefault(AttributeType.Precision)
+            * AttributeCombatRules.GetContributionPerPoint(
+                AttributeType.Precision,
+                AttributeType.CritChance);
+
+        Assert.InRange(critContribution, 9.999d, 10.001d);
+        Assert.InRange(allocation.UnspentBudget, 0, 0.001d);
+        Assert.Contains(AttributeType.CritChance, allocation.BindingCombatCaps);
+        Assert.True(allocation.AddedPoints[AttributeType.Power] > 25d);
+        Assert.Equal(3, EquipmentConstraintProfile.BalanceVersion);
+        Assert.True(EquipmentConstraintProfile.ProductionActive);
+    }
+
+    [Fact]
+    public void Overflow_preserves_blueprint_identity_across_compatible_slots()
+    {
+        var recipe = new CraftingRecipeDefinition
+        {
+            Id = "recipe.test.ring",
+            Name = "Test Ring",
+            OutputItemId = "test-ring",
+            OutputItemType = EquipmentType.Ring,
+            Tags = ["Accessory"],
+            InitialStatProfile = new Dictionary<AttributeType, double>
+            {
+                [AttributeType.CritChance] = 1d
+            }
+        };
+        var blueprint = new BlueprintDefinition
+        {
+            Id = "blueprint.test.fury",
+            Name = "Blueprint: Test Fury",
+            AnyRecipeTags = ["Accessory"],
+            StatProfile = new Dictionary<AttributeType, double>
+            {
+                [AttributeType.CritChance] = 1d
+            },
+            Tags = ["Fury"]
+        };
+        var design = EquipmentCraftingDesignComposer.Compose(recipe, blueprint);
+
+        Assert.Equal(
+            [
+                AttributeType.Power,
+                AttributeType.WeaponDamage,
+                AttributeType.CritDamage,
+                AttributeType.ArmorPenetration
+            ],
+            EquipmentConstraintProfile.GetOverflowWeights(design).Keys);
+    }
+
+    [Theory]
+    [InlineData(1, 1.50d)]
+    [InlineData(3, 1.375d)]
+    [InlineData(5, 1.25d)]
+    [InlineData(10, 1.00d)]
+    public void Production_profile_uses_tiered_summon_power_costs(
+        int tier,
+        double expectedCost)
+    {
+        Assert.Equal(
+            expectedCost,
+            EquipmentConstraintProfile.GetCostPerPoint(
+                AttributeType.SummonPower,
+                tier),
+            precision: 4);
+        Assert.Equal(
+            EquipmentStatBudgetCatalog.Get(AttributeType.Power, tier).CostPerPoint,
+            EquipmentConstraintProfile.GetCostPerPoint(
+                AttributeType.Power,
+                tier),
+            precision: 4);
+    }
+
+    [Theory]
+    [InlineData(1, 1.50d)]
+    [InlineData(5, 1.50d)]
+    [InlineData(8, 1.65d)]
+    [InlineData(10, 1.75d)]
+    public void Production_profile_uses_tiered_health_regeneration_costs(
+        int tier,
+        double expectedCost)
+    {
+        Assert.Equal(
+            expectedCost,
+            EquipmentConstraintProfile.GetCostPerPoint(
+                AttributeType.HealthRegeneration,
+                tier),
+            precision: 4);
+    }
+
+    [Theory]
+    [InlineData(1)]
+    [InlineData(5)]
+    [InlineData(10)]
+    public void Production_primary_costs_follow_their_derived_baskets(int tier)
+    {
+        foreach (var primary in new[]
+                 {
+                     AttributeType.Fortitude,
+                     AttributeType.Precision,
+                     AttributeType.Spirit
+                 })
+        {
+            var basketCost = AttributeCombatRules.PrimaryContributions
+                .Where(x => x.PrimaryAttribute == primary)
+                .Sum(x =>
+                    x.ContributionPerPoint
+                    * EquipmentConstraintProfile.GetCostPerPoint(
+                        x.DerivedAttribute,
+                        tier));
+
+            Assert.Equal(
+                basketCost,
+                EquipmentConstraintProfile.GetCostPerPoint(primary, tier),
+                precision: 4);
+        }
     }
 
     private sealed class FixedRandom(double value) : Random

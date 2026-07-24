@@ -5,6 +5,7 @@ using Application.UseCases.GameBootstrap.Dtos;
 using Application.UseCases.Tutorials.Queries.GetTutorialState;
 using AutoMapper;
 using Common.Primitives;
+using Domain.Models.Attributes;
 using MediatR;
 
 namespace Application.UseCases.GameBootstrap.Queries.GetGameBootstrap;
@@ -58,6 +59,7 @@ public sealed class GetGameBootstrapQueryHandler
             Tutorial = tutorial,
             CurrentAction = currentActionResponse.Data,
             ServerTimeUtc = DateTimeOffset.UtcNow,
+            AttributeDefinitions = AttributeCatalog.All,
         };
 
         return Response<GameBootstrapDto>.Success(

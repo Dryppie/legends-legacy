@@ -4,7 +4,7 @@ namespace Domain.Models.Professions.Crafting.V2;
 
 public static class EquipmentStatBudgetCatalog
 {
-    public const int BalanceVersion = 2;
+    public const int BalanceVersion = 3;
     public const int MinimumTier = 1;
     public const int MaximumTier = 10;
 
@@ -14,7 +14,7 @@ public static class EquipmentStatBudgetCatalog
             [AttributeType.Power] = Fixed(1d, 500),
             [AttributeType.Fortitude] = Tiered(500, (1, 1.34d), (5, 1.82d), (10, 2.17d)),
             [AttributeType.Precision] = Fixed(1.15d, 500),
-            [AttributeType.Spirit] = Fixed(1.05d, 500),
+            [AttributeType.Spirit] = Tiered(500, (1, 1.05d), (5, 1.0375d), (10, 1.0375d)),
             [AttributeType.MaxHealth] = Fixed(0.2d, 2_500),
             [AttributeType.WeaponDamage] = Fixed(1.5d, 400),
             [AttributeType.Armor] = Tiered(500, (1, 0.54d), (5, 1.02d), (10, 1.37d)),
@@ -25,18 +25,21 @@ public static class EquipmentStatBudgetCatalog
             [AttributeType.MagicPenetration] = Fixed(3d, 100),
             [AttributeType.DodgeChance] = Fixed(5d, 50),
             [AttributeType.BlockChance] = Fixed(5d, 50),
-            [AttributeType.DamageReduction] = Fixed(6d, AttributeCombatRules.DamageReductionCapPercent),
+            [AttributeType.DamageReduction] =
+                Fixed(6d, AttributeCatalog.GetFixedCap(AttributeType.DamageReduction)),
             [AttributeType.HealingPowerPercent] = Fixed(3d, 100),
-            [AttributeType.HealthRegeneration] = Fixed(1.5d, 300),
+            [AttributeType.HealthRegeneration] =
+                Tiered(300, (1, 1.5d), (5, 1.5d), (10, 1.75d)),
             [AttributeType.LifeSteal] = Fixed(6d, 50),
-            [AttributeType.Cooldown] = Fixed(6d, AttributeCombatRules.CooldownReductionCapPercent),
+            [AttributeType.Cooldown] =
+                Fixed(6d, AttributeCatalog.GetFixedCap(AttributeType.Cooldown)),
             [AttributeType.StatusResistance] = Fixed(2d, 150),
             [AttributeType.CrowdControlResistance] = Fixed(2d, 150),
-            [AttributeType.SummonPower] = Fixed(1.5d, 300),
+            [AttributeType.SummonPower] =
+                Tiered(300, (1, 1.5d), (5, 1.25d), (10, 1d)),
             [AttributeType.SummonHealth] = Fixed(0.5d, 1_000),
             [AttributeType.AttackSpeed] = Fixed(3d, 200)
         };
-
     public static IReadOnlyCollection<AttributeType> Attributes => Definitions.Keys.ToArray();
 
     public static EquipmentStatBudgetRule Get(AttributeType stat, int tier)

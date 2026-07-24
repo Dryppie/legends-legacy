@@ -4,6 +4,7 @@ import { CharacterActionDto } from '../../../../shared/models/Dtos/characterActi
 import { CharacterDto } from '../../../../shared/models/Dtos/characterDto';
 import { ApiResponse } from '../../../../shared/models/response';
 import { TutorialState } from '../../../../shared/models/tutorial';
+import { AttributeDefinition } from '../../../../shared/models/attribute-definition';
 import { ApiService } from '../api.service';
 
 export interface GameBootstrapDto {
@@ -11,6 +12,7 @@ export interface GameBootstrapDto {
   tutorial: TutorialState | null;
   currentAction: CharacterActionDto | null;
   serverTimeUtc: string;
+  attributeDefinitions: AttributeDefinition[];
 }
 
 @Injectable({ providedIn: 'root' })

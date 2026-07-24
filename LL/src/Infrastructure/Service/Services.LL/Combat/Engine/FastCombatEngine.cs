@@ -502,10 +502,20 @@ public sealed class FastCombatEngine
             var dodgeChance = Math.Clamp(
                 target.GetAttribute(AttributeType.DodgeChance),
                 0,
-                AttributeCombatRules.DodgeChanceCapPercent);
+                AttributeCatalog.GetFixedCap(AttributeType.DodgeChance));
             if (_random.NextDouble() * 100 < dodgeChance)
             {
-                Log(source, target, sourceName, EventType.Miss, 0, $"{source.Name} missed {target.Name}.", statsSource, countStatsActivation);
+                Log(
+                    source,
+                    target,
+                    sourceName,
+                    EventType.Miss,
+                    0,
+                    $"{source.Name} missed {target.Name}.",
+                    statsSource,
+                    countStatsActivation,
+                    incomingRawDamage: damage,
+                    avoidedDamage: damage);
                 Publish(new CombatEvent(AbilityTriggerEvent.OnDodge, target, source, null), combatants);
                 return 0;
             }
@@ -517,6 +527,15 @@ public sealed class FastCombatEngine
             ? ApplyCriticalMultiplier(source, damage)
             : damage;
         var typedDamage = ApplyTypedDefense(source, target, criticalDamage, damageType);
+        var typedMitigationPrevented = Math.Max(0, criticalDamage - typedDamage);
+        var physicalMitigationPrevented = damageType is DamageType.Physical or DamageType.Bleed
+            ? typedMitigationPrevented
+            : 0;
+        var magicalMitigationPrevented = damageType is DamageType.Magical
+            or DamageType.Burn
+            or DamageType.Poison
+                ? typedMitigationPrevented
+                : 0;
         var blocked = CanBlock(attackType) && RollBlock(target);
         var blockedDamage = blocked
             ? Math.Max(
@@ -525,11 +544,15 @@ public sealed class FastCombatEngine
                     typedDamage
                     * (1 - AttributeCombatRules.BlockDamageReductionPercent / 100f)))
             : typedDamage;
+        var blockPrevented = Math.Max(0, typedDamage - blockedDamage);
         var reducedDamage = ApplyDamageReduction(target, blockedDamage);
+        var damageReductionPrevented = Math.Max(0, blockedDamage - reducedDamage);
+        var damageAmplified = Math.Max(0, reducedDamage - blockedDamage);
         var barrierBefore = target.Barrier;
         var absorbed = Math.Min(barrierBefore, reducedDamage);
         target.AdjustBarrier(-absorbed);
-        var pendingHealthDamage = Math.Max(0, reducedDamage - (int)absorbed);
+        var barrierAbsorbed = (int)absorbed;
+        var pendingHealthDamage = Math.Max(0, reducedDamage - barrierAbsorbed);
         var healthBefore = target.Health;
         target.AdjustHealth(-pendingHealthDamage);
         var healthDamage = Math.Max(0, (int)Math.Round(healthBefore - target.Health));
@@ -543,7 +566,16 @@ public sealed class FastCombatEngine
             $"{source.Name} dealt {healthDamage} {damageType} damage to {target.Name}{(isCritical ? " (critical)" : string.Empty)}{(blocked ? " (blocked)" : string.Empty)}.",
             statsSource,
             countStatsActivation,
-            (int)absorbed);
+            barrierAbsorbed,
+            criticalDamage,
+            avoidedDamage: 0,
+            typedMitigationPrevented,
+            physicalMitigationPrevented,
+            magicalMitigationPrevented,
+            blockPrevented,
+            damageReductionPrevented,
+            damageAmplified,
+            pendingHealthDamage);
         Publish(new CombatEvent(AbilityTriggerEvent.OnHit, source, target, null), combatants);
         PublishAttackTypeEvents(source, target, attackType, combatants);
         Publish(new CombatEvent(AbilityTriggerEvent.OnDamaged, target, source, null), combatants);
@@ -573,7 +605,7 @@ public sealed class FastCombatEngine
         var reduction = Math.Clamp(
             target.GetAttribute(AttributeType.DamageReduction),
             -100,
-            AttributeCombatRules.DamageReductionCapPercent);
+            AttributeCatalog.GetFixedCap(AttributeType.DamageReduction));
         return Math.Max(0, (int)Math.Round(damage * (1 - reduction / 100f)));
     }
 
@@ -582,7 +614,7 @@ public sealed class FastCombatEngine
         var blockChance = Math.Clamp(
             target.GetAttribute(AttributeType.BlockChance),
             0,
-            AttributeCombatRules.BlockChanceCapPercent);
+            AttributeCatalog.GetFixedCap(AttributeType.BlockChance));
         return blockChance > 0 && _random.NextDouble() * 100 < blockChance;
     }
 
@@ -591,7 +623,7 @@ public sealed class FastCombatEngine
         var critChance = Math.Clamp(
             source.GetAttribute(AttributeType.CritChance),
             0,
-            AttributeCombatRules.CritChanceCapPercent);
+            AttributeCatalog.GetFixedCap(AttributeType.CritChance));
         return critChance > 0 && _random.NextDouble() * 100 < critChance;
     }
 
@@ -719,7 +751,7 @@ public sealed class FastCombatEngine
         var lifeStealPercentage = Math.Clamp(
             source.GetAttribute(AttributeType.LifeSteal) + effect.LifeStealPercentage,
             0,
-            AttributeCombatRules.LifeStealCapPercent);
+            AttributeCatalog.GetFixedCap(AttributeType.LifeSteal));
         if (lifeStealPercentage <= 0 || healthDamage <= 0)
             return;
 
@@ -819,9 +851,8 @@ public sealed class FastCombatEngine
 
         var summon = CreateSummonedCombatant(source, effect, summonDefinition, _abilitiesById);
         mutableCombatants.Add(summon);
-        _basicAttackProgress[summon] = 0;
+        _basicAttackProgress[summon] = GetBasicAttackChargeThreshold();
         _healthRegenerationProgress[summon] = 0;
-        InitializeActiveAbilityCooldowns(summon);
 
         Log(source, summon, effect.Id, EventType.Summon, 1, $"{source.Name} summoned {summon.Name}.", statsSource, countStatsActivation);
     }
@@ -838,9 +869,17 @@ public sealed class FastCombatEngine
         if (!_startActiveAbilitiesOnCooldown)
             return;
 
-        foreach (var ability in combatant.Abilities.Where(x => x.Definition.Kind == AbilitySpecKind.Active))
+        foreach (var ability in combatant.Abilities.Where(x =>
+                     x.Definition.Kind == AbilitySpecKind.Active
+                     && !IsSummonAbility(x.Definition)))
             ability.StartInitialCooldown(combatant.GetAttribute(AttributeType.Cooldown));
     }
+
+    private static bool IsSummonAbility(CompiledAbility ability) =>
+        ability.TriggersByEvent
+            .GetValueOrDefault(AbilityTriggerEvent.OnAbilityUsed)?
+            .SelectMany(trigger => trigger.Effects)
+            .Any(effect => effect.Operation == AbilityEffectOperation.Summon) == true;
 
     private static RuntimeCombatant CreateSummonedCombatant(
         RuntimeCombatant source,
@@ -1087,6 +1126,7 @@ public sealed class FastCombatEngine
                 .Take(1),
             AbilityTargetSelector.SummonedAllies => combatants.Where(x => x.Team == source.Team && x.IsAlive && x.IsSummoned),
             AbilityTargetSelector.NonSummonedAllies => combatants.Where(x => x.Team == source.Team && x.IsAlive && !x.IsSummoned),
+            AbilityTargetSelector.SummonedEnemies => combatants.Where(x => x.Team != source.Team && x.IsAlive && x.IsSummoned),
             _ => []
         };
     }
@@ -1220,7 +1260,16 @@ public sealed class FastCombatEngine
         string details,
         string? statsSource = null,
         bool countsAsActivation = false,
-        int barrierAbsorbed = 0)
+        int barrierAbsorbed = 0,
+        int incomingRawDamage = 0,
+        int avoidedDamage = 0,
+        int typedMitigationPrevented = 0,
+        int physicalMitigationPrevented = 0,
+        int magicalMitigationPrevented = 0,
+        int blockPrevented = 0,
+        int damageReductionPrevented = 0,
+        int damageAmplified = 0,
+        int finalHealthDamage = 0)
     {
         _log.Add(new CombatLogItem
         {
@@ -1233,6 +1282,15 @@ public sealed class FastCombatEngine
             EventType = eventType,
             Magnitude = magnitude,
             BarrierAbsorbed = barrierAbsorbed,
+            IncomingRawDamage = incomingRawDamage,
+            AvoidedDamage = avoidedDamage,
+            TypedMitigationPrevented = typedMitigationPrevented,
+            PhysicalMitigationPrevented = physicalMitigationPrevented,
+            MagicalMitigationPrevented = magicalMitigationPrevented,
+            BlockPrevented = blockPrevented,
+            DamageReductionPrevented = damageReductionPrevented,
+            DamageAmplified = damageAmplified,
+            FinalHealthDamage = finalHealthDamage,
             Details = details,
             CombatEntity = target is null
                 ? null

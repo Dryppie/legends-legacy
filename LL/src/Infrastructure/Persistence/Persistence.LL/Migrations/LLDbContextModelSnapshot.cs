@@ -3487,25 +3487,10 @@ namespace Persistence.LL.Migrations
                 {
                     b.HasBaseType("Domain.Models.Items.ItemBase");
 
-                    b.Property<int>("AttackSpeed")
-                        .HasColumnType("integer");
-
                     b.Property<int>("EquipmentType")
                         .HasColumnType("integer");
 
                     b.Property<int?>("GatheringType")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("Magnitude")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("MagnitudeRange")
-                        .HasColumnType("integer");
-
-                    b.Property<float>("ScalingAmount")
-                        .HasColumnType("real");
-
-                    b.Property<int>("ScalingAttribute")
                         .HasColumnType("integer");
 
                     b.HasDiscriminator().HasValue(0);

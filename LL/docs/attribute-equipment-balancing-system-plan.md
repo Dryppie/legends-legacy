@@ -49,7 +49,7 @@ The target design deliberately removes arbitrary primary-stat selection from abi
 
 ## Implementation status
 
-The production foundation and controlled calibration slices are implemented with combat rules version 3 and equipment balance version 2:
+The production foundation and controlled calibration slices are implemented with combat rules version 4 and equipment balance version 3:
 
 - all authored ability-effect scaling has been migrated to Power, and catalog validation rejects non-Power effect scaling;
 - Fortitude, Precision, and Spirit project into only their approved derived-stat groups;
@@ -65,7 +65,7 @@ The production foundation and controlled calibration slices are implemented with
 - a deterministic marginal-value analyzer covers all 24 equipment attributes at tiers 1, 5, and 10;
 - the analyzer executes thirteen production-engine scenarios over eight fixed seeds, reports paired 95% confidence intervals, proposes tier-specific candidate costs, and flags inert, cap-limited, mispriced, and unequal-budget results;
 - those scenarios now include mixed typed pressure, unmitigated pressure, a short burst check, and a 600-tick long-sustain check;
-- equal-budget Max Health versus Armor/Resistance comparisons are included in every reference tier;
+- an explicit 96-cell equal-budget matrix covers primary identities, offense, crit frontiers, steady/burst defense, sustain, and low/high-defense penetration at all three reference tiers; 90 cells are release gates and six are high-defense sensitivity probes;
 - five canonical full-equipment loadouts are analyzed at tiers 1, 5, and 10: Heavy Shield, Medium Dual Wield, Cloth Support, Two-Handed Damage, and Summoner;
 - loadout budgets are assembled from the actual individual equipment slot weights, including shield, dual-wield, and two-handed hand configurations;
 - every loadout runs the complete scenario matrix, reports its relevant scenarios separately, and exposes target, spent, and unspent budget plus any per-item hard-cap pressure;
@@ -75,27 +75,38 @@ The production foundation and controlled calibration slices are implemented with
 - generated barrier is reported but only barrier actually absorbed contributes prevention utility;
 - each loadout reports a relevant-scenario utility index, where `100` is the per-scenario median before the profile's intended scenarios are averaged;
 - comparisons are classified as either a genuine peer-balance check or output decomposition; cross-role Cloth Support versus Summoner results no longer emit a misleading loadout-mismatch warning;
-- matched summon calibration runs equal-budget Summoner and Direct Caster controls at tiers 1, 5, and 10 over 90, 180, and 600 ticks; both kits now contain the common magical strike plus one 70-tick role ability;
+- matched summon calibration runs equal-budget Summoner and Direct Caster controls at tiers 1, 5, and 10 over 90, 180, and 600 ticks; both kits contain the common magical strike plus one 100-tick role ability;
 - the Direct Caster's second ability is authored as the Power-scaling, direct-damage equivalent of one nominal 100-tick summon lifetime, so the control no longer gives Summoner a free extra ability;
+- the matched Direct Caster now reserves the same 20% defensive budget that the Summoner spends on owner/summon durability, and summon-only pressure no longer accidentally tests owner survivability;
+- summon abilities and newly created summons enter ready, removing the former double startup delay and its compatibility switch;
+- Summon Power uses active tier anchors of `1.50`, `1.25`, and `1.00` at tiers 1, 5, and 10; all nine matched summon comparisons pass the 20% gate;
+- Health Regeneration uses active tier anchors of `1.50`, `1.50`, and `1.75`; primary prices are recomputed from their active derived baskets, which makes Spirit `1.05`, `1.0375`, and `1.0375` at tiers 1, 5, and 10;
 - the summon report separately measures the effect of removing the summon ability, Spirit-derived summon bonuses, and explicit Summon Power/Health rolls, plus summon count, average active summons, and uptime;
 - matched hand calibration runs actual funding/behavior, equal-budget, and equal-budget/equal-behavior controls over the same tier and duration matrix;
-- a deterministic shared budget allocator redistributes per-item cap overflow among the remaining eligible uncapped attributes for crafted base rolls, previews, quality upgrades, and analyzer loadouts;
+- a deterministic constrained budget allocator shares whole-character cap capacity across independently generated slots, counts direct and primary-derived consumption together, and redirects saturated weight into role-appropriate attributes for crafted base rolls, previews, quality upgrades, tempering, and analyzer loadouts;
 - per-item allocation caps are now explicitly distinct from effective whole-character combat caps;
 - every canonical loadout reports whole-character cap utilization, direct equipment overflow, equivalent wasted budget, and wasted target-budget percentage; the Attack Speed cap is derived from weapon interval and the production 4x attack-rate ceiling;
-- a calibration gate blocks equipment balance version 3 while any controlled summon or representative hand comparison exceeds 20%, or a canonical loadout wastes more than 1% of target budget at an aggregate combat cap;
+- an aggregate allocator remains as an exact-loadout reference, applying baseline and primary-derived contributions before caps and deterministically redistributing remaining budget;
+- the report compares the conservative production allocation against that exact-loadout reference;
+- canonical scenarios and matched summon/hand controls run through the active production profile;
+- balance-version-3 constraints translate whole-character combat caps into conservative per-item capacity shares, account for primary-derived cap consumption, and redirect saturated recipe weight into role-appropriate uncapped attributes;
+- the production validator composes the complete enabled recipe and blueprint catalog into armor-family and hand-configuration loadouts at tiers 1, 5, and 10;
+- a second production-engine matrix runs 33 comparisons made from actual composed recipes and blueprints through the active profile: 21 same-purpose release gates and 12 deliberately diagnostic cross-role or cross-specialization cells;
+- those real-content comparisons cover balanced, fast, and penetration-oriented dual-wield/two-handed configurations, a tower-shield defensive peer, armor-family decompositions, and six blueprint relationships;
+- the active-profile calibration gate fails if any equal-budget, summon, representative hand, or real-content release comparison exceeds its tolerance, or a canonical production loadout wastes more than 1% of target budget at an aggregate combat cap;
 - the equipment budget profile supports reviewed tier anchors with linear interpolation for tiers 1 through 10;
 - crafting rolls, crafting previews, tempering, Admin diagnostics, API Gear Value, and frontend metadata all resolve the same tier-specific cost;
-- existing item stat rolls are grandfathered, while their current Gear Value and future tempering use balance version 2;
+- all equipment generation and Gear Value evaluation use the single active balance profile;
 - the report is available from the Admin diagnostics `attribute-balance` endpoint;
 - focused combat, analyzer, and equal-budget regression tests have been added.
 
 The initial primary coefficients are:
 
-| Primary | Derived contribution per point |
-| --- | --- |
-| Fortitude | `+4 Max Health`, `+0.5 Armor`, `+0.5 Resistance` |
-| Precision | `+0.1 Crit Chance`, `+0.1 Armor Penetration`, `+0.1 Magic Penetration`, `+0.05 Attack Speed` |
-| Spirit | `+0.15 Healing Power`, `+0.05 Health Regeneration`, `+0.1 Status Resistance`, `+0.1 Crowd Control Resistance`, `+0.05 Summon Power`, `+0.1 Summon Health` |
+| Primary   | Derived contribution per point                                                                                                                            |
+| --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Fortitude | `+4 Max Health`, `+0.5 Armor`, `+0.5 Resistance`                                                                                                          |
+| Precision | `+0.1 Crit Chance`, `+0.1 Armor Penetration`, `+0.1 Magic Penetration`, `+0.05 Attack Speed`                                                              |
+| Spirit    | `+0.15 Healing Power`, `+0.05 Health Regeneration`, `+0.1 Status Resistance`, `+0.1 Crowd Control Resistance`, `+0.05 Summon Power`, `+0.1 Summon Health` |
 
 The initial mitigation scale is `100`. Physical and Bleed damage use Armor; Magical, Burn, and Poison damage use Resistance. Block is capped at 50% chance and prevents 50% of an eligible direct hit. General Damage Reduction and Cooldown Reduction are each capped at 40%.
 
@@ -110,18 +121,11 @@ Fortitude cost =
     + 0.5 * Resistance cost
 ```
 
-Precision costs `1.15`, equal to its direct Crit Chance, physical penetration, magical penetration, and Attack Speed basket. Spirit costs `1.05`, equal to its approved healing, regeneration, resistance, and summon basket. Power and the remaining derived attributes retain their balance-version-1 costs until broader full-loadout coverage is complete.
+Precision costs `1.15`, equal to its direct Crit Chance, physical penetration, magical penetration, and Attack Speed basket. Spirit uses `1.05`, `1.0375`, and `1.0375` at tiers 1, 5, and 10, equal to its active healing, regeneration, resistance, and summon basket. Power and the remaining derived attributes retain their earlier costs.
 
-Still required before treating the broader balance program as complete:
+The hand calibration gate is complete. The authored two-handed Maul behavior uses `1.25 / 1.18` interval/damage multipliers, and the Gauntlets use `0.75 / 0.865`. All nine representative Dual-Wield versus Two-Handed comparisons and all real hand-configuration release cells pass the 20% tolerance.
 
-- correct summon duration/cadence scaling: eight of nine matched duration/tier comparisons exceed the 20% tolerance and the winner changes with fight length;
-- calibrate explicit Summon Power separately from Spirit: explicit summon rolls account for roughly 30% to 84% of summon damage in the current controls, while Spirit's summon-only contribution is roughly 3% to 8%;
-- correct the tier-10 Attack Speed/weapon-behavior interaction: representative Dual-Wield versus Two-Handed efficiency differs by roughly 32% to 35%, while the equal-behavior control stays within 1%;
-- rerun the gate and publish equipment balance version 3 only when all controlled comparisons pass;
-- add prevention-source telemetry beyond the existing barrier data;
-- decide whether the reviewed in-code profile should move to validated JSON once operational editing is needed;
-- regenerate dungeon recommendations for combat rules version 3;
-- decide whether a later release should normalize grandfathered pre-version-2 item rolls.
+The code-side balance program is complete. The remaining runtime check is to let the calibration worker regenerate dungeon recommendations under Power algorithm version 13 and combat rules version 4, then review the results.
 
 ### Implemented marginal analyzer
 
@@ -140,7 +144,8 @@ For each equipment attribute it:
 9. constructs each canonical loadout one slot at a time, applying the same per-item hard caps as generated equipment;
 10. runs every loadout through all thirteen scenarios and reports relevant-scenario medians separately;
 11. compares intended peer loadouts and emits warnings when their relevant outcome differs by more than 20%;
-12. emits warnings for inert paths, ordinary-gear cap pressure, cost changes over 20%, and equal-budget differences over 10 percentage points.
+12. runs the approved equal-budget peer matrix with per-relationship intent and tolerance, and blocks balance-version promotion when any cell fails;
+13. emits warnings for inert paths, ordinary-gear cap pressure, cost changes over 20%, and failed peer comparisons.
 
 The implemented scenarios are physical offense, magical offense, periodic offense, physical pressure, magical pressure, healing sustain, status resilience, crowd-control resilience, summon offense, mixed pressure, unmitigated pressure, burst pressure, and long sustain.
 
@@ -161,16 +166,16 @@ Budget is spent independently on every item before totals are aggregated. This i
 
 The first diagnostic pass exposes three tuning targets rather than silently changing production costs. Positive values in the table favor the first profile; negative values favor the second:
 
-| Comparison and scenario | Tier 1 | Tier 5 | Tier 10 |
-| --- | ---: | ---: | ---: |
-| Medium Dual Wield vs Two-Handed Damage, physical offense | `-7.11%` | `+32.69%` | `-33.41%` |
-| Cloth Support vs Summoner, magical output decomposition | `-57.87%` | `-98.85%` | `-148.97%` |
+| Comparison and scenario                                  |    Tier 1 |    Tier 5 |    Tier 10 |
+| -------------------------------------------------------- | --------: | --------: | ---------: |
+| Medium Dual Wield vs Two-Handed Damage, physical offense |  `-7.11%` | `+32.69%` |  `-33.41%` |
+| Cloth Support vs Summoner, magical output decomposition  | `-57.87%` | `-98.85%` | `-148.97%` |
 
 1. **The magical roles produce fundamentally different output.** This comparison is retained only as output decomposition, not as a peer-balance warning. At tier 5, Cloth Support produces `3,114.38` direct damage, `12` healing, and `96` absorbed barrier; Summoner produces `3,002.88` direct damage, `6,504` summon damage, and `84` regeneration. The decomposition shows that direct Power output is close and the separation comes from the summon channel. A matched control is still required before deciding whether that channel is overpriced or the expected role difference.
 2. **Hand balance is tier-dependent.** Medium Dual Wield and Two-Handed Damage reverse their relative result across the reference tiers and leave the intended 20% tolerance band. Slot funding cannot be tuned independently from weapon magnitude and attack cadence.
 3. **Hard-cap waste is now resolved deterministically.** When a stat reaches its per-item cap, the allocator removes it from the active pool and redistributes the overflow proportionally among the profile's remaining eligible stats. The tier-10 Two-Handed Damage and Summoner profiles now spend their full `9,348` target budget even though their reports still identify which attributes reached a cap.
 
-These are diagnostic findings, not balance-version-3 changes. Equipment balance version 2 remains the production profile until the interaction problems have been calibrated and regression-tested as a group.
+These were the diagnostic findings that motivated balance version 3. The later constrained-allocation and real-content calibration sections record how they were resolved before promotion.
 
 ### Explainable loadout utility
 
@@ -192,63 +197,158 @@ The relevant-scenario utility index is contextual, not a universal character Pow
 
 ### Matched calibration gate
 
-Equipment balance version 3 is now mechanically gated on two controlled matrices plus aggregate cap utilization. The gate is diagnostic and does not mutate the active profile.
+Equipment balance version 3 is mechanically guarded by two controlled matrices plus aggregate cap utilization. The gate is diagnostic and now verifies the active profile rather than a shadow candidate.
 
-The summon matrix compares damage per 100 spent equipment budget. The Direct Caster now has a second Power-scaling direct ability with the same 70-tick cooldown as the summon. Its authored magnitude is `99 + 1.445 * Power`, equal to the nominal damage of one 100-tick summon lifetime: four summon strikes plus five basic attacks. At the tier reference Power values, both role abilities therefore have authored budgets of `110.56`, `156.80`, and `214.60` damage:
+The summon matrix compares damage per 100 spent equipment budget after aggregate-safe candidate redistribution. The Direct Caster has a second Power-scaling direct ability with the same 100-tick cooldown as the summon. Its authored magnitude is equal to the nominal damage of one 100-tick summon lifetime: four summon strikes plus five basic attacks.
 
-| Tier | 90 ticks | 180 ticks | 600 ticks |
-| --- | ---: | ---: | ---: |
-| 1 | `-94.38%` | `-55.57%` | `+15.86%` |
-| 5 | `-145.78%` | `-92.23%` | `-37.11%` |
-| 10 | `-175.28%` | `-124.09%` | `-95.60%` |
+Three confounders were removed from the first matrix:
 
-Positive values favor Summoner and negative values favor the equal-budget Direct Caster. Eight of nine cells still fail the 20% tolerance after removing the ability-count confounder. Tier 1 converges inside tolerance in the long fight, while higher tiers remain increasingly direct-caster-favored. This proves that equipment allocation and summon scaling are not progressing together: changing one static Summon Power cost cannot solve startup delay, cooldown, duration, maximum concurrency, long-fight uptime, and high-tier scaling at once.
+1. The Direct Caster reserves 20% of its equipment budget for Fortitude, matching the Summoner's 15% Summon Health and 5% Max Health allocation instead of spending its entire budget on direct offense.
+2. The hostile pressure ability targets `SummonedEnemies`, so it measures Summon Health and summon uptime without killing the owner and turning the test into an owner-survival comparison.
+3. Summon abilities begin ready and newly created summons begin with their active ability and basic attack ready. This removes the combination of an owner initial cooldown followed by a second summon initial cooldown.
+
+The remaining tier progression is handled through the active Summon Power prices:
+
+| Tier | Active Summon Power cost |
+| ---- | ------------------------: |
+| 1    |                    `1.50` |
+| 5    |                    `1.25` |
+| 10   |                    `1.00` |
+
+Intermediate tiers interpolate linearly. The resulting matched differences are:
+
+| Tier |  90 ticks | 180 ticks | 600 ticks |
+| ---- | --------: | --------: | --------: |
+| 1    | `+19.21%` |  `+4.93%` |  `-3.40%` |
+| 5    | `-19.09%` | `-14.18%` |  `-9.69%` |
+| 10   |  `-8.99%` |  `-4.97%` |  `+1.43%` |
+
+Positive values favor Summoner and negative values favor the equal-budget Direct Caster. All nine cells pass the 20% tolerance, and the worst result is `+19.21%`. This closes the summon calibration gate without changing Power-only ability scaling or making Summon Power nonlinear.
 
 Summon contribution telemetry provides the causal split:
 
-- summon damage rises from roughly 20% of tier-1 short-fight output to roughly 91% of tier-10 long-fight output;
-- Spirit-derived summon bonuses account for only about 3% to 8% of summon damage;
-- explicit Summon Power/Health rolls account for about 30% at tier 1, 60% to 66% at tier 5, and 81% to 84% at tier 10;
-- average active summons rises with duration, and uptime reaches roughly 93% in the long controls.
+- summon damage rises from roughly 51% of tier-1 short-fight output to roughly 94% of tier-10 long-fight output;
+- Spirit-derived summon bonuses account for roughly 3% at tier 1 and 5.5% at tiers 5 and 10;
+- explicit Summon Power/Health rolls account for roughly 29% to 32% at tier 1, 69% to 70% at tier 5, and 89% at tier 10;
+- summon uptime is 100% in the isolated controls, while average active summons still exposes duration and concurrency behavior.
+
+### Equal-budget peer matrix
+
+The analyzer now runs 32 declared peer/context relationships at tiers 1, 5, and 10, producing 96 deterministic cells. Every result includes a stable ID, category, intent, scenario, benchmark context, candidate budget, tolerance, gains for both investments, difference in percentage points, pass/fail status, and whether it blocks release. The release gate requires all 90 acceptance cells to pass; six high-defense penetration cells remain diagnostic sensitivity probes.
+
+The six categories are primary identity, offense, crit, defense, sustain, and penetration. Strict substitutes use a 10-percentage-point tolerance. Contextual generalist-versus-specialist relationships use 20 percentage points. Primary-versus-derived-basket controls use `0.1` percentage point because both sides must construct the same effective attributes.
+
+Fortitude, Precision, and Spirit are compared with their complete derived baskets rather than with a single focused derived roll. The direct basket receives the exact points produced by the primary, and the candidate primary price is calculated from those same candidate derived costs. This prevents an invalid conclusion such as expecting equal budget in Spirit—a six-channel generalist—to equal the same budget concentrated entirely in Health Regeneration.
+
+The first sustain pass exposed two real diagnostic problems:
+
+1. Long Sustain did not give the reference character an authored damage ability, so equipment Life Steal had no eligible ability damage to convert into healing. The scenario now includes the common Power-scaling physical strike.
+2. Tier-10 Health Regeneration produced `26.74%` gain versus `3.06%` for Life Steal, exceeding the approved 20-point contextual tolerance. The balance-version-3 candidate Health Regeneration cost is now `1.75` at tier 10, interpolated from `1.50` at tier 5.
+
+Because Spirit contains both Health Regeneration and Summon Power, its price is computed from the complete active basket. The resulting Spirit anchors are `1.05`, `1.0375`, and `1.0375`.
+
+The frontier extension adds:
+
+- Crit Chance versus Crit Damage at explicit `10 / 50`, `40 / 125`, and `65 / 200` chance/damage baselines;
+- Max Health versus Armor, Dodge, Block, and Damage Reduction under the authored burst-pressure ability, in addition to steady pressure;
+- flat physical and magical penetration at 25% and 300% of reference target defense.
+
+Flat penetration's relative gain is higher against low defense and declines against high defense under the production formula. The 25% defense context is therefore the declared specialist release matchup; the 300% context is reported as sensitivity evidence and does not pretend that flat penetration is percentage penetration. All 90 current release cells pass.
 
 The hand matrix separates representative funding and behavior from two controls:
 
-The representative fast and slow weapon behaviors use the authored recipe values `0.75 / 0.78` and `1.25 / 1.22` for interval/damage multipliers.
+The representative fast and slow weapon behaviors use the authored recipe values `0.75 / 0.78` and `1.25 / 1.18` for interval/damage multipliers. The slow-weapon damage multiplier was reduced from `1.22` after the equal-budget control demonstrated that slot funding did not cause the tier-10 inversion.
 
 | Tier | Representative behavior, 90 ticks | Representative behavior, 180 ticks | Representative behavior, 600 ticks |
-| --- | ---: | ---: | ---: |
-| 1 | `+10.01%` | `+3.83%` | `+6.00%` |
-| 5 | `+15.26%` | `+10.74%` | `+11.51%` |
-| 10 | `-31.57%` | `-34.46%` | `-35.15%` |
+| ---- | --------------------------------: | ---------------------------------: | ---------------------------------: |
+| 1    |                         `+12.16%` |                           `+6.02%` |                           `+8.14%` |
+| 5    |                         `+18.07%` |                          `+16.31%` |                          `+13.55%` |
+| 10   |                         `-18.81%` |                          `-17.90%` |                          `-18.12%` |
 
-Positive values favor Dual Wield. Equalizing only budget does not fix tier 10, but equalizing budget and weapon behavior reduces every tier-10 difference to less than 1%. The remaining mismatch is therefore caused by cadence/magnitude interacting with high-tier Attack Speed, not by the stat allocation or hand-slot budget alone.
+Positive values favor Dual Wield. All nine representative comparisons now pass the 20% tolerance, with at least `1.19` percentage points of headroom. Equal-budget comparisons with the representative cadence still expose the tier-10 weapon-behavior inversion, while equalizing both budget and behavior reduces every difference to at most roughly `1.21%`. This confirms that the production-consistent magnitude adjustment fixes the identified cause without changing hand-slot funding.
 
 Aggregate cap telemetry confirms that this is broader than Attack Speed. It evaluates the final character value after all equipped items and primary-derived contributions, then compares it with the production combat cap. Equivalent wasted budget counts only direct equipment points above the cap, conservatively treating primary-derived points as useful first.
 
-| Loadout | Tier | Capped stat | Total / effective cap | Direct equipment waste | Wasted target budget |
-| --- | ---: | --- | ---: | ---: | ---: |
-| Medium Dual Wield | 5 | Crit Chance | `126.57 / 75` | `51.57` | `8.20%` |
-| Two-Handed Damage | 5 | Crit Chance | `100.25 / 75` | `25.25` | `4.21%` |
-| Heavy Shield | 10 | Block Chance | `190 / 50` | `140` | `7.37%` |
-| Medium Dual Wield | 10 | Crit Chance | `471.23 / 75` | `245.10` | `10.00%` |
-| Medium Dual Wield | 10 | Attack Speed | `600.77 / 200` | `400.77` | `12.26%` |
-| Cloth Support | 10 | Cooldown Reduction | `158.33 / 40` | `118.33` | `7.47%` |
-| Two-Handed Damage | 10 | Crit Chance | `386.77 / 75` | `245.62` | `10.51%` |
-| Summoner | 10 | Cooldown Reduction | `157.10 / 40` | `117.10` | `7.52%` |
+| Loadout           | Tier | Capped stat        | Total / effective cap | Direct equipment waste | Wasted target budget |
+| ----------------- | ---: | ------------------ | --------------------: | ---------------------: | -------------------: |
+| Medium Dual Wield |    5 | Crit Chance        |         `126.57 / 75` |                `51.57` |              `8.20%` |
+| Two-Handed Damage |    5 | Crit Chance        |         `100.25 / 75` |                `25.25` |              `4.21%` |
+| Heavy Shield      |   10 | Block Chance       |            `190 / 50` |                  `140` |              `7.37%` |
+| Medium Dual Wield |   10 | Crit Chance        |         `471.23 / 75` |               `245.10` |             `10.00%` |
+| Medium Dual Wield |   10 | Attack Speed       |        `600.77 / 200` |               `400.77` |             `12.26%` |
+| Cloth Support     |   10 | Cooldown Reduction |         `158.33 / 40` |               `118.33` |              `7.47%` |
+| Two-Handed Damage |   10 | Crit Chance        |         `386.77 / 75` |               `245.62` |             `10.51%` |
+| Summoner          |   10 | Cooldown Reduction |         `157.10 / 40` |               `117.10` |              `7.52%` |
 
 Cloth Support also exceeds the Cooldown Reduction cap by `0.625` points at tier 5, but its `0.15%` equivalent waste is below the 1% gate threshold. Seven canonical loadouts fail the aggregate-cap gate. Per-item redistribution succeeds in spending their budgets, but it cannot prevent several individually legal items from producing a wasteful whole-character total. The next profile revision must add recipe/loadout-aware allocation constraints or escalating cost bands for capped percentage stats.
+
+The analyzer-only candidate allocator removes all aggregate excess while preserving full target spend. It moves the following budget away from capped channels:
+
+| Loadout           | Tier | Budget redistributed |
+| ----------------- | ---: | -------------------: |
+| Medium Dual Wield |    5 |             `386.19` |
+| Cloth Support     |    5 |               `3.75` |
+| Two-Handed Damage |    5 |             `165.91` |
+| Heavy Shield      |   10 |             `700.00` |
+| Medium Dual Wield |   10 |           `3,892.98` |
+| Cloth Support     |   10 |             `710.00` |
+| Two-Handed Damage |   10 |           `2,048.79` |
+| Summoner          |   10 |             `702.60` |
+
+The most important tier-10 candidate share changes are:
+
+- Medium Dual Wield: Precision `25% → 3.38%`, Crit Chance `10% → 1.35%`, Attack Speed `15% → 5.56%`, with the released budget moving mainly to Power, Weapon Damage, and Crit Damage;
+- Heavy Shield: Block Chance `10% → 2.63%`;
+- Cloth Support: Cooldown Reduction `10% → 2.53%`;
+- Summoner: Cooldown Reduction `10.08% → 2.57%`;
+- Two-Handed Damage: Precision `15.77% → 2.62%` and Crit Chance `10.51% → 1.74%`.
+
+These exact whole-loadout targets remain a diagnostic reference. Production must allocate each item independently, so it uses conservative slot shares based on the largest supported combat loadout and redirects blocked budget without requiring knowledge of the character that will eventually equip the item.
+
+### Recipe-catalog production constraints
+
+Balance version 3 uses an item-level form of the aggregate-safe allocator. For every capped combat stat, each item receives a conservative share of the character's remaining capacity based on its slot-budget weight relative to the largest supported loadout. A shared linear constraint counts both direct rolls and primary-derived contributions against that capacity. For example, Precision and direct Crit Chance consume the same Crit Chance allowance.
+
+The production allocator uses the real recipe profile first. When all remaining recipe stats are blocked by a combat or allocation cap, it spends the residual budget through a small role-specific overflow group:
+
+- heavy armor and tower shields redirect toward Fortitude, Max Health, Armor, and Resistance;
+- physical weapons redirect toward Power, Weapon Damage, Crit Damage, and Armor Penetration;
+- magical weapons redirect toward Power, Spirit, Magic Penetration, and Health Regeneration;
+- cloth, other armor, off-hands, and jewelry use corresponding sustain, resilience, or general-purpose groups.
+
+Per-item allocation caps scale with slot-budget weight. This lets a two-handed weapon or chest piece accept the larger roll its funding implies while the independent whole-character combat constraint remains authoritative. `EquipmentConstraintProfile.ProductionActive` is `true`.
+
+The catalog validator currently covers:
+
+| Catalog measure                                |  Result |
+| ---------------------------------------------- | ------: |
+| Enabled equipment recipes                      |    `31` |
+| Enabled blueprints                             |    `11` |
+| Compatible base/blueprint designs              |   `225` |
+| Full loadouts across tiers 1, 5, and 10        | `3,744` |
+| Production loadouts over a combat cap          |     `0` |
+| Exact-reference loadouts over a combat cap     |     `0` |
+| Production loadouts unable to spend budget     |     `0` |
+| Exact-reference loadouts unable to spend budget |     `0` |
+
+The active constrained path produces no over-cap or unspent-budget failures across the full matrix.
+
+This result establishes that recipe-level constraints preserve funding while avoiding capped channels across the present catalog. Equal-budget, summon, representative hand, real-content peer, and aggregate-cap calibration all pass under the active profile.
 
 The current gate result is:
 
 ```text
 overflow redistribution: PASS
-aggregate cap use:       FAIL (7 loadouts waste above 1%)
-summon calibration:      FAIL (8 comparisons above 20%)
-hand calibration:        FAIL (3 actual comparisons above 20%)
-ready for version 3:     NO
+production aggregate use: PASS
+exact-reference use:      PASS
+equal-budget peers:      PASS (90 release cells)
+summon calibration:      PASS
+hand calibration:        PASS
+real crafting peers:     PASS (21 release cells)
+active profile:          PASS
 ```
 
-Equipment balance version 2 remains active. Incrementing the version while the gate is red would merely formalize known duration and cadence inversions.
+Equipment balance version 3 is active.
 
 ### Deterministic cap-overflow allocation
 
@@ -260,7 +360,7 @@ The shared allocator uses weighted water filling:
 4. redistribute the remaining budget across the remaining stats in stable `AttributeType` order;
 5. report budget as unspent only when every eligible stat is capped.
 
-Crafted rolls round only after continuous overflow redistribution. Preview ranges call the same allocator at their minimum and maximum budgets. Quality upgrades allocate their incremental budget against the item's existing stat-budget proportions and remaining capacities. This keeps generation, preview, and later quality growth consistent.
+Crafted rolls use continuous constrained allocation. Preview ranges call the same allocator at their minimum and maximum budgets. Quality upgrades allocate incremental budget against existing proportions and remaining coupled capacity. Directed tempering improvements also test direct, slot-scaled, and primary-derived caps before changing a stat. This keeps generation, preview, and later quality growth consistent.
 
 ## Pre-version-3 system audit
 
@@ -357,7 +457,7 @@ Each equipment instance combines:
 - an implicit rarity multiplier called `Boost` that applies only to base modifiers;
 - quality, tier, Potential, tempering state, recipe, blueprint, and affinity metadata;
 - weapon behavior from the crafting recipe/blueprint;
-- legacy weapon fields on `EquipmentBase`: Attack Speed, Magnitude, Magnitude Range, Scaling Attribute, and Scaling Amount.
+- weapon behavior now comes only from crafting recipe behavior and combat attributes; the disconnected EquipmentBase weapon fields have been removed.
 
 The effective modifier collection is:
 
@@ -503,7 +603,7 @@ Additional combat observations:
 - Healing and barriers use `BaseValue + ScalingAttribute * ScalingCoefficient`.
 - Ability cooldowns are authored ticks. The Cooldown attribute is not consulted.
 - Weapon recipe behavior can change basic-attack interval, damage multiplier, attack type, and damage type.
-- Legacy `EquipmentBase.AttackSpeed`, Magnitude, Magnitude Range, Scaling Attribute, and Scaling Amount are displayed but not used by `FastCombatEngine`.
+- Equipment tooltips and crafting previews no longer expose disconnected weapon magnitude, interval, or scaling fields.
 
 ## Why the pre-version-3 weights could not be trusted
 
@@ -610,12 +710,12 @@ Add unit, floor, soft cap, hard cap, and display metadata to the attribute defin
 
 Recommended primary identities:
 
-| Primary attribute | Identity | Initial derived targets |
-| --- | --- | --- |
-| Power | Universal ability and basic-attack magnitude | No derived-stat bundle; it is consumed directly |
-| Fortitude | Durable tank foundation | Max Health, Armor, Resistance |
-| Precision | Offensive reliability and tempo | Crit Chance rating, Armor Penetration, Magic Penetration, a modest Attack Speed contribution |
-| Spirit | Sustain, support, control resilience, and summons | Healing Power, Health Regeneration, Status Resistance, Crowd Control Resistance, Summon Power, Summon Health |
+| Primary attribute | Identity                                          | Initial derived targets                                                                                      |
+| ----------------- | ------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| Power             | Universal ability and basic-attack magnitude      | No derived-stat bundle; it is consumed directly                                                              |
+| Fortitude         | Durable tank foundation                           | Max Health, Armor, Resistance                                                                                |
+| Precision         | Offensive reliability and tempo                   | Crit Chance rating, Armor Penetration, Magic Penetration, a modest Attack Speed contribution                 |
+| Spirit            | Sustain, support, control resilience, and summons | Healing Power, Health Regeneration, Status Resistance, Crowd Control Resistance, Summon Power, Summon Health |
 
 These are deliberately limited mappings. Dodge, Block, general Damage Reduction, Crit Damage, Life Steal, Cooldown Reduction, and Weapon Damage remain independently itemized stats rather than being granted by a primary attribute. That preserves valuable specialist affixes and prevents one primary stat from becoming a complete build by itself.
 
@@ -776,7 +876,7 @@ Primary attributes never add to another primary attribute, so there is no recurs
 - Must be part of basic attacks.
 - Does not scale ability magnitude; abilities use Power.
 - Can still affect explicitly non-ability weapon mechanics introduced later, but those mechanics must not masquerade as ability scaling.
-- Migrate or retire legacy weapon Magnitude fields so there is one weapon-damage source.
+- Weapon Damage and recipe behavior are the only equipment-side basic-attack sources.
 
 #### Critical strikes
 
@@ -790,15 +890,15 @@ critMultiplier = 1 + CritDamageBonus / 100
 - Represent eligibility with an explicit three-state policy such as `CritEligibility.Default`, `CritEligibility.Allowed`, and `CritEligibility.Disallowed`. Do not use an omitted Boolean whose absence can be interpreted as `false`.
 - Resolve `Default` by operation type:
 
-| Operation                         | `Default` resolves to |
-| --------------------------------- | --------------------: |
-| Direct damage                     |               Allowed |
-| Direct healing                    |               Allowed |
-| Damage over time                  |            Disallowed |
-| Reflected damage                  |            Disallowed |
-| Life-steal healing                |            Disallowed |
-| Secondary proc                    |            Disallowed |
-| Barrier                           |            Disallowed |
+| Operation          | `Default` resolves to |
+| ------------------ | --------------------: |
+| Direct damage      |               Allowed |
+| Direct healing     |               Allowed |
+| Damage over time   |            Disallowed |
+| Reflected damage   |            Disallowed |
+| Life-steal healing |            Disallowed |
+| Secondary proc     |            Disallowed |
+| Barrier            |            Disallowed |
 
 - A healing effect with no authored override can crit. Only `CritEligibility.Disallowed` suppresses its critical strikes.
 - `CritEligibility.Allowed` can opt an otherwise-disallowed operation into crits when a specific ability requires it.
@@ -1299,12 +1399,7 @@ The item breakdown should contain:
 
 Avoid implicit `Boost` multiplication as the long-term model. Prefer materialized, inspectable instance modifiers or a clearly valued rarity budget multiplier that applies consistently.
 
-For existing equipment, choose and document one migration strategy:
-
-1. **Normalize all existing combat equipment** to the new balance version; or
-2. **Grandfather item rolls** with a stored `BalanceVersion`, while new items use the current profile.
-
-For an alpha game, normalization is likely simpler and fairer. If items already have player value that must be preserved, versioning is safer but adds long-term complexity.
+This local-only development environment uses one canonical equipment profile. Equipment instances do not persist historical balance versions, and all existing and newly generated equipment is evaluated with the active profile.
 
 ### Price weapon behavior
 
@@ -1318,7 +1413,7 @@ Recipe behavior changes real combat without appearing in the stat budget. Give b
 
 The existing dagger/gauntlet and mace/crossbow interval/damage pairs are close to DPS-neutral, but they still interact with on-hit effects, burst, and rounding. The analyzer should validate rather than assume neutrality.
 
-Retire or migrate legacy weapon fields that combat ignores. A tooltip must not present Magnitude or Attack Speed as a weapon mechanic unless production combat consumes it.
+Disconnected `EquipmentBase` weapon magnitude, attack-speed, and scaling fields have been removed. Tooltips present only combat-consumed attributes and authored recipe behavior.
 
 ### Recalibrate slot budgets
 
@@ -1345,7 +1440,6 @@ Return from the backend:
 
 - `itemBudget`;
 - `budgetByAttribute`;
-- `balanceVersion`;
 - optional comparison deltas against the currently equipped item;
 - warnings for unpriced/inert modifiers in development/admin responses.
 
@@ -1373,7 +1467,7 @@ Add startup and test-time validation:
 6. every modifier type is allowed for that attribute;
 7. hard caps cannot reach immunity, zero cooldown, or invalid attack cadence;
 8. weapon behavior is valid and priceable;
-9. no legacy displayed field is disconnected from combat;
+9. no displayed equipment field is disconnected from combat;
 10. no item contains an unknown or unpriced stat;
 11. base plus generated modifiers do not exceed the intended slot/tier budget without an explicit exception;
 12. two-handed overview aggregation counts an instance once;
@@ -1384,7 +1478,7 @@ Add startup and test-time validation:
 17. Fortitude, Precision, and Spirit contribute only to their approved dependency groups;
 18. an omitted or `Default` crit policy resolves direct healing as crit-eligible;
 19. disabling critical healing requires an explicit `CritEligibility.Disallowed`;
-20. legacy missing crit fields are migrated as `Default`, not interpreted as `Disallowed`;
+20. omitted crit eligibility resolves through the canonical `Default` policy rather than being interpreted as `Disallowed`;
 21. the Cooldown Reduction hard cap is exactly 40%, and content cannot override it with a higher local cap.
 
 In development and CI, inert equipment stats should be errors. In production startup, consider failing fast as well; silently selling dead stats is worse than rejecting invalid content.
@@ -1437,7 +1531,7 @@ Implement pure, tested combat math for:
 Also:
 
 - fix two-handed overview double counting;
-- migrate or hide ignored legacy weapon fields;
+- remove ignored weapon fields from the model, schema, API, content, and frontend;
 - add prevention-source telemetry to combat results/logging;
 - increment `PowerRatingAlgorithm.CombatRulesVersion`.
 
@@ -1464,12 +1558,12 @@ Deliverables:
 - modifier-type-aware evaluation;
 - behavior budget evaluation.
 
-Initially copy current costs into balance profile version 1 only as a compatibility bootstrap. Mark them uncalibrated.
+Initialize the profile from measured and reviewed costs; do not retain a compatibility price table.
 
 Exit criteria:
 
 - all runtime equipment generation reads one provider;
-- the old static cost catalog is removed or is only a compatibility facade;
+- the active cost catalog is the single authoritative profile;
 - every item can produce an auditable budget breakdown.
 
 ### Phase 3: Marginal-value analyzer
@@ -1527,26 +1621,25 @@ Exit criteria:
 - intentional specialist stats outperform generalists only in their target matchup;
 - full current recipe and blueprint catalog passes validation.
 
-### Phase 5: Existing item and content normalization
+### Phase 5: Item and content normalization
 
 Deliverables:
 
-- choose normalization or balance-version grandfathering;
+- use the single active profile for every item;
 - migrate every Spirit-, Precision-, Fortitude-, or secondary-scaled ability effect to Power;
 - recalculate migrated Power coefficients against canonical reference builds rather than copying coefficients blindly;
 - convert Crit units and any renamed stats;
-- migrate/hide legacy weapon properties;
+- remove disconnected weapon properties;
 - normalize static item-base modifiers versus generated modifiers;
 - update recipe/blueprint profiles and caps;
 - recalculate item previews;
 - update tutorial items explicitly.
 
-Potential migration implications:
+Schema implications:
 
 - pure combat formulas and JSON cost changes require no EF migration;
-- adding `BalanceVersion`, materialized budget fields, or item normalization state requires an EF migration;
-- changing existing persisted modifier amounts requires a controlled data migration/backfill;
-- migrations may be generated here but must not be applied to shared or production databases by this work.
+- because this is a local-only development environment, the base schema and model snapshots contain only the canonical item model;
+- an existing local database created from the removed schema should be recreated instead of supported through compatibility code.
 
 For an existing effect that used another scaling stat, a baseline-preserving starting conversion is:
 
@@ -1569,7 +1662,7 @@ Deliverables:
 - replace placeholder/obsolete attribute tooltip text;
 - show physical and magical mitigation at the character's tier;
 - distinguish Item Budget from Overall Power;
-- development/admin display for budget breakdown and balance version.
+- development/admin display for budget breakdown and the active profile version.
 
 Exit criteria:
 
@@ -1725,7 +1818,7 @@ Likely modifications:
 - `ItemStatRollService.cs`: spend versioned banded budget.
 - `TemperingMechanicsService.cs`: evaluate and spend through the same service.
 - `CraftingService.cs`: expose approved budget breakdown and ranges.
-- `EquipmentStatBudgetCatalog.cs`: remove, replace, or turn into a compatibility facade.
+- `EquipmentStatBudgetCatalog.cs`: keep as the single active reviewed cost profile.
 - `PowerAnalysisSimulationRunner.cs`: expose reusable continuous benchmark metrics without coupling crafting directly to runtime simulation.
 - `PowerRatingAlgorithm`: increment appropriate versions.
 - equipment DTOs: return budget/version/comparison metadata.
@@ -1736,7 +1829,7 @@ Keep all combat math reusable by both gameplay and simulations. Do not implement
 
 ## Resolved decisions and remaining decisions
 
-Resolved for combat rules version 3 and balance version 2:
+Resolved for combat rules version 4 and equipment balance version 3:
 
 1. Fortitude grants `+4 Max Health`, `+0.5 Armor`, and `+0.5 Resistance` per point.
 2. Precision grants `+0.05 Attack Speed` per point alongside `+0.1` to Crit Chance and both penetration stats.
@@ -1751,18 +1844,19 @@ Resolved for combat rules version 3 and balance version 2:
 11. Backend Item Budget is exposed to players as Gear Value; simulation-backed whole-build Power remains distinct.
 12. Equipment costs resolve by item tier from reviewed tier anchors; intermediate tiers use linear interpolation.
 13. Armor and Resistance use effective-health-derived tier anchors, and Fortitude is priced from its exact derived basket.
-14. Existing item rolls are grandfathered. Their Gear Value is recalculated under balance version 2, and future tempering uses the version-2 tier profile.
+14. Every item uses the active balance profile; equipment instances do not persist or branch on historical balance versions.
+15. Summon abilities and newly created summons always enter ready; there is no delayed-lifecycle compatibility mode.
+16. Disconnected `EquipmentBase` magnitude, magnitude-range, attack-speed, and scaling fields are removed from the domain model, schema, API, JSON content, Admin editor, crafting preview, and equipment tooltip.
 
 Still open:
 
-1. Should grandfathered pre-version-2 equipment eventually be normalized?
-2. Should the Spirit dependency group be narrowed after multi-scenario simulation?
-3. Should Attack Speed keep the 4x rate ceiling with loadout-aware allocation constraints, or move to a lower universal rate ceiling with new costs and weapon behavior?
-4. Should exact build-impact simulation remain in Admin diagnostics or also power an on-demand player comparison?
+1. Should the Spirit dependency group be narrowed after multi-scenario simulation?
+2. Should Attack Speed keep the 4x rate ceiling with loadout-aware allocation constraints, or move to a lower universal rate ceiling with new costs and weapon behavior?
+3. Should exact build-impact simulation remain in Admin diagnostics or also power an on-demand player comparison?
 
-## Recommended first implementation slice
+## Historical first implementation slice
 
-The smallest slice that directly fixes the reported Defense-versus-HP problem without creating another temporary scoring system is:
+The original smallest slice that directly addressed the reported Defense-versus-HP problem was:
 
 1. migrate all magnitude-bearing ability effects to Power-only scaling;
 2. implement the versioned primary influence profile for Fortitude, Precision, and Spirit;
@@ -1798,6 +1892,125 @@ The balancing system is complete when:
 - equal-budget peers are within approved tolerances in relevant scenarios;
 - conditional stats expose their matchup sensitivity rather than pretending to have universal value;
 - whole-build Power remains simulation-backed;
-- existing items and content have an explicit migration/version policy;
+- every item and content path uses the single active balance profile;
 - dungeon recommendations are recalibrated after the combat-rule change;
 - the full relevant test suite passes.
+
+### Current gap assessment
+
+The approved behavior, prices, allocator, canonical attribute metadata, and reconciling prevention telemetry now run together in production code. The code-side balance program meets its definition of done; automatically invalidated dungeon recommendations still require runtime execution and review.
+
+| Definition-of-done requirement                                                 | Status                                             | Evidence and remaining work                                                                                                                                                                                                                                                                                                                |
+| ------------------------------------------------------------------------------ | -------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Every equipment attribute has a tested production combat effect                | **Complete**                                       | All 24 equipment attributes have relevant deterministic analyzer coverage and a production combat consumer.                                                                                                                                                                                                                                |
+| Defensive prevention telemetry is attributable and reconciling                 | **Complete**                                       | Every incoming hit now records avoidance, physical/Armor mitigation, magical/Resistance mitigation, Block, general Damage Reduction, barrier absorption, damage amplification, and final health damage. Per-hit, entity, and averaged analyzer outputs enforce `incoming + amplification = avoidance + prevention + barrier + final health damage`. |
+| Canonical units, caps, and stacking rules exist for every attribute            | **Complete**                                       | All 24 definitions now declare their display name, description, unit, additive stacking rule, valid range, fixed/contextual cap behavior, equipment/content visibility, precision/suffix, approved primary source, and relevant benchmark scenarios. Combat cap lookups, allocation constraints, GameBootstrap, Admin diagnostics, and Angular equipment formatting/tooltips consume the catalog. |
+| Every numeric ability output scales from Power                                 | **Complete**                                       | Ability catalog validation rejects non-Power effect scaling; damage, healing, barriers, periodic effects, and other magnitude-bearing effects use effective Power. Summons act through their own Power after owner-to-summon attribute construction.                                                                                       |
+| Healing crits by default                                                       | **Complete**                                       | The three-state crit policy defaults direct healing to crit-eligible and supports an explicit opt-out.                                                                                                                                                                                                                                     |
+| Cooldown Reduction is additive and capped at 40%                               | **Complete**                                       | The shared cooldown calculation clamps reduction to 40% and uses ceiling-based tick rounding so cooldowns cannot fall below 60% of authored duration.                                                                                                                                                                                      |
+| The four primaries have distinct identities                                    | **Complete**                                       | Power owns ability magnitude; Fortitude owns toughness; Precision owns crit, penetration, and attack tempo; Spirit owns the approved sustain, resilience, and summon group.                                                                                                                                                                |
+| Primary dependencies are limited and non-recursive                             | **Complete**                                       | Fortitude, Precision, and Spirit project only into their declared derived groups, and no primary grants another primary.                                                                                                                                                                                                                   |
+| One backend evaluator prices every item modifier                               | **Complete**                                       | Crafting, tempering, API Gear Value, and frontend display all use the single active balance profile.                                                                                                                                                                                                                                       |
+| Crafting, tempering, previews, and tooltips use the approved profile           | **Complete**                                       | Base rolls and previews use the active constrained allocator; quality growth and directed tempering respect the same direct and coupled caps.                                                                                                                                                                                              |
+| No frontend-local attribute weights remain                                     | **Complete**                                       | The Angular `ATTRIBUTE_WEIGHTS` table has been removed; displayed Gear Value comes from the backend.                                                                                                                                                                                                                                       |
+| Deterministic analysis can regenerate candidate prices                         | **Complete**                                       | The analyzer measures all 24 stats over deterministic production-engine scenarios and emits tier-specific candidate costs and confidence data. Candidate overrides are visible in Admin diagnostics.                                                                                                                                       |
+| Equal-budget peers pass approved tolerances                                    | **Complete for the active profile**                | All 90 synthetic release cells, nine summon cells, nine representative hand cells, and 21 real recipe/blueprint release cells pass. Twelve cross-role or cross-specialization cells remain diagnostic by design.                                                                                                                            |
+| Conditional stats expose matchup sensitivity                                   | **Complete in Admin diagnostics**                  | Each stat declares relevant scenarios and reports per-scenario results, medians, confidence intervals, cap pressure, and contextual loadout output rather than one universal value.                                                                                                                                                        |
+| Whole-build Power remains simulation-backed                                    | **Complete**                                       | Character Power continues to use production-engine benchmark simulations and remains separate from Gear Value.                                                                                                                                                                                                                             |
+| Every item and content path uses the active profile                            | **Complete**                                       | Historical item-price branching and persisted item balance versions have been removed. The clean local schema, crafting, tempering, DTOs, and frontend all use the active profile.                                                                                                                                                           |
+| Dungeon recommendations match the active combat rules                          | **Pending operational recalibration**              | Power algorithm version 13 and combat rules version 4 invalidate older recommendation identities. The existing calibration worker will recompute and persist replacements after deployment; those generated values still need operational review.                                                                                          |
+| Full relevant tests pass                                                       | **Complete in the working tree**                   | `644/644` backend tests pass, including an explicit current-only equipment-surface guard plus canonical metadata, prevention-ledger, and stale-recommendation replacement coverage. The Angular development build and the two focused metadata-formatting tests pass; the unrelated full Angular suite still has four pre-existing failures in Tavern/AppComponent specs.                                                                                       |
+
+### Recently completed: tier-10 hand cadence gate
+
+The Maul's authored basic-attack damage multiplier was reduced from `1.22` to `1.18`, while its `1.25` interval multiplier and all hand-slot budgets remain unchanged. The analyzer now reads the representative Dagger and Maul behavior directly from the production crafting definitions instead of duplicating their numeric values, and it enforces `HandCalibrationPassed` with a regression assertion.
+
+The tier-10 representative differences are `-18.81%`, `-17.90%`, and `-18.12%` over 90, 180, and 600 ticks respectively. All nine representative tier/duration comparisons pass the 20% tolerance. Equal-budget/equal-behavior controls remain within roughly `1.21%`, preserving the evidence that cadence/magnitude behavior—not allocation waste—caused the original inversion.
+
+### Recently completed: real-content peer calibration
+
+Synthetic coverage remains complete: the 96-cell matrix has 90 passing release gates and six high-defense penetration sensitivity probes. The analyzer now also composes real crafting designs and runs 33 candidate-profile combat cells at tiers 1, 5, and 10:
+
+- 21 same-purpose release gates cover balanced, fast, and penetration-oriented dual-wield/two-handed choices, a tower-shield defensive peer, and offensive, sustain, and summon-oriented blueprint peers;
+- 12 diagnostic cells cover Heavy/Medium and Medium/Light armor-family decompositions, Arcane/Spirit offense-versus-sustain specialization, and Spirit/Primal support-versus-summon specialization;
+- every result exposes both composed design identifiers, scenario, candidate budget spent, allocated attribute points, utility per 100 budget, tolerance, pass state, and decomposed combat output;
+- `CraftingCombatPeerMatrixPassed` is part of `ActiveProfilePassed`, and failed cells emit `CraftingCombatPeerMismatch` findings.
+
+All 21 release cells now pass without widening the 20% peer tolerance. The authored adjustments are:
+
+- Greatsword basic-attack damage multiplier: `1.00 → 1.02`;
+- Gauntlets basic-attack damage multiplier: `0.78 → 0.865`, while retaining the `0.75` interval multiplier;
+- Execution blueprint influence: `0.40 → 0.20`;
+- Execution profile: Power `40%`, Weapon Damage `30%`, Crit Chance `20%`, Crit Damage `10%`, avoiding the former all-in Crit Damage/Precision feedback loop;
+- Aegis profile: Max Health `35%`, Armor `25%`, Resistance `25%`, Damage Reduction `15%`, reducing excessive investment into already-diminishing Armor;
+- Fury/Execution overflow remains offensive on every compatible slot, while Aegis overflow remains defensive.
+
+Arcane and Spirit remain fully measured, but their difference no longer blocks release because Arcane promises magical offense while Spirit promises sustain/support. Cross-role output decompositions remain diagnostic and are not promoted into false peer gates.
+
+### Recently completed: canonical attribute metadata
+
+`AttributeCatalog` is now the machine-readable contract for all 24 attributes. Each definition declares its unit, stacking rule, valid range, cap mode, equipment/content visibility, display precision and suffix, approved primary source, and relevant benchmark scenarios. Fixed caps resolve from the catalog, while Attack Speed resolves its useful cap from the weapon interval and the 4x runtime rate ceiling.
+
+Production combat cap clamps, Cooldown Reduction, allocation constraints, GameBootstrap, and Admin balance diagnostics consume the catalog. The Angular formatter is hydrated from GameBootstrap instead of maintaining its own label and percentage lists, and equipment rows build their tooltip descriptions, caps, and primary-source notes from the same definitions. In particular, Summon Power and Summon Health are explicitly percentage points, while Status Resistance and Crowd Control Resistance are ratings.
+
+Completeness tests require one definition for every `AttributeType`, exact parity with every equipment-budgeted stat, valid formatting data, aligned fixed caps, aligned primary contribution sources, non-recursive primary derivation, and analyzer-scenario compatibility.
+
+### Recently completed: reconciling prevention telemetry
+
+Damage events now carry a non-overlapping prevention ledger:
+
+- incoming pre-defense damage, after any critical multiplier;
+- Dodge/miss avoided damage and avoided-hit count;
+- physical mitigation prevented by Armor after physical penetration;
+- magical mitigation prevented by Resistance after magical penetration;
+- Block prevented;
+- general Damage Reduction prevented;
+- explicit damage amplification from negative reduction effects;
+- barrier absorbed;
+- final post-prevention damage delivered to health.
+
+Each combat-log hit, aggregated `EntityStats`, and averaged analyzer loadout output can be reconciled with:
+
+`incoming raw damage + amplification = avoided damage + typed mitigation + Block + general Damage Reduction + barrier absorbed + final health damage`
+
+Physical and magical typed mitigation are also required to sum to total typed mitigation. This lets mixed-pressure diagnostics attribute prevention to Armor versus Resistance and show how penetration changes that prevention without folding it into HP or barrier value.
+
+### Remaining operational steps
+
+The current profile is active, all `3,744` catalog loadouts spend their budgets without exceeding combat caps, and the active calibration gate passes. There is no item-version migration: the local schema contains only the canonical equipment model.
+
+If the local database was created before the schema cleanup, recreate it from the current migrations. This is intentionally a development reset rather than an application compatibility path.
+
+`PowerRatingAlgorithm.Version` is `13` and `PowerRatingAlgorithm.CombatRulesVersion` is `4`. Stale dungeon recommendations are rejected by that identity and recomputed by the existing calibration worker. `DungeonPowerCalibration.Enabled` is `true` in both default and Development API settings.
+
+Post-startup recommendation checks:
+
+```sql
+SELECT
+    "DungeonId",
+    "AlgorithmVersion",
+    "CombatRulesVersion",
+    "BenchmarkDefinitionVersion",
+    "RecommendationSeedSetVersion",
+    "UpdatedAtUtc"
+FROM "DungeonPowerRecommendationCacheEntries"
+WHERE "AlgorithmVersion" <> 13
+   OR "CombatRulesVersion" <> 4
+   OR "BenchmarkDefinitionVersion" <> 6
+   OR "RecommendationSeedSetVersion" <> 2
+ORDER BY "DungeonId";
+```
+
+After calibration completes, this query must return no rows for the currently deployed dungeon catalog. Review worker logs for the number loaded versus recalibrated, any `CalculationFailed` results, low-confidence results, and per-dungeon recommended Power changes. Sample at least the lowest, middle, and highest tier recommendations in the player-facing dungeon preview before closing the release.
+
+### Decisions that do not block completion by themselves
+
+- Keeping the approved profile in reviewed code instead of JSON is acceptable if operational editing is not needed. If JSON is chosen, it needs startup validation, deterministic ordering, and versioned snapshots.
+- Retaining Spirit's six derived attributes is acceptable if the expanded peer matrix passes; narrowing Spirit is a balance decision, not an architectural requirement.
+- Keeping exact build-impact simulation in Admin only is acceptable. A player-facing on-demand comparison is optional.
+
+### Minimum ordered operational path to done
+
+1. Recreate any stale local database from the current canonical migrations.
+2. Review the automatically regenerated dungeon recommendations for Power algorithm 13 / combat rules 4, benchmark definition 6, and seed set 2.
+3. Run the release verification suite and require every definition-of-done row above to be **Complete**.

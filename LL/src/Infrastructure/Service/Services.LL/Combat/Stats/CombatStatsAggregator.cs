@@ -123,12 +123,26 @@ public sealed class CombatStatsAggregator : ICombatStatsAggregator
                 if (item.EventType == EventType.Damage || item.EventType == EventType.DamageOverTime || item.EventType == EventType.DamageCrit)
                 {
                     target.DamageBlocked += item.BarrierAbsorbed;
+                    target.IncomingRawDamage += item.IncomingRawDamage;
+                    target.TypedMitigationPrevented += item.TypedMitigationPrevented;
+                    target.PhysicalMitigationPrevented += item.PhysicalMitigationPrevented;
+                    target.MagicalMitigationPrevented += item.MagicalMitigationPrevented;
+                    target.BlockPrevented += item.BlockPrevented;
+                    target.DamageReductionPrevented += item.DamageReductionPrevented;
+                    target.DamageAmplified += item.DamageAmplified;
+                    target.FinalHealthDamage += item.FinalHealthDamage;
                     if (relationship == DamageTargetRelationship.Opponent)
                         target.DamageTaken += item.Magnitude;
                     else if (relationship == DamageTargetRelationship.Self)
                         target.SelfDamageTaken += item.Magnitude;
                     else if (relationship == DamageTargetRelationship.Ally)
                         target.AlliedDamageTaken += item.Magnitude;
+                }
+                else if (item.EventType == EventType.Miss)
+                {
+                    target.IncomingRawDamage += item.IncomingRawDamage;
+                    target.AvoidedDamage += item.AvoidedDamage;
+                    target.AvoidedAttacks++;
                 }
                 else if (item.EventType == EventType.Heal || item.EventType == EventType.HealOverTime || item.EventType == EventType.HealCrit)
                     target.HealingReceived += item.Magnitude;
@@ -179,6 +193,10 @@ public sealed class WorkEntity
     public int DamageDone, DamageTaken, HealingDone, HealingReceived, HealthRegenerated;
     public int SelfDamageDone, SelfDamageTaken, AlliedDamageDone, AlliedDamageTaken;
     public int BarrierGenerated, DamageBlocked;
+    public int IncomingRawDamage, AvoidedDamage, AvoidedAttacks;
+    public int TypedMitigationPrevented, PhysicalMitigationPrevented, MagicalMitigationPrevented;
+    public int BlockPrevented, DamageReductionPrevented;
+    public int DamageAmplified, FinalHealthDamage;
 
     private readonly Dictionary<string, WorkAbility> _abilities = new(StringComparer.Ordinal);
     private string? _firstEntityName;
@@ -222,7 +240,17 @@ public sealed class WorkEntity
         AlliedDamageTaken,
         Team,
         BarrierGenerated,
-        DamageBlocked);
+        DamageBlocked,
+        IncomingRawDamage,
+        AvoidedDamage,
+        AvoidedAttacks,
+        TypedMitigationPrevented,
+        PhysicalMitigationPrevented,
+        MagicalMitigationPrevented,
+        BlockPrevented,
+        DamageReductionPrevented,
+        DamageAmplified,
+        FinalHealthDamage);
 }
 
 public sealed class WorkAbility

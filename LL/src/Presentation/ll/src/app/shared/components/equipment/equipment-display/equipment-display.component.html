@@ -21,7 +21,7 @@
     <span>{{ data.equipmentType }}</span>
     <span
       *ngIf="data.itemBudget > 0"
-      [title]="'Tier ' + data.itemBudgetTier + ' rates, balance version ' + data.balanceVersion"
+      [title]="'Tier ' + data.itemBudgetTier + ' equipment rates'"
     >
       Gear Value {{ data.itemBudget | number: '1.0-2' }}
     </span>
@@ -93,36 +93,6 @@
     </div>
   </div>
 
-  <!-- Weapon-only stats -->
-  <div
-    *ngIf="data.magnitude && data.magnitudeRange"
-    class="ll-item-detail-section"
-  >
-    <div class="ll-item-meta">Weapon</div>
-    <div class="mt-1 flex items-center justify-between gap-4 text-sm">
-      <span>Base Damage</span>
-      <span class="text-primary">
-        {{
-          data.magnitude * (1 - data.magnitudeRange / 100) | number: "1.0-0"
-        }}-{{
-          data.magnitude * (1 + data.magnitudeRange / 100) | number: "1.0-0"
-        }}
-      </span>
-    </div>
-    <div class="mt-1 text-xs text-secondary">
-      Scales with {{ data.scalingAttribute! | attributeTypeFormat }} ({{
-        data.scalingAmount! * 100
-      }}%)
-    </div>
-  </div>
-
-  <div *ngIf="data.attackSpeed" class="ll-item-stat-row">
-    <span>Attack Speed</span>
-    <span class="text-primary">
-      {{ 60 / data.attackSpeed | number: "1.1-1" }}s
-    </span>
-  </div>
-
   <div
     *ngIf="data.baseModifiers?.length || data.instanceModifiers?.length"
     class="ll-item-detail-section"
@@ -130,7 +100,11 @@
     <div class="ll-item-meta">Attributes</div>
 
     <div *ngIf="data.baseModifiers?.length" class="mt-2 text-sm">
-      <div *ngFor="let attr of data.baseModifiers" class="ll-item-stat-row">
+      <div
+        *ngFor="let attr of data.baseModifiers"
+        class="ll-item-stat-row"
+        [title]="attr.attributeType | attributeTooltip"
+      >
         <span>
           {{ attr.attributeType | attributeTypeFormat }}
         </span>
@@ -142,7 +116,11 @@
     </div>
 
     <div *ngIf="data.instanceModifiers?.length" class="mt-2 text-sm">
-      <div *ngFor="let attr of data.instanceModifiers" class="ll-item-stat-row">
+      <div
+        *ngFor="let attr of data.instanceModifiers"
+        class="ll-item-stat-row"
+        [title]="attr.attributeType | attributeTooltip"
+      >
         <span>
           {{ attr.attributeType | attributeTypeFormat }}
         </span>

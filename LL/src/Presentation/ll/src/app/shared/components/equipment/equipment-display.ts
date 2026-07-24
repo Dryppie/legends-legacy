@@ -22,18 +22,10 @@ export interface EquipmentDisplay {
   instanceModifiers: AttributeModifier[];
   itemBudget: number;
   itemBudgetTier: number;
-  balanceVersion: number;
   gatheringType?: GatheringType | null;
   toolBonuses: ToolBonusModifier[];
   toolAffixes: ToolBonusModifier[];
   baseToolBonuses: ToolBonusModifier[];
-
-  // Weapon only
-  magnitude?: number;
-  magnitudeRange?: number;
-  scalingAttribute?: AttributeType;
-  scalingAmount?: number;
-  attackSpeed?: number;
 
   // Instance-only
   potential?: number;
@@ -55,17 +47,11 @@ export function mapEquipmentToDisplay(
     instanceModifiers: sortAttributes(e.attributeModifiers),
     itemBudget: e.itemBudget ?? 0,
     itemBudgetTier: e.itemBudgetTier ?? 1,
-    balanceVersion: e.balanceVersion ?? 0,
     gatheringType: e.gatheringType,
     toolBonuses: e.toolBonuses ?? [],
     toolAffixes: [],
     baseToolBonuses: e.toolBonuses ?? [],
 
-    magnitude: e.magnitude,
-    magnitudeRange: e.magnitudeRange,
-    scalingAttribute: e.scalingAttribute,
-    scalingAmount: e.scalingAmount,
-    attackSpeed: e.attackSpeed,
   };
 }
 
@@ -91,17 +77,10 @@ export function mapInstanceToDisplay(
     instanceModifiers,
     itemBudget: inst.itemBudget ?? 0,
     itemBudgetTier: inst.itemBudgetTier ?? inst.tier ?? 1,
-    balanceVersion: inst.balanceVersion ?? 0,
     gatheringType: base.gatheringType,
     toolBonuses: effectiveToolBonuses,
     toolAffixes,
     baseToolBonuses,
-
-    magnitude: base.magnitude,
-    magnitudeRange: base.magnitudeRange,
-    scalingAttribute: base.scalingAttribute,
-    scalingAmount: base.scalingAmount,
-    attackSpeed: base.attackSpeed,
 
     potential: inst.potential,
     craftingDesign: inst.craftingDesign,

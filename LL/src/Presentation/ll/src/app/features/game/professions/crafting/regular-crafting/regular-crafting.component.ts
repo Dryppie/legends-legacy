@@ -20,7 +20,6 @@ import { NumberFormatPipe } from '../../../../../shared/pipes/number-format/numb
 import {
   CraftingAttributePreview,
   CraftingBlueprint,
-  CraftingItemPreview,
   CraftingMaterialCost,
   CraftingRecipe,
 } from '../../../../../shared/models/crafting-v2';
@@ -482,14 +481,6 @@ export class RegularCraftingComponent {
     return recipe.blueprints.filter(
       (blueprint) => blueprint.isLearned || !blueprint.isLocked,
     ).length;
-  }
-
-  minimumWeaponDamage(preview: CraftingItemPreview): number {
-    return Math.round(preview.magnitude * (1 - preview.magnitudeRange / 100));
-  }
-
-  maximumWeaponDamage(preview: CraftingItemPreview): number {
-    return Math.round(preview.magnitude * (1 + preview.magnitudeRange / 100));
   }
 
   private canCraftRecipe(

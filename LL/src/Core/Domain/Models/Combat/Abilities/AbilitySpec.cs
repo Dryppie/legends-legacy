@@ -64,7 +64,8 @@ public enum AbilityTargetSelector
     TwoAllies = 11,
     HighestMaxHealthAlly = 12,
     SummonedAllies = 13,
-    NonSummonedAllies = 14
+    NonSummonedAllies = 14,
+    SummonedEnemies = 15
 }
 
 public enum AbilityConditionType

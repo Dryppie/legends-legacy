@@ -86,7 +86,7 @@ public sealed class TemperingMechanicsServiceTests
         var equipment = CreateEquipment();
         equipment.Tier = 10;
         equipment.Quality = ItemQuality.Fine;
-        equipment.InstanceModifiers.Add(new InstanceAttributeModifier(AttributeType.Power, 499));
+        equipment.InstanceModifiers.Add(new InstanceAttributeModifier(AttributeType.Power, 574));
         equipment.InstanceModifiers.Add(new InstanceAttributeModifier(AttributeType.MaxHealth, 100));
         var service = new TemperingMechanicsService(Options.Create(new CraftingBalanceOptions
         {
@@ -99,7 +99,8 @@ public sealed class TemperingMechanicsServiceTests
 
         Assert.True(result.QualityIncreased);
         Assert.Equal(
-            EquipmentStatBudgetCatalog.Get(AttributeType.Power, equipment.Tier).HardCap,
+            EquipmentStatBudgetCatalog.Get(AttributeType.Power, equipment.Tier).HardCap
+            * 1.15f,
             equipment.InstanceModifiers.Single(x => x.AttributeType == AttributeType.Power).Amount);
         Assert.True(
             equipment.InstanceModifiers.Single(x => x.AttributeType == AttributeType.MaxHealth).Amount > 100);

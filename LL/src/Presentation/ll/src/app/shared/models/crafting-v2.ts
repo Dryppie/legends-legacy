@@ -45,11 +45,6 @@ export interface CraftingItemPreview {
   qualityChances: CraftingQualityChance[];
   minimumStartingPotential: number;
   maximumStartingPotential: number;
-  magnitude: number;
-  magnitudeRange: number;
-  attackSpeed: number;
-  scalingAttribute: AttributeType;
-  scalingAmount: number;
 }
 
 export interface CraftingBlueprint {

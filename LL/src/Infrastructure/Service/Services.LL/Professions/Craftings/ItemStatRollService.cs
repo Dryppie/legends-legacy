@@ -30,10 +30,7 @@ public class ItemStatRollService : IItemStatRollService
             * _options.GetSlotBudgetWeight(equipment.EquipmentType)
             * _options.GetQualityStatMultiplier(quality);
         var variance = 0.95d + (rng.NextDouble() * 0.10d);
-        var allocation = EquipmentBudgetAllocator.Allocate(
-            targetTier,
-            budget * variance,
-            profile);
+        var allocation = Allocate(equipment, design, targetTier, budget * variance);
 
         return allocation.AddedPoints
             .Select(x => new InstanceAttributeModifier(
@@ -59,14 +56,8 @@ public class ItemStatRollService : IItemStatRollService
             .ToList();
         var minimumBudget = tierAndSlotBudget * qualityMultipliers.Min();
         var maximumBudget = tierAndSlotBudget * qualityMultipliers.Max();
-        var minimum = EquipmentBudgetAllocator.Allocate(
-            targetTier,
-            minimumBudget * 0.95d,
-            design.InitialStatProfile);
-        var maximum = EquipmentBudgetAllocator.Allocate(
-            targetTier,
-            maximumBudget * 1.05d,
-            design.InitialStatProfile);
+        var minimum = Allocate(equipment, design, targetTier, minimumBudget * 0.95d);
+        var maximum = Allocate(equipment, design, targetTier, maximumBudget * 1.05d);
 
         return design.InitialStatProfile
             .Where(x => x.Value > 0)
@@ -75,5 +66,27 @@ public class ItemStatRollService : IItemStatRollService
                 (float)minimum.AddedPoints.GetValueOrDefault(x.Key),
                 (float)maximum.AddedPoints.GetValueOrDefault(x.Key)))
             .ToList();
+    }
+
+    private EquipmentConstrainedBudgetAllocation Allocate(
+        EquipmentBase equipment,
+        EquipmentCraftingDesign design,
+        int tier,
+        double budget)
+    {
+        var slotWeight = _options.GetSlotBudgetWeight(equipment.EquipmentType);
+        var constraints = EquipmentConstraintProfile.CreateItemConstraints(
+            EquipmentConstraintProfile.CreateTierBaseline(tier),
+            slotWeight,
+            _options.GetMaximumCombatLoadoutBudgetWeight(),
+            EquipmentConstraintProfile.MinimumSupportedBasicAttackIntervalMultiplier);
+        return EquipmentBudgetAllocator.AllocateConstrained(
+            tier,
+            budget,
+            design.InitialStatProfile,
+            constraints,
+            EquipmentConstraintProfile.GetOverflowWeights(design),
+            perItemCapMultiplier:
+                EquipmentConstraintProfile.GetPerItemCapMultiplier(slotWeight));
     }
 }

@@ -7,7 +7,9 @@ public static class EquipmentBudgetEvaluator
 {
     public const int BalanceVersion = EquipmentStatBudgetCatalog.BalanceVersion;
 
-    public static double Evaluate(IEnumerable<AttributeModifierBase> modifiers, int tier) =>
+    public static double Evaluate(
+        IEnumerable<AttributeModifierBase> modifiers,
+        int tier) =>
         Math.Round(
             modifiers
                 .Where(modifier => modifier.Amount > 0)
@@ -28,7 +30,9 @@ public static class EquipmentBudgetEvaluator
                 group => Math.Round(
                     group.Sum(modifier =>
                         modifier.Amount
-                        * EquipmentStatBudgetCatalog.Get(modifier.AttributeType, tier).CostPerPoint),
+                        * EquipmentStatBudgetCatalog.Get(
+                            modifier.AttributeType,
+                            tier).CostPerPoint),
                     2,
                     MidpointRounding.AwayFromZero));
 }

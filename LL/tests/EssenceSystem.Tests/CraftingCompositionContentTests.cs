@@ -1,6 +1,7 @@
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
+using Domain.Models.Attributes;
 using Domain.Models.Professions.Crafting;
 using Domain.Models.Professions.Crafting.V2;
 using Microsoft.Extensions.Configuration;
@@ -90,6 +91,53 @@ public sealed class CraftingCompositionContentTests
                 Assert.NotEmpty(recipe.Behavior.AttackCategory);
             }
         });
+    }
+
+    [Fact]
+    public void RepresentativeHandPeersRetainCalibratedCombatBehavior()
+    {
+        var recipes = CreateProvider().GetRecipes();
+        var dagger = recipes.Single(x => x.Id == "recipe.weapon.one_handed.dagger");
+        var greatsword = recipes.Single(x => x.Id == "recipe.weapon.two_handed.greatsword");
+        var gauntlets = recipes.Single(x => x.Id == "recipe.weapon.two_handed.gauntlets");
+        var maul = recipes.Single(x => x.Id == "recipe.weapon.two_handed.maul");
+
+        Assert.Equal(0.75d, dagger.Behavior.BasicAttackIntervalMultiplier);
+        Assert.Equal(0.78d, dagger.Behavior.BasicAttackDamageMultiplier);
+        Assert.Equal(1d, greatsword.Behavior.BasicAttackIntervalMultiplier);
+        Assert.Equal(1.02d, greatsword.Behavior.BasicAttackDamageMultiplier);
+        Assert.Equal(0.75d, gauntlets.Behavior.BasicAttackIntervalMultiplier);
+        Assert.Equal(0.865d, gauntlets.Behavior.BasicAttackDamageMultiplier);
+        Assert.Equal(1.25d, maul.Behavior.BasicAttackIntervalMultiplier);
+        Assert.Equal(1.18d, maul.Behavior.BasicAttackDamageMultiplier);
+    }
+
+    [Fact]
+    public void CalibratedBlueprintProfilesRetainTheirReviewedInfluenceAndWeights()
+    {
+        var provider = CreateProvider();
+        var execution = provider.GetBlueprint("blueprint_execution")!;
+        var aegis = provider.GetBlueprint("blueprint_aegis")!;
+
+        Assert.Equal(0.2d, execution.StatProfileInfluence);
+        Assert.Equal(
+            new Dictionary<AttributeType, double>
+            {
+                [AttributeType.Power] = 0.4d,
+                [AttributeType.CritDamage] = 0.1d,
+                [AttributeType.CritChance] = 0.2d,
+                [AttributeType.WeaponDamage] = 0.3d
+            },
+            execution.StatProfile);
+        Assert.Equal(
+            new Dictionary<AttributeType, double>
+            {
+                [AttributeType.Armor] = 0.25d,
+                [AttributeType.Resistance] = 0.25d,
+                [AttributeType.MaxHealth] = 0.35d,
+                [AttributeType.DamageReduction] = 0.15d
+            },
+            aegis.StatProfile);
     }
 
     [Fact]

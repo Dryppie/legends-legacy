@@ -12,6 +12,84 @@ namespace EssenceSystem.Tests;
 public sealed class AttributeCombatSystemTests
 {
     [Fact]
+    public void Attribute_catalog_defines_canonical_metadata_for_every_attribute()
+    {
+        var attributeTypes = Enum.GetValues<AttributeType>();
+        var definitions = AttributeCatalog.All;
+
+        Assert.Equal(attributeTypes.Length, definitions.Count);
+        Assert.Equal(
+            attributeTypes.Order(),
+            definitions.Select(x => x.AttributeType).Order());
+        Assert.All(definitions, definition =>
+        {
+            Assert.False(string.IsNullOrWhiteSpace(definition.DisplayName));
+            Assert.False(string.IsNullOrWhiteSpace(definition.Description));
+            Assert.True(definition.MinimumValue >= 0);
+            Assert.InRange(definition.DisplayPrecision, 0, 4);
+            Assert.True(definition.IsEquipmentEligible);
+            Assert.True(definition.IsContentFacing);
+            Assert.NotEmpty(definition.RelevantBenchmarkScenarios);
+            Assert.Equal(
+                definition.Unit == AttributeUnit.PercentagePoints,
+                definition.DisplaySuffix == "%");
+        });
+
+        Assert.Equal(
+            EquipmentStatBudgetCatalog.Attributes.Order(),
+            definitions
+                .Where(x => x.IsEquipmentEligible)
+                .Select(x => x.AttributeType)
+                .Order());
+    }
+
+    [Fact]
+    public void Attribute_catalog_caps_and_primary_sources_match_combat_rules()
+    {
+        var fixedCaps = new Dictionary<AttributeType, float>
+        {
+            [AttributeType.CritChance] = AttributeCombatRules.CritChanceCapPercent,
+            [AttributeType.DodgeChance] = AttributeCombatRules.DodgeChanceCapPercent,
+            [AttributeType.BlockChance] = AttributeCombatRules.BlockChanceCapPercent,
+            [AttributeType.DamageReduction] = AttributeCombatRules.DamageReductionCapPercent,
+            [AttributeType.LifeSteal] = AttributeCombatRules.LifeStealCapPercent,
+            [AttributeType.Cooldown] = AttributeCombatRules.CooldownReductionCapPercent
+        };
+
+        foreach (var (attribute, expectedCap) in fixedCaps)
+        {
+            Assert.Equal(AttributeCapKind.Fixed, AttributeCatalog.Get(attribute).CapKind);
+            Assert.Equal(expectedCap, AttributeCatalog.GetFixedCap(attribute));
+            Assert.True(AttributeCatalog.TryGetEffectiveCharacterCap(attribute, 1, out var effectiveCap));
+            Assert.Equal(expectedCap, effectiveCap);
+        }
+
+        Assert.Equal(
+            AttributeCapKind.ContextDependent,
+            AttributeCatalog.Get(AttributeType.AttackSpeed).CapKind);
+        Assert.True(AttributeCatalog.TryGetEffectiveCharacterCap(
+            AttributeType.AttackSpeed,
+            0.75,
+            out var fastWeaponCap));
+        Assert.True(AttributeCatalog.TryGetEffectiveCharacterCap(
+            AttributeType.AttackSpeed,
+            1.25,
+            out var slowWeaponCap));
+        Assert.True(slowWeaponCap > fastWeaponCap);
+
+        foreach (var contribution in AttributeCombatRules.PrimaryContributions)
+        {
+            Assert.Equal(
+                contribution.PrimaryAttribute,
+                AttributeCatalog.Get(contribution.DerivedAttribute).ApprovedPrimarySource);
+        }
+
+        Assert.DoesNotContain(
+            AttributeCombatRules.PrimaryContributions,
+            contribution => AttributeCombatRules.IsPrimary(contribution.DerivedAttribute));
+    }
+
+    [Fact]
     public void Primary_attributes_project_only_into_their_approved_groups()
     {
         var projected = AttributeCalculator.CalculateProjectedAttributes(
@@ -247,6 +325,102 @@ public sealed class AttributeCombatSystemTests
         RunSingleTick(penetratingSource, penetratedTarget);
 
         Assert.Equal(900, penetratedTarget.Health);
+    }
+
+    [Fact]
+    public void Damage_prevention_telemetry_is_non_overlapping_and_reconciles_each_hit()
+    {
+        var source = CreateCombatant(
+            "source",
+            CombatTeam.Friendly,
+            AbilityCompiler.CompileAbilities([CreateDamageAbility(100, DamageType.Physical)]).Values);
+        var target = CreateCombatant(
+            "target",
+            CombatTeam.Hostile,
+            [],
+            new Dictionary<AttributeType, float>
+            {
+                [AttributeType.MaxHealth] = 1_000,
+                [AttributeType.Armor] = 100,
+                [AttributeType.DamageReduction] = 20
+            });
+        target.AdjustBarrier(10);
+
+        var result = RunSingleTick(source, target);
+        var damage = Assert.Single(result.EventLog, x =>
+            x.ActorId == source.Id
+            && x.EventType == EventType.Damage);
+        var stats = result.EntityStats.Single(x => x.EntityId == target.Id);
+
+        Assert.Equal(100, damage.IncomingRawDamage);
+        Assert.Equal(50, damage.TypedMitigationPrevented);
+        Assert.Equal(50, damage.PhysicalMitigationPrevented);
+        Assert.Equal(0, damage.MagicalMitigationPrevented);
+        Assert.Equal(0, damage.BlockPrevented);
+        Assert.Equal(10, damage.DamageReductionPrevented);
+        Assert.Equal(0, damage.DamageAmplified);
+        Assert.Equal(10, damage.BarrierAbsorbed);
+        Assert.Equal(30, damage.FinalHealthDamage);
+        Assert.True(damage.PreventionTelemetryReconciles);
+
+        Assert.Equal(100, stats.IncomingRawDamage);
+        Assert.Equal(50, stats.TypedMitigationPrevented);
+        Assert.Equal(50, stats.PhysicalMitigationPrevented);
+        Assert.Equal(0, stats.MagicalMitigationPrevented);
+        Assert.Equal(10, stats.DamageReductionPrevented);
+        Assert.Equal(10, stats.DamageBlocked);
+        Assert.Equal(30, stats.FinalHealthDamage);
+        Assert.Equal(30, stats.DamageTaken);
+        Assert.True(stats.PreventionTelemetryReconciles);
+    }
+
+    [Fact]
+    public void Dodge_telemetry_records_the_avoided_incoming_hit_without_other_prevention()
+    {
+        CombatResult? dodgedResult = null;
+        for (var seed = 1; seed <= 100 && dodgedResult is null; seed++)
+        {
+            var ability = CreateEffectAbility(
+                "dodgeable",
+                new AbilityEffectSpec
+                {
+                    Id = "effect.dodgeable",
+                    Operation = AbilityEffectOperation.Damage,
+                    Target = AbilityTargetSelector.CurrentTarget,
+                    BaseValue = 100,
+                    AttackType = AttackType.Melee,
+                    DamageType = DamageType.Physical,
+                    CritEligibility = CritEligibility.Disallowed
+                });
+            var source = CreateCombatant(
+                $"source-{seed}",
+                CombatTeam.Friendly,
+                AbilityCompiler.CompileAbilities([ability]).Values);
+            var target = CreateCombatant(
+                $"target-{seed}",
+                CombatTeam.Hostile,
+                [],
+                new Dictionary<AttributeType, float>
+                {
+                    [AttributeType.MaxHealth] = 1_000,
+                    [AttributeType.DodgeChance] = 50
+                });
+            var result = RunSingleTick(source, target, seed);
+            if (result.EventLog.Any(x => x.EventType == EventType.Miss))
+                dodgedResult = result;
+        }
+
+        var dodged = Assert.IsType<CombatResult>(dodgedResult);
+        var miss = Assert.Single(dodged.EventLog, x => x.EventType == EventType.Miss);
+        var stats = dodged.EntityStats.Single(x => x.EntityId == miss.TargetId);
+
+        Assert.Equal(100, miss.IncomingRawDamage);
+        Assert.Equal(100, miss.AvoidedDamage);
+        Assert.Equal(1, stats.AvoidedAttacks);
+        Assert.Equal(100, stats.AvoidedDamage);
+        Assert.Equal(0, stats.FinalHealthDamage);
+        Assert.Equal(0, stats.DamageAmplified);
+        Assert.True(stats.PreventionTelemetryReconciles);
     }
 
     [Fact]

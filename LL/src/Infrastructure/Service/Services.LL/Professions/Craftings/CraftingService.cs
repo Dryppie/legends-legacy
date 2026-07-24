@@ -673,11 +673,6 @@ public class CraftingService : ICraftingService
                 .ToList(),
             MinimumStartingPotential = potentialValues.Min(),
             MaximumStartingPotential = potentialValues.Max(),
-            Magnitude = itemBase.Magnitude,
-            MagnitudeRange = itemBase.MagnitudeRange,
-            AttackSpeed = itemBase.AttackSpeed,
-            ScalingAttribute = itemBase.ScalingAttribute,
-            ScalingAmount = itemBase.ScalingAmount
         };
     }
 

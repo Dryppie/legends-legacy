@@ -8,12 +8,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "MaxHealth",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "soul_dust",
@@ -24,12 +19,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "MaxHealth",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "sigil_goblin_mines",
@@ -40,12 +30,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "MaxHealth",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "sigil_forgotten_catacombs",
@@ -56,12 +41,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "MaxHealth",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "sigil_hives_abyss",
@@ -72,12 +52,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "MaxHealth",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "item.monster_core.lesser",
@@ -88,12 +63,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "MaxHealth",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "item.monster_core.greater",
@@ -104,12 +74,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "MaxHealth",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "item.monster_core.primal",
@@ -120,12 +85,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "MaxHealth",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "item.essence_potential_core.region_1",
@@ -136,12 +96,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "MaxHealth",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "item.essence_potential_core.region_2",
@@ -152,12 +107,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "MaxHealth",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "item.essence_potential_core.region_3",
@@ -168,12 +118,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "MaxHealth",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "item.essence_potential_core.region_4",
@@ -184,12 +129,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "MaxHealth",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "item.essence_potential_core.region_5",
@@ -200,12 +140,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "MaxHealth",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "item.essence_potential_core.region_6",
@@ -216,12 +151,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "MaxHealth",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "item.essence_potential_core.region_7",
@@ -232,12 +162,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "MaxHealth",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "item.essence_potential_core.region_8",
@@ -248,12 +173,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "MaxHealth",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "item.essence_potential_core.region_9",
@@ -264,12 +184,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "MaxHealth",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "item.evolution_catalyst.cunning",
@@ -280,12 +195,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "MaxHealth",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "item.evolution_catalyst.warden",
@@ -296,12 +206,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "MaxHealth",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "item.evolution_catalyst.flame",
@@ -312,12 +217,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "MaxHealth",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "item.evolution_catalyst.echo",
@@ -328,12 +228,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "MaxHealth",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "item.evolution_catalyst.hollow",
@@ -344,12 +239,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "MaxHealth",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "item.evolution_catalyst.holy",
@@ -360,12 +250,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "MaxHealth",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "item.evolution_catalyst.beast",
@@ -376,12 +261,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "MaxHealth",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "item.evolution_catalyst.undead",
@@ -392,12 +272,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "MaxHealth",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "item.evolution_catalyst.boss_soul_core",
@@ -408,12 +283,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "MaxHealth",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "tempered_scrap",
@@ -424,12 +294,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "MaxHealth",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "item.essence.goblin_ambusher",
@@ -440,12 +305,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "item.essence.skeleton_guardian",
@@ -456,12 +316,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "item.essence.fire_ant",
@@ -472,12 +327,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "item.essence.cave_bat",
@@ -488,12 +338,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "item.essence.necroshade_wraith",
@@ -504,12 +349,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "item.essence.legacy.goblin",
@@ -520,12 +360,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "item.essence.legacy.training_goblin",
@@ -536,12 +371,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "item.essence.legacy.goblin_warrior",
@@ -552,12 +382,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "item.essence.legacy.goblin_archer",
@@ -568,12 +393,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "item.essence.legacy.large_rat",
@@ -584,12 +404,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "item.essence.legacy.flame_imp",
@@ -600,12 +415,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "item.essence.legacy.moss_lizard",
@@ -616,12 +426,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "item.essence.legacy.spider",
@@ -632,12 +437,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "item.essence.legacy.treant_sapling",
@@ -648,12 +448,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "item.essence.legacy.venomous_snake",
@@ -664,12 +459,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "item.essence.legacy.viper",
@@ -680,12 +470,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "item.essence.legacy.goblin_shaman",
@@ -696,12 +481,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "item.essence.legacy.poisonous_rat",
@@ -712,12 +492,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "item.essence.legacy.giant_bat",
@@ -728,12 +503,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "item.essence.legacy.frost_imp",
@@ -744,12 +514,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "item.essence.legacy.shadow_imp",
@@ -760,12 +525,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "item.essence.legacy.vampire_bat",
@@ -776,12 +536,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "item.essence.legacy.blue_slime",
@@ -792,12 +547,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "item.essence.legacy.brown_slime",
@@ -808,12 +558,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "item.essence.legacy.green_slime",
@@ -824,12 +569,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "item.essence.legacy.rainbow_slime",
@@ -840,12 +580,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "item.essence.legacy.red_slime",
@@ -856,12 +591,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "item.essence.legacy.transparent_slime",
@@ -872,12 +602,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "item.essence.legacy.enchanted_fairy",
@@ -888,12 +613,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "item.essence.legacy.glade_panther",
@@ -904,12 +624,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "item.essence.legacy.illusion_fox",
@@ -920,12 +635,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "item.essence.legacy.nightshade_blossom",
@@ -936,12 +646,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "item.essence.legacy.pixie",
@@ -952,12 +657,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "item.essence.legacy.hobgoblin",
@@ -968,12 +668,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "item.essence.legacy.feral_ghoul",
@@ -984,12 +679,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "item.essence.legacy.plague_ghoul",
@@ -1000,12 +690,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "item.essence.legacy.ravenous_ghoul",
@@ -1016,12 +701,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "item.essence.legacy.skeleton_archer",
@@ -1032,12 +712,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "item.essence.legacy.skeleton_mage",
@@ -1048,12 +723,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "item.essence.legacy.skeleton_warrior",
@@ -1064,12 +734,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "heavy_helm",
@@ -1099,12 +764,7 @@
       }
     ],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "MaxHealth",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "heavy_breastplate",
@@ -1134,12 +794,7 @@
       }
     ],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "MaxHealth",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "heavy_legplates",
@@ -1169,12 +824,7 @@
       }
     ],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "MaxHealth",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "medium_helm",
@@ -1204,12 +854,7 @@
       }
     ],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "MaxHealth",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "medium_mail",
@@ -1239,12 +884,7 @@
       }
     ],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "MaxHealth",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "medium_greaves",
@@ -1274,12 +914,7 @@
       }
     ],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "MaxHealth",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "light_hood",
@@ -1309,12 +944,7 @@
       }
     ],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "MaxHealth",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "light_vest",
@@ -1344,12 +974,7 @@
       }
     ],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "MaxHealth",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "light_leggings",
@@ -1379,12 +1004,7 @@
       }
     ],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "MaxHealth",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "cloth_cowl",
@@ -1414,12 +1034,7 @@
       }
     ],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "MaxHealth",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "cloth_robe",
@@ -1449,12 +1064,7 @@
       }
     ],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "MaxHealth",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "cloth_pants",
@@ -1484,12 +1094,7 @@
       }
     ],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "MaxHealth",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "band",
@@ -1500,12 +1105,7 @@
     "equipmentType": "Ring",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "MaxHealth",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "tutorial_sword",
@@ -1516,12 +1116,7 @@
     "equipmentType": "OneHanded",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 20,
-    "magnitude": 5,
-    "magnitudeRange": 10,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 0.5
+    "gatheringType": null
   },
   {
     "id": "tutorial_chest",
@@ -1551,12 +1146,7 @@
       }
     ],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "MaxHealth",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "tutorial_ring",
@@ -1580,12 +1170,7 @@
       }
     ],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "amulet",
@@ -1596,12 +1181,7 @@
     "equipmentType": "Necklace",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "MaxHealth",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "vial",
@@ -1612,12 +1192,7 @@
     "equipmentType": "Relic",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "MaxHealth",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "shortsword",
@@ -1628,12 +1203,7 @@
     "equipmentType": "OneHanded",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 20,
-    "magnitude": 10,
-    "magnitudeRange": 20,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 1
+    "gatheringType": null
   },
   {
     "id": "hatchet",
@@ -1644,12 +1214,7 @@
     "equipmentType": "OneHanded",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 20,
-    "magnitude": 10,
-    "magnitudeRange": 30,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 1
+    "gatheringType": null
   },
   {
     "id": "mace",
@@ -1660,12 +1225,7 @@
     "equipmentType": "OneHanded",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 20,
-    "magnitude": 10,
-    "magnitudeRange": 25,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 1
+    "gatheringType": null
   },
   {
     "id": "dagger",
@@ -1676,12 +1236,7 @@
     "equipmentType": "OneHanded",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 24,
-    "magnitude": 8,
-    "magnitudeRange": 15,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 0.8
+    "gatheringType": null
   },
   {
     "id": "greatsword",
@@ -1692,12 +1247,7 @@
     "equipmentType": "TwoHanded",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 10,
-    "magnitude": 15,
-    "magnitudeRange": 30,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 2
+    "gatheringType": null
   },
   {
     "id": "battle_axe",
@@ -1708,12 +1258,7 @@
     "equipmentType": "TwoHanded",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 10,
-    "magnitude": 15,
-    "magnitudeRange": 50,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 2
+    "gatheringType": null
   },
   {
     "id": "maul",
@@ -1724,12 +1269,7 @@
     "equipmentType": "TwoHanded",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 10,
-    "magnitude": 15,
-    "magnitudeRange": 40,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 2
+    "gatheringType": null
   },
   {
     "id": "spear",
@@ -1740,12 +1280,7 @@
     "equipmentType": "TwoHanded",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 12,
-    "magnitude": 14,
-    "magnitudeRange": 25,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 1.8
+    "gatheringType": null
   },
   {
     "id": "towershield",
@@ -1769,12 +1304,7 @@
       }
     ],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "MaxHealth",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "Spiritward",
@@ -1798,12 +1328,7 @@
       }
     ],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "MaxHealth",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "staff",
@@ -1814,12 +1339,7 @@
     "equipmentType": "TwoHanded",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 10,
-    "magnitude": 15,
-    "magnitudeRange": 35,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 2
+    "gatheringType": null
   },
   {
     "id": "grimoire",
@@ -1837,12 +1357,7 @@
       }
     ],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "MaxHealth",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "wand",
@@ -1853,12 +1368,7 @@
     "equipmentType": "OneHanded",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 20,
-    "magnitude": 10,
-    "magnitudeRange": 20,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 1
+    "gatheringType": null
   },
   {
     "id": "longbow",
@@ -1869,12 +1379,7 @@
     "equipmentType": "TwoHanded",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 15,
-    "magnitude": 13,
-    "magnitudeRange": 25,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 1.7
+    "gatheringType": null
   },
   {
     "id": "crossbow",
@@ -1885,12 +1390,7 @@
     "equipmentType": "TwoHanded",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 20,
-    "magnitude": 10,
-    "magnitudeRange": 40,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 1.5
+    "gatheringType": null
   },
   {
     "id": "gauntlets",
@@ -1901,12 +1401,7 @@
     "equipmentType": "TwoHanded",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 25,
-    "magnitude": 12,
-    "magnitudeRange": 20,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 1.3
+    "gatheringType": null
   },
   {
     "id": "basic_pickaxe",
@@ -1917,12 +1412,7 @@
     "equipmentType": "Tool",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": "Mining",
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": "Mining"
   },
   {
     "id": "basic_hatchet",
@@ -1933,12 +1423,7 @@
     "equipmentType": "Tool",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": "Woodcutting",
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": "Woodcutting"
   },
   {
     "id": "basic_fishing_rod",
@@ -1949,12 +1434,7 @@
     "equipmentType": "Tool",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": "Fishing",
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": "Fishing"
   },
   {
     "id": "basic_skinning_knife",
@@ -1965,12 +1445,7 @@
     "equipmentType": "Tool",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": "Skinning",
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": "Skinning"
   },
   {
     "id": "pickaxe",
@@ -1981,12 +1456,7 @@
     "equipmentType": "Tool",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": "Mining",
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": "Mining"
   },
   {
     "id": "woodcutting_hatchet",
@@ -1997,12 +1467,7 @@
     "equipmentType": "Tool",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": "Woodcutting",
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": "Woodcutting"
   },
   {
     "id": "fishing_rod",
@@ -2013,12 +1478,7 @@
     "equipmentType": "Tool",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": "Fishing",
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": "Fishing"
   },
   {
     "id": "skinning_knife",
@@ -2029,12 +1489,7 @@
     "equipmentType": "Tool",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": "Skinning",
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": "Skinning"
   },
   {
     "id": "rare_pickaxe",
@@ -2045,12 +1500,7 @@
     "equipmentType": "Tool",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": "Mining",
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": "Mining"
   },
   {
     "id": "rare_hatchet",
@@ -2061,12 +1511,7 @@
     "equipmentType": "Tool",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": "Woodcutting",
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": "Woodcutting"
   },
   {
     "id": "rare_fishing_rod",
@@ -2077,12 +1522,7 @@
     "equipmentType": "Tool",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": "Fishing",
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": "Fishing"
   },
   {
     "id": "rare_skinning_knife",
@@ -2093,12 +1533,7 @@
     "equipmentType": "Tool",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": "Skinning",
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": "Skinning"
   },
   {
     "id": "epic_pickaxe",
@@ -2109,12 +1544,7 @@
     "equipmentType": "Tool",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": "Mining",
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": "Mining"
   },
   {
     "id": "epic_hatchet",
@@ -2125,12 +1555,7 @@
     "equipmentType": "Tool",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": "Woodcutting",
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": "Woodcutting"
   },
   {
     "id": "epic_fishing_rod",
@@ -2141,12 +1566,7 @@
     "equipmentType": "Tool",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": "Fishing",
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": "Fishing"
   },
   {
     "id": "epic_skinning_knife",
@@ -2157,12 +1577,7 @@
     "equipmentType": "Tool",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": "Skinning",
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": "Skinning"
   },
   {
     "id": "unique_pickaxe",
@@ -2173,12 +1588,7 @@
     "equipmentType": "Tool",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": "Mining",
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": "Mining"
   },
   {
     "id": "unique_hatchet",
@@ -2189,12 +1599,7 @@
     "equipmentType": "Tool",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": "Woodcutting",
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": "Woodcutting"
   },
   {
     "id": "unique_fishing_rod",
@@ -2205,12 +1610,7 @@
     "equipmentType": "Tool",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": "Fishing",
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": "Fishing"
   },
   {
     "id": "unique_skinning_knife",
@@ -2221,12 +1621,7 @@
     "equipmentType": "Tool",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": "Skinning",
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": "Skinning"
   },
   {
     "id": "legendary_pickaxe",
@@ -2237,12 +1632,7 @@
     "equipmentType": "Tool",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": "Mining",
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": "Mining"
   },
   {
     "id": "legendary_hatchet",
@@ -2253,12 +1643,7 @@
     "equipmentType": "Tool",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": "Woodcutting",
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": "Woodcutting"
   },
   {
     "id": "legendary_fishing_rod",
@@ -2269,12 +1654,7 @@
     "equipmentType": "Tool",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": "Fishing",
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": "Fishing"
   },
   {
     "id": "legendary_skinning_knife",
@@ -2285,12 +1665,7 @@
     "equipmentType": "Tool",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": "Skinning",
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": "Skinning"
   },
   {
     "id": "legacy_pickaxe",
@@ -2301,12 +1676,7 @@
     "equipmentType": "Tool",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": "Mining",
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": "Mining"
   },
   {
     "id": "legacy_hatchet",
@@ -2317,12 +1687,7 @@
     "equipmentType": "Tool",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": "Woodcutting",
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": "Woodcutting"
   },
   {
     "id": "legacy_fishing_rod",
@@ -2333,12 +1698,7 @@
     "equipmentType": "Tool",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": "Fishing",
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": "Fishing"
   },
   {
     "id": "legacy_skinning_knife",
@@ -2349,12 +1709,7 @@
     "equipmentType": "Tool",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": "Skinning",
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": "Skinning"
   },
   {
     "id": "ore",
@@ -2365,12 +1720,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "copper_ore",
@@ -2381,12 +1731,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "verdant_ore",
@@ -2397,12 +1742,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "wood",
@@ -2413,12 +1753,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "crystalline_powder",
@@ -2429,12 +1764,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "rawhide",
@@ -2445,12 +1775,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "thick_hide",
@@ -2461,12 +1786,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "scaled_hide",
@@ -2477,12 +1797,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "soulglass_shard",
@@ -2493,12 +1808,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "mossy_stone",
@@ -2509,12 +1819,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "deep_stone",
@@ -2525,12 +1830,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "woven_fiber",
@@ -2541,12 +1841,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "silk_thread",
@@ -2557,12 +1852,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "spectral_thread",
@@ -2573,12 +1863,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "bone_fragments",
@@ -2589,12 +1874,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "grave_bone",
@@ -2605,12 +1885,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "ancient_bone",
@@ -2621,12 +1896,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "rough_stone",
@@ -2637,12 +1907,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "cracked_garnet",
@@ -2653,12 +1918,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "cave_fish",
@@ -2669,12 +1929,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "murky_fish_oil",
@@ -2685,12 +1940,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "bloodwood",
@@ -2701,12 +1951,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "living_bark",
@@ -2717,12 +1962,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "refined_fish_oil",
@@ -2733,12 +1973,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "shadow_oil",
@@ -2749,12 +1984,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "hardened_chitin",
@@ -2765,12 +1995,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "amber_resin",
@@ -2781,12 +2006,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "living_resin",
@@ -2797,12 +2017,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "item.essence.ant_worker",
@@ -2813,12 +2028,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "item.essence.forest_spirit",
@@ -2829,12 +2039,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "item.essence.wood_nymph",
@@ -2845,12 +2050,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "item.essence.giant_spider",
@@ -2861,12 +2061,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "item.essence.venomous_spiderling",
@@ -2877,12 +2072,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "ant_chitin",
@@ -2893,12 +2083,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "hive_resin",
@@ -2909,12 +2094,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "royal_chitin_fragment",
@@ -2925,12 +2105,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "venom_gland",
@@ -2941,12 +2116,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "royal_chitin_plate",
@@ -2957,12 +2127,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "hive_ichor",
@@ -2973,12 +2138,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "fury_heart",
@@ -2989,12 +2149,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "arcane_focus",
@@ -3005,12 +2160,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "executioners_mark",
@@ -3021,12 +2171,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "aegis_runestone",
@@ -3037,12 +2182,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "warden_sigil",
@@ -3053,12 +2193,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "endurance_core",
@@ -3069,12 +2204,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "phoenix_ember",
@@ -3085,12 +2215,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "spirit_prism",
@@ -3101,12 +2226,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "blueprint_venom_touched_sword",
@@ -3117,12 +2237,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "blueprint_hivefang_dagger",
@@ -3133,12 +2248,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "blueprint_fury",
@@ -3149,12 +2259,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "blueprint_arcane",
@@ -3165,12 +2270,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "blueprint_execution",
@@ -3181,12 +2281,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "blueprint_aegis",
@@ -3197,12 +2292,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "blueprint_warden",
@@ -3213,12 +2303,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "blueprint_endurance",
@@ -3229,12 +2314,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "blueprint_phoenix",
@@ -3245,12 +2325,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "blueprint_spirit",
@@ -3261,12 +2336,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "blueprint_primal",
@@ -3277,12 +2347,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "item.essence.blackjaw_spider",
@@ -3293,12 +2358,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "item.essence.raven",
@@ -3309,12 +2369,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "item.essence.widow_stalker",
@@ -3325,12 +2380,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "item.essence.scarecrow",
@@ -3341,12 +2391,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "item.essence.lost_soul",
@@ -3357,12 +2402,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "item.essence.apparition",
@@ -3373,12 +2413,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "item.essence.specter",
@@ -3389,12 +2424,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "item.essence.zombie",
@@ -3405,12 +2435,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "item.essence.half_zombie",
@@ -3421,12 +2446,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "item.essence.undead",
@@ -3437,12 +2457,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "item.essence.blood_zombie",
@@ -3453,12 +2468,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "item.essence.giant_worm",
@@ -3469,12 +2479,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "item.essence.burrowed_horror",
@@ -3485,12 +2490,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "item.essence.cave_leech",
@@ -3501,12 +2501,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "item.essence.stonejaw_grub",
@@ -3517,12 +2512,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": null
   },
   {
     "id": "item.essence.deep_burrower",
@@ -3533,11 +2523,6 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
-    "attackSpeed": 0,
-    "magnitude": 0,
-    "magnitudeRange": 0,
-    "gatheringType": null,
-    "scalingAttribute": "Power",
-    "scalingAmount": 0
+    "gatheringType": null
   }
 ]
