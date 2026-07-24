@@ -1,8 +1,19 @@
 import { NgClass, NgFor, NgIf } from '@angular/common';
-import { Component, computed, effect, Input, signal, Signal } from '@angular/core';
+import {
+  Component,
+  computed,
+  effect,
+  Input,
+  signal,
+  Signal,
+} from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { CraftingQueueItem } from '../../../../../shared/models/profession';
-import { EquipmentInstance, ItemInstance } from '../../../../../shared/models/item';
+import {
+  Equipment,
+  EquipmentInstance,
+  ItemInstance,
+} from '../../../../../shared/models/item';
 import { CraftingService } from '../../../../../core/services/api/crafting/crafting.service';
 import { InventoryStateService } from '../../../../../core/services/api/inventory/inventory-state.service';
 import { InventoryItem } from '../../../../../shared/models/inventoryItem';
@@ -11,6 +22,8 @@ import { EquipmentDisplayComponent } from '../../../../../shared/components/equi
 import { EquipmentType } from '../../../../../shared/models/enums/equipmentType';
 import { CharacterActionsStateService } from '../../../../../core/services/api/character-actions/character-actions.state.service';
 import { CharacterActionType } from '../../../../../shared/models/enums/characterActionType';
+import { ItemType } from '../../../../../shared/models/enums/itemType';
+import { Rarity } from '../../../../../shared/models/enums/rarity';
 
 @Component({
   selector: 'app-tempering',
@@ -35,23 +48,35 @@ export class TemperingComponent {
     this.craftingQueue().slice(1),
   );
 
-  filteredInventory = computed(() => {
-    return this.inventory().filter((ii) => {
-      const equipment = ii.itemInstance as EquipmentInstance;
+  readonly equipmentInventory = computed(() =>
+    this.inventory().filter((inventoryItem) =>
+      this.isNonToolEquipment(inventoryItem.itemInstance),
+    ),
+  );
+
+  readonly filteredInventory = computed(() =>
+    this.equipmentInventory().filter((inventoryItem) => {
+      const equipment = inventoryItem.itemInstance as EquipmentInstance;
       return (
-        equipment.equipmentBase?.equipmentType !== EquipmentType.Tool &&
-        (equipment.potential ?? 0) > 0
+        (equipment.potential ?? 0) > 0 &&
+        equipment.rarity !== Rarity.Legacy &&
+        !!equipment.baseRecipeId
       );
-    });
-  });
+    }),
+  );
+
+  readonly unavailableEquipmentCount = computed(
+    () => this.equipmentInventory().length - this.filteredInventory().length,
+  );
 
   private readonly selectedItemId = signal<string | null>(null);
 
   readonly selectedQueueItem = computed<CraftingQueueItem | null>(() => {
     const id = this.selectedItemId();
     return id
-      ? (this.craftingQueue().find((item) => item.equipmentInstance.id === id) ??
-          null)
+      ? (this.craftingQueue().find(
+          (item) => item.equipmentInstance.id === id,
+        ) ?? null)
       : null;
   });
 
@@ -74,22 +99,39 @@ export class TemperingComponent {
     return `Queued position ${queueIndex + 1}. Current and earlier queued items will finish first.`;
   });
 
-  readonly selectedEquipmentInstance = computed<EquipmentInstance | null>(() => {
-    const id = this.selectedItemId();
-    return (
-      (this.inventoryState
-        .items()
-        .find((i) => i.itemInstance.id === id)?.itemInstance as
-        | EquipmentInstance
-        | undefined) ??
-      this.selectedQueueItem()?.equipmentInstance ??
-      null
-    );
-  });
+  readonly selectedEquipmentInstance = computed<EquipmentInstance | null>(
+    () => {
+      const id = this.selectedItemId();
+      return (
+        (this.inventoryState.items().find((i) => i.itemInstance.id === id)
+          ?.itemInstance as EquipmentInstance | undefined) ??
+        this.selectedQueueItem()?.equipmentInstance ??
+        null
+      );
+    },
+  );
 
   readonly canTemper = computed<boolean>(() => {
     const eq = this.selectedEquipmentInstance();
-    return !!eq && (eq.potential ?? 0) >= 1;
+    return (
+      !!eq &&
+      this.isNonToolEquipment(eq) &&
+      (eq.potential ?? 0) >= 1 &&
+      eq.rarity !== Rarity.Legacy &&
+      !!eq.baseRecipeId
+    );
+  });
+
+  readonly selectedIneligibilityReason = computed<string | null>(() => {
+    const equipment = this.selectedEquipmentInstance();
+    if (!equipment || this.canTemper()) return null;
+    if ((equipment.potential ?? 0) < 1)
+      return 'This item has no remaining Potential.';
+    if (equipment.rarity === Rarity.Legacy)
+      return 'Legacy items cannot be tempered further.';
+    if (!equipment.baseRecipeId)
+      return 'This legacy item is not connected to a current base recipe.';
+    return 'This item cannot be tempered.';
   });
 
   constructor(
@@ -139,10 +181,14 @@ export class TemperingComponent {
     ]);
 
     this.inventoryState.setInventory(
-      this.inventoryState.items().filter((item) => item.itemInstance.id !== equipment.id),
+      this.inventoryState
+        .items()
+        .filter((item) => item.itemInstance.id !== equipment.id),
     );
     this.selectedItemId.set(equipment.id);
-    this.lastOutcome.set(`Queued ${equipment.displayName ?? equipment.itemBase.name} for tempering`);
+    this.lastOutcome.set(
+      `Queued ${equipment.displayName ?? equipment.itemBase.name} for tempering`,
+    );
   }
 
   selectQueuedItem(queueItem: CraftingQueueItem): void {
@@ -152,7 +198,11 @@ export class TemperingComponent {
 
   getEstimatedTime(queue: CraftingQueueItem[]): string {
     const totalSeconds = queue.reduce((sum, item) => {
-      return sum + Math.max(0, item.equipmentInstance.potential ?? 0) * this.temperingActionDurationSeconds;
+      return (
+        sum +
+        Math.max(0, item.equipmentInstance.potential ?? 0) *
+          this.temperingActionDurationSeconds
+      );
     }, 0);
 
     const hours = Math.floor(totalSeconds / 3600);
@@ -182,6 +232,18 @@ export class TemperingComponent {
     return `${currentXp} / ${this.itemXpPerRarity} EXP`;
   }
 
+  private isNonToolEquipment(item: ItemInstance): item is EquipmentInstance {
+    const equipment = item as EquipmentInstance;
+    const equipmentType =
+      equipment.equipmentBase?.equipmentType ??
+      (equipment.itemBase as Equipment | undefined)?.equipmentType;
+    const isEquipment =
+      item.itemBase?.itemType === ItemType.Equipment ||
+      equipment.equipmentBase != null;
+
+    return isEquipment && equipmentType !== EquipmentType.Tool;
+  }
+
   removeQueuedItem(queueItem: CraftingQueueItem, event: MouseEvent): void {
     event.stopPropagation();
     if (this.removingQueueItemId()) return;
@@ -193,7 +255,8 @@ export class TemperingComponent {
     this.craftingService.removeItemFromQueue(queueItem).subscribe({
       next: (response) => {
         const nextQueue =
-          response.currentAction?.craftingActionDetails?.craftingQueueItems ?? [];
+          response.currentAction?.craftingActionDetails?.craftingQueueItems ??
+          [];
         this.inventoryState.setInventory(response.inventoryItems);
         this.craftingService.setQueue(nextQueue);
         this.characterActionsState.refreshCurrentAction();
@@ -213,5 +276,4 @@ export class TemperingComponent {
       },
     });
   }
-
 }

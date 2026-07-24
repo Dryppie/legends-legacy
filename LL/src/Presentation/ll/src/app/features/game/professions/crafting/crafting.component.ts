@@ -15,11 +15,8 @@ import { ProfessionsService } from '../../../../core/services/api/professions/pr
 import { TabComponent } from '../../../../shared/components/custom-components/tabs/tab/tab.component';
 import { RegularCraftingComponent } from './regular-crafting/regular-crafting.component';
 import { TemperingComponent } from './tempering/tempering.component';
-import { ItemType } from '../../../../shared/models/enums/itemType';
-import { Equipment } from '../../../../shared/models/item';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { InventoryStateService } from '../../../../core/services/api/inventory/inventory-state.service';
-import { EquipmentType } from '../../../../shared/models/enums/equipmentType';
 import { TabsComponent } from '../../../../shared/components/custom-components/tabs/tabs.component';
 import { ProfessionType } from '../../../../shared/models/Dtos/characterProfession';
 import { TutorialStateService } from '../../../../core/services/api/tutorial/tutorial-state.service';
@@ -61,23 +58,10 @@ export class CraftingComponent implements OnInit {
 
     const tutorial = this.tutorialState.state();
     return (
-      tutorial?.presentation?.guidePageId ??
-      tutorial?.guidePageId ??
-      'crafting'
+      tutorial?.presentation?.guidePageId ?? tutorial?.guidePageId ?? 'crafting'
     );
   });
 
-  private readonly craftableEquipmentTypes = [
-    EquipmentType.Head,
-    EquipmentType.Chest,
-    EquipmentType.Legs,
-    EquipmentType.Ring,
-    EquipmentType.Necklace,
-    EquipmentType.Relic,
-    EquipmentType.TwoHanded,
-    EquipmentType.OneHanded,
-    EquipmentType.OffHand,
-  ];
   // ────────────────────────────────────── ctor/di ─────────────────────────────
   constructor() {
     effect(
@@ -120,21 +104,6 @@ export class CraftingComponent implements OnInit {
       (p) => p.professionType === ProfessionType.Crafting,
     ),
   );
-
-  readonly inventoryEquipment = computed(() => {
-    const inventory = this.inventoryState.items();
-    const prof = this.profession();
-    if (!inventory || !prof) return [];
-
-    return this.inventoryState.items().filter((i) => {
-      return (
-        i.itemInstance.itemBase.itemType === ItemType.Equipment &&
-        this.craftableEquipmentTypes.includes(
-          (i.itemInstance.itemBase as Equipment).equipmentType as EquipmentType,
-        )
-      );
-    }) as typeof inventory;
-  });
 
   ngOnInit(): void {
     this.professionService.refresh();
