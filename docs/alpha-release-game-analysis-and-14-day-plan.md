@@ -534,7 +534,7 @@ Each day contains at most two major work packages. The acceptance criteria are t
 - [x] Local verification passed: 553 main tests, Chat Release build, and Angular production build.
 - [x] High/critical .NET advisories are promoted to errors. Both the main and Chat dependency graphs now pass.
 - [x] Removed AutoMapper from Chat in favor of explicit DTO mapping and upgraded its Microsoft .NET 10 packages to `10.0.10`, resolving the transitive MessagePack advisories.
-- [x] Production npm dependencies are audited at high severity after a successful frontend build.
+- [x] Production npm dependencies are audited at high severity after a successful frontend build. Angular was migrated from unsupported version 18 to supported version 20, and the transitive `ws` dependency now resolves to patched version `7.5.13`; the production audit reports zero vulnerabilities.
 - [x] Added a disposable PostgreSQL-backed API smoke journey using generated accounts only: guest login, registration/login, both bootstrap paths, and Training Area discovery.
 - [x] The real smoke journey passed locally from clean migrations and seed data, and its uniquely named temporary database was removed afterward.
 - [ ] Run the complete gate in GitHub Actions.
