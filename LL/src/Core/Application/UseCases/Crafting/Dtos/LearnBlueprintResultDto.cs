@@ -6,13 +6,15 @@ namespace Application.UseCases.Crafting.Dtos;
 public sealed record LearnBlueprintResult(
     string BlueprintId,
     string BlueprintName,
-    int CompatibleRecipeCount);
+    string RecipeId,
+    string RecipeName);
 
 public sealed class LearnBlueprintResultDto : IMapFrom<LearnBlueprintResult>
 {
     public string BlueprintId { get; init; } = string.Empty;
     public string BlueprintName { get; init; } = string.Empty;
-    public int CompatibleRecipeCount { get; init; }
+    public string RecipeId { get; init; } = string.Empty;
+    public string RecipeName { get; init; } = string.Empty;
 
     public void Mapping(Profile profile)
     {

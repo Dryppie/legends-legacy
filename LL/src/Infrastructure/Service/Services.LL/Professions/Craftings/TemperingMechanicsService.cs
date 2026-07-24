@@ -37,25 +37,28 @@ public sealed class TemperingMechanicsService : ITemperingMechanicsService
         float? previousValue = null;
         float? newValue = null;
 
-        if (outcome is TemperingOutcome.Positive or TemperingOutcome.Critical)
+        switch (outcome)
         {
-            var improvement = TryApplyDirectedImprovement(equipment, profile, rng);
-            if (improvement is null)
-            {
-                outcome = TemperingOutcome.Neutral;
-            }
-            else
-            {
-                improvedStat = improvement.Stat;
-                previousValue = improvement.PreviousValue;
-                newValue = improvement.NewValue;
-                equipment.TemperingProgress++;
-                equipment.ItemXp++;
-                rarityUpgraded = ApplyRarityProgress(equipment);
+            case TemperingOutcome.Critical:
+                qualityIncreased = HandleCriticalOutcome(equipment, previousQuality, rng);
+                break;
 
-                if (outcome == TemperingOutcome.Critical)
-                    qualityIncreased = HandleCriticalOutcome(equipment, previousQuality, rng);
-            }
+            case TemperingOutcome.Positive:
+                equipment.ItemXp++;
+                var rarityResult = ApplyRarityProgress(equipment, profile, rng);
+                rarityUpgraded = rarityResult.Upgraded;
+                improvedStat = rarityResult.Improvement?.Stat;
+                previousValue = rarityResult.Improvement?.PreviousValue;
+                newValue = rarityResult.Improvement?.NewValue;
+                break;
+
+            case TemperingOutcome.Negative:
+                HandleNegativeOutcome(equipment, rng);
+                break;
+
+            case TemperingOutcome.Neutral:
+            default:
+                break;
         }
 
         equipment.Potential -= TemperingConstants.PotentialCost;
@@ -73,6 +76,19 @@ public sealed class TemperingMechanicsService : ITemperingMechanicsService
             improvedStat,
             previousValue,
             newValue);
+    }
+
+    private static void HandleNegativeOutcome(EquipmentInstance equipment, Random rng)
+    {
+        if (rng.NextDouble() < 0.8)
+        {
+            if (equipment.Potential > 0)
+                equipment.Potential--;
+        }
+        else if (equipment.ItemXp > 0)
+        {
+            equipment.ItemXp--;
+        }
     }
 
     private static DirectedImprovement? TryApplyDirectedImprovement(
@@ -166,33 +182,59 @@ public sealed class TemperingMechanicsService : ITemperingMechanicsService
         return true;
     }
 
-    private TemperingOutcome RollOutcome(Rarity rarity, Random rng, double neutralOutcomeReductionBps)
+    private TemperingOutcome RollOutcome(Rarity rarity, Random rng, double negativeOutcomeReductionBps)
     {
         var rarityIndex = (int)rarity;
         var criticalChance = Math.Clamp(
             _options.CriticalChanceBase + (_options.CriticalChancePerRarityStep * rarityIndex),
             0d,
             1d);
-        var neutralChance = 0.05d.ReduceChanceByPercentagePointBps(neutralOutcomeReductionBps);
+        var negativeChance = (0.05d + (0.05d * rarityIndex))
+            .ReduceChanceByPercentagePointBps(negativeOutcomeReductionBps);
+        var positiveChance = PositiveChance(rarity);
         var roll = rng.NextDouble();
+
         if (roll < criticalChance)
             return TemperingOutcome.Critical;
-        return roll < criticalChance + neutralChance
-            ? TemperingOutcome.Neutral
-            : TemperingOutcome.Positive;
+        roll -= criticalChance;
+
+        if (roll < positiveChance)
+            return TemperingOutcome.Positive;
+        roll -= positiveChance;
+
+        return roll < negativeChance
+            ? TemperingOutcome.Negative
+            : TemperingOutcome.Neutral;
     }
 
-    private static bool ApplyRarityProgress(EquipmentInstance equipment)
+    private static double PositiveChance(Rarity rarity) =>
+        rarity switch
+        {
+            Rarity.Common => 0.06d,
+            Rarity.Uncommon => 0.03d,
+            Rarity.Rare => 0.015d,
+            Rarity.Epic => 0.005d,
+            Rarity.Unique => 0.001d,
+            _ => 0d
+        };
+
+    private static RarityProgressResult ApplyRarityProgress(
+        EquipmentInstance equipment,
+        TemperingProfileDefinition profile,
+        Random rng)
     {
         var upgraded = false;
+        DirectedImprovement? improvement = null;
+
         while (equipment.ItemXp >= XpPerRarity && equipment.Rarity < Rarity.Legacy)
         {
             equipment.ItemXp -= XpPerRarity;
             equipment.Rarity++;
+            improvement = TryApplyDirectedImprovement(equipment, profile, rng) ?? improvement;
             upgraded = true;
         }
 
-        return upgraded;
+        return new RarityProgressResult(upgraded, improvement);
     }
 
     private void ApplyQualityStatMultiplierChange(
@@ -246,4 +288,8 @@ public sealed class TemperingMechanicsService : ITemperingMechanicsService
         Domain.Models.Attributes.AttributeType Stat,
         float PreviousValue,
         float NewValue);
+
+    private sealed record RarityProgressResult(
+        bool Upgraded,
+        DirectedImprovement? Improvement);
 }

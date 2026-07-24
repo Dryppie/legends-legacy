@@ -12,8 +12,15 @@ public sealed class BlueprintItemMetadataDto
     public IReadOnlyList<string> RequiredRecipeTags { get; init; } = [];
     public IReadOnlyList<string> AnyRecipeTags { get; init; } = [];
     public int CompatibleRecipeCount { get; init; }
+    public IReadOnlyList<BlueprintCompatibleRecipeDto> CompatibleRecipes { get; init; } = [];
     public string? SourceType { get; init; }
     public string? SourceId { get; init; }
+}
+
+public sealed class BlueprintCompatibleRecipeDto
+{
+    public string Id { get; init; } = string.Empty;
+    public string Name { get; init; } = string.Empty;
 }
 
 public sealed class BlueprintItemMetadataResolver
@@ -45,6 +52,18 @@ public sealed class BlueprintItemMetadataResolver
         if (blueprint is null)
             return null;
 
+        var compatibleRecipes = _definitions.GetRecipes()
+            .Where(recipe =>
+                recipe.Enabled &&
+                Domain.Models.Professions.Crafting.V2.EquipmentCraftingDesignComposer.IsCompatible(recipe, blueprint))
+            .OrderBy(recipe => recipe.Name)
+            .Select(recipe => new BlueprintCompatibleRecipeDto
+            {
+                Id = recipe.Id,
+                Name = recipe.Name
+            })
+            .ToList();
+
         return new BlueprintItemMetadataDto
         {
             BlueprintId = blueprint.Id,
@@ -52,8 +71,8 @@ public sealed class BlueprintItemMetadataResolver
             Description = blueprint.Description,
             RequiredRecipeTags = blueprint.RequiredRecipeTags,
             AnyRecipeTags = blueprint.AnyRecipeTags,
-            CompatibleRecipeCount = _definitions.GetRecipes()
-                .Count(recipe => Domain.Models.Professions.Crafting.V2.EquipmentCraftingDesignComposer.IsCompatible(recipe, blueprint)),
+            CompatibleRecipeCount = compatibleRecipes.Count,
+            CompatibleRecipes = compatibleRecipes,
             SourceType = blueprint.SourceType,
             SourceId = blueprint.SourceId
         };

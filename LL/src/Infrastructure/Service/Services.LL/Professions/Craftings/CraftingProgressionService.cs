@@ -12,10 +12,10 @@ public sealed class CraftingProgressionService : ICraftingProgressionService
         _craftingRepository = craftingRepository;
     }
 
-    public Task<IReadOnlySet<string>> GetUnlockedBlueprintIdsAsync(
+    public Task<IReadOnlyList<CharacterRecipeUnlock>> GetBlueprintUnlocksAsync(
         Guid characterId,
         CancellationToken cancellationToken) =>
-        _craftingRepository.GetUnlockedBlueprintIdsAsync(characterId, cancellationToken);
+        _craftingRepository.GetBlueprintUnlocksAsync(characterId, cancellationToken);
 
     public async Task<IReadOnlyDictionary<string, int>> GetRecipeMasteryLevelsAsync(
         Guid characterId,
@@ -40,21 +40,24 @@ public sealed class CraftingProgressionService : ICraftingProgressionService
 
     public Task<bool> HasBlueprintUnlockAsync(
         Guid characterId,
+        string recipeId,
         string blueprintId,
         CancellationToken cancellationToken) =>
-        _craftingRepository.HasBlueprintUnlockAsync(characterId, blueprintId, cancellationToken);
+        _craftingRepository.HasBlueprintUnlockAsync(characterId, recipeId, blueprintId, cancellationToken);
 
     public async Task<bool> TryUnlockBlueprintAsync(
         Guid characterId,
+        string recipeId,
         string blueprintId,
         CancellationToken cancellationToken)
     {
-        if (await HasBlueprintUnlockAsync(characterId, blueprintId, cancellationToken))
+        if (await HasBlueprintUnlockAsync(characterId, recipeId, blueprintId, cancellationToken))
             return false;
 
         _craftingRepository.AddRecipeUnlock(new CharacterRecipeUnlock
         {
             CharacterId = characterId,
+            RecipeId = recipeId,
             BlueprintId = blueprintId
         });
         return true;

@@ -64,6 +64,7 @@ export interface CraftingBlueprint {
   sourceId?: string | null;
   behavior: EquipmentBehavior;
   initialStatProfile: Record<string, number>;
+  blueprintStatProfile?: Record<string, number>;
   primaryTemperingStats: string[];
   secondaryTemperingStats: string[];
   temperingProfileSummary: string;
@@ -117,5 +118,6 @@ export interface CraftItemsResult {
 export interface LearnBlueprintResult {
   blueprintId: string;
   blueprintName: string;
-  compatibleRecipeCount: number;
+  recipeId: string;
+  recipeName: string;
 }

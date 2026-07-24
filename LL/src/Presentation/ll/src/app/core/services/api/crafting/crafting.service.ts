@@ -71,15 +71,16 @@ export class CraftingService {
 
   public learnBlueprint(
     blueprintItemInstanceId: string,
+    recipeId: string,
   ): Observable<LearnBlueprintResult> {
     return this.api
-      .post('Crafting/blueprints/learn', { blueprintItemInstanceId })
+      .post('Crafting/blueprints/learn', { blueprintItemInstanceId, recipeId })
       .pipe(
         map((response) => {
           const result = this.unwrapResponse<LearnBlueprintResult>(response);
           this.blueprintLearnedSubject.next(result);
           this.toast.showToast(
-            `Learned ${result.blueprintName} for ${result.compatibleRecipeCount} compatible recipes`,
+            `Learned ${result.blueprintName} for ${result.recipeName}`,
             'success',
             true,
             'tr',

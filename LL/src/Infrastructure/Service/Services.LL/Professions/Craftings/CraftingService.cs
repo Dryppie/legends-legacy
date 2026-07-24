@@ -177,7 +177,7 @@ public class CraftingService : ICraftingService
 
     public async Task<Response<IReadOnlyList<CraftingRecipeDto>>> GetCraftingRecipesAsync(Guid characterId, int targetTier, CancellationToken cancellationToken)
     {
-        var unlockedBlueprintIds = await _progressionService.GetUnlockedBlueprintIdsAsync(characterId, cancellationToken);
+        var blueprintUnlocks = await _progressionService.GetBlueprintUnlocksAsync(characterId, cancellationToken);
         var masteries = await _progressionService.GetRecipeMasteryLevelsAsync(characterId, cancellationToken);
         var ownedByItemId = await GetOwnedItemQuantitiesAsync(characterId, cancellationToken);
         var recipeDefinitions = _definitions.GetRecipes();
@@ -199,7 +199,7 @@ public class CraftingService : ICraftingService
                 targetTier,
                 masteries.GetValueOrDefault(recipe.Id),
                 ownedByItemId,
-                unlockedBlueprintIds,
+                GetUnlockedBlueprintIdsForRecipe(blueprintUnlocks, recipe.Id),
                 itemBases,
                 craftingLevel))
             .OrderBy(x => x.Category)
@@ -212,6 +212,7 @@ public class CraftingService : ICraftingService
     public async Task<Response<LearnBlueprintResult>> LearnBlueprintAsync(
         Guid characterId,
         Guid blueprintItemInstanceId,
+        string recipeId,
         CancellationToken cancellationToken)
     {
         var inventory = await _inventoryService.GetInventoryByIdAsync(characterId, cancellationToken);
@@ -222,12 +223,20 @@ public class CraftingService : ICraftingService
         if (blueprint is not { Enabled: true })
             return Response<LearnBlueprintResult>.Fail("Item is not a learnable Blueprint.");
 
-        if (await _craftingRepository.HasBlueprintUnlockAsync(
+        var recipe = _definitions.GetRecipe(recipeId);
+        if (recipe is not { Enabled: true })
+            return Response<LearnBlueprintResult>.Fail("Recipe does not exist.");
+        if (!EquipmentCraftingDesignComposer.IsCompatible(recipe, blueprint))
+            return Response<LearnBlueprintResult>.Fail("Blueprint is not compatible with the selected recipe.");
+
+        if (await _progressionService.HasBlueprintUnlockAsync(
                 characterId,
+                recipe.Id,
                 blueprint.Id,
                 cancellationToken))
         {
-            return Response<LearnBlueprintResult>.Fail("Blueprint is already learned.");
+            return Response<LearnBlueprintResult>.Fail(
+                $"Blueprint is already learned for {recipe.Name}.");
         }
 
         if (!await _inventoryService.TryConsumeInventoryItemAsync(characterId, blueprintItemInstanceId, cancellationToken))
@@ -235,12 +244,13 @@ public class CraftingService : ICraftingService
 
         var unlocked = await _progressionService.TryUnlockBlueprintAsync(
             characterId,
+            recipe.Id,
             blueprint.Id,
             cancellationToken);
         if (!unlocked)
         {
             throw new InvalidOperationException(
-                $"Concurrent Blueprint learning detected for Blueprint '{blueprint.Id}'.");
+                $"Concurrent Blueprint learning detected for Blueprint '{blueprint.Id}' and recipe '{recipe.Id}'.");
         }
 
         await _outbox.EnqueueAsync(
@@ -253,8 +263,8 @@ public class CraftingService : ICraftingService
         return Response<LearnBlueprintResult>.Success(new LearnBlueprintResult(
             blueprint.Id,
             blueprint.Name,
-            _definitions.GetRecipes().Count(recipe =>
-                EquipmentCraftingDesignComposer.IsCompatible(recipe, blueprint))));
+            recipe.Id,
+            recipe.Name));
     }
 
     public async Task<Response<CraftItemsResult>> CraftItemsAsync(
@@ -281,6 +291,7 @@ public class CraftingService : ICraftingService
 
             var hasUnlock = await _progressionService.HasBlueprintUnlockAsync(
                 characterId,
+                recipe.Id,
                 blueprint.Id,
                 cancellationToken);
             if (!hasUnlock)
@@ -503,6 +514,16 @@ public class CraftingService : ICraftingService
             ?? new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
     }
 
+    private static IReadOnlySet<string> GetUnlockedBlueprintIdsForRecipe(
+        IReadOnlyList<CharacterRecipeUnlock> unlocks,
+        string recipeId) =>
+        unlocks
+            .Where(unlock =>
+                unlock.RecipeId == null ||
+                unlock.RecipeId.Equals(recipeId, StringComparison.OrdinalIgnoreCase))
+            .Select(unlock => unlock.BlueprintId)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
     private CraftingRecipeDto ToRecipeDto(
         CraftingRecipeDefinition recipe,
         int targetTier,
@@ -539,6 +560,8 @@ public class CraftingService : ICraftingService
                     SourceId = blueprint.SourceId,
                     Behavior = design.Behavior,
                     InitialStatProfile = design.InitialStatProfile,
+                    BlueprintStatProfile = blueprint.StatProfile,
+                    StatProfileInfluence = blueprint.StatProfileInfluence,
                     PrimaryTemperingStats = primary,
                     SecondaryTemperingStats = secondary,
                     TemperingProfileSummary = summary,

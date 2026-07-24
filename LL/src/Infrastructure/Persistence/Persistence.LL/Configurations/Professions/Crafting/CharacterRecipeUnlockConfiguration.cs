@@ -9,7 +9,8 @@ public class CharacterRecipeUnlockConfiguration : IEntityTypeConfiguration<Chara
     public void Configure(EntityTypeBuilder<CharacterRecipeUnlock> builder)
     {
         builder.HasKey(x => x.Id);
+        builder.Property(x => x.RecipeId).HasMaxLength(128);
         builder.Property(x => x.BlueprintId).HasMaxLength(128);
-        builder.HasIndex(x => new { x.CharacterId, x.BlueprintId }).IsUnique();
+        builder.HasIndex(x => new { x.CharacterId, x.RecipeId, x.BlueprintId }).IsUnique();
     }
 }

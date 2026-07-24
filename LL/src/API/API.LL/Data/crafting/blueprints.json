@@ -70,7 +70,14 @@
       "basicAttackDamageMultiplier": 1,
       "role": ""
     },
-    "additionalMaterialRequirements": [],
+    "additionalMaterialRequirements": [
+      {
+        "type": "SpecialResource",
+        "itemId": "fury_heart",
+        "baseAmount": 1,
+        "amountPerTier": 0
+      }
+    ],
     "sourceType": "Dungeon",
     "sourceId": "goblin_mines",
     "tags": [
@@ -153,7 +160,14 @@
       "basicAttackDamageMultiplier": 1,
       "role": ""
     },
-    "additionalMaterialRequirements": [],
+    "additionalMaterialRequirements": [
+      {
+        "type": "SpecialResource",
+        "itemId": "arcane_focus",
+        "baseAmount": 1,
+        "amountPerTier": 0
+      }
+    ],
     "sourceType": "Dungeon",
     "sourceId": "goblin_mines",
     "tags": [
@@ -235,7 +249,14 @@
       "basicAttackDamageMultiplier": 1,
       "role": ""
     },
-    "additionalMaterialRequirements": [],
+    "additionalMaterialRequirements": [
+      {
+        "type": "SpecialResource",
+        "itemId": "executioners_mark",
+        "baseAmount": 1,
+        "amountPerTier": 0
+      }
+    ],
     "sourceType": "Dungeon",
     "sourceId": "goblin_mines",
     "tags": [
@@ -318,7 +339,14 @@
       "basicAttackDamageMultiplier": 1,
       "role": ""
     },
-    "additionalMaterialRequirements": [],
+    "additionalMaterialRequirements": [
+      {
+        "type": "SpecialResource",
+        "itemId": "aegis_runestone",
+        "baseAmount": 1,
+        "amountPerTier": 0
+      }
+    ],
     "sourceType": "Dungeon",
     "sourceId": "forgotten_catacombs",
     "tags": [
@@ -401,7 +429,14 @@
       "basicAttackDamageMultiplier": 1,
       "role": ""
     },
-    "additionalMaterialRequirements": [],
+    "additionalMaterialRequirements": [
+      {
+        "type": "SpecialResource",
+        "itemId": "warden_sigil",
+        "baseAmount": 1,
+        "amountPerTier": 0
+      }
+    ],
     "sourceType": "Dungeon",
     "sourceId": "hives_abyss",
     "tags": [
@@ -483,7 +518,14 @@
       "basicAttackDamageMultiplier": 1,
       "role": ""
     },
-    "additionalMaterialRequirements": [],
+    "additionalMaterialRequirements": [
+      {
+        "type": "SpecialResource",
+        "itemId": "endurance_core",
+        "baseAmount": 1,
+        "amountPerTier": 0
+      }
+    ],
     "sourceType": "Dungeon",
     "sourceId": "forgotten_catacombs",
     "tags": [
@@ -565,7 +607,14 @@
       "basicAttackDamageMultiplier": 1,
       "role": ""
     },
-    "additionalMaterialRequirements": [],
+    "additionalMaterialRequirements": [
+      {
+        "type": "SpecialResource",
+        "itemId": "phoenix_ember",
+        "baseAmount": 1,
+        "amountPerTier": 0
+      }
+    ],
     "sourceType": "Dungeon",
     "sourceId": "forgotten_catacombs",
     "tags": [
@@ -649,7 +698,14 @@
       "basicAttackDamageMultiplier": 1,
       "role": ""
     },
-    "additionalMaterialRequirements": [],
+    "additionalMaterialRequirements": [
+      {
+        "type": "SpecialResource",
+        "itemId": "spirit_prism",
+        "baseAmount": 1,
+        "amountPerTier": 0
+      }
+    ],
     "sourceType": "Dungeon",
     "sourceId": "forgotten_catacombs",
     "tags": [

@@ -32,7 +32,10 @@ public class CraftingController : BaseController
 
     [HttpPost("blueprints/learn")]
     public async Task<ActionResult<Response<LearnBlueprintResultDto>>> LearnBlueprint([FromBody] LearnBlueprintRequestDto request) =>
-        await Mediator.Send(new LearnBlueprintCommand(CurrentCharacterGuid, request.BlueprintItemInstanceId));
+        await Mediator.Send(new LearnBlueprintCommand(
+            CurrentCharacterGuid,
+            request.BlueprintItemInstanceId,
+            request.RecipeId));
 
     [HttpPost("RemoveCraftingQueueItem")]
     public async Task<ActionResult<Response<RemoveCraftingQueueItemResponseDto>>> RemoveCraftingQueueItem([FromBody] string queueItemId) =>

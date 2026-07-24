@@ -55,8 +55,14 @@ export interface BlueprintItemMetadata {
   requiredRecipeTags: string[];
   anyRecipeTags: string[];
   compatibleRecipeCount: number;
+  compatibleRecipes: BlueprintCompatibleRecipe[];
   sourceType?: string | null;
   sourceId?: string | null;
+}
+
+export interface BlueprintCompatibleRecipe {
+  id: string;
+  name: string;
 }
 
 export interface EquipmentCraftingDesignMetadata {

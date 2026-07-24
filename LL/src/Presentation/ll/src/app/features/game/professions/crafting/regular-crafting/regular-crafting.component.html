@@ -1,12 +1,13 @@
 <div
-  class="grid h-full w-full grid-cols-1 gap-4 overflow-y-auto px-4 pt-4 sm:px-6 md:grid-cols-[minmax(0,1fr)_minmax(20rem,28rem)]"
+  class="grid h-full min-h-0 w-full grid-cols-1 gap-4 overflow-y-auto px-4 py-4 sm:px-6 lg:grid-cols-[18rem_minmax(0,1fr)] xl:grid-cols-[19rem_minmax(30rem,1fr)_22rem] xl:overflow-hidden"
 >
-  <section class="flex h-full flex-col overflow-hidden">
-    <h2 class="ll-heading text-xl">Recipes</h2>
-    <div class="ll-toolbar mb-4">
+  <!-- Recipe navigation -->
+  <section class="flex min-h-0 flex-col overflow-hidden">
+    <h2 class="ll-heading px-1 text-lg uppercase tracking-wide">Recipes</h2>
+    <div class="mt-3 flex flex-wrap gap-2">
       <button
         type="button"
-        class="ll-button px-2 py-1"
+        class="ll-button px-3 py-1.5 text-xs"
         [ngClass]="{ 'll-card-accent text-primary': filterMode() === 'all' }"
         (click)="filterMode.set('all')"
       >
@@ -14,7 +15,7 @@
       </button>
       <button
         type="button"
-        class="ll-button px-2 py-1"
+        class="ll-button px-3 py-1.5 text-xs"
         [ngClass]="{
           'll-card-accent text-primary': filterMode() === 'craftable',
         }"
@@ -24,170 +25,513 @@
       </button>
       <button
         type="button"
-        class="ll-button px-2 py-1"
+        class="ll-button px-3 py-1.5 text-xs"
         [ngClass]="{
           'll-card-accent text-primary': filterMode() === 'blueprints',
         }"
         (click)="filterMode.set('blueprints')"
       >
-        Blueprint options
+        Has Blueprints
       </button>
     </div>
 
     <div
-      class="flex flex-col space-y-2 overflow-y-auto"
+      class="mt-3 flex min-h-0 flex-col gap-2 overflow-y-auto pr-1"
       data-tour="crafting-introduction"
     >
       <button
         *ngFor="let recipe of filteredRecipes(); trackBy: trackByRecipe"
         type="button"
-        class="ll-card p-3 text-left transition-colors hover:border-primary"
+        class="ll-card shrink-0 p-3 text-left transition-colors hover:border-primary/60"
         [ngClass]="{ 'll-card-accent': isSelectedRecipe(recipe) }"
         (click)="selectRecipe(recipe)"
       >
-        <div class="font-semibold text-white">{{ recipe.name }}</div>
-        <div class="ll-copy">
+        <div
+          class="font-semibold"
+          [ngClass]="isSelectedRecipe(recipe) ? 'text-primary' : 'text-white'"
+        >
+          {{ recipe.name }}
+        </div>
+        <div class="mt-0.5 text-xs text-secondary">
           {{ formatDisplayLabel(recipe.category) }} ·
           {{ recipe.blueprints.length }} Blueprints · Mastery
           {{ recipe.currentMasteryLevel }}
         </div>
       </button>
+
       <p *ngIf="!filteredRecipes().length" class="ll-empty-state">
         No recipes match this filter.
       </p>
     </div>
   </section>
 
-  <section class="ll-panel p-4" data-tour="selected-recipe">
+  <!-- Design selection -->
+  <section
+    class="ll-panel flex min-h-[34rem] min-w-0 flex-col overflow-hidden"
+    data-tour="selected-recipe"
+  >
     <ng-container *ngIf="selectedRecipe() as recipe; else noRecipe">
-      <h2 class="ll-heading text-xl">
-        {{
-          selectedDesign().itemPreview?.name ||
-            selectedDesign().name ||
-            recipe.name
-        }}
-      </h2>
-      <p class="ll-copy mt-1">{{ recipe.name }} recipe</p>
-      <div class="ll-copy mt-2 flex flex-wrap gap-2">
-        <span class="ll-state">{{
-          formatDisplayLabel(
-            selectedDesign().itemPreview?.equipmentType ?? recipe.outputItemType
-          )
-        }}</span>
-        <span *ngIf="selectedDesign().itemPreview as preview" class="ll-state"
-          >{{ preview.rarity }} base</span
-        >
-        <span class="ll-state"
-          >Profession {{ recipe.minimumProfessionLevel }}+</span
-        >
-        <span class="ll-state"
-          >T{{ recipe.minTier
-          }}<ng-container *ngIf="recipe.maxTier !== recipe.minTier"
-            >–{{ recipe.maxTier }}</ng-container
-          ></span
-        >
-      </div>
+      <header class="shrink-0 border-b border-white/10 px-5 py-4">
+        <div class="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <h2 class="ll-heading text-xl uppercase tracking-wide">
+              {{ recipe.name }}
+            </h2>
+            <p class="mt-1 text-xs text-secondary">
+              {{ formatDisplayLabel(recipe.category) }} ·
+              {{ recipe.blueprints.length }} reusable Blueprints · Mastery
+              {{ recipe.currentMasteryLevel }}
+            </p>
+          </div>
+          <div class="flex max-w-xs flex-wrap justify-end gap-2 text-xs">
+            <span class="ll-state">{{
+              formatDisplayLabel(recipe.outputItemType)
+            }}</span>
+            <span class="ll-state">Common base</span>
+            <span class="ll-state"
+              >Profession {{ recipe.minimumProfessionLevel }}+</span
+            >
+          </div>
+        </div>
 
-      <div class="mt-4">
-        <div class="ll-eyebrow text-primary">Optional Blueprint</div>
-        <div class="mt-2 grid gap-2">
+        <div class="mt-4 grid gap-2 md:grid-cols-[minmax(12rem,1fr)_auto]">
+          <label
+            class="ll-input flex min-h-10 items-center gap-2 px-3 text-sm text-secondary"
+          >
+            <span aria-hidden="true">⌕</span>
+            <input
+              type="search"
+              class="min-w-0 flex-1 bg-transparent text-white outline-none placeholder:text-secondary"
+              placeholder="Filter Blueprints..."
+              [value]="blueprintSearch()"
+              (input)="setBlueprintSearch($any($event.target).value)"
+            />
+          </label>
+          <div class="ll-segmented min-h-10 normal-case">
+            <button
+              type="button"
+              class="rounded px-2 py-1"
+              [ngClass]="{
+                'bg-primary/20 text-primary': blueprintFilter() === 'all',
+              }"
+              (click)="blueprintFilter.set('all')"
+            >
+              All {{ recipe.blueprints.length + 1 }}
+            </button>
+            <button
+              type="button"
+              class="rounded px-2 py-1"
+              [ngClass]="{
+                'bg-primary/20 text-primary': blueprintFilter() === 'craftable',
+              }"
+              (click)="blueprintFilter.set('craftable')"
+            >
+              Craftable {{ craftableDesignCount() }}
+            </button>
+            <button
+              type="button"
+              class="rounded px-2 py-1"
+              [ngClass]="{
+                'bg-primary/20 text-primary': blueprintFilter() === 'locked',
+              }"
+              (click)="blueprintFilter.set('locked')"
+            >
+              Locked {{ lockedBlueprintCount() }}
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <div class="min-h-0 flex-1 space-y-3 overflow-y-auto p-4">
+        <section
+          *ngIf="
+            blueprintFilter() !== 'locked' &&
+            (!blueprintSearch() ||
+              recipe.name
+                .toLowerCase()
+                .includes(blueprintSearch().toLowerCase()))
+          "
+          class="rounded-md border border-primary/35 bg-primary/[0.03] p-2"
+        >
+          <div class="flex items-center justify-between gap-3 px-2 py-1">
+            <div
+              class="ll-heading flex items-center gap-2 text-xs uppercase tracking-wide"
+            >
+              <span class="h-2.5 w-2.5 rounded-sm bg-primary"></span>
+              Common base
+            </div>
+            <span class="text-xs text-secondary">
+              1 ·
+              {{ isBaseRecipeCraftable() ? "craftable" : "requirements unmet" }}
+            </span>
+          </div>
+
           <button
             type="button"
-            class="ll-card p-3 text-left"
-            [ngClass]="{ 'll-card-accent': !selectedBlueprint() }"
+            class="mt-2 flex w-full items-center justify-between gap-3 rounded bg-white/[0.035] p-3 text-left transition-colors hover:bg-white/[0.06]"
+            [ngClass]="{ 'ring-1 ring-primary/60': !selectedBlueprint() }"
             (click)="selectBaseRecipe()"
           >
-            <div class="flex items-start justify-between gap-3">
-              <div>
-                <div class="font-semibold text-white">No Blueprint</div>
-                <div class="ll-copy mt-1">
-                  Craft the standard {{ recipe.name }} design.
-                </div>
+            <div class="min-w-0">
+              <div class="font-semibold text-white">{{ recipe.name }}</div>
+              <div class="mt-0.5 truncate text-xs text-secondary">
+                {{ recipe.description }}
               </div>
-              <span class="ll-state whitespace-nowrap">Base</span>
             </div>
+            <span class="ll-state shrink-0 text-emerald-300">Base</span>
           </button>
+        </section>
+
+        <section
+          *ngFor="
+            let blueprint of visibleBlueprints();
+            trackBy: trackByBlueprint
+          "
+          class="rounded-md border border-dashed p-2"
+          [ngClass]="
+            blueprint.isLocked
+              ? 'border-sky-400/35 bg-sky-400/[0.025]'
+              : 'border-violet-400/35 bg-violet-400/[0.025]'
+          "
+        >
+          <div class="flex items-center justify-between gap-3 px-2 py-1">
+            <div
+              class="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide"
+              [ngClass]="
+                blueprint.isLocked ? 'text-sky-300' : 'text-violet-300'
+              "
+            >
+              <span
+                class="h-2.5 w-2.5 rounded-sm"
+                [ngClass]="blueprint.isLocked ? 'bg-sky-300' : 'bg-violet-300'"
+              ></span>
+              {{ blueprint.name }}
+            </div>
+            <span class="truncate text-right text-xs text-secondary">
+              {{ blueprint.isLocked ? "0/1" : "Learned" }}
+              <ng-container *ngIf="blueprint.sourceType">
+                · {{ formatDisplayLabel(blueprint.sourceType) }}</ng-container
+              >
+              <ng-container *ngIf="blueprint.sourceId">
+                · {{ formatDisplayLabel(blueprint.sourceId) }}</ng-container
+              >
+            </span>
+          </div>
+
           <button
-            *ngFor="
-              let blueprint of recipe.blueprints;
-              trackBy: trackByBlueprint
-            "
             type="button"
-            class="ll-card p-3 text-left"
+            class="mt-2 flex w-full items-center justify-between gap-3 rounded bg-white/[0.035] p-3 text-left transition-colors hover:bg-white/[0.06]"
             [ngClass]="{
-              'll-card-accent': selectedBlueprint()?.id === blueprint.id,
+              'ring-1 ring-primary/60':
+                selectedBlueprint()?.id === blueprint.id,
               'opacity-70': blueprint.isLocked,
             }"
             (click)="selectBlueprint(blueprint)"
           >
-            <div class="flex items-start justify-between gap-3">
-              <div>
-                <div class="font-semibold text-white">{{ blueprint.name }}</div>
-                <div class="ll-copy mt-1">{{ blueprint.description }}</div>
+            <div class="min-w-0">
+              <div class="font-semibold text-white">
+                {{ blueprint.craftedItemName }}
               </div>
-              <span class="ll-state whitespace-nowrap">
-                {{ blueprint.isLocked ? "Locked" : "Learned" }}
-              </span>
+              <div class="mt-0.5 text-xs text-secondary">
+                {{ blueprint.description }}
+              </div>
             </div>
-            <div *ngIf="blueprint.isLocked" class="mt-2 text-xs text-secondary">
-              Blueprint source: {{ formatDisplayLabel(blueprint.sourceType) }}
-              <ng-container *ngIf="blueprint.sourceId">
-                · {{ formatDisplayLabel(blueprint.sourceId) }}</ng-container
-              >
-            </div>
+            <span
+              class="ll-state shrink-0"
+              [ngClass]="
+                blueprint.isLocked ? 'text-secondary' : 'text-emerald-300'
+              "
+            >
+              {{
+                blueprint.isLocked
+                  ? "Locked"
+                  : isBlueprintCraftable(blueprint)
+                    ? "Craftable"
+                    : "Learned"
+              }}
+            </span>
           </button>
-        </div>
+        </section>
+
+        <p
+          *ngIf="!visibleBlueprints().length && blueprintFilter() === 'locked'"
+          class="ll-empty-state"
+        >
+          This recipe has no locked Blueprints.
+        </p>
+        <p
+          *ngIf="
+            !visibleBlueprints().length &&
+            blueprintFilter() !== 'locked' &&
+            blueprintSearch()
+          "
+          class="ll-empty-state"
+        >
+          No Blueprints match “{{ blueprintSearch() }}”.
+        </p>
       </div>
 
+      <footer class="shrink-0 border-t border-white/10 bg-black/10 px-5 py-4">
+        <div
+          class="grid items-end gap-3 sm:grid-cols-[minmax(0,1fr)_7rem_auto]"
+        >
+          <div>
+            <div class="text-xs uppercase tracking-wide text-secondary">
+              Tier
+            </div>
+            <div class="mt-1 flex flex-wrap gap-2">
+              <button
+                *ngFor="let tier of tierOptions(); trackBy: trackByTier"
+                type="button"
+                class="ll-button min-h-9 px-3 py-1 text-sm"
+                [ngClass]="{
+                  'll-card-accent text-primary': targetTier() === tier,
+                }"
+                (click)="setTargetTier(tier)"
+              >
+                T{{ tier }}
+              </button>
+            </div>
+          </div>
+
+          <label class="text-xs uppercase tracking-wide text-secondary">
+            Quantity
+            <input
+              type="number"
+              class="ll-input no-spinner mt-1 w-full px-2 py-2 text-right text-sm text-white"
+              min="1"
+              max="100"
+              [value]="quantity()"
+              (input)="setQuantity($any($event.target).valueAsNumber)"
+            />
+          </label>
+
+          <app-regular-button
+            (pressed)="craft()"
+            [disabled]="!canCraftSelected() || isLoading()"
+          >
+            Craft
+          </app-regular-button>
+        </div>
+
+        <div class="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs">
+          <span class="text-secondary">Requires:</span>
+          <span *ngFor="let material of recipe.materialCosts">
+            {{ material.name
+            }}<ng-container *ngIf="material.tier">
+              T{{ material.tier }}</ng-container
+            >
+            <span
+              [ngClass]="{
+                'text-rose-400':
+                  getOwnedQuantity(material.itemId) <
+                  material.required * quantity(),
+                'text-primary':
+                  getOwnedQuantity(material.itemId) >=
+                  material.required * quantity(),
+              }"
+            >
+              {{ getOwnedQuantity(material.itemId) | numberFormat }}/{{
+                material.required * quantity() | numberFormat
+              }}
+            </span>
+          </span>
+          <span
+            *ngFor="let material of blueprintSpecificMaterialCosts()"
+            class="text-sky-300"
+          >
+            + {{ material.name
+            }}<ng-container *ngIf="material.tier">
+              T{{ material.tier }}</ng-container
+            >
+            <span class="text-[0.65rem] uppercase tracking-wide">
+              (Blueprint)
+            </span>
+            <span
+              [ngClass]="{
+                'text-rose-400':
+                  getOwnedQuantity(material.itemId) <
+                  material.required * quantity(),
+                'text-primary':
+                  getOwnedQuantity(material.itemId) >=
+                  material.required * quantity(),
+              }"
+            >
+              {{ getOwnedQuantity(material.itemId) | numberFormat }}/{{
+                material.required * quantity() | numberFormat
+              }}
+            </span>
+          </span>
+          <span *ngIf="selectedBlueprint()?.isLocked" class="text-danger">
+            Learn this Blueprint first.
+          </span>
+          <span
+            *ngIf="!selectedBlueprint()?.isLocked && !canCraftSelected()"
+            class="text-rose-400"
+          >
+            Requirements not met.
+          </span>
+        </div>
+
+        <div *ngIf="error() as message" class="ll-state ll-state-danger mt-3">
+          {{ message }}
+        </div>
+      </footer>
+    </ng-container>
+
+    <ng-template #noRecipe>
+      <div class="ll-empty-state">No crafting recipes available.</div>
+    </ng-template>
+  </section>
+
+  <!-- Persistent crafted-item preview -->
+  <aside
+    class="ll-panel min-h-[34rem] overflow-hidden lg:col-start-2 xl:col-start-3 xl:row-start-1"
+  >
+    <ng-container *ngIf="selectedRecipe() as recipe">
       <ng-container *ngIf="selectedDesign() as design">
         <div
-          *ngIf="design.itemPreview as preview"
-          class="ll-item-detail-section mt-4"
+          class="border-b border-white/10 px-5 py-4 text-xs font-semibold uppercase tracking-wider text-secondary"
         >
-          <div class="ll-eyebrow text-primary">Crafted item preview</div>
-          <div class="mt-2 flex items-start justify-between gap-3">
-            <div>
-              <div class="font-semibold text-white">{{ preview.name }}</div>
-              <p class="ll-copy mt-1">{{ preview.description }}</p>
-            </div>
-            <span class="ll-state whitespace-nowrap">T{{ preview.tier }}</span>
-          </div>
+          Crafted item preview
+        </div>
 
-          <div *ngIf="preview.magnitude > 0" class="mt-3 text-sm">
-            <div class="ll-item-stat-row">
-              <span>Base damage</span>
-              <span class="text-primary">
-                {{ minimumWeaponDamage(preview) }}–{{
-                  maximumWeaponDamage(preview)
-                }}
-              </span>
+        <div class="h-[calc(100%-3.25rem)] overflow-y-auto px-5 py-4">
+          <ng-container *ngIf="design.itemPreview as preview">
+            <div class="flex items-start justify-between gap-3">
+              <div>
+                <h2 class="ll-heading text-xl uppercase tracking-wide">
+                  {{ preview.name }}
+                </h2>
+                <p class="mt-1 text-xs text-secondary">
+                  {{ preview.description }}
+                </p>
+              </div>
+              <span class="ll-state shrink-0">T{{ preview.tier }}</span>
             </div>
-            <div *ngIf="preview.attackSpeed > 0" class="ll-item-stat-row">
-              <span>Base attack interval</span>
-              <span class="text-primary"
-                >{{ 60 / preview.attackSpeed | number: "1.1-2" }}s</span
-              >
-            </div>
-            <div class="ll-item-stat-row">
-              <span
-                >Scaling:
-                {{ preview.scalingAttribute | attributeTypeFormat }}</span
-              >
-              <span class="text-primary"
-                >{{ preview.scalingAmount * 100 | number: "1.0-2" }}%</span
-              >
-            </div>
-          </div>
 
-          <div class="mt-3">
-            <div class="ll-item-meta">Resulting attributes</div>
-            <div class="mt-1 text-sm">
+            <div *ngIf="preview.magnitude > 0" class="mt-4">
+              <div class="ll-item-stat-row">
+                <span>Base damage</span>
+                <span class="text-primary">
+                  {{ minimumWeaponDamage(preview) }}–{{
+                    maximumWeaponDamage(preview)
+                  }}
+                </span>
+              </div>
+              <div *ngIf="preview.attackSpeed > 0" class="ll-item-stat-row">
+                <span>Base attack interval</span>
+                <span class="text-primary">
+                  {{ 60 / preview.attackSpeed | number: "1.1-2" }}s
+                </span>
+              </div>
+              <div class="ll-item-stat-row">
+                <span
+                  >Scaling:
+                  {{ preview.scalingAttribute | attributeTypeFormat }}</span
+                >
+                <span class="text-primary">
+                  {{ preview.scalingAmount * 100 | number: "1.0-2" }}%
+                </span>
+              </div>
+            </div>
+
+            <div class="mt-4">
+              <div class="flex items-center justify-between gap-2">
+                <div class="ll-item-meta">
+                  {{
+                    selectedBlueprint()
+                      ? "From base recipe"
+                      : "Resulting attributes"
+                  }}
+                </div>
+                <span
+                  *ngIf="selectedBlueprint()"
+                  class="text-[0.65rem] text-secondary"
+                >
+                  Final crafted ranges
+                </span>
+              </div>
               <div
-                *ngFor="let attribute of preview.attributes"
+                *ngFor="let attribute of baseAttributeDisplays()"
+                class="border-b border-white/10 py-2 last:border-b-0"
+              >
+                <div class="flex items-center justify-between gap-3 text-xs">
+                  <span>{{
+                    attribute.attributeType | attributeTypeFormat
+                  }}</span>
+                  <span class="text-primary">
+                    {{
+                      attribute.resultMinimumAmount
+                        | attributeValueFormat: attribute.attributeType : true
+                    }}<ng-container
+                      *ngIf="
+                        attribute.resultMaximumAmount !==
+                        attribute.resultMinimumAmount
+                      "
+                      >–{{
+                        attribute.resultMaximumAmount
+                          | attributeValueFormat: attribute.attributeType : true
+                      }}</ng-container
+                    >
+                  </span>
+                </div>
+
+                <div
+                  *ngIf="attribute.hasBlueprintChange"
+                  class="mt-1 flex flex-wrap items-center justify-end gap-x-2 text-[0.65rem]"
+                >
+                  <span class="text-secondary">
+                    Base
+                    {{
+                      attribute.baseMinimumAmount
+                        | attributeValueFormat: attribute.attributeType : true
+                    }}<ng-container
+                      *ngIf="
+                        attribute.baseMaximumAmount !==
+                        attribute.baseMinimumAmount
+                      "
+                      >–{{
+                        attribute.baseMaximumAmount
+                          | attributeValueFormat: attribute.attributeType : true
+                      }}</ng-container
+                    >
+                  </span>
+                  <span class="text-sky-300">
+                    Blueprint
+                    {{
+                      attribute.blueprintMinimumChange
+                        | attributeValueFormat: attribute.attributeType : true
+                    }}<ng-container
+                      *ngIf="
+                        attribute.blueprintMaximumChange !==
+                        attribute.blueprintMinimumChange
+                      "
+                      >–{{
+                        attribute.blueprintMaximumChange
+                          | attributeValueFormat: attribute.attributeType : true
+                      }}</ng-container
+                    >
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div
+              *ngIf="
+                blueprintAddedAttributes().length &&
+                selectedBlueprint() as blueprint
+              "
+              class="ll-item-detail-section mt-4"
+            >
+              <div class="ll-item-meta">Added by Blueprint</div>
+
+              <div
+                *ngFor="let attribute of blueprintAddedAttributes()"
                 class="ll-item-stat-row"
               >
                 <span>{{ attribute.attributeType | attributeTypeFormat }}</span>
-                <span class="text-primary">
+                <span class="text-sky-300">
                   {{
                     attribute.minimumTotalAmount
                       | attributeValueFormat: attribute.attributeType : true
@@ -204,15 +548,8 @@
                 </span>
               </div>
             </div>
-            <p class="mt-2 text-xs text-secondary">
-              Includes fixed base attributes and the crafted stat roll. The
-              displayed range accounts for your current quality chances and the
-              ±5% crafting roll.
-            </p>
-          </div>
 
-          <div class="mt-3">
-            <div class="ll-item-stat-row text-sm">
+            <div class="ll-item-stat-row mt-3">
               <span>Starting Potential</span>
               <span class="text-primary">
                 {{ preview.minimumStartingPotential
@@ -225,172 +562,100 @@
                 >
               </span>
             </div>
-            <div class="mt-2 flex flex-wrap gap-2 text-xs">
-              <span
-                *ngFor="let chance of preview.qualityChances"
-                class="ll-state"
+
+            <div class="ll-item-stat-row">
+              <span>Profession requirement</span>
+              <span class="text-primary"
+                >{{ recipe.minimumProfessionLevel }}+</span
               >
-                {{ chance.quality }}
-                {{ chance.chancePercent | number: "1.0-2" }}%
-              </span>
+            </div>
+
+            <div class="ll-item-stat-row mt-3">
+              <span>Quality chances</span>
+              <div class="group relative">
+                <button
+                  type="button"
+                  class="ll-state cursor-help text-xs"
+                  aria-describedby="crafting-quality-chances"
+                >
+                  View chances
+                  <span aria-hidden="true" class="ml-1 text-sky-300">ⓘ</span>
+                </button>
+
+                <div
+                  id="crafting-quality-chances"
+                  role="tooltip"
+                  class="ll-panel invisible absolute bottom-full right-0 z-30 mb-2 w-44 translate-y-1 bg-texture p-3 opacity-0 shadow-xl transition duration-150 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100"
+                >
+                  <div class="ll-item-meta mb-2">Crafted item quality</div>
+                  <div
+                    *ngFor="let chance of preview.qualityChances"
+                    class="flex items-center justify-between gap-4 border-b border-white/10 py-1.5 text-xs last:border-b-0"
+                  >
+                    <span>{{ chance.quality }}</span>
+                    <span class="text-primary">
+                      {{ chance.chancePercent | number: "1.0-2" }}%
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </ng-container>
+
+          <div class="ll-item-detail-section mt-4">
+            <div class="ll-item-meta">Identity and behavior</div>
+            <div class="mt-2 flex flex-wrap gap-2">
+              <span *ngIf="design.behavior.handedness" class="ll-state">{{
+                formatDisplayLabel(design.behavior.handedness)
+              }}</span>
+              <span *ngIf="design.behavior.rangeCategory" class="ll-state">{{
+                formatDisplayLabel(design.behavior.rangeCategory)
+              }}</span>
+              <span *ngIf="design.behavior.attackCategory" class="ll-state">{{
+                formatDisplayLabel(design.behavior.attackCategory)
+              }}</span>
+              <span *ngIf="design.behavior.role" class="ll-state">{{
+                formatDisplayLabel(design.behavior.role)
+              }}</span>
             </div>
           </div>
-        </div>
 
-        <div class="ll-item-detail-section ll-copy mt-4">
-          <div class="ll-eyebrow text-primary">Identity and behavior</div>
-          <div class="mt-2 flex flex-wrap gap-2">
-            <span *ngIf="design.behavior.handedness" class="ll-state">{{
-              formatDisplayLabel(design.behavior.handedness)
-            }}</span>
-            <span *ngIf="design.behavior.rangeCategory" class="ll-state">{{
-              formatDisplayLabel(design.behavior.rangeCategory)
-            }}</span>
-            <span *ngIf="design.behavior.attackCategory" class="ll-state">{{
-              formatDisplayLabel(design.behavior.attackCategory)
-            }}</span>
-            <span *ngIf="design.behavior.role" class="ll-state">{{
-              formatDisplayLabel(design.behavior.role)
-            }}</span>
-          </div>
-          <div
-            *ngIf="
-              design.behavior.basicAttackDamageMultiplier !== 1 ||
-              design.behavior.basicAttackIntervalMultiplier !== 1
-            "
-            class="mt-2 text-xs text-secondary"
-          >
-            Basic attack:
-            {{
-              design.behavior.basicAttackDamageMultiplier * 100
-                | number: "1.0-2"
-            }}% damage ·
-            {{
-              design.behavior.basicAttackIntervalMultiplier * 100
-                | number: "1.0-2"
-            }}% interval
-          </div>
-        </div>
-
-        <div class="ll-item-detail-section ll-copy mt-4">
-          <div class="ll-eyebrow text-primary">Directed tempering</div>
-          <div class="mt-2">
-            <span class="text-secondary">Primary:</span>
-            <ng-container
-              *ngIf="design.primaryTemperingStats.length; else noPrimaryStats"
-            >
+          <div class="ll-item-detail-section mt-4 text-xs text-secondary">
+            <div class="ll-item-meta">Tempering</div>
+            <p class="mt-2 leading-relaxed">
+              Positive attempts build progress toward the next rarity. When
+              rarity increases, one eligible attribute is automatically
+              improved.
+            </p>
+            <div class="mt-3">
+              <span class="text-white">Favored attributes: </span>
               <ng-container
                 *ngFor="
                   let attribute of design.primaryTemperingStats;
                   let last = last
                 "
-                >{{ attribute | attributeTypeFormat
-                }}<ng-container *ngIf="!last">, </ng-container></ng-container
+                ><span class="text-white">{{
+                  attribute | attributeTypeFormat
+                }}</span
+                ><ng-container *ngIf="!last">, </ng-container></ng-container
               >
-            </ng-container>
-            <ng-template #noPrimaryStats>None</ng-template>
-          </div>
-          <div class="mt-1">
-            <span class="text-secondary">Secondary:</span>
-            <ng-container
-              *ngIf="
-                design.secondaryTemperingStats.length;
-                else noSecondaryStats
-              "
-            >
+            </div>
+            <div class="mt-1" *ngIf="design.secondaryTemperingStats.length">
+              <span class="text-white">Also possible: </span>
               <ng-container
                 *ngFor="
                   let attribute of design.secondaryTemperingStats;
                   let last = last
                 "
-                >{{ attribute | attributeTypeFormat
-                }}<ng-container *ngIf="!last">, </ng-container></ng-container
+                ><span class="text-white">{{
+                  attribute | attributeTypeFormat
+                }}</span
+                ><ng-container *ngIf="!last">, </ng-container></ng-container
               >
-            </ng-container>
-            <ng-template #noSecondaryStats>None</ng-template>
-          </div>
-        </div>
-
-        <div
-          class="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-[minmax(0,1fr)_8rem]"
-        >
-          <div class="ll-copy">
-            <div>Tier</div>
-            <div class="mt-1 flex flex-wrap gap-2">
-              <button
-                *ngFor="let tier of tierOptions(); trackBy: trackByTier"
-                type="button"
-                class="ll-button min-h-9 px-3 py-1 text-sm"
-                [ngClass]="{
-                  'll-card-accent text-primary': targetTier() === tier,
-                }"
-                (click)="setTargetTier(tier)"
-              >
-                T{{ tier }}
-              </button>
             </div>
           </div>
-          <label class="ll-copy"
-            >Quantity
-            <input
-              type="number"
-              class="ll-input no-spinner mt-1 w-full px-2 py-1 text-right"
-              min="1"
-              max="100"
-              [value]="quantity()"
-              (input)="setQuantity($any($event.target).valueAsNumber)"
-            />
-          </label>
-        </div>
-
-        <div class="ll-item-detail-section ll-copy mt-4">
-          <div class="ll-eyebrow text-primary">Requires</div>
-          <ul class="ml-5 list-disc">
-            <li *ngFor="let material of selectedMaterialCosts()">
-              {{ material.name
-              }}<span *ngIf="material.tier"> T{{ material.tier }}</span
-              >:
-              <span
-                [ngClass]="{
-                  'text-rose-500':
-                    getOwnedQuantity(material.itemId) <
-                    material.required * quantity(),
-                }"
-              >
-                x{{ getOwnedQuantity(material.itemId) | numberFormat }} / x{{
-                  material.required * quantity() | numberFormat
-                }}
-              </span>
-            </li>
-          </ul>
-        </div>
-
-        <div *ngIf="error() as message" class="ll-state ll-state-danger mt-4">
-          {{ message }}
-        </div>
-        <div class="mt-4 flex items-center gap-2">
-          <app-regular-button
-            (pressed)="craft()"
-            [disabled]="!canCraftSelected() || isLoading()"
-          >
-            Craft {{ design.itemPreview?.name || recipe.name }}
-          </app-regular-button>
-          <span *ngIf="selectedBlueprint()?.isLocked" class="text-amber-400"
-            >Learn its Blueprint first.</span
-          >
-          <span
-            *ngIf="!selectedBlueprint()?.isLocked && !canCraftSelected()"
-            class="text-rose-500"
-          >
-            Requirements not met.
-          </span>
         </div>
       </ng-container>
     </ng-container>
-    <ng-template #noRecipe
-      ><div class="ll-empty-state">
-        No crafting recipes available.
-      </div></ng-template
-    >
-  </section>
+  </aside>
 </div>

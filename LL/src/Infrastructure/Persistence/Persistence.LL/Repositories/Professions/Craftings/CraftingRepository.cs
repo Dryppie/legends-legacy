@@ -35,15 +35,13 @@ public class CraftingRepository : ICraftingRepository
         return queueItem?.EquipmentInstance;
     }
 
-    public async Task<IReadOnlySet<string>> GetUnlockedBlueprintIdsAsync(Guid characterId, CancellationToken cancellationToken)
-    {
-        var unlocks = await _dbContext.CharacterRecipeUnlocks
+    public async Task<IReadOnlyList<CharacterRecipeUnlock>> GetBlueprintUnlocksAsync(
+        Guid characterId,
+        CancellationToken cancellationToken) =>
+        await _dbContext.CharacterRecipeUnlocks
             .Where(x => x.CharacterId == characterId)
-            .Select(x => x.BlueprintId)
+            .AsNoTracking()
             .ToListAsync(cancellationToken);
-
-        return unlocks.ToHashSet(StringComparer.OrdinalIgnoreCase);
-    }
 
     public async Task<IReadOnlyDictionary<string, int>> GetRecipeMasteryLevelsAsync(Guid characterId, CancellationToken cancellationToken) =>
         await _dbContext.CharacterRecipeMasteries
@@ -56,10 +54,16 @@ public class CraftingRepository : ICraftingRepository
             .OrderBy(x => x.RecipeId)
             .ToListAsync(cancellationToken);
 
-    public async Task<bool> HasBlueprintUnlockAsync(Guid characterId, string blueprintId, CancellationToken cancellationToken) =>
+    public async Task<bool> HasBlueprintUnlockAsync(
+        Guid characterId,
+        string recipeId,
+        string blueprintId,
+        CancellationToken cancellationToken) =>
         await _dbContext.CharacterRecipeUnlocks
             .AnyAsync(
-                x => x.CharacterId == characterId && x.BlueprintId == blueprintId,
+                x => x.CharacterId == characterId &&
+                     x.BlueprintId == blueprintId &&
+                     (x.RecipeId == recipeId || x.RecipeId == null),
                 cancellationToken);
 
     public void AddRecipeUnlock(CharacterRecipeUnlock unlock) =>

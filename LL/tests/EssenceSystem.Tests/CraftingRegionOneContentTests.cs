@@ -27,11 +27,18 @@ public sealed class CraftingRegionOneContentTests
     }
 
     [Fact]
-    public void RegionOneDungeons_SourceEveryBlueprintAndSpecialResource()
+    public void RegionOneDungeons_SourceEveryBlueprintAndNonBlueprintSpecialResource()
     {
         var materials = ReadArray("crafting/materials.json");
         var blueprints = ReadArray("crafting/blueprints.json");
         var dungeons = ReadDungeonDifficulties();
+        var blueprintCatalystItemIds = blueprints
+            .SelectMany(blueprint => ChildArray(blueprint, "additionalMaterialRequirements"))
+            .Where(requirement =>
+                requirement?["type"]?.GetValue<string>() == "SpecialResource")
+            .Select(requirement => requirement?["itemId"]?.GetValue<string>())
+            .Where(itemId => !string.IsNullOrWhiteSpace(itemId))
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
 
         var firstClearItemIds = dungeons
             .SelectMany(dungeon => ChildArray(dungeon?["rewardTable"], "firstClearRewards"))
@@ -58,11 +65,49 @@ public sealed class CraftingRegionOneContentTests
         var missingSpecialResources = materials
             .Where(material => material?["isSpecialResource"]?.GetValue<bool>() == true)
             .Select(material => material?["itemId"]?.GetValue<string>() ?? string.Empty)
+            .Where(itemId => !blueprintCatalystItemIds.Contains(itemId))
             .Where(itemId => !sourcedItemIds.Contains(itemId))
             .ToList();
 
         Assert.Empty(missingBlueprints);
         Assert.Empty(missingSpecialResources);
+    }
+
+    [Fact]
+    public void EveryBlueprintRequiresOneUniqueRegisteredCatalyst()
+    {
+        var blueprints = ReadArray("crafting/blueprints.json");
+        var materials = ReadArray("crafting/materials.json")
+            .ToDictionary(
+                material => material?["itemId"]?.GetValue<string>() ?? string.Empty,
+                material => material,
+                StringComparer.OrdinalIgnoreCase);
+        var items = ReadArray("items/items.json")
+            .ToDictionary(
+                item => item?["id"]?.GetValue<string>() ?? string.Empty,
+                item => item,
+                StringComparer.OrdinalIgnoreCase);
+        var catalystItemIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        Assert.All(blueprints, blueprint =>
+        {
+            var catalyst = Assert.Single(
+                ChildArray(blueprint, "additionalMaterialRequirements"),
+                requirement =>
+                    requirement?["type"]?.GetValue<string>() == "SpecialResource");
+            var catalystItemId = catalyst?["itemId"]?.GetValue<string>() ?? string.Empty;
+
+            Assert.False(string.IsNullOrWhiteSpace(catalystItemId));
+            Assert.Equal(1, catalyst?["baseAmount"]?.GetValue<int>());
+            Assert.Equal(0, catalyst?["amountPerTier"]?.GetValue<int>());
+            Assert.True(
+                catalystItemIds.Add(catalystItemId),
+                $"Catalyst '{catalystItemId}' is assigned to more than one Blueprint.");
+            Assert.True(materials.TryGetValue(catalystItemId, out var material));
+            Assert.True(material?["isSpecialResource"]?.GetValue<bool>());
+            Assert.True(items.TryGetValue(catalystItemId, out var item));
+            Assert.Equal("Resource", item?["itemType"]?.GetValue<string>());
+        });
     }
 
     [Fact]

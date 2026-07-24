@@ -11,17 +11,16 @@ namespace EssenceSystem.Tests;
 public sealed class TemperingMechanicsServiceTests
 {
     [Fact]
-    public void PositiveAttemptImprovesExactlyOneProfileStatAndConsumesOnePotential()
+    public void PositiveAttemptOnlyBuildsRarityProgressAndConsumesOnePotential()
     {
         var equipment = CreateEquipment();
         var result = new TemperingMechanicsService()
-            .ApplyTemperingAttempt(equipment, CreateProfile(), new FixedRandom(0.5d));
+            .ApplyTemperingAttempt(equipment, CreateProfile(), new FixedRandom(0.01d));
 
         Assert.Equal(TemperingOutcome.Positive, result.Outcome);
-        Assert.Equal(AttributeType.Armor, result.ImprovedStat);
-        Assert.Single(equipment.InstanceModifiers);
+        Assert.Null(result.ImprovedStat);
+        Assert.Empty(equipment.InstanceModifiers);
         Assert.Equal(9, equipment.Potential);
-        Assert.Equal(1, equipment.TemperingProgress);
         Assert.Equal(1, equipment.ItemXp);
     }
 
@@ -33,7 +32,7 @@ public sealed class TemperingMechanicsServiceTests
         {
             CriticalChanceBase = 0d,
             CriticalChancePerRarityStep = 0d
-        })).ApplyTemperingAttempt(equipment, CreateProfile(), new FixedRandom(0.01d));
+        })).ApplyTemperingAttempt(equipment, CreateProfile(), new FixedRandom(0.5d));
 
         Assert.Equal(TemperingOutcome.Neutral, result.Outcome);
         Assert.Null(result.ImprovedStat);
@@ -49,11 +48,13 @@ public sealed class TemperingMechanicsServiceTests
         equipment.ItemXp = 9;
 
         var result = new TemperingMechanicsService()
-            .ApplyTemperingAttempt(equipment, CreateProfile(), new FixedRandom(0.5d));
+            .ApplyTemperingAttempt(equipment, CreateProfile(), new FixedRandom(0.01d));
 
         Assert.True(result.RarityUpgraded);
         Assert.Equal(Rarity.Uncommon, equipment.Rarity);
         Assert.Equal(0, equipment.ItemXp);
+        Assert.Equal(AttributeType.Armor, result.ImprovedStat);
+        Assert.Single(equipment.InstanceModifiers);
     }
 
     [Fact]

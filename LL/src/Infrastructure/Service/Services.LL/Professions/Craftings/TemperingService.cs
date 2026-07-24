@@ -44,6 +44,11 @@ public class TemperingService : ITemperingService
         var wasMasterpiece = current.EquipmentInstance.IsMasterpiece;
         var wasLevelingItem = current.EquipmentInstance.IsLevelingItem;
         var result = _temperingMechanics.ApplyTemperingAttempt(current.EquipmentInstance, profile, rng, negativeOutcomeReductionBps);
+        if (result.Outcome == TemperingOutcome.Negative)
+        {
+            temperingSummary.CursedOutcomes++;
+        }
+
         if (!wasMasterpiece && current.EquipmentInstance.IsMasterpiece)
         {
             temperingSummary.Masterpieces++;
@@ -59,11 +64,7 @@ public class TemperingService : ITemperingService
             temperingSummary.QualityIncreases++;
         }
 
-        var experience = result.Outcome switch
-        {
-            TemperingOutcome.Critical => 100,
-            _ => 1,
-        };
+        var experience = 1;
         experience = experience.ApplyPositiveBps(craftingExperienceGainBps);
 
         AllocateExpBasedOnCraftingProfession(temperingSummary, experience, current.CraftType);
