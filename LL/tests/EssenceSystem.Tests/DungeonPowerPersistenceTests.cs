@@ -117,6 +117,33 @@ public sealed class DungeonPowerPersistenceTests
         Assert.Equal(320, saved.Recommendation.RecommendedPartyPower);
     }
 
+    [Fact]
+    public async Task Startup_fails_gracefully_when_a_persisted_recommendation_is_invalid()
+    {
+        var valid = CreatePersisted("invalid_dungeon", 220);
+        var invalid = valid with
+        {
+            Recommendation = valid.Recommendation with
+            {
+                SimulationCount = 0
+            }
+        };
+        var analyzer = new FixedPowerAnalyzer(invalid.Identity, invalid.Recommendation);
+        var repository = new FixedRecommendationRepository([invalid]);
+        var store = new DungeonPowerRecommendationStore();
+        await using var provider = CreateWorkerProvider(analyzer, repository, store);
+        var worker = new DungeonPowerCalibrationWorker(
+            provider.GetRequiredService<IServiceScopeFactory>(),
+            Options.Create(new DungeonPowerCalibrationOptions { Enabled = false }),
+            NullLogger<DungeonPowerCalibrationWorker>.Instance);
+
+        await worker.StartAsync(CancellationToken.None);
+        await WaitForCalibrationAsync(store);
+
+        Assert.False(store.TryGet(invalid.Identity.DungeonId, out _));
+        Assert.Empty(repository.Upserts);
+    }
+
     private static DungeonPowerAnalyzer CreateDisabledAnalyzer(
         DungeonDefinition dungeon,
         IDungeonPowerRecommendationStore store) => new(

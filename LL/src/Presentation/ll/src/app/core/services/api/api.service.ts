@@ -42,6 +42,10 @@ export class ApiService {
       return error.error.errors.join('\n');
     }
 
+    if (typeof error.error?.detail === 'string' && error.error.detail.trim()) {
+      return error.error.detail;
+    }
+
     return error.message || 'Request failed';
   }
 

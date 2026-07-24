@@ -30,6 +30,7 @@ public sealed class DungeonPowerCalibrationWorker(
         var calibrated = 0;
         try
         {
+            var pendingUpserts = new List<PersistedDungeonPowerRecommendation>();
             var persisted = (await recommendationRepository.GetAllAsync(stoppingToken))
                 .GroupBy(entry => entry.Identity.DungeonId, StringComparer.OrdinalIgnoreCase)
                 .ToDictionary(
@@ -48,7 +49,8 @@ public sealed class DungeonPowerCalibrationWorker(
                         saved.Recommendation.DungeonContentHash,
                         identity.DungeonContentHash,
                         StringComparison.Ordinal) &&
-                    saved.Recommendation.State is PowerAnalysisState.Available or PowerAnalysisState.LowConfidence)
+                    saved.Recommendation.State is PowerAnalysisState.Available or PowerAnalysisState.LowConfidence &&
+                    DungeonPowerRecommendationDiagnostics.ValidateRecommendation(saved.Recommendation).Count == 0)
                 {
                     recommendationStore.Set(dungeon.Id, saved.Recommendation);
                     loaded++;
@@ -69,51 +71,92 @@ public sealed class DungeonPowerCalibrationWorker(
                 logger.LogInformation(
                     "Dungeon Power calculation is disabled by configuration; skipping {MissingCount} missing or stale recommendations.",
                     missing.Count);
-                return;
             }
-
-            foreach (var (dungeon, identity) in missing)
+            else
             {
-                try
+                foreach (var (dungeon, identity) in missing)
                 {
-                    logger.LogInformation("Calibrating Power recommendation for dungeon {DungeonId}.", dungeon.Id);
-                    var recommendation = await analyzer.AnalyzeDungeonAsync(
-                        dungeon.Id,
-                        dungeon.Tier.ToDungeonTier(),
-                        stoppingToken);
-                    if (recommendation.State is PowerAnalysisState.Available or PowerAnalysisState.LowConfidence)
+                    try
                     {
-                        recommendationStore.Set(dungeon.Id, recommendation);
-                        await recommendationRepository.UpsertAsync(
-                            new PersistedDungeonPowerRecommendation(
+                        logger.LogInformation("Calibrating Power recommendation for dungeon {DungeonId}.", dungeon.Id);
+                        var recommendation = await analyzer.AnalyzeDungeonAsync(
+                            dungeon.Id,
+                            dungeon.Tier.ToDungeonTier(),
+                            stoppingToken);
+                        var recommendationIssues =
+                            DungeonPowerRecommendationDiagnostics.ValidateRecommendation(recommendation);
+                        if (recommendation.State is PowerAnalysisState.Available or PowerAnalysisState.LowConfidence &&
+                            recommendationIssues.Count == 0)
+                        {
+                            recommendationStore.Set(dungeon.Id, recommendation);
+                            pendingUpserts.Add(new PersistedDungeonPowerRecommendation(
                                 identity,
                                 recommendation,
-                                DateTimeOffset.UtcNow),
-                            stoppingToken);
-                        calibrated++;
-                        logger.LogInformation(
-                            "Calibrated dungeon {DungeonId} at recommended Power {RecommendedPower} ({Confidence}).",
-                            dungeon.Id,
-                            recommendation.RecommendedPartyPower,
-                            recommendation.Confidence);
+                                DateTimeOffset.UtcNow));
+                            logger.LogInformation(
+                                "Calculated dungeon {DungeonId} at recommended Power {RecommendedPower} ({Confidence}).",
+                                dungeon.Id,
+                                recommendation.RecommendedPartyPower,
+                                recommendation.Confidence);
+                        }
+                        else
+                        {
+                            logger.LogWarning(
+                                "Power calibration for dungeon {DungeonId} returned {State}: {Message}. Diagnostics: {Diagnostics}",
+                                dungeon.Id,
+                                recommendation.State,
+                                recommendation.StatusMessage,
+                                string.Join(" ", recommendationIssues));
+                        }
                     }
-                    else
+                    catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
                     {
-                        logger.LogWarning(
-                            "Power calibration for dungeon {DungeonId} returned {State}: {Message}",
-                            dungeon.Id,
-                            recommendation.State,
-                            recommendation.StatusMessage);
+                        return;
+                    }
+                    catch (Exception exception)
+                    {
+                        logger.LogError(exception, "Power calibration failed for dungeon {DungeonId}.", dungeon.Id);
                     }
                 }
-                catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
-                {
-                    return;
-                }
-                catch (Exception exception)
-                {
-                    logger.LogError(exception, "Power calibration failed for dungeon {DungeonId}.", dungeon.Id);
-                }
+            }
+
+            var diagnostics = DungeonPowerRecommendationDiagnostics.Analyze(
+                dungeons,
+                recommendationStore.GetAll());
+            var invalidDungeonIds = diagnostics.Issues
+                .SelectMany(issue => issue.DungeonIds)
+                .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+            foreach (var issue in diagnostics.Issues)
+            {
+                logger.LogError(
+                    "Dungeon Power recommendation diagnostics rejected {DungeonIds}: {Message}",
+                    string.Join(", ", issue.DungeonIds),
+                    issue.Message);
+            }
+
+            foreach (var dungeonId in invalidDungeonIds)
+            {
+                recommendationStore.Remove(dungeonId);
+            }
+
+            foreach (var recommendation in pendingUpserts.Where(entry =>
+                         !invalidDungeonIds.Contains(entry.Identity.DungeonId)))
+            {
+                await recommendationRepository.UpsertAsync(recommendation, stoppingToken);
+                calibrated++;
+            }
+
+            var missingAfterValidation = dungeons
+                .Where(dungeon => !recommendationStore.TryGet(dungeon.Id, out _))
+                .Select(dungeon => dungeon.Id)
+                .ToArray();
+            if (missingAfterValidation.Length > 0)
+            {
+                logger.LogWarning(
+                    "Power recommendations are unavailable for {MissingCount} dungeons after calibration: {DungeonIds}.",
+                    missingAfterValidation.Length,
+                    string.Join(", ", missingAfterValidation));
             }
         }
         catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)

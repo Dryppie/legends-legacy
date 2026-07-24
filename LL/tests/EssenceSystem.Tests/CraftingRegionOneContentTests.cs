@@ -27,18 +27,11 @@ public sealed class CraftingRegionOneContentTests
     }
 
     [Fact]
-    public void RegionOneDungeons_SourceEveryBlueprintAndNonBlueprintSpecialResource()
+    public void RegionOneDungeons_SourceEveryBlueprintAndSpecialResource()
     {
         var materials = ReadArray("crafting/materials.json");
         var blueprints = ReadArray("crafting/blueprints.json");
         var dungeons = ReadDungeonDifficulties();
-        var blueprintCatalystItemIds = blueprints
-            .SelectMany(blueprint => ChildArray(blueprint, "additionalMaterialRequirements"))
-            .Where(requirement =>
-                requirement?["type"]?.GetValue<string>() == "SpecialResource")
-            .Select(requirement => requirement?["itemId"]?.GetValue<string>())
-            .Where(itemId => !string.IsNullOrWhiteSpace(itemId))
-            .ToHashSet(StringComparer.OrdinalIgnoreCase);
 
         var firstClearItemIds = dungeons
             .SelectMany(dungeon => ChildArray(dungeon?["rewardTable"], "firstClearRewards"))
@@ -65,12 +58,45 @@ public sealed class CraftingRegionOneContentTests
         var missingSpecialResources = materials
             .Where(material => material?["isSpecialResource"]?.GetValue<bool>() == true)
             .Select(material => material?["itemId"]?.GetValue<string>() ?? string.Empty)
-            .Where(itemId => !blueprintCatalystItemIds.Contains(itemId))
             .Where(itemId => !sourcedItemIds.Contains(itemId))
             .ToList();
 
         Assert.Empty(missingBlueprints);
         Assert.Empty(missingSpecialResources);
+    }
+
+    [Fact]
+    public void EveryDungeonBlueprintCatalystIsSourcedByItsDungeonFamily()
+    {
+        var blueprints = ReadArray("crafting/blueprints.json");
+        var dungeonDocument = ReadDocument("dungeons/dungeons.json");
+        var sourcedByFamily = ChildArray(dungeonDocument, "families")
+            .ToDictionary(
+                family => family?["id"]?.GetValue<string>() ?? string.Empty,
+                family => ChildArray(family, "difficulties")
+                    .SelectMany(GetDungeonRewardItemIds)
+                    .ToHashSet(StringComparer.OrdinalIgnoreCase),
+                StringComparer.OrdinalIgnoreCase);
+
+        var missing = blueprints
+            .Where(blueprint =>
+                blueprint?["enabled"]?.GetValue<bool>() == true &&
+                blueprint?["sourceType"]?.GetValue<string>() == "Dungeon")
+            .Select(blueprint => new
+            {
+                BlueprintId = blueprint?["id"]?.GetValue<string>() ?? string.Empty,
+                FamilyId = blueprint?["sourceId"]?.GetValue<string>() ?? string.Empty,
+                CatalystItemId = ChildArray(blueprint, "additionalMaterialRequirements")
+                    .Single(requirement => requirement?["type"]?.GetValue<string>() == "SpecialResource")?
+                    ["itemId"]?.GetValue<string>() ?? string.Empty
+            })
+            .Where(source =>
+                !sourcedByFamily.TryGetValue(source.FamilyId, out var itemIds) ||
+                !itemIds.Contains(source.CatalystItemId))
+            .Select(source => $"{source.BlueprintId}:{source.CatalystItemId}@{source.FamilyId}")
+            .ToList();
+
+        Assert.Empty(missing);
     }
 
     [Fact]

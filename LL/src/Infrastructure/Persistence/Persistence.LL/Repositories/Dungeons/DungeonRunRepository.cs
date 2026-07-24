@@ -146,6 +146,12 @@ public class DungeonRunRepository : IDungeonRunRepository
 
     public Task<bool> UpdateDungeonRunAsync(DungeonRun dungeonRun, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        var entry = _context.GetEntry(dungeonRun);
+        if (entry.State == EntityState.Detached)
+        {
+            entry.State = EntityState.Modified;
+        }
+
+        return Task.FromResult(true);
     }
 }

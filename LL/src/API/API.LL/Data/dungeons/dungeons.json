@@ -65,6 +65,12 @@
                 "minAmount": 1,
                 "maxAmount": 1,
                 "chance": 0.05
+              },
+              {
+                "itemId": "fury_heart",
+                "minAmount": 1,
+                "maxAmount": 1,
+                "chance": 0.22
               }
             ]
           },
@@ -191,6 +197,12 @@
                 "minAmount": 1,
                 "maxAmount": 1,
                 "chance": 0.045
+              },
+              {
+                "itemId": "executioners_mark",
+                "minAmount": 1,
+                "maxAmount": 1,
+                "chance": 0.16
               }
             ]
           },
@@ -317,6 +329,12 @@
                 "minAmount": 1,
                 "maxAmount": 1,
                 "chance": 0.04
+              },
+              {
+                "itemId": "arcane_focus",
+                "minAmount": 1,
+                "maxAmount": 1,
+                "chance": 0.14
               }
             ]
           },
@@ -517,6 +535,12 @@
                 "minAmount": 1,
                 "maxAmount": 1,
                 "chance": 0.05
+              },
+              {
+                "itemId": "aegis_runestone",
+                "minAmount": 1,
+                "maxAmount": 1,
+                "chance": 0.22
               }
             ]
           },
@@ -615,6 +639,12 @@
                 "minAmount": 1,
                 "maxAmount": 1,
                 "chance": 0.045
+              },
+              {
+                "itemId": "spirit_prism",
+                "minAmount": 1,
+                "maxAmount": 1,
+                "chance": 0.16
               }
             ]
           },
@@ -724,6 +754,18 @@
                 "minAmount": 1,
                 "maxAmount": 1,
                 "chance": 0.03
+              },
+              {
+                "itemId": "endurance_core",
+                "minAmount": 1,
+                "maxAmount": 1,
+                "chance": 0.12
+              },
+              {
+                "itemId": "phoenix_ember",
+                "minAmount": 1,
+                "maxAmount": 1,
+                "chance": 0.12
               }
             ]
           },
@@ -1000,6 +1042,12 @@
                 "minAmount": 1,
                 "maxAmount": 1,
                 "chance": 0.16
+              },
+              {
+                "itemId": "warden_sigil",
+                "minAmount": 1,
+                "maxAmount": 1,
+                "chance": 0.14
               }
             ]
           },
