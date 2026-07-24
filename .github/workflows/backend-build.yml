@@ -16,6 +16,11 @@ on:
         description: "Project name."
         required: true
         type: string
+      dotnet_version:
+        description: ".NET SDK version used to restore and build the project."
+        required: false
+        default: "10.x"
+        type: string
       version:
         description: "Version number."
         required: false
@@ -33,7 +38,7 @@ jobs:
       - name: Setup .NET SDK
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: "8.x"
+          dotnet-version: "${{ inputs.dotnet_version }}"
 
       - name: Restore ${{ inputs.project_name }}
         run: |

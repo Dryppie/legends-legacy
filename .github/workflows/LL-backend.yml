@@ -86,6 +86,7 @@ jobs:
     with:
       projects_filter: "LL/LegendsLegacy.sln"
       project_name: "LL"
+      dotnet_version: "10.x"
       version: ${{ needs.setup.outputs.version }}
 
   docker:

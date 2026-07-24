@@ -85,6 +85,7 @@ jobs:
     with:
       projects_filter: "LL-Chat/LL-Chat.sln"
       project_name: "LL-Chat"
+      dotnet_version: "10.x"
       version: ${{ needs.setup.outputs.version }}
 
   docker:
