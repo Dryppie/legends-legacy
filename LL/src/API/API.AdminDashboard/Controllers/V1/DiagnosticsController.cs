@@ -1,9 +1,11 @@
 using Application.Interfaces.Services.LL.Entities;
 using Application.Interfaces.Services.LL.Essences;
+using Application.Interfaces.Services.LL.Balance;
 using Application.Interfaces.Services.LL.Regions;
 using Application.UseCases._AdminDashboard.Diagnostics.Queries.GetAbilityCatalogBehaviorDiagnostics;
 using Application.UseCases._AdminDashboard.Diagnostics.Queries.GetAbilityCatalogCoverage;
 using Application.UseCases._AdminDashboard.Diagnostics.Queries.GetAbilityCatalogDiagnostics;
+using Application.UseCases._AdminDashboard.Diagnostics.Queries.GetAttributeBalanceDiagnostics;
 using Application.UseCases._AdminDashboard.Diagnostics.Queries.GetCreatureBuildProfileDiagnostics;
 using Application.UseCases._AdminDashboard.Diagnostics.Queries.GetDungeonPowerDiagnostics;
 using Application.Interfaces.Services.LL.PowerRatings;
@@ -17,6 +19,10 @@ namespace API.AdminDashboard.Controllers.V1;
 
 public class DiagnosticsController : BaseController
 {
+    [HttpGet("attribute-balance")]
+    public async Task<ActionResult<AttributeBalanceAnalysisReport>> GetAttributeBalanceDiagnostics() =>
+        Ok(await Mediator.Send(new GetAttributeBalanceDiagnosticsQuery()));
+
     [HttpGet("dungeon-power")]
     public async Task<ActionResult<IReadOnlyList<DungeonPowerDiagnostic>>> GetDungeonPowerDiagnostics() =>
         Ok(await Mediator.Send(new GetDungeonPowerDiagnosticsQuery()));

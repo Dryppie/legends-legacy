@@ -264,10 +264,10 @@ public sealed class EssenceSystemServiceTests
             ]);
 
         Assert.Equal(15, projected[AttributeType.Power]);
-        Assert.Equal(110, projected[AttributeType.MaxHealth]);
+        Assert.Equal(118, projected[AttributeType.MaxHealth]);
         Assert.Equal(2, projected[AttributeType.Fortitude]);
-        Assert.Equal(0, projected[AttributeType.Armor]);
-        Assert.Equal(4, projected[AttributeType.Resistance]);
+        Assert.Equal(1, projected[AttributeType.Armor]);
+        Assert.Equal(5, projected[AttributeType.Resistance]);
         Assert.Equal(3, projected[AttributeType.DodgeChance]);
     }
 

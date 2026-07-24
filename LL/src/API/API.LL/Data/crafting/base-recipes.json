@@ -2206,7 +2206,7 @@
       "attackCategory": "Physical",
       "rangeCategory": "Melee",
       "basicAttackIntervalMultiplier": 1,
-      "basicAttackDamageMultiplier": 1,
+      "basicAttackDamageMultiplier": 1.02,
       "role": ""
     },
     "initialStatProfile": {
@@ -2416,7 +2416,7 @@
       "attackCategory": "Physical",
       "rangeCategory": "Melee",
       "basicAttackIntervalMultiplier": 1.25,
-      "basicAttackDamageMultiplier": 1.22,
+      "basicAttackDamageMultiplier": 1.18,
       "role": ""
     },
     "initialStatProfile": {
@@ -2941,7 +2941,7 @@
       "attackCategory": "Physical",
       "rangeCategory": "Melee",
       "basicAttackIntervalMultiplier": 0.75,
-      "basicAttackDamageMultiplier": 0.78,
+      "basicAttackDamageMultiplier": 0.865,
       "role": ""
     },
     "initialStatProfile": {

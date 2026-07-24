@@ -23,19 +23,18 @@ public class ItemStatRollService : IItemStatRollService
         ItemQuality quality,
         Random rng)
     {
-        var profile = design.InitialStatProfile;
-        if (profile.Count == 0) return [];
+        if (design.InitialStatProfile.Count == 0) return [];
 
         var budget = _options.GetTierPowerBudget(targetTier)
             * _options.GetSlotBudgetWeight(equipment.EquipmentType)
             * _options.GetQualityStatMultiplier(quality);
         var variance = 0.95d + (rng.NextDouble() * 0.10d);
+        var allocation = Allocate(equipment, design, targetTier, budget * variance);
 
-        return profile
-            .Where(x => x.Value > 0)
+        return allocation.AddedPoints
             .Select(x => new InstanceAttributeModifier(
                 x.Key,
-                CalculateAmount(x.Key, budget, x.Value, variance),
+                (float)x.Value,
                 ModifierType.Flat))
             .ToList();
     }
@@ -56,24 +55,40 @@ public class ItemStatRollService : IItemStatRollService
             .ToList();
         var minimumBudget = tierAndSlotBudget * qualityMultipliers.Min();
         var maximumBudget = tierAndSlotBudget * qualityMultipliers.Max();
+        var minimum = Allocate(equipment, design, targetTier, minimumBudget * 0.95d);
+        var maximum = Allocate(equipment, design, targetTier, maximumBudget * 1.05d);
 
-        return design.InitialStatProfile
-            .Where(x => x.Value > 0)
-            .Select(x => new CraftedAttributeRange(
-                x.Key,
-                CalculateAmount(x.Key, minimumBudget, x.Value, 0.95d),
-                CalculateAmount(x.Key, maximumBudget, x.Value, 1.05d)))
+        return design.InitialStatProfile.Keys
+            .Concat(design.BlueprintBonusStatProfile.Keys)
+            .Distinct()
+            .Order()
+            .Select(attribute => new CraftedAttributeRange(
+                attribute,
+                (float)minimum.AddedPoints.GetValueOrDefault(attribute),
+                (float)maximum.AddedPoints.GetValueOrDefault(attribute)))
             .ToList();
     }
 
-    private static float CalculateAmount(
-        Domain.Models.Attributes.AttributeType attributeType,
-        double budget,
-        double profileShare,
-        double variance)
+    private EquipmentConstrainedBudgetAllocation Allocate(
+        EquipmentBase equipment,
+        EquipmentCraftingDesign design,
+        int tier,
+        double budget)
     {
-        var rule = EquipmentStatBudgetCatalog.Get(attributeType);
-        var amount = Math.Round((budget * profileShare * variance) / rule.CostPerPoint);
-        return (float)Math.Clamp(amount, 1d, rule.HardCap);
+        var slotWeight = _options.GetSlotBudgetWeight(equipment.EquipmentType);
+        var constraints = EquipmentConstraintProfile.CreateItemConstraints(
+            EquipmentConstraintProfile.CreateTierBaseline(tier),
+            slotWeight,
+            _options.GetMaximumCombatLoadoutBudgetWeight(),
+            EquipmentConstraintProfile.MinimumSupportedBasicAttackIntervalMultiplier);
+        var baseDesign = EquipmentCraftingDesignComposer.Compose(design.Recipe, null);
+        return EquipmentBudgetAllocator.AllocateDesignConstrained(
+            tier,
+            budget,
+            design,
+            constraints,
+            EquipmentConstraintProfile.GetOverflowWeights(baseDesign),
+            perItemCapMultiplier:
+                EquipmentConstraintProfile.GetPerItemCapMultiplier(slotWeight));
     }
 }

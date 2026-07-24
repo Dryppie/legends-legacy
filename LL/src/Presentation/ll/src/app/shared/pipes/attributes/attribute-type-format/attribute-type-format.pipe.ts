@@ -1,58 +1,32 @@
 import { Pipe, PipeTransform } from '@angular/core';
+import { getAttributeDefinition } from '../../../models/attribute-definition';
 
 export function formatAttributeType(value: string): string {
-  const labels: Record<string, string> = {
-    Power: 'Power',
-    Fortitude: 'Fortitude',
-    Precision: 'Precision',
-    Spirit: 'Spirit',
-
-    MaxHealth: 'Max Health',
-    WeaponDamage: 'Weapon Damage',
-    Armor: 'Armor',
-    Resistance: 'Resistance',
-    CritChance: 'Crit Chance',
-    CritDamage: 'Crit Damage',
-    ArmorPenetration: 'Armor Penetration',
-    MagicPenetration: 'Magic Penetration',
-
-    DodgeChance: 'Dodge',
-    BlockChance: 'Block',
-    DamageReduction: 'Damage Reduction',
-
-    HealingPowerPercent: 'Healing Power',
-    HealthRegeneration: 'Health Regen',
-    LifeSteal: 'Life Steal',
-
-    Cooldown: 'Cooldown Reduction',
-    StatusResistance: 'Status Resistance',
-    CrowdControlResistance: 'Crowd Control Resistance',
-
-    SummonPower: 'Summon Power',
-    SummonHealth: 'Summon Health',
-
-    AttackSpeed: 'Attack Speed',
-  };
-
-  return labels[value] ?? value.replace(/([A-Z])/g, ' $1').trim();
+  return (
+    getAttributeDefinition(value)?.displayName ??
+    value.replace(/([A-Z])/g, ' $1').trim()
+  );
 }
 
 export function isPercentAttribute(value?: string | null): boolean {
-  if (!value) return false;
+  return getAttributeDefinition(value)?.unit === 'PercentagePoints';
+}
 
-  return [
-    'CritChance',
-    'CritDamage',
-    'DodgeChance',
-    'BlockChance',
-    'DamageReduction',
-    'HealingPowerPercent',
-    'LifeSteal',
-    'Cooldown',
-    'StatusResistance',
-    'CrowdControlResistance',
-    'AttackSpeed',
-  ].includes(value);
+export function formatAttributeTooltip(value: string): string {
+  const definition = getAttributeDefinition(value);
+  if (!definition) return formatAttributeType(value);
+
+  const cap =
+    definition.capKind === 'Fixed' && definition.maximumValue != null
+      ? ` Cap: ${definition.maximumValue}${definition.displaySuffix}.`
+      : definition.capKind === 'ContextDependent'
+        ? ' Cap depends on combat context.'
+        : '';
+  const source = definition.approvedPrimarySource
+    ? ` Also gained from ${formatAttributeType(definition.approvedPrimarySource)}.`
+    : '';
+
+  return `${definition.description}${cap}${source}`;
 }
 
 @Pipe({
@@ -62,5 +36,15 @@ export function isPercentAttribute(value?: string | null): boolean {
 export class AttributeTypeFormatPipe implements PipeTransform {
   transform(value: string): string {
     return formatAttributeType(value);
+  }
+}
+
+@Pipe({
+  name: 'attributeTooltip',
+  standalone: true,
+})
+export class AttributeTooltipPipe implements PipeTransform {
+  transform(value: string): string {
+    return formatAttributeTooltip(value);
   }
 }

@@ -4,8 +4,8 @@ namespace Application.Interfaces.Services.LL.PowerRatings;
 
 public static class PowerRatingAlgorithm
 {
-    public const int Version = 12;
-    public const int CombatRulesVersion = 2;
+    public const int Version = 13;
+    public const int CombatRulesVersion = 4;
     public const int BenchmarkDefinitionVersion = 6;
     public const int RatingSeedSetVersion = 1;
     public const int DungeonSeedSetVersion = 2;

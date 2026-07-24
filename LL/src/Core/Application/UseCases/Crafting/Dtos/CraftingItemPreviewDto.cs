@@ -15,11 +15,6 @@ public sealed class CraftingItemPreviewDto
     public IReadOnlyList<CraftingQualityChanceDto> QualityChances { get; init; } = [];
     public int MinimumStartingPotential { get; init; }
     public int MaximumStartingPotential { get; init; }
-    public int Magnitude { get; init; }
-    public int MagnitudeRange { get; init; }
-    public int AttackSpeed { get; init; }
-    public AttributeType ScalingAttribute { get; init; }
-    public float ScalingAmount { get; init; }
 }
 
 public sealed class CraftingAttributePreviewDto

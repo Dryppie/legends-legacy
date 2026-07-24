@@ -4,6 +4,7 @@ using Application.Interfaces.Services.LL;
 using Application.Interfaces.Services.LL.Guilds;
 using Application.Interfaces.Services.LL.Achievements;
 using Application.Interfaces.Services.LL.CharacterActions;
+using Application.Interfaces.Services.LL.Balance;
 using Application.Interfaces.Services.LL.Colosseum;
 using Application.Interfaces.Services.LL.Dungeons;
 using Application.Interfaces.Services.LL.Entities;
@@ -25,6 +26,7 @@ using Services.LL._Simulator;
 using Services.LL.Attributes;
 using Services.LL.Achievements;
 using Services.LL.Authorization;
+using Services.LL.Balance;
 using Services.LL.Bonuses;
 using Services.LL.CharacterActions;
 using Services.LL.Colosseum;
@@ -217,6 +219,7 @@ public static class DependencyInjection
                 sp.GetRequiredService<JsonSerializerOptions>()));
         services.AddScoped<IAbilityCatalogDiagnostics, AbilityCatalogDiagnostics>();
         services.AddScoped<IAbilityBalanceSimulator, AbilityBalanceSimulator>();
+        services.AddScoped<IAttributeMarginalValueAnalyzer, AttributeMarginalValueAnalyzer>();
         services.AddScoped<IAbilityCatalogBehaviorDiagnostics>(sp =>
             new AbilityCatalogBehaviorDiagnostics(
                 sp.GetRequiredService<IAbilityCatalogProvider>(),

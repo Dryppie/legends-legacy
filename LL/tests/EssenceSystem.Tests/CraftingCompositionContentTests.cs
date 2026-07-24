@@ -1,6 +1,9 @@
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
+using Domain.Models.Attributes;
+using Domain.Models.Items;
+using Domain.Models.Items.Equipments;
 using Domain.Models.Professions.Crafting;
 using Domain.Models.Professions.Crafting.V2;
 using Microsoft.Extensions.Configuration;
@@ -93,6 +96,54 @@ public sealed class CraftingCompositionContentTests
     }
 
     [Fact]
+    public void RepresentativeHandPeersRetainCalibratedCombatBehavior()
+    {
+        var recipes = CreateProvider().GetRecipes();
+        var dagger = recipes.Single(x => x.Id == "recipe.weapon.one_handed.dagger");
+        var greatsword = recipes.Single(x => x.Id == "recipe.weapon.two_handed.greatsword");
+        var gauntlets = recipes.Single(x => x.Id == "recipe.weapon.two_handed.gauntlets");
+        var maul = recipes.Single(x => x.Id == "recipe.weapon.two_handed.maul");
+
+        Assert.Equal(0.75d, dagger.Behavior.BasicAttackIntervalMultiplier);
+        Assert.Equal(0.78d, dagger.Behavior.BasicAttackDamageMultiplier);
+        Assert.Equal(1d, greatsword.Behavior.BasicAttackIntervalMultiplier);
+        Assert.Equal(1.02d, greatsword.Behavior.BasicAttackDamageMultiplier);
+        Assert.Equal(0.75d, gauntlets.Behavior.BasicAttackIntervalMultiplier);
+        Assert.Equal(0.865d, gauntlets.Behavior.BasicAttackDamageMultiplier);
+        Assert.Equal(1.25d, maul.Behavior.BasicAttackIntervalMultiplier);
+        Assert.Equal(1.18d, maul.Behavior.BasicAttackDamageMultiplier);
+    }
+
+    [Fact]
+    public void CalibratedBlueprintProfilesRetainTheirReviewedBonusBudgetsAndWeights()
+    {
+        var provider = CreateProvider();
+        var execution = provider.GetBlueprint("blueprint_execution")!;
+        var aegis = provider.GetBlueprint("blueprint_aegis")!;
+
+        Assert.Equal(0.2d, execution.BonusStatBudgetMultiplier);
+        Assert.Equal(0.2d, aegis.BonusStatBudgetMultiplier);
+        Assert.Equal(
+            new Dictionary<AttributeType, double>
+            {
+                [AttributeType.Power] = 0.4d,
+                [AttributeType.CritDamage] = 0.1d,
+                [AttributeType.CritChance] = 0.2d,
+                [AttributeType.WeaponDamage] = 0.3d
+            },
+            execution.BonusStatProfile);
+        Assert.Equal(
+            new Dictionary<AttributeType, double>
+            {
+                [AttributeType.Armor] = 0.25d,
+                [AttributeType.Resistance] = 0.25d,
+                [AttributeType.MaxHealth] = 0.35d,
+                [AttributeType.DamageReduction] = 0.15d
+            },
+            aegis.BonusStatProfile);
+    }
+
+    [Fact]
     public void BlueprintsComposeAcrossCompatibleRecipesWithoutAuthoredCombinations()
     {
         var provider = CreateProvider();
@@ -106,8 +157,50 @@ public sealed class CraftingCompositionContentTests
             var design = EquipmentCraftingDesignComposer.Compose(recipe, venom);
             Assert.Contains("Venom-Touched", design.Name);
             Assert.NotEmpty(design.InitialStatProfile);
+            Assert.Equal(recipe.InitialStatProfile, design.InitialStatProfile);
+            Assert.Equal(venom.BonusStatProfile, design.BlueprintBonusStatProfile);
             Assert.NotEmpty(design.TemperingProfile.Stats);
         });
+    }
+
+    [Fact]
+    public void Aegis_cloth_cowl_preserves_every_base_roll_and_adds_bonus_power()
+    {
+        var provider = CreateProvider();
+        var recipe = provider.GetRecipes().Single(x => x.Id == "recipe.armor.head.cloth_cowl");
+        var aegis = provider.GetBlueprint("blueprint_aegis")!;
+        var equipment = new EquipmentBase
+        {
+            Id = recipe.OutputItemId,
+            Name = recipe.Name,
+            EquipmentType = recipe.OutputItemType
+        };
+        var service = new ItemStatRollService();
+        var baseStats = service.RollBaseStats(
+            equipment,
+            EquipmentCraftingDesignComposer.Compose(recipe, null),
+            1,
+            ItemQuality.Standard,
+            new FixedRandom(0.5d));
+        var aegisStats = service.RollBaseStats(
+            equipment,
+            EquipmentCraftingDesignComposer.Compose(recipe, aegis),
+            1,
+            ItemQuality.Standard,
+            new FixedRandom(0.5d));
+        var baseByAttribute = baseStats.ToDictionary(x => x.AttributeType, x => x.Amount);
+        var aegisByAttribute = aegisStats.ToDictionary(x => x.AttributeType, x => x.Amount);
+
+        Assert.All(baseByAttribute, stat =>
+            Assert.True(aegisByAttribute[stat.Key] >= stat.Value));
+        Assert.Equal(
+            baseByAttribute[AttributeType.Spirit],
+            aegisByAttribute[AttributeType.Spirit]);
+        Assert.True(
+            EquipmentBudgetEvaluator.Evaluate(aegisStats, 1) >
+            EquipmentBudgetEvaluator.Evaluate(baseStats, 1));
+        Assert.True(aegisByAttribute[AttributeType.Armor] > 0);
+        Assert.True(aegisByAttribute[AttributeType.DamageReduction] > 0);
     }
 
     [Fact]
@@ -193,5 +286,10 @@ public sealed class CraftingCompositionContentTests
         }
 
         throw new DirectoryNotFoundException("Crafting data root not found.");
+    }
+
+    private sealed class FixedRandom(double nextDouble) : Random
+    {
+        public override double NextDouble() => nextDouble;
     }
 }

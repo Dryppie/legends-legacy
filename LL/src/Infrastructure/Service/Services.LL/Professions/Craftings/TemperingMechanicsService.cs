@@ -62,7 +62,6 @@ public sealed class TemperingMechanicsService : ITemperingMechanicsService
         }
 
         equipment.Potential -= TemperingConstants.PotentialCost;
-
         return new TemperingAttemptResult(
             equipment,
             outcome,
@@ -91,7 +90,7 @@ public sealed class TemperingMechanicsService : ITemperingMechanicsService
         }
     }
 
-    private static DirectedImprovement? TryApplyDirectedImprovement(
+    private DirectedImprovement? TryApplyDirectedImprovement(
         EquipmentInstance equipment,
         TemperingProfileDefinition profile,
         Random rng)
@@ -99,9 +98,15 @@ public sealed class TemperingMechanicsService : ITemperingMechanicsService
         var currentByStat = equipment.InstanceModifiers
             .GroupBy(modifier => modifier.AttributeType)
             .ToDictionary(group => group.Key, group => group.Sum(modifier => modifier.Amount));
+        var allCurrentPoints = GetCurrentEquipmentPoints(equipment);
+        var slotWeight = _options.GetSlotBudgetWeight(equipment.EquipmentBase.EquipmentType);
+        var constraints = CreateItemConstraints(equipment, slotWeight);
+        var perItemCapMultiplier =
+            EquipmentConstraintProfile.GetPerItemCapMultiplier(slotWeight);
         var budgetByStat = currentByStat.ToDictionary(
             pair => pair.Key,
-            pair => Math.Max(0d, pair.Value) * EquipmentStatBudgetCatalog.Get(pair.Key).CostPerPoint);
+            pair => Math.Max(0d, pair.Value)
+                    * EquipmentStatBudgetCatalog.Get(pair.Key, equipment.Tier).CostPerPoint);
         var totalBudget = Math.Max(1d, budgetByStat.Values.Sum());
         var totalProfileWeight = profile.Stats.Sum(stat => Math.Max(0d, stat.Weight));
 
@@ -109,16 +114,21 @@ public sealed class TemperingMechanicsService : ITemperingMechanicsService
             .Select(stat =>
             {
                 var exists = currentByStat.TryGetValue(stat.Stat, out var currentValue);
-                var rule = EquipmentStatBudgetCatalog.Get(stat.Stat);
                 var currentBudget = budgetByStat.GetValueOrDefault(stat.Stat);
                 var currentShare = currentBudget / totalBudget;
                 var targetShare = stat.Weight / totalProfileWeight;
                 var cap = stat.MaxBudgetShare ?? 1d;
+                var maximumIncrease = EquipmentConstraintProfile.GetMaximumAdditionalPoints(
+                    stat.Stat,
+                    equipment.Tier,
+                    allCurrentPoints,
+                    constraints,
+                    perItemCapMultiplier);
 
                 if ((!exists && !stat.CanIntroduce) ||
                     (exists && !stat.CanIncrease) ||
                     stat.MinimumTier > equipment.Tier ||
-                    currentValue >= rule.HardCap ||
+                    maximumIncrease <= 0.000001d ||
                     currentShare >= cap)
                 {
                     return null;
@@ -140,11 +150,18 @@ public sealed class TemperingMechanicsService : ITemperingMechanicsService
             return null;
 
         var selected = PickWeighted(candidates, candidate => candidate.EffectiveWeight, rng);
-        var selectedRule = EquipmentStatBudgetCatalog.Get(selected.Definition.Stat);
+        var selectedRule = EquipmentStatBudgetCatalog.Get(selected.Definition.Stat, equipment.Tier);
         var previous = currentByStat.GetValueOrDefault(selected.Definition.Stat);
         var rollBudget = Math.Max(1d, equipment.Tier * 2d);
         var increase = (float)Math.Max(1d, Math.Round(rollBudget / selectedRule.CostPerPoint));
-        increase = Math.Min(increase, selectedRule.HardCap - previous);
+        increase = Math.Min(
+            increase,
+            (float)EquipmentConstraintProfile.GetMaximumAdditionalPoints(
+                selected.Definition.Stat,
+                equipment.Tier,
+                allCurrentPoints,
+                constraints,
+                perItemCapMultiplier));
         if (increase <= 0)
             return null;
 
@@ -164,7 +181,10 @@ public sealed class TemperingMechanicsService : ITemperingMechanicsService
         return new DirectedImprovement(selected.Definition.Stat, previous, previous + increase);
     }
 
-    private bool HandleCriticalOutcome(EquipmentInstance equipment, ItemQuality previousQuality, Random rng)
+    private bool HandleCriticalOutcome(
+        EquipmentInstance equipment,
+        ItemQuality previousQuality,
+        Random rng)
     {
         if (rng.NextDouble() < Math.Clamp(_options.CriticalLevelingItemChance, 0d, 1d))
         {
@@ -218,7 +238,7 @@ public sealed class TemperingMechanicsService : ITemperingMechanicsService
             _ => 0d
         };
 
-    private static RarityProgressResult ApplyRarityProgress(
+    private RarityProgressResult ApplyRarityProgress(
         EquipmentInstance equipment,
         TemperingProfileDefinition profile,
         Random rng)
@@ -248,14 +268,53 @@ public sealed class TemperingMechanicsService : ITemperingMechanicsService
             return;
 
         var ratio = newMultiplier / previousMultiplier;
-        foreach (var modifier in equipment.InstanceModifiers)
+        if (ratio <= 1d || equipment.InstanceModifiers.Count == 0)
+            return;
+
+        var currentPoints = equipment.InstanceModifiers
+            .GroupBy(modifier => modifier.AttributeType)
+            .ToDictionary(group => group.Key, group => (double)group.Sum(modifier => modifier.Amount));
+        var currentBudgetWeights = currentPoints.ToDictionary(
+            pair => pair.Key,
+            pair => pair.Value
+                    * EquipmentStatBudgetCatalog.Get(pair.Key, equipment.Tier).CostPerPoint);
+        var currentBudget = currentBudgetWeights.Values.Sum();
+        var allCurrentPoints = GetCurrentEquipmentPoints(equipment);
+        var slotWeight = _options.GetSlotBudgetWeight(equipment.EquipmentBase.EquipmentType);
+        var allocation = EquipmentBudgetAllocator.AllocateConstrained(
+            equipment.Tier,
+            currentBudget * (ratio - 1d),
+            currentBudgetWeights,
+            CreateItemConstraints(equipment, slotWeight),
+            currentBudgetWeights,
+            allCurrentPoints,
+            EquipmentConstraintProfile.GetPerItemCapMultiplier(slotWeight));
+
+        foreach (var (attribute, addedPoints) in allocation.AddedPoints)
         {
-            var hardCap = EquipmentStatBudgetCatalog.Get(modifier.AttributeType).HardCap;
-            modifier.Amount = (float)Math.Min(
-                hardCap,
-                Math.Max(1d, Math.Round(modifier.Amount * ratio)));
+            var modifier = equipment.InstanceModifiers
+                .First(x => x.AttributeType == attribute);
+            modifier.Amount += (float)addedPoints;
         }
     }
+
+    private IReadOnlyList<EquipmentLinearBudgetConstraint> CreateItemConstraints(
+        EquipmentInstance equipment,
+        double slotWeight) =>
+        EquipmentConstraintProfile.CreateItemConstraints(
+            EquipmentConstraintProfile.CreateTierBaseline(equipment.Tier),
+            slotWeight,
+            _options.GetMaximumCombatLoadoutBudgetWeight(),
+            EquipmentConstraintProfile.MinimumSupportedBasicAttackIntervalMultiplier);
+
+    private static Dictionary<Domain.Models.Attributes.AttributeType, double>
+        GetCurrentEquipmentPoints(EquipmentInstance equipment) =>
+        equipment.AttributeModifiers
+            .Where(modifier => modifier.ModifierType == ModifierType.Flat)
+            .GroupBy(modifier => modifier.AttributeType)
+            .ToDictionary(
+                group => group.Key,
+                group => (double)group.Sum(modifier => modifier.Amount));
 
     private static ItemQuality? GetNextQuality(ItemQuality current)
     {

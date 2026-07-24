@@ -144,6 +144,40 @@ public sealed class DungeonPowerPersistenceTests
         Assert.Empty(repository.Upserts);
     }
 
+    [Fact]
+    public async Task Startup_recalculates_and_replaces_a_stale_algorithm_recommendation()
+    {
+        var current = CreatePersisted("stale_dungeon", 410);
+        var staleIdentity = current.Identity with
+        {
+            AlgorithmVersion = current.Identity.AlgorithmVersion - 1,
+            CombatRulesVersion = current.Identity.CombatRulesVersion - 1
+        };
+        var stale = new PersistedDungeonPowerRecommendation(
+            staleIdentity,
+            CreateRecommendation(staleIdentity, 180),
+            current.UpdatedAtUtc.AddDays(-1));
+        var analyzer = new FixedPowerAnalyzer(current.Identity, current.Recommendation);
+        var repository = new FixedRecommendationRepository([stale]);
+        var store = new DungeonPowerRecommendationStore();
+        await using var provider = CreateWorkerProvider(analyzer, repository, store);
+        var worker = new DungeonPowerCalibrationWorker(
+            provider.GetRequiredService<IServiceScopeFactory>(),
+            Options.Create(new DungeonPowerCalibrationOptions { Enabled = true }),
+            NullLogger<DungeonPowerCalibrationWorker>.Instance);
+
+        await worker.StartAsync(CancellationToken.None);
+        await WaitForCalibrationAsync(store);
+
+        Assert.Equal(1, analyzer.AnalysisCount);
+        Assert.True(store.TryGet(current.Identity.DungeonId, out var loaded));
+        Assert.Equal(410, loaded.RecommendedPartyPower);
+        var saved = Assert.Single(repository.Upserts);
+        Assert.Equal(PowerRatingAlgorithm.Version, saved.Identity.AlgorithmVersion);
+        Assert.Equal(PowerRatingAlgorithm.CombatRulesVersion, saved.Identity.CombatRulesVersion);
+        Assert.Equal(current.Identity, saved.Identity);
+    }
+
     private static DungeonPowerAnalyzer CreateDisabledAnalyzer(
         DungeonDefinition dungeon,
         IDungeonPowerRecommendationStore store) => new(

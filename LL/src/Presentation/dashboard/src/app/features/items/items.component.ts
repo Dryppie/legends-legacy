@@ -67,11 +67,6 @@ export class ItemsComponent implements OnInit {
       // Equipment-specific
       equipmentType: [null],
       attributeModifiers: this.fb.array([]),
-      attackSpeed: [0, [Validators.required, Validators.min(0)]],
-      magnitude: [0, [Validators.required, Validators.min(0)]],
-      magnitudeRange: [0, [Validators.required, Validators.min(0)]],
-      scalingAttribute: [null, Validators.required],
-      scalingAmount: [0, [Validators.required, Validators.min(0)]],
       // Essence-specific
       essence: [null],
     });
@@ -82,11 +77,6 @@ export class ItemsComponent implements OnInit {
         this.itemForm.get('essence')!.reset();
       } else if (type === 'Essence') {
         this.itemForm.get('equipmentType')!.reset();
-        this.itemForm.get('magnitude')!.reset();
-        this.itemForm.get('scalingAttribute')!.reset();
-        this.itemForm.get('scalingAmount')!.reset();
-        this.itemForm.get('attackSpeed')!.reset();
-        this.itemForm.get('magnitudeRange')!.reset();
         while (this.attributeModifiers.length) {
           this.attributeModifiers.removeAt(0);
         }
@@ -109,11 +99,6 @@ export class ItemsComponent implements OnInit {
       itemType: null,
       description: '',
       equipmentType: null,
-      attackSpeed: 0,
-      magnitude: 0,
-      magnitudeRange: 0,
-      scalingAttribute: null,
-      scalingAmount: 0,
       essence: null,
     });
     // clear modifiers array
@@ -132,11 +117,6 @@ export class ItemsComponent implements OnInit {
       // patch equipmentType
       this.itemForm.patchValue({
         equipmentType: eq.equipmentType,
-        magnitude: eq.magnitude,
-        scalingAttribute: eq.scalingAttribute,
-        scalingAmount: eq.scalingAmount,
-        attackSpeed: eq.attackSpeed,
-        magnitudeRange: eq.magnitudeRange,
       });
       // clear and repopulate attribute modifiers
       this.attributeModifiers.clear();

@@ -333,12 +333,7 @@ namespace Persistence.LL.Migrations
                     ItemType = table.Column<int>(type: "integer", nullable: false),
                     Rarity = table.Column<int>(type: "integer", nullable: false),
                     EquipmentType = table.Column<int>(type: "integer", nullable: true),
-                    AttackSpeed = table.Column<int>(type: "integer", nullable: true),
-                    Magnitude = table.Column<int>(type: "integer", nullable: true),
-                    MagnitudeRange = table.Column<int>(type: "integer", nullable: true),
                     GatheringType = table.Column<int>(type: "integer", nullable: true),
-                    ScalingAttribute = table.Column<int>(type: "integer", nullable: true),
-                    ScalingAmount = table.Column<float>(type: "real", nullable: true),
                     EssenceDefinitionId = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: true),
                     DismantleDustAmount = table.Column<int>(type: "integer", nullable: true, defaultValue: 1)
                 },
