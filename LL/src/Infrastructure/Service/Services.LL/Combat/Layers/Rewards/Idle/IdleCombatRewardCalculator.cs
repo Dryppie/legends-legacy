@@ -4,6 +4,7 @@ using Application.Interfaces.Services.LL.Regions;
 using Domain.Models.Bonuses;
 using Domain.Models.Entities;
 using Domain.Models.Inventories;
+using Domain.Models.Items;
 using Services.LL.Combat.Layers.Rewards.Models;
 using Services.LL.Extensions;
 using Services.LL.Interfaces;
@@ -54,6 +55,10 @@ public sealed class IdleCombatRewardCalculator : IIdleCombatRewardCalculator
 
         var encounterOutcomes = new List<IdleEncounterCalculatedOutcome>(facts.Encounters.Count);
         var totalLoot = new List<InventoryItem>();
+        var powerRewards = new List<InventoryItem>();
+        var craftingRewards = new List<InventoryItem>();
+        var essenceRewards = new List<InventoryItem>();
+        var dungeonAccessRewards = new List<InventoryItem>();
         var totalExperience = 0;
         var totalCinders = 0;
         var sigilEligibleVictories = 0;
@@ -99,6 +104,7 @@ public sealed class IdleCombatRewardCalculator : IIdleCombatRewardCalculator
             if (encounter.IsVictory)
             {
                 loot = combatLootByEncounterId[encounter.EncounterId];
+                ClassifyCombatLoot(loot, powerRewards, craftingRewards, essenceRewards);
 
                 var essenceDrops = await _essenceResonanceService.RollEssenceDropsAsync(
                     facts.CharacterId,
@@ -110,6 +116,7 @@ public sealed class IdleCombatRewardCalculator : IIdleCombatRewardCalculator
                 if (essenceDrops.Count > 0)
                 {
                     loot = loot.Concat(essenceDrops).ToList();
+                    essenceRewards.AddRange(essenceDrops);
                 }
 
                 sigilEligibleVictories++;
@@ -149,6 +156,7 @@ public sealed class IdleCombatRewardCalculator : IIdleCombatRewardCalculator
         if (sigilDrops.Count > 0)
         {
             totalLoot.AddRange(sigilDrops);
+            dungeonAccessRewards.AddRange(sigilDrops);
         }
 
         var gatheringRewards = await _gatheringRewardProcessor.ProcessAsync(
@@ -175,6 +183,7 @@ public sealed class IdleCombatRewardCalculator : IIdleCombatRewardCalculator
         if (gatheringLoot.Count > 0)
         {
             totalLoot.AddRange(gatheringLoot);
+            craftingRewards.AddRange(gatheringLoot);
         }
 
         var totalSoulstones = _soulstoneRewardCalculator.Calculate(
@@ -190,8 +199,35 @@ public sealed class IdleCombatRewardCalculator : IIdleCombatRewardCalculator
             TotalCinders: totalCinders,
             TotalSoulstones: totalSoulstones,
             TotalLoot: totalLoot,
+            PowerRewards: powerRewards,
+            CraftingRewards: craftingRewards,
+            EssenceRewards: essenceRewards,
+            DungeonAccessRewards: dungeonAccessRewards,
             GatheringRewards: gatheringRewards,
             EncounterOutcomes: encounterOutcomes);
     }
 
+    private static void ClassifyCombatLoot(
+        IReadOnlyList<InventoryItem> loot,
+        ICollection<InventoryItem> powerRewards,
+        ICollection<InventoryItem> craftingRewards,
+        ICollection<InventoryItem> essenceRewards)
+    {
+        foreach (var item in loot)
+        {
+            switch (item.ItemInstance.ItemBase.ItemType)
+            {
+                case ItemType.Essence:
+                    essenceRewards.Add(item);
+                    break;
+                case ItemType.Equipment:
+                case ItemType.Consumable:
+                    powerRewards.Add(item);
+                    break;
+                default:
+                    craftingRewards.Add(item);
+                    break;
+            }
+        }
+    }
 }

@@ -70,6 +70,7 @@ export class CombatComponent implements OnInit, OnDestroy {
   enemyCharacters: SimpleCombatEntityDto[] = [];
   subscriptions: Subscription = new Subscription();
   readonly currentAction;
+  readonly idleCombatError;
   // Only set to true if a combat result has been received, or if start combat has been
   displayCombat = false;
   isLoading = false;
@@ -82,6 +83,7 @@ export class CombatComponent implements OnInit, OnDestroy {
     private readonly router: Router,
   ) {
     this.currentAction = this.characterActionService.currentAction;
+    this.idleCombatError = this.characterActionService.idleCombatError;
 
     const isStartingCombatSig = this.characterActionService.loadingCombat;
     const isRefreshingActionSig =
@@ -235,6 +237,10 @@ export class CombatComponent implements OnInit, OnDestroy {
     if (this.battleType === BattleType.IdleCombat) {
       this.router.navigate(['/game/world']);
     }
+  }
+
+  retryOfflineProgress(): void {
+    this.characterActionService.retryIdleCombatResolution();
   }
 
   private updateCharacter(

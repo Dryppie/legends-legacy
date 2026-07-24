@@ -10,6 +10,19 @@ interface LootSummaryItem {
   quantity: number;
 }
 
+interface RewardMetric {
+  label: string;
+  value: number;
+}
+
+interface RewardSection {
+  key: string;
+  title: string;
+  description: string;
+  metrics: RewardMetric[];
+  items: LootSummaryItem[];
+}
+
 @Component({
     selector: 'app-session-summary-popup',
     imports: [NgIf, NgFor],
@@ -20,8 +33,8 @@ export class SessionSummaryPopupComponent {
 
   getDuration(from: string | Date, to: string | Date): string {
     const fromDate = new Date(from);
-    const toDate = new Date();
-    const diffMs = toDate.getTime() - fromDate.getTime();
+    const toDate = new Date(to);
+    const diffMs = Math.max(0, toDate.getTime() - fromDate.getTime());
 
     const totalMinutes = Math.floor(diffMs / (1000 * 60));
     const days = Math.floor(totalMinutes / (60 * 24));
@@ -38,18 +51,60 @@ export class SessionSummaryPopupComponent {
     return joinedDuration;
   }
 
-  gatheredLoot(combatSession: CombatSessionDto): LootSummaryItem[] {
-    return this.compactLoot(
-      combatSession.combatResult.gatheringRewards.flatMap(
-        (gathering) => gathering.itemsGained,
-      ),
+  rewardSections(combatSession: CombatSessionDto): RewardSection[] {
+    const summary = combatSession.combatSummary;
+    const rewards = summary.rewardBreakdown;
+
+    const sections: RewardSection[] = [
+      {
+        key: 'power',
+        title: 'Power',
+        description: 'Character growth and direct upgrades',
+        metrics: this.positiveMetrics([
+          { label: 'Character XP', value: summary.totalExperience },
+        ]),
+        items: this.compactLoot(rewards?.powerItems ?? []),
+      },
+      {
+        key: 'crafting',
+        title: 'Crafting',
+        description: 'Materials for forging and professions',
+        metrics: [],
+        items: this.compactLoot(rewards?.craftingItems ?? []),
+      },
+      {
+        key: 'essence',
+        title: 'Essence',
+        description: 'Essence drops and progression materials',
+        metrics: [],
+        items: this.compactLoot(rewards?.essenceItems ?? []),
+      },
+      {
+        key: 'dungeon-access',
+        title: 'Dungeon Access',
+        description: 'Sigils used to enter Dungeons',
+        metrics: [],
+        items: this.compactLoot(rewards?.dungeonAccessItems ?? []),
+      },
+      {
+        key: 'currencies',
+        title: 'Currencies',
+        description: 'Spendable progression currencies',
+        metrics: this.positiveMetrics([
+          { label: 'Cinders', value: summary.totalCinders },
+          { label: 'Soulstones', value: summary.totalSoulstones },
+        ]),
+        items: [],
+      },
+    ];
+
+    return sections.filter(
+      (section) => section.metrics.length > 0 || section.items.length > 0,
     );
   }
 
-  hasGatheredLoot(combatSession: CombatSessionDto): boolean {
-    return combatSession.combatResult.gatheringRewards.some(
-      (gathering) => gathering.itemsGained.length > 0,
-    );
+  hasRewards(combatSession: CombatSessionDto): boolean {
+    return this.rewardSections(combatSession).length > 0;
   }
 
   trackLoot(_index: number, loot: LootSummaryItem): string {
@@ -80,5 +135,9 @@ export class SessionSummaryPopupComponent {
     return Array.from(compacted.values()).sort((a, b) =>
       a.name.localeCompare(b.name),
     );
+  }
+
+  private positiveMetrics(metrics: RewardMetric[]): RewardMetric[] {
+    return metrics.filter((metric) => metric.value > 0);
   }
 }

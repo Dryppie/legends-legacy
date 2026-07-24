@@ -47,10 +47,50 @@ public sealed class CharacterActionFlowTests
         Assert.Equal(0, repository.UpdateCount);
     }
 
+    [Fact]
+    public async Task Resolve_hydrates_combat_and_updates_the_action_boundary()
+    {
+        var repository = new CharacterActionRepositoryStub
+        {
+            Current = new CharacterAction(Guid.NewGuid(), new CombatActionDetails()),
+        };
+        var combat = new CombatServiceStub();
+        var service = new CharacterActionService(repository, combat, new CraftingServiceStub());
+
+        var result = await service.GetCharacterActionAsync(
+            repository.Current.CharacterId,
+            CancellationToken.None);
+
+        Assert.Same(combat.Session, result!.CombatSession);
+        Assert.Equal(1, combat.CallCount);
+        Assert.Equal(1, repository.UpdateCount);
+    }
+
+    [Fact]
+    public async Task Stop_marks_the_current_combat_action_for_deletion()
+    {
+        var repository = new CharacterActionRepositoryStub
+        {
+            Current = new CharacterAction(Guid.NewGuid(), new CombatActionDetails()),
+        };
+        var service = new CharacterActionService(
+            repository,
+            new CombatServiceStub(),
+            new CraftingServiceStub());
+
+        var stopped = await service.DeleteCharacterActionAsync(
+            repository.Current.CharacterId,
+            CancellationToken.None);
+
+        Assert.True(stopped);
+        Assert.Equal(1, repository.DeleteCount);
+    }
+
     private sealed class CharacterActionRepositoryStub : ICharacterActionRepository
     {
         public CharacterAction Current { get; set; } = null!;
         public int UpdateCount { get; private set; }
+        public int DeleteCount { get; private set; }
 
         public Task<CharacterAction?> StartCharacterActionAsync(CharacterAction characterAction, CancellationToken cancellationToken)
         {
@@ -62,10 +102,16 @@ public sealed class CharacterActionFlowTests
             Task.FromResult<CharacterAction?>(Current);
 
         public void UpdateCharacterAction(CharacterAction characterAction) => UpdateCount++;
-        public Task<bool> DeleteCharacterActionAsync(CharacterAction characterAction, CancellationToken cancellationToken) => throw new NotSupportedException();
+        public Task<bool> DeleteCharacterActionAsync(CharacterAction characterAction, CancellationToken cancellationToken)
+        {
+            DeleteCount++;
+            characterAction.IsDeleted = true;
+            return Task.FromResult(true);
+        }
         public Task<CharacterAction?> GetCraftingActionAsync(Guid characterId, CancellationToken cancellationToken) => throw new NotSupportedException();
         public Task<bool> UpdateCraftingActionAsync(Guid characterId, CraftingQueueItem characterAction, CancellationToken cancellationToken) => throw new NotSupportedException();
-        public Task<CharacterAction?> GetCharacterActionForDeletionAsync(Guid characterId, CancellationToken cancellationToken) => throw new NotSupportedException();
+        public Task<CharacterAction?> GetCharacterActionForDeletionAsync(Guid characterId, CancellationToken cancellationToken) =>
+            Task.FromResult<CharacterAction?>(Current);
     }
 
     private sealed class CombatServiceStub : ICombatService

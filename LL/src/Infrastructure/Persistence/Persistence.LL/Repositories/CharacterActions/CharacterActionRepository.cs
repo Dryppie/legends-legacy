@@ -36,6 +36,7 @@ public class CharacterActionRepository : ICharacterActionRepository
 
         existingAction.UpdatedAt = characterAction.UpdatedAt;
         existingAction.IsDeleted = false;
+        existingAction.RowVersion++;
 
         if (existingAction.ActionDetails != null)
         {
@@ -56,6 +57,7 @@ public class CharacterActionRepository : ICharacterActionRepository
 
         characterAction.IsDeleted = true;
         characterAction.ActionDetails = null;
+        characterAction.RowVersion++;
         _context.CharacterActions.Update(characterAction);
         return true;
     }
@@ -93,6 +95,7 @@ public class CharacterActionRepository : ICharacterActionRepository
 
     public void UpdateCharacterAction(CharacterAction characterAction)
     {
+        characterAction.RowVersion++;
         _context.CharacterActions.Update(characterAction);
     }
 
@@ -160,6 +163,7 @@ public class CharacterActionRepository : ICharacterActionRepository
         }
 
         existingAction.IsDeleted = false;
+        existingAction.RowVersion++;
 
         if (existingAction.ActionDetails is not CraftingActionDetails craftingDetails)
         {

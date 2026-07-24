@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Persistence.LL;
@@ -12,9 +13,11 @@ using Persistence.LL;
 namespace Persistence.LL.Migrations
 {
     [DbContext(typeof(LLDbContext))]
-    partial class LLDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260724115529_AddCharacterActionConcurrency")]
+    partial class AddCharacterActionConcurrency
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -2638,6 +2641,7 @@ namespace Persistence.LL.Migrations
                         .HasColumnType("uuid");
 
                     b.Property<string>("RecipeId")
+                        .IsRequired()
                         .HasMaxLength(128)
                         .HasColumnType("character varying(128)");
 
@@ -3539,12 +3543,10 @@ namespace Persistence.LL.Migrations
                         .HasColumnType("text[]");
 
                     b.Property<string>("BaseRecipeId")
-                        .HasMaxLength(128)
-                        .HasColumnType("character varying(128)");
+                        .HasColumnType("text");
 
                     b.Property<string>("BlueprintId")
-                        .HasMaxLength(160)
-                        .HasColumnType("character varying(160)");
+                        .HasColumnType("text");
 
                     b.Property<string>("CraftedName")
                         .HasColumnType("text");
@@ -3570,17 +3572,18 @@ namespace Persistence.LL.Migrations
                     b.Property<int>("Rarity")
                         .HasColumnType("integer");
 
+                    b.Property<string>("RecipeId")
+                        .HasColumnType("text");
+
+                    b.PrimitiveCollection<List<string>>("SpecialModifiers")
+                        .IsRequired()
+                        .HasColumnType("text[]");
+
                     b.Property<int>("TemperingProgress")
                         .HasColumnType("integer");
 
                     b.Property<int>("Tier")
                         .HasColumnType("integer");
-
-                    b.Property<uint>("Version")
-                        .IsConcurrencyToken()
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("xid")
-                        .HasColumnName("xmin");
 
                     b.HasDiscriminator().HasValue(0);
                 });

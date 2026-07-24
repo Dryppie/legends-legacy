@@ -37,6 +37,8 @@ builder.Services.AddControllers().AddJsonOptions(options =>
 {
     options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
 });
+builder.Services.AddProblemDetails();
+builder.Services.AddExceptionHandler<ConcurrencyExceptionHandler>();
 
 builder.Services.AddSignalR()
     .AddJsonProtocol(options =>
@@ -179,6 +181,8 @@ using (var scope = app.Services.CreateScope())
 await app.Services.ValidateCreatureBuildProfilesAsync();
 
 // Configure the HTTP request pipeline.
+app.UseExceptionHandler();
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();

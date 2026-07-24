@@ -87,6 +87,14 @@ export interface SessionSummary {
   totalGold: number;
   totalCinders: number;
   totalSoulstones: number;
+  rewardBreakdown?: CombatRewardBreakdown;
+}
+
+export interface CombatRewardBreakdown {
+  powerItems: InventoryItem[];
+  craftingItems: InventoryItem[];
+  essenceItems: InventoryItem[];
+  dungeonAccessItems: InventoryItem[];
 }
 
 export enum BattleOutcome {

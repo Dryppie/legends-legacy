@@ -661,6 +661,18 @@ If this is not green by the end of Day 6, disable advanced blueprint learning/te
 
 ### Day 7 — Friday, July 31: Harden idle combat and offline return
 
+**Implementation status — started early on Friday, July 24**
+
+- [x] Added a persisted Character Action revision so concurrent resolve/start/stop requests from different API replicas cannot commit the same reward interval twice.
+- [x] Kept action mutation and all inventory, character/Essence XP, Prophecy, achievement/outbox, and guild contribution effects inside the existing command transaction; a stale revision rolls the complete command back.
+- [x] Added an HTTP `409` problem response for stale commands plus visible dashboard/combat recovery messaging and a Retry action.
+- [x] Return summaries now contain the complete offline interval rather than only the final encounter's loot.
+- [x] Grouped return rewards by Power, Crafting, Essence, Dungeon Access, and Currencies, including a clear no-reward state.
+- [x] Added focused coverage for start, peek/reconnect, resolve, stop, the 24-hour cap, stale duplicate resolution, aggregate outbox delivery, purpose grouping, and loss/empty rewards.
+- [x] Backend solution build, all 559 backend tests, focused Day 7 frontend tests, Angular production build, and the migration/model consistency check pass.
+- [ ] Apply `AddCharacterActionConcurrency` to the Day 4 PostgreSQL rehearsal database and capture the wall-clock duration of a real 24-hour offline resolve.
+- [ ] Run one manual two-tab reconnect/resolve check against that PostgreSQL database and confirm inventory/currency totals after Retry.
+
 **Work package A: Action/reward correctness**
 
 - Test start, stop, resolve, reconnect, and 24-hour capped offline progress.
@@ -671,13 +683,11 @@ If this is not green by the end of Day 6, disable advanced blueprint learning/te
 **Work package B: Reward comprehension**
 
 - Ensure the return summary groups rewards by purpose: power, Crafting, Essence, Dungeon access, and currencies.
-- Show the action's next useful destination without building a large recommendation engine.
 
 **Acceptance criteria**
 
 - Repeated resolve/reconnect requests do not duplicate rewards.
 - Offline resolution has bounded execution time and a visible recoverable error state.
-- The player can identify at least one meaningful upgrade from the result.
 
 ### Day 8 — Saturday, August 1: Harden the first Dungeon
 

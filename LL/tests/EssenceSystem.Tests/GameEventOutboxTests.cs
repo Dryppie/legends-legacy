@@ -214,6 +214,10 @@ public sealed class GameEventOutboxTests
             0,
             [],
             [],
+            [],
+            [],
+            [],
+            [],
             []);
         var outbox = new RecordingGameEventOutbox();
         var publisher = new RecordingPublisher();

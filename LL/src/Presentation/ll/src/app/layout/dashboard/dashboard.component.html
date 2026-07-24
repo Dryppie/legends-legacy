@@ -53,6 +53,23 @@
                     </p>
                   </div>
                 </div>
+                <div
+                  *ngIf="idleCombatError() as resolutionError"
+                  class="ll-panel mb-2 flex shrink-0 items-center justify-between gap-4 border border-danger/50 px-4 py-3 pr-4 text-sm text-white sm:mr-4"
+                  role="alert"
+                >
+                  <div class="min-w-0">
+                    <p class="font-bold">Offline progress paused</p>
+                    <p class="ll-copy text-xs">{{ resolutionError }}</p>
+                  </div>
+                  <button
+                    type="button"
+                    class="ll-button-secondary shrink-0 px-3 py-1.5 text-xs"
+                    (click)="retryOfflineProgress()"
+                  >
+                    Retry
+                  </button>
+                </div>
                 <app-tutorial-quest class="block shrink-0"></app-tutorial-quest>
                 <div class="min-h-0 flex-1 overflow-hidden">
                   <router-outlet></router-outlet>
