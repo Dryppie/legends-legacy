@@ -1,0 +1,101 @@
+name: Release gate
+
+on:
+  workflow_call:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  backend:
+    uses: ./.github/workflows/backend-gate.yml
+
+  chat:
+    uses: ./.github/workflows/chat-gate.yml
+
+  frontend:
+    uses: ./.github/workflows/frontend-gate.yml
+
+  smoke:
+    name: Clean-account API smoke
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: legends_legacy_smoke
+          POSTGRES_USER: smoke
+          POSTGRES_PASSWORD: smoke-only-password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U smoke -d legends_legacy_smoke"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    env:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://127.0.0.1:5080
+      ConnectionStrings__LegendsLegacyDB: Host=127.0.0.1;Port=5432;Database=legends_legacy_smoke;Username=smoke;Password=smoke-only-password
+      Jwt__SigningKey: release-gate-only-signing-key-that-is-never-used-outside-ci
+      Jwt__Issuer: release-gate
+      Jwt__Audience: release-gate
+      Debug__Tutorial__Enabled: "true"
+      DungeonPowerCalibration__Enabled: "false"
+      LL_SMOKE_BASE_URL: http://127.0.0.1:5080
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 10 SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.x"
+
+      - name: Build smoke API
+        run: dotnet build "LL/src/API/API.LL/API.LL.csproj" --configuration Release
+
+      - name: Start smoke API
+        id: api
+        shell: bash
+        run: |
+          dotnet run \
+            --project "LL/src/API/API.LL/API.LL.csproj" \
+            --configuration Release \
+            --no-build \
+            > "$RUNNER_TEMP/ll-smoke-api.log" 2>&1 &
+          echo "pid=$!" >> "$GITHUB_OUTPUT"
+
+      - name: Wait for smoke API
+        shell: bash
+        run: |
+          for attempt in {1..90}; do
+            if curl --fail --silent "$LL_SMOKE_BASE_URL/healthz/live" > /dev/null; then
+              exit 0
+            fi
+
+            if ! kill -0 "${{ steps.api.outputs.pid }}" 2>/dev/null; then
+              cat "$RUNNER_TEMP/ll-smoke-api.log"
+              exit 1
+            fi
+
+            sleep 2
+          done
+
+          cat "$RUNNER_TEMP/ll-smoke-api.log"
+          exit 1
+
+      - name: Run clean-account smoke journey
+        shell: pwsh
+        run: ./build/smoke-ll.ps1 -BaseUrl $env:LL_SMOKE_BASE_URL
+
+      - name: Print API log after failure
+        if: failure()
+        shell: bash
+        run: cat "$RUNNER_TEMP/ll-smoke-api.log"
+
+      - name: Stop smoke API
+        if: always()
+        shell: bash
+        run: kill "${{ steps.api.outputs.pid }}" 2>/dev/null || true

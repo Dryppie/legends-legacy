@@ -3,7 +3,7 @@
 ## Backend Requirements:
 
 - Visual Studio (Recommended)
-- .NET SDK
+- .NET 10 SDK
 - MSSQL Express
 - Azure Data Studio (Recommended tool for managing Database)
 
