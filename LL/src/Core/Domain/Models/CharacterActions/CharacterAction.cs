@@ -6,7 +6,6 @@ using Domain.Models.Entities.Characters;
 namespace Domain.Models.CharacterActions;
 public class CharacterAction
 {
-    private const int OFFLINE_DURATION = 12;
     public Guid CharacterId { get; set; }
     public Character Character { get; set; } = null!;
     public CharacterActionType CharacterActionType => ActionDetails switch
@@ -19,7 +18,8 @@ public class CharacterAction
     public ActionDetails? ActionDetails { get; set; }
     public DateTimeOffset UpdatedAt { get; set; }
     public bool IsDeleted { get; set; }
-    //public bool IsCapped => DateTimeOffset.UtcNow >= UpdatedAt.AddHours(OFFLINE_DURATION);
+    public uint RowVersion { get; set; }
+
     [NotMapped]
     public CombatSession? CombatSession { get; set; }
     [NotMapped]

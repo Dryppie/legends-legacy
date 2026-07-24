@@ -42,6 +42,7 @@ export class DashboardComponent implements OnInit {
   readonly bootstrapLoaded: Signal<boolean>;
   readonly bootstrapLoading: Signal<boolean>;
   readonly bootstrapError: Signal<string | null>;
+  readonly idleCombatError: Signal<string | null>;
   readonly chatLayout;
 
   constructor(
@@ -53,6 +54,7 @@ export class DashboardComponent implements OnInit {
     this.bootstrapLoaded = this.bootstrapState.loaded;
     this.bootstrapLoading = this.bootstrapState.loading;
     this.bootstrapError = this.bootstrapState.error;
+    this.idleCombatError = this.state.idleCombatError;
     this.chatLayout = this.chatLayoutPreference.layout;
 
     effect(() => {
@@ -151,5 +153,9 @@ export class DashboardComponent implements OnInit {
     this.bootstrapState.reload().subscribe({
       error: () => undefined,
     });
+  }
+
+  retryOfflineProgress(): void {
+    this.state.retryIdleCombatResolution();
   }
 }

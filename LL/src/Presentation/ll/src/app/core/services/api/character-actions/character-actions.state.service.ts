@@ -22,6 +22,7 @@ import { CombatService } from '../../client-side/combat/combat.service';
 import { InventoryStateService } from '../inventory/inventory-state.service';
 import { EventBusService } from '../../client-side/event-bus/event-bus.service';
 import { Router } from '@angular/router';
+import { HttpErrorResponse } from '@angular/common/http';
 
 export type IdleCombatPhase =
   | 'idle'
@@ -46,6 +47,8 @@ export class CharacterActionsStateService {
   readonly loadingActionRefresh = computed(() => this._loadingActionRefresh());
   private readonly _idleCombatPhase = signal<IdleCombatPhase>('idle');
   readonly idleCombatPhase = computed(() => this._idleCombatPhase());
+  private readonly _idleCombatError = signal<string | null>(null);
+  readonly idleCombatError = computed(() => this._idleCombatError());
   private activeActionRefreshes = 0;
   private actionRefreshLoadingTimeout: ReturnType<typeof setTimeout> | null =
     null;
@@ -159,7 +162,7 @@ export class CharacterActionsStateService {
           this.resolveCurrentActionRequest().pipe(
             catchError((err) => {
               console.error('[Polling] Failed to fetch current action', err);
-              this._idleCombatPhase.set('error');
+              this.setIdleCombatError(err);
               return of(this._currentAction());
             }),
           ),
@@ -216,8 +219,8 @@ export class CharacterActionsStateService {
         }),
         catchError((err) => {
           console.error('Failed to start action', err);
-          if (isCombat) this._idleCombatPhase.set('error');
           this.reset();
+          if (isCombat) this.setIdleCombatError(err);
           return of(false);
         }),
       )
@@ -288,6 +291,7 @@ export class CharacterActionsStateService {
     this._loadingActionRefresh.set(false);
     this._loadingCombat.set(false);
     this._idleCombatPhase.set('idle');
+    this._idleCombatError.set(null);
     this.openCombatWhenHydrated = false;
     this._showAction.set(false);
     this._currentAction.set(null);
@@ -331,7 +335,7 @@ export class CharacterActionsStateService {
       this.resolveCurrentActionRequest().pipe(
         catchError((err) => {
           console.error('[Manual Refresh] Failed to fetch current action', err);
-          this._idleCombatPhase.set('error');
+          this.setIdleCombatError(err);
           return of(this._currentAction());
         }),
       ),
@@ -455,10 +459,34 @@ export class CharacterActionsStateService {
 
     return this.actionsService.resolveCurrentAction().pipe(
       tap((action) => {
-        if (action?.combatSession?.combatResult) {
+        this._idleCombatError.set(null);
+        if (
+          action?.characterActionType === CharacterActionType.Combat &&
+          !action.isDeleted
+        ) {
           this._idleCombatPhase.set('active');
         }
       }),
+    );
+  }
+
+  retryIdleCombatResolution(): void {
+    this._idleCombatError.set(null);
+    this.refreshCurrentAction();
+  }
+
+  private setIdleCombatError(error: unknown): void {
+    this._idleCombatPhase.set('error');
+
+    if (error instanceof HttpErrorResponse && error.status === 409) {
+      this._idleCombatError.set(
+        'Your progress was resolved by another request. Refresh to load the latest action state.',
+      );
+      return;
+    }
+
+    this._idleCombatError.set(
+      'Offline progress could not be resolved. Your rewards were not partially applied; retry when ready.',
     );
   }
 
