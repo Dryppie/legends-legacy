@@ -13,8 +13,8 @@
     ],
     "excludedRecipeTags": [],
     "compatibleRecipeIds": [],
-    "statProfileInfluence": 0.4,
-    "statProfile": {
+    "bonusStatBudgetMultiplier": 0.2,
+    "bonusStatProfile": {
       "Power": 0.35,
       "CritChance": 0.3,
       "WeaponDamage": 0.2,
@@ -103,8 +103,8 @@
     ],
     "excludedRecipeTags": [],
     "compatibleRecipeIds": [],
-    "statProfileInfluence": 0.4,
-    "statProfile": {
+    "bonusStatBudgetMultiplier": 0.2,
+    "bonusStatProfile": {
       "Spirit": 0.35,
       "MagicPenetration": 0.25,
       "Cooldown": 0.2,
@@ -192,8 +192,8 @@
     ],
     "excludedRecipeTags": [],
     "compatibleRecipeIds": [],
-    "statProfileInfluence": 0.2,
-    "statProfile": {
+    "bonusStatBudgetMultiplier": 0.2,
+    "bonusStatProfile": {
       "Power": 0.4,
       "CritDamage": 0.1,
       "CritChance": 0.2,
@@ -282,8 +282,8 @@
     ],
     "excludedRecipeTags": [],
     "compatibleRecipeIds": [],
-    "statProfileInfluence": 0.4,
-    "statProfile": {
+    "bonusStatBudgetMultiplier": 0.2,
+    "bonusStatProfile": {
       "Armor": 0.25,
       "Resistance": 0.25,
       "MaxHealth": 0.35,
@@ -372,8 +372,8 @@
     ],
     "excludedRecipeTags": [],
     "compatibleRecipeIds": [],
-    "statProfileInfluence": 0.4,
-    "statProfile": {
+    "bonusStatBudgetMultiplier": 0.2,
+    "bonusStatProfile": {
       "MaxHealth": 0.35,
       "CrowdControlResistance": 0.25,
       "Fortitude": 0.2,
@@ -461,8 +461,8 @@
     ],
     "excludedRecipeTags": [],
     "compatibleRecipeIds": [],
-    "statProfileInfluence": 0.4,
-    "statProfile": {
+    "bonusStatBudgetMultiplier": 0.2,
+    "bonusStatProfile": {
       "HealthRegeneration": 0.35,
       "MaxHealth": 0.3,
       "Fortitude": 0.2,
@@ -550,8 +550,8 @@
     ],
     "excludedRecipeTags": [],
     "compatibleRecipeIds": [],
-    "statProfileInfluence": 0.4,
-    "statProfile": {
+    "bonusStatBudgetMultiplier": 0.2,
+    "bonusStatProfile": {
       "HealthRegeneration": 0.35,
       "HealingPowerPercent": 0.25,
       "MaxHealth": 0.2,
@@ -641,8 +641,8 @@
     ],
     "excludedRecipeTags": [],
     "compatibleRecipeIds": [],
-    "statProfileInfluence": 0.4,
-    "statProfile": {
+    "bonusStatBudgetMultiplier": 0.2,
+    "bonusStatProfile": {
       "Spirit": 0.35,
       "Resistance": 0.25,
       "Cooldown": 0.2,
@@ -731,8 +731,8 @@
     ],
     "excludedRecipeTags": [],
     "compatibleRecipeIds": [],
-    "statProfileInfluence": 0.4,
-    "statProfile": {
+    "bonusStatBudgetMultiplier": 0.2,
+    "bonusStatProfile": {
       "SummonPower": 0.35,
       "SummonHealth": 0.3,
       "Fortitude": 0.2,
@@ -818,8 +818,8 @@
     "anyRecipeTags": [],
     "excludedRecipeTags": [],
     "compatibleRecipeIds": [],
-    "statProfileInfluence": 0.4,
-    "statProfile": {
+    "bonusStatBudgetMultiplier": 0.2,
+    "bonusStatProfile": {
       "Precision": 0.3,
       "LifeSteal": 0.25,
       "CritChance": 0.25,
@@ -906,8 +906,8 @@
     "anyRecipeTags": [],
     "excludedRecipeTags": [],
     "compatibleRecipeIds": [],
-    "statProfileInfluence": 0.4,
-    "statProfile": {
+    "bonusStatBudgetMultiplier": 0.2,
+    "bonusStatProfile": {
       "AttackSpeed": 0.3,
       "StatusResistance": 0.25,
       "Precision": 0.25,

@@ -1919,7 +1919,18 @@ The approved behavior, prices, allocator, canonical attribute metadata, and reco
 | Whole-build Power remains simulation-backed                                    | **Complete**                                       | Character Power continues to use production-engine benchmark simulations and remains separate from Gear Value.                                                                                                                                                                                                                             |
 | Every item and content path uses the active profile                            | **Complete**                                       | Historical item-price branching and persisted item balance versions have been removed. The clean local schema, crafting, tempering, DTOs, and frontend all use the active profile.                                                                                                                                                           |
 | Dungeon recommendations match the active combat rules                          | **Pending operational recalibration**              | Power algorithm version 13 and combat rules version 4 invalidate older recommendation identities. The existing calibration worker will recompute and persist replacements after deployment; those generated values still need operational review.                                                                                          |
-| Full relevant tests pass                                                       | **Complete in the working tree**                   | `644/644` backend tests pass, including an explicit current-only equipment-surface guard plus canonical metadata, prevention-ledger, and stale-recommendation replacement coverage. The Angular development build and the two focused metadata-formatting tests pass; the unrelated full Angular suite still has four pre-existing failures in Tavern/AppComponent specs.                                                                                       |
+| Full relevant tests pass                                                       | **Complete in the working tree**                   | Backend coverage includes explicit current-only equipment-surface and additive-blueprint guards plus canonical metadata, prevention-ledger, and stale-recommendation replacement coverage. The Angular development build and the two focused metadata-formatting tests pass; the unrelated full Angular suite still has four pre-existing failures in Tavern/AppComponent specs.                                                                                       |
+
+### Recently completed: blueprints are additive upgrades
+
+Blueprints no longer blend their stat profile into the base recipe's fixed budget. Crafting now performs two constrained allocations:
+
+1. allocate the complete base-recipe budget from the unchanged base-recipe profile;
+2. allocate a separate blueprint bonus equal to `20%` of the base budget from the blueprint's bonus-stat profile, using the completed base roll as the starting point for all item and combat caps.
+
+This guarantees that selecting a blueprint cannot lower Power, Spirit, or any other base-recipe roll. Overlapping blueprint stats increase the inherited value, new stats are added, and any cap-driven overflow remains aligned with the recipe or blueprint theme. The active content catalog spends the full authorized budget without exceeding item or effective combat caps.
+
+Tempering composition follows the same additive rule: the recipe's tempering weights and eligibility remain intact, while the blueprint adds or strengthens its own tempering options. The crafting preview explicitly reports that the base is retained, shows the separate bonus-budget percentage, and decomposes inherited versus blueprint-added ranges.
 
 ### Recently completed: tier-10 hand cadence gate
 
@@ -1940,7 +1951,7 @@ All 21 release cells now pass without widening the 20% peer tolerance. The autho
 
 - Greatsword basic-attack damage multiplier: `1.00 → 1.02`;
 - Gauntlets basic-attack damage multiplier: `0.78 → 0.865`, while retaining the `0.75` interval multiplier;
-- Execution blueprint influence: `0.40 → 0.20`;
+- every blueprint bonus-stat budget multiplier: `0.20`;
 - Execution profile: Power `40%`, Weapon Damage `30%`, Crit Chance `20%`, Crit Damage `10%`, avoiding the former all-in Crit Damage/Precision feedback loop;
 - Aegis profile: Max Health `35%`, Armor `25%`, Resistance `25%`, Damage Reduction `15%`, reducing excessive investment into already-diminishing Armor;
 - Fury/Execution overflow remains offensive on every compatible slot, while Aegis overflow remains defensive.

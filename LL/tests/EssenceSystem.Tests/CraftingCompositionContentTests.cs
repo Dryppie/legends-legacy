@@ -2,6 +2,8 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
 using Domain.Models.Attributes;
+using Domain.Models.Items;
+using Domain.Models.Items.Equipments;
 using Domain.Models.Professions.Crafting;
 using Domain.Models.Professions.Crafting.V2;
 using Microsoft.Extensions.Configuration;
@@ -113,13 +115,14 @@ public sealed class CraftingCompositionContentTests
     }
 
     [Fact]
-    public void CalibratedBlueprintProfilesRetainTheirReviewedInfluenceAndWeights()
+    public void CalibratedBlueprintProfilesRetainTheirReviewedBonusBudgetsAndWeights()
     {
         var provider = CreateProvider();
         var execution = provider.GetBlueprint("blueprint_execution")!;
         var aegis = provider.GetBlueprint("blueprint_aegis")!;
 
-        Assert.Equal(0.2d, execution.StatProfileInfluence);
+        Assert.Equal(0.2d, execution.BonusStatBudgetMultiplier);
+        Assert.Equal(0.2d, aegis.BonusStatBudgetMultiplier);
         Assert.Equal(
             new Dictionary<AttributeType, double>
             {
@@ -128,7 +131,7 @@ public sealed class CraftingCompositionContentTests
                 [AttributeType.CritChance] = 0.2d,
                 [AttributeType.WeaponDamage] = 0.3d
             },
-            execution.StatProfile);
+            execution.BonusStatProfile);
         Assert.Equal(
             new Dictionary<AttributeType, double>
             {
@@ -137,7 +140,7 @@ public sealed class CraftingCompositionContentTests
                 [AttributeType.MaxHealth] = 0.35d,
                 [AttributeType.DamageReduction] = 0.15d
             },
-            aegis.StatProfile);
+            aegis.BonusStatProfile);
     }
 
     [Fact]
@@ -154,8 +157,50 @@ public sealed class CraftingCompositionContentTests
             var design = EquipmentCraftingDesignComposer.Compose(recipe, venom);
             Assert.Contains("Venom-Touched", design.Name);
             Assert.NotEmpty(design.InitialStatProfile);
+            Assert.Equal(recipe.InitialStatProfile, design.InitialStatProfile);
+            Assert.Equal(venom.BonusStatProfile, design.BlueprintBonusStatProfile);
             Assert.NotEmpty(design.TemperingProfile.Stats);
         });
+    }
+
+    [Fact]
+    public void Aegis_cloth_cowl_preserves_every_base_roll_and_adds_bonus_power()
+    {
+        var provider = CreateProvider();
+        var recipe = provider.GetRecipes().Single(x => x.Id == "recipe.armor.head.cloth_cowl");
+        var aegis = provider.GetBlueprint("blueprint_aegis")!;
+        var equipment = new EquipmentBase
+        {
+            Id = recipe.OutputItemId,
+            Name = recipe.Name,
+            EquipmentType = recipe.OutputItemType
+        };
+        var service = new ItemStatRollService();
+        var baseStats = service.RollBaseStats(
+            equipment,
+            EquipmentCraftingDesignComposer.Compose(recipe, null),
+            1,
+            ItemQuality.Standard,
+            new FixedRandom(0.5d));
+        var aegisStats = service.RollBaseStats(
+            equipment,
+            EquipmentCraftingDesignComposer.Compose(recipe, aegis),
+            1,
+            ItemQuality.Standard,
+            new FixedRandom(0.5d));
+        var baseByAttribute = baseStats.ToDictionary(x => x.AttributeType, x => x.Amount);
+        var aegisByAttribute = aegisStats.ToDictionary(x => x.AttributeType, x => x.Amount);
+
+        Assert.All(baseByAttribute, stat =>
+            Assert.True(aegisByAttribute[stat.Key] >= stat.Value));
+        Assert.Equal(
+            baseByAttribute[AttributeType.Spirit],
+            aegisByAttribute[AttributeType.Spirit]);
+        Assert.True(
+            EquipmentBudgetEvaluator.Evaluate(aegisStats, 1) >
+            EquipmentBudgetEvaluator.Evaluate(baseStats, 1));
+        Assert.True(aegisByAttribute[AttributeType.Armor] > 0);
+        Assert.True(aegisByAttribute[AttributeType.DamageReduction] > 0);
     }
 
     [Fact]
@@ -241,5 +286,10 @@ public sealed class CraftingCompositionContentTests
         }
 
         throw new DirectoryNotFoundException("Crafting data root not found.");
+    }
+
+    private sealed class FixedRandom(double nextDouble) : Random
+    {
+        public override double NextDouble() => nextDouble;
     }
 }

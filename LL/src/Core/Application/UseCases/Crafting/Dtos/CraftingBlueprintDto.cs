@@ -17,9 +17,9 @@ public sealed class CraftingBlueprintDto
     public EquipmentBehaviorDefinition Behavior { get; init; } = new();
     public IReadOnlyDictionary<AttributeType, double> InitialStatProfile { get; init; } =
         new Dictionary<AttributeType, double>();
-    public IReadOnlyDictionary<AttributeType, double> BlueprintStatProfile { get; init; } =
+    public IReadOnlyDictionary<AttributeType, double> BonusStatProfile { get; init; } =
         new Dictionary<AttributeType, double>();
-    public double StatProfileInfluence { get; init; }
+    public double BonusStatBudgetMultiplier { get; init; }
     public IReadOnlyList<string> PrimaryTemperingStats { get; init; } = [];
     public IReadOnlyList<string> SecondaryTemperingStats { get; init; } = [];
     public string TemperingProfileSummary { get; init; } = string.Empty;

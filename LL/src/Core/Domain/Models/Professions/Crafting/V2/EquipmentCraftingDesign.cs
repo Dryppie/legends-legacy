@@ -9,6 +9,8 @@ public sealed record EquipmentCraftingDesign(
     string Description,
     EquipmentBehaviorDefinition Behavior,
     IReadOnlyDictionary<AttributeType, double> InitialStatProfile,
+    IReadOnlyDictionary<AttributeType, double> BlueprintBonusStatProfile,
+    double BlueprintBonusBudgetMultiplier,
     TemperingProfileDefinition TemperingProfile,
     IReadOnlyList<MaterialRequirementDefinition> AdditionalMaterialRequirements,
     IReadOnlyList<string> Tags);
@@ -59,6 +61,8 @@ public static class EquipmentCraftingDesignComposer
                 recipe.Description,
                 recipe.Behavior,
                 recipe.InitialStatProfile,
+                new Dictionary<AttributeType, double>(),
+                0d,
                 recipe.TemperingProfile,
                 [],
                 recipe.Tags
@@ -72,16 +76,16 @@ public static class EquipmentCraftingDesignComposer
             .Replace("{BlueprintName}", blueprintName, StringComparison.OrdinalIgnoreCase)
             .Replace("{BaseName}", recipe.Name, StringComparison.OrdinalIgnoreCase)
             .Trim();
-        var influence = Math.Clamp(blueprint.StatProfileInfluence, 0d, 1d);
-
         return new EquipmentCraftingDesign(
             recipe,
             blueprint,
             name,
             string.IsNullOrWhiteSpace(blueprint.Description) ? recipe.Description : blueprint.Description,
             ComposeBehavior(recipe.Behavior, blueprint.BehaviorModifiers),
-            BlendStatProfiles(recipe.InitialStatProfile, blueprint.StatProfile, influence),
-            BlendTemperingProfiles(recipe, blueprint, influence),
+            recipe.InitialStatProfile,
+            blueprint.BonusStatProfile,
+            Math.Max(0d, blueprint.BonusStatBudgetMultiplier),
+            ComposeTemperingProfiles(recipe, blueprint),
             blueprint.AdditionalMaterialRequirements,
             recipe.Tags
                 .Concat(recipe.AffinityTags)
@@ -109,44 +113,21 @@ public static class EquipmentCraftingDesignComposer
                 recipe.BasicAttackDamageMultiplier * overlay.BasicAttackDamageMultiplier
         };
 
-    private static IReadOnlyDictionary<AttributeType, double> BlendStatProfiles(
-        IReadOnlyDictionary<AttributeType, double> recipe,
-        IReadOnlyDictionary<AttributeType, double> blueprint,
-        double influence)
-    {
-        if (blueprint.Count == 0 || influence <= 0)
-            return recipe;
-
-        var combined = new Dictionary<AttributeType, double>();
-        foreach (var pair in recipe)
-            combined[pair.Key] = pair.Value * (1d - influence);
-        foreach (var pair in blueprint)
-            combined[pair.Key] = combined.GetValueOrDefault(pair.Key) + (pair.Value * influence);
-
-        var total = combined.Values.Sum();
-        return total <= 0
-            ? recipe
-            : combined.ToDictionary(pair => pair.Key, pair => pair.Value / total);
-    }
-
-    private static TemperingProfileDefinition BlendTemperingProfiles(
+    private static TemperingProfileDefinition ComposeTemperingProfiles(
         CraftingRecipeDefinition recipe,
-        BlueprintDefinition blueprint,
-        double influence)
+        BlueprintDefinition blueprint)
     {
-        if (blueprint.TemperingProfile.Stats.Count == 0 || influence <= 0)
+        if (blueprint.TemperingProfile.Stats.Count == 0)
             return recipe.TemperingProfile;
 
         var stats = recipe.TemperingProfile.Stats
-            .Select(stat => Scale(stat, 1d - influence))
             .ToDictionary(stat => stat.Stat);
 
         foreach (var overlay in blueprint.TemperingProfile.Stats)
         {
-            var scaled = Scale(overlay, influence);
             if (!stats.TryGetValue(overlay.Stat, out var existing))
             {
-                stats[overlay.Stat] = scaled;
+                stats[overlay.Stat] = overlay;
                 continue;
             }
 
@@ -154,7 +135,7 @@ public static class EquipmentCraftingDesignComposer
             stats[overlay.Stat] = new TemperingStatWeightDefinition
             {
                 Stat = overlay.Stat,
-                Weight = existing.Weight + scaled.Weight,
+                Weight = existing.Weight + overlay.Weight,
                 Category = overlay.Category == TemperingStatCategory.Primary
                     ? TemperingStatCategory.Primary
                     : existing.Category,
@@ -176,18 +157,4 @@ public static class EquipmentCraftingDesignComposer
                 .ToList()
         };
     }
-
-    private static TemperingStatWeightDefinition Scale(
-        TemperingStatWeightDefinition stat,
-        double multiplier) =>
-        new()
-        {
-            Stat = stat.Stat,
-            Weight = stat.Weight * multiplier,
-            Category = stat.Category,
-            CanIntroduce = stat.CanIntroduce,
-            CanIncrease = stat.CanIncrease,
-            MaxBudgetShare = stat.MaxBudgetShare,
-            MinimumTier = stat.MinimumTier
-        };
 }

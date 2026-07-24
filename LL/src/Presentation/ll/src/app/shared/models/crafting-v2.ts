@@ -59,7 +59,8 @@ export interface CraftingBlueprint {
   sourceId?: string | null;
   behavior: EquipmentBehavior;
   initialStatProfile: Record<string, number>;
-  blueprintStatProfile?: Record<string, number>;
+  bonusStatProfile?: Record<string, number>;
+  bonusStatBudgetMultiplier: number;
   primaryTemperingStats: string[];
   secondaryTemperingStats: string[];
   temperingProfileSummary: string;

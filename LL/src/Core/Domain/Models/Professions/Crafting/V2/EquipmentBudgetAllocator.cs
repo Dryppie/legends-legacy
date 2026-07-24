@@ -6,6 +6,56 @@ public static class EquipmentBudgetAllocator
 {
     private const double Epsilon = 0.000001d;
 
+    public static EquipmentConstrainedBudgetAllocation AllocateDesignConstrained(
+        int tier,
+        double baseBudget,
+        EquipmentCraftingDesign design,
+        IReadOnlyList<EquipmentLinearBudgetConstraint> constraints,
+        IReadOnlyDictionary<AttributeType, double>? baseOverflowWeights = null,
+        double perItemCapMultiplier = 1d)
+    {
+        var baseAllocation = AllocateConstrained(
+            tier,
+            baseBudget,
+            design.InitialStatProfile,
+            constraints,
+            baseOverflowWeights,
+            perItemCapMultiplier: perItemCapMultiplier);
+        var bonusBudget = Math.Max(0d, baseBudget)
+            * Math.Max(0d, design.BlueprintBonusBudgetMultiplier);
+        if (bonusBudget <= Epsilon || design.BlueprintBonusStatProfile.Count == 0)
+            return baseAllocation;
+
+        var bonusAllocation = AllocateConstrained(
+            tier,
+            bonusBudget,
+            design.BlueprintBonusStatProfile,
+            constraints,
+            EquipmentConstraintProfile.GetOverflowWeights(design),
+            currentPoints: baseAllocation.AddedPoints,
+            perItemCapMultiplier: perItemCapMultiplier);
+        var combinedPoints = baseAllocation.AddedPoints
+            .Concat(bonusAllocation.AddedPoints)
+            .GroupBy(entry => entry.Key)
+            .ToDictionary(group => group.Key, group => group.Sum(entry => entry.Value));
+
+        return new EquipmentConstrainedBudgetAllocation(
+            baseAllocation.TargetBudget + bonusAllocation.TargetBudget,
+            baseAllocation.SpentBudget + bonusAllocation.SpentBudget,
+            baseAllocation.UnspentBudget + bonusAllocation.UnspentBudget,
+            combinedPoints,
+            baseAllocation.CappedAttributes
+                .Concat(bonusAllocation.CappedAttributes)
+                .Distinct()
+                .Order()
+                .ToList(),
+            baseAllocation.BindingCombatCaps
+                .Concat(bonusAllocation.BindingCombatCaps)
+                .Distinct()
+                .Order()
+                .ToList());
+    }
+
     public static EquipmentBudgetAllocation Allocate(
         int tier,
         double budget,

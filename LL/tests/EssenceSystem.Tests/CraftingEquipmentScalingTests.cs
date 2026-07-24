@@ -68,6 +68,64 @@ public sealed class CraftingEquipmentScalingTests
     }
 
     [Fact]
+    public void Blueprint_roll_preserves_base_recipe_stats_and_adds_a_separate_bonus()
+    {
+        var service = new ItemStatRollService(Options.Create(new CraftingBalanceOptions()));
+        var equipment = new EquipmentBase
+        {
+            Id = "cloth_cowl",
+            Name = "Cloth Cowl",
+            EquipmentType = EquipmentType.Head
+        };
+        var recipe = new CraftingRecipeDefinition
+        {
+            Id = "recipe.armor.head.cloth",
+            Name = "Cloth Cowl",
+            OutputItemId = equipment.Id,
+            OutputItemType = equipment.EquipmentType,
+            InitialStatProfile = new Dictionary<AttributeType, double>
+            {
+                [AttributeType.Power] = 0.3d,
+                [AttributeType.Spirit] = 0.3d,
+                [AttributeType.MaxHealth] = 0.25d,
+                [AttributeType.Resistance] = 0.15d
+            }
+        };
+        var blueprint = new BlueprintDefinition
+        {
+            Id = "blueprint_aegis",
+            Name = "Blueprint: Aegis",
+            BonusStatBudgetMultiplier = 0.2d,
+            BonusStatProfile = new Dictionary<AttributeType, double>
+            {
+                [AttributeType.Armor] = 0.6d,
+                [AttributeType.DamageReduction] = 0.4d
+            }
+        };
+        var baseDesign = EquipmentCraftingDesignComposer.Compose(recipe, null);
+        var blueprintDesign = EquipmentCraftingDesignComposer.Compose(recipe, blueprint);
+
+        var baseStats = service.RollBaseStats(
+                equipment,
+                baseDesign,
+                1,
+                ItemQuality.Standard,
+                new FixedRandom(0.5d))
+            .ToDictionary(modifier => modifier.AttributeType, modifier => modifier.Amount);
+        var blueprintStats = service.RollBaseStats(
+                equipment,
+                blueprintDesign,
+                1,
+                ItemQuality.Standard,
+                new FixedRandom(0.5d))
+            .ToDictionary(modifier => modifier.AttributeType, modifier => modifier.Amount);
+
+        Assert.All(baseStats, stat => Assert.Equal(stat.Value, blueprintStats[stat.Key]));
+        Assert.True(blueprintStats[AttributeType.Armor] > 0);
+        Assert.True(blueprintStats[AttributeType.DamageReduction] > 0);
+    }
+
+    [Fact]
     public void GetQualityChances_ReportsTheActualMasteryZeroDistribution()
     {
         var service = new ItemQualityRollService();

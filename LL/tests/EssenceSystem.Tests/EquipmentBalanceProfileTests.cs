@@ -355,7 +355,7 @@ public sealed class EquipmentBalanceProfileTests
             Id = "blueprint.test.fury",
             Name = "Blueprint: Test Fury",
             AnyRecipeTags = ["Accessory"],
-            StatProfile = new Dictionary<AttributeType, double>
+            BonusStatProfile = new Dictionary<AttributeType, double>
             {
                 [AttributeType.CritChance] = 1d
             },

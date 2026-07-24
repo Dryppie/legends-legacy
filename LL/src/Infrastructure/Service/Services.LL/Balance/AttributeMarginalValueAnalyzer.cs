@@ -1659,12 +1659,13 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
                 slotWeights[index],
                 expectedLoadoutWeight,
                 EquipmentConstraintProfile.MinimumSupportedBasicAttackIntervalMultiplier);
-            var allocation = EquipmentBudgetAllocator.AllocateConstrained(
+            var allocation = EquipmentBudgetAllocator.AllocateDesignConstrained(
                 tier,
                 itemBudget,
-                designs[index].InitialStatProfile,
+                designs[index],
                 constraints,
-                EquipmentConstraintProfile.GetOverflowWeights(designs[index]),
+                EquipmentConstraintProfile.GetOverflowWeights(
+                    EquipmentCraftingDesignComposer.Compose(designs[index].Recipe, null)),
                 perItemCapMultiplier:
                     EquipmentConstraintProfile.GetPerItemCapMultiplier(slotWeights[index]));
             AddPoints(points, allocation.AddedPoints);
@@ -1832,7 +1833,12 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
             .ToList();
         var expectedLoadoutWeight = slotWeights.Sum();
         var tierBudget = _craftingBalance.GetTierPowerBudget(tier);
-        var targetBudget = tierBudget * expectedLoadoutWeight;
+        var targetBudget = designs
+            .Select((design, index) =>
+                tierBudget
+                * slotWeights[index]
+                * (1d + design.BlueprintBonusBudgetMultiplier))
+            .Sum();
         var baselineAttributes = CreateReferenceAttributes(tier);
         var currentPoints = new Dictionary<AttributeType, double>();
         var shadowPoints = new Dictionary<AttributeType, double>();
@@ -1847,12 +1853,13 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
                 slotWeights[index],
                 _craftingBalance.GetMaximumCombatLoadoutBudgetWeight(),
                 EquipmentConstraintProfile.MinimumSupportedBasicAttackIntervalMultiplier);
-            var current = EquipmentBudgetAllocator.AllocateConstrained(
+            var baseDesign = EquipmentCraftingDesignComposer.Compose(designs[index].Recipe, null);
+            var current = EquipmentBudgetAllocator.AllocateDesignConstrained(
                 tier,
                 itemBudget,
-                designs[index].InitialStatProfile,
+                designs[index],
                 productionConstraints,
-                EquipmentConstraintProfile.GetOverflowWeights(designs[index]),
+                EquipmentConstraintProfile.GetOverflowWeights(baseDesign),
                 perItemCapMultiplier:
                     EquipmentConstraintProfile.GetPerItemCapMultiplier(slotWeights[index]));
             var candidateConstraints = EquipmentConstraintProfile.CreateItemConstraints(
@@ -1860,12 +1867,12 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
                 slotWeights[index],
                 expectedLoadoutWeight,
                 basicAttackIntervalMultiplier);
-            var shadow = EquipmentBudgetAllocator.AllocateConstrained(
+            var shadow = EquipmentBudgetAllocator.AllocateDesignConstrained(
                 tier,
                 itemBudget,
-                designs[index].InitialStatProfile,
+                designs[index],
                 candidateConstraints,
-                EquipmentConstraintProfile.GetOverflowWeights(designs[index]),
+                EquipmentConstraintProfile.GetOverflowWeights(baseDesign),
                 perItemCapMultiplier:
                     EquipmentConstraintProfile.GetPerItemCapMultiplier(slotWeights[index]));
 

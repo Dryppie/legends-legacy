@@ -103,13 +103,13 @@ public sealed class JsonCraftingDefinitionProvider : ICraftingDefinitionProvider
             if (string.IsNullOrWhiteSpace(blueprint.SourceType) || string.IsNullOrWhiteSpace(blueprint.SourceId))
                 throw new InvalidOperationException($"Blueprint '{blueprint.Id}' has no acquisition source.");
 
-            if (blueprint.StatProfileInfluence is < 0 or > 1)
-                throw new InvalidOperationException($"Blueprint '{blueprint.Id}' has an invalid stat-profile influence.");
+            if (blueprint.BonusStatBudgetMultiplier is <= 0 or > 1)
+                throw new InvalidOperationException($"Blueprint '{blueprint.Id}' has an invalid bonus-stat budget multiplier.");
 
             if (!recipes.Any(recipe => EquipmentCraftingDesignComposer.IsCompatible(recipe, blueprint)))
                 throw new InvalidOperationException($"Blueprint '{blueprint.Id}' has no compatible equipment recipes.");
 
-            ValidateProfile(blueprint.Id, blueprint.StatProfile, blueprint.TemperingProfile);
+            ValidateProfile(blueprint.Id, blueprint.BonusStatProfile, blueprint.TemperingProfile);
             ValidateRequirements(blueprint.Id, blueprint.AdditionalMaterialRequirements, materials);
         }
     }

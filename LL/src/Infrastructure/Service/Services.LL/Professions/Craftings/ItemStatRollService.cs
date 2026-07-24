@@ -23,8 +23,7 @@ public class ItemStatRollService : IItemStatRollService
         ItemQuality quality,
         Random rng)
     {
-        var profile = design.InitialStatProfile;
-        if (profile.Count == 0) return [];
+        if (design.InitialStatProfile.Count == 0) return [];
 
         var budget = _options.GetTierPowerBudget(targetTier)
             * _options.GetSlotBudgetWeight(equipment.EquipmentType)
@@ -59,12 +58,14 @@ public class ItemStatRollService : IItemStatRollService
         var minimum = Allocate(equipment, design, targetTier, minimumBudget * 0.95d);
         var maximum = Allocate(equipment, design, targetTier, maximumBudget * 1.05d);
 
-        return design.InitialStatProfile
-            .Where(x => x.Value > 0)
-            .Select(x => new CraftedAttributeRange(
-                x.Key,
-                (float)minimum.AddedPoints.GetValueOrDefault(x.Key),
-                (float)maximum.AddedPoints.GetValueOrDefault(x.Key)))
+        return design.InitialStatProfile.Keys
+            .Concat(design.BlueprintBonusStatProfile.Keys)
+            .Distinct()
+            .Order()
+            .Select(attribute => new CraftedAttributeRange(
+                attribute,
+                (float)minimum.AddedPoints.GetValueOrDefault(attribute),
+                (float)maximum.AddedPoints.GetValueOrDefault(attribute)))
             .ToList();
     }
 
@@ -80,12 +81,13 @@ public class ItemStatRollService : IItemStatRollService
             slotWeight,
             _options.GetMaximumCombatLoadoutBudgetWeight(),
             EquipmentConstraintProfile.MinimumSupportedBasicAttackIntervalMultiplier);
-        return EquipmentBudgetAllocator.AllocateConstrained(
+        var baseDesign = EquipmentCraftingDesignComposer.Compose(design.Recipe, null);
+        return EquipmentBudgetAllocator.AllocateDesignConstrained(
             tier,
             budget,
-            design.InitialStatProfile,
+            design,
             constraints,
-            EquipmentConstraintProfile.GetOverflowWeights(design),
+            EquipmentConstraintProfile.GetOverflowWeights(baseDesign),
             perItemCapMultiplier:
                 EquipmentConstraintProfile.GetPerItemCapMultiplier(slotWeight));
     }

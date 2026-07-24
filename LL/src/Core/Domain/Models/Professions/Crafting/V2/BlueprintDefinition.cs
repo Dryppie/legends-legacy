@@ -13,8 +13,8 @@ public sealed class BlueprintDefinition
     public IReadOnlyList<string> AnyRecipeTags { get; init; } = [];
     public IReadOnlyList<string> ExcludedRecipeTags { get; init; } = [];
     public IReadOnlyList<string> CompatibleRecipeIds { get; init; } = [];
-    public double StatProfileInfluence { get; init; } = 0.4d;
-    public IReadOnlyDictionary<AttributeType, double> StatProfile { get; init; } =
+    public double BonusStatBudgetMultiplier { get; init; } = 0.2d;
+    public IReadOnlyDictionary<AttributeType, double> BonusStatProfile { get; init; } =
         new Dictionary<AttributeType, double>();
     public TemperingProfileDefinition TemperingProfile { get; init; } = new();
     public EquipmentBehaviorDefinition BehaviorModifiers { get; init; } = new();

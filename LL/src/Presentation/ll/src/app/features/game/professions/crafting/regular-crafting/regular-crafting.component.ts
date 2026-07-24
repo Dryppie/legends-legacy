@@ -123,7 +123,7 @@ export class RegularCraftingComponent {
       ]),
     );
     const blueprintTypes = new Set(
-      Object.entries(blueprint?.blueprintStatProfile ?? {})
+      Object.entries(blueprint?.bonusStatProfile ?? {})
         .filter(([, weight]) => weight > 0)
         .map(([attributeType]) => attributeType),
     );
@@ -164,7 +164,7 @@ export class RegularCraftingComponent {
         ),
       );
       const providedTypes = new Set(
-        Object.entries(blueprint.blueprintStatProfile ?? {})
+        Object.entries(blueprint.bonusStatProfile ?? {})
           .filter(([, weight]) => weight > 0)
           .map(([attributeType]) => attributeType),
       );

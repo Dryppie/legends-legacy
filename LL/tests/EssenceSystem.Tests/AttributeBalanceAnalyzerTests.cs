@@ -494,7 +494,13 @@ public sealed class AttributeBalanceAnalyzerTests
         Assert.Equal(3_744, catalog.LoadoutsAnalyzed);
         Assert.Equal(0, catalog.ProductionLoadoutsOverCap);
         Assert.Equal(0, catalog.ReferenceLoadoutsOverCap);
-        Assert.Equal(0, catalog.ProductionLoadoutsWithUnspentBudget);
+        Assert.True(
+            catalog.ProductionLoadoutsWithUnspentBudget == 0,
+            string.Join(
+                Environment.NewLine,
+                catalog.WorstProductionLoadouts.Select(loadout =>
+                    $"{loadout.Id}: target {loadout.TargetBudget}, spent {loadout.ProductionSpentBudget}, " +
+                    $"waste {loadout.ProductionMaximumWastedBudgetPercent}%")));
         Assert.Equal(0, catalog.ReferenceLoadoutsWithUnspentBudget);
         Assert.Equal(7, catalog.StatSummaries.Count);
         Assert.All(
