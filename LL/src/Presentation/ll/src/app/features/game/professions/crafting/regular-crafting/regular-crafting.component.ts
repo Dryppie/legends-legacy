@@ -46,6 +46,8 @@ type RecipeFilterMode =
   | 'unlearned'
   | 'mastery';
 
+type MobileCraftingPane = 'recipes' | 'blueprints' | 'preview';
+
 @Component({
   selector: 'app-regular-crafting',
   standalone: true,
@@ -76,6 +78,7 @@ export class RegularCraftingComponent {
   readonly recipeCategory = signal('all');
   readonly blueprintSearch = signal('');
   readonly blueprintFilter = signal<'all' | 'craftable' | 'locked'>('all');
+  readonly mobilePane = signal<MobileCraftingPane>('recipes');
   private readonly selectedRecipeId = signal<string | null>(null);
   private readonly selectedBlueprintId = signal<string | null>(null);
   private readonly destroyRef = inject(DestroyRef);
@@ -339,14 +342,19 @@ export class RegularCraftingComponent {
       });
   }
 
-  selectRecipe(recipe: CraftingRecipe): void {
+  selectRecipe(recipe: CraftingRecipe, openBlueprints = false): void {
     this.selectedRecipeId.set(recipe.id);
     this.selectedBlueprintId.set(null);
     this.blueprintSearch.set('');
     this.blueprintFilter.set('all');
+    if (openBlueprints) this.mobilePane.set('blueprints');
     this.targetTier.set(
       Math.min(Math.max(this.targetTier(), recipe.minTier), recipe.maxTier),
     );
+  }
+
+  setMobilePane(pane: MobileCraftingPane): void {
+    this.mobilePane.set(pane);
   }
 
   setRecipeFilter(mode: RecipeFilterMode): void {
