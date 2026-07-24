@@ -13,6 +13,12 @@ public class DungeonRunConfiguration : IEntityTypeConfiguration<DungeonRun>
 
     public void Configure(EntityTypeBuilder<DungeonRun> builder)
     {
+        builder.HasIndex(x => x.CharacterId)
+            .IsUnique();
+
+        builder.Property(x => x.RowVersion)
+            .IsConcurrencyToken();
+
         builder.Property(x => x.State)
             .HasColumnType("jsonb")
             .HasConversion(

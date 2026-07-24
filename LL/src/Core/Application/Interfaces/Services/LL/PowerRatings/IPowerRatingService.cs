@@ -133,6 +133,7 @@ public interface IDungeonPowerRecommendationStore
     bool TryGet(string dungeonId, out DungeonPowerRecommendation recommendation);
     IReadOnlyDictionary<string, DungeonPowerRecommendation> GetAll();
     void MarkCalibrationComplete();
+    bool Remove(string dungeonId);
     void Set(string dungeonId, DungeonPowerRecommendation recommendation);
 }
 

@@ -31,4 +31,5 @@ public sealed class DungeonRun
     public DateTimeOffset CreatedAt { get; set; }
     public DateTimeOffset? CompletedAt { get; set; }
     public DateTimeOffset? RewardsClaimedAt { get; set; }
+    public uint RowVersion { get; set; }
 }

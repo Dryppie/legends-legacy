@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Persistence.LL;
@@ -12,9 +13,11 @@ using Persistence.LL;
 namespace Persistence.LL.Migrations
 {
     [DbContext(typeof(LLDbContext))]
-    partial class LLDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260724130116_HardenDungeonRunTransactions")]
+    partial class HardenDungeonRunTransactions
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -3494,10 +3497,25 @@ namespace Persistence.LL.Migrations
                 {
                     b.HasBaseType("Domain.Models.Items.ItemBase");
 
+                    b.Property<int>("AttackSpeed")
+                        .HasColumnType("integer");
+
                     b.Property<int>("EquipmentType")
                         .HasColumnType("integer");
 
                     b.Property<int?>("GatheringType")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Magnitude")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("MagnitudeRange")
+                        .HasColumnType("integer");
+
+                    b.Property<float>("ScalingAmount")
+                        .HasColumnType("real");
+
+                    b.Property<int>("ScalingAttribute")
                         .HasColumnType("integer");
 
                     b.HasDiscriminator().HasValue(0);

@@ -691,6 +691,19 @@ If this is not green by the end of Day 6, disable advanced blueprint learning/te
 
 ### Day 8 — Saturday, August 1: Harden the first Dungeon
 
+**Implementation status — started early on Friday, July 24**
+
+- [x] Added a database concurrency revision to Dungeon runs and increment it for every accepted action, so simultaneous action/claim/dismiss transactions cannot both commit.
+- [x] Added a unique database constraint for one current Dungeon run per character; duplicate starts now return a recoverable HTTP `409`.
+- [x] Fixed the unimplemented Dungeon run update path that could crash completion rewards containing Cinders, Soulstones, or experience.
+- [x] Added regression coverage proving concurrent claim deletes cannot both commit and a second character cannot act on or claim another character's run.
+- [x] Added repeat-completion sources for all eleven Blueprint catalysts and strengthened the content tests so every special resource and every Dungeon Blueprint catalyst must be obtainable from its authored family.
+- [x] Added startup diagnostics for invalid ranges, missing simulation evidence, invalid completion rates, non-monotonic family recommendations, and obvious adjacent-tier outliers. Rejected recommendations are withheld and the completed calibration response lets the UI show them as unavailable.
+- [x] Backend solution build, all 580 backend tests, 13 focused Dungeon frontend tests, Angular production build, and the EF migration/model consistency check pass.
+- [ ] Apply `HardenDungeonRunTransactions` to the PostgreSQL rehearsal database, then complete the manual Goblin Mines first-clear, repeat-clear, retreat, defeat/expiry, reconnect, double-claim, and two-account ownership matrix.
+- [ ] Capture real calibration output for the six live difficulties and review the recommended Power values. The three authored Hive difficulties remain intentionally retired for the future Rift model and are not served or calibrated in the alpha runtime.
+- [ ] Repair the four pre-existing failures in the complete 35-test frontend suite (three `AppComponent` HTTP-provider setup failures and one Tavern podium-copy expectation); the Day 8 Dungeon-focused suite is green.
+
 **Work package A: Complete Goblin Mines workflow**
 
 - Verify entry cost, readiness recommendation, run creation, room progression, Vigor, combat, death/abandonment, reconnect, completion, first-clear reward, repeat reward, mastery, and claim.

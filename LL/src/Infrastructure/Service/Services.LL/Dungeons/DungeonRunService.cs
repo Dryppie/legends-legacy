@@ -202,6 +202,7 @@ public sealed class DungeonRunService : IDungeonRunService
             return null;
 
         EnsureRunState(run);
+        run.RowVersion++;
         if (run.State.ExpiresAt <= DateTimeOffset.UtcNow)
         {
             FailRun(run, GetCurrentRoom(run), "Abandonment", "The suspended delve expired after 48 hours.");

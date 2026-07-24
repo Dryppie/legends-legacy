@@ -22,6 +22,9 @@ public sealed class DungeonPowerRecommendationStore : IDungeonPowerRecommendatio
     public void MarkCalibrationComplete() =>
         Interlocked.Exchange(ref _isCalibrationComplete, 1);
 
+    public bool Remove(string dungeonId) =>
+        _recommendations.TryRemove(dungeonId, out _);
+
     public void Set(string dungeonId, DungeonPowerRecommendation recommendation)
     {
         if (recommendation.State is PowerAnalysisState.Available or PowerAnalysisState.LowConfidence)
