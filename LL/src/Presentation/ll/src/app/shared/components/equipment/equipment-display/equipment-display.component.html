@@ -19,7 +19,7 @@
 
   <div class="ll-item-meta flex flex-wrap items-center justify-between gap-1">
     <span>{{ data.equipmentType }}</span>
-    <span *ngIf="data.powerScore > 0">Power {{ data.powerScore }}</span>
+    <span *ngIf="data.itemBudget > 0">Gear Value {{ data.itemBudget | number: '1.0-2' }}</span>
   </div>
 
   <p *ngIf="data.description" class="ll-item-description">

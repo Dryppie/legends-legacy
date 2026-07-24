@@ -20,7 +20,8 @@ export interface EquipmentDisplay {
   description?: string;
   baseModifiers?: AttributeModifier[];
   instanceModifiers: AttributeModifier[];
-  powerScore: number;
+  itemBudget: number;
+  balanceVersion: number;
   gatheringType?: GatheringType | null;
   toolBonuses: ToolBonusModifier[];
   toolAffixes: ToolBonusModifier[];
@@ -51,7 +52,8 @@ export function mapEquipmentToDisplay(
     equipmentType: e.equipmentType,
     description: e.description,
     instanceModifiers: sortAttributes(e.attributeModifiers),
-    powerScore: calculatePowerScore(e.attributeModifiers),
+    itemBudget: e.itemBudget ?? 0,
+    balanceVersion: e.balanceVersion ?? 0,
     gatheringType: e.gatheringType,
     toolBonuses: e.toolBonuses ?? [],
     toolAffixes: [],
@@ -85,7 +87,8 @@ export function mapInstanceToDisplay(
     description: base.description,
     baseModifiers,
     instanceModifiers,
-    powerScore: calculatePowerScore([...baseModifiers, ...instanceModifiers]),
+    itemBudget: inst.itemBudget ?? 0,
+    balanceVersion: inst.balanceVersion ?? 0,
     gatheringType: base.gatheringType,
     toolBonuses: effectiveToolBonuses,
     toolAffixes,
@@ -104,33 +107,6 @@ export function mapInstanceToDisplay(
 
 const ATTRIBUTE_ORDER = Object.values(AttributeType);
 
-const ATTRIBUTE_WEIGHTS: Partial<Record<AttributeType, number>> = {
-  [AttributeType.Power]: 8,
-  [AttributeType.Fortitude]: 8,
-  [AttributeType.Precision]: 8,
-  [AttributeType.Spirit]: 5,
-  [AttributeType.MaxHealth]: 1.8,
-  [AttributeType.WeaponDamage]: 18,
-  [AttributeType.Armor]: 4,
-  [AttributeType.Resistance]: 4,
-  [AttributeType.CritChance]: 4,
-  [AttributeType.CritDamage]: 1.5,
-  [AttributeType.ArmorPenetration]: 2,
-  [AttributeType.MagicPenetration]: 2,
-  [AttributeType.DodgeChance]: 5,
-  [AttributeType.BlockChance]: 3,
-  [AttributeType.DamageReduction]: 7,
-  [AttributeType.HealingPowerPercent]: 2,
-  [AttributeType.HealthRegeneration]: 8,
-  [AttributeType.LifeSteal]: 4,
-  [AttributeType.Cooldown]: 3,
-  [AttributeType.StatusResistance]: 2,
-  [AttributeType.CrowdControlResistance]: 2,
-  [AttributeType.SummonPower]: 4,
-  [AttributeType.SummonHealth]: 0.15,
-  [AttributeType.AttackSpeed]: 3,
-};
-
 function sortAttributes(attributes: AttributeModifier[]): AttributeModifier[] {
   return [...attributes].sort((a, b) => {
     const orderDelta =
@@ -143,15 +119,6 @@ function sortAttributes(attributes: AttributeModifier[]): AttributeModifier[] {
 function getAttributeOrder(attribute: AttributeType): number {
   const index = ATTRIBUTE_ORDER.indexOf(attribute);
   return index === -1 ? Number.MAX_SAFE_INTEGER : index;
-}
-
-function calculatePowerScore(attributes: AttributeModifier[]): number {
-  const total = attributes.reduce((sum, attribute) => {
-    const weight = ATTRIBUTE_WEIGHTS[attribute.attributeType] ?? 1;
-    return sum + Math.max(0, attribute.amount) * weight;
-  }, 0);
-
-  return Math.max(0, Math.round(total));
 }
 
 function getToolDisplayName(baseName: string, rarity: Rarity): string {

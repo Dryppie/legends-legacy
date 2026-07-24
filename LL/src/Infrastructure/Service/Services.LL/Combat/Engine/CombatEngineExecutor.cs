@@ -610,6 +610,7 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
             ChancePercent = effect.ChancePercent,
             AttackType = effect.AttackType,
             DamageType = effect.DamageType,
+            CritEligibility = effect.CritEligibility,
             LifeStealPercentage = effect.LifeStealPercentage,
             ProcCoefficient = effect.ProcCoefficient,
             Tags = [.. effect.Tags],

@@ -5,10 +5,10 @@ public static class AttributeCatalog
     private static readonly IReadOnlyDictionary<AttributeType, AttributeDefinition> Definitions =
         new Dictionary<AttributeType, AttributeDefinition>
         {
-            [AttributeType.Power] = new(AttributeType.Power, "Primary offensive force."),
-            [AttributeType.Fortitude] = new(AttributeType.Fortitude, "Primary toughness."),
-            [AttributeType.Precision] = new(AttributeType.Precision, "Primary accuracy and critical reliability."),
-            [AttributeType.Spirit] = new(AttributeType.Spirit, "Primary resource and magical affinity."),
+            [AttributeType.Power] = new(AttributeType.Power, "Scales all numeric ability output and basic-attack damage."),
+            [AttributeType.Fortitude] = new(AttributeType.Fortitude, "Increases maximum health, armor, and resistance."),
+            [AttributeType.Precision] = new(AttributeType.Precision, "Increases critical chance, penetration, and attack speed."),
+            [AttributeType.Spirit] = new(AttributeType.Spirit, "Increases healing, regeneration, status resilience, and summon attributes."),
 
             [AttributeType.MaxHealth] = new(AttributeType.MaxHealth, "Maximum health."),
             [AttributeType.WeaponDamage] = new(AttributeType.WeaponDamage, "Weapon damage input."),
@@ -27,7 +27,7 @@ public static class AttributeCatalog
             [AttributeType.HealthRegeneration] = new(AttributeType.HealthRegeneration, "Health regeneration input."),
             [AttributeType.LifeSteal] = new(AttributeType.LifeSteal, "Life restored from damage dealt."),
 
-            [AttributeType.Cooldown] = new(AttributeType.Cooldown, "Cooldown improvement."),
+            [AttributeType.Cooldown] = new(AttributeType.Cooldown, "Cooldown reduction, capped at 40%."),
             [AttributeType.StatusResistance] = new(AttributeType.StatusResistance, "Status effect resistance."),
             [AttributeType.CrowdControlResistance] = new(AttributeType.CrowdControlResistance, "Crowd-control resistance."),
 

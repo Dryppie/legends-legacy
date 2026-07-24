@@ -1755,9 +1755,9 @@ public sealed class AbilitySystemTests
             new (int Timestamp, string Source, EventType EventType, string? TargetId, int Magnitude)[]
             {
                 (0, "Siphon", EventType.AbilityUse, null, 0),
-                (0, "effect.siphon.damage", EventType.Damage, "front-target", 16),
+                (0, "effect.siphon.damage", EventType.Damage, "front-target", 31),
                 (0, "Ambush Strike", EventType.AbilityUse, null, 0),
-                (0, "effect.ambush.damage", EventType.Damage, "front-target", 24),
+                (0, "effect.ambush.damage", EventType.Damage, "front-target", 9),
                 (0, "effect.ambush.damage", EventType.Death, "front-target", 0),
                 (0, "effect.vile_feast.heal", EventType.Heal, "ghoul", 50)
             },

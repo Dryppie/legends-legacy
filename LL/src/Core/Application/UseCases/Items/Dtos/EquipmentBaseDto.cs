@@ -3,6 +3,7 @@ using AutoMapper;
 using Domain.Models.Attributes.Modifiers;
 using Domain.Models.Items.Equipments;
 using Domain.Models.Items.Equipments.Tools;
+using Domain.Models.Professions.Crafting.V2;
 using Domain.Models.Professions.Gathering.GatheringNodes;
 
 namespace Application.UseCases.Items.Dtos;
@@ -12,9 +13,17 @@ public class EquipmentBaseDto : ItemBaseDto, IMapFrom<EquipmentBase>
     public ICollection<ItemAttributeModifier> AttributeModifiers { get; set; } = [];
     public ICollection<ToolBonusModifier> ToolBonuses { get; set; } = [];
     public GatheringType? GatheringType { get; set; }
+    public double ItemBudget { get; set; }
+    public int BalanceVersion { get; set; }
 
     public void Mapping(Profile profile)
     {
-        profile.CreateMap<EquipmentBase, EquipmentBaseDto>();
+        profile.CreateMap<EquipmentBase, EquipmentBaseDto>()
+            .ForMember(
+                destination => destination.ItemBudget,
+                options => options.MapFrom(source => EquipmentBudgetEvaluator.Evaluate(source.AttributeModifiers)))
+            .ForMember(
+                destination => destination.BalanceVersion,
+                options => options.MapFrom(_ => EquipmentBudgetEvaluator.BalanceVersion));
     }
 }

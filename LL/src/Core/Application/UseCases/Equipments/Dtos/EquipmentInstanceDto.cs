@@ -5,6 +5,7 @@ using Domain.Models.Attributes.Modifiers;
 using Domain.Models.Items;
 using Domain.Models.Items.Equipments;
 using Domain.Models.Items.Equipments.Tools;
+using Domain.Models.Professions.Crafting.V2;
 
 namespace Application.UseCases.Equipments.Dtos;
 public class EquipmentInstanceDto : ItemInstanceDto, IMapFrom<EquipmentInstance>
@@ -28,9 +29,17 @@ public class EquipmentInstanceDto : ItemInstanceDto, IMapFrom<EquipmentInstance>
     public List<ToolBonusModifier> ToolAffixes { get; set; } = [];
     public IReadOnlyList<ToolBonusModifier> EffectiveToolBonuses { get; set; } = [];
     public List<string> AffinityTags { get; set; } = [];
+    public double ItemBudget { get; set; }
+    public int BalanceVersion { get; set; }
     public void Mapping(Profile profile)
     {
         profile.CreateMap<EquipmentInstance, EquipmentInstanceDto>()
+            .ForMember(
+                destination => destination.ItemBudget,
+                options => options.MapFrom(source => EquipmentBudgetEvaluator.Evaluate(source.AttributeModifiers)))
+            .ForMember(
+                destination => destination.BalanceVersion,
+                options => options.MapFrom(_ => EquipmentBudgetEvaluator.BalanceVersion))
             .ForMember(
                 destination => destination.CraftingDesign,
                 options => options.MapFrom<EquipmentCraftingDesignMetadataResolver>());

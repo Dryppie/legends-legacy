@@ -101,6 +101,13 @@ public enum AbilityResourceType
     Mana = 3
 }
 
+public enum CritEligibility
+{
+    Default = 0,
+    Allowed = 1,
+    Disallowed = 2
+}
+
 public sealed class AbilitySpec
 {
     public string Id { get; set; } = string.Empty;
@@ -171,6 +178,7 @@ public sealed class AbilityEffectSpec
     public int ChancePercent { get; set; } = 100;
     public AttackType AttackType { get; set; } = AttackType.None;
     public DamageType DamageType { get; set; } = DamageType.None;
+    public CritEligibility CritEligibility { get; set; } = CritEligibility.Default;
     public float LifeStealPercentage { get; set; }
     public decimal ProcCoefficient { get; set; } = 1m;
     public List<string> Tags { get; set; } = [];

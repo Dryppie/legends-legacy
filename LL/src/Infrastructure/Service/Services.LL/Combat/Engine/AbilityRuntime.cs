@@ -58,6 +58,7 @@ public sealed class CompiledEffect
     public int ChancePercent { get; init; }
     public AttackType AttackType { get; init; }
     public DamageType DamageType { get; init; }
+    public CritEligibility CritEligibility { get; init; }
     public float LifeStealPercentage { get; init; }
     public decimal ProcCoefficient { get; init; }
     public AbilitySpecKind AbilityKind { get; init; }
@@ -122,11 +123,15 @@ public sealed class RuntimeAbility
     public int RemainingCooldownTicks { get; private set; }
     public bool IsReady => RemainingCooldownTicks <= 0;
 
-    public void StartInitialCooldown() =>
-        RemainingCooldownTicks = Math.Max(0, Definition.CooldownTicks);
+    public void StartInitialCooldown(float cooldownReductionPercent) =>
+        RemainingCooldownTicks = AttributeCombatRules.CalculateCooldownTicks(
+            Definition.CooldownTicks,
+            cooldownReductionPercent);
 
-    public void StartCooldown(int additionalTicks = 0) =>
-        RemainingCooldownTicks = Math.Max(0, Definition.CooldownTicks + additionalTicks);
+    public void StartCooldown(float cooldownReductionPercent, int additionalTicks = 0) =>
+        RemainingCooldownTicks = AttributeCombatRules.CalculateCooldownTicks(
+            Definition.CooldownTicks + additionalTicks,
+            cooldownReductionPercent);
 
     public void ReduceCooldown(int ticks)
     {
@@ -169,26 +174,30 @@ public sealed class RuntimeAbility
 
         _effectUses[effect.Id] = _effectUses.GetValueOrDefault(effect.Id) + 1;
     }
+
 }
 
 public sealed class RuntimeStatus
 {
     private readonly Dictionary<CompiledTrigger, int> _triggerCooldowns = [];
     private readonly Dictionary<string, int> _effectUses = new(StringComparer.OrdinalIgnoreCase);
+    private readonly int _durationTicks;
 
     public RuntimeStatus(
         CompiledStatus definition,
         RuntimeCombatant source,
         RuntimeCombatant owner,
         int stacks,
-        string? statsSource = null)
+        string? statsSource = null,
+        int? durationTicks = null)
     {
         Definition = definition;
         Source = source;
         Owner = owner;
         StatsSource = string.IsNullOrWhiteSpace(statsSource) ? definition.Name : statsSource;
         Stacks = Math.Clamp(stacks, 1, definition.MaxStacks);
-        RemainingDurationTicks = definition.DurationTicks;
+        _durationTicks = Math.Max(0, durationTicks ?? definition.DurationTicks);
+        RemainingDurationTicks = _durationTicks;
     }
 
     public CompiledStatus Definition { get; }
@@ -196,21 +205,22 @@ public sealed class RuntimeStatus
     public RuntimeCombatant Owner { get; }
     public string StatsSource { get; }
     public int Stacks { get; private set; }
+    public int DurationTicks => _durationTicks;
     public int RemainingDurationTicks { get; private set; }
-    public bool IsExpired => Definition.DurationTicks > 0 && RemainingDurationTicks <= 0;
+    public bool IsExpired => _durationTicks > 0 && RemainingDurationTicks <= 0;
 
     public void AddStacks(int amount)
     {
         Stacks = Math.Clamp(Stacks + amount, 0, Definition.MaxStacks);
-        if (Definition.DurationTicks > 0)
-            RemainingDurationTicks = Definition.DurationTicks;
+        if (_durationTicks > 0)
+            RemainingDurationTicks = _durationTicks;
     }
 
     public void Refresh(int stacks)
     {
         Stacks = Math.Clamp(Math.Max(Stacks, stacks), 1, Definition.MaxStacks);
-        if (Definition.DurationTicks > 0)
-            RemainingDurationTicks = Definition.DurationTicks;
+        if (_durationTicks > 0)
+            RemainingDurationTicks = _durationTicks;
     }
 
     public void Tick()
@@ -250,13 +260,20 @@ public sealed class RuntimeStatus
 
 public sealed class RuntimeEffect
 {
-    public RuntimeEffect(CompiledEffect definition, RuntimeCombatant source, RuntimeCombatant target, string? statsSource = null)
+    public RuntimeEffect(
+        CompiledEffect definition,
+        RuntimeCombatant source,
+        RuntimeCombatant target,
+        string? statsSource = null,
+        double durationMultiplier = 1d)
     {
         Definition = definition;
         Source = source;
         Target = target;
         StatsSource = string.IsNullOrWhiteSpace(statsSource) ? definition.StatsSource : statsSource;
-        RemainingDurationTicks = definition.DurationTicks;
+        RemainingDurationTicks = definition.DurationTicks <= 0
+            ? definition.DurationTicks
+            : Math.Max(1, (int)Math.Ceiling(definition.DurationTicks * Math.Max(0, durationMultiplier)));
         TicksUntilInterval = definition.IntervalTicks;
         RemainingUses = definition.Uses <= 0 ? int.MaxValue : definition.Uses;
     }
@@ -358,7 +375,10 @@ public sealed class RuntimeCombatant
         var oldMaxHealth = GetAttribute(AttributeType.MaxHealth);
         Attributes[attributeType] = Attributes.GetValueOrDefault(attributeType) + amount;
 
-        if (attributeType == AttributeType.MaxHealth)
+        if (AttributeCombatRules.IsPrimary(attributeType))
+            AttributeCombatRules.ApplyPrimaryDelta(Attributes, attributeType, amount);
+
+        if (attributeType == AttributeType.MaxHealth || attributeType == AttributeType.Fortitude)
             SyncHealthAfterMaxHealthChange(oldMaxHealth, GetAttribute(AttributeType.MaxHealth));
     }
 
