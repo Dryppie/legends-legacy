@@ -4,10 +4,9 @@ import { NgClass, NgIf } from '@angular/common';
 import { RouterLink } from '@angular/router';
 
 @Component({
-  selector: 'app-current-dungeon',
-  standalone: true,
-  imports: [NgIf, NgClass, RouterLink],
-  templateUrl: './current-dungeon.component.html',
+    selector: 'app-current-dungeon',
+    imports: [NgIf, NgClass, RouterLink],
+    templateUrl: './current-dungeon.component.html'
 })
 export class CurrentDungeonComponent {
   private readonly dungeonState = inject(DungeonStateService);

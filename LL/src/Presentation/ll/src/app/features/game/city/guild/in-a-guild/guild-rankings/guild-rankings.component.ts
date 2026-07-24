@@ -3,10 +3,9 @@ import { GuildStateService } from '../../../../../../core/services/api/guild/gui
 import { NgFor, NgIf } from '@angular/common';
 
 @Component({
-  selector: 'app-guild-rankings',
-  standalone: true,
-  imports: [NgIf, NgFor],
-  templateUrl: './guild-rankings.component.html',
+    selector: 'app-guild-rankings',
+    imports: [NgIf, NgFor],
+    templateUrl: './guild-rankings.component.html'
 })
 export class GuildRankingsComponent {
   readonly sortedGuilds;

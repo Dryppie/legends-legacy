@@ -5,10 +5,9 @@ import { CharacterActionDto } from '../../../models/Dtos/characterActionDto';
 import { CharacterActionsStateService } from '../../../../core/services/api/character-actions/character-actions.state.service';
 
 @Component({
-  selector: 'app-profession-action',
-  standalone: true,
-  imports: [ProgressBarComponent, NgIf],
-  templateUrl: './profession-action.component.html',
+    selector: 'app-profession-action',
+    imports: [ProgressBarComponent, NgIf],
+    templateUrl: './profession-action.component.html'
 })
 export class ProfessionActionComponent {
   currentAction: CharacterActionDto | null = null;

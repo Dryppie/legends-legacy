@@ -13,17 +13,16 @@ import { InventoryItem } from '../../models/inventoryItem';
 import { InventoryItemModalComponent } from './item-modals/inventory-item-modal/inventory-item-modal.component';
 
 @Component({
-  selector: 'app-modal-container',
-  standalone: true,
-  imports: [
-    NgIf,
-    EssenceModalComponent,
-    CombatFiltersModalComponent,
-    InventoryItemModalComponent,
-    InventoryEquipmentModalComponent,
-    OverviewEquipmentModalComponent,
-  ],
-  templateUrl: './modal-container.component.html',
+    selector: 'app-modal-container',
+    imports: [
+        NgIf,
+        EssenceModalComponent,
+        CombatFiltersModalComponent,
+        InventoryItemModalComponent,
+        InventoryEquipmentModalComponent,
+        OverviewEquipmentModalComponent,
+    ],
+    templateUrl: './modal-container.component.html'
 })
 export class ModalContainerComponent implements OnInit, OnDestroy {
   private subscriptions: Subscription[] = [];

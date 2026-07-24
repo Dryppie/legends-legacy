@@ -10,18 +10,17 @@ import { HumanizeEnumPipe } from '../../../../../../shared/pipes/enums/humanize-
 import { NumberFormatPipe } from '../../../../../../shared/pipes/number-format/number-format.pipe';
 
 @Component({
-  selector: 'app-guild-buildings',
-  standalone: true,
-  imports: [
-    DatePipe,
-    NgIf,
-    NgFor,
-    NgClass,
-    NumberFormatPipe,
-    RegularButtonComponent,
-    HumanizeEnumPipe,
-  ],
-  templateUrl: './guild-buildings.component.html',
+    selector: 'app-guild-buildings',
+    imports: [
+        DatePipe,
+        NgIf,
+        NgFor,
+        NgClass,
+        NumberFormatPipe,
+        RegularButtonComponent,
+        HumanizeEnumPipe,
+    ],
+    templateUrl: './guild-buildings.component.html'
 })
 export class GuildBuildingsComponent {
   readonly overview;

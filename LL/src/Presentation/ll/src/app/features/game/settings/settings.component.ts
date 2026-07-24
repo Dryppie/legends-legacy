@@ -20,16 +20,15 @@ import {
 } from '../../../core/services/client-side/sidebar-layout/sidebar-layout-preference.service';
 
 @Component({
-  selector: 'app-settings',
-  standalone: true,
-  imports: [
-    CommonModule,
-    SignupComponent,
-    FormsModule,
-    RegularButtonComponent,
-    DefaultHeaderComponent,
-  ],
-  templateUrl: './settings.component.html',
+    selector: 'app-settings',
+    imports: [
+        CommonModule,
+        SignupComponent,
+        FormsModule,
+        RegularButtonComponent,
+        DefaultHeaderComponent,
+    ],
+    templateUrl: './settings.component.html'
 })
 export class SettingsComponent {
   userInfo: UserInfoDto | null = null; // Initialize it to null first

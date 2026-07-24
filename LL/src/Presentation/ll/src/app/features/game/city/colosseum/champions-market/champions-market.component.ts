@@ -5,10 +5,9 @@ import { ChampionMarketItem } from '../../../../../shared/models/Dtos/colosseum/
 import { NumberFormatPipe } from '../../../../../shared/pipes/number-format/number-format.pipe';
 
 @Component({
-  selector: 'app-champions-market',
-  standalone: true,
-  imports: [NgFor, NgIf, DatePipe, NumberFormatPipe],
-  templateUrl: './champions-market.component.html',
+    selector: 'app-champions-market',
+    imports: [NgFor, NgIf, DatePipe, NumberFormatPipe],
+    templateUrl: './champions-market.component.html'
 })
 export class ChampionsMarketComponent {
   constructor(public readonly state: ColosseumStateService) {}

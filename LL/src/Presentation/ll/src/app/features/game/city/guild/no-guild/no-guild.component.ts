@@ -4,10 +4,9 @@ import { FormsModule } from '@angular/forms';
 import { GuildStateService } from '../../../../../core/services/api/guild/guild-state.service';
 
 @Component({
-  selector: 'app-no-guild',
-  standalone: true,
-  imports: [NgIf, NgFor, FormsModule],
-  templateUrl: './no-guild.component.html',
+    selector: 'app-no-guild',
+    imports: [NgIf, NgFor, FormsModule],
+    templateUrl: './no-guild.component.html'
 })
 export class NoGuildComponent {
   private readonly minimumGuildNameLength = 3;

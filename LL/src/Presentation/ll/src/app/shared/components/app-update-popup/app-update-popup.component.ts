@@ -3,10 +3,9 @@ import { NgIf } from '@angular/common';
 import { AppUpdateService } from '../../../core/services/client-side/app-update/app-update.service';
 
 @Component({
-  selector: 'app-update-popup',
-  standalone: true,
-  imports: [NgIf],
-  templateUrl: './app-update-popup.component.html',
+    selector: 'app-update-popup',
+    imports: [NgIf],
+    templateUrl: './app-update-popup.component.html'
 })
 export class AppUpdatePopupComponent {
   get updateAvailable() {

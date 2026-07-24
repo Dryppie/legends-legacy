@@ -6,12 +6,11 @@ import { getSlotTypeFromEquipmentType } from '../../../../utils/equipment/equipm
 import { EquipmentDisplayComponent } from '../../../equipment/equipment-display/equipment-display.component';
 
 @Component({
-  selector: 'app-inventory-equipment-modal',
-  standalone: true,
-  imports: [
-    EquipmentDisplayComponent,
-  ],
-  templateUrl: './inventory-equipment-modal.component.html',
+    selector: 'app-inventory-equipment-modal',
+    imports: [
+        EquipmentDisplayComponent,
+    ],
+    templateUrl: './inventory-equipment-modal.component.html'
 })
 export class InventoryEquipmentModalComponent implements OnInit {
   @Input() equipmentInstance!: EquipmentInstance;

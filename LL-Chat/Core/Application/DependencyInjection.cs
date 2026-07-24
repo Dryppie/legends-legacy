@@ -1,5 +1,4 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using System.Reflection;
 
 namespace Application;
 public static class DependencyInjection
@@ -10,8 +9,6 @@ public static class DependencyInjection
         {
             cfg.RegisterServicesFromAssembly(typeof(DependencyInjection).Assembly);
         });
-
-        services.AddAutoMapper(Assembly.GetExecutingAssembly());
 
         return services;
     }

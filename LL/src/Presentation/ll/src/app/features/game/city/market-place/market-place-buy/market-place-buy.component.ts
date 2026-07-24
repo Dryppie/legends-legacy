@@ -65,27 +65,26 @@ import {
 } from '../../../../../shared/components/custom-components/dropdown/dropdown.component';
 
 @Component({
-  selector: 'app-market-place-buy',
-  standalone: true,
-  imports: [
-    NgFor,
-    NgIf,
-    NgClass,
-    FormsModule,
-    ReactiveFormsModule,
-    RegularButtonComponent,
-    NumberFormatPipe,
-    MarketPlaceListingItemComponent,
-    NgSwitch,
-    NgSwitchCase,
-    NgSwitchDefault,
-    ItemComponent,
-    DecimalPipe,
-    AttributeTypeFormatPipe,
-    AttributeValueFormatPipe,
-    DropdownComponent,
-  ],
-  templateUrl: './market-place-buy.component.html',
+    selector: 'app-market-place-buy',
+    imports: [
+        NgFor,
+        NgIf,
+        NgClass,
+        FormsModule,
+        ReactiveFormsModule,
+        RegularButtonComponent,
+        NumberFormatPipe,
+        MarketPlaceListingItemComponent,
+        NgSwitch,
+        NgSwitchCase,
+        NgSwitchDefault,
+        ItemComponent,
+        DecimalPipe,
+        AttributeTypeFormatPipe,
+        AttributeValueFormatPipe,
+        DropdownComponent,
+    ],
+    templateUrl: './market-place-buy.component.html'
 })
 export class MarketPlaceBuyComponent implements OnInit {
   readonly allListings = signal<MarketPlaceListing[]>([]);

@@ -21,17 +21,16 @@ import { GuildStateService } from '../../../../../../core/services/api/guild/gui
 import { CharacterTagComponent } from '../../../../../../shared/components/character/character-tag/character-tag.component';
 
 @Component({
-  selector: 'app-guild-info',
-  standalone: true,
-  imports: [
-    NgFor,
-    NgIf,
-    NgClass,
-    FormsModule,
-    RegularButtonComponent,
-    CharacterTagComponent,
-  ],
-  templateUrl: './guild-info.component.html',
+    selector: 'app-guild-info',
+    imports: [
+        NgFor,
+        NgIf,
+        NgClass,
+        FormsModule,
+        RegularButtonComponent,
+        CharacterTagComponent,
+    ],
+    templateUrl: './guild-info.component.html'
 })
 export class GuildInfoComponent implements OnInit, OnChanges {
   @Input() guild!: Guild;

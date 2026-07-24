@@ -19,10 +19,9 @@ interface MarketPlaceFilterTab {
 }
 
 @Component({
-  selector: 'app-market-place-filter',
-  standalone: true,
-  imports: [NgFor, DropdownComponent],
-  templateUrl: './market-place-filter.component.html',
+    selector: 'app-market-place-filter',
+    imports: [NgFor, DropdownComponent],
+    templateUrl: './market-place-filter.component.html'
 })
 export class MarketPlaceFilterComponent {
   readonly tabs: readonly MarketPlaceFilterTab[] = [

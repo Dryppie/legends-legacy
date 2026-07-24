@@ -7,10 +7,9 @@ interface RoadmapItem {
 }
 
 @Component({
-  selector: 'app-roadmap',
-  standalone: true,
-  imports: [],
-  templateUrl: './roadmap.component.html',
+    selector: 'app-roadmap',
+    imports: [],
+    templateUrl: './roadmap.component.html'
 })
 export class RoadmapComponent {
   roadmapItems: RoadmapItem[] = [

@@ -7,10 +7,9 @@ import { NumberFormatPipe } from '../../../shared/pipes/number-format/number-for
 import { ShortNumberPipe } from '../../../shared/pipes/number-format/short-number.pipe';
 
 @Component({
-  selector: 'app-game-header',
-  standalone: true,
-  imports: [NgIf, CurrentDungeonComponent, NumberFormatPipe, ShortNumberPipe],
-  templateUrl: './game-header.component.html',
+    selector: 'app-game-header',
+    imports: [NgIf, CurrentDungeonComponent, NumberFormatPipe, ShortNumberPipe],
+    templateUrl: './game-header.component.html'
 })
 export class GameHeaderComponent {
   readonly currentCharacter;

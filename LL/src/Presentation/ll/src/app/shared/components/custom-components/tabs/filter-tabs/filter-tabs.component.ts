@@ -2,10 +2,9 @@ import { NgIf, NgFor, NgClass } from '@angular/common';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 
 @Component({
-  selector: 'app-filter-tabs',
-  standalone: true,
-  imports: [NgIf, NgFor, NgClass],
-  templateUrl: './filter-tabs.component.html',
+    selector: 'app-filter-tabs',
+    imports: [NgIf, NgFor, NgClass],
+    templateUrl: './filter-tabs.component.html'
 })
 export class FilterTabsComponent {
   @Input() tabs: string[] = [];

@@ -24,13 +24,12 @@ export interface DropdownOption<T = unknown> {
 }
 
 @Component({
-  selector: 'app-dropdown',
-  standalone: true,
-  imports: [NgClass, NgFor, NgIf, OverlayModule],
-  templateUrl: './dropdown.component.html',
-  host: {
-    class: 'relative inline-block',
-  },
+    selector: 'app-dropdown',
+    imports: [NgClass, NgFor, NgIf, OverlayModule],
+    templateUrl: './dropdown.component.html',
+    host: {
+        class: 'relative inline-block',
+    }
 })
 export class DropdownComponent<T = unknown> implements OnDestroy {
   private static nextId = 0;

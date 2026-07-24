@@ -19,19 +19,18 @@ import { ButtonComponent } from '../../../../shared/components/custom-components
 import { environment } from '../../../../../environments/environment';
 
 @Component({
-  selector: 'app-signup',
-  standalone: true,
-  imports: [
-    RouterLink,
-    ReactiveFormsModule,
-    NgIf,
-    MatIconModule,
-    MatFormFieldModule,
-    MatInputModule,
-    NgClass,
-    ButtonComponent,
-  ],
-  templateUrl: './signup.component.html',
+    selector: 'app-signup',
+    imports: [
+        RouterLink,
+        ReactiveFormsModule,
+        NgIf,
+        MatIconModule,
+        MatFormFieldModule,
+        MatInputModule,
+        NgClass,
+        ButtonComponent,
+    ],
+    templateUrl: './signup.component.html'
 })
 export class SignupComponent {
   @Input() convertAccount: boolean = false;

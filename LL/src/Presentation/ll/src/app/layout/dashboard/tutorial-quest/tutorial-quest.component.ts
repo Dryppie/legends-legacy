@@ -4,10 +4,9 @@ import { TutorialStateService } from '../../../core/services/api/tutorial/tutori
 import { TutorialPresenterService } from '../../../core/services/api/tutorial/tutorial-presenter.service';
 
 @Component({
-  selector: 'app-tutorial-quest',
-  standalone: true,
-  imports: [NgIf],
-  templateUrl: './tutorial-quest.component.html',
+    selector: 'app-tutorial-quest',
+    imports: [NgIf],
+    templateUrl: './tutorial-quest.component.html'
 })
 export class TutorialQuestComponent implements OnInit {
   private readonly tutorialState = inject(TutorialStateService);

@@ -14,21 +14,20 @@ import { ChatLayoutPreferenceService } from '../../core/services/client-side/cha
 import { GameHeaderComponent } from './game-header/game-header.component';
 
 @Component({
-  selector: 'app-dashboard',
-  standalone: true,
-  imports: [
-    RouterOutlet,
-    SidebarComponent,
-    NavbarComponent,
-    NgIf,
-    NgClass,
-    ChatComponent,
-    LootTrackerComponent,
-    CurrentActionComponent,
-    TutorialQuestComponent,
-    GameHeaderComponent,
-  ],
-  templateUrl: './dashboard.component.html',
+    selector: 'app-dashboard',
+    imports: [
+        RouterOutlet,
+        SidebarComponent,
+        NavbarComponent,
+        NgIf,
+        NgClass,
+        ChatComponent,
+        LootTrackerComponent,
+        CurrentActionComponent,
+        TutorialQuestComponent,
+        GameHeaderComponent,
+    ],
+    templateUrl: './dashboard.component.html'
 })
 export class DashboardComponent implements OnInit {
   isSidebarOpen = false;

@@ -18,10 +18,9 @@ type StatsParticipant = {
 };
 
 @Component({
-  selector: 'app-combat-entity-stats',
-  standalone: true,
-  imports: [NgIf, NgFor, NgClass, DecimalPipe, RegularButtonComponent],
-  templateUrl: './combat-entity-stats.component.html',
+    selector: 'app-combat-entity-stats',
+    imports: [NgIf, NgFor, NgClass, DecimalPipe, RegularButtonComponent],
+    templateUrl: './combat-entity-stats.component.html'
 })
 export class CombatEntityStatsComponent implements OnChanges {
   @Input() playerTeam: SimpleCombatEntityDto[] = [];

@@ -22,10 +22,9 @@ import {
 } from '../../../../../shared/models/Dtos/colosseum/tournamentGrounds';
 
 @Component({
-  selector: 'app-tournament-grounds',
-  standalone: true,
-  imports: [DatePipe, NgFor, NgIf, RouterLink],
-  templateUrl: './tournament-grounds.component.html',
+    selector: 'app-tournament-grounds',
+    imports: [DatePipe, NgFor, NgIf, RouterLink],
+    templateUrl: './tournament-grounds.component.html'
 })
 export class TournamentGroundsComponent implements OnInit {
   readonly status = signal<TournamentGroundsStatus | null>(null);

@@ -29,18 +29,17 @@ import { FirstPartyTourService } from '../../../core/services/client-side/first-
 import { Router } from '@angular/router';
 
 @Component({
-  selector: 'app-combat',
-  standalone: true,
-  host: { class: 'flex h-full min-h-0 w-full' },
-  imports: [
-    NgClass,
-    NgIf,
-    CountdownComponent,
-    MiniButtonComponent,
-    CombatLogComponent,
-    CombatEntityStatsComponent,
-  ],
-  templateUrl: './combat.component.html',
+    selector: 'app-combat',
+    host: { class: 'flex h-full min-h-0 w-full' },
+    imports: [
+        NgClass,
+        NgIf,
+        CountdownComponent,
+        MiniButtonComponent,
+        CombatLogComponent,
+        CombatEntityStatsComponent,
+    ],
+    templateUrl: './combat.component.html'
 })
 export class CombatComponent implements OnInit, OnDestroy {
   combatEvents: CombatEvent[] = [];

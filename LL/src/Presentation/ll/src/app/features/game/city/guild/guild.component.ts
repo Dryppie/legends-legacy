@@ -5,10 +5,9 @@ import { NgIf } from '@angular/common';
 import { GuildStateService } from '../../../../core/services/api/guild/guild-state.service';
 
 @Component({
-  selector: 'app-guild',
-  standalone: true,
-  imports: [NoGuildComponent, InAGuildComponent, NgIf],
-  templateUrl: './guild.component.html',
+    selector: 'app-guild',
+    imports: [NoGuildComponent, InAGuildComponent, NgIf],
+    templateUrl: './guild.component.html'
 })
 export class GuildComponent implements OnInit {
   readonly guild;

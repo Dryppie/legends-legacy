@@ -12,10 +12,9 @@ import {
 } from '@angular/core';
 
 @Component({
-  selector: 'app-click-popover',
-  standalone: true,
-  imports: [],
-  templateUrl: './click-popover.component.html',
+    selector: 'app-click-popover',
+    imports: [],
+    templateUrl: './click-popover.component.html'
 })
 export class ClickPopoverComponent implements AfterViewInit, OnDestroy {
   /** Template to render inside the popover */

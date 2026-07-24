@@ -6,10 +6,9 @@ import { CharacterStateService } from '../../../../core/services/api/character/c
 import { NgIf } from '@angular/common';
 
 @Component({
-  selector: 'app-market-place-listing-item',
-  standalone: true,
-  imports: [ItemComponent, NumberFormatPipe, NgIf],
-  templateUrl: './market-place-listing-item.component.html',
+    selector: 'app-market-place-listing-item',
+    imports: [ItemComponent, NumberFormatPipe, NgIf],
+    templateUrl: './market-place-listing-item.component.html'
 })
 export class MarketPlaceListingItemComponent {
   @Input() listing!: MarketPlaceListing;

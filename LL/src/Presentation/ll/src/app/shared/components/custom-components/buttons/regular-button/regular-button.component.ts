@@ -3,10 +3,9 @@ import { NgClass, NgIf } from '@angular/common';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 
 @Component({
-  selector: 'app-regular-button',
-  standalone: true,
-  imports: [NgClass, NgIf],
-  templateUrl: './regular-button.component.html',
+    selector: 'app-regular-button',
+    imports: [NgClass, NgIf],
+    templateUrl: './regular-button.component.html'
 })
 export class RegularButtonComponent {
   /** Button label. If omitted, projected content (icon, custom markup) is rendered. */

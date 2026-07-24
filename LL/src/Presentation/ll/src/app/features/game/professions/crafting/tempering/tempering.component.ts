@@ -13,10 +13,9 @@ import { CharacterActionsStateService } from '../../../../../core/services/api/c
 import { CharacterActionType } from '../../../../../shared/models/enums/characterActionType';
 
 @Component({
-  selector: 'app-tempering',
-  standalone: true,
-  imports: [NgFor, NgIf, NgClass, ItemComponent, EquipmentDisplayComponent],
-  templateUrl: './tempering.component.html',
+    selector: 'app-tempering',
+    imports: [NgFor, NgIf, NgClass, ItemComponent, EquipmentDisplayComponent],
+    templateUrl: './tempering.component.html'
 })
 export class TemperingComponent {
   @Input({ required: true }) inventory!: Signal<InventoryItem[]>;

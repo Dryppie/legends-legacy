@@ -19,23 +19,22 @@ import { ColosseumMatchResult } from '../../../../shared/models/Dtos/colosseum/c
 import { NumberFormatPipe } from '../../../../shared/pipes/number-format/number-format.pipe';
 
 @Component({
-  selector: 'app-colosseum',
-  standalone: true,
-  imports: [
-    BannerComponent,
-    TabComponent,
-    CombatComponent,
-    NgIf,
-    DatePipe,
-    ArenaBattleComponent,
-    ChampionsMarketComponent,
-    RankingsGloryComponent,
-    RecordOfBattleComponent,
-    TournamentGroundsComponent,
-    TabsComponent,
-    NumberFormatPipe,
-  ],
-  templateUrl: './colosseum.component.html',
+    selector: 'app-colosseum',
+    imports: [
+        BannerComponent,
+        TabComponent,
+        CombatComponent,
+        NgIf,
+        DatePipe,
+        ArenaBattleComponent,
+        ChampionsMarketComponent,
+        RankingsGloryComponent,
+        RecordOfBattleComponent,
+        TournamentGroundsComponent,
+        TabsComponent,
+        NumberFormatPipe,
+    ],
+    templateUrl: './colosseum.component.html'
 })
 export class ColosseumComponent implements OnInit {
   battleType = BattleType.Colosseum;

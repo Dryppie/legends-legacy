@@ -23,17 +23,16 @@ import { Rarity } from '../../../models/enums/rarity';
 import { EquipmentType } from '../../../models/enums/equipmentType';
 
 @Component({
-  selector: 'app-equipment-display',
-  standalone: true,
-  imports: [
-    NgIf,
-    NgFor,
-    NgClass,
-    AttributeTypeFormatPipe,
-    AttributeValueFormatPipe,
-    DecimalPipe,
-  ],
-  templateUrl: './equipment-display.component.html',
+    selector: 'app-equipment-display',
+    imports: [
+        NgIf,
+        NgFor,
+        NgClass,
+        AttributeTypeFormatPipe,
+        AttributeValueFormatPipe,
+        DecimalPipe,
+    ],
+    templateUrl: './equipment-display.component.html'
 })
 export class EquipmentDisplayComponent {
   @Input({ required: true }) item!: Equipment | EquipmentInstance;

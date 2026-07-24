@@ -5,15 +5,14 @@ import { HelpLauncherComponent } from '../../../help/help-launcher.component';
 import { NgIf } from '@angular/common';
 
 @Component({
-  selector: 'app-profession-header',
-  standalone: true,
-  imports: [
-    ProfessionIconComponent,
-    ProfessionActionComponent,
-    HelpLauncherComponent,
-    NgIf,
-  ],
-  templateUrl: './profession-header.component.html',
+    selector: 'app-profession-header',
+    imports: [
+        ProfessionIconComponent,
+        ProfessionActionComponent,
+        HelpLauncherComponent,
+        NgIf,
+    ],
+    templateUrl: './profession-header.component.html'
 })
 export class ProfessionHeaderComponent {
   @Input() title: string = '';

@@ -9,18 +9,17 @@ import { TabsComponent } from '../../../../shared/components/custom-components/t
 import { TabComponent } from '../../../../shared/components/custom-components/tabs/tab/tab.component';
 
 @Component({
-  selector: 'app-soulstone-archive',
-  standalone: true,
-  imports: [
-    DefaultHeaderComponent,
-    NgIf,
-    NgFor,
-    SoulstoneUpgradeCardComponent,
-    RegularButtonComponent,
-    TabsComponent,
-    TabComponent,
-  ],
-  templateUrl: './soulstone-archive.component.html',
+    selector: 'app-soulstone-archive',
+    imports: [
+        DefaultHeaderComponent,
+        NgIf,
+        NgFor,
+        SoulstoneUpgradeCardComponent,
+        RegularButtonComponent,
+        TabsComponent,
+        TabComponent,
+    ],
+    templateUrl: './soulstone-archive.component.html'
 })
 export class SoulstoneArchiveComponent implements OnInit {
   readonly character;

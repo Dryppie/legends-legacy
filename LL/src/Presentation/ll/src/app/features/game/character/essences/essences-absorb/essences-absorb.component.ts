@@ -9,17 +9,16 @@ import { SelectableListFilterComponent } from '../../../../../shared/components/
 import { InventoryItem } from '../../../../../shared/models/inventoryItem';
 
 @Component({
-  selector: 'app-essences-absorb',
-  standalone: true,
-  imports: [
-    NgIf,
-    ReactiveFormsModule,
-    FormsModule,
-    RegularButtonComponent,
-    EssenceDetailsComponent,
-    SelectableListFilterComponent,
-  ],
-  templateUrl: './essences-absorb.component.html',
+    selector: 'app-essences-absorb',
+    imports: [
+        NgIf,
+        ReactiveFormsModule,
+        FormsModule,
+        RegularButtonComponent,
+        EssenceDetailsComponent,
+        SelectableListFilterComponent,
+    ],
+    templateUrl: './essences-absorb.component.html'
 })
 export class EssencesAbsorbComponent {
   showModal = false;

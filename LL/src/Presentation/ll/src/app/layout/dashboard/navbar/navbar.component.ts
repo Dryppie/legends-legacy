@@ -19,10 +19,9 @@ import { Router } from '@angular/router';
 import { CharacterActionType } from '../../../shared/models/enums/characterActionType';
 
 @Component({
-  selector: 'app-navbar',
-  standalone: true,
-  imports: [NavbuttonComponent, NgIf, NgFor, NumberFormatPipe, ShortNumberPipe],
-  templateUrl: './navbar.component.html',
+    selector: 'app-navbar',
+    imports: [NavbuttonComponent, NgIf, NgFor, NumberFormatPipe, ShortNumberPipe],
+    templateUrl: './navbar.component.html'
 })
 export class NavbarComponent implements OnInit, OnDestroy {
   @Output() itemTapped = new EventEmitter<void>();

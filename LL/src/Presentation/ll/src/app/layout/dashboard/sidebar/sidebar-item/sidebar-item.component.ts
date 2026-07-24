@@ -5,15 +5,14 @@ import { ProfessionIconComponent } from '../../../../shared/components/professio
 import { NotificationIndicatorComponent } from '../../../../shared/components/notification-indicator/notification-indicator.component';
 
 @Component({
-  selector: 'app-sidebar-item',
-  standalone: true,
-  imports: [
-    NgClass,
-    NgIf,
-    ProfessionIconComponent,
-    NotificationIndicatorComponent,
-  ],
-  templateUrl: './sidebar-item.component.html',
+    selector: 'app-sidebar-item',
+    imports: [
+        NgClass,
+        NgIf,
+        ProfessionIconComponent,
+        NotificationIndicatorComponent,
+    ],
+    templateUrl: './sidebar-item.component.html'
 })
 export class SidebarItemComponent {
   @Input() item!: Tab;

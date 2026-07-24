@@ -24,24 +24,23 @@ import { TutorialStateService } from '../../../../core/services/api/tutorial/tut
 import { TUTORIAL_STEP_EQUIP_EQUIPMENT } from '../../../../shared/models/tutorial';
 
 @Component({
-  selector: 'app-inventory',
-  standalone: true,
-  imports: [
-    NgFor,
-    NgIf,
-    NgClass,
-    FilterTabsComponent,
-    InventoryItemComponent,
-    DefaultHeaderComponent,
-    EquipmentOverviewComponent,
-    RegularButtonComponent,
-    FormsModule,
-    ItemComponent,
-    HelpTooltipDirective,
-    EquipmentTypePipe,
-    DropdownComponent,
-  ],
-  templateUrl: './inventory.component.html',
+    selector: 'app-inventory',
+    imports: [
+        NgFor,
+        NgIf,
+        NgClass,
+        FilterTabsComponent,
+        InventoryItemComponent,
+        DefaultHeaderComponent,
+        EquipmentOverviewComponent,
+        RegularButtonComponent,
+        FormsModule,
+        ItemComponent,
+        HelpTooltipDirective,
+        EquipmentTypePipe,
+        DropdownComponent,
+    ],
+    templateUrl: './inventory.component.html'
 })
 export class InventoryComponent implements OnInit {
   tabs: SidebarSection[] = [
