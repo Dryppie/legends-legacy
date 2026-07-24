@@ -17,7 +17,11 @@ public enum AttributeBalanceScenario
     HealingSustain,
     StatusResilience,
     CrowdControlResilience,
-    SummonOffense
+    SummonOffense,
+    MixedPressure,
+    UnmitigatedPressure,
+    BurstPressure,
+    LongSustain
 }
 
 public enum AttributeBalanceFindingKind
@@ -26,7 +30,19 @@ public enum AttributeBalanceFindingKind
     Overvalued,
     Undervalued,
     CapLimited,
-    EqualBudgetMismatch
+    EqualBudgetMismatch,
+    LoadoutMismatch,
+    LoadoutCapPressure,
+    AggregateCapWaste,
+    SummonCalibrationMismatch,
+    HandCalibrationMismatch,
+    BalanceVersionBlocked
+}
+
+public enum EquipmentLoadoutComparisonPurpose
+{
+    PeerBalance,
+    OutputDecomposition
 }
 
 public sealed record AttributeBalanceAnalysisReport(
@@ -37,6 +53,11 @@ public sealed record AttributeBalanceAnalysisReport(
     double MarginalBudgetFraction,
     IReadOnlyList<AttributeMarginalValueMeasurement> Measurements,
     IReadOnlyList<EqualBudgetAttributeComparison> EqualBudgetComparisons,
+    IReadOnlyList<EquipmentLoadoutMeasurement> Loadouts,
+    IReadOnlyList<EquipmentLoadoutComparison> LoadoutComparisons,
+    IReadOnlyList<SummonCalibrationComparison> SummonCalibrations,
+    IReadOnlyList<HandCalibrationComparison> HandCalibrations,
+    EquipmentBalanceCalibrationGate CalibrationGate,
     IReadOnlyList<AttributeBalanceFinding> Findings);
 
 public sealed record AttributeMarginalValueMeasurement(
@@ -69,6 +90,128 @@ public sealed record EqualBudgetAttributeComparison(
     double FirstRelativeGainPercent,
     double SecondRelativeGainPercent,
     double DifferencePercentagePoints);
+
+public sealed record EquipmentLoadoutMeasurement(
+    string Id,
+    string Name,
+    int Tier,
+    double TargetBudget,
+    double SpentBudget,
+    double UnspentBudget,
+    double RelevantScenarioUtilityIndex,
+    IReadOnlyDictionary<AttributeType, double> AttributePoints,
+    IReadOnlyList<AttributeType> AttributesOverSingleStatCap,
+    IReadOnlyList<EquipmentAggregateCapMeasurement> AggregateCaps,
+    IReadOnlyList<EquipmentLoadoutScenarioMeasurement> Scenarios);
+
+public sealed record EquipmentAggregateCapMeasurement(
+    AttributeType Attribute,
+    double EffectiveCharacterCap,
+    double BaselineValue,
+    double DirectEquipmentPoints,
+    double PrimaryContributionPoints,
+    double TotalValue,
+    double EffectiveValue,
+    double ExcessPoints,
+    double DirectEquipmentExcessPoints,
+    double EquivalentWastedBudget,
+    double WastedTargetBudgetPercent);
+
+public sealed record EquipmentLoadoutScenarioMeasurement(
+    AttributeBalanceScenario Scenario,
+    bool IsRoleRelevant,
+    double MeanScore,
+    double RelativeToScenarioMedianPercent,
+    double ScoreConfidenceLow,
+    double ScoreConfidenceHigh,
+    EquipmentLoadoutOutput Output,
+    EquipmentLoadoutUtilityBreakdown Utility);
+
+public sealed record EquipmentLoadoutOutput(
+    double DirectDamage,
+    double SummonDamage,
+    double Healing,
+    double HealthRegeneration,
+    double BarrierGenerated,
+    double BarrierAbsorbed,
+    double DamageTaken,
+    double RemainingHealth,
+    double DurationTicks,
+    double AvoidedAttacks,
+    double SummonsCreated,
+    double AverageActiveSummons,
+    double SummonUptimePercent);
+
+public sealed record EquipmentLoadoutUtilityBreakdown(
+    double Damage,
+    double Sustain,
+    double Prevention,
+    double Survival,
+    double Total);
+
+public sealed record EquipmentLoadoutComparison(
+    int Tier,
+    AttributeBalanceScenario Scenario,
+    EquipmentLoadoutComparisonPurpose Purpose,
+    string FirstLoadoutId,
+    string SecondLoadoutId,
+    double FirstScore,
+    double SecondScore,
+    double DifferencePercent,
+    EquipmentLoadoutOutput FirstOutput,
+    EquipmentLoadoutOutput SecondOutput);
+
+public enum HandCalibrationMode
+{
+    RepresentativeFundingAndBehavior,
+    EqualBudget,
+    EqualBudgetAndBehavior
+}
+
+public sealed record SummonCalibrationComparison(
+    int Tier,
+    int DurationTicks,
+    double SummonerSpentBudget,
+    double DirectCasterSpentBudget,
+    double SummonerDamagePerHundredBudget,
+    double DirectCasterDamagePerHundredBudget,
+    double EqualBudgetDifferencePercent,
+    double SummonAbilityReferenceDamage,
+    double DirectAbilityReferenceDamage,
+    double AbilityBudgetDifferencePercent,
+    double SummonDamageSharePercent,
+    double SpiritSummonContributionPercent,
+    double ExplicitSummonStatContributionPercent,
+    EquipmentLoadoutOutput SummonerOutput,
+    EquipmentLoadoutOutput WithoutSummonAbilityOutput,
+    EquipmentLoadoutOutput WithoutSpiritSummonBonusOutput,
+    EquipmentLoadoutOutput WithoutExplicitSummonStatsOutput,
+    EquipmentLoadoutOutput DirectCasterOutput);
+
+public sealed record HandCalibrationComparison(
+    int Tier,
+    int DurationTicks,
+    HandCalibrationMode Mode,
+    double DualWieldTargetBudget,
+    double TwoHandedTargetBudget,
+    double DualWieldSpentBudget,
+    double TwoHandedSpentBudget,
+    double DualWieldDamagePerHundredBudget,
+    double TwoHandedDamagePerHundredBudget,
+    double DifferencePercent,
+    EquipmentLoadoutOutput DualWieldOutput,
+    EquipmentLoadoutOutput TwoHandedOutput);
+
+public sealed record EquipmentBalanceCalibrationGate(
+    double SummonTolerancePercent,
+    double HandTolerancePercent,
+    double AggregateCapWasteTolerancePercent,
+    bool OverflowRedistributionActive,
+    bool AggregateCapUtilizationPassed,
+    bool SummonCalibrationPassed,
+    bool HandCalibrationPassed,
+    bool ReadyForBalanceVersion3,
+    IReadOnlyList<string> Blockers);
 
 public sealed record AttributeBalanceFinding(
     AttributeBalanceFindingKind Kind,

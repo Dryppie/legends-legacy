@@ -14,8 +14,6 @@ public sealed record FastCombatEngineOptions(
 
 public sealed class FastCombatEngine
 {
-    private const float MinimumBasicAttackRate = 0.25f;
-    private const float MaximumBasicAttackRate = 4f;
     private const int HealthRegenerationIntervalTicks = 50;
 
     private readonly IReadOnlyDictionary<string, CompiledStatus> _statusesById;
@@ -831,11 +829,9 @@ public sealed class FastCombatEngine
     private int GetBasicAttackChargeThreshold() => Math.Max(1, _basicAttackIntervalTicks);
 
     private static float GetBasicAttackRate(RuntimeCombatant actor)
-    {
-        var rate = (1 + actor.GetAttribute(AttributeType.AttackSpeed) / 100f) /
-                   (float)actor.BasicAttackIntervalMultiplier;
-        return Math.Clamp(rate, MinimumBasicAttackRate, MaximumBasicAttackRate);
-    }
+        => AttributeCombatRules.CalculateBasicAttackRate(
+            actor.GetAttribute(AttributeType.AttackSpeed),
+            actor.BasicAttackIntervalMultiplier);
 
     private void InitializeActiveAbilityCooldowns(RuntimeCombatant combatant)
     {

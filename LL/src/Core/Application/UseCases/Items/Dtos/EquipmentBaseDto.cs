@@ -14,6 +14,7 @@ public class EquipmentBaseDto : ItemBaseDto, IMapFrom<EquipmentBase>
     public ICollection<ToolBonusModifier> ToolBonuses { get; set; } = [];
     public GatheringType? GatheringType { get; set; }
     public double ItemBudget { get; set; }
+    public int ItemBudgetTier { get; set; }
     public int BalanceVersion { get; set; }
 
     public void Mapping(Profile profile)
@@ -21,7 +22,12 @@ public class EquipmentBaseDto : ItemBaseDto, IMapFrom<EquipmentBase>
         profile.CreateMap<EquipmentBase, EquipmentBaseDto>()
             .ForMember(
                 destination => destination.ItemBudget,
-                options => options.MapFrom(source => EquipmentBudgetEvaluator.Evaluate(source.AttributeModifiers)))
+                options => options.MapFrom(source => EquipmentBudgetEvaluator.Evaluate(
+                    source.AttributeModifiers,
+                    EquipmentStatBudgetCatalog.MinimumTier)))
+            .ForMember(
+                destination => destination.ItemBudgetTier,
+                options => options.MapFrom(_ => EquipmentStatBudgetCatalog.MinimumTier))
             .ForMember(
                 destination => destination.BalanceVersion,
                 options => options.MapFrom(_ => EquipmentBudgetEvaluator.BalanceVersion));

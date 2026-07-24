@@ -101,7 +101,8 @@ public sealed class TemperingMechanicsService : ITemperingMechanicsService
             .ToDictionary(group => group.Key, group => group.Sum(modifier => modifier.Amount));
         var budgetByStat = currentByStat.ToDictionary(
             pair => pair.Key,
-            pair => Math.Max(0d, pair.Value) * EquipmentStatBudgetCatalog.Get(pair.Key).CostPerPoint);
+            pair => Math.Max(0d, pair.Value)
+                    * EquipmentStatBudgetCatalog.Get(pair.Key, equipment.Tier).CostPerPoint);
         var totalBudget = Math.Max(1d, budgetByStat.Values.Sum());
         var totalProfileWeight = profile.Stats.Sum(stat => Math.Max(0d, stat.Weight));
 
@@ -109,7 +110,7 @@ public sealed class TemperingMechanicsService : ITemperingMechanicsService
             .Select(stat =>
             {
                 var exists = currentByStat.TryGetValue(stat.Stat, out var currentValue);
-                var rule = EquipmentStatBudgetCatalog.Get(stat.Stat);
+                var rule = EquipmentStatBudgetCatalog.Get(stat.Stat, equipment.Tier);
                 var currentBudget = budgetByStat.GetValueOrDefault(stat.Stat);
                 var currentShare = currentBudget / totalBudget;
                 var targetShare = stat.Weight / totalProfileWeight;
@@ -118,7 +119,7 @@ public sealed class TemperingMechanicsService : ITemperingMechanicsService
                 if ((!exists && !stat.CanIntroduce) ||
                     (exists && !stat.CanIncrease) ||
                     stat.MinimumTier > equipment.Tier ||
-                    currentValue >= rule.HardCap ||
+                    currentValue >= rule.PerItemHardCap ||
                     currentShare >= cap)
                 {
                     return null;
@@ -140,11 +141,11 @@ public sealed class TemperingMechanicsService : ITemperingMechanicsService
             return null;
 
         var selected = PickWeighted(candidates, candidate => candidate.EffectiveWeight, rng);
-        var selectedRule = EquipmentStatBudgetCatalog.Get(selected.Definition.Stat);
+        var selectedRule = EquipmentStatBudgetCatalog.Get(selected.Definition.Stat, equipment.Tier);
         var previous = currentByStat.GetValueOrDefault(selected.Definition.Stat);
         var rollBudget = Math.Max(1d, equipment.Tier * 2d);
         var increase = (float)Math.Max(1d, Math.Round(rollBudget / selectedRule.CostPerPoint));
-        increase = Math.Min(increase, selectedRule.HardCap - previous);
+        increase = Math.Min(increase, selectedRule.PerItemHardCap - previous);
         if (increase <= 0)
             return null;
 
@@ -248,12 +249,28 @@ public sealed class TemperingMechanicsService : ITemperingMechanicsService
             return;
 
         var ratio = newMultiplier / previousMultiplier;
-        foreach (var modifier in equipment.InstanceModifiers)
+        if (ratio <= 1d || equipment.InstanceModifiers.Count == 0)
+            return;
+
+        var currentPoints = equipment.InstanceModifiers
+            .GroupBy(modifier => modifier.AttributeType)
+            .ToDictionary(group => group.Key, group => (double)group.Sum(modifier => modifier.Amount));
+        var currentBudgetWeights = currentPoints.ToDictionary(
+            pair => pair.Key,
+            pair => pair.Value
+                    * EquipmentStatBudgetCatalog.Get(pair.Key, equipment.Tier).CostPerPoint);
+        var currentBudget = currentBudgetWeights.Values.Sum();
+        var allocation = EquipmentBudgetAllocator.Allocate(
+            equipment.Tier,
+            currentBudget * (ratio - 1d),
+            currentBudgetWeights,
+            currentPoints);
+
+        foreach (var (attribute, addedPoints) in allocation.AddedPoints)
         {
-            var hardCap = EquipmentStatBudgetCatalog.Get(modifier.AttributeType).HardCap;
-            modifier.Amount = (float)Math.Min(
-                hardCap,
-                Math.Max(1d, Math.Round(modifier.Amount * ratio)));
+            var modifier = equipment.InstanceModifiers
+                .First(x => x.AttributeType == attribute);
+            modifier.Amount += (float)addedPoints;
         }
     }
 

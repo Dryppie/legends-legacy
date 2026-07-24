@@ -14,6 +14,8 @@ public static class AttributeCombatRules
     public const float BlockDamageReductionPercent = 50f;
     public const float CritChanceCapPercent = 75f;
     public const float LifeStealCapPercent = 50f;
+    public const float MinimumBasicAttackRate = 0.25f;
+    public const float MaximumBasicAttackRate = 4f;
     public const float DefenseRatingScale = 100f;
     public const float BasicAttackPowerCoefficient = 0.1f;
 
@@ -111,6 +113,48 @@ public static class AttributeCombatRules
             CooldownReductionCapPercent);
         var reducedTicks = authoredTicks * (100d - reductionPercent) / 100d;
         return Math.Max(1, (int)Math.Ceiling(reducedTicks - 1e-9d));
+    }
+
+    public static float CalculateBasicAttackRate(
+        float attackSpeedPercent,
+        double basicAttackIntervalMultiplier)
+    {
+        var intervalMultiplier = Math.Max(0.01d, basicAttackIntervalMultiplier);
+        var rate = (1d + attackSpeedPercent / 100d) / intervalMultiplier;
+        return (float)Math.Clamp(rate, MinimumBasicAttackRate, MaximumBasicAttackRate);
+    }
+
+    public static float CalculateUsefulAttackSpeedCapPercent(double basicAttackIntervalMultiplier)
+    {
+        var intervalMultiplier = Math.Max(0.01d, basicAttackIntervalMultiplier);
+        return (float)Math.Max(0d, (MaximumBasicAttackRate * intervalMultiplier - 1d) * 100d);
+    }
+
+    public static bool TryGetEffectiveCharacterCap(
+        AttributeType attributeType,
+        double basicAttackIntervalMultiplier,
+        out float cap)
+    {
+        cap = attributeType switch
+        {
+            AttributeType.CritChance => CritChanceCapPercent,
+            AttributeType.DodgeChance => DodgeChanceCapPercent,
+            AttributeType.BlockChance => BlockChanceCapPercent,
+            AttributeType.DamageReduction => DamageReductionCapPercent,
+            AttributeType.LifeSteal => LifeStealCapPercent,
+            AttributeType.Cooldown => CooldownReductionCapPercent,
+            AttributeType.AttackSpeed =>
+                CalculateUsefulAttackSpeedCapPercent(basicAttackIntervalMultiplier),
+            _ => 0
+        };
+        return attributeType is
+            AttributeType.CritChance or
+            AttributeType.DodgeChance or
+            AttributeType.BlockChance or
+            AttributeType.DamageReduction or
+            AttributeType.LifeSteal or
+            AttributeType.Cooldown or
+            AttributeType.AttackSpeed;
     }
 
     private static float GetValue(

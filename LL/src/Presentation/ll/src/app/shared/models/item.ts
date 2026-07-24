@@ -36,6 +36,7 @@ export interface EquipmentInstance extends ItemInstance {
   effectiveToolBonuses: ToolBonusModifier[];
   affinityTags: string[];
   itemBudget: number;
+  itemBudgetTier: number;
   balanceVersion: number;
 }
 
@@ -93,6 +94,7 @@ export interface Equipment extends ItemBase {
   scalingAttribute: AttributeType;
   scalingAmount: number;
   itemBudget: number;
+  itemBudgetTier: number;
   balanceVersion: number;
 }
 

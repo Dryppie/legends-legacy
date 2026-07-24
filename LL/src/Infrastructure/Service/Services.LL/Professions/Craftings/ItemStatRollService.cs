@@ -30,12 +30,15 @@ public class ItemStatRollService : IItemStatRollService
             * _options.GetSlotBudgetWeight(equipment.EquipmentType)
             * _options.GetQualityStatMultiplier(quality);
         var variance = 0.95d + (rng.NextDouble() * 0.10d);
+        var allocation = EquipmentBudgetAllocator.Allocate(
+            targetTier,
+            budget * variance,
+            profile);
 
-        return profile
-            .Where(x => x.Value > 0)
+        return allocation.AddedPoints
             .Select(x => new InstanceAttributeModifier(
                 x.Key,
-                CalculateAmount(x.Key, budget, x.Value, variance),
+                (float)x.Value,
                 ModifierType.Flat))
             .ToList();
     }
@@ -56,24 +59,21 @@ public class ItemStatRollService : IItemStatRollService
             .ToList();
         var minimumBudget = tierAndSlotBudget * qualityMultipliers.Min();
         var maximumBudget = tierAndSlotBudget * qualityMultipliers.Max();
+        var minimum = EquipmentBudgetAllocator.Allocate(
+            targetTier,
+            minimumBudget * 0.95d,
+            design.InitialStatProfile);
+        var maximum = EquipmentBudgetAllocator.Allocate(
+            targetTier,
+            maximumBudget * 1.05d,
+            design.InitialStatProfile);
 
         return design.InitialStatProfile
             .Where(x => x.Value > 0)
             .Select(x => new CraftedAttributeRange(
                 x.Key,
-                CalculateAmount(x.Key, minimumBudget, x.Value, 0.95d),
-                CalculateAmount(x.Key, maximumBudget, x.Value, 1.05d)))
+                (float)minimum.AddedPoints.GetValueOrDefault(x.Key),
+                (float)maximum.AddedPoints.GetValueOrDefault(x.Key)))
             .ToList();
-    }
-
-    private static float CalculateAmount(
-        Domain.Models.Attributes.AttributeType attributeType,
-        double budget,
-        double profileShare,
-        double variance)
-    {
-        var rule = EquipmentStatBudgetCatalog.Get(attributeType);
-        var amount = Math.Round((budget * profileShare * variance) / rule.CostPerPoint);
-        return (float)Math.Clamp(amount, 1d, rule.HardCap);
     }
 }

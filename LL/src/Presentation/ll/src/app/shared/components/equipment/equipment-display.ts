@@ -21,6 +21,7 @@ export interface EquipmentDisplay {
   baseModifiers?: AttributeModifier[];
   instanceModifiers: AttributeModifier[];
   itemBudget: number;
+  itemBudgetTier: number;
   balanceVersion: number;
   gatheringType?: GatheringType | null;
   toolBonuses: ToolBonusModifier[];
@@ -53,6 +54,7 @@ export function mapEquipmentToDisplay(
     description: e.description,
     instanceModifiers: sortAttributes(e.attributeModifiers),
     itemBudget: e.itemBudget ?? 0,
+    itemBudgetTier: e.itemBudgetTier ?? 1,
     balanceVersion: e.balanceVersion ?? 0,
     gatheringType: e.gatheringType,
     toolBonuses: e.toolBonuses ?? [],
@@ -88,6 +90,7 @@ export function mapInstanceToDisplay(
     baseModifiers,
     instanceModifiers,
     itemBudget: inst.itemBudget ?? 0,
+    itemBudgetTier: inst.itemBudgetTier ?? inst.tier ?? 1,
     balanceVersion: inst.balanceVersion ?? 0,
     gatheringType: base.gatheringType,
     toolBonuses: effectiveToolBonuses,

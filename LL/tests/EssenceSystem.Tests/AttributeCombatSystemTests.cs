@@ -297,7 +297,31 @@ public sealed class AttributeCombatSystemTests
         Assert.Equal(60, overcapped.RemainingCooldownTicks);
         Assert.Equal(
             AttributeCombatRules.CooldownReductionCapPercent,
-            EquipmentStatBudgetCatalog.Get(AttributeType.Cooldown).HardCap);
+            EquipmentStatBudgetCatalog.Get(AttributeType.Cooldown, tier: 1).HardCap);
+        Assert.Equal(
+            AttributeCombatRules.CooldownReductionCapPercent,
+            EquipmentStatBudgetCatalog.Get(AttributeType.Cooldown, tier: 1).PerItemHardCap);
+    }
+
+    [Theory]
+    [InlineData(0.75d, 200f)]
+    [InlineData(1d, 300f)]
+    [InlineData(1.25d, 400f)]
+    public void Useful_attack_speed_cap_depends_on_weapon_interval(
+        double intervalMultiplier,
+        float expectedCap)
+    {
+        Assert.True(AttributeCombatRules.TryGetEffectiveCharacterCap(
+            AttributeType.AttackSpeed,
+            intervalMultiplier,
+            out var cap));
+        Assert.Equal(expectedCap, cap);
+        Assert.Equal(
+            AttributeCombatRules.MaximumBasicAttackRate,
+            AttributeCombatRules.CalculateBasicAttackRate(cap, intervalMultiplier));
+        Assert.Equal(
+            AttributeCombatRules.MaximumBasicAttackRate,
+            AttributeCombatRules.CalculateBasicAttackRate(cap + 1_000, intervalMultiplier));
     }
 
     [Fact]
@@ -310,32 +334,42 @@ public sealed class AttributeCombatSystemTests
             new InstanceAttributeModifier(AttributeType.Armor, 5)
         ];
 
-        var total = EquipmentBudgetEvaluator.Evaluate(modifiers);
-        var breakdown = EquipmentBudgetEvaluator.EvaluateByAttribute(modifiers);
+        var total = EquipmentBudgetEvaluator.Evaluate(modifiers, tier: 1);
+        var breakdown = EquipmentBudgetEvaluator.EvaluateByAttribute(modifiers, tier: 1);
 
-        Assert.Equal(4.9d, total);
+        Assert.Equal(6.7d, total);
         Assert.Equal(2d, breakdown[AttributeType.Power]);
         Assert.Equal(2d, breakdown[AttributeType.MaxHealth]);
-        Assert.Equal(0.9d, breakdown[AttributeType.Armor]);
+        Assert.Equal(2.7d, breakdown[AttributeType.Armor]);
     }
 
-    [Fact]
-    public void Equal_budget_armor_and_health_are_close_in_a_physical_matchup()
+    [Theory]
+    [InlineData(1, 10d)]
+    [InlineData(5, 39d)]
+    [InlineData(10, 152d)]
+    public void Equal_budget_armor_and_health_have_similar_marginal_effective_health(
+        int tier,
+        double budget)
     {
-        const double budget = 50d;
-        const float baselineHealth = 100f;
+        var primary = 8f * tier;
+        var baselineHealth = 180 + tier * 80 + primary * 4;
+        var baselineArmor = tier * 5 + primary * 0.5f;
         var healthPoints =
-            (float)(budget / EquipmentStatBudgetCatalog.Get(AttributeType.MaxHealth).CostPerPoint);
+            (float)(budget / EquipmentStatBudgetCatalog.Get(AttributeType.MaxHealth, tier).CostPerPoint);
         var armorPoints =
-            (float)(budget / EquipmentStatBudgetCatalog.Get(AttributeType.Armor).CostPerPoint);
-        var healthEffectiveHealth = baselineHealth + healthPoints;
+            (float)(budget / EquipmentStatBudgetCatalog.Get(AttributeType.Armor, tier).CostPerPoint);
+        var baselineEffectiveHealth =
+            AttributeCombatRules.CalculateEffectiveHealth(baselineHealth, baselineArmor);
+        var healthEffectiveHealth =
+            AttributeCombatRules.CalculateEffectiveHealth(baselineHealth + healthPoints, baselineArmor);
         var armorEffectiveHealth =
-            AttributeCombatRules.CalculateEffectiveHealth(baselineHealth, armorPoints);
+            AttributeCombatRules.CalculateEffectiveHealth(baselineHealth, baselineArmor + armorPoints);
+        var healthGain = healthEffectiveHealth - baselineEffectiveHealth;
+        var armorGain = armorEffectiveHealth - baselineEffectiveHealth;
         var relativeDifference =
-            Math.Abs(armorEffectiveHealth - healthEffectiveHealth) / healthEffectiveHealth;
+            Math.Abs(armorGain - healthGain) / healthGain;
 
         Assert.InRange(relativeDifference, 0, 0.1f);
-        Assert.True(armorEffectiveHealth > healthEffectiveHealth);
     }
 
     [Fact]

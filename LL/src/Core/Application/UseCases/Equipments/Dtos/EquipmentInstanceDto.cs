@@ -30,13 +30,18 @@ public class EquipmentInstanceDto : ItemInstanceDto, IMapFrom<EquipmentInstance>
     public IReadOnlyList<ToolBonusModifier> EffectiveToolBonuses { get; set; } = [];
     public List<string> AffinityTags { get; set; } = [];
     public double ItemBudget { get; set; }
+    public int ItemBudgetTier { get; set; }
     public int BalanceVersion { get; set; }
     public void Mapping(Profile profile)
     {
         profile.CreateMap<EquipmentInstance, EquipmentInstanceDto>()
             .ForMember(
                 destination => destination.ItemBudget,
-                options => options.MapFrom(source => EquipmentBudgetEvaluator.Evaluate(source.AttributeModifiers)))
+                options => options.MapFrom(source =>
+                    EquipmentBudgetEvaluator.Evaluate(source.AttributeModifiers, source.Tier)))
+            .ForMember(
+                destination => destination.ItemBudgetTier,
+                options => options.MapFrom(source => source.Tier))
             .ForMember(
                 destination => destination.BalanceVersion,
                 options => options.MapFrom(_ => EquipmentBudgetEvaluator.BalanceVersion))
