@@ -192,7 +192,9 @@ public sealed class DungeonPowerAnalyzer : IDungeonPowerAnalyzer
                 profileResults.Values.Sum(x => x.Validation.Attempts),
                 TimeSpan.FromSeconds(reference.Validation.Attempts == 0
                     ? 0
-                    : reference.Validation.TotalCombatTicks / (double)reference.Validation.Attempts / 10d),
+                    : reference.Validation.TotalCombatTicks
+                      / (double)reference.Validation.Attempts
+                      / FastCombatEngine.TicksPerSecond),
                 completionRates,
                 unavailableProfiles.Count > 0
                     ? $"Recommendation excludes profiles that could not reach the target: {string.Join(", ", unavailableProfiles)}."

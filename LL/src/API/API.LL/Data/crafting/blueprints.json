@@ -16,9 +16,9 @@
     "bonusStatBudgetMultiplier": 0.2,
     "bonusStatProfile": {
       "Power": 0.35,
-      "CritChance": 0.3,
+      "CritChance": 0.25,
       "WeaponDamage": 0.2,
-      "AttackSpeed": 0.15
+      "AttackSpeed": 0.2
     },
     "temperingProfile": {
       "id": "blueprint_fury.tempering",
@@ -35,7 +35,7 @@
         },
         {
           "stat": "CritChance",
-          "weight": 30,
+          "weight": 25,
           "category": "Primary",
           "canIntroduce": true,
           "canIncrease": true,
@@ -53,7 +53,7 @@
         },
         {
           "stat": "AttackSpeed",
-          "weight": 15,
+          "weight": 20,
           "category": "Secondary",
           "canIntroduce": true,
           "canIncrease": true,

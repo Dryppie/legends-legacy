@@ -1,5 +1,6 @@
 using Application.Interfaces.Services.LL.Balance;
 using Domain.Models.Attributes;
+using Domain.Models.Items;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using Services.LL.Balance;
@@ -35,6 +36,9 @@ public sealed class AttributeBalanceAnalyzerTests
         Assert.Equal(
             first.CraftingCombatPeers.Select(x => JsonSerializer.Serialize(x)),
             second.CraftingCombatPeers.Select(x => JsonSerializer.Serialize(x)));
+        Assert.Equal(
+            JsonSerializer.Serialize(first.MaximumEquipmentProgression),
+            JsonSerializer.Serialize(second.MaximumEquipmentProgression));
         Assert.Equal(
             JsonSerializer.Serialize(first.CalibrationGate),
             JsonSerializer.Serialize(second.CalibrationGate));
@@ -467,7 +471,9 @@ public sealed class AttributeBalanceAnalyzerTests
             && report.CalibrationGate.EqualBudgetPeerMatrixPassed
             && report.CalibrationGate.SummonCalibrationPassed
             && report.CalibrationGate.HandCalibrationPassed
-            && report.CalibrationGate.CraftingCombatPeerMatrixPassed,
+            && report.CalibrationGate.CraftingCombatPeerMatrixPassed
+            && report.CalibrationGate.MaximumEquipmentProgressionAnalyzed
+            && report.CalibrationGate.MaximumEquipmentProgressionPassed,
             report.CalibrationGate.ActiveProfilePassed);
         Assert.True(report.CalibrationGate.OverflowRedistributionActive);
         Assert.True(report.CalibrationGate.CandidateAggregateCapUtilizationPassed);
@@ -476,8 +482,20 @@ public sealed class AttributeBalanceAnalyzerTests
             report.Findings.Any(x => x.Kind == AttributeBalanceFindingKind.BalanceVersionBlocked));
         Assert.True(
             report.CalibrationGate.ActiveProfilePassed,
-            string.Join(Environment.NewLine, report.CalibrationGate.Blockers));
-        Assert.Equal(3, report.BalanceVersion);
+            string.Join(Environment.NewLine, report.CalibrationGate.Blockers)
+            + Environment.NewLine
+            + string.Join(
+                Environment.NewLine,
+                report.MaximumEquipmentProgression.CombatPeers
+                    .Where(x => x.IsReleaseGate && !x.Passed)
+                    .Select(x =>
+                        $"{x.Id}: {x.DifferencePercent:0.##}%{Environment.NewLine}" +
+                        $"  first: {string.Join(", ", x.FirstAttributePoints.Select(p => $"{p.Key}={p.Value:0.##}"))}{Environment.NewLine}" +
+                        $"  second: {string.Join(", ", x.SecondAttributePoints.Select(p => $"{p.Key}={p.Value:0.##}"))}{Environment.NewLine}" +
+                        $"  spent: {x.FirstSpentBudget:0.##} vs {x.SecondSpentBudget:0.##}; " +
+                        $"utility/100: {x.FirstUtilityPerHundredBudget:0.##} vs " +
+                        $"{x.SecondUtilityPerHundredBudget:0.##}")));
+        Assert.Equal(4, report.BalanceVersion);
     }
 
     [Fact]
@@ -486,7 +504,7 @@ public sealed class AttributeBalanceAnalyzerTests
         var report = CreateAnalyzer().Analyze(CancellationToken.None);
         var catalog = report.CraftingCatalogConstraints;
 
-        Assert.Equal(3, catalog.CandidateBalanceVersion);
+        Assert.Equal(4, catalog.CandidateBalanceVersion);
         Assert.True(catalog.ProductionActive);
         Assert.Equal(31, catalog.RecipesAnalyzed);
         Assert.Equal(11, catalog.BlueprintsAnalyzed);
@@ -520,6 +538,49 @@ public sealed class AttributeBalanceAnalyzerTests
                 Assert.Empty(loadout.ReferenceAttributesOverCap);
                 Assert.Equal(loadout.TargetBudget, loadout.ReferenceSpentBudget, 3);
             });
+    }
+
+    [Fact]
+    public void Analyzer_exercises_the_absolute_maximum_equipment_progression_envelope()
+    {
+        var report = CreateAnalyzer().Analyze(CancellationToken.None);
+        var maximum = report.MaximumEquipmentProgression;
+
+        Assert.Equal(10, maximum.Tier);
+        Assert.Equal(ItemQuality.Masterwork, maximum.Quality);
+        Assert.Equal(Rarity.Legacy, maximum.Rarity);
+        Assert.Equal(1.12d, maximum.QualityMultiplier);
+        Assert.Equal(1.05d, maximum.CraftingVarianceMultiplier);
+        Assert.Equal(6, maximum.RarityUpgradesPerItem);
+        Assert.Equal(1_248, maximum.LoadoutsAnalyzed);
+        Assert.Equal(11, maximum.CombatPeers.Count);
+        Assert.True(report.CalibrationGate.MaximumEquipmentProgressionAnalyzed);
+        Assert.True(report.CalibrationGate.MaximumEquipmentProgressionPassed);
+        Assert.Equal(0, maximum.LoadoutsOverCap);
+        Assert.Equal(0, maximum.LoadoutsWithUnspentBudget);
+        Assert.Empty(maximum.CapSaturationByAttribute);
+        Assert.Empty(maximum.UnspentBudgetByRecipe);
+        Assert.Empty(maximum.WorstLoadouts);
+        Assert.All(maximum.CombatPeers, comparison =>
+        {
+            Assert.True(comparison.FirstSpentBudget > 0);
+            Assert.True(comparison.SecondSpentBudget > 0);
+            Assert.True(double.IsFinite(comparison.FirstUtilityPerHundredBudget));
+            Assert.True(double.IsFinite(comparison.SecondUtilityPerHundredBudget));
+            Assert.True(double.IsFinite(comparison.DifferencePercent));
+            Assert.Equal(
+                Math.Abs(comparison.DifferencePercent) <= comparison.TolerancePercent,
+                comparison.Passed);
+        });
+        Assert.All(
+            maximum.CombatPeers.Where(comparison => comparison.IsReleaseGate),
+            comparison => Assert.True(
+                comparison.Passed,
+                $"{comparison.Id}: {comparison.DifferencePercent:0.##}%"));
+        Assert.Equal(
+            maximum.CombatPeers.Count(x => !x.Passed),
+            report.Findings.Count(x =>
+                x.Kind == AttributeBalanceFindingKind.MaximumProgressionMismatch));
     }
 
     private static AttributeMarginalValueAnalyzer CreateAnalyzer() =>

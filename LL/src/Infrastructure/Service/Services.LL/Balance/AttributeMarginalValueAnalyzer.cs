@@ -2,9 +2,11 @@ using Application.Interfaces.Services.LL.Balance;
 using Application.Interfaces.Services.LL.PowerRatings;
 using Application.Interfaces.Services.LL.Professions;
 using Domain.Models.Attributes;
+using Domain.Models.Attributes.Modifiers;
 using Domain.Models.Combat;
 using Domain.Models.Combat.Abilities;
 using Domain.Models.Damages;
+using Domain.Models.Items;
 using Domain.Models.Items.Equipments;
 using Domain.Models.Professions.Crafting.V2;
 using Microsoft.Extensions.Options;
@@ -41,6 +43,10 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
         "recipe.weapon.one_handed.dagger";
     private const string RepresentativeSlowWeaponRecipeId =
         "recipe.weapon.two_handed.maul";
+    private const int MaximumEquipmentTier = 10;
+    private const ItemQuality MaximumEquipmentQuality = ItemQuality.Masterwork;
+    private const Rarity MaximumEquipmentRarity = Rarity.Legacy;
+    private const double MaximumCraftingVarianceMultiplier = 1.05d;
 
     private static readonly IReadOnlyList<int> ReferenceTiers = Array.AsReadOnly([1, 5, 10]);
     private static readonly IReadOnlyList<int> DeterministicSeeds =
@@ -767,12 +773,15 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
         var handCalibrations = AnalyzeHandCalibration(cancellationToken);
         var craftingCombatPeers = AnalyzeCraftingCombatPeers(cancellationToken);
         var craftingCatalogConstraints = AnalyzeCraftingCatalogConstraints(cancellationToken);
+        var maximumEquipmentProgression =
+            AnalyzeMaximumEquipmentProgression(cancellationToken);
         var calibrationGate = CreateCalibrationGate(
             equalBudgetComparisons,
             loadouts,
             summonCalibrations,
             handCalibrations,
-            craftingCombatPeers);
+            craftingCombatPeers,
+            maximumEquipmentProgression);
         var findings = CreateFindings(
             measurements,
             equalBudgetComparisons,
@@ -781,6 +790,7 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
             summonCalibrations,
             handCalibrations,
             craftingCombatPeers,
+            maximumEquipmentProgression,
             calibrationGate);
 
         return new AttributeBalanceAnalysisReport(
@@ -798,6 +808,7 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
             handCalibrations,
             craftingCombatPeers,
             craftingCatalogConstraints,
+            maximumEquipmentProgression,
             calibrationGate,
             findings);
     }
@@ -1609,6 +1620,358 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
         return comparisons;
     }
 
+    private MaximumEquipmentProgressionReport AnalyzeMaximumEquipmentProgression(
+        CancellationToken cancellationToken)
+    {
+        var recipes = _craftingDefinitions.GetRecipes()
+            .Where(x => x.Enabled && x.OutputItemType != EquipmentType.Tool)
+            .OrderBy(x => x.Id, StringComparer.Ordinal)
+            .ToList();
+        var blueprints = _craftingDefinitions.GetBlueprints()
+            .Where(x => x.Enabled)
+            .OrderBy(x => x.Id, StringComparer.Ordinal)
+            .ToList();
+        var equipmentBases = _craftingDefinitions.GetEquipmentBases();
+        var templates = CreateCatalogLoadoutTemplates(recipes, blueprints);
+        var allocations = new Dictionary<string, MaximumCatalogAllocation>(
+            StringComparer.Ordinal);
+
+        foreach (var template in templates)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            var allocation = CreateMaximumCatalogAllocation(template, equipmentBases);
+            allocations.Add(allocation.Combat.Id, allocation);
+        }
+
+        var comparisons = new List<CraftingCombatPeerComparison>(
+            CraftingCombatPeerSpecs.Count);
+        foreach (var spec in CraftingCombatPeerSpecs)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            var firstTemplate = FindCatalogTemplate(
+                templates,
+                spec.FirstArmorFamily,
+                spec.FirstHandConfiguration,
+                spec.FirstBlueprintId);
+            var secondTemplate = FindCatalogTemplate(
+                templates,
+                spec.SecondArmorFamily,
+                spec.SecondHandConfiguration,
+                spec.SecondBlueprintId);
+            var first = allocations[CreateCatalogLoadoutId(firstTemplate)];
+            var second = allocations[CreateCatalogLoadoutId(secondTemplate)];
+            var firstOutcomes = MeasureCatalogCombatScenario(
+                MaximumEquipmentTier,
+                spec.Scenario,
+                first.Combat,
+                cancellationToken);
+            var secondOutcomes = MeasureCatalogCombatScenario(
+                MaximumEquipmentTier,
+                spec.Scenario,
+                second.Combat,
+                cancellationToken);
+            var firstUtility = CalculateUtilityPerHundredBudget(
+                AverageUtility(firstOutcomes).Total,
+                first.Combat.SpentBudget);
+            var secondUtility = CalculateUtilityPerHundredBudget(
+                AverageUtility(secondOutcomes).Total,
+                second.Combat.SpentBudget);
+            var difference = CalculateSymmetricDifference(firstUtility, secondUtility);
+
+            comparisons.Add(new CraftingCombatPeerComparison(
+                spec.Id,
+                spec.Group,
+                MaximumEquipmentTier,
+                spec.Scenario,
+                first.Combat.Id,
+                second.Combat.Id,
+                Round(first.Combat.SpentBudget),
+                Round(second.Combat.SpentBudget),
+                first.Combat.Points.ToDictionary(x => x.Key, x => Round(x.Value)),
+                second.Combat.Points.ToDictionary(x => x.Key, x => Round(x.Value)),
+                Round(firstUtility),
+                Round(secondUtility),
+                Round(difference),
+                spec.TolerancePercent,
+                spec.IsReleaseGate,
+                Math.Abs(difference) <= spec.TolerancePercent,
+                AverageOutput(firstOutcomes),
+                AverageOutput(secondOutcomes)));
+        }
+
+        var measuredAllocations = allocations.Values
+            .Select(allocation =>
+            {
+                var caps = CalculateCatalogCapResults(
+                    MaximumEquipmentTier,
+                    allocation.TargetBudget,
+                    allocation.Combat.Points,
+                    allocation.Combat.BasicAttackIntervalMultiplier);
+                return (
+                    Measurement: new MaximumEquipmentLoadoutMeasurement(
+                        allocation.Combat.Id,
+                        allocation.ArmorFamily,
+                        allocation.HandConfiguration,
+                        allocation.BlueprintId,
+                        Round(allocation.TargetBudget),
+                        Round(allocation.Combat.SpentBudget),
+                        Round(allocation.StaticBaseModifierBudget),
+                        Round(allocation.GeneratedStatBudget),
+                        Round(allocation.RarityImprovementBudget),
+                        Round(allocation.UnspentBudget),
+                        Round(caps.Select(x => x.WastedBudgetPercent)
+                            .DefaultIfEmpty(0d)
+                            .Max()),
+                        caps
+                            .Where(x => x.ExcessPoints > 0.001d)
+                            .Select(x => x.Attribute)
+                            .Order()
+                            .ToList()),
+                    Caps: caps);
+            })
+            .ToList();
+        var measurements = measuredAllocations
+            .Select(entry => entry.Measurement)
+            .ToList();
+        var capSaturationByAttribute = measuredAllocations
+            .SelectMany(entry => entry.Caps.Where(cap => cap.ExcessPoints > 0.001d))
+            .GroupBy(cap => cap.Attribute)
+            .OrderByDescending(group => group.Count())
+            .ThenBy(group => group.Key)
+            .Select(group => new MaximumEquipmentCapSaturationGroup(
+                group.Key,
+                group.Count(),
+                Round(group.Average(cap => cap.WastedBudgetPercent)),
+                Round(group.Max(cap => cap.WastedBudgetPercent))))
+            .ToList();
+        var unspentBudgetByRecipe = allocations.Values
+            .SelectMany(allocation => allocation.ItemDiagnostics)
+            .Where(item => item.GeneratedUnspentBudget > 0.01d
+                           || item.RarityUnspentBudget > 0.01d)
+            .GroupBy(item => new
+            {
+                item.RecipeId,
+                item.EquipmentType,
+                item.BlueprintId
+            })
+            .Select(group => new MaximumEquipmentUnspentBudgetGroup(
+                group.Key.RecipeId,
+                group.Key.EquipmentType,
+                group.Key.BlueprintId,
+                group.Count(),
+                Round(group.Sum(item => item.GeneratedUnspentBudget)),
+                Round(group.Sum(item => item.RarityUnspentBudget)),
+                Round(group.Sum(item =>
+                    item.GeneratedUnspentBudget + item.RarityUnspentBudget)),
+                group.SelectMany(item => item.CappedAttributes)
+                    .Distinct()
+                    .Order()
+                    .ToList(),
+                group.SelectMany(item => item.BindingCombatCaps)
+                    .Distinct()
+                    .Order()
+                    .ToList()))
+            .OrderByDescending(group => group.TotalUnspentBudget)
+            .ThenBy(group => group.RecipeId, StringComparer.Ordinal)
+            .ThenBy(group => group.BlueprintId, StringComparer.Ordinal)
+            .ToList();
+
+        return new MaximumEquipmentProgressionReport(
+            MaximumEquipmentTier,
+            MaximumEquipmentQuality,
+            MaximumEquipmentRarity,
+            _craftingBalance.GetQualityStatMultiplier(MaximumEquipmentQuality),
+            MaximumCraftingVarianceMultiplier,
+            TemperingConstants.GetRarityUpgradeCount(MaximumEquipmentRarity),
+            measurements.Count,
+            measurements.Count(x => x.AttributesOverCap.Count > 0),
+            measurements.Count(x => x.UnspentBudget > 0.01d),
+            comparisons,
+            capSaturationByAttribute,
+            unspentBudgetByRecipe,
+            measurements
+                .Where(x => x.AttributesOverCap.Count > 0 || x.UnspentBudget > 0.01d)
+                .OrderByDescending(x => x.MaximumWastedBudgetPercent)
+                .ThenByDescending(x => x.UnspentBudget)
+                .ThenBy(x => x.Id, StringComparer.Ordinal)
+                .Take(20)
+                .ToList());
+    }
+
+    private MaximumCatalogAllocation CreateMaximumCatalogAllocation(
+        CatalogLoadoutTemplate template,
+        IReadOnlyDictionary<string, EquipmentBase> equipmentBases)
+    {
+        var designs = template.Recipes
+            .Select(recipe => EquipmentCraftingDesignComposer.Compose(
+                recipe,
+                template.Blueprint is not null
+                && EquipmentCraftingDesignComposer.IsCompatible(recipe, template.Blueprint)
+                    ? template.Blueprint
+                    : null))
+            .ToList();
+        var mainHandIndex = template.Recipes
+            .Select((recipe, index) => (recipe, index))
+            .First(x => x.recipe.Id.Equals(
+                template.MainHandRecipeId,
+                StringComparison.OrdinalIgnoreCase))
+            .index;
+        var mainHandBehavior = designs[mainHandIndex].Behavior;
+        var tierBudget = _craftingBalance.GetTierPowerBudget(MaximumEquipmentTier);
+        var maximumLoadoutWeight = _craftingBalance.GetMaximumCombatLoadoutBudgetWeight();
+        var qualityMultiplier =
+            _craftingBalance.GetQualityStatMultiplier(MaximumEquipmentQuality);
+        var rarityUpgradeBudget =
+            TemperingConstants.GetRarityUpgradeCount(MaximumEquipmentRarity)
+            * TemperingConstants.GetDirectedImprovementBudget(MaximumEquipmentTier);
+        var points = new Dictionary<AttributeType, double>();
+        var targetBudget = 0d;
+        var spentBudget = 0d;
+        var staticBaseModifierBudget = 0d;
+        var generatedStatBudget = 0d;
+        var rarityImprovementBudget = 0d;
+        var unspentBudget = 0d;
+        var itemDiagnostics = new List<MaximumItemProgressionDiagnostic>(
+            designs.Count);
+
+        for (var index = 0; index < designs.Count; index++)
+        {
+            var design = designs[index];
+            var recipe = template.Recipes[index];
+            var equipmentBase = equipmentBases[recipe.OutputItemId];
+            var slotWeight = _craftingBalance.GetSlotBudgetWeight(recipe.OutputItemType);
+            var constraints = EquipmentConstraintProfile.CreateItemConstraints(
+                EquipmentConstraintProfile.CreateTierBaseline(MaximumEquipmentTier),
+                slotWeight,
+                maximumLoadoutWeight,
+                EquipmentConstraintProfile.MinimumSupportedBasicAttackIntervalMultiplier);
+            var perItemCapMultiplier =
+                EquipmentConstraintProfile.GetPerItemCapMultiplier(slotWeight);
+            var itemPoints = equipmentBase.AttributeModifiers
+                .Where(modifier => modifier.ModifierType == ModifierType.Flat)
+                .GroupBy(modifier => modifier.AttributeType)
+                .ToDictionary(
+                    group => group.Key,
+                    group => group.Sum(modifier =>
+                        (double)EquipmentInstance.GetBoostedBaseModifierAmount(
+                            modifier.AttributeType,
+                            modifier.Amount,
+                            MaximumEquipmentRarity)));
+            var itemStaticBudget = itemPoints.Sum(entry =>
+                entry.Value
+                * EquipmentStatBudgetCatalog.Get(
+                    entry.Key,
+                    MaximumEquipmentTier).CostPerPoint);
+            staticBaseModifierBudget += itemStaticBudget;
+            targetBudget += itemStaticBudget;
+            spentBudget += itemStaticBudget;
+
+            var generatedBaseBudget =
+                tierBudget
+                * slotWeight
+                * qualityMultiplier
+                * MaximumCraftingVarianceMultiplier;
+            var generated = EquipmentBudgetAllocator.AllocateDesignConstrained(
+                MaximumEquipmentTier,
+                generatedBaseBudget,
+                design,
+                constraints,
+                EquipmentConstraintProfile.GetOverflowWeights(
+                    EquipmentCraftingDesignComposer.Compose(recipe, null)),
+                itemPoints,
+                perItemCapMultiplier);
+            AddPoints(itemPoints, generated.AddedPoints);
+            generatedStatBudget += generated.SpentBudget;
+            targetBudget += generated.TargetBudget;
+            spentBudget += generated.SpentBudget;
+            unspentBudget += generated.UnspentBudget;
+
+            var temperingWeights = design.TemperingProfile.Stats
+                .Where(stat =>
+                    stat.MinimumTier is null
+                    || stat.MinimumTier <= MaximumEquipmentTier)
+                .Where(stat =>
+                    itemPoints.ContainsKey(stat.Stat)
+                        ? stat.CanIncrease
+                        : stat.CanIntroduce)
+                .GroupBy(stat => stat.Stat)
+                .ToDictionary(
+                    group => group.Key,
+                    group => group.Sum(stat => Math.Max(0d, stat.Weight)));
+            var rarity = EquipmentBudgetAllocator.AllocateConstrained(
+                MaximumEquipmentTier,
+                rarityUpgradeBudget,
+                temperingWeights,
+                constraints,
+                EquipmentConstraintProfile.GetRarityOverflowWeights(
+                    recipe.OutputItemType,
+                    design.TemperingProfile),
+                itemPoints,
+                perItemCapMultiplier
+                * EquipmentConstraintProfile.RarityImprovementCapMultiplier);
+            AddPoints(itemPoints, rarity.AddedPoints);
+            rarityImprovementBudget += rarity.SpentBudget;
+            targetBudget += rarity.TargetBudget;
+            spentBudget += rarity.SpentBudget;
+            unspentBudget += rarity.UnspentBudget;
+            AddPoints(points, itemPoints);
+            itemDiagnostics.Add(new MaximumItemProgressionDiagnostic(
+                recipe.Id,
+                recipe.OutputItemType,
+                template.Blueprint is not null
+                && EquipmentCraftingDesignComposer.IsCompatible(
+                    recipe,
+                    template.Blueprint)
+                    ? template.Blueprint.Id
+                    : null,
+                generated.UnspentBudget,
+                rarity.UnspentBudget,
+                generated.CappedAttributes
+                    .Concat(rarity.CappedAttributes)
+                    .Distinct()
+                    .Order()
+                    .ToList(),
+                generated.BindingCombatCaps
+                    .Concat(rarity.BindingCombatCaps)
+                    .Distinct()
+                    .Order()
+                    .ToList()));
+        }
+
+        var attributes = CreateReferenceAttributes(MaximumEquipmentTier);
+        foreach (var (attribute, pointDelta) in points)
+            ApplyAttributeDelta(attributes, attribute, (float)pointDelta);
+
+        var combat = new CatalogCombatAllocation(
+            CreateCatalogLoadoutId(template),
+            spentBudget,
+            points,
+            attributes,
+            mainHandBehavior.BasicAttackIntervalMultiplier,
+            mainHandBehavior.BasicAttackDamageMultiplier,
+            mainHandBehavior.RangeCategory.Equals("Ranged", StringComparison.OrdinalIgnoreCase)
+                ? AttackType.Ranged
+                : AttackType.Melee,
+            mainHandBehavior.AttackCategory.Equals("Magical", StringComparison.OrdinalIgnoreCase)
+                ? DamageType.Magical
+                : DamageType.Physical);
+        return new MaximumCatalogAllocation(
+            template.ArmorFamily,
+            template.HandConfiguration,
+            template.Blueprint?.Id,
+            targetBudget,
+            staticBaseModifierBudget,
+            generatedStatBudget,
+            rarityImprovementBudget,
+            unspentBudget,
+            itemDiagnostics,
+            combat);
+    }
+
+    private static string CreateCatalogLoadoutId(CatalogLoadoutTemplate template) =>
+        $"{template.ArmorFamily}|{template.HandConfiguration}|" +
+        $"{template.Blueprint?.Id ?? "base"}";
+
     private static CatalogLoadoutTemplate FindCatalogTemplate(
         IReadOnlyList<CatalogLoadoutTemplate> templates,
         string armorFamily,
@@ -2114,7 +2477,8 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
         IReadOnlyList<EquipmentLoadoutMeasurement> loadouts,
         IReadOnlyList<SummonCalibrationComparison> summonCalibrations,
         IReadOnlyList<HandCalibrationComparison> handCalibrations,
-        IReadOnlyList<CraftingCombatPeerComparison> craftingCombatPeers)
+        IReadOnlyList<CraftingCombatPeerComparison> craftingCombatPeers,
+        MaximumEquipmentProgressionReport maximumEquipmentProgression)
     {
         var equalBudgetFailures = equalBudgetComparisons
             .Where(x => x.IsReleaseGate && !x.Passed)
@@ -2174,6 +2538,49 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
                 "their approved tolerances.");
         }
 
+        var maximumEquipmentProgressionAnalyzed =
+            maximumEquipmentProgression.LoadoutsAnalyzed > 0
+            && maximumEquipmentProgression.CombatPeers.Count == CraftingCombatPeerSpecs.Count
+            && maximumEquipmentProgression.CombatPeers.All(x =>
+                x.FirstSpentBudget > 0
+                && x.SecondSpentBudget > 0
+                && double.IsFinite(x.FirstUtilityPerHundredBudget)
+                && double.IsFinite(x.SecondUtilityPerHundredBudget)
+                && double.IsFinite(x.DifferencePercent));
+        if (!maximumEquipmentProgressionAnalyzed)
+        {
+            blockers.Add(
+                "The tier-10 Masterwork/Legacy maximum-equipment analysis is incomplete or invalid.");
+        }
+        var maximumEquipmentPeerFailures = maximumEquipmentProgression.CombatPeers
+            .Where(x => x.IsReleaseGate && !x.Passed)
+            .ToList();
+        if (maximumEquipmentProgression.LoadoutsOverCap > 0)
+        {
+            blockers.Add(
+                $"{maximumEquipmentProgression.LoadoutsOverCap} tier-10 Masterwork/Legacy " +
+                "loadouts exceed an effective character cap.");
+        }
+
+        if (maximumEquipmentProgression.LoadoutsWithUnspentBudget > 0)
+        {
+            blockers.Add(
+                $"{maximumEquipmentProgression.LoadoutsWithUnspentBudget} tier-10 " +
+                "Masterwork/Legacy loadouts cannot spend their full progression budget.");
+        }
+
+        if (maximumEquipmentPeerFailures.Count > 0)
+        {
+            blockers.Add(
+                $"{maximumEquipmentPeerFailures.Count} tier-10 Masterwork/Legacy " +
+                "combat peer comparisons exceed their approved tolerances.");
+        }
+        var maximumEquipmentProgressionPassed =
+            maximumEquipmentProgressionAnalyzed
+            && maximumEquipmentProgression.LoadoutsOverCap == 0
+            && maximumEquipmentProgression.LoadoutsWithUnspentBudget == 0
+            && maximumEquipmentPeerFailures.Count == 0;
+
         return new EquipmentBalanceCalibrationGate(
             SummonCalibrationTolerancePercent,
             HandCalibrationTolerancePercent,
@@ -2185,6 +2592,8 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
             SummonCalibrationPassed: summonFailures.Count == 0,
             HandCalibrationPassed: handFailures.Count == 0,
             CraftingCombatPeerMatrixPassed: craftingCombatPeerFailures.Count == 0,
+            MaximumEquipmentProgressionAnalyzed: maximumEquipmentProgressionAnalyzed,
+            MaximumEquipmentProgressionPassed: maximumEquipmentProgressionPassed,
             ActiveProfilePassed: blockers.Count == 0,
             blockers);
     }
@@ -2863,6 +3272,7 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
         IReadOnlyList<SummonCalibrationComparison> summonCalibrations,
         IReadOnlyList<HandCalibrationComparison> handCalibrations,
         IReadOnlyList<CraftingCombatPeerComparison> craftingCombatPeers,
+        MaximumEquipmentProgressionReport maximumEquipmentProgression,
         EquipmentBalanceCalibrationGate calibrationGate)
     {
         var findings = new List<AttributeBalanceFinding>();
@@ -2995,13 +3405,27 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
                 $"{comparison.Scenario}; tolerance is {comparison.TolerancePercent:0.##}%."));
         }
 
+        foreach (var comparison in maximumEquipmentProgression.CombatPeers.Where(x => !x.Passed))
+        {
+            findings.Add(new AttributeBalanceFinding(
+                AttributeBalanceFindingKind.MaximumProgressionMismatch,
+                maximumEquipmentProgression.Tier,
+                null,
+                $"{comparison.Id} at {maximumEquipmentProgression.Quality}/" +
+                $"{maximumEquipmentProgression.Rarity}: {comparison.FirstDesignId} and " +
+                $"{comparison.SecondDesignId} differ by " +
+                $"{Math.Abs(comparison.DifferencePercent):0.##}% in " +
+                $"{comparison.Scenario}; tolerance is {comparison.TolerancePercent:0.##}%."));
+        }
+
         if (!calibrationGate.ActiveProfilePassed)
         {
             findings.Add(new AttributeBalanceFinding(
                 AttributeBalanceFindingKind.BalanceVersionBlocked,
                 0,
                 null,
-                $"Equipment balance version 3 is blocked: {string.Join(" ", calibrationGate.Blockers)}"));
+                $"Equipment balance version {EquipmentBudgetEvaluator.BalanceVersion} is blocked: " +
+                string.Join(" ", calibrationGate.Blockers)));
         }
 
         return findings;
@@ -3136,6 +3560,27 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
         double BasicAttackDamageMultiplier,
         AttackType BasicAttackType,
         DamageType BasicAttackDamageType);
+
+    private sealed record MaximumCatalogAllocation(
+        string ArmorFamily,
+        string HandConfiguration,
+        string? BlueprintId,
+        double TargetBudget,
+        double StaticBaseModifierBudget,
+        double GeneratedStatBudget,
+        double RarityImprovementBudget,
+        double UnspentBudget,
+        IReadOnlyList<MaximumItemProgressionDiagnostic> ItemDiagnostics,
+        CatalogCombatAllocation Combat);
+
+    private sealed record MaximumItemProgressionDiagnostic(
+        string RecipeId,
+        EquipmentType EquipmentType,
+        string? BlueprintId,
+        double GeneratedUnspentBudget,
+        double RarityUnspentBudget,
+        IReadOnlyList<AttributeType> CappedAttributes,
+        IReadOnlyList<AttributeType> BindingCombatCaps);
 
     private sealed record CatalogCapResult(
         AttributeType Attribute,

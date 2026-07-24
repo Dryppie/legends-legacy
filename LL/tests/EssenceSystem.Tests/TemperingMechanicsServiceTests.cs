@@ -59,6 +59,27 @@ public sealed class TemperingMechanicsServiceTests
     }
 
     [Fact]
+    public void RarityUpgradeUsesThematicOverflowWhenAuthoredStatsAreCapped()
+    {
+        var equipment = CreateEquipment();
+        equipment.Tier = 10;
+        equipment.ItemXp = 9;
+        equipment.InstanceModifiers.Add(new InstanceAttributeModifier(
+            AttributeType.Armor,
+            719));
+
+        var result = new TemperingMechanicsService()
+            .ApplyTemperingAttempt(equipment, CreateProfile(), new FixedRandom(0.01d));
+
+        Assert.True(result.RarityUpgraded);
+        Assert.Equal(AttributeType.Power, result.ImprovedStat);
+        Assert.Equal(
+            20,
+            equipment.InstanceModifiers.Single(x =>
+                x.AttributeType == AttributeType.Power).Amount);
+    }
+
+    [Fact]
     public void CriticalQualityIncreaseDoesNotRestorePotential()
     {
         var equipment = CreateEquipment();

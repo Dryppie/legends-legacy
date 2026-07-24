@@ -136,16 +136,16 @@ public static class AttributeCatalog
             [AttributeType.HealthRegeneration] = new(
                 AttributeType.HealthRegeneration,
                 "Health Regen",
-                "Health restored once per regeneration interval.",
-                AttributeUnit.HealthPerRegenerationInterval,
+                "Health restored every five seconds.",
+                AttributeUnit.HealthPerFiveSeconds,
                 AttributeStackingRule.Additive,
                 0,
                 null,
                 AttributeCapKind.None,
                 true,
                 true,
-                2,
-                " HP/interval",
+                0,
+                " HP/5s",
                 AttributeType.Spirit,
                 Scenarios(AttributeBenchmarkScenario.HealingSustain, AttributeBenchmarkScenario.LongSustain)),
             [AttributeType.LifeSteal] = Percent(
@@ -270,7 +270,7 @@ public static class AttributeCatalog
             AttributeCapKind.None,
             true,
             true,
-            2,
+            0,
             string.Empty,
             primarySource,
             scenarios);
@@ -292,7 +292,7 @@ public static class AttributeCatalog
             AttributeCapKind.None,
             true,
             true,
-            2,
+            0,
             string.Empty,
             primarySource,
             scenarios);

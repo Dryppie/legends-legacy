@@ -1,4 +1,6 @@
 using Domain.Models.Attributes;
+using Domain.Models.Items;
+using Domain.Models.Items.Equipments;
 
 namespace Application.Interfaces.Services.LL.Balance;
 
@@ -37,6 +39,7 @@ public enum AttributeBalanceFindingKind
     SummonCalibrationMismatch,
     HandCalibrationMismatch,
     CraftingCombatPeerMismatch,
+    MaximumProgressionMismatch,
     BalanceVersionBlocked
 }
 
@@ -61,6 +64,7 @@ public sealed record AttributeBalanceAnalysisReport(
     IReadOnlyList<HandCalibrationComparison> HandCalibrations,
     IReadOnlyList<CraftingCombatPeerComparison> CraftingCombatPeers,
     CraftingCatalogConstraintReport CraftingCatalogConstraints,
+    MaximumEquipmentProgressionReport MaximumEquipmentProgression,
     EquipmentBalanceCalibrationGate CalibrationGate,
     IReadOnlyList<AttributeBalanceFinding> Findings);
 
@@ -315,6 +319,52 @@ public sealed record CraftingCatalogLoadoutConstraintMeasurement(
     IReadOnlyList<AttributeType> ProductionAttributesOverCap,
     IReadOnlyList<AttributeType> ReferenceAttributesOverCap);
 
+public sealed record MaximumEquipmentProgressionReport(
+    int Tier,
+    ItemQuality Quality,
+    Rarity Rarity,
+    double QualityMultiplier,
+    double CraftingVarianceMultiplier,
+    int RarityUpgradesPerItem,
+    int LoadoutsAnalyzed,
+    int LoadoutsOverCap,
+    int LoadoutsWithUnspentBudget,
+    IReadOnlyList<CraftingCombatPeerComparison> CombatPeers,
+    IReadOnlyList<MaximumEquipmentCapSaturationGroup> CapSaturationByAttribute,
+    IReadOnlyList<MaximumEquipmentUnspentBudgetGroup> UnspentBudgetByRecipe,
+    IReadOnlyList<MaximumEquipmentLoadoutMeasurement> WorstLoadouts);
+
+public sealed record MaximumEquipmentCapSaturationGroup(
+    AttributeType Attribute,
+    int LoadoutCount,
+    double AverageWastedBudgetPercent,
+    double MaximumWastedBudgetPercent);
+
+public sealed record MaximumEquipmentUnspentBudgetGroup(
+    string RecipeId,
+    EquipmentType EquipmentType,
+    string? BlueprintId,
+    int LoadoutOccurrences,
+    double GeneratedUnspentBudget,
+    double RarityUnspentBudget,
+    double TotalUnspentBudget,
+    IReadOnlyList<AttributeType> CappedAttributes,
+    IReadOnlyList<AttributeType> BindingCombatCaps);
+
+public sealed record MaximumEquipmentLoadoutMeasurement(
+    string Id,
+    string ArmorFamily,
+    string HandConfiguration,
+    string? BlueprintId,
+    double TargetBudget,
+    double SpentBudget,
+    double StaticBaseModifierBudget,
+    double GeneratedStatBudget,
+    double RarityImprovementBudget,
+    double UnspentBudget,
+    double MaximumWastedBudgetPercent,
+    IReadOnlyList<AttributeType> AttributesOverCap);
+
 public sealed record EquipmentBalanceCalibrationGate(
     double SummonTolerancePercent,
     double HandTolerancePercent,
@@ -326,6 +376,8 @@ public sealed record EquipmentBalanceCalibrationGate(
     bool SummonCalibrationPassed,
     bool HandCalibrationPassed,
     bool CraftingCombatPeerMatrixPassed,
+    bool MaximumEquipmentProgressionAnalyzed,
+    bool MaximumEquipmentProgressionPassed,
     bool ActiveProfilePassed,
     IReadOnlyList<string> Blockers);
 

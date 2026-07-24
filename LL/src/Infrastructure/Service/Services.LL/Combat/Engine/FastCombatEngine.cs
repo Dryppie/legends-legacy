@@ -14,7 +14,10 @@ public sealed record FastCombatEngineOptions(
 
 public sealed class FastCombatEngine
 {
-    private const int HealthRegenerationIntervalTicks = 50;
+    public const int TicksPerSecond = 10;
+    private const int HealthRegenerationIntervalSeconds = 5;
+    private const int HealthRegenerationIntervalTicks =
+        TicksPerSecond * HealthRegenerationIntervalSeconds;
 
     private readonly IReadOnlyDictionary<string, CompiledStatus> _statusesById;
     private readonly IReadOnlyDictionary<string, CompiledSummon> _summonsById;
@@ -1049,7 +1052,9 @@ public sealed class FastCombatEngine
 
             _healthRegenerationProgress[combatant] = 0;
 
-            var regeneration = Math.Max(0, combatant.GetAttribute(AttributeType.HealthRegeneration));
+            var regeneration = Math.Max(
+                0,
+                combatant.GetAttribute(AttributeType.HealthRegeneration));
             if (regeneration <= 0 || combatant.Health >= combatant.GetAttribute(AttributeType.MaxHealth))
                 continue;
 

@@ -9,6 +9,8 @@ public static class EquipmentConstraintProfile
     public const bool ProductionActive = true;
     public const double AggregateWasteTolerancePercent = 1d;
     public const double MinimumSupportedBasicAttackIntervalMultiplier = 0.75d;
+    public const double BlueprintBonusCapMultiplier = 1.25d;
+    public const double RarityImprovementCapMultiplier = 1.25d;
 
     public static double GetCostPerPoint(AttributeType attribute, int tier) =>
         EquipmentStatBudgetCatalog.Get(attribute, tier).CostPerPoint;
@@ -149,6 +151,73 @@ public static class EquipmentConstraintProfile
                     AttributeType.Fortitude,
                     AttributeType.Spirit,
                     AttributeType.MaxHealth,
+                    AttributeType.HealthRegeneration,
+                    AttributeType.StatusResistance),
+            _ => new Dictionary<AttributeType, double>()
+        };
+    }
+
+    public static IReadOnlyDictionary<AttributeType, double> GetRarityOverflowWeights(
+        EquipmentType equipmentType,
+        TemperingProfileDefinition profile)
+    {
+        var authoredStats = profile.Stats
+            .Select(stat => stat.Stat)
+            .ToHashSet();
+        var magical = authoredStats.Contains(AttributeType.MagicPenetration)
+            || authoredStats.Contains(AttributeType.Spirit)
+            || authoredStats.Contains(AttributeType.HealingPowerPercent)
+            || authoredStats.Contains(AttributeType.SummonPower);
+
+        return equipmentType switch
+        {
+            EquipmentType.OneHanded or EquipmentType.TwoHanded when magical =>
+                EqualWeights(
+                    AttributeType.Power,
+                    AttributeType.Spirit,
+                    AttributeType.MagicPenetration,
+                    AttributeType.HealthRegeneration,
+                    AttributeType.HealingPowerPercent,
+                    AttributeType.SummonPower),
+            EquipmentType.OneHanded or EquipmentType.TwoHanded =>
+                EqualWeights(
+                    AttributeType.Power,
+                    AttributeType.Precision,
+                    AttributeType.WeaponDamage,
+                    AttributeType.CritDamage,
+                    AttributeType.ArmorPenetration,
+                    AttributeType.AttackSpeed),
+            EquipmentType.OffHand =>
+                EqualWeights(
+                    AttributeType.Power,
+                    AttributeType.Fortitude,
+                    AttributeType.Spirit,
+                    AttributeType.MaxHealth,
+                    AttributeType.Armor,
+                    AttributeType.Resistance,
+                    AttributeType.HealthRegeneration,
+                    AttributeType.MagicPenetration,
+                    AttributeType.BlockChance),
+            EquipmentType.Head or EquipmentType.Chest or EquipmentType.Legs =>
+                EqualWeights(
+                    AttributeType.Power,
+                    AttributeType.Fortitude,
+                    AttributeType.Spirit,
+                    AttributeType.MaxHealth,
+                    AttributeType.Armor,
+                    AttributeType.Resistance,
+                    AttributeType.HealthRegeneration,
+                    AttributeType.StatusResistance),
+            EquipmentType.Ring or EquipmentType.Necklace or EquipmentType.Relic =>
+                EqualWeights(
+                    AttributeType.Power,
+                    AttributeType.Fortitude,
+                    AttributeType.Precision,
+                    AttributeType.Spirit,
+                    AttributeType.MaxHealth,
+                    AttributeType.WeaponDamage,
+                    AttributeType.Armor,
+                    AttributeType.Resistance,
                     AttributeType.HealthRegeneration,
                     AttributeType.StatusResistance),
             _ => new Dictionary<AttributeType, double>()

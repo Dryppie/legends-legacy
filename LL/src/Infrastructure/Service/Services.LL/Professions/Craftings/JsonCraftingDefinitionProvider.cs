@@ -18,6 +18,8 @@ public sealed class JsonCraftingDefinitionProvider : ICraftingDefinitionProvider
     public IReadOnlyList<MaterialDefinition> GetMaterials() => _definitions.Value.Materials;
     public IReadOnlyList<CraftingRecipeDefinition> GetRecipes() => _definitions.Value.Recipes;
     public IReadOnlyList<BlueprintDefinition> GetBlueprints() => _definitions.Value.Blueprints;
+    public IReadOnlyDictionary<string, EquipmentBase> GetEquipmentBases() =>
+        _definitions.Value.EquipmentBases;
 
     public MaterialDefinition? GetStandardMaterial(MaterialFamily family, int tier) =>
         _definitions.Value.Materials.FirstOrDefault(x => x.IsStandardTieredMaterial && x.Family == family && x.Tier == tier);
@@ -45,9 +47,35 @@ public sealed class JsonCraftingDefinitionProvider : ICraftingDefinitionProvider
         var materials = Read<IReadOnlyList<MaterialDefinition>>(craftingRoot, "materials.json", options);
         var recipes = Read<IReadOnlyList<CraftingRecipeDefinition>>(craftingRoot, "base-recipes.json", options);
         var blueprints = Read<IReadOnlyList<BlueprintDefinition>>(craftingRoot, "blueprints.json", options);
+        var equipmentBases = ReadEquipmentBases(
+            Path.Combine(contentRootPath, contentRoot, "items", "items.json"),
+            options);
 
-        Validate(materials, recipes, blueprints);
-        return new DefinitionSet(materials, recipes, blueprints);
+        Validate(materials, recipes, blueprints, equipmentBases);
+        return new DefinitionSet(materials, recipes, blueprints, equipmentBases);
+    }
+
+    private static IReadOnlyDictionary<string, EquipmentBase> ReadEquipmentBases(
+        string path,
+        JsonSerializerOptions options)
+    {
+        if (!File.Exists(path))
+            throw new InvalidOperationException("Required item definition file 'items/items.json' does not exist.");
+
+        using var document = JsonDocument.Parse(File.ReadAllText(path));
+        return document.RootElement
+            .EnumerateArray()
+            .Where(element =>
+                element.TryGetProperty("itemType", out var itemType)
+                && itemType.GetString()?.Equals(
+                    "Equipment",
+                    StringComparison.OrdinalIgnoreCase) == true)
+            .Select(element =>
+                JsonSerializer.Deserialize<EquipmentBase>(element.GetRawText(), options)
+                ?? throw new InvalidOperationException("Unable to parse an equipment item definition."))
+            .ToDictionary(
+                equipment => equipment.Id,
+                StringComparer.OrdinalIgnoreCase);
     }
 
     private static T Read<T>(string root, string fileName, JsonSerializerOptions options)
@@ -63,7 +91,8 @@ public sealed class JsonCraftingDefinitionProvider : ICraftingDefinitionProvider
     private static void Validate(
         IReadOnlyList<MaterialDefinition> materials,
         IReadOnlyList<CraftingRecipeDefinition> recipes,
-        IReadOnlyList<BlueprintDefinition> blueprints)
+        IReadOnlyList<BlueprintDefinition> blueprints,
+        IReadOnlyDictionary<string, EquipmentBase> equipmentBases)
     {
         EnsureUnique(materials.Select(x => x.Id), "material");
         EnsureUnique(recipes.Select(x => x.Id), "equipment recipe");
@@ -93,6 +122,12 @@ public sealed class JsonCraftingDefinitionProvider : ICraftingDefinitionProvider
 
             if (string.IsNullOrWhiteSpace(recipe.OutputItemId))
                 throw new InvalidOperationException($"Equipment recipe '{recipe.Id}' has no output item.");
+            if (!equipmentBases.TryGetValue(recipe.OutputItemId, out var equipmentBase))
+                throw new InvalidOperationException(
+                    $"Equipment recipe '{recipe.Id}' references missing item base '{recipe.OutputItemId}'.");
+            if (equipmentBase.EquipmentType != recipe.OutputItemType)
+                throw new InvalidOperationException(
+                    $"Equipment recipe '{recipe.Id}' output type does not match item base '{recipe.OutputItemId}'.");
 
             ValidateProfile(recipe.Id, recipe.InitialStatProfile, recipe.TemperingProfile);
             ValidateHandedness(recipe.Id, recipe.OutputItemType, recipe.Behavior);
@@ -198,5 +233,6 @@ public sealed class JsonCraftingDefinitionProvider : ICraftingDefinitionProvider
     private sealed record DefinitionSet(
         IReadOnlyList<MaterialDefinition> Materials,
         IReadOnlyList<CraftingRecipeDefinition> Recipes,
-        IReadOnlyList<BlueprintDefinition> Blueprints);
+        IReadOnlyList<BlueprintDefinition> Blueprints,
+        IReadOnlyDictionary<string, EquipmentBase> EquipmentBases);
 }

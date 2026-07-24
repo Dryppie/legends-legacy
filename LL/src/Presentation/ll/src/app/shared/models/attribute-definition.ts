@@ -4,7 +4,7 @@ export type AttributeUnit =
   | 'FlatPoints'
   | 'PercentagePoints'
   | 'Rating'
-  | 'HealthPerRegenerationInterval'
+  | 'HealthPerFiveSeconds'
   | 'MultiplierInput';
 
 export type AttributeStackingRule =

@@ -12,6 +12,7 @@ public static class EquipmentBudgetAllocator
         EquipmentCraftingDesign design,
         IReadOnlyList<EquipmentLinearBudgetConstraint> constraints,
         IReadOnlyDictionary<AttributeType, double>? baseOverflowWeights = null,
+        IReadOnlyDictionary<AttributeType, double>? currentPoints = null,
         double perItemCapMultiplier = 1d)
     {
         var baseAllocation = AllocateConstrained(
@@ -20,20 +21,28 @@ public static class EquipmentBudgetAllocator
             design.InitialStatProfile,
             constraints,
             baseOverflowWeights,
+            currentPoints,
             perItemCapMultiplier: perItemCapMultiplier);
         var bonusBudget = Math.Max(0d, baseBudget)
             * Math.Max(0d, design.BlueprintBonusBudgetMultiplier);
         if (bonusBudget <= Epsilon || design.BlueprintBonusStatProfile.Count == 0)
             return baseAllocation;
 
+        var pointsBeforeBonus = (currentPoints
+                ?? new Dictionary<AttributeType, double>())
+            .Concat(baseAllocation.AddedPoints)
+            .GroupBy(entry => entry.Key)
+            .ToDictionary(group => group.Key, group => group.Sum(entry => entry.Value));
         var bonusAllocation = AllocateConstrained(
             tier,
             bonusBudget,
             design.BlueprintBonusStatProfile,
             constraints,
             EquipmentConstraintProfile.GetOverflowWeights(design),
-            currentPoints: baseAllocation.AddedPoints,
-            perItemCapMultiplier: perItemCapMultiplier);
+            currentPoints: pointsBeforeBonus,
+            perItemCapMultiplier:
+                perItemCapMultiplier
+                * EquipmentConstraintProfile.BlueprintBonusCapMultiplier);
         var combinedPoints = baseAllocation.AddedPoints
             .Concat(bonusAllocation.AddedPoints)
             .GroupBy(entry => entry.Key)

@@ -4,7 +4,7 @@ namespace Domain.Models.Professions.Crafting.V2;
 
 public static class EquipmentStatBudgetCatalog
 {
-    public const int BalanceVersion = 3;
+    public const int BalanceVersion = 4;
     public const int MinimumTier = 1;
     public const int MaximumTier = 10;
 
@@ -20,7 +20,8 @@ public static class EquipmentStatBudgetCatalog
             [AttributeType.Armor] = Tiered(500, (1, 0.54d), (5, 1.02d), (10, 1.37d)),
             [AttributeType.Resistance] = Tiered(500, (1, 0.54d), (5, 1.02d), (10, 1.37d)),
             [AttributeType.CritChance] = Fixed(4d, 75),
-            [AttributeType.CritDamage] = Fixed(2d, 250),
+            [AttributeType.CritDamage] =
+                Tiered(250, (1, 2d), (5, 2.25d), (10, 2.5d)),
             [AttributeType.ArmorPenetration] = Fixed(3d, 100),
             [AttributeType.MagicPenetration] = Fixed(3d, 100),
             [AttributeType.DodgeChance] = Fixed(5d, 50),

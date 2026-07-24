@@ -33,7 +33,14 @@ public sealed class AttributeCombatSystemTests
             Assert.Equal(
                 definition.Unit == AttributeUnit.PercentagePoints,
                 definition.DisplaySuffix == "%");
+            Assert.Equal(
+                definition.Unit == AttributeUnit.PercentagePoints ? 2 : 0,
+                definition.DisplayPrecision);
         });
+
+        var healthRegeneration = AttributeCatalog.Get(AttributeType.HealthRegeneration);
+        Assert.Equal(AttributeUnit.HealthPerFiveSeconds, healthRegeneration.Unit);
+        Assert.Equal(" HP/5s", healthRegeneration.DisplaySuffix);
 
         Assert.Equal(
             EquipmentStatBudgetCatalog.Attributes.Order(),

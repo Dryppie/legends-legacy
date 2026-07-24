@@ -102,49 +102,34 @@ public sealed class TemperingMechanicsService : ITemperingMechanicsService
         var slotWeight = _options.GetSlotBudgetWeight(equipment.EquipmentBase.EquipmentType);
         var constraints = CreateItemConstraints(equipment, slotWeight);
         var perItemCapMultiplier =
-            EquipmentConstraintProfile.GetPerItemCapMultiplier(slotWeight);
+            EquipmentConstraintProfile.GetPerItemCapMultiplier(slotWeight)
+            * EquipmentConstraintProfile.RarityImprovementCapMultiplier;
         var budgetByStat = currentByStat.ToDictionary(
             pair => pair.Key,
             pair => Math.Max(0d, pair.Value)
                     * EquipmentStatBudgetCatalog.Get(pair.Key, equipment.Tier).CostPerPoint);
         var totalBudget = Math.Max(1d, budgetByStat.Values.Sum());
-        var totalProfileWeight = profile.Stats.Sum(stat => Math.Max(0d, stat.Weight));
-
-        var candidates = profile.Stats
-            .Select(stat =>
-            {
-                var exists = currentByStat.TryGetValue(stat.Stat, out var currentValue);
-                var currentBudget = budgetByStat.GetValueOrDefault(stat.Stat);
-                var currentShare = currentBudget / totalBudget;
-                var targetShare = stat.Weight / totalProfileWeight;
-                var cap = stat.MaxBudgetShare ?? 1d;
-                var maximumIncrease = EquipmentConstraintProfile.GetMaximumAdditionalPoints(
-                    stat.Stat,
-                    equipment.Tier,
-                    allCurrentPoints,
-                    constraints,
-                    perItemCapMultiplier);
-
-                if ((!exists && !stat.CanIntroduce) ||
-                    (exists && !stat.CanIncrease) ||
-                    stat.MinimumTier > equipment.Tier ||
-                    maximumIncrease <= 0.000001d ||
-                    currentShare >= cap)
+        var candidates = CreateCandidates(profile.Stats);
+        if (candidates.Count == 0)
+        {
+            var fallbackStats = EquipmentConstraintProfile
+                .GetRarityOverflowWeights(
+                    equipment.EquipmentBase.EquipmentType,
+                    profile)
+                .Where(entry => profile.Stats.All(stat => stat.Stat != entry.Key))
+                .Select(entry => new TemperingStatWeightDefinition
                 {
-                    return null;
-                }
-
-                var deficitMultiplier = 1d + (Math.Max(targetShare - currentShare, 0d) * 4d);
-                var continuationMultiplier = exists ? 1.15d : 1d;
-                var categoryMultiplier = stat.Category == TemperingStatCategory.Primary ? 1.25d : 1d;
-                var capMultiplier = Math.Max(0.05d, 1d - (currentShare / cap));
-                var effectiveWeight = stat.Weight * deficitMultiplier * continuationMultiplier *
-                                      categoryMultiplier * capMultiplier;
-                return new WeightedCandidate(stat, effectiveWeight);
-            })
-            .Where(candidate => candidate is not null && candidate.EffectiveWeight > 0)
-            .Select(candidate => candidate!)
-            .ToList();
+                    Stat = entry.Key,
+                    Weight = entry.Value,
+                    Category = TemperingStatCategory.Secondary,
+                    CanIntroduce = true,
+                    CanIncrease = true,
+                    MaxBudgetShare = 1d,
+                    MinimumTier = 1
+                })
+                .ToList();
+            candidates = CreateCandidates(fallbackStats);
+        }
 
         if (candidates.Count == 0)
             return null;
@@ -152,7 +137,7 @@ public sealed class TemperingMechanicsService : ITemperingMechanicsService
         var selected = PickWeighted(candidates, candidate => candidate.EffectiveWeight, rng);
         var selectedRule = EquipmentStatBudgetCatalog.Get(selected.Definition.Stat, equipment.Tier);
         var previous = currentByStat.GetValueOrDefault(selected.Definition.Stat);
-        var rollBudget = Math.Max(1d, equipment.Tier * 2d);
+        var rollBudget = TemperingConstants.GetDirectedImprovementBudget(equipment.Tier);
         var increase = (float)Math.Max(1d, Math.Round(rollBudget / selectedRule.CostPerPoint));
         increase = Math.Min(
             increase,
@@ -179,6 +164,58 @@ public sealed class TemperingMechanicsService : ITemperingMechanicsService
         }
 
         return new DirectedImprovement(selected.Definition.Stat, previous, previous + increase);
+
+        List<WeightedCandidate> CreateCandidates(
+            IReadOnlyList<TemperingStatWeightDefinition> definitions)
+        {
+            var totalWeight = definitions.Sum(stat => Math.Max(0d, stat.Weight));
+            if (totalWeight <= 0)
+                return [];
+
+            return definitions
+                .Select(stat =>
+                {
+                    var exists = currentByStat.ContainsKey(stat.Stat);
+                    var currentBudget = budgetByStat.GetValueOrDefault(stat.Stat);
+                    var currentShare = currentBudget / totalBudget;
+                    var targetShare = stat.Weight / totalWeight;
+                    var cap = stat.MaxBudgetShare ?? 1d;
+                    var maximumIncrease =
+                        EquipmentConstraintProfile.GetMaximumAdditionalPoints(
+                            stat.Stat,
+                            equipment.Tier,
+                            allCurrentPoints,
+                            constraints,
+                            perItemCapMultiplier);
+
+                    if ((!exists && !stat.CanIntroduce) ||
+                        (exists && !stat.CanIncrease) ||
+                        stat.MinimumTier > equipment.Tier ||
+                        maximumIncrease <= 0.000001d ||
+                        currentShare >= cap)
+                    {
+                        return null;
+                    }
+
+                    var deficitMultiplier =
+                        1d + (Math.Max(targetShare - currentShare, 0d) * 4d);
+                    var continuationMultiplier = exists ? 1.15d : 1d;
+                    var categoryMultiplier =
+                        stat.Category == TemperingStatCategory.Primary ? 1.25d : 1d;
+                    var capMultiplier = Math.Max(0.05d, 1d - (currentShare / cap));
+                    var effectiveWeight =
+                        stat.Weight
+                        * deficitMultiplier
+                        * continuationMultiplier
+                        * categoryMultiplier
+                        * capMultiplier;
+                    return new WeightedCandidate(stat, effectiveWeight);
+                })
+                .Where(candidate =>
+                    candidate is not null && candidate.EffectiveWeight > 0)
+                .Select(candidate => candidate!)
+                .ToList();
+        }
     }
 
     private bool HandleCriticalOutcome(

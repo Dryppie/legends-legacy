@@ -25,7 +25,7 @@ public sealed class CraftingBalanceOptions
 
     public Dictionary<EquipmentType, double> SlotBudgetWeights { get; set; } = new()
     {
-        [EquipmentType.TwoHanded] = 1.40d,
+        [EquipmentType.TwoHanded] = 1.70d,
         [EquipmentType.OneHanded] = 0.85d,
         [EquipmentType.OffHand] = 0.65d,
         [EquipmentType.Chest] = 1.15d,

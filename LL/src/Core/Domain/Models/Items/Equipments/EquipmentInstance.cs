@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
+using Domain.Models.Attributes;
 using Domain.Models.Attributes.Modifiers;
 using Domain.Models.Items.Equipments.Tools;
 
@@ -29,7 +30,13 @@ public class EquipmentInstance : ItemInstance
     [NotMapped]
     public IReadOnlyCollection<ItemAttributeModifier> BaseModifiers =>
         EquipmentBase?.AttributeModifiers
-            .Select(attr => new ItemAttributeModifier(attr.AttributeType, (int)Math.Ceiling(attr.Amount * Boost), attr.ModifierType))
+            .Select(attr => new ItemAttributeModifier(
+                attr.AttributeType,
+                GetBoostedBaseModifierAmount(
+                    attr.AttributeType,
+                    attr.Amount,
+                    Rarity),
+                attr.ModifierType))
             .ToList()
         ?? new List<ItemAttributeModifier>(0);
 
@@ -53,7 +60,9 @@ public class EquipmentInstance : ItemInstance
         .. ToolAffixes,
     ];
 
-    public float Boost => Rarity switch
+    public float Boost => GetRarityBoost(Rarity);
+
+    public static float GetRarityBoost(Rarity rarity) => rarity switch
     {
         Rarity.Common => 1.0f,
         Rarity.Uncommon => 1.25f,
@@ -64,4 +73,17 @@ public class EquipmentInstance : ItemInstance
         Rarity.Legacy => 6.0f,
         _ => 1.0f
     };
+
+    public static int GetBoostedBaseModifierAmount(
+        AttributeType attribute,
+        float amount,
+        Rarity rarity)
+    {
+        var boosted = (int)Math.Ceiling(amount * GetRarityBoost(rarity));
+        var definition = AttributeCatalog.Get(attribute);
+        return definition.CapKind == AttributeCapKind.Fixed
+               && definition.MaximumValue is { } maximum
+            ? Math.Min(boosted, (int)Math.Floor(maximum))
+            : boosted;
+    }
 }

@@ -217,7 +217,9 @@ public sealed class PowerAnalysisSimulationRunner
                 [AttributeType.CritChance] = Math.Min(35, 5 + intensity / 20f),
                 [AttributeType.CritDamage] = 50,
                 [AttributeType.AttackSpeed] = Math.Min(150, intensity / 10f),
-                [AttributeType.HealthRegeneration] = profile == CanonicalPartyProfile.Sustain ? Math.Max(1, intensity / 8f) : 0
+                [AttributeType.HealthRegeneration] = profile == CanonicalPartyProfile.Sustain
+                    ? Math.Max(1, intensity / 8f)
+                    : 0
             });
         var combatant = new CombatEntity(source)
         {

@@ -50,6 +50,33 @@ public sealed class EquipmentBalanceProfileTests
     }
 
     [Theory]
+    [InlineData(1, 2d)]
+    [InlineData(5, 2.25d)]
+    [InlineData(10, 2.5d)]
+    public void CritDamageCostRisesWithEndgameCritSynergy(
+        int tier,
+        double expectedCost)
+    {
+        Assert.Equal(
+            expectedCost,
+            EquipmentStatBudgetCatalog
+                .Get(AttributeType.CritDamage, tier)
+                .CostPerPoint,
+            precision: 4);
+    }
+
+    [Fact]
+    public void TwoHandedAndDualWieldReceiveEqualHandSlotFunding()
+    {
+        var options = new CraftingBalanceOptions();
+
+        Assert.Equal(
+            options.GetSlotBudgetWeight(EquipmentType.OneHanded) * 2d,
+            options.GetSlotBudgetWeight(EquipmentType.TwoHanded),
+            precision: 4);
+    }
+
+    [Theory]
     [InlineData(1)]
     [InlineData(5)]
     [InlineData(10)]
@@ -115,7 +142,7 @@ public sealed class EquipmentBalanceProfileTests
         Assert.Equal(54d, EquipmentBudgetEvaluator.Evaluate(modifiers, tier: 1));
         Assert.Equal(102d, EquipmentBudgetEvaluator.Evaluate(modifiers, tier: 5));
         Assert.Equal(137d, EquipmentBudgetEvaluator.Evaluate(modifiers, tier: 10));
-        Assert.Equal(3, EquipmentBudgetEvaluator.BalanceVersion);
+        Assert.Equal(4, EquipmentBudgetEvaluator.BalanceVersion);
     }
 
     [Fact]
@@ -139,6 +166,42 @@ public sealed class EquipmentBalanceProfileTests
         {
             Assert.Null(typeof(EquipmentBase).GetProperty(removedProperty));
         }
+    }
+
+    [Fact]
+    public void LegacyBaseModifiersCannotExceedFixedCharacterCaps()
+    {
+        var equipment = new EquipmentInstance
+        {
+            ItemBaseId = "test-shield",
+            ItemBase = new EquipmentBase
+            {
+                Id = "test-shield",
+                Name = "Test Shield",
+                EquipmentType = EquipmentType.OffHand,
+                AttributeModifiers =
+                [
+                    new ItemAttributeModifier(
+                        AttributeType.BlockChance,
+                        50,
+                        ModifierType.Flat),
+                    new ItemAttributeModifier(
+                        AttributeType.Armor,
+                        10,
+                        ModifierType.Flat)
+                ]
+            },
+            Rarity = Rarity.Legacy
+        };
+
+        Assert.Equal(
+            50,
+            equipment.BaseModifiers.Single(x =>
+                x.AttributeType == AttributeType.BlockChance).Amount);
+        Assert.Equal(
+            60,
+            equipment.BaseModifiers.Single(x =>
+                x.AttributeType == AttributeType.Armor).Amount);
     }
 
     [Fact]
@@ -331,7 +394,7 @@ public sealed class EquipmentBalanceProfileTests
         Assert.InRange(allocation.UnspentBudget, 0, 0.001d);
         Assert.Contains(AttributeType.CritChance, allocation.BindingCombatCaps);
         Assert.True(allocation.AddedPoints[AttributeType.Power] > 25d);
-        Assert.Equal(3, EquipmentConstraintProfile.BalanceVersion);
+        Assert.Equal(4, EquipmentConstraintProfile.BalanceVersion);
         Assert.True(EquipmentConstraintProfile.ProductionActive);
     }
 

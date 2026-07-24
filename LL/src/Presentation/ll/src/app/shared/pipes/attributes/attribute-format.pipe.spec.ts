@@ -27,13 +27,15 @@ describe('canonical attribute formatting', () => {
         displayName: 'Status Resistance',
         description: 'Status-duration resistance rating.',
         unit: 'Rating',
+        displayPrecision: 0,
       }),
       definition({
         attributeType: AttributeType.HealthRegeneration,
         displayName: 'Health Regen',
-        description: 'Health restored per interval.',
-        unit: 'HealthPerRegenerationInterval',
-        displaySuffix: ' HP/interval',
+        description: 'Health restored every five seconds.',
+        unit: 'HealthPerFiveSeconds',
+        displayPrecision: 0,
+        displaySuffix: ' HP/5s',
       }),
     ]);
   });
@@ -52,10 +54,15 @@ describe('canonical attribute formatting', () => {
     );
   });
 
-  it('does not present rating attributes as percentages', () => {
-    expect(formatAttributeValue(25, AttributeType.StatusResistance)).toBe('25');
+  it('rounds flat and rating attributes to integers', () => {
+    expect(formatAttributeValue(25.49, AttributeType.StatusResistance)).toBe(
+      '25',
+    );
+    expect(formatAttributeValue(25.5, AttributeType.StatusResistance)).toBe(
+      '26',
+    );
     expect(formatAttributeValue(4.5, AttributeType.HealthRegeneration)).toBe(
-      '4.5 HP/interval',
+      '5 HP/5s',
     );
   });
 });

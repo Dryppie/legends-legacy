@@ -82,12 +82,23 @@ public class ItemStatRollService : IItemStatRollService
             _options.GetMaximumCombatLoadoutBudgetWeight(),
             EquipmentConstraintProfile.MinimumSupportedBasicAttackIntervalMultiplier);
         var baseDesign = EquipmentCraftingDesignComposer.Compose(design.Recipe, null);
+        var basePoints = equipment.AttributeModifiers
+            .Where(modifier => modifier.ModifierType == ModifierType.Flat)
+            .GroupBy(modifier => modifier.AttributeType)
+            .ToDictionary(
+                group => group.Key,
+                group => group.Sum(modifier => (double)
+                    EquipmentInstance.GetBoostedBaseModifierAmount(
+                        modifier.AttributeType,
+                        modifier.Amount,
+                        Rarity.Common)));
         return EquipmentBudgetAllocator.AllocateDesignConstrained(
             tier,
             budget,
             design,
             constraints,
             EquipmentConstraintProfile.GetOverflowWeights(baseDesign),
+            basePoints,
             perItemCapMultiplier:
                 EquipmentConstraintProfile.GetPerItemCapMultiplier(slotWeight));
     }

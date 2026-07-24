@@ -5,7 +5,7 @@ public enum AttributeUnit
     FlatPoints,
     PercentagePoints,
     Rating,
-    HealthPerRegenerationInterval,
+    HealthPerFiveSeconds,
     MultiplierInput
 }
 
