@@ -24,21 +24,32 @@
       <div class="ll-copy mt-1">
         Learning permanently unlocks this Blueprint for one base recipe.
       </div>
-      <label class="ll-copy mt-3 block">
-        Base recipe
-        <select
-          class="ll-input mt-1 w-full px-2 py-2 text-white"
+      <div *ngIf="isLoadingRecipes()" class="ll-state mt-3">
+        Loading available base recipes...
+      </div>
+      <div *ngIf="compatibleRecipeOptions.length" class="ll-copy mt-3">
+        <div>Base recipe</div>
+        <app-dropdown
+          class="mt-1 block w-full"
+          appearance="field"
+          label="Select a base recipe"
           [value]="selectedRecipeId()"
-          (change)="selectRecipe($any($event.target).value)"
-        >
-          <option
-            *ngFor="let recipe of metadata.compatibleRecipes"
-            [value]="recipe.id"
-          >
-            {{ recipe.name }}
-          </option>
-        </select>
-      </label>
+          [options]="compatibleRecipeOptions"
+          [selectedValue]="selectedRecipeId()"
+          (selection)="selectRecipe($event)"
+        ></app-dropdown>
+      </div>
+      <div
+        *ngIf="
+          hasLoadedRecipes() &&
+          !isLoadingRecipes() &&
+          !compatibleRecipeOptions.length
+        "
+        class="ll-state mt-3"
+      >
+        You have already learned this Blueprint for every compatible base
+        recipe.
+      </div>
       <div class="ll-copy mt-2 text-xs text-secondary">
         Source: {{ metadata.sourceType || "Unknown" }}
         <ng-container *ngIf="metadata.sourceId">
@@ -56,7 +67,7 @@
         Close
       </button>
       <button
-        *ngIf="blueprint"
+        *ngIf="blueprint && compatibleRecipeOptions.length"
         type="button"
         class="ll-button"
         [disabled]="isLearning() || !selectedRecipeId()"

@@ -14,23 +14,22 @@
         <span class="text-xs text-secondary">⌕</span>
         <input
           type="search"
-          class="min-w-0 flex-1 bg-transparent text-xs text-white outline-none placeholder:text-secondary"
+          class="min-w-0 flex-1 appearance-none border-0 bg-transparent p-0 text-xs text-white outline-none ring-0 placeholder:text-secondary focus:border-0 focus:outline-none focus:ring-0"
           placeholder="Search recipes..."
           [value]="recipeSearch()"
           (input)="setRecipeSearch($any($event.target).value)"
         />
       </label>
 
-      <select
-        class="w-full rounded border border-white/10 bg-black/30 px-3 py-2 text-xs text-white outline-none focus:border-primary/60"
+      <app-dropdown
+        class="block w-full"
+        appearance="field"
+        label="All professions"
         [value]="recipeCategory()"
-        (change)="setRecipeCategory($any($event.target).value)"
-      >
-        <option value="all">All professions</option>
-        <option *ngFor="let category of recipeCategories()" [value]="category">
-          {{ formatDisplayLabel(category) }}
-        </option>
-      </select>
+        [options]="recipeCategoryOptions()"
+        [selectedValue]="recipeCategory()"
+        (selection)="setRecipeCategory($event)"
+      ></app-dropdown>
 
       <div class="flex flex-wrap gap-1.5">
         <button
@@ -147,10 +146,6 @@
             <span class="ll-state">{{
               formatDisplayLabel(recipe.outputItemType)
             }}</span>
-            <span class="ll-state">Common base</span>
-            <span class="ll-state"
-              >Profession {{ recipe.minimumProfessionLevel }}+</span
-            >
           </div>
         </div>
 
@@ -629,10 +624,10 @@
             </div>
 
             <div class="ll-item-stat-row">
-              <span>Profession requirement</span>
-              <span class="text-primary"
-                >{{ recipe.minimumProfessionLevel }}+</span
-              >
+              <span>Required crafting level</span>
+              <span class="text-primary">
+                Level {{ recipe.minimumProfessionLevel }}
+              </span>
             </div>
 
             <div class="ll-item-stat-row mt-3">

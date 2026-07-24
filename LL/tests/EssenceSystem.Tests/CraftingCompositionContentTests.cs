@@ -1,6 +1,7 @@
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
+using Domain.Models.Professions.Crafting;
 using Domain.Models.Professions.Crafting.V2;
 using Microsoft.Extensions.Configuration;
 using Services.LL.Professions.Craftings;
@@ -14,9 +15,64 @@ public sealed class CraftingCompositionContentTests
     {
         var provider = CreateProvider();
 
-        Assert.Equal(35, provider.GetRecipes().Count);
+        Assert.Equal(31, provider.GetRecipes().Count);
         Assert.Equal(11, provider.GetBlueprints().Count);
-        Assert.Equal(35, provider.GetRecipes().Select(recipe => recipe.OutputItemId).Distinct().Count());
+        Assert.Equal(31, provider.GetRecipes().Select(recipe => recipe.OutputItemId).Distinct().Count());
+    }
+
+    [Fact]
+    public void CraftingFamiliesContainOnlyTheRequestedRecipes()
+    {
+        var recipes = CreateProvider().GetRecipes();
+        var expectedByFamily = new Dictionary<CraftType, string[]>
+        {
+            [CraftType.JewelryCrafting] = ["Amulet", "Relic", "Ring"],
+            [CraftType.ArmorForging] =
+            [
+                "Cloth Cowl",
+                "Cloth Pants",
+                "Cloth Robe",
+                "Heavy Breastplate",
+                "Heavy Helm",
+                "Heavy Legplates",
+                "Light Hood",
+                "Light Legwraps",
+                "Light Vest",
+                "Medium Greaves",
+                "Medium Helm",
+                "Medium Mail"
+            ],
+            [CraftType.WeaponSmithing] =
+            [
+                "Battle Axe",
+                "Crossbow",
+                "Dagger",
+                "Gauntlets",
+                "Greatsword",
+                "Grimoire",
+                "Hand Axe",
+                "Longbow",
+                "Mace",
+                "Maul",
+                "Shortsword",
+                "Spear",
+                "Spiritward",
+                "Staff",
+                "Towershield",
+                "Wand"
+            ]
+        };
+
+        Assert.Equal(expectedByFamily.Keys.Order(), recipes.Select(recipe => recipe.Category).Distinct().Order());
+        foreach (var (family, expectedNames) in expectedByFamily)
+        {
+            Assert.Equal(
+                expectedNames.Order(StringComparer.Ordinal),
+                recipes
+                    .Where(recipe => recipe.Category == family)
+                    .Select(recipe => recipe.Name)
+                    .Order(StringComparer.Ordinal));
+        }
     }
 
     [Fact]
@@ -83,7 +139,7 @@ public sealed class CraftingCompositionContentTests
     public void LegacyRecipeVariantCatalogIsNoLongerRuntimeContent()
     {
         Assert.Throws<FileNotFoundException>(() => ReadArray("crafting/recipe-variants.json"));
-        Assert.Equal(35, ReadArray("crafting/base-recipes.json").Count);
+        Assert.Equal(31, ReadArray("crafting/base-recipes.json").Count);
     }
 
     internal static JsonArray ReadArray(string relativePath)

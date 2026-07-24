@@ -27,6 +27,11 @@ import {
 import { AttributeType } from '../../../../../shared/models/enums/attributeType';
 import { AttributeTypeFormatPipe } from '../../../../../shared/pipes/attributes/attribute-type-format/attribute-type-format.pipe';
 import { AttributeValueFormatPipe } from '../../../../../shared/pipes/attributes/attribute-value-format/attribute-value-format.pipe';
+import {
+  DropdownComponent,
+  DropdownOption,
+  DropdownSelection,
+} from '../../../../../shared/components/custom-components/dropdown/dropdown.component';
 
 interface BaseAttributeDisplay {
   attributeType: AttributeType;
@@ -57,6 +62,7 @@ type MobileCraftingPane = 'recipes' | 'blueprints' | 'preview';
     NgClass,
     DecimalPipe,
     RegularButtonComponent,
+    DropdownComponent,
     NumberFormatPipe,
     AttributeTypeFormatPipe,
     AttributeValueFormatPipe,
@@ -221,6 +227,15 @@ export class RegularCraftingComponent {
       (left, right) => left.localeCompare(right),
     ),
   );
+  readonly recipeCategoryOptions = computed<readonly DropdownOption<string>[]>(
+    () => [
+      { label: 'All professions', value: 'all' },
+      ...this.recipeCategories().map((category) => ({
+        label: this.formatDisplayLabel(category),
+        value: category,
+      })),
+    ],
+  );
 
   private readonly recipeSearchMatches = computed(() => {
     const queryTerms = this.recipeSearch()
@@ -367,8 +382,8 @@ export class RegularCraftingComponent {
     this.selectFirstVisibleRecipeIfNeeded();
   }
 
-  setRecipeCategory(value: string): void {
-    this.recipeCategory.set(value);
+  setRecipeCategory(selection: DropdownSelection<string>): void {
+    this.recipeCategory.set(selection.main);
     this.selectFirstVisibleRecipeIfNeeded();
   }
 

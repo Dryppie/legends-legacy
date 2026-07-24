@@ -71,8 +71,8 @@ public sealed class JsonCraftingDefinitionProvider : ICraftingDefinitionProvider
         EnsureUnique(blueprints.Select(x => x.Id), "blueprint");
         EnsureUnique(blueprints.Select(x => x.ItemId), "blueprint item");
 
-        if (recipes.Count != 35)
-            throw new InvalidOperationException($"Equipment crafting requires exactly 35 concrete recipes; found {recipes.Count}.");
+        if (recipes.Count == 0)
+            throw new InvalidOperationException("Equipment crafting requires at least one concrete recipe.");
 
         var duplicateMaterial = materials
             .Where(x => x.IsStandardTieredMaterial)

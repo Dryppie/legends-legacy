@@ -1309,8 +1309,8 @@
   },
   {
     "id": "recipe.jewelry.ring.band",
-    "name": "Band",
-    "description": "Craft a Band.",
+    "name": "Ring",
+    "description": "Craft a Ring.",
     "icon": "band",
     "category": "JewelryCrafting",
     "recipeFamily": "Accessory",
@@ -1343,14 +1343,14 @@
       "Ring",
       "OffensiveScaling",
       "StatusScaling",
-      "Band"
+      "Ring"
     ],
     "tags": [
       "Accessory",
       "Ring",
       "OffensiveScaling",
       "StatusScaling",
-      "Band"
+      "Ring"
     ],
     "minimumProfessionLevel": 1,
     "behavior": {
@@ -1369,7 +1369,7 @@
     },
     "temperingProfile": {
       "id": "recipe.jewelry.ring.band.tempering",
-      "name": "Band Tempering",
+      "name": "Ring Tempering",
       "stats": [
         {
           "stat": "Power",
@@ -1516,221 +1516,11 @@
     }
   },
   {
-    "id": "recipe.jewelry.necklace.charm",
-    "name": "Charm",
-    "description": "Craft a Charm.",
-    "icon": "charm",
-    "category": "JewelryCrafting",
-    "recipeFamily": "Accessory",
-    "slot": "Necklace",
-    "outputItemId": "charm",
-    "outputItemType": "Necklace",
-    "enabled": true,
-    "tierRange": {
-      "min": 1,
-      "max": 1
-    },
-    "materialRequirements": [
-      {
-        "type": "TieredMaterial",
-        "family": "Metal",
-        "baseAmount": 6,
-        "amountPerTier": 2
-      },
-      {
-        "type": "TieredMaterial",
-        "family": "Crystal",
-        "baseAmount": 4,
-        "amountPerTier": 1
-      }
-    ],
-    "additionalMaterialRequirements": [],
-    "specialResourceRequirements": [],
-    "affinityTags": [
-      "Accessory",
-      "Necklace",
-      "Survival",
-      "Sustain",
-      "Charm",
-      "Warden"
-    ],
-    "tags": [
-      "Accessory",
-      "Necklace",
-      "Survival",
-      "Sustain",
-      "Charm",
-      "Warden"
-    ],
-    "minimumProfessionLevel": 1,
-    "behavior": {
-      "handedness": "",
-      "attackCategory": "",
-      "rangeCategory": "",
-      "basicAttackIntervalMultiplier": 1,
-      "basicAttackDamageMultiplier": 1,
-      "role": ""
-    },
-    "initialStatProfile": {
-      "MaxHealth": 0.3,
-      "Resistance": 0.25,
-      "Fortitude": 0.25,
-      "HealthRegeneration": 0.2
-    },
-    "temperingProfile": {
-      "id": "recipe.jewelry.necklace.charm.tempering",
-      "name": "Charm Tempering",
-      "stats": [
-        {
-          "stat": "MaxHealth",
-          "weight": 30,
-          "category": "Primary",
-          "canIntroduce": true,
-          "canIncrease": true,
-          "maxBudgetShare": 0.4,
-          "minimumTier": 1
-        },
-        {
-          "stat": "Resistance",
-          "weight": 25,
-          "category": "Primary",
-          "canIntroduce": true,
-          "canIncrease": true,
-          "maxBudgetShare": 0.35,
-          "minimumTier": 1
-        },
-        {
-          "stat": "Fortitude",
-          "weight": 25,
-          "category": "Secondary",
-          "canIntroduce": true,
-          "canIncrease": true,
-          "maxBudgetShare": 0.3,
-          "minimumTier": 1
-        },
-        {
-          "stat": "HealthRegeneration",
-          "weight": 20,
-          "category": "Secondary",
-          "canIntroduce": true,
-          "canIncrease": true,
-          "maxBudgetShare": 0.3,
-          "minimumTier": 1
-        }
-      ]
-    }
-  },
-  {
-    "id": "recipe.jewelry.necklace.talisman",
-    "name": "Talisman",
-    "description": "Craft a Talisman.",
-    "icon": "talisman",
-    "category": "JewelryCrafting",
-    "recipeFamily": "Accessory",
-    "slot": "Necklace",
-    "outputItemId": "talisman",
-    "outputItemType": "Necklace",
-    "enabled": true,
-    "tierRange": {
-      "min": 1,
-      "max": 1
-    },
-    "materialRequirements": [
-      {
-        "type": "TieredMaterial",
-        "family": "Metal",
-        "baseAmount": 6,
-        "amountPerTier": 2
-      },
-      {
-        "type": "TieredMaterial",
-        "family": "Crystal",
-        "baseAmount": 4,
-        "amountPerTier": 1
-      }
-    ],
-    "additionalMaterialRequirements": [],
-    "specialResourceRequirements": [],
-    "affinityTags": [
-      "Accessory",
-      "Necklace",
-      "Survival",
-      "Sustain",
-      "Talisman",
-      "Endurance"
-    ],
-    "tags": [
-      "Accessory",
-      "Necklace",
-      "Survival",
-      "Sustain",
-      "Talisman",
-      "Endurance"
-    ],
-    "minimumProfessionLevel": 1,
-    "behavior": {
-      "handedness": "",
-      "attackCategory": "",
-      "rangeCategory": "",
-      "basicAttackIntervalMultiplier": 1,
-      "basicAttackDamageMultiplier": 1,
-      "role": ""
-    },
-    "initialStatProfile": {
-      "MaxHealth": 0.3,
-      "Resistance": 0.25,
-      "Fortitude": 0.25,
-      "HealthRegeneration": 0.2
-    },
-    "temperingProfile": {
-      "id": "recipe.jewelry.necklace.talisman.tempering",
-      "name": "Talisman Tempering",
-      "stats": [
-        {
-          "stat": "MaxHealth",
-          "weight": 30,
-          "category": "Primary",
-          "canIntroduce": true,
-          "canIncrease": true,
-          "maxBudgetShare": 0.4,
-          "minimumTier": 1
-        },
-        {
-          "stat": "Resistance",
-          "weight": 25,
-          "category": "Primary",
-          "canIntroduce": true,
-          "canIncrease": true,
-          "maxBudgetShare": 0.35,
-          "minimumTier": 1
-        },
-        {
-          "stat": "Fortitude",
-          "weight": 25,
-          "category": "Secondary",
-          "canIntroduce": true,
-          "canIncrease": true,
-          "maxBudgetShare": 0.3,
-          "minimumTier": 1
-        },
-        {
-          "stat": "HealthRegeneration",
-          "weight": 20,
-          "category": "Secondary",
-          "canIntroduce": true,
-          "canIncrease": true,
-          "maxBudgetShare": 0.3,
-          "minimumTier": 1
-        }
-      ]
-    }
-  },
-  {
     "id": "recipe.jewelry.relic.vial",
-    "name": "Vial",
-    "description": "Craft a Vial.",
+    "name": "Relic",
+    "description": "Craft a Relic.",
     "icon": "vial",
-    "category": "ArmorForging",
+    "category": "JewelryCrafting",
     "recipeFamily": "Relic",
     "slot": "Relic",
     "outputItemId": "vial",
@@ -1759,13 +1549,13 @@
     "affinityTags": [
       "Relic",
       "BuildDefining",
-      "Vial",
+      "Relic",
       "Recovery"
     ],
     "tags": [
       "Relic",
       "BuildDefining",
-      "Vial",
+      "Relic",
       "Recovery"
     ],
     "minimumProfessionLevel": 1,
@@ -1785,213 +1575,7 @@
     },
     "temperingProfile": {
       "id": "recipe.jewelry.relic.vial.tempering",
-      "name": "Vial Tempering",
-      "stats": [
-        {
-          "stat": "Spirit",
-          "weight": 30,
-          "category": "Primary",
-          "canIntroduce": true,
-          "canIncrease": true,
-          "maxBudgetShare": 0.4,
-          "minimumTier": 1
-        },
-        {
-          "stat": "HealthRegeneration",
-          "weight": 25,
-          "category": "Primary",
-          "canIntroduce": true,
-          "canIncrease": true,
-          "maxBudgetShare": 0.35,
-          "minimumTier": 1
-        },
-        {
-          "stat": "StatusResistance",
-          "weight": 25,
-          "category": "Secondary",
-          "canIntroduce": true,
-          "canIncrease": true,
-          "maxBudgetShare": 0.3,
-          "minimumTier": 1
-        },
-        {
-          "stat": "MaxHealth",
-          "weight": 20,
-          "category": "Secondary",
-          "canIntroduce": true,
-          "canIncrease": true,
-          "maxBudgetShare": 0.3,
-          "minimumTier": 1
-        }
-      ]
-    }
-  },
-  {
-    "id": "recipe.jewelry.relic.heart",
-    "name": "Heart",
-    "description": "Craft a Heart.",
-    "icon": "heart",
-    "category": "ArmorForging",
-    "recipeFamily": "Relic",
-    "slot": "Relic",
-    "outputItemId": "heart",
-    "outputItemType": "Relic",
-    "enabled": true,
-    "tierRange": {
-      "min": 1,
-      "max": 1
-    },
-    "materialRequirements": [
-      {
-        "type": "TieredMaterial",
-        "family": "Crystal",
-        "baseAmount": 6,
-        "amountPerTier": 2
-      },
-      {
-        "type": "TieredMaterial",
-        "family": "Bone",
-        "baseAmount": 3,
-        "amountPerTier": 1
-      }
-    ],
-    "additionalMaterialRequirements": [],
-    "specialResourceRequirements": [],
-    "affinityTags": [
-      "Relic",
-      "BuildDefining",
-      "Heart",
-      "Spirit",
-      "Mana"
-    ],
-    "tags": [
-      "Relic",
-      "BuildDefining",
-      "Heart",
-      "Spirit",
-      "Mana"
-    ],
-    "minimumProfessionLevel": 1,
-    "behavior": {
-      "handedness": "",
-      "attackCategory": "",
-      "rangeCategory": "",
-      "basicAttackIntervalMultiplier": 1,
-      "basicAttackDamageMultiplier": 1,
-      "role": ""
-    },
-    "initialStatProfile": {
-      "Spirit": 0.3,
-      "HealthRegeneration": 0.25,
-      "StatusResistance": 0.25,
-      "MaxHealth": 0.2
-    },
-    "temperingProfile": {
-      "id": "recipe.jewelry.relic.heart.tempering",
-      "name": "Heart Tempering",
-      "stats": [
-        {
-          "stat": "Spirit",
-          "weight": 30,
-          "category": "Primary",
-          "canIntroduce": true,
-          "canIncrease": true,
-          "maxBudgetShare": 0.4,
-          "minimumTier": 1
-        },
-        {
-          "stat": "HealthRegeneration",
-          "weight": 25,
-          "category": "Primary",
-          "canIntroduce": true,
-          "canIncrease": true,
-          "maxBudgetShare": 0.35,
-          "minimumTier": 1
-        },
-        {
-          "stat": "StatusResistance",
-          "weight": 25,
-          "category": "Secondary",
-          "canIntroduce": true,
-          "canIncrease": true,
-          "maxBudgetShare": 0.3,
-          "minimumTier": 1
-        },
-        {
-          "stat": "MaxHealth",
-          "weight": 20,
-          "category": "Secondary",
-          "canIntroduce": true,
-          "canIncrease": true,
-          "maxBudgetShare": 0.3,
-          "minimumTier": 1
-        }
-      ]
-    }
-  },
-  {
-    "id": "recipe.jewelry.relic.totem",
-    "name": "Totem",
-    "description": "Craft a Totem.",
-    "icon": "totem",
-    "category": "ArmorForging",
-    "recipeFamily": "Relic",
-    "slot": "Relic",
-    "outputItemId": "totem",
-    "outputItemType": "Relic",
-    "enabled": true,
-    "tierRange": {
-      "min": 1,
-      "max": 1
-    },
-    "materialRequirements": [
-      {
-        "type": "TieredMaterial",
-        "family": "Crystal",
-        "baseAmount": 6,
-        "amountPerTier": 2
-      },
-      {
-        "type": "TieredMaterial",
-        "family": "Bone",
-        "baseAmount": 3,
-        "amountPerTier": 1
-      }
-    ],
-    "additionalMaterialRequirements": [],
-    "specialResourceRequirements": [],
-    "affinityTags": [
-      "Relic",
-      "BuildDefining",
-      "Totem",
-      "Primal",
-      "Summon"
-    ],
-    "tags": [
-      "Relic",
-      "BuildDefining",
-      "Totem",
-      "Primal",
-      "Summon"
-    ],
-    "minimumProfessionLevel": 1,
-    "behavior": {
-      "handedness": "",
-      "attackCategory": "",
-      "rangeCategory": "",
-      "basicAttackIntervalMultiplier": 1,
-      "basicAttackDamageMultiplier": 1,
-      "role": ""
-    },
-    "initialStatProfile": {
-      "Spirit": 0.3,
-      "HealthRegeneration": 0.25,
-      "StatusResistance": 0.25,
-      "MaxHealth": 0.2
-    },
-    "temperingProfile": {
-      "id": "recipe.jewelry.relic.totem.tempering",
-      "name": "Totem Tempering",
+      "name": "Relic Tempering",
       "stats": [
         {
           "stat": "Spirit",
@@ -3414,7 +2998,7 @@
     "name": "Towershield",
     "description": "Craft a Towershield.",
     "icon": "towershield",
-    "category": "ArmorForging",
+    "category": "WeaponSmithing",
     "recipeFamily": "Offhand",
     "slot": "OffHand",
     "outputItemId": "towershield",
@@ -3519,7 +3103,7 @@
     "name": "Spiritward",
     "description": "Craft a Spiritward.",
     "icon": "Spiritward",
-    "category": "ArmorForging",
+    "category": "WeaponSmithing",
     "recipeFamily": "Offhand",
     "slot": "OffHand",
     "outputItemId": "Spiritward",
@@ -3626,7 +3210,7 @@
     "name": "Grimoire",
     "description": "Craft a Grimoire.",
     "icon": "grimoire",
-    "category": "ArmorForging",
+    "category": "WeaponSmithing",
     "recipeFamily": "Offhand",
     "slot": "OffHand",
     "outputItemId": "grimoire",

@@ -87,34 +87,10 @@
       "recipeId": "recipe.jewelry.necklace.amulet"
     },
     {
-      "legacyBaseRecipeId": "recipe_necklace",
-      "itemBaseId": "charm",
-      "legacyFormId": "charm",
-      "recipeId": "recipe.jewelry.necklace.charm"
-    },
-    {
-      "legacyBaseRecipeId": "recipe_necklace",
-      "itemBaseId": "talisman",
-      "legacyFormId": "talisman",
-      "recipeId": "recipe.jewelry.necklace.talisman"
-    },
-    {
       "legacyBaseRecipeId": "recipe_relic",
       "itemBaseId": "vial",
       "legacyFormId": "vial",
       "recipeId": "recipe.jewelry.relic.vial"
-    },
-    {
-      "legacyBaseRecipeId": "recipe_relic",
-      "itemBaseId": "heart",
-      "legacyFormId": "heart",
-      "recipeId": "recipe.jewelry.relic.heart"
-    },
-    {
-      "legacyBaseRecipeId": "recipe_relic",
-      "itemBaseId": "totem",
-      "legacyFormId": "totem",
-      "recipeId": "recipe.jewelry.relic.totem"
     },
     {
       "legacyBaseRecipeId": "recipe_one_handed_weapon",
@@ -246,15 +222,15 @@
       "legacyBlueprintId": "blueprint_warden",
       "legacyRecipeVariantId": "variant.jewelry.necklace.warden",
       "blueprintId": "blueprint_warden",
-      "recipeId": "recipe.jewelry.necklace.charm",
-      "canonicalItemBaseId": "charm"
+      "recipeId": "recipe.jewelry.necklace.amulet",
+      "canonicalItemBaseId": "amulet"
     },
     {
       "legacyBlueprintId": "blueprint_endurance",
       "legacyRecipeVariantId": "variant.jewelry.necklace.endurance",
       "blueprintId": "blueprint_endurance",
-      "recipeId": "recipe.jewelry.necklace.talisman",
-      "canonicalItemBaseId": "talisman"
+      "recipeId": "recipe.jewelry.necklace.amulet",
+      "canonicalItemBaseId": "amulet"
     },
     {
       "legacyBlueprintId": "blueprint_phoenix",
@@ -267,15 +243,15 @@
       "legacyBlueprintId": "blueprint_spirit",
       "legacyRecipeVariantId": "variant.jewelry.relic.spirit",
       "blueprintId": "blueprint_spirit",
-      "recipeId": "recipe.jewelry.relic.heart",
-      "canonicalItemBaseId": "heart"
+      "recipeId": "recipe.jewelry.relic.vial",
+      "canonicalItemBaseId": "vial"
     },
     {
       "legacyBlueprintId": "blueprint_primal",
       "legacyRecipeVariantId": "variant.jewelry.relic.primal",
       "blueprintId": "blueprint_primal",
-      "recipeId": "recipe.jewelry.relic.totem",
-      "canonicalItemBaseId": "totem"
+      "recipeId": "recipe.jewelry.relic.vial",
+      "canonicalItemBaseId": "vial"
     },
     {
       "legacyBlueprintId": "blueprint_venom",
