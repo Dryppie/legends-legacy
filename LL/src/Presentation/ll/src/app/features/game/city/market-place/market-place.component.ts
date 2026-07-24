@@ -15,22 +15,21 @@ import { DefaultHeaderComponent } from '../../../../shared/components/default-he
 type MarketPlaceMode = 'browse' | 'sell' | 'orders';
 
 @Component({
-  selector: 'app-market-place',
-  standalone: true,
-  imports: [
-    MarketPlaceBuyComponent,
-    MarketPlaceSellComponent,
-    MarketPlaceFilterComponent,
-    MarketPlaceCommodityComponent,
-    MarketPlaceOrdersComponent,
-    NumberFormatPipe,
-    NgIf,
-    NgSwitch,
-    NgSwitchCase,
-    DefaultHeaderComponent,
-  ],
-  templateUrl: './market-place.component.html',
-  styleUrl: './market-place.component.css',
+    selector: 'app-market-place',
+    imports: [
+        MarketPlaceBuyComponent,
+        MarketPlaceSellComponent,
+        MarketPlaceFilterComponent,
+        MarketPlaceCommodityComponent,
+        MarketPlaceOrdersComponent,
+        NumberFormatPipe,
+        NgIf,
+        NgSwitch,
+        NgSwitchCase,
+        DefaultHeaderComponent,
+    ],
+    templateUrl: './market-place.component.html',
+    styleUrl: './market-place.component.css'
 })
 export class MarketPlaceComponent {
   readonly ItemType = ItemType;

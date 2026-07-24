@@ -10,10 +10,9 @@ import { EquipmentStateService } from '../../../core/services/api/equipment/equi
 import { EquipmentType } from '../../models/enums/equipmentType';
 
 @Component({
-  selector: 'app-equipment-overview',
-  standalone: true,
-  imports: [NgFor, NgIf, NgClass, ItemComponent],
-  templateUrl: './equipment-overview.component.html',
+    selector: 'app-equipment-overview',
+    imports: [NgFor, NgIf, NgClass, ItemComponent],
+    templateUrl: './equipment-overview.component.html'
 })
 export class EquipmentOverviewComponent implements OnInit {
   isGhost(slot: EquipmentSlot): boolean {

@@ -15,17 +15,16 @@ import { CharacterTagComponent } from '../../../../../shared/components/characte
 import { NumberFormatPipe } from '../../../../../shared/pipes/number-format/number-format.pipe';
 
 @Component({
-  selector: 'app-arena-battle',
-  standalone: true,
-  imports: [
-    NgFor,
-    NgIf,
-    NgClass,
-    RegularButtonComponent,
-    CharacterTagComponent,
-    NumberFormatPipe,
-  ],
-  templateUrl: './arena-battle.component.html',
+    selector: 'app-arena-battle',
+    imports: [
+        NgFor,
+        NgIf,
+        NgClass,
+        RegularButtonComponent,
+        CharacterTagComponent,
+        NumberFormatPipe,
+    ],
+    templateUrl: './arena-battle.component.html'
 })
 export class ArenaBattleComponent implements OnChanges, OnDestroy {
   @Input() opponents: ArenaOpponentPreview[] = [];

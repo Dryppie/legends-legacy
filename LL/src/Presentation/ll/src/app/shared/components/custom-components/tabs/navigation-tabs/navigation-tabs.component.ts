@@ -22,11 +22,10 @@ export interface NavigationTab {
 export type NavigationTabsAppearance = 'primary' | 'compact';
 
 @Component({
-  selector: 'app-navigation-tabs',
-  standalone: true,
-  imports: [NgClass, NgFor, NgIf, NotificationIndicatorComponent],
-  templateUrl: './navigation-tabs.component.html',
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'app-navigation-tabs',
+    imports: [NgClass, NgFor, NgIf, NotificationIndicatorComponent],
+    templateUrl: './navigation-tabs.component.html',
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class NavigationTabsComponent {
   @Input() tabs: readonly NavigationTab[] = [];

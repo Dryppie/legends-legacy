@@ -5,10 +5,9 @@ import { RouterOutlet } from '@angular/router';
   providedIn: 'root',
 })
 @Component({
-  selector: 'app-character',
-  standalone: true,
-  imports: [RouterOutlet],
-  templateUrl: './character.component.html',
-  providers: [],
+    selector: 'app-character',
+    imports: [RouterOutlet],
+    templateUrl: './character.component.html',
+    providers: []
 })
 export class CharacterComponent {}

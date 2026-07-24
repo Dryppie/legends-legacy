@@ -3,10 +3,9 @@ import { ProfessionIconComponent } from '../professions/profession-icon/professi
 import { NgIf } from '@angular/common';
 
 @Component({
-  selector: 'app-default-header',
-  standalone: true,
-  imports: [NgIf, ProfessionIconComponent],
-  templateUrl: './default-header.component.html',
+    selector: 'app-default-header',
+    imports: [NgIf, ProfessionIconComponent],
+    templateUrl: './default-header.component.html'
 })
 export class DefaultHeaderComponent {
   @Input() title: string = '';

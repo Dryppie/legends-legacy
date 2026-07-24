@@ -19,19 +19,18 @@ import {
 } from '../../../../shared/models/tutorial';
 
 @Component({
-  selector: 'app-region',
-  standalone: true,
-  imports: [
-    NgIf,
-    NgFor,
-    CombatAreaCardComponent,
-    TabsComponent,
-    TabComponent,
-    RaidsComponent,
-    DungeonsComponent,
-    CombatComponent,
-  ],
-  templateUrl: './region.component.html',
+    selector: 'app-region',
+    imports: [
+        NgIf,
+        NgFor,
+        CombatAreaCardComponent,
+        TabsComponent,
+        TabComponent,
+        RaidsComponent,
+        DungeonsComponent,
+        CombatComponent,
+    ],
+    templateUrl: './region.component.html'
 })
 export class RegionComponent implements OnInit {
   regionId!: string;

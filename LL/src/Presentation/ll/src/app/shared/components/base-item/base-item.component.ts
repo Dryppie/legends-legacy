@@ -9,16 +9,15 @@ import { EssenceDetailsComponent } from '../essences/essence-details/essence-det
 import { EquipmentDisplayComponent } from '../equipment/equipment-display/equipment-display.component';
 
 @Component({
-  selector: 'app-base-item',
-  standalone: true,
-  imports: [
-    NgClass,
-    NgIf,
-    PopoverComponent,
-    EssenceDetailsComponent,
-    EquipmentDisplayComponent,
-  ],
-  templateUrl: './base-item.component.html',
+    selector: 'app-base-item',
+    imports: [
+        NgClass,
+        NgIf,
+        PopoverComponent,
+        EssenceDetailsComponent,
+        EquipmentDisplayComponent,
+    ],
+    templateUrl: './base-item.component.html'
 })
 export class BaseItemComponent {
   @Input({ required: true }) item!: ItemBase;

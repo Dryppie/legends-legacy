@@ -40,19 +40,18 @@ import {
 } from '../../../../../shared/utils/market-place/market-place-category.utils';
 
 @Component({
-  selector: 'app-market-place-sell',
-  standalone: true,
-  imports: [
-    CommonModule,
-    FormsModule,
-    ReactiveFormsModule,
-    MarketPlaceInventoryItemComponent,
-    RegularButtonComponent,
-    NumberFormatPipe,
-    FilterTabsComponent,
-    ItemComponent,
-  ],
-  templateUrl: './market-place-sell.component.html',
+    selector: 'app-market-place-sell',
+    imports: [
+        CommonModule,
+        FormsModule,
+        ReactiveFormsModule,
+        MarketPlaceInventoryItemComponent,
+        RegularButtonComponent,
+        NumberFormatPipe,
+        FilterTabsComponent,
+        ItemComponent,
+    ],
+    templateUrl: './market-place-sell.component.html'
 })
 export class MarketPlaceSellComponent implements OnInit {
   readonly myListings = signal<MarketPlaceListing[]>([]);

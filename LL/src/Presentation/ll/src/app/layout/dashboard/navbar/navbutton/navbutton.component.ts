@@ -3,10 +3,9 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
 import { NgClass } from '@angular/common';
 
 @Component({
-  selector: 'app-navbutton',
-  standalone: true,
-  imports: [RouterLink, RouterLinkActive, NgClass],
-  templateUrl: './navbutton.component.html',
+    selector: 'app-navbutton',
+    imports: [RouterLink, RouterLinkActive, NgClass],
+    templateUrl: './navbutton.component.html'
 })
 export class NavbuttonComponent {
   @Input() link: string = '';

@@ -7,10 +7,9 @@ import {
 } from '../../../core/services/client-side/first-party-tour/first-party-tour.models';
 
 @Component({
-  selector: 'app-first-party-tour-overlay',
-  standalone: true,
-  imports: [NgFor, NgIf, NgStyle],
-  template: `
+    selector: 'app-first-party-tour-overlay',
+    imports: [NgFor, NgIf, NgStyle],
+    template: `
     <ng-container *ngIf="state() as tour">
       <div class="first-party-tour-root" aria-live="polite">
         <div
@@ -81,8 +80,8 @@ import {
       </div>
     </ng-container>
   `,
-  styles: [
-    `
+    styles: [
+        `
       .first-party-tour-root {
         position: fixed;
         inset: 0;
@@ -116,7 +115,7 @@ import {
         pointer-events: auto;
       }
     `,
-  ],
+    ]
 })
 export class FirstPartyTourOverlayComponent {
   private readonly tour = inject(FirstPartyTourService);

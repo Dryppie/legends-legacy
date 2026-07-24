@@ -25,10 +25,9 @@ import { NumberFormatPipe } from '../../../../../shared/pipes/number-format/numb
 import { CraftingRecipe } from '../../../../../shared/models/crafting-v2';
 
 @Component({
-  selector: 'app-regular-crafting',
-  standalone: true,
-  imports: [NgIf, NgFor, NgClass, RegularButtonComponent, NumberFormatPipe, DropdownComponent],
-  templateUrl: './regular-crafting.component.html',
+    selector: 'app-regular-crafting',
+    imports: [NgIf, NgFor, NgClass, RegularButtonComponent, NumberFormatPipe, DropdownComponent],
+    templateUrl: './regular-crafting.component.html'
 })
 export class RegularCraftingComponent {
   @Input({ required: true }) recipes!: Signal<Recipe[]>;

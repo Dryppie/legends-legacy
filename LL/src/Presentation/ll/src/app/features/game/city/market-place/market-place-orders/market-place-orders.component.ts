@@ -10,15 +10,14 @@ import { NumberFormatPipe } from '../../../../../shared/pipes/number-format/numb
 import { CharacterStateService } from '../../../../../core/services/api/character/character-state.service';
 
 @Component({
-  selector: 'app-market-place-orders',
-  standalone: true,
-  imports: [
-    CommonModule,
-    ItemComponent,
-    NumberFormatPipe,
-    RegularButtonComponent,
-  ],
-  templateUrl: './market-place-orders.component.html',
+    selector: 'app-market-place-orders',
+    imports: [
+        CommonModule,
+        ItemComponent,
+        NumberFormatPipe,
+        RegularButtonComponent,
+    ],
+    templateUrl: './market-place-orders.component.html'
 })
 export class MarketPlaceOrdersComponent implements OnInit {
   constructor(

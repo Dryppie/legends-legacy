@@ -532,11 +532,12 @@ Each day contains at most two major work packages. The acceptance criteria are t
 - [x] Each deployment workflow runs only its own service gate before packaging or deployment jobs can begin.
 - [x] The full release gate composes the main Release build and complete test project, Chat Release build, Angular production build, and cross-service smoke journey.
 - [x] Local verification passed: 553 main tests, Chat Release build, and Angular production build.
-- [x] High/critical .NET advisories are promoted to errors. The main graph passes; Chat is correctly blocked by its current AutoMapper and MessagePack findings.
+- [x] High/critical .NET advisories are promoted to errors. Both the main and Chat dependency graphs now pass.
+- [x] Removed AutoMapper from Chat in favor of explicit DTO mapping and upgraded its Microsoft .NET 10 packages to `10.0.10`, resolving the transitive MessagePack advisories.
 - [x] Production npm dependencies are audited at high severity after a successful frontend build.
 - [x] Added a disposable PostgreSQL-backed API smoke journey using generated accounts only: guest login, registration/login, both bootstrap paths, and Training Area discovery.
 - [x] The real smoke journey passed locally from clean migrations and seed data, and its uniquely named temporary database was removed afterward.
-- [ ] Run the complete gate in GitHub Actions. The gate is expected to remain red until its current dependency findings are fixed.
+- [ ] Run the complete gate in GitHub Actions.
 
 **Work package A: CI gate**
 
@@ -553,7 +554,7 @@ Each day contains at most two major work packages. The acceptance criteria are t
 
 **Acceptance criteria**
 
-- A deliberately broken backend test or frontend build blocks every deployment workflow.
+- A deliberately broken build or test blocks its service deployment and the complete release gate.
 - No deployment packaging begins without green build/test status.
 - CI output identifies the exact failing layer.
 

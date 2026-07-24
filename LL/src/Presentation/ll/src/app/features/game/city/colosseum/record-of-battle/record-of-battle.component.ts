@@ -7,18 +7,17 @@ import { NumberFormatPipe } from '../../../../../shared/pipes/number-format/numb
 import { FilterTabsComponent } from '../../../../../shared/components/custom-components/tabs/filter-tabs/filter-tabs.component';
 
 @Component({
-  selector: 'app-record-of-battle',
-  standalone: true,
-  imports: [
-    NgIf,
-    NgFor,
-    NgClass,
-    DatePipe,
-    CharacterTagComponent,
-    NumberFormatPipe,
-    FilterTabsComponent,
-  ],
-  templateUrl: './record-of-battle.component.html',
+    selector: 'app-record-of-battle',
+    imports: [
+        NgIf,
+        NgFor,
+        NgClass,
+        DatePipe,
+        CharacterTagComponent,
+        NumberFormatPipe,
+        FilterTabsComponent,
+    ],
+    templateUrl: './record-of-battle.component.html'
 })
 export class RecordOfBattleComponent {
   @Input() previousMatches: ColosseumMatchResult[] = [];

@@ -11,10 +11,9 @@ interface LootSummaryItem {
 }
 
 @Component({
-  selector: 'app-session-summary-popup',
-  standalone: true,
-  imports: [NgIf, NgFor],
-  templateUrl: './session-summary-popup.component.html',
+    selector: 'app-session-summary-popup',
+    imports: [NgIf, NgFor],
+    templateUrl: './session-summary-popup.component.html'
 })
 export class SessionSummaryPopupComponent {
   constructor(public svc: SessionSummaryService) {}

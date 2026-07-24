@@ -27,16 +27,15 @@ import { GuildStateService } from '../../../core/services/api/guild/guild-state.
 import { SidebarLayoutPreferenceService } from '../../../core/services/client-side/sidebar-layout/sidebar-layout-preference.service';
 
 @Component({
-  selector: 'app-sidebar',
-  standalone: true,
-  imports: [
-    NgFor,
-    NgIf,
-    SidebarItemComponent,
-    RouterLink,
-    CurrentActionComponent,
-  ],
-  templateUrl: './sidebar.component.html',
+    selector: 'app-sidebar',
+    imports: [
+        NgFor,
+        NgIf,
+        SidebarItemComponent,
+        RouterLink,
+        CurrentActionComponent,
+    ],
+    templateUrl: './sidebar.component.html'
 })
 export class SidebarComponent implements OnInit, OnDestroy {
   @Output() itemTapped = new EventEmitter<void>();

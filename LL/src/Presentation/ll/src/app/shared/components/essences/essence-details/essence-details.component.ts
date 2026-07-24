@@ -7,17 +7,16 @@ import { AttributeValueFormatPipe } from '../../../pipes/attributes/attribute-va
 import { NgFor, NgIf } from '@angular/common';
 
 @Component({
-  selector: 'app-essence-details',
-  standalone: true,
-  imports: [
-    EssenceDescriptionComponent,
-    TicksToSecondsPipe,
-    AttributeTypeFormatPipe,
-    AttributeValueFormatPipe,
-    NgIf,
-    NgFor,
-  ],
-  templateUrl: './essence-details.component.html',
+    selector: 'app-essence-details',
+    imports: [
+        EssenceDescriptionComponent,
+        TicksToSecondsPipe,
+        AttributeTypeFormatPipe,
+        AttributeValueFormatPipe,
+        NgIf,
+        NgFor,
+    ],
+    templateUrl: './essence-details.component.html'
 })
 export class EssenceDetailsComponent {
   @Input() essence!: Essence;

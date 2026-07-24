@@ -10,17 +10,16 @@ import { InventoryStateService } from '../../../../../core/services/api/inventor
 import { EquipmentTypePipe } from '../../../../pipes/equipment/equipment-type-format/equipment-type.pipe';
 
 @Component({
-  selector: 'app-overview-equipment-modal',
-  standalone: true,
-  imports: [
-    AttributeTypeFormatPipe,
-    AttributeValueFormatPipe,
-    EquipmentTypePipe,
-    NgIf,
-    NgFor,
-    NgClass,
-  ],
-  templateUrl: './overview-equipment-modal.component.html',
+    selector: 'app-overview-equipment-modal',
+    imports: [
+        AttributeTypeFormatPipe,
+        AttributeValueFormatPipe,
+        EquipmentTypePipe,
+        NgIf,
+        NgFor,
+        NgClass,
+    ],
+    templateUrl: './overview-equipment-modal.component.html'
 })
 export class OverviewEquipmentModalComponent implements OnInit {
   @Input() equipmentSlotType!: EquipmentSlotType;

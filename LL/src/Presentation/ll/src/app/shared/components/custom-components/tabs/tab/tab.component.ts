@@ -1,10 +1,9 @@
 import { Component, Input, TemplateRef, ViewChild } from '@angular/core';
 
 @Component({
-  selector: 'app-tab',
-  standalone: true,
-  imports: [],
-  templateUrl: './tab.component.html',
+    selector: 'app-tab',
+    imports: [],
+    templateUrl: './tab.component.html'
 })
 export class TabComponent {
   /** What the user sees in the header bar */

@@ -4,10 +4,9 @@ import { Router } from '@angular/router';
 import { HelpOverlayService } from './help-overlay.service';
 
 @Component({
-  selector: 'app-help-launcher',
-  standalone: true,
-  imports: [NgIf],
-  template: `
+    selector: 'app-help-launcher',
+    imports: [NgIf],
+    template: `
     <button
       *ngIf="presentation === 'floating'; else inlineButton"
       data-tour="page-helper"
@@ -28,7 +27,7 @@ import { HelpOverlayService } from './help-overlay.service';
         {{ inlineLabel }}
       </button>
     </ng-template>
-  `,
+  `
 })
 export class HelpLauncherComponent {
   /** Override the page guide to open; otherwise uses current route. */

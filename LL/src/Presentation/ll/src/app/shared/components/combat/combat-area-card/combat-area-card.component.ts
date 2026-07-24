@@ -20,10 +20,9 @@ import {
 import { catchError, finalize, of, tap } from 'rxjs';
 
 @Component({
-  selector: 'app-combat-area-card',
-  standalone: true,
-  imports: [MiniButtonComponent, NgIf, CommonModule],
-  templateUrl: './combat-area-card.component.html',
+    selector: 'app-combat-area-card',
+    imports: [MiniButtonComponent, NgIf, CommonModule],
+    templateUrl: './combat-area-card.component.html'
 })
 export class CombatAreaCardComponent implements OnInit {
   @Input() area!: Area;

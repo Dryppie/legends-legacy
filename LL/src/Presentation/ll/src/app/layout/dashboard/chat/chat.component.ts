@@ -35,20 +35,19 @@ interface ChatRoom {
 }
 
 @Component({
-  selector: 'app-chat',
-  standalone: true,
-  imports: [
-    NgFor,
-    NgIf,
-    NgClass,
-    FormsModule,
-    RegularButtonComponent,
-    StickyScrollDirective,
-    DatePipe,
-    CharacterTagComponent,
-    RouterLink,
-  ],
-  templateUrl: './chat.component.html',
+    selector: 'app-chat',
+    imports: [
+        NgFor,
+        NgIf,
+        NgClass,
+        FormsModule,
+        RegularButtonComponent,
+        StickyScrollDirective,
+        DatePipe,
+        CharacterTagComponent,
+        RouterLink,
+    ],
+    templateUrl: './chat.component.html'
 })
 export class ChatComponent implements OnInit, OnDestroy {
   @Input() collapsible = false;

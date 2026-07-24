@@ -7,10 +7,9 @@ import { InventoryItem } from '../../../../models/inventoryItem';
 import { ItemComponent } from '../../../item/item.component';
 
 @Component({
-  selector: 'app-inventory-item-modal',
-  standalone: true,
-  imports: [NgFor, NgIf, ItemComponent],
-  templateUrl: './inventory-item-modal.component.html',
+    selector: 'app-inventory-item-modal',
+    imports: [NgFor, NgIf, ItemComponent],
+    templateUrl: './inventory-item-modal.component.html'
 })
 export class InventoryItemModalComponent implements OnInit {
   @Input({ required: true }) inventoryItem!: InventoryItem;
