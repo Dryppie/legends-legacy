@@ -3,10 +3,9 @@ import { EventType } from '../../../../models/Dtos/combatEventDto';
 import { NgFor } from '@angular/common';
 
 @Component({
-  selector: 'app-combat-filters-modal',
-  standalone: true,
-  imports: [NgFor],
-  templateUrl: './combat-filters-modal.component.html',
+    selector: 'app-combat-filters-modal',
+    imports: [NgFor],
+    templateUrl: './combat-filters-modal.component.html'
 })
 export class CombatFiltersModalComponent implements OnInit {
   deselectAll(): void {

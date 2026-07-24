@@ -26,18 +26,17 @@ type TitleStateFilter = 'All' | 'Unlocked' | 'Locked';
 type CollectionView = 'Achievements' | 'Titles';
 
 @Component({
-  selector: 'app-achievements',
-  standalone: true,
-  imports: [
-    NgClass,
-    NgFor,
-    NgIf,
-    FormsModule,
-    DefaultHeaderComponent,
-    RegularButtonComponent,
-    DropdownComponent,
-  ],
-  templateUrl: './achievements.component.html',
+    selector: 'app-achievements',
+    imports: [
+        NgClass,
+        NgFor,
+        NgIf,
+        FormsModule,
+        DefaultHeaderComponent,
+        RegularButtonComponent,
+        DropdownComponent,
+    ],
+    templateUrl: './achievements.component.html'
 })
 export class AchievementsComponent implements OnInit {
   readonly collectionViews: CollectionView[] = ['Achievements', 'Titles'];

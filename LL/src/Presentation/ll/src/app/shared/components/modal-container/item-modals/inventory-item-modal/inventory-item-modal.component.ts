@@ -19,7 +19,6 @@ import { ItemComponent } from '../../../item/item.component';
 
 @Component({
   selector: 'app-inventory-item-modal',
-  standalone: true,
   imports: [NgIf, DropdownComponent, ItemComponent],
   templateUrl: './inventory-item-modal.component.html',
 })

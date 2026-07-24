@@ -14,10 +14,9 @@ import {
 } from '../../../../../shared/models/Dtos/colosseum/tournamentGrounds';
 
 @Component({
-  selector: 'app-tournament-replay',
-  standalone: true,
-  imports: [CombatComponent, DatePipe, NgIf, RouterLink],
-  templateUrl: './tournament-replay.component.html',
+    selector: 'app-tournament-replay',
+    imports: [CombatComponent, DatePipe, NgIf, RouterLink],
+    templateUrl: './tournament-replay.component.html'
 })
 export class TournamentReplayComponent implements OnInit {
   readonly battleType = BattleType.Colosseum;

@@ -15,10 +15,9 @@ import { CharacterActionsStateService } from '../../../core/services/api/charact
 import { TimeSyncService } from '../../../core/services/api/time-sync/time-sync.service';
 
 @Component({
-  selector: 'app-progress-bar',
-  standalone: true,
-  imports: [],
-  templateUrl: './progress-bar.component.html',
+    selector: 'app-progress-bar',
+    imports: [],
+    templateUrl: './progress-bar.component.html'
 })
 export class ProgressBarComponent implements OnDestroy {
   @ViewChild('progressBar', { static: true })

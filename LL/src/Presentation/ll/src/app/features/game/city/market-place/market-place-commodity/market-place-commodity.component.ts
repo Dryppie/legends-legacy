@@ -69,11 +69,10 @@ type MobileOrderBook = 'sell' | 'buy';
 type MarketTicketSide = 'buy' | 'sell';
 
 @Component({
-  selector: 'app-market-place-commodity',
-  standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, NumberFormatPipe],
-  templateUrl: './market-place-commodity.component.html',
-  styleUrl: './market-place-commodity.component.css',
+    selector: 'app-market-place-commodity',
+    imports: [CommonModule, ReactiveFormsModule, NumberFormatPipe],
+    templateUrl: './market-place-commodity.component.html',
+    styleUrl: './market-place-commodity.component.css'
 })
 export class MarketPlaceCommodityComponent implements OnInit {
   private readonly _itemType = signal<ItemType>(ItemType.Resource);

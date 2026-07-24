@@ -19,19 +19,18 @@ import { environment } from '../../../../../environments/environment';
 import { GoogleAuthService } from '../../../../core/services/api/auth/google-auth.service';
 
 @Component({
-  selector: 'app-login',
-  standalone: true,
-  imports: [
-    RouterLink,
-    ReactiveFormsModule,
-    NgIf,
-    ButtonComponent,
-    MatIconModule,
-    MatFormFieldModule,
-    MatInputModule,
-    NgClass,
-  ],
-  templateUrl: './login.component.html',
+    selector: 'app-login',
+    imports: [
+        RouterLink,
+        ReactiveFormsModule,
+        NgIf,
+        ButtonComponent,
+        MatIconModule,
+        MatFormFieldModule,
+        MatInputModule,
+        NgClass,
+    ],
+    templateUrl: './login.component.html'
 })
 export class LoginComponent {
   document: any;

@@ -13,10 +13,9 @@ interface Toast {
 }
 
 @Component({
-  selector: 'app-toast',
-  standalone: true,
-  imports: [NgClass, NgFor, NgStyle, NgIf],
-  templateUrl: './toast.component.html',
+    selector: 'app-toast',
+    imports: [NgClass, NgFor, NgStyle, NgIf],
+    templateUrl: './toast.component.html'
 })
 export class ToastComponent {
   toasts: Toast[] = [];

@@ -8,10 +8,9 @@ import {
 import { ARENA_COLUMNS } from '../../../../../shared/models/Dtos/leaderboard/rows/arenaRow';
 
 @Component({
-  selector: 'app-rankings-glory',
-  standalone: true,
-  imports: [LeaderboardComponent],
-  templateUrl: './rankings-glory.component.html',
+    selector: 'app-rankings-glory',
+    imports: [LeaderboardComponent],
+    templateUrl: './rankings-glory.component.html'
 })
 export class RankingsGloryComponent implements OnChanges {
   @Input() rankings: LeaderboardEntry[] = [];

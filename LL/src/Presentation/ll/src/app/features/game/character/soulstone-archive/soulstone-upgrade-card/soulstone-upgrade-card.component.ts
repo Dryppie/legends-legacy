@@ -6,10 +6,9 @@ import { SoulstoneUpgradeStateService } from '../../../../../core/services/api/s
 import { RegularButtonComponent } from '../../../../../shared/components/custom-components/buttons/regular-button/regular-button.component';
 
 @Component({
-  selector: 'app-soulstone-upgrade-card',
-  standalone: true,
-  imports: [CommonModule, RegularButtonComponent],
-  templateUrl: './soulstone-upgrade-card.component.html',
+    selector: 'app-soulstone-upgrade-card',
+    imports: [CommonModule, RegularButtonComponent],
+    templateUrl: './soulstone-upgrade-card.component.html'
 })
 export class SoulstoneUpgradeCardComponent {
   @Input() character!: CharacterDto;

@@ -15,10 +15,9 @@ import { NgClass, NgFor, NgIf, NgTemplateOutlet } from '@angular/common';
 import { LocalStorageService } from '../../../../core/services/client-side/local-storage/local-storage.service';
 
 @Component({
-  selector: 'app-selectable-list-filter',
-  standalone: true,
-  imports: [NgIf, NgFor, NgClass, NgTemplateOutlet],
-  templateUrl: './selectable-list-filter.component.html',
+    selector: 'app-selectable-list-filter',
+    imports: [NgIf, NgFor, NgClass, NgTemplateOutlet],
+    templateUrl: './selectable-list-filter.component.html'
 })
 export class SelectableListFilterComponent<T> {
   @Input() storageKey?: string;

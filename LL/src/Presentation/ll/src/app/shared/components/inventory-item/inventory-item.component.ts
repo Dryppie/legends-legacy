@@ -8,10 +8,9 @@ import { ItemComponent } from '../item/item.component';
 import { EssenceItemViewService } from '../../../core/services/api/essences/essence-item-view.service';
 
 @Component({
-  selector: 'app-inventory-item',
-  standalone: true,
-  imports: [ItemComponent, NgIf],
-  templateUrl: './inventory-item.component.html',
+    selector: 'app-inventory-item',
+    imports: [ItemComponent, NgIf],
+    templateUrl: './inventory-item.component.html'
 })
 export class InventoryItemComponent {
   @Input() inventoryItem!: InventoryItem;

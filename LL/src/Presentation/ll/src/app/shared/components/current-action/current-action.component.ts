@@ -5,10 +5,9 @@ import { ProgressBarComponent } from '../progress-bar/progress-bar.component';
 import { CharacterActionsStateService } from '../../../core/services/api/character-actions/character-actions.state.service';
 
 @Component({
-  selector: 'app-current-action',
-  standalone: true,
-  imports: [ProgressBarComponent],
-  templateUrl: './current-action.component.html',
+    selector: 'app-current-action',
+    imports: [ProgressBarComponent],
+    templateUrl: './current-action.component.html'
 })
 export class CurrentActionComponent {
   currentAction: CharacterActionDto | null = null;

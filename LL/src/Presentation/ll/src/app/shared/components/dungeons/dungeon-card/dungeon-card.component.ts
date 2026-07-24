@@ -51,20 +51,19 @@ interface MasteryBonusDisplay {
 type DungeonDetailTab = 'rewards' | 'gathering' | 'mastery';
 
 @Component({
-  selector: 'app-dungeon-card',
-  standalone: true,
-  imports: [
-    NgIf,
-    NgFor,
-    NgClass,
-    NgTemplateOutlet,
-    DecimalPipe,
-    OverlayModule,
-    RegularButtonComponent,
-    ItemComponent,
-    BaseItemComponent,
-  ],
-  templateUrl: './dungeon-card.component.html',
+    selector: 'app-dungeon-card',
+    imports: [
+        NgIf,
+        NgFor,
+        NgClass,
+        NgTemplateOutlet,
+        DecimalPipe,
+        OverlayModule,
+        RegularButtonComponent,
+        ItemComponent,
+        BaseItemComponent,
+    ],
+    templateUrl: './dungeon-card.component.html'
 })
 export class DungeonCardComponent implements OnChanges {
   @Input({ required: true }) previewData!: DungeonPreviewData;

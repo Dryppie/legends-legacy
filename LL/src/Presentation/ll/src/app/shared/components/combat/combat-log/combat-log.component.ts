@@ -7,10 +7,9 @@ import { CommonModule } from '@angular/common';
 import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'app-combat-log',
-  standalone: true,
-  imports: [CommonModule],
-  templateUrl: './combat-log.component.html',
+    selector: 'app-combat-log',
+    imports: [CommonModule],
+    templateUrl: './combat-log.component.html'
 })
 export class CombatLogComponent {
   readonly stats;

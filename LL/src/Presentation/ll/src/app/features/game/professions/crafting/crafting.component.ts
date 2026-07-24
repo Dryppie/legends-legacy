@@ -27,17 +27,16 @@ import {
 } from '../../../../shared/models/tutorial';
 
 @Component({
-  selector: 'app-crafting',
-  standalone: true,
-  imports: [
-    ProfessionHeaderComponent,
-    NgIf,
-    TabComponent,
-    RegularCraftingComponent,
-    TemperingComponent,
-    TabsComponent,
-  ],
-  templateUrl: './crafting.component.html',
+    selector: 'app-crafting',
+    imports: [
+        ProfessionHeaderComponent,
+        NgIf,
+        TabComponent,
+        RegularCraftingComponent,
+        TemperingComponent,
+        TabsComponent,
+    ],
+    templateUrl: './crafting.component.html'
 })
 export class CraftingComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);

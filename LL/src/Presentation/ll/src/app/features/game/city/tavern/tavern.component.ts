@@ -21,18 +21,17 @@ interface BoardOption {
 }
 
 @Component({
-  selector: 'app-tavern',
-  standalone: true,
-  imports: [
-    DatePipe,
-    DefaultHeaderComponent,
-    DropdownComponent,
-    NgClass,
-    NgFor,
-    NgIf,
-    NumberFormatPipe,
-  ],
-  templateUrl: './tavern.component.html',
+    selector: 'app-tavern',
+    imports: [
+        DatePipe,
+        DefaultHeaderComponent,
+        DropdownComponent,
+        NgClass,
+        NgFor,
+        NgIf,
+        NumberFormatPipe,
+    ],
+    templateUrl: './tavern.component.html'
 })
 export class TavernComponent implements OnInit {
   readonly podiumOrder = [0, 1, 2];

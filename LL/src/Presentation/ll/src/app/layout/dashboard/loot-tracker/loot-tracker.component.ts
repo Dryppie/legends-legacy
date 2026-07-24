@@ -13,10 +13,9 @@ interface LootTrackerEntry {
 }
 
 @Component({
-  selector: 'app-loot-tracker',
-  standalone: true,
-  imports: [NgIf, NgFor, ItemComponent],
-  templateUrl: './loot-tracker.component.html',
+    selector: 'app-loot-tracker',
+    imports: [NgIf, NgFor, ItemComponent],
+    templateUrl: './loot-tracker.component.html'
 })
 export class LootTrackerComponent {
   private readonly maxEntries = 60;

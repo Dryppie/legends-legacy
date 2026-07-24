@@ -2,10 +2,9 @@ import { Component, Input, OnInit, OnDestroy, OnChanges } from '@angular/core';
 import { interval, Subscription } from 'rxjs';
 
 @Component({
-  selector: 'app-countdown',
-  standalone: true,
-  imports: [],
-  templateUrl: './countdown.component.html',
+    selector: 'app-countdown',
+    imports: [],
+    templateUrl: './countdown.component.html'
 })
 export class CountdownComponent implements OnInit, OnDestroy, OnChanges {
   @Input() targetDate!: Date;

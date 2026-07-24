@@ -18,7 +18,11 @@ env:
   patch: ${{ github.run_number }}
 
 jobs:
+  gate:
+    uses: ./.github/workflows/backend-gate.yml
+
   setup:
+    needs: gate
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.set_version.outputs.version }}
@@ -86,6 +90,7 @@ jobs:
     with:
       projects_filter: "LL/LegendsLegacy.sln"
       project_name: "LL"
+      dotnet_version: "10.x"
       version: ${{ needs.setup.outputs.version }}
 
   docker:

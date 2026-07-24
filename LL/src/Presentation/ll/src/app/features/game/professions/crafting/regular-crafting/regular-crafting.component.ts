@@ -55,7 +55,6 @@ type MobileCraftingPane = 'recipes' | 'blueprints' | 'preview';
 
 @Component({
   selector: 'app-regular-crafting',
-  standalone: true,
   imports: [
     NgIf,
     NgFor,

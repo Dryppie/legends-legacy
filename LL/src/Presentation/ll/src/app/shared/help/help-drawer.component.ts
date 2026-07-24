@@ -18,12 +18,11 @@ interface Guide {
 }
 
 @Component({
-  selector: 'app-help-drawer',
-  standalone: true,
-  imports: [CommonModule],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  styles: [
-    `
+    selector: 'app-help-drawer',
+    imports: [CommonModule],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    styles: [
+        `
       @keyframes slide-in {
         from {
           transform: translateX(100%);
@@ -33,8 +32,8 @@ interface Guide {
         }
       }
     `,
-  ],
-  template: `
+    ],
+    template: `
     <aside
       class="animate-slide-in flex h-full flex-col bg-texture text-white shadow-xl sm:border-r sm:border-primary/30"
     >
@@ -57,7 +56,7 @@ interface Guide {
         </article>
       </section>
     </aside>
-  `,
+  `
 })
 export class HelpDrawerComponent implements OnInit {
   private pageId = inject(HELP_PAGE_ID);

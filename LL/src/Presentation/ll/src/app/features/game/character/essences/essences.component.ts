@@ -39,22 +39,21 @@ type CreatureSourceFilter = 'all' | 'Area' | 'Dungeon';
 type CreatureEssenceFilter = 'all' | 'found' | 'not-found';
 
 @Component({
-  selector: 'app-essences',
-  standalone: true,
-  imports: [
-    CommonModule,
-    ScrollingModule,
-    FormsModule,
-    DefaultHeaderComponent,
-    EssenceDescriptionComponent,
-    NavigationTabsComponent,
-    AttributeTypeFormatPipe,
-    AttributeValueFormatPipe,
-    EssencesAbsorbComponent,
-    DropdownComponent,
-  ],
-  templateUrl: './essences.component.html',
-  styleUrls: ['./essences.component.scss'],
+    selector: 'app-essences',
+    imports: [
+        CommonModule,
+        ScrollingModule,
+        FormsModule,
+        DefaultHeaderComponent,
+        EssenceDescriptionComponent,
+        NavigationTabsComponent,
+        AttributeTypeFormatPipe,
+        AttributeValueFormatPipe,
+        EssencesAbsorbComponent,
+        DropdownComponent,
+    ],
+    templateUrl: './essences.component.html',
+    styleUrls: ['./essences.component.scss']
 })
 export class EssencesComponent implements OnInit {
   readonly archiveSearch = signal('');

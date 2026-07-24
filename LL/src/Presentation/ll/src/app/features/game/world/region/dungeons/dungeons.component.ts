@@ -65,10 +65,9 @@ const dungeonPresentation: Record<string, Partial<DungeonPreviewData>> = {
 };
 
 @Component({
-  selector: 'app-dungeons',
-  standalone: true,
-  imports: [DungeonCardComponent, NgFor, NgIf, NgClass, CharacterTagComponent],
-  templateUrl: './dungeons.component.html',
+    selector: 'app-dungeons',
+    imports: [DungeonCardComponent, NgFor, NgIf, NgClass, CharacterTagComponent],
+    templateUrl: './dungeons.component.html'
 })
 export class DungeonsComponent {
   selectedRecordsDungeon = signal<DungeonPreviewData | null>(null);

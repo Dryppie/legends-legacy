@@ -11,18 +11,17 @@ import { HumanizeEnumPipe } from '../../../../../../shared/pipes/enums/humanize-
 import { RegularButtonComponent } from '../../../../../../shared/components/custom-components/buttons/regular-button/regular-button.component';
 
 @Component({
-  selector: 'app-guild-shop',
-  standalone: true,
-  imports: [
-    NgIf,
-    NgFor,
-    NgClass,
-    DatePipe,
-    NumberFormatPipe,
-    HumanizeEnumPipe,
-    RegularButtonComponent,
-  ],
-  templateUrl: './guild-shop.component.html',
+    selector: 'app-guild-shop',
+    imports: [
+        NgIf,
+        NgFor,
+        NgClass,
+        DatePipe,
+        NumberFormatPipe,
+        HumanizeEnumPipe,
+        RegularButtonComponent,
+    ],
+    templateUrl: './guild-shop.component.html'
 })
 export class GuildShopComponent {
   readonly shop;

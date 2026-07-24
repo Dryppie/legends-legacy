@@ -30,10 +30,9 @@ import {
 let _nextId = 1;
 
 @Component({
-  selector: 'app-popover',
-  standalone: true,
-  imports: [OverlayModule, PortalModule, CommonModule],
-  templateUrl: './popover.component.html',
+    selector: 'app-popover',
+    imports: [OverlayModule, PortalModule, CommonModule],
+    templateUrl: './popover.component.html'
 })
 export class PopoverComponent implements AfterViewInit, OnDestroy {
   @Input({ required: true }) template!: TemplateRef<any>;

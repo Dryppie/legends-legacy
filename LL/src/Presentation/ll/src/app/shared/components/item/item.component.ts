@@ -15,16 +15,15 @@ import { PopoverComponent } from '../custom-components/popover/popover.component
 import { EssenceItemViewService } from '../../../core/services/api/essences/essence-item-view.service';
 
 @Component({
-  selector: 'app-item',
-  standalone: true,
-  imports: [
-    NgClass,
-    NgIf,
-    EssenceDetailsComponent,
-    EquipmentDisplayComponent,
-    PopoverComponent,
-  ],
-  templateUrl: './item.component.html',
+    selector: 'app-item',
+    imports: [
+        NgClass,
+        NgIf,
+        EssenceDetailsComponent,
+        EquipmentDisplayComponent,
+        PopoverComponent,
+    ],
+    templateUrl: './item.component.html'
 })
 export class ItemComponent {
   @Input() item!: ItemInstance;

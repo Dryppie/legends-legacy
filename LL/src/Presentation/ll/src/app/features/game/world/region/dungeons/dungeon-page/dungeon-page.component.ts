@@ -55,19 +55,18 @@ interface DungeonVigorForecast {
 }
 
 @Component({
-  selector: 'app-dungeon-page',
-  standalone: true,
-  imports: [
-    NgIf,
-    NgFor,
-    NgClass,
-    DecimalPipe,
-    CombatComponent,
-    DungeonRoomIconComponent,
-    InventoryItemComponent,
-  ],
-  templateUrl: './dungeon-page.component.html',
-  styleUrl: './dungeon-page.component.scss',
+    selector: 'app-dungeon-page',
+    imports: [
+        NgIf,
+        NgFor,
+        NgClass,
+        DecimalPipe,
+        CombatComponent,
+        DungeonRoomIconComponent,
+        InventoryItemComponent,
+    ],
+    templateUrl: './dungeon-page.component.html',
+    styleUrl: './dungeon-page.component.scss'
 })
 export class DungeonPageComponent {
   readonly dungeonState = inject(DungeonStateService);

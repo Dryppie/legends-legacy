@@ -6,11 +6,10 @@ import { EssenceEffectDto } from '../../../models/essence-system';
 import { formatAttributeType } from '../../../pipes/attributes/attribute-type-format/attribute-type-format.pipe';
 
 @Component({
-  selector: 'app-essence-description',
-  standalone: true,
-  imports: [AbilityTooltipContainerDirective],
-  templateUrl: './essence-description.component.html',
-  styleUrls: ['./essence-description.component.scss'],
+    selector: 'app-essence-description',
+    imports: [AbilityTooltipContainerDirective],
+    templateUrl: './essence-description.component.html',
+    styleUrls: ['./essence-description.component.scss']
 })
 export class EssenceDescriptionComponent implements OnChanges {
   private readonly magnitudeRange = 0.2;

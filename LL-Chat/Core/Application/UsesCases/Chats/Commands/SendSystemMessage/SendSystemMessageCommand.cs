@@ -1,7 +1,6 @@
 using Application.Interfaces.Services.Chats;
 using Application.UsesCases.Chats.Commands.SendMessage;
 using Application.UsesCases.Chats.Dtos;
-using AutoMapper;
 using Domain.Models.Chats;
 using MediatR;
 
@@ -18,12 +17,10 @@ public record SendSystemMessageCommand(
 public class SendSystemMessageCommandHandler : IRequestHandler<SendSystemMessageCommand, ChatMessageDto?>
 {
     private readonly IChatService _chatService;
-    private readonly IMapper _mapper;
 
-    public SendSystemMessageCommandHandler(IChatService chatService, IMapper mapper)
+    public SendSystemMessageCommandHandler(IChatService chatService)
     {
         _chatService = chatService;
-        _mapper = mapper;
     }
 
     public async Task<ChatMessageDto?> Handle(SendSystemMessageCommand request, CancellationToken cancellationToken)
@@ -57,6 +54,6 @@ public class SendSystemMessageCommandHandler : IRequestHandler<SendSystemMessage
 
         await _chatService.AddAsync(message, cancellationToken);
 
-        return _mapper.Map<ChatMessageDto>(message);
+        return ChatMessageDto.FromDomain(message);
     }
 }

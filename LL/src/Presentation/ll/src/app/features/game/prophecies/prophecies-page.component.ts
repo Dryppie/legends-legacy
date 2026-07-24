@@ -31,10 +31,9 @@ interface RewardDisplayItem {
 }
 
 @Component({
-  selector: 'app-prophecies-page',
-  standalone: true,
-  imports: [DefaultHeaderComponent, NgClass, NgFor, NgIf, OverlayModule, RouterLink],
-  templateUrl: './prophecies-page.component.html',
+    selector: 'app-prophecies-page',
+    imports: [DefaultHeaderComponent, NgClass, NgFor, NgIf, OverlayModule, RouterLink],
+    templateUrl: './prophecies-page.component.html'
 })
 export class PropheciesPageComponent implements OnInit, OnDestroy {
   private readonly guidanceRoutes: Record<ProphecyGuidanceDestination, string[]> = {

@@ -7,10 +7,9 @@ import {
 import { LeaderboardPodiumComponent } from './leaderboard-podium/leaderboard-podium.component';
 
 @Component({
-  selector: 'app-leaderboard',
-  standalone: true,
-  imports: [NgClass, NgIf, NgFor, LeaderboardPodiumComponent],
-  templateUrl: './generic-leaderboard.component.html',
+    selector: 'app-leaderboard',
+    imports: [NgClass, NgIf, NgFor, LeaderboardPodiumComponent],
+    templateUrl: './generic-leaderboard.component.html'
 })
 export class LeaderboardComponent<T extends LeaderboardEntry> {
   @Input({ required: true }) title!: string;

@@ -14,19 +14,18 @@ import { AttributeValueFormatPipe } from '../../../../shared/pipes/attributes/at
 import { ActivatedRoute, Router } from '@angular/router';
 
 @Component({
-  selector: 'app-character-overview',
-  standalone: true,
-  imports: [
-    DefaultHeaderComponent,
-    NgIf,
-    NgFor,
-    FormsModule,
-    RegularButtonComponent,
-    AttributeTypeFormatPipe,
-    AttributeValueFormatPipe,
-    DecimalPipe,
-  ],
-  templateUrl: './character-overview.component.html',
+    selector: 'app-character-overview',
+    imports: [
+        DefaultHeaderComponent,
+        NgIf,
+        NgFor,
+        FormsModule,
+        RegularButtonComponent,
+        AttributeTypeFormatPipe,
+        AttributeValueFormatPipe,
+        DecimalPipe,
+    ],
+    templateUrl: './character-overview.component.html'
 })
 export class CharacterOverviewComponent {
   readonly AttributeType = AttributeType;

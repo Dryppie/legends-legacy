@@ -26,10 +26,9 @@ import { ItemType } from '../../../../../shared/models/enums/itemType';
 import { Rarity } from '../../../../../shared/models/enums/rarity';
 
 @Component({
-  selector: 'app-tempering',
-  standalone: true,
-  imports: [NgFor, NgIf, NgClass, ItemComponent, EquipmentDisplayComponent],
-  templateUrl: './tempering.component.html',
+    selector: 'app-tempering',
+    imports: [NgFor, NgIf, NgClass, ItemComponent, EquipmentDisplayComponent],
+    templateUrl: './tempering.component.html'
 })
 export class TemperingComponent {
   @Input({ required: true }) inventory!: Signal<InventoryItem[]>;

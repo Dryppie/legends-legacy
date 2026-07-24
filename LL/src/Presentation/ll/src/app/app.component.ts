@@ -15,17 +15,16 @@ import { AppUpdateService } from './core/services/client-side/app-update/app-upd
 import { FirstPartyTourOverlayComponent } from './shared/components/first-party-tour-overlay/first-party-tour-overlay.component';
 
 @Component({
-  selector: 'app-root',
-  standalone: true,
-  imports: [
-    RouterOutlet,
-    ToastComponent,
-    ModalContainerComponent,
-    SessionSummaryPopupComponent,
-    AppUpdatePopupComponent,
-    FirstPartyTourOverlayComponent,
-  ],
-  templateUrl: './app.component.html',
+    selector: 'app-root',
+    imports: [
+        RouterOutlet,
+        ToastComponent,
+        ModalContainerComponent,
+        SessionSummaryPopupComponent,
+        AppUpdatePopupComponent,
+        FirstPartyTourOverlayComponent,
+    ],
+    templateUrl: './app.component.html'
 })
 export class AppComponent implements OnInit, AfterViewInit {
   title = 'll';

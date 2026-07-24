@@ -17,7 +17,11 @@ env:
   patch: ${{ github.run_number }}
 
 jobs:
+  gate:
+    uses: ./.github/workflows/frontend-gate.yml
+
   setup:
+    needs: gate
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.set_version.outputs.version }}
@@ -110,7 +114,7 @@ jobs:
         run: |
           docker build `
             --push `
-            --file "LL/src/Presentation/ll/Dockerfile" `
+            --file "LL/src/Presentation/ll/dockerfile" `
             --build-arg name=ll `
             --build-arg BUILD_VERSION=${{ needs.setup.outputs.version }} `
             --tag ghcr.io/${{ env.OWNER_LC }}/ll-frontend:${{ needs.setup.outputs.TAG }} `
