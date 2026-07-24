@@ -1,4 +1,5 @@
 using Domain.Models.Attributes;
+using Domain.Models.Attributes.Modifiers;
 using Domain.Models.Items;
 using Domain.Models.Items.Equipments;
 using Domain.Models.Professions.Crafting;
@@ -77,6 +78,32 @@ public sealed class TemperingMechanicsServiceTests
         Assert.Equal(ItemQuality.Exceptional, equipment.Quality);
         Assert.Equal(9, equipment.Potential);
         Assert.Equal(10, equipment.MaxPotential);
+    }
+
+    [Fact]
+    public void CriticalQualityIncreaseRedistributesBudgetFromACappedStat()
+    {
+        var equipment = CreateEquipment();
+        equipment.Tier = 10;
+        equipment.Quality = ItemQuality.Fine;
+        equipment.InstanceModifiers.Add(new InstanceAttributeModifier(AttributeType.Power, 574));
+        equipment.InstanceModifiers.Add(new InstanceAttributeModifier(AttributeType.MaxHealth, 100));
+        var service = new TemperingMechanicsService(Options.Create(new CraftingBalanceOptions
+        {
+            CriticalChanceBase = 1d,
+            CriticalChancePerRarityStep = 0d,
+            CriticalLevelingItemChance = 0d
+        }));
+
+        var result = service.ApplyTemperingAttempt(equipment, CreateProfile(), new FixedRandom(0.5d));
+
+        Assert.True(result.QualityIncreased);
+        Assert.Equal(
+            EquipmentStatBudgetCatalog.Get(AttributeType.Power, equipment.Tier).HardCap
+            * 1.15f,
+            equipment.InstanceModifiers.Single(x => x.AttributeType == AttributeType.Power).Amount);
+        Assert.True(
+            equipment.InstanceModifiers.Single(x => x.AttributeType == AttributeType.MaxHealth).Amount > 100);
     }
 
     private static EquipmentInstance CreateEquipment() => new()

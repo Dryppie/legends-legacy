@@ -1755,9 +1755,9 @@ public sealed class AbilitySystemTests
             new (int Timestamp, string Source, EventType EventType, string? TargetId, int Magnitude)[]
             {
                 (0, "Siphon", EventType.AbilityUse, null, 0),
-                (0, "effect.siphon.damage", EventType.Damage, "front-target", 16),
+                (0, "effect.siphon.damage", EventType.Damage, "front-target", 31),
                 (0, "Ambush Strike", EventType.AbilityUse, null, 0),
-                (0, "effect.ambush.damage", EventType.Damage, "front-target", 24),
+                (0, "effect.ambush.damage", EventType.Damage, "front-target", 9),
                 (0, "effect.ambush.damage", EventType.Death, "front-target", 0),
                 (0, "effect.vile_feast.heal", EventType.Heal, "ghoul", 50)
             },
@@ -2569,10 +2569,28 @@ public sealed class AbilitySystemTests
                             BaseValue = 7
                         }
                     ]
+                },
+                new AbilitySpec
+                {
+                    Id = "ability.damage.enemy.summons",
+                    Kind = AbilitySpecKind.Active,
+                    Name = "Damage Enemy Summons",
+                    Effects =
+                    [
+                        new()
+                        {
+                            Id = "effect.damage.enemy.summons",
+                            Operation = AbilityEffectOperation.Damage,
+                            Target = AbilityTargetSelector.SummonedEnemies,
+                            BaseValue = 13,
+                            CritEligibility = CritEligibility.Disallowed
+                        }
+                    ]
                 }
             ]);
         var friendly = CreateCombatant("friendly", CombatTeam.Friendly, abilities.Values);
         var ally = CreateCombatant("ally", CombatTeam.Friendly, []);
+        var hostile = CreateCombatant("hostile", CombatTeam.Hostile, []);
         var summon = new RuntimeCombatant(
             "summon",
             "Summon",
@@ -2587,16 +2605,133 @@ public sealed class AbilitySystemTests
             isSummoned: true,
             summonDurationTicks: 100,
             summonOwner: friendly);
-        var hostile = CreateCombatant("hostile", CombatTeam.Hostile, []);
+        var hostileSummon = new RuntimeCombatant(
+            "hostile-summon",
+            "Hostile Summon",
+            CombatTeam.Hostile,
+            new Dictionary<AttributeType, float>
+            {
+                [AttributeType.MaxHealth] = 50,
+                [AttributeType.Power] = 0
+            },
+            [],
+            ["Summoned"],
+            isSummoned: true,
+            summonDurationTicks: 100,
+            summonOwner: hostile);
         var engine = new FastCombatEngine(new Dictionary<string, CompiledStatus>(), new FastCombatEngineOptions(MaxTicks: 1, BasicAttackIntervalTicks: 1000));
 
-        var result = engine.Run([friendly, ally, summon], [hostile]);
+        var result = engine.Run([friendly, ally, summon], [hostile, hostileSummon]);
 
         Assert.Equal(11, summon.Barrier);
         Assert.Equal(7, friendly.Barrier);
         Assert.Equal(7, ally.Barrier);
+        Assert.Equal(37, hostileSummon.Health);
         Assert.DoesNotContain(result.EventLog, x => x.Source == "effect.buff.summons" && x.TargetId == "friendly");
         Assert.DoesNotContain(result.EventLog, x => x.Source == "effect.buff.non.summons" && x.TargetId == "summon");
+        Assert.Contains(result.EventLog, x =>
+            x.Source == "effect.damage.enemy.summons"
+            && x.TargetId == "hostile-summon");
+        Assert.DoesNotContain(result.EventLog, x =>
+            x.Source == "effect.damage.enemy.summons"
+            && x.TargetId == "hostile");
+    }
+
+    [Fact]
+    public void Engine_starts_summons_ready()
+    {
+        var summonAbility = new AbilitySpec
+        {
+            Id = "ability.summon.ready",
+            Kind = AbilitySpecKind.Active,
+            Name = "Summon Ready",
+            CooldownTicks = 100,
+            Effects =
+            [
+                new()
+                {
+                    Id = "effect.summon.ready",
+                    Operation = AbilityEffectOperation.Summon,
+                    Target = AbilityTargetSelector.Self,
+                    SummonId = "readySummon",
+                    DurationTicks = 100
+                }
+            ]
+        };
+        var strikeAbility = new AbilitySpec
+        {
+            Id = "ability.summon.ready.strike",
+            Kind = AbilitySpecKind.Active,
+            Name = "Ready Strike",
+            CooldownTicks = 100,
+            Effects =
+            [
+                new()
+                {
+                    Id = "effect.summon.ready.strike",
+                    Operation = AbilityEffectOperation.Damage,
+                    Target = AbilityTargetSelector.CurrentTarget,
+                    BaseValue = 5,
+                    CritEligibility = CritEligibility.Disallowed
+                }
+            ]
+        };
+        var compiledAbilities =
+            AbilityCompiler.CompileAbilities([summonAbility, strikeAbility]);
+        var compiledSummons = AbilityCompiler.CompileSummons(
+            [
+                new SummonSpec
+                {
+                    Id = "readySummon",
+                    Name = "Ready Summon",
+                    DurationTicks = 100,
+                    MaxActive = 1,
+                    AbilityIds = [strikeAbility.Id],
+                    Attributes =
+                    [
+                        new() { Attribute = AttributeType.MaxHealth, BaseValue = 20, MinimumValue = 1 },
+                        new() { Attribute = AttributeType.Power, BaseValue = 1 },
+                        new() { Attribute = AttributeType.WeaponDamage, BaseValue = 1, MinimumValue = 1 }
+                    ]
+                }
+            ]);
+
+        static (RuntimeCombatant Friendly, RuntimeCombatant Hostile) CreatePair(
+            IReadOnlyDictionary<string, CompiledAbility> abilities) =>
+            (
+                CreateCombatant(
+                    "friendly",
+                    CombatTeam.Friendly,
+                    [abilities["ability.summon.ready"]]),
+                CreateCombatant("hostile", CombatTeam.Hostile, []));
+
+        var defaultPair = CreatePair(compiledAbilities);
+        var defaultEngine = new FastCombatEngine(
+            new Dictionary<string, CompiledStatus>(),
+            compiledSummons,
+            compiledAbilities,
+            new FastCombatEngineOptions(
+                MaxTicks: 2,
+                BasicAttackIntervalTicks: 1000,
+                StartActiveAbilitiesOnCooldown: true));
+        var defaultResult = defaultEngine.Run(
+            [defaultPair.Friendly],
+            [defaultPair.Hostile]);
+        var summon = Assert.Single(
+            defaultResult.EventLog,
+            x => x.EventType == EventType.Summon);
+
+        Assert.Equal(0, summon.Timestamp);
+        Assert.Contains(defaultResult.EventLog, x =>
+            x.ActorId == summon.TargetId
+            && x.Source == "Ready Strike"
+            && x.EventType == EventType.AbilityUse
+            && x.Timestamp == 1);
+        Assert.Contains(defaultResult.EventLog, x =>
+            x.ActorId == summon.TargetId
+            && x.Source == "Basic Attack"
+            && x.EventType == EventType.AbilityUse
+            && x.Timestamp == 1);
     }
 
     [Fact]

@@ -1,6 +1,5 @@
 import { AttributeModifier } from './Dtos/attributesDto';
 import { EquipmentType } from './Dtos/equipmentSlot';
-import { AttributeType } from './enums/attributeType';
 import { ItemType } from './enums/itemType';
 import { ItemQuality } from './enums/itemQuality';
 import { Rarity } from './enums/rarity';
@@ -38,11 +37,6 @@ export interface ItemBase {
 export interface Equipment extends ItemBase {
   equipmentType: EquipmentType;
   attributeModifiers: AttributeModifier[];
-  magnitude: number;
-  scalingAttribute: AttributeType;
-  scalingAmount: number;
-  attackSpeed: number;
-  magnitudeRange: number;
 }
 
 export interface EssenceItem extends ItemBase {

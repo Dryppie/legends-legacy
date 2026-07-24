@@ -234,6 +234,9 @@ public static class AbilityCatalogValidator
             if (effect.DurationTicks < 0 || effect.IntervalTicks < 0 || effect.Uses < 0)
                 errors.Add($"{label}: duration, interval, and uses cannot be negative.");
 
+            if (effect.ScalingAttribute is not null and not AttributeType.Power)
+                errors.Add($"{label}: ability effect magnitude may scale only with Power.");
+
             if (effect.Operation == AbilityEffectOperation.ModifyAttribute && effect.Attribute is null)
                 errors.Add($"{label}: ModifyAttribute requires attribute.");
 

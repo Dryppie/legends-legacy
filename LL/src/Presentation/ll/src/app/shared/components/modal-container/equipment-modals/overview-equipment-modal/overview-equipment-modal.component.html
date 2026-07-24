@@ -36,6 +36,7 @@
       <div
         *ngFor="let attribute of currentEquippedEquipment.attributeModifiers"
         class="ll-item-stat-row"
+        [title]="attribute.attributeType | attributeTooltip"
       >
         <span>
           {{ attribute.attributeType | attributeTypeFormat }}
@@ -84,6 +85,7 @@
           <div
             *ngFor="let attribute of equipment.attributeModifiers"
             class="ll-item-stat-row"
+            [title]="attribute.attributeType | attributeTooltip"
           >
             <span>
               {{ attribute.attributeType | attributeTypeFormat }}

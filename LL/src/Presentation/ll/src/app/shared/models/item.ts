@@ -1,5 +1,4 @@
 import { AttributeModifier } from './Dtos/attributesDto';
-import { AttributeType } from './enums/attributeType';
 import { EquipmentType } from './enums/equipmentType';
 import { GatheringType } from './enums/gatheringType';
 import { ItemType } from './enums/itemType';
@@ -35,6 +34,8 @@ export interface EquipmentInstance extends ItemInstance {
   toolAffixes: ToolBonusModifier[];
   effectiveToolBonuses: ToolBonusModifier[];
   affinityTags: string[];
+  itemBudget: number;
+  itemBudgetTier: number;
 }
 
 export interface ItemBase {
@@ -84,12 +85,9 @@ export interface Equipment extends ItemBase {
   equipmentType: EquipmentType;
   attributeModifiers: AttributeModifier[];
   toolBonuses?: ToolBonusModifier[];
-  attackSpeed: number;
-  magnitude: number;
-  magnitudeRange: number;
   gatheringType?: GatheringType | null;
-  scalingAttribute: AttributeType;
-  scalingAmount: number;
+  itemBudget: number;
+  itemBudgetTier: number;
 }
 
 export interface ToolBonusModifier {

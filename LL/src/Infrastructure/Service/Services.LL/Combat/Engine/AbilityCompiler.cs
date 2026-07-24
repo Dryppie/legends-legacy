@@ -117,6 +117,7 @@ public static class AbilityCompiler
             ChancePercent = effect.ChancePercent,
             AttackType = effect.AttackType,
             DamageType = effect.DamageType,
+            CritEligibility = effect.CritEligibility,
             LifeStealPercentage = effect.LifeStealPercentage,
             ProcCoefficient = effect.ProcCoefficient <= 0 ? 1m : effect.ProcCoefficient,
             AbilityKind = abilityKind,

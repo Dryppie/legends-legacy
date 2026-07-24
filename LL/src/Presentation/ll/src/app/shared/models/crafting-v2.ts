@@ -45,11 +45,6 @@ export interface CraftingItemPreview {
   qualityChances: CraftingQualityChance[];
   minimumStartingPotential: number;
   maximumStartingPotential: number;
-  magnitude: number;
-  magnitudeRange: number;
-  attackSpeed: number;
-  scalingAttribute: AttributeType;
-  scalingAmount: number;
 }
 
 export interface CraftingBlueprint {
@@ -64,7 +59,8 @@ export interface CraftingBlueprint {
   sourceId?: string | null;
   behavior: EquipmentBehavior;
   initialStatProfile: Record<string, number>;
-  blueprintStatProfile?: Record<string, number>;
+  bonusStatProfile?: Record<string, number>;
+  bonusStatBudgetMultiplier: number;
   primaryTemperingStats: string[];
   secondaryTemperingStats: string[];
   temperingProfileSummary: string;

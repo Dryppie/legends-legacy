@@ -6,8 +6,9 @@ Equipment crafting uses three composable layers:
 
 1. A concrete Recipe determines the physical item, slot, base behavior, base
    stat profile, materials, tier range, and mastery track.
-2. An optional reusable Blueprint changes the item's name, stat emphasis,
-   tempering profile, tags, behavior modifiers, and additional material costs.
+2. An optional reusable Blueprint retains the Recipe's complete base-stat roll,
+   adds a separate bonus-stat budget, and extends its name, tempering profile,
+   tags, behavior modifiers, and material costs.
 3. Directed Tempering develops the finished item's attributes within the
    composed profile.
 
@@ -37,7 +38,7 @@ The catalog currently contains 35 concrete Recipes.
 - a stable Blueprint and physical item ID;
 - a display-name format;
 - required, alternative, excluded, or exact Recipe compatibility constraints;
-- a stat-profile influence and tempering profile;
+- a bonus-stat profile, bonus-budget multiplier, and additive tempering profile;
 - optional behavior and material modifiers;
 - acquisition metadata.
 
@@ -57,6 +58,12 @@ crafted names. A crafted item stores:
 
 The design is deterministic and is recomposed from those IDs whenever runtime
 behavior or metadata is needed.
+
+Stat composition is deliberately additive. The Recipe receives its full normal
+allocation first. The Blueprint then receives a separate `20%` bonus budget,
+allocated with the finished base roll supplied as the current value for item
+and combat-cap enforcement. Blueprint selection therefore never reduces a
+Recipe attribute.
 
 ## Player Flow
 

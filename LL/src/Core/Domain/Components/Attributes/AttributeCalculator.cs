@@ -15,15 +15,8 @@ public static class AttributeCalculator
     {
         entity.CombatAttributes.Clear();
 
-        foreach (var (attributeType, baseValue) in entity.BaseCombatAttributes)
-        {
-            var calculatedValue = GetCombatAttributeValue(entity, attributeType, baseValue);
-
-            if (!entity.CombatAttributes.TryAdd(attributeType, calculatedValue))
-            {
-                entity.CombatAttributes[attributeType] = calculatedValue;
-            }
-        }
+        foreach (var (attributeType, attributeValue) in CalculateRuntimeAttributes(entity))
+            entity.CombatAttributes[attributeType] = attributeValue;
 
         entity.SyncCurrentHealthToMax();
     }
@@ -39,7 +32,9 @@ public static class AttributeCalculator
         var baseAttributes = entity.BaseAttributes.ToDictionary(a => a.AttributeType, a => a.Value);
         var equipmentModifiers = entity.EquipmentSlots
             .Where(es => es.EquipmentInstance != null)
-            .SelectMany(es => es.EquipmentInstance!.AttributeModifiers)
+            .Select(es => es.EquipmentInstance!)
+            .DistinctBy(equipment => equipment.Id)
+            .SelectMany(equipment => equipment.AttributeModifiers)
             .Cast<AttributeModifierBase>()
             .ToList();
         var modifiers = equipmentModifiers.Concat(additionalModifiers ?? []).ToList();
@@ -67,13 +62,8 @@ public static class AttributeCalculator
 
         SyncBaseResources(entity.BaseCombatAttributes);
 
-        // Iterate over each attribute of the entity, and calculate baseAttributes
-        foreach (var (attributeType, attributeValue) in entity.BaseCombatAttributes)
-        {
-            var calculatedValue = GetCombatAttributeValue(entity, attributeType, attributeValue);
-
-            entity.CombatAttributes.TryAdd(attributeType, calculatedValue);
-        }
+        foreach (var (attributeType, attributeValue) in CalculateRuntimeAttributes(entity))
+            entity.CombatAttributes[attributeType] = attributeValue;
 
         entity.SyncCurrentHealthToMax();
     }
@@ -81,14 +71,17 @@ public static class AttributeCalculator
     // Recalculate a specific attribute for the entity by attribute type
     public static void CalculateCombatAttributeByType(CombatEntity entity, AttributeType attributeType)
     {
-        // Find the attribute in BaseAttributes or CombatAttributes
-        if (!entity.BaseCombatAttributes.TryGetValue(attributeType, out var attribute)) return;
+        var attribute = entity.BaseCombatAttributes.GetValueOrDefault(attributeType);
 
         var oldMaxHealth = entity.CombatAttributes.GetValueOrDefault(AttributeType.MaxHealth);
+        var oldValue = entity.CombatAttributes.GetValueOrDefault(attributeType);
         var calculatedValue = GetCombatAttributeValue(entity, attributeType, attribute);
 
-        if (entity.CombatAttributes.TryAdd(attributeType, calculatedValue))
+        if (!AttributeCombatRules.IsPrimary(attributeType))
         {
+            calculatedValue += GetTemporaryPrimaryContribution(entity, attributeType);
+            entity.CombatAttributes[attributeType] = calculatedValue;
+
             if (attributeType == AttributeType.MaxHealth)
                 entity.SyncCurrentHealthAfterMaxHealthChange(oldMaxHealth, calculatedValue);
 
@@ -96,9 +89,17 @@ public static class AttributeCalculator
         }
 
         entity.CombatAttributes[attributeType] = calculatedValue;
+        AttributeCombatRules.ApplyPrimaryDelta(
+            entity.CombatAttributes,
+            attributeType,
+            calculatedValue - oldValue);
 
-        if (attributeType == AttributeType.MaxHealth)
-            entity.SyncCurrentHealthAfterMaxHealthChange(oldMaxHealth, calculatedValue);
+        if (attributeType == AttributeType.Fortitude)
+        {
+            entity.SyncCurrentHealthAfterMaxHealthChange(
+                oldMaxHealth,
+                entity.CombatAttributes.GetValueOrDefault(AttributeType.MaxHealth));
+        }
     }
 
     private static float GetCombatAttributeValue(CombatEntity entity, AttributeType attributeType, float baseValue)
@@ -140,7 +141,8 @@ public static class AttributeCalculator
 
     public static Dictionary<AttributeType, float> CalculateProjectedAttributes(
         IReadOnlyDictionary<AttributeType, float> baseAttributes,
-        IEnumerable<AttributeModifierBase> modifiers)
+        IEnumerable<AttributeModifierBase> modifiers,
+        bool includePrimaryContributions = true)
     {
         var modifierList = modifiers.ToList();
         var projected = baseAttributes.Keys
@@ -152,7 +154,46 @@ public static class AttributeCalculator
                     baseAttributes.GetValueOrDefault(attributeType),
                     modifierList.Where(x => x.AttributeType == attributeType)));
 
+        if (includePrimaryContributions)
+            AttributeCombatRules.ApplyPrimaryContributions(projected);
+
         return projected;
+    }
+
+    private static Dictionary<AttributeType, float> CalculateRuntimeAttributes(CombatEntity entity)
+    {
+        var calculated = CalculateProjectedAttributes(
+            entity.BaseCombatAttributes,
+            entity.TemporaryModifiers,
+            includePrimaryContributions: false);
+
+        foreach (var primaryAttribute in Enum.GetValues<AttributeType>().Where(AttributeCombatRules.IsPrimary))
+        {
+            var delta =
+                calculated.GetValueOrDefault(primaryAttribute)
+                - entity.BaseCombatAttributes.GetValueOrDefault(primaryAttribute);
+            AttributeCombatRules.ApplyPrimaryDelta(calculated, primaryAttribute, delta);
+        }
+
+        return calculated;
+    }
+
+    private static float GetTemporaryPrimaryContribution(
+        CombatEntity entity,
+        AttributeType derivedAttribute)
+    {
+        var contribution = 0f;
+        foreach (var primaryAttribute in Enum.GetValues<AttributeType>().Where(AttributeCombatRules.IsPrimary))
+        {
+            var primaryDelta =
+                entity.CombatAttributes.GetValueOrDefault(primaryAttribute)
+                - entity.BaseCombatAttributes.GetValueOrDefault(primaryAttribute);
+            contribution +=
+                primaryDelta
+                * AttributeCombatRules.GetContributionPerPoint(primaryAttribute, derivedAttribute);
+        }
+
+        return contribution;
     }
 
     private static void SyncBaseResources(Dictionary<AttributeType, float> attributes)

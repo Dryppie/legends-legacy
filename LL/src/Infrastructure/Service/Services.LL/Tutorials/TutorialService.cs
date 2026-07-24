@@ -847,8 +847,6 @@ public sealed class TutorialService : ITutorialService, ITutorialProgressionServ
             Description = "Basic protective gear for first steps beyond the training yard.",
             Rarity = Rarity.Common,
             EquipmentType = EquipmentType.Chest,
-            ScalingAttribute = AttributeType.MaxHealth,
-            ScalingAmount = 0,
             AttributeModifiers =
             [
                 CreateModifier("10000000-0000-0000-0000-000000010001", AttributeType.Armor, 10),

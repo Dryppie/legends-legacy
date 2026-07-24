@@ -560,8 +560,8 @@ public class CraftingService : ICraftingService
                     SourceId = blueprint.SourceId,
                     Behavior = design.Behavior,
                     InitialStatProfile = design.InitialStatProfile,
-                    BlueprintStatProfile = blueprint.StatProfile,
-                    StatProfileInfluence = blueprint.StatProfileInfluence,
+                    BonusStatProfile = blueprint.BonusStatProfile,
+                    BonusStatBudgetMultiplier = blueprint.BonusStatBudgetMultiplier,
                     PrimaryTemperingStats = primary,
                     SecondaryTemperingStats = secondary,
                     TemperingProfileSummary = summary,
@@ -673,11 +673,6 @@ public class CraftingService : ICraftingService
                 .ToList(),
             MinimumStartingPotential = potentialValues.Min(),
             MaximumStartingPotential = potentialValues.Max(),
-            Magnitude = itemBase.Magnitude,
-            MagnitudeRange = itemBase.MagnitudeRange,
-            AttackSpeed = itemBase.AttackSpeed,
-            ScalingAttribute = itemBase.ScalingAttribute,
-            ScalingAmount = itemBase.ScalingAmount
         };
     }
 

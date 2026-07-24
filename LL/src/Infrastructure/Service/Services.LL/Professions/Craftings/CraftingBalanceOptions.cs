@@ -81,6 +81,24 @@ public sealed class CraftingBalanceOptions
             ? weight
             : 1d;
 
+    public double GetMaximumCombatLoadoutBudgetWeight()
+    {
+        var fixedSlots =
+            GetSlotBudgetWeight(EquipmentType.Head)
+            + GetSlotBudgetWeight(EquipmentType.Chest)
+            + GetSlotBudgetWeight(EquipmentType.Legs)
+            + GetSlotBudgetWeight(EquipmentType.Ring)
+            + GetSlotBudgetWeight(EquipmentType.Necklace)
+            + GetSlotBudgetWeight(EquipmentType.Relic);
+        var maximumHandConfiguration = Math.Max(
+            GetSlotBudgetWeight(EquipmentType.TwoHanded),
+            Math.Max(
+                GetSlotBudgetWeight(EquipmentType.OneHanded) * 2d,
+                GetSlotBudgetWeight(EquipmentType.OneHanded)
+                + GetSlotBudgetWeight(EquipmentType.OffHand)));
+        return fixedSlots + maximumHandConfiguration;
+    }
+
     public double GetQualityStatMultiplier(ItemQuality quality) =>
         QualityStatMultipliers.TryGetValue(quality, out var multiplier) && multiplier > 0
             ? multiplier

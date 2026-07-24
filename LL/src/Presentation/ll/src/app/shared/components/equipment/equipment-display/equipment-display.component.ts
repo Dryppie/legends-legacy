@@ -1,6 +1,7 @@
 import { DecimalPipe, NgClass, NgFor, NgIf } from '@angular/common';
 import { Component, Input } from '@angular/core';
 import {
+  AttributeTooltipPipe,
   AttributeTypeFormatPipe,
   isPercentAttribute,
 } from '../../../pipes/attributes/attribute-type-format/attribute-type-format.pipe';
@@ -29,6 +30,7 @@ import { EquipmentType } from '../../../models/enums/equipmentType';
         NgFor,
         NgClass,
         AttributeTypeFormatPipe,
+        AttributeTooltipPipe,
         AttributeValueFormatPipe,
         DecimalPipe,
     ],

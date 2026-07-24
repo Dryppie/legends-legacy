@@ -1,6 +1,9 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { Equipment, EquipmentInstance } from '../../../../models/item';
-import { AttributeTypeFormatPipe } from '../../../../pipes/attributes/attribute-type-format/attribute-type-format.pipe';
+import {
+  AttributeTooltipPipe,
+  AttributeTypeFormatPipe,
+} from '../../../../pipes/attributes/attribute-type-format/attribute-type-format.pipe';
 import { AttributeValueFormatPipe } from '../../../../pipes/attributes/attribute-value-format/attribute-value-format.pipe';
 import { NgClass, NgFor, NgIf } from '@angular/common';
 import { EquipmentSlotType } from '../../../../models/Dtos/equipment-slots/equipmentSlot';
@@ -13,6 +16,7 @@ import { EquipmentTypePipe } from '../../../../pipes/equipment/equipment-type-fo
     selector: 'app-overview-equipment-modal',
     imports: [
         AttributeTypeFormatPipe,
+        AttributeTooltipPipe,
         AttributeValueFormatPipe,
         EquipmentTypePipe,
         NgIf,

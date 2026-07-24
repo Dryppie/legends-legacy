@@ -8,6 +8,7 @@ import {
 } from './game-bootstrap.service';
 import { TutorialStateService } from '../tutorial/tutorial-state.service';
 import { GameEventService } from '../../real-time/game-event.service';
+import { setAttributeDefinitions } from '../../../../shared/models/attribute-definition';
 
 @Injectable({ providedIn: 'root' })
 export class GameBootstrapStateService {
@@ -68,6 +69,7 @@ export class GameBootstrapStateService {
     this._loaded.set(false);
     this._error.set(null);
     this._serverTimeUtc.set(null);
+    setAttributeDefinitions([]);
   }
 
   private fetch(force: boolean): Observable<GameBootstrapDto | null> {
@@ -106,6 +108,7 @@ export class GameBootstrapStateService {
   private hydrate(bootstrap: GameBootstrapDto): void {
     this._bootstrap.set(bootstrap);
     this._serverTimeUtc.set(bootstrap.serverTimeUtc);
+    setAttributeDefinitions(bootstrap.attributeDefinitions);
     this.auth.updateCharacter(bootstrap.character);
     this.tutorialState.initialize(bootstrap.tutorial, {
       resumeCurrentStep: true,

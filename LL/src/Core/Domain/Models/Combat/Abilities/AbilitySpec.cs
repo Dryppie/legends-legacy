@@ -64,7 +64,8 @@ public enum AbilityTargetSelector
     TwoAllies = 11,
     HighestMaxHealthAlly = 12,
     SummonedAllies = 13,
-    NonSummonedAllies = 14
+    NonSummonedAllies = 14,
+    SummonedEnemies = 15
 }
 
 public enum AbilityConditionType
@@ -99,6 +100,13 @@ public enum AbilityResourceType
     Barrier = 1,
     Cooldown = 2,
     Mana = 3
+}
+
+public enum CritEligibility
+{
+    Default = 0,
+    Allowed = 1,
+    Disallowed = 2
 }
 
 public sealed class AbilitySpec
@@ -171,6 +179,7 @@ public sealed class AbilityEffectSpec
     public int ChancePercent { get; set; } = 100;
     public AttackType AttackType { get; set; } = AttackType.None;
     public DamageType DamageType { get; set; } = DamageType.None;
+    public CritEligibility CritEligibility { get; set; } = CritEligibility.Default;
     public float LifeStealPercentage { get; set; }
     public decimal ProcCoefficient { get; set; } = 1m;
     public List<string> Tags { get; set; } = [];

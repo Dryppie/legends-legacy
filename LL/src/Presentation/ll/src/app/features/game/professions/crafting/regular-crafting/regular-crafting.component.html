@@ -470,32 +470,6 @@
               <span class="ll-state shrink-0">T{{ preview.tier }}</span>
             </div>
 
-            <div *ngIf="preview.magnitude > 0" class="mt-4">
-              <div class="ll-item-stat-row">
-                <span>Base damage</span>
-                <span class="text-primary">
-                  {{ minimumWeaponDamage(preview) }}–{{
-                    maximumWeaponDamage(preview)
-                  }}
-                </span>
-              </div>
-              <div *ngIf="preview.attackSpeed > 0" class="ll-item-stat-row">
-                <span>Base attack interval</span>
-                <span class="text-primary">
-                  {{ 60 / preview.attackSpeed | number: "1.1-2" }}s
-                </span>
-              </div>
-              <div class="ll-item-stat-row">
-                <span
-                  >Scaling:
-                  {{ preview.scalingAttribute | attributeTypeFormat }}</span
-                >
-                <span class="text-primary">
-                  {{ preview.scalingAmount * 100 | number: "1.0-2" }}%
-                </span>
-              </div>
-            </div>
-
             <div class="mt-4">
               <div class="flex items-center justify-between gap-2">
                 <div class="ll-item-meta">
@@ -505,12 +479,16 @@
                       : "Resulting attributes"
                   }}
                 </div>
-                <span
-                  *ngIf="selectedBlueprint()"
-                  class="text-[0.65rem] text-secondary"
-                >
-                  Final crafted ranges
-                </span>
+              <span
+                *ngIf="selectedBlueprint() as selectedBlueprint"
+                class="text-[0.65rem] text-secondary"
+              >
+                  Base retained ·
+                  {{
+                    selectedBlueprint.bonusStatBudgetMultiplier * 100
+                      | number: "1.0-0"
+                  }}% bonus budget
+              </span>
               </div>
               <div
                 *ngFor="let attribute of baseAttributeDisplays()"

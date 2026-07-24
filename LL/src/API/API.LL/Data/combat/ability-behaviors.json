@@ -625,7 +625,7 @@
     "expectedLogs": [
       {
         "source": "effect.frenzy.cooldown",
-        "eventType": "Debuff",
+        "eventType": "Buff",
         "targetId": "friendly",
         "minCount": 1
       },
@@ -777,6 +777,7 @@
     "friendlyStats": {
       "DodgeChance": 100
     },
+    "randomSeed": 1,
     "maxTicks": 1,
     "expectedLogs": [
       {
@@ -819,6 +820,7 @@
     "friendlyStats": {
       "DodgeChance": 100
     },
+    "randomSeed": 1,
     "maxTicks": 1,
     "expectedLogs": [
       {
@@ -841,6 +843,7 @@
     "friendlyStats": {
       "DodgeChance": 100
     },
+    "randomSeed": 1,
     "maxTicks": 1,
     "expectedLogs": [
       {
@@ -952,7 +955,7 @@
     "expectedLogs": [
       {
         "source": "effect.shell.cooldown",
-        "eventType": "Debuff",
+        "eventType": "Buff",
         "targetId": "friendly",
         "minCount": 1
       }
