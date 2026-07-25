@@ -28,6 +28,9 @@ public sealed class FastCombatEngine
     private readonly bool _startActiveAbilitiesOnCooldown;
     private readonly Dictionary<RuntimeCombatant, float> _basicAttackProgress = [];
     private readonly Dictionary<RuntimeCombatant, int> _healthRegenerationProgress = [];
+    private readonly Dictionary<RuntimeCombatant, int> _healthRegenerationPotential = [];
+    private readonly Dictionary<RuntimeCombatant, int> _healthRegenerationOverhealed = [];
+    private readonly Dictionary<RuntimeCombatant, int> _healthRegenerationPulses = [];
     private readonly List<CombatLogItem> _log = [];
     private int _currentTick;
 
@@ -102,13 +105,16 @@ public sealed class FastCombatEngine
             combatant => combatant.Id,
             combatant => combatant.Team.ToString(),
             StringComparer.OrdinalIgnoreCase);
+        var entityStats = AddHealthRegenerationTelemetry(
+            new CombatStatsAggregator().Aggregate(_log, teamsByEntityId),
+            combatants);
 
         return new CombatResult
         {
             EventLog = [.. _log],
             Duration = _currentTick,
             Outcome = DetermineOutcome(combatants),
-            EntityStats = [.. new CombatStatsAggregator().Aggregate(_log, teamsByEntityId)]
+            EntityStats = [.. entityStats]
         };
     }
 
@@ -1055,12 +1061,28 @@ public sealed class FastCombatEngine
             var regeneration = Math.Max(
                 0,
                 combatant.GetAttribute(AttributeType.HealthRegeneration));
-            if (regeneration <= 0 || combatant.Health >= combatant.GetAttribute(AttributeType.MaxHealth))
+            var potential = Math.Max(0, (int)Math.Round(regeneration));
+            if (potential <= 0)
                 continue;
+
+            _healthRegenerationPotential[combatant] =
+                _healthRegenerationPotential.GetValueOrDefault(combatant) + potential;
+            _healthRegenerationPulses[combatant] =
+                _healthRegenerationPulses.GetValueOrDefault(combatant) + 1;
+
+            if (combatant.Health >= combatant.GetAttribute(AttributeType.MaxHealth))
+            {
+                _healthRegenerationOverhealed[combatant] =
+                    _healthRegenerationOverhealed.GetValueOrDefault(combatant) + potential;
+                continue;
+            }
 
             var healthBefore = combatant.Health;
             combatant.AdjustHealth(regeneration);
             var restored = Math.Max(0, (int)Math.Round(combatant.Health - healthBefore));
+            _healthRegenerationOverhealed[combatant] =
+                _healthRegenerationOverhealed.GetValueOrDefault(combatant)
+                + Math.Max(0, potential - restored);
             if (restored <= 0)
                 continue;
 
@@ -1072,6 +1094,47 @@ public sealed class FastCombatEngine
                 restored,
                 $"{combatant.Name} regenerated {restored} health.");
         }
+    }
+
+    private IReadOnlyList<EntityStats> AddHealthRegenerationTelemetry(
+        IReadOnlyList<EntityStats> aggregatedStats,
+        IReadOnlyList<RuntimeCombatant> combatants)
+    {
+        var result = aggregatedStats.ToList();
+
+        foreach (var combatant in combatants)
+        {
+            var potential = _healthRegenerationPotential.GetValueOrDefault(combatant);
+            var pulses = _healthRegenerationPulses.GetValueOrDefault(combatant);
+            if (potential <= 0 && pulses <= 0)
+                continue;
+
+            var overhealed = _healthRegenerationOverhealed.GetValueOrDefault(combatant);
+            var index = result.FindIndex(stats =>
+                stats.EntityId.Equals(combatant.Id, StringComparison.OrdinalIgnoreCase));
+
+            if (index >= 0)
+            {
+                result[index] = result[index] with
+                {
+                    HealthRegenerationPotential = potential,
+                    HealthRegenerationOverhealed = overhealed,
+                    HealthRegenerationPulses = pulses
+                };
+                continue;
+            }
+
+            result.Add(new EntityStats(
+                combatant.Id,
+                combatant.Name,
+                [],
+                Team: combatant.Team.ToString(),
+                HealthRegenerationPotential: potential,
+                HealthRegenerationOverhealed: overhealed,
+                HealthRegenerationPulses: pulses));
+        }
+
+        return result;
     }
 
     private void TickSummons(IReadOnlyList<RuntimeCombatant> combatants)

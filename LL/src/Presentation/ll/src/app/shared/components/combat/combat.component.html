@@ -82,6 +82,9 @@
           >
             {{ outcome }}
           </span>
+          <span *ngIf="combatDurationTicks > 0" class="text-xs text-light_gray">
+            Duration {{ combatDurationLabel() }}
+          </span>
         </div>
 
         <app-mini-button

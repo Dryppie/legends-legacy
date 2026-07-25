@@ -29,21 +29,22 @@ import { FirstPartyTourService } from '../../../core/services/client-side/first-
 import { Router } from '@angular/router';
 
 @Component({
-    selector: 'app-combat',
-    host: { class: 'flex h-full min-h-0 w-full' },
-    imports: [
-        NgClass,
-        NgIf,
-        CountdownComponent,
-        MiniButtonComponent,
-        CombatLogComponent,
-        CombatEntityStatsComponent,
-    ],
-    templateUrl: './combat.component.html'
+  selector: 'app-combat',
+  host: { class: 'flex h-full min-h-0 w-full' },
+  imports: [
+    NgClass,
+    NgIf,
+    CountdownComponent,
+    MiniButtonComponent,
+    CombatLogComponent,
+    CombatEntityStatsComponent,
+  ],
+  templateUrl: './combat.component.html',
 })
 export class CombatComponent implements OnInit, OnDestroy {
   combatEvents: CombatEvent[] = [];
   entityStats: EntityStats[] = [];
+  combatDurationTicks = 0;
   private readonly lastHandledCombatEvent = new Map<BattleType, CombatEvent>();
   private flavorIntervalId: ReturnType<typeof setInterval> | null = null;
   private flavorVisibilityTimeoutId: ReturnType<typeof setTimeout> | null =
@@ -74,6 +75,13 @@ export class CombatComponent implements OnInit, OnDestroy {
   // Only set to true if a combat result has been received, or if start combat has been
   displayCombat = false;
   isLoading = false;
+
+  combatDurationLabel(): string {
+    const totalSeconds = Math.max(0, Math.round(this.combatDurationTicks / 10));
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    return minutes > 0 ? `${minutes}m ${seconds}s` : `${seconds}s`;
+  }
 
   constructor(
     private readonly characterActionService: CharacterActionsStateService,
@@ -130,6 +138,7 @@ export class CombatComponent implements OnInit, OnDestroy {
     effect(() => {
       const type = this.battleTypeSignal();
       const result = this.combatStateService.getCombatResult(type)();
+      this.combatDurationTicks = result?.duration ?? 0;
       if (result?.playerTeam.length) {
         this.syncCharactersFromResult(result);
       }

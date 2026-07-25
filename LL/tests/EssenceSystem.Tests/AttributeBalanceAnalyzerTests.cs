@@ -1,6 +1,7 @@
 using Application.Interfaces.Services.LL.Balance;
 using Domain.Models.Attributes;
 using Domain.Models.Items;
+using Domain.Models.Professions.Crafting.V2;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using Services.LL.Balance;
@@ -103,8 +104,8 @@ public sealed class AttributeBalanceAnalyzerTests
     {
         var report = CreateAnalyzer().Analyze(CancellationToken.None);
 
-        Assert.Equal(114, report.EqualBudgetComparisons.Count);
-        Assert.Equal(108, report.EqualBudgetComparisons.Count(x => x.IsReleaseGate));
+        Assert.Equal(123, report.EqualBudgetComparisons.Count);
+        Assert.Equal(117, report.EqualBudgetComparisons.Count(x => x.IsReleaseGate));
         Assert.Equal(6, report.EqualBudgetComparisons.Count(x => !x.IsReleaseGate));
         Assert.Equal(
             Enum.GetValues<AttributePeerComparisonGroup>(),
@@ -261,8 +262,8 @@ public sealed class AttributeBalanceAnalyzerTests
                 Assert.True(
                     comparison.FirstOutput.HealthRegeneration
                     > comparison.BaselineOutput.HealthRegeneration);
-            });
-        }
+        });
+    }
 
         Assert.All(
             report.EqualBudgetComparisons.Where(x =>
@@ -284,6 +285,49 @@ public sealed class AttributeBalanceAnalyzerTests
                     comparison.FirstOutput.HealthRegeneration
                     > comparison.BaselineOutput.HealthRegeneration);
             });
+    }
+
+    [Fact]
+    public void Analyzer_tests_health_regeneration_across_a_long_sustain_investment_frontier()
+    {
+        var report = CreateAnalyzer().Analyze(CancellationToken.None);
+        var expectedFrontier = new[]
+        {
+            (Id: "health-regeneration-max-health-long-low", Budget: 15.2d),
+            (Id: "health-regeneration-max-health-long", Budget: 30.4d),
+            (Id: "health-regeneration-max-health-long-observed", Budget: 45.6d),
+            (Id: "health-regeneration-max-health-long-high", Budget: 76d)
+        };
+        var frontier = expectedFrontier
+            .Select(expected => report.EqualBudgetComparisons.Single(x =>
+                x.Id == expected.Id && x.Tier == 10))
+            .ToList();
+
+        Assert.Equal(expectedFrontier.Select(x => x.Budget), frontier.Select(x => x.Budget));
+        Assert.Equal(
+            [7.2381d, 14.4762d, 21.7143d, 36.1905d],
+            frontier
+                .Select(x =>
+                    Math.Round(
+                        x.Budget
+                        / EquipmentStatBudgetCatalog
+                            .Get(AttributeType.HealthRegeneration, x.Tier)
+                            .CostPerPoint,
+                        4))
+                .ToArray());
+        Assert.True(frontier.Select(x => x.FirstRelativeGainPercent).SequenceEqual(
+            frontier.Select(x => x.FirstRelativeGainPercent).Order()));
+        Assert.True(frontier.Select(x => x.FirstOutput.HealthRegeneration).SequenceEqual(
+            frontier.Select(x => x.FirstOutput.HealthRegeneration).Order()));
+        Assert.All(frontier, comparison =>
+        {
+            Assert.True(comparison.IsReleaseGate);
+            Assert.True(
+                comparison.Passed,
+                $"{comparison.Id}: {comparison.FirstRelativeGainPercent:0.##}% versus " +
+                $"{comparison.SecondRelativeGainPercent:0.##}% " +
+                $"({comparison.DifferencePercentagePoints:0.##}pp)");
+        });
     }
 
     [Fact]
@@ -565,7 +609,7 @@ public sealed class AttributeBalanceAnalyzerTests
                         $"  spent: {x.FirstSpentBudget:0.##} vs {x.SecondSpentBudget:0.##}; " +
                         $"utility/100: {x.FirstUtilityPerHundredBudget:0.##} vs " +
                         $"{x.SecondUtilityPerHundredBudget:0.##}")));
-        Assert.Equal(4, report.BalanceVersion);
+        Assert.Equal(5, report.BalanceVersion);
     }
 
     [Fact]
@@ -574,7 +618,7 @@ public sealed class AttributeBalanceAnalyzerTests
         var report = CreateAnalyzer().Analyze(CancellationToken.None);
         var catalog = report.CraftingCatalogConstraints;
 
-        Assert.Equal(4, catalog.CandidateBalanceVersion);
+        Assert.Equal(5, catalog.CandidateBalanceVersion);
         Assert.True(catalog.ProductionActive);
         Assert.Equal(31, catalog.RecipesAnalyzed);
         Assert.Equal(11, catalog.BlueprintsAnalyzed);

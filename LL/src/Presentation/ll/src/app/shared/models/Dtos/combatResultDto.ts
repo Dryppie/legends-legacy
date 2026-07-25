@@ -37,6 +37,9 @@ export interface EntityStats {
   healingDone: number;
   healingReceived: number;
   healthRegenerated: number;
+  healthRegenerationPotential: number;
+  healthRegenerationOverhealed: number;
+  healthRegenerationPulses: number;
   selfDamageDone: number;
   selfDamageTaken: number;
   alliedDamageDone: number;

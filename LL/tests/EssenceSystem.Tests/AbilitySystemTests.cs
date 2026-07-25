@@ -339,12 +339,16 @@ public sealed class AbilitySystemTests
         Assert.Equal([49, 99], highSpiritRegeneration.Select(x => x.Timestamp));
         Assert.All(lowSpiritRegeneration, x => Assert.Equal(3, x.Magnitude));
         Assert.All(highSpiritRegeneration, x => Assert.Equal(3, x.Magnitude));
-        Assert.Equal(
-            6,
-            result.EntityStats.Single(x => x.EntityId == lowSpirit.Id).HealthRegenerated);
-        Assert.Equal(
-            6,
-            result.EntityStats.Single(x => x.EntityId == highSpirit.Id).HealthRegenerated);
+        var lowSpiritStats = result.EntityStats.Single(x => x.EntityId == lowSpirit.Id);
+        var highSpiritStats = result.EntityStats.Single(x => x.EntityId == highSpirit.Id);
+        Assert.Equal(6, lowSpiritStats.HealthRegenerated);
+        Assert.Equal(6, lowSpiritStats.HealthRegenerationPotential);
+        Assert.Equal(0, lowSpiritStats.HealthRegenerationOverhealed);
+        Assert.Equal(2, lowSpiritStats.HealthRegenerationPulses);
+        Assert.Equal(6, highSpiritStats.HealthRegenerated);
+        Assert.Equal(6, highSpiritStats.HealthRegenerationPotential);
+        Assert.Equal(0, highSpiritStats.HealthRegenerationOverhealed);
+        Assert.Equal(2, highSpiritStats.HealthRegenerationPulses);
     }
 
     [Fact]
@@ -367,6 +371,9 @@ public sealed class AbilitySystemTests
         Assert.Equal(
             0,
             result.EntityStats.SingleOrDefault(x => x.EntityId == friendly.Id)?.HealthRegenerated ?? 0);
+        Assert.Equal(
+            0,
+            result.EntityStats.SingleOrDefault(x => x.EntityId == friendly.Id)?.HealthRegenerationPulses ?? 0);
     }
 
     [Theory]
@@ -391,6 +398,9 @@ public sealed class AbilitySystemTests
         Assert.Equal(
             0,
             result.EntityStats.SingleOrDefault(x => x.EntityId == friendly.Id)?.HealthRegenerated ?? 0);
+        Assert.Equal(
+            0,
+            result.EntityStats.SingleOrDefault(x => x.EntityId == friendly.Id)?.HealthRegenerationPotential ?? 0);
     }
 
     [Fact]
@@ -409,9 +419,11 @@ public sealed class AbilitySystemTests
         Assert.DoesNotContain(
             result.EventLog,
             x => x.EventType == EventType.HealthRegeneration && x.TargetId == friendly.Id);
-        Assert.Equal(
-            0,
-            result.EntityStats.SingleOrDefault(x => x.EntityId == friendly.Id)?.HealthRegenerated ?? 0);
+        var stats = result.EntityStats.Single(x => x.EntityId == friendly.Id);
+        Assert.Equal(0, stats.HealthRegenerated);
+        Assert.Equal(3, stats.HealthRegenerationPotential);
+        Assert.Equal(3, stats.HealthRegenerationOverhealed);
+        Assert.Equal(1, stats.HealthRegenerationPulses);
     }
 
     [Fact]
@@ -432,6 +444,11 @@ public sealed class AbilitySystemTests
             x.EventType == EventType.HealthRegeneration && x.TargetId == friendly.Id);
         Assert.Equal(1, regeneration.Magnitude);
         Assert.Equal(200, regeneration.CombatEntity!.Health);
+        var stats = result.EntityStats.Single(x => x.EntityId == friendly.Id);
+        Assert.Equal(1, stats.HealthRegenerated);
+        Assert.Equal(3, stats.HealthRegenerationPotential);
+        Assert.Equal(2, stats.HealthRegenerationOverhealed);
+        Assert.Equal(1, stats.HealthRegenerationPulses);
     }
 
     [Fact]

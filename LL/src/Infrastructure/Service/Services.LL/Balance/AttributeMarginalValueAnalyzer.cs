@@ -268,6 +268,27 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
                 AttributeType.HealthRegeneration,
                 AttributeType.MaxHealth),
             GeneralistPeer(
+                "health-regeneration-max-health-long-low",
+                AttributePeerComparisonGroup.Sustain,
+                AttributeBalanceScenario.LongSustain,
+                AttributeType.HealthRegeneration,
+                AttributeType.MaxHealth,
+                budgetFraction: 0.01d),
+            GeneralistPeer(
+                "health-regeneration-max-health-long-observed",
+                AttributePeerComparisonGroup.Sustain,
+                AttributeBalanceScenario.LongSustain,
+                AttributeType.HealthRegeneration,
+                AttributeType.MaxHealth,
+                budgetFraction: 0.03d),
+            GeneralistPeer(
+                "health-regeneration-max-health-long-high",
+                AttributePeerComparisonGroup.Sustain,
+                AttributeBalanceScenario.LongSustain,
+                AttributeType.HealthRegeneration,
+                AttributeType.MaxHealth,
+                budgetFraction: 0.05d),
+            GeneralistPeer(
                 "health-regeneration-armor",
                 AttributePeerComparisonGroup.Sustain,
                 AttributeBalanceScenario.PhysicalPressure,

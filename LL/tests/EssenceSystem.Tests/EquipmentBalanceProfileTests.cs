@@ -142,7 +142,7 @@ public sealed class EquipmentBalanceProfileTests
         Assert.Equal(54d, EquipmentBudgetEvaluator.Evaluate(modifiers, tier: 1));
         Assert.Equal(102d, EquipmentBudgetEvaluator.Evaluate(modifiers, tier: 5));
         Assert.Equal(137d, EquipmentBudgetEvaluator.Evaluate(modifiers, tier: 10));
-        Assert.Equal(4, EquipmentBudgetEvaluator.BalanceVersion);
+        Assert.Equal(5, EquipmentBudgetEvaluator.BalanceVersion);
     }
 
     [Fact]
@@ -394,7 +394,7 @@ public sealed class EquipmentBalanceProfileTests
         Assert.InRange(allocation.UnspentBudget, 0, 0.001d);
         Assert.Contains(AttributeType.CritChance, allocation.BindingCombatCaps);
         Assert.True(allocation.AddedPoints[AttributeType.Power] > 25d);
-        Assert.Equal(4, EquipmentConstraintProfile.BalanceVersion);
+        Assert.Equal(5, EquipmentConstraintProfile.BalanceVersion);
         Assert.True(EquipmentConstraintProfile.ProductionActive);
     }
 
@@ -462,8 +462,8 @@ public sealed class EquipmentBalanceProfileTests
     [Theory]
     [InlineData(1, 1.50d)]
     [InlineData(5, 1.50d)]
-    [InlineData(8, 1.65d)]
-    [InlineData(10, 1.75d)]
+    [InlineData(8, 1.86d)]
+    [InlineData(10, 2.10d)]
     public void Production_profile_uses_tiered_health_regeneration_costs(
         int tier,
         double expectedCost)

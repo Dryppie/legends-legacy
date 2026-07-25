@@ -18,9 +18,9 @@ type StatsParticipant = {
 };
 
 @Component({
-    selector: 'app-combat-entity-stats',
-    imports: [NgIf, NgFor, NgClass, DecimalPipe, RegularButtonComponent],
-    templateUrl: './combat-entity-stats.component.html'
+  selector: 'app-combat-entity-stats',
+  imports: [NgIf, NgFor, NgClass, DecimalPipe, RegularButtonComponent],
+  templateUrl: './combat-entity-stats.component.html',
 })
 export class CombatEntityStatsComponent implements OnChanges {
   @Input() playerTeam: SimpleCombatEntityDto[] = [];
@@ -260,6 +260,9 @@ export class CombatEntityStatsComponent implements OnChanges {
       healingDone: 0,
       healingReceived: 0,
       healthRegenerated: 0,
+      healthRegenerationPotential: 0,
+      healthRegenerationOverhealed: 0,
+      healthRegenerationPulses: 0,
       selfDamageDone: 0,
       selfDamageTaken: 0,
       alliedDamageDone: 0,
