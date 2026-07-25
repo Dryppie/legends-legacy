@@ -17,8 +17,8 @@ public sealed class EquipmentSnapshot
     public bool IsMasterpiece { get; init; }
     public bool IsLevelingItem { get; init; }
 
-    public ICollection<InstanceAttributeModifier> InstanceModifiers { get; init; }
-        = new List<InstanceAttributeModifier>();
+    public ICollection<EquipmentAttributeModifierSnapshot> InstanceModifiers { get; init; }
+        = new List<EquipmentAttributeModifierSnapshot>();
 
     // Required by EF Core
     private EquipmentSnapshot() { }
@@ -38,16 +38,8 @@ public sealed class EquipmentSnapshot
             IsMasterpiece = inst.IsMasterpiece,
             IsLevelingItem = inst.IsLevelingItem,
             InstanceModifiers = inst.InstanceModifiers?
-                .Select(CloneInstanceModifier)
+                .Select(EquipmentAttributeModifierSnapshot.From)
                 .ToList() ?? []
         };
     }
-
-    private static InstanceAttributeModifier CloneInstanceModifier(
-        InstanceAttributeModifier modifier) =>
-        new(modifier.AttributeType, modifier.Amount, modifier.ModifierType)
-        {
-            Id = Guid.NewGuid(),
-            ItemInstanceId = modifier.ItemInstanceId
-        };
 }

@@ -51,7 +51,7 @@ public static class DependencyInjection
 
             if (autoAuthorize)
             {
-                options.OperationFilter<SwaggerAutoAuthFilter>();
+                options.DocumentFilter<SwaggerAutoAuthFilter>();
             }
         });
 

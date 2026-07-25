@@ -201,7 +201,9 @@ public class ColosseumService : IColosseumService
                 ItemXp = x.ItemXp,
                 IsMasterpiece = x.IsMasterpiece,
                 IsLevelingItem = x.IsLevelingItem,
-                InstanceModifiers = x.InstanceModifiers.ToList()
+                InstanceModifiers = x.InstanceModifiers
+                    .Select(modifier => modifier.ToInstanceModifier(x.EquipmentInstanceId))
+                    .ToList()
             })
             .ToList();
 
