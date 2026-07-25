@@ -71,6 +71,9 @@ public sealed class PowerAnalysisSimulationRunner
     private readonly Application.Interfaces.Services.AdminDashboard.ICreatureService _creatures;
     private readonly IEntityService _entities;
     private readonly IDungeonVigorService _vigor;
+    private readonly Dictionary<string, Creature> _dungeonCreatureSources =
+        new(StringComparer.OrdinalIgnoreCase);
+    private readonly Dictionary<int, Dictionary<string, CombatEntity>> _dungeonEnemyTemplatesByTier = [];
 
     public PowerAnalysisSimulationRunner(
         ICombatEngineExecutor combatEngine,
@@ -356,22 +359,78 @@ public sealed class PowerAnalysisSimulationRunner
         CancellationToken cancellationToken)
     {
         var creatureKeys = room.EncounterIds.Select(DungeonEncounterIdentity.NormalizeCreatureKey).ToList();
-        var creatureIds = await _creatures.GetCreaturesByKey(creatureKeys, cancellationToken);
+        await LoadMissingDungeonCreatureSourcesAsync(creatureKeys, room.RoomIndex, cancellationToken);
+
+        if (!_dungeonEnemyTemplatesByTier.TryGetValue(dungeonTier, out var templatesByKey))
+        {
+            templatesByKey = new Dictionary<string, CombatEntity>(StringComparer.OrdinalIgnoreCase);
+            _dungeonEnemyTemplatesByTier.Add(dungeonTier, templatesByKey);
+        }
+
+        var missingTemplateKeys = creatureKeys
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .Where(key => !templatesByKey.ContainsKey(key))
+            .ToList();
+        if (missingTemplateKeys.Count > 0)
+        {
+            var hostiles = _combatSetup.CreateCreatureCombatEntities(
+                missingTemplateKeys
+                    .Select(key => (Entity)_dungeonCreatureSources[key])
+                    .ToList(),
+                new Area { DifficultyTier = 1 });
+            if (hostiles.Count != missingTemplateKeys.Count)
+            {
+                throw new InvalidOperationException(
+                    $"Could not create every creature template for simulated room {room.RoomIndex}.");
+            }
+
+            foreach (var hostile in hostiles)
+                DungeonEnemyDifficultyScaling.Apply(hostile, dungeonTier);
+            await _combatSetup.PrepareEntitiesForCombat(hostiles);
+
+            for (var index = 0; index < missingTemplateKeys.Count; index++)
+                templatesByKey.Add(missingTemplateKeys[index], hostiles[index]);
+        }
+
+        return creatureKeys.Select(key => templatesByKey[key]).ToList();
+    }
+
+    private async Task LoadMissingDungeonCreatureSourcesAsync(
+        IReadOnlyList<string> creatureKeys,
+        int roomIndex,
+        CancellationToken cancellationToken)
+    {
+        var missingKeys = creatureKeys
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .Where(key => !_dungeonCreatureSources.ContainsKey(key))
+            .ToList();
+        if (missingKeys.Count == 0)
+            return;
+
+        var creatureIds = await _creatures.GetCreaturesByKey(missingKeys, cancellationToken);
+        if (creatureIds.Count != missingKeys.Count)
+        {
+            throw new InvalidOperationException(
+                $"Could not resolve every creature key in simulated room {roomIndex}.");
+        }
+
         var sourceEntities = await _entities.GetEntitiesByIdsForCombatAsync(
             creatureIds.Distinct().ToList(),
             cancellationToken);
-        var creaturesById = sourceEntities.OfType<Creature>().ToDictionary(x => x.Id);
-        var creatureEntities = creatureIds.Where(creaturesById.ContainsKey).Select(x => creaturesById[x]).ToList();
-        if (creatureEntities.Count != creatureKeys.Count)
-            throw new InvalidOperationException($"Could not resolve every creature in simulated room {room.RoomIndex}.");
+        var creaturesById = sourceEntities
+            .OfType<Creature>()
+            .ToDictionary(creature => creature.Id);
 
-        var hostiles = _combatSetup.CreateCreatureCombatEntities(
-            [.. creatureEntities],
-            new Area { DifficultyTier = 1 });
-        foreach (var hostile in hostiles)
-            DungeonEnemyDifficultyScaling.Apply(hostile, dungeonTier);
-        await _combatSetup.PrepareEntitiesForCombat([.. hostiles]);
-        return hostiles;
+        for (var index = 0; index < missingKeys.Count; index++)
+        {
+            if (!creaturesById.TryGetValue(creatureIds[index], out var creature))
+            {
+                throw new InvalidOperationException(
+                    $"Could not load every creature entity in simulated room {roomIndex}.");
+            }
+
+            _dungeonCreatureSources.Add(missingKeys[index], creature);
+        }
     }
 
     private async Task<CombatResult> RunCombatAsync(

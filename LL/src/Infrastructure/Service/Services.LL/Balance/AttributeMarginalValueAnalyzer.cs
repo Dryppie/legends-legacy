@@ -255,6 +255,42 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
                 AttributeBalanceScenario.LongSustain,
                 AttributeType.HealthRegeneration,
                 AttributeType.LifeSteal),
+            GeneralistPeer(
+                "health-regeneration-max-health-physical",
+                AttributePeerComparisonGroup.Sustain,
+                AttributeBalanceScenario.PhysicalPressure,
+                AttributeType.HealthRegeneration,
+                AttributeType.MaxHealth),
+            GeneralistPeer(
+                "health-regeneration-max-health-long",
+                AttributePeerComparisonGroup.Sustain,
+                AttributeBalanceScenario.LongSustain,
+                AttributeType.HealthRegeneration,
+                AttributeType.MaxHealth),
+            GeneralistPeer(
+                "health-regeneration-armor",
+                AttributePeerComparisonGroup.Sustain,
+                AttributeBalanceScenario.PhysicalPressure,
+                AttributeType.HealthRegeneration,
+                AttributeType.Armor),
+            GeneralistPeer(
+                "health-regeneration-resistance",
+                AttributePeerComparisonGroup.Sustain,
+                AttributeBalanceScenario.MagicalPressure,
+                AttributeType.HealthRegeneration,
+                AttributeType.Resistance),
+            GeneralistPeer(
+                "health-regeneration-damage-reduction-mixed",
+                AttributePeerComparisonGroup.Sustain,
+                AttributeBalanceScenario.MixedPressure,
+                AttributeType.HealthRegeneration,
+                AttributeType.DamageReduction),
+            GeneralistPeer(
+                "health-regeneration-damage-reduction-long",
+                AttributePeerComparisonGroup.Sustain,
+                AttributeBalanceScenario.LongSustain,
+                AttributeType.HealthRegeneration,
+                AttributeType.DamageReduction),
             ContextPeer(
                 "armor-penetration-weapon-damage-low-defense",
                 AttributePeerComparisonGroup.Penetration,
@@ -835,11 +871,11 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
         CancellationToken cancellationToken,
         EqualBudgetBenchmarkContext? benchmarkContext = null)
     {
-        var scores = new List<double>(DeterministicSeeds.Count);
+        var outcomes = new List<ScenarioOutcome>(DeterministicSeeds.Count);
         foreach (var seed in DeterministicSeeds)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            scores.Add(RunScenario(
+            outcomes.Add(RunScenario(
                 tier,
                 scenario,
                 pointDeltas,
@@ -848,10 +884,11 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
                 benchmarkContext));
         }
 
-        return new ScenarioSample(scores.Average(), scores);
+        var scores = outcomes.Select(x => x.Utility.Total).ToList();
+        return new ScenarioSample(scores.Average(), scores, AverageOutput(outcomes));
     }
 
-    private static double RunScenario(
+    private static ScenarioOutcome RunScenario(
         int tier,
         AttributeBalanceScenario scenario,
         IReadOnlyDictionary<AttributeType, double> pointDeltas,
@@ -883,7 +920,7 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
             seed,
             cancellationToken,
             opponentDefenseMultiplier:
-                benchmarkContext?.OpponentDefenseMultiplier ?? 1d).Utility.Total;
+                benchmarkContext?.OpponentDefenseMultiplier ?? 1d);
     }
 
     private static ScenarioOutcome ExecuteScenario(
@@ -3110,7 +3147,10 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
             Round(firstGain),
             Round(secondGain),
             Round(difference),
-            Math.Abs(difference) <= spec.TolerancePercentagePoints);
+            Math.Abs(difference) <= spec.TolerancePercentagePoints,
+            baseline.Output,
+            firstScore.Output,
+            secondScore.Output);
     }
 
     private static EqualBudgetPeerSpec StrictPeer(
@@ -3494,7 +3534,10 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
         double TolerancePercent,
         bool IsReleaseGate);
 
-    private sealed record ScenarioSample(double Mean, IReadOnlyList<double> Scores);
+    private sealed record ScenarioSample(
+        double Mean,
+        IReadOnlyList<double> Scores,
+        EquipmentLoadoutOutput Output);
 
     private sealed record ScenarioOutcome(
         EquipmentLoadoutOutput Output,

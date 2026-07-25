@@ -103,8 +103,8 @@ public sealed class AttributeBalanceAnalyzerTests
     {
         var report = CreateAnalyzer().Analyze(CancellationToken.None);
 
-        Assert.Equal(96, report.EqualBudgetComparisons.Count);
-        Assert.Equal(90, report.EqualBudgetComparisons.Count(x => x.IsReleaseGate));
+        Assert.Equal(114, report.EqualBudgetComparisons.Count);
+        Assert.Equal(108, report.EqualBudgetComparisons.Count(x => x.IsReleaseGate));
         Assert.Equal(6, report.EqualBudgetComparisons.Count(x => !x.IsReleaseGate));
         Assert.Equal(
             Enum.GetValues<AttributePeerComparisonGroup>(),
@@ -214,6 +214,76 @@ public sealed class AttributeBalanceAnalyzerTests
                     .Where(x => x.Context == "300% reference defense"),
                 comparison => Assert.False(comparison.IsReleaseGate));
         });
+    }
+
+    [Fact]
+    public void Analyzer_compares_health_regeneration_with_tank_and_recovery_peers()
+    {
+        var report = CreateAnalyzer().Analyze(CancellationToken.None);
+        var expectedComparisons = new Dictionary<string, (AttributeBalanceScenario Scenario, AttributeType Peer)>
+        {
+            ["health-regeneration-max-health-physical"] =
+                (AttributeBalanceScenario.PhysicalPressure, AttributeType.MaxHealth),
+            ["health-regeneration-max-health-long"] =
+                (AttributeBalanceScenario.LongSustain, AttributeType.MaxHealth),
+            ["health-regeneration-armor"] =
+                (AttributeBalanceScenario.PhysicalPressure, AttributeType.Armor),
+            ["health-regeneration-resistance"] =
+                (AttributeBalanceScenario.MagicalPressure, AttributeType.Resistance),
+            ["health-regeneration-damage-reduction-mixed"] =
+                (AttributeBalanceScenario.MixedPressure, AttributeType.DamageReduction),
+            ["health-regeneration-damage-reduction-long"] =
+                (AttributeBalanceScenario.LongSustain, AttributeType.DamageReduction)
+        };
+
+        foreach (var (id, expected) in expectedComparisons)
+        {
+            var comparisons = report.EqualBudgetComparisons
+                .Where(x => x.Id == id)
+                .OrderBy(x => x.Tier)
+                .ToList();
+
+            Assert.Equal([1, 5, 10], comparisons.Select(x => x.Tier));
+            Assert.All(comparisons, comparison =>
+            {
+                Assert.Equal(AttributePeerComparisonGroup.Sustain, comparison.Group);
+                Assert.Equal(AttributePeerComparisonIntent.GeneralistVersusSpecialist, comparison.Intent);
+                Assert.Equal(expected.Scenario, comparison.Scenario);
+                Assert.Equal(AttributeType.HealthRegeneration, comparison.FirstAttribute);
+                Assert.Equal(expected.Peer, comparison.SecondAttribute);
+                Assert.True(comparison.IsReleaseGate);
+                Assert.True(
+                    comparison.Passed,
+                    $"{comparison.Id} tier {comparison.Tier}: " +
+                    $"{comparison.FirstRelativeGainPercent:0.##}% versus " +
+                    $"{comparison.SecondRelativeGainPercent:0.##}%");
+                Assert.True(comparison.FirstRelativeGainPercent > 0);
+                Assert.True(
+                    comparison.FirstOutput.HealthRegeneration
+                    > comparison.BaselineOutput.HealthRegeneration);
+            });
+        }
+
+        Assert.All(
+            report.EqualBudgetComparisons.Where(x =>
+                x.Id == "healing-power-health-regeneration"),
+            comparison =>
+            {
+                Assert.True(comparison.SecondRelativeGainPercent > 0);
+                Assert.True(
+                    comparison.SecondOutput.HealthRegeneration
+                    > comparison.BaselineOutput.HealthRegeneration);
+            });
+        Assert.All(
+            report.EqualBudgetComparisons.Where(x =>
+                x.Id == "health-regeneration-life-steal"),
+            comparison =>
+            {
+                Assert.True(comparison.FirstRelativeGainPercent > 0);
+                Assert.True(
+                    comparison.FirstOutput.HealthRegeneration
+                    > comparison.BaselineOutput.HealthRegeneration);
+            });
     }
 
     [Fact]

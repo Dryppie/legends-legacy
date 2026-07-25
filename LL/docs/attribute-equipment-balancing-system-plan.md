@@ -65,7 +65,7 @@ The production foundation and controlled calibration slices are implemented with
 - a deterministic marginal-value analyzer covers all 24 equipment attributes at tiers 1, 5, and 10;
 - the analyzer executes thirteen production-engine scenarios over eight fixed seeds, reports paired 95% confidence intervals, proposes tier-specific candidate costs, and flags inert, cap-limited, mispriced, and unequal-budget results;
 - those scenarios now include mixed typed pressure, unmitigated pressure, a short burst check, and a 600-tick long-sustain check;
-- an explicit 96-cell equal-budget matrix covers primary identities, offense, crit frontiers, steady/burst defense, sustain, and low/high-defense penetration at all three reference tiers; 90 cells are release gates and six are high-defense sensitivity probes;
+- an explicit 114-cell equal-budget matrix covers primary identities, offense, crit frontiers, steady/burst defense, sustain, Health Regeneration versus tank peers, and low/high-defense penetration at all three reference tiers; 108 cells are release gates and six are high-defense sensitivity probes;
 - five canonical full-equipment loadouts are analyzed at tiers 1, 5, and 10: Heavy Shield, Medium Dual Wield, Cloth Support, Two-Handed Damage, and Summoner;
 - loadout budgets are assembled from the actual individual equipment slot weights, including shield, dual-wield, and two-handed hand configurations;
 - every loadout runs the complete scenario matrix, reports its relevant scenarios separately, and exposes target, spent, and unspent budget plus any per-item hard-cap pressure;
@@ -239,7 +239,7 @@ Summon contribution telemetry provides the causal split:
 
 ### Equal-budget peer matrix
 
-The analyzer now runs 32 declared peer/context relationships at tiers 1, 5, and 10, producing 96 deterministic cells. Every result includes a stable ID, category, intent, scenario, benchmark context, candidate budget, tolerance, gains for both investments, difference in percentage points, pass/fail status, and whether it blocks release. The release gate requires all 90 acceptance cells to pass; six high-defense penetration cells remain diagnostic sensitivity probes.
+The analyzer now runs 38 declared peer/context relationships at tiers 1, 5, and 10, producing 114 deterministic cells. Every result includes a stable ID, category, intent, scenario, benchmark context, candidate budget, tolerance, gains for both investments, difference in percentage points, pass/fail status, whether it blocks release, and averaged baseline/first/second combat outputs. The release gate requires all 108 acceptance cells to pass; six high-defense penetration cells remain diagnostic sensitivity probes.
 
 The six categories are primary identity, offense, crit, defense, sustain, and penetration. Strict substitutes use a 10-percentage-point tolerance. Contextual generalist-versus-specialist relationships use 20 percentage points. Primary-versus-derived-basket controls use `0.1` percentage point because both sides must construct the same effective attributes.
 
@@ -248,7 +248,7 @@ Fortitude, Precision, and Spirit are compared with their complete derived basket
 The first sustain pass exposed two real diagnostic problems:
 
 1. Long Sustain did not give the reference character an authored damage ability, so equipment Life Steal had no eligible ability damage to convert into healing. The scenario now includes the common Power-scaling physical strike.
-2. Tier-10 Health Regeneration produced `26.74%` gain versus `3.06%` for Life Steal, exceeding the approved 20-point contextual tolerance. Its cost is `1.75` at tier 10, interpolated from `1.50` at tier 5.
+2. The initial tier-10 Health Regeneration profile produced `26.74%` gain versus `3.06%` for Life Steal, exceeding the approved 20-point contextual tolerance. Its cost was therefore raised to `1.75` at tier 10, interpolated from `1.50` at tier 5. The active replay produces `21.49%` versus `3.06%`, a passing `18.43`-point difference.
 
 Because Spirit contains both Health Regeneration and Summon Power, its price is computed from the complete active basket. The resulting Spirit anchors are `1.05`, `1.0375`, and `1.0375`.
 
@@ -258,7 +258,7 @@ The frontier extension adds:
 - Max Health versus Armor, Dodge, Block, and Damage Reduction under the authored burst-pressure ability, in addition to steady pressure;
 - flat physical and magical penetration at 25% and 300% of reference target defense.
 
-Flat penetration's relative gain is higher against low defense and declines against high defense under the production formula. The 25% defense context is therefore the declared specialist release matchup; the 300% context is reported as sensitivity evidence and does not pretend that flat penetration is percentage penetration. All 90 current release cells pass.
+Flat penetration's relative gain is higher against low defense and declines against high defense under the production formula. The 25% defense context is therefore the declared specialist release matchup; the 300% context is reported as sensitivity evidence and does not pretend that flat penetration is percentage penetration. All 108 current release cells pass.
 
 The hand matrix separates representative funding and behavior from two controls:
 
@@ -346,7 +346,7 @@ The current gate result is:
 overflow redistribution: PASS
 production aggregate use: PASS
 exact-reference use:      PASS
-equal-budget peers:      PASS (90 release cells)
+equal-budget peers:      PASS (108 release cells)
 summon calibration:      PASS
 hand calibration:        PASS
 real crafting peers:     PASS (21 release cells)
@@ -1920,7 +1920,7 @@ The approved behavior, prices, allocator, canonical attribute metadata, and reco
 | Crafting, tempering, previews, and tooltips use the approved profile           | **Complete**                                       | Base rolls and previews use the active constrained allocator; quality growth and directed tempering respect the same direct and coupled caps.                                                                                                                                                                                              |
 | No frontend-local attribute weights remain                                     | **Complete**                                       | The Angular `ATTRIBUTE_WEIGHTS` table has been removed; displayed Gear Value comes from the backend.                                                                                                                                                                                                                                       |
 | Deterministic analysis can regenerate candidate prices                         | **Complete**                                       | The analyzer measures all 24 stats over deterministic production-engine scenarios and emits tier-specific candidate costs and confidence data. Candidate overrides are visible in Admin diagnostics.                                                                                                                                       |
-| Equal-budget peers pass approved tolerances                                    | **Complete for the active profile**                | All 90 synthetic release cells, nine summon cells, nine representative hand cells, and 21 real recipe/blueprint release cells pass. Twelve cross-role or cross-specialization cells remain diagnostic by design.                                                                                                                            |
+| Equal-budget peers pass approved tolerances                                    | **Complete for the active profile**                | All 108 synthetic release cells, nine summon cells, nine representative hand cells, and 21 real recipe/blueprint release cells pass. Twelve cross-role or cross-specialization cells remain diagnostic by design.                                                                                                                           |
 | Conditional stats expose matchup sensitivity                                   | **Complete in Admin diagnostics**                  | Each stat declares relevant scenarios and reports per-scenario results, medians, confidence intervals, cap pressure, and contextual loadout output rather than one universal value.                                                                                                                                                        |
 | Whole-build Power remains simulation-backed                                    | **Complete**                                       | Character Power continues to use production-engine benchmark simulations and remains separate from Gear Value.                                                                                                                                                                                                                             |
 | Every item and content path uses the active profile                            | **Complete**                                       | Historical item-price branching and persisted item balance versions have been removed. The clean local schema, crafting, tempering, DTOs, and frontend all use the active profile.                                                                                                                                                           |
@@ -1946,7 +1946,7 @@ The tier-10 representative differences are `-18.81%`, `-17.90%`, and `-18.12%` o
 
 ### Recently completed: real-content peer calibration
 
-Synthetic coverage remains complete: the 96-cell matrix has 90 passing release gates and six high-defense penetration sensitivity probes. The analyzer now also composes real crafting designs and runs 33 candidate-profile combat cells at tiers 1, 5, and 10:
+Synthetic coverage remains complete: the 114-cell matrix has 108 passing release gates and six high-defense penetration sensitivity probes. The analyzer now also composes real crafting designs and runs 33 candidate-profile combat cells at tiers 1, 5, and 10:
 
 - 21 same-purpose release gates cover balanced, fast, and penetration-oriented dual-wield/two-handed choices, a tower-shield defensive peer, and offensive, sustain, and summon-oriented blueprint peers;
 - 12 diagnostic cells cover Heavy/Medium and Medium/Light armor-family decompositions, Arcane/Spirit offense-versus-sustain specialization, and Spirit/Primal support-versus-summon specialization;
@@ -1971,6 +1971,27 @@ Arcane and Spirit remain fully measured, but their difference no longer blocks r
 Production combat cap clamps, Cooldown Reduction, allocation constraints, GameBootstrap, and Admin balance diagnostics consume the catalog. The Angular formatter is hydrated from GameBootstrap instead of maintaining its own label and percentage lists, and equipment rows build their tooltip descriptions, caps, and primary-source notes from the same definitions. In particular, Summon Power and Summon Health are explicitly percentage points, while Status Resistance and Crowd Control Resistance are ratings.
 
 Display precision follows the unit: flat points, ratings, and HP/5s render as rounded integers; percentage-point attributes retain up to two decimal places. Health Regeneration is canonically measured and displayed as `HP/5s`, matching the five-second runtime interval.
+
+### Recently completed: Health Regeneration comparison coverage
+
+Equal-budget Health Regeneration checks now compare it against Max Health in normal physical pressure and long sustain, Armor in physical pressure, Resistance in magical pressure, Damage Reduction in mixed pressure and long sustain, Healing Power in healing sustain, and Life Steal in long sustain. All comparisons run at tiers 1, 5, and 10 and are release gates under the existing 20-percentage-point generalist tolerance.
+
+The equal-budget records retain averaged combat outputs for the baseline and both investments. Regression tests therefore require an actual Health Regeneration investment to restore more HP than the baseline; a finite or non-negative utility value alone is no longer sufficient. Focused combat tests also enforce no pulse before five seconds, exact five-second cadence and magnitude, telemetry aggregation, no overheal, no healing at full health, and no effect from zero or negative values.
+
+The active tier-10 marginal results are:
+
+| Scenario | Equal-budget comparison | Health Regeneration gain | Peer gain |
+| --- | --- | ---: | ---: |
+| Physical pressure | Health Regeneration vs Max Health | `7.58%` | `9.03%` |
+| Physical pressure | Health Regeneration vs Armor | `7.58%` | `9.03%` |
+| Magical pressure | Health Regeneration vs Resistance | `7.58%` | `9.03%` |
+| Mixed pressure | Health Regeneration vs Damage Reduction | `4.89%` | `1.21%` |
+| Long sustain | Health Regeneration vs Max Health | `21.49%` | `12.15%` |
+| Long sustain | Health Regeneration vs Damage Reduction | `21.49%` | `4.10%` |
+| Healing sustain | Health Regeneration vs Healing Power | `8.34%` | `3.12%` |
+| Long sustain | Health Regeneration vs Life Steal | `21.49%` | `3.06%` |
+
+This demonstrates the intended duration tradeoff: direct Health, Armor, and Resistance are slightly stronger during normal focused pressure, while Health Regeneration becomes substantially stronger during attrition. Damage Reduction, Healing Power, and Life Steal remain more conditional in these particular reference kits. Tier-1 percentage and healing peers can produce zero marginal score at the small test budget because integer combat rounding consumes their sub-point changes; the raw output fields make that granularity visible instead of misclassifying Health Regeneration as universally superior.
 
 The maximum-progression analyzer runs all 1,248 real tier-10 recipe/blueprint loadouts at the upper equipment envelope: maximum craft variance, Masterwork quality, Legacy rarity's static-base boost, and six rarity-upgrade improvement budgets per item. It records cap saturation grouped by attribute, unspendable generated/rarity budget grouped by recipe and applied blueprint, and the full real crafting combat-peer matrix.
 

@@ -123,7 +123,10 @@ public sealed record EqualBudgetAttributeComparison(
     double FirstRelativeGainPercent,
     double SecondRelativeGainPercent,
     double DifferencePercentagePoints,
-    bool Passed);
+    bool Passed,
+    EquipmentLoadoutOutput BaselineOutput,
+    EquipmentLoadoutOutput FirstOutput,
+    EquipmentLoadoutOutput SecondOutput);
 
 public sealed record EquipmentLoadoutMeasurement(
     string Id,

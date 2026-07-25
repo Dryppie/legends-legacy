@@ -339,6 +339,79 @@ public sealed class AbilitySystemTests
         Assert.Equal([49, 99], highSpiritRegeneration.Select(x => x.Timestamp));
         Assert.All(lowSpiritRegeneration, x => Assert.Equal(3, x.Magnitude));
         Assert.All(highSpiritRegeneration, x => Assert.Equal(3, x.Magnitude));
+        Assert.Equal(
+            6,
+            result.EntityStats.Single(x => x.EntityId == lowSpirit.Id).HealthRegenerated);
+        Assert.Equal(
+            6,
+            result.EntityStats.Single(x => x.EntityId == highSpirit.Id).HealthRegenerated);
+    }
+
+    [Fact]
+    public void Engine_does_not_regenerate_health_before_five_seconds()
+    {
+        var friendly = CreateCombatant("friendly", CombatTeam.Friendly, []);
+        var hostile = CreateCombatant("hostile", CombatTeam.Hostile, []);
+        friendly.Attributes[AttributeType.HealthRegeneration] = 3;
+        friendly.AdjustHealth(-20);
+        var engine = new FastCombatEngine(
+            new Dictionary<string, CompiledStatus>(),
+            new FastCombatEngineOptions(MaxTicks: 49, BasicAttackIntervalTicks: 1_000));
+
+        var result = engine.Run([friendly], [hostile]);
+
+        Assert.Equal(180, friendly.Health);
+        Assert.DoesNotContain(
+            result.EventLog,
+            x => x.EventType == EventType.HealthRegeneration && x.TargetId == friendly.Id);
+        Assert.Equal(
+            0,
+            result.EntityStats.SingleOrDefault(x => x.EntityId == friendly.Id)?.HealthRegenerated ?? 0);
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(-3)]
+    public void Engine_ignores_non_positive_health_regeneration(int regeneration)
+    {
+        var friendly = CreateCombatant("friendly", CombatTeam.Friendly, []);
+        var hostile = CreateCombatant("hostile", CombatTeam.Hostile, []);
+        friendly.Attributes[AttributeType.HealthRegeneration] = regeneration;
+        friendly.AdjustHealth(-1);
+        var engine = new FastCombatEngine(
+            new Dictionary<string, CompiledStatus>(),
+            new FastCombatEngineOptions(MaxTicks: 50, BasicAttackIntervalTicks: 1_000));
+
+        var result = engine.Run([friendly], [hostile]);
+
+        Assert.Equal(199, friendly.Health);
+        Assert.DoesNotContain(
+            result.EventLog,
+            x => x.EventType == EventType.HealthRegeneration && x.TargetId == friendly.Id);
+        Assert.Equal(
+            0,
+            result.EntityStats.SingleOrDefault(x => x.EntityId == friendly.Id)?.HealthRegenerated ?? 0);
+    }
+
+    [Fact]
+    public void Engine_does_not_regenerate_health_at_full_health()
+    {
+        var friendly = CreateCombatant("friendly", CombatTeam.Friendly, []);
+        var hostile = CreateCombatant("hostile", CombatTeam.Hostile, []);
+        friendly.Attributes[AttributeType.HealthRegeneration] = 3;
+        var engine = new FastCombatEngine(
+            new Dictionary<string, CompiledStatus>(),
+            new FastCombatEngineOptions(MaxTicks: 50, BasicAttackIntervalTicks: 1_000));
+
+        var result = engine.Run([friendly], [hostile]);
+
+        Assert.Equal(200, friendly.Health);
+        Assert.DoesNotContain(
+            result.EventLog,
+            x => x.EventType == EventType.HealthRegeneration && x.TargetId == friendly.Id);
+        Assert.Equal(
+            0,
+            result.EntityStats.SingleOrDefault(x => x.EntityId == friendly.Id)?.HealthRegenerated ?? 0);
     }
 
     [Fact]
