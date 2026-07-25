@@ -1,9 +1,8 @@
 using Application.Common.Interfaces;
 using Common.Exceptions;
 using Domain.Models.Entities;
-using Domain.Models.Entities.Creatures;
-using Domain.Models.Items.Equipments;
 using Microsoft.EntityFrameworkCore;
+using Persistence.LL.QueryProfiles;
 
 namespace Persistence.LL.Repositories.Entities;
 
@@ -25,14 +24,7 @@ public class EntityRepository : IEntityRepository
     public async Task<List<Entity>> GetEntitiesByIdsForCombatAsync(List<Guid> entityIds, CancellationToken cancellationToken)
     {
         var entities = await _context.Entities
-            .Include(e => e.BaseAttributes)
-            .Include(e => e.EquipmentSlots)
-                .ThenInclude(es => (es.EquipmentInstance.ItemBase as EquipmentBase).AttributeModifiers)
-            .Include(e => e.EquipmentSlots)
-                .ThenInclude(es => es.EquipmentInstance.ToolAffixes)
-            .Include(e => e.EquipmentSlots)
-                .ThenInclude(es => (es.EquipmentInstance.ItemBase as EquipmentBase).ToolBonuses)
-            .Include(e => (e as Creature)!.StatOverrides)
+            .CombatReady()
             .Where(e => entityIds.Contains(e.Id))
             .ToListAsync(cancellationToken);
 
