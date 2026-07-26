@@ -152,8 +152,14 @@ public sealed class DungeonPowerAnalyzer : IDungeonPowerAnalyzer
                 return Failed("The first passing Balanced equipment build has a non-positive Combat Rating.", contentHash);
             var lower = ratings.Min();
             var upper = ratings.Max();
-            var reference = balanced;
-            var recommended = balanced.Rating;
+            var referenceEntry = profileResults
+                .Where(entry => entry.Value.Rating > 0)
+                .OrderByDescending(entry => entry.Value.Rating)
+                .ThenBy(entry => entry.Key)
+                .First();
+            var referenceProfile = referenceEntry.Key;
+            var reference = referenceEntry.Value;
+            var recommended = upper;
             var spread = recommended <= 0 ? 1m : (upper - lower) / (decimal)recommended;
             var confidence = unavailableProfiles.Count > 0
                 ? PowerRatingConfidence.Low
@@ -187,14 +193,18 @@ public sealed class DungeonPowerAnalyzer : IDungeonPowerAnalyzer
                       / FastCombatEngine.TicksPerSecond),
                 completionRates,
                 unavailableProfiles.Count > 0
-                    ? $"Balanced rung {balanced.Rung.Id} passed after " +
-                      $"{balanced.PreviousRung?.Id ?? "the ladder entry"} failed. " +
-                      $"Recommendation excludes profiles that could not reach the target: " +
+                    ? $"Recommended Combat Rating uses the highest available first-passing profile: " +
+                      $"{referenceProfile} rung {reference.Rung.Id}; preceding rung: " +
+                      $"{reference.PreviousRung?.Id ?? "none"}. Recommendation excludes profiles " +
+                      $"that could not reach the target: " +
                       $"{string.Join(", ", unavailableProfiles)}."
                     : confidence == PowerRatingConfidence.Low
-                        ? "Canonical party profiles disagree substantially about this dungeon."
-                        : $"Balanced rung {balanced.Rung.Id} is the first full-seed passing build; " +
-                          $"preceding rung: {balanced.PreviousRung?.Id ?? "none"}.");
+                        ? $"Canonical party profiles disagree substantially about this dungeon. " +
+                          $"Recommended Combat Rating uses the highest first-passing requirement: " +
+                          $"{referenceProfile} rung {reference.Rung.Id}."
+                        : $"Recommended Combat Rating uses the highest first-passing canonical profile: " +
+                          $"{referenceProfile} rung {reference.Rung.Id}; preceding rung: " +
+                          $"{reference.PreviousRung?.Id ?? "none"}.");
             StoreInCache(key, result);
             return result;
         }

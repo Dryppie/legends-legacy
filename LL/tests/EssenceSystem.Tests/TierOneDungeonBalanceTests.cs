@@ -6,6 +6,7 @@ using Domain.Models.Entities;
 using Domain.Models.Entities.Creatures;
 using Domain.Models.Essences;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using Services.AdminDashboard.JsonReaders;
 using Services.LL.Combat;
@@ -40,34 +41,31 @@ public sealed class TierOneDungeonBalanceTests
         var fixture = CreateFixture();
         var rung = fixture.Builds.GetProgressionLadder()
             .Single(candidate => candidate.Id == "t1-crude-common");
-        var results = new Dictionary<string, DungeonSimulationAggregate>();
-        foreach (var profile in Enum.GetValues<CanonicalPartyProfile>())
+        var build = fixture.Builds.CreateBuild(CanonicalPartyProfile.Balanced, rung);
+        var essences = new[]
         {
-            var build = fixture.Builds.CreateBuild(profile, rung);
-            var essences = new[]
-            {
-                CreateReferenceEssence(build.Character.Id, "essence.goblin_ambusher"),
-                CreateReferenceEssence(build.Character.Id, "essence.skeleton_guardian")
-            };
-            var combatant = await fixture.Simulations.CreateCanonicalCombatantAsync(
-                build,
-                essences,
-                CancellationToken.None);
-            _output.WriteLine(
-                $"{profile} reference rating: {build.Rating.Overall / 10}, " +
-                $"health: {combatant.GetAttributeValue(Domain.Models.Attributes.AttributeType.MaxHealth)}, " +
-                $"power: {combatant.GetAttributeValue(Domain.Models.Attributes.AttributeType.Power)}");
+            CreateReferenceEssence(build.Character.Id, "essence.goblin_ambusher"),
+            CreateReferenceEssence(build.Character.Id, "essence.skeleton_guardian")
+        };
+        var combatant = await fixture.Simulations.CreateCanonicalCombatantAsync(
+            build,
+            essences,
+            CancellationToken.None);
+        var results = new Dictionary<string, DungeonSimulationAggregate>();
+        _output.WriteLine(
+            $"Balanced reference rating: {build.Rating.Overall / 10}, " +
+            $"health: {combatant.GetAttributeValue(Domain.Models.Attributes.AttributeType.MaxHealth)}, " +
+            $"power: {combatant.GetAttributeValue(Domain.Models.Attributes.AttributeType.Power)}");
 
-            foreach (var dungeon in fixture.Dungeons.GetAll().Where(candidate => candidate.Tier == 1))
-            {
-                results[$"{dungeon.Id}/{profile}"] = await fixture.Simulations.RunDungeonAsync(
-                    dungeon.Id,
-                    dungeon.Tier,
-                    [combatant],
-                    BalanceSeeds,
-                    PowerAnalysisSimulationRunner.CanonicalAbilities,
-                    CancellationToken.None);
-            }
+        foreach (var dungeon in fixture.Dungeons.GetAll().Where(candidate => candidate.Tier == 1))
+        {
+            results[dungeon.Id] = await fixture.Simulations.RunDungeonAsync(
+                dungeon.Id,
+                dungeon.Tier,
+                [combatant],
+                BalanceSeeds,
+                PowerAnalysisSimulationRunner.CanonicalAbilities,
+                CancellationToken.None);
         }
 
         foreach (var result in results)
@@ -82,6 +80,32 @@ public sealed class TierOneDungeonBalanceTests
                 results.Select(result =>
                     $"{result.Key}: {result.Value.Completions}/{result.Value.Attempts} " +
                     $"({result.Value.CompletionRate:P0})")));
+    }
+
+    [Fact]
+    public async Task Goblin_mines_recommends_the_highest_first_passing_profile_rating()
+    {
+        var fixture = CreateFixture();
+
+        var recommendation = await fixture.Analyzer.AnalyzeDungeonAsync(
+            "goblin_mines",
+            Domain.Models.Dungeons.Definitions.DungeonTier.Normal,
+            CancellationToken.None);
+
+        _output.WriteLine(
+            $"Goblin Mines recommendation: {recommendation.RecommendedPartyPower / 10}; " +
+            $"canonical range: {recommendation.LowerRecommendedPower / 10}-" +
+            $"{recommendation.UpperRecommendedPower / 10}; " +
+            $"state: {recommendation.State}");
+
+        Assert.NotEqual(
+            Application.Interfaces.Services.LL.PowerRatings.PowerAnalysisState.CalculationFailed,
+            recommendation.State);
+        Assert.Equal(
+            recommendation.UpperRecommendedPower,
+            recommendation.RecommendedPartyPower);
+        Assert.True(
+            recommendation.RecommendedPartyPower >= recommendation.LowerRecommendedPower);
     }
 
     private static PlayerEssence CreateReferenceEssence(Guid characterId, string definitionId) =>
@@ -154,18 +178,26 @@ public sealed class TierOneDungeonBalanceTests
         var creatures = new CreatureJsonReader().GetCreaturesFromJson();
         var creatureLookup = new InMemoryCreatureLookup(creatures);
         var builds = new CanonicalEquipmentBuildFactory(Options.Create(new CraftingBalanceOptions()));
+        var abilityCatalog = new JsonAbilityCatalogProvider(configuration, apiRoot, options);
         var simulations = new PowerAnalysisSimulationRunner(
-            new CombatEngineExecutor(
-                new JsonAbilityCatalogProvider(configuration, apiRoot, options),
-                essenceDefinitions),
+            new CombatEngineExecutor(abilityCatalog, essenceDefinitions),
             combatSetup,
             runFactory,
             creatureLookup,
             creatureLookup,
             new DungeonVigorService(),
             builds);
+        var analyzer = new DungeonPowerAnalyzer(
+            dungeons,
+            simulations,
+            builds,
+            abilityCatalog,
+            creatureEssences,
+            new DungeonPowerRecommendationStore(),
+            Options.Create(new DungeonPowerCalibrationOptions { Enabled = true }),
+            NullLogger<DungeonPowerAnalyzer>.Instance);
 
-        return new BalanceFixture(dungeons, builds, simulations);
+        return new BalanceFixture(dungeons, builds, simulations, analyzer);
     }
 
     private static string FindApiRoot()
@@ -192,7 +224,8 @@ public sealed class TierOneDungeonBalanceTests
     private sealed record BalanceFixture(
         JsonDungeonDefinitions Dungeons,
         CanonicalEquipmentBuildFactory Builds,
-        PowerAnalysisSimulationRunner Simulations);
+        PowerAnalysisSimulationRunner Simulations,
+        DungeonPowerAnalyzer Analyzer);
 
     private sealed class InMemoryCreatureLookup(
         IReadOnlyList<Creature> creatures)

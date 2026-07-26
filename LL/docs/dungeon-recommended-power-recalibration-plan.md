@@ -109,12 +109,12 @@ An intensity can therefore pass the search sample and produce a materially diffe
 For each dungeon:
 
 1. Construct an ordered ladder of realistic, attainable canonical builds.
-2. Simulate each Balanced build against deterministic dungeon routes.
-3. Find the first build that reaches the approved completion target.
-4. Verify that the preceding build does not reach the target.
-5. Calculate the passing build's Overall Power using the normal Power benchmark.
-6. Publish that Overall Power as `RecommendedPartyPower`.
-7. Evaluate specialized builds around the same progression region to produce matchup range and confidence.
+2. Simulate every canonical profile against deterministic dungeon routes.
+3. Find each profile's first build that reaches the approved completion target.
+4. Verify that each preceding build does not reach the target.
+5. Calculate the passing builds' Overall Power using the normal Power calculation.
+6. Publish the highest first-passing Overall Power as `RecommendedPartyPower`.
+7. Publish the full passing range and derive confidence from profile spread.
 
 The current `72%` completion target can remain initially, but its statistical interpretation must be made explicit.
 
@@ -262,14 +262,14 @@ A binary search may be used only after the ladder has been proven monotonic. Eve
 
 ### Recommendation semantics
 
-- `RecommendedPartyPower`: Overall Power of the first passing Balanced build.
+- `RecommendedPartyPower`: highest first-passing Overall Power among valid canonical profiles.
 - `LowerRecommendedPower`: lowest positive passing Power among valid specialized profiles.
 - `UpperRecommendedPower`: highest passing Power among valid specialized profiles.
 - `Confidence`: derived from statistical confidence, unavailable profiles, and profile spread.
 - `EstimatedRunDuration`: average duration from the final validation sample.
 - `CanonicalPartyCompletionRates`: final validation rates, not adaptive-search rates.
 
-One specialized profile failing to calibrate should lower confidence and remain visible in diagnostics. It should not automatically erase a valid Balanced recommendation.
+One specialized profile failing to calibrate should lower confidence and remain visible in diagnostics. It should not automatically erase recommendations produced by the remaining valid profiles.
 
 ## Phase 5: statistical calibration
 
@@ -385,11 +385,11 @@ Startup logging should summarize results and provide concise failure diagnostics
 
 ### Dungeon threshold tests
 
-- The selected Balanced rung reaches the target.
-- The preceding Balanced rung does not reach the target.
+- Every selected canonical-profile rung reaches the target.
+- Each selected profile's preceding rung does not reach the target.
 - Final rates use the declared seed set.
 - Final outputs contain positive Power, simulation count, and duration.
-- Specialized profile failures produce Low Confidence rather than destroying the Balanced recommendation.
+- Specialized profile failures produce Low Confidence rather than destroying all other valid recommendations.
 
 ### Family tests
 
@@ -465,9 +465,9 @@ The Dungeon Recommended Power recalibration is complete when:
 - synthetic direct-stat intensity formulas no longer determine dungeon recommendations;
 - the full progression ladder is attainable, deterministic, and cap-safe;
 - entry and maximum builds have valid Power;
-- the first passing Balanced rung defines each recommendation;
-- the preceding rung is proven insufficient;
-- specialized profiles affect range and confidence without invalidating a sound Balanced result;
+- the highest first-passing canonical-profile rung defines each recommendation;
+- every selected profile's preceding rung is proven insufficient;
+- unavailable profiles lower confidence without invalidating the remaining calibrated profiles;
 - all authored dungeons have positive, deterministic recommendations;
 - family diagnostics no longer cascade-delete valid neighbors;
 - all supported dungeons remain within attainable maximum progression;

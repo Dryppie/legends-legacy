@@ -10,7 +10,7 @@ namespace EssenceSystem.Tests;
 public sealed class DungeonEnemyDifficultyScalingTests
 {
     [Theory]
-    [InlineData(1, 1)]
+    [InlineData(1, 3)]
     [InlineData(2, 5)]
     [InlineData(3, 25)]
     public void GetStrengthMultiplier_uses_the_calibrated_tier_curve(
@@ -23,6 +23,7 @@ public sealed class DungeonEnemyDifficultyScalingTests
     }
 
     [Theory]
+    [InlineData(1, 300, 30)]
     [InlineData(2, 500, 50)]
     [InlineData(3, 2500, 250)]
     public void Apply_scales_core_stats_without_scaling_capped_rates(
@@ -58,6 +59,7 @@ public sealed class DungeonEnemyDifficultyScalingTests
         Assert.Equal(
             dungeonTier switch
             {
+                1 => 30,
                 2 => 50,
                 _ => 250
             },

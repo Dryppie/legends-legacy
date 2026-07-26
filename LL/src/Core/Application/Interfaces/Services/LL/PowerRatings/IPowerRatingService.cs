@@ -4,8 +4,8 @@ namespace Application.Interfaces.Services.LL.PowerRatings;
 
 public static class PowerRatingAlgorithm
 {
-    public const int Version = 16;
-    public const int CombatRulesVersion = 6;
+    public const int Version = 17;
+    public const int CombatRulesVersion = 7;
     // Retained under its existing name for persistence compatibility. It now
     // versions the deterministic Combat Rating definition, not a benchmark.
     public const int BenchmarkDefinitionVersion = 10;

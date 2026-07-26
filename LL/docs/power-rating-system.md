@@ -95,10 +95,10 @@ than an invented benchmark:
 
 1. `CanonicalEquipmentBuildFactory` creates the attainable equipment ladder.
 2. Each canonical profile runs the actual dungeon over the fixed route seeds.
-3. The first rung reaching the 72% completion target is selected.
-4. That build's direct attributes are passed to `CombatRatingCalculator`.
-5. The Balanced profile supplies Recommended Combat Rating; specialized
-   profiles supply the diagnostic lower and upper range.
+3. Each profile's first rung reaching the 72% completion target is selected.
+4. Those builds' direct attributes are passed to `CombatRatingCalculator`.
+5. The highest first-passing profile rating supplies Recommended Combat Rating;
+   all valid profiles supply the diagnostic lower and upper range.
 
 The character number and dungeon recommendation therefore use the exact same
 weights and scale.
@@ -120,7 +120,9 @@ identity, tier, content hash, algorithm version, combat-rules version, rating
 definition version, recommendation seed version, and equipment balance version
 match.
 
-`PowerRatingAlgorithm.Version` is 15 for active Essence attribute inclusion.
+`PowerRatingAlgorithm.Version` is 17 for conservative canonical-profile
+recommendations, and `CombatRulesVersion` is 7 for the restored 3× Tier-I
+dungeon enemy scaling.
 The legacy-named `BenchmarkDefinitionVersion` column now stores
 the deterministic rating-definition version and is 10. Existing recommendations
 are stale and will be recalibrated.
@@ -187,4 +189,4 @@ Apply the existing `PersistDungeonPowerRecommendations` and
 `AddDungeonPowerEquipmentBalanceVersion` EF Core migrations before deploying if
 they have not already been applied. The application does not apply migrations
 automatically. Restarting the API with calibration enabled recalculates stale
-version-13 recommendations on the new scale.
+recommendations on the current scale.
