@@ -11,6 +11,7 @@ using Domain.Models.Dungeons;
 using Domain.Models.Dungeons.Definitions;
 using Domain.Models.Dungeons.Definitions.Encounters;
 using Domain.Models.Dungeons.Definitions.Rooms;
+using Domain.Models.Professions.Crafting.V2;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Services.LL.Combat.Engine;
@@ -21,12 +22,11 @@ public sealed class DungeonPowerAnalyzer : IDungeonPowerAnalyzer
 {
     private const int MaximumCacheEntries = 512;
     public const decimal TargetCompletionRate = 0.72m;
-    private static readonly int[] SearchSeeds = CreateSeeds(8, 40151);
     private static readonly int[] RecommendationSeeds = CreateSeeds(24, 90107);
 
     private readonly IDungeonDefinitions _dungeons;
     private readonly PowerAnalysisSimulationRunner _simulations;
-    private readonly PowerRatingService _powerRatings;
+    private readonly CanonicalEquipmentBuildFactory _canonicalBuilds;
     private readonly IAbilityCatalogProvider _abilities;
     private readonly ICreatureEssenceLootTableRepository _creatureEssences;
     private readonly IDungeonPowerRecommendationStore _recommendationStore;
@@ -37,7 +37,7 @@ public sealed class DungeonPowerAnalyzer : IDungeonPowerAnalyzer
     public DungeonPowerAnalyzer(
         IDungeonDefinitions dungeons,
         PowerAnalysisSimulationRunner simulations,
-        PowerRatingService powerRatings,
+        CanonicalEquipmentBuildFactory canonicalBuilds,
         IAbilityCatalogProvider abilities,
         ICreatureEssenceLootTableRepository creatureEssences,
         IDungeonPowerRecommendationStore recommendationStore,
@@ -46,7 +46,7 @@ public sealed class DungeonPowerAnalyzer : IDungeonPowerAnalyzer
     {
         _dungeons = dungeons;
         _simulations = simulations;
-        _powerRatings = powerRatings;
+        _canonicalBuilds = canonicalBuilds;
         _abilities = abilities;
         _creatureEssences = creatureEssences;
         _recommendationStore = recommendationStore;
@@ -64,7 +64,8 @@ public sealed class DungeonPowerAnalyzer : IDungeonPowerAnalyzer
             PowerRatingAlgorithm.Version,
             PowerRatingAlgorithm.CombatRulesVersion,
             PowerRatingAlgorithm.BenchmarkDefinitionVersion,
-            PowerRatingAlgorithm.RecommendationSeedSetVersion);
+            PowerRatingAlgorithm.RecommendationSeedSetVersion,
+            EquipmentStatBudgetCatalog.BalanceVersion);
     }
 
     public async Task<DungeonPowerRecommendation> AnalyzeDungeonAsync(
@@ -79,7 +80,7 @@ public sealed class DungeonPowerAnalyzer : IDungeonPowerAnalyzer
         }
         catch (Exception exception)
         {
-            _logger.LogWarning(exception, "Power recommendation requested for unknown dungeon {DungeonId}.", dungeonId);
+            _logger.LogWarning(exception, "Combat Rating recommendation requested for unknown dungeon {DungeonId}.", dungeonId);
             return Failed("The dungeon definition was not found.");
         }
 
@@ -94,12 +95,10 @@ public sealed class DungeonPowerAnalyzer : IDungeonPowerAnalyzer
             PowerRatingAlgorithm.Version,
             PowerRatingAlgorithm.CombatRulesVersion,
             PowerRatingAlgorithm.BenchmarkDefinitionVersion,
-            PowerRatingAlgorithm.RecommendationSeedSetVersion);
+            PowerRatingAlgorithm.RecommendationSeedSetVersion,
+            EquipmentStatBudgetCatalog.BalanceVersion);
         if (Cache.TryGetValue(key, out var cached))
-        {
-            _recommendationStore.Set(dungeon.Id, cached);
             return cached;
-        }
 
 
         if (_recommendationStore.TryGet(dungeon.Id, out var stored) &&
@@ -111,7 +110,7 @@ public sealed class DungeonPowerAnalyzer : IDungeonPowerAnalyzer
         }
 
         if (!_calibrationOptions.Enabled)
-            return Failed("Dungeon Power calibration is disabled by configuration.", contentHash);
+            return Failed("Dungeon Combat Rating calibration is disabled by configuration.", contentHash);
 
         try
         {
@@ -121,23 +120,11 @@ public sealed class DungeonPowerAnalyzer : IDungeonPowerAnalyzer
             {
                 try
                 {
-                    var intensity = await FindMinimumCanonicalIntensityAsync(
+                    var profileResult = await FindMinimumCanonicalBuildAsync(
                         dungeon,
                         profile,
                         cancellationToken);
-                    var combatant = await _simulations.CreateCanonicalCombatantAsync(
-                        profile,
-                        intensity,
-                        cancellationToken);
-                    var validation = await _simulations.RunDungeonAsync(
-                        dungeon.Id,
-                        dungeon.Tier,
-                        [combatant],
-                        RecommendationSeeds,
-                        PowerAnalysisSimulationRunner.CanonicalAbilities,
-                        cancellationToken);
-                    var rating = await _powerRatings.GetOverallDisplayPowerAsync([combatant], cancellationToken);
-                    profileResults[profile] = new ProfileResult(intensity, rating, validation);
+                    profileResults[profile] = profileResult;
                 }
                 catch (OperationCanceledException)
                 {
@@ -154,16 +141,19 @@ public sealed class DungeonPowerAnalyzer : IDungeonPowerAnalyzer
                 }
             }
 
-            if (profileResults.Count == 0)
-                return Failed("No canonical party profile could calibrate this dungeon.", contentHash);
+            if (!profileResults.TryGetValue(CanonicalPartyProfile.Balanced, out var balanced))
+                return Failed("The Balanced canonical equipment profile could not calibrate this dungeon.", contentHash);
 
-            var ratings = profileResults.Values.Select(x => x.Rating).ToArray();
+            var ratings = profileResults.Values
+                .Where(result => result.Rating > 0)
+                .Select(result => result.Rating)
+                .ToArray();
+            if (balanced.Rating <= 0 || ratings.Length == 0)
+                return Failed("The first passing Balanced equipment build has a non-positive Combat Rating.", contentHash);
             var lower = ratings.Min();
             var upper = ratings.Max();
-            var reference = profileResults.TryGetValue(CanonicalPartyProfile.Balanced, out var balanced)
-                ? balanced
-                : profileResults.Values.OrderBy(result => result.Rating).ElementAt(profileResults.Count / 2);
-            var recommended = reference.Rating;
+            var reference = balanced;
+            var recommended = balanced.Rating;
             var spread = recommended <= 0 ? 1m : (upper - lower) / (decimal)recommended;
             var confidence = unavailableProfiles.Count > 0
                 ? PowerRatingConfidence.Low
@@ -197,12 +187,15 @@ public sealed class DungeonPowerAnalyzer : IDungeonPowerAnalyzer
                       / FastCombatEngine.TicksPerSecond),
                 completionRates,
                 unavailableProfiles.Count > 0
-                    ? $"Recommendation excludes profiles that could not reach the target: {string.Join(", ", unavailableProfiles)}."
+                    ? $"Balanced rung {balanced.Rung.Id} passed after " +
+                      $"{balanced.PreviousRung?.Id ?? "the ladder entry"} failed. " +
+                      $"Recommendation excludes profiles that could not reach the target: " +
+                      $"{string.Join(", ", unavailableProfiles)}."
                     : confidence == PowerRatingConfidence.Low
                         ? "Canonical party profiles disagree substantially about this dungeon."
-                        : null);
+                        : $"Balanced rung {balanced.Rung.Id} is the first full-seed passing build; " +
+                          $"preceding rung: {balanced.PreviousRung?.Id ?? "none"}.");
             StoreInCache(key, result);
-            _recommendationStore.Set(dungeon.Id, result);
             return result;
         }
         catch (OperationCanceledException)
@@ -211,56 +204,43 @@ public sealed class DungeonPowerAnalyzer : IDungeonPowerAnalyzer
         }
         catch (Exception exception)
         {
-            _logger.LogError(exception, "Dungeon power analysis failed for {DungeonId}.", dungeon.Id);
-            return Failed("Dungeon power analysis could not be completed.", contentHash);
+            _logger.LogError(exception, "Dungeon Combat Rating analysis failed for {DungeonId}.", dungeon.Id);
+            return Failed("Dungeon Combat Rating analysis could not be completed.", contentHash);
         }
     }
 
-    private async Task<int> FindMinimumCanonicalIntensityAsync(
+    private async Task<ProfileResult> FindMinimumCanonicalBuildAsync(
         DungeonDefinition dungeon,
         CanonicalPartyProfile profile,
         CancellationToken cancellationToken)
     {
-        var lower = 0;
-        var upper = 1;
-        while (upper < PowerAnalysisSimulationRunner.MaximumBenchmarkIntensity &&
-               !await CanonicalPartyMeetsTargetAsync(dungeon, profile, upper, cancellationToken))
+        CanonicalEquipmentProgressionRung? preceding = null;
+        foreach (var rung in _canonicalBuilds.GetProgressionLadder())
         {
-            lower = upper;
-            upper = Math.Min(PowerAnalysisSimulationRunner.MaximumBenchmarkIntensity, upper * 2);
+            cancellationToken.ThrowIfCancellationRequested();
+            var build = _canonicalBuilds.CreateBuild(profile, rung);
+            var combatant = await _simulations.CreateCanonicalCombatantAsync(
+                build,
+                cancellationToken);
+            var validation = await _simulations.RunDungeonAsync(
+                dungeon.Id,
+                dungeon.Tier,
+                [combatant],
+                RecommendationSeeds,
+                PowerAnalysisSimulationRunner.CanonicalAbilities,
+                cancellationToken);
+            if (validation.CompletionRate < TargetCompletionRate)
+            {
+                preceding = rung;
+                continue;
+            }
+
+            var rating = build.Rating.Overall;
+            return new ProfileResult(rung, preceding, rating, validation);
         }
 
-        if (upper == PowerAnalysisSimulationRunner.MaximumBenchmarkIntensity &&
-            !await CanonicalPartyMeetsTargetAsync(dungeon, profile, upper, cancellationToken))
-            throw new InvalidOperationException($"No canonical {profile} party could clear {dungeon.Id}.");
-
-        while (lower + 1 < upper)
-        {
-            var middle = lower + (upper - lower) / 2;
-            if (await CanonicalPartyMeetsTargetAsync(dungeon, profile, middle, cancellationToken))
-                upper = middle;
-            else
-                lower = middle;
-        }
-
-        return upper;
-    }
-
-    private async Task<bool> CanonicalPartyMeetsTargetAsync(
-        DungeonDefinition dungeon,
-        CanonicalPartyProfile profile,
-        int intensity,
-        CancellationToken cancellationToken)
-    {
-        var combatant = await _simulations.CreateCanonicalCombatantAsync(profile, intensity, cancellationToken);
-        var result = await _simulations.RunDungeonAsync(
-            dungeon.Id,
-            dungeon.Tier,
-            [combatant],
-            SearchSeeds,
-            PowerAnalysisSimulationRunner.CanonicalAbilities,
-            cancellationToken);
-        return result.CompletionRate >= TargetCompletionRate;
+        throw new InvalidOperationException(
+            $"No attainable canonical {profile} equipment build could clear {dungeon.Id}.");
     }
 
     private PowerRequirementProfile BuildRequirementProfile(DungeonDefinition dungeon)
@@ -363,7 +343,8 @@ public sealed class DungeonPowerAnalyzer : IDungeonPowerAnalyzer
         message);
 
     private sealed record ProfileResult(
-        int Intensity,
+        CanonicalEquipmentProgressionRung Rung,
+        CanonicalEquipmentProgressionRung? PreviousRung,
         int Rating,
         DungeonSimulationAggregate Validation);
 }

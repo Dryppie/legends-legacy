@@ -12,6 +12,7 @@ using Domain.Models.Dungeons.Runs;
 using Domain.Models.Entities;
 using Domain.Models.Entities.Characters;
 using Domain.Models.Entities.Creatures;
+using Domain.Models.Essences;
 using Domain.Models.Regions.Areas;
 using Services.LL.Combat.Layers.Orchestration.Models;
 using Services.LL.Combat.Layers.Resolution.Dungeon;
@@ -47,7 +48,25 @@ public sealed record DungeonSimulationAggregate(
     int CheckpointsReached,
     int TotalCombatTicks,
     decimal CompletionRate,
-    decimal CheckpointRate);
+    decimal CheckpointRate)
+{
+    public (decimal Lower, decimal Upper) CompletionInterval =>
+        WilsonInterval(Completions, Attempts);
+
+    private static (decimal Lower, decimal Upper) WilsonInterval(int successes, int attempts)
+    {
+        if (attempts <= 0)
+            return (0m, 1m);
+
+        const double z = 1.959963984540054d;
+        var n = (double)attempts;
+        var p = Math.Clamp(successes / n, 0d, 1d);
+        var denominator = 1d + z * z / n;
+        var center = (p + z * z / (2d * n)) / denominator;
+        var margin = z * Math.Sqrt((p * (1d - p) + z * z / (4d * n)) / n) / denominator;
+        return ((decimal)Math.Max(0d, center - margin), (decimal)Math.Min(1d, center + margin));
+    }
+}
 
 public sealed class PowerAnalysisSimulationRunner
 {
@@ -71,6 +90,7 @@ public sealed class PowerAnalysisSimulationRunner
     private readonly Application.Interfaces.Services.AdminDashboard.ICreatureService _creatures;
     private readonly IEntityService _entities;
     private readonly IDungeonVigorService _vigor;
+    private readonly CanonicalEquipmentBuildFactory? _canonicalBuilds;
     private readonly Dictionary<string, Creature> _dungeonCreatureSources =
         new(StringComparer.OrdinalIgnoreCase);
     private readonly Dictionary<int, Dictionary<string, CombatEntity>> _dungeonEnemyTemplatesByTier = [];
@@ -81,7 +101,8 @@ public sealed class PowerAnalysisSimulationRunner
         DungeonRunFactory runFactory,
         Application.Interfaces.Services.AdminDashboard.ICreatureService creatures,
         IEntityService entities,
-        IDungeonVigorService vigor)
+        IDungeonVigorService vigor,
+        CanonicalEquipmentBuildFactory? canonicalBuilds = null)
     {
         _combatEngine = combatEngine;
         _combatSetup = combatSetup;
@@ -89,6 +110,7 @@ public sealed class PowerAnalysisSimulationRunner
         _creatures = creatures;
         _entities = entities;
         _vigor = vigor;
+        _canonicalBuilds = canonicalBuilds;
     }
 
     public async Task<bool> MeetsBenchmarkAsync(
@@ -105,7 +127,7 @@ public sealed class PowerAnalysisSimulationRunner
             hostiles,
             seed,
             maxTicks,
-            BenchmarkAbilities,
+            PowerBenchmarkAbilities,
             cancellationToken,
             basicAttackIntervalTicks: scenario is PowerBenchmarkScenario.PhysicalDurability or
                 PowerBenchmarkScenario.MagicalDurability
@@ -155,7 +177,7 @@ public sealed class PowerAnalysisSimulationRunner
             enemies,
             seed,
             maxTicks,
-            BenchmarkAbilities,
+            PowerBenchmarkAbilities,
             cancellationToken);
 
         var withoutAbilities = party.Select(x => x.DeepCloneForEncounter()).ToList();
@@ -171,7 +193,7 @@ public sealed class PowerAnalysisSimulationRunner
             enemies,
             seed,
             maxTicks,
-            BenchmarkAbilities,
+            PowerBenchmarkAbilities,
             cancellationToken);
 
         var baselineActions = CountHostileActions(baseline);
@@ -187,46 +209,40 @@ public sealed class PowerAnalysisSimulationRunner
         int intensity,
         CancellationToken cancellationToken)
     {
-        intensity = Math.Clamp(intensity, 1, MaximumBenchmarkIntensity);
-        var healthMultiplier = profile switch
-        {
-            CanonicalPartyProfile.Sustain => 1.3f,
-            CanonicalPartyProfile.Defensive => 1.4f,
-            _ => 1f
-        };
-        var offenseMultiplier = profile switch
-        {
-            CanonicalPartyProfile.Offense => 1.3f,
-            CanonicalPartyProfile.Area => 1.15f,
-            _ => 1f
-        };
-        var defenseMultiplier = profile switch
-        {
-            CanonicalPartyProfile.Sustain => 1.25f,
-            CanonicalPartyProfile.Defensive => 1.4f,
-            _ => 1f
-        };
-        var source = CreateEntity(
-            $"Canonical {profile} Party",
-            new Dictionary<AttributeType, float>
-            {
-                [AttributeType.MaxHealth] = (100 + intensity * 18) * healthMultiplier,
-                [AttributeType.Power] = (10 + intensity * 3) * offenseMultiplier,
-                [AttributeType.Fortitude] = intensity * defenseMultiplier,
-                [AttributeType.Spirit] = profile == CanonicalPartyProfile.Sustain ? intensity * 2 : intensity,
-                [AttributeType.Armor] = intensity * 1.5f * defenseMultiplier,
-                [AttributeType.Resistance] = intensity * 1.5f * defenseMultiplier,
-                [AttributeType.Precision] = intensity,
-                [AttributeType.CritChance] = Math.Min(35, 5 + intensity / 20f),
-                [AttributeType.CritDamage] = 50,
-                [AttributeType.AttackSpeed] = Math.Min(150, intensity / 10f),
-                [AttributeType.HealthRegeneration] = profile == CanonicalPartyProfile.Sustain
-                    ? Math.Max(1, intensity / 8f)
-                    : 0
-            });
-        var combatant = new CombatEntity(source)
+        if (_canonicalBuilds is null)
+            throw new InvalidOperationException("Canonical equipment builds are not configured.");
+        var ladder = _canonicalBuilds.GetProgressionLadder();
+        var rung = ladder[Math.Clamp(intensity, 0, ladder.Count - 1)];
+        return await CreateCanonicalCombatantAsync(profile, rung, cancellationToken);
+    }
+
+    public async Task<CombatEntity> CreateCanonicalCombatantAsync(
+        CanonicalPartyProfile profile,
+        CanonicalEquipmentProgressionRung rung,
+        CancellationToken cancellationToken)
+    {
+        if (_canonicalBuilds is null)
+            throw new InvalidOperationException("Canonical equipment builds are not configured.");
+        var build = _canonicalBuilds.CreateBuild(profile, rung);
+        return await CreateCanonicalCombatantAsync(build, cancellationToken);
+    }
+
+    public async Task<CombatEntity> CreateCanonicalCombatantAsync(
+        CanonicalEquipmentBuild build,
+        CancellationToken cancellationToken)
+        => await CreateCanonicalCombatantAsync(build, [], cancellationToken);
+
+    public async Task<CombatEntity> CreateCanonicalCombatantAsync(
+        CanonicalEquipmentBuild build,
+        IReadOnlyList<PlayerEssence> equippedEssences,
+        CancellationToken cancellationToken)
+    {
+        var profile = build.Profile;
+        var rung = build.Rung;
+        var combatant = new CombatEntity(build.Character)
         {
             HasEquippedEssenceSnapshot = true,
+            EquippedEssences = [.. equippedEssences],
             NativeAbilityIds = profile switch
             {
                 CanonicalPartyProfile.Offense => [CanonicalStrikeAbilityId, CanonicalAreaAbilityId],
@@ -236,6 +252,19 @@ public sealed class PowerAnalysisSimulationRunner
                 _ => [CanonicalStrikeAbilityId, CanonicalHealAbilityId]
             }
         };
+        if (build.MainHandRecipeId is not null)
+        {
+            combatant.MainHandEquipment = new Domain.Models.Items.Equipments.EquipmentInstance
+            {
+                Id = Guid.Empty,
+                ItemBaseId = $"canonical-{profile.ToString().ToLowerInvariant()}-weapon",
+                BaseRecipeId = build.MainHandRecipeId,
+                Tier = rung.Tier,
+                Quality = rung.Quality,
+                Rarity = rung.Rarity
+            };
+            combatant.Equipment.Add(combatant.MainHandEquipment);
+        }
         await _combatSetup.PrepareEntitiesForCombat([combatant]);
         return combatant;
     }
@@ -611,6 +640,12 @@ public sealed class PowerAnalysisSimulationRunner
             0.8f,
             DurabilityPressureCooldownTicks)
     ];
+
+    // Canonical combatants are rated through the same benchmark path as player builds.
+    // Their isolated ability ids therefore have to be available to the benchmark compiler;
+    // merely attaching the ids to the combatant is not enough.
+    private static IReadOnlyList<AbilitySpec> PowerBenchmarkAbilities { get; } =
+        [.. BenchmarkAbilities, .. CanonicalAbilities];
 
     private static AbilitySpec CreateDamageAbility(
         string id,

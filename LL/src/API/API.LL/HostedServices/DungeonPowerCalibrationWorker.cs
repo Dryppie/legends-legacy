@@ -31,6 +31,8 @@ public sealed class DungeonPowerCalibrationWorker(
         try
         {
             var pendingUpserts = new List<PersistedDungeonPowerRecommendation>();
+            var staged = new Dictionary<string, DungeonPowerRecommendation>(
+                StringComparer.OrdinalIgnoreCase);
             var persisted = (await recommendationRepository.GetAllAsync(stoppingToken))
                 .GroupBy(entry => entry.Identity.DungeonId, StringComparer.OrdinalIgnoreCase)
                 .ToDictionary(
@@ -52,7 +54,7 @@ public sealed class DungeonPowerCalibrationWorker(
                     saved.Recommendation.State is PowerAnalysisState.Available or PowerAnalysisState.LowConfidence &&
                     DungeonPowerRecommendationDiagnostics.ValidateRecommendation(saved.Recommendation).Count == 0)
                 {
-                    recommendationStore.Set(dungeon.Id, saved.Recommendation);
+                    staged[dungeon.Id] = saved.Recommendation;
                     loaded++;
                 }
                 else
@@ -62,14 +64,14 @@ public sealed class DungeonPowerCalibrationWorker(
             }
 
             logger.LogInformation(
-                "Loaded {LoadedCount} current dungeon Power recommendations from the database; {MissingCount} require calibration.",
+                "Loaded {LoadedCount} current dungeon Combat Rating recommendations from the database; {MissingCount} require calibration.",
                 loaded,
                 missing.Count);
 
             if (!options.Value.Enabled)
             {
                 logger.LogInformation(
-                    "Dungeon Power calculation is disabled by configuration; skipping {MissingCount} missing or stale recommendations.",
+                    "Dungeon Combat Rating calculation is disabled by configuration; skipping {MissingCount} missing or stale recommendations.",
                     missing.Count);
             }
             else
@@ -78,7 +80,7 @@ public sealed class DungeonPowerCalibrationWorker(
                 {
                     try
                     {
-                        logger.LogInformation("Calibrating Power recommendation for dungeon {DungeonId}.", dungeon.Id);
+                        logger.LogInformation("Calibrating Combat Rating recommendation for dungeon {DungeonId}.", dungeon.Id);
                         var recommendation = await analyzer.AnalyzeDungeonAsync(
                             dungeon.Id,
                             dungeon.Tier.ToDungeonTier(),
@@ -88,13 +90,13 @@ public sealed class DungeonPowerCalibrationWorker(
                         if (recommendation.State is PowerAnalysisState.Available or PowerAnalysisState.LowConfidence &&
                             recommendationIssues.Count == 0)
                         {
-                            recommendationStore.Set(dungeon.Id, recommendation);
+                            staged[dungeon.Id] = recommendation;
                             pendingUpserts.Add(new PersistedDungeonPowerRecommendation(
                                 identity,
                                 recommendation,
                                 DateTimeOffset.UtcNow));
                             logger.LogInformation(
-                                "Calculated dungeon {DungeonId} at recommended Power {RecommendedPower} ({Confidence}).",
+                                "Calculated dungeon {DungeonId} at recommended Combat Rating {RecommendedPower} ({Confidence}).",
                                 dungeon.Id,
                                 recommendation.RecommendedPartyPower,
                                 recommendation.Confidence);
@@ -102,7 +104,7 @@ public sealed class DungeonPowerCalibrationWorker(
                         else
                         {
                             logger.LogWarning(
-                                "Power calibration for dungeon {DungeonId} returned {State}: {Message}. Diagnostics: {Diagnostics}",
+                                "Combat Rating calibration for dungeon {DungeonId} returned {State}: {Message}. Diagnostics: {Diagnostics}",
                                 dungeon.Id,
                                 recommendation.State,
                                 recommendation.StatusMessage,
@@ -115,14 +117,14 @@ public sealed class DungeonPowerCalibrationWorker(
                     }
                     catch (Exception exception)
                     {
-                        logger.LogError(exception, "Power calibration failed for dungeon {DungeonId}.", dungeon.Id);
+                        logger.LogError(exception, "Combat Rating calibration failed for dungeon {DungeonId}.", dungeon.Id);
                     }
                 }
             }
 
             var diagnostics = DungeonPowerRecommendationDiagnostics.Analyze(
                 dungeons,
-                recommendationStore.GetAll());
+                staged);
             var invalidDungeonIds = diagnostics.Issues
                 .SelectMany(issue => issue.DungeonIds)
                 .ToHashSet(StringComparer.OrdinalIgnoreCase);
@@ -130,15 +132,21 @@ public sealed class DungeonPowerCalibrationWorker(
             foreach (var issue in diagnostics.Issues)
             {
                 logger.LogError(
-                    "Dungeon Power recommendation diagnostics rejected {DungeonIds}: {Message}",
+                    "Dungeon Combat Rating recommendation diagnostics rejected {DungeonIds}: {Message}",
                     string.Join(", ", issue.DungeonIds),
                     issue.Message);
             }
 
-            foreach (var dungeonId in invalidDungeonIds)
+            foreach (var warning in diagnostics.Warnings)
             {
-                recommendationStore.Remove(dungeonId);
+                logger.LogWarning(
+                    "Dungeon Combat Rating family diagnostic for {DungeonIds}: {Message}",
+                    string.Join(", ", warning.DungeonIds),
+                    warning.Message);
             }
+
+            foreach (var dungeonId in invalidDungeonIds)
+                staged.Remove(dungeonId);
 
             foreach (var recommendation in pendingUpserts.Where(entry =>
                          !invalidDungeonIds.Contains(entry.Identity.DungeonId)))
@@ -147,6 +155,7 @@ public sealed class DungeonPowerCalibrationWorker(
                 calibrated++;
             }
 
+            recommendationStore.Publish(staged);
             var missingAfterValidation = dungeons
                 .Where(dungeon => !recommendationStore.TryGet(dungeon.Id, out _))
                 .Select(dungeon => dungeon.Id)
@@ -154,7 +163,7 @@ public sealed class DungeonPowerCalibrationWorker(
             if (missingAfterValidation.Length > 0)
             {
                 logger.LogWarning(
-                    "Power recommendations are unavailable for {MissingCount} dungeons after calibration: {DungeonIds}.",
+                    "Combat Rating recommendations are unavailable for {MissingCount} dungeons after calibration: {DungeonIds}.",
                     missingAfterValidation.Length,
                     string.Join(", ", missingAfterValidation));
             }
@@ -165,7 +174,7 @@ public sealed class DungeonPowerCalibrationWorker(
         }
         catch (Exception exception)
         {
-            logger.LogError(exception, "Dungeon Power recommendation startup failed.");
+            logger.LogError(exception, "Dungeon Combat Rating recommendation startup failed.");
         }
         finally
         {
@@ -173,7 +182,7 @@ public sealed class DungeonPowerCalibrationWorker(
         }
 
         logger.LogInformation(
-            "Dungeon Power startup completed: {LoadedCount} loaded and {CalibratedCount} calibrated for {DungeonCount} dungeons.",
+            "Dungeon Combat Rating startup completed: {LoadedCount} loaded and {CalibratedCount} calibrated for {DungeonCount} dungeons.",
             loaded,
             calibrated,
             dungeons.Length);

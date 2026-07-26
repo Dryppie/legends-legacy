@@ -34,7 +34,7 @@ public sealed class DungeonRouteService : IDungeonRouteService
                 .Cast<RoomInstance>()
                 .ToList();
 
-            if (targetRooms.Count <= 1)
+            if (targetRooms.Count == 0)
             {
                 return [];
             }
@@ -47,18 +47,25 @@ public sealed class DungeonRouteService : IDungeonRouteService
                 .Select(room =>
                 {
                     var node = run.State.MapNodes.First(candidate => candidate.RoomIndex == room.RoomIndex);
-                    var scaledVigorCostMin = Math.Max(
-                        0,
-                        DungeonVigorService.ScaleCombatToll(node.VigorCostMin) - vigorReduction);
-                    var scaledVigorCostMax = Math.Max(
-                        0,
-                        DungeonVigorService.ScaleCombatToll(node.VigorCostMax) - vigorReduction);
-                    var vigorCostMin = widenForecast
-                        ? Math.Max(0, scaledVigorCostMin - 2)
-                        : scaledVigorCostMin;
-                    var vigorCostMax = widenForecast
-                        ? Math.Min(35, scaledVigorCostMax + 2)
-                        : scaledVigorCostMax;
+                    var isBoss = room.Type == RoomType.Boss;
+                    var scaledVigorCostMin = isBoss
+                        ? 0
+                        : Math.Max(
+                            0,
+                            DungeonVigorService.ScaleCombatToll(node.VigorCostMin) - vigorReduction);
+                    var scaledVigorCostMax = isBoss
+                        ? 0
+                        : Math.Max(
+                            0,
+                            DungeonVigorService.ScaleCombatToll(node.VigorCostMax) - vigorReduction);
+                    var vigorCostMin = scaledVigorCostMin;
+                    var vigorCostMax = scaledVigorCostMax;
+                    if (!isBoss && widenForecast)
+                    {
+                        vigorCostMin = Math.Max(0, scaledVigorCostMin - 2);
+                        vigorCostMax = Math.Min(35, scaledVigorCostMax + 2);
+                    }
+
                     return new DungeonRouteOption
                     {
                         Id = $"route:{room.RoomIndex}:{node.Id}",

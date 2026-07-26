@@ -18,6 +18,7 @@ public static class DungeonPowerRecommendationDiagnostics
             .Order(StringComparer.OrdinalIgnoreCase)
             .ToList();
         var issues = new List<DungeonPowerRecommendationIssue>();
+        var warnings = new List<DungeonPowerRecommendationIssue>();
 
         foreach (var dungeon in dungeons)
         {
@@ -53,7 +54,7 @@ public static class DungeonPowerRecommendationDiagnostics
 
                 if (currentRecommendation.RecommendedPartyPower <= previousRecommendation.RecommendedPartyPower)
                 {
-                    issues.Add(new DungeonPowerRecommendationIssue(
+                    warnings.Add(new DungeonPowerRecommendationIssue(
                         [previous.Id, current.Id],
                         $"Recommended Power must increase with difficulty, but '{current.Id}' is " +
                         $"{currentRecommendation.RecommendedPartyPower} after " +
@@ -64,7 +65,7 @@ public static class DungeonPowerRecommendationDiagnostics
                 if (currentRecommendation.RecommendedPartyPower >
                     previousRecommendation.RecommendedPartyPower * MaximumAdjacentDifficultyMultiplier)
                 {
-                    issues.Add(new DungeonPowerRecommendationIssue(
+                    warnings.Add(new DungeonPowerRecommendationIssue(
                         [previous.Id, current.Id],
                         $"Recommended Power for '{current.Id}' is more than " +
                         $"{MaximumAdjacentDifficultyMultiplier:0.#}x the previous difficulty and is an outlier."));
@@ -72,7 +73,7 @@ public static class DungeonPowerRecommendationDiagnostics
             }
         }
 
-        return new DungeonPowerRecommendationDiagnosticReport(missingDungeonIds, issues);
+        return new DungeonPowerRecommendationDiagnosticReport(missingDungeonIds, issues, warnings);
     }
 
     public static IReadOnlyList<string> ValidateRecommendation(
@@ -113,9 +114,10 @@ public static class DungeonPowerRecommendationDiagnostics
 
 public sealed record DungeonPowerRecommendationDiagnosticReport(
     IReadOnlyList<string> MissingDungeonIds,
-    IReadOnlyList<DungeonPowerRecommendationIssue> Issues)
+    IReadOnlyList<DungeonPowerRecommendationIssue> Issues,
+    IReadOnlyList<DungeonPowerRecommendationIssue> Warnings)
 {
-    public bool IsValid => Issues.Count == 0;
+    public bool IsValid => MissingDungeonIds.Count == 0 && Issues.Count == 0;
 }
 
 public sealed record DungeonPowerRecommendationIssue(

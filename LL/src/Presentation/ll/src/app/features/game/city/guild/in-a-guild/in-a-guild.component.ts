@@ -14,21 +14,20 @@ import { HumanizeEnumPipe } from '../../../../../shared/pipes/enums/humanize-enu
 import { NumberFormatPipe } from '../../../../../shared/pipes/number-format/number-format.pipe';
 
 @Component({
-    selector: 'app-in-a-guild',
-    imports: [
-        NgFor,
-        NgIf,
-        TabComponent,
-        GuildInfoComponent,
-        TabsComponent,
-        GuildBuildingsComponent,
-        GuildMissionsComponent,
-        GuildShopComponent,
-        GuildRankingsComponent,
-        HumanizeEnumPipe,
-        NumberFormatPipe,
-    ],
-    templateUrl: './in-a-guild.component.html'
+  selector: 'app-in-a-guild',
+  imports: [
+    NgFor,
+    TabComponent,
+    GuildInfoComponent,
+    TabsComponent,
+    GuildBuildingsComponent,
+    GuildMissionsComponent,
+    GuildShopComponent,
+    GuildRankingsComponent,
+    HumanizeEnumPipe,
+    NumberFormatPipe,
+  ],
+  templateUrl: './in-a-guild.component.html',
 })
 export class InAGuildComponent {
   @Input() guild!: Guild;

@@ -30,6 +30,7 @@ import { EquipmentType } from '../../../models/enums/equipmentType';
 import { BaseItemComponent } from '../../base-item/base-item.component';
 import { ConnectedPosition, OverlayModule } from '@angular/cdk/overlay';
 import { CharacterStateService } from '../../../../core/services/api/character/character-state.service';
+import { toDisplayedCombatRating } from '../../../models/combat-rating-display';
 
 interface RewardGroup {
   title: string;
@@ -66,6 +67,8 @@ type DungeonDetailTab = 'rewards' | 'gathering' | 'mastery';
     templateUrl: './dungeon-card.component.html'
 })
 export class DungeonCardComponent implements OnChanges {
+  readonly displayCombatRating = toDisplayedCombatRating;
+
   @Input({ required: true }) previewData!: DungeonPreviewData;
 
   @Input() height = 176;

@@ -1,5 +1,6 @@
 using Application.Interfaces.Services.LL.Dungeons;
 using Domain.Models.Combat;
+using Domain.Models.Dungeons.Definitions.Rooms;
 using Domain.Models.Dungeons.Runs;
 using Domain.Models.Dungeons.Mastery;
 
@@ -13,6 +14,11 @@ public sealed class DungeonVigorService : IDungeonVigorService
     public int ApplyCombatToll(DungeonRun run, RoomInstance room, CombatResult result)
     {
         ArgumentNullException.ThrowIfNull(result);
+
+        if (room.Type == RoomType.Boss)
+        {
+            return 0;
+        }
 
         var maxHealth = Math.Max(1, result.PlayerTeam.Sum(entity => Math.Max(0, entity.MaxHealth)));
         var remainingHealth = result.PlayerTeam.Sum(entity =>

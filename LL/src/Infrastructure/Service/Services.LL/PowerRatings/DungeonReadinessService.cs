@@ -209,33 +209,11 @@ public sealed class DungeonReadinessService : IDungeonReadinessService
     private static (IReadOnlyList<ReadinessInsight> Strengths, IReadOnlyList<ReadinessInsight> Weaknesses)
         CreateInsights(PowerRatingSnapshot power, DungeonPowerRecommendation recommendation)
     {
-        var required = recommendation.Requirements;
-        var baseline = Math.Max(1, recommendation.RecommendedPartyPower);
-        var comparisons = new[]
-        {
-            new Comparison("single-target", "Strong single-target damage for the boss.", "Single-target damage may be low for the boss.", power.SingleTargetOffense, required.SingleTarget),
-            new Comparison("area", "Strong area damage for multi-enemy rooms.", "Area damage may be limited for multi-enemy rooms.", power.MultiTargetOffense, required.AreaDamage),
-            new Comparison("physical", "Good physical durability for this dungeon.", "Physical durability may be too low for this dungeon.", power.PhysicalDurability, required.PhysicalDurability),
-            new Comparison("magical", "Good magical durability for this dungeon.", "Magical durability may be too low for this dungeon.", power.MagicalDurability, required.MagicalDurability),
-            new Comparison("sustain", "Strong sustain for the expected attrition.", "Sustain may be insufficient for the expected dungeon attrition.", power.Sustain, Math.Max(required.Sustain, required.Attrition)),
-            new Comparison("control", "Control and utility should reduce enemy pressure.", "The party has limited control utility for this route.", power.ControlUtility, required.Control)
-        };
-
-        var strengths = comparisons
-            .Select(x => new { Item = x, Ratio = x.Rating / (decimal)baseline })
-            .Where(x => x.Item.Requirement >= 0.25m && x.Ratio >= 0.95m + x.Item.Requirement * 0.10m)
-            .OrderByDescending(x => x.Ratio * x.Item.Requirement)
-            .Take(2)
-            .Select(x => new ReadinessInsight(x.Item.Code, x.Item.Strength, Math.Min(1, x.Ratio)))
-            .ToList();
-        var weaknesses = comparisons
-            .Select(x => new { Item = x, Ratio = x.Rating / (decimal)baseline })
-            .Where(x => x.Item.Requirement >= 0.25m && x.Ratio < 0.70m + x.Item.Requirement * 0.15m)
-            .OrderByDescending(x => (1 - x.Ratio) * x.Item.Requirement)
-            .Take(2)
-            .Select(x => new ReadinessInsight(x.Item.Code, x.Item.Weakness, Math.Min(1, 1 - x.Ratio)))
-            .ToList();
-        return (strengths, weaknesses);
+        // Attribute-only component totals cannot distinguish area shape, control,
+        // or conditional Essence utility. Readiness probability still comes from
+        // the real dungeon simulation; qualitative insights return with Essence
+        // and ability valuation.
+        return ([], []);
     }
 
     private static DungeonReadinessResult Unavailable(
@@ -257,10 +235,4 @@ public sealed class DungeonReadinessService : IDungeonReadinessService
         state,
         message);
 
-    private sealed record Comparison(
-        string Code,
-        string Strength,
-        string Weakness,
-        int Rating,
-        decimal Requirement);
 }

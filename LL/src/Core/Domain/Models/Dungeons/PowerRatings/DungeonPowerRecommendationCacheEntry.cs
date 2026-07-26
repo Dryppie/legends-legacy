@@ -9,6 +9,7 @@ public sealed class DungeonPowerRecommendationCacheEntry
     public int CombatRulesVersion { get; set; }
     public int BenchmarkDefinitionVersion { get; set; }
     public int RecommendationSeedSetVersion { get; set; }
+    public int EquipmentBalanceVersion { get; set; }
     public string RecommendationJson { get; set; } = null!;
     public DateTimeOffset UpdatedAtUtc { get; set; }
 }

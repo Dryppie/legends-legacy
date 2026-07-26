@@ -27,7 +27,7 @@ public sealed class DungeonPowerRecommendationDiagnosticsTests
     }
 
     [Fact]
-    public void Diagnostics_reject_non_monotonic_and_obvious_outlier_recommendations()
+    public void Family_progression_anomalies_are_non_destructive_warnings()
     {
         var dungeons = new[]
         {
@@ -45,10 +45,11 @@ public sealed class DungeonPowerRecommendationDiagnosticsTests
 
         var report = DungeonPowerRecommendationDiagnostics.Analyze(dungeons, recommendations);
 
-        Assert.False(report.IsValid);
-        Assert.Contains(report.Issues, issue =>
+        Assert.True(report.IsValid);
+        Assert.Empty(report.Issues);
+        Assert.Contains(report.Warnings, issue =>
             issue.Message.Contains("increase with difficulty", StringComparison.OrdinalIgnoreCase));
-        Assert.Contains(report.Issues, issue =>
+        Assert.Contains(report.Warnings, issue =>
             issue.Message.Contains("outlier", StringComparison.OrdinalIgnoreCase));
     }
 

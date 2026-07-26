@@ -30,7 +30,7 @@
 
         <div class="mt-4 flex items-center justify-end gap-2">
           <span class="ll-stat-label text-[10px] text-zinc-300/80">
-            Recommended Rating
+            Recommended Combat Rating
           </span>
           <span
             *ngIf="
@@ -39,7 +39,7 @@
             "
             class="font-serif text-2xl font-semibold text-primary"
           >
-            {{ recommended | number }}
+            {{ displayCombatRating(recommended) | number: '1.0-0' }}
           </span>
           <ng-template #previewRecommendationPending>
             <span class="text-xs text-zinc-400">
@@ -504,7 +504,10 @@
                 *ngIf="selectedPartyPower() !== null; else partyPowerUnavailable"
               >
                 <div class="mt-1 font-serif text-xl tabular-nums text-primary">
-                  {{ selectedPartyPower() | number }}
+                  {{
+                    displayCombatRating(selectedPartyPower()!)
+                      | number: '1.0-0'
+                  }}
                 </div>
               </ng-container>
               <ng-template #partyPowerUnavailable>
@@ -513,7 +516,7 @@
             </div>
 
             <div>
-              <div class="ll-stat-label">Recommended Rating</div>
+              <div class="ll-stat-label">Recommended Combat Rating</div>
               <ng-container
                 *ngIf="
                   selectedRecommendedPartyPower() as recommended;
@@ -521,7 +524,9 @@
                 "
               >
                 <div class="mt-1 font-serif text-xl tabular-nums text-white">
-                  {{ recommended | number }}
+                  {{
+                    displayCombatRating(recommended) | number: '1.0-0'
+                  }}
                 </div>
               </ng-container>
               <ng-template #recommendationPending>

@@ -39,7 +39,8 @@ public sealed class DungeonPowerRecommendationRepository(
                         entry.AlgorithmVersion,
                         entry.CombatRulesVersion,
                         entry.BenchmarkDefinitionVersion,
-                        entry.RecommendationSeedSetVersion),
+                        entry.RecommendationSeedSetVersion,
+                        entry.EquipmentBalanceVersion),
                     recommendation,
                     entry.UpdatedAtUtc));
             }
@@ -74,6 +75,7 @@ public sealed class DungeonPowerRecommendationRepository(
         entry.CombatRulesVersion = identity.CombatRulesVersion;
         entry.BenchmarkDefinitionVersion = identity.BenchmarkDefinitionVersion;
         entry.RecommendationSeedSetVersion = identity.RecommendationSeedSetVersion;
+        entry.EquipmentBalanceVersion = identity.EquipmentBalanceVersion;
         entry.RecommendationJson = JsonSerializer.Serialize(persisted.Recommendation, JsonOptions);
         entry.UpdatedAtUtc = persisted.UpdatedAtUtc;
 

@@ -234,6 +234,7 @@ public static class DependencyInjection
         services.AddScoped<IEssenceAbilityProvider, EssenceSystemService>();
         services.AddScoped<IEssenceCombatLoadoutResolver, EssenceSystemService>();
         services.AddScoped<PowerBuildSnapshotFactory>();
+        services.AddScoped<CanonicalEquipmentBuildFactory>();
         services.AddScoped<PowerAnalysisSimulationRunner>();
         services.AddScoped<PowerRatingService>();
         services.AddScoped<IPowerRatingService>(sp => sp.GetRequiredService<PowerRatingService>());

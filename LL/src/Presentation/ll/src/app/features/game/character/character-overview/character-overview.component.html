@@ -84,7 +84,10 @@
                       else powerUnavailable
                     "
                   >
-                    {{ characterOverview.power?.overall | number }}
+                    {{
+                      displayCombatRating(characterOverview.power!.overall)
+                        | number: "1.0-0"
+                    }}
                   </ng-container>
                   <ng-template #powerUnavailable>Unavailable</ng-template>
                 </div>

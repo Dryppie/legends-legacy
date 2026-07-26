@@ -1,13 +1,13 @@
-using System.Collections.Concurrent;
 using Application.Interfaces.Services.LL.PowerRatings;
+using System.Collections.Immutable;
 
 namespace Services.LL.PowerRatings;
 
 public sealed class DungeonPowerRecommendationStore : IDungeonPowerRecommendationStore
 {
     private int _isCalibrationComplete;
-    private readonly ConcurrentDictionary<string, DungeonPowerRecommendation> _recommendations =
-        new(StringComparer.OrdinalIgnoreCase);
+    private ImmutableDictionary<string, DungeonPowerRecommendation> _recommendations =
+        ImmutableDictionary.Create<string, DungeonPowerRecommendation>(StringComparer.OrdinalIgnoreCase);
 
     public bool IsCalibrationComplete => Volatile.Read(ref _isCalibrationComplete) == 1;
 
@@ -15,19 +15,32 @@ public sealed class DungeonPowerRecommendationStore : IDungeonPowerRecommendatio
         _recommendations.TryGetValue(dungeonId, out recommendation!);
 
     public IReadOnlyDictionary<string, DungeonPowerRecommendation> GetAll() =>
-        new Dictionary<string, DungeonPowerRecommendation>(
-            _recommendations,
-            StringComparer.OrdinalIgnoreCase);
+        Volatile.Read(ref _recommendations);
 
     public void MarkCalibrationComplete() =>
         Interlocked.Exchange(ref _isCalibrationComplete, 1);
 
+    public void Publish(IReadOnlyDictionary<string, DungeonPowerRecommendation> recommendations)
+    {
+        var accepted = recommendations
+            .Where(entry => entry.Value.State is PowerAnalysisState.Available or PowerAnalysisState.LowConfidence)
+            .ToImmutableDictionary(
+                entry => entry.Key,
+                entry => entry.Value,
+                StringComparer.OrdinalIgnoreCase);
+        Interlocked.Exchange(ref _recommendations, accepted);
+    }
+
     public bool Remove(string dungeonId) =>
-        _recommendations.TryRemove(dungeonId, out _);
+        ImmutableInterlocked.TryRemove(ref _recommendations, dungeonId, out _);
 
     public void Set(string dungeonId, DungeonPowerRecommendation recommendation)
     {
         if (recommendation.State is PowerAnalysisState.Available or PowerAnalysisState.LowConfidence)
-            _recommendations[dungeonId] = recommendation;
+            ImmutableInterlocked.AddOrUpdate(
+                ref _recommendations,
+                dungeonId,
+                recommendation,
+                (_, _) => recommendation);
     }
 }

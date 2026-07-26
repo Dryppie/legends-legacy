@@ -4,9 +4,11 @@ namespace Application.Interfaces.Services.LL.PowerRatings;
 
 public static class PowerRatingAlgorithm
 {
-    public const int Version = 13;
-    public const int CombatRulesVersion = 4;
-    public const int BenchmarkDefinitionVersion = 6;
+    public const int Version = 16;
+    public const int CombatRulesVersion = 6;
+    // Retained under its existing name for persistence compatibility. It now
+    // versions the deterministic Combat Rating definition, not a benchmark.
+    public const int BenchmarkDefinitionVersion = 10;
     public const int RatingSeedSetVersion = 1;
     public const int DungeonSeedSetVersion = 2;
     public const int RecommendationSeedSetVersion = 2;
@@ -110,7 +112,8 @@ public sealed record DungeonPowerCalibrationIdentity(
     int AlgorithmVersion,
     int CombatRulesVersion,
     int BenchmarkDefinitionVersion,
-    int RecommendationSeedSetVersion);
+    int RecommendationSeedSetVersion,
+    int EquipmentBalanceVersion);
 
 public sealed record PersistedDungeonPowerRecommendation(
     DungeonPowerCalibrationIdentity Identity,
@@ -133,6 +136,7 @@ public interface IDungeonPowerRecommendationStore
     bool TryGet(string dungeonId, out DungeonPowerRecommendation recommendation);
     IReadOnlyDictionary<string, DungeonPowerRecommendation> GetAll();
     void MarkCalibrationComplete();
+    void Publish(IReadOnlyDictionary<string, DungeonPowerRecommendation> recommendations);
     bool Remove(string dungeonId);
     void Set(string dungeonId, DungeonPowerRecommendation recommendation);
 }

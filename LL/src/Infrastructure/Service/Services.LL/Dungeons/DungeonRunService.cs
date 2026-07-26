@@ -500,6 +500,14 @@ public sealed class DungeonRunService : IDungeonRunService
             run.State.ExpiresAt = run.CreatedAt.AddHours(48);
         }
         _vigor.RefreshState(run);
+        var currentRoom = run.Rooms.FirstOrDefault(room =>
+            room.RoomIndex == run.CurrentRoomIndex);
+        if (run.Status == DungeonRunStatus.Active &&
+            currentRoom?.Status == RoomInstanceStatus.Completed &&
+            run.State.CurrentRouteOptions.Count == 0)
+        {
+            _routes.GenerateRouteOptions(run);
+        }
     }
 
     private DungeonRouteOption ChooseRoute(DungeonRun run, string routeOptionId)

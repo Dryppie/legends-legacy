@@ -12,6 +12,7 @@ import { AttributeType } from '../../../../shared/models/enums/attributeType';
 import { AttributeTypeFormatPipe } from '../../../../shared/pipes/attributes/attribute-type-format/attribute-type-format.pipe';
 import { AttributeValueFormatPipe } from '../../../../shared/pipes/attributes/attribute-value-format/attribute-value-format.pipe';
 import { ActivatedRoute, Router } from '@angular/router';
+import { toDisplayedCombatRating } from '../../../../shared/models/combat-rating-display';
 
 @Component({
     selector: 'app-character-overview',
@@ -29,6 +30,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 })
 export class CharacterOverviewComponent {
   readonly AttributeType = AttributeType;
+  readonly displayCombatRating = toDisplayedCombatRating;
   searchValue = signal('');
   private readonly searchedCharacter = signal<CharacterOverviewDto | null>(
     null,

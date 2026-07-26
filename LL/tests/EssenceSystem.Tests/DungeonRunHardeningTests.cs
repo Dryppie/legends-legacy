@@ -118,6 +118,71 @@ public sealed class DungeonRunHardeningTests
         Assert.Equal(0U, run.RowVersion);
     }
 
+    [Fact]
+    public async Task Loading_a_run_repairs_a_missing_single_route_without_advancing_the_player()
+    {
+        var run = CreateCompletedRun();
+        run.Status = DungeonRunStatus.Active;
+        run.CompletedAt = null;
+        run.CurrentRoomIndex = 0;
+        run.Rooms =
+        [
+            new RoomInstance
+            {
+                RoomIndex = 0,
+                Type = Domain.Models.Dungeons.Definitions.Rooms.RoomType.Entrance,
+                Status = RoomInstanceStatus.Completed
+            },
+            new RoomInstance
+            {
+                RoomIndex = 1,
+                Type = Domain.Models.Dungeons.Definitions.Rooms.RoomType.Combat,
+                Status = RoomInstanceStatus.Pending
+            }
+        ];
+        run.State.MapNodes =
+        [
+            new DungeonMapNode
+            {
+                Id = "entrance",
+                RoomIndex = 0,
+                NextRoomIndexes = [1]
+            },
+            new DungeonMapNode
+            {
+                Id = "first-combat",
+                DisplayName = "First Combat",
+                RoomIndex = 1,
+                Depth = 1,
+                VigorCostMin = 10,
+                VigorCostMax = 18
+            }
+        ];
+        var service = new DungeonRunService(
+            new FixedDungeonRunRepository(run),
+            null!,
+            null!,
+            null!,
+            null!,
+            null!,
+            null!,
+            null!,
+            null!,
+            new DungeonVigorService(),
+            new DungeonRouteService(),
+            null!,
+            null!);
+
+        var loaded = await service.GetDungeonRunAsync(
+            run.CharacterId,
+            CancellationToken.None);
+
+        Assert.NotNull(loaded);
+        var route = Assert.Single(loaded.State.CurrentRouteOptions);
+        Assert.Equal(1, route.RoomIndex);
+        Assert.Equal(0, loaded.CurrentRoomIndex);
+    }
+
     private static LLDbContext CreateDbContext(string databaseName)
     {
         var options = new DbContextOptionsBuilder<LLDbContext>()

@@ -1322,6 +1322,9 @@ namespace Persistence.LL.Migrations
                     b.Property<int>("DungeonTier")
                         .HasColumnType("integer");
 
+                    b.Property<int>("EquipmentBalanceVersion")
+                        .HasColumnType("integer");
+
                     b.Property<string>("RecommendationJson")
                         .IsRequired()
                         .HasColumnType("jsonb");

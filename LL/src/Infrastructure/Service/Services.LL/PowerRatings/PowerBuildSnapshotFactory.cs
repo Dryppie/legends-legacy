@@ -1,7 +1,9 @@
 using System.Globalization;
 using System.Security.Cryptography;
 using System.Text;
+using Application.Interfaces.Services.LL.Essences;
 using Application.Interfaces.Services.LL.PowerRatings;
+using Domain.Models.Attributes;
 using Domain.Models.Combat;
 using Domain.Models.Entities.Characters;
 using Services.LL.Interfaces;
@@ -10,19 +12,23 @@ namespace Services.LL.PowerRatings;
 
 public sealed record PowerBuildSnapshot(
     string Fingerprint,
-    IReadOnlyList<CombatEntity> Combatants);
+    IReadOnlyList<CombatEntity> Combatants,
+    CombatRatingBreakdown Rating);
 
 public sealed class PowerBuildSnapshotFactory
 {
     private readonly ICharacterRepository _characters;
     private readonly ICombatSetupService _combatSetup;
+    private readonly IEssenceCombatLoadoutResolver _essenceLoadouts;
 
     public PowerBuildSnapshotFactory(
         ICharacterRepository characters,
-        ICombatSetupService combatSetup)
+        ICombatSetupService combatSetup,
+        IEssenceCombatLoadoutResolver essenceLoadouts)
     {
         _characters = characters;
         _combatSetup = combatSetup;
+        _essenceLoadouts = essenceLoadouts;
     }
 
     public async Task<PowerBuildSnapshot?> CreateAsync(
@@ -47,6 +53,29 @@ public sealed class PowerBuildSnapshotFactory
             .Cast<Domain.Models.Essences.PlayerEssence>()
             .ToList() ?? [];
 
+        var equipment = character.EquipmentSlots
+            .Where(slot => slot.EquipmentInstance is not null)
+            .Select(slot => slot.EquipmentInstance!)
+            .DistinctBy(equipment => equipment.Id)
+            .ToList();
+        var essenceAttributeSources = equippedEssences
+            .DistinctBy(essence => essence.Id)
+            .Select(essence =>
+            {
+                var loadout = _essenceLoadouts.Resolve(character.Id, [essence]);
+                return new CombatRatingModifierSource(
+                    Math.Clamp(
+                        essence.PotentialTier,
+                        Domain.Models.Professions.Crafting.V2.EquipmentStatBudgetCatalog.MinimumTier,
+                        Domain.Models.Professions.Crafting.V2.EquipmentStatBudgetCatalog.MaximumTier),
+                    loadout.AttributeModifiers);
+            })
+            .ToList();
+        var rating = CombatRatingCalculator.Calculate(
+            character.BaseAttributes,
+            equipment,
+            essenceAttributeSources);
+
         var combatant = new CombatEntity(character)
         {
             EquippedEssences = equippedEssences,
@@ -54,7 +83,10 @@ public sealed class PowerBuildSnapshotFactory
         };
         await _combatSetup.PrepareEntitiesForCombat([combatant]);
 
-        return new PowerBuildSnapshot(CreateFingerprint(character), [combatant]);
+        return new PowerBuildSnapshot(
+            CreateFingerprint(character),
+            [combatant],
+            rating);
     }
 
     public static string CreateFingerprint(Character character)

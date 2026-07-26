@@ -2,12 +2,14 @@ using Application.Interfaces.Services.LL.PowerRatings;
 using Application.Interfaces.Services.LL.Essences;
 using Domain.Components.Attributes;
 using Domain.Models.Attributes;
+using Domain.Models.Attributes.Modifiers;
 using Domain.Models.Combat;
 using Domain.Models.Combat.Abilities;
 using Domain.Models.Damages;
 using Domain.Models.Dungeons.Definitions;
 using Domain.Models.Entities;
 using Domain.Models.Entities.Characters;
+using Domain.Models.Items.Equipments;
 using Services.LL.Combat.Layers.Resolution.Models;
 using Services.LL.Combat.Engine;
 using Services.LL.Interfaces.Combat.Resolution;
@@ -17,6 +19,130 @@ namespace EssenceSystem.Tests;
 
 public sealed class PowerRatingCoreTests
 {
+    [Fact]
+    public void AttributeCombatRating_UsesReferenceWeightsWithoutPrimaryDoubleCounting()
+    {
+        var baseAttributes = new[]
+        {
+            new EntityAttribute { AttributeType = AttributeType.Fortitude, Value = 10 },
+            new EntityAttribute { AttributeType = AttributeType.MaxHealth, Value = 100 }
+        };
+
+        var direct = CombatRatingCalculator.ProjectDirectAttributes(baseAttributes, []);
+        var rating = CombatRatingCalculator.CalculateCanonical(
+            direct,
+            new Dictionary<AttributeType, double>(),
+            1);
+
+        Assert.Equal(33, rating.Overall);
+    }
+
+    [Fact]
+    public void AttributeCombatRating_EquipmentIncreaseIsImmediateAndNotQuantizedToTens()
+    {
+        var baseline = CombatRatingCalculator.CalculateCanonical(
+            new Dictionary<AttributeType, float> { [AttributeType.Power] = 10 },
+            new Dictionary<AttributeType, double>(),
+            1);
+        var upgraded = CombatRatingCalculator.CalculateCanonical(
+            new Dictionary<AttributeType, float> { [AttributeType.Power] = 13 },
+            new Dictionary<AttributeType, double>(),
+            1);
+
+        Assert.Equal(3, upgraded.Overall - baseline.Overall);
+    }
+
+    [Fact]
+    public void AttributeCombatRating_UsesItemTierWeightsAndDeduplicatesTwoHandedInstances()
+    {
+        var item = new EquipmentInstance
+        {
+            Id = Guid.NewGuid(),
+            Tier = 5,
+            InstanceModifiers =
+            [
+                new InstanceAttributeModifier(AttributeType.Armor, 10)
+            ]
+        };
+
+        var once = CombatRatingCalculator.Calculate([], [item]);
+        var duplicatedSlotReference = CombatRatingCalculator.Calculate([], [item, item]);
+
+        Assert.Equal(10, once.Overall);
+        Assert.Equal(once.Overall, duplicatedSlotReference.Overall);
+    }
+
+    [Fact]
+    public void AttributeCombatRating_AddsActiveEssenceAttributesAtPotentialTier()
+    {
+        var withoutEssence = CombatRatingCalculator.Calculate([], []);
+        var withEssence = CombatRatingCalculator.Calculate(
+            [],
+            [],
+            [
+                new CombatRatingModifierSource(
+                    5,
+                    [new EssenceAttributeModifier(AttributeType.Armor, 10)])
+            ]);
+
+        Assert.Equal(10, withEssence.Overall - withoutEssence.Overall);
+        Assert.Equal(10, withEssence.PhysicalDurability);
+        Assert.Equal(0, withEssence.MagicalDurability);
+        Assert.Equal(0, withEssence.ControlUtility);
+    }
+
+    [Fact]
+    public void AttributeCombatRating_DoesNotValueEssenceAttributesBeyondCombinedCap()
+    {
+        var baseAttributes = new[]
+        {
+            new EntityAttribute { AttributeType = AttributeType.DodgeChance, Value = 45 }
+        };
+        var rating = CombatRatingCalculator.Calculate(
+            baseAttributes,
+            [],
+            [
+                new CombatRatingModifierSource(
+                    1,
+                    [new EssenceAttributeModifier(AttributeType.DodgeChance, 10)])
+            ]);
+
+        Assert.Equal(250, rating.Overall);
+    }
+
+    [Fact]
+    public void AttributeCombatRating_ClampsFixedCapOverflow()
+    {
+        var capped = CombatRatingCalculator.CalculateCanonical(
+            new Dictionary<AttributeType, float> { [AttributeType.DodgeChance] = 50 },
+            new Dictionary<AttributeType, double>(),
+            1);
+        var overflow = CombatRatingCalculator.CalculateCanonical(
+            new Dictionary<AttributeType, float> { [AttributeType.DodgeChance] = 500 },
+            new Dictionary<AttributeType, double>(),
+            1);
+
+        Assert.Equal(capped.Overall, overflow.Overall);
+    }
+
+    [Fact]
+    public void CanonicalRatingAttributes_RemoveDerivedPrimaryContributions()
+    {
+        var projected = new Dictionary<AttributeType, float>
+        {
+            [AttributeType.Fortitude] = 10,
+            [AttributeType.MaxHealth] = 140,
+            [AttributeType.Armor] = 5,
+            [AttributeType.Resistance] = 5
+        };
+
+        var direct = CombatRatingCalculator.RemovePrimaryContributions(projected);
+
+        Assert.Equal(100, direct[AttributeType.MaxHealth]);
+        Assert.Equal(0, direct[AttributeType.Armor]);
+        Assert.Equal(0, direct[AttributeType.Resistance]);
+    }
+
     [Fact]
     public void Build_fingerprint_tracks_combat_inputs_but_ignores_currency()
     {
@@ -75,6 +201,9 @@ public sealed class PowerRatingCoreTests
     {
         Assert.True(PowerRatingAlgorithm.Version > 0);
         Assert.True(PowerRatingAlgorithm.BenchmarkDefinitionVersion > 0);
+        Assert.Equal(
+            PowerRatingAlgorithm.BenchmarkDefinitionVersion,
+            CombatRatingCalculator.DefinitionVersion);
         Assert.True(PowerRatingAlgorithm.RatingSeedSetVersion > 0);
         Assert.True(PowerRatingAlgorithm.DungeonSeedSetVersion > 0);
     }
@@ -172,6 +301,36 @@ public sealed class PowerRatingCoreTests
             lowerPressure.Single(lower => lower.Slot.SlotId == hostile.Slot.SlotId)
                 .Combatant.GetAttributeValue(AttributeType.Power)));
         Assert.Single(higherPressure, hostile => hostile.Combatant.NativeAbilityIds.Count > 0);
+    }
+
+    [Fact]
+    public async Task Overall_benchmark_compiles_canonical_abilities_when_rating_canonical_builds()
+    {
+        var executor = new CapturingCombatExecutor();
+        var runner = new PowerAnalysisSimulationRunner(
+            executor,
+            null!,
+            null!,
+            null!,
+            null!,
+            null!);
+        var canonicalAbilityId = PowerAnalysisSimulationRunner.CanonicalAbilities[0].Id;
+        var combatant = new CombatEntity(CreateCharacter())
+        {
+            HasEquippedEssenceSnapshot = true,
+            NativeAbilityIds = [canonicalAbilityId]
+        };
+
+        await runner.MeetsBenchmarkAsync(
+            [combatant],
+            PowerBenchmarkScenario.Overall,
+            3,
+            17,
+            CancellationToken.None);
+
+        Assert.Contains(
+            executor.Captures[0].Options.SupplementalAbilities!,
+            ability => ability.Id == canonicalAbilityId);
     }
 
     [Theory]

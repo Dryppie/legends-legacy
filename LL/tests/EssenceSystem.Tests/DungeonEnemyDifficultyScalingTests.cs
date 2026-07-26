@@ -13,7 +13,7 @@ public sealed class DungeonEnemyDifficultyScalingTests
     [InlineData(1, 1)]
     [InlineData(2, 5)]
     [InlineData(3, 25)]
-    public void GetStrengthMultiplier_scales_each_tier_from_the_previous(
+    public void GetStrengthMultiplier_uses_the_calibrated_tier_curve(
         int dungeonTier,
         float expectedMultiplier)
     {
@@ -55,7 +55,13 @@ public sealed class DungeonEnemyDifficultyScalingTests
 
         Assert.Equal(expectedMaxHealth, enemy.GetAttributeValue(AttributeType.MaxHealth));
         Assert.Equal(expectedPower, enemy.GetAttributeValue(AttributeType.Power));
-        Assert.Equal(dungeonTier == 2 ? 50 : 250, enemy.GetAttributeValue(AttributeType.Spirit));
+        Assert.Equal(
+            dungeonTier switch
+            {
+                2 => 50,
+                _ => 250
+            },
+            enemy.GetAttributeValue(AttributeType.Spirit));
         Assert.Equal(5, enemy.GetAttributeValue(AttributeType.CritChance));
     }
 }

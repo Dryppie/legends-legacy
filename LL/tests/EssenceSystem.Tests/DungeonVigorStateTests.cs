@@ -99,6 +99,38 @@ public sealed class DungeonVigorStateTests
     }
 
     [Fact]
+    public void Single_available_room_is_exposed_as_a_player_route_choice()
+    {
+        var run = CreateBranchingRun();
+        run.Rooms.RemoveAll(room => room.RoomIndex == 2);
+        run.State.MapNodes.RemoveAll(node => node.RoomIndex == 2);
+        run.State.MapNodes[0].NextRoomIndexes = [1];
+
+        var route = Assert.Single(new DungeonRouteService().GenerateRouteOptions(run));
+
+        Assert.Equal(1, route.RoomIndex);
+        Assert.Equal(0, run.CurrentRoomIndex);
+        Assert.Equal(RoomInstanceStatus.Completed, run.Rooms[0].Status);
+    }
+
+    [Fact]
+    public void Boss_route_forecasts_no_vigor_cost_even_for_an_existing_run()
+    {
+        var run = CreateBranchingRun();
+        run.Rooms[1].Type = RoomType.Boss;
+        run.State.MapNodes[1].VigorCostMin = 18;
+        run.State.MapNodes[1].VigorCostMax = 32;
+        run.State.Vigor = 20;
+        new DungeonVigorService().RefreshState(run);
+
+        var routes = new DungeonRouteService().GenerateRouteOptions(run);
+
+        var bossRoute = Assert.Single(routes, route => route.RoomType == RoomType.Boss);
+        Assert.Equal(0, bossRoute.VigorCostMin);
+        Assert.Equal(0, bossRoute.VigorCostMax);
+    }
+
+    [Fact]
     public void Rest_site_recovery_is_fixed_clamped_and_recorded()
     {
         var run = CreateRun();
@@ -210,6 +242,43 @@ public sealed class DungeonVigorStateTests
 
         Assert.Equal(-10, applied);
         Assert.Equal(90, run.State.Vigor);
+    }
+
+    [Fact]
+    public void Boss_combat_does_not_consume_vigor_or_record_a_toll()
+    {
+        var run = CreateRun();
+        run.State.Vigor = 1;
+        var room = run.Rooms[0];
+        room.Type = RoomType.Boss;
+        run.State.MapNodes =
+        [
+            new DungeonMapNode
+            {
+                RoomIndex = room.RoomIndex,
+                VigorCostMin = 18,
+                VigorCostMax = 32
+            }
+        ];
+        var result = new CombatResult
+        {
+            PlayerTeam =
+            [
+                new SimpleCombatEntity
+                {
+                    Id = "hero",
+                    Name = "Hero",
+                    MaxHealth = 100,
+                    Health = 1
+                }
+            ]
+        };
+
+        var applied = new DungeonVigorService().ApplyCombatToll(run, room, result);
+
+        Assert.Equal(0, applied);
+        Assert.Equal(1, run.State.Vigor);
+        Assert.Empty(run.State.VigorHistory);
     }
 
     [Fact]
@@ -351,6 +420,13 @@ public sealed class DungeonVigorStateTests
                     RoomType.RestSite,
                     RoomType.Boss
                 }));
+        Assert.All(
+            delves.GetAll().SelectMany(delve => delve.Nodes).Where(node => node.RoomType == RoomType.Boss),
+            boss =>
+            {
+                Assert.Equal(0, boss.VigorCostMin);
+                Assert.Equal(0, boss.VigorCostMax);
+            });
     }
 
     [Theory]

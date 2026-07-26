@@ -6,6 +6,9 @@ namespace Services.LL.Combat.Layers.Resolution.Dungeon;
 
 public static class DungeonEnemyDifficultyScaling
 {
+    // Tier I uses the authored creature baseline. It is validated across every
+    // canonical full Tier-1 Crude/Common profile with two minimum-potential Essences.
+    public const float TierOneStrengthMultiplier = 1f;
     public const float StrengthMultiplierPerTier = 5f;
 
     private static readonly HashSet<AttributeType> ScaledAttributes =
@@ -26,7 +29,9 @@ public static class DungeonEnemyDifficultyScaling
     ];
 
     public static float GetStrengthMultiplier(int dungeonTier) =>
-        MathF.Pow(StrengthMultiplierPerTier, Math.Max(1, dungeonTier) - 1);
+        dungeonTier <= 1
+            ? TierOneStrengthMultiplier
+            : MathF.Pow(StrengthMultiplierPerTier, dungeonTier - 1);
 
     public static void Apply(CombatEntity enemy, int dungeonTier)
     {

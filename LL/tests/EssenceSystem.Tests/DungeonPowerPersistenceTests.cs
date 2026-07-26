@@ -151,7 +151,8 @@ public sealed class DungeonPowerPersistenceTests
         var staleIdentity = current.Identity with
         {
             AlgorithmVersion = current.Identity.AlgorithmVersion - 1,
-            CombatRulesVersion = current.Identity.CombatRulesVersion - 1
+            CombatRulesVersion = current.Identity.CombatRulesVersion - 1,
+            EquipmentBalanceVersion = current.Identity.EquipmentBalanceVersion - 1
         };
         var stale = new PersistedDungeonPowerRecommendation(
             staleIdentity,
@@ -201,7 +202,8 @@ public sealed class DungeonPowerPersistenceTests
             PowerRatingAlgorithm.Version,
             PowerRatingAlgorithm.CombatRulesVersion,
             PowerRatingAlgorithm.BenchmarkDefinitionVersion,
-            PowerRatingAlgorithm.RecommendationSeedSetVersion);
+            PowerRatingAlgorithm.RecommendationSeedSetVersion,
+            Domain.Models.Professions.Crafting.V2.EquipmentStatBudgetCatalog.BalanceVersion);
         return new PersistedDungeonPowerRecommendation(
             identity,
             CreateRecommendation(identity, recommendedPower),

@@ -27,7 +27,7 @@
         { "id": "war-drums", "displayName": "War Drum Gallery", "roomType": "Combat", "depth": 8, "lane": 1, "section": 3, "nextRoomIndexes": [19], "forecast": "War drummers rally a final goblin formation.", "vigorCostMin": 14, "vigorCostMax": 25, "tags": ["Elite"] },
         { "id": "rest-site-three", "displayName": "Final Rest Site", "roomType": "RestSite", "depth": 9, "lane": 0, "section": 3, "nextRoomIndexes": [20], "forecast": "Rest to recover 15 Vigor before the final approach." },
         { "id": "throne-tunnel", "displayName": "Throne Tunnel", "roomType": "Combat", "depth": 10, "lane": 0, "section": 3, "nextRoomIndexes": [21], "forecast": "The last defenders bar the throne.", "vigorCostMin": 13, "vigorCostMax": 24, "tags": ["Skirmish"] },
-        { "id": "boss", "displayName": "Hobgoblin Warden", "roomType": "Boss", "depth": 11, "lane": 0, "section": 3, "nextRoomIndexes": [], "forecast": "The final encounter.", "vigorCostMin": 18, "vigorCostMax": 32, "tags": ["Boss"] }
+        { "id": "boss", "displayName": "Hobgoblin Warden", "roomType": "Boss", "depth": 11, "lane": 0, "section": 3, "nextRoomIndexes": [], "forecast": "The final encounter.", "vigorCostMin": 0, "vigorCostMax": 0, "tags": ["Boss"] }
       ]
     },
     {
@@ -53,7 +53,7 @@
         { "id": "sepulchral-choir", "displayName": "Sepulchral Choir", "roomType": "Combat", "depth": 6, "lane": 1, "section": 2, "nextRoomIndexes": [16], "forecast": "A choir of restless dead defends the lower crypt.", "vigorCostMin": 13, "vigorCostMax": 23, "tags": ["Skirmish"] },
         { "id": "rest-site-two", "displayName": "Final Rest Site", "roomType": "RestSite", "depth": 7, "lane": 0, "section": 2, "nextRoomIndexes": [17], "forecast": "Rest to recover 15 Vigor before the final approach." },
         { "id": "veil-crossing", "displayName": "Veil Crossing", "roomType": "Combat", "depth": 8, "lane": 0, "section": 2, "nextRoomIndexes": [18], "forecast": "The last dead gather where the veil is thinnest.", "vigorCostMin": 13, "vigorCostMax": 24, "tags": ["Skirmish"] },
-        { "id": "boss", "displayName": "The Bound Wraith", "roomType": "Boss", "depth": 9, "lane": 0, "section": 2, "nextRoomIndexes": [], "forecast": "The final encounter.", "vigorCostMin": 18, "vigorCostMax": 32, "tags": ["Boss"] }
+        { "id": "boss", "displayName": "The Bound Wraith", "roomType": "Boss", "depth": 9, "lane": 0, "section": 2, "nextRoomIndexes": [], "forecast": "The final encounter.", "vigorCostMin": 0, "vigorCostMax": 0, "tags": ["Boss"] }
       ]
     },
     {
@@ -87,7 +87,7 @@
         { "id": "royal-molt", "displayName": "Royal Molt", "roomType": "Combat", "depth": 10, "lane": 1, "section": 4, "nextRoomIndexes": [22], "forecast": "Royal guards gather beneath the Matriarch's discarded shell.", "vigorCostMin": 15, "vigorCostMax": 27, "tags": ["Elite"] },
         { "id": "rest-site-four", "displayName": "Final Rest Site", "roomType": "RestSite", "depth": 11, "lane": 0, "section": 4, "nextRoomIndexes": [23], "forecast": "Rest to recover 15 Vigor before the final approach." },
         { "id": "throne-nest", "displayName": "Throne Nest", "roomType": "Combat", "depth": 12, "lane": 0, "section": 4, "nextRoomIndexes": [24], "forecast": "Royal defenders crowd the Matriarch's nest.", "vigorCostMin": 15, "vigorCostMax": 28, "tags": ["Elite"] },
-        { "id": "boss", "displayName": "Hive Matriarch", "roomType": "Boss", "depth": 13, "lane": 0, "section": 4, "nextRoomIndexes": [], "forecast": "The final encounter.", "vigorCostMin": 20, "vigorCostMax": 34, "tags": ["Boss"] }
+        { "id": "boss", "displayName": "Hive Matriarch", "roomType": "Boss", "depth": 13, "lane": 0, "section": 4, "nextRoomIndexes": [], "forecast": "The final encounter.", "vigorCostMin": 0, "vigorCostMax": 0, "tags": ["Boss"] }
       ]
     }
   ]
