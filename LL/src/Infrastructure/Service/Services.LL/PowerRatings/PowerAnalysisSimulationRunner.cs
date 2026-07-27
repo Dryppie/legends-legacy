@@ -230,41 +230,27 @@ public sealed class PowerAnalysisSimulationRunner
     public async Task<CombatEntity> CreateCanonicalCombatantAsync(
         CanonicalEquipmentBuild build,
         CancellationToken cancellationToken)
-        => await CreateCanonicalCombatantAsync(build, [], cancellationToken);
+        => await CreateCanonicalCombatantCoreAsync(
+            build,
+            build.EquippedEssences,
+            cancellationToken);
 
-    public async Task<CombatEntity> CreateCanonicalCombatantAsync(
+    private async Task<CombatEntity> CreateCanonicalCombatantCoreAsync(
         CanonicalEquipmentBuild build,
         IReadOnlyList<PlayerEssence> equippedEssences,
         CancellationToken cancellationToken)
     {
-        var profile = build.Profile;
-        var rung = build.Rung;
         var combatant = new CombatEntity(build.Character)
         {
             HasEquippedEssenceSnapshot = true,
             EquippedEssences = [.. equippedEssences],
-            NativeAbilityIds = profile switch
-            {
-                CanonicalPartyProfile.Offense => [CanonicalStrikeAbilityId, CanonicalAreaAbilityId],
-                CanonicalPartyProfile.Sustain => [CanonicalStrikeAbilityId, CanonicalHealAbilityId, CanonicalBarrierAbilityId],
-                CanonicalPartyProfile.Defensive => [CanonicalStrikeAbilityId, CanonicalBarrierAbilityId],
-                CanonicalPartyProfile.Area => [CanonicalStrikeAbilityId, CanonicalAreaAbilityId],
-                _ => [CanonicalStrikeAbilityId, CanonicalHealAbilityId]
-            }
+            NativeAbilityIds = []
         };
-        if (build.MainHandRecipeId is not null)
-        {
-            combatant.MainHandEquipment = new Domain.Models.Items.Equipments.EquipmentInstance
-            {
-                Id = Guid.Empty,
-                ItemBaseId = $"canonical-{profile.ToString().ToLowerInvariant()}-weapon",
-                BaseRecipeId = build.MainHandRecipeId,
-                Tier = rung.Tier,
-                Quality = rung.Quality,
-                Rarity = rung.Rarity
-            };
-            combatant.Equipment.Add(combatant.MainHandEquipment);
-        }
+        combatant.Equipment.AddRange(build.Equipment);
+        combatant.MainHandEquipment = build.Equipment.FirstOrDefault(item =>
+            item.EquipmentBase.EquipmentType is
+                Domain.Models.Items.Equipments.EquipmentType.OneHanded or
+                Domain.Models.Items.Equipments.EquipmentType.TwoHanded);
         await _combatSetup.PrepareEntitiesForCombat([combatant]);
         return combatant;
     }

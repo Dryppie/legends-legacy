@@ -1,12 +1,13 @@
-using Domain.Components.Attributes;
+using System.Security.Cryptography;
+using System.Text;
+using Application.Interfaces.Services.LL.Essences;
+using Application.Interfaces.Services.LL.Professions;
 using Domain.Helpers;
-using Domain.Models.Attributes;
 using Domain.Models.Entities.Characters;
+using Domain.Models.Essences;
 using Domain.Models.Items;
 using Domain.Models.Items.Equipments;
 using Domain.Models.Professions.Crafting.V2;
-using Microsoft.Extensions.Options;
-using Services.LL.Professions.Craftings;
 
 namespace Services.LL.PowerRatings;
 
@@ -17,28 +18,35 @@ public sealed record CanonicalEquipmentProgressionRung(
     Rarity Rarity,
     int TemperingSteps,
     int EquippedSlotCount,
-    string Id);
+    string Id)
+{
+    public bool UsesProjectedTierScaling => Tier > EquipmentStatBudgetCatalog.MaximumTier;
+}
 
 public sealed record CanonicalEquipmentBuild(
     CanonicalEquipmentProgressionRung Rung,
     CanonicalPartyProfile Profile,
     Character Character,
-    double AuthorizedBudget,
-    double SpentBudget,
-    IReadOnlyDictionary<AttributeType, double> EquipmentPoints,
+    IReadOnlyList<EquipmentInstance> Equipment,
+    IReadOnlyList<PlayerEssence> EquippedEssences,
     CombatRatingBreakdown Rating,
-    IReadOnlyList<AttributeType> BindingCombatCaps,
     int EquipmentBalanceVersion,
     string? MainHandRecipeId);
 
 /// <summary>
-/// Builds detached, deterministic canonical combatants from the active equipment budget rules.
-/// It deliberately creates no item instances and persists no player-owned state.
+/// Builds detached, deterministic canonical combatants from authored crafting
+/// recipes, item bases, and Region 1 Essences. Nothing is persisted or granted
+/// to a player. Equipment tiers beyond the live budget catalog are explicitly
+/// projected for calibration while retaining those real content identities.
 /// </summary>
 public sealed class CanonicalEquipmentBuildFactory
 {
-    // The first acquired slot matches the authored tutorial reward. Remaining slots are
-    // ordered deterministically, with a weapon early enough to represent ordinary combat.
+    private const int PositiveTemperingAttemptsPerRarity = 10;
+    private const int MaximumCanonicalEssenceCount = 6;
+    private const int MaximumCalibrationEquipmentTier = 20;
+    private const double ProjectedEquipmentPowerGrowthPerTier = 1.25d;
+
+    // Stable slot order keeps every full-set matrix build deterministic.
     private static readonly EquipmentType[] CanonicalSlots =
     [
         EquipmentType.Chest,
@@ -50,78 +58,131 @@ public sealed class CanonicalEquipmentBuildFactory
         EquipmentType.Relic,
     ];
 
-    private static readonly IReadOnlyDictionary<CanonicalPartyProfile, string> MainHandRecipes =
-        new Dictionary<CanonicalPartyProfile, string>
+    private static readonly IReadOnlyDictionary<
+        CanonicalPartyProfile,
+        IReadOnlyDictionary<EquipmentType, string>> ProfileRecipeIds =
+        new Dictionary<CanonicalPartyProfile, IReadOnlyDictionary<EquipmentType, string>>
         {
-            [CanonicalPartyProfile.Balanced] = "recipe.weapon.two_handed.greatsword",
-            [CanonicalPartyProfile.Offense] = "recipe.weapon.two_handed.gauntlets",
-            [CanonicalPartyProfile.Defensive] = "recipe.weapon.two_handed.maul",
-            [CanonicalPartyProfile.Sustain] = "recipe.weapon.two_handed.staff",
-            [CanonicalPartyProfile.Area] = "recipe.weapon.two_handed.staff"
+            [CanonicalPartyProfile.Balanced] = Recipes(
+                "recipe.armor.chest.medium_mail",
+                "recipe.weapon.two_handed.greatsword",
+                "recipe.armor.head.medium_helm",
+                "recipe.armor.legs.medium_greaves"),
+            [CanonicalPartyProfile.Offense] = Recipes(
+                "recipe.armor.chest.light_vest",
+                "recipe.weapon.two_handed.gauntlets",
+                "recipe.armor.head.light_hood",
+                "recipe.armor.legs.light_legwraps"),
+            [CanonicalPartyProfile.Sustain] = Recipes(
+                "recipe.armor.chest.cloth_robe",
+                "recipe.weapon.two_handed.staff",
+                "recipe.armor.head.cloth_cowl",
+                "recipe.armor.legs.cloth_pants"),
+            [CanonicalPartyProfile.Defensive] = Recipes(
+                "recipe.armor.chest.heavy_breastplate",
+                "recipe.weapon.two_handed.maul",
+                "recipe.armor.head.heavy_helm",
+                "recipe.armor.legs.heavy_legplates"),
+            [CanonicalPartyProfile.Area] = Recipes(
+                "recipe.armor.chest.cloth_robe",
+                "recipe.weapon.two_handed.staff",
+                "recipe.armor.head.cloth_cowl",
+                "recipe.armor.legs.cloth_pants")
         };
 
-    private static readonly IReadOnlyDictionary<CanonicalPartyProfile, IReadOnlyDictionary<AttributeType, double>>
-        ProfileWeights = new Dictionary<CanonicalPartyProfile, IReadOnlyDictionary<AttributeType, double>>
+    private static readonly IReadOnlyDictionary<CanonicalPartyProfile, string[]> ProfileEssenceIds =
+        new Dictionary<CanonicalPartyProfile, string[]>
         {
-            [CanonicalPartyProfile.Balanced] = Weights(
-                (AttributeType.Power, 0.20),
-                (AttributeType.Precision, 0.10),
-                (AttributeType.Fortitude, 0.15),
-                (AttributeType.Spirit, 0.10),
-                (AttributeType.MaxHealth, 0.15),
-                (AttributeType.WeaponDamage, 0.10),
-                (AttributeType.Armor, 0.10),
-                (AttributeType.Resistance, 0.10)),
-            [CanonicalPartyProfile.Offense] = Weights(
-                (AttributeType.Power, 0.30),
-                (AttributeType.Precision, 0.20),
-                (AttributeType.WeaponDamage, 0.20),
-                (AttributeType.CritChance, 0.10),
-                (AttributeType.CritDamage, 0.10),
-                (AttributeType.AttackSpeed, 0.10)),
-            [CanonicalPartyProfile.Defensive] = Weights(
-                (AttributeType.Power, 0.10),
-                (AttributeType.Fortitude, 0.25),
-                (AttributeType.MaxHealth, 0.25),
-                (AttributeType.Armor, 0.15),
-                (AttributeType.Resistance, 0.15),
-                (AttributeType.BlockChance, 0.10)),
-            [CanonicalPartyProfile.Sustain] = Weights(
-                (AttributeType.Power, 0.20),
-                (AttributeType.Spirit, 0.20),
-                (AttributeType.MaxHealth, 0.15),
-                (AttributeType.Fortitude, 0.10),
-                (AttributeType.Resistance, 0.10),
-                (AttributeType.HealingPowerPercent, 0.10),
-                (AttributeType.HealthRegeneration, 0.10),
-                (AttributeType.Cooldown, 0.05)),
-            [CanonicalPartyProfile.Area] = Weights(
-                (AttributeType.Power, 0.30),
-                (AttributeType.Precision, 0.15),
-                (AttributeType.Spirit, 0.15),
-                (AttributeType.WeaponDamage, 0.15),
-                (AttributeType.CritChance, 0.10),
-                (AttributeType.MagicPenetration, 0.10),
-                (AttributeType.AttackSpeed, 0.05))
+            [CanonicalPartyProfile.Balanced] =
+            [
+                "essence.legacy.goblin",
+                "essence.legacy.vampire_bat",
+                "essence.legacy.goblin_warrior",
+                "essence.legacy.enchanted_fairy",
+                "essence.legacy.goblin_archer",
+                "essence.legacy.pixie"
+            ],
+            [CanonicalPartyProfile.Offense] =
+            [
+                "essence.legacy.goblin_archer",
+                "essence.legacy.glade_panther",
+                "essence.legacy.goblin_warrior",
+                "essence.legacy.flame_imp",
+                "essence.legacy.hobgoblin",
+                "essence.legacy.vampire_bat"
+            ],
+            [CanonicalPartyProfile.Sustain] =
+            [
+                "essence.legacy.enchanted_fairy",
+                "essence.legacy.pixie",
+                "essence.legacy.treant_sapling",
+                "essence.legacy.goblin_shaman",
+                "essence.legacy.brown_slime",
+                "essence.legacy.green_slime"
+            ],
+            [CanonicalPartyProfile.Defensive] =
+            [
+                "essence.legacy.brown_slime",
+                "essence.legacy.goblin_warrior",
+                "essence.legacy.treant_sapling",
+                "essence.legacy.goblin_shaman",
+                "essence.legacy.blue_slime",
+                "essence.legacy.moss_lizard"
+            ],
+            [CanonicalPartyProfile.Area] =
+            [
+                "essence.legacy.flame_imp",
+                "essence.legacy.pixie",
+                "essence.legacy.frost_imp",
+                "essence.legacy.shadow_imp",
+                "essence.legacy.goblin_shaman",
+                "essence.legacy.rainbow_slime"
+            ]
         };
 
-    private static readonly (ItemQuality Quality, Rarity Rarity)[] TierMilestones =
+    private static readonly IReadOnlyDictionary<CanonicalPartyProfile, int> ProfileCharacterLevels =
+        new Dictionary<CanonicalPartyProfile, int>
+        {
+            [CanonicalPartyProfile.Balanced] = 5,
+            [CanonicalPartyProfile.Offense] = 15,
+            [CanonicalPartyProfile.Sustain] = 15,
+            [CanonicalPartyProfile.Defensive] = 10,
+            [CanonicalPartyProfile.Area] = 15
+        };
+
+    private static readonly Rarity[] CalibrationRarities =
     [
-        (ItemQuality.Crude, Rarity.Common),
-        (ItemQuality.Standard, Rarity.Uncommon),
-        (ItemQuality.Fine, Rarity.Rare),
-        (ItemQuality.Exceptional, Rarity.Legendary),
-        (ItemQuality.Masterwork, Rarity.Legacy)
+        Rarity.Common,
+        Rarity.Uncommon,
+        Rarity.Rare,
+        Rarity.Epic,
+        Rarity.Unique,
+        Rarity.Legendary
     ];
 
-    private readonly CraftingBalanceOptions _balance;
-    private readonly IReadOnlyList<double> _slotWeights;
+    private readonly ICraftingDefinitionProvider _craftingDefinitions;
+    private readonly IItemStatRollService _statRolls;
+    private readonly ITemperingMechanicsService _tempering;
+    private readonly IItemPotentialService _potential;
+    private readonly IEssenceCombatLoadoutResolver _essenceLoadouts;
+    private readonly IEssenceDefinitionRepository _essenceDefinitions;
     private readonly IReadOnlyList<CanonicalEquipmentProgressionRung> _ladder;
 
-    public CanonicalEquipmentBuildFactory(IOptions<CraftingBalanceOptions> balance)
+    public CanonicalEquipmentBuildFactory(
+        ICraftingDefinitionProvider craftingDefinitions,
+        IItemStatRollService statRolls,
+        ITemperingMechanicsService tempering,
+        IItemPotentialService potential,
+        IEssenceCombatLoadoutResolver essenceLoadouts,
+        IEssenceDefinitionRepository essenceDefinitions)
     {
-        _balance = balance.Value;
-        _slotWeights = CanonicalSlots.Select(_balance.GetSlotBudgetWeight).ToArray();
+        _craftingDefinitions = craftingDefinitions;
+        _statRolls = statRolls;
+        _tempering = tempering;
+        _potential = potential;
+        _essenceLoadouts = essenceLoadouts;
+        _essenceDefinitions = essenceDefinitions;
+        ValidateProfileContent();
         _ladder = CreateLadder();
     }
 
@@ -129,83 +190,210 @@ public sealed class CanonicalEquipmentBuildFactory
 
     public CanonicalEquipmentBuild CreateBuild(
         CanonicalPartyProfile profile,
-        CanonicalEquipmentProgressionRung rung)
+        CanonicalEquipmentProgressionRung rung) =>
+        CreateBuild(profile, rung, essenceCount: 2);
+
+    public CanonicalEquipmentBuild CreateBuildForDungeonTier(
+        CanonicalPartyProfile profile,
+        CanonicalEquipmentProgressionRung rung,
+        int dungeonTier) =>
+        CreateBuild(profile, rung, GetEssenceCountForDungeonTier(dungeonTier));
+
+    public static int GetEssenceCountForDungeonTier(int dungeonTier) => dungeonTier switch
+    {
+        1 => 2,
+        2 => 4,
+        3 => 6,
+        _ => throw new ArgumentOutOfRangeException(
+            nameof(dungeonTier),
+            dungeonTier,
+            "Canonical dungeon tiers must be between 1 and 3.")
+    };
+
+    private CanonicalEquipmentBuild CreateBuild(
+        CanonicalPartyProfile profile,
+        CanonicalEquipmentProgressionRung rung,
+        int essenceCount)
     {
         if (!_ladder.Any(candidate => candidate == rung))
-            throw new ArgumentException("The progression rung does not belong to the active canonical ladder.", nameof(rung));
-
-        var attributes = CreateCharacterBaseline();
-        var directBaseAttributes = CombatRatingCalculator.RemovePrimaryContributions(attributes);
-        var equipmentPoints = new Dictionary<AttributeType, double>();
-        var bindingCaps = new HashSet<AttributeType>();
-        var authorizedBudget = 0d;
-        var spentBudget = 0d;
-        var weights = ProfileWeights[profile];
-        var qualityMultiplier = _balance.GetQualityStatMultiplier(rung.Quality);
-        var temperingBudget =
-            rung.TemperingSteps * TemperingConstants.GetDirectedImprovementBudget(rung.Tier);
-
-        foreach (var slotWeight in _slotWeights.Take(rung.EquippedSlotCount))
-        {
-            var slotBudget =
-                _balance.GetTierPowerBudget(rung.Tier) * slotWeight * qualityMultiplier
-                + temperingBudget;
-            authorizedBudget += slotBudget;
-            var constraints = EquipmentConstraintProfile.CreateItemConstraints(
-                attributes,
-                slotWeight,
-                _balance.GetMaximumCombatLoadoutBudgetWeight(),
-                EquipmentConstraintProfile.MinimumSupportedBasicAttackIntervalMultiplier);
-            var allocation = EquipmentBudgetAllocator.AllocateConstrained(
-                rung.Tier,
-                slotBudget,
-                weights,
-                constraints,
-                weights,
-                perItemCapMultiplier: EquipmentConstraintProfile.GetPerItemCapMultiplier(slotWeight));
-            spentBudget += allocation.SpentBudget;
-            bindingCaps.UnionWith(allocation.BindingCombatCaps);
-
-            foreach (var (attribute, points) in allocation.AddedPoints)
-            {
-                equipmentPoints[attribute] = equipmentPoints.GetValueOrDefault(attribute) + points;
-                ApplyAttributeDelta(attributes, attribute, (float)points);
-            }
-        }
+            throw new ArgumentException(
+                "The progression rung does not belong to the active canonical ladder.",
+                nameof(rung));
+        if (essenceCount is < 1 or > MaximumCanonicalEssenceCount)
+            throw new ArgumentOutOfRangeException(nameof(essenceCount));
 
         var character = new Character
         {
-            Id = Guid.Empty,
+            Id = CreateDeterministicGuid($"canonical-character:{profile}"),
             Name = $"Canonical {profile} - {rung.Id}",
-            Level = rung.Tier,
-            BaseAttributes = attributes
-                .OrderBy(entry => entry.Key)
-                .Select(entry => new EntityAttribute
-                {
-                    AttributeType = entry.Key,
-                    Value = entry.Value
-                })
+            Level = Math.Max(
+                Math.Max(rung.Tier, ProfileCharacterLevels[profile]),
+                (essenceCount - 1) * 10),
+            BaseAttributes = EntityBaseAttributeHelper
+                .CreateEntityAttributes(CreateDeterministicGuid($"canonical-attributes:{profile}"))
+                .OrderBy(attribute => attribute.AttributeType)
                 .ToList()
         };
+        var equipment = CanonicalSlots
+            .Take(rung.EquippedSlotCount)
+            .Select((slot, index) => CreateEquipment(profile, rung, slot, index))
+            .ToList();
+        var essences = CreateEssences(profile, character.Id, essenceCount);
+        var essenceSources = essences
+            .Select(essence =>
+            {
+                var loadout = _essenceLoadouts.Resolve(character.Id, [essence]);
+                return new CombatRatingModifierSource(essence.PotentialTier, loadout.AttributeModifiers);
+            })
+            .ToList();
 
         return new CanonicalEquipmentBuild(
             rung,
             profile,
             character,
-            authorizedBudget,
-            spentBudget,
-            equipmentPoints,
-            CombatRatingCalculator.CalculateCanonical(
-                directBaseAttributes,
-                equipmentPoints,
-                rung.Tier),
-            bindingCaps.Order().ToList(),
+            equipment,
+            essences,
+            CombatRatingCalculator.Calculate(
+                character.BaseAttributes,
+                equipment,
+                essenceSources),
             EquipmentStatBudgetCatalog.BalanceVersion,
-            rung.EquippedSlotCount >= 2 ? MainHandRecipes[profile] : null);
+            equipment
+                .FirstOrDefault(item => item.EquipmentBase.EquipmentType == EquipmentType.TwoHanded)
+                ?.BaseRecipeId);
     }
+
+    private EquipmentInstance CreateEquipment(
+        CanonicalPartyProfile profile,
+        CanonicalEquipmentProgressionRung rung,
+        EquipmentType slot,
+        int slotIndex)
+    {
+        var recipeId = ProfileRecipeIds[profile][slot];
+        var recipe = _craftingDefinitions.GetRecipe(recipeId)
+            ?? throw new InvalidOperationException($"Canonical recipe '{recipeId}' was not found.");
+        if (rung.Tier is < EquipmentStatBudgetCatalog.MinimumTier
+            or > MaximumCalibrationEquipmentTier)
+        {
+            throw new InvalidOperationException(
+                $"Canonical equipment Tier {rung.Tier} is outside the supported stat-budget range.");
+        }
+
+        if (!_craftingDefinitions.GetEquipmentBases().TryGetValue(
+                recipe.OutputItemId,
+                out var itemBase))
+        {
+            throw new InvalidOperationException(
+                $"Canonical recipe '{recipe.Id}' output '{recipe.OutputItemId}' was not found.");
+        }
+
+        var design = EquipmentCraftingDesignComposer.Compose(recipe, null);
+        var raritySteps = TemperingConstants.GetRarityUpgradeCount(rung.Rarity);
+        var requiredPotential =
+            raritySteps
+            * PositiveTemperingAttemptsPerRarity
+            * TemperingConstants.PotentialCost;
+        var startingPotential = Math.Max(
+            requiredPotential,
+            _potential.CalculateStartingPotential(
+                itemBase,
+                rung.Tier,
+                rung.Quality,
+                masteryLevel: 0,
+                craftingLevel: rung.Tier));
+        var equipment = new EquipmentInstance
+        {
+            Id = CreateDeterministicGuid($"canonical-equipment:{profile}:{rung.Id}:{slotIndex}"),
+            ItemBaseId = itemBase.Id,
+            ItemBase = itemBase,
+            BaseRecipeId = recipe.Id,
+            CraftedName = design.Name,
+            Tier = rung.Tier,
+            Rarity = Rarity.Common,
+            Quality = rung.Quality,
+            Potential = startingPotential,
+            MaxPotential = startingPotential,
+            TemperingProgress = 0,
+            AffinityTags = [.. design.Tags],
+            InstanceModifiers =
+            [
+                .. _statRolls.RollBaseStats(
+                    itemBase,
+                    design,
+                    rung.Tier,
+                    rung.Quality,
+                    new Random(CreateDeterministicSeed(
+                        $"canonical-stat-roll:{profile}:{rung.Id}:{slotIndex}")))
+            ]
+        };
+
+        var temperingRandom = new PositiveTemperingRandom();
+        for (var attempt = 0;
+             attempt < raritySteps * PositiveTemperingAttemptsPerRarity;
+             attempt++)
+        {
+            _tempering.ApplyTemperingAttempt(
+                equipment,
+                design.TemperingProfile,
+                temperingRandom);
+        }
+
+        if (equipment.Rarity != rung.Rarity)
+        {
+            throw new InvalidOperationException(
+                $"Canonical item '{equipment.DisplayName}' reached {equipment.Rarity} " +
+                $"instead of {rung.Rarity}.");
+        }
+
+        ApplyProjectedTierScaling(equipment);
+        return equipment;
+    }
+
+    private static void ApplyProjectedTierScaling(EquipmentInstance equipment)
+    {
+        if (equipment.Tier <= EquipmentStatBudgetCatalog.MaximumTier)
+            return;
+
+        // Tier 10 is the end of the currently authored equipment budget table.
+        // Continue its late-game growth for calibration only so Mythic analysis
+        // can report the equipment tier its present enemy scaling would require.
+        var multiplier = Math.Pow(
+            ProjectedEquipmentPowerGrowthPerTier,
+            equipment.Tier - EquipmentStatBudgetCatalog.MaximumTier);
+        foreach (var modifier in equipment.InstanceModifiers)
+            modifier.Amount *= (float)multiplier;
+    }
+
+    private IReadOnlyList<PlayerEssence> CreateEssences(
+        CanonicalPartyProfile profile,
+        Guid characterId,
+        int essenceCount) =>
+        ProfileEssenceIds[profile]
+            .Take(essenceCount)
+            .Select((definitionId, index) => new PlayerEssence
+            {
+                Id = CreateDeterministicGuid($"canonical-essence:{profile}:{index}:{definitionId}"),
+                CharacterId = characterId,
+                EssenceDefinitionId = definitionId,
+                Level = 1,
+                NativeRegion = 1,
+                PotentialTier = 1,
+                AscensionTier = 0,
+                IsEvolved = false,
+                AbsorbedAt = DateTimeOffset.UnixEpoch,
+                UpdatedAt = DateTimeOffset.UnixEpoch
+            })
+            .ToList();
 
     private IReadOnlyList<CanonicalEquipmentProgressionRung> CreateLadder()
     {
+        // Calibration projects the real authored item bases and recipe designs
+        // beyond the live Region 1 recipe cap. Tiers above the authored budget
+        // table continue the late-game curve so the analyzer can identify and
+        // expose requirements that are not yet attainable in live content.
+        const int minimumTier = EquipmentStatBudgetCatalog.MinimumTier;
+        const int maximumTier = MaximumCalibrationEquipmentTier;
+
         var candidates = new List<(
             int Tier,
             ItemQuality Quality,
@@ -214,48 +402,23 @@ public sealed class CanonicalEquipmentBuildFactory
             int SlotCount,
             string Id)>();
 
-        // A real new character starts with base attributes and receives one tutorial chest,
-        // not a complete seven-slot Tier-1 loadout. These acquisition states close the
-        // low-end gap without inventing fractional item budgets.
-        candidates.Add((1, ItemQuality.Crude, Rarity.Common, 0, 0, "t1-base"));
-        for (var slotCount = 1; slotCount < CanonicalSlots.Length; slotCount++)
-        {
-            candidates.Add((
-                1,
-                ItemQuality.Crude,
-                Rarity.Common,
-                0,
-                slotCount,
-                $"t1-crude-common-{slotCount}-slots"));
-        }
-
         foreach (var tier in Enumerable.Range(
-                     EquipmentStatBudgetCatalog.MinimumTier,
-                     EquipmentStatBudgetCatalog.MaximumTier))
+                     minimumTier,
+                     maximumTier - minimumTier + 1))
         {
-            foreach (var milestone in TierMilestones)
+            foreach (var rarity in CalibrationRarities)
             {
-                var steps = TemperingConstants.GetRarityUpgradeCount(milestone.Rarity);
                 candidates.Add((
                     tier,
-                    milestone.Quality,
-                    milestone.Rarity,
-                    steps,
+                    ItemQuality.Standard,
+                    rarity,
+                    TemperingConstants.GetRarityUpgradeCount(rarity),
                     CanonicalSlots.Length,
-                    $"t{tier}-{milestone.Quality.ToString().ToLowerInvariant()}-" +
-                    milestone.Rarity.ToString().ToLowerInvariant()));
+                    $"t{tier}-standard-{rarity.ToString().ToLowerInvariant()}"));
             }
         }
 
-        var result = candidates
-            .OrderBy(candidate => CalculateExpectedCombatRating(
-                candidate.Tier,
-                candidate.Quality,
-                candidate.Steps,
-                candidate.SlotCount))
-            .ThenBy(candidate => candidate.Tier)
-            .ThenBy(candidate => candidate.Quality)
-            .ThenBy(candidate => candidate.Rarity)
+        return candidates
             .Select((candidate, index) => new CanonicalEquipmentProgressionRung(
                 index,
                 candidate.Tier,
@@ -264,56 +427,78 @@ public sealed class CanonicalEquipmentBuildFactory
                 candidate.Steps,
                 candidate.SlotCount,
                 candidate.Id))
-            .ToList();
-        return result.AsReadOnly();
+            .ToList()
+            .AsReadOnly();
     }
 
-    private double CalculateExpectedCombatRating(
-        int tier,
-        ItemQuality quality,
-        int temperingSteps,
-        int equippedSlotCount)
+    private void ValidateProfileContent()
     {
-        var directBaseline = CombatRatingCalculator.RemovePrimaryContributions(
-            CreateCharacterBaseline());
-        var baseRating = CombatRatingCalculator.CalculateCanonical(
-            directBaseline,
-            new Dictionary<AttributeType, double>(),
-            tier).Overall;
-        return baseRating + CalculateAuthorizedBudget(
-            tier,
-            quality,
-            temperingSteps,
-            equippedSlotCount);
+        foreach (var (profile, recipes) in ProfileRecipeIds)
+        {
+            if (!CanonicalSlots.All(recipes.ContainsKey))
+                throw new InvalidOperationException(
+                    $"Canonical {profile} does not define every equipment slot.");
+
+            foreach (var (slot, recipeId) in recipes)
+            {
+                var recipe = _craftingDefinitions.GetRecipe(recipeId)
+                    ?? throw new InvalidOperationException(
+                        $"Canonical {profile} recipe '{recipeId}' was not found.");
+                if (!recipe.Enabled || recipe.OutputItemType != slot)
+                {
+                    throw new InvalidOperationException(
+                        $"Canonical {profile} recipe '{recipeId}' is not an enabled {slot} recipe.");
+                }
+            }
+        }
+
+        foreach (var (profile, essenceIds) in ProfileEssenceIds)
+        {
+            if (essenceIds.Length != MaximumCanonicalEssenceCount)
+            {
+                throw new InvalidOperationException(
+                    $"Canonical {profile} must define exactly {MaximumCanonicalEssenceCount} Essences.");
+            }
+            if (essenceIds.Distinct(StringComparer.OrdinalIgnoreCase).Count() != essenceIds.Length)
+                throw new InvalidOperationException($"Canonical {profile} contains duplicate Essences.");
+            foreach (var essenceId in essenceIds)
+            {
+                if (_essenceDefinitions.GetById(essenceId) is null)
+                {
+                    throw new InvalidOperationException(
+                        $"Canonical {profile} Essence '{essenceId}' was not found.");
+                }
+            }
+        }
     }
 
-    private double CalculateAuthorizedBudget(
-        int tier,
-        ItemQuality quality,
-        int temperingSteps,
-        int equippedSlotCount) =>
-        _slotWeights.Take(equippedSlotCount).Sum(slotWeight =>
-            _balance.GetTierPowerBudget(tier)
-            * slotWeight
-            * _balance.GetQualityStatMultiplier(quality)
-            + temperingSteps * TemperingConstants.GetDirectedImprovementBudget(tier));
+    private static IReadOnlyDictionary<EquipmentType, string> Recipes(
+        string chest,
+        string twoHanded,
+        string head,
+        string legs) =>
+        new Dictionary<EquipmentType, string>
+        {
+            [EquipmentType.Chest] = chest,
+            [EquipmentType.TwoHanded] = twoHanded,
+            [EquipmentType.Head] = head,
+            [EquipmentType.Legs] = legs,
+            [EquipmentType.Ring] = "recipe.jewelry.ring.band",
+            [EquipmentType.Necklace] = "recipe.jewelry.necklace.amulet",
+            [EquipmentType.Relic] = "recipe.jewelry.relic.vial"
+        };
 
-    private static IReadOnlyDictionary<AttributeType, double> Weights(
-        params (AttributeType Attribute, double Weight)[] entries) =>
-        entries.ToDictionary(entry => entry.Attribute, entry => entry.Weight);
+    private static int CreateDeterministicSeed(string value) =>
+        BitConverter.ToInt32(SHA256.HashData(Encoding.UTF8.GetBytes(value)));
 
-    private static void ApplyAttributeDelta(
-        IDictionary<AttributeType, float> attributes,
-        AttributeType attribute,
-        float amount)
+    private static Guid CreateDeterministicGuid(string value)
     {
-        attributes[attribute] =
-            (attributes.TryGetValue(attribute, out var current) ? current : 0f) + amount;
-        if (AttributeCombatRules.IsPrimary(attribute))
-            AttributeCombatRules.ApplyPrimaryDelta(attributes, attribute, amount);
+        var hash = SHA256.HashData(Encoding.UTF8.GetBytes(value));
+        return new Guid(hash.AsSpan(0, 16));
     }
 
-    private static Dictionary<AttributeType, float> CreateCharacterBaseline() =>
-        EntityBaseAttributeHelper.CreateEntityAttributes(Guid.Empty)
-            .ToDictionary(attribute => attribute.AttributeType, attribute => attribute.Value);
+    private sealed class PositiveTemperingRandom : Random
+    {
+        protected override double Sample() => 0.0005d;
+    }
 }

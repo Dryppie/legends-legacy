@@ -141,25 +141,22 @@ public sealed class DungeonPowerAnalyzer : IDungeonPowerAnalyzer
                 }
             }
 
-            if (!profileResults.TryGetValue(CanonicalPartyProfile.Balanced, out var balanced))
-                return Failed("The Balanced canonical equipment profile could not calibrate this dungeon.", contentHash);
-
             var ratings = profileResults.Values
                 .Where(result => result.Rating > 0)
                 .Select(result => result.Rating)
                 .ToArray();
-            if (balanced.Rating <= 0 || ratings.Length == 0)
-                return Failed("The first passing Balanced equipment build has a non-positive Combat Rating.", contentHash);
+            if (ratings.Length == 0)
+                return Failed("No canonical equipment profile produced a positive passing Combat Rating.", contentHash);
             var lower = ratings.Min();
             var upper = ratings.Max();
             var referenceEntry = profileResults
                 .Where(entry => entry.Value.Rating > 0)
-                .OrderByDescending(entry => entry.Value.Rating)
+                .OrderBy(entry => entry.Value.Rating)
                 .ThenBy(entry => entry.Key)
                 .First();
             var referenceProfile = referenceEntry.Key;
             var reference = referenceEntry.Value;
-            var recommended = upper;
+            var recommended = lower;
             var spread = recommended <= 0 ? 1m : (upper - lower) / (decimal)recommended;
             var confidence = unavailableProfiles.Count > 0
                 ? PowerRatingConfidence.Low
@@ -193,17 +190,22 @@ public sealed class DungeonPowerAnalyzer : IDungeonPowerAnalyzer
                       / FastCombatEngine.TicksPerSecond),
                 completionRates,
                 unavailableProfiles.Count > 0
-                    ? $"Recommended Combat Rating uses the highest available first-passing profile: " +
-                      $"{referenceProfile} rung {reference.Rung.Id}; preceding rung: " +
+                    ? $"Recommended Combat Rating uses the lowest available first-passing profile: " +
+                      $"{referenceProfile} rung {DescribeRung(reference.Rung)} with " +
+                      $"{reference.EssenceCount} Essences; " +
+                      $"preceding rung: " +
                       $"{reference.PreviousRung?.Id ?? "none"}. Recommendation excludes profiles " +
                       $"that could not reach the target: " +
                       $"{string.Join(", ", unavailableProfiles)}."
                     : confidence == PowerRatingConfidence.Low
                         ? $"Canonical party profiles disagree substantially about this dungeon. " +
-                          $"Recommended Combat Rating uses the highest first-passing requirement: " +
-                          $"{referenceProfile} rung {reference.Rung.Id}."
-                        : $"Recommended Combat Rating uses the highest first-passing canonical profile: " +
-                          $"{referenceProfile} rung {reference.Rung.Id}; preceding rung: " +
+                          $"Recommended Combat Rating uses the lowest eligible first-passing requirement: " +
+                          $"{referenceProfile} rung {DescribeRung(reference.Rung)} with " +
+                          $"{reference.EssenceCount} Essences."
+                        : $"Recommended Combat Rating uses the lowest eligible first-passing canonical profile: " +
+                          $"{referenceProfile} rung {DescribeRung(reference.Rung)} with " +
+                          $"{reference.EssenceCount} Essences; " +
+                          $"preceding rung: " +
                           $"{reference.PreviousRung?.Id ?? "none"}.");
             StoreInCache(key, result);
             return result;
@@ -225,10 +227,17 @@ public sealed class DungeonPowerAnalyzer : IDungeonPowerAnalyzer
         CancellationToken cancellationToken)
     {
         CanonicalEquipmentProgressionRung? preceding = null;
-        foreach (var rung in _canonicalBuilds.GetProgressionLadder())
+        var buildsByRating = _canonicalBuilds.GetProgressionLadder()
+            .Select(rung => _canonicalBuilds.CreateBuildForDungeonTier(
+                profile,
+                rung,
+                dungeon.Tier))
+            .OrderBy(build => build.Rating.Overall)
+            .ThenBy(build => build.Rung.Index)
+            .ToList();
+        foreach (var build in buildsByRating)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            var build = _canonicalBuilds.CreateBuild(profile, rung);
             var combatant = await _simulations.CreateCanonicalCombatantAsync(
                 build,
                 cancellationToken);
@@ -237,16 +246,21 @@ public sealed class DungeonPowerAnalyzer : IDungeonPowerAnalyzer
                 dungeon.Tier,
                 [combatant],
                 RecommendationSeeds,
-                PowerAnalysisSimulationRunner.CanonicalAbilities,
+                supplementalAbilities: null,
                 cancellationToken);
             if (validation.CompletionRate < TargetCompletionRate)
             {
-                preceding = rung;
+                preceding = build.Rung;
                 continue;
             }
 
             var rating = build.Rating.Overall;
-            return new ProfileResult(rung, preceding, rating, validation);
+            return new ProfileResult(
+                build.Rung,
+                preceding,
+                rating,
+                build.EquippedEssences.Count,
+                validation);
         }
 
         throw new InvalidOperationException(
@@ -331,6 +345,11 @@ public sealed class DungeonPowerAnalyzer : IDungeonPowerAnalyzer
     private static int[] CreateSeeds(int count, int first) =>
         Enumerable.Range(0, count).Select(x => unchecked(first + x * 7919)).ToArray();
 
+    private static string DescribeRung(CanonicalEquipmentProgressionRung rung) =>
+        rung.UsesProjectedTierScaling
+            ? $"{rung.Id} (projected beyond the live Tier-10 equipment budget)"
+            : rung.Id;
+
     private static void StoreInCache(string key, DungeonPowerRecommendation result)
     {
         if (Cache.Count >= MaximumCacheEntries)
@@ -356,5 +375,6 @@ public sealed class DungeonPowerAnalyzer : IDungeonPowerAnalyzer
         CanonicalEquipmentProgressionRung Rung,
         CanonicalEquipmentProgressionRung? PreviousRung,
         int Rating,
+        int EssenceCount,
         DungeonSimulationAggregate Validation);
 }

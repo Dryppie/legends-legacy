@@ -4,7 +4,6 @@ using Application.Interfaces.Services.LL.Entities;
 using Application.UseCases._AdminDashboard.Creatures.Dtos;
 using Domain.Models.Entities;
 using Domain.Models.Entities.Creatures;
-using Domain.Models.Essences;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
@@ -36,20 +35,14 @@ public sealed class TierOneDungeonBalanceTests
         Enumerable.Range(0, 24).Select(index => unchecked(90107 + index * 104729)).ToArray();
 
     [Fact]
-    public async Task Active_tier_one_dungeons_are_clearable_in_full_worst_grade_gear_with_two_essences()
+    public async Task Full_standard_common_actual_loadout_can_clear_tier_one_dungeons()
     {
         var fixture = CreateFixture();
         var rung = fixture.Builds.GetProgressionLadder()
-            .Single(candidate => candidate.Id == "t1-crude-common");
+            .Single(candidate => candidate.Id == "t1-standard-common");
         var build = fixture.Builds.CreateBuild(CanonicalPartyProfile.Balanced, rung);
-        var essences = new[]
-        {
-            CreateReferenceEssence(build.Character.Id, "essence.goblin_ambusher"),
-            CreateReferenceEssence(build.Character.Id, "essence.skeleton_guardian")
-        };
         var combatant = await fixture.Simulations.CreateCanonicalCombatantAsync(
             build,
-            essences,
             CancellationToken.None);
         var results = new Dictionary<string, DungeonSimulationAggregate>();
         _output.WriteLine(
@@ -64,7 +57,7 @@ public sealed class TierOneDungeonBalanceTests
                 dungeon.Tier,
                 [combatant],
                 BalanceSeeds,
-                PowerAnalysisSimulationRunner.CanonicalAbilities,
+                supplementalAbilities: null,
                 CancellationToken.None);
         }
 
@@ -73,17 +66,15 @@ public sealed class TierOneDungeonBalanceTests
                 $"{result.Key}: {result.Value.Completions}/{result.Value.Attempts}, " +
                 $"{result.Value.TotalCombatTicks / (double)result.Value.Attempts:N0} average ticks");
 
-        Assert.True(
-            results.All(result => result.Value.CompletionRate >= DungeonPowerAnalyzer.TargetCompletionRate),
-            string.Join(
-                ", ",
-                results.Select(result =>
-                    $"{result.Key}: {result.Value.Completions}/{result.Value.Attempts} " +
-                    $"({result.Value.CompletionRate:P0})")));
+        Assert.All(
+            results,
+            result => Assert.True(
+                result.Value.CompletionRate >= DungeonPowerAnalyzer.TargetCompletionRate,
+                $"{result.Key} unexpectedly failed at {result.Value.CompletionRate:P0}."));
     }
 
     [Fact]
-    public async Task Goblin_mines_recommends_the_highest_first_passing_profile_rating()
+    public async Task Goblin_mines_recommends_the_lowest_eligible_first_passing_profile_rating()
     {
         var fixture = CreateFixture();
 
@@ -96,27 +87,98 @@ public sealed class TierOneDungeonBalanceTests
             $"Goblin Mines recommendation: {recommendation.RecommendedPartyPower / 10}; " +
             $"canonical range: {recommendation.LowerRecommendedPower / 10}-" +
             $"{recommendation.UpperRecommendedPower / 10}; " +
-            $"state: {recommendation.State}");
+            $"state: {recommendation.State}; " +
+            $"status: {recommendation.StatusMessage}");
 
         Assert.NotEqual(
             Application.Interfaces.Services.LL.PowerRatings.PowerAnalysisState.CalculationFailed,
             recommendation.State);
+        Assert.Equal(105, recommendation.RecommendedPartyPower / 10);
         Assert.Equal(
-            recommendation.UpperRecommendedPower,
+            recommendation.LowerRecommendedPower,
             recommendation.RecommendedPartyPower);
         Assert.True(
             recommendation.RecommendedPartyPower >= recommendation.LowerRecommendedPower);
+        Assert.Equal(
+            Enum.GetValues<CanonicalPartyProfile>().Length,
+            recommendation.CanonicalPartyCompletionRates.Count);
+        Assert.All(
+            recommendation.CanonicalPartyCompletionRates,
+            entry => Assert.True(
+                entry.Value >= DungeonPowerAnalyzer.TargetCompletionRate,
+                $"{entry.Key} calibrated below the completion target at {entry.Value:P0}."));
+        Assert.Contains(
+            "rung t1-standard-common with 2 Essences",
+            recommendation.StatusMessage,
+            StringComparison.Ordinal);
     }
 
-    private static PlayerEssence CreateReferenceEssence(Guid characterId, string definitionId) =>
-        new()
-        {
-            Id = Guid.NewGuid(),
-            CharacterId = characterId,
-            EssenceDefinitionId = definitionId,
-            Level = 1,
-            PotentialTier = 1
-        };
+    [Theory]
+    [InlineData(
+        "goblin_mines_ii",
+        Domain.Models.Dungeons.Definitions.DungeonTier.Heroic,
+        4,
+        "t4-standard-epic",
+        262,
+        false)]
+    [InlineData(
+        "goblin_mines_iii",
+        Domain.Models.Dungeons.Definitions.DungeonTier.Mythic,
+        6,
+        "t12-standard-common",
+        1548,
+        true)]
+    public async Task Higher_goblin_mines_tiers_find_an_actual_winning_profile(
+        string dungeonId,
+        Domain.Models.Dungeons.Definitions.DungeonTier dungeonTier,
+        int expectedEssenceCount,
+        string expectedRungId,
+        int expectedDisplayedRating,
+        bool expectedProjectedEquipment)
+    {
+        var fixture = CreateFixture();
+
+        var recommendation = await fixture.Analyzer.AnalyzeDungeonAsync(
+            dungeonId,
+            dungeonTier,
+            CancellationToken.None);
+
+        _output.WriteLine(
+            $"{dungeonId}: recommended {recommendation.RecommendedPartyPower / 10}; " +
+            $"canonical range {recommendation.LowerRecommendedPower / 10}-" +
+            $"{recommendation.UpperRecommendedPower / 10}; " +
+            $"state {recommendation.State}; status: {recommendation.StatusMessage}");
+        foreach (var rate in recommendation.CanonicalPartyCompletionRates)
+            _output.WriteLine($"{rate.Key}: {rate.Value:P0}");
+
+        Assert.NotEqual(
+            Application.Interfaces.Services.LL.PowerRatings.PowerAnalysisState.CalculationFailed,
+            recommendation.State);
+        Assert.True(recommendation.RecommendedPartyPower > 0);
+        Assert.Equal(expectedDisplayedRating, recommendation.RecommendedPartyPower / 10);
+        Assert.Equal(
+            recommendation.LowerRecommendedPower,
+            recommendation.RecommendedPartyPower);
+        Assert.NotEmpty(recommendation.CanonicalPartyCompletionRates);
+        Assert.All(
+            recommendation.CanonicalPartyCompletionRates,
+            entry => Assert.True(
+                entry.Value >= DungeonPowerAnalyzer.TargetCompletionRate,
+                $"{entry.Key} calibrated below the completion target at {entry.Value:P0}."));
+        Assert.Contains(
+            $"with {expectedEssenceCount} Essences",
+            recommendation.StatusMessage,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            $"rung {expectedRungId}",
+            recommendation.StatusMessage,
+            StringComparison.Ordinal);
+        Assert.Equal(
+            expectedProjectedEquipment,
+            recommendation.StatusMessage?.Contains(
+                "projected beyond the live Tier-10 equipment budget",
+                StringComparison.Ordinal) ?? false);
+    }
 
     private static BalanceFixture CreateFixture()
     {
@@ -177,7 +239,14 @@ public sealed class TierOneDungeonBalanceTests
         var runFactory = new DungeonRunFactory(dungeons, null!, delves);
         var creatures = new CreatureJsonReader().GetCreaturesFromJson();
         var creatureLookup = new InMemoryCreatureLookup(creatures);
-        var builds = new CanonicalEquipmentBuildFactory(Options.Create(new CraftingBalanceOptions()));
+        var balance = Options.Create(new CraftingBalanceOptions());
+        var builds = new CanonicalEquipmentBuildFactory(
+            new JsonCraftingDefinitionProvider(configuration, apiRoot, options),
+            new ItemStatRollService(balance),
+            new TemperingMechanicsService(balance),
+            new ItemPotentialService(balance),
+            essenceResolver,
+            essenceDefinitions);
         var abilityCatalog = new JsonAbilityCatalogProvider(configuration, apiRoot, options);
         var simulations = new PowerAnalysisSimulationRunner(
             new CombatEngineExecutor(abilityCatalog, essenceDefinitions),

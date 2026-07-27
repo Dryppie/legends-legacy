@@ -31,13 +31,15 @@ The repository already contains a simulation-backed foundation:
 
 Current relevant versions:
 
-- Power algorithm: `13`
-- Combat rules: `4`
-- Benchmark definition: `6`
+- Power algorithm: `21`
+- Combat rules: `8`
+- Benchmark definition: `10`
 - Recommendation seed set: `2`
 - Equipment balance: `5`
 
-The architecture is directionally correct. The missing connection is that dungeon calibration still uses synthetic intensity characters rather than builds funded by the real equipment system.
+The plan is now implemented. The problem statements below are retained as the
+historical rationale for replacing synthetic intensity characters with
+equipment-funded canonical builds.
 
 ## Current problems
 
@@ -113,7 +115,7 @@ For each dungeon:
 3. Find each profile's first build that reaches the approved completion target.
 4. Verify that each preceding build does not reach the target.
 5. Calculate the passing builds' Overall Power using the normal Power calculation.
-6. Publish the highest first-passing Overall Power as `RecommendedPartyPower`.
+6. Publish the lowest eligible first-passing Overall Power as `RecommendedPartyPower`.
 7. Publish the full passing range and derive confidence from profile spread.
 
 The current `72%` completion target can remain initially, but its statistical interpretation must be made explicit.
@@ -130,17 +132,20 @@ It should construct detached combatants for analysis without creating or persist
 
 Every build must use:
 
-- the active equipment balance profile;
-- the real full-equipment slot budget;
+- authored crafting recipes and their real output item bases;
+- the production crafting stat-roll and tempering mechanics;
 - real hand configurations;
 - active tier-specific attribute costs;
-- the constrained equipment allocator;
 - direct and primary-derived cap accounting;
-- deterministic allocation;
+- deterministic, reproducible rolls;
 - production combat attribute construction;
-- fixed canonical abilities appropriate to the profile.
+- two, four, or six explicitly selected Region 1 Essences appropriate to the
+  profile and dungeon difficulty;
+- the active and passive abilities actually supplied by those Essences.
 
-Do not duplicate attribute prices or allocation weights in the Power subsystem. Extract or reuse the canonical loadout definitions already exercised by the attribute-balance analyzer.
+Do not duplicate attribute prices, recipe stat profiles, or item definitions in
+the Power subsystem. Resolve them through the same content and crafting services
+used by player crafting.
 
 ### Canonical identities
 
@@ -152,12 +157,15 @@ Retain the following identities:
 - **Sustain**: exposes healing, barrier, and Health Regeneration sensitivity.
 - **Area**: exposes multi-target sensitivity.
 
-All profiles must receive the same total progression funding at a given ladder rung. They may distribute that funding differently, but no profile may receive free attributes outside the shared budget.
+Profiles use comparable quality, rarity, tempering, and slot milestones, but
+their exact ratings may differ because authored armor and weapon recipes differ.
+That variation is intentional game content and must remain visible in the
+calibrated range.
 
 ### Ability rules
 
 - All numeric ability output continues to scale from Power.
-- Canonical abilities remain isolated simulation definitions.
+- Canonical profiles use only abilities granted by their equipped Region 1 Essences.
 - Every profile must have enough baseline offense to finish ordinary encounters.
 - Sustain and defensive profiles must not be judged successful merely for surviving until the combat tick limit.
 - Dungeon completion still requires actual room victories and successful route completion.
@@ -166,23 +174,23 @@ All profiles must receive the same total progression funding at a given ladder r
 
 Replace synthetic intensity with an ordered, deterministic build ladder.
 
-The ladder should represent meaningful equipment progression states, including:
+The implemented ladder is a full-set matrix:
 
-1. entry/base equipment;
-2. increasing equipment tiers;
-3. increasing quality;
-4. increasing rarity;
-5. tempering progression;
-6. blueprint-enhanced variants where appropriate;
-7. Masterwork quality;
-8. Legacy rarity;
-9. the complete maximum-progression loadout.
+1. every build equips all seven selected equipment slots;
+2. quality is fixed at Standard;
+3. every equipment tier has Common, Uncommon, Rare, Epic, Unique, and
+   Legendary profiles;
+4. equipment Tiers 1 through 10 use production budgets;
+5. equipment Tiers 11 through 20 are clearly labelled calibration projections
+   beyond the current content limit;
+6. rarity is produced through the active tempering mechanics.
 
 The exact ladder must be derived from active crafting rules rather than copied into a second hand-authored table.
 
 ### Maximum equipment
 
-Maximum-quality, Legacy-rarity equipment is a ceiling test, not the basis for every recommendation.
+The highest projected Standard/Legendary equipment is a ceiling test, not the
+basis for every recommendation.
 
 It should prove that:
 
@@ -204,7 +212,8 @@ The canonical ladder must explicitly define its treatment of:
 Recommended initial approach:
 
 - use deterministic level/base-stat anchors;
-- use fixed canonical abilities;
+- equip two declared Region 1 Essences for Tier I, four for Tier II, and six
+  for Tier III;
 - exclude player-specific permanent bonuses;
 - use a declared canonical Essence policy;
 - allow the Power benchmark to account for the resulting complete combatant.
@@ -262,7 +271,7 @@ A binary search may be used only after the ladder has been proven monotonic. Eve
 
 ### Recommendation semantics
 
-- `RecommendedPartyPower`: highest first-passing Overall Power among valid canonical profiles.
+- `RecommendedPartyPower`: lowest eligible first-passing Overall Power among valid canonical profiles.
 - `LowerRecommendedPower`: lowest positive passing Power among valid specialized profiles.
 - `UpperRecommendedPower`: highest passing Power among valid specialized profiles.
 - `Confidence`: derived from statistical confidence, unavailable profiles, and profile spread.
@@ -368,12 +377,14 @@ Startup logging should summarize results and provide concise failure diagnostics
 
 ### Canonical build tests
 
-- Every profile spends the same authorized budget at each rung.
-- No profile exceeds item or combat caps.
-- Direct and primary-derived cap use is counted together.
+- Every equipment instance references an enabled authored recipe and its real output item.
+- Every profile defines six distinct Region 1 Essences and equips exactly
+  two, four, or six according to dungeon tier.
+- No profile receives direct synthetic equipment attributes or simulation-only abilities.
 - Builds are deterministic.
 - Builds use the active equipment balance version.
-- No profile receives unbudgeted attributes.
+- The ladder uses real selected recipes and item bases. Any tier beyond the
+  live equipment budget is explicitly marked as projected.
 
 ### Power progression tests
 
@@ -427,7 +438,8 @@ A dungeon recommendation is approved only when:
 - duration and simulation counts are positive;
 - completion rates are within `[0, 1]`;
 - all combat and recommendation outputs are finite;
-- the recommendation does not exceed attainable maximum Power;
+- a recommendation beyond the live Tier-10 equipment budget is explicitly
+  labelled as projected rather than presented as currently attainable;
 - the result is deterministic;
 - no intrinsic diagnostic error remains.
 
@@ -463,14 +475,16 @@ The Dungeon Recommended Power recalibration is complete when:
 
 - canonical recommendation builds are funded through the active equipment system;
 - synthetic direct-stat intensity formulas no longer determine dungeon recommendations;
-- the full progression ladder is attainable, deterministic, and cap-safe;
+- the live progression ladder is deterministic and cap-safe, while projected
+  tiers are explicitly separated from currently attainable content;
 - entry and maximum builds have valid Power;
-- the highest first-passing canonical-profile rung defines each recommendation;
+- the lowest eligible first-passing canonical-profile rung defines each recommendation;
 - every selected profile's preceding rung is proven insufficient;
 - unavailable profiles lower confidence without invalidating the remaining calibrated profiles;
 - all authored dungeons have positive, deterministic recommendations;
 - family diagnostics no longer cascade-delete valid neighbors;
-- all supported dungeons remain within attainable maximum progression;
+- any dungeon beyond attainable maximum progression reports the projected
+  equipment tier required to clear it;
 - recommendation cache identity includes every relevant combat, benchmark, seed, content, and equipment-balance dependency;
 - the full calibration report passes;
 - relevant backend tests pass;

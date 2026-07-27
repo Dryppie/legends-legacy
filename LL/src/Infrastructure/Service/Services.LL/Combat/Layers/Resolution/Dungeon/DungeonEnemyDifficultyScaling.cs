@@ -6,8 +6,9 @@ namespace Services.LL.Combat.Layers.Resolution.Dungeon;
 
 public static class DungeonEnemyDifficultyScaling
 {
-    // Tier I deliberately starts above the authored creature baseline so that
-    // Goblin Mines remains a meaningful dungeon rather than ordinary-world combat.
+    // Tier I deliberately starts above the authored creature baseline. Every
+    // higher difficulty compounds from that dungeon baseline, not from the
+    // original world-creature baseline.
     public const float TierOneStrengthMultiplier = 3f;
     public const float StrengthMultiplierPerTier = 5f;
 
@@ -29,9 +30,8 @@ public static class DungeonEnemyDifficultyScaling
     ];
 
     public static float GetStrengthMultiplier(int dungeonTier) =>
-        dungeonTier <= 1
-            ? TierOneStrengthMultiplier
-            : MathF.Pow(StrengthMultiplierPerTier, dungeonTier - 1);
+        TierOneStrengthMultiplier
+        * MathF.Pow(StrengthMultiplierPerTier, Math.Max(0, dungeonTier - 1));
 
     public static void Apply(CombatEntity enemy, int dungeonTier)
     {

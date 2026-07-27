@@ -93,20 +93,62 @@ no process-local rating cache or combat seeds.
 `DungeonPowerAnalyzer` continues to calibrate against the real dungeon rather
 than an invented benchmark:
 
-1. `CanonicalEquipmentBuildFactory` creates the attainable equipment ladder.
+1. `CanonicalEquipmentBuildFactory` crafts detached instances from authored
+   recipes and item bases using the production stat-roll and tempering rules.
 2. Each canonical profile runs the actual dungeon over the fixed route seeds.
-3. Each profile's first rung reaching the 72% completion target is selected.
-4. Those builds' direct attributes are passed to `CombatRatingCalculator`.
-5. The highest first-passing profile rating supplies Recommended Combat Rating;
+3. Each profile's equipment rungs are ordered by calculated Combat Rating, and
+   the lowest-rated rung reaching the 72% completion target is selected.
+4. Actual equipment modifiers and Region 1 Essence attributes are passed to
+   `CombatRatingCalculator`.
+5. The lowest eligible first-passing profile rating supplies Recommended Combat Rating;
    all valid profiles supply the diagnostic lower and upper range.
 
 The character number and dungeon recommendation therefore use the exact same
 weights and scale.
 
-Canonical builds exclude player-specific permanent bonuses and player Essence
-loadouts. The low end starts at base attributes, then the tutorial chest, a real
-two-handed weapon, and whole-slot acquisition. Later rungs cover tier, quality,
-rarity, and tempering progression.
+Canonical builds exclude player-specific permanent bonuses. They equip these
+fixed, reproducible game-content loadouts. Essence order matters: Tier I uses
+the first two, Tier II the first four, and Tier III all six.
+
+| Profile | Level anchor | Armor | Weapon | Ordered Region 1 Essence pool |
+| --- | ---: | --- | --- | --- |
+| Balanced | 5 | Medium Mail, Medium Helm, Medium Greaves | Greatsword | Goblin, Vampire Bat, Goblin Warrior, Enchanted Fairy, Goblin Archer, Pixie |
+| Offense | 15 | Light Vest, Light Hood, Light Legwraps | Gauntlets | Goblin Archer, Glade Panther, Goblin Warrior, Flame Imp, Hobgoblin, Vampire Bat |
+| Sustain | 15 | Cloth Robe, Cloth Cowl, Cloth Pants | Staff | Enchanted Fairy, Pixie, Treant Sapling, Goblin Shaman, Brown Slime, Green Slime |
+| Defensive | 10 | Heavy Breastplate, Heavy Helm, Heavy Legplates | Maul | Brown Slime, Goblin Warrior, Treant Sapling, Goblin Shaman, Blue Slime, Moss Lizard |
+| Area | 15 | Cloth Robe, Cloth Cowl, Cloth Pants | Staff | Flame Imp, Pixie, Frost Imp, Shadow Imp, Goblin Shaman, Rainbow Slime |
+
+The effective character level is raised when necessary to make the loadout
+legal under the production slot-unlock rule: at least level 10 for two
+Essences, level 30 for four, and level 50 for six.
+
+Every profile also equips the authored Ring, Amulet, and Relic recipes. The
+calibration ladder is a complete matrix of 120 full equipment sets: equipment
+Tiers 1 through 20, each represented once at Common, Uncommon, Rare, Epic,
+Unique, and Legendary rarity. Quality is always Standard, so rarity and
+equipment tier are the only gear-progression axes.
+
+Tiers 1 through 10 use the production equipment budget table. Tiers 11 through
+20 are calibration-only projections that continue the Tier-10 budget by 25% per
+tier. They do not unlock live crafting content; they expose when a dungeon
+currently requires more equipment power than the live Tier-10 catalog can
+provide. Recommendation diagnostics label such a selected rung as projected.
+
+Essence abilities are the actual abilities owned by those Essences; dungeon
+calibration no longer injects synthetic canonical damage, healing, or barrier
+abilities. Combat Rating itself still counts only their resolved attributes.
+
+The deterministic Goblin Mines regressions currently resolve to:
+
+- Tier I: displayed Combat Rating 105, Tier-1 Standard/Common Balanced
+  equipment, and two Essences.
+- Tier II: displayed Combat Rating 262, Tier-4 Standard/Epic Offense equipment,
+  and four Essences.
+- Tier III: displayed Combat Rating 1548, projected Tier-12 Standard/Common
+  Offense equipment, and six Essences.
+
+The Tier-12 result confirms that no profile within the live Tier-10 equipment
+budget currently reaches the Mythic completion target.
 
 The requirement profile still examines real encounter groups and creature
 abilities to describe physical, magical, area, boss, control, and attrition
@@ -120,11 +162,13 @@ identity, tier, content hash, algorithm version, combat-rules version, rating
 definition version, recommendation seed version, and equipment balance version
 match.
 
-`PowerRatingAlgorithm.Version` is 17 for conservative canonical-profile
-recommendations, and `CombatRulesVersion` is 7 for the restored 3× Tier-I
-dungeon enemy scaling.
+`PowerRatingAlgorithm.Version` is 21 for the full Standard-quality
+tier-by-rarity profile matrix.
+`CombatRulesVersion` is 8 for the compounded dungeon difficulty
+curve: Tier I is 3× the authored creature baseline, Tier II is 5× Tier I
+(15× authored), and Tier III is 5× Tier II (75× authored).
 The legacy-named `BenchmarkDefinitionVersion` column now stores
-the deterministic rating-definition version and is 10. Existing recommendations
+the deterministic rating-definition version and remains 10. Existing recommendations
 are stale and will be recalibrated.
 
 `DungeonPowerCalibration:Enabled` controls whether missing or stale entries may

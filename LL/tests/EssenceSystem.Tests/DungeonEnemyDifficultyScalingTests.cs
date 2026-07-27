@@ -11,8 +11,8 @@ public sealed class DungeonEnemyDifficultyScalingTests
 {
     [Theory]
     [InlineData(1, 3)]
-    [InlineData(2, 5)]
-    [InlineData(3, 25)]
+    [InlineData(2, 15)]
+    [InlineData(3, 75)]
     public void GetStrengthMultiplier_uses_the_calibrated_tier_curve(
         int dungeonTier,
         float expectedMultiplier)
@@ -24,8 +24,8 @@ public sealed class DungeonEnemyDifficultyScalingTests
 
     [Theory]
     [InlineData(1, 300, 30)]
-    [InlineData(2, 500, 50)]
-    [InlineData(3, 2500, 250)]
+    [InlineData(2, 1500, 150)]
+    [InlineData(3, 7500, 750)]
     public void Apply_scales_core_stats_without_scaling_capped_rates(
         int dungeonTier,
         int expectedMaxHealth,
@@ -60,8 +60,8 @@ public sealed class DungeonEnemyDifficultyScalingTests
             dungeonTier switch
             {
                 1 => 30,
-                2 => 50,
-                _ => 250
+                2 => 150,
+                _ => 750
             },
             enemy.GetAttributeValue(AttributeType.Spirit));
         Assert.Equal(5, enemy.GetAttributeValue(AttributeType.CritChance));
