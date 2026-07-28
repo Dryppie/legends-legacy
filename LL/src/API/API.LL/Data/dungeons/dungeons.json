@@ -460,9 +460,7 @@
           "type": "Combat",
           "weight": 1,
           "encounterIds": [
-            "skeleton_archer",
-            "skeleton_mage",
-            "skeleton_warrior"
+            "skeleton"
           ]
         },
         {
@@ -470,7 +468,7 @@
           "type": "Combat",
           "weight": 0.8,
           "encounterIds": [
-            "large_rat"
+            "skeleton"
           ]
         },
         {
@@ -478,7 +476,7 @@
           "type": "Combat",
           "weight": 0.8,
           "encounterIds": [
-            "vampire_bat"
+            "skeleton"
           ]
         },
         {
@@ -486,7 +484,7 @@
           "type": "Combat",
           "weight": 0.6,
           "encounterIds": [
-            "vampire_bat"
+            "skeleton"
           ]
         },
         {
@@ -494,20 +492,18 @@
           "type": "MiniBoss",
           "weight": 1,
           "encounterIds": [
-            "skeleton_warrior",
-            "skeleton_mage",
-            "skeleton_archer"
+            "skeleton"
           ],
-          "featuredEncounterId": "skeleton_warrior"
+          "featuredEncounterId": "skeleton"
         },
         {
           "id": "boss.1",
           "type": "Boss",
           "weight": 1,
           "encounterIds": [
-            "specter"
+            "skeleton"
           ],
-          "featuredEncounterId": "specter"
+          "featuredEncounterId": "skeleton"
         }
       ],
       "difficulties": [

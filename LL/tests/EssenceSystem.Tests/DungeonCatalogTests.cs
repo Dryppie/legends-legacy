@@ -118,6 +118,31 @@ public sealed class DungeonCatalogTests
     }
 
     [Fact]
+    public void TierOneDungeonFamilies_use_the_requested_creature_rosters()
+    {
+        var dungeons = MaterializeCurrentCatalog();
+
+        var goblinMinesCreatures = dungeons
+            .Where(dungeon => DungeonDefinitionIdentity.GetFamilyId(dungeon.Id) == "goblin_mines")
+            .SelectMany(dungeon => dungeon.Rooms)
+            .SelectMany(room => room.EncounterIds)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .OrderBy(id => id)
+            .ToArray();
+        Assert.Equal(
+            ["goblin", "goblin_archer", "goblin_shaman", "goblin_warrior", "hobgoblin"],
+            goblinMinesCreatures);
+
+        var forgottenCatacombsCreatures = dungeons
+            .Where(dungeon => DungeonDefinitionIdentity.GetFamilyId(dungeon.Id) == "forgotten_catacombs")
+            .SelectMany(dungeon => dungeon.Rooms)
+            .SelectMany(room => room.EncounterIds)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToArray();
+        Assert.Equal(["skeleton"], forgottenCatacombsCreatures);
+    }
+
+    [Fact]
     public void MaterializedDifficulties_DoNotShareMutableCollections()
     {
         var goblinMines = MaterializeCurrentCatalog()

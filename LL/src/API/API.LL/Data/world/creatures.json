@@ -152,51 +152,51 @@
     },
     {
       "id": "00000000-0000-0000-0000-000000000026",
-      "name": "Feral Ghoul",
-      "imagePath": "feral_ghoul",
-      "archetype": "Balanced"
+      "name": "Lumo Wisp",
+      "imagePath": "lumo_wisp",
+      "archetype": "Support"
     },
     {
       "id": "00000000-0000-0000-0000-000000000027",
-      "name": "Plague Ghoul",
-      "imagePath": "plague_ghoul",
-      "archetype": "Balanced"
+      "name": "Lumo Sentinel",
+      "imagePath": "lumo_sentinel",
+      "archetype": "Tank"
     },
     {
       "id": "00000000-0000-0000-0000-000000000028",
-      "name": "Ravenous Ghoul",
-      "imagePath": "ravenous_ghoul",
-      "archetype": "Balanced"
+      "name": "Crystal Wisp",
+      "imagePath": "crystal_wisp",
+      "archetype": "Support"
     },
     {
       "id": "00000000-0000-0000-0000-000000000029",
-      "name": "Skeleton Archer",
-      "imagePath": "skeleton_archer",
-      "archetype": "Balanced"
+      "name": "Grave Hound",
+      "imagePath": "grave_hound",
+      "archetype": "Bruiser"
     },
     {
       "id": "00000000-0000-0000-0000-000000000030",
-      "name": "Skeleton Mage",
-      "imagePath": "skeleton_mage",
-      "archetype": "Balanced"
+      "name": "Grave Wisp",
+      "imagePath": "grave_wisp",
+      "archetype": "Support"
     },
     {
       "id": "00000000-0000-0000-0000-000000000031",
-      "name": "Skeleton Warrior",
-      "imagePath": "skeleton_warrior",
+      "name": "Skeleton",
+      "imagePath": "skeleton",
       "archetype": "Balanced"
     },
     {
       "id": "00000000-0000-0000-0000-000000000032",
-      "name": "Ant Worker",
-      "imagePath": "ant_worker",
-      "archetype": "Support"
+      "name": "Thornback Boar",
+      "imagePath": "thornback_boar",
+      "archetype": "Bruiser"
     },
     {
       "id": "00000000-0000-0000-0000-000000000033",
-      "name": "Fire Ant",
-      "imagePath": "fire_ant",
-      "archetype": "DPS"
+      "name": "Hollow Stag",
+      "imagePath": "hollow_stag",
+      "archetype": "Balanced"
     },
     {
       "id": "00000000-0000-0000-0000-000000000034",
@@ -236,9 +236,9 @@
     },
     {
       "id": "00000000-0000-0000-0000-000000000040",
-      "name": "Scarecrow",
-      "imagePath": "scarecrow",
-      "archetype": "Hazard"
+      "name": "Rotroot Shambler",
+      "imagePath": "rotroot_shambler",
+      "archetype": "Tank"
     },
     {
       "id": "00000000-0000-0000-0000-000000000041",
@@ -248,27 +248,27 @@
     },
     {
       "id": "00000000-0000-0000-0000-000000000042",
-      "name": "Apparition",
-      "imagePath": "apparition",
-      "archetype": "Hazard"
+      "name": "Smolder Rat",
+      "imagePath": "smolder_rat",
+      "archetype": "Balanced"
     },
     {
       "id": "00000000-0000-0000-0000-000000000043",
-      "name": "Specter",
-      "imagePath": "specter",
-      "archetype": "DPS"
-    },
-    {
-      "id": "00000000-0000-0000-0000-000000000044",
-      "name": "Zombie",
-      "imagePath": "zombie",
+      "name": "Cinder Beetle",
+      "imagePath": "cinder_beetle",
       "archetype": "Tank"
     },
     {
-      "id": "00000000-0000-0000-0000-000000000045",
-      "name": "Half Zombie",
-      "imagePath": "half_zombie",
+      "id": "00000000-0000-0000-0000-000000000044",
+      "name": "Bog Mite",
+      "imagePath": "bog_mite",
       "archetype": "Balanced"
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000045",
+      "name": "Poisonous Rat",
+      "imagePath": "poisonous_rat",
+      "archetype": "DPS"
     },
     {
       "id": "00000000-0000-0000-0000-000000000046",
@@ -290,32 +290,20 @@
     },
     {
       "id": "00000000-0000-0000-0000-000000000049",
-      "name": "Burrowed Horror",
-      "imagePath": "burrowed_horror",
-      "archetype": "DPS"
+      "name": "Rotfly Toad",
+      "imagePath": "rotfly_toad",
+      "archetype": "Balanced"
     },
     {
       "id": "00000000-0000-0000-0000-000000000050",
-      "name": "Cave Leech",
-      "imagePath": "cave_leech",
-      "archetype": "Support"
+      "name": "Cave Bat",
+      "imagePath": "cave_bat",
+      "archetype": "Balanced"
     },
     {
       "id": "00000000-0000-0000-0000-000000000051",
-      "name": "Widow Stalker",
-      "imagePath": "widow_stalker",
-      "archetype": "DPS"
-    },
-    {
-      "id": "00000000-0000-0000-0000-000000000052",
-      "name": "Stonejaw Grub",
-      "imagePath": "stonejaw_grub",
-      "archetype": "Tank"
-    },
-    {
-      "id": "00000000-0000-0000-0000-000000000053",
-      "name": "Deep Burrower",
-      "imagePath": "deep_burrower",
+      "name": "Giant Bat",
+      "imagePath": "giant_bat",
       "archetype": "Bruiser"
     },
     {
