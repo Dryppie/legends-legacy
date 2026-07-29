@@ -1,5 +1,13 @@
 import { computed, effect, Injectable, signal } from '@angular/core';
-import { catchError, finalize, Observable, of, shareReplay, tap, throwError } from 'rxjs';
+import {
+  catchError,
+  finalize,
+  Observable,
+  of,
+  shareReplay,
+  tap,
+  throwError,
+} from 'rxjs';
 import { CharacterActionsStateService } from '../character-actions/character-actions.state.service';
 import { AuthService } from '../auth/auth.service';
 import {
@@ -110,9 +118,7 @@ export class GameBootstrapStateService {
     this._serverTimeUtc.set(bootstrap.serverTimeUtc);
     setAttributeDefinitions(bootstrap.attributeDefinitions);
     this.auth.updateCharacter(bootstrap.character);
-    this.tutorialState.initialize(bootstrap.tutorial, {
-      resumeCurrentStep: true,
-    });
+    this.tutorialState.initialize(bootstrap.tutorial);
     this.characterActionsState.initializeFromBootstrap(bootstrap.currentAction);
     this._loaded.set(true);
   }

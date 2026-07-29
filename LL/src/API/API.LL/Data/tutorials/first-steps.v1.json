@@ -35,7 +35,7 @@
     },
     {
       "key": "equip_essence",
-      "objective": "Attune the Goblin's Essence in your active essence loadout.",
+      "objective": "Equip the Goblin's Essence and save your active loadout.",
       "requiredAmount": 1,
       "actionLabel": "Open Loadout",
       "destinationRoute": "/game/character/essences",
@@ -44,20 +44,6 @@
       "trigger": {
         "type": "EssenceLoadoutChanged",
         "essenceDefinitionId": "essence.legacy.goblin"
-      },
-      "nextStepKey": "craft_equipment"
-    },
-    {
-      "key": "craft_equipment",
-      "objective": "Open Crafting to claim your Tutorial Chest.",
-      "requiredAmount": 1,
-      "actionLabel": "Open Crafting",
-      "destinationRoute": "/game/professions/crafting",
-      "tourPageId": "tutorial-crafting",
-      "guidePageId": "tutorial-crafting",
-      "trigger": {
-        "type": "ClientRouteVisited",
-        "route": "/game/professions/crafting"
       },
       "nextStepKey": "equip_equipment"
     },
@@ -75,6 +61,20 @@
         "itemBaseIds": [
           "tutorial_chest"
         ]
+      },
+      "nextStepKey": "start_lumo_ruins"
+    },
+    {
+      "key": "start_lumo_ruins",
+      "objective": "Begin your first expedition in Lumo Ruins.",
+      "requiredAmount": 1,
+      "actionLabel": "Go to Lumo Ruins",
+      "destinationRoute": "/game/world/shenic?area=region_01_area_01",
+      "tourPageId": "tutorial-lumo-ruins",
+      "guidePageId": "tutorial-lumo-ruins",
+      "trigger": {
+        "type": "CombatActionStarted",
+        "areaId": "region_01_area_01"
       },
       "nextStepKey": "complete"
     }

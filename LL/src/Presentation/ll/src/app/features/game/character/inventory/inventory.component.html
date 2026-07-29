@@ -119,10 +119,7 @@
         </div>
       </div>
 
-      <div
-        class="min-h-0 flex-1 overflow-y-auto p-2"
-        data-tour="inventory-items"
-      >
+      <div class="min-h-0 flex-1 overflow-y-auto p-2">
         <div
           *ngIf="!filteredItems.length"
           class="ll-empty-state h-full min-h-60"
@@ -138,6 +135,7 @@
                 selectedItemsContains(inventoryItem),
               'hover:border-light_gray/70 hover:bg-black/30': isScrapMode,
             }"
+            data-tour="inventory-items"
           >
             <app-inventory-item
               class="min-w-0 flex-1"
@@ -146,6 +144,7 @@
                   ? 'inventory-equipment-item'
                   : null
               "
+              [attr.data-item-base-id]="inventoryItem.itemInstance.itemBase.id"
               [inventoryItem]="inventoryItem"
             ></app-inventory-item>
 

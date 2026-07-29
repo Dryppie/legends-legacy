@@ -9,16 +9,26 @@
       "selector": "[data-tour=inventory-tab-all]"
     },
     "title": "1. Equipment tab",
-    "description": "Click Equipment to find the Tutorial Chest.",
+    "description": "Open Equipment to find the starter chest you earned by attuning your Essence.",
     "position": "bottom"
   },
   {
     "id": "find-tutorial-equipment",
     "kind": "click",
     "element": "[data-tour=inventory-items]",
-    "actionSelector": "[data-tour=inventory-equipment-item]",
-    "title": "2. Inventory items",
-    "description": "Your Tutorial Chest is listed here. Select it to open its equipment details.",
-    "position": "right"
+    "actionSelector": "[data-tour=inventory-equipment-item][data-item-base-id=tutorial_chest]",
+    "title": "2. Starter chest",
+    "description": "Select the Tutorial Chest to review its Health, Armor, and Resistance bonuses.",
+    "position": "bottom"
+  },
+  {
+    "id": "equip-tutorial-equipment",
+    "kind": "click",
+    "element": "[data-tour=tutorial-equipment-equip]",
+    "actionSelector": "[data-tour=tutorial-equipment-equip]",
+    "targetTimeoutMs": 5000,
+    "title": "3. Equip",
+    "description": "Equip the Tutorial Chest to strengthen your character.",
+    "position": "bottom"
   }
 ]

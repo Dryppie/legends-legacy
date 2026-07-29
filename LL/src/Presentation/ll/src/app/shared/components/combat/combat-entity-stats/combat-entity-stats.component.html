@@ -16,6 +16,7 @@
         }"
         (click)="selectEntity(participant.id)"
         [attr.aria-pressed]="selectedEntityId === participant.id"
+        data-tour-action="combatant-row"
       >
         <div class="flex min-w-0 items-center justify-between gap-3">
           <div class="min-w-0">
@@ -53,7 +54,7 @@
               participant.team === 'Friendly' ? 'text-primary' : 'text-danger'
             "
           >
-            {{ participant.team === 'Friendly' ? 'Yours' : 'Enemy' }}
+            {{ participant.team === "Friendly" ? "Yours" : "Enemy" }}
           </span>
           <span
             *ngIf="selectedEntityId !== participant.id"
@@ -167,7 +168,7 @@
     </div>
 
     <div class="hidden overflow-x-auto rounded border border-white/10 lg:block">
-      <div class="min-w-[66rem]">
+      <div class="min-w-[66rem]" data-tour="combatant-stats">
         <div
           class="grid grid-cols-[minmax(4.5rem,7rem)_minmax(7rem,2fr)_minmax(16rem,1.3fr)_7rem_6rem_6rem_6rem_6rem] items-center gap-3 bg-white/[0.035] px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-primary"
         >
@@ -193,10 +194,8 @@
             [ngClass]="{
               'bg-primary/[0.055]': selectedEntityId === participant.id,
             }"
-            [attr.data-tour]="
-              participant.team === 'Hostile' ? 'enemy-combat-stats' : null
-            "
             [attr.aria-pressed]="selectedEntityId === participant.id"
+            data-tour-action="combatant-row"
           >
             <span
               class="text-[10px] font-semibold uppercase tracking-[0.14em]"
@@ -205,7 +204,7 @@
                 participant.team === 'Friendly' ? 'text-primary' : 'text-danger'
               "
             >
-              {{ participant.team === 'Friendly' ? 'Yours' : 'Enemy' }}
+              {{ participant.team === "Friendly" ? "Yours" : "Enemy" }}
             </span>
 
             <span
@@ -322,11 +321,8 @@
     </div>
 
     <ng-container *ngIf="selectedStats as stats">
-      <div
-        class="mt-3 flex min-h-0 flex-col gap-3"
-        data-tour="your-combat-stats"
-      >
-        <div class="flex flex-col gap-2">
+      <div class="mt-3 flex min-h-0 flex-col gap-3">
+        <div class="flex flex-col gap-2" data-tour="your-combat-stats">
           <span
             class="hidden text-[10px] font-semibold uppercase tracking-[0.18em] text-primary lg:block"
           >
@@ -424,7 +420,7 @@
                 [attr.aria-label]="sortAriaLabel('uses')"
                 (click)="sortAbilities('uses')"
               >
-                Uses / Procs {{ sortIndicator('uses') }}
+                Uses / Procs {{ sortIndicator("uses") }}
               </button>
               <button
                 type="button"
@@ -432,7 +428,7 @@
                 [attr.aria-label]="sortAriaLabel('damage')"
                 (click)="sortAbilities('damage')"
               >
-                Damage {{ sortIndicator('damage') }}
+                Damage {{ sortIndicator("damage") }}
               </button>
               <button
                 type="button"
@@ -440,7 +436,7 @@
                 [attr.aria-label]="sortAriaLabel('healing')"
                 (click)="sortAbilities('healing')"
               >
-                Healing {{ sortIndicator('healing') }}
+                Healing {{ sortIndicator("healing") }}
               </button>
               <button
                 type="button"
@@ -448,7 +444,7 @@
                 [attr.aria-label]="sortAriaLabel('barrier')"
                 (click)="sortAbilities('barrier')"
               >
-                Barrier {{ sortIndicator('barrier') }}
+                Barrier {{ sortIndicator("barrier") }}
               </button>
             </div>
             <ng-container *ngFor="let ability of sortedAbilities">
@@ -472,7 +468,7 @@
                       "
                     >
                       avg
-                      {{ averagePrimaryOutput(ability) | number: '1.1-1' }}
+                      {{ averagePrimaryOutput(ability) | number: "1.1-1" }}
                     </ng-container>
                   </span>
                   <span

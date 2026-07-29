@@ -12,7 +12,9 @@
         "
       >
         <div data-tour="essence-absorb-details-content">
-          <app-essence-details [essence]="selectedEssence"></app-essence-details>
+          <app-essence-details
+            [essence]="selectedEssence"
+          ></app-essence-details>
         </div>
         <div
           class="mt-4 flex items-center justify-between gap-2"
@@ -48,16 +50,14 @@
     </div>
   </div>
   <!-- INVENTORY ESSENCES LIST -->
-  <div
-    class="flex h-full w-full flex-col space-y-2 overflow-y-auto md:order-1"
-    data-tour="inventory-essences-list"
-  >
+  <div class="flex h-full w-full flex-col space-y-2 overflow-y-auto md:order-1">
     <app-selectable-list-filter
       [storageKey]="'essences-absorb'"
       [items]="essenceState.inventoryEssences()"
       [selectedItem]="essenceState.selectedInventoryItem()"
       [filterOptions]="essenceFilters"
       tourItemId="inventory-essence-item"
+      data-tour="inventory-essences-list"
       (select)="selectEssence($event)"
     >
       <!-- How *one* essence row looks -->

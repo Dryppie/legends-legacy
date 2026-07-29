@@ -1,4 +1,6 @@
+using Application.UseCases.Tutorials.Commands.AttuneStarterEssence;
 using Application.UseCases.Tutorials.Commands.CompleteClientTutorialStep;
+using Application.UseCases.Tutorials.Commands.SkipTutorial;
 using Application.UseCases.Tutorials.Commands.StartTrainingBattle;
 using Application.UseCases.CharacterActions.Dtos.Responses.CombatDtos;
 using Application.UseCases.Tutorials.Dtos;
@@ -23,4 +25,12 @@ public sealed class TutorialController : BaseController
     [HttpPost("start-training-battle")]
     public async Task<ActionResult<Response<CombatResultDto>>> StartTrainingBattle() =>
         await Mediator.Send(new StartTrainingBattleCommand(CurrentCharacterGuid));
+
+    [HttpPost("attune-starter-essence")]
+    public async Task<ActionResult<TutorialStateDto?>> AttuneStarterEssence() =>
+        await Mediator.Send(new AttuneStarterEssenceCommand(CurrentCharacterGuid));
+
+    [HttpPost("skip")]
+    public async Task<ActionResult<TutorialCompletionDto>> Skip() =>
+        await Mediator.Send(new SkipTutorialCommand(CurrentCharacterGuid));
 }

@@ -19,21 +19,34 @@ export class TutorialPresenterService {
 
     return {
       stepKey: tutorial.currentStep,
-      route: tutorial.presentation?.destinationRoute ?? tutorial.destinationRoute,
+      route:
+        tutorial.presentation?.destinationRoute ?? tutorial.destinationRoute,
       tourPageId: tutorial.presentation?.tourPageId ?? tutorial.tourPageId,
     };
   });
 
   constructor() {
     this.router.events
-      .pipe(filter((event): event is NavigationEnd => event instanceof NavigationEnd))
+      .pipe(
+        filter(
+          (event): event is NavigationEnd => event instanceof NavigationEnd,
+        ),
+      )
       .subscribe((event) => this.currentUrl.set(event.urlAfterRedirects));
 
     effect(() => {
       const presentation = this.activePresentation();
       const url = this.currentUrl();
       const tourPageId = presentation?.tourPageId;
-      if (!tourPageId || !this.isCurrentRoute(presentation.route, url)) {
+      if (!presentation || !tourPageId) {
+        return;
+      }
+
+      if (!this.isCurrentRoute(presentation.route, url)) {
+        if (this.tour.state()?.pageId === tourPageId) {
+          this.tour.stop(false);
+        }
+        this.lastStartedKey = '';
         return;
       }
 
@@ -52,14 +65,9 @@ export class TutorialPresenterService {
   }
 
   private isCurrentRoute(expectedRoute: string, actualRoute: string): boolean {
-    const expected = this.normalizeRoute(expectedRoute);
-    const actual = this.normalizeRoute(actualRoute);
-
-    if (expected.includes('?')) {
-      return actual === expected;
-    }
-
-    return actual === expected || actual.startsWith(`${expected}?`);
+    const expectedPath = this.normalizeRoute(expectedRoute).split('?')[0];
+    const actualPath = this.normalizeRoute(actualRoute).split('?')[0];
+    return actualPath === expectedPath;
   }
 
   private normalizeRoute(route: string): string {

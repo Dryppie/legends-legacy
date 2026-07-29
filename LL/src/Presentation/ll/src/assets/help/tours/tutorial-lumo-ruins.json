@@ -1,0 +1,11 @@
+[
+  {
+    "id": "start-lumo-ruins",
+    "kind": "click",
+    "element": "[data-tour=lumo-ruins-battle]",
+    "actionSelector": "[data-tour=lumo-ruins-battle]",
+    "title": "1. Begin your expedition",
+    "description": "Start combat in Lumo Ruins. Unlike the training fight, this expedition continues over time until you stop it.",
+    "position": "left"
+  }
+]

@@ -65,6 +65,69 @@ public sealed class TutorialService : ITutorialService, ITutorialProgressionServ
         return MapState(progress);
     }
 
+    public async Task<TutorialState?> AttuneStarterEssenceAsync(
+        Guid characterId,
+        CancellationToken cancellationToken)
+    {
+        var progress = await GetOrCreateProgressAsync(characterId, false, cancellationToken);
+        if (progress.IsCompleted ||
+            progress.CurrentStep != TutorialConstants.StepEquipEssence)
+        {
+            CacheProgress(progress);
+            return MapState(progress);
+        }
+
+        var tutorialEssence = await EnsureTutorialEssenceAbsorbedAsync(
+            characterId,
+            cancellationToken);
+        await EnsureTutorialEssenceEquippedAsync(
+            characterId,
+            tutorialEssence,
+            cancellationToken);
+        await EnsureTutorialEquipmentGrantedAsync(progress, cancellationToken);
+
+        progress.EssenceEquippedAt ??= DateTimeOffset.UtcNow;
+        SetStep(progress, TutorialConstants.StepEquipEquipment);
+
+        await _context.SaveChangesAsync(cancellationToken);
+        await PublishTutorialStateChangedAsync(progress, cancellationToken);
+        return MapState(progress);
+    }
+
+    public async Task<TutorialCompletion> SkipAsync(
+        Guid characterId,
+        CancellationToken cancellationToken)
+    {
+        var progress = await GetOrCreateProgressAsync(characterId, false, cancellationToken);
+        if (!progress.IsCompleted)
+        {
+            var tutorialEssence = await EnsureTutorialEssenceAbsorbedAsync(
+                characterId,
+                cancellationToken);
+            await EnsureTutorialEssenceEquippedAsync(
+                characterId,
+                tutorialEssence,
+                cancellationToken);
+            await EnsureTutorialChestEquippedAsync(characterId, cancellationToken);
+
+            var now = DateTimeOffset.UtcNow;
+            progress.TrainingCombatWonAt ??= now;
+            progress.EssenceAbsorbedAt ??= now;
+            progress.EssenceEquippedAt ??= now;
+            progress.TrainingEssenceRewardGranted = true;
+            progress.CraftedTierOneEquipmentCount = TutorialConstants.RequiredCraftedEquipmentCount;
+            progress.EquippedTierOneEquipmentCount = TutorialConstants.RequiredEquippedEquipmentCount;
+
+            await GrantCompletionRewardAsync(progress, cancellationToken);
+            Complete(progress);
+            await _context.SaveChangesAsync(cancellationToken);
+            await PublishTutorialStateChangedAsync(progress, cancellationToken, wasSkipped: true);
+        }
+
+        CacheProgress(progress);
+        return CreateCompletion(wasSkipped: true);
+    }
+
     public async Task<TutorialProgressResult?> TryProgressAsync(
         Guid characterId,
         TutorialTrigger trigger,
@@ -120,6 +183,12 @@ public sealed class TutorialService : ITutorialService, ITutorialProgressionServ
         if (areaId.Equals(TutorialConstants.TrainingGroundsAreaId, StringComparison.OrdinalIgnoreCase))
         {
             return progress.CurrentStep == TutorialConstants.StepDefeatTrainingCreature;
+        }
+
+        if (areaId.Equals(TutorialConstants.LumoRuinsAreaId, StringComparison.OrdinalIgnoreCase))
+        {
+            return progress.IsCompleted ||
+                   progress.CurrentStep == TutorialConstants.StepStartLumoRuins;
         }
 
         return progress.IsCompleted;
@@ -198,6 +267,7 @@ public sealed class TutorialService : ITutorialService, ITutorialProgressionServ
             }
 
             progress.EssenceEquippedAt ??= DateTimeOffset.UtcNow;
+            await EnsureTutorialEquipmentGrantedAsync(progress, cancellationToken);
             Advance(progress, step);
             return (true, []);
         }
@@ -250,6 +320,12 @@ public sealed class TutorialService : ITutorialService, ITutorialProgressionServ
                 return (true, []);
             }
 
+            Advance(progress, step);
+            return (true, []);
+        }
+
+        if (triggerType.Equals("CombatActionStarted", StringComparison.OrdinalIgnoreCase))
+        {
             await GrantCompletionRewardAsync(progress, cancellationToken);
             Advance(progress, step);
             return (true, []);
@@ -346,7 +422,16 @@ public sealed class TutorialService : ITutorialService, ITutorialProgressionServ
                 cancellationToken))
         {
             progress.EssenceEquippedAt ??= DateTimeOffset.UtcNow;
-            SetStep(progress, TutorialConstants.StepCraftEquipment);
+            await EnsureTutorialEquipmentGrantedAsync(progress, cancellationToken);
+            SetStep(progress, TutorialConstants.StepEquipEquipment);
+            await PublishTutorialStateChangedAsync(progress, cancellationToken);
+            return true;
+        }
+
+        if (progress.CurrentStep == TutorialConstants.StepCraftEquipment)
+        {
+            await EnsureTutorialEquipmentGrantedAsync(progress, cancellationToken);
+            SetStep(progress, TutorialConstants.StepEquipEquipment);
             await PublishTutorialStateChangedAsync(progress, cancellationToken);
             return true;
         }
@@ -363,8 +448,7 @@ public sealed class TutorialService : ITutorialService, ITutorialProgressionServ
                 step?.Trigger?.RequiredCount ?? TutorialConstants.RequiredEquippedEquipmentCount;
             if (progress.EquippedTierOneEquipmentCount >= requiredCount)
             {
-                await GrantCompletionRewardAsync(progress, cancellationToken);
-                Complete(progress);
+                SetStep(progress, TutorialConstants.StepStartLumoRuins);
                 await PublishTutorialStateChangedAsync(progress, cancellationToken);
                 return true;
             }
@@ -745,6 +829,32 @@ public sealed class TutorialService : ITutorialService, ITutorialProgressionServ
         }, cancellationToken);
     }
 
+    private async Task EnsureTutorialEquipmentGrantedAsync(
+        CharacterTutorialProgress progress,
+        CancellationToken cancellationToken)
+    {
+        var hasTutorialChest = await _context.InventoryItems
+            .Include(x => x.ItemInstance)
+            .AnyAsync(x =>
+                    x.InventoryId == progress.CharacterId &&
+                    x.ItemInstance.ItemBaseId == TutorialConstants.TutorialChestItemBaseId,
+                cancellationToken) ||
+            await _context.EquipmentSlots
+                .Include(x => x.EquipmentInstance)
+                .AnyAsync(x =>
+                        x.EntityId == progress.CharacterId &&
+                        x.EquipmentInstance != null &&
+                        x.EquipmentInstance.ItemBaseId == TutorialConstants.TutorialChestItemBaseId,
+                    cancellationToken);
+
+        if (!hasTutorialChest)
+        {
+            await GrantTutorialEquipmentAsync(progress, cancellationToken);
+        }
+
+        progress.CraftedTierOneEquipmentCount = TutorialConstants.RequiredCraftedEquipmentCount;
+    }
+
     private async Task GrantCompletionRewardAsync(CharacterTutorialProgress progress, CancellationToken cancellationToken)
     {
         if (progress.CompletionRewardGranted)
@@ -756,7 +866,7 @@ public sealed class TutorialService : ITutorialService, ITutorialProgressionServ
             .FirstOrDefaultAsync(x => x.Id == progress.CharacterId, cancellationToken);
         if (character is not null)
         {
-            character.Cinders += 150;
+            character.Cinders += TutorialConstants.CompletionCinders;
         }
 
         progress.CompletionRewardGranted = true;
@@ -811,6 +921,8 @@ public sealed class TutorialService : ITutorialService, ITutorialProgressionServ
             TutorialConstants.StepEquipEquipment => progress.EquippedTierOneEquipmentCount,
             _ => 0
         };
+        var currentStepIndex = definition.Steps.FindIndex(candidate =>
+            candidate.Key.Equals(progress.CurrentStep, StringComparison.OrdinalIgnoreCase)) + 1;
 
         return new TutorialState(
             progress.TutorialId,
@@ -820,6 +932,8 @@ public sealed class TutorialService : ITutorialService, ITutorialProgressionServ
             step.Objective,
             current,
             step.RequiredAmount,
+            currentStepIndex,
+            definition.Steps.Count,
             new TutorialStepPresentation(
                 step.ActionLabel,
                 step.DestinationRoute,
@@ -904,7 +1018,8 @@ public sealed class TutorialService : ITutorialService, ITutorialProgressionServ
 
     private async Task PublishTutorialStateChangedAsync(
         CharacterTutorialProgress progress,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken,
+        bool wasSkipped = false)
     {
         CacheProgress(progress);
 
@@ -918,7 +1033,13 @@ public sealed class TutorialService : ITutorialService, ITutorialProgressionServ
         {
             await _eventPublisher.PublishAsync(
                 audience,
-                new TutorialCompletedMsg(progress.TutorialId));
+                new TutorialCompletedMsg(
+                    progress.TutorialId,
+                    TutorialConstants.CompletionCinders,
+                    wasSkipped
+                        ? "/game/world/shenic?area=region_01_area_01"
+                        : "/game/combat",
+                    wasSkipped));
             return;
         }
 
@@ -930,6 +1051,15 @@ public sealed class TutorialService : ITutorialService, ITutorialProgressionServ
                 new TutorialProgressedMsg(state));
         }
     }
+
+    private static TutorialCompletion CreateCompletion(bool wasSkipped) =>
+        new(
+            TutorialConstants.FirstStepsTutorialId,
+            TutorialConstants.CompletionCinders,
+            wasSkipped
+                ? "/game/world/shenic?area=region_01_area_01"
+                : "/game/combat",
+            wasSkipped);
 
     private bool IsCachedInactive(Guid characterId) =>
         _progressCache.Get(characterId) is { IsActive: false };

@@ -9,6 +9,7 @@ public static class TutorialConstants
     public const string StepEquipEssence = "equip_essence";
     public const string StepCraftEquipment = "craft_equipment";
     public const string StepEquipEquipment = "equip_equipment";
+    public const string StepStartLumoRuins = "start_lumo_ruins";
     public const string StepDefeatLumoRuins = "defeat_lumo_ruins";
     public const string StepComplete = "complete";
 
@@ -22,4 +23,5 @@ public static class TutorialConstants
 
     public const int RequiredCraftedEquipmentCount = 3;
     public const int RequiredEquippedEquipmentCount = 1;
+    public const int CompletionCinders = 150;
 }

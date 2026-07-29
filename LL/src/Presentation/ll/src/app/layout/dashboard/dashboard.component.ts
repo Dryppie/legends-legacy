@@ -8,26 +8,24 @@ import { LootTrackerComponent } from './loot-tracker/loot-tracker.component';
 import { CurrentActionComponent } from '../../shared/components/current-action/current-action.component';
 import { CharacterActionsStateService } from '../../core/services/api/character-actions/character-actions.state.service';
 import { CharacterActionType } from '../../shared/models/enums/characterActionType';
-import { TutorialQuestComponent } from './tutorial-quest/tutorial-quest.component';
 import { GameBootstrapStateService } from '../../core/services/api/game-bootstrap/game-bootstrap-state.service';
 import { ChatLayoutPreferenceService } from '../../core/services/client-side/chat-layout/chat-layout-preference.service';
 import { GameHeaderComponent } from './game-header/game-header.component';
 
 @Component({
-    selector: 'app-dashboard',
-    imports: [
-        RouterOutlet,
-        SidebarComponent,
-        NavbarComponent,
-        NgIf,
-        NgClass,
-        ChatComponent,
-        LootTrackerComponent,
-        CurrentActionComponent,
-        TutorialQuestComponent,
-        GameHeaderComponent,
-    ],
-    templateUrl: './dashboard.component.html'
+  selector: 'app-dashboard',
+  imports: [
+    RouterOutlet,
+    SidebarComponent,
+    NavbarComponent,
+    NgIf,
+    NgClass,
+    ChatComponent,
+    LootTrackerComponent,
+    CurrentActionComponent,
+    GameHeaderComponent,
+  ],
+  templateUrl: './dashboard.component.html',
 })
 export class DashboardComponent implements OnInit {
   isSidebarOpen = false;

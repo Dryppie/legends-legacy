@@ -17,6 +17,7 @@ import { FirstPartyTourActionWatcherService } from './first-party-tour-action-wa
 interface ActiveFirstPartyTour {
   pageId: string;
   storageKey: string;
+  routePath: string;
   steps: FirstPartyTourStep[];
   stepIndex: number;
   history: FirstPartyTourHistoryEntry[];
@@ -33,6 +34,8 @@ export class FirstPartyTourService {
   private statePredicates = new Map<string, FirstPartyTourStatePredicate>();
   private isTransitioning = false;
   private startingPageId: string | null = null;
+  private startingRoutePath: string | null = null;
+  private startVersion = 0;
   private pendingRefreshFrame: number | null = null;
 
   constructor(
@@ -42,8 +45,19 @@ export class FirstPartyTourService {
     private readonly actionWatcher: FirstPartyTourActionWatcherService,
   ) {
     this.router.events
-      .pipe(filter((event): event is NavigationEnd => event instanceof NavigationEnd))
-      .subscribe(() => this.refreshTargetRect());
+      .pipe(
+        filter(
+          (event): event is NavigationEnd => event instanceof NavigationEnd,
+        ),
+      )
+      .subscribe((event) => {
+        if (this.hasLeftTourRoute(event.urlAfterRedirects)) {
+          this.stop(false);
+          return;
+        }
+
+        this.refreshTargetRect();
+      });
   }
 
   async start(
@@ -55,18 +69,26 @@ export class FirstPartyTourService {
       return;
     }
 
-    if (
-      this.activeTour?.pageId === pageId ||
-      this.startingPageId === pageId
-    ) {
+    if (this.activeTour?.pageId === pageId || this.startingPageId === pageId) {
       return;
     }
 
     this.stop(false);
+    const startVersion = this.startVersion;
+    const routePath = this.routePath(this.router.url);
     this.startingPageId = pageId;
+    this.startingRoutePath = routePath;
 
     try {
       const steps = await this.loadSteps(pageId);
+      if (
+        this.startVersion !== startVersion ||
+        this.startingPageId !== pageId ||
+        this.startingRoutePath !== routePath
+      ) {
+        return;
+      }
+
       if (steps.length === 0) {
         return;
       }
@@ -74,6 +96,7 @@ export class FirstPartyTourService {
       this.activeTour = {
         pageId,
         storageKey,
+        routePath,
         steps,
         stepIndex: 0,
         history: [],
@@ -82,8 +105,12 @@ export class FirstPartyTourService {
       this.bindLayoutWatchers();
       await this.activateStep(0);
     } finally {
-      if (this.startingPageId === pageId) {
+      if (
+        this.startVersion === startVersion &&
+        this.startingPageId === pageId
+      ) {
         this.startingPageId = null;
+        this.startingRoutePath = null;
       }
     }
   }
@@ -93,6 +120,8 @@ export class FirstPartyTourService {
   }
 
   stop(markDone = false): void {
+    this.startVersion += 1;
+
     if (markDone && this.activeTour) {
       this.storage.set(this.activeTour.storageKey, 'done');
     }
@@ -108,6 +137,7 @@ export class FirstPartyTourService {
     this.activeTour = null;
     this.isTransitioning = false;
     this.startingPageId = null;
+    this.startingRoutePath = null;
     this.pendingRefreshFrame = null;
     this._state.set(null);
   }
@@ -129,6 +159,10 @@ export class FirstPartyTourService {
       scrollX: window.scrollX,
       scrollY: window.scrollY,
     });
+
+    if (tour.steps[tour.stepIndex].kind === 'navigate') {
+      tour.routePath = this.routePath(this.router.url);
+    }
 
     void this.activateStep(tour.stepIndex + 1);
   }
@@ -165,6 +199,10 @@ export class FirstPartyTourService {
     previous: FirstPartyTourHistoryEntry | undefined,
   ): Promise<void> {
     if (previous && this.router.url !== previous.route) {
+      const tour = this.activeTour;
+      if (tour) {
+        tour.routePath = this.routePath(previous.route);
+      }
       await this.router.navigateByUrl(previous.route);
     }
 
@@ -189,9 +227,16 @@ export class FirstPartyTourService {
     const step = tour.steps[stepIndex];
     tour.stepIndex = stepIndex;
     const target = await this.findTargetElement(step);
+    if (!this.isCurrentActivation(tour, stepIndex)) {
+      return;
+    }
+
     if (target) {
       this.scrollElementIntoView(target);
       await this.waitForAnimationFrame();
+      if (!this.isCurrentActivation(tour, stepIndex)) {
+        return;
+      }
     }
 
     this._state.set(
@@ -202,6 +247,13 @@ export class FirstPartyTourService {
       statePredicates: this.statePredicates,
     });
     this.isTransitioning = false;
+  }
+
+  private isCurrentActivation(
+    tour: ActiveFirstPartyTour,
+    stepIndex: number,
+  ): boolean {
+    return this.activeTour === tour && tour.stepIndex === stepIndex;
   }
 
   private refreshTargetRect(): void {
@@ -215,6 +267,31 @@ export class FirstPartyTourService {
     });
   }
 
+  private hasLeftTourRoute(url: string): boolean {
+    const destinationPath = this.routePath(url);
+    if (this.startingRoutePath && destinationPath !== this.startingRoutePath) {
+      return true;
+    }
+
+    const tour = this.activeTour;
+    if (!tour || destinationPath === tour.routePath) {
+      return false;
+    }
+
+    const step = tour.steps[tour.stepIndex];
+    const expectedRoute = step.advanceOn?.route ?? step.route;
+    return !(
+      step.kind === 'navigate' &&
+      expectedRoute &&
+      destinationPath === this.routePath(expectedRoute)
+    );
+  }
+
+  private routePath(route: string): string {
+    const normalized = route.startsWith('/') ? route : `/${route}`;
+    return normalized.split(/[?#]/, 1)[0];
+  }
+
   private updateTargetRect(): void {
     const tour = this.activeTour;
     const state = this._state();
@@ -224,7 +301,11 @@ export class FirstPartyTourService {
 
     const target = document.querySelector<HTMLElement>(state.step.element);
     this._state.set(
-      this.createViewState(tour, state.step, this.measureStep(state.step, target)),
+      this.createViewState(
+        tour,
+        state.step,
+        this.measureStep(state.step, target),
+      ),
     );
   }
 
@@ -245,7 +326,8 @@ export class FirstPartyTourService {
       canGoBack: tour.stepIndex > 0,
       canGoNext: allowsManualNext && !isLastStep,
       canFinish: allowsManualNext && isLastStep,
-      blocksInteraction: this.blocksInteraction(step),
+      blocksInteraction:
+        !tour.pageId.startsWith('tutorial-') && this.blocksInteraction(step),
       instruction: null,
     };
   }
@@ -441,14 +523,12 @@ export class FirstPartyTourService {
     }
 
     for (const selector of step.includeSelectors ?? []) {
-      document
-        .querySelectorAll(selector)
-        .forEach((included) => {
-          const includedRect = this.measure(included);
-          if (includedRect) {
-            rects.push(includedRect);
-          }
-        });
+      document.querySelectorAll(selector).forEach((included) => {
+        const includedRect = this.measure(included);
+        if (includedRect) {
+          rects.push(includedRect);
+        }
+      });
     }
 
     return this.unionRects(rects);
@@ -494,9 +574,7 @@ export class FirstPartyTourService {
     }
 
     if (step.restoreOnBack.type === 'click') {
-      document
-        .querySelector<HTMLElement>(step.restoreOnBack.selector)
-        ?.click();
+      document.querySelector<HTMLElement>(step.restoreOnBack.selector)?.click();
     }
   }
 
