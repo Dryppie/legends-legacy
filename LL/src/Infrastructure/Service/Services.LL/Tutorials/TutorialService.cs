@@ -62,6 +62,29 @@ public sealed class TutorialService : ITutorialService, ITutorialProgressionServ
         return MapState(progress);
     }
 
+    public async Task<TutorialState?> AcknowledgeWelcomeAsync(
+        Guid characterId,
+        CancellationToken cancellationToken)
+    {
+        var progress = await GetOrCreateProgressAsync(characterId, false, cancellationToken);
+        if (progress.IsCompleted)
+        {
+            CacheProgress(progress);
+            return null;
+        }
+
+        if (!progress.WelcomeAcknowledgedAt.HasValue)
+        {
+            progress.WelcomeAcknowledgedAt = DateTimeOffset.UtcNow;
+            Touch(progress);
+            await _context.SaveChangesAsync(cancellationToken);
+            await PublishTutorialStateChangedAsync(progress, cancellationToken);
+        }
+
+        CacheProgress(progress);
+        return MapState(progress);
+    }
+
     public async Task<TutorialState?> AttuneStarterEssenceAsync(
         Guid characterId,
         CancellationToken cancellationToken)
@@ -114,7 +137,6 @@ public sealed class TutorialService : ITutorialService, ITutorialProgressionServ
             progress.CraftedTierOneEquipmentCount = TutorialConstants.RequiredCraftedEquipmentCount;
             progress.EquippedTierOneEquipmentCount = TutorialConstants.RequiredEquippedEquipmentCount;
 
-            await GrantCompletionRewardAsync(progress, cancellationToken);
             Complete(progress);
             await _context.SaveChangesAsync(cancellationToken);
             await PublishTutorialStateChangedAsync(progress, cancellationToken, wasSkipped: true);
@@ -322,7 +344,6 @@ public sealed class TutorialService : ITutorialService, ITutorialProgressionServ
 
         if (triggerType.Equals("CombatActionStarted", StringComparison.OrdinalIgnoreCase))
         {
-            await GrantCompletionRewardAsync(progress, cancellationToken);
             Advance(progress, step);
             return (true, []);
         }
@@ -398,7 +419,6 @@ public sealed class TutorialService : ITutorialService, ITutorialProgressionServ
             return false;
         }
 
-        await GrantCompletionRewardAsync(progress, cancellationToken);
         Complete(progress);
         await PublishTutorialStateChangedAsync(progress, cancellationToken);
         return true;
@@ -588,7 +608,6 @@ public sealed class TutorialService : ITutorialService, ITutorialProgressionServ
         progress.EquippedTierOneEquipmentCount = TutorialConstants.RequiredEquippedEquipmentCount;
 
         await EnsureDebugTutorialCompletionStateAsync(progress, cancellationToken);
-        await GrantCompletionRewardAsync(progress, cancellationToken);
         Complete(progress);
     }
 
@@ -786,23 +805,6 @@ public sealed class TutorialService : ITutorialService, ITutorialProgressionServ
         return true;
     }
 
-    private async Task GrantCompletionRewardAsync(CharacterTutorialProgress progress, CancellationToken cancellationToken)
-    {
-        if (progress.CompletionRewardGranted)
-        {
-            return;
-        }
-
-        var character = await _context.Characters
-            .FirstOrDefaultAsync(x => x.Id == progress.CharacterId, cancellationToken);
-        if (character is not null)
-        {
-            character.Cinders += TutorialConstants.CompletionCinders;
-        }
-
-        progress.CompletionRewardGranted = true;
-    }
-
     private async Task<IReadOnlyList<InventoryItem>> AddItemRewardsAsync(
         Guid characterId,
         IReadOnlyDictionary<string, int> itemRewards,
@@ -874,6 +876,7 @@ public sealed class TutorialService : ITutorialService, ITutorialProgressionServ
             step.DestinationRoute,
             step.GuidePageId,
             step.TourPageId,
+            !progress.WelcomeAcknowledgedAt.HasValue,
             progress.IsCompleted);
     }
 
@@ -926,7 +929,7 @@ public sealed class TutorialService : ITutorialService, ITutorialProgressionServ
                 audience,
                 new TutorialCompletedMsg(
                     progress.TutorialId,
-                    TutorialConstants.CompletionCinders,
+                    0,
                     wasSkipped
                         ? "/game/world/shenic?area=region_01_area_01"
                         : "/game/combat",
@@ -946,7 +949,7 @@ public sealed class TutorialService : ITutorialService, ITutorialProgressionServ
     private static TutorialCompletion CreateCompletion(bool wasSkipped) =>
         new(
             TutorialConstants.FirstStepsTutorialId,
-            TutorialConstants.CompletionCinders,
+            0,
             wasSkipped
                 ? "/game/world/shenic?area=region_01_area_01"
                 : "/game/combat",

@@ -36,6 +36,7 @@ import {
   TUTORIAL_STEP_CRAFT_EQUIPMENT,
 } from '../../../../../shared/models/tutorial';
 import { TutorialStateService } from '../../../../../core/services/api/tutorial/tutorial-state.service';
+import { FirstPartyTourService } from '../../../../../core/services/client-side/first-party-tour/first-party-tour.service';
 
 interface BaseAttributeDisplay {
   attributeType: AttributeType;
@@ -92,6 +93,7 @@ export class RegularCraftingComponent {
   private readonly selectedBlueprintId = signal<string | null>(null);
   private readonly destroyRef = inject(DestroyRef);
   private readonly tutorialState = inject(TutorialStateService);
+  private readonly firstPartyTour = inject(FirstPartyTourService);
 
   readonly isTutorialWeaponSelectionActive = computed(
     () =>
@@ -376,6 +378,23 @@ export class RegularCraftingComponent {
       () => {
         this.isTutorialWeaponSelectionActive();
         this.selectFirstVisibleRecipeIfNeeded();
+      },
+      { allowSignalWrites: true },
+    );
+    effect(
+      () => {
+        const tour = this.firstPartyTour.state();
+        if (tour?.pageId !== 'tutorial-crafting') return;
+
+        switch (tour.step.id) {
+          case 'explain-common-base':
+          case 'explain-blueprints':
+            this.mobilePane.set('blueprints');
+            break;
+          case 'explain-item-preview':
+            this.mobilePane.set('preview');
+            break;
+        }
       },
       { allowSignalWrites: true },
     );

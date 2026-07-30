@@ -18,14 +18,13 @@ interface PopoverCoordinates {
   template: `
     <ng-container *ngIf="state() as tour">
       <div class="first-party-tour-root" aria-live="polite">
-        <ng-container *ngIf="!isTutorial(tour)">
-          <div
-            *ngFor="let style of backdropStyles(tour.targetRect)"
-            class="first-party-tour-backdrop"
-            [ngStyle]="style"
-            [style.pointer-events]="tour.blocksInteraction ? 'auto' : 'none'"
-          ></div>
-        </ng-container>
+        <div
+          *ngFor="let style of backdropStyles(tour.targetRect)"
+          class="first-party-tour-backdrop"
+          [class.first-party-tour-backdrop-tutorial]="isTutorial(tour)"
+          [ngStyle]="style"
+          [style.pointer-events]="tour.blocksInteraction || isTutorial(tour) ? 'auto' : 'none'"
+        ></div>
 
         <div
           *ngIf="tour.targetRect"
@@ -110,6 +109,11 @@ interface PopoverCoordinates {
         pointer-events: auto;
       }
 
+      .first-party-tour-backdrop-tutorial {
+        background: rgba(0, 0, 0, 0.24);
+        backdrop-filter: blur(0.6px);
+      }
+
       .first-party-tour-highlight {
         position: fixed;
         border: 1px solid rgba(249, 220, 160, 0.95);
@@ -144,8 +148,9 @@ interface PopoverCoordinates {
       .first-party-tour-popover {
         position: fixed;
         width: min(22rem, calc(100vw - 2rem));
-        max-height: calc(100vh - 2rem);
+        max-height: calc(100dvh - 2rem);
         overflow-y: auto;
+        overscroll-behavior: contain;
         padding: var(--ll-space-4);
         background-color: var(--ll-color-bg-deep);
         box-shadow:
@@ -171,6 +176,12 @@ interface PopoverCoordinates {
         .first-party-tour-highlight-action-sweep {
           animation: none;
           background-image: none;
+        }
+      }
+
+      @media (max-width: 39.999rem) {
+        .first-party-tour-popover button {
+          min-height: 2.75rem;
         }
       }
     `,
@@ -271,15 +282,24 @@ export class FirstPartyTourOverlayComponent {
 
   highlightStyle(rect: FirstPartyTourRect): Record<string, string> {
     const padding = 8;
+    const top = Math.max(0, rect.top - padding);
+    const left = Math.max(0, rect.left - padding);
+    const right = Math.min(window.innerWidth, rect.right + padding);
+    const bottom = Math.min(window.innerHeight, rect.bottom + padding);
+
     return {
-      top: `${Math.max(0, rect.top - padding)}px`,
-      left: `${Math.max(0, rect.left - padding)}px`,
-      width: `${rect.width + padding * 2}px`,
-      height: `${rect.height + padding * 2}px`,
+      top: `${top}px`,
+      left: `${left}px`,
+      width: `${Math.max(0, right - left)}px`,
+      height: `${Math.max(0, bottom - top)}px`,
     };
   }
 
   popoverStyle(tour: FirstPartyTourViewState): Record<string, string> {
+    if (window.innerWidth < 640) {
+      return this.mobilePopoverStyle(tour);
+    }
+
     const width = Math.min(352, window.innerWidth - 32);
     const height = 220;
     const gap = 12;
@@ -313,6 +333,58 @@ export class FirstPartyTourOverlayComponent {
     return {
       top: `${this.clamp(coordinates.top, margin, window.innerHeight - height - margin)}px`,
       left: `${this.clamp(coordinates.left, margin, window.innerWidth - width - margin)}px`,
+    };
+  }
+
+  private mobilePopoverStyle(
+    tour: FirstPartyTourViewState,
+  ): Record<string, string> {
+    const margin = 12;
+    const maxHeight = Math.max(
+      180,
+      Math.min(280, window.innerHeight * 0.46),
+    );
+    const target = this.mobilePlacementTarget(tour) ?? tour.targetRect;
+    const placeAtTop =
+      !!target && target.top + target.height / 2 > window.innerHeight / 2;
+
+    return {
+      left: `${margin}px`,
+      right: `${margin}px`,
+      width: 'auto',
+      ...(placeAtTop
+        ? { top: `${margin}px`, bottom: 'auto' }
+        : {
+            top: 'auto',
+            bottom: `max(${margin}px, env(safe-area-inset-bottom))`,
+          }),
+      maxHeight: `${maxHeight}px`,
+    };
+  }
+
+  private mobilePlacementTarget(
+    tour: FirstPartyTourViewState,
+  ): FirstPartyTourRect | null {
+    const selector =
+      tour.step.advanceOn?.selector ?? tour.step.actionSelector;
+    if (!selector) return null;
+
+    const actionable = Array.from(
+      document.querySelectorAll<HTMLElement>(selector),
+    ).find((element) => {
+      const rect = element.getBoundingClientRect();
+      return rect.width > 0 && rect.height > 0;
+    });
+    if (!actionable) return null;
+
+    const rect = actionable.getBoundingClientRect();
+    return {
+      top: rect.top,
+      right: rect.right,
+      bottom: rect.bottom,
+      left: rect.left,
+      width: rect.width,
+      height: rect.height,
     };
   }
 

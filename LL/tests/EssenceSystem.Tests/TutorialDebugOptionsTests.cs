@@ -20,7 +20,7 @@ namespace EssenceSystem.Tests;
 public sealed class TutorialDebugOptionsTests
 {
     [Fact]
-    public async Task GetStateAsync_completes_new_tutorial_and_grants_rewards_when_debug_tutorial_is_disabled()
+    public async Task GetStateAsync_completes_new_tutorial_and_prepares_starter_setup_when_debug_tutorial_is_disabled()
     {
         await using var db = CreateDb();
         var characterId = Guid.NewGuid();
@@ -47,8 +47,8 @@ public sealed class TutorialDebugOptionsTests
         Assert.Null(state);
         Assert.True(progress.IsCompleted);
         Assert.True(progress.TrainingEssenceRewardGranted);
-        Assert.True(progress.CompletionRewardGranted);
-        Assert.Equal(150, character.Cinders);
+        Assert.False(progress.CompletionRewardGranted);
+        Assert.Equal(0, character.Cinders);
         Assert.Equal(TutorialConstants.TutorialEssenceDefinitionId, playerEssence.EssenceDefinitionId);
         Assert.Contains(activeLoadout.Slots, slot => slot.SlotIndex == 0 && slot.PlayerEssenceId == playerEssence.Id);
         Assert.Empty(await db.EquipmentSlots.Where(slot => slot.EntityId == characterId).ToListAsync());
@@ -136,15 +136,55 @@ public sealed class TutorialDebugOptionsTests
             .SingleAsync(x => x.CharacterId == characterId && x.IsActive);
 
         Assert.True(completion.WasSkipped);
-        Assert.Equal(TutorialConstants.CompletionCinders, completion.RewardCinders);
+        Assert.Equal(0, completion.RewardCinders);
         Assert.True(progress.IsCompleted);
         Assert.True(progress.TrainingEssenceRewardGranted);
-        Assert.True(progress.CompletionRewardGranted);
-        Assert.Equal(TutorialConstants.CompletionCinders, character.Cinders);
+        Assert.False(progress.CompletionRewardGranted);
+        Assert.Equal(0, character.Cinders);
         Assert.Contains(
             activeLoadout.Slots,
             slot => slot.SlotIndex == 0 && slot.PlayerEssenceId == playerEssence.Id);
         Assert.Empty(await db.EquipmentSlots.Where(slot => slot.EntityId == characterId).ToListAsync());
+    }
+
+    [Fact]
+    public async Task AcknowledgeWelcomeAsync_persists_the_first_login_decision()
+    {
+        await using var db = CreateDb();
+        var characterId = Guid.NewGuid();
+        db.Characters.Add(new Character
+        {
+            Id = characterId,
+            Name = "New Hero",
+            UserId = Guid.NewGuid()
+        });
+        db.Inventories.Add(new Inventory { CharacterId = characterId });
+        db.CharacterTutorialProgresses.Add(new CharacterTutorialProgress
+        {
+            CharacterId = characterId,
+            TutorialId = TutorialConstants.FirstStepsTutorialId,
+            CurrentStep = TutorialConstants.StepEquipEssence
+        });
+        await db.SaveChangesAsync();
+
+        var service = CreateService(
+            db,
+            tutorialEnabled: true,
+            definitionProvider: new ActiveTutorialDefinitionProvider());
+
+        var initialState = await service.GetStateAsync(
+            characterId,
+            CancellationToken.None);
+        var acknowledgedState = await service.AcknowledgeWelcomeAsync(
+            characterId,
+            CancellationToken.None);
+        var persistedProgress = await db.CharacterTutorialProgresses.SingleAsync();
+
+        Assert.NotNull(initialState);
+        Assert.True(initialState.RequiresWelcome);
+        Assert.NotNull(acknowledgedState);
+        Assert.False(acknowledgedState.RequiresWelcome);
+        Assert.NotNull(persistedProgress.WelcomeAcknowledgedAt);
     }
 
     [Fact]
@@ -355,7 +395,7 @@ public sealed class TutorialDebugOptionsTests
         Assert.True(completionResult?.Progressed);
         Assert.Null(completionResult?.State);
         Assert.True(progress.IsCompleted);
-        Assert.Equal(TutorialConstants.CompletionCinders, character.Cinders);
+        Assert.Equal(0, character.Cinders);
     }
 
     private static LLDbContext CreateDb()

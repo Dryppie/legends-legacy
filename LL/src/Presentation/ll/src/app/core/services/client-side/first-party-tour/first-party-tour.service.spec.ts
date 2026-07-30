@@ -111,4 +111,47 @@ describe('FirstPartyTourService', () => {
 
     expect(service.state()).toBeNull();
   });
+
+  it('targets the visible responsive element when duplicate selectors exist', async () => {
+    spyOn(window, 'fetch').and.resolveTo({
+      ok: true,
+      json: async () => [
+        {
+          element: '[data-tour=responsive-target]',
+          description: 'Use the visible responsive target.',
+          targetTimeoutMs: 0,
+        },
+      ],
+    } as Response);
+
+    const hiddenTarget = document.createElement('div');
+    hiddenTarget.dataset['tour'] = 'responsive-target';
+    hiddenTarget.style.display = 'none';
+    document.body.appendChild(hiddenTarget);
+
+    const visibleTarget = document.createElement('button');
+    visibleTarget.dataset['tour'] = 'responsive-target';
+    visibleTarget.scrollIntoView = jasmine.createSpy('scrollIntoView');
+    spyOn(visibleTarget, 'getBoundingClientRect').and.returnValue({
+      top: 80,
+      right: 320,
+      bottom: 140,
+      left: 120,
+      width: 200,
+      height: 60,
+      x: 120,
+      y: 80,
+      toJSON: () => undefined,
+    });
+    document.body.appendChild(visibleTarget);
+
+    await service.start('tutorial-responsive-target');
+
+    expect(service.state()?.targetRect?.left).toBe(120);
+    expect(service.state()?.targetRect?.width).toBe(200);
+    expect(visibleTarget.scrollIntoView).toHaveBeenCalled();
+
+    hiddenTarget.remove();
+    visibleTarget.remove();
+  });
 });

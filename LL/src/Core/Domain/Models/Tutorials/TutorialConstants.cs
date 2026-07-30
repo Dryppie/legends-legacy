@@ -35,5 +35,4 @@ public static class TutorialConstants
     public const int TutorialCraftingWoodQuantity = 3;
     public const int RequiredCraftedEquipmentCount = 1;
     public const int RequiredEquippedEquipmentCount = 1;
-    public const int CompletionCinders = 150;
 }

@@ -17,7 +17,7 @@ import { CurrentActionComponent } from '../../../shared/components/current-actio
 import { CharacterActionsStateService } from '../../../core/services/api/character-actions/character-actions.state.service';
 import { CharacterActionType } from '../../../shared/models/enums/characterActionType';
 import { CharacterStateService } from '../../../core/services/api/character/character-state.service';
-import { SidebarSection } from '../../../shared/models/sidebar-item';
+import { SidebarSection, Tab } from '../../../shared/models/sidebar-item';
 import {
   NOTIFICATION_SURFACE,
   NotificationService,
@@ -28,6 +28,9 @@ import { GuildStateService } from '../../../core/services/api/guild/guild-state.
 import { SidebarLayoutPreferenceService } from '../../../core/services/client-side/sidebar-layout/sidebar-layout-preference.service';
 import { TimeSyncService } from '../../../core/services/api/time-sync/time-sync.service';
 import { environment } from '../../../../environments/environment';
+import { TutorialStateService } from '../../../core/services/api/tutorial/tutorial-state.service';
+import { TutorialPresenterService } from '../../../core/services/api/tutorial/tutorial-presenter.service';
+import { TUTORIAL_STEP_EQUIP_ESSENCE } from '../../../shared/models/tutorial';
 
 @Component({
     selector: 'app-sidebar',
@@ -63,6 +66,8 @@ export class SidebarComponent implements OnInit, OnDestroy {
     private readonly sidebarLayoutPreference: SidebarLayoutPreferenceService,
     private readonly router: Router,
     private readonly timeSync: TimeSyncService,
+    private readonly tutorialState: TutorialStateService,
+    private readonly tutorialPresenter: TutorialPresenterService,
   ) {
     this.sidebarLayout = this.sidebarLayoutPreference.layout;
 
@@ -123,7 +128,15 @@ export class SidebarComponent implements OnInit, OnDestroy {
     this.itemTapped.emit();
   }
 
-  onNavigate(): void {
+  onNavigate(item: Tab): void {
+    if (
+      item.id === 'essences' &&
+      this.tutorialState.state()?.currentStep === TUTORIAL_STEP_EQUIP_ESSENCE
+    ) {
+      this.essenceState.setActiveView('archive');
+      this.tutorialPresenter.presentCurrentStep();
+    }
+
     this.itemTapped.emit();
   }
 
@@ -169,6 +182,24 @@ export class SidebarComponent implements OnInit, OnDestroy {
     }
   }
 
+  isTutorialDestination(item: Tab): boolean {
+    const tutorial = this.tutorialState.state();
+    if (!tutorial || !this.tutorialState.presentationReady()) return false;
+
+    const destinationRoute =
+      tutorial.presentation?.destinationRoute ?? tutorial.destinationRoute;
+    const destinationPath = this.routePath(destinationRoute);
+    const itemRoute = `/${item.route.join('/')}`;
+    const itemPath = itemRoute.startsWith('/game/')
+      ? itemRoute
+      : `/game${itemRoute}`;
+
+    return (
+      destinationPath === itemPath ||
+      destinationPath.startsWith(`${itemPath}/`)
+    );
+  }
+
   private refreshCompactActionProgress(): void {
     const action = this.state.currentAction();
     if (!action || action.characterActionType === CharacterActionType.Idle) {
@@ -194,5 +225,10 @@ export class SidebarComponent implements OnInit, OnDestroy {
     const elapsed = this.timeSync.now() - startedAt;
     const progress = Math.max(0, Math.min((elapsed / durationMs) * 100, 100));
     this.compactActionProgress.set(progress);
+  }
+
+  private routePath(route: string): string {
+    const normalized = route.startsWith('/') ? route : `/${route}`;
+    return normalized.split(/[?#]/, 1)[0];
   }
 }

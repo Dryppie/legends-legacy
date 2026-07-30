@@ -299,7 +299,7 @@ export class FirstPartyTourService {
       return;
     }
 
-    const target = document.querySelector<HTMLElement>(state.step.element);
+    const target = this.findReadyTarget(state.step);
     this._state.set(
       this.createViewState(
         tour,
@@ -385,9 +385,8 @@ export class FirstPartyTourService {
   private async findTargetElement(
     step: FirstPartyTourStep,
   ): Promise<HTMLElement | null> {
-    const selector = step.element;
-    const immediate = document.querySelector<HTMLElement>(selector);
-    if (this.isTargetReady(immediate, step)) {
+    const immediate = this.findReadyTarget(step);
+    if (immediate) {
       return immediate;
     }
 
@@ -396,8 +395,8 @@ export class FirstPartyTourService {
       const timeoutMs = step.targetTimeoutMs ?? 2000;
 
       const check = () => {
-        const target = document.querySelector<HTMLElement>(selector);
-        if (this.isTargetReady(target, step)) {
+        const target = this.findReadyTarget(step);
+        if (target) {
           resolve(target);
           return;
         }
@@ -414,6 +413,19 @@ export class FirstPartyTourService {
     });
   }
 
+  private findReadyTarget(step: FirstPartyTourStep): HTMLElement | null {
+    const targets = Array.from(
+      document.querySelectorAll<HTMLElement>(step.element),
+    );
+
+    return (
+      targets.find(
+        (target) =>
+          this.isElementVisible(target) && this.isTargetReady(target, step),
+      ) ?? null
+    );
+  }
+
   private isTargetReady(
     target: HTMLElement | null,
     step: FirstPartyTourStep,
@@ -427,6 +439,16 @@ export class FirstPartyTourService {
     }
 
     return !this.isDisabled(target);
+  }
+
+  private isElementVisible(element: HTMLElement): boolean {
+    const rect = element.getBoundingClientRect();
+    if (rect.width <= 0 || rect.height <= 0) {
+      return false;
+    }
+
+    const style = getComputedStyle(element);
+    return style.display !== 'none' && style.visibility !== 'hidden';
   }
 
   private isDisabled(element: HTMLElement): boolean {

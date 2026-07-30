@@ -1,11 +1,9 @@
 [
   {
-    "id": "go-to-training-area",
-    "kind": "click",
-    "element": "[data-tour=tutorial-quest-action]",
-    "actionSelector": "[data-tour=tutorial-quest-action]",
-    "title": "Go to the Training Area",
-    "description": "Click this button to continue to your next First Steps objective.",
+    "id": "find-tutorial-destination",
+    "element": "[data-tour=tutorial-quest]",
+    "title": "Your next destination",
+    "description": "The First Steps header names where to go next. Look for the highlighted destination in the sidebar.",
     "position": "left",
     "alignment": "center"
   }

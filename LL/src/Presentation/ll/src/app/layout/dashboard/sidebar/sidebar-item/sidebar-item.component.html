@@ -2,12 +2,22 @@
   class="ll-sidebar-nav-item group relative overflow-hidden"
   [class.ll-sidebar-nav-item-active]="isActive"
   [class.ll-sidebar-nav-item-compact]="compact"
+  [class.ll-sidebar-nav-item-tutorial]="tutorialAttention"
 >
   <app-notification-indicator
     class="absolute z-20"
     [ngClass]="compact ? 'right-1 top-1' : 'right-2.5 top-2'"
     [count]="notificationCount"
   ></app-notification-indicator>
+
+  <span
+    *ngIf="tutorialAttention"
+    class="ll-sidebar-tutorial-cue absolute z-20"
+    [ngClass]="compact ? 'bottom-1 right-1' : 'bottom-1.5 right-2'"
+    aria-hidden="true"
+  >
+    {{ compact ? "!" : "Next" }}
+  </span>
 
   <div
     class="ll-sidebar-nav-icon relative z-10 flex h-8 w-8 shrink-0 items-center justify-center rounded-full"

@@ -3275,6 +3275,9 @@ namespace Persistence.LL.Migrations
                     b.Property<DateTimeOffset>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<DateTimeOffset?>("WelcomeAcknowledgedAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.HasKey("CharacterId", "TutorialId");
 
                     b.HasIndex("CurrentStep");

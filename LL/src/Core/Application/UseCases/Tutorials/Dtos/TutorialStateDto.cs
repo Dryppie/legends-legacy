@@ -20,6 +20,7 @@ public sealed class TutorialStateDto : IMapFrom<TutorialState>
     public string DestinationRoute { get; set; } = string.Empty;
     public string? GuidePageId { get; set; }
     public string? TourPageId { get; set; }
+    public bool RequiresWelcome { get; set; }
     public bool IsCompleted { get; set; }
 
     public void Mapping(Profile profile)

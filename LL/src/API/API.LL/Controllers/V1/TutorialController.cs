@@ -1,3 +1,4 @@
+using Application.UseCases.Tutorials.Commands.AcknowledgeTutorialWelcome;
 using Application.UseCases.Tutorials.Commands.AttuneStarterEssence;
 using Application.UseCases.Tutorials.Commands.CompleteClientTutorialStep;
 using Application.UseCases.Tutorials.Commands.SkipTutorial;
@@ -21,6 +22,10 @@ public sealed class TutorialController : BaseController
     [HttpPost("client-step")]
     public async Task<ActionResult<TutorialStateDto?>> CompleteClientStep(CompleteClientTutorialStepRequest request) =>
         await Mediator.Send(new CompleteClientTutorialStepCommand(CurrentCharacterGuid, request));
+
+    [HttpPost("welcome")]
+    public async Task<ActionResult<TutorialStateDto?>> AcknowledgeWelcome() =>
+        await Mediator.Send(new AcknowledgeTutorialWelcomeCommand(CurrentCharacterGuid));
 
     [HttpPost("start-training-battle")]
     public async Task<ActionResult<Response<CombatResultDto>>> StartTrainingBattle() =>

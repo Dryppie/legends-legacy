@@ -28,6 +28,7 @@ import {
   DropdownSelection,
 } from '../../../../shared/components/custom-components/dropdown/dropdown.component';
 import { TutorialStateService } from '../../../../core/services/api/tutorial/tutorial-state.service';
+import { TutorialPresenterService } from '../../../../core/services/api/tutorial/tutorial-presenter.service';
 import {
   TUTORIAL_GOBLIN_ESSENCE_DEFINITION_ID,
   TUTORIAL_STEP_ABSORB_ESSENCE,
@@ -228,6 +229,7 @@ export class EssencesComponent implements OnInit {
   constructor(
     public readonly essenceState: EssenceStateService,
     public readonly tutorialState: TutorialStateService,
+    private readonly tutorialPresenter: TutorialPresenterService,
   ) {
     effect(
       () => {
@@ -253,6 +255,13 @@ export class EssencesComponent implements OnInit {
       case 'creatures':
       case 'codex':
         this.essenceState.setActiveView(view as EssenceView);
+        if (
+          view === 'archive' &&
+          this.tutorialState.state()?.currentStep ===
+            TUTORIAL_STEP_EQUIP_ESSENCE
+        ) {
+          this.tutorialPresenter.presentCurrentStep();
+        }
     }
   }
 

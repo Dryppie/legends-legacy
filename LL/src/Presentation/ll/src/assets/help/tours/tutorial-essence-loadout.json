@@ -1,26 +1,13 @@
 [
   {
-    "id": "open-soul-archive",
-    "kind": "click",
-    "element": "[data-tour=essence-view-tabs]",
-    "actionSelector": "[data-tour=essence-view-tab-archive]",
-    "restoreOnBack": {
-      "type": "click",
-      "selector": "[data-tour=essence-view-tab-absorb]"
-    },
-    "title": "1. Archive tab",
-    "description": "Open your Soul Archive to find the Essence you just absorbed.",
-    "position": "bottom"
-  },
-  {
     "element": "[data-tour=essence-archive-list]",
-    "title": "2. Soul Archive",
+    "title": "1. Soul Archive",
     "description": "Absorbed Essences appear in your Soul Archive.",
     "position": "right"
   },
   {
     "element": "[data-tour=essence-loadouts]",
-    "title": "3. Active loadout",
+    "title": "2. Active loadout",
     "description": "Essences in your active loadout provide their abilities during combat. Changes remain a draft until you save them.",
     "position": "left"
   },
@@ -30,7 +17,7 @@
     "actionSelector": "[data-tour=tutorial-equip-essence]",
     "waitForEnabled": true,
     "targetTimeoutMs": 5000,
-    "title": "4. Equip your Essence",
+    "title": "3. Equip your Essence",
     "description": "Equip the Goblin's Essence.",
     "position": "left"
   },
@@ -40,7 +27,7 @@
     "actionSelector": "[data-tour=essence-loadout-save]",
     "waitForEnabled": true,
     "targetTimeoutMs": 5000,
-    "title": "5. Save your loadout",
+    "title": "4. Save your loadout",
     "description": "Your draft has unsaved changes. Save the loadout to attune the Essence and make its abilities available in combat.",
     "position": "left"
   }

@@ -34,6 +34,7 @@ export interface TutorialState {
   destinationRoute: string;
   guidePageId?: string | null;
   tourPageId?: string | null;
+  requiresWelcome: boolean;
   isCompleted: boolean;
 }
 

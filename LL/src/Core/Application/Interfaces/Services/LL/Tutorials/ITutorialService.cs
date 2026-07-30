@@ -5,6 +5,7 @@ namespace Application.Interfaces.Services.LL.Tutorials;
 public interface ITutorialService
 {
     Task<TutorialState?> GetStateAsync(Guid characterId, CancellationToken cancellationToken);
+    Task<TutorialState?> AcknowledgeWelcomeAsync(Guid characterId, CancellationToken cancellationToken);
     Task<bool> CanStartCombatAreaAsync(Guid characterId, string areaId, CancellationToken cancellationToken);
     Task<TutorialState?> AttuneStarterEssenceAsync(Guid characterId, CancellationToken cancellationToken);
     Task<TutorialCompletion> SkipAsync(Guid characterId, CancellationToken cancellationToken);
@@ -38,6 +39,7 @@ public sealed record TutorialState(
     string DestinationRoute,
     string? GuidePageId,
     string? TourPageId,
+    bool RequiresWelcome,
     bool IsCompleted);
 
 public sealed record TutorialStepPresentation(

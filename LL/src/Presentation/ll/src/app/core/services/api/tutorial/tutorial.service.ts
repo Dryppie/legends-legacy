@@ -19,6 +19,10 @@ export class TutorialService {
     return this.api.post('Tutorial/start-training-battle', {});
   }
 
+  acknowledgeWelcome(): Observable<TutorialState | null> {
+    return this.api.post('Tutorial/welcome', {});
+  }
+
   skip(): Observable<TutorialCompletion> {
     return this.api.post('Tutorial/skip', {});
   }

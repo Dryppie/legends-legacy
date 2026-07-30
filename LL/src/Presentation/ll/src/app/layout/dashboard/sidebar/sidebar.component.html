@@ -45,8 +45,9 @@
               [item]="item"
               [routerLink]="item.route"
               [isActive]="isItemActive(item.route)"
+              [tutorialAttention]="isTutorialDestination(item)"
               [notificationCount]="getSidebarItemNotificationCount(item.id)"
-              (click)="onNavigate()"
+              (click)="onNavigate(item)"
             >
             </app-sidebar-item>
           </div>
@@ -65,39 +66,28 @@
         title="Go to current action"
         (click)="navigateToAction()"
       >
-        <span
-          class="relative flex h-9 w-9 items-center justify-center rounded-full border border-[var(--ll-color-border)] bg-[var(--ll-color-surface-soft)]"
-        >
-          <svg
-            class="pointer-events-none absolute inset-0 h-full w-full -rotate-90 text-primary"
-            viewBox="0 0 36 36"
+        <span class="relative h-9 w-9">
+          <span
+            class="absolute inset-0 overflow-hidden rounded-full border border-[var(--ll-color-border)] bg-[var(--ll-color-surface-soft)]"
             aria-hidden="true"
           >
-            <circle
-              cx="18"
-              cy="18"
-              r="16"
-              fill="none"
-              stroke="currentColor"
-              stroke-opacity="0.14"
-              stroke-width="2.5"
-            ></circle>
-            <circle
-              cx="18"
-              cy="18"
-              r="16"
-              fill="none"
-              pathLength="100"
-              stroke="currentColor"
-              stroke-linecap="round"
-              stroke-width="2.5"
-              [attr.stroke-dasharray]="compactActionProgress() + ' 100'"
-              class="transition-[stroke-dasharray] duration-100 ease-linear"
-            ></circle>
-          </svg>
-          <span class="relative" aria-hidden="true">✦</span>
+            <span
+              class="absolute inset-x-0 bottom-0 overflow-hidden bg-gradient-to-t from-primary/35 to-primary/15 transition-[height] duration-100 ease-linear"
+              [style.height.%]="compactActionProgress()"
+            >
+              <span
+                class="absolute inset-x-0 top-0 h-px bg-primary/70 shadow-[0_0_5px_var(--ll-color-primary)]"
+              ></span>
+            </span>
+          </span>
           <span
-            class="absolute right-0 top-0 h-2 w-2 rounded-full bg-[var(--ll-color-success)]"
+            class="relative flex h-full w-full items-center justify-center text-primary"
+            aria-hidden="true"
+          >
+            ✦
+          </span>
+          <span
+            class="absolute right-0 top-0 z-10 h-2 w-2 rounded-full bg-[var(--ll-color-success)]"
             aria-hidden="true"
           ></span>
         </span>
@@ -128,8 +118,9 @@
           [compact]="true"
           [routerLink]="item.route"
           [isActive]="isItemActive(item.route)"
+          [tutorialAttention]="isTutorialDestination(item)"
           [notificationCount]="getSidebarItemNotificationCount(item.id)"
-          (click)="onNavigate()"
+          (click)="onNavigate(item)"
         ></app-sidebar-item>
       </div>
     </div>

@@ -4,10 +4,27 @@
     "kind": "click",
     "element": "[data-tour=crafting-introduction]",
     "actionSelector": "[data-tour=tutorial-weapon-recipe]",
+    "includeSelectors": ["[data-tour=tutorial-weapon-recipe]"],
     "targetTimeoutMs": 5000,
     "title": "1. Choose your weapon",
     "description": "Choose a Tier 1 one-handed weapon from this list. You have exactly enough Ore and Wood to craft one.",
     "position": "right"
+  },
+  {
+    "id": "explain-common-base",
+    "element": "[data-tour=crafting-base-recipe]",
+    "targetTimeoutMs": 5000,
+    "title": "2. Common base",
+    "description": "The Common Base is the standard version of this weapon. It uses the recipe's base materials and determines the weapon type and its core attributes. New variants of a recipe can be unlocked by collecting Blueprints.",
+    "position": "right"
+  },
+  {
+    "id": "explain-item-preview",
+    "element": "[data-tour=crafting-item-preview]",
+    "targetTimeoutMs": 5000,
+    "title": "3. Crafted item preview",
+    "description": "Check the result before spending materials. The preview shows attribute ranges, starting Potential, quality chances, item identity, and possible Tempering attributes.",
+    "position": "left"
   },
   {
     "id": "craft-tutorial-weapon",
@@ -16,8 +33,8 @@
     "actionSelector": "[data-tour=tutorial-craft-weapon]",
     "waitForEnabled": true,
     "targetTimeoutMs": 5000,
-    "title": "2. Craft your weapon",
-    "description": "Craft the selected one-handed base weapon at Tier 1. You can improve it and unlock specialized Blueprints later.",
+    "title": "4. Craft your weapon",
+    "description": "The Common Base is selected and you have enough materials for one Tier 1 weapon. Craft it now; you can return to specialized Blueprints later.",
     "position": "left"
   }
 ]

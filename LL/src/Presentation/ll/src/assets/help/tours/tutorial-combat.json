@@ -12,14 +12,5 @@
     "title": "2. Ability breakdown",
     "description": "This table shows how often each ability was used or triggered and how much damage, healing, or barrier it produced.",
     "position": "bottom"
-  },
-  {
-    "id": "open-essences",
-    "kind": "click",
-    "element": "[data-tour=tutorial-quest-action]",
-    "actionSelector": "[data-tour=tutorial-quest-action]",
-    "title": "3. Your first Essence",
-    "description": "Victory awarded an unbound Goblin's Essence. Open Essences, then absorb it into your Soul Archive to continue the tutorial.",
-    "position": "bottom"
   }
 ]
