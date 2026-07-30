@@ -1,0 +1,23 @@
+[
+  {
+    "id": "choose-tutorial-weapon",
+    "kind": "click",
+    "element": "[data-tour=crafting-introduction]",
+    "actionSelector": "[data-tour=tutorial-weapon-recipe]",
+    "targetTimeoutMs": 5000,
+    "title": "1. Choose your weapon",
+    "description": "Choose a Tier 1 one-handed weapon from this list. You have exactly enough Ore and Wood to craft one.",
+    "position": "right"
+  },
+  {
+    "id": "craft-tutorial-weapon",
+    "kind": "click",
+    "element": "[data-tour=tutorial-craft-weapon]",
+    "actionSelector": "[data-tour=tutorial-craft-weapon]",
+    "waitForEnabled": true,
+    "targetTimeoutMs": 5000,
+    "title": "2. Craft your weapon",
+    "description": "Craft the selected one-handed base weapon at Tier 1. You can improve it and unlock specialized Blueprints later.",
+    "position": "left"
+  }
+]

@@ -31,6 +31,11 @@ import {
   DropdownOption,
   DropdownSelection,
 } from '../../../../../shared/components/custom-components/dropdown/dropdown.component';
+import {
+  TUTORIAL_ONE_HANDED_WEAPON_ITEM_BASE_IDS,
+  TUTORIAL_STEP_CRAFT_EQUIPMENT,
+} from '../../../../../shared/models/tutorial';
+import { TutorialStateService } from '../../../../../core/services/api/tutorial/tutorial-state.service';
 
 interface BaseAttributeDisplay {
   attributeType: AttributeType;
@@ -86,9 +91,23 @@ export class RegularCraftingComponent {
   private readonly selectedRecipeId = signal<string | null>(null);
   private readonly selectedBlueprintId = signal<string | null>(null);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly tutorialState = inject(TutorialStateService);
+
+  readonly isTutorialWeaponSelectionActive = computed(
+    () =>
+      this.tutorialState.state()?.currentStep ===
+      TUTORIAL_STEP_CRAFT_EQUIPMENT,
+  );
+
+  private readonly tutorialScopedRecipes = computed(() => {
+    const recipes = this.recipesV2();
+    if (!this.isTutorialWeaponSelectionActive()) return recipes;
+
+    return recipes.filter((recipe) => this.isTutorialWeaponRecipe(recipe));
+  });
 
   readonly selectedRecipe = computed(() => {
-    const recipes = this.recipesV2();
+    const recipes = this.tutorialScopedRecipes();
     return (
       recipes.find((recipe) => recipe.id === this.selectedRecipeId()) ??
       recipes[0] ??
@@ -221,9 +240,9 @@ export class RegularCraftingComponent {
   );
 
   readonly recipeCategories = computed(() =>
-    Array.from(new Set(this.recipesV2().map((recipe) => recipe.category))).sort(
-      (left, right) => left.localeCompare(right),
-    ),
+    Array.from(
+      new Set(this.tutorialScopedRecipes().map((recipe) => recipe.category)),
+    ).sort((left, right) => left.localeCompare(right)),
   );
   readonly recipeCategoryOptions = computed<readonly DropdownOption<string>[]>(
     () => [
@@ -236,6 +255,9 @@ export class RegularCraftingComponent {
   );
 
   private readonly recipeSearchMatches = computed(() => {
+    const tutorialRecipes = this.tutorialScopedRecipes();
+    if (this.isTutorialWeaponSelectionActive()) return tutorialRecipes;
+
     const queryTerms = this.recipeSearch()
       .trim()
       .toLowerCase()
@@ -243,7 +265,7 @@ export class RegularCraftingComponent {
       .filter(Boolean);
     const category = this.recipeCategory();
 
-    return this.recipesV2().filter((recipe) => {
+    return tutorialRecipes.filter((recipe) => {
       if (category !== 'all' && recipe.category !== category) return false;
       if (!queryTerms.length) return true;
 
@@ -278,8 +300,11 @@ export class RegularCraftingComponent {
   });
 
   readonly filteredRecipes = computed(() => {
+    const recipes = this.recipeSearchMatches();
+    if (this.isTutorialWeaponSelectionActive()) return recipes;
+
     const mode = this.filterMode();
-    return this.recipeSearchMatches().filter((recipe) => {
+    return recipes.filter((recipe) => {
       switch (mode) {
         case 'craftable':
           return this.canCraftAnyDesign(recipe);
@@ -343,9 +368,17 @@ export class RegularCraftingComponent {
     private readonly inventoryState: InventoryStateService,
     private readonly craftingService: CraftingService,
   ) {
+    this.inventoryState.load(true);
     effect(() => this.loadRecipes(this.targetTier()), {
       allowSignalWrites: true,
     });
+    effect(
+      () => {
+        this.isTutorialWeaponSelectionActive();
+        this.selectFirstVisibleRecipeIfNeeded();
+      },
+      { allowSignalWrites: true },
+    );
     this.craftingService.blueprintLearned$
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((result) => {
@@ -465,6 +498,13 @@ export class RegularCraftingComponent {
 
   isSelectedRecipe(recipe: CraftingRecipe): boolean {
     return this.selectedRecipeId() === recipe.id;
+  }
+
+  isTutorialWeaponRecipe(recipe: CraftingRecipe): boolean {
+    return (
+      recipe.minTier === 1 &&
+      TUTORIAL_ONE_HANDED_WEAPON_ITEM_BASE_IDS.has(recipe.outputItemId)
+    );
   }
 
   isBlueprintCraftable(blueprint: CraftingBlueprint): boolean {

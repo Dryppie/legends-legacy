@@ -6,6 +6,7 @@ import {
   OnDestroy,
   OnInit,
   Output,
+  signal,
   untracked,
 } from '@angular/core';
 import { Router, RouterLink, NavigationEnd } from '@angular/router';
@@ -25,6 +26,8 @@ import { SidebarNotificationRefreshService } from '../../../core/services/client
 import { EssenceStateService } from '../../../core/services/api/essences/essence-state.service';
 import { GuildStateService } from '../../../core/services/api/guild/guild-state.service';
 import { SidebarLayoutPreferenceService } from '../../../core/services/client-side/sidebar-layout/sidebar-layout-preference.service';
+import { TimeSyncService } from '../../../core/services/api/time-sync/time-sync.service';
+import { environment } from '../../../../environments/environment';
 
 @Component({
     selector: 'app-sidebar',
@@ -41,11 +44,13 @@ export class SidebarComponent implements OnInit, OnDestroy {
   @Output() itemTapped = new EventEmitter<void>();
 
   private readonly destroy$ = new Subject<void>();
+  private compactProgressInterval: ReturnType<typeof setInterval> | null = null;
 
   sections: SidebarSection[] = [];
   activeUrl = '';
   displayCurrentAction = false;
   readonly sidebarLayout;
+  readonly compactActionProgress = signal(0);
 
   constructor(
     private readonly sidebarService: SidebarService,
@@ -57,6 +62,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
     public readonly guildState: GuildStateService,
     private readonly sidebarLayoutPreference: SidebarLayoutPreferenceService,
     private readonly router: Router,
+    private readonly timeSync: TimeSyncService,
   ) {
     this.sidebarLayout = this.sidebarLayoutPreference.layout;
 
@@ -79,6 +85,11 @@ export class SidebarComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.activeUrl = this.router.url;
+    this.refreshCompactActionProgress();
+    this.compactProgressInterval = setInterval(
+      () => this.refreshCompactActionProgress(),
+      100,
+    );
 
     this.sidebarService
       .getSidebar()
@@ -100,6 +111,10 @@ export class SidebarComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    if (this.compactProgressInterval) {
+      clearInterval(this.compactProgressInterval);
+      this.compactProgressInterval = null;
+    }
     this.destroy$.next();
     this.destroy$.complete();
   }
@@ -152,5 +167,32 @@ export class SidebarComponent implements OnInit, OnDestroy {
     } else {
       return;
     }
+  }
+
+  private refreshCompactActionProgress(): void {
+    const action = this.state.currentAction();
+    if (!action || action.characterActionType === CharacterActionType.Idle) {
+      this.compactActionProgress.set(0);
+      return;
+    }
+
+    const durationMs = environment.baseDuration * 1000;
+    let startedAt: number;
+
+    if (
+      action.characterActionType === CharacterActionType.Combat ||
+      action.isDeleted
+    ) {
+      const deadline = new Date(
+        action.nextResolutionAt ?? action.updatedAt,
+      ).getTime();
+      startedAt = deadline - durationMs;
+    } else {
+      startedAt = new Date(action.updatedAt).getTime();
+    }
+
+    const elapsed = this.timeSync.now() - startedAt;
+    const progress = Math.max(0, Math.min((elapsed / durationMs) * 100, 100));
+    this.compactActionProgress.set(progress);
   }
 }

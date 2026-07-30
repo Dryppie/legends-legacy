@@ -1,24 +1,11 @@
 [
   {
-    "id": "open-equipment-tab",
-    "kind": "click",
-    "element": "[data-tour=inventory-tabs]",
-    "actionSelector": "[data-tour=inventory-tab-equipment]",
-    "restoreOnBack": {
-      "type": "click",
-      "selector": "[data-tour=inventory-tab-all]"
-    },
-    "title": "1. Equipment tab",
-    "description": "Open Equipment to find the starter chest you earned by attuning your Essence.",
-    "position": "bottom"
-  },
-  {
     "id": "find-tutorial-equipment",
     "kind": "click",
-    "element": "[data-tour=inventory-items]",
-    "actionSelector": "[data-tour=inventory-equipment-item][data-item-base-id=tutorial_chest]",
-    "title": "2. Starter chest",
-    "description": "Select the Tutorial Chest to review its Health, Armor, and Resistance bonuses.",
+    "element": "[data-tour=inventory-equipment-item][data-tutorial-crafted-weapon=true]",
+    "actionSelector": "[data-tour=inventory-equipment-item][data-tutorial-crafted-weapon=true]",
+    "title": "1. Crafted weapon",
+    "description": "Select the Tier 1 weapon you just crafted to review its damage, quality, and combat properties.",
     "position": "bottom"
   },
   {
@@ -27,8 +14,8 @@
     "element": "[data-tour=tutorial-equipment-equip]",
     "actionSelector": "[data-tour=tutorial-equipment-equip]",
     "targetTimeoutMs": 5000,
-    "title": "3. Equip",
-    "description": "Equip the Tutorial Chest to strengthen your character.",
+    "title": "2. Equip",
+    "description": "Equip your crafted weapon so your character can use it in combat.",
     "position": "bottom"
   }
 ]

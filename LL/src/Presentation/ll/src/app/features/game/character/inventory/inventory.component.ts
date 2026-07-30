@@ -21,7 +21,10 @@ import {
   DropdownSelection,
 } from '../../../../shared/components/custom-components/dropdown/dropdown.component';
 import { TutorialStateService } from '../../../../core/services/api/tutorial/tutorial-state.service';
-import { TUTORIAL_STEP_EQUIP_EQUIPMENT } from '../../../../shared/models/tutorial';
+import {
+  TUTORIAL_STEP_EQUIP_EQUIPMENT,
+  TUTORIAL_ONE_HANDED_WEAPON_ITEM_BASE_IDS,
+} from '../../../../shared/models/tutorial';
 
 @Component({
     selector: 'app-inventory',
@@ -193,6 +196,15 @@ export class InventoryComponent implements OnInit {
     return this.isEquipmentItem(item)
       ? (item.itemInstance as EquipmentInstance)
       : null;
+  }
+
+  isTutorialCraftedWeapon(item: InventoryItem): boolean {
+    const equipment = this.equipmentInstance(item);
+    return (
+      equipment?.tier === 1 &&
+      !!equipment.baseRecipeId &&
+      TUTORIAL_ONE_HANDED_WEAPON_ITEM_BASE_IDS.has(equipment.itemBase.id)
+    );
   }
 
   equipmentRarityClass(item: InventoryItem): string {

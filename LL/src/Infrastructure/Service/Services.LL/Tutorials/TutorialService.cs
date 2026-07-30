@@ -2,15 +2,12 @@ using Application.Common.Interfaces;
 using Application.Interfaces.Services.LL.Tutorials;
 using Application.Interfaces.WebSockets;
 using Application.WebSockets.Contracts;
-using Domain.Models.Attributes;
-using Domain.Models.Attributes.Modifiers;
 using Domain.Models.Combat;
 using Domain.Models.Entities.Characters;
 using Domain.Models.Essences;
 using Domain.Models.Inventories;
 using Domain.Models.Items;
 using Domain.Models.Items.Equipments;
-using Domain.Models.Items.Equipments.Slots;
 using Domain.Models.Tutorials;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -84,10 +81,10 @@ public sealed class TutorialService : ITutorialService, ITutorialProgressionServ
             characterId,
             tutorialEssence,
             cancellationToken);
-        await EnsureTutorialEquipmentGrantedAsync(progress, cancellationToken);
+        await EnsureTutorialCraftingMaterialsAsync(progress, cancellationToken);
 
         progress.EssenceEquippedAt ??= DateTimeOffset.UtcNow;
-        SetStep(progress, TutorialConstants.StepEquipEquipment);
+        SetStep(progress, TutorialConstants.StepCraftEquipment);
 
         await _context.SaveChangesAsync(cancellationToken);
         await PublishTutorialStateChangedAsync(progress, cancellationToken);
@@ -108,7 +105,6 @@ public sealed class TutorialService : ITutorialService, ITutorialProgressionServ
                 characterId,
                 tutorialEssence,
                 cancellationToken);
-            await EnsureTutorialChestEquippedAsync(characterId, cancellationToken);
 
             var now = DateTimeOffset.UtcNow;
             progress.TrainingCombatWonAt ??= now;
@@ -267,26 +263,27 @@ public sealed class TutorialService : ITutorialService, ITutorialProgressionServ
             }
 
             progress.EssenceEquippedAt ??= DateTimeOffset.UtcNow;
-            await EnsureTutorialEquipmentGrantedAsync(progress, cancellationToken);
+            await EnsureTutorialCraftingMaterialsAsync(progress, cancellationToken);
             Advance(progress, step);
             return (true, []);
         }
 
         if (triggerType.Equals("ClientRouteVisited", StringComparison.OrdinalIgnoreCase))
         {
-            if (progress.CurrentStep == TutorialConstants.StepCraftEquipment)
-            {
-                await GrantTutorialEquipmentAsync(progress, cancellationToken);
-                progress.CraftedTierOneEquipmentCount = TutorialConstants.RequiredCraftedEquipmentCount;
-            }
-
             Advance(progress, step);
             return (true, []);
         }
 
         if (triggerType.Equals("CraftedEquipment", StringComparison.OrdinalIgnoreCase))
         {
-            var craftedTierOneItems = trigger.CraftedItemTiers?.Count(tier => tier == 1) ?? 0;
+            var allowedItemBaseIds = step.Trigger.ItemBaseIds.Count > 0
+                ? step.Trigger.ItemBaseIds
+                : TutorialConstants.TutorialOneHandedWeaponItemBaseIds;
+            var craftedTierOneItems = (trigger.CraftedItemBaseIds ?? [])
+                .Zip(trigger.CraftedItemTiers ?? [])
+                .Count(item =>
+                    item.Second == 1 &&
+                    allowedItemBaseIds.Contains(item.First, StringComparer.OrdinalIgnoreCase));
             if (craftedTierOneItems <= 0)
             {
                 return (false, []);
@@ -299,7 +296,6 @@ public sealed class TutorialService : ITutorialService, ITutorialProgressionServ
 
             if (progress.CraftedTierOneEquipmentCount >= TutorialConstants.RequiredCraftedEquipmentCount)
             {
-                await GrantTutorialEquipmentAsync(progress, cancellationToken);
                 Advance(progress, step);
             }
 
@@ -422,22 +418,38 @@ public sealed class TutorialService : ITutorialService, ITutorialProgressionServ
                 cancellationToken))
         {
             progress.EssenceEquippedAt ??= DateTimeOffset.UtcNow;
-            await EnsureTutorialEquipmentGrantedAsync(progress, cancellationToken);
-            SetStep(progress, TutorialConstants.StepEquipEquipment);
+            await EnsureTutorialCraftingMaterialsAsync(progress, cancellationToken);
+            SetStep(progress, TutorialConstants.StepCraftEquipment);
             await PublishTutorialStateChangedAsync(progress, cancellationToken);
             return true;
         }
 
         if (progress.CurrentStep == TutorialConstants.StepCraftEquipment)
         {
-            await EnsureTutorialEquipmentGrantedAsync(progress, cancellationToken);
-            SetStep(progress, TutorialConstants.StepEquipEquipment);
-            await PublishTutorialStateChangedAsync(progress, cancellationToken);
-            return true;
+            if (await HasCraftedTutorialWeaponAsync(progress.CharacterId, cancellationToken))
+            {
+                progress.CraftedTierOneEquipmentCount =
+                    TutorialConstants.RequiredCraftedEquipmentCount;
+                SetStep(progress, TutorialConstants.StepEquipEquipment);
+                await PublishTutorialStateChangedAsync(progress, cancellationToken);
+                return true;
+            }
+
+            return await EnsureTutorialCraftingMaterialsAsync(progress, cancellationToken);
         }
 
         if (progress.CurrentStep == TutorialConstants.StepEquipEquipment)
         {
+            if (!await HasCraftedTutorialWeaponAsync(progress.CharacterId, cancellationToken))
+            {
+                progress.CraftedTierOneEquipmentCount = 0;
+                progress.EquippedTierOneEquipmentCount = 0;
+                await EnsureTutorialCraftingMaterialsAsync(progress, cancellationToken);
+                SetStep(progress, TutorialConstants.StepCraftEquipment);
+                await PublishTutorialStateChangedAsync(progress, cancellationToken);
+                return true;
+            }
+
             var step = _definitionProvider.GetStep(progress.TutorialId, progress.CurrentStep);
             progress.EquippedTierOneEquipmentCount = await GetEquippedTutorialEquipmentCountAsync(
                 progress.CharacterId,
@@ -464,10 +476,7 @@ public sealed class TutorialService : ITutorialService, ITutorialProgressionServ
     {
         if (tutorialItemBaseIds.Count == 0)
         {
-            tutorialItemBaseIds =
-            [
-                TutorialConstants.TutorialChestItemBaseId
-            ];
+            tutorialItemBaseIds = TutorialConstants.TutorialOneHandedWeaponItemBaseIds;
         }
 
         var equippedTutorialItemCount = await _context.EquipmentSlots
@@ -475,10 +484,38 @@ public sealed class TutorialService : ITutorialService, ITutorialProgressionServ
             .Where(slot =>
                 slot.EntityId == characterId &&
                 slot.EquipmentInstance != null &&
+                slot.EquipmentInstance.Tier == 1 &&
+                slot.EquipmentInstance.BaseRecipeId != null &&
                 tutorialItemBaseIds.Contains(slot.EquipmentInstance.ItemBaseId))
             .CountAsync(cancellationToken);
 
         return equippedTutorialItemCount;
+    }
+
+    private async Task<bool> HasCraftedTutorialWeaponAsync(
+        Guid characterId,
+        CancellationToken cancellationToken)
+    {
+        var tutorialWeaponIds = TutorialConstants.TutorialOneHandedWeaponItemBaseIds;
+        var craftedWeaponIds = _context.ItemInstances
+            .OfType<EquipmentInstance>()
+            .Where(item =>
+                item.Tier == 1 &&
+                item.BaseRecipeId != null &&
+                tutorialWeaponIds.Contains(item.ItemBaseId))
+            .Select(item => item.Id);
+
+        return await _context.InventoryItems.AnyAsync(
+                   item =>
+                       item.InventoryId == characterId &&
+                       craftedWeaponIds.Contains(item.ItemInstanceId),
+                   cancellationToken) ||
+               await _context.EquipmentSlots.AnyAsync(
+                   slot =>
+                       slot.EntityId == characterId &&
+                       slot.EquipmentInstanceId != null &&
+                       craftedWeaponIds.Contains(slot.EquipmentInstanceId.Value),
+                   cancellationToken);
     }
 
     private async Task<CharacterTutorialProgress> GetOrCreateProgressAsync(
@@ -568,19 +605,13 @@ public sealed class TutorialService : ITutorialService, ITutorialProgressionServ
             tutorialEssence,
             cancellationToken);
 
-        var chestEquipped = await EnsureTutorialChestEquippedAsync(
-            progress.CharacterId,
-            cancellationToken);
-
         var now = DateTimeOffset.UtcNow;
         progress.TrainingCombatWonAt ??= now;
         progress.EssenceAbsorbedAt ??= now;
         progress.EssenceEquippedAt ??= now;
         progress.TrainingEssenceRewardGranted = true;
         progress.CraftedTierOneEquipmentCount = TutorialConstants.RequiredCraftedEquipmentCount;
-        progress.EquippedTierOneEquipmentCount = chestEquipped
-            ? TutorialConstants.RequiredEquippedEquipmentCount
-            : progress.EquippedTierOneEquipmentCount;
+        progress.EquippedTierOneEquipmentCount = TutorialConstants.RequiredEquippedEquipmentCount;
     }
 
     private async Task<PlayerEssence> EnsureTutorialEssenceAbsorbedAsync(
@@ -689,109 +720,6 @@ public sealed class TutorialService : ITutorialService, ITutorialProgressionServ
         slotZero.PlayerEssence = tutorialEssence;
     }
 
-    private async Task<bool> EnsureTutorialChestEquippedAsync(
-        Guid characterId,
-        CancellationToken cancellationToken)
-    {
-        await EnsureTutorialEquipmentItemBasesAsync(cancellationToken);
-
-        var chestSlot = await _context.EquipmentSlots
-            .Include(x => x.EquipmentInstance)
-            .FirstOrDefaultAsync(x =>
-                x.EntityId == characterId &&
-                x.EquipmentSlotType == EquipmentSlotType.Chest,
-                cancellationToken);
-
-        if (chestSlot is null)
-        {
-            chestSlot = new EquipmentSlot
-            {
-                EntityId = characterId,
-                EquipmentSlotType = EquipmentSlotType.Chest
-            };
-            await _context.EquipmentSlots.AddAsync(chestSlot, cancellationToken);
-        }
-
-        if (chestSlot.EquipmentInstance?.ItemBaseId == TutorialConstants.TutorialChestItemBaseId)
-        {
-            await RemoveInventoryItemsByBaseIdAsync(
-                characterId,
-                TutorialConstants.TutorialChestItemBaseId,
-                cancellationToken);
-            return true;
-        }
-
-        if (chestSlot.EquipmentInstance is not null)
-        {
-            return false;
-        }
-
-        var inventoryChest = await _context.InventoryItems
-            .Include(x => x.ItemInstance)
-                .ThenInclude(x => x.ItemBase)
-            .FirstOrDefaultAsync(x =>
-                x.InventoryId == characterId &&
-                x.ItemInstance.ItemBaseId == TutorialConstants.TutorialChestItemBaseId,
-                cancellationToken);
-
-        EquipmentInstance chestInstance;
-        if (inventoryChest?.ItemInstance is EquipmentInstance existingChestInstance)
-        {
-            chestInstance = existingChestInstance;
-            _context.InventoryItems.Remove(inventoryChest);
-        }
-        else
-        {
-            var itemBases = await _itemBases.GetItemBasesByIdsAsync(
-                [TutorialConstants.TutorialChestItemBaseId],
-                cancellationToken);
-            if (!itemBases.TryGetValue(TutorialConstants.TutorialChestItemBaseId, out var itemBase) ||
-                itemBase is not EquipmentBase equipmentBase)
-            {
-                throw new InvalidOperationException(
-                    $"Tutorial equipment item '{TutorialConstants.TutorialChestItemBaseId}' does not exist.");
-            }
-
-            chestInstance = new EquipmentInstance
-            {
-                Id = Guid.NewGuid(),
-                ItemBaseId = equipmentBase.Id,
-                ItemBase = equipmentBase,
-                Rarity = equipmentBase.Rarity,
-                Tier = 1
-            };
-
-            await _context.ItemInstances.AddAsync(chestInstance, cancellationToken);
-        }
-
-        chestSlot.EquipmentInstanceId = chestInstance.Id;
-        chestSlot.EquipmentInstance = chestInstance;
-        await RemoveInventoryItemsByBaseIdAsync(
-            characterId,
-            TutorialConstants.TutorialChestItemBaseId,
-            cancellationToken);
-
-        return true;
-    }
-
-    private async Task RemoveInventoryItemsByBaseIdAsync(
-        Guid characterId,
-        string itemBaseId,
-        CancellationToken cancellationToken)
-    {
-        var inventoryItems = await _context.InventoryItems
-            .Include(x => x.ItemInstance)
-            .Where(x =>
-                x.InventoryId == characterId &&
-                x.ItemInstance.ItemBaseId == itemBaseId)
-            .ToListAsync(cancellationToken);
-
-        if (inventoryItems.Count > 0)
-        {
-            _context.InventoryItems.RemoveRange(inventoryItems);
-        }
-    }
-
     private async Task<bool> ShouldAutoCompleteForExistingCharacterAsync(Guid characterId, CancellationToken cancellationToken)
     {
         var character = await _context.Characters
@@ -820,39 +748,42 @@ public sealed class TutorialService : ITutorialService, ITutorialProgressionServ
         return loot;
     }
 
-    private async Task GrantTutorialEquipmentAsync(CharacterTutorialProgress progress, CancellationToken cancellationToken)
-    {
-        await EnsureTutorialEquipmentItemBasesAsync(cancellationToken);
-        await AddItemRewardsAsync(progress.CharacterId, new Dictionary<string, int>
-        {
-            [TutorialConstants.TutorialChestItemBaseId] = 1
-        }, cancellationToken);
-    }
-
-    private async Task EnsureTutorialEquipmentGrantedAsync(
+    private async Task<bool> EnsureTutorialCraftingMaterialsAsync(
         CharacterTutorialProgress progress,
         CancellationToken cancellationToken)
     {
-        var hasTutorialChest = await _context.InventoryItems
-            .Include(x => x.ItemInstance)
-            .AnyAsync(x =>
-                    x.InventoryId == progress.CharacterId &&
-                    x.ItemInstance.ItemBaseId == TutorialConstants.TutorialChestItemBaseId,
-                cancellationToken) ||
-            await _context.EquipmentSlots
-                .Include(x => x.EquipmentInstance)
-                .AnyAsync(x =>
-                        x.EntityId == progress.CharacterId &&
-                        x.EquipmentInstance != null &&
-                        x.EquipmentInstance.ItemBaseId == TutorialConstants.TutorialChestItemBaseId,
-                    cancellationToken);
-
-        if (!hasTutorialChest)
+        var requiredQuantities = new Dictionary<string, int>
         {
-            await GrantTutorialEquipmentAsync(progress, cancellationToken);
+            [TutorialConstants.TutorialCraftingOreItemBaseId] =
+                TutorialConstants.TutorialCraftingOreQuantity,
+            [TutorialConstants.TutorialCraftingWoodItemBaseId] =
+                TutorialConstants.TutorialCraftingWoodQuantity
+        };
+        var missingQuantities = new Dictionary<string, int>();
+
+        foreach (var (itemBaseId, requiredQuantity) in requiredQuantities)
+        {
+            var ownedQuantity = await _inventory.GetInventoryQuantityAsync(
+                progress.CharacterId,
+                itemBaseId,
+                cancellationToken);
+            if (ownedQuantity < requiredQuantity)
+            {
+                missingQuantities[itemBaseId] = requiredQuantity - ownedQuantity;
+            }
         }
 
-        progress.CraftedTierOneEquipmentCount = TutorialConstants.RequiredCraftedEquipmentCount;
+        if (missingQuantities.Count == 0)
+        {
+            return false;
+        }
+
+        await AddItemRewardsAsync(
+            progress.CharacterId,
+            missingQuantities,
+            cancellationToken,
+            publishAsLoot: true);
+        return true;
     }
 
     private async Task GrantCompletionRewardAsync(CharacterTutorialProgress progress, CancellationToken cancellationToken)
@@ -945,46 +876,6 @@ public sealed class TutorialService : ITutorialService, ITutorialProgressionServ
             step.TourPageId,
             progress.IsCompleted);
     }
-
-    private async Task EnsureTutorialEquipmentItemBasesAsync(CancellationToken cancellationToken)
-    {
-        var tutorialItems = CreateTutorialEquipmentItemBases();
-        await _itemBases.AddMissingItemBasesAsync(tutorialItems, cancellationToken);
-    }
-
-    private static IReadOnlyList<ItemBase> CreateTutorialEquipmentItemBases()
-    {
-        var chest = new EquipmentBase
-        {
-            Id = TutorialConstants.TutorialChestItemBaseId,
-            Name = "Tutorial Chest",
-            Description = "Basic protective gear for first steps beyond the training yard.",
-            Rarity = Rarity.Common,
-            EquipmentType = EquipmentType.Chest,
-            AttributeModifiers =
-            [
-                CreateModifier("10000000-0000-0000-0000-000000010001", AttributeType.Armor, 10),
-                CreateModifier("10000000-0000-0000-0000-000000010002", AttributeType.Resistance, 10),
-                CreateModifier("10000000-0000-0000-0000-000000010003", AttributeType.MaxHealth, 35)
-            ]
-        };
-
-        foreach (var item in new[] { chest })
-        {
-            foreach (var modifier in item.AttributeModifiers)
-            {
-                modifier.ItemBaseId = item.Id;
-            }
-        }
-
-        return [chest];
-    }
-
-    private static ItemAttributeModifier CreateModifier(string id, AttributeType attributeType, float amount) =>
-        new(attributeType, amount, ModifierType.Flat)
-        {
-            Id = Guid.Parse(id)
-        };
 
     private static void SetStep(CharacterTutorialProgress progress, string step)
     {

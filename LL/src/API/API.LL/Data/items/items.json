@@ -1119,36 +1119,6 @@
     "gatheringType": null
   },
   {
-    "id": "tutorial_chest",
-    "name": "Tutorial Chest",
-    "description": "Basic protective gear for first steps beyond the training yard.",
-    "itemType": "Equipment",
-    "rarity": "Common",
-    "equipmentType": "Chest",
-    "attributeModifiers": [
-      {
-        "id": "10000000-0000-0000-0000-000000010001",
-        "attributeType": "Armor",
-        "amount": 10,
-        "modifierType": "Flat"
-      },
-      {
-        "id": "10000000-0000-0000-0000-000000010002",
-        "attributeType": "Resistance",
-        "amount": 10,
-        "modifierType": "Flat"
-      },
-      {
-        "id": "10000000-0000-0000-0000-000000010003",
-        "attributeType": "MaxHealth",
-        "amount": 35,
-        "modifierType": "Flat"
-      }
-    ],
-    "toolBonuses": [],
-    "gatheringType": null
-  },
-  {
     "id": "tutorial_ring",
     "name": "Tutorial Ring",
     "description": "A plain training ring with a small combat lesson etched inside.",

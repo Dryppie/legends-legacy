@@ -7,7 +7,14 @@
     [ngClass]="mobilePane() === 'recipes' ? 'flex' : 'hidden lg:flex'"
   >
     <h2 class="ll-heading px-1 text-lg uppercase tracking-wide">Recipes</h2>
-    <div class="mt-3 space-y-2">
+    <div
+      *ngIf="isTutorialWeaponSelectionActive()"
+      class="ll-card mt-3 px-3 py-2 text-xs text-secondary"
+    >
+      Showing Tier 1 one-handed weapons for the tutorial.
+    </div>
+
+    <div *ngIf="!isTutorialWeaponSelectionActive()" class="mt-3 space-y-2">
       <label
         class="flex items-center gap-2 rounded border border-white/10 bg-black/20 px-3 py-2 focus-within:border-primary/60"
       >
@@ -92,6 +99,9 @@
         type="button"
         class="ll-card shrink-0 p-3 text-left transition-colors hover:border-primary/60"
         [ngClass]="{ 'll-card-accent': isSelectedRecipe(recipe) }"
+        [attr.data-tour]="
+          isTutorialWeaponRecipe(recipe) ? 'tutorial-weapon-recipe' : null
+        "
         (click)="selectRecipe(recipe, true)"
       >
         <div class="flex items-center justify-between gap-2">
@@ -364,6 +374,7 @@
           </label>
 
           <app-regular-button
+            data-tour="tutorial-craft-weapon"
             (pressed)="craft()"
             [disabled]="!canCraftSelected() || isLoading()"
           >
@@ -786,6 +797,7 @@
 
         <app-regular-button
           class="w-full"
+          data-tour="tutorial-craft-weapon"
           [fullWidth]="true"
           (pressed)="craft()"
           [disabled]="!canCraftSelected() || isLoading()"

@@ -1,6 +1,6 @@
 {
   "tutorialId": "tutorial.first_steps",
-  "version": 1,
+  "version": 2,
   "title": "First Steps",
   "initialStepKey": "defeat_training_creature",
   "steps": [
@@ -45,11 +45,32 @@
         "type": "EssenceLoadoutChanged",
         "essenceDefinitionId": "essence.legacy.goblin"
       },
+      "nextStepKey": "craft_equipment"
+    },
+    {
+      "key": "craft_equipment",
+      "objective": "Craft a Tier 1 one-handed weapon of your choice.",
+      "requiredAmount": 1,
+      "actionLabel": "Open Crafting",
+      "destinationRoute": "/game/professions/crafting",
+      "tourPageId": "tutorial-crafting",
+      "guidePageId": "crafting",
+      "trigger": {
+        "type": "CraftedEquipment",
+        "requiredCount": 1,
+        "itemBaseIds": [
+          "shortsword",
+          "dagger",
+          "hatchet",
+          "mace",
+          "wand"
+        ]
+      },
       "nextStepKey": "equip_equipment"
     },
     {
       "key": "equip_equipment",
-      "objective": "Equip your Tutorial Chest.",
+      "objective": "Equip the weapon you crafted.",
       "requiredAmount": 1,
       "actionLabel": "Open Inventory",
       "destinationRoute": "/game/character/inventory",
@@ -59,7 +80,11 @@
         "type": "EquipmentChanged",
         "requiredCount": 1,
         "itemBaseIds": [
-          "tutorial_chest"
+          "shortsword",
+          "dagger",
+          "hatchet",
+          "mace",
+          "wand"
         ]
       },
       "nextStepKey": "start_lumo_ruins"

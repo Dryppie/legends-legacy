@@ -18,10 +18,22 @@ public static class TutorialConstants
     public const string TutorialEssenceDefinitionId = "essence.legacy.goblin";
     public const string TutorialEssenceItemBaseId = "item.essence.legacy.goblin";
     public const string TutorialSwordItemBaseId = "tutorial_sword";
-    public const string TutorialChestItemBaseId = "tutorial_chest";
     public const string TutorialRingItemBaseId = "tutorial_ring";
+    public const string TutorialCraftingOreItemBaseId = "ore";
+    public const string TutorialCraftingWoodItemBaseId = "wood";
 
-    public const int RequiredCraftedEquipmentCount = 3;
+    public static readonly IReadOnlyList<string> TutorialOneHandedWeaponItemBaseIds =
+    [
+        "shortsword",
+        "dagger",
+        "hatchet",
+        "mace",
+        "wand"
+    ];
+
+    public const int TutorialCraftingOreQuantity = 10;
+    public const int TutorialCraftingWoodQuantity = 3;
+    public const int RequiredCraftedEquipmentCount = 1;
     public const int RequiredEquippedEquipmentCount = 1;
     public const int CompletionCinders = 150;
 }

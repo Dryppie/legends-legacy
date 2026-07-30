@@ -236,11 +236,6 @@ export class EssencesComponent implements OnInit {
 
         if (tutorial.currentStep === TUTORIAL_STEP_ABSORB_ESSENCE) {
           this.essenceState.setActiveView('absorb');
-          return;
-        }
-
-        if (tutorial.currentStep === TUTORIAL_STEP_EQUIP_ESSENCE) {
-          this.essenceState.setActiveView('archive');
         }
       },
       { allowSignalWrites: true },

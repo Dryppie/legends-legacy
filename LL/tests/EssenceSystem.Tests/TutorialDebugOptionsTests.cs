@@ -43,9 +43,6 @@ public sealed class TutorialDebugOptionsTests
         var activeLoadout = await db.EssenceLoadouts
             .Include(x => x.Slots)
             .SingleAsync(x => x.CharacterId == characterId && x.IsActive);
-        var chestSlot = await db.EquipmentSlots
-            .Include(x => x.EquipmentInstance)
-            .SingleAsync(x => x.EntityId == characterId && x.EquipmentSlotType == EquipmentSlotType.Chest);
 
         Assert.Null(state);
         Assert.True(progress.IsCompleted);
@@ -54,7 +51,7 @@ public sealed class TutorialDebugOptionsTests
         Assert.Equal(150, character.Cinders);
         Assert.Equal(TutorialConstants.TutorialEssenceDefinitionId, playerEssence.EssenceDefinitionId);
         Assert.Contains(activeLoadout.Slots, slot => slot.SlotIndex == 0 && slot.PlayerEssenceId == playerEssence.Id);
-        Assert.Equal(TutorialConstants.TutorialChestItemBaseId, chestSlot.EquipmentInstance?.ItemBaseId);
+        Assert.Empty(await db.EquipmentSlots.Where(slot => slot.EntityId == characterId).ToListAsync());
         Assert.DoesNotContain(db.InventoryItems, item => item.InventoryId == characterId);
     }
 
@@ -104,14 +101,11 @@ public sealed class TutorialDebugOptionsTests
         var activeLoadout = await db.EssenceLoadouts
             .Include(x => x.Slots)
             .SingleAsync(x => x.CharacterId == characterId && x.IsActive);
-        var chestSlot = await db.EquipmentSlots
-            .Include(x => x.EquipmentInstance)
-            .SingleAsync(x => x.EntityId == characterId && x.EquipmentSlotType == EquipmentSlotType.Chest);
 
         Assert.Null(state);
         Assert.Equal(TutorialConstants.TutorialEssenceDefinitionId, playerEssence.EssenceDefinitionId);
         Assert.Contains(activeLoadout.Slots, slot => slot.SlotIndex == 0 && slot.PlayerEssenceId == playerEssence.Id);
-        Assert.Equal(TutorialConstants.TutorialChestItemBaseId, chestSlot.EquipmentInstance?.ItemBaseId);
+        Assert.Empty(await db.EquipmentSlots.Where(slot => slot.EntityId == characterId).ToListAsync());
         Assert.Empty(await db.InventoryItems.Where(item => item.InventoryId == characterId).ToListAsync());
     }
 
@@ -140,11 +134,6 @@ public sealed class TutorialDebugOptionsTests
         var activeLoadout = await db.EssenceLoadouts
             .Include(x => x.Slots)
             .SingleAsync(x => x.CharacterId == characterId && x.IsActive);
-        var chestSlot = await db.EquipmentSlots
-            .Include(x => x.EquipmentInstance)
-            .SingleAsync(x =>
-                x.EntityId == characterId &&
-                x.EquipmentSlotType == EquipmentSlotType.Chest);
 
         Assert.True(completion.WasSkipped);
         Assert.Equal(TutorialConstants.CompletionCinders, completion.RewardCinders);
@@ -155,13 +144,11 @@ public sealed class TutorialDebugOptionsTests
         Assert.Contains(
             activeLoadout.Slots,
             slot => slot.SlotIndex == 0 && slot.PlayerEssenceId == playerEssence.Id);
-        Assert.Equal(
-            TutorialConstants.TutorialChestItemBaseId,
-            chestSlot.EquipmentInstance?.ItemBaseId);
+        Assert.Empty(await db.EquipmentSlots.Where(slot => slot.EntityId == characterId).ToListAsync());
     }
 
     [Fact]
-    public async Task AttuneStarterEssenceAsync_skips_loadout_setup_and_grants_the_chest()
+    public async Task AttuneStarterEssenceAsync_starts_crafting_and_grants_weapon_materials()
     {
         await using var db = CreateDb();
         var characterId = Guid.NewGuid();
@@ -179,12 +166,12 @@ public sealed class TutorialDebugOptionsTests
             CurrentStep = TutorialConstants.StepEquipEssence
         });
         await db.SaveChangesAsync();
-        var inventory = new RecordingInventoryRepository();
+        var lootWriter = new RecordingLootRewardWriter();
         var service = CreateService(
             db,
             tutorialEnabled: true,
             definitionProvider: new ActiveTutorialDefinitionProvider(),
-            inventory: inventory);
+            lootWriter: lootWriter);
 
         var state = await service.AttuneStarterEssenceAsync(
             characterId,
@@ -196,34 +183,130 @@ public sealed class TutorialDebugOptionsTests
             .SingleAsync(x => x.CharacterId == characterId && x.IsActive);
 
         Assert.NotNull(state);
-        Assert.Equal(TutorialConstants.StepEquipEquipment, state.CurrentStep);
+        Assert.Equal(TutorialConstants.StepCraftEquipment, state.CurrentStep);
         Assert.Equal(2, state.CurrentStepIndex);
-        Assert.Equal(3, state.TotalSteps);
+        Assert.Equal(4, state.TotalSteps);
         Assert.Contains(
             activeLoadout.Slots,
             slot => slot.SlotIndex == 0 && slot.PlayerEssenceId == playerEssence.Id);
-        Assert.Contains(
-            inventory.Items,
-            item => item.ItemInstance.ItemBaseId == TutorialConstants.TutorialChestItemBaseId);
+        Assert.Equal(
+            TutorialConstants.TutorialCraftingOreQuantity,
+            lootWriter.Items
+                .Where(item => item.ItemInstance.ItemBaseId == TutorialConstants.TutorialCraftingOreItemBaseId)
+                .Sum(item => item.Quantity));
+        Assert.Equal(
+            TutorialConstants.TutorialCraftingWoodQuantity,
+            lootWriter.Items
+                .Where(item => item.ItemInstance.ItemBaseId == TutorialConstants.TutorialCraftingWoodItemBaseId)
+                .Sum(item => item.Quantity));
     }
 
     [Fact]
-    public async Task Equipment_then_Lumo_combat_start_completes_the_tutorial()
+    public async Task GetStateAsync_moves_legacy_chest_step_back_to_weapon_crafting()
     {
         await using var db = CreateDb();
         var characterId = Guid.NewGuid();
-        var chestBase = new EquipmentBase
+        db.Characters.Add(new Character
         {
-            Id = TutorialConstants.TutorialChestItemBaseId,
-            Name = "Tutorial Chest",
-            EquipmentType = EquipmentType.Chest
+            Id = characterId,
+            Name = "Migrating Hero",
+            UserId = Guid.NewGuid()
+        });
+        db.Inventories.Add(new Inventory { CharacterId = characterId });
+        db.CharacterTutorialProgresses.Add(new CharacterTutorialProgress
+        {
+            CharacterId = characterId,
+            TutorialId = TutorialConstants.FirstStepsTutorialId,
+            CurrentStep = TutorialConstants.StepEquipEquipment,
+            CraftedTierOneEquipmentCount =
+                TutorialConstants.RequiredCraftedEquipmentCount
+        });
+        await db.SaveChangesAsync();
+        var lootWriter = new RecordingLootRewardWriter();
+        var service = CreateService(
+            db,
+            tutorialEnabled: true,
+            definitionProvider: new ActiveTutorialDefinitionProvider(),
+            lootWriter: lootWriter);
+
+        var state = await service.GetStateAsync(characterId, CancellationToken.None);
+
+        Assert.Equal(TutorialConstants.StepCraftEquipment, state?.CurrentStep);
+        Assert.Equal(0, state?.CurrentAmount);
+        Assert.Equal(
+            TutorialConstants.TutorialCraftingOreQuantity +
+            TutorialConstants.TutorialCraftingWoodQuantity,
+            lootWriter.Items.Sum(item => item.Quantity));
+    }
+
+    [Fact]
+    public async Task CraftedEquipment_only_advances_for_an_allowed_tier_one_weapon()
+    {
+        await using var db = CreateDb();
+        var characterId = Guid.NewGuid();
+        db.Characters.Add(new Character
+        {
+            Id = characterId,
+            Name = "Crafting Hero",
+            UserId = Guid.NewGuid()
+        });
+        db.Inventories.Add(new Inventory { CharacterId = characterId });
+        db.CharacterTutorialProgresses.Add(new CharacterTutorialProgress
+        {
+            CharacterId = characterId,
+            TutorialId = TutorialConstants.FirstStepsTutorialId,
+            CurrentStep = TutorialConstants.StepCraftEquipment
+        });
+        await db.SaveChangesAsync();
+        var service = CreateService(
+            db,
+            tutorialEnabled: true,
+            definitionProvider: new ActiveTutorialDefinitionProvider());
+
+        var armorResult = await service.TryProgressAsync(
+            characterId,
+            TutorialTrigger.CraftedEquipment(["heavy_helm"], [1]),
+            CancellationToken.None);
+        var highTierResult = await service.TryProgressAsync(
+            characterId,
+            TutorialTrigger.CraftedEquipment(["shortsword"], [2]),
+            CancellationToken.None);
+        var twoHandedResult = await service.TryProgressAsync(
+            characterId,
+            TutorialTrigger.CraftedEquipment(["battle_axe"], [1]),
+            CancellationToken.None);
+        var weaponResult = await service.TryProgressAsync(
+            characterId,
+            TutorialTrigger.CraftedEquipment(["shortsword"], [1]),
+            CancellationToken.None);
+
+        Assert.Null(armorResult);
+        Assert.Null(highTierResult);
+        Assert.Null(twoHandedResult);
+        Assert.True(weaponResult?.Progressed);
+        Assert.Equal(
+            TutorialConstants.StepEquipEquipment,
+            weaponResult?.State?.CurrentStep);
+    }
+
+    [Fact]
+    public async Task Crafted_weapon_then_equipment_then_Lumo_combat_start_completes_the_tutorial()
+    {
+        await using var db = CreateDb();
+        var characterId = Guid.NewGuid();
+        var weaponBase = new EquipmentBase
+        {
+            Id = "shortsword",
+            Name = "Shortsword",
+            EquipmentType = EquipmentType.OneHanded
         };
-        var chest = new EquipmentInstance
+        var weapon = new EquipmentInstance
         {
             Id = Guid.NewGuid(),
-            ItemBaseId = chestBase.Id,
-            ItemBase = chestBase,
-            Tier = 1
+            ItemBaseId = weaponBase.Id,
+            ItemBase = weaponBase,
+            Tier = 1,
+            BaseRecipeId = "recipe.weapon.one_handed.shortsword"
         };
         db.Characters.Add(new Character
         {
@@ -235,9 +318,9 @@ public sealed class TutorialDebugOptionsTests
         db.EquipmentSlots.Add(new EquipmentSlot
         {
             EntityId = characterId,
-            EquipmentSlotType = EquipmentSlotType.Chest,
-            EquipmentInstanceId = chest.Id,
-            EquipmentInstance = chest
+            EquipmentSlotType = EquipmentSlotType.MainHand,
+            EquipmentInstanceId = weapon.Id,
+            EquipmentInstance = weapon
         });
         db.CharacterTutorialProgresses.Add(new CharacterTutorialProgress
         {
@@ -267,8 +350,8 @@ public sealed class TutorialDebugOptionsTests
         Assert.Equal(
             TutorialConstants.StepStartLumoRuins,
             equipmentResult?.State?.CurrentStep);
-        Assert.Equal(3, equipmentResult?.State?.CurrentStepIndex);
-        Assert.Equal(3, equipmentResult?.State?.TotalSteps);
+        Assert.Equal(4, equipmentResult?.State?.CurrentStepIndex);
+        Assert.Equal(4, equipmentResult?.State?.TotalSteps);
         Assert.True(completionResult?.Progressed);
         Assert.Null(completionResult?.State);
         Assert.True(progress.IsCompleted);
@@ -288,13 +371,14 @@ public sealed class TutorialDebugOptionsTests
         LLDbContext db,
         bool tutorialEnabled = false,
         ITutorialDefinitionProvider? definitionProvider = null,
-        RecordingInventoryRepository? inventory = null) =>
+        RecordingInventoryRepository? inventory = null,
+        RecordingLootRewardWriter? lootWriter = null) =>
         new(
             db,
             new RecordingItemBaseRepository(),
             inventory ?? new RecordingInventoryRepository(),
             new InventoryItemFactory(),
-            new RecordingLootRewardWriter(),
+            lootWriter ?? new RecordingLootRewardWriter(),
             definitionProvider ?? new EmptyTutorialDefinitionProvider(),
             new InMemoryTutorialProgressCache(),
             debugOptions: Options.Create(new TutorialDebugOptions
@@ -321,7 +405,7 @@ public sealed class TutorialDebugOptionsTests
         {
             TutorialId = TutorialConstants.FirstStepsTutorialId,
             Title = "First Steps",
-            Version = 1,
+            Version = 2,
             InitialStepKey = TutorialConstants.StepDefeatTrainingCreature,
             Steps =
             [
@@ -331,7 +415,7 @@ public sealed class TutorialDebugOptionsTests
                     Objective = "Attune the Goblin Essence.",
                     ActionLabel = "Open Essences",
                     DestinationRoute = "/game/character/essences",
-                    NextStepKey = TutorialConstants.StepEquipEquipment,
+                    NextStepKey = TutorialConstants.StepCraftEquipment,
                     Trigger = new TutorialStepTriggerDefinition
                     {
                         Type = "EssenceLoadoutChanged",
@@ -340,8 +424,22 @@ public sealed class TutorialDebugOptionsTests
                 },
                 new TutorialStepDefinition
                 {
+                    Key = TutorialConstants.StepCraftEquipment,
+                    Objective = "Craft a Tier 1 weapon.",
+                    ActionLabel = "Open Crafting",
+                    DestinationRoute = "/game/professions/crafting",
+                    NextStepKey = TutorialConstants.StepEquipEquipment,
+                    Trigger = new TutorialStepTriggerDefinition
+                    {
+                        Type = "CraftedEquipment",
+                        RequiredCount = 1,
+                        ItemBaseIds = [.. TutorialConstants.TutorialOneHandedWeaponItemBaseIds]
+                    }
+                },
+                new TutorialStepDefinition
+                {
                     Key = TutorialConstants.StepEquipEquipment,
-                    Objective = "Equip the starter chest.",
+                    Objective = "Equip the weapon you crafted.",
                     ActionLabel = "Open Inventory",
                     DestinationRoute = "/game/character/inventory",
                     NextStepKey = TutorialConstants.StepStartLumoRuins,
@@ -349,7 +447,7 @@ public sealed class TutorialDebugOptionsTests
                     {
                         Type = "EquipmentChanged",
                         RequiredCount = 1,
-                        ItemBaseIds = [TutorialConstants.TutorialChestItemBaseId]
+                        ItemBaseIds = [.. TutorialConstants.TutorialOneHandedWeaponItemBaseIds]
                     }
                 },
                 new TutorialStepDefinition
@@ -385,6 +483,20 @@ public sealed class TutorialDebugOptionsTests
                 Name = "Unbound Goblin's Essence",
                 ItemType = ItemType.Essence,
                 EssenceDefinitionId = TutorialConstants.TutorialEssenceDefinitionId
+            },
+            [TutorialConstants.TutorialCraftingOreItemBaseId] = new ItemBase
+            {
+                Id = TutorialConstants.TutorialCraftingOreItemBaseId,
+                Name = "Ore",
+                ItemType = ItemType.Resource,
+                Stackable = true
+            },
+            [TutorialConstants.TutorialCraftingWoodItemBaseId] = new ItemBase
+            {
+                Id = TutorialConstants.TutorialCraftingWoodItemBaseId,
+                Name = "Wood",
+                ItemType = ItemType.Resource,
+                Stackable = true
             }
         };
 

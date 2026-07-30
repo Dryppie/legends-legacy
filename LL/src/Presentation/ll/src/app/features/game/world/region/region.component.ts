@@ -1,5 +1,11 @@
 import { NgFor, NgIf } from '@angular/common';
-import { Component, effect, HostListener, OnInit } from '@angular/core';
+import {
+  Component,
+  effect,
+  HostListener,
+  OnDestroy,
+  OnInit,
+} from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Region, Area } from '../../../../shared/models/Dtos/regionDto';
 import { RegionService } from '../../../../core/services/client-side/region/region.service';
@@ -32,7 +38,7 @@ import {
     ],
     templateUrl: './region.component.html'
 })
-export class RegionComponent implements OnInit {
+export class RegionComponent implements OnInit, OnDestroy {
   regionId!: string;
   region!: Region; // You can define a more specific type based on your item data structure
   private sourceRegion: Region | null = null;
@@ -68,11 +74,14 @@ export class RegionComponent implements OnInit {
 
     this.route.queryParamMap.subscribe((params) => {
       this.targetAreaId = params.get('area');
+      this.dismissTrainingSummaryOutsideTrainingArea();
       this.applyRegionView();
     });
   }
 
-  ngOnDestroy(): void {}
+  ngOnDestroy(): void {
+    this.combatService.stop(BattleType.Training);
+  }
 
   getRegionDetails(id: string) {
     this.regionService.getRegionById(id).subscribe((data: any) => {
@@ -145,5 +154,14 @@ export class RegionComponent implements OnInit {
 
   closeTrainingSummary(): void {
     this.combatService.closeCurrentTrainingBattle();
+  }
+
+  private dismissTrainingSummaryOutsideTrainingArea(): void {
+    if (
+      this.targetAreaId !== TUTORIAL_TRAINING_GROUNDS_AREA_ID &&
+      this.combatStateService.getIsCombatActive(BattleType.Training)()
+    ) {
+      this.combatService.stop(BattleType.Training);
+    }
   }
 }
