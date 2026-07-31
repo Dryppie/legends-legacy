@@ -1,7 +1,6 @@
 import { NgFor, NgIf } from '@angular/common';
 import {
   Component,
-  computed,
   effect,
   EventEmitter,
   OnDestroy,
@@ -50,25 +49,12 @@ export class SidebarComponent implements OnInit, OnDestroy {
   private readonly destroy$ = new Subject<void>();
   private compactProgressAnimationFrame = 0;
 
-  private readonly sections = signal<SidebarSection[]>([]);
+  sections: SidebarSection[] = [];
   activeUrl = '';
   displayCurrentAction = false;
   readonly sidebarLayout;
   readonly compactActionProgress = signal(0);
   readonly compactActionTransitionDuration = signal(0);
-  readonly visibleSections = computed(() => {
-    const characterLevel = this.characterState.currentCharacter()?.level ?? 0;
-
-    return this.sections()
-      .map((section) => ({
-        ...section,
-        items: section.items.filter(
-          (item) => characterLevel >= (item.minimumLevel ?? 0),
-        ),
-      }))
-      .filter((section) => section.items.length > 0);
-  });
-
   constructor(
     private readonly sidebarService: SidebarService,
     private readonly state: CharacterActionsStateService,
@@ -118,7 +104,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
       .getSidebar()
       .pipe(takeUntil(this.destroy$))
       .subscribe((sections) => {
-        this.sections.set(sections);
+        this.sections = sections;
       });
 
     this.router.events

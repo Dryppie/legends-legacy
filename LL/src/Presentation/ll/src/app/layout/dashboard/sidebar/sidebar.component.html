@@ -29,7 +29,7 @@
       [class.ll-sidebar-detailed-only]="sidebarLayout() === 'compact'"
     >
       <div
-        *ngFor="let section of visibleSections(); trackBy: trackSection"
+        *ngFor="let section of sections; trackBy: trackSection"
         class="border-b border-primary/10 pb-1 last:border-b-0"
       >
         <div class="ll-section-label px-2 pb-1 pt-2.5 first:pt-1">
@@ -107,7 +107,7 @@
       </ng-template>
 
       <div
-        *ngFor="let section of visibleSections(); trackBy: trackSection"
+        *ngFor="let section of sections; trackBy: trackSection"
         class="flex flex-col border-b border-primary/10 py-1 last:border-b-0"
       >
         <app-sidebar-item

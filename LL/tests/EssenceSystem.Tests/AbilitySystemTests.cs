@@ -131,7 +131,7 @@ public sealed class AbilitySystemTests
 
         Assert.DoesNotContain(result.EventLog, x => x.EventType == EventType.AbilityUse && x.Timestamp == 0);
         Assert.Contains(result.EventLog, x => x.EventType == EventType.AbilityUse && x.Source == ability.Name && x.Timestamp == 3);
-        Assert.Equal(180, hostile.Health);
+        Assert.Equal(178, hostile.Health);
     }
 
     [Fact]
@@ -193,12 +193,104 @@ public sealed class AbilitySystemTests
 
         Assert.Equal(4, CountBasicAttacks(result, variantWeapon.Id));
         Assert.Equal(2, CountBasicAttacks(result, baseline.Id));
-        Assert.All(
-            result.EventLog.Where(log =>
+        var basicAttackDamage = result.EventLog
+            .Where(log =>
                 log.ActorId == variantWeapon.Id &&
                 log.Source == "Basic Attack" &&
-                log.EventType == EventType.Damage),
-            log => Assert.Equal(22, log.Magnitude));
+                log.EventType == EventType.Damage)
+            .Select(log => log.Magnitude)
+            .ToList();
+        Assert.All(basicAttackDamage, damage => Assert.InRange(damage, 18, 26));
+        Assert.True(basicAttackDamage.Distinct().Count() > 1);
+    }
+
+    [Fact]
+    public void Engine_varies_power_scaled_damage_and_healing_but_not_fixed_damage()
+    {
+        var ability = new AbilitySpec
+        {
+            Id = "ability.combat.variance",
+            Kind = AbilitySpecKind.Active,
+            Name = "Combat Variance",
+            Effects =
+            [
+                new()
+                {
+                    Id = "effect.power.damage",
+                    Operation = AbilityEffectOperation.Damage,
+                    Target = AbilityTargetSelector.CurrentTarget,
+                    BaseValue = 50,
+                    ScalingAttribute = AttributeType.Power,
+                    ScalingCoefficient = 1f,
+                    AttackType = AttackType.None,
+                    DamageType = DamageType.None
+                },
+                new()
+                {
+                    Id = "effect.fixed.damage",
+                    Operation = AbilityEffectOperation.Damage,
+                    Target = AbilityTargetSelector.CurrentTarget,
+                    BaseValue = 100,
+                    AttackType = AttackType.None,
+                    DamageType = DamageType.None
+                },
+                new()
+                {
+                    Id = "effect.power.heal",
+                    Operation = AbilityEffectOperation.Heal,
+                    Target = AbilityTargetSelector.Self,
+                    BaseValue = 50,
+                    ScalingAttribute = AttributeType.Power,
+                    ScalingCoefficient = 1f
+                }
+            ]
+        };
+        var compiledAbility = AbilityCompiler.CompileAbility(ability);
+        var damageRolls = new List<int>();
+        var healingRolls = new List<int>();
+
+        foreach (var seed in Enumerable.Range(1, 20))
+        {
+            var friendly = CreateCombatant(
+                $"friendly-{seed}",
+                CombatTeam.Friendly,
+                [compiledAbility],
+                maxHealth: 1_000);
+            friendly.AdjustHealth(-200);
+            var hostile = CreateCombatant(
+                $"hostile-{seed}",
+                CombatTeam.Hostile,
+                [],
+                maxHealth: 1_000);
+            var engine = new FastCombatEngine(
+                new Dictionary<string, CompiledStatus>(),
+                new FastCombatEngineOptions(
+                    MaxTicks: 1,
+                    BasicAttackIntervalTicks: 1_000,
+                    RandomSeed: seed));
+
+            var result = engine.Run([friendly], [hostile]);
+
+            damageRolls.Add(Assert.Single(
+                result.EventLog,
+                log => log.Source == "effect.power.damage"
+                       && log.EventType == EventType.Damage).Magnitude);
+            healingRolls.Add(Assert.Single(
+                result.EventLog,
+                log => log.Source == "effect.power.heal"
+                       && log.EventType == EventType.Heal).Magnitude);
+            Assert.Equal(
+                100,
+                Assert.Single(
+                    result.EventLog,
+                    log => log.Source == "effect.fixed.damage"
+                           && log.EventType == EventType.Damage).Magnitude);
+        }
+
+        Assert.All(damageRolls, damage => Assert.InRange(damage, 80, 120));
+        Assert.All(healingRolls, healing => Assert.InRange(healing, 80, 120));
+        Assert.True(damageRolls.Distinct().Count() > 1);
+        Assert.True(healingRolls.Distinct().Count() > 1);
     }
 
     [Fact]
@@ -464,7 +556,7 @@ public sealed class AbilitySystemTests
         var result = RunBattle([ability], [], maxTicks: 1, out var friendly, out var hostile);
 
         Assert.Equal(175, friendly.Health);
-        Assert.Equal(180, hostile.Health);
+        Assert.Equal(178, hostile.Health);
         Assert.Contains(result.EventLog, x => x.EventType == EventType.AbilityUse && x.Source == ability.Name);
     }
 
@@ -1388,8 +1480,8 @@ public sealed class AbilitySystemTests
 
         var result = engine.Run([friendly], [hostile]);
 
-        Assert.Equal(185, friendly.Health);
-        Assert.Contains(result.EventLog, x => x.Source == "effect.damage" && x.EventType == EventType.Damage && x.Magnitude == 15);
+        Assert.Equal(184, friendly.Health);
+        Assert.Contains(result.EventLog, x => x.Source == "effect.damage" && x.EventType == EventType.Damage && x.Magnitude == 16);
     }
 
     [Fact]
@@ -1793,7 +1885,7 @@ public sealed class AbilitySystemTests
         Assert.Equal(BattleOutcome.Draw, result.Outcome);
         Assert.Equal(1, result.Duration);
         Assert.Equal(194, panther.Health);
-        Assert.Equal(175, skeleton.Health);
+        Assert.Equal(174, skeleton.Health);
         Assert.Equal(115, panther.GetAttribute(AttributeType.CritDamage));
         Assert.Equal(10, skeleton.GetAttribute(AttributeType.DamageReduction));
         Assert.Equal(
@@ -1801,7 +1893,7 @@ public sealed class AbilitySystemTests
             {
                 (0, "effect.razor_claws.crit_damage", EventType.Buff, "panther", 15),
                 (0, "Ambush Strike", EventType.AbilityUse, null, 0),
-                (0, "effect.ambush.damage", EventType.Damage, "skeleton", 25),
+                (0, "effect.ambush.damage", EventType.Damage, "skeleton", 26),
                 (0, "effect.spiked_defense.reflect", EventType.Damage, "panther", 6),
                 (0, "Bone Shield", EventType.AbilityUse, null, 0),
                 (0, "effect.bone_shield.damage_reduction", EventType.Buff, "skeleton", 10)
@@ -1845,9 +1937,9 @@ public sealed class AbilitySystemTests
             new (int Timestamp, string Source, EventType EventType, string? TargetId, int Magnitude)[]
             {
                 (0, "Siphon", EventType.AbilityUse, null, 0),
-                (0, "effect.siphon.damage", EventType.Damage, "front-target", 31),
+                (0, "effect.siphon.damage", EventType.Damage, "front-target", 32),
                 (0, "Ambush Strike", EventType.AbilityUse, null, 0),
-                (0, "effect.ambush.damage", EventType.Damage, "front-target", 9),
+                (0, "effect.ambush.damage", EventType.Damage, "front-target", 8),
                 (0, "effect.ambush.damage", EventType.Death, "front-target", 0),
                 (0, "effect.vile_feast.heal", EventType.Heal, "ghoul", 50)
             },
@@ -2088,6 +2180,38 @@ public sealed class AbilitySystemTests
         Assert.Contains(result.EventLog, x => x.Source == "effect.damage.main" && x.EventType == EventType.Damage);
         Assert.Contains(result.EventLog, x => x.Source == "effect.burn.dot" && x.EventType == EventType.Damage);
         Assert.Contains(result.EventLog, x => x.Source == "effect.reflect.damage" && x.EventType == EventType.Damage);
+    }
+
+    [Fact]
+    public async Task Combat_engine_executor_uses_repeatable_encounter_specific_randomness()
+    {
+        var provider = new JsonAbilityCatalogProvider(
+            CreateConfig(),
+            FindApiContentRoot(),
+            CreateJsonOptions());
+        var executor = new CombatEngineExecutor(provider);
+        var firstEncounterId = Guid.Parse("00000000-0000-0000-0000-000000000001");
+        var secondEncounterId = Guid.Parse("00000000-0000-0000-0000-000000000002");
+
+        async Task<int[]> RunEncounter(Guid encounterId)
+        {
+            var runtime = CreateTrainingEncounterRuntime(
+                out _,
+                out _,
+                encounterId: encounterId);
+            var result = await executor.ExecuteAsync(runtime, CancellationToken.None);
+            return result.EventLog
+                .Where(log => log.EventType is EventType.Damage or EventType.DamageCrit)
+                .Select(log => log.Magnitude)
+                .ToArray();
+        }
+
+        var firstRun = await RunEncounter(firstEncounterId);
+        var repeatedRun = await RunEncounter(firstEncounterId);
+        var differentEncounter = await RunEncounter(secondEncounterId);
+
+        Assert.Equal(firstRun, repeatedRun);
+        Assert.NotEqual(firstRun, differentEncounter);
     }
 
     [Fact]
@@ -3172,14 +3296,15 @@ public sealed class AbilitySystemTests
     private static CombatEncounterRuntime CreateTrainingEncounterRuntime(
         out Character friendlyCharacter,
         out Character hostileCharacter,
-        CombatMode mode = CombatMode.Idle)
+        CombatMode mode = CombatMode.Idle,
+        Guid? encounterId = null)
     {
         friendlyCharacter = CreateSourceCharacter("Executor Friendly");
         hostileCharacter = CreateSourceCharacter("Executor Hostile");
         var friendlyCombatant = CreateCombatEntity("friendly-slot", friendlyCharacter, "essence.training");
         var hostileCombatant = CreateCombatEntity("hostile-slot", hostileCharacter);
         var plan = new CombatEncounterPlan(
-            Guid.NewGuid(),
+            encounterId ?? Guid.NewGuid(),
             mode,
             1,
             DateTimeOffset.UtcNow,

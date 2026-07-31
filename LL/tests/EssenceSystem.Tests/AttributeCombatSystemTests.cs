@@ -249,11 +249,11 @@ public sealed class AttributeCombatSystemTests
 
         var result = RunSingleTick(actor, target);
 
-        Assert.Contains(
+        var healing = Assert.Single(
             result.EventLog,
             log => log.Source == "effect.heal"
-                   && log.EventType == EventType.Heal
-                   && log.Magnitude == 30);
+                   && log.EventType == EventType.Heal);
+        Assert.InRange(healing.Magnitude, 24, 36);
     }
 
     [Fact]

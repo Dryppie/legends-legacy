@@ -35,7 +35,10 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
     {
         var execution = await ExecuteCoreAsync(
             runtime,
-            new CombatSimulationOptions(1337, 6000, StartActiveAbilitiesOnCooldown: true),
+            new CombatSimulationOptions(
+                runtime.Plan.EncounterId.GetHashCode(),
+                6000,
+                StartActiveAbilitiesOnCooldown: true),
             cancellationToken);
         SyncCombatEntityState(runtime.FriendlyParticipants, execution.Friendly);
         SyncCombatEntityState(runtime.HostileParticipants, execution.Hostile);

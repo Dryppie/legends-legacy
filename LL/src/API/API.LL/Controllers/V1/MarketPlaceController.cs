@@ -14,11 +14,14 @@ using Application.UseCases.MarketPlaces.Queries.GetMarketPlaceCatalog;
 using Application.UseCases.Items.Dtos;
 using Application.UseCases.MarketPlaces.Queries.GetMarketPlaceOrderHistory;
 using Application.UseCases.MarketPlaces.Queries.GetMarketPlaceItemSummary;
+using API.LL.Common;
 using Common.Primitives;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.LL.Controllers.V1;
 
+[Authorize(Policy = AuthorizationPolicies.RegisteredUser)]
 public class MarketPlaceController : BaseController
 {
     [HttpGet("Catalog")]
