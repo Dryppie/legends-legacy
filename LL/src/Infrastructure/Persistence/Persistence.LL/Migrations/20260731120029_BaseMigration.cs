@@ -159,6 +159,7 @@ namespace Persistence.LL.Migrations
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     CharacterId = table.Column<Guid>(type: "uuid", nullable: false),
+                    RecipeId = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: true),
                     BlueprintId = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: false),
                     UnlockedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
                 },
@@ -252,6 +253,7 @@ namespace Persistence.LL.Migrations
                     CombatRulesVersion = table.Column<int>(type: "integer", nullable: false),
                     BenchmarkDefinitionVersion = table.Column<int>(type: "integer", nullable: false),
                     RecommendationSeedSetVersion = table.Column<int>(type: "integer", nullable: false),
+                    EquipmentBalanceVersion = table.Column<int>(type: "integer", nullable: false),
                     RecommendationJson = table.Column<string>(type: "jsonb", nullable: false),
                     UpdatedAtUtc = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
                 },
@@ -586,7 +588,8 @@ namespace Persistence.LL.Migrations
                     UsedRetreat = table.Column<bool>(type: "boolean", nullable: false),
                     CreatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     CompletedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
-                    RewardsClaimedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true)
+                    RewardsClaimedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
+                    RowVersion = table.Column<long>(type: "bigint", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -1053,12 +1056,32 @@ namespace Persistence.LL.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "EquipmentAttributeModifierSnapshot",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    EquipmentSnapshotId = table.Column<Guid>(type: "uuid", nullable: false),
+                    AttributeType = table.Column<int>(type: "integer", nullable: false),
+                    Amount = table.Column<float>(type: "real", nullable: false),
+                    ModifierType = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_EquipmentAttributeModifierSnapshot", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_EquipmentAttributeModifierSnapshot_EquipmentSnapshot_Equipm~",
+                        column: x => x.EquipmentSnapshotId,
+                        principalTable: "EquipmentSnapshot",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "InstanceAttributeModifier",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     ItemInstanceId = table.Column<Guid>(type: "uuid", nullable: false),
-                    EquipmentSnapshotId = table.Column<Guid>(type: "uuid", nullable: true),
                     AttributeType = table.Column<int>(type: "integer", nullable: false),
                     Amount = table.Column<float>(type: "real", nullable: false),
                     ModifierType = table.Column<int>(type: "integer", nullable: false)
@@ -1066,11 +1089,6 @@ namespace Persistence.LL.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_InstanceAttributeModifier", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_InstanceAttributeModifier_EquipmentSnapshot_EquipmentSnapsh~",
-                        column: x => x.EquipmentSnapshotId,
-                        principalTable: "EquipmentSnapshot",
-                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_InstanceAttributeModifier_ItemInstances_ItemInstanceId",
                         column: x => x.ItemInstanceId,
@@ -1316,7 +1334,8 @@ namespace Persistence.LL.Migrations
                 {
                     CharacterId = table.Column<Guid>(type: "uuid", nullable: false),
                     UpdatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false)
+                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false),
+                    RowVersion = table.Column<long>(type: "bigint", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -2188,9 +2207,9 @@ namespace Persistence.LL.Migrations
                 column: "DungeonDefinitionId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_CharacterRecipeUnlocks_CharacterId_BlueprintId",
+                name: "IX_CharacterRecipeUnlocks_CharacterId_RecipeId_BlueprintId",
                 table: "CharacterRecipeUnlocks",
-                columns: new[] { "CharacterId", "BlueprintId" },
+                columns: new[] { "CharacterId", "RecipeId", "BlueprintId" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
@@ -2226,6 +2245,12 @@ namespace Persistence.LL.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_DungeonRuns_CharacterId",
+                table: "DungeonRuns",
+                column: "CharacterId",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_DungeonRuns_CharacterSnapshotId",
                 table: "DungeonRuns",
                 column: "CharacterSnapshotId");
@@ -2246,6 +2271,11 @@ namespace Persistence.LL.Migrations
                 name: "IX_Entities_UserId",
                 table: "Entities",
                 column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_EquipmentAttributeModifierSnapshot_EquipmentSnapshotId",
+                table: "EquipmentAttributeModifierSnapshot",
+                column: "EquipmentSnapshotId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_EquipmentSlots_EquipmentInstanceId",
@@ -2410,11 +2440,6 @@ namespace Persistence.LL.Migrations
                 table: "GuildShopPurchases",
                 columns: new[] { "GuildId", "CharacterId", "ShopItemKey", "PeriodKey" },
                 unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_InstanceAttributeModifier_EquipmentSnapshotId",
-                table: "InstanceAttributeModifier",
-                column: "EquipmentSnapshotId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_InstanceAttributeModifier_ItemInstanceId",
@@ -2869,6 +2894,9 @@ namespace Persistence.LL.Migrations
                 name: "EntityAttributeSnapshot");
 
             migrationBuilder.DropTable(
+                name: "EquipmentAttributeModifierSnapshot");
+
+            migrationBuilder.DropTable(
                 name: "EquipmentSlots");
 
             migrationBuilder.DropTable(
@@ -2986,6 +3014,9 @@ namespace Persistence.LL.Migrations
                 name: "ActionDetails");
 
             migrationBuilder.DropTable(
+                name: "EquipmentSnapshot");
+
+            migrationBuilder.DropTable(
                 name: "EssenceLoadouts");
 
             migrationBuilder.DropTable(
@@ -2996,9 +3027,6 @@ namespace Persistence.LL.Migrations
 
             migrationBuilder.DropTable(
                 name: "GuildMissionInstances");
-
-            migrationBuilder.DropTable(
-                name: "EquipmentSnapshot");
 
             migrationBuilder.DropTable(
                 name: "Inventories");
