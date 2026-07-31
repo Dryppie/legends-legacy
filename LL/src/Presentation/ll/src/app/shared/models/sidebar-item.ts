@@ -10,4 +10,5 @@ export interface Tab {
   icon: string;
   title: string;
   description?: string;
+  minimumLevel?: number;
 }

@@ -1,6 +1,7 @@
 import { NgFor, NgIf } from '@angular/common';
 import {
   Component,
+  computed,
   effect,
   EventEmitter,
   OnDestroy,
@@ -47,13 +48,26 @@ export class SidebarComponent implements OnInit, OnDestroy {
   @Output() itemTapped = new EventEmitter<void>();
 
   private readonly destroy$ = new Subject<void>();
-  private compactProgressInterval: ReturnType<typeof setInterval> | null = null;
+  private compactProgressAnimationFrame = 0;
 
-  sections: SidebarSection[] = [];
+  private readonly sections = signal<SidebarSection[]>([]);
   activeUrl = '';
   displayCurrentAction = false;
   readonly sidebarLayout;
   readonly compactActionProgress = signal(0);
+  readonly compactActionTransitionDuration = signal(0);
+  readonly visibleSections = computed(() => {
+    const characterLevel = this.characterState.currentCharacter()?.level ?? 0;
+
+    return this.sections()
+      .map((section) => ({
+        ...section,
+        items: section.items.filter(
+          (item) => characterLevel >= (item.minimumLevel ?? 0),
+        ),
+      }))
+      .filter((section) => section.items.length > 0);
+  });
 
   constructor(
     private readonly sidebarService: SidebarService,
@@ -72,7 +86,16 @@ export class SidebarComponent implements OnInit, OnDestroy {
     this.sidebarLayout = this.sidebarLayoutPreference.layout;
 
     effect(() => {
+      const action = this.state.currentAction();
+      const isCompact = this.sidebarLayout() === 'compact';
       this.displayCurrentAction = this.state.displayCurrentAction();
+      untracked(() => {
+        if (isCompact) {
+          this.startCompactActionProgress(action);
+        } else {
+          this.cancelCompactActionProgress();
+        }
+      });
     });
 
     effect(() => {
@@ -90,17 +113,12 @@ export class SidebarComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.activeUrl = this.router.url;
-    this.refreshCompactActionProgress();
-    this.compactProgressInterval = setInterval(
-      () => this.refreshCompactActionProgress(),
-      100,
-    );
 
     this.sidebarService
       .getSidebar()
       .pipe(takeUntil(this.destroy$))
       .subscribe((sections) => {
-        this.sections = sections;
+        this.sections.set(sections);
       });
 
     this.router.events
@@ -116,10 +134,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    if (this.compactProgressInterval) {
-      clearInterval(this.compactProgressInterval);
-      this.compactProgressInterval = null;
-    }
+    this.cancelCompactActionProgress();
     this.destroy$.next();
     this.destroy$.complete();
   }
@@ -200,8 +215,12 @@ export class SidebarComponent implements OnInit, OnDestroy {
     );
   }
 
-  private refreshCompactActionProgress(): void {
-    const action = this.state.currentAction();
+  private startCompactActionProgress(
+    action: ReturnType<CharacterActionsStateService['currentAction']>,
+  ): void {
+    this.cancelCompactActionProgress();
+    this.compactActionTransitionDuration.set(0);
+
     if (!action || action.characterActionType === CharacterActionType.Idle) {
       this.compactActionProgress.set(0);
       return;
@@ -225,6 +244,29 @@ export class SidebarComponent implements OnInit, OnDestroy {
     const elapsed = this.timeSync.now() - startedAt;
     const progress = Math.max(0, Math.min((elapsed / durationMs) * 100, 100));
     this.compactActionProgress.set(progress);
+
+    if (progress >= 100) return;
+
+    // Let the initial position render without a transition, then hand the
+    // remaining movement to the browser compositor as one continuous animation.
+    this.compactProgressAnimationFrame = requestAnimationFrame(() => {
+      this.compactProgressAnimationFrame = requestAnimationFrame(() => {
+        const remainingMs = Math.max(
+          durationMs - (this.timeSync.now() - startedAt),
+          0,
+        );
+        this.compactActionTransitionDuration.set(remainingMs);
+        this.compactActionProgress.set(100);
+        this.compactProgressAnimationFrame = 0;
+      });
+    });
+  }
+
+  private cancelCompactActionProgress(): void {
+    if (!this.compactProgressAnimationFrame) return;
+
+    cancelAnimationFrame(this.compactProgressAnimationFrame);
+    this.compactProgressAnimationFrame = 0;
   }
 
   private routePath(route: string): string {

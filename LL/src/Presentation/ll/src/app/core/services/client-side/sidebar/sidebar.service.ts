@@ -133,6 +133,7 @@ function getSidebarSections(): SidebarSection[] {
           icon: 'sidebar/city/guild',
           title: 'Guild',
           description: 'Guild headquarters',
+          minimumLevel: 10,
         },
         {
           id: 'colosseum',
@@ -140,6 +141,7 @@ function getSidebarSections(): SidebarSection[] {
           icon: 'sidebar/city/colosseum',
           title: 'Colosseum',
           description: 'Tournaments and battles',
+          minimumLevel: 5,
         },
         {
           id: 'market-place',
@@ -147,6 +149,7 @@ function getSidebarSections(): SidebarSection[] {
           icon: 'sidebar/city/cinder-bazaar',
           title: 'Cinder Bazaar',
           description: 'List and buy items',
+          minimumLevel: 10,
         },
         {
           id: 'tavern',

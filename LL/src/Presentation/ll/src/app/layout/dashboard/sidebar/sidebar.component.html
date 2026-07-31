@@ -29,7 +29,7 @@
       [class.ll-sidebar-detailed-only]="sidebarLayout() === 'compact'"
     >
       <div
-        *ngFor="let section of sections; trackBy: trackSection"
+        *ngFor="let section of visibleSections(); trackBy: trackSection"
         class="border-b border-primary/10 pb-1 last:border-b-0"
       >
         <div class="ll-section-label px-2 pb-1 pt-2.5 first:pt-1">
@@ -72,13 +72,12 @@
             aria-hidden="true"
           >
             <span
-              class="absolute inset-x-0 bottom-0 overflow-hidden bg-gradient-to-t from-primary/35 to-primary/15 transition-[height] duration-100 ease-linear"
-              [style.height.%]="compactActionProgress()"
-            >
-              <span
-                class="absolute inset-x-0 top-0 h-px bg-primary/70 shadow-[0_0_5px_var(--ll-color-primary)]"
-              ></span>
-            </span>
+              class="absolute inset-0 overflow-hidden bg-gradient-to-t from-primary/35 to-primary/15 transition-transform ease-linear will-change-transform"
+              [style.transition-duration.ms]="compactActionTransitionDuration()"
+              [style.transform]="
+                'translateY(' + (100 - compactActionProgress()) + '%)'
+              "
+            ></span>
           </span>
           <span
             class="relative flex h-full w-full items-center justify-center text-primary"
@@ -108,7 +107,7 @@
       </ng-template>
 
       <div
-        *ngFor="let section of sections; trackBy: trackSection"
+        *ngFor="let section of visibleSections(); trackBy: trackSection"
         class="flex flex-col border-b border-primary/10 py-1 last:border-b-0"
       >
         <app-sidebar-item

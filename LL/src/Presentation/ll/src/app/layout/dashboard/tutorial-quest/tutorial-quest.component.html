@@ -101,7 +101,6 @@
       aria-describedby="tutorial-welcome-description"
     >
       <div class="border-b border-primary/20 px-5 py-4 text-center">
-        <span class="ll-eyebrow text-[10px]">Welcome</span>
         <h2
           id="tutorial-welcome-title"
           class="mt-1 text-2xl text-primary [font-family:var(--ll-font-display)]"
@@ -155,29 +154,15 @@
         </button>
         <button
           type="button"
-          class="tutorial-welcome-primary-action relative isolate flex min-h-9 items-center justify-center overflow-hidden px-9 py-2 text-xs"
+          class="ll-button ll-button-primary min-h-9 px-4 py-2 text-xs"
           [disabled]="loading() || welcomeTransitioning()"
           (click)="beginTutorial()"
         >
-          <img
-            class="tutorial-welcome-button-ornament pointer-events-none absolute inset-y-0 left-0 h-full"
-            src="core/button/Left.svg"
-            alt=""
-            aria-hidden="true"
-          />
-          <span class="relative z-10">
-            {{
-              loading() && welcomeAction() === "start"
-                ? "Starting..."
-                : "Begin First Steps"
-            }}
-          </span>
-          <img
-            class="tutorial-welcome-button-ornament pointer-events-none absolute inset-y-0 right-0 h-full"
-            src="core/button/Right.svg"
-            alt=""
-            aria-hidden="true"
-          />
+          {{
+            loading() && welcomeAction() === "start"
+              ? "Starting..."
+              : "Begin First Steps"
+          }}
         </button>
       </div>
     </section>
@@ -206,7 +191,7 @@
         {{
           result.wasSkipped
             ? "Your starter setup is ready."
-            : "Lumo Ruins expedition started."
+            : "Battle in Lumo Ruins has started."
         }}
       </span>
     </div>

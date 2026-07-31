@@ -1,6 +1,13 @@
 import { CommonModule } from '@angular/common';
 import { ScrollingModule } from '@angular/cdk/scrolling';
-import { Component, computed, effect, OnInit, signal } from '@angular/core';
+import {
+  Component,
+  computed,
+  effect,
+  OnInit,
+  signal,
+  untracked,
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import {
   EssenceStateService,
@@ -58,6 +65,8 @@ type CreatureEssenceFilter = 'all' | 'found' | 'not-found';
   styleUrls: ['./essences.component.scss'],
 })
 export class EssencesComponent implements OnInit {
+  private lastPreparedTutorialStep: string | null = null;
+
   readonly archiveSearch = signal('');
   readonly creatureSearch = signal('');
   readonly creatureRegionFilter = signal('all');
@@ -234,10 +243,22 @@ export class EssencesComponent implements OnInit {
     effect(
       () => {
         const tutorial = this.tutorialState.state();
-        if (!tutorial || tutorial.isCompleted) return;
+        if (!tutorial || tutorial.isCompleted) {
+          this.lastPreparedTutorialStep = null;
+          return;
+        }
+
+        if (tutorial.currentStep === this.lastPreparedTutorialStep) return;
+        this.lastPreparedTutorialStep = tutorial.currentStep;
 
         if (tutorial.currentStep === TUTORIAL_STEP_ABSORB_ESSENCE) {
           this.essenceState.setActiveView('absorb');
+          return;
+        }
+
+        if (tutorial.currentStep === TUTORIAL_STEP_EQUIP_ESSENCE) {
+          this.essenceState.setActiveView('archive');
+          untracked(() => this.tutorialPresenter.presentCurrentStep());
         }
       },
       { allowSignalWrites: true },

@@ -233,6 +233,20 @@ export class TutorialStateService {
       return;
     }
 
+    const current = this._state();
+    if (
+      state &&
+      current &&
+      state.tutorialId === current.tutorialId &&
+      state.version === current.version &&
+      state.currentStepIndex < current.currentStepIndex
+    ) {
+      // A refresh started before a realtime progression event can finish later
+      // with an older step. Tutorial progress is monotonic within a definition
+      // version, so accepting that response would replay prior-step UI effects.
+      return;
+    }
+
     this._isCompleted.set(!state || state.isCompleted);
     const activeState = state && !state.isCompleted ? state : null;
     this._state.set(activeState);
