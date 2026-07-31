@@ -1,193 +1,247 @@
-<div *ngIf="missions() as missions" class="h-full overflow-y-auto p-4 text-sm text-neutral-200">
-  <div class="grid gap-3 xl:grid-cols-[1.2fr_0.8fr]">
-    <section class="space-y-3">
-      <div class="ll-card p-4">
-        <div class="flex flex-wrap items-start justify-between gap-3">
-          <div>
-            <p class="ll-eyebrow">Weekly Mission</p>
-            <h2 class="ll-heading text-lg">
-              {{ missions.activeMission?.definition?.name ?? "Awaiting Selection" }}
-            </h2>
-            <p class="ll-copy mt-1">
-              {{
-                missions.activeMission?.definition?.description ??
-                  "Choose one weekly objective for the guild."
-              }}
-            </p>
+<div *ngIf="missions() as missions" class="missions-shell">
+  <main class="missions-content">
+    <section class="weekly-mission-panel">
+      <header class="weekly-header">
+        <div class="weekly-heading">
+          <div class="weekly-label-row">
+            <p class="section-label">Weekly Mission</p>
+            <span aria-hidden="true">•</span>
+            <time [attr.datetime]="missions.nextWeeklyResetAt">
+              resets {{ missions.nextWeeklyResetAt | date: "mediumDate" }}
+            </time>
           </div>
-          <span class="rounded border px-2 py-1 text-xs">
-            Level {{ missions.guildLevel }}
-          </span>
-        </div>
-
-        <ng-container *ngIf="missions.activeMission as active; else options">
-          <div class="mt-4">
-            <div class="flex justify-between text-xs text-neutral-400">
-              <span>{{ active.currentAmount | numberFormat }}</span>
-              <span>{{ active.targetAmount | numberFormat }}</span>
-            </div>
-            <div class="mt-1 h-2 rounded bg-zinc-800">
-              <div
-                class="h-2 rounded bg-primary transition-all"
-                [style.width.%]="missionProgress()"
-              ></div>
-            </div>
-          </div>
-
-          <div class="mt-4 grid gap-2 sm:grid-cols-3">
-            <div class="ll-stat-card px-3 py-2">
-              <div class="ll-stat-label">Your Tier</div>
-              <div class="mt-1">
-                <span
-                  class="rounded border px-2 py-1 text-xs"
-                  [ngClass]="tierClass(missions.myWeeklyContribution?.tier)"
-                >
-                  {{ missions.myWeeklyContribution?.tier ?? "None" }}
-                </span>
-              </div>
-            </div>
-            <div class="ll-stat-card px-3 py-2">
-              <div class="ll-stat-label">Your Progress</div>
-              <div class="ll-heading mt-1 text-lg">
-                {{ missions.myWeeklyContribution?.amount ?? 0 | numberFormat }}
-              </div>
-            </div>
-            <div class="ll-stat-card px-3 py-2">
-              <div class="ll-stat-label">Resets</div>
-              <div class="mt-1 text-xs">
-                {{ missions.nextWeeklyResetAt | date: "mediumDate" }}
-              </div>
-            </div>
-          </div>
-
-          <div class="mt-4 flex justify-end">
-            <app-regular-button
-              [disabled]="!missions.myWeeklyContribution?.canClaimReward || loading()"
-              (pressed)="claimWeeklyReward()"
-              text="Claim Weekly"
-            ></app-regular-button>
-          </div>
-        </ng-container>
-
-        <ng-template #options>
-          <div class="mt-4 grid gap-2">
-            <button
-              *ngFor="let option of missions.weeklyOptions"
-              type="button"
-              class="ll-card border-zinc-300/30 p-3 text-left hover:bg-zinc-800/30"
-              [ngClass]="{ 'border-primary bg-primary/10': option.isSelected }"
-              (click)="selectMission(option)"
-            >
-              <div class="flex items-center justify-between gap-2">
-                <span class="font-semibold">{{ option.definition.name }}</span>
-                <span class="text-xs text-primary">
-                  {{ option.definition.category | humanize }}
-                </span>
-              </div>
-              <p class="ll-copy mt-1 text-xs">{{ option.definition.description }}</p>
-            </button>
-          </div>
-        </ng-template>
-      </div>
-
-      <div class="ll-card p-4">
-        <div class="flex items-center justify-between gap-3">
-          <div>
-            <p class="ll-eyebrow">Daily Orders</p>
-            <h2 class="ll-heading text-lg">Personal Guild Orders</h2>
-          </div>
-          <span class="text-xs text-neutral-400">
-            {{ missions.nextDailyResetAt | date: "shortTime" }}
-          </span>
-        </div>
-
-        <div class="mt-4 grid gap-2">
-          <div *ngFor="let order of missions.personalOrders" class="ll-card p-3">
-            <div class="flex flex-wrap items-start justify-between gap-2">
-              <div>
-                <div class="font-semibold">{{ order.definition.name }}</div>
-                <p class="ll-copy mt-1 text-xs">{{ order.definition.description }}</p>
-              </div>
-              <app-regular-button
-                [disabled]="!order.canClaimReward || loading()"
-                (pressed)="claimOrder(order)"
-                text="Claim"
-              ></app-regular-button>
-            </div>
-            <div class="mt-3">
-              <div class="flex justify-between text-xs text-neutral-400">
-                <span>{{ order.currentAmount | numberFormat }}</span>
-                <span>{{ order.targetAmount | numberFormat }}</span>
-              </div>
-              <div class="mt-1 h-1 rounded bg-zinc-800">
-                <div
-                  class="h-1 rounded bg-primary"
-                  [style.width.%]="orderProgress(order)"
-                ></div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <aside class="space-y-3">
-      <div class="ll-card p-4">
-        <p class="ll-eyebrow">Contribution</p>
-        <h2 class="ll-heading text-lg">This Week</h2>
-        <div class="mt-4 grid gap-2">
-          <div class="flex justify-between border-b border-zinc-700/60 py-2">
-            <span>Score</span>
-            <span>{{ missions.contributionSummary.weeklyContributionScore | numberFormat }}</span>
-          </div>
-          <div class="flex justify-between border-b border-zinc-700/60 py-2">
-            <span>Favor Earned</span>
-            <span>{{ missions.contributionSummary.guildFavorEarned | numberFormat }}</span>
-          </div>
-          <div class="flex justify-between border-b border-zinc-700/60 py-2">
-            <span>Supplies Generated</span>
-            <span>{{ missions.contributionSummary.guildSuppliesGenerated | numberFormat }}</span>
-          </div>
-          <div class="flex justify-between py-2">
-            <span>Orders Claimed</span>
-            <span>{{ missions.contributionSummary.ordersCompleted }}</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="ll-card p-4">
-        <p class="ll-eyebrow">Leaderboard</p>
-        <h2 class="ll-heading text-lg">Top Contributors</h2>
-        <div class="mt-4 space-y-2">
-          <div
-            *ngFor="let entry of missions.contributionLeaderboard; let index = index"
-            class="rounded border border-zinc-300/20 bg-zinc-950/20 px-3 py-2"
-          >
-            <div class="flex items-center justify-between gap-3">
-              <div class="min-w-0">
-                <div class="truncate font-semibold">
-                  {{ index + 1 }}. {{ entry.characterName }}
-                </div>
-                <div class="mt-1 text-xs text-neutral-400">
-                  {{ entry.weeklyMissionContribution | numberFormat }} mission / {{ entry.ordersCompleted }} orders
-                </div>
-              </div>
-              <div class="text-right">
-                <div class="ll-heading text-base">{{ entry.weeklyContributionScore | numberFormat }}</div>
-                <div class="text-xs text-primary">score</div>
-              </div>
-            </div>
-          </div>
-          <p *ngIf="missions.contributionLeaderboard.length === 0" class="ll-copy text-xs">
-            No weekly contributions yet.
+          <h1>
+            {{
+              missions.activeMission?.definition?.name ?? "Awaiting Selection"
+            }}
+          </h1>
+          <p>
+            {{
+              missions.activeMission?.definition?.description ??
+                "Choose one weekly objective for the guild."
+            }}
           </p>
         </div>
+
+        <div class="weekly-badges">
+          <span class="level-badge">Level {{ missions.guildLevel }}</span>
+          <div class="tier-row">
+            <small>Your tier</small>
+            <span
+              class="tier-badge"
+              [ngClass]="tierClass(missions.myWeeklyContribution?.tier)"
+            >
+              {{ missions.myWeeklyContribution?.tier ?? "None" }}
+            </span>
+          </div>
+        </div>
+      </header>
+
+      <ng-container *ngIf="missions.activeMission as active; else options">
+        <div class="weekly-progress">
+          <div class="progress-heading">
+            <p>
+              <strong>{{ active.currentAmount | numberFormat }} </strong>
+              <span>of {{ active.targetAmount | numberFormat }} complete</span>
+            </p>
+            <span>guild total</span>
+          </div>
+          <div class="progress-track" aria-hidden="true">
+            <span [style.width.%]="missionProgress()"></span>
+          </div>
+
+          <div class="weekly-metrics">
+            <div>
+              <span>Your contribution</span>
+              <strong>
+                {{ missions.myWeeklyContribution?.amount ?? 0 | numberFormat }}
+              </strong>
+            </div>
+            <div>
+              <span>Current tier</span>
+              <strong>{{
+                missions.myWeeklyContribution?.tier ?? "None"
+              }}</strong>
+            </div>
+            <div>
+              <span>Mission remaining</span>
+              <strong>{{ weeklyRemaining() | numberFormat }}</strong>
+            </div>
+          </div>
+        </div>
+
+        <footer class="weekly-footer">
+          <p
+            *ngIf="
+              missions.myWeeklyContribution?.canClaimReward;
+              else keepGoing
+            "
+          >
+            Your weekly mission reward is ready to claim.
+          </p>
+          <ng-template #keepGoing>
+            <p>Keep contributing to improve your weekly reward tier.</p>
+          </ng-template>
+          <app-regular-button
+            [disabled]="
+              !missions.myWeeklyContribution?.canClaimReward || loading()
+            "
+            (pressed)="claimWeeklyReward()"
+            text="Claim Weekly"
+          ></app-regular-button>
+        </footer>
+      </ng-container>
+
+      <ng-template #options>
+        <div class="mission-options">
+          <p class="option-intro">
+            Choose the objective your guild will pursue this week.
+          </p>
+          <button
+            *ngFor="let option of missions.weeklyOptions"
+            type="button"
+            class="mission-option"
+            [class.is-selected]="option.isSelected"
+            [disabled]="!missions.canSelectMission || option.isSelected"
+            (click)="selectMission(option)"
+          >
+            <span>
+              <strong>{{ option.definition.name }}</strong>
+              <small>{{ option.definition.description }}</small>
+            </span>
+            <span class="option-category">
+              {{ option.definition.category | humanize }}
+            </span>
+          </button>
+        </div>
+      </ng-template>
+    </section>
+
+    <section class="personal-orders">
+      <header class="orders-heading">
+        <h2 class="section-label">Personal Guild Orders</h2>
+        <p>
+          {{ claimableOrderCount(missions.personalOrders) }} of
+          {{ missions.personalOrders.length }} ready · resets
+          {{ missions.nextDailyResetAt | date: "shortTime" }}
+        </p>
+      </header>
+
+      <div class="order-list">
+        <article
+          *ngFor="let order of missions.personalOrders"
+          class="order-row"
+        >
+          <div class="order-copy">
+            <div class="order-title-row">
+              <h3>{{ order.definition.name }}</h3>
+              <span
+                class="order-status"
+                [class.is-complete]="order.canClaimReward"
+              >
+                {{ orderStatusLabel(order) }}
+              </span>
+            </div>
+            <p>
+              {{ order.definition.description }} ·
+              <strong>{{ order.currentAmount | numberFormat }}</strong> /
+              {{ order.targetAmount | numberFormat }}
+            </p>
+            <div class="order-progress" aria-hidden="true">
+              <span [style.width.%]="orderProgress(order)"></span>
+            </div>
+          </div>
+
+          <app-regular-button
+            [disabled]="!order.canClaimReward || loading()"
+            (pressed)="claimOrder(order)"
+            text="Claim"
+          ></app-regular-button>
+        </article>
+
+        <p *ngIf="missions.personalOrders.length === 0" class="empty-orders">
+          No personal orders are available today.
+        </p>
+      </div>
+    </section>
+  </main>
+
+  <aside class="missions-sidebar">
+    <section class="weekly-summary">
+      <p class="section-label">Your Week</p>
+      <div class="score-heading">
+        <strong>
+          {{
+            missions.contributionSummary.weeklyContributionScore | numberFormat
+          }}
+        </strong>
+        <span>contribution score</span>
       </div>
 
-      <div class="ll-card p-4">
-        <p class="ll-eyebrow">Guild Progress</p>
-        <h2 class="ll-heading text-lg">{{ missions.guildXp | numberFormat }} XP</h2>
+      <dl class="summary-stats">
+        <div>
+          <dt>Favor earned</dt>
+          <dd>
+            {{ missions.contributionSummary.guildFavorEarned | numberFormat }}
+          </dd>
+        </div>
+        <div>
+          <dt>Supplies generated</dt>
+          <dd>
+            {{
+              missions.contributionSummary.guildSuppliesGenerated | numberFormat
+            }}
+          </dd>
+        </div>
+        <div>
+          <dt>Orders claimed</dt>
+          <dd>{{ missions.contributionSummary.ordersCompleted }}</dd>
+        </div>
+      </dl>
+    </section>
+
+    <section class="contributors">
+      <header>
+        <h2 class="section-label">Top Contributors</h2>
+        <span>This week</span>
+      </header>
+
+      <ol class="contributor-list">
+        <li
+          *ngFor="
+            let entry of missions.contributionLeaderboard.slice(0, 3);
+            let index = index
+          "
+          [class.is-leading]="index === 0"
+        >
+          <span class="contributor-rank">{{ index + 1 }}</span>
+          <span class="contributor-name">
+            <strong>{{ entry.characterName }}</strong>
+            <small>
+              {{ entry.weeklyMissionContribution | numberFormat }} mission ·
+              {{ entry.ordersCompleted }} orders
+            </small>
+          </span>
+          <strong class="contributor-score">
+            {{ entry.weeklyContributionScore | numberFormat }}
+          </strong>
+        </li>
+      </ol>
+
+      <p
+        *ngIf="missions.contributionLeaderboard.length === 0"
+        class="empty-contributors"
+      >
+        No weekly contributions yet.
+      </p>
+    </section>
+
+    <section class="guild-progress-card">
+      <div>
+        <p class="section-label">Guild Progress</p>
+        <strong>Level {{ missions.guildLevel }}</strong>
       </div>
-    </aside>
-  </div>
+      <p>{{ missions.guildXp | numberFormat }} XP earned</p>
+    </section>
+  </aside>
 </div>

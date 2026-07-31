@@ -10,9 +10,8 @@
       "unlockSummary": "Higher levels unlock access to advanced guild buildings.",
       "baseCost": 150,
       "upgradeCostStep": 150,
-      "baseHours": 4,
       "benefits": [
-        { "level": 1, "title": "Guild Headquarters", "description": "The guild can manage missions, supplies, and construction.", "isImplemented": true },
+        { "level": 1, "title": "Guild Headquarters", "description": "The guild can manage missions, supplies, construction, and one additional member per Guild Hall level.", "isImplemented": true },
         { "level": 2, "title": "Support Buildings", "description": "Workshop and Treasury become available.", "isImplemented": true },
         { "level": 4, "title": "Combat Infrastructure", "description": "Raid Hall, Training Grounds, and Essence Sanctum become available.", "isImplemented": true },
         { "level": 6, "title": "War Planning", "description": "War Room becomes available.", "isImplemented": true }
@@ -28,7 +27,6 @@
       "unlockSummary": "Improves guild mission variety and rewards.",
       "baseCost": 100,
       "upgradeCostStep": 100,
-      "baseHours": 2,
       "benefits": [
         { "level": 1, "title": "Mission Infrastructure", "description": "Unlocks mission reward bonuses and keeps the mission system active.", "isImplemented": true },
         { "level": 2, "title": "Mission Variety", "description": "Adds a fourth weekly mission option when enough definitions are available.", "isImplemented": true },
@@ -46,7 +44,6 @@
       "unlockSummary": "Unlocks common, weekly, and prestige shop stock by level.",
       "baseCost": 150,
       "upgradeCostStep": 125,
-      "baseHours": 2,
       "benefits": [
         { "level": 1, "title": "Common Stock", "description": "Common guild shop stock can be purchased.", "isImplemented": true },
         { "level": 2, "title": "Expanded Stock", "description": "Additional common stock appears in the shop.", "isImplemented": true },
@@ -64,7 +61,6 @@
       "unlockSummary": "Unlock placeholder for future guild raids.",
       "baseCost": 400,
       "upgradeCostStep": 225,
-      "baseHours": 6,
       "benefits": [
         { "level": 1, "title": "Raid Readiness", "description": "Unlocks the Raids tab locked state and prepares future raid registration.", "isImplemented": true },
         { "level": 2, "title": "Raid Registration", "description": "Planned support for opening raid sign-ups.", "isImplemented": false },
@@ -82,7 +78,6 @@
       "unlockSummary": "Unlock placeholder for future guild wars.",
       "baseCost": 500,
       "upgradeCostStep": 250,
-      "baseHours": 8,
       "benefits": [
         { "level": 1, "title": "War Planning", "description": "Unlocks the Wars tab locked state and prepares future war registration.", "isImplemented": true },
         { "level": 2, "title": "Roster Planning", "description": "Planned support for war roster setup.", "isImplemented": false },
@@ -100,7 +95,6 @@
       "unlockSummary": "Adds crafting-flavored mission and shop support.",
       "baseCost": 175,
       "upgradeCostStep": 150,
-      "baseHours": 3,
       "benefits": [
         { "level": 1, "title": "Craft Orders", "description": "Crafting and tempering guild orders can appear from the data-driven order pool.", "isImplemented": true },
         { "level": 2, "title": "Workshop Stock", "description": "Workshop-themed shop stock can be configured through guild content data.", "isImplemented": true },
@@ -118,7 +112,6 @@
       "unlockSummary": "Future raid and war support effects.",
       "baseCost": 300,
       "upgradeCostStep": 200,
-      "baseHours": 5,
       "benefits": [
         { "level": 1, "title": "Training Yard", "description": "Unlocks the building foundation for combat preparation systems.", "isImplemented": true },
         { "level": 2, "title": "Raid Drills", "description": "Planned support for raid preparation bonuses.", "isImplemented": false },
@@ -136,7 +129,6 @@
       "unlockSummary": "Future essence missions and rewards.",
       "baseCost": 300,
       "upgradeCostStep": 200,
-      "baseHours": 5,
       "benefits": [
         { "level": 1, "title": "Essence Infrastructure", "description": "Unlocks the building foundation for essence-focused guild systems.", "isImplemented": true },
         { "level": 2, "title": "Essence Orders", "description": "Planned support for essence guild objectives.", "isImplemented": false },
@@ -151,14 +143,13 @@
       "maxLevel": 5,
       "isPermanent": false,
       "requiredGuildHallLevel": 2,
-      "unlockSummary": "Reduces building Guild Supply costs and construction time.",
+      "unlockSummary": "Reduces building Guild Supply costs.",
       "baseCost": 175,
       "upgradeCostStep": 150,
-      "baseHours": 3,
       "benefits": [
         { "level": 1, "title": "Supply Ledger", "description": "Treasury level reduces building Guild Supply costs by 2% per level.", "isImplemented": true },
         { "level": 2, "title": "Supply Storage", "description": "Guild Supply handling is represented through construction efficiency.", "isImplemented": true },
-        { "level": 3, "title": "Construction Efficiency", "description": "Treasury level reduces building construction time by 2% per level.", "isImplemented": true },
+        { "level": 3, "title": "Supply Efficiency", "description": "Guild Supply cost reductions improve with every Treasury level.", "isImplemented": true },
         { "level": 5, "title": "Quartermaster Network", "description": "Treasury efficiency reaches its current maximum.", "isImplemented": true }
       ]
     }

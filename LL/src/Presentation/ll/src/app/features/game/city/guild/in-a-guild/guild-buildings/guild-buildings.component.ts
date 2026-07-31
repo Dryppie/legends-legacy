@@ -1,30 +1,59 @@
-import { DatePipe, NgClass, NgFor, NgIf } from '@angular/common';
-import { Component, computed, effect, signal } from '@angular/core';
+import { DatePipe, NgFor, NgIf } from '@angular/common';
+import { Component, Input, computed, effect, signal } from '@angular/core';
 import { GuildStateService } from '../../../../../../core/services/api/guild/guild-state.service';
 import {
   GuildBuilding,
   GuildBuildingType,
 } from '../../../../../../shared/models/Dtos/guild/guildBuilding';
 import { RegularButtonComponent } from '../../../../../../shared/components/custom-components/buttons/regular-button/regular-button.component';
-import { HumanizeEnumPipe } from '../../../../../../shared/pipes/enums/humanize-enum.pipe';
 import { NumberFormatPipe } from '../../../../../../shared/pipes/number-format/number-format.pipe';
 
 @Component({
-    selector: 'app-guild-buildings',
-    imports: [
-        DatePipe,
-        NgIf,
-        NgFor,
-        NgClass,
-        NumberFormatPipe,
-        RegularButtonComponent,
-        HumanizeEnumPipe,
-    ],
-    templateUrl: './guild-buildings.component.html'
+  selector: 'app-guild-buildings',
+  imports: [DatePipe, NgIf, NgFor, NumberFormatPipe, RegularButtonComponent],
+  templateUrl: './guild-buildings.component.html',
+  styleUrl: './guild-buildings.component.scss',
 })
 export class GuildBuildingsComponent {
+  @Input() memberCap = 10;
+
+  readonly maximumMemberCap = 20;
   readonly overview;
   readonly selected = signal<GuildBuilding | null>(null);
+
+  readonly establishedBuildings = computed(() =>
+    (this.overview()?.buildings ?? []).filter(
+      (building) =>
+        building.definition.isPermanent || building.level > 0,
+    ),
+  );
+
+  readonly builtCount = computed(
+    () =>
+      (this.overview()?.buildings ?? []).filter(
+        (building) => building.definition.isPermanent || building.level > 0,
+      ).length,
+  );
+
+  readonly availableBuildings = computed(() => {
+    const hallLevel = this.overview()?.guildHallLevel ?? 0;
+    return (this.overview()?.buildings ?? []).filter(
+      (building) =>
+        !building.definition.isPermanent &&
+        building.level <= 0 &&
+        building.definition.requiredGuildHallLevel <= hallLevel,
+    );
+  });
+
+  readonly lockedBuildings = computed(() => {
+    const hallLevel = this.overview()?.guildHallLevel ?? 0;
+    return (this.overview()?.buildings ?? []).filter(
+      (building) =>
+        !building.definition.isPermanent &&
+        building.level <= 0 &&
+        building.definition.requiredGuildHallLevel > hallLevel,
+    );
+  });
 
   readonly selectedCost = computed(() => {
     const cost = this.selected()?.nextCost ?? {};
@@ -37,8 +66,22 @@ export class GuildBuildingsComponent {
   readonly selectedActionText = computed(() => {
     const building = this.selected();
     if (!building) return 'Select';
-    return building.canConstruct ? 'Construct' : 'Upgrade';
+    if (this.selectedSupplyShortfall() > 0) {
+      return `${this.selectedSupplyShortfall().toLocaleString()} supplies short`;
+    }
+    return building.level <= 0 ? 'Build' : 'Upgrade';
   });
+
+  readonly selectedSupplyCost = computed(
+    () => this.selected()?.nextCost?.GuildSupplies ?? 0,
+  );
+
+  readonly selectedSupplyShortfall = computed(() =>
+    Math.max(
+      0,
+      this.selectedSupplyCost() - (this.overview()?.guildSupplies ?? 0),
+    ),
+  );
 
   readonly canActOnSelected = computed(() => {
     const building = this.selected();
@@ -49,19 +92,18 @@ export class GuildBuildingsComponent {
   constructor(private readonly state: GuildStateService) {
     this.overview = this.state.buildings;
 
-    effect(
-      () => {
-        const buildings = this.overview()?.buildings ?? [];
-        const current = this.selected();
-        if (buildings.length === 0) return;
+    effect(() => {
+      const buildings = this.overview()?.buildings ?? [];
+      const current = this.selected();
+      if (buildings.length === 0) return;
 
-        const refreshed = current
-          ? buildings.find((building) => building.definition.type === current.definition.type)
-          : buildings[0];
-        this.selected.set(refreshed ?? buildings[0]);
-      },
-      { allowSignalWrites: true },
-    );
+      const refreshed = current
+        ? buildings.find(
+            (building) => building.definition.type === current.definition.type,
+          )
+        : buildings[0];
+      this.selected.set(refreshed ?? buildings[0]);
+    });
   }
 
   select(building: GuildBuilding): void {
@@ -73,7 +115,9 @@ export class GuildBuildingsComponent {
     if (!building) return;
 
     if (building.canConstruct) {
-      this.state.constructBuilding(building.definition.type as GuildBuildingType);
+      this.state.constructBuilding(
+        building.definition.type as GuildBuildingType,
+      );
       return;
     }
 
@@ -87,23 +131,8 @@ export class GuildBuildingsComponent {
   }
 
   buildingStatusLabel(building: GuildBuilding): string {
-    if (building.status === 'UnderConstruction') return 'Constructing';
-    if (building.status === 'Upgrading') return `Upgrading to ${building.targetLevel}`;
-    if (building.level <= 0) return 'Unbuilt';
+    if (building.level <= 0) return 'Not built';
     return `Level ${building.level}`;
-  }
-
-  buildingCardClass(building: GuildBuilding): string {
-    if (this.isSelected(building)) return 'border-primary bg-primary/10';
-    if (building.lockedReason) return 'border-zinc-700/70 opacity-80';
-    return 'border-zinc-300/30 hover:bg-zinc-800/30';
-  }
-
-  statusBadgeClass(building: GuildBuilding): string {
-    if (building.status !== 'Active') return 'll-badge-accent';
-    if (building.canConstruct || building.canUpgrade) return 'll-badge-success';
-    if (building.lockedReason) return 'll-badge-muted';
-    return 'll-badge-muted';
   }
 
   supplyProgress(building: GuildBuilding): number {
@@ -111,6 +140,33 @@ export class GuildBuildingsComponent {
     const available = this.overview()?.guildSupplies ?? 0;
     if (required <= 0) return 100;
     return Math.min(100, (available / required) * 100);
+  }
+
+  levelSegments(building: GuildBuilding): number[] {
+    return Array.from(
+      { length: building.definition.maxLevel },
+      (_, index) => index + 1,
+    );
+  }
+
+  nextMemberCap(): number {
+    return Math.min(this.maximumMemberCap, this.memberCap + 1);
+  }
+
+  isNextBenefit(
+    building: GuildBuilding,
+    benefit: { level: number; isImplemented: boolean },
+  ): boolean {
+    const nextLevel = Math.min(
+      ...building.definition.benefits
+        .filter(
+          (candidate) =>
+            candidate.isImplemented && candidate.level > building.level,
+        )
+        .map((candidate) => candidate.level),
+    );
+
+    return benefit.isImplemented && benefit.level === nextLevel;
   }
 
   benefitState(
@@ -127,17 +183,8 @@ export class GuildBuildingsComponent {
   ): string {
     const state = this.benefitState(building, benefit);
     if (state === 'active') return 'Active';
+    if (this.isNextBenefit(building, benefit)) return 'Next';
     if (state === 'future') return `Level ${benefit.level}`;
     return 'Planned';
-  }
-
-  benefitClass(
-    building: GuildBuilding,
-    benefit: { level: number; isImplemented: boolean },
-  ): string {
-    const state = this.benefitState(building, benefit);
-    if (state === 'active') return 'border-primary/70 bg-primary/10';
-    if (state === 'future') return 'border-zinc-500/50 bg-zinc-900/40';
-    return 'border-zinc-700/70 bg-black/20 opacity-80';
   }
 }

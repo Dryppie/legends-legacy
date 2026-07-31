@@ -35,8 +35,7 @@ public sealed class GuildBuildingServiceTests
         {
             GuildId = guild.Id,
             Type = GuildBuildingType.GuildHall,
-            Level = 1,
-            Status = GuildBuildingStatus.Active
+            Level = 1
         });
         await db.SaveChangesAsync();
         var service = new GuildBuildingService(db);
@@ -59,18 +58,20 @@ public sealed class GuildBuildingServiceTests
 
         Assert.True(missionBoardResult.Succeeded);
         Assert.True(marketOfficeResult.Succeeded);
-        Assert.Equal(GuildBuildingStatus.UnderConstruction, missionBoard.Status);
-        Assert.Equal(GuildBuildingStatus.UnderConstruction, marketOffice.Status);
-        Assert.Equal(1, missionBoard.TargetLevel);
-        Assert.Equal(1, marketOffice.TargetLevel);
+        Assert.Equal(1, missionBoard.Level);
+        Assert.Equal(1, marketOffice.Level);
         Assert.Equal(0, supplies.Amount);
+        Assert.Contains(missionBoardResult.Value!.ActivityLogs, x =>
+            x.Type == GuildActivityLogType.BuildingConstructed && x.Message == "Mission Board built to level 1.");
+        Assert.Contains(marketOfficeResult.Value!.ActivityLogs, x =>
+            x.Type == GuildActivityLogType.BuildingConstructed && x.Message == "Market Office built to level 1.");
     }
 
     [Fact]
-    public async Task GetOverview_finalizes_completed_construction_lazily()
+    public async Task Upgrade_applies_the_next_level_immediately()
     {
         await using var db = CreateDbContext();
-        var characterId = SeedGuild(db);
+        var characterId = SeedGuild(db, guildSupplies: 200);
         await db.SaveChangesAsync();
         var guild = await db.Guilds.SingleAsync();
         var now = new DateTimeOffset(2026, 6, 27, 12, 0, 0, TimeSpan.Zero);
@@ -78,32 +79,27 @@ public sealed class GuildBuildingServiceTests
         {
             GuildId = guild.Id,
             Type = GuildBuildingType.GuildHall,
-            Level = 4,
-            Status = GuildBuildingStatus.Active,
-            StartedAt = now
+            Level = 4
         });
-        db.GuildBuildings.Add(new GuildBuilding
+        var missionBoard = new GuildBuilding
         {
             GuildId = guild.Id,
             Type = GuildBuildingType.MissionBoard,
-            Level = 0,
-            TargetLevel = 1,
-            Status = GuildBuildingStatus.UnderConstruction,
-            StartedAt = now,
-            CompletesAt = now.AddHours(2)
-        });
+            Level = 1
+        };
+        db.GuildBuildings.Add(missionBoard);
         await db.SaveChangesAsync();
         var service = new GuildBuildingService(db);
 
-        var overview = await service.GetOverviewAsync(characterId, now.AddHours(3), CancellationToken.None);
+        var result = await service.UpgradeAsync(characterId, missionBoard.Id, now, CancellationToken.None);
+        await db.SaveChangesAsync();
+        var supplies = await db.Set<GuildResource>().SingleAsync(x => x.Resource == GuildResourceType.GuildSupplies);
 
-        var missionBoard = await db.GuildBuildings.SingleAsync(x => x.Type == GuildBuildingType.MissionBoard);
-
-        Assert.NotNull(overview);
-        Assert.Equal(GuildBuildingStatus.Active, missionBoard.Status);
-        Assert.Equal(1, missionBoard.Level);
-        Assert.Null(missionBoard.TargetLevel);
-        Assert.Contains(overview!.ActivityLogs, x => x.Type == GuildActivityLogType.BuildingConstructed);
+        Assert.True(result.Succeeded);
+        Assert.Equal(2, missionBoard.Level);
+        Assert.Equal(0, supplies.Amount);
+        Assert.Contains(result.Value!.ActivityLogs, x =>
+            x.Type == GuildActivityLogType.BuildingUpgraded && x.Message == "Mission Board upgraded to level 2.");
     }
 
     private static LLDbContext CreateDbContext()

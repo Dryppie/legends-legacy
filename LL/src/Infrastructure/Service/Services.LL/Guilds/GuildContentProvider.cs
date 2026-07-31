@@ -132,7 +132,6 @@ public sealed class GuildContentValidator : IGuildContentValidator
             if (building.RequiredGuildHallLevel <= 0) errors.Add($"{building.Type} required Guild Hall level must be positive");
             if (building.BaseCost < 0) errors.Add($"{building.Type} base cost cannot be negative");
             if (building.UpgradeCostStep < 0) errors.Add($"{building.Type} upgrade cost step cannot be negative");
-            if (building.BaseHours <= 0) errors.Add($"{building.Type} base hours must be positive");
             if (building.Benefits.Count == 0) errors.Add($"{building.Type} must define at least one benefit");
 
             foreach (var benefit in building.Benefits)
@@ -218,7 +217,6 @@ public sealed record GuildBuildingDefinition(
     string UnlockSummary,
     int BaseCost,
     int UpgradeCostStep,
-    int BaseHours,
     IReadOnlyList<GuildBuildingBenefitDto> Benefits);
 
 public sealed record GuildMissionDefinition(
@@ -291,10 +289,9 @@ internal static class GuildContentDefaults
             "Higher levels unlock access to advanced guild buildings.",
             BaseCost: 150,
             UpgradeCostStep: 150,
-            BaseHours: 4,
             Benefits:
             [
-                new(1, "Guild Headquarters", "The guild can manage missions, supplies, and construction.", true),
+                new(1, "Guild Headquarters", "The guild can manage missions, supplies, construction, and one additional member per Guild Hall level.", true),
                 new(2, "Support Buildings", "Workshop and Treasury become available.", true),
                 new(4, "Combat Infrastructure", "Raid Hall, Training Grounds, and Essence Sanctum become available.", true),
                 new(6, "War Planning", "War Room becomes available.", true)
@@ -309,7 +306,6 @@ internal static class GuildContentDefaults
             "Improves guild mission variety and rewards.",
             BaseCost: 100,
             UpgradeCostStep: 100,
-            BaseHours: 2,
             Benefits:
             [
                 new(1, "Mission Infrastructure", "Unlocks mission reward bonuses and keeps the mission system active.", true),
@@ -327,7 +323,6 @@ internal static class GuildContentDefaults
             "Unlocks common, weekly, and prestige shop stock by level.",
             BaseCost: 150,
             UpgradeCostStep: 125,
-            BaseHours: 2,
             Benefits:
             [
                 new(1, "Common Stock", "Common guild shop stock can be purchased.", true),
@@ -345,7 +340,6 @@ internal static class GuildContentDefaults
             "Unlock placeholder for future guild raids.",
             BaseCost: 400,
             UpgradeCostStep: 225,
-            BaseHours: 6,
             Benefits:
             [
                 new(1, "Raid Readiness", "Unlocks the Raids tab locked state and prepares future raid registration.", true),
@@ -363,7 +357,6 @@ internal static class GuildContentDefaults
             "Unlock placeholder for future guild wars.",
             BaseCost: 500,
             UpgradeCostStep: 250,
-            BaseHours: 8,
             Benefits:
             [
                 new(1, "War Planning", "Unlocks the Wars tab locked state and prepares future war registration.", true),
@@ -381,7 +374,6 @@ internal static class GuildContentDefaults
             "Adds crafting-flavored mission and shop support.",
             BaseCost: 175,
             UpgradeCostStep: 150,
-            BaseHours: 3,
             Benefits:
             [
                 new(1, "Craft Orders", "Crafting and tempering guild orders can appear from the data-driven order pool.", true),
@@ -399,7 +391,6 @@ internal static class GuildContentDefaults
             "Future raid and war support effects.",
             BaseCost: 300,
             UpgradeCostStep: 200,
-            BaseHours: 5,
             Benefits:
             [
                 new(1, "Training Yard", "Unlocks the building foundation for combat preparation systems.", true),
@@ -417,7 +408,6 @@ internal static class GuildContentDefaults
             "Future essence missions and rewards.",
             BaseCost: 300,
             UpgradeCostStep: 200,
-            BaseHours: 5,
             Benefits:
             [
                 new(1, "Essence Infrastructure", "Unlocks the building foundation for essence-focused guild systems.", true),
@@ -432,15 +422,14 @@ internal static class GuildContentDefaults
             MaxLevel: 5,
             IsPermanent: false,
             RequiredGuildHallLevel: 2,
-            "Reduces building Guild Supply costs and construction time.",
+            "Reduces building Guild Supply costs.",
             BaseCost: 175,
             UpgradeCostStep: 150,
-            BaseHours: 3,
             Benefits:
             [
                 new(1, "Supply Ledger", "Treasury level reduces building Guild Supply costs by 2% per level.", true),
                 new(2, "Supply Storage", "Guild Supply handling is represented through construction efficiency.", true),
-                new(3, "Construction Efficiency", "Treasury level reduces building construction time by 2% per level.", true),
+                new(3, "Supply Efficiency", "Guild Supply cost reductions improve with every Treasury level.", true),
                 new(5, "Quartermaster Network", "Treasury efficiency reaches its current maximum.", true)
             ])
     ];

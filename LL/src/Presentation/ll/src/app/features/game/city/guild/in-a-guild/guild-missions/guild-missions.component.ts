@@ -10,17 +10,18 @@ import { HumanizeEnumPipe } from '../../../../../../shared/pipes/enums/humanize-
 import { RegularButtonComponent } from '../../../../../../shared/components/custom-components/buttons/regular-button/regular-button.component';
 
 @Component({
-    selector: 'app-guild-missions',
-    imports: [
-        NgIf,
-        NgFor,
-        NgClass,
-        DatePipe,
-        NumberFormatPipe,
-        HumanizeEnumPipe,
-        RegularButtonComponent,
-    ],
-    templateUrl: './guild-missions.component.html'
+  selector: 'app-guild-missions',
+  imports: [
+    NgIf,
+    NgFor,
+    NgClass,
+    DatePipe,
+    NumberFormatPipe,
+    HumanizeEnumPipe,
+    RegularButtonComponent,
+  ],
+  templateUrl: './guild-missions.component.html',
+  styleUrl: './guild-missions.component.scss',
 })
 export class GuildMissionsComponent {
   readonly missions;
@@ -55,6 +56,23 @@ export class GuildMissionsComponent {
   orderProgress(order: PersonalGuildOrder): number {
     if (!order.targetAmount) return 0;
     return Math.min(100, (order.currentAmount / order.targetAmount) * 100);
+  }
+
+  claimableOrderCount(orders: PersonalGuildOrder[]): number {
+    return orders.filter((order) => order.canClaimReward).length;
+  }
+
+  weeklyRemaining(): number {
+    const mission = this.missions()?.activeMission;
+    if (!mission) return 0;
+    return Math.max(0, mission.targetAmount - mission.currentAmount);
+  }
+
+  orderStatusLabel(order: PersonalGuildOrder): string {
+    if (order.canClaimReward) return 'Complete';
+    if (order.status === 'RewardClaimed') return 'Claimed';
+    if (order.status === 'Expired') return 'Expired';
+    return 'In progress';
   }
 
   tierClass(tier: string | undefined): string {

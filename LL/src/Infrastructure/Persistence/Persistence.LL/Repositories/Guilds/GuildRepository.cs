@@ -84,11 +84,10 @@ public class GuildRepository : IGuildRepository
         var guild = await _context.Guilds
             .Include(g => g.Members)
             .Include(g => g.Invites)
+            .Include(g => g.Buildings)
             .FirstOrDefaultAsync(g => g.Id == guildId, cancellationToken);
 
         if (guild == null || guild.IsGuildFull()) return false;
-
-        if (guild.Members.Count >= guild.MaxMembers) return false;
 
         guild.Invites.Add(new GuildInvite
         {
@@ -104,6 +103,7 @@ public class GuildRepository : IGuildRepository
         var guild = await _context.Guilds
             .Include(g => g.Members)
             .Include(g => g.Invites)
+            .Include(g => g.Buildings)
             .FirstOrDefaultAsync(g => g.Id == guildId, cancellationToken);
 
         if (guild == null || guild.IsGuildFull()) return false;
@@ -112,8 +112,6 @@ public class GuildRepository : IGuildRepository
             .FirstOrDefaultAsync(c => c.Name.ToLower() == invitedCharacterName.ToLower(), cancellationToken);
 
         if (invitedCharacter == null) return false;
-
-        if (guild.Members.Count >= guild.MaxMembers) return false;
 
         guild.Invites.Add(new GuildInvite
         {
@@ -179,6 +177,7 @@ public class GuildRepository : IGuildRepository
     {
         var guild = await _context.Guilds
             .Include(g => g.Members)
+            .Include(g => g.Buildings)
             .FirstOrDefaultAsync(g => g.Id == guildId, cancellationToken);
 
         if (guild == null || guild.IsGuildFull()) return false;

@@ -1,93 +1,161 @@
-<div *ngIf="shop() as shop" class="h-full overflow-y-auto p-4 text-sm text-neutral-200">
-  <div class="mb-4 flex flex-wrap items-start justify-between gap-3">
-    <div>
-      <p class="ll-eyebrow">Guild Shop</p>
-      <h2 class="ll-heading text-lg">Market Office</h2>
-      <p class="ll-copy mt-1">
-        Weekly stock resets {{ shop.nextWeeklyResetAt | date: "mediumDate" }}
-        <span class="text-primary">({{ resetLabel(shop.nextWeeklyResetAt) }})</span>.
-      </p>
-    </div>
-    <div class="flex gap-2">
-      <div class="ll-stat-card px-3 py-2">
-        <div class="ll-stat-label">Favor</div>
-        <div class="ll-heading mt-1 text-lg">{{ shop.guildFavor | numberFormat }}</div>
-      </div>
-      <div class="ll-stat-card px-3 py-2">
-        <div class="ll-stat-label">Honors</div>
-        <div class="ll-heading mt-1 text-lg">{{ shop.guildHonors | numberFormat }}</div>
-      </div>
-    </div>
-  </div>
-
-  <div class="space-y-4">
-    <section *ngFor="let stockType of stockTypes" [class.hidden]="!hasStock(stockType)">
-      <div class="mb-2 flex items-center justify-between gap-3">
-        <h3 class="ll-heading text-base">{{ stockType | humanize }}</h3>
-        <span class="rounded border px-2 py-1 text-xs" [ngClass]="stockClass(stockType)">
-          {{ itemsForStock(stockType).length }} item{{ itemsForStock(stockType).length === 1 ? "" : "s" }}
-        </span>
+<div *ngIf="shop() as shop" class="shop-shell">
+  <main class="stock-workspace">
+    <header class="stock-header">
+      <div>
+        <p class="section-label">Market Office</p>
+        <h1>Guild Stock</h1>
+        <p>Equipment and supplies earned through guild service.</p>
       </div>
 
-      <div class="grid gap-3 lg:grid-cols-2">
-        <div *ngFor="let item of itemsForStock(stockType)" class="ll-card flex flex-col gap-3 p-4">
-          <div class="flex flex-wrap items-start justify-between gap-2">
-            <div>
-              <div class="ll-heading text-base">{{ item.name }}</div>
-              <p class="ll-copy mt-1 text-xs">{{ item.description }}</p>
-            </div>
-            <span class="rounded border px-2 py-1 text-xs" [ngClass]="stockClass(item.stockType)">
-              {{ item.isInWeeklyRotation ? "Rotating" : (item.stockType | humanize) }}
-            </span>
-          </div>
-
-          <div class="grid gap-2 sm:grid-cols-3">
-            <div class="ll-stat-card px-3 py-2">
-              <div class="ll-stat-label">Cost</div>
-              <div class="mt-1">
-                <span *ngIf="item.guildFavorCost > 0">{{ item.guildFavorCost | numberFormat }} Favor</span>
-                <span *ngIf="item.guildHonorsCost > 0">{{ item.guildHonorsCost | numberFormat }} Honors</span>
-              </div>
-            </div>
-            <div class="ll-stat-card px-3 py-2">
-              <div class="ll-stat-label">Limit</div>
-              <div class="mt-1">{{ item.purchasedThisPeriod }} / {{ item.weeklyLimit }}</div>
-            </div>
-            <div class="ll-stat-card px-3 py-2">
-              <div class="ll-stat-label">Requires</div>
-              <div class="mt-1 text-xs">{{ requirementText(item) }}</div>
-            </div>
-          </div>
-
-          <div>
-            <div class="mb-2 text-xs uppercase tracking-wide text-primary">Rewards</div>
-            <div class="grid gap-2 sm:grid-cols-2">
-              <div
-                *ngFor="let reward of item.rewards"
-                class="rounded border border-zinc-300/20 bg-zinc-950/30 px-3 py-2"
-              >
-                <div class="ll-stat-label">{{ reward.type | humanize }}</div>
-                <div class="ll-heading mt-1 text-base">{{ rewardAmountLabel(reward) }}</div>
-                <div class="mt-1 text-xs text-neutral-300">{{ rewardLabel(reward) | humanize }}</div>
-                <p *ngIf="reward.description" class="ll-copy mt-1 text-xs">
-                  {{ reward.description }}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div class="mt-auto flex flex-wrap items-center justify-between gap-2">
-            <p class="text-xs" [ngClass]="item.canPurchase ? 'text-emerald-300' : 'text-neutral-400'">
-              {{ item.lockedReason ?? "Available" }}
-            </p>
-            <app-regular-button
-              [disabled]="!item.canPurchase || loading()"
-              (pressed)="purchase(item)"
-              text="Purchase"
-            ></app-regular-button>
-          </div>
+      <div class="stock-header-meta">
+        <div class="wallet-summary" aria-label="Guild shop currencies">
+          <span>
+            <small>Favor</small>
+            <strong>{{ shop.guildFavor | numberFormat }}</strong>
+          </span>
+          <span>
+            <small>Honors</small>
+            <strong>{{ shop.guildHonors | numberFormat }}</strong>
+          </span>
+        </div>
+        <div class="reset-summary">
+          <small>Resets in</small>
+          <strong>{{ resetLabel(shop.nextWeeklyResetAt) }}</strong>
+          <time [attr.datetime]="shop.nextWeeklyResetAt">
+            {{ shop.nextWeeklyResetAt | date: "mediumDate" }}
+          </time>
         </div>
       </div>
+    </header>
+
+    <div class="stock-sections">
+      <section
+        *ngFor="let stockType of stockTypes"
+        class="stock-section"
+        [class.hidden]="!hasStock(stockType)"
+      >
+        <header class="stock-section-heading">
+          <div>
+            <h2>{{ stockType | humanize }} Stock</h2>
+            <span class="stock-badge" [ngClass]="stockClass(stockType)">
+              {{ itemsForStock(stockType).length }} item{{
+                itemsForStock(stockType).length === 1 ? "" : "s"
+              }}
+            </span>
+          </div>
+          <div class="column-headings" aria-hidden="true">
+            <span>Reward</span>
+            <span>Limit</span>
+            <span>Cost</span>
+          </div>
+        </header>
+
+        <div class="stock-list">
+          <button
+            *ngFor="let item of itemsForStock(stockType)"
+            type="button"
+            class="stock-row"
+            [class.is-selected]="isSelected(item)"
+            [class.is-locked]="!!item.lockedReason"
+            (click)="select(item)"
+          >
+            <span class="item-copy">
+              <strong>{{ item.name }}</strong>
+              <small>{{ item.description }}</small>
+              <small *ngIf="item.lockedReason" class="locked-reason">
+                {{ item.lockedReason }}
+              </small>
+            </span>
+
+            <span class="row-reward">
+              <ng-container *ngIf="item.rewards[0] as reward">
+                <strong>{{ rewardAmountLabel(reward) }}</strong>
+                <small>{{ rewardLabel(reward) | humanize }}</small>
+                <small *ngIf="item.rewards.length > 1">
+                  +{{ item.rewards.length - 1 }} more
+                </small>
+              </ng-container>
+            </span>
+
+            <span class="row-limit">
+              {{ item.purchasedThisPeriod }} / {{ item.weeklyLimit }}
+            </span>
+
+            <span class="row-cost">
+              <strong *ngIf="item.guildFavorCost > 0">
+                {{ item.guildFavorCost | numberFormat }}
+              </strong>
+              <strong *ngIf="item.guildHonorsCost > 0">
+                {{ item.guildHonorsCost | numberFormat }}
+              </strong>
+              <small>{{ item.guildFavorCost > 0 ? "Favor" : "Honors" }}</small>
+            </span>
+          </button>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <aside *ngIf="selected() as item" class="purchase-sidebar">
+    <section class="selected-item">
+      <p class="section-label">Selected</p>
+      <div class="selected-title-row">
+        <h2>{{ item.name }}</h2>
+        <span class="stock-badge" [ngClass]="stockClass(item.stockType)">
+          {{ item.stockType | humanize }}
+        </span>
+      </div>
+      <p class="selected-description">{{ item.description }}</p>
+      <p class="selected-requirement">{{ requirementText(item) }}</p>
     </section>
-  </div>
+
+    <section class="purchase-summary">
+      <p class="section-label">You Receive</p>
+      <div class="selected-rewards">
+        <article *ngFor="let reward of item.rewards">
+          <strong>{{ rewardAmountLabel(reward) }}</strong>
+          <span>{{ rewardLabel(reward) | humanize }}</span>
+          <p *ngIf="reward.description">{{ reward.description }}</p>
+        </article>
+      </div>
+
+      <dl class="purchase-stats">
+        <div>
+          <dt>Cost</dt>
+          <dd>{{ selectedCost() | numberFormat }} {{ selectedCurrency() }}</dd>
+        </div>
+        <div>
+          <dt>{{ selectedCurrency() }} after purchase</dt>
+          <dd>{{ selectedBalanceAfterPurchase() | numberFormat }}</dd>
+        </div>
+        <div>
+          <dt>Remaining this week</dt>
+          <dd>{{ remainingThisWeek(item) }} of {{ item.weeklyLimit }}</dd>
+        </div>
+      </dl>
+    </section>
+
+    <app-regular-button
+      [disabled]="!item.canPurchase || loading()"
+      [fullWidth]="true"
+      (pressed)="purchase(item)"
+      [text]="purchaseButtonText()"
+    ></app-regular-button>
+
+    <p class="purchase-guidance">
+      {{ item.lockedReason ?? "Available for purchase." }}
+    </p>
+
+    <section class="wallet-card">
+      <p class="section-label">Your Guild Currency</p>
+      <div>
+        <span>Favor</span>
+        <strong>{{ shop.guildFavor | numberFormat }}</strong>
+      </div>
+      <div>
+        <span>Honors</span>
+        <strong>{{ shop.guildHonors | numberFormat }}</strong>
+      </div>
+    </section>
+  </aside>
 </div>

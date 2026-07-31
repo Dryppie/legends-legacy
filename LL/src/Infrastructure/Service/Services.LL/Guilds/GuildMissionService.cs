@@ -590,8 +590,7 @@ public class GuildMissionService : IGuildMissionService
     }
 
     private static int GetMissionBoardLevel(Guild guild) =>
-        guild.Buildings.FirstOrDefault(x => x.Type == GuildBuildingType.MissionBoard
-            && x.Status == GuildBuildingStatus.Active)?.Level ?? 0;
+        guild.Buildings.FirstOrDefault(x => x.Type == GuildBuildingType.MissionBoard)?.Level ?? 0;
 
     private static WeeklyReward ApplyMissionBoardRewardBonus(Guild guild, WeeklyReward reward)
     {

@@ -207,8 +207,7 @@ public class GuildShopService : IGuildShopService
     }
 
     private static int GetMarketOfficeLevel(Guild guild) =>
-        guild.Buildings.FirstOrDefault(x => x.Type == GuildBuildingType.MarketOffice
-            && x.Status == GuildBuildingStatus.Active)?.Level ?? 0;
+        guild.Buildings.FirstOrDefault(x => x.Type == GuildBuildingType.MarketOffice)?.Level ?? 0;
 
     private async Task<string?> GetRewardLockedReasonAsync(
         Character character,

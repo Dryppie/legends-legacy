@@ -1,5 +1,6 @@
-﻿using Application.Common.Mappings;
+using Application.Common.Mappings;
 using AutoMapper;
+using Domain.Extensions.Guilds;
 using Domain.Models.Guilds;
 
 namespace Application.UseCases.Guilds.Dtos.Responses;
@@ -16,6 +17,7 @@ public class GuildSimpleDto : IMapFrom<Guild>
     {
         profile.CreateMap<Guild, GuildSimpleDto>()
             .ForMember(dto => dto.OwnerName, opt => opt.MapFrom(src => src.Owner.Name))
+            .ForMember(dto => dto.MaxMembers, opt => opt.MapFrom(src => src.EffectiveMaxMembers()))
             .ForMember(dto => dto.MemberCount, opt => opt.MapFrom(src => src.Members.Count()))
             .ForMember(dto => dto.Upgrades, opt => opt.MapFrom(src => src.Buildings.Sum(b => b.Level)));
     }
