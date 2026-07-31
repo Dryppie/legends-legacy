@@ -140,30 +140,53 @@
       <div
         class="flex flex-col-reverse gap-2 border-t border-primary/20 px-5 py-4 sm:flex-row sm:justify-end"
       >
-        <button
-          type="button"
-          class="ll-button px-4 py-2 text-xs"
-          [disabled]="loading() || welcomeTransitioning()"
-          (click)="skipFromWelcome()"
-        >
-          {{
-            loading() && welcomeAction() === "skip"
-              ? "Preparing your journey..."
-              : "Skip Tutorial"
-          }}
-        </button>
-        <button
-          type="button"
-          class="ll-button ll-button-primary min-h-9 px-4 py-2 text-xs"
-          [disabled]="loading() || welcomeTransitioning()"
-          (click)="beginTutorial()"
-        >
-          {{
-            loading() && welcomeAction() === "start"
-              ? "Starting..."
-              : "Begin First Steps"
-          }}
-        </button>
+        <ng-container *ngIf="!confirmingSkip">
+          <button
+            type="button"
+            class="ll-button px-4 py-2 text-xs"
+            [disabled]="loading() || welcomeTransitioning()"
+            (click)="requestSkip()"
+          >
+            Skip Tutorial
+          </button>
+          <button
+            type="button"
+            class="ll-button ll-button-primary min-h-9 px-4 py-2 text-xs"
+            [disabled]="loading() || welcomeTransitioning()"
+            (click)="beginTutorial()"
+          >
+            {{
+              loading() && welcomeAction() === "start"
+                ? "Starting..."
+                : "Begin First Steps"
+            }}
+          </button>
+        </ng-container>
+        <ng-container *ngIf="confirmingSkip">
+          <span class="self-center text-xs text-[var(--ll-color-text-muted)]">
+            Skip all tutorial steps?
+          </span>
+          <button
+            type="button"
+            class="ll-button px-4 py-2 text-xs"
+            [disabled]="loading()"
+            (click)="cancelSkip()"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            class="ll-button ll-button-primary min-h-9 px-4 py-2 text-xs"
+            [disabled]="loading()"
+            (click)="skipFromWelcome()"
+          >
+            {{
+              loading() && welcomeAction() === "skip"
+                ? "Preparing your journey..."
+                : "Confirm Skip"
+            }}
+          </button>
+        </ng-container>
       </div>
     </section>
   </div>

@@ -1,4 +1,5 @@
 using Application.Common.Interfaces;
+using Application.Interfaces.Services.LL.Items;
 using Application.Interfaces.Services.LL.Tutorials;
 using Application.Interfaces.WebSockets;
 using Application.WebSockets.Contracts;
@@ -8,6 +9,7 @@ using Domain.Models.Essences;
 using Domain.Models.Inventories;
 using Domain.Models.Items;
 using Domain.Models.Items.Equipments;
+using Domain.Models.Items.Equipments.Slots;
 using Domain.Models.Tutorials;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -21,6 +23,7 @@ public sealed class TutorialService : ITutorialService, ITutorialProgressionServ
     private readonly IDbContext _context;
     private readonly IItemBaseRepository _itemBases;
     private readonly IInventoryRepository _inventory;
+    private readonly IEquipmentSlotService _equipmentSlots;
     private readonly IInventoryItemFactory _inventoryItemFactory;
     private readonly ILootRewardWriter _lootRewardWriter;
     private readonly IGameEventPublisher? _eventPublisher;
@@ -32,6 +35,7 @@ public sealed class TutorialService : ITutorialService, ITutorialProgressionServ
         IDbContext context,
         IItemBaseRepository itemBases,
         IInventoryRepository inventory,
+        IEquipmentSlotService equipmentSlots,
         IInventoryItemFactory inventoryItemFactory,
         ILootRewardWriter lootRewardWriter,
         ITutorialDefinitionProvider definitionProvider,
@@ -42,6 +46,7 @@ public sealed class TutorialService : ITutorialService, ITutorialProgressionServ
         _context = context;
         _itemBases = itemBases;
         _inventory = inventory;
+        _equipmentSlots = equipmentSlots;
         _inventoryItemFactory = inventoryItemFactory;
         _lootRewardWriter = lootRewardWriter;
         _definitionProvider = definitionProvider;
@@ -128,6 +133,27 @@ public sealed class TutorialService : ITutorialService, ITutorialProgressionServ
                 characterId,
                 tutorialEssence,
                 cancellationToken);
+            var starterWeapon = await EnsureTutorialStarterWeaponAsync(
+                characterId,
+                cancellationToken);
+            await EnsureTutorialGatheringToolsAsync(characterId, cancellationToken);
+
+            if (starterWeapon is not null)
+            {
+                // The equipment service reloads Inventory from the database, so
+                // newly granted starter items must be persisted before equipping.
+                await _context.SaveChangesAsync(cancellationToken);
+                var equipped = await _equipmentSlots.EquipEquipmentAsync(
+                    characterId,
+                    starterWeapon.Id,
+                    EquipmentSlotType.MainHand,
+                    cancellationToken);
+                if (!equipped)
+                {
+                    throw new InvalidOperationException(
+                        "The tutorial starter Mace could not be equipped.");
+                }
+            }
 
             var now = DateTimeOffset.UtcNow;
             progress.TrainingCombatWonAt ??= now;
@@ -898,6 +924,49 @@ public sealed class TutorialService : ITutorialService, ITutorialProgressionServ
                 missingTools,
                 cancellationToken,
                 publishAsLoot: true);
+    }
+
+    private async Task<EquipmentInstance?> EnsureTutorialStarterWeaponAsync(
+        Guid characterId,
+        CancellationToken cancellationToken)
+    {
+        var itemBaseId = TutorialConstants.TutorialStarterWeaponItemBaseId;
+        var isEquipped = await _context.EquipmentSlots
+            .Include(slot => slot.EquipmentInstance)
+            .AnyAsync(
+                slot =>
+                    slot.EntityId == characterId &&
+                    slot.EquipmentInstance != null &&
+                    slot.EquipmentInstance.ItemBaseId == itemBaseId,
+                cancellationToken);
+
+        if (isEquipped)
+        {
+            return null;
+        }
+
+        var inventoryItem = await _context.InventoryItems
+            .Include(item => item.ItemInstance)
+            .ThenInclude(instance => instance.ItemBase)
+            .FirstOrDefaultAsync(
+                item =>
+                    item.InventoryId == characterId &&
+                    item.ItemInstance.ItemBaseId == itemBaseId,
+                cancellationToken);
+        if (inventoryItem?.ItemInstance is EquipmentInstance existingWeapon)
+        {
+            return existingWeapon;
+        }
+
+        var grantedItems = await AddItemRewardsAsync(
+            characterId,
+            new Dictionary<string, int> { [itemBaseId] = 1 },
+            cancellationToken,
+            publishAsLoot: true);
+        return grantedItems
+            .Select(item => item.ItemInstance)
+            .OfType<EquipmentInstance>()
+            .Single();
     }
 
     private async Task<IReadOnlyList<InventoryItem>> AddItemRewardsAsync(

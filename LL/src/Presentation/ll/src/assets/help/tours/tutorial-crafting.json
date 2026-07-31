@@ -1,13 +1,13 @@
 [
   {
     "id": "choose-tutorial-weapon",
-    "kind": "click",
+    "kind": "info",
     "element": "[data-tour=crafting-introduction]",
-    "actionSelector": "[data-tour=tutorial-weapon-recipe]",
     "includeSelectors": ["[data-tour=tutorial-weapon-recipe]"],
     "targetTimeoutMs": 5000,
+    "showNext": true,
     "title": "1. Choose your weapon",
-    "description": "Choose a Tier 1 one-handed weapon from this list. You have exactly enough Ore and Wood to craft one.",
+    "description": "Explore the Tier 1 one-handed weapons and select the one you want to craft. You have exactly enough Ore and Wood for one. When you are ready, select Next.",
     "position": "right"
   },
   {

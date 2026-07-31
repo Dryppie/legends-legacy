@@ -150,6 +150,7 @@ public sealed class GameEventOutboxTests
             db,
             itemBases: null!,
             inventory: null!,
+            equipmentSlots: null!,
             inventoryItemFactory: null!,
             lootRewardWriter: null!,
             new FirstStepsTutorialDefinitionProvider(),

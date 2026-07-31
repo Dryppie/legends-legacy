@@ -1,3 +1,4 @@
+using Application.Interfaces.Services.LL.Items;
 using Application.Interfaces.Services.LL.Tutorials;
 using Domain.Models.Entities.Characters;
 using Domain.Models.Inventories;
@@ -124,7 +125,13 @@ public sealed class TutorialDebugOptionsTests
         db.Inventories.Add(new Inventory { CharacterId = characterId });
         await db.SaveChangesAsync();
 
-        var service = CreateService(db, tutorialEnabled: true);
+        var lootWriter = new RecordingLootRewardWriter(db);
+        var equipmentSlots = new RecordingEquipmentSlotService(db);
+        var service = CreateService(
+            db,
+            tutorialEnabled: true,
+            lootWriter: lootWriter,
+            equipmentSlots: equipmentSlots);
 
         var completion = await service.SkipAsync(characterId, CancellationToken.None);
         await service.SkipAsync(characterId, CancellationToken.None);
@@ -145,7 +152,36 @@ public sealed class TutorialDebugOptionsTests
         Assert.Contains(
             activeLoadout.Slots,
             slot => slot.SlotIndex == 0 && slot.PlayerEssenceId == playerEssence.Id);
-        Assert.Empty(await db.EquipmentSlots.Where(slot => slot.EntityId == characterId).ToListAsync());
+        var mace = Assert.IsType<EquipmentInstance>(
+            lootWriter.Items.Single(item =>
+                item.ItemInstance.ItemBaseId ==
+                TutorialConstants.TutorialStarterWeaponItemBaseId).ItemInstance);
+        Assert.Contains(
+            equipmentSlots.EquipCalls,
+            call =>
+                call.EntityId == characterId &&
+                call.EquipmentId == mace.Id &&
+                call.SlotType == EquipmentSlotType.MainHand);
+        var equippedMainHand = await db.EquipmentSlots
+            .Include(slot => slot.EquipmentInstance)
+            .SingleAsync(slot =>
+                slot.EntityId == characterId &&
+                slot.EquipmentSlotType == EquipmentSlotType.MainHand);
+        Assert.Equal(mace.Id, equippedMainHand.EquipmentInstanceId);
+        Assert.Equal(
+            TutorialConstants.TutorialStarterWeaponItemBaseId,
+            equippedMainHand.EquipmentInstance?.ItemBaseId);
+        Assert.Equal(
+            new[]
+            {
+                "basic_hatchet",
+                "basic_pickaxe",
+                "basic_skinning_knife",
+                TutorialConstants.TutorialStarterWeaponItemBaseId
+            },
+            lootWriter.Items
+                .Select(item => item.ItemInstance.ItemBaseId)
+                .OrderBy(itemBaseId => itemBaseId));
     }
 
     [Fact]
@@ -443,11 +479,14 @@ public sealed class TutorialDebugOptionsTests
         bool tutorialEnabled = false,
         ITutorialDefinitionProvider? definitionProvider = null,
         RecordingInventoryRepository? inventory = null,
-        RecordingLootRewardWriter? lootWriter = null) =>
-        new(
+        RecordingLootRewardWriter? lootWriter = null,
+        RecordingEquipmentSlotService? equipmentSlots = null)
+    {
+        return new TutorialService(
             db,
             new RecordingItemBaseRepository(),
             inventory ?? new RecordingInventoryRepository(),
+            equipmentSlots ?? new RecordingEquipmentSlotService(),
             new InventoryItemFactory(),
             lootWriter ?? new RecordingLootRewardWriter(),
             definitionProvider ?? new EmptyTutorialDefinitionProvider(),
@@ -457,6 +496,7 @@ public sealed class TutorialDebugOptionsTests
                 Enabled = tutorialEnabled,
                 IsDevelopment = true
             }));
+    }
 
     private sealed class EmptyTutorialDefinitionProvider : ITutorialDefinitionProvider
     {
@@ -583,6 +623,13 @@ public sealed class TutorialDebugOptionsTests
                 ItemType = ItemType.Resource,
                 Stackable = true
             },
+            [TutorialConstants.TutorialStarterWeaponItemBaseId] = new EquipmentBase
+            {
+                Id = TutorialConstants.TutorialStarterWeaponItemBaseId,
+                Name = "Mace",
+                ItemType = ItemType.Equipment,
+                EquipmentType = EquipmentType.OneHanded
+            },
             ["basic_pickaxe"] = new EquipmentBase
             {
                 Id = "basic_pickaxe",
@@ -673,6 +720,13 @@ public sealed class TutorialDebugOptionsTests
 
     private sealed class RecordingLootRewardWriter : ILootRewardWriter
     {
+        private readonly LLDbContext? _db;
+
+        public RecordingLootRewardWriter(LLDbContext? db = null)
+        {
+            _db = db;
+        }
+
         public List<InventoryItem> Items { get; } = [];
 
         public Task AddLootAsync(
@@ -681,7 +735,81 @@ public sealed class TutorialDebugOptionsTests
             CancellationToken cancellationToken)
         {
             Items.AddRange(items);
+            if (_db is not null)
+            {
+                _db.InventoryItems.AddRange(items);
+            }
+
             return Task.CompletedTask;
         }
+    }
+
+    private sealed class RecordingEquipmentSlotService : IEquipmentSlotService
+    {
+        private readonly LLDbContext? _db;
+
+        public RecordingEquipmentSlotService(LLDbContext? db = null)
+        {
+            _db = db;
+        }
+
+        public List<(Guid EntityId, Guid EquipmentId, EquipmentSlotType? SlotType)> EquipCalls { get; } = [];
+
+        public Task<List<EquipmentSlot>> GetEquipmentSlotsByEntityIdAsync(
+            Guid entityId,
+            CancellationToken cancellationToken) =>
+            Task.FromResult(new List<EquipmentSlot>());
+
+        public async Task<bool> EquipEquipmentAsync(
+            Guid entityId,
+            Guid equipmentId,
+            EquipmentSlotType? slotType,
+            CancellationToken cancellationToken)
+        {
+            EquipCalls.Add((entityId, equipmentId, slotType));
+            if (_db is null)
+            {
+                return true;
+            }
+
+            var inventoryItem = await _db.InventoryItems
+                .Include(item => item.ItemInstance)
+                .FirstOrDefaultAsync(
+                    item =>
+                        item.InventoryId == entityId &&
+                        item.ItemInstanceId == equipmentId,
+                    cancellationToken);
+            if (inventoryItem?.ItemInstance is not EquipmentInstance equipment)
+            {
+                return false;
+            }
+
+            var targetSlotType = slotType ?? EquipmentSlotType.MainHand;
+            var targetSlot = await _db.EquipmentSlots.FirstOrDefaultAsync(
+                slot =>
+                    slot.EntityId == entityId &&
+                    slot.EquipmentSlotType == targetSlotType,
+                cancellationToken);
+            if (targetSlot is null)
+            {
+                targetSlot = new EquipmentSlot
+                {
+                    EntityId = entityId,
+                    EquipmentSlotType = targetSlotType
+                };
+                _db.EquipmentSlots.Add(targetSlot);
+            }
+
+            targetSlot.EquipmentInstanceId = equipment.Id;
+            targetSlot.EquipmentInstance = equipment;
+            _db.InventoryItems.Remove(inventoryItem);
+            return true;
+        }
+
+        public Task<bool> UnequipEquipmentAsync(
+            Guid entityId,
+            EquipmentSlotType slotType,
+            CancellationToken cancellationToken) =>
+            Task.FromResult(true);
     }
 }

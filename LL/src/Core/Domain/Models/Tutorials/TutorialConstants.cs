@@ -22,6 +22,7 @@ public static class TutorialConstants
     public const string TutorialRingItemBaseId = "tutorial_ring";
     public const string TutorialCraftingOreItemBaseId = "ore";
     public const string TutorialCraftingWoodItemBaseId = "wood";
+    public const string TutorialStarterWeaponItemBaseId = "mace";
 
     public static readonly IReadOnlyList<string> TutorialGatheringToolItemBaseIds =
     [

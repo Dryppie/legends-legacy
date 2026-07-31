@@ -10,6 +10,8 @@ import {
   inject,
   signal,
 } from '@angular/core';
+import { EquipmentStateService } from '../../../core/services/api/equipment/equipment-state.service';
+import { InventoryStateService } from '../../../core/services/api/inventory/inventory-state.service';
 import { TutorialStateService } from '../../../core/services/api/tutorial/tutorial-state.service';
 import { TutorialPresenterService } from '../../../core/services/api/tutorial/tutorial-presenter.service';
 import {
@@ -41,6 +43,8 @@ const FIRST_STEPS_STEP_ORDER = [
 export class TutorialQuestComponent implements OnInit, OnDestroy {
   private readonly tutorialState = inject(TutorialStateService);
   private readonly presenter = inject(TutorialPresenterService);
+  private readonly inventoryState = inject(InventoryStateService);
+  private readonly equipmentState = inject(EquipmentStateService);
   private welcomeTransitionTimer: ReturnType<typeof setTimeout> | null = null;
   private welcomeRevealTimer: ReturnType<typeof setTimeout> | null = null;
 
@@ -141,6 +145,7 @@ export class TutorialQuestComponent implements OnInit, OnDestroy {
   confirmSkip(): void {
     this.tutorialState.skip(() => {
       this.confirmingSkip = false;
+      this.refreshStarterSetup();
     });
   }
 
@@ -160,8 +165,10 @@ export class TutorialQuestComponent implements OnInit, OnDestroy {
     this.welcomeAction.set('skip');
     this.tutorialState.clearError();
     this.tutorialState.skip(() => {
+      this.confirmingSkip = false;
       this.welcomeOpen.set(false);
       this.welcomeAction.set(null);
+      this.refreshStarterSetup();
     });
   }
 
@@ -226,6 +233,11 @@ export class TutorialQuestComponent implements OnInit, OnDestroy {
       clearTimeout(this.welcomeRevealTimer);
       this.welcomeRevealTimer = null;
     }
+  }
+
+  private refreshStarterSetup(): void {
+    this.inventoryState.load(true);
+    this.equipmentState.load(true);
   }
 
   private prefersReducedMotion(): boolean {
