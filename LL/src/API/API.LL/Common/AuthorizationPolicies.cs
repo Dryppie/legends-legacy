@@ -10,6 +10,8 @@ public static class AuthorizationPolicies
     {
         options.AddPolicy(
             RegisteredUser,
-            policy => policy.RequireClaim("guest", bool.FalseString));
+            policy => policy
+                .RequireAuthenticatedUser()
+                .RequireClaim("guest", bool.FalseString));
     }
 }

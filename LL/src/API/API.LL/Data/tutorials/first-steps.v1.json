@@ -1,6 +1,6 @@
 {
   "tutorialId": "tutorial.first_steps",
-  "version": 2,
+  "version": 3,
   "title": "First Steps",
   "initialStepKey": "defeat_training_creature",
   "steps": [
@@ -87,11 +87,30 @@
           "wand"
         ]
       },
+      "nextStepKey": "equip_gathering_tool"
+    },
+    {
+      "key": "equip_gathering_tool",
+      "objective": "Equip a gathering tool. Each tool collects from its matching resource node while you fight.",
+      "requiredAmount": 1,
+      "actionLabel": "Head to Inventory",
+      "destinationRoute": "/game/character/inventory",
+      "tourPageId": "tutorial-gathering-tool",
+      "guidePageId": "tutorial-gathering",
+      "trigger": {
+        "type": "EquipmentChanged",
+        "requiredCount": 1,
+        "itemBaseIds": [
+          "basic_pickaxe",
+          "basic_hatchet",
+          "basic_skinning_knife"
+        ]
+      },
       "nextStepKey": "start_lumo_ruins"
     },
     {
       "key": "start_lumo_ruins",
-      "objective": "Begin your first expedition in Lumo Ruins.",
+      "objective": "Begin fighting in Lumo Ruins to gather resources with your equipped tool.",
       "requiredAmount": 1,
       "actionLabel": "Head to the World Map",
       "destinationRoute": "/game/world/shenic?area=region_01_area_01",

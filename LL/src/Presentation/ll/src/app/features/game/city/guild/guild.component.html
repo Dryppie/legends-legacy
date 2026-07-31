@@ -1,11 +1,19 @@
 <div class="ll-page-stack pr-4 sm:pr-6">
+  <app-default-header
+    class="flex-none"
+    section="City"
+    title="Guild"
+    text="Create or join a guild, gain powerful allies, and challenge difficult raids"
+    icon="sidebar/city/guild"
+  ></app-default-header>
+
   <ng-container *ngIf="guild() as guild; else noGuild">
     <app-in-a-guild
-      class="h-full overflow-hidden"
+      class="min-h-0 flex-1 overflow-hidden"
       [guild]="guild"
     ></app-in-a-guild>
   </ng-container>
   <ng-template #noGuild>
-    <app-no-guild class="h-full overflow-hidden"></app-no-guild>
+    <app-no-guild class="min-h-0 flex-1 overflow-hidden"></app-no-guild>
   </ng-template>
 </div>

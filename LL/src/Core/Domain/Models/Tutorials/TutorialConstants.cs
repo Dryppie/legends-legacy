@@ -9,6 +9,7 @@ public static class TutorialConstants
     public const string StepEquipEssence = "equip_essence";
     public const string StepCraftEquipment = "craft_equipment";
     public const string StepEquipEquipment = "equip_equipment";
+    public const string StepEquipGatheringTool = "equip_gathering_tool";
     public const string StepStartLumoRuins = "start_lumo_ruins";
     public const string StepDefeatLumoRuins = "defeat_lumo_ruins";
     public const string StepComplete = "complete";
@@ -21,6 +22,13 @@ public static class TutorialConstants
     public const string TutorialRingItemBaseId = "tutorial_ring";
     public const string TutorialCraftingOreItemBaseId = "ore";
     public const string TutorialCraftingWoodItemBaseId = "wood";
+
+    public static readonly IReadOnlyList<string> TutorialGatheringToolItemBaseIds =
+    [
+        "basic_pickaxe",
+        "basic_hatchet",
+        "basic_skinning_knife"
+    ];
 
     public static readonly IReadOnlyList<string> TutorialOneHandedWeaponItemBaseIds =
     [

@@ -326,10 +326,18 @@ public sealed class TutorialService : ITutorialService, ITutorialProgressionServ
 
         if (triggerType.Equals("EquipmentChanged", StringComparison.OrdinalIgnoreCase))
         {
-            progress.EquippedTierOneEquipmentCount = await GetEquippedTutorialEquipmentCountAsync(
-                progress.CharacterId,
-                step.Trigger.ItemBaseIds,
-                cancellationToken);
+            var isGatheringToolStep = step.Key.Equals(
+                TutorialConstants.StepEquipGatheringTool,
+                StringComparison.OrdinalIgnoreCase);
+            progress.EquippedTierOneEquipmentCount = isGatheringToolStep
+                ? await GetEquippedTutorialGatheringToolCountAsync(
+                    progress.CharacterId,
+                    step.Trigger.ItemBaseIds,
+                    cancellationToken)
+                : await GetEquippedTutorialEquipmentCountAsync(
+                    progress.CharacterId,
+                    step.Trigger.ItemBaseIds,
+                    cancellationToken);
             Touch(progress);
 
             var requiredCount = step.Trigger.RequiredCount ?? TutorialConstants.RequiredEquippedEquipmentCount;
@@ -338,8 +346,16 @@ public sealed class TutorialService : ITutorialService, ITutorialProgressionServ
                 return (true, []);
             }
 
+            var loot = isGatheringToolStep
+                ? []
+                : await EnsureTutorialGatheringToolsAsync(progress.CharacterId, cancellationToken);
+            if (!isGatheringToolStep)
+            {
+                progress.EquippedTierOneEquipmentCount = 0;
+            }
+
             Advance(progress, step);
-            return (true, []);
+            return (true, loot);
         }
 
         if (triggerType.Equals("CombatActionStarted", StringComparison.OrdinalIgnoreCase))
@@ -480,10 +496,35 @@ public sealed class TutorialService : ITutorialService, ITutorialProgressionServ
                 step?.Trigger?.RequiredCount ?? TutorialConstants.RequiredEquippedEquipmentCount;
             if (progress.EquippedTierOneEquipmentCount >= requiredCount)
             {
+                await EnsureTutorialGatheringToolsAsync(progress.CharacterId, cancellationToken);
+                progress.EquippedTierOneEquipmentCount = 0;
+                SetStep(progress, TutorialConstants.StepEquipGatheringTool);
+                await PublishTutorialStateChangedAsync(progress, cancellationToken);
+                return true;
+            }
+        }
+
+        if (progress.CurrentStep == TutorialConstants.StepEquipGatheringTool)
+        {
+            var toolsGranted = (await EnsureTutorialGatheringToolsAsync(
+                progress.CharacterId,
+                cancellationToken)).Count > 0;
+            var step = _definitionProvider.GetStep(progress.TutorialId, progress.CurrentStep);
+            progress.EquippedTierOneEquipmentCount = await GetEquippedTutorialGatheringToolCountAsync(
+                progress.CharacterId,
+                step?.Trigger?.ItemBaseIds ?? [],
+                cancellationToken);
+
+            var requiredCount =
+                step?.Trigger?.RequiredCount ?? TutorialConstants.RequiredEquippedEquipmentCount;
+            if (progress.EquippedTierOneEquipmentCount >= requiredCount)
+            {
                 SetStep(progress, TutorialConstants.StepStartLumoRuins);
                 await PublishTutorialStateChangedAsync(progress, cancellationToken);
                 return true;
             }
+
+            return toolsGranted;
         }
 
         return await CompleteLegacyLumoStepAsync(progress, cancellationToken);
@@ -510,6 +551,26 @@ public sealed class TutorialService : ITutorialService, ITutorialProgressionServ
             .CountAsync(cancellationToken);
 
         return equippedTutorialItemCount;
+    }
+
+    private async Task<int> GetEquippedTutorialGatheringToolCountAsync(
+        Guid characterId,
+        IReadOnlyCollection<string> tutorialItemBaseIds,
+        CancellationToken cancellationToken)
+    {
+        if (tutorialItemBaseIds.Count == 0)
+        {
+            tutorialItemBaseIds = TutorialConstants.TutorialGatheringToolItemBaseIds;
+        }
+
+        return await _context.EquipmentSlots
+            .Include(slot => slot.EquipmentInstance)
+            .Where(slot =>
+                slot.EntityId == characterId &&
+                slot.EquipmentSlotType == Domain.Models.Items.Equipments.Slots.EquipmentSlotType.Tool &&
+                slot.EquipmentInstance != null &&
+                tutorialItemBaseIds.Contains(slot.EquipmentInstance.ItemBaseId))
+            .CountAsync(cancellationToken);
     }
 
     private async Task<bool> HasCraftedTutorialWeaponAsync(
@@ -805,6 +866,40 @@ public sealed class TutorialService : ITutorialService, ITutorialProgressionServ
         return true;
     }
 
+    private async Task<IReadOnlyList<InventoryItem>> EnsureTutorialGatheringToolsAsync(
+        Guid characterId,
+        CancellationToken cancellationToken)
+    {
+        var missingTools = new Dictionary<string, int>();
+
+        foreach (var itemBaseId in TutorialConstants.TutorialGatheringToolItemBaseIds)
+        {
+            var inventoryQuantity = await _inventory.GetInventoryQuantityAsync(
+                characterId,
+                itemBaseId,
+                cancellationToken);
+            var isEquipped = await _context.EquipmentSlots.AnyAsync(
+                slot =>
+                    slot.EntityId == characterId &&
+                    slot.EquipmentInstance != null &&
+                    slot.EquipmentInstance.ItemBaseId == itemBaseId,
+                cancellationToken);
+
+            if (inventoryQuantity == 0 && !isEquipped)
+            {
+                missingTools[itemBaseId] = 1;
+            }
+        }
+
+        return missingTools.Count == 0
+            ? []
+            : await AddItemRewardsAsync(
+                characterId,
+                missingTools,
+                cancellationToken,
+                publishAsLoot: true);
+    }
+
     private async Task<IReadOnlyList<InventoryItem>> AddItemRewardsAsync(
         Guid characterId,
         IReadOnlyDictionary<string, int> itemRewards,
@@ -852,6 +947,7 @@ public sealed class TutorialService : ITutorialService, ITutorialProgressionServ
         {
             TutorialConstants.StepCraftEquipment => progress.CraftedTierOneEquipmentCount >= TutorialConstants.RequiredCraftedEquipmentCount ? 1 : 0,
             TutorialConstants.StepEquipEquipment => progress.EquippedTierOneEquipmentCount,
+            TutorialConstants.StepEquipGatheringTool => progress.EquippedTierOneEquipmentCount,
             _ => 0
         };
         var currentStepIndex = definition.Steps.FindIndex(candidate =>

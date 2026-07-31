@@ -349,7 +349,6 @@ public sealed class CombatGatheringRewardProcessor : ICombatGatheringRewardProce
     {
         GatheringType.Mining => ProfessionType.Mining,
         GatheringType.Woodcutting => ProfessionType.Woodcutting,
-        GatheringType.Fishing => ProfessionType.Fishing,
         GatheringType.Skinning => ProfessionType.Skinning,
         _ => ProfessionType.None
     };

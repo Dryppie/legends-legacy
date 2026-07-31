@@ -75,7 +75,6 @@ describe('TavernComponent', () => {
       'Crafting',
       'Mining',
       'Woodcutting',
-      'Fishing',
       'Skinning',
     ]);
     expect(state.load).toHaveBeenCalledWith('profession-crafting');

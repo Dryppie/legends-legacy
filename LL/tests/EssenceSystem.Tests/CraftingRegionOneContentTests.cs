@@ -5,6 +5,82 @@ namespace EssenceSystem.Tests;
 public sealed class CraftingRegionOneContentTests
 {
     [Fact]
+    public void GatheringCatalog_UsesOnlyOreWoodAndHideAsStandardMaterials()
+    {
+        var materials = ReadArray("crafting/materials.json");
+        var standardMaterials = materials
+            .Where(material => material?["isStandardTieredMaterial"]?.GetValue<bool>() == true)
+            .ToList();
+
+        Assert.Equal(
+            ["ore", "rawhide", "wood"],
+            standardMaterials
+                .Select(material => material?["itemId"]?.GetValue<string>() ?? string.Empty)
+                .Order(StringComparer.OrdinalIgnoreCase));
+        Assert.Equal(
+            ["Hide", "Metal", "Wood"],
+            standardMaterials
+                .Select(material => material?["family"]?.GetValue<string>() ?? string.Empty)
+                .Order(StringComparer.OrdinalIgnoreCase));
+
+        var allowedFamilies = new HashSet<string>(["Metal", "Wood", "Hide"], StringComparer.OrdinalIgnoreCase);
+        var invalidRecipeRequirements = ReadArray("crafting/base-recipes.json")
+            .SelectMany(recipe => ChildArray(recipe, "materialRequirements"))
+            .Select(requirement => requirement?["family"]?.GetValue<string>() ?? string.Empty)
+            .Where(family => !allowedFamilies.Contains(family))
+            .ToList();
+
+        Assert.Empty(invalidRecipeRequirements);
+    }
+
+    [Fact]
+    public void EveryCraftingMaterial_DescribesWhereItCanBeObtained()
+    {
+        Assert.All(ReadArray("crafting/materials.json"), material =>
+        {
+            var sources = ChildArray(material, "sources")
+                .Select(source => source?.GetValue<string>() ?? string.Empty)
+                .Where(source => !string.IsNullOrWhiteSpace(source))
+                .ToList();
+
+            Assert.NotEmpty(sources);
+        });
+    }
+
+    [Fact]
+    public void DungeonGathering_UsesThreeSkillsAndTheirMatchingBaseMaterials()
+    {
+        var specialResources = ReadArray("crafting/materials.json")
+            .Where(material => material?["isSpecialResource"]?.GetValue<bool>() == true)
+            .Select(material => material?["itemId"]?.GetValue<string>() ?? string.Empty)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+        var expectedMaterialBySkill = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["Mining"] = "ore",
+            ["Woodcutting"] = "wood",
+            ["Skinning"] = "rawhide"
+        };
+
+        foreach (var node in ReadDungeonDifficulties()
+                     .SelectMany(dungeon => ChildArray(dungeon, "gatheringNodes")))
+        {
+            var skill = node?["type"]?.GetValue<string>() ?? string.Empty;
+            Assert.True(expectedMaterialBySkill.TryGetValue(skill, out var expectedMaterial));
+
+            var lootItemIds = ChildArray(node, "loot")
+                .Select(loot => loot?["itemId"]?.GetValue<string>() ?? string.Empty)
+                .ToList();
+
+            Assert.Contains(expectedMaterial!, lootItemIds, StringComparer.OrdinalIgnoreCase);
+            Assert.All(lootItemIds, itemId =>
+                Assert.True(
+                    itemId.Equals(expectedMaterial, StringComparison.OrdinalIgnoreCase) ||
+                    specialResources.Contains(itemId),
+                    $"Gathering node '{node?["id"]}' contains retired material '{itemId}'."));
+        }
+    }
+
+    [Fact]
     public void RegionOneDungeons_SourceEveryStandardCraftingMaterial()
     {
         var materials = ReadArray("crafting/materials.json");

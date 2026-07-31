@@ -1331,7 +1331,7 @@
       },
       {
         "type": "TieredMaterial",
-        "family": "Crystal",
+        "family": "Wood",
         "baseAmount": 3,
         "amountPerTier": 1
       }
@@ -1434,7 +1434,7 @@
       },
       {
         "type": "TieredMaterial",
-        "family": "Crystal",
+        "family": "Wood",
         "baseAmount": 4,
         "amountPerTier": 1
       }
@@ -1533,13 +1533,13 @@
     "materialRequirements": [
       {
         "type": "TieredMaterial",
-        "family": "Crystal",
+        "family": "Wood",
         "baseAmount": 6,
         "amountPerTier": 2
       },
       {
         "type": "TieredMaterial",
-        "family": "Bone",
+        "family": "Hide",
         "baseAmount": 3,
         "amountPerTier": 1
       }
@@ -3017,7 +3017,7 @@
       },
       {
         "type": "TieredMaterial",
-        "family": "Crystal",
+        "family": "Wood",
         "baseAmount": 4,
         "amountPerTier": 1
       }
@@ -3122,7 +3122,7 @@
       },
       {
         "type": "TieredMaterial",
-        "family": "Crystal",
+        "family": "Wood",
         "baseAmount": 4,
         "amountPerTier": 1
       }
@@ -3229,7 +3229,7 @@
       },
       {
         "type": "TieredMaterial",
-        "family": "Crystal",
+        "family": "Wood",
         "baseAmount": 4,
         "amountPerTier": 1
       }

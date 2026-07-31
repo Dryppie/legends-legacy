@@ -1,5 +1,6 @@
 using API.Chat;
 using API.Chat.Hubs;
+using API.Chat.Hubs.Presence;
 using API.Chat.Hubs.Providers;
 using Application;
 using Asp.Versioning;
@@ -39,6 +40,7 @@ builder.Services.AddSignalR(o => { o.EnableDetailedErrors = true; })
 // TODO: For production
 //builder.Services.AddSignalR().AddStackExchangeRedis(builder.Configuration.GetConnectionString("Redis")!);
 builder.Services.AddSingleton<IUserIdProvider, CharacterIdProvider>();
+builder.Services.AddSingleton<IChatPresenceTracker, InMemoryChatPresenceTracker>();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();

@@ -70,7 +70,6 @@ export class TavernComponent implements OnInit {
       label: 'Woodcutting',
       category: 'Professions',
     },
-    { key: 'profession-fishing', label: 'Fishing', category: 'Professions' },
     { key: 'profession-skinning', label: 'Skinning', category: 'Professions' },
     {
       key: 'weekly-guild-contribution',

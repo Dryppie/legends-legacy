@@ -3,10 +3,16 @@ import { NoGuildComponent } from './no-guild/no-guild.component';
 import { InAGuildComponent } from './in-a-guild/in-a-guild.component';
 import { NgIf } from '@angular/common';
 import { GuildStateService } from '../../../../core/services/api/guild/guild-state.service';
+import { DefaultHeaderComponent } from '../../../../shared/components/default-header/default-header.component';
 
 @Component({
     selector: 'app-guild',
-    imports: [NoGuildComponent, InAGuildComponent, NgIf],
+    imports: [
+        NoGuildComponent,
+        InAGuildComponent,
+        NgIf,
+        DefaultHeaderComponent,
+    ],
     templateUrl: './guild.component.html'
 })
 export class GuildComponent implements OnInit {

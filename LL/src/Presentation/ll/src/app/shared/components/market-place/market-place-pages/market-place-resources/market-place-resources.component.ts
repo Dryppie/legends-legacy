@@ -8,6 +8,14 @@ import { Component, Input } from '@angular/core';
 })
 export class MarketPlaceResourcesComponent {
   private readonly catalystNames = new Set([
+    'fury heart',
+    'arcane focus',
+    "executioner's mark",
+    'aegis runestone',
+    'warden sigil',
+    'endurance core',
+    'phoenix ember',
+    'spirit prism',
     'venom gland',
     'royal chitin plate',
     'hive ichor',

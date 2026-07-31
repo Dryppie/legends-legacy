@@ -15,7 +15,6 @@ public static class LeaderboardBoardKey
     public const string Crafting = "profession-crafting";
     public const string Mining = "profession-mining";
     public const string Woodcutting = "profession-woodcutting";
-    public const string Fishing = "profession-fishing";
     public const string Skinning = "profession-skinning";
 
     public static readonly IReadOnlySet<string> All = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
@@ -33,7 +32,6 @@ public static class LeaderboardBoardKey
         Crafting,
         Mining,
         Woodcutting,
-        Fishing,
         Skinning
     };
 }

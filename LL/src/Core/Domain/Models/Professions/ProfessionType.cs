@@ -13,6 +13,5 @@ public enum ProfessionType
     // Gathering
     Mining = 4,
     Woodcutting = 5,
-    Fishing = 6,
     Skinning = 7,
 }

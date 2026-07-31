@@ -1,4 +1,10 @@
-import { DecimalPipe, NgClass, NgFor, NgIf } from '@angular/common';
+import {
+  DecimalPipe,
+  NgClass,
+  NgFor,
+  NgIf,
+  NgTemplateOutlet,
+} from '@angular/common';
 import {
   Component,
   computed,
@@ -64,6 +70,7 @@ type MobileCraftingPane = 'recipes' | 'blueprints' | 'preview';
     NgIf,
     NgFor,
     NgClass,
+    NgTemplateOutlet,
     DecimalPipe,
     RegularButtonComponent,
     DropdownComponent,

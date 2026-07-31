@@ -77,35 +77,16 @@
           "gatheringNodes": [
             {
               "id": "goblin_mines_dungeon_ore_vein",
-              "name": "Dungeon Ore Vein",
+              "name": "Ore Vein",
               "type": "Mining",
               "levelRequirement": 1,
               "procChance": 0.35,
               "loot": [
                 {
                   "itemId": "ore",
-                  "weight": 45,
+                  "weight": 100,
                   "minQuantity": 1,
                   "maxQuantity": 3
-                },
-                {
-                  "itemId": "rough_stone",
-                  "weight": 30,
-                  "minQuantity": 1,
-                  "maxQuantity": 2
-                },
-                {
-                  "itemId": "crystalline_powder",
-                  "weight": 20,
-                  "minQuantity": 1,
-                  "maxQuantity": 2
-                },
-                {
-                  "itemId": "cracked_garnet",
-                  "weight": 5,
-                  "minQuantity": 1,
-                  "maxQuantity": 1,
-                  "isRare": true
                 }
               ]
             },
@@ -118,56 +99,24 @@
               "loot": [
                 {
                   "itemId": "wood",
-                  "weight": 45,
+                  "weight": 95,
                   "minQuantity": 1,
                   "maxQuantity": 3
-                },
-                {
-                  "itemId": "woven_fiber",
-                  "weight": 25,
-                  "minQuantity": 1,
-                  "maxQuantity": 2
-                },
-                {
-                  "itemId": "rawhide",
-                  "weight": 20,
-                  "minQuantity": 1,
-                  "maxQuantity": 2
-                },
-                {
-                  "itemId": "bloodwood",
-                  "weight": 5,
-                  "minQuantity": 1,
-                  "maxQuantity": 1,
-                  "isRare": true
                 }
               ]
             },
             {
               "id": "goblin_mines_dungeon_stream",
-              "name": "Subterranean Stream",
-              "type": "Fishing",
+              "name": "Cave Beast Den",
+              "type": "Skinning",
               "levelRequirement": 1,
               "procChance": 0.18,
               "loot": [
                 {
-                  "itemId": "cave_fish",
-                  "weight": 40,
+                  "itemId": "rawhide",
+                  "weight": 75,
                   "minQuantity": 1,
                   "maxQuantity": 2
-                },
-                {
-                  "itemId": "murky_fish_oil",
-                  "weight": 30,
-                  "minQuantity": 1,
-                  "maxQuantity": 1
-                },
-                {
-                  "itemId": "refined_fish_oil",
-                  "weight": 5,
-                  "minQuantity": 1,
-                  "maxQuantity": 1,
-                  "isRare": true
                 }
               ]
             }
@@ -215,29 +164,10 @@
               "procChance": 0.4,
               "loot": [
                 {
-                  "itemId": "copper_ore",
-                  "weight": 45,
+                  "itemId": "ore",
+                  "weight": 100,
                   "minQuantity": 1,
                   "maxQuantity": 4
-                },
-                {
-                  "itemId": "mossy_stone",
-                  "weight": 30,
-                  "minQuantity": 1,
-                  "maxQuantity": 3
-                },
-                {
-                  "itemId": "cracked_garnet",
-                  "weight": 20,
-                  "minQuantity": 1,
-                  "maxQuantity": 2
-                },
-                {
-                  "itemId": "soulglass_shard",
-                  "weight": 5,
-                  "minQuantity": 1,
-                  "maxQuantity": 1,
-                  "isRare": true
                 }
               ]
             },
@@ -249,57 +179,25 @@
               "procChance": 0.24,
               "loot": [
                 {
-                  "itemId": "bloodwood",
-                  "weight": 40,
+                  "itemId": "wood",
+                  "weight": 90,
                   "minQuantity": 1,
                   "maxQuantity": 3
-                },
-                {
-                  "itemId": "thick_hide",
-                  "weight": 25,
-                  "minQuantity": 1,
-                  "maxQuantity": 2
-                },
-                {
-                  "itemId": "silk_thread",
-                  "weight": 20,
-                  "minQuantity": 1,
-                  "maxQuantity": 2
-                },
-                {
-                  "itemId": "living_bark",
-                  "weight": 5,
-                  "minQuantity": 1,
-                  "maxQuantity": 1,
-                  "isRare": true
                 }
               ]
             },
             {
               "id": "goblin_mines_ii_deep_stream",
-              "name": "Deep Mine Stream",
-              "type": "Fishing",
+              "name": "Deep Beast Den",
+              "type": "Skinning",
               "levelRequirement": 1,
               "procChance": 0.2,
               "loot": [
                 {
-                  "itemId": "cave_fish",
-                  "weight": 35,
+                  "itemId": "rawhide",
+                  "weight": 70,
                   "minQuantity": 1,
                   "maxQuantity": 2
-                },
-                {
-                  "itemId": "refined_fish_oil",
-                  "weight": 30,
-                  "minQuantity": 1,
-                  "maxQuantity": 2
-                },
-                {
-                  "itemId": "shadow_oil",
-                  "weight": 5,
-                  "minQuantity": 1,
-                  "maxQuantity": 1,
-                  "isRare": true
                 }
               ]
             }
@@ -347,29 +245,10 @@
               "procChance": 0.45,
               "loot": [
                 {
-                  "itemId": "verdant_ore",
-                  "weight": 45,
-                  "minQuantity": 2,
+                  "itemId": "ore",
+                  "weight": 100,
+                  "minQuantity": 1,
                   "maxQuantity": 4
-                },
-                {
-                  "itemId": "deep_stone",
-                  "weight": 30,
-                  "minQuantity": 1,
-                  "maxQuantity": 3
-                },
-                {
-                  "itemId": "soulglass_shard",
-                  "weight": 20,
-                  "minQuantity": 1,
-                  "maxQuantity": 2
-                },
-                {
-                  "itemId": "shadow_oil",
-                  "weight": 5,
-                  "minQuantity": 1,
-                  "maxQuantity": 1,
-                  "isRare": true
                 }
               ]
             },
@@ -381,57 +260,25 @@
               "procChance": 0.26,
               "loot": [
                 {
-                  "itemId": "living_bark",
-                  "weight": 40,
+                  "itemId": "wood",
+                  "weight": 90,
                   "minQuantity": 1,
                   "maxQuantity": 3
-                },
-                {
-                  "itemId": "scaled_hide",
-                  "weight": 25,
-                  "minQuantity": 1,
-                  "maxQuantity": 2
-                },
-                {
-                  "itemId": "spectral_thread",
-                  "weight": 20,
-                  "minQuantity": 1,
-                  "maxQuantity": 2
-                },
-                {
-                  "itemId": "soulglass_shard",
-                  "weight": 5,
-                  "minQuantity": 1,
-                  "maxQuantity": 1,
-                  "isRare": true
                 }
               ]
             },
             {
               "id": "goblin_mines_iii_black_stream",
-              "name": "Blackwater Stream",
-              "type": "Fishing",
+              "name": "Shadow Beast Den",
+              "type": "Skinning",
               "levelRequirement": 1,
               "procChance": 0.22,
               "loot": [
                 {
-                  "itemId": "cave_fish",
-                  "weight": 30,
+                  "itemId": "rawhide",
+                  "weight": 65,
                   "minQuantity": 1,
                   "maxQuantity": 2
-                },
-                {
-                  "itemId": "shadow_oil",
-                  "weight": 30,
-                  "minQuantity": 1,
-                  "maxQuantity": 2
-                },
-                {
-                  "itemId": "soulglass_shard",
-                  "weight": 5,
-                  "minQuantity": 1,
-                  "maxQuantity": 1,
-                  "isRare": true
                 }
               ]
             }
@@ -553,29 +400,10 @@
               "procChance": 0.3,
               "loot": [
                 {
-                  "itemId": "bone_fragments",
-                  "weight": 45,
+                  "itemId": "ore",
+                  "weight": 95,
                   "minQuantity": 1,
                   "maxQuantity": 3
-                },
-                {
-                  "itemId": "rough_stone",
-                  "weight": 25,
-                  "minQuantity": 1,
-                  "maxQuantity": 2
-                },
-                {
-                  "itemId": "woven_fiber",
-                  "weight": 20,
-                  "minQuantity": 1,
-                  "maxQuantity": 2
-                },
-                {
-                  "itemId": "grave_bone",
-                  "weight": 5,
-                  "minQuantity": 1,
-                  "maxQuantity": 1,
-                  "isRare": true
                 }
               ]
             },
@@ -587,29 +415,10 @@
               "procChance": 0.24,
               "loot": [
                 {
-                  "itemId": "woven_fiber",
-                  "weight": 40,
+                  "itemId": "rawhide",
+                  "weight": 90,
                   "minQuantity": 1,
                   "maxQuantity": 3
-                },
-                {
-                  "itemId": "rawhide",
-                  "weight": 25,
-                  "minQuantity": 1,
-                  "maxQuantity": 2
-                },
-                {
-                  "itemId": "crystalline_powder",
-                  "weight": 20,
-                  "minQuantity": 1,
-                  "maxQuantity": 2
-                },
-                {
-                  "itemId": "spectral_thread",
-                  "weight": 5,
-                  "minQuantity": 1,
-                  "maxQuantity": 1,
-                  "isRare": true
                 }
               ]
             }
@@ -657,29 +466,10 @@
               "procChance": 0.34,
               "loot": [
                 {
-                  "itemId": "grave_bone",
-                  "weight": 45,
+                  "itemId": "ore",
+                  "weight": 95,
                   "minQuantity": 1,
                   "maxQuantity": 3
-                },
-                {
-                  "itemId": "mossy_stone",
-                  "weight": 25,
-                  "minQuantity": 1,
-                  "maxQuantity": 3
-                },
-                {
-                  "itemId": "silk_thread",
-                  "weight": 20,
-                  "minQuantity": 1,
-                  "maxQuantity": 2
-                },
-                {
-                  "itemId": "ancient_bone",
-                  "weight": 5,
-                  "minQuantity": 1,
-                  "maxQuantity": 1,
-                  "isRare": true
                 }
               ]
             },
@@ -691,29 +481,10 @@
               "procChance": 0.26,
               "loot": [
                 {
-                  "itemId": "silk_thread",
-                  "weight": 40,
+                  "itemId": "rawhide",
+                  "weight": 88,
                   "minQuantity": 1,
                   "maxQuantity": 3
-                },
-                {
-                  "itemId": "thick_hide",
-                  "weight": 20,
-                  "minQuantity": 1,
-                  "maxQuantity": 2
-                },
-                {
-                  "itemId": "cracked_garnet",
-                  "weight": 20,
-                  "minQuantity": 1,
-                  "maxQuantity": 2
-                },
-                {
-                  "itemId": "spectral_thread",
-                  "weight": 8,
-                  "minQuantity": 1,
-                  "maxQuantity": 1,
-                  "isRare": true
                 }
               ]
             }
@@ -778,29 +549,10 @@
               "procChance": 0.38,
               "loot": [
                 {
-                  "itemId": "ancient_bone",
-                  "weight": 45,
+                  "itemId": "ore",
+                  "weight": 95,
                   "minQuantity": 1,
                   "maxQuantity": 3
-                },
-                {
-                  "itemId": "deep_stone",
-                  "weight": 25,
-                  "minQuantity": 1,
-                  "maxQuantity": 3
-                },
-                {
-                  "itemId": "spectral_thread",
-                  "weight": 20,
-                  "minQuantity": 1,
-                  "maxQuantity": 2
-                },
-                {
-                  "itemId": "soulglass_shard",
-                  "weight": 5,
-                  "minQuantity": 1,
-                  "maxQuantity": 1,
-                  "isRare": true
                 }
               ]
             },
@@ -812,29 +564,10 @@
               "procChance": 0.28,
               "loot": [
                 {
-                  "itemId": "soulglass_shard",
-                  "weight": 35,
+                  "itemId": "rawhide",
+                  "weight": 85,
                   "minQuantity": 1,
                   "maxQuantity": 2
-                },
-                {
-                  "itemId": "spectral_thread",
-                  "weight": 30,
-                  "minQuantity": 1,
-                  "maxQuantity": 2
-                },
-                {
-                  "itemId": "shadow_oil",
-                  "weight": 15,
-                  "minQuantity": 1,
-                  "maxQuantity": 1
-                },
-                {
-                  "itemId": "ancient_bone",
-                  "weight": 5,
-                  "minQuantity": 1,
-                  "maxQuantity": 1,
-                  "isRare": true
                 }
               ]
             }
@@ -945,22 +678,10 @@
               "procChance": 0.36,
               "loot": [
                 {
-                  "itemId": "ant_chitin",
-                  "weight": 45,
+                  "itemId": "rawhide",
+                  "weight": 95,
                   "minQuantity": 1,
                   "maxQuantity": 3
-                },
-                {
-                  "itemId": "hive_resin",
-                  "weight": 35,
-                  "minQuantity": 1,
-                  "maxQuantity": 2
-                },
-                {
-                  "itemId": "rawhide",
-                  "weight": 15,
-                  "minQuantity": 1,
-                  "maxQuantity": 2
                 },
                 {
                   "itemId": "venom_gland",
@@ -973,22 +694,16 @@
             },
             {
               "id": "hives_abyss_resin_runoff",
-              "name": "Resin Runoff",
-              "type": "Fishing",
+              "name": "Resinous Roots",
+              "type": "Woodcutting",
               "levelRequirement": 1,
               "procChance": 0.2,
               "loot": [
                 {
-                  "itemId": "hive_resin",
-                  "weight": 35,
+                  "itemId": "wood",
+                  "weight": 60,
                   "minQuantity": 1,
                   "maxQuantity": 2
-                },
-                {
-                  "itemId": "murky_fish_oil",
-                  "weight": 25,
-                  "minQuantity": 1,
-                  "maxQuantity": 1
                 },
                 {
                   "itemId": "venom_gland",
@@ -1060,22 +775,10 @@
               "procChance": 0.4,
               "loot": [
                 {
-                  "itemId": "royal_chitin_fragment",
-                  "weight": 45,
+                  "itemId": "rawhide",
+                  "weight": 95,
                   "minQuantity": 1,
                   "maxQuantity": 3
-                },
-                {
-                  "itemId": "amber_resin",
-                  "weight": 35,
-                  "minQuantity": 1,
-                  "maxQuantity": 3
-                },
-                {
-                  "itemId": "thick_hide",
-                  "weight": 15,
-                  "minQuantity": 1,
-                  "maxQuantity": 2
                 },
                 {
                   "itemId": "royal_chitin_plate",
@@ -1088,20 +791,14 @@
             },
             {
               "id": "hives_abyss_ii_ichor_pool",
-              "name": "Ichor Pool",
-              "type": "Fishing",
+              "name": "Amber Roots",
+              "type": "Woodcutting",
               "levelRequirement": 1,
               "procChance": 0.22,
               "loot": [
                 {
-                  "itemId": "amber_resin",
-                  "weight": 35,
-                  "minQuantity": 1,
-                  "maxQuantity": 2
-                },
-                {
-                  "itemId": "refined_fish_oil",
-                  "weight": 25,
+                  "itemId": "wood",
+                  "weight": 60,
                   "minQuantity": 1,
                   "maxQuantity": 2
                 },
@@ -1171,22 +868,10 @@
               "procChance": 0.44,
               "loot": [
                 {
-                  "itemId": "hardened_chitin",
-                  "weight": 45,
+                  "itemId": "rawhide",
+                  "weight": 95,
                   "minQuantity": 1,
                   "maxQuantity": 3
-                },
-                {
-                  "itemId": "living_resin",
-                  "weight": 35,
-                  "minQuantity": 1,
-                  "maxQuantity": 3
-                },
-                {
-                  "itemId": "scaled_hide",
-                  "weight": 15,
-                  "minQuantity": 1,
-                  "maxQuantity": 2
                 },
                 {
                   "itemId": "hive_ichor",
@@ -1199,20 +884,14 @@
             },
             {
               "id": "hives_abyss_iii_living_resin_pool",
-              "name": "Living Resin Pool",
-              "type": "Fishing",
+              "name": "Living Roots",
+              "type": "Woodcutting",
               "levelRequirement": 1,
               "procChance": 0.24,
               "loot": [
                 {
-                  "itemId": "living_resin",
-                  "weight": 35,
-                  "minQuantity": 1,
-                  "maxQuantity": 2
-                },
-                {
-                  "itemId": "shadow_oil",
-                  "weight": 25,
+                  "itemId": "wood",
+                  "weight": 60,
                   "minQuantity": 1,
                   "maxQuantity": 2
                 },

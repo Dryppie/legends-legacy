@@ -18,11 +18,13 @@ public sealed class MarketPlaceAuthorizationTests
     }
 
     [Theory]
-    [InlineData("True", false)]
-    [InlineData("False", true)]
-    [InlineData(null, false)]
+    [InlineData("True", true, false)]
+    [InlineData("False", true, true)]
+    [InlineData(null, true, false)]
+    [InlineData("False", false, false)]
     public async Task RegisteredUserPolicy_OnlyAllowsExplicitNonGuestClaim(
         string? guestClaim,
+        bool isAuthenticated,
         bool expectedAuthorization)
     {
         var services = new ServiceCollection();
@@ -34,7 +36,8 @@ public sealed class MarketPlaceAuthorizationTests
         IEnumerable<Claim> claims = guestClaim is null
             ? []
             : [new Claim("guest", guestClaim)];
-        var principal = new ClaimsPrincipal(new ClaimsIdentity(claims, "Test"));
+        var authenticationType = isAuthenticated ? "Test" : null;
+        var principal = new ClaimsPrincipal(new ClaimsIdentity(claims, authenticationType));
 
         var result = await authorizationService.AuthorizeAsync(
             principal,

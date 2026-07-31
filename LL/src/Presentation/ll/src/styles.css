@@ -770,14 +770,14 @@
       border-color 150ms ease,
       background-color 150ms ease,
       color 150ms ease,
-      transform 150ms ease;
+      box-shadow 150ms ease;
   }
 
   .ll-button:hover:not(:disabled) {
     border-color: var(--ll-color-primary);
     background: rgba(255, 255, 255, 0.08);
     color: var(--ll-color-primary);
-    transform: translateY(-1px);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
   }
 
   .ll-button:disabled {

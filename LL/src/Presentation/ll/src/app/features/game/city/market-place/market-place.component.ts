@@ -43,7 +43,7 @@ export class MarketPlaceComponent implements OnInit {
     id: 'resources',
     label: 'Resources',
     itemType: ItemType.Resource,
-    subcategory: 'Metal',
+    subcategory: 'Ore',
   });
   userInfo: UserInfoDto | null = null;
   userInfoLoaded = false;
