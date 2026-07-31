@@ -229,7 +229,7 @@ export class FirstPartyTourOverlayComponent {
   }
 
   showBackButton(tour: FirstPartyTourViewState): boolean {
-    return !this.isTutorial(tour);
+    return !this.isTutorial(tour) || tour.step.showBack === true;
   }
 
   backdropStyles(

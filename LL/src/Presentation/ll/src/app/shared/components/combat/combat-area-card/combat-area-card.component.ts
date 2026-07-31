@@ -114,6 +114,10 @@ export class CombatAreaCardComponent implements OnInit {
     return this.isTutorialLumoArea() ? 'lumo-ruins-battle' : null;
   }
 
+  gatheringTourId(): string | null {
+    return this.isTutorialLumoArea() ? 'lumo-ruins-gathering' : null;
+  }
+
   setIsLocked(): void {
     if (!this.area) {
       return;

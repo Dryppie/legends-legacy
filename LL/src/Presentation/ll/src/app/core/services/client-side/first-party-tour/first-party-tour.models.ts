@@ -32,6 +32,7 @@ export interface FirstPartyTourStepJson {
   advanceOn?: FirstPartyTourAdvanceRule;
   route?: string;
   stateKey?: string;
+  showBack?: boolean;
   showNext?: boolean;
   nextElement?: string;
   targetTimeoutMs?: number;

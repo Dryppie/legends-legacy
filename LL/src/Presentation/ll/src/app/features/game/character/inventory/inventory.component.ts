@@ -1,5 +1,5 @@
 import { NgClass, NgFor, NgIf } from '@angular/common';
-import { Component, computed, effect, OnInit } from '@angular/core';
+import { Component, computed, effect, OnInit, untracked } from '@angular/core';
 import { SidebarSection } from '../../../../shared/models/sidebar-item';
 import { DefaultHeaderComponent } from '../../../../shared/components/default-header/default-header.component';
 import { InventoryItem } from '../../../../shared/models/inventoryItem';
@@ -22,6 +22,7 @@ import {
   DropdownSelection,
 } from '../../../../shared/components/custom-components/dropdown/dropdown.component';
 import { TutorialStateService } from '../../../../core/services/api/tutorial/tutorial-state.service';
+import { TutorialPresenterService } from '../../../../core/services/api/tutorial/tutorial-presenter.service';
 import {
   TUTORIAL_GATHERING_TOOL_ITEM_BASE_IDS,
   TUTORIAL_STEP_EQUIP_EQUIPMENT,
@@ -103,6 +104,7 @@ export class InventoryComponent implements OnInit {
   constructor(
     public state: InventoryStateService,
     private readonly tutorialState: TutorialStateService,
+    private readonly tutorialPresenter: TutorialPresenterService,
   ) {
     effect(() => {
       const tutorial = this.tutorialState.state();
@@ -112,6 +114,10 @@ export class InventoryComponent implements OnInit {
         !tutorial.isCompleted
       ) {
         this.enterBrowseMode();
+
+        if (tutorial.currentStep === TUTORIAL_STEP_EQUIP_GATHERING_TOOL) {
+          untracked(() => this.tutorialPresenter.presentCurrentStep());
+        }
       }
     });
   }

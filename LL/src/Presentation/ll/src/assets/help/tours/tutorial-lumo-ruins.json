@@ -2,7 +2,7 @@
   {
     "id": "review-lumo-gathering",
     "kind": "info",
-    "element": "[data-tour=lumo-ruins-card]",
+    "element": "[data-tour=lumo-ruins-gathering]",
     "title": "1. Gathering while fighting",
     "description": "Lumo Ruins has Mining, Woodcutting, and Skinning nodes. After each victory, your equipped tool automatically attempts to collect from the matching node.",
     "position": "left"

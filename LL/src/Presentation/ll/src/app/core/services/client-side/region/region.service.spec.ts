@@ -1,0 +1,21 @@
+import { firstValueFrom } from 'rxjs';
+import { ApiService } from '../../api/api.service';
+import { GatheringType } from '../../../../shared/models/enums/gatheringType';
+import { RegionService } from './region.service';
+
+describe('RegionService', () => {
+  it('exposes all Lumo Ruins gathering node types', async () => {
+    const service = new RegionService({} as ApiService);
+
+    const region = await firstValueFrom(service.getRegionById('shenic'));
+    const lumoRuins = region.areas.find(
+      (area) => area.id === 'region_01_area_01',
+    );
+
+    expect(lumoRuins?.gatheringTypes).toEqual([
+      GatheringType.Mining,
+      GatheringType.Woodcutting,
+      GatheringType.Skinning,
+    ]);
+  });
+});

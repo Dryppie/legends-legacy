@@ -47,7 +47,10 @@
         <small class="ll-stat-label"
           >Req. LV: {{ area.levelRequirement }}</small
         >
-        <div class="mt-1 flex max-w-40 flex-wrap gap-1">
+        <div
+          class="mt-1 flex max-w-40 flex-wrap gap-1"
+          [attr.data-tour]="gatheringTourId()"
+        >
           <span
             *ngFor="let gatheringType of gatheringTypes()"
             class="ll-item-chip text-[0.65rem] text-primary"

@@ -14,14 +14,16 @@
     "id": "explain-common-base",
     "element": "[data-tour=crafting-base-recipe]",
     "targetTimeoutMs": 5000,
+    "showBack": true,
     "title": "2. Common base",
     "description": "The Common Base is the standard version of this weapon. It uses the recipe's base materials and determines the weapon type and its core attributes. New variants of a recipe can be unlocked by collecting Blueprints.",
-    "position": "right"
+    "position": "bottom"
   },
   {
     "id": "explain-item-preview",
     "element": "[data-tour=crafting-item-preview]",
     "targetTimeoutMs": 5000,
+    "showBack": true,
     "title": "3. Crafted item preview",
     "description": "Check the result before spending materials. The preview shows attribute ranges, starting Potential, quality chances, item identity, and possible Tempering attributes.",
     "position": "left"
@@ -33,6 +35,7 @@
     "actionSelector": "[data-tour=tutorial-craft-weapon]",
     "waitForEnabled": true,
     "targetTimeoutMs": 5000,
+    "showBack": true,
     "title": "4. Craft your weapon",
     "description": "The Common Base is selected and you have enough materials for one Tier 1 weapon. Craft it now; you can return to specialized Blueprints later.",
     "position": "left"
