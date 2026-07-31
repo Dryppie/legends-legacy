@@ -10,6 +10,7 @@ import { FilterTabsComponent } from '../../../../shared/components/custom-compon
 import { RegularButtonComponent } from '../../../../shared/components/custom-components/buttons/regular-button/regular-button.component';
 import { EquipmentInstance } from '../../../../shared/models/item';
 import { ItemType } from '../../../../shared/models/enums/itemType';
+import { EquipmentType } from '../../../../shared/models/enums/equipmentType';
 import { Rarity } from '../../../../shared/models/enums/rarity';
 import { FormsModule } from '@angular/forms';
 import { ItemComponent } from '../../../../shared/components/item/item.component';
@@ -22,7 +23,9 @@ import {
 } from '../../../../shared/components/custom-components/dropdown/dropdown.component';
 import { TutorialStateService } from '../../../../core/services/api/tutorial/tutorial-state.service';
 import {
+  TUTORIAL_GATHERING_TOOL_ITEM_BASE_IDS,
   TUTORIAL_STEP_EQUIP_EQUIPMENT,
+  TUTORIAL_STEP_EQUIP_GATHERING_TOOL,
   TUTORIAL_ONE_HANDED_WEAPON_ITEM_BASE_IDS,
 } from '../../../../shared/models/tutorial';
 
@@ -104,7 +107,8 @@ export class InventoryComponent implements OnInit {
     effect(() => {
       const tutorial = this.tutorialState.state();
       if (
-        tutorial?.currentStep === TUTORIAL_STEP_EQUIP_EQUIPMENT &&
+        (tutorial?.currentStep === TUTORIAL_STEP_EQUIP_EQUIPMENT ||
+          tutorial?.currentStep === TUTORIAL_STEP_EQUIP_GATHERING_TOOL) &&
         !tutorial.isCompleted
       ) {
         this.enterBrowseMode();
@@ -204,6 +208,14 @@ export class InventoryComponent implements OnInit {
       equipment?.tier === 1 &&
       !!equipment.baseRecipeId &&
       TUTORIAL_ONE_HANDED_WEAPON_ITEM_BASE_IDS.has(equipment.itemBase.id)
+    );
+  }
+
+  isTutorialGatheringTool(item: InventoryItem): boolean {
+    const equipment = this.equipmentInstance(item);
+    return (
+      equipment?.equipmentBase.equipmentType === EquipmentType.Tool &&
+      TUTORIAL_GATHERING_TOOL_ITEM_BASE_IDS.has(equipment.itemBase.id)
     );
   }
 

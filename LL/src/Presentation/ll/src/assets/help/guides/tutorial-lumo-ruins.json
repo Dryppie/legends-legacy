@@ -7,11 +7,11 @@
     },
     {
       "heading": "Combat continues",
-      "body": "Your character keeps resolving encounters over time until you stop the action. Return to Combat to inspect results and progression."
+      "body": "Your character keeps resolving encounters over time until you stop the action. After each victory, your equipped tool can automatically gather from the matching Mining, Woodcutting, or Skinning node."
     },
     {
       "heading": "Completing First Steps",
-      "body": "Start the Lumo Ruins expedition to complete First Steps, receive 150 Cinders, and unlock normal Shenic combat areas."
+      "body": "Start the Lumo Ruins expedition to complete First Steps and unlock normal Shenic combat areas. Return to Combat to inspect both battle and gathering results."
     }
   ]
 }

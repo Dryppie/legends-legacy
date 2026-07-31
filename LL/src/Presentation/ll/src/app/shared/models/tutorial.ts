@@ -5,6 +5,7 @@ export const TUTORIAL_STEP_ABSORB_ESSENCE = 'absorb_essence';
 export const TUTORIAL_STEP_EQUIP_ESSENCE = 'equip_essence';
 export const TUTORIAL_STEP_CRAFT_EQUIPMENT = 'craft_equipment';
 export const TUTORIAL_STEP_EQUIP_EQUIPMENT = 'equip_equipment';
+export const TUTORIAL_STEP_EQUIP_GATHERING_TOOL = 'equip_gathering_tool';
 export const TUTORIAL_STEP_START_LUMO_RUINS = 'start_lumo_ruins';
 export const TUTORIAL_ONE_HANDED_WEAPON_ITEM_BASE_IDS: ReadonlySet<string> =
   new Set([
@@ -14,6 +15,8 @@ export const TUTORIAL_ONE_HANDED_WEAPON_ITEM_BASE_IDS: ReadonlySet<string> =
     'mace',
     'wand',
   ]);
+export const TUTORIAL_GATHERING_TOOL_ITEM_BASE_IDS: ReadonlySet<string> =
+  new Set(['basic_pickaxe', 'basic_hatchet', 'basic_skinning_knife']);
 export const TUTORIAL_TRAINING_GROUNDS_AREA_ID =
   'tutorial_area_training_grounds';
 export const TUTORIAL_LUMO_RUINS_AREA_ID = 'region_01_area_01';

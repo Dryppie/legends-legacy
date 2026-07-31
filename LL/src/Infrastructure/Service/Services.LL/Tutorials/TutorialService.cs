@@ -346,7 +346,7 @@ public sealed class TutorialService : ITutorialService, ITutorialProgressionServ
                 return (true, []);
             }
 
-            var loot = isGatheringToolStep
+            IReadOnlyList<InventoryItem> loot = isGatheringToolStep
                 ? []
                 : await EnsureTutorialGatheringToolsAsync(progress.CharacterId, cancellationToken);
             if (!isGatheringToolStep)

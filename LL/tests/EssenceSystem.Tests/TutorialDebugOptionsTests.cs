@@ -6,6 +6,7 @@ using Domain.Models.Items.Equipments;
 using Domain.Models.Items.Equipments.Slots;
 using Domain.Models.Items.EssenceItems;
 using Domain.Models.MarketPlaces;
+using Domain.Models.Professions.Gathering.GatheringNodes;
 using Domain.Models.Tutorials;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -225,7 +226,7 @@ public sealed class TutorialDebugOptionsTests
         Assert.NotNull(state);
         Assert.Equal(TutorialConstants.StepCraftEquipment, state.CurrentStep);
         Assert.Equal(2, state.CurrentStepIndex);
-        Assert.Equal(4, state.TotalSteps);
+        Assert.Equal(5, state.TotalSteps);
         Assert.Contains(
             activeLoadout.Slots,
             slot => slot.SlotIndex == 0 && slot.PlayerEssenceId == playerEssence.Id);
@@ -330,7 +331,7 @@ public sealed class TutorialDebugOptionsTests
     }
 
     [Fact]
-    public async Task Crafted_weapon_then_equipment_then_Lumo_combat_start_completes_the_tutorial()
+    public async Task Equipped_weapon_grants_tools_then_equipped_tool_unlocks_Lumo_combat()
     {
         await using var db = CreateDb();
         var characterId = Guid.NewGuid();
@@ -369,12 +370,30 @@ public sealed class TutorialDebugOptionsTests
             CurrentStep = TutorialConstants.StepEquipEquipment
         });
         await db.SaveChangesAsync();
+        var lootWriter = new RecordingLootRewardWriter();
         var service = CreateService(
             db,
             tutorialEnabled: true,
-            definitionProvider: new ActiveTutorialDefinitionProvider());
+            definitionProvider: new ActiveTutorialDefinitionProvider(),
+            lootWriter: lootWriter);
 
         var equipmentResult = await service.TryProgressAsync(
+            characterId,
+            TutorialTrigger.EquipmentChanged(),
+            CancellationToken.None);
+        var grantedTool = Assert.IsType<EquipmentInstance>(
+            lootWriter.Items.Single(item =>
+                item.ItemInstance.ItemBaseId == "basic_pickaxe").ItemInstance);
+        db.EquipmentSlots.Add(new EquipmentSlot
+        {
+            EntityId = characterId,
+            EquipmentSlotType = EquipmentSlotType.Tool,
+            EquipmentInstanceId = grantedTool.Id,
+            EquipmentInstance = grantedTool
+        });
+        await db.SaveChangesAsync();
+
+        var toolResult = await service.TryProgressAsync(
             characterId,
             TutorialTrigger.EquipmentChanged(),
             CancellationToken.None);
@@ -388,10 +407,22 @@ public sealed class TutorialDebugOptionsTests
 
         Assert.True(equipmentResult?.Progressed);
         Assert.Equal(
-            TutorialConstants.StepStartLumoRuins,
+            TutorialConstants.StepEquipGatheringTool,
             equipmentResult?.State?.CurrentStep);
         Assert.Equal(4, equipmentResult?.State?.CurrentStepIndex);
-        Assert.Equal(4, equipmentResult?.State?.TotalSteps);
+        Assert.Equal(5, equipmentResult?.State?.TotalSteps);
+        Assert.Equal(
+            TutorialConstants.TutorialGatheringToolItemBaseIds.OrderBy(itemId => itemId),
+            lootWriter.Items
+                .Select(item => item.ItemInstance.ItemBaseId)
+                .Where(TutorialConstants.TutorialGatheringToolItemBaseIds.Contains)
+                .OrderBy(itemId => itemId));
+        Assert.True(toolResult?.Progressed);
+        Assert.Equal(
+            TutorialConstants.StepStartLumoRuins,
+            toolResult?.State?.CurrentStep);
+        Assert.Equal(5, toolResult?.State?.CurrentStepIndex);
+        Assert.Equal(5, toolResult?.State?.TotalSteps);
         Assert.True(completionResult?.Progressed);
         Assert.Null(completionResult?.State);
         Assert.True(progress.IsCompleted);
@@ -445,7 +476,7 @@ public sealed class TutorialDebugOptionsTests
         {
             TutorialId = TutorialConstants.FirstStepsTutorialId,
             Title = "First Steps",
-            Version = 2,
+            Version = 3,
             InitialStepKey = TutorialConstants.StepDefeatTrainingCreature,
             Steps =
             [
@@ -482,12 +513,26 @@ public sealed class TutorialDebugOptionsTests
                     Objective = "Equip the weapon you crafted.",
                     ActionLabel = "Open Inventory",
                     DestinationRoute = "/game/character/inventory",
-                    NextStepKey = TutorialConstants.StepStartLumoRuins,
+                    NextStepKey = TutorialConstants.StepEquipGatheringTool,
                     Trigger = new TutorialStepTriggerDefinition
                     {
                         Type = "EquipmentChanged",
                         RequiredCount = 1,
                         ItemBaseIds = [.. TutorialConstants.TutorialOneHandedWeaponItemBaseIds]
+                    }
+                },
+                new TutorialStepDefinition
+                {
+                    Key = TutorialConstants.StepEquipGatheringTool,
+                    Objective = "Equip a gathering tool.",
+                    ActionLabel = "Open Inventory",
+                    DestinationRoute = "/game/character/inventory",
+                    NextStepKey = TutorialConstants.StepStartLumoRuins,
+                    Trigger = new TutorialStepTriggerDefinition
+                    {
+                        Type = "EquipmentChanged",
+                        RequiredCount = 1,
+                        ItemBaseIds = [.. TutorialConstants.TutorialGatheringToolItemBaseIds]
                     }
                 },
                 new TutorialStepDefinition
@@ -537,6 +582,30 @@ public sealed class TutorialDebugOptionsTests
                 Name = "Wood",
                 ItemType = ItemType.Resource,
                 Stackable = true
+            },
+            ["basic_pickaxe"] = new EquipmentBase
+            {
+                Id = "basic_pickaxe",
+                Name = "Pickaxe",
+                ItemType = ItemType.Equipment,
+                EquipmentType = EquipmentType.Tool,
+                GatheringType = GatheringType.Mining
+            },
+            ["basic_hatchet"] = new EquipmentBase
+            {
+                Id = "basic_hatchet",
+                Name = "Hatchet",
+                ItemType = ItemType.Equipment,
+                EquipmentType = EquipmentType.Tool,
+                GatheringType = GatheringType.Woodcutting
+            },
+            ["basic_skinning_knife"] = new EquipmentBase
+            {
+                Id = "basic_skinning_knife",
+                Name = "Skinning Knife",
+                ItemType = ItemType.Equipment,
+                EquipmentType = EquipmentType.Tool,
+                GatheringType = GatheringType.Skinning
             }
         };
 
