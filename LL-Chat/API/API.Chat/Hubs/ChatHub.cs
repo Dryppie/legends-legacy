@@ -1,4 +1,5 @@
 ﻿using API.Chat.Hubs.Interfaces;
+using API.Chat.Hubs.Presence;
 using API.Chat.Utility;
 using Application.UsesCases.Chats.Commands.SendMessage;
 using Domain.Models.Chats;
@@ -15,15 +16,18 @@ public sealed class ChatHub : Hub<IChatClient>
 {
     private const string PublicPrefix = "pub:";   // e.g.  "pub:general"
     private const string GuildPrefix = "guild:"; // e.g.  "guild:5f7e…"  (GUID or slug)
-    private const string StatsGroup = "stats";   // e.g.  "pub:general"
-
     private readonly IMediator _mediator;
-    private readonly IDistributedCache _cache;   // for rate-limit / presence
+    private readonly IDistributedCache _cache;
+    private readonly IChatPresenceTracker _presence;
 
-    public ChatHub(IMediator mediator, IDistributedCache cache)
+    public ChatHub(
+        IMediator mediator,
+        IDistributedCache cache,
+        IChatPresenceTracker presence)
     {
         _mediator = mediator;
         _cache = cache;
+        _presence = presence;
     }
 
     public async Task Send(
@@ -106,6 +110,8 @@ public sealed class ChatHub : Hub<IChatClient>
     public Task LeavePublic(string room)
         => Groups.RemoveFromGroupAsync(Context.ConnectionId, PublicPrefix + room);
 
+    public int GetOnlineCount() => _presence.OnlineUserCount;
+
     /// <summary>Server-side code (e.g. after auth) calls this to enrol a connection in its guilds.</summary>
     public Task JoinGuild(string guildId)
     {
@@ -124,8 +130,28 @@ public sealed class ChatHub : Hub<IChatClient>
 
     public override async Task OnConnectedAsync()
     {
-        //await Groups.AddToGroupAsync(Context.ConnectionId, StatsGroup);
+        var userId = Context.UserIdentifier;
+        if (string.IsNullOrWhiteSpace(userId))
+        {
+            throw new HubException("Chat connection is missing a character identity.");
+        }
+
         await Groups.AddToGroupAsync(Context.ConnectionId, PublicPrefix);
+        await base.OnConnectedAsync();
+
+        var onlineCount = _presence.Connect(userId, Context.ConnectionId);
+        await Clients.All.OnlineCountChanged(onlineCount);
+    }
+
+    public override async Task OnDisconnectedAsync(Exception? exception)
+    {
+        var userId = Context.UserIdentifier;
+        var onlineCount = string.IsNullOrWhiteSpace(userId)
+            ? _presence.OnlineUserCount
+            : _presence.Disconnect(userId, Context.ConnectionId);
+
+        await base.OnDisconnectedAsync(exception);
+        await Clients.All.OnlineCountChanged(onlineCount);
     }
 
     private static string? NormalizeTitleDisplayName(string? titleDisplayName)

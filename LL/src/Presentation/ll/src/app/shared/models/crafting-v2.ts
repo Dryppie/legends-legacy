@@ -10,6 +10,7 @@ export interface CraftingMaterialCost {
   tier?: number | null;
   required: number;
   owned: number;
+  sources: string[];
 }
 
 export interface EquipmentBehavior {

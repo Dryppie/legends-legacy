@@ -1,5 +1,5 @@
 import { Component, effect, OnInit } from '@angular/core';
-import { BannerComponent } from '../../../../shared/components/banner/banner.component';
+import { DefaultHeaderComponent } from '../../../../shared/components/default-header/default-header.component';
 import { TabComponent } from '../../../../shared/components/custom-components/tabs/tab/tab.component';
 import { DatePipe, NgIf } from '@angular/common';
 import { CombatComponent } from '../../../../shared/components/combat/combat.component';
@@ -21,7 +21,7 @@ import { NumberFormatPipe } from '../../../../shared/pipes/number-format/number-
 @Component({
     selector: 'app-colosseum',
     imports: [
-        BannerComponent,
+        DefaultHeaderComponent,
         TabComponent,
         CombatComponent,
         NgIf,

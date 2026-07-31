@@ -22,6 +22,7 @@
     }"
     [disabled]="tab.disabled"
     [attr.aria-selected]="activeKey === tab.key"
+    [attr.data-tour]="getTourId(tab)"
     [attr.tabindex]="activeKey === tab.key ? 0 : -1"
     role="tab"
     (click)="select(tab)"

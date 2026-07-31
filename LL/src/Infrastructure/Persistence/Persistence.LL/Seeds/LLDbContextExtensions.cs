@@ -29,7 +29,6 @@ public static class LLDbContextExtensions
     [
         (Guid.Parse("00000000-0000-0000-1000-000000000001"), "basic_pickaxe"),
         (Guid.Parse("00000000-0000-0000-1000-000000000002"), "basic_hatchet"),
-        (Guid.Parse("00000000-0000-0000-1000-000000000003"), "basic_fishing_rod"),
         (Guid.Parse("00000000-0000-0000-1000-000000000004"), "basic_skinning_knife"),
     ];
     private static readonly (string ItemBaseId, int Quantity)[] AdminCraftingTestKit =
@@ -37,13 +36,6 @@ public static class LLDbContextExtensions
         ("ore", 500),
         ("wood", 500),
         ("rawhide", 500),
-        ("crystalline_powder", 500),
-        ("rough_stone", 500),
-        ("woven_fiber", 500),
-        ("bone_fragments", 500),
-        ("ant_chitin", 500),
-        ("hive_resin", 500),
-        ("murky_fish_oil", 500),
         ("venom_gland", 100),
         ("royal_chitin_plate", 100),
         ("hive_ichor", 100),

@@ -146,7 +146,7 @@
         "valuesByRank": [150, 300, 450, 600, 750]
       }
     ],
-    "appliesTo": ["Mining EXP", "Woodcutting EXP", "Fishing EXP", "Skinning EXP"],
+    "appliesTo": ["Mining EXP", "Woodcutting EXP", "Skinning EXP"],
     "doesNotApplyTo": ["Combat EXP", "Crafting EXP"],
     "enabled": true,
     "sortOrder": 220

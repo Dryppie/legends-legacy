@@ -165,6 +165,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     }
 );
+builder.Services.AddAuthorization(AuthorizationPolicies.Configure);
 
 var app = builder.Build();
 

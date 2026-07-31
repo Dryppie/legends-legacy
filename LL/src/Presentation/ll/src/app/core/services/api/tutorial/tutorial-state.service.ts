@@ -1,11 +1,9 @@
-import { Injectable, computed, effect, signal } from '@angular/core';
+import { Injectable, computed, effect, signal, untracked } from '@angular/core';
 import { Router } from '@angular/router';
 import { finalize } from 'rxjs';
 import {
-  TOUR_STATE_TUTORIAL_CRAFTING_READY,
-  TOUR_STATE_TUTORIAL_EQUIPMENT_COMPLETE,
-  TUTORIAL_STEP_CRAFT_EQUIPMENT,
-  TUTORIAL_STEP_EQUIP_EQUIPMENT,
+  TUTORIAL_STEP_START_LUMO_RUINS,
+  TutorialCompletion,
   TutorialState,
 } from '../../../../shared/models/tutorial';
 import { FirstPartyTourService } from '../../client-side/first-party-tour/first-party-tour.service';
@@ -13,18 +11,21 @@ import { EventBusService } from '../../client-side/event-bus/event-bus.service';
 import { GameEventService } from '../../real-time/game-event.service';
 import { TutorialService } from './tutorial.service';
 
-interface TutorialLoadOptions {
-  resumeCurrentStep?: boolean;
-}
-
 @Injectable({ providedIn: 'root' })
 export class TutorialStateService {
+  private static readonly completionRevealDelayMs = 1100;
+
   private readonly _state = signal<TutorialState | null>(null);
   private readonly _hasLoaded = signal(false);
   private readonly _isCompleted = signal(false);
   private readonly _loading = signal(false);
   private readonly _error = signal<string | null>(null);
-  private hasResumedCurrentStep = false;
+  private readonly _completion = signal<TutorialCompletion | null>(null);
+  private readonly _completionTransitioning = signal(false);
+  private readonly _welcomeTransitionPending = signal(false);
+  private lastActiveState: TutorialState | null = null;
+  private pendingCompletion: TutorialCompletion | null = null;
+  private completionRevealTimer: ReturnType<typeof setTimeout> | null = null;
   private lastLogoutCount = 0;
 
   readonly state = computed(() => this._state());
@@ -32,6 +33,19 @@ export class TutorialStateService {
   readonly isCompleted = computed(() => this._isCompleted());
   readonly loading = computed(() => this._loading());
   readonly error = computed(() => this._error());
+  readonly completion = computed(() => this._completion());
+  readonly completionTransitioning = computed(() =>
+    this._completionTransitioning(),
+  );
+  readonly requiresWelcome = computed(
+    () => this._state()?.requiresWelcome === true,
+  );
+  readonly presentationReady = computed(
+    () =>
+      !!this._state() &&
+      !this._state()!.requiresWelcome &&
+      !this._welcomeTransitionPending(),
+  );
   readonly visible = computed(() => {
     const state = this._state();
     return !!state && !state.isCompleted;
@@ -44,36 +58,12 @@ export class TutorialStateService {
     private readonly eventService: GameEventService,
     private readonly eventBus: EventBusService,
   ) {
-    this.firstPartyTour.registerStatePredicate(
-      TOUR_STATE_TUTORIAL_CRAFTING_READY,
-      () => {
-        const state = this._state();
-        return (
-          this._isCompleted() ||
-          (!!state &&
-            (state.currentStep === TUTORIAL_STEP_CRAFT_EQUIPMENT ||
-              state.currentStep === TUTORIAL_STEP_EQUIP_EQUIPMENT))
-        );
-      },
-    );
-
-    this.firstPartyTour.registerStatePredicate(
-      TOUR_STATE_TUTORIAL_EQUIPMENT_COMPLETE,
-      () => {
-        const state = this._state();
-        return (
-          this._isCompleted() ||
-          (!!state && state.currentStep !== TUTORIAL_STEP_EQUIP_EQUIPMENT)
-        );
-      },
-    );
-
     effect(
       () => {
         const event = this.eventService.event.TutorialProgressedMsg();
         if (!event?.tutorial) return;
 
-        this.applyState(event.tutorial);
+        untracked(() => this.applyState(event.tutorial));
       },
       { allowSignalWrites: true },
     );
@@ -83,12 +73,17 @@ export class TutorialStateService {
         const event = this.eventService.event.TutorialCompletedMsg();
         if (!event) return;
 
-        const current = this._state();
-        if (!current || current.tutorialId === event.tutorialId) {
-          this._hasLoaded.set(true);
-          this._isCompleted.set(true);
-          this._state.set(null);
-        }
+        untracked(() => {
+          const current = this._state();
+          if (!current || current.tutorialId === event.tutorialId) {
+            this.applyCompletion({
+              tutorialId: event.tutorialId,
+              rewardCinders: event.rewardCinders ?? 0,
+              nextRoute: event.nextRoute ?? '/game/combat',
+              wasSkipped: event.wasSkipped ?? false,
+            });
+          }
+        });
       },
       { allowSignalWrites: true },
     );
@@ -109,7 +104,7 @@ export class TutorialStateService {
     );
   }
 
-  load(options: TutorialLoadOptions = {}): void {
+  load(): void {
     if (this._loading()) return;
     this._loading.set(true);
     this._error.set(null);
@@ -120,35 +115,30 @@ export class TutorialStateService {
       .subscribe({
         next: (state) => {
           this.applyState(state);
-          if (state && !state.isCompleted) {
-            this.resumeCurrentStepIfRequested(state, options);
-          }
         },
         error: (err) =>
           this._error.set(err?.message ?? 'Failed to load tutorial progress'),
       });
   }
 
-  initialize(
-    state: TutorialState | null,
-    options: TutorialLoadOptions = {},
-  ): void {
+  initialize(state: TutorialState | null): void {
     this._loading.set(false);
     this._error.set(null);
     this.applyState(state);
-
-    if (state && !state.isCompleted) {
-      this.resumeCurrentStepIfRequested(state, options);
-    }
   }
 
   reset(): void {
+    this.clearCompletionRevealTimer();
     this._state.set(null);
     this._hasLoaded.set(false);
     this._isCompleted.set(false);
     this._loading.set(false);
     this._error.set(null);
-    this.hasResumedCurrentStep = false;
+    this._completion.set(null);
+    this._completionTransitioning.set(false);
+    this._welcomeTransitionPending.set(false);
+    this.lastActiveState = null;
+    this.pendingCompletion = null;
   }
 
   refresh(): void {
@@ -163,63 +153,172 @@ export class TutorialStateService {
     window.setTimeout(() => this.refresh(), delayMs);
   }
 
-  recordCraftingPageVisited(onComplete?: (state: TutorialState | null) => void): void {
-    this.tutorialService.recordCraftingPageVisited(this.router.url).subscribe({
-      next: (state) => {
-        this.applyState(state);
-        onComplete?.(state);
-      },
-      error: (err) =>
-        this._error.set(err?.message ?? 'Failed to update tutorial progress'),
-    });
+  acknowledgeWelcome(onComplete?: () => void): void {
+    if (this._loading() || !this.requiresWelcome()) return;
+
+    this._loading.set(true);
+    this._error.set(null);
+    this._welcomeTransitionPending.set(true);
+    this.tutorialService
+      .acknowledgeWelcome()
+      .pipe(finalize(() => this._loading.set(false)))
+      .subscribe({
+        next: (state) => {
+          this.applyState(state);
+          onComplete?.();
+        },
+        error: (err) => {
+          this._welcomeTransitionPending.set(false);
+          this._error.set(
+            err?.message ?? 'Failed to start the tutorial. Please try again.',
+          );
+        },
+      });
+  }
+
+  completeWelcomeTransition(): void {
+    this._welcomeTransitionPending.set(false);
+  }
+
+  skip(onComplete?: () => void): void {
+    if (this._loading()) return;
+
+    this._loading.set(true);
+    this._error.set(null);
+    this.tutorialService
+      .skip()
+      .pipe(finalize(() => this._loading.set(false)))
+      .subscribe({
+        next: (completion) => {
+          this.applyCompletion(completion);
+          onComplete?.();
+        },
+        error: (err) =>
+          this._error.set(err?.message ?? 'Failed to skip the tutorial'),
+      });
+  }
+
+  dismissCompletion(): void {
+    this._completion.set(null);
+  }
+
+  completeCompletionTransition(): void {
+    const completion = this.pendingCompletion;
+    if (!this._completionTransitioning() || !completion) return;
+
+    this.finishCompletion(completion);
+  }
+
+  reportError(message: string): void {
+    this._error.set(message);
+  }
+
+  clearError(): void {
+    this._error.set(null);
   }
 
   navigateToCurrentStep(): void {
     const state = this._state();
-    const route = state?.presentation?.destinationRoute ?? state?.destinationRoute;
+    const route =
+      state?.presentation?.destinationRoute ?? state?.destinationRoute;
     if (!route) return;
 
     this.router.navigateByUrl(route);
   }
 
-  private resumeCurrentStepIfRequested(
-    state: TutorialState,
-    options: TutorialLoadOptions,
-  ): void {
-    const route = state.presentation?.destinationRoute ?? state.destinationRoute;
+  private applyState(state: TutorialState | null): void {
+    this._hasLoaded.set(true);
 
-    if (
-      !options.resumeCurrentStep ||
-      this.hasResumedCurrentStep ||
-      state.isCompleted ||
-      !route ||
-      this.isCurrentRoute(route)
-    ) {
+    if (this._completionTransitioning()) {
       return;
     }
 
-    this.hasResumedCurrentStep = true;
-    queueMicrotask(() => this.router.navigateByUrl(route));
-  }
-
-  private isCurrentRoute(route: string): boolean {
-    const current = this.normalizeRoute(this.router.url);
-    const expected = this.normalizeRoute(route);
-
-    if (expected.includes('?')) {
-      return current === expected;
+    const current = this._state();
+    if (
+      state &&
+      current &&
+      state.tutorialId === current.tutorialId &&
+      state.version === current.version &&
+      state.currentStepIndex < current.currentStepIndex
+    ) {
+      // A refresh started before a realtime progression event can finish later
+      // with an older step. Tutorial progress is monotonic within a definition
+      // version, so accepting that response would replay prior-step UI effects.
+      return;
     }
 
-    return current === expected || current.startsWith(`${expected}?`);
-  }
-
-  private normalizeRoute(route: string): string {
-    return route.startsWith('/') ? route : `/${route}`;
-  }
-
-  private applyState(state: TutorialState | null): void {
-    this._hasLoaded.set(true);
     this._isCompleted.set(!state || state.isCompleted);
-    this._state.set(state && !state.isCompleted ? state : null);
+    const activeState = state && !state.isCompleted ? state : null;
+    this._state.set(activeState);
+    if (activeState) {
+      this.lastActiveState = activeState;
+    }
+  }
+
+  private applyCompletion(completion: TutorialCompletion): void {
+    const transitionState = this._state() ?? this.lastActiveState;
+    const shouldAnimate =
+      !completion.wasSkipped &&
+      transitionState?.currentStep === TUTORIAL_STEP_START_LUMO_RUINS &&
+      !this.prefersReducedMotion();
+
+    if (!shouldAnimate) {
+      this.finishCompletion(completion);
+      return;
+    }
+
+    if (this._completionTransitioning()) {
+      this.pendingCompletion = completion;
+      this.ensureCompletionRevealTimer(completion);
+      return;
+    }
+
+    this._hasLoaded.set(true);
+    this._isCompleted.set(true);
+    this._state.set(transitionState);
+    this._completion.set(null);
+    this._completionTransitioning.set(true);
+    this._welcomeTransitionPending.set(false);
+    this.pendingCompletion = completion;
+    this.firstPartyTour.stop(true);
+    this.ensureCompletionRevealTimer(completion);
+  }
+
+  private ensureCompletionRevealTimer(
+    fallbackCompletion: TutorialCompletion,
+  ): void {
+    if (this.completionRevealTimer !== null) return;
+
+    this.completionRevealTimer = window.setTimeout(
+      () => this.finishCompletion(this.pendingCompletion ?? fallbackCompletion),
+      TutorialStateService.completionRevealDelayMs,
+    );
+  }
+
+  private finishCompletion(completion: TutorialCompletion): void {
+    this.clearCompletionRevealTimer();
+    this._hasLoaded.set(true);
+    this._isCompleted.set(true);
+    this._state.set(null);
+    this._completion.set(completion);
+    this._completionTransitioning.set(false);
+    this._welcomeTransitionPending.set(false);
+    this.lastActiveState = null;
+    this.pendingCompletion = null;
+    this.firstPartyTour.stop(true);
+  }
+
+  private clearCompletionRevealTimer(): void {
+    if (this.completionRevealTimer === null) return;
+
+    clearTimeout(this.completionRevealTimer);
+    this.completionRevealTimer = null;
+  }
+
+  private prefersReducedMotion(): boolean {
+    return (
+      typeof window !== 'undefined' &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    );
   }
 }

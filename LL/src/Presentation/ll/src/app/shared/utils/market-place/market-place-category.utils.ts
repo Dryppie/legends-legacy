@@ -5,19 +5,20 @@ export const MARKETPLACE_RESOURCE_FAMILY_ITEM_IDS: ReadonlyMap<
   string,
   readonly string[]
 > = new Map([
-  ['metal', ['ore', 'copper_ore', 'verdant_ore']],
-  ['wood', ['wood', 'bloodwood', 'living_bark']],
-  ['hide', ['rawhide', 'thick_hide', 'scaled_hide']],
-  ['crystal', ['crystalline_powder', 'cracked_garnet', 'soulglass_shard']],
-  ['stone', ['rough_stone', 'mossy_stone', 'deep_stone']],
-  ['fiber', ['woven_fiber', 'silk_thread', 'spectral_thread']],
-  ['bone', ['bone_fragments', 'grave_bone', 'ancient_bone']],
-  ['chitin', ['ant_chitin', 'hardened_chitin', 'royal_chitin_fragment']],
-  ['resin', ['hive_resin', 'amber_resin', 'living_resin']],
-  ['oil', ['murky_fish_oil', 'refined_fish_oil', 'shadow_oil']],
+  ['ore', ['ore']],
+  ['wood', ['wood']],
+  ['hide', ['rawhide']],
 ]);
 
 export const MARKETPLACE_CATALYST_ITEM_IDS: ReadonlySet<string> = new Set([
+  'fury_heart',
+  'arcane_focus',
+  'executioners_mark',
+  'aegis_runestone',
+  'warden_sigil',
+  'endurance_core',
+  'phoenix_ember',
+  'spirit_prism',
   'venom_gland',
   'royal_chitin_plate',
   'hive_ichor',

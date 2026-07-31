@@ -167,6 +167,32 @@
   color: var(--ll-color-danger);
 }
 
+.soul-loadout-save-pending {
+  animation: soul-loadout-save-pending 1.6s ease-in-out infinite;
+}
+
+@keyframes soul-loadout-save-pending {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 1px rgba(249, 220, 160, 0.18),
+      0 0 0 rgba(249, 220, 160, 0);
+  }
+
+  50% {
+    box-shadow:
+      0 0 0 2px rgba(249, 220, 160, 0.42),
+      0 0 1rem rgba(249, 220, 160, 0.3);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .soul-loadout-save-pending {
+    animation: none;
+    box-shadow: 0 0 0 2px rgba(249, 220, 160, 0.42);
+  }
+}
+
 @media (min-width: 66rem) {
   .soul-archive-workspace {
     grid-template-columns: 21rem minmax(27rem, 1fr) 18rem;

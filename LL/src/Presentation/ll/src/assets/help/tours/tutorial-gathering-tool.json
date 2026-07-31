@@ -1,0 +1,22 @@
+[
+  {
+    "id": "find-gathering-tool",
+    "kind": "click",
+    "element": "[data-tour=inventory-equipment-item][data-tutorial-gathering-tool=true]",
+    "actionSelector": "[data-tour=inventory-equipment-item][data-tutorial-gathering-tool=true]",
+    "targetTimeoutMs": 10000,
+    "title": "1. Choose a gathering tool",
+    "description": "You received a Pickaxe, Hatchet, and Skinning Knife. Select any one; you can change tools later depending on the resource you want.",
+    "position": "bottom"
+  },
+  {
+    "id": "equip-gathering-tool",
+    "kind": "click",
+    "element": "[data-tour=tutorial-equipment-equip]",
+    "actionSelector": "[data-tour=tutorial-equipment-equip]",
+    "targetTimeoutMs": 5000,
+    "title": "2. Equip the tool",
+    "description": "Equip your chosen tool. It will automatically gather from matching nodes whenever you win fights in an area that contains them.",
+    "position": "bottom"
+  }
+]

@@ -1,6 +1,6 @@
 {
   "tutorialId": "tutorial.first_steps",
-  "version": 1,
+  "version": 3,
   "title": "First Steps",
   "initialStepKey": "defeat_training_creature",
   "steps": [
@@ -8,7 +8,7 @@
       "key": "defeat_training_creature",
       "objective": "Defeat the creature in the Training Area.",
       "requiredAmount": 1,
-      "actionLabel": "Go to Training Area",
+      "actionLabel": "Head to the World Map",
       "destinationRoute": "/game/world/shenic?area=tutorial_area_training_grounds",
       "tourPageId": "tutorial-training-area",
       "guidePageId": "tutorial-training",
@@ -23,7 +23,7 @@
       "key": "absorb_essence",
       "objective": "Absorb the Unbound Goblin's Essence into your Soul Archive.",
       "requiredAmount": 1,
-      "actionLabel": "Open Essences",
+      "actionLabel": "Head to Essences",
       "destinationRoute": "/game/character/essences",
       "tourPageId": "tutorial-essence-absorb",
       "guidePageId": "tutorial-essence-absorb",
@@ -35,9 +35,9 @@
     },
     {
       "key": "equip_essence",
-      "objective": "Attune the Goblin's Essence in your active essence loadout.",
+      "objective": "Equip the Goblin's Essence and save your active loadout.",
       "requiredAmount": 1,
-      "actionLabel": "Open Loadout",
+      "actionLabel": "Head to Essences",
       "destinationRoute": "/game/character/essences",
       "tourPageId": "tutorial-essence-loadout",
       "guidePageId": "tutorial-essence-loadout",
@@ -49,23 +49,30 @@
     },
     {
       "key": "craft_equipment",
-      "objective": "Open Crafting to claim your Tutorial Chest.",
+      "objective": "Craft a Tier 1 one-handed weapon of your choice.",
       "requiredAmount": 1,
-      "actionLabel": "Open Crafting",
+      "actionLabel": "Head to Crafting",
       "destinationRoute": "/game/professions/crafting",
       "tourPageId": "tutorial-crafting",
-      "guidePageId": "tutorial-crafting",
+      "guidePageId": "crafting",
       "trigger": {
-        "type": "ClientRouteVisited",
-        "route": "/game/professions/crafting"
+        "type": "CraftedEquipment",
+        "requiredCount": 1,
+        "itemBaseIds": [
+          "shortsword",
+          "dagger",
+          "hatchet",
+          "mace",
+          "wand"
+        ]
       },
       "nextStepKey": "equip_equipment"
     },
     {
       "key": "equip_equipment",
-      "objective": "Equip your Tutorial Chest.",
+      "objective": "Equip the weapon you crafted.",
       "requiredAmount": 1,
-      "actionLabel": "Open Inventory",
+      "actionLabel": "Head to Inventory",
       "destinationRoute": "/game/character/inventory",
       "tourPageId": "tutorial-inventory",
       "guidePageId": "tutorial-equipment",
@@ -73,8 +80,45 @@
         "type": "EquipmentChanged",
         "requiredCount": 1,
         "itemBaseIds": [
-          "tutorial_chest"
+          "shortsword",
+          "dagger",
+          "hatchet",
+          "mace",
+          "wand"
         ]
+      },
+      "nextStepKey": "equip_gathering_tool"
+    },
+    {
+      "key": "equip_gathering_tool",
+      "objective": "Equip a gathering tool. Each tool collects from its matching resource node while you fight.",
+      "requiredAmount": 1,
+      "actionLabel": "Head to Inventory",
+      "destinationRoute": "/game/character/inventory",
+      "tourPageId": "tutorial-gathering-tool",
+      "guidePageId": "tutorial-gathering",
+      "trigger": {
+        "type": "EquipmentChanged",
+        "requiredCount": 1,
+        "itemBaseIds": [
+          "basic_pickaxe",
+          "basic_hatchet",
+          "basic_skinning_knife"
+        ]
+      },
+      "nextStepKey": "start_lumo_ruins"
+    },
+    {
+      "key": "start_lumo_ruins",
+      "objective": "Begin fighting in Lumo Ruins to gather resources with your equipped tool.",
+      "requiredAmount": 1,
+      "actionLabel": "Head to the World Map",
+      "destinationRoute": "/game/world/shenic?area=region_01_area_01",
+      "tourPageId": "tutorial-lumo-ruins",
+      "guidePageId": "tutorial-lumo-ruins",
+      "trigger": {
+        "type": "CombatActionStarted",
+        "areaId": "region_01_area_01"
       },
       "nextStepKey": "complete"
     }

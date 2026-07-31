@@ -1,23 +1,40 @@
 [
   {
+    "id": "choose-tutorial-weapon",
+    "kind": "click",
     "element": "[data-tour=crafting-introduction]",
-    "title": "1. Recipes",
-    "description": "These recipes are where real crafted gear comes from. The tutorial grants weaker practice gear so you can continue right away.",
-    "position": "top"
+    "actionSelector": "[data-tour=tutorial-weapon-recipe]",
+    "includeSelectors": ["[data-tour=tutorial-weapon-recipe]"],
+    "targetTimeoutMs": 5000,
+    "title": "1. Choose your weapon",
+    "description": "Choose a Tier 1 one-handed weapon from this list. You have exactly enough Ore and Wood to craft one.",
+    "position": "right"
   },
   {
-    "element": "[data-tour=selected-recipe]",
-    "title": "2. Recipe details",
-    "description": "Later, this panel shows the output, material costs, tier, and quantity for the selected recipe.",
-    "position": "top"
+    "id": "explain-common-base",
+    "element": "[data-tour=crafting-base-recipe]",
+    "targetTimeoutMs": 5000,
+    "title": "2. Common base",
+    "description": "The Common Base is the standard version of this weapon. It uses the recipe's base materials and determines the weapon type and its core attributes. New variants of a recipe can be unlocked by collecting Blueprints.",
+    "position": "right"
   },
   {
-    "kind": "navigate",
-    "element": "[data-tour=tutorial-quest-action]",
-    "actionSelector": "[data-tour=tutorial-quest-action]",
-    "route": "/game/character/inventory",
-    "title": "3. Inventory",
-    "description": "Open Inventory to equip one piece of tutorial gear.",
-    "position": "bottom"
+    "id": "explain-item-preview",
+    "element": "[data-tour=crafting-item-preview]",
+    "targetTimeoutMs": 5000,
+    "title": "3. Crafted item preview",
+    "description": "Check the result before spending materials. The preview shows attribute ranges, starting Potential, quality chances, item identity, and possible Tempering attributes.",
+    "position": "left"
+  },
+  {
+    "id": "craft-tutorial-weapon",
+    "kind": "click",
+    "element": "[data-tour=tutorial-craft-weapon]",
+    "actionSelector": "[data-tour=tutorial-craft-weapon]",
+    "waitForEnabled": true,
+    "targetTimeoutMs": 5000,
+    "title": "4. Craft your weapon",
+    "description": "The Common Base is selected and you have enough materials for one Tier 1 weapon. Craft it now; you can return to specialized Blueprints later.",
+    "position": "left"
   }
 ]

@@ -34,13 +34,6 @@ public static class ProfessionsSeederHelper
             new Profession()
             {
                 CharacterId = characterId,
-                ProfessionType = ProfessionType.Fishing,
-                Level = 1,
-                Experience = 0
-            },
-            new Profession()
-            {
-                CharacterId = characterId,
                 ProfessionType = ProfessionType.Skinning,
                 Level = 1,
                 Experience = 0

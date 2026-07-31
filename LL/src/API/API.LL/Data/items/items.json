@@ -1119,36 +1119,6 @@
     "gatheringType": null
   },
   {
-    "id": "tutorial_chest",
-    "name": "Tutorial Chest",
-    "description": "Basic protective gear for first steps beyond the training yard.",
-    "itemType": "Equipment",
-    "rarity": "Common",
-    "equipmentType": "Chest",
-    "attributeModifiers": [
-      {
-        "id": "10000000-0000-0000-0000-000000010001",
-        "attributeType": "Armor",
-        "amount": 10,
-        "modifierType": "Flat"
-      },
-      {
-        "id": "10000000-0000-0000-0000-000000010002",
-        "attributeType": "Resistance",
-        "amount": 10,
-        "modifierType": "Flat"
-      },
-      {
-        "id": "10000000-0000-0000-0000-000000010003",
-        "attributeType": "MaxHealth",
-        "amount": 35,
-        "modifierType": "Flat"
-      }
-    ],
-    "toolBonuses": [],
-    "gatheringType": null
-  },
-  {
     "id": "tutorial_ring",
     "name": "Tutorial Ring",
     "description": "A plain training ring with a small combat lesson etched inside.",
@@ -1426,17 +1396,6 @@
     "gatheringType": "Woodcutting"
   },
   {
-    "id": "basic_fishing_rod",
-    "name": "Fishing Rod",
-    "description": "A simple fishing tool.",
-    "itemType": "Equipment",
-    "rarity": "Common",
-    "equipmentType": "Tool",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": "Fishing"
-  },
-  {
     "id": "basic_skinning_knife",
     "name": "Skinning Knife",
     "description": "A simple skinning tool.",
@@ -1468,17 +1427,6 @@
     "attributeModifiers": [],
     "toolBonuses": [],
     "gatheringType": "Woodcutting"
-  },
-  {
-    "id": "fishing_rod",
-    "name": "Fishing Rod",
-    "description": "A fishing tool.",
-    "itemType": "Equipment",
-    "rarity": "Uncommon",
-    "equipmentType": "Tool",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": "Fishing"
   },
   {
     "id": "skinning_knife",
@@ -1514,17 +1462,6 @@
     "gatheringType": "Woodcutting"
   },
   {
-    "id": "rare_fishing_rod",
-    "name": "Fishing Rod",
-    "description": "A refined fishing tool.",
-    "itemType": "Equipment",
-    "rarity": "Rare",
-    "equipmentType": "Tool",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": "Fishing"
-  },
-  {
     "id": "rare_skinning_knife",
     "name": "Skinning Knife",
     "description": "A refined skinning tool.",
@@ -1556,17 +1493,6 @@
     "attributeModifiers": [],
     "toolBonuses": [],
     "gatheringType": "Woodcutting"
-  },
-  {
-    "id": "epic_fishing_rod",
-    "name": "Fishing Rod",
-    "description": "An exceptional fishing tool.",
-    "itemType": "Equipment",
-    "rarity": "Epic",
-    "equipmentType": "Tool",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": "Fishing"
   },
   {
     "id": "epic_skinning_knife",
@@ -1602,17 +1528,6 @@
     "gatheringType": "Woodcutting"
   },
   {
-    "id": "unique_fishing_rod",
-    "name": "Fishing Rod",
-    "description": "A remarkable fishing tool.",
-    "itemType": "Equipment",
-    "rarity": "Unique",
-    "equipmentType": "Tool",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": "Fishing"
-  },
-  {
     "id": "unique_skinning_knife",
     "name": "Skinning Knife",
     "description": "A remarkable skinning tool.",
@@ -1644,17 +1559,6 @@
     "attributeModifiers": [],
     "toolBonuses": [],
     "gatheringType": "Woodcutting"
-  },
-  {
-    "id": "legendary_fishing_rod",
-    "name": "Fishing Rod",
-    "description": "A masterwork fishing tool.",
-    "itemType": "Equipment",
-    "rarity": "Legendary",
-    "equipmentType": "Tool",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": "Fishing"
   },
   {
     "id": "legendary_skinning_knife",
@@ -1690,17 +1594,6 @@
     "gatheringType": "Woodcutting"
   },
   {
-    "id": "legacy_fishing_rod",
-    "name": "Fishing Rod",
-    "description": "A storied fishing tool from a fallen age.",
-    "itemType": "Equipment",
-    "rarity": "Legacy",
-    "equipmentType": "Tool",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": "Fishing"
-  },
-  {
     "id": "legacy_skinning_knife",
     "name": "Skinning Knife",
     "description": "A storied skinning tool from a fallen age.",
@@ -1723,28 +1616,6 @@
     "gatheringType": null
   },
   {
-    "id": "copper_ore",
-    "name": "Copper Ore",
-    "description": "A reliable metal ore used for tier two crafting.",
-    "itemType": "Resource",
-    "rarity": "Common",
-    "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
-  },
-  {
-    "id": "verdant_ore",
-    "name": "Verdant Ore",
-    "description": "A green-veined ore used for stronger crafted equipment.",
-    "itemType": "Resource",
-    "rarity": "Uncommon",
-    "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
-  },
-  {
     "id": "wood",
     "name": "Wood",
     "description": "Common timber used for basic crafting.",
@@ -1756,264 +1627,11 @@
     "gatheringType": null
   },
   {
-    "id": "crystalline_powder",
-    "name": "Crystalline Powder",
-    "description": "Fine crystal dust used in caster and jewelry crafting.",
-    "itemType": "Resource",
-    "rarity": "Common",
-    "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
-  },
-  {
     "id": "rawhide",
-    "name": "Rawhide",
-    "description": "Flexible hide used for basic armor and bindings.",
+    "name": "Hide",
+    "description": "Flexible hide used for armor and bindings.",
     "itemType": "Resource",
     "rarity": "Common",
-    "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
-  },
-  {
-    "id": "thick_hide",
-    "name": "Thick Hide",
-    "description": "Dense hide used for sturdier armor patterns.",
-    "itemType": "Resource",
-    "rarity": "Common",
-    "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
-  },
-  {
-    "id": "scaled_hide",
-    "name": "Scaled Hide",
-    "description": "Layered hide used for higher tier Region One armor.",
-    "itemType": "Resource",
-    "rarity": "Uncommon",
-    "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
-  },
-  {
-    "id": "soulglass_shard",
-    "name": "Soulglass Shard",
-    "description": "A resonant crystal shard used for advanced magical crafting.",
-    "itemType": "Resource",
-    "rarity": "Rare",
-    "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
-  },
-  {
-    "id": "mossy_stone",
-    "name": "Mossy Stone",
-    "description": "A moss-covered stone suitable for defensive crafting.",
-    "itemType": "Resource",
-    "rarity": "Common",
-    "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
-  },
-  {
-    "id": "deep_stone",
-    "name": "Deep Stone",
-    "description": "Compressed stone from deeper Region One routes.",
-    "itemType": "Resource",
-    "rarity": "Uncommon",
-    "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
-  },
-  {
-    "id": "woven_fiber",
-    "name": "Woven Fiber",
-    "description": "Simple woven fiber used for cloth and light crafting.",
-    "itemType": "Resource",
-    "rarity": "Common",
-    "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
-  },
-  {
-    "id": "silk_thread",
-    "name": "Silk Thread",
-    "description": "Fine thread used for flexible armor and caster patterns.",
-    "itemType": "Resource",
-    "rarity": "Common",
-    "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
-  },
-  {
-    "id": "spectral_thread",
-    "name": "Spectral Thread",
-    "description": "Thread with a faint ghostly pull, used in advanced clothwork.",
-    "itemType": "Resource",
-    "rarity": "Rare",
-    "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
-  },
-  {
-    "id": "bone_fragments",
-    "name": "Bone Fragments",
-    "description": "Small bone fragments used for relic and grim crafting.",
-    "itemType": "Resource",
-    "rarity": "Common",
-    "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
-  },
-  {
-    "id": "grave_bone",
-    "name": "Grave Bone",
-    "description": "Bone touched by old burial magic.",
-    "itemType": "Resource",
-    "rarity": "Uncommon",
-    "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
-  },
-  {
-    "id": "ancient_bone",
-    "name": "Ancient Bone",
-    "description": "Old hardened bone used for advanced relic crafting.",
-    "itemType": "Resource",
-    "rarity": "Rare",
-    "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
-  },
-  {
-    "id": "rough_stone",
-    "name": "Rough Stone",
-    "description": "A rough stone chipped from combat-area gathering nodes.",
-    "itemType": "Resource",
-    "rarity": "Common",
-    "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
-  },
-  {
-    "id": "cracked_garnet",
-    "name": "Cracked Garnet",
-    "description": "A flawed garnet from an unstable ore vein.",
-    "itemType": "Resource",
-    "rarity": "Rare",
-    "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
-  },
-  {
-    "id": "cave_fish",
-    "name": "Cave Fish",
-    "description": "A pale fish from underground streams.",
-    "itemType": "Resource",
-    "rarity": "Common",
-    "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
-  },
-  {
-    "id": "murky_fish_oil",
-    "name": "Murky Fish Oil",
-    "description": "A pungent oil rendered from cave fish.",
-    "itemType": "Resource",
-    "rarity": "Uncommon",
-    "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
-  },
-  {
-    "id": "bloodwood",
-    "name": "Bloodwood",
-    "description": "Dark red timber from the Blood Grove.",
-    "itemType": "Resource",
-    "rarity": "Common",
-    "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
-  },
-  {
-    "id": "living_bark",
-    "name": "Living Bark",
-    "description": "Bark that still pulses faintly with life.",
-    "itemType": "Resource",
-    "rarity": "Uncommon",
-    "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
-  },
-  {
-    "id": "refined_fish_oil",
-    "name": "Refined Fish Oil",
-    "description": "Clean oil rendered for precise and flexible crafting.",
-    "itemType": "Resource",
-    "rarity": "Uncommon",
-    "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
-  },
-  {
-    "id": "shadow_oil",
-    "name": "Shadow Oil",
-    "description": "A dark oil used for advanced precision and shadow-themed crafting.",
-    "itemType": "Resource",
-    "rarity": "Rare",
-    "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
-  },
-  {
-    "id": "hardened_chitin",
-    "name": "Hardened Chitin",
-    "description": "Dense chitin used for higher-tier hive and defensive crafting.",
-    "itemType": "Resource",
-    "rarity": "Rare",
-    "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
-  },
-  {
-    "id": "amber_resin",
-    "name": "Amber Resin",
-    "description": "Hardened amber resin used for wards, bindings, and barrier gear.",
-    "itemType": "Resource",
-    "rarity": "Uncommon",
-    "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
-  },
-  {
-    "id": "living_resin",
-    "name": "Living Resin",
-    "description": "A pulsing resin used for advanced nature and hive patterns.",
-    "itemType": "Resource",
-    "rarity": "Rare",
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
@@ -2069,39 +1687,6 @@
     "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
     "itemType": "Essence",
     "rarity": "Uncommon",
-    "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
-  },
-  {
-    "id": "ant_chitin",
-    "name": "Ant Chitin",
-    "description": "Hardened chitin from hive creatures.",
-    "itemType": "Resource",
-    "rarity": "Common",
-    "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
-  },
-  {
-    "id": "hive_resin",
-    "name": "Hive Resin",
-    "description": "Sticky resin harvested from hive remains.",
-    "itemType": "Resource",
-    "rarity": "Uncommon",
-    "equipmentType": "Head",
-    "attributeModifiers": [],
-    "toolBonuses": [],
-    "gatheringType": null
-  },
-  {
-    "id": "royal_chitin_fragment",
-    "name": "Royal Chitin Fragment",
-    "description": "A rare fragment of unusually dense chitin.",
-    "itemType": "Resource",
-    "rarity": "Rare",
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],

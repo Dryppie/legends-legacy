@@ -41,6 +41,7 @@ public class CraftingRequirementResolver : ICraftingRequirementResolver
                     Name = material.Name,
                     Family = material.Family,
                     Tier = material.Tier,
+                    Sources = material.Sources,
                     Quantity = quantity
                 });
                 continue;
@@ -54,6 +55,7 @@ public class CraftingRequirementResolver : ICraftingRequirementResolver
                 Name = special.Name,
                 Family = special.Family,
                 Tier = special.Tier,
+                Sources = special.Sources,
                 Quantity = quantity
             });
         }
@@ -66,6 +68,7 @@ public class CraftingRequirementResolver : ICraftingRequirementResolver
                 Name = g.First().Name,
                 Family = g.First().Family,
                 Tier = g.First().Tier,
+                Sources = g.First().Sources,
                 Quantity = g.Sum(x => x.Quantity)
             })
             .ToList();

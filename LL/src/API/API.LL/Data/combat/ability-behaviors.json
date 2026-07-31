@@ -647,6 +647,7 @@
     "hostileAbilityIds": [
       "ability.essence.legacy.feral_ghoul.feral_pounce"
     ],
+    "friendlyHealth": 159,
     "maxTicks": 1,
     "expectedLogs": [
       {
@@ -754,6 +755,7 @@
       "ability.essence.legacy.feral_ghoul.feral_pounce",
       "ability.essence.goblin_ambusher.cowards_opening"
     ],
+    "hostileHealth": 159,
     "maxTicks": 1,
     "expectedLogs": [
       {
@@ -1042,6 +1044,10 @@
     "hostileStats": {
       "Power": 400
     },
+    "friendlyStats": {
+      "MaxHealth": 1000
+    },
+    "friendlyHealth": 299,
     "maxTicks": 1,
     "expectedLogs": [
       {

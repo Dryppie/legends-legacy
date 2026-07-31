@@ -25,6 +25,7 @@ import {
 } from '../../../../shared/models/essence-system';
 
 export type EssenceView = 'archive' | 'absorb' | 'creatures' | 'codex';
+const NEW_LOADOUT_NAME = 'New Loadout';
 
 @Injectable({ providedIn: 'root' })
 export class EssenceStateService {
@@ -194,6 +195,29 @@ export class EssenceStateService {
     return new Set(creatureIds).size !== creatureIds.length;
   });
 
+  readonly hasDraftChanges = computed(() => {
+    if (!this._loadouts()) return false;
+
+    const draftName = this._draftLoadoutName().trim();
+    const draftSlots = this._draftSlots();
+    const selectedLoadout = this.selectedLoadout();
+
+    if (!selectedLoadout) {
+      return (
+        draftName !== NEW_LOADOUT_NAME ||
+        draftSlots.some((essenceId) => !!essenceId)
+      );
+    }
+
+    const savedSlots = this.getLoadoutDraftSlots(selectedLoadout);
+    return (
+      draftName !== selectedLoadout.name ||
+      draftSlots.some(
+        (essenceId, slotIndex) => essenceId !== savedSlots[slotIndex],
+      )
+    );
+  });
+
   readonly canSaveDraft = computed(() => {
     const name = this._draftLoadoutName().trim();
     const loadouts = this._loadouts();
@@ -204,6 +228,7 @@ export class EssenceStateService {
 
     return (
       !!name &&
+      this.hasDraftChanges() &&
       !this.hasDuplicateDraftEssences() &&
       !this.hasDuplicateDraftCreatureSources() &&
       (!!selectedId || canCreate)
@@ -417,7 +442,7 @@ export class EssenceStateService {
 
   newLoadout(): void {
     this._selectedLoadoutId.set(null);
-    this._draftLoadoutName.set('New Loadout');
+    this._draftLoadoutName.set(NEW_LOADOUT_NAME);
     this._draftSlots.set(this.slotIndexes().map(() => null));
   }
 
@@ -473,7 +498,7 @@ export class EssenceStateService {
     );
   }
 
-  saveDraftLoadout(): void {
+  saveDraftLoadout(activateAfterSave = false): void {
     const name = this._draftLoadoutName().trim();
     if (!this.canSaveDraft()) return;
 
@@ -487,12 +512,35 @@ export class EssenceStateService {
       ? this.essencesService.updateLoadout(id, request)
       : this.essencesService.saveLoadout(request);
 
-    save.subscribe((loadout) => {
-      this._selectedLoadoutId.set(loadout.id);
-      if (loadout.isActive) {
-        this.characterState.markOverviewDirty();
-      }
-      this.refresh();
+    save.subscribe({
+      next: (loadout) => {
+        this._selectedLoadoutId.set(loadout.id);
+
+        if (activateAfterSave && !loadout.isActive) {
+          this.essencesService.activateLoadout(loadout.id).subscribe({
+            next: () => {
+              this.characterState.markOverviewDirty();
+              this.refresh();
+              this.tutorialState.refreshAfterOutboxProgress();
+            },
+            error: (error) =>
+              this._error.set(
+                error?.message ?? 'Failed to activate Essence loadout',
+              ),
+          });
+          return;
+        }
+
+        if (loadout.isActive) {
+          this.characterState.markOverviewDirty();
+        }
+        this.refresh();
+        if (activateAfterSave) {
+          this.tutorialState.refreshAfterOutboxProgress();
+        }
+      },
+      error: (error) =>
+        this._error.set(error?.message ?? 'Failed to save Essence loadout'),
     });
   }
 

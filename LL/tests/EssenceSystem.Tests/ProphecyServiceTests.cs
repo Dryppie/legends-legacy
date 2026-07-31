@@ -14,7 +14,7 @@ public sealed class ProphecyServiceTests
     [Theory]
     [InlineData("Mining", "Mining")]
     [InlineData("Woodcutting", "woodcutting")]
-    [InlineData("Fishing", " Fishing ")]
+    [InlineData("Skinning", " Skinning ")]
     public async Task TrackProgressAsync_counts_gathering_from_required_profession(
         string requiredProfession,
         string eventProfession)
@@ -38,7 +38,7 @@ public sealed class ProphecyServiceTests
 
     [Theory]
     [InlineData("Mining", "Woodcutting")]
-    [InlineData("Fishing", "Mining")]
+    [InlineData("Skinning", "Mining")]
     [InlineData("Woodcutting", null)]
     public async Task TrackProgressAsync_ignores_gathering_from_other_professions(
         string requiredProfession,

@@ -162,15 +162,15 @@
       "allowedSlots": [ "Focused" ]
     },
     {
-      "id": "daily.gathering.fish",
-      "title": "The River Hides Silver Beneath Silence",
-      "flavorText": "The water keeps what careless hands lose.",
-      "objectiveText": "Gather {target} fish.",
+      "id": "daily.gathering.hide",
+      "title": "The Wild Will Yield Its Hide",
+      "flavorText": "Claw and fang guard what patient hands can claim.",
+      "objectiveText": "Gather {target} hide.",
       "scope": "Daily",
       "category": "Gathering",
       "difficulty": "Common",
       "objectiveType": "GatherResources",
-      "objectiveParameterJson": "{\"requiredProfession\":\"Fishing\"}",
+      "objectiveParameterJson": "{\"requiredProfession\":\"Skinning\"}",
       "rewardProfileId": "Daily.Common",
       "weight": 70,
       "allowedSlots": [ "Focused" ]

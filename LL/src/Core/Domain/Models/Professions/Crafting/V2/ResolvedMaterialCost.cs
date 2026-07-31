@@ -7,4 +7,5 @@ public sealed class ResolvedMaterialCost
     public MaterialFamily Family { get; init; }
     public int? Tier { get; init; }
     public int Quantity { get; init; }
+    public IReadOnlyList<string> Sources { get; init; } = [];
 }

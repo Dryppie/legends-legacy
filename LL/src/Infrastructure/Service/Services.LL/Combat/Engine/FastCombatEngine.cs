@@ -15,6 +15,8 @@ public sealed record FastCombatEngineOptions(
 public sealed class FastCombatEngine
 {
     public const int TicksPerSecond = 10;
+    internal const double CombatMagnitudeVariance = 0.2d;
+    private const int MagnitudeRandomSeedSalt = unchecked((int)0x9E3779B9);
     private const int HealthRegenerationIntervalSeconds = 5;
     private const int HealthRegenerationIntervalTicks =
         TicksPerSecond * HealthRegenerationIntervalSeconds;
@@ -23,6 +25,7 @@ public sealed class FastCombatEngine
     private readonly IReadOnlyDictionary<string, CompiledSummon> _summonsById;
     private readonly IReadOnlyDictionary<string, CompiledAbility> _abilitiesById;
     private readonly Random _random;
+    private readonly Random _magnitudeRandom;
     private readonly int _maxTicks;
     private readonly int _basicAttackIntervalTicks;
     private readonly bool _startActiveAbilitiesOnCooldown;
@@ -52,6 +55,8 @@ public sealed class FastCombatEngine
         _summonsById = summonsById;
         _abilitiesById = abilitiesById;
         _random = new Random(resolved.RandomSeed);
+        _magnitudeRandom = new Random(
+            unchecked(resolved.RandomSeed ^ MagnitudeRandomSeedSalt));
         _maxTicks = resolved.MaxTicks;
         _basicAttackIntervalTicks = resolved.BasicAttackIntervalTicks;
         _startActiveAbilitiesOnCooldown = resolved.StartActiveAbilitiesOnCooldown;
@@ -152,12 +157,13 @@ public sealed class FastCombatEngine
         if (SelectFirstEnemy(actor, combatants) is not { } target)
             return;
 
-        var damage = Math.Max(
+        var baseDamage = Math.Max(
             1,
             (int)Math.Round(
                 (Math.Max(1, actor.GetAttribute(AttributeType.WeaponDamage))
                  + actor.GetAttribute(AttributeType.Power) * AttributeCombatRules.BasicAttackPowerCoefficient) *
                 actor.BasicAttackDamageMultiplier));
+        var damage = Math.Max(1, ApplyCombatMagnitudeVariance(baseDamage));
         Log(actor, null, "Basic Attack", EventType.AbilityUse, 0, $"{actor.Name} used Basic Attack");
         Publish(new CombatEvent(AbilityTriggerEvent.OnBasicAttack, actor, target, null), combatants);
         ApplyDamage(
@@ -405,6 +411,12 @@ public sealed class FastCombatEngine
         bool countStatsActivation = false)
     {
         var value = CalculateValue(effect, source);
+        if (effect.ScalingAttribute == AttributeType.Power
+            && effect.Operation is AbilityEffectOperation.Damage or AbilityEffectOperation.Heal)
+        {
+            value = ApplyCombatMagnitudeVariance(value);
+        }
+
         var statsSource = statsSourceOverride ?? effect.StatsSource;
 
         switch (effect.Operation)
@@ -1307,6 +1319,17 @@ public sealed class FastCombatEngine
             (int)Math.Round(effect.BaseValue + (effect.ScalingAttribute is { } attribute
                 ? source.GetAttribute(attribute) * effect.ScalingCoefficient
                 : 0)));
+
+    private int ApplyCombatMagnitudeVariance(int value)
+    {
+        if (value <= 0)
+            return value;
+
+        var minimumMultiplier = 1d - CombatMagnitudeVariance;
+        var multiplier =
+            minimumMultiplier + _magnitudeRandom.NextDouble() * CombatMagnitudeVariance * 2d;
+        return Math.Max(0, (int)Math.Round(value * multiplier));
+    }
 
     private static int CalculateCostValue(CompiledCost cost, RuntimeCombatant source) =>
         Math.Max(0, (int)Math.Round(cost.BaseValue + (cost.ScalingAttribute is { } attribute

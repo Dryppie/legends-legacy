@@ -12,8 +12,7 @@
             { "id": "advancement_stone", "type": "Item", "itemId": "advancement_stone", "weight": 32 },
             { "id": "pickaxe", "type": "Item", "itemId": "pickaxe", "weight": 5 },
             { "id": "woodcutting_hatchet", "type": "Item", "itemId": "woodcutting_hatchet", "weight": 5 },
-            { "id": "fishing_rod", "type": "Item", "itemId": "fishing_rod", "weight": 4 },
-            { "id": "skinning_knife", "type": "Item", "itemId": "skinning_knife", "weight": 4 },
+            { "id": "skinning_knife", "type": "Item", "itemId": "skinning_knife", "weight": 8 },
             { "id": "rare_pickaxe", "type": "Item", "itemId": "rare_pickaxe", "weight": 1, "tags": [ "rare", "tool" ] },
             { "id": "rare_hatchet", "type": "Item", "itemId": "rare_hatchet", "weight": 1, "tags": [ "rare", "tool" ] }
           ]
@@ -32,12 +31,10 @@
             { "id": "advancement_stone", "type": "Item", "itemId": "advancement_stone", "weight": 25 },
             { "id": "rare_pickaxe", "type": "Item", "itemId": "rare_pickaxe", "weight": 4, "tags": [ "rare", "tool" ] },
             { "id": "rare_hatchet", "type": "Item", "itemId": "rare_hatchet", "weight": 4, "tags": [ "rare", "tool" ] },
-            { "id": "rare_fishing_rod", "type": "Item", "itemId": "rare_fishing_rod", "weight": 4, "tags": [ "rare", "tool" ] },
-            { "id": "rare_skinning_knife", "type": "Item", "itemId": "rare_skinning_knife", "weight": 4, "tags": [ "rare", "tool" ] },
+            { "id": "rare_skinning_knife", "type": "Item", "itemId": "rare_skinning_knife", "weight": 8, "tags": [ "rare", "tool" ] },
             { "id": "epic_pickaxe", "type": "Item", "itemId": "epic_pickaxe", "weight": 1.5, "tags": [ "rare", "tool" ] },
             { "id": "epic_hatchet", "type": "Item", "itemId": "epic_hatchet", "weight": 1.5, "tags": [ "rare", "tool" ] },
-            { "id": "epic_fishing_rod", "type": "Item", "itemId": "epic_fishing_rod", "weight": 1.5, "tags": [ "rare", "tool" ] },
-            { "id": "epic_skinning_knife", "type": "Item", "itemId": "epic_skinning_knife", "weight": 1.5, "tags": [ "rare", "tool" ] }
+            { "id": "epic_skinning_knife", "type": "Item", "itemId": "epic_skinning_knife", "weight": 3, "tags": [ "rare", "tool" ] }
           ]
         }
       ]
@@ -54,20 +51,16 @@
             { "id": "advancement_stone", "type": "Item", "itemId": "advancement_stone", "weight": 18 },
             { "id": "epic_pickaxe", "type": "Item", "itemId": "epic_pickaxe", "weight": 4, "tags": [ "rare", "tool" ] },
             { "id": "epic_hatchet", "type": "Item", "itemId": "epic_hatchet", "weight": 4, "tags": [ "rare", "tool" ] },
-            { "id": "epic_fishing_rod", "type": "Item", "itemId": "epic_fishing_rod", "weight": 4, "tags": [ "rare", "tool" ] },
-            { "id": "epic_skinning_knife", "type": "Item", "itemId": "epic_skinning_knife", "weight": 4, "tags": [ "rare", "tool" ] },
+            { "id": "epic_skinning_knife", "type": "Item", "itemId": "epic_skinning_knife", "weight": 8, "tags": [ "rare", "tool" ] },
             { "id": "unique_pickaxe", "type": "Item", "itemId": "unique_pickaxe", "weight": 2, "tags": [ "rare", "tool" ] },
             { "id": "unique_hatchet", "type": "Item", "itemId": "unique_hatchet", "weight": 2, "tags": [ "rare", "tool" ] },
-            { "id": "unique_fishing_rod", "type": "Item", "itemId": "unique_fishing_rod", "weight": 2, "tags": [ "rare", "tool" ] },
-            { "id": "unique_skinning_knife", "type": "Item", "itemId": "unique_skinning_knife", "weight": 2, "tags": [ "rare", "tool" ] },
+            { "id": "unique_skinning_knife", "type": "Item", "itemId": "unique_skinning_knife", "weight": 4, "tags": [ "rare", "tool" ] },
             { "id": "legendary_pickaxe", "type": "Item", "itemId": "legendary_pickaxe", "weight": 0.75, "tags": [ "rare", "tool" ] },
             { "id": "legendary_hatchet", "type": "Item", "itemId": "legendary_hatchet", "weight": 0.75, "tags": [ "rare", "tool" ] },
-            { "id": "legendary_fishing_rod", "type": "Item", "itemId": "legendary_fishing_rod", "weight": 0.75, "tags": [ "rare", "tool" ] },
-            { "id": "legendary_skinning_knife", "type": "Item", "itemId": "legendary_skinning_knife", "weight": 0.75, "tags": [ "rare", "tool" ] },
+            { "id": "legendary_skinning_knife", "type": "Item", "itemId": "legendary_skinning_knife", "weight": 1.5, "tags": [ "rare", "tool" ] },
             { "id": "legacy_pickaxe", "type": "Item", "itemId": "legacy_pickaxe", "weight": 0.2, "tags": [ "rare", "tool" ] },
             { "id": "legacy_hatchet", "type": "Item", "itemId": "legacy_hatchet", "weight": 0.2, "tags": [ "rare", "tool" ] },
-            { "id": "legacy_fishing_rod", "type": "Item", "itemId": "legacy_fishing_rod", "weight": 0.2, "tags": [ "rare", "tool" ] },
-            { "id": "legacy_skinning_knife", "type": "Item", "itemId": "legacy_skinning_knife", "weight": 0.2, "tags": [ "rare", "tool" ] }
+            { "id": "legacy_skinning_knife", "type": "Item", "itemId": "legacy_skinning_knife", "weight": 0.4, "tags": [ "rare", "tool" ] }
           ]
         }
       ]
@@ -85,9 +78,9 @@
             { "id": "blueprint_arcane", "type": "Item", "itemId": "blueprint_arcane", "weight": 5 },
             { "id": "blueprint_execution", "type": "Item", "itemId": "blueprint_execution", "weight": 5 },
             { "id": "pickaxe", "type": "Item", "itemId": "pickaxe", "weight": 8 },
-            { "id": "fishing_rod", "type": "Item", "itemId": "fishing_rod", "weight": 5 },
+            { "id": "skinning_knife", "type": "Item", "itemId": "skinning_knife", "weight": 5 },
             { "id": "rare_pickaxe", "type": "Item", "itemId": "rare_pickaxe", "weight": 1, "tags": [ "rare", "tool" ] },
-            { "id": "rare_fishing_rod", "type": "Item", "itemId": "rare_fishing_rod", "weight": 0.75, "tags": [ "rare", "tool" ] }
+            { "id": "rare_skinning_knife", "type": "Item", "itemId": "rare_skinning_knife", "weight": 0.75, "tags": [ "rare", "tool" ] }
           ]
         }
       ]
@@ -102,9 +95,9 @@
           "noDropWeight": 84.1,
           "entries": [
             { "id": "rare_pickaxe", "type": "Item", "itemId": "rare_pickaxe", "weight": 7, "tags": [ "rare", "tool" ] },
-            { "id": "rare_fishing_rod", "type": "Item", "itemId": "rare_fishing_rod", "weight": 5, "tags": [ "rare", "tool" ] },
+            { "id": "rare_skinning_knife", "type": "Item", "itemId": "rare_skinning_knife", "weight": 5, "tags": [ "rare", "tool" ] },
             { "id": "epic_pickaxe", "type": "Item", "itemId": "epic_pickaxe", "weight": 2, "tags": [ "rare", "tool" ] },
-            { "id": "epic_fishing_rod", "type": "Item", "itemId": "epic_fishing_rod", "weight": 1.5, "tags": [ "rare", "tool" ] },
+            { "id": "epic_skinning_knife", "type": "Item", "itemId": "epic_skinning_knife", "weight": 1.5, "tags": [ "rare", "tool" ] },
             { "id": "unique_pickaxe", "type": "Item", "itemId": "unique_pickaxe", "weight": 0.4, "tags": [ "rare", "tool" ] }
           ]
         }
@@ -120,9 +113,9 @@
           "noDropWeight": 82.8,
           "entries": [
             { "id": "epic_pickaxe", "type": "Item", "itemId": "epic_pickaxe", "weight": 7, "tags": [ "rare", "tool" ] },
-            { "id": "epic_fishing_rod", "type": "Item", "itemId": "epic_fishing_rod", "weight": 5, "tags": [ "rare", "tool" ] },
+            { "id": "epic_skinning_knife", "type": "Item", "itemId": "epic_skinning_knife", "weight": 5, "tags": [ "rare", "tool" ] },
             { "id": "unique_pickaxe", "type": "Item", "itemId": "unique_pickaxe", "weight": 2.5, "tags": [ "rare", "tool" ] },
-            { "id": "unique_fishing_rod", "type": "Item", "itemId": "unique_fishing_rod", "weight": 1.75, "tags": [ "rare", "tool" ] },
+            { "id": "unique_skinning_knife", "type": "Item", "itemId": "unique_skinning_knife", "weight": 1.75, "tags": [ "rare", "tool" ] },
             { "id": "legendary_pickaxe", "type": "Item", "itemId": "legendary_pickaxe", "weight": 0.75, "tags": [ "rare", "tool" ] },
             { "id": "legacy_pickaxe", "type": "Item", "itemId": "legacy_pickaxe", "weight": 0.2, "tags": [ "rare", "tool" ] }
           ]
@@ -143,9 +136,9 @@
             { "id": "blueprint_phoenix", "type": "Item", "itemId": "blueprint_phoenix", "weight": 4 },
             { "id": "blueprint_spirit", "type": "Item", "itemId": "blueprint_spirit", "weight": 4 },
             { "id": "skinning_knife", "type": "Item", "itemId": "skinning_knife", "weight": 8 },
-            { "id": "fishing_rod", "type": "Item", "itemId": "fishing_rod", "weight": 4 },
+            { "id": "pickaxe", "type": "Item", "itemId": "pickaxe", "weight": 4 },
             { "id": "rare_skinning_knife", "type": "Item", "itemId": "rare_skinning_knife", "weight": 1, "tags": [ "rare", "tool" ] },
-            { "id": "rare_fishing_rod", "type": "Item", "itemId": "rare_fishing_rod", "weight": 0.75, "tags": [ "rare", "tool" ] }
+            { "id": "rare_pickaxe", "type": "Item", "itemId": "rare_pickaxe", "weight": 0.75, "tags": [ "rare", "tool" ] }
           ]
         }
       ]
@@ -160,9 +153,9 @@
           "noDropWeight": 85.35,
           "entries": [
             { "id": "rare_skinning_knife", "type": "Item", "itemId": "rare_skinning_knife", "weight": 7, "tags": [ "rare", "tool" ] },
-            { "id": "rare_fishing_rod", "type": "Item", "itemId": "rare_fishing_rod", "weight": 4, "tags": [ "rare", "tool" ] },
+            { "id": "rare_pickaxe", "type": "Item", "itemId": "rare_pickaxe", "weight": 4, "tags": [ "rare", "tool" ] },
             { "id": "epic_skinning_knife", "type": "Item", "itemId": "epic_skinning_knife", "weight": 2, "tags": [ "rare", "tool" ] },
-            { "id": "epic_fishing_rod", "type": "Item", "itemId": "epic_fishing_rod", "weight": 1.25, "tags": [ "rare", "tool" ] },
+            { "id": "epic_pickaxe", "type": "Item", "itemId": "epic_pickaxe", "weight": 1.25, "tags": [ "rare", "tool" ] },
             { "id": "unique_skinning_knife", "type": "Item", "itemId": "unique_skinning_knife", "weight": 0.4, "tags": [ "rare", "tool" ] }
           ]
         }
@@ -178,9 +171,9 @@
           "noDropWeight": 84.05,
           "entries": [
             { "id": "epic_skinning_knife", "type": "Item", "itemId": "epic_skinning_knife", "weight": 7, "tags": [ "rare", "tool" ] },
-            { "id": "epic_fishing_rod", "type": "Item", "itemId": "epic_fishing_rod", "weight": 4, "tags": [ "rare", "tool" ] },
+            { "id": "epic_pickaxe", "type": "Item", "itemId": "epic_pickaxe", "weight": 4, "tags": [ "rare", "tool" ] },
             { "id": "unique_skinning_knife", "type": "Item", "itemId": "unique_skinning_knife", "weight": 2.5, "tags": [ "rare", "tool" ] },
-            { "id": "unique_fishing_rod", "type": "Item", "itemId": "unique_fishing_rod", "weight": 1.5, "tags": [ "rare", "tool" ] },
+            { "id": "unique_pickaxe", "type": "Item", "itemId": "unique_pickaxe", "weight": 1.5, "tags": [ "rare", "tool" ] },
             { "id": "legendary_skinning_knife", "type": "Item", "itemId": "legendary_skinning_knife", "weight": 0.75, "tags": [ "rare", "tool" ] },
             { "id": "legacy_skinning_knife", "type": "Item", "itemId": "legacy_skinning_knife", "weight": 0.2, "tags": [ "rare", "tool" ] }
           ]
@@ -246,6 +239,63 @@
       ]
     },
     {
+      "id": "reward.gathering.lumo_ruins.ore_vein",
+      "displayName": "Lumo Ruins Ore Vein",
+      "rolls": [
+        {
+          "id": "mining_material",
+          "type": "Weighted",
+          "entries": [
+            {
+              "id": "ore",
+              "type": "Item",
+              "itemId": "ore",
+              "weight": 60,
+              "quantity": { "min": 1, "max": 3 }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "reward.gathering.lumo_ruins.fallen_tree",
+      "displayName": "Lumo Ruins Fallen Tree",
+      "rolls": [
+        {
+          "id": "woodcutting_material",
+          "type": "Weighted",
+          "entries": [
+            {
+              "id": "wood",
+              "type": "Item",
+              "itemId": "wood",
+              "weight": 60,
+              "quantity": { "min": 1, "max": 3 }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "reward.gathering.lumo_ruins.beast_remains",
+      "displayName": "Lumo Ruins Beast Remains",
+      "rolls": [
+        {
+          "id": "skinning_material",
+          "type": "Weighted",
+          "entries": [
+            {
+              "id": "rawhide",
+              "type": "Item",
+              "itemId": "rawhide",
+              "weight": 60,
+              "quantity": { "min": 1, "max": 3 }
+            }
+          ]
+        }
+      ]
+    },
+    {
       "id": "reward.gathering.blood_grove.bloodwood_tree",
       "displayName": "Blood Grove Bloodwood Tree",
       "rolls": [
@@ -254,19 +304,11 @@
           "type": "Weighted",
           "entries": [
             {
-              "id": "bloodwood",
+              "id": "wood",
               "type": "Item",
-              "itemId": "bloodwood",
-              "weight": 45,
+              "itemId": "wood",
+              "weight": 60,
               "quantity": { "min": 1, "max": 3 }
-            },
-            {
-              "id": "living_bark",
-              "type": "Item",
-              "itemId": "living_bark",
-              "weight": 15,
-              "quantity": { "min": 1, "max": 1 },
-              "tags": [ "rare" ]
             }
           ]
         }

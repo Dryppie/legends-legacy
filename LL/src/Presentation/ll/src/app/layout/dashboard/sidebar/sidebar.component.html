@@ -45,8 +45,9 @@
               [item]="item"
               [routerLink]="item.route"
               [isActive]="isItemActive(item.route)"
+              [tutorialAttention]="isTutorialDestination(item)"
               [notificationCount]="getSidebarItemNotificationCount(item.id)"
-              (click)="onNavigate()"
+              (click)="onNavigate(item)"
             >
             </app-sidebar-item>
           </div>
@@ -65,12 +66,27 @@
         title="Go to current action"
         (click)="navigateToAction()"
       >
-        <span
-          class="relative flex h-9 w-9 items-center justify-center rounded-full border border-[var(--ll-color-border)] bg-[var(--ll-color-surface-soft)]"
-        >
-          <span aria-hidden="true">✦</span>
+        <span class="relative h-9 w-9">
           <span
-            class="absolute right-0 top-0 h-2 w-2 rounded-full bg-[var(--ll-color-success)]"
+            class="absolute inset-0 overflow-hidden rounded-full border border-[var(--ll-color-border)] bg-[var(--ll-color-surface-soft)]"
+            aria-hidden="true"
+          >
+            <span
+              class="absolute inset-0 overflow-hidden bg-gradient-to-t from-primary/35 to-primary/15 transition-transform ease-linear will-change-transform"
+              [style.transition-duration.ms]="compactActionTransitionDuration()"
+              [style.transform]="
+                'translateY(' + (100 - compactActionProgress()) + '%)'
+              "
+            ></span>
+          </span>
+          <span
+            class="relative flex h-full w-full items-center justify-center text-primary"
+            aria-hidden="true"
+          >
+            ✦
+          </span>
+          <span
+            class="absolute right-0 top-0 z-10 h-2 w-2 rounded-full bg-[var(--ll-color-success)]"
             aria-hidden="true"
           ></span>
         </span>
@@ -101,8 +117,9 @@
           [compact]="true"
           [routerLink]="item.route"
           [isActive]="isItemActive(item.route)"
+          [tutorialAttention]="isTutorialDestination(item)"
           [notificationCount]="getSidebarItemNotificationCount(item.id)"
-          (click)="onNavigate()"
+          (click)="onNavigate(item)"
         ></app-sidebar-item>
       </div>
     </div>

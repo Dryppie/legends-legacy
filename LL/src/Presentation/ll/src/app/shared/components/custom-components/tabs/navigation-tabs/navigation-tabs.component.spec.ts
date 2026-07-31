@@ -52,4 +52,16 @@ describe('NavigationTabsComponent', () => {
 
     expect(selected).toEqual(['last']);
   });
+
+  it('adds stable tour selectors when a prefix is provided', () => {
+    fixture.componentRef.setInput('tourTabPrefix', 'example-tab');
+    fixture.detectChanges();
+
+    const buttons = fixture.nativeElement.querySelectorAll(
+      'button',
+    ) as NodeListOf<HTMLButtonElement>;
+
+    expect(buttons[0].dataset['tour']).toBe('example-tab-first');
+    expect(buttons[2].dataset['tour']).toBe('example-tab-last');
+  });
 });

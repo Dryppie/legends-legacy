@@ -521,7 +521,6 @@ public sealed class LeaderboardRepository : ILeaderboardRepository
         LeaderboardBoardKey.Crafting => ProfessionDefinition(boardKey, ProfessionType.Crafting),
         LeaderboardBoardKey.Mining => ProfessionDefinition(boardKey, ProfessionType.Mining),
         LeaderboardBoardKey.Woodcutting => ProfessionDefinition(boardKey, ProfessionType.Woodcutting),
-        LeaderboardBoardKey.Fishing => ProfessionDefinition(boardKey, ProfessionType.Fishing),
         LeaderboardBoardKey.Skinning => ProfessionDefinition(boardKey, ProfessionType.Skinning),
         _ => throw new ArgumentOutOfRangeException(nameof(boardKey), boardKey, null)
     };

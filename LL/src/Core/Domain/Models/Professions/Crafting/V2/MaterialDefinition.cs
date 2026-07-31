@@ -9,4 +9,5 @@ public sealed class MaterialDefinition
     public int? Tier { get; init; }
     public bool IsStandardTieredMaterial { get; init; }
     public bool IsSpecialResource { get; init; }
+    public IReadOnlyList<string> Sources { get; init; } = [];
 }

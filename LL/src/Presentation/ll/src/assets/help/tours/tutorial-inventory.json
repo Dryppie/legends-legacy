@@ -1,24 +1,21 @@
 [
   {
-    "id": "open-equipment-tab",
+    "id": "find-tutorial-equipment",
     "kind": "click",
-    "element": "[data-tour=inventory-tabs]",
-    "actionSelector": "[data-tour=inventory-tab-equipment]",
-    "restoreOnBack": {
-      "type": "click",
-      "selector": "[data-tour=inventory-tab-all]"
-    },
-    "title": "1. Equipment tab",
-    "description": "Click Equipment to find the Tutorial Chest.",
+    "element": "[data-tour=inventory-equipment-item][data-tutorial-crafted-weapon=true]",
+    "actionSelector": "[data-tour=inventory-equipment-item][data-tutorial-crafted-weapon=true]",
+    "title": "1. Crafted weapon",
+    "description": "Select the Tier 1 weapon you just crafted to review its damage, quality, and combat properties.",
     "position": "bottom"
   },
   {
-    "id": "find-tutorial-equipment",
+    "id": "equip-tutorial-equipment",
     "kind": "click",
-    "element": "[data-tour=inventory-items]",
-    "actionSelector": "[data-tour=inventory-equipment-item]",
-    "title": "2. Inventory items",
-    "description": "Your Tutorial Chest is listed here. Select it to open its equipment details.",
-    "position": "right"
+    "element": "[data-tour=tutorial-equipment-equip]",
+    "actionSelector": "[data-tour=tutorial-equipment-equip]",
+    "targetTimeoutMs": 5000,
+    "title": "2. Equip",
+    "description": "Equip your crafted weapon so your character can use it in combat.",
+    "position": "bottom"
   }
 ]

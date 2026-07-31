@@ -29,19 +29,8 @@ export class MarketPlaceFilterComponent {
       id: 'resources',
       label: 'Resources',
       itemType: ItemType.Resource,
-      defaultSubcategory: 'Metal',
-      subOptions: [
-        'Metal',
-        'Wood',
-        'Hide',
-        'Crystal',
-        'Stone',
-        'Fiber',
-        'Bone',
-        'Chitin',
-        'Resin',
-        'Oil',
-      ],
+      defaultSubcategory: 'Ore',
+      subOptions: ['Ore', 'Wood', 'Hide'],
     },
     {
       id: 'consumables',
@@ -81,7 +70,7 @@ export class MarketPlaceFilterComponent {
   ];
 
   readonly selectedTabId = signal<MarketCategoryId>('resources');
-  readonly selectedSubCategory = signal<string | null>('Metal');
+  readonly selectedSubCategory = signal<string | null>('Ore');
 
   @Output() readonly categoryChanged =
     new EventEmitter<MarketCategorySelection>();

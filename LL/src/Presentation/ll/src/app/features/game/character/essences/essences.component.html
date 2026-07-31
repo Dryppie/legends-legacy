@@ -11,6 +11,7 @@
     [tabs]="viewTabs()"
     [activeKey]="essenceState.activeView()"
     ariaLabel="Soul Archive views"
+    tourTabPrefix="essence-view-tab"
     (tabSelected)="selectView($event)"
   ></app-navigation-tabs>
 
@@ -33,7 +34,6 @@
   >
     <section
       class="ll-panel soul-archive-list flex min-h-0 flex-col overflow-hidden p-3"
-      data-tour="essence-archive-list"
     >
       <div
         class="mb-3 flex items-center justify-between border-b border-light_gray/70 pb-3"
@@ -96,6 +96,7 @@
             let essence of filteredArchiveEssences();
             trackBy: trackEssence
           "
+          data-tour="essence-archive-list"
           type="button"
           class="ll-card mb-2 w-full px-3 py-2 text-left text-white transition-colors hover:border-primary hover:bg-zinc-300/10"
           [ngClass]="{
@@ -204,18 +205,33 @@
           </div>
           <div class="flex flex-wrap gap-2">
             <button
-              type="button"
-              class="ll-button"
-              [class.ll-button-primary]="equippedDraftSlot(essence) === null"
-              [class.soul-equip-button-remove]="
-                equippedDraftSlot(essence) !== null
+              *ngIf="
+                isTutorialStarterAttunement(essence);
+                else regularAttunementButton
               "
-              data-tour="essence-equip-selected"
+              type="button"
+              class="ll-button ll-button-primary"
+              data-tour="tutorial-equip-essence"
               [disabled]="!canToggleEssenceSlot(essence)"
-              (click)="toggleEssenceSlot(essence)"
+              (click)="equipTutorialStarterEssence(essence)"
             >
-              {{ equipButtonText(essence) }}
+              {{ tutorialEquipButtonText(essence) }}
             </button>
+            <ng-template #regularAttunementButton>
+              <button
+                type="button"
+                class="ll-button"
+                [class.ll-button-primary]="equippedDraftSlot(essence) === null"
+                [class.soul-equip-button-remove]="
+                  equippedDraftSlot(essence) !== null
+                "
+                data-tour="essence-equip-selected"
+                [disabled]="!canToggleEssenceSlot(essence)"
+                (click)="toggleEssenceSlot(essence)"
+              >
+                {{ equipButtonText(essence) }}
+              </button>
+            </ng-template>
             <button
               type="button"
               class="ll-button soul-favorite-button"
@@ -600,8 +616,10 @@
             type="button"
             class="ll-button"
             data-tour="essence-loadout-save"
+            [class.ll-button-primary]="essenceState.canSaveDraft()"
+            [class.soul-loadout-save-pending]="essenceState.canSaveDraft()"
             [disabled]="!essenceState.canSaveDraft()"
-            (click)="essenceState.saveDraftLoadout()"
+            (click)="saveLoadout()"
           >
             Save
           </button>

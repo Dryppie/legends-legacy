@@ -166,9 +166,8 @@ Quest progression:
 
 - Objective completes: `Place the essence into your active loadout.`
 - Rewards are granted:
-  - Tier 1 crafting materials
-  - Cinders to support early crafting
-- New objective: `Visit Crafting to receive your tutorial gear.`
+  - 10 Ore and 3 Wood for one Tier 1 one-handed weapon
+- New objective: `Craft a Tier 1 one-handed weapon of your choice.`
 
 Player sees:
 
@@ -199,58 +198,53 @@ Recommended material types:
 
 The exact mix should match the selected starter recipes.
 
-### Step 7: Visit Crafting And Receive Tutorial Gear
+### Step 7: Craft A Starter Weapon
 
 The player is now on the Crafting page.
 
 Quest objective:
 
-- `Visit Crafting to receive your tutorial gear.`
+- `Craft a Tier 1 one-handed weapon of your choice.`
 
 Expected action:
 
-- Player navigates to the Crafting page.
+- Player navigates to Crafting, selects any offered Tier 1 one-handed weapon recipe, and crafts it.
 
 On success:
 
-- Quest progress completes immediately.
-- Player receives:
-  - `Tutorial Sword`
-  - `Tutorial Chest`
-  - `Tutorial Ring`
-- Tutorial items are weaker than equivalent base recipe gear.
-- Items appear in inventory.
+- Quest progress completes when the weapon is actually crafted.
+- The crafted weapon appears in inventory with its normal quality and crafting metadata.
 
 Implementation note:
 
-- The Crafting page records the tutorial visit through the API.
-- The reward grant must be idempotent.
+- The normal equipment-crafted event advances the tutorial.
+- Only an allowed Tier 1 weapon craft counts.
 
 Quest progression:
 
-- Objective completes: `Visit Crafting to receive your tutorial gear.`
-- New objective: `Equip your crafted gear.`
+- Objective completes: `Craft a Tier 1 one-handed weapon of your choice.`
+- New objective: `Equip the weapon you crafted.`
 
 Player sees:
 
 - Quest action button: `Go to Inventory`
 
-### Step 8: Equip Crafted Gear
+### Step 8: Equip The Crafted Weapon
 
 The player arrives at Inventory.
 
 Quest objective:
 
-- `Equip your Tutorial Sword, Tutorial Chest, and Tutorial Ring.`
+- `Equip the weapon you crafted.`
 
 Expected action:
 
-- Player equips the three tutorial items, or equivalent tier 1 gear.
+- Player selects and equips the Tier 1 weapon created in the previous step.
 
 Recommended requirement:
 
-- Require three equipped tier 1 items.
-- Prefer accepting any equipped tier 1 equipment item, not only the exact tutorial instances.
+- Require one equipped Tier 1 weapon with crafting metadata.
+- Accept any one-handed weapon recipe offered by the tutorial.
 
 On success:
 
@@ -301,13 +295,13 @@ Recommended quest id:
 
 Recommended steps:
 
-1. `go_to_training_grounds`
-2. `defeat_training_creature`
-3. `absorb_first_essence`
-4. `equip_first_essence`
-5. `visit_crafting`
-6. `equip_crafted_gear`
-7. `completed`
+1. `defeat_training_creature`
+2. `absorb_essence`
+3. `equip_essence`
+4. `craft_equipment`
+5. `equip_equipment`
+6. `start_lumo_ruins`
+7. `complete`
 
 Each step should store:
 
@@ -447,22 +441,22 @@ After `AbsorbUnboundEssenceAsync` succeeds:
 After a loadout is saved or activated:
 
 - Check whether any active slot contains the tutorial essence, or any essence if the tutorial accepts any first essence.
-- If the current step is `equip_first_essence`, grant crafting materials and advance to `visit_crafting`.
+- If the current step is `equip_essence`, grant crafting materials and advance to `craft_equipment`.
 
-### 9. Hook Crafting Page Visit
+### 9. Hook Equipment Crafting
 
-When the player opens the Crafting page:
+When the player crafts equipment:
 
-- Record the Crafting page visit.
-- If the current step is `visit_crafting`, grant tutorial gear exactly once.
-- Advance to `equip_crafted_gear`.
+- Listen for the normal equipment-crafted event.
+- If the current step is `craft_equipment`, validate the item base and tier.
+- Advance to `equip_equipment`.
 
 ### 10. Hook Equipment Changes
 
 After equipment is equipped or unequipped:
 
-- Count equipped tier 1 equipment.
-- If current step is `equip_crafted_gear` and enough gear is equipped, complete the tutorial.
+- Detect whether the crafted Tier 1 weapon is equipped.
+- If current step is `equip_equipment`, advance to the first Lumo Ruins expedition.
 
 ### 11. Add Tutorial Rewards
 
@@ -472,12 +466,8 @@ Suggested reward moments:
 
 - Training creature defeated:
   - Tutorial essence item
-- Essence equipped:
-  - Tier 1 crafting material bundle
-- Crafting page visited:
-  - Tutorial Sword
-  - Tutorial Chest
-  - Tutorial Ring
+- Essence loadout saved:
+  - Exactly 10 Ore and 3 Wood, enough for one offered Tier 1 one-handed weapon
 - Tutorial complete:
   - Small cinder/material reward
 
@@ -565,8 +555,8 @@ Step copy:
 - `Defeat the creature in the Training Grounds.`
 - `Absorb the essence it dropped.`
 - `Equip the essence in your active loadout.`
-- `Visit Crafting to receive your tutorial gear.`
-- `Equip your Tutorial Sword, Tutorial Chest, and Tutorial Ring.`
+- `Craft a Tier 1 one-handed weapon of your choice.`
+- `Equip the weapon you crafted.`
 - `You are ready to explore Shenic.`
 
 Button labels:
@@ -650,9 +640,9 @@ Manual QA:
 8. Equip essence in active loadout.
 9. Receive crafting materials.
 10. Navigate to Crafting.
-11. Verify Tutorial Sword, Tutorial Chest, and Tutorial Ring were granted.
+11. Select any offered Tier 1 one-handed weapon recipe and craft it.
 12. Navigate to Inventory.
-13. Equip tutorial gear.
+13. Equip the crafted weapon.
 14. Verify the tutorial completes and Training Grounds is no longer available.
 15. Navigate to Lumo Ruins.
 16. Defeat one normal creature.
