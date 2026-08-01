@@ -13,7 +13,6 @@ export interface CharacterDto {
   fateEcho: number;
   sigilFragments: number;
   guildFavor: number;
-  guildHonors: number;
   arenaRating: number;
   equippedTitle?: EquippedTitleDto | null;
 }

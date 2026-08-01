@@ -11,12 +11,8 @@ export type GuildBuildingType =
   | 'EssenceSanctum'
   | 'Treasury';
 
-export type GuildBuildingStatus = 'Active' | 'UnderConstruction' | 'Upgrading';
-
 export type GuildActivityLogType =
-  | 'BuildingConstructionStarted'
   | 'BuildingConstructed'
-  | 'BuildingUpgradeStarted'
   | 'BuildingUpgraded';
 
 export interface GuildBuildingDefinition {
@@ -41,9 +37,6 @@ export interface GuildBuilding {
   id?: string | null;
   definition: GuildBuildingDefinition;
   level: number;
-  targetLevel?: number | null;
-  status: GuildBuildingStatus;
-  completesAt?: string | null;
   nextCost?: Partial<Record<GuildResourceType, number>> | null;
   canConstruct: boolean;
   canUpgrade: boolean;

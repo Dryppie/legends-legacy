@@ -13,9 +13,6 @@ public class GuildBuildingConfiguration : IEntityTypeConfiguration<GuildBuilding
         builder.Property(x => x.Type)
             .HasConversion<string>();
 
-        builder.Property(x => x.Status)
-            .HasConversion<string>();
-
         builder.HasIndex(x => new { x.GuildId, x.Type })
             .IsUnique();
 

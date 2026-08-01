@@ -50,7 +50,10 @@
       ></app-guild-info>
     </app-tab>
     <app-tab label="Buildings">
-      <app-guild-buildings class="h-full overflow-hidden"></app-guild-buildings>
+      <app-guild-buildings
+        class="h-full overflow-hidden"
+        [memberCap]="guild.maxMembers"
+      ></app-guild-buildings>
     </app-tab>
     <app-tab
       label="Missions"

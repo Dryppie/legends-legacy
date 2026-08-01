@@ -1,144 +1,212 @@
-<div
-  *ngIf="overview() as overview"
-  class="grid h-full gap-3 overflow-y-auto p-4 text-sm text-neutral-200 xl:grid-cols-[1fr_20rem]"
->
-  <section class="space-y-3">
-    <div class="flex flex-wrap items-start justify-between gap-3">
-      <div>
-        <p class="ll-eyebrow">Guild Buildings</p>
-        <h2 class="ll-heading text-lg">Guild Hall Level {{ overview.guildHallLevel }}</h2>
-      </div>
-      <div class="ll-stat-card px-3 py-2">
-        <div class="ll-stat-label">Guild Supplies</div>
-        <div class="ll-heading mt-1 text-lg">{{ overview.guildSupplies | numberFormat }}</div>
-      </div>
-    </div>
+<div *ngIf="overview() as overview" class="guild-buildings-shell">
+  <aside class="building-rail" aria-label="Guild buildings">
+    <header class="rail-header">
+      <p class="section-label">Guild Buildings</p>
+      <p class="rail-count">
+        {{ builtCount() }} of {{ visibleBuildings().length }} built
+      </p>
+    </header>
 
-    <div class="grid gap-3 lg:grid-cols-[18rem_1fr]">
-      <div class="space-y-2">
-        <button
-          *ngFor="let building of overview.buildings"
-          type="button"
-          class="ll-card w-full p-3 text-left transition"
-          [ngClass]="buildingCardClass(building)"
-          (click)="select(building)"
-        >
-          <div class="flex items-start justify-between gap-2">
-            <div>
-              <div class="font-semibold">{{ building.definition.name }}</div>
-              <div class="mt-1 text-xs text-primary">
-                {{ buildingStatusLabel(building) }}
-              </div>
-            </div>
-          </div>
-          <div
-            *ngIf="building.nextCost?.GuildSupplies"
-            class="mt-3 h-1 rounded bg-zinc-800"
-          >
-            <div
-              class="h-1 rounded bg-primary transition"
-              [style.width.%]="supplyProgress(building)"
-            ></div>
-          </div>
-        </button>
-      </div>
+    <section *ngIf="establishedBuildings().length > 0" class="building-group">
+      <h2 class="section-label">Built</h2>
+      <button
+        *ngFor="let building of establishedBuildings()"
+        type="button"
+        class="building-row has-level-track"
+        [class.is-selected]="isSelected(building)"
+        (click)="select(building)"
+      >
+        <span class="building-row-copy">
+          <strong>{{ building.definition.name }}</strong>
+        </span>
+        <span class="building-level">{{ buildingStatusLabel(building) }}</span>
+        <span class="level-track" aria-hidden="true">
+          <span
+            *ngFor="let level of levelSegments(building)"
+            [class.is-filled]="level <= building.level"
+          ></span>
+        </span>
+      </button>
+    </section>
 
-      <div *ngIf="selected() as building" class="ll-card p-4">
-        <div class="flex flex-wrap items-start justify-between gap-3">
-          <div>
-            <p class="ll-eyebrow">Selected Building</p>
-            <h3 class="ll-heading text-lg">{{ building.definition.name }}</h3>
-          </div>
-          <span class="rounded border px-2 py-1 text-xs" [ngClass]="statusBadgeClass(building)">
-            {{ buildingStatusLabel(building) }}
+    <section *ngIf="availableBuildings().length > 0" class="building-group">
+      <h2 class="section-label">Ready to Build</h2>
+      <button
+        *ngFor="let building of availableBuildings()"
+        type="button"
+        class="building-row is-buildable"
+        [class.is-selected]="isSelected(building)"
+        (click)="select(building)"
+      >
+        <span class="building-row-copy">
+          <strong>{{ building.definition.name }}</strong>
+          <small>
+            {{ building.nextCost?.GuildSupplies ?? 0 | numberFormat }} supplies
+          </small>
+        </span>
+        <span class="build-command">Build</span>
+      </button>
+    </section>
+
+    <section
+      *ngIf="lockedBuildings().length > 0"
+      class="building-group is-locked-group"
+    >
+      <h2 class="section-label">Locked</h2>
+      <button
+        *ngFor="let building of lockedBuildings()"
+        type="button"
+        class="building-row is-locked"
+        [class.is-selected]="isSelected(building)"
+        (click)="select(building)"
+      >
+        <span class="building-row-copy">
+          <strong>{{ building.definition.name }}</strong>
+        </span>
+        <span class="hall-requirement">
+          Hall {{ building.definition.requiredGuildHallLevel }}
+        </span>
+      </button>
+    </section>
+  </aside>
+
+  <main *ngIf="selected() as building" class="building-workspace">
+    <header class="building-hero">
+      <div class="building-intro">
+        <p class="section-label">Selected Building</p>
+        <div class="building-title-row">
+          <h1>{{ building.definition.name }}</h1>
+          <span class="level-badge">
+            Level {{ building.level }} / {{ building.definition.maxLevel }}
           </span>
         </div>
-
-        <p class="ll-copy mt-2">{{ building.definition.description }}</p>
-        <p class="ll-copy mt-1 text-xs">{{ building.definition.unlockSummary }}</p>
-
-        <div class="mt-4 grid gap-2 sm:grid-cols-3">
-          <div class="ll-stat-card px-3 py-2">
-            <div class="ll-stat-label">Current</div>
-            <div class="ll-heading mt-1 text-lg">{{ building.level }}</div>
+        <p class="building-description">
+          {{ building.definition.description }}
+        </p>
+        <p class="building-summary">{{ building.definition.unlockSummary }}</p>
+        <section
+          *ngIf="building.definition.type === 'GuildHall'"
+          class="member-capacity-summary"
+          aria-label="Guild member capacity"
+        >
+          <div>
+            <span>Member capacity</span>
+            <strong>
+              {{ memberCap }}
+              <small>of {{ maximumMemberCap }}</small>
+            </strong>
           </div>
-          <div class="ll-stat-card px-3 py-2">
-            <div class="ll-stat-label">Max</div>
-            <div class="ll-heading mt-1 text-lg">{{ building.definition.maxLevel }}</div>
+          <div
+            *ngIf="building.level < building.definition.maxLevel; else maxCap"
+          >
+            <span>Next Guild Hall level</span>
+            <strong>+1 member slot</strong>
+            <small>{{ nextMemberCap() }} total capacity</small>
           </div>
-          <div class="ll-stat-card px-3 py-2">
-            <div class="ll-stat-label">Requires Hall</div>
-            <div class="ll-heading mt-1 text-lg">
-              {{ building.definition.requiredGuildHallLevel }}
+          <ng-template #maxCap>
+            <div>
+              <span>Guild Hall benefit</span>
+              <strong>Maximum capacity reached</strong>
             </div>
+          </ng-template>
+        </section>
+      </div>
+
+      <section class="next-level-panel" aria-label="Next building level">
+        <ng-container *ngIf="selectedCost().length > 0; else maxLevel">
+          <div class="cost-heading">
+            <span class="section-label">Next Level</span>
+            <strong>{{ selectedSupplyCost() | numberFormat }}</strong>
           </div>
-        </div>
-
-        <div *ngIf="building.completesAt" class="mt-4 border-y border-zinc-700/60 py-3">
-          <div class="text-xs uppercase text-primary">Completes</div>
-          <div class="mt-1">{{ building.completesAt | date: "medium" }}</div>
-        </div>
-
-        <div class="mt-4">
-          <div class="mb-2 text-xs uppercase tracking-wide text-primary">Benefits</div>
-          <div class="grid gap-2 lg:grid-cols-2">
-            <div
-              *ngFor="let benefit of building.definition.benefits"
-              class="rounded border p-3"
-              [ngClass]="benefitClass(building, benefit)"
-            >
-              <div class="flex items-start justify-between gap-2">
-                <div class="font-semibold text-neutral-100">{{ benefit.title }}</div>
-                <span class="shrink-0 rounded border border-zinc-400/40 px-2 py-1 text-[11px] uppercase text-primary">
-                  {{ benefitStateLabel(building, benefit) }}
-                </span>
-              </div>
-              <p class="ll-copy mt-2 text-xs">{{ benefit.description }}</p>
-            </div>
+          <div class="supply-bar" aria-hidden="true">
+            <span [style.width.%]="supplyProgress(building)"></span>
           </div>
-        </div>
-
-        <div class="mt-4">
-          <div class="mb-2 text-xs uppercase tracking-wide text-primary">Next Cost</div>
-          <div class="flex flex-wrap gap-2">
-            <span
-              *ngFor="let cost of selectedCost()"
-              class="rounded border border-zinc-300/30 px-2 py-1 text-xs"
-            >
-              {{ cost.amount | numberFormat }} {{ cost.resource | humanize }}
-            </span>
-            <span *ngIf="selectedCost().length === 0" class="text-xs text-neutral-400">
-              No further upgrade.
-            </span>
-          </div>
-        </div>
-
-        <div class="mt-4 flex flex-wrap items-center justify-between gap-3">
-          <p class="text-xs text-neutral-400">
-            {{ building.lockedReason ?? "Ready" }}
+          <p class="supply-balance">
+            {{ overview.guildSupplies | numberFormat }} /
+            {{ selectedSupplyCost() | numberFormat }} Guild Supplies
           </p>
+          <div
+            *ngIf="building.definition.type === 'GuildHall'"
+            class="hall-upgrade-benefit"
+          >
+            <span>Upgrade benefit</span>
+            <strong>+1 member slot</strong>
+          </div>
           <app-regular-button
             [disabled]="!canActOnSelected()"
+            [fullWidth]="true"
             (pressed)="actOnSelected()"
             [text]="selectedActionText()"
           ></app-regular-button>
-        </div>
-      </div>
-    </div>
-  </section>
+          <p
+            *ngIf="building.lockedReason && selectedSupplyShortfall() === 0"
+            class="action-reason"
+          >
+            {{ building.lockedReason }}
+          </p>
+        </ng-container>
+        <ng-template #maxLevel>
+          <span class="section-label">Building Status</span>
+          <strong class="max-level-copy">Maximum level reached</strong>
+        </ng-template>
+      </section>
+    </header>
 
-  <aside class="ll-card p-4">
-    <p class="ll-eyebrow">Activity</p>
-    <h2 class="ll-heading text-lg">Building Log</h2>
-    <div class="mt-4 space-y-3">
-      <div *ngFor="let log of overview.activityLogs" class="border-b border-zinc-700/60 pb-3">
-        <div class="text-xs text-primary">{{ log.type | humanize }}</div>
-        <div class="mt-1">{{ log.message }}</div>
-        <div class="mt-1 text-xs text-neutral-500">{{ log.createdAt | date: "short" }}</div>
-      </div>
-      <p *ngIf="overview.activityLogs.length === 0" class="ll-copy text-xs">
-        No building activity yet.
-      </p>
+    <div class="building-detail-grid">
+      <section class="upgrade-path">
+        <h2 class="section-label">Upgrade Path</h2>
+        <ol class="benefit-list">
+          <li
+            *ngFor="let benefit of building.definition.benefits"
+            class="benefit-row"
+            [attr.data-state]="benefitState(building, benefit)"
+          >
+            <span class="benefit-node">{{ benefit.level }}</span>
+            <div class="benefit-copy">
+              <div class="benefit-heading">
+                <h3>{{ benefit.title }}</h3>
+                <span
+                  *ngIf="
+                    benefitState(building, benefit) === 'active' ||
+                    isNextBenefit(building, benefit) ||
+                    !benefit.isImplemented
+                  "
+                  class="benefit-badge"
+                >
+                  {{ benefitStateLabel(building, benefit) }}
+                </span>
+              </div>
+              <p>{{ benefit.description }}</p>
+            </div>
+          </li>
+        </ol>
+      </section>
+
+      <aside class="building-log">
+        <div class="log-heading">
+          <h2 class="section-label">Building Log</h2>
+          <span>Recent</span>
+        </div>
+        <div
+          class="log-list"
+          role="region"
+          aria-label="Building activity log"
+          tabindex="0"
+        >
+          <article *ngFor="let log of overview.activityLogs" class="log-entry">
+            <p>{{ log.message }}</p>
+            <time
+              [attr.datetime]="log.createdAt"
+              [title]="log.createdAt | date: 'medium'"
+            >
+              {{ log.createdAt | date: "shortTime" }}
+            </time>
+          </article>
+          <p *ngIf="overview.activityLogs.length === 0" class="empty-log">
+            No building activity yet.
+          </p>
+        </div>
+      </aside>
     </div>
-  </aside>
+  </main>
 </div>

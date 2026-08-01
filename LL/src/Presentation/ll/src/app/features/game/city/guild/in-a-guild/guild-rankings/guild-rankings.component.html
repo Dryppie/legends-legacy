@@ -1,13 +1,27 @@
-<div
-  *ngIf="sortedGuilds() as guilds"
-  class="flex h-full w-full flex-col gap-4 overflow-y-auto p-2"
->
-  <ng-container *ngIf="guilds.length > 0; else noGuilds">
-    <section class="ll-panel flex flex-col overflow-hidden p-4 text-white">
+<div class="flex h-full w-full flex-col gap-4 overflow-y-auto p-2">
+  <div
+    *ngIf="leaderboardState.loading() && !leaderboardState.board()"
+    class="ll-empty-state mt-4"
+  >
+    Loading guild rankings...
+  </div>
+
+  <div *ngIf="leaderboardState.error() as error" class="ll-empty-state mt-4">
+    {{ error }}
+  </div>
+
+  <ng-container *ngIf="rankedGuilds() as guilds">
+    <section
+      *ngIf="guilds.length > 0; else noGuilds"
+      class="ll-panel flex flex-col overflow-hidden p-4 text-white"
+    >
       <div class="ll-header-row">
         <div>
           <div class="ll-eyebrow">Guild Rankings</div>
           <h2 class="ll-heading mt-1 text-2xl">Leaderboard</h2>
+          <p class="ll-copy mt-1 text-xs">
+            Ranked by guild level, then guild experience.
+          </p>
         </div>
 
         <div class="flex flex-wrap gap-2">
@@ -27,25 +41,29 @@
       </div>
 
       <div class="mt-4 min-w-0 overflow-auto">
-        <div class="min-w-[42rem]">
+        <div class="min-w-[52rem]">
           <div
-            class="ll-table-header grid grid-cols-[4rem_minmax(0,1fr)_minmax(0,1fr)_6rem_6rem] items-center gap-2 rounded-t"
+            class="ll-table-header grid grid-cols-[4rem_minmax(0,1fr)_minmax(0,1fr)_6rem_5rem_7rem] items-center gap-2 rounded-t"
           >
             <div>Rank</div>
             <div>Name</div>
             <div>Owner</div>
             <div class="justify-self-end">Members</div>
-            <div class="justify-self-end">Upgrades</div>
+            <div class="justify-self-end">Level</div>
+            <div class="justify-self-end">Guild XP</div>
           </div>
 
           <div>
             <div
-              class="ll-table-row grid grid-cols-[4rem_minmax(0,1fr)_minmax(0,1fr)_6rem_6rem] items-center justify-between gap-2"
-              *ngFor="let guild of guilds; let i = index"
+              class="ll-table-row grid grid-cols-[4rem_minmax(0,1fr)_minmax(0,1fr)_6rem_5rem_7rem] items-center justify-between gap-2"
+              [ngClass]="{
+                'bg-primary/10': isViewerGuild(guild.participantId),
+              }"
+              *ngFor="let guild of guilds"
             >
-              <div class="font-semibold text-primary">#{{ i + 1 }}</div>
+              <div class="font-semibold text-primary">#{{ guild.rank }}</div>
               <div class="break-words">
-                {{ guild.name }}
+                {{ guild.participantName }}
               </div>
               <div class="break-words">
                 {{ guild.ownerName }}
@@ -53,17 +71,25 @@
               <div class="justify-self-end">
                 {{ guild.memberCount }}/{{ guild.maxMembers }}
               </div>
-              <div class="justify-self-end">{{ guild.upgrades }}</div>
+              <div class="justify-self-end tabular-nums">
+                {{ guild.primaryValue | numberFormat }}
+              </div>
+              <div class="justify-self-end tabular-nums">
+                {{ guild.secondaryValue ?? 0 | numberFormat }}
+              </div>
             </div>
           </div>
         </div>
       </div>
     </section>
-  </ng-container>
 
-  <ng-template #noGuilds>
-    <div class="ll-empty-state mt-4">
-      No guilds exist! That's.. odd. Aren't you in one?
-    </div>
-  </ng-template>
+    <ng-template #noGuilds>
+      <div
+        *ngIf="!leaderboardState.loading() && !leaderboardState.error()"
+        class="ll-empty-state mt-4"
+      >
+        No guilds are ranked yet.
+      </div>
+    </ng-template>
+  </ng-container>
 </div>

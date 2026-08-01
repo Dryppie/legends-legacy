@@ -1,5 +1,6 @@
-﻿using Application.Common.Mappings;
+using Application.Common.Mappings;
 using AutoMapper;
+using Domain.Extensions.Guilds;
 using Domain.Models.Guilds;
 
 namespace Application.UseCases.Guilds.Dtos.Responses;
@@ -21,6 +22,7 @@ public class GuildDto : IMapFrom<Guild>
     {
         profile.CreateMap<Guild, GuildDto>()
             .ForMember(dto => dto.OwnerName, opt => opt.MapFrom(src => src.Owner.Name))
+            .ForMember(dto => dto.MaxMembers, opt => opt.MapFrom(src => src.EffectiveMaxMembers()))
             .ForMember(dto => dto.Invites, opt => opt.MapFrom(src => src.Invites.Where(i => !i.IsInvite)));
     }
 }

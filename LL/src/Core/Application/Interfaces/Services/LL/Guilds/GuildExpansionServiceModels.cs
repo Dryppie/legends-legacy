@@ -121,7 +121,6 @@ public sealed record GuildShopItemDto(
     string Description,
     GuildShopStockType StockType,
     long GuildFavorCost,
-    long GuildHonorsCost,
     int WeeklyLimit,
     int PurchasedThisPeriod,
     long RequiredWeeklyContribution,
@@ -134,7 +133,6 @@ public sealed record GuildShopItemDto(
 public sealed record GuildShopOverviewDto(
     Guid GuildId,
     long GuildFavor,
-    long GuildHonors,
     string WeeklyPeriodKey,
     DateTimeOffset NextWeeklyResetAt,
     IReadOnlyList<GuildShopItemDto> Items);
@@ -159,9 +157,6 @@ public sealed record GuildBuildingDto(
     Guid? Id,
     GuildBuildingDefinitionDto Definition,
     int Level,
-    int? TargetLevel,
-    GuildBuildingStatus Status,
-    DateTimeOffset? CompletesAt,
     IReadOnlyDictionary<GuildResourceType, int>? NextCost,
     bool CanConstruct,
     bool CanUpgrade,
