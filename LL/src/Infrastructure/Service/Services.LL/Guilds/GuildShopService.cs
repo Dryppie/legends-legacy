@@ -14,6 +14,10 @@ namespace Services.LL.Guilds;
 
 public class GuildShopService : IGuildShopService
 {
+    private const string CommonCatalystRotationGroup = "common-catalysts";
+    private const string RareCatalystRotationGroup = "rare-catalysts";
+    private const string BlueprintRotationGroup = "rare-blueprints";
+
     private readonly IDbContext _context;
     private readonly IInventoryItemFactory _inventoryItemFactory;
     private readonly IReadOnlyList<GuildShopItemDefinition> _items;
@@ -63,11 +67,8 @@ public class GuildShopService : IGuildShopService
 
         if (state.Value.Character.GuildFavor < definition.GuildFavorCost)
             return GuildOperationResult<GuildShopOverviewDto>.Fail("Not enough Guild Favor.");
-        if (state.Value.Character.GuildHonors < definition.GuildHonorsCost)
-            return GuildOperationResult<GuildShopOverviewDto>.Fail("Not enough Guild Honors.");
 
         state.Value.Character.GuildFavor -= definition.GuildFavorCost;
-        state.Value.Character.GuildHonors -= definition.GuildHonorsCost;
         foreach (var reward in definition.Rewards)
         {
             await ApplyRewardAsync(state.Value.Character, reward, now, cancellationToken);
@@ -136,7 +137,6 @@ public class GuildShopService : IGuildShopService
         new(
             state.Guild.Id,
             state.Character.GuildFavor,
-            state.Character.GuildHonors,
             state.WeeklyPeriodKey,
             state.NextWeeklyResetAt,
             GetActiveItems(state).Select(item =>
@@ -149,7 +149,6 @@ public class GuildShopService : IGuildShopService
                     item.Description,
                     item.StockType,
                     item.GuildFavorCost,
-                    item.GuildHonorsCost,
                     item.WeeklyLimit,
                     purchased,
                     item.RequiredWeeklyContribution,
@@ -163,20 +162,35 @@ public class GuildShopService : IGuildShopService
     private IReadOnlyList<GuildShopItemDefinition> GetActiveItems(ShopState state)
     {
         var fixedItems = _items.Where(x => !x.RotatesWeekly);
-        var weeklyItems = GuildContentHelpers.PickWeeklyRotation(
-            _items.Where(x => x.RotatesWeekly && x.StockType == GuildShopStockType.Weekly),
+        var marketOfficeLevel = GetMarketOfficeLevel(state.Guild);
+        var commonCatalystItems = GuildContentHelpers.PickWeeklyRotation(
+            _items.Where(x =>
+                x.RotatesWeekly
+                && x.StockType == GuildShopStockType.Common
+                && string.Equals(x.RotationGroup, CommonCatalystRotationGroup, StringComparison.OrdinalIgnoreCase)),
             state.WeeklyPeriodKey,
             count: 2,
             x => x.Key);
-        var prestigeItems = GuildContentHelpers.PickWeeklyRotation(
-            _items.Where(x => x.RotatesWeekly && x.StockType == GuildShopStockType.Prestige),
+        var rareCatalystItems = GuildContentHelpers.PickWeeklyRotation(
+            _items.Where(x =>
+                x.RotatesWeekly
+                && x.StockType == GuildShopStockType.Rare
+                && string.Equals(x.RotationGroup, RareCatalystRotationGroup, StringComparison.OrdinalIgnoreCase)),
+            state.WeeklyPeriodKey,
+            count: marketOfficeLevel >= 5 ? 2 : 1,
+            x => x.Key);
+        var rareBlueprintItems = GuildContentHelpers.PickWeeklyRotation(
+            _items.Where(x =>
+                x.RotatesWeekly
+                && x.StockType == GuildShopStockType.Rare
+                && string.Equals(x.RotationGroup, BlueprintRotationGroup, StringComparison.OrdinalIgnoreCase)),
             state.WeeklyPeriodKey,
             count: 1,
             x => x.Key);
-
         return fixedItems
-            .Concat(weeklyItems)
-            .Concat(prestigeItems)
+            .Concat(commonCatalystItems)
+            .Concat(rareCatalystItems)
+            .Concat(rareBlueprintItems)
             .OrderBy(x => x.StockType)
             .ThenBy(x => x.RequiredMarketOfficeLevel)
             .ThenBy(x => x.Key)
@@ -199,9 +213,6 @@ public class GuildShopService : IGuildShopService
 
         if (state.Character.GuildFavor < item.GuildFavorCost)
             return "Not enough Guild Favor.";
-
-        if (state.Character.GuildHonors < item.GuildHonorsCost)
-            return "Not enough Guild Honors.";
 
         return null;
     }

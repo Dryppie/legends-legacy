@@ -27,26 +27,15 @@ import { RegularButtonComponent } from '../../../../../../shared/components/cust
 export class GuildShopComponent {
   readonly shop;
   readonly loading;
-  readonly stockTypes: GuildShopStockType[] = ['Common', 'Weekly', 'Prestige'];
+  readonly stockTypes: GuildShopStockType[] = ['Common', 'Rare'];
   readonly selected = signal<GuildShopItem | null>(null);
 
   readonly selectedCost = computed(() => {
     const item = this.selected();
-    if (!item) return 0;
-    return item.guildFavorCost || item.guildHonorsCost;
+    return item?.guildFavorCost ?? 0;
   });
 
-  readonly selectedCurrency = computed(() =>
-    (this.selected()?.guildFavorCost ?? 0) > 0 ? 'Favor' : 'Honors',
-  );
-
-  readonly selectedBalance = computed(() => {
-    const shop = this.shop();
-    if (!shop) return 0;
-    return this.selectedCurrency() === 'Favor'
-      ? shop.guildFavor
-      : shop.guildHonors;
-  });
+  readonly selectedBalance = computed(() => this.shop()?.guildFavor ?? 0);
 
   readonly selectedBalanceAfterPurchase = computed(() =>
     Math.max(0, this.selectedBalance() - this.selectedCost()),
@@ -54,7 +43,7 @@ export class GuildShopComponent {
 
   readonly purchaseButtonText = computed(() => {
     if (!this.selected()) return 'Purchase';
-    return `Purchase for ${this.selectedCost().toLocaleString()} ${this.selectedCurrency()}`;
+    return `Purchase for ${this.selectedCost().toLocaleString()} Favor`;
   });
 
   constructor(private readonly state: GuildStateService) {
@@ -91,10 +80,8 @@ export class GuildShopComponent {
 
   stockClass(stockType: string): string {
     switch (stockType) {
-      case 'Prestige':
+      case 'Rare':
         return 'll-badge-accent';
-      case 'Weekly':
-        return 'll-badge-success';
       default:
         return 'll-badge-muted';
     }
@@ -130,10 +117,11 @@ export class GuildShopComponent {
   }
 
   rewardAmountLabel(reward: GuildShopReward): string {
-    if (reward.type === 'Item' || reward.type === 'Title') {
-      return reward.amount > 1
-        ? `${reward.amount.toLocaleString()} copies`
-        : 'Unlock';
+    if (
+      reward.type === 'Title' ||
+      (reward.type === 'Item' && reward.key?.startsWith('blueprint_'))
+    ) {
+      return 'Unlock';
     }
 
     return reward.amount.toLocaleString();

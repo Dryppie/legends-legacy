@@ -15,14 +15,29 @@ import { NumberFormatPipe } from '../../../../../../shared/pipes/number-format/n
   styleUrl: './guild-buildings.component.scss',
 })
 export class GuildBuildingsComponent {
+  private readonly hiddenBuildingTypes = new Set<GuildBuildingType>([
+    'RaidHall',
+    'WarRoom',
+    'Workshop',
+    'TrainingGrounds',
+    'EssenceSanctum',
+  ]);
+
   @Input() memberCap = 10;
 
   readonly maximumMemberCap = 20;
   readonly overview;
   readonly selected = signal<GuildBuilding | null>(null);
 
-  readonly establishedBuildings = computed(() =>
+  readonly visibleBuildings = computed(() =>
     (this.overview()?.buildings ?? []).filter(
+      (building) =>
+        !this.hiddenBuildingTypes.has(building.definition.type),
+    ),
+  );
+
+  readonly establishedBuildings = computed(() =>
+    this.visibleBuildings().filter(
       (building) =>
         building.definition.isPermanent || building.level > 0,
     ),
@@ -30,14 +45,14 @@ export class GuildBuildingsComponent {
 
   readonly builtCount = computed(
     () =>
-      (this.overview()?.buildings ?? []).filter(
+      this.visibleBuildings().filter(
         (building) => building.definition.isPermanent || building.level > 0,
       ).length,
   );
 
   readonly availableBuildings = computed(() => {
     const hallLevel = this.overview()?.guildHallLevel ?? 0;
-    return (this.overview()?.buildings ?? []).filter(
+    return this.visibleBuildings().filter(
       (building) =>
         !building.definition.isPermanent &&
         building.level <= 0 &&
@@ -47,7 +62,7 @@ export class GuildBuildingsComponent {
 
   readonly lockedBuildings = computed(() => {
     const hallLevel = this.overview()?.guildHallLevel ?? 0;
-    return (this.overview()?.buildings ?? []).filter(
+    return this.visibleBuildings().filter(
       (building) =>
         !building.definition.isPermanent &&
         building.level <= 0 &&
@@ -93,7 +108,7 @@ export class GuildBuildingsComponent {
     this.overview = this.state.buildings;
 
     effect(() => {
-      const buildings = this.overview()?.buildings ?? [];
+      const buildings = this.visibleBuildings();
       const current = this.selected();
       if (buildings.length === 0) return;
 

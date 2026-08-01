@@ -4,18 +4,14 @@
       <div>
         <p class="section-label">Market Office</p>
         <h1>Guild Stock</h1>
-        <p>Equipment and supplies earned through guild service.</p>
+        <p>High-value progression rewards earned through guild service.</p>
       </div>
 
       <div class="stock-header-meta">
-        <div class="wallet-summary" aria-label="Guild shop currencies">
+        <div class="wallet-summary" aria-label="Guild Favor balance">
           <span>
             <small>Favor</small>
             <strong>{{ shop.guildFavor | numberFormat }}</strong>
-          </span>
-          <span>
-            <small>Honors</small>
-            <strong>{{ shop.guildHonors | numberFormat }}</strong>
           </span>
         </div>
         <div class="reset-summary">
@@ -85,10 +81,7 @@
               <strong *ngIf="item.guildFavorCost > 0">
                 {{ item.guildFavorCost | numberFormat }}
               </strong>
-              <strong *ngIf="item.guildHonorsCost > 0">
-                {{ item.guildHonorsCost | numberFormat }}
-              </strong>
-              <small>{{ item.guildFavorCost > 0 ? "Favor" : "Honors" }}</small>
+              <small>Favor</small>
             </span>
           </button>
         </div>
@@ -122,10 +115,10 @@
       <dl class="purchase-stats">
         <div>
           <dt>Cost</dt>
-          <dd>{{ selectedCost() | numberFormat }} {{ selectedCurrency() }}</dd>
+          <dd>{{ selectedCost() | numberFormat }} Favor</dd>
         </div>
         <div>
-          <dt>{{ selectedCurrency() }} after purchase</dt>
+          <dt>Favor after purchase</dt>
           <dd>{{ selectedBalanceAfterPurchase() | numberFormat }}</dd>
         </div>
         <div>
@@ -147,14 +140,10 @@
     </p>
 
     <section class="wallet-card">
-      <p class="section-label">Your Guild Currency</p>
+      <p class="section-label">Your Guild Favor</p>
       <div>
         <span>Favor</span>
         <strong>{{ shop.guildFavor | numberFormat }}</strong>
-      </div>
-      <div>
-        <span>Honors</span>
-        <strong>{{ shop.guildHonors | numberFormat }}</strong>
       </div>
     </section>
   </aside>

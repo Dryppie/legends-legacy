@@ -222,7 +222,8 @@
   color: var(--ll-color-warning);
 }
 
-.stock-row > span:not(.item-copy) {
+.stock-row > .row-limit,
+.stock-row > .row-cost {
   text-align: right;
 }
 

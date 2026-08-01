@@ -1,541 +1,912 @@
-# Guild Buildings Analysis
+# Guild Buildings: Current-System Analysis
 
 ## Scope
 
-This document analyzes the current guild building system in the primary game application under `LL/`.
+This document analyzes the guild building system as it currently exists in `LL/`. It covers:
 
-The current building definitions are data-driven through `LL/src/API/API.LL/Data/guild-content.json`, with mirrored fallback defaults in `Services.LL/Guilds/GuildContentProvider.cs`. Actual gameplay effects are implemented mainly in:
+- the rules enforced by the backend,
+- the effects that are actually consumed by missions, shop, membership, and building costs,
+- the information shown on the Buildings tab,
+- progression and Guild Supply economics,
+- content and code redundancies,
+- misleading or unclear behavior,
+- and a recommended redesign order.
 
-- `Services.LL/Guilds/GuildBuildingService.cs`
-- `Services.LL/Guilds/GuildMissionService.cs`
-- `Services.LL/Guilds/GuildShopService.cs`
+This is an analysis document. It does not treat a benefit as functional merely because its content definition marks it as implemented. A benefit is considered functional only when another part of the game reads the building or its level and changes player-facing behavior.
 
-The current frontend display lives in:
+Primary sources reviewed:
 
+- `LL/src/API/API.LL/Data/guilds/guild-content.json`
+- `LL/src/Infrastructure/Service/Services.LL/Guilds/GuildBuildingService.cs`
+- `LL/src/Infrastructure/Service/Services.LL/Guilds/GuildMissionService.cs`
+- `LL/src/Infrastructure/Service/Services.LL/Guilds/GuildShopService.cs`
+- `LL/src/Infrastructure/Service/Services.LL/Guilds/GuildContentProvider.cs`
+- `LL/src/Core/Domain/Extensions/Guilds/GuildExtensions.cs`
 - `LL/src/Presentation/ll/src/app/features/game/city/guild/in-a-guild/guild-buildings/`
+- `LL/tests/EssenceSystem.Tests/GuildBuildingServiceTests.cs`
+- `LL/tests/EssenceSystem.Tests/GuildExtensionsTests.cs`
 
-No code changes are proposed directly in this document. This is a design and product analysis of the current state.
+## Executive Verdict
 
-## Executive Summary
+The building system has a good technical and visual foundation, but it currently overstates how much game is behind it.
 
-The guild building system has a solid structural foundation: buildings have definitions, costs, immediate upgrades, activity logs, role-based permissions, and frontend presentation. However, the current gameplay value is concentrated in only a few buildings.
+There are nine buildings. Only four have real runtime effects:
 
-The main issue is that the system presents itself as a strategic headquarters progression tree, but most buildings are either:
+1. Guild Hall
+2. Mission Board
+3. Market Office
+4. Treasury
 
-- a gate to another existing tab,
-- a small passive modifier,
-- a data hook without meaningful building-specific behavior,
-- or a placeholder for future systems.
+The other five have no runtime consumer outside their content definitions:
 
-This creates a mismatch between player expectation and actual payoff. Spending Guild Supplies on buildings should feel like choosing the identity and power curve of the guild. Right now, many choices feel like buying labels for systems that do not exist yet.
+1. Workshop
+2. Raid Hall
+3. War Room
+4. Training Grounds
+5. Essence Sanctum
 
-## Current Building Verdicts
+This is the central problem. More than half of the nominal building progression cost is attached to buildings that currently do nothing after purchase.
 
-| Building         | Current Role                                        | Verdict                                                   |
-| ---------------- | --------------------------------------------------- | --------------------------------------------------------- |
-| Guild Hall       | Unlock gate for other buildings                     | Keep, but make levels matter more                         |
-| Mission Board    | Mission options, daily orders, mission reward bonus | Best current building, needs deeper strategic choices     |
-| Market Office    | Guild shop unlocks                                  | Keep, but make stock more guild-activity-driven           |
-| Treasury         | Small construction cost/time discount               | Completely rework                                         |
-| Workshop         | Crafting-themed mission/shop hook                   | Rework heavily                                            |
-| Raid Hall        | Future raid placeholder                             | Hide, disable, or rebuild around a raid MVP               |
-| War Room         | Future guild war placeholder                        | Hide, disable, or rebuild around real guild war mechanics |
-| Training Grounds | Future raid/war preparation placeholder             | Completely change identity                                |
-| Essence Sanctum  | Essence-themed placeholder                          | Rework into a real essence progression building           |
+The system is strongest when a building connects to a recurring loop:
 
-## System Pain Points
+- Guild Hall changes recruitment capacity and unlock progression.
+- Mission Board changes recurring missions, orders, and rewards.
+- Market Office changes purchasable shop stock.
 
-### Too Many Buildings Sell Future Content
+It is weakest when the building is only a theme, future hook, or percentage:
 
-Raid Hall, War Room, Training Grounds, Essence Sanctum, and parts of Workshop mostly describe planned support rather than delivered mechanics.
+- Treasury is one passive discount described four different ways.
+- Workshop claims ownership of crafting content that already exists without it.
+- Raid Hall and War Room promise tabs that do not exist.
+- Training Grounds and Essence Sanctum currently buy only a level number.
 
-The frontend does mark unimplemented benefits as planned, which is good. The problem is that players can still spend Guild Supplies on these buildings, and the system displays them beside real buildings as if they are equally valid progression choices.
+The current system should be reduced to honest, useful choices before it is expanded. A smaller set of functional buildings would suit the game better than nine equally purchasable buildings with radically unequal value.
 
-The current risk is that leaders spend shared guild resources on a building that looks important but gives no meaningful return.
+## Current Rules
 
-### Guild Hall Has Dead Upper Levels
+### Construction And Upgrades
 
-Guild Hall has a max level of 10, but its meaningful unlocks currently stop at level 6:
+- Buildings and upgrades complete immediately.
+- Only the leader and officers can spend Guild Supplies.
+- Every building type can exist only once per guild.
+- The Guild Hall permanently exists and is lazily created at level 1 for older guilds.
+- Guild Hall level gates the initial construction of secondary buildings.
+- Guild Hall level does not gate later upgrades of a building.
+- There are no building slots, mutually exclusive choices, queues, demolition, refunds, or respecs.
+- Every building can eventually be owned and maxed if the guild has enough supplies.
 
-- Level 1: basic headquarters
-- Level 2: Workshop and Treasury
-- Level 4: Raid Hall, Training Grounds, Essence Sanctum
-- Level 6: War Room
+This makes the system an investment-order problem, not a headquarters-layout problem. The strategic question is simply which permanent upgrade should receive supplies first.
 
-Levels 7 through 10 do not currently create a strong gameplay reason to keep upgrading. That makes the core progression spine feel unfinished.
+### Currency
 
-### Strategic Choice Is Thin
+- Every building currently costs only Guild Supplies.
+- Cost increases linearly by level.
+- Treasury reduces future Guild Supply costs by 2% per Treasury level.
+- Costs are calculated and validated by the server.
 
-The construction system does not currently force meaningful tradeoffs beyond Guild Supplies and time. Tests confirm multiple buildings can be constructed without building slots.
+The API models costs as a resource dictionary, but only Guild Supplies are currently produced by the building service. This is reasonable future-proofing, although it adds contract and frontend complexity that is not yet used.
 
-That may be acceptable for a solo-developer-friendly system, but it means buildings need stronger individual identity. If the guild can eventually build everything, the interesting decision becomes build order. Build order only matters when the buildings actually change how members play.
+### Permissions And Feedback
 
-### Mission Board Dominates the Economy
+- Leaders and officers can construct and upgrade.
+- Regular members can inspect buildings but cannot spend supplies.
+- Successful actions create activity-log entries.
+- Building changes publish a guild realtime event, causing guild state to refresh for members.
+- The interface shows the next cost, available supplies, shortfall, level progression, benefits, and recent activity.
 
-Guild Supplies are generated through mission rewards, and Mission Board increases personal and weekly mission rewards by 5% per level, capped at 25%.
+These are good boundaries. Shared-currency authority is enforced server-side rather than trusted to the client.
 
-That makes Mission Board the natural first priority because it improves the engine that funds all other buildings. This is not inherently bad, but it does mean other early buildings need sharper reasons to compete.
+## Cost And Value Map
 
-### Treasury Is Weak Despite Being Implemented
+The table below shows nominal costs before Treasury discounts. Guild Hall starts at level 1, so its total is the cost of levels 2 through 10. Other buildings start unbuilt, so their total covers levels 1 through 5.
 
-Treasury gives a 2% construction cost reduction per level, maxing at 10%.
+| Building | Hall Requirement | Max Level | First Purchase | Nominal Cost To Max | Real Runtime Effect? |
+| --- | ---: | ---: | ---: | ---: | --- |
+| Guild Hall | 1 | 10 | 300 | 8,100 | Yes |
+| Mission Board | 1 | 5 | 100 | 1,500 | Yes |
+| Market Office | 1 | 5 | 150 | 2,000 | Yes |
+| Treasury | 2 | 5 | 175 | 2,375 | Yes, one passive effect |
+| Workshop | 2 | 5 | 175 | 2,375 | No |
+| Raid Hall | 4 | 5 | 400 | 4,250 | No |
+| Training Grounds | 4 | 5 | 300 | 3,500 | No |
+| Essence Sanctum | 4 | 5 | 300 | 3,500 | No |
+| War Room | 6 | 5 | 500 | 5,000 | No |
 
-Its total undiscounted cost is 2,375 Guild Supplies. That payoff is delayed, abstract, and hard to feel. It only becomes efficient if the guild has a large amount of future construction remaining, and even then it does not change behavior.
+Total nominal spend from the starting state to every maximum level is 32,600 Guild Supplies.
 
-Treasury is technically implemented, but emotionally underpowered.
+The five buildings with no runtime effect account for 18,625 supplies, or roughly 57% of that total. This is too much shared progression currency to attach to placeholder content.
 
-### Some Implemented Benefits Are Too Thin
+## What Is Great
 
-Some benefits are marked implemented because they unlock a foundation, a tab state, or a data-driven hook. These are technically true, but they are not satisfying player-facing benefits.
+### The Layout Is Strong
+
+The Buildings tab has a useful information hierarchy:
+
+- built, ready, and Hall-locked buildings are separated in a stable left rail,
+- the selected building owns the main workspace,
+- current level and level segments remain visible,
+- cost and supply progress have a dedicated action panel,
+- benefits are presented as an upgrade path,
+- and recent guild activity is available without leaving the page.
+
+This layout supports repeated use and comparison well. It is compact, game-like, and consistent with the rest of the guild area.
+
+### Immediate Completion Fits The Current System
+
+Removing construction timers was the right choice for the current depth of the feature. There is no queue management, worker assignment, acceleration economy, or meaningful scheduling decision that would justify waiting. Immediate completion keeps the interaction focused on the actual decision: whether the benefit is worth the Guild Supplies.
+
+### The Guild Hall Member Benefit Is Clear
+
+The Guild Hall now has a concrete per-level effect:
+
+- base guild capacity is 10,
+- each Guild Hall level adds one member,
+- level 1 therefore supports 11 members,
+- and level 10 supports 20 members.
+
+The Buildings tab explicitly shows current capacity, maximum capacity, and the next level's `+1 member slot` benefit. This is one of the clearest pieces of the system.
+
+### Server Authority Is Good
+
+The server validates:
+
+- guild membership,
+- leader or officer permissions,
+- valid building types,
+- uniqueness,
+- Guild Hall requirements,
+- maximum levels,
+- and available supplies.
+
+The client receives `CanConstruct`, `CanUpgrade`, and `LockedReason`, but it is not the source of truth. This is the correct approach for shared guild resources.
+
+### Mission Board And Market Office Prove The Concept
+
+Both buildings affect recurring systems outside the Buildings tab. Members can feel the consequences of those purchases during normal play. That is the standard every building should meet.
+
+### Planned Benefits Are Visually Distinguishable
+
+The upgrade path can show `Active`, `Next`, level requirements, and `Planned`. That is a good presentation mechanism. The problem is not the badge design; it is that some nonfunctional level-1 benefits are incorrectly marked implemented.
+
+## System-Wide Problems
+
+### 1. The Content Definitions Are Not Truthful Enough
+
+`IsImplemented` currently mixes several meanings:
+
+- a real mechanical effect,
+- the existence of a building record,
+- a possible data configuration hook,
+- or preparation for a future feature.
+
+Those are not equivalent.
 
 Examples:
 
-- "Unlocks the building foundation for combat preparation systems."
-- "Workshop-themed shop stock can be configured through guild content data."
-- "Unlocks the Raids tab locked state and prepares future raid registration."
+- Raid Hall says it unlocks a Raids tab state, but no Raids tab exists in the guild UI.
+- War Room says it unlocks a Wars tab state, but no Wars tab exists.
+- Workshop says crafting orders can appear, but crafting orders already appear without Workshop.
+- Training Grounds and Essence Sanctum mark their level-1 foundations implemented even though no service consumes either building.
 
-Those should not be treated as full building payoffs.
+An implemented badge should mean that buying the level changes current gameplay. By that definition, those claims are false.
 
-## Building-by-Building Analysis
+### 2. Placeholder Buildings Are Fully Purchasable
+
+The backend does not stop construction or upgrades when every useful benefit is planned. A leader can spend thousands of shared supplies and receive no effect.
+
+The `IsImplemented` field is presentation metadata only. It does not participate in validation, `CanConstruct`, or `CanUpgrade`.
+
+This is the highest-priority product problem because it permits irreversible shared-currency mistakes.
+
+### 3. The Progression Tree Is Shallower Than It Looks
+
+Guild Hall requirements gate only the first construction:
+
+- Hall 1: Mission Board and Market Office
+- Hall 2: Workshop and Treasury
+- Hall 4: Raid Hall, Training Grounds, and Essence Sanctum
+- Hall 6: War Room
+
+After construction, a guild can immediately upgrade that secondary building to level 5 without further Hall requirements. For example, a Hall 1 guild can max Mission Board and Market Office.
+
+This is simple, but it is not communicated. It also weakens the sense that headquarters progression and secondary-building progression are connected.
+
+### 4. Many Purchasable Levels Have No Immediate Payoff
+
+The interface allows every level below max to be purchased, but not every level has a distinct effect.
+
+Market Office no longer has this problem: level 4 now unlocks a rotating Blueprint. Mission Board level 4 also has an effect because the reward bonus rises from 15% to 20%, but that effect is not stated in the upgrade path. The next visible milestone remains level 5.
+
+For nonfunctional buildings, every level is effectively dead.
+
+### 5. The Next Upgrade Is Not Explained Precisely
+
+The action panel clearly shows cost, but only Guild Hall gets a dedicated next-level benefit summary.
+
+For other buildings, users must infer the result from the entire benefit path. That fails when:
+
+- the next numbered level has no milestone row,
+- a passive effect changes every level,
+- the next milestone is more than one level away,
+- or the benefit applies only after a reset.
+
+Every upgrade should state exactly what changes at the next level before the button is pressed.
+
+### 6. Shared Spending Has No Confirmation
+
+Selecting a building and pressing Build or Upgrade immediately spends shared supplies. There is no confirmation containing:
+
+- building name,
+- current and target level,
+- final cost,
+- remaining balance,
+- and exact unlocked effect.
+
+The selected-building step prevents accidental clicks from the rail, but it is not enough protection for expensive, irreversible shared purchases.
+
+### 7. "Ready To Build" Is Not Always Ready
+
+The left rail puts every unbuilt building whose Hall requirement is met under `Ready to Build`.
+
+That grouping ignores:
+
+- insufficient supplies,
+- regular-member permissions,
+- and whether the building has any implemented effect.
+
+A regular member can therefore see a building labeled ready with a visible `Build` command even though the action is disabled. The detailed panel eventually explains the lock, but the rail classification is misleading.
+
+Better states would be:
+
+- Available
+- Affordable
+- Requires supplies
+- Officer approval required
+- Coming later
+- Requires Hall level X
+
+### 8. "Building Log" Is Actually The Whole Guild Activity Log
+
+The building overview returns the latest ten entries from the shared guild activity table. Those entries include:
+
+- construction and upgrades,
+- mission selection,
+- personal order reward claims,
+- weekly mission reward claims,
+- and shop purchases.
+
+The UI labels this stream `Building Log`, which is inaccurate. Non-building activity can also push actual building history out of the ten-entry result.
+
+The log DTO includes `CharacterId`, but the UI does not show an actor name or identity. The visible entry therefore answers what happened and when, but not who spent the supplies or took the action.
+
+The visible timestamp is time-only. Older entries require hovering to discover the date.
+
+### 9. Data-Driven Content Is Duplicated
+
+Building definitions exist twice:
+
+1. JSON content in `guild-content.json`
+2. C# fallback definitions in `GuildContentProvider.cs`
+
+Names, descriptions, costs, benefits, and implementation flags must remain manually synchronized. This is a substantial redundancy and an easy source of drift.
+
+The content validator checks structural correctness, but not parity between both sources.
+
+It also does not validate several important design rules:
+
+- duplicate benefit levels,
+- missing effects on purchasable levels,
+- Hall requirements above the Hall maximum,
+- whether implemented claims have a runtime effect,
+- whether shop stock exists for a Market Office milestone,
+- or whether a placeholder building should be purchasable.
+
+### 10. The Frontend Activity Type Is Incorrectly Narrow
+
+The backend activity enum contains six event types, but the TypeScript `GuildActivityLogType` declares only:
+
+- `BuildingConstructed`
+- `BuildingUpgraded`
+
+The building endpoint can and does return mission and shop event types. JavaScript accepts those strings at runtime, but the TypeScript contract does not describe the real API response.
+
+### 11. Some API State Is Redundant Or Underused
+
+`GuildBuildingOverview` exposes `CanManageBuildings`, but the Buildings component does not use it for a page-level permission state. It relies on per-building action flags and locked reasons instead.
+
+This information should either be used to explain the member's role once at page level or removed from the contract.
+
+Similarly, the generic next-cost dictionary supports multiple resources, but the current UI and service are effectively Guild-Supplies-only. This is acceptable if multi-resource costs are planned; otherwise, a simpler contract would be clearer.
+
+### 12. Test Coverage Does Not Match The Shared-Currency Risk
+
+The shop now has focused coverage for Common and Rare catalyst pools, weekly rotation, the level-4 Blueprint rotation, item grants, and headline default reward values. Building-system coverage remains thin elsewhere.
+
+Current focused tests cover:
+
+- lazy creation of Guild Hall level 1,
+- immediate construction and supply spending,
+- immediate upgrades,
+- and member-cap calculations.
+
+Important missing tests include:
+
+- leader, officer, and regular-member permissions,
+- insufficient supplies,
+- duplicate construction,
+- Hall requirement enforcement,
+- maximum-level rejection,
+- cost growth by level,
+- Treasury rounding and discounts,
+- self-discount behavior while upgrading Treasury,
+- locked-reason accuracy,
+- placeholder-building purchase policy,
+- Mission Board reset timing,
+- the remaining Market Office level-to-stock thresholds,
+- JSON and fallback-definition parity,
+- and frontend rendering of non-building activity types.
+
+### 13. Concurrent Officer Purchases Are Not Protected
+
+`GuildResource` has no concurrency token, and building levels have no concurrency token. The service loads the current supply amount, checks it in memory, subtracts from the tracked entity, and saves at the end of the command transaction.
+
+A transaction makes each individual command atomic, but the default isolation does not prevent two officers from reading the same starting balance at the same time. Concurrent requests can therefore pass the same affordability check and overwrite one another's resource update. Concurrent upgrades of the same building can also calculate from the same starting level.
+
+Possible outcomes include:
+
+- two different buildings being purchased while only one effective deduction survives,
+- duplicate upgrade activity for one resulting level,
+- or inconsistent charging when simultaneous actions overlap.
+
+The unique guild-and-building-type index prevents duplicate records of the same building type, but it does not protect the shared resource balance or an existing building level.
+
+This should be treated as a correctness issue, not an optional optimization. Use an atomic guarded resource update, row locking, a concurrency token with retry/rejection, or a suitably isolated transaction for shared purchases.
+
+## Building Verdicts
+
+| Building | Actual Current Value | Clarity | Verdict |
+| --- | --- | --- | --- |
+| Guild Hall | Strong progression spine and member-cap growth | Mostly clear | Keep and enrich high levels |
+| Mission Board | Strongest recurring gameplay effect | Exact percentages and reset timing are unclear | Keep and deepen |
+| Market Office | Strong progression stock, weekly choices, and Blueprint access | Balance is not backed by live economy telemetry | Keep, monitor, connect to other buildings |
+| Treasury | Small future cost discount | Savings and return are hard to evaluate | Completely rework mechanically |
+| Workshop | No actual runtime effect | "Implemented" claims are misleading | Disable now, rebuild around guild crafting |
+| Raid Hall | No actual runtime effect | Promises a nonexistent tab | Hide until raid MVP exists |
+| War Room | No actual runtime effect | Promises a nonexistent tab | Hide until guild-war MVP exists |
+| Training Grounds | No actual runtime effect | Identity overlaps raid and war | Replace with a recurring challenge building |
+| Essence Sanctum | No actual runtime effect | Strong theme, no delivered loop | Rebuild as a core game-specific system |
+
+## Building-By-Building Analysis
 
 ## Guild Hall
 
-### Current Behavior
+### What It Actually Does
 
-Guild Hall exists permanently and is created lazily at level 1 if missing. Its level gates access to other buildings.
+- Exists permanently at level 1.
+- Adds one member slot per Hall level.
+- Raises member capacity from 11 at level 1 to 20 at level 10.
+- Unlocks Workshop and Treasury construction at level 2.
+- Unlocks Raid Hall, Training Grounds, and Essence Sanctum construction at level 4.
+- Unlocks War Room construction at level 6.
 
-Current unlocks:
+### What Is Great
 
-- Level 2 unlocks Workshop and Treasury.
-- Level 4 unlocks Raid Hall, Training Grounds, and Essence Sanctum.
-- Level 6 unlocks War Room.
+- It is a natural root building.
+- Its member-cap effect matters at every level.
+- Capacity is enforced when invitations and applications are accepted, not merely displayed.
+- The UI calls out current and next capacity clearly.
+- Its unlock levels give the building tree an understandable spine.
 
-### Pain Points
+### What Is Unclear Or Weak
 
-Guild Hall is structurally important but mechanically passive. It mostly says "you may now build other things." Once all buildings are unlocked, later levels do not carry enough meaning.
-
-The max level is 10, but the current design only justifies level 6.
-
-### Improvements
-
-Guild Hall should become the civic core of the guild. Good effects would be:
-
-- member cap increases,
-- additional officer slots,
-- construction queue slots,
-- guild announcement tools,
-- guild tag/banner customization,
-- guild policy slots,
-- better activity log/history depth,
-- recruitment visibility,
-- guild-wide weekly planning tools.
+- The benefit path shows milestone unlocks at levels 1, 2, 4, and 6, while the per-level member benefit lives in separate UI. The two presentations are correct but fragmented.
+- Levels 7 through 10 provide only member capacity. That is not dead progression, but it becomes expensive: the level-10 upgrade costs 1,500 supplies before Treasury discount for one final slot.
+- Several Hall unlocks currently lead to nonfunctional buildings, reducing the excitement of reaching Hall 4 and Hall 6.
+- The frontend hard-codes maximum member capacity as 20 while the backend derives it from a default base capacity of 10 plus Hall level. Those values can drift if configuration changes later.
 
 ### Recommendation
 
-Keep Guild Hall, but either add meaningful level 7-10 benefits or reduce the max level until those benefits exist.
+Keep Guild Hall. It is one of the best parts of the current system.
+
+Add one operational benefit at selected upper levels without weakening the member-cap rule. Suitable additions include:
+
+- recruitment listing improvements,
+- an extra officer or management permission slot,
+- guild announcement or planning tools,
+- deeper activity-history retention,
+- guild policy slots,
+- or cosmetic guild identity customization.
+
+Do not add waiting-time or construction-queue benefits now that construction is immediate.
 
 ## Mission Board
 
-### Current Behavior
+### What It Actually Does
 
-Mission Board is the strongest current building.
+Mission Board affects recurring guild play at every level:
 
-It affects:
+| Level | Actual Effect |
+| ---: | --- |
+| 0 | 3 weekly options, 3 daily orders, no reward bonus |
+| 1 | 5% bonus to Favor, Guild XP, and Guild Supplies from order and weekly-mission reward claims |
+| 2 | 10% reward bonus and a fourth weekly mission option |
+| 3 | 15% reward bonus and a fourth personal daily order |
+| 4 | 20% reward bonus |
+| 5 | 25% reward bonus |
 
-- weekly mission option count,
-- personal daily order count,
-- personal order rewards,
-- weekly mission rewards.
+Weekly mission targets are paced around a ten-player guild and the ten-second action timer. One player can perform 43,200 uninterrupted actions in five days, so ten players can perform 432,000. Monster Extermination and Craftsmen's Commission use that full guild capacity. Platinum requires a 10% personal share, placing it at exactly 43,200 kills or tempering actions.
 
-At level 2, it can add a fourth weekly mission option when enough definitions are available. At level 3, it can add a fourth personal daily order. Its reward bonus is 5% per level, up to 25%.
+| Weekly Mission | Guild Target | Personal Platinum Threshold |
+| --- | ---: | ---: |
+| Monster Extermination | 432,000 creatures | 43,200 creatures |
+| Dungeon Expedition | 1,000 rooms | 100 rooms |
+| Craftsmen's Commission | 432,000 actions | 43,200 actions |
+| Dungeon Vanguard | 100 runs | 10 runs |
 
-### Pain Points
+Guild progress stops at the shared target, but matching personal contribution continues until the weekly reset. This prevents an active guild from ending personal tier progression before a member reaches Platinum.
 
-Mission Board is effective, but its effects are mostly quantitative. It gives more options and more rewards, but not many interesting strategic choices.
+Weekly missions are never selected automatically. The service generates the available choices, then waits for a guild leader or officer to select one. The former calendar-week fallback, which selected the first option after Monday had been underway for 24 hours, was removed because it caused newly created midweek guilds to lose their choice immediately.
 
-Because it improves the supply-generation loop, it is likely the obvious first building for serious guilds.
+### What Is Great
 
-### Improvements
+- It changes systems members use every day and every week.
+- It offers both breadth and reward growth.
+- It improves the Guild Supply engine that funds headquarters progression.
+- Every level has a real effect.
+- Its cost is modest enough to feel attainable.
 
-Mission Board should become the guild coordination center. Possible effects:
+This is the best current example of what a guild building should be.
 
-- weekly mission rerolls,
-- officer-selected mission focus,
-- mission difficulty tiers,
-- guild streak bonuses,
-- role-based contribution bonuses,
-- specialized mission decks unlocked by other buildings,
-- member-scaled mission targets,
-- catch-up orders for lower-activity members.
+### What Is Unclear Or Redundant
+
+- The level-1 description says it "keeps the mission system active," but missions and orders exist without Mission Board.
+- The exact 5% per-level reward increase is not stated in the upgrade path.
+- "Mission currency" should be named explicitly as Guild Favor.
+- Level 4 has no benefit row even though its reward bonus increases.
+- Weekly options are generated once per week. Upgrading to level 2 after options exist does not add an option until the next weekly generation.
+- Personal orders are generated once per member per day. Upgrading to level 3 after today's orders exist does not add the fourth order until the next daily generation.
+- Reward bonuses are evaluated when rewards are claimed, so that part takes effect immediately. The UI does not explain this split timing.
+
+### Strategic Problem
+
+Mission Board is likely the optimal first investment because it increases Guild Supplies, which then funds every other building. That is acceptable only if competing buildings offer equally visible strategic value. Currently they do not.
 
 ### Recommendation
 
-Keep and deepen. Mission Board is the best current model for how guild buildings should work because it directly touches recurring play.
+Keep and deepen Mission Board.
+
+First, fix the copy and exact-level preview. Then add officer decisions rather than only passive growth:
+
+- one weekly reroll,
+- mission focus categories,
+- difficulty and reward tiers,
+- building-specific mission pools,
+- or catch-up orders for less active members.
 
 ## Market Office
 
-### Current Behavior
+### What It Actually Does
 
-Market Office unlocks guild shop stock:
+| Level | Actual Effect |
+| ---: | --- |
+| 0 | All shop items are locked by Market Office requirement |
+| 1 | Unlocks Common stock: two weekly catalyst caches drawn from the same five catalyst families as Rare stock, plus 25 Soulstones |
+| 2 | Adds two purchases of 10 Sigil Fragments, gated by 100 weekly contribution |
+| 3 | Unlocks Rare stock, including one rotating six-catalyst cache and stronger resource offers |
+| 4 | Unlocks one rotating Blueprint selected from eleven existing crafting designs |
+| 5 | Adds a second rotating six-catalyst Rare offer |
 
-- Level 1: common stock,
-- Level 2: expanded common stock,
-- Level 3: rotating weekly stock,
-- Level 5: prestige stock.
+Both Common and Rare stock reset weekly. Their catalyst pools both rotate across Fury, Arcane, Venom, Hive, and Primal recipes. Items can also have contribution, Favor, and weekly-limit requirements.
 
-Shop items are currently mostly personal currency/resource bundles such as Cinders, Soulstones, Fate Echo, Sigil Fragments, and Ascension Stone Fragments.
+### What Is Great
 
-### Pain Points
+- The level ladder is easy to understand conceptually.
+- It changes visible stock in another tab.
+- Every level now has a concrete stock unlock.
+- Rare rotation gives the building recurring relevance while a guaranteed Blueprint offer gives level 4 a distinct identity.
+- Contribution requirements connect shop access to guild participation.
+- The Shop tab shows reset timing, cost, limits, and locked reasons.
+- Soulstones, Sigil Fragments, Blueprints, and Blueprint recipe catalysts are the shop's primary rewards.
+- The shop does not sell Cinders or award Fate Echo, protecting the main currency economy and keeping stock focused on meaningful progression materials.
 
-Market Office works, but it feels generic. The stock is not strongly connected to what the guild has built, what the guild did that week, or which members contributed.
+### What Is Unclear Or Weak
 
-The name "Market Office" also overlaps mentally with the global marketplace. It behaves more like a guild quartermaster than a market.
-
-### Improvements
-
-Market Office should make guild activity visible in stock.
-
-Possible changes:
-
-- Workshop adds crafting crates to stock.
-- Raid Hall adds raid caches.
-- Essence Sanctum adds essence/soulstone offers.
-- War Room adds war spoils.
-- Treasury adds supply bundles or donation-matching contracts.
-- High weekly mission completion unlocks better weekly stock.
+- The building name can be confused with the global marketplace; this behaves more like a quartermaster or guild commissary.
+- Stock is generic and depends only on Market Office level, not on the rest of the headquarters.
+- The building's level-2 and level-3 benefits are meaningful, but the Buildings tab does not preview the exact items or slot count unlocked next.
+- Blueprint rotation does not account for what a member has already learned, and the deterministic weekly picker can select the same design in consecutive weeks.
+- Reward values are intentionally substantial, but no production telemetry currently validates Favor income, purchase rates, or player currency balances.
 
 ### Recommendation
 
-Keep, but consider renaming to Quartermaster if it remains a guild reward shop. Make stock depend on guild buildings and weekly guild activity.
+Keep Market Office in its current five-level shape. Its progression now has a useful cadence: Common catalysts and Soulstones, Sigil Fragments, Rare stock, Blueprints, then a second Rare catalyst slot.
+
+The next improvements should focus on quality rather than adding more raw stock:
+
+- collect purchase-rate and currency-balance telemetry before another numeric rebalance,
+- prevent frustrating Blueprint repetition or offer a choice mechanism,
+- make learned Blueprint duplicates intentionally tradable or otherwise reusable,
+- and preview the exact next-level stock on the Buildings tab.
+
+Longer term, make other functional buildings add stock categories. This creates a connected headquarters without requiring building slots.
 
 ## Treasury
 
-### Current Behavior
+### What It Actually Does
 
-Treasury reduces Guild Supply construction costs by 2% per level, up to 10%.
+- Reduces future building costs by 2% per Treasury level.
+- Reaches a maximum discount of 10% at level 5.
+- Uses ceiling rounding, so fractional discounted costs round upward.
+- Discounts its own later upgrades because the current Treasury level is read before each next cost is calculated.
 
-### Pain Points
+The nominal cost to max Treasury is 2,375 supplies. Its actual self-discounted sequence is approximately:
 
-Treasury is the weakest implemented building. It does not create new gameplay, new decisions, or visible excitement. It is a small efficiency modifier on the building system itself.
+- level 1: 175
+- level 2: 319
+- level 3: 456
+- level 4: 588
+- level 5: 713
+- total: 2,251
 
-Its value is also awkward because the best time to build it is early, but early guilds are the least able to spend resources on a delayed payoff.
+### What Is Great
 
-### Improvements
+- The effect is implemented consistently in the server cost calculation.
+- The discount immediately updates costs across all remaining buildings.
+- The theme of financial efficiency suits a Treasury.
 
-Treasury should become the guild finance and logistics building.
+### What Is Redundant
 
-Potential effects:
+Four benefit rows describe one linear passive effect:
 
-- member donation tracking,
-- weekly Guild Supply stipend,
-- contribution matching,
-- increased Guild Supplies from all mission rewards,
-- shared guild vault,
-- spending permissions and budgets,
-- building project funding,
-- emergency supply reserve,
-- weekly dividend based on member activity.
+- Supply Ledger
+- Supply Storage
+- Supply Efficiency
+- Quartermaster Network
+
+There is no separate storage mechanic, ledger, budget, stipend, donation system, or quartermaster action. The names imply multiple systems that do not exist.
+
+### What Is Weak Or Unclear
+
+- The UI shows discounted cost but not base cost, discount percentage, or supplies saved.
+- The player cannot judge return on investment without external calculation.
+- At a 10% maximum discount, a maxed Treasury needs roughly 22,510 supplies of later nominal spending to recover its own 2,251 cost. Progressive discounts make the real comparison dependent on purchase order.
+- The best mathematical time to buy it is early, but early guilds are least able to afford a long-term efficiency investment.
+- It changes no member behavior and creates no recurring guild decision.
 
 ### Recommendation
 
-Completely rework. Keep the name, but replace the current identity. A Treasury should make the guild economy feel alive, not just slightly reduce building costs.
+Completely rework Treasury's mechanics while keeping the building name.
+
+Its primary identity should be guild logistics, not only cheaper buildings. A focused first version could combine:
+
+- visible member supply donations,
+- a weekly supply stipend based on guild activity,
+- officer spending history and budgets,
+- and a smaller retained building-cost discount.
+
+That would give members a contribution path, officers a management tool, and the guild a recurring economic loop.
 
 ## Workshop
 
-### Current Behavior
+### What It Actually Does
 
-Workshop is positioned as crafting-focused progression.
+Nothing currently reads Workshop type or level outside its definition.
 
-Current benefits mostly say crafting and tempering orders can appear from the data-driven order pool, and workshop-themed shop stock can be configured through content data.
+Its stated implemented effects are not real dependencies:
 
-### Pain Points
+- Crafting and tempering missions already exist in the default pools without Workshop.
+- Shop items can be themed through content, but the shop definition has only a Market Office level requirement. It cannot require Workshop level.
 
-The current system does not appear to require Workshop for crafting missions to exist. Crafting and tempering orders are already present in the default mission/order definitions.
+### What Is Good
 
-This makes Workshop feel like flavor rather than a real building.
+- The theme is appropriate for a game with crafting and tempering systems.
+- It offers a natural non-combat guild identity.
+- Its Hall 2 position could make it an early alternative to pure mission optimization.
 
-### Improvements
+### What Is Misleading
 
-Workshop should own cooperative crafting.
-
-Possible effects:
-
-- guild crafting commissions,
-- shared material turn-ins,
-- member crafting order board,
-- guild project recipes,
-- crafting contribution multipliers,
-- tempering milestone rewards,
-- unlockable guild-exclusive recipes,
-- supply generation from crafted item quality.
+- Levels 1 and 2 are marked implemented despite producing no current behavior.
+- "Workshop Stock" describes developer configurability, not a player benefit.
+- The guild can pay 2,375 supplies to max a record that no gameplay service reads.
 
 ### Recommendation
 
-Rework heavily. Workshop should be one of the clearest non-combat guild identities, especially for players who prefer crafting loops.
+Disable construction now, then rebuild Workshop around cooperative crafting.
+
+A suitable minimum viable loop would be:
+
+1. The guild receives a weekly crafting commission.
+2. Members contribute qualifying crafted or tempered items.
+3. Progress produces Guild Supplies and crafting-themed personal rewards.
+4. Workshop levels add commission choice, reward quality, or an additional project.
+5. Completed Workshop milestones add real Workshop-gated stock to Market Office.
+
+This would make Workshop distinct, social, and useful without needing a massive new combat system.
 
 ## Raid Hall
 
-### Current Behavior
+### What It Actually Does
 
-Raid Hall is a future raid placeholder. Level 1 is marked implemented because it unlocks a locked state or prepares future registration. Later benefits are planned.
+Nothing currently reads Raid Hall type or level outside its definition. There is no Raids tab in the guild interface.
 
-### Pain Points
+### What Is Good
 
-Raid Hall is expensive and largely nonfunctional. It costs 4,250 Guild Supplies to max before any Treasury discounts, but current rewards are mostly future-facing.
+- A dedicated operations building can suit cooperative raid content.
+- Hall level 4 is a reasonable point for a more advanced guild system.
 
-Players should not be encouraged to invest in this until raids exist.
+### What Is Misleading
 
-### Improvements
-
-When raids are ready, Raid Hall should own:
-
-- raid registration,
-- raid windows,
-- raid keys,
-- member signup,
-- role assignment,
-- boss scouting,
-- contribution scoring,
-- raid reward chests,
-- raid practice objectives.
+- Level 1 claims to unlock a Raids tab state that does not exist.
+- Level 1 is marked implemented while providing no runtime behavior.
+- It costs 4,250 supplies to max, making it one of the most expensive placeholder purchases.
 
 ### Recommendation
 
-Hide or disable construction until a raid MVP exists. Once raids exist, rebuild the building around real raid operations.
+Hide or disable Raid Hall until a raid MVP exists.
+
+When raids are playable, Raid Hall should own concrete operations such as registration, member signup, role assignment, raid windows, contribution scoring, and raid rewards. It should be designed with that system rather than ahead of it.
 
 ## War Room
 
-### Current Behavior
+### What It Actually Does
 
-War Room is a future guild war placeholder. There is a worker/background-job hint for guild war phase rollover, but no meaningful War Room integration.
+Nothing currently reads War Room type or level outside its definition. There is no Wars tab in the guild interface.
 
-### Pain Points
+### What Is Good
 
-War Room has the highest non-Guild-Hall max cost at 5,000 Guild Supplies before discounts. That is too expensive for a placeholder.
+- It has a clear fantasy if guild wars become a real system.
+- Hall level 6 creates appropriate anticipation for an advanced competitive feature.
 
-It also requires Guild Hall level 6, so by the time players unlock it, they will expect a major system.
+### What Is Misleading
 
-### Improvements
-
-War Room should own guild war strategy.
-
-Possible effects:
-
-- war registration,
-- roster locks,
-- attack teams,
-- defensive formations,
-- scouting,
-- war phase visibility,
-- seasonal rating,
-- war shop unlocks,
-- guild honors generation,
-- strategic buffs that apply only inside war.
+- Level 1 claims to unlock a Wars tab state that does not exist.
+- Level 1 is marked implemented while providing no runtime behavior.
+- At 5,000 supplies to max, it is the most expensive non-Hall building and currently has no return.
 
 ### Recommendation
 
-Hide or disable until guild wars are real. If guild wars are near-term, War Room should be designed alongside that system, not as a generic future placeholder.
+Hide or disable War Room until guild wars have a playable minimum version.
+
+When implemented, it should own registration, roster management, scouting, attack and defense planning, phase visibility, seasonal rating, and war-specific rewards. Generic passive combat bonuses would not justify this building's cost or Hall requirement.
 
 ## Training Grounds
 
-### Current Behavior
+### What It Actually Does
 
-Training Grounds is positioned as future raid and war preparation.
+Nothing currently reads Training Grounds type or level outside its definition.
 
-### Pain Points
+### What Is Good
 
-The identity is too vague. It overlaps with Raid Hall and War Room, and "Training Grounds" also risks confusion with tutorial/training content elsewhere in the game.
+- A recurring combat-practice building could work without waiting for raids or wars.
+- It could provide an accessible combat contribution path for all guild members.
 
-It does not currently offer a unique loop.
+### What Is Redundant Or Unclear
 
-### Improvements
-
-This building needs a new identity. Better options:
-
-### Option A: Barracks
-
-Make it the combat-member development building:
-
-- combat daily orders,
-- sparring challenges,
-- guild combat milestones,
-- PvE preparation bonuses,
-- training medals,
-- member readiness score.
-
-### Option B: Proving Grounds
-
-Make it an internal challenge mode:
-
-- weekly guild combat trials,
-- leaderboard among guild members,
-- simulated bosses,
-- build testing,
-- low-stakes practice rewards.
+- Its current identity overlaps with both Raid Hall and War Room.
+- "Unlocks the building foundation" is not a gameplay effect.
+- Its planned raid and war preparation bonuses depend on two other unimplemented systems.
+- The name does not tell the player what recurring action becomes available.
 
 ### Recommendation
 
-Completely change. Either turn it into Barracks/Proving Grounds with a real recurring combat loop, or remove it until raid/war systems need a shared preparation building.
+Completely replace its current identity.
+
+The strongest replacement is `Proving Grounds`: a weekly guild challenge space with simulated encounters, member scoreboards, build testing, and modest repeatable rewards. That creates a real loop using existing combat systems and avoids waiting for raid or war development.
+
+If that loop is not planned, remove the building until it has a unique purpose.
 
 ## Essence Sanctum
 
-### Current Behavior
+### What It Actually Does
 
-Essence Sanctum is an essence-themed placeholder.
+Nothing currently reads Essence Sanctum type or level outside its definition.
 
-### Pain Points
+### What Is Good
 
-This building has one of the best thematic fits for Legends Legacy, but it currently does not deliver on that promise.
+- It is one of the strongest thematic fits for Legends Legacy.
+- Existing essence, Soulstone, Fate Echo, and Sigil Fragment economies provide material for a guild-level loop.
+- It can become meaningful without requiring a large multiplayer battle mode.
 
-Since essences appear central to character progression, a guild-level essence building should feel special.
+### What Is Weak
 
-### Improvements
-
-Essence Sanctum should become a real essence progression system.
-
-Possible effects:
-
-- essence donations,
-- weekly resonance rituals,
-- soulstone conversion,
-- Fate Echo or Sigil Fragment rewards,
-- guild-wide essence research,
-- essence-themed daily orders,
-- unlockable essence shop stock,
-- shared progression toward essence caches,
-- rotating elemental resonance weeks.
+- Every current benefit is only a future promise.
+- Level 1 is marked implemented solely because a building foundation exists.
+- Its name creates a high expectation that the current system does not meet.
 
 ### Recommendation
 
-Rework into a core mid-game building. This should probably be more important than Raid Hall or War Room until those larger multiplayer systems exist.
+Rebuild Essence Sanctum as a core mid-game building before Raid Hall or War Room.
 
-## Recommended Redesign Direction
+A focused version could provide:
 
-## Short-Term Fixes
+- weekly resonance projects,
+- member essence or Soulstone contributions,
+- rotating essence themes,
+- shared progress toward personal caches,
+- and Sanctum-gated Market Office stock.
 
-### 1. Gate Placeholder Buildings
+This suits the game's existing identity better than another generic combat bonus.
 
-Do not let guilds spend supplies on buildings that do not have meaningful effects.
+## Redundancy Summary
 
-Candidates to hide, disable, or label as unavailable:
+The following elements are currently redundant or unnecessarily duplicated:
+
+1. Building content is maintained in both JSON and C# fallback definitions.
+2. Treasury uses four named benefits to describe one passive percentage.
+3. Several "implemented" level-1 benefits mean only that a database row can exist.
+4. `CanManageBuildings` is returned but not used for a page-level permission treatment.
+5. `CharacterId` is returned in activity logs but not translated into visible actor identity.
+6. The TypeScript activity type describes only two of the six backend event types.
+7. The generic cost dictionary supports resources that building costs do not currently use.
+8. Placeholder building levels repeat the same absence of behavior at increasing prices.
+9. Unlock summary, description, and benefit copy sometimes restate the same passive effect without adding decision-relevant detail.
+
+## Recommended Product Direction
+
+### Keep As Core Buildings
+
+- Guild Hall
+- Mission Board
+- Market Office
+
+These already answer a useful question: what can the guild do now that it could not do before?
+
+### Rework Immediately
+
+- Treasury
+
+Keep the fantasy, but replace its single passive identity with logistics, donations, and recurring supply management.
+
+### Disable Until Rebuilt
+
+- Workshop
+- Essence Sanctum
+- Training Grounds
+
+These can become good buildings using systems already close to the game's current identity, but they should not consume supplies before their loops exist.
+
+### Hide Until Their Parent Systems Exist
 
 - Raid Hall
 - War Room
-- Training Grounds
-- Essence Sanctum
 
-Workshop may also need gating unless its effect becomes real.
+Their value cannot be honestly delivered without raids and guild wars.
 
-### 2. Rework Treasury First
+## Recommended Implementation Priorities
 
-Treasury is implemented but not compelling. Reworking it would improve the early building economy without waiting for raid or war systems.
+### Priority 0: Stop Selling No-Effect Levels
 
-Best first version:
+1. Protect Guild Supply spending and building levels from concurrent officer actions.
+2. Make a building or level non-purchasable when it has no current gameplay effect.
+3. Correct all false `IsImplemented` values.
+4. Remove nonexistent Raids and Wars tab claims.
+5. Fix the `Ready to Build` grouping so it reflects permissions and affordability.
+6. Add a shared-spending confirmation.
 
-- Increase Guild Supplies earned from mission rewards by a visible amount.
-- Add a weekly supply stipend.
-- Track member donations or weekly logistics contribution.
+### Priority 1: Make The Current Four Honest And Complete
 
-### 3. Add Guild Hall Level 7-10 Benefits
+1. Add exact next-level effect summaries for every building.
+2. Explain Mission Board percentages, affected rewards, and reset timing.
+3. Add telemetry for Guild Favor earnings, shop purchases, and skipped stock so Market Office values can be tuned against real play.
+4. Show Treasury base cost, discount, and supplies saved.
+5. Rename Building Log to Guild Activity or filter it to actual building events.
+6. Show the actor and full date for shared-currency actions.
 
-If Guild Hall remains max level 10, give those levels real meaning.
+### Priority 2: Strengthen The Headquarters Network
 
-Suggested progression:
+1. Let functional specialist buildings add stock to Market Office.
+2. Add building-specific mission pools to Mission Board.
+3. Give upper Guild Hall levels management or identity benefits alongside member capacity.
+4. Decide whether secondary-building levels should require higher Hall levels.
 
-- Level 7: second construction queue or faster project finalization.
-- Level 8: guild policy slot.
-- Level 9: advanced recruitment visibility or larger member cap.
-- Level 10: capstone guild identity feature.
+### Priority 3: Build The Best Near-Term Specialist Loops
 
-### 4. Make Market Office Stock Depend on Buildings
+1. Workshop cooperative commissions.
+2. Essence Sanctum resonance projects.
+3. Proving Grounds weekly combat challenges.
 
-The fastest way to make buildings feel connected is to let buildings influence guild shop stock.
+These can use existing crafting, essence, combat, mission, and reward systems.
 
-Examples:
+### Priority 4: Add Large Multiplayer Buildings With Their Systems
 
-- Workshop level adds crafting crates.
-- Essence Sanctum level adds soulstone/Fate Echo stock.
-- Raid Hall level adds raid preparation bundles.
-- War Room level adds honor/prestige stock.
-- Treasury level adds supply bundles or reduced purchase requirements.
+1. Raid Hall alongside raid MVP.
+2. War Room alongside guild-war MVP.
 
-## Medium-Term Redesign
+Do not build their level ladders independently from the features they are supposed to operate.
 
-### Add Building Archetypes
+## Technical Recommendations
 
-Each building should map to a clear gameplay archetype:
+### Establish One Content Source Of Truth
 
-| Archetype               | Building                       |
-| ----------------------- | ------------------------------ |
-| Civic / management      | Guild Hall                     |
-| Coordination / missions | Mission Board                  |
-| Economy / logistics     | Treasury                       |
-| Rewards / shop          | Market Office or Quartermaster |
-| Crafting                | Workshop                       |
-| Combat practice         | Barracks or Proving Grounds    |
-| Essence progression     | Essence Sanctum                |
-| Cooperative PvE         | Raid Hall                      |
-| Competitive guild PvP   | War Room                       |
+Prefer one of these approaches:
 
-### Replace Generic Bonuses With Loops
+- package the JSON as required application content and fail clearly if it is missing,
+- generate fallback content from the same source,
+- or add a parity test that compares every JSON and C# building field.
 
-The best buildings should unlock verbs, not only percentages.
+Manual duplication is the least reliable option.
 
-Weak pattern:
+### Separate Availability From Implementation
 
-- +2% cost reduction
-- +5% reward
-- unlocks future support
+A building needs explicit states such as:
 
-Stronger pattern:
+- implemented and purchasable,
+- visible preview but unavailable,
+- hidden,
+- or deprecated.
 
-- reroll a mission
-- start a guild commission
-- donate materials to a guild project
-- open a weekly ritual
-- register raid members
-- assign a war defense
-- unlock a building-specific shop rotation
+Per-benefit `IsImplemented` is not enough to control safe purchasing.
 
-## Suggested Priority Order
+### Define Exact Effects Per Purchased Level
 
-1. Mission Board: keep, polish, and make it the model for recurring guild engagement.
-2. Treasury: rework into guild logistics and supply generation.
-3. Market Office: connect stock to guild activity and other buildings.
-4. Guild Hall: add real levels 7-10 or lower the cap.
-5. Workshop: turn into cooperative crafting projects.
-6. Essence Sanctum: build essence donations/rituals/research.
-7. Training Grounds: rename and redesign as Barracks or Proving Grounds.
-8. Raid Hall: wait for raid MVP.
-9. War Room: wait for guild war MVP.
+Every purchasable next level should have a machine-readable effect summary. The server and UI should be able to answer:
 
-## Design Principle
+- what changes at this exact level,
+- whether it applies immediately or on reset,
+- what systems and rewards it affects,
+- and whether the effect is already active.
 
-A guild building should answer at least one of these questions:
+### Align Activity Contracts
 
-- What new thing can the guild do now?
-- What recurring decision did officers gain?
-- What new contribution path did members gain?
-- What reward category did the guild unlock?
-- What visible identity did the guild choose?
+- Use the complete backend activity enum in TypeScript.
+- Rename the panel to Guild Activity or filter event types.
+- Include actor display information when accountability matters.
+- Provide date-aware timestamps and a route to older history if history is meant to be useful.
 
-If a building cannot answer one of those questions, it should not be constructible yet.
+### Expand Focused Tests
 
-## Implementation Notes
+Add a table-driven building test suite covering every building and level for:
 
-Most content-facing changes can start in `guild-content.json`, but new effects require service code.
+- cost,
+- Hall requirement,
+- permissions,
+- affordability,
+- exact effect,
+- maximum-level behavior,
+- and UI-facing locked reason.
 
-Likely code areas:
+Add integration tests for Mission Board generation timing, Market Office stock thresholds, and Treasury discount rounding.
 
-- Building definitions and copy: `LL/src/API/API.LL/Data/guild-content.json`
-- Default fallback definitions: `GuildContentProvider.cs`
-- Construction rules and costs: `GuildBuildingService.cs`
-- Mission effects: `GuildMissionService.cs`
-- Shop stock and requirements: `GuildShopService.cs`
-- Frontend presentation: `guild-buildings.component.*`
+Add a relational-database concurrency test that issues two officer purchases against the same Guild Supply row. In-memory EF tests cannot validate the required locking or optimistic-concurrency behavior.
 
-If placeholder buildings are disabled, the model likely needs a content flag such as `isAvailable`, `isConstructible`, or `releaseState`. Relying only on `isImplemented` per benefit is not enough, because a building can have one thin "implemented" foundation benefit while still being a poor construction target.
+### Make Shared Spending Concurrency-Safe
 
-## Verification Notes
+Do not rely on a read-then-subtract sequence for Guild Supplies. Prefer one explicit invariant-preserving operation, for example an update whose predicate requires `Amount >= cost` and whose affected-row count determines success.
 
-This analysis was based on reading the guild building data, services, tests, and frontend models/components. No verification commands are required for this document-only change beyond confirming the markdown file exists.
+Protect building level changes as well. A version column or guarded update should ensure that an upgrade succeeds only when the persisted level still equals the level used to calculate its cost.
+
+## Design Standard For A Guild Building
+
+A purchasable guild building should satisfy at least two of these conditions:
+
+- It unlocks a new recurring action.
+- It creates a new officer decision.
+- It creates a new member contribution path.
+- It unlocks a visible reward category.
+- It changes another guild system in a way members can feel.
+- It expresses a distinct guild identity.
+
+It should also answer all of these before purchase:
+
+- What changes at the next level?
+- When does that change take effect?
+- Who benefits?
+- How much does it cost?
+- Can the guild undo the decision?
+
+If a building cannot answer those questions, it should be shown as future content rather than sold as current progression.
+
+## Final Assessment
+
+The current Guild Buildings page looks more complete than the underlying game system. That is both its success and its risk.
+
+The layout, server-side rules, immediate completion, member-cap integration, mission effects, and shop effects are strong. They form a credible base.
+
+The main work is not adding more buildings. It is making the current list honest:
+
+- three buildings are solid,
+- one needs a major economic redesign,
+- three need real specialist loops,
+- and two should wait for their parent multiplayer systems.
+
+The best next version would temporarily offer fewer purchases, but every offered purchase would visibly change how the guild plays. That would make the headquarters feel smaller on paper and much larger in practice.

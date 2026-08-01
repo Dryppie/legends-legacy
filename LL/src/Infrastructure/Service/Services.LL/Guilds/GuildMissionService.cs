@@ -74,6 +74,7 @@ public class GuildMissionService : IGuildMissionService
         }
 
         SelectOption(guild, option, characterId, now);
+        await _context.SaveChangesAsync(cancellationToken);
         var overview = await BuildOverviewAsync(guild.Id, characterId, now, cancellationToken);
         return GuildOperationResult<GuildMissionOverviewDto>.Success(overview);
     }
@@ -96,7 +97,7 @@ public class GuildMissionService : IGuildMissionService
         var character = await _context.Characters.FirstOrDefaultAsync(x => x.Id == characterId, cancellationToken);
         if (character is null) return GuildOperationResult<GuildMissionOverviewDto>.Fail("Character was not found.");
 
-        var orderReward = ApplyMissionBoardRewardBonus(guild, new WeeklyReward(50, 20, 10, 0));
+        var orderReward = ApplyMissionBoardRewardBonus(guild, new WeeklyReward(50, 20, 10));
 
         character.GuildFavor += orderReward.Favor;
         AddGuildXp(guild, orderReward.GuildXp);
@@ -146,7 +147,6 @@ public class GuildMissionService : IGuildMissionService
 
         var rewards = ApplyMissionBoardRewardBonus(guild, GetWeeklyReward(contribution.ContributionTier));
         character.GuildFavor += rewards.Favor;
-        character.GuildHonors += rewards.Honors;
         AddGuildXp(guild, rewards.GuildXp);
         AddGuildSupplies(guild, rewards.Supplies);
         AddPeriodRewards(guild.Id, characterId, GuildMissionPeriodType.Weekly, week.Key, rewards.Favor, rewards.GuildXp, rewards.Supplies, orderCompleted: false, now);
@@ -239,6 +239,25 @@ public class GuildMissionService : IGuildMissionService
         var currentOptions = await _context.GuildMissionOptions
             .Where(x => x.GuildId == guild.Id && x.WeekKey == week.Key)
             .ToListAsync(cancellationToken);
+        var obsoleteOptions = currentOptions
+            .Where(x => !_allDefinitions.ContainsKey(x.MissionDefinitionId))
+            .ToList();
+        if (obsoleteOptions.Count > 0)
+        {
+            _context.GuildMissionOptions.RemoveRange(obsoleteOptions);
+            currentOptions = currentOptions.Except(obsoleteOptions).ToList();
+        }
+
+        var currentInstance = await _context.GuildMissionInstances
+            .FirstOrDefaultAsync(x => x.GuildId == guild.Id && x.WeekKey == week.Key, cancellationToken);
+        if (currentInstance is not null && !_allDefinitions.ContainsKey(currentInstance.MissionDefinitionId))
+        {
+            _context.GuildMissionInstances.Remove(currentInstance);
+            currentInstance = null;
+            _context.GuildMissionOptions.RemoveRange(currentOptions);
+            currentOptions = [];
+        }
+
         if (currentOptions.Count == 0)
         {
             currentOptions = GetWeeklyMissionOptions(guild, week.Key)
@@ -254,16 +273,16 @@ public class GuildMissionService : IGuildMissionService
             _context.GuildMissionOptions.AddRange(currentOptions);
         }
 
-        var currentInstance = await _context.GuildMissionInstances
-            .FirstOrDefaultAsync(x => x.GuildId == guild.Id && x.WeekKey == week.Key, cancellationToken);
+        if (currentInstance is { Status: GuildMissionStatus.Active }
+            && _allDefinitions.TryGetValue(currentInstance.MissionDefinitionId, out var currentDefinition))
+        {
+            currentInstance.TargetAmount = Math.Max(1, currentDefinition.BaseTarget);
+        }
+
         var selectedOption = currentOptions.FirstOrDefault(x => x.IsSelected);
         if (currentInstance is null && selectedOption is not null)
         {
             SelectOption(guild, selectedOption, selectedOption.SelectedByCharacterId, selectedOption.SelectedAt ?? now);
-        }
-        else if (currentInstance is null && now >= week.StartsAt.AddHours(24))
-        {
-            SelectOption(guild, currentOptions[0], null, now);
         }
 
         var currentOrders = await _context.PersonalGuildOrders
@@ -353,13 +372,15 @@ public class GuildMissionService : IGuildMissionService
         var week = GetWeek(now);
         var instance = await _context.GuildMissionInstances
             .Include(x => x.Contributions)
-            .FirstOrDefaultAsync(x => x.GuildId == guild.Id && x.WeekKey == week.Key && x.Status == GuildMissionStatus.Active, cancellationToken);
+            .FirstOrDefaultAsync(x =>
+                x.GuildId == guild.Id
+                && x.WeekKey == week.Key
+                && (x.Status == GuildMissionStatus.Active || x.Status == GuildMissionStatus.Completed),
+                cancellationToken);
         if (instance is null) return 0;
         if (!_allDefinitions.TryGetValue(instance.MissionDefinitionId, out var definition) || definition.Metric != metric) return 0;
 
         var progress = Math.Min(amount, Math.Max(0, instance.TargetAmount - instance.CurrentAmount));
-        if (progress <= 0) return 0;
-
         instance.CurrentAmount += progress;
         var contribution = instance.Contributions.FirstOrDefault(x => x.CharacterId == characterId);
         if (contribution is null)
@@ -373,7 +394,7 @@ public class GuildMissionService : IGuildMissionService
             _context.GuildMissionContributions.Add(contribution);
         }
 
-        contribution.Amount += progress;
+        contribution.Amount += amount;
         contribution.LastContributedAt = now;
         contribution.ContributionTier = CalculateTier(contribution.Amount, instance.TargetAmount);
 
@@ -548,21 +569,21 @@ public class GuildMissionService : IGuildMissionService
         var ratio = amount / (double)Math.Max(1, target);
         return ratio switch
         {
-            >= 0.15d => GuildContributionTier.Platinum,
-            >= 0.1d => GuildContributionTier.Gold,
+            >= 0.1d => GuildContributionTier.Platinum,
+            >= 0.075d => GuildContributionTier.Gold,
             >= 0.05d => GuildContributionTier.Silver,
-            >= 0.01d => GuildContributionTier.Bronze,
+            >= 0.025d => GuildContributionTier.Bronze,
             _ => GuildContributionTier.None
         };
     }
 
     private static WeeklyReward GetWeeklyReward(GuildContributionTier tier) => tier switch
     {
-        GuildContributionTier.Platinum => new WeeklyReward(225, 650, 130, 1),
-        GuildContributionTier.Gold => new WeeklyReward(175, 500, 100, 0),
-        GuildContributionTier.Silver => new WeeklyReward(100, 250, 50, 0),
-        GuildContributionTier.Bronze => new WeeklyReward(50, 100, 20, 0),
-        _ => new WeeklyReward(0, 0, 0, 0)
+        GuildContributionTier.Platinum => new WeeklyReward(225, 650, 130),
+        GuildContributionTier.Gold => new WeeklyReward(175, 500, 100),
+        GuildContributionTier.Silver => new WeeklyReward(100, 250, 50),
+        GuildContributionTier.Bronze => new WeeklyReward(50, 100, 20),
+        _ => new WeeklyReward(0, 0, 0)
     };
 
     private IReadOnlyList<GuildMissionDefinition> GetWeeklyMissionOptions(Guild guild, string weekKey)
@@ -598,8 +619,7 @@ public class GuildMissionService : IGuildMissionService
         return new WeeklyReward(
             (long)Math.Ceiling(reward.Favor * multiplier),
             (long)Math.Ceiling(reward.GuildXp * multiplier),
-            (int)Math.Ceiling(reward.Supplies * multiplier),
-            reward.Honors);
+            (int)Math.Ceiling(reward.Supplies * multiplier));
     }
 
     private static void AddGuildXp(Guild guild, long xp)
@@ -692,5 +712,5 @@ public class GuildMissionService : IGuildMissionService
     }
 
     private sealed record WeekPeriod(string Key, DateTimeOffset StartsAt, DateTimeOffset EndsAt);
-    private sealed record WeeklyReward(long Favor, long GuildXp, int Supplies, long Honors);
+    private sealed record WeeklyReward(long Favor, long GuildXp, int Supplies);
 }
