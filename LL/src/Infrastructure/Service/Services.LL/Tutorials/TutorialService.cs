@@ -738,8 +738,6 @@ public sealed class TutorialService : ITutorialService, ITutorialProgressionServ
                 Id = Guid.NewGuid(),
                 CharacterId = characterId,
                 EssenceDefinitionId = TutorialConstants.TutorialEssenceDefinitionId,
-                NativeRegion = 1,
-                PotentialTier = 1,
                 Level = 1,
                 AbsorbedAt = now,
                 UpdatedAt = now

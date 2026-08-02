@@ -97,9 +97,7 @@ public sealed class CanonicalEquipmentBuildFactoryTests
             Assert.Equal(2, build.EquippedEssences.Count);
             Assert.All(build.EquippedEssences, essence =>
             {
-                Assert.Equal(1, essence.NativeRegion);
                 Assert.Equal(1, essence.Level);
-                Assert.Equal(1, essence.PotentialTier);
             });
             Assert.Equal(EquipmentStatBudgetCatalog.BalanceVersion, build.EquipmentBalanceVersion);
         });
@@ -235,7 +233,6 @@ public sealed class CanonicalEquipmentBuildFactoryTests
                 build.EquippedEssences.Select(essence => essence.EssenceDefinitionId)
                     .Distinct(StringComparer.OrdinalIgnoreCase)
                     .Count());
-            Assert.All(build.EquippedEssences, essence => Assert.Equal(1, essence.NativeRegion));
             Assert.True(
                 slotUnlocks.GetUnlockedSlotCount(build.Character.Level) >= expectedEssenceCount,
                 $"Level {build.Character.Level} cannot equip {expectedEssenceCount} Essences.");
@@ -264,9 +261,9 @@ public sealed class CanonicalEquipmentBuildFactoryTests
                     (modifier.AttributeType, modifier.Amount, modifier.ModifierType)));
         Assert.Equal(
             first.EquippedEssences.Select(essence =>
-                (essence.Id, essence.EssenceDefinitionId, essence.Level, essence.PotentialTier)),
+                (essence.Id, essence.EssenceDefinitionId, essence.Level, essence.AscensionTier)),
             second.EquippedEssences.Select(essence =>
-                (essence.Id, essence.EssenceDefinitionId, essence.Level, essence.PotentialTier)));
+                (essence.Id, essence.EssenceDefinitionId, essence.Level, essence.AscensionTier)));
     }
 
     private static CanonicalEquipmentBuildFactory CreateFactory()

@@ -8,7 +8,6 @@ using Application.UseCases.Essences.Commands.FavoriteEssence;
 using Application.UseCases.Essences.Commands.SaveEssenceLoadout;
 using Application.UseCases.Essences.Commands.SetEssenceFocus;
 using Application.UseCases.Essences.Commands.SpendEssenceDust;
-using Application.UseCases.Essences.Commands.UpgradeEssencePotential;
 using Application.UseCases.Essences.Dtos;
 using Application.UseCases.Essences.Queries.GetActiveEssenceLoadout;
 using Application.UseCases.Essences.Queries.GetCreatureArchive;
@@ -61,10 +60,6 @@ public class EssenceController : BaseController
     [HttpPost("{playerEssenceId:guid}/ascend")]
     public async Task<ActionResult<Response<EssenceMutationResponseDto>>> Ascend(Guid playerEssenceId) =>
         await Mediator.Send(new AscendEssenceCommand(CurrentCharacterGuid, playerEssenceId));
-
-    [HttpPost("{playerEssenceId:guid}/potential/upgrade")]
-    public async Task<ActionResult<Response<EssenceMutationResponseDto>>> UpgradePotential(Guid playerEssenceId) =>
-        await Mediator.Send(new UpgradeEssencePotentialCommand(CurrentCharacterGuid, playerEssenceId));
 
     [HttpPost("{playerEssenceId:guid}/evolve")]
     public async Task<ActionResult<Response<EssenceMutationResponseDto>>> Evolve(Guid playerEssenceId) =>

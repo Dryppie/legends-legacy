@@ -5,9 +5,6 @@ namespace Domain.Models.Dungeons.Definitions;
 
 public static class DungeonRewardCatalog
 {
-    public static string GetPotentialCoreRewardItemId(int region) =>
-        EssenceProgressionConstants.GetPotentialCoreItemId(region);
-
     public static IReadOnlyList<string> GetMonsterCoreRewardItemIds(DungeonGrade grade) =>
         grade switch
         {

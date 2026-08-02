@@ -325,7 +325,6 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
         {
             var valueMultiplier = EssenceProgressionConstants.ScaleAbilityValue(
                 1d,
-                essence.Level,
                 essence.AscensionTier,
                 effect.Operation.ToString());
             effect.BaseValue = ScaleValue(effect.BaseValue, valueMultiplier);

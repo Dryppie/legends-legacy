@@ -64,10 +64,7 @@ public sealed class PowerBuildSnapshotFactory
             {
                 var loadout = _essenceLoadouts.Resolve(character.Id, [essence]);
                 return new CombatRatingModifierSource(
-                    Math.Clamp(
-                        essence.PotentialTier,
-                        Domain.Models.Professions.Crafting.V2.EquipmentStatBudgetCatalog.MinimumTier,
-                        Domain.Models.Professions.Crafting.V2.EquipmentStatBudgetCatalog.MaximumTier),
+                    Domain.Models.Professions.Crafting.V2.EquipmentStatBudgetCatalog.MinimumTier,
                     loadout.AttributeModifiers);
             })
             .ToList();
@@ -140,8 +137,6 @@ public sealed class PowerBuildSnapshotFactory
                 continue;
 
             value.Append(':').Append(essence.EssenceDefinitionId)
-                .Append(':').Append(essence.Level)
-                .Append(':').Append(essence.PotentialTier)
                 .Append(':').Append(essence.AscensionTier)
                 .Append(':').Append(essence.IsEvolved);
         }

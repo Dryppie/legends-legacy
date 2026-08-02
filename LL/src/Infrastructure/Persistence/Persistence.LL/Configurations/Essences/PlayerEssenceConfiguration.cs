@@ -13,8 +13,6 @@ public sealed class PlayerEssenceConfiguration : IEntityTypeConfiguration<Player
         builder.HasIndex(x => x.CharacterId);
         builder.HasIndex(x => new { x.CharacterId, x.EssenceDefinitionId }).IsUnique();
         builder.Property(x => x.Level).HasDefaultValue(1);
-        builder.Property(x => x.NativeRegion).HasDefaultValue(1);
-        builder.Property(x => x.PotentialTier).HasDefaultValue(1);
         builder.Property(x => x.AbsorbedAt).IsRequired();
         builder.Property(x => x.UpdatedAt).IsRequired();
     }

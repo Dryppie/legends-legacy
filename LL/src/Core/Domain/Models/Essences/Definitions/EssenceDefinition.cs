@@ -11,7 +11,6 @@ public sealed class EssenceDefinition
     public string SourceMonsterId { get; set; } = string.Empty;
     public string Name { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
-    public int NativeRegion { get; set; } = 1;
     public Rarity Rarity { get; set; }
     public List<string> Tags { get; set; } = [];
     public List<EssenceAttributeBonusDefinition> AttributeBonuses { get; set; } = [];

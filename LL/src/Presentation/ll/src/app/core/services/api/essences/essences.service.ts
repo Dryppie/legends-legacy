@@ -67,12 +67,6 @@ export class EssencesService {
     return this.apiService.post(`essence/${playerEssenceId}/ascend`, {});
   }
 
-  public upgradePotential(
-    playerEssenceId: string,
-  ): Observable<EssenceMutationResponseDto> {
-    return this.apiService.post(`essence/${playerEssenceId}/potential/upgrade`, {});
-  }
-
   public evolve(playerEssenceId: string): Observable<EssenceMutationResponseDto> {
     return this.apiService.post(`essence/${playerEssenceId}/evolve`, {});
   }

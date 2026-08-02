@@ -36,10 +36,10 @@ intentional marginal-cost changes for attributes such as Armor and Fortitude
 across the progression curve.
 
 Each active Essence is resolved independently through the production Essence
-loadout resolver. Level-scaled bonuses and evolution-added attribute modifiers
-are valued with the same catalog at the Essence's Potential Tier. Potential,
-Ascension, and evolution do not receive arbitrary rating bonuses; they matter
-only when they change resolved attributes.
+loadout resolver. Fixed bonuses and evolution-added attribute modifiers are
+valued at the catalog's reference tier. Essence level and Ascension do not
+receive arbitrary rating bonuses; evolution matters only when it changes
+resolved attributes.
 
 Capped attributes are valued only to their combined useful cap across base,
 equipment, and active Essence sources. Mixed-tier over-cap budget is discounted

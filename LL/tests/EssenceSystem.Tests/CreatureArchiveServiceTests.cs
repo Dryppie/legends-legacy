@@ -520,9 +520,9 @@ public sealed class CreatureArchiveServiceTests
     {
         private readonly IReadOnlyList<EssenceDefinition> _definitions =
         [
-            CreateDefinition("essence.cave_bat", "monster.cave_bat", "Cave Bat Essence", 1),
-            CreateDefinition("essence.forest_wolf", "monster.forest_wolf", "Forest Wolf Essence", 2),
-            CreateDefinition("essence.stone_boar", "monster.stone_boar", "Stone Boar Essence", 3)
+            CreateDefinition("essence.cave_bat", "monster.cave_bat", "Cave Bat Essence"),
+            CreateDefinition("essence.forest_wolf", "monster.forest_wolf", "Forest Wolf Essence"),
+            CreateDefinition("essence.stone_boar", "monster.stone_boar", "Stone Boar Essence")
         ];
 
         public IReadOnlyList<EssenceDefinition> GetAll() => _definitions;
@@ -538,14 +538,12 @@ public sealed class CreatureArchiveServiceTests
         private static EssenceDefinition CreateDefinition(
             string id,
             string monsterId,
-            string name,
-            int nativeRegion) =>
+            string name) =>
             new()
             {
                 Id = id,
                 SourceMonsterId = monsterId,
                 Name = name,
-                NativeRegion = nativeRegion,
                 Tags = ["Species.Beast"]
             };
     }

@@ -131,7 +131,6 @@ export class EssencesComponent implements OnInit {
         }
         if (
           filter === 'ready' &&
-          !essence.canUpgradePotential &&
           !essence.canAscend &&
           !essence.canEvolve
         ) {
@@ -157,7 +156,6 @@ export class EssencesComponent implements OnInit {
             return b.level - a.level || a.name.localeCompare(b.name);
           case 'tier':
             return (
-              b.potentialTier - a.potentialTier ||
               b.ascensionTier - a.ascensionTier ||
               b.level - a.level ||
               a.name.localeCompare(b.name)
@@ -316,10 +314,6 @@ export class EssencesComponent implements OnInit {
 
   public ascend(essence: PlayerEssenceDto): void {
     this.essenceState.ascend(essence);
-  }
-
-  public upgradePotential(essence: PlayerEssenceDto): void {
-    this.essenceState.upgradePotential(essence);
   }
 
   public evolve(essence: PlayerEssenceDto): void {
