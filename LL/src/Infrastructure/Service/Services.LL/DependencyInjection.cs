@@ -10,6 +10,7 @@ using Application.Interfaces.Services.LL.Dungeons;
 using Application.Interfaces.Services.LL.Entities;
 using Application.Interfaces.Services.LL.Essences;
 using Application.Interfaces.Services.LL.Items;
+using Application.Interfaces.Services.LL.Inventories;
 using Application.Interfaces.Services.LL.Prophecies;
 using Application.Interfaces.Services.LL.Professions;
 using Application.Interfaces.Services.LL.PowerRatings;
@@ -281,6 +282,7 @@ public static class DependencyInjection
         services.AddScoped<IRewardRoller, RewardRoller>();
         services.AddScoped<IInventoryService, InventoryService>();
         services.AddScoped<IInventoryItemFactory, InventoryItemFactory>();
+        services.AddScoped<ISelectionCrateService, SelectionCrateService>();
 
         services.AddOptions<MarketPlaceOptions>()
             .Bind(config.GetSection(MarketPlaceOptions.SectionName))

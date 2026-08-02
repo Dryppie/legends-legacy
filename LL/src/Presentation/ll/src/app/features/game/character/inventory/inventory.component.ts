@@ -31,23 +31,23 @@ import {
 } from '../../../../shared/models/tutorial';
 
 @Component({
-    selector: 'app-inventory',
-    imports: [
-        NgFor,
-        NgIf,
-        NgClass,
-        FilterTabsComponent,
-        InventoryItemComponent,
-        DefaultHeaderComponent,
-        EquipmentOverviewComponent,
-        RegularButtonComponent,
-        FormsModule,
-        ItemComponent,
-        HelpTooltipDirective,
-        EquipmentTypePipe,
-        DropdownComponent,
-    ],
-    templateUrl: './inventory.component.html'
+  selector: 'app-inventory',
+  imports: [
+    NgFor,
+    NgIf,
+    NgClass,
+    FilterTabsComponent,
+    InventoryItemComponent,
+    DefaultHeaderComponent,
+    EquipmentOverviewComponent,
+    RegularButtonComponent,
+    FormsModule,
+    ItemComponent,
+    HelpTooltipDirective,
+    EquipmentTypePipe,
+    DropdownComponent,
+  ],
+  templateUrl: './inventory.component.html',
 })
 export class InventoryComponent implements OnInit {
   tabs: SidebarSection[] = [
@@ -64,6 +64,11 @@ export class InventoryComponent implements OnInit {
     {
       id: 'resources',
       label: 'Resources',
+      items: [],
+    },
+    {
+      id: 'consumables',
+      label: 'Consumables',
       items: [],
     },
     {
@@ -264,6 +269,9 @@ export class InventoryComponent implements OnInit {
 
       case 'Resources':
         return this.sortResourcesForDisplay(this.state.materials());
+
+      case 'Consumables':
+        return this.state.consumables();
 
       case 'Essences':
         return this.state.essences();

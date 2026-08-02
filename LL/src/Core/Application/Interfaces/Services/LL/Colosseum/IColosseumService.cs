@@ -26,7 +26,11 @@ public sealed record ChampionMarketPurchaseResult(
     int GlorySpent,
     int GloryRemaining,
     int CindersGranted,
-    int SoulstonesGranted);
+    int SoulstonesGranted,
+    int SigilFragmentsGranted,
+    string? RewardItemId,
+    string? RewardItemName,
+    int RewardItemQuantity);
 
 public interface IColosseumService
 {

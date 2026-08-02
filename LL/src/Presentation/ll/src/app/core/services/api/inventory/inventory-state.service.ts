@@ -98,6 +98,7 @@ export class InventoryStateService {
   /* Ready-made selectors for common queries */
   readonly equipment = this.byType(ItemType.Equipment);
   readonly materials = this.byType(ItemType.Resource);
+  readonly consumables = this.byType(ItemType.Consumable);
   readonly essences = this.byType(ItemType.Essence);
 
   load(force = false): void {

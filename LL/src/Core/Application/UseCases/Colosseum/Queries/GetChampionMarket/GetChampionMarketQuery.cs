@@ -69,7 +69,11 @@ public sealed class GetChampionMarketQueryHandler : IRequestHandler<GetChampionM
             reason,
             item.SortOrder,
             item.CindersGranted,
-            item.SoulstonesGranted);
+            item.SoulstonesGranted,
+            item.SigilFragmentsGranted,
+            item.RewardItemId,
+            item.RewardItemName,
+            item.RewardItemQuantity);
     }
 
     private static string? GetCannotPurchaseReason(Domain.Models.Entities.Characters.Character character, ChampionMarketItem item, int remainingWeekly, int remainingLifetime)

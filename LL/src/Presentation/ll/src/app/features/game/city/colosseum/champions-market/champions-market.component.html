@@ -1,59 +1,145 @@
-<section class="ll-panel flex h-full w-full flex-col overflow-hidden p-4 text-white">
-  <div class="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
-    <div>
-      <p class="ll-stat-label">Champion's Market</p>
-      <h2 class="ll-heading mt-1 text-xl">
-        {{ (state.championMarket()?.glory ?? state.status()?.glory ?? 0) | numberFormat }}
-        Glory
-      </h2>
-    </div>
-
-    <p class="text-sm text-secondary" *ngIf="state.championMarket()?.weeklyResetAt">
-      Weekly reset {{ state.championMarket()?.weeklyResetAt | date: "mediumDate" }}
-    </p>
-  </div>
-
-  <div
-    *ngIf="state.championMarket()?.items?.length; else emptyMarket"
-    class="mt-4 grid min-h-0 flex-1 gap-3 overflow-y-auto pr-1 md:grid-cols-2 xl:grid-cols-3"
-  >
-    <article
-      *ngFor="let item of state.championMarket()?.items ?? []"
-      class="ll-card flex min-h-40 flex-col justify-between gap-3 p-3"
-    >
-      <div>
-        <div class="flex items-start justify-between gap-2">
-          <div class="min-w-0">
-            <p class="ll-stat-label">{{ item.category }}</p>
-            <h3 class="ll-heading mt-1 text-base">{{ item.name }}</h3>
-          </div>
-          <span class="shrink-0 text-sm text-primary">
-            {{ item.gloryCost | numberFormat }}
-          </span>
+<ng-container *ngIf="state.championMarket() as market; else emptyMarket">
+  <div *ngIf="market.items.length; else emptyMarket" class="shop-shell">
+    <main class="stock-workspace">
+      <header class="stock-header">
+        <div>
+          <p class="section-label">Arena Quartermaster</p>
+          <h1>Champion's Stock</h1>
+          <p>Exclusive rewards earned through victories in the Colosseum.</p>
         </div>
 
-        <p class="mt-2 text-sm text-secondary">{{ item.description }}</p>
-        <p class="mt-2 text-xs text-secondary" *ngIf="item.weeklyPurchaseLimit">
-          Weekly remaining: {{ item.remainingWeeklyPurchases }}
-        </p>
-        <p class="mt-2 text-xs text-secondary" *ngIf="item.lifetimePurchaseLimit">
-          Remaining: {{ item.remainingLifetimePurchases }} /
-          {{ item.lifetimePurchaseLimit }}
-        </p>
+        <div class="stock-header-meta">
+          <div class="wallet-summary" aria-label="Glory balance">
+            <span>
+              <small>Glory</small>
+              <strong>{{ market.glory | numberFormat }}</strong>
+            </span>
+          </div>
+          <div class="reset-summary">
+            <small>Resets in</small>
+            <strong>{{ resetLabel(market.weeklyResetAt) }}</strong>
+            <time [attr.datetime]="market.weeklyResetAt">
+              {{ market.weeklyResetAt | date: "mediumDate" }}
+            </time>
+          </div>
+        </div>
+      </header>
+
+      <div class="stock-sections">
+        <section *ngFor="let category of categories()" class="stock-section">
+          <header class="stock-section-heading">
+            <div>
+              <h2>{{ category }}</h2>
+              <span class="stock-badge" [ngClass]="categoryClass(category)">
+                {{ itemsForCategory(category).length }} item{{
+                  itemsForCategory(category).length === 1 ? "" : "s"
+                }}
+              </span>
+            </div>
+            <div class="column-headings" aria-hidden="true">
+              <span>Reward</span>
+              <span>Limit</span>
+              <span>Cost</span>
+            </div>
+          </header>
+
+          <div class="stock-list">
+            <button
+              *ngFor="let item of itemsForCategory(category)"
+              type="button"
+              class="stock-row"
+              [class.is-selected]="isSelected(item)"
+              [class.is-locked]="!!item.cannotPurchaseReason"
+              (click)="select(item)"
+            >
+              <span class="item-copy">
+                <strong>{{ item.name }}</strong>
+                <small *ngIf="item.cannotPurchaseReason" class="locked-reason">
+                  {{ item.cannotPurchaseReason }}
+                </small>
+              </span>
+
+              <span class="row-reward">
+                <ng-container *ngIf="rewards(item)[0] as reward">
+                  <strong>{{ reward.amount }}</strong>
+                  <small>{{ reward.label }}</small>
+                  <small *ngIf="rewards(item).length > 1">
+                    +{{ rewards(item).length - 1 }} more
+                  </small>
+                </ng-container>
+              </span>
+
+              <span class="row-limit">{{ limitProgress(item) }}</span>
+
+              <span class="row-cost">
+                <strong>{{ item.gloryCost | numberFormat }}</strong>
+                <small>Glory</small>
+              </span>
+            </button>
+          </div>
+        </section>
       </div>
+    </main>
 
-      <button
-        type="button"
-        class="ll-button-primary w-full px-3 py-2"
+    <aside *ngIf="selected() as item" class="purchase-sidebar">
+      <section class="selected-item">
+        <p class="section-label">Selected</p>
+        <div class="selected-title-row">
+          <h2>{{ item.name }}</h2>
+          <span class="stock-badge" [ngClass]="categoryClass(item.category)">
+            {{ item.category }}
+          </span>
+        </div>
+        <p class="selected-requirement">{{ requirementText(item) }}</p>
+      </section>
+
+      <section class="purchase-summary">
+        <p class="section-label">You Receive</p>
+        <div class="selected-rewards">
+          <article *ngFor="let reward of rewards(item)">
+            <strong>{{ reward.amount }}</strong>
+            <span>{{ reward.label }}</span>
+          </article>
+        </div>
+
+        <dl class="purchase-stats">
+          <div>
+            <dt>Cost</dt>
+            <dd>{{ selectedCost() | numberFormat }} Glory</dd>
+          </div>
+          <div>
+            <dt>Glory after purchase</dt>
+            <dd>{{ selectedBalanceAfterPurchase() | numberFormat }}</dd>
+          </div>
+          <div>
+            <dt>Purchase limit</dt>
+            <dd>{{ limitDescription(item) }}</dd>
+          </div>
+        </dl>
+      </section>
+
+      <app-regular-button
         [disabled]="!item.canPurchase || state.loading()"
-        (click)="purchase(item)"
-      >
-        {{ item.canPurchase ? "Purchase" : (item.cannotPurchaseReason ?? "Unavailable") }}
-      </button>
-    </article>
-  </div>
+        [fullWidth]="true"
+        (pressed)="purchase(item)"
+        [text]="purchaseButtonText()"
+      ></app-regular-button>
 
-  <ng-template #emptyMarket>
-    <div class="ll-empty-state w-full">Champion's market is empty.</div>
-  </ng-template>
-</section>
+      <p class="purchase-guidance">
+        {{ item.cannotPurchaseReason ?? "Available for purchase." }}
+      </p>
+
+      <section class="wallet-card">
+        <p class="section-label">Your Glory</p>
+        <div>
+          <span>Glory</span>
+          <strong>{{ market.glory | numberFormat }}</strong>
+        </div>
+      </section>
+    </aside>
+  </div>
+</ng-container>
+
+<ng-template #emptyMarket>
+  <div class="ll-empty-state w-full">Champion's market is empty.</div>
+</ng-template>

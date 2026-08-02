@@ -8,9 +8,9 @@ import { ItemComponent } from '../item/item.component';
 import { EssenceItemViewService } from '../../../core/services/api/essences/essence-item-view.service';
 
 @Component({
-    selector: 'app-inventory-item',
-    imports: [ItemComponent, NgIf],
-    templateUrl: './inventory-item.component.html'
+  selector: 'app-inventory-item',
+  imports: [ItemComponent, NgIf],
+  templateUrl: './inventory-item.component.html',
 })
 export class InventoryItemComponent {
   @Input() inventoryItem!: InventoryItem;
@@ -51,7 +51,10 @@ export class InventoryItemComponent {
         this.inventoryItem.itemInstance.itemBase as EssenceItem,
       );
       this.modal.toggleEssenceModal(essence);
-    } else if (this.isBlueprint) {
+    } else if (
+      this.isBlueprint ||
+      !!this.inventoryItem.itemInstance.itemBase.selectionCrate
+    ) {
       this.modal.toggleInventoryItemModal(this.inventoryItem);
     }
   }

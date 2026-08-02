@@ -1693,6 +1693,19 @@
     "gatheringType": null
   },
   {
+    "id": "item.catalyst_selection_crate",
+    "name": "Catalyst Selection Crate",
+    "description": "Open this crate from your inventory to choose six catalysts for a specialized Blueprint recipe.",
+    "stackable": true,
+    "isBound": true,
+    "itemType": "Consumable",
+    "rarity": "Rare",
+    "equipmentType": "Head",
+    "attributeModifiers": [],
+    "toolBonuses": [],
+    "gatheringType": null
+  },
+  {
     "id": "venom_gland",
     "name": "Venom Gland",
     "description": "A volatile reagent used for venom-focused crafting variants.",

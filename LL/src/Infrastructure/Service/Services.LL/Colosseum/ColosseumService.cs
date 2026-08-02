@@ -1,3 +1,4 @@
+using Application.Interfaces.Services.LL;
 using Application.Interfaces.Services.LL.Colosseum;
 using Application.Interfaces.Services.LL.Entities;
 using Domain.Models.Colosseum;
@@ -29,6 +30,8 @@ public class ColosseumService : IColosseumService
     private readonly ICharacterSnapshotService _characterSnapshotService;
     private readonly IItemBaseRepository _itemBaseRepository;
     private readonly IChampionMarketCatalog _championMarketCatalog;
+    private readonly IInventoryService _inventoryService;
+    private readonly IInventoryItemFactory _inventoryItemFactory;
 
     public ColosseumService(
         IEntityService es,
@@ -40,7 +43,9 @@ public class ColosseumService : IColosseumService
         IRatingService rs,
         ICharacterSnapshotService characterSnapshotService,
         IItemBaseRepository itemBaseRepository,
-        IChampionMarketCatalog championMarketCatalog)
+        IChampionMarketCatalog championMarketCatalog,
+        IInventoryService inventoryService,
+        IInventoryItemFactory inventoryItemFactory)
     {
         _entityService = es;
         _characterService = cs;
@@ -52,6 +57,8 @@ public class ColosseumService : IColosseumService
         _characterSnapshotService = characterSnapshotService;
         _itemBaseRepository = itemBaseRepository;
         _championMarketCatalog = championMarketCatalog;
+        _inventoryService = inventoryService;
+        _inventoryItemFactory = inventoryItemFactory;
     }
 
     public async Task<StartArenaBattleResult?> StartArenaBattle(Guid characterId, Guid enemyId, CancellationToken cancellationToken)
@@ -404,14 +411,21 @@ public class ColosseumService : IColosseumService
 
     public IReadOnlyList<ChampionMarketItem> GetChampionMarketItems()
     {
-        return _championMarketCatalog.GetAll();
+        return _championMarketCatalog.GetActive(DateTimeOffset.UtcNow);
     }
 
-    public async Task<ChampionMarketPurchaseResult?> PurchaseChampionMarketItemAsync(Guid characterId, string itemId, int quantity, CancellationToken cancellationToken)
+    public async Task<ChampionMarketPurchaseResult?> PurchaseChampionMarketItemAsync(
+        Guid characterId,
+        string itemId,
+        int quantity,
+        CancellationToken cancellationToken)
     {
         if (quantity < 1) return null;
 
-        var item = _championMarketCatalog.GetById(itemId);
+        var now = DateTimeOffset.UtcNow;
+        var item = _championMarketCatalog
+            .GetActive(now)
+            .FirstOrDefault(x => x.Id.Equals(itemId, StringComparison.OrdinalIgnoreCase));
         if (item?.IsEnabled != true) return null;
 
         var character = await _colosseumRepository.GetArenaCharacterAsync(characterId, cancellationToken);
@@ -419,7 +433,7 @@ public class ColosseumService : IColosseumService
 
         if (!MeetsMarketRequirement(character, item)) return null;
 
-        var weeklyResetAt = ArenaCalendar.GetCurrentWeeklyResetStart(DateTimeOffset.UtcNow);
+        var weeklyResetAt = ArenaCalendar.GetCurrentWeeklyResetStart(now);
         var weeklyPurchased = await _colosseumRepository.CountChampionMarketPurchasesAsync(characterId, item.Id, weeklyResetAt, cancellationToken);
         var lifetimePurchased = await _colosseumRepository.CountChampionMarketPurchasesAsync(characterId, item.Id, null, cancellationToken);
 
@@ -430,11 +444,31 @@ public class ColosseumService : IColosseumService
         var totalCost = item.GloryCost * quantity;
         if (arena.Glory < totalCost) return null;
 
+        var rewardItemId = item.RewardItemId;
+        var rewardItemName = item.RewardItemName;
+        var rewardItemQuantity = checked(item.RewardItemQuantity * quantity);
+        var rewardInventoryItems = new List<Domain.Models.Inventories.InventoryItem>();
+        if (rewardItemQuantity > 0)
+        {
+            var itemBases = await _itemBaseRepository.GetItemBasesByIdsAsync([rewardItemId!], cancellationToken);
+            if (!itemBases.TryGetValue(rewardItemId!, out var itemBase)) return null;
+
+            rewardInventoryItems.AddRange(
+                _inventoryItemFactory.CreateForQuantity(itemBase, rewardItemQuantity, characterId));
+        }
+
         arena.Glory -= totalCost;
         var cindersGranted = item.CindersGranted * quantity;
         var soulstonesGranted = item.SoulstonesGranted * quantity;
+        var sigilFragmentsGranted = item.SigilFragmentsGranted * quantity;
         character.Cinders += cindersGranted;
         character.Soulstones += soulstonesGranted;
+        character.SigilFragments += sigilFragmentsGranted;
+
+        if (rewardInventoryItems.Count > 0)
+        {
+            await _inventoryService.AddItemsToInventory(characterId, rewardInventoryItems, cancellationToken);
+        }
 
         await _colosseumRepository.SaveChampionMarketPurchaseAsync(new ChampionMarketPurchase
         {
@@ -443,7 +477,7 @@ public class ColosseumService : IColosseumService
             ItemId = item.Id,
             Quantity = quantity,
             GloryCostPaid = totalCost,
-            PurchasedAt = DateTimeOffset.UtcNow
+            PurchasedAt = now
         }, cancellationToken);
 
         return new ChampionMarketPurchaseResult(
@@ -452,7 +486,11 @@ public class ColosseumService : IColosseumService
             totalCost,
             arena.Glory,
             cindersGranted,
-            soulstonesGranted);
+            soulstonesGranted,
+            sigilFragmentsGranted,
+            rewardItemId,
+            rewardItemName,
+            rewardItemQuantity);
     }
 
     public async Task<int> CountChampionMarketPurchasesAsync(Guid characterId, string itemId, DateTimeOffset? since, CancellationToken cancellationToken)

@@ -9,6 +9,11 @@ export interface ScrapEquipmentsResponse {
   inventoryItems: InventoryItem[];
 }
 
+export interface OpenSelectionCrateResponse {
+  consumedItemInstanceId: string;
+  rewards: InventoryItem[];
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -42,25 +47,27 @@ export class InventoryService {
     amount: number,
   ): Observable<unknown> {
     void amount;
-    return this.apiService.post(`essence/items/${essence.itemInstance.id}/dismantle`, {}).pipe(
-      map((inventory) => {
-        // this.toastService.showToast(
-        //   'Action completed successfully!',
-        //   'success',
-        // );
-        return inventory;
-      }),
+    return this.apiService
+      .post(`essence/items/${essence.itemInstance.id}/dismantle`, {})
+      .pipe(
+        map((inventory) => {
+          // this.toastService.showToast(
+          //   'Action completed successfully!',
+          //   'success',
+          // );
+          return inventory;
+        }),
 
-      catchError(() => {
-        // this.toastService.showToast(
-        //   'Login Failed',
-        //   'Wrong email or password',
-        //   'error',
-        //   't',
-        // );
-        return throwError(() => new Error('Failed to shatter essences'));
-      }),
-    );
+        catchError(() => {
+          // this.toastService.showToast(
+          //   'Login Failed',
+          //   'Wrong email or password',
+          //   'error',
+          //   't',
+          // );
+          return throwError(() => new Error('Failed to shatter essences'));
+        }),
+      );
   }
 
   scrapEquipment(equipmentIds: string[]): Observable<ScrapEquipmentsResponse> {
@@ -82,6 +89,16 @@ export class InventoryService {
         // );
         return throwError(() => new Error('Failed to scrap equipment'));
       }),
+    );
+  }
+
+  openCatalystSelectionCrate(
+    crateItemInstanceId: string,
+    optionId: string,
+  ): Observable<OpenSelectionCrateResponse> {
+    return this.apiService.post(
+      `inventory/items/${crateItemInstanceId}/open-catalyst-selection-crate`,
+      { optionId },
     );
   }
 }

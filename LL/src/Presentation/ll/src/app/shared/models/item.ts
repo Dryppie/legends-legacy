@@ -47,6 +47,17 @@ export interface ItemBase {
   stackable: boolean;
   isBound?: boolean;
   blueprint?: BlueprintItemMetadata | null;
+  selectionCrate?: SelectionCrateMetadata | null;
+}
+
+export interface SelectionCrateMetadata {
+  options: SelectionCrateOption[];
+}
+
+export interface SelectionCrateOption {
+  id: string;
+  name: string;
+  quantity: number;
 }
 
 export interface BlueprintItemMetadata {

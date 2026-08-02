@@ -77,7 +77,10 @@ export class ColosseumService {
     quantity = 1,
   ): Observable<ChampionMarketPurchaseResponse> {
     return this.apiService
-      .post('colosseum/market/purchase', { itemId, quantity })
+      .post('colosseum/market/purchase', {
+        itemId,
+        quantity,
+      })
       .pipe(
         catchError((err) => {
           return throwError(
@@ -166,7 +169,9 @@ export class ColosseumService {
     );
   }
 
-  getTournamentSeasonLeaderboard(): Observable<TournamentSeasonLeaderboardEntry[]> {
+  getTournamentSeasonLeaderboard(): Observable<
+    TournamentSeasonLeaderboardEntry[]
+  > {
     return this.apiService.get('colosseum/tournaments/season-leaderboard').pipe(
       catchError(() => {
         return throwError(
@@ -181,7 +186,9 @@ export class ColosseumService {
       .get(`colosseum/tournaments/${tournamentId}/bracket`)
       .pipe(
         catchError(() => {
-          return throwError(() => new Error('Failed to get tournament bracket'));
+          return throwError(
+            () => new Error('Failed to get tournament bracket'),
+          );
         }),
       );
   }
@@ -203,7 +210,9 @@ export class ColosseumService {
     this.combatService.startColosseumMatchSimulation(replay);
   }
 
-  registerTournament(tournamentId: string): Observable<RegisterTournamentResponse> {
+  registerTournament(
+    tournamentId: string,
+  ): Observable<RegisterTournamentResponse> {
     return this.apiService
       .post(`colosseum/tournaments/${tournamentId}/register`, {})
       .pipe(
@@ -215,13 +224,16 @@ export class ColosseumService {
       );
   }
 
-  withdrawTournament(tournamentId: string): Observable<WithdrawTournamentResponse> {
+  withdrawTournament(
+    tournamentId: string,
+  ): Observable<WithdrawTournamentResponse> {
     return this.apiService
       .post(`colosseum/tournaments/${tournamentId}/withdraw`, {})
       .pipe(
         catchError((err) => {
           return throwError(
-            () => new Error(err.message ?? 'Failed to withdraw from tournament'),
+            () =>
+              new Error(err.message ?? 'Failed to withdraw from tournament'),
           );
         }),
       );
@@ -254,19 +266,27 @@ export class ColosseumService {
       .pipe(
         catchError((err) => {
           return throwError(
-            () => new Error(err.message ?? 'Failed to invite tournament team member'),
+            () =>
+              new Error(
+                err.message ?? 'Failed to invite tournament team member',
+              ),
           );
         }),
       );
   }
 
-  acceptTournamentTeamInvite(inviteId: string): Observable<TournamentTeamActionResponse> {
+  acceptTournamentTeamInvite(
+    inviteId: string,
+  ): Observable<TournamentTeamActionResponse> {
     return this.apiService
       .post(`colosseum/tournaments/team-invites/${inviteId}/accept`, {})
       .pipe(
         catchError((err) => {
           return throwError(
-            () => new Error(err.message ?? 'Failed to accept tournament team invite'),
+            () =>
+              new Error(
+                err.message ?? 'Failed to accept tournament team invite',
+              ),
           );
         }),
       );
@@ -281,7 +301,8 @@ export class ColosseumService {
       .pipe(
         catchError((err) => {
           return throwError(
-            () => new Error(err.message ?? 'Failed to apply to tournament team'),
+            () =>
+              new Error(err.message ?? 'Failed to apply to tournament team'),
           );
         }),
       );
@@ -291,11 +312,17 @@ export class ColosseumService {
     applicationId: string,
   ): Observable<TournamentTeamActionResponse> {
     return this.apiService
-      .post(`colosseum/tournaments/team-applications/${applicationId}/accept`, {})
+      .post(
+        `colosseum/tournaments/team-applications/${applicationId}/accept`,
+        {},
+      )
       .pipe(
         catchError((err) => {
           return throwError(
-            () => new Error(err.message ?? 'Failed to accept tournament team application'),
+            () =>
+              new Error(
+                err.message ?? 'Failed to accept tournament team application',
+              ),
           );
         }),
       );
@@ -314,13 +341,16 @@ export class ColosseumService {
       .pipe(
         catchError((err) => {
           return throwError(
-            () => new Error(err.message ?? 'Failed to kick tournament team member'),
+            () =>
+              new Error(err.message ?? 'Failed to kick tournament team member'),
           );
         }),
       );
   }
 
-  getTournamentRewards(tournamentId?: string): Observable<TournamentRewardGrant[]> {
+  getTournamentRewards(
+    tournamentId?: string,
+  ): Observable<TournamentRewardGrant[]> {
     const path = tournamentId
       ? `colosseum/tournaments/${tournamentId}/rewards`
       : 'colosseum/tournaments/rewards';

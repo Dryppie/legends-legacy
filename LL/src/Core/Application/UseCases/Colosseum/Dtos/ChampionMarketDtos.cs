@@ -23,6 +23,10 @@ public sealed class ChampionMarketItemDto : IMapFrom<ChampionMarketItemModel>
     public int SortOrder { get; set; }
     public int CindersGranted { get; set; }
     public int SoulstonesGranted { get; set; }
+    public int SigilFragmentsGranted { get; set; }
+    public string? RewardItemId { get; set; }
+    public string? RewardItemName { get; set; }
+    public int RewardItemQuantity { get; set; }
 
     public void Mapping(Profile profile)
     {
@@ -61,6 +65,10 @@ public sealed class PurchaseChampionMarketItemResponseDto : IMapFrom<ChampionMar
     public int GloryRemaining { get; set; }
     public int CindersGranted { get; set; }
     public int SoulstonesGranted { get; set; }
+    public int SigilFragmentsGranted { get; set; }
+    public string? RewardItemId { get; set; }
+    public string? RewardItemName { get; set; }
+    public int RewardItemQuantity { get; set; }
 
     public void Mapping(Profile profile)
     {

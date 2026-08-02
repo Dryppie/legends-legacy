@@ -1,5 +1,6 @@
 ﻿using Application.UseCases.Inventories.Commands.ScrapEquipments;
 using Application.UseCases.Inventories.Dtos;
+using Application.UseCases.Inventories.Commands.OpenCatalystSelectionCrate;
 using Application.UseCases.Inventories.Queries.GetInventoryById;
 using Common.Primitives;
 using Microsoft.AspNetCore.Authorization;
@@ -17,4 +18,13 @@ public class InventoryController : BaseController
     [HttpPost("Scrap")]
     public async Task<ActionResult<Response<ScrapEquipmentsResponseDto>>> Scrap([FromBody] List<string> itemIds) =>
         await Mediator.Send(new ScrapEquipmentsCommand(CurrentCharacterGuid, itemIds));
+
+    [HttpPost("items/{crateItemInstanceId:guid}/open-catalyst-selection-crate")]
+    public async Task<ActionResult<Response<OpenSelectionCrateResultDto>>> OpenCatalystSelectionCrate(
+        Guid crateItemInstanceId,
+        [FromBody] OpenSelectionCrateRequestDto request) =>
+        await Mediator.Send(new OpenCatalystSelectionCrateCommand(
+            CurrentCharacterGuid,
+            crateItemInstanceId,
+            request.OptionId));
 }
