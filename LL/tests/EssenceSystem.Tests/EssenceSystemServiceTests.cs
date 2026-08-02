@@ -350,7 +350,37 @@ public sealed class EssenceSystemServiceTests
         Assert.Single(loadout.AttributeModifiers);
         Assert.Contains("Species.Beast", loadout.Tags);
         Assert.Contains("Mechanic.Execute", loadout.Tags);
-        Assert.Equal(2.16f, loadout.AttributeModifiers.Single().Amount, 2);
+        Assert.Equal(2f, loadout.AttributeModifiers.Single().Amount);
+    }
+
+    [Fact]
+    public void Resolve_combat_loadout_does_not_scale_attributes_with_level_or_ascension()
+    {
+        using var db = CreateDb();
+        var service = CreateService(db);
+        var characterId = Guid.NewGuid();
+        var baseEssence = new PlayerEssence
+        {
+            Id = Guid.NewGuid(),
+            CharacterId = characterId,
+            EssenceDefinitionId = "essence.test",
+            Level = 1,
+            AscensionTier = 0
+        };
+        var maxEssence = new PlayerEssence
+        {
+            Id = Guid.NewGuid(),
+            CharacterId = characterId,
+            EssenceDefinitionId = "essence.test",
+            Level = 100,
+            AscensionTier = 3
+        };
+
+        var baseBonus = service.Resolve(characterId, [baseEssence]).AttributeModifiers.Single().Amount;
+        var maxBonus = service.Resolve(characterId, [maxEssence]).AttributeModifiers.Single().Amount;
+
+        Assert.Equal(2f, baseBonus);
+        Assert.Equal(baseBonus, maxBonus);
     }
 
     [Fact]
@@ -422,7 +452,7 @@ public sealed class EssenceSystemServiceTests
         Assert.True(combatEntity.HasEquippedEssenceSnapshot);
         Assert.Contains("Species.Beast", combatEntity.Tags);
         var modifier = Assert.Single(combatEntity.TemporaryModifiers, x => x.AttributeType == AttributeType.Power);
-        Assert.Equal(2.24f, modifier.Amount, 2);
+        Assert.Equal(2f, modifier.Amount);
     }
 
     [Fact]
@@ -747,28 +777,7 @@ public sealed class EssenceSystemServiceTests
     }
 
     [Fact]
-    public async Task UpgradePotential_requires_current_level_cap_and_consumes_region_core()
-    {
-        await using var db = CreateDb();
-        var characterId = await SeedCharacterAndInventoryAsync(db);
-        var essenceId = await AddPlayerEssenceAsync(db, characterId, level: 9);
-        await AddInventoryQuantityAsync(db, characterId, "item.essence_potential_core.region_1", 3);
-        var service = CreateService(db);
-
-        var tooEarly = await service.UpgradePotentialAsync(characterId, essenceId, CancellationToken.None);
-        db.PlayerEssences.Single(x => x.Id == essenceId).Level = 10;
-        var upgraded = await service.UpgradePotentialAsync(characterId, essenceId, CancellationToken.None);
-        await db.SaveChangesAsync();
-
-        var essence = db.PlayerEssences.Single(x => x.Id == essenceId);
-        Assert.False(tooEarly.Succeeded);
-        Assert.True(upgraded.Succeeded);
-        Assert.Equal(2, essence.PotentialTier);
-        Assert.Equal(0, await InventoryQuantityAsync(db, characterId, "item.essence_potential_core.region_1"));
-    }
-
-    [Fact]
-    public async Task Ascension_does_not_raise_potential_level_cap()
+    public async Task Ascension_raises_level_cap_and_allows_leveling_to_continue()
     {
         await using var db = CreateDb();
         var characterId = await SeedCharacterAndInventoryAsync(db);
@@ -783,10 +792,9 @@ public sealed class EssenceSystemServiceTests
 
         var essence = db.PlayerEssences.Single(x => x.Id == essenceId);
         Assert.True(ascend.Succeeded);
-        Assert.False(dust.Succeeded);
+        Assert.True(dust.Succeeded);
         Assert.Equal(1, essence.AscensionTier);
-        Assert.Equal(1, essence.PotentialTier);
-        Assert.Equal(10, essence.Level);
+        Assert.True(essence.Level > 10);
     }
 
     [Fact]

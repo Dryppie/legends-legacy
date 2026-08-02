@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Persistence.LL;
@@ -12,9 +13,11 @@ using Persistence.LL;
 namespace Persistence.LL.Migrations
 {
     [DbContext(typeof(LLDbContext))]
-    partial class LLDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260801091048_RemoveEssencePotential")]
+    partial class RemoveEssencePotential
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1792,10 +1795,26 @@ namespace Persistence.LL.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<DateTimeOffset?>("CompletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset?>("CompletesAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<Guid>("GuildId")
                         .HasColumnType("uuid");
 
                     b.Property<int>("Level")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTimeOffset>("StartedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int?>("TargetLevel")
                         .HasColumnType("integer");
 
                     b.Property<string>("Type")
@@ -3418,6 +3437,9 @@ namespace Persistence.LL.Migrations
                         .HasColumnType("bigint");
 
                     b.Property<long>("GuildFavor")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("GuildHonors")
                         .HasColumnType("bigint");
 
                     b.Property<string>("NormalizedName")

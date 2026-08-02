@@ -9,23 +9,20 @@ public sealed class EssenceProgressionService : IEssenceProgressionService
     public int GetLevelCap(int ascensionTier) =>
         EssenceProgressionConstants.GetLevelCap(ascensionTier);
 
-    public int GetLevelCapForPotential(int potentialTier) =>
-        EssenceProgressionConstants.GetLevelCapForPotential(potentialTier);
-
     public int GetXpRequiredForNextLevel(PlayerEssence essence, EssenceDefinition definition)
     {
-        if (essence.Level >= GetLevelCapForPotential(essence.PotentialTier)) return 0;
+        if (essence.Level >= GetLevelCap(essence.AscensionTier)) return 0;
         return EssenceProgressionConstants.GetXpRequiredForLevel(essence.Level);
     }
 
     public EssenceXpGrantResult GrantXp(PlayerEssence essence, EssenceDefinition definition, int requestedXp)
     {
-        if (requestedXp <= 0) return new(0, 0, essence.Level >= GetLevelCapForPotential(essence.PotentialTier));
+        if (requestedXp <= 0) return new(0, 0, essence.Level >= GetLevelCap(essence.AscensionTier));
 
         var remaining = requestedXp;
         var gained = 0;
         var levels = 0;
-        var cap = GetLevelCapForPotential(essence.PotentialTier);
+        var cap = GetLevelCap(essence.AscensionTier);
 
         while (remaining > 0 && essence.Level < cap)
         {

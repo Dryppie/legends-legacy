@@ -118,7 +118,7 @@ This means dungeon rewards are split between JSON grant lists and EF-backed seed
 
 #### Hard-Coded Dungeon Progression Rewards
 
-Dungeon completion also awards potential cores and monster cores through code:
+Dungeon completion also awards monster cores through code:
 
 - `LL/src/Infrastructure/Service/Services.LL/Combat/Layers/Rewards/Dungeon/DungeonCompletionRewardApplier.cs`
 - `LL/src/Core/Domain/Models/Dungeons/Definitions/DungeonRewardCatalog.cs`

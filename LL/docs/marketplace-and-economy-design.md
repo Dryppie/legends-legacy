@@ -40,7 +40,7 @@ Crafting consumes tiered materials and special materials to create unique equipm
 
 ### Essence loop
 
-Unbound essences are either absorbed into the Soul Archive or dismantled into Soul Dust. Essence advancement consumes Soul Dust, Potential cores, monster cores, and evolution catalysts. This gives unbound essences and their supporting materials durable demand.
+Unbound essences are either absorbed into the Soul Archive or dismantled into Soul Dust. Essence advancement consumes Soul Dust, monster cores, and evolution catalysts. This gives unbound essences and their supporting materials durable demand.
 
 ### Existing item sinks
 

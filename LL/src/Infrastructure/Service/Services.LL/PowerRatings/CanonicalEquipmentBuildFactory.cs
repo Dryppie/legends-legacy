@@ -243,7 +243,9 @@ public sealed class CanonicalEquipmentBuildFactory
             .Select(essence =>
             {
                 var loadout = _essenceLoadouts.Resolve(character.Id, [essence]);
-                return new CombatRatingModifierSource(essence.PotentialTier, loadout.AttributeModifiers);
+                return new CombatRatingModifierSource(
+                    EquipmentStatBudgetCatalog.MinimumTier,
+                    loadout.AttributeModifiers);
             })
             .ToList();
 
@@ -376,8 +378,6 @@ public sealed class CanonicalEquipmentBuildFactory
                 CharacterId = characterId,
                 EssenceDefinitionId = definitionId,
                 Level = 1,
-                NativeRegion = 1,
-                PotentialTier = 1,
                 AscensionTier = 0,
                 IsEvolved = false,
                 AbsorbedAt = DateTimeOffset.UnixEpoch,

@@ -357,12 +357,6 @@ export class EssenceStateService {
       .subscribe((response) => this.applyEssenceMutation(response));
   }
 
-  upgradePotential(essence: PlayerEssenceDto): void {
-    this.essencesService
-      .upgradePotential(essence.id)
-      .subscribe((response) => this.applyEssenceMutation(response));
-  }
-
   evolve(essence: PlayerEssenceDto): void {
     this.essencesService
       .evolve(essence.id)

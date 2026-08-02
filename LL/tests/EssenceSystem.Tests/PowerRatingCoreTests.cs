@@ -73,7 +73,7 @@ public sealed class PowerRatingCoreTests
     }
 
     [Fact]
-    public void AttributeCombatRating_AddsActiveEssenceAttributesAtPotentialTier()
+    public void AttributeCombatRating_AddsActiveEssenceAttributesAtFixedReferenceTier()
     {
         var withoutEssence = CombatRatingCalculator.Calculate([], []);
         var withEssence = CombatRatingCalculator.Calculate(

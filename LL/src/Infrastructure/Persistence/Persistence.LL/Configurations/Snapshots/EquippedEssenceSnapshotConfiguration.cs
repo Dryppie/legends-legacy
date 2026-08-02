@@ -10,8 +10,6 @@ public sealed class EquippedEssenceSnapshotConfiguration : IEntityTypeConfigurat
     {
         builder.HasKey(x => x.Id);
         builder.Property(x => x.EssenceDefinitionId).HasMaxLength(128).IsRequired();
-        builder.Property(x => x.NativeRegion).HasDefaultValue(1);
-        builder.Property(x => x.PotentialTier).HasDefaultValue(1);
         builder.HasIndex(x => new { x.CharacterSnapshotId, x.SlotIndex }).IsUnique();
     }
 }

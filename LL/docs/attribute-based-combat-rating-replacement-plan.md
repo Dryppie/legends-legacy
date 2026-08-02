@@ -66,10 +66,8 @@ which is used by crafting and item DTOs. This prevents quality, rarity, or tier
 from receiving a second independent bonus.
 
 Each active Essence is resolved independently through
-`IEssenceCombatLoadoutResolver`. Its level-scaled and evolution-added attribute
-modifiers are valued at the Essence's clamped Potential Tier. Resolving
-independently preserves the correct tier weight when equipped Essences have
-different Potential Tiers.
+`IEssenceCombatLoadoutResolver`. Its fixed and evolution-added attribute
+modifiers are valued at the catalog's reference tier.
 
 Capped attributes are valued only up to their combined useful combat cap across
 base, equipment, and active Essence sources. When sources have different tier
@@ -125,7 +123,7 @@ the readiness probability.
 2. Deduplicate equipment instances so a two-handed item is counted once.
 3. Value base attributes at the fixed reference tier, each distinct equipped
    item's modifiers at its own tier, and each active Essence's resolved
-   attribute modifiers at its Potential Tier.
+   attribute modifiers at the fixed reference tier.
 4. Calculate the deterministic Combat Rating and component breakdown.
 5. Return `Available` with `High` confidence.
 6. Retain the combat snapshot and its full fingerprint for real-dungeon
@@ -192,8 +190,9 @@ character are on exactly the same scale.
 - Adding a positive equipment attribute cannot lower Combat Rating.
 - Derived primary contributions are not double counted.
 - Fixed-cap overflow does not increase Combat Rating.
-- Essence loadout, level, Potential Tier, or evolution changes alter Combat
-  Rating only when they change the resolved active Essence attribute budget.
+- Essence loadout or evolution changes alter Combat Rating only when they
+  change the resolved active Essence attribute budget. Essence levels and
+  Ascension Tiers do not scale attribute bonuses.
 - Equipment changes do alter Combat Rating.
 - Dungeon recommended Combat Rating uses the identical calculator and weights.
 - Persisted recommendations from the previous algorithm are rejected as stale.

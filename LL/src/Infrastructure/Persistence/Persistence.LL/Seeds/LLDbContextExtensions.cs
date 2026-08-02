@@ -618,8 +618,6 @@ public static class LLDbContextExtensions
                 Id = playerEssenceId,
                 CharacterId = adminCharacterId,
                 EssenceDefinitionId = essenceDefinitionId,
-                NativeRegion = 1,
-                PotentialTier = 1,
                 Level = 1,
                 AbsorbedAt = now,
                 UpdatedAt = now

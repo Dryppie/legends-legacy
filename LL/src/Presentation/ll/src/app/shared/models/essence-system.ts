@@ -137,36 +137,19 @@ export interface PlayerEssenceDto {
   level: number;
   currentXp: number;
   xpRequiredForNextLevel: number;
-  nativeRegion: number;
-  potentialTier: number;
-  potentialLevelCap: number;
+  levelCap: number;
   ascensionTier: number;
-  tierLevelCap: number;
   isEvolved: boolean;
   isFavorite: boolean;
   attunedSlot?: number | null;
   canAscend: boolean;
-  canUpgradePotential: boolean;
   canEvolve: boolean;
   missingRequirements: string[];
-  potentialInfo: EssencePotentialInfoDto;
   ascendInfo: EssenceAscendInfoDto;
   evolveInfo: EssenceEvolveInfoDto;
   currentAttributeBonuses: EssenceAttributeBonusDto[];
   activeAbility: EssenceAbilityDto;
   passiveAbility: EssenceAbilityDto;
-}
-
-export interface EssencePotentialInfoDto {
-  canPerform: boolean;
-  currentTier: number;
-  nextTier?: number | null;
-  currentLevelCap: number;
-  nextLevelCap?: number | null;
-  requiredItemId?: string | null;
-  requiredItemName?: string | null;
-  requirements: string[];
-  effects: string[];
 }
 
 export interface EssenceAscendInfoDto {
