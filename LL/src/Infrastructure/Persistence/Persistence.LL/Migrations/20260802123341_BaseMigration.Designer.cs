@@ -13,7 +13,7 @@ using Persistence.LL;
 namespace Persistence.LL.Migrations
 {
     [DbContext(typeof(LLDbContext))]
-    [Migration("20260731120029_BaseMigration")]
+    [Migration("20260802123341_BaseMigration")]
     partial class BaseMigration
     {
         /// <inheritdoc />
@@ -1742,16 +1742,6 @@ namespace Persistence.LL.Migrations
                         .HasColumnType("integer")
                         .HasDefaultValue(1);
 
-                    b.Property<int>("NativeRegion")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasDefaultValue(1);
-
-                    b.Property<int>("PotentialTier")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasDefaultValue(1);
-
                     b.Property<DateTimeOffset>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -1805,26 +1795,10 @@ namespace Persistence.LL.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<DateTimeOffset?>("CompletedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTimeOffset?>("CompletesAt")
-                        .HasColumnType("timestamp with time zone");
-
                     b.Property<Guid>("GuildId")
                         .HasColumnType("uuid");
 
                     b.Property<int>("Level")
-                        .HasColumnType("integer");
-
-                    b.Property<DateTimeOffset>("StartedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<int?>("TargetLevel")
                         .HasColumnType("integer");
 
                     b.Property<string>("Type")
@@ -3194,18 +3168,8 @@ namespace Persistence.LL.Migrations
                     b.Property<int>("Level")
                         .HasColumnType("integer");
 
-                    b.Property<int>("NativeRegion")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasDefaultValue(1);
-
                     b.Property<Guid>("PlayerEssenceId")
                         .HasColumnType("uuid");
-
-                    b.Property<int>("PotentialTier")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasDefaultValue(1);
 
                     b.Property<int>("SlotIndex")
                         .HasColumnType("integer");
@@ -3276,6 +3240,9 @@ namespace Persistence.LL.Migrations
                         .HasColumnType("boolean");
 
                     b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset?>("WelcomeAcknowledgedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.HasKey("CharacterId", "TutorialId");
@@ -3454,9 +3421,6 @@ namespace Persistence.LL.Migrations
                         .HasColumnType("bigint");
 
                     b.Property<long>("GuildFavor")
-                        .HasColumnType("bigint");
-
-                    b.Property<long>("GuildHonors")
                         .HasColumnType("bigint");
 
                     b.Property<string>("NormalizedName")
