@@ -1,10 +1,10 @@
 [
   {
-    "kind": "click",
+    "kind": "info",
     "element": "[data-tour=combatant-stats]",
-    "actionSelector": "[data-tour-action=combatant-row]",
+    "showNext": true,
     "title": "1. Combatant results",
-    "description": "These rows show remaining health and combat totals for you and other combatants. Select either row to inspect that combatant's ability breakdown.",
+    "description": "These rows show remaining health and combat totals for you and other combatants. You can select either row to inspect that combatant's results. Select Next to continue.",
     "position": "bottom"
   },
   {
