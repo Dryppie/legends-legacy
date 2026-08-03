@@ -93,7 +93,7 @@ public sealed class TierOneDungeonBalanceTests
         Assert.NotEqual(
             Application.Interfaces.Services.LL.PowerRatings.PowerAnalysisState.CalculationFailed,
             recommendation.State);
-        Assert.Equal(105, recommendation.RecommendedPartyPower / 10);
+        Assert.Equal(106, recommendation.RecommendedPartyPower / 10);
         Assert.Equal(
             recommendation.LowerRecommendedPower,
             recommendation.RecommendedPartyPower);
@@ -118,15 +118,15 @@ public sealed class TierOneDungeonBalanceTests
         "goblin_mines_ii",
         Domain.Models.Dungeons.Definitions.DungeonTier.Heroic,
         4,
-        "t4-standard-epic",
-        262,
+        "t4-standard-legendary",
+        313,
         false)]
     [InlineData(
         "goblin_mines_iii",
         Domain.Models.Dungeons.Definitions.DungeonTier.Mythic,
         6,
-        "t12-standard-common",
-        1548,
+        "t12-standard-legendary",
+        1726,
         true)]
     public async Task Higher_goblin_mines_tiers_find_an_actual_winning_profile(
         string dungeonId,

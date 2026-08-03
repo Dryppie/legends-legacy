@@ -518,8 +518,8 @@ public sealed class AttributeCombatSystemTests
         var total = EquipmentBudgetEvaluator.Evaluate(modifiers, tier: 1);
         var breakdown = EquipmentBudgetEvaluator.EvaluateByAttribute(modifiers, tier: 1);
 
-        Assert.Equal(6.7d, total);
-        Assert.Equal(2d, breakdown[AttributeType.Power]);
+        Assert.Equal(7.2d, total);
+        Assert.Equal(2.5d, breakdown[AttributeType.Power]);
         Assert.Equal(2d, breakdown[AttributeType.MaxHealth]);
         Assert.Equal(2.7d, breakdown[AttributeType.Armor]);
     }

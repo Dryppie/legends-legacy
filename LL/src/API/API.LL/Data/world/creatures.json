@@ -333,10 +333,6 @@
           "multiplier": 0.1
         },
         {
-          "attributeType": "WeaponDamage",
-          "multiplier": 0.1
-        },
-        {
           "attributeType": "Precision",
           "multiplier": 0.5
         }

@@ -33,10 +33,8 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
     private const int NominalRoleAbilityCooldownTicks = NominalSummonDurationTicks;
     private const int NominalSummonStrikeCooldownTicks = 24;
     private const int NominalSummonBasicAttackIntervalTicks = 20;
-    private const int NominalSummonPowerBase = 10;
-    private const float NominalSummonPowerCoefficient = 0.35f;
-    private const int NominalSummonWeaponDamageBase = 8;
-    private const float NominalSummonWeaponDamageCoefficient = 0.1f;
+    private const int NominalSummonPowerBase = 20;
+    private const float NominalSummonPowerCoefficient = 0.30f;
     private const int NominalSummonStrikeBase = 8;
     private const float NominalSummonStrikePowerCoefficient = 0.55f;
     private const string RepresentativeFastWeaponRecipeId =
@@ -139,18 +137,6 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
                 "spirit-basket-summon",
                 AttributeBalanceScenario.SummonOffense,
                 AttributeType.Spirit),
-            StrictPeer(
-                "power-weapon-damage-physical",
-                AttributePeerComparisonGroup.Offense,
-                AttributeBalanceScenario.PhysicalOffense,
-                AttributeType.Power,
-                AttributeType.WeaponDamage),
-            StrictPeer(
-                "power-weapon-damage-magical",
-                AttributePeerComparisonGroup.Offense,
-                AttributeBalanceScenario.MagicalOffense,
-                AttributeType.Power,
-                AttributeType.WeaponDamage),
             GeneralistPeer(
                 "power-attack-speed",
                 AttributePeerComparisonGroup.Offense,
@@ -313,20 +299,20 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
                 AttributeType.HealthRegeneration,
                 AttributeType.DamageReduction),
             ContextPeer(
-                "armor-penetration-weapon-damage-low-defense",
+                "armor-penetration-power-low-defense",
                 AttributePeerComparisonGroup.Penetration,
                 AttributeBalanceScenario.PhysicalOffense,
                 AttributeType.ArmorPenetration,
-                AttributeType.WeaponDamage,
+                AttributeType.Power,
                 LowDefenseContext,
                 AttributePeerComparisonIntent.GeneralistVersusSpecialist,
                 GeneralistPeerTolerancePercentagePoints),
             ContextPeer(
-                "armor-penetration-weapon-damage-high-defense",
+                "armor-penetration-power-high-defense",
                 AttributePeerComparisonGroup.Penetration,
                 AttributeBalanceScenario.PhysicalOffense,
                 AttributeType.ArmorPenetration,
-                AttributeType.WeaponDamage,
+                AttributeType.Power,
                 HighDefenseContext,
                 AttributePeerComparisonIntent.GeneralistVersusSpecialist,
                 GeneralistPeerTolerancePercentagePoints,
@@ -517,11 +503,6 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
                 AttributeBalanceScenario.BurstPressure,
                 AttributeBalanceScenario.LongSustain
             ],
-            [AttributeType.WeaponDamage] =
-            [
-                AttributeBalanceScenario.PhysicalOffense,
-                AttributeBalanceScenario.MagicalOffense
-            ],
             [AttributeType.Armor] =
             [
                 AttributeBalanceScenario.PhysicalPressure,
@@ -644,12 +625,12 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
             [.. StandardEquipmentSlotWeights, 0.85d, 0.85d],
             new Dictionary<AttributeType, double>
             {
-                [AttributeType.Power] = 0.20d,
-                [AttributeType.Precision] = 0.25d,
-                [AttributeType.WeaponDamage] = 0.20d,
+                [AttributeType.Power] = 0.30d,
+                [AttributeType.Precision] = 0.20d,
                 [AttributeType.CritChance] = 0.10d,
-                [AttributeType.CritDamage] = 0.10d,
-                [AttributeType.AttackSpeed] = 0.15d
+                [AttributeType.CritDamage] = 0.20d,
+                [AttributeType.ArmorPenetration] = 0.10d,
+                [AttributeType.AttackSpeed] = 0.10d
             },
             ["balance.physical-strike"],
             [
@@ -691,11 +672,11 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
             [.. StandardEquipmentSlotWeights, 1.40d],
             new Dictionary<AttributeType, double>
             {
-                [AttributeType.Power] = 0.30d,
-                [AttributeType.WeaponDamage] = 0.30d,
+                [AttributeType.Power] = 0.40d,
                 [AttributeType.Precision] = 0.15d,
                 [AttributeType.CritChance] = 0.10d,
-                [AttributeType.CritDamage] = 0.10d,
+                [AttributeType.CritDamage] = 0.20d,
+                [AttributeType.ArmorPenetration] = 0.10d,
                 [AttributeType.AttackSpeed] = 0.05d
             },
             ["balance.physical-strike"],
@@ -712,8 +693,8 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
             {
                 [AttributeType.Power] = 0.25d,
                 [AttributeType.Spirit] = 0.25d,
-                [AttributeType.SummonPower] = 0.20d,
-                [AttributeType.SummonHealth] = 0.15d,
+                [AttributeType.SummonPower] = 0.25d,
+                [AttributeType.SummonHealth] = 0.10d,
                 [AttributeType.Cooldown] = 0.10d,
                 [AttributeType.MaxHealth] = 0.05d
             },
@@ -731,11 +712,11 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
     private static readonly IReadOnlyDictionary<AttributeType, double> MatchedHandBudgetShares =
         new Dictionary<AttributeType, double>
         {
-            [AttributeType.Power] = 0.25d,
+            [AttributeType.Power] = 0.35d,
             [AttributeType.Precision] = 0.20d,
-            [AttributeType.WeaponDamage] = 0.25d,
             [AttributeType.CritChance] = 0.10d,
-            [AttributeType.CritDamage] = 0.10d,
+            [AttributeType.CritDamage] = 0.15d,
+            [AttributeType.ArmorPenetration] = 0.10d,
             [AttributeType.AttackSpeed] = 0.10d
         };
 
@@ -978,7 +959,8 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
             ["Role.Balance.Target"],
             basicAttackDamageType: scenario == AttributeBalanceScenario.MagicalPressure
                 ? DamageType.Magical
-                : DamageType.Physical);
+                : DamageType.Physical,
+            basicAttackDamageMultiplier: CreateOpponentBasicAttackDamageMultiplier(tier, scenario));
         var maxTicks = maxTicksOverride ?? GetMaxTicks(scenario);
         var engine = new FastCombatEngine(
             Statuses,
@@ -1161,7 +1143,6 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
             [AttributeType.Precision] = primary,
             [AttributeType.Spirit] = primary,
             [AttributeType.MaxHealth] = 180 + tier * 80,
-            [AttributeType.WeaponDamage] = 8 + tier * 4,
             [AttributeType.Armor] = tier * 5,
             [AttributeType.Resistance] = tier * 5,
             [AttributeType.CritChance] = 5,
@@ -1200,7 +1181,33 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
             AttributeBalanceScenario.UnmitigatedPressure or
             AttributeBalanceScenario.BurstPressure or
             AttributeBalanceScenario.LongSustain;
-        var weaponDamage = scenario switch
+        return new Dictionary<AttributeType, float>
+        {
+            [AttributeType.MaxHealth] = pressureScenario ? 1_000_000 : 2_000_000,
+            [AttributeType.Power] = 8 + tier * 6,
+            [AttributeType.Armor] = (float)(tier * 12 * Math.Max(0d, defenseMultiplier)),
+            [AttributeType.Resistance] = (float)(tier * 12 * Math.Max(0d, defenseMultiplier)),
+            [AttributeType.CritChance] = 0,
+            [AttributeType.CritDamage] = 50,
+            [AttributeType.AttackSpeed] = 0
+        };
+    }
+
+    private static double CreateOpponentBasicAttackDamageMultiplier(
+        int tier,
+        AttributeBalanceScenario scenario)
+    {
+        var pressureScenario = scenario is
+            AttributeBalanceScenario.PhysicalPressure or
+            AttributeBalanceScenario.MagicalPressure or
+            AttributeBalanceScenario.HealingSustain or
+            AttributeBalanceScenario.StatusResilience or
+            AttributeBalanceScenario.CrowdControlResilience or
+            AttributeBalanceScenario.MixedPressure or
+            AttributeBalanceScenario.UnmitigatedPressure or
+            AttributeBalanceScenario.BurstPressure or
+            AttributeBalanceScenario.LongSustain;
+        var previousBasicAttackDamage = scenario switch
         {
             AttributeBalanceScenario.StatusResilience or
             AttributeBalanceScenario.CrowdControlResilience => 4 + tier * 3,
@@ -1211,17 +1218,13 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
             _ when pressureScenario => 10 + tier * 10,
             _ => 4 + tier * 2
         };
-        return new Dictionary<AttributeType, float>
-        {
-            [AttributeType.MaxHealth] = pressureScenario ? 1_000_000 : 2_000_000,
-            [AttributeType.Power] = 8 + tier * 6,
-            [AttributeType.WeaponDamage] = weaponDamage,
-            [AttributeType.Armor] = (float)(tier * 12 * Math.Max(0d, defenseMultiplier)),
-            [AttributeType.Resistance] = (float)(tier * 12 * Math.Max(0d, defenseMultiplier)),
-            [AttributeType.CritChance] = 0,
-            [AttributeType.CritDamage] = 50,
-            [AttributeType.AttackSpeed] = 0
-        };
+        var power = 8 + tier * 6;
+        var previousRawDamage =
+            Math.Max(1, previousBasicAttackDamage)
+            + power * 0.1d;
+        var powerOnlyRawDamage =
+            1 + power * AttributeCombatRules.BasicAttackPowerCoefficient;
+        return powerOnlyRawDamage <= 0 ? 1d : previousRawDamage / powerOnlyRawDamage;
     }
 
     private static void ApplyAttributeDelta(
@@ -1392,13 +1395,12 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
             summonerProfile.SlotWeights,
             new Dictionary<AttributeType, double>
             {
-                [AttributeType.Power] = 0.25d,
+                [AttributeType.Power] = 0.30d,
                 [AttributeType.Fortitude] = 0.20d,
                 [AttributeType.Precision] = 0.15d,
-                [AttributeType.WeaponDamage] = 0.10d,
                 [AttributeType.CritChance] = 0.10d,
                 [AttributeType.CritDamage] = 0.10d,
-                [AttributeType.Cooldown] = 0.10d
+                [AttributeType.Cooldown] = 0.15d
             },
             ["balance.magical-strike", "balance.direct-control-burst"],
             [AttributeBalanceScenario.MagicalOffense],
@@ -2959,8 +2961,6 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
     {
         var summonPower =
             NominalSummonPowerBase + ownerPower * NominalSummonPowerCoefficient;
-        var summonWeaponDamage =
-            NominalSummonWeaponDamageBase + ownerPower * NominalSummonWeaponDamageCoefficient;
         var strikeUses = NominalSummonDurationTicks / NominalSummonStrikeCooldownTicks;
         var basicAttackUses =
             NominalSummonDurationTicks / NominalSummonBasicAttackIntervalTicks;
@@ -2968,8 +2968,7 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
                * (NominalSummonStrikeBase
                   + summonPower * NominalSummonStrikePowerCoefficient)
                + basicAttackUses
-               * (summonWeaponDamage
-                  + summonPower * AttributeCombatRules.BasicAttackPowerCoefficient);
+               * (1 + summonPower * AttributeCombatRules.BasicAttackPowerCoefficient);
     }
 
     private static double CalculateNominalDirectControlDamage(double ownerPower) =>
@@ -3993,14 +3992,6 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
                     BaseValue = NominalSummonPowerBase,
                     ScalingAttribute = AttributeType.Power,
                     ScalingCoefficient = NominalSummonPowerCoefficient
-                },
-                new SummonAttributeSpec
-                {
-                    Attribute = AttributeType.WeaponDamage,
-                    BaseValue = NominalSummonWeaponDamageBase,
-                    ScalingAttribute = AttributeType.Power,
-                    ScalingCoefficient = NominalSummonWeaponDamageCoefficient,
-                    MinimumValue = 1
                 }
             ]
         }

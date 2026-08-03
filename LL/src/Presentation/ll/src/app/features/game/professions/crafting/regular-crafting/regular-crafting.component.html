@@ -57,6 +57,17 @@
         (selection)="setRecipeCategory($event)"
       ></app-dropdown>
 
+      <app-dropdown
+        *ngIf="recipeSubcategoryOptions().length"
+        class="block w-full"
+        appearance="field"
+        [label]="recipeSubcategoryLabel()"
+        [value]="recipeSubcategory()"
+        [options]="recipeSubcategoryOptions()"
+        [selectedValue]="recipeSubcategory()"
+        (selection)="setRecipeSubcategory($event)"
+      ></app-dropdown>
+
       <div class="flex flex-wrap gap-1.5">
         <button
           type="button"

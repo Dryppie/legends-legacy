@@ -17,7 +17,7 @@ public static class AttributeCombatRules
     public const float MinimumBasicAttackRate = 0.25f;
     public const float MaximumBasicAttackRate = 4f;
     public const float DefenseRatingScale = 100f;
-    public const float BasicAttackPowerCoefficient = 0.1f;
+    public const float BasicAttackPowerCoefficient = 0.5f;
 
     private static readonly IReadOnlyList<PrimaryAttributeContribution> Contributions =
     [

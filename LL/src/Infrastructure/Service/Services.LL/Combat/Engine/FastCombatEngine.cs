@@ -160,8 +160,9 @@ public sealed class FastCombatEngine
         var baseDamage = Math.Max(
             1,
             (int)Math.Round(
-                (Math.Max(1, actor.GetAttribute(AttributeType.WeaponDamage))
-                 + actor.GetAttribute(AttributeType.Power) * AttributeCombatRules.BasicAttackPowerCoefficient) *
+                (1 + actor.GetAttribute(AttributeType.Power)
+                 * AttributeCombatRules.BasicAttackPowerCoefficient)
+                *
                 actor.BasicAttackDamageMultiplier));
         var damage = Math.Max(1, ApplyCombatMagnitudeVariance(baseDamage));
         Log(actor, null, "Basic Attack", EventType.AbilityUse, 0, $"{actor.Name} used Basic Attack");

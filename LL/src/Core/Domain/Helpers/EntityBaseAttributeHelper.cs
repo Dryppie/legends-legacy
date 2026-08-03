@@ -15,8 +15,8 @@ public static class EntityBaseAttributeHelper
     }
     public static List<EntityAttribute> CreateEntityAttributes(Guid entityId)
     {
-        var entityAttributes = Enum.GetValues(typeof(AttributeType))
-            .Cast<AttributeType>()
+        var entityAttributes = AttributeCatalog.All
+            .Select(definition => definition.AttributeType)
             .Select(attributeType => new EntityAttribute
             {
                 EntityId = entityId,
@@ -45,8 +45,8 @@ public static class EntityBaseAttributeHelper
 
     public static List<EntityAttribute> CreateSimulatedAttributes(int tier)
     {
-        var entityAttributes = Enum.GetValues(typeof(AttributeType))
-            .Cast<AttributeType>()
+        var entityAttributes = AttributeCatalog.All
+            .Select(definition => definition.AttributeType)
             .Select(attributeType => new EntityAttribute
             {
                 EntityId = new Guid(),

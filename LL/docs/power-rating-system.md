@@ -164,7 +164,7 @@ match.
 
 `PowerRatingAlgorithm.Version` is 21 for the full Standard-quality
 tier-by-rarity profile matrix.
-`CombatRulesVersion` is 8 for the compounded dungeon difficulty
+`CombatRulesVersion` is 9 for the Power-only damage model and compounded dungeon difficulty
 curve: Tier I is 3× the authored creature baseline, Tier II is 5× Tier I
 (15× authored), and Tier III is 5× Tier II (75× authored).
 The legacy-named `BenchmarkDefinitionVersion` column now stores

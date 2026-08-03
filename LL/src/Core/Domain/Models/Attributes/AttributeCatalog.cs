@@ -54,11 +54,6 @@ public static class AttributeCatalog
                     AttributeBenchmarkScenario.BurstPressure,
                     AttributeBenchmarkScenario.LongSustain),
                 AttributeType.Fortitude),
-            [AttributeType.WeaponDamage] = Flat(
-                AttributeType.WeaponDamage,
-                "Weapon Damage",
-                "Flat damage added to basic attacks.",
-                Scenarios(AttributeBenchmarkScenario.PhysicalOffense)),
             [AttributeType.Armor] = Rating(
                 AttributeType.Armor,
                 "Armor",

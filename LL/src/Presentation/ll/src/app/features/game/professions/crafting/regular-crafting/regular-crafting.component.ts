@@ -93,6 +93,7 @@ export class RegularCraftingComponent {
   readonly filterMode = signal<RecipeFilterMode>('all');
   readonly recipeSearch = signal('');
   readonly recipeCategory = signal('all');
+  readonly recipeSubcategory = signal('all');
   readonly blueprintSearch = signal('');
   readonly blueprintFilter = signal<'all' | 'craftable' | 'locked'>('all');
   readonly mobilePane = signal<MobileCraftingPane>('recipes');
@@ -262,6 +263,32 @@ export class RegularCraftingComponent {
       })),
     ],
   );
+  readonly recipeSubcategoryOptions = computed<
+    readonly DropdownOption<string>[]
+  >(() => {
+    switch (this.recipeCategory()) {
+      case 'ArmorForging':
+        return [
+          { label: 'All armor weights', value: 'all' },
+          { label: 'Heavy', value: 'HeavyArmor' },
+          { label: 'Medium', value: 'MediumArmor' },
+          { label: 'Light', value: 'LightArmor' },
+          { label: 'Cloth', value: 'ClothArmor' },
+        ];
+      case 'WeaponSmithing':
+        return [
+          { label: 'All weapon types', value: 'all' },
+          { label: 'One Handed', value: 'OneHanded' },
+          { label: 'Two Handed', value: 'TwoHanded' },
+          { label: 'Off Hand', value: 'OffHand' },
+        ];
+      default:
+        return [];
+    }
+  });
+  readonly recipeSubcategoryLabel = computed(
+    () => this.recipeSubcategoryOptions()[0]?.label ?? 'All types',
+  );
 
   private readonly recipeSearchMatches = computed(() => {
     const tutorialRecipes = this.tutorialScopedRecipes();
@@ -273,9 +300,15 @@ export class RegularCraftingComponent {
       .split(/\s+/)
       .filter(Boolean);
     const category = this.recipeCategory();
+    const subcategory = this.recipeSubcategory();
 
     return tutorialRecipes.filter((recipe) => {
       if (category !== 'all' && recipe.category !== category) return false;
+      if (
+        subcategory !== 'all' &&
+        !this.matchesRecipeSubcategory(recipe, category, subcategory)
+      )
+        return false;
       if (!queryTerms.length) return true;
 
       const searchableText = [
@@ -441,6 +474,12 @@ export class RegularCraftingComponent {
 
   setRecipeCategory(selection: DropdownSelection<string>): void {
     this.recipeCategory.set(selection.main);
+    this.recipeSubcategory.set('all');
+    this.selectFirstVisibleRecipeIfNeeded();
+  }
+
+  setRecipeSubcategory(selection: DropdownSelection<string>): void {
+    this.recipeSubcategory.set(selection.main);
     this.selectFirstVisibleRecipeIfNeeded();
   }
 
@@ -584,6 +623,22 @@ export class RegularCraftingComponent {
     return recipe.blueprints.some(
       (blueprint) => blueprint.isLearned || !blueprint.isLocked,
     );
+  }
+
+  private matchesRecipeSubcategory(
+    recipe: CraftingRecipe,
+    category: string,
+    subcategory: string,
+  ): boolean {
+    if (category === 'ArmorForging') {
+      return recipe.tags.includes(subcategory);
+    }
+
+    if (category === 'WeaponSmithing') {
+      return recipe.outputItemType === subcategory;
+    }
+
+    return true;
   }
 
   private selectFirstVisibleRecipeIfNeeded(): void {

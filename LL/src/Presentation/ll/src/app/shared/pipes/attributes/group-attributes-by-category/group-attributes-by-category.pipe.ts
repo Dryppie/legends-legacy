@@ -24,7 +24,6 @@ export class GroupAttributesByCategoryPipe implements PipeTransform {
     [AttributeType.Spirit]: AttributeCategory.Vitality,
 
     [AttributeType.MaxHealth]: AttributeCategory.Vitality,
-    [AttributeType.WeaponDamage]: AttributeCategory.Offensive,
     [AttributeType.Armor]: AttributeCategory.Defensive,
     [AttributeType.Resistance]: AttributeCategory.Defensive,
     [AttributeType.CritChance]: AttributeCategory.Offensive,

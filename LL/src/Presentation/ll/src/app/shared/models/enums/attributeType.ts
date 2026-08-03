@@ -5,7 +5,6 @@ export enum AttributeType {
   Spirit = 'Spirit',
 
   MaxHealth = 'MaxHealth',
-  WeaponDamage = 'WeaponDamage',
   Armor = 'Armor',
   Resistance = 'Resistance',
   CritChance = 'CritChance',

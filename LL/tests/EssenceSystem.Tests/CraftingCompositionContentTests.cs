@@ -109,7 +109,7 @@ public sealed class CraftingCompositionContentTests
         Assert.Equal(1d, greatsword.Behavior.BasicAttackIntervalMultiplier);
         Assert.Equal(1.02d, greatsword.Behavior.BasicAttackDamageMultiplier);
         Assert.Equal(0.75d, gauntlets.Behavior.BasicAttackIntervalMultiplier);
-        Assert.Equal(0.865d, gauntlets.Behavior.BasicAttackDamageMultiplier);
+        Assert.Equal(0.78d, gauntlets.Behavior.BasicAttackDamageMultiplier);
         Assert.Equal(1.25d, maul.Behavior.BasicAttackIntervalMultiplier);
         Assert.Equal(1.18d, maul.Behavior.BasicAttackDamageMultiplier);
     }
@@ -126,10 +126,9 @@ public sealed class CraftingCompositionContentTests
         Assert.Equal(
             new Dictionary<AttributeType, double>
             {
-                [AttributeType.Power] = 0.4d,
-                [AttributeType.CritDamage] = 0.1d,
-                [AttributeType.CritChance] = 0.2d,
-                [AttributeType.WeaponDamage] = 0.3d
+                [AttributeType.Power] = 0.5d,
+                [AttributeType.CritDamage] = 0.2d,
+                [AttributeType.CritChance] = 0.3d
             },
             execution.BonusStatProfile);
         Assert.Equal(

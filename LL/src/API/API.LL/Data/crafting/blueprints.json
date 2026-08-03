@@ -15,10 +15,9 @@
     "compatibleRecipeIds": [],
     "bonusStatBudgetMultiplier": 0.2,
     "bonusStatProfile": {
-      "Power": 0.35,
-      "CritChance": 0.25,
-      "WeaponDamage": 0.2,
-      "AttackSpeed": 0.2
+      "Power": 0.45,
+      "CritChance": 0.3,
+      "CritDamage": 0.25
     },
     "temperingProfile": {
       "id": "blueprint_fury.tempering",
@@ -26,16 +25,16 @@
       "stats": [
         {
           "stat": "Power",
-          "weight": 35,
+          "weight": 45,
           "category": "Primary",
           "canIntroduce": true,
           "canIncrease": true,
-          "maxBudgetShare": 0.4,
+          "maxBudgetShare": 0.5,
           "minimumTier": 1
         },
         {
           "stat": "CritChance",
-          "weight": 25,
+          "weight": 30,
           "category": "Primary",
           "canIntroduce": true,
           "canIncrease": true,
@@ -43,17 +42,8 @@
           "minimumTier": 1
         },
         {
-          "stat": "WeaponDamage",
-          "weight": 20,
-          "category": "Secondary",
-          "canIntroduce": true,
-          "canIncrease": true,
-          "maxBudgetShare": 0.3,
-          "minimumTier": 1
-        },
-        {
-          "stat": "AttackSpeed",
-          "weight": 20,
+          "stat": "CritDamage",
+          "weight": 25,
           "category": "Secondary",
           "canIntroduce": true,
           "canIncrease": true,
@@ -194,10 +184,9 @@
     "compatibleRecipeIds": [],
     "bonusStatBudgetMultiplier": 0.2,
     "bonusStatProfile": {
-      "Power": 0.4,
-      "CritDamage": 0.1,
-      "CritChance": 0.2,
-      "WeaponDamage": 0.3
+      "Power": 0.5,
+      "CritDamage": 0.2,
+      "CritChance": 0.3
     },
     "temperingProfile": {
       "id": "blueprint_execution.tempering",
@@ -205,16 +194,16 @@
       "stats": [
         {
           "stat": "Power",
-          "weight": 40,
+          "weight": 50,
           "category": "Primary",
           "canIntroduce": true,
           "canIncrease": true,
-          "maxBudgetShare": 0.4,
+          "maxBudgetShare": 0.55,
           "minimumTier": 1
         },
         {
           "stat": "CritDamage",
-          "weight": 10,
+          "weight": 20,
           "category": "Primary",
           "canIntroduce": true,
           "canIncrease": true,
@@ -223,15 +212,6 @@
         },
         {
           "stat": "CritChance",
-          "weight": 20,
-          "category": "Secondary",
-          "canIntroduce": true,
-          "canIncrease": true,
-          "maxBudgetShare": 0.3,
-          "minimumTier": 1
-        },
-        {
-          "stat": "WeaponDamage",
           "weight": 30,
           "category": "Secondary",
           "canIntroduce": true,

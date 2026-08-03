@@ -184,7 +184,7 @@ public sealed class AbilitySystemTests
             basicAttackDamageMultiplier: 2d,
             basicAttackType: AttackType.Ranged,
             basicAttackDamageType: DamageType.Magical);
-        var baseline = CreateCombatant("baseline", CombatTeam.Hostile, []);
+        var baseline = CreateCombatant("baseline", CombatTeam.Hostile, [], maxHealth: 10_000);
         var engine = new FastCombatEngine(
             new Dictionary<string, CompiledStatus>(),
             new FastCombatEngineOptions(MaxTicks: 61, BasicAttackIntervalTicks: 30));
@@ -200,7 +200,7 @@ public sealed class AbilitySystemTests
                 log.EventType == EventType.Damage)
             .Select(log => log.Magnitude)
             .ToList();
-        Assert.All(basicAttackDamage, damage => Assert.InRange(damage, 18, 26));
+        Assert.All(basicAttackDamage, damage => Assert.InRange(damage, 81, 123));
         Assert.True(basicAttackDamage.Distinct().Count() > 1);
     }
 
@@ -386,7 +386,7 @@ public sealed class AbilitySystemTests
     public void Engine_clamps_extreme_attack_speed_rates()
     {
         var veryFast = CreateCombatant("very-fast", CombatTeam.Friendly, []);
-        var verySlow = CreateCombatant("very-slow", CombatTeam.Hostile, []);
+        var verySlow = CreateCombatant("very-slow", CombatTeam.Hostile, [], maxHealth: 2_000);
         veryFast.Attributes[AttributeType.AttackSpeed] = 1000;
         verySlow.Attributes[AttributeType.AttackSpeed] = -1000;
         var engine = new FastCombatEngine(
@@ -2290,6 +2290,8 @@ public sealed class AbilitySystemTests
         var friendlyCombatant = CreateCombatEntity("friendly-slot", friendlyCharacter, essence.Id);
         friendlyCombatant.EquippedEssences.Single().IsEvolved = true;
         var hostileCombatant = CreateCombatEntity("hostile-slot", hostileCharacter);
+        IncreaseMaxHealth(friendlyCombatant, 2_000);
+        IncreaseMaxHealth(hostileCombatant, 2_000);
         var plan = new CombatEncounterPlan(
             Guid.NewGuid(),
             CombatMode.Idle,
@@ -2310,7 +2312,7 @@ public sealed class AbilitySystemTests
 
         Assert.Contains(result.EventLog, x => x.Source == "effect.damage.main" && x.EventType == EventType.Damage && x.Magnitude == 10);
         Assert.Contains(result.EventLog, x => x.Source == "effect.damage.main.evolved_bonus" && x.EventType == EventType.Damage && x.Magnitude == 5);
-        Assert.Single(result.EventLog, x => x.Source == "Evolved Strike" && x.EventType == EventType.AbilityUse);
+        Assert.Contains(result.EventLog, x => x.Source == "Evolved Strike" && x.EventType == EventType.AbilityUse);
     }
 
     [Fact]
@@ -2380,6 +2382,8 @@ public sealed class AbilitySystemTests
         var friendlyCombatant = CreateCombatEntity("friendly-slot", friendlyCharacter, essence.Id);
         friendlyCombatant.EquippedEssences.Single().IsEvolved = true;
         var hostileCombatant = CreateCombatEntity("hostile-slot", hostileCharacter);
+        IncreaseMaxHealth(friendlyCombatant, 2_000);
+        IncreaseMaxHealth(hostileCombatant, 2_000);
         var plan = new CombatEncounterPlan(
             Guid.NewGuid(),
             CombatMode.Idle,
@@ -2400,7 +2404,7 @@ public sealed class AbilitySystemTests
 
         Assert.Contains(result.EventLog, x => x.Source == "effect.damage.main" && x.EventType == EventType.Damage && x.Magnitude == 10);
         Assert.Contains(result.EventLog, x => x.Source == "effect.damage.evolved" && x.EventType == EventType.Damage && x.Magnitude == 4);
-        Assert.Single(result.EventLog, x => x.Source == "Add Effect Strike" && x.EventType == EventType.AbilityUse);
+        Assert.Contains(result.EventLog, x => x.Source == "Add Effect Strike" && x.EventType == EventType.AbilityUse);
     }
 
     [Fact]
@@ -2586,6 +2590,8 @@ public sealed class AbilitySystemTests
             Value = 0.5
         });
         var hostileCombatant = CreateCombatEntity("hostile-slot", hostileCharacter);
+        IncreaseMaxHealth(friendlyCombatant, 2_000);
+        IncreaseMaxHealth(hostileCombatant, 2_000);
         var plan = new CombatEncounterPlan(
             Guid.NewGuid(),
             CombatMode.Idle,
@@ -2605,7 +2611,7 @@ public sealed class AbilitySystemTests
         var result = await executor.ExecuteAsync(runtime, CancellationToken.None);
 
         Assert.Contains(result.EventLog, x => x.Source == "effect.damage.main" && x.EventType == EventType.Damage && x.Magnitude == 15);
-        Assert.Single(result.EventLog, x => x.Source == "Temporary Modifier Strike" && x.EventType == EventType.AbilityUse);
+        Assert.Contains(result.EventLog, x => x.Source == "Temporary Modifier Strike" && x.EventType == EventType.AbilityUse);
     }
 
     [Theory]
@@ -2904,8 +2910,7 @@ public sealed class AbilitySystemTests
                     Attributes =
                     [
                         new() { Attribute = AttributeType.MaxHealth, BaseValue = 20, MinimumValue = 1 },
-                        new() { Attribute = AttributeType.Power, BaseValue = 1 },
-                        new() { Attribute = AttributeType.WeaponDamage, BaseValue = 1, MinimumValue = 1 }
+                        new() { Attribute = AttributeType.Power, BaseValue = 1 }
                     ]
                 }
             ]);
@@ -3462,6 +3467,13 @@ public sealed class AbilitySystemTests
         attributes[AttributeType.Power] = 50;
         attributes[AttributeType.CritDamage] = 100;
         attributes[AttributeType.AttackSpeed] = 0;
+    }
+
+    private static void IncreaseMaxHealth(CombatEntity combatant, float maxHealth)
+    {
+        combatant.BaseCombatAttributes[AttributeType.MaxHealth] = maxHealth;
+        combatant.CombatAttributes[AttributeType.MaxHealth] = maxHealth;
+        combatant.SyncCurrentHealthToMax();
     }
 
     private static AbilitySpec CreateDamageAbility(string id, string tag) =>

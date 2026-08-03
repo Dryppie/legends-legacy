@@ -47,7 +47,6 @@ export class PropheciesPageComponent implements OnInit, OnDestroy {
   readonly overview = signal<PropheciesOverviewDto | null>(null);
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
-  readonly message = signal<string | null>(null);
   private readonly now = signal(Date.now());
   readonly weeklyFavorMarkers = [1, 2, 4, 6];
   readonly weeklyTrackEndPercent = 96;
@@ -159,7 +158,6 @@ export class PropheciesPageComponent implements OnInit, OnDestroy {
   refresh(): void {
     this.loading.set(true);
     this.error.set(null);
-    this.message.set(null);
 
     this.prophecyService.getOverview().subscribe({
       next: (overview) => {
@@ -178,13 +176,11 @@ export class PropheciesPageComponent implements OnInit, OnDestroy {
     if (this.loading()) return;
     this.loading.set(true);
     this.error.set(null);
-    this.message.set(null);
 
     this.prophecyService.acceptProphecy(prophecy.id).subscribe({
       next: (overview) => {
         this.overview.set(overview);
         this.syncNotificationCount();
-        this.message.set('Prophecy accepted.');
         this.toast.showToast('Prophecy accepted', prophecy.title, true);
         this.loading.set(false);
       },
@@ -202,13 +198,11 @@ export class PropheciesPageComponent implements OnInit, OnDestroy {
     const cost = this.overview()?.nextDailyRerollCost ?? 0;
     this.loading.set(true);
     this.error.set(null);
-    this.message.set(null);
 
     this.prophecyService.rerollDailyProphecies().subscribe({
       next: (overview) => {
         this.overview.set(overview);
         this.syncNotificationCount();
-        this.message.set('Daily prophecies rerolled.');
         this.toast.showToast(
           'Prophecies rerolled',
           cost > 0 ? `${cost} Fate Echo spent.` : 'Your free daily reroll has been used.',
@@ -229,7 +223,6 @@ export class PropheciesPageComponent implements OnInit, OnDestroy {
     if (this.loading()) return;
     this.loading.set(true);
     this.error.set(null);
-    this.message.set(null);
 
     this.prophecyService.claimProphecy(prophecy.id).subscribe({
       next: (response) => {
@@ -249,10 +242,10 @@ export class PropheciesPageComponent implements OnInit, OnDestroy {
                 ? response.prophecy
                 : current.greaterProphecy,
             weeklyRevelation: response.weeklyRevelation,
+            caches: this.updateCacheInventory(current.caches, response.reward),
           });
         }
         this.syncNotificationCount();
-        this.message.set('Prophecy reward claimed.');
         this.toast.showToast(
           'Prophecy claimed',
           this.rewardSummary(response.reward),
@@ -273,7 +266,6 @@ export class PropheciesPageComponent implements OnInit, OnDestroy {
     if (this.loading() || !milestone.isUnlocked || milestone.isClaimed) return;
     this.loading.set(true);
     this.error.set(null);
-    this.message.set(null);
 
     this.prophecyService.claimWeeklyMilestone(milestone.favorRequired).subscribe({
       next: (response) => {
@@ -282,10 +274,10 @@ export class PropheciesPageComponent implements OnInit, OnDestroy {
           this.overview.set({
             ...current,
             weeklyRevelation: response.weeklyRevelation,
+            caches: this.updateCacheInventory(current.caches, response.reward),
           });
         }
         this.syncNotificationCount();
-        this.message.set('Weekly Revelation claimed.');
         this.toast.showToast(
           'Weekly Revelation claimed',
           this.rewardSummary(response.reward),
@@ -306,7 +298,6 @@ export class PropheciesPageComponent implements OnInit, OnDestroy {
     if (this.loading() || cache.quantity <= 0) return;
     this.loading.set(true);
     this.error.set(null);
-    this.message.set(null);
 
     this.prophecyService.openCache(cache.itemId).subscribe({
       next: (response) => {
@@ -314,12 +305,15 @@ export class PropheciesPageComponent implements OnInit, OnDestroy {
         if (current) {
           this.overview.set({
             ...current,
-            caches: response.caches,
+            caches: this.updateCacheInventory(
+              current.caches,
+              response.reward,
+              cache.itemId,
+            ),
           });
         }
 
         this.syncNotificationCount();
-        this.message.set(`${cache.title} opened.`);
         this.toast.showToast(
           'Cache opened',
           this.rewardSummary(response.reward),
@@ -379,6 +373,40 @@ export class PropheciesPageComponent implements OnInit, OnDestroy {
   private progressToastMessage(update: ProphecyProgressedMsg): string {
     const amount = update.amountGained > 0 ? `+${update.amountGained} ` : '';
     return `${update.title}: ${amount}${update.currentValue}/${update.targetValue}`;
+  }
+
+  private updateCacheInventory(
+    caches: ProphecyCacheInventoryDto[],
+    reward: ProphecyRewardSnapshotDto,
+    consumedCacheItemId?: string,
+  ): ProphecyCacheInventoryDto[] {
+    const quantityChanges = new Map<string, number>();
+    const addQuantityChange = (itemId: string, quantity: number): void => {
+      const key = itemId.toLowerCase();
+      quantityChanges.set(key, (quantityChanges.get(key) ?? 0) + quantity);
+    };
+
+    if (consumedCacheItemId) {
+      addQuantityChange(consumedCacheItemId, -1);
+    }
+
+    if (reward.cacheItemId) {
+      addQuantityChange(reward.cacheItemId, 1);
+    }
+
+    const cacheItemIds = new Set(caches.map((cache) => cache.itemId.toLowerCase()));
+    for (const item of reward.items) {
+      if (cacheItemIds.has(item.itemId.toLowerCase())) {
+        addQuantityChange(item.itemId, item.quantity);
+      }
+    }
+
+    return caches.map((cache) => {
+      const quantityChange = quantityChanges.get(cache.itemId.toLowerCase()) ?? 0;
+      return quantityChange === 0
+        ? cache
+        : { ...cache, quantity: Math.max(0, cache.quantity + quantityChange) };
+    });
   }
 
   progressPercent(prophecy: ProphecyInstanceDto): number {

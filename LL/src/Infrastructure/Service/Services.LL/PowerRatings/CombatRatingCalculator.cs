@@ -34,7 +34,6 @@ public static class CombatRatingCalculator
         {
             AttributeType.Power,
             AttributeType.Precision,
-            AttributeType.WeaponDamage,
             AttributeType.CritChance,
             AttributeType.CritDamage,
             AttributeType.ArmorPenetration,

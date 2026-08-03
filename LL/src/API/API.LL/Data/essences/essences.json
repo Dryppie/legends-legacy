@@ -123,11 +123,7 @@
       "attributeBonuses": [
         {
           "attribute": "Power",
-          "baseValue": 4
-        },
-        {
-          "attribute": "WeaponDamage",
-          "baseValue": 2
+          "baseValue": 6
         }
       ],
       "evolution": {
@@ -379,7 +375,7 @@
           "baseValue": 4
         },
         {
-          "attribute": "WeaponDamage",
+          "attribute": "Power",
           "baseValue": 2
         }
       ],

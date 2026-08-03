@@ -18,7 +18,6 @@ public static class EquipmentAttributeRules
 
             // ===== BASE AND DERIVED INPUTS ====================================
             [AttributeType.MaxHealth] = Percent(min: 4, max: 15),
-            [AttributeType.WeaponDamage] = Percent(min: 4, max: 15),
             [AttributeType.Armor] = Percent(min: 2, max: 10),
             [AttributeType.Resistance] = Percent(min: 2, max: 10),
             [AttributeType.CritChance] = Percent(min: 1, max: 10),

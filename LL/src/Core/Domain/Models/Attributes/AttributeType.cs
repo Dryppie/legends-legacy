@@ -7,7 +7,6 @@ public enum AttributeType
     Spirit = 3,
 
     MaxHealth = 4,
-    WeaponDamage = 5,
     Armor = 6,
     Resistance = 7,
     CritChance = 8,

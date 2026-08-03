@@ -77,7 +77,6 @@ export class CharacterOverviewComponent {
       {
         title: 'Offense',
         attributes: [
-          AttributeType.WeaponDamage,
           AttributeType.CritChance,
           AttributeType.CritDamage,
           AttributeType.ArmorPenetration,
