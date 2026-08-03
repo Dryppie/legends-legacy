@@ -33,20 +33,27 @@ interface ChatRoom {
   requiresGuild?: boolean;
 }
 
+export function isWorldSystemMessage(message: ChatMessageDto): boolean {
+  return (
+    message.channelType === ChatChannelType.System &&
+    message.senderName.trim().toLowerCase() === 'world'
+  );
+}
+
 @Component({
-    selector: 'app-chat',
-    imports: [
-        NgFor,
-        NgIf,
-        NgClass,
-        FormsModule,
-        RegularButtonComponent,
-        StickyScrollDirective,
-        DatePipe,
-        CharacterTagComponent,
-        RouterLink,
-    ],
-    templateUrl: './chat.component.html'
+  selector: 'app-chat',
+  imports: [
+    NgFor,
+    NgIf,
+    NgClass,
+    FormsModule,
+    RegularButtonComponent,
+    StickyScrollDirective,
+    DatePipe,
+    CharacterTagComponent,
+    RouterLink,
+  ],
+  templateUrl: './chat.component.html',
 })
 export class ChatComponent implements OnInit, OnDestroy {
   @Input() collapsible = false;
@@ -317,6 +324,10 @@ export class ChatComponent implements OnInit, OnDestroy {
   }
 
   channelLabel(message: ChatMessageDto): string {
+    if (isWorldSystemMessage(message)) {
+      return 'World';
+    }
+
     if (message.channelType === ChatChannelType.General) {
       return message.contextKey === 'trade' || message.contextKey === 'help'
         ? message.contextKey
@@ -337,7 +348,9 @@ export class ChatComponent implements OnInit, OnDestroy {
       case ChatChannelType.Whisper:
         return 'll-badge-accent';
       case ChatChannelType.System:
-        return 'll-badge-muted';
+        return isWorldSystemMessage(message)
+          ? 'll-badge-warning'
+          : 'll-badge-muted';
       default:
         return 'll-badge-accent';
     }
@@ -354,10 +367,16 @@ export class ChatComponent implements OnInit, OnDestroy {
       case ChatChannelType.Whisper:
         return 'border-l-[var(--ll-color-primary-strong)] bg-[var(--ll-color-primary-soft)]';
       case ChatChannelType.System:
-        return 'border-l-[var(--ll-color-text-subtle)] bg-[var(--ll-color-surface-soft)]';
+        return isWorldSystemMessage(message)
+          ? 'border-l-[var(--ll-color-warning)] bg-[var(--ll-color-warning-soft)] shadow-[inset_0_0_18px_rgba(245,158,11,0.05)] hover:bg-[var(--ll-color-warning-soft)]'
+          : 'border-l-[var(--ll-color-text-subtle)] bg-[var(--ll-color-surface-soft)]';
       default:
         return 'border-l-[var(--ll-color-border-strong)]';
     }
+  }
+
+  isWorldAnnouncement(message: ChatMessageDto): boolean {
+    return isWorldSystemMessage(message);
   }
 
   whisperDisplayId(message: ChatMessageDto): string {

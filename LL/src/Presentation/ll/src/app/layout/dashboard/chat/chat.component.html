@@ -198,7 +198,9 @@
             class="mt-0.5 break-words text-xs leading-5"
             [ngClass]="{
               'italic text-[var(--ll-color-text-muted)]':
-                m.channelType === 'System',
+                m.channelType === 'System' && !isWorldAnnouncement(m),
+              'font-medium text-[var(--ll-color-primary)]':
+                isWorldAnnouncement(m),
               'text-[var(--ll-color-text)]': m.channelType !== 'System',
             }"
           >

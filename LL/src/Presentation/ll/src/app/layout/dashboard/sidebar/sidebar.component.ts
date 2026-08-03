@@ -1,6 +1,7 @@
 import { NgFor, NgIf } from '@angular/common';
 import {
   Component,
+  computed,
   effect,
   EventEmitter,
   OnDestroy,
@@ -33,15 +34,15 @@ import { TutorialPresenterService } from '../../../core/services/api/tutorial/tu
 import { TUTORIAL_STEP_EQUIP_ESSENCE } from '../../../shared/models/tutorial';
 
 @Component({
-    selector: 'app-sidebar',
-    imports: [
-        NgFor,
-        NgIf,
-        SidebarItemComponent,
-        RouterLink,
-        CurrentActionComponent,
-    ],
-    templateUrl: './sidebar.component.html'
+  selector: 'app-sidebar',
+  imports: [
+    NgFor,
+    NgIf,
+    SidebarItemComponent,
+    RouterLink,
+    CurrentActionComponent,
+  ],
+  templateUrl: './sidebar.component.html',
 })
 export class SidebarComponent implements OnInit, OnDestroy {
   @Output() itemTapped = new EventEmitter<void>();
@@ -53,6 +54,16 @@ export class SidebarComponent implements OnInit, OnDestroy {
   activeUrl = '';
   displayCurrentAction = false;
   readonly sidebarLayout;
+  readonly currentActionLabel = computed(() => {
+    switch (this.state.currentAction()?.characterActionType) {
+      case CharacterActionType.Combat:
+        return 'Battling';
+      case CharacterActionType.Crafting:
+        return 'Tempering';
+      default:
+        return 'Action';
+    }
+  });
   readonly compactActionProgress = signal(0);
   readonly compactActionTransitionDuration = signal(0);
   constructor(
@@ -196,8 +207,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
       : `/game${itemRoute}`;
 
     return (
-      destinationPath === itemPath ||
-      destinationPath.startsWith(`${itemPath}/`)
+      destinationPath === itemPath || destinationPath.startsWith(`${itemPath}/`)
     );
   }
 

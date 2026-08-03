@@ -1,12 +1,13 @@
 import { NgFor, NgIf } from '@angular/common';
 import {
   Component,
+  computed,
   effect,
   HostListener,
   OnDestroy,
   OnInit,
 } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { Region, Area } from '../../../../shared/models/Dtos/regionDto';
 import { RegionService } from '../../../../core/services/client-side/region/region.service';
 import { CombatAreaCardComponent } from '../../../../shared/components/combat/combat-area-card/combat-area-card.component';
@@ -19,24 +20,27 @@ import { CombatStateService } from '../../../../core/state/combat-state/combat-s
 import { BattleType } from '../../../../core/state/combat-state/combatState';
 import { CombatService } from '../../../../core/services/client-side/combat/combat.service';
 import { TutorialStateService } from '../../../../core/services/api/tutorial/tutorial-state.service';
+import { CharacterActionsStateService } from '../../../../core/services/api/character-actions/character-actions.state.service';
+import { CharacterActionType } from '../../../../shared/models/enums/characterActionType';
 import {
   TUTORIAL_STEP_DEFEAT_TRAINING_CREATURE,
   TUTORIAL_TRAINING_GROUNDS_AREA_ID,
 } from '../../../../shared/models/tutorial';
 
 @Component({
-    selector: 'app-region',
-    imports: [
-        NgIf,
-        NgFor,
-        CombatAreaCardComponent,
-        TabsComponent,
-        TabComponent,
-        RaidsComponent,
-        DungeonsComponent,
-        CombatComponent,
-    ],
-    templateUrl: './region.component.html'
+  selector: 'app-region',
+  imports: [
+    NgIf,
+    NgFor,
+    CombatAreaCardComponent,
+    TabsComponent,
+    TabComponent,
+    RaidsComponent,
+    DungeonsComponent,
+    CombatComponent,
+    RouterLink,
+  ],
+  templateUrl: './region.component.html',
 })
 export class RegionComponent implements OnInit, OnDestroy {
   regionId!: string;
@@ -44,6 +48,7 @@ export class RegionComponent implements OnInit, OnDestroy {
   private sourceRegion: Region | null = null;
   targetAreaId: string | null = null;
   readonly trainingBattleType = BattleType.Training;
+  readonly activeBattle;
 
   constructor(
     private route: ActivatedRoute,
@@ -51,7 +56,19 @@ export class RegionComponent implements OnInit, OnDestroy {
     public readonly combatStateService: CombatStateService,
     private readonly combatService: CombatService,
     private readonly tutorialState: TutorialStateService,
+    characterActions: CharacterActionsStateService,
   ) {
+    this.activeBattle = computed(() => {
+      const action = characterActions.currentAction();
+      if (action?.characterActionType !== CharacterActionType.Combat) {
+        return null;
+      }
+
+      return {
+        areaName: action.combatActionDetails?.area?.name ?? 'Current encounter',
+      };
+    });
+
     effect(() => {
       const tutorial = this.tutorialState.state();
       this.applyRegionView();
@@ -118,7 +135,9 @@ export class RegionComponent implements OnInit, OnDestroy {
     }
 
     const areas = [...region.areas];
-    const targetIndex = areas.findIndex((area: Area) => area.id === this.targetAreaId);
+    const targetIndex = areas.findIndex(
+      (area: Area) => area.id === this.targetAreaId,
+    );
     if (targetIndex <= 0) {
       return { ...region, areas };
     }
