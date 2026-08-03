@@ -137,6 +137,17 @@ export class RegularCraftingComponent {
   readonly selectedDesign = computed(
     () => this.selectedBlueprint() ?? this.selectedRecipe(),
   );
+  readonly possibleTemperingAttributes = computed(() => {
+    const design = this.selectedDesign();
+    if (!design) return [];
+
+    return Array.from(
+      new Set([
+        ...design.primaryTemperingStats,
+        ...design.secondaryTemperingStats,
+      ]),
+    );
+  });
 
   readonly baseAttributeDisplays = computed<BaseAttributeDisplay[]>(() => {
     const recipe = this.selectedRecipe();
@@ -211,23 +222,27 @@ export class RegularCraftingComponent {
     if (!recipe) return [];
 
     const query = this.blueprintSearch().trim().toLowerCase();
-    return recipe.blueprints.filter((blueprint) => {
-      if (this.blueprintFilter() === 'locked' && !blueprint.isLocked)
-        return false;
-      if (
-        this.blueprintFilter() === 'craftable' &&
-        !this.canCraftBlueprint(recipe, blueprint)
-      )
-        return false;
-      if (!query) return true;
+    return recipe.blueprints
+      .filter((blueprint) => {
+        if (this.blueprintFilter() === 'locked' && !blueprint.isLocked)
+          return false;
+        if (
+          this.blueprintFilter() === 'craftable' &&
+          !this.canCraftBlueprint(recipe, blueprint, 1)
+        )
+          return false;
+        if (!query) return true;
 
-      return [
-        blueprint.name,
-        blueprint.craftedItemName,
-        blueprint.description,
-        ...blueprint.tags,
-      ].some((value) => value.toLowerCase().includes(query));
-    });
+        return [
+          blueprint.name,
+          blueprint.craftedItemName,
+          blueprint.description,
+          ...blueprint.tags,
+        ].some((value) => value.toLowerCase().includes(query));
+      })
+      .sort(
+        (left, right) => Number(left.isLocked) - Number(right.isLocked),
+      );
   });
 
   readonly craftableDesignCount = computed(() => {
@@ -235,9 +250,9 @@ export class RegularCraftingComponent {
     if (!recipe) return 0;
 
     return (
-      (this.canCraftRecipe(recipe) ? 1 : 0) +
+      (this.canCraftRecipe(recipe, recipe.materialCosts, 1) ? 1 : 0) +
       recipe.blueprints.filter((blueprint) =>
-        this.canCraftBlueprint(recipe, blueprint),
+        this.canCraftBlueprint(recipe, blueprint, 1),
       ).length
     );
   });
@@ -504,7 +519,6 @@ export class RegularCraftingComponent {
 
   setQuantity(value: number): void {
     this.quantity.set(Math.min(Math.max(value || 1, 1), 100));
-    this.selectFirstVisibleRecipeIfNeeded();
   }
 
   craft(): void {
@@ -574,12 +588,12 @@ export class RegularCraftingComponent {
 
   isBlueprintCraftable(blueprint: CraftingBlueprint): boolean {
     const recipe = this.selectedRecipe();
-    return !!recipe && this.canCraftBlueprint(recipe, blueprint);
+    return !!recipe && this.canCraftBlueprint(recipe, blueprint, 1);
   }
 
   isBaseRecipeCraftable(): boolean {
     const recipe = this.selectedRecipe();
-    return !!recipe && this.canCraftRecipe(recipe);
+    return !!recipe && this.canCraftRecipe(recipe, recipe.materialCosts, 1);
   }
 
   learnedBlueprintCount(recipe: CraftingRecipe): number {
@@ -591,30 +605,32 @@ export class RegularCraftingComponent {
   private canCraftRecipe(
     recipe: CraftingRecipe,
     costs = recipe.materialCosts,
+    quantity = this.quantity(),
   ): boolean {
     if (this.characterProfession.level < recipe.minimumProfessionLevel)
       return false;
     return costs.every(
       (cost) =>
-        this.getOwnedQuantity(cost.itemId) >= cost.required * this.quantity(),
+        this.getOwnedQuantity(cost.itemId) >= cost.required * quantity,
     );
   }
 
   private canCraftBlueprint(
     recipe: CraftingRecipe,
     blueprint: CraftingBlueprint,
+    quantity = this.quantity(),
   ): boolean {
     return (
       !blueprint.isLocked &&
-      this.canCraftRecipe(recipe, blueprint.materialCosts)
+      this.canCraftRecipe(recipe, blueprint.materialCosts, quantity)
     );
   }
 
   canCraftAnyDesign(recipe: CraftingRecipe): boolean {
     return (
-      this.canCraftRecipe(recipe) ||
+      this.canCraftRecipe(recipe, recipe.materialCosts, 1) ||
       recipe.blueprints.some((blueprint) =>
-        this.canCraftBlueprint(recipe, blueprint),
+        this.canCraftBlueprint(recipe, blueprint, 1),
       )
     );
   }
