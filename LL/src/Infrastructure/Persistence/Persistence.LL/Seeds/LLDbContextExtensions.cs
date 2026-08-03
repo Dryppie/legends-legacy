@@ -743,6 +743,8 @@ public static class LLDbContextExtensions
         Name = seed.Name,
         Description = seed.Description,
         Hint = seed.Hint,
+        PlayerSystemMessageTemplate = seed.PlayerSystemMessageTemplate,
+        GlobalSystemMessageTemplate = seed.GlobalSystemMessageTemplate,
         Category = seed.Category,
         Type = seed.Type,
         Scope = seed.Scope,
@@ -767,6 +769,14 @@ public static class LLDbContextExtensions
         changed |= SetIfChanged(existing.Name, seed.Name, value => existing.Name = value);
         changed |= SetIfChanged(existing.Description, seed.Description, value => existing.Description = value);
         changed |= SetIfChanged(existing.Hint, seed.Hint, value => existing.Hint = value);
+        changed |= SetIfChanged(
+            existing.PlayerSystemMessageTemplate,
+            seed.PlayerSystemMessageTemplate,
+            value => existing.PlayerSystemMessageTemplate = value);
+        changed |= SetIfChanged(
+            existing.GlobalSystemMessageTemplate,
+            seed.GlobalSystemMessageTemplate,
+            value => existing.GlobalSystemMessageTemplate = value);
         changed |= SetIfChanged(existing.Category, seed.Category, value => existing.Category = value);
         changed |= SetIfChanged(existing.Type, seed.Type, value => existing.Type = value);
         changed |= SetIfChanged(existing.Scope, seed.Scope, value => existing.Scope = value);

@@ -91,7 +91,78 @@
       </div>
 
       <div class="mt-4 grid gap-4">
-        <div class="min-w-0" role="group" aria-label="Chat layout">
+        <div class="min-w-0" role="group" aria-label="Navigation layout">
+          <h3 class="font-semibold text-primary">Sidebar</h3>
+          <p class="ll-copy mt-1">
+            Choose how much space the sidebar uses on larger screens.
+          </p>
+
+          <div class="mt-3 grid gap-2 md:grid-cols-2">
+            <button
+              type="button"
+              class="ll-card flex items-start justify-between gap-3 p-3 text-left transition hover:border-primary/60"
+              [ngClass]="{
+                'border-primary/60 bg-primary/[0.08]':
+                  sidebarLayout() === 'detailed',
+              }"
+              [attr.aria-pressed]="sidebarLayout() === 'detailed'"
+              (click)="setSidebarLayout('detailed')"
+            >
+              <span>
+                <span class="block font-semibold text-white">
+                  Detailed sidebar
+                </span>
+                <span class="ll-copy mt-1 block">
+                  Show section headings, navigation names, and descriptions.
+                </span>
+              </span>
+              <span
+                class="ll-badge shrink-0 rounded"
+                [ngClass]="
+                  sidebarLayout() === 'detailed'
+                    ? 'll-badge-success'
+                    : 'll-badge-muted'
+                "
+              >
+                {{ sidebarLayout() === "detailed" ? "Active" : "Select" }}
+              </span>
+            </button>
+
+            <button
+              type="button"
+              class="ll-card flex items-start justify-between gap-3 p-3 text-left transition hover:border-primary/60"
+              [ngClass]="{
+                'border-primary/60 bg-primary/[0.08]':
+                  sidebarLayout() === 'compact',
+              }"
+              [attr.aria-pressed]="sidebarLayout() === 'compact'"
+              (click)="setSidebarLayout('compact')"
+            >
+              <span>
+                <span class="block font-semibold text-white">Compact rail</span>
+                <span class="ll-copy mt-1 block">
+                  Use icon-led navigation with short labels to maximize space.
+                </span>
+              </span>
+              <span
+                class="ll-badge shrink-0 rounded"
+                [ngClass]="
+                  sidebarLayout() === 'compact'
+                    ? 'll-badge-success'
+                    : 'll-badge-muted'
+                "
+              >
+                {{ sidebarLayout() === "compact" ? "Active" : "Select" }}
+              </span>
+            </button>
+          </div>
+        </div>
+
+        <div
+          class="hidden min-w-0 border-t border-light_gray/40 pt-4 sm:block"
+          role="group"
+          aria-label="Chat layout"
+        >
           <h3 class="font-semibold text-primary">Chat</h3>
           <p class="ll-copy mt-1">
             Keep chat beside the game or in a floating drawer.
@@ -155,77 +226,6 @@
                 "
               >
                 {{ chatLayout() === "floating" ? "Active" : "Select" }}
-              </span>
-            </button>
-          </div>
-        </div>
-
-        <div
-          class="hidden min-w-0 border-t border-light_gray/40 pt-4 sm:block"
-          role="group"
-          aria-label="Navigation layout"
-        >
-          <h3 class="font-semibold text-primary">Sidebar</h3>
-          <p class="ll-copy mt-1">
-            Choose how much space the sidebar uses on larger screens.
-          </p>
-
-          <div class="mt-3 grid gap-2 md:grid-cols-2">
-            <button
-              type="button"
-              class="ll-card flex items-start justify-between gap-3 p-3 text-left transition hover:border-primary/60"
-              [ngClass]="{
-                'border-primary/60 bg-primary/[0.08]':
-                  sidebarLayout() === 'detailed',
-              }"
-              [attr.aria-pressed]="sidebarLayout() === 'detailed'"
-              (click)="setSidebarLayout('detailed')"
-            >
-              <span>
-                <span class="block font-semibold text-white">
-                  Detailed sidebar
-                </span>
-                <span class="ll-copy mt-1 block">
-                  Show section headings, navigation names, and descriptions.
-                </span>
-              </span>
-              <span
-                class="ll-badge shrink-0 rounded"
-                [ngClass]="
-                  sidebarLayout() === 'detailed'
-                    ? 'll-badge-success'
-                    : 'll-badge-muted'
-                "
-              >
-                {{ sidebarLayout() === "detailed" ? "Active" : "Select" }}
-              </span>
-            </button>
-
-            <button
-              type="button"
-              class="ll-card flex items-start justify-between gap-3 p-3 text-left transition hover:border-primary/60"
-              [ngClass]="{
-                'border-primary/60 bg-primary/[0.08]':
-                  sidebarLayout() === 'compact',
-              }"
-              [attr.aria-pressed]="sidebarLayout() === 'compact'"
-              (click)="setSidebarLayout('compact')"
-            >
-              <span>
-                <span class="block font-semibold text-white">Compact rail</span>
-                <span class="ll-copy mt-1 block">
-                  Use icon-led navigation with short labels to maximize space.
-                </span>
-              </span>
-              <span
-                class="ll-badge shrink-0 rounded"
-                [ngClass]="
-                  sidebarLayout() === 'compact'
-                    ? 'll-badge-success'
-                    : 'll-badge-muted'
-                "
-              >
-                {{ sidebarLayout() === "compact" ? "Active" : "Select" }}
               </span>
             </button>
           </div>
