@@ -8,13 +8,7 @@ import { CharacterActionType } from '../../../../shared/models/enums/characterAc
 import { CombatActionHandler } from './handlers/combat-action-handler';
 import { CraftingActionHandler } from './handlers/crafting-action-handler';
 import { CharacterActionsPollingService } from './helpers/characterActionsPollingService';
-import {
-  catchError,
-  finalize,
-  Observable,
-  of,
-  tap,
-} from 'rxjs';
+import { catchError, finalize, Observable, of, tap } from 'rxjs';
 import { CharacterActionsService } from './character-actions.service';
 import { CharacterActionTypePersistenceService } from './helpers/character-action-type-persistence.service';
 import { GameService } from '../../client-side/game/game.service';
@@ -426,7 +420,10 @@ export class CharacterActionsStateService {
 
     if (!this.actionRefreshLoadingTimeout) {
       this.actionRefreshLoadingTimeout = setTimeout(() => {
-        if (this.activeActionRefreshes > 0 && this.shouldShowActionRefreshLoading()) {
+        if (
+          this.activeActionRefreshes > 0 &&
+          this.shouldShowActionRefreshLoading()
+        ) {
           this._loadingActionRefresh.set(true);
         }
       }, 250);
@@ -434,7 +431,10 @@ export class CharacterActionsStateService {
 
     return request$.pipe(
       finalize(() => {
-        this.activeActionRefreshes = Math.max(0, this.activeActionRefreshes - 1);
+        this.activeActionRefreshes = Math.max(
+          0,
+          this.activeActionRefreshes - 1,
+        );
 
         if (this.activeActionRefreshes > 0) {
           return;
@@ -486,7 +486,7 @@ export class CharacterActionsStateService {
     }
 
     this._idleCombatError.set(
-      'Offline progress could not be resolved. Your rewards were not partially applied; retry when ready.',
+      'Action could not be resolved - service might be unavailable. Retry again.',
     );
   }
 
