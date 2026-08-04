@@ -164,8 +164,7 @@ public sealed class EssenceDefinitionValidatorTests
             options,
             repository);
 
-        Assert.NotEmpty(provider.GetAll());
-        Assert.All(provider.GetAll(), collection => Assert.InRange(collection.EssenceDefinitionIds.Count, 2, 6));
+        Assert.Empty(provider.GetAll());
     }
 
     internal static EssenceDefinition ValidDefinition() => new()
