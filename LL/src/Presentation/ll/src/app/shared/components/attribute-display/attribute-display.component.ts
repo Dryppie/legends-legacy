@@ -1,18 +1,16 @@
 import { Component, Input } from '@angular/core';
 import { AttributeDto } from '../../models/Dtos/attributesDto';
-import {
-  AttributeTooltipPipe,
-  AttributeTypeFormatPipe,
-} from '../../pipes/attributes/attribute-type-format/attribute-type-format.pipe';
+import { AttributeTypeFormatPipe } from '../../pipes/attributes/attribute-type-format/attribute-type-format.pipe';
 import { AttributeValueFormatPipe } from '../../pipes/attributes/attribute-value-format/attribute-value-format.pipe';
+import { AttributeTooltipDirective } from '../../directives/attribute-tooltip/attribute-tooltip.directive';
 
 @Component({
   selector: 'app-attribute-display',
   standalone: true,
   imports: [
-    AttributeTooltipPipe,
     AttributeTypeFormatPipe,
     AttributeValueFormatPipe,
+    AttributeTooltipDirective,
   ],
   templateUrl: './attribute-display.component.html',
 })

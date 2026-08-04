@@ -8,7 +8,7 @@ public static class AttributeCatalog
             [AttributeType.Power] = Flat(
                 AttributeType.Power,
                 "Power",
-                "Scales all numeric ability output and basic-attack damage.",
+                "Damage, healing, and barriers scale on Power.",
                 Scenarios(
                     AttributeBenchmarkScenario.PhysicalOffense,
                     AttributeBenchmarkScenario.MagicalOffense,
@@ -115,7 +115,7 @@ public static class AttributeCatalog
             [AttributeType.DamageReduction] = Percent(
                 AttributeType.DamageReduction,
                 "Damage Reduction",
-                "General damage reduction applied after typed mitigation and block.",
+                "General damage reduction applied after defense and block.",
                 AttributeCombatRules.DamageReductionCapPercent,
                 Scenarios(
                     AttributeBenchmarkScenario.PhysicalPressure,
@@ -147,8 +147,9 @@ public static class AttributeCatalog
                 AttributeType.LifeSteal,
                 "Life Steal",
                 "Percentage of damage dealt restored as health.",
-                AttributeCombatRules.LifeStealCapPercent,
-                Scenarios(AttributeBenchmarkScenario.HealingSustain, AttributeBenchmarkScenario.LongSustain)),
+                scenarios: Scenarios(
+                    AttributeBenchmarkScenario.HealingSustain,
+                    AttributeBenchmarkScenario.LongSustain)),
 
             [AttributeType.Cooldown] = Percent(
                 AttributeType.Cooldown,

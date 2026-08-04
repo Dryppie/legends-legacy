@@ -770,10 +770,9 @@ public sealed class FastCombatEngine
         IReadOnlyList<RuntimeCombatant> combatants,
         string? statsSource)
     {
-        var lifeStealPercentage = Math.Clamp(
-            source.GetAttribute(AttributeType.LifeSteal) + effect.LifeStealPercentage,
+        var lifeStealPercentage = Math.Max(
             0,
-            AttributeCatalog.GetFixedCap(AttributeType.LifeSteal));
+            source.GetAttribute(AttributeType.LifeSteal) + effect.LifeStealPercentage);
         if (lifeStealPercentage <= 0 || healthDamage <= 0)
             return;
 

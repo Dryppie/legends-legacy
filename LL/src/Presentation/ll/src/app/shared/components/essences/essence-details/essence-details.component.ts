@@ -5,6 +5,8 @@ import { TicksToSecondsPipe } from '../../../pipes/ticks-to-seconds/ticks-to-sec
 import { AttributeTypeFormatPipe } from '../../../pipes/attributes/attribute-type-format/attribute-type-format.pipe';
 import { AttributeValueFormatPipe } from '../../../pipes/attributes/attribute-value-format/attribute-value-format.pipe';
 import { NgFor, NgIf } from '@angular/common';
+import { AttributeDisplayPipe } from '../../../pipes/attributes/attribute-display/attribute-display.pipe';
+import { AttributeTooltipDirective } from '../../../directives/attribute-tooltip/attribute-tooltip.directive';
 
 @Component({
     selector: 'app-essence-details',
@@ -13,6 +15,8 @@ import { NgFor, NgIf } from '@angular/common';
         TicksToSecondsPipe,
         AttributeTypeFormatPipe,
         AttributeValueFormatPipe,
+        AttributeDisplayPipe,
+        AttributeTooltipDirective,
         NgIf,
         NgFor,
     ],

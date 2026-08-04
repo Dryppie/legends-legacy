@@ -13,6 +13,7 @@ import { AttributeTypeFormatPipe } from '../../../../shared/pipes/attributes/att
 import { AttributeValueFormatPipe } from '../../../../shared/pipes/attributes/attribute-value-format/attribute-value-format.pipe';
 import { ActivatedRoute, Router } from '@angular/router';
 import { toDisplayedCombatRating } from '../../../../shared/models/combat-rating-display';
+import { AttributeTooltipDirective } from '../../../../shared/directives/attribute-tooltip/attribute-tooltip.directive';
 
 @Component({
     selector: 'app-character-overview',
@@ -24,6 +25,7 @@ import { toDisplayedCombatRating } from '../../../../shared/models/combat-rating
         RegularButtonComponent,
         AttributeTypeFormatPipe,
         AttributeValueFormatPipe,
+        AttributeTooltipDirective,
         DecimalPipe,
     ],
     templateUrl: './character-overview.component.html'

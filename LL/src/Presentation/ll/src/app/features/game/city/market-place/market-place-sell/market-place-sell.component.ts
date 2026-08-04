@@ -38,6 +38,7 @@ import {
   MARKETPLACE_CATALYST_ITEM_IDS,
   matchesMarketplaceResourceSubcategory,
 } from '../../../../../shared/utils/market-place/market-place-category.utils';
+import { aggregateAttributes } from '../../../../../shared/utils/attributes/attribute-order.utils';
 
 @Component({
     selector: 'app-market-place-sell',
@@ -149,7 +150,7 @@ export class MarketPlaceSellComponent implements OnInit {
     switch (base.itemType) {
       case 'Equipment': {
         const eq = instance as EquipmentInstance;
-        const mods = eq.attributeModifiers
+        const mods = aggregateAttributes(eq.attributeModifiers)
           .map(
             (m) =>
               `• ${formatAttributeType(m.attributeType)}: ${formatAttributeValue(m.amount, m.attributeType, true)}`,

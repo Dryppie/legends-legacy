@@ -59,7 +59,6 @@ public sealed class AttributeCombatSystemTests
             [AttributeType.DodgeChance] = AttributeCombatRules.DodgeChanceCapPercent,
             [AttributeType.BlockChance] = AttributeCombatRules.BlockChanceCapPercent,
             [AttributeType.DamageReduction] = AttributeCombatRules.DamageReductionCapPercent,
-            [AttributeType.LifeSteal] = AttributeCombatRules.LifeStealCapPercent,
             [AttributeType.Cooldown] = AttributeCombatRules.CooldownReductionCapPercent
         };
 
@@ -70,6 +69,13 @@ public sealed class AttributeCombatSystemTests
             Assert.True(AttributeCatalog.TryGetEffectiveCharacterCap(attribute, 1, out var effectiveCap));
             Assert.Equal(expectedCap, effectiveCap);
         }
+
+        Assert.Equal(100f, AttributeCombatRules.CritChanceCapPercent);
+        Assert.Equal(AttributeCapKind.None, AttributeCatalog.Get(AttributeType.LifeSteal).CapKind);
+        Assert.False(AttributeCatalog.TryGetEffectiveCharacterCap(
+            AttributeType.LifeSteal,
+            1,
+            out _));
 
         Assert.Equal(
             AttributeCapKind.ContextDependent,
@@ -453,6 +459,27 @@ public sealed class AttributeCombatSystemTests
         Assert.Equal(120, actor.Health);
         Assert.Contains(result.EventLog, log => log.ActorId == actor.Id && log.EventType == EventType.Heal && log.Magnitude == 20);
         Assert.DoesNotContain(result.EventLog, log => log.ActorId == actor.Id && log.EventType == EventType.HealCrit);
+    }
+
+    [Fact]
+    public void Character_life_steal_is_not_capped_at_one_hundred_percent()
+    {
+        var ability = CreateDamageAbility(40, DamageType.Physical);
+        var actor = CreateCombatant(
+            "drainer",
+            CombatTeam.Friendly,
+            AbilityCompiler.CompileAbilities([ability]).Values,
+            new Dictionary<AttributeType, float>
+            {
+                [AttributeType.MaxHealth] = 300,
+                [AttributeType.LifeSteal] = 150
+            });
+        actor.SetHealth(100);
+        var target = CreateCombatant("target", CombatTeam.Hostile, []);
+
+        RunSingleTick(actor, target, randomSeed: 1);
+
+        Assert.Equal(160, actor.Health);
     }
 
     [Fact]
