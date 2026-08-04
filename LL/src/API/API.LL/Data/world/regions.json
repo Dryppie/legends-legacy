@@ -8,10 +8,12 @@
           "name": "Training Area",
           "levelRequirement": 1,
           "difficultyTier": 0,
-          "spawnProbabilities": [1.0],
+          "spawnProbabilities": [
+            1.0
+          ],
           "creatures": [
             {
-              "creatureId": "00000000-0000-0000-0000-000000000054",
+              "creatureId": "00000000-0000-0000-0000-000000000001",
               "weightedSpawnRate": 1.0
             }
           ]
@@ -21,13 +23,32 @@
           "name": "Lumo Ruins",
           "levelRequirement": 1,
           "difficultyTier": 1,
-          "spawnProbabilities": [0.969, 0.03, 0.001],
+          "spawnProbabilities": [
+            0.969,
+            0.03,
+            0.001
+          ],
           "creatures": [
-            { "creatureId": "00000000-0000-0000-0000-000000000026", "weightedSpawnRate": 0.2 },
-            { "creatureId": "00000000-0000-0000-0000-000000000027", "weightedSpawnRate": 0.2 },
-            { "creatureId": "00000000-0000-0000-0000-000000000001", "weightedSpawnRate": 0.2 },
-            { "creatureId": "00000000-0000-0000-0000-000000000003", "weightedSpawnRate": 0.2 },
-            { "creatureId": "00000000-0000-0000-0000-000000000002", "weightedSpawnRate": 0.2 }
+            {
+              "creatureId": "00000000-0000-0000-0000-000000000026",
+              "weightedSpawnRate": 0.2
+            },
+            {
+              "creatureId": "00000000-0000-0000-0000-000000000027",
+              "weightedSpawnRate": 0.2
+            },
+            {
+              "creatureId": "00000000-0000-0000-0000-000000000001",
+              "weightedSpawnRate": 0.2
+            },
+            {
+              "creatureId": "00000000-0000-0000-0000-000000000003",
+              "weightedSpawnRate": 0.2
+            },
+            {
+              "creatureId": "00000000-0000-0000-0000-000000000002",
+              "weightedSpawnRate": 0.2
+            }
           ]
         },
         {
@@ -35,13 +56,32 @@
           "name": "Blood Grove",
           "levelRequirement": 5,
           "difficultyTier": 2,
-          "spawnProbabilities": [0.03, 0.969, 0.001],
+          "spawnProbabilities": [
+            0.03,
+            0.969,
+            0.001
+          ],
           "creatures": [
-            { "creatureId": "00000000-0000-0000-0000-000000000008", "weightedSpawnRate": 0.2 },
-            { "creatureId": "00000000-0000-0000-0000-000000000039", "weightedSpawnRate": 0.2 },
-            { "creatureId": "00000000-0000-0000-0000-000000000024", "weightedSpawnRate": 0.2 },
-            { "creatureId": "00000000-0000-0000-0000-000000000018", "weightedSpawnRate": 0.2 },
-            { "creatureId": "00000000-0000-0000-0000-000000000047", "weightedSpawnRate": 0.2 }
+            {
+              "creatureId": "00000000-0000-0000-0000-000000000008",
+              "weightedSpawnRate": 0.2
+            },
+            {
+              "creatureId": "00000000-0000-0000-0000-000000000039",
+              "weightedSpawnRate": 0.2
+            },
+            {
+              "creatureId": "00000000-0000-0000-0000-000000000024",
+              "weightedSpawnRate": 0.2
+            },
+            {
+              "creatureId": "00000000-0000-0000-0000-000000000018",
+              "weightedSpawnRate": 0.2
+            },
+            {
+              "creatureId": "00000000-0000-0000-0000-000000000047",
+              "weightedSpawnRate": 0.2
+            }
           ],
           "gatheringNodes": [
             {
@@ -58,13 +98,32 @@
           "name": "Crystal Creek",
           "levelRequirement": 10,
           "difficultyTier": 3,
-          "spawnProbabilities": [0.03, 0.969, 0.001],
+          "spawnProbabilities": [
+            0.03,
+            0.969,
+            0.001
+          ],
           "creatures": [
-            { "creatureId": "00000000-0000-0000-0000-000000000006", "weightedSpawnRate": 0.2 },
-            { "creatureId": "00000000-0000-0000-0000-000000000028", "weightedSpawnRate": 0.2 },
-            { "creatureId": "00000000-0000-0000-0000-000000000009", "weightedSpawnRate": 0.2 },
-            { "creatureId": "00000000-0000-0000-0000-000000000014", "weightedSpawnRate": 0.2 },
-            { "creatureId": "00000000-0000-0000-0000-000000000021", "weightedSpawnRate": 0.2 }
+            {
+              "creatureId": "00000000-0000-0000-0000-000000000006",
+              "weightedSpawnRate": 0.2
+            },
+            {
+              "creatureId": "00000000-0000-0000-0000-000000000028",
+              "weightedSpawnRate": 0.2
+            },
+            {
+              "creatureId": "00000000-0000-0000-0000-000000000009",
+              "weightedSpawnRate": 0.2
+            },
+            {
+              "creatureId": "00000000-0000-0000-0000-000000000014",
+              "weightedSpawnRate": 0.2
+            },
+            {
+              "creatureId": "00000000-0000-0000-0000-000000000021",
+              "weightedSpawnRate": 0.2
+            }
           ]
         },
         {
@@ -72,13 +131,32 @@
           "name": "Moonlit Graves",
           "levelRequirement": 15,
           "difficultyTier": 4,
-          "spawnProbabilities": [0.03, 0.969, 0.001],
+          "spawnProbabilities": [
+            0.03,
+            0.969,
+            0.001
+          ],
           "creatures": [
-            { "creatureId": "00000000-0000-0000-0000-000000000007", "weightedSpawnRate": 0.2 },
-            { "creatureId": "00000000-0000-0000-0000-000000000029", "weightedSpawnRate": 0.2 },
-            { "creatureId": "00000000-0000-0000-0000-000000000041", "weightedSpawnRate": 0.2 },
-            { "creatureId": "00000000-0000-0000-0000-000000000030", "weightedSpawnRate": 0.2 },
-            { "creatureId": "00000000-0000-0000-0000-000000000031", "weightedSpawnRate": 0.2 }
+            {
+              "creatureId": "00000000-0000-0000-0000-000000000007",
+              "weightedSpawnRate": 0.2
+            },
+            {
+              "creatureId": "00000000-0000-0000-0000-000000000029",
+              "weightedSpawnRate": 0.2
+            },
+            {
+              "creatureId": "00000000-0000-0000-0000-000000000041",
+              "weightedSpawnRate": 0.2
+            },
+            {
+              "creatureId": "00000000-0000-0000-0000-000000000030",
+              "weightedSpawnRate": 0.2
+            },
+            {
+              "creatureId": "00000000-0000-0000-0000-000000000031",
+              "weightedSpawnRate": 0.2
+            }
           ]
         },
         {
@@ -86,13 +164,32 @@
           "name": "Twilight Clearing",
           "levelRequirement": 20,
           "difficultyTier": 5,
-          "spawnProbabilities": [0.03, 0.969, 0.001],
+          "spawnProbabilities": [
+            0.03,
+            0.969,
+            0.001
+          ],
           "creatures": [
-            { "creatureId": "00000000-0000-0000-0000-000000000019", "weightedSpawnRate": 0.2 },
-            { "creatureId": "00000000-0000-0000-0000-000000000035", "weightedSpawnRate": 0.2 },
-            { "creatureId": "00000000-0000-0000-0000-000000000012", "weightedSpawnRate": 0.2 },
-            { "creatureId": "00000000-0000-0000-0000-000000000015", "weightedSpawnRate": 0.2 },
-            { "creatureId": "00000000-0000-0000-0000-000000000017", "weightedSpawnRate": 0.2 }
+            {
+              "creatureId": "00000000-0000-0000-0000-000000000019",
+              "weightedSpawnRate": 0.2
+            },
+            {
+              "creatureId": "00000000-0000-0000-0000-000000000035",
+              "weightedSpawnRate": 0.2
+            },
+            {
+              "creatureId": "00000000-0000-0000-0000-000000000012",
+              "weightedSpawnRate": 0.2
+            },
+            {
+              "creatureId": "00000000-0000-0000-0000-000000000015",
+              "weightedSpawnRate": 0.2
+            },
+            {
+              "creatureId": "00000000-0000-0000-0000-000000000017",
+              "weightedSpawnRate": 0.2
+            }
           ]
         },
         {
@@ -100,13 +197,32 @@
           "name": "Old Forest",
           "levelRequirement": 25,
           "difficultyTier": 6,
-          "spawnProbabilities": [0.03, 0.969, 0.001],
+          "spawnProbabilities": [
+            0.03,
+            0.969,
+            0.001
+          ],
           "creatures": [
-            { "creatureId": "00000000-0000-0000-0000-000000000032", "weightedSpawnRate": 0.2 },
-            { "creatureId": "00000000-0000-0000-0000-000000000033", "weightedSpawnRate": 0.2 },
-            { "creatureId": "00000000-0000-0000-0000-000000000023", "weightedSpawnRate": 0.2 },
-            { "creatureId": "00000000-0000-0000-0000-000000000016", "weightedSpawnRate": 0.2 },
-            { "creatureId": "00000000-0000-0000-0000-000000000034", "weightedSpawnRate": 0.2 }
+            {
+              "creatureId": "00000000-0000-0000-0000-000000000032",
+              "weightedSpawnRate": 0.2
+            },
+            {
+              "creatureId": "00000000-0000-0000-0000-000000000033",
+              "weightedSpawnRate": 0.2
+            },
+            {
+              "creatureId": "00000000-0000-0000-0000-000000000023",
+              "weightedSpawnRate": 0.2
+            },
+            {
+              "creatureId": "00000000-0000-0000-0000-000000000016",
+              "weightedSpawnRate": 0.2
+            },
+            {
+              "creatureId": "00000000-0000-0000-0000-000000000034",
+              "weightedSpawnRate": 0.2
+            }
           ]
         },
         {
@@ -114,13 +230,32 @@
           "name": "Thornroot Hollow",
           "levelRequirement": 30,
           "difficultyTier": 7,
-          "spawnProbabilities": [0.03, 0.969, 0.001],
+          "spawnProbabilities": [
+            0.03,
+            0.969,
+            0.001
+          ],
           "creatures": [
-            { "creatureId": "00000000-0000-0000-0000-000000000040", "weightedSpawnRate": 0.2 },
-            { "creatureId": "00000000-0000-0000-0000-000000000022", "weightedSpawnRate": 0.2 },
-            { "creatureId": "00000000-0000-0000-0000-000000000036", "weightedSpawnRate": 0.2 },
-            { "creatureId": "00000000-0000-0000-0000-000000000037", "weightedSpawnRate": 0.2 },
-            { "creatureId": "00000000-0000-0000-0000-000000000038", "weightedSpawnRate": 0.2 }
+            {
+              "creatureId": "00000000-0000-0000-0000-000000000040",
+              "weightedSpawnRate": 0.2
+            },
+            {
+              "creatureId": "00000000-0000-0000-0000-000000000022",
+              "weightedSpawnRate": 0.2
+            },
+            {
+              "creatureId": "00000000-0000-0000-0000-000000000036",
+              "weightedSpawnRate": 0.2
+            },
+            {
+              "creatureId": "00000000-0000-0000-0000-000000000037",
+              "weightedSpawnRate": 0.2
+            },
+            {
+              "creatureId": "00000000-0000-0000-0000-000000000038",
+              "weightedSpawnRate": 0.2
+            }
           ]
         },
         {
@@ -128,13 +263,32 @@
           "name": "Embercap Burrows",
           "levelRequirement": 35,
           "difficultyTier": 8,
-          "spawnProbabilities": [0.03, 0.969, 0.001],
+          "spawnProbabilities": [
+            0.03,
+            0.969,
+            0.001
+          ],
           "creatures": [
-            { "creatureId": "00000000-0000-0000-0000-000000000005", "weightedSpawnRate": 0.2 },
-            { "creatureId": "00000000-0000-0000-0000-000000000042", "weightedSpawnRate": 0.2 },
-            { "creatureId": "00000000-0000-0000-0000-000000000043", "weightedSpawnRate": 0.2 },
-            { "creatureId": "00000000-0000-0000-0000-000000000013", "weightedSpawnRate": 0.2 },
-            { "creatureId": "00000000-0000-0000-0000-000000000048", "weightedSpawnRate": 0.2 }
+            {
+              "creatureId": "00000000-0000-0000-0000-000000000005",
+              "weightedSpawnRate": 0.2
+            },
+            {
+              "creatureId": "00000000-0000-0000-0000-000000000042",
+              "weightedSpawnRate": 0.2
+            },
+            {
+              "creatureId": "00000000-0000-0000-0000-000000000043",
+              "weightedSpawnRate": 0.2
+            },
+            {
+              "creatureId": "00000000-0000-0000-0000-000000000013",
+              "weightedSpawnRate": 0.2
+            },
+            {
+              "creatureId": "00000000-0000-0000-0000-000000000048",
+              "weightedSpawnRate": 0.2
+            }
           ]
         },
         {
@@ -142,13 +296,32 @@
           "name": "Moonveil Marsh",
           "levelRequirement": 40,
           "difficultyTier": 9,
-          "spawnProbabilities": [0.03, 0.969, 0.001],
+          "spawnProbabilities": [
+            0.03,
+            0.969,
+            0.001
+          ],
           "creatures": [
-            { "creatureId": "00000000-0000-0000-0000-000000000044", "weightedSpawnRate": 0.2 },
-            { "creatureId": "00000000-0000-0000-0000-000000000011", "weightedSpawnRate": 0.2 },
-            { "creatureId": "00000000-0000-0000-0000-000000000004", "weightedSpawnRate": 0.2 },
-            { "creatureId": "00000000-0000-0000-0000-000000000025", "weightedSpawnRate": 0.2 },
-            { "creatureId": "00000000-0000-0000-0000-000000000045", "weightedSpawnRate": 0.2 }
+            {
+              "creatureId": "00000000-0000-0000-0000-000000000044",
+              "weightedSpawnRate": 0.2
+            },
+            {
+              "creatureId": "00000000-0000-0000-0000-000000000011",
+              "weightedSpawnRate": 0.2
+            },
+            {
+              "creatureId": "00000000-0000-0000-0000-000000000004",
+              "weightedSpawnRate": 0.2
+            },
+            {
+              "creatureId": "00000000-0000-0000-0000-000000000025",
+              "weightedSpawnRate": 0.2
+            },
+            {
+              "creatureId": "00000000-0000-0000-0000-000000000045",
+              "weightedSpawnRate": 0.2
+            }
           ]
         },
         {
@@ -156,13 +329,32 @@
           "name": "Duskmire Hollow",
           "levelRequirement": 45,
           "difficultyTier": 10,
-          "spawnProbabilities": [0.03, 0.969, 0.001],
+          "spawnProbabilities": [
+            0.03,
+            0.969,
+            0.001
+          ],
           "creatures": [
-            { "creatureId": "00000000-0000-0000-0000-000000000049", "weightedSpawnRate": 0.2 },
-            { "creatureId": "00000000-0000-0000-0000-000000000010", "weightedSpawnRate": 0.2 },
-            { "creatureId": "00000000-0000-0000-0000-000000000050", "weightedSpawnRate": 0.2 },
-            { "creatureId": "00000000-0000-0000-0000-000000000051", "weightedSpawnRate": 0.2 },
-            { "creatureId": "00000000-0000-0000-0000-000000000046", "weightedSpawnRate": 0.2 }
+            {
+              "creatureId": "00000000-0000-0000-0000-000000000049",
+              "weightedSpawnRate": 0.2
+            },
+            {
+              "creatureId": "00000000-0000-0000-0000-000000000010",
+              "weightedSpawnRate": 0.2
+            },
+            {
+              "creatureId": "00000000-0000-0000-0000-000000000050",
+              "weightedSpawnRate": 0.2
+            },
+            {
+              "creatureId": "00000000-0000-0000-0000-000000000051",
+              "weightedSpawnRate": 0.2
+            },
+            {
+              "creatureId": "00000000-0000-0000-0000-000000000046",
+              "weightedSpawnRate": 0.2
+            }
           ]
         }
       ]

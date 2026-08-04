@@ -1,47 +1,166 @@
 {
   "collections": [
     {
-      "id": "codex.collection.goblin-warband",
+      "id": "codex.collection.region-1.goblin-warband",
       "title": "Goblin Warband",
-      "description": "Study the common goblin fighting line by absorbing the scout, warrior, and archer Essences.",
+      "description": "Record the full Goblin hierarchy, from common raiders to the two combat disciplines of the Hobgoblin boss.",
       "category": "Creature Families",
       "essenceDefinitionIds": [
-        "essence.legacy.goblin",
-        "essence.legacy.goblin_warrior",
-        "essence.legacy.goblin_archer"
+        "essence.goblin",
+        "essence.goblin_archer",
+        "essence.goblin_warrior",
+        "essence.goblin_shaman",
+        "essence.hobgoblin",
+        "essence.hobgoblin_brutal_charge"
+      ],
+      "bonus": {
+        "kind": "DungeonRewardRetentionBps",
+        "value": 100,
+        "valuePerCollectionAscensionTier": 25,
+        "description": "+1% dungeon reward retention."
+      }
+    },
+    {
+      "id": "codex.collection.region-1.slime-spectrum",
+      "title": "Slime Spectrum",
+      "description": "Complete the full chromatic study of Region 1 Slimes and their wildly different adaptations.",
+      "category": "Creature Families",
+      "essenceDefinitionIds": [
+        "essence.blue_slime",
+        "essence.transparent_slime",
+        "essence.rainbow_slime",
+        "essence.red_slime",
+        "essence.green_slime",
+        "essence.brown_slime"
+      ],
+      "bonus": {
+        "kind": "DuplicateEssenceExtraMaterialChanceBps",
+        "value": 100,
+        "valuePerCollectionAscensionTier": 25,
+        "description": "+1% chance for extra materials from duplicate Essences."
+      }
+    },
+    {
+      "id": "codex.collection.region-1.imp-convergence",
+      "title": "Imp Convergence",
+      "description": "Bind the elemental pattern shared by the fiery, frozen, and shadowed Imp strains.",
+      "category": "Creature Families",
+      "essenceDefinitionIds": [
+        "essence.flame_imp",
+        "essence.frost_imp",
+        "essence.shadow_imp"
+      ],
+      "bonus": {
+        "kind": "EssencePityProgressionGainBps",
+        "value": 50,
+        "valuePerCollectionAscensionTier": 10,
+        "description": "+0.5% Essence pity progression gain."
+      }
+    },
+    {
+      "id": "codex.collection.region-1.thornroot-brood",
+      "title": "Thornroot Brood",
+      "description": "Trace the escalating forms of the Spider brood lurking throughout Thornroot Hollow.",
+      "category": "Creature Families",
+      "essenceDefinitionIds": [
+        "essence.spider",
+        "essence.giant_spider",
+        "essence.venomous_spiderling",
+        "essence.blackjaw_spider"
+      ],
+      "bonus": {
+        "kind": "FocusedMonsterEssenceDropRateRelativeBps",
+        "value": 50,
+        "valuePerCollectionAscensionTier": 10,
+        "description": "+0.5% Essence drop rate against focused monsters."
+      }
+    },
+    {
+      "id": "codex.collection.region-1.wings-of-night",
+      "title": "Wings of Night",
+      "description": "Compare the nocturnal instincts shared by ravens and the three Bat strains of Region 1.",
+      "category": "Creature Families",
+      "essenceDefinitionIds": [
+        "essence.vampire_bat",
+        "essence.raven",
+        "essence.cave_bat",
+        "essence.giant_bat"
       ],
       "bonus": {
         "kind": "EssenceDropRateRelativeBps",
         "value": 50,
         "valuePerCollectionAscensionTier": 10,
-        "description": "+0.5% Essence drop chance."
+        "description": "+0.5% Essence drop rate."
       }
     },
     {
-      "id": "codex.collection.vermin-signs",
-      "title": "Vermin Signs",
-      "description": "Compare the instincts of rats and their venom-touched kin.",
-      "category": "Creature Families",
+      "id": "codex.collection.region-1.fangs-scales-and-venom",
+      "title": "Fangs, Scales, and Venom",
+      "description": "Study the reptiles, poisoned predators, and toxic flora that evolved lethal defenses across Region 1.",
+      "category": "Essence Affinities",
       "essenceDefinitionIds": [
-        "essence.legacy.large_rat",
-        "essence.legacy.poisonous_rat"
+        "essence.venomous_snake",
+        "essence.moss_lizard",
+        "essence.viper",
+        "essence.poisonous_rat",
+        "essence.venomous_spiderling",
+        "essence.nightshade_blossom"
       ],
       "bonus": {
-        "kind": "DuplicateEssenceExtraMaterialChanceBps",
-        "value": 75,
-        "valuePerCollectionAscensionTier": 15,
-        "description": "+0.75% chance for extra materials from duplicate Essences."
+        "kind": "FocusedMonsterEssenceDropRateRelativeBps",
+        "value": 100,
+        "valuePerCollectionAscensionTier": 25,
+        "description": "+1% Essence drop rate against focused monsters."
       }
     },
     {
-      "id": "codex.collection.imp-triad",
-      "title": "Imp Triad",
-      "description": "Bind the volatile pattern shared by flame, frost, and shadow imps.",
-      "category": "Elemental Studies",
+      "id": "codex.collection.region-1.wandering-lights",
+      "title": "Wandering Lights",
+      "description": "Unravel the shared resonance of luminous Wisps and the Lost Souls that resemble them.",
+      "category": "Essence Affinities",
       "essenceDefinitionIds": [
-        "essence.legacy.flame_imp",
-        "essence.legacy.frost_imp",
-        "essence.legacy.shadow_imp"
+        "essence.lumo_wisp",
+        "essence.crystal_wisp",
+        "essence.grave_wisp",
+        "essence.lost_soul"
+      ],
+      "bonus": {
+        "kind": "EssencePityProgressionGainBps",
+        "value": 50,
+        "valuePerCollectionAscensionTier": 10,
+        "description": "+0.5% Essence pity progression gain."
+      }
+    },
+    {
+      "id": "codex.collection.region-1.twilight-court",
+      "title": "The Twilight Court",
+      "description": "Gather the fae and spirit-touched creatures whose magic bends the old woodland paths.",
+      "category": "Creature Families",
+      "essenceDefinitionIds": [
+        "essence.pixie",
+        "essence.wood_nymph",
+        "essence.enchanted_fairy",
+        "essence.illusion_fox",
+        "essence.forest_spirit"
+      ],
+      "bonus": {
+        "kind": "EssenceDropRateRelativeBps",
+        "value": 75,
+        "valuePerCollectionAscensionTier": 15,
+        "description": "+0.75% Essence drop rate."
+      }
+    },
+    {
+      "id": "codex.collection.region-1.ancient-wilds",
+      "title": "Sovereigns of the Ancient Wilds",
+      "description": "Archive the beasts and living guardians that command the oldest reaches of the forest.",
+      "category": "Regional Ecologies",
+      "essenceDefinitionIds": [
+        "essence.thornback_boar",
+        "essence.hollow_stag",
+        "essence.treant_sapling",
+        "essence.glade_panther",
+        "essence.forest_spirit"
       ],
       "bonus": {
         "kind": "EssencePityProgressionGainBps",
@@ -51,62 +170,79 @@
       }
     },
     {
-      "id": "codex.collection.slime-spectrum",
-      "title": "Slime Spectrum",
-      "description": "Complete a six-color survey of slime cores and their strange adaptations.",
+      "id": "codex.collection.region-1.restless-dead",
+      "title": "The Restless Dead",
+      "description": "Catalogue the many ways death persists in Blood Grove, Moonlit Graves, the Catacombs, and Duskmire.",
       "category": "Creature Families",
       "essenceDefinitionIds": [
-        "essence.legacy.blue_slime",
-        "essence.legacy.brown_slime",
-        "essence.legacy.green_slime",
-        "essence.legacy.rainbow_slime",
-        "essence.legacy.red_slime",
-        "essence.legacy.transparent_slime"
+        "essence.blood_zombie",
+        "essence.grave_hound",
+        "essence.lost_soul",
+        "essence.skeleton",
+        "essence.undead"
       ],
       "bonus": {
-        "kind": "EssenceDropRateRelativeBps",
-        "value": 100,
-        "valuePerCollectionAscensionTier": 25,
-        "description": "+1% Essence drop chance."
+        "kind": "DuplicateEssenceExtraMaterialChanceBps",
+        "value": 75,
+        "valuePerCollectionAscensionTier": 15,
+        "description": "+0.75% chance for extra materials from duplicate Essences."
       }
     },
     {
-      "id": "codex.collection.forest-whispers",
-      "title": "Forest Whispers",
-      "description": "Absorb several Essences that carry the hidden patterns of the living woods.",
-      "category": "Regions",
+      "id": "codex.collection.region-1.burrowers-and-scavengers",
+      "title": "Burrowers and Scavengers",
+      "description": "Follow the small survivors, tunnelling horrors, and hungry scavengers beneath the region's surface.",
+      "category": "Regional Ecologies",
       "essenceDefinitionIds": [
-        "essence.legacy.enchanted_fairy",
-        "essence.legacy.glade_panther",
-        "essence.legacy.illusion_fox",
-        "essence.legacy.nightshade_blossom",
-        "essence.legacy.pixie"
+        "essence.smolder_rat",
+        "essence.cinder_beetle",
+        "essence.giant_worm",
+        "essence.bog_mite",
+        "essence.large_rat"
+      ],
+      "bonus": {
+        "kind": "EssenceDropRateRelativeBps",
+        "value": 75,
+        "valuePerCollectionAscensionTier": 15,
+        "description": "+0.75% Essence drop rate."
+      }
+    },
+    {
+      "id": "codex.collection.region-1.blighted-life",
+      "title": "Blighted Life",
+      "description": "Connect the rot, poison, and corrosive adaptations spreading through the region's darkest habitats.",
+      "category": "Regional Ecologies",
+      "essenceDefinitionIds": [
+        "essence.nightshade_blossom",
+        "essence.rotroot_shambler",
+        "essence.rotfly_toad",
+        "essence.poisonous_rat",
+        "essence.green_slime"
       ],
       "bonus": {
         "kind": "FocusedMonsterEssenceDropRateRelativeBps",
         "value": 75,
         "valuePerCollectionAscensionTier": 15,
-        "description": "+0.75% Essence drop chance against focused monsters."
+        "description": "+0.75% Essence drop rate against focused monsters."
       }
     },
     {
-      "id": "codex.collection.grave-chorus",
-      "title": "Grave Chorus",
-      "description": "Record the shared resonance of restless dead and bone-bound fighters.",
-      "category": "Creature Families",
+      "id": "codex.collection.region-1.unyielding-forms",
+      "title": "Unyielding Forms",
+      "description": "Study creatures whose cores, shells, and mutable bodies let them endure otherwise fatal wounds.",
+      "category": "Essence Affinities",
       "essenceDefinitionIds": [
-        "essence.legacy.feral_ghoul",
-        "essence.legacy.plague_ghoul",
-        "essence.legacy.ravenous_ghoul",
-        "essence.legacy.skeleton_archer",
-        "essence.legacy.skeleton_mage",
-        "essence.legacy.skeleton_warrior"
+        "essence.lumo_sentinel",
+        "essence.transparent_slime",
+        "essence.giant_spider",
+        "essence.cinder_beetle",
+        "essence.brown_slime"
       ],
       "bonus": {
-        "kind": "DungeonRewardRetentionBps",
-        "value": 50,
-        "valuePerCollectionAscensionTier": 10,
-        "description": "+0.5% dungeon reward retention."
+        "kind": "DuplicateEssenceExtraMaterialChanceBps",
+        "value": 75,
+        "valuePerCollectionAscensionTier": 15,
+        "description": "+0.75% chance for extra materials from duplicate Essences."
       }
     }
   ]
