@@ -24,6 +24,13 @@ export enum EventType {
   StatusEffectExpired = 'StatusEffectExpired', // Dryp is no longer stunned // Is not logged in chat. Maybe something visual instead?
   HealthRegeneration = 'HealthRegeneration',
   Death = 'Death',
+  BarrierApplied = 'BarrierApplied',
+  BarrierAbsorbed = 'BarrierAbsorbed',
+  BarrierBroken = 'BarrierBroken',
+  ReflectedDamage = 'ReflectedDamage',
+  StatusEffectRemoved = 'StatusEffectRemoved',
+  StatusEffectCleansed = 'StatusEffectCleansed',
+  StatusEffectDispelled = 'StatusEffectDispelled',
 }
 
 export interface CombatEvent {

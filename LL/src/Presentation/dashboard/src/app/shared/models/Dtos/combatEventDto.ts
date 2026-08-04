@@ -23,6 +23,15 @@ export enum EventType {
   StatusEffect = 'StatusEffect', // Dryp is stunned
   StatusEffectExpired = 'StatusEffectExpired', // Dryp is no longer stunned // Is not logged in chat. Maybe something visual instead?
   Regeneration = 'Regeneration', // Natural regeneration every x seconds // Is not logged in chat
+  HealthRegeneration = 'HealthRegeneration',
+  Death = 'Death',
+  BarrierApplied = 'BarrierApplied',
+  BarrierAbsorbed = 'BarrierAbsorbed',
+  BarrierBroken = 'BarrierBroken',
+  ReflectedDamage = 'ReflectedDamage',
+  StatusEffectRemoved = 'StatusEffectRemoved',
+  StatusEffectCleansed = 'StatusEffectCleansed',
+  StatusEffectDispelled = 'StatusEffectDispelled',
 }
 
 export interface CombatEvent {
