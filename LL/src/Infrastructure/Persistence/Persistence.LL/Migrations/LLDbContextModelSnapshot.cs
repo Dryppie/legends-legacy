@@ -3477,6 +3477,13 @@ namespace Persistence.LL.Migrations
                     b.HasDiscriminator().HasValue(2);
                 });
 
+            modelBuilder.Entity("Domain.Models.Items.ConsumableItemBase", b =>
+                {
+                    b.HasBaseType("Domain.Models.Items.ItemBase");
+
+                    b.HasDiscriminator().HasValue(1);
+                });
+
             modelBuilder.Entity("Domain.Models.Items.Equipments.EquipmentBase", b =>
                 {
                     b.HasBaseType("Domain.Models.Items.ItemBase");

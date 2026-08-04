@@ -13,7 +13,7 @@ using Persistence.LL;
 namespace Persistence.LL.Migrations
 {
     [DbContext(typeof(LLDbContext))]
-    [Migration("20260802123341_BaseMigration")]
+    [Migration("20260804211150_BaseMigration")]
     partial class BaseMigration
     {
         /// <inheritdoc />
@@ -3478,6 +3478,13 @@ namespace Persistence.LL.Migrations
                     b.HasBaseType("Domain.Models.Entities.Entity");
 
                     b.HasDiscriminator().HasValue(2);
+                });
+
+            modelBuilder.Entity("Domain.Models.Items.ConsumableItemBase", b =>
+                {
+                    b.HasBaseType("Domain.Models.Items.ItemBase");
+
+                    b.HasDiscriminator().HasValue(1);
                 });
 
             modelBuilder.Entity("Domain.Models.Items.Equipments.EquipmentBase", b =>
