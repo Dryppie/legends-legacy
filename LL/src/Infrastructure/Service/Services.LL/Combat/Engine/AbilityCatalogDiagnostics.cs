@@ -6,7 +6,13 @@ namespace Services.LL.Combat.Engine;
 
 public sealed class AbilityCatalogDiagnostics : IAbilityCatalogDiagnostics
 {
-    private const string TrainingEssenceId = "essence.training";
+    private static readonly string[] DiagnosticAbilityIds =
+    [
+        "ability.creature.goblin.shiv_jab",
+        "ability.creature.lumo_wisp.lumo_barrier",
+        "ability.creature.flame_imp.firebomb_toss",
+        "ability.creature.thornback_boar.bristling_hide"
+    ];
     private readonly IAbilityCatalogProvider _catalogProvider;
 
     public AbilityCatalogDiagnostics(IAbilityCatalogProvider catalogProvider)
@@ -17,15 +23,23 @@ public sealed class AbilityCatalogDiagnostics : IAbilityCatalogDiagnostics
     public AbilityCatalogDiagnosticReport RunTrainingEncounter()
     {
         var catalog = _catalogProvider.GetCatalog();
+        var missingDiagnosticAbilities = DiagnosticAbilityIds
+            .Where(id => !catalog.AbilitiesById.ContainsKey(id))
+            .ToList();
         var compiledAbilities = AbilityCompiler.CompileAbilities(
-            catalog.OwningEssenceByAbilityId
-                .Where(x => x.Value.Equals(TrainingEssenceId, StringComparison.OrdinalIgnoreCase))
-                .Select(x => catalog.AbilitiesById[x.Key]));
+            DiagnosticAbilityIds
+                .Where(catalog.AbilitiesById.ContainsKey)
+                .Select(id => catalog.AbilitiesById[id]));
         var compiledCatalogAbilities = AbilityCompiler.CompileAbilities(catalog.Abilities);
         var compiledStatuses = AbilityCompiler.CompileStatuses(catalog.Statuses);
         var compiledSummons = AbilityCompiler.CompileSummons(catalog.Summons);
         var friendly = CreateCombatant("diagnostic-friendly", CombatTeam.Friendly, compiledAbilities.Values);
-        var hostile = CreateCombatant("diagnostic-hostile", CombatTeam.Hostile, []);
+        var hostile = CreateCombatant(
+            "diagnostic-hostile",
+            CombatTeam.Hostile,
+            compiledAbilities.TryGetValue("ability.creature.goblin.shiv_jab", out var hostileStrike)
+                ? [hostileStrike]
+                : []);
         var engine = new FastCombatEngine(
             compiledStatuses,
             compiledSummons,
@@ -34,10 +48,10 @@ public sealed class AbilityCatalogDiagnostics : IAbilityCatalogDiagnostics
         var result = engine.Run([friendly], [hostile]);
         var failures = new List<string>();
 
-        var directDamageObserved = result.EventLog.Any(x => x.Source == "effect.damage.main" && x.EventType == EventType.Damage);
-        var barrierObserved = result.EventLog.Any(x => x.Source == "effect.barrier.main" && x.EventType == EventType.RestoreBarrier);
-        var damageOverTimeObserved = result.EventLog.Any(x => x.Source == "effect.burn.dot" && x.EventType == EventType.Damage);
-        var reflectObserved = result.EventLog.Any(x => x.Source == "effect.reflect.damage" && x.EventType == EventType.Damage);
+        var directDamageObserved = result.EventLog.Any(x => x.EventType == EventType.Damage && !x.Source.StartsWith("condition.", StringComparison.OrdinalIgnoreCase));
+        var barrierObserved = result.EventLog.Any(x => x.EventType == EventType.RestoreBarrier);
+        var damageOverTimeObserved = result.EventLog.Any(x => x.Source == "condition.burn" && x.EventType == EventType.Damage);
+        var reflectObserved = result.EventLog.Any(x => x.Source == "condition.thorns" && x.EventType == EventType.ReflectedDamage);
         var summonDiagnostics = catalog.Summons
             .OrderBy(x => x.Id, StringComparer.OrdinalIgnoreCase)
             .Select(x => new AbilityCatalogSummonDiagnostic(
@@ -53,8 +67,8 @@ public sealed class AbilityCatalogDiagnostics : IAbilityCatalogDiagnostics
             .ToList();
         var summonAbilityReferenceCount = catalog.Summons.Sum(x => x.AbilityIds.Count);
 
-        if (compiledAbilities.Count == 0)
-            failures.Add($"No abilities found for '{TrainingEssenceId}'.");
+        foreach (var missingAbilityId in missingDiagnosticAbilities)
+            failures.Add($"Diagnostic ability '{missingAbilityId}' was not found.");
         if (!directDamageObserved)
             failures.Add("Training direct damage was not observed.");
         if (!barrierObserved)

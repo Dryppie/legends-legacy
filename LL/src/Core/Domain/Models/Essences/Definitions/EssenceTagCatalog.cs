@@ -29,15 +29,16 @@ public static class EssenceTagCatalog
                 "Effect.Physical", "Effect.Magical", "Effect.Poison", "Effect.Burn", "Effect.Bleed",
                 "Effect.Holy", "Effect.Healing", "Effect.Summon", "Effect.Barrier", "Effect.CrowdControl"
             ],
-            ["Control"] = ["Control.Stun", "Control.Freeze", "Control.Fear", "Control.Taunt", "Control.Blind", "Control.Interrupt", "Control.Suppression"],
-            ["Status"] = ["Status.Bleed", "Status.Burn", "Status.Poison", "Status.Chill", "Status.Cold", "Status.Freeze", "Status.Shock", "Status.Vulnerable", "Status.Weakened", "Status.Curse", "Status.Reflect"],
+            ["Control"] = ["Control.Stun", "Control.Freeze", "Control.Fear", "Control.Taunt", "Control.Blind", "Control.Interrupt"],
+            ["Status"] = ["Status.Bleed", "Status.Burn", "Status.Poison", "Status.Chill", "Status.Cold", "Status.Freeze", "Status.Vulnerable", "Status.Weakened", "Status.Curse", "Status.Reflect"],
             ["Resource"] = ["Resource.Health", "Resource.Barrier", "Resource.Cooldown"],
             ["Trigger"] =
             [
                 "Trigger.OnCombatStart", "Trigger.OnCombatEnd", "Trigger.OnHit", "Trigger.OnCrit", "Trigger.OnKill",
                 "Trigger.OnTakeDamage", "Trigger.OnDodge", "Trigger.OnBlock", "Trigger.OnBarrierBreak",
                 "Trigger.OnLowHealth", "Trigger.OnAllyLowHealth", "Trigger.OnInterval", "Trigger.OnStatusApplied",
-                "Trigger.OnStatusExpired", "Trigger.OnSummonDeath", "Trigger.OnAbilityUse", "Trigger.OnAbilityUsed",
+                "Trigger.OnStatusExpired", "Trigger.OnStatusRemoved", "Trigger.OnStatusCleansed",
+                "Trigger.OnStatusDispelled", "Trigger.OnSummonDeath", "Trigger.OnAbilityUse", "Trigger.OnAbilityUsed",
                 "Trigger.OnBasicAttack", "Trigger.OnAttacked", "Trigger.OnMeleeAttack", "Trigger.OnRangedAttack",
                 "Trigger.OnMeleeAttacked", "Trigger.OnRangedAttacked", "Trigger.OnHealthChanged", "Trigger.OnDeath",
                 "Trigger.OnHeal", "Trigger.OnHealed", "Trigger.OnLifestealHeal"

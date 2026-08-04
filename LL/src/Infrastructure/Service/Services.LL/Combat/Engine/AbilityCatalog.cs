@@ -234,8 +234,11 @@ public static class AbilityCatalogValidator
             if (effect.DurationTicks < 0 || effect.IntervalTicks < 0 || effect.Uses < 0)
                 errors.Add($"{label}: duration, interval, and uses cannot be negative.");
 
-            if (effect.ScalingAttribute is not null and not AttributeType.Power)
-                errors.Add($"{label}: ability effect magnitude may scale only with Power.");
+            if (effect.ScalingAttribute is { } scalingAttribute
+                && !AttributeCatalog.IsContentFacing(scalingAttribute))
+            {
+                errors.Add($"{label}: scaling attribute '{scalingAttribute}' is runtime-only and cannot be authored.");
+            }
 
             if (effect.Operation == AbilityEffectOperation.ModifyAttribute && effect.Attribute is null)
                 errors.Add($"{label}: ModifyAttribute requires attribute.");
@@ -250,6 +253,44 @@ public static class AbilityCatalogValidator
 
             if (effect.Operation == AbilityEffectOperation.Summon && string.IsNullOrWhiteSpace(effect.SummonId))
                 errors.Add($"{label}: Summon requires summonId.");
+
+            if (effect.Operation == AbilityEffectOperation.ApplyCondition && effect.Condition is null)
+                errors.Add($"{label}: ApplyCondition requires condition.");
+
+            if (effect.Operation == AbilityEffectOperation.ApplyRandomCondition
+                && (effect.Condition is null || effect.AlternativeCondition is null))
+            {
+                errors.Add($"{label}: ApplyRandomCondition requires condition and alternativeCondition.");
+            }
+
+            if (effect.Operation == AbilityEffectOperation.ModifyDamageTakenFromCondition
+                && effect.Condition is null)
+            {
+                errors.Add($"{label}: ModifyDamageTakenFromCondition requires condition.");
+            }
+
+            if (effect.Operation == AbilityEffectOperation.ApplyCondition && effect.Condition is { } condition)
+            {
+                if (condition == StandardConditionType.Thorns && effect.DurationTicks <= 0)
+                    errors.Add($"{label}: Thorns requires a positive durationTicks.");
+
+                if (condition == StandardConditionType.Thorns && effect.IntervalTicks > 0)
+                    errors.Add($"{label}: Thorns cannot use intervalTicks because durationTicks is its condition duration.");
+
+                if (condition != StandardConditionType.Thorns
+                    && effect.DurationTicks > 0
+                    && effect.IntervalTicks <= 0)
+                {
+                    errors.Add($"{label}: durationTicks requires intervalTicks; condition duration comes from canonical X or its fixed rule.");
+                }
+
+                if (RequiresPositiveConditionValue(condition)
+                    && effect.BaseValue <= 0
+                    && effect.ScalingCoefficient <= 0)
+                {
+                    errors.Add($"{label}: {condition} requires a positive condition value.");
+                }
+            }
 
             if (statusIds is not null
                 && !string.IsNullOrWhiteSpace(effect.StatusId)
@@ -289,6 +330,10 @@ public static class AbilityCatalogValidator
         {
             if (trigger.InternalCooldownTicks < 0)
                 errors.Add($"{ownerId}: trigger {trigger.Event} internal cooldown cannot be negative.");
+            if (trigger.InitialDelayTicks < 0)
+                errors.Add($"{ownerId}: trigger {trigger.Event} initial delay cannot be negative.");
+            if (trigger.EveryNthOccurrence <= 0)
+                errors.Add($"{ownerId}: trigger {trigger.Event} everyNthOccurrence must be positive.");
 
             foreach (var effectId in trigger.EffectIds)
             {
@@ -317,8 +362,24 @@ public static class AbilityCatalogValidator
             if (condition.Type == AbilityConditionType.HasTag && string.IsNullOrWhiteSpace(condition.Tag))
                 errors.Add($"{ownerId}: condition HasTag requires tag.");
 
+            if ((condition.Type == AbilityConditionType.HasCondition
+                 || condition.Type == AbilityConditionType.ConditionStacksAtLeast)
+                && condition.Condition is null)
+            {
+                errors.Add($"{ownerId}: condition {condition.Type} requires condition.");
+            }
+
+            if (condition.Type == AbilityConditionType.ConditionStacksAtLeast && condition.Value <= 0)
+                errors.Add($"{ownerId}: condition ConditionStacksAtLeast requires a positive value.");
+
             if (condition.Type == AbilityConditionType.ChancePercent && condition.Value is < 0 or > 100)
                 errors.Add($"{ownerId}: condition ChancePercent requires value between 0 and 100.");
+
+            if (condition.Type == AbilityConditionType.EventIdIs
+                && string.IsNullOrWhiteSpace(condition.StatusId))
+            {
+                errors.Add($"{ownerId}: condition EventIdIs requires statusId as its event id.");
+            }
         }
     }
 
@@ -410,4 +471,10 @@ public static class AbilityCatalogValidator
         if (!attributeTypes.Contains(AttributeType.MaxHealth))
             errors.Add($"{summonId}: summon attributes must include MaxHealth.");
     }
+
+    private static bool RequiresPositiveConditionValue(StandardConditionType condition) =>
+        condition is not StandardConditionType.Empower
+            and not StandardConditionType.Weaken
+            and not StandardConditionType.Haste
+            and not StandardConditionType.Slow;
 }

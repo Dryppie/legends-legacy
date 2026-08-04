@@ -600,6 +600,7 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
             ScalingCoefficient = effect.ScalingCoefficient,
             Attribute = effect.Attribute,
             StatusId = effect.StatusId,
+            Condition = effect.Condition,
             SummonId = effect.SummonId,
             SummonPowerMultiplier = effect.SummonPowerMultiplier,
             SummonHealthMultiplier = effect.SummonHealthMultiplier,
@@ -623,6 +624,7 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
             Type = condition.Type,
             Subject = condition.Subject,
             StatusId = condition.StatusId,
+            Condition = condition.Condition,
             Tag = condition.Tag,
             Value = condition.Value
         };

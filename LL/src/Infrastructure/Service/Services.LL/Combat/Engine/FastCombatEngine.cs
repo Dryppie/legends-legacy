@@ -10,7 +10,8 @@ public sealed record FastCombatEngineOptions(
     int MaxTicks = 6000,
     int BasicAttackIntervalTicks = 30,
     int RandomSeed = 1337,
-    bool StartActiveAbilitiesOnCooldown = false);
+    bool StartActiveAbilitiesOnCooldown = false,
+    float TauntThreatBonus = 100f);
 
 public sealed class FastCombatEngine
 {
@@ -26,13 +27,25 @@ public sealed class FastCombatEngine
     private readonly int _maxTicks;
     private readonly int _basicAttackIntervalTicks;
     private readonly bool _startActiveAbilitiesOnCooldown;
+    private readonly float _tauntThreatBonus;
     private readonly Dictionary<RuntimeCombatant, float> _basicAttackProgress = [];
-    private readonly Dictionary<RuntimeCombatant, int> _healthRegenerationProgress = [];
+    private readonly Dictionary<RuntimeCombatant, float> _healthRegenerationProgress = [];
     private readonly Dictionary<RuntimeCombatant, int> _healthRegenerationPotential = [];
     private readonly Dictionary<RuntimeCombatant, int> _healthRegenerationOverhealed = [];
     private readonly Dictionary<RuntimeCombatant, int> _healthRegenerationPulses = [];
     private readonly List<CombatLogItem> _log = [];
     private int _currentTick;
+    private long _applicationOrder;
+    private int _eventDepth;
+
+    private enum DamageDelivery
+    {
+        Direct,
+        Periodic,
+        Reflected,
+        Stored,
+        Self
+    }
 
     public FastCombatEngine(
         IReadOnlyDictionary<string, CompiledStatus> statusesById,
@@ -55,6 +68,7 @@ public sealed class FastCombatEngine
         _maxTicks = resolved.MaxTicks;
         _basicAttackIntervalTicks = resolved.BasicAttackIntervalTicks;
         _startActiveAbilitiesOnCooldown = resolved.StartActiveAbilitiesOnCooldown;
+        _tauntThreatBonus = Math.Max(0, resolved.TauntThreatBonus);
     }
 
     public CombatResult Run(
@@ -79,6 +93,8 @@ public sealed class FastCombatEngine
             if ((_currentTick & 63) == 0)
                 cancellationToken.ThrowIfCancellationRequested();
 
+            PublishIntervalEvents(combatants);
+
             foreach (var combatant in combatants.Where(x => x.IsAlive).ToList())
             {
                 if (IsActionBlocked(combatant) || !HasLivingOpponent(combatant, combatants))
@@ -92,6 +108,7 @@ public sealed class FastCombatEngine
 
             TickEffects(combatants);
             TickStatuses(combatants);
+            TickConditions(combatants);
             TickHealthRegeneration(combatants);
 
             foreach (var combatant in combatants)
@@ -118,6 +135,27 @@ public sealed class FastCombatEngine
         };
     }
 
+    private void PublishIntervalEvents(IReadOnlyList<RuntimeCombatant> combatants)
+    {
+        foreach (var combatant in combatants.Where(x => x.IsAlive).ToList())
+        {
+            var hasAbilityListener =
+                combatant.AbilityTriggersByEvent.ContainsKey(AbilityTriggerEvent.OnInterval);
+            var hasStatusListener = combatant.Statuses.Any(
+                status => status.Definition.TriggersByEvent.ContainsKey(AbilityTriggerEvent.OnInterval));
+            if (!hasAbilityListener && !hasStatusListener)
+                continue;
+
+            Publish(
+                new CombatEvent(
+                    AbilityTriggerEvent.OnInterval,
+                    combatant,
+                    combatant,
+                    null),
+                combatants);
+        }
+    }
+
     private void UseReadyActiveAbilities(RuntimeCombatant actor, IReadOnlyList<RuntimeCombatant> combatants)
     {
         foreach (var ability in actor.Abilities.Where(x => x.Definition.Kind == AbilitySpecKind.Active && x.IsReady))
@@ -134,7 +172,8 @@ public sealed class FastCombatEngine
                 actor.GetAttribute(AttributeType.Cooldown),
                 additionalCooldownTicks);
             Log(actor, null, ability.Definition.Name, EventType.AbilityUse, 0, $"{actor.Name} used {ability.Definition.Name}");
-            Publish(new CombatEvent(AbilityTriggerEvent.OnAbilityUsed, actor, null, ability.Definition.Id), combatants);
+            var primaryTarget = SelectActiveAbilityPrimaryTarget(ability, actor, combatants);
+            Publish(new CombatEvent(AbilityTriggerEvent.OnAbilityUsed, actor, primaryTarget, ability.Definition.Id), combatants);
         }
     }
 
@@ -156,11 +195,13 @@ public sealed class FastCombatEngine
             1,
             (int)Math.Round(
                 (Math.Max(1, actor.GetAttribute(AttributeType.WeaponDamage))
-                 + actor.GetAttribute(AttributeType.Power) * AttributeCombatRules.BasicAttackPowerCoefficient) *
+                 + GetEffectivePower(actor) * AttributeCombatRules.BasicAttackPowerCoefficient) *
                 actor.BasicAttackDamageMultiplier));
         Log(actor, null, "Basic Attack", EventType.AbilityUse, 0, $"{actor.Name} used Basic Attack");
-        Publish(new CombatEvent(AbilityTriggerEvent.OnBasicAttack, actor, target, null), combatants);
-        ApplyDamage(
+        Publish(new CombatEvent(AbilityTriggerEvent.OnBasicAttack, actor, target, "basic_attack"), combatants);
+        var basicAttackModifiers = actor.ConsumeNextBasicAttackModifiers();
+        damage = Math.Max(0, (int)Math.Round(damage * (1 + basicAttackModifiers.DamagePercent / 100f)));
+        var healthDamage = ApplyDamage(
             actor,
             target,
             damage,
@@ -168,11 +209,15 @@ public sealed class FastCombatEngine
             actor.BasicAttackDamageType,
             null,
             combatants,
-            "Basic Attack");
+            "Basic Attack",
+            armorPenetrationBonus: basicAttackModifiers.ArmorPenetration);
+        ApplyLifeSteal(actor, healthDamage, 0, combatants, "Basic Attack", "Basic Attack");
     }
 
     private static bool IsActionBlocked(RuntimeCombatant combatant) =>
-        combatant.Statuses.Any(status => status.Stacks > 0 && status.Definition.Tags.Contains("Control.Stun"));
+        combatant.Statuses.Any(status => status.Stacks > 0 && status.Definition.Tags.Contains("Control.Stun"))
+        || combatant.HasCondition(StandardConditionType.Stun)
+        || combatant.HasCondition(StandardConditionType.Freeze);
 
     private static bool HasLivingOpponent(RuntimeCombatant actor, IReadOnlyList<RuntimeCombatant> combatants) =>
         combatants.Any(x => x.Team != actor.Team && x.IsAlive);
@@ -240,7 +285,7 @@ public sealed class FastCombatEngine
                     healthChanged = true;
                     break;
                 case AbilityResourceType.Barrier:
-                    actor.AdjustBarrier(-value);
+                    actor.ConsumeBarrier(value);
                     break;
                 case AbilityResourceType.Cooldown:
                     additionalCooldownTicks += value;
@@ -261,72 +306,87 @@ public sealed class FastCombatEngine
 
     private void Publish(CombatEvent combatEvent, IReadOnlyList<RuntimeCombatant> combatants)
     {
-        foreach (var combatant in combatants.Where(x => x.IsAlive).ToList())
+        if (_eventDepth >= 64)
+            throw new InvalidOperationException("Combat event recursion exceeded the maximum depth of 64.");
+
+        _eventDepth++;
+        try
         {
-            if (combatant.AbilityTriggersByEvent.TryGetValue(combatEvent.Event, out var abilities))
+            foreach (var combatant in combatants
+                         .Where(x => x.IsAlive
+                                     || (combatEvent.Event == AbilityTriggerEvent.OnDeath
+                                         && ReferenceEquals(x, combatEvent.Source)))
+                         .ToList())
             {
-                foreach (var ability in abilities.ToList())
+                if (combatant.AbilityTriggersByEvent.TryGetValue(combatEvent.Event, out var abilities))
                 {
-                    if (ability.Definition.Kind == AbilitySpecKind.Active
-                        && !string.Equals(combatEvent.AbilityId, ability.Definition.Id, StringComparison.OrdinalIgnoreCase))
+                    foreach (var ability in abilities.ToList())
                     {
-                        continue;
-                    }
+                        if (ability.Definition.Kind == AbilitySpecKind.Active
+                            && !string.Equals(combatEvent.AbilityId, ability.Definition.Id, StringComparison.OrdinalIgnoreCase))
+                        {
+                            continue;
+                        }
 
-                    if (!IsSourceScopedTriggerRelevant(combatant, combatEvent))
-                        continue;
-
-                    foreach (var trigger in ability.Definition.TriggersByEvent[combatEvent.Event])
-                    {
-                        if (!ability.CanUseTrigger(trigger) || !ConditionsPass(trigger.Conditions, combatant, combatEvent))
+                        if (!IsSourceScopedTriggerRelevant(combatant, combatEvent))
                             continue;
 
-                        ability.StartTriggerCooldown(trigger);
+                        foreach (var trigger in ability.Definition.TriggersByEvent[combatEvent.Event])
+                        {
+                            if (!ability.CanUseTrigger(trigger, _currentTick) || !ConditionsPass(trigger.Conditions, combatant, combatEvent))
+                                continue;
+
+                            ability.StartTriggerCooldown(trigger);
+                            ExecuteTrigger(
+                                trigger,
+                                combatant,
+                                combatEvent,
+                                combatants,
+                                ability.CanUseEffect,
+                                ability.MarkEffectUsed,
+                                countStatsActivation: ability.Definition.Kind == AbilitySpecKind.Passive);
+                        }
+                    }
+                }
+
+                foreach (var status in combatant.Statuses.ToList())
+                {
+                    if (!status.Definition.TriggersByEvent.TryGetValue(combatEvent.Event, out var triggers))
+                        continue;
+
+                    if (!IsSourceScopedTriggerRelevant(status.Owner, combatEvent))
+                        continue;
+
+                    foreach (var trigger in triggers)
+                    {
+                        if (IsStatusLifecycleEvent(combatEvent.Event)
+                            && (!string.Equals(combatEvent.AbilityId, status.Definition.Id, StringComparison.OrdinalIgnoreCase)
+                                || !ReferenceEquals(combatEvent.Target, status.Owner)))
+                        {
+                            continue;
+                        }
+
+                        if (!status.CanUseTrigger(trigger, _currentTick) || !ConditionsPass(trigger.Conditions, status.Source, combatEvent))
+                            continue;
+
+                        status.StartTriggerCooldown(trigger);
                         ExecuteTrigger(
                             trigger,
-                            combatant,
+                            status.Source,
                             combatEvent,
                             combatants,
-                            ability.CanUseEffect,
-                            ability.MarkEffectUsed,
-                            countStatsActivation: ability.Definition.Kind == AbilitySpecKind.Passive);
+                            status.CanUseEffect,
+                            status.MarkEffectUsed,
+                            status.StatsSource,
+                            countStatsActivation: false,
+                            durationMultiplier: CalculateStatusEffectDurationMultiplier(status));
                     }
                 }
             }
-
-            foreach (var status in combatant.Statuses.ToList())
-            {
-                if (!status.Definition.TriggersByEvent.TryGetValue(combatEvent.Event, out var triggers))
-                    continue;
-
-                if (!IsSourceScopedTriggerRelevant(status.Owner, combatEvent))
-                    continue;
-
-                foreach (var trigger in triggers)
-                {
-                    if (IsStatusLifecycleEvent(combatEvent.Event)
-                        && (!string.Equals(combatEvent.AbilityId, status.Definition.Id, StringComparison.OrdinalIgnoreCase)
-                            || !ReferenceEquals(combatEvent.Target, status.Owner)))
-                    {
-                        continue;
-                    }
-
-                    if (!status.CanUseTrigger(trigger) || !ConditionsPass(trigger.Conditions, status.Source, combatEvent))
-                        continue;
-
-                    status.StartTriggerCooldown(trigger);
-                    ExecuteTrigger(
-                        trigger,
-                        status.Source,
-                        combatEvent,
-                        combatants,
-                        status.CanUseEffect,
-                        status.MarkEffectUsed,
-                        status.StatsSource,
-                        countStatsActivation: false,
-                        durationMultiplier: CalculateStatusEffectDurationMultiplier(status));
-                }
-            }
+        }
+        finally
+        {
+            _eventDepth--;
         }
     }
 
@@ -355,7 +415,10 @@ public sealed class FastCombatEngine
                 if (!target.IsAlive || !ConditionsPass(effect.Conditions, source, combatEvent with { Target = target }))
                     continue;
 
-                if (!IsPeriodicEffect(effect) && effect.ChancePercent < 100 && _random.Next(1, 101) > effect.ChancePercent)
+                if (effect.Operation != AbilityEffectOperation.ApplyRandomCondition
+                    && !IsPeriodicEffect(effect)
+                    && effect.ChancePercent < 100
+                    && _random.Next(1, 101) > effect.ChancePercent)
                     continue;
 
                 var countThisActivation = countStatsActivation && !activationCounted;
@@ -365,6 +428,7 @@ public sealed class FastCombatEngine
                     source,
                     target,
                     combatants,
+                    combatEvent,
                     statsSourceOverride,
                     countThisActivation,
                     durationMultiplier);
@@ -379,6 +443,7 @@ public sealed class FastCombatEngine
         RuntimeCombatant source,
         RuntimeCombatant target,
         IReadOnlyList<RuntimeCombatant> combatants,
+        CombatEvent? combatEvent = null,
         string? statsSourceOverride = null,
         bool countStatsActivation = false,
         double durationMultiplier = 1d)
@@ -390,9 +455,9 @@ public sealed class FastCombatEngine
             return;
         }
 
-        ApplyEffectOnce(effect, source, target, combatants, statsSource, countStatsActivation);
+        ApplyEffectOnce(effect, source, target, combatants, combatEvent, statsSource, countStatsActivation);
 
-        if (effect.DurationTicks > 0 && effect.Operation == AbilityEffectOperation.ModifyAttribute)
+        if (effect.DurationTicks > 0 && IsTimedModifierOperation(effect.Operation))
             target.ActiveEffects.Add(new RuntimeEffect(effect, source, target, statsSource, durationMultiplier));
     }
 
@@ -401,17 +466,37 @@ public sealed class FastCombatEngine
         RuntimeCombatant source,
         RuntimeCombatant target,
         IReadOnlyList<RuntimeCombatant> combatants,
+        CombatEvent? combatEvent = null,
         string? statsSourceOverride = null,
         bool countStatsActivation = false)
     {
-        var value = CalculateValue(effect, source);
+        var value = CalculateValue(effect, source, combatEvent);
         var statsSource = statsSourceOverride ?? effect.StatsSource;
 
         switch (effect.Operation)
         {
             case AbilityEffectOperation.Damage:
-                var healthDamage = ApplyDamage(source, target, value, effect.AttackType, effect.DamageType, effect, combatants, effect.Id, statsSource, countStatsActivation);
-                ApplyLifeSteal(effect, source, healthDamage, combatants, statsSource);
+                var delivery = IsPeriodicEffect(effect) || effect.AttackType == AttackType.DamageOverTime
+                    ? DamageDelivery.Periodic
+                    : effect.Tags.Contains("Damage.Secondary")
+                        ? DamageDelivery.Stored
+                    : ReferenceEquals(source, target)
+                        ? DamageDelivery.Self
+                        : DamageDelivery.Direct;
+                var healthDamage = ApplyDamage(
+                    source,
+                    target,
+                    value,
+                    effect.AttackType,
+                    effect.DamageType,
+                    effect,
+                    combatants,
+                    effect.Id,
+                    statsSource,
+                    countStatsActivation,
+                    delivery);
+                if (delivery == DamageDelivery.Direct)
+                    ApplyLifeSteal(effect, source, healthDamage, combatants, statsSource);
                 break;
             case AbilityEffectOperation.Heal:
                 RestoreHealth(
@@ -427,11 +512,10 @@ public sealed class FastCombatEngine
                 break;
             case AbilityEffectOperation.GrantBarrier:
                 var grantedBarrier = CanCrit(effect, AbilityEffectOperation.GrantBarrier)
-                                     && RollCriticalStrike(source)
+                                     && RollCriticalStrike(source, effect.CritChanceBonus)
                     ? ApplyCriticalMultiplier(source, value)
                     : value;
-                target.AdjustBarrier(grantedBarrier);
-                Log(source, target, effect.Id, EventType.RestoreBarrier, grantedBarrier, $"{source.Name} granted {grantedBarrier} barrier to {target.Name}.", statsSource, countStatsActivation);
+                GrantBarrier(source, target, grantedBarrier, effect.Id, statsSource, countStatsActivation, combatants);
                 break;
             case AbilityEffectOperation.RestoreResource:
                 if (effect.Resource == AbilityResourceType.Cooldown)
@@ -442,11 +526,10 @@ public sealed class FastCombatEngine
                 else if (effect.Resource == AbilityResourceType.Barrier)
                 {
                     var restoredBarrier = CanCrit(effect, AbilityEffectOperation.GrantBarrier)
-                                          && RollCriticalStrike(source)
+                                          && RollCriticalStrike(source, effect.CritChanceBonus)
                         ? ApplyCriticalMultiplier(source, value)
                         : value;
-                    target.AdjustBarrier(restoredBarrier);
-                    Log(source, target, effect.Id, EventType.RestoreBarrier, restoredBarrier, $"{source.Name} restored {restoredBarrier} barrier to {target.Name}.", statsSource, countStatsActivation);
+                    GrantBarrier(source, target, restoredBarrier, effect.Id, statsSource, countStatsActivation, combatants);
                 }
                 else
                 {
@@ -466,20 +549,86 @@ public sealed class FastCombatEngine
             case AbilityEffectOperation.ApplyStatus:
                 ApplyStatus(source, target, effect.StatusId!, Math.Max(1, value), combatants, statsSource, countStatsActivation);
                 break;
+            case AbilityEffectOperation.ApplyCondition:
+                ApplyCondition(
+                    source,
+                    target,
+                    effect.Condition!.Value,
+                    Math.Max(1, value),
+                    effect.DurationTicks,
+                    combatants,
+                    statsSource,
+                    countStatsActivation);
+                break;
             case AbilityEffectOperation.ModifyStatusStacks:
                 ModifyStatusStacks(source, target, effect.StatusId!, value, combatants);
                 break;
             case AbilityEffectOperation.RemoveStatus:
                 RemoveStatus(source, target, effect.StatusId!, combatants);
-                Log(source, target, effect.Id, EventType.StatusEffectExpired, 0, $"{target.Name} lost {effect.StatusId}.", statsSource, countStatsActivation);
+                Log(source, target, effect.Id, EventType.StatusEffectRemoved, 0, $"{target.Name} lost {effect.StatusId}.", statsSource, countStatsActivation);
+                break;
+            case AbilityEffectOperation.ApplyRandomCondition:
+                var selectedCondition = _random.Next(1, 101) <= effect.ChancePercent
+                    ? effect.Condition!.Value
+                    : effect.AlternativeCondition!.Value;
+                ApplyCondition(
+                    source,
+                    target,
+                    selectedCondition,
+                    Math.Max(1, value),
+                    effect.DurationTicks,
+                    combatants,
+                    statsSource,
+                    countStatsActivation);
                 break;
             case AbilityEffectOperation.Cleanse:
                 CleanseStatuses(source, target, combatants);
-                Log(source, target, effect.Id, EventType.StatusEffectExpired, 0, $"{target.Name} was cleansed.", statsSource, countStatsActivation);
+                CleanseConditions(source, target, effect.Condition, combatants);
+                Log(source, target, effect.Id, EventType.StatusEffectCleansed, 0, $"{target.Name} was cleansed.", statsSource, countStatsActivation);
+                break;
+            case AbilityEffectOperation.Dispel:
+                DispelConditions(source, target, effect.Condition, combatants);
+                Log(source, target, effect.Id, EventType.StatusEffectDispelled, 0, $"{target.Name} was dispelled.", statsSource, countStatsActivation);
                 break;
             case AbilityEffectOperation.ModifyAttribute:
                 target.AdjustAttribute(effect.Attribute!.Value, value);
                 Log(source, target, effect.Id, value >= 0 ? EventType.Buff : EventType.Debuff, value, $"{target.Name}'s {effect.Attribute} changed by {value}.", statsSource, countStatsActivation);
+                break;
+            case AbilityEffectOperation.ModifyThreat:
+                target.AdjustThreat(value);
+                Log(source, target, effect.Id, value >= 0 ? EventType.Buff : EventType.Debuff, value, $"{target.Name}'s Threat changed by {value}.", statsSource, countStatsActivation);
+                break;
+            case AbilityEffectOperation.ModifyRegenerationRate:
+                target.AdjustRegenerationRate(value);
+                Log(source, target, effect.Id, value >= 0 ? EventType.Buff : EventType.Debuff, value, $"{target.Name}'s Regeneration Rate changed by {value}%.", statsSource, countStatsActivation);
+                break;
+            case AbilityEffectOperation.ModifyRegenerationInterval:
+                target.AdjustRegenerationInterval(value);
+                Log(source, target, effect.Id, value <= 0 ? EventType.Buff : EventType.Debuff, value, $"{target.Name}'s Regeneration Interval changed by {value} ticks.", statsSource, countStatsActivation);
+                break;
+            case AbilityEffectOperation.ModifyHealingReceived:
+                target.AdjustHealingReceived(value);
+                Log(source, target, effect.Id, value >= 0 ? EventType.Buff : EventType.Debuff, value, $"{target.Name}'s healing received changed by {value}%.", statsSource, countStatsActivation);
+                break;
+            case AbilityEffectOperation.ModifyDamageDealt:
+                target.AdjustDamageDealt(effect.DamageType, value);
+                Log(source, target, effect.Id, value >= 0 ? EventType.Buff : EventType.Debuff, value, $"{target.Name}'s {effect.DamageType} damage dealt changed by {value}%.", statsSource, countStatsActivation);
+                break;
+            case AbilityEffectOperation.ModifyDamageTaken:
+                target.AdjustDamageTaken(effect.DamageType, value);
+                Log(source, target, effect.Id, value <= 0 ? EventType.Buff : EventType.Debuff, value, $"{target.Name}'s {effect.DamageType} damage taken changed by {value}%.", statsSource, countStatsActivation);
+                break;
+            case AbilityEffectOperation.ModifyDamageTakenFromCondition:
+                target.AdjustDamageTakenFromCondition(effect.Condition!.Value, value);
+                Log(source, target, effect.Id, value <= 0 ? EventType.Buff : EventType.Debuff, value, $"{target.Name}'s damage taken from {effect.Condition} attackers changed by {value}%.", statsSource, countStatsActivation);
+                break;
+            case AbilityEffectOperation.ModifyNextBasicAttackDamage:
+                target.ModifyNextBasicAttackDamage(value);
+                Log(source, target, effect.Id, EventType.Buff, value, $"{target.Name}'s current Basic Attack damage changed by {value}%.", statsSource, countStatsActivation);
+                break;
+            case AbilityEffectOperation.ModifyNextBasicAttackArmorPenetration:
+                target.ModifyNextBasicAttackArmorPenetration(value);
+                Log(source, target, effect.Id, EventType.Buff, value, $"{target.Name}'s current Basic Attack gained {value}% Armor Penetration.", statsSource, countStatsActivation);
                 break;
             case AbilityEffectOperation.Summon:
                 SummonCombatant(source, effect, combatants, statsSource, countStatsActivation);
@@ -504,9 +653,16 @@ public sealed class FastCombatEngine
         IReadOnlyList<RuntimeCombatant> combatants,
         string sourceName,
         string? statsSource = null,
-        bool countStatsActivation = false)
+        bool countStatsActivation = false,
+        DamageDelivery delivery = DamageDelivery.Direct,
+        float armorPenetrationBonus = 0)
     {
-        if (CanDodge(attackType) && target.GetAttribute(AttributeType.DodgeChance) > 0)
+        if (!target.IsAlive || damage <= 0)
+            return 0;
+
+        if (delivery == DamageDelivery.Direct
+            && CanDodge(attackType)
+            && target.GetAttribute(AttributeType.DodgeChance) > 0)
         {
             var dodgeChance = Math.Clamp(
                 target.GetAttribute(AttributeType.DodgeChance),
@@ -530,22 +686,36 @@ public sealed class FastCombatEngine
             }
         }
 
-        var isCritical = CanCrit(effect, AbilityEffectOperation.Damage)
-                         && RollCriticalStrike(source);
+        var damageModifier = source.GetDamageDealtPercent(damageType)
+                             + target.GetDamageTakenPercent(damageType, source);
+        damage = Math.Max(0, (int)Math.Round(damage * Math.Max(0, 1 + damageModifier / 100f)));
+        var isCritical = delivery == DamageDelivery.Direct
+                         && CanCrit(effect, AbilityEffectOperation.Damage)
+                         && RollCriticalStrike(source, effect?.CritChanceBonus ?? 0);
         var criticalDamage = isCritical
             ? ApplyCriticalMultiplier(source, damage)
             : damage;
-        var typedDamage = ApplyTypedDefense(source, target, criticalDamage, damageType);
-        var typedMitigationPrevented = Math.Max(0, criticalDamage - typedDamage);
+        var vulnerableDamage = delivery == DamageDelivery.Direct
+            ? ApplyVulnerable(target, criticalDamage)
+            : criticalDamage;
+        var vulnerableAmplified = Math.Max(0, vulnerableDamage - criticalDamage);
+        var typedDamage = ApplyTypedDefense(
+            source,
+            target,
+            vulnerableDamage,
+            damageType,
+            (effect?.ArmorPenetrationBonus ?? 0) + armorPenetrationBonus);
+        var typedMitigationPrevented = Math.Max(0, vulnerableDamage - typedDamage);
         var physicalMitigationPrevented = damageType is DamageType.Physical or DamageType.Bleed
             ? typedMitigationPrevented
             : 0;
         var magicalMitigationPrevented = damageType is DamageType.Magical
             or DamageType.Burn
             or DamageType.Poison
+            or DamageType.Shadow
                 ? typedMitigationPrevented
                 : 0;
-        var blocked = CanBlock(attackType) && RollBlock(target);
+        var blocked = delivery == DamageDelivery.Direct && CanBlock(attackType) && RollBlock(target);
         var blockedDamage = blocked
             ? Math.Max(
                 0,
@@ -556,12 +726,59 @@ public sealed class FastCombatEngine
         var blockPrevented = Math.Max(0, typedDamage - blockedDamage);
         var reducedDamage = ApplyDamageReduction(target, blockedDamage);
         var damageReductionPrevented = Math.Max(0, blockedDamage - reducedDamage);
-        var damageAmplified = Math.Max(0, reducedDamage - blockedDamage);
+        var guardedDamage = reducedDamage;
+        if (delivery == DamageDelivery.Direct
+            && reducedDamage > 0
+            && TryConsumeConditionCharge(target, StandardConditionType.Guard, source, combatants))
+        {
+            guardedDamage = Math.Max(0, (int)Math.Round(reducedDamage * 0.75f));
+        }
+        var damageAmplified = vulnerableAmplified + Math.Max(0, reducedDamage - blockedDamage);
         var barrierBefore = target.Barrier;
-        var absorbed = Math.Min(barrierBefore, reducedDamage);
-        target.AdjustBarrier(-absorbed);
-        var barrierAbsorbed = (int)absorbed;
-        var pendingHealthDamage = Math.Max(0, reducedDamage - barrierAbsorbed);
+        var barrierConsumption = target.ConsumeBarrierWithSources(guardedDamage);
+        var barrierAbsorbed = (int)barrierConsumption.Total;
+        if (barrierAbsorbed > 0)
+        {
+            foreach (var contribution in barrierConsumption.Contributions)
+            {
+                var barrierSource = contribution.Source ?? target;
+                var contributionAmount = Math.Max(0, (int)Math.Round(contribution.Amount));
+                Log(
+                    barrierSource,
+                    target,
+                    "Barrier",
+                    EventType.BarrierAbsorbed,
+                    contributionAmount,
+                    $"{contributionAmount} barrier from {barrierSource.Name} was consumed on {target.Name}.");
+                Publish(
+                    new CombatEvent(
+                        AbilityTriggerEvent.OnBarrierAbsorbed,
+                        barrierSource,
+                        target,
+                        null,
+                        contributionAmount,
+                        Instigator: source,
+                        BarrierApplicationOrder: contribution.ApplicationOrder),
+                    combatants);
+            }
+
+            if (barrierBefore > 0 && target.Barrier <= 0)
+            {
+                var finalContribution = barrierConsumption.Contributions[^1];
+                var barrierSource = finalContribution.Source ?? target;
+                Log(barrierSource, target, "Barrier", EventType.BarrierBroken, 0, $"{target.Name}'s barrier broke.");
+                Publish(
+                    new CombatEvent(
+                        AbilityTriggerEvent.OnBarrierBroken,
+                        barrierSource,
+                        target,
+                        null,
+                        Instigator: source,
+                        BarrierApplicationOrder: finalContribution.ApplicationOrder),
+                    combatants);
+            }
+        }
+        var pendingHealthDamage = Math.Max(0, guardedDamage - barrierAbsorbed);
         var healthBefore = target.Health;
         target.AdjustHealth(-pendingHealthDamage);
         var healthDamage = Math.Max(0, (int)Math.Round(healthBefore - target.Health));
@@ -570,7 +787,12 @@ public sealed class FastCombatEngine
             source,
             target,
             sourceName,
-            isCritical ? EventType.DamageCrit : EventType.Damage,
+            delivery switch
+            {
+                DamageDelivery.Periodic => EventType.Damage,
+                DamageDelivery.Reflected => EventType.ReflectedDamage,
+                _ => isCritical ? EventType.DamageCrit : EventType.Damage
+            },
             healthDamage,
             $"{source.Name} dealt {healthDamage} {damageType} damage to {target.Name}{(isCritical ? " (critical)" : string.Empty)}{(blocked ? " (blocked)" : string.Empty)}.",
             statsSource,
@@ -585,18 +807,49 @@ public sealed class FastCombatEngine
             damageReductionPrevented,
             damageAmplified,
             pendingHealthDamage);
-        Publish(new CombatEvent(AbilityTriggerEvent.OnHit, source, target, null), combatants);
-        PublishAttackTypeEvents(source, target, attackType, combatants);
-        Publish(new CombatEvent(AbilityTriggerEvent.OnDamaged, target, source, null), combatants);
-        Publish(new CombatEvent(AbilityTriggerEvent.OnAttacked, target, source, null), combatants);
+        if (delivery == DamageDelivery.Direct)
+        {
+            var directEvent = new CombatEvent(
+                AbilityTriggerEvent.OnHit,
+                source,
+                target,
+                sourceName.Equals("Basic Attack", StringComparison.Ordinal) ? "basic_attack" : effect?.Id,
+                healthDamage,
+                DamageType: damageType,
+                AttackType: attackType,
+                WasCritical: isCritical,
+                WasDirectHit: true);
+            Publish(directEvent, combatants);
+            PublishAttackTypeEvents(source, target, attackType, combatants, directEvent);
+            Publish(directEvent with { Event = AbilityTriggerEvent.OnDamaged, Source = target, Target = source }, combatants);
+            Publish(directEvent with { Event = AbilityTriggerEvent.OnAttacked, Source = target, Target = source }, combatants);
+        }
         if (healthDamage > 0)
             Publish(new CombatEvent(AbilityTriggerEvent.OnHealthChanged, target, source, null), combatants);
+
+        if (delivery == DamageDelivery.Direct
+            && healthDamage > 0
+            && !ReferenceEquals(source, target)
+            && source.IsAlive)
+        {
+            ResolveThorns(target, source, healthDamage, combatants);
+        }
 
         if (!target.IsAlive)
         {
             Log(source, target, sourceName, EventType.Death, 0, $"{target.Name} was killed by {source.Name}.", statsSource);
-            Publish(new CombatEvent(AbilityTriggerEvent.OnKill, source, target, null), combatants);
-            Publish(new CombatEvent(AbilityTriggerEvent.OnDeath, target, source, null), combatants);
+            var deathEvent = new CombatEvent(
+                AbilityTriggerEvent.OnKill,
+                source,
+                target,
+                null,
+                healthDamage,
+                DamageType: damageType,
+                AttackType: attackType,
+                WasCritical: isCritical,
+                WasDirectHit: delivery == DamageDelivery.Direct);
+            Publish(deathEvent, combatants);
+            Publish(deathEvent with { Event = AbilityTriggerEvent.OnDeath, Source = target, Target = source }, combatants);
             ExpireOwnedSummons(target, combatants, "owner death");
         }
 
@@ -618,6 +871,89 @@ public sealed class FastCombatEngine
         return Math.Max(0, (int)Math.Round(damage * (1 - reduction / 100f)));
     }
 
+    private static int ApplyVulnerable(RuntimeCombatant target, int damage)
+    {
+        var stacks = target.GetConditionStacks(StandardConditionType.Vulnerable);
+        if (stacks <= 0)
+            return damage;
+
+        return Math.Max(
+            0,
+            (int)Math.Min(
+                int.MaxValue,
+                Math.Round(damage * (1d + stacks * 0.25d))));
+    }
+
+    private void ResolveThorns(
+        RuntimeCombatant defender,
+        RuntimeCombatant attacker,
+        int healthDamage,
+        IReadOnlyList<RuntimeCombatant> combatants)
+    {
+        var reflectedPercent = defender.Conditions
+            .Where(x => x.Type == StandardConditionType.Thorns)
+            .Sum(x => (long)x.Value);
+        if (reflectedPercent <= 0)
+            return;
+
+        var reflectedDamage = Math.Max(
+            0,
+            (int)Math.Min(
+                int.MaxValue,
+                Math.Round(
+                    healthDamage * reflectedPercent / 100d,
+                    MidpointRounding.AwayFromZero)));
+        if (reflectedDamage <= 0)
+            return;
+
+        ApplyDamage(
+            defender,
+            attacker,
+            reflectedDamage,
+            AttackType.None,
+            DamageType.None,
+            null,
+            combatants,
+            GetConditionId(StandardConditionType.Thorns),
+            "Thorns",
+            delivery: DamageDelivery.Reflected);
+    }
+
+    private void GrantBarrier(
+        RuntimeCombatant source,
+        RuntimeCombatant target,
+        int requested,
+        string effectId,
+        string? statsSource,
+        bool countStatsActivation,
+        IReadOnlyList<RuntimeCombatant> combatants)
+    {
+        var applicationOrder = ++_applicationOrder;
+        var accepted = target.GrantBarrier(source, requested, applicationOrder);
+        var granted = Math.Max(0, (int)Math.Round(accepted));
+        if (granted <= 0)
+            return;
+
+        Log(
+            source,
+            target,
+            effectId,
+            EventType.RestoreBarrier,
+            granted,
+            $"{source.Name} granted {granted} barrier to {target.Name}.",
+            statsSource,
+            countStatsActivation);
+        Publish(
+            new CombatEvent(
+                AbilityTriggerEvent.OnBarrierApplied,
+                source,
+                target,
+                null,
+                granted,
+                BarrierApplicationOrder: applicationOrder),
+            combatants);
+    }
+
     private bool RollBlock(RuntimeCombatant target)
     {
         var blockChance = Math.Clamp(
@@ -627,10 +963,10 @@ public sealed class FastCombatEngine
         return blockChance > 0 && _random.NextDouble() * 100 < blockChance;
     }
 
-    private bool RollCriticalStrike(RuntimeCombatant source)
+    private bool RollCriticalStrike(RuntimeCombatant source, float bonusChance = 0)
     {
         var critChance = Math.Clamp(
-            source.GetAttribute(AttributeType.CritChance),
+            source.GetAttribute(AttributeType.CritChance) + bonusChance,
             0,
             AttributeCatalog.GetFixedCap(AttributeType.CritChance));
         return critChance > 0 && _random.NextDouble() * 100 < critChance;
@@ -667,13 +1003,14 @@ public sealed class FastCombatEngine
         RuntimeCombatant source,
         RuntimeCombatant target,
         int damage,
-        DamageType damageType)
+        DamageType damageType,
+        float penetrationBonus = 0)
     {
         var (defenseAttribute, penetrationAttribute) = damageType switch
         {
             DamageType.Physical or DamageType.Bleed =>
                 (AttributeType.Armor, AttributeType.ArmorPenetration),
-            DamageType.Magical or DamageType.Burn or DamageType.Poison =>
+            DamageType.Magical or DamageType.Burn or DamageType.Poison or DamageType.Shadow =>
                 (AttributeType.Resistance, AttributeType.MagicPenetration),
             _ => ((AttributeType?)null, (AttributeType?)null)
         };
@@ -681,9 +1018,15 @@ public sealed class FastCombatEngine
         if (defenseAttribute is null || penetrationAttribute is null)
             return damage;
 
+        var corrosionStacks = Math.Min(
+            50,
+            target.GetConditionStacks(StandardConditionType.Corrosion));
+        var corrodedDefense = Math.Max(
+            0,
+            target.GetAttribute(defenseAttribute.Value) * (1 - corrosionStacks / 100f));
         var mitigation = AttributeCombatRules.CalculateDefenseMitigation(
-            target.GetAttribute(defenseAttribute.Value),
-            source.GetAttribute(penetrationAttribute.Value));
+            corrodedDefense,
+            source.GetAttribute(penetrationAttribute.Value) + penetrationBonus);
         return Math.Max(0, (int)Math.Round(damage * (1 - mitigation)));
     }
 
@@ -691,17 +1034,18 @@ public sealed class FastCombatEngine
         RuntimeCombatant source,
         RuntimeCombatant target,
         AttackType attackType,
-        IReadOnlyList<RuntimeCombatant> combatants)
+        IReadOnlyList<RuntimeCombatant> combatants,
+        CombatEvent combatEvent)
     {
         switch (attackType)
         {
             case AttackType.Melee:
-                Publish(new CombatEvent(AbilityTriggerEvent.OnMeleeAttack, source, target, null), combatants);
-                Publish(new CombatEvent(AbilityTriggerEvent.OnMeleeAttacked, target, source, null), combatants);
+                Publish(combatEvent with { Event = AbilityTriggerEvent.OnMeleeAttack }, combatants);
+                Publish(combatEvent with { Event = AbilityTriggerEvent.OnMeleeAttacked, Source = target, Target = source }, combatants);
                 break;
             case AttackType.Ranged:
-                Publish(new CombatEvent(AbilityTriggerEvent.OnRangedAttack, source, target, null), combatants);
-                Publish(new CombatEvent(AbilityTriggerEvent.OnRangedAttacked, target, source, null), combatants);
+                Publish(combatEvent with { Event = AbilityTriggerEvent.OnRangedAttack }, combatants);
+                Publish(combatEvent with { Event = AbilityTriggerEvent.OnRangedAttacked, Source = target, Target = source }, combatants);
                 break;
         }
     }
@@ -726,6 +1070,7 @@ public sealed class FastCombatEngine
         if (isCritical)
             modifiedValue = ApplyCriticalMultiplier(source, modifiedValue);
 
+        modifiedValue = ApplyHealingReceivedModifier(target, modifiedValue);
         var before = target.Health;
         target.AdjustHealth(modifiedValue);
         var restored = Math.Max(0, (int)Math.Round(target.Health - before));
@@ -757,8 +1102,27 @@ public sealed class FastCombatEngine
         IReadOnlyList<RuntimeCombatant> combatants,
         string? statsSource)
     {
+        ApplyLifeSteal(
+            source,
+            healthDamage,
+            effect.LifeStealPercentage,
+            combatants,
+            effect.Id,
+            statsSource,
+            effect);
+    }
+
+    private void ApplyLifeSteal(
+        RuntimeCombatant source,
+        int healthDamage,
+        float effectPercentage,
+        IReadOnlyList<RuntimeCombatant> combatants,
+        string sourceName,
+        string? statsSource,
+        CompiledEffect? effect = null)
+    {
         var lifeStealPercentage = Math.Clamp(
-            source.GetAttribute(AttributeType.LifeSteal) + effect.LifeStealPercentage,
+            source.GetAttribute(AttributeType.LifeSteal) + effectPercentage,
             0,
             AttributeCatalog.GetFixedCap(AttributeType.LifeSteal));
         if (lifeStealPercentage <= 0 || healthDamage <= 0)
@@ -773,7 +1137,7 @@ public sealed class FastCombatEngine
             source,
             healing,
             combatants,
-            effect.Id,
+            sourceName,
             statsSource,
             isLifeSteal: true,
             effect);
@@ -791,11 +1155,27 @@ public sealed class FastCombatEngine
         if (!_statusesById.TryGetValue(statusId, out var statusDefinition))
             throw new InvalidOperationException($"Status '{statusId}' has not been compiled.");
 
+        var isControl = statusDefinition.Tags.Any(tag =>
+            tag.StartsWith("Control.", StringComparison.OrdinalIgnoreCase));
+        var isHarmful = isControl || statusDefinition.Tags.Any(tag =>
+            tag.StartsWith("Debuff", StringComparison.OrdinalIgnoreCase)
+            || tag.StartsWith("Affliction", StringComparison.OrdinalIgnoreCase));
+        if (isControl && target.HasCondition(StandardConditionType.Unstoppable))
+            return;
+
+        if (isHarmful && TryConsumeConditionCharge(target, StandardConditionType.Ward, source, combatants))
+            return;
+
         var existing = target.Statuses.FirstOrDefault(x => x.Definition.Id.Equals(statusId, StringComparison.OrdinalIgnoreCase));
         if (existing is not null)
         {
             if (statusDefinition.StackingPolicy == AbilityStatusStackingPolicy.Replace)
-                ExpireStatus(source, target, existing, combatants);
+                RemoveStatusInstance(
+                    source,
+                    target,
+                    existing,
+                    ConditionRemovalReason.Removed,
+                    combatants);
             else if (statusDefinition.StackingPolicy == AbilityStatusStackingPolicy.Refresh)
                 existing.Refresh(stacks);
             else
@@ -817,6 +1197,204 @@ public sealed class FastCombatEngine
         Log(source, target, statusId, EventType.StatusEffect, stacks, $"{source.Name} applied {statusId} to {target.Name}.", statsSource, countStatsActivation);
         Publish(new CombatEvent(AbilityTriggerEvent.OnStatusApplied, source, target, statusId), combatants);
     }
+
+    private void ApplyCondition(
+        RuntimeCombatant source,
+        RuntimeCombatant target,
+        StandardConditionType type,
+        int value,
+        int authoredDurationTicks,
+        IReadOnlyList<RuntimeCombatant> combatants,
+        string? statsSource,
+        bool countStatsActivation)
+    {
+        if (IsControlCondition(type) && target.HasCondition(StandardConditionType.Unstoppable))
+            return;
+
+        if (type is StandardConditionType.Freeze or StandardConditionType.Stun
+            && _random.Next(1, 101) > 80)
+        {
+            return;
+        }
+
+        if (IsHarmfulCondition(type)
+            && TryConsumeConditionCharge(target, StandardConditionType.Ward, source, combatants))
+        {
+            return;
+        }
+
+        var normalizedValue = Math.Max(1, value);
+        switch (type)
+        {
+            case StandardConditionType.Empower:
+            case StandardConditionType.Weaken:
+            case StandardConditionType.Haste:
+            case StandardConditionType.Slow:
+                ApplyOrRefreshUniqueCondition(source, target, type, 1, 10 * TicksPerSecond, statsSource);
+                break;
+            case StandardConditionType.Freeze:
+            case StandardConditionType.Stun:
+            case StandardConditionType.Taunt:
+            case StandardConditionType.Stealth:
+            case StandardConditionType.Unstoppable:
+                ApplyOrRefreshUniqueCondition(
+                    source,
+                    target,
+                    type,
+                    1,
+                    normalizedValue * TicksPerSecond,
+                    statsSource);
+                break;
+            case StandardConditionType.Chill:
+                ApplyOrStackSharedCondition(source, target, type, normalizedValue, 20, 10 * TicksPerSecond, statsSource);
+                break;
+            case StandardConditionType.Corrosion:
+                ApplyOrStackSharedCondition(source, target, type, normalizedValue, 50, 12 * TicksPerSecond, statsSource);
+                break;
+            case StandardConditionType.Vulnerable:
+                ApplyOrStackSharedCondition(source, target, type, normalizedValue, int.MaxValue, 0, statsSource);
+                break;
+            case StandardConditionType.Guard:
+            case StandardConditionType.Ward:
+                ApplyOrStackSharedCondition(source, target, type, normalizedValue, int.MaxValue, 0, statsSource);
+                break;
+            case StandardConditionType.Poison:
+                AddIndependentCondition(source, target, type, normalizedValue, 12 * TicksPerSecond, statsSource, 2 * TicksPerSecond);
+                break;
+            case StandardConditionType.Burn:
+                AddIndependentCondition(source, target, type, normalizedValue, 4 * TicksPerSecond, statsSource, TicksPerSecond);
+                break;
+            case StandardConditionType.Bleed:
+                AddIndependentCondition(source, target, type, normalizedValue, 8 * TicksPerSecond, statsSource, 2 * TicksPerSecond);
+                break;
+            case StandardConditionType.Doom:
+                AddIndependentCondition(source, target, type, normalizedValue, 15 * TicksPerSecond, statsSource);
+                break;
+            case StandardConditionType.Thorns:
+                AddIndependentCondition(source, target, type, normalizedValue, Math.Max(0, authoredDurationTicks), statsSource);
+                break;
+            case StandardConditionType.Wound:
+            case StandardConditionType.Recovery:
+            case StandardConditionType.Decay:
+            case StandardConditionType.Renewal:
+                AddIndependentCondition(
+                    source,
+                    target,
+                    type,
+                    1,
+                    normalizedValue * TicksPerSecond,
+                    statsSource);
+                break;
+            default:
+                throw new NotSupportedException($"Unsupported standard condition '{type}'.");
+        }
+
+        var conditionId = GetConditionId(type);
+        Log(
+            source,
+            target,
+            conditionId,
+            EventType.StatusEffect,
+            normalizedValue,
+            $"{source.Name} applied {type} to {target.Name}.",
+            statsSource,
+            countStatsActivation);
+        Publish(new CombatEvent(AbilityTriggerEvent.OnStatusApplied, source, target, conditionId), combatants);
+    }
+
+    private void ApplyOrRefreshUniqueCondition(
+        RuntimeCombatant source,
+        RuntimeCombatant target,
+        StandardConditionType type,
+        int value,
+        int durationTicks,
+        string? statsSource)
+    {
+        var existing = target.Conditions.FirstOrDefault(x => x.Type == type);
+        if (existing is null)
+        {
+            AddIndependentCondition(source, target, type, value, durationTicks, statsSource);
+            return;
+        }
+
+        existing.ReplaceValue(value);
+        existing.RefreshDuration(durationTicks);
+    }
+
+    private void ApplyOrStackSharedCondition(
+        RuntimeCombatant source,
+        RuntimeCombatant target,
+        StandardConditionType type,
+        int value,
+        int maximum,
+        int durationTicks,
+        string? statsSource)
+    {
+        var existing = target.Conditions.FirstOrDefault(x => x.Type == type);
+        if (existing is null)
+        {
+            AddIndependentCondition(
+                source,
+                target,
+                type,
+                Math.Min(value, maximum),
+                durationTicks,
+                statsSource);
+            return;
+        }
+
+        existing.AddValue(value, maximum);
+        if (durationTicks > 0)
+            existing.RefreshDuration(durationTicks);
+    }
+
+    private void AddIndependentCondition(
+        RuntimeCombatant source,
+        RuntimeCombatant target,
+        StandardConditionType type,
+        int value,
+        int durationTicks,
+        string? statsSource,
+        int intervalTicks = 0)
+    {
+        target.Conditions.Add(
+            new RuntimeCondition(
+                type,
+                source,
+                target,
+                value,
+                durationTicks,
+                GetEffectivePower(source),
+                ++_applicationOrder,
+                statsSource ?? type.ToString(),
+                intervalTicks));
+    }
+
+    private static bool IsControlCondition(StandardConditionType type) =>
+        type is StandardConditionType.Freeze or StandardConditionType.Stun;
+
+    private static bool IsHarmfulCondition(StandardConditionType type) =>
+        type is StandardConditionType.Slow
+            or StandardConditionType.Weaken
+            or StandardConditionType.Vulnerable
+            or StandardConditionType.Wound
+            or StandardConditionType.Decay
+            or StandardConditionType.Poison
+            or StandardConditionType.Burn
+            or StandardConditionType.Bleed
+            or StandardConditionType.Stun
+            or StandardConditionType.Chill
+            or StandardConditionType.Freeze
+            or StandardConditionType.Corrosion
+            or StandardConditionType.Doom;
+
+    private static bool IsBeneficialCondition(StandardConditionType type) =>
+        !IsHarmfulCondition(type);
+
+    private static string GetConditionId(StandardConditionType type) =>
+        type == StandardConditionType.Vulnerable
+            ? "condition.vulnerability"
+            : $"condition.{type.ToString().ToLowerInvariant()}";
 
     private static int CalculateStatusDuration(
         CompiledStatus statusDefinition,
@@ -869,9 +1447,21 @@ public sealed class FastCombatEngine
     private int GetBasicAttackChargeThreshold() => Math.Max(1, _basicAttackIntervalTicks);
 
     private static float GetBasicAttackRate(RuntimeCombatant actor)
-        => AttributeCombatRules.CalculateBasicAttackRate(
-            actor.GetAttribute(AttributeType.AttackSpeed),
-            actor.BasicAttackIntervalMultiplier);
+    {
+        var baseRate =
+            (1d + actor.GetAttribute(AttributeType.AttackSpeed) / 100d)
+            / Math.Max(0.01d, actor.BasicAttackIntervalMultiplier);
+        var hasteSlowMultiplier =
+            1d
+            + (actor.HasCondition(StandardConditionType.Haste) ? 0.25d : 0d)
+            - (actor.HasCondition(StandardConditionType.Slow) ? 0.25d : 0d);
+        var chillStacks = Math.Min(20, actor.GetConditionStacks(StandardConditionType.Chill));
+        var chillMultiplier = 1d - chillStacks / 100d;
+        return (float)Math.Clamp(
+            baseRate * hasteSlowMultiplier * chillMultiplier,
+            AttributeCombatRules.MinimumBasicAttackRate,
+            AttributeCombatRules.MaximumBasicAttackRate);
+    }
 
     private void InitializeActiveAbilityCooldowns(RuntimeCombatant combatant)
     {
@@ -933,7 +1523,7 @@ public sealed class FastCombatEngine
                 attribute.MinimumValue,
                 (int)Math.Round(
                     (attribute.BaseValue + (attribute.ScalingAttribute is { } scalingAttribute
-                        ? source.GetAttribute(scalingAttribute) * attribute.ScalingCoefficient
+                        ? GetEffectiveAttribute(source, scalingAttribute) * attribute.ScalingCoefficient
                         : 0))
                     * GetSummonAttributeMultiplier(attribute.Attribute, effect, source))));
 
@@ -981,7 +1571,7 @@ public sealed class FastCombatEngine
                      .Where(x => x.Definition.Id.Equals(statusId, StringComparison.OrdinalIgnoreCase))
                      .ToList())
         {
-            ExpireStatus(source, target, status, combatants);
+            RemoveStatusInstance(source, target, status, ConditionRemovalReason.Removed, combatants);
         }
     }
 
@@ -991,21 +1581,197 @@ public sealed class FastCombatEngine
         IReadOnlyList<RuntimeCombatant> combatants)
     {
         foreach (var status in target.Statuses.ToList())
-            ExpireStatus(source, target, status, combatants);
+            RemoveStatusInstance(source, target, status, ConditionRemovalReason.Cleansed, combatants);
     }
 
-    private void ExpireStatus(
+    private void CleanseConditions(
+        RuntimeCombatant source,
+        RuntimeCombatant target,
+        StandardConditionType? selectedType,
+        IReadOnlyList<RuntimeCombatant> combatants)
+    {
+        var types = selectedType is { } selected
+            ? [selected]
+            : target.Conditions
+                .Where(condition => IsHarmfulCondition(condition.Type))
+                .Select(condition => condition.Type)
+                .Distinct()
+                .ToArray();
+
+        foreach (var type in types.Where(IsHarmfulCondition))
+        {
+            var removeOne = type is StandardConditionType.Doom
+                or StandardConditionType.Wound
+                or StandardConditionType.Decay;
+            RemoveConditionInstances(
+                source,
+                target,
+                type,
+                removeOne ? 1 : int.MaxValue,
+                ConditionRemovalReason.Cleansed,
+                combatants);
+        }
+    }
+
+    private void DispelConditions(
+        RuntimeCombatant source,
+        RuntimeCombatant target,
+        StandardConditionType? selectedType,
+        IReadOnlyList<RuntimeCombatant> combatants)
+    {
+        var types = selectedType is { } selected
+            ? [selected]
+            : target.Conditions
+                .Where(condition => IsBeneficialCondition(condition.Type))
+                .Select(condition => condition.Type)
+                .Distinct()
+                .ToArray();
+
+        foreach (var type in types.Where(IsBeneficialCondition))
+        {
+            if (type is StandardConditionType.Guard or StandardConditionType.Ward)
+                continue;
+
+            var removeOne = type is StandardConditionType.Thorns
+                or StandardConditionType.Recovery
+                or StandardConditionType.Renewal;
+            RemoveConditionInstances(
+                source,
+                target,
+                type,
+                removeOne ? 1 : int.MaxValue,
+                ConditionRemovalReason.Dispelled,
+                combatants);
+        }
+    }
+
+    private void RemoveConditionInstances(
+        RuntimeCombatant source,
+        RuntimeCombatant target,
+        StandardConditionType type,
+        int count,
+        ConditionRemovalReason removalReason,
+        IReadOnlyList<RuntimeCombatant> combatants)
+    {
+        foreach (var condition in target.Conditions
+                     .Where(x => x.Type == type)
+                     .OrderBy(x => x.DurationTicks <= 0 ? int.MaxValue : x.RemainingDurationTicks)
+                     .ThenBy(x => x.ApplicationOrder)
+                     .Take(count)
+                     .ToList())
+        {
+            RemoveCondition(source, target, condition, removalReason, combatants);
+        }
+    }
+
+    private bool TryConsumeConditionCharge(
+        RuntimeCombatant target,
+        StandardConditionType type,
+        RuntimeCombatant eventSource,
+        IReadOnlyList<RuntimeCombatant> combatants)
+    {
+        var condition = target.Conditions
+            .Where(x => x.Type == type && x.Value > 0)
+            .OrderBy(x => x.ApplicationOrder)
+            .FirstOrDefault();
+        if (condition is null)
+            return false;
+
+        condition.AddValue(-1);
+        if (condition.Value <= 0)
+            RemoveCondition(
+                eventSource,
+                target,
+                condition,
+                ConditionRemovalReason.Consumed,
+                combatants);
+
+        return true;
+    }
+
+    private void RemoveCondition(
+        RuntimeCombatant eventSource,
+        RuntimeCombatant target,
+        RuntimeCondition condition,
+        ConditionRemovalReason removalReason,
+        IReadOnlyList<RuntimeCombatant> combatants)
+    {
+        if (!target.Conditions.Remove(condition))
+            return;
+
+        var conditionId = GetConditionId(condition.Type);
+        Log(
+            eventSource,
+            target,
+            conditionId,
+            GetRemovalLogEvent(removalReason),
+            0,
+            $"{condition.Type} was {GetRemovalDescription(removalReason)} on {target.Name}.",
+            condition.StatsSource);
+        Publish(
+            new CombatEvent(
+                GetRemovalTriggerEvent(removalReason),
+                condition.Source,
+                target,
+                conditionId,
+                RemovalReason: removalReason),
+            combatants);
+    }
+
+    private void RemoveStatusInstance(
         RuntimeCombatant source,
         RuntimeCombatant target,
         RuntimeStatus status,
+        ConditionRemovalReason removalReason,
         IReadOnlyList<RuntimeCombatant> combatants)
     {
         if (!target.Statuses.Remove(status))
             return;
 
-        Log(source, target, status.Definition.Id, EventType.StatusEffectExpired, 0, $"{status.Definition.Id} expired on {target.Name}.");
-        Publish(new CombatEvent(AbilityTriggerEvent.OnStatusExpired, status.Source, target, status.Definition.Id), combatants);
+        Log(
+            source,
+            target,
+            status.Definition.Id,
+            GetRemovalLogEvent(removalReason),
+            0,
+            $"{status.Definition.Id} was {GetRemovalDescription(removalReason)} on {target.Name}.");
+        Publish(
+            new CombatEvent(
+                GetRemovalTriggerEvent(removalReason),
+                status.Source,
+                target,
+                status.Definition.Id,
+                RemovalReason: removalReason),
+            combatants);
     }
+
+    private static AbilityTriggerEvent GetRemovalTriggerEvent(ConditionRemovalReason removalReason) =>
+        removalReason switch
+        {
+            ConditionRemovalReason.Expired => AbilityTriggerEvent.OnStatusExpired,
+            ConditionRemovalReason.Cleansed => AbilityTriggerEvent.OnStatusCleansed,
+            ConditionRemovalReason.Dispelled => AbilityTriggerEvent.OnStatusDispelled,
+            _ => AbilityTriggerEvent.OnStatusRemoved
+        };
+
+    private static EventType GetRemovalLogEvent(ConditionRemovalReason removalReason) =>
+        removalReason switch
+        {
+            ConditionRemovalReason.Expired => EventType.StatusEffectExpired,
+            ConditionRemovalReason.Cleansed => EventType.StatusEffectCleansed,
+            ConditionRemovalReason.Dispelled => EventType.StatusEffectDispelled,
+            _ => EventType.StatusEffectRemoved
+        };
+
+    private static string GetRemovalDescription(ConditionRemovalReason removalReason) =>
+        removalReason switch
+        {
+            ConditionRemovalReason.Expired => "expired",
+            ConditionRemovalReason.Cleansed => "cleansed",
+            ConditionRemovalReason.Dispelled => "dispelled",
+            ConditionRemovalReason.Consumed => "consumed",
+            _ => "removed"
+        };
 
     private void TickEffects(IReadOnlyList<RuntimeCombatant> combatants)
     {
@@ -1014,15 +1780,46 @@ public sealed class FastCombatEngine
             foreach (var effect in combatant.ActiveEffects.ToList())
             {
                 if (effect.Tick() && (effect.Definition.ChancePercent >= 100 || _random.Next(1, 101) <= effect.Definition.ChancePercent))
-                    ApplyEffectOnce(effect.Definition, effect.Source, effect.Target, combatants, effect.StatsSource);
+                    ApplyEffectOnce(
+                        effect.Definition,
+                        effect.Source,
+                        effect.Target,
+                        combatants,
+                        statsSourceOverride: effect.StatsSource);
 
                 if (effect.IsExpired)
                 {
-                    if (effect.Definition.Operation == AbilityEffectOperation.ModifyAttribute)
+                    if (IsTimedModifierOperation(effect.Definition.Operation))
                     {
                         var value = CalculateValue(effect.Definition, effect.Source);
-                        effect.Target.AdjustAttribute(effect.Definition.Attribute!.Value, -value);
-                        Log(effect.Source, effect.Target, effect.Definition.Id, EventType.BuffExpired, -value, $"{effect.Target.Name}'s {effect.Definition.Attribute} returned to normal.", effect.StatsSource);
+                        switch (effect.Definition.Operation)
+                        {
+                            case AbilityEffectOperation.ModifyAttribute:
+                                effect.Target.AdjustAttribute(effect.Definition.Attribute!.Value, -value);
+                                break;
+                            case AbilityEffectOperation.ModifyThreat:
+                                effect.Target.AdjustThreat(-value);
+                                break;
+                            case AbilityEffectOperation.ModifyRegenerationRate:
+                                effect.Target.AdjustRegenerationRate(-value);
+                                break;
+                            case AbilityEffectOperation.ModifyRegenerationInterval:
+                                effect.Target.AdjustRegenerationInterval(-value);
+                                break;
+                            case AbilityEffectOperation.ModifyHealingReceived:
+                                effect.Target.AdjustHealingReceived(-value);
+                                break;
+                            case AbilityEffectOperation.ModifyDamageDealt:
+                                effect.Target.AdjustDamageDealt(effect.Definition.DamageType, -value);
+                                break;
+                            case AbilityEffectOperation.ModifyDamageTaken:
+                                effect.Target.AdjustDamageTaken(effect.Definition.DamageType, -value);
+                                break;
+                            case AbilityEffectOperation.ModifyDamageTakenFromCondition:
+                                effect.Target.AdjustDamageTakenFromCondition(effect.Definition.Condition!.Value, -value);
+                                break;
+                        }
+                        Log(effect.Source, effect.Target, effect.Definition.Id, EventType.BuffExpired, -value, $"{effect.Target.Name}'s modifier returned to normal.", effect.StatsSource);
                     }
 
                     combatant.ActiveEffects.Remove(effect);
@@ -1040,7 +1837,12 @@ public sealed class FastCombatEngine
                 if (!status.IsExpired)
                     continue;
 
-                ExpireStatus(status.Source, combatant, status, combatants);
+                RemoveStatusInstance(
+                    status.Source,
+                    combatant,
+                    status,
+                    ConditionRemovalReason.Expired,
+                    combatants);
             }
         }
     }
@@ -1049,18 +1851,25 @@ public sealed class FastCombatEngine
     {
         foreach (var combatant in combatants.Where(x => x.IsAlive))
         {
-            var progress = _healthRegenerationProgress.GetValueOrDefault(combatant) + 1;
-            if (progress < HealthRegenerationIntervalTicks)
+            var rate = Math.Max(
+                0,
+                1 + combatant.RegenerationRatePercent / 100f);
+            var interval = Math.Max(
+                1,
+                HealthRegenerationIntervalTicks + combatant.RegenerationIntervalModifierTicks);
+            var progress = _healthRegenerationProgress.GetValueOrDefault(combatant) + rate;
+            if (progress < interval)
             {
                 _healthRegenerationProgress[combatant] = progress;
                 continue;
             }
 
-            _healthRegenerationProgress[combatant] = 0;
+            _healthRegenerationProgress[combatant] = progress - interval;
 
-            var regeneration = Math.Max(
-                0,
-                combatant.GetAttribute(AttributeType.HealthRegeneration));
+            var regeneration = ApplyRegenerationAmountModifier(
+                combatant,
+                Math.Max(0, combatant.GetAttribute(AttributeType.HealthRegeneration)));
+            regeneration = ApplyHealingReceivedModifier(combatant, regeneration);
             var potential = Math.Max(0, (int)Math.Round(regeneration));
             if (potential <= 0)
                 continue;
@@ -1093,7 +1902,118 @@ public sealed class FastCombatEngine
                 EventType.HealthRegeneration,
                 restored,
                 $"{combatant.Name} regenerated {restored} health.");
+            Publish(new CombatEvent(AbilityTriggerEvent.OnHeal, combatant, combatant, null), combatants);
+            Publish(new CombatEvent(AbilityTriggerEvent.OnHealed, combatant, combatant, null), combatants);
+            Publish(new CombatEvent(AbilityTriggerEvent.OnHealthChanged, combatant, combatant, null), combatants);
         }
+    }
+
+    private static int ApplyHealingReceivedModifier(RuntimeCombatant target, int healing)
+    {
+        var modifier =
+            (target.HasCondition(StandardConditionType.Recovery) ? 0.30f : 0f)
+            - (target.HasCondition(StandardConditionType.Wound) ? 0.30f : 0f)
+            + target.HealingReceivedPercent / 100f;
+        return Math.Max(0, (int)Math.Round(healing * (1 + modifier)));
+    }
+
+    private static float ApplyHealingReceivedModifier(RuntimeCombatant target, float healing)
+    {
+        var modifier =
+            (target.HasCondition(StandardConditionType.Recovery) ? 0.30f : 0f)
+            - (target.HasCondition(StandardConditionType.Wound) ? 0.30f : 0f)
+            + target.HealingReceivedPercent / 100f;
+        return Math.Max(0, healing * (1 + modifier));
+    }
+
+    private static float ApplyRegenerationAmountModifier(RuntimeCombatant target, float regeneration)
+    {
+        var modifier =
+            (target.HasCondition(StandardConditionType.Renewal) ? 0.30f : 0f)
+            - (target.HasCondition(StandardConditionType.Decay) ? 0.30f : 0f);
+        return Math.Max(0, regeneration * (1 + modifier));
+    }
+
+    private void TickConditions(IReadOnlyList<RuntimeCombatant> combatants)
+    {
+        foreach (var combatant in combatants)
+        {
+            foreach (var condition in combatant.Conditions.ToList())
+            {
+                var intervalDue = condition.Tick();
+                if (intervalDue && combatant.IsAlive)
+                    ResolvePeriodicCondition(condition, combatants);
+
+                if (!condition.IsExpired)
+                    continue;
+
+                if (condition.Type == StandardConditionType.Doom && combatant.IsAlive)
+                    ResolveDoom(condition, combatants);
+
+                RemoveCondition(
+                    condition.Source,
+                    combatant,
+                    condition,
+                    ConditionRemovalReason.Expired,
+                    combatants);
+            }
+        }
+    }
+
+    private void ResolvePeriodicCondition(
+        RuntimeCondition condition,
+        IReadOnlyList<RuntimeCombatant> combatants)
+    {
+        var damageType = condition.Type switch
+        {
+            StandardConditionType.Bleed => DamageType.Bleed,
+            StandardConditionType.Burn => DamageType.Burn,
+            StandardConditionType.Poison => DamageType.Poison,
+            _ => DamageType.None
+        };
+        if (damageType == DamageType.None)
+            return;
+
+        var damage = Math.Max(
+            0,
+            (int)Math.Round(
+                condition.PowerSnapshot * 0.01f * condition.Value,
+                MidpointRounding.AwayFromZero));
+        if (damage <= 0)
+            return;
+
+        ApplyDamage(
+            condition.Source,
+            condition.Owner,
+            damage,
+            AttackType.DamageOverTime,
+            damageType,
+            null,
+            combatants,
+            GetConditionId(condition.Type),
+            condition.StatsSource,
+            delivery: DamageDelivery.Periodic);
+    }
+
+    private void ResolveDoom(
+        RuntimeCondition condition,
+        IReadOnlyList<RuntimeCombatant> combatants)
+    {
+        var damage = Math.Max(0, (int)Math.Round(condition.PowerSnapshot * condition.Value / 100f));
+        if (damage <= 0)
+            return;
+
+        ApplyDamage(
+            condition.Source,
+            condition.Owner,
+            damage,
+            AttackType.None,
+            DamageType.Magical,
+            null,
+            combatants,
+            GetConditionId(StandardConditionType.Doom),
+            condition.StatsSource,
+            delivery: DamageDelivery.Stored);
     }
 
     private IReadOnlyList<EntityStats> AddHealthRegenerationTelemetry(
@@ -1150,21 +2070,41 @@ public sealed class FastCombatEngine
     }
 
     private static bool IsStatusLifecycleEvent(AbilityTriggerEvent triggerEvent) =>
-        triggerEvent is AbilityTriggerEvent.OnStatusApplied or AbilityTriggerEvent.OnStatusExpired;
+        triggerEvent is AbilityTriggerEvent.OnStatusApplied
+            or AbilityTriggerEvent.OnStatusExpired
+            or AbilityTriggerEvent.OnStatusRemoved
+            or AbilityTriggerEvent.OnStatusCleansed
+            or AbilityTriggerEvent.OnStatusDispelled;
 
     private static bool IsSourceScopedTriggerRelevant(RuntimeCombatant listener, CombatEvent combatEvent) =>
         combatEvent.Event switch
         {
             AbilityTriggerEvent.OnMeleeAttack
+                or AbilityTriggerEvent.OnAbilityUsed
                 or AbilityTriggerEvent.OnBasicAttack
                 or AbilityTriggerEvent.OnRangedAttack
+                or AbilityTriggerEvent.OnHit
+                or AbilityTriggerEvent.OnKill
                 or AbilityTriggerEvent.OnMeleeAttacked
                 or AbilityTriggerEvent.OnRangedAttacked
                 or AbilityTriggerEvent.OnDamaged
                 or AbilityTriggerEvent.OnAttacked
                 or AbilityTriggerEvent.OnHeal
                 or AbilityTriggerEvent.OnHealed
-                or AbilityTriggerEvent.OnLifestealHeal => ReferenceEquals(combatEvent.Source, listener),
+                or AbilityTriggerEvent.OnLifestealHeal
+                or AbilityTriggerEvent.OnInterval => ReferenceEquals(combatEvent.Source, listener),
+            AbilityTriggerEvent.OnStatusApplied
+                or AbilityTriggerEvent.OnStatusExpired
+                or AbilityTriggerEvent.OnStatusRemoved
+                or AbilityTriggerEvent.OnStatusCleansed
+                or AbilityTriggerEvent.OnStatusDispelled =>
+                ReferenceEquals(combatEvent.Source, listener)
+                || ReferenceEquals(combatEvent.Target, listener),
+            AbilityTriggerEvent.OnBarrierApplied
+                or AbilityTriggerEvent.OnBarrierAbsorbed
+                or AbilityTriggerEvent.OnBarrierBroken =>
+                ReferenceEquals(combatEvent.Source, listener)
+                || ReferenceEquals(combatEvent.Target, listener),
             _ => true
         };
 
@@ -1180,8 +2120,12 @@ public sealed class FastCombatEngine
             AbilityTargetSelector.Source => [source],
             AbilityTargetSelector.EventSource => combatEvent.Source is null ? [] : [combatEvent.Source],
             AbilityTargetSelector.EventTarget => combatEvent.Target is null ? [] : [combatEvent.Target],
-            AbilityTargetSelector.CurrentTarget => SelectFirstEnemy(source, combatants) is { } target ? [target] : [],
-            AbilityTargetSelector.RandomEnemy => SelectRandomEnemy(source, combatants) is { } target ? [target] : [],
+            AbilityTargetSelector.CurrentTarget => SelectLockedEnemy(source, combatEvent) is { } lockedTarget
+                ? [lockedTarget]
+                : SelectFirstEnemy(source, combatants) is { } target ? [target] : [],
+            AbilityTargetSelector.RandomEnemy => SelectLockedEnemy(source, combatEvent) is { } lockedTarget
+                ? [lockedTarget]
+                : SelectRandomEnemy(source, combatants) is { } target ? [target] : [],
             AbilityTargetSelector.LowestHealthAlly => combatants.Where(x => x.Team == source.Team && x.IsAlive).OrderBy(x => x.Health).Take(1),
             AbilityTargetSelector.AllEnemies => combatants.Where(x => x.Team != source.Team && x.IsAlive),
             AbilityTargetSelector.AllAllies => combatants.Where(x => x.Team == source.Team && x.IsAlive),
@@ -1195,9 +2139,49 @@ public sealed class FastCombatEngine
             AbilityTargetSelector.SummonedAllies => combatants.Where(x => x.Team == source.Team && x.IsAlive && x.IsSummoned),
             AbilityTargetSelector.NonSummonedAllies => combatants.Where(x => x.Team == source.Team && x.IsAlive && !x.IsSummoned),
             AbilityTargetSelector.SummonedEnemies => combatants.Where(x => x.Team != source.Team && x.IsAlive && x.IsSummoned),
+            AbilityTargetSelector.LowestHealthEnemy => SelectLockedEnemy(source, combatEvent) is { } lockedTarget
+                ? [lockedTarget]
+                : combatants
+                    .Where(x => x.Team != source.Team && x.IsAlive)
+                    .OrderBy(x => x.Health / Math.Max(1, x.GetAttribute(AttributeType.MaxHealth)))
+                    .Take(1),
             _ => []
         };
     }
+
+    private RuntimeCombatant? SelectActiveAbilityPrimaryTarget(
+        RuntimeAbility ability,
+        RuntimeCombatant source,
+        IReadOnlyList<RuntimeCombatant> combatants)
+    {
+        if (!ability.Definition.TriggersByEvent.TryGetValue(AbilityTriggerEvent.OnAbilityUsed, out var triggers))
+            return null;
+
+        var selector = triggers
+            .SelectMany(trigger => trigger.Effects)
+            .Select(effect => effect.Target)
+            .FirstOrDefault(target => target is AbilityTargetSelector.CurrentTarget
+                or AbilityTargetSelector.RandomEnemy
+                or AbilityTargetSelector.LowestHealthEnemy);
+
+        return selector switch
+        {
+            AbilityTargetSelector.CurrentTarget => SelectFirstEnemy(source, combatants),
+            AbilityTargetSelector.RandomEnemy => SelectRandomEnemy(source, combatants),
+            AbilityTargetSelector.LowestHealthEnemy => combatants
+                .Where(x => x.Team != source.Team && x.IsAlive)
+                .OrderBy(x => x.Health / Math.Max(1, x.GetAttribute(AttributeType.MaxHealth)))
+                .FirstOrDefault(),
+            _ => null
+        };
+    }
+
+    private static RuntimeCombatant? SelectLockedEnemy(RuntimeCombatant source, CombatEvent combatEvent) =>
+        combatEvent.Event == AbilityTriggerEvent.OnAbilityUsed
+        && combatEvent.Target is { IsAlive: true } target
+        && target.Team != source.Team
+            ? target
+            : null;
 
     private bool EffectCanResolve(
         CompiledEffect effect,
@@ -1244,23 +2228,49 @@ public sealed class FastCombatEngine
     private RuntimeCombatant? SelectFirstEnemy(RuntimeCombatant source, IReadOnlyList<RuntimeCombatant> combatants)
     {
         var enemies = combatants.Where(x => x.Team != source.Team && x.IsAlive).ToList();
-        return enemies.FirstOrDefault(IsTaunting) ?? enemies.FirstOrDefault();
+        return SelectThreatWeightedEnemy(enemies);
     }
 
     private RuntimeCombatant? SelectRandomEnemy(RuntimeCombatant source, IReadOnlyList<RuntimeCombatant> combatants)
     {
         var enemies = combatants.Where(x => x.Team != source.Team && x.IsAlive).ToList();
-        var tauntingEnemies = enemies.Where(IsTaunting).ToList();
-        if (tauntingEnemies.Count > 0)
-            enemies = tauntingEnemies;
-
         return enemies.Count == 0 ? null : enemies[_random.Next(enemies.Count)];
     }
 
-    private static bool IsTaunting(RuntimeCombatant combatant) =>
-        combatant.Statuses.Any(status =>
-            status.Definition.Id.Equals("status.taunt", StringComparison.OrdinalIgnoreCase)
-            || status.Definition.Tags.Contains("Control.Taunt"));
+    private RuntimeCombatant? SelectThreatWeightedEnemy(IReadOnlyList<RuntimeCombatant> enemies)
+    {
+        if (enemies.Count == 0)
+            return null;
+
+        var weights = enemies.Select(GetEffectiveThreat).ToArray();
+        var total = weights.Sum();
+        if (total <= 0)
+            return enemies[0];
+
+        var roll = _random.NextDouble() * total;
+        for (var index = 0; index < enemies.Count; index++)
+        {
+            roll -= weights[index];
+            if (roll < 0)
+                return enemies[index];
+        }
+
+        return enemies[^1];
+    }
+
+    private double GetEffectiveThreat(RuntimeCombatant combatant)
+    {
+        if (combatant.HasCondition(StandardConditionType.Stealth))
+            return 1d;
+
+        var threat = combatant.Threat;
+        if (combatant.HasCondition(StandardConditionType.Taunt))
+        {
+            threat += _tauntThreatBonus;
+        }
+
+        return threat;
+    }
 
     private bool ConditionsPass(
         IEnumerable<CompiledCondition> conditions,
@@ -1283,6 +2293,18 @@ public sealed class FastCombatEngine
                 && subject.Health / subject.GetAttribute(AttributeType.MaxHealth) * 100 > condition.Value,
             AbilityConditionType.HasStatus => subject.GetStatusStacks(condition.StatusId!) > 0,
             AbilityConditionType.StatusStacksAtLeast => subject.GetStatusStacks(condition.StatusId!) >= condition.Value,
+            AbilityConditionType.HasCondition => subject.HasCondition(condition.Condition!.Value),
+            AbilityConditionType.ConditionStacksAtLeast =>
+                subject.GetConditionStacks(condition.Condition!.Value) >= condition.Value,
+            AbilityConditionType.EventDamageTypeIs => combatEvent.DamageType == condition.DamageType,
+            AbilityConditionType.EventAttackTypeIs => combatEvent.AttackType == condition.AttackType,
+            AbilityConditionType.EventWasCritical => combatEvent.WasCritical,
+            AbilityConditionType.EventWasDirectHit => combatEvent.WasDirectHit,
+            AbilityConditionType.EventIdIs => string.Equals(
+                combatEvent.AbilityId,
+                condition.StatusId,
+                StringComparison.OrdinalIgnoreCase),
+            AbilityConditionType.EventSourceIsSelf => ReferenceEquals(combatEvent.Source, source),
             AbilityConditionType.HasTag => subject.Tags.Contains(condition.Tag!),
             AbilityConditionType.ChancePercent => _random.Next(1, 101) <= condition.Value,
             _ => false
@@ -1302,11 +2324,53 @@ public sealed class FastCombatEngine
             _ => null
         };
 
-    private static int CalculateValue(CompiledEffect effect, RuntimeCombatant source) =>
-        Math.Max(AllowsNegativeValue(effect.Operation) ? int.MinValue : 0,
-            (int)Math.Round(effect.BaseValue + (effect.ScalingAttribute is { } attribute
-                ? source.GetAttribute(attribute) * effect.ScalingCoefficient
-                : 0)));
+    private int CalculateValue(
+        CompiledEffect effect,
+        RuntimeCombatant source,
+        CombatEvent? combatEvent = null)
+    {
+        var scalingCoefficient = effect.ScalingCoefficient;
+        if (effect.MaximumScalingCoefficient > effect.ScalingCoefficient)
+        {
+            scalingCoefficient += (float)_random.NextDouble()
+                                  * (effect.MaximumScalingCoefficient - effect.ScalingCoefficient);
+        }
+
+        var value = effect.BaseValue
+                    + (effect.ScalingAttribute is { } attribute
+                        ? GetEffectiveAttribute(source, attribute) * scalingCoefficient
+                        : 0)
+                    + (combatEvent?.Magnitude ?? 0) * effect.EventMagnitudeCoefficient;
+        if (effect.ScalingCondition is { } condition)
+        {
+            value += source.GetConditionStacks(condition)
+                     * GetEffectivePower(source)
+                     * effect.ConditionScalingCoefficient;
+        }
+        if (!string.IsNullOrWhiteSpace(effect.ScalingStatusId))
+        {
+            value += source.GetStatusStacks(effect.ScalingStatusId)
+                     * GetEffectivePower(source)
+                     * effect.StatusScalingCoefficient;
+        }
+
+        return Math.Max(
+            AllowsNegativeValue(effect.Operation) ? int.MinValue : 0,
+            (int)Math.Round(value));
+    }
+
+    private static float GetEffectiveAttribute(RuntimeCombatant combatant, AttributeType attribute) =>
+        attribute == AttributeType.Power
+            ? GetEffectivePower(combatant)
+            : combatant.GetAttribute(attribute);
+
+    private static float GetEffectivePower(RuntimeCombatant combatant)
+    {
+        var modifier =
+            (combatant.HasCondition(StandardConditionType.Empower) ? 0.20f : 0f)
+            - (combatant.HasCondition(StandardConditionType.Weaken) ? 0.20f : 0f);
+        return Math.Max(0, combatant.GetAttribute(AttributeType.Power) * (1 + modifier));
+    }
 
     private static int CalculateCostValue(CompiledCost cost, RuntimeCombatant source) =>
         Math.Max(0, (int)Math.Round(cost.BaseValue + (cost.ScalingAttribute is { } attribute
@@ -1314,7 +2378,25 @@ public sealed class FastCombatEngine
             : 0)));
 
     private static bool AllowsNegativeValue(AbilityEffectOperation operation) =>
-        operation is AbilityEffectOperation.ModifyAttribute or AbilityEffectOperation.ModifyStatusStacks;
+        operation is AbilityEffectOperation.ModifyAttribute
+            or AbilityEffectOperation.ModifyStatusStacks
+            or AbilityEffectOperation.ModifyThreat
+            or AbilityEffectOperation.ModifyRegenerationRate
+            or AbilityEffectOperation.ModifyRegenerationInterval
+            or AbilityEffectOperation.ModifyHealingReceived
+            or AbilityEffectOperation.ModifyDamageDealt
+            or AbilityEffectOperation.ModifyDamageTaken
+            or AbilityEffectOperation.ModifyDamageTakenFromCondition;
+
+    private static bool IsTimedModifierOperation(AbilityEffectOperation operation) =>
+        operation is AbilityEffectOperation.ModifyAttribute
+            or AbilityEffectOperation.ModifyThreat
+            or AbilityEffectOperation.ModifyRegenerationRate
+            or AbilityEffectOperation.ModifyRegenerationInterval
+            or AbilityEffectOperation.ModifyHealingReceived
+            or AbilityEffectOperation.ModifyDamageDealt
+            or AbilityEffectOperation.ModifyDamageTaken
+            or AbilityEffectOperation.ModifyDamageTakenFromCondition;
 
     private static bool IsPeriodicEffect(CompiledEffect effect) =>
         effect.IntervalTicks > 0 && effect.DurationTicks > 0;
@@ -1389,5 +2471,22 @@ public sealed class FastCombatEngine
         AbilityTriggerEvent Event,
         RuntimeCombatant? Source,
         RuntimeCombatant? Target,
-        string? AbilityId);
+        string? AbilityId,
+        int Magnitude = 0,
+        RuntimeCombatant? Instigator = null,
+        long? BarrierApplicationOrder = null,
+        ConditionRemovalReason? RemovalReason = null,
+        DamageType DamageType = DamageType.None,
+        AttackType AttackType = AttackType.None,
+        bool WasCritical = false,
+        bool WasDirectHit = false);
+
+    private enum ConditionRemovalReason
+    {
+        Expired,
+        Removed,
+        Cleansed,
+        Dispelled,
+        Consumed
+    }
 }

@@ -6,6 +6,7 @@ using Application.Interfaces.Services.LL.Achievements;
 using Application.Interfaces.Services.LL.CharacterActions;
 using Application.Interfaces.Services.LL.Balance;
 using Application.Interfaces.Services.LL.Colosseum;
+using Application.Interfaces.Services.LL.Combat;
 using Application.Interfaces.Services.LL.Dungeons;
 using Application.Interfaces.Services.LL.Entities;
 using Application.Interfaces.Services.LL.Essences;
@@ -203,6 +204,11 @@ public static class DependencyInjection
                 contentRootPath,
                 sp.GetRequiredService<JsonSerializerOptions>(),
                 sp.GetRequiredService<IEssenceDefinitionRepository>()));
+        services.AddSingleton<ICreatureAbilityDefinitionProvider>(sp =>
+            new JsonCreatureAbilityDefinitionProvider(
+                config,
+                contentRootPath,
+                sp.GetRequiredService<JsonSerializerOptions>()));
         services.AddSingleton<IEssenceCodexCollectionDefinitionProvider>(sp =>
             new JsonEssenceCodexCollectionDefinitionProvider(
                 config,

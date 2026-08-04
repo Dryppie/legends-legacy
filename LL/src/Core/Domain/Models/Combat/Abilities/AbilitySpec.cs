@@ -30,7 +30,13 @@ public enum AbilityTriggerEvent
     OnHeal = 16,
     OnHealed = 17,
     OnLifestealHeal = 18,
-    OnDodge = 19
+    OnDodge = 19,
+    OnBarrierApplied = 20,
+    OnBarrierAbsorbed = 21,
+    OnBarrierBroken = 22,
+    OnStatusRemoved = 23,
+    OnStatusCleansed = 24,
+    OnStatusDispelled = 25
 }
 
 public enum AbilityEffectOperation
@@ -45,7 +51,19 @@ public enum AbilityEffectOperation
     ModifyAttribute = 7,
     Summon = 8,
     SelfDestruct = 9,
-    RestoreResource = 10
+    RestoreResource = 10,
+    ApplyCondition = 11,
+    Dispel = 12,
+    ModifyThreat = 13,
+    ModifyRegenerationRate = 14,
+    ModifyRegenerationInterval = 15,
+    ModifyHealingReceived = 16,
+    ModifyDamageDealt = 17,
+    ModifyDamageTaken = 18,
+    ModifyDamageTakenFromCondition = 19,
+    ApplyRandomCondition = 20,
+    ModifyNextBasicAttackDamage = 21,
+    ModifyNextBasicAttackArmorPenetration = 22
 }
 
 public enum AbilityTargetSelector
@@ -65,7 +83,8 @@ public enum AbilityTargetSelector
     HighestMaxHealthAlly = 12,
     SummonedAllies = 13,
     NonSummonedAllies = 14,
-    SummonedEnemies = 15
+    SummonedEnemies = 15,
+    LowestHealthEnemy = 16
 }
 
 public enum AbilityConditionType
@@ -76,7 +95,42 @@ public enum AbilityConditionType
     HasStatus = 3,
     StatusStacksAtLeast = 4,
     HasTag = 5,
-    ChancePercent = 6
+    ChancePercent = 6,
+    HasCondition = 7,
+    ConditionStacksAtLeast = 8,
+    EventDamageTypeIs = 9,
+    EventAttackTypeIs = 10,
+    EventWasCritical = 11,
+    EventWasDirectHit = 12,
+    EventIdIs = 13,
+    EventSourceIsSelf = 14
+}
+
+public enum StandardConditionType
+{
+    Haste = 0,
+    Slow = 1,
+    Empower = 2,
+    Weaken = 3,
+    Vulnerable = 4,
+    Wound = 5,
+    Recovery = 6,
+    Decay = 7,
+    Renewal = 8,
+    Guard = 9,
+    Ward = 10,
+    Unstoppable = 11,
+    Poison = 12,
+    Burn = 13,
+    Bleed = 14,
+    Stun = 15,
+    Taunt = 16,
+    Stealth = 17,
+    Chill = 18,
+    Freeze = 19,
+    Corrosion = 20,
+    Doom = 21,
+    Thorns = 22
 }
 
 public enum AbilityConditionSubject
@@ -155,6 +209,8 @@ public sealed class AbilityTriggerSpec
 {
     public AbilityTriggerEvent Event { get; set; }
     public int InternalCooldownTicks { get; set; }
+    public int InitialDelayTicks { get; set; }
+    public int EveryNthOccurrence { get; set; } = 1;
     public List<AbilityConditionSpec> Conditions { get; set; } = [];
     public List<string> EffectIds { get; set; } = [];
 }
@@ -167,8 +223,16 @@ public sealed class AbilityEffectSpec
     public int BaseValue { get; set; }
     public AttributeType? ScalingAttribute { get; set; }
     public float ScalingCoefficient { get; set; }
+    public float MaximumScalingCoefficient { get; set; }
+    public float EventMagnitudeCoefficient { get; set; }
+    public StandardConditionType? ScalingCondition { get; set; }
+    public float ConditionScalingCoefficient { get; set; }
+    public string? ScalingStatusId { get; set; }
+    public float StatusScalingCoefficient { get; set; }
     public AttributeType? Attribute { get; set; }
     public string? StatusId { get; set; }
+    public StandardConditionType? Condition { get; set; }
+    public StandardConditionType? AlternativeCondition { get; set; }
     public string? SummonId { get; set; }
     public double SummonPowerMultiplier { get; set; } = 1d;
     public double SummonHealthMultiplier { get; set; } = 1d;
@@ -180,6 +244,8 @@ public sealed class AbilityEffectSpec
     public AttackType AttackType { get; set; } = AttackType.None;
     public DamageType DamageType { get; set; } = DamageType.None;
     public CritEligibility CritEligibility { get; set; } = CritEligibility.Default;
+    public float CritChanceBonus { get; set; }
+    public float ArmorPenetrationBonus { get; set; }
     public float LifeStealPercentage { get; set; }
     public decimal ProcCoefficient { get; set; } = 1m;
     public List<string> Tags { get; set; } = [];
@@ -191,6 +257,9 @@ public sealed class AbilityConditionSpec
     public AbilityConditionType Type { get; set; }
     public AbilityConditionSubject Subject { get; set; } = AbilityConditionSubject.Target;
     public string? StatusId { get; set; }
+    public StandardConditionType? Condition { get; set; }
+    public DamageType DamageType { get; set; } = DamageType.None;
+    public AttackType AttackType { get; set; } = AttackType.None;
     public string? Tag { get; set; }
     public int Value { get; set; }
 }

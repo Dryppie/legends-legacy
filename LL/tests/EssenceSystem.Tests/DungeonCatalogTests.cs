@@ -20,7 +20,7 @@ public sealed class DungeonCatalogTests
         var runtimeValidator = new DungeonDefinitionValidator();
 
         Assert.Empty(runtimeValidator.Validate(definitions));
-        Assert.Equal(9, definitions.Count);
+        Assert.Equal(6, definitions.Count);
 
         var expected = new[]
         {
@@ -29,10 +29,7 @@ public sealed class DungeonCatalogTests
             new ExpectedDungeon("goblin_mines_iii", "Goblin Mines III", DungeonGrade.GradeIII, 12, 14, 2, "goblin_mines_ii"),
             new ExpectedDungeon("forgotten_catacombs", "Forgotten Catacombs I", DungeonGrade.GradeI, 11, 13, 1, null),
             new ExpectedDungeon("forgotten_catacombs_ii", "Forgotten Catacombs II", DungeonGrade.GradeII, 12, 14, 1, "forgotten_catacombs"),
-            new ExpectedDungeon("forgotten_catacombs_iii", "Forgotten Catacombs III", DungeonGrade.GradeIII, 13, 15, 1, "forgotten_catacombs_ii"),
-            new ExpectedDungeon("hives_abyss", "The Hive's Abyss I", DungeonGrade.GradeI, 12, 14, 3, null),
-            new ExpectedDungeon("hives_abyss_ii", "The Hive's Abyss II", DungeonGrade.GradeII, 13, 15, 3, "hives_abyss"),
-            new ExpectedDungeon("hives_abyss_iii", "The Hive's Abyss III", DungeonGrade.GradeIII, 14, 16, 3, "hives_abyss_ii")
+            new ExpectedDungeon("forgotten_catacombs_iii", "Forgotten Catacombs III", DungeonGrade.GradeIII, 13, 15, 1, "forgotten_catacombs_ii")
         };
 
         Assert.Collection(

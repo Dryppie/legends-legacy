@@ -11,30 +11,8 @@ namespace EssenceSystem.Tests;
 public sealed class RegionOneIdleAreaSeedTests
 {
     private const double AreaEssenceBaseDropChance = 0.0001;
-    private static readonly HashSet<string> CreatureEssencesPendingImplementation = new(StringComparer.OrdinalIgnoreCase)
-    {
-        "monster.bog_mite",
-        "monster.cinder_beetle",
-        "monster.crystal_wisp",
-        "monster.grave_hound",
-        "monster.grave_wisp",
-        "monster.hollow_stag",
-        "monster.lumo_sentinel",
-        "monster.lumo_wisp",
-        "monster.rotfly_toad",
-        "monster.rotroot_shambler",
-        "monster.smolder_rat",
-        "monster.thornback_boar"
-    };
-    private static readonly HashSet<string> CreatureEssencesPendingAreaDropTuning = new(StringComparer.OrdinalIgnoreCase)
-    {
-        "monster.cave_bat",
-        "monster.forest_spirit",
-        "monster.giant_bat",
-        "monster.poisonous_rat",
-        "monster.skeleton",
-        "monster.wood_nymph"
-    };
+    private static readonly HashSet<string> CreatureEssencesPendingImplementation = new(StringComparer.OrdinalIgnoreCase);
+    private static readonly HashSet<string> CreatureEssencesPendingAreaDropTuning = new(StringComparer.OrdinalIgnoreCase);
 
     [Fact]
     public async Task SeedCreaturesData_creates_tutorial_area_and_ten_region_one_idle_areas_without_goblin_mines()

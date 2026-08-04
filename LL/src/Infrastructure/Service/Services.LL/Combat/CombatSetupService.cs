@@ -1,4 +1,5 @@
 using Application.Interfaces.Services.LL.Essences;
+using Application.Interfaces.Services.LL.Combat;
 using Domain.Components.Attributes;
 using Domain.Models.Attributes;
 using Domain.Models.Combat;
@@ -16,17 +17,20 @@ public class CombatSetupService : ICombatSetupService
     private readonly IEssenceCombatLoadoutResolver _essenceCombatLoadoutResolver;
     private readonly IEssenceDefinitionRepository _essenceDefinitions;
     private readonly ICreatureEssenceLootTableRepository _creatureEssenceLootTables;
+    private readonly ICreatureAbilityDefinitionProvider? _creatureAbilities;
 
     public CombatSetupService(
         ICreatureScaler creatureScaler,
         IEssenceCombatLoadoutResolver essenceCombatLoadoutResolver,
         IEssenceDefinitionRepository essenceDefinitions,
-        ICreatureEssenceLootTableRepository creatureEssenceLootTables)
+        ICreatureEssenceLootTableRepository creatureEssenceLootTables,
+        ICreatureAbilityDefinitionProvider? creatureAbilities = null)
     {
         _creatureScaler = creatureScaler;
         _essenceCombatLoadoutResolver = essenceCombatLoadoutResolver;
         _essenceDefinitions = essenceDefinitions;
         _creatureEssenceLootTables = creatureEssenceLootTables;
+        _creatureAbilities = creatureAbilities;
     }
 
     public List<CombatEntity> CreatePlayerCombatEntities(List<Entity> entities)
@@ -60,13 +64,20 @@ public class CombatSetupService : ICombatSetupService
                 };
                 var monsterId = CreatureEssenceSource.GetMonsterDefinitionId(creature);
                 combatEntity.SourceMonsterId = monsterId;
+                var authoredCreatureAbilities = _creatureAbilities?.GetAbilityIds(monsterId) ?? [];
+                if (authoredCreatureAbilities.Count > 0)
+                    combatEntity.NativeAbilityIds = [.. authoredCreatureAbilities];
+
                 if (_creatureEssenceLootTables.GetByCreatureId(monsterId) is { } lootTable)
                 {
-                    combatEntity.NativeAbilityIds = lootTable.Variants
-                        .Select(x => x.ActiveAbilityId)
-                        .Prepend(lootTable.PassiveAbilityId)
-                        .Distinct(StringComparer.OrdinalIgnoreCase)
-                        .ToList();
+                    if (combatEntity.NativeAbilityIds.Count == 0)
+                    {
+                        combatEntity.NativeAbilityIds = lootTable.Variants
+                            .Select(x => x.ActiveAbilityId)
+                            .Prepend(lootTable.PassiveAbilityId)
+                            .Distinct(StringComparer.OrdinalIgnoreCase)
+                            .ToList();
+                    }
                     combatEntity.Tags = lootTable.Variants
                         .Select(x => _essenceDefinitions.GetById(x.EssenceDefinitionId))
                         .Where(x => x is not null)

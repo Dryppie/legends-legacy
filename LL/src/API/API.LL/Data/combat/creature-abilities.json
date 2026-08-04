@@ -1,0 +1,369 @@
+{
+  "creatures": [
+    {
+      "monsterId": "monster.vampire_bat",
+      "abilityIds": [
+        "ability.creature.vampire_bat.bloodthirsty_fangs",
+        "ability.creature.vampire_bat.erratic_flight"
+      ]
+    },
+    {
+      "monsterId": "monster.raven",
+      "abilityIds": [
+        "ability.creature.raven.piercing_peck",
+        "ability.creature.raven.bad_omen"
+      ]
+    },
+    {
+      "monsterId": "monster.venomous_snake",
+      "abilityIds": [
+        "ability.creature.venomous_snake.toxic_fangs",
+        "ability.creature.venomous_snake.venom_coated_strikes"
+      ]
+    },
+    {
+      "monsterId": "monster.nightshade_blossom",
+      "abilityIds": [
+        "ability.creature.nightshade_blossom.withering_petals",
+        "ability.creature.nightshade_blossom.midnight_bloom"
+      ]
+    },
+    {
+      "monsterId": "monster.blood_zombie",
+      "abilityIds": [
+        "ability.creature.blood_zombie.rending_bite",
+        "ability.creature.blood_zombie.clotted_flesh"
+      ]
+    },
+    {
+      "monsterId": "monster.lumo_wisp",
+      "abilityIds": [
+        "ability.creature.lumo_wisp.soothing_glow",
+        "ability.creature.lumo_wisp.lumo_barrier"
+      ]
+    },
+    {
+      "monsterId": "monster.lumo_sentinel",
+      "abilityIds": [
+        "ability.creature.lumo_sentinel.targeting_beam",
+        "ability.creature.lumo_sentinel.cracked_core"
+      ]
+    },
+    {
+      "monsterId": "monster.goblin",
+      "abilityIds": [
+        "ability.creature.goblin.shiv_jab",
+        "ability.creature.goblin.gobber_trapper"
+      ]
+    },
+    {
+      "monsterId": "monster.goblin_archer",
+      "abilityIds": [
+        "ability.creature.goblin_archer.snipers_strike",
+        "ability.creature.goblin_archer.poisoned_arrows"
+      ]
+    },
+    {
+      "monsterId": "monster.goblin_warrior",
+      "abilityIds": [
+        "ability.creature.goblin_warrior.raging_cleave",
+        "ability.creature.goblin_warrior.relentless"
+      ]
+    },
+    {
+      "monsterId": "monster.goblin_shaman",
+      "abilityIds": [
+        "ability.creature.goblin_shaman.weak_rejuvenation",
+        "ability.creature.goblin_shaman.spirit_link"
+      ]
+    },
+    {
+      "monsterId": "monster.hobgoblin",
+      "abilityIds": [
+        "ability.creature.hobgoblin.intimidating_slam",
+        "ability.creature.hobgoblin.brutal_charge",
+        "ability.creature.hobgoblin.threatening_presence"
+      ]
+    },
+    {
+      "monsterId": "monster.frost_imp",
+      "abilityIds": [
+        "ability.creature.frost_imp.ice_needle",
+        "ability.creature.frost_imp.cold_touch"
+      ]
+    },
+    {
+      "monsterId": "monster.crystal_wisp",
+      "abilityIds": [
+        "ability.creature.crystal_wisp.prismatic_shard",
+        "ability.creature.crystal_wisp.captured_light"
+      ]
+    },
+    {
+      "monsterId": "monster.blue_slime",
+      "abilityIds": [
+        "ability.creature.blue_slime.sweet_water",
+        "ability.creature.blue_slime.protective_slime"
+      ]
+    },
+    {
+      "monsterId": "monster.transparent_slime",
+      "abilityIds": [
+        "ability.creature.transparent_slime.transparent_engulf",
+        "ability.creature.transparent_slime.reconstitute"
+      ]
+    },
+    {
+      "monsterId": "monster.moss_lizard",
+      "abilityIds": [
+        "ability.creature.moss_lizard.moss_camouflage",
+        "ability.creature.moss_lizard.lost_tail"
+      ]
+    },
+    {
+      "monsterId": "monster.shadow_imp",
+      "abilityIds": [
+        "ability.creature.shadow_imp.shadow_image",
+        "ability.creature.shadow_imp.shadowy_presence"
+      ]
+    },
+    {
+      "monsterId": "monster.grave_hound",
+      "abilityIds": [
+        "ability.creature.grave_hound.gravebound_pounce",
+        "ability.creature.grave_hound.graveyard_howl"
+      ]
+    },
+    {
+      "monsterId": "monster.lost_soul",
+      "abilityIds": [
+        "ability.creature.lost_soul.soul_drain",
+        "ability.creature.lost_soul.soul_lantern"
+      ]
+    },
+    {
+      "monsterId": "monster.grave_wisp",
+      "abilityIds": [
+        "ability.creature.grave_wisp.mourning_flash",
+        "ability.creature.grave_wisp.pale_flame"
+      ]
+    },
+    {
+      "monsterId": "monster.skeleton",
+      "abilityIds": [
+        "ability.creature.skeleton.bone_smash",
+        "ability.creature.skeleton.calcium"
+      ]
+    },
+    {
+      "monsterId": "monster.pixie",
+      "abilityIds": [
+        "ability.creature.pixie.pixie_burst",
+        "ability.creature.pixie.resonant_chime"
+      ]
+    },
+    {
+      "monsterId": "monster.wood_nymph",
+      "abilityIds": [
+        "ability.creature.wood_nymph.bramble_shield",
+        "ability.creature.wood_nymph.natures_protection"
+      ]
+    },
+    {
+      "monsterId": "monster.rainbow_slime",
+      "abilityIds": [
+        "ability.creature.rainbow_slime.unstable_colors",
+        "ability.creature.rainbow_slime.colorful_shield"
+      ]
+    },
+    {
+      "monsterId": "monster.enchanted_fairy",
+      "abilityIds": [
+        "ability.creature.enchanted_fairy.faes_corrosion",
+        "ability.creature.enchanted_fairy.faes_charm"
+      ]
+    },
+    {
+      "monsterId": "monster.illusion_fox",
+      "abilityIds": [
+        "ability.creature.illusion_fox.a_doomed_illusion",
+        "ability.creature.illusion_fox.foxfire_wisp"
+      ]
+    },
+    {
+      "monsterId": "monster.thornback_boar",
+      "abilityIds": [
+        "ability.creature.thornback_boar.thorned_rush",
+        "ability.creature.thornback_boar.bristling_hide"
+      ]
+    },
+    {
+      "monsterId": "monster.hollow_stag",
+      "abilityIds": [
+        "ability.creature.hollow_stag.echoing_antlers",
+        "ability.creature.hollow_stag.hollow_core"
+      ]
+    },
+    {
+      "monsterId": "monster.treant_sapling",
+      "abilityIds": [
+        "ability.creature.treant_sapling.sprouting_surge",
+        "ability.creature.treant_sapling.nurturing_roots"
+      ]
+    },
+    {
+      "monsterId": "monster.glade_panther",
+      "abilityIds": [
+        "ability.creature.glade_panther.ambush_strike",
+        "ability.creature.glade_panther.razor_claws"
+      ]
+    },
+    {
+      "monsterId": "monster.forest_spirit",
+      "abilityIds": [
+        "ability.creature.forest_spirit.rejuvenation",
+        "ability.creature.forest_spirit.spirit_bloom"
+      ]
+    },
+    {
+      "monsterId": "monster.rotroot_shambler",
+      "abilityIds": [
+        "ability.creature.rotroot_shambler.rotburst",
+        "ability.creature.rotroot_shambler.decaying_husk"
+      ]
+    },
+    {
+      "monsterId": "monster.spider",
+      "abilityIds": [
+        "ability.creature.spider.skittering_strike",
+        "ability.creature.spider.spider_eyes"
+      ]
+    },
+    {
+      "monsterId": "monster.giant_spider",
+      "abilityIds": [
+        "ability.creature.giant_spider.spider_crash",
+        "ability.creature.giant_spider.thickened_carapace"
+      ]
+    },
+    {
+      "monsterId": "monster.venomous_spiderling",
+      "abilityIds": [
+        "ability.creature.venomous_spiderling.venom_web",
+        "ability.creature.venomous_spiderling.toxic_opportunity"
+      ]
+    },
+    {
+      "monsterId": "monster.blackjaw_spider",
+      "abilityIds": [
+        "ability.creature.blackjaw_spider.blackjaw_bite",
+        "ability.creature.blackjaw_spider.powerful_mandibles"
+      ]
+    },
+    {
+      "monsterId": "monster.flame_imp",
+      "abilityIds": [
+        "ability.creature.flame_imp.firebomb_toss",
+        "ability.creature.flame_imp.impish_flame"
+      ]
+    },
+    {
+      "monsterId": "monster.smolder_rat",
+      "abilityIds": [
+        "ability.creature.smolder_rat.scorching_tail",
+        "ability.creature.smolder_rat.heat_resistance"
+      ]
+    },
+    {
+      "monsterId": "monster.cinder_beetle",
+      "abilityIds": [
+        "ability.creature.cinder_beetle.burning_mandibles",
+        "ability.creature.cinder_beetle.molten_shell"
+      ]
+    },
+    {
+      "monsterId": "monster.red_slime",
+      "abilityIds": [
+        "ability.creature.red_slime.ignite_core",
+        "ability.creature.red_slime.recharging_core"
+      ]
+    },
+    {
+      "monsterId": "monster.giant_worm",
+      "abilityIds": [
+        "ability.creature.giant_worm.drag_beneath",
+        "ability.creature.giant_worm.erupting_ambush"
+      ]
+    },
+    {
+      "monsterId": "monster.bog_mite",
+      "abilityIds": [
+        "ability.creature.bog_mite.infestation",
+        "ability.creature.bog_mite.blood_feeders"
+      ]
+    },
+    {
+      "monsterId": "monster.green_slime",
+      "abilityIds": [
+        "ability.creature.green_slime.acid_splash",
+        "ability.creature.green_slime.corrosive_ooze"
+      ]
+    },
+    {
+      "monsterId": "monster.large_rat",
+      "abilityIds": [
+        "ability.creature.large_rat.tail_wrap",
+        "ability.creature.large_rat.big"
+      ]
+    },
+    {
+      "monsterId": "monster.viper",
+      "abilityIds": [
+        "ability.creature.viper.piercing_fangs",
+        "ability.creature.viper.potent_toxins"
+      ]
+    },
+    {
+      "monsterId": "monster.poisonous_rat",
+      "abilityIds": [
+        "ability.creature.poisonous_rat.toxic_bite",
+        "ability.creature.poisonous_rat.resistant_hide"
+      ]
+    },
+    {
+      "monsterId": "monster.rotfly_toad",
+      "abilityIds": [
+        "ability.creature.rotfly_toad.putrid_belch",
+        "ability.creature.rotfly_toad.rotfly_host"
+      ]
+    },
+    {
+      "monsterId": "monster.brown_slime",
+      "abilityIds": [
+        "ability.creature.brown_slime.absorb_impact",
+        "ability.creature.brown_slime.layered_mud"
+      ]
+    },
+    {
+      "monsterId": "monster.cave_bat",
+      "abilityIds": [
+        "ability.creature.cave_bat.sonic_screech",
+        "ability.creature.cave_bat.echolocation"
+      ]
+    },
+    {
+      "monsterId": "monster.giant_bat",
+      "abilityIds": [
+        "ability.creature.giant_bat.echoing_screech",
+        "ability.creature.giant_bat.resonant_cry"
+      ]
+    },
+    {
+      "monsterId": "monster.undead",
+      "abilityIds": [
+        "ability.creature.undead.necrotic_slash",
+        "ability.creature.undead.corpse_explosion"
+      ]
+    }
+  ]
+}

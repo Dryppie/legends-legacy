@@ -23,4 +23,11 @@ public enum EventType
     StatusEffectExpired,
     HealthRegeneration,
     Death,
+    BarrierApplied,
+    BarrierAbsorbed,
+    BarrierBroken,
+    ReflectedDamage,
+    StatusEffectRemoved,
+    StatusEffectCleansed,
+    StatusEffectDispelled,
 }

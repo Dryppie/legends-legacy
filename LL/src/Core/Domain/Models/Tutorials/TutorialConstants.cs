@@ -14,8 +14,8 @@ public static class TutorialConstants
 
     public const string TrainingGroundsAreaId = "tutorial_area_training_grounds";
     public const string LumoRuinsAreaId = "region_01_area_01";
-    public const string TutorialEssenceDefinitionId = "essence.legacy.goblin";
-    public const string TutorialEssenceItemBaseId = "item.essence.legacy.goblin";
+    public const string TutorialEssenceDefinitionId = "essence.goblin";
+    public const string TutorialEssenceItemBaseId = "item.essence.goblin";
     public const string TutorialSwordItemBaseId = "tutorial_sword";
     public const string TutorialChestItemBaseId = "tutorial_chest";
     public const string TutorialRingItemBaseId = "tutorial_ring";
