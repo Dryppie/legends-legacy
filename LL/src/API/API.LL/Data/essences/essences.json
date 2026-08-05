@@ -246,6 +246,7 @@
       "id": "essence.hobgoblin",
       "sourceMonsterId": "monster.hobgoblin",
       "name": "Hobgoblin Essence",
+      "variantName": "Intimidating Slam",
       "description": "The combat essence of Hobgoblin, granting Intimidating Slam and Threatening Presence.",
       "rarity": "Rare",
       "tags": [],
@@ -267,7 +268,8 @@
     {
       "id": "essence.hobgoblin_brutal_charge",
       "sourceMonsterId": "monster.hobgoblin",
-      "name": "Hobgoblin: Brutal Charge Essence",
+      "name": "Hobgoblin Essence",
+      "variantName": "Brutal Charge",
       "description": "The combat essence of Hobgoblin, granting Brutal Charge and Threatening Presence.",
       "rarity": "Rare",
       "tags": [],
@@ -277,7 +279,7 @@
       "evolution": {
         "id": "evolution.hobgoblin_brutal_charge",
         "name": "Awakened Hobgoblin",
-        "description": "The awakened form of Hobgoblin: Brutal Charge Essence.",
+        "description": "The awakened form of Hobgoblin Essence — Brutal Charge.",
         "requiredAscensionTier": 2,
         "requiredCatalystItemId": "",
         "addsTags": [],

@@ -86,7 +86,7 @@ public sealed class EssenceCatalogService : IEssenceCatalogService
 
         return new EssenceCatalogEssence(
             essence.Id,
-            essence.Name,
+            essence.DisplayName,
             essence.Description,
             essence.Rarity.ToString(),
             itemId,

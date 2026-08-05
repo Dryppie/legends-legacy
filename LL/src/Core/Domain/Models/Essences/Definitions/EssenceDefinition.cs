@@ -10,6 +10,11 @@ public sealed class EssenceDefinition
     public string Id { get; set; } = string.Empty;
     public string SourceMonsterId { get; set; } = string.Empty;
     public string Name { get; set; } = string.Empty;
+    public string VariantName { get; set; } = string.Empty;
+    [JsonIgnore]
+    public string DisplayName => string.IsNullOrWhiteSpace(VariantName)
+        ? Name
+        : $"{Name} — {VariantName}";
     public string Description { get; set; } = string.Empty;
     public Rarity Rarity { get; set; }
     public List<string> Tags { get; set; } = [];

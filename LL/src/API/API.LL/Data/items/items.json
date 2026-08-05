@@ -1476,7 +1476,7 @@
   },
   {
     "id": "item.essence.hobgoblin",
-    "name": "Unbound Hobgoblin Essence",
+    "name": "Unbound Hobgoblin Essence — Intimidating Slam",
     "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
     "itemType": "Essence",
     "rarity": "Rare",
@@ -1487,7 +1487,7 @@
   },
   {
     "id": "item.essence.hobgoblin_brutal_charge",
-    "name": "Unbound Hobgoblin: Brutal Charge Essence",
+    "name": "Unbound Hobgoblin Essence — Brutal Charge",
     "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
     "itemType": "Essence",
     "rarity": "Rare",

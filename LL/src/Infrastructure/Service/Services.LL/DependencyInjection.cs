@@ -226,6 +226,7 @@ public static class DependencyInjection
                 sp.GetRequiredService<JsonSerializerOptions>()));
         services.AddScoped<IAbilityCatalogDiagnostics, AbilityCatalogDiagnostics>();
         services.AddScoped<IAbilityBalanceSimulator, AbilityBalanceSimulator>();
+        services.AddScoped<IAbilityBalanceAuditService, AbilityBalanceAuditService>();
         services.AddScoped<IAttributeMarginalValueAnalyzer, AttributeMarginalValueAnalyzer>();
         services.AddScoped<IAbilityCatalogBehaviorDiagnostics>(sp =>
             new AbilityCatalogBehaviorDiagnostics(

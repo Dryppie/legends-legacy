@@ -27,7 +27,7 @@ export class EssenceItemViewService {
   private mapDefinitionToEssence(definition: EssenceDefinitionDto): Essence {
     return {
       id: definition.id,
-      name: definition.name,
+      name: definition.displayName,
       active: this.mapAbility(definition.activeAbility),
       passive: this.mapAbility(definition.passiveAbility),
       attributeModifiers: [],

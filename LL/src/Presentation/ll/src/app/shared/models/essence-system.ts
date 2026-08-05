@@ -4,6 +4,8 @@ export interface EssenceDefinitionDto {
   id: string;
   sourceMonsterId: string;
   name: string;
+  variantName: string;
+  displayName: string;
   description: string;
   rarity: string;
   tagsByCategory: Record<string, string[]>;

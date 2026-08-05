@@ -13,10 +13,35 @@ public sealed class EssenceDefinitionValidator : IEssenceDefinitionValidator
         var duplicateIds = definitions.GroupBy(x => x.Id, StringComparer.OrdinalIgnoreCase).Where(x => x.Count() > 1).Select(x => x.Key);
         errors.AddRange(duplicateIds.Select(id => $"Duplicate Essence id '{id}'."));
 
+        foreach (var creatureVariants in definitions
+                     .Where(x => !string.IsNullOrWhiteSpace(x.SourceMonsterId))
+                     .GroupBy(x => x.SourceMonsterId, StringComparer.OrdinalIgnoreCase)
+                     .Where(x => x.Count() > 1))
+        {
+            var baseNames = creatureVariants
+                .Select(x => x.Name?.Trim() ?? string.Empty)
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+            if (baseNames.Count > 1)
+                errors.Add($"{creatureVariants.Key}: Essence variants must use the same base name.");
+
+            foreach (var definition in creatureVariants.Where(x => string.IsNullOrWhiteSpace(x.VariantName)))
+                errors.Add($"{definition.Id}: variantName is required when a creature has multiple Essences.");
+
+            var duplicateVariantNames = creatureVariants
+                .Where(x => !string.IsNullOrWhiteSpace(x.VariantName))
+                .GroupBy(x => x.VariantName.Trim(), StringComparer.OrdinalIgnoreCase)
+                .Where(x => x.Count() > 1)
+                .Select(x => x.Key);
+            errors.AddRange(duplicateVariantNames.Select(name =>
+                $"{creatureVariants.Key}: duplicate Essence variantName '{name}'."));
+        }
+
         foreach (var definition in definitions)
         {
             if (string.IsNullOrWhiteSpace(definition.Id)) errors.Add("Essence id is required.");
             if (string.IsNullOrWhiteSpace(definition.SourceMonsterId)) errors.Add($"{definition.Id}: sourceMonsterId is required.");
+            if (string.IsNullOrWhiteSpace(definition.Name)) errors.Add($"{definition.Id}: name is required.");
             if (string.IsNullOrWhiteSpace(definition.ActiveAbilityId)) errors.Add($"{definition.Id}: activeAbilityId is required.");
             if (string.IsNullOrWhiteSpace(definition.PassiveAbilityId)) errors.Add($"{definition.Id}: passiveAbilityId is required.");
             if (definition.ActiveAbility is null || string.IsNullOrWhiteSpace(definition.ActiveAbility.Id)) errors.Add($"{definition.Id}: activeAbilityId '{definition.ActiveAbilityId}' could not be resolved.");

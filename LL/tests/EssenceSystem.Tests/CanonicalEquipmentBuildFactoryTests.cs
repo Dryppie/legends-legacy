@@ -1,11 +1,13 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Application.Interfaces.Services.LL.Essences;
 using Domain.Helpers;
 using Domain.Models.Items;
 using Domain.Models.Professions.Crafting.V2;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using Services.LL.Essences;
+using Services.LL.Combat.Engine;
 using Services.LL.PowerRatings;
 using Services.LL.Professions.Craftings;
 
@@ -14,6 +16,53 @@ namespace EssenceSystem.Tests;
 public sealed class CanonicalEquipmentBuildFactoryTests
 {
     private readonly CanonicalEquipmentBuildFactory _factory = CreateFactory();
+
+    [Fact]
+    public void Balance_simulator_handles_the_default_large_random_pool_with_canonical_equipment()
+    {
+        var apiRoot = FindApiRoot();
+        var configuration = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?> { ["Content:Root"] = "Data" })
+            .Build();
+        var jsonOptions = new JsonSerializerOptions(JsonSerializerDefaults.Web)
+        {
+            ReadCommentHandling = JsonCommentHandling.Skip,
+            AllowTrailingCommas = true
+        };
+        jsonOptions.Converters.Add(new JsonStringEnumConverter());
+        var essenceDefinitions = new JsonEssenceDefinitionRepository(
+            configuration,
+            apiRoot,
+            jsonOptions,
+            new EssenceDefinitionValidator());
+        var simulator = new AbilityBalanceSimulator(
+            new JsonAbilityCatalogProvider(configuration, apiRoot, jsonOptions),
+            essenceDefinitions,
+            _factory);
+
+        var request = new AbilityBalanceSimulationRequest(
+            BattleCount: 100,
+            TeamSize: 2,
+            EssencesPerParticipant: 5,
+            RandomSeed: 1337,
+            TopResults: 1000,
+            CandidatePoolSize: 1000,
+            CandidateTeams: null);
+        var report = simulator.Run(request);
+        var repeated = simulator.Run(request);
+
+        Assert.Equal(100, report.BattlesRun);
+        Assert.Equal(1000, report.CandidateTeamCount);
+        Assert.Equal(
+            JsonSerializer.Serialize(report.RankedCombinations),
+            JsonSerializer.Serialize(repeated.RankedCombinations));
+        Assert.Equal(
+            JsonSerializer.Serialize(report.EssenceResults),
+            JsonSerializer.Serialize(repeated.EssenceResults));
+        Assert.Equal(
+            JsonSerializer.Serialize(report.BattleSummaries),
+            JsonSerializer.Serialize(repeated.BattleSummaries));
+    }
 
     [Fact]
     public void Ladder_is_deterministic_and_projects_authored_items_across_supported_equipment_tiers()

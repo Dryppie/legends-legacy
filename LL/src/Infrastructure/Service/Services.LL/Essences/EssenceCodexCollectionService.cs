@@ -85,7 +85,7 @@ public sealed class EssenceCodexCollectionService : IEssenceCodexCollectionServi
                     sourceCreatureId is not null && discoveredCreatureIds.Contains(sourceCreatureId);
                 return new EssenceCodexMember(
                     isDiscovered ? id : null,
-                    isDiscovered ? definition?.Name ?? FormatEssenceName(id) : "Undiscovered Essence",
+                    isDiscovered ? definition?.DisplayName ?? FormatEssenceName(id) : "Undiscovered Essence",
                     isDiscovered,
                     isAbsorbed,
                     isAbsorbed ? ascensionTier : 0);

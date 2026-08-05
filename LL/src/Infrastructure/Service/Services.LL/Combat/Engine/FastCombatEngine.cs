@@ -11,7 +11,8 @@ public sealed record FastCombatEngineOptions(
     int BasicAttackIntervalTicks = 30,
     int RandomSeed = 1337,
     bool StartActiveAbilitiesOnCooldown = false,
-    float TauntThreatBonus = 100f);
+    float TauntThreatBonus = 100f,
+    bool CaptureEventLog = true);
 
 public sealed class FastCombatEngine
 {
@@ -31,12 +32,15 @@ public sealed class FastCombatEngine
     private readonly int _basicAttackIntervalTicks;
     private readonly bool _startActiveAbilitiesOnCooldown;
     private readonly float _tauntThreatBonus;
+    private readonly bool _captureEventLog;
     private readonly Dictionary<RuntimeCombatant, float> _basicAttackProgress = [];
     private readonly Dictionary<RuntimeCombatant, float> _healthRegenerationProgress = [];
     private readonly Dictionary<RuntimeCombatant, int> _healthRegenerationPotential = [];
     private readonly Dictionary<RuntimeCombatant, int> _healthRegenerationOverhealed = [];
     private readonly Dictionary<RuntimeCombatant, int> _healthRegenerationPulses = [];
     private readonly List<CombatLogItem> _log = [];
+    private readonly Dictionary<string, int> _balanceDamageDone = new(StringComparer.OrdinalIgnoreCase);
+    private readonly Dictionary<string, int> _balanceDamageTaken = new(StringComparer.OrdinalIgnoreCase);
     private int _currentTick;
     private long _applicationOrder;
     private int _eventDepth;
@@ -74,6 +78,7 @@ public sealed class FastCombatEngine
         _basicAttackIntervalTicks = resolved.BasicAttackIntervalTicks;
         _startActiveAbilitiesOnCooldown = resolved.StartActiveAbilitiesOnCooldown;
         _tauntThreatBonus = Math.Max(0, resolved.TauntThreatBonus);
+        _captureEventLog = resolved.CaptureEventLog;
     }
 
     public CombatResult Run(
@@ -123,13 +128,9 @@ public sealed class FastCombatEngine
             _currentTick++;
         }
 
-        var teamsByEntityId = combatants.ToDictionary(
-            combatant => combatant.Id,
-            combatant => combatant.Team.ToString(),
-            StringComparer.OrdinalIgnoreCase);
-        var entityStats = AddHealthRegenerationTelemetry(
-            new CombatStatsAggregator().Aggregate(_log, teamsByEntityId),
-            combatants);
+        var entityStats = _captureEventLog
+            ? CreateDetailedStats(combatants)
+            : CreateBalanceStats(combatants);
 
         return new CombatResult
         {
@@ -139,6 +140,28 @@ public sealed class FastCombatEngine
             EntityStats = [.. entityStats]
         };
     }
+
+    private IReadOnlyList<EntityStats> CreateDetailedStats(IReadOnlyList<RuntimeCombatant> combatants)
+    {
+        var teamsByEntityId = combatants.ToDictionary(
+            combatant => combatant.Id,
+            combatant => combatant.Team.ToString(),
+            StringComparer.OrdinalIgnoreCase);
+        return AddHealthRegenerationTelemetry(
+            new CombatStatsAggregator().Aggregate(_log, teamsByEntityId),
+            combatants);
+    }
+
+    private IReadOnlyList<EntityStats> CreateBalanceStats(IReadOnlyList<RuntimeCombatant> combatants) =>
+        combatants
+            .Select(combatant => new EntityStats(
+                combatant.Id,
+                combatant.Name,
+                [],
+                DamageDone: _balanceDamageDone.GetValueOrDefault(combatant.Id),
+                DamageTaken: _balanceDamageTaken.GetValueOrDefault(combatant.Id),
+                Team: combatant.Team.ToString()))
+            .ToList();
 
     private void PublishIntervalEvents(IReadOnlyList<RuntimeCombatant> combatants)
     {
@@ -342,14 +365,22 @@ public sealed class FastCombatEngine
                                 continue;
 
                             ability.StartTriggerCooldown(trigger);
-                            ExecuteTrigger(
-                                trigger,
-                                combatant,
-                                combatEvent,
-                                combatants,
-                                ability.CanUseEffect,
-                                ability.MarkEffectUsed,
-                                countStatsActivation: ability.Definition.Kind == AbilitySpecKind.Passive);
+                            ability.BeginTriggerExecution(trigger);
+                            try
+                            {
+                                ExecuteTrigger(
+                                    trigger,
+                                    combatant,
+                                    combatEvent,
+                                    combatants,
+                                    ability.CanUseEffect,
+                                    ability.MarkEffectUsed,
+                                    countStatsActivation: ability.Definition.Kind == AbilitySpecKind.Passive);
+                            }
+                            finally
+                            {
+                                ability.EndTriggerExecution(trigger);
+                            }
                         }
                     }
                 }
@@ -375,16 +406,24 @@ public sealed class FastCombatEngine
                             continue;
 
                         status.StartTriggerCooldown(trigger);
-                        ExecuteTrigger(
-                            trigger,
-                            status.Source,
-                            combatEvent,
-                            combatants,
-                            status.CanUseEffect,
-                            status.MarkEffectUsed,
-                            status.StatsSource,
-                            countStatsActivation: false,
-                            durationMultiplier: CalculateStatusEffectDurationMultiplier(status));
+                        status.BeginTriggerExecution(trigger);
+                        try
+                        {
+                            ExecuteTrigger(
+                                trigger,
+                                status.Source,
+                                combatEvent,
+                                combatants,
+                                status.CanUseEffect,
+                                status.MarkEffectUsed,
+                                status.StatsSource,
+                                countStatsActivation: false,
+                                durationMultiplier: CalculateStatusEffectDurationMultiplier(status));
+                        }
+                        finally
+                        {
+                            status.EndTriggerExecution(trigger);
+                        }
                     }
                 }
             }
@@ -793,6 +832,7 @@ public sealed class FastCombatEngine
         var healthBefore = target.Health;
         target.AdjustHealth(-pendingHealthDamage);
         var healthDamage = Math.Max(0, (int)Math.Round(healthBefore - target.Health));
+        TrackBalanceDamage(source, target, healthDamage, delivery);
 
         Log(
             source,
@@ -2442,6 +2482,9 @@ public sealed class FastCombatEngine
         int damageAmplified = 0,
         int finalHealthDamage = 0)
     {
+        if (!_captureEventLog)
+            return;
+
         _log.Add(new CombatLogItem
         {
             Source = sourceName,
@@ -2475,6 +2518,22 @@ public sealed class FastCombatEngine
                     Barrier = (int)target.Barrier
                 }
         });
+    }
+
+    private void TrackBalanceDamage(
+        RuntimeCombatant source,
+        RuntimeCombatant target,
+        int healthDamage,
+        DamageDelivery delivery)
+    {
+        if (_captureEventLog
+            || delivery == DamageDelivery.Reflected
+            || healthDamage <= 0
+            || source.Team == target.Team)
+            return;
+
+        _balanceDamageDone[source.Id] = _balanceDamageDone.GetValueOrDefault(source.Id) + healthDamage;
+        _balanceDamageTaken[target.Id] = _balanceDamageTaken.GetValueOrDefault(target.Id) + healthDamage;
     }
 
     private static BattleOutcome DetermineOutcome(IReadOnlyList<RuntimeCombatant> combatants)

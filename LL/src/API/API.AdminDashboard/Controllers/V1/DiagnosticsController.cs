@@ -19,6 +19,13 @@ namespace API.AdminDashboard.Controllers.V1;
 
 public class DiagnosticsController : BaseController
 {
+    private readonly IAbilityBalanceAuditService _balanceAudits;
+
+    public DiagnosticsController(IAbilityBalanceAuditService balanceAudits)
+    {
+        _balanceAudits = balanceAudits;
+    }
+
     [HttpGet("attribute-balance")]
     public async Task<ActionResult<AttributeBalanceAnalysisReport>> GetAttributeBalanceDiagnostics() =>
         Ok(await Mediator.Send(new GetAttributeBalanceDiagnosticsQuery()));
@@ -62,6 +69,14 @@ public class DiagnosticsController : BaseController
         [FromBody] AbilityBalanceSimulationRequest request)
     {
         return await Mediator.Send(new RunAbilityBalanceSimulationQuery(request));
+    }
+
+    [HttpPost("ability-balance-audit")]
+    public ActionResult<AbilityBalanceAuditReport> RunAbilityBalanceAudit(
+        [FromBody] AbilityBalanceAuditRequest request,
+        CancellationToken cancellationToken)
+    {
+        return Ok(_balanceAudits.Run(request, cancellationToken));
     }
 
     [HttpGet("dungeon-simulation-options")]

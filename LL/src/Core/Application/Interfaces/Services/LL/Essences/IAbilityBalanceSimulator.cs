@@ -2,8 +2,13 @@ namespace Application.Interfaces.Services.LL.Essences;
 
 public interface IAbilityBalanceSimulator
 {
-    AbilityBalanceSimulationReport Run(AbilityBalanceSimulationRequest request);
+    AbilityBalanceSimulationReport Run(
+        AbilityBalanceSimulationRequest request,
+        CancellationToken cancellationToken = default,
+        Action<AbilityBalanceSimulationProgress>? progress = null);
 }
+
+public sealed record AbilityBalanceSimulationProgress(long BattlesCompleted, long TotalBattles);
 
 public sealed record AbilityBalanceSimulationRequest(
     int BattleCount,
@@ -12,7 +17,10 @@ public sealed record AbilityBalanceSimulationRequest(
     int RandomSeed,
     int TopResults,
     int CandidatePoolSize,
-    IReadOnlyList<AbilityBalanceTeamLoadout>? CandidateTeams);
+    IReadOnlyList<AbilityBalanceTeamLoadout>? CandidateTeams,
+    int EquipmentTier = 10,
+    string EquipmentRarity = "Epic",
+    string EquipmentProfile = "Balanced");
 
 public sealed record AbilityBalanceTeamLoadout(
     IReadOnlyList<AbilityBalanceParticipantLoadout> Participants);
@@ -30,7 +38,12 @@ public sealed record AbilityBalanceSimulationReport(
     int CandidateTeamCount,
     int CandidatePoolSize,
     int AvailableEssenceCount,
+    int EquipmentTier,
+    string EquipmentRarity,
+    string EquipmentProfile,
+    IReadOnlyDictionary<string, float> ParticipantAttributes,
     IReadOnlyList<AbilityBalanceCombinationResult> RankedCombinations,
+    IReadOnlyList<AbilityBalanceEssenceResult> EssenceResults,
     IReadOnlyList<AbilityBalanceBattleSummary> BattleSummaries);
 
 public sealed record AbilityBalanceCombinationResult(
@@ -47,6 +60,24 @@ public sealed record AbilityBalanceCombinationResult(
     double AverageDuration,
     double AverageDamageDone,
     double AverageDamageTaken);
+
+public sealed record AbilityBalanceEssenceResult(
+    string EssenceId,
+    string DisplayName,
+    int TeamAppearances,
+    int Battles,
+    int Wins,
+    int Losses,
+    int Draws,
+    double Score,
+    double ScoreDelta,
+    double AdjustedScoreDelta,
+    double ConfidenceLower,
+    double ConfidenceUpper,
+    double AverageDuration,
+    double AverageDamageDone,
+    double AverageDamageTaken,
+    string Classification);
 
 public sealed record AbilityBalanceBattleSummary(
     int Index,

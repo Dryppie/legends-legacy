@@ -127,6 +127,7 @@ public sealed class RuntimeAbility
 {
     private readonly Dictionary<CompiledTrigger, int> _triggerCooldowns = [];
     private readonly Dictionary<CompiledTrigger, int> _triggerOccurrences = [];
+    private readonly HashSet<CompiledTrigger> _activeTriggers = [];
     private readonly Dictionary<string, int> _effectUses = new(StringComparer.OrdinalIgnoreCase);
 
     public RuntimeAbility(CompiledAbility definition)
@@ -173,7 +174,7 @@ public sealed class RuntimeAbility
 
     public bool CanUseTrigger(CompiledTrigger trigger, int currentTick)
     {
-        if (currentTick < trigger.InitialDelayTicks)
+        if (_activeTriggers.Contains(trigger) || currentTick < trigger.InitialDelayTicks)
             return false;
 
         var occurrence = _triggerOccurrences.GetValueOrDefault(trigger) + 1;
@@ -189,6 +190,10 @@ public sealed class RuntimeAbility
         if (trigger.InternalCooldownTicks > 0)
             _triggerCooldowns[trigger] = trigger.InternalCooldownTicks;
     }
+
+    public void BeginTriggerExecution(CompiledTrigger trigger) => _activeTriggers.Add(trigger);
+
+    public void EndTriggerExecution(CompiledTrigger trigger) => _activeTriggers.Remove(trigger);
 
     public bool CanUseEffect(CompiledEffect effect) =>
         effect.Uses <= 0 || _effectUses.GetValueOrDefault(effect.Id) < effect.Uses;
@@ -207,6 +212,7 @@ public sealed class RuntimeStatus
 {
     private readonly Dictionary<CompiledTrigger, int> _triggerCooldowns = [];
     private readonly Dictionary<CompiledTrigger, int> _triggerOccurrences = [];
+    private readonly HashSet<CompiledTrigger> _activeTriggers = [];
     private readonly Dictionary<string, int> _effectUses = new(StringComparer.OrdinalIgnoreCase);
     private readonly int _durationTicks;
 
@@ -266,7 +272,7 @@ public sealed class RuntimeStatus
 
     public bool CanUseTrigger(CompiledTrigger trigger, int currentTick)
     {
-        if (currentTick < trigger.InitialDelayTicks)
+        if (_activeTriggers.Contains(trigger) || currentTick < trigger.InitialDelayTicks)
             return false;
 
         var occurrence = _triggerOccurrences.GetValueOrDefault(trigger) + 1;
@@ -282,6 +288,10 @@ public sealed class RuntimeStatus
         if (trigger.InternalCooldownTicks > 0)
             _triggerCooldowns[trigger] = trigger.InternalCooldownTicks;
     }
+
+    public void BeginTriggerExecution(CompiledTrigger trigger) => _activeTriggers.Add(trigger);
+
+    public void EndTriggerExecution(CompiledTrigger trigger) => _activeTriggers.Remove(trigger);
 
     public bool CanUseEffect(CompiledEffect effect) =>
         effect.Uses <= 0 || _effectUses.GetValueOrDefault(effect.Id) < effect.Uses;

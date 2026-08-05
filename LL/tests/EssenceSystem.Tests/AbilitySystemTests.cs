@@ -23,6 +23,39 @@ namespace EssenceSystem.Tests;
 public sealed class AbilitySystemTests
 {
     [Fact]
+    public void Log_free_engine_mode_preserves_outcome_duration_and_damage_totals()
+    {
+        var ability = AbilityCompiler.CompileAbility(CreateDamageAbility("ability.log-free", "Test"));
+
+        CombatResult Run(bool captureEventLog)
+        {
+            var friendly = CreateCombatant("friendly", CombatTeam.Friendly, [ability]);
+            var hostile = CreateCombatant("hostile", CombatTeam.Hostile, []);
+            var engine = new FastCombatEngine(
+                new Dictionary<string, CompiledStatus>(),
+                new FastCombatEngineOptions(
+                    MaxTicks: 20,
+                    RandomSeed: 42,
+                    CaptureEventLog: captureEventLog));
+            return engine.Run([friendly], [hostile]);
+        }
+
+        var detailed = Run(captureEventLog: true);
+        var logFree = Run(captureEventLog: false);
+
+        Assert.NotEmpty(detailed.EventLog);
+        Assert.Empty(logFree.EventLog);
+        Assert.Equal(detailed.Outcome, logFree.Outcome);
+        Assert.Equal(detailed.Duration, logFree.Duration);
+        Assert.Equal(
+            detailed.EntityStats.Sum(stats => stats.DamageDone),
+            logFree.EntityStats.Sum(stats => stats.DamageDone));
+        Assert.Equal(
+            detailed.EntityStats.Sum(stats => stats.DamageTaken),
+            logFree.EntityStats.Sum(stats => stats.DamageTaken));
+    }
+
+    [Fact]
     public void Catalog_indexes_500_authored_abilities_without_scanning_runtime_combat()
     {
         var abilities = Enumerable.Range(0, 500)
@@ -1422,6 +1455,32 @@ public sealed class AbilitySystemTests
     }
 
     [Fact]
+    public void Multi_essence_creatures_have_distinct_variant_names_and_display_names()
+    {
+        var definitions = new JsonEssenceDefinitionRepository(
+            CreateConfig(),
+            FindApiContentRoot(),
+            CreateJsonOptions(),
+            new EssenceDefinitionValidator()).GetAll();
+        var multiEssenceCreatures = definitions
+            .GroupBy(x => x.SourceMonsterId, StringComparer.OrdinalIgnoreCase)
+            .Where(x => x.Count() > 1)
+            .ToList();
+
+        var hobgoblin = Assert.Single(multiEssenceCreatures);
+        Assert.Equal("monster.hobgoblin", hobgoblin.Key);
+        Assert.Single(hobgoblin.Select(x => x.Name).Distinct(StringComparer.OrdinalIgnoreCase));
+        Assert.Equal(hobgoblin.Count(), hobgoblin.Select(x => x.VariantName).Distinct(StringComparer.OrdinalIgnoreCase).Count());
+        Assert.All(hobgoblin, essence =>
+        {
+            Assert.False(string.IsNullOrWhiteSpace(essence.VariantName));
+            Assert.Equal($"{essence.Name} — {essence.VariantName}", essence.DisplayName);
+        });
+        Assert.Contains(hobgoblin, x => x.DisplayName == "Hobgoblin Essence — Intimidating Slam");
+        Assert.Contains(hobgoblin, x => x.DisplayName == "Hobgoblin Essence — Brutal Charge");
+    }
+
+    [Fact]
     public void Basic_attack_passives_modify_the_attack_that_triggered_them()
     {
         var passive = new AbilitySpec
@@ -1522,6 +1581,7 @@ public sealed class AbilitySystemTests
             new EssenceDefinitionValidator());
         var simulator = new AbilityBalanceSimulator(provider, essenceRepository);
 
+        var progress = new List<AbilityBalanceSimulationProgress>();
         var report = simulator.Run(new AbilityBalanceSimulationRequest(
             BattleCount: 20,
             TeamSize: 2,
@@ -1529,7 +1589,8 @@ public sealed class AbilitySystemTests
             RandomSeed: 123,
             TopResults: 10,
             CandidatePoolSize: 5,
-            CandidateTeams: null));
+            CandidateTeams: null),
+            progress: progress.Add);
 
         Assert.Equal("RandomPool", report.Mode);
         Assert.Equal(20, report.BattlesRun);
@@ -1537,7 +1598,21 @@ public sealed class AbilitySystemTests
         Assert.Equal(2, report.EssencesPerParticipant);
         Assert.Equal(5, report.CandidatePoolSize);
         Assert.Equal(5, report.CandidateTeamCount);
+        Assert.Equal(10, report.EquipmentTier);
+        Assert.Equal("Epic", report.EquipmentRarity);
+        Assert.Equal("Balanced", report.EquipmentProfile);
+        Assert.Equal(50, report.ParticipantAttributes[nameof(AttributeType.Power)]);
         Assert.NotEmpty(report.RankedCombinations);
+        Assert.NotEmpty(report.EssenceResults);
+        Assert.All(report.EssenceResults, essence =>
+        {
+            Assert.True(essence.Battles > 0);
+            Assert.InRange(essence.Score, 0, 1);
+            Assert.InRange(essence.ConfidenceLower, 0, essence.ConfidenceUpper);
+            Assert.InRange(essence.ConfidenceUpper, essence.ConfidenceLower, 1);
+        });
+        Assert.Equal(20, progress[^1].BattlesCompleted);
+        Assert.Equal(20, progress[^1].TotalBattles);
         Assert.True(report.RankedCombinations.Count <= 5);
         Assert.Equal(40, report.RankedCombinations.Sum(x => x.Battles));
         Assert.All(report.RankedCombinations, combination =>

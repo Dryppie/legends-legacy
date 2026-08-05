@@ -9,6 +9,8 @@ public sealed record EssenceDefinitionDto(
     string Id,
     string SourceMonsterId,
     string Name,
+    string VariantName,
+    string DisplayName,
     string Description,
     Rarity Rarity,
     IReadOnlyDictionary<string, IReadOnlyList<string>> TagsByCategory,
@@ -19,6 +21,8 @@ public sealed record EssenceDefinitionDto(
 {
     public EssenceDefinitionDto()
         : this(
+            string.Empty,
+            string.Empty,
             string.Empty,
             string.Empty,
             string.Empty,

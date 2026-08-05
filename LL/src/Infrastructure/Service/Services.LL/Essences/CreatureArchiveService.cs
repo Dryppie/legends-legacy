@@ -145,7 +145,7 @@ public sealed class CreatureArchiveService : ICreatureArchiveService
                     definitions
                         .Select(definition => new CreatureArchiveEssenceEntry(
                             definition.Id,
-                            definition.Name,
+                            definition.DisplayName,
                             absorbedIds.Contains(definition.Id),
                             definition.Tags))
                         .ToList(),

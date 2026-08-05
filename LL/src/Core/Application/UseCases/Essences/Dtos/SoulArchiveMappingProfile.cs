@@ -46,7 +46,7 @@ public sealed class PlayerEssenceArchiveEntryConverter : ITypeConverter<PlayerEs
         return new(
             essence.Id,
             essence.EssenceDefinitionId,
-            definition.Name,
+            definition.DisplayName,
             essence.Level,
             essence.CurrentXp,
             _progression.GetXpRequiredForNextLevel(essence, definition),

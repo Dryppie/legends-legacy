@@ -7,6 +7,8 @@ import {
   AbilityCatalogDiagnosticReport,
   AbilityBalanceSimulationReport,
   AbilityBalanceSimulationRequest,
+  AbilityBalanceAuditReport,
+  AbilityBalanceAuditRequest,
   RegionOneContentDiagnosticReport,
 } from '../../../../shared/models/diagnostics/ability-catalog-diagnostics';
 import {
@@ -44,6 +46,12 @@ export class DiagnosticsService {
       'diagnostics/ability-balance-simulation',
       request,
     );
+  }
+
+  public runAbilityBalanceAudit(
+    request: AbilityBalanceAuditRequest,
+  ): Observable<AbilityBalanceAuditReport> {
+    return this.apiService.post('diagnostics/ability-balance-audit', request);
   }
 
   public getDungeonSimulationOptions(): Observable<DungeonSimulationOptions> {
