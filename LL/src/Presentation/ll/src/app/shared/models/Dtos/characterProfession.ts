@@ -10,7 +10,6 @@ export enum ProfessionType {
   Crafting = 'Crafting',
 
   // Gathering
-  Fishing = 'Fishing',
   Mining = 'Mining',
   Woodcutting = 'Woodcutting',
   Skinning = 'Skinning',

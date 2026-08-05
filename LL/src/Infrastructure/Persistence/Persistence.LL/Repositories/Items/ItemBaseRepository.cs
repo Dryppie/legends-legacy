@@ -34,8 +34,6 @@ public class ItemBaseRepository : IItemBaseRepository
             return new Dictionary<string, ItemBase>();
         }
 
-        await NormalizePlainItemBaseDiscriminatorsAsync(itemIds, cancellationToken);
-
         return await _context.ItemBases
             .Include(x => (x as EquipmentBase)!.AttributeModifiers)
             .Include(x => (x as EquipmentBase)!.ToolBonuses)
@@ -73,8 +71,6 @@ public class ItemBaseRepository : IItemBaseRepository
         }
 
         var ids = itemBases.Select(x => x.Id).ToArray();
-        await NormalizePlainItemBaseDiscriminatorsAsync(ids, cancellationToken);
-
         var existing = await _context.ItemBases
             .Where(x => ids.Contains(x.Id))
             .Select(x => x.Id)
@@ -89,31 +85,5 @@ public class ItemBaseRepository : IItemBaseRepository
         {
             await _context.ItemBases.AddRangeAsync(missing, cancellationToken);
         }
-    }
-
-    private async Task NormalizePlainItemBaseDiscriminatorsAsync(
-        IReadOnlyCollection<string> itemIds,
-        CancellationToken cancellationToken)
-    {
-        if (_context is not DbContext dbContext || !dbContext.Database.IsRelational())
-        {
-            return;
-        }
-
-        var normalizedItemIds = itemIds
-            .Where(x => !string.IsNullOrWhiteSpace(x))
-            .Distinct(StringComparer.OrdinalIgnoreCase)
-            .ToArray();
-
-        if (normalizedItemIds.Length == 0)
-        {
-            return;
-        }
-
-        await _context.ItemBases
-            .Where(x => normalizedItemIds.Contains(x.Id) && x.ItemType == ItemType.Consumable)
-            .ExecuteUpdateAsync(
-                setters => setters.SetProperty(x => x.ItemType, ItemType.Resource),
-                cancellationToken);
     }
 }

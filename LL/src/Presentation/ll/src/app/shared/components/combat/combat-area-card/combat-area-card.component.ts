@@ -15,14 +15,16 @@ import { TutorialService } from '../../../../core/services/api/tutorial/tutorial
 import { CombatService } from '../../../../core/services/client-side/combat/combat.service';
 import {
   TUTORIAL_STEP_DEFEAT_TRAINING_CREATURE,
+  TUTORIAL_STEP_START_LUMO_RUINS,
+  TUTORIAL_LUMO_RUINS_AREA_ID,
   TUTORIAL_TRAINING_GROUNDS_AREA_ID,
 } from '../../../models/tutorial';
 import { catchError, finalize, of, tap } from 'rxjs';
 
 @Component({
-    selector: 'app-combat-area-card',
-    imports: [MiniButtonComponent, NgIf, CommonModule],
-    templateUrl: './combat-area-card.component.html'
+  selector: 'app-combat-area-card',
+  imports: [MiniButtonComponent, NgIf, CommonModule],
+  templateUrl: './combat-area-card.component.html',
 })
 export class CombatAreaCardComponent implements OnInit {
   @Input() area!: Area;
@@ -51,6 +53,17 @@ export class CombatAreaCardComponent implements OnInit {
       this.tutorialState.hasLoaded();
       this.setIsLocked();
     });
+
+    effect(() => {
+      const error = this.characterActionService.idleCombatError();
+      if (
+        error &&
+        this.tutorialState.state()?.currentStep ===
+          TUTORIAL_STEP_START_LUMO_RUINS
+      ) {
+        this.tutorialState.reportError(error);
+      }
+    });
   }
 
   ngOnInit(): void {
@@ -66,6 +79,7 @@ export class CombatAreaCardComponent implements OnInit {
   }
 
   startCombat(): void {
+    this.tutorialState.clearError();
     if (this.shouldStartTrainingBattle()) {
       this.startTrainingBattle();
       return;
@@ -85,15 +99,23 @@ export class CombatAreaCardComponent implements OnInit {
   }
 
   trainingAreaTourId(): string | null {
-    return this.area?.id === TUTORIAL_TRAINING_GROUNDS_AREA_ID
-      ? 'training-area-card'
-      : null;
+    if (this.area?.id === TUTORIAL_TRAINING_GROUNDS_AREA_ID) {
+      return 'training-area-card';
+    }
+
+    return this.isTutorialLumoArea() ? 'lumo-ruins-card' : null;
   }
 
   trainingBattleButtonTourId(): string | null {
-    return this.area?.id === TUTORIAL_TRAINING_GROUNDS_AREA_ID
-      ? 'training-area-battle'
-      : null;
+    if (this.area?.id === TUTORIAL_TRAINING_GROUNDS_AREA_ID) {
+      return 'training-area-battle';
+    }
+
+    return this.isTutorialLumoArea() ? 'lumo-ruins-battle' : null;
+  }
+
+  gatheringTourId(): string | null {
+    return this.isTutorialLumoArea() ? 'lumo-ruins-gathering' : null;
   }
 
   setIsLocked(): void {
@@ -108,13 +130,18 @@ export class CombatAreaCardComponent implements OnInit {
     const isTutorialActive = !!tutorial && !tutorial.isCompleted;
     const isFirstTutorialStep =
       tutorial?.currentStep === TUTORIAL_STEP_DEFEAT_TRAINING_CREATURE;
+    const isLumoTutorialStep =
+      tutorial?.currentStep === TUTORIAL_STEP_START_LUMO_RUINS;
+    const isLumoRuins = this.area.id === TUTORIAL_LUMO_RUINS_AREA_ID;
 
     this.isLocked =
       !character ||
       character.level < this.area.levelRequirement ||
       (isTrainingArea && !isFirstTutorialStep) ||
       (isTutorialUnknown && !isTrainingArea) ||
-      (isTutorialActive && !isTrainingArea);
+      (isTutorialActive &&
+        !isTrainingArea &&
+        !(isLumoTutorialStep && isLumoRuins));
   }
 
   gatheringTypes(): GatheringType[] {
@@ -141,6 +168,9 @@ export class CombatAreaCardComponent implements OnInit {
         }),
         catchError((err) => {
           console.error('Failed to start training battle', err);
+          this.tutorialState.reportError(
+            err?.message ?? 'Failed to start the training battle.',
+          );
           return of(null);
         }),
         finalize(() => {
@@ -148,5 +178,12 @@ export class CombatAreaCardComponent implements OnInit {
         }),
       )
       .subscribe();
+  }
+
+  private isTutorialLumoArea(): boolean {
+    return (
+      this.area?.id === TUTORIAL_LUMO_RUINS_AREA_ID &&
+      this.tutorialState.state()?.currentStep === TUTORIAL_STEP_START_LUMO_RUINS
+    );
   }
 }

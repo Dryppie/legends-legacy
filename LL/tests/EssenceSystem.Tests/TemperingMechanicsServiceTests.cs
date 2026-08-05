@@ -74,7 +74,7 @@ public sealed class TemperingMechanicsServiceTests
         Assert.True(result.RarityUpgraded);
         Assert.Equal(AttributeType.Power, result.ImprovedStat);
         Assert.Equal(
-            20,
+            16,
             equipment.InstanceModifiers.Single(x =>
                 x.AttributeType == AttributeType.Power).Amount);
     }
@@ -107,7 +107,7 @@ public sealed class TemperingMechanicsServiceTests
         var equipment = CreateEquipment();
         equipment.Tier = 10;
         equipment.Quality = ItemQuality.Fine;
-        equipment.InstanceModifiers.Add(new InstanceAttributeModifier(AttributeType.Power, 574));
+        equipment.InstanceModifiers.Add(new InstanceAttributeModifier(AttributeType.Power, 2_069));
         equipment.InstanceModifiers.Add(new InstanceAttributeModifier(AttributeType.MaxHealth, 100));
         var service = new TemperingMechanicsService(Options.Create(new CraftingBalanceOptions
         {

@@ -1,66 +1,65 @@
 <div class="ll-page-stack">
-  <app-default-header
-    class="flex-none"
-    section="Character"
-    title="Soulstones"
-    text="Permanent constellations"
-    icon="sidebar/character/soulstones"
-  ></app-default-header>
+  <div class="flex flex-wrap items-center justify-between gap-2 pr-4 sm:pr-6">
+    <app-default-header
+      class="flex-none"
+      section="Character"
+      title="Soulstones"
+      text="Spend Soulstones on permanent branch upgrades"
+      icon="sidebar/character/soulstones"
+    ></app-default-header>
 
-  <section class="ll-page-header mr-4 flex flex-col gap-3 sm:mr-6">
-    <div class="flex flex-wrap items-start justify-between gap-3">
-      <div>
-        <h2 class="ll-heading">Soulstone Constellations</h2>
-        <p class="ll-copy">Spend Soulstones on permanent branch upgrades.</p>
-      </div>
+    <app-regular-button
+      variant="danger"
+      text="Reset"
+      (pressed)="openResetConfirmation()"
+      [disabled]="loading() || totalUpgradeRanks() === 0"
+    ></app-regular-button>
+  </div>
+
+  <div
+    *ngIf="resetConfirmationOpen"
+    class="ll-state ll-state-danger mr-4 flex flex-col gap-3 sm:mr-6 sm:flex-row sm:items-center sm:justify-between"
+  >
+    <span>
+      Reset {{ totalUpgradeRanks() }} ranks for
+      {{ resetRefund() }} Soulstones?
+    </span>
+    <span class="flex flex-wrap gap-2">
+      <app-regular-button
+        variant="secondary"
+        text="Cancel"
+        (pressed)="cancelReset()"
+        [disabled]="loading()"
+      ></app-regular-button>
       <app-regular-button
         variant="danger"
-        text="Reset"
-        (pressed)="openResetConfirmation()"
-        [disabled]="loading() || totalUpgradeRanks() === 0"
+        text="Confirm reset"
+        (pressed)="confirmResetSoulstoneUpgrades()"
+        [disabled]="loading()"
       ></app-regular-button>
-    </div>
+    </span>
+  </div>
 
-    <div
-      *ngIf="resetConfirmationOpen"
-      class="ll-state ll-state-danger flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
+  <section class="grid grid-cols-4 gap-1 pr-4 sm:gap-2 sm:pr-6">
+    <article
+      *ngFor="let card of summaryCards()"
+      class="ll-stat-card min-w-0 p-2 sm:p-3"
     >
-      <span>
-        Reset {{ totalUpgradeRanks() }} ranks for
-        {{ resetRefund() }} Soulstones?
-      </span>
-      <span class="flex flex-wrap gap-2">
-        <app-regular-button
-          variant="secondary"
-          text="Cancel"
-          (pressed)="cancelReset()"
-          [disabled]="loading()"
-        ></app-regular-button>
-        <app-regular-button
-          variant="danger"
-          text="Confirm reset"
-          (pressed)="confirmResetSoulstoneUpgrades()"
-          [disabled]="loading()"
-        ></app-regular-button>
-      </span>
-    </div>
-
-    <div class="grid grid-cols-2 gap-2 xl:grid-cols-4">
-      <div *ngFor="let card of summaryCards()" class="ll-stat-card px-3 py-2">
-        <div class="ll-stat-label">{{ card.label }}</div>
-        <div class="ll-stat-value mt-1">
-          {{ card.value }}
-        </div>
+      <div class="ll-stat-label truncate">{{ card.label }}</div>
+      <div class="ll-heading mt-0.5 truncate text-xl sm:mt-1 sm:text-3xl">
+        {{ card.value }}
       </div>
-    </div>
+    </article>
+  </section>
 
+  <div class="mr-4 grid gap-2 sm:mr-6">
     <p *ngIf="error()" class="ll-state ll-state-danger">
       {{ error() }}
     </p>
     <p *ngIf="lastRefund() > 0" class="ll-state">
       Refunded {{ lastRefund() }} Soulstones.
     </p>
-  </section>
+  </div>
 
   <ng-container *ngIf="character() as character">
     <app-tabs class="flex min-h-0 flex-1 flex-col overflow-hidden pr-4 sm:pr-6">

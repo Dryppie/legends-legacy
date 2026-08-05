@@ -97,6 +97,8 @@
             <article
               *ngFor="let type of primaryAttributes"
               class="ll-stat-card"
+              [appAttributeTooltip]="getAttribute(type)"
+              attributeTooltipPosition="below"
             >
               <div class="ll-stat-label">
                 {{ getAttribute(type).attributeType | attributeTypeFormat }}
@@ -140,6 +142,7 @@
                   let attribute of getSectionAttributes(section.attributes)
                 "
                 class="flex items-center justify-between gap-3 py-2 text-sm"
+                [appAttributeTooltip]="attribute"
               >
                 <span class="text-zinc-300">
                   {{ attribute.attributeType | attributeTypeFormat }}

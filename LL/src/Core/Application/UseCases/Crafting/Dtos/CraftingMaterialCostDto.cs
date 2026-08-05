@@ -11,6 +11,7 @@ public sealed class CraftingMaterialCostDto : IMapFrom<ResolvedMaterialCost>
     public int? Tier { get; init; }
     public int Required { get; init; }
     public int Owned { get; init; }
+    public IReadOnlyList<string> Sources { get; init; } = [];
 
     public void Mapping(Profile profile)
     {

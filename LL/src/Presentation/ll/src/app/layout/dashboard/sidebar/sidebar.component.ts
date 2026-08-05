@@ -1,11 +1,13 @@
 import { NgFor, NgIf } from '@angular/common';
 import {
   Component,
+  computed,
   effect,
   EventEmitter,
   OnDestroy,
   OnInit,
   Output,
+  signal,
   untracked,
 } from '@angular/core';
 import { Router, RouterLink, NavigationEnd } from '@angular/router';
@@ -16,7 +18,7 @@ import { CurrentActionComponent } from '../../../shared/components/current-actio
 import { CharacterActionsStateService } from '../../../core/services/api/character-actions/character-actions.state.service';
 import { CharacterActionType } from '../../../shared/models/enums/characterActionType';
 import { CharacterStateService } from '../../../core/services/api/character/character-state.service';
-import { SidebarSection } from '../../../shared/models/sidebar-item';
+import { SidebarSection, Tab } from '../../../shared/models/sidebar-item';
 import {
   NOTIFICATION_SURFACE,
   NotificationService,
@@ -25,28 +27,45 @@ import { SidebarNotificationRefreshService } from '../../../core/services/client
 import { EssenceStateService } from '../../../core/services/api/essences/essence-state.service';
 import { GuildStateService } from '../../../core/services/api/guild/guild-state.service';
 import { SidebarLayoutPreferenceService } from '../../../core/services/client-side/sidebar-layout/sidebar-layout-preference.service';
+import { TimeSyncService } from '../../../core/services/api/time-sync/time-sync.service';
+import { environment } from '../../../../environments/environment';
+import { TutorialStateService } from '../../../core/services/api/tutorial/tutorial-state.service';
+import { TutorialPresenterService } from '../../../core/services/api/tutorial/tutorial-presenter.service';
+import { TUTORIAL_STEP_EQUIP_ESSENCE } from '../../../shared/models/tutorial';
 
 @Component({
-    selector: 'app-sidebar',
-    imports: [
-        NgFor,
-        NgIf,
-        SidebarItemComponent,
-        RouterLink,
-        CurrentActionComponent,
-    ],
-    templateUrl: './sidebar.component.html'
+  selector: 'app-sidebar',
+  imports: [
+    NgFor,
+    NgIf,
+    SidebarItemComponent,
+    RouterLink,
+    CurrentActionComponent,
+  ],
+  templateUrl: './sidebar.component.html',
 })
 export class SidebarComponent implements OnInit, OnDestroy {
   @Output() itemTapped = new EventEmitter<void>();
 
   private readonly destroy$ = new Subject<void>();
+  private compactProgressAnimationFrame = 0;
 
   sections: SidebarSection[] = [];
   activeUrl = '';
   displayCurrentAction = false;
   readonly sidebarLayout;
-
+  readonly currentActionLabel = computed(() => {
+    switch (this.state.currentAction()?.characterActionType) {
+      case CharacterActionType.Combat:
+        return 'Battling';
+      case CharacterActionType.Crafting:
+        return 'Tempering';
+      default:
+        return 'Action';
+    }
+  });
+  readonly compactActionProgress = signal(0);
+  readonly compactActionTransitionDuration = signal(0);
   constructor(
     private readonly sidebarService: SidebarService,
     private readonly state: CharacterActionsStateService,
@@ -57,11 +76,23 @@ export class SidebarComponent implements OnInit, OnDestroy {
     public readonly guildState: GuildStateService,
     private readonly sidebarLayoutPreference: SidebarLayoutPreferenceService,
     private readonly router: Router,
+    private readonly timeSync: TimeSyncService,
+    private readonly tutorialState: TutorialStateService,
+    private readonly tutorialPresenter: TutorialPresenterService,
   ) {
     this.sidebarLayout = this.sidebarLayoutPreference.layout;
 
     effect(() => {
+      const action = this.state.currentAction();
+      const isCompact = this.sidebarLayout() === 'compact';
       this.displayCurrentAction = this.state.displayCurrentAction();
+      untracked(() => {
+        if (isCompact) {
+          this.startCompactActionProgress(action);
+        } else {
+          this.cancelCompactActionProgress();
+        }
+      });
     });
 
     effect(() => {
@@ -100,6 +131,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.cancelCompactActionProgress();
     this.destroy$.next();
     this.destroy$.complete();
   }
@@ -108,7 +140,15 @@ export class SidebarComponent implements OnInit, OnDestroy {
     this.itemTapped.emit();
   }
 
-  onNavigate(): void {
+  onNavigate(item: Tab): void {
+    if (
+      item.id === 'essences' &&
+      this.tutorialState.state()?.currentStep === TUTORIAL_STEP_EQUIP_ESSENCE
+    ) {
+      this.essenceState.setActiveView('archive');
+      this.tutorialPresenter.presentCurrentStep();
+    }
+
     this.itemTapped.emit();
   }
 
@@ -152,5 +192,81 @@ export class SidebarComponent implements OnInit, OnDestroy {
     } else {
       return;
     }
+  }
+
+  isTutorialDestination(item: Tab): boolean {
+    const tutorial = this.tutorialState.state();
+    if (!tutorial || !this.tutorialState.presentationReady()) return false;
+
+    const destinationRoute =
+      tutorial.presentation?.destinationRoute ?? tutorial.destinationRoute;
+    const destinationPath = this.routePath(destinationRoute);
+    const itemRoute = `/${item.route.join('/')}`;
+    const itemPath = itemRoute.startsWith('/game/')
+      ? itemRoute
+      : `/game${itemRoute}`;
+
+    return (
+      destinationPath === itemPath || destinationPath.startsWith(`${itemPath}/`)
+    );
+  }
+
+  private startCompactActionProgress(
+    action: ReturnType<CharacterActionsStateService['currentAction']>,
+  ): void {
+    this.cancelCompactActionProgress();
+    this.compactActionTransitionDuration.set(0);
+
+    if (!action || action.characterActionType === CharacterActionType.Idle) {
+      this.compactActionProgress.set(0);
+      return;
+    }
+
+    const durationMs = environment.baseDuration * 1000;
+    let startedAt: number;
+
+    if (
+      action.characterActionType === CharacterActionType.Combat ||
+      action.isDeleted
+    ) {
+      const deadline = new Date(
+        action.nextResolutionAt ?? action.updatedAt,
+      ).getTime();
+      startedAt = deadline - durationMs;
+    } else {
+      startedAt = new Date(action.updatedAt).getTime();
+    }
+
+    const elapsed = this.timeSync.now() - startedAt;
+    const progress = Math.max(0, Math.min((elapsed / durationMs) * 100, 100));
+    this.compactActionProgress.set(progress);
+
+    if (progress >= 100) return;
+
+    // Let the initial position render without a transition, then hand the
+    // remaining movement to the browser compositor as one continuous animation.
+    this.compactProgressAnimationFrame = requestAnimationFrame(() => {
+      this.compactProgressAnimationFrame = requestAnimationFrame(() => {
+        const remainingMs = Math.max(
+          durationMs - (this.timeSync.now() - startedAt),
+          0,
+        );
+        this.compactActionTransitionDuration.set(remainingMs);
+        this.compactActionProgress.set(100);
+        this.compactProgressAnimationFrame = 0;
+      });
+    });
+  }
+
+  private cancelCompactActionProgress(): void {
+    if (!this.compactProgressAnimationFrame) return;
+
+    cancelAnimationFrame(this.compactProgressAnimationFrame);
+    this.compactProgressAnimationFrame = 0;
+  }
+
+  private routePath(route: string): string {
+    const normalized = route.startsWith('/') ? route : `/${route}`;
+    return normalized.split(/[?#]/, 1)[0];
   }
 }

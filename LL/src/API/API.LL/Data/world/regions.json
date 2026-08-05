@@ -49,6 +49,29 @@
               "creatureId": "00000000-0000-0000-0000-000000000002",
               "weightedSpawnRate": 0.2
             }
+          ],
+          "gatheringNodes": [
+            {
+              "id": "lumo_ruins_ore_vein",
+              "name": "Ore Vein",
+              "type": "Mining",
+              "procChance": 0.4,
+              "rewardTableId": "reward.gathering.lumo_ruins.ore_vein"
+            },
+            {
+              "id": "lumo_ruins_fallen_tree",
+              "name": "Fallen Tree",
+              "type": "Woodcutting",
+              "procChance": 0.4,
+              "rewardTableId": "reward.gathering.lumo_ruins.fallen_tree"
+            },
+            {
+              "id": "lumo_ruins_beast_remains",
+              "name": "Beast Remains",
+              "type": "Skinning",
+              "procChance": 0.4,
+              "rewardTableId": "reward.gathering.lumo_ruins.beast_remains"
+            }
           ]
         },
         {

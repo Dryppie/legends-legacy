@@ -36,10 +36,10 @@ intentional marginal-cost changes for attributes such as Armor and Fortitude
 across the progression curve.
 
 Each active Essence is resolved independently through the production Essence
-loadout resolver. Level-scaled bonuses and evolution-added attribute modifiers
-are valued with the same catalog at the Essence's Potential Tier. Potential,
-Ascension, and evolution do not receive arbitrary rating bonuses; they matter
-only when they change resolved attributes.
+loadout resolver. Fixed bonuses and evolution-added attribute modifiers are
+valued at the catalog's reference tier. Essence level and Ascension do not
+receive arbitrary rating bonuses; evolution matters only when it changes
+resolved attributes.
 
 Capped attributes are valued only to their combined useful cap across base,
 equipment, and active Essence sources. Mixed-tier over-cap budget is discounted
@@ -164,7 +164,7 @@ match.
 
 `PowerRatingAlgorithm.Version` is 21 for the full Standard-quality
 tier-by-rarity profile matrix.
-`CombatRulesVersion` is 8 for the compounded dungeon difficulty
+`CombatRulesVersion` is 9 for the Power-only damage model and compounded dungeon difficulty
 curve: Tier I is 3× the authored creature baseline, Tier II is 5× Tier I
 (15× authored), and Tier III is 5× Tier II (75× authored).
 The legacy-named `BenchmarkDefinitionVersion` column now stores

@@ -1,5 +1,3 @@
-import { AttributeModifier } from '../../models/Dtos/attributesDto';
-import { AttributeType } from '../../models/enums/attributeType';
 import { EquipmentType } from '../../models/enums/equipmentType';
 import { GatheringType } from '../../models/enums/gatheringType';
 import { ItemQuality } from '../../models/enums/itemQuality';
@@ -10,6 +8,8 @@ import {
   EquipmentCraftingDesignMetadata,
   ToolBonusModifier,
 } from '../../models/item';
+import { aggregateAttributes } from '../../utils/attributes/attribute-order.utils';
+import { AttributeModifier } from '../../models/Dtos/attributesDto';
 
 export interface EquipmentDisplay {
   // Common
@@ -18,8 +18,7 @@ export interface EquipmentDisplay {
   quality?: ItemQuality;
   equipmentType: EquipmentType;
   description?: string;
-  baseModifiers?: AttributeModifier[];
-  instanceModifiers: AttributeModifier[];
+  attributes: AttributeModifier[];
   itemBudget: number;
   itemBudgetTier: number;
   gatheringType?: GatheringType | null;
@@ -44,14 +43,13 @@ export function mapEquipmentToDisplay(
     rarity: e.rarity,
     equipmentType: e.equipmentType,
     description: e.description,
-    instanceModifiers: sortAttributes(e.attributeModifiers),
+    attributes: aggregateAttributes(e.attributeModifiers),
     itemBudget: e.itemBudget ?? 0,
     itemBudgetTier: e.itemBudgetTier ?? 1,
     gatheringType: e.gatheringType,
     toolBonuses: e.toolBonuses ?? [],
     toolAffixes: [],
     baseToolBonuses: e.toolBonuses ?? [],
-
   };
 }
 
@@ -59,8 +57,10 @@ export function mapInstanceToDisplay(
   inst: EquipmentInstance,
 ): EquipmentDisplay {
   const base = inst.equipmentBase;
-  const baseModifiers = sortAttributes(inst.baseModifiers ?? []);
-  const instanceModifiers = sortAttributes(inst.instanceModifiers ?? []);
+  const attributes = aggregateAttributes([
+    ...(inst.baseModifiers ?? []),
+    ...(inst.instanceModifiers ?? []),
+  ]);
   const baseToolBonuses = base.toolBonuses ?? [];
   const toolAffixes = inst.toolAffixes ?? [];
   const effectiveToolBonuses = inst.effectiveToolBonuses?.length
@@ -73,8 +73,7 @@ export function mapInstanceToDisplay(
     quality: inst.quality,
     equipmentType: base.equipmentType,
     description: base.description,
-    baseModifiers,
-    instanceModifiers,
+    attributes,
     itemBudget: inst.itemBudget ?? 0,
     itemBudgetTier: inst.itemBudgetTier ?? inst.tier ?? 1,
     gatheringType: base.gatheringType,
@@ -85,22 +84,6 @@ export function mapInstanceToDisplay(
     potential: inst.potential,
     craftingDesign: inst.craftingDesign,
   };
-}
-
-const ATTRIBUTE_ORDER = Object.values(AttributeType);
-
-function sortAttributes(attributes: AttributeModifier[]): AttributeModifier[] {
-  return [...attributes].sort((a, b) => {
-    const orderDelta =
-      getAttributeOrder(a.attributeType) - getAttributeOrder(b.attributeType);
-
-    return orderDelta || a.attributeType.localeCompare(b.attributeType);
-  });
-}
-
-function getAttributeOrder(attribute: AttributeType): number {
-  const index = ATTRIBUTE_ORDER.indexOf(attribute);
-  return index === -1 ? Number.MAX_SAFE_INTEGER : index;
 }
 
 function getToolDisplayName(baseName: string, rarity: Rarity): string {

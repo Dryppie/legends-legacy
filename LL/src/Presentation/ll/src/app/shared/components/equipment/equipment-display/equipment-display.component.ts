@@ -1,7 +1,6 @@
 import { DecimalPipe, NgClass, NgFor, NgIf } from '@angular/common';
 import { Component, Input } from '@angular/core';
 import {
-  AttributeTooltipPipe,
   AttributeTypeFormatPipe,
   isPercentAttribute,
 } from '../../../pipes/attributes/attribute-type-format/attribute-type-format.pipe';
@@ -22,6 +21,7 @@ import {
 } from '../../../models/Dtos/attributesDto';
 import { Rarity } from '../../../models/enums/rarity';
 import { EquipmentType } from '../../../models/enums/equipmentType';
+import { AttributeTooltipDirective } from '../../../directives/attribute-tooltip/attribute-tooltip.directive';
 
 @Component({
     selector: 'app-equipment-display',
@@ -30,8 +30,8 @@ import { EquipmentType } from '../../../models/enums/equipmentType';
         NgFor,
         NgClass,
         AttributeTypeFormatPipe,
-        AttributeTooltipPipe,
         AttributeValueFormatPipe,
+        AttributeTooltipDirective,
         DecimalPipe,
     ],
     templateUrl: './equipment-display.component.html'

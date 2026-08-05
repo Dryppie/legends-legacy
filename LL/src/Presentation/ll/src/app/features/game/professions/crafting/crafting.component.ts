@@ -19,31 +19,23 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { InventoryStateService } from '../../../../core/services/api/inventory/inventory-state.service';
 import { TabsComponent } from '../../../../shared/components/custom-components/tabs/tabs.component';
 import { ProfessionType } from '../../../../shared/models/Dtos/characterProfession';
-import { TutorialStateService } from '../../../../core/services/api/tutorial/tutorial-state.service';
-import { ToastService } from '../../../../core/services/client-side/components/toast/toast.service';
-import {
-  TUTORIAL_STEP_CRAFT_EQUIPMENT,
-  TUTORIAL_STEP_EQUIP_EQUIPMENT,
-} from '../../../../shared/models/tutorial';
 
 @Component({
-    selector: 'app-crafting',
-    imports: [
-        ProfessionHeaderComponent,
-        NgIf,
-        TabComponent,
-        RegularCraftingComponent,
-        TemperingComponent,
-        TabsComponent,
-    ],
-    templateUrl: './crafting.component.html'
+  selector: 'app-crafting',
+  imports: [
+    ProfessionHeaderComponent,
+    NgIf,
+    TabComponent,
+    RegularCraftingComponent,
+    TemperingComponent,
+    TabsComponent,
+  ],
+  templateUrl: './crafting.component.html',
 })
 export class CraftingComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly professionService = inject(ProfessionsService);
   private readonly inventoryState = inject(InventoryStateService);
-  private readonly tutorialState = inject(TutorialStateService);
-  private readonly toast = inject(ToastService);
 
   readonly professionId = toSignal(
     this.route.paramMap.pipe(map((p) => p.get('id') ?? '')),
@@ -51,15 +43,7 @@ export class CraftingComponent implements OnInit {
   );
 
   readonly profession = signal<CraftingProfession | null>(null);
-  readonly tutorialCraftingHandoff = signal(false);
-  readonly guidePageId = computed(() => {
-    if (!this.tutorialCraftingHandoff()) return 'crafting';
-
-    const tutorial = this.tutorialState.state();
-    return (
-      tutorial?.presentation?.guidePageId ?? tutorial?.guidePageId ?? 'crafting'
-    );
-  });
+  readonly guidePageId = 'crafting';
 
   // ────────────────────────────────────── ctor/di ─────────────────────────────
   constructor() {
@@ -69,21 +53,6 @@ export class CraftingComponent implements OnInit {
         if (id) {
           this.getProfessionDetails(id);
         }
-      },
-      { allowSignalWrites: true },
-    );
-
-    effect(
-      () => {
-        if (this.tutorialState.loading()) {
-          return;
-        }
-
-        const tutorial = this.tutorialState.state();
-        this.tutorialCraftingHandoff.set(
-          tutorial?.currentStep === TUTORIAL_STEP_CRAFT_EQUIPMENT &&
-            !tutorial.isCompleted,
-        );
       },
       { allowSignalWrites: true },
     );
@@ -106,25 +75,6 @@ export class CraftingComponent implements OnInit {
 
   ngOnInit(): void {
     this.professionService.refresh();
-    const wasClaimingTutorialGear =
-      this.tutorialState.state()?.currentStep === TUTORIAL_STEP_CRAFT_EQUIPMENT;
-    this.tutorialCraftingHandoff.set(wasClaimingTutorialGear);
-
-    this.tutorialState.recordCraftingPageVisited((state) => {
-      this.inventoryState.load(true);
-
-      if (
-        wasClaimingTutorialGear &&
-        state?.currentStep === TUTORIAL_STEP_EQUIP_EQUIPMENT
-      ) {
-        this.toast.showToast(
-          'Tutorial gear received',
-          'Crafting granted a Tutorial Chest. Open Inventory to equip it.',
-          true,
-          'tr',
-        );
-      }
-    });
   }
 
   getProfessionDetails(id: string) {

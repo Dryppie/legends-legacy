@@ -1331,7 +1331,7 @@
       },
       {
         "type": "TieredMaterial",
-        "family": "Crystal",
+        "family": "Wood",
         "baseAmount": 3,
         "amountPerTier": 1
       }
@@ -1434,7 +1434,7 @@
       },
       {
         "type": "TieredMaterial",
-        "family": "Crystal",
+        "family": "Wood",
         "baseAmount": 4,
         "amountPerTier": 1
       }
@@ -1533,13 +1533,13 @@
     "materialRequirements": [
       {
         "type": "TieredMaterial",
-        "family": "Crystal",
+        "family": "Wood",
         "baseAmount": 6,
         "amountPerTier": 2
       },
       {
         "type": "TieredMaterial",
-        "family": "Bone",
+        "family": "Hide",
         "baseAmount": 3,
         "amountPerTier": 1
       }
@@ -1674,7 +1674,7 @@
     },
     "initialStatProfile": {
       "Precision": 0.3,
-      "WeaponDamage": 0.3,
+      "Power": 0.3,
       "CritChance": 0.2,
       "AttackSpeed": 0.2
     },
@@ -1692,7 +1692,7 @@
           "minimumTier": 1
         },
         {
-          "stat": "WeaponDamage",
+          "stat": "Power",
           "weight": 30,
           "category": "Primary",
           "canIntroduce": true,
@@ -1787,7 +1787,7 @@
       "AttackSpeed": 0.3,
       "CritChance": 0.25,
       "Precision": 0.25,
-      "WeaponDamage": 0.2
+      "Power": 0.2
     },
     "temperingProfile": {
       "id": "recipe.weapon.one_handed.dagger.tempering",
@@ -1821,7 +1821,7 @@
           "minimumTier": 1
         },
         {
-          "stat": "WeaponDamage",
+          "stat": "Power",
           "weight": 20,
           "category": "Secondary",
           "canIntroduce": true,
@@ -1891,7 +1891,7 @@
       "role": ""
     },
     "initialStatProfile": {
-      "WeaponDamage": 0.35,
+      "Power": 0.35,
       "CritDamage": 0.25,
       "ArmorPenetration": 0.2,
       "Precision": 0.2
@@ -1901,7 +1901,7 @@
       "name": "Hand Axe Tempering",
       "stats": [
         {
-          "stat": "WeaponDamage",
+          "stat": "Power",
           "weight": 35,
           "category": "Primary",
           "canIntroduce": true,
@@ -1998,17 +1998,16 @@
       "role": ""
     },
     "initialStatProfile": {
-      "WeaponDamage": 0.35,
-      "ArmorPenetration": 0.3,
-      "Power": 0.2,
-      "Precision": 0.15
+      "Power": 0.35,
+      "ArmorPenetration": 0.35,
+      "Precision": 0.3
     },
     "temperingProfile": {
       "id": "recipe.weapon.one_handed.mace.tempering",
       "name": "Mace Tempering",
       "stats": [
         {
-          "stat": "WeaponDamage",
+          "stat": "Power",
           "weight": 35,
           "category": "Primary",
           "canIntroduce": true,
@@ -2018,7 +2017,7 @@
         },
         {
           "stat": "ArmorPenetration",
-          "weight": 30,
+          "weight": 35,
           "category": "Primary",
           "canIntroduce": true,
           "canIncrease": true,
@@ -2026,17 +2025,8 @@
           "minimumTier": 1
         },
         {
-          "stat": "Power",
-          "weight": 20,
-          "category": "Secondary",
-          "canIntroduce": true,
-          "canIncrease": true,
-          "maxBudgetShare": 0.3,
-          "minimumTier": 1
-        },
-        {
           "stat": "Precision",
-          "weight": 15,
+          "weight": 30,
           "category": "Secondary",
           "canIntroduce": true,
           "canIncrease": true,
@@ -2105,7 +2095,7 @@
       "role": ""
     },
     "initialStatProfile": {
-      "Spirit": 0.35,
+      "Power": 0.35,
       "MagicPenetration": 0.25,
       "Precision": 0.2,
       "AttackSpeed": 0.2
@@ -2115,7 +2105,7 @@
       "name": "Wand Tempering",
       "stats": [
         {
-          "stat": "Spirit",
+          "stat": "Power",
           "weight": 35,
           "category": "Primary",
           "canIntroduce": true,
@@ -2210,17 +2200,17 @@
       "role": ""
     },
     "initialStatProfile": {
-      "WeaponDamage": 0.35,
-      "Precision": 0.25,
+      "Power": 0.3,
+      "Precision": 0.3,
       "CritChance": 0.2,
-      "CritDamage": 0.2
+      "AttackSpeed": 0.2
     },
     "temperingProfile": {
       "id": "recipe.weapon.two_handed.greatsword.tempering",
       "name": "Greatsword Tempering",
       "stats": [
         {
-          "stat": "WeaponDamage",
+          "stat": "Power",
           "weight": 35,
           "category": "Primary",
           "canIntroduce": true,
@@ -2315,7 +2305,7 @@
       "role": ""
     },
     "initialStatProfile": {
-      "WeaponDamage": 0.35,
+      "Power": 0.35,
       "CritDamage": 0.25,
       "ArmorPenetration": 0.2,
       "Precision": 0.2
@@ -2325,7 +2315,7 @@
       "name": "Battle Axe Tempering",
       "stats": [
         {
-          "stat": "WeaponDamage",
+          "stat": "Power",
           "weight": 35,
           "category": "Primary",
           "canIntroduce": true,
@@ -2420,18 +2410,17 @@
       "role": ""
     },
     "initialStatProfile": {
-      "WeaponDamage": 0.35,
-      "ArmorPenetration": 0.3,
-      "Power": 0.2,
-      "Precision": 0.15
+      "Power": 0.35,
+      "ArmorPenetration": 0.35,
+      "Precision": 0.3
     },
     "temperingProfile": {
       "id": "recipe.weapon.two_handed.maul.tempering",
       "name": "Maul Tempering",
       "stats": [
         {
-          "stat": "WeaponDamage",
-          "weight": 35,
+          "stat": "Power",
+          "weight": 30,
           "category": "Primary",
           "canIntroduce": true,
           "canIncrease": true,
@@ -2440,7 +2429,7 @@
         },
         {
           "stat": "ArmorPenetration",
-          "weight": 30,
+          "weight": 35,
           "category": "Primary",
           "canIntroduce": true,
           "canIncrease": true,
@@ -2448,17 +2437,8 @@
           "minimumTier": 1
         },
         {
-          "stat": "Power",
-          "weight": 20,
-          "category": "Secondary",
-          "canIntroduce": true,
-          "canIncrease": true,
-          "maxBudgetShare": 0.3,
-          "minimumTier": 1
-        },
-        {
           "stat": "Precision",
-          "weight": 15,
+          "weight": 30,
           "category": "Secondary",
           "canIntroduce": true,
           "canIncrease": true,
@@ -2527,7 +2507,7 @@
     "initialStatProfile": {
       "Precision": 0.3,
       "ArmorPenetration": 0.25,
-      "WeaponDamage": 0.25,
+      "Power": 0.25,
       "CritChance": 0.2
     },
     "temperingProfile": {
@@ -2545,7 +2525,7 @@
         },
         {
           "stat": "ArmorPenetration",
-          "weight": 25,
+          "weight": 30,
           "category": "Primary",
           "canIntroduce": true,
           "canIncrease": true,
@@ -2553,7 +2533,7 @@
           "minimumTier": 1
         },
         {
-          "stat": "WeaponDamage",
+          "stat": "Power",
           "weight": 25,
           "category": "Secondary",
           "canIntroduce": true,
@@ -2630,7 +2610,7 @@
       "role": ""
     },
     "initialStatProfile": {
-      "Spirit": 0.35,
+      "Power": 0.35,
       "MagicPenetration": 0.25,
       "Cooldown": 0.2,
       "Precision": 0.2
@@ -2640,7 +2620,7 @@
       "name": "Staff Tempering",
       "stats": [
         {
-          "stat": "Spirit",
+          "stat": "Power",
           "weight": 35,
           "category": "Primary",
           "canIntroduce": true,
@@ -2736,7 +2716,7 @@
     },
     "initialStatProfile": {
       "Precision": 0.3,
-      "WeaponDamage": 0.3,
+      "Power": 0.3,
       "CritChance": 0.2,
       "ArmorPenetration": 0.2
     },
@@ -2754,7 +2734,7 @@
           "minimumTier": 1
         },
         {
-          "stat": "WeaponDamage",
+          "stat": "Power",
           "weight": 30,
           "category": "Primary",
           "canIntroduce": true,
@@ -2840,7 +2820,7 @@
       "role": ""
     },
     "initialStatProfile": {
-      "WeaponDamage": 0.35,
+      "Power": 0.35,
       "ArmorPenetration": 0.3,
       "CritDamage": 0.2,
       "Precision": 0.15
@@ -2850,7 +2830,7 @@
       "name": "Crossbow Tempering",
       "stats": [
         {
-          "stat": "WeaponDamage",
+          "stat": "Power",
           "weight": 35,
           "category": "Primary",
           "canIntroduce": true,
@@ -2868,7 +2848,7 @@
           "minimumTier": 1
         },
         {
-          "stat": "CritDamage",
+          "stat": "AttackSpeed",
           "weight": 20,
           "category": "Secondary",
           "canIntroduce": true,
@@ -2941,13 +2921,13 @@
       "attackCategory": "Physical",
       "rangeCategory": "Melee",
       "basicAttackIntervalMultiplier": 0.75,
-      "basicAttackDamageMultiplier": 0.865,
+      "basicAttackDamageMultiplier": 0.78,
       "role": ""
     },
     "initialStatProfile": {
       "AttackSpeed": 0.35,
       "Precision": 0.25,
-      "WeaponDamage": 0.2,
+      "Power": 0.2,
       "CritChance": 0.2
     },
     "temperingProfile": {
@@ -2973,7 +2953,7 @@
           "minimumTier": 1
         },
         {
-          "stat": "WeaponDamage",
+          "stat": "Power",
           "weight": 20,
           "category": "Secondary",
           "canIntroduce": true,
@@ -3017,7 +2997,7 @@
       },
       {
         "type": "TieredMaterial",
-        "family": "Crystal",
+        "family": "Wood",
         "baseAmount": 4,
         "amountPerTier": 1
       }
@@ -3122,7 +3102,7 @@
       },
       {
         "type": "TieredMaterial",
-        "family": "Crystal",
+        "family": "Wood",
         "baseAmount": 4,
         "amountPerTier": 1
       }
@@ -3229,7 +3209,7 @@
       },
       {
         "type": "TieredMaterial",
-        "family": "Crystal",
+        "family": "Wood",
         "baseAmount": 4,
         "amountPerTier": 1
       }

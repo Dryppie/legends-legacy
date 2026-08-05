@@ -15,6 +15,10 @@ export interface ChampionMarketItem {
   sortOrder: number;
   cindersGranted: number;
   soulstonesGranted: number;
+  sigilFragmentsGranted: number;
+  rewardItemId?: string | null;
+  rewardItemName?: string | null;
+  rewardItemQuantity: number;
 }
 
 export interface ChampionMarket {
@@ -30,4 +34,8 @@ export interface ChampionMarketPurchaseResponse {
   gloryRemaining: number;
   cindersGranted: number;
   soulstonesGranted: number;
+  sigilFragmentsGranted: number;
+  rewardItemId?: string | null;
+  rewardItemName?: string | null;
+  rewardItemQuantity: number;
 }

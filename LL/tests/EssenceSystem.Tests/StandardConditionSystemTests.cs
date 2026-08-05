@@ -239,8 +239,9 @@ public sealed class StandardConditionSystemTests
 
         Run([attacker], [defender], maxTicks: 1, basicAttackIntervalTicks: 1);
 
-        Assert.Equal(900, defender.Health);
-        Assert.Equal(965, attacker.Health);
+        var damageDealt = 1000 - defender.Health;
+        Assert.InRange(damageDealt, 80, 120);
+        Assert.Equal((int)Math.Round(damageDealt * 0.35), 1000 - attacker.Health);
         Assert.Equal(2, defender.Conditions.Count(x => x.Type == StandardConditionType.Thorns));
     }
 
@@ -332,8 +333,9 @@ public sealed class StandardConditionSystemTests
 
         Run([attacker], [defender], maxTicks: 1, basicAttackIntervalTicks: 1);
 
-        Assert.Equal(940, defender.Health);
-        Assert.Equal(988, attacker.Health);
+        var healthDamage = 1000 - defender.Health;
+        Assert.InRange(healthDamage, 40, 80);
+        Assert.Equal((int)Math.Round(healthDamage * 0.20), 1000 - attacker.Health);
     }
 
     [Fact]
@@ -493,8 +495,7 @@ public sealed class StandardConditionSystemTests
         var empoweredTarget = Combatant("empowered.target", CombatTeam.Hostile, []);
 
         Run([empowered], [empoweredTarget], maxTicks: 1);
-
-        Assert.Equal(880, empoweredTarget.Health);
+        var empoweredDamage = 1000 - empoweredTarget.Health;
 
         var canceledStrike = Passive(
             "canceled.strike",
@@ -514,8 +515,9 @@ public sealed class StandardConditionSystemTests
         var canceledTarget = Combatant("canceled.target", CombatTeam.Hostile, []);
 
         Run([canceled], [canceledTarget], maxTicks: 1);
+        var canceledDamage = 1000 - canceledTarget.Health;
 
-        Assert.Equal(900, canceledTarget.Health);
+        Assert.Equal((int)Math.Round(canceledDamage * 1.20), empoweredDamage);
 
         var hasteAndSlow = Passive(
             "haste.slow",
@@ -530,7 +532,7 @@ public sealed class StandardConditionSystemTests
 
         Run([normalRate], [normalTarget], maxTicks: 4, basicAttackIntervalTicks: 4);
 
-        Assert.Equal(990, normalTarget.Health);
+        Assert.InRange(1000 - normalTarget.Health, 8, 12);
 
         var chilled = Passive(
             "slow.chill",
@@ -602,8 +604,9 @@ public sealed class StandardConditionSystemTests
 
         Run([actor], [enemy], maxTicks: 1, basicAttackIntervalTicks: 1);
 
-        Assert.Equal(935, actor.Health);
-        Assert.Equal(900, enemy.Health);
+        var damageDealt = 1000 - enemy.Health;
+        var expectedHealing = (int)Math.Round(Math.Round(damageDealt * 0.50) * 0.70);
+        Assert.Equal(900 + expectedHealing, actor.Health);
     }
 
     [Fact]
@@ -625,7 +628,7 @@ public sealed class StandardConditionSystemTests
         Run([attacker], [low, high], maxTicks: 1, basicAttackIntervalTicks: 1);
 
         Assert.Equal(1000, low.Health);
-        Assert.Equal(990, high.Health);
+        Assert.InRange(1000 - high.Health, 8, 12);
 
         var stealthThreat = Passive(
             "stealth.threat",
@@ -653,7 +656,7 @@ public sealed class StandardConditionSystemTests
         Run([secondAttacker], [stealth, visible], maxTicks: 1, basicAttackIntervalTicks: 1, randomSeed: 1337);
 
         Assert.Equal(1000, stealth.Health);
-        Assert.Equal(990, visible.Health);
+        Assert.InRange(1000 - visible.Health, 8, 12);
     }
 
     private static AbilitySpec Passive(string id, params AbilityEffectSpec[] effects) =>
@@ -721,13 +724,13 @@ public sealed class StandardConditionSystemTests
             {
                 [AttributeType.MaxHealth] = maxHealth,
                 [AttributeType.Power] = power,
-                [AttributeType.WeaponDamage] = weaponDamage,
                 [AttributeType.Armor] = armor,
                 [AttributeType.Resistance] = 0,
                 [AttributeType.HealthRegeneration] = healthRegeneration,
                 [AttributeType.LifeSteal] = lifeSteal
             },
             abilities.Select(AbilityCompiler.CompileAbility),
+            basicAttackDamageMultiplier: weaponDamage,
             basicAttackIntervalMultiplier: basicAttackIntervalMultiplier);
 
     private static CombatResult Run(

@@ -1,4 +1,4 @@
-import { NgIf } from '@angular/common';
+import { NgFor, NgIf } from '@angular/common';
 import {
   Component,
   EventEmitter,
@@ -16,24 +16,29 @@ import {
   DropdownSelection,
 } from '../../../custom-components/dropdown/dropdown.component';
 import { ItemComponent } from '../../../item/item.component';
+import { InventoryService } from '../../../../../core/services/api/inventory/inventory.service';
+import { SelectionCrateOption } from '../../../../models/item';
 
 @Component({
   selector: 'app-inventory-item-modal',
-  imports: [NgIf, DropdownComponent, ItemComponent],
+  imports: [NgFor, NgIf, DropdownComponent, ItemComponent],
   templateUrl: './inventory-item-modal.component.html',
 })
 export class InventoryItemModalComponent implements OnInit {
   @Input({ required: true }) inventoryItem!: InventoryItem;
   @Output() close = new EventEmitter<void>();
   readonly isLearning = signal(false);
+  readonly isOpeningCrate = signal(false);
   readonly isLoadingRecipes = signal(false);
   readonly hasLoadedRecipes = signal(false);
   readonly error = signal<string | null>(null);
   readonly selectedRecipeId = signal('');
+  readonly selectedCrateOptionId = signal('');
   private readonly availableRecipeIds = signal<ReadonlySet<string>>(new Set());
 
   constructor(
     private readonly craftingService: CraftingService,
+    private readonly inventoryService: InventoryService,
     private readonly inventoryState: InventoryStateService,
   ) {}
 
@@ -48,6 +53,10 @@ export class InventoryItemModalComponent implements OnInit {
     return this.inventoryItem.itemInstance.itemBase.blueprint ?? null;
   }
 
+  get selectionCrate() {
+    return this.inventoryItem.itemInstance.itemBase.selectionCrate ?? null;
+  }
+
   get compatibleRecipeOptions(): readonly DropdownOption<string>[] {
     const availableRecipeIds = this.availableRecipeIds();
     return (this.blueprint?.compatibleRecipes ?? [])
@@ -59,7 +68,33 @@ export class InventoryItemModalComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.selectedCrateOptionId.set(this.selectionCrate?.options[0]?.id ?? '');
     this.loadAvailableRecipes();
+  }
+
+  selectCrateOption(option: SelectionCrateOption): void {
+    this.selectedCrateOptionId.set(option.id);
+  }
+
+  openSelectionCrate(): void {
+    const optionId = this.selectedCrateOptionId();
+    if (!this.selectionCrate || !optionId || this.isOpeningCrate()) return;
+
+    this.isOpeningCrate.set(true);
+    this.error.set(null);
+    this.inventoryService
+      .openCatalystSelectionCrate(this.inventoryItem.itemInstance.id, optionId)
+      .subscribe({
+        next: (response) => {
+          this.inventoryState.decrementItem(response.consumedItemInstanceId, 1);
+          this.inventoryState.addOrIncrementMany(response.rewards);
+          this.close.emit();
+        },
+        error: (err) => {
+          this.error.set(err.message ?? 'Failed to open the selection crate.');
+          this.isOpeningCrate.set(false);
+        },
+      });
   }
 
   selectRecipe(selection: DropdownSelection<string>): void {

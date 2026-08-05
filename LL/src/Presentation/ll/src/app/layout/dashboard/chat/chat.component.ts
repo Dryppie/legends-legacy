@@ -14,7 +14,7 @@ import {
   ChatMessageDto,
   ChatService,
 } from '../../../core/services/ll-chat/chat-service/chat.service';
-import { catchError, of, Subscription, switchMap, timer } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { DatePipe, NgClass, NgFor, NgIf } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
@@ -25,7 +25,6 @@ import { CharacterStateService } from '../../../core/services/api/character/char
 import { CharacterTagComponent } from '../../../shared/components/character/character-tag/character-tag.component';
 import { AuthService } from '../../../core/services/api/auth/auth.service';
 import { UserInfoDto } from '../../../shared/models/Dtos/userInfoDto';
-import { PlayerService } from '../../../core/services/api/players/player.service';
 
 interface ChatRoom {
   label: string;
@@ -34,20 +33,27 @@ interface ChatRoom {
   requiresGuild?: boolean;
 }
 
+export function isWorldSystemMessage(message: ChatMessageDto): boolean {
+  return (
+    message.channelType === ChatChannelType.System &&
+    message.senderName.trim().toLowerCase() === 'world'
+  );
+}
+
 @Component({
-    selector: 'app-chat',
-    imports: [
-        NgFor,
-        NgIf,
-        NgClass,
-        FormsModule,
-        RegularButtonComponent,
-        StickyScrollDirective,
-        DatePipe,
-        CharacterTagComponent,
-        RouterLink,
-    ],
-    templateUrl: './chat.component.html'
+  selector: 'app-chat',
+  imports: [
+    NgFor,
+    NgIf,
+    NgClass,
+    FormsModule,
+    RegularButtonComponent,
+    StickyScrollDirective,
+    DatePipe,
+    CharacterTagComponent,
+    RouterLink,
+  ],
+  templateUrl: './chat.component.html',
 })
 export class ChatComponent implements OnInit, OnDestroy {
   @Input() collapsible = false;
@@ -112,7 +118,6 @@ export class ChatComponent implements OnInit, OnDestroy {
   userInfo: UserInfoDto | null = null;
   userInfoLoaded = false;
   chatAccessFailed = false;
-  onlinePlayers = 1;
   private sub = new Subscription();
   private channelDragPointerId: number | null = null;
   private channelDragStartX = 0;
@@ -150,7 +155,8 @@ export class ChatComponent implements OnInit, OnDestroy {
   }
 
   get onlinePlayerLabel(): string {
-    return `${this.onlinePlayers} online`;
+    const onlinePlayers = this.chat.onlinePlayerCount();
+    return onlinePlayers === null ? 'Connecting...' : `${onlinePlayers} online`;
   }
 
   constructor(
@@ -158,7 +164,6 @@ export class ChatComponent implements OnInit, OnDestroy {
     private readonly guildState: GuildStateService,
     private readonly characterState: CharacterStateService,
     private readonly authService: AuthService,
-    private readonly playerService: PlayerService,
   ) {
     this.guild = this.guildState.guild;
     this.characterId = this.characterState.currentCharacterId;
@@ -180,21 +185,6 @@ export class ChatComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.sub.add(
-      timer(0, 1000 * 60 * 2)
-        .pipe(
-          switchMap(() =>
-            this.playerService
-              .getOnlinePlayerCount()
-              .pipe(catchError(() => of(null))),
-          ),
-        )
-        .subscribe((count) => {
-          if (count !== null) {
-            this.onlinePlayers = Math.max(1, count);
-          }
-        }),
-    );
     this.sub.add(
       this.chat.messages$.subscribe((m) => {
         this.messages = m;
@@ -334,6 +324,10 @@ export class ChatComponent implements OnInit, OnDestroy {
   }
 
   channelLabel(message: ChatMessageDto): string {
+    if (isWorldSystemMessage(message)) {
+      return 'World';
+    }
+
     if (message.channelType === ChatChannelType.General) {
       return message.contextKey === 'trade' || message.contextKey === 'help'
         ? message.contextKey
@@ -354,7 +348,9 @@ export class ChatComponent implements OnInit, OnDestroy {
       case ChatChannelType.Whisper:
         return 'll-badge-accent';
       case ChatChannelType.System:
-        return 'll-badge-muted';
+        return isWorldSystemMessage(message)
+          ? 'll-badge-warning'
+          : 'll-badge-muted';
       default:
         return 'll-badge-accent';
     }
@@ -371,10 +367,16 @@ export class ChatComponent implements OnInit, OnDestroy {
       case ChatChannelType.Whisper:
         return 'border-l-[var(--ll-color-primary-strong)] bg-[var(--ll-color-primary-soft)]';
       case ChatChannelType.System:
-        return 'border-l-[var(--ll-color-text-subtle)] bg-[var(--ll-color-surface-soft)]';
+        return isWorldSystemMessage(message)
+          ? 'border-l-[var(--ll-color-warning)] bg-[var(--ll-color-warning-soft)] shadow-[inset_0_0_18px_rgba(245,158,11,0.05)] hover:bg-[var(--ll-color-warning-soft)]'
+          : 'border-l-[var(--ll-color-text-subtle)] bg-[var(--ll-color-surface-soft)]';
       default:
         return 'border-l-[var(--ll-color-border-strong)]';
     }
+  }
+
+  isWorldAnnouncement(message: ChatMessageDto): boolean {
+    return isWorldSystemMessage(message);
   }
 
   whisperDisplayId(message: ChatMessageDto): string {
@@ -469,11 +471,60 @@ export class ChatComponent implements OnInit, OnDestroy {
       this.draft = '';
       this.sendError = '';
     } catch (err) {
-      this.sendError =
-        err instanceof Error ? err.message : 'Unable to send chat message.';
+      this.sendError = getChatSendErrorMessage(err);
       console.warn('Unable to send chat message.', err);
     }
   }
+}
+
+export function getChatSendErrorMessage(error: unknown): string {
+  const technicalMessage =
+    error instanceof Error
+      ? error.message
+      : typeof error === 'string'
+        ? error
+        : '';
+  const normalizedMessage = technicalMessage.toLowerCase();
+
+  if (
+    normalizedMessage.includes('register your account') ||
+    normalizedMessage.includes('guest account')
+  ) {
+    return 'Register your account before writing in chat.';
+  }
+
+  if (
+    normalizedMessage.includes('not a member') ||
+    normalizedMessage.includes('forbidden')
+  ) {
+    return 'You no longer have access to this chat channel.';
+  }
+
+  if (
+    normalizedMessage.includes('rate limit') ||
+    normalizedMessage.includes('too many')
+  ) {
+    return "You're sending messages too quickly. Please wait a moment.";
+  }
+
+  if (normalizedMessage.includes('not found')) {
+    return "That player couldn't be found.";
+  }
+
+  const availabilityErrors = [
+    'failed to fetch',
+    'negotiation',
+    'network',
+    'connection',
+    'disconnected',
+    'timeout',
+    'unavailable',
+  ];
+  if (availabilityErrors.some((value) => normalizedMessage.includes(value))) {
+    return 'Chat is temporarily unavailable. Check your connection and try again.';
+  }
+
+  return "Your message couldn't be sent. Please try again.";
 }
 
 const COMBINING_MARKS_PATTERN = /\p{M}/gu;

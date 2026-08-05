@@ -8,12 +8,12 @@ import {
 describe('marketplace category matching', () => {
   it('matches only resources from the selected family', () => {
     expect(
-      matchesMarketplaceResourceSubcategory(resource('ore'), 'Metal'),
+      matchesMarketplaceResourceSubcategory(resource('ore'), 'Ore'),
     ).toBeTrue();
     expect(
       matchesMarketplaceResourceSubcategory(
-        resource('bone_fragments'),
-        'Metal',
+        resource('rawhide'),
+        'Ore',
       ),
     ).toBeFalse();
   });
@@ -22,13 +22,13 @@ describe('marketplace category matching', () => {
     expect(
       matchesMarketplaceResourceSubcategory(
         resource('blueprint_aegis', 'Blueprint: Aegis'),
-        'Metal',
+        'Ore',
       ),
     ).toBeFalse();
     expect(
       matchesMarketplaceResourceSubcategory(
         resource('venom_gland', 'Venom Gland'),
-        'Metal',
+        'Ore',
       ),
     ).toBeFalse();
   });

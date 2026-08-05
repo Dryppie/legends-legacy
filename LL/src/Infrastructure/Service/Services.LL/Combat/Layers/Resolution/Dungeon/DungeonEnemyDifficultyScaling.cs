@@ -19,7 +19,6 @@ public static class DungeonEnemyDifficultyScaling
         AttributeType.Fortitude,
         AttributeType.Precision,
         AttributeType.Spirit,
-        AttributeType.WeaponDamage,
         AttributeType.Armor,
         AttributeType.Resistance,
         AttributeType.ArmorPenetration,

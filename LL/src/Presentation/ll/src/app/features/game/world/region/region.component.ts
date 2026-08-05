@@ -1,6 +1,13 @@
 import { NgFor, NgIf } from '@angular/common';
-import { Component, effect, HostListener, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import {
+  Component,
+  computed,
+  effect,
+  HostListener,
+  OnDestroy,
+  OnInit,
+} from '@angular/core';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { Region, Area } from '../../../../shared/models/Dtos/regionDto';
 import { RegionService } from '../../../../core/services/client-side/region/region.service';
 import { CombatAreaCardComponent } from '../../../../shared/components/combat/combat-area-card/combat-area-card.component';
@@ -13,31 +20,35 @@ import { CombatStateService } from '../../../../core/state/combat-state/combat-s
 import { BattleType } from '../../../../core/state/combat-state/combatState';
 import { CombatService } from '../../../../core/services/client-side/combat/combat.service';
 import { TutorialStateService } from '../../../../core/services/api/tutorial/tutorial-state.service';
+import { CharacterActionsStateService } from '../../../../core/services/api/character-actions/character-actions.state.service';
+import { CharacterActionType } from '../../../../shared/models/enums/characterActionType';
 import {
   TUTORIAL_STEP_DEFEAT_TRAINING_CREATURE,
   TUTORIAL_TRAINING_GROUNDS_AREA_ID,
 } from '../../../../shared/models/tutorial';
 
 @Component({
-    selector: 'app-region',
-    imports: [
-        NgIf,
-        NgFor,
-        CombatAreaCardComponent,
-        TabsComponent,
-        TabComponent,
-        RaidsComponent,
-        DungeonsComponent,
-        CombatComponent,
-    ],
-    templateUrl: './region.component.html'
+  selector: 'app-region',
+  imports: [
+    NgIf,
+    NgFor,
+    CombatAreaCardComponent,
+    TabsComponent,
+    TabComponent,
+    RaidsComponent,
+    DungeonsComponent,
+    CombatComponent,
+    RouterLink,
+  ],
+  templateUrl: './region.component.html',
 })
-export class RegionComponent implements OnInit {
+export class RegionComponent implements OnInit, OnDestroy {
   regionId!: string;
   region!: Region; // You can define a more specific type based on your item data structure
   private sourceRegion: Region | null = null;
   targetAreaId: string | null = null;
   readonly trainingBattleType = BattleType.Training;
+  readonly activeBattle;
 
   constructor(
     private route: ActivatedRoute,
@@ -45,7 +56,19 @@ export class RegionComponent implements OnInit {
     public readonly combatStateService: CombatStateService,
     private readonly combatService: CombatService,
     private readonly tutorialState: TutorialStateService,
+    characterActions: CharacterActionsStateService,
   ) {
+    this.activeBattle = computed(() => {
+      const action = characterActions.currentAction();
+      if (action?.characterActionType !== CharacterActionType.Combat) {
+        return null;
+      }
+
+      return {
+        areaName: action.combatActionDetails?.area?.name ?? 'Current encounter',
+      };
+    });
+
     effect(() => {
       const tutorial = this.tutorialState.state();
       this.applyRegionView();
@@ -68,11 +91,14 @@ export class RegionComponent implements OnInit {
 
     this.route.queryParamMap.subscribe((params) => {
       this.targetAreaId = params.get('area');
+      this.dismissTrainingSummaryOutsideTrainingArea();
       this.applyRegionView();
     });
   }
 
-  ngOnDestroy(): void {}
+  ngOnDestroy(): void {
+    this.combatService.stop(BattleType.Training);
+  }
 
   getRegionDetails(id: string) {
     this.regionService.getRegionById(id).subscribe((data: any) => {
@@ -109,7 +135,9 @@ export class RegionComponent implements OnInit {
     }
 
     const areas = [...region.areas];
-    const targetIndex = areas.findIndex((area: Area) => area.id === this.targetAreaId);
+    const targetIndex = areas.findIndex(
+      (area: Area) => area.id === this.targetAreaId,
+    );
     if (targetIndex <= 0) {
       return { ...region, areas };
     }
@@ -145,5 +173,14 @@ export class RegionComponent implements OnInit {
 
   closeTrainingSummary(): void {
     this.combatService.closeCurrentTrainingBattle();
+  }
+
+  private dismissTrainingSummaryOutsideTrainingArea(): void {
+    if (
+      this.targetAreaId !== TUTORIAL_TRAINING_GROUNDS_AREA_ID &&
+      this.combatStateService.getIsCombatActive(BattleType.Training)()
+    ) {
+      this.combatService.stop(BattleType.Training);
+    }
   }
 }

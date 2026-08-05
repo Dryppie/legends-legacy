@@ -1,6 +1,7 @@
 using Application.Interfaces.Services.LL.Colosseum;
 using Domain.Models.Colosseum;
 using Microsoft.Extensions.Configuration;
+using Services.LL.Guilds;
 using System.Text.Json;
 
 namespace Services.LL.Colosseum;
@@ -25,6 +26,27 @@ public sealed class JsonChampionMarketCatalog : IChampionMarketCatalog
     }
 
     public IReadOnlyList<ChampionMarketItem> GetAll() => _items;
+
+    public IReadOnlyList<ChampionMarketItem> GetActive(DateTimeOffset now)
+    {
+        var weekKey = ArenaCalendar
+            .GetCurrentWeeklyResetStart(now)
+            .ToString("yyyyMMdd");
+        var fixedItems = _items.Where(x => x.IsEnabled && !x.RotatesWeekly);
+        var rotatingItems = _items
+            .Where(x => x.IsEnabled && x.RotatesWeekly)
+            .GroupBy(x => x.RotationGroup!, StringComparer.OrdinalIgnoreCase)
+            .SelectMany(group => GuildContentHelpers.PickWeeklyRotation(
+                group,
+                weekKey,
+                count: 1,
+                x => x.Id));
+
+        return fixedItems
+            .Concat(rotatingItems)
+            .OrderBy(x => x.SortOrder)
+            .ToList();
+    }
 
     public ChampionMarketItem? GetById(string itemId) =>
         _items.FirstOrDefault(x => x.Id.Equals(itemId, StringComparison.OrdinalIgnoreCase));
@@ -57,13 +79,40 @@ public sealed class JsonChampionMarketCatalog : IChampionMarketCatalog
         }
 
         var invalidCosts = items
-            .Where(x => x.GloryCost < 0 || x.CindersGranted < 0 || x.SoulstonesGranted < 0)
+            .Where(x =>
+                x.GloryCost < 0 ||
+                x.CindersGranted < 0 ||
+                x.SoulstonesGranted < 0 ||
+                x.SigilFragmentsGranted < 0 ||
+                x.RewardItemQuantity < 0)
             .Select(x => x.Id)
             .ToList();
 
         if (invalidCosts.Count > 0)
         {
             throw new InvalidOperationException("Champion's Market item costs and grants must be zero or greater: " + string.Join(", ", invalidCosts));
+        }
+
+        var invalidItemRewards = items
+            .Where(x =>
+                (x.RewardItemQuantity > 0 && string.IsNullOrWhiteSpace(x.RewardItemId)) ||
+                (x.RewardItemQuantity == 0 && !string.IsNullOrWhiteSpace(x.RewardItemId)))
+            .Select(x => x.Id)
+            .ToList();
+
+        if (invalidItemRewards.Count > 0)
+        {
+            throw new InvalidOperationException("Champion's Market inventory rewards require both an item id and a positive quantity: " + string.Join(", ", invalidItemRewards));
+        }
+
+        var invalidRotations = items
+            .Where(x => x.RotatesWeekly && string.IsNullOrWhiteSpace(x.RotationGroup))
+            .Select(x => x.Id)
+            .ToList();
+
+        if (invalidRotations.Count > 0)
+        {
+            throw new InvalidOperationException("Rotating Champion's Market items require a rotation group: " + string.Join(", ", invalidRotations));
         }
 
         var invalidLimits = items

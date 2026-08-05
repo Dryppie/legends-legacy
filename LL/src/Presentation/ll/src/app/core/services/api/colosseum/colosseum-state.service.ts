@@ -22,6 +22,7 @@ import {
 } from '../../client-side/notifications/notification.service';
 import { GameEventDeduper } from '../../real-time/game-event/game-event-consumer';
 import { ToastService } from '../../client-side/components/toast/toast.service';
+import { InventoryStateService } from '../inventory/inventory-state.service';
 
 @Injectable({ providedIn: 'root' })
 export class ColosseumStateService {
@@ -60,6 +61,7 @@ export class ColosseumStateService {
     private readonly characterState: CharacterStateService,
     private readonly notificationService: NotificationService,
     private readonly toastService: ToastService,
+    private readonly inventoryState: InventoryStateService,
   ) {
     effect(
       () => {
@@ -370,6 +372,12 @@ export class ColosseumStateService {
       response.soulstonesGranted > 0
         ? `${response.soulstonesGranted} Soulstones`
         : null,
+      response.sigilFragmentsGranted > 0
+        ? `${response.sigilFragmentsGranted} Sigil Fragments`
+        : null,
+      response.rewardItemQuantity > 0
+        ? `${response.rewardItemQuantity} ${response.rewardItemName ?? response.rewardItemId ?? 'items'}`
+        : null,
     ].filter((reward): reward is string => reward !== null);
 
     const spent = `${response.glorySpent} Glory spent`;
@@ -383,12 +391,17 @@ export class ColosseumStateService {
   ): void {
     const character = this.characterState.currentCharacter();
     this.applyGloryBalance(response.gloryRemaining);
+    if (response.rewardItemQuantity > 0) {
+      this.inventoryState.load(true);
+    }
 
     if (character) {
       this.characterState.updateCharacter({
         ...character,
         cinders: character.cinders + response.cindersGranted,
         soulstones: character.soulstones + response.soulstonesGranted,
+        sigilFragments:
+          character.sigilFragments + response.sigilFragmentsGranted,
       });
     }
   }

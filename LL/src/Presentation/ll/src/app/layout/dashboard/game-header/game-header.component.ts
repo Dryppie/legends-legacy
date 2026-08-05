@@ -5,11 +5,18 @@ import { LocalStorageService } from '../../../core/services/client-side/local-st
 import { CurrentDungeonComponent } from '../../../shared/components/current-dungeon/current-dungeon.component';
 import { NumberFormatPipe } from '../../../shared/pipes/number-format/number-format.pipe';
 import { ShortNumberPipe } from '../../../shared/pipes/number-format/short-number.pipe';
+import { TutorialQuestComponent } from '../tutorial-quest/tutorial-quest.component';
 
 @Component({
-    selector: 'app-game-header',
-    imports: [NgIf, CurrentDungeonComponent, NumberFormatPipe, ShortNumberPipe],
-    templateUrl: './game-header.component.html'
+  selector: 'app-game-header',
+  imports: [
+    NgIf,
+    CurrentDungeonComponent,
+    NumberFormatPipe,
+    ShortNumberPipe,
+    TutorialQuestComponent,
+  ],
+  templateUrl: './game-header.component.html',
 })
 export class GameHeaderComponent {
   readonly currentCharacter;

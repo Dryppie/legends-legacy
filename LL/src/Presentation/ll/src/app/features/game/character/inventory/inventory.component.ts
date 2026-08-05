@@ -1,5 +1,5 @@
 import { NgClass, NgFor, NgIf } from '@angular/common';
-import { Component, computed, effect, OnInit } from '@angular/core';
+import { Component, computed, effect, OnInit, untracked } from '@angular/core';
 import { SidebarSection } from '../../../../shared/models/sidebar-item';
 import { DefaultHeaderComponent } from '../../../../shared/components/default-header/default-header.component';
 import { InventoryItem } from '../../../../shared/models/inventoryItem';
@@ -10,6 +10,7 @@ import { FilterTabsComponent } from '../../../../shared/components/custom-compon
 import { RegularButtonComponent } from '../../../../shared/components/custom-components/buttons/regular-button/regular-button.component';
 import { EquipmentInstance } from '../../../../shared/models/item';
 import { ItemType } from '../../../../shared/models/enums/itemType';
+import { EquipmentType } from '../../../../shared/models/enums/equipmentType';
 import { Rarity } from '../../../../shared/models/enums/rarity';
 import { FormsModule } from '@angular/forms';
 import { ItemComponent } from '../../../../shared/components/item/item.component';
@@ -21,26 +22,32 @@ import {
   DropdownSelection,
 } from '../../../../shared/components/custom-components/dropdown/dropdown.component';
 import { TutorialStateService } from '../../../../core/services/api/tutorial/tutorial-state.service';
-import { TUTORIAL_STEP_EQUIP_EQUIPMENT } from '../../../../shared/models/tutorial';
+import { TutorialPresenterService } from '../../../../core/services/api/tutorial/tutorial-presenter.service';
+import {
+  TUTORIAL_GATHERING_TOOL_ITEM_BASE_IDS,
+  TUTORIAL_STEP_EQUIP_EQUIPMENT,
+  TUTORIAL_STEP_EQUIP_GATHERING_TOOL,
+  TUTORIAL_ONE_HANDED_WEAPON_ITEM_BASE_IDS,
+} from '../../../../shared/models/tutorial';
 
 @Component({
-    selector: 'app-inventory',
-    imports: [
-        NgFor,
-        NgIf,
-        NgClass,
-        FilterTabsComponent,
-        InventoryItemComponent,
-        DefaultHeaderComponent,
-        EquipmentOverviewComponent,
-        RegularButtonComponent,
-        FormsModule,
-        ItemComponent,
-        HelpTooltipDirective,
-        EquipmentTypePipe,
-        DropdownComponent,
-    ],
-    templateUrl: './inventory.component.html'
+  selector: 'app-inventory',
+  imports: [
+    NgFor,
+    NgIf,
+    NgClass,
+    FilterTabsComponent,
+    InventoryItemComponent,
+    DefaultHeaderComponent,
+    EquipmentOverviewComponent,
+    RegularButtonComponent,
+    FormsModule,
+    ItemComponent,
+    HelpTooltipDirective,
+    EquipmentTypePipe,
+    DropdownComponent,
+  ],
+  templateUrl: './inventory.component.html',
 })
 export class InventoryComponent implements OnInit {
   tabs: SidebarSection[] = [
@@ -57,6 +64,11 @@ export class InventoryComponent implements OnInit {
     {
       id: 'resources',
       label: 'Resources',
+      items: [],
+    },
+    {
+      id: 'consumables',
+      label: 'Consumables',
       items: [],
     },
     {
@@ -97,14 +109,20 @@ export class InventoryComponent implements OnInit {
   constructor(
     public state: InventoryStateService,
     private readonly tutorialState: TutorialStateService,
+    private readonly tutorialPresenter: TutorialPresenterService,
   ) {
     effect(() => {
       const tutorial = this.tutorialState.state();
       if (
-        tutorial?.currentStep === TUTORIAL_STEP_EQUIP_EQUIPMENT &&
+        (tutorial?.currentStep === TUTORIAL_STEP_EQUIP_EQUIPMENT ||
+          tutorial?.currentStep === TUTORIAL_STEP_EQUIP_GATHERING_TOOL) &&
         !tutorial.isCompleted
       ) {
         this.enterBrowseMode();
+
+        if (tutorial.currentStep === TUTORIAL_STEP_EQUIP_GATHERING_TOOL) {
+          untracked(() => this.tutorialPresenter.presentCurrentStep());
+        }
       }
     });
   }
@@ -195,6 +213,23 @@ export class InventoryComponent implements OnInit {
       : null;
   }
 
+  isTutorialCraftedWeapon(item: InventoryItem): boolean {
+    const equipment = this.equipmentInstance(item);
+    return (
+      equipment?.tier === 1 &&
+      !!equipment.baseRecipeId &&
+      TUTORIAL_ONE_HANDED_WEAPON_ITEM_BASE_IDS.has(equipment.itemBase.id)
+    );
+  }
+
+  isTutorialGatheringTool(item: InventoryItem): boolean {
+    const equipment = this.equipmentInstance(item);
+    return (
+      equipment?.equipmentBase.equipmentType === EquipmentType.Tool &&
+      TUTORIAL_GATHERING_TOOL_ITEM_BASE_IDS.has(equipment.itemBase.id)
+    );
+  }
+
   equipmentRarityClass(item: InventoryItem): string {
     const rarity = this.equipmentInstance(item)?.rarity ?? Rarity.Common;
 
@@ -234,6 +269,9 @@ export class InventoryComponent implements OnInit {
 
       case 'Resources':
         return this.sortResourcesForDisplay(this.state.materials());
+
+      case 'Consumables':
+        return this.state.consumables();
 
       case 'Essences':
         return this.state.essences();

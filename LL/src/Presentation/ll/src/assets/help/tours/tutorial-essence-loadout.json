@@ -2,23 +2,23 @@
   {
     "element": "[data-tour=essence-archive-list]",
     "title": "1. Soul Archive",
-    "description": "Absorbed Essences appear here. Select your Goblin Essence if you want to inspect its abilities.",
+    "description": "Absorbed Essences appear in your Soul Archive.",
     "position": "right"
   },
   {
     "element": "[data-tour=essence-loadouts]",
-    "title": "2. Loadouts",
-    "description": "Loadouts decide which absorbed Essences are active in combat.",
+    "title": "2. Active loadout",
+    "description": "Essences in your active loadout provide their abilities during combat. Changes remain a draft until you save them.",
     "position": "left"
   },
   {
     "kind": "click",
-    "element": "[data-tour=essence-equip-selected]",
-    "actionSelector": "[data-tour=essence-equip-selected]",
+    "element": "[data-tour=tutorial-equip-essence]",
+    "actionSelector": "[data-tour=tutorial-equip-essence]",
     "waitForEnabled": true,
     "targetTimeoutMs": 5000,
-    "title": "3. Slots",
-    "description": "Equip the selected Goblin Essence into the first available slot.",
+    "title": "3. Equip your Essence",
+    "description": "Equip the Goblin's Essence.",
     "position": "left"
   },
   {
@@ -27,35 +27,8 @@
     "actionSelector": "[data-tour=essence-loadout-save]",
     "waitForEnabled": true,
     "targetTimeoutMs": 5000,
-    "title": "4. Save",
-    "description": "Save your loadout changes.",
-    "position": "top"
-  },
-  {
-    "kind": "click",
-    "element": "[data-tour=essence-loadout-activate]",
-    "actionSelector": "[data-tour=essence-loadout-activate]",
-    "waitForEnabled": true,
-    "targetTimeoutMs": 5000,
-    "title": "5. Activate",
-    "description": "Activate the saved loadout.",
-    "position": "top"
-  },
-  {
-    "kind": "waitForState",
-    "element": "[data-tour=essence-loadout-activate]",
-    "stateKey": "tutorial.crafting.ready",
-    "title": "6. Loadout ready",
-    "description": "Your Essence loadout is being activated.",
-    "position": "top"
-  },
-  {
-    "kind": "navigate",
-    "element": "[data-tour=tutorial-quest-action]",
-    "actionSelector": "[data-tour=tutorial-quest-action]",
-    "route": "/game/professions/crafting",
-    "title": "7. Crafting",
-    "description": "Open Crafting to receive your tutorial equipment.",
-    "position": "right"
+    "title": "4. Save your loadout",
+    "description": "Your draft has unsaved changes. Save the loadout to attune the Essence and make its abilities available in combat.",
+    "position": "left"
   }
 ]

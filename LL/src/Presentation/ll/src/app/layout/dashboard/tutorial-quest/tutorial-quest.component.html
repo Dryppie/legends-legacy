@@ -1,27 +1,230 @@
 <section
   *ngIf="visible() && state() as tutorial"
+  #tutorialHeader
   data-tour="tutorial-quest"
-  class="ll-panel mb-2 flex shrink-0 flex-col gap-3 px-4 py-3 pr-4 sm:mr-4 md:flex-row md:items-center md:justify-between"
+  class="tutorial-attention flex min-w-0 flex-1 items-center gap-2 rounded-md border border-primary/25 bg-primary/5 px-3 py-1.5"
+  [class.tutorial-header-awaiting-welcome]="welcomeOpen()"
+  [class.tutorial-header-welcome-reveal]="welcomeRevealing()"
+  [class.tutorial-header-completing]="completionTransitioning()"
+  [attr.aria-busy]="completionTransitioning()"
 >
-  <div class="min-w-0">
-    <div class="ll-eyebrow">Tutorial</div>
-    <div class="mt-1 flex min-w-0 flex-wrap items-baseline gap-x-3 gap-y-1">
-      <h2 class="ll-heading text-lg">{{ tutorial.title }}</h2>
-      <span class="ll-copy text-xs">
-        {{ tutorial.currentAmount }}/{{ tutorial.requiredAmount }}
+  <div class="min-w-0 flex-1">
+    <div class="flex min-w-0 items-center gap-2">
+      <span class="tutorial-attention-beacon shrink-0" aria-hidden="true">
+        !
+      </span>
+      <span class="ll-eyebrow shrink-0 text-[9px]">First Steps</span>
+      <span class="shrink-0 text-[10px] text-primary">
+        Step {{ currentStepIndex() }} / {{ totalSteps() }}
+      </span>
+      <span
+        class="tutorial-destination-instruction shrink-0 text-[10px] font-semibold text-primary"
+      >
+        <span aria-hidden="true">→</span>
+        {{ tutorial.actionLabel }}
+      </span>
+      <span
+        class="hidden min-w-0 truncate text-xs text-[var(--ll-color-text-subtle)] lg:block"
+        [title]="tutorial.objective"
+      >
+        {{ tutorial.objective }}
       </span>
     </div>
-    <p class="ll-copy mt-1 text-sm">{{ tutorial.objective }}</p>
+
+    <div
+      class="mt-1 h-1.5 overflow-hidden rounded-full bg-black/50"
+      role="progressbar"
+      [attr.aria-label]="progressLabel()"
+      [attr.aria-valuenow]="overallProgressPercent()"
+      aria-valuemin="0"
+      aria-valuemax="100"
+    >
+      <div
+        class="tutorial-progress-fill h-full rounded-full bg-primary"
+        [style.width.%]="overallProgressPercent()"
+        (transitionend)="completeTutorialTransition($event)"
+      ></div>
+    </div>
   </div>
 
-  <div class="flex shrink-0 items-center gap-2">
+  <span
+    *ngIf="completionTransitioning()"
+    class="shrink-0 text-[10px] font-semibold text-primary"
+    aria-live="polite"
+  >
+    Finishing...
+  </span>
+  <ng-container *ngIf="!completionTransitioning() && !confirmingSkip">
     <button
       type="button"
-      class="ll-button-primary px-4 py-2 text-xs"
-      data-tour="tutorial-quest-action"
-      (click)="go()"
+      class="ll-button shrink-0 px-2.5 py-1 text-[10px]"
+      (click)="requestSkip()"
     >
-      {{ tutorial.actionLabel }}
+      Skip Tutorial
     </button>
+  </ng-container>
+  <ng-container *ngIf="!completionTransitioning() && confirmingSkip">
+    <span class="shrink-0 text-[10px] text-[var(--ll-color-text-muted)]">
+      Skip all steps?
+    </span>
+    <button
+      type="button"
+      class="ll-button shrink-0 px-2.5 py-1 text-[10px]"
+      [disabled]="loading()"
+      (click)="cancelSkip()"
+    >
+      Cancel
+    </button>
+    <button
+      type="button"
+      class="ll-button-primary shrink-0 px-2.5 py-1 text-[10px]"
+      [disabled]="loading()"
+      (click)="confirmSkip()"
+    >
+      {{ loading() ? "Skipping..." : "Confirm Skip" }}
+    </button>
+  </ng-container>
+</section>
+
+<ng-container *ngIf="state() as tutorial">
+  <div
+    *ngIf="welcomeOpen()"
+    class="ll-modal-backdrop tutorial-welcome-backdrop"
+    [class.tutorial-welcome-transitioning]="welcomeTransitioning()"
+  >
+    <section
+      #welcomePanel
+      class="ll-modal-panel tutorial-welcome-panel overflow-hidden p-0"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="tutorial-welcome-title"
+      aria-describedby="tutorial-welcome-description"
+    >
+      <div class="border-b border-primary/20 px-5 py-4 text-center">
+        <h2
+          id="tutorial-welcome-title"
+          class="mt-1 text-2xl text-primary [font-family:var(--ll-font-display)]"
+        >
+          Your legend begins here
+        </h2>
+        <p
+          id="tutorial-welcome-description"
+          class="mx-auto mt-2 max-w-sm text-sm leading-6 text-[var(--ll-color-text-subtle)]"
+        >
+          Start the tutorial, or skip it to explore the game freely.
+        </p>
+      </div>
+
+      <div class="space-y-4 px-5 py-4">
+        <div class="grid gap-2 text-sm sm:grid-cols-2">
+          <div class="ll-card flex items-start gap-2.5 px-3 py-2.5">
+            <span class="mt-0.5 text-primary" aria-hidden="true">✦</span>
+            <span>Win your first training battle and claim an Essence.</span>
+          </div>
+          <div class="ll-card flex items-start gap-2.5 px-3 py-2.5">
+            <span class="mt-0.5 text-primary" aria-hidden="true">✦</span>
+            <span
+              >Craft a weapon, equip it, and begin your first expedition.</span
+            >
+          </div>
+        </div>
+        <div
+          *ngIf="error() as welcomeError"
+          class="ll-state ll-state-danger text-xs"
+          role="alert"
+        >
+          {{ welcomeError }}
+        </div>
+      </div>
+
+      <div
+        class="flex flex-col-reverse gap-2 border-t border-primary/20 px-5 py-4 sm:flex-row sm:justify-end"
+      >
+        <ng-container *ngIf="!confirmingSkip">
+          <button
+            type="button"
+            class="ll-button px-4 py-2 text-xs"
+            [disabled]="loading() || welcomeTransitioning()"
+            (click)="requestSkip()"
+          >
+            Skip Tutorial
+          </button>
+          <button
+            type="button"
+            class="ll-button ll-button-primary min-h-9 px-4 py-2 text-xs"
+            [disabled]="loading() || welcomeTransitioning()"
+            (click)="beginTutorial()"
+          >
+            {{
+              loading() && welcomeAction() === "start"
+                ? "Starting..."
+                : "Begin First Steps"
+            }}
+          </button>
+        </ng-container>
+        <ng-container *ngIf="confirmingSkip">
+          <span class="self-center text-xs text-[var(--ll-color-text-muted)]">
+            Skip all tutorial steps?
+          </span>
+          <button
+            type="button"
+            class="ll-button px-4 py-2 text-xs"
+            [disabled]="loading()"
+            (click)="cancelSkip()"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            class="ll-button ll-button-primary min-h-9 px-4 py-2 text-xs"
+            [disabled]="loading()"
+            (click)="skipFromWelcome()"
+          >
+            {{
+              loading() && welcomeAction() === "skip"
+                ? "Preparing your journey..."
+                : "Confirm Skip"
+            }}
+          </button>
+        </ng-container>
+      </div>
+    </section>
   </div>
+</ng-container>
+
+<div
+  *ngIf="error() as tutorialError"
+  class="ll-state ll-state-danger basis-full px-3 py-1.5 text-xs"
+  role="alert"
+>
+  {{ tutorialError }}
+</div>
+
+<section
+  *ngIf="completion() as result"
+  data-tour="tutorial-completion"
+  class="flex min-w-0 flex-1 items-center gap-3 rounded-md border border-primary/40 bg-primary/10 px-3 py-1.5"
+>
+  <div class="min-w-0 flex-1">
+    <div class="flex min-w-0 items-center gap-2">
+      <span class="ll-eyebrow shrink-0">
+        {{ result.wasSkipped ? "Tutorial skipped" : "First Steps complete" }}
+      </span>
+      <span class="min-w-0 truncate text-xs text-white">
+        {{
+          result.wasSkipped
+            ? "Your starter setup is ready."
+            : "Battle in Lumo Ruins has started."
+        }}
+      </span>
+    </div>
+  </div>
+
+  <button
+    type="button"
+    class="ll-button shrink-0 px-2.5 py-1 text-[10px]"
+    (click)="dismissCompletion()"
+  >
+    Dismiss
+  </button>
 </section>

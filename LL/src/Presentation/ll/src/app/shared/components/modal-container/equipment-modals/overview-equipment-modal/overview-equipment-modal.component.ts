@@ -1,7 +1,6 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { Equipment, EquipmentInstance } from '../../../../models/item';
 import {
-  AttributeTooltipPipe,
   AttributeTypeFormatPipe,
 } from '../../../../pipes/attributes/attribute-type-format/attribute-type-format.pipe';
 import { AttributeValueFormatPipe } from '../../../../pipes/attributes/attribute-value-format/attribute-value-format.pipe';
@@ -11,13 +10,16 @@ import { getAllowedEquipmentTypesForSlot } from '../../../../utils/equipment/equ
 import { EquipmentStateService } from '../../../../../core/services/api/equipment/equipment-state.service';
 import { InventoryStateService } from '../../../../../core/services/api/inventory/inventory-state.service';
 import { EquipmentTypePipe } from '../../../../pipes/equipment/equipment-type-format/equipment-type.pipe';
+import { AttributeDisplayPipe } from '../../../../pipes/attributes/attribute-display/attribute-display.pipe';
+import { AttributeTooltipDirective } from '../../../../directives/attribute-tooltip/attribute-tooltip.directive';
 
 @Component({
     selector: 'app-overview-equipment-modal',
     imports: [
         AttributeTypeFormatPipe,
-        AttributeTooltipPipe,
         AttributeValueFormatPipe,
+        AttributeDisplayPipe,
+        AttributeTooltipDirective,
         EquipmentTypePipe,
         NgIf,
         NgFor,

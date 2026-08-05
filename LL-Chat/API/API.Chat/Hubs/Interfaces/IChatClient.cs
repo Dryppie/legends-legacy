@@ -6,4 +6,5 @@ public interface IChatClient        // strongly-typed hub (optional)
 {
     Task Receive(ChatMessageDto dto);
     Task ReceiveStats(ChannelStatsDto stats);
+    Task OnlineCountChanged(int count);
 }

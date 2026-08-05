@@ -39,6 +39,11 @@ export class RegionService {
           name: 'Lumo Ruins',
           levelRequirement: 1,
           creatures: ['Lumo Wisp', 'Lumo Sentinel', 'Goblin', 'Goblin Archer', 'Goblin Warrior'],
+          gatheringTypes: [
+            GatheringType.Mining,
+            GatheringType.Woodcutting,
+            GatheringType.Skinning,
+          ],
           description:
             'The Lumo Ruins are crumbling remnants of a forgotten kingdom, where luminous spirits and sentinels linger among goblin-held halls.',
         },

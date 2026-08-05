@@ -5,13 +5,11 @@ import {
   EquipmentSlotType,
 } from '../../../../shared/models/Dtos/equipment-slots/equipmentSlot';
 import { EquipmentInstance } from '../../../../shared/models/item';
-import {
-  EquipmentChangeResponse,
-  EquipmentService,
-} from './equipment.service';
+import { EquipmentChangeResponse, EquipmentService } from './equipment.service';
 import { InventoryStateService } from '../inventory/inventory-state.service';
 import { EventBusService } from '../../client-side/event-bus/event-bus.service';
 import { CharacterStateService } from '../character/character-state.service';
+import { TutorialStateService } from '../tutorial/tutorial-state.service';
 
 @Injectable({ providedIn: 'root' })
 export class EquipmentStateService {
@@ -32,6 +30,7 @@ export class EquipmentStateService {
     private readonly inventoryState: InventoryStateService,
     private readonly eventBus: EventBusService,
     private readonly characterState: CharacterStateService,
+    private readonly tutorialState: TutorialStateService,
   ) {
     this.load();
 
@@ -95,8 +94,7 @@ export class EquipmentStateService {
       .pipe(finalize(() => this._loading.set(false)))
       .subscribe({
         next: (response) => this.applyEquipmentChange(response),
-        error: (err) =>
-          this._error.set(err.message ?? 'Failed to equip item.'),
+        error: (err) => this._error.set(err.message ?? 'Failed to equip item.'),
       });
   }
 
@@ -118,5 +116,6 @@ export class EquipmentStateService {
     this._equipmentSlots.set(response.equipmentSlots);
     this.inventoryState.setInventory(response.inventoryItems);
     this.characterState.markOverviewDirty();
+    this.tutorialState.refreshAfterOutboxProgress();
   }
 }

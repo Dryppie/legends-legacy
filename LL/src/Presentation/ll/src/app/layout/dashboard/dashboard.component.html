@@ -70,7 +70,6 @@
                     Retry
                   </button>
                 </div>
-                <app-tutorial-quest class="block shrink-0"></app-tutorial-quest>
                 <div class="min-h-0 flex-1 overflow-hidden">
                   <router-outlet></router-outlet>
                 </div>
@@ -89,12 +88,12 @@
                       <p class="font-bold">
                         {{
                           bootstrapError()
-                            ? 'Game state unavailable'
-                            : 'Entering the game'
+                            ? "Game state unavailable"
+                            : "Entering the game"
                         }}
                       </p>
                       <p class="ll-copy text-xs">
-                        {{ bootstrapError() || 'Loading game data.' }}
+                        {{ bootstrapError() || "Loading game data." }}
                       </p>
                     </div>
                   </div>

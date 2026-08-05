@@ -59,7 +59,6 @@ public sealed class AttributeCombatSystemTests
             [AttributeType.DodgeChance] = AttributeCombatRules.DodgeChanceCapPercent,
             [AttributeType.BlockChance] = AttributeCombatRules.BlockChanceCapPercent,
             [AttributeType.DamageReduction] = AttributeCombatRules.DamageReductionCapPercent,
-            [AttributeType.LifeSteal] = AttributeCombatRules.LifeStealCapPercent,
             [AttributeType.Cooldown] = AttributeCombatRules.CooldownReductionCapPercent
         };
 
@@ -70,6 +69,13 @@ public sealed class AttributeCombatSystemTests
             Assert.True(AttributeCatalog.TryGetEffectiveCharacterCap(attribute, 1, out var effectiveCap));
             Assert.Equal(expectedCap, effectiveCap);
         }
+
+        Assert.Equal(100f, AttributeCombatRules.CritChanceCapPercent);
+        Assert.Equal(AttributeCapKind.None, AttributeCatalog.Get(AttributeType.LifeSteal).CapKind);
+        Assert.False(AttributeCatalog.TryGetEffectiveCharacterCap(
+            AttributeType.LifeSteal,
+            1,
+            out _));
 
         Assert.Equal(
             AttributeCapKind.ContextDependent,
@@ -248,11 +254,11 @@ public sealed class AttributeCombatSystemTests
 
         var result = RunSingleTick(actor, target);
 
-        Assert.Contains(
+        var healing = Assert.Single(
             result.EventLog,
             log => log.Source == "effect.heal"
-                   && log.EventType == EventType.Heal
-                   && log.Magnitude == 30);
+                   && log.EventType == EventType.Heal);
+        Assert.InRange(healing.Magnitude, 24, 36);
     }
 
     [Fact]
@@ -455,6 +461,27 @@ public sealed class AttributeCombatSystemTests
     }
 
     [Fact]
+    public void Character_life_steal_is_not_capped_at_one_hundred_percent()
+    {
+        var ability = CreateDamageAbility(40, DamageType.Physical);
+        var actor = CreateCombatant(
+            "drainer",
+            CombatTeam.Friendly,
+            AbilityCompiler.CompileAbilities([ability]).Values,
+            new Dictionary<AttributeType, float>
+            {
+                [AttributeType.MaxHealth] = 300,
+                [AttributeType.LifeSteal] = 150
+            });
+        actor.SetHealth(100);
+        var target = CreateCombatant("target", CombatTeam.Hostile, []);
+
+        RunSingleTick(actor, target, randomSeed: 1);
+
+        Assert.Equal(160, actor.Health);
+    }
+
+    [Fact]
     public void Cooldown_reduction_is_globally_capped_at_forty_percent()
     {
         var definition = AbilityCompiler.CompileAbility(new AbilitySpec
@@ -517,8 +544,8 @@ public sealed class AttributeCombatSystemTests
         var total = EquipmentBudgetEvaluator.Evaluate(modifiers, tier: 1);
         var breakdown = EquipmentBudgetEvaluator.EvaluateByAttribute(modifiers, tier: 1);
 
-        Assert.Equal(6.7d, total);
-        Assert.Equal(2d, breakdown[AttributeType.Power]);
+        Assert.Equal(7.2d, total);
+        Assert.Equal(2.5d, breakdown[AttributeType.Power]);
         Assert.Equal(2d, breakdown[AttributeType.MaxHealth]);
         Assert.Equal(2.7d, breakdown[AttributeType.Armor]);
     }

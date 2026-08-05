@@ -1,6 +1,6 @@
 <div
   class="group relative flex w-full items-center justify-between gap-2 px-2 py-1 text-primary hover:bg-zinc-900/50 focus:outline-none"
-  [title]="attribute.attributeType | attributeTooltip"
+  [appAttributeTooltip]="attribute"
 >
   <div>{{ attribute.attributeType | attributeTypeFormat }}</div>
   <div class="text-white">

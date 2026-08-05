@@ -1,4 +1,10 @@
-import { DecimalPipe, NgClass, NgFor, NgIf } from '@angular/common';
+import {
+  DecimalPipe,
+  NgClass,
+  NgFor,
+  NgIf,
+  NgTemplateOutlet,
+} from '@angular/common';
 import {
   Component,
   computed,
@@ -31,6 +37,12 @@ import {
   DropdownOption,
   DropdownSelection,
 } from '../../../../../shared/components/custom-components/dropdown/dropdown.component';
+import {
+  TUTORIAL_ONE_HANDED_WEAPON_ITEM_BASE_IDS,
+  TUTORIAL_STEP_CRAFT_EQUIPMENT,
+} from '../../../../../shared/models/tutorial';
+import { TutorialStateService } from '../../../../../core/services/api/tutorial/tutorial-state.service';
+import { FirstPartyTourService } from '../../../../../core/services/client-side/first-party-tour/first-party-tour.service';
 
 interface BaseAttributeDisplay {
   attributeType: AttributeType;
@@ -58,6 +70,7 @@ type MobileCraftingPane = 'recipes' | 'blueprints' | 'preview';
     NgIf,
     NgFor,
     NgClass,
+    NgTemplateOutlet,
     DecimalPipe,
     RegularButtonComponent,
     DropdownComponent,
@@ -80,15 +93,31 @@ export class RegularCraftingComponent {
   readonly filterMode = signal<RecipeFilterMode>('all');
   readonly recipeSearch = signal('');
   readonly recipeCategory = signal('all');
+  readonly recipeSubcategory = signal('all');
   readonly blueprintSearch = signal('');
   readonly blueprintFilter = signal<'all' | 'craftable' | 'locked'>('all');
   readonly mobilePane = signal<MobileCraftingPane>('recipes');
   private readonly selectedRecipeId = signal<string | null>(null);
   private readonly selectedBlueprintId = signal<string | null>(null);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly tutorialState = inject(TutorialStateService);
+  private readonly firstPartyTour = inject(FirstPartyTourService);
+
+  readonly isTutorialWeaponSelectionActive = computed(
+    () =>
+      this.tutorialState.state()?.currentStep ===
+      TUTORIAL_STEP_CRAFT_EQUIPMENT,
+  );
+
+  private readonly tutorialScopedRecipes = computed(() => {
+    const recipes = this.recipesV2();
+    if (!this.isTutorialWeaponSelectionActive()) return recipes;
+
+    return recipes.filter((recipe) => this.isTutorialWeaponRecipe(recipe));
+  });
 
   readonly selectedRecipe = computed(() => {
-    const recipes = this.recipesV2();
+    const recipes = this.tutorialScopedRecipes();
     return (
       recipes.find((recipe) => recipe.id === this.selectedRecipeId()) ??
       recipes[0] ??
@@ -108,6 +137,17 @@ export class RegularCraftingComponent {
   readonly selectedDesign = computed(
     () => this.selectedBlueprint() ?? this.selectedRecipe(),
   );
+  readonly possibleTemperingAttributes = computed(() => {
+    const design = this.selectedDesign();
+    if (!design) return [];
+
+    return Array.from(
+      new Set([
+        ...design.primaryTemperingStats,
+        ...design.secondaryTemperingStats,
+      ]),
+    );
+  });
 
   readonly baseAttributeDisplays = computed<BaseAttributeDisplay[]>(() => {
     const recipe = this.selectedRecipe();
@@ -182,23 +222,27 @@ export class RegularCraftingComponent {
     if (!recipe) return [];
 
     const query = this.blueprintSearch().trim().toLowerCase();
-    return recipe.blueprints.filter((blueprint) => {
-      if (this.blueprintFilter() === 'locked' && !blueprint.isLocked)
-        return false;
-      if (
-        this.blueprintFilter() === 'craftable' &&
-        !this.canCraftBlueprint(recipe, blueprint)
-      )
-        return false;
-      if (!query) return true;
+    return recipe.blueprints
+      .filter((blueprint) => {
+        if (this.blueprintFilter() === 'locked' && !blueprint.isLocked)
+          return false;
+        if (
+          this.blueprintFilter() === 'craftable' &&
+          !this.canCraftBlueprint(recipe, blueprint, 1)
+        )
+          return false;
+        if (!query) return true;
 
-      return [
-        blueprint.name,
-        blueprint.craftedItemName,
-        blueprint.description,
-        ...blueprint.tags,
-      ].some((value) => value.toLowerCase().includes(query));
-    });
+        return [
+          blueprint.name,
+          blueprint.craftedItemName,
+          blueprint.description,
+          ...blueprint.tags,
+        ].some((value) => value.toLowerCase().includes(query));
+      })
+      .sort(
+        (left, right) => Number(left.isLocked) - Number(right.isLocked),
+      );
   });
 
   readonly craftableDesignCount = computed(() => {
@@ -206,9 +250,9 @@ export class RegularCraftingComponent {
     if (!recipe) return 0;
 
     return (
-      (this.canCraftRecipe(recipe) ? 1 : 0) +
+      (this.canCraftRecipe(recipe, recipe.materialCosts, 1) ? 1 : 0) +
       recipe.blueprints.filter((blueprint) =>
-        this.canCraftBlueprint(recipe, blueprint),
+        this.canCraftBlueprint(recipe, blueprint, 1),
       ).length
     );
   });
@@ -221,9 +265,9 @@ export class RegularCraftingComponent {
   );
 
   readonly recipeCategories = computed(() =>
-    Array.from(new Set(this.recipesV2().map((recipe) => recipe.category))).sort(
-      (left, right) => left.localeCompare(right),
-    ),
+    Array.from(
+      new Set(this.tutorialScopedRecipes().map((recipe) => recipe.category)),
+    ).sort((left, right) => left.localeCompare(right)),
   );
   readonly recipeCategoryOptions = computed<readonly DropdownOption<string>[]>(
     () => [
@@ -234,17 +278,52 @@ export class RegularCraftingComponent {
       })),
     ],
   );
+  readonly recipeSubcategoryOptions = computed<
+    readonly DropdownOption<string>[]
+  >(() => {
+    switch (this.recipeCategory()) {
+      case 'ArmorForging':
+        return [
+          { label: 'All armor weights', value: 'all' },
+          { label: 'Heavy', value: 'HeavyArmor' },
+          { label: 'Medium', value: 'MediumArmor' },
+          { label: 'Light', value: 'LightArmor' },
+          { label: 'Cloth', value: 'ClothArmor' },
+        ];
+      case 'WeaponSmithing':
+        return [
+          { label: 'All weapon types', value: 'all' },
+          { label: 'One Handed', value: 'OneHanded' },
+          { label: 'Two Handed', value: 'TwoHanded' },
+          { label: 'Off Hand', value: 'OffHand' },
+        ];
+      default:
+        return [];
+    }
+  });
+  readonly recipeSubcategoryLabel = computed(
+    () => this.recipeSubcategoryOptions()[0]?.label ?? 'All types',
+  );
 
   private readonly recipeSearchMatches = computed(() => {
+    const tutorialRecipes = this.tutorialScopedRecipes();
+    if (this.isTutorialWeaponSelectionActive()) return tutorialRecipes;
+
     const queryTerms = this.recipeSearch()
       .trim()
       .toLowerCase()
       .split(/\s+/)
       .filter(Boolean);
     const category = this.recipeCategory();
+    const subcategory = this.recipeSubcategory();
 
-    return this.recipesV2().filter((recipe) => {
+    return tutorialRecipes.filter((recipe) => {
       if (category !== 'all' && recipe.category !== category) return false;
+      if (
+        subcategory !== 'all' &&
+        !this.matchesRecipeSubcategory(recipe, category, subcategory)
+      )
+        return false;
       if (!queryTerms.length) return true;
 
       const searchableText = [
@@ -278,8 +357,11 @@ export class RegularCraftingComponent {
   });
 
   readonly filteredRecipes = computed(() => {
+    const recipes = this.recipeSearchMatches();
+    if (this.isTutorialWeaponSelectionActive()) return recipes;
+
     const mode = this.filterMode();
-    return this.recipeSearchMatches().filter((recipe) => {
+    return recipes.filter((recipe) => {
       switch (mode) {
         case 'craftable':
           return this.canCraftAnyDesign(recipe);
@@ -343,9 +425,34 @@ export class RegularCraftingComponent {
     private readonly inventoryState: InventoryStateService,
     private readonly craftingService: CraftingService,
   ) {
+    this.inventoryState.load(true);
     effect(() => this.loadRecipes(this.targetTier()), {
       allowSignalWrites: true,
     });
+    effect(
+      () => {
+        this.isTutorialWeaponSelectionActive();
+        this.selectFirstVisibleRecipeIfNeeded();
+      },
+      { allowSignalWrites: true },
+    );
+    effect(
+      () => {
+        const tour = this.firstPartyTour.state();
+        if (tour?.pageId !== 'tutorial-crafting') return;
+
+        switch (tour.step.id) {
+          case 'explain-common-base':
+          case 'explain-blueprints':
+            this.mobilePane.set('blueprints');
+            break;
+          case 'explain-item-preview':
+            this.mobilePane.set('preview');
+            break;
+        }
+      },
+      { allowSignalWrites: true },
+    );
     this.craftingService.blueprintLearned$
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((result) => {
@@ -382,6 +489,12 @@ export class RegularCraftingComponent {
 
   setRecipeCategory(selection: DropdownSelection<string>): void {
     this.recipeCategory.set(selection.main);
+    this.recipeSubcategory.set('all');
+    this.selectFirstVisibleRecipeIfNeeded();
+  }
+
+  setRecipeSubcategory(selection: DropdownSelection<string>): void {
+    this.recipeSubcategory.set(selection.main);
     this.selectFirstVisibleRecipeIfNeeded();
   }
 
@@ -406,7 +519,6 @@ export class RegularCraftingComponent {
 
   setQuantity(value: number): void {
     this.quantity.set(Math.min(Math.max(value || 1, 1), 100));
-    this.selectFirstVisibleRecipeIfNeeded();
   }
 
   craft(): void {
@@ -467,14 +579,21 @@ export class RegularCraftingComponent {
     return this.selectedRecipeId() === recipe.id;
   }
 
+  isTutorialWeaponRecipe(recipe: CraftingRecipe): boolean {
+    return (
+      recipe.minTier === 1 &&
+      TUTORIAL_ONE_HANDED_WEAPON_ITEM_BASE_IDS.has(recipe.outputItemId)
+    );
+  }
+
   isBlueprintCraftable(blueprint: CraftingBlueprint): boolean {
     const recipe = this.selectedRecipe();
-    return !!recipe && this.canCraftBlueprint(recipe, blueprint);
+    return !!recipe && this.canCraftBlueprint(recipe, blueprint, 1);
   }
 
   isBaseRecipeCraftable(): boolean {
     const recipe = this.selectedRecipe();
-    return !!recipe && this.canCraftRecipe(recipe);
+    return !!recipe && this.canCraftRecipe(recipe, recipe.materialCosts, 1);
   }
 
   learnedBlueprintCount(recipe: CraftingRecipe): number {
@@ -486,30 +605,32 @@ export class RegularCraftingComponent {
   private canCraftRecipe(
     recipe: CraftingRecipe,
     costs = recipe.materialCosts,
+    quantity = this.quantity(),
   ): boolean {
     if (this.characterProfession.level < recipe.minimumProfessionLevel)
       return false;
     return costs.every(
       (cost) =>
-        this.getOwnedQuantity(cost.itemId) >= cost.required * this.quantity(),
+        this.getOwnedQuantity(cost.itemId) >= cost.required * quantity,
     );
   }
 
   private canCraftBlueprint(
     recipe: CraftingRecipe,
     blueprint: CraftingBlueprint,
+    quantity = this.quantity(),
   ): boolean {
     return (
       !blueprint.isLocked &&
-      this.canCraftRecipe(recipe, blueprint.materialCosts)
+      this.canCraftRecipe(recipe, blueprint.materialCosts, quantity)
     );
   }
 
   canCraftAnyDesign(recipe: CraftingRecipe): boolean {
     return (
-      this.canCraftRecipe(recipe) ||
+      this.canCraftRecipe(recipe, recipe.materialCosts, 1) ||
       recipe.blueprints.some((blueprint) =>
-        this.canCraftBlueprint(recipe, blueprint),
+        this.canCraftBlueprint(recipe, blueprint, 1),
       )
     );
   }
@@ -518,6 +639,22 @@ export class RegularCraftingComponent {
     return recipe.blueprints.some(
       (blueprint) => blueprint.isLearned || !blueprint.isLocked,
     );
+  }
+
+  private matchesRecipeSubcategory(
+    recipe: CraftingRecipe,
+    category: string,
+    subcategory: string,
+  ): boolean {
+    if (category === 'ArmorForging') {
+      return recipe.tags.includes(subcategory);
+    }
+
+    if (category === 'WeaponSmithing') {
+      return recipe.outputItemType === subcategory;
+    }
+
+    return true;
   }
 
   private selectFirstVisibleRecipeIfNeeded(): void {

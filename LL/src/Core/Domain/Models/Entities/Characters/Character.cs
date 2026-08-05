@@ -27,7 +27,6 @@ public class Character : Entity
     public long FateEcho { get; set; } = 0;
     public long SigilFragments { get; set; } = 0;
     public long GuildFavor { get; set; } = 0;
-    public long GuildHonors { get; set; } = 0;
     public ICollection<CharacterSoulstoneUpgrade> CharacterSoulstoneUpgrades { get; set; } = [];
     public Inventory Inventory { get; set; } = null!;
     public CharacterArenaProfile ArenaProfile { get; set; } = null!;

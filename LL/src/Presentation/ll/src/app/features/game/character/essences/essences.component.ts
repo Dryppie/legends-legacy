@@ -1,6 +1,13 @@
 import { CommonModule } from '@angular/common';
 import { ScrollingModule } from '@angular/cdk/scrolling';
-import { Component, computed, effect, OnInit, signal } from '@angular/core';
+import {
+  Component,
+  computed,
+  effect,
+  OnInit,
+  signal,
+  untracked,
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import {
   EssenceStateService,
@@ -28,7 +35,9 @@ import {
   DropdownSelection,
 } from '../../../../shared/components/custom-components/dropdown/dropdown.component';
 import { TutorialStateService } from '../../../../core/services/api/tutorial/tutorial-state.service';
+import { TutorialPresenterService } from '../../../../core/services/api/tutorial/tutorial-presenter.service';
 import {
+  TUTORIAL_GOBLIN_ESSENCE_DEFINITION_ID,
   TUTORIAL_STEP_ABSORB_ESSENCE,
   TUTORIAL_STEP_EQUIP_ESSENCE,
 } from '../../../../shared/models/tutorial';
@@ -39,23 +48,25 @@ type CreatureSourceFilter = 'all' | 'Area' | 'Dungeon';
 type CreatureEssenceFilter = 'all' | 'found' | 'not-found';
 
 @Component({
-    selector: 'app-essences',
-    imports: [
-        CommonModule,
-        ScrollingModule,
-        FormsModule,
-        DefaultHeaderComponent,
-        EssenceDescriptionComponent,
-        NavigationTabsComponent,
-        AttributeTypeFormatPipe,
-        AttributeValueFormatPipe,
-        EssencesAbsorbComponent,
-        DropdownComponent,
-    ],
-    templateUrl: './essences.component.html',
-    styleUrls: ['./essences.component.scss']
+  selector: 'app-essences',
+  imports: [
+    CommonModule,
+    ScrollingModule,
+    FormsModule,
+    DefaultHeaderComponent,
+    EssenceDescriptionComponent,
+    NavigationTabsComponent,
+    AttributeTypeFormatPipe,
+    AttributeValueFormatPipe,
+    EssencesAbsorbComponent,
+    DropdownComponent,
+  ],
+  templateUrl: './essences.component.html',
+  styleUrls: ['./essences.component.scss'],
 })
 export class EssencesComponent implements OnInit {
+  private lastPreparedTutorialStep: string | null = null;
+
   readonly archiveSearch = signal('');
   readonly creatureSearch = signal('');
   readonly creatureRegionFilter = signal('all');
@@ -120,7 +131,6 @@ export class EssencesComponent implements OnInit {
         }
         if (
           filter === 'ready' &&
-          !essence.canUpgradePotential &&
           !essence.canAscend &&
           !essence.canEvolve
         ) {
@@ -146,7 +156,6 @@ export class EssencesComponent implements OnInit {
             return b.level - a.level || a.name.localeCompare(b.name);
           case 'tier':
             return (
-              b.potentialTier - a.potentialTier ||
               b.ascensionTier - a.ascensionTier ||
               b.level - a.level ||
               a.name.localeCompare(b.name)
@@ -226,12 +235,19 @@ export class EssencesComponent implements OnInit {
 
   constructor(
     public readonly essenceState: EssenceStateService,
-    private readonly tutorialState: TutorialStateService,
+    public readonly tutorialState: TutorialStateService,
+    private readonly tutorialPresenter: TutorialPresenterService,
   ) {
     effect(
       () => {
         const tutorial = this.tutorialState.state();
-        if (!tutorial || tutorial.isCompleted) return;
+        if (!tutorial || tutorial.isCompleted) {
+          this.lastPreparedTutorialStep = null;
+          return;
+        }
+
+        if (tutorial.currentStep === this.lastPreparedTutorialStep) return;
+        this.lastPreparedTutorialStep = tutorial.currentStep;
 
         if (tutorial.currentStep === TUTORIAL_STEP_ABSORB_ESSENCE) {
           this.essenceState.setActiveView('absorb');
@@ -240,6 +256,7 @@ export class EssencesComponent implements OnInit {
 
         if (tutorial.currentStep === TUTORIAL_STEP_EQUIP_ESSENCE) {
           this.essenceState.setActiveView('archive');
+          untracked(() => this.tutorialPresenter.presentCurrentStep());
         }
       },
       { allowSignalWrites: true },
@@ -257,6 +274,13 @@ export class EssencesComponent implements OnInit {
       case 'creatures':
       case 'codex':
         this.essenceState.setActiveView(view as EssenceView);
+        if (
+          view === 'archive' &&
+          this.tutorialState.state()?.currentStep ===
+            TUTORIAL_STEP_EQUIP_ESSENCE
+        ) {
+          this.tutorialPresenter.presentCurrentStep();
+        }
     }
   }
 
@@ -292,10 +316,6 @@ export class EssencesComponent implements OnInit {
     this.essenceState.ascend(essence);
   }
 
-  public upgradePotential(essence: PlayerEssenceDto): void {
-    this.essenceState.upgradePotential(essence);
-  }
-
   public evolve(essence: PlayerEssenceDto): void {
     this.essenceState.evolve(essence);
   }
@@ -327,6 +347,51 @@ export class EssencesComponent implements OnInit {
     if (slotIndex === null) return;
 
     this.essenceState.setDraftSlot(slotIndex, essence.id);
+  }
+
+  public isTutorialStarterAttunement(essence: PlayerEssenceDto): boolean {
+    const tutorial = this.tutorialState.state();
+    return (
+      tutorial?.currentStep === TUTORIAL_STEP_EQUIP_ESSENCE &&
+      essence.essenceDefinitionId === TUTORIAL_GOBLIN_ESSENCE_DEFINITION_ID
+    );
+  }
+
+  public equipTutorialStarterEssence(essence: PlayerEssenceDto): void {
+    if (this.equippedDraftSlot(essence) !== null) return;
+
+    const slotIndex = this.nextEquipSlot(essence);
+    if (slotIndex === null) return;
+
+    this.essenceState.setDraftSlot(slotIndex, essence.id);
+  }
+
+  public tutorialEquipButtonText(essence: PlayerEssenceDto): string {
+    const slotIndex = this.equippedDraftSlot(essence);
+    return slotIndex === null
+      ? 'Equip Essence'
+      : `Equipped in Slot ${slotIndex + 1}`;
+  }
+
+  public saveLoadout(): void {
+    const tutorial = this.tutorialState.state();
+    const hasTutorialStarterDrafted = this.essenceState
+      .draftSlots()
+      .some((playerEssenceId) =>
+        this.essenceState
+          .essenceOptions()
+          .some(
+            (essence) =>
+              essence.id === playerEssenceId &&
+              essence.essenceDefinitionId ===
+                TUTORIAL_GOBLIN_ESSENCE_DEFINITION_ID,
+          ),
+      );
+
+    this.essenceState.saveDraftLoadout(
+      tutorial?.currentStep === TUTORIAL_STEP_EQUIP_ESSENCE &&
+        hasTutorialStarterDrafted,
+    );
   }
 
   public canToggleEssenceSlot(essence: PlayerEssenceDto): boolean {
@@ -411,6 +476,7 @@ export class EssencesComponent implements OnInit {
   public loadoutSaveHint(): string {
     if (!this.essenceState.loadouts()) return 'Loading loadout slots.';
     if (this.essenceState.canSaveDraft()) return '';
+    if (!this.essenceState.hasDraftChanges()) return 'No unsaved changes.';
     if (!this.essenceState.draftLoadoutName().trim()) return 'Name required.';
     if (this.essenceState.hasDuplicateDraftEssences()) {
       return 'Each Essence can only be assigned once.';

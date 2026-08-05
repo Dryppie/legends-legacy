@@ -70,7 +70,7 @@ internal static class ProphecyMappingHelpers
             ProphecyObjectiveType.KillCreatures => CreateGuidance(
                 ProphecyGuidanceDestination.WorldCombat,
                 "Fight Encounters",
-                "Defeat qualifying creatures in world encounters."),
+                "Every creature you defeat in combat counts toward this prophecy."),
             _ => new ProphecyGuidanceDto()
         };
     }

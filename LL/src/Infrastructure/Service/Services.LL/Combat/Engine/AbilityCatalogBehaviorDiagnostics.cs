@@ -7,6 +7,7 @@ using Domain.Models.Essences;
 using Domain.Models.Regions.Areas;
 using Services.LL.Combat.Layers.Orchestration.Models;
 using Services.LL.Combat.Layers.Resolution.Models;
+using Services.LL.Interfaces.Combat.Resolution;
 using Microsoft.Extensions.Configuration;
 using System.Text.Json;
 
@@ -127,7 +128,7 @@ public sealed class AbilityCatalogBehaviorDiagnostics : IAbilityCatalogBehaviorD
             var result = engine.Run([friendly], hostiles);
 
             foreach (var expected in scenario.ExpectedLogs)
-                CheckExpectedLog(scenario, expected, result, failures);
+                CheckExpectedLog(catalog, expected, result, failures);
 
             foreach (var expected in scenario.ExpectedStatuses)
                 CheckExpectedStatus(scenario, expected, combatants, failures);
@@ -198,10 +199,18 @@ public sealed class AbilityCatalogBehaviorDiagnostics : IAbilityCatalogBehaviorD
             [new CombatRuntimeParticipant(plan.FriendlyParticipants.Single(), friendlyCharacter, friendlyCombatant)],
             [.. hostileParticipants.Select((item, index) => new CombatRuntimeParticipant(plan.HostileParticipants[index], item.Character, item.Combatant))]);
         var executor = new CombatEngineExecutor(_catalogProvider, _essenceDefinitions);
-        var result = executor.ExecuteAsync(runtime, CancellationToken.None).GetAwaiter().GetResult();
+        var result = executor.ExecuteSimulationAsync(
+                runtime,
+                new CombatSimulationOptions(
+                    scenario.RandomSeed,
+                    MaxTicks: 6000,
+                    StartActiveAbilitiesOnCooldown: true),
+                CancellationToken.None)
+            .GetAwaiter()
+            .GetResult();
 
         foreach (var expected in scenario.ExpectedLogs)
-            CheckExpectedLog(scenario, expected, result, failures);
+            CheckExpectedLog(catalog, expected, result, failures);
 
         if (scenario.ExpectedStatuses.Count > 0)
             failures.Add("Essence-loadout scenarios currently support expectedLogs only.");
@@ -229,16 +238,29 @@ public sealed class AbilityCatalogBehaviorDiagnostics : IAbilityCatalogBehaviorD
             failures);
 
     private static void CheckExpectedLog(
-        AbilityBehaviorScenario scenario,
+        AbilityCatalog catalog,
         ExpectedLogObservation expected,
         CombatResult result,
         ICollection<string> failures)
     {
+        var minimumMagnitude = expected.MinMagnitude;
+        if (minimumMagnitude is not null
+            && expected.EventType is EventType.Damage
+                or EventType.DamageCrit
+                or EventType.Heal
+                or EventType.HealCrit
+            && CatalogEffectUsesCombatMagnitudeVariance(catalog, expected.Source))
+        {
+            minimumMagnitude = (int)Math.Floor(
+                minimumMagnitude.Value
+                * (1d - FastCombatEngine.CombatMagnitudeVariance));
+        }
+
         var matches = result.EventLog
             .Where(x => string.Equals(x.Source, expected.Source, StringComparison.OrdinalIgnoreCase))
             .Where(x => x.EventType == expected.EventType)
             .Where(x => expected.TargetId is null || string.Equals(x.TargetId, expected.TargetId, StringComparison.OrdinalIgnoreCase))
-            .Where(x => expected.MinMagnitude is null || x.Magnitude >= expected.MinMagnitude)
+            .Where(x => minimumMagnitude is null || x.Magnitude >= minimumMagnitude)
             .ToList();
 
         if (matches.Count < expected.MinCount)
@@ -252,6 +274,18 @@ public sealed class AbilityCatalogBehaviorDiagnostics : IAbilityCatalogBehaviorD
                 + $"Observed sources: {string.Join(", ", observedSources)}.");
         }
     }
+
+    private static bool CatalogEffectUsesCombatMagnitudeVariance(
+        AbilityCatalog catalog,
+        string effectId) =>
+        catalog.Abilities
+            .SelectMany(ability => ability.Effects)
+            .Concat(catalog.Statuses.SelectMany(status => status.Effects))
+            .Any(effect =>
+                effect.Id.Equals(effectId, StringComparison.OrdinalIgnoreCase)
+                && effect.ScalingAttribute == AttributeType.Power
+                && effect.Operation is AbilityEffectOperation.Damage
+                    or AbilityEffectOperation.Heal);
 
     private static void CheckExpectedStatus(
         AbilityBehaviorScenario scenario,

@@ -29,7 +29,6 @@ public static class EquipmentConstraintProfile
             [AttributeType.Precision] = primary,
             [AttributeType.Spirit] = primary,
             [AttributeType.MaxHealth] = 180 + normalizedTier * 80,
-            [AttributeType.WeaponDamage] = 8 + normalizedTier * 4,
             [AttributeType.Armor] = normalizedTier * 5,
             [AttributeType.Resistance] = normalizedTier * 5,
             [AttributeType.CritChance] = 5,
@@ -81,9 +80,10 @@ public static class EquipmentConstraintProfile
         {
             return EqualWeights(
                 AttributeType.Power,
-                AttributeType.WeaponDamage,
+                AttributeType.CritChance,
                 AttributeType.CritDamage,
-                AttributeType.ArmorPenetration);
+                AttributeType.ArmorPenetration,
+                AttributeType.AttackSpeed);
         }
 
         if (tags.Contains("Aegis"))
@@ -126,11 +126,7 @@ public static class EquipmentConstraintProfile
                     AttributeType.MagicPenetration,
                     AttributeType.HealthRegeneration),
             EquipmentType.OneHanded or EquipmentType.TwoHanded =>
-                EqualWeights(
-                    AttributeType.Power,
-                    AttributeType.WeaponDamage,
-                    AttributeType.CritDamage,
-                    AttributeType.ArmorPenetration),
+                EqualWeights(AttributeType.Power),
             EquipmentType.OffHand
                 when role.Equals("Towershield", StringComparison.OrdinalIgnoreCase) =>
                 EqualWeights(
@@ -180,13 +176,7 @@ public static class EquipmentConstraintProfile
                     AttributeType.HealingPowerPercent,
                     AttributeType.SummonPower),
             EquipmentType.OneHanded or EquipmentType.TwoHanded =>
-                EqualWeights(
-                    AttributeType.Power,
-                    AttributeType.Precision,
-                    AttributeType.WeaponDamage,
-                    AttributeType.CritDamage,
-                    AttributeType.ArmorPenetration,
-                    AttributeType.AttackSpeed),
+                EqualWeights(AttributeType.Power),
             EquipmentType.OffHand =>
                 EqualWeights(
                     AttributeType.Power,
@@ -215,7 +205,6 @@ public static class EquipmentConstraintProfile
                     AttributeType.Precision,
                     AttributeType.Spirit,
                     AttributeType.MaxHealth,
-                    AttributeType.WeaponDamage,
                     AttributeType.Armor,
                     AttributeType.Resistance,
                     AttributeType.HealthRegeneration,

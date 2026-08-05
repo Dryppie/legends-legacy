@@ -150,6 +150,7 @@ public sealed class GameEventOutboxTests
             db,
             itemBases: null!,
             inventory: null!,
+            equipmentSlots: null!,
             inventoryItemFactory: null!,
             lootRewardWriter: null!,
             new FirstStepsTutorialDefinitionProvider(),
@@ -417,7 +418,7 @@ public sealed class GameEventOutboxTests
                     Key = TutorialConstants.StepDefeatTrainingCreature,
                     Objective = "Defeat the creature in the Training Area.",
                     RequiredAmount = 1,
-                    ActionLabel = "Go to Training Area",
+                    ActionLabel = "Go to World Map",
                     DestinationRoute = "/game/world",
                     NextStepKey = TutorialConstants.StepAbsorbEssence,
                     Trigger = new TutorialStepTriggerDefinition

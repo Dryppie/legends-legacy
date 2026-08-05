@@ -104,8 +104,8 @@ public sealed class AttributeBalanceAnalyzerTests
     {
         var report = CreateAnalyzer().Analyze(CancellationToken.None);
 
-        Assert.Equal(123, report.EqualBudgetComparisons.Count);
-        Assert.Equal(117, report.EqualBudgetComparisons.Count(x => x.IsReleaseGate));
+        Assert.Equal(117, report.EqualBudgetComparisons.Count);
+        Assert.Equal(111, report.EqualBudgetComparisons.Count(x => x.IsReleaseGate));
         Assert.Equal(6, report.EqualBudgetComparisons.Count(x => !x.IsReleaseGate));
         Assert.Equal(
             Enum.GetValues<AttributePeerComparisonGroup>(),
@@ -185,7 +185,7 @@ public sealed class AttributeBalanceAnalyzerTests
                 .Where(x =>
                     x.Tier == tier
                     && x.Id.StartsWith(
-                        "armor-penetration-weapon-damage-",
+                        "armor-penetration-power-",
                         StringComparison.Ordinal))
                 .ToList();
             var magicalPenetration = report.EqualBudgetComparisons
@@ -521,7 +521,13 @@ public sealed class AttributeBalanceAnalyzerTests
 
         Assert.Equal(9, report.SummonCalibrations.Count);
         Assert.Equal(27, report.HandCalibrations.Count);
-        Assert.True(report.CalibrationGate.SummonCalibrationPassed);
+        Assert.True(
+            report.CalibrationGate.SummonCalibrationPassed,
+            string.Join(
+                Environment.NewLine,
+                report.SummonCalibrations
+                    .Where(x => Math.Abs(x.EqualBudgetDifferencePercent) > report.CalibrationGate.SummonTolerancePercent)
+                    .Select(x => $"Tier {x.Tier}, {x.DurationTicks} ticks: {x.EqualBudgetDifferencePercent:0.##}%")));
         Assert.True(
             report.CalibrationGate.HandCalibrationPassed,
             string.Join(
@@ -600,6 +606,12 @@ public sealed class AttributeBalanceAnalyzerTests
             + Environment.NewLine
             + string.Join(
                 Environment.NewLine,
+                report.CraftingCombatPeers
+                    .Where(x => x.IsReleaseGate && !x.Passed)
+                    .Select(x => $"{x.Id} t{x.Tier}: {x.DifferencePercent:0.##}%"))
+            + Environment.NewLine
+            + string.Join(
+                Environment.NewLine,
                 report.MaximumEquipmentProgression.CombatPeers
                     .Where(x => x.IsReleaseGate && !x.Passed)
                     .Select(x =>
@@ -609,7 +621,7 @@ public sealed class AttributeBalanceAnalyzerTests
                         $"  spent: {x.FirstSpentBudget:0.##} vs {x.SecondSpentBudget:0.##}; " +
                         $"utility/100: {x.FirstUtilityPerHundredBudget:0.##} vs " +
                         $"{x.SecondUtilityPerHundredBudget:0.##}")));
-        Assert.Equal(5, report.BalanceVersion);
+        Assert.Equal(6, report.BalanceVersion);
     }
 
     [Fact]
@@ -618,7 +630,7 @@ public sealed class AttributeBalanceAnalyzerTests
         var report = CreateAnalyzer().Analyze(CancellationToken.None);
         var catalog = report.CraftingCatalogConstraints;
 
-        Assert.Equal(5, catalog.CandidateBalanceVersion);
+        Assert.Equal(6, catalog.CandidateBalanceVersion);
         Assert.True(catalog.ProductionActive);
         Assert.Equal(31, catalog.RecipesAnalyzed);
         Assert.Equal(11, catalog.BlueprintsAnalyzed);
@@ -669,7 +681,14 @@ public sealed class AttributeBalanceAnalyzerTests
         Assert.Equal(1_248, maximum.LoadoutsAnalyzed);
         Assert.Equal(11, maximum.CombatPeers.Count);
         Assert.True(report.CalibrationGate.MaximumEquipmentProgressionAnalyzed);
-        Assert.True(report.CalibrationGate.MaximumEquipmentProgressionPassed);
+        Assert.True(
+            report.CalibrationGate.MaximumEquipmentProgressionPassed,
+            string.Join(
+                Environment.NewLine,
+                report.CalibrationGate.Blockers.Concat(
+                    maximum.UnspentBudgetByRecipe.Select(group =>
+                        $"{group.RecipeId}/{group.BlueprintId ?? "base"}: " +
+                        $"{group.TotalUnspentBudget} unspent across {group.LoadoutOccurrences} items"))));
         Assert.Equal(0, maximum.LoadoutsOverCap);
         Assert.Equal(0, maximum.LoadoutsWithUnspentBudget);
         Assert.Empty(maximum.CapSaturationByAttribute);

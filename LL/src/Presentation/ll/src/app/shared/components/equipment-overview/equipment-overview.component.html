@@ -10,7 +10,8 @@
       <img
         src="icons/equipment-slots/{{ slot.iconPath }}.svg"
         alt="empty_equipment"
-        class="center w-8 object-contain"
+        class="center w-8 object-contain transition-[filter,opacity] duration-150"
+        [ngClass]="slot.equipmentInstance ? '' : 'opacity-35 grayscale'"
       />
     </div>
     <app-item

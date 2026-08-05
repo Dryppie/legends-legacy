@@ -4,7 +4,7 @@
       "id": "weekly.combat.kills",
       "title": "The World Will Know Your Violence",
       "flavorText": "A week is enough time to become a warning.",
-      "objectiveText": "Defeat {target} qualifying creatures this week.",
+      "objectiveText": "Defeat {target} creatures this week.",
       "scope": "Weekly",
       "category": "Combat",
       "difficulty": "Uncommon",

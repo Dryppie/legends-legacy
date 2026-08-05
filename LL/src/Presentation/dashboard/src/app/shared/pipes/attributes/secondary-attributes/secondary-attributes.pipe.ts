@@ -9,7 +9,6 @@ import { AttributeDto } from '../../../models/Dtos/attributesDto';
 export class SecondaryAttributesPipe implements PipeTransform {
   private secondaryAttributes = [
     AttributeType.MaxHealth,
-    AttributeType.WeaponDamage,
     AttributeType.Armor,
     AttributeType.Resistance,
     AttributeType.CritChance,

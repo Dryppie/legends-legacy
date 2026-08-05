@@ -11,9 +11,23 @@
     <app-equipment-display [item]="equipmentInstance"> </app-equipment-display>
 
     <div class="mt-6 flex place-items-end justify-end gap-2">
-      <button type="button" (click)="onClose()" class="ll-button">Close</button>
+      <button
+        type="button"
+        class="ll-button"
+        data-tour="tutorial-equipment-close"
+        (click)="onClose()"
+      >
+        Close
+      </button>
 
-      <button type="button" class="ll-button" (click)="onEquip()">Equip</button>
+      <button
+        type="button"
+        class="ll-button"
+        data-tour="tutorial-equipment-equip"
+        (click)="onEquip()"
+      >
+        Equip
+      </button>
     </div>
   </div>
 </div>

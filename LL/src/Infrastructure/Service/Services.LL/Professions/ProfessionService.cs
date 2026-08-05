@@ -7,6 +7,7 @@ public class ProfessionService : IProfessionService
 {
     private const int JewelryCraftingProfessionValue = 2;
     private const int WeaponSmithingProfessionValue = 3;
+    private const int RetiredFishingProfessionValue = 6;
     private readonly IProfessionRepository _professionRepository;
 
     public ProfessionService(IProfessionRepository professionRepository)
@@ -47,7 +48,7 @@ public class ProfessionService : IProfessionService
     {
         var professions = await _professionRepository.GetProfessionsAsync(characterId, cancellationToken);
         var visibleProfessions = professions
-            .Where(profession => !IsDeprecatedCraftingProfession(profession.ProfessionType))
+            .Where(profession => !IsRetiredProfession(profession.ProfessionType))
             .ToList();
 
         foreach (var profession in visibleProfessions)
@@ -73,5 +74,11 @@ public class ProfessionService : IProfessionService
     {
         var value = (int)professionType;
         return value is JewelryCraftingProfessionValue or WeaponSmithingProfessionValue;
+    }
+
+    private static bool IsRetiredProfession(ProfessionType professionType)
+    {
+        return IsDeprecatedCraftingProfession(professionType) ||
+            (int)professionType == RetiredFishingProfessionValue;
     }
 }

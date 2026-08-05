@@ -9,8 +9,6 @@ public sealed class EquippedEssenceSnapshot
     public int SlotIndex { get; init; }
     public Guid PlayerEssenceId { get; init; }
     public string EssenceDefinitionId { get; init; } = string.Empty;
-    public int NativeRegion { get; init; } = 1;
-    public int PotentialTier { get; init; } = 1;
     public int Level { get; init; }
     public int CurrentXp { get; init; }
     public int AscensionTier { get; init; }
@@ -26,8 +24,6 @@ public sealed class EquippedEssenceSnapshot
             SlotIndex = slotIndex,
             PlayerEssenceId = essence.Id,
             EssenceDefinitionId = essence.EssenceDefinitionId,
-            NativeRegion = essence.NativeRegion,
-            PotentialTier = essence.PotentialTier,
             Level = essence.Level,
             CurrentXp = essence.CurrentXp,
             AscensionTier = essence.AscensionTier,
@@ -40,8 +36,6 @@ public sealed class EquippedEssenceSnapshot
             Id = PlayerEssenceId,
             CharacterId = characterId,
             EssenceDefinitionId = EssenceDefinitionId,
-            NativeRegion = NativeRegion,
-            PotentialTier = PotentialTier,
             Level = Level,
             CurrentXp = CurrentXp,
             AscensionTier = AscensionTier,

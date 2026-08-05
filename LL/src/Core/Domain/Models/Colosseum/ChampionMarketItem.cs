@@ -13,4 +13,10 @@ public sealed record ChampionMarketItem(
     bool IsEnabled,
     int SortOrder,
     int CindersGranted = 0,
-    int SoulstonesGranted = 0);
+    int SoulstonesGranted = 0,
+    int SigilFragmentsGranted = 0,
+    string? RewardItemId = null,
+    string? RewardItemName = null,
+    int RewardItemQuantity = 0,
+    bool RotatesWeekly = false,
+    string? RotationGroup = null);

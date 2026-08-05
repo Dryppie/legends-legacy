@@ -142,7 +142,7 @@ public sealed class EquipmentBalanceProfileTests
         Assert.Equal(54d, EquipmentBudgetEvaluator.Evaluate(modifiers, tier: 1));
         Assert.Equal(102d, EquipmentBudgetEvaluator.Evaluate(modifiers, tier: 5));
         Assert.Equal(137d, EquipmentBudgetEvaluator.Evaluate(modifiers, tier: 10));
-        Assert.Equal(5, EquipmentBudgetEvaluator.BalanceVersion);
+        Assert.Equal(6, EquipmentBudgetEvaluator.BalanceVersion);
     }
 
     [Fact]
@@ -209,7 +209,7 @@ public sealed class EquipmentBalanceProfileTests
     {
         var allocation = EquipmentBudgetAllocator.Allocate(
             tier: 1,
-            budget: 700d,
+            budget: 2_700d,
             new Dictionary<AttributeType, double>
             {
                 [AttributeType.Power] = 0.9d,
@@ -217,9 +217,9 @@ public sealed class EquipmentBalanceProfileTests
             },
             roundToWholePoints: false);
 
-        Assert.Equal(500d, allocation.AddedPoints[AttributeType.Power], precision: 4);
-        Assert.Equal(1_000d, allocation.AddedPoints[AttributeType.MaxHealth], precision: 4);
-        Assert.Equal(700d, allocation.SpentBudget, precision: 4);
+        Assert.Equal(1_800d, allocation.AddedPoints[AttributeType.Power], precision: 4);
+        Assert.Equal(2_250d, allocation.AddedPoints[AttributeType.MaxHealth], precision: 4);
+        Assert.Equal(2_700d, allocation.SpentBudget, precision: 4);
         Assert.Equal(0d, allocation.UnspentBudget, precision: 4);
         Assert.Contains(AttributeType.Power, allocation.CappedAttributes);
     }
@@ -288,9 +288,9 @@ public sealed class EquipmentBalanceProfileTests
             OutputItemType = equipment.EquipmentType,
             InitialStatProfile = new Dictionary<AttributeType, double>
             {
-                [AttributeType.Power] = 0.90d,
+                [AttributeType.DamageReduction] = 0.90d,
                 [AttributeType.MaxHealth] = 0.05d,
-                [AttributeType.WeaponDamage] = 0.05d
+                [AttributeType.Armor] = 0.05d
             }
         };
 
@@ -307,9 +307,14 @@ public sealed class EquipmentBalanceProfileTests
         var maximumRoundingError = modifiers.Sum(modifier =>
             EquipmentStatBudgetCatalog.Get(modifier.AttributeType, 10).CostPerPoint / 2d);
 
-        Assert.Equal(
-            EquipmentStatBudgetCatalog.Get(AttributeType.Power, 10).HardCap,
-            modifiers.Single(x => x.AttributeType == AttributeType.Power).Amount);
+        Assert.True(
+            modifiers.Single(x => x.AttributeType == AttributeType.DamageReduction).Amount
+            < expectedBudget * recipe.InitialStatProfile[AttributeType.DamageReduction]
+            / EquipmentStatBudgetCatalog.Get(AttributeType.DamageReduction, 10).CostPerPoint);
+        Assert.Contains(modifiers, modifier =>
+            modifier.AttributeType != AttributeType.DamageReduction
+            && modifier.AttributeType != AttributeType.MaxHealth
+            && modifier.AttributeType != AttributeType.Armor);
         Assert.InRange(
             Math.Abs(evaluatedBudget - expectedBudget),
             0,
@@ -393,8 +398,11 @@ public sealed class EquipmentBalanceProfileTests
         Assert.InRange(critContribution, 9.999d, 10.001d);
         Assert.InRange(allocation.UnspentBudget, 0, 0.001d);
         Assert.Contains(AttributeType.CritChance, allocation.BindingCombatCaps);
-        Assert.True(allocation.AddedPoints[AttributeType.Power] > 25d);
-        Assert.Equal(5, EquipmentConstraintProfile.BalanceVersion);
+        Assert.True(
+            allocation.AddedPoints[AttributeType.Power]
+            > 100d * weights[AttributeType.Power]
+            / EquipmentStatBudgetCatalog.Get(AttributeType.Power, 10).CostPerPoint);
+        Assert.Equal(6, EquipmentConstraintProfile.BalanceVersion);
         Assert.True(EquipmentConstraintProfile.ProductionActive);
     }
 
@@ -429,9 +437,10 @@ public sealed class EquipmentBalanceProfileTests
         Assert.Equal(
             [
                 AttributeType.Power,
-                AttributeType.WeaponDamage,
+                AttributeType.CritChance,
                 AttributeType.CritDamage,
-                AttributeType.ArmorPenetration
+                AttributeType.ArmorPenetration,
+                AttributeType.AttackSpeed
             ],
             EquipmentConstraintProfile.GetOverflowWeights(design).Keys);
     }

@@ -93,33 +93,14 @@
     </div>
   </div>
 
-  <div
-    *ngIf="data.baseModifiers?.length || data.instanceModifiers?.length"
-    class="ll-item-detail-section"
-  >
+  <div *ngIf="data.attributes.length" class="ll-item-detail-section">
     <div class="ll-item-meta">Attributes</div>
 
-    <div *ngIf="data.baseModifiers?.length" class="mt-2 text-sm">
+    <div class="mt-2 text-sm">
       <div
-        *ngFor="let attr of data.baseModifiers"
+        *ngFor="let attr of data.attributes"
         class="ll-item-stat-row"
-        [title]="attr.attributeType | attributeTooltip"
-      >
-        <span>
-          {{ attr.attributeType | attributeTypeFormat }}
-        </span>
-        <span class="text-primary">
-          {{ attr.amount | attributeValueFormat: attr.attributeType : true
-          }}<span *ngIf="shouldAppendModifierPercent(attr)">%</span></span
-        >
-      </div>
-    </div>
-
-    <div *ngIf="data.instanceModifiers?.length" class="mt-2 text-sm">
-      <div
-        *ngFor="let attr of data.instanceModifiers"
-        class="ll-item-stat-row"
-        [title]="attr.attributeType | attributeTooltip"
+        [appAttributeTooltip]="attr"
       >
         <span>
           {{ attr.attributeType | attributeTypeFormat }}

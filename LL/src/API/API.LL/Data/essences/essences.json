@@ -5,7 +5,6 @@
       "sourceMonsterId": "monster.vampire_bat",
       "name": "Vampire Bat Essence",
       "description": "The combat essence of Vampire Bat, granting Bloodthirsty Fangs and Erratic Flight.",
-      "nativeRegion": 1,
       "rarity": "Common",
       "tags": [],
       "attributeBonuses": [
@@ -33,7 +32,6 @@
       "sourceMonsterId": "monster.raven",
       "name": "Raven Essence",
       "description": "The combat essence of Raven, granting Piercing Peck and Bad Omen.",
-      "nativeRegion": 1,
       "rarity": "Common",
       "tags": [],
       "attributeBonuses": [
@@ -61,7 +59,6 @@
       "sourceMonsterId": "monster.venomous_snake",
       "name": "Venomous Snake Essence",
       "description": "The combat essence of Venomous Snake, granting Toxic Fangs and Venom-Coated Strikes.",
-      "nativeRegion": 1,
       "rarity": "Common",
       "tags": [],
       "attributeBonuses": [
@@ -89,7 +86,6 @@
       "sourceMonsterId": "monster.nightshade_blossom",
       "name": "Nightshade Blossom Essence",
       "description": "The combat essence of Nightshade Blossom, granting Withering Petals and Midnight Bloom.",
-      "nativeRegion": 1,
       "rarity": "Common",
       "tags": [],
       "attributeBonuses": [
@@ -117,7 +113,6 @@
       "sourceMonsterId": "monster.blood_zombie",
       "name": "Blood Zombie Essence",
       "description": "The combat essence of Blood Zombie, granting Rending Bite and Clotted Flesh.",
-      "nativeRegion": 1,
       "rarity": "Common",
       "tags": [],
       "attributeBonuses": [
@@ -145,7 +140,6 @@
       "sourceMonsterId": "monster.lumo_wisp",
       "name": "Lumo Wisp Essence",
       "description": "The combat essence of Lumo Wisp, granting Soothing Glow and Lumo Barrier.",
-      "nativeRegion": 1,
       "rarity": "Common",
       "tags": [],
       "attributeBonuses": [
@@ -173,7 +167,6 @@
       "sourceMonsterId": "monster.lumo_sentinel",
       "name": "Lumo Sentinel Essence",
       "description": "The combat essence of Lumo Sentinel, granting Targeting Beam and Cracked Core.",
-      "nativeRegion": 1,
       "rarity": "Common",
       "tags": [],
       "attributeBonuses": [
@@ -201,7 +194,6 @@
       "sourceMonsterId": "monster.goblin",
       "name": "Goblin Essence",
       "description": "The combat essence of Goblin, granting Shiv Jab and Gobber Trapper.",
-      "nativeRegion": 1,
       "rarity": "Common",
       "tags": [],
       "attributeBonuses": [
@@ -229,7 +221,6 @@
       "sourceMonsterId": "monster.goblin_archer",
       "name": "Goblin Archer Essence",
       "description": "The combat essence of Goblin Archer, granting Sniper's Strike and Poisoned Arrows.",
-      "nativeRegion": 1,
       "rarity": "Common",
       "tags": [],
       "attributeBonuses": [
@@ -257,7 +248,6 @@
       "sourceMonsterId": "monster.goblin_warrior",
       "name": "Goblin Warrior Essence",
       "description": "The combat essence of Goblin Warrior, granting Raging Cleave and Relentless.",
-      "nativeRegion": 1,
       "rarity": "Common",
       "tags": [],
       "attributeBonuses": [
@@ -285,7 +275,6 @@
       "sourceMonsterId": "monster.goblin_shaman",
       "name": "Goblin Shaman Essence",
       "description": "The combat essence of Goblin Shaman, granting Weak Rejuvenation and Spirit Link.",
-      "nativeRegion": 1,
       "rarity": "Common",
       "tags": [],
       "attributeBonuses": [
@@ -313,7 +302,6 @@
       "sourceMonsterId": "monster.hobgoblin",
       "name": "Hobgoblin Essence",
       "description": "The combat essence of Hobgoblin, granting Intimidating Slam and Threatening Presence.",
-      "nativeRegion": 1,
       "rarity": "Rare",
       "tags": [],
       "attributeBonuses": [
@@ -341,7 +329,6 @@
       "sourceMonsterId": "monster.hobgoblin",
       "name": "Hobgoblin: Brutal Charge Essence",
       "description": "The combat essence of Hobgoblin, granting Brutal Charge and Threatening Presence.",
-      "nativeRegion": 1,
       "rarity": "Rare",
       "tags": [],
       "attributeBonuses": [
@@ -369,7 +356,6 @@
       "sourceMonsterId": "monster.frost_imp",
       "name": "Frost Imp Essence",
       "description": "The combat essence of Frost Imp, granting Ice Needle and Cold Touch.",
-      "nativeRegion": 1,
       "rarity": "Common",
       "tags": [],
       "attributeBonuses": [
@@ -397,7 +383,6 @@
       "sourceMonsterId": "monster.crystal_wisp",
       "name": "Crystal Wisp Essence",
       "description": "The combat essence of Crystal Wisp, granting Prismatic Shard and Captured Light.",
-      "nativeRegion": 1,
       "rarity": "Common",
       "tags": [],
       "attributeBonuses": [
@@ -425,7 +410,6 @@
       "sourceMonsterId": "monster.blue_slime",
       "name": "Blue Slime Essence",
       "description": "The combat essence of Blue Slime, granting Sweet Water and Protective Slime.",
-      "nativeRegion": 1,
       "rarity": "Common",
       "tags": [],
       "attributeBonuses": [
@@ -453,7 +437,6 @@
       "sourceMonsterId": "monster.transparent_slime",
       "name": "Transparent Slime Essence",
       "description": "The combat essence of Transparent Slime, granting Transparent Engulf and Reconstitute.",
-      "nativeRegion": 1,
       "rarity": "Common",
       "tags": [],
       "attributeBonuses": [
@@ -481,7 +464,6 @@
       "sourceMonsterId": "monster.moss_lizard",
       "name": "Moss Lizard Essence",
       "description": "The combat essence of Moss Lizard, granting Moss Camouflage and Lost Tail.",
-      "nativeRegion": 1,
       "rarity": "Common",
       "tags": [],
       "attributeBonuses": [
@@ -509,7 +491,6 @@
       "sourceMonsterId": "monster.shadow_imp",
       "name": "Shadow Imp Essence",
       "description": "The combat essence of Shadow Imp, granting Shadow Image and Shadowy Presence.",
-      "nativeRegion": 1,
       "rarity": "Common",
       "tags": [],
       "attributeBonuses": [
@@ -537,7 +518,6 @@
       "sourceMonsterId": "monster.grave_hound",
       "name": "Grave Hound Essence",
       "description": "The combat essence of Grave Hound, granting Gravebound Pounce and Graveyard Howl.",
-      "nativeRegion": 1,
       "rarity": "Common",
       "tags": [],
       "attributeBonuses": [
@@ -565,7 +545,6 @@
       "sourceMonsterId": "monster.lost_soul",
       "name": "Lost Soul Essence",
       "description": "The combat essence of Lost Soul, granting Soul Drain and Soul Lantern.",
-      "nativeRegion": 1,
       "rarity": "Common",
       "tags": [],
       "attributeBonuses": [
@@ -593,7 +572,6 @@
       "sourceMonsterId": "monster.grave_wisp",
       "name": "Grave Wisp Essence",
       "description": "The combat essence of Grave Wisp, granting Mourning Flash and Pale Flame.",
-      "nativeRegion": 1,
       "rarity": "Common",
       "tags": [],
       "attributeBonuses": [
@@ -621,7 +599,6 @@
       "sourceMonsterId": "monster.skeleton",
       "name": "Skeleton Essence",
       "description": "The combat essence of Skeleton, granting Bone Smash and Calcium.",
-      "nativeRegion": 1,
       "rarity": "Common",
       "tags": [],
       "attributeBonuses": [
@@ -649,7 +626,6 @@
       "sourceMonsterId": "monster.pixie",
       "name": "Pixie Essence",
       "description": "The combat essence of Pixie, granting Pixie Burst and Resonant Chime.",
-      "nativeRegion": 1,
       "rarity": "Common",
       "tags": [],
       "attributeBonuses": [
@@ -677,7 +653,6 @@
       "sourceMonsterId": "monster.wood_nymph",
       "name": "Wood Nymph Essence",
       "description": "The combat essence of Wood Nymph, granting Bramble Shield and Nature's Protection.",
-      "nativeRegion": 1,
       "rarity": "Common",
       "tags": [],
       "attributeBonuses": [
@@ -705,7 +680,6 @@
       "sourceMonsterId": "monster.rainbow_slime",
       "name": "Rainbow Slime Essence",
       "description": "The combat essence of Rainbow Slime, granting Unstable Colors and Colorful Shield.",
-      "nativeRegion": 1,
       "rarity": "Common",
       "tags": [],
       "attributeBonuses": [
@@ -733,7 +707,6 @@
       "sourceMonsterId": "monster.enchanted_fairy",
       "name": "Enchanted Fairy Essence",
       "description": "The combat essence of Enchanted Fairy, granting Fae's Corrosion and Fae's Charm.",
-      "nativeRegion": 1,
       "rarity": "Common",
       "tags": [],
       "attributeBonuses": [
@@ -761,7 +734,6 @@
       "sourceMonsterId": "monster.illusion_fox",
       "name": "Illusion Fox Essence",
       "description": "The combat essence of Illusion Fox, granting A Doomed Illusion and Foxfire Wisp.",
-      "nativeRegion": 1,
       "rarity": "Common",
       "tags": [],
       "attributeBonuses": [
@@ -789,7 +761,6 @@
       "sourceMonsterId": "monster.thornback_boar",
       "name": "Thornback Boar Essence",
       "description": "The combat essence of Thornback Boar, granting Thorned Rush and Bristling Hide.",
-      "nativeRegion": 1,
       "rarity": "Common",
       "tags": [],
       "attributeBonuses": [
@@ -817,7 +788,6 @@
       "sourceMonsterId": "monster.hollow_stag",
       "name": "Hollow Stag Essence",
       "description": "The combat essence of Hollow Stag, granting Echoing Antlers and Hollow Core.",
-      "nativeRegion": 1,
       "rarity": "Common",
       "tags": [],
       "attributeBonuses": [
@@ -845,7 +815,6 @@
       "sourceMonsterId": "monster.treant_sapling",
       "name": "Treant Sapling Essence",
       "description": "The combat essence of Treant Sapling, granting Sprouting Surge and Nurturing Roots.",
-      "nativeRegion": 1,
       "rarity": "Common",
       "tags": [],
       "attributeBonuses": [
@@ -873,7 +842,6 @@
       "sourceMonsterId": "monster.glade_panther",
       "name": "Glade Panther Essence",
       "description": "The combat essence of Glade Panther, granting Ambush Strike and Razor Claws.",
-      "nativeRegion": 1,
       "rarity": "Common",
       "tags": [],
       "attributeBonuses": [
@@ -901,7 +869,6 @@
       "sourceMonsterId": "monster.forest_spirit",
       "name": "Forest Spirit Essence",
       "description": "The combat essence of Forest Spirit, granting Rejuvenation and Spirit Bloom.",
-      "nativeRegion": 1,
       "rarity": "Common",
       "tags": [],
       "attributeBonuses": [
@@ -929,7 +896,6 @@
       "sourceMonsterId": "monster.rotroot_shambler",
       "name": "Rotroot Shambler Essence",
       "description": "The combat essence of Rotroot Shambler, granting Rotburst and Decaying Husk.",
-      "nativeRegion": 1,
       "rarity": "Common",
       "tags": [],
       "attributeBonuses": [
@@ -957,7 +923,6 @@
       "sourceMonsterId": "monster.spider",
       "name": "Spider Essence",
       "description": "The combat essence of Spider, granting Skittering Strike and Spider Eyes.",
-      "nativeRegion": 1,
       "rarity": "Common",
       "tags": [],
       "attributeBonuses": [
@@ -985,7 +950,6 @@
       "sourceMonsterId": "monster.giant_spider",
       "name": "Giant Spider Essence",
       "description": "The combat essence of Giant Spider, granting Spider Crash and Thickened Carapace.",
-      "nativeRegion": 1,
       "rarity": "Common",
       "tags": [],
       "attributeBonuses": [
@@ -1013,7 +977,6 @@
       "sourceMonsterId": "monster.venomous_spiderling",
       "name": "Venomous Spiderling Essence",
       "description": "The combat essence of Venomous Spiderling, granting Venom Web and Toxic Opportunity.",
-      "nativeRegion": 1,
       "rarity": "Common",
       "tags": [],
       "attributeBonuses": [
@@ -1041,7 +1004,6 @@
       "sourceMonsterId": "monster.blackjaw_spider",
       "name": "Blackjaw Spider Essence",
       "description": "The combat essence of Blackjaw Spider, granting Blackjaw Bite and Powerful Mandibles.",
-      "nativeRegion": 1,
       "rarity": "Common",
       "tags": [],
       "attributeBonuses": [
@@ -1069,7 +1031,6 @@
       "sourceMonsterId": "monster.flame_imp",
       "name": "Flame Imp Essence",
       "description": "The combat essence of Flame Imp, granting Firebomb Toss and Impish Flame.",
-      "nativeRegion": 1,
       "rarity": "Common",
       "tags": [],
       "attributeBonuses": [
@@ -1097,7 +1058,6 @@
       "sourceMonsterId": "monster.smolder_rat",
       "name": "Smolder Rat Essence",
       "description": "The combat essence of Smolder Rat, granting Scorching Tail and Heat Resistance.",
-      "nativeRegion": 1,
       "rarity": "Common",
       "tags": [],
       "attributeBonuses": [
@@ -1125,7 +1085,6 @@
       "sourceMonsterId": "monster.cinder_beetle",
       "name": "Cinder Beetle Essence",
       "description": "The combat essence of Cinder Beetle, granting Burning Mandibles and Molten Shell.",
-      "nativeRegion": 1,
       "rarity": "Common",
       "tags": [],
       "attributeBonuses": [
@@ -1153,7 +1112,6 @@
       "sourceMonsterId": "monster.red_slime",
       "name": "Red Slime Essence",
       "description": "The combat essence of Red Slime, granting Ignite Core and Recharging Core.",
-      "nativeRegion": 1,
       "rarity": "Common",
       "tags": [],
       "attributeBonuses": [
@@ -1181,7 +1139,6 @@
       "sourceMonsterId": "monster.giant_worm",
       "name": "Giant Worm Essence",
       "description": "The combat essence of Giant Worm, granting Drag Beneath and Erupting Ambush.",
-      "nativeRegion": 1,
       "rarity": "Common",
       "tags": [],
       "attributeBonuses": [
@@ -1209,7 +1166,6 @@
       "sourceMonsterId": "monster.bog_mite",
       "name": "Bog Mite Essence",
       "description": "The combat essence of Bog Mite, granting Infestation and Blood Feeders.",
-      "nativeRegion": 1,
       "rarity": "Common",
       "tags": [],
       "attributeBonuses": [
@@ -1237,7 +1193,6 @@
       "sourceMonsterId": "monster.green_slime",
       "name": "Green Slime Essence",
       "description": "The combat essence of Green Slime, granting Acid Splash and Corrosive Ooze.",
-      "nativeRegion": 1,
       "rarity": "Common",
       "tags": [],
       "attributeBonuses": [
@@ -1265,7 +1220,6 @@
       "sourceMonsterId": "monster.large_rat",
       "name": "Large Rat Essence",
       "description": "The combat essence of Large Rat, granting Tail Wrap and Big.",
-      "nativeRegion": 1,
       "rarity": "Common",
       "tags": [],
       "attributeBonuses": [
@@ -1293,7 +1247,6 @@
       "sourceMonsterId": "monster.viper",
       "name": "Viper Essence",
       "description": "The combat essence of Viper, granting Piercing Fangs and Potent Toxins.",
-      "nativeRegion": 1,
       "rarity": "Common",
       "tags": [],
       "attributeBonuses": [
@@ -1321,7 +1274,6 @@
       "sourceMonsterId": "monster.poisonous_rat",
       "name": "Poisonous Rat Essence",
       "description": "The combat essence of Poisonous Rat, granting Toxic Bite and Resistant Hide.",
-      "nativeRegion": 1,
       "rarity": "Common",
       "tags": [],
       "attributeBonuses": [
@@ -1349,7 +1301,6 @@
       "sourceMonsterId": "monster.rotfly_toad",
       "name": "Rotfly Toad Essence",
       "description": "The combat essence of Rotfly Toad, granting Putrid Belch and Rotfly Host.",
-      "nativeRegion": 1,
       "rarity": "Common",
       "tags": [],
       "attributeBonuses": [
@@ -1377,7 +1328,6 @@
       "sourceMonsterId": "monster.brown_slime",
       "name": "Brown Slime Essence",
       "description": "The combat essence of Brown Slime, granting Absorb Impact and Layered Mud.",
-      "nativeRegion": 1,
       "rarity": "Common",
       "tags": [],
       "attributeBonuses": [
@@ -1405,7 +1355,6 @@
       "sourceMonsterId": "monster.cave_bat",
       "name": "Cave Bat Essence",
       "description": "The combat essence of Cave Bat, granting Sonic Screech and Echolocation.",
-      "nativeRegion": 1,
       "rarity": "Common",
       "tags": [],
       "attributeBonuses": [
@@ -1433,7 +1382,6 @@
       "sourceMonsterId": "monster.giant_bat",
       "name": "Giant Bat Essence",
       "description": "The combat essence of Giant Bat, granting Echoing Screech and Resonant Cry.",
-      "nativeRegion": 1,
       "rarity": "Common",
       "tags": [],
       "attributeBonuses": [
@@ -1461,7 +1409,6 @@
       "sourceMonsterId": "monster.undead",
       "name": "Undead Essence",
       "description": "The combat essence of Undead, granting Necrotic Slash and Corpse Explosion.",
-      "nativeRegion": 1,
       "rarity": "Common",
       "tags": [],
       "attributeBonuses": [

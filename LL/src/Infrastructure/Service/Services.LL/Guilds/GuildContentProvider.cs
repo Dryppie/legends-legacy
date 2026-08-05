@@ -132,7 +132,6 @@ public sealed class GuildContentValidator : IGuildContentValidator
             if (building.RequiredGuildHallLevel <= 0) errors.Add($"{building.Type} required Guild Hall level must be positive");
             if (building.BaseCost < 0) errors.Add($"{building.Type} base cost cannot be negative");
             if (building.UpgradeCostStep < 0) errors.Add($"{building.Type} upgrade cost step cannot be negative");
-            if (building.BaseHours <= 0) errors.Add($"{building.Type} base hours must be positive");
             if (building.Benefits.Count == 0) errors.Add($"{building.Type} must define at least one benefit");
 
             foreach (var benefit in building.Benefits)
@@ -179,7 +178,7 @@ public sealed class GuildContentValidator : IGuildContentValidator
         {
             if (string.IsNullOrWhiteSpace(item.Key)) errors.Add("Shop item key is required");
             if (string.IsNullOrWhiteSpace(item.Name)) errors.Add($"Shop item '{item.Key}' name is required");
-            if (item.GuildFavorCost < 0 || item.GuildHonorsCost < 0) errors.Add($"Shop item '{item.Key}' costs cannot be negative");
+            if (item.GuildFavorCost < 0) errors.Add($"Shop item '{item.Key}' cost cannot be negative");
             if (item.WeeklyLimit < 0) errors.Add($"Shop item '{item.Key}' weekly limit cannot be negative");
             if (item.RequiredWeeklyContribution < 0) errors.Add($"Shop item '{item.Key}' weekly contribution requirement cannot be negative");
             if (item.RequiredMarketOfficeLevel <= 0) errors.Add($"Shop item '{item.Key}' Market Office requirement must be positive");
@@ -218,7 +217,6 @@ public sealed record GuildBuildingDefinition(
     string UnlockSummary,
     int BaseCost,
     int UpgradeCostStep,
-    int BaseHours,
     IReadOnlyList<GuildBuildingBenefitDto> Benefits);
 
 public sealed record GuildMissionDefinition(
@@ -236,7 +234,6 @@ public sealed record GuildShopItemDefinition(
     string Description,
     GuildShopStockType StockType,
     long GuildFavorCost,
-    long GuildHonorsCost,
     int WeeklyLimit,
     long RequiredWeeklyContribution,
     int RequiredMarketOfficeLevel,
@@ -271,6 +268,8 @@ internal static class GuildContentHelpers
 
 internal static class GuildContentDefaults
 {
+    private const long FiveDayGuildActionCapacity = 432_000;
+
     public static GuildContentDocument Document => new()
     {
         Buildings = BuildingDefinitions,
@@ -291,10 +290,9 @@ internal static class GuildContentDefaults
             "Higher levels unlock access to advanced guild buildings.",
             BaseCost: 150,
             UpgradeCostStep: 150,
-            BaseHours: 4,
             Benefits:
             [
-                new(1, "Guild Headquarters", "The guild can manage missions, supplies, and construction.", true),
+                new(1, "Guild Headquarters", "The guild can manage missions, supplies, construction, and one additional member per Guild Hall level.", true),
                 new(2, "Support Buildings", "Workshop and Treasury become available.", true),
                 new(4, "Combat Infrastructure", "Raid Hall, Training Grounds, and Essence Sanctum become available.", true),
                 new(6, "War Planning", "War Room becomes available.", true)
@@ -309,7 +307,6 @@ internal static class GuildContentDefaults
             "Improves guild mission variety and rewards.",
             BaseCost: 100,
             UpgradeCostStep: 100,
-            BaseHours: 2,
             Benefits:
             [
                 new(1, "Mission Infrastructure", "Unlocks mission reward bonuses and keeps the mission system active.", true),
@@ -324,16 +321,16 @@ internal static class GuildContentDefaults
             MaxLevel: 5,
             IsPermanent: false,
             RequiredGuildHallLevel: 1,
-            "Unlocks common, weekly, and prestige shop stock by level.",
+            "Unlocks rotating common catalysts and rare stock by level.",
             BaseCost: 150,
             UpgradeCostStep: 125,
-            BaseHours: 2,
             Benefits:
             [
-                new(1, "Common Stock", "Common guild shop stock can be purchased.", true),
-                new(2, "Expanded Stock", "Additional common stock appears in the shop.", true),
-                new(3, "Weekly Stock", "Rotating weekly shop stock becomes available.", true),
-                new(5, "Prestige Procurement", "Prestige stock becomes available.", true)
+                new(1, "Common Stock", "Two recipe catalyst caches rotate weekly alongside Soulstone reserves.", true),
+                new(2, "Sigil Supplies", "Sigil Fragment stock becomes available.", true),
+                new(3, "Rare Stock", "Rare supplies and one rotating six-catalyst cache become available.", true),
+                new(4, "Blueprint Archive", "One rotating Blueprint becomes available each week.", true),
+                new(5, "Expanded Rare Stock", "A second rotating rare catalyst cache becomes available each week.", true)
             ]),
         new(
             GuildBuildingType.RaidHall,
@@ -345,7 +342,6 @@ internal static class GuildContentDefaults
             "Unlock placeholder for future guild raids.",
             BaseCost: 400,
             UpgradeCostStep: 225,
-            BaseHours: 6,
             Benefits:
             [
                 new(1, "Raid Readiness", "Unlocks the Raids tab locked state and prepares future raid registration.", true),
@@ -363,7 +359,6 @@ internal static class GuildContentDefaults
             "Unlock placeholder for future guild wars.",
             BaseCost: 500,
             UpgradeCostStep: 250,
-            BaseHours: 8,
             Benefits:
             [
                 new(1, "War Planning", "Unlocks the Wars tab locked state and prepares future war registration.", true),
@@ -381,7 +376,6 @@ internal static class GuildContentDefaults
             "Adds crafting-flavored mission and shop support.",
             BaseCost: 175,
             UpgradeCostStep: 150,
-            BaseHours: 3,
             Benefits:
             [
                 new(1, "Craft Orders", "Crafting and tempering guild orders can appear from the data-driven order pool.", true),
@@ -399,7 +393,6 @@ internal static class GuildContentDefaults
             "Future raid and war support effects.",
             BaseCost: 300,
             UpgradeCostStep: 200,
-            BaseHours: 5,
             Benefits:
             [
                 new(1, "Training Yard", "Unlocks the building foundation for combat preparation systems.", true),
@@ -417,7 +410,6 @@ internal static class GuildContentDefaults
             "Future essence missions and rewards.",
             BaseCost: 300,
             UpgradeCostStep: 200,
-            BaseHours: 5,
             Benefits:
             [
                 new(1, "Essence Infrastructure", "Unlocks the building foundation for essence-focused guild systems.", true),
@@ -432,26 +424,24 @@ internal static class GuildContentDefaults
             MaxLevel: 5,
             IsPermanent: false,
             RequiredGuildHallLevel: 2,
-            "Reduces building Guild Supply costs and construction time.",
+            "Reduces building Guild Supply costs.",
             BaseCost: 175,
             UpgradeCostStep: 150,
-            BaseHours: 3,
             Benefits:
             [
                 new(1, "Supply Ledger", "Treasury level reduces building Guild Supply costs by 2% per level.", true),
                 new(2, "Supply Storage", "Guild Supply handling is represented through construction efficiency.", true),
-                new(3, "Construction Efficiency", "Treasury level reduces building construction time by 2% per level.", true),
+                new(3, "Supply Efficiency", "Guild Supply cost reductions improve with every Treasury level.", true),
                 new(5, "Quartermaster Network", "Treasury efficiency reaches its current maximum.", true)
             ])
     ];
 
     private static readonly GuildMissionDefinition[] WeeklyMissionDefinitions =
     [
-        new(Guid.Parse("2f4bbec5-6212-47af-8b1d-e34cae632ae5"), "weekly.monster_extermination", "Monster Extermination", "Defeat creatures together as a guild.", GuildMissionCategory.Combat, GuildContributionMetric.CreaturesDefeated, 2000),
-        new(Guid.Parse("00cf74dd-0b37-457b-a2b2-94a7630307e1"), "weekly.dungeon_expedition", "Dungeon Expedition", "Clear dungeon rooms together as a guild.", GuildMissionCategory.Dungeon, GuildContributionMetric.DungeonRoomsCleared, 50),
-        new(Guid.Parse("d9a3f2d8-3a97-4e16-80fe-496d87afea70"), "weekly.craftsmens_commission", "Craftsmen's Commission", "Complete tempering actions together as a guild.", GuildMissionCategory.Crafting, GuildContributionMetric.TemperingActionsCompleted, 250),
-        new(Guid.Parse("9b2b2643-2bd2-43ac-bb50-5a6d7b6e45c1"), "weekly.forge_quota", "Forge Quota", "Craft items together as a guild.", GuildMissionCategory.Crafting, GuildContributionMetric.ItemsCrafted, 75),
-        new(Guid.Parse("683a9d85-8d9c-4750-b9c7-e89f8b2b9b61"), "weekly.dungeon_vanguard", "Dungeon Vanguard", "Complete dungeon runs together as a guild.", GuildMissionCategory.Dungeon, GuildContributionMetric.DungeonsCompleted, 12)
+        new(Guid.Parse("2f4bbec5-6212-47af-8b1d-e34cae632ae5"), "weekly.monster_extermination", "Monster Extermination", "Defeat creatures together as a guild.", GuildMissionCategory.Combat, GuildContributionMetric.CreaturesDefeated, FiveDayGuildActionCapacity),
+        new(Guid.Parse("00cf74dd-0b37-457b-a2b2-94a7630307e1"), "weekly.dungeon_expedition", "Dungeon Expedition", "Clear dungeon rooms together as a guild.", GuildMissionCategory.Dungeon, GuildContributionMetric.DungeonRoomsCleared, 1_000),
+        new(Guid.Parse("d9a3f2d8-3a97-4e16-80fe-496d87afea70"), "weekly.craftsmens_commission", "Craftsmen's Commission", "Complete tempering actions together as a guild.", GuildMissionCategory.Crafting, GuildContributionMetric.TemperingActionsCompleted, FiveDayGuildActionCapacity),
+        new(Guid.Parse("683a9d85-8d9c-4750-b9c7-e89f8b2b9b61"), "weekly.dungeon_vanguard", "Dungeon Vanguard", "Complete dungeon runs together as a guild.", GuildMissionCategory.Dungeon, GuildContributionMetric.DungeonsCompleted, 100)
     ];
 
     private static readonly GuildMissionDefinition[] DailyOrderDefinitions =
@@ -464,13 +454,105 @@ internal static class GuildContentDefaults
 
     private static readonly GuildShopItemDefinition[] ShopItemDefinitions =
     [
-        new("common.cinder_purse", "Cinder Purse", "A practical packet of Cinders for everyday upgrades.", GuildShopStockType.Common, 75, 0, 5, 0, 1, false, null, [new GuildShopRewardDto(GuildShopRewardType.Cinders, 500)]),
-        new("common.soulstone_cache", "Soulstone Cache", "A small cache of Soulstones earned through guild service.", GuildShopStockType.Common, 125, 0, 3, 0, 1, false, null, [new GuildShopRewardDto(GuildShopRewardType.Soulstones, 2)]),
-        new("common.cinder_satchel", "Cinder Satchel", "A larger packet made available through an expanded Market Office.", GuildShopStockType.Common, 180, 0, 2, 100, 2, false, null, [new GuildShopRewardDto(GuildShopRewardType.Cinders, 1200)]),
-        new("weekly.builder_crate", "Builder's Crate", "A weekly support crate for active guild contributors.", GuildShopStockType.Weekly, 250, 0, 1, 250, 3, true, "weekly", [new GuildShopRewardDto(GuildShopRewardType.Cinders, 1500), new GuildShopRewardDto(GuildShopRewardType.Soulstones, 3)]),
-        new("weekly.soulstone_bundle", "Soulstone Bundle", "A rotating bundle for members who kept the weekly ledger moving.", GuildShopStockType.Weekly, 300, 0, 1, 300, 3, true, "weekly", [new GuildShopRewardDto(GuildShopRewardType.Soulstones, 6)]),
-        new("weekly.echo_stipend", "Echo Stipend", "A focused weekly stipend for prophecy and fate planning.", GuildShopStockType.Weekly, 350, 0, 1, 350, 3, true, "weekly", [new GuildShopRewardDto(GuildShopRewardType.FateEcho, 15), new GuildShopRewardDto(GuildShopRewardType.SigilFragments, 25)]),
-        new("prestige.honor_reliquary", "Honor Reliquary", "A rare prestige reliquary reserved for proven guild champions.", GuildShopStockType.Prestige, 0, 2, 1, 500, 5, true, "prestige", [new GuildShopRewardDto(GuildShopRewardType.FateEcho, 25), new GuildShopRewardDto(GuildShopRewardType.Soulstones, 8), new GuildShopRewardDto(GuildShopRewardType.Item, 1, "item.monster_core.lesser", "Lesser Monster Core")]),
-        new("prestige.elder_cache", "Elder Cache", "A rotating prestige cache for members with exceptional weekly standing.", GuildShopStockType.Prestige, 0, 3, 1, 750, 5, true, "prestige", [new GuildShopRewardDto(GuildShopRewardType.Cinders, 3500), new GuildShopRewardDto(GuildShopRewardType.Soulstones, 10), new GuildShopRewardDto(GuildShopRewardType.SigilFragments, 50)])
+        .. CreateCommonCatalystShopItems(),
+        new("common.soulstone_cache", "Soulstone Reserve", "A dependable supply of Soulstones for constellation progression.", GuildShopStockType.Common, 200, 2, 0, 1, false, null, [new GuildShopRewardDto(GuildShopRewardType.Soulstones, 25)]),
+        new("common.sigil_fragment_case", "Sigil Fragment Case", "Enough fragments to assemble a meaningful supply of dungeon sigils.", GuildShopStockType.Common, 200, 2, 100, 2, false, null, [new GuildShopRewardDto(GuildShopRewardType.SigilFragments, 10)]),
+        new("rare.soulstone_bundle", "Greater Soulstone Reserve", "A concentrated Soulstone shipment for long-term constellation upgrades.", GuildShopStockType.Rare, 350, 1, 300, 3, false, null, [new GuildShopRewardDto(GuildShopRewardType.Soulstones, 50)]),
+        new("rare.sigilwright_cache", "Sigilwright's Cache", "A large fragment cache for assembling dungeon sigils.", GuildShopStockType.Rare, 350, 1, 350, 3, false, null, [new GuildShopRewardDto(GuildShopRewardType.SigilFragments, 30)]),
+        .. CreateRareCatalystShopItems(),
+        .. CreateBlueprintShopItems(),
     ];
+
+    private static IEnumerable<GuildShopItemDefinition> CreateCommonCatalystShopItems()
+    {
+        yield return CreateCommonCatalystShopItem("fury", "Fury", "fury_heart", "Fury Heart");
+        yield return CreateCommonCatalystShopItem("arcane", "Arcane", "arcane_focus", "Arcane Focus");
+        yield return CreateCommonCatalystShopItem("venom", "Venom", "venom_gland", "Venom Gland");
+        yield return CreateCommonCatalystShopItem("hive", "Hive", "royal_chitin_plate", "Royal Chitin Plate");
+        yield return CreateCommonCatalystShopItem("primal", "Primal", "hive_ichor", "Hive Ichor");
+    }
+
+    private static GuildShopItemDefinition CreateCommonCatalystShopItem(
+        string id,
+        string designName,
+        string itemId,
+        string itemName) =>
+        new(
+            $"common.{id}_catalyst_cache",
+            $"{designName} Catalyst Cache",
+            $"Two {PluralizeCatalystName(itemName)} for {designName} Blueprint recipes.",
+            GuildShopStockType.Common,
+            GuildFavorCost: 100,
+            WeeklyLimit: 2,
+            RequiredWeeklyContribution: 0,
+            RequiredMarketOfficeLevel: 1,
+            RotatesWeekly: true,
+            RotationGroup: "common-catalysts",
+            [new GuildShopRewardDto(GuildShopRewardType.Item, 2, itemId, itemName)]);
+
+    private static IEnumerable<GuildShopItemDefinition> CreateRareCatalystShopItems()
+    {
+        yield return CreateRareCatalystShopItem("fury", "Fury", "fury_heart", "Fury Heart");
+        yield return CreateRareCatalystShopItem("arcane", "Arcane", "arcane_focus", "Arcane Focus");
+        yield return CreateRareCatalystShopItem("venom", "Venom", "venom_gland", "Venom Gland");
+        yield return CreateRareCatalystShopItem("hive", "Hive", "royal_chitin_plate", "Royal Chitin Plate");
+        yield return CreateRareCatalystShopItem("primal", "Primal", "hive_ichor", "Hive Ichor");
+    }
+
+    private static GuildShopItemDefinition CreateRareCatalystShopItem(
+        string id,
+        string designName,
+        string itemId,
+        string itemName) =>
+        new(
+            $"rare.{id}_catalyst_cache",
+            $"Rare {designName} Catalyst Cache",
+            $"Six {PluralizeCatalystName(itemName)} for {designName} Blueprint recipes.",
+            GuildShopStockType.Rare,
+            GuildFavorCost: 250,
+            WeeklyLimit: 1,
+            RequiredWeeklyContribution: 250,
+            RequiredMarketOfficeLevel: 3,
+            RotatesWeekly: true,
+            RotationGroup: "rare-catalysts",
+            [new GuildShopRewardDto(GuildShopRewardType.Item, 6, itemId, itemName)]);
+
+    private static IEnumerable<GuildShopItemDefinition> CreateBlueprintShopItems()
+    {
+        yield return CreateBlueprintShopItem("fury", "Blueprint: Fury");
+        yield return CreateBlueprintShopItem("arcane", "Blueprint: Arcane");
+        yield return CreateBlueprintShopItem("execution", "Blueprint: Execution");
+        yield return CreateBlueprintShopItem("aegis", "Blueprint: Aegis");
+        yield return CreateBlueprintShopItem("warden", "Blueprint: Warden");
+        yield return CreateBlueprintShopItem("endurance", "Blueprint: Endurance");
+        yield return CreateBlueprintShopItem("phoenix", "Blueprint: Phoenix");
+        yield return CreateBlueprintShopItem("spirit", "Blueprint: Spirit");
+        yield return CreateBlueprintShopItem("primal", "Blueprint: Primal");
+        yield return CreateBlueprintShopItem("venom_touched_sword", "Blueprint: Venom-Touched Sword");
+        yield return CreateBlueprintShopItem("hivefang_dagger", "Blueprint: Hivefang Dagger");
+    }
+
+    private static GuildShopItemDefinition CreateBlueprintShopItem(string id, string name) =>
+        new(
+            $"rare.blueprint_{id}",
+            name,
+            "A rare crafting design selected from the Guild Blueprint Archive.",
+            GuildShopStockType.Rare,
+            GuildFavorCost: 450,
+            WeeklyLimit: 1,
+            RequiredWeeklyContribution: 400,
+            RequiredMarketOfficeLevel: 4,
+            RotatesWeekly: true,
+            RotationGroup: "rare-blueprints",
+            [new GuildShopRewardDto(GuildShopRewardType.Item, 1, $"blueprint_{id}", name)]);
+
+    private static string PluralizeCatalystName(string itemName) => itemName switch
+    {
+        "Fury Heart" => "Fury Hearts",
+        "Arcane Focus" => "Arcane Focuses",
+        "Venom Gland" => "Venom Glands",
+        "Royal Chitin Plate" => "Royal Chitin Plates",
+        "Hive Ichor" => "Hive Ichors",
+        _ => itemName
+    };
 }

@@ -2,7 +2,7 @@
   <app-default-header
     class="marketplace-header flex-none"
     section="City"
-    title="Marketplace"
+    title="Cinder Bazaar"
     [text]="
       (characterState.currentCharacter()?.cinders ?? 0 | numberFormat) +
       ' Cinders'
@@ -11,6 +11,7 @@
   ></app-default-header>
 
   <section
+    *ngIf="canUseMarketplace; else marketplaceUnavailable"
     class="ll-panel flex h-full min-h-0 flex-col overflow-hidden"
     [class.marketplace-mobile-detail]="mobileDetailOpen()"
   >
@@ -101,4 +102,45 @@
       </ng-container>
     </div>
   </section>
+
+  <ng-template #marketplaceUnavailable>
+    <section
+      class="ll-panel flex min-h-64 items-center justify-center px-6 py-10 text-center"
+    >
+      <div class="max-w-lg">
+        <ng-container *ngIf="!userInfoLoaded; else accessResolved">
+          <h2 class="text-xl text-primary">Checking Marketplace access...</h2>
+          <p class="mt-3 text-sm text-[var(--ll-color-text-muted)]">
+            Verifying your account.
+          </p>
+        </ng-container>
+
+        <ng-template #accessResolved>
+          <ng-container *ngIf="isGuestAccount; else accessCheckFailed">
+            <h2 class="text-xl text-primary">
+              Register your account to use the Marketplace
+            </h2>
+            <p class="mt-3 text-sm text-[var(--ll-color-text-muted)]">
+              Guest accounts cannot browse or trade on the Marketplace.
+            </p>
+            <a
+              routerLink="/game/settings"
+              class="ll-button ll-button-primary mt-6 inline-flex"
+            >
+              Bind email or Gmail in Settings
+            </a>
+          </ng-container>
+
+          <ng-template #accessCheckFailed>
+            <h2 class="text-xl text-primary">
+              Unable to verify Marketplace access
+            </h2>
+            <p class="mt-3 text-sm text-[var(--ll-color-text-muted)]">
+              Please refresh the page and try again.
+            </p>
+          </ng-template>
+        </ng-template>
+      </div>
+    </section>
+  </ng-template>
 </div>

@@ -143,7 +143,7 @@ New action-aware schema:
   "element": "[data-tour=inventory-tabs]",
   "actionSelector": "[data-tour=inventory-equipment-tab]",
   "title": "Equipment tab",
-  "description": "Click Equipment to find the Tutorial Sword, Tutorial Chest, and Tutorial Ring.",
+  "description": "Click Equipment to find the Tier 1 weapon you crafted.",
   "position": "bottom"
 }
 ```
@@ -167,12 +167,12 @@ State-aware schema:
 
 ```json
 {
-  "id": "equip-three-items",
+  "id": "equip-crafted-weapon",
   "kind": "waitForState",
   "element": "[data-tour=equipped-overview]",
   "stateKey": "tutorial.equipment.complete",
   "title": "Equip your gear",
-  "description": "Equip the Tutorial Sword, Tutorial Chest, and Tutorial Ring to complete First Steps.",
+  "description": "Equip your crafted Tier 1 weapon to complete this equipment lesson.",
   "position": "left"
 }
 ```

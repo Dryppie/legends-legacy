@@ -13,8 +13,8 @@ using Persistence.LL;
 namespace Persistence.LL.Migrations
 {
     [DbContext(typeof(LLDbContext))]
-    [Migration("20260724115529_AddCharacterActionConcurrency")]
-    partial class AddCharacterActionConcurrency
+    [Migration("20260804211150_BaseMigration")]
+    partial class BaseMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -331,9 +331,6 @@ namespace Persistence.LL.Migrations
                     b.Property<int>("AttributeType")
                         .HasColumnType("integer");
 
-                    b.Property<Guid?>("EquipmentSnapshotId")
-                        .HasColumnType("uuid");
-
                     b.Property<Guid>("ItemInstanceId")
                         .HasColumnType("uuid");
 
@@ -341,8 +338,6 @@ namespace Persistence.LL.Migrations
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("EquipmentSnapshotId");
 
                     b.HasIndex("ItemInstanceId");
 
@@ -1330,6 +1325,9 @@ namespace Persistence.LL.Migrations
                     b.Property<int>("DungeonTier")
                         .HasColumnType("integer");
 
+                    b.Property<int>("EquipmentBalanceVersion")
+                        .HasColumnType("integer");
+
                     b.Property<string>("RecommendationJson")
                         .IsRequired()
                         .HasColumnType("jsonb");
@@ -1420,6 +1418,10 @@ namespace Persistence.LL.Migrations
                     b.Property<DateTimeOffset?>("RewardsClaimedAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<long>("RowVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("bigint");
+
                     b.Property<int>("Seed")
                         .HasColumnType("integer");
 
@@ -1434,6 +1436,9 @@ namespace Persistence.LL.Migrations
                         .HasColumnType("boolean");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CharacterId")
+                        .IsUnique();
 
                     b.HasIndex("CharacterSnapshotId");
 
@@ -1737,16 +1742,6 @@ namespace Persistence.LL.Migrations
                         .HasColumnType("integer")
                         .HasDefaultValue(1);
 
-                    b.Property<int>("NativeRegion")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasDefaultValue(1);
-
-                    b.Property<int>("PotentialTier")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasDefaultValue(1);
-
                     b.Property<DateTimeOffset>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -1800,26 +1795,10 @@ namespace Persistence.LL.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<DateTimeOffset?>("CompletedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTimeOffset?>("CompletesAt")
-                        .HasColumnType("timestamp with time zone");
-
                     b.Property<Guid>("GuildId")
                         .HasColumnType("uuid");
 
                     b.Property<int>("Level")
-                        .HasColumnType("integer");
-
-                    b.Property<DateTimeOffset>("StartedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<int?>("TargetLevel")
                         .HasColumnType("integer");
 
                     b.Property<string>("Type")
@@ -2641,7 +2620,6 @@ namespace Persistence.LL.Migrations
                         .HasColumnType("uuid");
 
                     b.Property<string>("RecipeId")
-                        .IsRequired()
                         .HasMaxLength(128)
                         .HasColumnType("character varying(128)");
 
@@ -3098,6 +3076,31 @@ namespace Persistence.LL.Migrations
                     b.ToTable("EntityAttributeSnapshot");
                 });
 
+            modelBuilder.Entity("Domain.Models.Snapshots.EquipmentAttributeModifierSnapshot", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<float>("Amount")
+                        .HasColumnType("real");
+
+                    b.Property<int>("AttributeType")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("EquipmentSnapshotId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("ModifierType")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EquipmentSnapshotId");
+
+                    b.ToTable("EquipmentAttributeModifierSnapshot");
+                });
+
             modelBuilder.Entity("Domain.Models.Snapshots.EquipmentSnapshot", b =>
                 {
                     b.Property<Guid>("Id")
@@ -3165,18 +3168,8 @@ namespace Persistence.LL.Migrations
                     b.Property<int>("Level")
                         .HasColumnType("integer");
 
-                    b.Property<int>("NativeRegion")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasDefaultValue(1);
-
                     b.Property<Guid>("PlayerEssenceId")
                         .HasColumnType("uuid");
-
-                    b.Property<int>("PotentialTier")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasDefaultValue(1);
 
                     b.Property<int>("SlotIndex")
                         .HasColumnType("integer");
@@ -3247,6 +3240,9 @@ namespace Persistence.LL.Migrations
                         .HasColumnType("boolean");
 
                     b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset?>("WelcomeAcknowledgedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.HasKey("CharacterId", "TutorialId");
@@ -3427,9 +3423,6 @@ namespace Persistence.LL.Migrations
                     b.Property<long>("GuildFavor")
                         .HasColumnType("bigint");
 
-                    b.Property<long>("GuildHonors")
-                        .HasColumnType("bigint");
-
                     b.Property<string>("NormalizedName")
                         .IsRequired()
                         .HasMaxLength(80)
@@ -3487,6 +3480,13 @@ namespace Persistence.LL.Migrations
                     b.HasDiscriminator().HasValue(2);
                 });
 
+            modelBuilder.Entity("Domain.Models.Items.ConsumableItemBase", b =>
+                {
+                    b.HasBaseType("Domain.Models.Items.ItemBase");
+
+                    b.HasDiscriminator().HasValue(1);
+                });
+
             modelBuilder.Entity("Domain.Models.Items.Equipments.EquipmentBase", b =>
                 {
                     b.HasBaseType("Domain.Models.Items.ItemBase");
@@ -3528,10 +3528,12 @@ namespace Persistence.LL.Migrations
                         .HasColumnType("text[]");
 
                     b.Property<string>("BaseRecipeId")
-                        .HasColumnType("text");
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
 
                     b.Property<string>("BlueprintId")
-                        .HasColumnType("text");
+                        .HasMaxLength(160)
+                        .HasColumnType("character varying(160)");
 
                     b.Property<string>("CraftedName")
                         .HasColumnType("text");
@@ -3557,18 +3559,17 @@ namespace Persistence.LL.Migrations
                     b.Property<int>("Rarity")
                         .HasColumnType("integer");
 
-                    b.Property<string>("RecipeId")
-                        .HasColumnType("text");
-
-                    b.PrimitiveCollection<List<string>>("SpecialModifiers")
-                        .IsRequired()
-                        .HasColumnType("text[]");
-
                     b.Property<int>("TemperingProgress")
                         .HasColumnType("integer");
 
                     b.Property<int>("Tier")
                         .HasColumnType("integer");
+
+                    b.Property<uint>("Version")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("xid")
+                        .HasColumnName("xmin");
 
                     b.HasDiscriminator().HasValue(0);
                 });
@@ -3613,10 +3614,6 @@ namespace Persistence.LL.Migrations
 
             modelBuilder.Entity("Domain.Models.Attributes.Modifiers.InstanceAttributeModifier", b =>
                 {
-                    b.HasOne("Domain.Models.Snapshots.EquipmentSnapshot", null)
-                        .WithMany("InstanceModifiers")
-                        .HasForeignKey("EquipmentSnapshotId");
-
                     b.HasOne("Domain.Models.Items.Equipments.EquipmentInstance", null)
                         .WithMany("InstanceModifiers")
                         .HasForeignKey("ItemInstanceId")
@@ -4242,6 +4239,15 @@ namespace Persistence.LL.Migrations
                     b.HasOne("Domain.Models.Snapshots.CharacterSnapshot", null)
                         .WithMany("BaseAttributes")
                         .HasForeignKey("CharacterSnapshotId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Domain.Models.Snapshots.EquipmentAttributeModifierSnapshot", b =>
+                {
+                    b.HasOne("Domain.Models.Snapshots.EquipmentSnapshot", null)
+                        .WithMany("InstanceModifiers")
+                        .HasForeignKey("EquipmentSnapshotId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

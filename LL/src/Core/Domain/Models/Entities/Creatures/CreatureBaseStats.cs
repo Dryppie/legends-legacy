@@ -12,7 +12,6 @@ public static class MonsterBaseStats
     public const float BaseFortitude = 10f;
     public const float BasePrecision = 10f;
     public const float BaseSpirit = 10f;
-    public const float BaseWeaponDamage = 0f;
     public const float BaseArmor = 10f;
     public const float BaseResistance = 10f;
     public const float BaseCritChance = 0.05f;
@@ -39,7 +38,6 @@ public static class MonsterBaseStats
                 { AttributeType.Precision, BasePrecision },
                 { AttributeType.Spirit, BaseSpirit },
                 { AttributeType.MaxHealth, BaseMaxHealth },
-                { AttributeType.WeaponDamage, BaseWeaponDamage },
                 { AttributeType.Armor, BaseArmor },
                 { AttributeType.Resistance, BaseResistance },
                 { AttributeType.CritChance, BaseCritChance },

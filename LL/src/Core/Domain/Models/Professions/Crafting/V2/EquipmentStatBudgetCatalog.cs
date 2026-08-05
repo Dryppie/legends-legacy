@@ -4,19 +4,18 @@ namespace Domain.Models.Professions.Crafting.V2;
 
 public static class EquipmentStatBudgetCatalog
 {
-    public const int BalanceVersion = 5;
+    public const int BalanceVersion = 6;
     public const int MinimumTier = 1;
     public const int MaximumTier = 10;
 
     private static readonly IReadOnlyDictionary<AttributeType, EquipmentStatBudgetDefinition> Definitions =
         new Dictionary<AttributeType, EquipmentStatBudgetDefinition>
         {
-            [AttributeType.Power] = Fixed(1d, 500),
+            [AttributeType.Power] = Fixed(1.25d, 1_800),
             [AttributeType.Fortitude] = Tiered(500, (1, 1.34d), (5, 1.82d), (10, 2.17d)),
             [AttributeType.Precision] = Fixed(1.15d, 500),
             [AttributeType.Spirit] = Tiered(500, (1, 1.05d), (5, 1.0375d), (10, 1.055d)),
             [AttributeType.MaxHealth] = Fixed(0.2d, 2_500),
-            [AttributeType.WeaponDamage] = Fixed(1.5d, 400),
             [AttributeType.Armor] = Tiered(500, (1, 0.54d), (5, 1.02d), (10, 1.37d)),
             [AttributeType.Resistance] = Tiered(500, (1, 0.54d), (5, 1.02d), (10, 1.37d)),
             [AttributeType.CritChance] = Fixed(4d, 75),

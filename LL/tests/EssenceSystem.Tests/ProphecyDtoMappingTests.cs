@@ -62,6 +62,17 @@ public sealed class ProphecyDtoMappingTests
     }
 
     [Fact]
+    public void ProphecyInstanceDto_explains_that_every_defeated_creature_counts()
+    {
+        var dto = CreateMapper().Map<ProphecyInstanceDto>(
+            CreateInstance(ProphecyObjectiveType.KillCreatures));
+
+        Assert.Equal(
+            "Every creature you defeat in combat counts toward this prophecy.",
+            dto.Guidance.Hint);
+    }
+
+    [Fact]
     public void DungeonSigilAssemblyResponseDto_maps_all_result_fields()
     {
         var result = new DungeonSigilAssemblyResult(

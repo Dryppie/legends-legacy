@@ -1,10 +1,6 @@
 <div *ngIf="guilds() as guilds" class="ll-page-stack gap-3">
-  <div class="ll-page-header flex flex-col gap-2">
-    <h2 class="ll-heading">Guilds</h2>
-    <div class="ll-copy italic text-white">
-      Create or join a guild, gain powerful allies, and challenge difficult
-      raids.
-    </div>
+  <div class="flex flex-wrap items-center justify-between gap-3">
+    <p class="ll-copy">Browse open guilds or establish your own.</p>
     <button type="button" class="ll-button w-fit" (click)="openModal()">
       Create Guild
     </button>

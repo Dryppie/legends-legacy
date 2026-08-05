@@ -2,7 +2,7 @@
   {
     "element": "[data-tour=essence-view-tabs]",
     "title": "1. Absorb tab",
-    "description": "Use the Absorb tab to turn unbound Essence items into permanent Soul Archive entries.",
+    "description": "Use the Absorb tab to absorb an unbound Essence permanently into your Soul Archive.",
     "position": "bottom"
   },
   {

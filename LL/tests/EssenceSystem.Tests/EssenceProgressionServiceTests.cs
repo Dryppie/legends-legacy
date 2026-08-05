@@ -6,6 +6,27 @@ namespace EssenceSystem.Tests;
 
 public sealed class EssenceProgressionServiceTests
 {
+    [Theory]
+    [InlineData(0, 10)]
+    [InlineData(1, 30)]
+    [InlineData(2, 60)]
+    [InlineData(3, 100)]
+    public void Ascension_tier_determines_level_cap(int ascensionTier, int expectedLevelCap)
+    {
+        Assert.Equal(expectedLevelCap, EssenceProgressionConstants.GetLevelCap(ascensionTier));
+    }
+
+    [Theory]
+    [InlineData(1, 10)]
+    [InlineData(2, 30)]
+    [InlineData(3, 60)]
+    public void Ascension_requires_reaching_the_current_tier_cap(int nextAscensionTier, int requiredLevel)
+    {
+        var requirement = EssenceProgressionConstants.GetAscensionRequirement(nextAscensionTier);
+
+        Assert.Equal(requiredLevel, requirement.RequiredLevel);
+    }
+
     [Fact]
     public void GrantXp_does_not_bank_xp_past_current_tier_cap()
     {
@@ -48,7 +69,7 @@ public sealed class EssenceProgressionServiceTests
     }
 
     [Fact]
-    public void GrantXp_uses_potential_tier_for_level_cap_instead_of_ascension()
+    public void GrantXp_uses_ascension_tier_for_level_cap()
     {
         var service = new EssenceProgressionService();
         var essence = new PlayerEssence
@@ -56,51 +77,48 @@ public sealed class EssenceProgressionServiceTests
             EssenceDefinitionId = "essence.test",
             Level = 10,
             CurrentXp = 0,
-            PotentialTier = 2,
-            AscensionTier = 0
+            AscensionTier = 1
         };
 
         var result = service.GrantXp(essence, EssenceDefinitionValidatorTests.ValidDefinition(), 100_000);
 
-        Assert.Equal(20, essence.Level);
+        Assert.Equal(30, essence.Level);
         Assert.Equal(0, essence.CurrentXp);
         Assert.True(result.ReachedTierCap);
-        Assert.Equal(10, result.LevelsGained);
+        Assert.Equal(20, result.LevelsGained);
     }
 
     [Fact]
-    public void GrantXp_does_not_let_ascension_raise_level_cap()
+    public void GrantXp_allows_levels_up_to_100_after_final_ascension()
     {
         var service = new EssenceProgressionService();
         var essence = new PlayerEssence
         {
             EssenceDefinitionId = "essence.test",
-            Level = 10,
+            Level = 99,
             CurrentXp = 0,
-            PotentialTier = 1,
             AscensionTier = 3
         };
 
-        var result = service.GrantXp(essence, EssenceDefinitionValidatorTests.ValidDefinition(), 500);
+        var result = service.GrantXp(essence, EssenceDefinitionValidatorTests.ValidDefinition(), int.MaxValue);
 
-        Assert.Equal(10, essence.Level);
-        Assert.Equal(0, result.XpGained);
+        Assert.Equal(100, essence.Level);
+        Assert.Equal(1, result.LevelsGained);
         Assert.True(result.ReachedTierCap);
     }
 
     [Fact]
-    public void GrantXp_reaches_first_potential_cap_after_expected_fixed_xp_runs()
+    public void GrantXp_reaches_first_ascension_cap_after_expected_fixed_xp_runs()
     {
         var service = new EssenceProgressionService();
         var essence = new PlayerEssence
         {
             EssenceDefinitionId = "essence.test",
-            Level = 1,
-            PotentialTier = 1
+            Level = 1
         };
         var runs = 0;
 
-        while (essence.Level < EssenceProgressionConstants.GetLevelCapForPotential(essence.PotentialTier))
+        while (essence.Level < EssenceProgressionConstants.GetLevelCap(essence.AscensionTier))
         {
             service.GrantXp(essence, EssenceDefinitionValidatorTests.ValidDefinition(), requestedXp: 250);
             runs++;
@@ -112,15 +130,13 @@ public sealed class EssenceProgressionServiceTests
     }
 
     [Fact]
-    public void EquippedEssenceSnapshot_round_trips_native_region_and_potential_tier()
+    public void EquippedEssenceSnapshot_round_trips_level_and_ascension_tier()
     {
         var essence = new PlayerEssence
         {
             Id = Guid.NewGuid(),
             CharacterId = Guid.NewGuid(),
             EssenceDefinitionId = "essence.test",
-            NativeRegion = 3,
-            PotentialTier = 4,
             Level = 31,
             CurrentXp = 25,
             AscensionTier = 2,
@@ -130,18 +146,17 @@ public sealed class EssenceProgressionServiceTests
         var snapshot = EquippedEssenceSnapshot.From(Guid.NewGuid(), 1, essence);
         var restored = snapshot.ToPlayerEssence(essence.CharacterId);
 
-        Assert.Equal(3, snapshot.NativeRegion);
-        Assert.Equal(4, snapshot.PotentialTier);
-        Assert.Equal(3, restored.NativeRegion);
-        Assert.Equal(4, restored.PotentialTier);
+        Assert.Equal(31, snapshot.Level);
+        Assert.Equal(2, snapshot.AscensionTier);
+        Assert.Equal(31, restored.Level);
+        Assert.Equal(2, restored.AscensionTier);
     }
 
     [Fact]
-    public void Ability_value_scaling_uses_level_and_effect_specific_ascension_growth()
+    public void Ability_value_scaling_uses_effect_specific_ascension_growth()
     {
         var scaled = EssenceProgressionConstants.ScaleAbilityValue(
             baseValue: 100,
-            level: 3,
             ascensionTier: 1,
             effectType: "Damage");
 

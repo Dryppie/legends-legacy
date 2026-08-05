@@ -166,7 +166,6 @@ public sealed class EssenceDefinitionValidatorTests
 
         var collections = provider.GetAll();
         var regionOneEssences = repository.GetAll()
-            .Where(essence => essence.NativeRegion == 1)
             .Select(essence => essence.Id)
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
         var collectedEssences = collections

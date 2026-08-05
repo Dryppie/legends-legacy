@@ -10,12 +10,31 @@
       "unlockSummary": "Higher levels unlock access to advanced guild buildings.",
       "baseCost": 150,
       "upgradeCostStep": 150,
-      "baseHours": 4,
       "benefits": [
-        { "level": 1, "title": "Guild Headquarters", "description": "The guild can manage missions, supplies, and construction.", "isImplemented": true },
-        { "level": 2, "title": "Support Buildings", "description": "Workshop and Treasury become available.", "isImplemented": true },
-        { "level": 4, "title": "Combat Infrastructure", "description": "Raid Hall, Training Grounds, and Essence Sanctum become available.", "isImplemented": true },
-        { "level": 6, "title": "War Planning", "description": "War Room becomes available.", "isImplemented": true }
+        {
+          "level": 1,
+          "title": "Guild Headquarters",
+          "description": "The guild can manage missions, supplies, construction, and one additional member per Guild Hall level.",
+          "isImplemented": true
+        },
+        {
+          "level": 2,
+          "title": "Support Buildings",
+          "description": "Workshop and Treasury become available.",
+          "isImplemented": true
+        },
+        {
+          "level": 4,
+          "title": "Combat Infrastructure",
+          "description": "Raid Hall, Training Grounds, and Essence Sanctum become available.",
+          "isImplemented": true
+        },
+        {
+          "level": 6,
+          "title": "War Planning",
+          "description": "War Room becomes available.",
+          "isImplemented": true
+        }
       ]
     },
     {
@@ -28,12 +47,31 @@
       "unlockSummary": "Improves guild mission variety and rewards.",
       "baseCost": 100,
       "upgradeCostStep": 100,
-      "baseHours": 2,
       "benefits": [
-        { "level": 1, "title": "Mission Infrastructure", "description": "Unlocks mission reward bonuses and keeps the mission system active.", "isImplemented": true },
-        { "level": 2, "title": "Mission Variety", "description": "Adds a fourth weekly mission option when enough definitions are available.", "isImplemented": true },
-        { "level": 3, "title": "Improved Orders", "description": "Adds a fourth personal daily order when enough definitions are available.", "isImplemented": true },
-        { "level": 5, "title": "Premium Contracts", "description": "Personal and weekly mission currency, XP, and supply rewards gain the full board bonus.", "isImplemented": true }
+        {
+          "level": 1,
+          "title": "Mission Infrastructure",
+          "description": "Unlocks mission reward bonuses and keeps the mission system active.",
+          "isImplemented": true
+        },
+        {
+          "level": 2,
+          "title": "Mission Variety",
+          "description": "Adds a fourth weekly mission option when enough definitions are available.",
+          "isImplemented": true
+        },
+        {
+          "level": 3,
+          "title": "Improved Orders",
+          "description": "Adds a fourth personal daily order when enough definitions are available.",
+          "isImplemented": true
+        },
+        {
+          "level": 5,
+          "title": "Premium Contracts",
+          "description": "Personal and weekly mission currency, XP, and supply rewards gain the full board bonus.",
+          "isImplemented": true
+        }
       ]
     },
     {
@@ -43,15 +81,40 @@
       "maxLevel": 5,
       "isPermanent": false,
       "requiredGuildHallLevel": 1,
-      "unlockSummary": "Unlocks common, weekly, and prestige shop stock by level.",
+      "unlockSummary": "Unlocks rotating common catalysts and rare stock by level.",
       "baseCost": 150,
       "upgradeCostStep": 125,
-      "baseHours": 2,
       "benefits": [
-        { "level": 1, "title": "Common Stock", "description": "Common guild shop stock can be purchased.", "isImplemented": true },
-        { "level": 2, "title": "Expanded Stock", "description": "Additional common stock appears in the shop.", "isImplemented": true },
-        { "level": 3, "title": "Weekly Stock", "description": "Rotating weekly shop stock becomes available.", "isImplemented": true },
-        { "level": 5, "title": "Prestige Procurement", "description": "Prestige stock becomes available.", "isImplemented": true }
+        {
+          "level": 1,
+          "title": "Common Stock",
+          "description": "Two recipe catalyst caches rotate weekly alongside Soulstone reserves.",
+          "isImplemented": true
+        },
+        {
+          "level": 2,
+          "title": "Sigil Supplies",
+          "description": "Sigil Fragment stock becomes available.",
+          "isImplemented": true
+        },
+        {
+          "level": 3,
+          "title": "Rare Stock",
+          "description": "Rare supplies and one rotating six-catalyst cache become available.",
+          "isImplemented": true
+        },
+        {
+          "level": 4,
+          "title": "Blueprint Archive",
+          "description": "One rotating Blueprint becomes available each week.",
+          "isImplemented": true
+        },
+        {
+          "level": 5,
+          "title": "Expanded Rare Stock",
+          "description": "A second rotating rare catalyst cache becomes available each week.",
+          "isImplemented": true
+        }
       ]
     },
     {
@@ -64,12 +127,31 @@
       "unlockSummary": "Unlock placeholder for future guild raids.",
       "baseCost": 400,
       "upgradeCostStep": 225,
-      "baseHours": 6,
       "benefits": [
-        { "level": 1, "title": "Raid Readiness", "description": "Unlocks the Raids tab locked state and prepares future raid registration.", "isImplemented": true },
-        { "level": 2, "title": "Raid Registration", "description": "Planned support for opening raid sign-ups.", "isImplemented": false },
-        { "level": 3, "title": "Raid Coordination", "description": "Planned support for raid contribution scoring.", "isImplemented": false },
-        { "level": 5, "title": "Raid Spoils", "description": "Planned support for improved raid rewards.", "isImplemented": false }
+        {
+          "level": 1,
+          "title": "Raid Readiness",
+          "description": "Unlocks the Raids tab locked state and prepares future raid registration.",
+          "isImplemented": true
+        },
+        {
+          "level": 2,
+          "title": "Raid Registration",
+          "description": "Planned support for opening raid sign-ups.",
+          "isImplemented": false
+        },
+        {
+          "level": 3,
+          "title": "Raid Coordination",
+          "description": "Planned support for raid contribution scoring.",
+          "isImplemented": false
+        },
+        {
+          "level": 5,
+          "title": "Raid Spoils",
+          "description": "Planned support for improved raid rewards.",
+          "isImplemented": false
+        }
       ]
     },
     {
@@ -82,12 +164,31 @@
       "unlockSummary": "Unlock placeholder for future guild wars.",
       "baseCost": 500,
       "upgradeCostStep": 250,
-      "baseHours": 8,
       "benefits": [
-        { "level": 1, "title": "War Planning", "description": "Unlocks the Wars tab locked state and prepares future war registration.", "isImplemented": true },
-        { "level": 2, "title": "Roster Planning", "description": "Planned support for war roster setup.", "isImplemented": false },
-        { "level": 3, "title": "Defense Planning", "description": "Planned support for defense preparation.", "isImplemented": false },
-        { "level": 5, "title": "Season Strategy", "description": "Planned support for seasonal war progression.", "isImplemented": false }
+        {
+          "level": 1,
+          "title": "War Planning",
+          "description": "Unlocks the Wars tab locked state and prepares future war registration.",
+          "isImplemented": true
+        },
+        {
+          "level": 2,
+          "title": "Roster Planning",
+          "description": "Planned support for war roster setup.",
+          "isImplemented": false
+        },
+        {
+          "level": 3,
+          "title": "Defense Planning",
+          "description": "Planned support for defense preparation.",
+          "isImplemented": false
+        },
+        {
+          "level": 5,
+          "title": "Season Strategy",
+          "description": "Planned support for seasonal war progression.",
+          "isImplemented": false
+        }
       ]
     },
     {
@@ -100,12 +201,31 @@
       "unlockSummary": "Adds crafting-flavored mission and shop support.",
       "baseCost": 175,
       "upgradeCostStep": 150,
-      "baseHours": 3,
       "benefits": [
-        { "level": 1, "title": "Craft Orders", "description": "Crafting and tempering guild orders can appear from the data-driven order pool.", "isImplemented": true },
-        { "level": 2, "title": "Workshop Stock", "description": "Workshop-themed shop stock can be configured through guild content data.", "isImplemented": true },
-        { "level": 3, "title": "Supply Efficiency", "description": "Planned support for crafting-related Guild Supply bonuses.", "isImplemented": false },
-        { "level": 5, "title": "Masterwork Support", "description": "Planned support for high-tier crafting objectives.", "isImplemented": false }
+        {
+          "level": 1,
+          "title": "Craft Orders",
+          "description": "Crafting and tempering guild orders can appear from the data-driven order pool.",
+          "isImplemented": true
+        },
+        {
+          "level": 2,
+          "title": "Workshop Stock",
+          "description": "Workshop-themed shop stock can be configured through guild content data.",
+          "isImplemented": true
+        },
+        {
+          "level": 3,
+          "title": "Supply Efficiency",
+          "description": "Planned support for crafting-related Guild Supply bonuses.",
+          "isImplemented": false
+        },
+        {
+          "level": 5,
+          "title": "Masterwork Support",
+          "description": "Planned support for high-tier crafting objectives.",
+          "isImplemented": false
+        }
       ]
     },
     {
@@ -118,12 +238,31 @@
       "unlockSummary": "Future raid and war support effects.",
       "baseCost": 300,
       "upgradeCostStep": 200,
-      "baseHours": 5,
       "benefits": [
-        { "level": 1, "title": "Training Yard", "description": "Unlocks the building foundation for combat preparation systems.", "isImplemented": true },
-        { "level": 2, "title": "Raid Drills", "description": "Planned support for raid preparation bonuses.", "isImplemented": false },
-        { "level": 3, "title": "War Drills", "description": "Planned support for war preparation bonuses.", "isImplemented": false },
-        { "level": 5, "title": "Veteran Training", "description": "Planned support for advanced combat guild objectives.", "isImplemented": false }
+        {
+          "level": 1,
+          "title": "Training Yard",
+          "description": "Unlocks the building foundation for combat preparation systems.",
+          "isImplemented": true
+        },
+        {
+          "level": 2,
+          "title": "Raid Drills",
+          "description": "Planned support for raid preparation bonuses.",
+          "isImplemented": false
+        },
+        {
+          "level": 3,
+          "title": "War Drills",
+          "description": "Planned support for war preparation bonuses.",
+          "isImplemented": false
+        },
+        {
+          "level": 5,
+          "title": "Veteran Training",
+          "description": "Planned support for advanced combat guild objectives.",
+          "isImplemented": false
+        }
       ]
     },
     {
@@ -136,12 +275,31 @@
       "unlockSummary": "Future essence missions and rewards.",
       "baseCost": 300,
       "upgradeCostStep": 200,
-      "baseHours": 5,
       "benefits": [
-        { "level": 1, "title": "Essence Infrastructure", "description": "Unlocks the building foundation for essence-focused guild systems.", "isImplemented": true },
-        { "level": 2, "title": "Essence Orders", "description": "Planned support for essence guild objectives.", "isImplemented": false },
-        { "level": 3, "title": "Essence Rewards", "description": "Planned support for essence-themed guild rewards.", "isImplemented": false },
-        { "level": 5, "title": "Sanctum Rituals", "description": "Planned support for advanced essence progression.", "isImplemented": false }
+        {
+          "level": 1,
+          "title": "Essence Infrastructure",
+          "description": "Unlocks the building foundation for essence-focused guild systems.",
+          "isImplemented": true
+        },
+        {
+          "level": 2,
+          "title": "Essence Orders",
+          "description": "Planned support for essence guild objectives.",
+          "isImplemented": false
+        },
+        {
+          "level": 3,
+          "title": "Essence Rewards",
+          "description": "Planned support for essence-themed guild rewards.",
+          "isImplemented": false
+        },
+        {
+          "level": 5,
+          "title": "Sanctum Rituals",
+          "description": "Planned support for advanced essence progression.",
+          "isImplemented": false
+        }
       ]
     },
     {
@@ -151,39 +309,585 @@
       "maxLevel": 5,
       "isPermanent": false,
       "requiredGuildHallLevel": 2,
-      "unlockSummary": "Reduces building Guild Supply costs and construction time.",
+      "unlockSummary": "Reduces building Guild Supply costs.",
       "baseCost": 175,
       "upgradeCostStep": 150,
-      "baseHours": 3,
       "benefits": [
-        { "level": 1, "title": "Supply Ledger", "description": "Treasury level reduces building Guild Supply costs by 2% per level.", "isImplemented": true },
-        { "level": 2, "title": "Supply Storage", "description": "Guild Supply handling is represented through construction efficiency.", "isImplemented": true },
-        { "level": 3, "title": "Construction Efficiency", "description": "Treasury level reduces building construction time by 2% per level.", "isImplemented": true },
-        { "level": 5, "title": "Quartermaster Network", "description": "Treasury efficiency reaches its current maximum.", "isImplemented": true }
+        {
+          "level": 1,
+          "title": "Supply Ledger",
+          "description": "Treasury level reduces building Guild Supply costs by 2% per level.",
+          "isImplemented": true
+        },
+        {
+          "level": 2,
+          "title": "Supply Storage",
+          "description": "Guild Supply handling is represented through construction efficiency.",
+          "isImplemented": true
+        },
+        {
+          "level": 3,
+          "title": "Supply Efficiency",
+          "description": "Guild Supply cost reductions improve with every Treasury level.",
+          "isImplemented": true
+        },
+        {
+          "level": 5,
+          "title": "Quartermaster Network",
+          "description": "Treasury efficiency reaches its current maximum.",
+          "isImplemented": true
+        }
       ]
     }
   ],
   "weeklyMissions": [
-    { "id": "2f4bbec5-6212-47af-8b1d-e34cae632ae5", "key": "weekly.monster_extermination", "name": "Monster Extermination", "description": "Defeat creatures together as a guild.", "category": "Combat", "metric": "CreaturesDefeated", "baseTarget": 2000 },
-    { "id": "00cf74dd-0b37-457b-a2b2-94a7630307e1", "key": "weekly.dungeon_expedition", "name": "Dungeon Expedition", "description": "Clear dungeon rooms together as a guild.", "category": "Dungeon", "metric": "DungeonRoomsCleared", "baseTarget": 50 },
-    { "id": "d9a3f2d8-3a97-4e16-80fe-496d87afea70", "key": "weekly.craftsmens_commission", "name": "Craftsmen's Commission", "description": "Complete tempering actions together as a guild.", "category": "Crafting", "metric": "TemperingActionsCompleted", "baseTarget": 250 },
-    { "id": "9b2b2643-2bd2-43ac-bb50-5a6d7b6e45c1", "key": "weekly.forge_quota", "name": "Forge Quota", "description": "Craft items together as a guild.", "category": "Crafting", "metric": "ItemsCrafted", "baseTarget": 75 },
-    { "id": "683a9d85-8d9c-4750-b9c7-e89f8b2b9b61", "key": "weekly.dungeon_vanguard", "name": "Dungeon Vanguard", "description": "Complete dungeon runs together as a guild.", "category": "Dungeon", "metric": "DungeonsCompleted", "baseTarget": 12 }
+    {
+      "id": "2f4bbec5-6212-47af-8b1d-e34cae632ae5",
+      "key": "weekly.monster_extermination",
+      "name": "Monster Extermination",
+      "description": "Defeat creatures together as a guild.",
+      "category": "Combat",
+      "metric": "CreaturesDefeated",
+      "baseTarget": 432000
+    },
+    {
+      "id": "00cf74dd-0b37-457b-a2b2-94a7630307e1",
+      "key": "weekly.dungeon_expedition",
+      "name": "Dungeon Expedition",
+      "description": "Clear dungeon rooms together as a guild.",
+      "category": "Dungeon",
+      "metric": "DungeonRoomsCleared",
+      "baseTarget": 1000
+    },
+    {
+      "id": "d9a3f2d8-3a97-4e16-80fe-496d87afea70",
+      "key": "weekly.craftsmens_commission",
+      "name": "Craftsmen's Commission",
+      "description": "Complete tempering actions together as a guild.",
+      "category": "Crafting",
+      "metric": "TemperingActionsCompleted",
+      "baseTarget": 432000
+    },
+    {
+      "id": "683a9d85-8d9c-4750-b9c7-e89f8b2b9b61",
+      "key": "weekly.dungeon_vanguard",
+      "name": "Dungeon Vanguard",
+      "description": "Complete dungeon runs together as a guild.",
+      "category": "Dungeon",
+      "metric": "DungeonsCompleted",
+      "baseTarget": 100
+    }
   ],
   "dailyOrders": [
-    { "id": "8d7a12db-39eb-44f0-8c66-3ba79b606ca2", "key": "daily.creatures_defeated", "name": "Cull the Wilds", "description": "Defeat 100 creatures.", "category": "Combat", "metric": "CreaturesDefeated", "baseTarget": 100 },
-    { "id": "ff235b05-d721-4d96-b603-609c8abed319", "key": "daily.dungeon_rooms", "name": "Scout the Depths", "description": "Clear 5 dungeon rooms.", "category": "Dungeon", "metric": "DungeonRoomsCleared", "baseTarget": 5 },
-    { "id": "c4ec6549-2bdc-4c7d-8494-6a5d8fbe7df2", "key": "daily.tempering_actions", "name": "Temper the Arsenal", "description": "Complete 20 tempering actions.", "category": "Crafting", "metric": "TemperingActionsCompleted", "baseTarget": 20 },
-    { "id": "73254589-f56f-470b-9944-aa4d3a03322e", "key": "daily.items_crafted", "name": "Stock the Workshop", "description": "Craft 5 items.", "category": "Crafting", "metric": "ItemsCrafted", "baseTarget": 5 }
+    {
+      "id": "8d7a12db-39eb-44f0-8c66-3ba79b606ca2",
+      "key": "daily.creatures_defeated",
+      "name": "Cull the Wilds",
+      "description": "Defeat 100 creatures.",
+      "category": "Combat",
+      "metric": "CreaturesDefeated",
+      "baseTarget": 100
+    },
+    {
+      "id": "ff235b05-d721-4d96-b603-609c8abed319",
+      "key": "daily.dungeon_rooms",
+      "name": "Scout the Depths",
+      "description": "Clear 5 dungeon rooms.",
+      "category": "Dungeon",
+      "metric": "DungeonRoomsCleared",
+      "baseTarget": 5
+    },
+    {
+      "id": "c4ec6549-2bdc-4c7d-8494-6a5d8fbe7df2",
+      "key": "daily.tempering_actions",
+      "name": "Temper the Arsenal",
+      "description": "Complete 20 tempering actions.",
+      "category": "Crafting",
+      "metric": "TemperingActionsCompleted",
+      "baseTarget": 20
+    },
+    {
+      "id": "73254589-f56f-470b-9944-aa4d3a03322e",
+      "key": "daily.items_crafted",
+      "name": "Stock the Workshop",
+      "description": "Craft 5 items.",
+      "category": "Crafting",
+      "metric": "ItemsCrafted",
+      "baseTarget": 5
+    }
   ],
   "shopItems": [
-    { "key": "common.cinder_purse", "name": "Cinder Purse", "description": "A practical packet of Cinders for everyday upgrades.", "stockType": "Common", "guildFavorCost": 75, "guildHonorsCost": 0, "weeklyLimit": 5, "requiredWeeklyContribution": 0, "requiredMarketOfficeLevel": 1, "rotatesWeekly": false, "rotationGroup": null, "rewards": [{ "type": "Cinders", "amount": 500 }] },
-    { "key": "common.soulstone_cache", "name": "Soulstone Cache", "description": "A small cache of Soulstones earned through guild service.", "stockType": "Common", "guildFavorCost": 125, "guildHonorsCost": 0, "weeklyLimit": 3, "requiredWeeklyContribution": 0, "requiredMarketOfficeLevel": 1, "rotatesWeekly": false, "rotationGroup": null, "rewards": [{ "type": "Soulstones", "amount": 2 }] },
-    { "key": "common.cinder_satchel", "name": "Cinder Satchel", "description": "A larger packet made available through an expanded Market Office.", "stockType": "Common", "guildFavorCost": 180, "guildHonorsCost": 0, "weeklyLimit": 2, "requiredWeeklyContribution": 100, "requiredMarketOfficeLevel": 2, "rotatesWeekly": false, "rotationGroup": null, "rewards": [{ "type": "Cinders", "amount": 1200 }] },
-    { "key": "weekly.builder_crate", "name": "Builder's Crate", "description": "A weekly support crate for active guild contributors.", "stockType": "Weekly", "guildFavorCost": 250, "guildHonorsCost": 0, "weeklyLimit": 1, "requiredWeeklyContribution": 250, "requiredMarketOfficeLevel": 3, "rotatesWeekly": true, "rotationGroup": "weekly", "rewards": [{ "type": "Cinders", "amount": 1500 }, { "type": "Soulstones", "amount": 3 }] },
-    { "key": "weekly.soulstone_bundle", "name": "Soulstone Bundle", "description": "A rotating bundle for members who kept the weekly ledger moving.", "stockType": "Weekly", "guildFavorCost": 300, "guildHonorsCost": 0, "weeklyLimit": 1, "requiredWeeklyContribution": 300, "requiredMarketOfficeLevel": 3, "rotatesWeekly": true, "rotationGroup": "weekly", "rewards": [{ "type": "Soulstones", "amount": 6 }] },
-    { "key": "weekly.echo_stipend", "name": "Echo Stipend", "description": "A focused weekly stipend for prophecy and fate planning.", "stockType": "Weekly", "guildFavorCost": 350, "guildHonorsCost": 0, "weeklyLimit": 1, "requiredWeeklyContribution": 350, "requiredMarketOfficeLevel": 3, "rotatesWeekly": true, "rotationGroup": "weekly", "rewards": [{ "type": "FateEcho", "amount": 15 }, { "type": "SigilFragments", "amount": 25 }] },
-    { "key": "prestige.honor_reliquary", "name": "Honor Reliquary", "description": "A rare prestige reliquary reserved for proven guild champions.", "stockType": "Prestige", "guildFavorCost": 0, "guildHonorsCost": 2, "weeklyLimit": 1, "requiredWeeklyContribution": 500, "requiredMarketOfficeLevel": 5, "rotatesWeekly": true, "rotationGroup": "prestige", "rewards": [{ "type": "FateEcho", "amount": 25 }, { "type": "Soulstones", "amount": 8 }, { "type": "Item", "amount": 1, "key": "item.monster_core.lesser", "name": "Lesser Monster Core" }] },
-    { "key": "prestige.elder_cache", "name": "Elder Cache", "description": "A rotating prestige cache for members with exceptional weekly standing.", "stockType": "Prestige", "guildFavorCost": 0, "guildHonorsCost": 3, "weeklyLimit": 1, "requiredWeeklyContribution": 750, "requiredMarketOfficeLevel": 5, "rotatesWeekly": true, "rotationGroup": "prestige", "rewards": [{ "type": "Cinders", "amount": 3500 }, { "type": "Soulstones", "amount": 10 }, { "type": "SigilFragments", "amount": 50 }] }
+    {
+      "key": "common.fury_catalyst_cache",
+      "name": "Fury Catalyst Cache",
+      "description": "Two Fury Hearts for Fury Blueprint recipes.",
+      "stockType": "Common",
+      "guildFavorCost": 100,
+      "weeklyLimit": 2,
+      "requiredWeeklyContribution": 0,
+      "requiredMarketOfficeLevel": 1,
+      "rotatesWeekly": true,
+      "rotationGroup": "common-catalysts",
+      "rewards": [
+        {
+          "type": "Item",
+          "amount": 2,
+          "key": "fury_heart",
+          "name": "Fury Heart"
+        }
+      ]
+    },
+    {
+      "key": "common.arcane_catalyst_cache",
+      "name": "Arcane Catalyst Cache",
+      "description": "Two Arcane Focuses for Arcane Blueprint recipes.",
+      "stockType": "Common",
+      "guildFavorCost": 100,
+      "weeklyLimit": 2,
+      "requiredWeeklyContribution": 0,
+      "requiredMarketOfficeLevel": 1,
+      "rotatesWeekly": true,
+      "rotationGroup": "common-catalysts",
+      "rewards": [
+        {
+          "type": "Item",
+          "amount": 2,
+          "key": "arcane_focus",
+          "name": "Arcane Focus"
+        }
+      ]
+    },
+    {
+      "key": "common.venom_catalyst_cache",
+      "name": "Venom Catalyst Cache",
+      "description": "Two Venom Glands for Venom Blueprint recipes.",
+      "stockType": "Common",
+      "guildFavorCost": 100,
+      "weeklyLimit": 2,
+      "requiredWeeklyContribution": 0,
+      "requiredMarketOfficeLevel": 1,
+      "rotatesWeekly": true,
+      "rotationGroup": "common-catalysts",
+      "rewards": [
+        {
+          "type": "Item",
+          "amount": 2,
+          "key": "venom_gland",
+          "name": "Venom Gland"
+        }
+      ]
+    },
+    {
+      "key": "common.hive_catalyst_cache",
+      "name": "Hive Catalyst Cache",
+      "description": "Two Royal Chitin Plates for Hive Blueprint recipes.",
+      "stockType": "Common",
+      "guildFavorCost": 100,
+      "weeklyLimit": 2,
+      "requiredWeeklyContribution": 0,
+      "requiredMarketOfficeLevel": 1,
+      "rotatesWeekly": true,
+      "rotationGroup": "common-catalysts",
+      "rewards": [
+        {
+          "type": "Item",
+          "amount": 2,
+          "key": "royal_chitin_plate",
+          "name": "Royal Chitin Plate"
+        }
+      ]
+    },
+    {
+      "key": "common.primal_catalyst_cache",
+      "name": "Primal Catalyst Cache",
+      "description": "Two Hive Ichors for Primal Blueprint recipes.",
+      "stockType": "Common",
+      "guildFavorCost": 100,
+      "weeklyLimit": 2,
+      "requiredWeeklyContribution": 0,
+      "requiredMarketOfficeLevel": 1,
+      "rotatesWeekly": true,
+      "rotationGroup": "common-catalysts",
+      "rewards": [
+        {
+          "type": "Item",
+          "amount": 2,
+          "key": "hive_ichor",
+          "name": "Hive Ichor"
+        }
+      ]
+    },
+    {
+      "key": "common.soulstone_cache",
+      "name": "Soulstone Reserve",
+      "description": "A dependable supply of Soulstones for constellation progression.",
+      "stockType": "Common",
+      "guildFavorCost": 200,
+      "weeklyLimit": 2,
+      "requiredWeeklyContribution": 0,
+      "requiredMarketOfficeLevel": 1,
+      "rotatesWeekly": false,
+      "rotationGroup": null,
+      "rewards": [{ "type": "Soulstones", "amount": 25 }]
+    },
+    {
+      "key": "common.sigil_fragment_case",
+      "name": "Sigil Fragment Case",
+      "description": "Enough fragments to assemble a meaningful supply of dungeon sigils.",
+      "stockType": "Common",
+      "guildFavorCost": 200,
+      "weeklyLimit": 2,
+      "requiredWeeklyContribution": 100,
+      "requiredMarketOfficeLevel": 2,
+      "rotatesWeekly": false,
+      "rotationGroup": null,
+      "rewards": [{ "type": "SigilFragments", "amount": 10 }]
+    },
+    {
+      "key": "rare.soulstone_bundle",
+      "name": "Greater Soulstone Reserve",
+      "description": "A concentrated Soulstone shipment for long-term constellation upgrades.",
+      "stockType": "Rare",
+      "guildFavorCost": 350,
+      "weeklyLimit": 1,
+      "requiredWeeklyContribution": 300,
+      "requiredMarketOfficeLevel": 3,
+      "rotatesWeekly": false,
+      "rotationGroup": null,
+      "rewards": [{ "type": "Soulstones", "amount": 50 }]
+    },
+    {
+      "key": "rare.sigilwright_cache",
+      "name": "Sigilwright's Cache",
+      "description": "A large fragment cache for assembling dungeon sigils.",
+      "stockType": "Rare",
+      "guildFavorCost": 350,
+      "weeklyLimit": 1,
+      "requiredWeeklyContribution": 350,
+      "requiredMarketOfficeLevel": 3,
+      "rotatesWeekly": false,
+      "rotationGroup": null,
+      "rewards": [{ "type": "SigilFragments", "amount": 30 }]
+    },
+    {
+      "key": "rare.fury_catalyst_cache",
+      "name": "Rare Fury Catalyst Cache",
+      "description": "Six Fury Hearts for Fury Blueprint recipes.",
+      "stockType": "Rare",
+      "guildFavorCost": 250,
+      "weeklyLimit": 1,
+      "requiredWeeklyContribution": 250,
+      "requiredMarketOfficeLevel": 3,
+      "rotatesWeekly": true,
+      "rotationGroup": "rare-catalysts",
+      "rewards": [
+        {
+          "type": "Item",
+          "amount": 6,
+          "key": "fury_heart",
+          "name": "Fury Heart"
+        }
+      ]
+    },
+    {
+      "key": "rare.arcane_catalyst_cache",
+      "name": "Rare Arcane Catalyst Cache",
+      "description": "Six Arcane Focuses for Arcane Blueprint recipes.",
+      "stockType": "Rare",
+      "guildFavorCost": 250,
+      "weeklyLimit": 1,
+      "requiredWeeklyContribution": 250,
+      "requiredMarketOfficeLevel": 3,
+      "rotatesWeekly": true,
+      "rotationGroup": "rare-catalysts",
+      "rewards": [
+        {
+          "type": "Item",
+          "amount": 6,
+          "key": "arcane_focus",
+          "name": "Arcane Focus"
+        }
+      ]
+    },
+    {
+      "key": "rare.venom_catalyst_cache",
+      "name": "Rare Venom Catalyst Cache",
+      "description": "Six Venom Glands for Venom Blueprint recipes.",
+      "stockType": "Rare",
+      "guildFavorCost": 250,
+      "weeklyLimit": 1,
+      "requiredWeeklyContribution": 250,
+      "requiredMarketOfficeLevel": 3,
+      "rotatesWeekly": true,
+      "rotationGroup": "rare-catalysts",
+      "rewards": [
+        {
+          "type": "Item",
+          "amount": 6,
+          "key": "venom_gland",
+          "name": "Venom Gland"
+        }
+      ]
+    },
+    {
+      "key": "rare.hive_catalyst_cache",
+      "name": "Rare Hive Catalyst Cache",
+      "description": "Six Royal Chitin Plates for Hive Blueprint recipes.",
+      "stockType": "Rare",
+      "guildFavorCost": 250,
+      "weeklyLimit": 1,
+      "requiredWeeklyContribution": 250,
+      "requiredMarketOfficeLevel": 3,
+      "rotatesWeekly": true,
+      "rotationGroup": "rare-catalysts",
+      "rewards": [
+        {
+          "type": "Item",
+          "amount": 6,
+          "key": "royal_chitin_plate",
+          "name": "Royal Chitin Plate"
+        }
+      ]
+    },
+    {
+      "key": "rare.primal_catalyst_cache",
+      "name": "Rare Primal Catalyst Cache",
+      "description": "Six Hive Ichors for Primal Blueprint recipes.",
+      "stockType": "Rare",
+      "guildFavorCost": 250,
+      "weeklyLimit": 1,
+      "requiredWeeklyContribution": 250,
+      "requiredMarketOfficeLevel": 3,
+      "rotatesWeekly": true,
+      "rotationGroup": "rare-catalysts",
+      "rewards": [
+        {
+          "type": "Item",
+          "amount": 6,
+          "key": "hive_ichor",
+          "name": "Hive Ichor"
+        }
+      ]
+    },
+    {
+      "key": "rare.blueprint_fury",
+      "name": "Blueprint: Fury",
+      "description": "A rare crafting design selected from the Guild Blueprint Archive.",
+      "stockType": "Rare",
+      "guildFavorCost": 450,
+      "weeklyLimit": 1,
+      "requiredWeeklyContribution": 400,
+      "requiredMarketOfficeLevel": 4,
+      "rotatesWeekly": true,
+      "rotationGroup": "rare-blueprints",
+      "rewards": [
+        {
+          "type": "Item",
+          "amount": 1,
+          "key": "blueprint_fury",
+          "name": "Blueprint: Fury"
+        }
+      ]
+    },
+    {
+      "key": "rare.blueprint_arcane",
+      "name": "Blueprint: Arcane",
+      "description": "A rare crafting design selected from the Guild Blueprint Archive.",
+      "stockType": "Rare",
+      "guildFavorCost": 450,
+      "weeklyLimit": 1,
+      "requiredWeeklyContribution": 400,
+      "requiredMarketOfficeLevel": 4,
+      "rotatesWeekly": true,
+      "rotationGroup": "rare-blueprints",
+      "rewards": [
+        {
+          "type": "Item",
+          "amount": 1,
+          "key": "blueprint_arcane",
+          "name": "Blueprint: Arcane"
+        }
+      ]
+    },
+    {
+      "key": "rare.blueprint_execution",
+      "name": "Blueprint: Execution",
+      "description": "A rare crafting design selected from the Guild Blueprint Archive.",
+      "stockType": "Rare",
+      "guildFavorCost": 450,
+      "weeklyLimit": 1,
+      "requiredWeeklyContribution": 400,
+      "requiredMarketOfficeLevel": 4,
+      "rotatesWeekly": true,
+      "rotationGroup": "rare-blueprints",
+      "rewards": [
+        {
+          "type": "Item",
+          "amount": 1,
+          "key": "blueprint_execution",
+          "name": "Blueprint: Execution"
+        }
+      ]
+    },
+    {
+      "key": "rare.blueprint_aegis",
+      "name": "Blueprint: Aegis",
+      "description": "A rare crafting design selected from the Guild Blueprint Archive.",
+      "stockType": "Rare",
+      "guildFavorCost": 450,
+      "weeklyLimit": 1,
+      "requiredWeeklyContribution": 400,
+      "requiredMarketOfficeLevel": 4,
+      "rotatesWeekly": true,
+      "rotationGroup": "rare-blueprints",
+      "rewards": [
+        {
+          "type": "Item",
+          "amount": 1,
+          "key": "blueprint_aegis",
+          "name": "Blueprint: Aegis"
+        }
+      ]
+    },
+    {
+      "key": "rare.blueprint_warden",
+      "name": "Blueprint: Warden",
+      "description": "A rare crafting design selected from the Guild Blueprint Archive.",
+      "stockType": "Rare",
+      "guildFavorCost": 450,
+      "weeklyLimit": 1,
+      "requiredWeeklyContribution": 400,
+      "requiredMarketOfficeLevel": 4,
+      "rotatesWeekly": true,
+      "rotationGroup": "rare-blueprints",
+      "rewards": [
+        {
+          "type": "Item",
+          "amount": 1,
+          "key": "blueprint_warden",
+          "name": "Blueprint: Warden"
+        }
+      ]
+    },
+    {
+      "key": "rare.blueprint_endurance",
+      "name": "Blueprint: Endurance",
+      "description": "A rare crafting design selected from the Guild Blueprint Archive.",
+      "stockType": "Rare",
+      "guildFavorCost": 450,
+      "weeklyLimit": 1,
+      "requiredWeeklyContribution": 400,
+      "requiredMarketOfficeLevel": 4,
+      "rotatesWeekly": true,
+      "rotationGroup": "rare-blueprints",
+      "rewards": [
+        {
+          "type": "Item",
+          "amount": 1,
+          "key": "blueprint_endurance",
+          "name": "Blueprint: Endurance"
+        }
+      ]
+    },
+    {
+      "key": "rare.blueprint_phoenix",
+      "name": "Blueprint: Phoenix",
+      "description": "A rare crafting design selected from the Guild Blueprint Archive.",
+      "stockType": "Rare",
+      "guildFavorCost": 450,
+      "weeklyLimit": 1,
+      "requiredWeeklyContribution": 400,
+      "requiredMarketOfficeLevel": 4,
+      "rotatesWeekly": true,
+      "rotationGroup": "rare-blueprints",
+      "rewards": [
+        {
+          "type": "Item",
+          "amount": 1,
+          "key": "blueprint_phoenix",
+          "name": "Blueprint: Phoenix"
+        }
+      ]
+    },
+    {
+      "key": "rare.blueprint_spirit",
+      "name": "Blueprint: Spirit",
+      "description": "A rare crafting design selected from the Guild Blueprint Archive.",
+      "stockType": "Rare",
+      "guildFavorCost": 450,
+      "weeklyLimit": 1,
+      "requiredWeeklyContribution": 400,
+      "requiredMarketOfficeLevel": 4,
+      "rotatesWeekly": true,
+      "rotationGroup": "rare-blueprints",
+      "rewards": [
+        {
+          "type": "Item",
+          "amount": 1,
+          "key": "blueprint_spirit",
+          "name": "Blueprint: Spirit"
+        }
+      ]
+    },
+    {
+      "key": "rare.blueprint_primal",
+      "name": "Blueprint: Primal",
+      "description": "A rare crafting design selected from the Guild Blueprint Archive.",
+      "stockType": "Rare",
+      "guildFavorCost": 450,
+      "weeklyLimit": 1,
+      "requiredWeeklyContribution": 400,
+      "requiredMarketOfficeLevel": 4,
+      "rotatesWeekly": true,
+      "rotationGroup": "rare-blueprints",
+      "rewards": [
+        {
+          "type": "Item",
+          "amount": 1,
+          "key": "blueprint_primal",
+          "name": "Blueprint: Primal"
+        }
+      ]
+    },
+    {
+      "key": "rare.blueprint_venom_touched_sword",
+      "name": "Blueprint: Venom-Touched Sword",
+      "description": "A rare crafting design selected from the Guild Blueprint Archive.",
+      "stockType": "Rare",
+      "guildFavorCost": 450,
+      "weeklyLimit": 1,
+      "requiredWeeklyContribution": 400,
+      "requiredMarketOfficeLevel": 4,
+      "rotatesWeekly": true,
+      "rotationGroup": "rare-blueprints",
+      "rewards": [
+        {
+          "type": "Item",
+          "amount": 1,
+          "key": "blueprint_venom_touched_sword",
+          "name": "Blueprint: Venom-Touched Sword"
+        }
+      ]
+    },
+    {
+      "key": "rare.blueprint_hivefang_dagger",
+      "name": "Blueprint: Hivefang Dagger",
+      "description": "A rare crafting design selected from the Guild Blueprint Archive.",
+      "stockType": "Rare",
+      "guildFavorCost": 450,
+      "weeklyLimit": 1,
+      "requiredWeeklyContribution": 400,
+      "requiredMarketOfficeLevel": 4,
+      "rotatesWeekly": true,
+      "rotationGroup": "rare-blueprints",
+      "rewards": [
+        {
+          "type": "Item",
+          "amount": 1,
+          "key": "blueprint_hivefang_dagger",
+          "name": "Blueprint: Hivefang Dagger"
+        }
+      ]
+    }
   ]
 }

@@ -1,6 +1,8 @@
 using Domain.Models.Essences;
 using Domain.Models.Regions;
 using Domain.Models.Regions.Areas;
+using Domain.Models.Professions.Gathering.GatheringNodes;
+using Domain.Models.Tutorials;
 using Microsoft.EntityFrameworkCore;
 using Persistence.LL;
 using Persistence.LL.Seeds.Seeding;
@@ -110,6 +112,29 @@ public sealed class RegionOneIdleAreaSeedTests
                 expectedCreatureNames.OrderBy(name => name),
                 creatureNamesByArea[areaName]);
         }
+    }
+
+    [Fact]
+    public async Task Lumo_Ruins_teaches_each_base_gathering_type()
+    {
+        await using var db = CreateDb();
+
+        await SeedCreatures.SeedCreaturesData(db);
+        await db.SaveChangesAsync();
+
+        var lumoRuins = await db.Areas
+            .Include(area => area.GatheringNodes)
+            .SingleAsync(area => area.Id == TutorialConstants.LumoRuinsAreaId);
+
+        Assert.Equal(3, lumoRuins.GatheringNodes.Count);
+        Assert.Equal(
+            [GatheringType.Mining, GatheringType.Woodcutting, GatheringType.Skinning],
+            lumoRuins.GatheringNodes.Select(node => node.Type).OrderBy(type => type).ToArray());
+        Assert.All(lumoRuins.GatheringNodes, node =>
+        {
+            Assert.Equal(0.4, node.ProcChance, precision: 6);
+            Assert.False(string.IsNullOrWhiteSpace(node.RewardTableId));
+        });
     }
 
     [Fact]

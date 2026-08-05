@@ -50,8 +50,10 @@ export class ChatService {
   private readonly systemSenderId = '00000000-0000-0000-0000-000000000000';
   // expose an observable stream of all messages
   private readonly messageList = signal<ChatMessageDto[]>([]);
+  private readonly _onlinePlayerCount = signal<number | null>(null);
   public messages$ = toObservable(this.messageList);
   public whisperDraftTarget$ = this.whisperDraftRequests.asObservable();
+  public readonly onlinePlayerCount = this._onlinePlayerCount.asReadonly();
   private readonly apiBase = environment.chatApiRoot; // e.g. https://api.legends-legacy.com
 
   constructor(
@@ -272,11 +274,30 @@ export class ChatService {
       this.zone.run(() => this.addMessage(msg));
     });
 
+    this.hub.off('OnlineCountChanged');
+    this.hub.on('OnlineCountChanged', (count: number) => {
+      this.zone.run(() => this.setOnlinePlayerCount(count));
+    });
+
     try {
       await this.hub.start();
     } catch (error) {
+      if (
+        this.hub &&
+        this.hub.state !== signalR.HubConnectionState.Disconnected
+      ) {
+        await this.hub.stop();
+      }
       this.hub = undefined;
+      this._onlinePlayerCount.set(null);
       throw error;
+    }
+
+    try {
+      const onlineCount = await this.hub.invoke<number>('GetOnlineCount');
+      this.zone.run(() => this.setOnlinePlayerCount(onlineCount));
+    } catch {
+      // Keep Chat usable during a rolling deployment with an older Chat API.
     }
   }
 
@@ -303,6 +324,7 @@ export class ChatService {
     this.activeGuildId = null;
     this.connectAndLoadPromise = undefined;
     this.messageList.set([]);
+    this._onlinePlayerCount.set(null);
 
     this.incoming$.complete(); // ends the old stream
     this.incoming$ = new ReplaySubject<ChatMessageDto>();
@@ -324,5 +346,11 @@ export class ChatService {
 
   private currentSenderTitleDisplayName(): string | null {
     return this.auth.currentCharacter()?.equippedTitle?.displayName?.trim() || null;
+  }
+
+  private setOnlinePlayerCount(count: number): void {
+    this._onlinePlayerCount.set(
+      Number.isFinite(count) ? Math.max(0, Math.trunc(count)) : null,
+    );
   }
 }

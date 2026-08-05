@@ -63,6 +63,9 @@ import {
   DropdownOption,
   DropdownSelection,
 } from '../../../../../shared/components/custom-components/dropdown/dropdown.component';
+import { AttributeDisplayPipe } from '../../../../../shared/pipes/attributes/attribute-display/attribute-display.pipe';
+import { aggregateAttributes } from '../../../../../shared/utils/attributes/attribute-order.utils';
+import { AttributeTooltipDirective } from '../../../../../shared/directives/attribute-tooltip/attribute-tooltip.directive';
 
 @Component({
     selector: 'app-market-place-buy',
@@ -82,6 +85,8 @@ import {
         DecimalPipe,
         AttributeTypeFormatPipe,
         AttributeValueFormatPipe,
+        AttributeDisplayPipe,
+        AttributeTooltipDirective,
         DropdownComponent,
     ],
     templateUrl: './market-place-buy.component.html'
@@ -305,7 +310,7 @@ export class MarketPlaceBuyComponent implements OnInit {
     switch (base.itemType) {
       case 'Equipment': {
         const eq = instance as EquipmentInstance;
-        const mods = eq.attributeModifiers
+        const mods = aggregateAttributes(eq.attributeModifiers)
           .map(
             (m) =>
               `• ${formatAttributeType(m.attributeType)}: ${formatAttributeValue(m.amount, m.attributeType, true)}`,

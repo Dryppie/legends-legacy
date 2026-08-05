@@ -144,7 +144,8 @@
           <app-item [item]="e.itemInstance"></app-item>
           <div
             class="text-sm text-neutral-400"
-            *ngFor="let mod of getAttributeModifiers(e)"
+            *ngFor="let mod of getAttributeModifiers(e) | attributeDisplay"
+            [appAttributeTooltip]="mod"
           >
             {{ mod.attributeType | attributeTypeFormat }}:
             {{ mod.amount | attributeValueFormat: mod.attributeType : true }}

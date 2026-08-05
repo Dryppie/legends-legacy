@@ -1,4 +1,4 @@
-export type GuildShopStockType = 'Common' | 'Weekly' | 'Prestige';
+export type GuildShopStockType = 'Common' | 'Rare';
 
 export interface GuildShopReward {
   type: string;
@@ -14,7 +14,6 @@ export interface GuildShopItem {
   description: string;
   stockType: GuildShopStockType;
   guildFavorCost: number;
-  guildHonorsCost: number;
   weeklyLimit: number;
   purchasedThisPeriod: number;
   requiredWeeklyContribution: number;
@@ -28,7 +27,6 @@ export interface GuildShopItem {
 export interface GuildShopOverview {
   guildId: string;
   guildFavor: number;
-  guildHonors: number;
   weeklyPeriodKey: string;
   nextWeeklyResetAt: string;
   items: GuildShopItem[];

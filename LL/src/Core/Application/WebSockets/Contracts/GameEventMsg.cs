@@ -26,5 +26,9 @@ public record AchievementUnlockedMsg(
 
 public record TutorialProgressedMsg(TutorialState Tutorial) : GameEventMsg;
 
-public record TutorialCompletedMsg(string TutorialId) : GameEventMsg;
+public record TutorialCompletedMsg(
+    string TutorialId,
+    int RewardCinders = 0,
+    string? NextRoute = null,
+    bool WasSkipped = false) : GameEventMsg;
 //public record LootReceivedMsg(Guid CharacterId, List<InventoryItemDto> Items) : GameEventMsg;

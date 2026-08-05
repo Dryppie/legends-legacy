@@ -47,13 +47,42 @@
         <small class="ll-stat-label"
           >Req. LV: {{ area.levelRequirement }}</small
         >
-        <div class="mt-1 flex max-w-40 flex-wrap gap-1">
-          <span
-            *ngFor="let gatheringType of gatheringTypes()"
-            class="ll-item-chip text-[0.65rem] text-primary"
+        <div
+          class="mt-1 flex max-w-40 flex-wrap gap-1"
+          [attr.data-tour]="gatheringTourId()"
+        >
+          <div
+            *ngIf="gatheringTypes().length > 0"
+            class="group/gathering relative"
           >
-            {{ gatheringType }}
-          </span>
+            <button
+              type="button"
+              class="ll-item-chip cursor-help text-[0.65rem] text-primary"
+              aria-haspopup="true"
+              [attr.aria-label]="
+                'Gathering node types: ' + gatheringTypes().join(', ')
+              "
+            >
+              Gathering {{ gatheringTypes().length }}
+              <span aria-hidden="true">▴</span>
+            </button>
+
+            <div
+              class="ll-card absolute bottom-full left-0 z-30 hidden min-w-36 bg-texture p-2 shadow-xl group-hover/gathering:block group-focus-within/gathering:block"
+              role="tooltip"
+            >
+              <p class="ll-eyebrow mb-1 text-[0.6rem]">Gathering nodes</p>
+              <ul class="space-y-1">
+                <li
+                  *ngFor="let gatheringType of gatheringTypes()"
+                  class="flex items-center gap-1.5 whitespace-nowrap text-[0.7rem] text-white"
+                >
+                  <span class="text-primary" aria-hidden="true">◆</span>
+                  {{ gatheringType }}
+                </li>
+              </ul>
+            </div>
+          </div>
           <span
             *ngIf="gatheringTypes().length === 0"
             class="ll-item-chip text-[0.65rem]"

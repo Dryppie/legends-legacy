@@ -33,6 +33,7 @@ export class NavigationTabsComponent {
   @Input() ariaLabel = 'Sections';
   @Input() appearance: NavigationTabsAppearance = 'primary';
   @Input() stretch = true;
+  @Input() tourTabPrefix: string | null = null;
   @Output() readonly tabSelected = new EventEmitter<string>();
 
   @ViewChildren('tabButton')
@@ -41,6 +42,12 @@ export class NavigationTabsComponent {
   select(tab: NavigationTab): void {
     if (tab.disabled || tab.key === this.activeKey) return;
     this.tabSelected.emit(tab.key);
+  }
+
+  getTourId(tab: NavigationTab): string | null {
+    return this.tourTabPrefix
+      ? `${this.tourTabPrefix}-${this.toKebabCase(tab.key)}`
+      : null;
   }
 
   onTabKeydown(event: KeyboardEvent, index: number): void {
@@ -77,5 +84,9 @@ export class NavigationTabsComponent {
     const targetTab = this.tabs[targetIndex];
     this.select(targetTab);
     this.tabButtons.get(targetIndex)?.nativeElement.focus();
+  }
+
+  private toKebabCase(value: string): string {
+    return value.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-');
   }
 }

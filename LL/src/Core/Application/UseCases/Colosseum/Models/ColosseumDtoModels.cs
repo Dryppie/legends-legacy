@@ -96,7 +96,11 @@ public sealed record ChampionMarketItemModel(
     string? CannotPurchaseReason,
     int SortOrder,
     int CindersGranted,
-    int SoulstonesGranted);
+    int SoulstonesGranted,
+    int SigilFragmentsGranted,
+    string? RewardItemId,
+    string? RewardItemName,
+    int RewardItemQuantity);
 
 public sealed record PurchaseChampionMarketItemRequestModel(
     string ItemId,

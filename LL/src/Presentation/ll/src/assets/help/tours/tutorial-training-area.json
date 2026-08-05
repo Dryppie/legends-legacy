@@ -6,6 +6,6 @@
     "actionSelector": "[data-tour=training-area-battle]",
     "title": "Training Area",
     "description": "Click Battle in the Training Area to earn your first Essence.",
-    "position": "left"
+    "position": "bottom"
   }
 ]

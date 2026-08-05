@@ -30,7 +30,7 @@ public class GuildBuildingService : IGuildBuildingService
         var guild = await LoadGuildAsync(characterId, cancellationToken);
         if (guild is null) return null;
 
-        EnsureCurrentState(guild, null, now);
+        EnsureGuildHall(guild, now);
         if (_context.HasChanges)
         {
             await _context.SaveChangesAsync(cancellationToken);
@@ -48,7 +48,7 @@ public class GuildBuildingService : IGuildBuildingService
         var guild = await LoadGuildAsync(characterId, cancellationToken);
         if (guild is null) return GuildOperationResult<GuildBuildingOverviewDto>.Fail("You are not in a guild.");
 
-        EnsureCurrentState(guild, characterId, now);
+        EnsureGuildHall(guild, now);
 
         if (!CanManageBuildings(guild, characterId))
             return GuildOperationResult<GuildBuildingOverviewDto>.Fail("Only guild leaders and officers can spend Guild Supplies.");
@@ -74,20 +74,16 @@ public class GuildBuildingService : IGuildBuildingService
         {
             GuildId = guild.Id,
             Type = definition.Type,
-            Level = 0,
-            TargetLevel = 1,
-            Status = GuildBuildingStatus.UnderConstruction,
-            StartedAt = now,
-            CompletesAt = now.AddHours(GetBuildHours(guild, definition, 1)),
+            Level = 1,
             UpdatedAt = now
         };
         AddBuilding(guild, building);
 
         AddActivityLog(
             guild,
-            GuildActivityLogType.BuildingConstructionStarted,
+            GuildActivityLogType.BuildingConstructed,
             characterId,
-            $"{definition.Name} construction started.",
+            $"{definition.Name} built to level 1.",
             now);
 
         return GuildOperationResult<GuildBuildingOverviewDto>.Success(BuildOverview(guild, characterId));
@@ -102,7 +98,7 @@ public class GuildBuildingService : IGuildBuildingService
         var guild = await LoadGuildAsync(characterId, cancellationToken);
         if (guild is null) return GuildOperationResult<GuildBuildingOverviewDto>.Fail("You are not in a guild.");
 
-        EnsureCurrentState(guild, characterId, now);
+        EnsureGuildHall(guild, now);
 
         if (!CanManageBuildings(guild, characterId))
             return GuildOperationResult<GuildBuildingOverviewDto>.Fail("Only guild leaders and officers can spend Guild Supplies.");
@@ -112,9 +108,6 @@ public class GuildBuildingService : IGuildBuildingService
             return GuildOperationResult<GuildBuildingOverviewDto>.Fail("Guild building was not found.");
 
         var definition = _definitionMap[building.Type];
-        if (building.Status != GuildBuildingStatus.Active)
-            return GuildOperationResult<GuildBuildingOverviewDto>.Fail("That building is already being worked on.");
-
         if (building.Level >= definition.MaxLevel)
             return GuildOperationResult<GuildBuildingOverviewDto>.Fail("That building is already at max level.");
 
@@ -123,18 +116,14 @@ public class GuildBuildingService : IGuildBuildingService
         if (!TrySpendGuildSupplies(guild, cost[GuildResourceType.GuildSupplies]))
             return GuildOperationResult<GuildBuildingOverviewDto>.Fail("Not enough Guild Supplies.");
 
-        building.TargetLevel = nextLevel;
-        building.Status = GuildBuildingStatus.Upgrading;
-        building.StartedAt = now;
-        building.CompletesAt = now.AddHours(GetBuildHours(guild, definition, nextLevel));
-        building.CompletedAt = null;
+        building.Level = nextLevel;
         building.UpdatedAt = now;
 
         AddActivityLog(
             guild,
-            GuildActivityLogType.BuildingUpgradeStarted,
+            GuildActivityLogType.BuildingUpgraded,
             characterId,
-            $"{definition.Name} upgrade to level {nextLevel} started.",
+            $"{definition.Name} upgraded to level {nextLevel}.",
             now);
 
         return GuildOperationResult<GuildBuildingOverviewDto>.Success(BuildOverview(guild, characterId));
@@ -148,7 +137,7 @@ public class GuildBuildingService : IGuildBuildingService
             .Include(x => x.ActivityLogs)
             .FirstOrDefaultAsync(x => x.Members.Select(m => m.CharacterId).Contains(characterId), cancellationToken);
 
-    private void EnsureCurrentState(Guild guild, Guid? characterId, DateTimeOffset now)
+    private void EnsureGuildHall(Guild guild, DateTimeOffset now)
     {
         var hall = guild.Buildings.FirstOrDefault(x => x.Type == GuildBuildingType.GuildHall);
         if (hall is null)
@@ -158,38 +147,8 @@ public class GuildBuildingService : IGuildBuildingService
                 GuildId = guild.Id,
                 Type = GuildBuildingType.GuildHall,
                 Level = 1,
-                Status = GuildBuildingStatus.Active,
-                StartedAt = guild.CreatedAt,
-                CompletedAt = guild.CreatedAt,
                 UpdatedAt = now
             });
-        }
-
-        foreach (var building in guild.Buildings.Where(x => x.Status != GuildBuildingStatus.Active && x.CompletesAt <= now))
-        {
-            if (!_definitionMap.TryGetValue(building.Type, out var definition))
-            {
-                continue;
-            }
-
-            var completedLevel = building.TargetLevel ?? Math.Max(1, building.Level);
-            var completedType = building.Status == GuildBuildingStatus.UnderConstruction
-                ? GuildActivityLogType.BuildingConstructed
-                : GuildActivityLogType.BuildingUpgraded;
-
-            building.Level = completedLevel;
-            building.TargetLevel = null;
-            building.Status = GuildBuildingStatus.Active;
-            building.CompletedAt = building.CompletesAt;
-            building.CompletesAt = null;
-            building.UpdatedAt = now;
-
-            AddActivityLog(
-                guild,
-                completedType,
-                characterId,
-                $"{definition.Name} reached level {completedLevel}.",
-                now);
         }
     }
 
@@ -215,7 +174,6 @@ public class GuildBuildingService : IGuildBuildingService
     {
         var building = guild.Buildings.FirstOrDefault(x => x.Type == definition.Type);
         var guildHallLevel = GetGuildHallLevel(guild);
-        var status = building?.Status ?? GuildBuildingStatus.Active;
         var level = building?.Level ?? 0;
         var isConstructed = building is not null;
         var lockedReason = GetLockedReason(guild, definition, building, canManage);
@@ -226,19 +184,14 @@ public class GuildBuildingService : IGuildBuildingService
             building?.Id,
             ToDefinitionDto(definition),
             definition.IsPermanent && building is null ? 1 : level,
-            building?.TargetLevel,
-            status,
-            building?.CompletesAt,
             nextCost,
             !definition.IsPermanent && !isConstructed && lockedReason is null && canManage,
-            isConstructed && status == GuildBuildingStatus.Active && level < definition.MaxLevel && lockedReason is null && canManage,
+            isConstructed && level < definition.MaxLevel && lockedReason is null && canManage,
             lockedReason);
 
         static string? GetLockedReason(Guild guild, GuildBuildingDefinition definition, GuildBuilding? building, bool canManage)
         {
             if (!canManage) return "Leader or officer required.";
-            if (building?.Status is GuildBuildingStatus.UnderConstruction) return "Construction is in progress.";
-            if (building?.Status is GuildBuildingStatus.Upgrading) return "Upgrade is in progress.";
             if (building?.Level >= definition.MaxLevel) return "Max level reached.";
 
             var guildHallLevel = GetGuildHallLevel(guild);
@@ -286,16 +239,9 @@ public class GuildBuildingService : IGuildBuildingService
         };
     }
 
-    private static double GetBuildHours(Guild guild, GuildBuildingDefinition definition, int level)
-    {
-        var baseHours = definition.BaseHours * Math.Max(1, level);
-        var discountPercent = GetTreasuryLevel(guild) * 2;
-        return Math.Max(0.25d, baseHours * (100 - discountPercent) / 100d);
-    }
-
     private static int GetTreasuryLevel(Guild guild) =>
         Math.Clamp(
-            guild.Buildings.FirstOrDefault(x => x.Type == GuildBuildingType.Treasury && x.Status == GuildBuildingStatus.Active)?.Level ?? 0,
+            guild.Buildings.FirstOrDefault(x => x.Type == GuildBuildingType.Treasury)?.Level ?? 0,
             0,
             5);
 

@@ -12,12 +12,11 @@ public static class AttributeCombatRules
     public const float DodgeChanceCapPercent = 50f;
     public const float BlockChanceCapPercent = 50f;
     public const float BlockDamageReductionPercent = 50f;
-    public const float CritChanceCapPercent = 75f;
-    public const float LifeStealCapPercent = 50f;
+    public const float CritChanceCapPercent = 100f;
     public const float MinimumBasicAttackRate = 0.25f;
     public const float MaximumBasicAttackRate = 4f;
     public const float DefenseRatingScale = 100f;
-    public const float BasicAttackPowerCoefficient = 0.1f;
+    public const float BasicAttackPowerCoefficient = 0.5f;
 
     private static readonly IReadOnlyList<PrimaryAttributeContribution> Contributions =
     [

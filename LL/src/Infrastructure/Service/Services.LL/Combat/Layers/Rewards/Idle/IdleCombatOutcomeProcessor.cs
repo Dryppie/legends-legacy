@@ -144,15 +144,6 @@ public sealed class IdleCombatOutcomeProcessor : ICombatOutcomeProcessor
                     encounter.StartedAt,
                     ProphecyProgressKind.EncounterWon,
                     EnemyCount: encounter.HostileCreatures.Count));
-
-                foreach (var creature in encounter.HostileCreatures)
-                {
-                    progressEvents.Add(new ProphecyProgressEvent(
-                        facts.CharacterId,
-                        encounter.StartedAt,
-                        ProphecyProgressKind.CreatureDefeated,
-                        CreatureDefinitionId: creature.Id.ToString()));
-                }
             }
             else
             {
@@ -161,6 +152,24 @@ public sealed class IdleCombatOutcomeProcessor : ICombatOutcomeProcessor
                     encounter.StartedAt,
                     ProphecyProgressKind.EncounterLost,
                     EnemyCount: encounter.HostileCreatures.Count));
+            }
+
+            for (var index = 0; index < encounter.HostileCreatures.Count; index++)
+            {
+                var wasDefeated = encounter.IsVictory ||
+                    (index < encounter.CombatResult.EnemyTeam.Count &&
+                     encounter.CombatResult.EnemyTeam[index].Health <= 0);
+
+                if (!wasDefeated)
+                {
+                    continue;
+                }
+
+                progressEvents.Add(new ProphecyProgressEvent(
+                    facts.CharacterId,
+                    encounter.StartedAt,
+                    ProphecyProgressKind.CreatureDefeated,
+                    CreatureDefinitionId: encounter.HostileCreatures[index].Id.ToString()));
             }
         }
 

@@ -5,12 +5,5 @@ public enum MaterialFamily
     Metal,
     Wood,
     Hide,
-    Crystal,
-    Stone,
-    Fiber,
-    Bone,
-    Chitin,
-    Resin,
-    Oil,
     Special
 }
