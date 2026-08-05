@@ -34,6 +34,7 @@ export enum DamageType {
   Bleed = 'Bleed',
   Burn = 'Burn',
   Poison = 'Poison',
+  Shadow = 'Shadow',
 }
 
 export enum DamageTag {

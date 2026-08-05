@@ -95,48 +95,48 @@ public sealed class CanonicalEquipmentBuildFactory
         {
             [CanonicalPartyProfile.Balanced] =
             [
-                "essence.legacy.goblin",
-                "essence.legacy.vampire_bat",
-                "essence.legacy.goblin_warrior",
-                "essence.legacy.enchanted_fairy",
-                "essence.legacy.goblin_archer",
-                "essence.legacy.pixie"
+                "essence.goblin",
+                "essence.vampire_bat",
+                "essence.goblin_warrior",
+                "essence.enchanted_fairy",
+                "essence.goblin_archer",
+                "essence.pixie"
             ],
             [CanonicalPartyProfile.Offense] =
             [
-                "essence.legacy.goblin_archer",
-                "essence.legacy.glade_panther",
-                "essence.legacy.goblin_warrior",
-                "essence.legacy.flame_imp",
-                "essence.legacy.hobgoblin",
-                "essence.legacy.vampire_bat"
+                "essence.goblin_archer",
+                "essence.glade_panther",
+                "essence.goblin_warrior",
+                "essence.flame_imp",
+                "essence.hobgoblin",
+                "essence.vampire_bat"
             ],
             [CanonicalPartyProfile.Sustain] =
             [
-                "essence.legacy.enchanted_fairy",
-                "essence.legacy.pixie",
-                "essence.legacy.treant_sapling",
-                "essence.legacy.goblin_shaman",
-                "essence.legacy.brown_slime",
-                "essence.legacy.green_slime"
+                "essence.enchanted_fairy",
+                "essence.pixie",
+                "essence.treant_sapling",
+                "essence.goblin_shaman",
+                "essence.brown_slime",
+                "essence.green_slime"
             ],
             [CanonicalPartyProfile.Defensive] =
             [
-                "essence.legacy.brown_slime",
-                "essence.legacy.goblin_warrior",
-                "essence.legacy.treant_sapling",
-                "essence.legacy.goblin_shaman",
-                "essence.legacy.blue_slime",
-                "essence.legacy.moss_lizard"
+                "essence.brown_slime",
+                "essence.goblin_warrior",
+                "essence.treant_sapling",
+                "essence.goblin_shaman",
+                "essence.blue_slime",
+                "essence.moss_lizard"
             ],
             [CanonicalPartyProfile.Area] =
             [
-                "essence.legacy.flame_imp",
-                "essence.legacy.pixie",
-                "essence.legacy.frost_imp",
-                "essence.legacy.shadow_imp",
-                "essence.legacy.goblin_shaman",
-                "essence.legacy.rainbow_slime"
+                "essence.flame_imp",
+                "essence.pixie",
+                "essence.frost_imp",
+                "essence.shadow_imp",
+                "essence.goblin_shaman",
+                "essence.rainbow_slime"
             ]
         };
 

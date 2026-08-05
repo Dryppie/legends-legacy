@@ -7,4 +7,5 @@ public enum DamageType
     Bleed,
     Burn,
     Poison,
+    Shadow,
 }

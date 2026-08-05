@@ -16,7 +16,7 @@ public class RegionRepository : IRegionRepository
     public async Task<Region> GetRegionByIdAsync(int regionId, CancellationToken cancellationToken)
     {
         var region = await _context.Regions
-            .Include(r => r.Areas)
+            .Include(r => r.Areas.OrderBy(area => area.DifficultyTier))
             .ThenInclude(a => a.Creatures)
             .FirstOrDefaultAsync(r => r.Id.Equals(regionId), cancellationToken);
 

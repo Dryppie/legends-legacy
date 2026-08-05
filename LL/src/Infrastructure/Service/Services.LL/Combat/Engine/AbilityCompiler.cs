@@ -86,6 +86,8 @@ public static class AbilityCompiler
         {
             Event = trigger.Event,
             InternalCooldownTicks = trigger.InternalCooldownTicks,
+            InitialDelayTicks = trigger.InitialDelayTicks,
+            EveryNthOccurrence = Math.Max(1, trigger.EveryNthOccurrence),
             Conditions = [.. trigger.Conditions.Select(CompileCondition)],
             Effects = [.. selectedEffects.Select(effect => CompileEffect(effect, statsSource, abilityKind, abilityTags))]
         };
@@ -105,8 +107,16 @@ public static class AbilityCompiler
             BaseValue = effect.BaseValue,
             ScalingAttribute = effect.ScalingAttribute,
             ScalingCoefficient = effect.ScalingCoefficient,
+            MaximumScalingCoefficient = effect.MaximumScalingCoefficient,
+            EventMagnitudeCoefficient = effect.EventMagnitudeCoefficient,
+            ScalingCondition = effect.ScalingCondition,
+            ConditionScalingCoefficient = effect.ConditionScalingCoefficient,
+            ScalingStatusId = effect.ScalingStatusId,
+            StatusScalingCoefficient = effect.StatusScalingCoefficient,
             Attribute = effect.Attribute,
             StatusId = effect.StatusId,
+            Condition = effect.Condition,
+            AlternativeCondition = effect.AlternativeCondition,
             SummonId = effect.SummonId,
             SummonPowerMultiplier = effect.SummonPowerMultiplier <= 0 ? 1d : effect.SummonPowerMultiplier,
             SummonHealthMultiplier = effect.SummonHealthMultiplier <= 0 ? 1d : effect.SummonHealthMultiplier,
@@ -118,6 +128,8 @@ public static class AbilityCompiler
             AttackType = effect.AttackType,
             DamageType = effect.DamageType,
             CritEligibility = effect.CritEligibility,
+            CritChanceBonus = effect.CritChanceBonus,
+            ArmorPenetrationBonus = effect.ArmorPenetrationBonus,
             LifeStealPercentage = effect.LifeStealPercentage,
             ProcCoefficient = effect.ProcCoefficient <= 0 ? 1m : effect.ProcCoefficient,
             AbilityKind = abilityKind,
@@ -141,6 +153,9 @@ public static class AbilityCompiler
             Type = condition.Type,
             Subject = condition.Subject,
             StatusId = condition.StatusId,
+            Condition = condition.Condition,
+            DamageType = condition.DamageType,
+            AttackType = condition.AttackType,
             Tag = condition.Tag,
             Value = condition.Value
         };

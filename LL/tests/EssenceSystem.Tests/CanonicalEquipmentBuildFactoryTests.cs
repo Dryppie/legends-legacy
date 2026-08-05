@@ -115,7 +115,7 @@ public sealed class CanonicalEquipmentBuildFactoryTests
             ],
             balanced.Equipment.Select(item => item.ItemBaseId));
         Assert.Equal(
-            ["essence.legacy.goblin", "essence.legacy.vampire_bat"],
+            ["essence.goblin", "essence.vampire_bat"],
             balanced.EquippedEssences.Select(essence => essence.EssenceDefinitionId));
     }
 
@@ -124,36 +124,36 @@ public sealed class CanonicalEquipmentBuildFactoryTests
         CanonicalPartyProfile.Balanced,
         "medium_mail",
         "greatsword",
-        "essence.legacy.goblin",
-        "essence.legacy.vampire_bat",
+        "essence.goblin",
+        "essence.vampire_bat",
         10)]
     [InlineData(
         CanonicalPartyProfile.Offense,
         "light_vest",
         "gauntlets",
-        "essence.legacy.goblin_archer",
-        "essence.legacy.glade_panther",
+        "essence.goblin_archer",
+        "essence.glade_panther",
         15)]
     [InlineData(
         CanonicalPartyProfile.Sustain,
         "cloth_robe",
         "staff",
-        "essence.legacy.enchanted_fairy",
-        "essence.legacy.pixie",
+        "essence.enchanted_fairy",
+        "essence.pixie",
         15)]
     [InlineData(
         CanonicalPartyProfile.Defensive,
         "heavy_breastplate",
         "maul",
-        "essence.legacy.brown_slime",
-        "essence.legacy.goblin_warrior",
+        "essence.brown_slime",
+        "essence.goblin_warrior",
         10)]
     [InlineData(
         CanonicalPartyProfile.Area,
         "cloth_robe",
         "staff",
-        "essence.legacy.flame_imp",
-        "essence.legacy.pixie",
+        "essence.flame_imp",
+        "essence.pixie",
         15)]
     public void Profile_loadout_identity_is_explicit_and_reproducible(
         CanonicalPartyProfile profile,

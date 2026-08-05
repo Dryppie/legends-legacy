@@ -392,7 +392,6 @@ public sealed class AbilityBalanceSimulator : IAbilityBalanceSimulator
     private static string FormatEssenceId(string essenceId)
     {
         var cleaned = essenceId
-            .Replace("essence.legacy.", string.Empty, StringComparison.OrdinalIgnoreCase)
             .Replace("essence.", string.Empty, StringComparison.OrdinalIgnoreCase)
             .Replace("_", " ", StringComparison.OrdinalIgnoreCase)
             .Replace(".", " ", StringComparison.OrdinalIgnoreCase)

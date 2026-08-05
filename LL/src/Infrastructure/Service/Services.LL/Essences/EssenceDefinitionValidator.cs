@@ -30,7 +30,7 @@ public sealed class EssenceDefinitionValidator : IEssenceDefinitionValidator
 
             foreach (var tag in definition.Tags.Concat(definition.ActiveAbility?.Tags ?? []).Concat(definition.PassiveAbility?.Tags ?? []).Concat(definition.Evolution?.AddsTags ?? []))
             {
-                if (!EssenceTagCatalog.AllTags.Contains(tag)) errors.Add($"{definition.Id}: unknown tag '{tag}'.");
+                if (!IsKnownTag(tag)) errors.Add($"{definition.Id}: unknown tag '{tag}'.");
             }
 
             foreach (var bonus in definition.AttributeBonuses.Concat(definition.Evolution?.AttributeModifierChanges ?? []))
@@ -90,7 +90,7 @@ public sealed class EssenceDefinitionValidator : IEssenceDefinitionValidator
         foreach (var effect in ability.Effects)
         {
             if (string.IsNullOrWhiteSpace(effect.Id)) errors.Add($"{essenceId}/{ability.Id}: effect id is required.");
-            if (effect.Operation != AbilityEffectOperation.ModifyAttribute
+            if (!AllowsNegativeValue(effect.Operation)
                 && effect.BaseValue < 0)
             {
                 errors.Add($"{essenceId}/{ability.Id}/{effect.Id}: scaling values cannot be negative.");
@@ -101,6 +101,9 @@ public sealed class EssenceDefinitionValidator : IEssenceDefinitionValidator
                 errors.Add($"{essenceId}/{ability.Id}/{effect.Id}: attribute '{effect.Attribute}' is runtime-only and cannot be authored.");
             if (effect.Operation == AbilityEffectOperation.ApplyStatus && string.IsNullOrWhiteSpace(effect.StatusId))
                 errors.Add($"{essenceId}/{ability.Id}/{effect.Id}: ApplyStatus requires status.");
+            if (effect.Operation == AbilityEffectOperation.ApplyCondition && effect.Condition is null)
+                errors.Add($"{essenceId}/{ability.Id}/{effect.Id}: ApplyCondition requires condition.");
+            ValidateStandardConditionEffect(essenceId, $"{ability.Id}/{effect.Id}", effect, errors);
 
             ValidateConditions(essenceId, $"{ability.Id}/{effect.Id}", effect.Conditions, errors);
         }
@@ -163,7 +166,7 @@ public sealed class EssenceDefinitionValidator : IEssenceDefinitionValidator
         List<string> errors)
     {
         if (string.IsNullOrWhiteSpace(effect.Id)) errors.Add($"{essenceId}/{ownerId}: effect id is required.");
-        if (effect.Operation != AbilityEffectOperation.ModifyAttribute
+        if (!AllowsNegativeValue(effect.Operation)
             && effect.BaseValue < 0)
         {
             errors.Add($"{essenceId}/{ownerId}: scaling values cannot be negative.");
@@ -174,6 +177,9 @@ public sealed class EssenceDefinitionValidator : IEssenceDefinitionValidator
             errors.Add($"{essenceId}/{ownerId}: attribute '{effect.Attribute}' is runtime-only and cannot be authored.");
         if (effect.Operation == AbilityEffectOperation.ApplyStatus && string.IsNullOrWhiteSpace(effect.StatusId))
             errors.Add($"{essenceId}/{ownerId}: ApplyStatus requires status.");
+        if (effect.Operation == AbilityEffectOperation.ApplyCondition && effect.Condition is null)
+            errors.Add($"{essenceId}/{ownerId}: ApplyCondition requires condition.");
+        ValidateStandardConditionEffect(essenceId, ownerId, effect, errors);
 
         ValidateConditions(essenceId, ownerId, effect.Conditions, errors);
     }
@@ -183,7 +189,7 @@ public sealed class EssenceDefinitionValidator : IEssenceDefinitionValidator
         foreach (var condition in conditions)
         {
             if (condition.Type == AbilityConditionType.HasTag &&
-                (string.IsNullOrWhiteSpace(condition.Tag) || !EssenceTagCatalog.AllTags.Contains(condition.Tag)))
+                (string.IsNullOrWhiteSpace(condition.Tag) || !IsKnownTag(condition.Tag)))
             {
                 errors.Add($"{essenceId}/{ownerId}: condition '{condition.Type}' requires a known tag.");
             }
@@ -199,8 +205,63 @@ public sealed class EssenceDefinitionValidator : IEssenceDefinitionValidator
             {
                 errors.Add($"{essenceId}/{ownerId}: condition '{condition.Type}' requires status and a positive stack value.");
             }
+
+            if ((condition.Type == AbilityConditionType.HasCondition
+                 || condition.Type == AbilityConditionType.ConditionStacksAtLeast)
+                && condition.Condition is null)
+            {
+                errors.Add($"{essenceId}/{ownerId}: condition '{condition.Type}' requires condition.");
+            }
+
+            if (condition.Type == AbilityConditionType.ConditionStacksAtLeast && condition.Value <= 0)
+                errors.Add($"{essenceId}/{ownerId}: condition '{condition.Type}' requires a positive stack value.");
         }
     }
+
+    private static bool AllowsNegativeValue(AbilityEffectOperation operation) =>
+        operation is AbilityEffectOperation.ModifyAttribute
+            or AbilityEffectOperation.ModifyStatusStacks
+            or AbilityEffectOperation.ModifyThreat
+            or AbilityEffectOperation.ModifyRegenerationRate
+            or AbilityEffectOperation.ModifyRegenerationInterval
+            or AbilityEffectOperation.ModifyHealingReceived
+            or AbilityEffectOperation.ModifyDamageDealt
+            or AbilityEffectOperation.ModifyDamageTaken
+            or AbilityEffectOperation.ModifyDamageTakenFromCondition;
+
+    private static void ValidateStandardConditionEffect(
+        string essenceId,
+        string ownerId,
+        AbilityEffectSpec effect,
+        ICollection<string> errors)
+    {
+        if (effect.Operation != AbilityEffectOperation.ApplyCondition || effect.Condition is not { } condition)
+            return;
+
+        if (condition == StandardConditionType.Thorns && effect.DurationTicks <= 0)
+            errors.Add($"{essenceId}/{ownerId}: Thorns requires a positive durationTicks.");
+        if (condition == StandardConditionType.Thorns && effect.IntervalTicks > 0)
+            errors.Add($"{essenceId}/{ownerId}: Thorns cannot use intervalTicks because durationTicks is its condition duration.");
+        if (condition != StandardConditionType.Thorns
+            && effect.DurationTicks > 0
+            && effect.IntervalTicks <= 0)
+        {
+            errors.Add($"{essenceId}/{ownerId}: durationTicks requires intervalTicks; condition duration comes from canonical X or its fixed rule.");
+        }
+        if (condition is not StandardConditionType.Empower
+            and not StandardConditionType.Weaken
+            and not StandardConditionType.Haste
+            and not StandardConditionType.Slow
+            && effect.BaseValue <= 0
+            && effect.ScalingCoefficient <= 0)
+        {
+            errors.Add($"{essenceId}/{ownerId}: {condition} requires a positive condition value.");
+        }
+    }
+
+    private static bool IsKnownTag(string tag) =>
+        EssenceTagCatalog.AllTags.Contains(tag)
+        || tag.StartsWith("Creature.", StringComparison.OrdinalIgnoreCase);
 
     public void ThrowIfInvalid(IReadOnlyList<EssenceDefinition> definitions)
     {

@@ -1,5 +1,7 @@
 # Ability System
 
+> For current, repository-audited combat terminology and behavior, use the [Combat Lexicon and Catalogue](combat-lexicon/README.md). New abilities should use the typed examples in [Standard Condition Ability Authoring](combat-lexicon/ability-authoring.md). This document contains earlier architecture terminology; known differences are recorded in the lexicon's [catalogue audit](combat-lexicon/catalogue-audit.md).
+
 ## Overview
 
 LegendsLegacy uses a data-driven, Essence-owned ability system.
@@ -53,12 +55,11 @@ Add an entry to `abilityDefinitions`:
       "scaling": { "baseValue": 80, "perLevel": 7, "perAscensionTier": 20 }
     },
     {
-      "id": "effect.status.burn",
-      "type": "ApplyStatus",
+      "id": "effect.condition.burn",
+      "operation": "ApplyCondition",
       "target": "AllEnemies",
-      "status": "Burn",
-      "durationSeconds": 8,
-      "scaling": { "baseValue": 1 }
+      "condition": "Burn",
+      "baseValue": 1
     }
   ]
 }
@@ -83,16 +84,17 @@ Passive abilities are authored the same way but use `kind: "Passive"` and usuall
   "cooldownSeconds": 8,
   "targeting": "Attacker",
   "tags": ["Trigger.OnTakeDamage", "Status.Burn"],
-  "triggers": [{ "type": "Trigger.OnTakeDamage", "internalCooldownSeconds": 8 }],
+  "triggers": [
+    { "type": "Trigger.OnTakeDamage", "internalCooldownSeconds": 8 }
+  ],
   "conditions": [{ "type": "ChanceRoll", "value": 25 }],
   "effects": [
     {
-      "id": "effect.status.burn",
-      "type": "ApplyStatus",
+      "id": "effect.condition.burn",
+      "operation": "ApplyCondition",
       "target": "Attacker",
-      "status": "Burn",
-      "durationSeconds": 5,
-      "scaling": { "baseValue": 1 }
+      "condition": "Burn",
+      "baseValue": 1
     }
   ]
 }
@@ -120,6 +122,9 @@ Common triggers:
 - `Trigger.OnStatusApplied`
 - `Trigger.OnStatusExpired`
 - `Trigger.OnInterval`
+- `Trigger.OnStatusRemoved`
+- `Trigger.OnStatusCleansed`
+- `Trigger.OnStatusDispelled`
 
 The runtime maps these to `TriggerEvent` values. Event dispatch has a maximum depth guard so recursive triggered effects fail clearly instead of looping forever.
 
@@ -155,6 +160,7 @@ Current reusable primitives:
 
 - `Damage`
 - `Heal`
+- `ApplyCondition`
 - `ApplyStatus`
 - `RemoveStatus`
 - `Cleanse`
@@ -231,7 +237,9 @@ Runtime statuses use:
 - `JsonStatusService`
 - status-related effect actions and conditions
 
-Current authored abilities can apply/remove statuses and check whether a combatant has a status. Full stack refresh/expiration authoring is a future deepening task.
+`ApplyStatus` is reserved for bespoke mechanics without a standard-condition equivalent. Shared
+effects such as Burn, Bleed, Poison, Stun, and the other Combat Lexicon conditions use
+`ApplyCondition`.
 
 ## Evolution
 

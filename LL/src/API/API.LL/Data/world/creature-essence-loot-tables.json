@@ -1,644 +1,14 @@
 {
   "creatures": [
     {
-      "id": "monster.goblin_ambusher",
-      "essenceLootTable": {
-        "baseDropChance": 0.001,
-        "passiveAbilityId": "ability.essence.goblin_ambusher.cowards_opening",
-        "variants": [
-          {
-            "essenceDefinitionId": "essence.goblin_ambusher",
-            "activeAbilityId": "ability.essence.goblin_ambusher.cheap_shot",
-            "weight": 1
-          }
-        ]
-      }
-    },
-    {
-      "id": "monster.skeleton",
-      "essenceLootTable": {
-        "baseDropChance": 0.001,
-        "passiveAbilityId": "ability.essence.skeleton_guardian.rattle_guard",
-        "variants": [
-          {
-            "essenceDefinitionId": "essence.skeleton_guardian",
-            "activeAbilityId": "ability.essence.skeleton_guardian.bone_bulwark",
-            "weight": 1
-          }
-        ]
-      }
-    },
-    {
-      "id": "monster.fire_ant",
-      "essenceLootTable": {
-        "baseDropChance": 0.0012,
-        "passiveAbilityId": "ability.essence.fire_ant.colony_heat",
-        "variants": [
-          {
-            "essenceDefinitionId": "essence.fire_ant",
-            "activeAbilityId": "ability.essence.fire_ant.burning_mandibles",
-            "weight": 1
-          }
-        ]
-      }
-    },
-    {
-      "id": "monster.cave_bat",
-      "essenceLootTable": {
-        "baseDropChance": 0.0015,
-        "passiveAbilityId": "ability.essence.cave_bat.skittering_wings",
-        "variants": [
-          {
-            "essenceDefinitionId": "essence.cave_bat",
-            "activeAbilityId": "ability.essence.cave_bat.screech",
-            "weight": 1
-          }
-        ]
-      }
-    },
-    {
-      "id": "monster.necroshade_wraith",
-      "essenceLootTable": {
-        "baseDropChance": 0.0008,
-        "passiveAbilityId": "ability.essence.necroshade_wraith.grave_whisper",
-        "variants": [
-          {
-            "essenceDefinitionId": "essence.necroshade_wraith",
-            "activeAbilityId": "ability.essence.necroshade_wraith.wraith_hex",
-            "weight": 1
-          }
-        ]
-      }
-    },
-    {
-      "id": "monster.goblin",
-      "essenceLootTable": {
-        "baseDropChance": 0.0001,
-        "passiveAbilityId": "ability.essence.legacy.goblin.pocket_dirt",
-        "variants": [
-          {
-            "essenceDefinitionId": "essence.legacy.goblin",
-            "activeAbilityId": "ability.essence.legacy.goblin.sneak_attack",
-            "weight": 1
-          }
-        ]
-      }
-    },
-    {
-      "id": "monster.training_goblin",
-      "essenceLootTable": {
-        "baseDropChance": 0.0001,
-        "passiveAbilityId": "ability.essence.legacy.training_goblin.pocket_pebbles",
-        "variants": [
-          {
-            "essenceDefinitionId": "essence.legacy.training_goblin",
-            "activeAbilityId": "ability.essence.legacy.training_goblin.training_stab",
-            "weight": 1
-          }
-        ]
-      }
-    },
-    {
-      "id": "monster.goblin_warrior",
-      "essenceLootTable": {
-        "baseDropChance": 0.0001,
-        "passiveAbilityId": "ability.essence.legacy.goblin_warrior.reckless_assault",
-        "variants": [
-          {
-            "essenceDefinitionId": "essence.legacy.goblin_warrior",
-            "activeAbilityId": "ability.essence.legacy.goblin_warrior.raging_cleave",
-            "weight": 1
-          }
-        ]
-      }
-    },
-    {
-      "id": "monster.goblin_archer",
-      "essenceLootTable": {
-        "baseDropChance": 0.0001,
-        "passiveAbilityId": "ability.essence.legacy.goblin_archer.poisoned_arrows",
-        "variants": [
-          {
-            "essenceDefinitionId": "essence.legacy.goblin_archer",
-            "activeAbilityId": "ability.essence.legacy.goblin_archer.snipers_strike",
-            "weight": 1
-          }
-        ]
-      }
-    },
-    {
-      "id": "monster.large_rat",
-      "essenceLootTable": {
-        "baseDropChance": 0.0001,
-        "passiveAbilityId": "ability.essence.legacy.large_rat.big",
-        "variants": [
-          {
-            "essenceDefinitionId": "essence.legacy.large_rat",
-            "activeAbilityId": "ability.essence.legacy.large_rat.tail_wrap",
-            "weight": 1
-          }
-        ]
-      }
-    },
-    {
-      "id": "monster.flame_imp",
-      "essenceLootTable": {
-        "baseDropChance": 0.0001,
-        "passiveAbilityId": "ability.essence.legacy.flame_imp.hot_aura",
-        "variants": [
-          {
-            "essenceDefinitionId": "essence.legacy.flame_imp",
-            "activeAbilityId": "ability.essence.legacy.flame_imp.firebomb_toss",
-            "weight": 1
-          }
-        ]
-      }
-    },
-    {
-      "id": "monster.frost_imp",
-      "essenceLootTable": {
-        "baseDropChance": 0.0001,
-        "passiveAbilityId": "ability.essence.legacy.frost_imp.cold_aura",
-        "variants": [
-          {
-            "essenceDefinitionId": "essence.legacy.frost_imp",
-            "activeAbilityId": "ability.essence.legacy.frost_imp.ice_touch",
-            "weight": 1
-          }
-        ]
-      }
-    },
-    {
-      "id": "monster.shadow_imp",
-      "essenceLootTable": {
-        "baseDropChance": 0.0001,
-        "passiveAbilityId": "ability.essence.legacy.shadow_imp.shadowy_presence",
-        "variants": [
-          {
-            "essenceDefinitionId": "essence.legacy.shadow_imp",
-            "activeAbilityId": "ability.essence.legacy.shadow_imp.shadow_image",
-            "weight": 1
-          }
-        ]
-      }
-    },
-    {
       "id": "monster.vampire_bat",
       "essenceLootTable": {
         "baseDropChance": 0.0001,
-        "passiveAbilityId": "ability.essence.legacy.vampire_bat.dark_vitality",
+        "passiveAbilityId": "ability.creature.vampire_bat.erratic_flight",
         "variants": [
           {
-            "essenceDefinitionId": "essence.legacy.vampire_bat",
-            "activeAbilityId": "ability.essence.legacy.vampire_bat.bloodthirsty_fangs",
-            "weight": 1
-          }
-        ]
-      }
-    },
-    {
-      "id": "monster.blue_slime",
-      "essenceLootTable": {
-        "baseDropChance": 0.0001,
-        "passiveAbilityId": "ability.essence.legacy.blue_slime.absorptive_shell",
-        "variants": [
-          {
-            "essenceDefinitionId": "essence.legacy.blue_slime",
-            "activeAbilityId": "ability.essence.legacy.blue_slime.sweet_water",
-            "weight": 1
-          }
-        ]
-      }
-    },
-    {
-      "id": "monster.brown_slime",
-      "essenceLootTable": {
-        "baseDropChance": 0.0001,
-        "passiveAbilityId": "ability.essence.legacy.brown_slime.earthly_fortitude",
-        "variants": [
-          {
-            "essenceDefinitionId": "essence.legacy.brown_slime",
-            "activeAbilityId": "ability.essence.legacy.brown_slime.mud_armor",
-            "weight": 1
-          }
-        ]
-      }
-    },
-    {
-      "id": "monster.green_slime",
-      "essenceLootTable": {
-        "baseDropChance": 0.0001,
-        "passiveAbilityId": "ability.essence.legacy.green_slime.corrosive_ooze",
-        "variants": [
-          {
-            "essenceDefinitionId": "essence.legacy.green_slime",
-            "activeAbilityId": "ability.essence.legacy.green_slime.acid_splash",
-            "weight": 1
-          }
-        ]
-      }
-    },
-    {
-      "id": "monster.rainbow_slime",
-      "essenceLootTable": {
-        "baseDropChance": 0.0001,
-        "passiveAbilityId": "ability.essence.legacy.rainbow_slime.colorful_shield",
-        "variants": [
-          {
-            "essenceDefinitionId": "essence.legacy.rainbow_slime",
-            "activeAbilityId": "ability.essence.legacy.rainbow_slime.unstable_colors",
-            "weight": 1
-          }
-        ]
-      }
-    },
-    {
-      "id": "monster.red_slime",
-      "essenceLootTable": {
-        "baseDropChance": 0.0001,
-        "passiveAbilityId": "ability.essence.legacy.red_slime.fire_body",
-        "variants": [
-          {
-            "essenceDefinitionId": "essence.legacy.red_slime",
-            "activeAbilityId": "ability.essence.legacy.red_slime.ignite_core",
-            "weight": 1
-          }
-        ]
-      }
-    },
-    {
-      "id": "monster.transparent_slime",
-      "essenceLootTable": {
-        "baseDropChance": 0.0001,
-        "passiveAbilityId": "ability.essence.legacy.transparent_slime.transparent_shift",
-        "variants": [
-          {
-            "essenceDefinitionId": "essence.legacy.transparent_slime",
-            "activeAbilityId": "ability.essence.legacy.transparent_slime.transparent_engulf",
-            "weight": 1
-          }
-        ]
-      }
-    },
-    {
-      "id": "monster.enchanted_fairy",
-      "essenceLootTable": {
-        "baseDropChance": 0.0001,
-        "passiveAbilityId": "ability.essence.legacy.enchanted_fairy.enchanted_charm",
-        "variants": [
-          {
-            "essenceDefinitionId": "essence.legacy.enchanted_fairy",
-            "activeAbilityId": "ability.essence.legacy.enchanted_fairy.faes_embrace",
-            "weight": 1
-          }
-        ]
-      }
-    },
-    {
-      "id": "monster.glade_panther",
-      "essenceLootTable": {
-        "baseDropChance": 0.0001,
-        "passiveAbilityId": "ability.essence.legacy.glade_panther.razor_claws",
-        "variants": [
-          {
-            "essenceDefinitionId": "essence.legacy.glade_panther",
-            "activeAbilityId": "ability.essence.legacy.glade_panther.ambush_strike",
-            "weight": 1
-          }
-        ]
-      }
-    },
-    {
-      "id": "monster.illusion_fox",
-      "essenceLootTable": {
-        "baseDropChance": 0.0001,
-        "passiveAbilityId": "ability.essence.legacy.illusion_fox.foxfire_wisp",
-        "variants": [
-          {
-            "essenceDefinitionId": "essence.legacy.illusion_fox",
-            "activeAbilityId": "ability.essence.legacy.illusion_fox.distracting_illusion",
-            "weight": 1
-          }
-        ]
-      }
-    },
-    {
-      "id": "monster.nightshade_blossom",
-      "essenceLootTable": {
-        "baseDropChance": 0.0001,
-        "passiveAbilityId": "ability.essence.legacy.nightshade_blossom.twilight_bloom",
-        "variants": [
-          {
-            "essenceDefinitionId": "essence.legacy.nightshade_blossom",
-            "activeAbilityId": "ability.essence.legacy.nightshade_blossom.necrotic_spores",
-            "weight": 1
-          }
-        ]
-      }
-    },
-    {
-      "id": "monster.pixie",
-      "essenceLootTable": {
-        "baseDropChance": 0.0001,
-        "passiveAbilityId": "ability.essence.legacy.pixie.resonant_chime",
-        "variants": [
-          {
-            "essenceDefinitionId": "essence.legacy.pixie",
-            "activeAbilityId": "ability.essence.legacy.pixie.pixie_burst",
-            "weight": 1
-          }
-        ]
-      }
-    },
-    {
-      "id": "monster.hobgoblin",
-      "essenceLootTable": {
-        "baseDropChance": 0.001,
-        "passiveAbilityId": "ability.essence.legacy.hobgoblin.savage_onslaught",
-        "variants": [
-          {
-            "essenceDefinitionId": "essence.legacy.hobgoblin",
-            "activeAbilityId": "ability.essence.legacy.hobgoblin.frenzy",
-            "weight": 1
-          }
-        ]
-      }
-    },
-    {
-      "id": "monster.moss_lizard",
-      "essenceLootTable": {
-        "baseDropChance": 0.0001,
-        "passiveAbilityId": "ability.essence.legacy.moss_lizard.lost_tail",
-        "variants": [
-          {
-            "essenceDefinitionId": "essence.legacy.moss_lizard",
-            "activeAbilityId": "ability.essence.legacy.moss_lizard.moss_camouflage",
-            "weight": 1
-          }
-        ]
-      }
-    },
-    {
-      "id": "monster.spider",
-      "essenceLootTable": {
-        "baseDropChance": 0.0001,
-        "passiveAbilityId": "ability.essence.legacy.spider.spider_eyes",
-        "variants": [
-          {
-            "essenceDefinitionId": "essence.legacy.spider",
-            "activeAbilityId": "ability.essence.legacy.spider.skittering_strike",
-            "weight": 1
-          }
-        ]
-      }
-    },
-    {
-      "id": "monster.treant_sapling",
-      "essenceLootTable": {
-        "baseDropChance": 0.0001,
-        "passiveAbilityId": "ability.essence.legacy.treant_sapling.nurturing_roots",
-        "variants": [
-          {
-            "essenceDefinitionId": "essence.legacy.treant_sapling",
-            "activeAbilityId": "ability.essence.legacy.treant_sapling.sprouting_surge",
-            "weight": 1
-          }
-        ]
-      }
-    },
-    {
-      "id": "monster.venomous_snake",
-      "essenceLootTable": {
-        "baseDropChance": 0.0001,
-        "passiveAbilityId": "ability.essence.legacy.venomous_snake.toxic_hide",
-        "variants": [
-          {
-            "essenceDefinitionId": "essence.legacy.venomous_snake",
-            "activeAbilityId": "ability.essence.legacy.venomous_snake.venomous_spit",
-            "weight": 1
-          }
-        ]
-      }
-    },
-    {
-      "id": "monster.viper",
-      "essenceLootTable": {
-        "baseDropChance": 0.0001,
-        "passiveAbilityId": "ability.essence.legacy.viper.potent_toxins",
-        "variants": [
-          {
-            "essenceDefinitionId": "essence.legacy.viper",
-            "activeAbilityId": "ability.essence.legacy.viper.piercing_fangs",
-            "weight": 1
-          }
-        ]
-      }
-    },
-    {
-      "id": "monster.goblin_shaman",
-      "essenceLootTable": {
-        "baseDropChance": 0.001,
-        "passiveAbilityId": "ability.essence.legacy.goblin_shaman.spirit_link",
-        "variants": [
-          {
-            "essenceDefinitionId": "essence.legacy.goblin_shaman",
-            "activeAbilityId": "ability.essence.legacy.goblin_shaman.weak_rejuvenation",
-            "weight": 1
-          }
-        ]
-      }
-    },
-    {
-      "id": "monster.poisonous_rat",
-      "essenceLootTable": {
-        "baseDropChance": 0.001,
-        "passiveAbilityId": "ability.essence.legacy.poisonous_rat.resistant_hide",
-        "variants": [
-          {
-            "essenceDefinitionId": "essence.legacy.poisonous_rat",
-            "activeAbilityId": "ability.essence.legacy.poisonous_rat.toxic_bite",
-            "weight": 1
-          }
-        ]
-      }
-    },
-    {
-      "id": "monster.giant_bat",
-      "essenceLootTable": {
-        "baseDropChance": 0.001,
-        "passiveAbilityId": "ability.essence.legacy.giant_bat.resonant_cry",
-        "variants": [
-          {
-            "essenceDefinitionId": "essence.legacy.giant_bat",
-            "activeAbilityId": "ability.essence.legacy.giant_bat.echoing_screech",
-            "weight": 1
-          }
-        ]
-      }
-    },
-    {
-      "id": "monster.feral_ghoul",
-      "essenceLootTable": {
-        "baseDropChance": 0.0001,
-        "passiveAbilityId": "ability.essence.legacy.feral_ghoul.shredding_claws",
-        "variants": [
-          {
-            "essenceDefinitionId": "essence.legacy.feral_ghoul",
-            "activeAbilityId": "ability.essence.legacy.feral_ghoul.feral_pounce",
-            "weight": 1
-          }
-        ]
-      }
-    },
-    {
-      "id": "monster.plague_ghoul",
-      "essenceLootTable": {
-        "baseDropChance": 0.0001,
-        "passiveAbilityId": "ability.essence.legacy.plague_ghoul.pestilent_touch",
-        "variants": [
-          {
-            "essenceDefinitionId": "essence.legacy.plague_ghoul",
-            "activeAbilityId": "ability.essence.legacy.plague_ghoul.plague_swipe",
-            "weight": 1
-          }
-        ]
-      }
-    },
-    {
-      "id": "monster.ravenous_ghoul",
-      "essenceLootTable": {
-        "baseDropChance": 0.0001,
-        "passiveAbilityId": "ability.essence.legacy.ravenous_ghoul.vile_feast",
-        "variants": [
-          {
-            "essenceDefinitionId": "essence.legacy.ravenous_ghoul",
-            "activeAbilityId": "ability.essence.legacy.ravenous_ghoul.draining_claws",
-            "weight": 1
-          }
-        ]
-      }
-    },
-    {
-      "id": "monster.skeleton_archer",
-      "essenceLootTable": {
-        "baseDropChance": 0.0001,
-        "passiveAbilityId": "ability.essence.legacy.skeleton_archer.piercing_arrows",
-        "variants": [
-          {
-            "essenceDefinitionId": "essence.legacy.skeleton_archer",
-            "activeAbilityId": "ability.essence.legacy.skeleton_archer.bone_arrow",
-            "weight": 1
-          }
-        ]
-      }
-    },
-    {
-      "id": "monster.skeleton_mage",
-      "essenceLootTable": {
-        "baseDropChance": 0.0001,
-        "passiveAbilityId": "ability.essence.legacy.skeleton_mage.protective_bone_barrier",
-        "variants": [
-          {
-            "essenceDefinitionId": "essence.legacy.skeleton_mage",
-            "activeAbilityId": "ability.essence.legacy.skeleton_mage.siphon",
-            "weight": 1
-          }
-        ]
-      }
-    },
-    {
-      "id": "monster.skeleton_warrior",
-      "essenceLootTable": {
-        "baseDropChance": 0.0001,
-        "passiveAbilityId": "ability.essence.legacy.skeleton_warrior.spiked_defense",
-        "variants": [
-          {
-            "essenceDefinitionId": "essence.legacy.skeleton_warrior",
-            "activeAbilityId": "ability.essence.legacy.skeleton_warrior.bone_shield",
-            "weight": 1
-          }
-        ]
-      }
-    },
-    {
-      "id": "monster.ant_worker",
-      "essenceLootTable": {
-        "baseDropChance": 0.001,
-        "passiveAbilityId": "ability.essence.ant_worker.reinforced_exoskeleton",
-        "variants": [
-          {
-            "essenceDefinitionId": "essence.ant_worker",
-            "activeAbilityId": "ability.essence.ant_worker.workers_aid",
-            "weight": 1
-          }
-        ]
-      }
-    },
-    {
-      "id": "monster.forest_spirit",
-      "essenceLootTable": {
-        "baseDropChance": 0.001,
-        "passiveAbilityId": "ability.essence.forest_spirit.balance_of_elements",
-        "variants": [
-          {
-            "essenceDefinitionId": "essence.forest_spirit",
-            "activeAbilityId": "ability.essence.forest_spirit.rejuvenation",
-            "weight": 1
-          }
-        ]
-      }
-    },
-    {
-      "id": "monster.wood_nymph",
-      "essenceLootTable": {
-        "baseDropChance": 0.001,
-        "passiveAbilityId": "ability.essence.wood_nymph.natures_regeneration",
-        "variants": [
-          {
-            "essenceDefinitionId": "essence.wood_nymph",
-            "activeAbilityId": "ability.essence.wood_nymph.bramble_shield",
-            "weight": 1
-          }
-        ]
-      }
-    },
-    {
-      "id": "monster.giant_spider",
-      "essenceLootTable": {
-        "baseDropChance": 0.0001,
-        "passiveAbilityId": "ability.essence.giant_spider.thickened_carapace",
-        "variants": [
-          {
-            "essenceDefinitionId": "essence.giant_spider",
-            "activeAbilityId": "ability.essence.giant_spider.spider_crash",
-            "weight": 1
-          }
-        ]
-      }
-    },
-    {
-      "id": "monster.venomous_spiderling",
-      "essenceLootTable": {
-        "baseDropChance": 0.0001,
-        "passiveAbilityId": "ability.essence.venomous_spiderling.tainted_fangs",
-        "variants": [
-          {
-            "essenceDefinitionId": "essence.venomous_spiderling",
-            "activeAbilityId": "ability.essence.venomous_spiderling.venom_web",
-            "weight": 1
-          }
-        ]
-      }
-    },
-    {
-      "id": "monster.blackjaw_spider",
-      "essenceLootTable": {
-        "baseDropChance": 0.0001,
-        "passiveAbilityId": "ability.essence.blackjaw_spider.chitinous_jaws",
-        "variants": [
-          {
-            "essenceDefinitionId": "essence.blackjaw_spider",
-            "activeAbilityId": "ability.essence.blackjaw_spider.crushing_bite",
+            "essenceDefinitionId": "essence.vampire_bat",
+            "activeAbilityId": "ability.creature.vampire_bat.bloodthirsty_fangs",
             "weight": 1
           }
         ]
@@ -648,123 +18,39 @@
       "id": "monster.raven",
       "essenceLootTable": {
         "baseDropChance": 0.0001,
-        "passiveAbilityId": "ability.essence.raven.watchful_messenger",
+        "passiveAbilityId": "ability.creature.raven.bad_omen",
         "variants": [
           {
             "essenceDefinitionId": "essence.raven",
-            "activeAbilityId": "ability.essence.raven.ravens_mark",
+            "activeAbilityId": "ability.creature.raven.piercing_peck",
             "weight": 1
           }
         ]
       }
     },
     {
-      "id": "monster.widow_stalker",
+      "id": "monster.venomous_snake",
       "essenceLootTable": {
         "baseDropChance": 0.0001,
-        "passiveAbilityId": "ability.essence.widow_stalker.silkstep",
+        "passiveAbilityId": "ability.creature.venomous_snake.venom_coated_strikes",
         "variants": [
           {
-            "essenceDefinitionId": "essence.widow_stalker",
-            "activeAbilityId": "ability.essence.widow_stalker.widows_ambush",
+            "essenceDefinitionId": "essence.venomous_snake",
+            "activeAbilityId": "ability.creature.venomous_snake.toxic_fangs",
             "weight": 1
           }
         ]
       }
     },
     {
-      "id": "monster.scarecrow",
+      "id": "monster.nightshade_blossom",
       "essenceLootTable": {
         "baseDropChance": 0.0001,
-        "passiveAbilityId": "ability.essence.scarecrow.hollow_gaze",
+        "passiveAbilityId": "ability.creature.nightshade_blossom.midnight_bloom",
         "variants": [
           {
-            "essenceDefinitionId": "essence.scarecrow",
-            "activeAbilityId": "ability.essence.scarecrow.straw_terror",
-            "weight": 1
-          }
-        ]
-      }
-    },
-    {
-      "id": "monster.lost_soul",
-      "essenceLootTable": {
-        "baseDropChance": 0.0001,
-        "passiveAbilityId": "ability.essence.lost_soul.lingering_will",
-        "variants": [
-          {
-            "essenceDefinitionId": "essence.lost_soul",
-            "activeAbilityId": "ability.essence.lost_soul.soul_mend",
-            "weight": 1
-          }
-        ]
-      }
-    },
-    {
-      "id": "monster.apparition",
-      "essenceLootTable": {
-        "baseDropChance": 0.0001,
-        "passiveAbilityId": "ability.essence.apparition.phase_body",
-        "variants": [
-          {
-            "essenceDefinitionId": "essence.apparition",
-            "activeAbilityId": "ability.essence.apparition.ethereal_touch",
-            "weight": 1
-          }
-        ]
-      }
-    },
-    {
-      "id": "monster.specter",
-      "essenceLootTable": {
-        "baseDropChance": 0.0001,
-        "passiveAbilityId": "ability.essence.specter.spectral_focus",
-        "variants": [
-          {
-            "essenceDefinitionId": "essence.specter",
-            "activeAbilityId": "ability.essence.specter.haunting_wail",
-            "weight": 1
-          }
-        ]
-      }
-    },
-    {
-      "id": "monster.zombie",
-      "essenceLootTable": {
-        "baseDropChance": 0.0001,
-        "passiveAbilityId": "ability.essence.zombie.dead_flesh",
-        "variants": [
-          {
-            "essenceDefinitionId": "essence.zombie",
-            "activeAbilityId": "ability.essence.zombie.rot_slam",
-            "weight": 1
-          }
-        ]
-      }
-    },
-    {
-      "id": "monster.half_zombie",
-      "essenceLootTable": {
-        "baseDropChance": 0.0001,
-        "passiveAbilityId": "ability.essence.half_zombie.twitching_recovery",
-        "variants": [
-          {
-            "essenceDefinitionId": "essence.half_zombie",
-            "activeAbilityId": "ability.essence.half_zombie.clinging_bite",
-            "weight": 1
-          }
-        ]
-      }
-    },
-    {
-      "id": "monster.undead",
-      "essenceLootTable": {
-        "baseDropChance": 0.0001,
-        "passiveAbilityId": "ability.essence.undead.deathless_nerves",
-        "variants": [
-          {
-            "essenceDefinitionId": "essence.undead",
-            "activeAbilityId": "ability.essence.undead.grave_swing",
+            "essenceDefinitionId": "essence.nightshade_blossom",
+            "activeAbilityId": "ability.creature.nightshade_blossom.withering_petals",
             "weight": 1
           }
         ]
@@ -774,11 +60,520 @@
       "id": "monster.blood_zombie",
       "essenceLootTable": {
         "baseDropChance": 0.0001,
-        "passiveAbilityId": "ability.essence.blood_zombie.red_hunger",
+        "passiveAbilityId": "ability.creature.blood_zombie.clotted_flesh",
         "variants": [
           {
             "essenceDefinitionId": "essence.blood_zombie",
-            "activeAbilityId": "ability.essence.blood_zombie.bloodletting_grasp",
+            "activeAbilityId": "ability.creature.blood_zombie.rending_bite",
+            "weight": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "monster.lumo_wisp",
+      "essenceLootTable": {
+        "baseDropChance": 0.0001,
+        "passiveAbilityId": "ability.creature.lumo_wisp.lumo_barrier",
+        "variants": [
+          {
+            "essenceDefinitionId": "essence.lumo_wisp",
+            "activeAbilityId": "ability.creature.lumo_wisp.soothing_glow",
+            "weight": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "monster.lumo_sentinel",
+      "essenceLootTable": {
+        "baseDropChance": 0.0001,
+        "passiveAbilityId": "ability.creature.lumo_sentinel.cracked_core",
+        "variants": [
+          {
+            "essenceDefinitionId": "essence.lumo_sentinel",
+            "activeAbilityId": "ability.creature.lumo_sentinel.targeting_beam",
+            "weight": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "monster.goblin",
+      "essenceLootTable": {
+        "baseDropChance": 0.0001,
+        "passiveAbilityId": "ability.creature.goblin.gobber_trapper",
+        "variants": [
+          {
+            "essenceDefinitionId": "essence.goblin",
+            "activeAbilityId": "ability.creature.goblin.shiv_jab",
+            "weight": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "monster.goblin_archer",
+      "essenceLootTable": {
+        "baseDropChance": 0.0001,
+        "passiveAbilityId": "ability.creature.goblin_archer.poisoned_arrows",
+        "variants": [
+          {
+            "essenceDefinitionId": "essence.goblin_archer",
+            "activeAbilityId": "ability.creature.goblin_archer.snipers_strike",
+            "weight": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "monster.goblin_warrior",
+      "essenceLootTable": {
+        "baseDropChance": 0.0001,
+        "passiveAbilityId": "ability.creature.goblin_warrior.relentless",
+        "variants": [
+          {
+            "essenceDefinitionId": "essence.goblin_warrior",
+            "activeAbilityId": "ability.creature.goblin_warrior.raging_cleave",
+            "weight": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "monster.goblin_shaman",
+      "essenceLootTable": {
+        "baseDropChance": 0.0001,
+        "passiveAbilityId": "ability.creature.goblin_shaman.spirit_link",
+        "variants": [
+          {
+            "essenceDefinitionId": "essence.goblin_shaman",
+            "activeAbilityId": "ability.creature.goblin_shaman.weak_rejuvenation",
+            "weight": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "monster.hobgoblin",
+      "essenceLootTable": {
+        "baseDropChance": 0.0001,
+        "passiveAbilityId": "ability.creature.hobgoblin.threatening_presence",
+        "variants": [
+          {
+            "essenceDefinitionId": "essence.hobgoblin",
+            "activeAbilityId": "ability.creature.hobgoblin.intimidating_slam",
+            "weight": 1
+          },
+          {
+            "essenceDefinitionId": "essence.hobgoblin_brutal_charge",
+            "activeAbilityId": "ability.creature.hobgoblin.brutal_charge",
+            "weight": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "monster.frost_imp",
+      "essenceLootTable": {
+        "baseDropChance": 0.0001,
+        "passiveAbilityId": "ability.creature.frost_imp.cold_touch",
+        "variants": [
+          {
+            "essenceDefinitionId": "essence.frost_imp",
+            "activeAbilityId": "ability.creature.frost_imp.ice_needle",
+            "weight": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "monster.crystal_wisp",
+      "essenceLootTable": {
+        "baseDropChance": 0.0001,
+        "passiveAbilityId": "ability.creature.crystal_wisp.captured_light",
+        "variants": [
+          {
+            "essenceDefinitionId": "essence.crystal_wisp",
+            "activeAbilityId": "ability.creature.crystal_wisp.prismatic_shard",
+            "weight": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "monster.blue_slime",
+      "essenceLootTable": {
+        "baseDropChance": 0.0001,
+        "passiveAbilityId": "ability.creature.blue_slime.protective_slime",
+        "variants": [
+          {
+            "essenceDefinitionId": "essence.blue_slime",
+            "activeAbilityId": "ability.creature.blue_slime.sweet_water",
+            "weight": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "monster.transparent_slime",
+      "essenceLootTable": {
+        "baseDropChance": 0.0001,
+        "passiveAbilityId": "ability.creature.transparent_slime.reconstitute",
+        "variants": [
+          {
+            "essenceDefinitionId": "essence.transparent_slime",
+            "activeAbilityId": "ability.creature.transparent_slime.transparent_engulf",
+            "weight": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "monster.moss_lizard",
+      "essenceLootTable": {
+        "baseDropChance": 0.0001,
+        "passiveAbilityId": "ability.creature.moss_lizard.lost_tail",
+        "variants": [
+          {
+            "essenceDefinitionId": "essence.moss_lizard",
+            "activeAbilityId": "ability.creature.moss_lizard.moss_camouflage",
+            "weight": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "monster.shadow_imp",
+      "essenceLootTable": {
+        "baseDropChance": 0.0001,
+        "passiveAbilityId": "ability.creature.shadow_imp.shadowy_presence",
+        "variants": [
+          {
+            "essenceDefinitionId": "essence.shadow_imp",
+            "activeAbilityId": "ability.creature.shadow_imp.shadow_image",
+            "weight": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "monster.grave_hound",
+      "essenceLootTable": {
+        "baseDropChance": 0.0001,
+        "passiveAbilityId": "ability.creature.grave_hound.graveyard_howl",
+        "variants": [
+          {
+            "essenceDefinitionId": "essence.grave_hound",
+            "activeAbilityId": "ability.creature.grave_hound.gravebound_pounce",
+            "weight": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "monster.lost_soul",
+      "essenceLootTable": {
+        "baseDropChance": 0.0001,
+        "passiveAbilityId": "ability.creature.lost_soul.soul_lantern",
+        "variants": [
+          {
+            "essenceDefinitionId": "essence.lost_soul",
+            "activeAbilityId": "ability.creature.lost_soul.soul_drain",
+            "weight": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "monster.grave_wisp",
+      "essenceLootTable": {
+        "baseDropChance": 0.0001,
+        "passiveAbilityId": "ability.creature.grave_wisp.pale_flame",
+        "variants": [
+          {
+            "essenceDefinitionId": "essence.grave_wisp",
+            "activeAbilityId": "ability.creature.grave_wisp.mourning_flash",
+            "weight": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "monster.skeleton",
+      "essenceLootTable": {
+        "baseDropChance": 0.0001,
+        "passiveAbilityId": "ability.creature.skeleton.calcium",
+        "variants": [
+          {
+            "essenceDefinitionId": "essence.skeleton",
+            "activeAbilityId": "ability.creature.skeleton.bone_smash",
+            "weight": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "monster.pixie",
+      "essenceLootTable": {
+        "baseDropChance": 0.0001,
+        "passiveAbilityId": "ability.creature.pixie.resonant_chime",
+        "variants": [
+          {
+            "essenceDefinitionId": "essence.pixie",
+            "activeAbilityId": "ability.creature.pixie.pixie_burst",
+            "weight": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "monster.wood_nymph",
+      "essenceLootTable": {
+        "baseDropChance": 0.0001,
+        "passiveAbilityId": "ability.creature.wood_nymph.natures_protection",
+        "variants": [
+          {
+            "essenceDefinitionId": "essence.wood_nymph",
+            "activeAbilityId": "ability.creature.wood_nymph.bramble_shield",
+            "weight": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "monster.rainbow_slime",
+      "essenceLootTable": {
+        "baseDropChance": 0.0001,
+        "passiveAbilityId": "ability.creature.rainbow_slime.colorful_shield",
+        "variants": [
+          {
+            "essenceDefinitionId": "essence.rainbow_slime",
+            "activeAbilityId": "ability.creature.rainbow_slime.unstable_colors",
+            "weight": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "monster.enchanted_fairy",
+      "essenceLootTable": {
+        "baseDropChance": 0.0001,
+        "passiveAbilityId": "ability.creature.enchanted_fairy.faes_charm",
+        "variants": [
+          {
+            "essenceDefinitionId": "essence.enchanted_fairy",
+            "activeAbilityId": "ability.creature.enchanted_fairy.faes_corrosion",
+            "weight": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "monster.illusion_fox",
+      "essenceLootTable": {
+        "baseDropChance": 0.0001,
+        "passiveAbilityId": "ability.creature.illusion_fox.foxfire_wisp",
+        "variants": [
+          {
+            "essenceDefinitionId": "essence.illusion_fox",
+            "activeAbilityId": "ability.creature.illusion_fox.a_doomed_illusion",
+            "weight": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "monster.thornback_boar",
+      "essenceLootTable": {
+        "baseDropChance": 0.0001,
+        "passiveAbilityId": "ability.creature.thornback_boar.bristling_hide",
+        "variants": [
+          {
+            "essenceDefinitionId": "essence.thornback_boar",
+            "activeAbilityId": "ability.creature.thornback_boar.thorned_rush",
+            "weight": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "monster.hollow_stag",
+      "essenceLootTable": {
+        "baseDropChance": 0.0001,
+        "passiveAbilityId": "ability.creature.hollow_stag.hollow_core",
+        "variants": [
+          {
+            "essenceDefinitionId": "essence.hollow_stag",
+            "activeAbilityId": "ability.creature.hollow_stag.echoing_antlers",
+            "weight": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "monster.treant_sapling",
+      "essenceLootTable": {
+        "baseDropChance": 0.0001,
+        "passiveAbilityId": "ability.creature.treant_sapling.nurturing_roots",
+        "variants": [
+          {
+            "essenceDefinitionId": "essence.treant_sapling",
+            "activeAbilityId": "ability.creature.treant_sapling.sprouting_surge",
+            "weight": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "monster.glade_panther",
+      "essenceLootTable": {
+        "baseDropChance": 0.0001,
+        "passiveAbilityId": "ability.creature.glade_panther.razor_claws",
+        "variants": [
+          {
+            "essenceDefinitionId": "essence.glade_panther",
+            "activeAbilityId": "ability.creature.glade_panther.ambush_strike",
+            "weight": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "monster.forest_spirit",
+      "essenceLootTable": {
+        "baseDropChance": 0.0001,
+        "passiveAbilityId": "ability.creature.forest_spirit.spirit_bloom",
+        "variants": [
+          {
+            "essenceDefinitionId": "essence.forest_spirit",
+            "activeAbilityId": "ability.creature.forest_spirit.rejuvenation",
+            "weight": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "monster.rotroot_shambler",
+      "essenceLootTable": {
+        "baseDropChance": 0.0001,
+        "passiveAbilityId": "ability.creature.rotroot_shambler.decaying_husk",
+        "variants": [
+          {
+            "essenceDefinitionId": "essence.rotroot_shambler",
+            "activeAbilityId": "ability.creature.rotroot_shambler.rotburst",
+            "weight": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "monster.spider",
+      "essenceLootTable": {
+        "baseDropChance": 0.0001,
+        "passiveAbilityId": "ability.creature.spider.spider_eyes",
+        "variants": [
+          {
+            "essenceDefinitionId": "essence.spider",
+            "activeAbilityId": "ability.creature.spider.skittering_strike",
+            "weight": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "monster.giant_spider",
+      "essenceLootTable": {
+        "baseDropChance": 0.0001,
+        "passiveAbilityId": "ability.creature.giant_spider.thickened_carapace",
+        "variants": [
+          {
+            "essenceDefinitionId": "essence.giant_spider",
+            "activeAbilityId": "ability.creature.giant_spider.spider_crash",
+            "weight": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "monster.venomous_spiderling",
+      "essenceLootTable": {
+        "baseDropChance": 0.0001,
+        "passiveAbilityId": "ability.creature.venomous_spiderling.toxic_opportunity",
+        "variants": [
+          {
+            "essenceDefinitionId": "essence.venomous_spiderling",
+            "activeAbilityId": "ability.creature.venomous_spiderling.venom_web",
+            "weight": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "monster.blackjaw_spider",
+      "essenceLootTable": {
+        "baseDropChance": 0.0001,
+        "passiveAbilityId": "ability.creature.blackjaw_spider.powerful_mandibles",
+        "variants": [
+          {
+            "essenceDefinitionId": "essence.blackjaw_spider",
+            "activeAbilityId": "ability.creature.blackjaw_spider.blackjaw_bite",
+            "weight": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "monster.flame_imp",
+      "essenceLootTable": {
+        "baseDropChance": 0.0001,
+        "passiveAbilityId": "ability.creature.flame_imp.impish_flame",
+        "variants": [
+          {
+            "essenceDefinitionId": "essence.flame_imp",
+            "activeAbilityId": "ability.creature.flame_imp.firebomb_toss",
+            "weight": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "monster.smolder_rat",
+      "essenceLootTable": {
+        "baseDropChance": 0.0001,
+        "passiveAbilityId": "ability.creature.smolder_rat.heat_resistance",
+        "variants": [
+          {
+            "essenceDefinitionId": "essence.smolder_rat",
+            "activeAbilityId": "ability.creature.smolder_rat.scorching_tail",
+            "weight": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "monster.cinder_beetle",
+      "essenceLootTable": {
+        "baseDropChance": 0.0001,
+        "passiveAbilityId": "ability.creature.cinder_beetle.molten_shell",
+        "variants": [
+          {
+            "essenceDefinitionId": "essence.cinder_beetle",
+            "activeAbilityId": "ability.creature.cinder_beetle.burning_mandibles",
+            "weight": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "monster.red_slime",
+      "essenceLootTable": {
+        "baseDropChance": 0.0001,
+        "passiveAbilityId": "ability.creature.red_slime.recharging_core",
+        "variants": [
+          {
+            "essenceDefinitionId": "essence.red_slime",
+            "activeAbilityId": "ability.creature.red_slime.ignite_core",
             "weight": 1
           }
         ]
@@ -788,67 +583,151 @@
       "id": "monster.giant_worm",
       "essenceLootTable": {
         "baseDropChance": 0.0001,
-        "passiveAbilityId": "ability.essence.giant_worm.earth_plated_hide",
+        "passiveAbilityId": "ability.creature.giant_worm.erupting_ambush",
         "variants": [
           {
             "essenceDefinitionId": "essence.giant_worm",
-            "activeAbilityId": "ability.essence.giant_worm.burrow_crush",
+            "activeAbilityId": "ability.creature.giant_worm.drag_beneath",
             "weight": 1
           }
         ]
       }
     },
     {
-      "id": "monster.burrowed_horror",
+      "id": "monster.bog_mite",
       "essenceLootTable": {
         "baseDropChance": 0.0001,
-        "passiveAbilityId": "ability.essence.burrowed_horror.subterranean_force",
+        "passiveAbilityId": "ability.creature.bog_mite.blood_feeders",
         "variants": [
           {
-            "essenceDefinitionId": "essence.burrowed_horror",
-            "activeAbilityId": "ability.essence.burrowed_horror.rupture",
+            "essenceDefinitionId": "essence.bog_mite",
+            "activeAbilityId": "ability.creature.bog_mite.infestation",
             "weight": 1
           }
         ]
       }
     },
     {
-      "id": "monster.cave_leech",
+      "id": "monster.green_slime",
       "essenceLootTable": {
         "baseDropChance": 0.0001,
-        "passiveAbilityId": "ability.essence.cave_leech.blood_sense",
+        "passiveAbilityId": "ability.creature.green_slime.corrosive_ooze",
         "variants": [
           {
-            "essenceDefinitionId": "essence.cave_leech",
-            "activeAbilityId": "ability.essence.cave_leech.leeching_latch",
+            "essenceDefinitionId": "essence.green_slime",
+            "activeAbilityId": "ability.creature.green_slime.acid_splash",
             "weight": 1
           }
         ]
       }
     },
     {
-      "id": "monster.stonejaw_grub",
+      "id": "monster.large_rat",
       "essenceLootTable": {
         "baseDropChance": 0.0001,
-        "passiveAbilityId": "ability.essence.stonejaw_grub.mineral_shell",
+        "passiveAbilityId": "ability.creature.large_rat.big",
         "variants": [
           {
-            "essenceDefinitionId": "essence.stonejaw_grub",
-            "activeAbilityId": "ability.essence.stonejaw_grub.stone_gnaw",
+            "essenceDefinitionId": "essence.large_rat",
+            "activeAbilityId": "ability.creature.large_rat.tail_wrap",
             "weight": 1
           }
         ]
       }
     },
     {
-      "id": "monster.deep_burrower",
+      "id": "monster.viper",
       "essenceLootTable": {
         "baseDropChance": 0.0001,
-        "passiveAbilityId": "ability.essence.deep_burrower.tremor_sense",
+        "passiveAbilityId": "ability.creature.viper.potent_toxins",
         "variants": [
           {
-            "essenceDefinitionId": "essence.deep_burrower",
-            "activeAbilityId": "ability.essence.deep_burrower.tunnel_collapse",
+            "essenceDefinitionId": "essence.viper",
+            "activeAbilityId": "ability.creature.viper.piercing_fangs",
+            "weight": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "monster.poisonous_rat",
+      "essenceLootTable": {
+        "baseDropChance": 0.0001,
+        "passiveAbilityId": "ability.creature.poisonous_rat.resistant_hide",
+        "variants": [
+          {
+            "essenceDefinitionId": "essence.poisonous_rat",
+            "activeAbilityId": "ability.creature.poisonous_rat.toxic_bite",
+            "weight": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "monster.rotfly_toad",
+      "essenceLootTable": {
+        "baseDropChance": 0.0001,
+        "passiveAbilityId": "ability.creature.rotfly_toad.rotfly_host",
+        "variants": [
+          {
+            "essenceDefinitionId": "essence.rotfly_toad",
+            "activeAbilityId": "ability.creature.rotfly_toad.putrid_belch",
+            "weight": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "monster.brown_slime",
+      "essenceLootTable": {
+        "baseDropChance": 0.0001,
+        "passiveAbilityId": "ability.creature.brown_slime.layered_mud",
+        "variants": [
+          {
+            "essenceDefinitionId": "essence.brown_slime",
+            "activeAbilityId": "ability.creature.brown_slime.absorb_impact",
+            "weight": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "monster.cave_bat",
+      "essenceLootTable": {
+        "baseDropChance": 0.0001,
+        "passiveAbilityId": "ability.creature.cave_bat.echolocation",
+        "variants": [
+          {
+            "essenceDefinitionId": "essence.cave_bat",
+            "activeAbilityId": "ability.creature.cave_bat.sonic_screech",
+            "weight": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "monster.giant_bat",
+      "essenceLootTable": {
+        "baseDropChance": 0.0001,
+        "passiveAbilityId": "ability.creature.giant_bat.resonant_cry",
+        "variants": [
+          {
+            "essenceDefinitionId": "essence.giant_bat",
+            "activeAbilityId": "ability.creature.giant_bat.echoing_screech",
+            "weight": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "monster.undead",
+      "essenceLootTable": {
+        "baseDropChance": 0.0001,
+        "passiveAbilityId": "ability.creature.undead.corpse_explosion",
+        "variants": [
+          {
+            "essenceDefinitionId": "essence.undead",
+            "activeAbilityId": "ability.creature.undead.necrotic_slash",
             "weight": 1
           }
         ]

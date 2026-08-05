@@ -116,6 +116,7 @@ public sealed class AbilityCatalogBehaviorDiagnostics : IAbilityCatalogBehaviorD
                 .ToList();
             var combatants = hostiles.Concat([friendly]).ToDictionary(x => x.Id, StringComparer.OrdinalIgnoreCase);
             ApplyInitialStatuses(scenario.InitialStatuses, statuses, combatants);
+            ApplyInitialConditions(scenario.InitialConditions, combatants);
             var engine = new FastCombatEngine(
                 statuses,
                 summons,
@@ -131,6 +132,8 @@ public sealed class AbilityCatalogBehaviorDiagnostics : IAbilityCatalogBehaviorD
 
             foreach (var expected in scenario.ExpectedStatuses)
                 CheckExpectedStatus(scenario, expected, combatants, failures);
+            foreach (var expected in scenario.ExpectedConditions)
+                CheckExpectedCondition(expected, combatants, failures);
 
             return new AbilityCatalogBehaviorScenarioResult(
                 scenario.Id,
@@ -262,8 +265,13 @@ public sealed class AbilityCatalogBehaviorDiagnostics : IAbilityCatalogBehaviorD
 
         if (matches.Count < expected.MinCount)
         {
+            var observedSources = result.EventLog
+                .Where(x => x.EventType == expected.EventType)
+                .Select(x => x.Source)
+                .Distinct(StringComparer.OrdinalIgnoreCase);
             failures.Add(
-                $"{expected.Source}: expected at least {expected.MinCount} {expected.EventType} log(s), found {matches.Count}.");
+                $"{expected.Source}: expected at least {expected.MinCount} {expected.EventType} log(s), found {matches.Count}. "
+                + $"Observed sources: {string.Join(", ", observedSources)}.");
         }
     }
 
@@ -422,6 +430,53 @@ public sealed class AbilityCatalogBehaviorDiagnostics : IAbilityCatalogBehaviorD
         }
     }
 
+    private static void CheckExpectedCondition(
+        ExpectedConditionObservation expected,
+        IReadOnlyDictionary<string, RuntimeCombatant> combatants,
+        ICollection<string> failures)
+    {
+        if (!combatants.TryGetValue(expected.CombatantId, out var combatant))
+        {
+            failures.Add($"{expected.Condition}: combatant '{expected.CombatantId}' was not present.");
+            return;
+        }
+
+        var stacks = combatant.GetConditionStacks(expected.Condition);
+        if (stacks < expected.MinStacks)
+        {
+            failures.Add(
+                $"{expected.Condition}: expected at least {expected.MinStacks} stack(s) on {expected.CombatantId}, found {stacks}.");
+        }
+    }
+
+    private static void ApplyInitialConditions(
+        IReadOnlyList<InitialConditionSpec> initialConditions,
+        IReadOnlyDictionary<string, RuntimeCombatant> combatants)
+    {
+        long applicationOrder = 0;
+        foreach (var initialCondition in initialConditions)
+        {
+            if (!combatants.TryGetValue(initialCondition.CombatantId, out var owner))
+                throw new InvalidOperationException($"Initial condition combatant '{initialCondition.CombatantId}' was not present.");
+
+            var source = !string.IsNullOrWhiteSpace(initialCondition.SourceCombatantId)
+                && combatants.TryGetValue(initialCondition.SourceCombatantId, out var requestedSource)
+                    ? requestedSource
+                    : owner;
+
+            owner.Conditions.Add(
+                new RuntimeCondition(
+                    initialCondition.Condition,
+                    source,
+                    owner,
+                    Math.Max(1, initialCondition.Stacks),
+                    Math.Max(0, initialCondition.DurationTicks),
+                    source.GetAttribute(AttributeType.Power),
+                    ++applicationOrder,
+                    $"condition.{initialCondition.Condition.ToString().ToLowerInvariant()}"));
+        }
+    }
+
     private sealed class AbilityBehaviorScenario
     {
         public string Id { get; set; } = string.Empty;
@@ -441,8 +496,10 @@ public sealed class AbilityCatalogBehaviorDiagnostics : IAbilityCatalogBehaviorD
         public Dictionary<AttributeType, float> FriendlyStats { get; set; } = [];
         public Dictionary<AttributeType, float> HostileStats { get; set; } = [];
         public List<InitialStatusSpec> InitialStatuses { get; set; } = [];
+        public List<InitialConditionSpec> InitialConditions { get; set; } = [];
         public List<ExpectedLogObservation> ExpectedLogs { get; set; } = [];
         public List<ExpectedStatusObservation> ExpectedStatuses { get; set; } = [];
+        public List<ExpectedConditionObservation> ExpectedConditions { get; set; } = [];
         public bool UsesEssenceLoadout =>
             FriendlyEssenceIds.Count > 0
             || HostileEssenceIds.Count > 0
@@ -458,6 +515,15 @@ public sealed class AbilityCatalogBehaviorDiagnostics : IAbilityCatalogBehaviorD
         public int Stacks { get; set; } = 1;
     }
 
+    private sealed class InitialConditionSpec
+    {
+        public string CombatantId { get; set; } = string.Empty;
+        public string? SourceCombatantId { get; set; }
+        public StandardConditionType Condition { get; set; }
+        public int Stacks { get; set; } = 1;
+        public int DurationTicks { get; set; }
+    }
+
     private sealed class ExpectedLogObservation
     {
         public string Source { get; set; } = string.Empty;
@@ -471,6 +537,13 @@ public sealed class AbilityCatalogBehaviorDiagnostics : IAbilityCatalogBehaviorD
     {
         public string CombatantId { get; set; } = string.Empty;
         public string StatusId { get; set; } = string.Empty;
+        public int MinStacks { get; set; } = 1;
+    }
+
+    private sealed class ExpectedConditionObservation
+    {
+        public string CombatantId { get; set; } = string.Empty;
+        public StandardConditionType Condition { get; set; }
         public int MinStacks { get; set; } = 1;
     }
 }

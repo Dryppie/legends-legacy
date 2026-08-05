@@ -1,2022 +1,1435 @@
 {
   "essences": [
     {
-      "id": "essence.goblin_ambusher",
-      "sourceMonsterId": "monster.goblin_ambusher",
-      "name": "Goblin Ambusher Essence",
-      "description": "The stolen cunning of a goblin that strikes hardest when the enemy is exposed.",
-      "rarity": "Rare",
-      "tags": [
-        "Species.Goblinoid",
-        "Species.Humanoid",
-        "Role.Assassin",
-        "Range.Melee",
-        "Element.Physical",
-        "Pattern.SingleTarget",
-        "Status.Bleed",
-        "Trigger.OnCrit",
-        "Target.Enemy"
-      ],
-      "attributeBonuses": [
-        {
-          "attribute": "Precision",
-          "baseValue": 4
-        },
-        {
-          "attribute": "DodgeChance",
-          "baseValue": 1
-        }
-      ],
-      "evolution": {
-        "id": "evolution.goblin_ambusher.pack_opportunist",
-        "name": "Pack Opportunist",
-        "description": "Cheap Shot gains execute-style bonus damage against bleeding wounded enemies.",
-        "requiredAscensionTier": 2,
-        "requiredCatalystItemId": "item.evolution_catalyst.cunning",
-        "addsTags": [
-          "Mechanic.Execute"
-        ],
-        "activeAbilityModifiers": [
-          {
-            "target": "effect.damage.main",
-            "operation": "AddMultiplier",
-            "value": 0.2,
-            "condition": "TargetHasStatus.Bleed"
-          }
-        ]
-      },
-      "activeAbilityId": "ability.essence.goblin_ambusher.cheap_shot",
-      "passiveAbilityId": "ability.essence.goblin_ambusher.cowards_opening"
-    },
-    {
-      "id": "essence.skeleton_guardian",
-      "sourceMonsterId": "monster.skeleton",
-      "name": "Skeleton Guardian Essence",
-      "description": "A brittle sentinel's oath made durable through bone and spite.",
-      "rarity": "Rare",
-      "tags": [
-        "Species.Undead",
-        "Role.Tank",
-        "Role.Defensive",
-        "Element.Physical",
-        "Defense.Block",
-        "Defense.Guard",
-        "Defense.Barrier",
-        "Control.Taunt"
-      ],
-      "attributeBonuses": [
-        {
-          "attribute": "Fortitude",
-          "baseValue": 3
-        },
-        {
-          "attribute": "Armor",
-          "baseValue": 3
-        },
-        {
-          "attribute": "BlockChance",
-          "baseValue": 1
-        }
-      ],
-      "evolution": {
-        "id": "evolution.skeleton_guardian.ossified_sentinel",
-        "name": "Ossified Sentinel",
-        "description": "Bone Bulwark also taunts the highest-threat enemy.",
-        "requiredAscensionTier": 2,
-        "requiredCatalystItemId": "item.evolution_catalyst.warden",
-        "addsTags": [
-          "Control.Taunt"
-        ],
-        "activeAbilityModifiers": [
-          {
-            "target": "effect.barrier.main",
-            "operation": "AddEffect",
-            "value": 1,
-            "effect": {
-              "id": "effect.status.taunt",
-              "operation": "ApplyStatus",
-              "target": "Self",
-              "statusId": "status.taunt",
-              "baseValue": 1
-            }
-          }
-        ]
-      },
-      "activeAbilityId": "ability.essence.skeleton_guardian.bone_bulwark",
-      "passiveAbilityId": "ability.essence.skeleton_guardian.rattle_guard"
-    },
-    {
-      "id": "essence.fire_ant",
-      "sourceMonsterId": "monster.fire_ant",
-      "name": "Fire Ant Essence",
-      "description": "Colony heat condensed into a biting, ember-bright instinct.",
-      "rarity": "Rare",
-      "tags": [
-        "Species.Insectoid",
-        "Role.Offensive",
-        "Range.Melee",
-        "Element.Fire",
-        "Status.Burn",
-        "Pattern.DamageOverTime",
-        "Trigger.OnHit"
-      ],
+      "id": "essence.vampire_bat",
+      "sourceMonsterId": "monster.vampire_bat",
+      "name": "Vampire Bat Essence",
+      "description": "The combat essence of Vampire Bat, granting Bloodthirsty Fangs and Erratic Flight.",
+      "rarity": "Common",
+      "tags": [],
       "attributeBonuses": [
         {
           "attribute": "Power",
-          "baseValue": 6
+          "baseValue": 1
         }
       ],
+      "activeAbilityId": "ability.creature.vampire_bat.bloodthirsty_fangs",
+      "passiveAbilityId": "ability.creature.vampire_bat.erratic_flight",
       "evolution": {
-        "id": "evolution.fire_ant.hiveflame_instinct",
-        "name": "Hiveflame Instinct",
-        "description": "Yellow Sting spreads a weaker Burn to another random enemy.",
+        "id": "evolution.vampire_bat",
+        "name": "Awakened Vampire Bat",
+        "description": "The awakened form of Vampire Bat Essence.",
         "requiredAscensionTier": 2,
-        "requiredCatalystItemId": "item.evolution_catalyst.flame",
-        "addsTags": [
-          "Target.RandomEnemy"
-        ],
-        "activeAbilityModifiers": [
-          {
-            "target": "effect.damage.fire",
-            "operation": "AddEffect",
-            "value": 1,
-            "effect": {
-              "id": "effect.status.lesser_burn",
-              "operation": "ApplyStatus",
-              "target": "RandomEnemy",
-              "statusId": "status.lesser_burn",
-              "baseValue": 1
-            }
-          }
-        ]
-      },
-      "activeAbilityId": "ability.essence.fire_ant.burning_mandibles",
-      "passiveAbilityId": "ability.essence.fire_ant.colony_heat"
+        "requiredCatalystItemId": "",
+        "addsTags": [],
+        "attributeModifierChanges": [],
+        "activeAbilityModifiers": [],
+        "passiveAbilityModifiers": []
+      }
+    },
+    {
+      "id": "essence.raven",
+      "sourceMonsterId": "monster.raven",
+      "name": "Raven Essence",
+      "description": "The combat essence of Raven, granting Piercing Peck and Bad Omen.",
+      "rarity": "Common",
+      "tags": [],
+      "attributeBonuses": [
+        {
+          "attribute": "Power",
+          "baseValue": 1
+        }
+      ],
+      "activeAbilityId": "ability.creature.raven.piercing_peck",
+      "passiveAbilityId": "ability.creature.raven.bad_omen",
+      "evolution": {
+        "id": "evolution.raven",
+        "name": "Awakened Raven",
+        "description": "The awakened form of Raven Essence.",
+        "requiredAscensionTier": 2,
+        "requiredCatalystItemId": "",
+        "addsTags": [],
+        "attributeModifierChanges": [],
+        "activeAbilityModifiers": [],
+        "passiveAbilityModifiers": []
+      }
+    },
+    {
+      "id": "essence.venomous_snake",
+      "sourceMonsterId": "monster.venomous_snake",
+      "name": "Venomous Snake Essence",
+      "description": "The combat essence of Venomous Snake, granting Toxic Fangs and Venom-Coated Strikes.",
+      "rarity": "Common",
+      "tags": [],
+      "attributeBonuses": [
+        {
+          "attribute": "Power",
+          "baseValue": 1
+        }
+      ],
+      "activeAbilityId": "ability.creature.venomous_snake.toxic_fangs",
+      "passiveAbilityId": "ability.creature.venomous_snake.venom_coated_strikes",
+      "evolution": {
+        "id": "evolution.venomous_snake",
+        "name": "Awakened Venomous Snake",
+        "description": "The awakened form of Venomous Snake Essence.",
+        "requiredAscensionTier": 2,
+        "requiredCatalystItemId": "",
+        "addsTags": [],
+        "attributeModifierChanges": [],
+        "activeAbilityModifiers": [],
+        "passiveAbilityModifiers": []
+      }
+    },
+    {
+      "id": "essence.nightshade_blossom",
+      "sourceMonsterId": "monster.nightshade_blossom",
+      "name": "Nightshade Blossom Essence",
+      "description": "The combat essence of Nightshade Blossom, granting Withering Petals and Midnight Bloom.",
+      "rarity": "Common",
+      "tags": [],
+      "attributeBonuses": [
+        {
+          "attribute": "Power",
+          "baseValue": 1
+        }
+      ],
+      "activeAbilityId": "ability.creature.nightshade_blossom.withering_petals",
+      "passiveAbilityId": "ability.creature.nightshade_blossom.midnight_bloom",
+      "evolution": {
+        "id": "evolution.nightshade_blossom",
+        "name": "Awakened Nightshade Blossom",
+        "description": "The awakened form of Nightshade Blossom Essence.",
+        "requiredAscensionTier": 2,
+        "requiredCatalystItemId": "",
+        "addsTags": [],
+        "attributeModifierChanges": [],
+        "activeAbilityModifiers": [],
+        "passiveAbilityModifiers": []
+      }
+    },
+    {
+      "id": "essence.blood_zombie",
+      "sourceMonsterId": "monster.blood_zombie",
+      "name": "Blood Zombie Essence",
+      "description": "The combat essence of Blood Zombie, granting Rending Bite and Clotted Flesh.",
+      "rarity": "Common",
+      "tags": [],
+      "attributeBonuses": [
+        {
+          "attribute": "Power",
+          "baseValue": 1
+        }
+      ],
+      "activeAbilityId": "ability.creature.blood_zombie.rending_bite",
+      "passiveAbilityId": "ability.creature.blood_zombie.clotted_flesh",
+      "evolution": {
+        "id": "evolution.blood_zombie",
+        "name": "Awakened Blood Zombie",
+        "description": "The awakened form of Blood Zombie Essence.",
+        "requiredAscensionTier": 2,
+        "requiredCatalystItemId": "",
+        "addsTags": [],
+        "attributeModifierChanges": [],
+        "activeAbilityModifiers": [],
+        "passiveAbilityModifiers": []
+      }
+    },
+    {
+      "id": "essence.lumo_wisp",
+      "sourceMonsterId": "monster.lumo_wisp",
+      "name": "Lumo Wisp Essence",
+      "description": "The combat essence of Lumo Wisp, granting Soothing Glow and Lumo Barrier.",
+      "rarity": "Common",
+      "tags": [],
+      "attributeBonuses": [
+        {
+          "attribute": "Power",
+          "baseValue": 1
+        }
+      ],
+      "activeAbilityId": "ability.creature.lumo_wisp.soothing_glow",
+      "passiveAbilityId": "ability.creature.lumo_wisp.lumo_barrier",
+      "evolution": {
+        "id": "evolution.lumo_wisp",
+        "name": "Awakened Lumo Wisp",
+        "description": "The awakened form of Lumo Wisp Essence.",
+        "requiredAscensionTier": 2,
+        "requiredCatalystItemId": "",
+        "addsTags": [],
+        "attributeModifierChanges": [],
+        "activeAbilityModifiers": [],
+        "passiveAbilityModifiers": []
+      }
+    },
+    {
+      "id": "essence.lumo_sentinel",
+      "sourceMonsterId": "monster.lumo_sentinel",
+      "name": "Lumo Sentinel Essence",
+      "description": "The combat essence of Lumo Sentinel, granting Targeting Beam and Cracked Core.",
+      "rarity": "Common",
+      "tags": [],
+      "attributeBonuses": [
+        {
+          "attribute": "Power",
+          "baseValue": 1
+        }
+      ],
+      "activeAbilityId": "ability.creature.lumo_sentinel.targeting_beam",
+      "passiveAbilityId": "ability.creature.lumo_sentinel.cracked_core",
+      "evolution": {
+        "id": "evolution.lumo_sentinel",
+        "name": "Awakened Lumo Sentinel",
+        "description": "The awakened form of Lumo Sentinel Essence.",
+        "requiredAscensionTier": 2,
+        "requiredCatalystItemId": "",
+        "addsTags": [],
+        "attributeModifierChanges": [],
+        "activeAbilityModifiers": [],
+        "passiveAbilityModifiers": []
+      }
+    },
+    {
+      "id": "essence.goblin",
+      "sourceMonsterId": "monster.goblin",
+      "name": "Goblin Essence",
+      "description": "The combat essence of Goblin, granting Shiv Jab and Gobber Trapper.",
+      "rarity": "Common",
+      "tags": [],
+      "attributeBonuses": [
+        {
+          "attribute": "Power",
+          "baseValue": 1
+        }
+      ],
+      "activeAbilityId": "ability.creature.goblin.shiv_jab",
+      "passiveAbilityId": "ability.creature.goblin.gobber_trapper",
+      "evolution": {
+        "id": "evolution.goblin",
+        "name": "Awakened Goblin",
+        "description": "The awakened form of Goblin Essence.",
+        "requiredAscensionTier": 2,
+        "requiredCatalystItemId": "",
+        "addsTags": [],
+        "attributeModifierChanges": [],
+        "activeAbilityModifiers": [],
+        "passiveAbilityModifiers": []
+      }
+    },
+    {
+      "id": "essence.goblin_archer",
+      "sourceMonsterId": "monster.goblin_archer",
+      "name": "Goblin Archer Essence",
+      "description": "The combat essence of Goblin Archer, granting Sniper's Strike and Poisoned Arrows.",
+      "rarity": "Common",
+      "tags": [],
+      "attributeBonuses": [
+        {
+          "attribute": "Power",
+          "baseValue": 1
+        }
+      ],
+      "activeAbilityId": "ability.creature.goblin_archer.snipers_strike",
+      "passiveAbilityId": "ability.creature.goblin_archer.poisoned_arrows",
+      "evolution": {
+        "id": "evolution.goblin_archer",
+        "name": "Awakened Goblin Archer",
+        "description": "The awakened form of Goblin Archer Essence.",
+        "requiredAscensionTier": 2,
+        "requiredCatalystItemId": "",
+        "addsTags": [],
+        "attributeModifierChanges": [],
+        "activeAbilityModifiers": [],
+        "passiveAbilityModifiers": []
+      }
+    },
+    {
+      "id": "essence.goblin_warrior",
+      "sourceMonsterId": "monster.goblin_warrior",
+      "name": "Goblin Warrior Essence",
+      "description": "The combat essence of Goblin Warrior, granting Raging Cleave and Relentless.",
+      "rarity": "Common",
+      "tags": [],
+      "attributeBonuses": [
+        {
+          "attribute": "Power",
+          "baseValue": 1
+        }
+      ],
+      "activeAbilityId": "ability.creature.goblin_warrior.raging_cleave",
+      "passiveAbilityId": "ability.creature.goblin_warrior.relentless",
+      "evolution": {
+        "id": "evolution.goblin_warrior",
+        "name": "Awakened Goblin Warrior",
+        "description": "The awakened form of Goblin Warrior Essence.",
+        "requiredAscensionTier": 2,
+        "requiredCatalystItemId": "",
+        "addsTags": [],
+        "attributeModifierChanges": [],
+        "activeAbilityModifiers": [],
+        "passiveAbilityModifiers": []
+      }
+    },
+    {
+      "id": "essence.goblin_shaman",
+      "sourceMonsterId": "monster.goblin_shaman",
+      "name": "Goblin Shaman Essence",
+      "description": "The combat essence of Goblin Shaman, granting Weak Rejuvenation and Spirit Link.",
+      "rarity": "Common",
+      "tags": [],
+      "attributeBonuses": [
+        {
+          "attribute": "Power",
+          "baseValue": 1
+        }
+      ],
+      "activeAbilityId": "ability.creature.goblin_shaman.weak_rejuvenation",
+      "passiveAbilityId": "ability.creature.goblin_shaman.spirit_link",
+      "evolution": {
+        "id": "evolution.goblin_shaman",
+        "name": "Awakened Goblin Shaman",
+        "description": "The awakened form of Goblin Shaman Essence.",
+        "requiredAscensionTier": 2,
+        "requiredCatalystItemId": "",
+        "addsTags": [],
+        "attributeModifierChanges": [],
+        "activeAbilityModifiers": [],
+        "passiveAbilityModifiers": []
+      }
+    },
+    {
+      "id": "essence.hobgoblin",
+      "sourceMonsterId": "monster.hobgoblin",
+      "name": "Hobgoblin Essence",
+      "description": "The combat essence of Hobgoblin, granting Intimidating Slam and Threatening Presence.",
+      "rarity": "Rare",
+      "tags": [],
+      "attributeBonuses": [
+        {
+          "attribute": "Power",
+          "baseValue": 1
+        }
+      ],
+      "activeAbilityId": "ability.creature.hobgoblin.intimidating_slam",
+      "passiveAbilityId": "ability.creature.hobgoblin.threatening_presence",
+      "evolution": {
+        "id": "evolution.hobgoblin",
+        "name": "Awakened Hobgoblin",
+        "description": "The awakened form of Hobgoblin Essence.",
+        "requiredAscensionTier": 2,
+        "requiredCatalystItemId": "",
+        "addsTags": [],
+        "attributeModifierChanges": [],
+        "activeAbilityModifiers": [],
+        "passiveAbilityModifiers": []
+      }
+    },
+    {
+      "id": "essence.hobgoblin_brutal_charge",
+      "sourceMonsterId": "monster.hobgoblin",
+      "name": "Hobgoblin: Brutal Charge Essence",
+      "description": "The combat essence of Hobgoblin, granting Brutal Charge and Threatening Presence.",
+      "rarity": "Rare",
+      "tags": [],
+      "attributeBonuses": [
+        {
+          "attribute": "Power",
+          "baseValue": 1
+        }
+      ],
+      "activeAbilityId": "ability.creature.hobgoblin.brutal_charge",
+      "passiveAbilityId": "ability.creature.hobgoblin.threatening_presence",
+      "evolution": {
+        "id": "evolution.hobgoblin_brutal_charge",
+        "name": "Awakened Hobgoblin",
+        "description": "The awakened form of Hobgoblin: Brutal Charge Essence.",
+        "requiredAscensionTier": 2,
+        "requiredCatalystItemId": "",
+        "addsTags": [],
+        "attributeModifierChanges": [],
+        "activeAbilityModifiers": [],
+        "passiveAbilityModifiers": []
+      }
+    },
+    {
+      "id": "essence.frost_imp",
+      "sourceMonsterId": "monster.frost_imp",
+      "name": "Frost Imp Essence",
+      "description": "The combat essence of Frost Imp, granting Ice Needle and Cold Touch.",
+      "rarity": "Common",
+      "tags": [],
+      "attributeBonuses": [
+        {
+          "attribute": "Power",
+          "baseValue": 1
+        }
+      ],
+      "activeAbilityId": "ability.creature.frost_imp.ice_needle",
+      "passiveAbilityId": "ability.creature.frost_imp.cold_touch",
+      "evolution": {
+        "id": "evolution.frost_imp",
+        "name": "Awakened Frost Imp",
+        "description": "The awakened form of Frost Imp Essence.",
+        "requiredAscensionTier": 2,
+        "requiredCatalystItemId": "",
+        "addsTags": [],
+        "attributeModifierChanges": [],
+        "activeAbilityModifiers": [],
+        "passiveAbilityModifiers": []
+      }
+    },
+    {
+      "id": "essence.crystal_wisp",
+      "sourceMonsterId": "monster.crystal_wisp",
+      "name": "Crystal Wisp Essence",
+      "description": "The combat essence of Crystal Wisp, granting Prismatic Shard and Captured Light.",
+      "rarity": "Common",
+      "tags": [],
+      "attributeBonuses": [
+        {
+          "attribute": "Power",
+          "baseValue": 1
+        }
+      ],
+      "activeAbilityId": "ability.creature.crystal_wisp.prismatic_shard",
+      "passiveAbilityId": "ability.creature.crystal_wisp.captured_light",
+      "evolution": {
+        "id": "evolution.crystal_wisp",
+        "name": "Awakened Crystal Wisp",
+        "description": "The awakened form of Crystal Wisp Essence.",
+        "requiredAscensionTier": 2,
+        "requiredCatalystItemId": "",
+        "addsTags": [],
+        "attributeModifierChanges": [],
+        "activeAbilityModifiers": [],
+        "passiveAbilityModifiers": []
+      }
+    },
+    {
+      "id": "essence.blue_slime",
+      "sourceMonsterId": "monster.blue_slime",
+      "name": "Blue Slime Essence",
+      "description": "The combat essence of Blue Slime, granting Sweet Water and Protective Slime.",
+      "rarity": "Common",
+      "tags": [],
+      "attributeBonuses": [
+        {
+          "attribute": "Power",
+          "baseValue": 1
+        }
+      ],
+      "activeAbilityId": "ability.creature.blue_slime.sweet_water",
+      "passiveAbilityId": "ability.creature.blue_slime.protective_slime",
+      "evolution": {
+        "id": "evolution.blue_slime",
+        "name": "Awakened Blue Slime",
+        "description": "The awakened form of Blue Slime Essence.",
+        "requiredAscensionTier": 2,
+        "requiredCatalystItemId": "",
+        "addsTags": [],
+        "attributeModifierChanges": [],
+        "activeAbilityModifiers": [],
+        "passiveAbilityModifiers": []
+      }
+    },
+    {
+      "id": "essence.transparent_slime",
+      "sourceMonsterId": "monster.transparent_slime",
+      "name": "Transparent Slime Essence",
+      "description": "The combat essence of Transparent Slime, granting Transparent Engulf and Reconstitute.",
+      "rarity": "Common",
+      "tags": [],
+      "attributeBonuses": [
+        {
+          "attribute": "Power",
+          "baseValue": 1
+        }
+      ],
+      "activeAbilityId": "ability.creature.transparent_slime.transparent_engulf",
+      "passiveAbilityId": "ability.creature.transparent_slime.reconstitute",
+      "evolution": {
+        "id": "evolution.transparent_slime",
+        "name": "Awakened Transparent Slime",
+        "description": "The awakened form of Transparent Slime Essence.",
+        "requiredAscensionTier": 2,
+        "requiredCatalystItemId": "",
+        "addsTags": [],
+        "attributeModifierChanges": [],
+        "activeAbilityModifiers": [],
+        "passiveAbilityModifiers": []
+      }
+    },
+    {
+      "id": "essence.moss_lizard",
+      "sourceMonsterId": "monster.moss_lizard",
+      "name": "Moss Lizard Essence",
+      "description": "The combat essence of Moss Lizard, granting Moss Camouflage and Lost Tail.",
+      "rarity": "Common",
+      "tags": [],
+      "attributeBonuses": [
+        {
+          "attribute": "Power",
+          "baseValue": 1
+        }
+      ],
+      "activeAbilityId": "ability.creature.moss_lizard.moss_camouflage",
+      "passiveAbilityId": "ability.creature.moss_lizard.lost_tail",
+      "evolution": {
+        "id": "evolution.moss_lizard",
+        "name": "Awakened Moss Lizard",
+        "description": "The awakened form of Moss Lizard Essence.",
+        "requiredAscensionTier": 2,
+        "requiredCatalystItemId": "",
+        "addsTags": [],
+        "attributeModifierChanges": [],
+        "activeAbilityModifiers": [],
+        "passiveAbilityModifiers": []
+      }
+    },
+    {
+      "id": "essence.shadow_imp",
+      "sourceMonsterId": "monster.shadow_imp",
+      "name": "Shadow Imp Essence",
+      "description": "The combat essence of Shadow Imp, granting Shadow Image and Shadowy Presence.",
+      "rarity": "Common",
+      "tags": [],
+      "attributeBonuses": [
+        {
+          "attribute": "Power",
+          "baseValue": 1
+        }
+      ],
+      "activeAbilityId": "ability.creature.shadow_imp.shadow_image",
+      "passiveAbilityId": "ability.creature.shadow_imp.shadowy_presence",
+      "evolution": {
+        "id": "evolution.shadow_imp",
+        "name": "Awakened Shadow Imp",
+        "description": "The awakened form of Shadow Imp Essence.",
+        "requiredAscensionTier": 2,
+        "requiredCatalystItemId": "",
+        "addsTags": [],
+        "attributeModifierChanges": [],
+        "activeAbilityModifiers": [],
+        "passiveAbilityModifiers": []
+      }
+    },
+    {
+      "id": "essence.grave_hound",
+      "sourceMonsterId": "monster.grave_hound",
+      "name": "Grave Hound Essence",
+      "description": "The combat essence of Grave Hound, granting Gravebound Pounce and Graveyard Howl.",
+      "rarity": "Common",
+      "tags": [],
+      "attributeBonuses": [
+        {
+          "attribute": "Power",
+          "baseValue": 1
+        }
+      ],
+      "activeAbilityId": "ability.creature.grave_hound.gravebound_pounce",
+      "passiveAbilityId": "ability.creature.grave_hound.graveyard_howl",
+      "evolution": {
+        "id": "evolution.grave_hound",
+        "name": "Awakened Grave Hound",
+        "description": "The awakened form of Grave Hound Essence.",
+        "requiredAscensionTier": 2,
+        "requiredCatalystItemId": "",
+        "addsTags": [],
+        "attributeModifierChanges": [],
+        "activeAbilityModifiers": [],
+        "passiveAbilityModifiers": []
+      }
+    },
+    {
+      "id": "essence.lost_soul",
+      "sourceMonsterId": "monster.lost_soul",
+      "name": "Lost Soul Essence",
+      "description": "The combat essence of Lost Soul, granting Soul Drain and Soul Lantern.",
+      "rarity": "Common",
+      "tags": [],
+      "attributeBonuses": [
+        {
+          "attribute": "Power",
+          "baseValue": 1
+        }
+      ],
+      "activeAbilityId": "ability.creature.lost_soul.soul_drain",
+      "passiveAbilityId": "ability.creature.lost_soul.soul_lantern",
+      "evolution": {
+        "id": "evolution.lost_soul",
+        "name": "Awakened Lost Soul",
+        "description": "The awakened form of Lost Soul Essence.",
+        "requiredAscensionTier": 2,
+        "requiredCatalystItemId": "",
+        "addsTags": [],
+        "attributeModifierChanges": [],
+        "activeAbilityModifiers": [],
+        "passiveAbilityModifiers": []
+      }
+    },
+    {
+      "id": "essence.grave_wisp",
+      "sourceMonsterId": "monster.grave_wisp",
+      "name": "Grave Wisp Essence",
+      "description": "The combat essence of Grave Wisp, granting Mourning Flash and Pale Flame.",
+      "rarity": "Common",
+      "tags": [],
+      "attributeBonuses": [
+        {
+          "attribute": "Power",
+          "baseValue": 1
+        }
+      ],
+      "activeAbilityId": "ability.creature.grave_wisp.mourning_flash",
+      "passiveAbilityId": "ability.creature.grave_wisp.pale_flame",
+      "evolution": {
+        "id": "evolution.grave_wisp",
+        "name": "Awakened Grave Wisp",
+        "description": "The awakened form of Grave Wisp Essence.",
+        "requiredAscensionTier": 2,
+        "requiredCatalystItemId": "",
+        "addsTags": [],
+        "attributeModifierChanges": [],
+        "activeAbilityModifiers": [],
+        "passiveAbilityModifiers": []
+      }
+    },
+    {
+      "id": "essence.skeleton",
+      "sourceMonsterId": "monster.skeleton",
+      "name": "Skeleton Essence",
+      "description": "The combat essence of Skeleton, granting Bone Smash and Calcium.",
+      "rarity": "Common",
+      "tags": [],
+      "attributeBonuses": [
+        {
+          "attribute": "Power",
+          "baseValue": 1
+        }
+      ],
+      "activeAbilityId": "ability.creature.skeleton.bone_smash",
+      "passiveAbilityId": "ability.creature.skeleton.calcium",
+      "evolution": {
+        "id": "evolution.skeleton",
+        "name": "Awakened Skeleton",
+        "description": "The awakened form of Skeleton Essence.",
+        "requiredAscensionTier": 2,
+        "requiredCatalystItemId": "",
+        "addsTags": [],
+        "attributeModifierChanges": [],
+        "activeAbilityModifiers": [],
+        "passiveAbilityModifiers": []
+      }
+    },
+    {
+      "id": "essence.pixie",
+      "sourceMonsterId": "monster.pixie",
+      "name": "Pixie Essence",
+      "description": "The combat essence of Pixie, granting Pixie Burst and Resonant Chime.",
+      "rarity": "Common",
+      "tags": [],
+      "attributeBonuses": [
+        {
+          "attribute": "Power",
+          "baseValue": 1
+        }
+      ],
+      "activeAbilityId": "ability.creature.pixie.pixie_burst",
+      "passiveAbilityId": "ability.creature.pixie.resonant_chime",
+      "evolution": {
+        "id": "evolution.pixie",
+        "name": "Awakened Pixie",
+        "description": "The awakened form of Pixie Essence.",
+        "requiredAscensionTier": 2,
+        "requiredCatalystItemId": "",
+        "addsTags": [],
+        "attributeModifierChanges": [],
+        "activeAbilityModifiers": [],
+        "passiveAbilityModifiers": []
+      }
+    },
+    {
+      "id": "essence.wood_nymph",
+      "sourceMonsterId": "monster.wood_nymph",
+      "name": "Wood Nymph Essence",
+      "description": "The combat essence of Wood Nymph, granting Bramble Shield and Nature's Protection.",
+      "rarity": "Common",
+      "tags": [],
+      "attributeBonuses": [
+        {
+          "attribute": "Power",
+          "baseValue": 1
+        }
+      ],
+      "activeAbilityId": "ability.creature.wood_nymph.bramble_shield",
+      "passiveAbilityId": "ability.creature.wood_nymph.natures_protection",
+      "evolution": {
+        "id": "evolution.wood_nymph",
+        "name": "Awakened Wood Nymph",
+        "description": "The awakened form of Wood Nymph Essence.",
+        "requiredAscensionTier": 2,
+        "requiredCatalystItemId": "",
+        "addsTags": [],
+        "attributeModifierChanges": [],
+        "activeAbilityModifiers": [],
+        "passiveAbilityModifiers": []
+      }
+    },
+    {
+      "id": "essence.rainbow_slime",
+      "sourceMonsterId": "monster.rainbow_slime",
+      "name": "Rainbow Slime Essence",
+      "description": "The combat essence of Rainbow Slime, granting Unstable Colors and Colorful Shield.",
+      "rarity": "Common",
+      "tags": [],
+      "attributeBonuses": [
+        {
+          "attribute": "Power",
+          "baseValue": 1
+        }
+      ],
+      "activeAbilityId": "ability.creature.rainbow_slime.unstable_colors",
+      "passiveAbilityId": "ability.creature.rainbow_slime.colorful_shield",
+      "evolution": {
+        "id": "evolution.rainbow_slime",
+        "name": "Awakened Rainbow Slime",
+        "description": "The awakened form of Rainbow Slime Essence.",
+        "requiredAscensionTier": 2,
+        "requiredCatalystItemId": "",
+        "addsTags": [],
+        "attributeModifierChanges": [],
+        "activeAbilityModifiers": [],
+        "passiveAbilityModifiers": []
+      }
+    },
+    {
+      "id": "essence.enchanted_fairy",
+      "sourceMonsterId": "monster.enchanted_fairy",
+      "name": "Enchanted Fairy Essence",
+      "description": "The combat essence of Enchanted Fairy, granting Fae's Corrosion and Fae's Charm.",
+      "rarity": "Common",
+      "tags": [],
+      "attributeBonuses": [
+        {
+          "attribute": "Power",
+          "baseValue": 1
+        }
+      ],
+      "activeAbilityId": "ability.creature.enchanted_fairy.faes_corrosion",
+      "passiveAbilityId": "ability.creature.enchanted_fairy.faes_charm",
+      "evolution": {
+        "id": "evolution.enchanted_fairy",
+        "name": "Awakened Enchanted Fairy",
+        "description": "The awakened form of Enchanted Fairy Essence.",
+        "requiredAscensionTier": 2,
+        "requiredCatalystItemId": "",
+        "addsTags": [],
+        "attributeModifierChanges": [],
+        "activeAbilityModifiers": [],
+        "passiveAbilityModifiers": []
+      }
+    },
+    {
+      "id": "essence.illusion_fox",
+      "sourceMonsterId": "monster.illusion_fox",
+      "name": "Illusion Fox Essence",
+      "description": "The combat essence of Illusion Fox, granting A Doomed Illusion and Foxfire Wisp.",
+      "rarity": "Common",
+      "tags": [],
+      "attributeBonuses": [
+        {
+          "attribute": "Power",
+          "baseValue": 1
+        }
+      ],
+      "activeAbilityId": "ability.creature.illusion_fox.a_doomed_illusion",
+      "passiveAbilityId": "ability.creature.illusion_fox.foxfire_wisp",
+      "evolution": {
+        "id": "evolution.illusion_fox",
+        "name": "Awakened Illusion Fox",
+        "description": "The awakened form of Illusion Fox Essence.",
+        "requiredAscensionTier": 2,
+        "requiredCatalystItemId": "",
+        "addsTags": [],
+        "attributeModifierChanges": [],
+        "activeAbilityModifiers": [],
+        "passiveAbilityModifiers": []
+      }
+    },
+    {
+      "id": "essence.thornback_boar",
+      "sourceMonsterId": "monster.thornback_boar",
+      "name": "Thornback Boar Essence",
+      "description": "The combat essence of Thornback Boar, granting Thorned Rush and Bristling Hide.",
+      "rarity": "Common",
+      "tags": [],
+      "attributeBonuses": [
+        {
+          "attribute": "Power",
+          "baseValue": 1
+        }
+      ],
+      "activeAbilityId": "ability.creature.thornback_boar.thorned_rush",
+      "passiveAbilityId": "ability.creature.thornback_boar.bristling_hide",
+      "evolution": {
+        "id": "evolution.thornback_boar",
+        "name": "Awakened Thornback Boar",
+        "description": "The awakened form of Thornback Boar Essence.",
+        "requiredAscensionTier": 2,
+        "requiredCatalystItemId": "",
+        "addsTags": [],
+        "attributeModifierChanges": [],
+        "activeAbilityModifiers": [],
+        "passiveAbilityModifiers": []
+      }
+    },
+    {
+      "id": "essence.hollow_stag",
+      "sourceMonsterId": "monster.hollow_stag",
+      "name": "Hollow Stag Essence",
+      "description": "The combat essence of Hollow Stag, granting Echoing Antlers and Hollow Core.",
+      "rarity": "Common",
+      "tags": [],
+      "attributeBonuses": [
+        {
+          "attribute": "Power",
+          "baseValue": 1
+        }
+      ],
+      "activeAbilityId": "ability.creature.hollow_stag.echoing_antlers",
+      "passiveAbilityId": "ability.creature.hollow_stag.hollow_core",
+      "evolution": {
+        "id": "evolution.hollow_stag",
+        "name": "Awakened Hollow Stag",
+        "description": "The awakened form of Hollow Stag Essence.",
+        "requiredAscensionTier": 2,
+        "requiredCatalystItemId": "",
+        "addsTags": [],
+        "attributeModifierChanges": [],
+        "activeAbilityModifiers": [],
+        "passiveAbilityModifiers": []
+      }
+    },
+    {
+      "id": "essence.treant_sapling",
+      "sourceMonsterId": "monster.treant_sapling",
+      "name": "Treant Sapling Essence",
+      "description": "The combat essence of Treant Sapling, granting Sprouting Surge and Nurturing Roots.",
+      "rarity": "Common",
+      "tags": [],
+      "attributeBonuses": [
+        {
+          "attribute": "Power",
+          "baseValue": 1
+        }
+      ],
+      "activeAbilityId": "ability.creature.treant_sapling.sprouting_surge",
+      "passiveAbilityId": "ability.creature.treant_sapling.nurturing_roots",
+      "evolution": {
+        "id": "evolution.treant_sapling",
+        "name": "Awakened Treant Sapling",
+        "description": "The awakened form of Treant Sapling Essence.",
+        "requiredAscensionTier": 2,
+        "requiredCatalystItemId": "",
+        "addsTags": [],
+        "attributeModifierChanges": [],
+        "activeAbilityModifiers": [],
+        "passiveAbilityModifiers": []
+      }
+    },
+    {
+      "id": "essence.glade_panther",
+      "sourceMonsterId": "monster.glade_panther",
+      "name": "Glade Panther Essence",
+      "description": "The combat essence of Glade Panther, granting Ambush Strike and Razor Claws.",
+      "rarity": "Common",
+      "tags": [],
+      "attributeBonuses": [
+        {
+          "attribute": "Power",
+          "baseValue": 1
+        }
+      ],
+      "activeAbilityId": "ability.creature.glade_panther.ambush_strike",
+      "passiveAbilityId": "ability.creature.glade_panther.razor_claws",
+      "evolution": {
+        "id": "evolution.glade_panther",
+        "name": "Awakened Glade Panther",
+        "description": "The awakened form of Glade Panther Essence.",
+        "requiredAscensionTier": 2,
+        "requiredCatalystItemId": "",
+        "addsTags": [],
+        "attributeModifierChanges": [],
+        "activeAbilityModifiers": [],
+        "passiveAbilityModifiers": []
+      }
+    },
+    {
+      "id": "essence.forest_spirit",
+      "sourceMonsterId": "monster.forest_spirit",
+      "name": "Forest Spirit Essence",
+      "description": "The combat essence of Forest Spirit, granting Rejuvenation and Spirit Bloom.",
+      "rarity": "Common",
+      "tags": [],
+      "attributeBonuses": [
+        {
+          "attribute": "Power",
+          "baseValue": 1
+        }
+      ],
+      "activeAbilityId": "ability.creature.forest_spirit.rejuvenation",
+      "passiveAbilityId": "ability.creature.forest_spirit.spirit_bloom",
+      "evolution": {
+        "id": "evolution.forest_spirit",
+        "name": "Awakened Forest Spirit",
+        "description": "The awakened form of Forest Spirit Essence.",
+        "requiredAscensionTier": 2,
+        "requiredCatalystItemId": "",
+        "addsTags": [],
+        "attributeModifierChanges": [],
+        "activeAbilityModifiers": [],
+        "passiveAbilityModifiers": []
+      }
+    },
+    {
+      "id": "essence.rotroot_shambler",
+      "sourceMonsterId": "monster.rotroot_shambler",
+      "name": "Rotroot Shambler Essence",
+      "description": "The combat essence of Rotroot Shambler, granting Rotburst and Decaying Husk.",
+      "rarity": "Common",
+      "tags": [],
+      "attributeBonuses": [
+        {
+          "attribute": "Power",
+          "baseValue": 1
+        }
+      ],
+      "activeAbilityId": "ability.creature.rotroot_shambler.rotburst",
+      "passiveAbilityId": "ability.creature.rotroot_shambler.decaying_husk",
+      "evolution": {
+        "id": "evolution.rotroot_shambler",
+        "name": "Awakened Rotroot Shambler",
+        "description": "The awakened form of Rotroot Shambler Essence.",
+        "requiredAscensionTier": 2,
+        "requiredCatalystItemId": "",
+        "addsTags": [],
+        "attributeModifierChanges": [],
+        "activeAbilityModifiers": [],
+        "passiveAbilityModifiers": []
+      }
+    },
+    {
+      "id": "essence.spider",
+      "sourceMonsterId": "monster.spider",
+      "name": "Spider Essence",
+      "description": "The combat essence of Spider, granting Skittering Strike and Spider Eyes.",
+      "rarity": "Common",
+      "tags": [],
+      "attributeBonuses": [
+        {
+          "attribute": "Power",
+          "baseValue": 1
+        }
+      ],
+      "activeAbilityId": "ability.creature.spider.skittering_strike",
+      "passiveAbilityId": "ability.creature.spider.spider_eyes",
+      "evolution": {
+        "id": "evolution.spider",
+        "name": "Awakened Spider",
+        "description": "The awakened form of Spider Essence.",
+        "requiredAscensionTier": 2,
+        "requiredCatalystItemId": "",
+        "addsTags": [],
+        "attributeModifierChanges": [],
+        "activeAbilityModifiers": [],
+        "passiveAbilityModifiers": []
+      }
+    },
+    {
+      "id": "essence.giant_spider",
+      "sourceMonsterId": "monster.giant_spider",
+      "name": "Giant Spider Essence",
+      "description": "The combat essence of Giant Spider, granting Spider Crash and Thickened Carapace.",
+      "rarity": "Common",
+      "tags": [],
+      "attributeBonuses": [
+        {
+          "attribute": "Power",
+          "baseValue": 1
+        }
+      ],
+      "activeAbilityId": "ability.creature.giant_spider.spider_crash",
+      "passiveAbilityId": "ability.creature.giant_spider.thickened_carapace",
+      "evolution": {
+        "id": "evolution.giant_spider",
+        "name": "Awakened Giant Spider",
+        "description": "The awakened form of Giant Spider Essence.",
+        "requiredAscensionTier": 2,
+        "requiredCatalystItemId": "",
+        "addsTags": [],
+        "attributeModifierChanges": [],
+        "activeAbilityModifiers": [],
+        "passiveAbilityModifiers": []
+      }
+    },
+    {
+      "id": "essence.venomous_spiderling",
+      "sourceMonsterId": "monster.venomous_spiderling",
+      "name": "Venomous Spiderling Essence",
+      "description": "The combat essence of Venomous Spiderling, granting Venom Web and Toxic Opportunity.",
+      "rarity": "Common",
+      "tags": [],
+      "attributeBonuses": [
+        {
+          "attribute": "Power",
+          "baseValue": 1
+        }
+      ],
+      "activeAbilityId": "ability.creature.venomous_spiderling.venom_web",
+      "passiveAbilityId": "ability.creature.venomous_spiderling.toxic_opportunity",
+      "evolution": {
+        "id": "evolution.venomous_spiderling",
+        "name": "Awakened Venomous Spiderling",
+        "description": "The awakened form of Venomous Spiderling Essence.",
+        "requiredAscensionTier": 2,
+        "requiredCatalystItemId": "",
+        "addsTags": [],
+        "attributeModifierChanges": [],
+        "activeAbilityModifiers": [],
+        "passiveAbilityModifiers": []
+      }
+    },
+    {
+      "id": "essence.blackjaw_spider",
+      "sourceMonsterId": "monster.blackjaw_spider",
+      "name": "Blackjaw Spider Essence",
+      "description": "The combat essence of Blackjaw Spider, granting Blackjaw Bite and Powerful Mandibles.",
+      "rarity": "Common",
+      "tags": [],
+      "attributeBonuses": [
+        {
+          "attribute": "Power",
+          "baseValue": 1
+        }
+      ],
+      "activeAbilityId": "ability.creature.blackjaw_spider.blackjaw_bite",
+      "passiveAbilityId": "ability.creature.blackjaw_spider.powerful_mandibles",
+      "evolution": {
+        "id": "evolution.blackjaw_spider",
+        "name": "Awakened Blackjaw Spider",
+        "description": "The awakened form of Blackjaw Spider Essence.",
+        "requiredAscensionTier": 2,
+        "requiredCatalystItemId": "",
+        "addsTags": [],
+        "attributeModifierChanges": [],
+        "activeAbilityModifiers": [],
+        "passiveAbilityModifiers": []
+      }
+    },
+    {
+      "id": "essence.flame_imp",
+      "sourceMonsterId": "monster.flame_imp",
+      "name": "Flame Imp Essence",
+      "description": "The combat essence of Flame Imp, granting Firebomb Toss and Impish Flame.",
+      "rarity": "Common",
+      "tags": [],
+      "attributeBonuses": [
+        {
+          "attribute": "Power",
+          "baseValue": 1
+        }
+      ],
+      "activeAbilityId": "ability.creature.flame_imp.firebomb_toss",
+      "passiveAbilityId": "ability.creature.flame_imp.impish_flame",
+      "evolution": {
+        "id": "evolution.flame_imp",
+        "name": "Awakened Flame Imp",
+        "description": "The awakened form of Flame Imp Essence.",
+        "requiredAscensionTier": 2,
+        "requiredCatalystItemId": "",
+        "addsTags": [],
+        "attributeModifierChanges": [],
+        "activeAbilityModifiers": [],
+        "passiveAbilityModifiers": []
+      }
+    },
+    {
+      "id": "essence.smolder_rat",
+      "sourceMonsterId": "monster.smolder_rat",
+      "name": "Smolder Rat Essence",
+      "description": "The combat essence of Smolder Rat, granting Scorching Tail and Heat Resistance.",
+      "rarity": "Common",
+      "tags": [],
+      "attributeBonuses": [
+        {
+          "attribute": "Power",
+          "baseValue": 1
+        }
+      ],
+      "activeAbilityId": "ability.creature.smolder_rat.scorching_tail",
+      "passiveAbilityId": "ability.creature.smolder_rat.heat_resistance",
+      "evolution": {
+        "id": "evolution.smolder_rat",
+        "name": "Awakened Smolder Rat",
+        "description": "The awakened form of Smolder Rat Essence.",
+        "requiredAscensionTier": 2,
+        "requiredCatalystItemId": "",
+        "addsTags": [],
+        "attributeModifierChanges": [],
+        "activeAbilityModifiers": [],
+        "passiveAbilityModifiers": []
+      }
+    },
+    {
+      "id": "essence.cinder_beetle",
+      "sourceMonsterId": "monster.cinder_beetle",
+      "name": "Cinder Beetle Essence",
+      "description": "The combat essence of Cinder Beetle, granting Burning Mandibles and Molten Shell.",
+      "rarity": "Common",
+      "tags": [],
+      "attributeBonuses": [
+        {
+          "attribute": "Power",
+          "baseValue": 1
+        }
+      ],
+      "activeAbilityId": "ability.creature.cinder_beetle.burning_mandibles",
+      "passiveAbilityId": "ability.creature.cinder_beetle.molten_shell",
+      "evolution": {
+        "id": "evolution.cinder_beetle",
+        "name": "Awakened Cinder Beetle",
+        "description": "The awakened form of Cinder Beetle Essence.",
+        "requiredAscensionTier": 2,
+        "requiredCatalystItemId": "",
+        "addsTags": [],
+        "attributeModifierChanges": [],
+        "activeAbilityModifiers": [],
+        "passiveAbilityModifiers": []
+      }
+    },
+    {
+      "id": "essence.red_slime",
+      "sourceMonsterId": "monster.red_slime",
+      "name": "Red Slime Essence",
+      "description": "The combat essence of Red Slime, granting Ignite Core and Recharging Core.",
+      "rarity": "Common",
+      "tags": [],
+      "attributeBonuses": [
+        {
+          "attribute": "Power",
+          "baseValue": 1
+        }
+      ],
+      "activeAbilityId": "ability.creature.red_slime.ignite_core",
+      "passiveAbilityId": "ability.creature.red_slime.recharging_core",
+      "evolution": {
+        "id": "evolution.red_slime",
+        "name": "Awakened Red Slime",
+        "description": "The awakened form of Red Slime Essence.",
+        "requiredAscensionTier": 2,
+        "requiredCatalystItemId": "",
+        "addsTags": [],
+        "attributeModifierChanges": [],
+        "activeAbilityModifiers": [],
+        "passiveAbilityModifiers": []
+      }
+    },
+    {
+      "id": "essence.giant_worm",
+      "sourceMonsterId": "monster.giant_worm",
+      "name": "Giant Worm Essence",
+      "description": "The combat essence of Giant Worm, granting Drag Beneath and Erupting Ambush.",
+      "rarity": "Common",
+      "tags": [],
+      "attributeBonuses": [
+        {
+          "attribute": "Power",
+          "baseValue": 1
+        }
+      ],
+      "activeAbilityId": "ability.creature.giant_worm.drag_beneath",
+      "passiveAbilityId": "ability.creature.giant_worm.erupting_ambush",
+      "evolution": {
+        "id": "evolution.giant_worm",
+        "name": "Awakened Giant Worm",
+        "description": "The awakened form of Giant Worm Essence.",
+        "requiredAscensionTier": 2,
+        "requiredCatalystItemId": "",
+        "addsTags": [],
+        "attributeModifierChanges": [],
+        "activeAbilityModifiers": [],
+        "passiveAbilityModifiers": []
+      }
+    },
+    {
+      "id": "essence.bog_mite",
+      "sourceMonsterId": "monster.bog_mite",
+      "name": "Bog Mite Essence",
+      "description": "The combat essence of Bog Mite, granting Infestation and Blood Feeders.",
+      "rarity": "Common",
+      "tags": [],
+      "attributeBonuses": [
+        {
+          "attribute": "Power",
+          "baseValue": 1
+        }
+      ],
+      "activeAbilityId": "ability.creature.bog_mite.infestation",
+      "passiveAbilityId": "ability.creature.bog_mite.blood_feeders",
+      "evolution": {
+        "id": "evolution.bog_mite",
+        "name": "Awakened Bog Mite",
+        "description": "The awakened form of Bog Mite Essence.",
+        "requiredAscensionTier": 2,
+        "requiredCatalystItemId": "",
+        "addsTags": [],
+        "attributeModifierChanges": [],
+        "activeAbilityModifiers": [],
+        "passiveAbilityModifiers": []
+      }
+    },
+    {
+      "id": "essence.green_slime",
+      "sourceMonsterId": "monster.green_slime",
+      "name": "Green Slime Essence",
+      "description": "The combat essence of Green Slime, granting Acid Splash and Corrosive Ooze.",
+      "rarity": "Common",
+      "tags": [],
+      "attributeBonuses": [
+        {
+          "attribute": "Power",
+          "baseValue": 1
+        }
+      ],
+      "activeAbilityId": "ability.creature.green_slime.acid_splash",
+      "passiveAbilityId": "ability.creature.green_slime.corrosive_ooze",
+      "evolution": {
+        "id": "evolution.green_slime",
+        "name": "Awakened Green Slime",
+        "description": "The awakened form of Green Slime Essence.",
+        "requiredAscensionTier": 2,
+        "requiredCatalystItemId": "",
+        "addsTags": [],
+        "attributeModifierChanges": [],
+        "activeAbilityModifiers": [],
+        "passiveAbilityModifiers": []
+      }
+    },
+    {
+      "id": "essence.large_rat",
+      "sourceMonsterId": "monster.large_rat",
+      "name": "Large Rat Essence",
+      "description": "The combat essence of Large Rat, granting Tail Wrap and Big.",
+      "rarity": "Common",
+      "tags": [],
+      "attributeBonuses": [
+        {
+          "attribute": "Power",
+          "baseValue": 1
+        }
+      ],
+      "activeAbilityId": "ability.creature.large_rat.tail_wrap",
+      "passiveAbilityId": "ability.creature.large_rat.big",
+      "evolution": {
+        "id": "evolution.large_rat",
+        "name": "Awakened Large Rat",
+        "description": "The awakened form of Large Rat Essence.",
+        "requiredAscensionTier": 2,
+        "requiredCatalystItemId": "",
+        "addsTags": [],
+        "attributeModifierChanges": [],
+        "activeAbilityModifiers": [],
+        "passiveAbilityModifiers": []
+      }
+    },
+    {
+      "id": "essence.viper",
+      "sourceMonsterId": "monster.viper",
+      "name": "Viper Essence",
+      "description": "The combat essence of Viper, granting Piercing Fangs and Potent Toxins.",
+      "rarity": "Common",
+      "tags": [],
+      "attributeBonuses": [
+        {
+          "attribute": "Power",
+          "baseValue": 1
+        }
+      ],
+      "activeAbilityId": "ability.creature.viper.piercing_fangs",
+      "passiveAbilityId": "ability.creature.viper.potent_toxins",
+      "evolution": {
+        "id": "evolution.viper",
+        "name": "Awakened Viper",
+        "description": "The awakened form of Viper Essence.",
+        "requiredAscensionTier": 2,
+        "requiredCatalystItemId": "",
+        "addsTags": [],
+        "attributeModifierChanges": [],
+        "activeAbilityModifiers": [],
+        "passiveAbilityModifiers": []
+      }
+    },
+    {
+      "id": "essence.poisonous_rat",
+      "sourceMonsterId": "monster.poisonous_rat",
+      "name": "Poisonous Rat Essence",
+      "description": "The combat essence of Poisonous Rat, granting Toxic Bite and Resistant Hide.",
+      "rarity": "Common",
+      "tags": [],
+      "attributeBonuses": [
+        {
+          "attribute": "Power",
+          "baseValue": 1
+        }
+      ],
+      "activeAbilityId": "ability.creature.poisonous_rat.toxic_bite",
+      "passiveAbilityId": "ability.creature.poisonous_rat.resistant_hide",
+      "evolution": {
+        "id": "evolution.poisonous_rat",
+        "name": "Awakened Poisonous Rat",
+        "description": "The awakened form of Poisonous Rat Essence.",
+        "requiredAscensionTier": 2,
+        "requiredCatalystItemId": "",
+        "addsTags": [],
+        "attributeModifierChanges": [],
+        "activeAbilityModifiers": [],
+        "passiveAbilityModifiers": []
+      }
+    },
+    {
+      "id": "essence.rotfly_toad",
+      "sourceMonsterId": "monster.rotfly_toad",
+      "name": "Rotfly Toad Essence",
+      "description": "The combat essence of Rotfly Toad, granting Putrid Belch and Rotfly Host.",
+      "rarity": "Common",
+      "tags": [],
+      "attributeBonuses": [
+        {
+          "attribute": "Power",
+          "baseValue": 1
+        }
+      ],
+      "activeAbilityId": "ability.creature.rotfly_toad.putrid_belch",
+      "passiveAbilityId": "ability.creature.rotfly_toad.rotfly_host",
+      "evolution": {
+        "id": "evolution.rotfly_toad",
+        "name": "Awakened Rotfly Toad",
+        "description": "The awakened form of Rotfly Toad Essence.",
+        "requiredAscensionTier": 2,
+        "requiredCatalystItemId": "",
+        "addsTags": [],
+        "attributeModifierChanges": [],
+        "activeAbilityModifiers": [],
+        "passiveAbilityModifiers": []
+      }
+    },
+    {
+      "id": "essence.brown_slime",
+      "sourceMonsterId": "monster.brown_slime",
+      "name": "Brown Slime Essence",
+      "description": "The combat essence of Brown Slime, granting Absorb Impact and Layered Mud.",
+      "rarity": "Common",
+      "tags": [],
+      "attributeBonuses": [
+        {
+          "attribute": "Power",
+          "baseValue": 1
+        }
+      ],
+      "activeAbilityId": "ability.creature.brown_slime.absorb_impact",
+      "passiveAbilityId": "ability.creature.brown_slime.layered_mud",
+      "evolution": {
+        "id": "evolution.brown_slime",
+        "name": "Awakened Brown Slime",
+        "description": "The awakened form of Brown Slime Essence.",
+        "requiredAscensionTier": 2,
+        "requiredCatalystItemId": "",
+        "addsTags": [],
+        "attributeModifierChanges": [],
+        "activeAbilityModifiers": [],
+        "passiveAbilityModifiers": []
+      }
     },
     {
       "id": "essence.cave_bat",
       "sourceMonsterId": "monster.cave_bat",
       "name": "Cave Bat Essence",
-      "description": "A flicker of wings and sound that turns evasion into opportunity.",
-      "rarity": "Uncommon",
-      "tags": [
-        "Species.Beast",
-        "Species.Avian",
-        "Role.Controller",
-        "Range.Melee",
-        "Element.Physical",
-        "Control.Blind",
-        "Control.Interrupt",
-        "Defense.Dodge",
-        "Trigger.OnDodge"
-      ],
-      "attributeBonuses": [
-        {
-          "attribute": "DodgeChance",
-          "baseValue": 2
-        },
-        {
-          "attribute": "Precision",
-          "baseValue": 1
-        }
-      ],
-      "evolution": {
-        "id": "evolution.cave_bat.echo_hunter",
-        "name": "Echo Hunter",
-        "description": "Screech marks the target so the next hit deals bonus damage.",
-        "requiredAscensionTier": 1,
-        "requiredCatalystItemId": "item.evolution_catalyst.echo",
-        "addsTags": [
-          "Status.Vulnerable"
-        ],
-        "activeAbilityModifiers": [
-          {
-            "target": "effect.damage.sonic",
-            "operation": "AddEffect",
-            "value": 1,
-            "effect": {
-              "id": "effect.status.vulnerable_mark",
-              "operation": "ApplyStatus",
-              "target": "CurrentTarget",
-              "statusId": "status.vulnerable_mark",
-              "baseValue": 1
-            }
-          }
-        ]
-      },
-      "activeAbilityId": "ability.essence.cave_bat.screech",
-      "passiveAbilityId": "ability.essence.cave_bat.skittering_wings"
-    },
-    {
-      "id": "essence.necroshade_wraith",
-      "sourceMonsterId": "monster.necroshade_wraith",
-      "name": "Necroshade Wraith Essence",
-      "description": "A cold whisper that lingers after death and fattens on curses.",
-      "rarity": "Epic",
-      "tags": [
-        "Species.Undead",
-        "Species.Spirit",
-        "Role.Caster",
-        "Role.Debuffer",
-        "Element.Shadow",
-        "Element.Necrotic",
-        "Status.Curse",
-        "Control.Suppression",
-        "Pattern.Periodic"
-      ],
-      "attributeBonuses": [
-        {
-          "attribute": "Spirit",
-          "baseValue": 5
-        },
-        {
-          "attribute": "Resistance",
-          "baseValue": 3
-        }
-      ],
-      "evolution": {
-        "id": "evolution.necroshade_wraith.hollow_dominion",
-        "name": "Hollow Dominion",
-        "description": "Cursed enemies deal reduced damage and suffer more shadow damage.",
-        "requiredAscensionTier": 3,
-        "requiredCatalystItemId": "item.evolution_catalyst.hollow",
-        "addsTags": [
-          "Status.Weakened"
-        ],
-        "passiveAbilityModifiers": [
-          {
-            "target": "effect.restore.cooldown",
-            "operation": "AddEffect",
-            "value": 1,
-            "effect": {
-              "id": "effect.restore.cooldown.evolved",
-              "operation": "RestoreResource",
-              "target": "Self",
-              "resource": "Cooldown",
-              "baseValue": 1
-            }
-          }
-        ]
-      },
-      "activeAbilityId": "ability.essence.necroshade_wraith.wraith_hex",
-      "passiveAbilityId": "ability.essence.necroshade_wraith.grave_whisper"
-    },
-    {
-      "id": "essence.legacy.goblin",
-      "sourceMonsterId": "monster.goblin",
-      "name": "Goblin's Essence",
-      "description": "A recovered legacy essence containing Sneak Attack and Pocket Dirt.",
-      "rarity": "Rare",
-      "tags": [
-        "Species.Goblinoid",
-        "Species.Humanoid",
-        "Role.Controller",
-        "Effect.Ability"
-      ],
-      "attributeBonuses": [
-        {
-          "attribute": "Precision",
-          "baseValue": 3
-        },
-        {
-          "attribute": "DodgeChance",
-          "baseValue": 1
-        }
-      ],
-      "evolution": {
-        "id": "evolution.legacy.goblin",
-        "name": "Legacy Awakening",
-        "description": "This legacy essence has no special evolution yet.",
-        "requiredAscensionTier": 1,
-        "requiredCatalystItemId": "item.evolution_catalyst.legacy"
-      },
-      "activeAbilityId": "ability.essence.legacy.goblin.sneak_attack",
-      "passiveAbilityId": "ability.essence.legacy.goblin.pocket_dirt"
-    },
-    {
-      "id": "essence.legacy.training_goblin",
-      "sourceMonsterId": "monster.training_goblin",
-      "name": "Training Goblin's Essence",
-      "description": "A recovered legacy essence containing a training goblin's basic cunning.",
+      "description": "The combat essence of Cave Bat, granting Sonic Screech and Echolocation.",
       "rarity": "Common",
-      "tags": [
-        "Species.Goblinoid",
-        "Species.Humanoid",
-        "Role.Controller",
-        "Effect.Ability"
-      ],
-      "attributeBonuses": [
-        {
-          "attribute": "Precision",
-          "baseValue": 1
-        },
-        {
-          "attribute": "DodgeChance",
-          "baseValue": 1
-        }
-      ],
-      "evolution": {
-        "id": "evolution.legacy.training_goblin",
-        "name": "Legacy Awakening",
-        "description": "This legacy essence has no special evolution yet.",
-        "requiredAscensionTier": 1,
-        "requiredCatalystItemId": "item.evolution_catalyst.legacy"
-      },
-      "activeAbilityId": "ability.essence.legacy.training_goblin.training_stab",
-      "passiveAbilityId": "ability.essence.legacy.training_goblin.pocket_pebbles"
-    },
-    {
-      "id": "essence.legacy.goblin_warrior",
-      "sourceMonsterId": "monster.goblin_warrior",
-      "name": "Goblin Warrior's Essence",
-      "description": "A recovered legacy essence containing Raging Cleave and Reckless Assault.",
-      "rarity": "Rare",
-      "tags": [
-        "Species.Goblinoid",
-        "Species.Humanoid",
-        "Role.Controller",
-        "Effect.Ability"
-      ],
+      "tags": [],
       "attributeBonuses": [
         {
           "attribute": "Power",
-          "baseValue": 3
-        },
-        {
-          "attribute": "Armor",
-          "baseValue": 2
-        }
-      ],
-      "evolution": {
-        "id": "evolution.legacy.goblin_warrior",
-        "name": "Legacy Awakening",
-        "description": "This legacy essence has no special evolution yet.",
-        "requiredAscensionTier": 1,
-        "requiredCatalystItemId": "item.evolution_catalyst.legacy"
-      },
-      "activeAbilityId": "ability.essence.legacy.goblin_warrior.raging_cleave",
-      "passiveAbilityId": "ability.essence.legacy.goblin_warrior.reckless_assault"
-    },
-    {
-      "id": "essence.legacy.goblin_archer",
-      "sourceMonsterId": "monster.goblin_archer",
-      "name": "Goblin Archer's Essence",
-      "description": "A recovered legacy essence containing Sniper's Strike and Poisoned Arrows.",
-      "rarity": "Rare",
-      "tags": [
-        "Species.Goblinoid",
-        "Species.Humanoid",
-        "Role.Controller",
-        "Effect.Ability"
-      ],
-      "attributeBonuses": [
-        {
-          "attribute": "Precision",
-          "baseValue": 4
-        },
-        {
-          "attribute": "Power",
-          "baseValue": 2
-        }
-      ],
-      "evolution": {
-        "id": "evolution.legacy.goblin_archer",
-        "name": "Legacy Awakening",
-        "description": "This legacy essence has no special evolution yet.",
-        "requiredAscensionTier": 1,
-        "requiredCatalystItemId": "item.evolution_catalyst.legacy"
-      },
-      "activeAbilityId": "ability.essence.legacy.goblin_archer.snipers_strike",
-      "passiveAbilityId": "ability.essence.legacy.goblin_archer.poisoned_arrows"
-    },
-    {
-      "id": "essence.legacy.large_rat",
-      "sourceMonsterId": "monster.large_rat",
-      "name": "Large Rat's Essence",
-      "description": "A recovered legacy essence containing Tail Wrap and Big.",
-      "rarity": "Rare",
-      "tags": [
-        "Species.Beast",
-        "Role.Support",
-        "Effect.Ability"
-      ],
-      "attributeBonuses": [
-        {
-          "attribute": "Fortitude",
-          "baseValue": 4
-        },
-        {
-          "attribute": "MaxHealth",
-          "baseValue": 20
-        }
-      ],
-      "evolution": {
-        "id": "evolution.legacy.large_rat",
-        "name": "Legacy Awakening",
-        "description": "This legacy essence has no special evolution yet.",
-        "requiredAscensionTier": 1,
-        "requiredCatalystItemId": "item.evolution_catalyst.legacy"
-      },
-      "activeAbilityId": "ability.essence.legacy.large_rat.tail_wrap",
-      "passiveAbilityId": "ability.essence.legacy.large_rat.big"
-    },
-    {
-      "id": "essence.legacy.flame_imp",
-      "sourceMonsterId": "monster.flame_imp",
-      "name": "Flame Imp's Essence",
-      "description": "A recovered legacy essence containing Firebomb Toss and Hot Aura.",
-      "rarity": "Rare",
-      "tags": [
-        "Species.Demon",
-        "Role.Controller",
-        "Effect.Ability"
-      ],
-      "attributeBonuses": [
-        {
-          "attribute": "Spirit",
-          "baseValue": 3
-        },
-        {
-          "attribute": "MagicPenetration",
-          "baseValue": 2
-        }
-      ],
-      "evolution": {
-        "id": "evolution.legacy.flame_imp",
-        "name": "Legacy Awakening",
-        "description": "This legacy essence has no special evolution yet.",
-        "requiredAscensionTier": 1,
-        "requiredCatalystItemId": "item.evolution_catalyst.legacy"
-      },
-      "activeAbilityId": "ability.essence.legacy.flame_imp.firebomb_toss",
-      "passiveAbilityId": "ability.essence.legacy.flame_imp.hot_aura"
-    },
-    {
-      "id": "essence.legacy.frost_imp",
-      "sourceMonsterId": "monster.frost_imp",
-      "name": "Frost Imp's Essence",
-      "description": "A recovered legacy essence containing Ice Touch and Cold Aura.",
-      "rarity": "Rare",
-      "tags": [
-        "Species.Demon",
-        "Role.Controller",
-        "Effect.Ability"
-      ],
-      "attributeBonuses": [
-        {
-          "attribute": "Spirit",
-          "baseValue": 3
-        },
-        {
-          "attribute": "StatusResistance",
           "baseValue": 1
         }
       ],
+      "activeAbilityId": "ability.creature.cave_bat.sonic_screech",
+      "passiveAbilityId": "ability.creature.cave_bat.echolocation",
       "evolution": {
-        "id": "evolution.legacy.frost_imp",
-        "name": "Legacy Awakening",
-        "description": "This legacy essence has no special evolution yet.",
-        "requiredAscensionTier": 1,
-        "requiredCatalystItemId": "item.evolution_catalyst.legacy"
-      },
-      "activeAbilityId": "ability.essence.legacy.frost_imp.ice_touch",
-      "passiveAbilityId": "ability.essence.legacy.frost_imp.cold_aura"
+        "id": "evolution.cave_bat",
+        "name": "Awakened Cave Bat",
+        "description": "The awakened form of Cave Bat Essence.",
+        "requiredAscensionTier": 2,
+        "requiredCatalystItemId": "",
+        "addsTags": [],
+        "attributeModifierChanges": [],
+        "activeAbilityModifiers": [],
+        "passiveAbilityModifiers": []
+      }
     },
     {
-      "id": "essence.legacy.shadow_imp",
-      "sourceMonsterId": "monster.shadow_imp",
-      "name": "Shadow Imp's Essence",
-      "description": "A recovered legacy essence containing Shadow Image and Shadowy Presence.",
-      "rarity": "Rare",
-      "tags": [
-        "Species.Demon",
-        "Role.Support",
-        "Effect.Ability"
-      ],
-      "attributeBonuses": [
-        {
-          "attribute": "Spirit",
-          "baseValue": 3
-        },
-        {
-          "attribute": "DodgeChance",
-          "baseValue": 1
-        }
-      ],
-      "evolution": {
-        "id": "evolution.legacy.shadow_imp",
-        "name": "Legacy Awakening",
-        "description": "This legacy essence has no special evolution yet.",
-        "requiredAscensionTier": 1,
-        "requiredCatalystItemId": "item.evolution_catalyst.legacy"
-      },
-      "activeAbilityId": "ability.essence.legacy.shadow_imp.shadow_image",
-      "passiveAbilityId": "ability.essence.legacy.shadow_imp.shadowy_presence"
-    },
-    {
-      "id": "essence.legacy.vampire_bat",
-      "sourceMonsterId": "monster.vampire_bat",
-      "name": "Vampire Bat's Essence",
-      "description": "A recovered legacy essence containing Bloodthirsty Fangs and Dark Vitality.",
-      "rarity": "Rare",
-      "tags": [
-        "Species.Beast",
-        "Role.Support",
-        "Effect.Ability"
-      ],
-      "attributeBonuses": [
-        {
-          "attribute": "Power",
-          "baseValue": 3
-        },
-        {
-          "attribute": "LifeSteal",
-          "baseValue": 1
-        }
-      ],
-      "evolution": {
-        "id": "evolution.legacy.vampire_bat",
-        "name": "Legacy Awakening",
-        "description": "This legacy essence has no special evolution yet.",
-        "requiredAscensionTier": 1,
-        "requiredCatalystItemId": "item.evolution_catalyst.legacy"
-      },
-      "activeAbilityId": "ability.essence.legacy.vampire_bat.bloodthirsty_fangs",
-      "passiveAbilityId": "ability.essence.legacy.vampire_bat.dark_vitality"
-    },
-    {
-      "id": "essence.legacy.blue_slime",
-      "sourceMonsterId": "monster.blue_slime",
-      "name": "Blue Slime's Essence",
-      "description": "A recovered legacy essence containing Sweet Water and Absorptive Shell.",
-      "rarity": "Rare",
-      "tags": [
-        "Species.Slime",
-        "Role.Support",
-        "Effect.Ability"
-      ],
-      "attributeBonuses": [
-        {
-          "attribute": "Fortitude",
-          "baseValue": 3
-        },
-        {
-          "attribute": "HealingPowerPercent",
-          "baseValue": 1
-        }
-      ],
-      "evolution": {
-        "id": "evolution.legacy.blue_slime",
-        "name": "Legacy Awakening",
-        "description": "This legacy essence has no special evolution yet.",
-        "requiredAscensionTier": 1,
-        "requiredCatalystItemId": "item.evolution_catalyst.legacy"
-      },
-      "activeAbilityId": "ability.essence.legacy.blue_slime.sweet_water",
-      "passiveAbilityId": "ability.essence.legacy.blue_slime.absorptive_shell"
-    },
-    {
-      "id": "essence.legacy.brown_slime",
-      "sourceMonsterId": "monster.brown_slime",
-      "name": "Brown Slime's Essence",
-      "description": "A recovered legacy essence containing Mud Armor and Earthly Fortitude.",
-      "rarity": "Rare",
-      "tags": [
-        "Species.Slime",
-        "Role.Controller",
-        "Effect.Ability"
-      ],
-      "attributeBonuses": [
-        {
-          "attribute": "Fortitude",
-          "baseValue": 4
-        },
-        {
-          "attribute": "Armor",
-          "baseValue": 2
-        }
-      ],
-      "evolution": {
-        "id": "evolution.legacy.brown_slime",
-        "name": "Legacy Awakening",
-        "description": "This legacy essence has no special evolution yet.",
-        "requiredAscensionTier": 1,
-        "requiredCatalystItemId": "item.evolution_catalyst.legacy"
-      },
-      "activeAbilityId": "ability.essence.legacy.brown_slime.mud_armor",
-      "passiveAbilityId": "ability.essence.legacy.brown_slime.earthly_fortitude"
-    },
-    {
-      "id": "essence.legacy.green_slime",
-      "sourceMonsterId": "monster.green_slime",
-      "name": "Green Slime's Essence",
-      "description": "A recovered legacy essence containing Acid Splash and Corrosive Ooze.",
-      "rarity": "Rare",
-      "tags": [
-        "Species.Slime",
-        "Role.Controller",
-        "Effect.Ability"
-      ],
-      "attributeBonuses": [
-        {
-          "attribute": "Spirit",
-          "baseValue": 3
-        },
-        {
-          "attribute": "MagicPenetration",
-          "baseValue": 2
-        }
-      ],
-      "evolution": {
-        "id": "evolution.legacy.green_slime",
-        "name": "Legacy Awakening",
-        "description": "This legacy essence has no special evolution yet.",
-        "requiredAscensionTier": 1,
-        "requiredCatalystItemId": "item.evolution_catalyst.legacy"
-      },
-      "activeAbilityId": "ability.essence.legacy.green_slime.acid_splash",
-      "passiveAbilityId": "ability.essence.legacy.green_slime.corrosive_ooze"
-    },
-    {
-      "id": "essence.legacy.rainbow_slime",
-      "sourceMonsterId": "monster.rainbow_slime",
-      "name": "Rainbow Slime's Essence",
-      "description": "A recovered legacy essence containing Unstable Colors and Colorful Shield.",
-      "rarity": "Rare",
-      "tags": [
-        "Species.Slime",
-        "Role.Support",
-        "Effect.Ability"
-      ],
-      "attributeBonuses": [
-        {
-          "attribute": "Spirit",
-          "baseValue": 3
-        },
-        {
-          "attribute": "Resistance",
-          "baseValue": 2
-        }
-      ],
-      "evolution": {
-        "id": "evolution.legacy.rainbow_slime",
-        "name": "Legacy Awakening",
-        "description": "This legacy essence has no special evolution yet.",
-        "requiredAscensionTier": 1,
-        "requiredCatalystItemId": "item.evolution_catalyst.legacy"
-      },
-      "activeAbilityId": "ability.essence.legacy.rainbow_slime.unstable_colors",
-      "passiveAbilityId": "ability.essence.legacy.rainbow_slime.colorful_shield"
-    },
-    {
-      "id": "essence.legacy.red_slime",
-      "sourceMonsterId": "monster.red_slime",
-      "name": "Red Slime's Essence",
-      "description": "A recovered legacy essence containing Ignite Core and Fire Body.",
-      "rarity": "Rare",
-      "tags": [
-        "Species.Slime",
-        "Role.Controller",
-        "Effect.Ability"
-      ],
-      "attributeBonuses": [
-        {
-          "attribute": "Power",
-          "baseValue": 3
-        },
-        {
-          "attribute": "DamageReduction",
-          "baseValue": 1
-        }
-      ],
-      "evolution": {
-        "id": "evolution.legacy.red_slime",
-        "name": "Legacy Awakening",
-        "description": "This legacy essence has no special evolution yet.",
-        "requiredAscensionTier": 1,
-        "requiredCatalystItemId": "item.evolution_catalyst.legacy"
-      },
-      "activeAbilityId": "ability.essence.legacy.red_slime.ignite_core",
-      "passiveAbilityId": "ability.essence.legacy.red_slime.fire_body"
-    },
-    {
-      "id": "essence.legacy.transparent_slime",
-      "sourceMonsterId": "monster.transparent_slime",
-      "name": "Transparent Slime's Essence",
-      "description": "A recovered legacy essence containing Transparent Engulf and Transparent Shift.",
-      "rarity": "Rare",
-      "tags": [
-        "Species.Slime",
-        "Role.Support",
-        "Effect.Ability"
-      ],
-      "attributeBonuses": [
-        {
-          "attribute": "Precision",
-          "baseValue": 3
-        },
-        {
-          "attribute": "DodgeChance",
-          "baseValue": 1
-        }
-      ],
-      "evolution": {
-        "id": "evolution.legacy.transparent_slime",
-        "name": "Legacy Awakening",
-        "description": "This legacy essence has no special evolution yet.",
-        "requiredAscensionTier": 1,
-        "requiredCatalystItemId": "item.evolution_catalyst.legacy"
-      },
-      "activeAbilityId": "ability.essence.legacy.transparent_slime.transparent_engulf",
-      "passiveAbilityId": "ability.essence.legacy.transparent_slime.transparent_shift"
-    },
-    {
-      "id": "essence.legacy.enchanted_fairy",
-      "sourceMonsterId": "monster.enchanted_fairy",
-      "name": "Enchanted Fairy's Essence",
-      "description": "A recovered legacy essence containing Fae's Embrace and Enchanted Charm.",
-      "rarity": "Rare",
-      "tags": [
-        "Species.Beast",
-        "Role.Support",
-        "Effect.Ability"
-      ],
-      "attributeBonuses": [
-        {
-          "attribute": "Spirit",
-          "baseValue": 3
-        },
-        {
-          "attribute": "HealingPowerPercent",
-          "baseValue": 1
-        }
-      ],
-      "evolution": {
-        "id": "evolution.legacy.enchanted_fairy",
-        "name": "Legacy Awakening",
-        "description": "This legacy essence has no special evolution yet.",
-        "requiredAscensionTier": 1,
-        "requiredCatalystItemId": "item.evolution_catalyst.legacy"
-      },
-      "activeAbilityId": "ability.essence.legacy.enchanted_fairy.faes_embrace",
-      "passiveAbilityId": "ability.essence.legacy.enchanted_fairy.enchanted_charm"
-    },
-    {
-      "id": "essence.legacy.glade_panther",
-      "sourceMonsterId": "monster.glade_panther",
-      "name": "Glade Panther's Essence",
-      "description": "A recovered legacy essence containing Ambush Strike and Razor Claws.",
-      "rarity": "Rare",
-      "tags": [
-        "Species.Beast",
-        "Role.Offensive",
-        "Effect.Ability"
-      ],
-      "attributeBonuses": [
-        {
-          "attribute": "Power",
-          "baseValue": 4
-        },
-        {
-          "attribute": "CritChance",
-          "baseValue": 1
-        }
-      ],
-      "evolution": {
-        "id": "evolution.legacy.glade_panther",
-        "name": "Legacy Awakening",
-        "description": "This legacy essence has no special evolution yet.",
-        "requiredAscensionTier": 1,
-        "requiredCatalystItemId": "item.evolution_catalyst.legacy"
-      },
-      "activeAbilityId": "ability.essence.legacy.glade_panther.ambush_strike",
-      "passiveAbilityId": "ability.essence.legacy.glade_panther.razor_claws"
-    },
-    {
-      "id": "essence.legacy.illusion_fox",
-      "sourceMonsterId": "monster.illusion_fox",
-      "name": "Illusion Fox's Essence",
-      "description": "A recovered legacy essence containing Distracting Illusion and Foxfire Wisp.",
-      "rarity": "Rare",
-      "tags": [
-        "Species.Beast",
-        "Role.Offensive",
-        "Effect.Ability"
-      ],
-      "attributeBonuses": [
-        {
-          "attribute": "Spirit",
-          "baseValue": 4
-        },
-        {
-          "attribute": "MagicPenetration",
-          "baseValue": 2
-        }
-      ],
-      "evolution": {
-        "id": "evolution.legacy.illusion_fox",
-        "name": "Legacy Awakening",
-        "description": "This legacy essence has no special evolution yet.",
-        "requiredAscensionTier": 1,
-        "requiredCatalystItemId": "item.evolution_catalyst.legacy"
-      },
-      "activeAbilityId": "ability.essence.legacy.illusion_fox.distracting_illusion",
-      "passiveAbilityId": "ability.essence.legacy.illusion_fox.foxfire_wisp"
-    },
-    {
-      "id": "essence.legacy.nightshade_blossom",
-      "sourceMonsterId": "monster.nightshade_blossom",
-      "name": "Nightshade Blossom's Essence",
-      "description": "A recovered legacy essence containing Necrotic Spores and Twilight Bloom.",
-      "rarity": "Rare",
-      "tags": [
-        "Species.Plant",
-        "Role.Support",
-        "Effect.Ability"
-      ],
-      "attributeBonuses": [
-        {
-          "attribute": "Spirit",
-          "baseValue": 3
-        },
-        {
-          "attribute": "HealingPowerPercent",
-          "baseValue": 1
-        }
-      ],
-      "evolution": {
-        "id": "evolution.legacy.nightshade_blossom",
-        "name": "Legacy Awakening",
-        "description": "This legacy essence has no special evolution yet.",
-        "requiredAscensionTier": 1,
-        "requiredCatalystItemId": "item.evolution_catalyst.legacy"
-      },
-      "activeAbilityId": "ability.essence.legacy.nightshade_blossom.necrotic_spores",
-      "passiveAbilityId": "ability.essence.legacy.nightshade_blossom.twilight_bloom"
-    },
-    {
-      "id": "essence.legacy.pixie",
-      "sourceMonsterId": "monster.pixie",
-      "name": "Pixie's Essence",
-      "description": "A recovered legacy essence containing Pixie Burst and Resonant Chime.",
-      "rarity": "Rare",
-      "tags": [
-        "Species.Spirit",
-        "Role.Offensive",
-        "Effect.Ability"
-      ],
-      "attributeBonuses": [
-        {
-          "attribute": "Spirit",
-          "baseValue": 4
-        },
-        {
-          "attribute": "Cooldown",
-          "baseValue": 1
-        }
-      ],
-      "evolution": {
-        "id": "evolution.legacy.pixie",
-        "name": "Legacy Awakening",
-        "description": "This legacy essence has no special evolution yet.",
-        "requiredAscensionTier": 1,
-        "requiredCatalystItemId": "item.evolution_catalyst.legacy"
-      },
-      "activeAbilityId": "ability.essence.legacy.pixie.pixie_burst",
-      "passiveAbilityId": "ability.essence.legacy.pixie.resonant_chime"
-    },
-    {
-      "id": "essence.legacy.hobgoblin",
-      "sourceMonsterId": "monster.hobgoblin",
-      "name": "Hobgoblin's Essence",
-      "description": "A recovered legacy essence containing Frenzy and Savage Onslaught.",
-      "rarity": "Rare",
-      "tags": [
-        "Species.Goblinoid",
-        "Species.Humanoid",
-        "Role.Support",
-        "Effect.Ability"
-      ],
-      "attributeBonuses": [
-        {
-          "attribute": "Power",
-          "baseValue": 4
-        },
-        {
-          "attribute": "CritChance",
-          "baseValue": 1
-        }
-      ],
-      "evolution": {
-        "id": "evolution.legacy.hobgoblin",
-        "name": "Legacy Awakening",
-        "description": "This legacy essence has no special evolution yet.",
-        "requiredAscensionTier": 1,
-        "requiredCatalystItemId": "item.evolution_catalyst.legacy"
-      },
-      "activeAbilityId": "ability.essence.legacy.hobgoblin.frenzy",
-      "passiveAbilityId": "ability.essence.legacy.hobgoblin.savage_onslaught"
-    },
-    {
-      "id": "essence.legacy.moss_lizard",
-      "sourceMonsterId": "monster.moss_lizard",
-      "name": "Moss Lizard's Essence",
-      "description": "A recovered legacy essence containing Moss Camouflage and Lost Tail.",
-      "rarity": "Rare",
-      "tags": [
-        "Species.Beast",
-        "Role.Assassin",
-        "Effect.Ability"
-      ],
-      "attributeBonuses": [
-        {
-          "attribute": "Precision",
-          "baseValue": 3
-        },
-        {
-          "attribute": "DodgeChance",
-          "baseValue": 1
-        }
-      ],
-      "evolution": {
-        "id": "evolution.legacy.moss_lizard",
-        "name": "Legacy Awakening",
-        "description": "This legacy essence has no special evolution yet.",
-        "requiredAscensionTier": 1,
-        "requiredCatalystItemId": "item.evolution_catalyst.legacy"
-      },
-      "activeAbilityId": "ability.essence.legacy.moss_lizard.moss_camouflage",
-      "passiveAbilityId": "ability.essence.legacy.moss_lizard.lost_tail"
-    },
-    {
-      "id": "essence.legacy.spider",
-      "sourceMonsterId": "monster.spider",
-      "name": "Spider's Essence",
-      "description": "A recovered legacy essence containing Skittering Strike and Spider Eyes.",
-      "rarity": "Rare",
-      "tags": [
-        "Species.Beast",
-        "Role.Assassin",
-        "Effect.Ability"
-      ],
-      "attributeBonuses": [
-        {
-          "attribute": "Precision",
-          "baseValue": 4
-        },
-        {
-          "attribute": "CritChance",
-          "baseValue": 1
-        }
-      ],
-      "evolution": {
-        "id": "evolution.legacy.spider",
-        "name": "Legacy Awakening",
-        "description": "This legacy essence has no special evolution yet.",
-        "requiredAscensionTier": 1,
-        "requiredCatalystItemId": "item.evolution_catalyst.legacy"
-      },
-      "activeAbilityId": "ability.essence.legacy.spider.skittering_strike",
-      "passiveAbilityId": "ability.essence.legacy.spider.spider_eyes"
-    },
-    {
-      "id": "essence.legacy.treant_sapling",
-      "sourceMonsterId": "monster.treant_sapling",
-      "name": "Treant Sapling's Essence",
-      "description": "A recovered legacy essence containing Sprouting Surge and Nurturing Roots.",
-      "rarity": "Rare",
-      "tags": [
-        "Species.Plant",
-        "Role.Support",
-        "Effect.Ability",
-        "Healing"
-      ],
-      "attributeBonuses": [
-        {
-          "attribute": "Fortitude",
-          "baseValue": 3
-        },
-        {
-          "attribute": "HealingPowerPercent",
-          "baseValue": 1
-        }
-      ],
-      "evolution": {
-        "id": "evolution.legacy.treant_sapling",
-        "name": "Legacy Awakening",
-        "description": "This legacy essence has no special evolution yet.",
-        "requiredAscensionTier": 1,
-        "requiredCatalystItemId": "item.evolution_catalyst.legacy"
-      },
-      "activeAbilityId": "ability.essence.legacy.treant_sapling.sprouting_surge",
-      "passiveAbilityId": "ability.essence.legacy.treant_sapling.nurturing_roots"
-    },
-    {
-      "id": "essence.legacy.venomous_snake",
-      "sourceMonsterId": "monster.venomous_snake",
-      "name": "Venomous Snake's Essence",
-      "description": "A recovered legacy essence containing Venomous Spit and Toxic Hide.",
-      "rarity": "Rare",
-      "tags": [
-        "Species.Beast",
-        "Role.Controller",
-        "Status.Poison",
-        "Effect.Ability"
-      ],
-      "attributeBonuses": [
-        {
-          "attribute": "Precision",
-          "baseValue": 3
-        },
-        {
-          "attribute": "StatusResistance",
-          "baseValue": 1
-        }
-      ],
-      "evolution": {
-        "id": "evolution.legacy.venomous_snake",
-        "name": "Legacy Awakening",
-        "description": "This legacy essence has no special evolution yet.",
-        "requiredAscensionTier": 1,
-        "requiredCatalystItemId": "item.evolution_catalyst.legacy"
-      },
-      "activeAbilityId": "ability.essence.legacy.venomous_snake.venomous_spit",
-      "passiveAbilityId": "ability.essence.legacy.venomous_snake.toxic_hide"
-    },
-    {
-      "id": "essence.legacy.viper",
-      "sourceMonsterId": "monster.viper",
-      "name": "Viper's Essence",
-      "description": "A recovered legacy essence containing Piercing Fangs and Potent Toxins.",
-      "rarity": "Rare",
-      "tags": [
-        "Species.Beast",
-        "Role.Assassin",
-        "Status.Poison",
-        "Effect.Ability"
-      ],
-      "attributeBonuses": [
-        {
-          "attribute": "Power",
-          "baseValue": 3
-        },
-        {
-          "attribute": "MagicPenetration",
-          "baseValue": 1
-        }
-      ],
-      "evolution": {
-        "id": "evolution.legacy.viper",
-        "name": "Legacy Awakening",
-        "description": "This legacy essence has no special evolution yet.",
-        "requiredAscensionTier": 1,
-        "requiredCatalystItemId": "item.evolution_catalyst.legacy"
-      },
-      "activeAbilityId": "ability.essence.legacy.viper.piercing_fangs",
-      "passiveAbilityId": "ability.essence.legacy.viper.potent_toxins"
-    },
-    {
-      "id": "essence.legacy.goblin_shaman",
-      "sourceMonsterId": "monster.goblin_shaman",
-      "name": "Goblin Shaman's Essence",
-      "description": "A recovered legacy essence containing Weak Rejuvenation and Spirit Link.",
-      "rarity": "Rare",
-      "tags": [
-        "Species.Goblinoid",
-        "Species.Humanoid",
-        "Role.Support",
-        "Effect.Ability"
-      ],
-      "attributeBonuses": [
-        {
-          "attribute": "Spirit",
-          "baseValue": 4
-        },
-        {
-          "attribute": "HealingPowerPercent",
-          "baseValue": 1
-        }
-      ],
-      "evolution": {
-        "id": "evolution.legacy.goblin_shaman",
-        "name": "Legacy Awakening",
-        "description": "This legacy essence has no special evolution yet.",
-        "requiredAscensionTier": 1,
-        "requiredCatalystItemId": "item.evolution_catalyst.legacy"
-      },
-      "activeAbilityId": "ability.essence.legacy.goblin_shaman.weak_rejuvenation",
-      "passiveAbilityId": "ability.essence.legacy.goblin_shaman.spirit_link"
-    },
-    {
-      "id": "essence.legacy.poisonous_rat",
-      "sourceMonsterId": "monster.poisonous_rat",
-      "name": "Poisonous Rat's Essence",
-      "description": "A recovered legacy essence containing Toxic Bite and Resistant Hide.",
-      "rarity": "Rare",
-      "tags": [
-        "Species.Beast",
-        "Role.Controller",
-        "Status.Poison",
-        "Effect.Ability"
-      ],
-      "attributeBonuses": [
-        {
-          "attribute": "Precision",
-          "baseValue": 3
-        },
-        {
-          "attribute": "StatusResistance",
-          "baseValue": 1
-        }
-      ],
-      "evolution": {
-        "id": "evolution.legacy.poisonous_rat",
-        "name": "Legacy Awakening",
-        "description": "This legacy essence has no special evolution yet.",
-        "requiredAscensionTier": 1,
-        "requiredCatalystItemId": "item.evolution_catalyst.legacy"
-      },
-      "activeAbilityId": "ability.essence.legacy.poisonous_rat.toxic_bite",
-      "passiveAbilityId": "ability.essence.legacy.poisonous_rat.resistant_hide"
-    },
-    {
-      "id": "essence.legacy.giant_bat",
+      "id": "essence.giant_bat",
       "sourceMonsterId": "monster.giant_bat",
-      "name": "Giant Bat's Essence",
-      "description": "A recovered legacy essence containing Echoing Screech and Resonant Cry.",
-      "rarity": "Rare",
-      "tags": [
-        "Species.Beast",
-        "Role.Controller",
-        "Effect.Ability"
-      ],
-      "attributeBonuses": [
-        {
-          "attribute": "Precision",
-          "baseValue": 3
-        },
-        {
-          "attribute": "Spirit",
-          "baseValue": 2
-        }
-      ],
-      "evolution": {
-        "id": "evolution.legacy.giant_bat",
-        "name": "Legacy Awakening",
-        "description": "This legacy essence has no special evolution yet.",
-        "requiredAscensionTier": 1,
-        "requiredCatalystItemId": "item.evolution_catalyst.legacy"
-      },
-      "activeAbilityId": "ability.essence.legacy.giant_bat.echoing_screech",
-      "passiveAbilityId": "ability.essence.legacy.giant_bat.resonant_cry"
-    },
-    {
-      "id": "essence.legacy.feral_ghoul",
-      "sourceMonsterId": "monster.feral_ghoul",
-      "name": "Feral Ghoul's Essence",
-      "description": "A recovered legacy essence containing Feral Pounce and Shredding Claws.",
-      "rarity": "Rare",
-      "tags": [
-        "Species.Undead",
-        "Role.Controller",
-        "Effect.Ability"
-      ],
-      "attributeBonuses": [
-        {
-          "attribute": "Power",
-          "baseValue": 3
-        },
-        {
-          "attribute": "Precision",
-          "baseValue": 2
-        }
-      ],
-      "evolution": {
-        "id": "evolution.legacy.feral_ghoul",
-        "name": "Legacy Awakening",
-        "description": "This legacy essence has no special evolution yet.",
-        "requiredAscensionTier": 1,
-        "requiredCatalystItemId": "item.evolution_catalyst.legacy"
-      },
-      "activeAbilityId": "ability.essence.legacy.feral_ghoul.feral_pounce",
-      "passiveAbilityId": "ability.essence.legacy.feral_ghoul.shredding_claws"
-    },
-    {
-      "id": "essence.legacy.plague_ghoul",
-      "sourceMonsterId": "monster.plague_ghoul",
-      "name": "Plague Ghoul's Essence",
-      "description": "A recovered legacy essence containing Plague Swipe and Pestilent Touch.",
-      "rarity": "Rare",
-      "tags": [
-        "Species.Undead",
-        "Role.Controller",
-        "Effect.Ability"
-      ],
-      "attributeBonuses": [
-        {
-          "attribute": "Power",
-          "baseValue": 3
-        },
-        {
-          "attribute": "StatusResistance",
-          "baseValue": 1
-        }
-      ],
-      "evolution": {
-        "id": "evolution.legacy.plague_ghoul",
-        "name": "Legacy Awakening",
-        "description": "This legacy essence has no special evolution yet.",
-        "requiredAscensionTier": 1,
-        "requiredCatalystItemId": "item.evolution_catalyst.legacy"
-      },
-      "activeAbilityId": "ability.essence.legacy.plague_ghoul.plague_swipe",
-      "passiveAbilityId": "ability.essence.legacy.plague_ghoul.pestilent_touch"
-    },
-    {
-      "id": "essence.legacy.ravenous_ghoul",
-      "sourceMonsterId": "monster.ravenous_ghoul",
-      "name": "Ravenous Ghoul's Essence",
-      "description": "A recovered legacy essence containing Draining Claws and Vile Feast.",
-      "rarity": "Rare",
-      "tags": [
-        "Species.Undead",
-        "Role.Support",
-        "Effect.Ability"
-      ],
-      "attributeBonuses": [
-        {
-          "attribute": "Power",
-          "baseValue": 3
-        },
-        {
-          "attribute": "LifeSteal",
-          "baseValue": 1
-        }
-      ],
-      "evolution": {
-        "id": "evolution.legacy.ravenous_ghoul",
-        "name": "Legacy Awakening",
-        "description": "This legacy essence has no special evolution yet.",
-        "requiredAscensionTier": 1,
-        "requiredCatalystItemId": "item.evolution_catalyst.legacy"
-      },
-      "activeAbilityId": "ability.essence.legacy.ravenous_ghoul.draining_claws",
-      "passiveAbilityId": "ability.essence.legacy.ravenous_ghoul.vile_feast"
-    },
-    {
-      "id": "essence.legacy.skeleton_archer",
-      "sourceMonsterId": "monster.skeleton_archer",
-      "name": "Skeleton Archer's Essence",
-      "description": "A recovered legacy essence containing Bone Arrow and Piercing Arrows.",
-      "rarity": "Rare",
-      "tags": [
-        "Species.Undead",
-        "Role.Controller",
-        "Effect.Ability"
-      ],
-      "attributeBonuses": [
-        {
-          "attribute": "Precision",
-          "baseValue": 4
-        },
-        {
-          "attribute": "ArmorPenetration",
-          "baseValue": 2
-        }
-      ],
-      "evolution": {
-        "id": "evolution.legacy.skeleton_archer",
-        "name": "Legacy Awakening",
-        "description": "This legacy essence has no special evolution yet.",
-        "requiredAscensionTier": 1,
-        "requiredCatalystItemId": "item.evolution_catalyst.legacy"
-      },
-      "activeAbilityId": "ability.essence.legacy.skeleton_archer.bone_arrow",
-      "passiveAbilityId": "ability.essence.legacy.skeleton_archer.piercing_arrows"
-    },
-    {
-      "id": "essence.legacy.skeleton_mage",
-      "sourceMonsterId": "monster.skeleton_mage",
-      "name": "Skeleton Mage's Essence",
-      "description": "A recovered legacy essence containing Siphon and Protective Bone Barrier.",
-      "rarity": "Rare",
-      "tags": [
-        "Species.Undead",
-        "Role.Support",
-        "Effect.Ability"
-      ],
-      "attributeBonuses": [
-        {
-          "attribute": "Spirit",
-          "baseValue": 4
-        },
-        {
-          "attribute": "Resistance",
-          "baseValue": 2
-        }
-      ],
-      "evolution": {
-        "id": "evolution.legacy.skeleton_mage",
-        "name": "Legacy Awakening",
-        "description": "This legacy essence has no special evolution yet.",
-        "requiredAscensionTier": 1,
-        "requiredCatalystItemId": "item.evolution_catalyst.legacy"
-      },
-      "activeAbilityId": "ability.essence.legacy.skeleton_mage.siphon",
-      "passiveAbilityId": "ability.essence.legacy.skeleton_mage.protective_bone_barrier"
-    },
-    {
-      "id": "essence.legacy.skeleton_warrior",
-      "sourceMonsterId": "monster.skeleton_warrior",
-      "name": "Skeleton Warrior's Essence",
-      "description": "A recovered legacy essence containing Bone Shield and Spiked Defense.",
-      "rarity": "Rare",
-      "tags": [
-        "Species.Undead",
-        "Role.Support",
-        "Effect.Ability"
-      ],
-      "attributeBonuses": [
-        {
-          "attribute": "Fortitude",
-          "baseValue": 4
-        },
-        {
-          "attribute": "BlockChance",
-          "baseValue": 1
-        }
-      ],
-      "evolution": {
-        "id": "evolution.legacy.skeleton_warrior",
-        "name": "Legacy Awakening",
-        "description": "This legacy essence has no special evolution yet.",
-        "requiredAscensionTier": 1,
-        "requiredCatalystItemId": "item.evolution_catalyst.legacy"
-      },
-      "activeAbilityId": "ability.essence.legacy.skeleton_warrior.bone_shield",
-      "passiveAbilityId": "ability.essence.legacy.skeleton_warrior.spiked_defense"
-    },
-    {
-      "id": "essence.ant_worker",
-      "sourceMonsterId": "monster.ant_worker",
-      "name": "Ant Worker's Essence",
-      "description": "A diligent hive essence that protects allies and hardens itself through steady labor.",
+      "name": "Giant Bat Essence",
+      "description": "The combat essence of Giant Bat, granting Echoing Screech and Resonant Cry.",
       "rarity": "Common",
-      "tags": [
-        "Species.Insectoid",
-        "Role.Support",
-        "Healing",
-        "Defense.DamageReduction",
-        "Effect.Ability"
-      ],
-      "attributeBonuses": [
-        {
-          "attribute": "Fortitude",
-          "baseValue": 3
-        },
-        {
-          "attribute": "DamageReduction",
-          "baseValue": 1
-        }
-      ],
-      "evolution": {
-        "id": "evolution.ant_worker",
-        "name": "Legacy Awakening",
-        "description": "This essence has no special evolution yet.",
-        "requiredAscensionTier": 1,
-        "requiredCatalystItemId": "item.evolution_catalyst.legacy"
-      },
-      "activeAbilityId": "ability.essence.ant_worker.workers_aid",
-      "passiveAbilityId": "ability.essence.ant_worker.reinforced_exoskeleton"
-    },
-    {
-      "id": "essence.forest_spirit",
-      "sourceMonsterId": "monster.forest_spirit",
-      "name": "Forest Spirit's Essence",
-      "description": "A calm woodland essence that restores wounded allies and steadies elemental defenses.",
-      "rarity": "Rare",
-      "tags": [
-        "Species.Spirit",
-        "Role.Support",
-        "Healing",
-        "Defense.Resistance",
-        "Effect.Ability"
-      ],
-      "attributeBonuses": [
-        {
-          "attribute": "Spirit",
-          "baseValue": 4
-        },
-        {
-          "attribute": "Resistance",
-          "baseValue": 2
-        }
-      ],
-      "evolution": {
-        "id": "evolution.forest_spirit",
-        "name": "Legacy Awakening",
-        "description": "This essence has no special evolution yet.",
-        "requiredAscensionTier": 1,
-        "requiredCatalystItemId": "item.evolution_catalyst.legacy"
-      },
-      "activeAbilityId": "ability.essence.forest_spirit.rejuvenation",
-      "passiveAbilityId": "ability.essence.forest_spirit.balance_of_elements"
-    },
-    {
-      "id": "essence.wood_nymph",
-      "sourceMonsterId": "monster.wood_nymph",
-      "name": "Wood Nymph's Essence",
-      "description": "A defensive forest essence that wraps allies in thorns and encourages natural recovery.",
-      "rarity": "Rare",
-      "tags": [
-        "Species.Plant",
-        "Species.Spirit",
-        "Role.Support",
-        "Status.Reflect",
-        "Defense.Recovery",
-        "Effect.Ability"
-      ],
-      "attributeBonuses": [
-        {
-          "attribute": "Spirit",
-          "baseValue": 3
-        },
-        {
-          "attribute": "HealthRegeneration",
-          "baseValue": 1
-        }
-      ],
-      "evolution": {
-        "id": "evolution.wood_nymph",
-        "name": "Legacy Awakening",
-        "description": "This essence has no special evolution yet.",
-        "requiredAscensionTier": 1,
-        "requiredCatalystItemId": "item.evolution_catalyst.legacy"
-      },
-      "activeAbilityId": "ability.essence.wood_nymph.bramble_shield",
-      "passiveAbilityId": "ability.essence.wood_nymph.natures_regeneration"
-    },
-    {
-      "id": "essence.giant_spider",
-      "sourceMonsterId": "monster.giant_spider",
-      "name": "Giant Spider's Essence",
-      "description": "A heavy arachnid essence built around brutal impact and hardened carapace.",
-      "rarity": "Rare",
-      "tags": [
-        "Species.Beast",
-        "Role.Offensive",
-        "Range.Melee",
-        "Defense.Armor",
-        "Effect.Ability"
-      ],
+      "tags": [],
       "attributeBonuses": [
         {
           "attribute": "Power",
-          "baseValue": 4
-        },
-        {
-          "attribute": "Armor",
-          "baseValue": 3
-        }
-      ],
-      "evolution": {
-        "id": "evolution.giant_spider",
-        "name": "Legacy Awakening",
-        "description": "This essence has no special evolution yet.",
-        "requiredAscensionTier": 1,
-        "requiredCatalystItemId": "item.evolution_catalyst.legacy"
-      },
-      "activeAbilityId": "ability.essence.giant_spider.spider_crash",
-      "passiveAbilityId": "ability.essence.giant_spider.thickened_carapace"
-    },
-    {
-      "id": "essence.venomous_spiderling",
-      "sourceMonsterId": "monster.venomous_spiderling",
-      "name": "Venomous Spiderling's Essence",
-      "description": "A quick venomous essence that binds targets in poison and turns basic attacks toxic.",
-      "rarity": "Uncommon",
-      "tags": [
-        "Species.Beast",
-        "Role.Controller",
-        "Status.Poison",
-        "Range.Ranged",
-        "Effect.Ability"
-      ],
-      "attributeBonuses": [
-        {
-          "attribute": "Precision",
-          "baseValue": 3
-        },
-        {
-          "attribute": "MagicPenetration",
           "baseValue": 1
         }
       ],
+      "activeAbilityId": "ability.creature.giant_bat.echoing_screech",
+      "passiveAbilityId": "ability.creature.giant_bat.resonant_cry",
       "evolution": {
-        "id": "evolution.venomous_spiderling",
-        "name": "Legacy Awakening",
-        "description": "This essence has no special evolution yet.",
-        "requiredAscensionTier": 1,
-        "requiredCatalystItemId": "item.evolution_catalyst.legacy"
-      },
-      "activeAbilityId": "ability.essence.venomous_spiderling.venom_web",
-      "passiveAbilityId": "ability.essence.venomous_spiderling.tainted_fangs"
-    },
-    {
-      "id": "essence.blackjaw_spider",
-      "sourceMonsterId": "monster.blackjaw_spider",
-      "name": "Blackjaw Spider's Essence",
-      "description": "A hardened forest spider essence built around crushing bites and armor penetration.",
-      "rarity": "Uncommon",
-      "tags": [
-        "Species.Beast",
-        "Role.Offensive",
-        "Effect.Ability"
-      ],
-      "attributeBonuses": [
-        {
-          "attribute": "Power",
-          "baseValue": 3
-        },
-        {
-          "attribute": "ArmorPenetration",
-          "baseValue": 2
-        }
-      ],
-      "evolution": {
-        "id": "evolution.blackjaw_spider",
-        "name": "Legacy Awakening",
-        "description": "This essence has no special evolution yet.",
-        "requiredAscensionTier": 1,
-        "requiredCatalystItemId": "item.evolution_catalyst.legacy"
-      },
-      "activeAbilityId": "ability.essence.blackjaw_spider.crushing_bite",
-      "passiveAbilityId": "ability.essence.blackjaw_spider.chitinous_jaws"
-    },
-    {
-      "id": "essence.raven",
-      "sourceMonsterId": "monster.raven",
-      "name": "Raven's Essence",
-      "description": "A watchful messenger essence that marks targets from afar.",
-      "rarity": "Common",
-      "tags": [
-        "Species.Avian",
-        "Role.Support",
-        "Effect.Ability"
-      ],
-      "attributeBonuses": [
-        {
-          "attribute": "Precision",
-          "baseValue": 2
-        },
-        {
-          "attribute": "DodgeChance",
-          "baseValue": 1
-        }
-      ],
-      "evolution": {
-        "id": "evolution.raven",
-        "name": "Legacy Awakening",
-        "description": "This essence has no special evolution yet.",
-        "requiredAscensionTier": 1,
-        "requiredCatalystItemId": "item.evolution_catalyst.legacy"
-      },
-      "activeAbilityId": "ability.essence.raven.ravens_mark",
-      "passiveAbilityId": "ability.essence.raven.watchful_messenger"
-    },
-    {
-      "id": "essence.widow_stalker",
-      "sourceMonsterId": "monster.widow_stalker",
-      "name": "Widow Stalker's Essence",
-      "description": "A patient ambusher essence that favors venomous openings and evasive footwork.",
-      "rarity": "Uncommon",
-      "tags": [
-        "Species.Beast",
-        "Role.Assassin",
-        "Effect.Ability"
-      ],
-      "attributeBonuses": [
-        {
-          "attribute": "Precision",
-          "baseValue": 3
-        },
-        {
-          "attribute": "DodgeChance",
-          "baseValue": 1
-        }
-      ],
-      "evolution": {
-        "id": "evolution.widow_stalker",
-        "name": "Legacy Awakening",
-        "description": "This essence has no special evolution yet.",
-        "requiredAscensionTier": 1,
-        "requiredCatalystItemId": "item.evolution_catalyst.legacy"
-      },
-      "activeAbilityId": "ability.essence.widow_stalker.widows_ambush",
-      "passiveAbilityId": "ability.essence.widow_stalker.silkstep"
-    },
-    {
-      "id": "essence.scarecrow",
-      "sourceMonsterId": "monster.scarecrow",
-      "name": "Scarecrow's Essence",
-      "description": "A hollow field-ward essence that frightens groups and resists control.",
-      "rarity": "Uncommon",
-      "tags": [
-        "Species.Construct",
-        "Role.Controller",
-        "Effect.Ability"
-      ],
-      "attributeBonuses": [
-        {
-          "attribute": "Spirit",
-          "baseValue": 2
-        },
-        {
-          "attribute": "CrowdControlResistance",
-          "baseValue": 2
-        }
-      ],
-      "evolution": {
-        "id": "evolution.scarecrow",
-        "name": "Legacy Awakening",
-        "description": "This essence has no special evolution yet.",
-        "requiredAscensionTier": 1,
-        "requiredCatalystItemId": "item.evolution_catalyst.legacy"
-      },
-      "activeAbilityId": "ability.essence.scarecrow.straw_terror",
-      "passiveAbilityId": "ability.essence.scarecrow.hollow_gaze"
-    },
-    {
-      "id": "essence.lost_soul",
-      "sourceMonsterId": "monster.lost_soul",
-      "name": "Lost Soul's Essence",
-      "description": "A sorrowful support essence that restores wounded allies and strengthens spirit.",
-      "rarity": "Uncommon",
-      "tags": [
-        "Species.Spirit",
-        "Role.Support",
-        "Effect.Ability"
-      ],
-      "attributeBonuses": [
-        {
-          "attribute": "Spirit",
-          "baseValue": 3
-        },
-        {
-          "attribute": "HealingPowerPercent",
-          "baseValue": 1
-        }
-      ],
-      "evolution": {
-        "id": "evolution.lost_soul",
-        "name": "Legacy Awakening",
-        "description": "This essence has no special evolution yet.",
-        "requiredAscensionTier": 1,
-        "requiredCatalystItemId": "item.evolution_catalyst.legacy"
-      },
-      "activeAbilityId": "ability.essence.lost_soul.soul_mend",
-      "passiveAbilityId": "ability.essence.lost_soul.lingering_will"
-    },
-    {
-      "id": "essence.apparition",
-      "sourceMonsterId": "monster.apparition",
-      "name": "Apparition's Essence",
-      "description": "A flickering defensive essence that strikes and phases behind a barrier.",
-      "rarity": "Uncommon",
-      "tags": [
-        "Species.Spirit",
-        "Role.Defensive",
-        "Effect.Ability"
-      ],
-      "attributeBonuses": [
-        {
-          "attribute": "DodgeChance",
-          "baseValue": 2
-        },
-        {
-          "attribute": "Spirit",
-          "baseValue": 1
-        }
-      ],
-      "evolution": {
-        "id": "evolution.apparition",
-        "name": "Legacy Awakening",
-        "description": "This essence has no special evolution yet.",
-        "requiredAscensionTier": 1,
-        "requiredCatalystItemId": "item.evolution_catalyst.legacy"
-      },
-      "activeAbilityId": "ability.essence.apparition.ethereal_touch",
-      "passiveAbilityId": "ability.essence.apparition.phase_body"
-    },
-    {
-      "id": "essence.specter",
-      "sourceMonsterId": "monster.specter",
-      "name": "Specter's Essence",
-      "description": "A focused haunting essence that tears through magical defenses.",
-      "rarity": "Rare",
-      "tags": [
-        "Species.Undead",
-        "Role.Caster",
-        "Effect.Ability"
-      ],
-      "attributeBonuses": [
-        {
-          "attribute": "Spirit",
-          "baseValue": 3
-        },
-        {
-          "attribute": "MagicPenetration",
-          "baseValue": 2
-        }
-      ],
-      "evolution": {
-        "id": "evolution.specter",
-        "name": "Legacy Awakening",
-        "description": "This essence has no special evolution yet.",
-        "requiredAscensionTier": 1,
-        "requiredCatalystItemId": "item.evolution_catalyst.legacy"
-      },
-      "activeAbilityId": "ability.essence.specter.haunting_wail",
-      "passiveAbilityId": "ability.essence.specter.spectral_focus"
-    },
-    {
-      "id": "essence.zombie",
-      "sourceMonsterId": "monster.zombie",
-      "name": "Zombie's Essence",
-      "description": "A stubborn undead essence built around raw health and heavy blows.",
-      "rarity": "Common",
-      "tags": [
-        "Species.Undead",
-        "Role.Tank",
-        "Effect.Ability"
-      ],
-      "attributeBonuses": [
-        {
-          "attribute": "MaxHealth",
-          "baseValue": 10
-        },
-        {
-          "attribute": "Fortitude",
-          "baseValue": 1
-        }
-      ],
-      "evolution": {
-        "id": "evolution.zombie",
-        "name": "Legacy Awakening",
-        "description": "This essence has no special evolution yet.",
-        "requiredAscensionTier": 1,
-        "requiredCatalystItemId": "item.evolution_catalyst.legacy"
-      },
-      "activeAbilityId": "ability.essence.zombie.rot_slam",
-      "passiveAbilityId": "ability.essence.zombie.dead_flesh"
-    },
-    {
-      "id": "essence.half_zombie",
-      "sourceMonsterId": "monster.half_zombie",
-      "name": "Half Zombie's Essence",
-      "description": "A twitching undead essence that clings to life through bites and recovery.",
-      "rarity": "Common",
-      "tags": [
-        "Species.Undead",
-        "Role.Defensive",
-        "Effect.Ability"
-      ],
-      "attributeBonuses": [
-        {
-          "attribute": "Power",
-          "baseValue": 2
-        },
-        {
-          "attribute": "HealthRegeneration",
-          "baseValue": 1
-        }
-      ],
-      "evolution": {
-        "id": "evolution.half_zombie",
-        "name": "Legacy Awakening",
-        "description": "This essence has no special evolution yet.",
-        "requiredAscensionTier": 1,
-        "requiredCatalystItemId": "item.evolution_catalyst.legacy"
-      },
-      "activeAbilityId": "ability.essence.half_zombie.clinging_bite",
-      "passiveAbilityId": "ability.essence.half_zombie.twitching_recovery"
+        "id": "evolution.giant_bat",
+        "name": "Awakened Giant Bat",
+        "description": "The awakened form of Giant Bat Essence.",
+        "requiredAscensionTier": 2,
+        "requiredCatalystItemId": "",
+        "addsTags": [],
+        "attributeModifierChanges": [],
+        "activeAbilityModifiers": [],
+        "passiveAbilityModifiers": []
+      }
     },
     {
       "id": "essence.undead",
       "sourceMonsterId": "monster.undead",
-      "name": "Undead's Essence",
-      "description": "A tireless undead essence that swings through multiple foes and shrugs off statuses.",
-      "rarity": "Uncommon",
-      "tags": [
-        "Species.Undead",
-        "Role.Offensive",
-        "Effect.Ability"
-      ],
+      "name": "Undead Essence",
+      "description": "The combat essence of Undead, granting Necrotic Slash and Corpse Explosion.",
+      "rarity": "Common",
+      "tags": [],
       "attributeBonuses": [
         {
           "attribute": "Power",
-          "baseValue": 2
-        },
-        {
-          "attribute": "StatusResistance",
-          "baseValue": 2
+          "baseValue": 1
         }
       ],
+      "activeAbilityId": "ability.creature.undead.necrotic_slash",
+      "passiveAbilityId": "ability.creature.undead.corpse_explosion",
       "evolution": {
         "id": "evolution.undead",
-        "name": "Legacy Awakening",
-        "description": "This essence has no special evolution yet.",
-        "requiredAscensionTier": 1,
-        "requiredCatalystItemId": "item.evolution_catalyst.legacy"
-      },
-      "activeAbilityId": "ability.essence.undead.grave_swing",
-      "passiveAbilityId": "ability.essence.undead.deathless_nerves"
-    },
-    {
-      "id": "essence.blood_zombie",
-      "sourceMonsterId": "monster.blood_zombie",
-      "name": "Blood Zombie's Essence",
-      "description": "A hungry undead essence that drains life through bleeding strikes.",
-      "rarity": "Rare",
-      "tags": [
-        "Species.Undead",
-        "Role.Offensive",
-        "Effect.Ability"
-      ],
-      "attributeBonuses": [
-        {
-          "attribute": "Power",
-          "baseValue": 3
-        },
-        {
-          "attribute": "LifeSteal",
-          "baseValue": 2
-        }
-      ],
-      "evolution": {
-        "id": "evolution.blood_zombie",
-        "name": "Legacy Awakening",
-        "description": "This essence has no special evolution yet.",
-        "requiredAscensionTier": 1,
-        "requiredCatalystItemId": "item.evolution_catalyst.legacy"
-      },
-      "activeAbilityId": "ability.essence.blood_zombie.bloodletting_grasp",
-      "passiveAbilityId": "ability.essence.blood_zombie.red_hunger"
-    },
-    {
-      "id": "essence.giant_worm",
-      "sourceMonsterId": "monster.giant_worm",
-      "name": "Giant Worm's Essence",
-      "description": "A massive burrowing essence that crushes enemies and hardens armor.",
-      "rarity": "Rare",
-      "tags": [
-        "Species.Vermin",
-        "Role.Offensive",
-        "Effect.Ability"
-      ],
-      "attributeBonuses": [
-        {
-          "attribute": "Fortitude",
-          "baseValue": 3
-        },
-        {
-          "attribute": "Armor",
-          "baseValue": 3
-        }
-      ],
-      "evolution": {
-        "id": "evolution.giant_worm",
-        "name": "Legacy Awakening",
-        "description": "This essence has no special evolution yet.",
-        "requiredAscensionTier": 1,
-        "requiredCatalystItemId": "item.evolution_catalyst.legacy"
-      },
-      "activeAbilityId": "ability.essence.giant_worm.burrow_crush",
-      "passiveAbilityId": "ability.essence.giant_worm.earth_plated_hide"
-    },
-    {
-      "id": "essence.burrowed_horror",
-      "sourceMonsterId": "monster.burrowed_horror",
-      "name": "Burrowed Horror's Essence",
-      "description": "A subterranean terror essence that ruptures groups and increases raw power.",
-      "rarity": "Rare",
-      "tags": [
-        "Species.Aberration",
-        "Role.Offensive",
-        "Effect.Ability"
-      ],
-      "attributeBonuses": [
-        {
-          "attribute": "Power",
-          "baseValue": 4
-        },
-        {
-          "attribute": "ArmorPenetration",
-          "baseValue": 1
-        }
-      ],
-      "evolution": {
-        "id": "evolution.burrowed_horror",
-        "name": "Legacy Awakening",
-        "description": "This essence has no special evolution yet.",
-        "requiredAscensionTier": 1,
-        "requiredCatalystItemId": "item.evolution_catalyst.legacy"
-      },
-      "activeAbilityId": "ability.essence.burrowed_horror.rupture",
-      "passiveAbilityId": "ability.essence.burrowed_horror.subterranean_force"
-    },
-    {
-      "id": "essence.cave_leech",
-      "sourceMonsterId": "monster.cave_leech",
-      "name": "Cave Leech's Essence",
-      "description": "A draining cave essence that latches on and feeds through lifesteal.",
-      "rarity": "Uncommon",
-      "tags": [
-        "Species.Vermin",
-        "Role.Support",
-        "Effect.Ability"
-      ],
-      "attributeBonuses": [
-        {
-          "attribute": "LifeSteal",
-          "baseValue": 2
-        },
-        {
-          "attribute": "HealthRegeneration",
-          "baseValue": 1
-        }
-      ],
-      "evolution": {
-        "id": "evolution.cave_leech",
-        "name": "Legacy Awakening",
-        "description": "This essence has no special evolution yet.",
-        "requiredAscensionTier": 1,
-        "requiredCatalystItemId": "item.evolution_catalyst.legacy"
-      },
-      "activeAbilityId": "ability.essence.cave_leech.leeching_latch",
-      "passiveAbilityId": "ability.essence.cave_leech.blood_sense"
-    },
-    {
-      "id": "essence.stonejaw_grub",
-      "sourceMonsterId": "monster.stonejaw_grub",
-      "name": "Stonejaw Grub's Essence",
-      "description": "A mineral-fed grub essence that gnaws enemies while shielding itself.",
-      "rarity": "Uncommon",
-      "tags": [
-        "Species.Vermin",
-        "Role.Tank",
-        "Effect.Ability"
-      ],
-      "attributeBonuses": [
-        {
-          "attribute": "Fortitude",
-          "baseValue": 2
-        },
-        {
-          "attribute": "DamageReduction",
-          "baseValue": 1
-        }
-      ],
-      "evolution": {
-        "id": "evolution.stonejaw_grub",
-        "name": "Legacy Awakening",
-        "description": "This essence has no special evolution yet.",
-        "requiredAscensionTier": 1,
-        "requiredCatalystItemId": "item.evolution_catalyst.legacy"
-      },
-      "activeAbilityId": "ability.essence.stonejaw_grub.stone_gnaw",
-      "passiveAbilityId": "ability.essence.stonejaw_grub.mineral_shell"
-    },
-    {
-      "id": "essence.deep_burrower",
-      "sourceMonsterId": "monster.deep_burrower",
-      "name": "Deep Burrower's Essence",
-      "description": "A deep-tunneling bruiser essence that collapses earth beneath multiple foes.",
-      "rarity": "Rare",
-      "tags": [
-        "Species.Vermin",
-        "Role.Offensive",
-        "Effect.Ability"
-      ],
-      "attributeBonuses": [
-        {
-          "attribute": "Power",
-          "baseValue": 3
-        },
-        {
-          "attribute": "ArmorPenetration",
-          "baseValue": 2
-        }
-      ],
-      "evolution": {
-        "id": "evolution.deep_burrower",
-        "name": "Legacy Awakening",
-        "description": "This essence has no special evolution yet.",
-        "requiredAscensionTier": 1,
-        "requiredCatalystItemId": "item.evolution_catalyst.legacy"
-      },
-      "activeAbilityId": "ability.essence.deep_burrower.tunnel_collapse",
-      "passiveAbilityId": "ability.essence.deep_burrower.tremor_sense"
+        "name": "Awakened Undead",
+        "description": "The awakened form of Undead Essence.",
+        "requiredAscensionTier": 2,
+        "requiredCatalystItemId": "",
+        "addsTags": [],
+        "attributeModifierChanges": [],
+        "activeAbilityModifiers": [],
+        "passiveAbilityModifiers": []
+      }
     }
   ]
 }

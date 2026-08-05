@@ -1,57 +1,27 @@
 {
   "creatures": [
     {
-      "id": "00000000-0000-0000-0000-000000000001",
-      "name": "Goblin",
-      "imagePath": "goblin",
-      "archetype": "Balanced"
-    },
-    {
-      "id": "00000000-0000-0000-0000-000000000002",
-      "name": "Goblin Warrior",
-      "imagePath": "goblin_warrior",
+      "id": "00000000-0000-0000-0000-000000000038",
+      "name": "Blackjaw Spider",
+      "imagePath": "blackjaw_spider",
       "archetype": "Bruiser"
     },
     {
-      "id": "00000000-0000-0000-0000-000000000003",
-      "name": "Goblin Archer",
-      "imagePath": "goblin_archer",
-      "archetype": "DPS"
-    },
-    {
-      "id": "00000000-0000-0000-0000-000000000004",
-      "name": "Large Rat",
-      "imagePath": "large_rat",
+      "id": "00000000-0000-0000-0000-000000000047",
+      "name": "Blood Zombie",
+      "imagePath": "blood_zombie",
       "archetype": "Tank"
-    },
-    {
-      "id": "00000000-0000-0000-0000-000000000005",
-      "name": "Flame Imp",
-      "imagePath": "flame_imp",
-      "archetype": "Balanced"
-    },
-    {
-      "id": "00000000-0000-0000-0000-000000000006",
-      "name": "Frost Imp",
-      "imagePath": "frost_imp",
-      "archetype": "Balanced"
-    },
-    {
-      "id": "00000000-0000-0000-0000-000000000007",
-      "name": "Shadow Imp",
-      "imagePath": "shadow_imp",
-      "archetype": "Balanced"
-    },
-    {
-      "id": "00000000-0000-0000-0000-000000000008",
-      "name": "Vampire Bat",
-      "imagePath": "vampire_bat",
-      "archetype": "Balanced"
     },
     {
       "id": "00000000-0000-0000-0000-000000000009",
       "name": "Blue Slime",
       "imagePath": "blue_slime",
+      "archetype": "Balanced"
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000044",
+      "name": "Bog Mite",
+      "imagePath": "bog_mite",
       "archetype": "Balanced"
     },
     {
@@ -61,28 +31,22 @@
       "archetype": "Balanced"
     },
     {
-      "id": "00000000-0000-0000-0000-000000000011",
-      "name": "Green Slime",
-      "imagePath": "green_slime",
+      "id": "00000000-0000-0000-0000-000000000050",
+      "name": "Cave Bat",
+      "imagePath": "cave_bat",
       "archetype": "Balanced"
     },
     {
-      "id": "00000000-0000-0000-0000-000000000012",
-      "name": "Rainbow Slime",
-      "imagePath": "rainbow_slime",
-      "archetype": "Balanced"
+      "id": "00000000-0000-0000-0000-000000000043",
+      "name": "Cinder Beetle",
+      "imagePath": "cinder_beetle",
+      "archetype": "Tank"
     },
     {
-      "id": "00000000-0000-0000-0000-000000000013",
-      "name": "Red Slime",
-      "imagePath": "red_slime",
-      "archetype": "Balanced"
-    },
-    {
-      "id": "00000000-0000-0000-0000-000000000014",
-      "name": "Transparent Slime",
-      "imagePath": "transparent_slime",
-      "archetype": "Balanced"
+      "id": "00000000-0000-0000-0000-000000000028",
+      "name": "Crystal Wisp",
+      "imagePath": "crystal_wisp",
+      "archetype": "Support"
     },
     {
       "id": "00000000-0000-0000-0000-000000000015",
@@ -91,15 +55,135 @@
       "archetype": "Balanced"
     },
     {
+      "id": "00000000-0000-0000-0000-000000000005",
+      "name": "Flame Imp",
+      "imagePath": "flame_imp",
+      "archetype": "Balanced"
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000034",
+      "name": "Forest Spirit",
+      "imagePath": "forest_spirit",
+      "archetype": "Support"
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000006",
+      "name": "Frost Imp",
+      "imagePath": "frost_imp",
+      "archetype": "Balanced"
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000051",
+      "name": "Giant Bat",
+      "imagePath": "giant_bat",
+      "archetype": "Bruiser"
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000036",
+      "name": "Giant Spider",
+      "imagePath": "giant_spider",
+      "archetype": "Bruiser"
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000048",
+      "name": "Giant Worm",
+      "imagePath": "giant_worm",
+      "archetype": "Bruiser"
+    },
+    {
       "id": "00000000-0000-0000-0000-000000000016",
       "name": "Glade Panther",
       "imagePath": "glade_panther",
       "archetype": "Balanced"
     },
     {
+      "id": "00000000-0000-0000-0000-000000000001",
+      "name": "Goblin",
+      "imagePath": "goblin",
+      "archetype": "Balanced"
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000003",
+      "name": "Goblin Archer",
+      "imagePath": "goblin_archer",
+      "archetype": "DPS"
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000055",
+      "name": "Goblin Shaman",
+      "imagePath": "goblin_shaman",
+      "archetype": "Support"
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000002",
+      "name": "Goblin Warrior",
+      "imagePath": "goblin_warrior",
+      "archetype": "Bruiser"
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000029",
+      "name": "Grave Hound",
+      "imagePath": "grave_hound",
+      "archetype": "Bruiser"
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000030",
+      "name": "Grave Wisp",
+      "imagePath": "grave_wisp",
+      "archetype": "Support"
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000011",
+      "name": "Green Slime",
+      "imagePath": "green_slime",
+      "archetype": "Balanced"
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000020",
+      "name": "Hobgoblin",
+      "imagePath": "hobgoblin",
+      "archetype": "Balanced"
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000033",
+      "name": "Hollow Stag",
+      "imagePath": "hollow_stag",
+      "archetype": "Balanced"
+    },
+    {
       "id": "00000000-0000-0000-0000-000000000017",
       "name": "Illusion Fox",
       "imagePath": "illusion_fox",
+      "archetype": "Balanced"
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000004",
+      "name": "Large Rat",
+      "imagePath": "large_rat",
+      "archetype": "Tank"
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000041",
+      "name": "Lost Soul",
+      "imagePath": "lost_soul",
+      "archetype": "Support"
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000027",
+      "name": "Lumo Sentinel",
+      "imagePath": "lumo_sentinel",
+      "archetype": "Tank"
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000026",
+      "name": "Lumo Wisp",
+      "imagePath": "lumo_wisp",
+      "archetype": "Support"
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000021",
+      "name": "Moss Lizard",
+      "imagePath": "moss_lizard",
       "archetype": "Balanced"
     },
     {
@@ -115,15 +199,57 @@
       "archetype": "Balanced"
     },
     {
-      "id": "00000000-0000-0000-0000-000000000020",
-      "name": "Hobgoblin",
-      "imagePath": "hobgoblin",
+      "id": "00000000-0000-0000-0000-000000000045",
+      "name": "Poisonous Rat",
+      "imagePath": "poisonous_rat",
+      "archetype": "DPS"
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000012",
+      "name": "Rainbow Slime",
+      "imagePath": "rainbow_slime",
       "archetype": "Balanced"
     },
     {
-      "id": "00000000-0000-0000-0000-000000000021",
-      "name": "Moss Lizard",
-      "imagePath": "moss_lizard",
+      "id": "00000000-0000-0000-0000-000000000039",
+      "name": "Raven",
+      "imagePath": "raven",
+      "archetype": "Balanced"
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000013",
+      "name": "Red Slime",
+      "imagePath": "red_slime",
+      "archetype": "Balanced"
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000049",
+      "name": "Rotfly Toad",
+      "imagePath": "rotfly_toad",
+      "archetype": "Balanced"
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000040",
+      "name": "Rotroot Shambler",
+      "imagePath": "rotroot_shambler",
+      "archetype": "Tank"
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000007",
+      "name": "Shadow Imp",
+      "imagePath": "shadow_imp",
+      "archetype": "Balanced"
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000031",
+      "name": "Skeleton",
+      "imagePath": "skeleton",
+      "archetype": "Balanced"
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000042",
+      "name": "Smolder Rat",
+      "imagePath": "smolder_rat",
       "archetype": "Balanced"
     },
     {
@@ -133,141 +259,21 @@
       "archetype": "Balanced"
     },
     {
+      "id": "00000000-0000-0000-0000-000000000032",
+      "name": "Thornback Boar",
+      "imagePath": "thornback_boar",
+      "archetype": "Bruiser"
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000014",
+      "name": "Transparent Slime",
+      "imagePath": "transparent_slime",
+      "archetype": "Balanced"
+    },
+    {
       "id": "00000000-0000-0000-0000-000000000023",
       "name": "Treant Sapling",
       "imagePath": "treant_sapling",
-      "archetype": "Balanced"
-    },
-    {
-      "id": "00000000-0000-0000-0000-000000000024",
-      "name": "Venomous Snake",
-      "imagePath": "venomous_snake",
-      "archetype": "Balanced"
-    },
-    {
-      "id": "00000000-0000-0000-0000-000000000025",
-      "name": "Viper",
-      "imagePath": "viper",
-      "archetype": "Balanced"
-    },
-    {
-      "id": "00000000-0000-0000-0000-000000000026",
-      "name": "Feral Ghoul",
-      "imagePath": "feral_ghoul",
-      "archetype": "Balanced"
-    },
-    {
-      "id": "00000000-0000-0000-0000-000000000027",
-      "name": "Plague Ghoul",
-      "imagePath": "plague_ghoul",
-      "archetype": "Balanced"
-    },
-    {
-      "id": "00000000-0000-0000-0000-000000000028",
-      "name": "Ravenous Ghoul",
-      "imagePath": "ravenous_ghoul",
-      "archetype": "Balanced"
-    },
-    {
-      "id": "00000000-0000-0000-0000-000000000029",
-      "name": "Skeleton Archer",
-      "imagePath": "skeleton_archer",
-      "archetype": "Balanced"
-    },
-    {
-      "id": "00000000-0000-0000-0000-000000000030",
-      "name": "Skeleton Mage",
-      "imagePath": "skeleton_mage",
-      "archetype": "Balanced"
-    },
-    {
-      "id": "00000000-0000-0000-0000-000000000031",
-      "name": "Skeleton Warrior",
-      "imagePath": "skeleton_warrior",
-      "archetype": "Balanced"
-    },
-    {
-      "id": "00000000-0000-0000-0000-000000000032",
-      "name": "Ant Worker",
-      "imagePath": "ant_worker",
-      "archetype": "Support"
-    },
-    {
-      "id": "00000000-0000-0000-0000-000000000033",
-      "name": "Fire Ant",
-      "imagePath": "fire_ant",
-      "archetype": "DPS"
-    },
-    {
-      "id": "00000000-0000-0000-0000-000000000034",
-      "name": "Forest Spirit",
-      "imagePath": "forest_spirit",
-      "archetype": "Support"
-    },
-    {
-      "id": "00000000-0000-0000-0000-000000000035",
-      "name": "Wood Nymph",
-      "imagePath": "wood_nymph",
-      "archetype": "Support"
-    },
-    {
-      "id": "00000000-0000-0000-0000-000000000036",
-      "name": "Giant Spider",
-      "imagePath": "giant_spider",
-      "archetype": "Bruiser"
-    },
-    {
-      "id": "00000000-0000-0000-0000-000000000037",
-      "name": "Venomous Spiderling",
-      "imagePath": "venomous_spiderling",
-      "archetype": "Balanced"
-    },
-    {
-      "id": "00000000-0000-0000-0000-000000000038",
-      "name": "Blackjaw Spider",
-      "imagePath": "blackjaw_spider",
-      "archetype": "Bruiser"
-    },
-    {
-      "id": "00000000-0000-0000-0000-000000000039",
-      "name": "Raven",
-      "imagePath": "raven",
-      "archetype": "Balanced"
-    },
-    {
-      "id": "00000000-0000-0000-0000-000000000040",
-      "name": "Scarecrow",
-      "imagePath": "scarecrow",
-      "archetype": "Hazard"
-    },
-    {
-      "id": "00000000-0000-0000-0000-000000000041",
-      "name": "Lost Soul",
-      "imagePath": "lost_soul",
-      "archetype": "Support"
-    },
-    {
-      "id": "00000000-0000-0000-0000-000000000042",
-      "name": "Apparition",
-      "imagePath": "apparition",
-      "archetype": "Hazard"
-    },
-    {
-      "id": "00000000-0000-0000-0000-000000000043",
-      "name": "Specter",
-      "imagePath": "specter",
-      "archetype": "DPS"
-    },
-    {
-      "id": "00000000-0000-0000-0000-000000000044",
-      "name": "Zombie",
-      "imagePath": "zombie",
-      "archetype": "Tank"
-    },
-    {
-      "id": "00000000-0000-0000-0000-000000000045",
-      "name": "Half Zombie",
-      "imagePath": "half_zombie",
       "archetype": "Balanced"
     },
     {
@@ -277,71 +283,33 @@
       "archetype": "Bruiser"
     },
     {
-      "id": "00000000-0000-0000-0000-000000000047",
-      "name": "Blood Zombie",
-      "imagePath": "blood_zombie",
-      "archetype": "Tank"
+      "id": "00000000-0000-0000-0000-000000000008",
+      "name": "Vampire Bat",
+      "imagePath": "vampire_bat",
+      "archetype": "Balanced"
     },
     {
-      "id": "00000000-0000-0000-0000-000000000048",
-      "name": "Giant Worm",
-      "imagePath": "giant_worm",
-      "archetype": "Bruiser"
+      "id": "00000000-0000-0000-0000-000000000024",
+      "name": "Venomous Snake",
+      "imagePath": "venomous_snake",
+      "archetype": "Balanced"
     },
     {
-      "id": "00000000-0000-0000-0000-000000000049",
-      "name": "Burrowed Horror",
-      "imagePath": "burrowed_horror",
-      "archetype": "DPS"
+      "id": "00000000-0000-0000-0000-000000000037",
+      "name": "Venomous Spiderling",
+      "imagePath": "venomous_spiderling",
+      "archetype": "Balanced"
     },
     {
-      "id": "00000000-0000-0000-0000-000000000050",
-      "name": "Cave Leech",
-      "imagePath": "cave_leech",
-      "archetype": "Support"
+      "id": "00000000-0000-0000-0000-000000000025",
+      "name": "Viper",
+      "imagePath": "viper",
+      "archetype": "Balanced"
     },
     {
-      "id": "00000000-0000-0000-0000-000000000051",
-      "name": "Widow Stalker",
-      "imagePath": "widow_stalker",
-      "archetype": "DPS"
-    },
-    {
-      "id": "00000000-0000-0000-0000-000000000052",
-      "name": "Stonejaw Grub",
-      "imagePath": "stonejaw_grub",
-      "archetype": "Tank"
-    },
-    {
-      "id": "00000000-0000-0000-0000-000000000053",
-      "name": "Deep Burrower",
-      "imagePath": "deep_burrower",
-      "archetype": "Bruiser"
-    },
-    {
-      "id": "00000000-0000-0000-0000-000000000054",
-      "name": "Training Goblin",
-      "imagePath": "goblin",
-      "archetype": "Balanced",
-      "statOverrides": [
-        {
-          "attributeType": "MaxHealth",
-          "multiplier": 0.2
-        },
-        {
-          "attributeType": "Power",
-          "multiplier": 0.1
-        },
-        {
-          "attributeType": "Precision",
-          "multiplier": 0.5
-        }
-      ]
-    },
-    {
-      "id": "00000000-0000-0000-0000-000000000055",
-      "name": "Goblin Shaman",
-      "imagePath": "goblin_shaman",
+      "id": "00000000-0000-0000-0000-000000000035",
+      "name": "Wood Nymph",
+      "imagePath": "wood_nymph",
       "archetype": "Support"
     }
   ]

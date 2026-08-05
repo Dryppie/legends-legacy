@@ -163,7 +163,7 @@ public sealed class AttributeCombatSystemTests
     }
 
     [Fact]
-    public void Catalog_rejects_non_power_ability_effect_scaling()
+    public void Catalog_allows_content_facing_ability_effect_scaling_attributes()
     {
         var ability = CreateEffectAbility(
             "invalid-scaling",
@@ -179,8 +179,7 @@ public sealed class AttributeCombatSystemTests
 
         var validation = AbilityCatalogValidator.Validate([ability], []);
 
-        Assert.False(validation.IsValid);
-        Assert.Contains(validation.Errors, error => error.Contains("scale only with Power", StringComparison.Ordinal));
+        Assert.True(validation.IsValid, string.Join(Environment.NewLine, validation.Errors));
     }
 
     [Theory]

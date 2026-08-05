@@ -164,8 +164,24 @@ public sealed class EssenceDefinitionValidatorTests
             options,
             repository);
 
-        Assert.NotEmpty(provider.GetAll());
-        Assert.All(provider.GetAll(), collection => Assert.InRange(collection.EssenceDefinitionIds.Count, 2, 6));
+        var collections = provider.GetAll();
+        var regionOneEssences = repository.GetAll()
+            .Select(essence => essence.Id)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+        var collectedEssences = collections
+            .SelectMany(collection => collection.EssenceDefinitionIds)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        Assert.Equal(13, collections.Count);
+        Assert.All(collections, collection =>
+        {
+            Assert.InRange(collection.EssenceDefinitionIds.Count, 2, 6);
+        });
+        Assert.Equal(
+            ["Creature Families", "Essence Affinities", "Regional Ecologies"],
+            collections.Select(collection => collection.Category).Distinct().Order().ToArray());
+        Assert.Equal(53, regionOneEssences.Count);
+        Assert.Equal(regionOneEssences.Order(StringComparer.OrdinalIgnoreCase), collectedEssences.Order(StringComparer.OrdinalIgnoreCase));
     }
 
     internal static EssenceDefinition ValidDefinition() => new()

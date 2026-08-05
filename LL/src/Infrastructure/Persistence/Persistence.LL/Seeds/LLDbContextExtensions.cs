@@ -58,11 +58,11 @@ public static class LLDbContextExtensions
     ];
     private static readonly (Guid PlayerEssenceId, string EssenceDefinitionId)[] AdminStarterEssences =
     [
-        (Guid.Parse("00000000-0000-0000-2000-000000000001"), "essence.goblin_ambusher"),
-        (Guid.Parse("00000000-0000-0000-2000-000000000002"), "essence.skeleton_guardian"),
-        (Guid.Parse("00000000-0000-0000-2000-000000000003"), "essence.fire_ant"),
+        (Guid.Parse("00000000-0000-0000-2000-000000000001"), "essence.goblin"),
+        (Guid.Parse("00000000-0000-0000-2000-000000000002"), "essence.skeleton"),
+        (Guid.Parse("00000000-0000-0000-2000-000000000003"), "essence.flame_imp"),
         (Guid.Parse("00000000-0000-0000-2000-000000000004"), "essence.cave_bat"),
-        (Guid.Parse("00000000-0000-0000-2000-000000000005"), "essence.necroshade_wraith"),
+        (Guid.Parse("00000000-0000-0000-2000-000000000005"), "essence.lumo_wisp"),
     ];
     private static readonly Guid AdminStarterEssenceLoadoutId = Guid.Parse("00000000-0000-0000-3000-000000000001");
     private const string AdminStarterEssenceLoadoutName = "Admin Starter";
@@ -325,16 +325,16 @@ public static class LLDbContextExtensions
         {
             var essenceItemBaseIds = new[]
             {
-                "item.essence.goblin_ambusher",
-                "item.essence.skeleton_guardian",
-                "item.essence.fire_ant",
+                "item.essence.goblin",
+                "item.essence.skeleton",
+                "item.essence.flame_imp",
                 "item.essence.cave_bat",
-                "item.essence.necroshade_wraith",
-                "item.essence.legacy.goblin",
-                "item.essence.legacy.goblin_warrior",
-                "item.essence.legacy.goblin_archer",
-                "item.essence.legacy.large_rat",
-                "item.essence.legacy.flame_imp",
+                "item.essence.lumo_wisp",
+                "item.essence.goblin_warrior",
+                "item.essence.goblin_archer",
+                "item.essence.large_rat",
+                "item.essence.frost_imp",
+                "item.essence.vampire_bat",
             };
 
             var essenceItemInstances = essenceItemBaseIds

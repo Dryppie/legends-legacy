@@ -307,9 +307,7 @@
           "type": "Combat",
           "weight": 1,
           "encounterIds": [
-            "skeleton_archer",
-            "skeleton_mage",
-            "skeleton_warrior"
+            "skeleton"
           ]
         },
         {
@@ -317,7 +315,7 @@
           "type": "Combat",
           "weight": 0.8,
           "encounterIds": [
-            "large_rat"
+            "skeleton"
           ]
         },
         {
@@ -325,7 +323,7 @@
           "type": "Combat",
           "weight": 0.8,
           "encounterIds": [
-            "vampire_bat"
+            "skeleton"
           ]
         },
         {
@@ -333,7 +331,7 @@
           "type": "Combat",
           "weight": 0.6,
           "encounterIds": [
-            "vampire_bat"
+            "skeleton"
           ]
         },
         {
@@ -341,20 +339,18 @@
           "type": "MiniBoss",
           "weight": 1,
           "encounterIds": [
-            "skeleton_warrior",
-            "skeleton_mage",
-            "skeleton_archer"
+            "skeleton"
           ],
-          "featuredEncounterId": "skeleton_warrior"
+          "featuredEncounterId": "skeleton"
         },
         {
           "id": "boss.1",
           "type": "Boss",
           "weight": 1,
           "encounterIds": [
-            "specter"
+            "skeleton"
           ],
-          "featuredEncounterId": "specter"
+          "featuredEncounterId": "skeleton"
         }
       ],
       "difficulties": [
@@ -568,346 +564,6 @@
                   "weight": 85,
                   "minQuantity": 1,
                   "maxQuantity": 2
-                }
-              ]
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "id": "hives_abyss",
-      "name": "The Hive's Abyss",
-      "sigilItemId": "sigil_hives_abyss",
-      "region": 1,
-      "entryCosts": [
-        {
-          "itemId": "sigil_hives_abyss",
-          "amount": 1
-        }
-      ],
-      "monsterLootModifiers": {
-        "Essence": 15
-      },
-      "restSiteCount": 3,
-      "roomTemplates": [
-        {
-          "id": "combat.1",
-          "type": "Combat",
-          "weight": 1,
-          "encounterIds": [
-            "ant_worker"
-          ]
-        },
-        {
-          "id": "combat.2",
-          "type": "Combat",
-          "weight": 0.9,
-          "encounterIds": [
-            "fire_ant"
-          ]
-        },
-        {
-          "id": "miniboss.1",
-          "type": "MiniBoss",
-          "weight": 1,
-          "encounterIds": [
-            "ant_worker"
-          ],
-          "featuredEncounterId": "ant_worker"
-        },
-        {
-          "id": "boss.1",
-          "type": "Boss",
-          "weight": 0.92,
-          "encounterIds": [
-            "fire_ant"
-          ],
-          "featuredEncounterId": "fire_ant"
-        },
-        {
-          "id": "boss.2",
-          "type": "Boss",
-          "weight": 0.08,
-          "encounterIds": [
-            "fire_ant"
-          ],
-          "featuredEncounterId": "fire_ant"
-        }
-      ],
-      "difficulties": [
-        {
-          "id": "hives_abyss",
-          "difficulty": 1,
-          "minRooms": 12,
-          "maxRooms": 14,
-          "rewardTable": {
-            "firstClearRewards": [
-              {
-                "itemId": "item.monster_core.lesser",
-                "minAmount": 6,
-                "maxAmount": 6
-              },
-              {
-                "itemId": "blueprint_venom_touched_sword",
-                "minAmount": 1,
-                "maxAmount": 1
-              }
-            ],
-            "completionRewards": [
-              {
-                "itemId": "blueprint_venom_touched_sword",
-                "minAmount": 1,
-                "maxAmount": 1,
-                "chance": 0.05
-              },
-              {
-                "itemId": "venom_gland",
-                "minAmount": 1,
-                "maxAmount": 1,
-                "chance": 0.22
-              }
-            ]
-          },
-          "gatheringNodes": [
-            {
-              "id": "hives_abyss_chitin_nest",
-              "name": "Chitin Nest",
-              "type": "Skinning",
-              "levelRequirement": 1,
-              "procChance": 0.36,
-              "loot": [
-                {
-                  "itemId": "rawhide",
-                  "weight": 95,
-                  "minQuantity": 1,
-                  "maxQuantity": 3
-                },
-                {
-                  "itemId": "venom_gland",
-                  "weight": 5,
-                  "minQuantity": 1,
-                  "maxQuantity": 1,
-                  "isRare": true
-                }
-              ]
-            },
-            {
-              "id": "hives_abyss_resin_runoff",
-              "name": "Resinous Roots",
-              "type": "Woodcutting",
-              "levelRequirement": 1,
-              "procChance": 0.2,
-              "loot": [
-                {
-                  "itemId": "wood",
-                  "weight": 60,
-                  "minQuantity": 1,
-                  "maxQuantity": 2
-                },
-                {
-                  "itemId": "venom_gland",
-                  "weight": 8,
-                  "minQuantity": 1,
-                  "maxQuantity": 1,
-                  "isRare": true
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "id": "hives_abyss_ii",
-          "difficulty": 2,
-          "minRooms": 13,
-          "maxRooms": 15,
-          "rewardTable": {
-            "firstClearRewards": [
-              {
-                "itemId": "item.monster_core.greater",
-                "minAmount": 12,
-                "maxAmount": 12
-              },
-              {
-                "itemId": "blueprint_hivefang_dagger",
-                "minAmount": 1,
-                "maxAmount": 1
-              },
-              {
-                "itemId": "blueprint_warden",
-                "minAmount": 1,
-                "maxAmount": 1
-              }
-            ],
-            "completionRewards": [
-              {
-                "itemId": "blueprint_hivefang_dagger",
-                "minAmount": 1,
-                "maxAmount": 1,
-                "chance": 0.04
-              },
-              {
-                "itemId": "blueprint_warden",
-                "minAmount": 1,
-                "maxAmount": 1,
-                "chance": 0.035
-              },
-              {
-                "itemId": "royal_chitin_plate",
-                "minAmount": 1,
-                "maxAmount": 1,
-                "chance": 0.16
-              },
-              {
-                "itemId": "warden_sigil",
-                "minAmount": 1,
-                "maxAmount": 1,
-                "chance": 0.14
-              }
-            ]
-          },
-          "gatheringNodes": [
-            {
-              "id": "hives_abyss_ii_royal_nest",
-              "name": "Royal Chitin Nest",
-              "type": "Skinning",
-              "levelRequirement": 1,
-              "procChance": 0.4,
-              "loot": [
-                {
-                  "itemId": "rawhide",
-                  "weight": 95,
-                  "minQuantity": 1,
-                  "maxQuantity": 3
-                },
-                {
-                  "itemId": "royal_chitin_plate",
-                  "weight": 5,
-                  "minQuantity": 1,
-                  "maxQuantity": 1,
-                  "isRare": true
-                }
-              ]
-            },
-            {
-              "id": "hives_abyss_ii_ichor_pool",
-              "name": "Amber Roots",
-              "type": "Woodcutting",
-              "levelRequirement": 1,
-              "procChance": 0.22,
-              "loot": [
-                {
-                  "itemId": "wood",
-                  "weight": 60,
-                  "minQuantity": 1,
-                  "maxQuantity": 2
-                },
-                {
-                  "itemId": "venom_gland",
-                  "weight": 8,
-                  "minQuantity": 1,
-                  "maxQuantity": 1,
-                  "isRare": true
-                },
-                {
-                  "itemId": "royal_chitin_plate",
-                  "weight": 4,
-                  "minQuantity": 1,
-                  "maxQuantity": 1,
-                  "isRare": true
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "id": "hives_abyss_iii",
-          "difficulty": 3,
-          "minRooms": 14,
-          "maxRooms": 16,
-          "rewardTable": {
-            "firstClearRewards": [
-              {
-                "itemId": "item.monster_core.primal",
-                "minAmount": 24,
-                "maxAmount": 24
-              },
-              {
-                "itemId": "blueprint_primal",
-                "minAmount": 1,
-                "maxAmount": 1
-              }
-            ],
-            "completionRewards": [
-              {
-                "itemId": "blueprint_primal",
-                "minAmount": 1,
-                "maxAmount": 1,
-                "chance": 0.035
-              },
-              {
-                "itemId": "hive_ichor",
-                "minAmount": 1,
-                "maxAmount": 1,
-                "chance": 0.14
-              },
-              {
-                "itemId": "royal_chitin_plate",
-                "minAmount": 1,
-                "maxAmount": 1,
-                "chance": 0.12
-              }
-            ]
-          },
-          "gatheringNodes": [
-            {
-              "id": "hives_abyss_iii_hardened_nest",
-              "name": "Hardened Chitin Nest",
-              "type": "Skinning",
-              "levelRequirement": 1,
-              "procChance": 0.44,
-              "loot": [
-                {
-                  "itemId": "rawhide",
-                  "weight": 95,
-                  "minQuantity": 1,
-                  "maxQuantity": 3
-                },
-                {
-                  "itemId": "hive_ichor",
-                  "weight": 5,
-                  "minQuantity": 1,
-                  "maxQuantity": 1,
-                  "isRare": true
-                }
-              ]
-            },
-            {
-              "id": "hives_abyss_iii_living_resin_pool",
-              "name": "Living Roots",
-              "type": "Woodcutting",
-              "levelRequirement": 1,
-              "procChance": 0.24,
-              "loot": [
-                {
-                  "itemId": "wood",
-                  "weight": 60,
-                  "minQuantity": 1,
-                  "maxQuantity": 2
-                },
-                {
-                  "itemId": "hive_ichor",
-                  "weight": 8,
-                  "minQuantity": 1,
-                  "maxQuantity": 1,
-                  "isRare": true
-                },
-                {
-                  "itemId": "royal_chitin_plate",
-                  "weight": 5,
-                  "minQuantity": 1,
-                  "maxQuantity": 1,
-                  "isRare": true
                 }
               ]
             }

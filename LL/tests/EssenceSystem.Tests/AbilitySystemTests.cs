@@ -11,6 +11,7 @@ using Microsoft.Extensions.Configuration;
 using Services.LL.Combat.Layers.Resolution;
 using Services.LL.Combat.Layers.Orchestration.Models;
 using Services.LL.Combat.Layers.Resolution.Models;
+using Services.LL.Combat;
 using Services.LL.Combat.Engine;
 using Services.LL.Essences;
 using Services.LL.Interfaces.Combat.Resolution;
@@ -626,24 +627,23 @@ public sealed class AbilitySystemTests
     }
 
     [Fact]
-    public void Engine_prefers_taunting_targets_for_basic_attacks()
+    public void Engine_weights_taunting_targets_for_basic_attacks()
     {
-        var taunt = new StatusSpec
-        {
-            Id = "status.taunt",
-            Name = "Taunt",
-            StackingPolicy = AbilityStatusStackingPolicy.Refresh,
-            MaxStacks = 1,
-            DurationTicks = 30,
-            Tags = ["Control.Taunt"]
-        };
-        var statuses = AbilityCompiler.CompileStatuses([taunt]);
         var front = CreateCombatant("front", CombatTeam.Friendly, []);
         var taunter = CreateCombatant("taunter", CombatTeam.Friendly, []);
         var hostile = CreateCombatant("hostile", CombatTeam.Hostile, []);
-        taunter.Statuses.Add(new RuntimeStatus(statuses["status.taunt"], taunter, taunter, 1));
+        taunter.Conditions.Add(
+            new RuntimeCondition(
+                StandardConditionType.Taunt,
+                taunter,
+                taunter,
+                1,
+                30,
+                taunter.GetAttribute(AttributeType.Power),
+                1,
+                "condition.taunt"));
         var engine = new FastCombatEngine(
-            statuses,
+            new Dictionary<string, CompiledStatus>(),
             new FastCombatEngineOptions(MaxTicks: 1, BasicAttackIntervalTicks: 1));
 
         var result = engine.Run([front, taunter], [hostile]);
@@ -1298,7 +1298,7 @@ public sealed class AbilitySystemTests
             CreateJsonOptions());
         var catalog = provider.GetCatalog();
         var compiledAbilities = AbilityCompiler.CompileAbilities(
-            [catalog.AbilitiesById["ability.essence.legacy.large_rat.big"]]);
+            [catalog.AbilitiesById["ability.creature.large_rat.big"]]);
         var friendly = CreateCombatant("friendly", CombatTeam.Friendly, compiledAbilities.Values);
         var hostile = CreateCombatant("hostile", CombatTeam.Hostile, []);
         var engine = new FastCombatEngine(
@@ -1307,8 +1307,8 @@ public sealed class AbilitySystemTests
 
         engine.Run([friendly], [hostile]);
 
-        Assert.Equal(250, friendly.GetAttribute(AttributeType.MaxHealth));
-        Assert.Equal(250, friendly.Health);
+        Assert.Equal(220, friendly.GetAttribute(AttributeType.MaxHealth));
+        Assert.Equal(220, friendly.Health);
     }
 
     [Fact]
@@ -1326,6 +1326,139 @@ public sealed class AbilitySystemTests
         Assert.All(effects, effect => Assert.InRange(effect.ProcCoefficient, 0.01m, 2m));
         Assert.Contains(effects, effect => effect.ProcCoefficient < 1m);
         Assert.Contains(effects, effect => effect.Operation == AbilityEffectOperation.Damage && effect.ProcCoefficient < 1m);
+    }
+
+    [Fact]
+    public void Json_creature_profiles_resolve_every_authored_native_ability()
+    {
+        var contentRoot = FindApiContentRoot();
+        var options = CreateJsonOptions();
+        var profiles = new JsonCreatureAbilityDefinitionProvider(CreateConfig(), contentRoot, options);
+        var catalog = new JsonAbilityCatalogProvider(CreateConfig(), contentRoot, options).GetCatalog();
+        var monsterIds = new[]
+        {
+            "vampire_bat", "raven", "venomous_snake", "nightshade_blossom", "blood_zombie",
+            "lumo_wisp", "lumo_sentinel", "goblin", "goblin_archer", "goblin_warrior",
+            "goblin_shaman", "hobgoblin", "frost_imp", "crystal_wisp", "blue_slime",
+            "transparent_slime", "moss_lizard", "shadow_imp", "grave_hound", "lost_soul",
+            "grave_wisp", "skeleton", "pixie", "wood_nymph", "rainbow_slime",
+            "enchanted_fairy", "illusion_fox", "thornback_boar", "hollow_stag", "treant_sapling",
+            "glade_panther", "forest_spirit", "rotroot_shambler", "spider", "giant_spider",
+            "venomous_spiderling", "blackjaw_spider", "flame_imp", "smolder_rat", "cinder_beetle",
+            "red_slime", "giant_worm", "bog_mite", "green_slime", "large_rat", "viper",
+            "poisonous_rat", "rotfly_toad", "brown_slime", "cave_bat", "giant_bat", "undead"
+        };
+
+        var allAbilityIds = monsterIds
+            .Select(id => (MonsterId: $"monster.{id}", AbilityIds: profiles.GetAbilityIds($"monster.{id}")))
+            .ToArray();
+
+        Assert.Equal(52, allAbilityIds.Length);
+        Assert.All(allAbilityIds, profile =>
+            Assert.Equal(profile.MonsterId == "monster.hobgoblin" ? 3 : 2, profile.AbilityIds.Count));
+        Assert.Equal(105, allAbilityIds.SelectMany(x => x.AbilityIds).Distinct(StringComparer.OrdinalIgnoreCase).Count());
+        Assert.Equal(106, catalog.AbilitiesById.Count);
+        Assert.Contains("ability.summon.shadow_image.shadow_strike", catalog.AbilitiesById.Keys);
+        Assert.All(allAbilityIds.SelectMany(x => x.AbilityIds), abilityId =>
+        {
+            var ability = Assert.IsType<AbilitySpec>(catalog.AbilitiesById.GetValueOrDefault(abilityId));
+            Assert.StartsWith("essence.", ability.OwningEssenceId, StringComparison.Ordinal);
+            Assert.StartsWith("ability.creature.", ability.Id, StringComparison.Ordinal);
+        });
+    }
+
+    [Fact]
+    public void Json_essence_catalogue_contains_only_the_authored_creature_roster()
+    {
+        var contentRoot = FindApiContentRoot();
+        var options = CreateJsonOptions();
+        var definitions = new JsonEssenceDefinitionRepository(
+            CreateConfig(),
+            contentRoot,
+            options,
+            new EssenceDefinitionValidator());
+        var lootTables = new JsonCreatureEssenceLootTableRepository(
+            CreateConfig(),
+            contentRoot,
+            options,
+            definitions);
+        var itemPath = Path.Combine(contentRoot, "Data", "items", "items.json");
+        var items = JsonSerializer.Deserialize<List<JsonElement>>(File.ReadAllText(itemPath), options) ?? [];
+
+        var allDefinitions = definitions.GetAll();
+        var allLootTables = lootTables.GetAll();
+        var essenceItems = items.Where(item =>
+            item.TryGetProperty("itemType", out var itemType)
+            && itemType.GetString()?.Equals("Essence", StringComparison.OrdinalIgnoreCase) == true).ToList();
+
+        Assert.Equal(53, allDefinitions.Count);
+        Assert.Equal(52, allDefinitions.Select(x => x.SourceMonsterId).Distinct(StringComparer.OrdinalIgnoreCase).Count());
+        Assert.Equal(52, allLootTables.Count);
+        Assert.Equal(53, essenceItems.Count);
+        Assert.All(allDefinitions, definition =>
+        {
+            Assert.StartsWith("monster.", definition.SourceMonsterId, StringComparison.Ordinal);
+            Assert.StartsWith("ability.creature.", definition.ActiveAbilityId, StringComparison.Ordinal);
+            Assert.StartsWith("ability.creature.", definition.PassiveAbilityId, StringComparison.Ordinal);
+        });
+        Assert.Equal(2, allDefinitions.Count(x => x.SourceMonsterId == "monster.hobgoblin"));
+    }
+
+    [Fact]
+    public void Basic_attack_passives_modify_the_attack_that_triggered_them()
+    {
+        var passive = new AbilitySpec
+        {
+            Id = "ability.test.basic_attack_modifier",
+            Kind = AbilitySpecKind.Passive,
+            Name = "Basic Attack Modifier",
+            Triggers =
+            [
+                new()
+                {
+                    Event = AbilityTriggerEvent.OnBasicAttack,
+                    EffectIds = ["effect.test.basic_damage", "effect.test.basic_penetration"]
+                }
+            ],
+            Effects =
+            [
+                new()
+                {
+                    Id = "effect.test.basic_damage",
+                    Operation = AbilityEffectOperation.ModifyNextBasicAttackDamage,
+                    Target = AbilityTargetSelector.Self,
+                    BaseValue = 40
+                },
+                new()
+                {
+                    Id = "effect.test.basic_penetration",
+                    Operation = AbilityEffectOperation.ModifyNextBasicAttackArmorPenetration,
+                    Target = AbilityTargetSelector.Self,
+                    BaseValue = 50
+                }
+            ]
+        };
+        var compiled = AbilityCompiler.CompileAbilities([passive]);
+        var attacker = CreateCombatant("attacker", CombatTeam.Friendly, compiled.Values);
+        var defender = CreateCombatant("defender", CombatTeam.Hostile, []);
+        defender.AdjustAttribute(AttributeType.Armor, 100);
+        var engine = new FastCombatEngine(new Dictionary<string, CompiledStatus>(), new FastCombatEngineOptions(
+            MaxTicks: 1,
+            BasicAttackIntervalTicks: 1,
+            RandomSeed: 17));
+
+        var result = engine.Run([attacker], [defender]);
+
+        var hit = Assert.Single(result.EventLog, x =>
+            x.Source == "Basic Attack"
+            && x.ActorId == "attacker"
+            && x.EventType == EventType.Damage);
+        Assert.True(hit.Magnitude > 0);
+        Assert.Contains(result.EventLog, x => x.Source == "effect.test.basic_damage" && x.EventType == EventType.Buff);
+        Assert.Contains(result.EventLog, x => x.Source == "effect.test.basic_penetration" && x.EventType == EventType.Buff);
+        var remainingModifiers = attacker.ConsumeNextBasicAttackModifiers();
+        Assert.Equal(0, remainingModifiers.DamagePercent);
+        Assert.Equal(0, remainingModifiers.ArmorPenetration);
     }
 
     [Fact]
@@ -1418,9 +1551,9 @@ public sealed class AbilitySystemTests
             new EssenceDefinitionValidator());
         var simulator = new AbilityBalanceSimulator(provider, essenceRepository);
         var first = new AbilityBalanceTeamLoadout(
-            [new AbilityBalanceParticipantLoadout(["essence.legacy.large_rat"])]);
+            [new AbilityBalanceParticipantLoadout(["essence.large_rat"])]);
         var second = new AbilityBalanceTeamLoadout(
-            [new AbilityBalanceParticipantLoadout(["essence.legacy.flame_imp"])]);
+            [new AbilityBalanceParticipantLoadout(["essence.flame_imp"])]);
 
         var report = simulator.Run(new AbilityBalanceSimulationRequest(
             BattleCount: 6,
@@ -1436,8 +1569,8 @@ public sealed class AbilitySystemTests
         Assert.Equal(2, report.CandidateTeamCount);
         Assert.Equal(10, report.CandidatePoolSize);
         Assert.Equal(2, report.RankedCombinations.Count);
-        Assert.Contains(report.RankedCombinations, combination => combination.DisplayName == "Large Rat's Essence");
-        Assert.Contains(report.RankedCombinations, combination => combination.DisplayName == "Flame Imp's Essence");
+        Assert.Contains(report.RankedCombinations, combination => combination.DisplayName == "Large Rat Essence");
+        Assert.Contains(report.RankedCombinations, combination => combination.DisplayName == "Flame Imp Essence");
         Assert.All(report.RankedCombinations, combination => Assert.Equal(6, combination.Battles));
     }
 
@@ -1485,108 +1618,6 @@ public sealed class AbilitySystemTests
     }
 
     [Fact]
-    public void Json_catalog_skeleton_warrior_spiked_defense_reflects_melee_attackers()
-    {
-        var provider = new JsonAbilityCatalogProvider(
-            CreateConfig(),
-            FindApiContentRoot(),
-            CreateJsonOptions());
-        var catalog = provider.GetCatalog();
-        var compiledAbilities = AbilityCompiler.CompileAbilities(
-            [catalog.AbilitiesById["ability.essence.legacy.skeleton_warrior.spiked_defense"]]);
-        var friendly = CreateCombatant("friendly", CombatTeam.Friendly, compiledAbilities.Values);
-        var hostile = CreateCombatant("hostile", CombatTeam.Hostile, []);
-        var engine = new FastCombatEngine(
-            AbilityCompiler.CompileStatuses(catalog.Statuses),
-            new FastCombatEngineOptions(MaxTicks: 1, BasicAttackIntervalTicks: 1));
-
-        var result = engine.Run([friendly], [hostile]);
-
-        Assert.Contains(result.EventLog, x =>
-            x.Source == "effect.spiked_defense.reflect"
-            && x.ActorId == "friendly"
-            && x.TargetId == "hostile"
-            && x.EventType == EventType.Damage
-            && x.Magnitude == 6);
-    }
-
-    [Fact]
-    public void Json_catalog_plague_swipe_applies_two_target_dot()
-    {
-        var provider = new JsonAbilityCatalogProvider(
-            CreateConfig(),
-            FindApiContentRoot(),
-            CreateJsonOptions());
-        var catalog = provider.GetCatalog();
-        var compiledAbilities = AbilityCompiler.CompileAbilities(
-            [catalog.AbilitiesById["ability.essence.legacy.plague_ghoul.plague_swipe"]]);
-        var compiledStatuses = AbilityCompiler.CompileStatuses(catalog.Statuses);
-        var friendly = CreateCombatant("friendly", CombatTeam.Friendly, compiledAbilities.Values);
-        var firstHostile = CreateCombatant("hostile-1", CombatTeam.Hostile, []);
-        var secondHostile = CreateCombatant("hostile-2", CombatTeam.Hostile, []);
-        var engine = new FastCombatEngine(
-            compiledStatuses,
-            new FastCombatEngineOptions(MaxTicks: 12, BasicAttackIntervalTicks: 1000));
-
-        var result = engine.Run([friendly], [firstHostile, secondHostile]);
-
-        Assert.Contains(result.EventLog, x => x.Source == "status.plague_swipe_poison" && x.TargetId == "hostile-1");
-        Assert.Contains(result.EventLog, x => x.Source == "status.plague_swipe_poison" && x.TargetId == "hostile-2");
-        Assert.Equal(2, result.EventLog.Count(x => x.Source == "effect.plague_swipe.damage" && x.EventType == EventType.Damage));
-        Assert.Equal(2, result.EventLog.Count(x => x.Source == "effect.plague_swipe.dot" && x.EventType == EventType.Damage));
-    }
-
-    [Fact]
-    public void Json_catalog_protective_bone_barrier_grants_periodic_barrier()
-    {
-        var provider = new JsonAbilityCatalogProvider(
-            CreateConfig(),
-            FindApiContentRoot(),
-            CreateJsonOptions());
-        var catalog = provider.GetCatalog();
-        var compiledAbilities = AbilityCompiler.CompileAbilities(
-            [catalog.AbilitiesById["ability.essence.legacy.skeleton_mage.protective_bone_barrier"]]);
-        var friendly = CreateCombatant("friendly", CombatTeam.Friendly, compiledAbilities.Values);
-        var hostile = CreateCombatant("hostile", CombatTeam.Hostile, []);
-        var engine = new FastCombatEngine(
-            AbilityCompiler.CompileStatuses(catalog.Statuses),
-            new FastCombatEngineOptions(MaxTicks: 101, BasicAttackIntervalTicks: 1000));
-
-        var result = engine.Run([friendly], [hostile]);
-
-        Assert.Equal(25, friendly.Barrier);
-        Assert.Contains(result.EventLog, x =>
-            x.Source == "effect.protective_bone_barrier.periodic"
-            && x.TargetId == "friendly"
-            && x.EventType == EventType.RestoreBarrier
-            && x.Magnitude == 25);
-    }
-
-    [Fact]
-    public void Json_catalog_vile_feast_heals_once_on_death()
-    {
-        var provider = new JsonAbilityCatalogProvider(
-            CreateConfig(),
-            FindApiContentRoot(),
-            CreateJsonOptions());
-        var catalog = provider.GetCatalog();
-        var compiledAbilities = AbilityCompiler.CompileAbilities(
-            [catalog.AbilitiesById["ability.essence.legacy.ravenous_ghoul.vile_feast"]]);
-        var friendly = CreateCombatant("friendly", CombatTeam.Friendly, compiledAbilities.Values);
-        friendly.AdjustHealth(-120);
-        var firstHostile = CreateCombatant("hostile-1", CombatTeam.Hostile, [], maxHealth: 1);
-        var secondHostile = CreateCombatant("hostile-2", CombatTeam.Hostile, [], maxHealth: 1);
-        var engine = new FastCombatEngine(
-            AbilityCompiler.CompileStatuses(catalog.Statuses),
-            new FastCombatEngineOptions(MaxTicks: 3, BasicAttackIntervalTicks: 1));
-
-        var result = engine.Run([friendly], [firstHostile, secondHostile]);
-
-        Assert.Single(result.EventLog, x => x.Source == "effect.vile_feast.heal" && x.EventType == EventType.Heal);
-        Assert.Contains(result.EventLog, x => x.Source == "effect.vile_feast.heal" && x.Magnitude == 120);
-    }
-
-    [Fact]
     public void Json_catalog_illusion_fox_foxfire_only_retaliates_when_owner_is_attacked()
     {
         var provider = new JsonAbilityCatalogProvider(
@@ -1595,7 +1626,7 @@ public sealed class AbilitySystemTests
             CreateJsonOptions());
         var catalog = provider.GetCatalog();
         var compiledAbilities = AbilityCompiler.CompileAbilities(
-            [catalog.AbilitiesById["ability.essence.legacy.illusion_fox.foxfire_wisp"]]);
+            [catalog.AbilitiesById["ability.creature.illusion_fox.foxfire_wisp"]]);
         var compiledStatuses = AbilityCompiler.CompileStatuses(catalog.Statuses);
 
         var foxOwner = CreateCombatant("fox-owner", CombatTeam.Friendly, compiledAbilities.Values);
@@ -1631,7 +1662,7 @@ public sealed class AbilitySystemTests
             && x.ActorId == "fox-owner"
             && x.TargetId == "attacker"
             && x.EventType == EventType.Damage
-            && x.Magnitude == 8);
+            && x.Magnitude is >= 14 and <= 22);
         Assert.Equal(0, foxOwner.GetStatusStacks("status.foxfire_stack"));
     }
 
@@ -1664,7 +1695,16 @@ public sealed class AbilitySystemTests
         var hostileAbilities = AbilityCompiler.CompileAbilities([CreateDamageAbility("ability.hostile.hit", "Family.Test")]);
         var friendly = CreateCombatant("friendly", CombatTeam.Friendly, []);
         var hostile = CreateCombatant("hostile", CombatTeam.Hostile, hostileAbilities.Values);
-        hostile.Statuses.Add(new RuntimeStatus(statuses["status.feral_pounce_stunned"], hostile, hostile, 1));
+        hostile.Conditions.Add(
+            new RuntimeCondition(
+                StandardConditionType.Stun,
+                hostile,
+                hostile,
+                1,
+                30,
+                hostile.GetAttribute(AttributeType.Power),
+                1,
+                "condition.stun"));
         var engine = new FastCombatEngine(statuses, new FastCombatEngineOptions(MaxTicks: 1, BasicAttackIntervalTicks: 1));
 
         var result = engine.Run([friendly], [hostile]);
@@ -1749,7 +1789,7 @@ public sealed class AbilitySystemTests
         var result = engine.Run([friendly], [hostile]);
 
         Assert.Empty(hostile.Statuses);
-        Assert.Contains(result.EventLog, x => x.Source == "status.stack.consume" && x.EventType == EventType.StatusEffectExpired);
+        Assert.Contains(result.EventLog, x => x.Source == "status.stack.consume" && x.EventType == EventType.StatusEffectRemoved);
     }
 
     [Fact]
@@ -1790,8 +1830,8 @@ public sealed class AbilitySystemTests
         var result = engine.Run([friendly], [hostile]);
 
         Assert.Empty(hostile.Statuses);
-        Assert.Contains(result.EventLog, x => x.Source == "effect.remove.status" && x.EventType == EventType.StatusEffectExpired);
-        Assert.Contains(result.EventLog, x => x.Source == "effect.cleanse" && x.EventType == EventType.StatusEffectExpired);
+        Assert.Contains(result.EventLog, x => x.Source == "effect.remove.status" && x.EventType == EventType.StatusEffectRemoved);
+        Assert.Contains(result.EventLog, x => x.Source == "effect.cleanse" && x.EventType == EventType.StatusEffectCleansed);
     }
 
     [Fact]
@@ -1836,114 +1876,27 @@ public sealed class AbilitySystemTests
             CreateJsonOptions());
         var catalog = provider.GetCatalog();
 
-        Assert.Contains("ability.training.strike", catalog.AbilitiesById.Keys);
-        Assert.Contains("status.training.burn", catalog.StatusesById.Keys);
-        Assert.Equal("essence.training", catalog.OwningEssenceByAbilityId["ability.training.strike"]);
+        Assert.Contains("ability.creature.goblin.shiv_jab", catalog.AbilitiesById.Keys);
+        Assert.DoesNotContain("status.training.burn", catalog.StatusesById.Keys);
+        Assert.Equal("essence.goblin", catalog.OwningEssenceByAbilityId["ability.creature.goblin.shiv_jab"]);
 
         var compiledAbilities = AbilityCompiler.CompileAbilities(
             [
-                catalog.AbilitiesById["ability.training.strike"],
-                catalog.AbilitiesById["ability.training.guard"],
-                catalog.AbilitiesById["ability.training.burn"]
+                catalog.AbilitiesById["ability.creature.goblin.shiv_jab"],
+                catalog.AbilitiesById["ability.creature.lumo_wisp.lumo_barrier"],
+                catalog.AbilitiesById["ability.creature.flame_imp.firebomb_toss"]
             ]);
         var compiledStatuses = AbilityCompiler.CompileStatuses(catalog.Statuses);
         var friendly = CreateCombatant("json-friendly", CombatTeam.Friendly, compiledAbilities.Values);
         var hostile = CreateCombatant("json-hostile", CombatTeam.Hostile, []);
-        var engine = new FastCombatEngine(compiledStatuses, new FastCombatEngineOptions(MaxTicks: 40, RandomSeed: 7));
+        var engine = new FastCombatEngine(compiledStatuses, new FastCombatEngineOptions(MaxTicks: 70, RandomSeed: 7));
 
         var result = engine.Run([friendly], [hostile]);
 
         Assert.True(hostile.Health < hostile.GetAttribute(AttributeType.MaxHealth));
-        Assert.Contains(result.EventLog, x => x.Source == "effect.damage.main" && x.EventType == EventType.Damage);
-        Assert.Contains(result.EventLog, x => x.Source == "effect.barrier.main" && x.EventType == EventType.RestoreBarrier);
-        Assert.Contains(result.EventLog, x => x.Source == "effect.burn.dot" && x.EventType == EventType.Damage);
-        Assert.Contains(result.EventLog, x => x.Source == "effect.reflect.damage" && x.EventType == EventType.Damage);
-    }
-
-    [Fact]
-    public void Json_catalog_fixed_seed_golden_1v1_covers_buff_damage_reflect_and_defense()
-    {
-        var catalog = new JsonAbilityCatalogProvider(
-            CreateConfig(),
-            FindApiContentRoot(),
-            CreateJsonOptions()).GetCatalog();
-        var friendlyAbilities = CompileCatalogAbilities(
-            catalog,
-            "ability.essence.legacy.glade_panther.ambush_strike",
-            "ability.essence.legacy.glade_panther.razor_claws");
-        var hostileAbilities = CompileCatalogAbilities(
-            catalog,
-            "ability.essence.legacy.skeleton_warrior.bone_shield",
-            "ability.essence.legacy.skeleton_warrior.spiked_defense");
-        var statuses = AbilityCompiler.CompileStatuses(catalog.Statuses);
-        var panther = CreateCombatant("panther", CombatTeam.Friendly, friendlyAbilities.Values);
-        var skeleton = CreateCombatant("skeleton", CombatTeam.Hostile, hostileAbilities.Values);
-        var engine = new FastCombatEngine(statuses, new FastCombatEngineOptions(MaxTicks: 1, BasicAttackIntervalTicks: 1000, RandomSeed: 41));
-
-        var result = engine.Run([panther], [skeleton]);
-
-        Assert.Equal(BattleOutcome.Draw, result.Outcome);
-        Assert.Equal(1, result.Duration);
-        Assert.Equal(194, panther.Health);
-        Assert.Equal(174, skeleton.Health);
-        Assert.Equal(115, panther.GetAttribute(AttributeType.CritDamage));
-        Assert.Equal(10, skeleton.GetAttribute(AttributeType.DamageReduction));
-        Assert.Equal(
-            new (int Timestamp, string Source, EventType EventType, string? TargetId, int Magnitude)[]
-            {
-                (0, "effect.razor_claws.crit_damage", EventType.Buff, "panther", 15),
-                (0, "Ambush Strike", EventType.AbilityUse, null, 0),
-                (0, "effect.ambush.damage", EventType.Damage, "skeleton", 26),
-                (0, "effect.spiked_defense.reflect", EventType.Damage, "panther", 6),
-                (0, "Bone Shield", EventType.AbilityUse, null, 0),
-                (0, "effect.bone_shield.damage_reduction", EventType.Buff, "skeleton", 10)
-            },
-            result.EventLog.Select(x => (x.Timestamp, x.Source, x.EventType, (string?)x.TargetId, x.Magnitude)).ToArray());
-    }
-
-    [Fact]
-    public void Json_catalog_fixed_seed_golden_team_fight_covers_death_and_one_time_heal()
-    {
-        var catalog = new JsonAbilityCatalogProvider(
-            CreateConfig(),
-            FindApiContentRoot(),
-            CreateJsonOptions()).GetCatalog();
-        var mageAbilities = CompileCatalogAbilities(
-            catalog,
-            "ability.essence.legacy.skeleton_mage.siphon");
-        var pantherAbilities = CompileCatalogAbilities(
-            catalog,
-            "ability.essence.legacy.glade_panther.ambush_strike");
-        var ghoulAbilities = CompileCatalogAbilities(
-            catalog,
-            "ability.essence.legacy.ravenous_ghoul.vile_feast");
-        var statuses = AbilityCompiler.CompileStatuses(catalog.Statuses);
-        var mage = CreateCombatant("mage", CombatTeam.Friendly, mageAbilities.Values);
-        var panther = CreateCombatant("panther", CombatTeam.Friendly, pantherAbilities.Values);
-        var ghoul = CreateCombatant("ghoul", CombatTeam.Friendly, ghoulAbilities.Values);
-        ghoul.AdjustHealth(-50);
-        var frontTarget = CreateCombatant("front-target", CombatTeam.Hostile, [], maxHealth: 40);
-        var backTarget = CreateCombatant("back-target", CombatTeam.Hostile, []);
-        var engine = new FastCombatEngine(statuses, new FastCombatEngineOptions(MaxTicks: 1, BasicAttackIntervalTicks: 1000, RandomSeed: 41));
-
-        var result = engine.Run([mage, panther, ghoul], [frontTarget, backTarget]);
-
-        Assert.Equal(BattleOutcome.Draw, result.Outcome);
-        Assert.Equal(0, frontTarget.Health);
-        Assert.Equal(200, backTarget.Health);
-        Assert.Equal(200, ghoul.Health);
-        Assert.Single(result.EventLog, x => x.Source == "effect.vile_feast.heal" && x.EventType == EventType.Heal);
-        Assert.Equal(
-            new (int Timestamp, string Source, EventType EventType, string? TargetId, int Magnitude)[]
-            {
-                (0, "Siphon", EventType.AbilityUse, null, 0),
-                (0, "effect.siphon.damage", EventType.Damage, "front-target", 32),
-                (0, "Ambush Strike", EventType.AbilityUse, null, 0),
-                (0, "effect.ambush.damage", EventType.Damage, "front-target", 8),
-                (0, "effect.ambush.damage", EventType.Death, "front-target", 0),
-                (0, "effect.vile_feast.heal", EventType.Heal, "ghoul", 50)
-            },
-            result.EventLog.Select(x => (x.Timestamp, x.Source, x.EventType, (string?)x.TargetId, x.Magnitude)).ToArray());
+        Assert.Contains(result.EventLog, x => x.Source == "effect.creature.goblin.shiv_jab.damage" && x.EventType == EventType.Damage);
+        Assert.Contains(result.EventLog, x => x.Source == "effect.creature.lumo_wisp.lumo_barrier.barrier" && x.EventType == EventType.RestoreBarrier);
+        Assert.Contains(result.EventLog, x => x.Source == "condition.burn" && x.EventType == EventType.Damage);
     }
 
     [Fact]
@@ -2013,7 +1966,8 @@ public sealed class AbilitySystemTests
 
         Assert.True(report.IsComplete, string.Join(Environment.NewLine, report.Gaps.Select(x => $"{x.EssenceId} {x.Slot}: {x.Reason}")));
         Assert.Equal(report.RequiredSlotCount, report.CoveredSlotCount);
-        Assert.Equal(122, report.RequiredSlotCount);
+        Assert.Equal(106, report.RequiredSlotCount);
+        Assert.Equal(53, report.EssenceCount);
         Assert.Equal(report.EssenceCount, report.RuntimeLoadoutChecks.Count);
         Assert.All(report.RuntimeLoadoutChecks, check =>
         {
@@ -2021,131 +1975,10 @@ public sealed class AbilitySystemTests
             Assert.Null(check.Failure);
             Assert.Equal(2, check.AbilityIds.Count);
         });
-        Assert.DoesNotContain(report.Gaps, x => x.EssenceId == "essence.goblin_ambusher");
-        Assert.DoesNotContain(report.Gaps, x => x.EssenceId == "essence.skeleton_guardian");
-        Assert.DoesNotContain(report.Gaps, x => x.EssenceId == "essence.fire_ant");
-        Assert.DoesNotContain(report.Gaps, x => x.EssenceId == "essence.ant_worker");
-        Assert.DoesNotContain(report.Gaps, x => x.EssenceId == "essence.forest_spirit");
-        Assert.DoesNotContain(report.Gaps, x => x.EssenceId == "essence.wood_nymph");
-        Assert.DoesNotContain(report.Gaps, x => x.EssenceId == "essence.giant_spider");
-        Assert.DoesNotContain(report.Gaps, x => x.EssenceId == "essence.venomous_spiderling");
-        foreach (var essenceId in new[]
-        {
-            "essence.blackjaw_spider",
-            "essence.raven",
-            "essence.widow_stalker",
-            "essence.scarecrow",
-            "essence.lost_soul",
-            "essence.apparition",
-            "essence.specter",
-            "essence.zombie",
-            "essence.half_zombie",
-            "essence.undead",
-            "essence.blood_zombie",
-            "essence.giant_worm",
-            "essence.burrowed_horror",
-            "essence.cave_leech",
-            "essence.stonejaw_grub",
-            "essence.deep_burrower"
-        })
-        {
-            Assert.DoesNotContain(report.Gaps, x => x.EssenceId == essenceId);
-        }
-        Assert.DoesNotContain(report.Gaps, x => x.EssenceId == "essence.cave_bat");
-        Assert.DoesNotContain(report.Gaps, x => x.EssenceId == "essence.necroshade_wraith");
-        Assert.DoesNotContain(report.Gaps, x => x.EssenceId == "essence.legacy.goblin");
-        Assert.DoesNotContain(report.Gaps, x => x.EssenceId == "essence.legacy.training_goblin");
-        Assert.DoesNotContain(report.Gaps, x => x.EssenceId == "essence.legacy.goblin_warrior");
-        Assert.DoesNotContain(report.Gaps, x => x.EssenceId == "essence.legacy.goblin_archer");
-        Assert.DoesNotContain(report.Gaps, x => x.EssenceId == "essence.legacy.large_rat");
-        Assert.DoesNotContain(report.Gaps, x => x.EssenceId == "essence.legacy.flame_imp");
-        Assert.DoesNotContain(report.Gaps, x => x.EssenceId == "essence.legacy.frost_imp");
-        Assert.DoesNotContain(report.Gaps, x => x.EssenceId == "essence.legacy.shadow_imp");
-        Assert.DoesNotContain(report.Gaps, x => x.EssenceId == "essence.legacy.vampire_bat");
-        Assert.DoesNotContain(report.Gaps, x => x.EssenceId == "essence.legacy.blue_slime");
-        Assert.DoesNotContain(report.Gaps, x => x.EssenceId == "essence.legacy.brown_slime");
-        Assert.DoesNotContain(report.Gaps, x => x.EssenceId == "essence.legacy.green_slime");
-        Assert.DoesNotContain(report.Gaps, x => x.EssenceId == "essence.legacy.rainbow_slime");
-        Assert.DoesNotContain(report.Gaps, x => x.EssenceId == "essence.legacy.red_slime");
-        Assert.DoesNotContain(report.Gaps, x => x.EssenceId == "essence.legacy.transparent_slime");
-        Assert.DoesNotContain(report.Gaps, x => x.EssenceId == "essence.legacy.enchanted_fairy");
-        Assert.DoesNotContain(report.Gaps, x => x.EssenceId == "essence.legacy.glade_panther");
-        Assert.DoesNotContain(report.Gaps, x => x.EssenceId == "essence.legacy.illusion_fox");
-        Assert.DoesNotContain(report.Gaps, x => x.EssenceId == "essence.legacy.nightshade_blossom");
-        Assert.DoesNotContain(report.Gaps, x => x.EssenceId == "essence.legacy.pixie");
-        Assert.DoesNotContain(report.Gaps, x => x.EssenceId == "essence.legacy.hobgoblin");
-        Assert.DoesNotContain(report.Gaps, x => x.EssenceId == "essence.legacy.feral_ghoul");
-        Assert.DoesNotContain(report.Gaps, x => x.EssenceId == "essence.legacy.plague_ghoul");
-        Assert.DoesNotContain(report.Gaps, x => x.EssenceId == "essence.legacy.ravenous_ghoul");
-        Assert.DoesNotContain(report.Gaps, x => x.EssenceId == "essence.legacy.skeleton_archer");
-        Assert.DoesNotContain(report.Gaps, x => x.EssenceId == "essence.legacy.skeleton_mage");
-        Assert.DoesNotContain(report.Gaps, x => x.EssenceId == "essence.legacy.skeleton_warrior");
-        Assert.Contains(report.Slots, x => x.EssenceId == "essence.goblin_ambusher" && x.Slot == "Active" && x.AbilityId == "ability.essence.goblin_ambusher.cheap_shot");
-        Assert.Contains(report.Slots, x => x.EssenceId == "essence.goblin_ambusher" && x.Slot == "Passive" && x.AbilityId == "ability.essence.goblin_ambusher.cowards_opening");
-        Assert.Contains(report.Slots, x => x.EssenceId == "essence.skeleton_guardian" && x.Slot == "Active" && x.AbilityId == "ability.essence.skeleton_guardian.bone_bulwark");
-        Assert.Contains(report.Slots, x => x.EssenceId == "essence.skeleton_guardian" && x.Slot == "Passive" && x.AbilityId == "ability.essence.skeleton_guardian.rattle_guard");
-        Assert.Contains(report.Slots, x => x.EssenceId == "essence.fire_ant" && x.Slot == "Active" && x.AbilityId == "ability.essence.fire_ant.burning_mandibles");
-        Assert.Contains(report.Slots, x => x.EssenceId == "essence.fire_ant" && x.Slot == "Passive" && x.AbilityId == "ability.essence.fire_ant.colony_heat");
-        Assert.Contains(report.Slots, x => x.EssenceId == "essence.cave_bat" && x.Slot == "Active" && x.AbilityId == "ability.essence.cave_bat.screech");
-        Assert.Contains(report.Slots, x => x.EssenceId == "essence.cave_bat" && x.Slot == "Passive" && x.AbilityId == "ability.essence.cave_bat.skittering_wings");
-        Assert.Contains(report.Slots, x => x.EssenceId == "essence.necroshade_wraith" && x.Slot == "Active" && x.AbilityId == "ability.essence.necroshade_wraith.wraith_hex");
-        Assert.Contains(report.Slots, x => x.EssenceId == "essence.necroshade_wraith" && x.Slot == "Passive" && x.AbilityId == "ability.essence.necroshade_wraith.grave_whisper");
-        Assert.Contains(report.Slots, x => x.EssenceId == "essence.legacy.goblin" && x.Slot == "Active" && x.AbilityId == "ability.essence.legacy.goblin.sneak_attack");
-        Assert.Contains(report.Slots, x => x.EssenceId == "essence.legacy.goblin" && x.Slot == "Passive" && x.AbilityId == "ability.essence.legacy.goblin.pocket_dirt");
-        Assert.Contains(report.Slots, x => x.EssenceId == "essence.legacy.training_goblin" && x.Slot == "Active" && x.AbilityId == "ability.essence.legacy.training_goblin.training_stab");
-        Assert.Contains(report.Slots, x => x.EssenceId == "essence.legacy.training_goblin" && x.Slot == "Passive" && x.AbilityId == "ability.essence.legacy.training_goblin.pocket_pebbles");
-        Assert.Contains(report.Slots, x => x.EssenceId == "essence.legacy.goblin_warrior" && x.Slot == "Active" && x.AbilityId == "ability.essence.legacy.goblin_warrior.raging_cleave");
-        Assert.Contains(report.Slots, x => x.EssenceId == "essence.legacy.goblin_warrior" && x.Slot == "Passive" && x.AbilityId == "ability.essence.legacy.goblin_warrior.reckless_assault");
-        Assert.Contains(report.Slots, x => x.EssenceId == "essence.legacy.goblin_archer" && x.Slot == "Active" && x.AbilityId == "ability.essence.legacy.goblin_archer.snipers_strike");
-        Assert.Contains(report.Slots, x => x.EssenceId == "essence.legacy.goblin_archer" && x.Slot == "Passive" && x.AbilityId == "ability.essence.legacy.goblin_archer.poisoned_arrows");
-        Assert.Contains(report.Slots, x => x.EssenceId == "essence.legacy.large_rat" && x.Slot == "Active" && x.AbilityId == "ability.essence.legacy.large_rat.tail_wrap");
-        Assert.Contains(report.Slots, x => x.EssenceId == "essence.legacy.large_rat" && x.Slot == "Passive" && x.AbilityId == "ability.essence.legacy.large_rat.big");
-        Assert.Contains(report.Slots, x => x.EssenceId == "essence.legacy.flame_imp" && x.Slot == "Active" && x.AbilityId == "ability.essence.legacy.flame_imp.firebomb_toss");
-        Assert.Contains(report.Slots, x => x.EssenceId == "essence.legacy.flame_imp" && x.Slot == "Passive" && x.AbilityId == "ability.essence.legacy.flame_imp.hot_aura");
-        Assert.Contains(report.Slots, x => x.EssenceId == "essence.legacy.frost_imp" && x.Slot == "Active" && x.AbilityId == "ability.essence.legacy.frost_imp.ice_touch");
-        Assert.Contains(report.Slots, x => x.EssenceId == "essence.legacy.frost_imp" && x.Slot == "Passive" && x.AbilityId == "ability.essence.legacy.frost_imp.cold_aura");
-        Assert.Contains(report.Slots, x => x.EssenceId == "essence.legacy.shadow_imp" && x.Slot == "Active" && x.AbilityId == "ability.essence.legacy.shadow_imp.shadow_image");
-        Assert.Contains(report.Slots, x => x.EssenceId == "essence.legacy.shadow_imp" && x.Slot == "Passive" && x.AbilityId == "ability.essence.legacy.shadow_imp.shadowy_presence");
-        Assert.Contains(report.Slots, x => x.EssenceId == "essence.legacy.vampire_bat" && x.Slot == "Active" && x.AbilityId == "ability.essence.legacy.vampire_bat.bloodthirsty_fangs");
-        Assert.Contains(report.Slots, x => x.EssenceId == "essence.legacy.vampire_bat" && x.Slot == "Passive" && x.AbilityId == "ability.essence.legacy.vampire_bat.dark_vitality");
-        Assert.Contains(report.Slots, x => x.EssenceId == "essence.legacy.blue_slime" && x.Slot == "Active" && x.AbilityId == "ability.essence.legacy.blue_slime.sweet_water");
-        Assert.Contains(report.Slots, x => x.EssenceId == "essence.legacy.blue_slime" && x.Slot == "Passive" && x.AbilityId == "ability.essence.legacy.blue_slime.absorptive_shell");
-        Assert.Contains(report.Slots, x => x.EssenceId == "essence.legacy.brown_slime" && x.Slot == "Active" && x.AbilityId == "ability.essence.legacy.brown_slime.mud_armor");
-        Assert.Contains(report.Slots, x => x.EssenceId == "essence.legacy.brown_slime" && x.Slot == "Passive" && x.AbilityId == "ability.essence.legacy.brown_slime.earthly_fortitude");
-        Assert.Contains(report.Slots, x => x.EssenceId == "essence.legacy.green_slime" && x.Slot == "Active" && x.AbilityId == "ability.essence.legacy.green_slime.acid_splash");
-        Assert.Contains(report.Slots, x => x.EssenceId == "essence.legacy.green_slime" && x.Slot == "Passive" && x.AbilityId == "ability.essence.legacy.green_slime.corrosive_ooze");
-        Assert.Contains(report.Slots, x => x.EssenceId == "essence.legacy.rainbow_slime" && x.Slot == "Active" && x.AbilityId == "ability.essence.legacy.rainbow_slime.unstable_colors");
-        Assert.Contains(report.Slots, x => x.EssenceId == "essence.legacy.rainbow_slime" && x.Slot == "Passive" && x.AbilityId == "ability.essence.legacy.rainbow_slime.colorful_shield");
-        Assert.Contains(report.Slots, x => x.EssenceId == "essence.legacy.red_slime" && x.Slot == "Active" && x.AbilityId == "ability.essence.legacy.red_slime.ignite_core");
-        Assert.Contains(report.Slots, x => x.EssenceId == "essence.legacy.red_slime" && x.Slot == "Passive" && x.AbilityId == "ability.essence.legacy.red_slime.fire_body");
-        Assert.Contains(report.Slots, x => x.EssenceId == "essence.legacy.transparent_slime" && x.Slot == "Active" && x.AbilityId == "ability.essence.legacy.transparent_slime.transparent_engulf");
-        Assert.Contains(report.Slots, x => x.EssenceId == "essence.legacy.transparent_slime" && x.Slot == "Passive" && x.AbilityId == "ability.essence.legacy.transparent_slime.transparent_shift");
-        Assert.Contains(report.Slots, x => x.EssenceId == "essence.legacy.enchanted_fairy" && x.Slot == "Active" && x.AbilityId == "ability.essence.legacy.enchanted_fairy.faes_embrace");
-        Assert.Contains(report.Slots, x => x.EssenceId == "essence.legacy.enchanted_fairy" && x.Slot == "Passive" && x.AbilityId == "ability.essence.legacy.enchanted_fairy.enchanted_charm");
-        Assert.Contains(report.Slots, x => x.EssenceId == "essence.legacy.glade_panther" && x.Slot == "Active" && x.AbilityId == "ability.essence.legacy.glade_panther.ambush_strike");
-        Assert.Contains(report.Slots, x => x.EssenceId == "essence.legacy.glade_panther" && x.Slot == "Passive" && x.AbilityId == "ability.essence.legacy.glade_panther.razor_claws");
-        Assert.Contains(report.Slots, x => x.EssenceId == "essence.legacy.illusion_fox" && x.Slot == "Active" && x.AbilityId == "ability.essence.legacy.illusion_fox.distracting_illusion");
-        Assert.Contains(report.Slots, x => x.EssenceId == "essence.legacy.illusion_fox" && x.Slot == "Passive" && x.AbilityId == "ability.essence.legacy.illusion_fox.foxfire_wisp");
-        Assert.Contains(report.Slots, x => x.EssenceId == "essence.legacy.nightshade_blossom" && x.Slot == "Active" && x.AbilityId == "ability.essence.legacy.nightshade_blossom.necrotic_spores");
-        Assert.Contains(report.Slots, x => x.EssenceId == "essence.legacy.nightshade_blossom" && x.Slot == "Passive" && x.AbilityId == "ability.essence.legacy.nightshade_blossom.twilight_bloom");
-        Assert.Contains(report.Slots, x => x.EssenceId == "essence.legacy.pixie" && x.Slot == "Active" && x.AbilityId == "ability.essence.legacy.pixie.pixie_burst");
-        Assert.Contains(report.Slots, x => x.EssenceId == "essence.legacy.pixie" && x.Slot == "Passive" && x.AbilityId == "ability.essence.legacy.pixie.resonant_chime");
-        Assert.Contains(report.Slots, x => x.EssenceId == "essence.legacy.hobgoblin" && x.Slot == "Active" && x.AbilityId == "ability.essence.legacy.hobgoblin.frenzy");
-        Assert.Contains(report.Slots, x => x.EssenceId == "essence.legacy.hobgoblin" && x.Slot == "Passive" && x.AbilityId == "ability.essence.legacy.hobgoblin.savage_onslaught");
-        Assert.Contains(report.Slots, x => x.EssenceId == "essence.legacy.feral_ghoul" && x.Slot == "Active" && x.AbilityId == "ability.essence.legacy.feral_ghoul.feral_pounce");
-        Assert.Contains(report.Slots, x => x.EssenceId == "essence.legacy.feral_ghoul" && x.Slot == "Passive" && x.AbilityId == "ability.essence.legacy.feral_ghoul.shredding_claws");
-        Assert.Contains(report.Slots, x => x.EssenceId == "essence.legacy.plague_ghoul" && x.Slot == "Active" && x.AbilityId == "ability.essence.legacy.plague_ghoul.plague_swipe");
-        Assert.Contains(report.Slots, x => x.EssenceId == "essence.legacy.plague_ghoul" && x.Slot == "Passive" && x.AbilityId == "ability.essence.legacy.plague_ghoul.pestilent_touch");
-        Assert.Contains(report.Slots, x => x.EssenceId == "essence.legacy.ravenous_ghoul" && x.Slot == "Active" && x.AbilityId == "ability.essence.legacy.ravenous_ghoul.draining_claws");
-        Assert.Contains(report.Slots, x => x.EssenceId == "essence.legacy.ravenous_ghoul" && x.Slot == "Passive" && x.AbilityId == "ability.essence.legacy.ravenous_ghoul.vile_feast");
-        Assert.Contains(report.Slots, x => x.EssenceId == "essence.legacy.skeleton_archer" && x.Slot == "Active" && x.AbilityId == "ability.essence.legacy.skeleton_archer.bone_arrow");
-        Assert.Contains(report.Slots, x => x.EssenceId == "essence.legacy.skeleton_archer" && x.Slot == "Passive" && x.AbilityId == "ability.essence.legacy.skeleton_archer.piercing_arrows");
-        Assert.Contains(report.Slots, x => x.EssenceId == "essence.legacy.skeleton_mage" && x.Slot == "Active" && x.AbilityId == "ability.essence.legacy.skeleton_mage.siphon");
-        Assert.Contains(report.Slots, x => x.EssenceId == "essence.legacy.skeleton_mage" && x.Slot == "Passive" && x.AbilityId == "ability.essence.legacy.skeleton_mage.protective_bone_barrier");
-        Assert.Contains(report.Slots, x => x.EssenceId == "essence.legacy.skeleton_warrior" && x.Slot == "Active" && x.AbilityId == "ability.essence.legacy.skeleton_warrior.bone_shield");
-        Assert.Contains(report.Slots, x => x.EssenceId == "essence.legacy.skeleton_warrior" && x.Slot == "Passive" && x.AbilityId == "ability.essence.legacy.skeleton_warrior.spiked_defense");
+        Assert.Equal(
+            essenceRepository.GetAll().Select(x => x.Id).Order(StringComparer.OrdinalIgnoreCase),
+            report.RuntimeLoadoutChecks.Select(x => x.EssenceId).Order(StringComparer.OrdinalIgnoreCase));
     }
-
     [Fact]
     public async Task Combat_engine_executor_runs_real_encounter_runtime()
     {
@@ -2155,7 +1988,7 @@ public sealed class AbilitySystemTests
             CreateJsonOptions());
         var friendlyCharacter = CreateSourceCharacter("Executor Friendly");
         var hostileCharacter = CreateSourceCharacter("Executor Hostile");
-        var friendlyCombatant = CreateCombatEntity("friendly-slot", friendlyCharacter, "essence.training");
+        var friendlyCombatant = CreateCombatEntity("friendly-slot", friendlyCharacter, "essence.goblin");
         var hostileCombatant = CreateCombatEntity("hostile-slot", hostileCharacter);
         var plan = new CombatEncounterPlan(
             Guid.NewGuid(),
@@ -2177,9 +2010,8 @@ public sealed class AbilitySystemTests
 
         Assert.Equal(plan.StartsAt, result.StartedAt);
         Assert.True(result.Duration > 0);
-        Assert.Contains(result.EventLog, x => x.Source == "effect.damage.main" && x.EventType == EventType.Damage);
-        Assert.Contains(result.EventLog, x => x.Source == "effect.burn.dot" && x.EventType == EventType.Damage);
-        Assert.Contains(result.EventLog, x => x.Source == "effect.reflect.damage" && x.EventType == EventType.Damage);
+        Assert.Contains(result.EventLog, x => x.Source == "effect.creature.goblin.shiv_jab.damage" && x.EventType == EventType.Damage);
+        Assert.Contains(result.EventLog, x => x.Source == "condition.bleed" && x.EventType == EventType.Damage);
     }
 
     [Fact]
@@ -2614,37 +2446,6 @@ public sealed class AbilitySystemTests
         Assert.Contains(result.EventLog, x => x.Source == "Temporary Modifier Strike" && x.EventType == EventType.AbilityUse);
     }
 
-    [Theory]
-    [InlineData(CombatMode.Idle)]
-    [InlineData(CombatMode.Dungeon)]
-    [InlineData(CombatMode.Pvp)]
-    [InlineData(CombatMode.Raid)]
-    public async Task Combat_engine_executor_runs_real_loadout_golden_contracts(CombatMode mode)
-    {
-        var runtime = CreateRealEssenceEncounterRuntime(
-            mode,
-            ["essence.legacy.green_slime"],
-            ["essence.legacy.skeleton_warrior"],
-            out _,
-            out _);
-        var provider = new JsonAbilityCatalogProvider(
-            CreateConfig(),
-            FindApiContentRoot(),
-            CreateJsonOptions());
-        var executor = new CombatEngineExecutor(provider);
-
-        var result = await executor.ExecuteAsync(runtime, CancellationToken.None);
-
-        Assert.Equal(runtime.Plan.StartsAt, result.StartedAt);
-        Assert.True(result.Duration > 0);
-        Assert.NotEmpty(result.EventLog);
-        Assert.NotEmpty(result.EntityStats);
-        Assert.Contains(result.EventLog, x => x.Source == "Acid Splash" && x.EventType == EventType.AbilityUse && x.ActorId == "friendly-slot");
-        Assert.Contains(result.EventLog, x => x.Source == "status.green_slime.poison" && x.EventType == EventType.StatusEffect && x.TargetId == "hostile-slot");
-        Assert.Contains(result.EventLog, x => x.Source == "effect.green_slime_poison.dot" && x.EventType == EventType.Damage && x.Magnitude == 4);
-        Assert.Contains(result.EventLog, x => x.Source == "effect.spiked_defense.reflect" && x.EventType == EventType.Damage && x.TargetId == "friendly-slot" && x.Magnitude == 6);
-    }
-
     [Fact]
     public async Task Combat_engine_executor_illusion_fox_passive_retaliates_when_holder_is_attacked()
     {
@@ -2656,7 +2457,7 @@ public sealed class AbilitySystemTests
         var foxCharacter = CreateSourceCharacter("Illusion Fox Holder");
         var hostileCharacter = CreateSourceCharacter("Hostile Attacker");
         var allyCombatant = CreateCombatEntity("ally-slot", allyCharacter);
-        var foxCombatant = CreateCombatEntity("fox-slot", foxCharacter, "essence.legacy.illusion_fox");
+        var foxCombatant = CreateCombatEntity("fox-slot", foxCharacter, "essence.illusion_fox");
         var hostileCombatant = CreateCombatEntity("hostile-slot", hostileCharacter);
         var plan = new CombatEncounterPlan(
             Guid.NewGuid(),
@@ -2690,7 +2491,7 @@ public sealed class AbilitySystemTests
             && x.ActorId == "fox-slot"
             && x.TargetId == "fox-slot"
             && x.EventType == EventType.StatusEffect);
-        Assert.Equal(8, foxfire.Magnitude);
+        Assert.InRange(foxfire.Magnitude, 14, 22);
         Assert.Contains(result.EventLog, x =>
             x.Source == "Basic Attack"
             && x.ActorId == "hostile-slot"
@@ -2709,7 +2510,7 @@ public sealed class AbilitySystemTests
     {
         var runtime = CreateRealEssenceEncounterRuntime(
             CombatMode.Idle,
-            ["essence.legacy.shadow_imp"],
+            ["essence.shadow_imp"],
             [],
             out _,
             out _);
@@ -2721,15 +2522,15 @@ public sealed class AbilitySystemTests
 
         var result = await executor.ExecuteAsync(runtime, CancellationToken.None);
         var summonLog = result.EventLog.First(x =>
-            x.Source == "effect.shadow_image.summon"
+            x.Source == "effect.creature.shadow_imp.shadow_image.summon"
             && x.ActorId == "friendly-slot"
             && x.EventType == EventType.Summon);
         var summonId = summonLog.TargetId;
 
         Assert.NotNull(summonLog.CombatEntity);
-        Assert.Equal("Shadow Image", summonLog.CombatEntity!.Name);
+        Assert.Equal("Creature Shadow Image", summonLog.CombatEntity!.Name);
         Assert.Equal("shadow_image", summonLog.CombatEntity.ImagePath);
-        Assert.True(provider.GetCatalog().SummonsById.ContainsKey("shadowImage"));
+        Assert.True(provider.GetCatalog().SummonsById.ContainsKey("creatureShadowImage"));
         Assert.Contains(result.EventLog, x =>
             x.ActorId == summonId
             && x.Source == "Shadow Strike"
@@ -3077,7 +2878,7 @@ public sealed class AbilitySystemTests
     {
         var runtime = CreateRealEssenceEncounterRuntime(
             CombatMode.Idle,
-            ["essence.legacy.goblin"],
+            ["essence.goblin"],
             [],
             out _,
             out _);
@@ -3089,18 +2890,17 @@ public sealed class AbilitySystemTests
 
         var result = await executor.ExecuteAsync(runtime, CancellationToken.None);
         var friendlyStats = result.EntityStats.Single(x => x.EntityId == "friendly-slot");
-        var sneakAttack = Assert.Single(friendlyStats.Abilities, x => x.Name == "Sneak Attack");
+        var shivJab = Assert.Single(friendlyStats.Abilities, x => x.Name == "Shiv Jab");
 
-        Assert.True(sneakAttack.Uses > 0);
-        Assert.True(sneakAttack.TotalDamage > 0);
-        Assert.DoesNotContain(friendlyStats.Abilities, x => x.Name == "Sneak Attack Bleed");
+        Assert.True(shivJab.Uses > 0);
+        Assert.True(shivJab.TotalDamage > 0);
         Assert.Contains(result.EventLog, x =>
-            x.Source == "effect.initial.damage"
-            && x.StatsSource == "Sneak Attack"
+            x.Source == "effect.creature.goblin.shiv_jab.damage"
+            && x.StatsSource == "Shiv Jab"
             && x.EventType == EventType.Damage);
         Assert.Contains(result.EventLog, x =>
-            x.Source == "effect.bleed.dot"
-            && x.StatsSource == "Sneak Attack"
+            x.Source == "condition.bleed"
+            && x.StatsSource == "Shiv Jab"
             && x.EventType == EventType.Damage);
     }
 
@@ -3109,7 +2909,7 @@ public sealed class AbilitySystemTests
     {
         var runtime = CreateRealEssenceEncounterRuntime(
             CombatMode.Idle,
-            ["essence.legacy.goblin_warrior"],
+            ["essence.goblin_warrior"],
             [],
             out _,
             out _);
@@ -3121,13 +2921,13 @@ public sealed class AbilitySystemTests
 
         var result = await executor.ExecuteAsync(runtime, CancellationToken.None);
         var friendlyStats = result.EntityStats.Single(x => x.EntityId == "friendly-slot");
-        var recklessAssault = Assert.Single(friendlyStats.Abilities, x => x.Name == "Reckless Assault");
+        var relentless = Assert.Single(friendlyStats.Abilities, x => x.Name == "Relentless");
 
-        Assert.Equal(1, recklessAssault.Uses);
-        Assert.Equal(2, result.EventLog.Count(x =>
+        Assert.Equal(1, relentless.Uses);
+        Assert.Single(result.EventLog, x =>
             x.ActorId == "friendly-slot"
-            && x.StatsSource == "Reckless Assault"
-            && x.EventType is EventType.Buff or EventType.Debuff));
+            && x.StatsSource == "Relentless"
+            && x.EventType == EventType.Buff);
     }
 
     [Fact]
@@ -3197,7 +2997,7 @@ public sealed class AbilitySystemTests
         Assert.True(result.Duration > 0);
         Assert.NotEmpty(result.EventLog);
         Assert.NotEmpty(result.EntityStats);
-        Assert.Contains(result.EventLog, x => x.Source == "effect.damage.main" && x.EventType == EventType.Damage);
+        Assert.Contains(result.EventLog, x => x.Source == "effect.creature.goblin.shiv_jab.damage" && x.EventType == EventType.Damage);
     }
 
     [Fact]
@@ -3306,7 +3106,7 @@ public sealed class AbilitySystemTests
     {
         friendlyCharacter = CreateSourceCharacter("Executor Friendly");
         hostileCharacter = CreateSourceCharacter("Executor Hostile");
-        var friendlyCombatant = CreateCombatEntity("friendly-slot", friendlyCharacter, "essence.training");
+        var friendlyCombatant = CreateCombatEntity("friendly-slot", friendlyCharacter, "essence.goblin");
         var hostileCombatant = CreateCombatEntity("hostile-slot", hostileCharacter);
         var plan = new CombatEncounterPlan(
             encounterId ?? Guid.NewGuid(),
