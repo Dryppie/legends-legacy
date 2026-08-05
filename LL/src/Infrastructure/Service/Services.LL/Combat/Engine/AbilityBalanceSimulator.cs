@@ -271,8 +271,38 @@ public sealed class AbilityBalanceSimulator : IAbilityBalanceSimulator
             .SelectMany(equipment => equipment.AttributeModifiers)
             .Cast<AttributeModifierBase>();
 
-        return AttributeCalculator.CalculateProjectedAttributes(baseAttributes, equipmentModifiers);
+        var participantAttributes = AttributeCalculator.CalculateProjectedAttributes(
+            baseAttributes,
+            equipmentModifiers);
+        if (profile == CanonicalPartyProfile.Balanced)
+            EqualizePhysicalAndMagicalMitigation(participantAttributes);
+
+        return participantAttributes;
     }
+
+    private static void EqualizePhysicalAndMagicalMitigation(
+        IDictionary<AttributeType, float> attributes)
+    {
+        var totalDefense = Math.Max(
+            0,
+            GetAttribute(attributes, AttributeType.Armor)
+            + GetAttribute(attributes, AttributeType.Resistance));
+        var penetrationDifference =
+            GetAttribute(attributes, AttributeType.ArmorPenetration)
+            - GetAttribute(attributes, AttributeType.MagicPenetration);
+        var armor = Math.Clamp(
+            (totalDefense + penetrationDifference) / 2f,
+            0,
+            totalDefense);
+
+        attributes[AttributeType.Armor] = armor;
+        attributes[AttributeType.Resistance] = totalDefense - armor;
+    }
+
+    private static float GetAttribute(
+        IDictionary<AttributeType, float> attributes,
+        AttributeType attributeType) =>
+        attributes.TryGetValue(attributeType, out var value) ? value : 0;
 
     private static void ReportProgress(
         Action<AbilityBalanceSimulationProgress>? progress,

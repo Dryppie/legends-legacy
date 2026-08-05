@@ -2,6 +2,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Application.Interfaces.Services.LL.Essences;
 using Domain.Helpers;
+using Domain.Models.Attributes;
 using Domain.Models.Items;
 using Domain.Models.Professions.Crafting.V2;
 using Microsoft.Extensions.Configuration;
@@ -62,6 +63,13 @@ public sealed class CanonicalEquipmentBuildFactoryTests
         Assert.Equal(
             JsonSerializer.Serialize(report.BattleSummaries),
             JsonSerializer.Serialize(repeated.BattleSummaries));
+        var physicalMitigation = AttributeCombatRules.CalculateDefenseMitigation(
+            report.ParticipantAttributes[nameof(AttributeType.Armor)],
+            report.ParticipantAttributes[nameof(AttributeType.ArmorPenetration)]);
+        var magicalMitigation = AttributeCombatRules.CalculateDefenseMitigation(
+            report.ParticipantAttributes[nameof(AttributeType.Resistance)],
+            report.ParticipantAttributes[nameof(AttributeType.MagicPenetration)]);
+        Assert.Equal(physicalMitigation, magicalMitigation, precision: 6);
     }
 
     [Fact]
