@@ -60,7 +60,7 @@ public sealed class PlayerEssenceArchiveEntryConverter : ITypeConverter<PlayerEs
             missing,
             GetAscendInfo(essence, definition, canAscend),
             GetEvolveInfo(essence, definition, canEvolve),
-            GetAttributeBonuses(definition, essence).ToList(),
+            [],
             MapAbility(definition.ActiveAbility, essence),
             MapAbility(definition.PassiveAbility, essence));
     }
@@ -143,9 +143,6 @@ public sealed class PlayerEssenceArchiveEntryConverter : ITypeConverter<PlayerEs
         if (!string.IsNullOrWhiteSpace(definition.Evolution.Description))
             effects.Add(definition.Evolution.Description);
 
-        if (definition.Evolution.AttributeModifierChanges.Count > 0)
-            effects.Add($"Adds {definition.Evolution.AttributeModifierChanges.Count} evolved attribute bonus changes.");
-
         if (definition.Evolution.ActiveAbilityModifiers.Count > 0)
             effects.Add("Enhances the active ability.");
 
@@ -186,15 +183,6 @@ public sealed class PlayerEssenceArchiveEntryConverter : ITypeConverter<PlayerEs
             .Select(x => x.Length == 0 ? x : char.ToUpperInvariant(x[0]) + x[1..]);
 
         return string.Join(' ', parts);
-    }
-
-    private static IEnumerable<EssenceAttributeBonusDto> GetAttributeBonuses(EssenceDefinition definition, PlayerEssence essence)
-    {
-        var bonuses = definition.AttributeBonuses.Concat(essence.IsEvolved ? definition.Evolution.AttributeModifierChanges : []);
-        foreach (var bonus in bonuses)
-        {
-            yield return new(bonus.Attribute, bonus.ModifierKind.ToString(), bonus.BaseValue, bonus.BaseValue);
-        }
     }
 
     private EssenceAbilityDto MapAbility(AbilitySpec ability, PlayerEssence essence) =>

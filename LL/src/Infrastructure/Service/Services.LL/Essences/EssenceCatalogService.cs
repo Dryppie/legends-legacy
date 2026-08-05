@@ -91,9 +91,7 @@ public sealed class EssenceCatalogService : IEssenceCatalogService
             essence.Rarity.ToString(),
             itemId,
             essence.Tags,
-            essence.AttributeBonuses
-                .Select(x => new EssenceCatalogAttributeBonus(x.Attribute.ToString(), x.BaseValue))
-                .ToList(),
+            [],
             activeAbility is null ? null : BuildAbility(activeAbility),
             passiveAbility is null ? null : BuildAbility(passiveAbility));
     }

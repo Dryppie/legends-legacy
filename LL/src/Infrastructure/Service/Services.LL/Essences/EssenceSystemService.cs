@@ -402,16 +402,10 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
         }
     }
 
-    public async Task<IReadOnlyList<AttributeModifierBase>> GetAttunedAttributeModifiersAsync(Guid characterId, CancellationToken cancellationToken)
-    {
-        var loadout = await ResolveAsync(characterId, cancellationToken);
-        return loadout.AttributeModifiers;
-    }
+    public Task<IReadOnlyList<AttributeModifierBase>> GetAttunedAttributeModifiersAsync(Guid characterId, CancellationToken cancellationToken) =>
+        Task.FromResult<IReadOnlyList<AttributeModifierBase>>([]);
 
-    public IReadOnlyList<AttributeModifierBase> GetAttunedAttributeModifiers(IEnumerable<PlayerEssence> essences)
-    {
-        return Resolve(Guid.Empty, essences).AttributeModifiers;
-    }
+    public IReadOnlyList<AttributeModifierBase> GetAttunedAttributeModifiers(IEnumerable<PlayerEssence> essences) => [];
 
     public async Task<IReadOnlyList<AbilitySpec>> GetAttunedAbilitiesAsync(Guid characterId, CancellationToken cancellationToken)
     {
@@ -447,7 +441,6 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
     public EssenceCombatLoadout Resolve(Guid characterId, IEnumerable<PlayerEssence> equippedEssences)
     {
         var essences = equippedEssences.ToList();
-        var attributeModifiers = new List<AttributeModifierBase>();
         var tags = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
         foreach (var essence in essences)
@@ -457,22 +450,12 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
 
             foreach (var tag in GetEssenceTags(definition, essence))
                 tags.Add(tag);
-
-            foreach (var bonus in GetAttributeBonusDefinitions(definition, essence))
-            {
-                attributeModifiers.Add(new EssenceAttributeModifier(
-                    bonus.Attribute,
-                    (float)GetAttributeBonusValue(bonus),
-                    bonus.ModifierKind == EssenceModifierKind.Percent
-                        ? ModifierType.Additive
-                        : ModifierType.Flat));
-            }
         }
 
         return new EssenceCombatLoadout(
             characterId,
             essences,
-            attributeModifiers,
+            [],
             tags);
     }
 
@@ -810,14 +793,8 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
             : string.Empty;
     }
 
-    private static IEnumerable<EssenceAttributeBonusDefinition> GetAttributeBonusDefinitions(EssenceDefinition definition, PlayerEssence essence) =>
-        definition.AttributeBonuses.Concat(essence.IsEvolved ? definition.Evolution.AttributeModifierChanges : []);
-
     private static IEnumerable<string> GetEssenceTags(EssenceDefinition definition, PlayerEssence essence) =>
         definition.Tags.Concat(essence.IsEvolved ? definition.Evolution.AddsTags : []);
-
-    private static double GetAttributeBonusValue(EssenceAttributeBonusDefinition bonus) =>
-        bonus.BaseValue;
 
     private static EssenceOperationResult Ok(string message) => new(true, message);
     private static EssenceOperationResult Fail(string message) => new(false, message);

@@ -239,7 +239,7 @@ Add-Creature 'Goblin' 'goblin' @(
 )
 
 Add-Creature 'Goblin Archer' 'goblin_archer' @(
-    (New-Ability 'Goblin Archer' 'goblin_archer' 'snipers_strike' Active "Sniper's Strike" 'Deal 100% ranged Physical Damage with +50% Critical Chance. Authored cost: 22 (resource unspecified).' @(
+    (New-Ability 'Goblin Archer' 'goblin_archer' 'snipers_strike' Active "Sniper's Strike" 'Deal 100% ranged Physical Damage with +50% Critical Chance.' @(
         (New-Effect 'effect.creature.goblin_archer.snipers_strike.damage' Damage RandomEnemy 0 Power 1.00 -AttackType Ranged -DamageType Physical -CritChanceBonus 50)
     ) -Cooldown 250),
     (New-Ability 'Goblin Archer' 'goblin_archer' 'poisoned_arrows' Passive 'Poisoned Arrows' 'Ranged attacks have a 10% chance to apply Poison(10).' @(

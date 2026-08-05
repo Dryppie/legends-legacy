@@ -70,16 +70,15 @@ public sealed class EssenceDefinitionValidatorTests
     }
 
     [Fact]
-    public void Validate_accepts_content_facing_stat_system_attributes()
+    public void Validate_rejects_legacy_essence_attribute_bonuses()
     {
         var definition = ValidDefinition();
         definition.AttributeBonuses.Add(new EssenceAttributeBonusDefinition { Attribute = AttributeType.Power, BaseValue = 2 });
-        definition.AttributeBonuses.Add(new EssenceAttributeBonusDefinition { Attribute = AttributeType.MaxHealth, BaseValue = 5 });
-        definition.AttributeBonuses.Add(new EssenceAttributeBonusDefinition { Attribute = AttributeType.SummonPower, BaseValue = 3 });
+        definition.Evolution.AttributeModifierChanges.Add(new EssenceAttributeBonusDefinition { Attribute = AttributeType.MaxHealth, BaseValue = 5 });
 
         var errors = _validator.Validate([definition]);
 
-        Assert.DoesNotContain(errors, error => error.Contains("attribute", StringComparison.OrdinalIgnoreCase));
+        Assert.Contains(errors, error => error.Contains("attribute bonuses are no longer supported", StringComparison.OrdinalIgnoreCase));
     }
 
     [Fact]
@@ -136,6 +135,11 @@ public sealed class EssenceDefinitionValidatorTests
             _validator);
 
         Assert.NotEmpty(repository.GetAll());
+        Assert.All(repository.GetAll(), definition =>
+        {
+            Assert.Empty(definition.AttributeBonuses);
+            Assert.Empty(definition.Evolution.AttributeModifierChanges);
+        });
     }
 
     [Fact]

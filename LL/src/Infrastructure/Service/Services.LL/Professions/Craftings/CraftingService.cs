@@ -538,7 +538,9 @@ public class CraftingService : ICraftingService
         itemBases.TryGetValue(recipe.OutputItemId, out var itemBase);
         var baseDesign = EquipmentCraftingDesignComposer.Compose(recipe, null);
         var blueprints = _definitions.GetBlueprints()
-            .Where(blueprint => EquipmentCraftingDesignComposer.IsCompatible(recipe, blueprint))
+            .Where(blueprint =>
+                blueprint.Enabled &&
+                EquipmentCraftingDesignComposer.IsCompatible(recipe, blueprint))
             .OrderBy(blueprint => blueprint.Name)
             .Select(blueprint =>
             {

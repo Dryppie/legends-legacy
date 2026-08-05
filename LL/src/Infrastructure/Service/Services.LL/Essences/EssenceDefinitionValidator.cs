@@ -26,19 +26,12 @@ public sealed class EssenceDefinitionValidator : IEssenceDefinitionValidator
             if (definition.PassiveAbility is not null && definition.PassiveAbility.Kind != AbilitySpecKind.Passive)
                 errors.Add($"{definition.Id}: passiveAbilityId '{definition.PassiveAbilityId}' must reference a Passive ability definition.");
             if (definition.Evolution is null || string.IsNullOrWhiteSpace(definition.Evolution.Id)) errors.Add($"{definition.Id}: exactly one evolution is required.");
-            if (definition.AttributeBonuses.Count == 0) errors.Add($"{definition.Id}: at least one attribute bonus is required.");
+            if (definition.AttributeBonuses.Count > 0 || definition.Evolution?.AttributeModifierChanges.Count > 0)
+                errors.Add($"{definition.Id}: Essence attribute bonuses are no longer supported; use ability effects instead.");
 
             foreach (var tag in definition.Tags.Concat(definition.ActiveAbility?.Tags ?? []).Concat(definition.PassiveAbility?.Tags ?? []).Concat(definition.Evolution?.AddsTags ?? []))
             {
                 if (!IsKnownTag(tag)) errors.Add($"{definition.Id}: unknown tag '{tag}'.");
-            }
-
-            foreach (var bonus in definition.AttributeBonuses.Concat(definition.Evolution?.AttributeModifierChanges ?? []))
-            {
-                if (!AttributeCatalog.IsKnown(bonus.Attribute))
-                    errors.Add($"{definition.Id}: unknown attribute '{bonus.Attribute}'.");
-                else if (!AttributeCatalog.IsContentFacing(bonus.Attribute))
-                    errors.Add($"{definition.Id}: attribute '{bonus.Attribute}' is runtime-only and cannot be authored as an Essence bonus.");
             }
 
             ValidateAbility(definition.Id, definition.ActiveAbility, errors);

@@ -587,6 +587,8 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
         {
             Event = trigger.Event,
             InternalCooldownTicks = trigger.InternalCooldownTicks,
+            InitialDelayTicks = trigger.InitialDelayTicks,
+            EveryNthOccurrence = trigger.EveryNthOccurrence,
             Conditions = [.. trigger.Conditions.Select(CloneCondition)],
             EffectIds = [.. trigger.EffectIds]
         };
@@ -600,9 +602,16 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
             BaseValue = effect.BaseValue,
             ScalingAttribute = effect.ScalingAttribute,
             ScalingCoefficient = effect.ScalingCoefficient,
+            MaximumScalingCoefficient = effect.MaximumScalingCoefficient,
+            EventMagnitudeCoefficient = effect.EventMagnitudeCoefficient,
+            ScalingCondition = effect.ScalingCondition,
+            ConditionScalingCoefficient = effect.ConditionScalingCoefficient,
+            ScalingStatusId = effect.ScalingStatusId,
+            StatusScalingCoefficient = effect.StatusScalingCoefficient,
             Attribute = effect.Attribute,
             StatusId = effect.StatusId,
             Condition = effect.Condition,
+            AlternativeCondition = effect.AlternativeCondition,
             SummonId = effect.SummonId,
             SummonPowerMultiplier = effect.SummonPowerMultiplier,
             SummonHealthMultiplier = effect.SummonHealthMultiplier,
@@ -614,6 +623,8 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
             AttackType = effect.AttackType,
             DamageType = effect.DamageType,
             CritEligibility = effect.CritEligibility,
+            CritChanceBonus = effect.CritChanceBonus,
+            ArmorPenetrationBonus = effect.ArmorPenetrationBonus,
             LifeStealPercentage = effect.LifeStealPercentage,
             ProcCoefficient = effect.ProcCoefficient,
             Tags = [.. effect.Tags],
@@ -627,6 +638,8 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
             Subject = condition.Subject,
             StatusId = condition.StatusId,
             Condition = condition.Condition,
+            DamageType = condition.DamageType,
+            AttackType = condition.AttackType,
             Tag = condition.Tag,
             Value = condition.Value
         };

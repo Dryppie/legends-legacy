@@ -21,8 +21,8 @@ public sealed record CombatRatingModifierSource(
 
 /// <summary>
 /// Calculates deterministic Combat Rating from base attributes, equipped item
-/// attributes, and active Essence attributes. Essence abilities are deliberately
-/// outside this version's contract.
+/// attributes, plus explicitly supplied temporary attribute sources. Essence
+/// abilities are deliberately outside this version's contract.
 /// </summary>
 public static class CombatRatingCalculator
 {

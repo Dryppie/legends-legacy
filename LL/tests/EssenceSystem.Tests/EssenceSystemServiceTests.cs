@@ -203,7 +203,7 @@ public sealed class EssenceSystemServiceTests
     }
 
     [Fact]
-    public async Task Only_attuned_essences_contribute_bonuses_and_gain_combat_xp()
+    public async Task Attuned_essences_do_not_contribute_attributes_and_gain_combat_xp()
     {
         await using var db = CreateDb();
         var characterId = await SeedCharacterAndInventoryAsync(db, level: 20);
@@ -223,9 +223,7 @@ public sealed class EssenceSystemServiceTests
         var bonuses = await service.GetAttunedAttributeModifiersAsync(characterId, CancellationToken.None);
         await service.GrantCombatXpToAttunedEssencesAsync(characterId, 50, CancellationToken.None);
 
-        var attackPowerBonus = Assert.Single(bonuses, x => x.AttributeType == AttributeType.Power);
-        Assert.Equal(2, attackPowerBonus.Amount);
-        Assert.Equal(ModifierType.Flat, attackPowerBonus.ModifierType);
+        Assert.Empty(bonuses);
         Assert.Equal(50, db.PlayerEssences.Single(x => x.Id == attunedId).CurrentXp);
         Assert.Equal(0, db.PlayerEssences.Single(x => x.Id == inactiveId).CurrentXp);
     }
@@ -234,9 +232,9 @@ public sealed class EssenceSystemServiceTests
     public void Attribute_calculator_applies_flat_additive_and_multiplicative_phases()
     {
         var result = AttributeCalculator.CalculateModifiedValue(100, [
-            new EssenceAttributeModifier(AttributeType.Power, 10, ModifierType.Flat),
-            new EssenceAttributeModifier(AttributeType.Power, 25, ModifierType.Additive),
-            new EssenceAttributeModifier(AttributeType.Power, 50, ModifierType.Multiplicative)
+            new AbilityAttributeModifier(AttributeType.Power, 10, ModifierType.Flat),
+            new AbilityAttributeModifier(AttributeType.Power, 25, ModifierType.Additive),
+            new AbilityAttributeModifier(AttributeType.Power, 50, ModifierType.Multiplicative)
         ]);
 
         Assert.Equal(206, result);
@@ -256,11 +254,11 @@ public sealed class EssenceSystemServiceTests
                 [AttributeType.DodgeChance] = 0
             },
             [
-                new EssenceAttributeModifier(AttributeType.Power, 5, ModifierType.Flat),
-                new EssenceAttributeModifier(AttributeType.Fortitude, 2, ModifierType.Flat),
-                new EssenceAttributeModifier(AttributeType.MaxHealth, 10, ModifierType.Flat),
-                new EssenceAttributeModifier(AttributeType.DodgeChance, 3, ModifierType.Flat),
-                new EssenceAttributeModifier(AttributeType.Resistance, 4, ModifierType.Flat)
+                new AbilityAttributeModifier(AttributeType.Power, 5, ModifierType.Flat),
+                new AbilityAttributeModifier(AttributeType.Fortitude, 2, ModifierType.Flat),
+                new AbilityAttributeModifier(AttributeType.MaxHealth, 10, ModifierType.Flat),
+                new AbilityAttributeModifier(AttributeType.DodgeChance, 3, ModifierType.Flat),
+                new AbilityAttributeModifier(AttributeType.Resistance, 4, ModifierType.Flat)
             ]);
 
         Assert.Equal(15, projected[AttributeType.Power]);
@@ -272,7 +270,7 @@ public sealed class EssenceSystemServiceTests
     }
 
     [Fact]
-    public async Task Percent_essence_bonuses_emit_additive_stat_modifiers()
+    public async Task Legacy_essence_attribute_bonuses_do_not_emit_stat_modifiers()
     {
         await using var db = CreateDb();
         var characterId = await SeedCharacterAndInventoryAsync(db, level: 20);
@@ -293,9 +291,7 @@ public sealed class EssenceSystemServiceTests
 
         var modifiers = await service.GetAttunedAttributeModifiersAsync(characterId, CancellationToken.None);
 
-        var modifier = Assert.Single(modifiers, x => x.AttributeType == AttributeType.Power);
-        Assert.Equal(15, modifier.Amount);
-        Assert.Equal(ModifierType.Additive, modifier.ModifierType);
+        Assert.Empty(modifiers);
     }
 
     [Fact]
@@ -325,7 +321,7 @@ public sealed class EssenceSystemServiceTests
     }
 
     [Fact]
-    public async Task Resolve_combat_loadout_exposes_attuned_essence_abilities_bonuses_and_tags()
+    public async Task Resolve_combat_loadout_exposes_attuned_essences_and_tags_without_attributes()
     {
         await using var db = CreateDb();
         var characterId = await SeedCharacterAndInventoryAsync(db, level: 20);
@@ -347,14 +343,13 @@ public sealed class EssenceSystemServiceTests
         var loadout = await service.ResolveAsync(characterId, CancellationToken.None);
 
         Assert.Single(loadout.EquippedEssences);
-        Assert.Single(loadout.AttributeModifiers);
+        Assert.Empty(loadout.AttributeModifiers);
         Assert.Contains("Species.Beast", loadout.Tags);
         Assert.Contains("Mechanic.Execute", loadout.Tags);
-        Assert.Equal(2f, loadout.AttributeModifiers.Single().Amount);
     }
 
     [Fact]
-    public void Resolve_combat_loadout_does_not_scale_attributes_with_level_or_ascension()
+    public void Resolve_combat_loadout_ignores_legacy_attributes_at_every_progression_level()
     {
         using var db = CreateDb();
         var service = CreateService(db);
@@ -376,11 +371,8 @@ public sealed class EssenceSystemServiceTests
             AscensionTier = 3
         };
 
-        var baseBonus = service.Resolve(characterId, [baseEssence]).AttributeModifiers.Single().Amount;
-        var maxBonus = service.Resolve(characterId, [maxEssence]).AttributeModifiers.Single().Amount;
-
-        Assert.Equal(2f, baseBonus);
-        Assert.Equal(baseBonus, maxBonus);
+        Assert.Empty(service.Resolve(characterId, [baseEssence]).AttributeModifiers);
+        Assert.Empty(service.Resolve(characterId, [maxEssence]).AttributeModifiers);
     }
 
     [Fact]
@@ -433,7 +425,7 @@ public sealed class EssenceSystemServiceTests
     }
 
     [Fact]
-    public async Task PrepareEntitiesForCombat_applies_source_monster_essence_to_creatures()
+    public async Task PrepareEntitiesForCombat_applies_source_monster_essence_without_attributes_to_creatures()
     {
         await using var db = CreateDb();
         var definition = FakeDefinitionRepository.CreateDefinition("essence.utility", "monster.utility_beast");
@@ -451,8 +443,7 @@ public sealed class EssenceSystemServiceTests
         Assert.Contains(combatEntity.EquippedEssences, x => x.EssenceDefinitionId == "essence.utility");
         Assert.True(combatEntity.HasEquippedEssenceSnapshot);
         Assert.Contains("Species.Beast", combatEntity.Tags);
-        var modifier = Assert.Single(combatEntity.TemporaryModifiers, x => x.AttributeType == AttributeType.Power);
-        Assert.Equal(2f, modifier.Amount);
+        Assert.Empty(combatEntity.TemporaryModifiers);
     }
 
     [Fact]
@@ -719,7 +710,7 @@ public sealed class EssenceSystemServiceTests
     }
 
     [Fact]
-    public async Task PrepareEntitiesForCombat_applies_essence_loadout_to_player_combat_state()
+    public async Task PrepareEntitiesForCombat_applies_essence_loadout_without_changing_player_attributes()
     {
         await using var db = CreateDb();
         var characterId = await SeedCharacterAndInventoryAsync(db, level: 20);
@@ -754,7 +745,7 @@ public sealed class EssenceSystemServiceTests
         Assert.Contains(combatEntity.EquippedEssences, x => x.Id == essenceId && x.EssenceDefinitionId == "essence.test");
         Assert.True(combatEntity.HasEquippedEssenceSnapshot);
         Assert.Contains("Species.Beast", combatEntity.Tags);
-        Assert.Equal(12, combatEntity.CombatAttributes[AttributeType.Power]);
+        Assert.Equal(10, combatEntity.CombatAttributes[AttributeType.Power]);
     }
 
     [Fact]

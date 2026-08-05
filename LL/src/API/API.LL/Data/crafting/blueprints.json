@@ -418,7 +418,7 @@
       }
     ],
     "sourceType": "Dungeon",
-    "sourceId": "hives_abyss",
+    "sourceId": "forgotten_catacombs",
     "tags": [
       "Warden",
       "Support",
@@ -777,7 +777,7 @@
       }
     ],
     "sourceType": "Dungeon",
-    "sourceId": "hives_abyss",
+    "sourceId": "forgotten_catacombs",
     "tags": [
       "Primal",
       "Nature",
@@ -864,7 +864,7 @@
       }
     ],
     "sourceType": "Dungeon",
-    "sourceId": "hives_abyss",
+    "sourceId": "goblin_mines",
     "tags": [
       "Venom",
       "Poison",
@@ -952,7 +952,7 @@
       }
     ],
     "sourceType": "Dungeon",
-    "sourceId": "hives_abyss",
+    "sourceId": "goblin_mines",
     "tags": [
       "Hive",
       "Chitin",

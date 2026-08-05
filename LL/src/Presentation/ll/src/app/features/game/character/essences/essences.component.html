@@ -52,7 +52,7 @@
       <div class="mb-3 grid gap-2">
         <input
           class="ll-input w-full"
-          placeholder="Search essence, ability, attribute"
+          placeholder="Search essence or ability"
           [ngModel]="archiveSearch()"
           (ngModelChange)="archiveSearch.set($event)"
         />
@@ -123,9 +123,7 @@
               </span>
             </div>
             <span class="ll-badge shrink-0 rounded text-zinc-300">
-              L{{ essence.level }} A{{
-                essence.ascensionTier
-              }}
+              L{{ essence.level }} A{{ essence.ascensionTier }}
             </span>
           </div>
           <div class="mt-2 flex items-center justify-between gap-3 text-xs">
@@ -266,24 +264,6 @@
               [effects]="essence.passiveAbility.effects"
             ></app-essence-description>
           </article>
-        </div>
-
-        <div class="ll-card mt-4 p-3">
-          <h3 class="ll-eyebrow text-primary">Current Bonuses</h3>
-          <div class="mt-2 grid gap-2 sm:grid-cols-2">
-            <div
-              class="flex items-center justify-between rounded border border-light_gray/50 px-2 py-1.5 text-sm"
-              *ngFor="let bonus of essence.currentAttributeBonuses"
-            >
-              <span class="text-zinc-300">
-                {{ bonus.attribute | attributeTypeFormat }}
-              </span>
-              <span class="text-primary">{{
-                bonus.currentValue
-                  | attributeValueFormat: bonus.attribute : true
-              }}</span>
-            </div>
-          </div>
         </div>
 
         <section class="ll-card mt-4">

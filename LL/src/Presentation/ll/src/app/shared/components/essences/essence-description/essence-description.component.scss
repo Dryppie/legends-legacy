@@ -30,3 +30,24 @@
   text-decoration-color: rgb(251 191 36 / 0.35);
   text-underline-offset: 2px;
 }
+
+:host ::ng-deep .keyword {
+  color: #a5b4fc;
+  cursor: help;
+  font-size: inherit;
+  font-weight: 500;
+  line-height: inherit;
+  text-decoration: underline;
+  text-decoration-color: rgb(165 180 252 / 0.4);
+  text-decoration-style: dotted;
+  text-underline-offset: 3px;
+}
+
+:host ::ng-deep .dmg:focus-visible,
+:host ::ng-deep .heal:focus-visible,
+:host ::ng-deep .mod:focus-visible,
+:host ::ng-deep .keyword:focus-visible {
+  border-radius: 2px;
+  outline: 1px solid currentColor;
+  outline-offset: 2px;
+}

@@ -6,7 +6,7 @@ namespace Services.LL.PowerRatings;
 public sealed class PowerRatingService : IPowerRatingService
 {
     private const string AttributeRatingStatus =
-        "Combat Rating includes base, equipment, and active Essence attributes; Essence abilities are not yet included.";
+        "Combat Rating includes base and equipment attributes; Essence abilities are not yet included.";
 
     private readonly PowerBuildSnapshotFactory _snapshots;
     private readonly ILogger<PowerRatingService> _logger;

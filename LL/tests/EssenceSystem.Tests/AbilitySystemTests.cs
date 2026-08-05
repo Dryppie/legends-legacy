@@ -1329,6 +1329,23 @@ public sealed class AbilitySystemTests
     }
 
     [Fact]
+    public void Json_catalog_does_not_expose_unimplemented_authored_cost_notes()
+    {
+        var catalog = new JsonAbilityCatalogProvider(
+            CreateConfig(),
+            FindApiContentRoot(),
+            CreateJsonOptions()).GetCatalog();
+        var sniperStrike = catalog.AbilitiesById["ability.creature.goblin_archer.snipers_strike"];
+
+        Assert.Equal(
+            "Deal 100% ranged Physical Damage with +50% Critical Chance.",
+            sniperStrike.Description);
+        Assert.DoesNotContain(
+            catalog.AbilitiesById.Values,
+            ability => ability.Description.Contains("resource unspecified", StringComparison.OrdinalIgnoreCase));
+    }
+
+    [Fact]
     public void Json_creature_profiles_resolve_every_authored_native_ability()
     {
         var contentRoot = FindApiContentRoot();
@@ -2905,7 +2922,7 @@ public sealed class AbilitySystemTests
     }
 
     [Fact]
-    public async Task Combat_engine_executor_counts_multi_effect_passive_trigger_as_one_proc()
+    public async Task Combat_engine_executor_preserves_every_nth_multi_effect_trigger_for_ascended_essence()
     {
         var runtime = CreateRealEssenceEncounterRuntime(
             CombatMode.Idle,
@@ -2913,6 +2930,9 @@ public sealed class AbilitySystemTests
             [],
             out _,
             out _);
+        runtime.FriendlyParticipants.Single()
+            .Combatant.EquippedEssences.Single()
+            .AscensionTier = 1;
         var provider = new JsonAbilityCatalogProvider(
             CreateConfig(),
             FindApiContentRoot(),
@@ -2922,12 +2942,15 @@ public sealed class AbilitySystemTests
         var result = await executor.ExecuteAsync(runtime, CancellationToken.None);
         var friendlyStats = result.EntityStats.Single(x => x.EntityId == "friendly-slot");
         var relentless = Assert.Single(friendlyStats.Abilities, x => x.Name == "Relentless");
-
-        Assert.Equal(1, relentless.Uses);
-        Assert.Single(result.EventLog, x =>
+        var basicAttackCount = CountBasicAttacks(result, "friendly-slot");
+        var relentlessBuffs = result.EventLog.Count(x =>
             x.ActorId == "friendly-slot"
             && x.StatsSource == "Relentless"
             && x.EventType == EventType.Buff);
+
+        Assert.True(basicAttackCount >= 3);
+        Assert.Equal(basicAttackCount / 3, relentless.Uses);
+        Assert.Equal(relentless.Uses, relentlessBuffs);
     }
 
     [Fact]

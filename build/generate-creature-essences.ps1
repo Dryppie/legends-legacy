@@ -58,9 +58,7 @@ foreach ($profile in $profileDocument.creatures) {
             nativeRegion = 1
             rarity = $(if ($slug -eq 'hobgoblin') { 'Rare' } else { 'Common' })
             tags = @()
-            attributeBonuses = @(
-                [pscustomobject][ordered]@{ attribute = 'Power'; baseValue = 1 }
-            )
+            attributeBonuses = @()
             activeAbilityId = $active.id
             passiveAbilityId = $passive.id
             evolution = [pscustomobject][ordered]@{

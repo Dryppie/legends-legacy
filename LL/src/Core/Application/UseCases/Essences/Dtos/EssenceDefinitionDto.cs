@@ -36,7 +36,9 @@ public sealed record EssenceDefinitionDto(
     {
         profile.CreateMap<EssenceDefinition, EssenceDefinitionDto>()
             .ForMember(destination => destination.TagsByCategory, options =>
-                options.MapFrom(source => GroupTags(source.Tags)));
+                options.MapFrom(source => GroupTags(source.Tags)))
+            .ForMember(destination => destination.AttributeBonuses, options =>
+                options.MapFrom(_ => Array.Empty<EssenceAttributeBonusDto>()));
     }
 
     private static EssenceAbilityDto EmptyAbility() =>

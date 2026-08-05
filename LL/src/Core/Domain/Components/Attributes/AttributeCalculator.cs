@@ -22,7 +22,7 @@ public static class AttributeCalculator
     }
 
     /// <summary>
-    /// This is used to get an overview of the entity's attributes after applying equipment, essences, etc.
+    /// This is used to get an overview of the entity's attributes after applying equipment and other modifiers.
     /// </summary>
     /// <param name="entity"></param>
     public static void CalculateBaseAttributes(Entity entity, IEnumerable<AttributeModifierBase>? additionalModifiers = null)

@@ -11,15 +11,21 @@
       [disabled]="isLoading"
       (click)="loadCatalog()"
     >
-      {{ isLoading ? 'Refreshing' : 'Refresh' }}
+      {{ isLoading ? "Refreshing" : "Refresh" }}
     </button>
   </div>
 
-  <div *ngIf="error" class="mb-4 rounded border border-red-400/60 bg-red-950/40 p-4 text-red-100">
+  <div
+    *ngIf="error"
+    class="mb-4 rounded border border-red-400/60 bg-red-950/40 p-4 text-red-100"
+  >
     {{ error }}
   </div>
 
-  <div *ngIf="report" class="flex min-h-0 flex-auto flex-col gap-4 overflow-hidden pr-4">
+  <div
+    *ngIf="report"
+    class="flex min-h-0 flex-auto flex-col gap-4 overflow-hidden pr-4"
+  >
     <section class="grid shrink-0 gap-3 md:grid-cols-3">
       <label class="grid gap-1 text-sm">
         <span class="text-light_gray">Region</span>
@@ -28,7 +34,10 @@
           [(ngModel)]="selectedRegionId"
           (ngModelChange)="onRegionChanged()"
         >
-          <option *ngFor="let region of report.regions; trackBy: trackRegion" [value]="region.id">
+          <option
+            *ngFor="let region of report.regions; trackBy: trackRegion"
+            [value]="region.id"
+          >
             {{ region.name }}
           </option>
         </select>
@@ -41,7 +50,10 @@
           [(ngModel)]="selectedAreaId"
           (ngModelChange)="onAreaChanged()"
         >
-          <option *ngFor="let area of selectedRegion?.areas ?? []; trackBy: trackArea" [value]="area.id">
+          <option
+            *ngFor="let area of selectedRegion?.areas ?? []; trackBy: trackArea"
+            [value]="area.id"
+          >
             {{ area.name }} · {{ area.sourceType }}
           </option>
         </select>
@@ -53,107 +65,180 @@
           class="rounded border border-light_gray/40 bg-black/40 px-3 py-2 text-white"
           [(ngModel)]="selectedMonsterId"
         >
-          <option *ngFor="let monster of selectedArea?.monsters ?? []; trackBy: trackMonster" [value]="monster.id">
+          <option
+            *ngFor="
+              let monster of selectedArea?.monsters ?? [];
+              trackBy: trackMonster
+            "
+            [value]="monster.id"
+          >
             {{ monster.name }}
           </option>
         </select>
       </label>
     </section>
 
-    <section class="grid min-h-0 flex-auto gap-4 overflow-hidden xl:grid-cols-[20rem_1fr]">
-      <aside class="min-h-0 overflow-auto rounded border border-light_gray/40 bg-black/20">
-        <div class="border-b border-light_gray/30 px-4 py-3 text-sm font-semibold text-light_gray">
-          {{ selectedArea?.name || 'Area' }}
+    <section
+      class="grid min-h-0 flex-auto gap-4 overflow-hidden xl:grid-cols-[20rem_1fr]"
+    >
+      <aside
+        class="min-h-0 overflow-auto rounded border border-light_gray/40 bg-black/20"
+      >
+        <div
+          class="border-b border-light_gray/30 px-4 py-3 text-sm font-semibold text-light_gray"
+        >
+          {{ selectedArea?.name || "Area" }}
         </div>
         <button
-          *ngFor="let monster of selectedArea?.monsters ?? []; trackBy: trackMonster"
+          *ngFor="
+            let monster of selectedArea?.monsters ?? [];
+            trackBy: trackMonster
+          "
           type="button"
           class="grid w-full grid-cols-[1fr_auto] gap-3 border-b border-light_gray/20 px-4 py-3 text-left text-sm hover:bg-white/5"
-          [ngClass]="selectedMonsterId === monster.id ? 'bg-primary/15 text-primary' : 'text-white'"
+          [ngClass]="
+            selectedMonsterId === monster.id
+              ? 'bg-primary/15 text-primary'
+              : 'text-white'
+          "
           (click)="selectedMonsterId = monster.id"
         >
           <span>
             <span class="block font-semibold">{{ monster.name }}</span>
-            <span class="block text-xs text-light_gray">{{ monster.tier }} · {{ monster.sourceType }}</span>
+            <span class="block text-xs text-light_gray"
+              >{{ monster.tier }} · {{ monster.sourceType }}</span
+            >
           </span>
           <span
             class="rounded border px-2 py-1 text-xs"
-            [ngClass]="monster.essences.length > 0 ? 'border-emerald-300/50 text-emerald-200' : 'border-amber-300/50 text-amber-200'"
+            [ngClass]="
+              monster.essences.length > 0
+                ? 'border-emerald-300/50 text-emerald-200'
+                : 'border-amber-300/50 text-amber-200'
+            "
           >
-            {{ monster.essences.length > 0 ? monster.essences.length + ' Essence' + (monster.essences.length === 1 ? '' : 's') : 'Missing' }}
+            {{
+              monster.essences.length > 0
+                ? monster.essences.length +
+                  " Essence" +
+                  (monster.essences.length === 1 ? "" : "s")
+                : "Missing"
+            }}
           </span>
         </button>
       </aside>
 
-      <main class="min-h-0 overflow-auto rounded border border-light_gray/40 bg-black/20 p-4" *ngIf="selectedMonster as monster">
+      <main
+        class="min-h-0 overflow-auto rounded border border-light_gray/40 bg-black/20 p-4"
+        *ngIf="selectedMonster as monster"
+      >
         <div class="grid gap-4 lg:grid-cols-[1fr_18rem]">
           <section>
-            <div class="text-sm uppercase text-light_gray">{{ monster.sourceType }} · {{ monster.sourceName }} · {{ monster.tier }}</div>
-            <h3 class="mt-1 text-3xl font-semibold text-primary">{{ monster.name }}</h3>
-            <div class="mt-1 break-all text-sm text-light_gray">{{ monster.id }}</div>
+            <div class="text-sm uppercase text-light_gray">
+              {{ monster.sourceType }} · {{ monster.sourceName }} ·
+              {{ monster.tier }}
+            </div>
+            <h3 class="mt-1 text-3xl font-semibold text-primary">
+              {{ monster.name }}
+            </h3>
+            <div class="mt-1 break-all text-sm text-light_gray">
+              {{ monster.id }}
+            </div>
           </section>
 
           <section class="rounded border border-light_gray/30 bg-black/20 p-3">
             <div class="text-xs uppercase text-light_gray">Image Key</div>
-            <div class="mt-1 break-all text-lg text-white">{{ monster.imagePath }}</div>
+            <div class="mt-1 break-all text-lg text-white">
+              {{ monster.imagePath }}
+            </div>
           </section>
         </div>
 
         <ng-container *ngIf="monster.essences.length > 0; else missingEssence">
           <ng-container *ngFor="let essence of monster.essences">
-          <section class="mt-4 rounded border border-light_gray/30 bg-black/20 p-4">
-            <div class="flex flex-wrap items-start justify-between gap-3">
-              <div class="min-w-0">
-                <div class="text-sm uppercase text-light_gray">Essence</div>
-                <h4 class="mt-1 text-2xl font-semibold text-primary">{{ essence.name }}</h4>
-                <div class="mt-1 break-all text-sm text-light_gray">{{ essence.id }}</div>
+            <section
+              class="mt-4 rounded border border-light_gray/30 bg-black/20 p-4"
+            >
+              <div class="flex flex-wrap items-start justify-between gap-3">
+                <div class="min-w-0">
+                  <div class="text-sm uppercase text-light_gray">Essence</div>
+                  <h4 class="mt-1 text-2xl font-semibold text-primary">
+                    {{ essence.name }}
+                  </h4>
+                  <div class="mt-1 break-all text-sm text-light_gray">
+                    {{ essence.id }}
+                  </div>
+                </div>
+                <div
+                  class="rounded border border-primary/50 px-3 py-2 text-sm font-semibold text-primary"
+                >
+                  {{ essence.rarity }}
+                </div>
               </div>
-              <div class="rounded border border-primary/50 px-3 py-2 text-sm font-semibold text-primary">
-                {{ essence.rarity }}
+
+              <p class="mt-3 text-sm text-light_gray">
+                {{ essence.description }}
+              </p>
+
+              <div class="mt-4 grid gap-3 md:grid-cols-2">
+                <div
+                  class="rounded border border-light_gray/30 bg-black/20 p-3"
+                >
+                  <div class="text-xs uppercase text-light_gray">Item</div>
+                  <div
+                    class="mt-1 truncate text-sm text-white"
+                    [title]="essence.itemId || ''"
+                  >
+                    {{ essence.itemId || "Missing" }}
+                  </div>
+                </div>
+                <div
+                  class="rounded border border-light_gray/30 bg-black/20 p-3"
+                >
+                  <div class="text-xs uppercase text-light_gray">Tags</div>
+                  <div class="mt-1 text-lg text-primary">
+                    {{ essence.tags.length }}
+                  </div>
+                </div>
               </div>
-            </div>
 
-            <p class="mt-3 text-sm text-light_gray">{{ essence.description }}</p>
-
-            <div class="mt-4 grid gap-3 md:grid-cols-2">
-              <div class="rounded border border-light_gray/30 bg-black/20 p-3">
-                <div class="text-xs uppercase text-light_gray">Item</div>
-                <div class="mt-1 truncate text-sm text-white" [title]="essence.itemId || ''">{{ essence.itemId || 'Missing' }}</div>
+              <div class="mt-4 flex flex-wrap gap-2">
+                <span
+                  *ngFor="let tag of essence.tags; trackBy: trackText"
+                  class="rounded border border-light_gray/30 bg-black/30 px-2 py-1 text-xs text-light_gray"
+                >
+                  {{ tag }}
+                </span>
               </div>
-              <div class="rounded border border-light_gray/30 bg-black/20 p-3">
-                <div class="text-xs uppercase text-light_gray">Tags</div>
-                <div class="mt-1 text-lg text-primary">{{ essence.tags.length }}</div>
-              </div>
-            </div>
+            </section>
 
-            <div class="mt-4 flex flex-wrap gap-2">
-              <span
-                *ngFor="let tag of essence.tags; trackBy: trackText"
-                class="rounded border border-light_gray/30 bg-black/30 px-2 py-1 text-xs text-light_gray"
-              >
-                {{ tag }}
-              </span>
-            </div>
-
-            <div class="mt-4 grid gap-2 md:grid-cols-2 xl:grid-cols-4">
-              <div *ngFor="let bonus of essence.attributeBonuses" class="rounded border border-light_gray/30 bg-black/20 p-3">
-                <div class="text-xs uppercase text-light_gray">{{ bonus.attribute }}</div>
-                <div class="mt-1 text-xl text-primary">+{{ bonus.baseValue }}</div>
-              </div>
-            </div>
-          </section>
-
-          <section class="mt-4 grid gap-4 xl:grid-cols-2">
-            <ng-container *ngTemplateOutlet="abilityCard; context: { ability: essence.activeAbility, title: 'Active' }"></ng-container>
-            <ng-container *ngTemplateOutlet="abilityCard; context: { ability: essence.passiveAbility, title: 'Shared Passive' }"></ng-container>
-          </section>
+            <section class="mt-4 grid gap-4 xl:grid-cols-2">
+              <ng-container
+                *ngTemplateOutlet="
+                  abilityCard;
+                  context: { ability: essence.activeAbility, title: 'Active' }
+                "
+              ></ng-container>
+              <ng-container
+                *ngTemplateOutlet="
+                  abilityCard;
+                  context: {
+                    ability: essence.passiveAbility,
+                    title: 'Shared Passive',
+                  }
+                "
+              ></ng-container>
+            </section>
           </ng-container>
         </ng-container>
       </main>
     </section>
   </div>
 
-  <div *ngIf="isLoading && !report" class="flex flex-auto items-center justify-center text-light_gray">
+  <div
+    *ngIf="isLoading && !report"
+    class="flex flex-auto items-center justify-center text-light_gray"
+  >
     Loading catalog
   </div>
 </div>
@@ -164,10 +249,16 @@
       <div class="flex flex-wrap items-start justify-between gap-3">
         <div class="min-w-0">
           <div class="text-sm uppercase text-light_gray">{{ title }}</div>
-          <h4 class="mt-1 text-xl font-semibold text-primary">{{ ability.name }}</h4>
-          <div class="mt-1 break-all text-xs text-light_gray">{{ ability.id }}</div>
+          <h4 class="mt-1 text-xl font-semibold text-primary">
+            {{ ability.name }}
+          </h4>
+          <div class="mt-1 break-all text-xs text-light_gray">
+            {{ ability.id }}
+          </div>
         </div>
-        <div class="rounded border border-primary/50 px-2 py-1 text-xs text-primary">
+        <div
+          class="rounded border border-primary/50 px-2 py-1 text-xs text-primary"
+        >
           {{ ability.cooldownTicks }} ticks
         </div>
       </div>
@@ -185,19 +276,28 @@
 
       <div class="mt-4 grid gap-2">
         <div class="text-xs uppercase text-light_gray">Triggers</div>
-        <div *ngFor="let trigger of ability.triggers" class="rounded border border-light_gray/20 bg-black/20 p-3 text-sm">
+        <div
+          *ngFor="let trigger of ability.triggers"
+          class="rounded border border-light_gray/20 bg-black/20 p-3 text-sm"
+        >
           <div class="font-semibold text-white">{{ trigger.event }}</div>
-          <div class="mt-1 break-all text-xs text-light_gray">{{ trigger.effectIds.join(', ') }}</div>
+          <div class="mt-1 break-all text-xs text-light_gray">
+            {{ trigger.effectIds.join(", ") }}
+          </div>
         </div>
       </div>
 
       <div class="mt-4 grid gap-2">
         <div class="text-xs uppercase text-light_gray">Effects</div>
-        <div *ngFor="let effect of ability.effects; trackBy: trackEffect" class="rounded border border-light_gray/20 bg-black/20 p-3 text-sm">
+        <div
+          *ngFor="let effect of ability.effects; trackBy: trackEffect"
+          class="rounded border border-light_gray/20 bg-black/20 p-3 text-sm"
+        >
           <div class="font-semibold text-white">{{ effect.id }}</div>
           <div class="mt-1 text-primary">{{ formatEffectValue(effect) }}</div>
           <div class="mt-1 text-xs text-light_gray">
-            {{ effect.target }} · {{ effect.attackType }} · {{ effect.damageType }}
+            {{ effect.target }} · {{ effect.attackType }} ·
+            {{ effect.damageType }}
           </div>
         </div>
       </div>
@@ -206,13 +306,17 @@
 </ng-template>
 
 <ng-template #missingEssence>
-  <div class="mt-4 rounded border border-amber-300/50 bg-amber-950/30 p-4 text-amber-100">
+  <div
+    class="mt-4 rounded border border-amber-300/50 bg-amber-950/30 p-4 text-amber-100"
+  >
     Essence definition missing.
   </div>
 </ng-template>
 
 <ng-template #missingAbility>
-  <div class="rounded border border-amber-300/50 bg-amber-950/30 p-4 text-amber-100">
+  <div
+    class="rounded border border-amber-300/50 bg-amber-950/30 p-4 text-amber-100"
+  >
     Ability definition missing.
   </div>
 </ng-template>

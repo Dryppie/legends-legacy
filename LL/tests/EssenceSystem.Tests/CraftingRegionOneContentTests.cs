@@ -127,12 +127,26 @@ public sealed class CraftingRegionOneContentTests
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
 
         var missingBlueprints = blueprints
+            .Where(blueprint =>
+                blueprint?["enabled"]?.GetValue<bool>() == true &&
+                blueprint?["sourceType"]?.GetValue<string>() == "Dungeon")
             .Select(blueprint => blueprint?["itemId"]?.GetValue<string>() ?? string.Empty)
             .Where(itemId => !firstClearItemIds.Contains(itemId))
             .ToList();
 
+        var enabledDungeonCatalysts = blueprints
+            .Where(blueprint =>
+                blueprint?["enabled"]?.GetValue<bool>() == true &&
+                blueprint?["sourceType"]?.GetValue<string>() == "Dungeon")
+            .SelectMany(blueprint => ChildArray(blueprint, "additionalMaterialRequirements"))
+            .Where(requirement => requirement?["type"]?.GetValue<string>() == "SpecialResource")
+            .Select(requirement => requirement?["itemId"]?.GetValue<string>() ?? string.Empty)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
         var missingSpecialResources = materials
-            .Where(material => material?["isSpecialResource"]?.GetValue<bool>() == true)
+            .Where(material =>
+                material?["isSpecialResource"]?.GetValue<bool>() == true &&
+                enabledDungeonCatalysts.Contains(material?["itemId"]?.GetValue<string>() ?? string.Empty))
             .Select(material => material?["itemId"]?.GetValue<string>() ?? string.Empty)
             .Where(itemId => !sourcedItemIds.Contains(itemId))
             .ToList();
@@ -173,6 +187,31 @@ public sealed class CraftingRegionOneContentTests
             .ToList();
 
         Assert.Empty(missing);
+    }
+
+    [Fact]
+    public void FormerHivesAbyssBlueprints_AreMigratedToLiveDungeonFamilies()
+    {
+        var expectedFamilyByBlueprintId = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["blueprint_warden"] = "forgotten_catacombs",
+            ["blueprint_primal"] = "forgotten_catacombs",
+            ["blueprint_venom"] = "goblin_mines",
+            ["blueprint_hive"] = "goblin_mines"
+        };
+        var migratedBlueprints = ReadArray("crafting/blueprints.json")
+            .Where(blueprint => expectedFamilyByBlueprintId.ContainsKey(
+                blueprint?["id"]?.GetValue<string>() ?? string.Empty))
+            .ToList();
+
+        Assert.Equal(expectedFamilyByBlueprintId.Count, migratedBlueprints.Count);
+        Assert.All(migratedBlueprints, blueprint =>
+        {
+            var blueprintId = blueprint?["id"]?.GetValue<string>() ?? string.Empty;
+            Assert.True(blueprint?["enabled"]?.GetValue<bool>());
+            Assert.Equal("Dungeon", blueprint?["sourceType"]?.GetValue<string>());
+            Assert.Equal(expectedFamilyByBlueprintId[blueprintId], blueprint?["sourceId"]?.GetValue<string>());
+        });
     }
 
     [Fact]

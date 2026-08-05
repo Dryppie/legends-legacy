@@ -88,28 +88,4 @@
       </span>
     </div>
   </div>
-
-  <div
-    *ngIf="essence.attributeModifiers.length > 0"
-    class="border-t border-primary/20 pt-2"
-  >
-    <div class="text-[11px] uppercase tracking-[0.16em] text-secondary">
-      Attributes
-    </div>
-    <ul class="mt-2 list-none p-0 text-sm">
-      <li *ngFor="let attr of essence.attributeModifiers | attributeDisplay">
-        <div
-          class="flex justify-between gap-6 border-b border-white/5 py-1 last:border-b-0"
-          [appAttributeTooltip]="attr"
-        >
-          <span class="text-zinc-300">
-            {{ attr.attributeType | attributeTypeFormat }}
-          </span>
-          <span class="text-primary">
-            {{ attr.amount | attributeValueFormat: attr.attributeType : true }}
-          </span>
-        </div>
-      </li>
-    </ul>
-  </div>
 </div>

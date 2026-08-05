@@ -1,18 +1,16 @@
 import { Injectable } from '@angular/core';
 import {
-  AttributeModifier,
-  ModifierType,
-} from '../../../../shared/models/Dtos/attributesDto';
-import {
   Ability,
   AttackType,
   DamageType,
   Essence,
 } from '../../../../shared/models/essence';
 import { EffectTag } from '../../../../shared/models/enums/effectType';
-import { AttributeType } from '../../../../shared/models/enums/attributeType';
 import { Targeting } from '../../../../shared/models/enums/targeting';
-import { EssenceItem, essenceItemToEssence } from '../../../../shared/models/item';
+import {
+  EssenceItem,
+  essenceItemToEssence,
+} from '../../../../shared/models/item';
 import {
   EssenceAbilityDto,
   EssenceDefinitionDto,
@@ -32,13 +30,7 @@ export class EssenceItemViewService {
       name: definition.name,
       active: this.mapAbility(definition.activeAbility),
       passive: this.mapAbility(definition.passiveAbility),
-      attributeModifiers: definition.attributeBonuses.map<AttributeModifier>(
-        (bonus) => ({
-          attributeType: bonus.attribute as AttributeType,
-          amount: bonus.currentValue,
-          modifierType: this.mapModifierType(bonus.modifierKind),
-        }),
-      ),
+      attributeModifiers: [],
     };
   }
 
@@ -65,17 +57,5 @@ export class EssenceItemViewService {
     return values.filter((value): value is T[keyof T] =>
       allowedValues.has(value),
     );
-  }
-
-  private mapModifierType(modifierKind: string): ModifierType {
-    switch (modifierKind) {
-      case ModifierType.Multiplicative:
-        return ModifierType.Multiplicative;
-      case ModifierType.Additive:
-      case 'Percent':
-        return ModifierType.Additive;
-      default:
-        return ModifierType.Flat;
-    }
   }
 }

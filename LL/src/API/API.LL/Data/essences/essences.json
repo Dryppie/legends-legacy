@@ -7,12 +7,7 @@
       "description": "The combat essence of Vampire Bat, granting Bloodthirsty Fangs and Erratic Flight.",
       "rarity": "Common",
       "tags": [],
-      "attributeBonuses": [
-        {
-          "attribute": "Power",
-          "baseValue": 1
-        }
-      ],
+      "attributeBonuses": [],
       "activeAbilityId": "ability.creature.vampire_bat.bloodthirsty_fangs",
       "passiveAbilityId": "ability.creature.vampire_bat.erratic_flight",
       "evolution": {
@@ -34,12 +29,7 @@
       "description": "The combat essence of Raven, granting Piercing Peck and Bad Omen.",
       "rarity": "Common",
       "tags": [],
-      "attributeBonuses": [
-        {
-          "attribute": "Power",
-          "baseValue": 1
-        }
-      ],
+      "attributeBonuses": [],
       "activeAbilityId": "ability.creature.raven.piercing_peck",
       "passiveAbilityId": "ability.creature.raven.bad_omen",
       "evolution": {
@@ -61,12 +51,7 @@
       "description": "The combat essence of Venomous Snake, granting Toxic Fangs and Venom-Coated Strikes.",
       "rarity": "Common",
       "tags": [],
-      "attributeBonuses": [
-        {
-          "attribute": "Power",
-          "baseValue": 1
-        }
-      ],
+      "attributeBonuses": [],
       "activeAbilityId": "ability.creature.venomous_snake.toxic_fangs",
       "passiveAbilityId": "ability.creature.venomous_snake.venom_coated_strikes",
       "evolution": {
@@ -88,12 +73,7 @@
       "description": "The combat essence of Nightshade Blossom, granting Withering Petals and Midnight Bloom.",
       "rarity": "Common",
       "tags": [],
-      "attributeBonuses": [
-        {
-          "attribute": "Power",
-          "baseValue": 1
-        }
-      ],
+      "attributeBonuses": [],
       "activeAbilityId": "ability.creature.nightshade_blossom.withering_petals",
       "passiveAbilityId": "ability.creature.nightshade_blossom.midnight_bloom",
       "evolution": {
@@ -115,12 +95,7 @@
       "description": "The combat essence of Blood Zombie, granting Rending Bite and Clotted Flesh.",
       "rarity": "Common",
       "tags": [],
-      "attributeBonuses": [
-        {
-          "attribute": "Power",
-          "baseValue": 1
-        }
-      ],
+      "attributeBonuses": [],
       "activeAbilityId": "ability.creature.blood_zombie.rending_bite",
       "passiveAbilityId": "ability.creature.blood_zombie.clotted_flesh",
       "evolution": {
@@ -142,12 +117,7 @@
       "description": "The combat essence of Lumo Wisp, granting Soothing Glow and Lumo Barrier.",
       "rarity": "Common",
       "tags": [],
-      "attributeBonuses": [
-        {
-          "attribute": "Power",
-          "baseValue": 1
-        }
-      ],
+      "attributeBonuses": [],
       "activeAbilityId": "ability.creature.lumo_wisp.soothing_glow",
       "passiveAbilityId": "ability.creature.lumo_wisp.lumo_barrier",
       "evolution": {
@@ -169,12 +139,7 @@
       "description": "The combat essence of Lumo Sentinel, granting Targeting Beam and Cracked Core.",
       "rarity": "Common",
       "tags": [],
-      "attributeBonuses": [
-        {
-          "attribute": "Power",
-          "baseValue": 1
-        }
-      ],
+      "attributeBonuses": [],
       "activeAbilityId": "ability.creature.lumo_sentinel.targeting_beam",
       "passiveAbilityId": "ability.creature.lumo_sentinel.cracked_core",
       "evolution": {
@@ -196,12 +161,7 @@
       "description": "The combat essence of Goblin, granting Shiv Jab and Gobber Trapper.",
       "rarity": "Common",
       "tags": [],
-      "attributeBonuses": [
-        {
-          "attribute": "Power",
-          "baseValue": 1
-        }
-      ],
+      "attributeBonuses": [],
       "activeAbilityId": "ability.creature.goblin.shiv_jab",
       "passiveAbilityId": "ability.creature.goblin.gobber_trapper",
       "evolution": {
@@ -223,12 +183,7 @@
       "description": "The combat essence of Goblin Archer, granting Sniper's Strike and Poisoned Arrows.",
       "rarity": "Common",
       "tags": [],
-      "attributeBonuses": [
-        {
-          "attribute": "Power",
-          "baseValue": 1
-        }
-      ],
+      "attributeBonuses": [],
       "activeAbilityId": "ability.creature.goblin_archer.snipers_strike",
       "passiveAbilityId": "ability.creature.goblin_archer.poisoned_arrows",
       "evolution": {
@@ -250,12 +205,7 @@
       "description": "The combat essence of Goblin Warrior, granting Raging Cleave and Relentless.",
       "rarity": "Common",
       "tags": [],
-      "attributeBonuses": [
-        {
-          "attribute": "Power",
-          "baseValue": 1
-        }
-      ],
+      "attributeBonuses": [],
       "activeAbilityId": "ability.creature.goblin_warrior.raging_cleave",
       "passiveAbilityId": "ability.creature.goblin_warrior.relentless",
       "evolution": {
@@ -277,12 +227,7 @@
       "description": "The combat essence of Goblin Shaman, granting Weak Rejuvenation and Spirit Link.",
       "rarity": "Common",
       "tags": [],
-      "attributeBonuses": [
-        {
-          "attribute": "Power",
-          "baseValue": 1
-        }
-      ],
+      "attributeBonuses": [],
       "activeAbilityId": "ability.creature.goblin_shaman.weak_rejuvenation",
       "passiveAbilityId": "ability.creature.goblin_shaman.spirit_link",
       "evolution": {
@@ -304,12 +249,7 @@
       "description": "The combat essence of Hobgoblin, granting Intimidating Slam and Threatening Presence.",
       "rarity": "Rare",
       "tags": [],
-      "attributeBonuses": [
-        {
-          "attribute": "Power",
-          "baseValue": 1
-        }
-      ],
+      "attributeBonuses": [],
       "activeAbilityId": "ability.creature.hobgoblin.intimidating_slam",
       "passiveAbilityId": "ability.creature.hobgoblin.threatening_presence",
       "evolution": {
@@ -331,12 +271,7 @@
       "description": "The combat essence of Hobgoblin, granting Brutal Charge and Threatening Presence.",
       "rarity": "Rare",
       "tags": [],
-      "attributeBonuses": [
-        {
-          "attribute": "Power",
-          "baseValue": 1
-        }
-      ],
+      "attributeBonuses": [],
       "activeAbilityId": "ability.creature.hobgoblin.brutal_charge",
       "passiveAbilityId": "ability.creature.hobgoblin.threatening_presence",
       "evolution": {
@@ -358,12 +293,7 @@
       "description": "The combat essence of Frost Imp, granting Ice Needle and Cold Touch.",
       "rarity": "Common",
       "tags": [],
-      "attributeBonuses": [
-        {
-          "attribute": "Power",
-          "baseValue": 1
-        }
-      ],
+      "attributeBonuses": [],
       "activeAbilityId": "ability.creature.frost_imp.ice_needle",
       "passiveAbilityId": "ability.creature.frost_imp.cold_touch",
       "evolution": {
@@ -385,12 +315,7 @@
       "description": "The combat essence of Crystal Wisp, granting Prismatic Shard and Captured Light.",
       "rarity": "Common",
       "tags": [],
-      "attributeBonuses": [
-        {
-          "attribute": "Power",
-          "baseValue": 1
-        }
-      ],
+      "attributeBonuses": [],
       "activeAbilityId": "ability.creature.crystal_wisp.prismatic_shard",
       "passiveAbilityId": "ability.creature.crystal_wisp.captured_light",
       "evolution": {
@@ -412,12 +337,7 @@
       "description": "The combat essence of Blue Slime, granting Sweet Water and Protective Slime.",
       "rarity": "Common",
       "tags": [],
-      "attributeBonuses": [
-        {
-          "attribute": "Power",
-          "baseValue": 1
-        }
-      ],
+      "attributeBonuses": [],
       "activeAbilityId": "ability.creature.blue_slime.sweet_water",
       "passiveAbilityId": "ability.creature.blue_slime.protective_slime",
       "evolution": {
@@ -439,12 +359,7 @@
       "description": "The combat essence of Transparent Slime, granting Transparent Engulf and Reconstitute.",
       "rarity": "Common",
       "tags": [],
-      "attributeBonuses": [
-        {
-          "attribute": "Power",
-          "baseValue": 1
-        }
-      ],
+      "attributeBonuses": [],
       "activeAbilityId": "ability.creature.transparent_slime.transparent_engulf",
       "passiveAbilityId": "ability.creature.transparent_slime.reconstitute",
       "evolution": {
@@ -466,12 +381,7 @@
       "description": "The combat essence of Moss Lizard, granting Moss Camouflage and Lost Tail.",
       "rarity": "Common",
       "tags": [],
-      "attributeBonuses": [
-        {
-          "attribute": "Power",
-          "baseValue": 1
-        }
-      ],
+      "attributeBonuses": [],
       "activeAbilityId": "ability.creature.moss_lizard.moss_camouflage",
       "passiveAbilityId": "ability.creature.moss_lizard.lost_tail",
       "evolution": {
@@ -493,12 +403,7 @@
       "description": "The combat essence of Shadow Imp, granting Shadow Image and Shadowy Presence.",
       "rarity": "Common",
       "tags": [],
-      "attributeBonuses": [
-        {
-          "attribute": "Power",
-          "baseValue": 1
-        }
-      ],
+      "attributeBonuses": [],
       "activeAbilityId": "ability.creature.shadow_imp.shadow_image",
       "passiveAbilityId": "ability.creature.shadow_imp.shadowy_presence",
       "evolution": {
@@ -520,12 +425,7 @@
       "description": "The combat essence of Grave Hound, granting Gravebound Pounce and Graveyard Howl.",
       "rarity": "Common",
       "tags": [],
-      "attributeBonuses": [
-        {
-          "attribute": "Power",
-          "baseValue": 1
-        }
-      ],
+      "attributeBonuses": [],
       "activeAbilityId": "ability.creature.grave_hound.gravebound_pounce",
       "passiveAbilityId": "ability.creature.grave_hound.graveyard_howl",
       "evolution": {
@@ -547,12 +447,7 @@
       "description": "The combat essence of Lost Soul, granting Soul Drain and Soul Lantern.",
       "rarity": "Common",
       "tags": [],
-      "attributeBonuses": [
-        {
-          "attribute": "Power",
-          "baseValue": 1
-        }
-      ],
+      "attributeBonuses": [],
       "activeAbilityId": "ability.creature.lost_soul.soul_drain",
       "passiveAbilityId": "ability.creature.lost_soul.soul_lantern",
       "evolution": {
@@ -574,12 +469,7 @@
       "description": "The combat essence of Grave Wisp, granting Mourning Flash and Pale Flame.",
       "rarity": "Common",
       "tags": [],
-      "attributeBonuses": [
-        {
-          "attribute": "Power",
-          "baseValue": 1
-        }
-      ],
+      "attributeBonuses": [],
       "activeAbilityId": "ability.creature.grave_wisp.mourning_flash",
       "passiveAbilityId": "ability.creature.grave_wisp.pale_flame",
       "evolution": {
@@ -601,12 +491,7 @@
       "description": "The combat essence of Skeleton, granting Bone Smash and Calcium.",
       "rarity": "Common",
       "tags": [],
-      "attributeBonuses": [
-        {
-          "attribute": "Power",
-          "baseValue": 1
-        }
-      ],
+      "attributeBonuses": [],
       "activeAbilityId": "ability.creature.skeleton.bone_smash",
       "passiveAbilityId": "ability.creature.skeleton.calcium",
       "evolution": {
@@ -628,12 +513,7 @@
       "description": "The combat essence of Pixie, granting Pixie Burst and Resonant Chime.",
       "rarity": "Common",
       "tags": [],
-      "attributeBonuses": [
-        {
-          "attribute": "Power",
-          "baseValue": 1
-        }
-      ],
+      "attributeBonuses": [],
       "activeAbilityId": "ability.creature.pixie.pixie_burst",
       "passiveAbilityId": "ability.creature.pixie.resonant_chime",
       "evolution": {
@@ -655,12 +535,7 @@
       "description": "The combat essence of Wood Nymph, granting Bramble Shield and Nature's Protection.",
       "rarity": "Common",
       "tags": [],
-      "attributeBonuses": [
-        {
-          "attribute": "Power",
-          "baseValue": 1
-        }
-      ],
+      "attributeBonuses": [],
       "activeAbilityId": "ability.creature.wood_nymph.bramble_shield",
       "passiveAbilityId": "ability.creature.wood_nymph.natures_protection",
       "evolution": {
@@ -682,12 +557,7 @@
       "description": "The combat essence of Rainbow Slime, granting Unstable Colors and Colorful Shield.",
       "rarity": "Common",
       "tags": [],
-      "attributeBonuses": [
-        {
-          "attribute": "Power",
-          "baseValue": 1
-        }
-      ],
+      "attributeBonuses": [],
       "activeAbilityId": "ability.creature.rainbow_slime.unstable_colors",
       "passiveAbilityId": "ability.creature.rainbow_slime.colorful_shield",
       "evolution": {
@@ -709,12 +579,7 @@
       "description": "The combat essence of Enchanted Fairy, granting Fae's Corrosion and Fae's Charm.",
       "rarity": "Common",
       "tags": [],
-      "attributeBonuses": [
-        {
-          "attribute": "Power",
-          "baseValue": 1
-        }
-      ],
+      "attributeBonuses": [],
       "activeAbilityId": "ability.creature.enchanted_fairy.faes_corrosion",
       "passiveAbilityId": "ability.creature.enchanted_fairy.faes_charm",
       "evolution": {
@@ -736,12 +601,7 @@
       "description": "The combat essence of Illusion Fox, granting A Doomed Illusion and Foxfire Wisp.",
       "rarity": "Common",
       "tags": [],
-      "attributeBonuses": [
-        {
-          "attribute": "Power",
-          "baseValue": 1
-        }
-      ],
+      "attributeBonuses": [],
       "activeAbilityId": "ability.creature.illusion_fox.a_doomed_illusion",
       "passiveAbilityId": "ability.creature.illusion_fox.foxfire_wisp",
       "evolution": {
@@ -763,12 +623,7 @@
       "description": "The combat essence of Thornback Boar, granting Thorned Rush and Bristling Hide.",
       "rarity": "Common",
       "tags": [],
-      "attributeBonuses": [
-        {
-          "attribute": "Power",
-          "baseValue": 1
-        }
-      ],
+      "attributeBonuses": [],
       "activeAbilityId": "ability.creature.thornback_boar.thorned_rush",
       "passiveAbilityId": "ability.creature.thornback_boar.bristling_hide",
       "evolution": {
@@ -790,12 +645,7 @@
       "description": "The combat essence of Hollow Stag, granting Echoing Antlers and Hollow Core.",
       "rarity": "Common",
       "tags": [],
-      "attributeBonuses": [
-        {
-          "attribute": "Power",
-          "baseValue": 1
-        }
-      ],
+      "attributeBonuses": [],
       "activeAbilityId": "ability.creature.hollow_stag.echoing_antlers",
       "passiveAbilityId": "ability.creature.hollow_stag.hollow_core",
       "evolution": {
@@ -817,12 +667,7 @@
       "description": "The combat essence of Treant Sapling, granting Sprouting Surge and Nurturing Roots.",
       "rarity": "Common",
       "tags": [],
-      "attributeBonuses": [
-        {
-          "attribute": "Power",
-          "baseValue": 1
-        }
-      ],
+      "attributeBonuses": [],
       "activeAbilityId": "ability.creature.treant_sapling.sprouting_surge",
       "passiveAbilityId": "ability.creature.treant_sapling.nurturing_roots",
       "evolution": {
@@ -844,12 +689,7 @@
       "description": "The combat essence of Glade Panther, granting Ambush Strike and Razor Claws.",
       "rarity": "Common",
       "tags": [],
-      "attributeBonuses": [
-        {
-          "attribute": "Power",
-          "baseValue": 1
-        }
-      ],
+      "attributeBonuses": [],
       "activeAbilityId": "ability.creature.glade_panther.ambush_strike",
       "passiveAbilityId": "ability.creature.glade_panther.razor_claws",
       "evolution": {
@@ -871,12 +711,7 @@
       "description": "The combat essence of Forest Spirit, granting Rejuvenation and Spirit Bloom.",
       "rarity": "Common",
       "tags": [],
-      "attributeBonuses": [
-        {
-          "attribute": "Power",
-          "baseValue": 1
-        }
-      ],
+      "attributeBonuses": [],
       "activeAbilityId": "ability.creature.forest_spirit.rejuvenation",
       "passiveAbilityId": "ability.creature.forest_spirit.spirit_bloom",
       "evolution": {
@@ -898,12 +733,7 @@
       "description": "The combat essence of Rotroot Shambler, granting Rotburst and Decaying Husk.",
       "rarity": "Common",
       "tags": [],
-      "attributeBonuses": [
-        {
-          "attribute": "Power",
-          "baseValue": 1
-        }
-      ],
+      "attributeBonuses": [],
       "activeAbilityId": "ability.creature.rotroot_shambler.rotburst",
       "passiveAbilityId": "ability.creature.rotroot_shambler.decaying_husk",
       "evolution": {
@@ -925,12 +755,7 @@
       "description": "The combat essence of Spider, granting Skittering Strike and Spider Eyes.",
       "rarity": "Common",
       "tags": [],
-      "attributeBonuses": [
-        {
-          "attribute": "Power",
-          "baseValue": 1
-        }
-      ],
+      "attributeBonuses": [],
       "activeAbilityId": "ability.creature.spider.skittering_strike",
       "passiveAbilityId": "ability.creature.spider.spider_eyes",
       "evolution": {
@@ -952,12 +777,7 @@
       "description": "The combat essence of Giant Spider, granting Spider Crash and Thickened Carapace.",
       "rarity": "Common",
       "tags": [],
-      "attributeBonuses": [
-        {
-          "attribute": "Power",
-          "baseValue": 1
-        }
-      ],
+      "attributeBonuses": [],
       "activeAbilityId": "ability.creature.giant_spider.spider_crash",
       "passiveAbilityId": "ability.creature.giant_spider.thickened_carapace",
       "evolution": {
@@ -979,12 +799,7 @@
       "description": "The combat essence of Venomous Spiderling, granting Venom Web and Toxic Opportunity.",
       "rarity": "Common",
       "tags": [],
-      "attributeBonuses": [
-        {
-          "attribute": "Power",
-          "baseValue": 1
-        }
-      ],
+      "attributeBonuses": [],
       "activeAbilityId": "ability.creature.venomous_spiderling.venom_web",
       "passiveAbilityId": "ability.creature.venomous_spiderling.toxic_opportunity",
       "evolution": {
@@ -1006,12 +821,7 @@
       "description": "The combat essence of Blackjaw Spider, granting Blackjaw Bite and Powerful Mandibles.",
       "rarity": "Common",
       "tags": [],
-      "attributeBonuses": [
-        {
-          "attribute": "Power",
-          "baseValue": 1
-        }
-      ],
+      "attributeBonuses": [],
       "activeAbilityId": "ability.creature.blackjaw_spider.blackjaw_bite",
       "passiveAbilityId": "ability.creature.blackjaw_spider.powerful_mandibles",
       "evolution": {
@@ -1033,12 +843,7 @@
       "description": "The combat essence of Flame Imp, granting Firebomb Toss and Impish Flame.",
       "rarity": "Common",
       "tags": [],
-      "attributeBonuses": [
-        {
-          "attribute": "Power",
-          "baseValue": 1
-        }
-      ],
+      "attributeBonuses": [],
       "activeAbilityId": "ability.creature.flame_imp.firebomb_toss",
       "passiveAbilityId": "ability.creature.flame_imp.impish_flame",
       "evolution": {
@@ -1060,12 +865,7 @@
       "description": "The combat essence of Smolder Rat, granting Scorching Tail and Heat Resistance.",
       "rarity": "Common",
       "tags": [],
-      "attributeBonuses": [
-        {
-          "attribute": "Power",
-          "baseValue": 1
-        }
-      ],
+      "attributeBonuses": [],
       "activeAbilityId": "ability.creature.smolder_rat.scorching_tail",
       "passiveAbilityId": "ability.creature.smolder_rat.heat_resistance",
       "evolution": {
@@ -1087,12 +887,7 @@
       "description": "The combat essence of Cinder Beetle, granting Burning Mandibles and Molten Shell.",
       "rarity": "Common",
       "tags": [],
-      "attributeBonuses": [
-        {
-          "attribute": "Power",
-          "baseValue": 1
-        }
-      ],
+      "attributeBonuses": [],
       "activeAbilityId": "ability.creature.cinder_beetle.burning_mandibles",
       "passiveAbilityId": "ability.creature.cinder_beetle.molten_shell",
       "evolution": {
@@ -1114,12 +909,7 @@
       "description": "The combat essence of Red Slime, granting Ignite Core and Recharging Core.",
       "rarity": "Common",
       "tags": [],
-      "attributeBonuses": [
-        {
-          "attribute": "Power",
-          "baseValue": 1
-        }
-      ],
+      "attributeBonuses": [],
       "activeAbilityId": "ability.creature.red_slime.ignite_core",
       "passiveAbilityId": "ability.creature.red_slime.recharging_core",
       "evolution": {
@@ -1141,12 +931,7 @@
       "description": "The combat essence of Giant Worm, granting Drag Beneath and Erupting Ambush.",
       "rarity": "Common",
       "tags": [],
-      "attributeBonuses": [
-        {
-          "attribute": "Power",
-          "baseValue": 1
-        }
-      ],
+      "attributeBonuses": [],
       "activeAbilityId": "ability.creature.giant_worm.drag_beneath",
       "passiveAbilityId": "ability.creature.giant_worm.erupting_ambush",
       "evolution": {
@@ -1168,12 +953,7 @@
       "description": "The combat essence of Bog Mite, granting Infestation and Blood Feeders.",
       "rarity": "Common",
       "tags": [],
-      "attributeBonuses": [
-        {
-          "attribute": "Power",
-          "baseValue": 1
-        }
-      ],
+      "attributeBonuses": [],
       "activeAbilityId": "ability.creature.bog_mite.infestation",
       "passiveAbilityId": "ability.creature.bog_mite.blood_feeders",
       "evolution": {
@@ -1195,12 +975,7 @@
       "description": "The combat essence of Green Slime, granting Acid Splash and Corrosive Ooze.",
       "rarity": "Common",
       "tags": [],
-      "attributeBonuses": [
-        {
-          "attribute": "Power",
-          "baseValue": 1
-        }
-      ],
+      "attributeBonuses": [],
       "activeAbilityId": "ability.creature.green_slime.acid_splash",
       "passiveAbilityId": "ability.creature.green_slime.corrosive_ooze",
       "evolution": {
@@ -1222,12 +997,7 @@
       "description": "The combat essence of Large Rat, granting Tail Wrap and Big.",
       "rarity": "Common",
       "tags": [],
-      "attributeBonuses": [
-        {
-          "attribute": "Power",
-          "baseValue": 1
-        }
-      ],
+      "attributeBonuses": [],
       "activeAbilityId": "ability.creature.large_rat.tail_wrap",
       "passiveAbilityId": "ability.creature.large_rat.big",
       "evolution": {
@@ -1249,12 +1019,7 @@
       "description": "The combat essence of Viper, granting Piercing Fangs and Potent Toxins.",
       "rarity": "Common",
       "tags": [],
-      "attributeBonuses": [
-        {
-          "attribute": "Power",
-          "baseValue": 1
-        }
-      ],
+      "attributeBonuses": [],
       "activeAbilityId": "ability.creature.viper.piercing_fangs",
       "passiveAbilityId": "ability.creature.viper.potent_toxins",
       "evolution": {
@@ -1276,12 +1041,7 @@
       "description": "The combat essence of Poisonous Rat, granting Toxic Bite and Resistant Hide.",
       "rarity": "Common",
       "tags": [],
-      "attributeBonuses": [
-        {
-          "attribute": "Power",
-          "baseValue": 1
-        }
-      ],
+      "attributeBonuses": [],
       "activeAbilityId": "ability.creature.poisonous_rat.toxic_bite",
       "passiveAbilityId": "ability.creature.poisonous_rat.resistant_hide",
       "evolution": {
@@ -1303,12 +1063,7 @@
       "description": "The combat essence of Rotfly Toad, granting Putrid Belch and Rotfly Host.",
       "rarity": "Common",
       "tags": [],
-      "attributeBonuses": [
-        {
-          "attribute": "Power",
-          "baseValue": 1
-        }
-      ],
+      "attributeBonuses": [],
       "activeAbilityId": "ability.creature.rotfly_toad.putrid_belch",
       "passiveAbilityId": "ability.creature.rotfly_toad.rotfly_host",
       "evolution": {
@@ -1330,12 +1085,7 @@
       "description": "The combat essence of Brown Slime, granting Absorb Impact and Layered Mud.",
       "rarity": "Common",
       "tags": [],
-      "attributeBonuses": [
-        {
-          "attribute": "Power",
-          "baseValue": 1
-        }
-      ],
+      "attributeBonuses": [],
       "activeAbilityId": "ability.creature.brown_slime.absorb_impact",
       "passiveAbilityId": "ability.creature.brown_slime.layered_mud",
       "evolution": {
@@ -1357,12 +1107,7 @@
       "description": "The combat essence of Cave Bat, granting Sonic Screech and Echolocation.",
       "rarity": "Common",
       "tags": [],
-      "attributeBonuses": [
-        {
-          "attribute": "Power",
-          "baseValue": 1
-        }
-      ],
+      "attributeBonuses": [],
       "activeAbilityId": "ability.creature.cave_bat.sonic_screech",
       "passiveAbilityId": "ability.creature.cave_bat.echolocation",
       "evolution": {
@@ -1384,12 +1129,7 @@
       "description": "The combat essence of Giant Bat, granting Echoing Screech and Resonant Cry.",
       "rarity": "Common",
       "tags": [],
-      "attributeBonuses": [
-        {
-          "attribute": "Power",
-          "baseValue": 1
-        }
-      ],
+      "attributeBonuses": [],
       "activeAbilityId": "ability.creature.giant_bat.echoing_screech",
       "passiveAbilityId": "ability.creature.giant_bat.resonant_cry",
       "evolution": {
@@ -1411,12 +1151,7 @@
       "description": "The combat essence of Undead, granting Necrotic Slash and Corpse Explosion.",
       "rarity": "Common",
       "tags": [],
-      "attributeBonuses": [
-        {
-          "attribute": "Power",
-          "baseValue": 1
-        }
-      ],
+      "attributeBonuses": [],
       "activeAbilityId": "ability.creature.undead.necrotic_slash",
       "passiveAbilityId": "ability.creature.undead.corpse_explosion",
       "evolution": {

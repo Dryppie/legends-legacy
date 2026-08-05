@@ -26,8 +26,6 @@ import {
   EssenceLoadoutDto,
   PlayerEssenceDto,
 } from '../../../../shared/models/essence-system';
-import { AttributeTypeFormatPipe } from '../../../../shared/pipes/attributes/attribute-type-format/attribute-type-format.pipe';
-import { AttributeValueFormatPipe } from '../../../../shared/pipes/attributes/attribute-value-format/attribute-value-format.pipe';
 import { EssencesAbsorbComponent } from './essences-absorb/essences-absorb.component';
 import {
   DropdownComponent,
@@ -56,8 +54,6 @@ type CreatureEssenceFilter = 'all' | 'found' | 'not-found';
     DefaultHeaderComponent,
     EssenceDescriptionComponent,
     NavigationTabsComponent,
-    AttributeTypeFormatPipe,
-    AttributeValueFormatPipe,
     EssencesAbsorbComponent,
     DropdownComponent,
   ],
@@ -129,11 +125,7 @@ export class EssencesComponent implements OnInit {
         ) {
           return false;
         }
-        if (
-          filter === 'ready' &&
-          !essence.canAscend &&
-          !essence.canEvolve
-        ) {
+        if (filter === 'ready' && !essence.canAscend && !essence.canEvolve) {
           return false;
         }
 
@@ -143,7 +135,6 @@ export class EssencesComponent implements OnInit {
           essence.name,
           essence.activeAbility.name,
           essence.passiveAbility.name,
-          ...essence.currentAttributeBonuses.map((bonus) => bonus.attribute),
         ]
           .join(' ')
           .toLowerCase();

@@ -533,7 +533,7 @@
     "id": "ability.creature.goblin_archer.snipers_strike",
     "kind": "Active",
     "name": "Sniper's Strike",
-    "description": "Deal 100% ranged Physical Damage with +50% Critical Chance. Authored cost: 22 (resource unspecified).",
+    "description": "Deal 100% ranged Physical Damage with +50% Critical Chance.",
     "cooldownTicks": 250,
     "tags": [
       "Effect.Ability",

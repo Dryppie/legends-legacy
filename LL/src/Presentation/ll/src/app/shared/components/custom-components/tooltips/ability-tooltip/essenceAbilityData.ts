@@ -1,10 +1,16 @@
 export interface EssenceAbilityData {
-  base: number;
-  attr: string | null;
-  scale: number;
-  bonus: number;
-  total: string;
-  attrValue: number;
-  unit: string;
-  hasRange: boolean;
+  kind: 'magnitude' | 'keyword';
+  title: string;
+  description?: string;
+  detail?: string;
+  base?: number;
+  attr?: string | null;
+  scale?: number;
+  scaleDisplay?: string;
+  bonus?: number;
+  total?: string;
+  attrValue?: number;
+  unit?: string;
+  hasRange?: boolean;
+  note?: string;
 }

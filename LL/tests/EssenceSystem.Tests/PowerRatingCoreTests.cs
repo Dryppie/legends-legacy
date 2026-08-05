@@ -73,26 +73,26 @@ public sealed class PowerRatingCoreTests
     }
 
     [Fact]
-    public void AttributeCombatRating_AddsActiveEssenceAttributesAtFixedReferenceTier()
+    public void AttributeCombatRating_AddsExplicitTemporaryAttributesAtTheirSourceTier()
     {
-        var withoutEssence = CombatRatingCalculator.Calculate([], []);
-        var withEssence = CombatRatingCalculator.Calculate(
+        var withoutTemporarySource = CombatRatingCalculator.Calculate([], []);
+        var withTemporarySource = CombatRatingCalculator.Calculate(
             [],
             [],
             [
                 new CombatRatingModifierSource(
                     5,
-                    [new EssenceAttributeModifier(AttributeType.Armor, 10)])
+                    [new AbilityAttributeModifier(AttributeType.Armor, 10)])
             ]);
 
-        Assert.Equal(10, withEssence.Overall - withoutEssence.Overall);
-        Assert.Equal(10, withEssence.PhysicalDurability);
-        Assert.Equal(0, withEssence.MagicalDurability);
-        Assert.Equal(0, withEssence.ControlUtility);
+        Assert.Equal(10, withTemporarySource.Overall - withoutTemporarySource.Overall);
+        Assert.Equal(10, withTemporarySource.PhysicalDurability);
+        Assert.Equal(0, withTemporarySource.MagicalDurability);
+        Assert.Equal(0, withTemporarySource.ControlUtility);
     }
 
     [Fact]
-    public void AttributeCombatRating_DoesNotValueEssenceAttributesBeyondCombinedCap()
+    public void AttributeCombatRating_DoesNotValueTemporaryAttributesBeyondCombinedCap()
     {
         var baseAttributes = new[]
         {
@@ -104,7 +104,7 @@ public sealed class PowerRatingCoreTests
             [
                 new CombatRatingModifierSource(
                     1,
-                    [new EssenceAttributeModifier(AttributeType.DodgeChance, 10)])
+                    [new AbilityAttributeModifier(AttributeType.DodgeChance, 10)])
             ]);
 
         Assert.Equal(250, rating.Overall);
