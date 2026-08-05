@@ -1193,6 +1193,78 @@ public sealed class AbilitySystemTests
     }
 
     [Fact]
+    public void Forest_spirit_bloom_counts_only_heals_applied_by_its_owner()
+    {
+        var spiritBloom = CreateSpiritBloomPassive();
+        var alliedHeals = new AbilitySpec
+        {
+            Id = "ability.ally.three.heals",
+            Kind = AbilitySpecKind.Active,
+            Name = "Ally Three Heals",
+            CooldownTicks = 1000,
+            Costs = [new() { Resource = AbilityResourceType.Health, BaseValue = 100 }],
+            Effects =
+            [
+                CreateFixedHeal("effect.ally.heal.one"),
+                CreateFixedHeal("effect.ally.heal.two"),
+                CreateFixedHeal("effect.ally.heal.three")
+            ]
+        };
+        var owner = CreateCombatant(
+            "forest-spirit-owner",
+            CombatTeam.Friendly,
+            [AbilityCompiler.CompileAbility(spiritBloom)]);
+        var ally = CreateCombatant(
+            "ally-healer",
+            CombatTeam.Friendly,
+            [AbilityCompiler.CompileAbility(alliedHeals)]);
+        var hostile = CreateCombatant("hostile", CombatTeam.Hostile, []);
+        var engine = new FastCombatEngine(
+            new Dictionary<string, CompiledStatus>(),
+            new FastCombatEngineOptions(MaxTicks: 1, BasicAttackIntervalTicks: 1000));
+
+        var result = engine.Run([owner, ally], [hostile]);
+
+        Assert.DoesNotContain(
+            result.EventLog,
+            entry => entry.Source == "effect.forest.spirit.bloom" && entry.EventType == EventType.Heal);
+    }
+
+    [Fact]
+    public void Forest_spirit_bloom_counts_each_owner_hot_application_once_not_each_tick()
+    {
+        var spiritBloom = CreateSpiritBloomPassive();
+        var threeHealOverTimeApplications = new AbilitySpec
+        {
+            Id = "ability.owner.three.hots",
+            Kind = AbilitySpecKind.Active,
+            Name = "Three Heal Over Time Applications",
+            CooldownTicks = 1000,
+            Costs = [new() { Resource = AbilityResourceType.Health, BaseValue = 100 }],
+            Effects =
+            [
+                CreateFixedHeal("effect.owner.hot.one", durationTicks: 40, intervalTicks: 10),
+                CreateFixedHeal("effect.owner.hot.two", durationTicks: 40, intervalTicks: 10),
+                CreateFixedHeal("effect.owner.hot.three", durationTicks: 40, intervalTicks: 10)
+            ]
+        };
+        var owner = CreateCombatant(
+            "forest-spirit-owner",
+            CombatTeam.Friendly,
+            AbilityCompiler.CompileAbilities([spiritBloom, threeHealOverTimeApplications]).Values);
+        var hostile = CreateCombatant("hostile", CombatTeam.Hostile, []);
+        var engine = new FastCombatEngine(
+            new Dictionary<string, CompiledStatus>(),
+            new FastCombatEngineOptions(MaxTicks: 41, BasicAttackIntervalTicks: 1000));
+
+        var result = engine.Run([owner], [hostile]);
+
+        Assert.Single(
+            result.EventLog,
+            entry => entry.Source == "effect.forest.spirit.bloom" && entry.EventType == EventType.Heal);
+    }
+
+    [Fact]
     public void Engine_honors_limited_uses_across_multi_target_effects()
     {
         var abilities = AbilityCompiler.CompileAbilities(
@@ -3418,6 +3490,49 @@ public sealed class AbilitySystemTests
                     BaseValue = value
                 }
             ]
+        };
+
+    private static AbilitySpec CreateSpiritBloomPassive() =>
+        new()
+        {
+            Id = "ability.creature.forest_spirit.spirit_bloom",
+            Kind = AbilitySpecKind.Passive,
+            Name = "Spirit Bloom",
+            Triggers =
+            [
+                new()
+                {
+                    Event = AbilityTriggerEvent.OnHeal,
+                    EveryNthOccurrence = 3,
+                    EffectIds = ["effect.forest.spirit.bloom"]
+                }
+            ],
+            Effects =
+            [
+                new()
+                {
+                    Id = "effect.forest.spirit.bloom",
+                    Operation = AbilityEffectOperation.Heal,
+                    Target = AbilityTargetSelector.EventTarget,
+                    BaseValue = 30,
+                    CritEligibility = CritEligibility.Disallowed
+                }
+            ]
+        };
+
+    private static AbilityEffectSpec CreateFixedHeal(
+        string id,
+        int durationTicks = 0,
+        int intervalTicks = 0) =>
+        new()
+        {
+            Id = id,
+            Operation = AbilityEffectOperation.Heal,
+            Target = AbilityTargetSelector.Self,
+            BaseValue = 10,
+            DurationTicks = durationTicks,
+            IntervalTicks = intervalTicks,
+            CritEligibility = CritEligibility.Disallowed
         };
 
     private static Character CreateSourceCharacter(string name) =>

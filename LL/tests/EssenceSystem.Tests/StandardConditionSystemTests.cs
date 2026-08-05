@@ -156,10 +156,44 @@ public sealed class StandardConditionSystemTests
 
         Run([actor], [enemy], maxTicks: 1);
 
-        Assert.Equal(925, enemy.Health);
+        Assert.Equal(938, enemy.Health);
         Assert.False(enemy.HasCondition(StandardConditionType.Guard));
-        Assert.Equal(2, enemy.GetConditionStacks(StandardConditionType.Vulnerable));
+        Assert.Equal(1, enemy.GetConditionStacks(StandardConditionType.Vulnerable));
         Assert.Equal(50, enemy.GetConditionStacks(StandardConditionType.Corrosion));
+    }
+
+    [Fact]
+    public void Vulnerable_amplifies_and_consumes_one_stack_per_direct_hit()
+    {
+        var attack = Passive(
+            "vulnerable.charges",
+            ConditionEffect("vulnerable", StandardConditionType.Vulnerable, AbilityTargetSelector.CurrentTarget, 2),
+            DamageEffect("first.hit", 100),
+            DamageEffect("second.hit", 100),
+            DamageEffect("third.hit", 100));
+        var actor = Combatant("actor", CombatTeam.Friendly, [attack]);
+        var enemy = Combatant("enemy", CombatTeam.Hostile, []);
+
+        Run([actor], [enemy], maxTicks: 1);
+
+        Assert.Equal(650, enemy.Health);
+        Assert.False(enemy.HasCondition(StandardConditionType.Vulnerable));
+    }
+
+    [Fact]
+    public void Periodic_damage_does_not_amplify_or_consume_vulnerable()
+    {
+        var conditions = Passive(
+            "vulnerable.periodic",
+            ConditionEffect("vulnerable", StandardConditionType.Vulnerable, AbilityTargetSelector.CurrentTarget, 1),
+            ConditionEffect("poison", StandardConditionType.Poison, AbilityTargetSelector.CurrentTarget, 10));
+        var actor = Combatant("actor", CombatTeam.Friendly, [conditions], power: 100);
+        var enemy = Combatant("enemy", CombatTeam.Hostile, []);
+
+        Run([actor], [enemy], maxTicks: 21);
+
+        Assert.Equal(990, enemy.Health);
+        Assert.Equal(1, enemy.GetConditionStacks(StandardConditionType.Vulnerable));
     }
 
     [Fact]
@@ -702,6 +736,17 @@ public sealed class StandardConditionSystemTests
             Operation = AbilityEffectOperation.Heal,
             Target = AbilityTargetSelector.Self,
             BaseValue = value,
+            CritEligibility = CritEligibility.Disallowed
+        };
+
+    private static AbilityEffectSpec DamageEffect(string id, int value) =>
+        new()
+        {
+            Id = id,
+            Operation = AbilityEffectOperation.Damage,
+            Target = AbilityTargetSelector.CurrentTarget,
+            BaseValue = value,
+            DamageType = DamageType.None,
             CritEligibility = CritEligibility.Disallowed
         };
 

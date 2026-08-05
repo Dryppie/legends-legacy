@@ -38,7 +38,7 @@ export const COMBAT_KEYWORDS: readonly CombatKeywordDefinition[] = [
   {
     name: 'Vulnerable',
     description:
-      'Each stack increases direct damage taken by 25%. It lasts until removed.',
+      'The next direct hit deals 25% increased damage and consumes one stack. It lasts until triggered or removed.',
     valueMeaning: 'stacks',
   },
   {
