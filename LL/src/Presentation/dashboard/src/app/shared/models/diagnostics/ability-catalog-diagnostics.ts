@@ -160,9 +160,16 @@ export interface AbilityBalanceSimulationReport {
   equipmentRarity: string;
   equipmentProfile: string;
   participantAttributes: Record<string, number>;
+  availableEssences: AbilityBalanceEssenceDefinition[];
   rankedCombinations: AbilityBalanceCombinationResult[];
   essenceResults: AbilityBalanceEssenceResult[];
   battleSummaries: AbilityBalanceBattleSummary[];
+}
+
+export interface AbilityBalanceEssenceDefinition {
+  essenceId: string;
+  sourceMonsterId: string;
+  abilityIds: string[];
 }
 
 export interface AbilityBalanceEssenceResult {

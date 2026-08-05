@@ -1667,6 +1667,108 @@ public sealed class AbilitySystemTests
     }
 
     [Fact]
+    public void Balance_simulator_uses_each_variant_explicit_active_and_shared_passive()
+    {
+        var provider = new JsonAbilityCatalogProvider(
+            CreateConfig(),
+            FindApiContentRoot(),
+            CreateJsonOptions());
+        var essenceRepository = new JsonEssenceDefinitionRepository(
+            CreateConfig(),
+            FindApiContentRoot(),
+            CreateJsonOptions(),
+            new EssenceDefinitionValidator());
+        var simulator = new AbilityBalanceSimulator(provider, essenceRepository);
+
+        var report = simulator.Run(new AbilityBalanceSimulationRequest(
+            BattleCount: 1,
+            TeamSize: 1,
+            EssencesPerParticipant: 1,
+            RandomSeed: 71,
+            TopResults: 2,
+            CandidatePoolSize: 2,
+            CandidateTeams: null));
+
+        var brutalCharge = Assert.Single(report.AvailableEssences, essence =>
+            essence.EssenceId == "essence.hobgoblin_brutal_charge");
+        Assert.Equal("monster.hobgoblin", brutalCharge.SourceMonsterId);
+        Assert.Equal(2, brutalCharge.AbilityIds.Count);
+        Assert.Contains("ability.creature.hobgoblin.brutal_charge", brutalCharge.AbilityIds);
+        Assert.Contains("ability.creature.hobgoblin.threatening_presence", brutalCharge.AbilityIds);
+    }
+
+    [Fact]
+    public void Balance_simulator_rejects_same_creature_variants_on_one_participant()
+    {
+        var provider = new JsonAbilityCatalogProvider(
+            CreateConfig(),
+            FindApiContentRoot(),
+            CreateJsonOptions());
+        var essenceRepository = new JsonEssenceDefinitionRepository(
+            CreateConfig(),
+            FindApiContentRoot(),
+            CreateJsonOptions(),
+            new EssenceDefinitionValidator());
+        var simulator = new AbilityBalanceSimulator(provider, essenceRepository);
+        var invalid = new AbilityBalanceTeamLoadout(
+        [
+            new AbilityBalanceParticipantLoadout(
+            [
+                "essence.hobgoblin",
+                "essence.hobgoblin_brutal_charge"
+            ])
+        ]);
+        var opponent = new AbilityBalanceTeamLoadout(
+            [new AbilityBalanceParticipantLoadout(["essence.large_rat", "essence.flame_imp"])]);
+
+        var exception = Assert.Throws<InvalidOperationException>(() => simulator.Run(
+            new AbilityBalanceSimulationRequest(
+                BattleCount: 1,
+                TeamSize: 1,
+                EssencesPerParticipant: 2,
+                RandomSeed: 72,
+                TopResults: 2,
+                CandidatePoolSize: 2,
+                CandidateTeams: [invalid, opponent])));
+
+        Assert.Contains("monster.hobgoblin", exception.Message, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("cannot equip multiple", exception.Message, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public void Balance_simulator_random_teams_use_unique_source_creatures_per_participant()
+    {
+        var provider = new JsonAbilityCatalogProvider(
+            CreateConfig(),
+            FindApiContentRoot(),
+            CreateJsonOptions());
+        var essenceRepository = new JsonEssenceDefinitionRepository(
+            CreateConfig(),
+            FindApiContentRoot(),
+            CreateJsonOptions(),
+            new EssenceDefinitionValidator());
+        var simulator = new AbilityBalanceSimulator(provider, essenceRepository);
+
+        var report = simulator.Run(new AbilityBalanceSimulationRequest(
+            BattleCount: 100,
+            TeamSize: 2,
+            EssencesPerParticipant: 10,
+            RandomSeed: 73,
+            TopResults: 50,
+            CandidatePoolSize: 50,
+            CandidateTeams: null));
+
+        Assert.NotEmpty(report.RankedCombinations);
+        Assert.All(report.RankedCombinations.SelectMany(combination => combination.Participants), participant =>
+        {
+            var sourceMonsterIds = participant.EssenceIds
+                .Select(id => Assert.IsType<EssenceDefinition>(essenceRepository.GetById(id)).SourceMonsterId)
+                .ToList();
+            Assert.Equal(sourceMonsterIds.Count, sourceMonsterIds.Distinct(StringComparer.OrdinalIgnoreCase).Count());
+        });
+    }
+
+    [Fact]
     public void Engine_supports_status_stacks_and_reflect_triggers()
     {
         var thorns = new AbilitySpec

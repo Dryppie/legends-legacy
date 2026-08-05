@@ -15,13 +15,16 @@ public sealed class AbilityBalanceAuditService : IAbilityBalanceAuditService
     private static readonly JsonSerializerOptions JsonOptions = CreateJsonOptions();
     private readonly IAbilityBalanceSimulator _simulator;
     private readonly IAbilityCatalogProvider _catalogProvider;
+    private readonly IEssenceDefinitionRepository? _essenceDefinitions;
 
     public AbilityBalanceAuditService(
         IAbilityBalanceSimulator simulator,
-        IAbilityCatalogProvider catalogProvider)
+        IAbilityCatalogProvider catalogProvider,
+        IEssenceDefinitionRepository? essenceDefinitions = null)
     {
         _simulator = simulator;
         _catalogProvider = catalogProvider;
+        _essenceDefinitions = essenceDefinitions;
     }
 
     public AbilityBalanceAuditReport Run(
@@ -86,17 +89,18 @@ public sealed class AbilityBalanceAuditService : IAbilityBalanceAuditService
             if (representative is null)
                 continue;
 
+            var originalLoadout = ToLoadout(representative);
             var teamEssenceIds = GetEssenceIds(representative)
                 .ToHashSet(StringComparer.OrdinalIgnoreCase);
             var replacement = screeningEssenceResults
                 .Where(result => result.Classification == "Healthy"
-                    && !teamEssenceIds.Contains(result.EssenceId))
+                    && !teamEssenceIds.Contains(result.EssenceId)
+                    && CanReplaceEssence(originalLoadout, flagged.EssenceId, result.EssenceId))
                 .OrderBy(result => Math.Abs(result.AdjustedScoreDelta))
                 .FirstOrDefault();
             if (replacement is null)
                 continue;
 
-            var originalLoadout = ToLoadout(representative);
             var replacementLoadout = ReplaceEssence(
                 originalLoadout,
                 flagged.EssenceId,
@@ -261,6 +265,26 @@ public sealed class AbilityBalanceAuditService : IAbilityBalanceAuditService
             .ToList());
     }
 
+    private bool CanReplaceEssence(
+        AbilityBalanceTeamLoadout loadout,
+        string essenceId,
+        string replacementEssenceId)
+    {
+        var participant = loadout.Participants.FirstOrDefault(candidate =>
+            candidate.EssenceIds.Contains(essenceId, StringComparer.OrdinalIgnoreCase));
+        if (participant is null)
+            return false;
+
+        var replacementSource = GetSourceMonsterId(replacementEssenceId);
+        return participant.EssenceIds
+            .Where(candidate => !candidate.Equals(essenceId, StringComparison.OrdinalIgnoreCase))
+            .Select(GetSourceMonsterId)
+            .All(source => !source.Equals(replacementSource, StringComparison.OrdinalIgnoreCase));
+    }
+
+    private string GetSourceMonsterId(string essenceId) =>
+        _essenceDefinitions?.GetById(essenceId)?.SourceMonsterId ?? essenceId;
+
     private static double CombinationScore(AbilityBalanceCombinationResult combination) =>
         combination.Battles == 0
             ? 0d
@@ -344,6 +368,13 @@ public sealed class AbilityBalanceAuditService : IAbilityBalanceAuditService
             catalog.Statuses,
             catalog.Summons,
             catalog.AbilityIdsByOwningEssence,
+            Essences = _essenceDefinitions?.GetAll().Select(definition => new
+            {
+                definition.Id,
+                definition.SourceMonsterId,
+                definition.ActiveAbilityId,
+                definition.PassiveAbilityId
+            }),
             EquipmentStatBudgetCatalog.BalanceVersion
         }, JsonOptions);
         return Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(content))).ToLowerInvariant();

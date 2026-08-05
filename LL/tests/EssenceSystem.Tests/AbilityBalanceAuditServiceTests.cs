@@ -106,6 +106,7 @@ public sealed class AbilityBalanceAuditServiceTests
                 request.EquipmentRarity,
                 request.EquipmentProfile,
                 new Dictionary<string, float>(),
+                [],
                 combinations,
                 essenceResults,
                 []);

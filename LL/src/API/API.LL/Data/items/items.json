@@ -46,7 +46,7 @@
   {
     "id": "sigil_hives_abyss",
     "name": "Hive Sigil",
-    "description": "A sigil used to open a run into The Hive's Abyss.",
+    "description": "A sigil used to open a run into The Hive\u0027s Abyss.",
     "itemType": "Resource",
     "rarity": "Common",
     "equipmentType": "Head",
@@ -1102,8 +1102,6 @@
     "id": "item.catalyst_selection_crate",
     "name": "Catalyst Selection Crate",
     "description": "Open this crate from your inventory to choose six catalysts for a specialized Blueprint recipe.",
-    "stackable": true,
-    "isBound": true,
     "itemType": "Consumable",
     "rarity": "Rare",
     "equipmentType": "Head",
@@ -1168,7 +1166,7 @@
   },
   {
     "id": "executioners_mark",
-    "name": "Executioner's Mark",
+    "name": "Executioner\u0027s Mark",
     "description": "A grim token used to bind the Execution design to crafted equipment.",
     "itemType": "Resource",
     "rarity": "Rare",
@@ -1476,7 +1474,7 @@
   },
   {
     "id": "item.essence.hobgoblin",
-    "name": "Unbound Hobgoblin Essence — Intimidating Slam",
+    "name": "Unbound Hobgoblin Essence \u2014 Intimidating Slam",
     "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
     "itemType": "Essence",
     "rarity": "Rare",
@@ -1487,7 +1485,7 @@
   },
   {
     "id": "item.essence.hobgoblin_brutal_charge",
-    "name": "Unbound Hobgoblin Essence — Brutal Charge",
+    "name": "Unbound Hobgoblin Essence \u2014 Brutal Charge",
     "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
     "itemType": "Essence",
     "rarity": "Rare",
