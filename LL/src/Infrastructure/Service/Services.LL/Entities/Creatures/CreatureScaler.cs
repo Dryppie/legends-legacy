@@ -62,7 +62,7 @@ public class CreatureScaler : ICreatureScaler
             {
                 AttributeType.MaxHealth => (float)(baseValue * scaling.HealthMultiplier),
                 AttributeType.Power => (float)(baseValue * scaling.OffenseMultiplier),
-                AttributeType.Precision => (float)(baseValue * scaling.PrecisionMultiplier),
+                AttributeType.AttackSpeed => (float)(baseValue * scaling.AttackSpeedMultiplier),
                 AttributeType.CritChance => Math.Min(baseValue + (float)scaling.CritChanceBonus, scaling.CritChanceCap),
                 AttributeType.CritDamage => Math.Min(baseValue + (float)scaling.CritDamageBonus, scaling.CritDamageCap),
                 AttributeType.ArmorPenetration => (float)(baseValue * scaling.PenetrationMultiplier),
@@ -86,7 +86,7 @@ public class CreatureScaler : ICreatureScaler
         ScaleSingle(creature, AttributeType.MaxHealth, p.HealthMultiplier);
         ScaleSingle(creature, AttributeType.Power, p.DamageMultiplier);
         ScaleGroup(creature, AttributeType.Armor, AttributeType.Resistance, p.DefenseMultiplier);
-        ScaleSingle(creature, AttributeType.Precision, p.SpeedMultiplier);
+        ScaleSingle(creature, AttributeType.AttackSpeed, p.SpeedMultiplier);
     }
 
     private static void ApplyDamageProfile(Creature creature)
@@ -129,7 +129,7 @@ public class CreatureScaler : ICreatureScaler
     //    ScaleGroup(creature, AttributeType.Power, AttributeType.Power, p.DamageMultiplier);
     //    ScaleGroup(creature, AttributeType.Armor, AttributeType.Resistance, p.DefenseMultiplier);
 
-    //    ScaleSingle(creature, AttributeType.Precision, p.SpeedMultiplier);
+    //    ScaleSingle(creature, AttributeType.AttackSpeed, p.SpeedMultiplier);
     //    ScaleSingle(creature, AttributeType.Cooldown, p.CdrMultiplier);
     //}
 
@@ -138,7 +138,7 @@ public class CreatureScaler : ICreatureScaler
     //    ScaleGroup(creature, AttributeType.MaxHealth, AttributeType.MaxHealth, creature.HealthFactor);
     //    ScaleGroup(creature, AttributeType.Power, AttributeType.Power, creature.DamageFactor);
     //    ScaleGroup(creature, AttributeType.Armor, AttributeType.Resistance, creature.DefenseFactor);
-    //    ScaleSingle(creature, AttributeType.Precision, creature.SpeedFactor);
+    //    ScaleSingle(creature, AttributeType.AttackSpeed, creature.SpeedFactor);
     //}
 
     //private static void ApplyRubberBanding(Creature creature, Area ctx, int effectiveD)

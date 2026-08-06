@@ -594,7 +594,7 @@ public sealed class CreatureArchiveServiceTests
                     new RoomDefinition
                     {
                         Type = RoomType.Combat,
-                        EncounterIds = ["cave_bat"]
+                        EncounterIds = ["vampire_bat"]
                     }
                 ]
             },

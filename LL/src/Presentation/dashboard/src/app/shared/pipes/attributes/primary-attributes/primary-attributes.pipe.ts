@@ -7,20 +7,7 @@ import { AttributeDto } from '../../../models/Dtos/attributesDto';
   standalone: true,
 })
 export class PrimaryAttributesPipe implements PipeTransform {
-  private primaryAttributes = [
-    AttributeType.Constitution,
-    AttributeType.Endurance,
-    AttributeType.Willpower,
-    AttributeType.Strength,
-    AttributeType.FightingSpirit,
-    AttributeType.Dexterity,
-    AttributeType.Agility,
-    AttributeType.Intelligence,
-    AttributeType.Wisdom,
-    AttributeType.Instinct,
-    AttributeType.Perception,
-    AttributeType.Luck,
-  ];
+  private primaryAttributes = [AttributeType.Power];
 
   transform(values: AttributeDto[], ...args: unknown[]): AttributeDto[] {
     return values.filter((value) =>

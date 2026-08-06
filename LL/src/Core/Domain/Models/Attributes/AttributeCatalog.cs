@@ -15,35 +15,6 @@ public static class AttributeCatalog
                     AttributeBenchmarkScenario.PeriodicOffense,
                     AttributeBenchmarkScenario.HealingSustain,
                     AttributeBenchmarkScenario.SummonOffense)),
-            [AttributeType.Fortitude] = Flat(
-                AttributeType.Fortitude,
-                "Fortitude",
-                "Increases maximum health, armor, and resistance.",
-                Scenarios(
-                    AttributeBenchmarkScenario.PhysicalPressure,
-                    AttributeBenchmarkScenario.MagicalPressure,
-                    AttributeBenchmarkScenario.MixedPressure,
-                    AttributeBenchmarkScenario.BurstPressure,
-                    AttributeBenchmarkScenario.LongSustain)),
-            [AttributeType.Precision] = Flat(
-                AttributeType.Precision,
-                "Precision",
-                "Increases critical chance, physical and magical penetration, and attack speed.",
-                Scenarios(
-                    AttributeBenchmarkScenario.PhysicalOffense,
-                    AttributeBenchmarkScenario.MagicalOffense,
-                    AttributeBenchmarkScenario.PeriodicOffense)),
-            [AttributeType.Spirit] = Flat(
-                AttributeType.Spirit,
-                "Spirit",
-                "Increases healing, regeneration, status resilience, and summon attributes.",
-                Scenarios(
-                    AttributeBenchmarkScenario.HealingSustain,
-                    AttributeBenchmarkScenario.StatusResilience,
-                    AttributeBenchmarkScenario.CrowdControlResilience,
-                    AttributeBenchmarkScenario.SummonOffense,
-                    AttributeBenchmarkScenario.LongSustain)),
-
             [AttributeType.MaxHealth] = Flat(
                 AttributeType.MaxHealth,
                 "Max Health",
@@ -52,20 +23,19 @@ public static class AttributeCatalog
                     AttributeBenchmarkScenario.MixedPressure,
                     AttributeBenchmarkScenario.UnmitigatedPressure,
                     AttributeBenchmarkScenario.BurstPressure,
-                    AttributeBenchmarkScenario.LongSustain),
-                AttributeType.Fortitude),
-            [AttributeType.Armor] = Rating(
+                    AttributeBenchmarkScenario.LongSustain)),
+            [AttributeType.Armor] = Percent(
                 AttributeType.Armor,
                 "Armor",
-                "Physical mitigation rating with diminishing returns.",
-                Scenarios(AttributeBenchmarkScenario.PhysicalPressure, AttributeBenchmarkScenario.MixedPressure),
-                AttributeType.Fortitude),
-            [AttributeType.Resistance] = Rating(
+                "Reduces incoming physical damage by this many percentage points.",
+                AttributeCombatRules.TypedMitigationCapPercent,
+                Scenarios(AttributeBenchmarkScenario.PhysicalPressure, AttributeBenchmarkScenario.MixedPressure)),
+            [AttributeType.Resistance] = Percent(
                 AttributeType.Resistance,
                 "Resistance",
-                "Magical and elemental mitigation rating with diminishing returns.",
-                Scenarios(AttributeBenchmarkScenario.MagicalPressure, AttributeBenchmarkScenario.MixedPressure),
-                AttributeType.Fortitude),
+                "Reduces incoming magical and elemental damage by this many percentage points.",
+                AttributeCombatRules.TypedMitigationCapPercent,
+                Scenarios(AttributeBenchmarkScenario.MagicalPressure, AttributeBenchmarkScenario.MixedPressure)),
             [AttributeType.CritChance] = Percent(
                 AttributeType.CritChance,
                 "Crit Chance",
@@ -74,8 +44,7 @@ public static class AttributeCatalog
                 Scenarios(
                     AttributeBenchmarkScenario.PhysicalOffense,
                     AttributeBenchmarkScenario.MagicalOffense,
-                    AttributeBenchmarkScenario.HealingSustain),
-                AttributeType.Precision),
+                    AttributeBenchmarkScenario.HealingSustain)),
             [AttributeType.CritDamage] = Percent(
                 AttributeType.CritDamage,
                 "Crit Damage",
@@ -84,18 +53,18 @@ public static class AttributeCatalog
                     AttributeBenchmarkScenario.PhysicalOffense,
                     AttributeBenchmarkScenario.MagicalOffense,
                     AttributeBenchmarkScenario.HealingSustain)),
-            [AttributeType.ArmorPenetration] = Rating(
+            [AttributeType.ArmorPenetration] = Percent(
                 AttributeType.ArmorPenetration,
                 "Armor Penetration",
-                "Physical defense rating ignored by attacks.",
-                Scenarios(AttributeBenchmarkScenario.PhysicalOffense),
-                AttributeType.Precision),
-            [AttributeType.MagicPenetration] = Rating(
+                "Removes this many percentage points of the target's Armor.",
+                AttributeCombatRules.TypedPenetrationCapPercent,
+                Scenarios(AttributeBenchmarkScenario.PhysicalOffense)),
+            [AttributeType.MagicPenetration] = Percent(
                 AttributeType.MagicPenetration,
                 "Magic Penetration",
-                "Magical defense rating ignored by attacks.",
-                Scenarios(AttributeBenchmarkScenario.MagicalOffense, AttributeBenchmarkScenario.PeriodicOffense),
-                AttributeType.Precision),
+                "Removes this many percentage points of the target's Resistance.",
+                AttributeCombatRules.TypedPenetrationCapPercent,
+                Scenarios(AttributeBenchmarkScenario.MagicalOffense, AttributeBenchmarkScenario.PeriodicOffense)),
 
             [AttributeType.DodgeChance] = Percent(
                 AttributeType.DodgeChance,
@@ -126,8 +95,7 @@ public static class AttributeCatalog
                 AttributeType.HealingPowerPercent,
                 "Healing Power",
                 "Increases health restoration, including life steal, but does not increase barriers.",
-                scenarios: Scenarios(AttributeBenchmarkScenario.HealingSustain, AttributeBenchmarkScenario.LongSustain),
-                primarySource: AttributeType.Spirit),
+                scenarios: Scenarios(AttributeBenchmarkScenario.HealingSustain, AttributeBenchmarkScenario.LongSustain)),
             [AttributeType.HealthRegeneration] = new(
                 AttributeType.HealthRegeneration,
                 "Health Regen",
@@ -141,7 +109,6 @@ public static class AttributeCatalog
                 true,
                 0,
                 " HP/5s",
-                AttributeType.Spirit,
                 Scenarios(AttributeBenchmarkScenario.HealingSustain, AttributeBenchmarkScenario.LongSustain)),
             [AttributeType.LifeSteal] = Percent(
                 AttributeType.LifeSteal,
@@ -165,27 +132,23 @@ public static class AttributeCatalog
                 AttributeType.StatusResistance,
                 "Status Resistance",
                 "Reduces the duration of non-crowd-control status effects.",
-                Scenarios(AttributeBenchmarkScenario.StatusResilience),
-                AttributeType.Spirit),
+                Scenarios(AttributeBenchmarkScenario.StatusResilience)),
             [AttributeType.CrowdControlResistance] = Rating(
                 AttributeType.CrowdControlResistance,
                 "Crowd Control Resistance",
                 "Reduces the duration of crowd-control effects.",
-                Scenarios(AttributeBenchmarkScenario.CrowdControlResilience),
-                AttributeType.Spirit),
+                Scenarios(AttributeBenchmarkScenario.CrowdControlResilience)),
 
             [AttributeType.SummonPower] = Percent(
                 AttributeType.SummonPower,
                 "Summon Power",
                 "Increases the Power inherited by summoned units.",
-                scenarios: Scenarios(AttributeBenchmarkScenario.SummonOffense),
-                primarySource: AttributeType.Spirit),
+                scenarios: Scenarios(AttributeBenchmarkScenario.SummonOffense)),
             [AttributeType.SummonHealth] = Percent(
                 AttributeType.SummonHealth,
                 "Summon Health",
                 "Increases the maximum health inherited by summoned units.",
-                scenarios: Scenarios(AttributeBenchmarkScenario.SummonOffense),
-                primarySource: AttributeType.Spirit),
+                scenarios: Scenarios(AttributeBenchmarkScenario.SummonOffense)),
 
             [AttributeType.AttackSpeed] = new(
                 AttributeType.AttackSpeed,
@@ -200,7 +163,6 @@ public static class AttributeCatalog
                 true,
                 2,
                 "%",
-                AttributeType.Precision,
                 Scenarios(AttributeBenchmarkScenario.PhysicalOffense))
         };
 
@@ -253,8 +215,7 @@ public static class AttributeCatalog
         AttributeType attributeType,
         string displayName,
         string description,
-        IReadOnlyList<AttributeBenchmarkScenario> scenarios,
-        AttributeType? primarySource = null) =>
+        IReadOnlyList<AttributeBenchmarkScenario> scenarios) =>
         new(
             attributeType,
             displayName,
@@ -268,15 +229,13 @@ public static class AttributeCatalog
             true,
             0,
             string.Empty,
-            primarySource,
             scenarios);
 
     private static AttributeDefinition Rating(
         AttributeType attributeType,
         string displayName,
         string description,
-        IReadOnlyList<AttributeBenchmarkScenario> scenarios,
-        AttributeType? primarySource = null) =>
+        IReadOnlyList<AttributeBenchmarkScenario> scenarios) =>
         new(
             attributeType,
             displayName,
@@ -290,7 +249,6 @@ public static class AttributeCatalog
             true,
             0,
             string.Empty,
-            primarySource,
             scenarios);
 
     private static AttributeDefinition Percent(
@@ -298,8 +256,7 @@ public static class AttributeCatalog
         string displayName,
         string description,
         float? maximum = null,
-        IReadOnlyList<AttributeBenchmarkScenario>? scenarios = null,
-        AttributeType? primarySource = null) =>
+        IReadOnlyList<AttributeBenchmarkScenario>? scenarios = null) =>
         new(
             attributeType,
             displayName,
@@ -313,7 +270,6 @@ public static class AttributeCatalog
             true,
             2,
             "%",
-            primarySource,
             scenarios ?? []);
 
     private static IReadOnlyList<AttributeBenchmarkScenario> Scenarios(

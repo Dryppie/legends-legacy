@@ -82,12 +82,12 @@ export class CombatDiagnosticsComponent implements OnInit, OnDestroy {
   ];
   readonly equipmentProfiles = ['Balanced', 'Offense', 'Sustain', 'Defensive', 'Area'];
   auditSettings = {
-    teamSize: 2,
+    teamSize: 3,
     essencesPerParticipant: 5,
     candidatePoolSize: 1000,
-    screeningBattleCount: 250000,
+    screeningBattleCount: 25000,
     finalistCount: 100,
-    finalistBattleCount: 500,
+    finalistBattleCount: 10,
     validationBattleCount: 200,
     randomSeeds: '1337, 2027, 9001',
     equipmentTier: 10,
@@ -292,12 +292,12 @@ export class CombatDiagnosticsComponent implements OnInit, OnDestroy {
     this.isRunningAudit = true;
     this.auditError = null;
     const request: AbilityBalanceAuditRequest = {
-      teamSize: Number(this.auditSettings.teamSize) || 2,
+      teamSize: Number(this.auditSettings.teamSize) || 3,
       essencesPerParticipant: Number(this.auditSettings.essencesPerParticipant) || 5,
       candidatePoolSize: Number(this.auditSettings.candidatePoolSize) || 1000,
-      screeningBattleCount: Number(this.auditSettings.screeningBattleCount) || 250000,
+      screeningBattleCount: Number(this.auditSettings.screeningBattleCount) || 25000,
       finalistCount: Number(this.auditSettings.finalistCount) || 100,
-      finalistBattleCount: Number(this.auditSettings.finalistBattleCount) || 500,
+      finalistBattleCount: Number(this.auditSettings.finalistBattleCount) || 10,
       validationBattleCount: Number(this.auditSettings.validationBattleCount) || 200,
       randomSeeds: this.parseAuditSeeds(),
       equipmentTier: Number(this.auditSettings.equipmentTier) || 10,

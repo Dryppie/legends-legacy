@@ -12,16 +12,16 @@ describe('sortAttributes', () => {
       modifier(AttributeType.Resistance),
       modifier(AttributeType.Power),
       modifier(AttributeType.MaxHealth),
-      modifier(AttributeType.Spirit),
+      modifier(AttributeType.HealthRegeneration),
     ];
 
     expect(
       sortAttributes(attributes).map((attribute) => attribute.attributeType),
     ).toEqual([
       AttributeType.Power,
-      AttributeType.Spirit,
       AttributeType.MaxHealth,
       AttributeType.Resistance,
+      AttributeType.HealthRegeneration,
       AttributeType.Cooldown,
     ]);
   });
@@ -43,13 +43,13 @@ describe('sortAttributes', () => {
   it('combines matching attributes into final values', () => {
     const attributes = aggregateAttributes([
       modifier(AttributeType.MaxHealth, 50),
-      modifier(AttributeType.Spirit, 29),
+      modifier(AttributeType.HealthRegeneration, 29),
       modifier(AttributeType.MaxHealth, 87),
     ]);
 
     expect(attributes).toEqual([
-      modifier(AttributeType.Spirit, 29),
       modifier(AttributeType.MaxHealth, 137),
+      modifier(AttributeType.HealthRegeneration, 29),
     ]);
   });
 

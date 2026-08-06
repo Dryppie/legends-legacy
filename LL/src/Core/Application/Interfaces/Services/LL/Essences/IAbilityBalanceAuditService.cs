@@ -8,12 +8,12 @@ public interface IAbilityBalanceAuditService
 }
 
 public sealed record AbilityBalanceAuditRequest(
-    int TeamSize = 2,
+    int TeamSize = 3,
     int EssencesPerParticipant = 5,
     int CandidatePoolSize = 1_000,
-    int ScreeningBattleCount = 250_000,
+    int ScreeningBattleCount = 25_000,
     int FinalistCount = 100,
-    int FinalistBattleCount = 500,
+    int FinalistBattleCount = 10,
     int ValidationBattleCount = 200,
     IReadOnlyList<int>? RandomSeeds = null,
     int EquipmentTier = 10,

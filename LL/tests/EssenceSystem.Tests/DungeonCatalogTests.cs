@@ -3,6 +3,7 @@ using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
 using Domain.Models.Dungeons;
 using Domain.Models.Dungeons.Definitions;
+using Domain.Models.Dungeons.Definitions.Encounters;
 using Services.LL.JsonDefinitions;
 using Services.LL.JsonDefinitions.Dungeons;
 using Services.LL.JsonDefinitions.Reader;
@@ -137,6 +138,19 @@ public sealed class DungeonCatalogTests
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .ToArray();
         Assert.Equal(["skeleton"], forgottenCatacombsCreatures);
+    }
+
+    [Theory]
+    [InlineData("skeleton")]
+    [InlineData("poisonous_rat")]
+    [InlineData("cave_bat")]
+    [InlineData("giant_bat")]
+    public void Distinct_creature_keys_are_not_rewritten_to_legacy_creatures(string creatureKey)
+    {
+        Assert.Equal(creatureKey, DungeonEncounterIdentity.NormalizeCreatureKey(creatureKey));
+        Assert.Equal(
+            $"monster.{creatureKey}",
+            DungeonEncounterIdentity.ToMonsterDefinitionId(creatureKey));
     }
 
     [Fact]

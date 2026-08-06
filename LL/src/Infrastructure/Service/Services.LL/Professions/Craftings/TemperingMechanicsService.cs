@@ -340,6 +340,7 @@ public sealed class TemperingMechanicsService : ITemperingMechanicsService
         double slotWeight) =>
         EquipmentConstraintProfile.CreateItemConstraints(
             EquipmentConstraintProfile.CreateTierBaseline(equipment.Tier),
+            equipment.Tier,
             slotWeight,
             _options.GetMaximumCombatLoadoutBudgetWeight(),
             EquipmentConstraintProfile.MinimumSupportedBasicAttackIntervalMultiplier);

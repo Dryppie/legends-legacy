@@ -20,7 +20,6 @@ describe('canonical attribute formatting', () => {
         maximumValue: 75,
         capKind: 'Fixed',
         displaySuffix: '%',
-        approvedPrimarySource: AttributeType.Precision,
       }),
       definition({
         attributeType: AttributeType.StatusResistance,
@@ -42,7 +41,7 @@ describe('canonical attribute formatting', () => {
 
   afterEach(() => setAttributeDefinitions([]));
 
-  it('uses server-provided labels, units, precision, caps, and primary sources', () => {
+  it('uses server-provided labels, units, precision, and caps', () => {
     expect(formatAttributeType(AttributeType.CritChance)).toBe(
       'Critical Chance',
     );
@@ -50,7 +49,7 @@ describe('canonical attribute formatting', () => {
       '+12.35%',
     );
     expect(formatAttributeTooltip(AttributeType.CritChance)).toBe(
-      'Chance to critically strike. Cap: 75%. Also gained from Precision.',
+      'Chance to critically strike. Cap: 75%.',
     );
   });
 
@@ -81,7 +80,6 @@ function definition(
     isContentFacing: true,
     displayPrecision: 2,
     displaySuffix: '',
-    approvedPrimarySource: null,
     relevantBenchmarkScenarios: ['PhysicalOffense'],
     ...overrides,
   };

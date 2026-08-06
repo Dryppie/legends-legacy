@@ -103,7 +103,7 @@ It should describe policies and curve parameters, not final per-area stats. A co
         "growthPerStep": 0.0,
         "exponent": 1.0
       },
-      "precisionGrowthPerStep": 0.0,
+      "attackSpeedGrowthPerStep": 0.0,
       "maximumStepIncrease": 0.0
     }
   ],

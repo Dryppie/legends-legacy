@@ -25,7 +25,7 @@ public sealed class DungeonEnemyDifficultyScalingTests
     [Theory]
     [InlineData(1, 300, 30)]
     [InlineData(2, 1500, 150)]
-    [InlineData(3, 7500, 750)]
+    [InlineData(3, 18375, 750)]
     public void Apply_scales_core_stats_without_scaling_capped_rates(
         int dungeonTier,
         int expectedMaxHealth,
@@ -43,27 +43,10 @@ public sealed class DungeonEnemyDifficultyScalingTests
         var enemy = new CombatEntity(entity);
 
         DungeonEnemyDifficultyScaling.Apply(enemy, dungeonTier);
-        enemy.BaseAttributes.Add(new EntityAttribute
-        {
-            AttributeType = AttributeType.Spirit,
-            Value = 0
-        });
-        enemy.TemporaryModifiers.Add(new DungeonAttributeModifier(
-            AttributeType.Spirit,
-            10,
-            ModifierType.Flat));
         AttributeCalculator.CalculateBaseCombatAttributes(enemy);
 
         Assert.Equal(expectedMaxHealth, enemy.GetAttributeValue(AttributeType.MaxHealth));
         Assert.Equal(expectedPower, enemy.GetAttributeValue(AttributeType.Power));
-        Assert.Equal(
-            dungeonTier switch
-            {
-                1 => 30,
-                2 => 150,
-                _ => 750
-            },
-            enemy.GetAttributeValue(AttributeType.Spirit));
         Assert.Equal(5, enemy.GetAttributeValue(AttributeType.CritChance));
     }
 }

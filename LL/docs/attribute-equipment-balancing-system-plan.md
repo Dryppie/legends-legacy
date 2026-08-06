@@ -1,5 +1,21 @@
 # Attribute and equipment balancing system
 
+> **Superseded primary-attribute design:** Sections in this document that describe
+> Fortitude, Precision, Spirit, or primary-to-secondary contributions are retained
+> only as a historical design record. They are not part of the implemented model.
+> Power is the sole universal ability coefficient, and every character-sheet stat
+> is granted and balanced directly. The current design is documented in
+> `../../docs/tier-stable-combat-scaling-design.md`.
+
+> **Current calibration addendum (equipment balance version 10):** Power is priced with
+> tier anchors of `24.00`, `6.70`, and `3.50`; Summon Power uses `3.00`, `1.25`, and
+> `1.00`; and Summon Health uses `1.90`, `0.75`, and `0.50` at tiers 1, 5, and 10.
+> The release matrix compares Power with Attack Speed in a long, basic-attack-only
+> context and passes at all three reference tiers. All nine matched summon cells, all
+> same-role recipe/blueprint release peers, aggregate-cap checks, and maximum-equipment
+> release gates pass. Historical v6 primary-attribute costs and result tables below do
+> not describe the active profile.
+
 ## Purpose
 
 This document analyzes the current attribute and equipment implementations and proposes a system for:

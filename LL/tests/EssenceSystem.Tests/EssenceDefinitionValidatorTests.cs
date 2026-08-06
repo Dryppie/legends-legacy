@@ -143,6 +143,37 @@ public sealed class EssenceDefinitionValidatorTests
     }
 
     [Fact]
+    public void Authored_essence_actives_use_varied_cooldown_cadences()
+    {
+        var options = new JsonSerializerOptions
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            ReadCommentHandling = JsonCommentHandling.Skip,
+            AllowTrailingCommas = true
+        };
+        options.Converters.Add(new JsonStringEnumConverter());
+        var config = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?> { ["Content:Root"] = "Data" })
+            .Build();
+
+        var repository = new JsonEssenceDefinitionRepository(
+            config,
+            FindApiContentRoot(),
+            options,
+            _validator);
+
+        var cooldowns = repository.GetAll()
+            .Select(definition => definition.ActiveAbility.CooldownTicks)
+            .ToArray();
+
+        Assert.Equal(53, cooldowns.Length);
+        Assert.All(cooldowns, cooldown => Assert.InRange(cooldown, 75, 220));
+        Assert.True(cooldowns.Distinct().Count() >= 10);
+        Assert.Contains(cooldowns, cooldown => cooldown < 100);
+        Assert.Contains(cooldowns, cooldown => cooldown > 100);
+    }
+
+    [Fact]
     public void Authored_essence_codex_collection_json_passes_definition_validation()
     {
         var options = new JsonSerializerOptions

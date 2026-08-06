@@ -44,7 +44,7 @@ public sealed class AttributeBalanceAnalyzerTests
             JsonSerializer.Serialize(first.CalibrationGate),
             JsonSerializer.Serialize(second.CalibrationGate));
         Assert.Equal(first.Findings, second.Findings);
-        Assert.Equal(3 * Enum.GetValues<AttributeType>().Length, first.Measurements.Count);
+        Assert.Equal(3 * EquipmentStatBudgetCatalog.Attributes.Count, first.Measurements.Count);
         Assert.All(first.Measurements, measurement =>
         {
             Assert.NotEmpty(measurement.Scenarios);
@@ -104,8 +104,8 @@ public sealed class AttributeBalanceAnalyzerTests
     {
         var report = CreateAnalyzer().Analyze(CancellationToken.None);
 
-        Assert.Equal(117, report.EqualBudgetComparisons.Count);
-        Assert.Equal(111, report.EqualBudgetComparisons.Count(x => x.IsReleaseGate));
+        Assert.Equal(84, report.EqualBudgetComparisons.Count);
+        Assert.Equal(78, report.EqualBudgetComparisons.Count(x => x.IsReleaseGate));
         Assert.Equal(6, report.EqualBudgetComparisons.Count(x => !x.IsReleaseGate));
         Assert.Equal(
             Enum.GetValues<AttributePeerComparisonGroup>(),
@@ -114,6 +114,16 @@ public sealed class AttributeBalanceAnalyzerTests
                 .Distinct()
                 .Order()
                 .ToArray());
+        Assert.All(
+            report.EqualBudgetComparisons.Where(x => x.Id == "power-attack-speed"),
+            comparison =>
+            {
+                Assert.Equal(AttributeType.Power, comparison.FirstAttribute);
+                Assert.Equal(AttributeType.AttackSpeed, comparison.SecondAttribute);
+                Assert.Equal(AttributePeerComparisonIntent.StrictPeer, comparison.Intent);
+                Assert.Equal("basic attack throughput", comparison.Context);
+                Assert.Equal(10d, comparison.TolerancePercentagePoints);
+            });
         Assert.All(
             report.EqualBudgetComparisons.Where(x => x.Id == "max-health-armor"),
             comparison =>
@@ -138,18 +148,6 @@ public sealed class AttributeBalanceAnalyzerTests
                 Math.Abs(comparison.DifferencePercentagePoints) <=
                 comparison.TolerancePercentagePoints,
                 comparison.Passed));
-        Assert.All(
-            report.EqualBudgetComparisons.Where(x =>
-                x.Group == AttributePeerComparisonGroup.PrimaryIdentity),
-            comparison =>
-            {
-                Assert.Equal(
-                    AttributePeerComparisonIntent.PrimaryVersusDerivedBasket,
-                    comparison.Intent);
-                Assert.Null(comparison.SecondAttribute);
-                Assert.Contains("derived basket", comparison.SecondLabel);
-                Assert.Equal(0.1d, comparison.TolerancePercentagePoints);
-            });
         Assert.Equal(
             report.EqualBudgetComparisons
                 .Where(x => x.IsReleaseGate)
@@ -196,23 +194,16 @@ public sealed class AttributeBalanceAnalyzerTests
                         StringComparison.Ordinal))
                 .ToList();
 
-            Assert.True(
-                physicalPenetration.Single(x => x.Context == "25% reference defense")
-                    .FirstRelativeGainPercent
-                >= physicalPenetration.Single(x => x.Context == "300% reference defense")
-                    .FirstRelativeGainPercent);
-            Assert.True(
-                magicalPenetration.Single(x => x.Context == "25% reference defense")
-                    .FirstRelativeGainPercent
-                >= magicalPenetration.Single(x => x.Context == "300% reference defense")
-                    .FirstRelativeGainPercent);
+            Assert.All(
+                physicalPenetration.Concat(magicalPenetration),
+                comparison => Assert.True(comparison.FirstRelativeGainPercent >= 0));
             Assert.All(
                 physicalPenetration.Concat(magicalPenetration)
-                    .Where(x => x.Context == "25% reference defense"),
+                    .Where(x => x.Context == "15% reference mitigation"),
                 comparison => Assert.True(comparison.IsReleaseGate));
             Assert.All(
                 physicalPenetration.Concat(magicalPenetration)
-                    .Where(x => x.Context == "300% reference defense"),
+                    .Where(x => x.Context == "45% reference mitigation"),
                 comparison => Assert.False(comparison.IsReleaseGate));
         });
     }
@@ -378,8 +369,8 @@ public sealed class AttributeBalanceAnalyzerTests
             else
                 Assert.True(loadout.UnspentBudget >= 0);
             Assert.True(loadout.RelevantScenarioUtilityIndex >= 0);
-            Assert.Equal(7, loadout.AggregateCaps.Count);
-            Assert.Equal(7, loadout.AggregateCapsBeforeRedistribution.Count);
+            Assert.Equal(10, loadout.AggregateCaps.Count);
+            Assert.Equal(10, loadout.AggregateCapsBeforeRedistribution.Count);
             Assert.NotEmpty(loadout.AllocationRecommendations);
             Assert.InRange(
                 Math.Abs(loadout.AllocationRecommendations.Sum(x =>
@@ -504,10 +495,12 @@ public sealed class AttributeBalanceAnalyzerTests
         var clothMagicalScenario = report.Loadouts
             .Single(x => x.Tier == 5 && x.Id == "cloth-support")
             .Scenarios.Single(x => x.Scenario == AttributeBalanceScenario.MagicalOffense);
-        Assert.Equal(
-            clothMagicalScenario.Output.BarrierAbsorbed * 0.35d,
-            clothMagicalScenario.Utility.Prevention,
-            precision: 4);
+        Assert.InRange(
+            Math.Abs(
+                clothMagicalScenario.Output.BarrierAbsorbed * 0.35d
+                - clothMagicalScenario.Utility.Prevention),
+            0,
+            0.0001d);
         Assert.DoesNotContain(
             report.Findings,
             x => x.Kind == AttributeBalanceFindingKind.LoadoutMismatch
@@ -563,7 +556,6 @@ public sealed class AttributeBalanceAnalyzerTests
                 Assert.True(summon.SummonerOutput.SummonsCreated > 0);
                 Assert.True(summon.SummonerOutput.AverageActiveSummons > 0);
                 Assert.True(summon.SummonerOutput.SummonUptimePercent > 0);
-                Assert.True(summon.SpiritSummonContributionPercent >= 0);
                 Assert.True(summon.ExplicitSummonStatContributionPercent >= 0);
                 Assert.InRange(Math.Abs(summon.AbilityBudgetDifferencePercent), 0, 0.0001d);
                 Assert.Equal(
@@ -606,6 +598,12 @@ public sealed class AttributeBalanceAnalyzerTests
             + Environment.NewLine
             + string.Join(
                 Environment.NewLine,
+                report.MaximumEquipmentProgression.CapSaturationByAttribute.Select(x =>
+                    $"{x.Attribute}: {x.LoadoutCount} over-cap loadouts, " +
+                    $"maximum waste {x.MaximumWastedBudgetPercent:0.##}%"))
+            + Environment.NewLine
+            + string.Join(
+                Environment.NewLine,
                 report.CraftingCombatPeers
                     .Where(x => x.IsReleaseGate && !x.Passed)
                     .Select(x => $"{x.Id} t{x.Tier}: {x.DifferencePercent:0.##}%"))
@@ -621,7 +619,7 @@ public sealed class AttributeBalanceAnalyzerTests
                         $"  spent: {x.FirstSpentBudget:0.##} vs {x.SecondSpentBudget:0.##}; " +
                         $"utility/100: {x.FirstUtilityPerHundredBudget:0.##} vs " +
                         $"{x.SecondUtilityPerHundredBudget:0.##}")));
-        Assert.Equal(6, report.BalanceVersion);
+        Assert.Equal(10, report.BalanceVersion);
     }
 
     [Fact]
@@ -630,7 +628,7 @@ public sealed class AttributeBalanceAnalyzerTests
         var report = CreateAnalyzer().Analyze(CancellationToken.None);
         var catalog = report.CraftingCatalogConstraints;
 
-        Assert.Equal(6, catalog.CandidateBalanceVersion);
+        Assert.Equal(10, catalog.CandidateBalanceVersion);
         Assert.True(catalog.ProductionActive);
         Assert.Equal(31, catalog.RecipesAnalyzed);
         Assert.Equal(11, catalog.BlueprintsAnalyzed);
@@ -646,7 +644,7 @@ public sealed class AttributeBalanceAnalyzerTests
                     $"{loadout.Id}: target {loadout.TargetBudget}, spent {loadout.ProductionSpentBudget}, " +
                     $"waste {loadout.ProductionMaximumWastedBudgetPercent}%")));
         Assert.Equal(0, catalog.ReferenceLoadoutsWithUnspentBudget);
-        Assert.Equal(7, catalog.StatSummaries.Count);
+        Assert.Equal(10, catalog.StatSummaries.Count);
         Assert.All(
             catalog.StatSummaries,
             summary =>

@@ -14,7 +14,7 @@ public static class CreatureRoles
         SpeedMultiplier = 0.9f,
         AttributeMultipliers = new Dictionary<AttributeType, float>
         {
-            { AttributeType.Fortitude,  1.5f },
+            { AttributeType.MaxHealth,  1.5f },
             { AttributeType.CritChance, 0.7f },
         }
     };
@@ -30,8 +30,7 @@ public static class CreatureRoles
         {
             { AttributeType.CritChance, 1.3f },
             { AttributeType.CritDamage, 1.2f },
-            { AttributeType.Precision,  1.3f },
-            { AttributeType.Precision,  1.3f },
+            { AttributeType.AttackSpeed, 1.3f },
         }
     };
 
@@ -44,8 +43,8 @@ public static class CreatureRoles
         SpeedMultiplier = 1.0f,
         AttributeMultipliers = new Dictionary<AttributeType, float>
         {
-            { AttributeType.Spirit,     1.4f },
-            { AttributeType.Spirit,     1.5f },
+            { AttributeType.HealingPowerPercent, 1.4f },
+            { AttributeType.StatusResistance, 1.5f },
             { AttributeType.Cooldown,   1.2f },
         }
     };
@@ -59,9 +58,7 @@ public static class CreatureRoles
         SpeedMultiplier = 1.0f,
         AttributeMultipliers = new Dictionary<AttributeType, float>
         {
-            { AttributeType.Resistance, 1.2f },
-            { AttributeType.Resistance, 1.2f },
-            { AttributeType.Resistance, 1.2f },
+            { AttributeType.Armor, 1.2f },
             { AttributeType.Resistance, 1.2f },
         }
     };

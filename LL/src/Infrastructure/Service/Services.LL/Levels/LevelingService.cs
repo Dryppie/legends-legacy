@@ -33,7 +33,7 @@ public class LevelingService : ILevelingService
             // After leveling up and adjusting current experience, calculate whether there's enough experience left for more level ups
             xpRequired = _experienceProgression.GetRequiredExperience(character.Level);
 
-            LevelUpPrimaryAttributes(character);
+            LevelUpCombatAttributes(character);
 
             //TODO: Add Publish Event to notify listeners that listen to level ups
             await _publisher.Publish(
@@ -46,17 +46,14 @@ public class LevelingService : ILevelingService
         }
     }
 
-    private static void LevelUpPrimaryAttributes(Character character)
+    private static void LevelUpCombatAttributes(Character character)
     {
         foreach (var attr in character.BaseAttributes)
         {
-            if (attr.AttributeType == AttributeType.Power ||
-                attr.AttributeType == AttributeType.Fortitude ||
-                attr.AttributeType == AttributeType.Precision ||
-                attr.AttributeType == AttributeType.Spirit)
-            {
+            if (attr.AttributeType == AttributeType.Power)
                 attr.Value += 2;
-            }
+            else if (attr.AttributeType == AttributeType.MaxHealth)
+                attr.Value += 8;
         }
     }
 

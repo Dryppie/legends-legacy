@@ -131,7 +131,7 @@ public sealed class AbilityCatalogCoverageAnalyzer : IAbilityCatalogCoverageAnal
             {
                 [AttributeType.MaxHealth] = 500,
                 [AttributeType.Power] = 50,
-                [AttributeType.Spirit] = 50,
+                [AttributeType.HealingPowerPercent] = 50,
                 [AttributeType.CritDamage] = 100,
                 [AttributeType.DodgeChance] = 0
             },

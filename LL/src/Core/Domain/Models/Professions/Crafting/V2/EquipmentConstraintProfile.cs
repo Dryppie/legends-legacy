@@ -11,6 +11,9 @@ public static class EquipmentConstraintProfile
     public const double MinimumSupportedBasicAttackIntervalMultiplier = 0.75d;
     public const double BlueprintBonusCapMultiplier = 1.25d;
     public const double RarityImprovementCapMultiplier = 1.25d;
+    private const float TierOneCraftedMitigationCapPercent = 35f;
+    private const float TierFiveCraftedMitigationCapPercent = 42f;
+    private const float TierTenCraftedMitigationCapPercent = 50f;
 
     public static double GetCostPerPoint(AttributeType attribute, int tier) =>
         EquipmentStatBudgetCatalog.Get(attribute, tier).CostPerPoint;
@@ -21,25 +24,21 @@ public static class EquipmentConstraintProfile
             tier,
             EquipmentStatBudgetCatalog.MinimumTier,
             EquipmentStatBudgetCatalog.MaximumTier);
-        var primary = 8f * normalizedTier;
         var attributes = new Dictionary<AttributeType, float>
         {
-            [AttributeType.Power] = primary,
-            [AttributeType.Fortitude] = primary,
-            [AttributeType.Precision] = primary,
-            [AttributeType.Spirit] = primary,
-            [AttributeType.MaxHealth] = 180 + normalizedTier * 80,
-            [AttributeType.Armor] = normalizedTier * 5,
-            [AttributeType.Resistance] = normalizedTier * 5,
+            [AttributeType.Power] = 8f * normalizedTier,
+            [AttributeType.MaxHealth] = 180 + normalizedTier * 112,
+            [AttributeType.Armor] = 0,
+            [AttributeType.Resistance] = 0,
             [AttributeType.CritChance] = 5,
             [AttributeType.CritDamage] = 50
         };
-        AttributeCombatRules.ApplyPrimaryContributions(attributes);
         return attributes;
     }
 
     public static IReadOnlyList<EquipmentLinearBudgetConstraint> CreateItemConstraints(
         IReadOnlyDictionary<AttributeType, float> baselineAttributes,
+        int tier,
         double slotBudgetWeight,
         double expectedLoadoutBudgetWeight,
         double basicAttackIntervalMultiplier)
@@ -58,6 +57,9 @@ public static class EquipmentConstraintProfile
                 continue;
             }
 
+            if (attribute is AttributeType.Armor or AttributeType.Resistance)
+                effectiveCap = GetCraftedMitigationCapPercent(tier);
+
             var baseline = baselineAttributes.GetValueOrDefault(attribute);
             constraints.Add(new EquipmentLinearBudgetConstraint(
                 attribute,
@@ -65,6 +67,24 @@ public static class EquipmentConstraintProfile
         }
 
         return constraints;
+    }
+
+    public static float GetCraftedMitigationCapPercent(int tier)
+    {
+        var normalizedTier = Math.Clamp(
+            tier,
+            EquipmentStatBudgetCatalog.MinimumTier,
+            EquipmentStatBudgetCatalog.MaximumTier);
+        if (normalizedTier <= 5)
+        {
+            return TierOneCraftedMitigationCapPercent
+                   + (TierFiveCraftedMitigationCapPercent - TierOneCraftedMitigationCapPercent)
+                   * (normalizedTier - 1) / 4f;
+        }
+
+        return TierFiveCraftedMitigationCapPercent
+               + (TierTenCraftedMitigationCapPercent - TierFiveCraftedMitigationCapPercent)
+               * (normalizedTier - 5) / 5f;
     }
 
     public static IReadOnlyDictionary<AttributeType, double> GetOverflowWeights(
@@ -89,10 +109,10 @@ public static class EquipmentConstraintProfile
         if (tags.Contains("Aegis"))
         {
             return EqualWeights(
-                AttributeType.Fortitude,
                 AttributeType.MaxHealth,
                 AttributeType.Armor,
-                AttributeType.Resistance);
+                AttributeType.Resistance,
+                AttributeType.BlockChance);
         }
 
         return design.Recipe.OutputItemType switch
@@ -100,55 +120,52 @@ public static class EquipmentConstraintProfile
             EquipmentType.Head or EquipmentType.Chest or EquipmentType.Legs
                 when role.Equals("Heavy", StringComparison.OrdinalIgnoreCase) =>
                 EqualWeights(
-                    AttributeType.Fortitude,
                     AttributeType.MaxHealth,
                     AttributeType.Armor,
-                    AttributeType.Resistance),
+                    AttributeType.Resistance,
+                    AttributeType.BlockChance),
             EquipmentType.Head or EquipmentType.Chest or EquipmentType.Legs
                 when role.Equals("Cloth", StringComparison.OrdinalIgnoreCase) =>
                 EqualWeights(
                     AttributeType.Power,
-                    AttributeType.Spirit,
                     AttributeType.Resistance,
                     AttributeType.HealingPowerPercent,
                     AttributeType.HealthRegeneration),
             EquipmentType.Head or EquipmentType.Chest or EquipmentType.Legs =>
                 EqualWeights(
                     AttributeType.Power,
-                    AttributeType.Fortitude,
                     AttributeType.MaxHealth,
                     AttributeType.Armor,
+                    AttributeType.Resistance,
                     AttributeType.StatusResistance),
             EquipmentType.OneHanded or EquipmentType.TwoHanded when magical =>
                 EqualWeights(
                     AttributeType.Power,
-                    AttributeType.Spirit,
                     AttributeType.MagicPenetration,
-                    AttributeType.HealthRegeneration),
+                    AttributeType.HealthRegeneration,
+                    AttributeType.HealingPowerPercent),
             EquipmentType.OneHanded or EquipmentType.TwoHanded =>
                 EqualWeights(AttributeType.Power),
             EquipmentType.OffHand
                 when role.Equals("Towershield", StringComparison.OrdinalIgnoreCase) =>
                 EqualWeights(
-                    AttributeType.Fortitude,
                     AttributeType.MaxHealth,
                     AttributeType.Armor,
-                    AttributeType.Resistance),
+                    AttributeType.Resistance,
+                    AttributeType.BlockChance),
             EquipmentType.OffHand =>
                 EqualWeights(
                     AttributeType.Power,
-                    AttributeType.Spirit,
                     AttributeType.Resistance,
                     AttributeType.HealthRegeneration,
                     AttributeType.MagicPenetration),
             EquipmentType.Ring or EquipmentType.Necklace or EquipmentType.Relic =>
                 EqualWeights(
                     AttributeType.Power,
-                    AttributeType.Fortitude,
-                    AttributeType.Spirit,
                     AttributeType.MaxHealth,
                     AttributeType.HealthRegeneration,
-                    AttributeType.StatusResistance),
+                    AttributeType.StatusResistance,
+                    AttributeType.CrowdControlResistance),
             _ => new Dictionary<AttributeType, double>()
         };
     }
@@ -161,7 +178,6 @@ public static class EquipmentConstraintProfile
             .Select(stat => stat.Stat)
             .ToHashSet();
         var magical = authoredStats.Contains(AttributeType.MagicPenetration)
-            || authoredStats.Contains(AttributeType.Spirit)
             || authoredStats.Contains(AttributeType.HealingPowerPercent)
             || authoredStats.Contains(AttributeType.SummonPower);
 
@@ -170,7 +186,6 @@ public static class EquipmentConstraintProfile
             EquipmentType.OneHanded or EquipmentType.TwoHanded when magical =>
                 EqualWeights(
                     AttributeType.Power,
-                    AttributeType.Spirit,
                     AttributeType.MagicPenetration,
                     AttributeType.HealthRegeneration,
                     AttributeType.HealingPowerPercent,
@@ -180,8 +195,6 @@ public static class EquipmentConstraintProfile
             EquipmentType.OffHand =>
                 EqualWeights(
                     AttributeType.Power,
-                    AttributeType.Fortitude,
-                    AttributeType.Spirit,
                     AttributeType.MaxHealth,
                     AttributeType.Armor,
                     AttributeType.Resistance,
@@ -191,8 +204,6 @@ public static class EquipmentConstraintProfile
             EquipmentType.Head or EquipmentType.Chest or EquipmentType.Legs =>
                 EqualWeights(
                     AttributeType.Power,
-                    AttributeType.Fortitude,
-                    AttributeType.Spirit,
                     AttributeType.MaxHealth,
                     AttributeType.Armor,
                     AttributeType.Resistance,
@@ -201,14 +212,14 @@ public static class EquipmentConstraintProfile
             EquipmentType.Ring or EquipmentType.Necklace or EquipmentType.Relic =>
                 EqualWeights(
                     AttributeType.Power,
-                    AttributeType.Fortitude,
-                    AttributeType.Precision,
-                    AttributeType.Spirit,
                     AttributeType.MaxHealth,
                     AttributeType.Armor,
                     AttributeType.Resistance,
                     AttributeType.HealthRegeneration,
-                    AttributeType.StatusResistance),
+                    AttributeType.StatusResistance,
+                    AttributeType.CrowdControlResistance,
+                    AttributeType.CritChance,
+                    AttributeType.AttackSpeed),
             _ => new Dictionary<AttributeType, double>()
         };
     }
@@ -231,21 +242,13 @@ public static class EquipmentConstraintProfile
 
         foreach (var constraint in constraints)
         {
-            var contributionPerPoint = attribute == constraint.EffectiveAttribute
-                ? 1d
-                : AttributeCombatRules.GetContributionPerPoint(
-                    attribute,
-                    constraint.EffectiveAttribute);
+            var contributionPerPoint = attribute == constraint.EffectiveAttribute ? 1d : 0d;
             if (contributionPerPoint <= 0)
                 continue;
 
             var currentContribution = currentPoints.Sum(entry =>
                 entry.Value
-                * (entry.Key == constraint.EffectiveAttribute
-                    ? 1d
-                    : AttributeCombatRules.GetContributionPerPoint(
-                        entry.Key,
-                        constraint.EffectiveAttribute)));
+                * (entry.Key == constraint.EffectiveAttribute ? 1d : 0d));
             maximum = Math.Min(
                 maximum,
                 Math.Max(0d, constraint.MaximumAddedValue - currentContribution)

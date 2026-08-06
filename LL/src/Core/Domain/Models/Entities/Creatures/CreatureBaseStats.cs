@@ -9,9 +9,6 @@ public static class MonsterBaseStats
     public const float BaseHealthRegeneration = 0f;
 
     public const float BasePower = 7f;
-    public const float BaseFortitude = 10f;
-    public const float BasePrecision = 10f;
-    public const float BaseSpirit = 10f;
     public const float BaseArmor = 10f;
     public const float BaseResistance = 10f;
     public const float BaseCritChance = 0.05f;
@@ -34,9 +31,6 @@ public static class MonsterBaseStats
         new Dictionary<AttributeType, float>
         {
                 { AttributeType.Power, BasePower },
-                { AttributeType.Fortitude, BaseFortitude },
-                { AttributeType.Precision, BasePrecision },
-                { AttributeType.Spirit, BaseSpirit },
                 { AttributeType.MaxHealth, BaseMaxHealth },
                 { AttributeType.Armor, BaseArmor },
                 { AttributeType.Resistance, BaseResistance },

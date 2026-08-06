@@ -40,7 +40,7 @@ export interface CreatureScalingProfile {
   offenseMultiplier: number;
   defenseMultiplier: number;
   resistanceMultiplier: number;
-  precisionMultiplier: number;
+  attackSpeedMultiplier: number;
   penetrationMultiplier: number;
   softDefenseMultiplier: number;
   critChanceBonus: number;

@@ -46,7 +46,7 @@
   {
     "id": "sigil_hives_abyss",
     "name": "Hive Sigil",
-    "description": "A sigil used to open a run into The Hive's Abyss.",
+    "description": "A sigil used to open a run into The Hive\u0027s Abyss.",
     "itemType": "Resource",
     "rarity": "Common",
     "equipmentType": "Head",
@@ -208,13 +208,13 @@
       {
         "id": "d67d3f92-a0be-4547-aa9f-a5eb8367f936",
         "attributeType": "Armor",
-        "amount": 30,
+        "amount": 3,
         "modifierType": "Flat"
       },
       {
         "id": "1b6717ef-47ad-492c-a000-9331f2164658",
         "attributeType": "Resistance",
-        "amount": 30,
+        "amount": 3,
         "modifierType": "Flat"
       },
       {
@@ -238,13 +238,13 @@
       {
         "id": "d089d1ad-756c-4280-a2dd-91af1cfa8efb",
         "attributeType": "Armor",
-        "amount": 30,
+        "amount": 3,
         "modifierType": "Flat"
       },
       {
         "id": "8f7c2296-75a5-4a3c-83f7-eec770873eb0",
         "attributeType": "Resistance",
-        "amount": 30,
+        "amount": 3,
         "modifierType": "Flat"
       },
       {
@@ -268,13 +268,13 @@
       {
         "id": "e605c0a8-c0a8-4b6c-a8e2-62def125026b",
         "attributeType": "Armor",
-        "amount": 30,
+        "amount": 3,
         "modifierType": "Flat"
       },
       {
         "id": "ef73bf86-a057-4711-9e36-4e1187eac981",
         "attributeType": "Resistance",
-        "amount": 30,
+        "amount": 3,
         "modifierType": "Flat"
       },
       {
@@ -298,7 +298,7 @@
       {
         "id": "3d832b10-4c1b-46bf-9e50-c9f7eb473d22",
         "attributeType": "Armor",
-        "amount": 20,
+        "amount": 3,
         "modifierType": "Flat"
       },
       {
@@ -328,7 +328,7 @@
       {
         "id": "1e87a243-ecde-4cfe-bf59-7207fc8b822f",
         "attributeType": "Armor",
-        "amount": 20,
+        "amount": 3,
         "modifierType": "Flat"
       },
       {
@@ -358,7 +358,7 @@
       {
         "id": "0dc31466-211c-4581-b76b-7ff3b5999469",
         "attributeType": "Armor",
-        "amount": 20,
+        "amount": 3,
         "modifierType": "Flat"
       },
       {
@@ -388,7 +388,7 @@
       {
         "id": "1fc58844-c138-4f27-8075-de482d406bb6",
         "attributeType": "Armor",
-        "amount": 10,
+        "amount": 2,
         "modifierType": "Flat"
       },
       {
@@ -418,7 +418,7 @@
       {
         "id": "db53ac47-ed67-4a3a-be12-c8b6d9aa14f6",
         "attributeType": "Armor",
-        "amount": 10,
+        "amount": 2,
         "modifierType": "Flat"
       },
       {
@@ -448,7 +448,7 @@
       {
         "id": "72d3d796-6a10-4fbf-9dd1-6fdcf39c63dc",
         "attributeType": "Armor",
-        "amount": 10,
+        "amount": 2,
         "modifierType": "Flat"
       },
       {
@@ -478,7 +478,7 @@
       {
         "id": "bec165bc-6b16-44ce-853f-bfe817ea1bf3",
         "attributeType": "Resistance",
-        "amount": 10,
+        "amount": 2,
         "modifierType": "Flat"
       },
       {
@@ -508,7 +508,7 @@
       {
         "id": "04eba557-a382-421b-86ec-89c441cdbe8a",
         "attributeType": "Resistance",
-        "amount": 10,
+        "amount": 2,
         "modifierType": "Flat"
       },
       {
@@ -538,7 +538,7 @@
       {
         "id": "219fd7ad-10fe-436b-9035-5ce891388e84",
         "attributeType": "Resistance",
-        "amount": 10,
+        "amount": 2,
         "modifierType": "Flat"
       },
       {
@@ -595,7 +595,7 @@
       },
       {
         "id": "10000000-0000-0000-0000-000000010005",
-        "attributeType": "Precision",
+        "attributeType": "CritChance",
         "amount": 2,
         "modifierType": "Flat"
       }
@@ -724,13 +724,13 @@
       {
         "id": "1c432e25-a7d6-41e5-aaca-6463473c5e7d",
         "attributeType": "Armor",
-        "amount": 10,
+        "amount": 5,
         "modifierType": "Flat"
       },
       {
         "id": "274001ff-288d-4dfc-b482-2d85ba5a1ebe",
         "attributeType": "BlockChance",
-        "amount": 50,
+        "amount": 5,
         "modifierType": "Flat"
       }
     ],
@@ -748,13 +748,13 @@
       {
         "id": "ea387086-d8b9-42da-b1f2-79dbdba22094",
         "attributeType": "Resistance",
-        "amount": 10,
+        "amount": 5,
         "modifierType": "Flat"
       },
       {
         "id": "067b7b8a-4370-45ba-9312-e7ba5a1e05f3",
         "attributeType": "BlockChance",
-        "amount": 50,
+        "amount": 5,
         "modifierType": "Flat"
       }
     ],
@@ -1102,10 +1102,9 @@
     "id": "item.catalyst_selection_crate",
     "name": "Catalyst Selection Crate",
     "description": "Open this crate from your inventory to choose six catalysts for a specialized Blueprint recipe.",
-    "stackable": true,
-    "isBound": true,
     "itemType": "Consumable",
     "rarity": "Rare",
+    "isBound": true,
     "equipmentType": "Head",
     "attributeModifiers": [],
     "toolBonuses": [],
@@ -1168,7 +1167,7 @@
   },
   {
     "id": "executioners_mark",
-    "name": "Executioner's Mark",
+    "name": "Executioner\u0027s Mark",
     "description": "A grim token used to bind the Execution design to crafted equipment.",
     "itemType": "Resource",
     "rarity": "Rare",
@@ -1476,7 +1475,7 @@
   },
   {
     "id": "item.essence.hobgoblin",
-    "name": "Unbound Hobgoblin Essence — Intimidating Slam",
+    "name": "Unbound Hobgoblin Essence \u2014 Intimidating Slam",
     "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
     "itemType": "Essence",
     "rarity": "Rare",
@@ -1487,7 +1486,7 @@
   },
   {
     "id": "item.essence.hobgoblin_brutal_charge",
-    "name": "Unbound Hobgoblin Essence — Brutal Charge",
+    "name": "Unbound Hobgoblin Essence \u2014 Brutal Charge",
     "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
     "itemType": "Essence",
     "rarity": "Rare",

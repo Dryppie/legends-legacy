@@ -225,17 +225,17 @@ public static class EquipmentBudgetAllocator
                 var currentContribution =
                     existingPoints.Sum(entry =>
                         entry.Value
-                        * GetDirectOrPrimaryContribution(
+                        * GetDirectContribution(
                             entry.Key,
                             constraint.EffectiveAttribute))
                     + points.Sum(entry =>
                         entry.Value
-                        * GetDirectOrPrimaryContribution(
+                        * GetDirectContribution(
                             entry.Key,
                             constraint.EffectiveAttribute));
                 var proposedContribution = proposedPoints.Sum(entry =>
                     entry.Value
-                    * GetDirectOrPrimaryContribution(
+                    * GetDirectContribution(
                         entry.Key,
                         constraint.EffectiveAttribute));
                 if (proposedContribution <= Epsilon)
@@ -277,12 +277,12 @@ public static class EquipmentBudgetAllocator
                 var contribution =
                     existingPoints.Sum(entry =>
                         entry.Value
-                        * GetDirectOrPrimaryContribution(
+                        * GetDirectContribution(
                             entry.Key,
                             constraint.EffectiveAttribute))
                     + points.Sum(entry =>
                         entry.Value
-                        * GetDirectOrPrimaryContribution(
+                        * GetDirectContribution(
                             entry.Key,
                             constraint.EffectiveAttribute));
                 if (contribution < constraint.MaximumAddedValue - Epsilon)
@@ -290,7 +290,7 @@ public static class EquipmentBudgetAllocator
 
                 bindingCombatCaps.Add(constraint.EffectiveAttribute);
                 foreach (var attribute in activeWeights.Keys.Where(attribute =>
-                             GetDirectOrPrimaryContribution(
+                             GetDirectContribution(
                                  attribute,
                                  constraint.EffectiveAttribute) > 0))
                 {
@@ -337,12 +337,10 @@ public static class EquipmentBudgetAllocator
             .OrderBy(x => x.Key)
             .ToDictionary(x => x.Key, x => x.Value);
 
-    private static double GetDirectOrPrimaryContribution(
+    private static double GetDirectContribution(
         AttributeType source,
         AttributeType target) =>
-        source == target
-            ? 1d
-            : AttributeCombatRules.GetContributionPerPoint(source, target);
+        source == target ? 1d : 0d;
 }
 
 public sealed record EquipmentBudgetAllocation(

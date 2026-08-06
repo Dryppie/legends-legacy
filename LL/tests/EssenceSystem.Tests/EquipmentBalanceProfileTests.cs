@@ -15,7 +15,10 @@ public sealed class EquipmentBalanceProfileTests
     public void Profile_covers_every_attribute_with_positive_ordered_anchors()
     {
         Assert.Equal(
-            Enum.GetValues<AttributeType>().Order(),
+            AttributeCatalog.All
+                .Where(x => x.IsEquipmentEligible)
+                .Select(x => x.AttributeType)
+                .Order(),
             EquipmentStatBudgetCatalog.Attributes.Order());
 
         foreach (var attribute in EquipmentStatBudgetCatalog.Attributes)
@@ -30,11 +33,11 @@ public sealed class EquipmentBalanceProfileTests
     }
 
     [Theory]
-    [InlineData(1, 0.54d)]
-    [InlineData(3, 0.78d)]
-    [InlineData(5, 1.02d)]
-    [InlineData(8, 1.23d)]
-    [InlineData(10, 1.37d)]
+    [InlineData(1, 0.68d)]
+    [InlineData(3, 1.275d)]
+    [InlineData(5, 1.87d)]
+    [InlineData(8, 3.22d)]
+    [InlineData(10, 4.12d)]
     public void Typed_defense_cost_interpolates_between_reviewed_tier_anchors(
         int tier,
         double expectedCost)
@@ -65,6 +68,22 @@ public sealed class EquipmentBalanceProfileTests
             precision: 4);
     }
 
+    [Theory]
+    [InlineData(1, 24d)]
+    [InlineData(3, 15.35d)]
+    [InlineData(5, 6.7d)]
+    [InlineData(8, 4.78d)]
+    [InlineData(10, 3.5d)]
+    public void Power_cost_tracks_its_tier_relative_throughput_value(
+        int tier,
+        double expectedCost)
+    {
+        Assert.Equal(
+            expectedCost,
+            EquipmentStatBudgetCatalog.Get(AttributeType.Power, tier).CostPerPoint,
+            precision: 4);
+    }
+
     [Fact]
     public void TwoHandedAndDualWieldReceiveEqualHandSlotFunding()
     {
@@ -73,50 +92,6 @@ public sealed class EquipmentBalanceProfileTests
         Assert.Equal(
             options.GetSlotBudgetWeight(EquipmentType.OneHanded) * 2d,
             options.GetSlotBudgetWeight(EquipmentType.TwoHanded),
-            precision: 4);
-    }
-
-    [Theory]
-    [InlineData(1)]
-    [InlineData(5)]
-    [InlineData(10)]
-    public void Fortitude_cost_equals_its_direct_derived_stat_basket(int tier)
-    {
-        var fortitudeCost = EquipmentStatBudgetCatalog.Get(AttributeType.Fortitude, tier).CostPerPoint;
-        var maxHealthCost = EquipmentStatBudgetCatalog.Get(AttributeType.MaxHealth, tier).CostPerPoint;
-        var armorCost = EquipmentStatBudgetCatalog.Get(AttributeType.Armor, tier).CostPerPoint;
-        var resistanceCost = EquipmentStatBudgetCatalog.Get(AttributeType.Resistance, tier).CostPerPoint;
-        var basketCost = 4 * maxHealthCost + 0.5d * armorCost + 0.5d * resistanceCost;
-
-        Assert.Equal(basketCost, fortitudeCost, precision: 4);
-    }
-
-    [Theory]
-    [InlineData(1)]
-    [InlineData(5)]
-    [InlineData(10)]
-    public void Precision_and_spirit_costs_equal_their_direct_derived_stat_baskets(int tier)
-    {
-        var precisionBasket =
-            0.1d * EquipmentStatBudgetCatalog.Get(AttributeType.CritChance, tier).CostPerPoint
-            + 0.1d * EquipmentStatBudgetCatalog.Get(AttributeType.ArmorPenetration, tier).CostPerPoint
-            + 0.1d * EquipmentStatBudgetCatalog.Get(AttributeType.MagicPenetration, tier).CostPerPoint
-            + 0.05d * EquipmentStatBudgetCatalog.Get(AttributeType.AttackSpeed, tier).CostPerPoint;
-        var spiritBasket =
-            0.15d * EquipmentStatBudgetCatalog.Get(AttributeType.HealingPowerPercent, tier).CostPerPoint
-            + 0.05d * EquipmentStatBudgetCatalog.Get(AttributeType.HealthRegeneration, tier).CostPerPoint
-            + 0.1d * EquipmentStatBudgetCatalog.Get(AttributeType.StatusResistance, tier).CostPerPoint
-            + 0.1d * EquipmentStatBudgetCatalog.Get(AttributeType.CrowdControlResistance, tier).CostPerPoint
-            + 0.05d * EquipmentStatBudgetCatalog.Get(AttributeType.SummonPower, tier).CostPerPoint
-            + 0.1d * EquipmentStatBudgetCatalog.Get(AttributeType.SummonHealth, tier).CostPerPoint;
-
-        Assert.Equal(
-            precisionBasket,
-            EquipmentStatBudgetCatalog.Get(AttributeType.Precision, tier).CostPerPoint,
-            precision: 4);
-        Assert.Equal(
-            spiritBasket,
-            EquipmentStatBudgetCatalog.Get(AttributeType.Spirit, tier).CostPerPoint,
             precision: 4);
     }
 
@@ -139,10 +114,10 @@ public sealed class EquipmentBalanceProfileTests
             new InstanceAttributeModifier(AttributeType.Armor, 100)
         ];
 
-        Assert.Equal(54d, EquipmentBudgetEvaluator.Evaluate(modifiers, tier: 1));
-        Assert.Equal(102d, EquipmentBudgetEvaluator.Evaluate(modifiers, tier: 5));
-        Assert.Equal(137d, EquipmentBudgetEvaluator.Evaluate(modifiers, tier: 10));
-        Assert.Equal(6, EquipmentBudgetEvaluator.BalanceVersion);
+        Assert.Equal(68d, EquipmentBudgetEvaluator.Evaluate(modifiers, tier: 1));
+        Assert.Equal(187d, EquipmentBudgetEvaluator.Evaluate(modifiers, tier: 5));
+        Assert.Equal(412d, EquipmentBudgetEvaluator.Evaluate(modifiers, tier: 10));
+        Assert.Equal(10, EquipmentBudgetEvaluator.BalanceVersion);
     }
 
     [Fact]
@@ -169,7 +144,7 @@ public sealed class EquipmentBalanceProfileTests
     }
 
     [Fact]
-    public void LegacyBaseModifiersCannotExceedFixedCharacterCaps()
+    public void LegacyBasePercentageModifiersRemainReadableAndCannotExceedCharacterCaps()
     {
         var equipment = new EquipmentInstance
         {
@@ -199,7 +174,7 @@ public sealed class EquipmentBalanceProfileTests
             equipment.BaseModifiers.Single(x =>
                 x.AttributeType == AttributeType.BlockChance).Amount);
         Assert.Equal(
-            60,
+            10,
             equipment.BaseModifiers.Single(x =>
                 x.AttributeType == AttributeType.Armor).Amount);
     }
@@ -209,17 +184,17 @@ public sealed class EquipmentBalanceProfileTests
     {
         var allocation = EquipmentBudgetAllocator.Allocate(
             tier: 1,
-            budget: 2_700d,
+            budget: 47_000d,
             new Dictionary<AttributeType, double>
             {
-                [AttributeType.Power] = 0.9d,
-                [AttributeType.MaxHealth] = 0.1d
+                [AttributeType.Power] = 0.95d,
+                [AttributeType.MaxHealth] = 0.05d
             },
             roundToWholePoints: false);
 
         Assert.Equal(1_800d, allocation.AddedPoints[AttributeType.Power], precision: 4);
-        Assert.Equal(2_250d, allocation.AddedPoints[AttributeType.MaxHealth], precision: 4);
-        Assert.Equal(2_700d, allocation.SpentBudget, precision: 4);
+        Assert.Equal(19_000d, allocation.AddedPoints[AttributeType.MaxHealth], precision: 4);
+        Assert.Equal(47_000d, allocation.SpentBudget, precision: 4);
         Assert.Equal(0d, allocation.UnspentBudget, precision: 4);
         Assert.Contains(AttributeType.Power, allocation.CappedAttributes);
     }
@@ -311,10 +286,6 @@ public sealed class EquipmentBalanceProfileTests
             modifiers.Single(x => x.AttributeType == AttributeType.DamageReduction).Amount
             < expectedBudget * recipe.InitialStatProfile[AttributeType.DamageReduction]
             / EquipmentStatBudgetCatalog.Get(AttributeType.DamageReduction, 10).CostPerPoint);
-        Assert.Contains(modifiers, modifier =>
-            modifier.AttributeType != AttributeType.DamageReduction
-            && modifier.AttributeType != AttributeType.MaxHealth
-            && modifier.AttributeType != AttributeType.Armor);
         Assert.InRange(
             Math.Abs(evaluatedBudget - expectedBudget),
             0,
@@ -370,12 +341,11 @@ public sealed class EquipmentBalanceProfileTests
     }
 
     [Fact]
-    public void Constrained_allocator_shares_a_combat_cap_between_direct_and_primary_stats()
+    public void Constrained_allocator_respects_a_direct_combat_cap()
     {
         var weights = new Dictionary<AttributeType, double>
         {
-            [AttributeType.Precision] = 0.50d,
-            [AttributeType.CritChance] = 0.25d,
+            [AttributeType.CritChance] = 0.75d,
             [AttributeType.Power] = 0.25d
         };
         EquipmentLinearBudgetConstraint[] constraints =
@@ -388,12 +358,7 @@ public sealed class EquipmentBalanceProfileTests
             budget: 100d,
             weights,
             constraints);
-        var critContribution =
-            allocation.AddedPoints.GetValueOrDefault(AttributeType.CritChance)
-            + allocation.AddedPoints.GetValueOrDefault(AttributeType.Precision)
-            * AttributeCombatRules.GetContributionPerPoint(
-                AttributeType.Precision,
-                AttributeType.CritChance);
+        var critContribution = allocation.AddedPoints.GetValueOrDefault(AttributeType.CritChance);
 
         Assert.InRange(critContribution, 9.999d, 10.001d);
         Assert.InRange(allocation.UnspentBudget, 0, 0.001d);
@@ -402,7 +367,7 @@ public sealed class EquipmentBalanceProfileTests
             allocation.AddedPoints[AttributeType.Power]
             > 100d * weights[AttributeType.Power]
             / EquipmentStatBudgetCatalog.Get(AttributeType.Power, 10).CostPerPoint);
-        Assert.Equal(6, EquipmentConstraintProfile.BalanceVersion);
+        Assert.Equal(10, EquipmentConstraintProfile.BalanceVersion);
         Assert.True(EquipmentConstraintProfile.ProductionActive);
     }
 
@@ -446,8 +411,8 @@ public sealed class EquipmentBalanceProfileTests
     }
 
     [Theory]
-    [InlineData(1, 1.50d)]
-    [InlineData(3, 1.375d)]
+    [InlineData(1, 3.00d)]
+    [InlineData(3, 2.125d)]
     [InlineData(5, 1.25d)]
     [InlineData(10, 1.00d)]
     public void Production_profile_uses_tiered_summon_power_costs(
@@ -469,6 +434,24 @@ public sealed class EquipmentBalanceProfileTests
     }
 
     [Theory]
+    [InlineData(1, 1.90d)]
+    [InlineData(3, 1.325d)]
+    [InlineData(5, 0.75d)]
+    [InlineData(8, 0.60d)]
+    [InlineData(10, 0.50d)]
+    public void Production_profile_uses_tiered_summon_health_costs(
+        int tier,
+        double expectedCost)
+    {
+        Assert.Equal(
+            expectedCost,
+            EquipmentConstraintProfile.GetCostPerPoint(
+                AttributeType.SummonHealth,
+                tier),
+            precision: 4);
+    }
+
+    [Theory]
     [InlineData(1, 1.50d)]
     [InlineData(5, 1.50d)]
     [InlineData(8, 1.86d)]
@@ -483,34 +466,6 @@ public sealed class EquipmentBalanceProfileTests
                 AttributeType.HealthRegeneration,
                 tier),
             precision: 4);
-    }
-
-    [Theory]
-    [InlineData(1)]
-    [InlineData(5)]
-    [InlineData(10)]
-    public void Production_primary_costs_follow_their_derived_baskets(int tier)
-    {
-        foreach (var primary in new[]
-                 {
-                     AttributeType.Fortitude,
-                     AttributeType.Precision,
-                     AttributeType.Spirit
-                 })
-        {
-            var basketCost = AttributeCombatRules.PrimaryContributions
-                .Where(x => x.PrimaryAttribute == primary)
-                .Sum(x =>
-                    x.ContributionPerPoint
-                    * EquipmentConstraintProfile.GetCostPerPoint(
-                        x.DerivedAttribute,
-                        tier));
-
-            Assert.Equal(
-                basketCost,
-                EquipmentConstraintProfile.GetCostPerPoint(primary, tier),
-                precision: 4);
-        }
     }
 
     private sealed class FixedRandom(double value) : Random

@@ -28,7 +28,7 @@
         "growthPerStep": 0.16,
         "exponent": 1.08
       },
-      "precisionGrowthPerStep": 0.08,
+      "attackSpeedGrowthPerStep": 0.08,
       "penetrationGrowthPerStep": 0.10,
       "softDefenseGrowthPerStep": 0.05,
       "critChancePerStep": 0.03,
@@ -64,7 +64,7 @@
         "growthPerStep": 0.16,
         "exponent": 1.08
       },
-      "precisionGrowthPerStep": 0.08,
+      "attackSpeedGrowthPerStep": 0.08,
       "penetrationGrowthPerStep": 0.10,
       "softDefenseGrowthPerStep": 0.05,
       "critChancePerStep": 0.03,

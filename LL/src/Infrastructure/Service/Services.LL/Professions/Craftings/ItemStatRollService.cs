@@ -78,6 +78,7 @@ public class ItemStatRollService : IItemStatRollService
         var slotWeight = _options.GetSlotBudgetWeight(equipment.EquipmentType);
         var constraints = EquipmentConstraintProfile.CreateItemConstraints(
             EquipmentConstraintProfile.CreateTierBaseline(tier),
+            tier,
             slotWeight,
             _options.GetMaximumCombatLoadoutBudgetWeight(),
             EquipmentConstraintProfile.MinimumSupportedBasicAttackIntervalMultiplier);

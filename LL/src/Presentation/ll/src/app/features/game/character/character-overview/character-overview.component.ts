@@ -68,17 +68,13 @@ export class CharacterOverviewComponent {
 
     return this.characterService.currentCharacter()?.name;
   });
-  readonly primaryAttributes = [
-    AttributeType.Power,
-    AttributeType.Fortitude,
-    AttributeType.Precision,
-    AttributeType.Spirit,
-  ];
   readonly attributeSections: { title: string; attributes: AttributeType[] }[] =
     [
       {
         title: 'Offense',
         attributes: [
+          AttributeType.Power,
+          AttributeType.AttackSpeed,
           AttributeType.CritChance,
           AttributeType.CritDamage,
           AttributeType.ArmorPenetration,
@@ -88,6 +84,7 @@ export class CharacterOverviewComponent {
       {
         title: 'Defense',
         attributes: [
+          AttributeType.MaxHealth,
           AttributeType.Armor,
           AttributeType.Resistance,
           AttributeType.DodgeChance,

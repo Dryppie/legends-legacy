@@ -169,23 +169,6 @@ public sealed class AbilitySystemTests
     }
 
     [Fact]
-    public void Engine_uses_fixed_basic_attack_cadence_regardless_of_precision()
-    {
-        var lowPrecision = CreateCombatant("low-precision", CombatTeam.Friendly, []);
-        var baseline = CreateCombatant("baseline", CombatTeam.Hostile, []);
-        lowPrecision.Attributes[AttributeType.Precision] = 5;
-        baseline.Attributes[AttributeType.Precision] = 20;
-        var engine = new FastCombatEngine(
-            new Dictionary<string, CompiledStatus>(),
-            new FastCombatEngineOptions(MaxTicks: 61, BasicAttackIntervalTicks: 30));
-
-        var result = engine.Run([lowPrecision], [baseline]);
-
-        Assert.Equal(2, CountBasicAttacks(result, lowPrecision.Id));
-        Assert.Equal(2, CountBasicAttacks(result, baseline.Id));
-    }
-
-    [Fact]
     public void Engine_attack_speed_increases_basic_attack_cadence()
     {
         var hasted = CreateCombatant("hasted", CombatTeam.Friendly, []);
@@ -434,47 +417,31 @@ public sealed class AbilitySystemTests
     }
 
     [Fact]
-    public void Engine_regenerates_health_every_five_seconds_regardless_of_spirit()
+    public void Engine_regenerates_health_every_five_seconds_from_the_direct_stat()
     {
-        var lowSpirit = CreateCombatant("low-spirit", CombatTeam.Friendly, []);
-        var highSpirit = CreateCombatant("high-spirit", CombatTeam.Friendly, []);
+        var friendly = CreateCombatant("friendly", CombatTeam.Friendly, []);
         var hostile = CreateCombatant("hostile", CombatTeam.Hostile, []);
-        lowSpirit.Attributes[AttributeType.HealthRegeneration] = 3;
-        lowSpirit.Attributes[AttributeType.Spirit] = 0;
-        highSpirit.Attributes[AttributeType.HealthRegeneration] = 3;
-        highSpirit.Attributes[AttributeType.Spirit] = 1_000;
-        lowSpirit.AdjustHealth(-20);
-        highSpirit.AdjustHealth(-20);
+        friendly.Attributes[AttributeType.HealthRegeneration] = 3;
+        friendly.AdjustHealth(-20);
         var engine = new FastCombatEngine(
             new Dictionary<string, CompiledStatus>(),
             new FastCombatEngineOptions(MaxTicks: 100, BasicAttackIntervalTicks: 1_000));
 
-        var result = engine.Run([lowSpirit, highSpirit], [hostile]);
+        var result = engine.Run([friendly], [hostile]);
 
-        Assert.Equal(186, lowSpirit.Health);
-        Assert.Equal(186, highSpirit.Health);
+        Assert.Equal(186, friendly.Health);
 
-        var lowSpiritRegeneration = result.EventLog
-            .Where(x => x.EventType == EventType.HealthRegeneration && x.TargetId == lowSpirit.Id)
-            .ToList();
-        var highSpiritRegeneration = result.EventLog
-            .Where(x => x.EventType == EventType.HealthRegeneration && x.TargetId == highSpirit.Id)
+        var regeneration = result.EventLog
+            .Where(x => x.EventType == EventType.HealthRegeneration && x.TargetId == friendly.Id)
             .ToList();
 
-        Assert.Equal([49, 99], lowSpiritRegeneration.Select(x => x.Timestamp));
-        Assert.Equal([49, 99], highSpiritRegeneration.Select(x => x.Timestamp));
-        Assert.All(lowSpiritRegeneration, x => Assert.Equal(3, x.Magnitude));
-        Assert.All(highSpiritRegeneration, x => Assert.Equal(3, x.Magnitude));
-        var lowSpiritStats = result.EntityStats.Single(x => x.EntityId == lowSpirit.Id);
-        var highSpiritStats = result.EntityStats.Single(x => x.EntityId == highSpirit.Id);
-        Assert.Equal(6, lowSpiritStats.HealthRegenerated);
-        Assert.Equal(6, lowSpiritStats.HealthRegenerationPotential);
-        Assert.Equal(0, lowSpiritStats.HealthRegenerationOverhealed);
-        Assert.Equal(2, lowSpiritStats.HealthRegenerationPulses);
-        Assert.Equal(6, highSpiritStats.HealthRegenerated);
-        Assert.Equal(6, highSpiritStats.HealthRegenerationPotential);
-        Assert.Equal(0, highSpiritStats.HealthRegenerationOverhealed);
-        Assert.Equal(2, highSpiritStats.HealthRegenerationPulses);
+        Assert.Equal([49, 99], regeneration.Select(x => x.Timestamp));
+        Assert.All(regeneration, x => Assert.Equal(3, x.Magnitude));
+        var stats = result.EntityStats.Single(x => x.EntityId == friendly.Id);
+        Assert.Equal(6, stats.HealthRegenerated);
+        Assert.Equal(6, stats.HealthRegenerationPotential);
+        Assert.Equal(0, stats.HealthRegenerationOverhealed);
+        Assert.Equal(2, stats.HealthRegenerationPulses);
     }
 
     [Fact]
@@ -1193,6 +1160,78 @@ public sealed class AbilitySystemTests
     }
 
     [Fact]
+    public void Forest_spirit_bloom_counts_only_heals_applied_by_its_owner()
+    {
+        var spiritBloom = CreateSpiritBloomPassive();
+        var alliedHeals = new AbilitySpec
+        {
+            Id = "ability.ally.three.heals",
+            Kind = AbilitySpecKind.Active,
+            Name = "Ally Three Heals",
+            CooldownTicks = 1000,
+            Costs = [new() { Resource = AbilityResourceType.Health, BaseValue = 100 }],
+            Effects =
+            [
+                CreateFixedHeal("effect.ally.heal.one"),
+                CreateFixedHeal("effect.ally.heal.two"),
+                CreateFixedHeal("effect.ally.heal.three")
+            ]
+        };
+        var owner = CreateCombatant(
+            "forest-spirit-owner",
+            CombatTeam.Friendly,
+            [AbilityCompiler.CompileAbility(spiritBloom)]);
+        var ally = CreateCombatant(
+            "ally-healer",
+            CombatTeam.Friendly,
+            [AbilityCompiler.CompileAbility(alliedHeals)]);
+        var hostile = CreateCombatant("hostile", CombatTeam.Hostile, []);
+        var engine = new FastCombatEngine(
+            new Dictionary<string, CompiledStatus>(),
+            new FastCombatEngineOptions(MaxTicks: 1, BasicAttackIntervalTicks: 1000));
+
+        var result = engine.Run([owner, ally], [hostile]);
+
+        Assert.DoesNotContain(
+            result.EventLog,
+            entry => entry.Source == "effect.forest.spirit.bloom" && entry.EventType == EventType.Heal);
+    }
+
+    [Fact]
+    public void Forest_spirit_bloom_counts_each_owner_hot_application_once_not_each_tick()
+    {
+        var spiritBloom = CreateSpiritBloomPassive();
+        var threeHealOverTimeApplications = new AbilitySpec
+        {
+            Id = "ability.owner.three.hots",
+            Kind = AbilitySpecKind.Active,
+            Name = "Three Heal Over Time Applications",
+            CooldownTicks = 1000,
+            Costs = [new() { Resource = AbilityResourceType.Health, BaseValue = 100 }],
+            Effects =
+            [
+                CreateFixedHeal("effect.owner.hot.one", durationTicks: 40, intervalTicks: 10),
+                CreateFixedHeal("effect.owner.hot.two", durationTicks: 40, intervalTicks: 10),
+                CreateFixedHeal("effect.owner.hot.three", durationTicks: 40, intervalTicks: 10)
+            ]
+        };
+        var owner = CreateCombatant(
+            "forest-spirit-owner",
+            CombatTeam.Friendly,
+            AbilityCompiler.CompileAbilities([spiritBloom, threeHealOverTimeApplications]).Values);
+        var hostile = CreateCombatant("hostile", CombatTeam.Hostile, []);
+        var engine = new FastCombatEngine(
+            new Dictionary<string, CompiledStatus>(),
+            new FastCombatEngineOptions(MaxTicks: 41, BasicAttackIntervalTicks: 1000));
+
+        var result = engine.Run([owner], [hostile]);
+
+        Assert.Single(
+            result.EventLog,
+            entry => entry.Source == "effect.forest.spirit.bloom" && entry.EventType == EventType.Heal);
+    }
+
+    [Fact]
     public void Engine_honors_limited_uses_across_multi_target_effects()
     {
         var abilities = AbilityCompiler.CompileAbilities(
@@ -1371,7 +1410,7 @@ public sealed class AbilitySystemTests
         var sniperStrike = catalog.AbilitiesById["ability.creature.goblin_archer.snipers_strike"];
 
         Assert.Equal(
-            "Deal 100% ranged Physical Damage with +50% Critical Chance.",
+            "Deal 135% ranged Physical Damage with +50% Critical Chance.",
             sniperStrike.Description);
         Assert.DoesNotContain(
             catalog.AbilitiesById.Values,
@@ -1664,6 +1703,108 @@ public sealed class AbilitySystemTests
         Assert.Contains(report.RankedCombinations, combination => combination.DisplayName == "Large Rat Essence");
         Assert.Contains(report.RankedCombinations, combination => combination.DisplayName == "Flame Imp Essence");
         Assert.All(report.RankedCombinations, combination => Assert.Equal(6, combination.Battles));
+    }
+
+    [Fact]
+    public void Balance_simulator_uses_each_variant_explicit_active_and_shared_passive()
+    {
+        var provider = new JsonAbilityCatalogProvider(
+            CreateConfig(),
+            FindApiContentRoot(),
+            CreateJsonOptions());
+        var essenceRepository = new JsonEssenceDefinitionRepository(
+            CreateConfig(),
+            FindApiContentRoot(),
+            CreateJsonOptions(),
+            new EssenceDefinitionValidator());
+        var simulator = new AbilityBalanceSimulator(provider, essenceRepository);
+
+        var report = simulator.Run(new AbilityBalanceSimulationRequest(
+            BattleCount: 1,
+            TeamSize: 1,
+            EssencesPerParticipant: 1,
+            RandomSeed: 71,
+            TopResults: 2,
+            CandidatePoolSize: 2,
+            CandidateTeams: null));
+
+        var brutalCharge = Assert.Single(report.AvailableEssences, essence =>
+            essence.EssenceId == "essence.hobgoblin_brutal_charge");
+        Assert.Equal("monster.hobgoblin", brutalCharge.SourceMonsterId);
+        Assert.Equal(2, brutalCharge.AbilityIds.Count);
+        Assert.Contains("ability.creature.hobgoblin.brutal_charge", brutalCharge.AbilityIds);
+        Assert.Contains("ability.creature.hobgoblin.threatening_presence", brutalCharge.AbilityIds);
+    }
+
+    [Fact]
+    public void Balance_simulator_rejects_same_creature_variants_on_one_participant()
+    {
+        var provider = new JsonAbilityCatalogProvider(
+            CreateConfig(),
+            FindApiContentRoot(),
+            CreateJsonOptions());
+        var essenceRepository = new JsonEssenceDefinitionRepository(
+            CreateConfig(),
+            FindApiContentRoot(),
+            CreateJsonOptions(),
+            new EssenceDefinitionValidator());
+        var simulator = new AbilityBalanceSimulator(provider, essenceRepository);
+        var invalid = new AbilityBalanceTeamLoadout(
+        [
+            new AbilityBalanceParticipantLoadout(
+            [
+                "essence.hobgoblin",
+                "essence.hobgoblin_brutal_charge"
+            ])
+        ]);
+        var opponent = new AbilityBalanceTeamLoadout(
+            [new AbilityBalanceParticipantLoadout(["essence.large_rat", "essence.flame_imp"])]);
+
+        var exception = Assert.Throws<InvalidOperationException>(() => simulator.Run(
+            new AbilityBalanceSimulationRequest(
+                BattleCount: 1,
+                TeamSize: 1,
+                EssencesPerParticipant: 2,
+                RandomSeed: 72,
+                TopResults: 2,
+                CandidatePoolSize: 2,
+                CandidateTeams: [invalid, opponent])));
+
+        Assert.Contains("monster.hobgoblin", exception.Message, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("cannot equip multiple", exception.Message, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public void Balance_simulator_random_teams_use_unique_source_creatures_per_participant()
+    {
+        var provider = new JsonAbilityCatalogProvider(
+            CreateConfig(),
+            FindApiContentRoot(),
+            CreateJsonOptions());
+        var essenceRepository = new JsonEssenceDefinitionRepository(
+            CreateConfig(),
+            FindApiContentRoot(),
+            CreateJsonOptions(),
+            new EssenceDefinitionValidator());
+        var simulator = new AbilityBalanceSimulator(provider, essenceRepository);
+
+        var report = simulator.Run(new AbilityBalanceSimulationRequest(
+            BattleCount: 100,
+            TeamSize: 2,
+            EssencesPerParticipant: 10,
+            RandomSeed: 73,
+            TopResults: 50,
+            CandidatePoolSize: 50,
+            CandidateTeams: null));
+
+        Assert.NotEmpty(report.RankedCombinations);
+        Assert.All(report.RankedCombinations.SelectMany(combination => combination.Participants), participant =>
+        {
+            var sourceMonsterIds = participant.EssenceIds
+                .Select(id => Assert.IsType<EssenceDefinition>(essenceRepository.GetById(id)).SourceMonsterId)
+                .ToList();
+            Assert.Equal(sourceMonsterIds.Count, sourceMonsterIds.Distinct(StringComparer.OrdinalIgnoreCase).Count());
+        });
     }
 
     [Fact]
@@ -2622,6 +2763,8 @@ public sealed class AbilitySystemTests
         Assert.NotNull(summonLog.CombatEntity);
         Assert.Equal("Creature Shadow Image", summonLog.CombatEntity!.Name);
         Assert.Equal("shadow_image", summonLog.CombatEntity.ImagePath);
+        Assert.Equal(20, summonLog.CombatEntity.MaxHealth);
+        Assert.Equal(20, summonLog.CombatEntity.Health);
         Assert.True(provider.GetCatalog().SummonsById.ContainsKey("creatureShadowImage"));
         Assert.Contains(result.EventLog, x =>
             x.ActorId == summonId
@@ -3316,6 +3459,49 @@ public sealed class AbilitySystemTests
                     BaseValue = value
                 }
             ]
+        };
+
+    private static AbilitySpec CreateSpiritBloomPassive() =>
+        new()
+        {
+            Id = "ability.creature.forest_spirit.spirit_bloom",
+            Kind = AbilitySpecKind.Passive,
+            Name = "Spirit Bloom",
+            Triggers =
+            [
+                new()
+                {
+                    Event = AbilityTriggerEvent.OnHeal,
+                    EveryNthOccurrence = 3,
+                    EffectIds = ["effect.forest.spirit.bloom"]
+                }
+            ],
+            Effects =
+            [
+                new()
+                {
+                    Id = "effect.forest.spirit.bloom",
+                    Operation = AbilityEffectOperation.Heal,
+                    Target = AbilityTargetSelector.EventTarget,
+                    BaseValue = 30,
+                    CritEligibility = CritEligibility.Disallowed
+                }
+            ]
+        };
+
+    private static AbilityEffectSpec CreateFixedHeal(
+        string id,
+        int durationTicks = 0,
+        int intervalTicks = 0) =>
+        new()
+        {
+            Id = id,
+            Operation = AbilityEffectOperation.Heal,
+            Target = AbilityTargetSelector.Self,
+            BaseValue = 10,
+            DurationTicks = durationTicks,
+            IntervalTicks = intervalTicks,
+            CritEligibility = CritEligibility.Disallowed
         };
 
     private static Character CreateSourceCharacter(string name) =>

@@ -74,7 +74,7 @@ public sealed class RegionCreatureScalingProvider : IRegionCreatureScalingProvid
             Evaluate(profile.OffenseCurve, progressionStep),
             Evaluate(profile.DefenseCurve, progressionStep),
             Evaluate(profile.ResistanceCurve, progressionStep),
-            1d + profile.PrecisionGrowthPerStep * progressionStep,
+            1d + profile.AttackSpeedGrowthPerStep * progressionStep,
             1d + profile.PenetrationGrowthPerStep * progressionStep,
             1d + profile.SoftDefenseGrowthPerStep * progressionStep,
             profile.CritChancePerStep * progressionStep,
@@ -122,7 +122,7 @@ public sealed class RegionCreatureScalingProvider : IRegionCreatureScalingProvid
         MapCurve(profile.OffenseCurve),
         MapCurve(profile.DefenseCurve),
         MapCurve(profile.ResistanceCurve),
-        profile.PrecisionGrowthPerStep,
+        profile.AttackSpeedGrowthPerStep,
         profile.PenetrationGrowthPerStep,
         profile.SoftDefenseGrowthPerStep,
         profile.CritChancePerStep,
@@ -273,7 +273,7 @@ public sealed class RegionCreatureScalingProvider : IRegionCreatureScalingProvid
         public GrowthCurveDocument OffenseCurve { get; set; } = new();
         public GrowthCurveDocument DefenseCurve { get; set; } = new();
         public GrowthCurveDocument ResistanceCurve { get; set; } = new();
-        public double PrecisionGrowthPerStep { get; set; }
+        public double AttackSpeedGrowthPerStep { get; set; }
         public double PenetrationGrowthPerStep { get; set; }
         public double SoftDefenseGrowthPerStep { get; set; }
         public double CritChancePerStep { get; set; }

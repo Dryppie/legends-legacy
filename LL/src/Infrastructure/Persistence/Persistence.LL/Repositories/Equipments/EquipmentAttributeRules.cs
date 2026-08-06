@@ -12,9 +12,6 @@ public static class EquipmentAttributeRules
         {
             // ===== PRIMARY =====================================================
             [AttributeType.Power] = Percent(min: 4, max: 15),
-            [AttributeType.Fortitude] = Flat(min: 2, max: 10),
-            [AttributeType.Precision] = Percent(min: 2, max: 15),
-            [AttributeType.Spirit] = Percent(min: 5, max: 20),
 
             // ===== BASE AND DERIVED INPUTS ====================================
             [AttributeType.MaxHealth] = Percent(min: 4, max: 15),
@@ -44,9 +41,6 @@ public static class EquipmentAttributeRules
     }
 
     // -------- convenience factories ----------------------------------------
-    private static Rule Flat(int min, int max) =>
-        new(min, max, ModifierType.Flat);
-
     private static Rule Percent(int min, int max) =>
         new(min, max, ModifierType.Additive);
 }

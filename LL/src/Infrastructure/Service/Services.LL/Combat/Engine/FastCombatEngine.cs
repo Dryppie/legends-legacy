@@ -496,6 +496,13 @@ public sealed class FastCombatEngine
         if (effect.IntervalTicks > 0 && effect.DurationTicks > 0)
         {
             target.ActiveEffects.Add(new RuntimeEffect(effect, source, target, statsSource, durationMultiplier));
+            if (effect.Operation == AbilityEffectOperation.Heal)
+            {
+                Publish(
+                    new CombatEvent(AbilityTriggerEvent.OnHeal, source, target, effect.Id),
+                    combatants);
+            }
+
             return;
         }
 
@@ -745,9 +752,13 @@ public sealed class FastCombatEngine
         var criticalDamage = isCritical
             ? ApplyCriticalMultiplier(source, damage)
             : damage;
-        var vulnerableDamage = delivery == DamageDelivery.Direct
-            ? ApplyVulnerable(target, criticalDamage)
-            : criticalDamage;
+        var vulnerableDamage = criticalDamage;
+        if (delivery == DamageDelivery.Direct
+            && criticalDamage > 0
+            && TryConsumeConditionCharge(target, StandardConditionType.Vulnerable, source, combatants))
+        {
+            vulnerableDamage = ApplyVulnerable(criticalDamage);
+        }
         var vulnerableAmplified = Math.Max(0, vulnerableDamage - criticalDamage);
         var typedDamage = ApplyTypedDefense(
             source,
@@ -922,18 +933,12 @@ public sealed class FastCombatEngine
         return Math.Max(0, (int)Math.Round(damage * (1 - reduction / 100f)));
     }
 
-    private static int ApplyVulnerable(RuntimeCombatant target, int damage)
-    {
-        var stacks = target.GetConditionStacks(StandardConditionType.Vulnerable);
-        if (stacks <= 0)
-            return damage;
-
-        return Math.Max(
+    private static int ApplyVulnerable(int damage) =>
+        Math.Max(
             0,
             (int)Math.Min(
                 int.MaxValue,
-                Math.Round(damage * (1d + stacks * 0.25d))));
-    }
+                Math.Round(damage * 1.25d)));
 
     private void ResolveThorns(
         RuntimeCombatant defender,
@@ -1138,7 +1143,8 @@ public sealed class FastCombatEngine
         if (restored <= 0)
             return;
 
-        Publish(new CombatEvent(AbilityTriggerEvent.OnHeal, source, target, null), combatants);
+        if (effect is null || !IsPeriodicEffect(effect))
+            Publish(new CombatEvent(AbilityTriggerEvent.OnHeal, source, target, null), combatants);
         Publish(new CombatEvent(AbilityTriggerEvent.OnHealed, target, source, null), combatants);
         Publish(new CombatEvent(AbilityTriggerEvent.OnHealthChanged, target, source, null), combatants);
 

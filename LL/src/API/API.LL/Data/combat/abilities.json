@@ -5,17 +5,11 @@
     "name": "Shadow Strike",
     "description": "The shadow image lashes out with a quick shadow attack.",
     "cooldownTicks": 25,
-    "tags": [
-      "Effect.SummonAbility",
-      "Element.Shadow",
-      "Damage.Direct"
-    ],
+    "tags": ["Effect.SummonAbility", "Element.Shadow", "Damage.Direct"],
     "triggers": [
       {
         "event": "OnAbilityUsed",
-        "effectIds": [
-          "effect.shadow_image.shadow_strike.damage"
-        ]
+        "effectIds": ["effect.shadow_image.shadow_strike.damage"]
       }
     ],
     "effects": [
@@ -37,11 +31,8 @@
     "kind": "Active",
     "name": "Bloodthirsty Fangs",
     "description": "Deal 110% Physical Damage to the target and heal for 50% of damage dealt.",
-    "cooldownTicks": 100,
-    "tags": [
-      "Effect.Ability",
-      "Creature.VampireBat"
-    ],
+    "cooldownTicks": 80,
+    "tags": ["Effect.Ability", "Creature.VampireBat"],
     "effects": [
       {
         "id": "effect.creature.vampire_bat.bloodthirsty_fangs.damage",
@@ -63,16 +54,11 @@
     "name": "Erratic Flight",
     "description": "Gain 5% Dodge while below 20% Health.",
     "cooldownTicks": 0,
-    "tags": [
-      "Effect.Ability",
-      "Creature.VampireBat"
-    ],
+    "tags": ["Effect.Ability", "Creature.VampireBat"],
     "triggers": [
       {
         "event": "OnInterval",
-        "effectIds": [
-          "effect.creature.vampire_bat.erratic_flight.dodge"
-        ],
+        "effectIds": ["effect.creature.vampire_bat.erratic_flight.dodge"],
         "internalCooldownTicks": 1,
         "conditions": [
           {
@@ -101,11 +87,8 @@
     "kind": "Active",
     "name": "Piercing Peck",
     "description": "Strike a random enemy for 150% Physical Damage.",
-    "cooldownTicks": 100,
-    "tags": [
-      "Effect.Ability",
-      "Creature.Raven"
-    ],
+    "cooldownTicks": 90,
+    "tags": ["Effect.Ability", "Creature.Raven"],
     "effects": [
       {
         "id": "effect.creature.raven.piercing_peck.damage",
@@ -126,10 +109,7 @@
     "name": "Bad Omen",
     "description": "At combat start, apply Vulnerable(2) to all enemies.",
     "cooldownTicks": 0,
-    "tags": [
-      "Effect.Ability",
-      "Creature.Raven"
-    ],
+    "tags": ["Effect.Ability", "Creature.Raven"],
     "effects": [
       {
         "id": "effect.creature.raven.bad_omen.vulnerable",
@@ -146,19 +126,16 @@
     "id": "ability.creature.venomous_snake.toxic_fangs",
     "kind": "Active",
     "name": "Toxic Fangs",
-    "description": "Deal 75% Physical Damage and apply Poison(15).",
-    "cooldownTicks": 100,
-    "tags": [
-      "Effect.Ability",
-      "Creature.VenomousSnake"
-    ],
+    "description": "Deal 100% Physical Damage and apply Poison(15).",
+    "cooldownTicks": 110,
+    "tags": ["Effect.Ability", "Creature.VenomousSnake"],
     "effects": [
       {
         "id": "effect.creature.venomous_snake.toxic_fangs.damage",
         "operation": "Damage",
         "target": "CurrentTarget",
         "scalingAttribute": "Power",
-        "scalingCoefficient": 0.75,
+        "scalingCoefficient": 1.0,
         "attackType": "Melee",
         "damageType": "Physical",
         "procCoefficient": 1
@@ -180,10 +157,7 @@
     "name": "Venom-Coated Strikes",
     "description": "Basic attacks have a 12% chance to apply Poison(10).",
     "cooldownTicks": 0,
-    "tags": [
-      "Effect.Ability",
-      "Creature.VenomousSnake"
-    ],
+    "tags": ["Effect.Ability", "Creature.VenomousSnake"],
     "triggers": [
       {
         "event": "OnBasicAttack",
@@ -211,10 +185,7 @@
     "name": "Withering Petals",
     "description": "Deal 90% Magical Damage to a random enemy and apply Weaken.",
     "cooldownTicks": 100,
-    "tags": [
-      "Effect.Ability",
-      "Creature.NightshadeBlossom"
-    ],
+    "tags": ["Effect.Ability", "Creature.NightshadeBlossom"],
     "effects": [
       {
         "id": "effect.creature.nightshade_blossom.withering_petals.damage",
@@ -243,16 +214,11 @@
     "name": "Midnight Bloom",
     "description": "Every 12 seconds, heal yourself for 50% Power.",
     "cooldownTicks": 0,
-    "tags": [
-      "Effect.Ability",
-      "Creature.NightshadeBlossom"
-    ],
+    "tags": ["Effect.Ability", "Creature.NightshadeBlossom"],
     "triggers": [
       {
         "event": "OnInterval",
-        "effectIds": [
-          "effect.creature.nightshade_blossom.midnight_bloom.heal"
-        ],
+        "effectIds": ["effect.creature.nightshade_blossom.midnight_bloom.heal"],
         "internalCooldownTicks": 120,
         "initialDelayTicks": 120
       }
@@ -274,11 +240,8 @@
     "kind": "Active",
     "name": "Rending Bite",
     "description": "Deal 90% Physical Damage to a random enemy and apply Bleed(20).",
-    "cooldownTicks": 100,
-    "tags": [
-      "Effect.Ability",
-      "Creature.BloodZombie"
-    ],
+    "cooldownTicks": 120,
+    "tags": ["Effect.Ability", "Creature.BloodZombie"],
     "effects": [
       {
         "id": "effect.creature.blood_zombie.rending_bite.damage",
@@ -307,16 +270,11 @@
     "name": "Clotted Flesh",
     "description": "Take 10% less Physical Damage while above 50% Health.",
     "cooldownTicks": 0,
-    "tags": [
-      "Effect.Ability",
-      "Creature.BloodZombie"
-    ],
+    "tags": ["Effect.Ability", "Creature.BloodZombie"],
     "triggers": [
       {
         "event": "OnInterval",
-        "effectIds": [
-          "effect.creature.blood_zombie.clotted_flesh.defense"
-        ],
+        "effectIds": ["effect.creature.blood_zombie.clotted_flesh.defense"],
         "internalCooldownTicks": 1,
         "conditions": [
           {
@@ -345,11 +303,8 @@
     "kind": "Active",
     "name": "Soothing Glow",
     "description": "Heal the lowest-health ally for 80% Power.",
-    "cooldownTicks": 100,
-    "tags": [
-      "Effect.Ability",
-      "Creature.LumoWisp"
-    ],
+    "cooldownTicks": 80,
+    "tags": ["Effect.Ability", "Creature.LumoWisp"],
     "effects": [
       {
         "id": "effect.creature.lumo_wisp.soothing_glow.heal",
@@ -368,10 +323,7 @@
     "name": "Lumo Barrier",
     "description": "At combat start, gain Barrier equal to 9% Max Health.",
     "cooldownTicks": 0,
-    "tags": [
-      "Effect.Ability",
-      "Creature.LumoWisp"
-    ],
+    "tags": ["Effect.Ability", "Creature.LumoWisp"],
     "effects": [
       {
         "id": "effect.creature.lumo_wisp.lumo_barrier.barrier",
@@ -390,10 +342,7 @@
     "name": "Targeting Beam",
     "description": "Deal 160% Magical Damage to a random enemy.",
     "cooldownTicks": 100,
-    "tags": [
-      "Effect.Ability",
-      "Creature.LumoSentinel"
-    ],
+    "tags": ["Effect.Ability", "Creature.LumoSentinel"],
     "effects": [
       {
         "id": "effect.creature.lumo_sentinel.targeting_beam.damage",
@@ -414,10 +363,7 @@
     "name": "Cracked Core",
     "description": "Gain 30% Magical Defense above 66% Health; lose 15% below 33% Health.",
     "cooldownTicks": 0,
-    "tags": [
-      "Effect.Ability",
-      "Creature.LumoSentinel"
-    ],
+    "tags": ["Effect.Ability", "Creature.LumoSentinel"],
     "triggers": [
       {
         "event": "OnInterval",
@@ -471,11 +417,8 @@
     "kind": "Active",
     "name": "Shiv Jab",
     "description": "Deal 100% Physical Damage to a random enemy and apply Bleed(10).",
-    "cooldownTicks": 100,
-    "tags": [
-      "Effect.Ability",
-      "Creature.Goblin"
-    ],
+    "cooldownTicks": 90,
+    "tags": ["Effect.Ability", "Creature.Goblin"],
     "effects": [
       {
         "id": "effect.creature.goblin.shiv_jab.damage",
@@ -504,16 +447,11 @@
     "name": "Gobber Trapper",
     "description": "The first time you dodge, apply Bleed(70) to the attacker.",
     "cooldownTicks": 0,
-    "tags": [
-      "Effect.Ability",
-      "Creature.Goblin"
-    ],
+    "tags": ["Effect.Ability", "Creature.Goblin"],
     "triggers": [
       {
         "event": "OnDodge",
-        "effectIds": [
-          "effect.creature.goblin.gobber_trapper.bleed"
-        ]
+        "effectIds": ["effect.creature.goblin.gobber_trapper.bleed"]
       }
     ],
     "effects": [
@@ -533,19 +471,16 @@
     "id": "ability.creature.goblin_archer.snipers_strike",
     "kind": "Active",
     "name": "Sniper's Strike",
-    "description": "Deal 100% ranged Physical Damage with +50% Critical Chance.",
-    "cooldownTicks": 250,
-    "tags": [
-      "Effect.Ability",
-      "Creature.GoblinArcher"
-    ],
+    "description": "Deal 135% ranged Physical Damage with +50% Critical Chance.",
+    "cooldownTicks": 120,
+    "tags": ["Effect.Ability", "Creature.GoblinArcher"],
     "effects": [
       {
         "id": "effect.creature.goblin_archer.snipers_strike.damage",
         "operation": "Damage",
         "target": "RandomEnemy",
         "scalingAttribute": "Power",
-        "scalingCoefficient": 1.0,
+        "scalingCoefficient": 1.35,
         "attackType": "Ranged",
         "damageType": "Physical",
         "critChanceBonus": 50.0,
@@ -560,16 +495,11 @@
     "name": "Poisoned Arrows",
     "description": "Ranged attacks have a 10% chance to apply Poison(10).",
     "cooldownTicks": 0,
-    "tags": [
-      "Effect.Ability",
-      "Creature.GoblinArcher"
-    ],
+    "tags": ["Effect.Ability", "Creature.GoblinArcher"],
     "triggers": [
       {
         "event": "OnRangedAttack",
-        "effectIds": [
-          "effect.creature.goblin_archer.poisoned_arrows.poison"
-        ]
+        "effectIds": ["effect.creature.goblin_archer.poisoned_arrows.poison"]
       }
     ],
     "effects": [
@@ -590,11 +520,8 @@
     "kind": "Active",
     "name": "Raging Cleave",
     "description": "Deal 150% Physical Damage to two enemies.",
-    "cooldownTicks": 100,
-    "tags": [
-      "Effect.Ability",
-      "Creature.GoblinWarrior"
-    ],
+    "cooldownTicks": 130,
+    "tags": ["Effect.Ability", "Creature.GoblinWarrior"],
     "effects": [
       {
         "id": "effect.creature.goblin_warrior.raging_cleave.damage",
@@ -613,18 +540,13 @@
     "id": "ability.creature.goblin_warrior.relentless",
     "kind": "Passive",
     "name": "Relentless",
-    "description": "Every third Basic Attack deals 40% increased damage.",
+    "description": "Every third Basic Attack deals 30% increased damage.",
     "cooldownTicks": 0,
-    "tags": [
-      "Effect.Ability",
-      "Creature.GoblinWarrior"
-    ],
+    "tags": ["Effect.Ability", "Creature.GoblinWarrior"],
     "triggers": [
       {
         "event": "OnBasicAttack",
-        "effectIds": [
-          "effect.creature.goblin_warrior.relentless.damage"
-        ],
+        "effectIds": ["effect.creature.goblin_warrior.relentless.damage"],
         "everyNthOccurrence": 3
       }
     ],
@@ -633,7 +555,7 @@
         "id": "effect.creature.goblin_warrior.relentless.damage",
         "operation": "ModifyNextBasicAttackDamage",
         "target": "Self",
-        "baseValue": 40,
+        "baseValue": 30,
         "procCoefficient": 1
       }
     ],
@@ -643,19 +565,16 @@
     "id": "ability.creature.goblin_shaman.weak_rejuvenation",
     "kind": "Active",
     "name": "Weak Rejuvenation",
-    "description": "Heal the lowest-health ally for 35% Power every 4 seconds for 20 seconds.",
-    "cooldownTicks": 100,
-    "tags": [
-      "Effect.Ability",
-      "Creature.GoblinShaman"
-    ],
+    "description": "Heal the lowest-health ally for 50% Power every 4 seconds for 20 seconds.",
+    "cooldownTicks": 170,
+    "tags": ["Effect.Ability", "Creature.GoblinShaman"],
     "effects": [
       {
         "id": "effect.creature.goblin_shaman.weak_rejuvenation.heal",
         "operation": "Heal",
         "target": "LowestHealthAlly",
         "scalingAttribute": "Power",
-        "scalingCoefficient": 0.35,
+        "scalingCoefficient": 0.5,
         "durationTicks": 200,
         "intervalTicks": 40,
         "procCoefficient": 1
@@ -669,16 +588,11 @@
     "name": "Spirit Link",
     "description": "After 15 seconds, apply Recovery(20) to all allies.",
     "cooldownTicks": 0,
-    "tags": [
-      "Effect.Ability",
-      "Creature.GoblinShaman"
-    ],
+    "tags": ["Effect.Ability", "Creature.GoblinShaman"],
     "triggers": [
       {
         "event": "OnInterval",
-        "effectIds": [
-          "effect.creature.goblin_shaman.spirit_link.recovery"
-        ],
+        "effectIds": ["effect.creature.goblin_shaman.spirit_link.recovery"],
         "internalCooldownTicks": 100000,
         "initialDelayTicks": 150
       }
@@ -699,19 +613,16 @@
     "id": "ability.creature.hobgoblin.intimidating_slam",
     "kind": "Active",
     "name": "Intimidating Slam",
-    "description": "Deal 180% Physical Damage and apply Vulnerable(2).",
-    "cooldownTicks": 100,
-    "tags": [
-      "Effect.Ability",
-      "Creature.Hobgoblin"
-    ],
+    "description": "Deal 145% Physical Damage and apply Vulnerable(1).",
+    "cooldownTicks": 160,
+    "tags": ["Effect.Ability", "Creature.Hobgoblin"],
     "effects": [
       {
         "id": "effect.creature.hobgoblin.intimidating_slam.damage",
         "operation": "Damage",
         "target": "CurrentTarget",
         "scalingAttribute": "Power",
-        "scalingCoefficient": 1.8,
+        "scalingCoefficient": 1.45,
         "attackType": "Melee",
         "damageType": "Physical",
         "procCoefficient": 1
@@ -720,7 +631,7 @@
         "id": "effect.creature.hobgoblin.intimidating_slam.vulnerable",
         "operation": "ApplyCondition",
         "target": "CurrentTarget",
-        "baseValue": 2,
+        "baseValue": 1,
         "condition": "Vulnerable",
         "procCoefficient": 1
       }
@@ -731,12 +642,9 @@
     "id": "ability.creature.hobgoblin.brutal_charge",
     "kind": "Active",
     "name": "Brutal Charge",
-    "description": "Gain Unstoppable(3), deal 220% Physical Damage, and Stun(1) if the target is below 30% Health.",
-    "cooldownTicks": 100,
-    "tags": [
-      "Effect.Ability",
-      "Creature.Hobgoblin"
-    ],
+    "description": "Gain Unstoppable(3), deal 150% Physical Damage, and Stun(1) if the target is below 30% Health.",
+    "cooldownTicks": 180,
+    "tags": ["Effect.Ability", "Creature.Hobgoblin"],
     "effects": [
       {
         "id": "effect.creature.hobgoblin.brutal_charge.unstoppable",
@@ -751,7 +659,7 @@
         "operation": "Damage",
         "target": "CurrentTarget",
         "scalingAttribute": "Power",
-        "scalingCoefficient": 2.2,
+        "scalingCoefficient": 1.5,
         "attackType": "Melee",
         "damageType": "Physical",
         "procCoefficient": 1
@@ -780,10 +688,7 @@
     "name": "Threatening Presence",
     "description": "At combat start gain 50 Threat and take 10% less damage from Vulnerable enemies.",
     "cooldownTicks": 0,
-    "tags": [
-      "Effect.Ability",
-      "Creature.Hobgoblin"
-    ],
+    "tags": ["Effect.Ability", "Creature.Hobgoblin"],
     "effects": [
       {
         "id": "effect.creature.hobgoblin.threatening_presence.threat",
@@ -809,10 +714,7 @@
     "name": "Ice Needle",
     "description": "Deal 160% Magical Damage to a random enemy.",
     "cooldownTicks": 100,
-    "tags": [
-      "Effect.Ability",
-      "Creature.FrostImp"
-    ],
+    "tags": ["Effect.Ability", "Creature.FrostImp"],
     "effects": [
       {
         "id": "effect.creature.frost_imp.ice_needle.damage",
@@ -833,16 +735,11 @@
     "name": "Cold Touch",
     "description": "Basic Attacks apply Chill(1).",
     "cooldownTicks": 0,
-    "tags": [
-      "Effect.Ability",
-      "Creature.FrostImp"
-    ],
+    "tags": ["Effect.Ability", "Creature.FrostImp"],
     "triggers": [
       {
         "event": "OnBasicAttack",
-        "effectIds": [
-          "effect.creature.frost_imp.cold_touch.chill"
-        ]
+        "effectIds": ["effect.creature.frost_imp.cold_touch.chill"]
       }
     ],
     "effects": [
@@ -862,11 +759,8 @@
     "kind": "Active",
     "name": "Prismatic Shard",
     "description": "Deal 50-250% Magical Damage to a random enemy.",
-    "cooldownTicks": 100,
-    "tags": [
-      "Effect.Ability",
-      "Creature.CrystalWisp"
-    ],
+    "cooldownTicks": 110,
+    "tags": ["Effect.Ability", "Creature.CrystalWisp"],
     "effects": [
       {
         "id": "effect.creature.crystal_wisp.prismatic_shard.damage",
@@ -888,10 +782,7 @@
     "name": "Captured Light",
     "description": "Increase all healing received by 8%.",
     "cooldownTicks": 0,
-    "tags": [
-      "Effect.Ability",
-      "Creature.CrystalWisp"
-    ],
+    "tags": ["Effect.Ability", "Creature.CrystalWisp"],
     "effects": [
       {
         "id": "effect.creature.crystal_wisp.captured_light.healing",
@@ -908,11 +799,8 @@
     "kind": "Active",
     "name": "Sweet Water",
     "description": "Heal all allies for 70% Power over 6 seconds.",
-    "cooldownTicks": 100,
-    "tags": [
-      "Effect.Ability",
-      "Creature.BlueSlime"
-    ],
+    "cooldownTicks": 140,
+    "tags": ["Effect.Ability", "Creature.BlueSlime"],
     "effects": [
       {
         "id": "effect.creature.blue_slime.sweet_water.heal",
@@ -933,10 +821,7 @@
     "name": "Protective Slime",
     "description": "At combat start, grant all allies Barrier equal to 7% of your Max Health.",
     "cooldownTicks": 0,
-    "tags": [
-      "Effect.Ability",
-      "Creature.BlueSlime"
-    ],
+    "tags": ["Effect.Ability", "Creature.BlueSlime"],
     "effects": [
       {
         "id": "effect.creature.blue_slime.protective_slime.barrier",
@@ -953,18 +838,23 @@
     "id": "ability.creature.transparent_slime.transparent_engulf",
     "kind": "Active",
     "name": "Transparent Engulf",
-    "description": "Taunt a random enemy for 7 seconds.",
-    "cooldownTicks": 100,
-    "tags": [
-      "Effect.Ability",
-      "Creature.TransparentSlime"
-    ],
+    "description": "Gain Guard(4) and Taunt a random enemy for 11 seconds.",
+    "cooldownTicks": 160,
+    "tags": ["Effect.Ability", "Creature.TransparentSlime"],
     "effects": [
+      {
+        "id": "effect.creature.transparent_slime.transparent_engulf.guard",
+        "operation": "ApplyCondition",
+        "target": "Self",
+        "baseValue": 4,
+        "condition": "Guard",
+        "procCoefficient": 1
+      },
       {
         "id": "effect.creature.transparent_slime.transparent_engulf.taunt",
         "operation": "ApplyCondition",
         "target": "RandomEnemy",
-        "baseValue": 7,
+        "baseValue": 11,
         "condition": "Taunt",
         "procCoefficient": 1
       }
@@ -977,16 +867,11 @@
     "name": "Reconstitute",
     "description": "The first time you fall below 90% Health, heal 15% Max Health.",
     "cooldownTicks": 0,
-    "tags": [
-      "Effect.Ability",
-      "Creature.TransparentSlime"
-    ],
+    "tags": ["Effect.Ability", "Creature.TransparentSlime"],
     "triggers": [
       {
         "event": "OnHealthChanged",
-        "effectIds": [
-          "effect.creature.transparent_slime.reconstitute.heal"
-        ],
+        "effectIds": ["effect.creature.transparent_slime.reconstitute.heal"],
         "conditions": [
           {
             "type": "HealthBelowPercent",
@@ -1013,19 +898,16 @@
     "id": "ability.creature.moss_lizard.moss_camouflage",
     "kind": "Active",
     "name": "Moss Camouflage",
-    "description": "Deal 170% Physical Damage and gain Stealth(3).",
-    "cooldownTicks": 100,
-    "tags": [
-      "Effect.Ability",
-      "Creature.MossLizard"
-    ],
+    "description": "Deal 150% Physical Damage and gain Stealth(2).",
+    "cooldownTicks": 140,
+    "tags": ["Effect.Ability", "Creature.MossLizard"],
     "effects": [
       {
         "id": "effect.creature.moss_lizard.moss_camouflage.damage",
         "operation": "Damage",
         "target": "CurrentTarget",
         "scalingAttribute": "Power",
-        "scalingCoefficient": 1.7,
+        "scalingCoefficient": 1.5,
         "attackType": "Melee",
         "damageType": "Physical",
         "procCoefficient": 1
@@ -1034,7 +916,7 @@
         "id": "effect.creature.moss_lizard.moss_camouflage.stealth",
         "operation": "ApplyCondition",
         "target": "Self",
-        "baseValue": 3,
+        "baseValue": 2,
         "condition": "Stealth",
         "procCoefficient": 1
       }
@@ -1047,16 +929,11 @@
     "name": "Lost Tail",
     "description": "The first time you fall below 40% Health, increase Health Regeneration rate by 250% for 14 seconds.",
     "cooldownTicks": 0,
-    "tags": [
-      "Effect.Ability",
-      "Creature.MossLizard"
-    ],
+    "tags": ["Effect.Ability", "Creature.MossLizard"],
     "triggers": [
       {
         "event": "OnHealthChanged",
-        "effectIds": [
-          "effect.creature.moss_lizard.lost_tail.regeneration"
-        ],
+        "effectIds": ["effect.creature.moss_lizard.lost_tail.regeneration"],
         "conditions": [
           {
             "type": "HealthBelowPercent",
@@ -1083,12 +960,9 @@
     "id": "ability.creature.shadow_imp.shadow_image",
     "kind": "Active",
     "name": "Shadow Image",
-    "description": "Summon a shadow illusion with exactly 1 Health.",
-    "cooldownTicks": 100,
-    "tags": [
-      "Effect.Ability",
-      "Creature.ShadowImp"
-    ],
+    "description": "Summon a shadow illusion with 10% of your Max Health.",
+    "cooldownTicks": 180,
+    "tags": ["Effect.Ability", "Creature.ShadowImp"],
     "effects": [
       {
         "id": "effect.creature.shadow_imp.shadow_image.summon",
@@ -1106,10 +980,7 @@
     "name": "Shadowy Presence",
     "description": "Increase Dodge by 2%.",
     "cooldownTicks": 0,
-    "tags": [
-      "Effect.Ability",
-      "Creature.ShadowImp"
-    ],
+    "tags": ["Effect.Ability", "Creature.ShadowImp"],
     "effects": [
       {
         "id": "effect.creature.shadow_imp.shadowy_presence.dodge",
@@ -1126,19 +997,16 @@
     "id": "ability.creature.grave_hound.gravebound_pounce",
     "kind": "Active",
     "name": "Gravebound Pounce",
-    "description": "Deal 180% Physical Damage to the lowest-health enemy.",
-    "cooldownTicks": 100,
-    "tags": [
-      "Effect.Ability",
-      "Creature.GraveHound"
-    ],
+    "description": "Deal 160% Physical Damage to the lowest-health enemy.",
+    "cooldownTicks": 130,
+    "tags": ["Effect.Ability", "Creature.GraveHound"],
     "effects": [
       {
         "id": "effect.creature.grave_hound.gravebound_pounce.damage",
         "operation": "Damage",
         "target": "LowestHealthEnemy",
         "scalingAttribute": "Power",
-        "scalingCoefficient": 1.8,
+        "scalingCoefficient": 1.6,
         "attackType": "Melee",
         "damageType": "Physical",
         "procCoefficient": 1
@@ -1152,10 +1020,7 @@
     "name": "Graveyard Howl",
     "description": "At combat start, apply Slow to all enemies.",
     "cooldownTicks": 0,
-    "tags": [
-      "Effect.Ability",
-      "Creature.GraveHound"
-    ],
+    "tags": ["Effect.Ability", "Creature.GraveHound"],
     "effects": [
       {
         "id": "effect.creature.grave_hound.graveyard_howl.slow",
@@ -1173,11 +1038,8 @@
     "kind": "Active",
     "name": "Soul Drain",
     "description": "Deal 110% Magical Damage and heal for 50% of damage dealt.",
-    "cooldownTicks": 100,
-    "tags": [
-      "Effect.Ability",
-      "Creature.LostSoul"
-    ],
+    "cooldownTicks": 90,
+    "tags": ["Effect.Ability", "Creature.LostSoul"],
     "effects": [
       {
         "id": "effect.creature.lost_soul.soul_drain.damage",
@@ -1199,10 +1061,7 @@
     "name": "Soul Lantern",
     "description": "At combat start, apply Vulnerable(5) to a random enemy.",
     "cooldownTicks": 0,
-    "tags": [
-      "Effect.Ability",
-      "Creature.LostSoul"
-    ],
+    "tags": ["Effect.Ability", "Creature.LostSoul"],
     "effects": [
       {
         "id": "effect.creature.lost_soul.soul_lantern.vulnerable",
@@ -1220,11 +1079,8 @@
     "kind": "Active",
     "name": "Mourning Flash",
     "description": "Deal 120% Magical Damage to a random enemy and apply Slow.",
-    "cooldownTicks": 100,
-    "tags": [
-      "Effect.Ability",
-      "Creature.GraveWisp"
-    ],
+    "cooldownTicks": 110,
+    "tags": ["Effect.Ability", "Creature.GraveWisp"],
     "effects": [
       {
         "id": "effect.creature.grave_wisp.mourning_flash.damage",
@@ -1253,16 +1109,11 @@
     "name": "Pale Flame",
     "description": "Magical hits deal an additional 5% Shadow Damage.",
     "cooldownTicks": 0,
-    "tags": [
-      "Effect.Ability",
-      "Creature.GraveWisp"
-    ],
+    "tags": ["Effect.Ability", "Creature.GraveWisp"],
     "triggers": [
       {
         "event": "OnHit",
-        "effectIds": [
-          "effect.creature.grave_wisp.pale_flame.damage"
-        ],
+        "effectIds": ["effect.creature.grave_wisp.pale_flame.damage"],
         "conditions": [
           {
             "type": "EventDamageTypeIs",
@@ -1279,9 +1130,7 @@
         "target": "EventTarget",
         "eventMagnitudeCoefficient": 0.05,
         "damageType": "Shadow",
-        "tags": [
-          "Damage.Secondary"
-        ],
+        "tags": ["Damage.Secondary"],
         "procCoefficient": 1
       }
     ],
@@ -1292,11 +1141,8 @@
     "kind": "Active",
     "name": "Bone Smash",
     "description": "Deal 150% Physical Damage.",
-    "cooldownTicks": 100,
-    "tags": [
-      "Effect.Ability",
-      "Creature.Skeleton"
-    ],
+    "cooldownTicks": 120,
+    "tags": ["Effect.Ability", "Creature.Skeleton"],
     "effects": [
       {
         "id": "effect.creature.skeleton.bone_smash.damage",
@@ -1317,10 +1163,7 @@
     "name": "Calcium",
     "description": "At combat start, gain Guard(4).",
     "cooldownTicks": 0,
-    "tags": [
-      "Effect.Ability",
-      "Creature.Skeleton"
-    ],
+    "tags": ["Effect.Ability", "Creature.Skeleton"],
     "effects": [
       {
         "id": "effect.creature.skeleton.calcium.guard",
@@ -1338,11 +1181,8 @@
     "kind": "Active",
     "name": "Pixie Burst",
     "description": "Deal 80% Magical Damage to all enemies.",
-    "cooldownTicks": 100,
-    "tags": [
-      "Effect.Ability",
-      "Creature.Pixie"
-    ],
+    "cooldownTicks": 120,
+    "tags": ["Effect.Ability", "Creature.Pixie"],
     "effects": [
       {
         "id": "effect.creature.pixie.pixie_burst.damage",
@@ -1363,16 +1203,11 @@
     "name": "Resonant Chime",
     "description": "Whenever you use an ability, gain 1% Critical Damage.",
     "cooldownTicks": 0,
-    "tags": [
-      "Effect.Ability",
-      "Creature.Pixie"
-    ],
+    "tags": ["Effect.Ability", "Creature.Pixie"],
     "triggers": [
       {
         "event": "OnAbilityUsed",
-        "effectIds": [
-          "effect.creature.pixie.resonant_chime.crit_damage"
-        ]
+        "effectIds": ["effect.creature.pixie.resonant_chime.crit_damage"]
       }
     ],
     "effects": [
@@ -1391,12 +1226,9 @@
     "id": "ability.creature.wood_nymph.bramble_shield",
     "kind": "Active",
     "name": "Bramble Shield",
-    "description": "Grant the highest-Max-Health ally Thorns(5) for 12 seconds and Barrier equal to 80% Power.",
-    "cooldownTicks": 100,
-    "tags": [
-      "Effect.Ability",
-      "Creature.WoodNymph"
-    ],
+    "description": "Grant the highest-Max-Health ally Thorns(5) for 12 seconds and Barrier equal to 200% Power.",
+    "cooldownTicks": 160,
+    "tags": ["Effect.Ability", "Creature.WoodNymph"],
     "effects": [
       {
         "id": "effect.creature.wood_nymph.bramble_shield.thorns",
@@ -1412,7 +1244,7 @@
         "operation": "GrantBarrier",
         "target": "HighestMaxHealthAlly",
         "scalingAttribute": "Power",
-        "scalingCoefficient": 0.8,
+        "scalingCoefficient": 2.0,
         "procCoefficient": 1
       }
     ],
@@ -1424,10 +1256,7 @@
     "name": "Nature's Protection",
     "description": "At combat start, gain Renewal(15) and Ward(2).",
     "cooldownTicks": 0,
-    "tags": [
-      "Effect.Ability",
-      "Creature.WoodNymph"
-    ],
+    "tags": ["Effect.Ability", "Creature.WoodNymph"],
     "effects": [
       {
         "id": "effect.creature.wood_nymph.natures_protection.renewal",
@@ -1453,11 +1282,8 @@
     "kind": "Active",
     "name": "Unstable Colors",
     "description": "Each ally has an 80% chance to gain Empower; otherwise they gain Weaken.",
-    "cooldownTicks": 100,
-    "tags": [
-      "Effect.Ability",
-      "Creature.RainbowSlime"
-    ],
+    "cooldownTicks": 180,
+    "tags": ["Effect.Ability", "Creature.RainbowSlime"],
     "effects": [
       {
         "id": "effect.creature.rainbow_slime.unstable_colors.condition",
@@ -1478,16 +1304,11 @@
     "name": "Colorful Shield",
     "description": "Whenever you use an ability, grant Barrier equal to 20% Power to the highest-Max-Health ally.",
     "cooldownTicks": 0,
-    "tags": [
-      "Effect.Ability",
-      "Creature.RainbowSlime"
-    ],
+    "tags": ["Effect.Ability", "Creature.RainbowSlime"],
     "triggers": [
       {
         "event": "OnAbilityUsed",
-        "effectIds": [
-          "effect.creature.rainbow_slime.colorful_shield.barrier"
-        ]
+        "effectIds": ["effect.creature.rainbow_slime.colorful_shield.barrier"]
       }
     ],
     "effects": [
@@ -1507,11 +1328,8 @@
     "kind": "Active",
     "name": "Fae's Corrosion",
     "description": "Deal 140% Magical Damage to a random enemy and apply Corrosion(8).",
-    "cooldownTicks": 100,
-    "tags": [
-      "Effect.Ability",
-      "Creature.EnchantedFairy"
-    ],
+    "cooldownTicks": 120,
+    "tags": ["Effect.Ability", "Creature.EnchantedFairy"],
     "effects": [
       {
         "id": "effect.creature.enchanted_fairy.faes_corrosion.damage",
@@ -1540,16 +1358,11 @@
     "name": "Fae's Charm",
     "description": "Every 20 seconds, each enemy has an 80% chance to receive Stun(3).",
     "cooldownTicks": 0,
-    "tags": [
-      "Effect.Ability",
-      "Creature.EnchantedFairy"
-    ],
+    "tags": ["Effect.Ability", "Creature.EnchantedFairy"],
     "triggers": [
       {
         "event": "OnInterval",
-        "effectIds": [
-          "effect.creature.enchanted_fairy.faes_charm.stun"
-        ],
+        "effectIds": ["effect.creature.enchanted_fairy.faes_charm.stun"],
         "internalCooldownTicks": 200,
         "initialDelayTicks": 200
       }
@@ -1571,13 +1384,20 @@
     "id": "ability.creature.illusion_fox.a_doomed_illusion",
     "kind": "Active",
     "name": "A Doomed Illusion",
-    "description": "Apply Doom(300) to a random enemy.",
-    "cooldownTicks": 100,
-    "tags": [
-      "Effect.Ability",
-      "Creature.IllusionFox"
-    ],
+    "description": "Deal 75% Magical Damage and apply Doom(300) to a random enemy.",
+    "cooldownTicks": 140,
+    "tags": ["Effect.Ability", "Creature.IllusionFox"],
     "effects": [
+      {
+        "id": "effect.creature.illusion_fox.a_doomed_illusion.damage",
+        "operation": "Damage",
+        "target": "RandomEnemy",
+        "scalingAttribute": "Power",
+        "scalingCoefficient": 0.75,
+        "attackType": "Ranged",
+        "damageType": "Magical",
+        "procCoefficient": 1
+      },
       {
         "id": "effect.creature.illusion_fox.a_doomed_illusion.doom",
         "operation": "ApplyCondition",
@@ -1595,16 +1415,11 @@
     "name": "Foxfire Wisp",
     "description": "Every 5 seconds gain a Foxfire stack, up to 3. When attacked, consume one to deal 35% Magical Damage per stack.",
     "cooldownTicks": 0,
-    "tags": [
-      "Effect.Ability",
-      "Creature.IllusionFox"
-    ],
+    "tags": ["Effect.Ability", "Creature.IllusionFox"],
     "triggers": [
       {
         "event": "OnInterval",
-        "effectIds": [
-          "effect.creature.illusion_fox.foxfire_wisp.stack"
-        ],
+        "effectIds": ["effect.creature.illusion_fox.foxfire_wisp.stack"],
         "internalCooldownTicks": 50,
         "initialDelayTicks": 50
       }
@@ -1626,11 +1441,8 @@
     "kind": "Active",
     "name": "Thorned Rush",
     "description": "Deal 180% Physical Damage plus 2% per Thorns stack.",
-    "cooldownTicks": 100,
-    "tags": [
-      "Effect.Ability",
-      "Creature.ThornbackBoar"
-    ],
+    "cooldownTicks": 120,
+    "tags": ["Effect.Ability", "Creature.ThornbackBoar"],
     "effects": [
       {
         "id": "effect.creature.thornback_boar.thorned_rush.damage",
@@ -1653,10 +1465,7 @@
     "name": "Bristling Hide",
     "description": "At combat start, gain Thorns(10) for 30 seconds.",
     "cooldownTicks": 0,
-    "tags": [
-      "Effect.Ability",
-      "Creature.ThornbackBoar"
-    ],
+    "tags": ["Effect.Ability", "Creature.ThornbackBoar"],
     "effects": [
       {
         "id": "effect.creature.thornback_boar.bristling_hide.thorns",
@@ -1674,19 +1483,16 @@
     "id": "ability.creature.hollow_stag.echoing_antlers",
     "kind": "Active",
     "name": "Echoing Antlers",
-    "description": "Deal 150% Magical Damage and apply Weaken.",
-    "cooldownTicks": 100,
-    "tags": [
-      "Effect.Ability",
-      "Creature.HollowStag"
-    ],
+    "description": "Deal 125% Magical Damage and apply Weaken.",
+    "cooldownTicks": 120,
+    "tags": ["Effect.Ability", "Creature.HollowStag"],
     "effects": [
       {
         "id": "effect.creature.hollow_stag.echoing_antlers.damage",
         "operation": "Damage",
         "target": "CurrentTarget",
         "scalingAttribute": "Power",
-        "scalingCoefficient": 1.5,
+        "scalingCoefficient": 1.25,
         "attackType": "Melee",
         "damageType": "Magical",
         "procCoefficient": 1
@@ -1708,10 +1514,7 @@
     "name": "Hollow Core",
     "description": "For every 20% Health lost, gain 1% Damage Reduction for the rest of combat.",
     "cooldownTicks": 0,
-    "tags": [
-      "Effect.Ability",
-      "Creature.HollowStag"
-    ],
+    "tags": ["Effect.Ability", "Creature.HollowStag"],
     "triggers": [
       {
         "event": "OnHealthChanged",
@@ -1795,19 +1598,16 @@
     "id": "ability.creature.treant_sapling.sprouting_surge",
     "kind": "Active",
     "name": "Sprouting Surge",
-    "description": "Heal yourself for 210% Power.",
-    "cooldownTicks": 100,
-    "tags": [
-      "Effect.Ability",
-      "Creature.TreantSapling"
-    ],
+    "description": "Heal yourself for 300% Power.",
+    "cooldownTicks": 160,
+    "tags": ["Effect.Ability", "Creature.TreantSapling"],
     "effects": [
       {
         "id": "effect.creature.treant_sapling.sprouting_surge.heal",
         "operation": "Heal",
         "target": "Self",
         "scalingAttribute": "Power",
-        "scalingCoefficient": 2.1,
+        "scalingCoefficient": 3.0,
         "procCoefficient": 1
       }
     ],
@@ -1819,10 +1619,7 @@
     "name": "Nurturing Roots",
     "description": "Increase all healing received by 15%.",
     "cooldownTicks": 0,
-    "tags": [
-      "Effect.Ability",
-      "Creature.TreantSapling"
-    ],
+    "tags": ["Effect.Ability", "Creature.TreantSapling"],
     "effects": [
       {
         "id": "effect.creature.treant_sapling.nurturing_roots.healing",
@@ -1838,19 +1635,16 @@
     "id": "ability.creature.glade_panther.ambush_strike",
     "kind": "Active",
     "name": "Ambush Strike",
-    "description": "Deal 175% Physical Damage with +20% Critical Chance.",
-    "cooldownTicks": 100,
-    "tags": [
-      "Effect.Ability",
-      "Creature.GladePanther"
-    ],
+    "description": "Deal 125% Physical Damage with +20% Critical Chance.",
+    "cooldownTicks": 130,
+    "tags": ["Effect.Ability", "Creature.GladePanther"],
     "effects": [
       {
         "id": "effect.creature.glade_panther.ambush_strike.damage",
         "operation": "Damage",
         "target": "CurrentTarget",
         "scalingAttribute": "Power",
-        "scalingCoefficient": 1.75,
+        "scalingCoefficient": 1.25,
         "attackType": "Melee",
         "damageType": "Physical",
         "critChanceBonus": 20.0,
@@ -1863,18 +1657,15 @@
     "id": "ability.creature.glade_panther.razor_claws",
     "kind": "Passive",
     "name": "Razor Claws",
-    "description": "Increase Critical Damage by 22%.",
+    "description": "Increase Critical Damage by 15%.",
     "cooldownTicks": 0,
-    "tags": [
-      "Effect.Ability",
-      "Creature.GladePanther"
-    ],
+    "tags": ["Effect.Ability", "Creature.GladePanther"],
     "effects": [
       {
         "id": "effect.creature.glade_panther.razor_claws.crit_damage",
         "operation": "ModifyAttribute",
         "target": "Self",
-        "baseValue": 22,
+        "baseValue": 15,
         "attribute": "CritDamage",
         "procCoefficient": 1
       }
@@ -1886,11 +1677,8 @@
     "kind": "Active",
     "name": "Rejuvenation",
     "description": "Heal the lowest-health ally for 120% Power.",
-    "cooldownTicks": 100,
-    "tags": [
-      "Effect.Ability",
-      "Creature.ForestSpirit"
-    ],
+    "cooldownTicks": 110,
+    "tags": ["Effect.Ability", "Creature.ForestSpirit"],
     "effects": [
       {
         "id": "effect.creature.forest_spirit.rejuvenation.heal",
@@ -1907,18 +1695,13 @@
     "id": "ability.creature.forest_spirit.spirit_bloom",
     "kind": "Passive",
     "name": "Spirit Bloom",
-    "description": "Every third healing event restores an additional 30% Power to its target.",
+    "description": "Every third heal you apply restores an additional 30% Power to its target.",
     "cooldownTicks": 0,
-    "tags": [
-      "Effect.Ability",
-      "Creature.ForestSpirit"
-    ],
+    "tags": ["Effect.Ability", "Creature.ForestSpirit"],
     "triggers": [
       {
         "event": "OnHeal",
-        "effectIds": [
-          "effect.creature.forest_spirit.spirit_bloom.heal"
-        ],
+        "effectIds": ["effect.creature.forest_spirit.spirit_bloom.heal"],
         "everyNthOccurrence": 3
       }
     ],
@@ -1939,11 +1722,8 @@
     "kind": "Active",
     "name": "Rotburst",
     "description": "Deal 140% Physical Damage and apply Decay(15).",
-    "cooldownTicks": 100,
-    "tags": [
-      "Effect.Ability",
-      "Creature.RotrootShambler"
-    ],
+    "cooldownTicks": 120,
+    "tags": ["Effect.Ability", "Creature.RotrootShambler"],
     "effects": [
       {
         "id": "effect.creature.rotroot_shambler.rotburst.damage",
@@ -1972,10 +1752,7 @@
     "name": "Decaying Husk",
     "description": "The first time you fall below 50% Health, apply Poison(30) and Decay(20) to all enemies.",
     "cooldownTicks": 0,
-    "tags": [
-      "Effect.Ability",
-      "Creature.RotrootShambler"
-    ],
+    "tags": ["Effect.Ability", "Creature.RotrootShambler"],
     "triggers": [
       {
         "event": "OnHealthChanged",
@@ -2018,11 +1795,8 @@
     "kind": "Active",
     "name": "Skittering Strike",
     "description": "Deal 120% Physical Damage.",
-    "cooldownTicks": 100,
-    "tags": [
-      "Effect.Ability",
-      "Creature.Spider"
-    ],
+    "cooldownTicks": 75,
+    "tags": ["Effect.Ability", "Creature.Spider"],
     "effects": [
       {
         "id": "effect.creature.spider.skittering_strike.damage",
@@ -2043,10 +1817,7 @@
     "name": "Spider Eyes",
     "description": "Increase Critical Chance by 2%.",
     "cooldownTicks": 0,
-    "tags": [
-      "Effect.Ability",
-      "Creature.Spider"
-    ],
+    "tags": ["Effect.Ability", "Creature.Spider"],
     "effects": [
       {
         "id": "effect.creature.spider.spider_eyes.crit",
@@ -2063,19 +1834,16 @@
     "id": "ability.creature.giant_spider.spider_crash",
     "kind": "Active",
     "name": "Spider Crash",
-    "description": "Deal 220% Physical Damage to the target and 80% Physical Damage to yourself.",
-    "cooldownTicks": 100,
-    "tags": [
-      "Effect.Ability",
-      "Creature.GiantSpider"
-    ],
+    "description": "Deal 190% Physical Damage to the target and 80% Physical Damage to yourself.",
+    "cooldownTicks": 130,
+    "tags": ["Effect.Ability", "Creature.GiantSpider"],
     "effects": [
       {
         "id": "effect.creature.giant_spider.spider_crash.target",
         "operation": "Damage",
         "target": "CurrentTarget",
         "scalingAttribute": "Power",
-        "scalingCoefficient": 2.2,
+        "scalingCoefficient": 1.9,
         "attackType": "Melee",
         "damageType": "Physical",
         "procCoefficient": 1
@@ -2098,10 +1866,7 @@
     "name": "Thickened Carapace",
     "description": "Increase Physical Armor by 15%.",
     "cooldownTicks": 0,
-    "tags": [
-      "Effect.Ability",
-      "Creature.GiantSpider"
-    ],
+    "tags": ["Effect.Ability", "Creature.GiantSpider"],
     "effects": [
       {
         "id": "effect.creature.giant_spider.thickened_carapace.armor",
@@ -2119,13 +1884,20 @@
     "id": "ability.creature.venomous_spiderling.venom_web",
     "kind": "Active",
     "name": "Venom Web",
-    "description": "Apply Poison(20) and Slow.",
-    "cooldownTicks": 100,
-    "tags": [
-      "Effect.Ability",
-      "Creature.VenomousSpiderling"
-    ],
+    "description": "Deal 60% Magical Damage and apply Poison(20) and Slow.",
+    "cooldownTicks": 90,
+    "tags": ["Effect.Ability", "Creature.VenomousSpiderling"],
     "effects": [
+      {
+        "id": "effect.creature.venomous_spiderling.venom_web.damage",
+        "operation": "Damage",
+        "target": "CurrentTarget",
+        "scalingAttribute": "Power",
+        "scalingCoefficient": 0.6,
+        "attackType": "Ranged",
+        "damageType": "Magical",
+        "procCoefficient": 1
+      },
       {
         "id": "effect.creature.venomous_spiderling.venom_web.poison",
         "operation": "ApplyCondition",
@@ -2151,10 +1923,7 @@
     "name": "Toxic Opportunity",
     "description": "Basic Attacks against Slowed enemies apply Poison(4).",
     "cooldownTicks": 0,
-    "tags": [
-      "Effect.Ability",
-      "Creature.VenomousSpiderling"
-    ],
+    "tags": ["Effect.Ability", "Creature.VenomousSpiderling"],
     "triggers": [
       {
         "event": "OnBasicAttack",
@@ -2187,11 +1956,8 @@
     "kind": "Active",
     "name": "Blackjaw Bite",
     "description": "Deal 160% Physical Damage, or 220% if the target is below 40% Health.",
-    "cooldownTicks": 100,
-    "tags": [
-      "Effect.Ability",
-      "Creature.BlackjawSpider"
-    ],
+    "cooldownTicks": 110,
+    "tags": ["Effect.Ability", "Creature.BlackjawSpider"],
     "effects": [
       {
         "id": "effect.creature.blackjaw_spider.blackjaw_bite.normal",
@@ -2236,10 +2002,7 @@
     "name": "Powerful Mandibles",
     "description": "Every eighth Basic Attack has 50% Armor Penetration.",
     "cooldownTicks": 0,
-    "tags": [
-      "Effect.Ability",
-      "Creature.BlackjawSpider"
-    ],
+    "tags": ["Effect.Ability", "Creature.BlackjawSpider"],
     "triggers": [
       {
         "event": "OnBasicAttack",
@@ -2265,11 +2028,8 @@
     "kind": "Active",
     "name": "Firebomb Toss",
     "description": "Deal 120% Magical Damage and apply Burn(20).",
-    "cooldownTicks": 100,
-    "tags": [
-      "Effect.Ability",
-      "Creature.FlameImp"
-    ],
+    "cooldownTicks": 110,
+    "tags": ["Effect.Ability", "Creature.FlameImp"],
     "effects": [
       {
         "id": "effect.creature.flame_imp.firebomb_toss.damage",
@@ -2298,16 +2058,11 @@
     "name": "Impish Flame",
     "description": "Whenever you apply Burn, there is a 20% chance to apply Taunt(15).",
     "cooldownTicks": 0,
-    "tags": [
-      "Effect.Ability",
-      "Creature.FlameImp"
-    ],
+    "tags": ["Effect.Ability", "Creature.FlameImp"],
     "triggers": [
       {
         "event": "OnStatusApplied",
-        "effectIds": [
-          "effect.creature.flame_imp.impish_flame.taunt"
-        ],
+        "effectIds": ["effect.creature.flame_imp.impish_flame.taunt"],
         "conditions": [
           {
             "type": "EventIdIs",
@@ -2336,10 +2091,7 @@
     "name": "Scorching Tail",
     "description": "Deal 140% Physical Damage and 100% additional damage if the target is Burning.",
     "cooldownTicks": 100,
-    "tags": [
-      "Effect.Ability",
-      "Creature.SmolderRat"
-    ],
+    "tags": ["Effect.Ability", "Creature.SmolderRat"],
     "effects": [
       {
         "id": "effect.creature.smolder_rat.scorching_tail.damage",
@@ -2358,9 +2110,7 @@
         "scalingAttribute": "Power",
         "scalingCoefficient": 1.0,
         "damageType": "Physical",
-        "tags": [
-          "Damage.Secondary"
-        ],
+        "tags": ["Damage.Secondary"],
         "conditions": [
           {
             "type": "HasCondition",
@@ -2379,10 +2129,7 @@
     "name": "Heat Resistance",
     "description": "Take 15% less Burn Damage.",
     "cooldownTicks": 0,
-    "tags": [
-      "Effect.Ability",
-      "Creature.SmolderRat"
-    ],
+    "tags": ["Effect.Ability", "Creature.SmolderRat"],
     "effects": [
       {
         "id": "effect.creature.smolder_rat.heat_resistance.damage",
@@ -2400,11 +2147,8 @@
     "kind": "Active",
     "name": "Burning Mandibles",
     "description": "Deal 90% Physical Damage and apply Burn(12) and Bleed(12).",
-    "cooldownTicks": 100,
-    "tags": [
-      "Effect.Ability",
-      "Creature.CinderBeetle"
-    ],
+    "cooldownTicks": 130,
+    "tags": ["Effect.Ability", "Creature.CinderBeetle"],
     "effects": [
       {
         "id": "effect.creature.cinder_beetle.burning_mandibles.damage",
@@ -2439,18 +2183,13 @@
     "id": "ability.creature.cinder_beetle.molten_shell",
     "kind": "Passive",
     "name": "Molten Shell",
-    "description": "When critically hit, deal 150% Magical Damage to the attacker. Can trigger four times.",
+    "description": "When critically hit, deal 100% Magical Damage to the attacker. Can trigger three times.",
     "cooldownTicks": 0,
-    "tags": [
-      "Effect.Ability",
-      "Creature.CinderBeetle"
-    ],
+    "tags": ["Effect.Ability", "Creature.CinderBeetle"],
     "triggers": [
       {
         "event": "OnDamaged",
-        "effectIds": [
-          "effect.creature.cinder_beetle.molten_shell.damage"
-        ],
+        "effectIds": ["effect.creature.cinder_beetle.molten_shell.damage"],
         "conditions": [
           {
             "type": "EventWasCritical",
@@ -2465,12 +2204,10 @@
         "operation": "Damage",
         "target": "EventTarget",
         "scalingAttribute": "Power",
-        "scalingCoefficient": 1.5,
-        "uses": 4,
+        "scalingCoefficient": 1.0,
+        "uses": 3,
         "damageType": "Magical",
-        "tags": [
-          "Damage.Secondary"
-        ],
+        "tags": ["Damage.Secondary"],
         "procCoefficient": 1
       }
     ],
@@ -2480,19 +2217,16 @@
     "id": "ability.creature.red_slime.ignite_core",
     "kind": "Active",
     "name": "Ignite Core",
-    "description": "For 10 seconds, deal 15% Magical Damage each second to everyone except yourself.",
-    "cooldownTicks": 100,
-    "tags": [
-      "Effect.Ability",
-      "Creature.RedSlime"
-    ],
+    "description": "For 10 seconds, deal 18% Magical Damage each second to all enemies.",
+    "cooldownTicks": 180,
+    "tags": ["Effect.Ability", "Creature.RedSlime"],
     "effects": [
       {
         "id": "effect.creature.red_slime.ignite_core.damage",
         "operation": "Damage",
-        "target": "EveryoneButSelf",
+        "target": "AllEnemies",
         "scalingAttribute": "Power",
-        "scalingCoefficient": 0.15,
+        "scalingCoefficient": 0.18,
         "durationTicks": 100,
         "intervalTicks": 10,
         "damageType": "Magical",
@@ -2505,18 +2239,13 @@
     "id": "ability.creature.red_slime.recharging_core",
     "kind": "Passive",
     "name": "Recharging Core",
-    "description": "Every 12 seconds, gain 4% Critical Damage, up to 40%.",
+    "description": "Every 12 seconds, gain 5% Critical Damage, up to 40%.",
     "cooldownTicks": 0,
-    "tags": [
-      "Effect.Ability",
-      "Creature.RedSlime"
-    ],
+    "tags": ["Effect.Ability", "Creature.RedSlime"],
     "triggers": [
       {
         "event": "OnInterval",
-        "effectIds": [
-          "effect.creature.red_slime.recharging_core.crit_damage"
-        ],
+        "effectIds": ["effect.creature.red_slime.recharging_core.crit_damage"],
         "internalCooldownTicks": 120,
         "initialDelayTicks": 120
       }
@@ -2526,9 +2255,9 @@
         "id": "effect.creature.red_slime.recharging_core.crit_damage",
         "operation": "ModifyAttribute",
         "target": "Self",
-        "baseValue": 4,
+        "baseValue": 5,
         "attribute": "CritDamage",
-        "uses": 10,
+        "uses": 8,
         "procCoefficient": 1
       }
     ],
@@ -2539,11 +2268,8 @@
     "kind": "Active",
     "name": "Drag Beneath",
     "description": "Deal 160% Physical Damage and apply Stun(2).",
-    "cooldownTicks": 100,
-    "tags": [
-      "Effect.Ability",
-      "Creature.GiantWorm"
-    ],
+    "cooldownTicks": 150,
+    "tags": ["Effect.Ability", "Creature.GiantWorm"],
     "effects": [
       {
         "id": "effect.creature.giant_worm.drag_beneath.damage",
@@ -2570,19 +2296,16 @@
     "id": "ability.creature.giant_worm.erupting_ambush",
     "kind": "Passive",
     "name": "Erupting Ambush",
-    "description": "At combat start, deal 300% Physical Damage to the lowest-health enemy and apply Bleed(18).",
+    "description": "At combat start, deal 180% Physical Damage to the lowest-health enemy and apply Bleed(8).",
     "cooldownTicks": 0,
-    "tags": [
-      "Effect.Ability",
-      "Creature.GiantWorm"
-    ],
+    "tags": ["Effect.Ability", "Creature.GiantWorm"],
     "effects": [
       {
         "id": "effect.creature.giant_worm.erupting_ambush.damage",
         "operation": "Damage",
         "target": "LowestHealthEnemy",
         "scalingAttribute": "Power",
-        "scalingCoefficient": 3.0,
+        "scalingCoefficient": 1.8,
         "attackType": "Melee",
         "damageType": "Physical",
         "procCoefficient": 1
@@ -2591,7 +2314,7 @@
         "id": "effect.creature.giant_worm.erupting_ambush.bleed",
         "operation": "ApplyCondition",
         "target": "LowestHealthEnemy",
-        "baseValue": 18,
+        "baseValue": 8,
         "condition": "Bleed",
         "procCoefficient": 1
       }
@@ -2603,11 +2326,8 @@
     "kind": "Active",
     "name": "Infestation",
     "description": "Deal 140% Physical Damage and apply Wound(9).",
-    "cooldownTicks": 100,
-    "tags": [
-      "Effect.Ability",
-      "Creature.BogMite"
-    ],
+    "cooldownTicks": 110,
+    "tags": ["Effect.Ability", "Creature.BogMite"],
     "effects": [
       {
         "id": "effect.creature.bog_mite.infestation.damage",
@@ -2636,16 +2356,11 @@
     "name": "Blood Feeders",
     "description": "Heal for 5% of damage dealt to Poisoned targets.",
     "cooldownTicks": 0,
-    "tags": [
-      "Effect.Ability",
-      "Creature.BogMite"
-    ],
+    "tags": ["Effect.Ability", "Creature.BogMite"],
     "triggers": [
       {
         "event": "OnHit",
-        "effectIds": [
-          "effect.creature.bog_mite.blood_feeders.heal"
-        ]
+        "effectIds": ["effect.creature.bog_mite.blood_feeders.heal"]
       }
     ],
     "effects": [
@@ -2671,11 +2386,8 @@
     "kind": "Active",
     "name": "Acid Splash",
     "description": "Deal 60% Magical Damage and apply Poison(18) to all enemies.",
-    "cooldownTicks": 100,
-    "tags": [
-      "Effect.Ability",
-      "Creature.GreenSlime"
-    ],
+    "cooldownTicks": 170,
+    "tags": ["Effect.Ability", "Creature.GreenSlime"],
     "effects": [
       {
         "id": "effect.creature.green_slime.acid_splash.damage",
@@ -2704,16 +2416,11 @@
     "name": "Corrosive Ooze",
     "description": "When damaged by a Physical melee hit, apply Poison(3) to the attacker.",
     "cooldownTicks": 0,
-    "tags": [
-      "Effect.Ability",
-      "Creature.GreenSlime"
-    ],
+    "tags": ["Effect.Ability", "Creature.GreenSlime"],
     "triggers": [
       {
         "event": "OnDamaged",
-        "effectIds": [
-          "effect.creature.green_slime.corrosive_ooze.poison"
-        ],
+        "effectIds": ["effect.creature.green_slime.corrosive_ooze.poison"],
         "conditions": [
           {
             "type": "EventDamageTypeIs",
@@ -2744,19 +2451,16 @@
     "id": "ability.creature.large_rat.tail_wrap",
     "kind": "Active",
     "name": "Tail Wrap",
-    "description": "Deal 240% Physical Damage.",
-    "cooldownTicks": 100,
-    "tags": [
-      "Effect.Ability",
-      "Creature.LargeRat"
-    ],
+    "description": "Deal 210% Physical Damage.",
+    "cooldownTicks": 150,
+    "tags": ["Effect.Ability", "Creature.LargeRat"],
     "effects": [
       {
         "id": "effect.creature.large_rat.tail_wrap.damage",
         "operation": "Damage",
         "target": "CurrentTarget",
         "scalingAttribute": "Power",
-        "scalingCoefficient": 2.4,
+        "scalingCoefficient": 2.1,
         "attackType": "Melee",
         "damageType": "Physical",
         "procCoefficient": 1
@@ -2770,10 +2474,7 @@
     "name": "Big",
     "description": "Increase Max Health by 10%.",
     "cooldownTicks": 0,
-    "tags": [
-      "Effect.Ability",
-      "Creature.LargeRat"
-    ],
+    "tags": ["Effect.Ability", "Creature.LargeRat"],
     "effects": [
       {
         "id": "effect.creature.large_rat.big.health",
@@ -2792,11 +2493,8 @@
     "kind": "Active",
     "name": "Piercing Fangs",
     "description": "Deal 90% Physical Damage and another 90% if the target is Poisoned.",
-    "cooldownTicks": 100,
-    "tags": [
-      "Effect.Ability",
-      "Creature.Viper"
-    ],
+    "cooldownTicks": 90,
+    "tags": ["Effect.Ability", "Creature.Viper"],
     "effects": [
       {
         "id": "effect.creature.viper.piercing_fangs.damage",
@@ -2815,9 +2513,7 @@
         "scalingAttribute": "Power",
         "scalingCoefficient": 0.9,
         "damageType": "Physical",
-        "tags": [
-          "Damage.Secondary"
-        ],
+        "tags": ["Damage.Secondary"],
         "conditions": [
           {
             "type": "HasCondition",
@@ -2836,10 +2532,7 @@
     "name": "Potent Toxins",
     "description": "Increase Poison Damage dealt by 7%.",
     "cooldownTicks": 0,
-    "tags": [
-      "Effect.Ability",
-      "Creature.Viper"
-    ],
+    "tags": ["Effect.Ability", "Creature.Viper"],
     "effects": [
       {
         "id": "effect.creature.viper.potent_toxins.damage",
@@ -2856,13 +2549,20 @@
     "id": "ability.creature.poisonous_rat.toxic_bite",
     "kind": "Active",
     "name": "Toxic Bite",
-    "description": "Apply Poison(20), with a 5% chance to also apply Toxic Blood.",
-    "cooldownTicks": 100,
-    "tags": [
-      "Effect.Ability",
-      "Creature.PoisonousRat"
-    ],
+    "description": "Deal 70% Physical Damage and apply Poison(20), with a 5% chance to also apply Toxic Blood.",
+    "cooldownTicks": 75,
+    "tags": ["Effect.Ability", "Creature.PoisonousRat"],
     "effects": [
+      {
+        "id": "effect.creature.poisonous_rat.toxic_bite.damage",
+        "operation": "Damage",
+        "target": "CurrentTarget",
+        "scalingAttribute": "Power",
+        "scalingCoefficient": 0.7,
+        "attackType": "Melee",
+        "damageType": "Physical",
+        "procCoefficient": 1
+      },
       {
         "id": "effect.creature.poisonous_rat.toxic_bite.poison",
         "operation": "ApplyCondition",
@@ -2889,10 +2589,7 @@
     "name": "Resistant Hide",
     "description": "Take 12% less Poison Damage.",
     "cooldownTicks": 0,
-    "tags": [
-      "Effect.Ability",
-      "Creature.PoisonousRat"
-    ],
+    "tags": ["Effect.Ability", "Creature.PoisonousRat"],
     "effects": [
       {
         "id": "effect.creature.poisonous_rat.resistant_hide.damage",
@@ -2911,10 +2608,7 @@
     "name": "Putrid Belch",
     "description": "Deal 80% Magical Damage and apply Decay(14).",
     "cooldownTicks": 100,
-    "tags": [
-      "Effect.Ability",
-      "Creature.RotflyToad"
-    ],
+    "tags": ["Effect.Ability", "Creature.RotflyToad"],
     "effects": [
       {
         "id": "effect.creature.rotfly_toad.putrid_belch.damage",
@@ -2943,16 +2637,11 @@
     "name": "Rotfly Host",
     "description": "When an enemy with Decay dies, heal 8% Max Health.",
     "cooldownTicks": 0,
-    "tags": [
-      "Effect.Ability",
-      "Creature.RotflyToad"
-    ],
+    "tags": ["Effect.Ability", "Creature.RotflyToad"],
     "triggers": [
       {
         "event": "OnKill",
-        "effectIds": [
-          "effect.creature.rotfly_toad.rotfly_host.heal"
-        ]
+        "effectIds": ["effect.creature.rotfly_toad.rotfly_host.heal"]
       }
     ],
     "effects": [
@@ -2979,11 +2668,8 @@
     "kind": "Active",
     "name": "Absorb Impact",
     "description": "Gain Guard(5).",
-    "cooldownTicks": 100,
-    "tags": [
-      "Effect.Ability",
-      "Creature.BrownSlime"
-    ],
+    "cooldownTicks": 120,
+    "tags": ["Effect.Ability", "Creature.BrownSlime"],
     "effects": [
       {
         "id": "effect.creature.brown_slime.absorb_impact.guard",
@@ -3002,16 +2688,11 @@
     "name": "Layered Mud",
     "description": "When hit by a Basic Attack, gain 1 Armor for 6 seconds, up to 30 applications.",
     "cooldownTicks": 0,
-    "tags": [
-      "Effect.Ability",
-      "Creature.BrownSlime"
-    ],
+    "tags": ["Effect.Ability", "Creature.BrownSlime"],
     "triggers": [
       {
         "event": "OnAttacked",
-        "effectIds": [
-          "effect.creature.brown_slime.layered_mud.armor"
-        ],
+        "effectIds": ["effect.creature.brown_slime.layered_mud.armor"],
         "conditions": [
           {
             "type": "EventIdIs",
@@ -3040,11 +2721,8 @@
     "kind": "Active",
     "name": "Sonic Screech",
     "description": "Deal 135% Magical Damage and apply Slow.",
-    "cooldownTicks": 100,
-    "tags": [
-      "Effect.Ability",
-      "Creature.CaveBat"
-    ],
+    "cooldownTicks": 120,
+    "tags": ["Effect.Ability", "Creature.CaveBat"],
     "effects": [
       {
         "id": "effect.creature.cave_bat.sonic_screech.damage",
@@ -3071,19 +2749,16 @@
     "id": "ability.creature.cave_bat.echolocation",
     "kind": "Passive",
     "name": "Echolocation",
-    "description": "Increase hit chance by 5%.",
+    "description": "Increase Crit Chance by 5%.",
     "cooldownTicks": 0,
-    "tags": [
-      "Effect.Ability",
-      "Creature.CaveBat"
-    ],
+    "tags": ["Effect.Ability", "Creature.CaveBat"],
     "effects": [
       {
-        "id": "effect.creature.cave_bat.echolocation.precision",
+        "id": "effect.creature.cave_bat.echolocation.crit_chance",
         "operation": "ModifyAttribute",
         "target": "Self",
         "baseValue": 5,
-        "attribute": "Precision",
+        "attribute": "CritChance",
         "procCoefficient": 1
       }
     ],
@@ -3094,11 +2769,8 @@
     "kind": "Active",
     "name": "Echoing Screech",
     "description": "Deal 90% Magical Damage to all enemies.",
-    "cooldownTicks": 100,
-    "tags": [
-      "Effect.Ability",
-      "Creature.GiantBat"
-    ],
+    "cooldownTicks": 120,
+    "tags": ["Effect.Ability", "Creature.GiantBat"],
     "effects": [
       {
         "id": "effect.creature.giant_bat.echoing_screech.damage",
@@ -3119,16 +2791,11 @@
     "name": "Resonant Cry",
     "description": "Every fourth Basic Attack deals 30% Magical Damage to all enemies.",
     "cooldownTicks": 0,
-    "tags": [
-      "Effect.Ability",
-      "Creature.GiantBat"
-    ],
+    "tags": ["Effect.Ability", "Creature.GiantBat"],
     "triggers": [
       {
         "event": "OnBasicAttack",
-        "effectIds": [
-          "effect.creature.giant_bat.resonant_cry.damage"
-        ],
+        "effectIds": ["effect.creature.giant_bat.resonant_cry.damage"],
         "everyNthOccurrence": 4
       }
     ],
@@ -3140,9 +2807,7 @@
         "scalingAttribute": "Power",
         "scalingCoefficient": 0.3,
         "damageType": "Magical",
-        "tags": [
-          "Damage.Secondary"
-        ],
+        "tags": ["Damage.Secondary"],
         "procCoefficient": 1
       }
     ],
@@ -3153,11 +2818,8 @@
     "kind": "Active",
     "name": "Necrotic Slash",
     "description": "Deal 150% Physical Damage and apply Decay(8).",
-    "cooldownTicks": 100,
-    "tags": [
-      "Effect.Ability",
-      "Creature.Undead"
-    ],
+    "cooldownTicks": 120,
+    "tags": ["Effect.Ability", "Creature.Undead"],
     "effects": [
       {
         "id": "effect.creature.undead.necrotic_slash.damage",
@@ -3186,16 +2848,11 @@
     "name": "Corpse Explosion",
     "description": "When killed by a direct hit, deal 350% Magical Damage to the attacker.",
     "cooldownTicks": 0,
-    "tags": [
-      "Effect.Ability",
-      "Creature.Undead"
-    ],
+    "tags": ["Effect.Ability", "Creature.Undead"],
     "triggers": [
       {
         "event": "OnDeath",
-        "effectIds": [
-          "effect.creature.undead.corpse_explosion.damage"
-        ],
+        "effectIds": ["effect.creature.undead.corpse_explosion.damage"],
         "conditions": [
           {
             "type": "EventWasDirectHit",
@@ -3216,9 +2873,7 @@
         "scalingAttribute": "Power",
         "scalingCoefficient": 3.5,
         "damageType": "Magical",
-        "tags": [
-          "Damage.Secondary"
-        ],
+        "tags": ["Damage.Secondary"],
         "procCoefficient": 1
       }
     ],

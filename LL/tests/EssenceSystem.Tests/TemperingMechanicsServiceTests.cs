@@ -74,7 +74,7 @@ public sealed class TemperingMechanicsServiceTests
         Assert.True(result.RarityUpgraded);
         Assert.Equal(AttributeType.Power, result.ImprovedStat);
         Assert.Equal(
-            16,
+            6,
             equipment.InstanceModifiers.Single(x =>
                 x.AttributeType == AttributeType.Power).Amount);
     }

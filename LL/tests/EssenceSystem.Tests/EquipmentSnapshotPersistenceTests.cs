@@ -30,7 +30,7 @@ public sealed class EquipmentSnapshotPersistenceTests
             },
             InstanceModifiers =
             [
-                new InstanceAttributeModifier(AttributeType.Fortitude, 11)
+                new InstanceAttributeModifier(AttributeType.MaxHealth, 11)
                 {
                     Id = Guid.NewGuid(),
                     ItemInstanceId = equipmentId
@@ -64,12 +64,12 @@ public sealed class EquipmentSnapshotPersistenceTests
             .SingleAsync(x => x.Id == characterSnapshot.Id);
 
         var liveModifier = Assert.Single(persistedEquipment.InstanceModifiers);
-        Assert.Equal(AttributeType.Fortitude, liveModifier.AttributeType);
+        Assert.Equal(AttributeType.MaxHealth, liveModifier.AttributeType);
         Assert.Equal(11, liveModifier.Amount);
 
         var snapshotModifier = Assert.Single(
             Assert.Single(persistedSnapshot.Equipment).InstanceModifiers);
-        Assert.Equal(AttributeType.Fortitude, snapshotModifier.AttributeType);
+        Assert.Equal(AttributeType.MaxHealth, snapshotModifier.AttributeType);
         Assert.Equal(11, snapshotModifier.Amount);
     }
 }

@@ -281,7 +281,7 @@ Add focused tests in:
 Recommended coverage:
 
 1. Baseline Attack Speed `0` still attacks every 30 ticks.
-2. Precision still does not affect basic attack cadence.
+2. Attack Speed is the only character attribute that affects basic attack cadence.
 3. `+100 AttackSpeed` doubles basic attack frequency.
 4. `-50 AttackSpeed` halves basic attack frequency.
 5. Timed `ModifyAttribute` buff changes attack progress during combat.

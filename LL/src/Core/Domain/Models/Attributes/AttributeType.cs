@@ -2,32 +2,28 @@ namespace Domain.Models.Attributes;
 public enum AttributeType
 {
     Power = 0,
-    Fortitude = 1,
-    Precision = 2,
-    Spirit = 3,
+    MaxHealth = 1,
+    Armor = 2,
+    Resistance = 3,
+    CritChance = 4,
+    CritDamage = 5,
+    ArmorPenetration = 6,
+    MagicPenetration = 7,
 
-    MaxHealth = 4,
-    Armor = 6,
-    Resistance = 7,
-    CritChance = 8,
-    CritDamage = 9,
-    ArmorPenetration = 10,
-    MagicPenetration = 11,
+    DodgeChance = 8,
+    BlockChance = 9,
+    DamageReduction = 10,
 
-    DodgeChance = 12,
-    BlockChance = 13,
-    DamageReduction = 14,
+    HealingPowerPercent = 11,
+    HealthRegeneration = 12,
+    LifeSteal = 13,
 
-    HealingPowerPercent = 15,
-    HealthRegeneration = 16,
-    LifeSteal = 17,
+    Cooldown = 14,
+    StatusResistance = 15,
+    CrowdControlResistance = 16,
 
-    Cooldown = 18,
-    StatusResistance = 19,
-    CrowdControlResistance = 20,
+    SummonPower = 17,
+    SummonHealth = 18,
 
-    SummonPower = 21,
-    SummonHealth = 22,
-
-    AttackSpeed = 23
+    AttackSpeed = 19
 }

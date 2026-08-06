@@ -38,7 +38,7 @@ export const COMBAT_KEYWORDS: readonly CombatKeywordDefinition[] = [
   {
     name: 'Vulnerable',
     description:
-      'Each stack increases direct damage taken by 25%. It lasts until removed.',
+      'The next direct hit deals 25% increased damage and consumes one stack. It lasts until triggered or removed.',
     valueMeaning: 'stacks',
   },
   {
@@ -219,10 +219,10 @@ export const COMBAT_KEYWORDS: readonly CombatKeywordDefinition[] = [
   },
   {
     name: 'Distracted',
-    description: 'Reduces Precision through illusion.',
+    description: 'Reduces Crit Chance through illusion.',
   },
   {
     name: 'Spirit Blight',
-    description: 'Reduces Spirit for a short duration.',
+    description: 'Reduces Healing Power for a short duration.',
   },
 ];

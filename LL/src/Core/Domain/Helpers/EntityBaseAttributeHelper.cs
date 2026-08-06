@@ -33,10 +33,7 @@ public static class EntityBaseAttributeHelper
         return attributeType switch
         {
             AttributeType.Power => 10,
-            AttributeType.Fortitude => 10,
-            AttributeType.Precision => 10,
-            AttributeType.Spirit => 10,
-            AttributeType.MaxHealth => 100,
+            AttributeType.MaxHealth => 140,
             AttributeType.CritDamage => 100,
             AttributeType.HealthRegeneration => 2,
             _ => 0

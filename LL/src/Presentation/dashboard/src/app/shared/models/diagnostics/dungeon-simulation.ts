@@ -40,11 +40,8 @@ export interface DungeonSimulationCharacter {
   level: number;
   maxHealth: number;
   power: number;
-  fortitude: number;
-  spirit: number;
   armor: number;
   resistance: number;
-  precision: number;
   critChance: number;
   critDamage: number;
   attackSpeed: number;

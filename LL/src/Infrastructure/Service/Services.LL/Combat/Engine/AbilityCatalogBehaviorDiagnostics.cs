@@ -318,7 +318,7 @@ public sealed class AbilityCatalogBehaviorDiagnostics : IAbilityCatalogBehaviorD
         {
             [AttributeType.MaxHealth] = 200,
             [AttributeType.Power] = 50,
-            [AttributeType.Spirit] = 50,
+            [AttributeType.HealingPowerPercent] = 50,
             [AttributeType.CritDamage] = 100,
             [AttributeType.DodgeChance] = 0
         };
@@ -397,7 +397,7 @@ public sealed class AbilityCatalogBehaviorDiagnostics : IAbilityCatalogBehaviorD
         {
             [AttributeType.MaxHealth] = 200,
             [AttributeType.Power] = 50,
-            [AttributeType.Spirit] = 50,
+            [AttributeType.HealingPowerPercent] = 50,
             [AttributeType.CritDamage] = 100,
             [AttributeType.DodgeChance] = 0
         };

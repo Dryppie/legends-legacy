@@ -91,7 +91,6 @@ public sealed record AttributeScenarioMeasurement(
 
 public enum AttributePeerComparisonGroup
 {
-    PrimaryIdentity,
     Offense,
     Crit,
     Defense,
@@ -102,8 +101,7 @@ public enum AttributePeerComparisonGroup
 public enum AttributePeerComparisonIntent
 {
     StrictPeer,
-    GeneralistVersusSpecialist,
-    PrimaryVersusDerivedBasket
+    GeneralistVersusSpecialist
 }
 
 public sealed record EqualBudgetAttributeComparison(
@@ -157,7 +155,6 @@ public sealed record EquipmentAggregateCapMeasurement(
     double EffectiveCharacterCap,
     double BaselineValue,
     double DirectEquipmentPoints,
-    double PrimaryContributionPoints,
     double TotalValue,
     double EffectiveValue,
     double ExcessPoints,
@@ -237,11 +234,9 @@ public sealed record SummonCalibrationComparison(
     double DirectAbilityReferenceDamage,
     double AbilityBudgetDifferencePercent,
     double SummonDamageSharePercent,
-    double SpiritSummonContributionPercent,
     double ExplicitSummonStatContributionPercent,
     EquipmentLoadoutOutput SummonerOutput,
     EquipmentLoadoutOutput WithoutSummonAbilityOutput,
-    EquipmentLoadoutOutput WithoutSpiritSummonBonusOutput,
     EquipmentLoadoutOutput WithoutExplicitSummonStatsOutput,
     EquipmentLoadoutOutput DirectCasterOutput);
 

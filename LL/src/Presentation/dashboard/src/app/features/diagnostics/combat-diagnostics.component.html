@@ -445,7 +445,10 @@
             <div>
               <div class="text-sm font-semibold text-white">Completed Balance Audit</div>
               <div class="mt-1 text-xs text-light_gray">
-                Tier {{ selectedAudit.request.equipmentTier }} {{ selectedAudit.request.equipmentRarity }} {{ selectedAudit.request.equipmentProfile }} · {{ selectedAudit.completedAtUtc | date:'medium' }}
+                Tier {{ selectedAudit.request.equipmentTier }} {{ selectedAudit.request.equipmentRarity }} {{ selectedAudit.request.equipmentProfile }}
+                · {{ selectedAudit.request.teamSize }} participants per team
+                · {{ selectedAudit.request.essencesPerParticipant }} Essences per participant
+                · {{ selectedAudit.completedAtUtc | date:'medium' }}
               </div>
             </div>
             <div class="flex items-center gap-2">
@@ -472,16 +475,21 @@
             (click)="selectAudit(audit)"
           >
             <div class="font-semibold">T{{ audit.request.equipmentTier }} {{ audit.request.equipmentRarity }}</div>
+            <div class="mt-1 text-light_gray">
+              {{ audit.request.teamSize }} participants · {{ audit.request.essencesPerParticipant }} Essences each
+            </div>
             <div class="mt-1">{{ audit.completedAtUtc | date:'short' }}</div>
           </button>
         </div>
 
         <ng-container *ngIf="selectedAudit?.report as report">
-          <div class="mt-4 grid gap-3 md:grid-cols-5">
+          <div class="mt-4 grid gap-3 md:grid-cols-4 xl:grid-cols-7">
             <div class="rounded border border-light_gray/30 bg-black/20 p-3"><div class="text-xs uppercase text-light_gray">Total Battles</div><div class="mt-1 text-lg text-primary">{{ report.totalBattlesRun | number }}</div></div>
             <div class="rounded border border-light_gray/30 bg-black/20 p-3"><div class="text-xs uppercase text-light_gray">Teams Screened</div><div class="mt-1 text-lg text-primary">{{ report.candidateTeamsTested | number }}</div></div>
             <div class="rounded border border-light_gray/30 bg-black/20 p-3"><div class="text-xs uppercase text-light_gray">Finalists</div><div class="mt-1 text-lg text-primary">{{ report.finalistTeamCount }}</div></div>
             <div class="rounded border border-light_gray/30 bg-black/20 p-3"><div class="text-xs uppercase text-light_gray">Replacement Tests</div><div class="mt-1 text-lg text-primary">{{ report.validationResults.length }}</div></div>
+            <div class="rounded border border-light_gray/30 bg-black/20 p-3"><div class="text-xs uppercase text-light_gray">Participants / Team</div><div class="mt-1 text-lg text-primary">{{ selectedAudit?.request?.teamSize }}</div></div>
+            <div class="rounded border border-light_gray/30 bg-black/20 p-3"><div class="text-xs uppercase text-light_gray">Essences / Participant</div><div class="mt-1 text-lg text-primary">{{ selectedAudit?.request?.essencesPerParticipant }}</div></div>
             <div class="rounded border border-light_gray/30 bg-black/20 p-3"><div class="text-xs uppercase text-light_gray">Build</div><div class="mt-1 text-lg text-primary">T{{ report.equipmentTier }} {{ report.equipmentRarity }}</div></div>
           </div>
 

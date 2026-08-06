@@ -42,9 +42,15 @@ public sealed record AbilityBalanceSimulationReport(
     string EquipmentRarity,
     string EquipmentProfile,
     IReadOnlyDictionary<string, float> ParticipantAttributes,
+    IReadOnlyList<AbilityBalanceEssenceDefinition> AvailableEssences,
     IReadOnlyList<AbilityBalanceCombinationResult> RankedCombinations,
     IReadOnlyList<AbilityBalanceEssenceResult> EssenceResults,
     IReadOnlyList<AbilityBalanceBattleSummary> BattleSummaries);
+
+public sealed record AbilityBalanceEssenceDefinition(
+    string EssenceId,
+    string SourceMonsterId,
+    IReadOnlyList<string> AbilityIds);
 
 public sealed record AbilityBalanceCombinationResult(
     string Signature,
