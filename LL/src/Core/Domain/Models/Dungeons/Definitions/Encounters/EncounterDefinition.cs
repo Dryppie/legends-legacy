@@ -11,10 +11,6 @@ public static class DungeonEncounterIdentity
     private static readonly IReadOnlyDictionary<string, string> CreatureKeyAliases =
         new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
-            ["skeleton"] = "skeleton_warrior",
-            ["poisonous_rat"] = "large_rat",
-            ["cave_bat"] = "vampire_bat",
-            ["giant_bat"] = "vampire_bat",
             ["necroshade_wraith"] = "specter",
             ["queens_guard_ant"] = "ant_worker",
             ["ant_queen"] = "fire_ant",

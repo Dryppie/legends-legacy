@@ -219,10 +219,10 @@ export const COMBAT_KEYWORDS: readonly CombatKeywordDefinition[] = [
   },
   {
     name: 'Distracted',
-    description: 'Reduces Precision through illusion.',
+    description: 'Reduces Crit Chance through illusion.',
   },
   {
     name: 'Spirit Blight',
-    description: 'Reduces Spirit for a short duration.',
+    description: 'Reduces Healing Power for a short duration.',
   },
 ];

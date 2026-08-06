@@ -156,7 +156,7 @@ public sealed class StandardConditionSystemTests
 
         Run([actor], [enemy], maxTicks: 1);
 
-        Assert.Equal(938, enemy.Health);
+        Assert.Equal(954, enemy.Health);
         Assert.False(enemy.HasCondition(StandardConditionType.Guard));
         Assert.Equal(1, enemy.GetConditionStacks(StandardConditionType.Vulnerable));
         Assert.Equal(50, enemy.GetConditionStacks(StandardConditionType.Corrosion));

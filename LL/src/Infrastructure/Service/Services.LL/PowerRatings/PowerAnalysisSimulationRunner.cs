@@ -685,7 +685,7 @@ public sealed class PowerAnalysisSimulationRunner
                 Operation = operation,
                 Target = target,
                 BaseValue = baseValue,
-                ScalingAttribute = AttributeType.Spirit,
+                ScalingAttribute = AttributeType.Power,
                 ScalingCoefficient = coefficient
             }
         ]

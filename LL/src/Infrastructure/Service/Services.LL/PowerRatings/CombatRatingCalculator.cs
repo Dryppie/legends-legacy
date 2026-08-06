@@ -26,14 +26,13 @@ public sealed record CombatRatingModifierSource(
 /// </summary>
 public static class CombatRatingCalculator
 {
-    public const int DefinitionVersion = 10;
+    public const int DefinitionVersion = 12;
     public const int ReferenceWeightTier = EquipmentStatBudgetCatalog.MinimumTier;
 
     private static readonly IReadOnlySet<AttributeType> OffenseAttributes =
         new HashSet<AttributeType>
         {
             AttributeType.Power,
-            AttributeType.Precision,
             AttributeType.CritChance,
             AttributeType.CritDamage,
             AttributeType.ArmorPenetration,
@@ -46,7 +45,6 @@ public static class CombatRatingCalculator
     private static readonly IReadOnlySet<AttributeType> PhysicalDurabilityAttributes =
         new HashSet<AttributeType>
         {
-            AttributeType.Fortitude,
             AttributeType.MaxHealth,
             AttributeType.Armor,
             AttributeType.DodgeChance,
@@ -58,7 +56,6 @@ public static class CombatRatingCalculator
     private static readonly IReadOnlySet<AttributeType> MagicalDurabilityAttributes =
         new HashSet<AttributeType>
         {
-            AttributeType.Fortitude,
             AttributeType.MaxHealth,
             AttributeType.Resistance,
             AttributeType.DodgeChance,
@@ -71,7 +68,6 @@ public static class CombatRatingCalculator
     private static readonly IReadOnlySet<AttributeType> SustainAttributes =
         new HashSet<AttributeType>
         {
-            AttributeType.Spirit,
             AttributeType.MaxHealth,
             AttributeType.HealingPowerPercent,
             AttributeType.HealthRegeneration,
@@ -88,24 +84,7 @@ public static class CombatRatingCalculator
             .ToDictionary(group => group.Key, group => group.Sum(attribute => attribute.Value));
         return AttributeCalculator.CalculateProjectedAttributes(
             baseValues,
-            equipmentModifiers,
-            includePrimaryContributions: false);
-    }
-
-    public static IReadOnlyDictionary<AttributeType, float> RemovePrimaryContributions(
-        IReadOnlyDictionary<AttributeType, float> projectedAttributes)
-    {
-        var direct = projectedAttributes.ToDictionary(entry => entry.Key, entry => entry.Value);
-        foreach (var contribution in AttributeCombatRules.PrimaryContributions)
-        {
-            var derived = direct.GetValueOrDefault(contribution.DerivedAttribute);
-            var primary = direct.GetValueOrDefault(contribution.PrimaryAttribute);
-            direct[contribution.DerivedAttribute] = Math.Max(
-                0,
-                derived - primary * contribution.ContributionPerPoint);
-        }
-
-        return direct;
+            equipmentModifiers);
     }
 
     public static CombatRatingBreakdown Calculate(
@@ -115,7 +94,13 @@ public static class CombatRatingCalculator
     {
         var sources = CreateBaseSources(baseAttributes);
         foreach (var item in equipment.DistinctBy(item => item.Id))
-            AddModifierSource(sources, item.AttributeModifiers, item.Tier);
+        {
+            // Authored base modifiers are invariant item identity, so their
+            // rating must not fall when the same base is crafted at a higher
+            // tier. Generated and tempered points retain tier-aware valuation.
+            AddModifierSource(sources, item.BaseModifiers, ReferenceWeightTier);
+            AddModifierSource(sources, item.InstanceModifiers, item.Tier);
+        }
 
         foreach (var source in additionalAttributeSources ?? [])
             AddModifierSource(sources, source.Modifiers, source.Tier);
@@ -128,7 +113,9 @@ public static class CombatRatingCalculator
         IReadOnlyDictionary<AttributeType, double> equipmentPoints,
         int equipmentTier)
     {
-        var sources = directBaseAttributes.ToDictionary(
+        var sources = directBaseAttributes
+            .Where(entry => EquipmentStatBudgetCatalog.IsKnown(entry.Key))
+            .ToDictionary(
             entry => entry.Key,
             entry => CreateSource(entry.Key, entry.Value, ReferenceWeightTier));
         AddPointSource(sources, equipmentPoints, equipmentTier);

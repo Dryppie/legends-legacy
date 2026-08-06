@@ -86,7 +86,7 @@ public sealed class CraftingEquipmentScalingTests
             InitialStatProfile = new Dictionary<AttributeType, double>
             {
                 [AttributeType.Power] = 0.3d,
-                [AttributeType.Spirit] = 0.3d,
+                [AttributeType.HealingPowerPercent] = 0.3d,
                 [AttributeType.MaxHealth] = 0.25d,
                 [AttributeType.Resistance] = 0.15d
             }
@@ -197,7 +197,7 @@ public sealed class CraftingEquipmentScalingTests
             OutputItemType = EquipmentType.Head,
             InitialStatProfile = new Dictionary<AttributeType, double>
             {
-                [AttributeType.Armor] = 1d
+                [AttributeType.Power] = 1d
             }
         };
         return EquipmentCraftingDesignComposer.Compose(recipe, null);

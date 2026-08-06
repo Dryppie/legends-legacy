@@ -1,5 +1,6 @@
 using Application.Interfaces.Services.LL.Entities;
 using Application.UseCases.Characters.Events;
+using Domain.Models.Attributes;
 using Domain.Models.Entities.Characters;
 using Domain.Models.Dungeons.Definitions.Rooms;
 using Domain.Models.Progression;
@@ -94,6 +95,27 @@ public sealed class CharacterExperienceProgressionTests
 
         Assert.Equal(3, character.Level);
         Assert.Equal(50, character.Experience);
+    }
+
+    [Fact]
+    public async Task Leveling_increases_power_and_visible_health()
+    {
+        var service = new LevelingService(new RecordingPublisher(), new FlatProgressionProvider());
+        var character = new Character
+        {
+            Level = 1,
+            Experience = 100,
+            BaseAttributes =
+            [
+                new EntityAttribute { AttributeType = AttributeType.Power, Value = 10 },
+                new EntityAttribute { AttributeType = AttributeType.MaxHealth, Value = 140 }
+            ]
+        };
+
+        await service.UpdateCharacterLevel(character, CancellationToken.None);
+
+        Assert.Equal(12, character.BaseAttributes.Single(x => x.AttributeType == AttributeType.Power).Value);
+        Assert.Equal(148, character.BaseAttributes.Single(x => x.AttributeType == AttributeType.MaxHealth).Value);
     }
 
     [Fact]

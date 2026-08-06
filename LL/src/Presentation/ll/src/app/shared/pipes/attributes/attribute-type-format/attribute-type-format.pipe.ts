@@ -22,11 +22,8 @@ export function formatAttributeTooltip(value: string): string {
       : definition.capKind === 'ContextDependent'
         ? ' Cap depends on combat context.'
         : '';
-  const source = definition.approvedPrimarySource
-    ? ` Also gained from ${formatAttributeType(definition.approvedPrimarySource)}.`
-    : '';
 
-  return `${definition.description}${cap}${source}`;
+  return `${definition.description}${cap}`;
 }
 
 @Pipe({

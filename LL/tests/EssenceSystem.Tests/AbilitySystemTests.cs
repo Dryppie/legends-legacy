@@ -169,23 +169,6 @@ public sealed class AbilitySystemTests
     }
 
     [Fact]
-    public void Engine_uses_fixed_basic_attack_cadence_regardless_of_precision()
-    {
-        var lowPrecision = CreateCombatant("low-precision", CombatTeam.Friendly, []);
-        var baseline = CreateCombatant("baseline", CombatTeam.Hostile, []);
-        lowPrecision.Attributes[AttributeType.Precision] = 5;
-        baseline.Attributes[AttributeType.Precision] = 20;
-        var engine = new FastCombatEngine(
-            new Dictionary<string, CompiledStatus>(),
-            new FastCombatEngineOptions(MaxTicks: 61, BasicAttackIntervalTicks: 30));
-
-        var result = engine.Run([lowPrecision], [baseline]);
-
-        Assert.Equal(2, CountBasicAttacks(result, lowPrecision.Id));
-        Assert.Equal(2, CountBasicAttacks(result, baseline.Id));
-    }
-
-    [Fact]
     public void Engine_attack_speed_increases_basic_attack_cadence()
     {
         var hasted = CreateCombatant("hasted", CombatTeam.Friendly, []);
@@ -434,47 +417,31 @@ public sealed class AbilitySystemTests
     }
 
     [Fact]
-    public void Engine_regenerates_health_every_five_seconds_regardless_of_spirit()
+    public void Engine_regenerates_health_every_five_seconds_from_the_direct_stat()
     {
-        var lowSpirit = CreateCombatant("low-spirit", CombatTeam.Friendly, []);
-        var highSpirit = CreateCombatant("high-spirit", CombatTeam.Friendly, []);
+        var friendly = CreateCombatant("friendly", CombatTeam.Friendly, []);
         var hostile = CreateCombatant("hostile", CombatTeam.Hostile, []);
-        lowSpirit.Attributes[AttributeType.HealthRegeneration] = 3;
-        lowSpirit.Attributes[AttributeType.Spirit] = 0;
-        highSpirit.Attributes[AttributeType.HealthRegeneration] = 3;
-        highSpirit.Attributes[AttributeType.Spirit] = 1_000;
-        lowSpirit.AdjustHealth(-20);
-        highSpirit.AdjustHealth(-20);
+        friendly.Attributes[AttributeType.HealthRegeneration] = 3;
+        friendly.AdjustHealth(-20);
         var engine = new FastCombatEngine(
             new Dictionary<string, CompiledStatus>(),
             new FastCombatEngineOptions(MaxTicks: 100, BasicAttackIntervalTicks: 1_000));
 
-        var result = engine.Run([lowSpirit, highSpirit], [hostile]);
+        var result = engine.Run([friendly], [hostile]);
 
-        Assert.Equal(186, lowSpirit.Health);
-        Assert.Equal(186, highSpirit.Health);
+        Assert.Equal(186, friendly.Health);
 
-        var lowSpiritRegeneration = result.EventLog
-            .Where(x => x.EventType == EventType.HealthRegeneration && x.TargetId == lowSpirit.Id)
-            .ToList();
-        var highSpiritRegeneration = result.EventLog
-            .Where(x => x.EventType == EventType.HealthRegeneration && x.TargetId == highSpirit.Id)
+        var regeneration = result.EventLog
+            .Where(x => x.EventType == EventType.HealthRegeneration && x.TargetId == friendly.Id)
             .ToList();
 
-        Assert.Equal([49, 99], lowSpiritRegeneration.Select(x => x.Timestamp));
-        Assert.Equal([49, 99], highSpiritRegeneration.Select(x => x.Timestamp));
-        Assert.All(lowSpiritRegeneration, x => Assert.Equal(3, x.Magnitude));
-        Assert.All(highSpiritRegeneration, x => Assert.Equal(3, x.Magnitude));
-        var lowSpiritStats = result.EntityStats.Single(x => x.EntityId == lowSpirit.Id);
-        var highSpiritStats = result.EntityStats.Single(x => x.EntityId == highSpirit.Id);
-        Assert.Equal(6, lowSpiritStats.HealthRegenerated);
-        Assert.Equal(6, lowSpiritStats.HealthRegenerationPotential);
-        Assert.Equal(0, lowSpiritStats.HealthRegenerationOverhealed);
-        Assert.Equal(2, lowSpiritStats.HealthRegenerationPulses);
-        Assert.Equal(6, highSpiritStats.HealthRegenerated);
-        Assert.Equal(6, highSpiritStats.HealthRegenerationPotential);
-        Assert.Equal(0, highSpiritStats.HealthRegenerationOverhealed);
-        Assert.Equal(2, highSpiritStats.HealthRegenerationPulses);
+        Assert.Equal([49, 99], regeneration.Select(x => x.Timestamp));
+        Assert.All(regeneration, x => Assert.Equal(3, x.Magnitude));
+        var stats = result.EntityStats.Single(x => x.EntityId == friendly.Id);
+        Assert.Equal(6, stats.HealthRegenerated);
+        Assert.Equal(6, stats.HealthRegenerationPotential);
+        Assert.Equal(0, stats.HealthRegenerationOverhealed);
+        Assert.Equal(2, stats.HealthRegenerationPulses);
     }
 
     [Fact]
@@ -1443,7 +1410,7 @@ public sealed class AbilitySystemTests
         var sniperStrike = catalog.AbilitiesById["ability.creature.goblin_archer.snipers_strike"];
 
         Assert.Equal(
-            "Deal 100% ranged Physical Damage with +50% Critical Chance.",
+            "Deal 135% ranged Physical Damage with +50% Critical Chance.",
             sniperStrike.Description);
         Assert.DoesNotContain(
             catalog.AbilitiesById.Values,
@@ -2796,6 +2763,8 @@ public sealed class AbilitySystemTests
         Assert.NotNull(summonLog.CombatEntity);
         Assert.Equal("Creature Shadow Image", summonLog.CombatEntity!.Name);
         Assert.Equal("shadow_image", summonLog.CombatEntity.ImagePath);
+        Assert.Equal(20, summonLog.CombatEntity.MaxHealth);
+        Assert.Equal(20, summonLog.CombatEntity.Health);
         Assert.True(provider.GetCatalog().SummonsById.ContainsKey("creatureShadowImage"));
         Assert.Contains(result.EventLog, x =>
             x.ActorId == summonId

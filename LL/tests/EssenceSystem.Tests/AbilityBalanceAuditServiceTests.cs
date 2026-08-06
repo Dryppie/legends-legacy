@@ -18,12 +18,13 @@ public sealed class AbilityBalanceAuditServiceTests
         Assert.Equal(10, screeningRequest.EquipmentTier);
         Assert.Equal("Epic", screeningRequest.EquipmentRarity);
         Assert.Equal("Balanced", screeningRequest.EquipmentProfile);
+        Assert.Equal(3, screeningRequest.TeamSize);
         Assert.Equal(1000, screeningRequest.CandidatePoolSize);
-        Assert.Equal(250000, screeningRequest.BattleCount);
+        Assert.Equal(25000, screeningRequest.BattleCount);
         Assert.Equal([1337, 2027, 9001], simulator.Requests.Take(3).Select(request => request.RandomSeed));
-        Assert.Equal(500, simulator.Requests[^1].BattleCount);
+        Assert.Equal(10, simulator.Requests[^1].BattleCount);
         Assert.Equal(100, simulator.Requests[^1].TopResults);
-        Assert.Equal(750500, report.TotalBattlesRun);
+        Assert.Equal(75010, report.TotalBattlesRun);
     }
 
     [Fact]

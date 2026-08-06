@@ -79,8 +79,16 @@ public class EquipmentInstance : ItemInstance
         float amount,
         Rarity rarity)
     {
-        var boosted = (int)Math.Ceiling(amount * GetRarityBoost(rarity));
         var definition = AttributeCatalog.Get(attribute);
+        if (definition.Unit == AttributeUnit.PercentagePoints
+            && definition.CapKind == AttributeCapKind.Fixed)
+        {
+            return Math.Min(
+                (int)Math.Ceiling(amount),
+                (int)Math.Floor(definition.MaximumValue!.Value));
+        }
+
+        var boosted = (int)Math.Ceiling(amount * GetRarityBoost(rarity));
         return definition.CapKind == AttributeCapKind.Fixed
                && definition.MaximumValue is { } maximum
             ? Math.Min(boosted, (int)Math.Floor(maximum))

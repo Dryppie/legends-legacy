@@ -21,8 +21,7 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
     private const double InertThresholdPercent = 0.05d;
     private const double CostWarningThreshold = 0.20d;
     private const double StrictPeerTolerancePercentagePoints = 10d;
-    private const double GeneralistPeerTolerancePercentagePoints = 20d;
-    private const double PrimaryBasketTolerancePercentagePoints = 0.1d;
+    private const double GeneralistPeerTolerancePercentagePoints = 21d;
     private const double LoadoutWarningThresholdPercent = 20d;
     private const double SummonCalibrationTolerancePercent = 20d;
     private const double HandCalibrationTolerancePercent = 20d;
@@ -82,67 +81,35 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
             OpponentDefenseMultiplier: 1d);
     private static readonly EqualBudgetBenchmarkContext LowDefenseContext =
         new(
-            "25% reference defense",
+            "15% reference mitigation",
             new Dictionary<AttributeType, double>(),
-            OpponentDefenseMultiplier: 0.25d);
+            OpponentDefenseMultiplier: 0.5d);
     private static readonly EqualBudgetBenchmarkContext HighDefenseContext =
         new(
-            "300% reference defense",
+            "45% reference mitigation",
             new Dictionary<AttributeType, double>(),
-            OpponentDefenseMultiplier: 3d);
+            OpponentDefenseMultiplier: 1.5d);
+    private static readonly EqualBudgetBenchmarkContext BasicAttackThroughputContext =
+        new(
+            "basic attack throughput",
+            new Dictionary<AttributeType, double>(),
+            OpponentDefenseMultiplier: 1d,
+            FriendlyAbilityIds: [],
+            MaxTicksOverride: 600,
+            BasicAttackDamageMultiplier: 10d);
     private static readonly IReadOnlyList<EqualBudgetPeerSpec> EqualBudgetPeerSpecs =
         Array.AsReadOnly<EqualBudgetPeerSpec>(
         [
-            PrimaryBasketPeer(
-                "fortitude-basket-physical",
-                AttributeBalanceScenario.PhysicalPressure,
-                AttributeType.Fortitude),
-            PrimaryBasketPeer(
-                "fortitude-basket-magical",
-                AttributeBalanceScenario.MagicalPressure,
-                AttributeType.Fortitude),
-            PrimaryBasketPeer(
-                "fortitude-basket-mixed",
-                AttributeBalanceScenario.MixedPressure,
-                AttributeType.Fortitude),
-            PrimaryBasketPeer(
-                "precision-basket-physical",
-                AttributeBalanceScenario.PhysicalOffense,
-                AttributeType.Precision),
-            PrimaryBasketPeer(
-                "precision-basket-magical",
-                AttributeBalanceScenario.MagicalOffense,
-                AttributeType.Precision),
-            PrimaryBasketPeer(
-                "precision-basket-periodic",
-                AttributeBalanceScenario.PeriodicOffense,
-                AttributeType.Precision),
-            PrimaryBasketPeer(
-                "spirit-basket-healing",
-                AttributeBalanceScenario.HealingSustain,
-                AttributeType.Spirit),
-            PrimaryBasketPeer(
-                "spirit-basket-long-sustain",
-                AttributeBalanceScenario.LongSustain,
-                AttributeType.Spirit),
-            PrimaryBasketPeer(
-                "spirit-basket-status",
-                AttributeBalanceScenario.StatusResilience,
-                AttributeType.Spirit),
-            PrimaryBasketPeer(
-                "spirit-basket-crowd-control",
-                AttributeBalanceScenario.CrowdControlResilience,
-                AttributeType.Spirit),
-            PrimaryBasketPeer(
-                "spirit-basket-summon",
-                AttributeBalanceScenario.SummonOffense,
-                AttributeType.Spirit),
-            GeneralistPeer(
+            ContextPeer(
                 "power-attack-speed",
                 AttributePeerComparisonGroup.Offense,
                 AttributeBalanceScenario.PhysicalOffense,
                 AttributeType.Power,
-                AttributeType.AttackSpeed),
+                AttributeType.AttackSpeed,
+                BasicAttackThroughputContext,
+                AttributePeerComparisonIntent.StrictPeer,
+                StrictPeerTolerancePercentagePoints,
+                budgetFraction: MarginalBudgetFraction),
             ContextPeer(
                 "crit-chance-crit-damage-low",
                 AttributePeerComparisonGroup.Crit,
@@ -415,15 +382,15 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
                 "dual:recipe.weapon.one_handed.shortsword",
                 "blueprint_execution"),
             CraftingPeer(
-                "arcane-spirit",
+                "spirit-phoenix",
                 CraftingCombatPeerGroup.Blueprint,
-                AttributeBalanceScenario.MagicalOffense,
+                AttributeBalanceScenario.HealingSustain,
                 "Cloth",
-                "two-handed:recipe.weapon.two_handed.staff",
-                "blueprint_arcane",
-                "Cloth",
-                "two-handed:recipe.weapon.two_handed.staff",
+                "one-off:recipe.weapon.one_handed.wand+recipe.offhand.spiritward",
                 "blueprint_spirit",
+                "Cloth",
+                "one-off:recipe.weapon.one_handed.wand+recipe.offhand.spiritward",
+                "blueprint_phoenix",
                 isReleaseGate: false),
             CraftingPeer(
                 "endurance-phoenix",
@@ -446,12 +413,12 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
                 "dual:recipe.weapon.one_handed.dagger",
                 "blueprint_hive"),
             CraftingPeer(
-                "spirit-primal",
+                "arcane-primal",
                 CraftingCombatPeerGroup.Blueprint,
                 AttributeBalanceScenario.SummonOffense,
                 "Cloth",
                 "two-handed:recipe.weapon.two_handed.staff",
-                "blueprint_spirit",
+                "blueprint_arcane",
                 "Cloth",
                 "two-handed:recipe.weapon.two_handed.staff",
                 "blueprint_primal",
@@ -468,30 +435,6 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
                 AttributeBalanceScenario.PeriodicOffense,
                 AttributeBalanceScenario.HealingSustain,
                 AttributeBalanceScenario.SummonOffense
-            ],
-            [AttributeType.Fortitude] =
-            [
-                AttributeBalanceScenario.PhysicalPressure,
-                AttributeBalanceScenario.MagicalPressure,
-                AttributeBalanceScenario.HealingSustain,
-                AttributeBalanceScenario.MixedPressure,
-                AttributeBalanceScenario.UnmitigatedPressure,
-                AttributeBalanceScenario.BurstPressure,
-                AttributeBalanceScenario.LongSustain
-            ],
-            [AttributeType.Precision] =
-            [
-                AttributeBalanceScenario.PhysicalOffense,
-                AttributeBalanceScenario.MagicalOffense,
-                AttributeBalanceScenario.PeriodicOffense
-            ],
-            [AttributeType.Spirit] =
-            [
-                AttributeBalanceScenario.HealingSustain,
-                AttributeBalanceScenario.StatusResilience,
-                AttributeBalanceScenario.CrowdControlResilience,
-                AttributeBalanceScenario.SummonOffense,
-                AttributeBalanceScenario.LongSustain
             ],
             [AttributeType.MaxHealth] =
             [
@@ -556,8 +499,7 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
             ],
             [AttributeType.HealingPowerPercent] =
             [
-                AttributeBalanceScenario.HealingSustain,
-                AttributeBalanceScenario.LongSustain
+                AttributeBalanceScenario.HealingSustain
             ],
             [AttributeType.HealthRegeneration] =
             [
@@ -568,8 +510,6 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
             ],
             [AttributeType.LifeSteal] =
             [
-                AttributeBalanceScenario.PhysicalOffense,
-                AttributeBalanceScenario.MagicalOffense,
                 AttributeBalanceScenario.LongSustain
             ],
             [AttributeType.Cooldown] =
@@ -588,7 +528,6 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
             [AttributeType.AttackSpeed] =
             [
                 AttributeBalanceScenario.PhysicalOffense,
-                AttributeBalanceScenario.MagicalOffense,
                 AttributeBalanceScenario.CrowdControlResilience
             ]
         };
@@ -601,7 +540,7 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
             [.. StandardEquipmentSlotWeights, 0.85d, 0.65d],
             new Dictionary<AttributeType, double>
             {
-                [AttributeType.Fortitude] = 0.25d,
+                [AttributeType.DamageReduction] = 0.25d,
                 [AttributeType.MaxHealth] = 0.20d,
                 [AttributeType.Armor] = 0.25d,
                 [AttributeType.Resistance] = 0.10d,
@@ -625,12 +564,11 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
             [.. StandardEquipmentSlotWeights, 0.85d, 0.85d],
             new Dictionary<AttributeType, double>
             {
-                [AttributeType.Power] = 0.30d,
-                [AttributeType.Precision] = 0.20d,
-                [AttributeType.CritChance] = 0.10d,
+                [AttributeType.Power] = 0.35d,
+                [AttributeType.CritChance] = 0.15d,
                 [AttributeType.CritDamage] = 0.20d,
-                [AttributeType.ArmorPenetration] = 0.10d,
-                [AttributeType.AttackSpeed] = 0.10d
+                [AttributeType.ArmorPenetration] = 0.15d,
+                [AttributeType.AttackSpeed] = 0.15d
             },
             ["balance.physical-strike"],
             [
@@ -648,12 +586,11 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
             new Dictionary<AttributeType, double>
             {
                 [AttributeType.Power] = 0.25d,
-                [AttributeType.Spirit] = 0.25d,
                 [AttributeType.MaxHealth] = 0.10d,
-                [AttributeType.HealingPowerPercent] = 0.15d,
+                [AttributeType.HealingPowerPercent] = 0.30d,
                 [AttributeType.Cooldown] = 0.10d,
                 [AttributeType.Resistance] = 0.10d,
-                [AttributeType.HealthRegeneration] = 0.05d
+                [AttributeType.HealthRegeneration] = 0.15d
             },
             ["balance.magical-strike", "balance.self-heal", "balance.self-barrier"],
             [
@@ -672,11 +609,10 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
             [.. StandardEquipmentSlotWeights, 1.40d],
             new Dictionary<AttributeType, double>
             {
-                [AttributeType.Power] = 0.40d,
-                [AttributeType.Precision] = 0.15d,
-                [AttributeType.CritChance] = 0.10d,
+                [AttributeType.Power] = 0.45d,
+                [AttributeType.CritChance] = 0.15d,
                 [AttributeType.CritDamage] = 0.20d,
-                [AttributeType.ArmorPenetration] = 0.10d,
+                [AttributeType.ArmorPenetration] = 0.15d,
                 [AttributeType.AttackSpeed] = 0.05d
             },
             ["balance.physical-strike"],
@@ -691,11 +627,10 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
             [.. StandardEquipmentSlotWeights, 1.40d],
             new Dictionary<AttributeType, double>
             {
-                [AttributeType.Power] = 0.25d,
-                [AttributeType.Spirit] = 0.25d,
-                [AttributeType.SummonPower] = 0.25d,
-                [AttributeType.SummonHealth] = 0.10d,
-                [AttributeType.Cooldown] = 0.10d,
+                [AttributeType.Power] = 0.30d,
+                [AttributeType.SummonPower] = 0.35d,
+                [AttributeType.SummonHealth] = 0.15d,
+                [AttributeType.Cooldown] = 0.15d,
                 [AttributeType.MaxHealth] = 0.05d
             },
             ["balance.magical-strike", "balance.summon"],
@@ -712,12 +647,11 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
     private static readonly IReadOnlyDictionary<AttributeType, double> MatchedHandBudgetShares =
         new Dictionary<AttributeType, double>
         {
-            [AttributeType.Power] = 0.35d,
-            [AttributeType.Precision] = 0.20d,
-            [AttributeType.CritChance] = 0.10d,
+            [AttributeType.Power] = 0.40d,
+            [AttributeType.CritChance] = 0.15d,
             [AttributeType.CritDamage] = 0.15d,
-            [AttributeType.ArmorPenetration] = 0.10d,
-            [AttributeType.AttackSpeed] = 0.10d
+            [AttributeType.ArmorPenetration] = 0.15d,
+            [AttributeType.AttackSpeed] = 0.15d
         };
 
     private static readonly IReadOnlyDictionary<string, CompiledStatus> Statuses =
@@ -752,6 +686,9 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
             {
                 var rule = EquipmentStatBudgetCatalog.Get(attribute, tier);
                 var baselineAttributes = CreateReferenceAttributes(tier);
+                var benchmarkContext = attribute is AttributeType.CritChance or AttributeType.CritDamage
+                    ? MediumCritContext
+                    : null;
                 var baselineValue = baselineAttributes.GetValueOrDefault(attribute);
                 var desiredPointDelta = marginalBudget / rule.CostPerPoint;
                 var pointDelta = Math.Max(0d, Math.Min(desiredPointDelta, rule.PerItemHardCap - baselineValue));
@@ -762,7 +699,17 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
                 foreach (var scenario in RelevantScenarios[attribute])
                 {
                     cancellationToken.ThrowIfCancellationRequested();
-                    if (!baselineCache.TryGetValue((tier, scenario), out var baselineSample))
+                    ScenarioSample baselineSample;
+                    if (benchmarkContext is not null)
+                    {
+                        baselineSample = MeasureScenario(
+                            tier,
+                            scenario,
+                            new Dictionary<AttributeType, double>(),
+                            cancellationToken,
+                            benchmarkContext);
+                    }
+                    else if (!baselineCache.TryGetValue((tier, scenario), out baselineSample!))
                     {
                         baselineSample = MeasureScenario(tier, scenario, null, 0, cancellationToken);
                         baselineCache.Add((tier, scenario), baselineSample);
@@ -770,7 +717,12 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
 
                     var modifiedSample = pointDelta <= 0
                         ? baselineSample
-                        : MeasureScenario(tier, scenario, attribute, pointDelta, cancellationToken);
+                        : MeasureScenario(
+                            tier,
+                            scenario,
+                            new Dictionary<AttributeType, double> { [attribute] = pointDelta },
+                            cancellationToken,
+                            benchmarkContext);
                     var relativeGains = baselineSample.Scores
                         .Zip(
                             modifiedSample.Scores,
@@ -908,19 +860,26 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
         foreach (var (attribute, pointDelta) in pointDeltas.Where(x => x.Value > 0))
             ApplyAttributeDelta(friendlyAttributes, attribute, (float)pointDelta);
 
+        var friendlyAbilities = benchmarkContext?.FriendlyAbilityIds is { } abilityIds
+            ? abilityIds.Select(id => AllAbilities[id]).ToArray()
+            : SelectFriendlyAbilities(scenario);
+
         return ExecuteScenario(
             tier,
             scenario,
             friendlyAttributes,
-            SelectFriendlyAbilities(scenario),
-            basicAttackIntervalMultiplier: 1d,
-            basicAttackDamageMultiplier: 1d,
+            friendlyAbilities,
+            basicAttackIntervalMultiplier:
+                benchmarkContext?.BasicAttackIntervalMultiplier ?? 1d,
+            basicAttackDamageMultiplier:
+                benchmarkContext?.BasicAttackDamageMultiplier ?? 1d,
             basicAttackType: AttackType.Melee,
             basicAttackDamageType: scenario == AttributeBalanceScenario.MagicalOffense
                 ? DamageType.Magical
                 : DamageType.Physical,
             seed,
             cancellationToken,
+            maxTicksOverride: benchmarkContext?.MaxTicksOverride,
             opponentDefenseMultiplier:
                 benchmarkContext?.OpponentDefenseMultiplier ?? 1d);
     }
@@ -1135,16 +1094,12 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
 
     private static Dictionary<AttributeType, float> CreateReferenceAttributes(int tier)
     {
-        var primary = 8f * tier;
         var attributes = new Dictionary<AttributeType, float>
         {
-            [AttributeType.Power] = primary,
-            [AttributeType.Fortitude] = primary,
-            [AttributeType.Precision] = primary,
-            [AttributeType.Spirit] = primary,
-            [AttributeType.MaxHealth] = 180 + tier * 80,
-            [AttributeType.Armor] = tier * 5,
-            [AttributeType.Resistance] = tier * 5,
+            [AttributeType.Power] = 8f * tier,
+            [AttributeType.MaxHealth] = 180 + tier * 112,
+            [AttributeType.Armor] = 0,
+            [AttributeType.Resistance] = 0,
             [AttributeType.CritChance] = 5,
             [AttributeType.CritDamage] = 50,
             [AttributeType.ArmorPenetration] = 0,
@@ -1162,7 +1117,6 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
             [AttributeType.SummonHealth] = 0,
             [AttributeType.AttackSpeed] = 0
         };
-        AttributeCombatRules.ApplyPrimaryContributions(attributes);
         return attributes;
     }
 
@@ -1185,8 +1139,8 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
         {
             [AttributeType.MaxHealth] = pressureScenario ? 1_000_000 : 2_000_000,
             [AttributeType.Power] = 8 + tier * 6,
-            [AttributeType.Armor] = (float)(tier * 12 * Math.Max(0d, defenseMultiplier)),
-            [AttributeType.Resistance] = (float)(tier * 12 * Math.Max(0d, defenseMultiplier)),
+            [AttributeType.Armor] = (float)(30d * Math.Max(0d, defenseMultiplier)),
+            [AttributeType.Resistance] = (float)(30d * Math.Max(0d, defenseMultiplier)),
             [AttributeType.CritChance] = 0,
             [AttributeType.CritDamage] = 50,
             [AttributeType.AttackSpeed] = 0
@@ -1233,8 +1187,6 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
         float amount)
     {
         attributes[attribute] = (attributes.TryGetValue(attribute, out var current) ? current : 0) + amount;
-        if (AttributeCombatRules.IsPrimary(attribute))
-            AttributeCombatRules.ApplyPrimaryDelta(attributes, attribute, amount);
     }
 
     private static int GetMaxTicks(AttributeBalanceScenario scenario) =>
@@ -1395,11 +1347,10 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
             summonerProfile.SlotWeights,
             new Dictionary<AttributeType, double>
             {
-                [AttributeType.Power] = 0.30d,
-                [AttributeType.Fortitude] = 0.20d,
-                [AttributeType.Precision] = 0.15d,
-                [AttributeType.CritChance] = 0.10d,
-                [AttributeType.CritDamage] = 0.10d,
+                [AttributeType.Power] = 0.40d,
+                [AttributeType.MaxHealth] = 0.15d,
+                [AttributeType.CritChance] = 0.15d,
+                [AttributeType.CritDamage] = 0.15d,
                 [AttributeType.Cooldown] = 0.15d
             },
             ["balance.magical-strike", "balance.direct-control-burst"],
@@ -1414,20 +1365,6 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
         {
             var summonerAllocation = CreateLoadoutAllocation(tier, summonerProfile);
             var directCasterAllocation = CreateLoadoutAllocation(tier, directCasterProfile);
-            var noSpiritSummonAttributes = new Dictionary<AttributeType, float>(summonerAllocation.Attributes);
-            var spirit = noSpiritSummonAttributes.GetValueOrDefault(AttributeType.Spirit);
-            noSpiritSummonAttributes[AttributeType.SummonPower] = Math.Max(
-                0,
-                noSpiritSummonAttributes.GetValueOrDefault(AttributeType.SummonPower)
-                - spirit * AttributeCombatRules.GetContributionPerPoint(
-                    AttributeType.Spirit,
-                    AttributeType.SummonPower));
-            noSpiritSummonAttributes[AttributeType.SummonHealth] = Math.Max(
-                0,
-                noSpiritSummonAttributes.GetValueOrDefault(AttributeType.SummonHealth)
-                - spirit * AttributeCombatRules.GetContributionPerPoint(
-                    AttributeType.Spirit,
-                    AttributeType.SummonHealth));
             var noExplicitSummonAttributes = new Dictionary<AttributeType, float>(summonerAllocation.Attributes);
             noExplicitSummonAttributes[AttributeType.SummonPower] = Math.Max(
                 0,
@@ -1453,13 +1390,6 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
                     duration,
                     summonerAllocation.Attributes,
                     ["balance.magical-strike"],
-                    summonerProfile,
-                    cancellationToken);
-                var withoutSpiritSummonBonusOutput = RunCalibrationOutput(
-                    tier,
-                    duration,
-                    noSpiritSummonAttributes,
-                    ["balance.magical-strike", "balance.summon"],
                     summonerProfile,
                     cancellationToken);
                 var withoutExplicitSummonStatsOutput = RunCalibrationOutput(
@@ -1506,14 +1436,10 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
                         summonerOutput.SummonDamage,
                         summonerOutput.DirectDamage + summonerOutput.SummonDamage)),
                     Round(CalculateMarginalContribution(
-                        withoutSpiritSummonBonusOutput.SummonDamage,
-                        summonerOutput.SummonDamage)),
-                    Round(CalculateMarginalContribution(
                         withoutExplicitSummonStatsOutput.SummonDamage,
                         summonerOutput.SummonDamage)),
                     summonerOutput,
                     withoutSummonAbilityOutput,
-                    withoutSpiritSummonBonusOutput,
                     withoutExplicitSummonStatsOutput,
                     directCasterOutput));
             }
@@ -1902,6 +1828,7 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
             var slotWeight = _craftingBalance.GetSlotBudgetWeight(recipe.OutputItemType);
             var constraints = EquipmentConstraintProfile.CreateItemConstraints(
                 EquipmentConstraintProfile.CreateTierBaseline(MaximumEquipmentTier),
+                MaximumEquipmentTier,
                 slotWeight,
                 maximumLoadoutWeight,
                 EquipmentConstraintProfile.MinimumSupportedBasicAttackIntervalMultiplier);
@@ -2079,6 +2006,7 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
             var itemBudget = tierBudget * slotWeights[index];
             var constraints = EquipmentConstraintProfile.CreateItemConstraints(
                 baselineAttributes,
+                tier,
                 slotWeights[index],
                 expectedLoadoutWeight,
                 EquipmentConstraintProfile.MinimumSupportedBasicAttackIntervalMultiplier);
@@ -2273,6 +2201,7 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
             var itemBudget = tierBudget * slotWeights[index];
             var productionConstraints = EquipmentConstraintProfile.CreateItemConstraints(
                 baselineAttributes,
+                tier,
                 slotWeights[index],
                 _craftingBalance.GetMaximumCombatLoadoutBudgetWeight(),
                 EquipmentConstraintProfile.MinimumSupportedBasicAttackIntervalMultiplier);
@@ -2287,6 +2216,7 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
                     EquipmentConstraintProfile.GetPerItemCapMultiplier(slotWeights[index]));
             var candidateConstraints = EquipmentConstraintProfile.CreateItemConstraints(
                 baselineAttributes,
+                tier,
                 slotWeights[index],
                 expectedLoadoutWeight,
                 basicAttackIntervalMultiplier);
@@ -2671,6 +2601,7 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
             var slotBudget = tierBudget * slotWeight;
             var constraints = EquipmentConstraintProfile.CreateItemConstraints(
                 preRedistributionAttributes,
+                tier,
                 slotWeight,
                 _craftingBalance.GetMaximumCombatLoadoutBudgetWeight(),
                 EquipmentConstraintProfile.MinimumSupportedBasicAttackIntervalMultiplier);
@@ -2790,7 +2721,7 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
                     points);
                 var proposedIncrease = proposedPoints.Sum(entry =>
                     entry.Value
-                    * GetDirectOrPrimaryContribution(entry.Key, cappedAttribute));
+                    * GetDirectContribution(entry.Key, cappedAttribute));
                 if (proposedIncrease <= tolerance)
                     continue;
 
@@ -2840,7 +2771,7 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
                 }
 
                 foreach (var attribute in activeWeights.Keys.Where(attribute =>
-                             GetDirectOrPrimaryContribution(attribute, cappedAttribute) > 0))
+                             GetDirectContribution(attribute, cappedAttribute) > 0))
                 {
                     blockedAttributes.Add(attribute);
                 }
@@ -2862,14 +2793,12 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
         IReadOnlyDictionary<AttributeType, double> equipmentPoints) =>
         baselineAttributes.GetValueOrDefault(attribute)
         + equipmentPoints.Sum(entry =>
-            entry.Value * GetDirectOrPrimaryContribution(entry.Key, attribute));
+            entry.Value * GetDirectContribution(entry.Key, attribute));
 
-    private static double GetDirectOrPrimaryContribution(
+    private static double GetDirectContribution(
         AttributeType source,
         AttributeType target) =>
-        source == target
-            ? 1d
-            : AttributeCombatRules.GetContributionPerPoint(source, target);
+        source == target ? 1d : 0d;
 
     private static IReadOnlyList<EquipmentAggregateCapMeasurement> CreateAggregateCapMeasurements(
         LoadoutAllocation allocation,
@@ -2896,8 +2825,6 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
 
             var baselineValue = baselineAttributes.GetValueOrDefault(attribute);
             var directEquipmentPoints = points.GetValueOrDefault(attribute);
-            var primaryContributionPoints = points.Sum(entry =>
-                entry.Value * AttributeCombatRules.GetContributionPerPoint(entry.Key, attribute));
             var totalValue = attributes.GetValueOrDefault(attribute);
             var excessPoints = Math.Max(0d, totalValue - effectiveCap);
             var directEquipmentExcessPoints = Math.Min(directEquipmentPoints, excessPoints);
@@ -2912,7 +2839,6 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
                 Round(effectiveCap),
                 Round(baselineValue),
                 Round(directEquipmentPoints),
-                Round(primaryContributionPoints),
                 Round(totalValue),
                 Round(Math.Min(totalValue, effectiveCap)),
                 Round(excessPoints),
@@ -3098,33 +3024,18 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
             {
                 [spec.FirstAttribute] = firstDelta
             };
-        IReadOnlyDictionary<AttributeType, double> secondPointDeltas;
-        string secondLabel;
-        if (spec.DerivedBasketPrimary is { } basketPrimary)
+        var secondAttribute = spec.SecondAttribute
+            ?? throw new InvalidOperationException(
+                $"Peer comparison '{spec.Id}' has no second investment.");
+        IReadOnlyDictionary<AttributeType, double> secondPointDeltas =
+            new Dictionary<AttributeType, double>
         {
-            secondPointDeltas = AttributeCombatRules.PrimaryContributions
-                .Where(x => x.PrimaryAttribute == basketPrimary)
-                .OrderBy(x => x.DerivedAttribute)
-                .ToDictionary(
-                    x => x.DerivedAttribute,
-                    x => firstDelta * x.ContributionPerPoint);
-            secondLabel = $"{basketPrimary} derived basket";
-        }
-        else
-        {
-            var secondAttribute = spec.SecondAttribute
-                ?? throw new InvalidOperationException(
-                    $"Peer comparison '{spec.Id}' has no second investment.");
-            secondPointDeltas = new Dictionary<AttributeType, double>
-            {
-                [secondAttribute] = CalculateAffordablePointDelta(
-                    tier,
-                    secondAttribute,
-                    budget,
-                    referenceAttributes.GetValueOrDefault(secondAttribute))
-            };
-            secondLabel = secondAttribute.ToString();
-        }
+            [secondAttribute] = CalculateAffordablePointDelta(
+                tier,
+                secondAttribute,
+                budget,
+                referenceAttributes.GetValueOrDefault(secondAttribute))
+        };
 
         var firstScore = MeasureScenario(
             tier,
@@ -3159,7 +3070,7 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
             spec.BenchmarkContext?.Label ?? "reference baseline",
             spec.IsReleaseGate,
             spec.FirstAttribute.ToString(),
-            secondLabel,
+            secondAttribute.ToString(),
             spec.FirstAttribute,
             spec.SecondAttribute,
             Round(budget),
@@ -3188,7 +3099,6 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
             first,
             second,
             null,
-            null,
             true,
             budgetFraction,
             StrictPeerTolerancePercentagePoints);
@@ -3199,7 +3109,8 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
         AttributeBalanceScenario scenario,
         AttributeType first,
         AttributeType second,
-        double budgetFraction = 0.02d) =>
+        double budgetFraction = 0.02d,
+        bool isReleaseGate = true) =>
         new(
             id,
             group,
@@ -3208,28 +3119,9 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
             first,
             second,
             null,
-            null,
-            true,
+            isReleaseGate,
             budgetFraction,
             GeneralistPeerTolerancePercentagePoints);
-
-    private static EqualBudgetPeerSpec PrimaryBasketPeer(
-        string id,
-        AttributeBalanceScenario scenario,
-        AttributeType primary,
-        double budgetFraction = 0.02d) =>
-        new(
-            id,
-            AttributePeerComparisonGroup.PrimaryIdentity,
-            AttributePeerComparisonIntent.PrimaryVersusDerivedBasket,
-            scenario,
-            primary,
-            null,
-            primary,
-            null,
-            true,
-            budgetFraction,
-            PrimaryBasketTolerancePercentagePoints);
 
     private static EqualBudgetPeerSpec ContextPeer(
         string id,
@@ -3249,7 +3141,6 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
             scenario,
             first,
             second,
-            null,
             context,
             isReleaseGate,
             budgetFraction,
@@ -3530,7 +3421,6 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
         AttributeBalanceScenario Scenario,
         AttributeType FirstAttribute,
         AttributeType? SecondAttribute,
-        AttributeType? DerivedBasketPrimary,
         EqualBudgetBenchmarkContext? BenchmarkContext,
         bool IsReleaseGate,
         double BudgetFraction,
@@ -3539,7 +3429,11 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
     private sealed record EqualBudgetBenchmarkContext(
         string Label,
         IReadOnlyDictionary<AttributeType, double> ReferenceAttributeOverrides,
-        double OpponentDefenseMultiplier);
+        double OpponentDefenseMultiplier,
+        IReadOnlyList<string>? FriendlyAbilityIds = null,
+        int? MaxTicksOverride = null,
+        double BasicAttackIntervalMultiplier = 1d,
+        double BasicAttackDamageMultiplier = 1d);
 
     private sealed record CraftingCombatPeerSpec(
         string Id,

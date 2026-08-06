@@ -28,7 +28,6 @@ public sealed class AttributeCombatSystemTests
             Assert.True(definition.MinimumValue >= 0);
             Assert.InRange(definition.DisplayPrecision, 0, 4);
             Assert.True(definition.IsEquipmentEligible);
-            Assert.True(definition.IsContentFacing);
             Assert.NotEmpty(definition.RelevantBenchmarkScenarios);
             Assert.Equal(
                 definition.Unit == AttributeUnit.PercentagePoints,
@@ -59,6 +58,10 @@ public sealed class AttributeCombatSystemTests
             [AttributeType.DodgeChance] = AttributeCombatRules.DodgeChanceCapPercent,
             [AttributeType.BlockChance] = AttributeCombatRules.BlockChanceCapPercent,
             [AttributeType.DamageReduction] = AttributeCombatRules.DamageReductionCapPercent,
+            [AttributeType.Armor] = AttributeCombatRules.TypedMitigationCapPercent,
+            [AttributeType.Resistance] = AttributeCombatRules.TypedMitigationCapPercent,
+            [AttributeType.ArmorPenetration] = AttributeCombatRules.TypedPenetrationCapPercent,
+            [AttributeType.MagicPenetration] = AttributeCombatRules.TypedPenetrationCapPercent,
             [AttributeType.Cooldown] = AttributeCombatRules.CooldownReductionCapPercent
         };
 
@@ -72,6 +75,13 @@ public sealed class AttributeCombatSystemTests
 
         Assert.Equal(100f, AttributeCombatRules.CritChanceCapPercent);
         Assert.Equal(AttributeCapKind.None, AttributeCatalog.Get(AttributeType.LifeSteal).CapKind);
+        Assert.Equal(
+            AttributeCapKind.None,
+            AttributeCatalog.Get(AttributeType.HealingPowerPercent).CapKind);
+        Assert.False(AttributeCatalog.TryGetEffectiveCharacterCap(
+            AttributeType.HealingPowerPercent,
+            1,
+            out _));
         Assert.False(AttributeCatalog.TryGetEffectiveCharacterCap(
             AttributeType.LifeSteal,
             1,
@@ -89,77 +99,6 @@ public sealed class AttributeCombatSystemTests
             1.25,
             out var slowWeaponCap));
         Assert.True(slowWeaponCap > fastWeaponCap);
-
-        foreach (var contribution in AttributeCombatRules.PrimaryContributions)
-        {
-            Assert.Equal(
-                contribution.PrimaryAttribute,
-                AttributeCatalog.Get(contribution.DerivedAttribute).ApprovedPrimarySource);
-        }
-
-        Assert.DoesNotContain(
-            AttributeCombatRules.PrimaryContributions,
-            contribution => AttributeCombatRules.IsPrimary(contribution.DerivedAttribute));
-    }
-
-    [Fact]
-    public void Primary_attributes_project_only_into_their_approved_groups()
-    {
-        var projected = AttributeCalculator.CalculateProjectedAttributes(
-            new Dictionary<AttributeType, float>
-            {
-                [AttributeType.Power] = 10,
-                [AttributeType.Fortitude] = 10,
-                [AttributeType.Precision] = 10,
-                [AttributeType.Spirit] = 10,
-                [AttributeType.MaxHealth] = 100
-            },
-            Array.Empty<AttributeModifierBase>());
-
-        Assert.Equal(10, projected[AttributeType.Power]);
-        Assert.Equal(140, projected[AttributeType.MaxHealth]);
-        Assert.Equal(5, projected[AttributeType.Armor], 3);
-        Assert.Equal(5, projected[AttributeType.Resistance], 3);
-        Assert.Equal(1, projected[AttributeType.CritChance], 3);
-        Assert.Equal(1, projected[AttributeType.ArmorPenetration], 3);
-        Assert.Equal(1, projected[AttributeType.MagicPenetration], 3);
-        Assert.Equal(0.5f, projected[AttributeType.AttackSpeed], 3);
-        Assert.Equal(1.5f, projected[AttributeType.HealingPowerPercent], 3);
-        Assert.Equal(0.5f, projected[AttributeType.HealthRegeneration], 3);
-        Assert.Equal(1, projected[AttributeType.StatusResistance], 3);
-        Assert.Equal(1, projected[AttributeType.CrowdControlResistance], 3);
-        Assert.Equal(0.5f, projected[AttributeType.SummonPower], 3);
-        Assert.Equal(1, projected[AttributeType.SummonHealth], 3);
-        Assert.Equal(0, projected.GetValueOrDefault(AttributeType.Cooldown));
-        Assert.Equal(0, projected.GetValueOrDefault(AttributeType.DamageReduction));
-    }
-
-    [Fact]
-    public void Runtime_primary_changes_update_only_their_dependency_group()
-    {
-        var attributes = AttributeCalculator.CalculateProjectedAttributes(
-            new Dictionary<AttributeType, float>
-            {
-                [AttributeType.Power] = 10,
-                [AttributeType.Fortitude] = 10,
-                [AttributeType.Precision] = 10,
-                [AttributeType.Spirit] = 10,
-                [AttributeType.MaxHealth] = 100
-            },
-            Array.Empty<AttributeModifierBase>());
-        var combatant = CreateCombatant("primary", CombatTeam.Friendly, [], attributes);
-
-        combatant.AdjustAttribute(AttributeType.Fortitude, 10);
-        combatant.AdjustAttribute(AttributeType.Spirit, 10);
-
-        Assert.Equal(180, combatant.GetAttribute(AttributeType.MaxHealth));
-        Assert.Equal(180, combatant.Health);
-        Assert.Equal(10, combatant.GetAttribute(AttributeType.Armor), 3);
-        Assert.Equal(10, combatant.GetAttribute(AttributeType.Resistance), 3);
-        Assert.Equal(3, combatant.GetAttribute(AttributeType.HealingPowerPercent), 3);
-        Assert.Equal(1, combatant.GetAttribute(AttributeType.HealthRegeneration), 3);
-        Assert.Equal(10, combatant.GetAttribute(AttributeType.Power));
-        Assert.Equal(0, combatant.GetAttribute(AttributeType.Cooldown));
     }
 
     [Fact]
@@ -173,7 +112,7 @@ public sealed class AttributeCombatSystemTests
                 Operation = AbilityEffectOperation.Heal,
                 Target = AbilityTargetSelector.Self,
                 BaseValue = 10,
-                ScalingAttribute = AttributeType.Spirit,
+                ScalingAttribute = AttributeType.Power,
                 ScalingCoefficient = 1
             });
 
@@ -296,7 +235,7 @@ public sealed class AttributeCombatSystemTests
     }
 
     [Fact]
-    public void Armor_and_penetration_use_the_same_typed_defense_scale()
+    public void Armor_and_penetration_use_readable_percentage_points()
     {
         var ability = CreateDamageAbility(100, DamageType.Physical);
         var compiled = AbilityCompiler.CompileAbilities([ability]).Values;
@@ -307,7 +246,7 @@ public sealed class AttributeCombatSystemTests
             new Dictionary<AttributeType, float>
             {
                 [AttributeType.MaxHealth] = 1_000,
-                [AttributeType.Armor] = 100
+                [AttributeType.Armor] = 50
             });
         var source = CreateCombatant("source", CombatTeam.Friendly, compiled);
 
@@ -322,7 +261,7 @@ public sealed class AttributeCombatSystemTests
             new Dictionary<AttributeType, float>
             {
                 [AttributeType.MaxHealth] = 1_000,
-                [AttributeType.Armor] = 100
+                [AttributeType.Armor] = 50
             });
         var penetratingSource = CreateCombatant(
             "penetrating-source",
@@ -331,12 +270,16 @@ public sealed class AttributeCombatSystemTests
             new Dictionary<AttributeType, float>
             {
                 [AttributeType.MaxHealth] = 200,
-                [AttributeType.ArmorPenetration] = 100
+                [AttributeType.ArmorPenetration] = 25
             });
 
         RunSingleTick(penetratingSource, penetratedTarget);
 
-        Assert.Equal(900, penetratedTarget.Health);
+        Assert.Equal(925, penetratedTarget.Health);
+
+        Assert.Equal(
+            0.8f,
+            AttributeCombatRules.CalculateDefenseMitigation(defense: 100, penetration: 0));
     }
 
     [Fact]
@@ -353,7 +296,7 @@ public sealed class AttributeCombatSystemTests
             new Dictionary<AttributeType, float>
             {
                 [AttributeType.MaxHealth] = 1_000,
-                [AttributeType.Armor] = 100,
+                [AttributeType.Armor] = 50,
                 [AttributeType.DamageReduction] = 20
             });
         target.AdjustBarrier(10);
@@ -544,10 +487,10 @@ public sealed class AttributeCombatSystemTests
         var total = EquipmentBudgetEvaluator.Evaluate(modifiers, tier: 1);
         var breakdown = EquipmentBudgetEvaluator.EvaluateByAttribute(modifiers, tier: 1);
 
-        Assert.Equal(7.2d, total);
-        Assert.Equal(2.5d, breakdown[AttributeType.Power]);
+        Assert.Equal(53.4d, total);
+        Assert.Equal(48d, breakdown[AttributeType.Power]);
         Assert.Equal(2d, breakdown[AttributeType.MaxHealth]);
-        Assert.Equal(2.7d, breakdown[AttributeType.Armor]);
+        Assert.Equal(3.4d, breakdown[AttributeType.Armor]);
     }
 
     [Theory]
@@ -560,7 +503,7 @@ public sealed class AttributeCombatSystemTests
     {
         var primary = 8f * tier;
         var baselineHealth = 180 + tier * 80 + primary * 4;
-        var baselineArmor = tier * 5 + primary * 0.5f;
+        var baselineArmor = 0f;
         var healthPoints =
             (float)(budget / EquipmentStatBudgetCatalog.Get(AttributeType.MaxHealth, tier).CostPerPoint);
         var armorPoints =

@@ -95,17 +95,17 @@
     "compatibleRecipeIds": [],
     "bonusStatBudgetMultiplier": 0.2,
     "bonusStatProfile": {
-      "Spirit": 0.35,
+      "Power": 0.35,
       "MagicPenetration": 0.25,
       "Cooldown": 0.2,
-      "Precision": 0.2
+      "CritChance": 0.2
     },
     "temperingProfile": {
       "id": "blueprint_arcane.tempering",
       "name": "Arcane Tempering",
       "stats": [
         {
-          "stat": "Spirit",
+          "stat": "Power",
           "weight": 35,
           "category": "Primary",
           "canIntroduce": true,
@@ -132,7 +132,7 @@
           "minimumTier": 1
         },
         {
-          "stat": "Precision",
+          "stat": "CritChance",
           "weight": 20,
           "category": "Secondary",
           "canIntroduce": true,
@@ -242,7 +242,7 @@
     "tags": [
       "Execution",
       "Crit",
-      "Precision",
+      "CritChance",
       "Damage"
     ],
     "enabled": true
@@ -356,7 +356,7 @@
     "bonusStatProfile": {
       "MaxHealth": 0.35,
       "CrowdControlResistance": 0.25,
-      "Fortitude": 0.2,
+      "Armor": 0.2,
       "HealthRegeneration": 0.2
     },
     "temperingProfile": {
@@ -382,7 +382,7 @@
           "minimumTier": 1
         },
         {
-          "stat": "Fortitude",
+          "stat": "Armor",
           "weight": 20,
           "category": "Secondary",
           "canIntroduce": true,
@@ -445,8 +445,8 @@
     "bonusStatProfile": {
       "HealthRegeneration": 0.35,
       "MaxHealth": 0.3,
-      "Fortitude": 0.2,
-      "Spirit": 0.15
+      "Armor": 0.2,
+      "StatusResistance": 0.15
     },
     "temperingProfile": {
       "id": "blueprint_endurance.tempering",
@@ -471,7 +471,7 @@
           "minimumTier": 1
         },
         {
-          "stat": "Fortitude",
+          "stat": "Armor",
           "weight": 20,
           "category": "Secondary",
           "canIntroduce": true,
@@ -480,7 +480,7 @@
           "minimumTier": 1
         },
         {
-          "stat": "Spirit",
+          "stat": "StatusResistance",
           "weight": 15,
           "category": "Secondary",
           "canIntroduce": true,
@@ -623,7 +623,7 @@
     "compatibleRecipeIds": [],
     "bonusStatBudgetMultiplier": 0.2,
     "bonusStatProfile": {
-      "Spirit": 0.35,
+      "HealingPowerPercent": 0.35,
       "Resistance": 0.25,
       "Cooldown": 0.2,
       "HealthRegeneration": 0.2
@@ -633,7 +633,7 @@
       "name": "Spirit Tempering",
       "stats": [
         {
-          "stat": "Spirit",
+          "stat": "HealingPowerPercent",
           "weight": 35,
           "category": "Primary",
           "canIntroduce": true,
@@ -689,7 +689,7 @@
     "sourceType": "Dungeon",
     "sourceId": "forgotten_catacombs",
     "tags": [
-      "Spirit",
+      "HealingPowerPercent",
       "Support",
       "Mana",
       "MagicDefense"
@@ -715,7 +715,7 @@
     "bonusStatProfile": {
       "SummonPower": 0.35,
       "SummonHealth": 0.3,
-      "Fortitude": 0.2,
+      "CrowdControlResistance": 0.2,
       "Power": 0.15
     },
     "temperingProfile": {
@@ -741,7 +741,7 @@
           "minimumTier": 1
         },
         {
-          "stat": "Fortitude",
+          "stat": "CrowdControlResistance",
           "weight": 20,
           "category": "Secondary",
           "canIntroduce": true,
@@ -800,7 +800,7 @@
     "compatibleRecipeIds": [],
     "bonusStatBudgetMultiplier": 0.2,
     "bonusStatProfile": {
-      "Precision": 0.3,
+      "Power": 0.3,
       "LifeSteal": 0.25,
       "CritChance": 0.25,
       "AttackSpeed": 0.2
@@ -810,7 +810,7 @@
       "name": "Venom Tempering",
       "stats": [
         {
-          "stat": "Precision",
+          "stat": "Power",
           "weight": 30,
           "category": "Primary",
           "canIntroduce": true,
@@ -890,7 +890,7 @@
     "bonusStatProfile": {
       "AttackSpeed": 0.3,
       "StatusResistance": 0.25,
-      "Precision": 0.25,
+      "CritChance": 0.25,
       "LifeSteal": 0.2
     },
     "temperingProfile": {
@@ -916,7 +916,7 @@
           "minimumTier": 1
         },
         {
-          "stat": "Precision",
+          "stat": "CritChance",
           "weight": 25,
           "category": "Secondary",
           "canIntroduce": true,

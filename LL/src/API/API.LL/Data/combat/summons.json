@@ -59,8 +59,10 @@
     "attributes": [
       {
         "attribute": "MaxHealth",
-        "baseValue": 1,
-        "minimumValue": 1
+        "baseValue": 0,
+        "minimumValue": 1,
+        "scalingAttribute": "MaxHealth",
+        "scalingCoefficient": 0.1
       },
       {
         "attribute": "Power",

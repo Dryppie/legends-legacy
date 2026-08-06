@@ -50,67 +50,48 @@
     class="min-h-0 overflow-y-auto pr-2 sm:pr-4"
   >
     <section class="ll-page-header">
-      <div class="grid gap-4">
+      <div
+        class="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(360px,480px)] lg:items-end"
+      >
         <div>
-          <div class="flex flex-wrap items-start justify-between gap-3">
-            <div>
-              <p class="ll-eyebrow text-primary">Combat Profile</p>
-              <h2 class="ll-heading mt-1 text-2xl text-white">
-                {{ profileLabel() }}
+          <p class="ll-eyebrow text-primary">Combat Profile</p>
+          <h2 class="ll-heading mt-1 text-2xl text-white">
+            {{ profileLabel() }}
+          </h2>
+        </div>
+
+        <div class="grid gap-3 sm:grid-cols-2">
+          <article class="ll-stat-card">
+            <div class="ll-stat-label">Character Level</div>
+            <div class="mt-1">
+              <h2 class="ll-heading text-3xl leading-none">
+                Level {{ characterOverview.level }}
               </h2>
             </div>
-          </div>
+          </article>
 
-          <div class="mt-3 grid gap-3 md:grid-cols-2 xl:grid-cols-6">
-            <article class="ll-stat-card xl:col-span-1">
-              <div class="ll-stat-label">Character Level</div>
-              <div class="mt-1">
-                <h2 class="ll-heading text-3xl leading-none">
-                  Level {{ characterOverview.level }}
-                </h2>
+          <article
+            class="ll-stat-card ll-card-accent relative overflow-hidden text-left"
+            title="Combat Rating summarizes permanent combat attributes and the equipped build."
+          >
+            <div class="relative">
+              <div class="ll-stat-label">Combat Rating</div>
+              <div class="ll-heading mt-1 text-3xl leading-none">
+                <ng-container
+                  *ngIf="
+                    characterOverview.power?.state === 'Available';
+                    else powerUnavailable
+                  "
+                >
+                  {{
+                    displayCombatRating(characterOverview.power!.overall)
+                      | number: "1.0-0"
+                  }}
+                </ng-container>
+                <ng-template #powerUnavailable>Unavailable</ng-template>
               </div>
-            </article>
-
-            <article
-              class="ll-stat-card ll-card-accent relative overflow-hidden text-left xl:col-span-1"
-              title="Power is an estimate based on deterministic combat simulations. Matchups and randomness still matter."
-            >
-              <div class="relative">
-                <div class="ll-stat-label">Combat Rating</div>
-                <div class="ll-heading mt-1 text-3xl leading-none">
-                  <ng-container
-                    *ngIf="
-                      characterOverview.power?.state === 'Available';
-                      else powerUnavailable
-                    "
-                  >
-                    {{
-                      displayCombatRating(characterOverview.power!.overall)
-                        | number: "1.0-0"
-                    }}
-                  </ng-container>
-                  <ng-template #powerUnavailable>Unavailable</ng-template>
-                </div>
-              </div>
-            </article>
-
-            <article
-              *ngFor="let type of primaryAttributes"
-              class="ll-stat-card"
-              [appAttributeTooltip]="getAttribute(type)"
-              attributeTooltipPosition="below"
-            >
-              <div class="ll-stat-label">
-                {{ getAttribute(type).attributeType | attributeTypeFormat }}
-              </div>
-              <div class="ll-stat-value">
-                {{
-                  getAttribute(type).value
-                    | attributeValueFormat: getAttribute(type).attributeType
-                }}
-              </div>
-            </article>
-          </div>
+            </div>
+          </article>
         </div>
       </div>
     </section>
@@ -121,7 +102,7 @@
           class="mb-4 flex items-center justify-between gap-3 border-b border-light_gray/70 pb-3"
         >
           <div>
-            <h2 class="ll-heading">Attributes</h2>
+            <h2 class="ll-heading">Combat Attributes</h2>
             <p class="ll-copy">
               Combat values after equipment and permanent bonuses.
             </p>

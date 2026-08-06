@@ -22,7 +22,7 @@ public static class EssenceTagCatalog
             ["Pattern"] = ["Pattern.SingleTarget", "Pattern.MultiTarget", "Pattern.Area", "Pattern.DamageOverTime", "Pattern.Periodic", "Pattern.TimedBuff"],
             ["Defense"] = ["Defense.Block", "Defense.Guard", "Defense.Barrier", "Defense.Dodge", "Defense.Recovery", "Defense.DamageReduction", "Defense.Armor", "Defense.Resistance"],
             ["Offense"] = ["Offense.Critical", "Offense.Power"],
-            ["Debuff"] = ["Debuff.Precision", "Debuff.Regeneration"],
+            ["Debuff"] = ["Debuff.CritChance", "Debuff.Regeneration"],
             ["Effect"] =
             [
                 "Effect.None", "Effect.BasicAttack", "Effect.Ability", "Effect.Melee", "Effect.Ranged",

@@ -24,7 +24,7 @@ public sealed class PowerRatingCoreTests
     {
         var baseAttributes = new[]
         {
-            new EntityAttribute { AttributeType = AttributeType.Fortitude, Value = 10 },
+            new EntityAttribute { AttributeType = AttributeType.Power, Value = 10 },
             new EntityAttribute { AttributeType = AttributeType.MaxHealth, Value = 100 }
         };
 
@@ -34,7 +34,7 @@ public sealed class PowerRatingCoreTests
             new Dictionary<AttributeType, double>(),
             1);
 
-        Assert.Equal(33, rating.Overall);
+        Assert.Equal(260, rating.Overall);
     }
 
     [Fact]
@@ -49,7 +49,7 @@ public sealed class PowerRatingCoreTests
             new Dictionary<AttributeType, double>(),
             1);
 
-        Assert.Equal(3, upgraded.Overall - baseline.Overall);
+        Assert.Equal(72, upgraded.Overall - baseline.Overall);
     }
 
     [Fact]
@@ -68,8 +68,38 @@ public sealed class PowerRatingCoreTests
         var once = CombatRatingCalculator.Calculate([], [item]);
         var duplicatedSlotReference = CombatRatingCalculator.Calculate([], [item, item]);
 
-        Assert.Equal(10, once.Overall);
+        Assert.Equal(19, once.Overall);
         Assert.Equal(once.Overall, duplicatedSlotReference.Overall);
+    }
+
+    [Fact]
+    public void AttributeCombatRating_ValuesAuthoredBaseModifiersAtAStableReferenceTier()
+    {
+        var itemBase = new EquipmentBase
+        {
+            Id = "stable-base",
+            Name = "Stable Base",
+            AttributeModifiers =
+            [
+                new ItemAttributeModifier(AttributeType.Power, 10)
+            ]
+        };
+        var tierOne = new EquipmentInstance
+        {
+            Id = Guid.NewGuid(),
+            ItemBase = itemBase,
+            Tier = 1
+        };
+        var tierTen = new EquipmentInstance
+        {
+            Id = Guid.NewGuid(),
+            ItemBase = itemBase,
+            Tier = 10
+        };
+
+        Assert.Equal(
+            CombatRatingCalculator.Calculate([], [tierOne]).Overall,
+            CombatRatingCalculator.Calculate([], [tierTen]).Overall);
     }
 
     [Fact]
@@ -85,8 +115,8 @@ public sealed class PowerRatingCoreTests
                     [new AbilityAttributeModifier(AttributeType.Armor, 10)])
             ]);
 
-        Assert.Equal(10, withTemporarySource.Overall - withoutTemporarySource.Overall);
-        Assert.Equal(10, withTemporarySource.PhysicalDurability);
+        Assert.Equal(19, withTemporarySource.Overall - withoutTemporarySource.Overall);
+        Assert.Equal(19, withTemporarySource.PhysicalDurability);
         Assert.Equal(0, withTemporarySource.MagicalDurability);
         Assert.Equal(0, withTemporarySource.ControlUtility);
     }
@@ -123,24 +153,6 @@ public sealed class PowerRatingCoreTests
             1);
 
         Assert.Equal(capped.Overall, overflow.Overall);
-    }
-
-    [Fact]
-    public void CanonicalRatingAttributes_RemoveDerivedPrimaryContributions()
-    {
-        var projected = new Dictionary<AttributeType, float>
-        {
-            [AttributeType.Fortitude] = 10,
-            [AttributeType.MaxHealth] = 140,
-            [AttributeType.Armor] = 5,
-            [AttributeType.Resistance] = 5
-        };
-
-        var direct = CombatRatingCalculator.RemovePrimaryContributions(projected);
-
-        Assert.Equal(100, direct[AttributeType.MaxHealth]);
-        Assert.Equal(0, direct[AttributeType.Armor]);
-        Assert.Equal(0, direct[AttributeType.Resistance]);
     }
 
     [Fact]
@@ -473,10 +485,7 @@ public sealed class PowerRatingCoreTests
         BaseAttributes =
         [
             new EntityAttribute { AttributeType = AttributeType.Power, Value = 10 },
-            new EntityAttribute { AttributeType = AttributeType.Fortitude, Value = 10 },
-            new EntityAttribute { AttributeType = AttributeType.Precision, Value = 10 },
-            new EntityAttribute { AttributeType = AttributeType.Spirit, Value = 10 },
-            new EntityAttribute { AttributeType = AttributeType.MaxHealth, Value = 100 },
+            new EntityAttribute { AttributeType = AttributeType.MaxHealth, Value = 140 },
             new EntityAttribute { AttributeType = AttributeType.HealthRegeneration, Value = 2 }
         ]
     };

@@ -64,7 +64,7 @@
     "initialStatProfile": {
       "Armor": 0.35,
       "MaxHealth": 0.3,
-      "Fortitude": 0.2,
+      "BlockChance": 0.2,
       "CrowdControlResistance": 0.15
     },
     "temperingProfile": {
@@ -90,7 +90,7 @@
           "minimumTier": 1
         },
         {
-          "stat": "Fortitude",
+          "stat": "BlockChance",
           "weight": 20,
           "category": "Secondary",
           "canIntroduce": true,
@@ -171,8 +171,8 @@
     "initialStatProfile": {
       "MaxHealth": 0.3,
       "Armor": 0.25,
-      "Precision": 0.25,
-      "Fortitude": 0.2
+      "CritChance": 0.25,
+      "Resistance": 0.2
     },
     "temperingProfile": {
       "id": "recipe.armor.head.medium_helm.tempering",
@@ -197,7 +197,7 @@
           "minimumTier": 1
         },
         {
-          "stat": "Precision",
+          "stat": "CritChance",
           "weight": 25,
           "category": "Secondary",
           "canIntroduce": true,
@@ -206,7 +206,7 @@
           "minimumTier": 1
         },
         {
-          "stat": "Fortitude",
+          "stat": "Resistance",
           "weight": 20,
           "category": "Secondary",
           "canIntroduce": true,
@@ -255,7 +255,7 @@
       "Dodge",
       "Crit",
       "Speed",
-      "Precision",
+      "CritChance",
       "Poison"
     ],
     "tags": [
@@ -265,7 +265,7 @@
       "Dodge",
       "Crit",
       "Speed",
-      "Precision",
+      "CritChance",
       "Poison"
     ],
     "minimumProfessionLevel": 1,
@@ -279,7 +279,7 @@
     },
     "initialStatProfile": {
       "DodgeChance": 0.3,
-      "Precision": 0.25,
+      "CritChance": 0.25,
       "AttackSpeed": 0.25,
       "StatusResistance": 0.2
     },
@@ -297,7 +297,7 @@
           "minimumTier": 1
         },
         {
-          "stat": "Precision",
+          "stat": "CritChance",
           "weight": 25,
           "category": "Primary",
           "canIntroduce": true,
@@ -387,7 +387,7 @@
       "role": "Cloth"
     },
     "initialStatProfile": {
-      "Spirit": 0.35,
+      "HealingPowerPercent": 0.35,
       "Resistance": 0.25,
       "Cooldown": 0.2,
       "MaxHealth": 0.2
@@ -397,7 +397,7 @@
       "name": "Cloth Cowl Tempering",
       "stats": [
         {
-          "stat": "Spirit",
+          "stat": "HealingPowerPercent",
           "weight": 35,
           "category": "Primary",
           "canIntroduce": true,
@@ -500,7 +500,7 @@
     "initialStatProfile": {
       "Armor": 0.35,
       "MaxHealth": 0.3,
-      "Fortitude": 0.2,
+      "BlockChance": 0.2,
       "CrowdControlResistance": 0.15
     },
     "temperingProfile": {
@@ -526,7 +526,7 @@
           "minimumTier": 1
         },
         {
-          "stat": "Fortitude",
+          "stat": "BlockChance",
           "weight": 20,
           "category": "Secondary",
           "canIntroduce": true,
@@ -607,8 +607,8 @@
     "initialStatProfile": {
       "MaxHealth": 0.3,
       "Armor": 0.25,
-      "Precision": 0.25,
-      "Fortitude": 0.2
+      "CritChance": 0.25,
+      "Resistance": 0.2
     },
     "temperingProfile": {
       "id": "recipe.armor.chest.medium_mail.tempering",
@@ -633,7 +633,7 @@
           "minimumTier": 1
         },
         {
-          "stat": "Precision",
+          "stat": "CritChance",
           "weight": 25,
           "category": "Secondary",
           "canIntroduce": true,
@@ -642,7 +642,7 @@
           "minimumTier": 1
         },
         {
-          "stat": "Fortitude",
+          "stat": "Resistance",
           "weight": 20,
           "category": "Secondary",
           "canIntroduce": true,
@@ -691,7 +691,7 @@
       "Dodge",
       "Crit",
       "Speed",
-      "Precision",
+      "CritChance",
       "Poison"
     ],
     "tags": [
@@ -701,7 +701,7 @@
       "Dodge",
       "Crit",
       "Speed",
-      "Precision",
+      "CritChance",
       "Poison"
     ],
     "minimumProfessionLevel": 1,
@@ -715,7 +715,7 @@
     },
     "initialStatProfile": {
       "DodgeChance": 0.3,
-      "Precision": 0.25,
+      "CritChance": 0.25,
       "AttackSpeed": 0.25,
       "StatusResistance": 0.2
     },
@@ -733,7 +733,7 @@
           "minimumTier": 1
         },
         {
-          "stat": "Precision",
+          "stat": "CritChance",
           "weight": 25,
           "category": "Primary",
           "canIntroduce": true,
@@ -823,7 +823,7 @@
       "role": "Cloth"
     },
     "initialStatProfile": {
-      "Spirit": 0.35,
+      "HealingPowerPercent": 0.35,
       "Resistance": 0.25,
       "Cooldown": 0.2,
       "MaxHealth": 0.2
@@ -833,7 +833,7 @@
       "name": "Cloth Robe Tempering",
       "stats": [
         {
-          "stat": "Spirit",
+          "stat": "HealingPowerPercent",
           "weight": 35,
           "category": "Primary",
           "canIntroduce": true,
@@ -936,7 +936,7 @@
     "initialStatProfile": {
       "Armor": 0.35,
       "MaxHealth": 0.3,
-      "Fortitude": 0.2,
+      "BlockChance": 0.2,
       "CrowdControlResistance": 0.15
     },
     "temperingProfile": {
@@ -962,7 +962,7 @@
           "minimumTier": 1
         },
         {
-          "stat": "Fortitude",
+          "stat": "BlockChance",
           "weight": 20,
           "category": "Secondary",
           "canIntroduce": true,
@@ -1043,8 +1043,8 @@
     "initialStatProfile": {
       "MaxHealth": 0.3,
       "Armor": 0.25,
-      "Precision": 0.25,
-      "Fortitude": 0.2
+      "CritChance": 0.25,
+      "Resistance": 0.2
     },
     "temperingProfile": {
       "id": "recipe.armor.legs.medium_greaves.tempering",
@@ -1069,7 +1069,7 @@
           "minimumTier": 1
         },
         {
-          "stat": "Precision",
+          "stat": "CritChance",
           "weight": 25,
           "category": "Secondary",
           "canIntroduce": true,
@@ -1078,7 +1078,7 @@
           "minimumTier": 1
         },
         {
-          "stat": "Fortitude",
+          "stat": "Resistance",
           "weight": 20,
           "category": "Secondary",
           "canIntroduce": true,
@@ -1127,7 +1127,7 @@
       "Dodge",
       "Crit",
       "Speed",
-      "Precision",
+      "CritChance",
       "Poison"
     ],
     "tags": [
@@ -1137,7 +1137,7 @@
       "Dodge",
       "Crit",
       "Speed",
-      "Precision",
+      "CritChance",
       "Poison"
     ],
     "minimumProfessionLevel": 1,
@@ -1151,7 +1151,7 @@
     },
     "initialStatProfile": {
       "DodgeChance": 0.3,
-      "Precision": 0.25,
+      "CritChance": 0.25,
       "AttackSpeed": 0.25,
       "StatusResistance": 0.2
     },
@@ -1169,7 +1169,7 @@
           "minimumTier": 1
         },
         {
-          "stat": "Precision",
+          "stat": "CritChance",
           "weight": 25,
           "category": "Primary",
           "canIntroduce": true,
@@ -1259,7 +1259,7 @@
       "role": "Cloth"
     },
     "initialStatProfile": {
-      "Spirit": 0.35,
+      "HealingPowerPercent": 0.35,
       "Resistance": 0.25,
       "Cooldown": 0.2,
       "MaxHealth": 0.2
@@ -1269,7 +1269,7 @@
       "name": "Cloth Pants Tempering",
       "stats": [
         {
-          "stat": "Spirit",
+          "stat": "HealingPowerPercent",
           "weight": 35,
           "category": "Primary",
           "canIntroduce": true,
@@ -1364,7 +1364,7 @@
     "initialStatProfile": {
       "Power": 0.3,
       "CritChance": 0.25,
-      "Precision": 0.25,
+      "CritDamage": 0.25,
       "AttackSpeed": 0.2
     },
     "temperingProfile": {
@@ -1390,7 +1390,7 @@
           "minimumTier": 1
         },
         {
-          "stat": "Precision",
+          "stat": "CritDamage",
           "weight": 25,
           "category": "Secondary",
           "canIntroduce": true,
@@ -1469,7 +1469,7 @@
     "initialStatProfile": {
       "MaxHealth": 0.3,
       "Resistance": 0.25,
-      "Fortitude": 0.25,
+      "Armor": 0.25,
       "HealthRegeneration": 0.2
     },
     "temperingProfile": {
@@ -1495,7 +1495,7 @@
           "minimumTier": 1
         },
         {
-          "stat": "Fortitude",
+          "stat": "Armor",
           "weight": 25,
           "category": "Secondary",
           "canIntroduce": true,
@@ -1568,7 +1568,7 @@
       "role": ""
     },
     "initialStatProfile": {
-      "Spirit": 0.3,
+      "HealingPowerPercent": 0.3,
       "HealthRegeneration": 0.25,
       "StatusResistance": 0.25,
       "MaxHealth": 0.2
@@ -1578,7 +1578,7 @@
       "name": "Relic Tempering",
       "stats": [
         {
-          "stat": "Spirit",
+          "stat": "HealingPowerPercent",
           "weight": 30,
           "category": "Primary",
           "canIntroduce": true,
@@ -1673,7 +1673,7 @@
       "role": ""
     },
     "initialStatProfile": {
-      "Precision": 0.3,
+      "ArmorPenetration": 0.3,
       "Power": 0.3,
       "CritChance": 0.2,
       "AttackSpeed": 0.2
@@ -1683,7 +1683,7 @@
       "name": "Shortsword Tempering",
       "stats": [
         {
-          "stat": "Precision",
+          "stat": "ArmorPenetration",
           "weight": 30,
           "category": "Primary",
           "canIntroduce": true,
@@ -1786,7 +1786,7 @@
     "initialStatProfile": {
       "AttackSpeed": 0.3,
       "CritChance": 0.25,
-      "Precision": 0.25,
+      "CritDamage": 0.25,
       "Power": 0.2
     },
     "temperingProfile": {
@@ -1812,7 +1812,7 @@
           "minimumTier": 1
         },
         {
-          "stat": "Precision",
+          "stat": "CritDamage",
           "weight": 25,
           "category": "Secondary",
           "canIntroduce": true,
@@ -1894,7 +1894,7 @@
       "Power": 0.35,
       "CritDamage": 0.25,
       "ArmorPenetration": 0.2,
-      "Precision": 0.2
+      "AttackSpeed": 0.2
     },
     "temperingProfile": {
       "id": "recipe.weapon.one_handed.hand_axe.tempering",
@@ -1928,7 +1928,7 @@
           "minimumTier": 1
         },
         {
-          "stat": "Precision",
+          "stat": "AttackSpeed",
           "weight": 20,
           "category": "Secondary",
           "canIntroduce": true,
@@ -2000,7 +2000,7 @@
     "initialStatProfile": {
       "Power": 0.35,
       "ArmorPenetration": 0.35,
-      "Precision": 0.3
+      "CritChance": 0.3
     },
     "temperingProfile": {
       "id": "recipe.weapon.one_handed.mace.tempering",
@@ -2025,7 +2025,7 @@
           "minimumTier": 1
         },
         {
-          "stat": "Precision",
+          "stat": "CritChance",
           "weight": 30,
           "category": "Secondary",
           "canIntroduce": true,
@@ -2097,7 +2097,7 @@
     "initialStatProfile": {
       "Power": 0.35,
       "MagicPenetration": 0.25,
-      "Precision": 0.2,
+      "CritChance": 0.2,
       "AttackSpeed": 0.2
     },
     "temperingProfile": {
@@ -2123,7 +2123,7 @@
           "minimumTier": 1
         },
         {
-          "stat": "Precision",
+          "stat": "CritChance",
           "weight": 20,
           "category": "Secondary",
           "canIntroduce": true,
@@ -2201,7 +2201,7 @@
     },
     "initialStatProfile": {
       "Power": 0.3,
-      "Precision": 0.3,
+      "ArmorPenetration": 0.3,
       "CritChance": 0.2,
       "AttackSpeed": 0.2
     },
@@ -2219,7 +2219,7 @@
           "minimumTier": 1
         },
         {
-          "stat": "Precision",
+          "stat": "ArmorPenetration",
           "weight": 25,
           "category": "Primary",
           "canIntroduce": true,
@@ -2308,7 +2308,7 @@
       "Power": 0.35,
       "CritDamage": 0.25,
       "ArmorPenetration": 0.2,
-      "Precision": 0.2
+      "AttackSpeed": 0.2
     },
     "temperingProfile": {
       "id": "recipe.weapon.two_handed.battle_axe.tempering",
@@ -2342,7 +2342,7 @@
           "minimumTier": 1
         },
         {
-          "stat": "Precision",
+          "stat": "AttackSpeed",
           "weight": 20,
           "category": "Secondary",
           "canIntroduce": true,
@@ -2412,7 +2412,7 @@
     "initialStatProfile": {
       "Power": 0.35,
       "ArmorPenetration": 0.35,
-      "Precision": 0.3
+      "CritChance": 0.3
     },
     "temperingProfile": {
       "id": "recipe.weapon.two_handed.maul.tempering",
@@ -2437,7 +2437,7 @@
           "minimumTier": 1
         },
         {
-          "stat": "Precision",
+          "stat": "CritChance",
           "weight": 30,
           "category": "Secondary",
           "canIntroduce": true,
@@ -2484,7 +2484,7 @@
       "TwoHanded",
       "Polearm",
       "Reach",
-      "Precision",
+      "AttackSpeed",
       "AntiBoss"
     ],
     "tags": [
@@ -2492,7 +2492,7 @@
       "TwoHanded",
       "Polearm",
       "Reach",
-      "Precision",
+      "AttackSpeed",
       "AntiBoss"
     ],
     "minimumProfessionLevel": 1,
@@ -2505,7 +2505,7 @@
       "role": ""
     },
     "initialStatProfile": {
-      "Precision": 0.3,
+      "AttackSpeed": 0.3,
       "ArmorPenetration": 0.25,
       "Power": 0.25,
       "CritChance": 0.2
@@ -2515,7 +2515,7 @@
       "name": "Spear Tempering",
       "stats": [
         {
-          "stat": "Precision",
+          "stat": "AttackSpeed",
           "weight": 30,
           "category": "Primary",
           "canIntroduce": true,
@@ -2613,7 +2613,7 @@
       "Power": 0.35,
       "MagicPenetration": 0.25,
       "Cooldown": 0.2,
-      "Precision": 0.2
+      "CritChance": 0.2
     },
     "temperingProfile": {
       "id": "recipe.weapon.two_handed.staff.tempering",
@@ -2647,7 +2647,7 @@
           "minimumTier": 1
         },
         {
-          "stat": "Precision",
+          "stat": "CritChance",
           "weight": 20,
           "category": "Secondary",
           "canIntroduce": true,
@@ -2695,7 +2695,7 @@
       "Ranged",
       "Bow",
       "SustainedDamage",
-      "Precision"
+      "AttackSpeed"
     ],
     "tags": [
       "Weapon",
@@ -2703,7 +2703,7 @@
       "Ranged",
       "Bow",
       "SustainedDamage",
-      "Precision"
+      "AttackSpeed"
     ],
     "minimumProfessionLevel": 1,
     "behavior": {
@@ -2715,7 +2715,7 @@
       "role": ""
     },
     "initialStatProfile": {
-      "Precision": 0.3,
+      "AttackSpeed": 0.3,
       "Power": 0.3,
       "CritChance": 0.2,
       "ArmorPenetration": 0.2
@@ -2725,7 +2725,7 @@
       "name": "Longbow Tempering",
       "stats": [
         {
-          "stat": "Precision",
+          "stat": "AttackSpeed",
           "weight": 30,
           "category": "Primary",
           "canIntroduce": true,
@@ -2823,7 +2823,7 @@
       "Power": 0.35,
       "ArmorPenetration": 0.3,
       "CritDamage": 0.2,
-      "Precision": 0.15
+      "CritChance": 0.15
     },
     "temperingProfile": {
       "id": "recipe.weapon.two_handed.crossbow.tempering",
@@ -2857,7 +2857,7 @@
           "minimumTier": 1
         },
         {
-          "stat": "Precision",
+          "stat": "CritChance",
           "weight": 15,
           "category": "Secondary",
           "canIntroduce": true,
@@ -2926,7 +2926,7 @@
     },
     "initialStatProfile": {
       "AttackSpeed": 0.35,
-      "Precision": 0.25,
+      "CritDamage": 0.25,
       "Power": 0.2,
       "CritChance": 0.2
     },
@@ -2944,7 +2944,7 @@
           "minimumTier": 1
         },
         {
-          "stat": "Precision",
+          "stat": "CritDamage",
           "weight": 25,
           "category": "Primary",
           "canIntroduce": true,
@@ -3114,7 +3114,7 @@
       "Ward",
       "MagicDefense",
       "Barrier",
-      "Spirit",
+      "SummonHealth",
       "Support",
       "Summon"
     ],
@@ -3123,7 +3123,7 @@
       "Ward",
       "MagicDefense",
       "Barrier",
-      "Spirit",
+      "SummonHealth",
       "Support",
       "Summon"
     ],
@@ -3139,7 +3139,7 @@
     "initialStatProfile": {
       "Resistance": 0.35,
       "HealthRegeneration": 0.25,
-      "Spirit": 0.2,
+      "SummonHealth": 0.2,
       "MaxHealth": 0.2
     },
     "temperingProfile": {
@@ -3165,7 +3165,7 @@
           "minimumTier": 1
         },
         {
-          "stat": "Spirit",
+          "stat": "SummonHealth",
           "weight": 20,
           "category": "Secondary",
           "canIntroduce": true,
@@ -3242,9 +3242,9 @@
       "role": "Grimoire"
     },
     "initialStatProfile": {
-      "Spirit": 0.35,
+      "Power": 0.35,
       "MagicPenetration": 0.25,
-      "Precision": 0.2,
+      "CritChance": 0.2,
       "Cooldown": 0.2
     },
     "temperingProfile": {
@@ -3252,7 +3252,7 @@
       "name": "Grimoire Tempering",
       "stats": [
         {
-          "stat": "Spirit",
+          "stat": "Power",
           "weight": 35,
           "category": "Primary",
           "canIntroduce": true,
@@ -3270,7 +3270,7 @@
           "minimumTier": 1
         },
         {
-          "stat": "Precision",
+          "stat": "CritChance",
           "weight": 20,
           "category": "Secondary",
           "canIntroduce": true,

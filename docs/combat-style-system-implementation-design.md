@@ -219,9 +219,9 @@ Caster:
 - Gains Arcane Charge from active Essence ability use.
 - At 5 Arcane Charge, empowers the next active effect.
 - Arcanist amplifies active Magic/Spell effects.
-- Spellblade focus adds Spirit-scaling magical bonus damage to Melee-tagged active damage.
+- Spellblade focus adds Power-scaling magical bonus damage to Melee-tagged active damage.
 - Occultist amplifies Curse/DoT active effects and builds extra Arcane Charge from Curse/DoT active abilities.
-- Level 25 and 40 milestones scale Arcanist amplification/Arcane Charge, Spellblade Spirit conversion, and Occultist amplification.
+- Level 25 and 40 milestones scale Arcanist amplification/Arcane Charge, Spellblade conversion, and Occultist amplification.
 
 Summoner:
 

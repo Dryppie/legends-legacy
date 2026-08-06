@@ -247,7 +247,6 @@ public sealed class EssenceSystemServiceTests
             new Dictionary<AttributeType, float>
             {
                 [AttributeType.MaxHealth] = 100,
-                [AttributeType.Spirit] = 50,
                 [AttributeType.Power] = 10,
                 [AttributeType.Armor] = 0,
                 [AttributeType.Resistance] = 0,
@@ -255,17 +254,15 @@ public sealed class EssenceSystemServiceTests
             },
             [
                 new AbilityAttributeModifier(AttributeType.Power, 5, ModifierType.Flat),
-                new AbilityAttributeModifier(AttributeType.Fortitude, 2, ModifierType.Flat),
                 new AbilityAttributeModifier(AttributeType.MaxHealth, 10, ModifierType.Flat),
                 new AbilityAttributeModifier(AttributeType.DodgeChance, 3, ModifierType.Flat),
                 new AbilityAttributeModifier(AttributeType.Resistance, 4, ModifierType.Flat)
             ]);
 
         Assert.Equal(15, projected[AttributeType.Power]);
-        Assert.Equal(118, projected[AttributeType.MaxHealth]);
-        Assert.Equal(2, projected[AttributeType.Fortitude]);
-        Assert.Equal(1, projected[AttributeType.Armor]);
-        Assert.Equal(5, projected[AttributeType.Resistance]);
+        Assert.Equal(110, projected[AttributeType.MaxHealth]);
+        Assert.Equal(0, projected[AttributeType.Armor]);
+        Assert.Equal(4, projected[AttributeType.Resistance]);
         Assert.Equal(3, projected[AttributeType.DodgeChance]);
     }
 
@@ -727,9 +724,7 @@ public sealed class EssenceSystemServiceTests
         character.BaseAttributes =
         [
             new EntityAttribute { AttributeType = AttributeType.MaxHealth, Value = 100 },
-            new EntityAttribute { AttributeType = AttributeType.Power, Value = 10 },
-            new EntityAttribute { AttributeType = AttributeType.Precision, Value = 10 },
-            new EntityAttribute { AttributeType = AttributeType.Spirit, Value = 10 }
+            new EntityAttribute { AttributeType = AttributeType.Power, Value = 10 }
         ];
         await db.SaveChangesAsync();
         var essenceService = CreateService(db);

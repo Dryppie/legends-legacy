@@ -102,7 +102,7 @@ Essence attribute bonuses are converted to normal backend stat modifiers before 
 
 The attribute system is defined by `AttributeType` and `AttributeCatalog`. Essence content, equipment modifiers, combat temporary modifiers, and backend calculations use the same stat names:
 
-- Primary: `Power`, `Fortitude`, `Precision`, `Spirit`
+- Universal ability scaling: `Power`
 - Base and derived inputs: `MaxHealth`, `WeaponDamage`, `Armor`, `Resistance`, `CritChance`, `CritDamage`, `ArmorPenetration`, `MagicPenetration`
 - Defensive: `DodgeChance`, `BlockChance`, `BlockEffectiveness`, `DamageReduction`, `StatusResistance`, `CrowdControlResistance`
 - Recovery: `HealingPowerPercent`, `HealthRegeneration`, `LifeSteal`

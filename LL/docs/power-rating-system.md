@@ -24,15 +24,16 @@ The detailed design and rollout checklist are in
 
 ## Calculation
 
-`CombatRatingCalculator` values persisted base attributes before
-primary-derived contributions, preventing Fortitude, Precision, and Spirit from
-being counted again through derived attributes. Base attributes use Tier-1
-`EquipmentStatBudgetCatalog` costs as a stable reference.
+`CombatRatingCalculator` values persisted base attributes directly. There is no
+primary-to-secondary projection layer: Power is the universal ability coefficient,
+while Max Health, defenses, recovery, and utility are independent attributes. Base
+attributes use Tier-1 `EquipmentStatBudgetCatalog` costs as a stable reference.
 
-Each distinct equipped item is valued with the same amount-times-tier-cost
-formula as `EquipmentBudgetEvaluator`, using that item's tier. This is the same
-tier-aware attribute budget used by crafting and item DTOs. It preserves the
-intentional marginal-cost changes for attributes such as Armor and Fortitude
+Each distinct equipped item separates its two attribute sources. Authored base
+modifiers use the stable Tier-1 reference weights, because the same base identity
+must not lose Combat Rating when crafted at a higher tier. Generated and tempered
+instance modifiers use that item's tier-aware costs, matching
+`EquipmentBudgetEvaluator` and preserving the intentional marginal-cost changes
 across the progression curve.
 
 Each active Essence is resolved independently through the production Essence
@@ -53,7 +54,8 @@ Formula:
 Combat Rating =
     round(
         Base Attribute Budget
-        + Σ Equipped Item Attribute Budget
+        + Σ Equipped Item Base Attribute Budget at the reference tier
+        + Σ Equipped Item Instance Attribute Budget at the item tier
         + Σ Active Essence Attribute Budget
     )
 
@@ -140,15 +142,16 @@ abilities. Combat Rating itself still counts only their resolved attributes.
 
 The deterministic Goblin Mines regressions currently resolve to:
 
-- Tier I: displayed Combat Rating 105, Tier-1 Standard/Common Balanced
+- Tier I: displayed Combat Rating 153, Tier-2 Standard/Uncommon Defensive
   equipment, and two Essences.
-- Tier II: displayed Combat Rating 262, Tier-4 Standard/Epic Offense equipment,
-  and four Essences.
-- Tier III: displayed Combat Rating 1548, projected Tier-12 Standard/Common
-  Offense equipment, and six Essences.
+- Tier II: displayed Combat Rating 492, Tier-5 Standard/Uncommon Balanced
+  equipment, and four Essences.
+- Tier III: displayed Combat Rating 1265, Tier-10 Standard/Common Sustain
+  equipment, and six Essences.
 
-The Tier-12 result confirms that no profile within the live Tier-10 equipment
-budget currently reaches the Mythic completion target.
+All three current recommendations remain within the live Tier-10 equipment
+budget. These snapshots are deterministic calibration results, not separately
+authored dungeon numbers.
 
 The requirement profile still examines real encounter groups and creature
 abilities to describe physical, magical, area, boss, control, and attrition
@@ -168,7 +171,7 @@ tier-by-rarity profile matrix.
 curve: Tier I is 3× the authored creature baseline, Tier II is 5× Tier I
 (15× authored), and Tier III is 5× Tier II (75× authored).
 The legacy-named `BenchmarkDefinitionVersion` column now stores
-the deterministic rating-definition version and remains 10. Existing recommendations
+the deterministic rating-definition version and is 12. Existing recommendations
 are stale and will be recalibrated.
 
 `DungeonPowerCalibration:Enabled` controls whether missing or stale entries may

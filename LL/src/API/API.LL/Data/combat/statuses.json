@@ -81,29 +81,29 @@
   {
     "id": "status.illusion_fox.accuracy_debuff",
     "name": "Distracted",
-    "description": "Precision reduced by illusion.",
+    "description": "Crit Chance reduced by illusion.",
     "stackingPolicy": "Stack",
     "maxStacks": 5,
     "durationTicks": 50,
     "tags": [
       "Status.Debuff",
-      "Debuff.Precision",
+      "Debuff.CritChance",
       "Pattern.TimedDebuff"
     ],
     "triggers": [
       {
         "event": "OnStatusApplied",
         "effectIds": [
-          "effect.accuracy_debuff.precision"
+          "effect.accuracy_debuff.crit_chance"
         ]
       }
     ],
     "effects": [
       {
-        "id": "effect.accuracy_debuff.precision",
+        "id": "effect.accuracy_debuff.crit_chance",
         "operation": "ModifyAttribute",
         "target": "EventTarget",
-        "attribute": "Precision",
+        "attribute": "CritChance",
         "baseValue": -10,
         "durationTicks": 50,
         "procCoefficient": 0.4
@@ -173,7 +173,7 @@
   {
     "id": "status.necrotic_spore_debuff",
     "name": "Spirit Blight",
-    "description": "Reduces Spirit for a short duration.",
+    "description": "Reduces Healing Power for a short duration.",
     "stackingPolicy": "Refresh",
     "maxStacks": 1,
     "durationTicks": 80,
@@ -185,16 +185,16 @@
       {
         "event": "OnStatusApplied",
         "effectIds": [
-          "effect.necrotic_spores.spirit"
+          "effect.necrotic_spores.healing_power"
         ]
       }
     ],
     "effects": [
       {
-        "id": "effect.necrotic_spores.spirit",
+        "id": "effect.necrotic_spores.healing_power",
         "operation": "ModifyAttribute",
         "target": "EventTarget",
-        "attribute": "Spirit",
+        "attribute": "HealingPowerPercent",
         "baseValue": -40,
         "durationTicks": 80,
         "procCoefficient": 0.4

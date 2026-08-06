@@ -3,12 +3,10 @@ import { AttributeDto } from '../../../models/Dtos/attributesDto';
 import { AttributeType } from '../../../models/enums/attributeType';
 
 export enum AttributeCategory {
-  Offensive = 'Offensive',
-  Defensive = 'Defensive',
-  Vitality = 'Vitality',
+  Offense = 'Offense',
+  Defense = 'Defense',
   Recovery = 'Recovery',
   Utility = 'Utility',
-  Summons = 'Summons',
 }
 
 @Pipe({
@@ -18,22 +16,19 @@ export enum AttributeCategory {
 })
 export class GroupAttributesByCategoryPipe implements PipeTransform {
   ATTRIBUTE_CATEGORY_MAP: Record<AttributeType, AttributeCategory> = {
-    [AttributeType.Power]: AttributeCategory.Offensive,
-    [AttributeType.Fortitude]: AttributeCategory.Vitality,
-    [AttributeType.Precision]: AttributeCategory.Offensive,
-    [AttributeType.Spirit]: AttributeCategory.Vitality,
+    [AttributeType.Power]: AttributeCategory.Offense,
 
-    [AttributeType.MaxHealth]: AttributeCategory.Vitality,
-    [AttributeType.Armor]: AttributeCategory.Defensive,
-    [AttributeType.Resistance]: AttributeCategory.Defensive,
-    [AttributeType.CritChance]: AttributeCategory.Offensive,
-    [AttributeType.CritDamage]: AttributeCategory.Offensive,
-    [AttributeType.ArmorPenetration]: AttributeCategory.Offensive,
-    [AttributeType.MagicPenetration]: AttributeCategory.Offensive,
+    [AttributeType.MaxHealth]: AttributeCategory.Defense,
+    [AttributeType.Armor]: AttributeCategory.Defense,
+    [AttributeType.Resistance]: AttributeCategory.Defense,
+    [AttributeType.CritChance]: AttributeCategory.Offense,
+    [AttributeType.CritDamage]: AttributeCategory.Offense,
+    [AttributeType.ArmorPenetration]: AttributeCategory.Offense,
+    [AttributeType.MagicPenetration]: AttributeCategory.Offense,
 
-    [AttributeType.DodgeChance]: AttributeCategory.Defensive,
-    [AttributeType.BlockChance]: AttributeCategory.Defensive,
-    [AttributeType.DamageReduction]: AttributeCategory.Defensive,
+    [AttributeType.DodgeChance]: AttributeCategory.Defense,
+    [AttributeType.BlockChance]: AttributeCategory.Defense,
+    [AttributeType.DamageReduction]: AttributeCategory.Defense,
 
     [AttributeType.HealingPowerPercent]: AttributeCategory.Recovery,
     [AttributeType.HealthRegeneration]: AttributeCategory.Recovery,
@@ -43,9 +38,9 @@ export class GroupAttributesByCategoryPipe implements PipeTransform {
     [AttributeType.StatusResistance]: AttributeCategory.Utility,
     [AttributeType.CrowdControlResistance]: AttributeCategory.Utility,
 
-    [AttributeType.SummonPower]: AttributeCategory.Summons,
-    [AttributeType.SummonHealth]: AttributeCategory.Summons,
-    [AttributeType.AttackSpeed]: AttributeCategory.Offensive,
+    [AttributeType.SummonPower]: AttributeCategory.Utility,
+    [AttributeType.SummonHealth]: AttributeCategory.Utility,
+    [AttributeType.AttackSpeed]: AttributeCategory.Offense,
   };
 
   transform(values: AttributeDto[]): Record<string, AttributeDto[]> {

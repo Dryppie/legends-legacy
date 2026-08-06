@@ -54,5 +54,4 @@ public sealed record AttributeDefinition(
     bool IsContentFacing,
     int DisplayPrecision,
     string DisplaySuffix,
-    AttributeType? ApprovedPrimarySource,
     IReadOnlyList<AttributeBenchmarkScenario> RelevantBenchmarkScenarios);

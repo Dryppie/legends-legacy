@@ -56,14 +56,16 @@ attribute modifiers they produce.
 
 ### Direct Attributes and Equipment Budgets
 
-Persisted base attributes are valued directly, before primary-derived
-contributions. For example, Fortitude receives its own weight, while the health,
-armor, and resistance derived from Fortitude are not added a second time.
+Persisted base attributes are valued directly. Power is valued as the universal
+ability coefficient; Max Health, defenses, recovery, and utility each receive their
+own explicit weight. No attribute implicitly produces another attribute.
 
-Each distinct equipped item is valued from its authored attribute modifiers
-with the same amount-times-tier-cost formula as `EquipmentBudgetEvaluator`,
-which is used by crafting and item DTOs. This prevents quality, rarity, or tier
-from receiving a second independent bonus.
+Each distinct equipped item separates authored base modifiers from generated
+instance modifiers. Base modifiers use stable Tier-1 reference weights so the
+same item identity cannot lose rating at a higher crafting tier. Generated and
+tempered instance modifiers use the item's tier-aware costs, matching
+`EquipmentBudgetEvaluator`. This prevents quality, rarity, or tier from receiving
+a second independent bonus while keeping canonical tier progression monotonic.
 
 Each active Essence is resolved independently through
 `IEssenceCombatLoadoutResolver`. Its fixed and evolution-added attribute
@@ -76,11 +78,12 @@ change the result.
 
 ### Weights and Scale
 
-Base attributes use the Tier-1 `EquipmentStatBudgetCatalog.CostPerPoint` as a
-stable reference. Each equipment modifier uses the catalog cost for that item's
-tier. Tier-aware equipment weights are required because Armor, Fortitude, and
-other diminishing-return attributes intentionally have different marginal
-costs across the progression curve.
+Base attributes and authored equipment-base modifiers use the Tier-1
+`EquipmentStatBudgetCatalog.CostPerPoint` as a stable reference. Generated and
+tempered equipment modifiers use the catalog cost for that item's tier.
+Tier-aware generated weights are required because Armor, Max Health, and other
+diminishing-return attributes intentionally have different marginal costs
+across the progression curve.
 
 The unrounded sum is converted to a non-negative whole number using
 `MidpointRounding.AwayFromZero`.

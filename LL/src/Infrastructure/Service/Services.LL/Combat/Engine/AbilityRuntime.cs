@@ -538,10 +538,7 @@ public sealed class RuntimeCombatant
         var oldMaxHealth = GetAttribute(AttributeType.MaxHealth);
         Attributes[attributeType] = Attributes.GetValueOrDefault(attributeType) + amount;
 
-        if (AttributeCombatRules.IsPrimary(attributeType))
-            AttributeCombatRules.ApplyPrimaryDelta(Attributes, attributeType, amount);
-
-        if (attributeType == AttributeType.MaxHealth || attributeType == AttributeType.Fortitude)
+        if (attributeType == AttributeType.MaxHealth)
             SyncHealthAfterMaxHealthChange(oldMaxHealth, GetAttribute(AttributeType.MaxHealth));
     }
 

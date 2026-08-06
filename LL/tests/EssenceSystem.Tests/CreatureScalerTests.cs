@@ -43,7 +43,7 @@ public sealed class CreatureScalerTests
         [
             new StatOverride { AttributeType = AttributeType.MaxHealth, Multiplier = 0.20f },
             new StatOverride { AttributeType = AttributeType.Power, Multiplier = 0.10f },
-            new StatOverride { AttributeType = AttributeType.Precision, Multiplier = 0.50f }
+            new StatOverride { AttributeType = AttributeType.Armor, Multiplier = 0.50f }
         ];
         var area = new Area { Name = "Training Area", LevelRequirement = 1, DifficultyTier = 0 };
 
@@ -51,7 +51,7 @@ public sealed class CreatureScalerTests
 
         Assert.Equal(12, creature.BaseAttributesDict[AttributeType.MaxHealth]);
         Assert.Equal(0, creature.BaseAttributesDict[AttributeType.Power]);
-        Assert.Equal(5, creature.BaseAttributesDict[AttributeType.Precision]);
+        Assert.Equal(5, creature.BaseAttributesDict[AttributeType.Armor]);
     }
 
     private static Creature CreateBalancedCreature() =>

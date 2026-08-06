@@ -193,8 +193,8 @@ public sealed class CraftingCompositionContentTests
         Assert.All(baseByAttribute, stat =>
             Assert.True(aegisByAttribute[stat.Key] >= stat.Value));
         Assert.Equal(
-            baseByAttribute[AttributeType.Spirit],
-            aegisByAttribute[AttributeType.Spirit]);
+            baseByAttribute[AttributeType.HealingPowerPercent],
+            aegisByAttribute[AttributeType.HealingPowerPercent]);
         Assert.True(
             EquipmentBudgetEvaluator.Evaluate(aegisStats, 1) >
             EquipmentBudgetEvaluator.Evaluate(baseStats, 1));

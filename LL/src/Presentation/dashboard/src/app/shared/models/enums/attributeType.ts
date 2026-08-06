@@ -1,8 +1,5 @@
 export enum AttributeType {
   Power = 'Power',
-  Fortitude = 'Fortitude',
-  Precision = 'Precision',
-  Spirit = 'Spirit',
 
   MaxHealth = 'MaxHealth',
   Armor = 'Armor',

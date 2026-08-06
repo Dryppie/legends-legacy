@@ -48,7 +48,7 @@ public class CreatureScaler : ICreatureScaler
             {
                 AttributeType.MaxHealth => ScaleHp(baseValue, progressionTier),
                 AttributeType.Power => ScaleOffense(baseValue, progressionTier),
-                AttributeType.Precision => (float)(baseValue * (1.0 + MonsterScalingConstants.AccuracyPerTier * progressionTier)),
+                AttributeType.AttackSpeed => (float)(baseValue * (1.0 + MonsterScalingConstants.AccuracyPerTier * progressionTier)),
                 AttributeType.CritChance => Math.Min(baseValue + (float)(MonsterScalingConstants.CritChancePerTier * progressionTier), MonsterScalingConstants.CritChanceCap),
                 AttributeType.CritDamage => Math.Min(baseValue + (float)(MonsterScalingConstants.CritDamagePerTier * progressionTier), MonsterScalingConstants.CritDamageCap),
                 AttributeType.ArmorPenetration => (float)(baseValue * (1.0 + MonsterScalingConstants.PenPerTier * progressionTier)),
@@ -105,7 +105,7 @@ public class CreatureScaler : ICreatureScaler
         ScaleSingle(creature, AttributeType.MaxHealth, p.HealthMultiplier);
         ScaleSingle(creature, AttributeType.Power, p.DamageMultiplier);
         ScaleGroup(creature, AttributeType.Armor, AttributeType.Resistance, p.DefenseMultiplier);
-        ScaleSingle(creature, AttributeType.Precision, p.SpeedMultiplier);
+        ScaleSingle(creature, AttributeType.AttackSpeed, p.SpeedMultiplier);
     }
 
     private static void ApplyDamageProfile(Creature creature)
@@ -148,7 +148,7 @@ public class CreatureScaler : ICreatureScaler
     //    ScaleGroup(creature, AttributeType.Power, AttributeType.Power, p.DamageMultiplier);
     //    ScaleGroup(creature, AttributeType.Armor, AttributeType.Resistance, p.DefenseMultiplier);
 
-    //    ScaleSingle(creature, AttributeType.Precision, p.SpeedMultiplier);
+    //    ScaleSingle(creature, AttributeType.AttackSpeed, p.SpeedMultiplier);
     //    ScaleSingle(creature, AttributeType.Cooldown, p.CdrMultiplier);
     //}
 
@@ -157,7 +157,7 @@ public class CreatureScaler : ICreatureScaler
     //    ScaleGroup(creature, AttributeType.MaxHealth, AttributeType.MaxHealth, creature.HealthFactor);
     //    ScaleGroup(creature, AttributeType.Power, AttributeType.Power, creature.DamageFactor);
     //    ScaleGroup(creature, AttributeType.Armor, AttributeType.Resistance, creature.DefenseFactor);
-    //    ScaleSingle(creature, AttributeType.Precision, creature.SpeedFactor);
+    //    ScaleSingle(creature, AttributeType.AttackSpeed, creature.SpeedFactor);
     //}
 
     //private static void ApplyRubberBanding(Creature creature, Area ctx, int effectiveD)

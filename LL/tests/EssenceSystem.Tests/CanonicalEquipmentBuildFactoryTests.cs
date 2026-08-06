@@ -70,6 +70,10 @@ public sealed class CanonicalEquipmentBuildFactoryTests
             report.ParticipantAttributes[nameof(AttributeType.Resistance)],
             report.ParticipantAttributes[nameof(AttributeType.MagicPenetration)]);
         Assert.Equal(physicalMitigation, magicalMitigation, precision: 6);
+        Assert.Equal(0.3f, physicalMitigation, precision: 6);
+        Assert.Equal(0, report.ParticipantAttributes[nameof(AttributeType.ArmorPenetration)]);
+        Assert.Equal(0, report.ParticipantAttributes[nameof(AttributeType.MagicPenetration)]);
+        Assert.Equal(0, report.ParticipantAttributes[nameof(AttributeType.HealingPowerPercent)]);
     }
 
     [Fact]

@@ -28,7 +28,6 @@ export interface AttributeDefinition {
   isContentFacing: boolean;
   displayPrecision: number;
   displaySuffix: string;
-  approvedPrimarySource: AttributeType | null;
   relevantBenchmarkScenarios: string[];
 }
 
