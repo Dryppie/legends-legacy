@@ -1,0 +1,18 @@
+{
+  "title": "Guild Guide",
+  "lastReviewed": "2026-08-06",
+  "sections": [
+    {
+      "heading": "Joining or creating",
+      "body": "Characters without a guild can review invitations, browse available guilds, apply, or create a guild. Creation and application requirements are shown before confirmation. A character can belong to only one guild at a time."
+    },
+    {
+      "heading": "Members and permissions",
+      "body": "The Guild tab shows members, invitations, applications, and actions available to your role. Leadership and officer permissions control sensitive actions such as inviting, accepting applications, and managing the guild."
+    },
+    {
+      "heading": "Buildings, missions, and shop",
+      "body": "Buildings provide guild-wide progression and benefits when their requirements are funded. Missions and personal guild orders contribute activity and rewards. The Guild Shop spends Guild Favor on the currently available stock, while Rankings compare guild progression."
+    }
+  ]
+}

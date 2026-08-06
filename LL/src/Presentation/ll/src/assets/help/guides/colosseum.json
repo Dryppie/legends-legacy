@@ -1,0 +1,18 @@
+{
+  "title": "Colosseum Guide",
+  "lastReviewed": "2026-08-06",
+  "sections": [
+    {
+      "heading": "Arena profile",
+      "body": "The summary tracks your tickets, tier, rating, Glory, streak, daily-win state, and record. Your defense setup is used when other competitors face your character, so keep it aligned with your current build."
+    },
+    {
+      "heading": "Arena and tournaments",
+      "body": "Arena battles match you through the current competitive system and update the displayed record when resolved. Tournament Grounds contains scheduled brackets, teams, entry requirements, and match history. Review the tournament details before entering."
+    },
+    {
+      "heading": "Rewards and records",
+      "body": "Glory and other competitive rewards are spent or claimed through the relevant Colosseum views, including the Champion's Market. Rankings compare competitors, and Record of Battles links completed matches to their available details or replay."
+    }
+  ]
+}

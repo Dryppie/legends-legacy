@@ -18,6 +18,8 @@
     <app-help-launcher
       *ngIf="guidePageId"
       [pageId]="guidePageId"
+      presentation="inline"
+      [ariaLabel]="'Open ' + title + ' guide'"
     ></app-help-launcher>
   </div>
   <div class="w-full sm:flex sm:justify-end">

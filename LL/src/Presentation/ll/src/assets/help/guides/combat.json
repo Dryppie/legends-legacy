@@ -1,0 +1,18 @@
+{
+  "title": "Combat Guide",
+  "lastReviewed": "2026-08-06",
+  "sections": [
+    {
+      "heading": "Encounters",
+      "body": "Combat resolves encounters using your current character stats, equipment, active Essence loadout, and the enemy team. The combat view displays both teams, changing vitals, the encounter duration, and the final outcome."
+    },
+    {
+      "heading": "Ongoing and offline combat",
+      "body": "Idle combat continues as character actions resolve. When you return, stored encounters and rewards may need a moment to catch up. If offline progress is paused, use Retry after reviewing the displayed error."
+    },
+    {
+      "heading": "Controls and results",
+      "body": "Stop ends ongoing idle combat after the current state is resolved. Training, dungeon, and replay battles can instead offer a Skip or Continue action. Rewards and progression are recorded by the activity that started the battle."
+    }
+  ]
+}

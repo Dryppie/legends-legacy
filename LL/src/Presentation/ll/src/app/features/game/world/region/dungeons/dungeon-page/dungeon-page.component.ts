@@ -24,6 +24,7 @@ import { CombatComponent } from '../../../../../../shared/components/combat/comb
 import { DungeonRoomIconComponent } from '../../../../../../shared/components/dungeons/dungeon-room-icon/dungeon-room-icon.component';
 import { InventoryItemComponent } from '../../../../../../shared/components/inventory-item/inventory-item.component';
 import { InventoryItem } from '../../../../../../shared/models/inventoryItem';
+import { HelpLauncherComponent } from '../../../../../../shared/help/help-launcher.component';
 
 interface DungeonGraphNode extends DungeonMapNode {
   x: number;
@@ -55,18 +56,19 @@ interface DungeonVigorForecast {
 }
 
 @Component({
-    selector: 'app-dungeon-page',
-    imports: [
-        NgIf,
-        NgFor,
-        NgClass,
-        DecimalPipe,
-        CombatComponent,
-        DungeonRoomIconComponent,
-        InventoryItemComponent,
-    ],
-    templateUrl: './dungeon-page.component.html',
-    styleUrl: './dungeon-page.component.scss'
+  selector: 'app-dungeon-page',
+  imports: [
+    NgIf,
+    NgFor,
+    NgClass,
+    DecimalPipe,
+    CombatComponent,
+    DungeonRoomIconComponent,
+    InventoryItemComponent,
+    HelpLauncherComponent,
+  ],
+  templateUrl: './dungeon-page.component.html',
+  styleUrl: './dungeon-page.component.scss',
 })
 export class DungeonPageComponent {
   readonly dungeonState = inject(DungeonStateService);

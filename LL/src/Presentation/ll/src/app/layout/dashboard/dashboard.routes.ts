@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { DashboardComponent } from './dashboard.component';
 import { CombatComponent } from '../../shared/components/combat/combat.component';
+import { GUIDE_PAGE_IDS } from '../../shared/help/guide-catalog';
 
 export const DASHBOARD_ROUTES: Routes = [
   {
@@ -15,6 +16,7 @@ export const DASHBOARD_ROUTES: Routes = [
       {
         path: 'combat',
         component: CombatComponent,
+        data: { guidePageId: GUIDE_PAGE_IDS.combat },
       },
       {
         path: 'character',

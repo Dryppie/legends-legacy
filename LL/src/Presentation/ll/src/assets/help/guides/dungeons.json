@@ -1,0 +1,18 @@
+{
+  "title": "Dungeons Guide",
+  "lastReviewed": "2026-08-06",
+  "sections": [
+    {
+      "heading": "Expeditions and routes",
+      "body": "A dungeon run generates a map of connected rooms. Complete the current room, then choose from the available route options. The map marks traversed rooms, your current position, and routes that can be selected next."
+    },
+    {
+      "heading": "Vigor and decisions",
+      "body": "Vigor represents the condition of your expedition and can change as rooms resolve. Room previews and decision text describe known consequences, while forecasts communicate uncertainty. Reaching a failed state ends the expedition."
+    },
+    {
+      "heading": "Pending Loot",
+      "body": "Rewards collected during a run remain Pending Loot until secured. Completing the dungeon or choosing a safe retreat lets you claim eligible rewards; failing the run loses Pending Loot. Review the warning and current route before continuing."
+    }
+  ]
+}

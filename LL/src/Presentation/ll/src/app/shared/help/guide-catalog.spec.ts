@@ -1,0 +1,51 @@
+import { Route, Routes } from '@angular/router';
+import { DASHBOARD_ROUTES } from '../../layout/dashboard/dashboard.routes';
+import { CHARACTER_ROUTES } from '../../features/game/character/character.routes';
+import { CITY_ROUTES } from '../../features/game/city/city.routes';
+import { PROFESSIONS_ROUTES } from '../../features/game/professions/professions.routes';
+import { WORLD_ROUTES } from '../../features/game/world/world.routes';
+import { PROPHECIES_ROUTES } from '../../features/game/prophecies/prophecies.routes';
+import { SETTINGS_ROUTES } from '../../features/game/settings/settings.routes';
+import { ALL_GUIDE_PAGE_IDS } from './guide-catalog';
+
+describe('guide route catalog', () => {
+  const routeSets: Routes[] = [
+    DASHBOARD_ROUTES,
+    CHARACTER_ROUTES,
+    CITY_ROUTES,
+    PROFESSIONS_ROUTES,
+    WORLD_ROUTES,
+    PROPHECIES_ROUTES,
+    SETTINGS_ROUTES,
+  ];
+
+  it('assigns guide metadata to every concrete game page', () => {
+    const pages = routeSets.flatMap((routes) => concretePages(routes));
+    const withoutGuide = pages
+      .filter((route) => typeof route.data?.['guidePageId'] !== 'string')
+      .map((route) => route.path);
+
+    expect(withoutGuide).toEqual([]);
+  });
+
+  it('uses every catalog entry in route metadata', () => {
+    const usedIds = new Set(
+      routeSets
+        .flatMap((routes) => concretePages(routes))
+        .map((route) => route.data?.['guidePageId'])
+        .filter((id): id is string => typeof id === 'string'),
+    );
+
+    expect(ALL_GUIDE_PAGE_IDS.filter((id) => !usedIds.has(id))).toEqual([]);
+  });
+});
+
+function concretePages(routes: Routes): Route[] {
+  return routes.flatMap((route) => {
+    if (route.children?.length) return concretePages(route.children);
+    if (route.redirectTo !== undefined || route.component === undefined) {
+      return [];
+    }
+    return [route];
+  });
+}

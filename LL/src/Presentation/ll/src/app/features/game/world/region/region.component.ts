@@ -26,6 +26,7 @@ import {
   TUTORIAL_STEP_DEFEAT_TRAINING_CREATURE,
   TUTORIAL_TRAINING_GROUNDS_AREA_ID,
 } from '../../../../shared/models/tutorial';
+import { HelpLauncherComponent } from '../../../../shared/help/help-launcher.component';
 
 @Component({
   selector: 'app-region',
@@ -39,6 +40,7 @@ import {
     DungeonsComponent,
     CombatComponent,
     RouterLink,
+    HelpLauncherComponent,
   ],
   templateUrl: './region.component.html',
 })

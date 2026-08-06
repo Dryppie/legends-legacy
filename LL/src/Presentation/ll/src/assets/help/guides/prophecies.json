@@ -1,0 +1,18 @@
+{
+  "title": "Prophecies Guide",
+  "lastReviewed": "2026-08-06",
+  "sections": [
+    {
+      "heading": "Daily prophecies",
+      "body": "Daily prophecy slots present a choice of objectives. Select one for each available slot, then perform the described activity elsewhere in the game. Progress updates automatically when qualifying actions are recorded."
+    },
+    {
+      "heading": "Weekly Favor and revelations",
+      "body": "Completing prophecy objectives contributes to weekly progression. Revelation milestones and greater prophecies provide additional goals and rewards; the page shows current progress and any choices still required."
+    },
+    {
+      "heading": "Claims, caches, and expiry",
+      "body": "Completed objectives must be claimed where a claim action is shown. Reward caches remain listed until opened. Daily and weekly content follows its displayed reset cycle, so review incomplete and unclaimed entries before expiry."
+    }
+  ]
+}

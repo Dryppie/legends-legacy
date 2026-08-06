@@ -1,0 +1,18 @@
+{
+  "title": "Soul Archive Guide",
+  "lastReviewed": "2026-08-06",
+  "sections": [
+    {
+      "heading": "Archived Essences",
+      "body": "Defeated creatures can contribute Essences to your archive. Select an Essence to review its attributes, progression, available actions, and the creature it came from. Filters help locate Essences by region, creature, or progression state."
+    },
+    {
+      "heading": "Progression",
+      "body": "Absorption uses eligible Essence resources to strengthen an archived Essence. Ascension and evolution have their own requirements and are only offered when the selected Essence is eligible. The details panel previews the result before you confirm."
+    },
+    {
+      "heading": "Loadouts and Creature Archive",
+      "body": "Place compatible Essences into a loadout, save the arrangement, and activate it to apply its effects. Only the active loadout affects your character. The Creature Archive records discovered creatures and highlights opportunities connected to Essence Focus."
+    }
+  ]
+}

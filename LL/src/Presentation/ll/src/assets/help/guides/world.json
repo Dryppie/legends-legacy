@@ -1,0 +1,18 @@
+{
+  "title": "World & Regions Guide",
+  "lastReviewed": "2026-08-06",
+  "sections": [
+    {
+      "heading": "Regions",
+      "body": "The World Map opens available regions. Each region groups its activities into Areas, Dungeons, and Raids. Availability can depend on progression, authored content, or activity-specific requirements."
+    },
+    {
+      "heading": "Areas",
+      "body": "Area cards show the creatures and activity available at that location. Starting an area can begin combat or another character action. Your current action remains accessible from the navigation while it is active."
+    },
+    {
+      "heading": "Dungeons and raids",
+      "body": "Dungeons are route-based expeditions with Vigor and Pending Loot. Raids are larger encounters with their own entry and participation requirements. Open an activity card to review its current requirements before starting."
+    }
+  ]
+}

@@ -22,11 +22,18 @@
     class="flex h-full w-full items-center justify-center px-4 text-center"
   >
     <div class="ll-panel w-full max-w-xl p-6">
-      <p class="ll-eyebrow">
-        {{ isLoading ? 'Offline Progress' : 'Idle Combat' }}
-      </p>
+      <div class="flex items-center justify-between gap-3 text-left">
+        <p class="ll-eyebrow">
+          {{ isLoading ? "Offline Progress" : "Idle Combat" }}
+        </p>
+        <app-help-launcher
+          [pageId]="combatGuidePageId"
+          presentation="inline"
+          ariaLabel="Open combat guide"
+        ></app-help-launcher>
+      </div>
       <h2 class="ll-heading mt-2 text-2xl">
-        {{ isLoading ? 'Resolving Combat' : 'Combat Is Ongoing' }}
+        {{ isLoading ? "Resolving Combat" : "Combat Is Ongoing" }}
       </h2>
       <p *ngIf="isLoading" class="ll-copy mt-3">
         Resolving stored combat and rewards.
@@ -87,13 +94,20 @@
           </span>
         </div>
 
-        <app-mini-button
-          class="block shrink-0 self-start sm:self-auto"
-          [text]="combatActionButtonText()"
-          [disabled]="isStoppingCombat"
-          [width]="battleType === 'IdleCombat' ? '72px' : '132px'"
-          (click)="onStopOrSkip()"
-        ></app-mini-button>
+        <div class="flex shrink-0 items-center gap-2 self-start sm:self-auto">
+          <app-help-launcher
+            [pageId]="combatGuidePageId"
+            presentation="inline"
+            ariaLabel="Open combat guide"
+          ></app-help-launcher>
+          <app-mini-button
+            class="block"
+            [text]="combatActionButtonText()"
+            [disabled]="isStoppingCombat"
+            [width]="battleType === 'IdleCombat' ? '72px' : '132px'"
+            (click)="onStopOrSkip()"
+          ></app-mini-button>
+        </div>
       </header>
 
       <app-combat-entity-stats

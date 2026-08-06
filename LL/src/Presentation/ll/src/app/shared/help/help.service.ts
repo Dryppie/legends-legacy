@@ -32,6 +32,15 @@ export class HelpService {
       return this.cache.get(param)!;
     }
 
-    return this.http.get<T>(param);
+    if (!this.cache.has(param)) {
+      this.cache.set(
+        param,
+        this.http
+          .get<T>(param)
+          .pipe(shareReplay({ bufferSize: 1, refCount: false })),
+      );
+    }
+
+    return this.cache.get(param)!;
   }
 }
