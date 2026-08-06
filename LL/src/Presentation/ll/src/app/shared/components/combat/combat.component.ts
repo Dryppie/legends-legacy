@@ -27,6 +27,8 @@ import { CharacterActionsStateService } from '../../../core/services/api/charact
 import { CombatEntityStatsComponent } from './combat-entity-stats/combat-entity-stats.component';
 import { FirstPartyTourService } from '../../../core/services/client-side/first-party-tour/first-party-tour.service';
 import { Router } from '@angular/router';
+import { HelpLauncherComponent } from '../../help/help-launcher.component';
+import { GUIDE_PAGE_IDS } from '../../help/guide-catalog';
 
 @Component({
   selector: 'app-combat',
@@ -38,10 +40,12 @@ import { Router } from '@angular/router';
     MiniButtonComponent,
     CombatLogComponent,
     CombatEntityStatsComponent,
+    HelpLauncherComponent,
   ],
   templateUrl: './combat.component.html',
 })
 export class CombatComponent implements OnInit, OnDestroy {
+  readonly combatGuidePageId = GUIDE_PAGE_IDS.combat;
   combatEvents: CombatEvent[] = [];
   entityStats: EntityStats[] = [];
   combatDurationTicks = 0;

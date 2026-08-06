@@ -13,21 +13,29 @@
 
 <ng-template #replayShell>
   <section class="ll-page-stack pr-4 text-white sm:pr-6">
-    <div *ngIf="error()" class="ll-panel border border-red-500/40 p-3 text-sm text-red-200">
+    <div
+      *ngIf="error()"
+      class="ll-panel border border-red-500/40 p-3 text-sm text-red-200"
+    >
       {{ error() }}
     </div>
 
     <section class="ll-stat-card flex flex-col gap-4 p-4">
-      <div class="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+      <div
+        class="flex flex-col gap-3 md:flex-row md:items-start md:justify-between"
+      >
         <div class="min-w-0">
           <p class="ll-stat-label">Tournament Replay</p>
           <h1 class="ll-heading mt-1 text-xl">
             {{ details()?.summary?.name ?? "Tournament Match" }}
           </h1>
           <p class="ll-copy mt-1">
-            <span *ngIf="round() as currentRound">{{ currentRound.name }} · </span>
+            <span *ngIf="round() as currentRound"
+              >{{ currentRound.name }} ·
+            </span>
             <span *ngIf="match() as currentMatch">
-              Match {{ currentMatch.matchNumber }} · {{ outcomeLabel(currentMatch) }}
+              Match {{ currentMatch.matchNumber }} ·
+              {{ outcomeLabel(currentMatch) }}
             </span>
             <span *ngIf="details()?.summary?.completedAtUtc">
               · {{ details()?.summary?.completedAtUtc | date: "short" }}
@@ -36,6 +44,10 @@
         </div>
 
         <div class="flex shrink-0 flex-wrap gap-2">
+          <app-help-launcher
+            presentation="inline"
+            ariaLabel="Open tournament replay guide"
+          ></app-help-launcher>
           <button
             type="button"
             class="ll-button-primary px-3 py-2 text-sm"
@@ -54,11 +66,12 @@
         </div>
       </div>
 
-      <div *ngIf="loading()" class="ll-empty-state">
-        Loading replay...
-      </div>
+      <div *ngIf="loading()" class="ll-empty-state">Loading replay...</div>
 
-      <div *ngIf="match() as currentMatch" class="grid gap-3 md:grid-cols-[1fr_auto_1fr]">
+      <div
+        *ngIf="match() as currentMatch"
+        class="grid gap-3 md:grid-cols-[1fr_auto_1fr]"
+      >
         <div class="ll-panel p-3">
           <p class="ll-stat-label">Player One</p>
           <p
@@ -71,9 +84,13 @@
           </p>
         </div>
 
-        <div class="ll-panel flex min-w-28 flex-col items-center justify-center p-3 text-center">
+        <div
+          class="ll-panel flex min-w-28 flex-col items-center justify-center p-3 text-center"
+        >
           <p class="ll-stat-label">Outcome</p>
-          <p class="ll-heading mt-1 text-base">{{ outcomeLabel(currentMatch) }}</p>
+          <p class="ll-heading mt-1 text-base">
+            {{ outcomeLabel(currentMatch) }}
+          </p>
         </div>
 
         <div class="ll-panel p-3 md:text-right">
@@ -89,14 +106,21 @@
         </div>
       </div>
 
-      <div *ngIf="replay() as loadedReplay" class="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+      <div
+        *ngIf="replay() as loadedReplay"
+        class="grid gap-2 sm:grid-cols-2 lg:grid-cols-4"
+      >
         <div class="ll-panel p-3">
           <p class="ll-stat-label">Combat Result</p>
-          <p class="ll-heading mt-1 text-base">{{ enumLabel(loadedReplay.outcome) }}</p>
+          <p class="ll-heading mt-1 text-base">
+            {{ enumLabel(loadedReplay.outcome) }}
+          </p>
         </div>
         <div class="ll-panel p-3">
           <p class="ll-stat-label">Experience</p>
-          <p class="ll-heading mt-1 text-base">{{ loadedReplay.experienceGained }}</p>
+          <p class="ll-heading mt-1 text-base">
+            {{ loadedReplay.experienceGained }}
+          </p>
         </div>
         <div class="ll-panel p-3">
           <p class="ll-stat-label">Duration</p>

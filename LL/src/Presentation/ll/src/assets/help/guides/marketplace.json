@@ -1,0 +1,18 @@
+{
+  "title": "Cinder Bazaar Guide",
+  "lastReviewed": "2026-08-06",
+  "sections": [
+    {
+      "heading": "Browse and buy",
+      "body": "Browse filters the market by item category. Commodity markets group interchangeable resources, consumables, and Essences into buy and sell order books; unique equipment is listed as exact items. Always review quantity, unit price, and total before confirming."
+    },
+    {
+      "heading": "Sell and place orders",
+      "body": "Sell selects eligible inventory items and either fills matching demand or creates a listing at your chosen price. Commodity markets can also accept buy orders. Restrictions shown by the action panel must be resolved before an order can be submitted."
+    },
+    {
+      "heading": "My Orders and access",
+      "body": "My Orders contains your active listings and buy orders and provides their cancellation actions. Cinders committed to an order or items committed to a listing remain tied to that order until it fills or is cancelled. Guest accounts must be registered before using the Bazaar."
+    }
+  ]
+}

@@ -1,4 +1,5 @@
-import { Injectable, Injector } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
+import { Inject, Injectable, Injector } from '@angular/core';
 import { Overlay, OverlayRef } from '@angular/cdk/overlay';
 import { ComponentPortal } from '@angular/cdk/portal';
 import { HelpDrawerComponent } from './help-drawer.component';
@@ -9,9 +10,11 @@ export class HelpOverlayService {
   constructor(
     private overlay: Overlay,
     private injector: Injector,
+    @Inject(DOCUMENT) private document: Document,
   ) {}
 
   open(pageId: string) {
+    const previouslyFocused = this.document.activeElement as HTMLElement | null;
     const overlayRef = this.overlay.create({
       hasBackdrop: true,
       backdropClass: 'cdk-overlay-dark-backdrop',
@@ -21,12 +24,13 @@ export class HelpOverlayService {
         .global()
         .left('0')
         .top('0')
-        .width('384px')
-        .height('100vh'),
+        .width('min(384px, 100vw)')
+        .height('100dvh'),
     });
 
     // close on backdrop click
     overlayRef.backdropClick().subscribe(() => overlayRef.dispose());
+    overlayRef.detachments().subscribe(() => previouslyFocused?.focus());
 
     // pass pageId + overlayRef to the drawer
     const injector = Injector.create({

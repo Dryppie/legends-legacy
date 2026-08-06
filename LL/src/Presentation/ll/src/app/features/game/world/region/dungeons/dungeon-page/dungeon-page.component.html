@@ -24,15 +24,21 @@
           </h1>
         </div>
 
-        <div class="dungeon-depth">
-          Expedition
-          <strong>
-            {{
-              rewardResult.run.status === "Retreated"
-                ? "Retreated"
-                : "Completed"
-            }}
-          </strong>
+        <div class="dungeon-header__actions">
+          <div class="dungeon-depth">
+            Expedition
+            <strong>
+              {{
+                rewardResult.run.status === "Retreated"
+                  ? "Retreated"
+                  : "Completed"
+              }}
+            </strong>
+          </div>
+          <app-help-launcher
+            presentation="inline"
+            ariaLabel="Open dungeon guide"
+          ></app-help-launcher>
         </div>
       </header>
 
@@ -137,6 +143,10 @@
             <b>{{ phaseLabel() }}</b>
             <span class="dungeon-status-note"> - {{ statusNote() }}</span>
           </div>
+          <app-help-launcher
+            presentation="inline"
+            ariaLabel="Open dungeon guide"
+          ></app-help-launcher>
         </div>
       </header>
 
@@ -605,6 +615,11 @@
 
 <ng-template #emptyState>
   <div class="dungeon-empty ll-panel bg-texture">
+    <app-help-launcher
+      class="self-end"
+      presentation="inline"
+      ariaLabel="Open dungeon guide"
+    ></app-help-launcher>
     <div class="dungeon-eyebrow ll-eyebrow">No active run</div>
     <h2 class="ll-heading">Choose a dungeon to begin</h2>
     <p>Your generated dungeon map and Pending Loot will appear here.</p>

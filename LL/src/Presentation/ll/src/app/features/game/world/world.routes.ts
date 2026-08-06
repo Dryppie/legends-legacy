@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 import { WorldComponent } from './world.component';
 import { RegionComponent } from './region/region.component';
 import { DungeonPageComponent } from './region/dungeons/dungeon-page/dungeon-page.component';
+import { GUIDE_PAGE_IDS } from '../../../shared/help/guide-catalog';
 
 export const WORLD_ROUTES: Routes = [
   {
@@ -11,6 +12,7 @@ export const WORLD_ROUTES: Routes = [
       {
         path: 'dungeon',
         component: DungeonPageComponent,
+        data: { guidePageId: GUIDE_PAGE_IDS.dungeons },
       },
       {
         path: '',
@@ -20,6 +22,7 @@ export const WORLD_ROUTES: Routes = [
       {
         path: ':id',
         component: RegionComponent,
+        data: { guidePageId: GUIDE_PAGE_IDS.world },
       },
     ],
   },

@@ -1,17 +1,22 @@
 {
-  "title": "Crafting & Tempering - Guide",
+  "title": "Crafting & Tempering Guide",
+  "lastReviewed": "2026-08-06",
   "sections": [
     {
       "heading": "Crafting",
-      "body": "Crafting an item costs materials, and the item you craft receives a base of 500 Potential. The item receives an additional 10 Potential for every crafting level you have for that specific item type (armor, jewelry, or weapon).<br>Crafting an item does not give you EXP. Only tempering does."
+      "body": "Choose a learned recipe, select the item tier and quantity, then spend the listed materials to create the equipment. Every crafted item starts at Common rarity, while its initial Quality is rolled separately. Higher recipe mastery improves your Quality chances."
+    },
+    {
+      "heading": "Potential and progression",
+      "body": "Starting Potential depends on the item's tier and Quality, your mastery of that recipe, and your Crafting level. The preview shows the exact possible range before you craft. Crafting items grants recipe-mastery experience; tempering grants Crafting profession experience."
     },
     {
       "heading": "Tempering",
-      "body": "Every tempering action costs 1 Potential, and has four different types of outcomes."
+      "body": "Add eligible crafted equipment to the tempering queue. Each tempering action takes 10 seconds and always spends 1 Potential. Items with no Potential, items without a current base recipe, and items that have reached Legacy rarity cannot be tempered."
     },
     {
       "heading": "Outcomes",
-      "body": "<strong>Critical</strong> -> Turns the item into a Masterpiece or Growth Item. <br><strong>Positive</strong> -> Increase item exp by 1. Reaching 10 item exp upgrades the item to the next rarity. Each increase in rarity decreases the chance for a positive outcome. <br><strong>Negative</strong> -> A negative outcome has a 5% chance of happening. This increases by +5% for every increase in rarity.<br>A negative outcome either decrease item exp, or consumes 1 extra potential. <br><strong>Neutral</strong> -> Does nothing."
+      "body": "<strong>Critical</strong> — Usually improves the item's Quality by one step, increasing its stats. A rare critical instead turns it into a leveling item.<br><strong>Positive</strong> — Adds 1 item XP. At 10 item XP, the item advances to the next rarity and receives a stat improvement based on its tempering profile. Positive outcomes become less likely at higher rarities.<br><strong>Negative</strong> — May spend 1 additional Potential or remove 1 item XP. The chance starts at 5% for Common items and rises by 5 percentage points per rarity step.<br><strong>Neutral</strong> — Has no additional effect beyond the normal Potential cost."
     }
   ]
 }

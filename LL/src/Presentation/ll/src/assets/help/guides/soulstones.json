@@ -1,0 +1,18 @@
+{
+  "title": "Soulstone Archive Guide",
+  "lastReviewed": "2026-08-06",
+  "sections": [
+    {
+      "heading": "Permanent progression",
+      "body": "Soulstones purchase permanent character upgrades. The summary shows your available currency and progression, while the tabs organize upgrades into branches."
+    },
+    {
+      "heading": "Branches and prerequisites",
+      "body": "Select an upgrade to review its current rank, next effect, cost, and prerequisites. Some upgrades require earlier ranks or another node in the same branch before they can be purchased."
+    },
+    {
+      "heading": "Before purchasing",
+      "body": "A Soulstone purchase is permanent and spends the displayed currency immediately. Compare the next-rank effect with your build and current activities before committing your stones."
+    }
+  ]
+}

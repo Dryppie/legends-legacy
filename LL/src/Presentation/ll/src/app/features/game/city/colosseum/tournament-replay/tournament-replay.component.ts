@@ -12,11 +12,12 @@ import {
   TournamentDetails,
   TournamentMatch,
 } from '../../../../../shared/models/Dtos/colosseum/tournamentGrounds';
+import { HelpLauncherComponent } from '../../../../../shared/help/help-launcher.component';
 
 @Component({
-    selector: 'app-tournament-replay',
-    imports: [CombatComponent, DatePipe, NgIf, RouterLink],
-    templateUrl: './tournament-replay.component.html'
+  selector: 'app-tournament-replay',
+  imports: [CombatComponent, DatePipe, NgIf, RouterLink, HelpLauncherComponent],
+  templateUrl: './tournament-replay.component.html',
 })
 export class TournamentReplayComponent implements OnInit {
   readonly battleType = BattleType.Colosseum;
@@ -31,9 +32,11 @@ export class TournamentReplayComponent implements OnInit {
   readonly round = computed(() => {
     const bracket = this.bracket();
     const matchId = this.matchId();
-    return bracket?.rounds.find((round) =>
-      round.matches.some((match) => match.id === matchId),
-    ) ?? null;
+    return (
+      bracket?.rounds.find((round) =>
+        round.matches.some((match) => match.id === matchId),
+      ) ?? null
+    );
   });
 
   readonly match = computed<TournamentMatch | null>(() => {
@@ -73,7 +76,10 @@ export class TournamentReplayComponent implements OnInit {
   }
 
   teamLabel(
-    team: { name: string; seed?: number | null; memberCount?: number | null } | null | undefined,
+    team:
+      | { name: string; seed?: number | null; memberCount?: number | null }
+      | null
+      | undefined,
   ): string {
     if (!team) return 'Pending';
     const name = team.seed ? `#${team.seed} ${team.name}` : team.name;

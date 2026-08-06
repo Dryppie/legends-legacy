@@ -1,0 +1,18 @@
+{
+  "title": "Tournament Replay Guide",
+  "lastReviewed": "2026-08-06",
+  "sections": [
+    {
+      "heading": "Historical match",
+      "body": "A tournament replay shows the recorded teams, round, match number, outcome, and combat result for a completed tournament match. It does not start a new competitive match or change the recorded bracket."
+    },
+    {
+      "heading": "Playing the replay",
+      "body": "Choose Play Replay to watch the stored combat sequence. During playback, Skip advances past the animated battle and returns to the replay summary."
+    },
+    {
+      "heading": "Returning",
+      "body": "Use Back to return to the Colosseum. If replay data cannot be loaded, the error message identifies whether the link is incomplete or the recorded match is unavailable."
+    }
+  ]
+}

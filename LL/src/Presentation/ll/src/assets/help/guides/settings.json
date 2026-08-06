@@ -1,0 +1,18 @@
+{
+  "title": "Settings Guide",
+  "lastReviewed": "2026-08-06",
+  "sections": [
+    {
+      "heading": "Interface layout",
+      "body": "Sidebar and Chat controls change how navigation and chat are arranged on supported screen sizes. These preferences affect presentation only and do not change character progression."
+    },
+    {
+      "heading": "Identity and access",
+      "body": "Account settings show the current character and available sign-in methods. Guest accounts can bind email or Gmail to protect access and unlock account-restricted features. Character-name changes and credential actions show their requirements before saving."
+    },
+    {
+      "heading": "Session and support",
+      "body": "Sign Out ends the current session on this device. Game links provide beta, support, and patch-note destinations. Review the displayed build version when reporting a problem."
+    }
+  ]
+}
