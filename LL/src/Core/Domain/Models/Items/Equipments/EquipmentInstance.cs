@@ -28,8 +28,18 @@ public class EquipmentInstance : ItemInstance
         : CraftedName ?? EquipmentBase.Name;
 
     [NotMapped]
+    public bool UsesRecipeStatBudget => !string.IsNullOrWhiteSpace(BaseRecipeId);
+
+    /// <summary>
+    /// Authored item-base modifiers are retained for legacy and directly granted equipment.
+    /// Crafted equipment receives its complete combat budget through recipe-generated instance
+    /// modifiers, so applying these modifiers as well would budget the same item twice.
+    /// </summary>
+    [NotMapped]
     public IReadOnlyCollection<ItemAttributeModifier> BaseModifiers =>
-        EquipmentBase?.AttributeModifiers
+        UsesRecipeStatBudget
+            ? []
+            : EquipmentBase?.AttributeModifiers
             .Select(attr => new ItemAttributeModifier(
                 attr.AttributeType,
                 GetBoostedBaseModifierAmount(
@@ -38,7 +48,7 @@ public class EquipmentInstance : ItemInstance
                     Rarity),
                 attr.ModifierType))
             .ToList()
-        ?? new List<ItemAttributeModifier>(0);
+              ?? [];
 
 
     /// <summary>Modifiers that were added to *this* item as it levelled up.</summary>

@@ -628,12 +628,7 @@ public class CraftingService : ICraftingService
                 tier,
                 possibleQualities)
             .ToDictionary(x => x.AttributeType);
-        var baseAmounts = itemBase.AttributeModifiers
-            .GroupBy(x => x.AttributeType)
-            .ToDictionary(x => x.Key, x => x.Sum(modifier => modifier.Amount));
-        var attributes = baseAmounts.Keys
-            .Concat(craftedRanges.Keys)
-            .Distinct()
+        var attributes = craftedRanges.Keys
             .OrderBy(x => x)
             .Select(attributeType =>
             {
@@ -641,7 +636,7 @@ public class CraftingService : ICraftingService
                 return new CraftingAttributePreviewDto
                 {
                     AttributeType = attributeType,
-                    BaseAmount = baseAmounts.GetValueOrDefault(attributeType),
+                    BaseAmount = 0,
                     MinimumCraftedAmount = crafted?.MinimumAmount ?? 0,
                     MaximumCraftedAmount = crafted?.MaximumAmount ?? 0
                 };

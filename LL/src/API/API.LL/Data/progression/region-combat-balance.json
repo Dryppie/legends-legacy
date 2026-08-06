@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 3,
   "profiles": [
     {
       "id": "legacy-area-v1",
@@ -38,47 +38,49 @@
       "maximumStepIncrease": 0.50
     },
     {
-      "id": "shenic-area-v1",
+      "id": "shenic-area-v3",
       "targetWinRateBasisPoints": 8500,
       "healthCurve": {
-        "model": "Power",
-        "baseMultiplier": 1.0,
-        "growthPerStep": 0.22,
-        "exponent": 1.12
+        "model": "Exponential",
+        "baseMultiplier": 1.6,
+        "growthPerStep": 0.2609,
+        "exponent": 1.0
       },
       "offenseCurve": {
-        "model": "Power",
-        "baseMultiplier": 1.0,
-        "growthPerStep": 0.18,
-        "exponent": 1.10
+        "model": "Exponential",
+        "baseMultiplier": 1.85,
+        "growthPerStep": 0.1891,
+        "exponent": 1.0
       },
       "defenseCurve": {
-        "model": "Power",
-        "baseMultiplier": 1.0,
-        "growthPerStep": 0.16,
-        "exponent": 1.08
+        "model": "Exponential",
+        "baseMultiplier": 1.15,
+        "growthPerStep": 0.1948,
+        "exponent": 1.0
       },
       "resistanceCurve": {
-        "model": "Power",
-        "baseMultiplier": 1.0,
-        "growthPerStep": 0.16,
-        "exponent": 1.08
+        "model": "Exponential",
+        "baseMultiplier": 1.15,
+        "growthPerStep": 0.1948,
+        "exponent": 1.0
       },
-      "attackSpeedGrowthPerStep": 0.08,
-      "penetrationGrowthPerStep": 0.10,
-      "softDefenseGrowthPerStep": 0.05,
+      "attackSpeedGrowthPerStep": 0.10,
+      "penetrationGrowthPerStep": 0.12,
+      "softDefenseGrowthPerStep": 0.06,
       "critChancePerStep": 0.03,
       "critDamagePerStep": 0.04,
       "critChanceCap": 0.45,
       "critDamageCap": 2.0,
-      "maximumStepIncrease": 0.50
+      "maximumStepIncrease": 0.27
     }
   ],
   "regions": [
     {
       "regionKey": "shenic",
-      "profileId": "shenic-area-v1",
+      "profileId": "shenic-area-v3",
       "startingGlobalStep": 1,
+      "startingCombatRating": 47,
+      "endingCombatRating": 342,
       "areaIds": [
         "region_01_area_01",
         "region_01_area_02",
@@ -90,6 +92,18 @@
         "region_01_area_10",
         "region_01_area_11",
         "region_01_area_07"
+      ],
+      "defaultBuildIds": [
+        "tutorial-starter",
+        "t1-standard-common",
+        "t1-standard-common",
+        "t1-standard-uncommon",
+        "t1-standard-rare",
+        "t1-standard-rare",
+        "t1-standard-epic",
+        "t1-standard-epic",
+        "t1-standard-unique",
+        "t1-standard-legendary"
       ]
     }
   ]

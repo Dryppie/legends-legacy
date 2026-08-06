@@ -86,6 +86,82 @@ public sealed class RegionOneAreaSimulationTests
         Assert.Contains(report.Areas, area => area.Status == "Too easy");
     }
 
+    [Fact]
+    public async Task Region_endpoint_projections_cover_tier_one_through_tier_ten()
+    {
+        var fixture = CreateFixture();
+
+        var options = await fixture.Simulator.GetOptionsAsync(CancellationToken.None);
+
+        Assert.Equal(10, options.RegionProjections.Count);
+        var first = options.RegionProjections[0];
+        Assert.Equal(1, first.RegionNumber);
+        Assert.Equal(1, first.EquipmentTier);
+        Assert.Equal(45, first.EndingCharacterLevel);
+        Assert.Equal(5, first.EssenceCount);
+        Assert.Equal(342, first.RecommendedEndpointCombatRating);
+        Assert.Equal(358, first.MaximumEndpointCombatRating);
+
+        var second = options.RegionProjections[1];
+        Assert.Equal(2, second.RegionNumber);
+        Assert.Equal(2, second.EquipmentTier);
+        Assert.Equal(95, second.EndingCharacterLevel);
+        Assert.Equal(6, second.EssenceCount);
+        Assert.Equal(627, second.RecommendedEndpointCombatRating);
+        Assert.Equal(644, second.MaximumEndpointCombatRating);
+
+        Assert.All(
+            options.RegionProjections.Zip(options.RegionProjections.Skip(1)),
+            pair => Assert.True(
+                pair.Second.RecommendedEndpointCombatRating >
+                pair.First.RecommendedEndpointCombatRating));
+    }
+
+    [Fact]
+    public async Task Area_ten_is_doable_with_full_tier_one_legendary_builds()
+    {
+        var fixture = CreateFixture();
+        var winRates = new Dictionary<string, double>();
+        foreach (var profile in Enum.GetNames<CanonicalPartyProfile>())
+        {
+            var report = await fixture.Simulator.RunAsync(
+                new AreaSimulationRequest(
+                    "region_01_area_07",
+                    48,
+                    91_007,
+                    profile,
+                    "t1-standard-legendary"),
+                CancellationToken.None);
+            winRates[profile] = report.WinRate;
+        }
+
+        var summary = string.Join(", ", winRates.Select(entry =>
+            $"{entry.Key}={entry.Value:N2}%"));
+        Assert.All(
+            winRates.Values,
+            winRate => Assert.True(
+                winRate >= 75,
+                $"Tier-1 Legendary endpoint fell below viability: {summary}."));
+    }
+
+    [Fact]
+    public async Task Area_one_is_just_doable_with_the_tutorial_mace_and_goblin_essence()
+    {
+        var fixture = CreateFixture();
+        var report = await fixture.Simulator.RunAsync(
+            new AreaSimulationRequest(
+                "region_01_area_01",
+                240,
+                73_901,
+                CanonicalPartyProfile.Balanced.ToString(),
+                CanonicalEquipmentBuildFactory.TutorialStarterBuildId),
+            CancellationToken.None);
+
+        Assert.InRange(report.WinRate, 80, 90);
+        Assert.Equal(47, report.Scaling.RecommendedCombatRating);
+        Assert.Equal(CanonicalEquipmentBuildFactory.TutorialStarterBuildId, report.BuildId);
+    }
+
     private static AreaFixture CreateFixture()
     {
         var apiRoot = FindApiRoot();

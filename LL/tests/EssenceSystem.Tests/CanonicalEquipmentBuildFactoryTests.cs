@@ -128,7 +128,8 @@ public sealed class CanonicalEquipmentBuildFactoryTests
         var rung = _factory.GetProgressionLadder()
             .Single(candidate => candidate.Id == "t1-standard-common");
         var build = _factory.CreateBuild(CanonicalPartyProfile.Balanced, rung);
-        var expected = EntityBaseAttributeHelper.CreateEntityAttributes(Guid.Empty)
+        var expected = EntityBaseAttributeHelper
+            .CreateEntityAttributesForLevel(Guid.Empty, build.Character.Level)
             .ToDictionary(attribute => attribute.AttributeType, attribute => attribute.Value);
         var actual = build.Character.BaseAttributes
             .ToDictionary(attribute => attribute.AttributeType, attribute => attribute.Value);
@@ -270,6 +271,105 @@ public sealed class CanonicalEquipmentBuildFactoryTests
                         $"{pair.Second.Id} {pair.Second.Overall}."));
             }
         }
+    }
+
+    [Fact]
+    public void Tier_ten_profile_combat_ratings_remain_comparable()
+    {
+        var rung = _factory.GetProgressionLadder()
+            .Single(candidate => candidate.Id == "t10-standard-legendary");
+        var builds = Enum.GetValues<CanonicalPartyProfile>()
+            .ToDictionary(
+                profile => profile,
+                profile => _factory.CreateBuild(profile, rung));
+        var ratings = builds.ToDictionary(x => x.Key, x => x.Value.Rating.Overall);
+        var summary = string.Join(
+            ", ",
+            builds.Select(entry =>
+                $"{entry.Key}={entry.Value.Rating.Overall / 10}" +
+                $"(O{entry.Value.Rating.SingleTargetOffense / 10}/" +
+                $"P{entry.Value.Rating.PhysicalDurability / 10}/" +
+                $"M{entry.Value.Rating.MagicalDurability / 10}/" +
+                $"S{entry.Value.Rating.Sustain / 10})"));
+
+        var defensiveToOffense = ratings[CanonicalPartyProfile.Defensive]
+                                 / (double)ratings[CanonicalPartyProfile.Offense];
+        Assert.True(
+            defensiveToOffense is >= 0.9 and <= 1.1,
+            $"Tier-10 defensive/offense Combat Rating ratio was " +
+            $"{defensiveToOffense:0.###}: {summary}.");
+        Assert.True(
+            ratings.Values.Min() >= ratings.Values.Max() * 0.75,
+            $"Tier-10 canonical Combat Ratings diverged too far: {summary}.");
+    }
+
+    [Fact]
+    public void Tier_one_epic_profile_combat_ratings_remain_comparable()
+    {
+        var rung = _factory.GetProgressionLadder()
+            .Single(candidate => candidate.Id == "t1-standard-epic");
+        var ratings = Enum.GetValues<CanonicalPartyProfile>()
+            .ToDictionary(
+                profile => profile,
+                profile => _factory.CreateBuild(profile, rung).Rating.Overall);
+        var summary = string.Join(
+            ", ",
+            ratings.Select(entry => $"{entry.Key}={entry.Value / 10}"));
+        var expectedDisplayedRatings = new Dictionary<CanonicalPartyProfile, int>
+        {
+            [CanonicalPartyProfile.Balanced] = 179,
+            [CanonicalPartyProfile.Offense] = 191,
+            [CanonicalPartyProfile.Sustain] = 190,
+            [CanonicalPartyProfile.Defensive] = 166,
+            [CanonicalPartyProfile.Area] = 190
+        };
+
+        Assert.Equal(
+            expectedDisplayedRatings,
+            ratings.ToDictionary(entry => entry.Key, entry => entry.Value / 10));
+        Assert.True(
+            ratings.Values.Min() >= ratings.Values.Max() * 0.8,
+            $"Tier-1 epic canonical Combat Ratings diverged too far: {summary}.");
+    }
+
+    [Fact]
+    public void Tier_one_legendary_profile_ratings_are_stable()
+    {
+        var rung = _factory.GetProgressionLadder()
+            .Single(candidate => candidate.Id == "t1-standard-legendary");
+        var ratings = Enum.GetValues<CanonicalPartyProfile>()
+            .ToDictionary(
+                profile => profile,
+                profile => _factory.CreateBuild(profile, rung).Rating.Overall / 10);
+
+        Assert.Equal(184, ratings[CanonicalPartyProfile.Balanced]);
+        Assert.Equal(193, ratings[CanonicalPartyProfile.Offense]);
+        Assert.Equal(197, ratings[CanonicalPartyProfile.Sustain]);
+        Assert.Equal(168, ratings[CanonicalPartyProfile.Defensive]);
+        Assert.Equal(193, ratings[CanonicalPartyProfile.Area]);
+    }
+
+    [Fact]
+    public void Tutorial_starter_build_uses_only_the_common_mace_and_goblin_essence()
+    {
+        var build = _factory.CreateTutorialStarterBuild();
+
+        Assert.Equal(1, build.Character.Level);
+        Assert.Equal("mace", Assert.Single(build.Equipment).ItemBaseId);
+        Assert.Null(build.Equipment[0].BaseRecipeId);
+        Assert.Equal(Rarity.Common, build.Equipment[0].Rarity);
+        Assert.Equal(
+            "essence.goblin",
+            Assert.Single(build.EquippedEssences).EssenceDefinitionId);
+        Assert.Equal(
+            10,
+            build.Character.BaseAttributes.Single(attribute =>
+                attribute.AttributeType == AttributeType.Power).Value);
+        Assert.Equal(
+            140,
+            build.Character.BaseAttributes.Single(attribute =>
+                attribute.AttributeType == AttributeType.MaxHealth).Value);
+        Assert.Equal(47, build.Rating.Overall / 10);
     }
 
     [Theory]

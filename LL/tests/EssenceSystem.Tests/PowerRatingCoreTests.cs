@@ -53,7 +53,7 @@ public sealed class PowerRatingCoreTests
     }
 
     [Fact]
-    public void AttributeCombatRating_UsesItemTierWeightsAndDeduplicatesTwoHandedInstances()
+    public void AttributeCombatRating_UsesReferenceWeightsAndDeduplicatesTwoHandedInstances()
     {
         var item = new EquipmentInstance
         {
@@ -68,7 +68,7 @@ public sealed class PowerRatingCoreTests
         var once = CombatRatingCalculator.Calculate([], [item]);
         var duplicatedSlotReference = CombatRatingCalculator.Calculate([], [item, item]);
 
-        Assert.Equal(19, once.Overall);
+        Assert.Equal(7, once.Overall);
         Assert.Equal(once.Overall, duplicatedSlotReference.Overall);
     }
 
@@ -103,7 +103,83 @@ public sealed class PowerRatingCoreTests
     }
 
     [Fact]
-    public void AttributeCombatRating_AddsExplicitTemporaryAttributesAtTheirSourceTier()
+    public void AttributeCombatRating_ValuesIdenticalFinalStatsEquallyAcrossSourcesAndTiers()
+    {
+        var baseModifierItem = new EquipmentInstance
+        {
+            Id = Guid.NewGuid(),
+            ItemBase = new EquipmentBase
+            {
+                Id = "base-power",
+                Name = "Base Power",
+                AttributeModifiers =
+                [
+                    new ItemAttributeModifier(AttributeType.Power, 10)
+                ]
+            },
+            Tier = 10
+        };
+        var generatedModifierItem = new EquipmentInstance
+        {
+            Id = Guid.NewGuid(),
+            Tier = 10,
+            InstanceModifiers =
+            [
+                new InstanceAttributeModifier(AttributeType.Power, 10)
+            ]
+        };
+        var additionalModifierRating = CombatRatingCalculator.Calculate(
+            [],
+            [],
+            [
+                new CombatRatingModifierSource(
+                    5,
+                    [new AbilityAttributeModifier(AttributeType.Power, 10)])
+            ]);
+
+        Assert.Equal(240, CombatRatingCalculator.Calculate([], [baseModifierItem]).Overall);
+        Assert.Equal(240, CombatRatingCalculator.Calculate([], [generatedModifierItem]).Overall);
+        Assert.Equal(240, additionalModifierRating.Overall);
+    }
+
+    [Fact]
+    public void AttributeCombatRating_AppliesModifierSemanticsBeforeValuation()
+    {
+        var rating = CombatRatingCalculator.Calculate(
+            [new EntityAttribute { AttributeType = AttributeType.Power, Value = 10 }],
+            [],
+            [
+                new CombatRatingModifierSource(
+                    10,
+                    [
+                        new AbilityAttributeModifier(
+                            AttributeType.Power,
+                            50,
+                            ModifierType.Additive)
+                    ])
+            ]);
+
+        Assert.Equal(360, rating.Overall);
+    }
+
+    [Fact]
+    public void CanonicalCombatRating_DoesNotChangeWithEquipmentSourceTier()
+    {
+        var tierOne = CombatRatingCalculator.CalculateCanonical(
+            new Dictionary<AttributeType, float>(),
+            new Dictionary<AttributeType, double> { [AttributeType.Power] = 10 },
+            1);
+        var tierTen = CombatRatingCalculator.CalculateCanonical(
+            new Dictionary<AttributeType, float>(),
+            new Dictionary<AttributeType, double> { [AttributeType.Power] = 10 },
+            10);
+
+        Assert.Equal(240, tierOne.Overall);
+        Assert.Equal(tierOne.Overall, tierTen.Overall);
+    }
+
+    [Fact]
+    public void AttributeCombatRating_AddsExplicitAttributesAtReferenceWeights()
     {
         var withoutTemporarySource = CombatRatingCalculator.Calculate([], []);
         var withTemporarySource = CombatRatingCalculator.Calculate(
@@ -115,8 +191,8 @@ public sealed class PowerRatingCoreTests
                     [new AbilityAttributeModifier(AttributeType.Armor, 10)])
             ]);
 
-        Assert.Equal(19, withTemporarySource.Overall - withoutTemporarySource.Overall);
-        Assert.Equal(19, withTemporarySource.PhysicalDurability);
+        Assert.Equal(7, withTemporarySource.Overall - withoutTemporarySource.Overall);
+        Assert.Equal(7, withTemporarySource.PhysicalDurability);
         Assert.Equal(0, withTemporarySource.MagicalDurability);
         Assert.Equal(0, withTemporarySource.ControlUtility);
     }

@@ -108,7 +108,7 @@ public sealed class TierOneDungeonBalanceTests
                 entry.Value >= DungeonPowerAnalyzer.TargetCompletionRate,
                 $"{entry.Key} calibrated below the completion target at {entry.Value:P0}."));
         Assert.Contains(
-            "rung t2-standard-uncommon with 2 Essences",
+            "rung t1-standard-common with 2 Essences",
             recommendation.StatusMessage,
             StringComparison.Ordinal);
     }
@@ -118,15 +118,15 @@ public sealed class TierOneDungeonBalanceTests
         "goblin_mines_ii",
         Domain.Models.Dungeons.Definitions.DungeonTier.Heroic,
         4,
-        "t5-standard-uncommon",
-        492,
+        "t5-standard-epic",
+        625,
         false)]
     [InlineData(
         "goblin_mines_iii",
         Domain.Models.Dungeons.Definitions.DungeonTier.Mythic,
         6,
-        "t10-standard-uncommon",
-        1332,
+        "t10-standard-common",
+        2950,
         false)]
     public async Task Higher_goblin_mines_tiers_find_an_actual_winning_profile(
         string dungeonId,

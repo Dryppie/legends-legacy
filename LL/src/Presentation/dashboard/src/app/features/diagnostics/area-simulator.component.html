@@ -67,7 +67,7 @@
       </label>
       <div *ngIf="selectedArea as area" class="ll-stat-card p-3 md:col-span-2">
         <div class="ll-stat-label">Authored progression</div>
-        <strong class="mt-1 block">Step {{ area.globalStep }} · Level {{ area.levelRequirement }}</strong>
+        <strong class="mt-1 block">Global {{ area.globalStep }} · Region {{ area.regionStep + 1 }} · Level {{ area.levelRequirement }} · CR {{ area.recommendedCombatRating }}</strong>
         <small class="ll-text-subtle">{{ area.profileId }} · target {{ area.targetWinRateBasisPoints / 100 | number:'1.0-2' }}%</small>
       </div>
       <div class="flex items-end gap-2 md:col-span-2">
@@ -82,6 +82,29 @@
       </div>
     </div>
   </form>
+
+  <section *ngIf="options?.regionProjections?.length" class="ll-panel space-y-3 bg-texture p-5">
+    <div>
+      <div class="ll-label">Game-wide projection</div>
+      <h2 class="text-xl font-semibold text-primary">Canonical region endpoints</h2>
+      <p class="ll-helper mt-1">Projected from each tier's full Standard/Legendary builds at the region's ending level. The lowest profile is the recommended endpoint anchor.</p>
+    </div>
+    <div class="overflow-x-auto">
+      <table class="w-full text-left text-sm">
+        <thead class="ll-text-subtle"><tr><th class="p-2">Region</th><th class="p-2">Equipment</th><th class="p-2">End level</th><th class="p-2">Essences</th><th class="p-2">Recommended CR</th><th class="p-2">Profile range</th></tr></thead>
+        <tbody>
+          <tr *ngFor="let projection of options?.regionProjections" class="border-t border-white/10">
+            <td class="p-2 font-medium">{{ projection.regionNumber }}</td>
+            <td class="p-2">T{{ projection.equipmentTier }} Legendary</td>
+            <td class="p-2">{{ projection.endingCharacterLevel }}</td>
+            <td class="p-2">{{ projection.essenceCount }}</td>
+            <td class="p-2 font-semibold text-primary">{{ projection.recommendedEndpointCombatRating }}</td>
+            <td class="p-2">{{ projection.recommendedEndpointCombatRating }}–{{ projection.maximumEndpointCombatRating }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
 
   <section *ngIf="report as result" class="ll-panel space-y-5 bg-texture p-5">
     <div class="flex flex-wrap items-end justify-between gap-4">

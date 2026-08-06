@@ -15,7 +15,6 @@ public sealed class AreaCombatSimulator : IAreaCombatSimulator
     public const int MaximumEncounters = 1_000;
     private const int DefaultSeed = 73_901;
     private const int MaximumCombatTicks = 6_000;
-
     private readonly IAreaRepository _areas;
     private readonly IEntityService _entities;
     private readonly ICombatSetupService _combatSetup;
@@ -56,10 +55,14 @@ public sealed class AreaCombatSimulator : IAreaCombatSimulator
                 AreaId = areaId,
                 region.RegionKey,
                 region.ProfileId,
-                GlobalStep = region.StartingGlobalStep + index
+                GlobalStep = region.StartingGlobalStep + index,
+                RegionStep = index,
+                DefaultBuildId = region.DefaultBuildIds[index]
             }))
             .ToDictionary(x => x.AreaId, StringComparer.OrdinalIgnoreCase);
         var ladder = _builds.GetProgressionLadder();
+        var regionProjections = CreateRegionProjections(ladder);
+        ValidateConfiguredRegionEndpoints(catalog, regionProjections);
 
         return new AreaSimulationOptions(
             areas
@@ -73,20 +76,96 @@ public sealed class AreaCombatSimulator : IAreaCombatSimulator
                         placement.RegionKey,
                         area.LevelRequirement,
                         placement.GlobalStep,
+                        placement.RegionStep,
+                        _scaling.GetScaling(area).RecommendedCombatRating ?? 0,
                         placement.ProfileId,
                         profilesById[placement.ProfileId].TargetWinRateBasisPoints,
-                        GetDefaultRung(ladder, placement.GlobalStep).Id);
+                        placement.DefaultBuildId);
                 })
                 .OrderBy(area => area.GlobalStep)
                 .ToArray(),
             Enum.GetNames<CanonicalPartyProfile>(),
-            ladder.Select(rung => new AreaSimulationBuildOption(
+            new[]
+            {
+                new AreaSimulationBuildOption(
+                    CanonicalEquipmentBuildFactory.TutorialStarterBuildId,
+                    1,
+                    Domain.Models.Items.ItemQuality.Standard.ToString(),
+                    Domain.Models.Items.Rarity.Common.ToString())
+            }.Concat(ladder.Select(rung => new AreaSimulationBuildOption(
                     rung.Id,
                     rung.Tier,
                     rung.Quality.ToString(),
-                    rung.Rarity.ToString()))
+                    rung.Rarity.ToString())))
                 .ToArray(),
+            regionProjections,
             MaximumEncounters);
+    }
+
+    private static void ValidateConfiguredRegionEndpoints(
+        RegionCombatBalanceCatalog catalog,
+        IReadOnlyList<AreaSimulationRegionProjection> projections)
+    {
+        var regions = catalog.Regions
+            .OrderBy(region => region.StartingGlobalStep)
+            .ToArray();
+        if (regions.Length > projections.Count)
+        {
+            throw new InvalidOperationException(
+                $"Region balance defines {regions.Length} regions, but canonical progression " +
+                $"supports only {projections.Count}.");
+        }
+
+        for (var index = 0; index < regions.Length; index++)
+        {
+            var region = regions[index];
+            var projection = projections[index];
+            if (region.EndingCombatRating != projection.RecommendedEndpointCombatRating)
+            {
+                throw new InvalidOperationException(
+                    $"Region '{region.RegionKey}' ends at CR {region.EndingCombatRating}, but " +
+                    $"canonical Tier {projection.EquipmentTier} Legendary progression ends at " +
+                    $"CR {projection.RecommendedEndpointCombatRating}.");
+            }
+        }
+    }
+
+    private IReadOnlyList<AreaSimulationRegionProjection> CreateRegionProjections(
+        IReadOnlyList<CanonicalEquipmentProgressionRung> ladder)
+    {
+        return Enumerable.Range(1, CanonicalRegionProgressionPolicy.RegionCount)
+            .Select(regionNumber =>
+            {
+                var equipmentTier = CanonicalRegionProgressionPolicy
+                    .GetEquipmentTier(regionNumber);
+                var endingLevel = CanonicalRegionProgressionPolicy
+                    .GetEndingCharacterLevel(regionNumber);
+                var essenceCount = Math.Min(
+                    6,
+                    _essenceSlots.GetUnlockedSlotCount(endingLevel));
+                var rung = ladder.Single(candidate =>
+                    candidate.Id == $"t{equipmentTier}-standard-legendary");
+                var profiles = Enum.GetValues<CanonicalPartyProfile>()
+                    .Select(profile => new AreaSimulationProfileProjection(
+                        profile.ToString(),
+                        _builds.CreateBuildForArea(
+                                profile,
+                                rung,
+                                endingLevel,
+                                essenceCount)
+                            .Rating.Overall / 10))
+                    .ToArray();
+
+                return new AreaSimulationRegionProjection(
+                    regionNumber,
+                    equipmentTier,
+                    endingLevel,
+                    essenceCount,
+                    profiles.Min(profile => profile.CombatRating),
+                    profiles.Max(profile => profile.CombatRating),
+                    profiles);
+            })
+            .ToArray();
     }
 
     public async Task<AreaSimulationReport> RunAsync(
@@ -103,16 +182,29 @@ public sealed class AreaCombatSimulator : IAreaCombatSimulator
             throw new InvalidOperationException($"Area '{area.Id}' has no combat spawn content.");
 
         var ladder = _builds.GetProgressionLadder();
-        var rung = ladder.FirstOrDefault(x => x.Id.Equals(request.BuildId, StringComparison.OrdinalIgnoreCase))
-                   ?? throw new ArgumentException($"Unknown canonical build '{request.BuildId}'.", nameof(request));
         var encounterCount = Math.Clamp(request.EncounterCount, 1, MaximumEncounters);
         var baseSeed = request.RandomSeed == 0 ? DefaultSeed : request.RandomSeed;
-        var essenceCount = Math.Min(6, _essenceSlots.GetUnlockedSlotCount(area.LevelRequirement));
-        var build = _builds.CreateBuildForArea(
-            profile,
-            rung,
-            area.LevelRequirement,
-            essenceCount);
+        CanonicalEquipmentBuild build;
+        if (request.BuildId.Equals(
+                CanonicalEquipmentBuildFactory.TutorialStarterBuildId,
+                StringComparison.OrdinalIgnoreCase))
+        {
+            build = _builds.CreateTutorialStarterBuild();
+        }
+        else
+        {
+            var rung = ladder.FirstOrDefault(x =>
+                           x.Id.Equals(request.BuildId, StringComparison.OrdinalIgnoreCase))
+                       ?? throw new ArgumentException(
+                           $"Unknown canonical build '{request.BuildId}'.",
+                           nameof(request));
+            var essenceCount = Math.Min(6, _essenceSlots.GetUnlockedSlotCount(area.LevelRequirement));
+            build = _builds.CreateBuildForArea(
+                profile,
+                rung,
+                area.LevelRequirement,
+                essenceCount);
+        }
         var friendly = await _simulations.CreateCanonicalCombatantAsync(build, cancellationToken);
         var hostileTemplates = await CreateHostileTemplatesAsync(area, cancellationToken);
         var outcomes = new List<AreaSimulationEncounterResult>(encounterCount);
@@ -151,7 +243,7 @@ public sealed class AreaCombatSimulator : IAreaCombatSimulator
         return CreateReport(
             area,
             profile,
-            rung.Id,
+            request.BuildId,
             (int)friendly.GetAttributeValue(Domain.Models.Attributes.AttributeType.MaxHealth),
             baseSeed,
             outcomes);
@@ -225,16 +317,6 @@ public sealed class AreaCombatSimulator : IAreaCombatSimulator
             _scaling.GetScaling(area),
             compositions,
             outcomes);
-    }
-
-    private static CanonicalEquipmentProgressionRung GetDefaultRung(
-        IReadOnlyList<CanonicalEquipmentProgressionRung> ladder,
-        int globalStep)
-    {
-        var minimumTier = ladder.Min(x => x.Tier);
-        var maximumTier = ladder.Max(x => x.Tier);
-        return ladder.First(x => x.Tier == Math.Clamp(globalStep, minimumTier, maximumTier) &&
-                          x.Rarity == Domain.Models.Items.Rarity.Common);
     }
 
     private static double Percentile(IEnumerable<int> values, double percentile)

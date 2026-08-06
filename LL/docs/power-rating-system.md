@@ -24,17 +24,16 @@ The detailed design and rollout checklist are in
 
 ## Calculation
 
-`CombatRatingCalculator` values persisted base attributes directly. There is no
-primary-to-secondary projection layer: Power is the universal ability coefficient,
-while Max Health, defenses, recovery, and utility are independent attributes. Base
-attributes use Tier-1 `EquipmentStatBudgetCatalog` costs as a stable reference.
+`CombatRatingCalculator` first projects the character's final direct attributes
+from persisted base attributes, each distinct equipped item, and resolved active
+Essence modifiers. It then values every final attribute at the Tier-1
+`EquipmentStatBudgetCatalog` reference cost. This makes identical combat stats
+worth identical Combat Rating regardless of whether they came from an authored
+item base, a generated or tempered modifier, or an Essence.
 
-Each distinct equipped item separates its two attribute sources. Authored base
-modifiers use the stable Tier-1 reference weights, because the same base identity
-must not lose Combat Rating when crafted at a higher tier. Generated and tempered
-instance modifiers use that item's tier-aware costs, matching
-`EquipmentBudgetEvaluator` and preserving the intentional marginal-cost changes
-across the progression curve.
+The projection applies each modifier's real flat, additive, or multiplicative
+semantics before valuation. Tier-aware costs remain crafting-budget rules; they
+do not change the combat value of an already-generated stat point.
 
 Each active Essence is resolved independently through the production Essence
 loadout resolver. Fixed bonuses and evolution-added attribute modifiers are
@@ -42,10 +41,8 @@ valued at the catalog's reference tier. Essence level and Ascension do not
 receive arbitrary rating bonuses; evolution matters only when it changes
 resolved attributes.
 
-Capped attributes are valued only to their combined useful cap across base,
-equipment, and active Essence sources. Mixed-tier over-cap budget is discounted
-proportionally, making the result independent of source ordering. The internal
-total is rounded once to a whole number using
+Capped attributes are valued only to their combined useful cap after projection.
+The internal total is rounded once to a whole number using
 `MidpointRounding.AwayFromZero`; there is no ten-point quantization.
 
 Formula:
@@ -53,10 +50,8 @@ Formula:
 ```text
 Combat Rating =
     round(
-        Base Attribute Budget
-        + Σ Equipped Item Base Attribute Budget at the reference tier
-        + Σ Equipped Item Instance Attribute Budget at the item tier
-        + Σ Active Essence Attribute Budget
+        Σ useful final attribute points
+          × that attribute's Tier-1 reference cost
     )
 
 Displayed Combat Rating = Combat Rating / 10
@@ -142,16 +137,17 @@ abilities. Combat Rating itself still counts only their resolved attributes.
 
 The deterministic Goblin Mines regressions currently resolve to:
 
-- Tier I: displayed Combat Rating 153, Tier-2 Standard/Uncommon Defensive
+- Tier I: displayed Combat Rating 154, Tier-2 Standard/Uncommon Defensive
   equipment, and two Essences.
-- Tier II: displayed Combat Rating 492, Tier-5 Standard/Uncommon Balanced
+- Tier II: displayed Combat Rating 608, Tier-5 Standard/Uncommon Balanced
   equipment, and four Essences.
-- Tier III: displayed Combat Rating 1265, Tier-10 Standard/Common Sustain
-  equipment, and six Essences.
+- Tier III: displayed Combat Rating 2490, Tier-11 Standard/Common Offense
+  equipment, and six Essences. Tier 11 is a calibration-only projection beyond
+  the live equipment table.
 
-All three current recommendations remain within the live Tier-10 equipment
-budget. These snapshots are deterministic calibration results, not separately
-authored dungeon numbers.
+The Tier-III result now exposes that its current combat tuning extends beyond
+the live Tier-10 equipment budget. These snapshots are deterministic calibration
+results, not separately authored dungeon numbers.
 
 The requirement profile still examines real encounter groups and creature
 abilities to describe physical, magical, area, boss, control, and attrition
@@ -165,13 +161,13 @@ identity, tier, content hash, algorithm version, combat-rules version, rating
 definition version, recommendation seed version, and equipment balance version
 match.
 
-`PowerRatingAlgorithm.Version` is 21 for the full Standard-quality
-tier-by-rarity profile matrix.
+`PowerRatingAlgorithm.Version` is 22 for source-independent final-attribute
+valuation over the full Standard-quality tier-by-rarity profile matrix.
 `CombatRulesVersion` is 9 for the Power-only damage model and compounded dungeon difficulty
 curve: Tier I is 3× the authored creature baseline, Tier II is 5× Tier I
 (15× authored), and Tier III is 5× Tier II (75× authored).
 The legacy-named `BenchmarkDefinitionVersion` column now stores
-the deterministic rating-definition version and is 12. Existing recommendations
+the deterministic rating-definition version and is 13. Existing recommendations
 are stale and will be recalibrated.
 
 `DungeonPowerCalibration:Enabled` controls whether missing or stale entries may

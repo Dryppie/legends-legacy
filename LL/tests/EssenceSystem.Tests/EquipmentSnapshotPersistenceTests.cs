@@ -22,6 +22,7 @@ public sealed class EquipmentSnapshotPersistenceTests
         {
             Id = equipmentId,
             ItemBaseId = "test.snapshot.helm",
+            BaseRecipeId = "recipe.test.snapshot.helm",
             ItemBase = new EquipmentBase
             {
                 Id = "test.snapshot.helm",
@@ -69,6 +70,9 @@ public sealed class EquipmentSnapshotPersistenceTests
 
         var snapshotModifier = Assert.Single(
             Assert.Single(persistedSnapshot.Equipment).InstanceModifiers);
+        Assert.Equal(
+            "recipe.test.snapshot.helm",
+            Assert.Single(persistedSnapshot.Equipment).BaseRecipeId);
         Assert.Equal(AttributeType.MaxHealth, snapshotModifier.AttributeType);
         Assert.Equal(11, snapshotModifier.Amount);
     }

@@ -7,7 +7,11 @@
 > is granted and balanced directly. The current design is documented in
 > `../../docs/tier-stable-combat-scaling-design.md`.
 
-> **Current calibration addendum (equipment balance version 10):** Power is priced with
+> **Current calibration addendum (equipment balance version 11):** Crafted equipment uses
+> recipe-generated and tempered instance modifiers as its complete combat-stat budget;
+> authored item-base modifiers apply only to legacy and directly granted equipment. Status
+> Resistance uses tier anchors of `2.00`, `0.40`, and `0.665` to keep light-armor budgets
+> comparable after removing the former unbudgeted base-Power subsidy. Power is priced with
 > tier anchors of `24.00`, `6.70`, and `3.50`; Summon Power uses `3.00`, `1.25`, and
 > `1.00`; and Summon Health uses `1.90`, `0.75`, and `0.50` at tiers 1, 5, and 10.
 > The release matrix compares Power with Attack Speed in a long, basic-attack-only

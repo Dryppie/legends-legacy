@@ -189,6 +189,7 @@ public static class DependencyInjection
         services.AddScoped<IDungeonPreviewRewardService, DungeonPreviewRewardService>();
         services.AddScoped<IDungeonMasteryService, DungeonMasteryService>();
         services.AddScoped<IDungeonVigorService, DungeonVigorService>();
+        services.AddScoped<DungeonSimulationEquipmentFactory>();
         services.AddScoped<IDungeonRunSimulator, DungeonRunSimulator>();
         services.AddSingleton<IDungeonDelveDefinitionProvider>(sp =>
             new JsonDungeonDelveDefinitionProvider(

@@ -21,13 +21,13 @@ export interface DungeonSimulationEssenceOption {
 export interface DungeonSimulationEquipmentSlotOption {
   id: string;
   name: string;
-  attributeBonuses: Record<string, number>;
+  attributeBonusesByRarity: Record<string, Record<string, number>>;
 }
 
 export interface DungeonSimulationEquipmentRarityOption {
   id: string;
   name: string;
-  multiplier: number;
+  temperingSteps: number;
 }
 
 export interface DungeonSimulationEquipment {

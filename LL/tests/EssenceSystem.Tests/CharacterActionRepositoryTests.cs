@@ -10,6 +10,36 @@ namespace EssenceSystem.Tests;
 public sealed class CharacterActionRepositoryTests
 {
     [Fact]
+    public async Task Immediate_resolution_keeps_a_new_character_action_tracked_as_added()
+    {
+        await using var db = CreateDb();
+        var characterId = Guid.NewGuid();
+        var area = new Area { Id = "first-area", Name = "First Area" };
+        db.Areas.Add(area);
+        await db.SaveChangesAsync();
+
+        var repository = new CharacterActionRepository(db);
+        var action = new CharacterAction(
+            characterId,
+            new CombatActionDetails([characterId], area));
+
+        var startedAction = await repository.StartCharacterActionAsync(action, CancellationToken.None);
+        Assert.NotNull(startedAction);
+        Assert.Equal(EntityState.Added, db.Entry(startedAction).State);
+
+        // CharacterActionService performs this update after resolving the first
+        // encounter, while the new action still has not been saved.
+        repository.UpdateCharacterAction(startedAction);
+
+        Assert.Equal(EntityState.Added, db.Entry(startedAction).State);
+        Assert.Equal(EntityState.Added, db.Entry(startedAction.ActionDetails!).State);
+        await db.SaveChangesAsync();
+
+        Assert.Single(db.CharacterActions);
+        Assert.Single(db.ActionDetails);
+    }
+
+    [Fact]
     public async Task StartCharacterActionAsync_replaces_existing_combat_details()
     {
         await using var db = CreateDb();

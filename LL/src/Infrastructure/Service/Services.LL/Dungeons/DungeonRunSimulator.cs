@@ -1,7 +1,6 @@
 using Application.Interfaces.Services.LL.Dungeons;
 using Application.Interfaces.Services.LL.Entities;
 using Application.Interfaces.Services.LL.Essences;
-using Application.Interfaces.Services.LL.Professions;
 using Domain.Models.Attributes;
 using Domain.Models.Attributes.Modifiers;
 using Domain.Models.Combat;
@@ -16,11 +15,9 @@ using Domain.Models.Items;
 using Domain.Models.Items.Equipments;
 using Domain.Models.Professions.Crafting.V2;
 using Domain.Models.Regions.Areas;
-using Microsoft.Extensions.Options;
 using Services.LL.Combat.Layers.Orchestration.Models;
 using Services.LL.Combat.Layers.Resolution.Dungeon;
 using Services.LL.Combat.Layers.Resolution.Models;
-using Services.LL.Professions.Craftings;
 using Services.LL.Interfaces;
 using Services.LL.Interfaces.Combat.Resolution;
 using AdminCreatureService = Application.Interfaces.Services.AdminDashboard.ICreatureService;
@@ -51,8 +48,7 @@ public sealed class DungeonRunSimulator : IDungeonRunSimulator
     private readonly ICombatEngineExecutor _combatEngine;
     private readonly ICombatEncounterResultFactory _resultFactory;
     private readonly IDungeonVigorService _vigor;
-    private readonly ICraftingDefinitionProvider _craftingDefinitions;
-    private readonly CraftingBalanceOptions _craftingBalance;
+    private readonly DungeonSimulationEquipmentFactory _simulationEquipment;
 
     public DungeonRunSimulator(
         IDungeonDefinitions dungeons,
@@ -64,8 +60,7 @@ public sealed class DungeonRunSimulator : IDungeonRunSimulator
         ICombatEngineExecutor combatEngine,
         ICombatEncounterResultFactory resultFactory,
         IDungeonVigorService vigor,
-        ICraftingDefinitionProvider craftingDefinitions,
-        IOptions<CraftingBalanceOptions> craftingBalance)
+        DungeonSimulationEquipmentFactory simulationEquipment)
     {
         _dungeons = dungeons;
         _essences = essences;
@@ -76,8 +71,7 @@ public sealed class DungeonRunSimulator : IDungeonRunSimulator
         _combatEngine = combatEngine;
         _resultFactory = resultFactory;
         _vigor = vigor;
-        _craftingDefinitions = craftingDefinitions;
-        _craftingBalance = craftingBalance.Value;
+        _simulationEquipment = simulationEquipment;
     }
 
     public DungeonSimulationOptions GetOptions() => new(
@@ -102,14 +96,17 @@ public sealed class DungeonRunSimulator : IDungeonRunSimulator
             .Select(slot => new DungeonSimulationEquipmentSlotOption(
                 slot.Id,
                 slot.Name,
-                GetEquipmentAttributeBonuses(slot.EquipmentType)
-                    .ToDictionary(pair => pair.Key.ToString(), pair => pair.Value)))
+                GetCraftableRarities().ToDictionary(
+                    rarity => rarity.ToString(),
+                    rarity => (IReadOnlyDictionary<string, float>)_simulationEquipment
+                        .GetAttributeBonuses(slot.Id, slot.EquipmentType, rarity)
+                        .ToDictionary(pair => pair.Key.ToString(), pair => pair.Value))))
             .ToList(),
-        Enum.GetValues<Rarity>()
+        GetCraftableRarities()
             .Select(rarity => new DungeonSimulationEquipmentRarityOption(
                 rarity.ToString(),
                 rarity.ToString(),
-                GetRarityMultiplier(rarity)))
+                TemperingConstants.GetRarityUpgradeCount(rarity)))
             .ToList());
 
     public async Task<DungeonSimulationReport> RunAsync(
@@ -486,56 +483,17 @@ public sealed class DungeonRunSimulator : IDungeonRunSimulator
 
         return SimulationEquipmentSlots
             .Where(slot => equippedSlotIds.Contains(slot.Id))
-            .Select(slot =>
-            {
-                var itemBaseId = $"simulation.{slot.Id.ToLowerInvariant()}";
-                var itemBase = new EquipmentBase
-                {
-                    Id = itemBaseId,
-                    Name = $"Simulated {slot.Name}",
-                    EquipmentType = slot.EquipmentType,
-                    Rarity = Rarity.Common,
-                    AttributeModifiers = GetEquipmentAttributeBonuses(slot.EquipmentType)
-                        .Select(pair => new ItemAttributeModifier(pair.Key, pair.Value)
-                        {
-                            ItemBaseId = itemBaseId
-                        })
-                        .ToList()
-                };
-
-                return new EquipmentInstance
-                {
-                    Id = Guid.NewGuid(),
-                    ItemBaseId = itemBaseId,
-                    ItemBase = itemBase,
-                    Rarity = rarity,
-                    Tier = 1
-                };
-            })
+            .Select(slot => _simulationEquipment.Create(
+                slot.Id,
+                slot.EquipmentType,
+                rarity))
             .ToList();
     }
 
-    private IReadOnlyDictionary<AttributeType, float> GetEquipmentAttributeBonuses(EquipmentType equipmentType)
-    {
-        var recipe = _craftingDefinitions.GetRecipes().FirstOrDefault(candidate =>
-            candidate.Enabled &&
-            candidate.OutputItemType == equipmentType);
-        if (recipe is null)
-            throw new InvalidOperationException($"No crafting recipe exists for simulated {equipmentType} equipment.");
-
-        var profile = recipe.InitialStatProfile;
-        var budget = _craftingBalance.GetTierPowerBudget(1) *
-                     _craftingBalance.GetSlotBudgetWeight(equipmentType);
-
-        return profile
-            .Where(pair => pair.Value > 0)
-            .ToDictionary(
-                pair => pair.Key,
-                pair => (float)Math.Max(1, Math.Round(budget * pair.Value)));
-    }
-
-    private static float GetRarityMultiplier(Rarity rarity) =>
-        new EquipmentInstance { Rarity = rarity }.Boost;
+    private static IReadOnlyList<Rarity> GetCraftableRarities() =>
+        Enum.GetValues<Rarity>()
+            .Where(rarity => rarity <= Rarity.Legendary)
+            .ToList();
 
     private static string NormalizeRouteStrategy(string? strategy) =>
         strategy?.Trim().ToLowerInvariant() switch

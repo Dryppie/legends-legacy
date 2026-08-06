@@ -68,6 +68,49 @@ public sealed class CraftingEquipmentScalingTests
     }
 
     [Fact]
+    public void RollBaseStats_DoesNotCountAuthoredBaseModifiersAgainstRecipeBudget()
+    {
+        var service = new ItemStatRollService(Options.Create(new CraftingBalanceOptions()));
+        var plain = new EquipmentBase
+        {
+            Id = "plain-helm",
+            Name = "Plain Helm",
+            EquipmentType = EquipmentType.Head
+        };
+        var authored = new EquipmentBase
+        {
+            Id = "authored-helm",
+            Name = "Authored Helm",
+            EquipmentType = EquipmentType.Head,
+            AttributeModifiers =
+            [
+                new Domain.Models.Attributes.Modifiers.ItemAttributeModifier(
+                    AttributeType.Power,
+                    500,
+                    Domain.Models.Attributes.Modifiers.ModifierType.Flat)
+            ]
+        };
+        var design = CreateSingleStatDesign();
+
+        var plainRoll = service.RollBaseStats(
+            plain,
+            design,
+            1,
+            ItemQuality.Standard,
+            new FixedRandom(0.5d));
+        var authoredRoll = service.RollBaseStats(
+            authored,
+            design,
+            1,
+            ItemQuality.Standard,
+            new FixedRandom(0.5d));
+
+        Assert.Equal(
+            plainRoll.Select(x => (x.AttributeType, x.Amount)),
+            authoredRoll.Select(x => (x.AttributeType, x.Amount)));
+    }
+
+    [Fact]
     public void Blueprint_roll_preserves_base_recipe_stats_and_adds_a_separate_bonus()
     {
         var service = new ItemStatRollService(Options.Create(new CraftingBalanceOptions()));

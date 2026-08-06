@@ -12,7 +12,9 @@ public sealed record CreatureScalingProfile(
     string ProfileId,
     string? RegionKey,
     int GlobalStep,
+    int? RegionStep,
     int ProgressionStep,
+    int? RecommendedCombatRating,
     double HealthMultiplier,
     double OffenseMultiplier,
     double DefenseMultiplier,
@@ -56,4 +58,7 @@ public sealed record RegionCombatBalanceRegion(
     string RegionKey,
     string ProfileId,
     int StartingGlobalStep,
-    IReadOnlyList<string> AreaIds);
+    int StartingCombatRating,
+    int EndingCombatRating,
+    IReadOnlyList<string> AreaIds,
+    IReadOnlyList<string> DefaultBuildIds);

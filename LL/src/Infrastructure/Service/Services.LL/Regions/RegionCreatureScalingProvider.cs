@@ -21,7 +21,7 @@ public sealed class RegionCreatureScalingProvider : IRegionCreatureScalingProvid
     {
     }
 
-    internal RegionCreatureScalingProvider(RegionCombatBalanceCatalog catalog)
+    public RegionCreatureScalingProvider(RegionCombatBalanceCatalog catalog)
     {
         Validate(catalog);
         _catalog = catalog;
@@ -31,7 +31,13 @@ public sealed class RegionCreatureScalingProvider : IRegionCreatureScalingProvid
                 areaId,
                 region.RegionKey,
                 region.ProfileId,
-                checked(region.StartingGlobalStep + index))))
+                checked(region.StartingGlobalStep + index),
+                index,
+                InterpolateCombatRating(
+                    region.StartingCombatRating,
+                    region.EndingCombatRating,
+                    index,
+                    region.AreaIds.Count))))
             .ToDictionary(x => x.AreaId, StringComparer.OrdinalIgnoreCase);
     }
 
@@ -46,11 +52,19 @@ public sealed class RegionCreatureScalingProvider : IRegionCreatureScalingProvid
             return CreateScaling(
                 _profiles[placement.ProfileId],
                 placement.RegionKey,
-                placement.GlobalStep);
+                placement.GlobalStep,
+                placement.RegionStep,
+                placement.RecommendedCombatRating);
         }
 
         var fallback = _profiles[DefaultProfileId];
-        return CreateScaling(fallback, null, Math.Max(1, area.DifficultyTier));
+        var fallbackGlobalStep = Math.Max(1, area.DifficultyTier);
+        return CreateScaling(
+            fallback,
+            null,
+            fallbackGlobalStep,
+            fallbackGlobalStep - 1,
+            null);
     }
 
     public static IRegionCreatureScalingProvider CreateLegacyFallback() =>
@@ -62,14 +76,18 @@ public sealed class RegionCreatureScalingProvider : IRegionCreatureScalingProvid
     private static CreatureScalingProfile CreateScaling(
         RegionCombatBalanceProfile profile,
         string? regionKey,
-        int globalStep)
+        int globalStep,
+        int progressionStep,
+        int? recommendedCombatRating)
     {
-        var progressionStep = Math.Max(0, globalStep - 1);
+        progressionStep = Math.Max(0, progressionStep);
         return new CreatureScalingProfile(
             profile.Id,
             regionKey,
             globalStep,
+            regionKey is null ? null : progressionStep,
             progressionStep,
+            recommendedCombatRating,
             Evaluate(profile.HealthCurve, progressionStep),
             Evaluate(profile.OffenseCurve, progressionStep),
             Evaluate(profile.DefenseCurve, progressionStep),
@@ -112,7 +130,10 @@ public sealed class RegionCreatureScalingProvider : IRegionCreatureScalingProvid
                 region.RegionKey,
                 region.ProfileId,
                 region.StartingGlobalStep,
-                region.AreaIds)).ToArray());
+                region.StartingCombatRating,
+                region.EndingCombatRating,
+                region.AreaIds,
+                region.DefaultBuildIds)).ToArray());
     }
 
     private static RegionCombatBalanceProfile MapProfile(ProfileDocument profile) => new(
@@ -172,12 +193,18 @@ public sealed class RegionCreatureScalingProvider : IRegionCreatureScalingProvid
         }
 
         var areaIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var regionKeys = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         foreach (var region in catalog.Regions)
         {
             if (string.IsNullOrWhiteSpace(region.RegionKey) ||
+                !regionKeys.Add(region.RegionKey) ||
                 !profileIds.Contains(region.ProfileId) ||
                 region.StartingGlobalStep <= 0 ||
-                region.AreaIds.Count == 0)
+                region.StartingCombatRating <= 0 ||
+                region.EndingCombatRating < region.StartingCombatRating ||
+                region.AreaIds.Count == 0 ||
+                region.DefaultBuildIds.Count != region.AreaIds.Count ||
+                region.DefaultBuildIds.Any(string.IsNullOrWhiteSpace))
             {
                 throw new InvalidOperationException($"Region combat entry '{region.RegionKey}' is invalid.");
             }
@@ -196,7 +223,16 @@ public sealed class RegionCreatureScalingProvider : IRegionCreatureScalingProvid
             CreatureScalingProfile? previous = null;
             for (var index = 0; index < region.AreaIds.Count; index++)
             {
-                var current = CreateScaling(profile, region.RegionKey, region.StartingGlobalStep + index);
+                var current = CreateScaling(
+                    profile,
+                    region.RegionKey,
+                    region.StartingGlobalStep + index,
+                    index,
+                    InterpolateCombatRating(
+                        region.StartingCombatRating,
+                        region.EndingCombatRating,
+                        index,
+                        region.AreaIds.Count));
                 if (previous is not null)
                 {
                     ValidateStepIncrease(region.RegionKey, "health", previous.HealthMultiplier, current.HealthMultiplier, profile.MaximumStepIncrease);
@@ -205,6 +241,36 @@ public sealed class RegionCreatureScalingProvider : IRegionCreatureScalingProvid
                     ValidateStepIncrease(region.RegionKey, "resistance", previous.ResistanceMultiplier, current.ResistanceMultiplier, profile.MaximumStepIncrease);
                 }
                 previous = current;
+            }
+        }
+
+        var orderedRegions = catalog.Regions
+            .OrderBy(region => region.StartingGlobalStep)
+            .ToArray();
+        if (orderedRegions.Length > 0 && orderedRegions[0].StartingGlobalStep != 1)
+        {
+            throw new InvalidOperationException(
+                "The first region combat entry must begin at global step 1.");
+        }
+
+        for (var index = 1; index < orderedRegions.Length; index++)
+        {
+            var previous = orderedRegions[index - 1];
+            var current = orderedRegions[index];
+            var expectedGlobalStep = checked(
+                previous.StartingGlobalStep + previous.AreaIds.Count);
+            if (current.StartingGlobalStep != expectedGlobalStep)
+            {
+                throw new InvalidOperationException(
+                    $"Region '{current.RegionKey}' must begin at global step " +
+                    $"{expectedGlobalStep}, after '{previous.RegionKey}'.");
+            }
+
+            if (current.StartingCombatRating < previous.EndingCombatRating)
+            {
+                throw new InvalidOperationException(
+                    $"Region '{current.RegionKey}' starts below the ending Combat Rating " +
+                    $"of '{previous.RegionKey}'.");
             }
         }
     }
@@ -256,7 +322,25 @@ public sealed class RegionCreatureScalingProvider : IRegionCreatureScalingProvid
         string AreaId,
         string RegionKey,
         string ProfileId,
-        int GlobalStep);
+        int GlobalStep,
+        int RegionStep,
+        int RecommendedCombatRating);
+
+    private static int InterpolateCombatRating(
+        int startingCombatRating,
+        int endingCombatRating,
+        int areaIndex,
+        int areaCount)
+    {
+        if (areaCount <= 1 || startingCombatRating == endingCombatRating)
+            return startingCombatRating;
+
+        var progress = areaIndex / (double)(areaCount - 1);
+        var multiplier = Math.Pow(
+            endingCombatRating / (double)startingCombatRating,
+            progress);
+        return (int)Math.Round(startingCombatRating * multiplier);
+    }
 
     private sealed class RegionCombatBalanceDocument
     {
@@ -296,6 +380,9 @@ public sealed class RegionCreatureScalingProvider : IRegionCreatureScalingProvid
         public string RegionKey { get; set; } = string.Empty;
         public string ProfileId { get; set; } = string.Empty;
         public int StartingGlobalStep { get; set; }
+        public int StartingCombatRating { get; set; }
+        public int EndingCombatRating { get; set; }
         public List<string> AreaIds { get; set; } = [];
+        public List<string> DefaultBuildIds { get; set; } = [];
     }
 }

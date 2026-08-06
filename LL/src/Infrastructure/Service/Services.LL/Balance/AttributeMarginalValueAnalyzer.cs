@@ -1617,7 +1617,6 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
             .Where(x => x.Enabled)
             .OrderBy(x => x.Id, StringComparer.Ordinal)
             .ToList();
-        var equipmentBases = _craftingDefinitions.GetEquipmentBases();
         var templates = CreateCatalogLoadoutTemplates(recipes, blueprints);
         var allocations = new Dictionary<string, MaximumCatalogAllocation>(
             StringComparer.Ordinal);
@@ -1625,7 +1624,7 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
         foreach (var template in templates)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            var allocation = CreateMaximumCatalogAllocation(template, equipmentBases);
+            var allocation = CreateMaximumCatalogAllocation(template);
             allocations.Add(allocation.Combat.Id, allocation);
         }
 
@@ -1785,8 +1784,7 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
     }
 
     private MaximumCatalogAllocation CreateMaximumCatalogAllocation(
-        CatalogLoadoutTemplate template,
-        IReadOnlyDictionary<string, EquipmentBase> equipmentBases)
+        CatalogLoadoutTemplate template)
     {
         var designs = template.Recipes
             .Select(recipe => EquipmentCraftingDesignComposer.Compose(
@@ -1824,7 +1822,6 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
         {
             var design = designs[index];
             var recipe = template.Recipes[index];
-            var equipmentBase = equipmentBases[recipe.OutputItemId];
             var slotWeight = _craftingBalance.GetSlotBudgetWeight(recipe.OutputItemType);
             var constraints = EquipmentConstraintProfile.CreateItemConstraints(
                 EquipmentConstraintProfile.CreateTierBaseline(MaximumEquipmentTier),
@@ -1834,24 +1831,10 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
                 EquipmentConstraintProfile.MinimumSupportedBasicAttackIntervalMultiplier);
             var perItemCapMultiplier =
                 EquipmentConstraintProfile.GetPerItemCapMultiplier(slotWeight);
-            var itemPoints = equipmentBase.AttributeModifiers
-                .Where(modifier => modifier.ModifierType == ModifierType.Flat)
-                .GroupBy(modifier => modifier.AttributeType)
-                .ToDictionary(
-                    group => group.Key,
-                    group => group.Sum(modifier =>
-                        (double)EquipmentInstance.GetBoostedBaseModifierAmount(
-                            modifier.AttributeType,
-                            modifier.Amount,
-                            MaximumEquipmentRarity)));
-            var itemStaticBudget = itemPoints.Sum(entry =>
-                entry.Value
-                * EquipmentStatBudgetCatalog.Get(
-                    entry.Key,
-                    MaximumEquipmentTier).CostPerPoint);
-            staticBaseModifierBudget += itemStaticBudget;
-            targetBudget += itemStaticBudget;
-            spentBudget += itemStaticBudget;
+            // Crafted equipment is entirely budgeted by its generated and tempered
+            // instance modifiers. Authored item-base modifiers are a legacy/direct-grant
+            // path and must not be included in recipe progression audits.
+            var itemPoints = new Dictionary<AttributeType, double>();
 
             var generatedBaseBudget =
                 tierBudget

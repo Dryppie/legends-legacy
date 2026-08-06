@@ -2,7 +2,7 @@
 
 ## Status
 
-Implemented with combat rules version 9 and equipment balance version 10. The values in
+Implemented with combat rules version 9 and equipment balance version 11. The values in
 this document are the measured playtest baseline and should be changed only through a new
 versioned balance pass.
 
@@ -58,7 +58,22 @@ A 100% Power damage effect, a 75% Power heal, and a 65% Power barrier retain app
 
 A defensive build has visibly higher mitigation. A sustain build has visibly higher Healing Power. These advantages come from intentional allocation, not automatic tier inflation.
 
-## Equipment balance version 10
+## Equipment balance version 11
+
+Version 11 removes authored item-base modifiers from recipe-crafted equipment. Crafted
+items receive their complete combat budget from generated and tempered instance modifiers;
+authored base modifiers remain only for legacy and directly granted equipment. This closes
+the unbudgeted path that previously gave light and cloth armor large rarity-scaled Power
+bonuses outside the recipe allocator.
+
+Status Resistance now uses reviewed costs of `2.00`, `0.40`, and `0.665` at tiers 1, 5,
+and 10. Light armor deliberately spends part of its identity budget on this stat. The old
+flat `2.00` cost left that equipment materially below other profiles once its unbudgeted
+base Power was removed. The adjusted anchors preserve the approved equal-budget, hand-mode,
+summon, aggregate-cap, and maximum-progression gates while keeping Tier-1 Epic and max-tier
+canonical Combat Ratings comparable.
+
+### Version 10 foundation
 
 Power remains the single, player-facing magnitude attribute. Its internal item-budget
 price is tiered because one additional Power is a much larger relative increase when a
@@ -75,7 +90,7 @@ Intermediate tiers interpolate linearly between those anchors. These costs are g
 weights, not extra combat rules: an item still grants the displayed number of Power,
 Summon Power, or Summon Health, and combat consumes that displayed value directly.
 
-The v10 analyzer validates Power against Attack Speed in a 600-tick, basic-attack-only
+The analyzer validates Power against Attack Speed in a 600-tick, basic-attack-only
 throughput context. Active abilities are deliberately excluded from this one comparison,
 because Attack Speed does not accelerate them. A damage multiplier prevents integer event
 rounding from hiding small Tier 1 changes without altering either stat's relative gain.
@@ -93,9 +108,9 @@ The matched Summoner-versus-Direct-Caster checks also pass their 20% tolerance a
 necessary because cheap Summon Power and Summon Health previously made the Tier 1
 Summoner outperform its equal-budget control by as much as `41.31%`.
 
-Combat Rating uses the Tier-1 reference value for invariant authored item-base
-modifiers, while generated and tempered modifiers retain their item's tier-aware
-price. This prevents an identical base bonus from losing rating at a higher tier
+Combat Rating projects final attributes and values all of them at Tier-1 reference
+weights, while crafting continues to use tier-aware prices. This prevents an
+identical base bonus from losing rating at a higher tier
 and keeps every canonical profile's rating strictly increasing from T1 through T20.
 
 ## Target defensive attributes

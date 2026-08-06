@@ -26,7 +26,7 @@ public sealed record CombatRatingModifierSource(
 /// </summary>
 public static class CombatRatingCalculator
 {
-    public const int DefinitionVersion = 12;
+    public const int DefinitionVersion = 13;
     public const int ReferenceWeightTier = EquipmentStatBudgetCatalog.MinimumTier;
 
     private static readonly IReadOnlySet<AttributeType> OffenseAttributes =
@@ -92,20 +92,13 @@ public static class CombatRatingCalculator
         IEnumerable<EquipmentInstance> equipment,
         IEnumerable<CombatRatingModifierSource>? additionalAttributeSources = null)
     {
-        var sources = CreateBaseSources(baseAttributes);
-        foreach (var item in equipment.DistinctBy(item => item.Id))
-        {
-            // Authored base modifiers are invariant item identity, so their
-            // rating must not fall when the same base is crafted at a higher
-            // tier. Generated and tempered points retain tier-aware valuation.
-            AddModifierSource(sources, item.BaseModifiers, ReferenceWeightTier);
-            AddModifierSource(sources, item.InstanceModifiers, item.Tier);
-        }
+        var modifiers = equipment
+            .DistinctBy(item => item.Id)
+            .SelectMany(item => item.AttributeModifiers)
+            .Concat((additionalAttributeSources ?? []).SelectMany(source => source.Modifiers));
+        var projected = ProjectDirectAttributes(baseAttributes, modifiers);
 
-        foreach (var source in additionalAttributeSources ?? [])
-            AddModifierSource(sources, source.Modifiers, source.Tier);
-
-        return CreateBreakdown(ApplyCaps(sources));
+        return CreateBreakdown(ValueProjectedAttributes(projected));
     }
 
     public static CombatRatingBreakdown CalculateCanonical(
@@ -113,13 +106,22 @@ public static class CombatRatingCalculator
         IReadOnlyDictionary<AttributeType, double> equipmentPoints,
         int equipmentTier)
     {
-        var sources = directBaseAttributes
+        // Retain the tier parameter for callers that construct canonical rungs,
+        // but do not let source metadata change the value of identical final stats.
+        _ = equipmentTier;
+        var projected = directBaseAttributes
             .Where(entry => EquipmentStatBudgetCatalog.IsKnown(entry.Key))
             .ToDictionary(
-            entry => entry.Key,
-            entry => CreateSource(entry.Key, entry.Value, ReferenceWeightTier));
-        AddPointSource(sources, equipmentPoints, equipmentTier);
-        return CreateBreakdown(ApplyCaps(sources));
+                entry => entry.Key,
+                entry => (double)entry.Value);
+        foreach (var (attribute, points) in equipmentPoints.Where(entry =>
+                     entry.Value > 0
+                     && EquipmentStatBudgetCatalog.IsKnown(entry.Key)))
+        {
+            projected[attribute] = projected.GetValueOrDefault(attribute) + points;
+        }
+
+        return CreateBreakdown(ValueProjectedAttributes(projected));
     }
 
     private static CombatRatingBreakdown CreateBreakdown(
@@ -137,84 +139,37 @@ public static class CombatRatingCalculator
             0);
     }
 
-    private static Dictionary<AttributeType, RatingSource> CreateBaseSources(
-        IEnumerable<Domain.Models.Attributes.EntityAttribute> baseAttributes)
-    {
-        var values = baseAttributes
-            .GroupBy(attribute => attribute.AttributeType)
-            .ToDictionary(group => group.Key, group => group.Sum(attribute => attribute.Value));
-        return EquipmentStatBudgetCatalog.Attributes.ToDictionary(
-            attribute => attribute,
-            attribute => CreateSource(
-                attribute,
-                values.GetValueOrDefault(attribute),
-                ReferenceWeightTier));
-    }
-
-    private static void AddModifierSource(
-        IDictionary<AttributeType, RatingSource> target,
-        IEnumerable<AttributeModifierBase> modifiers,
-        int tier)
-    {
-        var points = modifiers
-            .Where(modifier =>
-                modifier.Amount > 0
-                && EquipmentStatBudgetCatalog.IsKnown(modifier.AttributeType))
-            .GroupBy(modifier => modifier.AttributeType)
-            .ToDictionary(group => group.Key, group => group.Sum(modifier => (double)modifier.Amount));
-        AddPointSource(target, points, tier);
-    }
-
-    private static void AddPointSource(
-        IDictionary<AttributeType, RatingSource> target,
-        IReadOnlyDictionary<AttributeType, double> points,
-        int tier)
-    {
-        foreach (var (attribute, amount) in points.Where(entry =>
-                     entry.Value > 0
-                     && EquipmentStatBudgetCatalog.IsKnown(entry.Key)))
-        {
-            var addition = CreateSource(attribute, amount, tier);
-            if (!target.TryGetValue(attribute, out var current))
-                current = new RatingSource(0, 0);
-            target[attribute] = new RatingSource(
-                current.Points + addition.Points,
-                current.Budget + addition.Budget);
-        }
-    }
-
-    private static RatingSource CreateSource(
-        AttributeType attribute,
-        double points,
-        int weightTier)
-    {
-        var usefulPoints = Math.Max(0, points);
-        return new RatingSource(
-            usefulPoints,
-            usefulPoints
-            * EquipmentStatBudgetCatalog.Get(attribute, weightTier).CostPerPoint);
-    }
-
-    private static IReadOnlyDictionary<AttributeType, double> ApplyCaps(
-        IReadOnlyDictionary<AttributeType, RatingSource> sources)
-    {
-        return sources.ToDictionary(
+    private static IReadOnlyDictionary<AttributeType, double> ValueProjectedAttributes(
+        IReadOnlyDictionary<AttributeType, float> projected) =>
+        ValueProjectedAttributes(projected.ToDictionary(
             entry => entry.Key,
-            entry =>
-            {
-                if (entry.Value.Points <= 0)
-                    return 0;
-                if (!AttributeCatalog.TryGetEffectiveCharacterCap(
-                        entry.Key,
-                        EquipmentConstraintProfile.MinimumSupportedBasicAttackIntervalMultiplier,
-                        out var cap))
-                {
-                    return entry.Value.Budget;
-                }
+            entry => (double)entry.Value));
 
-                return entry.Value.Budget
-                       * Math.Min(1d, cap / entry.Value.Points);
-            });
+    private static IReadOnlyDictionary<AttributeType, double> ValueProjectedAttributes(
+        IReadOnlyDictionary<AttributeType, double> projected)
+    {
+        return projected
+            .Where(entry => EquipmentStatBudgetCatalog.IsKnown(entry.Key))
+            .ToDictionary(
+                entry => entry.Key,
+                entry =>
+                {
+                    var usefulPoints = Math.Max(0, entry.Value);
+                    if (usefulPoints <= 0)
+                        return 0;
+                    if (!AttributeCatalog.TryGetEffectiveCharacterCap(
+                            entry.Key,
+                            EquipmentConstraintProfile.MinimumSupportedBasicAttackIntervalMultiplier,
+                            out var cap))
+                    {
+                        cap = float.MaxValue;
+                    }
+
+                    return Math.Min(usefulPoints, cap)
+                           * EquipmentStatBudgetCatalog
+                               .Get(entry.Key, ReferenceWeightTier)
+                               .CostPerPoint;
+                });
     }
 
     private static double Sum(
@@ -224,6 +179,4 @@ public static class CombatRatingCalculator
 
     private static int Round(double value) =>
         Math.Max(0, (int)Math.Round(value, MidpointRounding.AwayFromZero));
-
-    private readonly record struct RatingSource(double Points, double Budget);
 }

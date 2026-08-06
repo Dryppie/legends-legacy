@@ -56,34 +56,24 @@ attribute modifiers they produce.
 
 ### Direct Attributes and Equipment Budgets
 
-Persisted base attributes are valued directly. Power is valued as the universal
-ability coefficient; Max Health, defenses, recovery, and utility each receive their
-own explicit weight. No attribute implicitly produces another attribute.
-
-Each distinct equipped item separates authored base modifiers from generated
-instance modifiers. Base modifiers use stable Tier-1 reference weights so the
-same item identity cannot lose rating at a higher crafting tier. Generated and
-tempered instance modifiers use the item's tier-aware costs, matching
-`EquipmentBudgetEvaluator`. This prevents quality, rarity, or tier from receiving
-a second independent bonus while keeping canonical tier progression monotonic.
+Persisted base attributes, modifiers from each distinct equipped item, and
+resolved Essence attribute modifiers are projected into the same final direct
+attribute set. Flat, additive, and multiplicative modifier semantics are applied
+before valuation. Power is the universal ability coefficient; Max Health,
+defenses, recovery, and utility each receive their own explicit weight.
 
 Each active Essence is resolved independently through
 `IEssenceCombatLoadoutResolver`. Its fixed and evolution-added attribute
 modifiers are valued at the catalog's reference tier.
 
-Capped attributes are valued only up to their combined useful combat cap across
-base, equipment, and active Essence sources. When sources have different tier
-weights, over-cap budget is discounted proportionally so source ordering cannot
-change the result.
+Capped attributes are valued only up to their useful combat cap after projection.
 
 ### Weights and Scale
 
-Base attributes and authored equipment-base modifiers use the Tier-1
-`EquipmentStatBudgetCatalog.CostPerPoint` as a stable reference. Generated and
-tempered equipment modifiers use the catalog cost for that item's tier.
-Tier-aware generated weights are required because Armor, Max Health, and other
-diminishing-return attributes intentionally have different marginal costs
-across the progression curve.
+Every final attribute uses the Tier-1
+`EquipmentStatBudgetCatalog.CostPerPoint` as a stable reference. Tier-aware
+catalog costs govern how crafting budgets convert into stat points, but the
+same final stat point never changes Combat Rating because of its source or tier.
 
 The unrounded sum is converted to a non-negative whole number using
 `MidpointRounding.AwayFromZero`.
@@ -124,10 +114,10 @@ the readiness probability.
 
 1. Load the server-owned character overview and equipped item instances.
 2. Deduplicate equipment instances so a two-handed item is counted once.
-3. Value base attributes at the fixed reference tier, each distinct equipped
-   item's modifiers at its own tier, and each active Essence's resolved
-   attribute modifiers at the fixed reference tier.
-4. Calculate the deterministic Combat Rating and component breakdown.
+3. Project final direct attributes using base attributes, each distinct equipped
+   item's modifiers, and each active Essence's resolved attribute modifiers.
+4. Value the useful projected points at fixed reference weights and calculate
+   the deterministic Combat Rating and component breakdown.
 5. Return `Available` with `High` confidence.
 6. Retain the combat snapshot and its full fingerprint for real-dungeon
    readiness simulation. Essence state remains in that fingerprint because it
@@ -145,9 +135,9 @@ benchmark is involved:
 1. Build the ordered canonical equipment progression ladder.
 2. For each canonical profile, simulate the actual dungeon until the first rung
    reaches the target completion rate.
-3. Calculate that rung's Combat Rating from its direct baseline attributes and
-   tier-aware equipment budget using the same calculator as a real character.
-4. Use the Balanced profile's rating as the recommendation.
+3. Calculate that rung's Combat Rating from its final projected attributes using
+   the same fixed reference weights as a real character.
+4. Use the lowest eligible first-passing profile rating as the recommendation.
 5. Preserve the specialized-profile range, completion diagnostics, persistence,
    and confidence reporting.
 

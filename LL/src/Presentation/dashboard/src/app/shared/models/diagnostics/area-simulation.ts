@@ -2,6 +2,7 @@ export interface AreaSimulationOptions {
   areas: AreaSimulationAreaOption[];
   profiles: string[];
   builds: AreaSimulationBuildOption[];
+  regionProjections: AreaSimulationRegionProjection[];
   maximumEncounters: number;
 }
 
@@ -11,6 +12,8 @@ export interface AreaSimulationAreaOption {
   regionKey: string;
   levelRequirement: number;
   globalStep: number;
+  regionStep: number;
+  recommendedCombatRating: number;
   profileId: string;
   targetWinRateBasisPoints: number;
   defaultBuildId: string;
@@ -21,6 +24,21 @@ export interface AreaSimulationBuildOption {
   tier: number;
   quality: string;
   rarity: string;
+}
+
+export interface AreaSimulationRegionProjection {
+  regionNumber: number;
+  equipmentTier: number;
+  endingCharacterLevel: number;
+  essenceCount: number;
+  recommendedEndpointCombatRating: number;
+  maximumEndpointCombatRating: number;
+  profiles: AreaSimulationProfileProjection[];
+}
+
+export interface AreaSimulationProfileProjection {
+  profile: string;
+  combatRating: number;
 }
 
 export interface AreaSimulationRequest {
@@ -35,7 +53,9 @@ export interface CreatureScalingProfile {
   profileId: string;
   regionKey: string | null;
   globalStep: number;
+  regionStep: number | null;
   progressionStep: number;
+  recommendedCombatRating: number | null;
   healthMultiplier: number;
   offenseMultiplier: number;
   defenseMultiplier: number;

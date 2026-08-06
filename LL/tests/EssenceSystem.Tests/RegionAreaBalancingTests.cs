@@ -2,6 +2,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Domain.Models.Regions.Areas;
 using Microsoft.Extensions.Configuration;
+using Services.LL.PowerRatings;
 using Services.LL.Regions;
 using Services.LL.Spawnings;
 
@@ -18,6 +19,10 @@ public sealed class RegionAreaBalancingTests
         Assert.Equal(10, region.AreaIds.Count);
         Assert.Equal("region_01_area_01", region.AreaIds[0]);
         Assert.Equal("region_01_area_07", region.AreaIds[^1]);
+        Assert.Equal(
+            CanonicalEquipmentBuildFactory.TutorialStarterBuildId,
+            region.DefaultBuildIds[0]);
+        Assert.Equal("t1-standard-legendary", region.DefaultBuildIds[^1]);
 
         var scalings = region.AreaIds
             .Select((areaId, index) => provider.GetScaling(new Area
@@ -28,6 +33,11 @@ public sealed class RegionAreaBalancingTests
             .ToArray();
 
         Assert.Equal(Enumerable.Range(1, 10), scalings.Select(x => x.GlobalStep));
+        Assert.Equal(Enumerable.Range(0, 10), scalings.Select(x => x.RegionStep));
+        Assert.Equal(Enumerable.Range(0, 10), scalings.Select(x => x.ProgressionStep));
+        Assert.Equal(
+            [47, 59, 73, 91, 114, 142, 176, 220, 274, 342],
+            scalings.Select(x => x.RecommendedCombatRating));
         Assert.All(scalings.Zip(scalings.Skip(1)), pair =>
         {
             Assert.True(pair.Second.HealthMultiplier > pair.First.HealthMultiplier);
@@ -43,13 +53,17 @@ public sealed class RegionAreaBalancingTests
         var first = provider.GetScaling(new Area { Id = "region_01_area_01", DifficultyTier = 1 });
         var last = provider.GetScaling(new Area { Id = "region_01_area_07", DifficultyTier = 10 });
 
-        Assert.Equal("shenic-area-v1", first.ProfileId);
-        Assert.Equal(1d, first.HealthMultiplier, 6);
-        Assert.Equal(Math.Pow(1 + 0.22 * 9, 1.12), last.HealthMultiplier, 6);
-        Assert.Equal(Math.Pow(1 + 0.18 * 9, 1.10), last.OffenseMultiplier, 6);
+        Assert.Equal("shenic-area-v3", first.ProfileId);
+        Assert.Equal(1.6d, first.HealthMultiplier, 6);
+        Assert.Equal(1.85d, first.OffenseMultiplier, 6);
+        Assert.Equal(47, first.RecommendedCombatRating);
+        Assert.Equal(1.6d * Math.Pow(1.2609, 9), last.HealthMultiplier, 6);
+        Assert.Equal(1.85d * Math.Pow(1.1891, 9), last.OffenseMultiplier, 6);
+        Assert.Equal(342, last.RecommendedCombatRating);
 
         var fallback = provider.GetScaling(new Area { Id = "unmapped", DifficultyTier = 10 });
         Assert.Equal("legacy-area-v1", fallback.ProfileId);
+        Assert.Null(fallback.RecommendedCombatRating);
         Assert.Equal(Math.Pow(1 + 0.22 * 9, 1.12), fallback.HealthMultiplier, 6);
         Assert.All(provider.GetCatalog().Profiles, profile => Assert.Equal(8_500, profile.TargetWinRateBasisPoints));
     }
@@ -66,9 +80,58 @@ public sealed class RegionAreaBalancingTests
         });
 
         Assert.Null(scaling.RegionKey);
+        Assert.Null(scaling.RegionStep);
         Assert.Equal(11, scaling.GlobalStep);
         Assert.Equal(10, scaling.ProgressionStep);
         Assert.True(scaling.HealthMultiplier > 3);
+    }
+
+    [Fact]
+    public void Region_two_starts_its_curve_at_local_step_zero()
+    {
+        var provider = new RegionCreatureScalingProvider(CreateTwoRegionCatalog());
+
+        var first = provider.GetScaling(new Area { Id = "region-02-area-01" });
+        var second = provider.GetScaling(new Area { Id = "region-02-area-02" });
+
+        Assert.Equal(3, first.GlobalStep);
+        Assert.Equal(0, first.RegionStep);
+        Assert.Equal(0, first.ProgressionStep);
+        Assert.Equal(5d, first.HealthMultiplier, 6);
+        Assert.Equal(4, second.GlobalStep);
+        Assert.Equal(1, second.RegionStep);
+        Assert.Equal(1, second.ProgressionStep);
+        Assert.Equal(6d, second.HealthMultiplier, 6);
+    }
+
+    [Fact]
+    public void Region_catalog_rejects_global_step_gaps()
+    {
+        var catalog = CreateTwoRegionCatalog();
+        var second = catalog.Regions[1] with { StartingGlobalStep = 4 };
+
+        var error = Assert.Throws<InvalidOperationException>(() =>
+            new RegionCreatureScalingProvider(catalog with
+            {
+                Regions = [catalog.Regions[0], second]
+            }));
+
+        Assert.Contains("must begin at global step 3", error.Message);
+    }
+
+    [Fact]
+    public void Region_catalog_rejects_combat_rating_regression_at_a_boundary()
+    {
+        var catalog = CreateTwoRegionCatalog();
+        var second = catalog.Regions[1] with { StartingCombatRating = 199 };
+
+        var error = Assert.Throws<InvalidOperationException>(() =>
+            new RegionCreatureScalingProvider(catalog with
+            {
+                Regions = [catalog.Regions[0], second]
+            }));
+
+        Assert.Contains("starts below the ending Combat Rating", error.Message);
     }
 
     [Fact]
@@ -110,6 +173,63 @@ public sealed class RegionAreaBalancingTests
         var options = new JsonSerializerOptions(JsonSerializerDefaults.Web);
         options.Converters.Add(new JsonStringEnumConverter());
         return new RegionCreatureScalingProvider(configuration, apiRoot, options);
+    }
+
+    private static RegionCombatBalanceCatalog CreateTwoRegionCatalog()
+    {
+        var fallback = CreateProvider().GetCatalog().Profiles.Single(profile =>
+            profile.Id == RegionCreatureScalingProvider.DefaultProfileId);
+        var firstProfile = CreateProfile("test-region-1", 1d, 0.1d);
+        var secondProfile = CreateProfile("test-region-2", 5d, 0.2d);
+
+        return new RegionCombatBalanceCatalog(
+            1,
+            [fallback, firstProfile, secondProfile],
+            [
+                new RegionCombatBalanceRegion(
+                    "test-1",
+                    firstProfile.Id,
+                    1,
+                    100,
+                    200,
+                    ["region-01-area-01", "region-01-area-02"],
+                    ["t1-standard-common", "t1-standard-legendary"]),
+                new RegionCombatBalanceRegion(
+                    "test-2",
+                    secondProfile.Id,
+                    3,
+                    200,
+                    400,
+                    ["region-02-area-01", "region-02-area-02"],
+                    ["t1-standard-legendary", "t2-standard-legendary"])
+            ]);
+    }
+
+    private static RegionCombatBalanceProfile CreateProfile(
+        string id,
+        double baseMultiplier,
+        double growthPerStep)
+    {
+        var curve = new RegionCombatGrowthCurve(
+            "Exponential",
+            baseMultiplier,
+            growthPerStep,
+            1d);
+        return new RegionCombatBalanceProfile(
+            id,
+            8_500,
+            curve,
+            curve,
+            curve,
+            curve,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0.45f,
+            2f,
+            0.5d);
     }
 
     private static string FindApiRoot()

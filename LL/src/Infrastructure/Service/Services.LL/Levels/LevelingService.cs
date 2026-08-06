@@ -1,5 +1,6 @@
 using Application.UseCases.Characters.Events;
 using Application.Interfaces.Services.LL.Entities;
+using Domain.Helpers;
 using Domain.Helpers.Constants;
 using Domain.Models.Attributes;
 using Domain.Models.Entities.Characters;
@@ -51,9 +52,9 @@ public class LevelingService : ILevelingService
         foreach (var attr in character.BaseAttributes)
         {
             if (attr.AttributeType == AttributeType.Power)
-                attr.Value += 2;
+                attr.Value += EntityBaseAttributeHelper.PowerPerCharacterLevel;
             else if (attr.AttributeType == AttributeType.MaxHealth)
-                attr.Value += 8;
+                attr.Value += EntityBaseAttributeHelper.MaxHealthPerCharacterLevel;
         }
     }
 

@@ -203,6 +203,7 @@ public class ColosseumService : IColosseumService
                 Id = x.EquipmentInstanceId,
                 ItemBaseId = x.ItemBaseId,
                 ItemBase = itemBases[x.ItemBaseId],
+                BaseRecipeId = x.BaseRecipeId,
                 Rarity = x.Rarity,
                 Potential = x.Potential,
                 ItemXp = x.ItemXp,

@@ -112,9 +112,15 @@ It should describe policies and curve parameters, not final per-area stats. A co
       "regionKey": "shenic",
       "profileId": "standard-region-v1",
       "startingGlobalStep": 1,
+      "startingCombatRating": 47,
+      "endingCombatRating": 342,
       "areaIds": [
         "region_01_area_01",
         "region_01_area_02"
+      ],
+      "defaultBuildIds": [
+        "tutorial-starter",
+        "t1-standard-common"
       ]
     }
   ]
@@ -443,6 +449,29 @@ Estimated effort is approximately 8–13 focused development days, followed by m
 
 The first implementation slice now includes the versioned curve catalog, explicit Shenic area order, reusable global steps, startup validation, `CreatureScaler` integration, deterministic weighted spawning, canonical area builds, real idle-mode combat simulation, full-region profile analysis, Admin Dashboard endpoints, and an Area Simulator page.
 
-The initial `shenic-area-v1` profile deliberately reproduces the former difficulty-tier formulas. Moving those formulas into the system-owned profile therefore does not silently rebalance live combat while establishing the new curve boundary. The full-region analyzer currently identifies the legacy baseline as too easy for canonical builds; that result is calibration input, not an approved 85% curve. The shared curve and any genuine content outliers can now be tuned and revalidated without authoring final stats for each area.
+The approved Region 1 calibration is `shenic-area-v3`. It anchors Lumo Ruins to the
+actual post-tutorial loadout: a Level 1 character with the Common starter weapon and
+Goblin Essence at CR 47. Duskmire Hollow is anchored to the weakest viable Level 45
+full Tier 1 Legendary canonical build at CR 342. Recommended Combat Rating uses
+geometric interpolation across the ten areas:
+
+| Area step | Recommended CR |
+| ---: | ---: |
+| 1 | 47 |
+| 2 | 59 |
+| 3 | 73 |
+| 4 | 91 |
+| 5 | 114 |
+| 6 | 142 |
+| 7 | 176 |
+| 8 | 220 |
+| 9 | 274 |
+| 10 | 342 |
+
+Creature health, offense, defense, resistance, and secondary scaling use the shared
+versioned exponential profile rather than per-area final stats. Deterministic balance
+tests hold the tutorial build to an 80–90% Area 1 win band and require every Tier 1
+Legendary canonical profile to remain viable in Area 10. Area-owned XP and Cinders per
+hour remain unchanged.
 
 The implementation reads XP and Cinders exclusively from `area-experience.json`. Reports show the authored area targets and calculate effective hourly values from observed win rate; no creature reward field or creature-specific rate was introduced.

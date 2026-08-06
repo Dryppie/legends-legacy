@@ -33,21 +33,22 @@ public sealed class EquipmentBalanceProfileTests
     }
 
     [Theory]
-    [InlineData(1, 0.68d)]
-    [InlineData(3, 1.275d)]
-    [InlineData(5, 1.87d)]
-    [InlineData(8, 3.22d)]
-    [InlineData(10, 4.12d)]
+    [InlineData(1, 0.68d, 0.68d)]
+    [InlineData(3, 1.275d, 1.275d)]
+    [InlineData(5, 1.87d, 1.87d)]
+    [InlineData(8, 3.22d, 3.22d)]
+    [InlineData(10, 4.12d, 4.12d)]
     public void Typed_defense_cost_interpolates_between_reviewed_tier_anchors(
         int tier,
-        double expectedCost)
+        double expectedArmorCost,
+        double expectedResistanceCost)
     {
         Assert.Equal(
-            expectedCost,
+            expectedArmorCost,
             EquipmentStatBudgetCatalog.Get(AttributeType.Armor, tier).CostPerPoint,
             precision: 4);
         Assert.Equal(
-            expectedCost,
+            expectedResistanceCost,
             EquipmentStatBudgetCatalog.Get(AttributeType.Resistance, tier).CostPerPoint,
             precision: 4);
     }
@@ -117,7 +118,7 @@ public sealed class EquipmentBalanceProfileTests
         Assert.Equal(68d, EquipmentBudgetEvaluator.Evaluate(modifiers, tier: 1));
         Assert.Equal(187d, EquipmentBudgetEvaluator.Evaluate(modifiers, tier: 5));
         Assert.Equal(412d, EquipmentBudgetEvaluator.Evaluate(modifiers, tier: 10));
-        Assert.Equal(10, EquipmentBudgetEvaluator.BalanceVersion);
+        Assert.Equal(11, EquipmentBudgetEvaluator.BalanceVersion);
     }
 
     [Fact]
@@ -177,6 +178,45 @@ public sealed class EquipmentBalanceProfileTests
             10,
             equipment.BaseModifiers.Single(x =>
                 x.AttributeType == AttributeType.Armor).Amount);
+    }
+
+    [Fact]
+    public void Crafted_equipment_uses_recipe_modifiers_without_authored_base_modifiers()
+    {
+        var equipmentId = Guid.NewGuid();
+        var equipment = new EquipmentInstance
+        {
+            Id = equipmentId,
+            ItemBaseId = "test-crafted-armor",
+            BaseRecipeId = "recipe.test-crafted-armor",
+            ItemBase = new EquipmentBase
+            {
+                Id = "test-crafted-armor",
+                Name = "Test Crafted Armor",
+                EquipmentType = EquipmentType.Chest,
+                AttributeModifiers =
+                [
+                    new ItemAttributeModifier(
+                        AttributeType.Power,
+                        100,
+                        ModifierType.Flat)
+                ]
+            },
+            Rarity = Rarity.Legendary,
+            InstanceModifiers =
+            [
+                new InstanceAttributeModifier(AttributeType.Armor, 12)
+                {
+                    ItemInstanceId = equipmentId
+                }
+            ]
+        };
+
+        Assert.True(equipment.UsesRecipeStatBudget);
+        Assert.Empty(equipment.BaseModifiers);
+        var modifier = Assert.Single(equipment.AttributeModifiers);
+        Assert.Equal(AttributeType.Armor, modifier.AttributeType);
+        Assert.Equal(12, modifier.Amount);
     }
 
     [Fact]
@@ -367,7 +407,7 @@ public sealed class EquipmentBalanceProfileTests
             allocation.AddedPoints[AttributeType.Power]
             > 100d * weights[AttributeType.Power]
             / EquipmentStatBudgetCatalog.Get(AttributeType.Power, 10).CostPerPoint);
-        Assert.Equal(10, EquipmentConstraintProfile.BalanceVersion);
+        Assert.Equal(11, EquipmentConstraintProfile.BalanceVersion);
         Assert.True(EquipmentConstraintProfile.ProductionActive);
     }
 

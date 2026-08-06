@@ -95,8 +95,19 @@ public class CharacterActionRepository : ICharacterActionRepository
 
     public void UpdateCharacterAction(CharacterAction characterAction)
     {
+        var entry = _context.GetEntry(characterAction);
+
+        // A newly started combat action is resolved immediately, before the unit of
+        // work is saved. Calling Update here would change the new parent from Added
+        // to Modified while leaving its ActionDetails Added. Relational providers
+        // would then insert the details before the missing parent and violate the FK.
+        if (entry.State == EntityState.Added)
+            return;
+
         characterAction.RowVersion++;
-        _context.CharacterActions.Update(characterAction);
+
+        if (entry.State == EntityState.Detached)
+            _context.CharacterActions.Update(characterAction);
     }
 
     public async Task<CharacterAction?> GetCraftingActionAsync(Guid characterId, CancellationToken cancellationToken)

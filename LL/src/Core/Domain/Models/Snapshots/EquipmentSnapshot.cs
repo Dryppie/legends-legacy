@@ -11,6 +11,7 @@ public sealed class EquipmentSnapshot
     public EquipmentSlotType Slot { get; init; }
     public Guid EquipmentInstanceId { get; init; }
     public string ItemBaseId { get; init; } = default!;
+    public string? BaseRecipeId { get; init; }
     public Rarity Rarity { get; init; }
     public int? Potential { get; init; }
     public int ItemXp { get; init; }
@@ -32,6 +33,7 @@ public sealed class EquipmentSnapshot
             Slot = slot,
             EquipmentInstanceId = inst.Id,
             ItemBaseId = inst.ItemBaseId,
+            BaseRecipeId = inst.BaseRecipeId,
             Rarity = inst.Rarity,
             Potential = inst.Potential,
             ItemXp = inst.ItemXp,

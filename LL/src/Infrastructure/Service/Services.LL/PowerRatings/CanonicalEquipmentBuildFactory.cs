@@ -41,6 +41,7 @@ public sealed record CanonicalEquipmentBuild(
 /// </summary>
 public sealed class CanonicalEquipmentBuildFactory
 {
+    public const string TutorialStarterBuildId = "tutorial-starter";
     private const int PositiveTemperingAttemptsPerRarity = 10;
     private const int MaximumCanonicalEssenceCount = 6;
     private const int MaximumCalibrationEquipmentTier = 20;
@@ -206,8 +207,58 @@ public sealed class CanonicalEquipmentBuildFactory
         int essenceCount)
     {
         var build = CreateBuild(profile, rung, essenceCount);
-        build.Character.Level = Math.Max(1, characterLevel);
-        return build;
+        var resolvedLevel = Math.Max(1, characterLevel);
+        build.Character.Level = resolvedLevel;
+        build.Character.BaseAttributes = EntityBaseAttributeHelper
+            .CreateEntityAttributesForLevel(build.Character.Id, resolvedLevel)
+            .OrderBy(attribute => attribute.AttributeType)
+            .ToList();
+        return build with
+        {
+            Rating = CalculateRating(
+                build.Character,
+                build.Equipment,
+                build.EquippedEssences)
+        };
+    }
+
+    public CanonicalEquipmentBuild CreateTutorialStarterBuild()
+    {
+        var rung = _ladder.Single(candidate => candidate.Id == "t1-standard-common");
+        var character = new Character
+        {
+            Id = CreateDeterministicGuid("region-one-tutorial-starter-character"),
+            Name = "Region 1 Tutorial Starter",
+            Level = 1,
+            BaseAttributes = EntityBaseAttributeHelper
+                .CreateEntityAttributesForLevel(
+                    CreateDeterministicGuid("region-one-tutorial-starter-attributes"),
+                    level: 1)
+                .OrderBy(attribute => attribute.AttributeType)
+                .ToList()
+        };
+        if (!_craftingDefinitions.GetEquipmentBases().TryGetValue("mace", out var maceBase))
+            throw new InvalidOperationException("Tutorial starter mace item base was not found.");
+        var equipment = new EquipmentInstance
+        {
+            Id = CreateDeterministicGuid("region-one-tutorial-starter-equipment"),
+            ItemBaseId = maceBase.Id,
+            ItemBase = maceBase,
+            Tier = EquipmentStatBudgetCatalog.MinimumTier,
+            Rarity = Rarity.Common,
+            Quality = ItemQuality.Standard
+        };
+        var essences = CreateEssences(CanonicalPartyProfile.Balanced, character.Id, essenceCount: 1);
+
+        return new CanonicalEquipmentBuild(
+            rung,
+            CanonicalPartyProfile.Balanced,
+            character,
+            [equipment],
+            essences,
+            CalculateRating(character, [equipment], essences),
+            EquipmentStatBudgetCatalog.BalanceVersion,
+            null);
     }
 
     public static int GetEssenceCountForDungeonTier(int dungeonTier) => dungeonTier switch
@@ -241,7 +292,11 @@ public sealed class CanonicalEquipmentBuildFactory
                 Math.Max(rung.Tier, ProfileCharacterLevels[profile]),
                 (essenceCount - 1) * 10),
             BaseAttributes = EntityBaseAttributeHelper
-                .CreateEntityAttributes(CreateDeterministicGuid($"canonical-attributes:{profile}"))
+                .CreateEntityAttributesForLevel(
+                    CreateDeterministicGuid($"canonical-attributes:{profile}"),
+                    Math.Max(
+                        Math.Max(rung.Tier, ProfileCharacterLevels[profile]),
+                        (essenceCount - 1) * 10))
                 .OrderBy(attribute => attribute.AttributeType)
                 .ToList()
         };
@@ -250,6 +305,25 @@ public sealed class CanonicalEquipmentBuildFactory
             .Select((slot, index) => CreateEquipment(profile, rung, slot, index))
             .ToList();
         var essences = CreateEssences(profile, character.Id, essenceCount);
+
+        return new CanonicalEquipmentBuild(
+            rung,
+            profile,
+            character,
+            equipment,
+            essences,
+            CalculateRating(character, equipment, essences),
+            EquipmentStatBudgetCatalog.BalanceVersion,
+            equipment
+                .FirstOrDefault(item => item.EquipmentBase.EquipmentType == EquipmentType.TwoHanded)
+                ?.BaseRecipeId);
+    }
+
+    private CombatRatingBreakdown CalculateRating(
+        Character character,
+        IReadOnlyList<EquipmentInstance> equipment,
+        IReadOnlyList<PlayerEssence> essences)
+    {
         var essenceSources = essences
             .Select(essence =>
             {
@@ -259,21 +333,10 @@ public sealed class CanonicalEquipmentBuildFactory
                     loadout.AttributeModifiers);
             })
             .ToList();
-
-        return new CanonicalEquipmentBuild(
-            rung,
-            profile,
-            character,
+        return CombatRatingCalculator.Calculate(
+            character.BaseAttributes,
             equipment,
-            essences,
-            CombatRatingCalculator.Calculate(
-                character.BaseAttributes,
-                equipment,
-                essenceSources),
-            EquipmentStatBudgetCatalog.BalanceVersion,
-            equipment
-                .FirstOrDefault(item => item.EquipmentBase.EquipmentType == EquipmentType.TwoHanded)
-                ?.BaseRecipeId);
+            essenceSources);
     }
 
     private EquipmentInstance CreateEquipment(
@@ -283,6 +346,19 @@ public sealed class CanonicalEquipmentBuildFactory
         int slotIndex)
     {
         var recipeId = ProfileRecipeIds[profile][slot];
+        return CreateEquipmentFromRecipe(
+            recipeId,
+            rung,
+            $"canonical-equipment:{profile}:{rung.Id}:{slotIndex}",
+            $"canonical-stat-roll:{profile}:{rung.Id}:{slotIndex}");
+    }
+
+    private EquipmentInstance CreateEquipmentFromRecipe(
+        string recipeId,
+        CanonicalEquipmentProgressionRung rung,
+        string equipmentIdentity,
+        string statRollIdentity)
+    {
         var recipe = _craftingDefinitions.GetRecipe(recipeId)
             ?? throw new InvalidOperationException($"Canonical recipe '{recipeId}' was not found.");
         if (rung.Tier is < EquipmentStatBudgetCatalog.MinimumTier
@@ -316,7 +392,7 @@ public sealed class CanonicalEquipmentBuildFactory
                 craftingLevel: rung.Tier));
         var equipment = new EquipmentInstance
         {
-            Id = CreateDeterministicGuid($"canonical-equipment:{profile}:{rung.Id}:{slotIndex}"),
+            Id = CreateDeterministicGuid(equipmentIdentity),
             ItemBaseId = itemBase.Id,
             ItemBase = itemBase,
             BaseRecipeId = recipe.Id,
@@ -335,8 +411,7 @@ public sealed class CanonicalEquipmentBuildFactory
                     design,
                     rung.Tier,
                     rung.Quality,
-                    new Random(CreateDeterministicSeed(
-                        $"canonical-stat-roll:{profile}:{rung.Id}:{slotIndex}")))
+                    new Random(CreateDeterministicSeed(statRollIdentity)))
             ]
         };
 

@@ -132,7 +132,10 @@ export class DungeonSimulatorComponent implements OnInit {
     return (this.options?.equipmentRarities ?? []).map((rarity) => ({
       label: rarity.name,
       value: rarity.id,
-      detail: `×${rarity.multiplier.toFixed(2)}`,
+      detail:
+        rarity.temperingSteps === 0
+          ? 'Base craft'
+          : `${rarity.temperingSteps} rarity upgrades`,
     }));
   }
 
@@ -167,11 +170,14 @@ export class DungeonSimulatorComponent implements OnInit {
   }
 
   equipmentBonusSummary(slot: DungeonSimulationEquipmentSlotOption): string {
-    const multiplier = this.selectedEquipmentRarityMultiplier;
-    return Object.entries(slot.attributeBonuses)
+    const bonuses =
+      slot.attributeBonusesByRarity[
+        this.request.character.equipment.rarity
+      ] ?? {};
+    return Object.entries(bonuses)
       .map(
         ([attribute, value]) =>
-          `+${Math.ceil(value * multiplier)} ${this.formatAttributeName(attribute)}`,
+          `+${value} ${this.formatAttributeName(attribute)}`,
       )
       .join(' · ');
   }
@@ -207,14 +213,6 @@ export class DungeonSimulatorComponent implements OnInit {
 
   trackRun(_: number, run: { runNumber: number }): number {
     return run.runNumber;
-  }
-
-  private get selectedEquipmentRarityMultiplier(): number {
-    return (
-      this.options?.equipmentRarities?.find(
-        (rarity) => rarity.id === this.request.character.equipment.rarity,
-      )?.multiplier ?? 1
-    );
   }
 
   private formatAttributeName(attribute: string): string {

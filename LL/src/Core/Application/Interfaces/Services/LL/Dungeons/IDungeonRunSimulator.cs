@@ -26,12 +26,12 @@ public sealed record DungeonSimulationEssenceOption(string Id, string Name);
 public sealed record DungeonSimulationEquipmentSlotOption(
     string Id,
     string Name,
-    IReadOnlyDictionary<string, float> AttributeBonuses);
+    IReadOnlyDictionary<string, IReadOnlyDictionary<string, float>> AttributeBonusesByRarity);
 
 public sealed record DungeonSimulationEquipmentRarityOption(
     string Id,
     string Name,
-    float Multiplier);
+    int TemperingSteps);
 
 public sealed record DungeonSimulationRequest(
     string DungeonDefinitionId,

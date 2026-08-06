@@ -12,6 +12,7 @@ public sealed record AreaSimulationOptions(
     IReadOnlyList<AreaSimulationAreaOption> Areas,
     IReadOnlyList<string> Profiles,
     IReadOnlyList<AreaSimulationBuildOption> Builds,
+    IReadOnlyList<AreaSimulationRegionProjection> RegionProjections,
     int MaximumEncounters);
 
 public sealed record AreaSimulationAreaOption(
@@ -20,6 +21,8 @@ public sealed record AreaSimulationAreaOption(
     string RegionKey,
     int LevelRequirement,
     int GlobalStep,
+    int RegionStep,
+    int RecommendedCombatRating,
     string ProfileId,
     int TargetWinRateBasisPoints,
     string DefaultBuildId);
@@ -29,6 +32,19 @@ public sealed record AreaSimulationBuildOption(
     int Tier,
     string Quality,
     string Rarity);
+
+public sealed record AreaSimulationRegionProjection(
+    int RegionNumber,
+    int EquipmentTier,
+    int EndingCharacterLevel,
+    int EssenceCount,
+    int RecommendedEndpointCombatRating,
+    int MaximumEndpointCombatRating,
+    IReadOnlyList<AreaSimulationProfileProjection> Profiles);
+
+public sealed record AreaSimulationProfileProjection(
+    string Profile,
+    int CombatRating);
 
 public sealed record AreaSimulationRequest(
     string AreaId,
