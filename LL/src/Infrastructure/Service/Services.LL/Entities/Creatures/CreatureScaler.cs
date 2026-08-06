@@ -1,21 +1,33 @@
-using Domain.Helpers.Constants;
+using Application.Interfaces.Services.LL.Regions;
 using Domain.Models.Attributes;
 using Domain.Models.Entities.Creatures;
 using Domain.Models.Entities.Creatures.Templates;
 using Domain.Models.Regions.Areas;
 using Services.LL.Interfaces;
+using Services.LL.Regions;
 
 namespace Services.LL.Entities.Creatures;
 
 public class CreatureScaler : ICreatureScaler
 {
+    private readonly IRegionCreatureScalingProvider _scalingProvider;
+
+    public CreatureScaler()
+        : this(RegionCreatureScalingProvider.CreateLegacyFallback())
+    {
+    }
+
+    public CreatureScaler(IRegionCreatureScalingProvider scalingProvider)
+    {
+        _scalingProvider = scalingProvider;
+    }
+
     public void ApplyScaling(Creature creature, Area area)
     {
-        var difficultyTier = Math.Max(1, area.DifficultyTier);
-        var progressionTier = difficultyTier - 1;
+        var scaling = _scalingProvider.GetScaling(area);
 
         InitializeFromBaseline(creature);
-        ApplyDifficultyScaling(creature, progressionTier);
+        ApplyDifficultyScaling(creature, scaling);
         ApplyArchetype(creature);
         ApplyDamageProfile(creature);
         ApplyDefenseProfile(creature);
@@ -25,7 +37,7 @@ public class CreatureScaler : ICreatureScaler
         //ApplyRubberBanding(creature, area, D);
         ApplyStatOverrides(creature);
         SyncHealth(creature);
-        ClampCrits(creature);
+        ClampCrits(creature, scaling);
     }
 
     private static void InitializeFromBaseline(Creature creature)
@@ -39,63 +51,32 @@ public class CreatureScaler : ICreatureScaler
         }
     }
 
-    private static void ApplyDifficultyScaling(Creature creature, int progressionTier)
+    private static void ApplyDifficultyScaling(
+        Creature creature,
+        CreatureScalingProfile scaling)
     {
         foreach (var type in MonsterBaseStats.Baseline.Keys)
         {
             var baseValue = MonsterBaseStats.Baseline[type];
             var scaled = type switch
             {
-                AttributeType.MaxHealth => ScaleHp(baseValue, progressionTier),
-                AttributeType.Power => ScaleOffense(baseValue, progressionTier),
-                AttributeType.AttackSpeed => (float)(baseValue * (1.0 + MonsterScalingConstants.AccuracyPerTier * progressionTier)),
-                AttributeType.CritChance => Math.Min(baseValue + (float)(MonsterScalingConstants.CritChancePerTier * progressionTier), MonsterScalingConstants.CritChanceCap),
-                AttributeType.CritDamage => Math.Min(baseValue + (float)(MonsterScalingConstants.CritDamagePerTier * progressionTier), MonsterScalingConstants.CritDamageCap),
-                AttributeType.ArmorPenetration => (float)(baseValue * (1.0 + MonsterScalingConstants.PenPerTier * progressionTier)),
-                AttributeType.MagicPenetration => (float)(baseValue * (1.0 + MonsterScalingConstants.PenPerTier * progressionTier)),
-                AttributeType.Armor => ScaleDefense(baseValue, progressionTier),
-                AttributeType.Resistance => ScaleResistance(baseValue, progressionTier),
-                AttributeType.DamageReduction => ScaleSoftDefense(baseValue, progressionTier),
-                AttributeType.CrowdControlResistance => ScaleSoftDefense(baseValue, progressionTier),
-                AttributeType.StatusResistance => ScaleSoftDefense(baseValue, progressionTier),
+                AttributeType.MaxHealth => (float)(baseValue * scaling.HealthMultiplier),
+                AttributeType.Power => (float)(baseValue * scaling.OffenseMultiplier),
+                AttributeType.AttackSpeed => (float)(baseValue * scaling.AttackSpeedMultiplier),
+                AttributeType.CritChance => Math.Min(baseValue + (float)scaling.CritChanceBonus, scaling.CritChanceCap),
+                AttributeType.CritDamage => Math.Min(baseValue + (float)scaling.CritDamageBonus, scaling.CritDamageCap),
+                AttributeType.ArmorPenetration => (float)(baseValue * scaling.PenetrationMultiplier),
+                AttributeType.MagicPenetration => (float)(baseValue * scaling.PenetrationMultiplier),
+                AttributeType.Armor => (float)(baseValue * scaling.DefenseMultiplier),
+                AttributeType.Resistance => (float)(baseValue * scaling.ResistanceMultiplier),
+                AttributeType.DamageReduction => (float)(baseValue * scaling.SoftDefenseMultiplier),
+                AttributeType.CrowdControlResistance => (float)(baseValue * scaling.SoftDefenseMultiplier),
+                AttributeType.StatusResistance => (float)(baseValue * scaling.SoftDefenseMultiplier),
                 _ => baseValue
             };
 
             creature.BaseAttributesDict[type] = (int)scaled;
         }
-    }
-
-    private static float ScaleHp(float baseHp, int progressionTier)
-    {
-        var mult = Math.Pow(1 + MonsterScalingConstants.HpA * progressionTier, MonsterScalingConstants.HpB);
-        return (float)(baseHp * mult);
-    }
-
-    private static float ScaleOffense(float baseVal, int progressionTier)
-    {
-        var mult = Math.Pow(1 + MonsterScalingConstants.OffenseC * progressionTier, MonsterScalingConstants.OffenseExp);
-        return (float)(baseVal * mult);
-    }
-
-    private static float ScaleDefense(float baseVal, int progressionTier)
-    {
-        if (baseVal <= 0) return baseVal;
-        var mult = Math.Pow(1 + MonsterScalingConstants.DefenseA * progressionTier, MonsterScalingConstants.DefenseB);
-        return (float)(baseVal * mult);
-    }
-
-    private static float ScaleSoftDefense(float baseVal, int progressionTier)
-    {
-        if (baseVal <= 0) return baseVal;
-        var mult = 1.0 + 0.05 * progressionTier;
-        return (float)(baseVal * mult);
-    }
-
-    private static float ScaleResistance(float baseVal, int progressionTier)
-    {
-        if (baseVal <= 0) return baseVal;
-        var mult = Math.Pow(1 + MonsterScalingConstants.ResistA * progressionTier, MonsterScalingConstants.ResistB);
-        return (float)(baseVal * mult);
     }
 
     private static void ApplyArchetype(Creature creature)
@@ -221,18 +202,18 @@ public class CreatureScaler : ICreatureScaler
         }
     }
 
-    private static void ClampCrits(Creature creature)
+    private static void ClampCrits(Creature creature, CreatureScalingProfile scaling)
     {
         if (creature.BaseAttributesDict.TryGetValue(AttributeType.CritChance, out var cc))
         {
             creature.BaseAttributesDict[AttributeType.CritChance] =
-                Math.Clamp(cc, 0f, MonsterScalingConstants.CritChanceCap);
+                Math.Clamp(cc, 0f, scaling.CritChanceCap);
         }
 
         if (creature.BaseAttributesDict.TryGetValue(AttributeType.CritDamage, out var cd))
         {
             creature.BaseAttributesDict[AttributeType.CritDamage] =
-                Math.Clamp(cd, 1f, MonsterScalingConstants.CritDamageCap);
+                Math.Clamp(cd, 1f, scaling.CritDamageCap);
         }
     }
 

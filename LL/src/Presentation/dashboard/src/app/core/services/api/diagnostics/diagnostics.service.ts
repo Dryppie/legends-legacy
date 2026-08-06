@@ -16,6 +16,13 @@ import {
   DungeonSimulationReport,
   DungeonSimulationRequest,
 } from '../../../../shared/models/diagnostics/dungeon-simulation';
+import {
+  AreaSimulationOptions,
+  AreaSimulationReport,
+  AreaSimulationRequest,
+  RegionAreaBalanceReport,
+  RegionAreaBalanceRequest,
+} from '../../../../shared/models/diagnostics/area-simulation';
 
 @Injectable({
   providedIn: 'root',
@@ -62,6 +69,22 @@ export class DiagnosticsService {
     request: DungeonSimulationRequest,
   ): Observable<DungeonSimulationReport> {
     return this.apiService.post('diagnostics/dungeon-simulation', request);
+  }
+
+  public getAreaSimulationOptions(): Observable<AreaSimulationOptions> {
+    return this.apiService.get('diagnostics/area-simulation-options');
+  }
+
+  public runAreaSimulation(
+    request: AreaSimulationRequest,
+  ): Observable<AreaSimulationReport> {
+    return this.apiService.post('diagnostics/area-simulation', request);
+  }
+
+  public analyzeRegionAreaBalance(
+    request: RegionAreaBalanceRequest,
+  ): Observable<RegionAreaBalanceReport> {
+    return this.apiService.post('diagnostics/region-area-balance', request);
   }
 
 }

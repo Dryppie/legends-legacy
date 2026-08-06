@@ -12,6 +12,7 @@ using Application.Interfaces.Services.LL.PowerRatings;
 using Application.UseCases._AdminDashboard.Diagnostics.Queries.GetRegionOneContentDiagnostics;
 using Application.UseCases._AdminDashboard.Diagnostics.Queries.RunAbilityBalanceSimulation;
 using Application.UseCases._AdminDashboard.Diagnostics.Queries.RunDungeonSimulation;
+using Application.UseCases._AdminDashboard.Diagnostics.Queries.RunAreaSimulation;
 using Application.Interfaces.Services.LL.Dungeons;
 using Microsoft.AspNetCore.Mvc;
 
@@ -90,6 +91,26 @@ public class DiagnosticsController : BaseController
         [FromBody] DungeonSimulationRequest request)
     {
         return await Mediator.Send(new RunDungeonSimulationQuery(request));
+    }
+
+    [HttpGet("area-simulation-options")]
+    public async Task<ActionResult<AreaSimulationOptions>> GetAreaSimulationOptions()
+    {
+        return await Mediator.Send(new GetAreaSimulationOptionsQuery());
+    }
+
+    [HttpPost("area-simulation")]
+    public async Task<ActionResult<AreaSimulationReport>> RunAreaSimulation(
+        [FromBody] AreaSimulationRequest request)
+    {
+        return await Mediator.Send(new RunAreaSimulationQuery(request));
+    }
+
+    [HttpPost("region-area-balance")]
+    public async Task<ActionResult<RegionAreaBalanceReport>> AnalyzeRegionAreaBalance(
+        [FromBody] RegionAreaBalanceRequest request)
+    {
+        return await Mediator.Send(new AnalyzeRegionAreaBalanceQuery(request));
     }
 
 }

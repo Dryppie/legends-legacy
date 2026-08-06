@@ -5,6 +5,7 @@ import { ItemsComponent } from '../../features/items/items.component';
 import { CombatDiagnosticsComponent } from '../../features/diagnostics/combat-diagnostics.component';
 import { EssenceCatalogComponent } from '../../features/essence-catalog/essence-catalog.component';
 import { DungeonSimulatorComponent } from '../../features/diagnostics/dungeon-simulator.component';
+import { AreaSimulatorComponent } from '../../features/diagnostics/area-simulator.component';
 
 export const DASHBOARD_ROUTES: Routes = [
   {
@@ -31,6 +32,10 @@ export const DASHBOARD_ROUTES: Routes = [
       {
         path: 'dungeon-simulator',
         component: DungeonSimulatorComponent,
+      },
+      {
+        path: 'area-simulator',
+        component: AreaSimulatorComponent,
       },
       {
         path: 'essence-catalog',

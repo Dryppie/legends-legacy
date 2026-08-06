@@ -448,14 +448,15 @@ public sealed class PowerAnalysisSimulationRunner
         }
     }
 
-    private async Task<CombatResult> RunCombatAsync(
+    public async Task<CombatResult> RunCombatAsync(
         IReadOnlyList<CombatEntity> friendlyTemplates,
         IReadOnlyList<CombatEntity> hostileTemplates,
         int seed,
         int maxTicks,
         IReadOnlyList<AbilitySpec>? supplementalAbilities,
         CancellationToken cancellationToken,
-        int basicAttackIntervalTicks = 30)
+        int basicAttackIntervalTicks = 30,
+        Area? idleArea = null)
     {
         var friendly = friendlyTemplates.Select(x => x.DeepCloneForEncounter()).ToList();
         var hostile = hostileTemplates.Select(x => x.DeepCloneForEncounter()).ToList();
@@ -466,13 +467,17 @@ public sealed class PowerAnalysisSimulationRunner
         AddParticipants(friendly, CombatSide.Friendly, "power-friendly", slots, friendlyParticipants);
         AddParticipants(hostile, CombatSide.Hostile, "power-hostile", slots, hostileParticipants);
 
+        var mode = idleArea is null ? CombatMode.Dungeon : CombatMode.Idle;
+        CombatEncounterSourceContext sourceContext = idleArea is null
+            ? new DungeonEncounterSourceContext(Guid.Empty)
+            : new IdleEncounterSourceContext(Guid.Empty, idleArea, TimeSpan.FromSeconds(10));
         var plan = new CombatEncounterPlan(
             Guid.Empty,
-            CombatMode.Dungeon,
+            mode,
             1,
             DateTimeOffset.UnixEpoch,
             slots,
-            new DungeonEncounterSourceContext(Guid.Empty));
+            sourceContext);
         var runtime = new CombatEncounterRuntime(plan, friendlyParticipants, hostileParticipants);
         return await _combatEngine.ExecuteSimulationAsync(
             runtime,

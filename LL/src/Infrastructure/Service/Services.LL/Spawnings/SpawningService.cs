@@ -27,30 +27,7 @@ public class SpawningService : ISpawningService
     /// <returns>The chosen number of monsters to spawn.</returns>
     public int HowManyMonstersToSpawn(List<float> counterProbabilities)
     {
-        if (counterProbabilities == null || counterProbabilities.Count == 0)
-            throw new ArgumentException("counterProbabilities cannot be null or empty.");
-
-        // Sum up all the probabilities to get a total "weight".
-        float total = counterProbabilities.Sum();
-        if (total <= 0)
-            throw new ArgumentException("Sum of counterProbabilities must be greater than zero.");
-
-        // Generate a random value between 0 and total.
-        double randomValue = _random.NextDouble() * total;
-
-        // Pick which "bucket" the random value falls into.
-        float cumulative = 0f;
-        for (int i = 0; i < counterProbabilities.Count; i++)
-        {
-            cumulative += counterProbabilities[i];
-            if (randomValue <= cumulative)
-            {
-                return i + 1; // +1 because of list index
-            }
-        }
-
-        // In case of floating-point inaccuracies, return 1 monster count by default.
-        return 1;
+        return WeightedSpawnSelector.SelectCreatureCount(counterProbabilities, _random);
     }
 
     /// <summary>
@@ -61,26 +38,7 @@ public class SpawningService : ISpawningService
     /// <returns>A list of the chosen creatures.</returns>
     public List<AreaCreature> WhatAreaCreaturesToSpawn(List<AreaCreature> creatures, int count)
     {
-        var creaturesToSpawn = new List<AreaCreature>();
-        if (creatures == null || creatures.Count == 0)
-            return creaturesToSpawn;
-
-        // Extract the spawn rates from each creature
-        var spawnRates = creatures.Select(c => c.WeightedSpawnRate).ToList();
-
-        for (int i = 0; i < count; i++)
-        {
-            // Randomly pick one creature index
-            int chosenIndex = RandomSpawn(spawnRates);
-
-            // Safety check: ensure the chosen index is in range
-            if (chosenIndex >= 0 && chosenIndex < creatures.Count)
-            {
-                creaturesToSpawn.Add(creatures[chosenIndex]);
-            }
-        }
-
-        return creaturesToSpawn;
+        return WeightedSpawnSelector.SelectCreatures(creatures, count, _random).ToList();
     }
 
     /// <summary>
@@ -92,26 +50,6 @@ public class SpawningService : ISpawningService
     /// <returns>The index of the creature chosen to spawn.</returns>
     public int RandomSpawn(List<float> weightedSpawnRates)
     {
-        if (weightedSpawnRates == null || weightedSpawnRates.Count == 0)
-            throw new ArgumentException("weightedSpawnRates cannot be null or empty.");
-
-        float total = weightedSpawnRates.Sum();
-        if (total <= 0)
-            throw new ArgumentException("Sum of weightedSpawnRates must be greater than zero.");
-
-        double randomValue = _random.NextDouble() * total;
-        float cumulative = 0f;
-
-        for (int i = 0; i < weightedSpawnRates.Count; i++)
-        {
-            cumulative += weightedSpawnRates[i];
-            if (randomValue <= cumulative)
-            {
-                return i; // +1 because of list index
-            }
-        }
-
-        // Fallback (should not normally happen unless floating precision issues)
-        return 0;
+        return WeightedSpawnSelector.SelectIndex(weightedSpawnRates, _random);
     }
 }

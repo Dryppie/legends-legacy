@@ -1,0 +1,153 @@
+<div class="space-y-5 p-6 text-[var(--ll-color-text)]">
+  <header class="ll-page-header flex flex-wrap items-start justify-between gap-4">
+    <div>
+      <div class="text-xs font-semibold uppercase tracking-[0.22em] text-primary">Balance tools</div>
+      <h1 class="mt-1 text-3xl font-semibold text-primary">Area Simulator</h1>
+      <p class="ll-helper mt-2 max-w-3xl text-sm">
+        Validate the versioned region scaling curve against real idle-area creatures,
+        encounter weights, abilities, canonical equipment, and Essence unlocks.
+      </p>
+    </div>
+    <div class="ll-stat-card min-w-60 px-4 py-3 text-right">
+      <div class="ll-stat-label">Simulation mode</div>
+      <div class="ll-stat-value">Deterministic and isolated</div>
+      <div class="ll-helper mt-1 text-xs">Area XP and Cinders remain area-owned targets</div>
+    </div>
+  </header>
+
+  <div *ngIf="loadingOptions" class="ll-empty-state">Loading region balance content...</div>
+  <div *ngIf="error" class="ll-card ll-card-danger p-4 text-[var(--ll-color-danger)]">{{ error }}</div>
+
+  <form *ngIf="options" class="ll-panel bg-texture p-5" (ngSubmit)="runSimulation()">
+    <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+      <label class="ll-field xl:col-span-2">
+        <span class="ll-label">Area</span>
+        <app-dropdown
+          class="block w-full"
+          appearance="field"
+          label="Select area"
+          [value]="request.areaId"
+          [selectedValue]="request.areaId"
+          [options]="areaDropdownOptions"
+          (selection)="selectArea($event)"
+        />
+      </label>
+      <label class="ll-field">
+        <span class="ll-label">Canonical profile</span>
+        <app-dropdown
+          class="block w-full"
+          appearance="field"
+          label="Select profile"
+          [value]="request.characterProfile"
+          [selectedValue]="request.characterProfile"
+          [options]="profileDropdownOptions"
+          (selection)="selectProfile($event)"
+        />
+      </label>
+      <label class="ll-field">
+        <span class="ll-label">Equipment build</span>
+        <app-dropdown
+          class="block w-full"
+          appearance="field"
+          label="Select build"
+          [value]="request.buildId"
+          [selectedValue]="request.buildId"
+          [options]="buildDropdownOptions"
+          (selection)="selectBuild($event)"
+        />
+      </label>
+      <label class="ll-field">
+        <span class="ll-label">Encounters</span>
+        <input class="ll-input no-spinner w-full" type="number" name="encounters" min="1"
+          [max]="options.maximumEncounters" [(ngModel)]="request.encounterCount" />
+      </label>
+      <label class="ll-field">
+        <span class="ll-label">Base seed</span>
+        <input class="ll-input no-spinner w-full" type="number" name="seed" [(ngModel)]="request.randomSeed" />
+      </label>
+      <div *ngIf="selectedArea as area" class="ll-stat-card p-3 md:col-span-2">
+        <div class="ll-stat-label">Authored progression</div>
+        <strong class="mt-1 block">Step {{ area.globalStep }} · Level {{ area.levelRequirement }}</strong>
+        <small class="ll-text-subtle">{{ area.profileId }} · target {{ area.targetWinRateBasisPoints / 100 | number:'1.0-2' }}%</small>
+      </div>
+      <div class="flex items-end gap-2 md:col-span-2">
+        <button type="submit" class="ll-button ll-button-primary flex-1 px-5 py-3"
+          [disabled]="simulating || !request.areaId">
+          {{ simulating ? 'Simulating...' : 'Run Area Simulation' }}
+        </button>
+        <button type="button" class="ll-button flex-1 px-5 py-3" (click)="analyzeFullRegion()"
+          [disabled]="analyzingRegion || !request.areaId">
+          {{ analyzingRegion ? 'Analyzing region...' : 'Analyze Full Region' }}
+        </button>
+      </div>
+    </div>
+  </form>
+
+  <section *ngIf="report as result" class="ll-panel space-y-5 bg-texture p-5">
+    <div class="flex flex-wrap items-end justify-between gap-4">
+      <div>
+        <div class="ll-label">Area result</div>
+        <h2 class="text-2xl font-semibold text-primary">{{ result.areaName }}</h2>
+        <p class="ll-helper mt-1">{{ result.characterProfile }} · {{ result.buildId }} · seed {{ result.randomSeed }}</p>
+      </div>
+      <div class="text-right">
+        <div class="text-4xl font-bold"
+          [ngClass]="result.winRate >= 80 && result.winRate <= 90 ? 'll-text-success' : 'll-text-warning'">
+          {{ result.winRate | number:'1.0-2' }}%
+        </div>
+        <div class="ll-stat-label mt-1">Encounter win rate</div>
+      </div>
+    </div>
+
+    <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6">
+      <div class="ll-stat-card p-3"><div class="ll-stat-label">Victories</div><strong class="mt-2 block text-xl">{{ result.victories }}</strong></div>
+      <div class="ll-stat-card p-3"><div class="ll-stat-label">Defeats / draws</div><strong class="mt-2 block text-xl">{{ result.defeats }} / {{ result.draws }}</strong></div>
+      <div class="ll-stat-card p-3"><div class="ll-stat-label">Median ticks</div><strong class="mt-2 block text-xl">{{ result.medianCombatTicks | number:'1.0-1' }}</strong></div>
+      <div class="ll-stat-card p-3"><div class="ll-stat-label">P95 damage / player HP</div><strong class="mt-2 block text-xl">{{ result.p95DamageTaken | number:'1.0-0' }} / {{ result.playerMaxHealth | number:'1.0-0' }}</strong></div>
+      <div class="ll-stat-card p-3"><div class="ll-stat-label">Effective XP/hour</div><strong class="mt-2 block text-xl">{{ result.effectiveExperiencePerHour | number:'1.0-0' }}</strong><small class="ll-text-subtle">Area target {{ result.targetExperiencePerHour | number:'1.0-0' }}</small></div>
+      <div class="ll-stat-card p-3"><div class="ll-stat-label">Effective Cinders/hour</div><strong class="mt-2 block text-xl">{{ result.effectiveCindersPerHour | number:'1.0-0' }}</strong><small class="ll-text-subtle">Area target {{ result.targetCindersPerHour | number:'1.0-0' }}</small></div>
+    </div>
+
+    <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div class="ll-stat-card p-3"><div class="ll-stat-label">Health scale</div><strong class="mt-1 block">×{{ result.scaling.healthMultiplier | number:'1.2-3' }}</strong></div>
+      <div class="ll-stat-card p-3"><div class="ll-stat-label">Offense scale</div><strong class="mt-1 block">×{{ result.scaling.offenseMultiplier | number:'1.2-3' }}</strong></div>
+      <div class="ll-stat-card p-3"><div class="ll-stat-label">Defense scale</div><strong class="mt-1 block">×{{ result.scaling.defenseMultiplier | number:'1.2-3' }}</strong></div>
+      <div class="ll-stat-card p-3"><div class="ll-stat-label">Resistance scale</div><strong class="mt-1 block">×{{ result.scaling.resistanceMultiplier | number:'1.2-3' }}</strong></div>
+    </div>
+
+    <div class="overflow-x-auto">
+      <table class="w-full text-left text-sm">
+        <thead class="ll-text-subtle"><tr><th class="p-2">Composition</th><th class="p-2">Attempts</th><th class="p-2">Win rate</th><th class="p-2">Avg ticks</th><th class="p-2">Avg damage</th></tr></thead>
+        <tbody>
+          <tr *ngFor="let composition of result.compositions; trackBy: trackComposition" class="border-t border-white/10">
+            <td class="p-2">{{ composition.composition }}</td><td class="p-2">{{ composition.attempts }}</td>
+            <td class="p-2">{{ composition.winRate | number:'1.0-2' }}%</td><td class="p-2">{{ composition.averageCombatTicks | number:'1.0-1' }}</td>
+            <td class="p-2">{{ composition.averageDamageTaken | number:'1.0-1' }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section *ngIf="regionReport as region" class="ll-panel space-y-4 bg-texture p-5">
+    <div class="flex flex-wrap justify-between gap-3">
+      <div><div class="ll-label">Region validation</div><h2 class="text-2xl font-semibold text-primary">{{ region.regionKey }} · curve v{{ region.balanceVersion }}</h2></div>
+      <div class="text-right"><strong [ngClass]="region.isWithinTolerance ? 'll-text-success' : 'll-text-warning'">{{ region.isWithinTolerance ? 'In tolerance' : 'Needs calibration' }}</strong><div class="ll-helper">Smooth curve: {{ region.isSmooth ? 'yes' : 'no' }}</div></div>
+    </div>
+    <div *ngIf="region.warnings.length" class="ll-card ll-card-danger p-3"><div *ngFor="let warning of region.warnings">{{ warning }}</div></div>
+    <div class="overflow-x-auto">
+      <table class="w-full text-left text-sm">
+        <thead class="ll-text-subtle"><tr><th class="p-2">Step</th><th class="p-2">Area</th><th class="p-2">Status</th><th class="p-2">Average win</th><th class="p-2">Lowest profile</th><th class="p-2">Effective XP/h</th><th class="p-2">H / O / D</th></tr></thead>
+        <tbody>
+          <tr *ngFor="let area of region.areas; trackBy: trackArea" class="border-t border-white/10">
+            <td class="p-2">{{ area.globalStep }}</td><td class="p-2 font-medium">{{ area.areaName }}</td>
+            <td class="p-2" [ngClass]="statusClass(area.status)">{{ area.status }}</td>
+            <td class="p-2">{{ area.averageWinRate | number:'1.0-2' }}%</td><td class="p-2">{{ area.lowestProfileWinRate | number:'1.0-2' }}%</td>
+            <td class="p-2">{{ area.effectiveExperiencePerHour | number:'1.0-0' }}</td>
+            <td class="p-2">{{ area.scaling.healthMultiplier | number:'1.2-2' }} / {{ area.scaling.offenseMultiplier | number:'1.2-2' }} / {{ area.scaling.defenseMultiplier | number:'1.2-2' }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>

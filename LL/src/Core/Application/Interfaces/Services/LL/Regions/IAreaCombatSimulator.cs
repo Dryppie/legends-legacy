@@ -1,0 +1,81 @@
+namespace Application.Interfaces.Services.LL.Regions;
+
+public interface IAreaCombatSimulator
+{
+    Task<AreaSimulationOptions> GetOptionsAsync(CancellationToken cancellationToken);
+    Task<AreaSimulationReport> RunAsync(
+        AreaSimulationRequest request,
+        CancellationToken cancellationToken);
+}
+
+public sealed record AreaSimulationOptions(
+    IReadOnlyList<AreaSimulationAreaOption> Areas,
+    IReadOnlyList<string> Profiles,
+    IReadOnlyList<AreaSimulationBuildOption> Builds,
+    int MaximumEncounters);
+
+public sealed record AreaSimulationAreaOption(
+    string Id,
+    string Name,
+    string RegionKey,
+    int LevelRequirement,
+    int GlobalStep,
+    string ProfileId,
+    int TargetWinRateBasisPoints,
+    string DefaultBuildId);
+
+public sealed record AreaSimulationBuildOption(
+    string Id,
+    int Tier,
+    string Quality,
+    string Rarity);
+
+public sealed record AreaSimulationRequest(
+    string AreaId,
+    int EncounterCount,
+    int RandomSeed,
+    string CharacterProfile,
+    string BuildId);
+
+public sealed record AreaSimulationReport(
+    string AreaId,
+    string AreaName,
+    int LevelRequirement,
+    string CharacterProfile,
+    string BuildId,
+    int PlayerMaxHealth,
+    int RequestedEncounters,
+    int Victories,
+    int Defeats,
+    int Draws,
+    double WinRate,
+    double AverageCombatTicks,
+    double MedianCombatTicks,
+    double P95CombatTicks,
+    double AverageDamageTaken,
+    double P95DamageTaken,
+    decimal TargetExperiencePerHour,
+    decimal TargetCindersPerHour,
+    decimal EffectiveExperiencePerHour,
+    decimal EffectiveCindersPerHour,
+    int RandomSeed,
+    CreatureScalingProfile Scaling,
+    IReadOnlyList<AreaSimulationCompositionResult> Compositions,
+    IReadOnlyList<AreaSimulationEncounterResult> Encounters);
+
+public sealed record AreaSimulationCompositionResult(
+    string Composition,
+    int Attempts,
+    int Victories,
+    double WinRate,
+    double AverageCombatTicks,
+    double AverageDamageTaken);
+
+public sealed record AreaSimulationEncounterResult(
+    int EncounterNumber,
+    int Seed,
+    string Outcome,
+    int CombatTicks,
+    int DamageTaken,
+    int RemainingHealth,
+    IReadOnlyList<string> Enemies);
