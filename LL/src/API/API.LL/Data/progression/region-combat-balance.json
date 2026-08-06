@@ -1,0 +1,96 @@
+{
+  "version": 1,
+  "profiles": [
+    {
+      "id": "legacy-area-v1",
+      "targetWinRateBasisPoints": 8500,
+      "healthCurve": {
+        "model": "Power",
+        "baseMultiplier": 1.0,
+        "growthPerStep": 0.22,
+        "exponent": 1.12
+      },
+      "offenseCurve": {
+        "model": "Power",
+        "baseMultiplier": 1.0,
+        "growthPerStep": 0.18,
+        "exponent": 1.10
+      },
+      "defenseCurve": {
+        "model": "Power",
+        "baseMultiplier": 1.0,
+        "growthPerStep": 0.16,
+        "exponent": 1.08
+      },
+      "resistanceCurve": {
+        "model": "Power",
+        "baseMultiplier": 1.0,
+        "growthPerStep": 0.16,
+        "exponent": 1.08
+      },
+      "precisionGrowthPerStep": 0.08,
+      "penetrationGrowthPerStep": 0.10,
+      "softDefenseGrowthPerStep": 0.05,
+      "critChancePerStep": 0.03,
+      "critDamagePerStep": 0.04,
+      "critChanceCap": 0.45,
+      "critDamageCap": 2.0,
+      "maximumStepIncrease": 0.50
+    },
+    {
+      "id": "shenic-area-v1",
+      "targetWinRateBasisPoints": 8500,
+      "healthCurve": {
+        "model": "Power",
+        "baseMultiplier": 1.0,
+        "growthPerStep": 0.22,
+        "exponent": 1.12
+      },
+      "offenseCurve": {
+        "model": "Power",
+        "baseMultiplier": 1.0,
+        "growthPerStep": 0.18,
+        "exponent": 1.10
+      },
+      "defenseCurve": {
+        "model": "Power",
+        "baseMultiplier": 1.0,
+        "growthPerStep": 0.16,
+        "exponent": 1.08
+      },
+      "resistanceCurve": {
+        "model": "Power",
+        "baseMultiplier": 1.0,
+        "growthPerStep": 0.16,
+        "exponent": 1.08
+      },
+      "precisionGrowthPerStep": 0.08,
+      "penetrationGrowthPerStep": 0.10,
+      "softDefenseGrowthPerStep": 0.05,
+      "critChancePerStep": 0.03,
+      "critDamagePerStep": 0.04,
+      "critChanceCap": 0.45,
+      "critDamageCap": 2.0,
+      "maximumStepIncrease": 0.50
+    }
+  ],
+  "regions": [
+    {
+      "regionKey": "shenic",
+      "profileId": "shenic-area-v1",
+      "startingGlobalStep": 1,
+      "areaIds": [
+        "region_01_area_01",
+        "region_01_area_02",
+        "region_01_area_03",
+        "region_01_area_04",
+        "region_01_area_06",
+        "region_01_area_08",
+        "region_01_area_09",
+        "region_01_area_10",
+        "region_01_area_11",
+        "region_01_area_07"
+      ]
+    }
+  ]
+}

@@ -101,8 +101,15 @@ public static class DependencyInjection
         services.AddScoped<IRegionService, RegionService>();
         services.AddScoped<IAreaService, AreaService>();
         services.AddScoped<IRegionOneContentDiagnostics, RegionOneContentDiagnostics>();
+        services.AddScoped<IAreaCombatSimulator, AreaCombatSimulator>();
+        services.AddScoped<IRegionAreaBalanceAnalyzer, RegionAreaBalanceAnalyzer>();
         services.AddSingleton<IAreaExperienceBalanceProvider>(sp =>
             new JsonAreaExperienceBalanceProvider(
+                config,
+                contentRootPath,
+                sp.GetRequiredService<JsonSerializerOptions>()));
+        services.AddSingleton<IRegionCreatureScalingProvider>(sp =>
+            new RegionCreatureScalingProvider(
                 config,
                 contentRootPath,
                 sp.GetRequiredService<JsonSerializerOptions>()));

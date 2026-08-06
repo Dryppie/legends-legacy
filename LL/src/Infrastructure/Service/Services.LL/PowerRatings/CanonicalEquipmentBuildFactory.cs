@@ -199,6 +199,17 @@ public sealed class CanonicalEquipmentBuildFactory
         int dungeonTier) =>
         CreateBuild(profile, rung, GetEssenceCountForDungeonTier(dungeonTier));
 
+    public CanonicalEquipmentBuild CreateBuildForArea(
+        CanonicalPartyProfile profile,
+        CanonicalEquipmentProgressionRung rung,
+        int characterLevel,
+        int essenceCount)
+    {
+        var build = CreateBuild(profile, rung, essenceCount);
+        build.Character.Level = Math.Max(1, characterLevel);
+        return build;
+    }
+
     public static int GetEssenceCountForDungeonTier(int dungeonTier) => dungeonTier switch
     {
         1 => 2,
