@@ -118,7 +118,7 @@ public sealed class EquipmentBalanceProfileTests
         Assert.Equal(68d, EquipmentBudgetEvaluator.Evaluate(modifiers, tier: 1));
         Assert.Equal(187d, EquipmentBudgetEvaluator.Evaluate(modifiers, tier: 5));
         Assert.Equal(412d, EquipmentBudgetEvaluator.Evaluate(modifiers, tier: 10));
-        Assert.Equal(11, EquipmentBudgetEvaluator.BalanceVersion);
+        Assert.Equal(12, EquipmentBudgetEvaluator.BalanceVersion);
     }
 
     [Fact]
@@ -407,7 +407,7 @@ public sealed class EquipmentBalanceProfileTests
             allocation.AddedPoints[AttributeType.Power]
             > 100d * weights[AttributeType.Power]
             / EquipmentStatBudgetCatalog.Get(AttributeType.Power, 10).CostPerPoint);
-        Assert.Equal(11, EquipmentConstraintProfile.BalanceVersion);
+        Assert.Equal(12, EquipmentConstraintProfile.BalanceVersion);
         Assert.True(EquipmentConstraintProfile.ProductionActive);
     }
 

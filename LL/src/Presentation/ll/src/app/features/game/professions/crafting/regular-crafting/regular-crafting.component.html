@@ -5,9 +5,13 @@
     class="ll-panel pointer-events-none invisible absolute bottom-full left-1/2 z-50 mb-2 w-64 max-w-[calc(100vw-2rem)] -translate-x-1/2 translate-y-1 bg-texture p-3 text-left text-xs font-normal normal-case tracking-normal text-zinc-200 opacity-0 shadow-xl transition duration-150 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus:visible group-focus:translate-y-0 group-focus:opacity-100"
   >
     <span class="block text-[0.6rem] uppercase tracking-[0.18em] text-secondary"
-      >Where to find</span
+    >Where to find</span
     >
     <span class="mt-1 block text-sm text-primary">{{ material.name }}</span>
+    <span class="mt-1 flex items-center justify-between gap-4 text-secondary">
+      <span>Owned</span>
+      <span class="font-medium tabular-nums text-primary">{{ material.owned }}</span>
+    </span>
     <span
       *ngFor="let source of material.sources"
       class="mt-1.5 block border-t border-white/10 pt-1.5 leading-relaxed first:border-t-0 first:pt-0"

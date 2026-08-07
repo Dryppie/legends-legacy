@@ -190,6 +190,90 @@ public sealed class CraftingRegionOneContentTests
     }
 
     [Fact]
+    public void StandardMaterialSources_ListEveryActualCombatAreaAndExcludeTheBazaar()
+    {
+        var regionDocument = ReadDocument("world/regions.json");
+        var areas = ChildArray(regionDocument, "regions")
+            .SelectMany(region => ChildArray(region, "areas"))
+            .ToList();
+        var materials = ReadArray("crafting/materials.json")
+            .Where(material => material?["isStandardTieredMaterial"]?.GetValue<bool>() == true)
+            .ToDictionary(
+                material => material?["family"]?.GetValue<string>() ?? string.Empty,
+                material => string.Join(" ", ChildArray(material, "sources").Select(source => source?.GetValue<string>())),
+                StringComparer.OrdinalIgnoreCase);
+        var familyByGatheringType = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["Mining"] = "Metal",
+            ["Woodcutting"] = "Wood",
+            ["Skinning"] = "Hide"
+        };
+
+        Assert.All(materials.Values, source =>
+            Assert.DoesNotContain("Cinder Bazaar", source, StringComparison.OrdinalIgnoreCase));
+
+        foreach (var (gatheringType, family) in familyByGatheringType)
+        {
+            var expectedAreaNames = areas
+                .Where(area => ChildArray(area, "gatheringNodes").Any(node =>
+                    string.Equals(
+                        node?["type"]?.GetValue<string>(),
+                        gatheringType,
+                        StringComparison.OrdinalIgnoreCase)))
+                .Select(area => area?["name"]?.GetValue<string>() ?? string.Empty)
+                .Order(StringComparer.OrdinalIgnoreCase)
+                .ToArray();
+            var listedAreaNames = areas
+                .Select(area => area?["name"]?.GetValue<string>() ?? string.Empty)
+                .Where(areaName => materials[family].Contains(areaName, StringComparison.OrdinalIgnoreCase))
+                .Order(StringComparer.OrdinalIgnoreCase)
+                .ToArray();
+
+            Assert.InRange(expectedAreaNames.Length, 4, 5);
+            Assert.Equal(expectedAreaNames, listedAreaNames);
+        }
+    }
+
+    [Fact]
+    public void CombatAreaGathering_YieldsAboutFourAverageEquipmentCraftsPerDay()
+    {
+        const double encountersPerDay = 24 * 60 * 60 / 10d;
+        var recipes = ReadArray("crafting/base-recipes.json");
+        var averageTierOneRecipeCost = recipes.Average(recipe =>
+            ChildArray(recipe, "materialRequirements")
+                .Sum(requirement => requirement?["baseAmount"]?.GetValue<int>() ?? 0));
+        var rewardTables = ChildArray(ReadDocument("rewards/reward-tables.json"), "rewardTables")
+            .ToDictionary(
+                table => table?["id"]?.GetValue<string>() ?? string.Empty,
+                table => table,
+                StringComparer.OrdinalIgnoreCase);
+        var nodes = ChildArray(ReadDocument("world/regions.json"), "regions")
+            .SelectMany(region => ChildArray(region, "areas"))
+            .SelectMany(area => ChildArray(area, "gatheringNodes"))
+            .ToList();
+
+        Assert.NotEmpty(nodes);
+        Assert.All(nodes, node =>
+        {
+            var rewardTableId = node?["rewardTableId"]?.GetValue<string>() ?? string.Empty;
+            Assert.True(rewardTables.TryGetValue(rewardTableId, out var rewardTable));
+            var quantities = ChildArray(rewardTable, "rolls")
+                .SelectMany(roll => ChildArray(roll, "entries"))
+                .Select(entry => entry?["quantity"])
+                .Where(quantity => quantity is not null)
+                .Select(quantity =>
+                    ((quantity?["min"]?.GetValue<int>() ?? 0) +
+                     (quantity?["max"]?.GetValue<int>() ?? 0)) / 2d)
+                .ToArray();
+            var averageYield = Assert.Single(quantities);
+            var procChance = node?["procChance"]?.GetValue<double>() ?? 0;
+            var expectedCrafts = encountersPerDay * procChance * averageYield / averageTierOneRecipeCost;
+
+            Assert.InRange(expectedCrafts, 3.9, 4.1);
+        });
+    }
+
+    [Fact]
     public void FormerHivesAbyssBlueprints_AreMigratedToLiveDungeonFamilies()
     {
         var expectedFamilyByBlueprintId = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)

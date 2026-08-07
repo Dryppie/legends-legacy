@@ -8,8 +8,12 @@ import {
   EquipmentCraftingDesignMetadata,
   ToolBonusModifier,
 } from '../../models/item';
-import { aggregateAttributes } from '../../utils/attributes/attribute-order.utils';
+import {
+  aggregateAttributes,
+  sortAttributes,
+} from '../../utils/attributes/attribute-order.utils';
 import { AttributeModifier } from '../../models/Dtos/attributesDto';
+import { AttributeType } from '../../models/enums/attributeType';
 
 export interface EquipmentDisplay {
   // Common
@@ -29,6 +33,12 @@ export interface EquipmentDisplay {
   // Instance-only
   potential?: number;
   craftingDesign?: EquipmentCraftingDesignMetadata | null;
+}
+
+export interface EquipmentAttributeComparison {
+  attributeType: AttributeType;
+  equippedAmount: number;
+  hoveredAmount: number;
 }
 
 export function mapEquipmentToDisplay(
@@ -84,6 +94,46 @@ export function mapInstanceToDisplay(
     potential: inst.potential,
     craftingDesign: inst.craftingDesign,
   };
+}
+
+export function buildAttributeComparisons(
+  hovered: EquipmentDisplay,
+  equipped: EquipmentDisplay,
+): EquipmentAttributeComparison[] {
+  const hoveredByType = sumAttributesByType(hovered.attributes);
+  const equippedByType = sumAttributesByType(equipped.attributes);
+  const attributeTypes = new Set([
+    ...hoveredByType.keys(),
+    ...equippedByType.keys(),
+  ]);
+
+  return sortAttributes(
+    [...attributeTypes].map((attributeType) => {
+      const hoveredAmount = hoveredByType.get(attributeType) ?? 0;
+      const equippedAmount = equippedByType.get(attributeType) ?? 0;
+
+      return {
+        attributeType,
+        equippedAmount,
+        hoveredAmount,
+      };
+    }),
+  );
+}
+
+function sumAttributesByType(
+  attributes: readonly AttributeModifier[],
+): Map<AttributeType, number> {
+  const totals = new Map<AttributeType, number>();
+
+  for (const attribute of attributes) {
+    totals.set(
+      attribute.attributeType,
+      (totals.get(attribute.attributeType) ?? 0) + attribute.amount,
+    );
+  }
+
+  return totals;
 }
 
 function getToolDisplayName(baseName: string, rarity: Rarity): string {

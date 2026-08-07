@@ -56,7 +56,7 @@ public sealed class TierOneDungeonBalanceTests
         Assert.NotEqual(
             Application.Interfaces.Services.LL.PowerRatings.PowerAnalysisState.CalculationFailed,
             recommendation.State);
-        Assert.Equal(143, recommendation.RecommendedPartyPower / 10);
+        Assert.Equal(145, recommendation.RecommendedPartyPower / 10);
         Assert.InRange(
             recommendation.RecommendedPartyPower,
             recommendation.LowerRecommendedPower,
@@ -177,7 +177,7 @@ public sealed class TierOneDungeonBalanceTests
         Domain.Models.Dungeons.Definitions.DungeonTier.Mythic,
         6,
         "t3-standard-epic",
-        274,
+        275,
         false)]
     [InlineData(
         "forgotten_catacombs_ii",
@@ -191,7 +191,7 @@ public sealed class TierOneDungeonBalanceTests
         Domain.Models.Dungeons.Definitions.DungeonTier.Mythic,
         6,
         "t3-standard-epic",
-        274,
+        275,
         false)]
     public async Task Higher_dungeon_tiers_find_an_actual_winning_profile(
         string dungeonId,

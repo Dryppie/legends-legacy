@@ -30,7 +30,8 @@ export class AttributeValueFormatPipe implements PipeTransform {
 }
 
 function formatNumber(value: number, precision: number): string {
-  return Number.isInteger(value)
-    ? `${value}`
-    : value.toFixed(precision).replace(/\.?0+$/, '');
+  if (Number.isInteger(value)) return `${value}`;
+
+  const formatted = value.toFixed(precision);
+  return precision === 0 ? formatted : formatted.replace(/\.?0+$/, '');
 }

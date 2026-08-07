@@ -1,29 +1,41 @@
 import { NgClass, NgIf } from '@angular/common';
 import { Component, Input } from '@angular/core';
-import { EssenceItem, Equipment, ItemBase } from '../../models/item';
+import {
+  EssenceItem,
+  Equipment,
+  EquipmentInstance,
+  ItemBase,
+} from '../../models/item';
 import { ItemType } from '../../models/enums/itemType';
 import { Rarity } from '../../models/enums/rarity';
 import { EssenceItemViewService } from '../../../core/services/api/essences/essence-item-view.service';
 import { PopoverComponent } from '../custom-components/popover/popover.component';
 import { EssenceDetailsComponent } from '../essences/essence-details/essence-details.component';
 import { EquipmentDisplayComponent } from '../equipment/equipment-display/equipment-display.component';
+import { InventoryStateService } from '../../../core/services/api/inventory/inventory-state.service';
+import { EquipmentStateService } from '../../../core/services/api/equipment/equipment-state.service';
+import { findEquippedComparison } from '../../utils/equipment/equipment.utils';
 
 @Component({
-    selector: 'app-base-item',
-    imports: [
-        NgClass,
-        NgIf,
-        PopoverComponent,
-        EssenceDetailsComponent,
-        EquipmentDisplayComponent,
-    ],
-    templateUrl: './base-item.component.html'
+  selector: 'app-base-item',
+  imports: [
+    NgClass,
+    NgIf,
+    PopoverComponent,
+    EssenceDetailsComponent,
+    EquipmentDisplayComponent,
+  ],
+  templateUrl: './base-item.component.html',
 })
 export class BaseItemComponent {
   @Input({ required: true }) item!: ItemBase;
   @Input() useBaseName = false;
 
-  constructor(private readonly essenceItemView: EssenceItemViewService) {}
+  constructor(
+    private readonly essenceItemView: EssenceItemViewService,
+    private readonly inventoryState: InventoryStateService,
+    private readonly equipmentState: EquipmentStateService,
+  ) {}
 
   get isEssence(): boolean {
     return this.item.itemType === ItemType.Essence;
@@ -43,6 +55,25 @@ export class BaseItemComponent {
 
   itemAsEquipment(item: ItemBase): Equipment {
     return item as Equipment;
+  }
+
+  get ownedQuantity(): number {
+    return this.inventoryState
+      .items()
+      .filter(
+        (inventoryItem) =>
+          inventoryItem.itemInstance.itemBase.id === this.item.id,
+      )
+      .reduce((total, inventoryItem) => total + inventoryItem.quantity, 0);
+  }
+
+  get equippedComparison(): EquipmentInstance | null {
+    if (!this.isEquipment) return null;
+
+    return findEquippedComparison(
+      this.itemAsEquipment(this.item),
+      this.equipmentState.equipmentSlots(),
+    );
   }
 
   get rarityClasses() {

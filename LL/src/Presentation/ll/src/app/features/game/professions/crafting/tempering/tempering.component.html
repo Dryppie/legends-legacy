@@ -7,7 +7,11 @@
       <ng-container
         *ngIf="selectedEquipmentInstance() as equipment; else noItem"
       >
-        <app-equipment-display [item]="equipment"></app-equipment-display>
+        <app-equipment-display
+          [item]="equipment"
+          [compactCraftingDesign]="true"
+          [showPossibleUpgradeAttributes]="true"
+        ></app-equipment-display>
 
         <div *ngIf="selectedQueueStatus() as queueStatus" class="ll-state mt-4">
           {{ queueStatus }}

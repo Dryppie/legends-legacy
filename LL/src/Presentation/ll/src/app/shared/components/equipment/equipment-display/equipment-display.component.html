@@ -1,124 +1,319 @@
-<div class="ll-item-detail">
-  <div class="flex items-start justify-between gap-3">
-    <h2 class="ll-item-detail-title" [ngClass]="rarityClasses">
-      {{ data.name }}
-    </h2>
-    <div class="flex shrink-0 flex-wrap justify-end gap-2">
-      <span
-        *ngIf="!useBaseName"
-        class="ll-item-chip"
-        [ngClass]="rarityBadgeClasses"
-      >
-        {{ data.rarity }}
-      </span>
-      <span *ngIf="data.quality" class="ll-item-chip ll-item-chip-accent">
-        {{ data.quality }}
-      </span>
-    </div>
-  </div>
-
-  <div class="ll-item-meta flex flex-wrap items-center justify-between gap-1">
-    <span>{{ data.equipmentType }}</span>
-    <span
-      *ngIf="data.itemBudget > 0"
-      [title]="'Tier ' + data.itemBudgetTier + ' equipment rates'"
-    >
-      Gear Value {{ data.itemBudget | number: '1.0-2' }}
-    </span>
-  </div>
-
-  <p *ngIf="data.description" class="ll-item-description">
-    {{ data.description }}
-  </p>
-
-  <div *ngIf="data.craftingDesign as design" class="ll-item-detail-section">
-    <div class="ll-item-meta">Crafting Design</div>
-    <div class="mt-1 font-medium text-white">{{ design.name }}</div>
-    <p *ngIf="design.description" class="mt-1 text-xs text-secondary">
-      {{ design.description }}
-    </p>
-    <div class="mt-2 flex flex-wrap gap-2">
-      <span *ngIf="design.handedness" class="ll-item-chip">{{
-        design.handedness
-      }}</span>
-      <span *ngIf="design.rangeCategory" class="ll-item-chip">{{
-        design.rangeCategory
-      }}</span>
-      <span *ngIf="design.attackCategory" class="ll-item-chip">{{
-        design.attackCategory
-      }}</span>
-      <span *ngIf="design.role" class="ll-item-chip ll-item-chip-accent">{{
-        design.role
-      }}</span>
-    </div>
-    <div class="mt-2 text-xs text-secondary">
-      Tempering: {{ design.primaryTemperingStats.join(", ") }}
-      <ng-container *ngIf="design.secondaryTemperingStats.length">
-        · Secondary: {{ design.secondaryTemperingStats.join(", ") }}
-      </ng-container>
-    </div>
-  </div>
-
-  <div *ngIf="hasToolDetails" class="ll-card p-3">
-    <div class="flex items-center justify-between gap-3">
-      <div class="ll-item-meta">Tool Affixes</div>
-      <span class="ll-item-chip ll-item-chip-accent">
-        {{ toolAffixSummary }}
-      </span>
-    </div>
-
-    <div *ngIf="data.toolAffixes.length" class="mt-2 text-sm">
-      <div
-        *ngFor="let bonus of data.toolAffixes"
-        class="ll-item-stat-row grid grid-cols-[minmax(0,1fr)_auto] gap-x-4 gap-y-0.5"
-      >
-        <span class="font-medium text-white">
-          {{ bonus.name || formatToolBonusType(bonus.bonusType) }}
-        </span>
-        <span class="text-primary">{{ formatToolBonusAmount(bonus) }}</span>
-        <span class="col-span-2 text-xs text-secondary">
-          {{ formatToolBonusType(bonus.bonusType) }}
-        </span>
-      </div>
-    </div>
-
-    <div *ngIf="data.baseToolBonuses.length" class="mt-3 text-sm">
-      <div class="ll-item-meta mb-1">Base Traits</div>
-      <div *ngFor="let bonus of data.baseToolBonuses" class="ll-item-stat-row">
-        <span>
-          {{ bonus.name || formatToolBonusType(bonus.bonusType) }}
-        </span>
-        <span class="text-primary">{{ formatToolBonusAmount(bonus) }}</span>
-      </div>
-    </div>
-  </div>
-
-  <div *ngIf="data.attributes.length" class="ll-item-detail-section">
-    <div class="ll-item-meta">Attributes</div>
-
-    <div class="mt-2 text-sm">
-      <div
-        *ngFor="let attr of data.attributes"
-        class="ll-item-stat-row"
-        [appAttributeTooltip]="attr"
-      >
-        <span>
-          {{ attr.attributeType | attributeTypeFormat }}
-        </span>
-        <span class="text-primary">
-          {{ attr.amount | attributeValueFormat: attr.attributeType : true
-          }}<span *ngIf="shouldAppendModifierPercent(attr)">%</span></span
-        >
-      </div>
-    </div>
-  </div>
-
-  <!-- Instance-only -->
+<ng-container *ngIf="sideBySideComparison as equipped; else standardEquipment">
   <div
-    *ngIf="data.potential != null"
-    class="ll-item-stat-row ll-item-detail-section"
+    class="grid w-[min(34rem,calc(100vw-3rem))] grid-cols-1 overflow-hidden sm:grid-cols-2"
   >
-    <span>Potential</span>
-    <span class="text-primary">{{ data.potential }}</span>
+    <section class="flex min-w-0 flex-col p-2 sm:pr-4">
+      <div class="ll-item-meta text-primary">Hovered</div>
+      <h2
+        class="ll-item-detail-title mt-1 truncate"
+        [ngClass]="rarityClass(data.rarity)"
+      >
+        {{ data.name }}
+      </h2>
+      <div class="ll-item-meta mt-1 truncate">
+        {{ comparisonMeta(data) }}
+      </div>
+
+      <div class="mt-3 flex-1 text-sm">
+        <div
+          *ngFor="let comparison of comparisonRows"
+          class="grid min-h-7 grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-x-3"
+        >
+          <span class="truncate text-secondary">
+            {{ comparison.attributeType | attributeTypeFormat }}
+          </span>
+          <span class="font-semibold tabular-nums text-primary">
+            {{
+              comparison.hoveredAmount
+                | attributeValueFormat: comparison.attributeType
+            }}
+          </span>
+          <span
+            data-testid="comparison-difference"
+            [attr.data-attribute]="comparison.attributeType"
+            class="min-w-12 text-right font-semibold tabular-nums"
+            [ngClass]="
+              comparisonClass(
+                comparison.hoveredAmount - comparison.equippedAmount
+              )
+            "
+          >
+            {{
+              comparison.hoveredAmount - comparison.equippedAmount
+                | attributeValueFormat: comparison.attributeType : true
+            }}
+          </span>
+        </div>
+      </div>
+
+      <div class="mt-3 border-t border-primary/20 pt-3">
+        <div class="flex items-end justify-between gap-4">
+          <span class="ll-item-meta text-primary">Gear Value</span>
+          <span class="font-serif text-xl tabular-nums text-primary">
+            {{ data.itemBudget | number: "1.0-2" }}
+          </span>
+        </div>
+        <div class="mt-1 flex items-center justify-between gap-4 text-xs">
+          <span *ngIf="data.potential != null" class="ll-item-meta">
+            Potential {{ data.potential }}
+          </span>
+          <span
+            class="ml-auto font-semibold tabular-nums"
+            [ngClass]="comparisonClass(data.itemBudget - equipped.itemBudget)"
+          >
+            {{ data.itemBudget - equipped.itemBudget > 0 ? "+" : ""
+            }}{{ data.itemBudget - equipped.itemBudget | number: "1.0-2" }} vs
+            equipped
+          </span>
+        </div>
+      </div>
+    </section>
+
+    <section
+      class="flex min-w-0 flex-col border-t border-primary/20 bg-black/20 p-2 opacity-70 sm:border-l sm:border-t-0 sm:pl-4"
+    >
+      <div class="ll-item-meta">Equipped</div>
+      <h2
+        class="ll-item-detail-title mt-1 truncate"
+        [ngClass]="rarityClass(equipped.rarity)"
+      >
+        {{ equipped.name }}
+      </h2>
+      <div class="ll-item-meta mt-1 truncate">
+        {{ comparisonMeta(equipped) }}
+      </div>
+
+      <div class="mt-3 flex-1 text-sm">
+        <div
+          *ngFor="let comparison of comparisonRows"
+          class="grid min-h-7 grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3"
+        >
+          <span class="truncate text-secondary">
+            {{ comparison.attributeType | attributeTypeFormat }}
+          </span>
+          <span class="font-semibold tabular-nums text-white">
+            {{
+              comparison.equippedAmount
+                | attributeValueFormat: comparison.attributeType
+            }}
+          </span>
+        </div>
+      </div>
+
+      <div class="mt-3 border-t border-primary/20 pt-3">
+        <div class="flex items-end justify-between gap-4">
+          <span class="ll-item-meta">Gear Value</span>
+          <span class="font-serif text-xl tabular-nums text-white">
+            {{ equipped.itemBudget | number: "1.0-2" }}
+          </span>
+        </div>
+        <div
+          *ngIf="equipped.potential != null"
+          class="ll-item-meta mt-1 text-right"
+        >
+          Potential {{ equipped.potential }}
+        </div>
+      </div>
+    </section>
   </div>
-</div>
+</ng-container>
+
+<ng-template #standardEquipment>
+  <div class="ll-item-detail">
+    <div class="flex items-start justify-between gap-3">
+      <h2 class="ll-item-detail-title" [ngClass]="rarityClasses">
+        {{ data.name }}
+      </h2>
+      <div class="flex shrink-0 flex-wrap justify-end gap-2">
+        <span
+          *ngIf="!useBaseName"
+          class="ll-item-chip"
+          [ngClass]="rarityBadgeClasses"
+        >
+          {{ data.rarity }}
+        </span>
+        <span *ngIf="data.quality" class="ll-item-chip ll-item-chip-accent">
+          {{ data.quality }}
+        </span>
+      </div>
+    </div>
+
+    <div class="ll-item-meta flex flex-wrap items-center justify-between gap-1">
+      <span>{{ data.equipmentType }}</span>
+      <span
+        *ngIf="data.itemBudget > 0"
+        [title]="'Tier ' + data.itemBudgetTier + ' equipment rates'"
+      >
+        Gear Value {{ data.itemBudget | number: "1.0-2" }}
+      </span>
+    </div>
+
+    <p *ngIf="data.description" class="ll-item-description">
+      {{ data.description }}
+    </p>
+
+    <div *ngIf="data.craftingDesign as design" class="ll-item-detail-section">
+      <ng-container *ngIf="!compactCraftingDesign">
+        <div class="ll-item-meta">Crafting Design</div>
+        <div class="mt-1 font-medium text-white">{{ design.name }}</div>
+        <p *ngIf="design.description" class="mt-1 text-xs text-secondary">
+          {{ design.description }}
+        </p>
+      </ng-container>
+      <div class="mt-2 flex flex-wrap gap-2">
+        <span *ngIf="design.handedness" class="ll-item-chip">{{
+          design.handedness
+        }}</span>
+        <span *ngIf="design.rangeCategory" class="ll-item-chip">{{
+          design.rangeCategory
+        }}</span>
+        <span *ngIf="design.attackCategory" class="ll-item-chip">{{
+          design.attackCategory
+        }}</span>
+        <span *ngIf="design.role" class="ll-item-chip ll-item-chip-accent">{{
+          design.role
+        }}</span>
+      </div>
+      <div
+        *ngIf="showPossibleUpgradeAttributes"
+        class="mt-2 text-xs text-secondary"
+      >
+        <span class="ll-item-meta block">Possible upgrade attributes</span>
+        <span class="mt-1 block text-white">
+          {{
+            possibleDesignAttributes(
+              design.primaryTemperingStats,
+              design.secondaryTemperingStats
+            ).join(", ")
+          }}
+        </span>
+      </div>
+    </div>
+
+    <div *ngIf="hasToolDetails" class="ll-card p-3">
+      <div class="flex items-center justify-between gap-3">
+        <div class="ll-item-meta">Tool Affixes</div>
+        <span class="ll-item-chip ll-item-chip-accent">
+          {{ toolAffixSummary }}
+        </span>
+      </div>
+
+      <div *ngIf="data.toolAffixes.length" class="mt-2 text-sm">
+        <div
+          *ngFor="let bonus of data.toolAffixes"
+          class="ll-item-stat-row grid grid-cols-[minmax(0,1fr)_auto] gap-x-4 gap-y-0.5"
+        >
+          <span class="font-medium text-white">
+            {{ bonus.name || formatToolBonusType(bonus.bonusType) }}
+          </span>
+          <span class="text-primary">{{ formatToolBonusAmount(bonus) }}</span>
+          <span class="col-span-2 text-xs text-secondary">
+            {{ formatToolBonusType(bonus.bonusType) }}
+          </span>
+        </div>
+      </div>
+
+      <div *ngIf="data.baseToolBonuses.length" class="mt-3 text-sm">
+        <div class="ll-item-meta mb-1">Base Traits</div>
+        <div
+          *ngFor="let bonus of data.baseToolBonuses"
+          class="ll-item-stat-row"
+        >
+          <span>
+            {{ bonus.name || formatToolBonusType(bonus.bonusType) }}
+          </span>
+          <span class="text-primary">{{ formatToolBonusAmount(bonus) }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="data.attributes.length" class="ll-item-detail-section">
+      <div class="ll-item-meta">Attributes</div>
+
+      <div class="mt-2 text-sm">
+        <div
+          *ngFor="let attr of data.attributes"
+          class="ll-item-stat-row"
+          [appAttributeTooltip]="attr"
+        >
+          <span>
+            {{ attr.attributeType | attributeTypeFormat }}
+          </span>
+          <span class="text-primary">
+            {{ attr.amount | attributeValueFormat: attr.attributeType : true
+            }}<span *ngIf="shouldAppendModifierPercent(attr)">%</span></span
+          >
+        </div>
+      </div>
+    </div>
+
+    <!-- Instance-only -->
+    <div
+      *ngIf="data.potential != null"
+      class="ll-item-stat-row ll-item-detail-section"
+    >
+      <span>Potential</span>
+      <span class="text-primary">{{ data.potential }}</span>
+    </div>
+
+    <div *ngIf="comparisonData as equipped" class="ll-item-detail-section">
+      <div class="ll-item-meta">Compared with equipped</div>
+      <div class="mt-1 font-medium text-white">{{ equipped.name }}</div>
+
+      <div
+        class="mt-2 grid grid-cols-[minmax(0,1fr)_auto_auto] gap-x-3 text-[0.65rem] uppercase tracking-wide text-secondary"
+      >
+        <span>Attribute</span>
+        <span>Equipped</span>
+        <span>Change</span>
+      </div>
+      <div
+        *ngFor="let comparison of comparisonRows"
+        class="grid grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-x-3 border-b border-white/5 py-1 text-sm last:border-b-0"
+      >
+        <span class="text-secondary">
+          {{ comparison.attributeType | attributeTypeFormat }}
+        </span>
+        <span class="tabular-nums text-white">
+          {{
+            comparison.equippedAmount
+              | attributeValueFormat: comparison.attributeType
+          }}
+        </span>
+        <span
+          data-testid="comparison-difference"
+          [attr.data-attribute]="comparison.attributeType"
+          class="min-w-14 text-right tabular-nums"
+          [ngClass]="
+            comparisonClass(
+              comparison.hoveredAmount - comparison.equippedAmount
+            )
+          "
+        >
+          {{
+            comparison.hoveredAmount - comparison.equippedAmount
+              | attributeValueFormat: comparison.attributeType : true
+          }}
+        </span>
+      </div>
+
+      <div
+        *ngIf="data.itemBudget > 0 || equipped.itemBudget > 0"
+        class="ll-item-stat-row mt-1"
+      >
+        <span>Gear Value</span>
+        <span class="flex gap-3 tabular-nums">
+          <span class="text-white">{{
+            equipped.itemBudget | number: "1.0-2"
+          }}</span>
+          <span
+            [ngClass]="comparisonClass(data.itemBudget - equipped.itemBudget)"
+          >
+            {{ data.itemBudget - equipped.itemBudget > 0 ? "+" : ""
+            }}{{ data.itemBudget - equipped.itemBudget | number: "1.0-2" }}
+          </span>
+        </span>
+      </div>
+    </div>
+  </div>
+</ng-template>

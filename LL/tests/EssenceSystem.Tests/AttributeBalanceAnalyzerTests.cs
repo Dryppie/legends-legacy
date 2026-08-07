@@ -369,8 +369,8 @@ public sealed class AttributeBalanceAnalyzerTests
             else
                 Assert.True(loadout.UnspentBudget >= 0);
             Assert.True(loadout.RelevantScenarioUtilityIndex >= 0);
-            Assert.Equal(10, loadout.AggregateCaps.Count);
-            Assert.Equal(10, loadout.AggregateCapsBeforeRedistribution.Count);
+            Assert.Equal(11, loadout.AggregateCaps.Count);
+            Assert.Equal(11, loadout.AggregateCapsBeforeRedistribution.Count);
             Assert.NotEmpty(loadout.AllocationRecommendations);
             Assert.InRange(
                 Math.Abs(loadout.AllocationRecommendations.Sum(x =>
@@ -619,7 +619,7 @@ public sealed class AttributeBalanceAnalyzerTests
                         $"  spent: {x.FirstSpentBudget:0.##} vs {x.SecondSpentBudget:0.##}; " +
                         $"utility/100: {x.FirstUtilityPerHundredBudget:0.##} vs " +
                         $"{x.SecondUtilityPerHundredBudget:0.##}")));
-        Assert.Equal(11, report.BalanceVersion);
+        Assert.Equal(12, report.BalanceVersion);
     }
 
     [Fact]
@@ -628,7 +628,7 @@ public sealed class AttributeBalanceAnalyzerTests
         var report = CreateAnalyzer().Analyze(CancellationToken.None);
         var catalog = report.CraftingCatalogConstraints;
 
-        Assert.Equal(11, catalog.CandidateBalanceVersion);
+        Assert.Equal(12, catalog.CandidateBalanceVersion);
         Assert.True(catalog.ProductionActive);
         Assert.Equal(31, catalog.RecipesAnalyzed);
         Assert.Equal(11, catalog.BlueprintsAnalyzed);
@@ -644,7 +644,7 @@ public sealed class AttributeBalanceAnalyzerTests
                     $"{loadout.Id}: target {loadout.TargetBudget}, spent {loadout.ProductionSpentBudget}, " +
                     $"waste {loadout.ProductionMaximumWastedBudgetPercent}%")));
         Assert.Equal(0, catalog.ReferenceLoadoutsWithUnspentBudget);
-        Assert.Equal(10, catalog.StatSummaries.Count);
+        Assert.Equal(11, catalog.StatSummaries.Count);
         Assert.All(
             catalog.StatSummaries,
             summary =>

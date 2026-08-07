@@ -13,24 +13,31 @@ import { ItemType } from '../../models/enums/itemType';
 import { EquipmentType } from '../../models/enums/equipmentType';
 import { PopoverComponent } from '../custom-components/popover/popover.component';
 import { EssenceItemViewService } from '../../../core/services/api/essences/essence-item-view.service';
+import { InventoryStateService } from '../../../core/services/api/inventory/inventory-state.service';
+import { EquipmentStateService } from '../../../core/services/api/equipment/equipment-state.service';
+import { findEquippedComparison } from '../../utils/equipment/equipment.utils';
 
 @Component({
-    selector: 'app-item',
-    imports: [
-        NgClass,
-        NgIf,
-        EssenceDetailsComponent,
-        EquipmentDisplayComponent,
-        PopoverComponent,
-    ],
-    templateUrl: './item.component.html'
+  selector: 'app-item',
+  imports: [
+    NgClass,
+    NgIf,
+    EssenceDetailsComponent,
+    EquipmentDisplayComponent,
+    PopoverComponent,
+  ],
+  templateUrl: './item.component.html',
 })
 export class ItemComponent {
   @Input() item!: ItemInstance;
   itemHovered: boolean = false;
   tooltipPosition = {};
 
-  constructor(private readonly essenceItemView: EssenceItemViewService) {}
+  constructor(
+    private readonly essenceItemView: EssenceItemViewService,
+    private readonly inventoryState: InventoryStateService,
+    private readonly equipmentState: EquipmentStateService,
+  ) {}
 
   get isEssence(): boolean {
     return this.item.itemBase.itemType === ItemType.Essence;
@@ -82,6 +89,25 @@ export class ItemComponent {
     return 'equipmentBase' in item
       ? (item as EquipmentInstance)
       : (item.itemBase as Equipment);
+  }
+
+  get ownedQuantity(): number {
+    return this.inventoryState
+      .items()
+      .filter(
+        (inventoryItem) =>
+          inventoryItem.itemInstance.itemBase.id === this.item.itemBase.id,
+      )
+      .reduce((total, inventoryItem) => total + inventoryItem.quantity, 0);
+  }
+
+  get equippedComparison(): EquipmentInstance | null {
+    if (!this.isEquipment) return null;
+
+    return findEquippedComparison(
+      this.itemAsEquipment(this.item),
+      this.equipmentState.equipmentSlots(),
+    );
   }
 
   get rarityClasses() {

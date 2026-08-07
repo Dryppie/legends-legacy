@@ -1459,10 +1459,19 @@ public sealed class FastCombatEngine
         if (statusDefinition.DurationTicks <= 0)
             return statusDefinition.DurationTicks;
 
-        var resistanceAttribute = statusDefinition.Tags.Contains("Control.Stun")
+        var isCrowdControl = statusDefinition.Tags.Any(tag =>
+            tag.StartsWith("Control.", StringComparison.OrdinalIgnoreCase));
+        var resistanceAttribute = isCrowdControl
             ? AttributeType.CrowdControlResistance
             : AttributeType.StatusResistance;
         var resistance = Math.Max(0, target.GetAttribute(resistanceAttribute));
+        if (isCrowdControl)
+        {
+            return AttributeCombatRules.CalculateCrowdControlDurationTicks(
+                statusDefinition.DurationTicks,
+                resistance);
+        }
+
         return Math.Max(
             1,
             (int)Math.Ceiling(statusDefinition.DurationTicks / (1 + resistance / 100f)));

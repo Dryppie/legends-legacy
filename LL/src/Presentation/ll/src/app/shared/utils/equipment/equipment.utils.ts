@@ -1,5 +1,9 @@
-import { EquipmentSlotType } from '../../models/Dtos/equipment-slots/equipmentSlot';
+import {
+  EquipmentSlot,
+  EquipmentSlotType,
+} from '../../models/Dtos/equipment-slots/equipmentSlot';
 import { EquipmentType } from '../../models/enums/equipmentType';
+import { Equipment, EquipmentInstance } from '../../models/item';
 
 export function getAllowedEquipmentTypesForSlot(
   slot: EquipmentSlotType,
@@ -30,29 +34,61 @@ export function getAllowedEquipmentTypesForSlot(
 
 export function getSlotTypeFromEquipmentType(
   equipmentType: EquipmentType,
-  ): EquipmentSlotType {
-    switch (equipmentType) {
-      case EquipmentType.Head:
-        return EquipmentSlotType.Head;
-      case EquipmentType.Chest:
-        return EquipmentSlotType.Chest;
-      case EquipmentType.Legs:
-        return EquipmentSlotType.Legs;
-      case EquipmentType.Relic:
-        return EquipmentSlotType.Relic;
-      case EquipmentType.Necklace:
-        return EquipmentSlotType.Necklace;
-      case EquipmentType.Ring:
-        return EquipmentSlotType.Ring;
-      case EquipmentType.TwoHanded:
-        return EquipmentSlotType.MainHand;
-      case EquipmentType.OneHanded:
-        return EquipmentSlotType.MainHand;
-      case EquipmentType.OffHand:
-        return EquipmentSlotType.OffHand;
-      case EquipmentType.Tool:
-        return EquipmentSlotType.Tool;
-      default:
-        throw new Error(`Unhandled equipment type: ${equipmentType}`);
-    }
+): EquipmentSlotType {
+  switch (equipmentType) {
+    case EquipmentType.Head:
+      return EquipmentSlotType.Head;
+    case EquipmentType.Chest:
+      return EquipmentSlotType.Chest;
+    case EquipmentType.Legs:
+      return EquipmentSlotType.Legs;
+    case EquipmentType.Relic:
+      return EquipmentSlotType.Relic;
+    case EquipmentType.Necklace:
+      return EquipmentSlotType.Necklace;
+    case EquipmentType.Ring:
+      return EquipmentSlotType.Ring;
+    case EquipmentType.TwoHanded:
+      return EquipmentSlotType.MainHand;
+    case EquipmentType.OneHanded:
+      return EquipmentSlotType.MainHand;
+    case EquipmentType.OffHand:
+      return EquipmentSlotType.OffHand;
+    case EquipmentType.Tool:
+      return EquipmentSlotType.Tool;
+    default:
+      throw new Error(`Unhandled equipment type: ${equipmentType}`);
   }
+}
+
+export function findEquippedComparison(
+  item: Equipment | EquipmentInstance,
+  slots: readonly EquipmentSlot[],
+): EquipmentInstance | null {
+  if (
+    isEquipmentInstance(item) &&
+    slots.some((slot) => slot.equipmentInstance?.id === item.id)
+  ) {
+    return null;
+  }
+
+  const equipmentType = isEquipmentInstance(item)
+    ? item.equipmentBase.equipmentType
+    : item.equipmentType;
+  const slotType = getSlotTypeFromEquipmentType(equipmentType);
+  const equipped = slots.find(
+    (slot) => slot.equipmentSlotType === slotType,
+  )?.equipmentInstance;
+
+  if (!equipped) {
+    return null;
+  }
+
+  return equipped;
+}
+
+function isEquipmentInstance(
+  item: Equipment | EquipmentInstance,
+): item is EquipmentInstance {
+  return 'equipmentBase' in item;
+}

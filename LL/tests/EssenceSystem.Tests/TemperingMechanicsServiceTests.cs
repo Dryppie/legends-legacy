@@ -127,6 +127,87 @@ public sealed class TemperingMechanicsServiceTests
             equipment.InstanceModifiers.Single(x => x.AttributeType == AttributeType.MaxHealth).Amount > 100);
     }
 
+    [Fact]
+    public void Attempt_normalizes_existing_equipment_values_to_canonical_precision()
+    {
+        var equipment = CreateEquipment();
+        equipment.InstanceModifiers.Add(new InstanceAttributeModifier(
+            AttributeType.MaxHealth,
+            199.49f));
+        equipment.InstanceModifiers.Add(new InstanceAttributeModifier(
+            AttributeType.CrowdControlResistance,
+            9.933024f));
+        var service = new TemperingMechanicsService(Options.Create(new CraftingBalanceOptions
+        {
+            CriticalChanceBase = 0d,
+            CriticalChancePerRarityStep = 0d
+        }));
+
+        service.ApplyTemperingAttempt(equipment, CreateProfile(), new FixedRandom(0.5d));
+
+        Assert.Equal(
+            199,
+            equipment.InstanceModifiers.Single(x =>
+                x.AttributeType == AttributeType.MaxHealth).Amount);
+        Assert.Equal(
+            9.93f,
+            equipment.InstanceModifiers.Single(x =>
+                x.AttributeType == AttributeType.CrowdControlResistance).Amount);
+    }
+
+    [Fact]
+    public void Rarity_upgrade_improves_a_realistic_capped_cloth_item()
+    {
+        var equipment = new EquipmentInstance
+        {
+            ItemBaseId = "cloth_cowl",
+            ItemBase = new EquipmentBase
+            {
+                Id = "cloth_cowl",
+                Name = "Cloth Cowl",
+                EquipmentType = EquipmentType.Chest
+            },
+            BaseRecipeId = "recipe.armor.head.cloth_cowl",
+            Tier = 1,
+            Potential = 10,
+            ItemXp = 9,
+            InstanceModifiers =
+            [
+                new InstanceAttributeModifier(AttributeType.MaxHealth, 143),
+                new InstanceAttributeModifier(AttributeType.Resistance, 6.24f),
+                new InstanceAttributeModifier(AttributeType.HealingPowerPercent, 16.65f),
+                new InstanceAttributeModifier(AttributeType.Cooldown, 4.76f)
+            ]
+        };
+        var profile = new TemperingProfileDefinition
+        {
+            Id = "recipe.armor.head.cloth_cowl.tempering",
+            Name = "Cloth Cowl Tempering",
+            Stats =
+            [
+                TemperingStat(AttributeType.HealingPowerPercent, 35, 0.4d),
+                TemperingStat(AttributeType.Resistance, 25, 0.35d),
+                TemperingStat(AttributeType.Cooldown, 20, 0.3d),
+                TemperingStat(AttributeType.MaxHealth, 20, 0.3d)
+            ]
+        };
+        var before = EquipmentBudgetEvaluator.Evaluate(
+            equipment.AttributeModifiers,
+            equipment.Tier);
+
+        var result = new TemperingMechanicsService().ApplyTemperingAttempt(
+            equipment,
+            profile,
+            new FixedRandom(0.0005d));
+
+        Assert.True(result.RarityUpgraded);
+        Assert.NotNull(result.ImprovedStat);
+        Assert.True(
+            EquipmentBudgetEvaluator.Evaluate(equipment.AttributeModifiers, equipment.Tier) > before,
+            $"{result.ImprovedStat}: {result.PreviousStatValue} -> {result.NewStatValue}; " +
+            string.Join(", ", equipment.InstanceModifiers.Select(x => $"{x.AttributeType}={x.Amount}")));
+    }
+
     private static EquipmentInstance CreateEquipment() => new()
     {
         ItemBaseId = "heavy_breastplate",
@@ -157,6 +238,20 @@ public sealed class TemperingMechanicsServiceTests
                 MaxBudgetShare = 1d
             }
         ]
+    };
+
+    private static TemperingStatWeightDefinition TemperingStat(
+        AttributeType stat,
+        double weight,
+        double maximumBudgetShare) => new()
+    {
+        Stat = stat,
+        Weight = weight,
+        Category = TemperingStatCategory.Secondary,
+        CanIntroduce = true,
+        CanIncrease = true,
+        MaxBudgetShare = maximumBudgetShare,
+        MinimumTier = 1
     };
 
     private sealed class FixedRandom(double value) : Random

@@ -62,7 +62,9 @@ public sealed class AttributeCombatSystemTests
             [AttributeType.Resistance] = AttributeCombatRules.TypedMitigationCapPercent,
             [AttributeType.ArmorPenetration] = AttributeCombatRules.TypedPenetrationCapPercent,
             [AttributeType.MagicPenetration] = AttributeCombatRules.TypedPenetrationCapPercent,
-            [AttributeType.Cooldown] = AttributeCombatRules.CooldownReductionCapPercent
+            [AttributeType.Cooldown] = AttributeCombatRules.CooldownReductionCapPercent,
+            [AttributeType.CrowdControlResistance] =
+                AttributeCombatRules.CrowdControlResistanceCapPercent
         };
 
         foreach (var (attribute, expectedCap) in fixedCaps)
@@ -563,6 +565,67 @@ public sealed class AttributeCombatSystemTests
         engine.Run([source], [target]);
 
         Assert.Equal(49, Assert.Single(target.Statuses).RemainingDurationTicks);
+    }
+
+    [Fact]
+    public void Crowd_control_resistance_is_a_capped_percentage_duration_reduction()
+    {
+        var status = new StatusSpec
+        {
+            Id = "status.freeze",
+            Name = "Freeze",
+            DurationTicks = 100,
+            MaxStacks = 1,
+            Tags = ["Control.Freeze"]
+        };
+        var ability = CreateEffectAbility(
+            "apply-freeze",
+            new AbilityEffectSpec
+            {
+                Id = "effect.freeze",
+                Operation = AbilityEffectOperation.ApplyStatus,
+                Target = AbilityTargetSelector.CurrentTarget,
+                StatusId = status.Id,
+                BaseValue = 1
+            });
+        var source = CreateCombatant(
+            "source",
+            CombatTeam.Friendly,
+            AbilityCompiler.CompileAbilities([ability]).Values);
+        var target = CreateCombatant(
+            "target",
+            CombatTeam.Hostile,
+            [],
+            new Dictionary<AttributeType, float>
+            {
+                [AttributeType.MaxHealth] = 200,
+                [AttributeType.CrowdControlResistance] = 25
+            });
+        var engine = new FastCombatEngine(
+            AbilityCompiler.CompileStatuses([status]),
+            new FastCombatEngineOptions(MaxTicks: 1, BasicAttackIntervalTicks: 1_000));
+
+        engine.Run([source], [target]);
+
+        Assert.Equal(74, Assert.Single(target.Statuses).RemainingDurationTicks);
+        Assert.Equal(
+            20,
+            AttributeCombatRules.CalculateCrowdControlDurationTicks(
+                authoredTicks: 100,
+                resistancePercent: 1_000));
+    }
+
+    [Theory]
+    [InlineData(AttributeType.MaxHealth, 199.6, 200)]
+    [InlineData(AttributeType.StatusResistance, 9.933024, 10)]
+    [InlineData(AttributeType.CrowdControlResistance, 9.933024, 9.93)]
+    [InlineData(AttributeType.Armor, 4.616, 4.62)]
+    public void Equipment_values_quantize_to_their_canonical_attribute_precision(
+        AttributeType attribute,
+        double raw,
+        double expected)
+    {
+        Assert.Equal(expected, AttributeValueQuantizer.Quantize(attribute, raw));
     }
 
     [Fact]

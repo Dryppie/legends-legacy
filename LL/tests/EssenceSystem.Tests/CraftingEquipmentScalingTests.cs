@@ -29,8 +29,8 @@ public sealed class CraftingEquipmentScalingTests
         var equipment = new EquipmentBase { Id = "iron_helm", Name = "Iron Helm", EquipmentType = EquipmentType.Head };
         var recipe = CreateSingleStatDesign();
 
-        var standard = service.RollBaseStats(equipment, recipe, 1, ItemQuality.Standard, new FixedRandom(0.5d)).Single();
-        var fine = service.RollBaseStats(equipment, recipe, 1, ItemQuality.Fine, new FixedRandom(0.5d)).Single();
+        var standard = service.RollBaseStats(equipment, recipe, 10, ItemQuality.Standard, new FixedRandom(0.5d)).Single();
+        var fine = service.RollBaseStats(equipment, recipe, 10, ItemQuality.Fine, new FixedRandom(0.5d)).Single();
 
         Assert.True(fine.Amount > standard.Amount);
     }
@@ -65,6 +65,76 @@ public sealed class CraftingEquipmentScalingTests
 
         Assert.Equal(minimumRoll.Amount, preview.MinimumAmount);
         Assert.Equal(maximumRoll.Amount, preview.MaximumAmount);
+    }
+
+    [Fact]
+    public void HeavyHelmRoll_CannotFallBelowItsAdvertisedCrowdControlResistanceRange()
+    {
+        var service = new ItemStatRollService(Options.Create(new CraftingBalanceOptions()));
+        var equipment = new EquipmentBase
+        {
+            Id = "heavy_helm",
+            Name = "Heavy Helm",
+            EquipmentType = EquipmentType.Head
+        };
+        var recipe = new CraftingRecipeDefinition
+        {
+            Id = "recipe.armor.head.heavy_helm",
+            Name = "Heavy Helm",
+            OutputItemId = equipment.Id,
+            OutputItemType = equipment.EquipmentType,
+            InitialStatProfile = new Dictionary<AttributeType, double>
+            {
+                [AttributeType.Armor] = 0.35d,
+                [AttributeType.MaxHealth] = 0.30d,
+                [AttributeType.BlockChance] = 0.20d,
+                [AttributeType.CrowdControlResistance] = 0.15d
+            }
+        };
+        var design = EquipmentCraftingDesignComposer.Compose(recipe, null);
+        var qualities = new[]
+        {
+            ItemQuality.Crude,
+            ItemQuality.Standard,
+            ItemQuality.Fine,
+            ItemQuality.Exceptional
+        };
+        var advertised = service.GetBaseStatRanges(
+                equipment,
+                design,
+                1,
+                qualities)
+            .Single(range =>
+                range.AttributeType == AttributeType.CrowdControlResistance);
+
+        var lowestStandardRoll = service.RollBaseStats(
+                equipment,
+                design,
+                1,
+                ItemQuality.Standard,
+                new FixedRandom(0d))
+            .Single(modifier =>
+                modifier.AttributeType == AttributeType.CrowdControlResistance);
+
+        Assert.InRange(
+            lowestStandardRoll.Amount,
+            advertised.MinimumAmount,
+            advertised.MaximumAmount);
+        Assert.True(
+            lowestStandardRoll.Amount > 1f,
+            $"Heavy Helm rolled {lowestStandardRoll.Amount} Crowd Control Resistance " +
+            $"despite advertising {advertised.MinimumAmount}-{advertised.MaximumAmount}.");
+        Assert.Equal(
+            AttributeValueQuantizer.Quantize(
+                AttributeType.CrowdControlResistance,
+                lowestStandardRoll.Amount),
+            lowestStandardRoll.Amount);
+        Assert.Equal(
+            AttributeUnit.PercentagePoints,
+            AttributeCatalog.Get(AttributeType.CrowdControlResistance).Unit);
+        Assert.Equal(
+            "%",
+            AttributeCatalog.Get(AttributeType.CrowdControlResistance).DisplaySuffix);
     }
 
     [Fact]

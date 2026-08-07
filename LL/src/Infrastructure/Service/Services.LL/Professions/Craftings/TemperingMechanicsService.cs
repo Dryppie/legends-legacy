@@ -1,4 +1,5 @@
 using Application.Interfaces.Services.LL.Professions;
+using Domain.Models.Attributes;
 using Domain.Models.Attributes.Modifiers;
 using Domain.Models.Items;
 using Domain.Models.Items.Equipments;
@@ -27,6 +28,8 @@ public sealed class TemperingMechanicsService : ITemperingMechanicsService
     {
         if ((equipment.Potential ?? 0) < TemperingConstants.PotentialCost)
             throw new InvalidOperationException("Equipment does not have enough Potential.");
+
+        QuantizeInstanceModifiers(equipment);
 
         var previousRarity = equipment.Rarity;
         var previousQuality = equipment.Quality;
@@ -156,14 +159,19 @@ public sealed class TemperingMechanicsService : ITemperingMechanicsService
         {
             equipment.InstanceModifiers.Add(new InstanceAttributeModifier(
                 selected.Definition.Stat,
-                increase));
+                AttributeValueQuantizer.Quantize(selected.Definition.Stat, increase)));
         }
         else
         {
-            existingModifier.Amount += increase;
+            existingModifier.Amount = AttributeValueQuantizer.Quantize(
+                selected.Definition.Stat,
+                existingModifier.Amount + increase);
         }
 
-        return new DirectedImprovement(selected.Definition.Stat, previous, previous + increase);
+        var updated = equipment.InstanceModifiers
+            .Where(modifier => modifier.AttributeType == selected.Definition.Stat)
+            .Sum(modifier => modifier.Amount);
+        return new DirectedImprovement(selected.Definition.Stat, previous, updated);
 
         List<WeightedCandidate> CreateCandidates(
             IReadOnlyList<TemperingStatWeightDefinition> definitions)
@@ -187,11 +195,19 @@ public sealed class TemperingMechanicsService : ITemperingMechanicsService
                             allCurrentPoints,
                             constraints,
                             perItemCapMultiplier);
+                    var currentValue = (double)currentByStat.GetValueOrDefault(stat.Stat);
+                    var quantizedCurrent = AttributeValueQuantizer.Quantize(
+                        stat.Stat,
+                        currentValue);
+                    var quantizedMaximum = AttributeValueQuantizer.Quantize(
+                        stat.Stat,
+                        currentValue + maximumIncrease);
 
                     if ((!exists && !stat.CanIntroduce) ||
                         (exists && !stat.CanIncrease) ||
                         stat.MinimumTier > equipment.Tier ||
                         maximumIncrease <= 0.000001d ||
+                        quantizedMaximum <= quantizedCurrent ||
                         currentShare >= cap)
                     {
                         return null;
@@ -331,7 +347,19 @@ public sealed class TemperingMechanicsService : ITemperingMechanicsService
         {
             var modifier = equipment.InstanceModifiers
                 .First(x => x.AttributeType == attribute);
-            modifier.Amount += (float)addedPoints;
+            modifier.Amount = AttributeValueQuantizer.Quantize(
+                attribute,
+                modifier.Amount + (float)addedPoints);
+        }
+    }
+
+    private static void QuantizeInstanceModifiers(EquipmentInstance equipment)
+    {
+        foreach (var modifier in equipment.InstanceModifiers)
+        {
+            modifier.Amount = AttributeValueQuantizer.Quantize(
+                modifier.AttributeType,
+                modifier.Amount);
         }
     }
 

@@ -29,6 +29,16 @@ describe('canonical attribute formatting', () => {
         displayPrecision: 0,
       }),
       definition({
+        attributeType: AttributeType.CrowdControlResistance,
+        displayName: 'Crowd Control Resistance',
+        description: 'Reduces crowd-control duration.',
+        unit: 'PercentagePoints',
+        maximumValue: 80,
+        capKind: 'Fixed',
+        displayPrecision: 2,
+        displaySuffix: '%',
+      }),
+      definition({
         attributeType: AttributeType.HealthRegeneration,
         displayName: 'Health Regen',
         description: 'Health restored every five seconds.',
@@ -63,6 +73,24 @@ describe('canonical attribute formatting', () => {
     expect(formatAttributeValue(4.5, AttributeType.HealthRegeneration)).toBe(
       '5 HP/5s',
     );
+    expect(formatAttributeValue(9.933024, AttributeType.StatusResistance)).toBe(
+      '10',
+    );
+    expect(
+      formatAttributeValue(99.9, AttributeType.StatusResistance, true),
+    ).toBe('+100');
+  });
+
+  it('formats crowd control resistance as percentage points', () => {
+    expect(
+      formatAttributeValue(
+        9.933024,
+        AttributeType.CrowdControlResistance,
+      ),
+    ).toBe('9.93%');
+    expect(
+      formatAttributeValue(8, AttributeType.CrowdControlResistance, true),
+    ).toBe('+8%');
   });
 });
 

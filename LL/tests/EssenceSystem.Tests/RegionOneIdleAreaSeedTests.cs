@@ -132,7 +132,7 @@ public sealed class RegionOneIdleAreaSeedTests
             lumoRuins.GatheringNodes.Select(node => node.Type).OrderBy(type => type).ToArray());
         Assert.All(lumoRuins.GatheringNodes, node =>
         {
-            Assert.Equal(0.4, node.ProcChance, precision: 6);
+            Assert.Equal(0.0037, node.ProcChance, precision: 6);
             Assert.False(string.IsNullOrWhiteSpace(node.RewardTableId));
         });
     }

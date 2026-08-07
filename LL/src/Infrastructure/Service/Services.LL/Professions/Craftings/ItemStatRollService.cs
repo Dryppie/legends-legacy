@@ -1,4 +1,5 @@
 using Application.Interfaces.Services.LL.Professions;
+using Domain.Models.Attributes;
 using Domain.Models.Attributes.Modifiers;
 using Domain.Models.Items;
 using Domain.Models.Items.Equipments;
@@ -34,7 +35,7 @@ public class ItemStatRollService : IItemStatRollService
         return allocation.AddedPoints
             .Select(x => new InstanceAttributeModifier(
                 x.Key,
-                (float)x.Value,
+                AttributeValueQuantizer.Quantize(x.Key, (float)x.Value),
                 ModifierType.Flat))
             .ToList();
     }
@@ -64,8 +65,12 @@ public class ItemStatRollService : IItemStatRollService
             .Order()
             .Select(attribute => new CraftedAttributeRange(
                 attribute,
-                (float)minimum.AddedPoints.GetValueOrDefault(attribute),
-                (float)maximum.AddedPoints.GetValueOrDefault(attribute)))
+                AttributeValueQuantizer.Quantize(
+                    attribute,
+                    (float)minimum.AddedPoints.GetValueOrDefault(attribute)),
+                AttributeValueQuantizer.Quantize(
+                    attribute,
+                    (float)maximum.AddedPoints.GetValueOrDefault(attribute))))
             .ToList();
     }
 

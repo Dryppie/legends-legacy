@@ -12,7 +12,19 @@
   <app-equipment-display
     *ngIf="isEquipment"
     [item]="itemAsEquipment(item)"
+    [comparisonItem]="equippedComparison"
+    [compactCraftingDesign]="true"
   ></app-equipment-display>
+
+  <div
+    *ngIf="isEssence"
+    class="mt-3 flex items-center justify-between gap-4 border-t border-primary/20 pt-2 text-sm"
+  >
+    <span class="text-secondary">Owned</span>
+    <span class="font-medium tabular-nums text-primary">{{
+      ownedQuantity
+    }}</span>
+  </div>
 
   <div *ngIf="isGenericItem" class="ll-item-detail">
     <div class="flex items-start justify-between gap-3">
@@ -62,6 +74,13 @@
       <span *ngIf="rewardSource" class="ll-item-chip">
         {{ rewardSource }}
       </span>
+    </div>
+
+    <div class="ll-item-stat-row ll-item-detail-section">
+      <span>Owned</span>
+      <span class="font-medium tabular-nums text-primary">{{
+        ownedQuantity
+      }}</span>
     </div>
   </div>
 </ng-template>

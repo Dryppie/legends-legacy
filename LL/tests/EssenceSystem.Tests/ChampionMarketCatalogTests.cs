@@ -10,16 +10,7 @@ public sealed class ChampionMarketCatalogTests
     [Fact]
     public void CatalogContainsTitlesAndSixRewardingWeeklyCaches()
     {
-        var apiRoot = Path.GetFullPath(Path.Combine(
-            AppContext.BaseDirectory,
-            "..",
-            "..",
-            "..",
-            "..",
-            "..",
-            "src",
-            "API",
-            "API.LL"));
+        var apiRoot = TestContentPaths.FindApiRoot();
         var config = new ConfigurationBuilder()
             .AddInMemoryCollection(new Dictionary<string, string?>
             {

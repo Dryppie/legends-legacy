@@ -133,10 +133,11 @@ public static class AttributeCatalog
                 "Status Resistance",
                 "Reduces the duration of non-crowd-control status effects.",
                 Scenarios(AttributeBenchmarkScenario.StatusResilience)),
-            [AttributeType.CrowdControlResistance] = Rating(
+            [AttributeType.CrowdControlResistance] = Percent(
                 AttributeType.CrowdControlResistance,
                 "Crowd Control Resistance",
-                "Reduces the duration of crowd-control effects.",
+                "Reduces the duration of crowd-control effects by this many percentage points.",
+                AttributeCombatRules.CrowdControlResistanceCapPercent,
                 Scenarios(AttributeBenchmarkScenario.CrowdControlResilience)),
 
             [AttributeType.SummonPower] = Percent(

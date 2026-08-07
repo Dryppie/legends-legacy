@@ -11,8 +11,7 @@ public sealed class ProphecyBalanceProviderTests
     [Fact]
     public void Committed_prophecy_catalog_is_valid_and_complete()
     {
-        var apiRoot = Path.GetFullPath(
-            Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "..", "src", "API", "API.LL"));
+        var apiRoot = TestContentPaths.FindApiRoot();
         var options = new JsonSerializerOptions
         {
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase,

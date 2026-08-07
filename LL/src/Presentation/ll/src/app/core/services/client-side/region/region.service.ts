@@ -61,6 +61,7 @@ export class RegionService {
           name: 'Crystal Creek',
           levelRequirement: 10,
           creatures: ['Frost Imp', 'Crystal Wisp', 'Blue Slime', 'Transparent Slime', 'Moss Lizard'],
+          gatheringTypes: [GatheringType.Mining],
           description:
             'Crystal Creek shimmers with enchanted waters and glowing minerals, drawing frost-touched creatures that feed on its arcane residue.',
         },
@@ -69,6 +70,7 @@ export class RegionService {
           name: 'Moonlit Graves',
           levelRequirement: 15,
           creatures: ['Shadow Imp', 'Grave Hound', 'Lost Soul', 'Grave Wisp', 'Skeleton'],
+          gatheringTypes: [GatheringType.Mining, GatheringType.Skinning],
           description:
             'Moonlit Graves is a pale cemetery where grave-born creatures and lost spirits gather beneath an unending moon.',
         },
@@ -77,6 +79,7 @@ export class RegionService {
           name: 'Twilight Clearing',
           levelRequirement: 20,
           creatures: ['Pixie', 'Wood Nymph', 'Rainbow Slime', 'Enchanted Fairy', 'Illusion Fox'],
+          gatheringTypes: [GatheringType.Woodcutting],
           description:
             'Bathed in eternal dusk, the Twilight Clearing is a mystical glade where mischievous fae and creatures of illusion gather.',
         },
@@ -85,6 +88,7 @@ export class RegionService {
           name: 'Old Forest',
           levelRequirement: 25,
           creatures: ['Thornback Boar', 'Hollow Stag', 'Treant Sapling', 'Glade Panther', 'Forest Spirit'],
+          gatheringTypes: [GatheringType.Woodcutting, GatheringType.Skinning],
           description:
             'The Old Forest is an ancient woodland where territorial beasts and spirits guard roots older than Shenic itself.',
         },
@@ -93,6 +97,7 @@ export class RegionService {
           name: 'Thornroot Hollow',
           levelRequirement: 30,
           creatures: ['Rotroot Shambler', 'Spider', 'Giant Spider', 'Venomous Spiderling', 'Blackjaw Spider'],
+          gatheringTypes: [GatheringType.Woodcutting],
           description:
             'Thornroot Hollow is a tangled sink beneath the forest canopy, overrun by spiders and animated rot.',
         },
@@ -101,6 +106,7 @@ export class RegionService {
           name: 'Embercap Burrows',
           levelRequirement: 35,
           creatures: ['Flame Imp', 'Smolder Rat', 'Cinder Beetle', 'Red Slime', 'Giant Worm'],
+          gatheringTypes: [GatheringType.Mining],
           description:
             'Embercap Burrows is a scorched tunnel network where heat-loving vermin nest among glowing fungus and molten seams.',
         },
@@ -109,6 +115,7 @@ export class RegionService {
           name: 'Moonveil Marsh',
           levelRequirement: 40,
           creatures: ['Bog Mite', 'Green Slime', 'Large Rat', 'Viper', 'Poisonous Rat'],
+          gatheringTypes: [GatheringType.Skinning],
           description:
             'Moonveil Marsh is a venomous wetland where swollen vermin and marsh predators move beneath luminous fog.',
         },
@@ -117,6 +124,7 @@ export class RegionService {
           name: 'Duskmire Hollow',
           levelRequirement: 45,
           creatures: ['Rotfly Toad', 'Brown Slime', 'Cave Bat', 'Giant Bat', 'Undead'],
+          gatheringTypes: [GatheringType.Mining],
           description:
             'Duskmire Hollow is a lightless mire of stagnant caves, where bats, slimes, and the undead thrive in the gloom.',
         },

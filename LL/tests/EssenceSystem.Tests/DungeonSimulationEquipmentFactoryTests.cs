@@ -43,7 +43,10 @@ public sealed class DungeonSimulationEquipmentFactoryTests
             Assert.NotEmpty(common.InstanceModifiers);
             Assert.True(
                 EquipmentBudgetEvaluator.Evaluate(epic.AttributeModifiers, epic.Tier) >
-                EquipmentBudgetEvaluator.Evaluate(common.AttributeModifiers, common.Tier));
+                EquipmentBudgetEvaluator.Evaluate(common.AttributeModifiers, common.Tier),
+                $"{slotId} {equipmentType} did not gain budget from Common to Epic. " +
+                $"Common: {string.Join(", ", common.InstanceModifiers.Select(x => $"{x.AttributeType}={x.Amount}"))}; " +
+                $"Epic: {string.Join(", ", epic.InstanceModifiers.Select(x => $"{x.AttributeType}={x.Amount}"))}.");
         }
     }
 

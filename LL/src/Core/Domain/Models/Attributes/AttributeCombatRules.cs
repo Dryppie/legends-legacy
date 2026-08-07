@@ -10,6 +10,7 @@ public static class AttributeCombatRules
     public const float CritChanceCapPercent = 100f;
     public const float TypedMitigationCapPercent = 80f;
     public const float TypedPenetrationCapPercent = 60f;
+    public const float CrowdControlResistanceCapPercent = 80f;
     public const float MinimumBasicAttackRate = 0.25f;
     public const float MaximumBasicAttackRate = 4f;
     public const float BasicAttackPowerCoefficient = 0.5f;
@@ -40,6 +41,21 @@ public static class AttributeCombatRules
             cooldownReductionPercent,
             0,
             AttributeCatalog.GetFixedCap(AttributeType.Cooldown));
+        var reducedTicks = authoredTicks * (100d - reductionPercent) / 100d;
+        return Math.Max(1, (int)Math.Ceiling(reducedTicks - 1e-9d));
+    }
+
+    public static int CalculateCrowdControlDurationTicks(
+        int authoredTicks,
+        float resistancePercent)
+    {
+        if (authoredTicks <= 0)
+            return authoredTicks;
+
+        var reductionPercent = Math.Clamp(
+            resistancePercent,
+            0,
+            CrowdControlResistanceCapPercent);
         var reducedTicks = authoredTicks * (100d - reductionPercent) / 100d;
         return Math.Max(1, (int)Math.Ceiling(reducedTicks - 1e-9d));
     }
