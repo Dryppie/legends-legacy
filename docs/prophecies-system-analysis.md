@@ -627,7 +627,7 @@ The Prophecies page is a substantial standalone Angular component with a corresp
 | Essences              | Essences → Prophecies       | Medium            | Active-slot XP and Archive absorption; “feed” behavior not found.                                                          |
 | Gathering             | Combat rewards → Prophecies | Partial           | Only gathering results from combat processors were found; authored profession filters are enforced.                        |
 | Inventory             | Bidirectional               | Strong            | Prophecies create bound cache items; cache opening consumes them.                                                          |
-| Character progression | Prophecies → Character      | Strong            | Cinders, Soulstones, character XP, and three fragment/echo balances.                                                       |
+| Character progression | Prophecies → Character      | Strong            | Soulstones, character XP, Sigil Fragments, Fate Echo, caches, and progression materials; Prophecies do not grant Cinders.   |
 | Leveling              | Prophecies → Leveling       | Strong            | Character XP runs through level recalculation.                                                                             |
 | Realtime              | Prophecies → UI             | Medium            | Immediate aggregated feedback, but still published before commit.                                                         |
 | Sidebar notifications | Prophecies → Navigation     | Medium            | Good actionable badge, but refresh is not globally realtime.                                                               |

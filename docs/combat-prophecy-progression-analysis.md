@@ -6,7 +6,7 @@ Character XP and Cinders are owned by the activity that creates the encounter, n
 
 - Areas budget rewards per hour from area difficulty and expected encounter size.
 - Dungeons budget rewards per victorious combat encounter from dungeon tier and room type.
-- Prophecies scale XP with the character level curve and Cinders with their bounded reward recipe.
+- Prophecies scale XP with the character level curve and deliberately do not grant Cinders.
 - Creature definitions own combat identity, stats, loot, and Essence relationships. They do not contain XP or Cinder values.
 
 This separation prevents a creature reused in multiple areas or dungeons from forcing those activities to share progression rates.
@@ -108,13 +108,7 @@ The curve continues beyond level 100 and is stored as 64-bit character experienc
 
 ## Prophecy comparison
 
-Prophecy XP remains a percentage of the next-level requirement, while Prophecy Cinders use a slow bounded level multiplier. This keeps Prophecy rewards relevant without allowing their Cinders to inherit the quadratic XP curve.
-
-```text
-Prophecy Cinder growth = min(+200%, +1% per character level after level 1)
-```
-
-Area Cinders are now predictable enough to compare against Prophecy recipes: nominal area Cinders are always 10% of nominal area XP before integer rounding, while Prophecy Cinders remain discrete cadence rewards.
+Prophecy XP remains a percentage of the next-level requirement. Prophecies do not grant Cinders; Cinder acquisition remains attached to world combat, dungeons, and other economy activities. This gives Prophecies a clearer reward identity around XP, Soulstones, Sigil Fragments, Fate Echo, caches, and progression materials.
 
 ## Content-authoring rules
 

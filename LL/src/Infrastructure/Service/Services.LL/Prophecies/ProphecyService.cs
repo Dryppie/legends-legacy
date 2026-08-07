@@ -1043,8 +1043,13 @@ public sealed class ProphecyService : IProphecyService
             Rarity = definition.Rarity
         };
 
-    private static ProphecyRewardSnapshot ReadReward(string json) =>
-        JsonSerializer.Deserialize<ProphecyRewardSnapshot>(json, JsonOptions) ?? new ProphecyRewardSnapshot();
+    private static ProphecyRewardSnapshot ReadReward(string json)
+    {
+        var reward = JsonSerializer.Deserialize<ProphecyRewardSnapshot>(json, JsonOptions)
+                     ?? new ProphecyRewardSnapshot();
+        reward.Cinders = 0;
+        return reward;
+    }
 
     private static ProphecyProgressSnapshot ReadProgress(string json) =>
         JsonSerializer.Deserialize<ProphecyProgressSnapshot>(json, JsonOptions) ?? new ProphecyProgressSnapshot();

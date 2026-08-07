@@ -311,6 +311,28 @@ public sealed class ProphecyServiceTests
     }
 
     [Fact]
+    public async Task ClaimAsync_suppresses_cinders_from_a_legacy_reward_snapshot()
+    {
+        var prophecy = CreateCompletedProphecy();
+        prophecy.RewardSnapshotJson = JsonSerializer.Serialize(
+            new ProphecyRewardSnapshot { Cinders = 10_000 },
+            new JsonSerializerOptions(JsonSerializerDefaults.Web));
+        var service = CreateService(prophecy);
+
+        var result = await service.ClaimAsync(
+            prophecy.PlayerId,
+            prophecy.CharacterId,
+            prophecy.Id,
+            Now,
+            CancellationToken.None);
+
+        Assert.True(result.Succeeded);
+        var claim = Assert.IsType<ProphecyClaimResult>(result.Value);
+        Assert.Equal(0, claim.Reward.Cinders);
+        Assert.Equal(ProphecyStatus.Claimed, prophecy.Status);
+    }
+
+    [Fact]
     public async Task ClaimAsync_credits_two_favor_for_greater_prophecy()
     {
         var prophecy = CreateGatheringProphecy("{}");
