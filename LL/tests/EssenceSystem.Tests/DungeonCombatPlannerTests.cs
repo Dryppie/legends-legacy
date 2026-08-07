@@ -25,4 +25,20 @@ public sealed class DungeonCombatPlannerTests
 
         Assert.Equal(expectedTier, plan.DungeonTier);
     }
+
+    [Fact]
+    public void Dungeon_plan_carries_the_authored_enemy_strength_multiplier()
+    {
+        var characterId = Guid.NewGuid();
+        var plan = new DungeonCombatPlanner().CreatePlan(
+            Guid.NewGuid(),
+            characterId,
+            new CharacterSnapshot { CharacterId = characterId },
+            1,
+            [characterId],
+            [Guid.NewGuid()],
+            enemyStrengthMultiplier: 3.7f);
+
+        Assert.Equal(3.7f, plan.EnemyStrengthMultiplier);
+    }
 }

@@ -149,14 +149,21 @@ public sealed class DungeonPowerAnalyzer : IDungeonPowerAnalyzer
                 return Failed("No canonical equipment profile produced a positive passing Combat Rating.", contentHash);
             var lower = ratings.Min();
             var upper = ratings.Max();
-            var referenceEntry = profileResults
-                .Where(entry => entry.Value.Rating > 0)
-                .OrderBy(entry => entry.Value.Rating)
-                .ThenBy(entry => entry.Key)
-                .First();
+            var referenceEntry = profileResults.TryGetValue(
+                    CanonicalPartyProfile.Balanced,
+                    out var balancedResult)
+                && balancedResult.Rating > 0
+                    ? new KeyValuePair<CanonicalPartyProfile, ProfileResult>(
+                        CanonicalPartyProfile.Balanced,
+                        balancedResult)
+                    : profileResults
+                        .Where(entry => entry.Value.Rating > 0)
+                        .OrderBy(entry => entry.Value.Rating)
+                        .ThenBy(entry => entry.Key)
+                        .First();
             var referenceProfile = referenceEntry.Key;
             var reference = referenceEntry.Value;
-            var recommended = lower;
+            var recommended = reference.Rating;
             var spread = recommended <= 0 ? 1m : (upper - lower) / (decimal)recommended;
             var confidence = unavailableProfiles.Count > 0
                 ? PowerRatingConfidence.Low
@@ -190,7 +197,7 @@ public sealed class DungeonPowerAnalyzer : IDungeonPowerAnalyzer
                       / FastCombatEngine.TicksPerSecond),
                 completionRates,
                 unavailableProfiles.Count > 0
-                    ? $"Recommended Combat Rating uses the lowest available first-passing profile: " +
+                    ? $"Recommended Combat Rating uses the baseline first-passing profile: " +
                       $"{referenceProfile} rung {DescribeRung(reference.Rung)} with " +
                       $"{reference.EssenceCount} Essences; " +
                       $"preceding rung: " +
@@ -199,10 +206,10 @@ public sealed class DungeonPowerAnalyzer : IDungeonPowerAnalyzer
                       $"{string.Join(", ", unavailableProfiles)}."
                     : confidence == PowerRatingConfidence.Low
                         ? $"Canonical party profiles disagree substantially about this dungeon. " +
-                          $"Recommended Combat Rating uses the lowest eligible first-passing requirement: " +
+                          $"Recommended Combat Rating uses the baseline first-passing requirement: " +
                           $"{referenceProfile} rung {DescribeRung(reference.Rung)} with " +
                           $"{reference.EssenceCount} Essences."
-                        : $"Recommended Combat Rating uses the lowest eligible first-passing canonical profile: " +
+                        : $"Recommended Combat Rating uses the baseline first-passing canonical profile: " +
                           $"{referenceProfile} rung {DescribeRung(reference.Rung)} with " +
                           $"{reference.EssenceCount} Essences; " +
                           $"preceding rung: " +
@@ -247,7 +254,8 @@ public sealed class DungeonPowerAnalyzer : IDungeonPowerAnalyzer
                 [combatant],
                 RecommendationSeeds,
                 supplementalAbilities: null,
-                cancellationToken);
+                cancellationToken,
+                dungeon.EnemyStrengthMultiplier);
             if (validation.CompletionRate < TargetCompletionRate)
             {
                 preceding = build.Rung;
@@ -337,6 +345,7 @@ public sealed class DungeonPowerAnalyzer : IDungeonPowerAnalyzer
             dungeon.MinRooms,
             dungeon.MaxRooms,
             dungeon.RestSiteCount,
+            dungeon.EnemyStrengthMultiplier,
             Rooms = dungeon.Rooms.Select(x => new { x.Type, x.EncounterIds })
         });
         return Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(payload))).ToLowerInvariant();

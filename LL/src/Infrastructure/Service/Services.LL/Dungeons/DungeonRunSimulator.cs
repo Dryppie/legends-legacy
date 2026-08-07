@@ -131,6 +131,7 @@ public sealed class DungeonRunSimulator : IDungeonRunSimulator
             results.Add(await RunSingleAsync(
                 dungeon.Id,
                 dungeon.Tier,
+                dungeon.EnemyStrengthMultiplier,
                 character,
                 masteryLevel,
                 routeStrategy,
@@ -159,6 +160,7 @@ public sealed class DungeonRunSimulator : IDungeonRunSimulator
     private async Task<DungeonSimulationRunResult> RunSingleAsync(
         string dungeonDefinitionId,
         int dungeonTier,
+        float? enemyStrengthMultiplier,
         DungeonSimulationCharacter character,
         int masteryLevel,
         string routeStrategy,
@@ -220,6 +222,7 @@ public sealed class DungeonRunSimulator : IDungeonRunSimulator
                 run,
                 room,
                 dungeonTier,
+                enemyStrengthMultiplier,
                 character,
                 cancellationToken);
             totalCombatTicks += combatResult.Duration;
@@ -279,6 +282,7 @@ public sealed class DungeonRunSimulator : IDungeonRunSimulator
         DungeonRun run,
         RoomInstance room,
         int dungeonTier,
+        float? enemyStrengthMultiplier,
         DungeonSimulationCharacter characterConfiguration,
         CancellationToken cancellationToken)
     {
@@ -323,7 +327,7 @@ public sealed class DungeonRunSimulator : IDungeonRunSimulator
             [.. creatureEntities],
             new Area { DifficultyTier = 1 });
         foreach (var hostile in hostiles)
-            DungeonEnemyDifficultyScaling.Apply(hostile, dungeonTier);
+            DungeonEnemyDifficultyScaling.Apply(hostile, dungeonTier, enemyStrengthMultiplier);
 
         await _combatSetup.PrepareEntitiesForCombat([player, .. hostiles]);
 

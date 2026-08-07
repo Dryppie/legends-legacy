@@ -93,7 +93,8 @@ public sealed class PowerAnalysisSimulationRunner
     private readonly CanonicalEquipmentBuildFactory? _canonicalBuilds;
     private readonly Dictionary<string, Creature> _dungeonCreatureSources =
         new(StringComparer.OrdinalIgnoreCase);
-    private readonly Dictionary<int, Dictionary<string, CombatEntity>> _dungeonEnemyTemplatesByTier = [];
+    private readonly Dictionary<(int Tier, float Strength), Dictionary<string, CombatEntity>>
+        _dungeonEnemyTemplatesByDifficulty = [];
 
     public PowerAnalysisSimulationRunner(
         ICombatEngineExecutor combatEngine,
@@ -261,7 +262,8 @@ public sealed class PowerAnalysisSimulationRunner
         IReadOnlyList<CombatEntity> party,
         IReadOnlyList<int> seeds,
         IReadOnlyList<AbilitySpec>? supplementalAbilities,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken,
+        float? enemyStrengthMultiplier = null)
     {
         var completions = 0;
         var checkpoints = 0;
@@ -273,6 +275,7 @@ public sealed class PowerAnalysisSimulationRunner
             var outcome = await RunDungeonOnceAsync(
                 dungeonDefinitionId,
                 dungeonTier,
+                enemyStrengthMultiplier,
                 party,
                 seed,
                 supplementalAbilities,
@@ -296,6 +299,7 @@ public sealed class PowerAnalysisSimulationRunner
     private async Task<(bool Completed, bool CheckpointReached, int CombatTicks)> RunDungeonOnceAsync(
         string dungeonDefinitionId,
         int dungeonTier,
+        float? enemyStrengthMultiplier,
         IReadOnlyList<CombatEntity> party,
         int seed,
         IReadOnlyList<AbilitySpec>? supplementalAbilities,
@@ -331,7 +335,11 @@ public sealed class PowerAnalysisSimulationRunner
             if (room.Type is not (RoomType.Combat or RoomType.MiniBoss or RoomType.Boss))
                 continue;
 
-            var hostiles = await CreateDungeonEnemiesAsync(room, dungeonTier, cancellationToken);
+            var hostiles = await CreateDungeonEnemiesAsync(
+                room,
+                dungeonTier,
+                enemyStrengthMultiplier,
+                cancellationToken);
             var roomParty = party.Select(x => x.DeepCloneForEncounter()).ToList();
             if (run.State.VigorState == "Exhausted")
             {
@@ -371,15 +379,20 @@ public sealed class PowerAnalysisSimulationRunner
     private async Task<List<CombatEntity>> CreateDungeonEnemiesAsync(
         RoomInstance room,
         int dungeonTier,
+        float? enemyStrengthMultiplier,
         CancellationToken cancellationToken)
     {
         var creatureKeys = room.EncounterIds.Select(DungeonEncounterIdentity.NormalizeCreatureKey).ToList();
         await LoadMissingDungeonCreatureSourcesAsync(creatureKeys, room.RoomIndex, cancellationToken);
 
-        if (!_dungeonEnemyTemplatesByTier.TryGetValue(dungeonTier, out var templatesByKey))
+        var strength = DungeonEnemyDifficultyScaling.GetStrengthMultiplier(
+            dungeonTier,
+            enemyStrengthMultiplier);
+        var cacheKey = (dungeonTier, strength);
+        if (!_dungeonEnemyTemplatesByDifficulty.TryGetValue(cacheKey, out var templatesByKey))
         {
             templatesByKey = new Dictionary<string, CombatEntity>(StringComparer.OrdinalIgnoreCase);
-            _dungeonEnemyTemplatesByTier.Add(dungeonTier, templatesByKey);
+            _dungeonEnemyTemplatesByDifficulty.Add(cacheKey, templatesByKey);
         }
 
         var missingTemplateKeys = creatureKeys
@@ -400,7 +413,7 @@ public sealed class PowerAnalysisSimulationRunner
             }
 
             foreach (var hostile in hostiles)
-                DungeonEnemyDifficultyScaling.Apply(hostile, dungeonTier);
+                DungeonEnemyDifficultyScaling.Apply(hostile, dungeonTier, strength);
             await _combatSetup.PrepareEntitiesForCombat(hostiles);
 
             for (var index = 0; index < missingTemplateKeys.Count; index++)

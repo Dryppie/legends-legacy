@@ -106,6 +106,12 @@ public sealed class DungeonCatalogValidator
 
             if (difficulty.MaxRooms < difficulty.MinRooms)
                 errors.Add($"{difficultyLabel}: maxRooms must be greater than or equal to minRooms.");
+
+            if (difficulty.EnemyStrengthMultiplier is { } multiplier
+                && (!float.IsFinite(multiplier) || multiplier <= 1f))
+            {
+                errors.Add($"{difficultyLabel}: enemyStrengthMultiplier must be a finite value greater than one.");
+            }
         }
     }
 

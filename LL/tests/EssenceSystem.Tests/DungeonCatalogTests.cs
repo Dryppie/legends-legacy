@@ -25,12 +25,12 @@ public sealed class DungeonCatalogTests
 
         var expected = new[]
         {
-            new ExpectedDungeon("goblin_mines", "Goblin Mines I", DungeonGrade.GradeI, 10, 12, 2, null),
-            new ExpectedDungeon("goblin_mines_ii", "Goblin Mines II", DungeonGrade.GradeII, 11, 13, 2, "goblin_mines"),
-            new ExpectedDungeon("goblin_mines_iii", "Goblin Mines III", DungeonGrade.GradeIII, 12, 14, 2, "goblin_mines_ii"),
-            new ExpectedDungeon("forgotten_catacombs", "Forgotten Catacombs I", DungeonGrade.GradeI, 11, 13, 1, null),
-            new ExpectedDungeon("forgotten_catacombs_ii", "Forgotten Catacombs II", DungeonGrade.GradeII, 12, 14, 1, "forgotten_catacombs"),
-            new ExpectedDungeon("forgotten_catacombs_iii", "Forgotten Catacombs III", DungeonGrade.GradeIII, 13, 15, 1, "forgotten_catacombs_ii")
+            new ExpectedDungeon("goblin_mines", "Goblin Mines I", DungeonGrade.GradeI, 10, 12, 2, null, null),
+            new ExpectedDungeon("goblin_mines_ii", "Goblin Mines II", DungeonGrade.GradeII, 11, 13, 2, "goblin_mines", null),
+            new ExpectedDungeon("goblin_mines_iii", "Goblin Mines III", DungeonGrade.GradeIII, 12, 14, 2, "goblin_mines_ii", null),
+            new ExpectedDungeon("forgotten_catacombs", "Forgotten Catacombs I", DungeonGrade.GradeI, 11, 13, 1, null, 3.7f),
+            new ExpectedDungeon("forgotten_catacombs_ii", "Forgotten Catacombs II", DungeonGrade.GradeII, 12, 14, 1, "forgotten_catacombs", 6.05f),
+            new ExpectedDungeon("forgotten_catacombs_iii", "Forgotten Catacombs III", DungeonGrade.GradeIII, 13, 15, 1, "forgotten_catacombs_ii", null)
         };
 
         Assert.Collection(
@@ -136,8 +136,11 @@ public sealed class DungeonCatalogTests
             .SelectMany(dungeon => dungeon.Rooms)
             .SelectMany(room => room.EncounterIds)
             .Distinct(StringComparer.OrdinalIgnoreCase)
+            .OrderBy(id => id)
             .ToArray();
-        Assert.Equal(["skeleton"], forgottenCatacombsCreatures);
+        Assert.Equal(
+            ["blood_zombie", "grave_hound", "grave_wisp", "lost_soul", "skeleton", "undead"],
+            forgottenCatacombsCreatures);
     }
 
     [Theory]
@@ -243,6 +246,7 @@ public sealed class DungeonCatalogTests
         Assert.Equal(expected.MaxRooms, actual.MaxRooms);
         Assert.Equal(expected.RestSiteCount, actual.RestSiteCount);
         Assert.Equal(expected.RequiredPreviousDungeonId, actual.RequiredPreviousDungeonId);
+        Assert.Equal(expected.EnemyStrengthMultiplier, actual.EnemyStrengthMultiplier);
         Assert.Equal(expected.RequiredPreviousDungeonId is null ? null : (DungeonGrade?)((int)expected.Grade - 1), actual.RequiredPreviousDungeonGrade);
         Assert.Equal([$"reward.dungeon.{expected.Id}.completion"], actual.CompletionRewardTableIds);
         Assert.Equal([$"reward.dungeon.tier.{(int)expected.Grade}"], actual.TierRewardTableIds);
@@ -275,5 +279,6 @@ public sealed class DungeonCatalogTests
         int MinRooms,
         int MaxRooms,
         int RestSiteCount,
-        string? RequiredPreviousDungeonId);
+        string? RequiredPreviousDungeonId,
+        float? EnemyStrengthMultiplier);
 }

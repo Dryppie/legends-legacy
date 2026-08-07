@@ -13,5 +13,6 @@ public sealed record DungeonCombatOrchestrationRequest(
     IReadOnlyList<string> EnemyCreatureKeys,
     IReadOnlyList<AttributeModifierBase>? RunAttributeModifiers = null,
     IReadOnlyList<EssenceAbilityModifierDefinition>? RunAbilityModifiers = null,
-    IReadOnlyList<AttributeModifierBase>? EnemyAttributeModifiers = null)
+    IReadOnlyList<AttributeModifierBase>? EnemyAttributeModifiers = null,
+    float? EnemyStrengthMultiplier = null)
     : CombatOrchestrationRequest(CombatMode.Dungeon);

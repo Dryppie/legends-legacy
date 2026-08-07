@@ -10,9 +10,9 @@ namespace EssenceSystem.Tests;
 public sealed class DungeonEnemyDifficultyScalingTests
 {
     [Theory]
-    [InlineData(1, 2.75)]
-    [InlineData(2, 13.75)]
-    [InlineData(3, 68.75)]
+    [InlineData(1, 3.6)]
+    [InlineData(2, 6.25)]
+    [InlineData(3, 8.2)]
     public void GetStrengthMultiplier_uses_the_calibrated_tier_curve(
         int dungeonTier,
         float expectedMultiplier)
@@ -22,10 +22,16 @@ public sealed class DungeonEnemyDifficultyScalingTests
             DungeonEnemyDifficultyScaling.GetStrengthMultiplier(dungeonTier));
     }
 
+    [Fact]
+    public void GetStrengthMultiplier_uses_a_valid_authored_override()
+    {
+        Assert.Equal(3.7f, DungeonEnemyDifficultyScaling.GetStrengthMultiplier(1, 3.7f));
+    }
+
     [Theory]
-    [InlineData(1, 275, 27)]
-    [InlineData(2, 1375, 137)]
-    [InlineData(3, 16843, 687)]
+    [InlineData(1, 360, 36)]
+    [InlineData(2, 625, 62)]
+    [InlineData(3, 820, 82)]
     public void Apply_scales_core_stats_without_scaling_capped_rates(
         int dungeonTier,
         int expectedMaxHealth,

@@ -14,6 +14,7 @@ public sealed class DungeonDefinition
     public int Region { get; set; } = 1;
     public DungeonGrade Grade { get; set; } = DungeonGrade.GradeI;
     public int Tier { get; set; } = 1;
+    public float? EnemyStrengthMultiplier { get; set; }
     public string? RequiredAreaId { get; set; }
     public string? RequiredQuestId { get; set; }
     public string? RequiredPreviousDungeonId { get; set; }

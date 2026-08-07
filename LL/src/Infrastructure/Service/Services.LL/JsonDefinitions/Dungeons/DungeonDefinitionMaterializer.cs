@@ -35,6 +35,7 @@ public sealed class DungeonDefinitionMaterializer(DungeonCatalogValidator catalo
                 Region = family.Region,
                 Grade = (DungeonGrade)difficulty.Difficulty,
                 Tier = difficulty.Difficulty,
+                EnemyStrengthMultiplier = difficulty.EnemyStrengthMultiplier,
                 RequiredAreaId = family.RequiredAreaId,
                 RequiredQuestId = family.RequiredQuestId,
                 RequiredPreviousDungeonId = previous?.Id,

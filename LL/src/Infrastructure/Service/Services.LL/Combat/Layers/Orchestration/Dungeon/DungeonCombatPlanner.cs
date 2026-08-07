@@ -17,7 +17,8 @@ public sealed class DungeonCombatPlanner : IDungeonCombatPlanner
         IReadOnlyList<Guid> enemySourceEntityIds,
         IReadOnlyList<AttributeModifierBase>? runAttributeModifiers = null,
         IReadOnlyList<EssenceAbilityModifierDefinition>? runAbilityModifiers = null,
-        IReadOnlyList<AttributeModifierBase>? enemyAttributeModifiers = null) =>
+        IReadOnlyList<AttributeModifierBase>? enemyAttributeModifiers = null,
+        float? enemyStrengthMultiplier = null) =>
         new(
             DungeonRunId: dungeonRunId,
             CharacterId: characterId,
@@ -27,7 +28,8 @@ public sealed class DungeonCombatPlanner : IDungeonCombatPlanner
             EnemySourceEntityIds: enemySourceEntityIds,
             RunAttributeModifiers: runAttributeModifiers ?? [],
             RunAbilityModifiers: runAbilityModifiers ?? [],
-            EnemyAttributeModifiers: enemyAttributeModifiers ?? []);
+            EnemyAttributeModifiers: enemyAttributeModifiers ?? [],
+            EnemyStrengthMultiplier: enemyStrengthMultiplier);
 
     public CombatEncounterPlan CreateEncounterPlan(DungeonCombatPlan plan, int sequence, DateTimeOffset startsAt)
     {

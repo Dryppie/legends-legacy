@@ -32,59 +32,22 @@ public sealed class TierOneDungeonBalanceTests
     }
 
     private static readonly int[] BalanceSeeds =
-        Enumerable.Range(0, 24).Select(index => unchecked(90107 + index * 104729)).ToArray();
+        Enumerable.Range(0, 24).Select(index => unchecked(90107 + index * 7919)).ToArray();
 
-    [Fact]
-    public async Task Full_standard_common_actual_loadout_can_clear_tier_one_dungeons()
-    {
-        var fixture = CreateFixture();
-        var rung = fixture.Builds.GetProgressionLadder()
-            .Single(candidate => candidate.Id == "t1-standard-common");
-        var build = fixture.Builds.CreateBuild(CanonicalPartyProfile.Balanced, rung);
-        var combatant = await fixture.Simulations.CreateCanonicalCombatantAsync(
-            build,
-            CancellationToken.None);
-        var results = new Dictionary<string, DungeonSimulationAggregate>();
-        _output.WriteLine(
-            $"Balanced reference rating: {build.Rating.Overall / 10}, " +
-            $"health: {combatant.GetAttributeValue(Domain.Models.Attributes.AttributeType.MaxHealth)}, " +
-            $"power: {combatant.GetAttributeValue(Domain.Models.Attributes.AttributeType.Power)}");
-
-        foreach (var dungeon in fixture.Dungeons.GetAll().Where(candidate => candidate.Tier == 1))
-        {
-            results[dungeon.Id] = await fixture.Simulations.RunDungeonAsync(
-                dungeon.Id,
-                dungeon.Tier,
-                [combatant],
-                BalanceSeeds,
-                supplementalAbilities: null,
-                CancellationToken.None);
-        }
-
-        foreach (var result in results)
-            _output.WriteLine(
-                $"{result.Key}: {result.Value.Completions}/{result.Value.Attempts}, " +
-                $"{result.Value.TotalCombatTicks / (double)result.Value.Attempts:N0} average ticks");
-
-        Assert.All(
-            results,
-            result => Assert.True(
-                result.Value.CompletionRate >= DungeonPowerAnalyzer.TargetCompletionRate,
-                $"{result.Key} unexpectedly failed at {result.Value.CompletionRate:P0}."));
-    }
-
-    [Fact]
-    public async Task Goblin_mines_recommends_the_lowest_eligible_first_passing_profile_rating()
+    [Theory]
+    [InlineData("goblin_mines")]
+    [InlineData("forgotten_catacombs")]
+    public async Task Tier_one_dungeons_recommend_the_matching_epic_profile(string dungeonId)
     {
         var fixture = CreateFixture();
 
         var recommendation = await fixture.Analyzer.AnalyzeDungeonAsync(
-            "goblin_mines",
+            dungeonId,
             Domain.Models.Dungeons.Definitions.DungeonTier.Normal,
             CancellationToken.None);
 
         _output.WriteLine(
-            $"Goblin Mines recommendation: {recommendation.RecommendedPartyPower / 10}; " +
+            $"{dungeonId} recommendation: {recommendation.RecommendedPartyPower / 10}; " +
             $"canonical range: {recommendation.LowerRecommendedPower / 10}-" +
             $"{recommendation.UpperRecommendedPower / 10}; " +
             $"state: {recommendation.State}; " +
@@ -93,12 +56,11 @@ public sealed class TierOneDungeonBalanceTests
         Assert.NotEqual(
             Application.Interfaces.Services.LL.PowerRatings.PowerAnalysisState.CalculationFailed,
             recommendation.State);
-        Assert.Equal(117, recommendation.RecommendedPartyPower / 10);
-        Assert.Equal(
+        Assert.Equal(143, recommendation.RecommendedPartyPower / 10);
+        Assert.InRange(
+            recommendation.RecommendedPartyPower,
             recommendation.LowerRecommendedPower,
-            recommendation.RecommendedPartyPower);
-        Assert.True(
-            recommendation.RecommendedPartyPower >= recommendation.LowerRecommendedPower);
+            recommendation.UpperRecommendedPower);
         Assert.Equal(
             Enum.GetValues<CanonicalPartyProfile>().Length,
             recommendation.CanonicalPartyCompletionRates.Count);
@@ -108,9 +70,98 @@ public sealed class TierOneDungeonBalanceTests
                 entry.Value >= DungeonPowerAnalyzer.TargetCompletionRate,
                 $"{entry.Key} calibrated below the completion target at {entry.Value:P0}."));
         Assert.Contains(
-            "rung t1-standard-common with 2 Essences",
+            "rung t1-standard-epic with 2 Essences",
             recommendation.StatusMessage,
             StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Epic_dungeon_milestone_ratings_follow_equipment_tiers_one_through_three()
+    {
+        var fixture = CreateFixture();
+        var previousMinimum = 0;
+
+        foreach (var dungeonTier in Enumerable.Range(1, 3))
+        {
+            var rung = fixture.Builds.GetProgressionLadder()
+                .Single(candidate => candidate.Id == $"t{dungeonTier}-standard-epic");
+            var ratings = Enum.GetValues<CanonicalPartyProfile>()
+                .ToDictionary(
+                    profile => profile,
+                    profile => fixture.Builds
+                        .CreateBuildForDungeonTier(profile, rung, dungeonTier)
+                        .Rating.Overall / 10);
+
+            _output.WriteLine(
+                $"Dungeon Tier {dungeonTier} Epic ratings: " +
+                string.Join(", ", ratings.Select(entry => $"{entry.Key}={entry.Value}")));
+
+            Assert.True(ratings.Values.Min() > previousMinimum);
+            previousMinimum = ratings.Values.Min();
+        }
+    }
+
+    [Theory]
+    [InlineData("goblin_mines", 1)]
+    [InlineData("goblin_mines_ii", 2)]
+    [InlineData("goblin_mines_iii", 3)]
+    [InlineData("forgotten_catacombs", 1)]
+    [InlineData("forgotten_catacombs_ii", 2)]
+    [InlineData("forgotten_catacombs_iii", 3)]
+    public async Task Dungeon_tiers_are_anchored_between_matching_rare_and_epic_equipment(
+        string dungeonId,
+        int dungeonTier)
+    {
+        var fixture = CreateFixture();
+        var dungeon = fixture.Dungeons.GetByKey(dungeonId);
+        var rareRung = fixture.Builds.GetProgressionLadder()
+            .Single(candidate => candidate.Id == $"t{dungeonTier}-standard-rare");
+        var epicRung = fixture.Builds.GetProgressionLadder()
+            .Single(candidate => candidate.Id == $"t{dungeonTier}-standard-epic");
+        var rareBuild = fixture.Builds.CreateBuildForDungeonTier(
+            CanonicalPartyProfile.Balanced,
+            rareRung,
+            dungeonTier);
+        var epicBuild = fixture.Builds.CreateBuildForDungeonTier(
+            CanonicalPartyProfile.Balanced,
+            epicRung,
+            dungeonTier);
+        var rareCombatant = await fixture.Simulations.CreateCanonicalCombatantAsync(
+            rareBuild,
+            CancellationToken.None);
+        var epicCombatant = await fixture.Simulations.CreateCanonicalCombatantAsync(
+            epicBuild,
+            CancellationToken.None);
+        var rareResult = await fixture.Simulations.RunDungeonAsync(
+            dungeonId,
+            dungeonTier,
+            [rareCombatant],
+            BalanceSeeds,
+            supplementalAbilities: null,
+            CancellationToken.None,
+            dungeon.EnemyStrengthMultiplier);
+        var epicResult = await fixture.Simulations.RunDungeonAsync(
+            dungeonId,
+            dungeonTier,
+            [epicCombatant],
+            BalanceSeeds,
+            supplementalAbilities: null,
+            CancellationToken.None,
+            dungeon.EnemyStrengthMultiplier);
+
+        _output.WriteLine(
+            $"{dungeonId}: Rare CR {rareBuild.Rating.Overall / 10} => " +
+            $"{rareResult.CompletionRate:P0}; Epic CR {epicBuild.Rating.Overall / 10} => " +
+            $"{epicResult.CompletionRate:P0}.");
+
+        Assert.True(
+            rareResult.CompletionRate < DungeonPowerAnalyzer.TargetCompletionRate,
+            $"{dungeonId} was already reliable with matching Rare equipment " +
+            $"at {rareResult.CompletionRate:P0}.");
+        Assert.True(
+            epicResult.CompletionRate >= DungeonPowerAnalyzer.TargetCompletionRate,
+            $"{dungeonId} was not reliable with matching Epic equipment " +
+            $"at {epicResult.CompletionRate:P0}.");
     }
 
     [Theory]
@@ -118,17 +169,31 @@ public sealed class TierOneDungeonBalanceTests
         "goblin_mines_ii",
         Domain.Models.Dungeons.Definitions.DungeonTier.Heroic,
         4,
-        "t6-standard-common",
-        642,
+        "t2-standard-epic",
+        203,
         false)]
     [InlineData(
         "goblin_mines_iii",
         Domain.Models.Dungeons.Definitions.DungeonTier.Mythic,
         6,
-        "t10-standard-common",
-        2756,
+        "t3-standard-epic",
+        274,
         false)]
-    public async Task Higher_goblin_mines_tiers_find_an_actual_winning_profile(
+    [InlineData(
+        "forgotten_catacombs_ii",
+        Domain.Models.Dungeons.Definitions.DungeonTier.Heroic,
+        4,
+        "t2-standard-epic",
+        203,
+        false)]
+    [InlineData(
+        "forgotten_catacombs_iii",
+        Domain.Models.Dungeons.Definitions.DungeonTier.Mythic,
+        6,
+        "t3-standard-epic",
+        274,
+        false)]
+    public async Task Higher_dungeon_tiers_find_an_actual_winning_profile(
         string dungeonId,
         Domain.Models.Dungeons.Definitions.DungeonTier dungeonTier,
         int expectedEssenceCount,
@@ -156,9 +221,10 @@ public sealed class TierOneDungeonBalanceTests
             recommendation.State);
         Assert.True(recommendation.RecommendedPartyPower > 0);
         Assert.Equal(expectedDisplayedRating, recommendation.RecommendedPartyPower / 10);
-        Assert.Equal(
+        Assert.InRange(
+            recommendation.RecommendedPartyPower,
             recommendation.LowerRecommendedPower,
-            recommendation.RecommendedPartyPower);
+            recommendation.UpperRecommendedPower);
         Assert.NotEmpty(recommendation.CanonicalPartyCompletionRates);
         Assert.All(
             recommendation.CanonicalPartyCompletionRates,

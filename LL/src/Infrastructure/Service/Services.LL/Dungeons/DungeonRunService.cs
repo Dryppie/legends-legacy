@@ -312,16 +312,18 @@ public sealed class DungeonRunService : IDungeonRunService
             playerModifiers.Add(new DungeonAttributeModifier(AttributeType.MaxHealth, -10, ModifierType.Additive));
         }
 
+        var dungeon = _dungeons.GetByKey(run.DungeonDefinitionId);
         var orchestrationRequest = new DungeonCombatOrchestrationRequest(
             DungeonRunId: run.Id,
             CharacterId: snapshot.CharacterId,
             CharacterSnapshot: snapshot,
             CurrentRoomIndex: run.CurrentRoomIndex,
-            DungeonTier: _dungeons.GetByKey(run.DungeonDefinitionId).Tier,
+            DungeonTier: dungeon.Tier,
             EnemyCreatureKeys: room.EncounterIds,
             RunAttributeModifiers: playerModifiers,
             RunAbilityModifiers: [],
-            EnemyAttributeModifiers: []);
+            EnemyAttributeModifiers: [],
+            EnemyStrengthMultiplier: dungeon.EnemyStrengthMultiplier);
 
         var orchestrationResult = await _orchestrationCoordinator.OrchestrateAsync(
             orchestrationRequest,

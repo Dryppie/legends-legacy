@@ -135,19 +135,25 @@ Essence abilities are the actual abilities owned by those Essences; dungeon
 calibration no longer injects synthetic canonical damage, healing, or barrier
 abilities. Combat Rating itself still counts only their resolved attributes.
 
-The deterministic Goblin Mines regressions currently resolve to:
+The deterministic dungeon regressions are anchored to matching full Epic
+equipment milestones for every authored dungeon family:
 
-- Tier I: displayed Combat Rating 154, Tier-2 Standard/Uncommon Defensive
-  equipment, and two Essences.
-- Tier II: displayed Combat Rating 608, Tier-5 Standard/Uncommon Balanced
-  equipment, and four Essences.
-- Tier III: displayed Combat Rating 2490, Tier-11 Standard/Common Offense
-  equipment, and six Essences. Tier 11 is a calibration-only projection beyond
-  the live equipment table.
+- Tier I: displayed Combat Rating 143, Tier-1 Standard/Epic Balanced equipment,
+  and two Essences.
+- Tier II: displayed Combat Rating 203, Tier-2 Standard/Epic Balanced equipment,
+  and four Essences.
+- Tier III: displayed Combat Rating 274, Tier-3 Standard/Epic Balanced equipment,
+  and six Essences.
 
-The Tier-III result now exposes that its current combat tuning extends beyond
-the live Tier-10 equipment budget. These snapshots are deterministic calibration
-results, not separately authored dungeon numbers.
+The matching Rare Balanced build remains below the 72% completion target at
+each tier, while the Epic build reaches at least 75% over the official 24
+recommendation seeds. These snapshots are deterministic calibration results,
+not separately authored recommendation numbers.
+
+The displayed recommendation uses the Balanced canonical profile as its stable
+baseline. Other profiles still define the lower and upper recommendation range
+and confidence, but a specialized low-rating build can no longer pull the main
+recommendation below the equipment milestone being communicated to players.
 
 The requirement profile still examines real encounter groups and creature
 abilities to describe physical, magical, area, boss, control, and attrition
@@ -167,9 +173,15 @@ Character levels use a deterministic base-attribute curve: every completed
 level-up grants `+0.25 Power` and `+20 Max Health`. At the current attribute
 costs, those gains consume 6 and 4 internal rating-budget points respectively,
 for 10 internal points (1 displayed Combat Rating) per completed level-up.
-`CombatRulesVersion` is 10 for the Power-only damage model and compounded dungeon difficulty
-curve: Tier I is 2.75× the authored creature baseline, Tier II is 5× Tier I
-(13.75× authored), and Tier III is 5× Tier II (68.75× authored).
+`CombatRulesVersion` is 11 for the Power-only damage model and equipment-anchored
+dungeon difficulty curve: Tier I is 3.6× the authored creature baseline, Tier II
+is 6.25×, and Tier III is 8.2×. These are explicit per-tier defaults rather than
+an exponentially compounded multiplier. A dungeon difficulty may author a
+validated `enemyStrengthMultiplier` when its encounter composition needs a
+small family-specific correction; Forgotten Catacombs currently uses 3.7× for
+Tier I and 6.05× for Tier II. The same value is used by live combat, the admin
+simulator, readiness analysis, and recommendation calibration. The former
+hidden Tier-III durability multiplier has been removed.
 The legacy-named `BenchmarkDefinitionVersion` column now stores
 the deterministic rating-definition version and is 13. Existing recommendations
 are stale and will be recalibrated.

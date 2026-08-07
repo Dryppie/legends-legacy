@@ -74,7 +74,8 @@ public sealed class DungeonCombatResolutionSessionFactory : IDungeonCombatResolu
             hostileIds,
             sourceEntitiesById,
             plan.DungeonTier,
-            plan.EnemyAttributeModifiers);
+            plan.EnemyAttributeModifiers,
+            plan.EnemyStrengthMultiplier);
 
         await _combatSetupService.PrepareEntitiesForCombat(
             [.. friendlyTemplates.Values, .. hostileTemplates.Values]);
@@ -143,7 +144,8 @@ public sealed class DungeonCombatResolutionSessionFactory : IDungeonCombatResolu
         IReadOnlyCollection<Guid> hostileIds,
         Dictionary<Guid, Entity> sourceEntitiesById,
         int dungeonTier,
-        IReadOnlyList<Domain.Models.Attributes.Modifiers.AttributeModifierBase> enemyAttributeModifiers)
+        IReadOnlyList<Domain.Models.Attributes.Modifiers.AttributeModifierBase> enemyAttributeModifiers,
+        float? enemyStrengthMultiplier)
     {
         var templates = new Dictionary<Guid, CombatEntity>();
 
@@ -159,7 +161,7 @@ public sealed class DungeonCombatResolutionSessionFactory : IDungeonCombatResolu
                 .CreateCreatureCombatEntities([creature], new Area { DifficultyTier = 1 })
                 .Single();
 
-            DungeonEnemyDifficultyScaling.Apply(template, dungeonTier);
+            DungeonEnemyDifficultyScaling.Apply(template, dungeonTier, enemyStrengthMultiplier);
 
             foreach (var modifier in enemyAttributeModifiers)
             {

@@ -114,7 +114,8 @@ public sealed class DungeonReadinessService : IDungeonReadinessService
                     build.Combatants,
                     seeds,
                     supplementalAbilities: null,
-                    cancellationToken);
+                    cancellationToken,
+                    dungeon.EnemyStrengthMultiplier);
                 attempts += batch.Attempts;
                 completions += batch.Completions;
                 checkpoints += batch.CheckpointsReached;

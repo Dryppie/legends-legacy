@@ -6,11 +6,13 @@ namespace Services.LL.Combat.Layers.Resolution.Dungeon;
 
 public static class DungeonEnemyDifficultyScaling
 {
-    // Tier I deliberately starts above the authored creature baseline. Every
-    // higher difficulty compounds from that dungeon baseline, not from the
-    // original world-creature baseline.
-    public const float TierOneStrengthMultiplier = 2.75f;
-    public const float StrengthMultiplierPerTier = 5f;
+    // Each dungeon difficulty is anchored to the matching full Epic equipment
+    // milestone: Tier I equipment for Normal, Tier II for Heroic, and Tier III
+    // for Mythic. Keep these explicit so later tiers cannot accidentally inherit
+    // an exponential multiplier unrelated to attainable equipment progression.
+    public const float TierOneStrengthMultiplier = 3.6f;
+    public const float TierTwoStrengthMultiplier = 6.25f;
+    public const float TierThreeStrengthMultiplier = 8.2f;
 
     private static readonly HashSet<AttributeType> ScaledAttributes =
     [
@@ -25,22 +27,36 @@ public static class DungeonEnemyDifficultyScaling
         AttributeType.SummonHealth
     ];
 
-    public static float GetStrengthMultiplier(int dungeonTier) =>
-        TierOneStrengthMultiplier
-        * MathF.Pow(StrengthMultiplierPerTier, Math.Max(0, dungeonTier - 1));
-
-    // Armor and Resistance now stop at 80% instead of approaching 100% as ratings.
-    // Move the removed Heroic/Mythic effective health into visible Max Health so
-    // dungeon durability does not depend on an opaque defense curve.
-    public static float GetDurabilityCompensation(int dungeonTier) => dungeonTier switch
+    public static float GetStrengthMultiplier(int dungeonTier, float? authoredMultiplier = null)
     {
-        <= 2 => 1f,
-        _ => 2.45f
-    };
+        if (dungeonTier is < 1 or > 3)
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(dungeonTier),
+                dungeonTier,
+                "Dungeon tiers must be between 1 and 3.");
+        }
 
-    public static void Apply(CombatEntity enemy, int dungeonTier)
+        if (authoredMultiplier is { } multiplier)
+        {
+            if (!float.IsFinite(multiplier) || multiplier <= 1f)
+                throw new ArgumentOutOfRangeException(nameof(authoredMultiplier));
+
+            return multiplier;
+        }
+
+        return dungeonTier switch
+        {
+            1 => TierOneStrengthMultiplier,
+            2 => TierTwoStrengthMultiplier,
+            3 => TierThreeStrengthMultiplier,
+            _ => throw new ArgumentOutOfRangeException(nameof(dungeonTier))
+        };
+    }
+
+    public static void Apply(CombatEntity enemy, int dungeonTier, float? authoredMultiplier = null)
     {
-        var multiplier = GetStrengthMultiplier(dungeonTier);
+        var multiplier = GetStrengthMultiplier(dungeonTier, authoredMultiplier);
         if (multiplier <= 1f)
             return;
 
@@ -50,15 +66,6 @@ public static class DungeonEnemyDifficultyScaling
             enemy.TemporaryModifiers.Add(new DungeonAttributeModifier(
                 attributeType,
                 modifierAmount,
-                ModifierType.Multiplicative));
-        }
-
-        var durabilityCompensation = GetDurabilityCompensation(dungeonTier);
-        if (durabilityCompensation > 1f)
-        {
-            enemy.TemporaryModifiers.Add(new DungeonAttributeModifier(
-                AttributeType.MaxHealth,
-                (durabilityCompensation - 1f) * 100f,
                 ModifierType.Multiplicative));
         }
     }

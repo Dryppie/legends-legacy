@@ -13,4 +13,5 @@ public sealed record DungeonCombatPlan(
     IReadOnlyList<Guid> EnemySourceEntityIds,
     IReadOnlyList<AttributeModifierBase> RunAttributeModifiers,
     IReadOnlyList<EssenceAbilityModifierDefinition> RunAbilityModifiers,
-    IReadOnlyList<AttributeModifierBase> EnemyAttributeModifiers);
+    IReadOnlyList<AttributeModifierBase> EnemyAttributeModifiers,
+    float? EnemyStrengthMultiplier);

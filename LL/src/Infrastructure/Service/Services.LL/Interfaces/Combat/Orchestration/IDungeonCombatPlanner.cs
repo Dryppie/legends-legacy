@@ -16,7 +16,8 @@ public interface IDungeonCombatPlanner
         IReadOnlyList<Guid> enemySourceEntityIds,
         IReadOnlyList<AttributeModifierBase>? runAttributeModifiers = null,
         IReadOnlyList<EssenceAbilityModifierDefinition>? runAbilityModifiers = null,
-        IReadOnlyList<AttributeModifierBase>? enemyAttributeModifiers = null);
+        IReadOnlyList<AttributeModifierBase>? enemyAttributeModifiers = null,
+        float? enemyStrengthMultiplier = null);
 
     CombatEncounterPlan CreateEncounterPlan(
         DungeonCombatPlan plan,

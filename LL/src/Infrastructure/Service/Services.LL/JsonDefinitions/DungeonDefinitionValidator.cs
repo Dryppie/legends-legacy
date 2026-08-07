@@ -63,6 +63,12 @@ public sealed class DungeonDefinitionValidator : IDungeonDefinitionValidator
         if (dungeon.RestSiteCount < 0)
             errors.Add($"{label}: restSiteCount cannot be negative.");
 
+        if (dungeon.EnemyStrengthMultiplier is { } multiplier
+            && (!float.IsFinite(multiplier) || multiplier <= 1f))
+        {
+            errors.Add($"{label}: enemyStrengthMultiplier must be a finite value greater than one.");
+        }
+
         if (!string.IsNullOrWhiteSpace(dungeon.RequiredPreviousDungeonId)
             && !definitionsById.ContainsKey(dungeon.RequiredPreviousDungeonId))
         {
