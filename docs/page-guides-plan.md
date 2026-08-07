@@ -32,10 +32,11 @@ Public landing, login, and signup pages are outside this scope.
 | 2        | Guild              | Membership, roles, missions, buildings, shop, and rankings |
 | 2        | Colosseum          | Teams, tournaments, entry, brackets, and match outcomes    |
 | 2        | Cinder Bazaar      | Buying, selling, listings, fees, and restrictions          |
-| 3        | Achievements       | Categories, hidden achievements, rewards, and titles       |
-| 3        | Leaderboard        | Ranking categories, placement, and refresh behavior        |
-| 3        | Settings           | Layout, chat, account, and preference behavior             |
 | 3        | Tournament replay  | Replay controls, historical state, and result summaries    |
+
+Achievements, Leaderboard, and Settings are intentionally guide-free because
+their interfaces are self-explanatory and do not need separate reference
+content.
 
 ## Content rules
 
@@ -57,7 +58,8 @@ Public landing, login, and signup pages are outside this scope.
 
 ## Acceptance criteria
 
-- Every game-sidebar destination has a visible Guide control on desktop and mobile.
+- Every supported game-sidebar destination has a visible Guide control on desktop and mobile.
+- Intentionally guide-free routes are explicitly marked in route metadata.
 - Combat, region, dungeon, and tournament replay custom headers expose the same control.
 - Every route metadata ID resolves to a valid guide asset.
 - No supported guide request returns a missing asset.

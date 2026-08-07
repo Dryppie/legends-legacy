@@ -40,7 +40,7 @@ export const CITY_ROUTES: Routes = [
       {
         path: 'tavern',
         component: TavernComponent,
-        data: { guidePageId: GUIDE_PAGE_IDS.leaderboard },
+        data: { guideDisabled: true },
       },
     ],
   },

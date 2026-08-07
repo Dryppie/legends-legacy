@@ -39,13 +39,13 @@ public sealed class EssenceProgressionServiceTests
             AscensionTier = 0
         };
 
-        var result = service.GrantXp(essence, EssenceDefinitionValidatorTests.ValidDefinition(), 10_000);
+        var result = service.GrantXp(essence, EssenceDefinitionValidatorTests.ValidDefinition(), int.MaxValue);
 
         Assert.Equal(10, essence.Level);
         Assert.Equal(0, essence.CurrentXp);
         Assert.True(result.ReachedTierCap);
         Assert.Equal(1, result.LevelsGained);
-        Assert.True(result.XpGained < 10_000);
+        Assert.True(result.XpGained < int.MaxValue);
     }
 
     [Fact]
@@ -80,7 +80,7 @@ public sealed class EssenceProgressionServiceTests
             AscensionTier = 1
         };
 
-        var result = service.GrantXp(essence, EssenceDefinitionValidatorTests.ValidDefinition(), 100_000);
+        var result = service.GrantXp(essence, EssenceDefinitionValidatorTests.ValidDefinition(), int.MaxValue);
 
         Assert.Equal(30, essence.Level);
         Assert.Equal(0, essence.CurrentXp);
@@ -108,25 +108,13 @@ public sealed class EssenceProgressionServiceTests
     }
 
     [Fact]
-    public void GrantXp_reaches_first_ascension_cap_after_expected_fixed_xp_runs()
+    public void First_ten_levels_require_about_five_days_of_area_one_experience()
     {
-        var service = new EssenceProgressionService();
-        var essence = new PlayerEssence
-        {
-            EssenceDefinitionId = "essence.test",
-            Level = 1
-        };
-        var runs = 0;
+        const int areaOneExperiencePerHour = 10_800;
+        var required = Enumerable.Range(1, 9)
+            .Sum(EssenceProgressionConstants.GetXpRequiredForLevel);
 
-        while (essence.Level < EssenceProgressionConstants.GetLevelCap(essence.AscensionTier))
-        {
-            service.GrantXp(essence, EssenceDefinitionValidatorTests.ValidDefinition(), requestedXp: 250);
-            runs++;
-        }
-
-        Assert.Equal(8, runs);
-        Assert.Equal(10, essence.Level);
-        Assert.Equal(0, essence.CurrentXp);
+        Assert.InRange(required, areaOneExperiencePerHour * 24 * 5 - 10, areaOneExperiencePerHour * 24 * 5 + 10);
     }
 
     [Fact]

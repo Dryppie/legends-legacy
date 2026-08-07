@@ -43,8 +43,10 @@ export class EssenceStateService {
   private readonly _draftLoadoutName = signal('Default');
   private readonly _draftSlots = signal<(string | null)[]>([]);
   private readonly _loading = signal(false);
+  private readonly _spendingDust = signal(false);
   private readonly _error = signal<string | null>(null);
   private resetVersion = 0;
+  private dustMutationVersion = 0;
 
   readonly activeView = computed(() => this._activeView());
   readonly currentTime = computed(() => this._now());
@@ -92,6 +94,7 @@ export class EssenceStateService {
   readonly draftLoadoutName = computed(() => this._draftLoadoutName());
   readonly draftSlots = computed(() => this._draftSlots());
   readonly loading = computed(() => this._loading());
+  readonly spendingDust = computed(() => this._spendingDust());
   readonly error = computed(() => this._error());
 
   readonly inventoryEssences = computed(() =>
@@ -321,6 +324,7 @@ export class EssenceStateService {
 
   reset(): void {
     this.resetVersion += 1;
+    this.dustMutationVersion += 1;
     this._activeView.set('archive');
     this._archive.set(null);
     this._loadouts.set(null);
@@ -332,6 +336,7 @@ export class EssenceStateService {
     this._draftLoadoutName.set('Default');
     this._draftSlots.set([]);
     this._loading.set(false);
+    this._spendingDust.set(false);
     this._error.set(null);
     this._seenEssenceFocusReadyKey.set(null);
     this._highlightEssenceFocus.set(false);
@@ -346,9 +351,47 @@ export class EssenceStateService {
   }
 
   spendDust(essence: PlayerEssenceDto): void {
+    if (this._spendingDust()) return;
+
+    const resetVersion = this.resetVersion;
+    const mutationVersion = ++this.dustMutationVersion;
+    this._spendingDust.set(true);
+    this._error.set(null);
+
     this.essencesService
       .spendDust(essence.id, 1)
-      .subscribe((response) => this.applyEssenceMutation(response));
+      .pipe(
+        finalize(() => {
+          if (mutationVersion === this.dustMutationVersion) {
+            this._spendingDust.set(false);
+          }
+        }),
+      )
+      .subscribe({
+        next: (response) => {
+          if (
+            resetVersion !== this.resetVersion ||
+            mutationVersion !== this.dustMutationVersion
+          ) {
+            return;
+          }
+
+          if (!response.succeeded) {
+            this._error.set(response.message || 'Failed to level up essence');
+            return;
+          }
+
+          this.applyEssenceMutation(response);
+        },
+        error: (error) => {
+          if (
+            resetVersion === this.resetVersion &&
+            mutationVersion === this.dustMutationVersion
+          ) {
+            this._error.set(error?.message ?? 'Failed to level up essence');
+          }
+        },
+      });
   }
 
   ascend(essence: PlayerEssenceDto): void {

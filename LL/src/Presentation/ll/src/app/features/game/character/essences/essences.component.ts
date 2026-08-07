@@ -34,6 +34,12 @@ import {
 } from '../../../../shared/components/custom-components/dropdown/dropdown.component';
 import { TutorialStateService } from '../../../../core/services/api/tutorial/tutorial-state.service';
 import { TutorialPresenterService } from '../../../../core/services/api/tutorial/tutorial-presenter.service';
+import { InventoryStateService } from '../../../../core/services/api/inventory/inventory-state.service';
+import {
+  canSpendEssenceDust,
+  essenceDustActionLabel,
+  essenceDustLevelingDescription,
+} from './essence-leveling.utils';
 import {
   TUTORIAL_GOBLIN_ESSENCE_DEFINITION_ID,
   TUTORIAL_STEP_ABSORB_ESSENCE,
@@ -44,6 +50,13 @@ type ArchiveFilter = 'all' | 'favorites' | 'attuned' | 'ready';
 type ArchiveSort = 'name' | 'level' | 'tier';
 type CreatureSourceFilter = 'all' | 'Area' | 'Dungeon';
 type CreatureEssenceFilter = 'all' | 'found' | 'not-found';
+
+interface AscendRequirementView {
+  label: string;
+  current?: number;
+  required?: number;
+  isMet: boolean;
+}
 
 @Component({
   selector: 'app-essences',
@@ -70,7 +83,6 @@ export class EssencesComponent implements OnInit {
   readonly creatureEssenceFilter = signal<CreatureEssenceFilter>('all');
   readonly archiveFilter = signal<ArchiveFilter>('all');
   readonly archiveSort = signal<ArchiveSort>('name');
-  readonly upgradeDetailsOpen = signal(false);
   readonly viewTabs = computed<readonly NavigationTab[]>(() => [
     { key: 'archive', label: 'Archive' },
     { key: 'absorb', label: 'Absorb' },
@@ -125,7 +137,7 @@ export class EssencesComponent implements OnInit {
         ) {
           return false;
         }
-        if (filter === 'ready' && !essence.canAscend && !essence.canEvolve) {
+        if (filter === 'ready' && !this.canAscendEssence(essence)) {
           return false;
         }
 
@@ -228,6 +240,7 @@ export class EssencesComponent implements OnInit {
     public readonly essenceState: EssenceStateService,
     public readonly tutorialState: TutorialStateService,
     private readonly tutorialPresenter: TutorialPresenterService,
+    private readonly inventoryState: InventoryStateService,
   ) {
     effect(
       () => {
@@ -300,15 +313,90 @@ export class EssencesComponent implements OnInit {
   }
 
   public spendDust(essence: PlayerEssenceDto): void {
+    if (!this.canSpendDust(essence)) return;
     this.essenceState.spendDust(essence);
+  }
+
+  public canSpendDust(essence: PlayerEssenceDto): boolean {
+    return canSpendEssenceDust(
+      essence.level,
+      essence.levelCap,
+      this.essenceDustHeld(),
+      this.essenceState.spendingDust(),
+    );
+  }
+
+  public dustLevelingDescription(essence: PlayerEssenceDto): string {
+    return essenceDustLevelingDescription(
+      essence.level,
+      essence.levelCap,
+      essence.ascendInfo.nextTier !== null &&
+        essence.ascendInfo.nextTier !== undefined,
+      this.essenceDustHeld(),
+    );
+  }
+
+  public dustActionLabel(essence: PlayerEssenceDto): string {
+    return essenceDustActionLabel(
+      essence.level,
+      essence.levelCap,
+      this.essenceDustHeld(),
+      this.essenceState.spendingDust(),
+    );
+  }
+
+  private essenceDustHeld(): number {
+    return this.essenceState.archive()?.essenceDust ?? 0;
   }
 
   public ascend(essence: PlayerEssenceDto): void {
     this.essenceState.ascend(essence);
   }
 
-  public evolve(essence: PlayerEssenceDto): void {
-    this.essenceState.evolve(essence);
+  public ascendRequirements(
+    essence: PlayerEssenceDto,
+  ): readonly AscendRequirementView[] {
+    const requirements: AscendRequirementView[] = [];
+    const requiredLevel = essence.ascendInfo.requiredLevel;
+    if (requiredLevel !== null && requiredLevel !== undefined) {
+      requirements.push({
+        label: `Level ${requiredLevel}`,
+        current: essence.level,
+        required: requiredLevel,
+        isMet: essence.level >= requiredLevel,
+      });
+    }
+
+    const requiredItems = essence.ascendInfo.requiredItemAmount;
+    const requiredItemId = essence.ascendInfo.requiredItemId;
+    if (
+      requiredItems !== null &&
+      requiredItems !== undefined &&
+      requiredItemId
+    ) {
+      const currentItems = this.inventoryQuantity(requiredItemId);
+      requirements.push({
+        label: essence.ascendInfo.requiredItemName ?? 'Required item',
+        current: currentItems,
+        required: requiredItems,
+        isMet: currentItems >= requiredItems,
+      });
+    }
+
+    if (requirements.length > 0) return requirements;
+
+    return essence.ascendInfo.requirements.map((requirement) => ({
+      label: this.cleanRequirement(requirement),
+      isMet: essence.ascendInfo.canPerform,
+    }));
+  }
+
+  public canAscendEssence(essence: PlayerEssenceDto): boolean {
+    return (
+      essence.ascendInfo.nextTier !== null &&
+      essence.ascendInfo.nextTier !== undefined &&
+      this.ascendRequirements(essence).every((requirement) => requirement.isMet)
+    );
   }
 
   public selectLoadout(loadout: EssenceLoadoutDto): void {
@@ -446,8 +534,15 @@ export class EssencesComponent implements OnInit {
     return slotIndex >= 0 ? slotIndex : null;
   }
 
-  public toggleUpgradeDetails(): void {
-    this.upgradeDetailsOpen.update((open) => !open);
+  private inventoryQuantity(itemId: string): number {
+    return this.inventoryState
+      .items()
+      .filter((item) => item.itemInstance.itemBase.id === itemId)
+      .reduce((total, item) => total + item.quantity, 0);
+  }
+
+  private cleanRequirement(requirement: string): string {
+    return requirement.trim().replace(/\.$/, '');
   }
 
   public selectedAttunementLabel(essence: PlayerEssenceDto): string {

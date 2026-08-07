@@ -1,13 +1,13 @@
 <div class="ll-page-stack pb-4 sm:pb-0">
   <app-default-header
-    class="flex-none"
+    class="flex-none pr-4 sm:pr-6"
     section="Character"
     title="Overview"
     text="Stats, combat rating, and Essence loadout"
     icon="sidebar/character/overview"
   ></app-default-header>
 
-  <div class="grid gap-2 p-1 pr-5 sm:pr-1">
+  <div class="grid gap-2">
     <div class="ll-input-group">
       <input
         type="text"
@@ -45,10 +45,7 @@
     No character overview loaded.
   </div>
 
-  <div
-    *ngIf="character() as characterOverview"
-    class="min-h-0 overflow-y-auto pr-2 sm:pr-4"
-  >
+  <div *ngIf="character() as characterOverview" class="min-h-0 overflow-y-auto">
     <section class="ll-page-header">
       <div
         class="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(360px,480px)] lg:items-end"

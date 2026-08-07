@@ -1,9 +1,8 @@
 <ng-container *ngIf="characterProfession() as characterProfession">
   <div class="flex h-full w-full flex-col text-white sm:gap-4">
     <app-profession-header
-      *ngIf="profession() as profession"
       class="pr-4 sm:pr-6"
-      title="{{ profession.name }}"
+      [title]="profession()?.name ?? 'Crafting'"
       icon="sidebar/professions/crafting"
       [level]="characterProfession.level"
       [experience]="characterProfession.experience"

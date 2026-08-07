@@ -2,8 +2,8 @@ namespace Domain.Models.Essences;
 
 public static class EssenceProgressionConstants
 {
-    public const int BaseXpPerLevel = 100;
-    public const double XpGrowth = 1.18;
+    public const int BaseXpPerLevel = 132_860;
+    public const double XpGrowth = 1.02;
     public const int MaxEssenceLevel = 100;
     public const int MaxAscensionTier = 3;
     public const string LesserMonsterCoreItemId = "item.monster_core.lesser";
@@ -119,6 +119,15 @@ public static class EssenceProgressionConstants
             "Taunt" => AttributeValueGrowthPerAscensionTier,
             "ModifyStatusStacks" => StatusStackValueGrowthPerAscensionTier,
             "ModifyStatusEffect" => StatusStackValueGrowthPerAscensionTier,
+            "ModifyThreat" => AttributeValueGrowthPerAscensionTier,
+            "ModifyRegenerationRate" => AttributeValueGrowthPerAscensionTier,
+            "ModifyRegenerationInterval" => AttributeValueGrowthPerAscensionTier,
+            "ModifyHealingReceived" => AttributeValueGrowthPerAscensionTier,
+            "ModifyDamageDealt" => AttributeValueGrowthPerAscensionTier,
+            "ModifyDamageTaken" => AttributeValueGrowthPerAscensionTier,
+            "ModifyDamageTakenFromCondition" => AttributeValueGrowthPerAscensionTier,
+            "ModifyNextBasicAttackDamage" => DamageValueGrowthPerAscensionTier,
+            "ModifyNextBasicAttackArmorPenetration" => AttributeValueGrowthPerAscensionTier,
             _ => 0
         };
 

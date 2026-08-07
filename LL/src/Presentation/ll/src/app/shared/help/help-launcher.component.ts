@@ -18,16 +18,19 @@ import { HelpOverlayService } from './help-overlay.service';
       {{ label }}
     </button>
     <ng-template #inlineButton>
-      <button
-        type="button"
-        data-tour="page-helper"
-        class="ll-button-secondary flex items-center gap-1.5 px-3 py-2 text-xs"
-        (click)="open()"
-        [attr.aria-label]="ariaLabel"
+      <span
+        class="inline-flex h-10 w-10 items-center justify-center sm:h-14 sm:w-14"
       >
-        <span aria-hidden="true" class="text-sm leading-none">?</span>
-        {{ inlineLabel }}
-      </button>
+        <button
+          type="button"
+          data-tour="page-helper"
+          class="z-50 h-8 w-8 rounded-full border-b border-l border-primary bg-texture text-xl text-white shadow-lg transition-transform hover:scale-[1.1] hover:bg-slate-700 sm:h-12 sm:w-12 sm:border-b-0 sm:border-l-0 sm:border-r sm:border-t"
+          (click)="open()"
+          [attr.aria-label]="ariaLabel"
+        >
+          ?
+        </button>
+      </span>
     </ng-template>
   `,
 })
@@ -39,7 +42,6 @@ export class HelpLauncherComponent {
   @Input() pageId?: string;
   @Input() presentation: 'floating' | 'inline' = 'floating';
   @Input() label = '?';
-  @Input() inlineLabel = 'Guide';
   @Input() ariaLabel = 'Open help';
 
   open() {

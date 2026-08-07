@@ -3,8 +3,8 @@ using Domain.Models.Attributes;
 namespace Domain.Helpers;
 public static class EntityBaseAttributeHelper
 {
-    public const int PowerPerCharacterLevel = 2;
-    public const int MaxHealthPerCharacterLevel = 8;
+    public const float PowerPerCharacterLevel = 0.25f;
+    public const int MaxHealthPerCharacterLevel = 20;
 
     public static List<EntityAttribute> CreateEntityAttributesWithIncrease(Guid entityId, float percentage)
     {
@@ -36,16 +36,25 @@ public static class EntityBaseAttributeHelper
         int level)
     {
         var attributes = CreateEntityAttributes(entityId);
-        var completedLevelUps = Math.Max(0, level - 1);
         foreach (var attribute in attributes)
-        {
-            if (attribute.AttributeType == AttributeType.Power)
-                attribute.Value += PowerPerCharacterLevel * completedLevelUps;
-            else if (attribute.AttributeType == AttributeType.MaxHealth)
-                attribute.Value += MaxHealthPerCharacterLevel * completedLevelUps;
-        }
+            attribute.Value = GetValueForCharacterLevel(attribute.AttributeType, level);
 
         return attributes;
+    }
+
+    public static float GetValueForCharacterLevel(
+        AttributeType attributeType,
+        int level)
+    {
+        var completedLevelUps = Math.Max(0, level - 1);
+        var baseValue = GetBaseValueForAttribute(attributeType);
+
+        return attributeType switch
+        {
+            AttributeType.Power => baseValue + (PowerPerCharacterLevel * completedLevelUps),
+            AttributeType.MaxHealth => baseValue + (MaxHealthPerCharacterLevel * completedLevelUps),
+            _ => baseValue
+        };
     }
 
     private static int GetBaseValueForAttribute(AttributeType attributeType)

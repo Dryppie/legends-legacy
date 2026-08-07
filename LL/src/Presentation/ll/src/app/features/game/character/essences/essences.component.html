@@ -1,5 +1,6 @@
 <div class="ll-page-stack soul-archive-page">
   <app-default-header
+    class="pr-4 sm:pr-6"
     section="Character"
     [text]="essenceState.archiveText()"
     title="Soul Archive"
@@ -179,17 +180,10 @@
               </span>
               <span
                 class="rounded border px-2 py-0.5"
-                [ngClass]="eligibilityClass(essence.ascendInfo.canPerform)"
+                [ngClass]="eligibilityClass(canAscendEssence(essence))"
               >
                 Ascend
-                {{ essence.ascendInfo.canPerform ? "Ready" : "Locked" }}
-              </span>
-              <span
-                class="rounded border px-2 py-0.5"
-                [ngClass]="eligibilityClass(essence.evolveInfo.canPerform)"
-              >
-                Evolve
-                {{ essence.evolveInfo.canPerform ? "Ready" : "Locked" }}
+                {{ canAscendEssence(essence) ? "Ready" : "Locked" }}
               </span>
             </div>
           </div>
@@ -244,6 +238,7 @@
             </div>
             <app-essence-description
               class="text-sm text-zinc-300"
+              [abilityName]="essence.activeAbility.name"
               [description]="essence.activeAbility.description"
               [effects]="essence.activeAbility.effects"
             ></app-essence-description>
@@ -260,154 +255,133 @@
             </div>
             <app-essence-description
               class="text-sm text-zinc-300"
+              [abilityName]="essence.passiveAbility.name"
               [description]="essence.passiveAbility.description"
               [effects]="essence.passiveAbility.effects"
             ></app-essence-description>
           </article>
         </div>
 
-        <section class="ll-card mt-4">
-          <button
-            type="button"
-            class="flex w-full items-center justify-between gap-3 px-3 py-2 text-left transition-colors hover:bg-zinc-300/10"
-            [attr.aria-expanded]="upgradeDetailsOpen()"
-            (click)="toggleUpgradeDetails()"
-          >
-            <div>
-              <h3 class="ll-eyebrow text-primary">Progression Details</h3>
-              <p class="ll-copy mt-1 text-xs">
-                Ascend and Evolve requirements and effects
-              </p>
-            </div>
-            <span class="shrink-0 text-sm text-primary">
-              {{ upgradeDetailsOpen() ? "Hide" : "Show" }}
-            </span>
-          </button>
+        <section class="ll-card soul-progression mt-4 overflow-hidden">
+          <header class="px-4 py-3">
+            <h3 class="ll-eyebrow text-primary">Progression Details</h3>
+          </header>
 
-          <div
-            *ngIf="upgradeDetailsOpen()"
-            class="grid gap-3 border-t border-light_gray/60 p-3"
-          >
-            <article class="ll-card p-3">
+          <div class="soul-progression-layout border-t border-light_gray/60">
+            <article class="soul-progression-path">
               <div class="flex items-start justify-between gap-3">
-                <div>
-                  <h3 class="ll-eyebrow text-primary">Ascend</h3>
-                  <p class="ll-copy mt-1 text-xs">
-                    Tier {{ essence.ascendInfo.currentTier }}
-                    <ng-container *ngIf="essence.ascendInfo.nextTier !== null">
-                      to {{ essence.ascendInfo.nextTier }}
-                    </ng-container>
-                  </p>
-                </div>
+                <h3 class="ll-heading text-base text-primary">
+                  Ascend
+                  <span aria-hidden="true">·</span>
+                  <ng-container
+                    *ngIf="essence.ascendInfo.nextTier !== null; else maxTier"
+                  >
+                    Tier {{ essence.ascendInfo.nextTier }}
+                  </ng-container>
+                  <ng-template #maxTier>Max Tier</ng-template>
+                </h3>
                 <span
-                  class="rounded border px-2 py-0.5 text-xs"
+                  class="soul-progression-status"
                   [ngClass]="{
-                    'border-primary/40 bg-primary/10 text-primary':
-                      essence.ascendInfo.canPerform,
-                    'border-light_gray/50 text-zinc-400':
-                      !essence.ascendInfo.canPerform,
+                    'text-emerald-400': canAscendEssence(essence),
+                    'text-zinc-500': !canAscendEssence(essence),
                   }"
                 >
-                  {{ essence.ascendInfo.canPerform ? "Eligible" : "Locked" }}
+                  {{ canAscendEssence(essence) ? "Ready" : "Locked" }}
                 </span>
               </div>
 
-              <div class="mt-3 grid gap-3 text-xs sm:grid-cols-2">
-                <div>
-                  <div class="font-semibold text-zinc-300">Requires</div>
-                  <ul class="mt-1 list-disc space-y-1 pl-4 text-zinc-400">
-                    <li
-                      *ngFor="
-                        let requirement of essence.ascendInfo.requirements
-                      "
+              <div
+                class="soul-progression-readiness"
+                [class.soul-progression-readiness-ready]="
+                  canAscendEssence(essence)
+                "
+                aria-hidden="true"
+              ></div>
+
+              <div class="soul-progression-details">
+                <section class="soul-progression-requirement-panel">
+                  <h4 class="soul-progression-section-title">Requirements</h4>
+                  <ul class="soul-progression-requirements">
+                    <li *ngFor="let requirement of ascendRequirements(essence)">
+                      <span
+                        class="soul-progression-check"
+                        [class.text-emerald-400]="requirement.isMet"
+                        aria-hidden="true"
+                      >
+                        {{ requirement.isMet ? "✓" : "○" }}
+                      </span>
+                      <span>{{ requirement.label }}</span>
+                      <span
+                        *ngIf="
+                          requirement.current !== undefined &&
+                          requirement.required !== undefined
+                        "
+                        class="soul-progression-requirement-progress"
+                      >
+                        {{ requirement.current }}/{{ requirement.required }}
+                      </span>
+                    </li>
+                  </ul>
+                </section>
+
+                <section class="soul-progression-grant-panel">
+                  <h4 class="soul-progression-section-title">On Ascending</h4>
+                  <dl
+                    *ngIf="
+                      essence.ascendInfo.grantedChanges.length > 0;
+                      else noAscensionChanges
+                    "
+                    class="soul-progression-grants"
+                  >
+                    <div
+                      *ngFor="let grant of essence.ascendInfo.grantedChanges"
+                      class="soul-progression-grant"
                     >
-                      {{ requirement }}
-                    </li>
-                  </ul>
-                </div>
-                <div>
-                  <div class="font-semibold text-zinc-300">Does</div>
-                  <ul class="mt-1 list-disc space-y-1 pl-4 text-zinc-400">
-                    <li *ngFor="let effect of essence.ascendInfo.effects">
-                      {{ effect }}
-                    </li>
-                  </ul>
-                </div>
+                      <dt>{{ grant.label }}</dt>
+                      <dd>
+                        <span>{{ grant.currentValue }}</span>
+                        <span class="soul-progression-arrow" aria-hidden="true"
+                          >→</span
+                        >
+                        <strong>{{ grant.nextValue }}</strong>
+                      </dd>
+                    </div>
+                  </dl>
+                  <ng-template #noAscensionChanges>
+                    <p class="text-xs leading-relaxed text-zinc-500">
+                      No further Ascension bonuses are available.
+                    </p>
+                  </ng-template>
+                </section>
               </div>
+
+              <button
+                type="button"
+                class="ll-button ll-button-primary soul-progression-action"
+                [disabled]="!canAscendEssence(essence)"
+                (click)="ascend(essence)"
+              >
+                Ascend
+              </button>
             </article>
 
-            <article class="ll-card p-3">
-              <div class="flex items-start justify-between gap-3">
-                <div>
-                  <h3 class="ll-eyebrow text-primary">Evolve</h3>
-                  <p class="ll-copy mt-1 text-xs">
-                    {{ essence.evolveInfo.name || "Evolution" }}
-                  </p>
-                </div>
-                <span
-                  class="rounded border px-2 py-0.5 text-xs"
-                  [ngClass]="{
-                    'border-primary/40 bg-primary/10 text-primary':
-                      essence.evolveInfo.canPerform,
-                    'border-light_gray/50 text-zinc-400':
-                      !essence.evolveInfo.canPerform,
-                  }"
-                >
-                  {{ essence.evolveInfo.canPerform ? "Eligible" : "Locked" }}
-                </span>
+            <footer class="soul-progression-footer">
+              <div class="soul-progression-leveling-copy">
+                <strong>Level up with Essence Dust</strong>
+                <span>{{ dustLevelingDescription(essence) }}</span>
               </div>
-
-              <div class="mt-3 grid gap-3 text-xs sm:grid-cols-2">
-                <div>
-                  <div class="font-semibold text-zinc-300">Requires</div>
-                  <ul class="mt-1 list-disc space-y-1 pl-4 text-zinc-400">
-                    <li
-                      *ngFor="
-                        let requirement of essence.evolveInfo.requirements
-                      "
-                    >
-                      {{ requirement }}
-                    </li>
-                  </ul>
-                </div>
-                <div>
-                  <div class="font-semibold text-zinc-300">Does</div>
-                  <ul class="mt-1 list-disc space-y-1 pl-4 text-zinc-400">
-                    <li *ngFor="let effect of essence.evolveInfo.effects">
-                      {{ effect }}
-                    </li>
-                  </ul>
-                </div>
-              </div>
-            </article>
+              <button
+                type="button"
+                class="ll-button soul-action-button"
+                [disabled]="!canSpendDust(essence)"
+                (click)="spendDust(essence)"
+              >
+                {{ dustActionLabel(essence) }}
+              </button>
+            </footer>
           </div>
         </section>
-
-        <div class="mt-4 flex flex-wrap gap-2">
-          <button
-            type="button"
-            class="ll-button soul-action-button"
-            (click)="spendDust(essence)"
-          >
-            Spend 1 Dust
-          </button>
-          <button
-            type="button"
-            class="ll-button soul-action-button"
-            [disabled]="!essence.canAscend"
-            (click)="ascend(essence)"
-          >
-            Ascend
-          </button>
-          <button
-            type="button"
-            class="ll-button soul-action-button"
-            [disabled]="!essence.canEvolve"
-            (click)="evolve(essence)"
-          >
-            Evolve
-          </button>
-        </div>
       </section>
 
       <section

@@ -181,8 +181,7 @@ export const COMBAT_KEYWORDS: readonly CombatKeywordDefinition[] = [
   {
     name: 'Basic Attack',
     aliases: ['Basic Attacks'],
-    description:
-      'The automatic attack performed when its attack timer is ready.',
+    description: 'Your basic attack uses your weapon(s).',
   },
   {
     name: 'Direct Hit',

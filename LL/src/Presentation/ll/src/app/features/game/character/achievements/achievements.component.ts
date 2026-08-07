@@ -27,6 +27,7 @@ type CollectionView = 'Achievements' | 'Titles';
 
 @Component({
   selector: 'app-achievements',
+  host: { class: 'block h-full min-h-0' },
   imports: [
     NgClass,
     NgFor,
@@ -64,6 +65,7 @@ export class AchievementsComponent implements OnInit {
   readonly titleSearch = signal('');
   readonly titleState = signal<TitleStateFilter>('All');
   readonly titleDisplayPosition = signal<TitleDisplayPosition>('Prefix');
+  readonly titlePositionUpdating = signal(false);
 
   readonly achievementStates: AchievementStateFilter[] = [
     'All',
@@ -254,6 +256,54 @@ export class AchievementsComponent implements OnInit {
       });
   }
 
+  setTitleDisplayPosition(position: TitleDisplayPosition): void {
+    if (
+      position === this.titleDisplayPosition() ||
+      this.titlePositionUpdating()
+    ) {
+      return;
+    }
+
+    const previousPosition = this.titleDisplayPosition();
+    this.titleDisplayPosition.set(position);
+
+    const equippedTitle = this.equippedTitle();
+    if (!equippedTitle) {
+      return;
+    }
+
+    this.titlePositionUpdating.set(true);
+    this.error.set('');
+
+    this.achievementsApi
+      .equipTitle(equippedTitle.key, position)
+      .pipe(finalize(() => this.titlePositionUpdating.set(false)))
+      .subscribe({
+        next: (updatedTitle) => {
+          this.characterState.updateEquippedTitle(updatedTitle);
+          this.titles.update((titles) =>
+            titles.map((title) =>
+              title.key === equippedTitle.key
+                ? {
+                    ...title,
+                    displayPosition: position,
+                    preview:
+                      position === 'Prefix'
+                        ? title.prefixPreview
+                        : title.suffixPreview,
+                  }
+                : title,
+            ),
+          );
+          this.characterState.refresh();
+        },
+        error: (err) => {
+          this.titleDisplayPosition.set(previousPosition);
+          this.error.set(err.message);
+        },
+      });
+  }
+
   unequip(): void {
     this.achievementsApi.unequipTitle().subscribe({
       next: () => {
@@ -312,9 +362,7 @@ export class AchievementsComponent implements OnInit {
 
   canEquip(title: TitleDto): boolean {
     return (
-      title.isUnlocked &&
-      (!title.isEquipped ||
-        title.displayPosition !== this.titleDisplayPosition())
+      title.isUnlocked && !title.isEquipped && !this.titlePositionUpdating()
     );
   }
 
@@ -324,9 +372,7 @@ export class AchievementsComponent implements OnInit {
     }
 
     if (title.isEquipped) {
-      return title.displayPosition === this.titleDisplayPosition()
-        ? 'Equipped'
-        : 'Update';
+      return 'Equipped';
     }
 
     return 'Equip';
@@ -340,7 +386,13 @@ export class AchievementsComponent implements OnInit {
 
   private refreshTitles(): void {
     this.achievementsApi.getTitles().subscribe({
-      next: (titles) => this.titles.set(titles),
+      next: (titles) => {
+        this.titles.set(titles);
+        const equippedTitle = titles.find((title) => title.isEquipped);
+        if (equippedTitle) {
+          this.titleDisplayPosition.set(equippedTitle.displayPosition);
+        }
+      },
       error: (err) => this.error.set(err.message),
     });
   }

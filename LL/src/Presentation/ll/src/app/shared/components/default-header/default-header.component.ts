@@ -6,6 +6,7 @@ import { GuidePageId } from '../../help/guide-catalog';
 
 @Component({
   selector: 'app-default-header',
+  host: { class: 'block min-w-0 w-full' },
   imports: [NgIf, ProfessionIconComponent, HelpLauncherComponent],
   templateUrl: './default-header.component.html',
 })
@@ -15,4 +16,5 @@ export class DefaultHeaderComponent {
   @Input() icon: string = '';
   @Input() section: string = '';
   @Input() guidePageId?: GuidePageId;
+  @Input() showGuide = true;
 }

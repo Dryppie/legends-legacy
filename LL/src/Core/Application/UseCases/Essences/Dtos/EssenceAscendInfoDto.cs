@@ -7,4 +7,12 @@ public sealed record EssenceAscendInfoDto(
     string? RequiredItemId,
     string? RequiredItemName,
     IReadOnlyList<string> Requirements,
-    IReadOnlyList<string> Effects);
+    IReadOnlyList<string> Effects,
+    int? RequiredLevel,
+    int? RequiredItemAmount,
+    IReadOnlyList<EssenceAscensionGrantDto> GrantedChanges);
+
+public sealed record EssenceAscensionGrantDto(
+    string Label,
+    string CurrentValue,
+    string NextValue);

@@ -11,6 +11,8 @@ export interface EssenceAbilityData {
   total?: string;
   attrValue?: number;
   unit?: string;
+  resultLabel?: string;
   hasRange?: boolean;
+  rollDisplay?: string;
   note?: string;
 }

@@ -759,7 +759,31 @@ public sealed class EssenceSystemServiceTests
         Assert.True(result.ReachedTierCap);
         Assert.Equal(10, db.PlayerEssences.Single(x => x.Id == essenceId).Level);
         Assert.Equal(0, db.PlayerEssences.Single(x => x.Id == essenceId).CurrentXp);
-        Assert.Equal(84, await InventoryQuantityAsync(db, characterId, "soul_dust"));
+        Assert.Equal(99, await InventoryQuantityAsync(db, characterId, "soul_dust"));
+    }
+
+    [Fact]
+    public async Task One_dust_always_completes_exactly_one_essence_level()
+    {
+        await using var db = CreateDb();
+        var characterId = await SeedCharacterAndInventoryAsync(db);
+        var essenceId = await AddPlayerEssenceAsync(db, characterId, level: 2);
+        var essence = db.PlayerEssences.Single(x => x.Id == essenceId);
+        essence.CurrentXp = 5_000;
+        await AddInventoryQuantityAsync(db, characterId, "soul_dust", 1);
+        var service = CreateService(db);
+        var expectedXp = EssenceProgressionConstants.GetXpRequiredForLevel(2) - essence.CurrentXp;
+
+        var result = await service.SpendEssenceDustAsync(characterId, essenceId, 1, CancellationToken.None);
+        await db.SaveChangesAsync();
+
+        Assert.True(result.Succeeded);
+        Assert.Equal(1, result.DustSpent);
+        Assert.Equal(1, result.LevelsGained);
+        Assert.Equal(expectedXp, result.XpGained);
+        Assert.Equal(3, essence.Level);
+        Assert.Equal(0, essence.CurrentXp);
+        Assert.Equal(0, await InventoryQuantityAsync(db, characterId, "soul_dust"));
     }
 
     [Fact]
@@ -780,7 +804,8 @@ public sealed class EssenceSystemServiceTests
         Assert.True(ascend.Succeeded);
         Assert.True(dust.Succeeded);
         Assert.Equal(1, essence.AscensionTier);
-        Assert.True(essence.Level > 10);
+        Assert.Equal(30, essence.Level);
+        Assert.Equal(80, await InventoryQuantityAsync(db, characterId, "soul_dust"));
     }
 
     [Fact]

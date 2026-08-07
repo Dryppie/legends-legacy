@@ -1,16 +1,14 @@
-<div
-  class="ll-page-stack pb-4 pr-4 sm:pb-0 sm:pr-6"
-  *ngIf="currentCharacter() as character"
->
+<div class="ll-page-stack pb-4 sm:pb-0" *ngIf="currentCharacter() as character">
   <app-default-header
-    class="flex-none"
+    class="flex-none pr-4 sm:pr-6"
     section="Account"
     title="Settings"
     text="Profile, account bindings, and game links"
     icon="sidebar/system/settings"
+    [showGuide]="false"
   ></app-default-header>
 
-  <div class="min-h-0 flex-1 overflow-y-auto pr-1">
+  <div class="min-h-0 flex-1 overflow-y-auto">
     <section class="ll-page-header">
       <div class="grid gap-4 xl:grid-cols-[minmax(0,1fr)_22rem]">
         <div class="min-w-0">

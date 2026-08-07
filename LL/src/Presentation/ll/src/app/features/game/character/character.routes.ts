@@ -35,7 +35,7 @@ export const CHARACTER_ROUTES: Routes = [
       {
         path: 'achievements',
         component: AchievementsComponent,
-        data: { guidePageId: GUIDE_PAGE_IDS.achievements },
+        data: { guideDisabled: true },
       },
       {
         path: 'soulstone-archive',

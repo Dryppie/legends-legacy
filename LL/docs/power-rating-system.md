@@ -161,11 +161,15 @@ identity, tier, content hash, algorithm version, combat-rules version, rating
 definition version, recommendation seed version, and equipment balance version
 match.
 
-`PowerRatingAlgorithm.Version` is 22 for source-independent final-attribute
+`PowerRatingAlgorithm.Version` is 23 for source-independent final-attribute
 valuation over the full Standard-quality tier-by-rarity profile matrix.
-`CombatRulesVersion` is 9 for the Power-only damage model and compounded dungeon difficulty
-curve: Tier I is 3× the authored creature baseline, Tier II is 5× Tier I
-(15× authored), and Tier III is 5× Tier II (75× authored).
+Character levels use a deterministic base-attribute curve: every completed
+level-up grants `+0.25 Power` and `+20 Max Health`. At the current attribute
+costs, those gains consume 6 and 4 internal rating-budget points respectively,
+for 10 internal points (1 displayed Combat Rating) per completed level-up.
+`CombatRulesVersion` is 10 for the Power-only damage model and compounded dungeon difficulty
+curve: Tier I is 2.75× the authored creature baseline, Tier II is 5× Tier I
+(13.75× authored), and Tier III is 5× Tier II (68.75× authored).
 The legacy-named `BenchmarkDefinitionVersion` column now stores
 the deterministic rating-definition version and is 13. Existing recommendations
 are stale and will be recalibrated.

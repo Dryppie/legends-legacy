@@ -4,8 +4,10 @@ using Domain.Models.Attributes;
 using Domain.Models.Entities.Characters;
 using Domain.Models.Dungeons.Definitions.Rooms;
 using Domain.Models.Progression;
+using Domain.Models.Professions.Crafting.V2;
 using Domain.Models.Professions;
 using Domain.Helpers.Constants;
+using Domain.Helpers;
 using MediatR;
 using Microsoft.Extensions.Configuration;
 using Services.LL.Levels;
@@ -114,8 +116,54 @@ public sealed class CharacterExperienceProgressionTests
 
         await service.UpdateCharacterLevel(character, CancellationToken.None);
 
-        Assert.Equal(12, character.BaseAttributes.Single(x => x.AttributeType == AttributeType.Power).Value);
-        Assert.Equal(148, character.BaseAttributes.Single(x => x.AttributeType == AttributeType.MaxHealth).Value);
+        Assert.Equal(10.25f, character.BaseAttributes.Single(x => x.AttributeType == AttributeType.Power).Value);
+        Assert.Equal(160, character.BaseAttributes.Single(x => x.AttributeType == AttributeType.MaxHealth).Value);
+    }
+
+    [Fact]
+    public void Character_level_attributes_follow_the_same_deterministic_curve_at_any_level()
+    {
+        var attributes = EntityBaseAttributeHelper
+            .CreateEntityAttributesForLevel(Guid.Empty, 500)
+            .ToDictionary(attribute => attribute.AttributeType, attribute => attribute.Value);
+
+        Assert.Equal(134.75f, attributes[AttributeType.Power]);
+        Assert.Equal(10_120, attributes[AttributeType.MaxHealth]);
+    }
+
+    [Fact]
+    public void Each_level_up_spends_one_displayed_combat_rating_of_attribute_budget()
+    {
+        var internalBudget =
+            EntityBaseAttributeHelper.PowerPerCharacterLevel
+            * EquipmentStatBudgetCatalog.Get(AttributeType.Power, tier: 1).CostPerPoint
+            + EntityBaseAttributeHelper.MaxHealthPerCharacterLevel
+            * EquipmentStatBudgetCatalog.Get(AttributeType.MaxHealth, tier: 1).CostPerPoint;
+
+        Assert.Equal(10d, internalBudget, precision: 6);
+        Assert.Equal(1d, internalBudget / 10d, precision: 6);
+    }
+
+    [Fact]
+    public async Task Multi_level_gain_recomputes_attributes_from_the_final_level()
+    {
+        var service = new LevelingService(new RecordingPublisher(), new FlatProgressionProvider());
+        var character = new Character
+        {
+            Level = 1,
+            Experience = 300,
+            BaseAttributes =
+            [
+                new EntityAttribute { AttributeType = AttributeType.Power, Value = 10 },
+                new EntityAttribute { AttributeType = AttributeType.MaxHealth, Value = 140 }
+            ]
+        };
+
+        await service.UpdateCharacterLevel(character, CancellationToken.None);
+
+        Assert.Equal(4, character.Level);
+        Assert.Equal(10.75f, character.BaseAttributes.Single(x => x.AttributeType == AttributeType.Power).Value);
+        Assert.Equal(200, character.BaseAttributes.Single(x => x.AttributeType == AttributeType.MaxHealth).Value);
     }
 
     [Fact]

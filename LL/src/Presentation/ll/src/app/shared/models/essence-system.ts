@@ -49,6 +49,7 @@ export interface EssenceEffectDto {
 export interface EssenceEffectScalingDto {
   attribute: string;
   coefficient: number;
+  maximumCoefficient?: number | null;
 }
 
 export interface EssenceEvolutionDto {
@@ -160,8 +161,17 @@ export interface EssenceAscendInfoDto {
   nextTier?: number | null;
   requiredItemId?: string | null;
   requiredItemName?: string | null;
+  requiredLevel?: number | null;
+  requiredItemAmount?: number | null;
   requirements: string[];
   effects: string[];
+  grantedChanges: EssenceAscensionGrantDto[];
+}
+
+export interface EssenceAscensionGrantDto {
+  label: string;
+  currentValue: string;
+  nextValue: string;
 }
 
 export interface EssenceEvolveInfoDto {

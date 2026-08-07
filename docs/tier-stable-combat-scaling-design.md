@@ -200,9 +200,10 @@ Crit Chance, Attack Speed, Healing Power, regeneration, mitigation, penetration,
 resilience, and summon bonuses by name instead of hiding several effects inside a
 primary-stat bundle.
 
-Fortitude, Precision, and Spirit are not part of the attribute model. Characters gain
-`+8 Max Health` and `+2 Power` per level, and tier reference profiles include that same
-visible health growth.
+Fortitude, Precision, and Spirit are not part of the attribute model. Every completed
+character level-up grants `+0.25 Power` and `+20 Max Health`. This spends the current
+one-CR level budget as 0.6 CR of Power and 0.4 CR of whole-number health, and tier
+reference profiles include that same deterministic growth.
 
 ## Tank progression and crafting value
 

@@ -5,11 +5,10 @@
 
   <div
     role="tooltip"
-    class="pointer-events-auto max-w-[20rem] rounded-lg border border-zinc-600 bg-texture p-3 text-xs text-zinc-200 shadow-lg backdrop-blur"
+    class="pointer-events-auto w-[20rem] max-w-[calc(100vw-1rem)] rounded-lg border border-zinc-600 bg-texture p-3 text-xs text-zinc-200 shadow-lg backdrop-blur"
   >
-    <div class="font-semibold text-primary">{{ data.title }}</div>
-
     <ng-container *ngIf="data.kind === 'keyword'">
+      <div class="font-semibold text-primary">{{ data.title }}</div>
       <p class="mt-1 leading-relaxed text-zinc-300">{{ data.description }}</p>
       <p *ngIf="data.detail" class="mt-2 font-medium text-indigo-300">
         {{ data.detail }}
@@ -17,29 +16,60 @@
     </ng-container>
 
     <ng-container *ngIf="data.kind === 'magnitude'">
-      <div class="mt-2 grid grid-cols-[auto_1fr] gap-x-4 gap-y-1">
-        <span>Base:</span>
-        <span class="text-zinc-100">{{ data.base }}</span>
+      <div class="text-center">
+        <div class="ll-eyebrow text-primary">{{ data.title }}</div>
 
-        <ng-container *ngIf="data.attr">
-          <span>Attribute:</span>
-          <span>{{ data.attr }} ({{ data.attrValue }})</span>
+        <div
+          class="my-2 flex items-center justify-center gap-2"
+          aria-hidden="true"
+        >
+          <span class="h-px w-16 bg-zinc-700"></span>
+          <span class="h-1.5 w-1.5 rotate-45 bg-primary"></span>
+          <span class="h-px w-16 bg-zinc-700"></span>
+        </div>
 
-          <span>Scaling:</span>
-          <span class="text-emerald-400">{{ data.scaleDisplay }}</span>
-
-          <span class="col-span-2 italic text-zinc-400">
-            {{ data.base }} + ({{ data.attrValue }} × {{ data.scaleDisplay }})
-          </span>
-        </ng-container>
-
-        <hr class="col-span-2 my-1 border-zinc-700" />
-
-        <span class="col-span-2 font-medium text-amber-400">
-          {{ data.total }} {{ data.unit }}
-        </span>
+        <div class="font-display text-3xl font-semibold text-primary">
+          {{ displayedTotal }}
+        </div>
+        <div
+          class="mt-0.5 text-[0.65rem] uppercase tracking-[0.2em] text-zinc-400"
+        >
+          {{ data.resultLabel || data.unit }}
+        </div>
+        <div *ngIf="hasBaseValue" class="mt-1 text-[0.65rem] text-zinc-500">
+          Includes {{ data.base }} base {{ data.unit }}
+        </div>
       </div>
-      <p *ngIf="data.note" class="mt-2 leading-relaxed text-zinc-400">
+
+      <hr class="my-3 border-zinc-700" />
+
+      <div class="grid grid-cols-3 gap-2 text-xs">
+        <div class="text-left">
+          <span class="text-zinc-400">{{ data.attr || "Base" }}</span>
+          <span class="ml-1 font-semibold text-zinc-100">
+            {{ data.attr ? data.attrValue : data.base }}
+          </span>
+        </div>
+
+        <div class="text-center">
+          <span class="text-zinc-400">Scaling</span>
+          <span class="ml-1 font-semibold text-emerald-400">
+            {{ data.attr ? data.scaleDisplay : "—" }}
+          </span>
+        </div>
+
+        <div class="text-right">
+          <span class="text-zinc-400">Roll</span>
+          <span class="ml-1 font-semibold text-primary">
+            {{ rollDisplay }}
+          </span>
+        </div>
+      </div>
+
+      <p
+        *ngIf="data.note"
+        class="mt-3 text-center leading-relaxed text-zinc-500"
+      >
         {{ data.note }}
       </p>
     </ng-container>

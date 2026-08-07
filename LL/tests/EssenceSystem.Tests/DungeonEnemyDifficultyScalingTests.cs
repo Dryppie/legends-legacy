@@ -10,9 +10,9 @@ namespace EssenceSystem.Tests;
 public sealed class DungeonEnemyDifficultyScalingTests
 {
     [Theory]
-    [InlineData(1, 3)]
-    [InlineData(2, 15)]
-    [InlineData(3, 75)]
+    [InlineData(1, 2.75)]
+    [InlineData(2, 13.75)]
+    [InlineData(3, 68.75)]
     public void GetStrengthMultiplier_uses_the_calibrated_tier_curve(
         int dungeonTier,
         float expectedMultiplier)
@@ -23,9 +23,9 @@ public sealed class DungeonEnemyDifficultyScalingTests
     }
 
     [Theory]
-    [InlineData(1, 300, 30)]
-    [InlineData(2, 1500, 150)]
-    [InlineData(3, 18375, 750)]
+    [InlineData(1, 275, 27)]
+    [InlineData(2, 1375, 137)]
+    [InlineData(3, 16843, 687)]
     public void Apply_scales_core_stats_without_scaling_capped_rates(
         int dungeonTier,
         int expectedMaxHealth,

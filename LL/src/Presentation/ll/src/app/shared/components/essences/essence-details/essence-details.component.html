@@ -23,6 +23,7 @@
     </div>
     <app-essence-description
       class="w-full"
+      [abilityName]="essence.active.name"
       [description]="essence.active.description"
       [effects]="essence.active.effects"
     ></app-essence-description>
@@ -64,6 +65,7 @@
       </span>
     </div>
     <app-essence-description
+      [abilityName]="essence.passive.name"
       [description]="essence.passive.description"
       [effects]="essence.passive.effects"
     ></app-essence-description>

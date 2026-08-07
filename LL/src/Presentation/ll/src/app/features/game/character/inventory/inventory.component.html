@@ -1,13 +1,12 @@
 <div class="ll-page-stack">
-  <div class="flex flex-wrap items-center justify-between gap-3 pr-4">
-    <app-default-header
-      section="Character"
-      title="Inventory"
-      [text]="inventoryCountLabel"
-      icon="sidebar/character/inventory"
-    ></app-default-header>
-
-    <div class="flex items-center gap-2">
+  <app-default-header
+    class="pr-4 sm:pr-6"
+    section="Character"
+    title="Inventory"
+    [text]="inventoryCountLabel"
+    icon="sidebar/character/inventory"
+  >
+    <div header-actions class="flex items-center gap-2">
       <button
         type="button"
         class="ll-button flex h-8 w-8 items-center justify-center p-0 text-primary"
@@ -39,10 +38,10 @@
         </button>
       </div>
     </div>
-  </div>
+  </app-default-header>
 
   <div
-    class="grid min-h-0 flex-1 grid-cols-1 gap-4 overflow-hidden pr-4 lg:grid-cols-[minmax(0,1fr)_25rem]"
+    class="grid min-h-0 flex-1 grid-cols-1 gap-4 overflow-hidden lg:grid-cols-[minmax(0,1fr)_25rem]"
   >
     <div class="ll-panel flex min-h-0 flex-col overflow-hidden">
       <div

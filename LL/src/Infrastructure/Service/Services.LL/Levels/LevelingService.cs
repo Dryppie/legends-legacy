@@ -51,10 +51,12 @@ public class LevelingService : ILevelingService
     {
         foreach (var attr in character.BaseAttributes)
         {
-            if (attr.AttributeType == AttributeType.Power)
-                attr.Value += EntityBaseAttributeHelper.PowerPerCharacterLevel;
-            else if (attr.AttributeType == AttributeType.MaxHealth)
-                attr.Value += EntityBaseAttributeHelper.MaxHealthPerCharacterLevel;
+            if (attr.AttributeType is AttributeType.Power or AttributeType.MaxHealth)
+            {
+                attr.Value = EntityBaseAttributeHelper.GetValueForCharacterLevel(
+                    attr.AttributeType,
+                    character.Level);
+            }
         }
     }
 

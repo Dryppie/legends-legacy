@@ -180,10 +180,23 @@ describe('TavernComponent', () => {
       '2',
       '3',
     ]);
-    expect(podiumEntries[0].textContent).toContain('Champion');
-    expect(podiumEntries[1].textContent).toContain('Runner-up');
+    expect(podiumEntries[0].textContent).toContain('First place');
+    expect(podiumEntries[1].textContent).toContain('Second place');
     expect(podiumEntries[2].textContent).toContain('Third place');
     expect(podiumEntries[0].getAttribute('aria-label')).toBe('Rank 1: First');
+  });
+
+  it('keeps page chrome fixed while the standings own vertical scrolling', () => {
+    const page = fixture.nativeElement.querySelector(
+      '[data-testid="leaderboard-page"]',
+    ) as HTMLElement;
+    const standings = fixture.nativeElement.querySelector(
+      '[data-testid="standings-scroll"]',
+    ) as HTMLElement;
+
+    expect(page.classList).toContain('overflow-hidden');
+    expect(page.classList).not.toContain('overflow-y-auto');
+    expect(standings.classList).toContain('overflow-y-auto');
   });
 
   it('uses the configured participant label and viewer participant id', () => {

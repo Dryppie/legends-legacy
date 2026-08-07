@@ -34,6 +34,7 @@ export class EssenceDescriptionFormatter {
     description: string,
     effects: EssenceEffectDto[],
     resolveAttributeValue: AttributeValueResolver,
+    abilityName = '',
   ): string {
     const replacements: string[] = [];
     const protect = (html: string): string => {
@@ -65,6 +66,7 @@ export class EssenceDescriptionFormatter {
                 undefined,
                 undefined,
                 this.shouldDisplayRange(effect.type),
+                abilityName,
               ),
             )
           : token;
@@ -77,6 +79,7 @@ export class EssenceDescriptionFormatter {
       effectIndexes,
       resolveAttributeValue,
       protect,
+      abilityName,
     );
     text = this.decorateKeywords(text, protect);
 
@@ -94,6 +97,7 @@ export class EssenceDescriptionFormatter {
     effectIndexes: Map<string, number>,
     resolveAttributeValue: AttributeValueResolver,
     protect: (html: string) => string,
+    abilityName: string,
   ): string {
     const magnitude =
       /\b(\d+(?:\.\d+)?(?:\s*-\s*\d+(?:\.\d+)?)?%)\s+((?:(?:ranged|melee)\s+)?(?:(?:Physical|Magical|Shadow|Poison|Burn|Bleed)\s+)?(?:Damage|Power|Max Health)|additional damage)\b/gi;
@@ -115,8 +119,16 @@ export class EssenceDescriptionFormatter {
           .replace(/%/g, '')
           .split('-')
           .map((value) => Number(value.trim()));
-        const minimumCoefficient = percentages[0] / 100;
-        const maximumCoefficient = (percentages[1] ?? percentages[0]) / 100;
+        const authoredMinimumCoefficient = percentages[0] / 100;
+        const authoredMaximumCoefficient =
+          (percentages[1] ?? percentages[0]) / 100;
+        const minimumCoefficient = scaling.coefficient;
+        const ascensionMultiplier = authoredMinimumCoefficient
+          ? minimumCoefficient / authoredMinimumCoefficient
+          : 1;
+        const maximumCoefficient =
+          scaling.maximumCoefficient ??
+          authoredMaximumCoefficient * ascensionMultiplier;
         const attributeValue = resolveAttributeValue(scaling.attribute);
         const base = effect.currentValue ?? effect.baseValue ?? 0;
         const rawMinimum = base + attributeValue * minimumCoefficient;
@@ -129,6 +141,13 @@ export class EssenceDescriptionFormatter {
         );
         const total = `${previewMinimum}-${previewMaximum}`;
         const unit = effectType === 'Heal' ? 'healing' : 'damage';
+        const resultLabel =
+          effectType === 'Damage' && /damage/i.test(suffix) ? suffix : unit;
+
+        const scaledPercentText = this.formatCoefficientRange(
+          minimumCoefficient,
+          maximumCoefficient,
+        );
 
         return protect(
           this.buildMagnitudeSpan(
@@ -137,9 +156,12 @@ export class EssenceDescriptionFormatter {
             effectType === 'Heal' ? 'heal' : 'dmg',
             unit,
             resolveAttributeValue,
-            visibleText,
-            percentText,
+            visibleText.replace(percentText, scaledPercentText),
+            scaledPercentText,
             (minimumCoefficient + maximumCoefficient) / 2,
+            true,
+            abilityName,
+            resultLabel,
           ),
         );
       },
@@ -184,6 +206,8 @@ export class EssenceDescriptionFormatter {
     scaleDisplay?: string,
     coefficientOverride?: number,
     hasRange = true,
+    abilityName = '',
+    resultLabel = unit,
   ): string {
     const base = effect.currentValue ?? effect.baseValue ?? 0;
     const scaling = effect.scaling?.[0];
@@ -194,18 +218,15 @@ export class EssenceDescriptionFormatter {
     const bonus = attributeValue * coefficient;
     const attribute = scaling ? formatAttributeType(scaling.attribute) : '';
     const title =
-      unit === 'healing'
+      abilityName ||
+      (unit === 'healing'
         ? 'Estimated healing'
         : unit === 'damage'
           ? 'Estimated damage'
-          : `Estimated ${unit.toLowerCase()}`;
-    const note = hasRange
-      ? unit === 'healing'
-        ? 'Before healing-received modifiers. Includes the ±20% combat roll.'
-        : unit === 'damage'
-          ? 'Before critical hits, damage modifiers, and target mitigation. Includes the ±20% combat roll.'
-          : 'Includes the ±20% combat roll.'
-      : '';
+          : `Estimated ${unit.toLowerCase()}`);
+    const rollDisplay = hasRange
+      ? `±${this.formatPercent(this.magnitudeRange)}`
+      : 'Fixed';
 
     return (
       `<span class="${cssClass}" tabindex="0" data-tooltip-kind="magnitude" ` +
@@ -218,9 +239,10 @@ export class EssenceDescriptionFormatter {
       `data-bonus="${this.escapeAttribute(this.formatValue(bonus))}" ` +
       `data-display="${this.escapeAttribute(total)}" ` +
       `data-unit="${this.escapeAttribute(unit)}" ` +
-      `data-note="${this.escapeAttribute(note)}" ` +
+      `data-result-label="${this.escapeAttribute(resultLabel)}" ` +
+      `data-roll-display="${this.escapeAttribute(rollDisplay)}" ` +
       `data-range="${hasRange ? 'true' : 'false'}" ` +
-      `aria-label="${this.escapeAttribute(`${title}: ${total} ${unit}. ${note}`)}">` +
+      `aria-label="${this.escapeAttribute(`${title}: ${total} ${unit}.`)}">` +
       `${this.escapeHtml(visibleText)}</span>`
     );
   }
@@ -384,6 +406,13 @@ export class EssenceDescriptionFormatter {
 
   private formatPercent(coefficient: number): string {
     return `${this.formatValue(coefficient * 100)}%`;
+  }
+
+  private formatCoefficientRange(minimum: number, maximum: number): string {
+    const minimumDisplay = this.formatPercent(minimum);
+    if (Math.abs(maximum - minimum) < Number.EPSILON) return minimumDisplay;
+
+    return `${minimumDisplay}-${this.formatPercent(maximum)}`;
   }
 
   private escapeRegExp(value: string): string {

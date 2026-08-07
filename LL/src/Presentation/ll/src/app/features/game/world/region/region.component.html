@@ -15,67 +15,61 @@
 
 <ng-template #regionView>
   <div
-    class="flex h-full min-h-0 w-full flex-col gap-4 overflow-y-auto overflow-x-hidden pr-4"
+    class="flex h-full min-h-0 w-full flex-col gap-4 overflow-y-auto overflow-x-hidden"
   >
-    <section
-      class="ll-panel flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between"
+    <app-default-header
       *ngIf="region"
+      class="pr-4 sm:pr-6"
+      section="Region"
+      [title]="region.name"
+      text="Areas, dungeons, and raids"
+      icon="sidebar/world/world-map"
     >
-      <div>
-        <div class="ll-eyebrow">Region</div>
-        <h1 class="ll-heading mt-1 text-3xl">{{ region.name }}</h1>
-      </div>
+      <a
+        *ngIf="activeBattle() as battle"
+        header-actions
+        routerLink="/game/combat"
+        class="group flex min-h-8 min-w-0 max-w-32 items-center gap-2 rounded-full border border-[var(--ll-color-border-strong)] bg-[var(--ll-color-primary-soft)] px-3 py-1.5 text-xs transition-colors hover:border-primary hover:bg-primary/15 sm:max-w-[24rem]"
+        [attr.aria-label]="'In battle: ' + battle.areaName"
+      >
+        <span
+          class="h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--ll-color-success)]"
+          aria-hidden="true"
+        ></span>
 
-      <div class="flex w-full items-center gap-2 sm:ml-auto sm:w-auto">
-        <a
-          *ngIf="activeBattle() as battle"
-          routerLink="/game/combat"
-          class="group flex min-h-8 min-w-0 flex-1 items-center gap-2 rounded-full border border-[var(--ll-color-border-strong)] bg-[var(--ll-color-primary-soft)] px-3 py-1.5 text-xs transition-colors hover:border-primary hover:bg-primary/15 sm:w-auto sm:max-w-[24rem]"
-          [attr.aria-label]="'In battle: ' + battle.areaName"
+        <span
+          class="hidden shrink-0 text-[10px] font-semibold uppercase tracking-wide text-[var(--ll-color-text-muted)] sm:inline"
         >
-          <span
-            class="h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--ll-color-success)]"
-            aria-hidden="true"
-          ></span>
+          In battle
+        </span>
 
-          <span
-            class="shrink-0 text-[10px] font-semibold uppercase tracking-wide text-[var(--ll-color-text-muted)]"
-          >
-            In battle
-          </span>
+        <span
+          class="hidden text-[var(--ll-color-text-subtle)] sm:inline"
+          aria-hidden="true"
+        >
+          ·
+        </span>
 
-          <span
-            class="hidden text-[var(--ll-color-text-subtle)] sm:inline"
-            aria-hidden="true"
-          >
-            ·
-          </span>
+        <strong class="min-w-0 truncate font-medium text-primary">
+          {{ battle.areaName }}
+        </strong>
 
-          <strong class="min-w-0 truncate font-medium text-primary">
-            {{ battle.areaName }}
-          </strong>
-
-          <svg
-            class="h-3.5 w-3.5 shrink-0 text-primary/70 transition-transform group-hover:translate-x-0.5"
-            viewBox="0 0 16 16"
-            fill="none"
-            aria-hidden="true"
-          >
-            <path
-              d="m6 3 5 5-5 5"
-              stroke="currentColor"
-              stroke-width="1.5"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            />
-          </svg>
-        </a>
-        <app-help-launcher
-          presentation="inline"
-          ariaLabel="Open world and regions guide"
-        ></app-help-launcher>
-      </div>
-    </section>
+        <svg
+          class="h-3.5 w-3.5 shrink-0 text-primary/70 transition-transform group-hover:translate-x-0.5"
+          viewBox="0 0 16 16"
+          fill="none"
+          aria-hidden="true"
+        >
+          <path
+            d="m6 3 5 5-5 5"
+            stroke="currentColor"
+            stroke-width="1.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
+      </a>
+    </app-default-header>
 
     <app-tabs *ngIf="region" class="flex w-full shrink-0 flex-col">
       <app-tab label="Areas">

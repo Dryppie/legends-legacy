@@ -1,5 +1,6 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Application.Interfaces.Services.LL.Regions;
 using Domain.Models.Regions.Areas;
 using Microsoft.Extensions.Configuration;
 using Services.LL.PowerRatings;
@@ -33,10 +34,10 @@ public sealed class RegionAreaBalancingTests
             .ToArray();
 
         Assert.Equal(Enumerable.Range(1, 10), scalings.Select(x => x.GlobalStep));
-        Assert.Equal(Enumerable.Range(0, 10), scalings.Select(x => x.RegionStep));
+        Assert.Equal(Enumerable.Range(0, 10), scalings.Select(x => x.RegionStep!.Value));
         Assert.Equal(Enumerable.Range(0, 10), scalings.Select(x => x.ProgressionStep));
         Assert.Equal(
-            [47, 59, 73, 91, 114, 142, 176, 220, 274, 342],
+            [47, 54, 62, 72, 83, 95, 109, 126, 145, 167],
             scalings.Select(x => x.RecommendedCombatRating));
         Assert.All(scalings.Zip(scalings.Skip(1)), pair =>
         {
@@ -53,13 +54,13 @@ public sealed class RegionAreaBalancingTests
         var first = provider.GetScaling(new Area { Id = "region_01_area_01", DifficultyTier = 1 });
         var last = provider.GetScaling(new Area { Id = "region_01_area_07", DifficultyTier = 10 });
 
-        Assert.Equal("shenic-area-v3", first.ProfileId);
+        Assert.Equal("shenic-area-v4", first.ProfileId);
         Assert.Equal(1.6d, first.HealthMultiplier, 6);
         Assert.Equal(1.85d, first.OffenseMultiplier, 6);
         Assert.Equal(47, first.RecommendedCombatRating);
-        Assert.Equal(1.6d * Math.Pow(1.2609, 9), last.HealthMultiplier, 6);
-        Assert.Equal(1.85d * Math.Pow(1.1891, 9), last.OffenseMultiplier, 6);
-        Assert.Equal(342, last.RecommendedCombatRating);
+        Assert.Equal(1.6d * Math.Pow(1.180298, 9), last.HealthMultiplier, 6);
+        Assert.Equal(1.85d * Math.Pow(1.122646, 9), last.OffenseMultiplier, 6);
+        Assert.Equal(167, last.RecommendedCombatRating);
 
         var fallback = provider.GetScaling(new Area { Id = "unmapped", DifficultyTier = 10 });
         Assert.Equal("legacy-area-v1", fallback.ProfileId);

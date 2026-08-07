@@ -1,10 +1,11 @@
 <div class="ll-page-stack overflow-y-auto overscroll-contain pb-2 sm:pb-4">
-  <div class="flex flex-wrap items-center justify-between gap-2 pr-4">
+  <div class="flex flex-wrap items-center justify-between gap-2 pr-4 sm:pr-6">
     <app-default-header
       section="Character"
       title="Achievements"
       text="Legacy Renown, records, and titles"
       icon="sidebar/character/achievements"
+      [showGuide]="false"
     ></app-default-header>
 
     <!-- <app-regular-button
@@ -14,11 +15,11 @@
     ></app-regular-button> -->
   </div>
 
-  <p *ngIf="error()" class="ll-state ll-state-danger mr-4">
+  <p *ngIf="error()" class="ll-state ll-state-danger">
     {{ error() }}
   </p>
 
-  <section *ngIf="overview() as o" class="grid grid-cols-4 gap-1 pr-4 sm:gap-2">
+  <section *ngIf="overview() as o" class="grid grid-cols-4 gap-1 sm:gap-2">
     <article class="ll-stat-card min-w-0 p-2 sm:p-3">
       <div class="ll-stat-label truncate">Points</div>
       <div class="ll-heading mt-0.5 truncate text-xl sm:mt-1 sm:text-3xl">
@@ -45,7 +46,7 @@
     </article>
   </section>
 
-  <div class="pr-4">
+  <div>
     <div
       class="ll-segmented ll-scrollbar-none inline-flex max-w-full flex-nowrap gap-1 overflow-x-auto overscroll-x-contain bg-black/30 p-1 sm:flex-wrap sm:overflow-visible"
     >
@@ -78,9 +79,9 @@
 
   <div
     *ngIf="activeView() === 'Achievements'; else titlesView"
-    class="min-h-0 flex-1 overflow-visible pr-4 sm:overflow-hidden"
+    class="min-h-0 flex-1 overflow-visible sm:overflow-hidden"
   >
-    <section class="ll-panel flex min-h-0 flex-col overflow-hidden">
+    <section class="ll-panel flex h-full min-h-0 flex-col overflow-hidden">
       <div
         class="ll-toolbar flex-col items-stretch rounded-none border-x-0 border-t-0 px-3 py-3"
       >
@@ -229,7 +230,7 @@
 
   <ng-template #titlesView>
     <div
-      class="grid min-h-0 flex-1 grid-cols-1 gap-2 overflow-hidden pr-4 xl:grid-cols-[22rem_minmax(0,1fr)]"
+      class="grid min-h-0 flex-1 grid-cols-1 gap-2 overflow-hidden xl:grid-cols-[22rem_minmax(0,1fr)]"
     >
       <aside class="ll-panel flex min-h-0 flex-col overflow-hidden">
         <div class="border-b border-light_gray/70 p-4">
@@ -241,7 +242,7 @@
             <button
               type="button"
               class="ll-button px-3 py-1 text-xs"
-              [disabled]="!equippedTitle()"
+              [disabled]="!equippedTitle() || titlePositionUpdating()"
               (click)="unequip()"
             >
               Unequip
@@ -254,7 +255,7 @@
               *ngIf="equippedTitle() as title; else noEquippedTitle"
             >
               <div class="mt-1 text-base font-semibold text-primary">
-                {{ title.preview }}
+                {{ titlePreview(title) }}
               </div>
               <p class="ll-copy mt-1">{{ title.description }}</p>
             </ng-container>
@@ -273,7 +274,8 @@
                   'll-segmented-button-active':
                     titleDisplayPosition() === position,
                 }"
-                (click)="titleDisplayPosition.set(position)"
+                [disabled]="titlePositionUpdating()"
+                (click)="setTitleDisplayPosition(position)"
               >
                 {{ position }}
               </button>

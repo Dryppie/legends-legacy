@@ -184,16 +184,32 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
         var definition = _definitions.GetById(essence.EssenceDefinitionId);
         if (definition is null) return new(false, "Essence definition not found.", 0, 0, 0, false);
 
+        var availableLevels = _progression.GetLevelCap(essence.AscensionTier) - essence.Level;
+        if (availableLevels <= 0)
+            return new(false, "This Essence is at its current Ascension level cap.", 0, 0, 0, true);
+
         var ownedDust = await GetInventoryQuantityAsync(characterId, EssenceDustItemId, cancellationToken);
-        var dustToSpend = Math.Min(dustAmount, ownedDust);
+        var dustToSpend = Math.Min(Math.Min(dustAmount, ownedDust), availableLevels);
         if (dustToSpend <= 0) return new(false, "Not enough Essence Dust.", 0, 0, 0, false);
 
-        var result = _progression.GrantXp(essence, definition, dustToSpend * 25);
-        var spent = (int)Math.Ceiling(result.XpGained / 25d);
-        if (spent <= 0) return new(false, "This Essence is at its current Ascension level cap.", 0, 0, 0, true);
+        var xpGained = 0;
+        var levelsGained = 0;
+        for (var index = 0; index < dustToSpend; index++)
+        {
+            var xpToNextLevel = _progression.GetXpRequiredForNextLevel(essence, definition) - essence.CurrentXp;
+            var result = _progression.GrantXp(essence, definition, xpToNextLevel);
+            xpGained += result.XpGained;
+            levelsGained += result.LevelsGained;
+        }
 
-        await RemoveInventoryQuantityAsync(characterId, EssenceDustItemId, spent, cancellationToken);
-        return new(true, "Essence Dust spent.", spent, result.XpGained, result.LevelsGained, result.ReachedTierCap);
+        await RemoveInventoryQuantityAsync(characterId, EssenceDustItemId, levelsGained, cancellationToken);
+        return new(
+            true,
+            "Essence Dust spent.",
+            levelsGained,
+            xpGained,
+            levelsGained,
+            essence.Level >= _progression.GetLevelCap(essence.AscensionTier));
     }
 
     public async Task<EssenceOperationResult> AscendEssenceAsync(Guid characterId, Guid playerEssenceId, CancellationToken cancellationToken)

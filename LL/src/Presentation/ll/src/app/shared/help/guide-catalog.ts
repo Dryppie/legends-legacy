@@ -2,7 +2,6 @@ export const GUIDE_PAGE_IDS = {
   characterOverview: 'character-overview',
   inventory: 'inventory',
   essences: 'essences',
-  achievements: 'achievements',
   soulstones: 'soulstones',
   combat: 'combat',
   world: 'world',
@@ -13,8 +12,6 @@ export const GUIDE_PAGE_IDS = {
   colosseum: 'colosseum',
   tournamentReplay: 'tournament-replay',
   marketplace: 'marketplace',
-  leaderboard: 'leaderboard',
-  settings: 'settings',
 } as const;
 
 export type GuidePageId = (typeof GUIDE_PAGE_IDS)[keyof typeof GUIDE_PAGE_IDS];

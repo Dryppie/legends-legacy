@@ -1,5 +1,5 @@
 {
-  "version": 3,
+  "version": 4,
   "profiles": [
     {
       "id": "legacy-area-v1",
@@ -38,37 +38,37 @@
       "maximumStepIncrease": 0.50
     },
     {
-      "id": "shenic-area-v3",
+      "id": "shenic-area-v4",
       "targetWinRateBasisPoints": 8500,
       "healthCurve": {
         "model": "Exponential",
         "baseMultiplier": 1.6,
-        "growthPerStep": 0.2609,
+        "growthPerStep": 0.180298,
         "exponent": 1.0
       },
       "offenseCurve": {
         "model": "Exponential",
         "baseMultiplier": 1.85,
-        "growthPerStep": 0.1891,
+        "growthPerStep": 0.122646,
         "exponent": 1.0
       },
       "defenseCurve": {
         "model": "Exponential",
         "baseMultiplier": 1.15,
-        "growthPerStep": 0.1948,
+        "growthPerStep": 0.127070,
         "exponent": 1.0
       },
       "resistanceCurve": {
         "model": "Exponential",
         "baseMultiplier": 1.15,
-        "growthPerStep": 0.1948,
+        "growthPerStep": 0.127070,
         "exponent": 1.0
       },
-      "attackSpeedGrowthPerStep": 0.10,
-      "penetrationGrowthPerStep": 0.12,
-      "softDefenseGrowthPerStep": 0.06,
-      "critChancePerStep": 0.03,
-      "critDamagePerStep": 0.04,
+      "attackSpeedGrowthPerStep": 0.048830,
+      "penetrationGrowthPerStep": 0.058596,
+      "softDefenseGrowthPerStep": 0.029298,
+      "critChancePerStep": 0.014649,
+      "critDamagePerStep": 0.019532,
       "critChanceCap": 0.45,
       "critDamageCap": 2.0,
       "maximumStepIncrease": 0.27
@@ -77,10 +77,10 @@
   "regions": [
     {
       "regionKey": "shenic",
-      "profileId": "shenic-area-v3",
+      "profileId": "shenic-area-v4",
       "startingGlobalStep": 1,
       "startingCombatRating": 47,
-      "endingCombatRating": 342,
+      "endingCombatRating": 167,
       "areaIds": [
         "region_01_area_01",
         "region_01_area_02",

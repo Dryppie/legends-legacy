@@ -2,8 +2,24 @@ import { Component, effect, Input, OnChanges } from '@angular/core';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { CharacterStateService } from '../../../../core/services/api/character/character-state.service';
 import { AbilityTooltipContainerDirective } from '../../../directives/ability-tooltip-container/ability-tooltip-container.directive';
+import { AttributeDto } from '../../../models/Dtos/attributesDto';
 import { EssenceEffectDto } from '../../../models/essence-system';
 import { EssenceDescriptionFormatter } from './essence-description-formatter';
+
+export function resolveEffectiveAttributeValue(
+  attribute: string,
+  combatAttributes: AttributeDto[],
+  baseAttributes: AttributeDto[],
+): number {
+  const matches = (candidate: AttributeDto) =>
+    candidate.attributeType.toLowerCase() === attribute.toLowerCase();
+
+  return (
+    combatAttributes.find(matches)?.value ??
+    baseAttributes.find(matches)?.value ??
+    0
+  );
+}
 
 @Component({
   selector: 'app-essence-description',
@@ -13,6 +29,7 @@ import { EssenceDescriptionFormatter } from './essence-description-formatter';
 })
 export class EssenceDescriptionComponent implements OnChanges {
   @Input() description = '';
+  @Input() abilityName = '';
   @Input() effects: EssenceEffectDto[] = [];
   safeDescription!: SafeHtml;
 
@@ -37,22 +54,17 @@ export class EssenceDescriptionComponent implements OnChanges {
       this.description,
       this.effects,
       (attribute) => this.getAttributeValue(attribute),
+      this.abilityName,
     );
     this.safeDescription = this.sanitizer.bypassSecurityTrustHtml(html);
   }
 
   private getAttributeValue(attribute: string): number {
     const overview = this.characterState.overview();
-    const attributes = [
-      ...(overview?.baseAttributes ?? []),
-      ...(overview?.baseCombatAttributes ?? []),
-    ];
-
-    return (
-      attributes.find(
-        (candidate) =>
-          candidate.attributeType.toLowerCase() === attribute.toLowerCase(),
-      )?.value ?? 0
+    return resolveEffectiveAttributeValue(
+      attribute,
+      overview?.baseCombatAttributes ?? [],
+      overview?.baseAttributes ?? [],
     );
   }
 }

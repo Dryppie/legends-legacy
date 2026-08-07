@@ -24,7 +24,12 @@ public sealed class AbilityEffectSpecConverter : ITypeConverter<AbilityEffectSpe
             source.StatusId,
             source.DurationTicks > 0 ? source.DurationTicks / 10d : null,
             source.ScalingAttribute is { } attribute
-                ? [new EssenceEffectScalingDto(attribute.ToString(), source.ScalingCoefficient)]
+                ? [new EssenceEffectScalingDto(
+                    attribute.ToString(),
+                    source.ScalingCoefficient,
+                    source.MaximumScalingCoefficient > source.ScalingCoefficient
+                        ? source.MaximumScalingCoefficient
+                        : null)]
                 : [],
             []);
 }

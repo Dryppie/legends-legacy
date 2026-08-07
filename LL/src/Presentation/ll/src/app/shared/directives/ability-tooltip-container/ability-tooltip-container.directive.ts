@@ -153,7 +153,9 @@ export class AbilityTooltipContainerDirective implements OnDestroy {
       attr: attr || null,
       attrValue: Number(attrvalue),
       unit: unit ?? '',
+      resultLabel: dataset['resultLabel'] ?? unit ?? '',
       hasRange: range === 'true',
+      rollDisplay: dataset['rollDisplay'] ?? '',
       note: dataset['note'] ?? '',
     };
   }

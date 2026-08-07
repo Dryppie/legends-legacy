@@ -52,7 +52,14 @@ describe('HelpLauncherComponent', () => {
     const button: HTMLButtonElement = fixture.nativeElement.querySelector(
       '[data-tour="page-helper"]',
     );
-    expect(button.textContent).toContain('Guide');
+    expect(button.textContent?.trim()).toBe('?');
+    expect(button.classList).toContain('rounded-full');
+    expect(button.classList).toContain('border-b');
+    expect(button.classList).toContain('border-l');
+    expect(button.classList).toContain('bg-texture');
+    expect(button.classList).toContain('hover:scale-[1.1]');
+    expect(button.parentElement?.classList).toContain('sm:h-14');
+    expect(button.parentElement?.classList).toContain('sm:w-14');
 
     button.click();
 

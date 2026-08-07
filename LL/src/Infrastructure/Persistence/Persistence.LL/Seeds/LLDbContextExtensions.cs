@@ -190,7 +190,9 @@ public static class LLDbContextExtensions
             CharacterId = character.Id,
         };
 
-        var attributes = EntityBaseAttributeHelper.CreateEntityAttributes(character.Id);
+        var attributes = EntityBaseAttributeHelper.CreateEntityAttributesForLevel(
+            character.Id,
+            character.Level);
         await context.EntityAttributes.AddRangeAsync(attributes);
 
         var arenaTicketStatus = new ArenaTicketStatus()
@@ -234,7 +236,9 @@ public static class LLDbContextExtensions
             {
                 CharacterId = character.Id,
             };
-            var attributes = EntityBaseAttributeHelper.CreateEntityAttributes(character.Id);
+            var attributes = EntityBaseAttributeHelper.CreateEntityAttributesForLevel(
+                character.Id,
+                character.Level);
             var arenaTicketStatus = new ArenaTicketStatus
             {
                 CharacterId = character.Id,

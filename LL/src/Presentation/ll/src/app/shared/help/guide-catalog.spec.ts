@@ -19,13 +19,17 @@ describe('guide route catalog', () => {
     SETTINGS_ROUTES,
   ];
 
-  it('assigns guide metadata to every concrete game page', () => {
+  it('marks every concrete game page as guided or intentionally guide-free', () => {
     const pages = routeSets.flatMap((routes) => concretePages(routes));
-    const withoutGuide = pages
-      .filter((route) => typeof route.data?.['guidePageId'] !== 'string')
+    const invalidGuideConfiguration = pages
+      .filter((route) => {
+        const hasGuide = typeof route.data?.['guidePageId'] === 'string';
+        const guideDisabled = route.data?.['guideDisabled'] === true;
+        return hasGuide === guideDisabled;
+      })
       .map((route) => route.path);
 
-    expect(withoutGuide).toEqual([]);
+    expect(invalidGuideConfiguration).toEqual([]);
   });
 
   it('uses every catalog entry in route metadata', () => {

@@ -317,11 +317,11 @@ public sealed class CanonicalEquipmentBuildFactoryTests
             ratings.Select(entry => $"{entry.Key}={entry.Value / 10}"));
         var expectedDisplayedRatings = new Dictionary<CanonicalPartyProfile, int>
         {
-            [CanonicalPartyProfile.Balanced] = 179,
-            [CanonicalPartyProfile.Offense] = 191,
-            [CanonicalPartyProfile.Sustain] = 190,
-            [CanonicalPartyProfile.Defensive] = 166,
-            [CanonicalPartyProfile.Area] = 190
+            [CanonicalPartyProfile.Balanced] = 143,
+            [CanonicalPartyProfile.Offense] = 134,
+            [CanonicalPartyProfile.Sustain] = 136,
+            [CanonicalPartyProfile.Defensive] = 130,
+            [CanonicalPartyProfile.Area] = 136
         };
 
         Assert.Equal(
@@ -341,12 +341,16 @@ public sealed class CanonicalEquipmentBuildFactoryTests
             .ToDictionary(
                 profile => profile,
                 profile => _factory.CreateBuild(profile, rung).Rating.Overall / 10);
+        var expectedDisplayedRatings = new Dictionary<CanonicalPartyProfile, int>
+        {
+            [CanonicalPartyProfile.Balanced] = 150,
+            [CanonicalPartyProfile.Offense] = 138,
+            [CanonicalPartyProfile.Sustain] = 140,
+            [CanonicalPartyProfile.Defensive] = 132,
+            [CanonicalPartyProfile.Area] = 139
+        };
 
-        Assert.Equal(184, ratings[CanonicalPartyProfile.Balanced]);
-        Assert.Equal(193, ratings[CanonicalPartyProfile.Offense]);
-        Assert.Equal(197, ratings[CanonicalPartyProfile.Sustain]);
-        Assert.Equal(168, ratings[CanonicalPartyProfile.Defensive]);
-        Assert.Equal(193, ratings[CanonicalPartyProfile.Area]);
+        Assert.Equal(expectedDisplayedRatings, ratings);
     }
 
     [Fact]

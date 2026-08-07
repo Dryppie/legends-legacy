@@ -1,13 +1,13 @@
-<div class="ll-page-stack sm:pr-4">
-  <div class="flex flex-wrap items-center justify-between">
-    <app-default-header
-      section="Oracle"
-      title="Prophecies"
-      text="Daily omens, weekly favor, and earned caches"
-      icon="sidebar/world/prophecies"
-    ></app-default-header>
-
+<div class="ll-page-stack">
+  <app-default-header
+    class="pr-4 sm:pr-6"
+    section="Oracle"
+    title="Prophecies"
+    text="Daily omens, weekly favor, and earned caches"
+    icon="sidebar/world/prophecies"
+  >
     <button
+      header-actions
       type="button"
       class="ll-button"
       (click)="refresh()"
@@ -15,7 +15,7 @@
     >
       Refresh
     </button>
-  </div>
+  </app-default-header>
 
   <div *ngIf="error()" class="ll-state-danger">{{ error() }}</div>
   <div *ngIf="loading() && !overview()" class="ll-empty-state">
@@ -199,7 +199,7 @@
     </section>
 
     <div
-      class="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto overscroll-contain pr-2 sm:pr-4"
+      class="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto overscroll-contain"
     >
       <section class="ll-panel bg-texture bg-auto p-4">
         <div class="mb-3 flex flex-wrap items-center justify-between gap-3">

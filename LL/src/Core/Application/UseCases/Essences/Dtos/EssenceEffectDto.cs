@@ -12,4 +12,7 @@ public sealed record EssenceEffectDto(
     IReadOnlyList<EssenceEffectScalingDto> Scaling,
     IReadOnlyList<EssenceEffectDto> NestedEffects);
 
-public sealed record EssenceEffectScalingDto(string Attribute, double Coefficient);
+public sealed record EssenceEffectScalingDto(
+    string Attribute,
+    double Coefficient,
+    double? MaximumCoefficient = null);

@@ -21,8 +21,15 @@
   justify-content: space-between;
   gap: var(--ll-space-6);
   padding: var(--ll-space-3) var(--ll-space-5);
+  padding-right: var(--ll-space-4);
   border-bottom: 1px solid var(--ll-color-border);
   background: var(--ll-color-surface-strong);
+}
+
+@media (min-width: 640px) {
+  .dungeon-header {
+    padding-right: var(--ll-space-6);
+  }
 }
 
 .dungeon-eyebrow,
@@ -981,7 +988,8 @@
 
   .dungeon-header__actions {
     width: 100%;
-    align-items: flex-start;
+    align-items: center;
+    justify-content: space-between;
     flex-wrap: wrap;
     gap: var(--ll-space-3);
   }
@@ -1014,8 +1022,9 @@
 
   .dungeon-header__actions {
     width: 100%;
-    align-items: flex-start;
-    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    flex-direction: row;
     gap: var(--ll-space-3);
   }
 

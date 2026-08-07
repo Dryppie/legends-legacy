@@ -9,7 +9,7 @@ public static class DungeonEnemyDifficultyScaling
     // Tier I deliberately starts above the authored creature baseline. Every
     // higher difficulty compounds from that dungeon baseline, not from the
     // original world-creature baseline.
-    public const float TierOneStrengthMultiplier = 3f;
+    public const float TierOneStrengthMultiplier = 2.75f;
     public const float StrengthMultiplierPerTier = 5f;
 
     private static readonly HashSet<AttributeType> ScaledAttributes =

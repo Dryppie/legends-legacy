@@ -1,0 +1,170 @@
+using Domain.Models.Attributes;
+using Domain.Models.Combat.Abilities;
+
+namespace Domain.Models.Essences;
+
+public static class EssenceAbilityProgressionScaler
+{
+    public static AbilitySpec Apply(AbilitySpec ability, int ascensionTier)
+    {
+        if (ascensionTier <= 0)
+            return ability;
+
+        var scaled = CloneAbility(ability);
+        if (scaled.Kind == AbilitySpecKind.Active)
+            scaled.CooldownTicks = ScaleCooldownTicks(scaled.CooldownTicks, ascensionTier);
+
+        foreach (var trigger in scaled.Triggers)
+            trigger.InternalCooldownTicks = ScaleCooldownTicks(trigger.InternalCooldownTicks, ascensionTier);
+
+        foreach (var effect in scaled.Effects)
+        {
+            var valueMultiplier = EssenceProgressionConstants.ScaleAbilityValue(
+                1d,
+                ascensionTier,
+                effect.Operation.ToString());
+
+            effect.BaseValue = ScaleValue(effect.BaseValue, valueMultiplier);
+            effect.ScalingCoefficient *= (float)valueMultiplier;
+            effect.MaximumScalingCoefficient *= (float)valueMultiplier;
+            effect.EventMagnitudeCoefficient *= (float)valueMultiplier;
+            effect.ConditionScalingCoefficient *= (float)valueMultiplier;
+            effect.StatusScalingCoefficient *= (float)valueMultiplier;
+
+            if (effect.DurationTicks > 0)
+            {
+                effect.DurationTicks = SecondsToTicks(EssenceProgressionConstants.ScaleEffectDurationSeconds(
+                    effect.DurationTicks / 10d,
+                    ascensionTier,
+                    effect.Operation.ToString(),
+                    effect.StatusId));
+            }
+
+            if (effect.Operation == AbilityEffectOperation.Summon)
+            {
+                effect.SummonPowerMultiplier *= EssenceProgressionConstants.GetSummonPowerMultiplier(ascensionTier);
+                effect.SummonHealthMultiplier *= EssenceProgressionConstants.GetSummonHealthMultiplier(ascensionTier);
+            }
+        }
+
+        return scaled;
+    }
+
+    private static int ScaleCooldownTicks(int ticks, int ascensionTier) =>
+        ticks <= 0
+            ? ticks
+            : SecondsToTicks(EssenceProgressionConstants.ScaleActiveCooldownSeconds(ticks / 10d, ascensionTier));
+
+    private static int ScaleValue(int value, double multiplier) =>
+        (int)Math.Round(value * multiplier, MidpointRounding.AwayFromZero);
+
+    private static int SecondsToTicks(double seconds) =>
+        Math.Max(0, (int)Math.Round(seconds * 10d, MidpointRounding.AwayFromZero));
+
+    private static AbilitySpec CloneAbility(AbilitySpec ability) =>
+        new()
+        {
+            Id = ability.Id,
+            Kind = ability.Kind,
+            Name = ability.Name,
+            Description = ability.Description,
+            OwningEssenceId = ability.OwningEssenceId,
+            CooldownTicks = ability.CooldownTicks,
+            Tags = [.. ability.Tags],
+            DeliveryTags = [.. ability.DeliveryTags],
+            EffectTags = [.. ability.EffectTags],
+            TargetingType = ability.TargetingType,
+            Scaling = new Dictionary<AttributeType, float>(ability.Scaling),
+            ConversionFlags = CloneConversionFlags(ability.ConversionFlags),
+            IsHardCrowdControl = ability.IsHardCrowdControl,
+            CanEcho = ability.CanEcho,
+            CanRepeat = ability.CanRepeat,
+            CanTriggerWeaponEffects = ability.CanTriggerWeaponEffects,
+            Costs = [.. ability.Costs.Select(CloneCost)],
+            Triggers = [.. ability.Triggers.Select(CloneTrigger)],
+            Effects = [.. ability.Effects.Select(CloneEffect)]
+        };
+
+    private static AbilityConversionFlags CloneConversionFlags(AbilityConversionFlags flags) =>
+        new()
+        {
+            AllowDamageTypeConversion = flags.AllowDamageTypeConversion,
+            AllowScalingConversion = flags.AllowScalingConversion,
+            AllowDeliveryConversion = flags.AllowDeliveryConversion,
+            AllowTargetingConversion = flags.AllowTargetingConversion,
+            AllowSummonProxy = flags.AllowSummonProxy,
+            AllowEquipmentOverride = flags.AllowEquipmentOverride,
+            AllowTrueDamageConversion = flags.AllowTrueDamageConversion
+        };
+
+    private static AbilityCostSpec CloneCost(AbilityCostSpec cost) =>
+        new()
+        {
+            Resource = cost.Resource,
+            BaseValue = cost.BaseValue,
+            ScalingAttribute = cost.ScalingAttribute,
+            ScalingCoefficient = cost.ScalingCoefficient
+        };
+
+    private static AbilityTriggerSpec CloneTrigger(AbilityTriggerSpec trigger) =>
+        new()
+        {
+            Event = trigger.Event,
+            InternalCooldownTicks = trigger.InternalCooldownTicks,
+            InitialDelayTicks = trigger.InitialDelayTicks,
+            EveryNthOccurrence = trigger.EveryNthOccurrence,
+            Conditions = [.. trigger.Conditions.Select(CloneCondition)],
+            EffectIds = [.. trigger.EffectIds]
+        };
+
+    private static AbilityEffectSpec CloneEffect(AbilityEffectSpec effect) =>
+        new()
+        {
+            Id = effect.Id,
+            Operation = effect.Operation,
+            Target = effect.Target,
+            BaseValue = effect.BaseValue,
+            ScalingAttribute = effect.ScalingAttribute,
+            ScalingCoefficient = effect.ScalingCoefficient,
+            MaximumScalingCoefficient = effect.MaximumScalingCoefficient,
+            EventMagnitudeCoefficient = effect.EventMagnitudeCoefficient,
+            ScalingCondition = effect.ScalingCondition,
+            ConditionScalingCoefficient = effect.ConditionScalingCoefficient,
+            ScalingStatusId = effect.ScalingStatusId,
+            StatusScalingCoefficient = effect.StatusScalingCoefficient,
+            Attribute = effect.Attribute,
+            StatusId = effect.StatusId,
+            Condition = effect.Condition,
+            AlternativeCondition = effect.AlternativeCondition,
+            SummonId = effect.SummonId,
+            SummonPowerMultiplier = effect.SummonPowerMultiplier,
+            SummonHealthMultiplier = effect.SummonHealthMultiplier,
+            Resource = effect.Resource,
+            DurationTicks = effect.DurationTicks,
+            IntervalTicks = effect.IntervalTicks,
+            Uses = effect.Uses,
+            ChancePercent = effect.ChancePercent,
+            AttackType = effect.AttackType,
+            DamageType = effect.DamageType,
+            CritEligibility = effect.CritEligibility,
+            CritChanceBonus = effect.CritChanceBonus,
+            ArmorPenetrationBonus = effect.ArmorPenetrationBonus,
+            LifeStealPercentage = effect.LifeStealPercentage,
+            ProcCoefficient = effect.ProcCoefficient,
+            Tags = [.. effect.Tags],
+            Conditions = [.. effect.Conditions.Select(CloneCondition)]
+        };
+
+    private static AbilityConditionSpec CloneCondition(AbilityConditionSpec condition) =>
+        new()
+        {
+            Type = condition.Type,
+            Subject = condition.Subject,
+            StatusId = condition.StatusId,
+            Condition = condition.Condition,
+            DamageType = condition.DamageType,
+            AttackType = condition.AttackType,
+            Tag = condition.Tag,
+            Value = condition.Value
+        };
+}
