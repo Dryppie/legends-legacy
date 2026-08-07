@@ -1,5 +1,6 @@
 import {
   Component,
+  computed,
   effect,
   EventEmitter,
   Input,
@@ -29,6 +30,7 @@ import { FirstPartyTourService } from '../../../core/services/client-side/first-
 import { Router } from '@angular/router';
 import { HelpLauncherComponent } from '../../help/help-launcher.component';
 import { GUIDE_PAGE_IDS } from '../../help/guide-catalog';
+import { CharacterActionType } from '../../models/enums/characterActionType';
 
 @Component({
   selector: 'app-combat',
@@ -75,6 +77,7 @@ export class CombatComponent implements OnInit, OnDestroy {
   enemyCharacters: SimpleCombatEntityDto[] = [];
   subscriptions: Subscription = new Subscription();
   readonly currentAction;
+  readonly hasActiveIdleCombat;
   readonly idleCombatError;
   // Only set to true if a combat result has been received, or if start combat has been
   displayCombat = false;
@@ -95,6 +98,13 @@ export class CombatComponent implements OnInit, OnDestroy {
     private readonly router: Router,
   ) {
     this.currentAction = this.characterActionService.currentAction;
+    this.hasActiveIdleCombat = computed(() => {
+      const action = this.currentAction();
+      return (
+        action?.characterActionType === CharacterActionType.Combat &&
+        !action.isDeleted
+      );
+    });
     this.idleCombatError = this.characterActionService.idleCombatError;
 
     const isStartingCombatSig = this.characterActionService.loadingCombat;
@@ -103,6 +113,22 @@ export class CombatComponent implements OnInit, OnDestroy {
 
     effect(() => {
       this.isLoading = isStartingCombatSig() || isRefreshingActionSig();
+    });
+
+    effect(() => {
+      const shouldLeaveCombatRoute =
+        this.battleTypeSignal() === BattleType.IdleCombat &&
+        !this.hasActiveIdleCombat() &&
+        !isStartingCombatSig() &&
+        !isRefreshingActionSig();
+
+      if (!shouldLeaveCombatRoute) return;
+
+      queueMicrotask(() => {
+        if (this.router.url.startsWith('/game/combat')) {
+          void this.router.navigate(['/game/world']);
+        }
+      });
     });
 
     effect(() => {
@@ -240,7 +266,6 @@ export class CombatComponent implements OnInit, OnDestroy {
     this.stopCombatButtonText = 'Stopping combat..';
     this.characterActionService.stopAction();
     this.gameService.endCombat();
-    this.router.navigate(['/game/world']);
   }
 
   stopCombat() {

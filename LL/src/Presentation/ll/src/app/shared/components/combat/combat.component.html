@@ -18,19 +18,18 @@
   </div>
 
   <div
-    *ngIf="!displayCombat && battleType === 'IdleCombat'"
+    *ngIf="
+      !displayCombat &&
+      battleType === 'IdleCombat' &&
+      (hasActiveIdleCombat() || isLoading)
+    "
     class="flex h-full w-full items-center justify-center px-4 text-center"
   >
     <div class="ll-panel w-full max-w-xl p-6">
-      <div class="flex items-center justify-between gap-3 text-left">
+      <div class="text-left">
         <p class="ll-eyebrow">
           {{ isLoading ? "Offline Progress" : "Idle Combat" }}
         </p>
-        <app-help-launcher
-          [pageId]="combatGuidePageId"
-          presentation="inline"
-          ariaLabel="Open combat guide"
-        ></app-help-launcher>
       </div>
       <h2 class="ll-heading mt-2 text-2xl">
         {{ isLoading ? "Resolving Combat" : "Combat Is Ongoing" }}
