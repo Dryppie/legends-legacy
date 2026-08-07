@@ -28,7 +28,7 @@ public sealed class ProphecyBalanceProviderTests
         var catalog = provider.GetCatalog();
         Assert.Equal(24, catalog.Targets.Count);
         Assert.Equal(7, catalog.RewardProfiles.Count);
-        Assert.Equal(3, catalog.CategoryRewardPackages.Count);
+        Assert.Equal(5, catalog.CategoryRewardPackages.Count);
         Assert.Equal(100, catalog.RewardScaling.CinderGrowthBasisPointsPerCharacterLevel);
         Assert.Equal(20000, catalog.RewardScaling.CinderGrowthCapBasisPoints);
         Assert.Equal(5, catalog.RewardScaling.CinderRoundingIncrement);
@@ -80,43 +80,56 @@ public sealed class ProphecyBalanceProviderTests
         Assert.Equal(4500, 5 * shares["Daily.Common"] + shares["Weekly.Uncommon"]);
         Assert.Equal(6500, 5 * shares["Daily.Rare"] + shares["Weekly.Epic"]);
 
-        var cinderFloors = catalog.RewardProfiles.ToDictionary(
+        Assert.All(catalog.RewardProfiles, profile => Assert.Equal(0, profile.MinimumCinders));
+        Assert.All(catalog.WeeklyMilestones, milestone => Assert.Equal(0, milestone.Reward.Cinders));
+        Assert.All(catalog.Caches, cache =>
+            Assert.All(cache.Rewards, entry => Assert.Equal(0, entry.Reward.Cinders)));
+
+        var soulstonesByProfile = catalog.RewardProfiles.ToDictionary(
             x => x.Id,
-            x => x.MinimumCinders);
-        Assert.Equal(1_000, cinderFloors["Daily.Common"]);
-        Assert.Equal(1_250, cinderFloors["Daily.Uncommon"]);
-        Assert.Equal(1_500, cinderFloors["Daily.Rare"]);
-        Assert.Equal(1_750, cinderFloors["Daily.Epic"]);
-        Assert.Equal(8_000, cinderFloors["Weekly.Uncommon"]);
-        Assert.Equal(10_000, cinderFloors["Weekly.Rare"]);
-        Assert.Equal(12_000, cinderFloors["Weekly.Epic"]);
-        Assert.Equal([1_000L, 2_500L, 5_000L], catalog.WeeklyMilestones
-            .OrderBy(x => x.FavorRequired)
-            .Select(x => x.Reward.Cinders));
+            x => x.FlatReward.Soulstones);
+        Assert.Equal(2, soulstonesByProfile["Daily.Common"]);
+        Assert.Equal(3, soulstonesByProfile["Daily.Uncommon"]);
+        Assert.Equal(4, soulstonesByProfile["Daily.Rare"]);
+        Assert.Equal(6, soulstonesByProfile["Daily.Epic"]);
+        Assert.Equal(8, soulstonesByProfile["Weekly.Uncommon"]);
+        Assert.Equal(12, soulstonesByProfile["Weekly.Rare"]);
+        Assert.Equal(16, soulstonesByProfile["Weekly.Epic"]);
 
-        Assert.All(catalog.RewardProfiles.Where(x => x.Scope == ProphecyScope.Daily),
-            profile => Assert.Equal(2, profile.FlatReward.SigilFragments));
-        Assert.All(catalog.RewardProfiles.Where(x => x.Scope == ProphecyScope.Weekly),
-            profile => Assert.Equal(5, profile.FlatReward.SigilFragments));
+        var fragmentsByProfile = catalog.RewardProfiles.ToDictionary(
+            x => x.Id,
+            x => x.FlatReward.SigilFragments);
+        Assert.Equal(2, fragmentsByProfile["Daily.Common"]);
+        Assert.Equal(3, fragmentsByProfile["Daily.Uncommon"]);
+        Assert.Equal(4, fragmentsByProfile["Daily.Rare"]);
+        Assert.Equal(5, fragmentsByProfile["Daily.Epic"]);
+        Assert.Equal(8, fragmentsByProfile["Weekly.Uncommon"]);
+        Assert.Equal(10, fragmentsByProfile["Weekly.Rare"]);
+        Assert.Equal(12, fragmentsByProfile["Weekly.Epic"]);
 
-        var expectedWeeklyFragments = 5 * 2 + 5 + new[]
+        var expectedWeeklySoulstones = 5 * soulstonesByProfile["Daily.Common"]
+            + soulstonesByProfile["Weekly.Uncommon"]
+            + catalog.WeeklyMilestones.Sum(x => x.Reward.Soulstones)
+            + new[]
+            {
+                "greater_prophecy_cache",
+                "revelation_cache_small",
+                "revelation_cache_greater",
+                "revelation_cache_perfect_week"
+            }.Sum(cacheId => ExpectedReward(catalog.Caches.Single(x => x.ItemId == cacheId), x => x.Soulstones));
+        Assert.Equal(50.35, expectedWeeklySoulstones, precision: 2);
+
+        var expectedWeeklyFragments = 5 * fragmentsByProfile["Daily.Common"]
+            + fragmentsByProfile["Weekly.Uncommon"]
+            + catalog.WeeklyMilestones.Sum(x => x.Reward.SigilFragments)
+            + new[]
         {
             "greater_prophecy_cache",
             "revelation_cache_small",
             "revelation_cache_greater",
             "revelation_cache_perfect_week"
-        }.Sum(cacheId => ExpectedSigilFragments(catalog.Caches.Single(x => x.ItemId == cacheId)));
-        Assert.InRange(expectedWeeklyFragments, 23, 25);
-        Assert.Equal(24.05, expectedWeeklyFragments, precision: 2);
-
-        var expectedCacheCinders = new[]
-        {
-            "greater_prophecy_cache",
-            "revelation_cache_small",
-            "revelation_cache_greater",
-            "revelation_cache_perfect_week"
-        }.Sum(cacheId => ExpectedCinders(catalog.Caches.Single(x => x.ItemId == cacheId)));
-        Assert.Equal(9_262.5, expectedCacheCinders, precision: 1);
+        }.Sum(cacheId => ExpectedReward(catalog.Caches.Single(x => x.ItemId == cacheId), x => x.SigilFragments));
+        Assert.Equal(47.75, expectedWeeklyFragments, precision: 2);
 
         var weeklyDungeon = catalog.CategoryRewardPackages.Single(x =>
             x.Scope == ProphecyScope.Weekly &&
@@ -124,21 +137,43 @@ public sealed class ProphecyBalanceProviderTests
             x.Difficulty == ProphecyDifficulty.Rare);
         Assert.Contains(weeklyDungeon.LevelScaledItems,
             x => x.MinLevel == 60 && x.ItemId == "item.monster_core.primal" && x.Quantity == 1);
+
+        var weeklyEssence = catalog.CategoryRewardPackages.Single(x =>
+            x.Scope == ProphecyScope.Weekly &&
+            x.Category == ProphecyCategory.Essence &&
+            x.Difficulty == ProphecyDifficulty.Uncommon);
+        Assert.Contains(weeklyEssence.LevelScaledItems,
+            x => x.MinLevel == 30 && x.MaxLevel == 59 && x.ItemId == "item.monster_core.greater" && x.Quantity == 1);
+
+        var weeklyCrafting = catalog.CategoryRewardPackages.Single(x =>
+            x.Scope == ProphecyScope.Weekly &&
+            x.Category == ProphecyCategory.Crafting &&
+            x.Difficulty == ProphecyDifficulty.Uncommon);
+        var catalystCrate = Assert.Single(weeklyCrafting.Reward.Items);
+        Assert.Equal("item.catalyst_selection_crate", catalystCrate.ItemId);
+        Assert.Equal(1, catalystCrate.Quantity);
+
+        var perfectWeek = catalog.Caches.Single(x => x.ItemId == "revelation_cache_perfect_week");
+        Assert.Equal(0.2, ExpectedItemQuantity(perfectWeek, "item.catalyst_selection_crate"), precision: 2);
     }
 
-    private static double ExpectedSigilFragments(ProphecyCacheDefinition cache)
+    private static double ExpectedReward(
+        ProphecyCacheDefinition cache,
+        Func<ProphecyRewardSnapshot, long> selector)
     {
         var totalWeight = cache.Rewards.Sum(x => x.Weight);
         var expectedPerRoll = cache.Rewards.Sum(x =>
-            (double)x.Weight / totalWeight * x.Reward.SigilFragments);
+            (double)x.Weight / totalWeight * selector(x.Reward));
         return cache.Rolls * expectedPerRoll;
     }
 
-    private static double ExpectedCinders(ProphecyCacheDefinition cache)
+    private static double ExpectedItemQuantity(ProphecyCacheDefinition cache, string itemId)
     {
         var totalWeight = cache.Rewards.Sum(x => x.Weight);
         var expectedPerRoll = cache.Rewards.Sum(x =>
-            (double)x.Weight / totalWeight * x.Reward.Cinders);
+            (double)x.Weight / totalWeight * x.Reward.Items
+                .Where(item => item.ItemId == itemId)
+                .Sum(item => item.Quantity));
         return cache.Rolls * expectedPerRoll;
     }
 }

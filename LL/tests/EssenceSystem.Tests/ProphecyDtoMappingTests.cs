@@ -73,6 +73,18 @@ public sealed class ProphecyDtoMappingTests
     }
 
     [Fact]
+    public void ProphecyInstanceDto_hides_cinders_from_a_legacy_reward_snapshot()
+    {
+        var instance = CreateInstance(ProphecyObjectiveType.KillCreatures);
+        instance.RewardSnapshotJson = "{\"cinders\":10000,\"soulstones\":2}";
+
+        var dto = CreateMapper().Map<ProphecyInstanceDto>(instance);
+
+        Assert.Equal(0, dto.Reward.Cinders);
+        Assert.Equal(2, dto.Reward.Soulstones);
+    }
+
+    [Fact]
     public void DungeonSigilAssemblyResponseDto_maps_all_result_fields()
     {
         var result = new DungeonSigilAssemblyResult(

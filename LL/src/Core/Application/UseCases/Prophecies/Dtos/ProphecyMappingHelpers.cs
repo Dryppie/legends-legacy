@@ -19,8 +19,13 @@ internal static class ProphecyMappingHelpers
             ObjectiveType = string.Empty
         };
 
-    public static ProphecyRewardSnapshot ReadReward(string json) =>
-        JsonSerializer.Deserialize<ProphecyRewardSnapshot>(json, JsonOptions) ?? new ProphecyRewardSnapshot();
+    public static ProphecyRewardSnapshot ReadReward(string json)
+    {
+        var reward = JsonSerializer.Deserialize<ProphecyRewardSnapshot>(json, JsonOptions)
+                     ?? new ProphecyRewardSnapshot();
+        reward.Cinders = 0;
+        return reward;
+    }
 
     public static ProphecyGuidanceDto Guidance(PlayerProphecyInstance instance)
     {
