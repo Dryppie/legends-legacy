@@ -245,6 +245,9 @@
             <p class="mt-2 text-xs text-zinc-400">
               Cooldown: {{ essence.activeAbility.cooldownSeconds }}s
             </p>
+            <app-ability-tags
+              [tags]="essence.activeAbility.tags"
+            ></app-ability-tags>
           </article>
           <article class="ll-card p-3">
             <div class="mb-2 flex items-center justify-between gap-2">
@@ -259,6 +262,9 @@
               [description]="essence.passiveAbility.description"
               [effects]="essence.passiveAbility.effects"
             ></app-essence-description>
+            <app-ability-tags
+              [tags]="essence.passiveAbility.tags"
+            ></app-ability-tags>
           </article>
         </div>
 

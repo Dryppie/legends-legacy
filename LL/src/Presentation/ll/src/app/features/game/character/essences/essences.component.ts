@@ -19,6 +19,7 @@ import {
 } from '../../../../shared/components/custom-components/tabs/navigation-tabs/navigation-tabs.component';
 import { DefaultHeaderComponent } from '../../../../shared/components/default-header/default-header.component';
 import { EssenceDescriptionComponent } from '../../../../shared/components/essences/essence-description/essence-description.component';
+import { AbilityTagsComponent } from '../../../../shared/components/essences/ability-tags/ability-tags.component';
 import {
   CreatureArchiveEntryDto,
   EssenceCodexEntryDto,
@@ -66,6 +67,7 @@ interface AscendRequirementView {
     FormsModule,
     DefaultHeaderComponent,
     EssenceDescriptionComponent,
+    AbilityTagsComponent,
     NavigationTabsComponent,
     EssencesAbsorbComponent,
     DropdownComponent,

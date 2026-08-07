@@ -1,0 +1,40 @@
+:host {
+  display: block;
+  min-width: 0;
+}
+
+.ability-tags {
+  display: grid;
+  gap: 0.4rem;
+  margin-top: 0.65rem;
+  padding-top: 0.6rem;
+  border-top: 1px solid rgba(109, 109, 109, 0.3);
+}
+
+.ability-tags-heading {
+  color: var(--ll-color-text-muted);
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.ability-tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+
+.ability-tag {
+  display: inline-flex;
+  min-width: 0;
+  align-items: center;
+  padding: 0.28rem 0.5rem;
+  border: 1px solid rgba(249, 220, 160, 0.18);
+  border-radius: 0.3rem;
+  background: rgba(249, 220, 160, 0.045);
+  color: var(--ll-color-text);
+  font-size: 0.65rem;
+  line-height: 1;
+  white-space: nowrap;
+}

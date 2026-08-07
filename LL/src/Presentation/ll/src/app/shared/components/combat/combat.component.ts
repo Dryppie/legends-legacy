@@ -3,6 +3,7 @@ import {
   computed,
   effect,
   EventEmitter,
+  HostListener,
   Input,
   OnDestroy,
   OnInit,
@@ -240,7 +241,19 @@ export class CombatComponent implements OnInit, OnDestroy {
       return this.isStoppingCombat ? 'Quitting...' : 'Quit';
     }
 
+    if (this.isEscapeDismissibleBattleType()) {
+      return 'Close Summary (Esc)';
+    }
+
     return 'Close Summary';
+  }
+
+  @HostListener('document:keydown.escape')
+  onEscapeKey(): void {
+    if (!this.displayCombat || !this.outcome) return;
+    if (!this.isEscapeDismissibleBattleType()) return;
+
+    this.skipCombat();
   }
 
   outcomeBadgeClass(): string {
@@ -258,6 +271,13 @@ export class CombatComponent implements OnInit, OnDestroy {
 
   skipCombat() {
     this.skipBattle.emit();
+  }
+
+  private isEscapeDismissibleBattleType(): boolean {
+    return (
+      this.battleType === BattleType.Colosseum ||
+      this.battleType === BattleType.Dungeon
+    );
   }
 
   initiateStoppingCombat() {

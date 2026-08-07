@@ -14,6 +14,7 @@ export interface Essence {
 export interface Ability {
   name: string;
   description: string;
+  tags: string[];
   attackTypes: AttackType[];
   damageTypes: DamageType[];
   effectTags: EffectTag[];

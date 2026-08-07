@@ -40,9 +40,10 @@ export class EssenceItemViewService {
     return {
       name: ability.name,
       description: ability.description,
-      attackTypes: this.filterEnumValues(tags, AttackType),
-      damageTypes: this.filterEnumValues(tags, DamageType),
-      effectTags: this.filterEnumValues(tags, EffectTag),
+      tags: [...tags],
+      attackTypes: this.filterEnumValues(tags, AttackType, 'Attack'),
+      damageTypes: this.filterEnumValues(tags, DamageType, 'Damage'),
+      effectTags: this.filterEnumValues(tags, EffectTag, 'Effect'),
       targeting: ability.targeting ? [ability.targeting as Targeting] : [],
       cooldown: ability.cooldownSeconds * 10,
       effects: ability.effects ?? [],
@@ -52,10 +53,14 @@ export class EssenceItemViewService {
   private filterEnumValues<T extends Record<string, string>>(
     values: string[],
     enumType: T,
+    category: string,
   ): T[keyof T][] {
     const allowedValues = new Set(Object.values(enumType));
-    return values.filter((value): value is T[keyof T] =>
-      allowedValues.has(value),
-    );
+    return values
+      .filter(
+        (value) => !value.includes('.') || value.startsWith(`${category}.`),
+      )
+      .map((value) => value.slice(value.lastIndexOf('.') + 1))
+      .filter((value): value is T[keyof T] => allowedValues.has(value));
   }
 }

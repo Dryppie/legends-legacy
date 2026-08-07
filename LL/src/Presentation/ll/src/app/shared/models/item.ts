@@ -139,6 +139,7 @@ export function essenceItemToEssence(item: EssenceItem): Essence {
     active: {
       name: 'Unbound Essence',
       description: item.description,
+      tags: [],
       attackTypes: [],
       damageTypes: [],
       effectTags: [],
@@ -149,6 +150,7 @@ export function essenceItemToEssence(item: EssenceItem): Essence {
     passive: {
       name: 'Soul Archive',
       description: 'Absorb this item to add it to the Soul Archive.',
+      tags: [],
       attackTypes: [],
       damageTypes: [],
       effectTags: [],

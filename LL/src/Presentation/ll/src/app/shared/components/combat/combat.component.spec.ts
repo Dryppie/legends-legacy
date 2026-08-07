@@ -5,6 +5,8 @@ import { CharacterActionsStateService } from '../../../core/services/api/charact
 import { FirstPartyTourService } from '../../../core/services/client-side/first-party-tour/first-party-tour.service';
 import { GameService } from '../../../core/services/client-side/game/game.service';
 import { CombatStateService } from '../../../core/state/combat-state/combat-state.service';
+import { BattleType } from '../../../core/state/combat-state/combatState';
+import { BattleOutcome } from '../../models/Dtos/combatResultDto';
 import { CharacterActionType } from '../../models/enums/characterActionType';
 import { CombatComponent } from './combat.component';
 
@@ -81,5 +83,43 @@ describe('CombatComponent', () => {
     await Promise.resolve();
 
     expect(router.navigate).toHaveBeenCalledOnceWith(['/game/world']);
+  });
+
+  it('shows the Escape shortcut on Arena and Dungeon summary buttons', () => {
+    fixture.componentInstance.battleType = BattleType.Colosseum;
+    expect(fixture.componentInstance.combatActionButtonText()).toBe(
+      'Close Summary (Esc)',
+    );
+
+    fixture.componentInstance.battleType = BattleType.Dungeon;
+    expect(fixture.componentInstance.combatActionButtonText()).toBe(
+      'Close Summary (Esc)',
+    );
+  });
+
+  it('closes a completed Arena or Dungeon summary when Escape is pressed', () => {
+    const component = fixture.componentInstance;
+    const emitSpy = spyOn(component.skipBattle, 'emit');
+    component.displayCombat = true;
+    component.outcome = BattleOutcome.Victory;
+
+    component.battleType = BattleType.Colosseum;
+    component.onEscapeKey();
+    component.battleType = BattleType.Dungeon;
+    component.onEscapeKey();
+
+    expect(emitSpy).toHaveBeenCalledTimes(2);
+  });
+
+  it('does not close other combat views when Escape is pressed', () => {
+    const component = fixture.componentInstance;
+    const emitSpy = spyOn(component.skipBattle, 'emit');
+    component.displayCombat = true;
+    component.outcome = BattleOutcome.Victory;
+    component.battleType = BattleType.Training;
+
+    component.onEscapeKey();
+
+    expect(emitSpy).not.toHaveBeenCalled();
   });
 });

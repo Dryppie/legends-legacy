@@ -54,7 +54,7 @@ public sealed class EssenceDefinitionValidator : IEssenceDefinitionValidator
             if (definition.AttributeBonuses.Count > 0 || definition.Evolution?.AttributeModifierChanges.Count > 0)
                 errors.Add($"{definition.Id}: Essence attribute bonuses are no longer supported; use ability effects instead.");
 
-            foreach (var tag in definition.Tags.Concat(definition.ActiveAbility?.Tags ?? []).Concat(definition.PassiveAbility?.Tags ?? []).Concat(definition.Evolution?.AddsTags ?? []))
+            foreach (var tag in definition.Tags.Concat(definition.Evolution?.AddsTags ?? []))
             {
                 if (!IsKnownTag(tag)) errors.Add($"{definition.Id}: unknown tag '{tag}'.");
             }

@@ -1,0 +1,12 @@
+<section
+  *ngIf="displayTags.length > 0"
+  class="ability-tags"
+  aria-label="Ability tags"
+>
+  <span class="ability-tags-heading">Tags</span>
+  <ul class="ability-tag-list">
+    <li *ngFor="let tag of displayTags; trackBy: trackTag" class="ability-tag">
+      {{ tag }}
+    </li>
+  </ul>
+</section>

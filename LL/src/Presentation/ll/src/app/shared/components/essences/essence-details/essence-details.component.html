@@ -31,26 +31,7 @@
       Cooldown:
       {{ essence.active.cooldown | ticksToSeconds }} seconds
     </p>
-    <div class="mt-2 flex flex-wrap gap-1 text-[11px] text-zinc-300">
-      <span
-        *ngFor="let tag of essence.active.attackTypes"
-        class="rounded border border-white/10 px-2 py-0.5"
-      >
-        {{ tag }}
-      </span>
-      <span
-        *ngFor="let tag of essence.active.damageTypes"
-        class="rounded border border-white/10 px-2 py-0.5"
-      >
-        {{ tag }}
-      </span>
-      <span
-        *ngFor="let tag of essence.active.effectTags"
-        class="rounded border border-white/10 px-2 py-0.5"
-      >
-        {{ tag }}
-      </span>
-    </div>
+    <app-ability-tags [tags]="essence.active.tags"></app-ability-tags>
   </div>
 
   <div class="border-t border-primary/20 pt-2">
@@ -69,25 +50,6 @@
       [description]="essence.passive.description"
       [effects]="essence.passive.effects"
     ></app-essence-description>
-    <div class="mt-2 flex flex-wrap gap-1 text-[11px] text-zinc-300">
-      <span
-        *ngFor="let tag of essence.passive.attackTypes"
-        class="rounded border border-white/10 px-2 py-0.5"
-      >
-        {{ tag }}
-      </span>
-      <span
-        *ngFor="let tag of essence.passive.damageTypes"
-        class="rounded border border-white/10 px-2 py-0.5"
-      >
-        {{ tag }}
-      </span>
-      <span
-        *ngFor="let tag of essence.passive.effectTags"
-        class="rounded border border-white/10 px-2 py-0.5"
-      >
-        {{ tag }}
-      </span>
-    </div>
+    <app-ability-tags [tags]="essence.passive.tags"></app-ability-tags>
   </div>
 </div>

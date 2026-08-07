@@ -1410,7 +1410,7 @@ public sealed class AbilitySystemTests
         var sniperStrike = catalog.AbilitiesById["ability.creature.goblin_archer.snipers_strike"];
 
         Assert.Equal(
-            "Deal 135% ranged Physical Damage with +50% Critical Chance.",
+            "Deal 135% Physical Damage with +50% Critical Chance.",
             sniperStrike.Description);
         Assert.DoesNotContain(
             catalog.AbilitiesById.Values,
@@ -1491,6 +1491,37 @@ public sealed class AbilitySystemTests
             Assert.StartsWith("ability.creature.", definition.PassiveAbilityId, StringComparison.Ordinal);
         });
         Assert.Equal(2, allDefinitions.Count(x => x.SourceMonsterId == "monster.hobgoblin"));
+    }
+
+    [Fact]
+    public void Authored_ability_tags_are_available_to_backend_interactions()
+    {
+        var catalog = new JsonAbilityCatalogProvider(
+            CreateConfig(),
+            FindApiContentRoot(),
+            CreateJsonOptions()).GetCatalog();
+
+        var sonicScreech = catalog.AbilitiesById["ability.creature.cave_bat.sonic_screech"];
+        var echolocation = catalog.AbilitiesById["ability.creature.cave_bat.echolocation"];
+        var acidSplash = catalog.AbilitiesById["ability.creature.green_slime.acid_splash"];
+        var spiderEyes = catalog.AbilitiesById["ability.creature.spider.spider_eyes"];
+        var poisonedArrows = catalog.AbilitiesById["ability.creature.goblin_archer.poisoned_arrows"];
+        var corrosiveOoze = catalog.AbilitiesById["ability.creature.green_slime.corrosive_ooze"];
+
+        Assert.Equal(["Magical", "Ranged", "Debuff"], sonicScreech.Tags);
+        Assert.Equal(["Buff"], echolocation.Tags);
+        Assert.Equal(["Magical", "Ranged", "Poison", "Area"], acidSplash.Tags);
+        Assert.Equal(["Buff"], spiderEyes.Tags);
+        Assert.Contains(sonicScreech.Id, catalog.AbilityIdsByTag["Debuff"]);
+        Assert.Contains(echolocation.Id, catalog.AbilityIdsByTag["Buff"]);
+        Assert.Contains(acidSplash.Id, catalog.AbilityIdsByTag["Poison"]);
+        Assert.False(catalog.AbilityIdsByTag.ContainsKey("Damage"));
+        Assert.Equal(
+            "Ranged attacks have a 10% chance to apply Poison(10).",
+            poisonedArrows.Description);
+        Assert.Equal(
+            "When damaged by a Physical melee attack, apply Poison(3) to the attacker.",
+            corrosiveOoze.Description);
     }
 
     [Fact]
