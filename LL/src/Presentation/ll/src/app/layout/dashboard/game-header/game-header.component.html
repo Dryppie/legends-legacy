@@ -1,8 +1,32 @@
 <header
   *ngIf="currentCharacter() as character"
-  class="ll-panel flex min-h-12 w-full flex-wrap items-center gap-x-3 gap-y-2 rounded-none bg-texture px-3 py-2 sm:rounded-b-md sm:px-4"
+  class="ll-panel flex min-h-14 w-full items-center gap-3 rounded-none bg-texture px-3 py-2 sm:min-h-12 sm:flex-wrap sm:gap-x-3 sm:gap-y-2 sm:rounded-b-md sm:px-4"
 >
-  <div class="flex min-w-0 items-baseline gap-2">
+  <div class="flex min-w-0 flex-1 items-center gap-3 sm:hidden">
+    <button
+      type="button"
+      class="flex h-9 w-9 shrink-0 items-center justify-center rounded-md text-primary transition-colors hover:bg-[var(--ll-color-primary-soft)]"
+      aria-label="Toggle navigation"
+      (click)="menuTapped.emit()"
+    >
+      <img src="core/button/Hamburger.png" class="h-5 w-5" alt="" />
+    </button>
+
+    <div class="min-w-0 leading-none">
+      <strong
+        class="block truncate text-sm uppercase tracking-wide text-primary [font-family:var(--ll-font-display)]"
+      >
+        {{ activePageTitle }}
+      </strong>
+      <span
+        class="mt-1 block truncate text-[9px] uppercase tracking-[0.14em] text-[var(--ll-color-text-muted)]"
+      >
+        {{ activeSectionLabel || character.name }}
+      </span>
+    </div>
+  </div>
+
+  <div class="hidden min-w-0 items-baseline gap-2 sm:flex">
     <strong
       class="max-w-[12ch] truncate text-sm uppercase tracking-wide text-primary [font-family:var(--ll-font-display)] sm:max-w-[18ch] sm:text-base"
     >
@@ -15,43 +39,53 @@
     </span>
   </div>
 
-  <div class="flex min-w-0 items-center gap-2">
+  <div
+    class="ml-auto flex min-w-0 shrink-0 items-center gap-1.5 sm:ml-0 sm:gap-2"
+  >
     <button
       type="button"
-      class="ll-currency-pill h-7 min-h-0 max-w-[11rem] px-2.5 text-[10px] sm:text-xs"
+      class="ll-currency-pill h-7 min-h-0 max-w-[6.5rem] px-2 text-[10px] sm:max-w-[11rem] sm:px-2.5 sm:text-xs"
       title="Toggle abbreviated currency values"
+      aria-label="Toggle Cinders number format"
       (click)="toggleFormat()"
     >
       <span class="truncate">
-        {{
-          useShortFormat
-            ? (character.cinders | shortNumber)
-            : (character.cinders | numberFormat)
-        }}
-        Cinders
+        <span class="sm:hidden">{{ character.cinders | shortNumber }}</span>
+        <span class="hidden sm:inline">
+          {{
+            useShortFormat
+              ? (character.cinders | shortNumber)
+              : (character.cinders | numberFormat)
+          }}
+          Cinders
+        </span>
       </span>
     </button>
 
     <button
       type="button"
-      class="ll-currency-pill h-7 min-h-0 max-w-[11rem] px-2.5 text-[10px] sm:text-xs"
+      class="ll-currency-pill h-7 min-h-0 max-w-[6.5rem] px-2 text-[10px] sm:max-w-[11rem] sm:px-2.5 sm:text-xs"
       title="Toggle abbreviated currency values"
+      aria-label="Toggle Soulstones number format"
       (click)="toggleFormat()"
     >
       <span class="truncate">
-        {{
-          useShortFormat
-            ? (character.soulstones | shortNumber)
-            : (character.soulstones | numberFormat)
-        }}
-        Soulstones
+        <span class="sm:hidden">{{ character.soulstones | shortNumber }}</span>
+        <span class="hidden sm:inline">
+          {{
+            useShortFormat
+              ? (character.soulstones | shortNumber)
+              : (character.soulstones | numberFormat)
+          }}
+          Soulstones
+        </span>
       </span>
     </button>
   </div>
 
   <app-tutorial-quest
-    class="flex min-w-0 flex-1 basis-full flex-wrap items-center gap-2 lg:basis-auto"
+    class="hidden min-w-0 flex-1 basis-full flex-wrap items-center gap-2 sm:flex lg:basis-auto"
   ></app-tutorial-quest>
 
-  <app-current-dungeon class="contents"></app-current-dungeon>
+  <app-current-dungeon class="hidden sm:contents"></app-current-dungeon>
 </header>

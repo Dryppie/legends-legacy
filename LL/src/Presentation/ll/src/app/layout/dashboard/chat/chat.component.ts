@@ -60,7 +60,9 @@ export class ChatComponent implements OnInit, OnDestroy {
   @Input() collapsed = false;
   @Input() drawer = false;
   @Input() drawerTall = false;
+  @Input() mobileDock = false;
   @Output() close = new EventEmitter<void>();
+  @Output() expand = new EventEmitter<void>();
   @Output() collapsedChange = new EventEmitter<boolean>();
   @Output() drawerTallChange = new EventEmitter<boolean>();
   @ViewChild('chatInput') chatInput?: ElementRef<HTMLInputElement>;
@@ -130,6 +132,20 @@ export class ChatComponent implements OnInit, OnDestroy {
 
   get activeRoomType(): ChatChannelType {
     return this.activeChannel.type;
+  }
+
+  get activeMobileRoomLabel(): string {
+    return (
+      this.visibleRooms.find(
+        (room) =>
+          room.contextKey === this.activeRoomKey &&
+          room.channelType === this.activeRoomType,
+      )?.label ?? 'Chat'
+    );
+  }
+
+  get latestMobileMessage(): ChatMessageDto | undefined {
+    return this.filteredMessages[this.filteredMessages.length - 1];
   }
 
   get isGuestAccount(): boolean {

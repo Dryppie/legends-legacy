@@ -1,27 +1,45 @@
 <div
-  class="flex w-full gap-4 rounded-md bg-cover bg-center px-3 py-2 text-white sm:flex-col sm:gap-0"
-  style="
-    background-image: linear-gradient(to bottom, #00000095 50%, #1f150c95),
-      url(&quot;core/Light.svg&quot;);
-  "
+  *ngIf="compact; else standardAction"
+  class="ll-panel flex w-full flex-col gap-2 px-3 py-2.5 text-white"
 >
-  <div class="flex justify-between">
-    <label class="whitespace-nowrap">{{ performingAction }}</label>
-    <label class="hidden sm:block">{{ totalDuration() }}</label>
+  <div
+    class="flex min-w-0 items-center justify-between gap-3 text-[10px] font-semibold uppercase tracking-wide"
+  >
+    <span class="truncate text-primary">{{ performingAction }}</span>
+    <span class="shrink-0">{{ remainingTime }}</span>
   </div>
-  <div class="flex w-full gap-2">
-    <div class="flex w-full items-center gap-2 rounded-md">
-      <label class="block w-14 text-nowrap text-center">{{
-        remainingTime
-      }}</label>
-      <app-progress-bar
-        class="w-full"
-        (remainingTimeChange)="onRemainingTimeChange($event)"
-      >
-      </app-progress-bar>
-    </div>
-    <label class="cursor-pointer text-nowrap text-primary underline"
-      >Go to action</label
-    >
-  </div>
+  <app-progress-bar
+    class="w-full"
+    (remainingTimeChange)="onRemainingTimeChange($event)"
+  ></app-progress-bar>
 </div>
+
+<ng-template #standardAction>
+  <div
+    class="flex w-full gap-4 rounded-md bg-cover bg-center px-3 py-2 text-white sm:flex-col sm:gap-0"
+    style="
+      background-image: linear-gradient(to bottom, #00000095 50%, #1f150c95),
+        url(&quot;core/Light.svg&quot;);
+    "
+  >
+    <div class="flex justify-between">
+      <label class="whitespace-nowrap">{{ performingAction }}</label>
+      <label class="hidden sm:block">{{ totalDuration() }}</label>
+    </div>
+    <div class="flex w-full gap-2">
+      <div class="flex w-full items-center gap-2 rounded-md">
+        <label class="block w-14 text-nowrap text-center">{{
+          remainingTime
+        }}</label>
+        <app-progress-bar
+          class="w-full"
+          (remainingTimeChange)="onRemainingTimeChange($event)"
+        >
+        </app-progress-bar>
+      </div>
+      <label class="cursor-pointer text-nowrap text-primary underline"
+        >Go to action</label
+      >
+    </div>
+  </div>
+</ng-template>

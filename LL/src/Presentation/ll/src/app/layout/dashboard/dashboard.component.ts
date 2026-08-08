@@ -1,7 +1,6 @@
 import { Component, effect, HostListener, OnInit, Signal } from '@angular/core';
 import { SidebarComponent } from './sidebar/sidebar.component';
 import { Router, RouterOutlet } from '@angular/router';
-import { NavbarComponent } from './navbar/navbar.component';
 import { NgClass, NgIf } from '@angular/common';
 import { ChatComponent } from './chat/chat.component';
 import { LootTrackerComponent } from './loot-tracker/loot-tracker.component';
@@ -17,7 +16,6 @@ import { GameHeaderComponent } from './game-header/game-header.component';
   imports: [
     RouterOutlet,
     SidebarComponent,
-    NavbarComponent,
     NgIf,
     NgClass,
     ChatComponent,
@@ -81,7 +79,7 @@ export class DashboardComponent implements OnInit {
     const nextIsScreenLarge = window.innerWidth >= 1280;
 
     if (nextIsScreenSmall && !this.isScreenSmall) {
-      this.isSidebarOpen = false;
+      this.isSidebarOpen = true;
     }
 
     if (!nextIsScreenSmall) {
@@ -103,6 +101,12 @@ export class DashboardComponent implements OnInit {
   }
 
   toggleChat(): void {
+    if (this.isScreenSmall) {
+      this.closeSidebar();
+      this.isFloatingChatOpen = !this.isFloatingChatOpen;
+      return;
+    }
+
     if (this.chatLayout() === 'floating') {
       this.isFloatingDrawerOpen = !this.isFloatingDrawerOpen;
       return;

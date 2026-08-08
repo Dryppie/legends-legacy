@@ -3,23 +3,10 @@
   [class.ll-sidebar-shell-compact]="sidebarLayout() === 'compact'"
 >
   <div class="ll-sidebar-panel bg-texture bg-auto">
-    <div
-      class="flex h-12 items-center justify-between border-b border-primary/15 px-4 sm:hidden"
-    >
-      <h3 class="text-primary">Legend's Legacy</h3>
-      <button
-        type="button"
-        class="ll-button flex h-9 w-9 items-center justify-center p-0 text-xl leading-none text-primary"
-        (click)="toggleSidebar()"
-        aria-label="Close menu"
-      >
-        &times;
-      </button>
-    </div>
-
     <app-current-action
       *ngIf="displayCurrentAction"
-      class="hidden w-full border-b border-primary/10 p-2 sm:block"
+      class="block w-full border-b border-primary/10 p-2"
+      [compact]="true"
       [class.ll-sidebar-detailed-only]="sidebarLayout() === 'compact'"
       (click)="navigateToAction(); toggleSidebar()"
     ></app-current-action>

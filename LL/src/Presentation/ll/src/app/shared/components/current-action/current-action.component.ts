@@ -1,15 +1,17 @@
-import { Component, effect, OnInit } from '@angular/core';
+import { NgIf } from '@angular/common';
+import { Component, effect, Input } from '@angular/core';
 import { CharacterActionDto } from '../../models/Dtos/characterActionDto';
 import { CharacterActionType } from '../../models/enums/characterActionType';
 import { ProgressBarComponent } from '../progress-bar/progress-bar.component';
 import { CharacterActionsStateService } from '../../../core/services/api/character-actions/character-actions.state.service';
 
 @Component({
-    selector: 'app-current-action',
-    imports: [ProgressBarComponent],
-    templateUrl: './current-action.component.html'
+  selector: 'app-current-action',
+  imports: [NgIf, ProgressBarComponent],
+  templateUrl: './current-action.component.html',
 })
 export class CurrentActionComponent {
+  @Input() compact = false;
   currentAction: CharacterActionDto | null = null;
   remainingTime: string = '00:00'; // Add a property to track the remaining time
   performingAction = '';
