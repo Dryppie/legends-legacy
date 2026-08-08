@@ -19,20 +19,24 @@ import { environment } from '../../../../../environments/environment';
 import { GoogleAuthService } from '../../../../core/services/api/auth/google-auth.service';
 
 @Component({
-    selector: 'app-login',
-    imports: [
-        RouterLink,
-        ReactiveFormsModule,
-        NgIf,
-        ButtonComponent,
-        MatIconModule,
-        MatFormFieldModule,
-        MatInputModule,
-        NgClass,
-    ],
-    templateUrl: './login.component.html'
+  selector: 'app-login',
+  host: {
+    class: 'block h-full w-full',
+  },
+  imports: [
+    RouterLink,
+    ReactiveFormsModule,
+    NgIf,
+    ButtonComponent,
+    MatIconModule,
+    MatFormFieldModule,
+    MatInputModule,
+    NgClass,
+  ],
+  templateUrl: './login.component.html',
 })
 export class LoginComponent {
+  readonly maintenance = environment.maintenance;
   document: any;
   constructor(
     private authService: AuthService,

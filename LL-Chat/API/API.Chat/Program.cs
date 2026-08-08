@@ -161,6 +161,27 @@ if (app.Environment.IsDevelopment())
 
 app.UseCors("AllowSpecificOrigin");
 
+if (config.GetValue<bool>("FeatureManagement:DisableAllRequests"))
+{
+    var maintenanceMessage = config.GetValue<string>("FeatureManagement:MaintenanceMessage")
+        ?? "Chat is currently undergoing maintenance.";
+    var retryAfterSeconds = config.GetValue<int?>("FeatureManagement:MaintenanceRetryAfterSeconds") ?? 300;
+
+    app.Use(async (context, next) =>
+    {
+        var path = context.Request.Path;
+        if (path.StartsWithSegments("/healthz/ready") || path.StartsWithSegments("/healthz/live"))
+        {
+            await next();
+            return;
+        }
+
+        context.Response.StatusCode = StatusCodes.Status503ServiceUnavailable;
+        context.Response.Headers.RetryAfter = retryAfterSeconds.ToString();
+        await context.Response.WriteAsync(maintenanceMessage);
+    });
+}
+
 app.UseAuthentication();
 app.UseAuthorization();
 

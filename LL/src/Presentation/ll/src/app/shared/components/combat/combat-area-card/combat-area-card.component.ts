@@ -32,6 +32,7 @@ export class CombatAreaCardComponent implements OnInit {
 
   currentAction: CharacterActionDto | null = null;
   readonly currentCharacter;
+  readonly isStartingIdleCombat;
   isLocked = true;
   isStartingTrainingBattle = false;
 
@@ -43,6 +44,7 @@ export class CombatAreaCardComponent implements OnInit {
     private readonly combatService: CombatService,
   ) {
     this.currentCharacter = this.characterService.getCurrentCharacter();
+    this.isStartingIdleCombat = this.characterActionService.loadingCombat;
 
     effect(() => {
       this.currentAction = this.characterActionService.currentAction();
@@ -72,13 +74,16 @@ export class CombatAreaCardComponent implements OnInit {
 
   canStartAction(): boolean {
     return (
-      this.currentAction == null ||
-      (new Date(this.currentAction.updatedAt).getTime() <= Date.now() &&
-        this.currentAction.isDeleted)
+      !this.isStartingIdleCombat() &&
+      (this.currentAction == null ||
+        (new Date(this.currentAction.updatedAt).getTime() <= Date.now() &&
+          this.currentAction.isDeleted))
     );
   }
 
   startCombat(): void {
+    if (this.isStartingTrainingBattle || this.isStartingIdleCombat()) return;
+
     this.tutorialState.clearError();
     if (this.shouldStartTrainingBattle()) {
       this.startTrainingBattle();
@@ -95,7 +100,9 @@ export class CombatAreaCardComponent implements OnInit {
   }
 
   battleButtonText(): string {
-    return this.isStartingTrainingBattle ? '...' : 'Battle';
+    return this.isStartingTrainingBattle || this.isStartingIdleCombat()
+      ? '...'
+      : 'Battle';
   }
 
   trainingAreaTourId(): string | null {

@@ -98,9 +98,10 @@
           text="Cancel"
         ></app-mini-button>
         <app-mini-button
-          *ngIf="canStartAction()"
+          *ngIf="canStartAction() || isStartingIdleCombat()"
           class="w-[64px]"
           [text]="battleButtonText()"
+          [disabled]="isStartingIdleCombat()"
           (click)="startCombat()"
         ></app-mini-button>
       </div>

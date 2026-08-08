@@ -17,6 +17,7 @@ import {
 import { TutorialStateService } from '../tutorial/tutorial-state.service';
 import { GameEventService } from '../../real-time/game-event.service';
 import { setAttributeDefinitions } from '../../../../shared/models/attribute-definition';
+import { TimeSyncService } from '../time-sync/time-sync.service';
 
 @Injectable({ providedIn: 'root' })
 export class GameBootstrapStateService {
@@ -39,6 +40,7 @@ export class GameBootstrapStateService {
     private readonly tutorialState: TutorialStateService,
     private readonly characterActionsState: CharacterActionsStateService,
     private readonly gameEvents: GameEventService,
+    private readonly timeSync: TimeSyncService,
   ) {
     effect(
       () => {
@@ -116,6 +118,7 @@ export class GameBootstrapStateService {
   private hydrate(bootstrap: GameBootstrapDto): void {
     this._bootstrap.set(bootstrap);
     this._serverTimeUtc.set(bootstrap.serverTimeUtc);
+    this.timeSync.updateFromServerTime(bootstrap.serverTimeUtc);
     setAttributeDefinitions(bootstrap.attributeDefinitions);
     this.auth.updateCharacter(bootstrap.character);
     this.tutorialState.initialize(bootstrap.tutorial);

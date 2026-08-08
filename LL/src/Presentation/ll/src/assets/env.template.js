@@ -8,4 +8,7 @@
   window.env.chatApiRoot = "${chatApiRoot}";
   window.env.isLocal = "${isLocal}";
   window.env.googleClientId = "${googleClientId}";
+  window.env.maintenanceEnabled = "${maintenanceEnabled}";
+  window.env.maintenanceMessage = "${maintenanceMessage}";
+  window.env.maintenanceExpectedBack = "${maintenanceExpectedBack}";
 })(this);

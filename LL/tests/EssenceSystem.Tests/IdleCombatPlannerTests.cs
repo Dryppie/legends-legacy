@@ -39,6 +39,20 @@ public sealed class IdleCombatPlannerTests
     }
 
     [Fact]
+    public void CreatePlan_repairs_a_deadline_farther_than_one_cadence_in_the_future()
+    {
+        var now = DateTimeOffset.Parse("2026-06-23T12:00:00Z");
+        var action = CreateCombatAction(now.AddHours(19));
+        var planner = CreatePlanner();
+
+        var plan = planner.CreatePlan(new IdleCombatOrchestrationRequest(action, now));
+
+        Assert.Equal(1, plan.PlannedEncounterCount);
+        Assert.Equal(now, plan.From);
+        Assert.Equal(now.AddSeconds(10), plan.ExecutableUntil);
+    }
+
+    [Fact]
     public void CreatePlan_catches_up_due_encounters_on_cadence_boundaries()
     {
         var firstEncounterAt = DateTimeOffset.Parse("2026-06-23T12:00:00Z");

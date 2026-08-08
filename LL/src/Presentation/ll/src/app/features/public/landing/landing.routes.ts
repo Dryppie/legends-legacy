@@ -6,6 +6,7 @@ import { RoadmapComponent } from './roadmap/roadmap.component';
 import { LoginComponent } from './login/login.component';
 import { WorldComponent } from './world/world.component';
 import { FaqComponent } from './faq/faq.component';
+import { maintenanceGuard } from '../../../core/guards/maintenance.guard';
 
 export const LANDING_ROUTES: Routes = [
   {
@@ -40,6 +41,7 @@ export const LANDING_ROUTES: Routes = [
       {
         path: 'signup',
         component: SignupComponent,
+        canActivate: [maintenanceGuard],
       },
     ],
   },

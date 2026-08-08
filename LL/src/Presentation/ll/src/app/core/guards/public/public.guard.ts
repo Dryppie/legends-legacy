@@ -1,8 +1,13 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
 import { AuthService } from '../../services/api/auth/auth.service';
+import { environment } from '../../../../environments/environment';
 
 export const publicGuard: CanActivateFn = async (): Promise<boolean> => {
+  if (environment.maintenance.enabled) {
+    return true;
+  }
+
   const authService = inject(AuthService);
   const router = inject(Router);
 

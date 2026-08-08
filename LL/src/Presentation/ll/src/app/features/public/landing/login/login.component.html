@@ -17,58 +17,59 @@
         class="center w-60 object-contain"
       />
     </div>
-    <form
-      [formGroup]="loginForm"
-      (ngSubmit)="login()"
-      class="mt-2 flex flex-col justify-center"
-    >
-      <label
-        class="group relative flex h-12 w-full items-center border border-[#494949] bg-gray focus-within:border-[#B57D0B]"
-        [ngClass]="{
-          'border-[#D72E34]': loginError || validateEmail(),
-          'border-[#494949]': !loginError,
-        }"
+    <ng-container *ngIf="!maintenance.enabled; else maintenancePanel">
+      <form
+        [formGroup]="loginForm"
+        (ngSubmit)="login()"
+        class="mt-2 flex flex-col justify-center"
       >
-        <p class="cursor-text pl-3 text-[#D1D1D1]">Email</p>
-        <input
-          data-1p-ignore
-          matInput
-          (input)="resetLoginError()"
-          aria-label="Email address"
-          type="email"
-          required
-          class="relative ml-auto h-full w-full appearance-none bg-gray pr-3 text-right text-white focus:z-10 focus:outline-none sm:text-sm sm:leading-5"
-          formControlName="email"
-        />
-      </label>
-      <div *ngIf="validateEmail()" class="mt-1 text-sm text-[#D72E34]">
-        Incorrect Email format
-      </div>
-      <label
-        class="group relative mt-4 flex h-12 w-full items-center border bg-gray focus-within:border-[#B57D0B]"
-        [ngClass]="{
-          'border-[#D72E34]': loginError || validatePassword(),
-          'border-[#494949]': !loginError,
-        }"
-      >
-        <p class="cursor-text pl-3 text-[#D1D1D1]">Password</p>
-        <input
-          data-1p-ignore
-          matInput
-          (input)="resetLoginError()"
-          aria-label="Password"
-          type="password"
-          required
-          class="relative ml-auto h-full w-full appearance-none bg-gray pr-3 text-right text-white focus:z-10 focus:outline-none sm:text-sm sm:leading-5"
-          formControlName="password"
-        />
-      </label>
-      <div *ngIf="validatePassword()" class="mt-1 text-sm text-[#D72E34]">
-        Incorrect Password format
-      </div>
+        <label
+          class="group relative flex h-12 w-full items-center border border-[#494949] bg-gray focus-within:border-[#B57D0B]"
+          [ngClass]="{
+            'border-[#D72E34]': loginError || validateEmail(),
+            'border-[#494949]': !loginError,
+          }"
+        >
+          <p class="cursor-text pl-3 text-[#D1D1D1]">Email</p>
+          <input
+            data-1p-ignore
+            matInput
+            (input)="resetLoginError()"
+            aria-label="Email address"
+            type="email"
+            required
+            class="relative ml-auto h-full w-full appearance-none bg-gray pr-3 text-right text-white focus:z-10 focus:outline-none sm:text-sm sm:leading-5"
+            formControlName="email"
+          />
+        </label>
+        <div *ngIf="validateEmail()" class="mt-1 text-sm text-[#D72E34]">
+          Incorrect Email format
+        </div>
+        <label
+          class="group relative mt-4 flex h-12 w-full items-center border bg-gray focus-within:border-[#B57D0B]"
+          [ngClass]="{
+            'border-[#D72E34]': loginError || validatePassword(),
+            'border-[#494949]': !loginError,
+          }"
+        >
+          <p class="cursor-text pl-3 text-[#D1D1D1]">Password</p>
+          <input
+            data-1p-ignore
+            matInput
+            (input)="resetLoginError()"
+            aria-label="Password"
+            type="password"
+            required
+            class="relative ml-auto h-full w-full appearance-none bg-gray pr-3 text-right text-white focus:z-10 focus:outline-none sm:text-sm sm:leading-5"
+            formControlName="password"
+          />
+        </label>
+        <div *ngIf="validatePassword()" class="mt-1 text-sm text-[#D72E34]">
+          Incorrect Password format
+        </div>
 
-      <div class="mt-2 flex items-center justify-between">
-        <!-- <div class="flex items-center">
+        <div class="mt-2 flex items-center justify-between">
+          <!-- <div class="flex items-center">
           <input
             id="remember_me"
             type="checkbox"
@@ -82,51 +83,76 @@
           </label>
         </div> -->
 
-        <div class="text-sm leading-5">
-          <button
-            href="#"
-            class="font-medium text-ancient-secondary hover:text-ancient-primary focus:underline focus:outline-none"
-            (click)="('do nothing')"
-          >
-            Forgot password?
-          </button>
+          <div class="text-sm leading-5">
+            <button
+              href="#"
+              class="font-medium text-ancient-secondary hover:text-ancient-primary focus:underline focus:outline-none"
+              (click)="('do nothing')"
+            >
+              Forgot password?
+            </button>
+          </div>
         </div>
+
+        <div class="mt-12">
+          <app-button
+            type="submit"
+            [disabled]="!loginForm.valid"
+            text="LOG IN"
+          ></app-button>
+        </div>
+
+        <button
+          routerLink="/signup"
+          class="my-4 w-full text-center text-primary underline focus:outline-none"
+        >
+          New to Legend's Legacy? Sign up!
+        </button>
+      </form>
+
+      <div class="mt-4 flex justify-center">
+        <button
+          type="button"
+          (click)="onGoogleClick()"
+          class="flex items-center rounded-lg bg-white px-4 py-2 text-black shadow-md hover:bg-light_gray focus:outline-none"
+        >
+          <img
+            src="/assets/google-logo.png"
+            alt="Google Logo"
+            class="mr-2 h-6"
+          />
+          Continue with Google
+        </button>
       </div>
-
-      <div class="mt-12">
-        <app-button
-          type="submit"
-          [disabled]="!loginForm.valid"
-          text="LOG IN"
-        ></app-button>
+      <div class="mt-4 flex justify-center">
+        <button
+          (click)="loginAsGuest()"
+          type="button"
+          class="flex items-center rounded-lg bg-white px-4 py-2 text-black shadow-md hover:bg-light_gray focus:outline-none"
+        >
+          Login as Guest
+        </button>
       </div>
-
-      <button
-        routerLink="/signup"
-        class="my-4 w-full text-center text-primary underline focus:outline-none"
+    </ng-container>
+    <ng-template #maintenancePanel>
+      <section
+        class="mx-6 w-full max-w-md rounded border border-primary bg-black/50 p-6 text-center shadow-lg"
+        aria-live="polite"
       >
-        New to Legend's Legacy? Sign up!
-      </button>
-    </form>
-
-    <div class="mt-4 flex justify-center">
-      <button
-        type="button"
-        (click)="onGoogleClick()"
-        class="flex items-center rounded-lg bg-white px-4 py-2 text-black shadow-md hover:bg-light_gray focus:outline-none"
-      >
-        <img src="/assets/google-logo.png" alt="Google Logo" class="mr-2 h-6" />
-        Continue with Google
-      </button>
-    </div>
-    <div class="mt-4 flex justify-center">
-      <button
-        (click)="loginAsGuest()"
-        type="button"
-        class="flex items-center rounded-lg bg-white px-4 py-2 text-black shadow-md hover:bg-light_gray focus:outline-none"
-      >
-        Login as Guest
-      </button>
-    </div>
+        <h1 class="text-2xl text-primary">Maintenance in progress</h1>
+        <p class="mt-4 text-zinc-300">{{ maintenance.message }}</p>
+        <div
+          *ngIf="maintenance.expectedBack"
+          class="mt-5 rounded border border-light_gray bg-black/30 px-4 py-3"
+        >
+          <p class="text-sm text-zinc-400">Expected return</p>
+          <p class="mt-1 text-white">{{ maintenance.expectedBack }}</p>
+        </div>
+        <p class="mt-5 text-sm text-zinc-400">
+          Login and game services are temporarily unavailable. This page will
+          return to normal when maintenance is complete.
+        </p>
+      </section>
+    </ng-template>
   </div>
 </div>

@@ -17,6 +17,7 @@ import { TimeSyncService } from '../../time-sync/time-sync.service';
 @Injectable({ providedIn: 'root' })
 export class CharacterActionsPollingService {
   private readonly minPollDelayMs = 1_000;
+  private readonly maxPollDelayMs = 30_000;
   private readonly maxImmediateBackoffMs = 30_000;
   private readonly recentPollDecisions: Array<{
     actionType: CharacterActionType;
@@ -105,7 +106,22 @@ export class CharacterActionsPollingService {
       }
     } else {
       this.consecutiveImmediatePolls = 0;
-      scheduledDelayMs = Math.max(rawDelayMs, this.minPollDelayMs);
+      scheduledDelayMs = Math.min(
+        this.maxPollDelayMs,
+        Math.max(rawDelayMs, this.minPollDelayMs),
+      );
+
+      if (rawDelayMs > this.maxPollDelayMs) {
+        console.warn(
+          '[CharacterActionsPolling] Capped suspicious future deadline',
+          {
+            rawDelayMs,
+            scheduledDelayMs,
+            actionType: action.characterActionType,
+            updatedAt: action.updatedAt,
+          },
+        );
+      }
     }
 
     this.recordPollDecision(action, rawDelayMs, scheduledDelayMs);

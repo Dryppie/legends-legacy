@@ -25,8 +25,18 @@ public sealed class IdleCombatPlanner : IIdleCombatPlanner
     public IdleCombatPlan CreatePlan(IdleCombatOrchestrationRequest request)
     {
         var to = request.Now;
-        var from = request.NextEncounterAt > to - _maximumOfflineDuration
-            ? request.NextEncounterAt
+        var nextEncounterAt = request.NextEncounterAt;
+
+        // A resolved encounter advances the boundary by exactly one cadence, so
+        // anything farther ahead is corrupted scheduling state. Treat it as due
+        // now rather than allowing clients to remain frozen until that timestamp.
+        if (nextEncounterAt > to + _encounterCadence)
+        {
+            nextEncounterAt = to;
+        }
+
+        var from = nextEncounterAt > to - _maximumOfflineDuration
+            ? nextEncounterAt
             : to - _maximumOfflineDuration;
         var action = request.ActionDetails;
 

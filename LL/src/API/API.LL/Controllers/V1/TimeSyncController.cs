@@ -7,9 +7,10 @@ namespace API.LL.Controllers.V1;
 public class TimeSyncController : BaseController
 {
     /// <summary>
-    /// Returns the current server time in UTC format.
+    /// Returns the current server time as Unix epoch milliseconds.
     /// </summary>
     [HttpGet()]
-    [ProducesResponseType(typeof(DateTimeOffset), StatusCodes.Status200OK)]
-    public ActionResult<DateTimeOffset> GetCurrentTime() => Ok(DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
+    [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+    [ProducesResponseType(typeof(long), StatusCodes.Status200OK)]
+    public ActionResult<long> GetCurrentTime() => Ok(DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
 }

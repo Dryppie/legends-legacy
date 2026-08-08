@@ -18,15 +18,28 @@ import { firstValueFrom } from 'rxjs';
 import { AuthInterceptor } from './core/interceptors/auth-interceptor';
 import { RealTimeFacade } from './core/services/real-time/real-time-facade';
 import { TimeSyncService } from './core/services/api/time-sync/time-sync.service';
+import { environment } from '../environments/environment';
 
 export function initializeApp(authService: AuthService) {
+  if (environment.maintenance.enabled) {
+    return () => Promise.resolve();
+  }
+
   return () =>
     firstValueFrom(authService.checkAuth()).catch(() => Promise.resolve());
 }
 function startRealTime(realTime: RealTimeFacade) {
-  return () => realTime.initialize();
+  return () => {
+    if (!environment.maintenance.enabled) {
+      realTime.initialize();
+    }
+  };
 }
 export function initializeTimeSync(timeSyncService: TimeSyncService) {
+  if (environment.maintenance.enabled) {
+    return () => Promise.resolve();
+  }
+
   return () => timeSyncService.sync();
 }
 

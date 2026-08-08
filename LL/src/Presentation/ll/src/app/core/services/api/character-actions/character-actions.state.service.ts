@@ -50,7 +50,6 @@ export class CharacterActionsStateService {
   private readonly _startTime = signal<number | null>(null);
   private readonly _tickingDuration = signal<number>(0);
   private resetVersion = 0;
-  private openCombatWhenHydrated = false;
   readonly tickingDuration = computed(() => {
     const ms = this._tickingDuration();
     const sec = Math.floor(ms / 1000) % 60;
@@ -104,10 +103,6 @@ export class CharacterActionsStateService {
             this.combatHandler.handle(action);
             this._idleCombatPhase.set('active');
             this.gameService.resumeCombat();
-            if (this.openCombatWhenHydrated) {
-              this.openCombatWhenHydrated = false;
-              this.router.navigate(['/game/combat']);
-            }
           });
           break;
         case CharacterActionType.Crafting:
@@ -142,7 +137,6 @@ export class CharacterActionsStateService {
   }
 
   initializeFromBootstrap(action: CharacterActionDto | null): void {
-    this.openCombatWhenHydrated = false;
     this.startPolling(action);
   }
 
@@ -181,7 +175,6 @@ export class CharacterActionsStateService {
       case CharacterActionType.Combat:
         this._loadingCombat.set(true);
         this._idleCombatPhase.set('starting');
-        this.openCombatWhenHydrated = true;
         call$ = this.actionsService.startCombat(
           payload as StartCombatActionRequest,
         );
@@ -204,17 +197,17 @@ export class CharacterActionsStateService {
             this.reset();
           } else {
             if (isCombat) {
-              this.applyActionUpdate(result as CharacterActionDto);
+              this.acceptStartedCombat(result as CharacterActionDto);
+              return;
             }
-            this.startPolling(
-              isCombat ? (result as CharacterActionDto) : undefined,
-            );
+            this.startPolling();
           }
         }),
         catchError((err) => {
           console.error('Failed to start action', err);
+          if (isCombat) return this.recoverStartedCombat(err);
+
           this.reset();
-          if (isCombat) this.setIdleCombatError(err);
           return of(false);
         }),
       )
@@ -286,7 +279,6 @@ export class CharacterActionsStateService {
     this._loadingCombat.set(false);
     this._idleCombatPhase.set('idle');
     this._idleCombatError.set(null);
-    this.openCombatWhenHydrated = false;
     this._showAction.set(false);
     this._currentAction.set(null);
   }
@@ -473,6 +465,54 @@ export class CharacterActionsStateService {
   retryIdleCombatResolution(): void {
     this._idleCombatError.set(null);
     this.refreshCurrentAction();
+  }
+
+  private acceptStartedCombat(action: CharacterActionDto): void {
+    if (
+      action.characterActionType !== CharacterActionType.Combat ||
+      action.isDeleted
+    ) {
+      this.failCombatStart(
+        new Error('The server did not return an active combat action.'),
+      );
+      return;
+    }
+
+    this._idleCombatError.set(null);
+    this.applyActionUpdate(action);
+    this.startPolling(action);
+    void this.router.navigate(['/game/combat']);
+  }
+
+  private recoverStartedCombat(
+    startError: unknown,
+  ): Observable<CharacterActionDto | null> {
+    return this.actionsService.resolveCurrentAction().pipe(
+      tap((action) => {
+        if (
+          action?.characterActionType === CharacterActionType.Combat &&
+          !action.isDeleted
+        ) {
+          this.acceptStartedCombat(action);
+          return;
+        }
+
+        this.failCombatStart(startError);
+      }),
+      catchError((recoveryError) => {
+        console.error(
+          'Failed to reconcile combat after the start request failed',
+          recoveryError,
+        );
+        this.failCombatStart(startError);
+        return of(null);
+      }),
+    );
+  }
+
+  private failCombatStart(error: unknown): void {
+    this.reset();
+    this.setIdleCombatError(error);
   }
 
   private setIdleCombatError(error: unknown): void {

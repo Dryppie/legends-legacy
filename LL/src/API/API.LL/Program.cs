@@ -192,19 +192,24 @@ if (app.Environment.IsDevelopment())
 
 app.UseCors("AllowSpecificOrigin");
 
-if (config.GetValue("FeatureManagement:DisableAllRequests", "false") == "true")
+if (config.GetValue<bool>("FeatureManagement:DisableAllRequests"))
 {
+    var maintenanceMessage = config.GetValue<string>("FeatureManagement:MaintenanceMessage")
+        ?? "The game is currently undergoing maintenance.";
+    var retryAfterSeconds = config.GetValue<int?>("FeatureManagement:MaintenanceRetryAfterSeconds") ?? 300;
+
     app.Use(async (context, next) =>
     {
-        var path = context.Request.Path.Value?.ToLowerInvariant();
-        if (path != null && (path.Contains("/healthz/ready") || path.Contains("/healthz/live")))
+        var path = context.Request.Path;
+        if (path.StartsWithSegments("/healthz/ready") || path.StartsWithSegments("/healthz/live"))
         {
-            await next(); // allow health checks through
+            await next();
             return;
         }
 
         context.Response.StatusCode = StatusCodes.Status503ServiceUnavailable;
-        await context.Response.WriteAsync("The backend is currently unavailable.");
+        context.Response.Headers.RetryAfter = retryAfterSeconds.ToString();
+        await context.Response.WriteAsync(maintenanceMessage);
     });
 }
 
