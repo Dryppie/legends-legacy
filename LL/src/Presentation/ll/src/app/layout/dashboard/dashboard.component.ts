@@ -1,12 +1,10 @@
 import { Component, effect, HostListener, OnInit, Signal } from '@angular/core';
 import { SidebarComponent } from './sidebar/sidebar.component';
-import { Router, RouterOutlet } from '@angular/router';
+import { RouterOutlet } from '@angular/router';
 import { NgClass, NgIf } from '@angular/common';
 import { ChatComponent } from './chat/chat.component';
 import { LootTrackerComponent } from './loot-tracker/loot-tracker.component';
-import { CurrentActionComponent } from '../../shared/components/current-action/current-action.component';
 import { CharacterActionsStateService } from '../../core/services/api/character-actions/character-actions.state.service';
-import { CharacterActionType } from '../../shared/models/enums/characterActionType';
 import { GameBootstrapStateService } from '../../core/services/api/game-bootstrap/game-bootstrap-state.service';
 import { ChatLayoutPreferenceService } from '../../core/services/client-side/chat-layout/chat-layout-preference.service';
 import { GameHeaderComponent } from './game-header/game-header.component';
@@ -20,7 +18,6 @@ import { GameHeaderComponent } from './game-header/game-header.component';
     NgClass,
     ChatComponent,
     LootTrackerComponent,
-    CurrentActionComponent,
     GameHeaderComponent,
   ],
   templateUrl: './dashboard.component.html',
@@ -33,7 +30,7 @@ export class DashboardComponent implements OnInit {
   isFloatingDrawerOpen = false;
   isFloatingDrawerTall = false;
   isFloatingChatOpen = false;
-  displayCurrentAction = false;
+  isMobileChatExpanded = false;
   isResolvingAction = false;
   readonly bootstrapLoaded: Signal<boolean>;
   readonly bootstrapLoading: Signal<boolean>;
@@ -43,7 +40,6 @@ export class DashboardComponent implements OnInit {
 
   constructor(
     private readonly state: CharacterActionsStateService,
-    private readonly router: Router,
     private readonly bootstrapState: GameBootstrapStateService,
     private readonly chatLayoutPreference: ChatLayoutPreferenceService,
   ) {
@@ -52,10 +48,6 @@ export class DashboardComponent implements OnInit {
     this.bootstrapError = this.bootstrapState.error;
     this.idleCombatError = this.state.idleCombatError;
     this.chatLayout = this.chatLayoutPreference.layout;
-
-    effect(() => {
-      this.displayCurrentAction = this.state.displayCurrentAction();
-    });
 
     effect(() => {
       this.isResolvingAction = this.state.loadingActionRefresh();
@@ -79,7 +71,7 @@ export class DashboardComponent implements OnInit {
     const nextIsScreenLarge = window.innerWidth >= 1280;
 
     if (nextIsScreenSmall && !this.isScreenSmall) {
-      this.isSidebarOpen = true;
+      this.isSidebarOpen = false;
     }
 
     if (!nextIsScreenSmall) {
@@ -92,21 +84,27 @@ export class DashboardComponent implements OnInit {
     if (nextIsScreenLarge) {
       this.isFloatingChatOpen = false;
     }
+
+    if (!nextIsScreenSmall) {
+      this.isMobileChatExpanded = false;
+    }
   }
 
   toggleNav() {
     if (!this.isScreenSmall) return;
 
     this.isSidebarOpen = !this.isSidebarOpen;
+    if (this.isSidebarOpen) {
+      this.isMobileChatExpanded = false;
+    }
+  }
+
+  toggleMobileChat(): void {
+    this.closeSidebar();
+    this.isMobileChatExpanded = !this.isMobileChatExpanded;
   }
 
   toggleChat(): void {
-    if (this.isScreenSmall) {
-      this.closeSidebar();
-      this.isFloatingChatOpen = !this.isFloatingChatOpen;
-      return;
-    }
-
     if (this.chatLayout() === 'floating') {
       this.isFloatingDrawerOpen = !this.isFloatingDrawerOpen;
       return;
@@ -130,24 +128,6 @@ export class DashboardComponent implements OnInit {
   closeSidebar() {
     if (this.isScreenSmall) {
       this.isSidebarOpen = false;
-    }
-  }
-
-  navigateToAction(): void {
-    const action = this.state.currentAction();
-    if (!action) return;
-
-    const actionType = action.characterActionType;
-
-    if (actionType === CharacterActionType.Combat) {
-      this.router.navigate(['/game/combat']);
-      return;
-    }
-
-    if (actionType === CharacterActionType.Crafting) {
-      this.router.navigate(['game', 'professions', 'crafting']);
-    } else {
-      return;
     }
   }
 

@@ -61,6 +61,7 @@ export class ChatComponent implements OnInit, OnDestroy {
   @Input() drawer = false;
   @Input() drawerTall = false;
   @Input() mobileDock = false;
+  @Input() mobileDockExpanded = false;
   @Output() close = new EventEmitter<void>();
   @Output() expand = new EventEmitter<void>();
   @Output() collapsedChange = new EventEmitter<boolean>();

@@ -40,11 +40,6 @@
               class="flex h-full min-h-0 w-full flex-col overflow-hidden pb-2 pl-2 sm:pb-6 sm:pl-6"
             >
               <ng-container *ngIf="bootstrapLoaded(); else bootstrapPending">
-                <app-current-action
-                  *ngIf="displayCurrentAction && !isSidebarOpen"
-                  class="mb-2 block shrink-0 pr-2 sm:hidden"
-                  (click)="navigateToAction()"
-                ></app-current-action>
                 <div
                   *ngIf="isResolvingAction"
                   class="ll-panel mb-2 flex shrink-0 items-center gap-3 px-4 py-3 pr-4 text-sm text-white sm:mr-4"
@@ -136,9 +131,11 @@
 
     <app-chat
       *ngIf="isScreenSmall"
-      class="block h-[5.5rem] shrink-0"
+      class="block shrink-0 overflow-hidden transition-[height] duration-200"
+      [ngClass]="isMobileChatExpanded ? 'h-64' : 'h-[5.5rem]'"
       [mobileDock]="true"
-      (expand)="toggleChat()"
+      [mobileDockExpanded]="isMobileChatExpanded"
+      (expand)="toggleMobileChat()"
     ></app-chat>
   </div>
 </div>
@@ -183,13 +180,13 @@
 </button>
 
 <div
-  *ngIf="isFloatingChatOpen && !isScreenLarge"
+  *ngIf="isFloatingChatOpen && !isScreenSmall && !isScreenLarge"
   class="ll-screen-overlay fixed inset-0 z-40 xl:hidden"
   (click)="toggleChat()"
 ></div>
 
 <aside
-  *ngIf="isFloatingChatOpen && !isScreenLarge"
+  *ngIf="isFloatingChatOpen && !isScreenSmall && !isScreenLarge"
   class="fixed inset-y-0 right-0 z-50 h-full w-[min(20rem,85vw)] transform transition-transform duration-200 sm:w-[min(24rem,85vw)] xl:hidden"
   [class.translate-x-0]="isFloatingChatOpen"
   [class.translate-x-full]="!isFloatingChatOpen"

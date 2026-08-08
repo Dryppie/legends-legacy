@@ -29,12 +29,13 @@
       <button
         type="button"
         class="flex h-6 w-6 shrink-0 items-center justify-center rounded text-primary transition-colors hover:bg-[var(--ll-color-primary-soft)]"
-        aria-label="Open chat"
+        [attr.aria-label]="mobileDockExpanded ? 'Collapse chat' : 'Expand chat'"
+        [attr.aria-expanded]="mobileDockExpanded"
         (click)="expand.emit()"
       >
         <svg class="h-3 w-3" viewBox="0 0 16 16" fill="none" aria-hidden="true">
           <path
-            d="m4 10 4-4 4 4"
+            [attr.d]="mobileDockExpanded ? 'm4 6 4 4 4-4' : 'm4 10 4-4 4 4'"
             stroke="currentColor"
             stroke-width="1.5"
             stroke-linecap="round"
@@ -44,7 +45,40 @@
       </button>
     </div>
 
-    <div class="flex min-h-0 flex-1 items-center gap-2 px-3 py-2">
+    <section
+      *ngIf="mobileDockExpanded"
+      class="flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto px-2 py-2"
+      appStickyScroll
+      aria-live="polite"
+    >
+      <ng-container *ngIf="filteredMessages.length; else emptyExpandedChat">
+        <article
+          *ngFor="let message of filteredMessages"
+          class="rounded-sm border-l-2 border-l-[var(--ll-color-border-strong)] bg-[var(--ll-color-surface-soft)] px-2 py-1.5"
+        >
+          <div class="flex min-w-0 items-baseline gap-1.5 text-[10px]">
+            <time class="shrink-0 text-[var(--ll-color-text-subtle)]">
+              {{ message.sentAt | date: "shortTime" }}
+            </time>
+            <strong class="shrink-0 text-primary">
+              {{ message.senderName }}:
+            </strong>
+            <span class="min-w-0 break-words text-[var(--ll-color-text)]">
+              {{ message.body }}
+            </span>
+          </div>
+        </article>
+      </ng-container>
+      <ng-template #emptyExpandedChat>
+        <p class="m-auto text-xs text-[var(--ll-color-text-muted)]">
+          No messages in this channel yet.
+        </p>
+      </ng-template>
+    </section>
+
+    <div
+      class="flex h-14 shrink-0 items-center gap-2 border-t border-[var(--ll-color-border)] px-3 py-2"
+    >
       <input
         #chatInput
         type="text"

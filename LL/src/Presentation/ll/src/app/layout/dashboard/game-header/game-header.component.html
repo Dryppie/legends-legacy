@@ -50,7 +50,9 @@
       (click)="toggleFormat()"
     >
       <span class="truncate">
-        <span class="sm:hidden">{{ character.cinders | shortNumber }}</span>
+        <span class="sm:hidden"
+          >{{ character.cinders | shortNumber }} Cinders</span
+        >
         <span class="hidden sm:inline">
           {{
             useShortFormat
@@ -70,7 +72,9 @@
       (click)="toggleFormat()"
     >
       <span class="truncate">
-        <span class="sm:hidden">{{ character.soulstones | shortNumber }}</span>
+        <span class="sm:hidden"
+          >{{ character.soulstones | shortNumber }} Soulstones</span
+        >
         <span class="hidden sm:inline">
           {{
             useShortFormat
