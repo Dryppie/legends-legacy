@@ -24,7 +24,6 @@ public sealed class ItemBaseConverter : JsonConverter<ItemBase>
             "Equipment" => typeof(EquipmentBase),
             "Essence" => typeof(EssenceItemBase),
             "Resource" => typeof(ItemBase),
-            "Consumable" => typeof(ConsumableItemBase),
             _ => throw new JsonException($"Unknown itemType \"{discriminator}\".")
         };
 

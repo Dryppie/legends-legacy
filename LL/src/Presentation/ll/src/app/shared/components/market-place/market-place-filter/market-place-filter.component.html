@@ -1,9 +1,10 @@
 <nav
-  class="flex flex-wrap items-center gap-1 overflow-visible"
+  class="ll-scrollbar-none flex flex-nowrap items-center gap-1 overflow-x-auto overscroll-x-contain pb-1 sm:flex-wrap sm:overflow-visible sm:pb-0"
   aria-label="Marketplace categories"
 >
   <app-dropdown
     *ngFor="let tab of tabs"
+    class="flex-none"
     [value]="tab.itemType"
     [label]="tab.label"
     [subOptions]="tab.subOptions"

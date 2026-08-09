@@ -221,7 +221,6 @@ public sealed class IdleCombatRewardCalculator : IIdleCombatRewardCalculator
                     essenceRewards.Add(item);
                     break;
                 case ItemType.Equipment:
-                case ItemType.Consumable:
                     powerRewards.Add(item);
                     break;
                 default:

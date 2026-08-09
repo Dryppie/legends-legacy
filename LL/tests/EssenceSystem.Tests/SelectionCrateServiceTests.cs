@@ -18,7 +18,7 @@ public sealed class SelectionCrateServiceTests
         var crate = CreateInventoryItem(
             characterId,
             CatalystSelectionCrateCatalog.ItemBaseId,
-            ItemType.Consumable,
+            ItemType.Resource,
             quantity: 1);
         var inventory = new FakeInventoryService(crate);
         var itemBases = new FakeItemBaseRepository(CatalystSelectionCrateCatalog.Options.Select(option =>
@@ -55,7 +55,7 @@ public sealed class SelectionCrateServiceTests
         var crate = CreateInventoryItem(
             characterId,
             CatalystSelectionCrateCatalog.ItemBaseId,
-            ItemType.Consumable,
+            ItemType.Resource,
             quantity: 1);
         var inventory = new FakeInventoryService(crate);
         var service = new SelectionCrateService(

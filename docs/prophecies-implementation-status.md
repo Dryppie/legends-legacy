@@ -163,7 +163,7 @@ The prophecy service consumes these notifications and updates active prophecy pr
 
 ### Inventory Rewards
 
-Prophecy cache rewards are now granted into the character inventory as stackable, bound consumable items.
+Prophecy cache rewards are now granted into the character inventory as stackable, bound resource items.
 
 Implemented cache item bases:
 

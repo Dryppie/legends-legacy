@@ -16,7 +16,7 @@
     [class.marketplace-mobile-detail]="mobileDetailOpen()"
   >
     <div
-      class="marketplace-navigation flex flex-none gap-3 border-b border-light_gray px-4 py-3 lg:px-5"
+      class="marketplace-navigation flex flex-none gap-3 border-b border-light_gray px-3 py-2.5 sm:px-4 sm:py-3 lg:px-5"
     >
       <app-market-place-filter
         *ngIf="mode() !== 'orders'"
@@ -68,7 +68,6 @@
           <app-market-place-commodity
             *ngIf="
               selectedMarket().itemType === ItemType.Resource ||
-                selectedMarket().itemType === ItemType.Consumable ||
                 selectedMarket().itemType === ItemType.Essence;
               else exactItemMarket
             "
@@ -92,7 +91,7 @@
           [itemType]="selectedMarket().itemType"
           [category]="selectedMarket().id"
           [subcategory]="selectedMarket().subcategory"
-          class="h-full overflow-y-auto p-4"
+          class="block h-full overflow-y-auto p-3 sm:p-4"
         ></app-market-place-sell>
 
         <app-market-place-orders

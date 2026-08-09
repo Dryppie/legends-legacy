@@ -113,7 +113,6 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : DbContext(opti
         modelBuilder.Entity<ItemBase>()
             .HasDiscriminator<ItemType>("ItemType")
             .HasValue<ItemBase>(ItemType.Resource)
-            .HasValue<ConsumableItemBase>(ItemType.Consumable)
             .HasValue<EquipmentBase>(ItemType.Equipment)
             .HasValue<EssenceItemBase>(ItemType.Essence);
 

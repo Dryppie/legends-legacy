@@ -47,7 +47,7 @@ The current version does not use:
 
 - Essence active or passive abilities;
 - temporary combat modifiers;
-- buffs, consumables, dungeon modifiers, or transient health;
+- buffs, dungeon modifiers, or transient health;
 - synthetic benchmark outcomes; or
 - item rarity, quality, Potential, or tempering as independent bonuses.
 

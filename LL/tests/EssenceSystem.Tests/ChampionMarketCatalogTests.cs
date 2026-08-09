@@ -75,7 +75,7 @@ public sealed class ChampionMarketCatalogTests
         var crateItem = itemDocument.RootElement
             .EnumerateArray()
             .Single(item => item.GetProperty("id").GetString() == CatalystSelectionCrateCatalog.ItemBaseId);
-        Assert.Equal("Consumable", crateItem.GetProperty("itemType").GetString());
+        Assert.Equal("Resource", crateItem.GetProperty("itemType").GetString());
         Assert.True(crateItem.GetProperty("isBound").GetBoolean());
         Assert.Equal(
             [

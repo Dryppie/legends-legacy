@@ -24,7 +24,7 @@ These catalogue models are design contracts layered over the current runtime pol
 | **Intensity Stacks** | One condition accumulates stack magnitude to a declared cap. The entry defines shared or individual duration.                                                      |
 | **Independent Stacks** | Every application creates a separate stack with its own source, magnitude, tick progress, and duration. Stacks do not refresh or replace one another. The entry states whether the count is capped. |
 | **Per Source**       | Each source owns one independent application; same-source reapplication follows the entry's refresh rule.                                                          |
-| **Charges**          | Applications add consumable charges to a cap. A qualifying event consumes a defined number.                                                                        |
+| **Charges**          | Applications add expendable charges to a cap. A qualifying event consumes a defined number.                                                                        |
 | **Pool**             | Applications contribute quantities to one pool. The entry defines cap, consumption order, and contribution expiry.                                                 |
 | **Unique**           | Only one effective instance exists. Reapplication refreshes or replaces it as the entry states.                                                                    |
 

@@ -1,7 +1,9 @@
 <div
-  class="grid h-full min-h-0 gap-4 overflow-hidden py-3 text-white xl:grid-cols-[minmax(0,1fr)_24rem]"
+  class="flex min-h-full flex-col gap-5 overflow-visible py-1 text-white sm:py-3 xl:grid xl:h-full xl:min-h-0 xl:grid-cols-[minmax(0,1fr)_24rem] xl:gap-4 xl:overflow-hidden"
 >
-  <section class="flex min-h-0 flex-col overflow-hidden">
+  <section
+    class="flex flex-none flex-col overflow-visible xl:min-h-0 xl:flex-auto xl:overflow-hidden"
+  >
     <div class="mb-3 flex items-baseline justify-between gap-3">
       <h2 class="ll-heading text-xl uppercase">{{ inventoryTitle }}</h2>
       <span class="ll-eyebrow"> {{ filteredItems.length }} available </span>
@@ -17,7 +19,7 @@
     </div>
 
     <div
-      class="min-h-0 flex-1 overflow-y-auto bg-[var(--ll-color-surface-soft)]"
+      class="max-h-48 overflow-y-auto overscroll-contain bg-[var(--ll-color-surface-soft)] xl:max-h-none xl:min-h-0 xl:flex-1"
       [ngClass]="
         selectedItemType() ? 'll-panel' : 'll-panel rounded-t-none border-t-0'
       "
@@ -41,7 +43,9 @@
     </div>
   </section>
 
-  <aside class="ll-panel flex min-h-0 flex-col gap-4 overflow-hidden p-4">
+  <aside
+    class="ll-panel flex flex-none flex-col gap-5 overflow-visible p-4 xl:min-h-0 xl:flex-auto xl:gap-4 xl:overflow-hidden"
+  >
     <div class="min-h-0">
       <h2 class="ll-heading text-xl uppercase">Sell Order</h2>
       <ng-container *ngIf="pendingItem() as p; else placeholder">
@@ -156,13 +160,15 @@
     </div>
 
     <div
-      class="flex min-h-0 flex-1 flex-col gap-3 overflow-hidden border-t border-primary/20 pt-4"
+      class="flex min-h-0 flex-col gap-3 border-t border-primary/20 pt-4 xl:flex-1 xl:overflow-hidden"
     >
       <div class="flex w-full items-center justify-between">
         <h3 class="ll-heading text-base uppercase">Your Listings</h3>
         <span class="ll-helper">{{ displayedMyListings().length }}/10</span>
       </div>
-      <div class="ll-card min-h-0 overflow-y-auto">
+      <div
+        class="ll-card max-h-48 min-h-0 overflow-y-auto overscroll-contain xl:max-h-none"
+      >
         <ng-container
           *ngFor="let l of displayedMyListings(); trackBy: trackByListing"
         >

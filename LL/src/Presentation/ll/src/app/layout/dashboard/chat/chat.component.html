@@ -5,25 +5,58 @@
     <div
       class="flex h-8 shrink-0 items-center gap-2 border-b border-[var(--ll-color-border)] px-3"
     >
-      <span
-        class="shrink-0 rounded border border-[var(--ll-color-border)] bg-[var(--ll-color-primary-soft)] px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-primary"
+      <nav
+        *ngIf="mobileDockExpanded; else collapsedMobileSummary"
+        #channelScroller
+        class="ll-scrollbar-none flex min-w-0 flex-1 cursor-grab touch-pan-y gap-1.5 overflow-x-auto active:cursor-grabbing"
+        aria-label="Chat channels"
+        (pointerdown)="onChannelPointerDown($event)"
+        (pointermove)="onChannelPointerMove($event)"
+        (pointerup)="onChannelPointerEnd($event)"
+        (pointercancel)="onChannelPointerEnd($event)"
       >
-        {{ activeMobileRoomLabel }}
-      </span>
-
-      <p
-        *ngIf="latestMobileMessage as message; else emptyMobileChat"
-        class="min-w-0 flex-1 truncate text-[11px]"
-      >
-        <strong class="text-primary">{{ message.senderName }}:</strong>
-        <span class="text-[var(--ll-color-text)]"> {{ message.body }}</span>
-      </p>
-      <ng-template #emptyMobileChat>
-        <p
-          class="min-w-0 flex-1 truncate text-[10px] text-[var(--ll-color-text-muted)]"
+        <button
+          *ngFor="let room of visibleRooms"
+          type="button"
+          class="shrink-0 whitespace-nowrap rounded-full border border-[var(--ll-color-border)] bg-[var(--ll-color-surface-soft)] px-2 py-0.5 text-[9px] tracking-wide text-[var(--ll-color-text-muted)] transition-colors"
+          [ngClass]="{
+            'border-[var(--ll-color-border-strong)] bg-[var(--ll-color-primary-soft)] text-primary':
+              activeRoomKey === room.contextKey &&
+              activeRoomType === room.channelType,
+          }"
+          [attr.aria-pressed]="
+            activeRoomKey === room.contextKey &&
+            activeRoomType === room.channelType
+          "
+          (click)="
+            selectChannelFromPointer($event, room.channelType, room.contextKey)
+          "
         >
-          {{ onlinePlayerLabel }}
+          {{ room.label }}
+        </button>
+      </nav>
+
+      <ng-template #collapsedMobileSummary>
+        <span
+          class="shrink-0 rounded border border-[var(--ll-color-border)] bg-[var(--ll-color-primary-soft)] px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-primary"
+        >
+          {{ activeMobileRoomLabel }}
+        </span>
+
+        <p
+          *ngIf="latestMobileMessage as message; else emptyMobileChat"
+          class="min-w-0 flex-1 truncate text-[11px]"
+        >
+          <strong class="text-primary">{{ message.senderName }}:</strong>
+          <span class="text-[var(--ll-color-text)]"> {{ message.body }}</span>
         </p>
+        <ng-template #emptyMobileChat>
+          <p
+            class="min-w-0 flex-1 truncate text-[10px] text-[var(--ll-color-text-muted)]"
+          >
+            {{ onlinePlayerLabel }}
+          </p>
+        </ng-template>
       </ng-template>
 
       <button

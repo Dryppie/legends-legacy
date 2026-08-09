@@ -16,7 +16,7 @@ The current version includes:
 - resolved attribute modifiers from Essences in the active loadout.
 
 The current version deliberately excludes Essence abilities, temporary combat modifiers,
-consumables, and dungeon-only effects. The API status message states that
+and dungeon-only effects. The API status message states that
 Essence abilities are not yet included.
 
 The detailed design and rollout checklist are in

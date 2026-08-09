@@ -69,10 +69,10 @@ type MobileOrderBook = 'sell' | 'buy';
 type MarketTicketSide = 'buy' | 'sell';
 
 @Component({
-    selector: 'app-market-place-commodity',
-    imports: [CommonModule, ReactiveFormsModule, NumberFormatPipe],
-    templateUrl: './market-place-commodity.component.html',
-    styleUrl: './market-place-commodity.component.css'
+  selector: 'app-market-place-commodity',
+  imports: [CommonModule, ReactiveFormsModule, NumberFormatPipe],
+  templateUrl: './market-place-commodity.component.html',
+  styleUrl: './market-place-commodity.component.css',
 })
 export class MarketPlaceCommodityComponent implements OnInit {
   private readonly _itemType = signal<ItemType>(ItemType.Resource);
@@ -291,8 +291,6 @@ export class MarketPlaceCommodityComponent implements OnInit {
         return 'Catalyst catalogue';
       case 'essences':
         return 'Essence catalogue';
-      case 'consumables':
-        return `${this._subcategory() ?? 'Consumable'} catalogue`;
       default:
         return `${this._subcategory() ?? 'Resource'} market`;
     }
@@ -306,8 +304,6 @@ export class MarketPlaceCommodityComponent implements OnInit {
         return 'Catalysts';
       case 'essences':
         return 'Essences';
-      case 'consumables':
-        return this._subcategory() ?? 'Consumables';
       default:
         return this._subcategory() ?? 'Resources';
     }

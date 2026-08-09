@@ -81,11 +81,6 @@ export class InventoryComponent implements OnInit {
       items: [],
     },
     {
-      id: 'consumables',
-      label: 'Consumables',
-      items: [],
-    },
-    {
       id: 'essences',
       label: 'Essences',
       items: [],
@@ -289,9 +284,6 @@ export class InventoryComponent implements OnInit {
 
       case 'Resources':
         return this.sortResourcesForDisplay(this.state.materials());
-
-      case 'Consumables':
-        return this.state.consumables();
 
       case 'Essences':
         return this.state.essences();

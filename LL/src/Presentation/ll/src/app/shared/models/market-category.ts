@@ -2,7 +2,6 @@ import { ItemType } from './enums/itemType';
 
 export type MarketCategoryId =
   | 'resources'
-  | 'consumables'
   | 'blueprints'
   | 'catalysts'
   | 'equipment'

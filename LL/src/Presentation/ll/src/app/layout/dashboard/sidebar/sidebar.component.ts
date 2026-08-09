@@ -96,7 +96,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
     });
 
     effect(() => {
-      const characterId = this.characterState.currentCharacter()?.id;
+      const characterId = this.characterState.currentCharacterId();
       untracked(() =>
         this.sidebarNotificationRefreshService.refreshForCharacter(characterId),
       );

@@ -1102,7 +1102,7 @@
     "id": "item.catalyst_selection_crate",
     "name": "Catalyst Selection Crate",
     "description": "Open this crate from your inventory to choose six catalysts for a specialized Blueprint recipe.",
-    "itemType": "Consumable",
+    "itemType": "Resource",
     "rarity": "Rare",
     "isBound": true,
     "equipmentType": "Head",

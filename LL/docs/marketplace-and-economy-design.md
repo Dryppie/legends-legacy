@@ -6,7 +6,7 @@ This document records the current Legends Legacy item economy, assesses the exis
 
 The recommended marketplace has one consistent shell with two trading models:
 
-- **Commodity markets** for stackable and interchangeable items: resources, catalysts, blueprints, consumables, and unbound essences.
+- **Commodity markets** for stackable and interchangeable items: resources, catalysts, blueprints, and unbound essences.
 - **Exact-item listings** for rolled equipment, where the individual instance, attributes, quality, Potential, blueprint, and tempering history matter.
 
 ## Current item economy
@@ -127,13 +127,12 @@ Categories filter the selected item rather than replacing the overall interactio
 - Resources
 - Catalysts
 - Blueprints
-- Consumables
 - Essences
 - Equipment
 
 ## Commodity experience
 
-Resources, catalysts, blueprints, consumables, and unbound essences use an item-centric market page. Selecting a catalogue item shows:
+Resources, catalysts, blueprints, and unbound essences use an item-centric market page. Selecting a catalogue item shows:
 
 - Owned quantity
 - Best sell price
@@ -238,7 +237,7 @@ Implemented in the current marketplace slice:
 - Atomic instant commodity buys and sells with price-time priority.
 - Crossing commodity buy and sell orders immediately consume compatible opposing orders in price-time priority and leave only the unfilled remainder active.
 - Resting-order guards prevent duplicate same-side orders and prevent a character from creating a buy order while selling the same item, or a sell listing while holding a buy order for it.
-- Commodity buy orders for resources, catalysts, blueprints, consumables, and unbound essences.
+- Commodity buy orders for resources, catalysts, blueprints, and unbound essences.
 - Exact-instance equipment listings with slot, rarity, quality, minimum tier, and minimum Potential filters.
 - Browse, Sell, and My Orders navigation with active-order cancellation and recent trade history.
 - A configurable three-percent seller fee and persisted trade ledger.

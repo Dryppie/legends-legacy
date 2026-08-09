@@ -24,7 +24,6 @@ public static class DbJsonSeeder
         var itemPath = Path.Combine(AppContext.BaseDirectory, "Data", "items", "items.json");
         var itemJson = await File.ReadAllTextAsync(itemPath);
         var items = JsonSerializer.Deserialize<List<ItemBase>>(itemJson, opt)!;
-        await RestoreConsumableDiscriminatorsAsync(ctx, items);
         var existingEquipmentById = await ctx.ItemBases
             .OfType<EquipmentBase>()
             .Include(x => x.AttributeModifiers)
@@ -102,31 +101,6 @@ public static class DbJsonSeeder
             if (existing == null) ctx.ItemBases.Add(item);
             else ctx.GetEntry(existing).CurrentValues.SetValues(item);
         }
-    }
-
-    private static async Task RestoreConsumableDiscriminatorsAsync(
-        IDbContext ctx,
-        IReadOnlyCollection<ItemBase> items)
-    {
-        if (ctx is not DbContext dbContext || !dbContext.Database.IsRelational())
-        {
-            return;
-        }
-
-        var consumableIds = items
-            .OfType<ConsumableItemBase>()
-            .Select(x => x.Id)
-            .ToArray();
-
-        if (consumableIds.Length == 0)
-        {
-            return;
-        }
-
-        await ctx.ItemBases
-            .Where(x => consumableIds.Contains(x.Id) && x.ItemType == ItemType.Resource)
-            .ExecuteUpdateAsync(setters =>
-                setters.SetProperty(x => x.ItemType, ItemType.Consumable));
     }
 
     private static void SyncEquipmentAttributeModifiers(

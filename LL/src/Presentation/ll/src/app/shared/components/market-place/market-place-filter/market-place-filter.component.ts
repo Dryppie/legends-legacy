@@ -19,9 +19,9 @@ interface MarketPlaceFilterTab {
 }
 
 @Component({
-    selector: 'app-market-place-filter',
-    imports: [NgFor, DropdownComponent],
-    templateUrl: './market-place-filter.component.html'
+  selector: 'app-market-place-filter',
+  imports: [NgFor, DropdownComponent],
+  templateUrl: './market-place-filter.component.html',
 })
 export class MarketPlaceFilterComponent {
   readonly tabs: readonly MarketPlaceFilterTab[] = [
@@ -31,13 +31,6 @@ export class MarketPlaceFilterComponent {
       itemType: ItemType.Resource,
       defaultSubcategory: 'Ore',
       subOptions: ['Ore', 'Wood', 'Hide'],
-    },
-    {
-      id: 'consumables',
-      label: 'Consumables',
-      itemType: ItemType.Consumable,
-      defaultSubcategory: 'Potion',
-      subOptions: ['Potion', 'Food', 'Scroll'],
     },
     {
       id: 'blueprints',
