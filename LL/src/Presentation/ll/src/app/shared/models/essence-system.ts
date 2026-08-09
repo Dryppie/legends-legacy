@@ -101,6 +101,7 @@ export interface CreatureArchiveEssenceEntryDto {
   name: string;
   isAbsorbed: boolean;
   tags: string[];
+  definition: EssenceDefinitionDto;
 }
 
 export interface EssenceCodexDto {
@@ -131,6 +132,7 @@ export interface EssenceCodexMemberDto {
   isDiscovered: boolean;
   isAbsorbed: boolean;
   ascensionTier: number;
+  definition?: EssenceDefinitionDto | null;
 }
 
 export interface PlayerEssenceDto {

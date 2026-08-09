@@ -1,7 +1,7 @@
 <div
-  class="relative inline-block"
+  [ngClass]="originClass"
   #origin
-  [attr.aria-haspopup]="true"
+  [attr.aria-haspopup]="disabled ? null : true"
   [attr.aria-expanded]="overlayRef ? 'true' : 'false'"
   (click)="onOriginClick($event)"
   (mouseenter)="onOriginEnter()"

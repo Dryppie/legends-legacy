@@ -29,10 +29,13 @@
       </button>
     </section>
 
-    <section *ngIf="availableBuildings().length > 0" class="building-group">
+    <section
+      *ngIf="readyToBuildBuildings().length > 0"
+      class="building-group"
+    >
       <h2 class="section-label">Ready to Build</h2>
       <button
-        *ngFor="let building of availableBuildings()"
+        *ngFor="let building of readyToBuildBuildings()"
         type="button"
         class="building-row is-buildable"
         [class.is-selected]="isSelected(building)"
@@ -45,6 +48,30 @@
           </small>
         </span>
         <span class="build-command">Build</span>
+      </button>
+    </section>
+
+    <section
+      *ngIf="awaitingSuppliesBuildings().length > 0"
+      class="building-group"
+    >
+      <h2 class="section-label">Awaiting Supplies</h2>
+      <button
+        *ngFor="let building of awaitingSuppliesBuildings()"
+        type="button"
+        class="building-row is-awaiting-resources"
+        [class.is-selected]="isSelected(building)"
+        (click)="select(building)"
+      >
+        <span class="building-row-copy">
+          <strong>{{ building.definition.name }}</strong>
+          <small>
+            {{ building.nextCost?.GuildSupplies ?? 0 | numberFormat }} supplies
+          </small>
+        </span>
+        <span class="build-command">
+          {{ supplyShortfall(building) | numberFormat }} short
+        </span>
       </button>
     </section>
 

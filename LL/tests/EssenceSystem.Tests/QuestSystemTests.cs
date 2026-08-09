@@ -45,6 +45,9 @@ public sealed class QuestSystemTests
             provider.Get(QuestConstants.TrialOfLumo).Chain);
         Assert.Equal("chain.shenic", trialChain.Id);
         Assert.Equal("Shenic Campaign", trialChain.Title);
+        Assert.Equal(
+            "New Shenic areas unlock as you reach their required character levels and complete each campaign quest.",
+            trialChain.Description);
         Assert.Equal(1, trialChain.Step);
         Assert.Equal(10, trialChain.TotalSteps);
         Assert.Equal(10, provider.Get(QuestConstants.LastLightInDuskmire).Chain?.Step);
@@ -457,6 +460,46 @@ public sealed class QuestSystemTests
             "test",
             CancellationToken.None);
 
+        Assert.Equal(QuestStatus.Completed, progress.Status);
+        Assert.All(progress.Objectives, objective => Assert.NotNull(objective.CompletedAt));
+    }
+
+    [Fact]
+    public async Task Arms_of_choice_advances_each_objective_from_its_one_handed_weapon_recipe()
+    {
+        var characterId = Guid.NewGuid();
+        var definitions = CreateDefinitions();
+        var repository = new RecordingQuestRepository(level: 5);
+        repository.Progresses.Add(CreateActiveProgress(
+            characterId,
+            definitions.Get(QuestConstants.ArmsOfChoice),
+            isPinned: false));
+        var service = new QuestService(
+            repository,
+            definitions,
+            itemBases: new RecordingItemBaseRepository(),
+            inventoryItemFactory: new RecordingInventoryItemFactory(),
+            lootRewardWriter: new RecordingLootRewardWriter(),
+            TimeProvider.System);
+
+        await service.ProcessAsync(
+            characterId,
+            QuestTrigger.EquipmentCrafted(
+                ["shortsword", "dagger", "hatchet", "mace", "wand"],
+                [1, 1, 1, 1, 1],
+                [
+                    "recipe.weapon.one_handed.shortsword",
+                    "recipe.weapon.one_handed.dagger",
+                    "recipe.weapon.one_handed.hand_axe",
+                    "recipe.weapon.one_handed.mace",
+                    "recipe.weapon.one_handed.wand"
+                ]),
+            null,
+            "test",
+            CancellationToken.None);
+
+        var progress = repository.Progresses.Single(
+            x => x.QuestId == QuestConstants.ArmsOfChoice);
         Assert.Equal(QuestStatus.Completed, progress.Status);
         Assert.All(progress.Objectives, objective => Assert.NotNull(objective.CompletedAt));
     }

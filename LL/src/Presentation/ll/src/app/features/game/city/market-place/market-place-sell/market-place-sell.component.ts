@@ -32,6 +32,7 @@ import { ItemComponent } from '../../../../../shared/components/item/item.compon
 import { formatAttributeType } from '../../../../../shared/pipes/attributes/attribute-type-format/attribute-type-format.pipe';
 import { formatAttributeValue } from '../../../../../shared/pipes/attributes/attribute-value-format/attribute-value-format.pipe';
 import { ItemType } from '../../../../../shared/models/enums/itemType';
+import { ItemQuality } from '../../../../../shared/models/enums/itemQuality';
 import { MarketCategoryId } from '../../../../../shared/models/market-category';
 import {
   isMarketplaceBlueprintResource,
@@ -309,6 +310,12 @@ export class MarketPlaceSellComponent implements OnInit {
         this.selectedItemId = '';
       }
     });
+  }
+
+  listingQuality(listing: MarketPlaceListing): ItemQuality | null {
+    return listing.itemInstance.itemBase.itemType === ItemType.Equipment
+      ? (listing.itemInstance as EquipmentInstance).quality
+      : null;
   }
 
   tabs: SidebarSection[] = [

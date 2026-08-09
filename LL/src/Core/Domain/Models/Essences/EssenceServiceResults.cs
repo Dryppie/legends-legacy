@@ -1,4 +1,5 @@
 using Domain.Models.Bonuses;
+using Domain.Models.Essences.Definitions;
 
 namespace Domain.Models.Essences;
 
@@ -37,7 +38,8 @@ public sealed record CreatureArchiveEssenceEntry(
     string EssenceDefinitionId,
     string Name,
     bool IsAbsorbed,
-    IReadOnlyList<string> Tags);
+    IReadOnlyList<string> Tags,
+    EssenceDefinition Definition);
 
 public sealed record EssenceCodex(
     IReadOnlyList<EssenceCodexEntry> Entries);
@@ -64,7 +66,8 @@ public sealed record EssenceCodexMember(
     string Name,
     bool IsDiscovered,
     bool IsAbsorbed,
-    int AscensionTier);
+    int AscensionTier,
+    EssenceDefinition? Definition);
 
 public sealed record PlayerEssenceArchiveEntry(
     PlayerEssence Essence,

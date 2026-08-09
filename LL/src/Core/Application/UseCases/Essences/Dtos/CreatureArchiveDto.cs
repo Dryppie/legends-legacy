@@ -68,10 +68,11 @@ public sealed record CreatureArchiveEssenceEntryDto(
     string EssenceDefinitionId,
     string Name,
     bool IsAbsorbed,
-    IReadOnlyList<string> Tags) : IMapFrom<CreatureArchiveEssenceEntry>
+    IReadOnlyList<string> Tags,
+    EssenceDefinitionDto Definition) : IMapFrom<CreatureArchiveEssenceEntry>
 {
     public CreatureArchiveEssenceEntryDto()
-        : this(string.Empty, string.Empty, false, [])
+        : this(string.Empty, string.Empty, false, [], new EssenceDefinitionDto())
     {
     }
 

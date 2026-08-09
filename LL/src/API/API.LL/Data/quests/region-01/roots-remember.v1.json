@@ -4,7 +4,7 @@
   "title": "The Roots Remember",
   "summary": "Follow the Old Forest's corrupted roots deeper into Shenic.",
   "category": "Shenic",
-  "chain": { "id": "chain.shenic", "title": "Shenic Campaign", "step": 6, "totalSteps": 10 },
+  "chain": { "id": "chain.shenic", "title": "Shenic Campaign", "description": "New Shenic areas unlock as you reach their required character levels and complete each campaign quest.", "step": 6, "totalSteps": 10 },
   "sortOrder": 150,
   "objectiveMode": "Sequential",
   "availability": {

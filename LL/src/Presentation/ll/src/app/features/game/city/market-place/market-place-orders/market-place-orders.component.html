@@ -18,9 +18,15 @@
     <div class="ll-panel overflow-hidden">
       <div
         *ngFor="let listing of marketplaceState.myListings(); trackBy: trackListing"
-        class="ll-table-row grid grid-cols-[minmax(0,1fr)_auto_auto_auto_auto] items-center gap-3"
+        class="ll-table-row grid grid-cols-[minmax(0,1fr)_auto_auto_auto_auto_auto] items-center gap-3"
       >
         <app-item [item]="listing.itemInstance"></app-item>
+        <span
+          *ngIf="listingQuality(listing) as quality"
+          class="ll-item-chip ll-item-chip-accent"
+        >
+          {{ quality }}
+        </span>
         <span class="ll-helper">Expires {{ listing.expiresAt | date: 'MMM d, HH:mm' }}</span>
         <span class="text-sm">x{{ listing.quantity | numberFormat }}</span>
         <span class="text-sm text-primary">

@@ -154,6 +154,14 @@
   border-style: dashed;
 }
 
+.building-row.is-awaiting-resources {
+  border-style: dashed;
+}
+
+.building-row.is-awaiting-resources .build-command {
+  color: var(--ll-color-text-muted);
+}
+
 .building-row.is-locked {
   opacity: 0.7;
 }

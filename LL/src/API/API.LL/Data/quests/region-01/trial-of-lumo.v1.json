@@ -4,7 +4,7 @@
   "title": "Trial of Lumo",
   "summary": "Prove that you can endure the dangers beyond the training route.",
   "category": "Shenic",
-  "chain": { "id": "chain.shenic", "title": "Shenic Campaign", "step": 1, "totalSteps": 10 },
+  "chain": { "id": "chain.shenic", "title": "Shenic Campaign", "description": "New Shenic areas unlock as you reach their required character levels and complete each campaign quest.", "step": 1, "totalSteps": 10 },
   "sortOrder": 100,
   "objectiveMode": "Sequential",
   "availability": {

@@ -79,6 +79,7 @@ public sealed class CreatureArchiveServiceTests
         Assert.Equal("essence.cave_bat", essence.EssenceDefinitionId);
         Assert.Equal("Cave Bat Essence", essence.Name);
         Assert.True(essence.IsAbsorbed);
+        Assert.Equal("essence.cave_bat", essence.Definition.Id);
         Assert.False(creature.IsEssenceFocus);
         Assert.Equal(0, creature.EssenceFocusTotalDurationSeconds);
         Assert.Equal(0, creature.CurrentEssenceFocusDurationSeconds);
@@ -322,6 +323,7 @@ public sealed class CreatureArchiveServiceTests
             Assert.False(member.IsAbsorbed);
             Assert.Null(member.EssenceDefinitionId);
             Assert.Equal("Undiscovered Essence", member.Name);
+            Assert.Null(member.Definition);
         });
     }
 
@@ -350,6 +352,7 @@ public sealed class CreatureArchiveServiceTests
         Assert.Equal("essence.cave_bat", discovered.EssenceDefinitionId);
         Assert.Equal("Cave Bat Essence", discovered.Name);
         Assert.False(discovered.IsAbsorbed);
+        Assert.Equal("essence.cave_bat", discovered.Definition?.Id);
         Assert.Equal(2, entry.Essences.Count(member => !member.IsDiscovered));
     }
 

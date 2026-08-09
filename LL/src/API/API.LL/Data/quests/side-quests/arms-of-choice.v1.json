@@ -16,40 +16,55 @@
       "description": "Craft a one-handed shortsword.",
       "type": "EquipmentCrafted",
       "requiredAmount": 1,
-      "filters": { "itemBaseIds": ["shortsword"] },
-      "presentation": { "actionLabel": "Head to Crafting", "destinationRoute": "/game/professions/crafting" }
+      "filters": { "baseRecipeIds": ["recipe.weapon.one_handed.shortsword"] },
+      "presentation": {
+        "actionLabel": "Head to Crafting",
+        "destinationRoute": "/game/professions/crafting"
+      }
     },
     {
       "key": "craft_dagger",
       "description": "Craft a one-handed dagger.",
       "type": "EquipmentCrafted",
       "requiredAmount": 1,
-      "filters": { "itemBaseIds": ["dagger"] },
-      "presentation": { "actionLabel": "Head to Crafting", "destinationRoute": "/game/professions/crafting" }
+      "filters": { "baseRecipeIds": ["recipe.weapon.one_handed.dagger"] },
+      "presentation": {
+        "actionLabel": "Head to Crafting",
+        "destinationRoute": "/game/professions/crafting"
+      }
     },
     {
       "key": "craft_hatchet",
-      "description": "Craft a one-handed hatchet.",
+      "description": "Craft a one-handed hand axe.",
       "type": "EquipmentCrafted",
       "requiredAmount": 1,
-      "filters": { "itemBaseIds": ["hatchet"] },
-      "presentation": { "actionLabel": "Head to Crafting", "destinationRoute": "/game/professions/crafting" }
+      "filters": { "baseRecipeIds": ["recipe.weapon.one_handed.hand_axe"] },
+      "presentation": {
+        "actionLabel": "Head to Crafting",
+        "destinationRoute": "/game/professions/crafting"
+      }
     },
     {
       "key": "craft_mace",
       "description": "Craft a one-handed mace.",
       "type": "EquipmentCrafted",
       "requiredAmount": 1,
-      "filters": { "itemBaseIds": ["mace"] },
-      "presentation": { "actionLabel": "Head to Crafting", "destinationRoute": "/game/professions/crafting" }
+      "filters": { "baseRecipeIds": ["recipe.weapon.one_handed.mace"] },
+      "presentation": {
+        "actionLabel": "Head to Crafting",
+        "destinationRoute": "/game/professions/crafting"
+      }
     },
     {
       "key": "craft_wand",
       "description": "Craft a one-handed wand.",
       "type": "EquipmentCrafted",
       "requiredAmount": 1,
-      "filters": { "itemBaseIds": ["wand"] },
-      "presentation": { "actionLabel": "Head to Crafting", "destinationRoute": "/game/professions/crafting" }
+      "filters": { "baseRecipeIds": ["recipe.weapon.one_handed.wand"] },
+      "presentation": {
+        "actionLabel": "Head to Crafting",
+        "destinationRoute": "/game/professions/crafting"
+      }
     }
   ],
   "rewards": [

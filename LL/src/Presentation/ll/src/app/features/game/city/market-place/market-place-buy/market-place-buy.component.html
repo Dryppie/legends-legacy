@@ -82,9 +82,10 @@
       </button>
     </div>
 
-    <div class="ll-table-header grid grid-cols-4">
+    <div class="ll-table-header grid grid-cols-5">
       <label class="col-start-1 col-end-3">Name</label>
       <label>Quantity</label>
+      <label>Quality</label>
       <label class="justify-self-end">Cinders per unit</label>
     </div>
     <div
@@ -93,10 +94,13 @@
       <div
         *ngFor="let l of filteredListings(); trackBy: trackByListing"
         (click)="selectListing(l)"
+        [attr.aria-disabled]="isOwnListing(l)"
         [ngClass]="{
           'bg-primary/20 text-white': l.id === selectedListingId,
+          'cursor-pointer hover:bg-zinc-600/30': !isOwnListing(l),
+          'cursor-not-allowed opacity-60': isOwnListing(l),
         }"
-        class="cursor-pointer transition hover:bg-zinc-600/30"
+        class="transition"
       >
         <app-market-place-listing-item
           [listing]="l"
@@ -183,7 +187,8 @@
       </div>
       <app-regular-button
         class="w-full"
-        text="Buy"
+        [text]="isOwnListing(sel) ? 'Your listing' : 'Buy'"
+        [disabled]="isOwnListing(sel)"
         fullWidth
         (pressed)="buyoutListing()"
       />

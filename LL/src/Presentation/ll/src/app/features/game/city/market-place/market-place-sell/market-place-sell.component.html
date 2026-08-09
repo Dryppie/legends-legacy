@@ -173,9 +173,15 @@
           *ngFor="let l of displayedMyListings(); trackBy: trackByListing"
         >
           <div
-            class="ll-table-row grid grid-cols-[minmax(0,1fr)_auto_auto_auto] items-center gap-2"
+            class="ll-table-row grid grid-cols-[minmax(0,1fr)_auto_auto_auto_auto] items-center gap-2"
           >
             <app-item [item]="l.itemInstance"></app-item>
+            <span
+              *ngIf="listingQuality(l) as quality"
+              class="ll-item-chip ll-item-chip-accent"
+            >
+              {{ quality }}
+            </span>
             <div class="text-sm text-zinc-200">
               <span>x{{ l.quantity | numberFormat }}</span>
             </div>

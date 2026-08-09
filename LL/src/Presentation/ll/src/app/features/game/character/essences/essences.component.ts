@@ -1,5 +1,8 @@
 import { CommonModule } from '@angular/common';
-import { ScrollingModule } from '@angular/cdk/scrolling';
+import {
+  CdkVirtualScrollViewport,
+  ScrollingModule,
+} from '@angular/cdk/scrolling';
 import {
   Component,
   computed,
@@ -8,6 +11,7 @@ import {
   OnInit,
   signal,
   untracked,
+  ViewChild,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -23,11 +27,13 @@ import {
 } from '../../../../shared/components/custom-components/tabs/navigation-tabs/navigation-tabs.component';
 import { DefaultHeaderComponent } from '../../../../shared/components/default-header/default-header.component';
 import { EssenceDescriptionComponent } from '../../../../shared/components/essences/essence-description/essence-description.component';
+import { EssenceDetailsComponent } from '../../../../shared/components/essences/essence-details/essence-details.component';
 import { AbilityTagsComponent } from '../../../../shared/components/essences/ability-tags/ability-tags.component';
 import {
   CreatureArchiveEntryDto,
   EssenceCodexEntryDto,
   EssenceCodexMemberDto,
+  EssenceDefinitionDto,
   EssenceLoadoutDto,
   PlayerEssenceDto,
 } from '../../../../shared/models/essence-system';
@@ -49,6 +55,9 @@ import {
   ONBOARDING_GOBLIN_ESSENCE_DEFINITION_ID,
   TRAINING_DAY_QUEST_ID,
 } from '../../../../shared/models/quest';
+import { PopoverComponent } from '../../../../shared/components/custom-components/popover/popover.component';
+import { EssenceItemViewService } from '../../../../core/services/api/essences/essence-item-view.service';
+import { Essence } from '../../../../shared/models/essence';
 
 type ArchiveFilter = 'all' | 'favorites' | 'attuned' | 'ready';
 type ArchiveSort = 'name' | 'level' | 'tier';
@@ -70,7 +79,9 @@ interface AscendRequirementView {
     FormsModule,
     DefaultHeaderComponent,
     EssenceDescriptionComponent,
+    EssenceDetailsComponent,
     AbilityTagsComponent,
+    PopoverComponent,
     NavigationTabsComponent,
     EssencesAbsorbComponent,
     DropdownComponent,
@@ -79,6 +90,9 @@ interface AscendRequirementView {
   styleUrls: ['./essences.component.scss'],
 })
 export class EssencesComponent implements OnInit {
+  @ViewChild(CdkVirtualScrollViewport)
+  private archiveViewport?: CdkVirtualScrollViewport;
+
   private lastPreparedQuestObjective: string | null = null;
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
@@ -267,6 +281,7 @@ export class EssencesComponent implements OnInit {
     public readonly questState: QuestStateService,
     private readonly questPresenter: QuestPresenterService,
     private readonly inventoryState: InventoryStateService,
+    private readonly essenceItemView: EssenceItemViewService,
   ) {
     effect(() => {
       const view = this.requestedView();
@@ -371,6 +386,32 @@ export class EssencesComponent implements OnInit {
     if (window.matchMedia('(max-width: 639px)').matches) {
       this.mobileLoadoutOpen.set(false);
       this.router.navigate(['/game/character/essences', essence.id]);
+    }
+  }
+
+  public essenceDefinitionDetails(definition: EssenceDefinitionDto): Essence {
+    return this.essenceItemView.fromDefinition(definition);
+  }
+
+  public focusLoadoutEssence(essence: PlayerEssenceDto): void {
+    let archiveIndex = this.filteredArchiveEssences().findIndex(
+      (entry) => entry.id === essence.id,
+    );
+
+    if (archiveIndex < 0) {
+      this.archiveSearch.set('');
+      this.archiveFilter.set('all');
+      archiveIndex = this.filteredArchiveEssences().findIndex(
+        (entry) => entry.id === essence.id,
+      );
+    }
+
+    this.selectPlayerEssence(essence);
+
+    if (archiveIndex >= 0) {
+      requestAnimationFrame(() =>
+        this.archiveViewport?.scrollToIndex(archiveIndex, 'smooth'),
+      );
     }
   }
 

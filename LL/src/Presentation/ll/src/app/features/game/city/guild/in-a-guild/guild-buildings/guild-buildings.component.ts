@@ -60,6 +60,18 @@ export class GuildBuildingsComponent {
     );
   });
 
+  readonly readyToBuildBuildings = computed(() =>
+    this.availableBuildings().filter(
+      (building) => this.supplyShortfall(building) === 0,
+    ),
+  );
+
+  readonly awaitingSuppliesBuildings = computed(() =>
+    this.availableBuildings().filter(
+      (building) => this.supplyShortfall(building) > 0,
+    ),
+  );
+
   readonly lockedBuildings = computed(() => {
     const hallLevel = this.overview()?.guildHallLevel ?? 0;
     return this.visibleBuildings().filter(
@@ -155,6 +167,14 @@ export class GuildBuildingsComponent {
     const available = this.overview()?.guildSupplies ?? 0;
     if (required <= 0) return 100;
     return Math.min(100, (available / required) * 100);
+  }
+
+  supplyShortfall(building: GuildBuilding): number {
+    return Math.max(
+      0,
+      (building.nextCost?.GuildSupplies ?? 0) -
+        (this.overview()?.guildSupplies ?? 0),
+    );
   }
 
   levelSegments(building: GuildBuilding): number[] {

@@ -52,6 +52,7 @@ export interface QuestChoiceOption {
 export interface QuestChain {
   id: string;
   title: string;
+  description: string;
   step: number;
   totalSteps: number;
 }

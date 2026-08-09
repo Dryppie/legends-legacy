@@ -1,4 +1,4 @@
-<div class="ll-item-row grid min-h-9 grid-cols-4 gap-2 px-2 py-1 text-sm">
+<div class="ll-item-row grid min-h-9 grid-cols-5 gap-2 px-2 py-1 text-sm">
   <div class="col-start-1 col-end-3 flex min-w-0 items-center gap-2">
     <app-item [item]="listing.itemInstance"></app-item>
     <ng-container
@@ -8,6 +8,7 @@
     </ng-container>
   </div>
   <div class="text-white">x{{ listing.quantity | numberFormat }}</div>
+  <div class="truncate text-zinc-300">{{ qualityLabel }}</div>
 
   <div class="ml-auto flex items-center gap-1 text-primary">
     <div>{{ listing.unitPrice | numberFormat }}</div>

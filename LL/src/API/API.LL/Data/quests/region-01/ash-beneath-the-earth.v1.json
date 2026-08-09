@@ -4,7 +4,7 @@
   "title": "Ash Beneath the Earth",
   "summary": "Descend into Embercap Burrows and confront what feeds its buried heat.",
   "category": "Shenic",
-  "chain": { "id": "chain.shenic", "title": "Shenic Campaign", "step": 8, "totalSteps": 10 },
+  "chain": { "id": "chain.shenic", "title": "Shenic Campaign", "description": "New Shenic areas unlock as you reach their required character levels and complete each campaign quest.", "step": 8, "totalSteps": 10 },
   "sortOrder": 170,
   "objectiveMode": "Sequential",
   "availability": {

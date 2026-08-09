@@ -103,6 +103,13 @@
       </span>
     </div>
 
+    <p
+      *ngIf="activeQuest.chain as chain"
+      class="mt-2 text-[11px] leading-4 text-zinc-400"
+    >
+      {{ chain.description }}
+    </p>
+
     <p *ngIf="requiresChoice()" class="mt-3 text-xs leading-5 text-zinc-300">
       Review the three creatures and choose the Essence that will begin your
       Soul Archive.

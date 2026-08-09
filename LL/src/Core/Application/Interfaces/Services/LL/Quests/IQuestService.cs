@@ -69,6 +69,7 @@ public sealed record QuestChoiceOption(
 public sealed record QuestChain(
     string Id,
     string Title,
+    string Description,
     int Step,
     int TotalSteps);
 
@@ -106,6 +107,7 @@ public sealed record QuestTrigger(
     string? EssenceDefinitionId = null,
     IReadOnlyCollection<string>? CraftedItemBaseIds = null,
     IReadOnlyCollection<int>? CraftedItemTiers = null,
+    IReadOnlyCollection<string?>? CraftedBaseRecipeIds = null,
     int? CharacterLevel = null,
     int ActionCount = 1,
     string? EquippedGatheringType = null)
@@ -131,8 +133,13 @@ public sealed record QuestTrigger(
 
     public static QuestTrigger EquipmentCrafted(
         IReadOnlyCollection<string> itemBaseIds,
-        IReadOnlyCollection<int> tiers) =>
-        new("EquipmentCrafted", CraftedItemBaseIds: itemBaseIds, CraftedItemTiers: tiers);
+        IReadOnlyCollection<int> tiers,
+        IReadOnlyCollection<string?>? baseRecipeIds = null) =>
+        new(
+            "EquipmentCrafted",
+            CraftedItemBaseIds: itemBaseIds,
+            CraftedItemTiers: tiers,
+            CraftedBaseRecipeIds: baseRecipeIds);
 
     public static QuestTrigger EquipmentChanged() => new("EquipmentChanged");
 

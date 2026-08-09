@@ -322,6 +322,20 @@
   font-weight: 400;
 }
 
+.soul-loadout-slot-select {
+  cursor: pointer;
+  text-align: left;
+  transition: color 150ms ease;
+}
+
+.soul-loadout-slot-select:hover,
+.soul-loadout-slot-select:focus-visible {
+  color: var(--ll-color-primary);
+  outline: none;
+  text-decoration: underline;
+  text-underline-offset: 0.16rem;
+}
+
 .soul-loadout-remove {
   grid-column: 2;
   flex: none;

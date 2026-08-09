@@ -66,7 +66,8 @@ public sealed class QuestGameEventOutboxConsumer(
     private static QuestTrigger CreateEquipmentCraftedTrigger(EquipmentCraftedPayload payload) =>
         QuestTrigger.EquipmentCrafted(
             payload.CraftedItems.Select(x => x.ItemBaseId).ToList(),
-            payload.CraftedItems.Select(x => x.Tier).ToList());
+            payload.CraftedItems.Select(x => x.Tier).ToList(),
+            payload.CraftedItems.Select(x => x.BaseRecipeId).ToList());
 
     private static QuestTrigger CreateCombatTrigger(IdleCombatEncounterCompletedPayload payload) =>
         QuestTrigger.CombatCompleted(

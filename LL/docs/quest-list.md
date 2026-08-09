@@ -30,7 +30,7 @@ Requirements below are the objectives that must be completed, not the prerequisi
 - [x] **A Second Soul** — absorb one additional Essence into the Soul Archive.
 - [x] **An Adaptable Archive** — attune Goblin, Lumo Wisp, and Lumo Sentinel Essences in sequence.
 - [x] **Armor and Adornment** — craft one Tier 1 armor piece and one Tier 1 jewelry piece, in either order.
-- [x] **Arms of Choice** — craft one one-handed shortsword, dagger, hatchet, mace, and wand, in any order.
+- [x] **Arms of Choice** — craft one one-handed shortsword, dagger, Hand Axe, mace, and wand, in any order.
 - [x] **Made by Your Own Hand** — craft a Tier 2 one-handed weapon, then equip a Tier 2 weapon you crafted.
 - [x] **Stone, Timber, and Hide** — complete 10 actions in Lumo Ruins with a pickaxe, 10 with a hatchet, and 10 with a skinning knife equipped.
 - [x] **Focused Pursuit** — set Essence Focus for one creature from the Creatures tab.

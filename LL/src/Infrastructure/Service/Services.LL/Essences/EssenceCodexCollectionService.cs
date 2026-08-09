@@ -88,7 +88,8 @@ public sealed class EssenceCodexCollectionService : IEssenceCodexCollectionServi
                     isDiscovered ? definition?.DisplayName ?? FormatEssenceName(id) : "Undiscovered Essence",
                     isDiscovered,
                     isAbsorbed,
-                    isAbsorbed ? ascensionTier : 0);
+                    isAbsorbed ? ascensionTier : 0,
+                    isDiscovered ? definition : null);
             })
             .ToList();
 

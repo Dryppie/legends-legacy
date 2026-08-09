@@ -4,7 +4,7 @@
   "title": "Crystal Currents",
   "summary": "Secure the creek before its strange resonance draws something worse.",
   "category": "Shenic",
-  "chain": { "id": "chain.shenic", "title": "Shenic Campaign", "step": 3, "totalSteps": 10 },
+  "chain": { "id": "chain.shenic", "title": "Shenic Campaign", "description": "New Shenic areas unlock as you reach their required character levels and complete each campaign quest.", "step": 3, "totalSteps": 10 },
   "sortOrder": 120,
   "objectiveMode": "Sequential",
   "availability": {

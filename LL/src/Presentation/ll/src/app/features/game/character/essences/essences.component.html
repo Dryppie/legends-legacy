@@ -601,9 +601,14 @@
                   else emptyLoadoutSlot
                 "
               >
-                <span class="soul-loadout-slot-name">
+                <button
+                  type="button"
+                  class="soul-loadout-slot-name soul-loadout-slot-select"
+                  [attr.aria-label]="'View ' + slottedEssence.name"
+                  (click)="focusLoadoutEssence(slottedEssence)"
+                >
                   {{ slottedEssence.name }}
-                </span>
+                </button>
                 <button
                   type="button"
                   class="soul-loadout-remove"
@@ -856,19 +861,32 @@
 
         <div class="mt-3 rounded border border-light_gray/60 p-2 text-sm">
           <div class="mb-1 text-zinc-400">Essence variants</div>
-          <div
+          <app-popover
             *ngFor="let essence of creature.essences"
-            class="flex items-center justify-between gap-3 py-1"
+            class="block"
+            originClass="relative block"
+            trigger="hover"
+            [template]="creatureEssenceDetails"
           >
-            <span
-              [ngClass]="essence.isAbsorbed ? 'text-primary' : 'text-zinc-300'"
-            >
-              {{ essence.name }}
-            </span>
-            <span class="text-xs text-zinc-500">
-              {{ essence.isAbsorbed ? "Archived" : "Not archived" }}
-            </span>
-          </div>
+            <div class="flex items-center justify-between gap-3 py-1">
+              <span
+                [ngClass]="
+                  essence.isAbsorbed ? 'text-primary' : 'text-zinc-300'
+                "
+              >
+                {{ essence.name }}
+              </span>
+              <span class="text-xs text-zinc-500">
+                {{ essence.isAbsorbed ? "Archived" : "Not archived" }}
+              </span>
+            </div>
+
+            <ng-template #creatureEssenceDetails>
+              <app-essence-details
+                [essence]="essenceDefinitionDetails(essence.definition)"
+              ></app-essence-details>
+            </ng-template>
+          </app-popover>
           <p
             *ngIf="creature.essences.length === 0"
             class="text-xs text-zinc-500"
@@ -958,40 +976,55 @@
         </div>
 
         <div class="mt-4 grid gap-2">
-          <div
+          <app-popover
             *ngFor="let member of entry.essences; trackBy: trackCodexMember"
-            class="flex items-center justify-between gap-3 rounded border border-light_gray/60 px-2 py-1.5 text-xs"
-            [ngClass]="{
-              'border-dashed opacity-70': !member.isDiscovered,
-            }"
+            class="block"
+            originClass="relative block"
+            trigger="hover"
+            [disabled]="!member.definition"
+            [template]="codexEssenceDetails"
           >
-            <span
-              class="min-w-0 truncate"
-              [ngClass]="
-                member.isAbsorbed
-                  ? 'text-primary'
-                  : member.isDiscovered
-                    ? 'text-zinc-300'
-                    : 'italic text-zinc-500'
-              "
+            <div
+              class="flex items-center justify-between gap-3 rounded border border-light_gray/60 px-2 py-1.5 text-xs"
+              [ngClass]="{
+                'border-dashed opacity-70': !member.isDiscovered,
+              }"
             >
-              {{ member.name }}
-            </span>
-            <span
-              class="ll-badge shrink-0 rounded"
-              [ngClass]="
-                member.isAbsorbed ? 'll-badge-accent' : 'll-badge-muted'
-              "
-            >
-              {{
-                member.isAbsorbed
-                  ? "Asc " + member.ascensionTier
-                  : member.isDiscovered
-                    ? "Missing"
-                    : "Unknown"
-              }}
-            </span>
-          </div>
+              <span
+                class="min-w-0 truncate"
+                [ngClass]="
+                  member.isAbsorbed
+                    ? 'text-primary'
+                    : member.isDiscovered
+                      ? 'text-zinc-300'
+                      : 'italic text-zinc-500'
+                "
+              >
+                {{ member.name }}
+              </span>
+              <span
+                class="ll-badge shrink-0 rounded"
+                [ngClass]="
+                  member.isAbsorbed ? 'll-badge-accent' : 'll-badge-muted'
+                "
+              >
+                {{
+                  member.isAbsorbed
+                    ? "Asc " + member.ascensionTier
+                    : member.isDiscovered
+                      ? "Missing"
+                      : "Unknown"
+                }}
+              </span>
+            </div>
+
+            <ng-template #codexEssenceDetails>
+              <app-essence-details
+                *ngIf="member.definition as definition"
+                [essence]="essenceDefinitionDetails(definition)"
+              ></app-essence-details>
+            </ng-template>
+          </app-popover>
         </div>
 
         <div class="mt-4">

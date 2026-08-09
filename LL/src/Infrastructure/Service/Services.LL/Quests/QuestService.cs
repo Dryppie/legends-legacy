@@ -412,11 +412,7 @@ public sealed class QuestService(
             "EssenceFocusSet" when trigger.Type == "EssenceFocusSet" => 1,
 
             "EquipmentCrafted" when trigger.Type == "EquipmentCrafted" =>
-                (trigger.CraftedItemBaseIds ?? [])
-                    .Zip(trigger.CraftedItemTiers ?? [])
-                    .LongCount(x =>
-                        (filters.ItemBaseIds.Count == 0 || filters.ItemBaseIds.Contains(x.First)) &&
-                        (!filters.Tier.HasValue || x.Second == filters.Tier.Value)),
+                CountMatchingCraftedItems(trigger, filters),
 
             "EquipmentEquipped" when trigger.Type == "EquipmentChanged" =>
                 await repository.HasQualifyingEquipmentEquippedAsync(
@@ -446,6 +442,25 @@ public sealed class QuestService(
 
             _ => 0
         };
+    }
+
+    private static long CountMatchingCraftedItems(
+        QuestTrigger trigger,
+        QuestObjectiveFilterDefinition filters)
+    {
+        var itemBaseIds = trigger.CraftedItemBaseIds?.ToList() ?? [];
+        var tiers = trigger.CraftedItemTiers?.ToList() ?? [];
+        var baseRecipeIds = trigger.CraftedBaseRecipeIds?.ToList() ?? [];
+        var itemCount = Math.Min(itemBaseIds.Count, tiers.Count);
+
+        return Enumerable.Range(0, itemCount).LongCount(index =>
+            (filters.ItemBaseIds.Count == 0 ||
+             filters.ItemBaseIds.Contains(itemBaseIds[index], StringComparer.OrdinalIgnoreCase)) &&
+            (filters.BaseRecipeIds.Count == 0 ||
+             index < baseRecipeIds.Count &&
+             baseRecipeIds[index] is not null &&
+             filters.BaseRecipeIds.Contains(baseRecipeIds[index]!, StringComparer.OrdinalIgnoreCase)) &&
+            (!filters.Tier.HasValue || tiers[index] == filters.Tier.Value));
     }
 
     private async Task<string?> ResolveExpectedEssenceDefinitionIdAsync(
@@ -575,6 +590,7 @@ public sealed class QuestService(
                         : new QuestChain(
                             definition.Chain.Id,
                             definition.Chain.Title,
+                            definition.Chain.Description,
                             definition.Chain.Step,
                             definition.Chain.TotalSteps),
                     definition.Choice is null

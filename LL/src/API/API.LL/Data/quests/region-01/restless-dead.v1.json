@@ -4,7 +4,7 @@
   "title": "The Restless Dead",
   "summary": "Break the dead's hold over the paths through Moonlit Graves.",
   "category": "Shenic",
-  "chain": { "id": "chain.shenic", "title": "Shenic Campaign", "step": 4, "totalSteps": 10 },
+  "chain": { "id": "chain.shenic", "title": "Shenic Campaign", "description": "New Shenic areas unlock as you reach their required character levels and complete each campaign quest.", "step": 4, "totalSteps": 10 },
   "sortOrder": 130,
   "objectiveMode": "Sequential",
   "availability": {

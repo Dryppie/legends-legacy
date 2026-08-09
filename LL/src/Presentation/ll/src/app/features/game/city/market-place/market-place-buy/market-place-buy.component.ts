@@ -400,7 +400,7 @@ export class MarketPlaceBuyComponent implements OnInit {
 
   buyoutListing(): void {
     const sel = this.selectedListing();
-    if (!sel || this.qtyCtrl.invalid) return;
+    if (!sel || this.isOwnListing(sel) || this.qtyCtrl.invalid) return;
     const qty = this.qtyCtrl.value!;
 
     // 👇 Replace with your real service / API call
@@ -462,8 +462,18 @@ export class MarketPlaceBuyComponent implements OnInit {
   }
 
   selectListing(listing: MarketPlaceListing) {
+    if (this.isOwnListing(listing)) {
+      this.selectedListing.set(null);
+      this.selectedListingId = '';
+      return;
+    }
+
     this.selectedListing.set(listing);
     this.selectedListingId = listing.id;
+  }
+
+  isOwnListing(listing: MarketPlaceListing): boolean {
+    return listing.sellerId === this.characterState.currentCharacterId();
   }
 
   /* Handy trackBy for *ngFor */

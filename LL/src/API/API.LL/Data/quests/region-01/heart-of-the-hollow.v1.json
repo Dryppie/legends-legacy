@@ -4,7 +4,7 @@
   "title": "Heart of the Hollow",
   "summary": "Cut through Thornroot Hollow before it strangles the forest around it.",
   "category": "Shenic",
-  "chain": { "id": "chain.shenic", "title": "Shenic Campaign", "step": 7, "totalSteps": 10 },
+  "chain": { "id": "chain.shenic", "title": "Shenic Campaign", "description": "New Shenic areas unlock as you reach their required character levels and complete each campaign quest.", "step": 7, "totalSteps": 10 },
   "sortOrder": 160,
   "objectiveMode": "Sequential",
   "availability": {

@@ -8,6 +8,9 @@ import { MarketPlaceBuyOrder } from '../../../../../shared/models/Dtos/market-pl
 import { MarketPlaceListing } from '../../../../../shared/models/Dtos/market-place/market-place-listing';
 import { NumberFormatPipe } from '../../../../../shared/pipes/number-format/number-format.pipe';
 import { CharacterStateService } from '../../../../../core/services/api/character/character-state.service';
+import { EquipmentInstance } from '../../../../../shared/models/item';
+import { ItemType } from '../../../../../shared/models/enums/itemType';
+import { ItemQuality } from '../../../../../shared/models/enums/itemQuality';
 
 @Component({
     selector: 'app-market-place-orders',
@@ -35,6 +38,12 @@ export class MarketPlaceOrdersComponent implements OnInit {
 
   cancelBuyOrder(order: MarketPlaceBuyOrder): void {
     this.marketplaceState.cancelBuyOrder(order.id).subscribe();
+  }
+
+  listingQuality(listing: MarketPlaceListing): ItemQuality | null {
+    return listing.itemInstance.itemBase.itemType === ItemType.Equipment
+      ? (listing.itemInstance as EquipmentInstance).quality
+      : null;
   }
 
   trackListing = (_: number, listing: MarketPlaceListing) => listing.id;

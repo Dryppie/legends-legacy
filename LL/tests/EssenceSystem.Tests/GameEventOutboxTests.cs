@@ -14,6 +14,7 @@ using Domain.Models.CharacterActions.Sessions;
 using Domain.Models.Combat;
 using Domain.Models.Entities.Creatures;
 using Domain.Models.Essences;
+using Domain.Models.Items;
 using Domain.Models.Items.Equipments;
 using Domain.Models.Outbox;
 using Domain.Models.Professions.Gathering.GatheringNodes;
@@ -181,6 +182,38 @@ public sealed class GameEventOutboxTests
         Assert.Equal(
             ["EssenceFocusSet", "ColosseumBattleStarted", "DailyProphecyCompleted"],
             progression.Triggers.Select(trigger => trigger.Type));
+    }
+
+    [Fact]
+    public async Task Quest_consumer_preserves_the_crafted_base_recipe_id()
+    {
+        var characterId = Guid.NewGuid();
+        var progression = new RecordingQuestProgressionService();
+        var consumer = new QuestGameEventOutboxConsumer(progression, CreateJsonOptions());
+        var payload = new EquipmentCraftedPayload(
+            characterId,
+            [
+                new OutboxEquipmentItemPayload(
+                    "hatchet",
+                    1,
+                    Rarity.Common,
+                    ItemQuality.Standard,
+                    10,
+                    "recipe.weapon.one_handed.hand_axe",
+                    null,
+                    [],
+                    false)
+            ],
+            1);
+
+        await consumer.HandleAsync(
+            CreateOutboxMessage(characterId, GameEventTypes.EquipmentCrafted, payload),
+            CancellationToken.None);
+
+        var trigger = Assert.Single(progression.Triggers);
+        Assert.Equal(
+            ["recipe.weapon.one_handed.hand_axe"],
+            trigger.CraftedBaseRecipeIds);
     }
 
     [Fact]

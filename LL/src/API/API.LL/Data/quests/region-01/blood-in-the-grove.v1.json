@@ -4,7 +4,7 @@
   "title": "Blood in the Grove",
   "summary": "Thin the creatures feeding Blood Grove's unnatural growth.",
   "category": "Shenic",
-  "chain": { "id": "chain.shenic", "title": "Shenic Campaign", "step": 2, "totalSteps": 10 },
+  "chain": { "id": "chain.shenic", "title": "Shenic Campaign", "description": "New Shenic areas unlock as you reach their required character levels and complete each campaign quest.", "step": 2, "totalSteps": 10 },
   "sortOrder": 110,
   "objectiveMode": "Sequential",
   "availability": {

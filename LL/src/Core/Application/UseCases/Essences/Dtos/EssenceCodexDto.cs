@@ -52,10 +52,11 @@ public sealed record EssenceCodexMemberDto(
     string Name,
     bool IsDiscovered,
     bool IsAbsorbed,
-    int AscensionTier) : IMapFrom<EssenceCodexMember>
+    int AscensionTier,
+    EssenceDefinitionDto? Definition) : IMapFrom<EssenceCodexMember>
 {
     public EssenceCodexMemberDto()
-        : this(null, string.Empty, false, false, 0)
+        : this(null, string.Empty, false, false, 0, null)
     {
     }
 

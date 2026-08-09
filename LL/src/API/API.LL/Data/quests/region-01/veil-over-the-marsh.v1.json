@@ -4,7 +4,7 @@
   "title": "The Veil Over the Marsh",
   "summary": "Cross Moonveil Marsh and force its hidden creatures into the open.",
   "category": "Shenic",
-  "chain": { "id": "chain.shenic", "title": "Shenic Campaign", "step": 9, "totalSteps": 10 },
+  "chain": { "id": "chain.shenic", "title": "Shenic Campaign", "description": "New Shenic areas unlock as you reach their required character levels and complete each campaign quest.", "step": 9, "totalSteps": 10 },
   "sortOrder": 180,
   "objectiveMode": "Sequential",
   "availability": {

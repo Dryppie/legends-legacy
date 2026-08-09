@@ -20,11 +20,11 @@ import {
 export class EssenceItemViewService {
   asEssence(item: EssenceItem): Essence {
     return item.essence
-      ? this.mapDefinitionToEssence(item.essence)
+      ? this.fromDefinition(item.essence)
       : essenceItemToEssence(item);
   }
 
-  private mapDefinitionToEssence(definition: EssenceDefinitionDto): Essence {
+  fromDefinition(definition: EssenceDefinitionDto): Essence {
     return {
       id: definition.id,
       name: definition.displayName,

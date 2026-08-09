@@ -48,6 +48,7 @@ public sealed class QuestChainDefinition
 {
     public string Id { get; set; } = string.Empty;
     public string Title { get; set; } = string.Empty;
+    public string Description { get; set; } = string.Empty;
     public int Step { get; set; }
     public int TotalSteps { get; set; }
 }
@@ -79,6 +80,7 @@ public sealed class QuestObjectiveFilterDefinition
     public bool ToolSlotOnly { get; set; }
     public string? GatheringType { get; set; }
     public List<string> ItemBaseIds { get; set; } = [];
+    public List<string> BaseRecipeIds { get; set; } = [];
 }
 
 public sealed class QuestPresentationDefinition

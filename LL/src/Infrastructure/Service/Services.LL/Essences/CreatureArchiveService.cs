@@ -152,7 +152,8 @@ public sealed class CreatureArchiveService : ICreatureArchiveService
                             definition.Id,
                             definition.DisplayName,
                             absorbedIds.Contains(definition.Id),
-                            definition.Tags))
+                            definition.Tags,
+                            definition))
                         .ToList(),
                     locationsByCreatureId.GetValueOrDefault(entry.CreatureDefinitionId, []),
                     definitions.SelectMany(x => x.Tags).Distinct(StringComparer.OrdinalIgnoreCase).ToList());
