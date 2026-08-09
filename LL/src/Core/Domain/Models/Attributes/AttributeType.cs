@@ -22,8 +22,6 @@ public enum AttributeType
     StatusResistance = 15,
     CrowdControlResistance = 16,
 
-    SummonPower = 17,
-    SummonHealth = 18,
-
+    // Values 17 and 18 were retired with the dedicated summon attributes.
     AttackSpeed = 19
 }

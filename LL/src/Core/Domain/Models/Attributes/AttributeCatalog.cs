@@ -140,17 +140,6 @@ public static class AttributeCatalog
                 AttributeCombatRules.CrowdControlResistanceCapPercent,
                 Scenarios(AttributeBenchmarkScenario.CrowdControlResilience)),
 
-            [AttributeType.SummonPower] = Percent(
-                AttributeType.SummonPower,
-                "Summon Power",
-                "Increases the Power inherited by summoned units.",
-                scenarios: Scenarios(AttributeBenchmarkScenario.SummonOffense)),
-            [AttributeType.SummonHealth] = Percent(
-                AttributeType.SummonHealth,
-                "Summon Health",
-                "Increases the maximum health inherited by summoned units.",
-                scenarios: Scenarios(AttributeBenchmarkScenario.SummonOffense)),
-
             [AttributeType.AttackSpeed] = new(
                 AttributeType.AttackSpeed,
                 "Attack Speed",

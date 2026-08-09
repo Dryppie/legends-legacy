@@ -4,15 +4,15 @@
   "sections": [
     {
       "heading": "Your combat profile",
-      "body": "The overview summarizes your character level, Combat Rating, equipment, active Essence loadout, and combat attributes. Use it to understand the combined result of your equipment, Essences, and permanent progression."
+      "body": "The overview summarizes your character level, Combat Rating, equipment, active Essence loadout, and combat attributes."
     },
     {
       "heading": "Attributes",
-      "body": "Attributes are grouped into offense, defense, recovery, and utility. Hover or focus an attribute name for its current explanation. Values shown here include all active modifiers, so they can change when equipment or an Essence loadout changes."
+      "body": "Attributes are grouped into offense, defense, recovery, and utility. Hover an attribute name for its current explanation. Values shown here include all active modifiers, so they can change when equipment or an Essence loadout changes."
     },
     {
       "heading": "Improving your character",
-      "body": "Equip stronger items in Inventory, refine an Essence loadout in the Soul Archive, spend Soulstones on permanent upgrades, and advance your character and profession levels. Combat Rating is a summary, not a substitute for choosing stats that suit your build."
+      "body": "Equip stronger gear, and new essences. Every character also level gives you +20 Health and +0.25 Power."
     }
   ]
 }

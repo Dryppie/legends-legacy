@@ -27,15 +27,13 @@ public static class EquipmentAttributeRules
             [AttributeType.BlockChance] = Percent(min: 1, max: 5),
             [AttributeType.DamageReduction] = Percent(min: 2, max: 10),
 
-            // ===== RECOVERY / UTILITY / STATUS / SUMMONS ======================
+            // ===== RECOVERY / UTILITY / STATUS ================================
             [AttributeType.HealingPowerPercent] = Percent(min: 2, max: 10),
             [AttributeType.HealthRegeneration] = Percent(min: 4, max: 15),
             [AttributeType.LifeSteal] = Percent(min: 1, max: 5),
             [AttributeType.Cooldown] = Percent(min: 1, max: 5),
             [AttributeType.StatusResistance] = Percent(min: 2, max: 15),
             [AttributeType.CrowdControlResistance] = Percent(min: 2, max: 15),
-            [AttributeType.SummonPower] = Percent(min: 4, max: 15),
-            [AttributeType.SummonHealth] = Percent(min: 4, max: 15),
             [AttributeType.AttackSpeed] = Percent(min: 1, max: 8),
         };
     }

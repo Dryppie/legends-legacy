@@ -124,6 +124,43 @@ public sealed class JsonQuestDefinitionProvider : IQuestDefinitionProvider
                     $"Quest '{definition.Id}' has unsupported objective mode '{definition.ObjectiveMode}'.");
             }
 
+            if (definition.Chain is not null &&
+                (string.IsNullOrWhiteSpace(definition.Chain.Id) ||
+                 string.IsNullOrWhiteSpace(definition.Chain.Title) ||
+                 definition.Chain.Step <= 0 ||
+                 definition.Chain.TotalSteps < definition.Chain.Step))
+            {
+                throw new InvalidOperationException(
+                    $"Quest '{definition.Id}' has invalid chain metadata.");
+            }
+
+            if (definition.Choice is not null)
+            {
+                if (string.IsNullOrWhiteSpace(definition.Choice.SelectionTitle) ||
+                    definition.Choice.Options.Count < 2)
+                {
+                    throw new InvalidOperationException(
+                        $"Quest '{definition.Id}' choices require a selection title and at least two options.");
+                }
+
+                EnsureUniqueKeys(
+                    definition.Id,
+                    "choice option",
+                    definition.Choice.Options.Select(x => x.Key));
+                foreach (var option in definition.Choice.Options)
+                {
+                    if (string.IsNullOrWhiteSpace(option.Title) ||
+                        option.CreatureId == Guid.Empty ||
+                        string.IsNullOrWhiteSpace(option.EssenceDefinitionId) ||
+                        string.IsNullOrWhiteSpace(option.RewardItemBaseId) ||
+                        string.IsNullOrWhiteSpace(option.EncounterKey))
+                    {
+                        throw new InvalidOperationException(
+                            $"Quest '{definition.Id}' has an invalid choice option '{option.Key}'.");
+                    }
+                }
+            }
+
             EnsureUniqueKeys(definition.Id, "objective", definition.Objectives.Select(x => x.Key));
             EnsureUniqueKeys(definition.Id, "reward", definition.Rewards.Select(x => x.Key));
 
@@ -160,6 +197,27 @@ public sealed class JsonQuestDefinitionProvider : IQuestDefinitionProvider
             }
         }
 
+        foreach (var chain in latest.Values
+                     .Where(x => x.Chain is not null)
+                     .GroupBy(x => x.Chain!.Id, StringComparer.OrdinalIgnoreCase))
+        {
+            var totalSteps = chain.Select(x => x.Chain!.TotalSteps).Distinct().ToList();
+            var titles = chain.Select(x => x.Chain!.Title).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+            var duplicateSteps = chain
+                .GroupBy(x => x.Chain!.Step)
+                .Where(x => x.Count() > 1)
+                .Select(x => x.Key)
+                .ToList();
+            var hasCompleteSequence = totalSteps.Count == 1 &&
+                                      chain.Select(x => x.Chain!.Step).Order().SequenceEqual(
+                                          Enumerable.Range(1, totalSteps[0]));
+            if (totalSteps.Count != 1 || titles.Count != 1 || duplicateSteps.Count > 0 || !hasCompleteSequence)
+            {
+                throw new InvalidOperationException(
+                    $"Quest chain '{chain.Key}' must have one title and every step from 1 through its total.");
+            }
+        }
+
         DetectCycles(latest);
     }
 
@@ -176,10 +234,13 @@ public sealed class JsonQuestDefinitionProvider : IQuestDefinitionProvider
         }
 
         using var itemDocument = JsonDocument.Parse(File.ReadAllText(itemPath));
-        var itemIds = itemDocument.RootElement
+        var items = itemDocument.RootElement
             .EnumerateArray()
-            .Select(x => x.GetProperty("id").GetString()!)
-            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+            .ToDictionary(
+                x => x.GetProperty("id").GetString()!,
+                x => x,
+                StringComparer.OrdinalIgnoreCase);
+        var itemIds = items.Keys.ToHashSet(StringComparer.OrdinalIgnoreCase);
         var missingItems = definitions
             .SelectMany(x => x.Rewards)
             .Where(x => !string.IsNullOrWhiteSpace(x.ItemBaseId) && !itemIds.Contains(x.ItemBaseId))
@@ -190,6 +251,78 @@ public sealed class JsonQuestDefinitionProvider : IQuestDefinitionProvider
         {
             throw new InvalidOperationException(
                 "Quest rewards reference missing item bases: " + string.Join(", ", missingItems));
+        }
+
+        var creaturePath = Path.Combine(dataRoot, "world", "creatures.json");
+        var essencePath = Path.Combine(dataRoot, "essences", "essences.json");
+        if (!File.Exists(creaturePath) || !File.Exists(essencePath))
+        {
+            throw new InvalidOperationException(
+                "Quest choice validation requires creature and Essence catalogs.");
+        }
+
+        using var creatureDocument = JsonDocument.Parse(File.ReadAllText(creaturePath));
+        var creatures = creatureDocument.RootElement
+            .GetProperty("creatures")
+            .EnumerateArray()
+            .ToDictionary(
+                x => Guid.Parse(x.GetProperty("id").GetString()!),
+                x => x);
+        using var essenceDocument = JsonDocument.Parse(File.ReadAllText(essencePath));
+        var essences = essenceDocument.RootElement
+            .GetProperty("essences")
+            .EnumerateArray()
+            .ToDictionary(
+                x => x.GetProperty("id").GetString()!,
+                x => x,
+                StringComparer.OrdinalIgnoreCase);
+
+        foreach (var (quest, option) in definitions
+                     .Where(x => x.Choice is not null)
+                     .SelectMany(
+                         quest => quest.Choice!.Options.Select(option => (quest, option))))
+        {
+            if (!creatures.TryGetValue(option.CreatureId, out var creature))
+            {
+                throw new InvalidOperationException(
+                    $"Quest '{quest.Id}' choice '{option.Key}' references missing creature '{option.CreatureId}'.");
+            }
+
+            if (!essences.TryGetValue(option.EssenceDefinitionId, out var essence))
+            {
+                throw new InvalidOperationException(
+                    $"Quest '{quest.Id}' choice '{option.Key}' references missing Essence '{option.EssenceDefinitionId}'.");
+            }
+
+            if (!items.TryGetValue(option.RewardItemBaseId, out var rewardItem) ||
+                !string.Equals(
+                    rewardItem.GetProperty("itemType").GetString(),
+                    "Essence",
+                    StringComparison.OrdinalIgnoreCase) ||
+                !option.RewardItemBaseId.Equals(
+                    $"item.{option.EssenceDefinitionId}",
+                    StringComparison.OrdinalIgnoreCase))
+            {
+                throw new InvalidOperationException(
+                    $"Quest '{quest.Id}' choice '{option.Key}' has an invalid Essence reward item.");
+            }
+
+            var creatureName = creature.GetProperty("name").GetString()!;
+            var expectedMonsterId = "monster." + creatureName.Trim()
+                .Replace("'", string.Empty, StringComparison.Ordinal)
+                .Replace(" ", "_", StringComparison.Ordinal)
+                .ToLowerInvariant();
+            if (!expectedMonsterId.Equals(
+                    essence.GetProperty("sourceMonsterId").GetString(),
+                    StringComparison.OrdinalIgnoreCase) ||
+                string.IsNullOrWhiteSpace(essence.GetProperty("activeAbilityId").GetString()) ||
+                string.IsNullOrWhiteSpace(essence.GetProperty("passiveAbilityId").GetString()))
+            {
+                throw new InvalidOperationException(
+                    $"Quest '{quest.Id}' choice '{option.Key}' does not match its creature's Essence abilities.");
+            }
+
+            option.CreatureName = creatureName;
         }
 
         using var regionDocument = JsonDocument.Parse(File.ReadAllText(regionPath));
@@ -231,6 +364,25 @@ public sealed class JsonQuestDefinitionProvider : IQuestDefinitionProvider
         {
             throw new InvalidOperationException(
                 "Combat areas reference missing quests: " + string.Join(", ", missingAreaQuestIds));
+        }
+
+        var latestDefinitions = definitions
+            .GroupBy(x => x.Id, StringComparer.OrdinalIgnoreCase)
+            .ToDictionary(
+                x => x.Key,
+                x => x.MaxBy(definition => definition.Version)!,
+                StringComparer.OrdinalIgnoreCase);
+        foreach (var (quest, objective) in definitions.SelectMany(
+                     quest => quest.Objectives.Select(objective => (quest, objective))))
+        {
+            var choiceQuestId = objective.Filters.EssenceDefinitionFromChoiceQuestId;
+            if (string.IsNullOrWhiteSpace(choiceQuestId)) continue;
+            if (!latestDefinitions.TryGetValue(choiceQuestId, out var choiceQuest) ||
+                choiceQuest.Choice is null)
+            {
+                throw new InvalidOperationException(
+                    $"Quest '{quest.Id}' objective '{objective.Key}' references a missing choice quest '{choiceQuestId}'.");
+            }
         }
     }
 

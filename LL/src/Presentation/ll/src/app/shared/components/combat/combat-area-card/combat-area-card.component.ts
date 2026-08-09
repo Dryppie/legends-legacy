@@ -27,6 +27,8 @@ import { catchError, finalize, of, tap } from 'rxjs';
   templateUrl: './combat-area-card.component.html',
 })
 export class CombatAreaCardComponent implements OnInit {
+  readonly GatheringType = GatheringType;
+
   @Input() area!: Area;
   @Input() isLastInRow = false;
 
@@ -55,9 +57,7 @@ export class CombatAreaCardComponent implements OnInit {
 
     effect(() => {
       const error = this.characterActionService.idleCombatError();
-      if (
-        error && this.isIntoLumoRuinsActive()
-      ) {
+      if (error && this.isIntoLumoRuinsActive()) {
         this.questState.reportError(error);
       }
     });
@@ -102,7 +102,7 @@ export class CombatAreaCardComponent implements OnInit {
 
   trainingAreaTourId(): string | null {
     if (this.area?.id === TRAINING_GROUNDS_AREA_ID) {
-      return 'training-area-card';
+      return this.selectedTrainingEncounterKey() ? 'training-area-card' : null;
     }
 
     return this.isQuestGuidedLumoArea() ? 'lumo-ruins-card' : null;
@@ -110,7 +110,9 @@ export class CombatAreaCardComponent implements OnInit {
 
   trainingBattleButtonTourId(): string | null {
     if (this.area?.id === TRAINING_GROUNDS_AREA_ID) {
-      return 'training-area-battle';
+      return this.selectedTrainingEncounterKey()
+        ? 'training-area-battle'
+        : null;
     }
 
     return this.isQuestGuidedLumoArea() ? 'lumo-ruins-battle' : null;
@@ -126,11 +128,18 @@ export class CombatAreaCardComponent implements OnInit {
     }
 
     const access = this.questState.accessFor(this.area.id);
-    this.isLocked = !access?.canAccess;
+    this.isLocked =
+      !access?.canAccess ||
+      (this.area.id === TRAINING_GROUNDS_AREA_ID &&
+        !this.selectedTrainingEncounterKey());
   }
 
   gatheringTypes(): GatheringType[] {
     return this.area.gatheringTypes ?? [];
+  }
+
+  gatheringTypeInitial(gatheringType: GatheringType): string {
+    return gatheringType.charAt(0).toUpperCase();
   }
 
   specificCard(): void {
@@ -145,8 +154,9 @@ export class CombatAreaCardComponent implements OnInit {
     if (this.isStartingTrainingBattle) return;
 
     this.isStartingTrainingBattle = true;
+    const encounterKey = this.selectedTrainingEncounterKey() ?? 'training';
     this.questService
-      .startEncounter(TRAINING_DAY_QUEST_ID, 'training')
+      .startEncounter(TRAINING_DAY_QUEST_ID, encounterKey)
       .pipe(
         tap((result) => {
           this.combatService.startTrainingBattleSummary(result);
@@ -165,10 +175,25 @@ export class CombatAreaCardComponent implements OnInit {
       .subscribe();
   }
 
-  private isQuestGuidedLumoArea(): boolean {
+  private selectedTrainingEncounterKey(): string | null {
+    const trainingQuest = this.questState
+      .journal()
+      .quests.find(
+        (quest) =>
+          quest.questId === TRAINING_DAY_QUEST_ID &&
+          quest.status === QuestStatus.Active,
+      );
+    if (!trainingQuest?.choice) return trainingQuest ? 'training' : null;
+
     return (
-      this.area?.id === LUMO_RUINS_AREA_ID && this.isIntoLumoRuinsActive()
+      trainingQuest.choice.options.find(
+        (option) => option.key === trainingQuest.choice?.selectedOptionKey,
+      )?.encounterKey ?? null
     );
+  }
+
+  private isQuestGuidedLumoArea(): boolean {
+    return this.area?.id === LUMO_RUINS_AREA_ID && this.isIntoLumoRuinsActive();
   }
 
   private isIntoLumoRuinsActive(): boolean {

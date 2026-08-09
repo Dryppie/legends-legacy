@@ -45,7 +45,10 @@ import {
   essenceDustActionLabel,
   essenceDustLevelingDescription,
 } from './essence-leveling.utils';
-import { ONBOARDING_GOBLIN_ESSENCE_DEFINITION_ID } from '../../../../shared/models/quest';
+import {
+  ONBOARDING_GOBLIN_ESSENCE_DEFINITION_ID,
+  TRAINING_DAY_QUEST_ID,
+} from '../../../../shared/models/quest';
 
 type ArchiveFilter = 'all' | 'favorites' | 'attuned' | 'ready';
 type ArchiveSort = 'name' | 'level' | 'tier';
@@ -484,9 +487,11 @@ export class EssencesComponent implements OnInit {
   }
 
   public isOnboardingStarterAttunement(essence: PlayerEssenceDto): boolean {
+    const starterEssenceDefinitionId =
+      this.onboardingStarterEssenceDefinitionId();
     return (
       this.questState.pinnedObjective()?.type === 'EssenceEquipped' &&
-      essence.essenceDefinitionId === ONBOARDING_GOBLIN_ESSENCE_DEFINITION_ID
+      essence.essenceDefinitionId === starterEssenceDefinitionId
     );
   }
 
@@ -507,6 +512,8 @@ export class EssencesComponent implements OnInit {
   }
 
   public saveLoadout(): void {
+    const starterEssenceDefinitionId =
+      this.onboardingStarterEssenceDefinitionId();
     const hasOnboardingStarterDrafted = this.essenceState
       .draftSlots()
       .some((playerEssenceId) =>
@@ -515,14 +522,28 @@ export class EssencesComponent implements OnInit {
           .some(
             (essence) =>
               essence.id === playerEssenceId &&
-              essence.essenceDefinitionId ===
-                ONBOARDING_GOBLIN_ESSENCE_DEFINITION_ID,
+              essence.essenceDefinitionId === starterEssenceDefinitionId,
           ),
       );
 
     this.essenceState.saveDraftLoadout(
       this.questState.pinnedObjective()?.type === 'EssenceEquipped' &&
         hasOnboardingStarterDrafted,
+    );
+  }
+
+  private onboardingStarterEssenceDefinitionId(): string {
+    const firstHunt = this.questState
+      .journal()
+      .quests.find((quest) => quest.questId === TRAINING_DAY_QUEST_ID);
+    if (!firstHunt?.choice) {
+      return ONBOARDING_GOBLIN_ESSENCE_DEFINITION_ID;
+    }
+
+    return (
+      firstHunt.choice.options.find(
+        (option) => option.key === firstHunt.choice?.selectedOptionKey,
+      )?.essenceDefinitionId ?? ONBOARDING_GOBLIN_ESSENCE_DEFINITION_ID
     );
   }
 

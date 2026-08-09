@@ -33,23 +33,76 @@ public sealed class QuestService(
         return await MapJournalAsync(progresses, cancellationToken);
     }
 
-    public async Task<QuestJournal> AcceptAsync(
+    public async Task<QuestJournal> SelectChoiceAsync(
         Guid characterId,
         string questId,
+        string optionKey,
         CancellationToken cancellationToken)
     {
         var progresses = (await repository.GetProgressesAsync(characterId, cancellationToken)).ToList();
         await EnsureAvailabilityAsync(characterId, progresses, cancellationToken);
         var progress = progresses.FirstOrDefault(x =>
             x.QuestId.Equals(questId, StringComparison.OrdinalIgnoreCase));
-        if (progress is null || progress.Status != QuestStatus.Available)
+        if (progress is null || progress.Status != QuestStatus.Active)
         {
-            throw new InvalidOperationException("The quest is not available to accept.");
+            throw new InvalidOperationException("The quest choice is not active.");
         }
 
-        Activate(progress);
-        EnsurePinnedQuest(progresses);
+        var definition = definitions.Get(progress.QuestId, progress.DefinitionVersion);
+        var choice = definition.Choice
+            ?? throw new InvalidOperationException("This quest does not have a choice.");
+        var option = choice.Options.FirstOrDefault(x =>
+            x.Key.Equals(optionKey, StringComparison.OrdinalIgnoreCase))
+            ?? throw new InvalidOperationException("The selected quest option does not exist.");
+
+        if (!string.IsNullOrWhiteSpace(progress.SelectedOptionKey))
+        {
+            if (!progress.SelectedOptionKey.Equals(option.Key, StringComparison.OrdinalIgnoreCase))
+            {
+                throw new InvalidOperationException("This quest choice has already been confirmed.");
+            }
+
+            return await MapJournalAsync(progresses, cancellationToken);
+        }
+
+        if (progress.Objectives.Any(x => x.CurrentAmount > 0 || x.CompletedAt.HasValue))
+        {
+            throw new InvalidOperationException("A quest choice cannot be changed after progress has started.");
+        }
+
+        var now = timeProvider.GetUtcNow();
+        progress.SelectedOptionKey = option.Key;
+        progress.UpdatedAt = now;
+        progress.RowVersion++;
         await repository.SaveChangesAsync(cancellationToken);
+        var journal = await MapJournalAsync(progresses, cancellationToken);
+        await PublishChangedAsync(characterId, journal, cancellationToken);
+        return journal;
+    }
+
+    public async Task<QuestJournal> AcknowledgeWelcomeAsync(
+        Guid characterId,
+        CancellationToken cancellationToken)
+    {
+        var progresses = (await repository.GetProgressesAsync(characterId, cancellationToken)).ToList();
+        await EnsureAvailabilityAsync(characterId, progresses, cancellationToken);
+        var progress = progresses.FirstOrDefault(x =>
+            x.QuestId.Equals(QuestConstants.TrainingDay, StringComparison.OrdinalIgnoreCase) &&
+            x.Status == QuestStatus.Active);
+        if (progress is null)
+        {
+            throw new InvalidOperationException("The tutorial welcome is not available.");
+        }
+
+        if (!progress.AcceptedAt.HasValue)
+        {
+            var now = timeProvider.GetUtcNow();
+            progress.AcceptedAt = now;
+            progress.UpdatedAt = now;
+            progress.RowVersion++;
+            await repository.SaveChangesAsync(cancellationToken);
+        }
+
         var journal = await MapJournalAsync(progresses, cancellationToken);
         await PublishChangedAsync(characterId, journal, cancellationToken);
         return journal;
@@ -170,13 +223,14 @@ public sealed class QuestService(
         List<CharacterQuestProgress> progresses,
         CancellationToken cancellationToken)
     {
+        var now = timeProvider.GetUtcNow();
+        var changed = UpgradeUnstartedChoiceDefinitions(progresses, now);
         var level = await repository.GetCharacterLevelAsync(characterId, cancellationToken)
             ?? throw new InvalidOperationException("Character was not found.");
-        var changed = false;
-        var now = timeProvider.GetUtcNow();
 
-        foreach (var definition in definitions.GetAll())
+        foreach (var latestDefinition in definitions.GetAll())
         {
+            var definition = GetCompatibleDefinition(latestDefinition, progresses);
             if (progresses.Any(x => x.QuestId.Equals(definition.Id, StringComparison.OrdinalIgnoreCase)))
             {
                 continue;
@@ -197,8 +251,12 @@ public sealed class QuestService(
                 CharacterId = characterId,
                 QuestId = definition.Id,
                 DefinitionVersion = definition.Version,
-                Status = definition.AutoAccept ? QuestStatus.Active : QuestStatus.Available,
-                AcceptedAt = definition.AutoAccept ? now : null,
+                Status = QuestStatus.Active,
+                AcceptedAt = !definition.Id.Equals(
+                                 QuestConstants.TrainingDay,
+                                 StringComparison.OrdinalIgnoreCase)
+                    ? now
+                    : null,
                 CreatedAt = now,
                 UpdatedAt = now,
                 Objectives = definition.Objectives.Select(objective =>
@@ -217,6 +275,90 @@ public sealed class QuestService(
         }
 
         return changed;
+    }
+
+    private bool UpgradeUnstartedChoiceDefinitions(
+        IReadOnlyList<CharacterQuestProgress> progresses,
+        DateTimeOffset now)
+    {
+        var changed = false;
+        foreach (var progress in progresses.Where(x =>
+                     x.Status == QuestStatus.Active &&
+                     string.IsNullOrWhiteSpace(x.SelectedOptionKey) &&
+                     x.Objectives.All(objective =>
+                         objective.CurrentAmount == 0 &&
+                         !objective.CompletedAt.HasValue)))
+        {
+            var current = definitions.Get(progress.QuestId, progress.DefinitionVersion);
+            var latest = definitions.Get(progress.QuestId);
+            if (current.Choice is null ||
+                latest.Choice is null ||
+                latest.Version <= current.Version)
+            {
+                continue;
+            }
+
+            var latestObjectives = latest.Objectives.ToDictionary(
+                objective => objective.Key,
+                StringComparer.OrdinalIgnoreCase);
+            if (latestObjectives.Count != progress.Objectives.Count ||
+                progress.Objectives.Any(objective =>
+                    !latestObjectives.TryGetValue(objective.ObjectiveKey, out var latestObjective) ||
+                    latestObjective.RequiredAmount != objective.RequiredAmount))
+            {
+                continue;
+            }
+
+            progress.DefinitionVersion = latest.Version;
+            progress.UpdatedAt = now;
+            progress.RowVersion++;
+            changed = true;
+        }
+
+        return changed;
+    }
+
+    private QuestDefinition GetCompatibleDefinition(
+        QuestDefinition latestDefinition,
+        IReadOnlyList<CharacterQuestProgress> progresses)
+    {
+        for (var version = latestDefinition.Version; version >= 1; version--)
+        {
+            QuestDefinition candidate;
+            try
+            {
+                candidate = definitions.Get(latestDefinition.Id, version);
+            }
+            catch (InvalidOperationException)
+            {
+                continue;
+            }
+
+            var choiceReferences = candidate.Objectives
+                .Select(x => x.Filters.EssenceDefinitionFromChoiceQuestId)
+                .Where(x => !string.IsNullOrWhiteSpace(x))
+                .Cast<string>()
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+            var compatible = choiceReferences.All(choiceQuestId =>
+            {
+                var choiceProgress = progresses.FirstOrDefault(progress =>
+                    progress.QuestId.Equals(choiceQuestId, StringComparison.OrdinalIgnoreCase));
+                if (choiceProgress is null || string.IsNullOrWhiteSpace(choiceProgress.SelectedOptionKey))
+                {
+                    return false;
+                }
+
+                var choiceDefinition = definitions.Get(
+                    choiceProgress.QuestId,
+                    choiceProgress.DefinitionVersion);
+                return GetSelectedOption(choiceProgress, choiceDefinition) is not null;
+            });
+            if (compatible) return candidate;
+        }
+
+        throw new InvalidOperationException(
+            $"No compatible definition version exists for quest '{latestDefinition.Id}'.");
     }
 
     private static IReadOnlyList<(CharacterQuestObjectiveProgress Progress, QuestObjectiveDefinition Definition)>
@@ -238,6 +380,10 @@ public sealed class QuestService(
         CancellationToken cancellationToken)
     {
         var filters = objective.Filters;
+        var expectedEssenceDefinitionId = await ResolveExpectedEssenceDefinitionIdAsync(
+            characterId,
+            filters,
+            cancellationToken);
         return objective.Type switch
         {
             "CombatEncounterCompleted" when
@@ -247,12 +393,14 @@ public sealed class QuestService(
 
             "EssenceAbsorbed" when
                 trigger.Type == "EssenceAbsorbed" &&
-                Matches(filters.EssenceDefinitionId, trigger.EssenceDefinitionId) => 1,
+                Matches(expectedEssenceDefinitionId, trigger.EssenceDefinitionId) => 1,
 
-            "EssenceEquipped" when trigger.Type == "EssenceLoadoutChanged" =>
+            "EssenceEquipped" when
+                trigger.Type == "EssenceLoadoutChanged" &&
+                !string.IsNullOrWhiteSpace(expectedEssenceDefinitionId) =>
                 await repository.HasEssenceInActiveLoadoutAsync(
                     characterId,
-                    filters.EssenceDefinitionId ?? string.Empty,
+                    expectedEssenceDefinitionId,
                     cancellationToken) ? 1 : 0,
 
             "EquipmentCrafted" when trigger.Type == "EquipmentCrafted" =>
@@ -288,18 +436,44 @@ public sealed class QuestService(
         };
     }
 
+    private async Task<string?> ResolveExpectedEssenceDefinitionIdAsync(
+        Guid characterId,
+        QuestObjectiveFilterDefinition filters,
+        CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(filters.EssenceDefinitionFromChoiceQuestId))
+        {
+            return filters.EssenceDefinitionId;
+        }
+
+        var choiceProgress = await repository.GetProgressAsync(
+            characterId,
+            filters.EssenceDefinitionFromChoiceQuestId,
+            cancellationToken)
+            ?? throw new InvalidOperationException(
+                $"Choice quest progress '{filters.EssenceDefinitionFromChoiceQuestId}' was not found.");
+        var choiceDefinition = definitions.Get(
+            choiceProgress.QuestId,
+            choiceProgress.DefinitionVersion);
+        var option = GetSelectedOption(choiceProgress, choiceDefinition)
+            ?? throw new InvalidOperationException(
+                $"Choice quest '{choiceProgress.QuestId}' has no valid selected option.");
+        return option.EssenceDefinitionId;
+    }
+
     private async Task<IReadOnlyList<InventoryItem>> GrantRewardsAsync(
         CharacterQuestProgress progress,
         QuestDefinition definition,
         CancellationToken cancellationToken)
     {
-        if (progress.RewardsGrantedAt.HasValue || definition.Rewards.Count == 0)
+        var rewards = GetResolvedRewards(progress, definition);
+        if (progress.RewardsGrantedAt.HasValue || rewards.Count == 0)
         {
             progress.RewardsGrantedAt ??= timeProvider.GetUtcNow();
             return [];
         }
 
-        var quantities = definition.Rewards
+        var quantities = rewards
             .Where(x => x.Type == "Item")
             .GroupBy(x => x.ItemBaseId!, StringComparer.OrdinalIgnoreCase)
             .ToDictionary(x => x.Key, x => x.Sum(reward => reward.Quantity), StringComparer.OrdinalIgnoreCase);
@@ -332,7 +506,10 @@ public sealed class QuestService(
             .OrderBy(x => definitions.Get(x.QuestId, x.DefinitionVersion).SortOrder)
             .ToList();
         var pinned = active.FirstOrDefault(x => x.IsPinned);
-        var selected = pinned ?? active.FirstOrDefault();
+        var selected = pinned ?? active.FirstOrDefault(progress =>
+            definitions
+                .Get(progress.QuestId, progress.DefinitionVersion)
+                .Category.Equals("Tutorial", StringComparison.OrdinalIgnoreCase));
         var changed = false;
         var now = timeProvider.GetUtcNow();
         foreach (var progress in progresses)
@@ -348,24 +525,18 @@ public sealed class QuestService(
         return changed;
     }
 
-    private void Activate(CharacterQuestProgress progress)
-    {
-        var now = timeProvider.GetUtcNow();
-        progress.Status = QuestStatus.Active;
-        progress.AcceptedAt ??= now;
-        progress.UpdatedAt = now;
-        progress.RowVersion++;
-    }
-
     private async Task<QuestJournal> MapJournalAsync(
         IReadOnlyList<CharacterQuestProgress> progresses,
         CancellationToken cancellationToken)
     {
         var itemBaseIds = progresses
-            .SelectMany(progress => definitions
-                .Get(progress.QuestId, progress.DefinitionVersion)
-                .Rewards)
-            .Select(reward => reward.ItemBaseId)
+            .SelectMany(progress =>
+            {
+                var definition = definitions.Get(progress.QuestId, progress.DefinitionVersion);
+                return GetResolvedRewards(progress, definition)
+                    .Select(reward => reward.ItemBaseId)
+                    .Concat(definition.Choice?.Options.Select(x => x.RewardItemBaseId) ?? []);
+            })
             .Where(itemBaseId => !string.IsNullOrWhiteSpace(itemBaseId))
             .Select(itemBaseId => itemBaseId!)
             .Distinct(StringComparer.OrdinalIgnoreCase)
@@ -378,15 +549,48 @@ public sealed class QuestService(
             .Select(progress =>
             {
                 var definition = definitions.Get(progress.QuestId, progress.DefinitionVersion);
+                var selectedOption = GetSelectedOption(progress, definition);
+                var rewards = GetResolvedRewards(progress, definition);
                 return new QuestState(
                     progress.QuestId,
                     progress.DefinitionVersion,
-                    definition.Title,
-                    definition.Summary,
+                    selectedOption?.Title ?? definition.Choice?.SelectionTitle ?? definition.Title,
+                    selectedOption?.Summary ?? definition.Choice?.SelectionSummary ?? definition.Summary,
                     definition.Category,
+                    definition.ObjectiveMode,
+                    definition.Chain is null
+                        ? null
+                        : new QuestChain(
+                            definition.Chain.Id,
+                            definition.Chain.Title,
+                            definition.Chain.Step,
+                            definition.Chain.TotalSteps),
+                    definition.Choice is null
+                        ? null
+                        : new QuestChoice(
+                            definition.Choice.SelectionTitle,
+                            definition.Choice.SelectionSummary,
+                            definition.Choice.ConfirmationText,
+                            progress.SelectedOptionKey,
+                            definition.Choice.Options.Select(option =>
+                                new QuestChoiceOption(
+                                    option.Key,
+                                    option.Title,
+                                    option.Summary,
+                                    option.CreatureId,
+                                    option.CreatureName,
+                                    option.EssenceDefinitionId,
+                                    option.RewardItemBaseId,
+                                    option.EncounterKey,
+                                    rewardItemBases.GetValueOrDefault(option.RewardItemBaseId))).ToList()),
                     definition.SortOrder,
                     progress.Status,
                     progress.IsPinned,
+                    progress.QuestId.Equals(
+                        QuestConstants.TrainingDay,
+                        StringComparison.OrdinalIgnoreCase) &&
+                    progress.Status == QuestStatus.Active &&
+                    !progress.AcceptedAt.HasValue,
                     progress.AcceptedAt,
                     progress.CompletedAt,
                     definition.Objectives.Select(objective =>
@@ -405,7 +609,7 @@ public sealed class QuestService(
                                 objective.Presentation.GuidePageId,
                                 objective.Presentation.TourPageId));
                     }).ToList(),
-                    definition.Rewards.Select(reward =>
+                    rewards.Select(reward =>
                         new QuestRewardState(
                             reward.Key,
                             reward.Type,
@@ -419,6 +623,32 @@ public sealed class QuestService(
             .OrderBy(x => x.SortOrder)
             .ToList();
         return new QuestJournal(states, states.FirstOrDefault(x => x.IsPinned)?.QuestId);
+    }
+
+    private static QuestChoiceOptionDefinition? GetSelectedOption(
+        CharacterQuestProgress progress,
+        QuestDefinition definition) =>
+        string.IsNullOrWhiteSpace(progress.SelectedOptionKey)
+            ? null
+            : definition.Choice?.Options.FirstOrDefault(option =>
+                option.Key.Equals(progress.SelectedOptionKey, StringComparison.OrdinalIgnoreCase));
+
+    private static IReadOnlyList<QuestRewardDefinition> GetResolvedRewards(
+        CharacterQuestProgress progress,
+        QuestDefinition definition)
+    {
+        var selectedOption = GetSelectedOption(progress, definition);
+        if (selectedOption is null) return definition.Rewards;
+
+        return definition.Rewards
+            .Append(new QuestRewardDefinition
+            {
+                Key = $"choice_{selectedOption.Key}_essence",
+                Type = "Item",
+                ItemBaseId = selectedOption.RewardItemBaseId,
+                Quantity = 1
+            })
+            .ToList();
     }
 
     private Task PublishChangedAsync(

@@ -178,8 +178,7 @@ public static class EquipmentConstraintProfile
             .Select(stat => stat.Stat)
             .ToHashSet();
         var magical = authoredStats.Contains(AttributeType.MagicPenetration)
-            || authoredStats.Contains(AttributeType.HealingPowerPercent)
-            || authoredStats.Contains(AttributeType.SummonPower);
+            || authoredStats.Contains(AttributeType.HealingPowerPercent);
 
         return equipmentType switch
         {
@@ -188,8 +187,7 @@ public static class EquipmentConstraintProfile
                     AttributeType.Power,
                     AttributeType.MagicPenetration,
                     AttributeType.HealthRegeneration,
-                    AttributeType.HealingPowerPercent,
-                    AttributeType.SummonPower),
+                    AttributeType.HealingPowerPercent),
             EquipmentType.OneHanded or EquipmentType.TwoHanded =>
                 EqualWeights(AttributeType.Power),
             EquipmentType.OffHand =>

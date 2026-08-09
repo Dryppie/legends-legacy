@@ -8,8 +8,11 @@ header tracker, objective guidance, realtime state, reward processing, legacy
 progress backfill, and server-authoritative combat-area gates are in place.
 
 A functional quest journal page is available at `/game/quests`, including
-active, available, and completed views; objective and reward progress; quest
-acceptance and pinning; and objective navigation. Its two-pane journal layout
+active and completed views; objective and reward progress; quest pinning; and
+objective navigation. Locked definitions have no character progress row and
+become Active automatically when their prerequisites are met. The later
+automatic-activation change supersedes the Available/manual-acceptance design
+notes retained below as historical implementation planning. Its two-pane journal layout
 implements the supplied visual reference while remaining responsive for the
 game's smaller layouts.
 
@@ -203,9 +206,8 @@ A definition should contain:
   "version": 1,
   "title": "Training Day",
   "summary": "Prove that you can survive your first encounter.",
-  "category": "Onboarding",
+  "category": "Tutorial",
   "sortOrder": 10,
-  "autoAccept": true,
   "objectiveMode": "Sequential",
   "availability": {
     "minimumLevel": 1,

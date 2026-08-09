@@ -5,7 +5,6 @@
   "summary": "Prove that you can survive your first encounter.",
   "category": "Tutorial",
   "sortOrder": 10,
-  "autoAccept": true,
   "objectiveMode": "Sequential",
   "availability": {
     "minimumLevel": 1,

@@ -1,0 +1,95 @@
+.quest-header-awaiting-welcome {
+  pointer-events: none;
+  opacity: 0;
+  transform: scale(0.98);
+}
+
+.quest-header-welcome-reveal {
+  animation: quest-header-welcome-reveal 650ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.quest-welcome-backdrop {
+  transition:
+    background-color 480ms ease,
+    opacity 480ms ease;
+}
+
+.quest-welcome-panel {
+  --quest-welcome-shift-x: 0px;
+  --quest-welcome-shift-y: 0px;
+
+  max-width: 34rem;
+  transform-origin: center;
+  animation: quest-welcome-enter 280ms cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform, opacity, filter;
+}
+
+.quest-welcome-transitioning {
+  pointer-events: none;
+  background-color: transparent;
+}
+
+.quest-welcome-transitioning .quest-welcome-panel {
+  animation: quest-welcome-collapse 680ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes quest-welcome-enter {
+  from {
+    opacity: 0;
+    transform: translateY(1rem) scale(0.97);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes quest-welcome-collapse {
+  0% {
+    opacity: 1;
+    transform: translate(0, 0) scale(1);
+  }
+
+  65% {
+    opacity: 0.85;
+  }
+
+  100% {
+    filter: blur(1px);
+    opacity: 0;
+    transform: translate(
+        var(--quest-welcome-shift-x),
+        var(--quest-welcome-shift-y)
+      )
+      scale(0.16);
+  }
+}
+
+@keyframes quest-header-welcome-reveal {
+  0% {
+    box-shadow: 0 0 0 transparent;
+    opacity: 0;
+    transform: scale(0.96);
+  }
+
+  55% {
+    box-shadow: 0 0 24px
+      color-mix(in srgb, var(--ll-color-primary) 40%, transparent);
+    opacity: 1;
+    transform: scale(1.015);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .quest-header-welcome-reveal,
+  .quest-welcome-panel,
+  .quest-welcome-transitioning .quest-welcome-panel {
+    animation: none;
+  }
+}

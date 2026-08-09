@@ -49,12 +49,18 @@ export class GameRealtimeEventRegistry {
       const payload = envelope.payload as DungeonRewardsClaimed;
       this.injector
         .get(GameRealtimeStore)
-        .setRewardClaim(payload.claimedLoot ?? []);
+        .setRewardClaim(
+          payload.claimedLoot ?? [],
+          envelope.occurredAt,
+          'dungeon-reward',
+        );
     });
 
     this.addHandler(gameRealtimeEventNames.lootReceived, (envelope) => {
       const payload = envelope.payload as LootReceived;
-      this.injector.get(GameRealtimeStore).addLoot(payload.items ?? []);
+      this.injector
+        .get(GameRealtimeStore)
+        .addLoot(payload.items ?? [], envelope.occurredAt, payload.source);
       this.injector
         .get(InventoryStateService)
         .addOrIncrementMany(payload.items ?? []);

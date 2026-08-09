@@ -19,6 +19,7 @@ using Domain.Models.Guilds.Buildings;
 using Domain.Models.Guilds.Missions;
 using Domain.Models.Guilds.Shop;
 using Domain.Models.Inventories;
+using Domain.Models.LootHistory;
 using Domain.Models.Items;
 using Domain.Models.Items.Equipments;
 using Domain.Models.Items.Equipments.Slots;
@@ -226,6 +227,7 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : DbContext(opti
     public DbSet<Inventory> Inventories => Set<Inventory>();
 
     public DbSet<InventoryItem> InventoryItems => Set<InventoryItem>();
+    public DbSet<LootHistoryEntry> LootHistoryEntries => Set<LootHistoryEntry>();
 
     public DbSet<ItemBase> ItemBases => Set<ItemBase>();
     public DbSet<ItemInstance> ItemInstances => Set<ItemInstance>();

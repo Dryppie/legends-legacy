@@ -200,6 +200,8 @@ export class SidebarComponent implements OnInit, OnDestroy {
   }
 
   isQuestDestination(item: Tab): boolean {
+    if (this.questState.pinnedQuest()?.category !== 'Tutorial') return false;
+
     const destinationRoute =
       this.questState.pinnedObjective()?.presentation.destinationRoute;
     if (!destinationRoute) return false;

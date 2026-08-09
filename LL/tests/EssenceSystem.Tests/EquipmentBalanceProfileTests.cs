@@ -118,7 +118,7 @@ public sealed class EquipmentBalanceProfileTests
         Assert.Equal(68d, EquipmentBudgetEvaluator.Evaluate(modifiers, tier: 1));
         Assert.Equal(187d, EquipmentBudgetEvaluator.Evaluate(modifiers, tier: 5));
         Assert.Equal(412d, EquipmentBudgetEvaluator.Evaluate(modifiers, tier: 10));
-        Assert.Equal(12, EquipmentBudgetEvaluator.BalanceVersion);
+        Assert.Equal(13, EquipmentBudgetEvaluator.BalanceVersion);
     }
 
     [Fact]
@@ -407,7 +407,7 @@ public sealed class EquipmentBalanceProfileTests
             allocation.AddedPoints[AttributeType.Power]
             > 100d * weights[AttributeType.Power]
             / EquipmentStatBudgetCatalog.Get(AttributeType.Power, 10).CostPerPoint);
-        Assert.Equal(12, EquipmentConstraintProfile.BalanceVersion);
+        Assert.Equal(13, EquipmentConstraintProfile.BalanceVersion);
         Assert.True(EquipmentConstraintProfile.ProductionActive);
     }
 
@@ -448,47 +448,6 @@ public sealed class EquipmentBalanceProfileTests
                 AttributeType.AttackSpeed
             ],
             EquipmentConstraintProfile.GetOverflowWeights(design).Keys);
-    }
-
-    [Theory]
-    [InlineData(1, 3.00d)]
-    [InlineData(3, 2.125d)]
-    [InlineData(5, 1.25d)]
-    [InlineData(10, 1.00d)]
-    public void Production_profile_uses_tiered_summon_power_costs(
-        int tier,
-        double expectedCost)
-    {
-        Assert.Equal(
-            expectedCost,
-            EquipmentConstraintProfile.GetCostPerPoint(
-                AttributeType.SummonPower,
-                tier),
-            precision: 4);
-        Assert.Equal(
-            EquipmentStatBudgetCatalog.Get(AttributeType.Power, tier).CostPerPoint,
-            EquipmentConstraintProfile.GetCostPerPoint(
-                AttributeType.Power,
-                tier),
-            precision: 4);
-    }
-
-    [Theory]
-    [InlineData(1, 1.90d)]
-    [InlineData(3, 1.325d)]
-    [InlineData(5, 0.75d)]
-    [InlineData(8, 0.60d)]
-    [InlineData(10, 0.50d)]
-    public void Production_profile_uses_tiered_summon_health_costs(
-        int tier,
-        double expectedCost)
-    {
-        Assert.Equal(
-            expectedCost,
-            EquipmentConstraintProfile.GetCostPerPoint(
-                AttributeType.SummonHealth,
-                tier),
-            precision: 4);
     }
 
     [Theory]

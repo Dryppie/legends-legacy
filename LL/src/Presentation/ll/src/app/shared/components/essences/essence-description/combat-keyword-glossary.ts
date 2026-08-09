@@ -69,7 +69,7 @@ export const COMBAT_KEYWORDS: readonly CombatKeywordDefinition[] = [
     name: 'Guard',
     aliases: ['Guarded'],
     description:
-      'Each charge reduces the post-mitigation damage of one direct hit by 25%.',
+      'Each charge reduces the damage received of one direct hit by 25%.',
     valueMeaning: 'charges',
   },
   {

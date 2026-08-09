@@ -5,7 +5,6 @@
   "summary": "Craft and equip your first weapon.",
   "category": "Tutorial",
   "sortOrder": 30,
-  "autoAccept": true,
   "objectiveMode": "Sequential",
   "availability": {
     "minimumLevel": 1,

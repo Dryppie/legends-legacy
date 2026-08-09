@@ -1590,7 +1590,7 @@ public sealed class FastCombatEngine
                     (attribute.BaseValue + (attribute.ScalingAttribute is { } scalingAttribute
                         ? GetEffectiveAttribute(source, scalingAttribute) * attribute.ScalingCoefficient
                         : 0))
-                    * GetSummonAttributeMultiplier(attribute.Attribute, effect, source))));
+                    * GetSummonAttributeMultiplier(attribute.Attribute, effect))));
 
         attributes.TryAdd(AttributeType.MaxHealth, 1);
         attributes.TryAdd(AttributeType.Power, 0);
@@ -1600,14 +1600,11 @@ public sealed class FastCombatEngine
 
     private static double GetSummonAttributeMultiplier(
         AttributeType attribute,
-        CompiledEffect effect,
-        RuntimeCombatant source) =>
+        CompiledEffect effect) =>
         attribute == AttributeType.MaxHealth
             ? Math.Max(0d, effect.SummonHealthMultiplier)
-              * Math.Max(0d, 1d + source.GetAttribute(AttributeType.SummonHealth) / 100d)
             : attribute == AttributeType.Power
                 ? Math.Max(0d, effect.SummonPowerMultiplier)
-                  * Math.Max(0d, 1d + source.GetAttribute(AttributeType.SummonPower) / 100d)
                 : 1d;
 
     private void ModifyStatusStacks(

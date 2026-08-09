@@ -2,6 +2,7 @@ using Application.Interfaces.Outbox;
 using Application.Interfaces.Services.LL;
 using Application.Interfaces.Services.LL.Dungeons;
 using Application.Interfaces.Services.LL.Entities;
+using Application.Interfaces.Services.LL.Inventories;
 using Application.Interfaces.WebSockets;
 using Application.MediatR.Markers;
 using Application.UseCases.Characters.Dtos;
@@ -25,6 +26,7 @@ public class ClaimDungeonRewardsCommandHandler : IRequestHandler<ClaimDungeonRew
     private readonly IGameRealtimeBroadcaster _gameRealtime;
     private readonly IMapper _mapper;
     private readonly IGameEventOutbox _outbox;
+    private readonly ILootHistoryService _lootHistory;
 
     public ClaimDungeonRewardsCommandHandler(
         IDungeonRunService dungeonRunService,
@@ -32,7 +34,8 @@ public class ClaimDungeonRewardsCommandHandler : IRequestHandler<ClaimDungeonRew
         ICharacterService characterService,
         IGameRealtimeBroadcaster gameRealtime,
         IMapper mapper,
-        IGameEventOutbox outbox)
+        IGameEventOutbox outbox,
+        ILootHistoryService lootHistory)
     {
         _dungeonRunService = dungeonRunService;
         _inventoryService = inventoryService;
@@ -40,6 +43,7 @@ public class ClaimDungeonRewardsCommandHandler : IRequestHandler<ClaimDungeonRew
         _gameRealtime = gameRealtime;
         _mapper = mapper;
         _outbox = outbox;
+        _lootHistory = lootHistory;
     }
 
     public async Task<Response<ClaimDungeonRewardsResponseDto>> Handle(ClaimDungeonRewardsCommand request, CancellationToken cancellationToken)
@@ -72,6 +76,12 @@ public class ClaimDungeonRewardsCommandHandler : IRequestHandler<ClaimDungeonRew
         var inventoryItems = _mapper.Map<List<InventoryItemDto>>(inventory.InventoryItems);
         var claimedLoot = _mapper.Map<List<InventoryItemDto>>(result.ClaimedLoot);
         var characterDto = _mapper.Map<CharacterDto>(character);
+
+        await _lootHistory.RecordAsync(
+            request.CharacterId,
+            claimedLoot,
+            "dungeon-reward",
+            cancellationToken);
 
         await _gameRealtime.PublishAsync(
             new Audience.Character(request.CharacterId),

@@ -17,6 +17,8 @@ public sealed class QuestEncounterService(
     ICombatEngineExecutor combatEngineExecutor,
     ICombatEncounterResultFactory combatEncounterResultFactory,
     ICombatAreaAccessService accessService,
+    IQuestRepository questRepository,
+    IQuestDefinitionProvider questDefinitions,
     IQuestProgressionService progressionService) : IQuestEncounterService
 {
     private static readonly TimeSpan TrainingEncounterCadence = TimeSpan.FromSeconds(10);
@@ -27,8 +29,35 @@ public sealed class QuestEncounterService(
         string encounterKey,
         CancellationToken cancellationToken)
     {
-        if (!questId.Equals(QuestConstants.TrainingDay, StringComparison.OrdinalIgnoreCase) ||
-            !encounterKey.Equals("training", StringComparison.OrdinalIgnoreCase))
+        if (!questId.Equals(QuestConstants.TrainingDay, StringComparison.OrdinalIgnoreCase))
+        {
+            return null;
+        }
+
+        var questProgress = await questRepository.GetProgressAsync(
+            characterId,
+            questId,
+            cancellationToken);
+        if (questProgress is null || questProgress.Status != QuestStatus.Active)
+        {
+            return null;
+        }
+
+        var questDefinition = questDefinitions.Get(
+            questProgress.QuestId,
+            questProgress.DefinitionVersion);
+        QuestChoiceOptionDefinition? selectedOption = null;
+        if (questDefinition.Choice is not null)
+        {
+            selectedOption = questDefinition.Choice.Options.FirstOrDefault(option =>
+                option.Key.Equals(questProgress.SelectedOptionKey, StringComparison.OrdinalIgnoreCase));
+            if (selectedOption is null ||
+                !selectedOption.EncounterKey.Equals(encounterKey, StringComparison.OrdinalIgnoreCase))
+            {
+                return null;
+            }
+        }
+        else if (!encounterKey.Equals("training", StringComparison.OrdinalIgnoreCase))
         {
             return null;
         }
@@ -48,7 +77,7 @@ public sealed class QuestEncounterService(
             return null;
         }
 
-        var creatureId = area.Creatures
+        var creatureId = selectedOption?.CreatureId ?? area.Creatures
             .OrderByDescending(x => x.WeightedSpawnRate)
             .Select(x => x.CreatureId)
             .FirstOrDefault();

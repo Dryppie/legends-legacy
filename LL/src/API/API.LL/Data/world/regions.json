@@ -82,7 +82,7 @@
           "name": "Blood Grove",
           "levelRequirement": 5,
           "difficultyTier": 2,
-          "requiredCompletedQuestId": "quest.region01.into_lumo_ruins",
+          "requiredCompletedQuestId": "quest.shenic.trial_of_lumo",
           "spawnProbabilities": [
             0.03,
             0.969,
@@ -125,6 +125,7 @@
           "name": "Crystal Creek",
           "levelRequirement": 10,
           "difficultyTier": 3,
+          "requiredCompletedQuestId": "quest.shenic.blood_in_the_grove",
           "spawnProbabilities": [
             0.03,
             0.969,
@@ -167,6 +168,7 @@
           "name": "Moonlit Graves",
           "levelRequirement": 15,
           "difficultyTier": 4,
+          "requiredCompletedQuestId": "quest.shenic.crystal_currents",
           "spawnProbabilities": [
             0.03,
             0.969,
@@ -216,6 +218,7 @@
           "name": "Twilight Clearing",
           "levelRequirement": 20,
           "difficultyTier": 5,
+          "requiredCompletedQuestId": "quest.shenic.restless_dead",
           "spawnProbabilities": [
             0.03,
             0.969,
@@ -258,6 +261,7 @@
           "name": "Old Forest",
           "levelRequirement": 25,
           "difficultyTier": 6,
+          "requiredCompletedQuestId": "quest.shenic.between_day_and_night",
           "spawnProbabilities": [
             0.03,
             0.969,
@@ -307,6 +311,7 @@
           "name": "Thornroot Hollow",
           "levelRequirement": 30,
           "difficultyTier": 7,
+          "requiredCompletedQuestId": "quest.shenic.roots_remember",
           "spawnProbabilities": [
             0.03,
             0.969,
@@ -349,6 +354,7 @@
           "name": "Embercap Burrows",
           "levelRequirement": 35,
           "difficultyTier": 8,
+          "requiredCompletedQuestId": "quest.shenic.heart_of_the_hollow",
           "spawnProbabilities": [
             0.03,
             0.969,
@@ -391,6 +397,7 @@
           "name": "Moonveil Marsh",
           "levelRequirement": 40,
           "difficultyTier": 9,
+          "requiredCompletedQuestId": "quest.shenic.ash_beneath_the_earth",
           "spawnProbabilities": [
             0.03,
             0.969,
@@ -433,6 +440,7 @@
           "name": "Duskmire Hollow",
           "levelRequirement": 45,
           "difficultyTier": 10,
+          "requiredCompletedQuestId": "quest.shenic.veil_over_the_marsh",
           "spawnProbabilities": [
             0.03,
             0.969,

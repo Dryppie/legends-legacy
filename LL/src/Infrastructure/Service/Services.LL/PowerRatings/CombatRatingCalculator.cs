@@ -26,7 +26,7 @@ public sealed record CombatRatingModifierSource(
 /// </summary>
 public static class CombatRatingCalculator
 {
-    public const int DefinitionVersion = 13;
+    public const int DefinitionVersion = 14;
     public const int ReferenceWeightTier = EquipmentStatBudgetCatalog.MinimumTier;
 
     private static readonly IReadOnlySet<AttributeType> OffenseAttributes =
@@ -38,7 +38,6 @@ public static class CombatRatingCalculator
             AttributeType.ArmorPenetration,
             AttributeType.MagicPenetration,
             AttributeType.Cooldown,
-            AttributeType.SummonPower,
             AttributeType.AttackSpeed
         };
 

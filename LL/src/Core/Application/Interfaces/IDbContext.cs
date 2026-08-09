@@ -16,6 +16,7 @@ using Domain.Models.Guilds.Buildings;
 using Domain.Models.Guilds.Missions;
 using Domain.Models.Guilds.Shop;
 using Domain.Models.Inventories;
+using Domain.Models.LootHistory;
 using Domain.Models.Items;
 using Domain.Models.Items.Equipments.Slots;
 using Domain.Models.Items.EssenceItems;
@@ -106,6 +107,7 @@ public interface IDbContext
     DbSet<GuildShopPurchase> GuildShopPurchases { get; }
     DbSet<Inventory> Inventories { get; }
     DbSet<InventoryItem> InventoryItems { get; }
+    DbSet<LootHistoryEntry> LootHistoryEntries { get; }
     DbSet<ItemBase> ItemBases { get; }
     DbSet<ItemInstance> ItemInstances { get; }
     DbSet<MarketPlaceListing> MarketPlaceListings { get; }

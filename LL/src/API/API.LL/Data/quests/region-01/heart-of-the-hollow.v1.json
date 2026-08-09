@@ -1,0 +1,34 @@
+{
+  "id": "quest.shenic.heart_of_the_hollow",
+  "version": 1,
+  "title": "Heart of the Hollow",
+  "summary": "Cut through Thornroot Hollow before it strangles the forest around it.",
+  "category": "Shenic",
+  "chain": { "id": "chain.shenic", "title": "Shenic Campaign", "step": 7, "totalSteps": 10 },
+  "sortOrder": 160,
+  "objectiveMode": "Sequential",
+  "availability": {
+    "minimumLevel": 30,
+    "completedQuestIds": ["quest.shenic.roots_remember"]
+  },
+  "objectives": [
+    {
+      "key": "cut_through_thornroot",
+      "description": "Win 12 encounters in Thornroot Hollow.",
+      "type": "CombatEncounterCompleted",
+      "requiredAmount": 12,
+      "filters": {
+        "areaId": "region_01_area_09",
+        "requiresVictory": true
+      },
+      "presentation": {
+        "actionLabel": "Head to Thornroot Hollow",
+        "destinationRoute": "/game/world/shenic?area=region_01_area_09"
+      }
+    }
+  ],
+  "rewards": [
+    { "key": "thornroot_wood", "type": "Item", "itemBaseId": "wood", "quantity": 50 },
+    { "key": "hollow_ore", "type": "Item", "itemBaseId": "ore", "quantity": 25 }
+  ]
+}

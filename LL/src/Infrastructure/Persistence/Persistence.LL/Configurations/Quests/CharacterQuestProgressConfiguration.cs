@@ -10,6 +10,7 @@ public sealed class CharacterQuestProgressConfiguration : IEntityTypeConfigurati
     {
         builder.HasKey(x => new { x.CharacterId, x.QuestId });
         builder.Property(x => x.QuestId).HasMaxLength(160).IsRequired();
+        builder.Property(x => x.SelectedOptionKey).HasMaxLength(80);
         builder.Property(x => x.RowVersion).IsConcurrencyToken();
         builder.HasIndex(x => new { x.CharacterId, x.Status });
         builder.HasIndex(x => new { x.CharacterId, x.IsPinned });

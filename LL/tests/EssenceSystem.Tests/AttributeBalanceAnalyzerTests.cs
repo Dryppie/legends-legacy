@@ -343,14 +343,12 @@ public sealed class AttributeBalanceAnalyzerTests
     }
 
     [Fact]
-    public void Analyzer_observes_status_and_summon_derived_stats_in_production_combat()
+    public void Analyzer_observes_status_stats_in_production_combat()
     {
         var report = CreateAnalyzer().Analyze(CancellationToken.None);
 
         AssertMeasuredGain(report, AttributeType.StatusResistance);
         AssertMeasuredGain(report, AttributeType.CrowdControlResistance);
-        AssertMeasuredGain(report, AttributeType.SummonPower);
-        AssertMeasuredGain(report, AttributeType.SummonHealth);
     }
 
     [Fact]
@@ -520,7 +518,10 @@ public sealed class AttributeBalanceAnalyzerTests
                 Environment.NewLine,
                 report.SummonCalibrations
                     .Where(x => Math.Abs(x.EqualBudgetDifferencePercent) > report.CalibrationGate.SummonTolerancePercent)
-                    .Select(x => $"Tier {x.Tier}, {x.DurationTicks} ticks: {x.EqualBudgetDifferencePercent:0.##}%")));
+                    .Select(x =>
+                        $"Tier {x.Tier}, {x.DurationTicks} ticks: {x.EqualBudgetDifferencePercent:0.##}% " +
+                        $"(summoner {x.SummonerDamagePerHundredBudget:0.##}, " +
+                        $"direct {x.DirectCasterDamagePerHundredBudget:0.##})")));
         Assert.True(
             report.CalibrationGate.HandCalibrationPassed,
             string.Join(
@@ -556,7 +557,6 @@ public sealed class AttributeBalanceAnalyzerTests
                 Assert.True(summon.SummonerOutput.SummonsCreated > 0);
                 Assert.True(summon.SummonerOutput.AverageActiveSummons > 0);
                 Assert.True(summon.SummonerOutput.SummonUptimePercent > 0);
-                Assert.True(summon.ExplicitSummonStatContributionPercent >= 0);
                 Assert.InRange(Math.Abs(summon.AbilityBudgetDifferencePercent), 0, 0.0001d);
                 Assert.Equal(
                     summon.SummonAbilityReferenceDamage,
@@ -619,7 +619,7 @@ public sealed class AttributeBalanceAnalyzerTests
                         $"  spent: {x.FirstSpentBudget:0.##} vs {x.SecondSpentBudget:0.##}; " +
                         $"utility/100: {x.FirstUtilityPerHundredBudget:0.##} vs " +
                         $"{x.SecondUtilityPerHundredBudget:0.##}")));
-        Assert.Equal(12, report.BalanceVersion);
+        Assert.Equal(13, report.BalanceVersion);
     }
 
     [Fact]
@@ -628,7 +628,7 @@ public sealed class AttributeBalanceAnalyzerTests
         var report = CreateAnalyzer().Analyze(CancellationToken.None);
         var catalog = report.CraftingCatalogConstraints;
 
-        Assert.Equal(12, catalog.CandidateBalanceVersion);
+        Assert.Equal(13, catalog.CandidateBalanceVersion);
         Assert.True(catalog.ProductionActive);
         Assert.Equal(31, catalog.RecipesAnalyzed);
         Assert.Equal(11, catalog.BlueprintsAnalyzed);

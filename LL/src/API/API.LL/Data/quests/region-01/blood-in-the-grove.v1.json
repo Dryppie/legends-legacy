@@ -1,0 +1,34 @@
+{
+  "id": "quest.shenic.blood_in_the_grove",
+  "version": 1,
+  "title": "Blood in the Grove",
+  "summary": "Thin the creatures feeding Blood Grove's unnatural growth.",
+  "category": "Shenic",
+  "chain": { "id": "chain.shenic", "title": "Shenic Campaign", "step": 2, "totalSteps": 10 },
+  "sortOrder": 110,
+  "objectiveMode": "Sequential",
+  "availability": {
+    "minimumLevel": 5,
+    "completedQuestIds": ["quest.shenic.trial_of_lumo"]
+  },
+  "objectives": [
+    {
+      "key": "secure_blood_grove",
+      "description": "Win 5 encounters in Blood Grove.",
+      "type": "CombatEncounterCompleted",
+      "requiredAmount": 5,
+      "filters": {
+        "areaId": "region_01_area_02",
+        "requiresVictory": true
+      },
+      "presentation": {
+        "actionLabel": "Head to Blood Grove",
+        "destinationRoute": "/game/world/shenic?area=region_01_area_02"
+      }
+    }
+  ],
+  "rewards": [
+    { "key": "bloodwood", "type": "Item", "itemBaseId": "wood", "quantity": 15 },
+    { "key": "grove_hide", "type": "Item", "itemBaseId": "rawhide", "quantity": 20 }
+  ]
+}

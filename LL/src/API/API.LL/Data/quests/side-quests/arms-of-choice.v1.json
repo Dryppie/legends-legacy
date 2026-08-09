@@ -1,0 +1,59 @@
+{
+  "id": "quest.crafting.arms_of_choice",
+  "version": 1,
+  "title": "Arms of Choice",
+  "summary": "Learn the balance and materials of every one-handed weapon family.",
+  "category": "Crafting",
+  "sortOrder": 220,
+  "objectiveMode": "All",
+  "availability": {
+    "minimumLevel": 5,
+    "completedQuestIds": ["quest.onboarding.tools_of_trade"]
+  },
+  "objectives": [
+    {
+      "key": "craft_shortsword",
+      "description": "Craft a one-handed shortsword.",
+      "type": "EquipmentCrafted",
+      "requiredAmount": 1,
+      "filters": { "itemBaseIds": ["shortsword"] },
+      "presentation": { "actionLabel": "Head to Crafting", "destinationRoute": "/game/professions/crafting" }
+    },
+    {
+      "key": "craft_dagger",
+      "description": "Craft a one-handed dagger.",
+      "type": "EquipmentCrafted",
+      "requiredAmount": 1,
+      "filters": { "itemBaseIds": ["dagger"] },
+      "presentation": { "actionLabel": "Head to Crafting", "destinationRoute": "/game/professions/crafting" }
+    },
+    {
+      "key": "craft_hatchet",
+      "description": "Craft a one-handed hatchet.",
+      "type": "EquipmentCrafted",
+      "requiredAmount": 1,
+      "filters": { "itemBaseIds": ["hatchet"] },
+      "presentation": { "actionLabel": "Head to Crafting", "destinationRoute": "/game/professions/crafting" }
+    },
+    {
+      "key": "craft_mace",
+      "description": "Craft a one-handed mace.",
+      "type": "EquipmentCrafted",
+      "requiredAmount": 1,
+      "filters": { "itemBaseIds": ["mace"] },
+      "presentation": { "actionLabel": "Head to Crafting", "destinationRoute": "/game/professions/crafting" }
+    },
+    {
+      "key": "craft_wand",
+      "description": "Craft a one-handed wand.",
+      "type": "EquipmentCrafted",
+      "requiredAmount": 1,
+      "filters": { "itemBaseIds": ["wand"] },
+      "presentation": { "actionLabel": "Head to Crafting", "destinationRoute": "/game/professions/crafting" }
+    }
+  ],
+  "rewards": [
+    { "key": "ore", "type": "Item", "itemBaseId": "ore", "quantity": 50 },
+    { "key": "wood", "type": "Item", "itemBaseId": "wood", "quantity": 25 }
+  ]
+}

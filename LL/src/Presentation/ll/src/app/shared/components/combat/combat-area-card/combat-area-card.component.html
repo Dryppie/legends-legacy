@@ -26,6 +26,62 @@
     </div>
   </div>
 
+  <ul
+    *ngIf="gatheringTypes().length > 0"
+    class="absolute bottom-[6.75rem] right-4 z-20 flex items-center gap-3"
+    [attr.data-tour]="gatheringTourId()"
+    aria-label="Gathering nodes"
+  >
+    <li
+      *ngFor="let gatheringType of gatheringTypes()"
+      class="group/node relative size-8"
+    >
+      <button
+        type="button"
+        class="absolute inset-0 flex rotate-45 cursor-help items-center justify-center rounded-md border shadow-md backdrop-blur-sm transition duration-150 group-hover/node:-translate-y-0.5 group-hover/node:shadow-lg group-focus-within/node:-translate-y-0.5"
+        [class.border-slate-300/80]="gatheringType === GatheringType.Mining"
+        [class.bg-slate-800/90]="gatheringType === GatheringType.Mining"
+        [class.text-slate-100]="gatheringType === GatheringType.Mining"
+        [class.border-emerald-500/80]="
+          gatheringType === GatheringType.Woodcutting
+        "
+        [class.bg-emerald-950/90]="
+          gatheringType === GatheringType.Woodcutting
+        "
+        [class.text-emerald-200]="
+          gatheringType === GatheringType.Woodcutting
+        "
+        [class.border-amber-500/80]="gatheringType === GatheringType.Skinning"
+        [class.bg-amber-950/90]="gatheringType === GatheringType.Skinning"
+        [class.text-amber-200]="gatheringType === GatheringType.Skinning"
+        [attr.aria-label]="gatheringType + ' gathering node'"
+      >
+        <span
+          class="-rotate-45 text-[0.65rem] font-semibold"
+          aria-hidden="true"
+        >
+          {{ gatheringTypeInitial(gatheringType) }}
+        </span>
+      </button>
+
+      <span
+        class="pointer-events-none absolute bottom-full left-1/2 z-40 mb-3 -translate-x-1/2 translate-y-1 whitespace-nowrap rounded border border-[var(--ll-color-border-strong)] bg-zinc-950/95 px-2 py-1 text-[0.65rem] font-medium text-white opacity-0 shadow-xl transition-all duration-150 group-hover/node:translate-y-0 group-hover/node:opacity-100 group-focus-within/node:translate-y-0 group-focus-within/node:opacity-100"
+        role="tooltip"
+      >
+        <span
+          class="mr-1 inline-block size-1.5 rounded-full"
+          [class.bg-slate-300]="gatheringType === GatheringType.Mining"
+          [class.bg-emerald-400]="
+            gatheringType === GatheringType.Woodcutting
+          "
+          [class.bg-amber-400]="gatheringType === GatheringType.Skinning"
+          aria-hidden="true"
+        ></span>
+        {{ gatheringType }} node
+      </span>
+    </li>
+  </ul>
+
   <div class="relative flex h-full w-full items-end">
     <div
       class="border-gradient absolute w-full rounded-md opacity-70"
@@ -47,49 +103,6 @@
         <small class="ll-stat-label"
           >Req. LV: {{ area.levelRequirement }}</small
         >
-        <div
-          class="mt-1 flex max-w-40 flex-wrap gap-1"
-          [attr.data-tour]="gatheringTourId()"
-        >
-          <div
-            *ngIf="gatheringTypes().length > 0"
-            class="group/gathering relative"
-          >
-            <button
-              type="button"
-              class="ll-item-chip cursor-help text-[0.65rem] text-primary"
-              aria-haspopup="true"
-              [attr.aria-label]="
-                'Gathering node types: ' + gatheringTypes().join(', ')
-              "
-            >
-              Gathering {{ gatheringTypes().length }}
-              <span aria-hidden="true">▴</span>
-            </button>
-
-            <div
-              class="ll-card absolute bottom-full left-0 z-30 hidden min-w-36 bg-texture p-2 shadow-xl group-hover/gathering:block group-focus-within/gathering:block"
-              role="tooltip"
-            >
-              <p class="ll-eyebrow mb-1 text-[0.6rem]">Gathering nodes</p>
-              <ul class="space-y-1">
-                <li
-                  *ngFor="let gatheringType of gatheringTypes()"
-                  class="flex items-center gap-1.5 whitespace-nowrap text-[0.7rem] text-white"
-                >
-                  <span class="text-primary" aria-hidden="true">◆</span>
-                  {{ gatheringType }}
-                </li>
-              </ul>
-            </div>
-          </div>
-          <span
-            *ngIf="gatheringTypes().length === 0"
-            class="ll-item-chip text-[0.65rem]"
-          >
-            No gathering
-          </span>
-        </div>
       </div>
       <div class="-mb-2" [attr.data-tour]="trainingBattleButtonTourId()">
         <app-mini-button

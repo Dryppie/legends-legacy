@@ -8,7 +8,7 @@ import {
   OnInit,
 } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { Region, Area } from '../../../../shared/models/Dtos/regionDto';
+import { Region } from '../../../../shared/models/Dtos/regionDto';
 import { RegionService } from '../../../../core/services/client-side/region/region.service';
 import { CombatAreaCardComponent } from '../../../../shared/components/combat/combat-area-card/combat-area-card.component';
 import { TabsComponent } from '../../../../shared/components/custom-components/tabs/tabs.component';
@@ -122,31 +122,12 @@ export class RegionComponent implements OnInit, OnDestroy {
     return (index + 1) % this.columnCount === 0;
   }
 
-  private withTargetAreaFirst(region: Region): Region {
-    if (!this.targetAreaId) {
-      return region;
-    }
-
-    const areas = [...region.areas];
-    const targetIndex = areas.findIndex(
-      (area: Area) => area.id === this.targetAreaId,
-    );
-    if (targetIndex <= 0) {
-      return { ...region, areas };
-    }
-
-    const [targetArea] = areas.splice(targetIndex, 1);
-    return { ...region, areas: [targetArea, ...areas] };
-  }
-
   private applyRegionView(): void {
     if (!this.sourceRegion) {
       return;
     }
 
-    this.region = this.withTargetAreaFirst(
-      this.withQuestAreaAvailability(this.sourceRegion),
-    );
+    this.region = this.withQuestAreaAvailability(this.sourceRegion);
   }
 
   private withQuestAreaAvailability(region: Region): Region {

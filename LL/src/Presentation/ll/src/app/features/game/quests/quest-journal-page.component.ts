@@ -2,18 +2,19 @@ import { NgClass, NgFor, NgIf } from '@angular/common';
 import { Component, computed, OnInit, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { QuestStateService } from '../../../core/services/api/quest/quest-state.service';
+import { EssenceItemViewService } from '../../../core/services/api/essences/essence-item-view.service';
 import { BaseItemComponent } from '../../../shared/components/base-item/base-item.component';
+import { Essence } from '../../../shared/models/essence';
+import { EssenceItem } from '../../../shared/models/item';
 import {
+  QuestChoiceOption,
   QuestObjectiveState,
   QuestRewardState,
   QuestState,
   QuestStatus,
 } from '../../../shared/models/quest';
 
-type QuestJournalTab =
-  | QuestStatus.Active
-  | QuestStatus.Available
-  | QuestStatus.Completed;
+type QuestJournalTab = QuestStatus.Active | QuestStatus.Completed;
 type QuestSortMode = 'Order' | 'Progress';
 
 @Component({
@@ -25,18 +26,15 @@ type QuestSortMode = 'Order' | 'Progress';
 export class QuestJournalPageComponent implements OnInit {
   readonly tabs: QuestJournalTab[] = [
     QuestStatus.Active,
-    QuestStatus.Available,
     QuestStatus.Completed,
   ];
   readonly activeTab = signal<QuestJournalTab>(QuestStatus.Active);
   readonly sortMode = signal<QuestSortMode>('Order');
   readonly selectedQuestId = signal<string | null>(null);
+  readonly pendingChoiceKey = signal<string | null>(null);
   readonly visibleQuests = computed(() => {
     let quests: QuestState[];
     switch (this.activeTab()) {
-      case QuestStatus.Available:
-        quests = this.questState.availableQuests();
-        break;
       case QuestStatus.Completed:
         quests = this.questState.completedQuests();
         break;
@@ -70,6 +68,7 @@ export class QuestJournalPageComponent implements OnInit {
   constructor(
     readonly questState: QuestStateService,
     private readonly router: Router,
+    private readonly essenceItemView: EssenceItemViewService,
   ) {}
 
   ngOnInit(): void {
@@ -79,10 +78,12 @@ export class QuestJournalPageComponent implements OnInit {
   setTab(tab: QuestJournalTab): void {
     this.activeTab.set(tab);
     this.selectedQuestId.set(null);
+    this.pendingChoiceKey.set(null);
   }
 
   selectQuest(quest: QuestState): void {
     this.selectedQuestId.set(quest.questId);
+    this.pendingChoiceKey.set(null);
   }
 
   isSelected(quest: QuestState): boolean {
@@ -95,8 +96,6 @@ export class QuestJournalPageComponent implements OnInit {
 
   tabCount(tab: QuestJournalTab): number {
     switch (tab) {
-      case QuestStatus.Available:
-        return this.questState.availableQuests().length;
       case QuestStatus.Completed:
         return this.questState.completedQuests().length;
       default:
@@ -106,6 +105,17 @@ export class QuestJournalPageComponent implements OnInit {
 
   currentObjective(quest: QuestState): QuestObjectiveState | null {
     return quest.objectives.find((objective) => !objective.isCompleted) ?? null;
+  }
+
+  isObjectiveAvailable(
+    quest: QuestState,
+    objective: QuestObjectiveState,
+  ): boolean {
+    return (
+      !objective.isCompleted &&
+      (quest.objectiveMode === 'All' ||
+        this.currentObjective(quest) === objective)
+    );
   }
 
   completedObjectiveCount(quest: QuestState): number {
@@ -132,6 +142,10 @@ export class QuestJournalPageComponent implements OnInit {
     return Math.round(progress / quest.objectives.length);
   }
 
+  chainSteps(totalSteps: number): number[] {
+    return Array.from({ length: totalSteps }, (_, index) => index + 1);
+  }
+
   rewardLabel(reward: QuestRewardState, includeQuantity = true): string {
     const name = (reward.itemBaseId ?? reward.key)
       .split(/[._-]/)
@@ -141,10 +155,25 @@ export class QuestJournalPageComponent implements OnInit {
     return includeQuantity ? `${reward.quantity} ${name}` : name;
   }
 
-  acceptQuest(quest: QuestState): void {
-    this.selectedQuestId.set(quest.questId);
-    this.activeTab.set(QuestStatus.Active);
-    this.questState.accept(quest.questId);
+  requiresChoice(quest: QuestState): boolean {
+    return !!quest.choice && !quest.choice.selectedOptionKey;
+  }
+
+  chooseOption(option: QuestChoiceOption): void {
+    this.pendingChoiceKey.set(option.key);
+  }
+
+  confirmChoice(quest: QuestState): void {
+    const optionKey = this.pendingChoiceKey();
+    if (!optionKey || this.questState.loading()) return;
+    this.questState.selectChoice(quest.questId, optionKey, () =>
+      this.pendingChoiceKey.set(null),
+    );
+  }
+
+  choiceEssence(option: QuestChoiceOption): Essence | null {
+    if (!option.rewardItemBase) return null;
+    return this.essenceItemView.asEssence(option.rewardItemBase as EssenceItem);
   }
 
   togglePinned(quest: QuestState): void {

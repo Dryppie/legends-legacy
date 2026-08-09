@@ -1,4 +1,5 @@
 using Application.Interfaces.Services.LL;
+using Application.Interfaces.Services.LL.Inventories;
 using Application.Interfaces.WebSockets;
 using Application.UseCases.Inventories.Dtos;
 using Application.WebSockets.Contracts;
@@ -13,17 +14,20 @@ public sealed class InventoryLootRewardWriter : ILootRewardWriter
     private readonly IInventoryService _inventoryService;
     private readonly IGameEventPublisher _gameEventPublisher;
     private readonly IGameRealtimeBroadcaster _gameRealtime;
+    private readonly ILootHistoryService _lootHistory;
     private readonly IMapper _mapper;
 
     public InventoryLootRewardWriter(
         IInventoryService inventoryService,
         IGameEventPublisher gameEventPublisher,
         IGameRealtimeBroadcaster gameRealtime,
+        ILootHistoryService lootHistory,
         IMapper mapper)
     {
         _inventoryService = inventoryService;
         _gameEventPublisher = gameEventPublisher;
         _gameRealtime = gameRealtime;
+        _lootHistory = lootHistory;
         _mapper = mapper;
     }
 
@@ -43,6 +47,12 @@ public sealed class InventoryLootRewardWriter : ILootRewardWriter
             cancellationToken);
 
         var mappedItems = items.Select(x => _mapper.Map<InventoryItemDto>(x)).ToList();
+        await _lootHistory.RecordAsync(
+            ownerCharacterId,
+            mappedItems,
+            "combat-reward",
+            cancellationToken);
+
         var message = new LootReceivedMsg(ownerCharacterId, mappedItems);
 
         await _gameEventPublisher.PublishAsync(

@@ -143,6 +143,33 @@ public sealed class CraftingCompositionContentTests
     }
 
     [Fact]
+    public void Summon_crafting_profiles_use_the_stats_inherited_by_summons()
+    {
+        var provider = CreateProvider();
+        var primal = provider.GetBlueprint("blueprint_primal")!;
+        var spiritward = provider.GetRecipes().Single(x => x.Id == "recipe.offhand.spiritward");
+
+        Assert.Equal(
+            new Dictionary<AttributeType, double>
+            {
+                [AttributeType.Power] = 0.5d,
+                [AttributeType.MaxHealth] = 0.3d,
+                [AttributeType.CrowdControlResistance] = 0.2d
+            },
+            primal.BonusStatProfile);
+        Assert.Equal(
+            new Dictionary<AttributeType, double>
+            {
+                [AttributeType.Resistance] = 0.35d,
+                [AttributeType.HealthRegeneration] = 0.25d,
+                [AttributeType.MaxHealth] = 0.4d
+            },
+            spiritward.InitialStatProfile);
+        Assert.Equal(1d, primal.BonusStatProfile.Values.Sum(), precision: 4);
+        Assert.Equal(1d, spiritward.InitialStatProfile.Values.Sum(), precision: 4);
+    }
+
+    [Fact]
     public void BlueprintsComposeAcrossCompatibleRecipesWithoutAuthoredCombinations()
     {
         var provider = CreateProvider();

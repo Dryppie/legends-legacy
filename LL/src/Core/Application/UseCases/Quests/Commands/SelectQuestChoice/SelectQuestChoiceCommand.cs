@@ -5,24 +5,27 @@ using AutoMapper;
 using Common.Primitives;
 using MediatR;
 
-namespace Application.UseCases.Quests.Commands.AcceptQuest;
+namespace Application.UseCases.Quests.Commands.SelectQuestChoice;
 
-public sealed record AcceptQuestCommand(Guid CharacterId, string QuestId)
-    : ICommand<Response<QuestJournalDto>>;
+public sealed record SelectQuestChoiceCommand(
+    Guid CharacterId,
+    string QuestId,
+    string OptionKey) : ICommand<Response<QuestJournalDto>>;
 
-public sealed class AcceptQuestCommandHandler(
+public sealed class SelectQuestChoiceCommandHandler(
     IQuestService questService,
-    IMapper mapper) : IRequestHandler<AcceptQuestCommand, Response<QuestJournalDto>>
+    IMapper mapper) : IRequestHandler<SelectQuestChoiceCommand, Response<QuestJournalDto>>
 {
     public async Task<Response<QuestJournalDto>> Handle(
-        AcceptQuestCommand request,
+        SelectQuestChoiceCommand request,
         CancellationToken cancellationToken)
     {
         try
         {
-            var journal = await questService.AcceptAsync(
+            var journal = await questService.SelectChoiceAsync(
                 request.CharacterId,
                 request.QuestId,
+                request.OptionKey,
                 cancellationToken);
             return Response<QuestJournalDto>.Success(mapper.Map<QuestJournalDto>(journal));
         }
@@ -32,3 +35,5 @@ public sealed class AcceptQuestCommandHandler(
         }
     }
 }
+
+public sealed record SelectQuestChoiceRequest(string OptionKey);

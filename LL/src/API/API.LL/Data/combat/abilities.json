@@ -1607,7 +1607,7 @@
         "operation": "Heal",
         "target": "Self",
         "scalingAttribute": "Power",
-        "scalingCoefficient": 3.0,
+        "scalingCoefficient": 2.5,
         "procCoefficient": 1
       }
     ],

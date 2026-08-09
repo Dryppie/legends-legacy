@@ -568,6 +568,13 @@ public sealed class AttributeCombatSystemTests
     }
 
     [Fact]
+    public void Dedicated_summon_attributes_are_not_part_of_the_game_catalog()
+    {
+        Assert.False(Enum.TryParse<AttributeType>("SummonPower", out _));
+        Assert.False(Enum.TryParse<AttributeType>("SummonHealth", out _));
+    }
+
+    [Fact]
     public void Crowd_control_resistance_is_a_capped_percentage_duration_reduction()
     {
         var status = new StatusSpec

@@ -1,0 +1,32 @@
+{
+  "id": "quest.character.warden_of_shenic",
+  "version": 1,
+  "title": "Warden of Shenic",
+  "summary": "Stand once more in Duskmire as a proven defender of the region.",
+  "category": "Character",
+  "sortOrder": 270,
+  "objectiveMode": "Sequential",
+  "availability": {
+    "minimumLevel": 45,
+    "completedQuestIds": [
+      "quest.shenic.last_light_in_duskmire",
+      "quest.character.tested_wanderer"
+    ]
+  },
+  "objectives": [
+    {
+      "key": "defend_duskmire",
+      "description": "Win an encounter in Duskmire Hollow as a level 45 adventurer.",
+      "type": "CombatEncounterCompleted",
+      "requiredAmount": 1,
+      "filters": { "areaId": "region_01_area_07", "requiresVictory": true },
+      "presentation": {
+        "actionLabel": "Head to Duskmire Hollow",
+        "destinationRoute": "/game/world/shenic?area=region_01_area_07"
+      }
+    }
+  ],
+  "rewards": [
+    { "key": "advancement_stones", "type": "Item", "itemBaseId": "advancement_stone", "quantity": 5 }
+  ]
+}

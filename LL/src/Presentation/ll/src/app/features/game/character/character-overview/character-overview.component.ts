@@ -106,8 +106,6 @@ export class CharacterOverviewComponent {
           AttributeType.Cooldown,
           AttributeType.StatusResistance,
           AttributeType.CrowdControlResistance,
-          AttributeType.SummonPower,
-          AttributeType.SummonHealth,
         ],
       },
     ];

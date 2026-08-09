@@ -1,0 +1,34 @@
+{
+  "id": "quest.shenic.roots_remember",
+  "version": 1,
+  "title": "The Roots Remember",
+  "summary": "Follow the Old Forest's corrupted roots deeper into Shenic.",
+  "category": "Shenic",
+  "chain": { "id": "chain.shenic", "title": "Shenic Campaign", "step": 6, "totalSteps": 10 },
+  "sortOrder": 150,
+  "objectiveMode": "Sequential",
+  "availability": {
+    "minimumLevel": 25,
+    "completedQuestIds": ["quest.shenic.between_day_and_night"]
+  },
+  "objectives": [
+    {
+      "key": "cross_old_forest",
+      "description": "Win 10 encounters in Old Forest.",
+      "type": "CombatEncounterCompleted",
+      "requiredAmount": 10,
+      "filters": {
+        "areaId": "region_01_area_08",
+        "requiresVictory": true
+      },
+      "presentation": {
+        "actionLabel": "Head to Old Forest",
+        "destinationRoute": "/game/world/shenic?area=region_01_area_08"
+      }
+    }
+  ],
+  "rewards": [
+    { "key": "ancient_wood", "type": "Item", "itemBaseId": "wood", "quantity": 40 },
+    { "key": "stag_hide", "type": "Item", "itemBaseId": "rawhide", "quantity": 25 }
+  ]
+}

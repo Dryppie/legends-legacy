@@ -1,0 +1,29 @@
+{
+  "id": "quest.essences.a_second_soul",
+  "version": 1,
+  "title": "A Second Soul",
+  "summary": "Expand your Soul Archive beyond its first bound Essence.",
+  "category": "Essences",
+  "sortOrder": 200,
+  "objectiveMode": "Sequential",
+  "availability": {
+    "minimumLevel": 1,
+    "completedQuestIds": ["quest.region01.into_lumo_ruins"]
+  },
+  "objectives": [
+    {
+      "key": "absorb_another_essence",
+      "description": "Absorb another Essence into your Soul Archive.",
+      "type": "EssenceAbsorbed",
+      "requiredAmount": 1,
+      "filters": {},
+      "presentation": {
+        "actionLabel": "Head to Essences",
+        "destinationRoute": "/game/character/essences"
+      }
+    }
+  ],
+  "rewards": [
+    { "key": "soul_dust", "type": "Item", "itemBaseId": "soul_dust", "quantity": 10 }
+  ]
+}

@@ -34,6 +34,7 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
     private const int NominalSummonBasicAttackIntervalTicks = 20;
     private const int NominalSummonPowerBase = 20;
     private const float NominalSummonPowerCoefficient = 0.30f;
+    private const float SummonPowerInheritanceCoefficient = 0.5f;
     private const int NominalSummonStrikeBase = 8;
     private const float NominalSummonStrikePowerCoefficient = 0.55f;
     private const string RepresentativeFastWeaponRecipeId =
@@ -523,8 +524,6 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
             ],
             [AttributeType.StatusResistance] = [AttributeBalanceScenario.StatusResilience],
             [AttributeType.CrowdControlResistance] = [AttributeBalanceScenario.CrowdControlResilience],
-            [AttributeType.SummonPower] = [AttributeBalanceScenario.SummonOffense],
-            [AttributeType.SummonHealth] = [AttributeBalanceScenario.SummonOffense],
             [AttributeType.AttackSpeed] =
             [
                 AttributeBalanceScenario.PhysicalOffense,
@@ -627,11 +626,11 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
             [.. StandardEquipmentSlotWeights, 1.40d],
             new Dictionary<AttributeType, double>
             {
-                [AttributeType.Power] = 0.30d,
-                [AttributeType.SummonPower] = 0.35d,
-                [AttributeType.SummonHealth] = 0.15d,
+                [AttributeType.Power] = 0.35d,
+                [AttributeType.CritChance] = 0.15d,
+                [AttributeType.CritDamage] = 0.15d,
                 [AttributeType.Cooldown] = 0.15d,
-                [AttributeType.MaxHealth] = 0.05d
+                [AttributeType.MaxHealth] = 0.20d
             },
             ["balance.magical-strike", "balance.summon"],
             [
@@ -1113,8 +1112,6 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
             [AttributeType.Cooldown] = 0,
             [AttributeType.StatusResistance] = 0,
             [AttributeType.CrowdControlResistance] = 0,
-            [AttributeType.SummonPower] = 0,
-            [AttributeType.SummonHealth] = 0,
             [AttributeType.AttackSpeed] = 0
         };
         return attributes;
@@ -1365,16 +1362,6 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
         {
             var summonerAllocation = CreateLoadoutAllocation(tier, summonerProfile);
             var directCasterAllocation = CreateLoadoutAllocation(tier, directCasterProfile);
-            var noExplicitSummonAttributes = new Dictionary<AttributeType, float>(summonerAllocation.Attributes);
-            noExplicitSummonAttributes[AttributeType.SummonPower] = Math.Max(
-                0,
-                noExplicitSummonAttributes.GetValueOrDefault(AttributeType.SummonPower)
-                - (float)summonerAllocation.Points.GetValueOrDefault(AttributeType.SummonPower));
-            noExplicitSummonAttributes[AttributeType.SummonHealth] = Math.Max(
-                0,
-                noExplicitSummonAttributes.GetValueOrDefault(AttributeType.SummonHealth)
-                - (float)summonerAllocation.Points.GetValueOrDefault(AttributeType.SummonHealth));
-
             foreach (var duration in CalibrationDurations)
             {
                 cancellationToken.ThrowIfCancellationRequested();
@@ -1390,13 +1377,6 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
                     duration,
                     summonerAllocation.Attributes,
                     ["balance.magical-strike"],
-                    summonerProfile,
-                    cancellationToken);
-                var withoutExplicitSummonStatsOutput = RunCalibrationOutput(
-                    tier,
-                    duration,
-                    noExplicitSummonAttributes,
-                    ["balance.magical-strike", "balance.summon"],
                     summonerProfile,
                     cancellationToken);
                 var directCasterOutput = RunCalibrationOutput(
@@ -1435,12 +1415,8 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
                     Round(CalculateShare(
                         summonerOutput.SummonDamage,
                         summonerOutput.DirectDamage + summonerOutput.SummonDamage)),
-                    Round(CalculateMarginalContribution(
-                        withoutExplicitSummonStatsOutput.SummonDamage,
-                        summonerOutput.SummonDamage)),
                     summonerOutput,
                     withoutSummonAbilityOutput,
-                    withoutExplicitSummonStatsOutput,
                     directCasterOutput));
             }
         }
@@ -3868,7 +3844,19 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
                     Attribute = AttributeType.Power,
                     BaseValue = NominalSummonPowerBase,
                     ScalingAttribute = AttributeType.Power,
-                    ScalingCoefficient = NominalSummonPowerCoefficient
+                    ScalingCoefficient = SummonPowerInheritanceCoefficient
+                },
+                new SummonAttributeSpec
+                {
+                    Attribute = AttributeType.CritChance,
+                    ScalingAttribute = AttributeType.CritChance,
+                    ScalingCoefficient = 1f
+                },
+                new SummonAttributeSpec
+                {
+                    Attribute = AttributeType.CritDamage,
+                    ScalingAttribute = AttributeType.CritDamage,
+                    ScalingCoefficient = 1f
                 }
             ]
         }

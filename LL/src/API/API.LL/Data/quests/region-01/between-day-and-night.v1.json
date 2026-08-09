@@ -1,0 +1,34 @@
+{
+  "id": "quest.shenic.between_day_and_night",
+  "version": 1,
+  "title": "Between Day and Night",
+  "summary": "Survive the creatures gathering beneath the clearing's permanent dusk.",
+  "category": "Shenic",
+  "chain": { "id": "chain.shenic", "title": "Shenic Campaign", "step": 5, "totalSteps": 10 },
+  "sortOrder": 140,
+  "objectiveMode": "Sequential",
+  "availability": {
+    "minimumLevel": 20,
+    "completedQuestIds": ["quest.shenic.restless_dead"]
+  },
+  "objectives": [
+    {
+      "key": "break_the_twilight",
+      "description": "Win 10 encounters in Twilight Clearing.",
+      "type": "CombatEncounterCompleted",
+      "requiredAmount": 10,
+      "filters": {
+        "areaId": "region_01_area_06",
+        "requiresVictory": true
+      },
+      "presentation": {
+        "actionLabel": "Head to Twilight Clearing",
+        "destinationRoute": "/game/world/shenic?area=region_01_area_06"
+      }
+    }
+  ],
+  "rewards": [
+    { "key": "duskwood", "type": "Item", "itemBaseId": "wood", "quantity": 30 },
+    { "key": "twilight_dust", "type": "Item", "itemBaseId": "soul_dust", "quantity": 15 }
+  ]
+}

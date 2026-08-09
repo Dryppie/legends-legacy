@@ -4,7 +4,7 @@ namespace Domain.Models.Professions.Crafting.V2;
 
 public static class EquipmentStatBudgetCatalog
 {
-    public const int BalanceVersion = 12;
+    public const int BalanceVersion = 13;
     public const int MinimumTier = 1;
     public const int MaximumTier = 10;
 
@@ -43,10 +43,6 @@ public static class EquipmentStatBudgetCatalog
                 Tiered(5_000, (1, 2d), (5, 0.4d), (10, 0.665d)),
             [AttributeType.CrowdControlResistance] =
                 Fixed(2d, AttributeCatalog.GetFixedCap(AttributeType.CrowdControlResistance)),
-            [AttributeType.SummonPower] =
-                Tiered(5_000, (1, 3d), (5, 1.25d), (10, 1d)),
-            [AttributeType.SummonHealth] =
-                Tiered(5_000, (1, 1.9d), (5, 0.75d), (10, 0.5d)),
             [AttributeType.AttackSpeed] = Fixed(2.8d, 200)
         };
     public static IReadOnlyCollection<AttributeType> Attributes => Definitions.Keys.ToArray();

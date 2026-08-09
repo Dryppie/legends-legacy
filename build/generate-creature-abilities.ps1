@@ -718,16 +718,17 @@ if ($shadowImage) {
     $health = $shadowImage.attributes | Where-Object attribute -eq 'MaxHealth'
     $health.baseValue = 1
     $health.minimumValue = 1
-    $health | Add-Member -NotePropertyName scalingAttribute -NotePropertyValue SummonHealth -Force
-    $health | Add-Member -NotePropertyName scalingCoefficient -NotePropertyValue 1 -Force
+    $health | Add-Member -NotePropertyName scalingAttribute -NotePropertyValue MaxHealth -Force
+    $health | Add-Member -NotePropertyName scalingCoefficient -NotePropertyValue 0.1 -Force
+    $power = $shadowImage.attributes | Where-Object attribute -eq 'Power'
+    $power | Add-Member -NotePropertyName scalingAttribute -NotePropertyValue Power -Force
+    $power | Add-Member -NotePropertyName scalingCoefficient -NotePropertyValue 0.3 -Force
 
     $creatureShadowImage = $shadowImage | ConvertTo-Json -Depth 20 | ConvertFrom-Json
     $creatureShadowImage.id = 'creatureShadowImage'
     $creatureShadowImage.name = 'Creature Shadow Image'
     $creatureHealth = $creatureShadowImage.attributes | Where-Object attribute -eq 'MaxHealth'
-    $creatureHealth.PSObject.Properties.Remove('scalingAttribute')
-    $creatureHealth.PSObject.Properties.Remove('scalingCoefficient')
-    $creatureHealth.baseValue = 1
+    $creatureHealth.baseValue = 0
     $creatureHealth.minimumValue = 1
     $summons += $creatureShadowImage
 }

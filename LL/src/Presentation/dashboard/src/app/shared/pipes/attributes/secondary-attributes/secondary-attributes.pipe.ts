@@ -24,8 +24,6 @@ export class SecondaryAttributesPipe implements PipeTransform {
     AttributeType.Cooldown,
     AttributeType.StatusResistance,
     AttributeType.CrowdControlResistance,
-    AttributeType.SummonPower,
-    AttributeType.SummonHealth,
     AttributeType.AttackSpeed,
   ];
 

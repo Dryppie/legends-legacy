@@ -7,7 +7,12 @@ namespace Application.Interfaces.Services.LL.Quests;
 public interface IQuestService
 {
     Task<QuestJournal> GetJournalAsync(Guid characterId, CancellationToken cancellationToken);
-    Task<QuestJournal> AcceptAsync(Guid characterId, string questId, CancellationToken cancellationToken);
+    Task<QuestJournal> AcknowledgeWelcomeAsync(Guid characterId, CancellationToken cancellationToken);
+    Task<QuestJournal> SelectChoiceAsync(
+        Guid characterId,
+        string questId,
+        string optionKey,
+        CancellationToken cancellationToken);
     Task<QuestJournal> PinAsync(Guid characterId, string? questId, CancellationToken cancellationToken);
 }
 
@@ -31,13 +36,41 @@ public sealed record QuestState(
     string Title,
     string Summary,
     string Category,
+    string ObjectiveMode,
+    QuestChain? Chain,
+    QuestChoice? Choice,
     int SortOrder,
     QuestStatus Status,
     bool IsPinned,
+    bool RequiresWelcome,
     DateTimeOffset? AcceptedAt,
     DateTimeOffset? CompletedAt,
     IReadOnlyList<QuestObjectiveState> Objectives,
     IReadOnlyList<QuestRewardState> Rewards);
+
+public sealed record QuestChoice(
+    string SelectionTitle,
+    string SelectionSummary,
+    string ConfirmationText,
+    string? SelectedOptionKey,
+    IReadOnlyList<QuestChoiceOption> Options);
+
+public sealed record QuestChoiceOption(
+    string Key,
+    string Title,
+    string Summary,
+    Guid CreatureId,
+    string CreatureName,
+    string EssenceDefinitionId,
+    string RewardItemBaseId,
+    string EncounterKey,
+    ItemBase? RewardItemBase);
+
+public sealed record QuestChain(
+    string Id,
+    string Title,
+    int Step,
+    int TotalSteps);
 
 public sealed record QuestObjectiveState(
     string Key,

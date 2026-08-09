@@ -1,17 +1,13 @@
 import { Injectable, computed, effect, signal } from '@angular/core';
 import { CharacterActionDto } from '../../../../shared/models/Dtos/characterActionDto';
 import { InventoryItem } from '../../../../shared/models/inventoryItem';
+import { LootHistoryEntry } from '../../../../shared/models/loot-history';
 import { EventBusService } from '../../client-side/event-bus/event-bus.service';
-
-interface RecentLootEntry {
-  item: InventoryItem;
-  receivedAt: number;
-}
 
 @Injectable({ providedIn: 'root' })
 export class GameRealtimeStore {
-  private readonly maxLootEntries = 60;
-  private readonly _recentLoot = signal<RecentLootEntry[]>([]);
+  private readonly maxLootEntries = 50;
+  private readonly _recentLoot = signal<LootHistoryEntry[]>([]);
   private readonly _lastIdleAction = signal<CharacterActionDto | null>(null);
   private readonly _lastRewardClaim = signal<InventoryItem[]>([]);
 
@@ -30,21 +26,35 @@ export class GameRealtimeStore {
     );
   }
 
-  addLoot(items: InventoryItem[]): void {
+  setLootHistory(entries: LootHistoryEntry[]): void {
+    this._recentLoot.set(entries.slice(0, this.maxLootEntries));
+  }
+
+  addLoot(
+    items: InventoryItem[],
+    receivedAt = new Date().toISOString(),
+    source = 'loot',
+  ): void {
     if (!items.length) return;
 
-    const entries = items.map((item) => ({
+    const entries = items.map((item, index) => ({
+      id: `live:${receivedAt}:${item.itemInstance.id}:${index}`,
       item,
-      receivedAt: Date.now(),
+      receivedAt,
+      source,
     }));
     this._recentLoot.update((current) =>
-      [...current, ...entries].slice(-this.maxLootEntries),
+      [...entries, ...current].slice(0, this.maxLootEntries),
     );
   }
 
-  setRewardClaim(items: InventoryItem[]): void {
+  setRewardClaim(
+    items: InventoryItem[],
+    receivedAt?: string,
+    source = 'dungeon-reward',
+  ): void {
     this._lastRewardClaim.set(items.slice(0, this.maxLootEntries));
-    this.addLoot(items);
+    this.addLoot(items, receivedAt, source);
   }
 
   setIdleAction(action: CharacterActionDto): void {
@@ -52,8 +62,12 @@ export class GameRealtimeStore {
   }
 
   clear(): void {
-    this._recentLoot.set([]);
+    this.clearLootHistory();
     this._lastIdleAction.set(null);
     this._lastRewardClaim.set([]);
+  }
+
+  clearLootHistory(): void {
+    this._recentLoot.set([]);
   }
 }

@@ -25,11 +25,8 @@ export class QuestStateService {
   readonly loading = this._loading.asReadonly();
   readonly error = this._error.asReadonly();
   readonly activeQuests = computed(() =>
-    this._journal().quests.filter((quest) => quest.status === QuestStatus.Active),
-  );
-  readonly availableQuests = computed(() =>
     this._journal().quests.filter(
-      (quest) => quest.status === QuestStatus.Available,
+      (quest) => quest.status === QuestStatus.Active,
     ),
   );
   readonly completedQuests = computed(() =>
@@ -60,8 +57,7 @@ export class QuestStateService {
         const event = this.events.event.QuestJournalChangedMsg();
         if (!event?.journal) return;
         untracked(() => {
-          this.initialize(event.journal);
-          this.loadAreaAccess();
+          this.initializeAndRefreshAccessWhenNeeded(event.journal);
         });
       },
       { allowSignalWrites: true },
@@ -108,20 +104,45 @@ export class QuestStateService {
     window.setTimeout(() => this.loadJournalSilently(), delayMs);
   }
 
-  accept(questId: string): void {
+  selectChoice(
+    questId: string,
+    optionKey: string,
+    onComplete?: () => void,
+  ): void {
     if (this._loading()) return;
     this._loading.set(true);
     this._error.set(null);
     this.api
-      .accept(questId)
+      .selectChoice(questId, optionKey)
       .pipe(finalize(() => this._loading.set(false)))
       .subscribe({
         next: (journal) => {
           this.initialize(journal);
-          this.loadAreaAccess();
+          onComplete?.();
         },
         error: (error) =>
-          this._error.set(error?.message ?? 'Failed to accept quest'),
+          this._error.set(error?.message ?? 'Failed to select quest choice'),
+      });
+  }
+
+  acknowledgeWelcome(onComplete?: () => void, onError?: () => void): void {
+    if (this._loading()) return;
+    this._loading.set(true);
+    this._error.set(null);
+    this.api
+      .acknowledgeWelcome()
+      .pipe(finalize(() => this._loading.set(false)))
+      .subscribe({
+        next: (journal) => {
+          this.initialize(journal);
+          onComplete?.();
+        },
+        error: (error) => {
+          this._error.set(
+            error?.message ?? 'Failed to start the tutorial. Please try again.',
+          );
+          onError?.();
+        },
       });
   }
 
@@ -140,12 +161,20 @@ export class QuestStateService {
   }
 
   navigateToPinnedObjective(): void {
+    const quest = this.pinnedQuest();
+    if (quest?.choice && !quest.choice.selectedOptionKey) {
+      void this.router.navigateByUrl('/game/quests');
+      return;
+    }
+
     const route = this.pinnedObjective()?.presentation.destinationRoute;
     if (route) void this.router.navigateByUrl(route);
   }
 
   accessFor(areaId: string): CombatAreaAccess | null {
-    return this._areaAccess().find((access) => access.areaId === areaId) ?? null;
+    return (
+      this._areaAccess().find((access) => access.areaId === areaId) ?? null
+    );
   }
 
   loadAreaAccess(): void {
@@ -173,11 +202,23 @@ export class QuestStateService {
 
   private loadJournalSilently(): void {
     this.api.getJournal().subscribe({
-      next: (journal) => {
-        this.initialize(journal);
-        this.loadAreaAccess();
-      },
+      next: (journal) => this.initializeAndRefreshAccessWhenNeeded(journal),
       error: () => undefined,
     });
+  }
+
+  private initializeAndRefreshAccessWhenNeeded(journal: QuestJournal): void {
+    const previousCompleted = this.completedQuestSignature(this._journal());
+    const nextCompleted = this.completedQuestSignature(journal);
+    this.initialize(journal);
+    if (previousCompleted !== nextCompleted) this.loadAreaAccess();
+  }
+
+  private completedQuestSignature(journal: QuestJournal): string {
+    return journal.quests
+      .filter((quest) => quest.status === QuestStatus.Completed)
+      .map((quest) => quest.questId)
+      .sort()
+      .join('|');
   }
 }

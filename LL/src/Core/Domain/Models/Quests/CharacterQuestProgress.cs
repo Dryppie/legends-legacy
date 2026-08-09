@@ -7,6 +7,7 @@ public sealed class CharacterQuestProgress
     public int DefinitionVersion { get; set; }
     public QuestStatus Status { get; set; }
     public bool IsPinned { get; set; }
+    public string? SelectedOptionKey { get; set; }
     public DateTimeOffset? AcceptedAt { get; set; }
     public DateTimeOffset? CompletedAt { get; set; }
     public DateTimeOffset? RewardsGrantedAt { get; set; }

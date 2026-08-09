@@ -38,8 +38,6 @@ export class GroupAttributesByCategoryPipe implements PipeTransform {
     [AttributeType.StatusResistance]: AttributeCategory.Utility,
     [AttributeType.CrowdControlResistance]: AttributeCategory.Utility,
 
-    [AttributeType.SummonPower]: AttributeCategory.Utility,
-    [AttributeType.SummonHealth]: AttributeCategory.Utility,
     [AttributeType.AttackSpeed]: AttributeCategory.Offense,
   };
 

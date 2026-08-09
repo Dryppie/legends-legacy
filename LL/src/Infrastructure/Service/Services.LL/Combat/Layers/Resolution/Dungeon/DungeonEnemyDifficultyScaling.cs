@@ -22,9 +22,7 @@ public static class DungeonEnemyDifficultyScaling
         AttributeType.Resistance,
         AttributeType.ArmorPenetration,
         AttributeType.MagicPenetration,
-        AttributeType.HealthRegeneration,
-        AttributeType.SummonPower,
-        AttributeType.SummonHealth
+        AttributeType.HealthRegeneration
     ];
 
     public static float GetStrengthMultiplier(int dungeonTier, float? authoredMultiplier = null)

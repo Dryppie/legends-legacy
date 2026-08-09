@@ -134,9 +134,17 @@
               >
                 {{ quest.category }}
               </span>
+              <span
+                *ngIf="quest.chain as chain"
+                class="shrink-0 rounded-sm border border-primary/25 px-1.5 py-0.5 font-semibold uppercase tracking-wider text-primary"
+              >
+                Chain {{ chain.step }}/{{ chain.totalSteps }}
+              </span>
               <span class="truncate">
                 {{
-                  currentObjective(quest)?.description ||
+                  (requiresChoice(quest)
+                    ? quest.choice?.selectionSummary
+                    : currentObjective(quest)?.description) ||
                     (quest.status === QuestStatus.Completed
                       ? "Quest completed"
                       : quest.summary)
@@ -172,6 +180,13 @@
                 >
                   Pinned
                 </span>
+                <span
+                  *ngIf="quest.chain as chain"
+                  class="rounded-sm border border-primary/30 px-2 py-1 text-[9px] font-semibold uppercase tracking-[0.16em] text-primary"
+                >
+                  {{ chain.title }} · Chain {{ chain.step }} of
+                  {{ chain.totalSteps }}
+                </span>
                 <span class="text-[10px] text-zinc-400">
                   {{ quest.status }} quest
                 </span>
@@ -183,7 +198,51 @@
                 {{ quest.title }}
               </h2>
 
-              <div class="mt-3 flex flex-wrap items-center gap-3">
+              <div
+                *ngIf="quest.chain as chain"
+                class="mt-3 flex flex-wrap items-center gap-3"
+              >
+                <span
+                  class="text-[10px] font-semibold uppercase tracking-[0.18em] text-zinc-400"
+                >
+                  Chain
+                </span>
+                <span class="flex items-center" aria-hidden="true">
+                  <ng-container
+                    *ngFor="
+                      let chainStep of chainSteps(chain.totalSteps);
+                      let last = last
+                    "
+                  >
+                    <span
+                      class="h-2.5 w-2.5 rounded-full border border-primary/50"
+                      [ngClass]="{
+                        'bg-primary': chainStep < chain.step,
+                        'ring-1 ring-primary ring-offset-2 ring-offset-black/60':
+                          chainStep === chain.step,
+                        'bg-black/40': chainStep >= chain.step,
+                      }"
+                    ></span>
+                    <span
+                      *ngIf="!last"
+                      class="h-px w-4 sm:w-6"
+                      [ngClass]="{
+                        'bg-primary/70': chainStep < chain.step,
+                        'bg-primary/25': chainStep >= chain.step,
+                      }"
+                    ></span>
+                  </ng-container>
+                </span>
+                <span class="text-[10px] text-zinc-400">
+                  {{ chain.title }} · step {{ chain.step }} of
+                  {{ chain.totalSteps }}
+                </span>
+              </div>
+
+              <div
+                *ngIf="!requiresChoice(quest)"
+                class="mt-3 flex flex-wrap items-center gap-3"
+              >
                 <span
                   class="text-[10px] font-semibold uppercase tracking-[0.18em] text-zinc-400"
                 >
@@ -221,11 +280,25 @@
               </blockquote>
             </div>
 
-            <section class="mt-4">
+            <section
+              *ngIf="!requiresChoice(quest); else firstHuntChoice"
+              class="mt-4"
+            >
               <div
                 class="mb-2 flex items-center justify-between gap-4 text-[10px] font-semibold uppercase tracking-[0.16em]"
               >
-                <span class="text-zinc-400">Objectives</span>
+                <span class="flex items-center gap-2 text-zinc-400">
+                  Objectives
+                  <span
+                    *ngIf="
+                      quest.objectiveMode === 'All' &&
+                      quest.objectives.length > 1
+                    "
+                    class="normal-case tracking-normal text-zinc-500"
+                  >
+                    Complete in any order
+                  </span>
+                </span>
                 <span class="text-primary">
                   {{ completedObjectiveCount(quest) }} /
                   {{ quest.objectives.length }}
@@ -237,8 +310,10 @@
                   *ngFor="let objective of quest.objectives"
                   class="flex items-center justify-between gap-4 rounded border border-light_gray/20 bg-white/[0.025] px-4 py-3"
                   [ngClass]="{
-                    'border-primary/30 bg-primary/5':
-                      currentObjective(quest) === objective,
+                    'border-primary/30 bg-primary/5': isObjectiveAvailable(
+                      quest,
+                      objective
+                    ),
                     'opacity-60': objective.isCompleted,
                   }"
                 >
@@ -248,12 +323,13 @@
                       [ngClass]="{
                         'border-primary/40 bg-primary/20 text-primary':
                           objective.isCompleted,
-                        'border-primary text-primary':
-                          !objective.isCompleted &&
-                          currentObjective(quest) === objective,
+                        'border-primary text-primary': isObjectiveAvailable(
+                          quest,
+                          objective
+                        ),
                         'border-light_gray/30 text-zinc-500':
                           !objective.isCompleted &&
-                          currentObjective(quest) !== objective,
+                          !isObjectiveAvailable(quest, objective),
                       }"
                     >
                       {{ objective.isCompleted ? "✓" : "" }}
@@ -262,8 +338,10 @@
                       class="text-sm text-zinc-200"
                       [ngClass]="{
                         'line-through': objective.isCompleted,
-                        'font-semibold text-primary':
-                          currentObjective(quest) === objective,
+                        'font-semibold text-primary': isObjectiveAvailable(
+                          quest,
+                          objective
+                        ),
                       }"
                     >
                       {{ objective.description }}
@@ -276,6 +354,108 @@
                 </div>
               </div>
             </section>
+
+            <ng-template #firstHuntChoice>
+              <section *ngIf="quest.choice as choice" class="mt-4">
+                <div class="mb-3">
+                  <div class="ll-eyebrow text-[10px]">First Hunts</div>
+                  <p class="mt-1 text-sm text-zinc-300">
+                    {{ choice.selectionSummary }}
+                  </p>
+                </div>
+
+                <div class="grid gap-3 xl:grid-cols-3">
+                  <button
+                    *ngFor="let option of choice.options"
+                    type="button"
+                    class="overflow-hidden rounded border border-light_gray/20 bg-black/15 text-left transition-colors hover:border-primary/40 hover:bg-primary/5"
+                    [ngClass]="{
+                      'border-primary bg-primary/10':
+                        pendingChoiceKey() === option.key,
+                    }"
+                    [disabled]="questState.loading()"
+                    (click)="chooseOption(option)"
+                  >
+                    <div class="border-b border-light_gray/20 p-3">
+                      <span class="block min-w-0">
+                        <span
+                          class="block text-lg font-[var(--ll-font-display)] font-semibold text-primary"
+                        >
+                          {{ option.creatureName }}
+                        </span>
+                        <span
+                          class="mt-1 block text-[11px] leading-4 text-zinc-400"
+                        >
+                          {{ option.summary }}
+                        </span>
+                      </span>
+                    </div>
+
+                    <ng-container *ngIf="choiceEssence(option) as essence">
+                      <div class="grid gap-2 p-3">
+                        <div
+                          class="rounded border border-light_gray/15 bg-white/[0.025] p-2.5"
+                        >
+                          <div class="ll-eyebrow text-[9px]">
+                            Active Essence
+                          </div>
+                          <div class="mt-1 text-xs font-semibold text-primary">
+                            {{ essence.active.name }}
+                          </div>
+                          <p class="mt-1 text-[11px] leading-4 text-zinc-300">
+                            {{ essence.active.description }}
+                          </p>
+                        </div>
+                        <div
+                          class="rounded border border-light_gray/15 bg-white/[0.025] p-2.5"
+                        >
+                          <div class="ll-eyebrow text-[9px]">
+                            Passive Essence
+                          </div>
+                          <div class="mt-1 text-xs font-semibold text-primary">
+                            {{ essence.passive.name }}
+                          </div>
+                          <p class="mt-1 text-[11px] leading-4 text-zinc-300">
+                            {{ essence.passive.description }}
+                          </p>
+                        </div>
+                      </div>
+                    </ng-container>
+
+                    <span
+                      class="flex items-center gap-2 border-t border-light_gray/20 px-3 py-2.5 text-[11px] text-zinc-300"
+                    >
+                      <span class="ll-eyebrow text-[9px]">Guaranteed</span>
+                      <app-base-item
+                        *ngIf="option.rewardItemBase as rewardItem"
+                        [item]="rewardItem"
+                      ></app-base-item>
+                    </span>
+                  </button>
+                </div>
+
+                <div
+                  *ngIf="pendingChoiceKey()"
+                  class="mt-3 flex flex-wrap items-center justify-between gap-3 rounded border border-primary/30 bg-primary/5 p-3"
+                >
+                  <p class="text-xs text-zinc-300">
+                    {{ choice.confirmationText }} This choice cannot be changed.
+                  </p>
+                  <button
+                    type="button"
+                    class="ll-button ll-button-primary px-5 py-2.5 text-xs"
+                    [disabled]="questState.loading()"
+                    (click)="confirmChoice(quest)"
+                  >
+                    {{
+                      questState.loading()
+                        ? "Confirming..."
+                        : "Confirm First Hunt"
+                    }}
+                  </button>
+                </div>
+              </section>
+            </ng-template>
 
             <footer
               class="mt-4 flex flex-wrap items-end justify-between gap-4 border-t border-light_gray/20 pt-4 lg:mt-auto"
@@ -310,16 +490,6 @@
               </div>
 
               <div class="flex flex-wrap gap-2">
-                <button
-                  *ngIf="quest.status === QuestStatus.Available"
-                  type="button"
-                  class="ll-button ll-button-primary px-5 py-3 text-xs"
-                  [disabled]="questState.loading()"
-                  (click)="acceptQuest(quest)"
-                >
-                  Accept Quest
-                </button>
-
                 <ng-container *ngIf="quest.status === QuestStatus.Active">
                   <button
                     type="button"
@@ -331,6 +501,7 @@
                   </button>
                   <button
                     *ngIf="
+                      !requiresChoice(quest) &&
                       currentObjective(quest)?.presentation?.destinationRoute
                     "
                     type="button"

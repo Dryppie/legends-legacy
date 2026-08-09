@@ -1,0 +1,29 @@
+{
+  "id": "quest.character.a_name_in_shenic",
+  "version": 1,
+  "title": "A Name in Shenic",
+  "summary": "Grow from a new arrival into a recognized adventurer of Shenic.",
+  "category": "Character",
+  "sortOrder": 250,
+  "objectiveMode": "Sequential",
+  "availability": {
+    "minimumLevel": 1,
+    "completedQuestIds": ["quest.shenic.trial_of_lumo"]
+  },
+  "objectives": [
+    {
+      "key": "reach_level_ten",
+      "description": "Reach character level 10.",
+      "type": "CharacterLevelReached",
+      "requiredAmount": 10,
+      "filters": {},
+      "presentation": {
+        "actionLabel": "Head to the World Map",
+        "destinationRoute": "/game/world/shenic"
+      }
+    }
+  ],
+  "rewards": [
+    { "key": "advancement_stone", "type": "Item", "itemBaseId": "advancement_stone", "quantity": 1 }
+  ]
+}

@@ -1,7 +1,6 @@
 import { ItemBase } from './item';
 
 export enum QuestStatus {
-  Available = 'Available',
   Active = 'Active',
   Completed = 'Completed',
 }
@@ -17,13 +16,44 @@ export interface QuestState {
   title: string;
   summary: string;
   category: string;
+  objectiveMode: 'Sequential' | 'All';
+  chain?: QuestChain | null;
+  choice?: QuestChoice | null;
   sortOrder: number;
   status: QuestStatus;
   isPinned: boolean;
+  requiresWelcome: boolean;
   acceptedAt?: string | null;
   completedAt?: string | null;
   objectives: QuestObjectiveState[];
   rewards: QuestRewardState[];
+}
+
+export interface QuestChoice {
+  selectionTitle: string;
+  selectionSummary: string;
+  confirmationText: string;
+  selectedOptionKey?: string | null;
+  options: QuestChoiceOption[];
+}
+
+export interface QuestChoiceOption {
+  key: string;
+  title: string;
+  summary: string;
+  creatureId: string;
+  creatureName: string;
+  essenceDefinitionId: string;
+  rewardItemBaseId: string;
+  encounterKey: string;
+  rewardItemBase?: ItemBase | null;
+}
+
+export interface QuestChain {
+  id: string;
+  title: string;
+  step: number;
+  totalSteps: number;
 }
 
 export interface QuestObjectiveState {

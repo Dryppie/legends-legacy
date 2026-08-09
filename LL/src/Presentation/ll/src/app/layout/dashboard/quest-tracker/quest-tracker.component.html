@@ -1,6 +1,15 @@
 <section
   *ngIf="quest() as activeQuest"
-  class="flex min-w-0 flex-1 items-center gap-2 rounded-md border border-primary/25 bg-primary/5 px-3 py-1.5"
+  #questHeader
+  class="group relative z-40 hidden min-w-0 flex-1 items-center gap-2 rounded-md border border-primary/25 bg-primary/5 px-3 py-1.5 outline-none transition-colors focus-within:border-primary/40 hover:border-primary/40 sm:flex"
+  [class.quest-header-awaiting-welcome]="welcomeOpen()"
+  [class.quest-header-welcome-reveal]="welcomeRevealing()"
+  tabindex="0"
+  [attr.aria-label]="
+    'Pinned quest: ' +
+    activeQuest.title +
+    '. Hover or focus to view objectives.'
+  "
 >
   <div class="min-w-0 flex-1">
     <div class="flex min-w-0 items-center gap-2">
@@ -10,16 +19,30 @@
         {{ activeQuest.title }}
       </span>
       <span
-        *ngIf="objective() as currentObjective"
-        class="hidden min-w-0 truncate text-xs text-[var(--ll-color-text-subtle)] lg:block"
-        [title]="currentObjective.description"
+        *ngIf="activeQuest.chain as chain"
+        class="hidden shrink-0 rounded-sm border border-primary/25 px-1.5 py-0.5 text-[8px] font-semibold uppercase tracking-wider text-primary xl:inline"
       >
-        {{ currentObjective.description }}
+        Chain {{ chain.step }}/{{ chain.totalSteps }}
       </span>
+      <span
+        *ngIf="requiresChoice(); else currentObjectiveSummary"
+        class="hidden min-w-0 truncate text-xs text-[var(--ll-color-text-subtle)] lg:block"
+      >
+        {{ activeQuest.choice?.selectionSummary }}
+      </span>
+      <ng-template #currentObjectiveSummary>
+        <span
+          *ngIf="objective() as currentObjective"
+          class="hidden min-w-0 truncate text-xs text-[var(--ll-color-text-subtle)] lg:block"
+          [title]="currentObjective.description"
+        >
+          {{ currentObjective.description }}
+        </span>
+      </ng-template>
     </div>
 
     <div
-      *ngIf="objective() as currentObjective"
+      *ngIf="!requiresChoice() && objective() as currentObjective"
       class="mt-1 flex items-center gap-2"
     >
       <div
@@ -36,24 +59,173 @@
         ></div>
       </div>
       <span class="shrink-0 text-[10px] text-zinc-400">
-        {{ currentObjective.currentAmount }} / {{ currentObjective.requiredAmount }}
+        {{ currentObjective.currentAmount }} /
+        {{ currentObjective.requiredAmount }}
       </span>
     </div>
   </div>
 
   <button
-    *ngIf="objective()?.presentation?.destinationRoute"
+    *ngIf="requiresChoice() || objective()?.presentation?.destinationRoute"
     type="button"
     class="ll-button shrink-0 px-2.5 py-1 text-[10px]"
     (click)="navigate()"
   >
-    {{ objective()?.presentation?.actionLabel || "Go" }}
+    {{
+      requiresChoice()
+        ? "Choose Hunt"
+        : objective()?.presentation?.actionLabel || "Go"
+    }}
   </button>
+
+  <aside
+    class="ll-panel pointer-events-none invisible absolute left-0 top-full z-50 mt-2 w-full min-w-80 max-w-xl translate-y-1 bg-texture p-3 opacity-0 shadow-xl transition duration-150 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100"
+    role="tooltip"
+  >
+    <div class="flex items-center justify-between gap-4">
+      <div class="min-w-0">
+        <div class="ll-eyebrow text-[9px]">Pinned quest</div>
+        <div
+          class="truncate text-sm font-[var(--ll-font-display)] font-semibold text-primary"
+        >
+          {{ activeQuest.title }}
+        </div>
+        <div
+          *ngIf="activeQuest.chain as chain"
+          class="mt-0.5 text-[9px] font-semibold uppercase tracking-[0.14em] text-primary/80"
+        >
+          {{ chain.title }} · Chain {{ chain.step }} of {{ chain.totalSteps }}
+        </div>
+      </div>
+      <span class="shrink-0 text-[10px] text-[var(--ll-color-text-muted)]">
+        {{ completedObjectiveCount() }} / {{ activeQuest.objectives.length }}
+        objectives
+      </span>
+    </div>
+
+    <p *ngIf="requiresChoice()" class="mt-3 text-xs leading-5 text-zinc-300">
+      Review the three creatures and choose the Essence that will begin your
+      Soul Archive.
+    </p>
+
+    <div *ngIf="!requiresChoice()" class="mt-3 space-y-2">
+      <div
+        *ngFor="let questObjective of activeQuest.objectives; let index = index"
+        class="rounded border border-light_gray/20 bg-black/15 px-2.5 py-2"
+      >
+        <div class="flex items-start gap-2">
+          <span
+            class="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full border text-[9px]"
+            [class.border-primary]="questObjective.isCompleted"
+            [class.bg-primary]="questObjective.isCompleted"
+            [class.text-black]="questObjective.isCompleted"
+            [class.border-light_gray]="!questObjective.isCompleted"
+            [class.text-zinc-400]="!questObjective.isCompleted"
+            aria-hidden="true"
+          >
+            {{ questObjective.isCompleted ? "✓" : index + 1 }}
+          </span>
+          <span
+            class="min-w-0 flex-1 text-[11px] leading-4 text-zinc-200"
+            [class.line-through]="questObjective.isCompleted"
+            [class.text-zinc-500]="questObjective.isCompleted"
+          >
+            {{ questObjective.description }}
+          </span>
+          <span class="shrink-0 text-[10px] tabular-nums text-primary">
+            {{ questObjective.currentAmount }} /
+            {{ questObjective.requiredAmount }}
+          </span>
+        </div>
+        <div class="ml-6 mt-1.5 h-1 overflow-hidden rounded-full bg-black/50">
+          <div
+            class="h-full rounded-full bg-primary"
+            [style.width.%]="
+              objectiveProgress(
+                questObjective.currentAmount,
+                questObjective.requiredAmount
+              )
+            "
+          ></div>
+        </div>
+      </div>
+    </div>
+  </aside>
 </section>
+
+<ng-container *ngIf="quest() as activeQuest">
+  <div
+    *ngIf="welcomeOpen()"
+    class="ll-modal-backdrop quest-welcome-backdrop"
+    [class.quest-welcome-transitioning]="welcomeTransitioning()"
+  >
+    <section
+      #welcomePanel
+      class="ll-modal-panel quest-welcome-panel overflow-hidden p-0"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="quest-welcome-title"
+      aria-describedby="quest-welcome-description"
+    >
+      <div class="border-b border-primary/20 px-5 py-4 text-center">
+        <div class="ll-eyebrow text-[10px]">Welcome to Legends Legacy</div>
+        <h2
+          id="quest-welcome-title"
+          class="mt-1 text-2xl text-primary [font-family:var(--ll-font-display)]"
+        >
+          Your legend begins here
+        </h2>
+        <p
+          id="quest-welcome-description"
+          class="mx-auto mt-2 max-w-sm text-sm leading-6 text-[var(--ll-color-text-subtle)]"
+        >
+          Choose your First Hunt, claim its guaranteed Essence, and follow the
+          Tutorial quests to prepare for your journey through Shenic.
+        </p>
+      </div>
+
+      <div class="space-y-4 px-5 py-4">
+        <div class="grid gap-2 text-sm sm:grid-cols-2">
+          <div class="ll-card flex items-start gap-2.5 px-3 py-2.5">
+            <span class="mt-0.5 text-primary" aria-hidden="true">✦</span>
+            <span
+              >Compare three Essence ability pairs and choose your hunt.</span
+            >
+          </div>
+          <div class="ll-card flex items-start gap-2.5 px-3 py-2.5">
+            <span class="mt-0.5 text-primary" aria-hidden="true">✦</span>
+            <span
+              >Craft a weapon, gather your tools, and enter Lumo Ruins.</span
+            >
+          </div>
+        </div>
+
+        <div
+          *ngIf="error() as welcomeError"
+          class="ll-state ll-state-danger text-xs"
+          role="alert"
+        >
+          {{ welcomeError }}
+        </div>
+      </div>
+
+      <div class="flex justify-end border-t border-primary/20 px-5 py-4">
+        <button
+          type="button"
+          class="ll-button ll-button-primary min-h-9 px-5 py-2 text-xs"
+          [disabled]="loading() || welcomeStarting() || welcomeTransitioning()"
+          (click)="beginTutorial()"
+        >
+          {{ welcomeStarting() ? "Starting..." : "Begin First Steps" }}
+        </button>
+      </div>
+    </section>
+  </div>
+</ng-container>
 
 <div
   *ngIf="error() as questError"
-  class="ll-state ll-state-danger basis-full px-3 py-1.5 text-xs"
+  class="ll-state ll-state-danger hidden basis-full px-3 py-1.5 text-xs sm:block"
   role="alert"
 >
   {{ questError }}

@@ -3114,7 +3114,6 @@
       "Ward",
       "MagicDefense",
       "Barrier",
-      "SummonHealth",
       "Support",
       "Summon"
     ],
@@ -3123,7 +3122,6 @@
       "Ward",
       "MagicDefense",
       "Barrier",
-      "SummonHealth",
       "Support",
       "Summon"
     ],
@@ -3139,8 +3137,7 @@
     "initialStatProfile": {
       "Resistance": 0.35,
       "HealthRegeneration": 0.25,
-      "SummonHealth": 0.2,
-      "MaxHealth": 0.2
+      "MaxHealth": 0.4
     },
     "temperingProfile": {
       "id": "recipe.offhand.spiritward.tempering",
@@ -3165,21 +3162,12 @@
           "minimumTier": 1
         },
         {
-          "stat": "SummonHealth",
-          "weight": 20,
-          "category": "Secondary",
-          "canIntroduce": true,
-          "canIncrease": true,
-          "maxBudgetShare": 0.3,
-          "minimumTier": 1
-        },
-        {
           "stat": "MaxHealth",
-          "weight": 20,
+          "weight": 40,
           "category": "Secondary",
           "canIntroduce": true,
           "canIncrease": true,
-          "maxBudgetShare": 0.3,
+          "maxBudgetShare": 0.45,
           "minimumTier": 1
         }
       ]

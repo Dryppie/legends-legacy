@@ -1,0 +1,34 @@
+{
+  "id": "quest.shenic.crystal_currents",
+  "version": 1,
+  "title": "Crystal Currents",
+  "summary": "Secure the creek before its strange resonance draws something worse.",
+  "category": "Shenic",
+  "chain": { "id": "chain.shenic", "title": "Shenic Campaign", "step": 3, "totalSteps": 10 },
+  "sortOrder": 120,
+  "objectiveMode": "Sequential",
+  "availability": {
+    "minimumLevel": 10,
+    "completedQuestIds": ["quest.shenic.blood_in_the_grove"]
+  },
+  "objectives": [
+    {
+      "key": "secure_crystal_creek",
+      "description": "Win 7 encounters in Crystal Creek.",
+      "type": "CombatEncounterCompleted",
+      "requiredAmount": 7,
+      "filters": {
+        "areaId": "region_01_area_03",
+        "requiresVictory": true
+      },
+      "presentation": {
+        "actionLabel": "Head to Crystal Creek",
+        "destinationRoute": "/game/world/shenic?area=region_01_area_03"
+      }
+    }
+  ],
+  "rewards": [
+    { "key": "crystal_ore", "type": "Item", "itemBaseId": "ore", "quantity": 25 },
+    { "key": "resonant_dust", "type": "Item", "itemBaseId": "soul_dust", "quantity": 10 }
+  ]
+}

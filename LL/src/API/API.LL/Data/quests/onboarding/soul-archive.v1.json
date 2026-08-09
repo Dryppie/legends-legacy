@@ -5,7 +5,6 @@
   "summary": "Bind your first Essence and attune it for battle.",
   "category": "Tutorial",
   "sortOrder": 20,
-  "autoAccept": true,
   "objectiveMode": "Sequential",
   "availability": {
     "minimumLevel": 1,

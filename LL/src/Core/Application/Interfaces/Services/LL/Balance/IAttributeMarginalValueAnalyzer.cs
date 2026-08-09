@@ -234,10 +234,8 @@ public sealed record SummonCalibrationComparison(
     double DirectAbilityReferenceDamage,
     double AbilityBudgetDifferencePercent,
     double SummonDamageSharePercent,
-    double ExplicitSummonStatContributionPercent,
     EquipmentLoadoutOutput SummonerOutput,
     EquipmentLoadoutOutput WithoutSummonAbilityOutput,
-    EquipmentLoadoutOutput WithoutExplicitSummonStatsOutput,
     EquipmentLoadoutOutput DirectCasterOutput);
 
 public sealed record HandCalibrationComparison(

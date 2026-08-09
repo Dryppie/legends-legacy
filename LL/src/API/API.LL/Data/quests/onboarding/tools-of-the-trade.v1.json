@@ -5,7 +5,6 @@
   "summary": "Prepare a gathering tool before leaving the training route.",
   "category": "Tutorial",
   "sortOrder": 40,
-  "autoAccept": true,
   "objectiveMode": "Sequential",
   "availability": {
     "minimumLevel": 1,

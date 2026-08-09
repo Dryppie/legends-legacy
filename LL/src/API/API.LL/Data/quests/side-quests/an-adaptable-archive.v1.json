@@ -1,0 +1,51 @@
+{
+  "id": "quest.essences.an_adaptable_archive",
+  "version": 1,
+  "title": "An Adaptable Archive",
+  "summary": "Learn to reshape your active Essence loadout for different threats.",
+  "category": "Essences",
+  "sortOrder": 210,
+  "objectiveMode": "Sequential",
+  "availability": {
+    "minimumLevel": 5,
+    "completedQuestIds": ["quest.essences.a_second_soul"]
+  },
+  "objectives": [
+    {
+      "key": "attune_goblin",
+      "description": "Attune the Goblin Essence in your active loadout.",
+      "type": "EssenceEquipped",
+      "requiredAmount": 1,
+      "filters": { "essenceDefinitionId": "essence.goblin" },
+      "presentation": {
+        "actionLabel": "Head to Essences",
+        "destinationRoute": "/game/character/essences"
+      }
+    },
+    {
+      "key": "attune_lumo_wisp",
+      "description": "Attune the Lumo Wisp Essence in your active loadout.",
+      "type": "EssenceEquipped",
+      "requiredAmount": 1,
+      "filters": { "essenceDefinitionId": "essence.lumo_wisp" },
+      "presentation": {
+        "actionLabel": "Head to Essences",
+        "destinationRoute": "/game/character/essences"
+      }
+    },
+    {
+      "key": "attune_lumo_sentinel",
+      "description": "Attune the Lumo Sentinel Essence in your active loadout.",
+      "type": "EssenceEquipped",
+      "requiredAmount": 1,
+      "filters": { "essenceDefinitionId": "essence.lumo_sentinel" },
+      "presentation": {
+        "actionLabel": "Head to Essences",
+        "destinationRoute": "/game/character/essences"
+      }
+    }
+  ],
+  "rewards": [
+    { "key": "soul_dust", "type": "Item", "itemBaseId": "soul_dust", "quantity": 25 }
+  ]
+}

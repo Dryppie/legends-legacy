@@ -2348,6 +2348,34 @@ namespace Persistence.LL.Migrations
                     b.UseTphMappingStrategy();
                 });
 
+            modelBuilder.Entity("Domain.Models.LootHistory.LootHistoryEntry", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("CharacterId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ItemSnapshotJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<DateTimeOffset>("ReceivedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Source")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("character varying(80)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CharacterId", "ReceivedAt");
+
+                    b.ToTable("LootHistoryEntries");
+                });
+
             modelBuilder.Entity("Domain.Models.MarketPlaces.MarketPlaceBuyOrder", b =>
                 {
                     b.Property<Guid>("Id")
@@ -3000,6 +3028,10 @@ namespace Persistence.LL.Migrations
                     b.Property<long>("RowVersion")
                         .IsConcurrencyToken()
                         .HasColumnType("bigint");
+
+                    b.Property<string>("SelectedOptionKey")
+                        .HasMaxLength(80)
+                        .HasColumnType("character varying(80)");
 
                     b.Property<int>("Status")
                         .HasColumnType("integer");
@@ -4174,6 +4206,17 @@ namespace Persistence.LL.Migrations
                         .IsRequired();
 
                     b.Navigation("ItemBase");
+                });
+
+            modelBuilder.Entity("Domain.Models.LootHistory.LootHistoryEntry", b =>
+                {
+                    b.HasOne("Domain.Models.Entities.Characters.Character", "Character")
+                        .WithMany()
+                        .HasForeignKey("CharacterId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Character");
                 });
 
             modelBuilder.Entity("Domain.Models.MarketPlaces.MarketPlaceBuyOrder", b =>

@@ -21,9 +21,15 @@ export class QuestService {
     return this.api.get('Quest/area-access');
   }
 
-  accept(questId: string): Observable<QuestJournal> {
+  selectChoice(questId: string, optionKey: string): Observable<QuestJournal> {
     return this.api
-      .post(`Quest/${encodeURIComponent(questId)}/accept`, {})
+      .post(`Quest/${encodeURIComponent(questId)}/choice`, { optionKey })
+      .pipe(map((response) => this.unwrapResponse<QuestJournal>(response)));
+  }
+
+  acknowledgeWelcome(): Observable<QuestJournal> {
+    return this.api
+      .post('Quest/welcome/acknowledge', {})
       .pipe(map((response) => this.unwrapResponse<QuestJournal>(response)));
   }
 

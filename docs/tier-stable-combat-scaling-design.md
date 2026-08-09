@@ -73,7 +73,7 @@ base Power was removed. The adjusted anchors preserve the approved equal-budget,
 summon, aggregate-cap, and maximum-progression gates while keeping Tier-1 Epic and max-tier
 canonical Combat Ratings comparable.
 
-### Version 10 foundation
+### Version 13 foundation
 
 Power remains the single, player-facing magnitude attribute. Its internal item-budget
 price is tiered because one additional Power is a much larger relative increase when a
@@ -83,12 +83,10 @@ stats at each equipment tier without adding a player-facing conversion formula.
 | Attribute | Tier 1 cost | Tier 5 cost | Tier 10 cost |
 | --------- | ----------: | ----------: | -----------: |
 | Power | `24.00` | `6.70` | `3.50` |
-| Summon Power | `3.00` | `1.25` | `1.00` |
-| Summon Health | `1.90` | `0.75` | `0.50` |
 
 Intermediate tiers interpolate linearly between those anchors. These costs are generation
-weights, not extra combat rules: an item still grants the displayed number of Power,
-Summon Power, or Summon Health, and combat consumes that displayed value directly.
+weights, not extra combat rules: an item still grants the displayed number of Power and
+combat consumes that displayed value directly.
 
 The analyzer validates Power against Attack Speed in a 600-tick, basic-attack-only
 throughput context. Active abilities are deliberately excluded from this one comparison,
@@ -104,9 +102,9 @@ Measured equal-budget gains are:
 | 10 | `52.81%` | `52.56%` | `+0.25pp` |
 
 The matched Summoner-versus-Direct-Caster checks also pass their 20% tolerance at 90,
-180, and 600 ticks for tiers 1, 5, and 10. Raising the early-tier summon-stat prices was
-necessary because cheap Summon Power and Summon Health previously made the Tier 1
-Summoner outperform its equal-budget control by as much as `41.31%`.
+180, and 600 ticks for tiers 1, 5, and 10. Summons now inherit authored shares of ordinary
+owner attributes, so their offense and durability scale through Power, Max Health, and
+crit stats instead of dedicated summon equipment rolls.
 
 Combat Rating projects final attributes and values all of them at Tier-1 reference
 weights, while crafting continues to use tier-aware prices. This prevents an

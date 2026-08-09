@@ -1,0 +1,34 @@
+{
+  "id": "quest.shenic.restless_dead",
+  "version": 1,
+  "title": "The Restless Dead",
+  "summary": "Break the dead's hold over the paths through Moonlit Graves.",
+  "category": "Shenic",
+  "chain": { "id": "chain.shenic", "title": "Shenic Campaign", "step": 4, "totalSteps": 10 },
+  "sortOrder": 130,
+  "objectiveMode": "Sequential",
+  "availability": {
+    "minimumLevel": 15,
+    "completedQuestIds": ["quest.shenic.crystal_currents"]
+  },
+  "objectives": [
+    {
+      "key": "quiet_moonlit_graves",
+      "description": "Win 8 encounters in Moonlit Graves.",
+      "type": "CombatEncounterCompleted",
+      "requiredAmount": 8,
+      "filters": {
+        "areaId": "region_01_area_04",
+        "requiresVictory": true
+      },
+      "presentation": {
+        "actionLabel": "Head to Moonlit Graves",
+        "destinationRoute": "/game/world/shenic?area=region_01_area_04"
+      }
+    }
+  ],
+  "rewards": [
+    { "key": "grave_ore", "type": "Item", "itemBaseId": "ore", "quantity": 20 },
+    { "key": "grave_hide", "type": "Item", "itemBaseId": "rawhide", "quantity": 20 }
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "id": "quest.character.tested_wanderer",
+  "version": 1,
+  "title": "Tested Wanderer",
+  "summary": "Keep walking Shenic's roads until experience becomes instinct.",
+  "category": "Character",
+  "sortOrder": 260,
+  "objectiveMode": "Sequential",
+  "availability": {
+    "minimumLevel": 1,
+    "completedQuestIds": ["quest.character.a_name_in_shenic"]
+  },
+  "objectives": [
+    {
+      "key": "reach_level_twenty_five",
+      "description": "Reach character level 25.",
+      "type": "CharacterLevelReached",
+      "requiredAmount": 25,
+      "filters": {},
+      "presentation": {
+        "actionLabel": "Head to the World Map",
+        "destinationRoute": "/game/world/shenic"
+      }
+    }
+  ],
+  "rewards": [
+    { "key": "advancement_stones", "type": "Item", "itemBaseId": "advancement_stone", "quantity": 2 }
+  ]
+}

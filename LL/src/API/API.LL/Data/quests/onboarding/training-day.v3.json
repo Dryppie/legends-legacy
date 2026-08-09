@@ -1,0 +1,66 @@
+{
+  "id": "quest.onboarding.training_day",
+  "version": 3,
+  "title": "Your First Hunt",
+  "summary": "Choose the creature whose Essence will begin your Soul Archive.",
+  "category": "Tutorial",
+  "sortOrder": 10,
+  "objectiveMode": "Sequential",
+  "availability": {
+    "minimumLevel": 1,
+    "completedQuestIds": []
+  },
+  "choice": {
+    "selectionTitle": "Choose Your First Hunt",
+    "selectionSummary": "Study each creature's Essence abilities, then choose the one you want to claim.",
+    "confirmationText": "This choice determines the first guaranteed Essence in your Soul Archive.",
+    "options": [
+      {
+        "key": "goblin_warrior",
+        "title": "Hunt the Goblin Warrior",
+        "summary": "An aggressive bruiser that cleaves multiple enemies and empowers repeated attacks.",
+        "creatureId": "00000000-0000-0000-0000-000000000002",
+        "essenceDefinitionId": "essence.goblin_warrior",
+        "rewardItemBaseId": "item.essence.goblin_warrior",
+        "encounterKey": "first-hunt"
+      },
+      {
+        "key": "hollow_stag",
+        "title": "Hunt the Hollow Stag",
+        "summary": "A magical fighter that weakens its target and grows tougher as it takes damage.",
+        "creatureId": "00000000-0000-0000-0000-000000000033",
+        "essenceDefinitionId": "essence.hollow_stag",
+        "rewardItemBaseId": "item.essence.hollow_stag",
+        "encounterKey": "first-hunt"
+      },
+      {
+        "key": "treant_sapling",
+        "title": "Hunt the Treant Sapling",
+        "summary": "A resilient healer that restores itself and benefits more from incoming healing.",
+        "creatureId": "00000000-0000-0000-0000-000000000023",
+        "essenceDefinitionId": "essence.treant_sapling",
+        "rewardItemBaseId": "item.essence.treant_sapling",
+        "encounterKey": "first-hunt"
+      }
+    ]
+  },
+  "objectives": [
+    {
+      "key": "win_first_hunt",
+      "description": "Defeat your chosen creature in the Training Area.",
+      "type": "CombatEncounterCompleted",
+      "requiredAmount": 1,
+      "filters": {
+        "areaId": "tutorial_area_training_grounds",
+        "requiresVictory": true
+      },
+      "presentation": {
+        "actionLabel": "Begin First Hunt",
+        "destinationRoute": "/game/world/shenic?area=tutorial_area_training_grounds",
+        "guidePageId": "tutorial-training",
+        "tourPageId": "tutorial-training-area"
+      }
+    }
+  ],
+  "rewards": []
+}

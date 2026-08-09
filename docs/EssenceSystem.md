@@ -107,7 +107,9 @@ The attribute system is defined by `AttributeType` and `AttributeCatalog`. Essen
 - Defensive: `DodgeChance`, `BlockChance`, `BlockEffectiveness`, `DamageReduction`, `StatusResistance`, `CrowdControlResistance`
 - Recovery: `HealingPowerPercent`, `HealthRegeneration`, `LifeSteal`
 - Utility: `Cooldown`
-- Summons: `SummonPower`, `SummonHealth`
+
+Summons inherit authored shares of ordinary owner stats such as `Power`, `MaxHealth`,
+`CritChance`, and `CritDamage`; there are no dedicated summon attributes.
 
 These are the actual stats now; the old combat attributes such as attack power, separate physical/magical defenses, mana-specific stats, elemental resistance buckets, and current health/mana entries are no longer authored as `AttributeType` values.
 

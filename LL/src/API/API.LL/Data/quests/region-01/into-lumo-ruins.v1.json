@@ -3,9 +3,8 @@
   "version": 1,
   "title": "Into the Ruins",
   "summary": "Put your new equipment to use in Lumo Ruins.",
-  "category": "Shenic",
+  "category": "Tutorial",
   "sortOrder": 50,
-  "autoAccept": true,
   "objectiveMode": "Sequential",
   "availability": {
     "minimumLevel": 1,

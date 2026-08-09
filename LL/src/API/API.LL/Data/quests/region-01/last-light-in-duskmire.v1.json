@@ -1,0 +1,33 @@
+{
+  "id": "quest.shenic.last_light_in_duskmire",
+  "version": 1,
+  "title": "Last Light in Duskmire",
+  "summary": "Break the force holding Duskmire Hollow and finish the Shenic campaign.",
+  "category": "Shenic",
+  "chain": { "id": "chain.shenic", "title": "Shenic Campaign", "step": 10, "totalSteps": 10 },
+  "sortOrder": 190,
+  "objectiveMode": "Sequential",
+  "availability": {
+    "minimumLevel": 45,
+    "completedQuestIds": ["quest.shenic.veil_over_the_marsh"]
+  },
+  "objectives": [
+    {
+      "key": "break_duskmire",
+      "description": "Win 20 encounters in Duskmire Hollow.",
+      "type": "CombatEncounterCompleted",
+      "requiredAmount": 20,
+      "filters": {
+        "areaId": "region_01_area_07",
+        "requiresVictory": true
+      },
+      "presentation": {
+        "actionLabel": "Head to Duskmire Hollow",
+        "destinationRoute": "/game/world/shenic?area=region_01_area_07"
+      }
+    }
+  ],
+  "rewards": [
+    { "key": "advancement_stones", "type": "Item", "itemBaseId": "advancement_stone", "quantity": 3 }
+  ]
+}

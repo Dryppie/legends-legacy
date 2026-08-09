@@ -14,12 +14,42 @@ public sealed class QuestDefinition
     public string Title { get; set; } = string.Empty;
     public string Summary { get; set; } = string.Empty;
     public string Category { get; set; } = string.Empty;
+    public QuestChainDefinition? Chain { get; set; }
+    public QuestChoiceDefinition? Choice { get; set; }
     public int SortOrder { get; set; }
-    public bool AutoAccept { get; set; }
     public string ObjectiveMode { get; set; } = "Sequential";
     public QuestAvailabilityDefinition Availability { get; set; } = new();
     public List<QuestObjectiveDefinition> Objectives { get; set; } = [];
     public List<QuestRewardDefinition> Rewards { get; set; } = [];
+}
+
+public sealed class QuestChoiceDefinition
+{
+    public string SelectionTitle { get; set; } = string.Empty;
+    public string SelectionSummary { get; set; } = string.Empty;
+    public string ConfirmationText { get; set; } = string.Empty;
+    public List<QuestChoiceOptionDefinition> Options { get; set; } = [];
+}
+
+public sealed class QuestChoiceOptionDefinition
+{
+    public string Key { get; set; } = string.Empty;
+    public string Title { get; set; } = string.Empty;
+    public string Summary { get; set; } = string.Empty;
+    public Guid CreatureId { get; set; }
+    public string EssenceDefinitionId { get; set; } = string.Empty;
+    public string RewardItemBaseId { get; set; } = string.Empty;
+    public string EncounterKey { get; set; } = string.Empty;
+
+    public string CreatureName { get; set; } = string.Empty;
+}
+
+public sealed class QuestChainDefinition
+{
+    public string Id { get; set; } = string.Empty;
+    public string Title { get; set; } = string.Empty;
+    public int Step { get; set; }
+    public int TotalSteps { get; set; }
 }
 
 public sealed class QuestAvailabilityDefinition
@@ -43,6 +73,7 @@ public sealed class QuestObjectiveFilterDefinition
     public string? AreaId { get; set; }
     public bool? RequiresVictory { get; set; }
     public string? EssenceDefinitionId { get; set; }
+    public string? EssenceDefinitionFromChoiceQuestId { get; set; }
     public int? Tier { get; set; }
     public bool MustBeCrafted { get; set; }
     public bool ToolSlotOnly { get; set; }

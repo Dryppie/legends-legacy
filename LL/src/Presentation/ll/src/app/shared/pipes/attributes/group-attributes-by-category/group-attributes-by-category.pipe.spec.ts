@@ -28,7 +28,7 @@ describe('GroupAttributesByCategoryPipe', () => {
       AttributeType.HealingPowerPercent,
     );
     expect(types(grouped[AttributeCategory.Utility])).toContain(
-      AttributeType.SummonPower,
+      AttributeType.Cooldown,
     );
 
     expect(Object.values(grouped).flat()).toHaveSize(

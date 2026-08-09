@@ -18,14 +18,14 @@
         "attribute": "MaxHealth",
         "baseValue": 1,
         "minimumValue": 1,
-        "scalingAttribute": "SummonHealth",
-        "scalingCoefficient": 1
+        "scalingAttribute": "MaxHealth",
+        "scalingCoefficient": 0.1
       },
       {
         "attribute": "Power",
         "baseValue": 0,
-        "scalingAttribute": "SummonPower",
-        "scalingCoefficient": 1,
+        "scalingAttribute": "Power",
+        "scalingCoefficient": 0.3,
         "minimumValue": 0
       },
       {
@@ -67,8 +67,8 @@
       {
         "attribute": "Power",
         "baseValue": 0,
-        "scalingAttribute": "SummonPower",
-        "scalingCoefficient": 1,
+        "scalingAttribute": "Power",
+        "scalingCoefficient": 0.3,
         "minimumValue": 0
       },
       {

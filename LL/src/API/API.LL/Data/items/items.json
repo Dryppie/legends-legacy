@@ -13,7 +13,7 @@
   {
     "id": "soul_dust",
     "name": "Soul Dust",
-    "description": "A material gotten by disolving Essences.",
+    "description": "A material gotten by disolving Essences. Can be used to level up Essences in your Soul Archive.",
     "itemType": "Resource",
     "rarity": "Common",
     "equipmentType": "Head",

@@ -18,7 +18,7 @@
     "waitForEnabled": true,
     "targetTimeoutMs": 5000,
     "title": "3. Equip your Essence",
-    "description": "Equip the Goblin's Essence.",
+    "description": "Equip your first Essence.",
     "position": "left"
   },
   {

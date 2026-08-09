@@ -713,26 +713,25 @@
     "compatibleRecipeIds": [],
     "bonusStatBudgetMultiplier": 0.2,
     "bonusStatProfile": {
-      "SummonPower": 0.35,
-      "SummonHealth": 0.3,
+      "MaxHealth": 0.3,
       "CrowdControlResistance": 0.2,
-      "Power": 0.15
+      "Power": 0.5
     },
     "temperingProfile": {
       "id": "blueprint_primal.tempering",
       "name": "Primal Tempering",
       "stats": [
         {
-          "stat": "SummonPower",
-          "weight": 35,
+          "stat": "Power",
+          "weight": 50,
           "category": "Primary",
           "canIntroduce": true,
           "canIncrease": true,
-          "maxBudgetShare": 0.4,
+          "maxBudgetShare": 0.55,
           "minimumTier": 1
         },
         {
-          "stat": "SummonHealth",
+          "stat": "MaxHealth",
           "weight": 30,
           "category": "Primary",
           "canIntroduce": true,
@@ -743,15 +742,6 @@
         {
           "stat": "CrowdControlResistance",
           "weight": 20,
-          "category": "Secondary",
-          "canIntroduce": true,
-          "canIncrease": true,
-          "maxBudgetShare": 0.3,
-          "minimumTier": 1
-        },
-        {
-          "stat": "Power",
-          "weight": 15,
           "category": "Secondary",
           "canIntroduce": true,
           "canIncrease": true,

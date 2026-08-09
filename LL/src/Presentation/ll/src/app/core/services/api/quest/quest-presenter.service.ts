@@ -15,7 +15,13 @@ export class QuestPresenterService {
   private readonly activePresentation = computed(() => {
     const quest = this.quests.pinnedQuest();
     const objective = this.quests.pinnedObjective();
-    if (!quest || !objective) return null;
+    if (
+      !quest ||
+      !objective ||
+      (quest.choice && !quest.choice.selectedOptionKey)
+    ) {
+      return null;
+    }
     return {
       key: `${quest.questId}:${quest.version}:${objective.key}`,
       route: objective.presentation.destinationRoute,
@@ -69,7 +75,10 @@ export class QuestPresenterService {
   }
 
   private isCurrentRoute(expected: string, actual: string): boolean {
-    return this.normalize(expected).split('?')[0] === this.normalize(actual).split('?')[0];
+    return (
+      this.normalize(expected).split('?')[0] ===
+      this.normalize(actual).split('?')[0]
+    );
   }
 
   private normalize(route: string): string {

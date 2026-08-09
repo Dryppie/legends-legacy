@@ -1,34 +1,35 @@
-import { NgFor, NgIf } from '@angular/common';
+import { DatePipe, NgFor, NgIf } from '@angular/common';
 import { Component, effect, signal } from '@angular/core';
+import { finalize } from 'rxjs';
 import { GameEventService } from '../../../core/services/real-time/game-event.service';
 import { GameRealtimeStore } from '../../../core/services/real-time/game-realtime/game-realtime-store.service';
 import { isGameRealtimeEnabled } from '../../../core/services/real-time/game-realtime/game-realtime-feature';
 import { InventoryItem } from '../../../shared/models/inventoryItem';
 import { ItemComponent } from '../../../shared/components/item/item.component';
 import { LocalStorageService } from '../../../core/services/client-side/local-storage/local-storage.service';
-
-interface LootTrackerEntry {
-  item: InventoryItem;
-  receivedAt: number;
-}
+import { LootHistoryEntry } from '../../../shared/models/loot-history';
+import { LootHistoryService } from '../../../core/services/api/loot-history/loot-history.service';
 
 @Component({
     selector: 'app-loot-tracker',
-    imports: [NgIf, NgFor, ItemComponent],
+    imports: [NgIf, NgFor, DatePipe, ItemComponent],
     templateUrl: './loot-tracker.component.html'
 })
 export class LootTrackerComponent {
-  private readonly maxEntries = 60;
-  entries: LootTrackerEntry[] = [];
+  private readonly maxEntries = 50;
+  entries: LootHistoryEntry[] = [];
   expanded = signal(true);
+  clearing = signal(false);
   private lastLootUpdateId: string | null = null;
 
   constructor(
     private readonly eventService: GameEventService,
     private readonly realtimeStore: GameRealtimeStore,
     private readonly storage: LocalStorageService,
+    private readonly lootHistory: LootHistoryService,
   ) {
     this.expanded.set(this.storage.get<boolean>('lootTrackerExpanded') ?? true);
+    this.loadHistory();
 
     effect(
       () => {
@@ -43,20 +44,17 @@ export class LootTrackerComponent {
           }
 
           this.lastLootUpdateId = updateId;
-          this.entries = [
-            ...this.entries,
-            ...this.compactLoot(loot.payload).map((item) => ({
-              item,
-              receivedAt: Date.now(),
-            })),
-          ].slice(-this.maxEntries);
+          this.realtimeStore.addLoot(
+            this.compactLoot(loot.payload),
+            envelope?.occurredAt,
+            'combat-reward',
+          );
         }
       },
       { allowSignalWrites: true },
     );
 
     effect(() => {
-      if (!isGameRealtimeEnabled()) return;
       this.entries = this.realtimeStore.recentLoot();
     });
   }
@@ -66,8 +64,25 @@ export class LootTrackerComponent {
     this.storage.set('lootTrackerExpanded', this.expanded());
   }
 
-  trackEntry(index: number, entry: LootTrackerEntry): string {
-    return `${entry.item.itemInstance.id}:${entry.item.itemInstance.itemBase.id}:${entry.receivedAt}:${index}`;
+  clearHistory(event: Event): void {
+    event.stopPropagation();
+    if (this.clearing() || this.entries.length === 0) return;
+
+    this.clearing.set(true);
+    this.lootHistory
+      .clear()
+      .pipe(finalize(() => this.clearing.set(false)))
+      .subscribe(() => this.realtimeStore.clearLootHistory());
+  }
+
+  trackEntry(index: number, entry: LootHistoryEntry): string {
+    return entry.id || `${entry.item.itemInstance.id}:${entry.receivedAt}:${index}`;
+  }
+
+  private loadHistory(): void {
+    this.lootHistory
+      .getRecent()
+      .subscribe((entries) => this.realtimeStore.setLootHistory(entries));
   }
 
   private compactLoot(items: InventoryItem[]): InventoryItem[] {

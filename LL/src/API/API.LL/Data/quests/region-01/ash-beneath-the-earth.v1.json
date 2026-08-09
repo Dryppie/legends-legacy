@@ -1,0 +1,34 @@
+{
+  "id": "quest.shenic.ash_beneath_the_earth",
+  "version": 1,
+  "title": "Ash Beneath the Earth",
+  "summary": "Descend into Embercap Burrows and confront what feeds its buried heat.",
+  "category": "Shenic",
+  "chain": { "id": "chain.shenic", "title": "Shenic Campaign", "step": 8, "totalSteps": 10 },
+  "sortOrder": 170,
+  "objectiveMode": "Sequential",
+  "availability": {
+    "minimumLevel": 35,
+    "completedQuestIds": ["quest.shenic.heart_of_the_hollow"]
+  },
+  "objectives": [
+    {
+      "key": "descend_embercap",
+      "description": "Win 12 encounters in Embercap Burrows.",
+      "type": "CombatEncounterCompleted",
+      "requiredAmount": 12,
+      "filters": {
+        "areaId": "region_01_area_10",
+        "requiresVictory": true
+      },
+      "presentation": {
+        "actionLabel": "Head to Embercap Burrows",
+        "destinationRoute": "/game/world/shenic?area=region_01_area_10"
+      }
+    }
+  ],
+  "rewards": [
+    { "key": "ember_ore", "type": "Item", "itemBaseId": "ore", "quantity": 50 },
+    { "key": "tempered_scrap", "type": "Item", "itemBaseId": "tempered_scrap", "quantity": 5 }
+  ]
+}
