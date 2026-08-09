@@ -1,4 +1,5 @@
 using Application.Interfaces.Services.LL.Essences;
+using Domain.Models.Bonuses;
 using Domain.Models.Essences.Definitions;
 using Microsoft.Extensions.Configuration;
 using System.Text.Json;
@@ -7,6 +8,14 @@ namespace Services.LL.Essences;
 
 public sealed class JsonEssenceCodexCollectionDefinitionProvider : IEssenceCodexCollectionDefinitionProvider
 {
+    private static readonly HashSet<BonusKind> AllowedBonusKinds =
+    [
+        BonusKind.EssencePityProgressionGainBps,
+        BonusKind.EssenceDropRateRelativeBps,
+        BonusKind.EssenceExperienceGainBps,
+        BonusKind.FocusedMonsterEssenceDropRateRelativeBps
+    ];
+
     private readonly IReadOnlyList<EssenceCodexCollectionDefinition> _definitions;
 
     public JsonEssenceCodexCollectionDefinitionProvider(
@@ -99,6 +108,18 @@ public sealed class JsonEssenceCodexCollectionDefinitionProvider : IEssenceCodex
         if (invalidBonusValues.Count > 0)
         {
             throw new InvalidDataException("Essence Codex collections require positive base bonus values and non-negative ascension bonus values: " + string.Join(", ", invalidBonusValues));
+        }
+
+        var invalidBonusKinds = definitions
+            .Where(x => !AllowedBonusKinds.Contains(x.Bonus.Kind))
+            .Select(x => x.Id)
+            .ToList();
+
+        if (invalidBonusKinds.Count > 0)
+        {
+            throw new InvalidDataException(
+                "Essence Codex collections may only grant Essence pity progression, drop rate, experience gain, or focused-monster drop rate bonuses: " +
+                string.Join(", ", invalidBonusKinds));
         }
     }
 

@@ -229,6 +229,33 @@ public sealed class EssenceSystemServiceTests
     }
 
     [Fact]
+    public async Task Essence_experience_bonus_increases_combat_xp_for_attuned_essences()
+    {
+        await using var db = CreateDb();
+        var characterId = await SeedCharacterAndInventoryAsync(db, level: 20);
+        var attunedId = await AddPlayerEssenceAsync(db, characterId, "essence.test");
+        db.EssenceLoadouts.Add(new EssenceLoadout
+        {
+            Id = Guid.NewGuid(),
+            CharacterId = characterId,
+            Name = "Active",
+            IsActive = true,
+            Slots = [new EssenceLoadoutSlot { Id = Guid.NewGuid(), SlotIndex = 0, PlayerEssenceId = attunedId }]
+        });
+        await db.SaveChangesAsync();
+        var service = CreateService(
+            db,
+            bonusService: new StaticBonusService(new Dictionary<BonusKind, double>
+            {
+                [BonusKind.EssenceExperienceGainBps] = 2500
+            }));
+
+        await service.GrantCombatXpToAttunedEssencesAsync(characterId, 100, CancellationToken.None);
+
+        Assert.Equal(125, db.PlayerEssences.Single(x => x.Id == attunedId).CurrentXp);
+    }
+
+    [Fact]
     public void Attribute_calculator_applies_flat_additive_and_multiplicative_phases()
     {
         var result = AttributeCalculator.CalculateModifiedValue(100, [

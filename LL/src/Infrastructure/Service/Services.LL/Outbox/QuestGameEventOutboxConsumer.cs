@@ -16,10 +16,13 @@ public sealed class QuestGameEventOutboxConsumer(
         eventType is GameEventTypes.EquipmentChanged
             or GameEventTypes.EssenceAbsorbed
             or GameEventTypes.EssenceLoadoutChanged
+            or GameEventTypes.EssenceFocusSet
             or GameEventTypes.EquipmentCrafted
             or GameEventTypes.IdleCombatEncounterCompleted
             or GameEventTypes.CharacterCreated
-            or GameEventTypes.CharacterLevelReached;
+            or GameEventTypes.CharacterLevelReached
+            or GameEventTypes.ColosseumBattleCompleted
+            or GameEventTypes.ProphecyCompleted;
 
     public Task HandleAsync(GameEventOutboxMessage message, CancellationToken cancellationToken)
     {
@@ -34,6 +37,7 @@ public sealed class QuestGameEventOutboxConsumer(
             GameEventTypes.EssenceAbsorbed => QuestTrigger.EssenceAbsorbed(
                 Read<EssenceAbsorbedPayload>(message).EssenceDefinitionId),
             GameEventTypes.EssenceLoadoutChanged => QuestTrigger.EssenceLoadoutChanged(),
+            GameEventTypes.EssenceFocusSet => QuestTrigger.EssenceFocusSet(),
             GameEventTypes.EquipmentCrafted => CreateEquipmentCraftedTrigger(
                 Read<EquipmentCraftedPayload>(message)),
             GameEventTypes.IdleCombatEncounterCompleted => CreateCombatTrigger(
@@ -41,6 +45,11 @@ public sealed class QuestGameEventOutboxConsumer(
             GameEventTypes.CharacterCreated => QuestTrigger.CharacterLevelReached(1),
             GameEventTypes.CharacterLevelReached => QuestTrigger.CharacterLevelReached(
                 Read<CharacterLevelReachedPayload>(message).Level),
+            GameEventTypes.ColosseumBattleCompleted => QuestTrigger.ColosseumBattleStarted(),
+            GameEventTypes.ProphecyCompleted when
+                Read<ProphecyCompletedPayload>(message).Scope.Equals(
+                    "Daily",
+                    StringComparison.OrdinalIgnoreCase) => QuestTrigger.DailyProphecyCompleted(),
             _ => null
         };
 
@@ -60,7 +69,11 @@ public sealed class QuestGameEventOutboxConsumer(
             payload.CraftedItems.Select(x => x.Tier).ToList());
 
     private static QuestTrigger CreateCombatTrigger(IdleCombatEncounterCompletedPayload payload) =>
-        QuestTrigger.CombatCompleted(payload.AreaId, payload.WonEncounter);
+        QuestTrigger.CombatCompleted(
+            payload.AreaId,
+            payload.WonEncounter,
+            Math.Max(1, payload.ActionCount),
+            payload.EquippedGatheringType);
 
     private T Read<T>(GameEventOutboxMessage message) =>
         JsonSerializer.Deserialize<T>(message.PayloadJson, jsonOptions)

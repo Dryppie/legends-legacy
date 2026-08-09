@@ -4,6 +4,7 @@ public enum BonusKind
 {
     EssenceDropRateRelativeBps,
     EssencePityProgressionGainBps,
+    EssenceExperienceGainBps,
     DuplicateEssenceExtraMaterialChanceBps,
     FocusedMonsterEssenceDropRateRelativeBps,
     CombatExperienceGainBps,

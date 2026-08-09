@@ -106,15 +106,28 @@ public sealed record QuestTrigger(
     string? EssenceDefinitionId = null,
     IReadOnlyCollection<string>? CraftedItemBaseIds = null,
     IReadOnlyCollection<int>? CraftedItemTiers = null,
-    int? CharacterLevel = null)
+    int? CharacterLevel = null,
+    int ActionCount = 1,
+    string? EquippedGatheringType = null)
 {
-    public static QuestTrigger CombatCompleted(string areaId, bool wonEncounter) =>
-        new("CombatEncounterCompleted", AreaId: areaId, WonEncounter: wonEncounter);
+    public static QuestTrigger CombatCompleted(
+        string areaId,
+        bool wonEncounter,
+        int actionCount = 1,
+        string? equippedGatheringType = null) =>
+        new(
+            "CombatEncounterCompleted",
+            AreaId: areaId,
+            WonEncounter: wonEncounter,
+            ActionCount: actionCount,
+            EquippedGatheringType: equippedGatheringType);
 
     public static QuestTrigger EssenceAbsorbed(string essenceDefinitionId) =>
         new("EssenceAbsorbed", EssenceDefinitionId: essenceDefinitionId);
 
     public static QuestTrigger EssenceLoadoutChanged() => new("EssenceLoadoutChanged");
+
+    public static QuestTrigger EssenceFocusSet() => new("EssenceFocusSet");
 
     public static QuestTrigger EquipmentCrafted(
         IReadOnlyCollection<string> itemBaseIds,
@@ -125,4 +138,8 @@ public sealed record QuestTrigger(
 
     public static QuestTrigger CharacterLevelReached(int level) =>
         new("CharacterLevelReached", CharacterLevel: level);
+
+    public static QuestTrigger ColosseumBattleStarted() => new("ColosseumBattleStarted");
+
+    public static QuestTrigger DailyProphecyCompleted() => new("DailyProphecyCompleted");
 }

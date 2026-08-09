@@ -391,6 +391,12 @@ public sealed class QuestService(
                 Matches(filters.AreaId, trigger.AreaId) &&
                 (filters.RequiresVictory != true || trigger.WonEncounter == true) => 1,
 
+            "AreaActionCompletedWithTool" when
+                trigger.Type == "CombatEncounterCompleted" &&
+                Matches(filters.AreaId, trigger.AreaId) &&
+                Matches(filters.GatheringType, trigger.EquippedGatheringType) =>
+                Math.Max(0, trigger.ActionCount),
+
             "EssenceAbsorbed" when
                 trigger.Type == "EssenceAbsorbed" &&
                 Matches(expectedEssenceDefinitionId, trigger.EssenceDefinitionId) => 1,
@@ -402,6 +408,8 @@ public sealed class QuestService(
                     characterId,
                     expectedEssenceDefinitionId,
                     cancellationToken) ? 1 : 0,
+
+            "EssenceFocusSet" when trigger.Type == "EssenceFocusSet" => 1,
 
             "EquipmentCrafted" when trigger.Type == "EquipmentCrafted" =>
                 (trigger.CraftedItemBaseIds ?? [])
@@ -431,6 +439,10 @@ public sealed class QuestService(
             "CharacterLevelReached" when
                 trigger.Type == "CharacterLevelReached" &&
                 trigger.CharacterLevel >= objective.RequiredAmount => objective.RequiredAmount,
+
+            "ColosseumBattleStarted" when trigger.Type == "ColosseumBattleStarted" => 1,
+
+            "DailyProphecyCompleted" when trigger.Type == "DailyProphecyCompleted" => 1,
 
             _ => 0
         };

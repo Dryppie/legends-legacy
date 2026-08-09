@@ -86,6 +86,10 @@ export class EssencesComponent implements OnInit {
     this.route.paramMap.pipe(map((params) => params.get('essenceId'))),
     { initialValue: null },
   );
+  private readonly requestedView = toSignal(
+    this.route.queryParamMap.pipe(map((params) => params.get('view'))),
+    { initialValue: null },
+  );
 
   readonly archiveSearch = signal('');
   readonly mobileLoadoutOpen = signal(false);
@@ -264,6 +268,18 @@ export class EssencesComponent implements OnInit {
     private readonly questPresenter: QuestPresenterService,
     private readonly inventoryState: InventoryStateService,
   ) {
+    effect(() => {
+      const view = this.requestedView();
+      if (
+        view === 'archive' ||
+        view === 'absorb' ||
+        view === 'creatures' ||
+        view === 'codex'
+      ) {
+        this.essenceState.setActiveView(view);
+      }
+    });
+
     effect(
       () => {
         const objective = this.questState.pinnedObjective();

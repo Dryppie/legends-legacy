@@ -1,6 +1,8 @@
 using Application.Common.Interfaces;
+using Application.Interfaces.Outbox;
 using Application.Interfaces.Services.LL.Dungeons;
 using Application.Interfaces.Services.LL.Essences;
+using Application.UseCases.Outbox;
 using Domain.Models.Dungeons.Definitions;
 using Domain.Models.Dungeons.Definitions.Encounters;
 using Domain.Models.Entities.Creatures;
@@ -19,19 +21,22 @@ public sealed class CreatureArchiveService : ICreatureArchiveService
     private readonly ICreatureEssenceLootTableRepository _creatureEssenceLootTables;
     private readonly IEssenceCodexCollectionService _codexCollections;
     private readonly IDungeonDefinitions _dungeonDefinitions;
+    private readonly IGameEventOutbox? _outbox;
 
     public CreatureArchiveService(
         IDbContext dbContext,
         IEssenceDefinitionRepository essenceDefinitions,
         ICreatureEssenceLootTableRepository creatureEssenceLootTables,
         IEssenceCodexCollectionService codexCollections,
-        IDungeonDefinitions dungeonDefinitions)
+        IDungeonDefinitions dungeonDefinitions,
+        IGameEventOutbox? outbox = null)
     {
         _dbContext = dbContext;
         _essenceDefinitions = essenceDefinitions;
         _creatureEssenceLootTables = creatureEssenceLootTables;
         _codexCollections = codexCollections;
         _dungeonDefinitions = dungeonDefinitions;
+        _outbox = outbox;
     }
 
     public async Task RecordDefeatedCreaturesAsync(
@@ -285,6 +290,16 @@ public sealed class CreatureArchiveService : ICreatureArchiveService
 
         focusedEntry.IsEssenceFocus = true;
         focusedEntry.EssenceFocusSetAtUtc = now;
+
+        if (_outbox is not null)
+        {
+            await _outbox.EnqueueAsync(
+                GameEventTypes.EssenceFocusSet,
+                new EssenceFocusSetPayload(characterId, focusedEntry.CreatureDefinitionId),
+                characterId,
+                null,
+                cancellationToken);
+        }
 
         await _dbContext.SaveChangesAsync(cancellationToken);
         return await GetCreatureArchiveAsync(characterId, cancellationToken);

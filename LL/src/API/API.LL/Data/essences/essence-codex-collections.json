@@ -14,10 +14,10 @@
         "essence.hobgoblin_brutal_charge"
       ],
       "bonus": {
-        "kind": "DungeonRewardRetentionBps",
+        "kind": "EssenceExperienceGainBps",
         "value": 100,
         "valuePerCollectionAscensionTier": 25,
-        "description": "+1% dungeon reward retention."
+        "description": "+1% Essence EXP gained."
       }
     },
     {
@@ -34,10 +34,10 @@
         "essence.brown_slime"
       ],
       "bonus": {
-        "kind": "DuplicateEssenceExtraMaterialChanceBps",
+        "kind": "EssenceExperienceGainBps",
         "value": 100,
         "valuePerCollectionAscensionTier": 25,
-        "description": "+1% chance for extra materials from duplicate Essences."
+        "description": "+1% Essence EXP gained."
       }
     },
     {
@@ -182,10 +182,10 @@
         "essence.undead"
       ],
       "bonus": {
-        "kind": "DuplicateEssenceExtraMaterialChanceBps",
+        "kind": "EssenceExperienceGainBps",
         "value": 75,
         "valuePerCollectionAscensionTier": 15,
-        "description": "+0.75% chance for extra materials from duplicate Essences."
+        "description": "+0.75% Essence EXP gained."
       }
     },
     {
@@ -239,10 +239,10 @@
         "essence.brown_slime"
       ],
       "bonus": {
-        "kind": "DuplicateEssenceExtraMaterialChanceBps",
+        "kind": "EssenceExperienceGainBps",
         "value": 75,
         "valuePerCollectionAscensionTier": 15,
-        "description": "+0.75% chance for extra materials from duplicate Essences."
+        "description": "+0.75% Essence EXP gained."
       }
     }
   ]

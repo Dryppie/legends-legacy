@@ -1,0 +1,29 @@
+{
+  "id": "quest.essences.focused_pursuit",
+  "version": 1,
+  "title": "Focused Pursuit",
+  "summary": "Choose a creature whose Essence you want to pursue more deliberately.",
+  "category": "Essences",
+  "sortOrder": 290,
+  "objectiveMode": "Sequential",
+  "availability": {
+    "minimumLevel": 1,
+    "completedQuestIds": ["quest.region01.into_lumo_ruins"]
+  },
+  "objectives": [
+    {
+      "key": "set_essence_focus",
+      "description": "Set Essence Focus for a creature in the Creatures tab.",
+      "type": "EssenceFocusSet",
+      "requiredAmount": 1,
+      "filters": {},
+      "presentation": {
+        "actionLabel": "Head to Creatures",
+        "destinationRoute": "/game/character/essences?view=creatures"
+      }
+    }
+  ],
+  "rewards": [
+    { "key": "soul_dust", "type": "Item", "itemBaseId": "soul_dust", "quantity": 10 }
+  ]
+}

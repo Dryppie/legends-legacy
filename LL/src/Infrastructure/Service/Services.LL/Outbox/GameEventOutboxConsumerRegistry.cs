@@ -13,6 +13,7 @@ public sealed class GameEventOutboxConsumerRegistry : IGameEventOutboxConsumerRe
                 [GameEventOutboxConsumerNames.Quests, GameEventOutboxConsumerNames.Achievements],
             [GameEventTypes.EssenceLoadoutChanged] =
                 [GameEventOutboxConsumerNames.Quests, GameEventOutboxConsumerNames.Achievements],
+            [GameEventTypes.EssenceFocusSet] = [GameEventOutboxConsumerNames.Quests],
             [GameEventTypes.EssenceAscended] = [GameEventOutboxConsumerNames.Achievements],
             [GameEventTypes.EquipmentCrafted] =
                 [GameEventOutboxConsumerNames.Quests, GameEventOutboxConsumerNames.Achievements],
@@ -26,7 +27,9 @@ public sealed class GameEventOutboxConsumerRegistry : IGameEventOutboxConsumerRe
                 [GameEventOutboxConsumerNames.Quests, GameEventOutboxConsumerNames.Achievements],
             [GameEventTypes.DungeonRunStarted] = [GameEventOutboxConsumerNames.Achievements],
             [GameEventTypes.DungeonRunCompleted] = [GameEventOutboxConsumerNames.Achievements],
-            [GameEventTypes.ColosseumBattleCompleted] = [GameEventOutboxConsumerNames.Achievements]
+            [GameEventTypes.ColosseumBattleCompleted] =
+                [GameEventOutboxConsumerNames.Quests, GameEventOutboxConsumerNames.Achievements],
+            [GameEventTypes.ProphecyCompleted] = [GameEventOutboxConsumerNames.Quests]
         };
 
     public IReadOnlyList<string> GetConsumers(string eventType) =>

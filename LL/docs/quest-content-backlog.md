@@ -22,6 +22,10 @@ The first content release is now represented in the JSON quest catalog:
 - All quests in **Additional Quests Supported Now** are implemented. `A Second
   Soul` intentionally requires only absorbing any additional Essence; it does
   not require equipping it.
+- `Stone, Timber, and Hide` is implemented as the first post-tutorial gathering
+  quest. It counts Lumo Ruins actions separately for each equipped tool type.
+- `Focused Pursuit`, `The Arena Calls`, and `An Omen Fulfilled` introduce
+  Essence Focus, Colosseum, and daily Prophecy activities as side quests.
 
 ## Implementation Labels
 
@@ -43,14 +47,18 @@ The current system supports:
 - absorbing and equipping a specified Essence;
 - crafting and equipping qualifying equipment;
 - equipping gathering tools;
+- counting area actions by equipped gathering-tool type;
+- setting Essence Focus for a known creature;
+- starting a Colosseum battle;
+- completing a daily Prophecy;
 - reaching a character level;
 - item rewards;
 - quest-driven combat-area unlocks;
 - one pinned quest with objective navigation.
 
 The current system does not yet support creature-specific kills, gathering
-results, dungeon completion, Colosseum results, Guild activity, marketplace
-activity, Soulstone upgrades, prophecy completion, currency rewards,
+results, dungeon completion, Colosseum outcome filters, Guild activity, marketplace
+activity, Soulstone upgrades, broader Prophecy filters, currency rewards,
 repeatable quests, dialogue choices, or branching outcomes.
 
 ## Recommended First Content Release
@@ -147,20 +155,14 @@ reward IDs still need to be selected from live content before authoring JSON.
 | A Name in Shenic      | Character | Reach level 10                                         | 1 Advancement Stone     | Implemented |
 | Tested Wanderer       | Character | Reach level 25                                         | 2 Advancement Stones    | Implemented |
 | Warden of Shenic      | Character | Finish the chain at level 45, then defend Duskmire     | 5 Advancement Stones    | Implemented |
+| Stone, Timber, and Hide | Gathering | Complete 10 Lumo Ruins actions with each tool type   | 12 Ore, Wood, and Hide each | Implemented |
+| Focused Pursuit        | Essences  | Set Essence Focus for one known creature               | 10 Soul Dust            | Implemented |
+| The Arena Calls        | Colosseum | Start one Colosseum battle                              | 1 Advancement Stone     | Implemented |
+| An Omen Fulfilled      | Prophecies | Complete one daily Prophecy                            | 1 Advancement Stone     | Implemented |
 
 ## Quests Requiring Small Engine Extensions
 
 ### Gathering
-
-#### Stone, Timber, and Hide
-
-- **Concept:** Gather successfully from an Ore Vein, Fallen Tree, and Beast
-  Remains in Lumo Ruins.
-- **New objective:** `GatheringNodeCompleted` with area, node, and gathering
-  type filters.
-- **Reward:** A small regional material bundle or upgraded tools.
-- **Why add it:** Equipping tools currently completes the tutorial, but the
-  quest system never teaches the player to obtain materials with them.
 
 #### The Bloodwood Cut
 
@@ -268,23 +270,11 @@ reward IDs still need to be selected from live content before authoring JSON.
 - **New objectives:** `GuildContributionMade` and `GuildMissionCompleted`.
 - **Reward:** Guild currency or a mission item bundle.
 
-#### The Arena Calls
-
-- **Concept:** Enter and win the first Colosseum match.
-- **New objective:** `ColosseumMatchCompleted` with victory and bracket filters.
-- **Reward:** Colosseum currency or equipment.
-
 #### Tournament Tested
 
 - **Concept:** Complete a tournament and reach a specified placement.
 - **New objective:** `TournamentCompleted` with placement filters.
 - **Reward:** Tournament currency, equipment, or a title.
-
-#### An Omen Fulfilled
-
-- **Concept:** Complete one daily or weekly Prophecy.
-- **New objective:** `ProphecyCompleted` with prophecy cadence filters.
-- **Reward:** Prophecy currency or an item cache.
 
 ## Narrative Hunts Requiring Creature Filters
 
@@ -366,11 +356,10 @@ retries cannot grant the reward twice.
 
 1. Author the nine-quest Shenic progression chain using existing combat
    objectives and item rewards.
-2. Add gathering-result objectives and ship `Stone, Timber, and Hide` as the
-   first post-tutorial profession quest.
+2. Add gathering-result objectives for node-specific gathering quests.
 3. Add tempering and broader equipment filters for the crafting side quests.
-4. Add Dungeon and Colosseum completion events for mid-game quest lines.
-5. Add Guild, marketplace, Soulstone, and Prophecy objectives.
+4. Add Dungeon completion and Colosseum outcome filters for mid-game quest lines.
+5. Add Guild, marketplace, Soulstone, and broader Prophecy objectives.
 6. Add currency, title, and blueprint reward handlers.
 7. Add creature-specific hunts once combat events expose defeated creature
    IDs.

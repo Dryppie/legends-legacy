@@ -23,6 +23,10 @@ public static class QuestConstants
     public const string ArmsOfChoice = "quest.crafting.arms_of_choice";
     public const string MadeByYourOwnHand = "quest.crafting.made_by_your_own_hand";
     public const string ArmorAndAdornment = "quest.crafting.armor_and_adornment";
+    public const string StoneTimberAndHide = "quest.gathering.stone_timber_and_hide";
+    public const string FocusedPursuit = "quest.essences.focused_pursuit";
+    public const string TheArenaCalls = "quest.colosseum.the_arena_calls";
+    public const string AnOmenFulfilled = "quest.prophecies.an_omen_fulfilled";
     public const string BloodGroveVeteran = "quest.combat.blood_grove_veteran";
     public const string ANameInShenic = "quest.character.a_name_in_shenic";
     public const string TestedWanderer = "quest.character.tested_wanderer";

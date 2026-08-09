@@ -1,0 +1,29 @@
+{
+  "id": "quest.prophecies.an_omen_fulfilled",
+  "version": 1,
+  "title": "An Omen Fulfilled",
+  "summary": "Follow one of the day's omens through to its conclusion.",
+  "category": "Prophecies",
+  "sortOrder": 310,
+  "objectiveMode": "Sequential",
+  "availability": {
+    "minimumLevel": 1,
+    "completedQuestIds": ["quest.region01.into_lumo_ruins"]
+  },
+  "objectives": [
+    {
+      "key": "complete_daily_prophecy",
+      "description": "Complete one daily Prophecy.",
+      "type": "DailyProphecyCompleted",
+      "requiredAmount": 1,
+      "filters": {},
+      "presentation": {
+        "actionLabel": "Head to Prophecies",
+        "destinationRoute": "/game/prophecies"
+      }
+    }
+  ],
+  "rewards": [
+    { "key": "advancement_stone", "type": "Item", "itemBaseId": "advancement_stone", "quantity": 1 }
+  ]
+}

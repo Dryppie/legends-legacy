@@ -1,4 +1,5 @@
 using Domain.Models.Attributes;
+using Domain.Models.Bonuses;
 using Domain.Models.Combat.Abilities;
 using Domain.Models.Essences.Definitions;
 using Microsoft.Extensions.Configuration;
@@ -217,6 +218,17 @@ public sealed class EssenceDefinitionValidatorTests
             collections.Select(collection => collection.Category).Distinct().Order().ToArray());
         Assert.Equal(53, regionOneEssences.Count);
         Assert.Equal(regionOneEssences.Order(StringComparer.OrdinalIgnoreCase), collectedEssences.Order(StringComparer.OrdinalIgnoreCase));
+        var allowedBonusKinds = new HashSet<BonusKind>
+        {
+            BonusKind.EssencePityProgressionGainBps,
+            BonusKind.EssenceDropRateRelativeBps,
+            BonusKind.EssenceExperienceGainBps,
+            BonusKind.FocusedMonsterEssenceDropRateRelativeBps
+        };
+        Assert.All(collections, collection => Assert.Contains(collection.Bonus.Kind, allowedBonusKinds));
+        Assert.Equal(
+            allowedBonusKinds.Order(),
+            collections.Select(collection => collection.Bonus.Kind).Distinct().Order());
     }
 
     internal static EssenceDefinition ValidDefinition() => new()

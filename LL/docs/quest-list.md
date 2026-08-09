@@ -32,6 +32,10 @@ Requirements below are the objectives that must be completed, not the prerequisi
 - [x] **Armor and Adornment** — craft one Tier 1 armor piece and one Tier 1 jewelry piece, in either order.
 - [x] **Arms of Choice** — craft one one-handed shortsword, dagger, hatchet, mace, and wand, in any order.
 - [x] **Made by Your Own Hand** — craft a Tier 2 one-handed weapon, then equip a Tier 2 weapon you crafted.
+- [x] **Stone, Timber, and Hide** — complete 10 actions in Lumo Ruins with a pickaxe, 10 with a hatchet, and 10 with a skinning knife equipped.
+- [x] **Focused Pursuit** — set Essence Focus for one creature from the Creatures tab.
+- [x] **The Arena Calls** — start one Colosseum battle; winning is not required.
+- [x] **An Omen Fulfilled** — complete one daily Prophecy.
 - [x] **Blood Grove Veteran** — win 25 encounters in Blood Grove.
 - [x] **A Name in Shenic** — reach character level 10.
 - [x] **Tested Wanderer** — reach character level 25.
@@ -41,7 +45,6 @@ Requirements below are the objectives that must be completed, not the prerequisi
 
 ### Gathering
 
-- [ ] **Stone, Timber, and Hide** — gather successfully from an Ore Vein, Fallen Tree, and Beast Remains in Lumo Ruins.
 - [ ] **The Bloodwood Cut** — gather Bloodwood several times in Blood Grove.
 - [ ] **Relics in the Seam** — mine both Crystal Seam and Grave Ore nodes.
 
@@ -69,9 +72,7 @@ Requirements below are the objectives that must be completed, not the prerequisi
 - [ ] **A Fair Exchange** — complete one marketplace purchase and one marketplace sale.
 - [ ] **Oathbound** — join or create a Guild.
 - [ ] **For the Guild** — contribute to a Guild building and complete one Guild mission.
-- [ ] **The Arena Calls** — enter and win one Colosseum match.
 - [ ] **Tournament Tested** — complete a tournament and reach the required placement.
-- [ ] **An Omen Fulfilled** — complete one daily or weekly Prophecy.
 
 ### Creature Hunts
 

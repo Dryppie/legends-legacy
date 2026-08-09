@@ -17,6 +17,10 @@ public sealed record EssenceLoadoutChangedPayload(
     IReadOnlyCollection<Guid> AttunedPlayerEssenceIds,
     int EquippedEssenceCount);
 
+public sealed record EssenceFocusSetPayload(
+    Guid CharacterId,
+    string CreatureDefinitionId);
+
 public sealed record EssenceAscendedPayload(
     Guid CharacterId,
     int AscensionTier,
@@ -41,7 +45,9 @@ public sealed record IdleCombatEncounterCompletedPayload(
     int MonstersDefeated,
     IReadOnlyCollection<string> DefeatedCreatureFamilyKeys,
     int PlayerDefeats,
-    int? LowestWinningHealthPercent);
+    int? LowestWinningHealthPercent,
+    int ActionCount,
+    string? EquippedGatheringType);
 
 public sealed record CharacterCreatedPayload(Guid CharacterId);
 
@@ -65,6 +71,11 @@ public sealed record ColosseumBattleCompletedPayload(
     BattleOutcome Outcome,
     int CharacterRatingBefore,
     int OpponentRatingBefore);
+
+public sealed record ProphecyCompletedPayload(
+    Guid CharacterId,
+    Guid ProphecyId,
+    string Scope);
 
 public sealed record OutboxEquipmentItemPayload(
     string ItemBaseId,

@@ -3,6 +3,7 @@ using Application.Common.Interfaces;
 using Application.Interfaces.Outbox;
 using Application.Interfaces.Services.LL.Achievements;
 using Application.Interfaces.Services.LL.Essences;
+using Application.Interfaces.Services.LL.Quests;
 using Application.UseCases.Achievements.Dtos;
 using Application.UseCases.Outbox;
 using Application.UseCases.Prophecies.Events;
@@ -15,6 +16,7 @@ using Domain.Models.Entities.Creatures;
 using Domain.Models.Essences;
 using Domain.Models.Items.Equipments;
 using Domain.Models.Outbox;
+using Domain.Models.Professions.Gathering.GatheringNodes;
 using Domain.Models.Regions.Areas;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -124,6 +126,48 @@ public sealed class GameEventOutboxTests
     }
 
     [Fact]
+    public async Task Quest_consumer_maps_focus_colosseum_and_daily_prophecy_events()
+    {
+        var characterId = Guid.NewGuid();
+        var progression = new RecordingQuestProgressionService();
+        var consumer = new QuestGameEventOutboxConsumer(progression, CreateJsonOptions());
+
+        await consumer.HandleAsync(
+            CreateOutboxMessage(
+                characterId,
+                GameEventTypes.EssenceFocusSet,
+                new EssenceFocusSetPayload(characterId, "monster.goblin")),
+            CancellationToken.None);
+        await consumer.HandleAsync(
+            CreateOutboxMessage(
+                characterId,
+                GameEventTypes.ColosseumBattleCompleted,
+                new ColosseumBattleCompletedPayload(
+                    characterId,
+                    Guid.NewGuid(),
+                    BattleOutcome.Defeat,
+                    1000,
+                    1000)),
+            CancellationToken.None);
+        await consumer.HandleAsync(
+            CreateOutboxMessage(
+                characterId,
+                GameEventTypes.ProphecyCompleted,
+                new ProphecyCompletedPayload(characterId, Guid.NewGuid(), "Daily")),
+            CancellationToken.None);
+        await consumer.HandleAsync(
+            CreateOutboxMessage(
+                characterId,
+                GameEventTypes.ProphecyCompleted,
+                new ProphecyCompletedPayload(characterId, Guid.NewGuid(), "Weekly")),
+            CancellationToken.None);
+
+        Assert.Equal(
+            ["EssenceFocusSet", "ColosseumBattleStarted", "DailyProphecyCompleted"],
+            progression.Triggers.Select(trigger => trigger.Type));
+    }
+
+    [Fact]
     public async Task Idle_combat_processor_enqueues_one_aggregate_outbox_message_for_many_encounters()
     {
         var characterId = Guid.NewGuid();
@@ -137,7 +181,7 @@ public sealed class GameEventOutboxTests
             TimeSpan.FromMinutes(3),
             area,
             [],
-            null,
+            new EquippedGatheringTool { GatheringType = GatheringType.Mining },
             [
                 CreateEncounter(
                     1,
@@ -218,6 +262,8 @@ public sealed class GameEventOutboxTests
         Assert.Equal(["Goblin", "Wolf", "Goblin"], payload.DefeatedCreatureFamilyKeys);
         Assert.Equal(1, payload.PlayerDefeats);
         Assert.Equal(12, payload.LowestWinningHealthPercent);
+        Assert.Equal(3, payload.ActionCount);
+        Assert.Equal("Mining", payload.EquippedGatheringType);
 
         var prophecyBatch = Assert.Single(publisher.Notifications.OfType<ProphecyProgressBatchNotification>());
         Assert.Equal(6, prophecyBatch.ProgressEvents.Count);
@@ -235,6 +281,20 @@ public sealed class GameEventOutboxTests
 
     private static JsonSerializerOptions CreateJsonOptions() =>
         new(JsonSerializerDefaults.Web);
+
+    private static GameEventOutboxMessage CreateOutboxMessage<TPayload>(
+        Guid characterId,
+        string eventType,
+        TPayload payload) =>
+        new()
+        {
+            Id = Guid.NewGuid(),
+            CharacterId = characterId,
+            EventType = eventType,
+            PayloadJson = JsonSerializer.Serialize(payload, CreateJsonOptions()),
+            CreatedAt = Now,
+            AvailableAt = Now
+        };
 
     private static IdleEncounterRewardFacts CreateEncounter(
         int sequence,
@@ -257,6 +317,25 @@ public sealed class GameEventOutboxTests
     private sealed class FixedTimeProvider(DateTimeOffset now) : TimeProvider
     {
         public override DateTimeOffset GetUtcNow() => now;
+    }
+
+    private sealed class RecordingQuestProgressionService : IQuestProgressionService
+    {
+        public List<QuestTrigger> Triggers { get; } = [];
+
+        public Task<QuestProgressionResult> ProcessAsync(
+            Guid characterId,
+            QuestTrigger trigger,
+            Guid? outboxMessageId,
+            string eventType,
+            CancellationToken cancellationToken)
+        {
+            Triggers.Add(trigger);
+            return Task.FromResult(new QuestProgressionResult(
+                new QuestJournal([], null),
+                [],
+                []));
+        }
     }
 
     private sealed class RecordingGameEventOutbox : IGameEventOutbox

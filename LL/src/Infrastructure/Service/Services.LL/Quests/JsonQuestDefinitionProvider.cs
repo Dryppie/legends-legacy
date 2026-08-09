@@ -11,11 +11,18 @@ public sealed class JsonQuestDefinitionProvider : IQuestDefinitionProvider
         "CombatEncounterCompleted",
         "EssenceAbsorbed",
         "EssenceEquipped",
+        "EssenceFocusSet",
         "EquipmentCrafted",
         "EquipmentEquipped",
         "GatheringToolEquipped",
-        "CharacterLevelReached"
+        "AreaActionCompletedWithTool",
+        "CharacterLevelReached",
+        "ColosseumBattleStarted",
+        "DailyProphecyCompleted"
     ];
+
+    private static readonly HashSet<string> GatheringTypes =
+        ["Mining", "Woodcutting", "Skinning"];
 
     private static readonly HashSet<string> RewardTypes = ["Item"];
     private readonly IReadOnlyDictionary<string, IReadOnlyDictionary<int, QuestDefinition>> _definitions;
@@ -181,6 +188,15 @@ public sealed class JsonQuestDefinitionProvider : IQuestDefinitionProvider
                 {
                     throw new InvalidOperationException(
                         $"Quest '{definition.Id}' has an invalid objective '{objective.Key}'.");
+                }
+
+                if (objective.Type == "AreaActionCompletedWithTool" &&
+                    (string.IsNullOrWhiteSpace(objective.Filters.AreaId) ||
+                     string.IsNullOrWhiteSpace(objective.Filters.GatheringType) ||
+                     !GatheringTypes.Contains(objective.Filters.GatheringType)))
+                {
+                    throw new InvalidOperationException(
+                        $"Quest '{definition.Id}' objective '{objective.Key}' requires a valid area and gathering type.");
                 }
             }
 

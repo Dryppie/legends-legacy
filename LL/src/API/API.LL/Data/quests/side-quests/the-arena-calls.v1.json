@@ -1,0 +1,29 @@
+{
+  "id": "quest.colosseum.the_arena_calls",
+  "version": 1,
+  "title": "The Arena Calls",
+  "summary": "Step into the Colosseum and test yourself against another adventurer.",
+  "category": "Colosseum",
+  "sortOrder": 300,
+  "objectiveMode": "Sequential",
+  "availability": {
+    "minimumLevel": 1,
+    "completedQuestIds": ["quest.region01.into_lumo_ruins"]
+  },
+  "objectives": [
+    {
+      "key": "start_colosseum_battle",
+      "description": "Start a Colosseum battle.",
+      "type": "ColosseumBattleStarted",
+      "requiredAmount": 1,
+      "filters": {},
+      "presentation": {
+        "actionLabel": "Head to the Colosseum",
+        "destinationRoute": "/game/city/colosseum"
+      }
+    }
+  ],
+  "rewards": [
+    { "key": "advancement_stone", "type": "Item", "itemBaseId": "advancement_stone", "quantity": 1 }
+  ]
+}

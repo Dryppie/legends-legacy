@@ -1,5 +1,6 @@
 using System.Text.Json;
 using Application.Interfaces.Services.LL.Quests;
+using Application.UseCases.Outbox;
 using Domain.Models.Items;
 using Domain.Models.Items.Equipments;
 using Domain.Models.Inventories;
@@ -21,7 +22,7 @@ public sealed class QuestSystemTests
 
         var definitions = provider.GetAll();
 
-        Assert.Equal(24, definitions.Count);
+        Assert.Equal(28, definitions.Count);
         Assert.Equal(QuestConstants.TrainingDay, definitions[0].Id);
         var firstHunt = provider.Get(QuestConstants.TrainingDay);
         Assert.Equal(4, firstHunt.Version);
@@ -55,6 +56,28 @@ public sealed class QuestSystemTests
             [QuestConstants.IntoLumoRuins],
             armorAndAdornment.Availability.CompletedQuestIds);
         Assert.Equal(2, armorAndAdornment.Objectives.Count);
+        var stoneTimberAndHide = provider.Get(QuestConstants.StoneTimberAndHide);
+        Assert.Equal("Gathering", stoneTimberAndHide.Category);
+        Assert.Equal("All", stoneTimberAndHide.ObjectiveMode);
+        Assert.Equal(
+            [QuestConstants.IntoLumoRuins],
+            stoneTimberAndHide.Availability.CompletedQuestIds);
+        Assert.Equal(3, stoneTimberAndHide.Objectives.Count);
+        Assert.All(stoneTimberAndHide.Objectives, objective => Assert.Equal(10, objective.RequiredAmount));
+        Assert.Equal(
+            [12, 12, 12],
+            stoneTimberAndHide.Rewards.Select(reward => reward.Quantity));
+        var focusedPursuit = provider.Get(QuestConstants.FocusedPursuit);
+        Assert.Equal("EssenceFocusSet", Assert.Single(focusedPursuit.Objectives).Type);
+        Assert.Equal(
+            "/game/character/essences?view=creatures",
+            focusedPursuit.Objectives[0].Presentation.DestinationRoute);
+        Assert.Equal(
+            "ColosseumBattleStarted",
+            Assert.Single(provider.Get(QuestConstants.TheArenaCalls).Objectives).Type);
+        Assert.Equal(
+            "DailyProphecyCompleted",
+            Assert.Single(provider.Get(QuestConstants.AnOmenFulfilled).Objectives).Type);
         Assert.All(
             definitions.SelectMany(quest => quest.Objectives),
             objective => Assert.False(string.IsNullOrWhiteSpace(objective.Presentation.DestinationRoute)));
@@ -436,6 +459,159 @@ public sealed class QuestSystemTests
 
         Assert.Equal(QuestStatus.Completed, progress.Status);
         Assert.All(progress.Objectives, objective => Assert.NotNull(objective.CompletedAt));
+    }
+
+    [Fact]
+    public async Task Stone_timber_and_hide_counts_Lumo_actions_for_each_equipped_tool_and_grants_materials()
+    {
+        var characterId = Guid.NewGuid();
+        var definitions = CreateDefinitions();
+        var repository = new RecordingQuestRepository(level: 1);
+        repository.Progresses.Add(CreateActiveProgress(
+            characterId,
+            definitions.Get(QuestConstants.StoneTimberAndHide),
+            isPinned: false));
+        var service = new QuestService(
+            repository,
+            definitions,
+            itemBases: new RecordingItemBaseRepository(),
+            inventoryItemFactory: new RecordingInventoryItemFactory(),
+            lootRewardWriter: new RecordingLootRewardWriter(),
+            TimeProvider.System);
+
+        await service.ProcessAsync(
+            characterId,
+            QuestTrigger.CombatCompleted(
+                QuestConstants.BloodGroveAreaId,
+                wonEncounter: false,
+                actionCount: 10,
+                equippedGatheringType: "Mining"),
+            null,
+            "test",
+            CancellationToken.None);
+        var progress = repository.Progresses.Single(
+            x => x.QuestId == QuestConstants.StoneTimberAndHide);
+        Assert.All(progress.Objectives, objective => Assert.Equal(0, objective.CurrentAmount));
+
+        await service.ProcessAsync(
+            characterId,
+            QuestTrigger.CombatCompleted(
+                QuestConstants.LumoRuinsAreaId,
+                wonEncounter: false,
+                actionCount: 7,
+                equippedGatheringType: "Mining"),
+            null,
+            "test",
+            CancellationToken.None);
+        await service.ProcessAsync(
+            characterId,
+            QuestTrigger.CombatCompleted(
+                QuestConstants.LumoRuinsAreaId,
+                wonEncounter: false,
+                actionCount: 10,
+                equippedGatheringType: "Woodcutting"),
+            null,
+            "test",
+            CancellationToken.None);
+        await service.ProcessAsync(
+            characterId,
+            QuestTrigger.CombatCompleted(
+                QuestConstants.LumoRuinsAreaId,
+                wonEncounter: false,
+                actionCount: 10,
+                equippedGatheringType: "Skinning"),
+            null,
+            "test",
+            CancellationToken.None);
+
+        Assert.Equal(7, progress.Objectives.Single(x => x.ObjectiveKey == "mine_in_lumo_ruins").CurrentAmount);
+        Assert.Equal(10, progress.Objectives.Single(x => x.ObjectiveKey == "cut_timber_in_lumo_ruins").CurrentAmount);
+        Assert.Equal(10, progress.Objectives.Single(x => x.ObjectiveKey == "skin_in_lumo_ruins").CurrentAmount);
+        Assert.Equal(QuestStatus.Active, progress.Status);
+
+        var result = await service.ProcessAsync(
+            characterId,
+            QuestTrigger.CombatCompleted(
+                QuestConstants.LumoRuinsAreaId,
+                wonEncounter: false,
+                actionCount: 3,
+                equippedGatheringType: "Mining"),
+            null,
+            "test",
+            CancellationToken.None);
+
+        Assert.Equal(QuestStatus.Completed, progress.Status);
+        Assert.All(progress.Objectives, objective => Assert.NotNull(objective.CompletedAt));
+        Assert.Equal(
+            [("ore", 12), ("rawhide", 12), ("wood", 12)],
+            result.Loot
+                .Select(item => (item.ItemInstance.ItemBaseId, item.Quantity))
+                .OrderBy(item => item.ItemBaseId));
+    }
+
+    [Fact]
+    public async Task Side_activity_quests_complete_from_focus_arena_and_daily_prophecy_events()
+    {
+        var characterId = Guid.NewGuid();
+        var definitions = CreateDefinitions();
+        var repository = new RecordingQuestRepository(level: 1);
+        foreach (var questId in new[]
+                 {
+                     QuestConstants.FocusedPursuit,
+                     QuestConstants.TheArenaCalls,
+                     QuestConstants.AnOmenFulfilled
+                 })
+        {
+            repository.Progresses.Add(CreateActiveProgress(
+                characterId,
+                definitions.Get(questId),
+                isPinned: false));
+        }
+
+        var service = new QuestService(
+            repository,
+            definitions,
+            itemBases: new RecordingItemBaseRepository(),
+            inventoryItemFactory: new RecordingInventoryItemFactory(),
+            lootRewardWriter: new RecordingLootRewardWriter(),
+            TimeProvider.System);
+
+        await service.ProcessAsync(
+            characterId,
+            QuestTrigger.EssenceFocusSet(),
+            null,
+            GameEventTypes.EssenceFocusSet,
+            CancellationToken.None);
+
+        Assert.Equal(
+            QuestStatus.Completed,
+            repository.Progresses.Single(x => x.QuestId == QuestConstants.FocusedPursuit).Status);
+        Assert.Equal(
+            QuestStatus.Active,
+            repository.Progresses.Single(x => x.QuestId == QuestConstants.TheArenaCalls).Status);
+        Assert.Equal(
+            QuestStatus.Active,
+            repository.Progresses.Single(x => x.QuestId == QuestConstants.AnOmenFulfilled).Status);
+
+        await service.ProcessAsync(
+            characterId,
+            QuestTrigger.ColosseumBattleStarted(),
+            null,
+            GameEventTypes.ColosseumBattleCompleted,
+            CancellationToken.None);
+        await service.ProcessAsync(
+            characterId,
+            QuestTrigger.DailyProphecyCompleted(),
+            null,
+            GameEventTypes.ProphecyCompleted,
+            CancellationToken.None);
+
+        Assert.All(
+            repository.Progresses.Where(progress =>
+                progress.QuestId is QuestConstants.FocusedPursuit or
+                    QuestConstants.TheArenaCalls or
+                    QuestConstants.AnOmenFulfilled),
+            progress => Assert.Equal(QuestStatus.Completed, progress.Status));
     }
 
     [Fact]

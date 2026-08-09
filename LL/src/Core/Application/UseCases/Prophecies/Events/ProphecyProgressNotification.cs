@@ -1,5 +1,7 @@
+using Application.Interfaces.Outbox;
 using Application.Interfaces.WebSockets;
 using Application.Interfaces.Services.LL.Prophecies;
+using Application.UseCases.Outbox;
 using Application.WebSockets.Contracts;
 using MediatR;
 
@@ -13,13 +15,16 @@ public sealed class ProphecyProgressNotificationHandler : INotificationHandler<P
 {
     private readonly IProphecyService _prophecyService;
     private readonly IGameEventPublisher _eventPublisher;
+    private readonly IGameEventOutbox _outbox;
 
     public ProphecyProgressNotificationHandler(
         IProphecyService prophecyService,
-        IGameEventPublisher eventPublisher)
+        IGameEventPublisher eventPublisher,
+        IGameEventOutbox outbox)
     {
         _prophecyService = prophecyService;
         _eventPublisher = eventPublisher;
+        _outbox = outbox;
     }
 
     public async Task Handle(ProphecyProgressNotification notification, CancellationToken cancellationToken)
@@ -28,6 +33,7 @@ public sealed class ProphecyProgressNotificationHandler : INotificationHandler<P
 
         foreach (var update in updates)
         {
+            await EnqueueCompletionAsync(update, cancellationToken);
             await _eventPublisher.PublishAsync(
                 new Audience.Character(update.CharacterId),
                 new ProphecyProgressedMsg(
@@ -43,19 +49,34 @@ public sealed class ProphecyProgressNotificationHandler : INotificationHandler<P
                     update.Completed));
         }
     }
+
+    private Task EnqueueCompletionAsync(
+        ProphecyProgressUpdate update,
+        CancellationToken cancellationToken) =>
+        !update.Completed || !update.Scope.Equals("Daily", StringComparison.OrdinalIgnoreCase)
+            ? Task.CompletedTask
+            : _outbox.EnqueueAsync(
+                GameEventTypes.ProphecyCompleted,
+                new ProphecyCompletedPayload(update.CharacterId, update.ProphecyId, update.Scope),
+                update.CharacterId,
+                null,
+                cancellationToken);
 }
 
 public sealed class ProphecyProgressBatchNotificationHandler : INotificationHandler<ProphecyProgressBatchNotification>
 {
     private readonly IProphecyService _prophecyService;
     private readonly IGameEventPublisher _eventPublisher;
+    private readonly IGameEventOutbox _outbox;
 
     public ProphecyProgressBatchNotificationHandler(
         IProphecyService prophecyService,
-        IGameEventPublisher eventPublisher)
+        IGameEventPublisher eventPublisher,
+        IGameEventOutbox outbox)
     {
         _prophecyService = prophecyService;
         _eventPublisher = eventPublisher;
+        _outbox = outbox;
     }
 
     public async Task Handle(ProphecyProgressBatchNotification notification, CancellationToken cancellationToken)
@@ -64,6 +85,7 @@ public sealed class ProphecyProgressBatchNotificationHandler : INotificationHand
 
         foreach (var update in updates)
         {
+            await EnqueueCompletionAsync(update, cancellationToken);
             await _eventPublisher.PublishAsync(
                 new Audience.Character(update.CharacterId),
                 new ProphecyProgressedMsg(
@@ -79,4 +101,16 @@ public sealed class ProphecyProgressBatchNotificationHandler : INotificationHand
                     update.Completed));
         }
     }
+
+    private Task EnqueueCompletionAsync(
+        ProphecyProgressUpdate update,
+        CancellationToken cancellationToken) =>
+        !update.Completed || !update.Scope.Equals("Daily", StringComparison.OrdinalIgnoreCase)
+            ? Task.CompletedTask
+            : _outbox.EnqueueAsync(
+                GameEventTypes.ProphecyCompleted,
+                new ProphecyCompletedPayload(update.CharacterId, update.ProphecyId, update.Scope),
+                update.CharacterId,
+                null,
+                cancellationToken);
 }

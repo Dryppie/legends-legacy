@@ -20,15 +20,15 @@ import {
 } from '../../../core/services/client-side/sidebar-layout/sidebar-layout-preference.service';
 
 @Component({
-    selector: 'app-settings',
-    imports: [
-        CommonModule,
-        SignupComponent,
-        FormsModule,
-        RegularButtonComponent,
-        DefaultHeaderComponent,
-    ],
-    templateUrl: './settings.component.html'
+  selector: 'app-settings',
+  imports: [
+    CommonModule,
+    SignupComponent,
+    FormsModule,
+    RegularButtonComponent,
+    DefaultHeaderComponent,
+  ],
+  templateUrl: './settings.component.html',
 })
 export class SettingsComponent {
   userInfo: UserInfoDto | null = null; // Initialize it to null first
@@ -63,7 +63,7 @@ export class SettingsComponent {
     });
   }
 
-  version = '1.0.0'; // or pull from environment
+  version = '0.5.0'; // or pull from environment
 
   ngOnInit() {
     this.authService.getUserInfo().subscribe((userInfo) => {

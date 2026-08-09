@@ -397,13 +397,15 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
     public async Task GrantCombatXpToAttunedEssencesAsync(Guid characterId, int xp, CancellationToken cancellationToken)
     {
         var totalGranted = 0;
+        var factors = await GetBonusFactorsAsync(characterId, DateTimeOffset.UtcNow, cancellationToken);
+        var adjustedXp = xp.ApplyPositiveBps(factors.Get(BonusKind.EssenceExperienceGainBps));
         var activeSlots = await GetActiveSlotsAsync(characterId, cancellationToken);
         foreach (var slot in activeSlots.Where(x => x.PlayerEssence is not null))
         {
             var definition = _definitions.GetById(slot.PlayerEssence!.EssenceDefinitionId);
             if (definition is not null)
             {
-                var result = _progression.GrantXp(slot.PlayerEssence, definition, xp);
+                var result = _progression.GrantXp(slot.PlayerEssence, definition, adjustedXp);
                 totalGranted += result.XpGained;
             }
         }

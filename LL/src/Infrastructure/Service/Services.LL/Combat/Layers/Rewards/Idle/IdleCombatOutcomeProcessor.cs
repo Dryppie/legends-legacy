@@ -111,7 +111,9 @@ public sealed class IdleCombatOutcomeProcessor : ICombatOutcomeProcessor
                 defeatedCreatures.Count,
                 [.. defeatedCreatures.Select(GetCreatureFamilyKey)],
                 facts.Encounters.Count(x => x.Outcome == BattleOutcome.Defeat),
-                lowestWinningHealthPercent == 0 ? null : lowestWinningHealthPercent),
+                lowestWinningHealthPercent == 0 ? null : lowestWinningHealthPercent,
+                facts.Encounters.Count,
+                facts.EquippedTool?.GatheringType.ToString()),
             facts.CharacterId,
             null,
             cancellationToken);

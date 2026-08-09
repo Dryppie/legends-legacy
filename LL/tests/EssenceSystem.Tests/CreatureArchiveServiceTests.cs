@@ -1,5 +1,7 @@
+using Application.Interfaces.Outbox;
 using Application.Interfaces.Services.LL.Dungeons;
 using Application.Interfaces.Services.LL.Essences;
+using Application.UseCases.Outbox;
 using Domain.Models.Bonuses;
 using Domain.Models.Combat.Abilities;
 using Domain.Models.Dungeons;
@@ -204,7 +206,8 @@ public sealed class CreatureArchiveServiceTests
                 LastDefeatedAtUtc = DateTimeOffset.UtcNow
             });
         await db.SaveChangesAsync();
-        var service = CreateService(db);
+        var outbox = new RecordingGameEventOutbox();
+        var service = CreateService(db, outbox);
 
         var archive = await service.SetEssenceFocusAsync(characterId, "monster.forest_wolf", CancellationToken.None);
 
@@ -215,6 +218,11 @@ public sealed class CreatureArchiveServiceTests
         Assert.NotNull(archive.EssenceFocusAvailableAtUtc);
         Assert.True(await service.IsEssenceFocusAsync(characterId, "monster.forest_wolf", CancellationToken.None));
         Assert.False(await service.IsEssenceFocusAsync(characterId, "monster.cave_bat", CancellationToken.None));
+        var message = Assert.Single(outbox.Messages);
+        Assert.Equal(GameEventTypes.EssenceFocusSet, message.EventType);
+        Assert.Equal(characterId, message.CharacterId);
+        var payload = Assert.IsType<EssenceFocusSetPayload>(message.Payload);
+        Assert.Equal("monster.forest_wolf", payload.CreatureDefinitionId);
     }
 
     [Fact]
@@ -455,7 +463,9 @@ public sealed class CreatureArchiveServiceTests
         return new LLDbContext(options);
     }
 
-    private static CreatureArchiveService CreateService(LLDbContext db)
+    private static CreatureArchiveService CreateService(
+        LLDbContext db,
+        IGameEventOutbox? outbox = null)
     {
         var definitions = new FakeDefinitionRepository();
         var lootTables = new FakeCreatureEssenceLootTableRepository(definitions);
@@ -464,7 +474,8 @@ public sealed class CreatureArchiveServiceTests
             definitions,
             lootTables,
             CreateCodexCollectionService(db, definitions, lootTables),
-            new FakeDungeonDefinitions());
+            new FakeDungeonDefinitions(),
+            outbox);
     }
 
     private static EssenceCodexCollectionService CreateCodexCollectionService(
@@ -488,6 +499,27 @@ public sealed class CreatureArchiveServiceTests
             EssenceDefinitionId = essenceDefinitionId,
             AscensionTier = ascensionTier
         };
+
+    private sealed class RecordingGameEventOutbox : IGameEventOutbox
+    {
+        public List<RecordedOutboxMessage> Messages { get; } = [];
+
+        public Task EnqueueAsync<TPayload>(
+            string eventType,
+            TPayload payload,
+            Guid? characterId,
+            Guid? accountId,
+            CancellationToken cancellationToken)
+        {
+            Messages.Add(new RecordedOutboxMessage(eventType, payload!, characterId));
+            return Task.CompletedTask;
+        }
+    }
+
+    private sealed record RecordedOutboxMessage(
+        string EventType,
+        object Payload,
+        Guid? CharacterId);
 
     private sealed class FakeCollectionDefinitionProvider : IEssenceCodexCollectionDefinitionProvider
     {
