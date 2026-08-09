@@ -1,6 +1,10 @@
 <div
   *ngIf="tabs.length > 1"
-  class="ll-segmented flex w-full flex-wrap"
+  class="ll-segmented ll-scrollbar-none flex w-full"
+  [ngClass]="{
+    'flex-nowrap overflow-x-auto overscroll-x-contain': scrollable,
+    'flex-wrap': !scrollable,
+  }"
   role="tablist"
 >
   <button
@@ -9,8 +13,9 @@
     class="ll-segmented-button"
     [ngClass]="{
       'll-segmented-button-active': activeTab === tab,
-      'w-1/3': tabs.length >= 6,
-      'flex-1': tabs.length < 6,
+      'min-w-max flex-none': scrollable,
+      'w-1/3': !scrollable && tabs.length >= 6,
+      'flex-1': !scrollable && tabs.length < 6,
     }"
     [attr.aria-selected]="activeTab === tab"
     [attr.data-tour]="getTourId(tab)"

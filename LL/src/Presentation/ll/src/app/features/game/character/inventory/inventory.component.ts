@@ -1,5 +1,12 @@
 import { NgClass, NgFor, NgIf } from '@angular/common';
-import { Component, computed, effect, OnInit, untracked } from '@angular/core';
+import {
+  Component,
+  computed,
+  effect,
+  OnInit,
+  signal,
+  untracked,
+} from '@angular/core';
 import { SidebarSection } from '../../../../shared/models/sidebar-item';
 import { DefaultHeaderComponent } from '../../../../shared/components/default-header/default-header.component';
 import { InventoryItem } from '../../../../shared/models/inventoryItem';
@@ -29,6 +36,7 @@ import {
   TUTORIAL_STEP_EQUIP_GATHERING_TOOL,
   TUTORIAL_ONE_HANDED_WEAPON_ITEM_BASE_IDS,
 } from '../../../../shared/models/tutorial';
+type MobileInventoryView = 'Inventory' | 'Equipment';
 
 @Component({
   selector: 'app-inventory',
@@ -50,6 +58,12 @@ import {
   templateUrl: './inventory.component.html',
 })
 export class InventoryComponent implements OnInit {
+  readonly mobileView = signal<MobileInventoryView>('Inventory');
+  readonly mobileViewTabs: readonly MobileInventoryView[] = [
+    'Inventory',
+    'Equipment',
+  ];
+
   tabs: SidebarSection[] = [
     {
       id: 'all',
@@ -255,6 +269,12 @@ export class InventoryComponent implements OnInit {
 
   setActiveTab(tabLabel: string) {
     this.activeTab = tabLabel;
+  }
+
+  selectMobileView(view: string): void {
+    if (view === 'Inventory' || view === 'Equipment') {
+      this.mobileView.set(view);
+    }
   }
 
   get filteredItems(): InventoryItem[] {

@@ -3,10 +3,12 @@ import { Component } from '@angular/core';
 import { SessionSummaryService } from '../../../core/services/client-side/session-summary/session-summary.service';
 import { CombatSessionDto } from '../../models/Dtos/combatResultDto';
 import { InventoryItem } from '../../models/inventoryItem';
+import { ItemInstance } from '../../models/item';
+import { ItemComponent } from '../item/item.component';
 
 interface LootSummaryItem {
   key: string;
-  name: string;
+  itemInstance: ItemInstance;
   quantity: number;
 }
 
@@ -24,9 +26,9 @@ interface RewardSection {
 }
 
 @Component({
-    selector: 'app-session-summary-popup',
-    imports: [NgIf, NgFor],
-    templateUrl: './session-summary-popup.component.html'
+  selector: 'app-session-summary-popup',
+  imports: [NgIf, NgFor, ItemComponent],
+  templateUrl: './session-summary-popup.component.html',
 })
 export class SessionSummaryPopupComponent {
   constructor(public svc: SessionSummaryService) {}
@@ -111,13 +113,16 @@ export class SessionSummaryPopupComponent {
     return loot.key;
   }
 
+  trackSection(_index: number, section: RewardSection): string {
+    return section.key;
+  }
+
   private compactLoot(items: InventoryItem[]): LootSummaryItem[] {
     const compacted = new Map<string, LootSummaryItem>();
 
     for (const item of items) {
       const itemBase = item.itemInstance.itemBase;
-      const name = item.itemInstance.displayName || itemBase.name;
-      const key = itemBase.id || name;
+      const key = itemBase.id || item.itemInstance.displayName || itemBase.name;
       const existing = compacted.get(key);
 
       if (existing) {
@@ -127,14 +132,20 @@ export class SessionSummaryPopupComponent {
 
       compacted.set(key, {
         key,
-        name,
+        itemInstance: item.itemInstance,
         quantity: item.quantity,
       });
     }
 
     return Array.from(compacted.values()).sort((a, b) =>
-      a.name.localeCompare(b.name),
+      this.itemName(a.itemInstance).localeCompare(
+        this.itemName(b.itemInstance),
+      ),
     );
+  }
+
+  private itemName(item: ItemInstance): string {
+    return item.displayName || item.itemBase.name;
   }
 
   private positiveMetrics(metrics: RewardMetric[]): RewardMetric[] {

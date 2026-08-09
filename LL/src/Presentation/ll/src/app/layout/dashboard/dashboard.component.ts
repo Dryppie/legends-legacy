@@ -23,6 +23,14 @@ import { GameHeaderComponent } from './game-header/game-header.component';
   templateUrl: './dashboard.component.html',
 })
 export class DashboardComponent implements OnInit {
+  private static readonly sidebarSwipeDistance = 64;
+  private static readonly sidebarSwipeFlickDistance = 32;
+  private static readonly sidebarSwipeFlickVelocity = 0.45;
+  private static readonly sidebarSwipeDirectionRatio = 1.25;
+  private static readonly sidebarSwipeIntentDistance = 10;
+  private static readonly sidebarSwipeStartInset = 24;
+  private static readonly sidebarSwipeEndInset = 112;
+
   isSidebarOpen = false;
   isScreenSmall = false;
   isScreenLarge = false;
@@ -31,12 +39,18 @@ export class DashboardComponent implements OnInit {
   isFloatingDrawerTall = false;
   isFloatingChatOpen = false;
   isMobileChatExpanded = false;
+  isSidebarSwiping = false;
+  sidebarSwipeOffset = 0;
   isResolvingAction = false;
   readonly bootstrapLoaded: Signal<boolean>;
   readonly bootstrapLoading: Signal<boolean>;
   readonly bootstrapError: Signal<string | null>;
   readonly idleCombatError: Signal<string | null>;
   readonly chatLayout;
+  private sidebarSwipeTouchIdentifier: number | null = null;
+  private sidebarSwipeStartX = 0;
+  private sidebarSwipeStartY = 0;
+  private sidebarSwipeStartTime = 0;
 
   constructor(
     private readonly state: CharacterActionsStateService,
@@ -87,6 +101,7 @@ export class DashboardComponent implements OnInit {
 
     if (!nextIsScreenSmall) {
       this.isMobileChatExpanded = false;
+      this.cancelActiveSidebarSwipe();
     }
   }
 
@@ -97,6 +112,86 @@ export class DashboardComponent implements OnInit {
     if (this.isSidebarOpen) {
       this.isMobileChatExpanded = false;
     }
+  }
+
+  startSidebarSwipe(event: TouchEvent): void {
+    const eventTarget = event.target;
+    const startedOnInteractiveElement =
+      eventTarget instanceof Element &&
+      !!eventTarget.closest(
+        'a, button, input, select, textarea, [contenteditable="true"], [role="button"]',
+      );
+
+    const touch = event.changedTouches.item(0);
+    if (
+      !this.isScreenSmall ||
+      this.isSidebarOpen ||
+      event.touches.length !== 1 ||
+      !touch ||
+      touch.clientX < DashboardComponent.sidebarSwipeStartInset ||
+      touch.clientX > DashboardComponent.sidebarSwipeEndInset ||
+      startedOnInteractiveElement
+    ) {
+      return;
+    }
+
+    this.sidebarSwipeTouchIdentifier = touch.identifier;
+    this.sidebarSwipeStartX = touch.clientX;
+    this.sidebarSwipeStartY = touch.clientY;
+    this.sidebarSwipeStartTime = event.timeStamp;
+    this.sidebarSwipeOffset = 0;
+  }
+
+  updateSidebarSwipe(event: TouchEvent): void {
+    const touch = this.findTrackedTouch(event.touches);
+    if (!touch) return;
+
+    if (this.updateSidebarSwipePosition(touch.clientX, touch.clientY)) {
+      event.preventDefault();
+    }
+  }
+
+  finishSidebarSwipe(event: TouchEvent): void {
+    const touch = this.findTrackedTouch(event.changedTouches);
+    if (!touch) return;
+
+    this.updateSidebarSwipePosition(touch.clientX, touch.clientY);
+    if (!this.isSidebarSwiping) {
+      this.resetSidebarSwipePointer();
+      return;
+    }
+
+    event.preventDefault();
+    const horizontalDistance = touch.clientX - this.sidebarSwipeStartX;
+    const verticalDistance = Math.abs(touch.clientY - this.sidebarSwipeStartY);
+    const elapsedTime = Math.max(
+      event.timeStamp - this.sidebarSwipeStartTime,
+      1,
+    );
+    const horizontalVelocity = horizontalDistance / elapsedTime;
+    const hasOpeningDirection =
+      horizontalDistance >=
+      verticalDistance * DashboardComponent.sidebarSwipeDirectionRatio;
+    const isOpeningSwipe =
+      hasOpeningDirection &&
+      (horizontalDistance >= DashboardComponent.sidebarSwipeDistance ||
+        (horizontalDistance >= DashboardComponent.sidebarSwipeFlickDistance &&
+          horizontalVelocity >= DashboardComponent.sidebarSwipeFlickVelocity));
+
+    if (isOpeningSwipe) {
+      this.isFloatingChatOpen = false;
+      this.isFloatingDrawerOpen = false;
+      this.isMobileChatExpanded = false;
+    }
+
+    this.isSidebarOpen = isOpeningSwipe;
+    this.isSidebarSwiping = false;
+    this.sidebarSwipeOffset = 0;
+    this.resetSidebarSwipePointer();
+  }
+
+  cancelSidebarSwipe(): void {
+    this.cancelActiveSidebarSwipe();
   }
 
   toggleMobileChat(): void {
@@ -122,11 +217,14 @@ export class DashboardComponent implements OnInit {
   openSidebar() {
     this.isFloatingChatOpen = false;
     this.isFloatingDrawerOpen = false;
+    this.isMobileChatExpanded = false;
+    this.cancelActiveSidebarSwipe();
     this.isSidebarOpen = true;
   }
 
   closeSidebar() {
     if (this.isScreenSmall) {
+      this.cancelActiveSidebarSwipe();
       this.isSidebarOpen = false;
     }
   }
@@ -139,5 +237,67 @@ export class DashboardComponent implements OnInit {
 
   retryOfflineProgress(): void {
     this.state.retryIdleCombatResolution();
+  }
+
+  private cancelActiveSidebarSwipe(): void {
+    this.isSidebarSwiping = false;
+    this.sidebarSwipeOffset = 0;
+    this.resetSidebarSwipePointer();
+  }
+
+  private updateSidebarSwipePosition(
+    clientX: number,
+    clientY: number,
+  ): boolean {
+    const horizontalDistance = clientX - this.sidebarSwipeStartX;
+    const verticalDistance = Math.abs(clientY - this.sidebarSwipeStartY);
+
+    if (!this.isSidebarSwiping) {
+      const movedDistance = Math.max(
+        Math.abs(horizontalDistance),
+        verticalDistance,
+      );
+      if (movedDistance < DashboardComponent.sidebarSwipeIntentDistance) {
+        return false;
+      }
+
+      const hasHorizontalIntent =
+        horizontalDistance > 0 &&
+        horizontalDistance >=
+          verticalDistance * DashboardComponent.sidebarSwipeDirectionRatio;
+      if (!hasHorizontalIntent) {
+        this.cancelActiveSidebarSwipe();
+        return false;
+      }
+
+      this.isSidebarSwiping = true;
+    }
+
+    const targetSidebarWidth = window.innerWidth * 0.64;
+    this.sidebarSwipeOffset = Math.min(
+      Math.max(horizontalDistance, 0),
+      targetSidebarWidth,
+    );
+    return true;
+  }
+
+  private findTrackedTouch(touches: TouchList): Touch | null {
+    if (this.sidebarSwipeTouchIdentifier === null) return null;
+
+    for (let index = 0; index < touches.length; index += 1) {
+      const touch = touches.item(index);
+      if (touch?.identifier === this.sidebarSwipeTouchIdentifier) {
+        return touch;
+      }
+    }
+
+    return null;
+  }
+
+  private resetSidebarSwipePointer(): void {
+    this.sidebarSwipeTouchIdentifier = null;
+    this.sidebarSwipeStartX = 0;
+    this.sidebarSwipeStartY = 0;
+    this.sidebarSwipeStartTime = 0;
   }
 }

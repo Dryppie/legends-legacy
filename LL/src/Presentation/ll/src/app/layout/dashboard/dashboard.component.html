@@ -1,4 +1,10 @@
-<div class="ll-app-frame">
+<div
+  class="ll-app-frame"
+  (touchstart)="startSidebarSwipe($event)"
+  (touchmove)="updateSidebarSwipe($event)"
+  (touchend)="finishSidebarSwipe($event)"
+  (touchcancel)="cancelSidebarSwipe()"
+>
   <div class="flex h-full min-h-0 w-full flex-auto flex-col">
     <app-game-header
       *ngIf="isScreenSmall"
@@ -10,10 +16,24 @@
       <nav
         class="relative z-30 h-full shrink-0 overflow-hidden transition-[width] duration-200 sm:w-auto"
         [ngClass]="
-          isScreenSmall ? (isSidebarOpen ? 'w-[64vw]' : 'w-0') : 'w-auto'
+          isScreenSmall
+            ? isSidebarSwiping
+              ? ''
+              : isSidebarOpen
+                ? 'w-[64vw]'
+                : 'w-0'
+            : 'w-auto'
         "
-        [attr.aria-hidden]="isScreenSmall && !isSidebarOpen"
-        [attr.inert]="isScreenSmall && !isSidebarOpen ? '' : null"
+        [style.width.px]="
+          isScreenSmall && isSidebarSwiping ? sidebarSwipeOffset : null
+        "
+        [style.transition]="isSidebarSwiping ? 'none' : null"
+        [attr.aria-hidden]="
+          isScreenSmall && !isSidebarOpen && !isSidebarSwiping
+        "
+        [attr.inert]="
+          isScreenSmall && !isSidebarOpen && !isSidebarSwiping ? '' : null
+        "
       >
         <app-sidebar
           (itemTapped)="closeSidebar()"

@@ -40,10 +40,27 @@
     </div>
   </app-default-header>
 
+  <app-filter-tabs
+    *ngIf="isBrowseMode"
+    class="flex-none lg:hidden"
+    data-tour="mobile-inventory-view-tabs"
+    [tabs]="mobileViewTabs"
+    [activeTab]="mobileView()"
+    tourTabPrefix="mobile-inventory-view-tab"
+    (tabSelected)="selectMobileView($event)"
+  ></app-filter-tabs>
+
   <div
     class="grid min-h-0 flex-1 grid-cols-1 gap-4 overflow-hidden lg:grid-cols-[minmax(0,1fr)_25rem]"
   >
-    <div class="ll-panel flex min-h-0 flex-col overflow-hidden">
+    <div
+      class="ll-panel min-h-0 flex-col overflow-hidden"
+      [ngClass]="
+        !isBrowseMode || mobileView() === 'Inventory'
+          ? 'flex'
+          : 'hidden lg:flex'
+      "
+    >
       <div
         *ngIf="isScrapMode"
         class="flex flex-wrap items-center justify-between gap-3 border-b border-light_gray/70 px-4 py-3"
@@ -66,6 +83,7 @@
         *ngIf="isBrowseMode"
         [tabs]="tabLabels"
         [activeTab]="activeTab"
+        [scrollable]="true"
         (tabSelected)="setActiveTab($event)"
         tourTabPrefix="inventory-tab"
         class="flex-none"
@@ -206,6 +224,7 @@
     <aside
       *ngIf="isBrowseMode"
       class="ll-panel min-h-0 overflow-y-auto p-4"
+      [ngClass]="mobileView() === 'Inventory' ? 'hidden lg:block' : 'block'"
       data-tour="equipped-overview"
     >
       <div class="flex flex-col items-center space-y-2">

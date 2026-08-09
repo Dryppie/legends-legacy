@@ -34,20 +34,23 @@
         </div>
       </div>
 
-      <div class="mt-4 space-y-3" *ngIf="hasRewards(combatSession); else noRewards">
+      <div
+        class="mt-4 space-y-3"
+        *ngIf="hasRewards(combatSession); else noRewards"
+      >
         <section
           class="ll-card p-3"
-          *ngFor="let section of rewardSections(combatSession)"
+          *ngFor="
+            let section of rewardSections(combatSession);
+            trackBy: trackSection
+          "
         >
           <div>
             <div class="ll-eyebrow">{{ section.title }}</div>
             <p class="ll-copy text-xs">{{ section.description }}</p>
           </div>
 
-          <div
-            *ngIf="section.metrics.length"
-            class="mt-2 flex flex-wrap gap-2"
-          >
+          <div *ngIf="section.metrics.length" class="mt-2 flex flex-wrap gap-2">
             <span
               *ngFor="let metric of section.metrics"
               class="ll-badge ll-badge-success"
@@ -61,7 +64,7 @@
               class="flex min-w-16 items-center gap-2 rounded border border-primary/25 bg-black/20 px-2 py-1"
               *ngFor="let loot of section.items; trackBy: trackLoot"
             >
-              <div class="ll-text-success">{{ loot.name }}</div>
+              <app-item [item]="loot.itemInstance"></app-item>
               <div class="text-secondary">x{{ loot.quantity }}</div>
             </div>
           </div>
@@ -72,7 +75,8 @@
         <div class="ll-card mt-4 p-3 text-center">
           <div class="ll-eyebrow">No rewards this interval</div>
           <p class="ll-copy mt-1 text-xs">
-            Your action is still active and can be resolved again after the next encounter.
+            Your action is still active and can be resolved again after the next
+            encounter.
           </p>
         </div>
       </ng-template>
@@ -124,7 +128,8 @@
         <div
           class="ll-stat-card min-w-0 p-2"
           *ngIf="
-            temperingSession.temperingSummary.qualityIncreases > 0 as qualityIncreases
+            temperingSession.temperingSummary.qualityIncreases >
+            0 as qualityIncreases
           "
         >
           <div class="ll-text-success">
