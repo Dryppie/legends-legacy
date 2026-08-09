@@ -19,13 +19,10 @@ import { CombatComponent } from '../../../../shared/components/combat/combat.com
 import { CombatStateService } from '../../../../core/state/combat-state/combat-state.service';
 import { BattleType } from '../../../../core/state/combat-state/combatState';
 import { CombatService } from '../../../../core/services/client-side/combat/combat.service';
-import { TutorialStateService } from '../../../../core/services/api/tutorial/tutorial-state.service';
+import { QuestStateService } from '../../../../core/services/api/quest/quest-state.service';
 import { CharacterActionsStateService } from '../../../../core/services/api/character-actions/character-actions.state.service';
 import { CharacterActionType } from '../../../../shared/models/enums/characterActionType';
-import {
-  TUTORIAL_STEP_DEFEAT_TRAINING_CREATURE,
-  TUTORIAL_TRAINING_GROUNDS_AREA_ID,
-} from '../../../../shared/models/tutorial';
+import { TRAINING_GROUNDS_AREA_ID } from '../../../../shared/models/quest';
 import { DefaultHeaderComponent } from '../../../../shared/components/default-header/default-header.component';
 
 @Component({
@@ -57,7 +54,7 @@ export class RegionComponent implements OnInit, OnDestroy {
     private regionService: RegionService,
     public readonly combatStateService: CombatStateService,
     private readonly combatService: CombatService,
-    private readonly tutorialState: TutorialStateService,
+    private readonly questState: QuestStateService,
     characterActions: CharacterActionsStateService,
   ) {
     this.activeBattle = computed(() => {
@@ -72,14 +69,8 @@ export class RegionComponent implements OnInit, OnDestroy {
     });
 
     effect(() => {
-      const tutorial = this.tutorialState.state();
+      this.questState.areaAccess();
       this.applyRegionView();
-      if (
-        tutorial?.currentStep === TUTORIAL_STEP_DEFEAT_TRAINING_CREATURE &&
-        !tutorial.isCompleted
-      ) {
-        this.applyRegionView();
-      }
     });
   }
 
@@ -154,21 +145,15 @@ export class RegionComponent implements OnInit, OnDestroy {
     }
 
     this.region = this.withTargetAreaFirst(
-      this.withTutorialAreaAvailability(this.sourceRegion),
+      this.withQuestAreaAvailability(this.sourceRegion),
     );
   }
 
-  private withTutorialAreaAvailability(region: Region): Region {
-    const tutorial = this.tutorialState.state();
-    const showTrainingArea =
-      tutorial?.currentStep === TUTORIAL_STEP_DEFEAT_TRAINING_CREATURE &&
-      !tutorial.isCompleted;
-
+  private withQuestAreaAvailability(region: Region): Region {
     return {
       ...region,
       areas: region.areas.filter(
-        (area) =>
-          area.id !== TUTORIAL_TRAINING_GROUNDS_AREA_ID || showTrainingArea,
+        (area) => this.questState.accessFor(area.id)?.isVisible !== false,
       ),
     };
   }
@@ -179,7 +164,7 @@ export class RegionComponent implements OnInit, OnDestroy {
 
   private dismissTrainingSummaryOutsideTrainingArea(): void {
     if (
-      this.targetAreaId !== TUTORIAL_TRAINING_GROUNDS_AREA_ID &&
+      this.targetAreaId !== TRAINING_GROUNDS_AREA_ID &&
       this.combatStateService.getIsCombatActive(BattleType.Training)()
     ) {
       this.combatService.stop(BattleType.Training);

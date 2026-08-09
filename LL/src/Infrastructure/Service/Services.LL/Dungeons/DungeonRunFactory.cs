@@ -4,6 +4,7 @@ using Application.Interfaces.Services.LL.Dungeons;
 using Domain.Models.Dungeons.Definitions.Rooms;
 using Domain.Models.Dungeons.Runs;
 using Services.LL.Interfaces;
+using Domain.Models.Items.Equipments.Slots;
 
 namespace Services.LL.Dungeons;
 
@@ -30,7 +31,8 @@ public sealed class DungeonRunFactory
         ValidateRestSiteCount(dungeon, delve);
         var snapshot = await _snapshotService.CreateAsync(characterId, ct);
 
-        return CreateRun(characterId, snapshot.Id, dungeon, delve, seed);
+        var startedWithoutWeapon = snapshot.Equipment.All(x => x.Slot != EquipmentSlotType.MainHand);
+        return CreateRun(characterId, snapshot.Id, dungeon, delve, seed, startedWithoutWeapon);
     }
 
     public DungeonRun CreateForSimulation(string dungeonDefinitionId, int seed)
@@ -39,7 +41,7 @@ public sealed class DungeonRunFactory
         var delve = _delves.GetForDungeon(dungeonDefinitionId);
         ValidateRestSiteCount(dungeon, delve);
 
-        return CreateRun(Guid.Empty, null, dungeon, delve, seed);
+        return CreateRun(Guid.Empty, null, dungeon, delve, seed, false);
     }
 
     private static DungeonRun CreateRun(
@@ -47,7 +49,8 @@ public sealed class DungeonRunFactory
         Guid? snapshotId,
         DungeonDefinition dungeon,
         DungeonDelveDefinition delve,
-        int seed)
+        int seed,
+        bool startedWithoutWeapon)
     {
 
         var layoutRandom = new Random(seed);
@@ -65,6 +68,7 @@ public sealed class DungeonRunFactory
             CurrentRoomIndex = 0,
             State = new DungeonRunState
             {
+                StartedWithoutWeapon = startedWithoutWeapon,
                 Vigor = 100,
                 VigorState = "Steady",
                 CurrentSection = 1,

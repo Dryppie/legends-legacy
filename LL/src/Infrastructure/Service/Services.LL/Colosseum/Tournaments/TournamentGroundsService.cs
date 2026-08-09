@@ -1,5 +1,6 @@
 using Application.Interfaces.WebSockets;
 using Application.Interfaces.Services.LL.Colosseum;
+using Application.Interfaces.Services.LL.Achievements;
 using Application.Interfaces.Services.LL.Entities;
 using Domain.Models.Colosseum;
 using Domain.Models.Colosseum.Tournaments;
@@ -48,6 +49,7 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
     private readonly ITournamentLockService _tournamentLockService;
     private readonly TimeProvider _timeProvider;
     private readonly TournamentGroundsOptions _options;
+    private readonly IAchievementService? _achievementService;
 
     public TournamentGroundsService(
         ITournamentGroundsRepository tournaments,
@@ -60,7 +62,8 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
         IGameRealtimeBroadcaster gameRealtime,
         ITournamentLockService tournamentLockService,
         TimeProvider timeProvider,
-        IOptions<TournamentGroundsOptions> options)
+        IOptions<TournamentGroundsOptions> options,
+        IAchievementService? achievementService = null)
     {
         _tournaments = tournaments;
         _entityService = entityService;
@@ -73,6 +76,7 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
         _tournamentLockService = tournamentLockService;
         _timeProvider = timeProvider;
         _options = options.Value;
+        _achievementService = achievementService;
     }
 
     public async Task EnsureUpcomingTournamentsAsync(CancellationToken cancellationToken)
@@ -1497,6 +1501,14 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
             if (!exists)
             {
                 await _tournaments.AddAsync(reward, cancellationToken);
+            }
+
+            if (_achievementService is not null)
+            {
+                await _achievementService.RecordColosseumTournamentAsync(
+                    participant.CharacterId,
+                    participant.TeamId == championTeamId,
+                    cancellationToken);
             }
         }
 

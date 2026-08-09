@@ -14,6 +14,7 @@ public interface IAchievementRepository
     Task<PlayerAchievementProgress?> GetProgressAsync(Guid accountId, Guid? characterId, Guid achievementDefinitionId, int? seasonId, CancellationToken cancellationToken);
     Task AddProgressAsync(PlayerAchievementProgress progress, CancellationToken cancellationToken);
     Task<int> CountCompletedAchievementsAsync(Guid accountId, CancellationToken cancellationToken);
+    Task<int> CountCompletedNonHiddenAchievementsAsync(Guid accountId, CancellationToken cancellationToken);
     Task<int> GetTotalAchievementPointsAsync(Guid accountId, CancellationToken cancellationToken);
 
     Task<IReadOnlyList<TitleDefinition>> GetActiveTitlesAsync(CancellationToken cancellationToken);
@@ -35,4 +36,17 @@ public interface IAchievementRepository
     Task<IReadOnlyList<EquipmentInstance>> GetOwnedEquipmentAsync(Guid characterId, CancellationToken cancellationToken);
     Task<IReadOnlyList<DungeonCompletionRecord>> GetDungeonCompletionsAsync(Guid characterId, CancellationToken cancellationToken);
     Task<IReadOnlyList<ColosseumMatchResult>> GetColosseumMatchesAsync(Guid characterId, CancellationToken cancellationToken);
+    Task<int> GetCompletedProphecyCountAsync(Guid accountId, CancellationToken cancellationToken);
+    Task<bool> HasCompletedWeeklyProphecyCycleAsync(Guid accountId, CancellationToken cancellationToken);
+    Task<bool> IsGuildMemberAsync(Guid characterId, CancellationToken cancellationToken);
+    Task<int> GetCompletedGuildOrderCountAsync(Guid accountId, CancellationToken cancellationToken);
+    Task<int> GetCompletedGuildMissionCountAsync(Guid characterId, CancellationToken cancellationToken);
+    Task<long> GetGuildSuppliesGeneratedAsync(Guid accountId, CancellationToken cancellationToken);
+    Task<int> GetMarketplaceSaleCountAsync(Guid accountId, CancellationToken cancellationToken);
+    Task<int> GetSoulstoneUpgradeRankCountAsync(Guid accountId, CancellationToken cancellationToken);
+    Task<IReadOnlyDictionary<string, int>> GetSoulstoneUpgradeRanksAsync(Guid characterId, CancellationToken cancellationToken);
+    Task<int> GetMaxDungeonMasteryLevelAsync(Guid characterId, CancellationToken cancellationToken);
+    Task<int> GetMaxCraftingMasteryLevelAsync(Guid characterId, CancellationToken cancellationToken);
+    Task<(int Completed, int Won)> GetTournamentSummaryAsync(Guid characterId, CancellationToken cancellationToken);
+    Task<int> GetChampionMarketPurchaseCountAsync(Guid characterId, CancellationToken cancellationToken);
 }

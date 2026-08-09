@@ -14,4 +14,7 @@ public class AreaService : IAreaService
     {
         return await _areaRepository.GetAreaByIdAsync(id);
     }
+
+    public Task<IReadOnlyList<Area>> GetAllAreasAsync(CancellationToken cancellationToken) =>
+        _areaRepository.GetAreasWithCreaturesAsync(cancellationToken);
 }

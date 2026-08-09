@@ -1,0 +1,60 @@
+<section
+  *ngIf="quest() as activeQuest"
+  class="flex min-w-0 flex-1 items-center gap-2 rounded-md border border-primary/25 bg-primary/5 px-3 py-1.5"
+>
+  <div class="min-w-0 flex-1">
+    <div class="flex min-w-0 items-center gap-2">
+      <span class="shrink-0 text-primary" aria-hidden="true">!</span>
+      <span class="ll-eyebrow shrink-0 text-[9px]">Quest</span>
+      <span class="shrink-0 text-[10px] font-semibold text-primary">
+        {{ activeQuest.title }}
+      </span>
+      <span
+        *ngIf="objective() as currentObjective"
+        class="hidden min-w-0 truncate text-xs text-[var(--ll-color-text-subtle)] lg:block"
+        [title]="currentObjective.description"
+      >
+        {{ currentObjective.description }}
+      </span>
+    </div>
+
+    <div
+      *ngIf="objective() as currentObjective"
+      class="mt-1 flex items-center gap-2"
+    >
+      <div
+        class="h-1.5 min-w-16 flex-1 overflow-hidden rounded-full bg-black/50"
+        role="progressbar"
+        [attr.aria-label]="currentObjective.description"
+        [attr.aria-valuenow]="currentObjective.currentAmount"
+        aria-valuemin="0"
+        [attr.aria-valuemax]="currentObjective.requiredAmount"
+      >
+        <div
+          class="h-full rounded-full bg-primary"
+          [style.width.%]="progressPercent()"
+        ></div>
+      </div>
+      <span class="shrink-0 text-[10px] text-zinc-400">
+        {{ currentObjective.currentAmount }} / {{ currentObjective.requiredAmount }}
+      </span>
+    </div>
+  </div>
+
+  <button
+    *ngIf="objective()?.presentation?.destinationRoute"
+    type="button"
+    class="ll-button shrink-0 px-2.5 py-1 text-[10px]"
+    (click)="navigate()"
+  >
+    {{ objective()?.presentation?.actionLabel || "Go" }}
+  </button>
+</section>
+
+<div
+  *ngIf="error() as questError"
+  class="ll-state ll-state-danger basis-full px-3 py-1.5 text-xs"
+  role="alert"
+>
+  {{ questError }}
+</div>

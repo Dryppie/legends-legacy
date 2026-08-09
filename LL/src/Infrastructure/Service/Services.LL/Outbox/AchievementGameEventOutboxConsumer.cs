@@ -136,6 +136,7 @@ public sealed class AchievementGameEventOutboxConsumer(
         achievementService.RecordItemsCraftedAsync(
             payload.CharacterId,
             payload.CraftedItems.Select(ToEquipmentInstance).ToList(),
+            payload.CraftingMasteryLevel,
             cancellationToken);
 
     private Task HandleEquipmentTemperedAsync(
@@ -189,6 +190,7 @@ public sealed class AchievementGameEventOutboxConsumer(
             payload.DungeonDefinitionId,
             payload.CompletedWithoutDefeat,
             payload.CompletedWithoutRetreat,
+            payload.CompletedWithoutWeapon,
             payload.DefeatedBossKeys,
             cancellationToken);
 

@@ -31,13 +31,13 @@
   >
     <h2 class="ll-heading px-1 text-lg uppercase tracking-wide">Recipes</h2>
     <div
-      *ngIf="isTutorialWeaponSelectionActive()"
+      *ngIf="isOnboardingWeaponSelectionActive()"
       class="ll-card mt-3 px-3 py-2 text-xs text-secondary"
     >
       Showing Tier 1 one-handed weapons for the tutorial.
     </div>
 
-    <div *ngIf="!isTutorialWeaponSelectionActive()" class="mt-3 space-y-2">
+    <div *ngIf="!isOnboardingWeaponSelectionActive()" class="mt-3 space-y-2">
       <label
         class="flex items-center gap-2 rounded border border-white/10 bg-black/20 px-3 py-2 focus-within:border-primary/60"
       >
@@ -146,7 +146,7 @@
             canCraftAnyDesign(recipe) ? null : 'Requirements not met'
           "
           [attr.data-tour]="
-            isTutorialWeaponRecipe(recipe) ? 'tutorial-weapon-recipe' : null
+            isOnboardingWeaponRecipe(recipe) ? 'onboarding-weapon-recipe' : null
           "
           (click)="selectRecipe(recipe, true)"
         >

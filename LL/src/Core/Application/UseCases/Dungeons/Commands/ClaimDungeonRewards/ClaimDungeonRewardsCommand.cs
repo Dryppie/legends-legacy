@@ -57,6 +57,7 @@ public class ClaimDungeonRewardsCommandHandler : IRequestHandler<ClaimDungeonRew
                     result.DungeonDefinitionId,
                     result.CompletedWithoutDefeat,
                     result.CompletedWithoutRetreat,
+                    result.CompletedWithoutWeapon,
                     result.DefeatedBossKeys),
                 request.CharacterId,
                 null,

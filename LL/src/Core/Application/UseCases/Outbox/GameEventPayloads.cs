@@ -24,7 +24,8 @@ public sealed record EssenceAscendedPayload(
 
 public sealed record EquipmentCraftedPayload(
     Guid CharacterId,
-    IReadOnlyCollection<OutboxEquipmentItemPayload> CraftedItems);
+    IReadOnlyCollection<OutboxEquipmentItemPayload> CraftedItems,
+    int CraftingMasteryLevel);
 
 public sealed record EquipmentTemperedPayload(
     Guid CharacterId,
@@ -55,6 +56,7 @@ public sealed record DungeonRunCompletedPayload(
     string DungeonDefinitionId,
     bool CompletedWithoutDefeat,
     bool CompletedWithoutRetreat,
+    bool CompletedWithoutWeapon,
     IReadOnlyCollection<string> DefeatedBossKeys);
 
 public sealed record ColosseumBattleCompletedPayload(
@@ -63,12 +65,6 @@ public sealed record ColosseumBattleCompletedPayload(
     BattleOutcome Outcome,
     int CharacterRatingBefore,
     int OpponentRatingBefore);
-
-public sealed record ClientTutorialStepPayload(
-    Guid CharacterId,
-    string StepKey,
-    string TriggerType,
-    string? Route);
 
 public sealed record OutboxEquipmentItemPayload(
     string ItemBaseId,

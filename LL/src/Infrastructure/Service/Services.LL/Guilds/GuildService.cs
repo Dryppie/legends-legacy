@@ -1,5 +1,6 @@
 ﻿using Application.Interfaces.Services.LL;
 using Domain.Extensions.Guilds;
+using Application.Interfaces.Services.LL.Achievements;
 using Domain.Models.Guilds;
 
 namespace Services.LL.Guilds;
@@ -7,10 +8,12 @@ public class GuildService : IGuildService
 {
     private const int MinimumGuildNameLength = 3;
     private readonly IGuildRepository _guildRepository;
+    private readonly IAchievementService? _achievementService;
 
-    public GuildService(IGuildRepository guildRepository)
+    public GuildService(IGuildRepository guildRepository, IAchievementService? achievementService = null)
     {
         _guildRepository = guildRepository;
+        _achievementService = achievementService;
     }
 
     #region guild
@@ -20,7 +23,13 @@ public class GuildService : IGuildService
         if (string.IsNullOrEmpty(normalizedName) || normalizedName.Length < MinimumGuildNameLength)
             return false;
 
-        return await _guildRepository.CreateAsync(characterId, normalizedName, cancellationToken);
+        var created = await _guildRepository.CreateAsync(characterId, normalizedName, cancellationToken);
+        if (created && _achievementService is not null)
+        {
+            await _achievementService.RecordGuildJoinedAsync(characterId, cancellationToken);
+        }
+
+        return created;
     }
 
     public async Task<Guild?> GetMyGuildAsync(Guid characterId, CancellationToken cancellationToken) =>
@@ -62,8 +71,16 @@ public class GuildService : IGuildService
         return await _guildRepository.InviteCharacterByNameAsync(currentCharacterId, guildId, invitedCharacterName, cancellationToken);
     }
 
-    public async Task<bool> AcceptInviteAsync(Guid characterId, Guid guildId, CancellationToken cancellationToken) => 
-        await _guildRepository.AcceptInviteAsync(characterId, guildId, cancellationToken);
+    public async Task<bool> AcceptInviteAsync(Guid characterId, Guid guildId, CancellationToken cancellationToken)
+    {
+        var accepted = await _guildRepository.AcceptInviteAsync(characterId, guildId, cancellationToken);
+        if (accepted && _achievementService is not null)
+        {
+            await _achievementService.RecordGuildJoinedAsync(characterId, cancellationToken);
+        }
+
+        return accepted;
+    }
 
     public async Task<List<GuildInvite>> GetMyInvitesAsync(Guid characterId, CancellationToken cancellationToken) =>
         await _guildRepository.GetMyInvitesAsync(characterId, cancellationToken);
@@ -84,7 +101,13 @@ public class GuildService : IGuildService
         var requestingMember = await _guildRepository.GetGuildMember(characterId, cancellationToken);
         if (requestingMember == null || !requestingMember.HasInvitePermissions()) return false;
 
-        return await _guildRepository.ApproveApplicationAsync(requestingMember.GuildId, applicationCharacterId, cancellationToken);
+        var approved = await _guildRepository.ApproveApplicationAsync(requestingMember.GuildId, applicationCharacterId, cancellationToken);
+        if (approved && _achievementService is not null)
+        {
+            await _achievementService.RecordGuildJoinedAsync(applicationCharacterId, cancellationToken);
+        }
+
+        return approved;
     }
 
     public async Task<bool> RejectInviteAsync(Guid characterId, Guid guildId, CancellationToken cancellationToken) => 

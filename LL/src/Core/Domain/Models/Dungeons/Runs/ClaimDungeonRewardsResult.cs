@@ -9,5 +9,6 @@ public sealed class ClaimDungeonRewardsResult
     public string DungeonDefinitionId { get; init; } = string.Empty;
     public bool CompletedWithoutDefeat { get; init; }
     public bool CompletedWithoutRetreat { get; init; }
+    public bool CompletedWithoutWeapon { get; init; }
     public IReadOnlyList<string> DefeatedBossKeys { get; init; } = [];
 }

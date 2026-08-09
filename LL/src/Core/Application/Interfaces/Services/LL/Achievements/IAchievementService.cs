@@ -41,6 +41,7 @@ public interface IAchievementService
         string dungeonDefinitionId,
         bool completedWithoutDefeat,
         bool completedWithoutRetreat,
+        bool completedWithoutWeapon,
         IReadOnlyCollection<string> defeatedBossKeys,
         CancellationToken cancellationToken);
     Task RecordIdleCombatAsync(
@@ -57,7 +58,11 @@ public interface IAchievementService
         CancellationToken cancellationToken);
     Task RecordEssenceLoadoutSavedAsync(Guid characterId, int equippedEssenceCount, CancellationToken cancellationToken);
     Task RecordEssenceAscendedAsync(Guid characterId, int ascensionTier, int ascendedToTierCount, CancellationToken cancellationToken);
-    Task RecordItemsCraftedAsync(Guid characterId, IReadOnlyCollection<EquipmentInstance> craftedItems, CancellationToken cancellationToken);
+    Task RecordItemsCraftedAsync(
+        Guid characterId,
+        IReadOnlyCollection<EquipmentInstance> craftedItems,
+        int? craftingMasteryLevel,
+        CancellationToken cancellationToken);
     Task RecordItemsTemperedAsync(
         Guid characterId,
         TemperingSummary summary,
@@ -66,5 +71,13 @@ public interface IAchievementService
     Task RecordBlueprintUnlockedAsync(Guid characterId, CancellationToken cancellationToken);
     Task RecordCharacterCreatedAsync(Guid characterId, CancellationToken cancellationToken);
     Task RecordCharacterLevelReachedAsync(Guid characterId, int level, CancellationToken cancellationToken);
+    Task RecordProphecyCompletedAsync(Guid characterId, bool completedWeeklyCycle, CancellationToken cancellationToken);
+    Task RecordGuildJoinedAsync(Guid characterId, CancellationToken cancellationToken);
+    Task RecordGuildProgressAsync(Guid characterId, int ordersCompleted, bool missionCompleted, long suppliesGenerated, CancellationToken cancellationToken);
+    Task RecordMarketplaceSaleAsync(Guid characterId, CancellationToken cancellationToken);
+    Task RecordSoulstoneUpgradePurchasedAsync(Guid characterId, bool allUpgradesMaxed, CancellationToken cancellationToken);
+    Task RecordDungeonMasteryLevelReachedAsync(Guid characterId, int level, CancellationToken cancellationToken);
+    Task RecordColosseumTournamentAsync(Guid characterId, bool won, CancellationToken cancellationToken);
+    Task RecordChampionMarketPurchaseAsync(Guid characterId, CancellationToken cancellationToken);
     Task<AchievementRecalculationResultDto?> RecalculateProgressAsync(Guid accountId, Guid characterId, CancellationToken cancellationToken);
 }

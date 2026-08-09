@@ -163,10 +163,10 @@
               "
               [attr.data-item-base-id]="inventoryItem.itemInstance.itemBase.id"
               [attr.data-tutorial-crafted-weapon]="
-                isTutorialCraftedWeapon(inventoryItem) ? 'true' : null
+                isOnboardingCraftedWeapon(inventoryItem) ? 'true' : null
               "
               [attr.data-tutorial-gathering-tool]="
-                isTutorialGatheringTool(inventoryItem) ? 'true' : null
+                isOnboardingGatheringTool(inventoryItem) ? 'true' : null
               "
               [inventoryItem]="inventoryItem"
             ></app-inventory-item>

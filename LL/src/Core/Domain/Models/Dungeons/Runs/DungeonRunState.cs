@@ -7,6 +7,7 @@ public sealed class DungeonRunState
 {
     public Guid RunId { get; set; }
     public int MasteryLevelAtStart { get; set; }
+    public bool StartedWithoutWeapon { get; set; }
     public DungeonLootBag SecuredLoot { get; set; } = new();
     public DungeonLootBag PendingLoot { get; set; } = new();
     public List<DungeonMapNode> MapNodes { get; set; } = [];

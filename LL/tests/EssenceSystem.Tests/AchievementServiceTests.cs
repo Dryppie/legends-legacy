@@ -10,11 +10,30 @@ using Microsoft.EntityFrameworkCore;
 using Persistence.LL;
 using Persistence.LL.Repositories.Achievements;
 using Services.LL.Achievements;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace EssenceSystem.Tests;
 
 public sealed class AchievementServiceTests
 {
+    [Fact]
+    public void Achievement_catalog_deserializes_all_domain_enum_values()
+    {
+        var options = new JsonSerializerOptions(JsonSerializerDefaults.Web)
+        {
+            Converters = { new JsonStringEnumConverter() }
+        };
+        var catalogPath = Path.Combine(AppContext.BaseDirectory, "Data", "achievements");
+        var achievements = Directory.EnumerateFiles(catalogPath, "*.json")
+            .SelectMany(path => JsonSerializer.Deserialize<List<AchievementCatalogEntry>>(File.ReadAllText(path), options) ?? [])
+            .ToList();
+
+        Assert.Equal(101, achievements.Count);
+        Assert.Equal(101, achievements.Select(x => x.Key).Distinct(StringComparer.OrdinalIgnoreCase).Count());
+        Assert.Equal(101, achievements.Select(x => x.SortOrder).Distinct().Count());
+    }
+
     [Fact]
     public async Task Progress_unlocks_achievement_once_and_awards_points_and_title_once()
     {
@@ -226,9 +245,9 @@ public sealed class AchievementServiceTests
         await db.SaveChangesAsync();
         var service = CreateService(db);
 
-        await service.RecordDungeonRunCompletedAsync(characterId, "test_dungeon", false, false, [], CancellationToken.None);
-        await service.RecordDungeonRunCompletedAsync(characterId, "test_dungeon", true, false, [], CancellationToken.None);
-        await service.RecordDungeonRunCompletedAsync(characterId, "test_dungeon", true, true, [], CancellationToken.None);
+        await service.RecordDungeonRunCompletedAsync(characterId, "test_dungeon", false, false, false, [], CancellationToken.None);
+        await service.RecordDungeonRunCompletedAsync(characterId, "test_dungeon", true, false, false, [], CancellationToken.None);
+        await service.RecordDungeonRunCompletedAsync(characterId, "test_dungeon", true, true, false, [], CancellationToken.None);
         await db.SaveChangesAsync();
 
         var achievements = await service.GetAchievementsAsync(accountId, characterId, new(), CancellationToken.None);
@@ -365,7 +384,7 @@ public sealed class AchievementServiceTests
             Potential = 9
         };
 
-        await service.RecordItemsCraftedAsync(characterId, [setItem, normalItem], CancellationToken.None);
+        await service.RecordItemsCraftedAsync(characterId, [setItem, normalItem], null, CancellationToken.None);
         await service.RecordItemsTemperedAsync(
             characterId,
             new TemperingSummary { TotalActions = 3, Masterpieces = 1, CursedOutcomes = 2 },
@@ -408,6 +427,115 @@ public sealed class AchievementServiceTests
         Assert.True(achievements.Single(x => x.Key == "general.started").IsCompleted);
         Assert.True(achievements.Single(x => x.Key == "general.level").IsCompleted);
         Assert.True(achievements.Single(x => x.Key == "craft.blueprints").IsCompleted);
+    }
+
+    [Fact]
+    public async Task New_gameplay_hooks_unlock_their_achievement_requirements()
+    {
+        await using var db = CreateDbContext();
+        var accountId = Guid.NewGuid();
+        var characterId = Guid.NewGuid();
+        SeedCharacter(db, accountId, characterId);
+        SeedAchievement(db, "prophecy.complete", AchievementRequirementType.PropheciesCompleted, 1);
+        SeedAchievement(db, "prophecy.weekly", AchievementRequirementType.WeeklyProphecyCycleCompleted, 1);
+        SeedAchievement(db, "guild.join", AchievementRequirementType.GuildJoined, 1, AchievementScope.Character);
+        SeedAchievement(db, "guild.orders", AchievementRequirementType.GuildOrdersCompleted, 2);
+        SeedAchievement(db, "guild.mission", AchievementRequirementType.GuildMissionsCompleted, 1, AchievementScope.Character);
+        SeedAchievement(db, "guild.supplies", AchievementRequirementType.GuildSuppliesGenerated, 10);
+        SeedAchievement(db, "market.sale", AchievementRequirementType.MarketplaceSalesCompleted, 1);
+        SeedAchievement(db, "soulstone.first", AchievementRequirementType.SoulstoneUpgradesPurchased, 1);
+        SeedAchievement(db, "soulstone.max", AchievementRequirementType.AllSoulstoneUpgradesMaxed, 1);
+        SeedAchievement(db, "dungeon.mastery", AchievementRequirementType.DungeonMasteryLevelReached, 10);
+        SeedAchievement(db, "tournament.play", AchievementRequirementType.ColosseumTournamentsCompleted, 1, AchievementScope.Character);
+        SeedAchievement(db, "tournament.win", AchievementRequirementType.ColosseumTournamentsWon, 1, AchievementScope.Character);
+        SeedAchievement(db, "champion.buy", AchievementRequirementType.ChampionMarketPurchases, 1, AchievementScope.Character);
+        SeedAchievement(db, "dungeon.empty", AchievementRequirementType.DungeonCompletedWithoutWeapon, 1, AchievementScope.Character);
+        await db.SaveChangesAsync();
+        var service = CreateService(db);
+
+        await service.RecordProphecyCompletedAsync(characterId, true, CancellationToken.None);
+        await service.RecordGuildJoinedAsync(characterId, CancellationToken.None);
+        await service.RecordGuildProgressAsync(characterId, 2, true, 10, CancellationToken.None);
+        await service.RecordMarketplaceSaleAsync(characterId, CancellationToken.None);
+        await service.RecordSoulstoneUpgradePurchasedAsync(characterId, true, CancellationToken.None);
+        await service.RecordDungeonMasteryLevelReachedAsync(characterId, 10, CancellationToken.None);
+        await service.RecordColosseumTournamentAsync(characterId, true, CancellationToken.None);
+        await service.RecordChampionMarketPurchaseAsync(characterId, CancellationToken.None);
+        await service.RecordDungeonRunCompletedAsync(characterId, "dungeon", false, false, true, [], CancellationToken.None);
+        await db.SaveChangesAsync();
+
+        var achievements = await service.GetAchievementsAsync(accountId, characterId, new(), CancellationToken.None);
+        Assert.Equal(14, achievements.Count);
+        Assert.All(achievements, achievement => Assert.True(achievement.IsCompleted, achievement.Key));
+    }
+
+    [Fact]
+    public async Task Meta_achievements_include_unlocks_and_titles_created_in_the_current_transaction()
+    {
+        await using var db = CreateDbContext();
+        var accountId = Guid.NewGuid();
+        var characterId = Guid.NewGuid();
+        SeedCharacter(db, accountId, characterId);
+        for (var index = 0; index < 10; index++)
+        {
+            var key = $"combat.meta_{index}";
+            SeedAchievement(db, key, AchievementRequirementType.MonstersDefeated, 1);
+            SeedTitle(db, $"title.meta_{index}", key, TitleScope.Account);
+        }
+        SeedAchievement(db, "legacy.trophy", AchievementRequirementType.AchievementsUnlocked, 10, category: AchievementCategory.Legacy);
+        SeedAchievement(db, "legacy.titles", AchievementRequirementType.TitlesUnlocked, 10, category: AchievementCategory.Legacy);
+        await db.SaveChangesAsync();
+        var service = CreateService(db);
+
+        var unlocks = await service.AddProgressAsync(accountId, characterId, AchievementRequirementType.MonstersDefeated);
+        await db.SaveChangesAsync();
+
+        Assert.Contains(unlocks, x => x.AchievementKey == "legacy.trophy");
+        Assert.Contains(unlocks, x => x.AchievementKey == "legacy.titles");
+        Assert.Equal(10, await db.PlayerTitleUnlocks.CountAsync());
+    }
+
+    [Fact]
+    public async Task Completionist_excludes_hidden_achievements_and_itself()
+    {
+        await using var db = CreateDbContext();
+        var accountId = Guid.NewGuid();
+        var characterId = Guid.NewGuid();
+        SeedCharacter(db, accountId, characterId);
+        SeedAchievement(db, "visible.one", AchievementRequirementType.MonstersDefeated, 1);
+        SeedAchievement(db, "visible.two", AchievementRequirementType.MonstersDefeated, 1);
+        SeedAchievement(db, "hidden.one", AchievementRequirementType.MonstersDefeated, 1, visibility: AchievementVisibility.Hidden);
+        SeedAchievement(db, "legacy.completionist", AchievementRequirementType.NonHiddenAchievementsCompleted, 2, category: AchievementCategory.Legacy);
+        await db.SaveChangesAsync();
+        var service = CreateService(db);
+
+        var unlocks = await service.AddProgressAsync(accountId, characterId, AchievementRequirementType.MonstersDefeated);
+        await db.SaveChangesAsync();
+
+        Assert.Contains(unlocks, x => x.AchievementKey == "legacy.completionist");
+    }
+
+    [Fact]
+    public async Task Item_variant_progress_counts_each_recipe_and_blueprint_design_once()
+    {
+        await using var db = CreateDbContext();
+        var accountId = Guid.NewGuid();
+        var characterId = Guid.NewGuid();
+        SeedCharacter(db, accountId, characterId);
+        SeedAchievement(db, "crafting.variants", AchievementRequirementType.UniqueItemVariantsCrafted, 2, category: AchievementCategory.Crafting);
+        await db.SaveChangesAsync();
+        var service = CreateService(db);
+        var firstVariant = new EquipmentInstance { BaseRecipeId = "sword", BlueprintId = "ember" };
+        var secondVariant = new EquipmentInstance { BaseRecipeId = "sword", BlueprintId = "frost" };
+
+        await service.RecordItemsCraftedAsync(characterId, [firstVariant], null, CancellationToken.None);
+        await service.RecordItemsCraftedAsync(characterId, [firstVariant], null, CancellationToken.None);
+        var beforeSecondVariant = await service.GetAchievementsAsync(accountId, characterId, new(), CancellationToken.None);
+        await service.RecordItemsCraftedAsync(characterId, [secondVariant], null, CancellationToken.None);
+        await db.SaveChangesAsync();
+
+        Assert.False(Assert.Single(beforeSecondVariant).IsCompleted);
+        Assert.True(Assert.Single(await service.GetAchievementsAsync(accountId, characterId, new(), CancellationToken.None)).IsCompleted);
     }
 
     private static LLDbContext CreateDbContext()
@@ -502,4 +630,14 @@ public sealed class AchievementServiceTests
             key.Split(['.', '_'], StringSplitOptions.RemoveEmptyEntries)
                 .Select(part => char.ToUpperInvariant(part[0]) + part[1..]));
     }
+
+    private sealed record AchievementCatalogEntry(
+        string Key,
+        AchievementCategory Category,
+        AchievementType Type,
+        AchievementScope Scope,
+        AchievementVisibility Visibility,
+        TitleRarity Rarity,
+        AchievementRequirementType RequirementType,
+        int SortOrder);
 }

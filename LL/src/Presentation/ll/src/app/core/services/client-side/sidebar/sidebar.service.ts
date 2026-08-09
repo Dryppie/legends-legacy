@@ -102,6 +102,13 @@ function getSidebarSections(): SidebarSection[] {
           description: 'Travel and explore',
         },
         {
+          id: 'quests',
+          route: ['quests'],
+          icon: 'sidebar/world/quest-journal',
+          title: 'Quests',
+          description: 'Objectives and rewards',
+        },
+        {
           id: 'prophecies',
           route: ['prophecies'],
           icon: 'sidebar/world/prophecies',

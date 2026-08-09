@@ -15,5 +15,4 @@ public static class GameEventTypes
     public const string DungeonRunStarted = "dungeon.run_started";
     public const string DungeonRunCompleted = "dungeon.run_completed";
     public const string ColosseumBattleCompleted = "colosseum.battle_completed";
-    public const string ClientTutorialStep = "tutorial.client_step";
 }

@@ -19,5 +19,5 @@ export class SidebarItemComponent {
   @Input() isActive = false;
   @Input() notificationCount = 0;
   @Input() compact = false;
-  @Input() tutorialAttention = false;
+  @Input() questAttention = false;
 }

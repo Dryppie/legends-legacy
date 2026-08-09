@@ -13,11 +13,11 @@ using Application.Interfaces.Services.LL.Essences;
 using Application.Interfaces.Services.LL.Items;
 using Application.Interfaces.Services.LL.Inventories;
 using Application.Interfaces.Services.LL.Prophecies;
+using Application.Interfaces.Services.LL.Quests;
 using Application.Interfaces.Services.LL.Professions;
 using Application.Interfaces.Services.LL.PowerRatings;
 using Application.Interfaces.Services.LL.Regions;
 using Application.Interfaces.Services.LL.Rewards;
-using Application.Interfaces.Services.LL.Tutorials;
 using Domain.Models.Dungeons;
 using Domain.Models.Dungeons.Runs;
 using Domain.Models.Users;
@@ -74,6 +74,7 @@ using Services.LL.MarketPlaces;
 using Services.LL.Outbox;
 using Services.LL.Players;
 using Services.LL.Prophecies;
+using Services.LL.Quests;
 using Services.LL.Professions;
 using Services.LL.Professions.Craftings;
 using Services.LL.Providers;
@@ -84,7 +85,6 @@ using Services.LL.Snapshots;
 using Services.LL.Soulstones;
 using Services.LL.Spawnings;
 using Services.LL.Users;
-using Services.LL.Tutorials;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -348,20 +348,18 @@ public static class DependencyInjection
         services.AddScoped<ISimulatorService, SimulatorService>();
         services.AddScoped<IGameEventOutbox, GameEventOutbox>();
         services.AddSingleton<IGameEventOutboxConsumerRegistry, GameEventOutboxConsumerRegistry>();
-        services.AddScoped<IGameEventOutboxConsumer, TutorialGameEventOutboxConsumer>();
+        services.AddScoped<IGameEventOutboxConsumer, QuestGameEventOutboxConsumer>();
         services.AddScoped<IGameEventOutboxConsumer, AchievementGameEventOutboxConsumer>();
-        services.AddSingleton<ITutorialDefinitionProvider>(sp =>
-            new JsonTutorialDefinitionProvider(
+        services.AddSingleton<IQuestDefinitionProvider>(sp =>
+            new JsonQuestDefinitionProvider(
                 config,
                 contentRootPath,
                 sp.GetRequiredService<JsonSerializerOptions>()));
-        services.Configure<TutorialDebugOptions>(config.GetSection(TutorialDebugOptions.SectionName));
-        services.PostConfigure<TutorialDebugOptions>(options => options.IsDevelopment = isDevelopment);
-        services.AddSingleton<ITutorialProgressCache, InMemoryTutorialProgressCache>();
-        services.AddScoped<TutorialService>();
-        services.AddScoped<ITutorialService>(sp => sp.GetRequiredService<TutorialService>());
-        services.AddScoped<ITutorialProgressionService>(sp => sp.GetRequiredService<TutorialService>());
-        services.AddScoped<ITutorialBattleService, TutorialBattleService>();
+        services.AddScoped<QuestService>();
+        services.AddScoped<IQuestService>(sp => sp.GetRequiredService<QuestService>());
+        services.AddScoped<IQuestProgressionService>(sp => sp.GetRequiredService<QuestService>());
+        services.AddScoped<ICombatAreaAccessService, CombatAreaAccessService>();
+        services.AddScoped<IQuestEncounterService, QuestEncounterService>();
 
         services.AddSingleton(_ => new SoulstoneUpgradeDefinitionProvider(contentRootPath));
 

@@ -1,7 +1,7 @@
 import { Injectable, computed, effect, signal } from '@angular/core';
 import { EMPTY, forkJoin, Observable, catchError, finalize, tap } from 'rxjs';
 import { InventoryStateService } from '../inventory/inventory-state.service';
-import { TutorialStateService } from '../tutorial/tutorial-state.service';
+import { QuestStateService } from '../quest/quest-state.service';
 import { EssencesService } from './essences.service';
 import { EssenceItemViewService } from './essence-item-view.service';
 import { EventBusService } from '../../client-side/event-bus/event-bus.service';
@@ -242,7 +242,7 @@ export class EssenceStateService {
     private readonly essencesService: EssencesService,
     private readonly inventoryState: InventoryStateService,
     private readonly essenceItemView: EssenceItemViewService,
-    private readonly tutorialState: TutorialStateService,
+    private readonly questState: QuestStateService,
     private readonly eventBus: EventBusService,
     private readonly characterState: CharacterStateService,
   ) {
@@ -443,7 +443,7 @@ export class EssenceStateService {
 
         this.applyEssenceMutation(response);
         this.refreshLoadouts();
-        this.tutorialState.refreshAfterOutboxProgress();
+        this.questState.refreshAfterOutboxProgress();
         this._selectedInventoryItemId.set(
           this.getFirstAbsorbableInventoryEssenceId(),
         );
@@ -558,7 +558,7 @@ export class EssenceStateService {
             next: () => {
               this.characterState.markOverviewDirty();
               this.refresh();
-              this.tutorialState.refreshAfterOutboxProgress();
+              this.questState.refreshAfterOutboxProgress();
             },
             error: (error) =>
               this._error.set(
@@ -573,7 +573,7 @@ export class EssenceStateService {
         }
         this.refresh();
         if (activateAfterSave) {
-          this.tutorialState.refreshAfterOutboxProgress();
+          this.questState.refreshAfterOutboxProgress();
         }
       },
       error: (error) =>
@@ -587,7 +587,7 @@ export class EssenceStateService {
     this.essencesService.activateLoadout(id).subscribe(() => {
       this.characterState.markOverviewDirty();
       this.refresh();
-      this.tutorialState.refreshAfterOutboxProgress();
+      this.questState.refreshAfterOutboxProgress();
     });
   }
 

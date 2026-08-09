@@ -1,6 +1,7 @@
-﻿using Application.Interfaces.Services.LL.Tutorials;
+using Application.Interfaces.Services.LL.Quests;
 
 namespace Application.WebSockets.Contracts;
+
 public abstract record GameEventMsg;
 
 public record SaleCompletedMsg(Guid ItemId, Guid SellerId, int Price) : GameEventMsg;
@@ -24,11 +25,4 @@ public record AchievementUnlockedMsg(
     string Message,
     bool IsGlobal) : GameEventMsg;
 
-public record TutorialProgressedMsg(TutorialState Tutorial) : GameEventMsg;
-
-public record TutorialCompletedMsg(
-    string TutorialId,
-    int RewardCinders = 0,
-    string? NextRoute = null,
-    bool WasSkipped = false) : GameEventMsg;
-//public record LootReceivedMsg(Guid CharacterId, List<InventoryItemDto> Items) : GameEventMsg;
+public record QuestJournalChangedMsg(QuestJournal Journal) : GameEventMsg;

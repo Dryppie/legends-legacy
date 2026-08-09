@@ -1,6 +1,7 @@
 using Application.Interfaces.Services.LL;
 using Application.Interfaces.Services.LL.Entities;
 using Application.Interfaces.Services.LL.Prophecies;
+using Application.Interfaces.Services.LL.Achievements;
 using Domain.Models.Entities;
 using Domain.Models.Inventories;
 using Domain.Models.Items;
@@ -26,6 +27,7 @@ public sealed class ProphecyService : IProphecyService
     private readonly IInventoryService _inventoryService;
     private readonly IInventoryRepository _inventoryRepository;
     private readonly IItemBaseRepository _itemBases;
+    private readonly IAchievementService? _achievementService;
 
     public ProphecyService(
         IProphecyDefinitionProvider definitionProvider,
@@ -38,7 +40,8 @@ public sealed class ProphecyService : IProphecyService
         ILevelingService levelingService,
         IInventoryService inventoryService,
         IInventoryRepository inventoryRepository,
-        IItemBaseRepository itemBases)
+        IItemBaseRepository itemBases,
+        IAchievementService? achievementService = null)
     {
         _definitions = definitionProvider.GetAll();
         _balance = balanceProvider.GetCatalog();
@@ -51,6 +54,7 @@ public sealed class ProphecyService : IProphecyService
         _inventoryService = inventoryService;
         _inventoryRepository = inventoryRepository;
         _itemBases = itemBases;
+        _achievementService = achievementService;
     }
 
     public async Task<PropheciesOverview> GetOverviewAsync(
@@ -465,6 +469,20 @@ public sealed class ProphecyService : IProphecyService
         foreach (var progressEvent in progressEvents.OrderBy(x => x.OccurredAt))
         {
             ApplyProgress(active, progressEvent, initialValues, changedProphecies);
+        }
+
+        if (_achievementService is not null)
+        {
+            foreach (var completed in changedProphecies.Where(x => x.Status == ProphecyStatus.Completed))
+            {
+                var completedWeeklyCycle = completed.Scope == ProphecyScope.Weekly && active
+                    .Where(x => x.Scope == ProphecyScope.Weekly && x.PeriodStart == completed.PeriodStart && x.PeriodEnd == completed.PeriodEnd)
+                    .All(x => x.Status == ProphecyStatus.Completed);
+                await _achievementService.RecordProphecyCompletedAsync(
+                    characterIds[0],
+                    completedWeeklyCycle,
+                    cancellationToken);
+            }
         }
 
         return changedProphecies

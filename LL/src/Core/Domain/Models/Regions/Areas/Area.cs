@@ -5,6 +5,9 @@ public class Area
     public string Name { get; set; } = string.Empty;
     public int LevelRequirement { get; set; }
     public int DifficultyTier { get; set; }
+    public string? RequiredActiveQuestId { get; set; }
+    public string? RequiredCompletedQuestId { get; set; }
+    public bool HideWhenLocked { get; set; }
     public ICollection<AreaCreature> Creatures { get; set; } = [];
     /// <summary>
     /// Chance of spawning n. of creatures 

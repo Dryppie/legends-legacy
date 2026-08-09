@@ -3,7 +3,6 @@ using Application.Common.Interfaces;
 using Application.Interfaces.Outbox;
 using Application.Interfaces.Services.LL.Achievements;
 using Application.Interfaces.Services.LL.Essences;
-using Application.Interfaces.Services.LL.Tutorials;
 using Application.UseCases.Achievements.Dtos;
 using Application.UseCases.Outbox;
 using Application.UseCases.Prophecies.Events;
@@ -17,7 +16,6 @@ using Domain.Models.Essences;
 using Domain.Models.Items.Equipments;
 using Domain.Models.Outbox;
 using Domain.Models.Regions.Areas;
-using Domain.Models.Tutorials;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Persistence.LL;
@@ -27,7 +25,6 @@ using Services.LL.Combat.Layers.Rewards.Idle;
 using Services.LL.Combat.Layers.Rewards.Models;
 using Services.LL.Interfaces.Combat.Reward.Idle;
 using Services.LL.Outbox;
-using Services.LL.Tutorials;
 
 namespace EssenceSystem.Tests;
 
@@ -79,7 +76,7 @@ public sealed class GameEventOutboxTests
             },
             delivery =>
             {
-                Assert.Equal(GameEventOutboxConsumerNames.Tutorial, delivery.Consumer);
+                Assert.Equal(GameEventOutboxConsumerNames.Quests, delivery.Consumer);
                 Assert.Equal(GameEventOutboxDeliveryStatus.Pending, delivery.Status);
                 Assert.Equal(message.Id, delivery.MessageId);
             });
@@ -124,50 +121,6 @@ public sealed class GameEventOutboxTests
 
         Assert.Equal([characterId], achievements.CharacterCreatedCalls);
         Assert.Single(await db.AchievementEventLedgers.ToListAsync());
-    }
-
-    [Fact]
-    public async Task Tutorial_progression_uses_persisted_step_when_cache_is_stale()
-    {
-        await using var db = CreateDb();
-        var characterId = Guid.NewGuid();
-
-        db.CharacterTutorialProgresses.Add(new CharacterTutorialProgress
-        {
-            CharacterId = characterId,
-            TutorialId = TutorialConstants.FirstStepsTutorialId,
-            CurrentStep = TutorialConstants.StepAbsorbEssence
-        });
-        await db.SaveChangesAsync(CancellationToken.None);
-
-        var cache = new InMemoryTutorialProgressCache();
-        cache.SetActive(
-            characterId,
-            TutorialConstants.FirstStepsTutorialId,
-            TutorialConstants.StepDefeatTrainingCreature);
-
-        var service = new TutorialService(
-            db,
-            itemBases: null!,
-            inventory: null!,
-            equipmentSlots: null!,
-            inventoryItemFactory: null!,
-            lootRewardWriter: null!,
-            new FirstStepsTutorialDefinitionProvider(),
-            cache);
-
-        var result = await service.TryProgressAsync(
-            characterId,
-            TutorialTrigger.EssenceAbsorbed(TutorialConstants.TutorialEssenceDefinitionId),
-            CancellationToken.None);
-
-        Assert.NotNull(result);
-        Assert.True(result.Progressed);
-        Assert.Equal(TutorialConstants.StepEquipEssence, result.State?.CurrentStep);
-
-        var progress = await db.CharacterTutorialProgresses.SingleAsync();
-        Assert.Equal(TutorialConstants.StepEquipEssence, progress.CurrentStep);
-        Assert.NotNull(progress.EssenceAbsorbedAt);
     }
 
     [Fact]
@@ -403,69 +356,6 @@ public sealed class GameEventOutboxTests
             Publish((object)notification, cancellationToken);
     }
 
-    private sealed class FirstStepsTutorialDefinitionProvider : ITutorialDefinitionProvider
-    {
-        private readonly TutorialDefinition _definition = new()
-        {
-            TutorialId = TutorialConstants.FirstStepsTutorialId,
-            Version = 1,
-            Title = "First Steps",
-            InitialStepKey = TutorialConstants.StepDefeatTrainingCreature,
-            Steps =
-            [
-                new()
-                {
-                    Key = TutorialConstants.StepDefeatTrainingCreature,
-                    Objective = "Defeat the creature in the Training Area.",
-                    RequiredAmount = 1,
-                    ActionLabel = "Go to World Map",
-                    DestinationRoute = "/game/world",
-                    NextStepKey = TutorialConstants.StepAbsorbEssence,
-                    Trigger = new TutorialStepTriggerDefinition
-                    {
-                        Type = "IdleCombatCompleted",
-                        AreaId = TutorialConstants.TrainingGroundsAreaId,
-                        RequiresVictory = true
-                    }
-                },
-                new()
-                {
-                    Key = TutorialConstants.StepAbsorbEssence,
-                    Objective = "Absorb the Unbound Goblin's Essence into your Soul Archive.",
-                    RequiredAmount = 1,
-                    ActionLabel = "Open Essences",
-                    DestinationRoute = "/game/character/essences",
-                    NextStepKey = TutorialConstants.StepEquipEssence,
-                    Trigger = new TutorialStepTriggerDefinition
-                    {
-                        Type = "EssenceAbsorbed",
-                        EssenceDefinitionId = TutorialConstants.TutorialEssenceDefinitionId
-                    }
-                },
-                new()
-                {
-                    Key = TutorialConstants.StepEquipEssence,
-                    Objective = "Attune the Goblin's Essence in your active essence loadout.",
-                    RequiredAmount = 1,
-                    ActionLabel = "Open Essences",
-                    DestinationRoute = "/game/character/essences",
-                    NextStepKey = TutorialConstants.StepCraftEquipment,
-                    Trigger = new TutorialStepTriggerDefinition
-                    {
-                        Type = "EssenceLoadoutChanged",
-                        EssenceDefinitionId = TutorialConstants.TutorialEssenceDefinitionId
-                    }
-                }
-            ]
-        };
-
-        public TutorialDefinition Get(string tutorialId) => _definition;
-
-        public TutorialStepDefinition? GetStep(string tutorialId, string stepKey) =>
-            _definition.Steps.FirstOrDefault(step =>
-                step.Key.Equals(stepKey, StringComparison.OrdinalIgnoreCase));
-    }
-
     private sealed class RecordingAchievementService : IAchievementService
     {
         public List<Guid> CharacterCreatedCalls { get; } = [];
@@ -533,6 +423,7 @@ public sealed class GameEventOutboxTests
             string dungeonDefinitionId,
             bool completedWithoutDefeat,
             bool completedWithoutRetreat,
+            bool completedWithoutWeapon,
             IReadOnlyCollection<string> defeatedBossKeys,
             CancellationToken cancellationToken) =>
             Task.CompletedTask;
@@ -559,7 +450,7 @@ public sealed class GameEventOutboxTests
         public Task RecordEssenceAscendedAsync(Guid characterId, int ascensionTier, int ascendedToTierCount, CancellationToken cancellationToken) =>
             Task.CompletedTask;
 
-        public Task RecordItemsCraftedAsync(Guid characterId, IReadOnlyCollection<EquipmentInstance> craftedItems, CancellationToken cancellationToken) =>
+        public Task RecordItemsCraftedAsync(Guid characterId, IReadOnlyCollection<EquipmentInstance> craftedItems, int? craftingMasteryLevel, CancellationToken cancellationToken) =>
             Task.CompletedTask;
 
         public Task RecordItemsTemperedAsync(
@@ -574,6 +465,15 @@ public sealed class GameEventOutboxTests
 
         public Task RecordCharacterLevelReachedAsync(Guid characterId, int level, CancellationToken cancellationToken) =>
             Task.CompletedTask;
+
+        public Task RecordProphecyCompletedAsync(Guid characterId, bool completedWeeklyCycle, CancellationToken cancellationToken) => Task.CompletedTask;
+        public Task RecordGuildJoinedAsync(Guid characterId, CancellationToken cancellationToken) => Task.CompletedTask;
+        public Task RecordGuildProgressAsync(Guid characterId, int ordersCompleted, bool missionCompleted, long suppliesGenerated, CancellationToken cancellationToken) => Task.CompletedTask;
+        public Task RecordMarketplaceSaleAsync(Guid characterId, CancellationToken cancellationToken) => Task.CompletedTask;
+        public Task RecordSoulstoneUpgradePurchasedAsync(Guid characterId, bool allUpgradesMaxed, CancellationToken cancellationToken) => Task.CompletedTask;
+        public Task RecordDungeonMasteryLevelReachedAsync(Guid characterId, int level, CancellationToken cancellationToken) => Task.CompletedTask;
+        public Task RecordColosseumTournamentAsync(Guid characterId, bool won, CancellationToken cancellationToken) => Task.CompletedTask;
+        public Task RecordChampionMarketPurchaseAsync(Guid characterId, CancellationToken cancellationToken) => Task.CompletedTask;
 
         public Task<AchievementRecalculationResultDto?> RecalculateProgressAsync(Guid accountId, Guid characterId, CancellationToken cancellationToken) =>
             Task.FromResult<AchievementRecalculationResultDto?>(null);

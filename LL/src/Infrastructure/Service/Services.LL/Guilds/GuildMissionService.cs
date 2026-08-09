@@ -1,5 +1,6 @@
 using Application.Common.Interfaces;
 using Application.Interfaces.Services.LL.Guilds;
+using Application.Interfaces.Services.LL.Achievements;
 using Domain.Extensions.Guilds;
 using Domain.Models.Guilds;
 using Domain.Models.Guilds.Buildings;
@@ -17,18 +18,20 @@ public class GuildMissionService : IGuildMissionService
     private readonly IReadOnlyList<GuildMissionDefinition> _weeklyDefinitions;
     private readonly IReadOnlyList<GuildMissionDefinition> _dailyDefinitions;
     private readonly IReadOnlyDictionary<Guid, GuildMissionDefinition> _allDefinitions;
+    private readonly IAchievementService? _achievementService;
 
     public GuildMissionService(IDbContext context)
-        : this(context, new DefaultGuildContentProvider())
+        : this(context, new DefaultGuildContentProvider(), null)
     {
     }
 
-    public GuildMissionService(IDbContext context, IGuildContentProvider content)
+    public GuildMissionService(IDbContext context, IGuildContentProvider content, IAchievementService? achievementService = null)
     {
         _context = context;
         _weeklyDefinitions = content.WeeklyMissions;
         _dailyDefinitions = content.DailyOrders;
         _allDefinitions = _weeklyDefinitions.Concat(_dailyDefinitions).ToDictionary(x => x.Id);
+        _achievementService = achievementService;
     }
 
     public async Task<GuildMissionOverviewDto?> GetOverviewAsync(Guid characterId, DateTimeOffset now, CancellationToken cancellationToken)
@@ -114,6 +117,11 @@ public class GuildMissionService : IGuildMissionService
             $"Personal guild order reward claimed for {GetDefinitionName(order.MissionDefinitionId)}.",
             now);
 
+        if (_achievementService is not null)
+        {
+            await _achievementService.RecordGuildProgressAsync(characterId, 0, false, orderReward.Supplies, cancellationToken);
+        }
+
         var overview = await BuildOverviewAsync(guild.Id, characterId, now, cancellationToken);
         return GuildOperationResult<GuildMissionOverviewDto>.Success(overview);
     }
@@ -158,6 +166,11 @@ public class GuildMissionService : IGuildMissionService
             characterId,
             $"Weekly guild mission reward claimed at {contribution.ContributionTier} tier.",
             now);
+
+        if (_achievementService is not null)
+        {
+            await _achievementService.RecordGuildProgressAsync(characterId, 0, false, rewards.Supplies, cancellationToken);
+        }
 
         var overview = await BuildOverviewAsync(guild.Id, characterId, now, cancellationToken);
         return GuildOperationResult<GuildMissionOverviewDto>.Success(overview);
@@ -207,12 +220,30 @@ public class GuildMissionService : IGuildMissionService
         });
 
         var completedOrders = await ProgressPersonalOrdersAsync(guild.Id, contributionEvent.CharacterId, contributionEvent.Metric, contributionEvent.Amount, now, cancellationToken);
-        var weeklyProgress = await ProgressWeeklyMissionAsync(guild, contributionEvent.CharacterId, contributionEvent.Metric, contributionEvent.Amount, now, cancellationToken);
+        var weekly = await ProgressWeeklyMissionAsync(guild, contributionEvent.CharacterId, contributionEvent.Metric, contributionEvent.Amount, now, cancellationToken);
 
-        AddContributionPeriod(guild.Id, contributionEvent.CharacterId, GuildMissionPeriodType.Daily, GetDailyKey(now), contributionEvent.Amount, weeklyProgress, now);
-        AddContributionPeriod(guild.Id, contributionEvent.CharacterId, GuildMissionPeriodType.Weekly, GetWeek(now).Key, contributionEvent.Amount, weeklyProgress, now);
+        AddContributionPeriod(guild.Id, contributionEvent.CharacterId, GuildMissionPeriodType.Daily, GetDailyKey(now), contributionEvent.Amount, weekly.Progress, now);
+        AddContributionPeriod(guild.Id, contributionEvent.CharacterId, GuildMissionPeriodType.Weekly, GetWeek(now).Key, contributionEvent.Amount, weekly.Progress, now);
 
-        return new GuildContributionResult(true, false, weeklyProgress, completedOrders);
+        if (_achievementService is not null && completedOrders > 0)
+        {
+            await _achievementService.RecordGuildProgressAsync(
+                contributionEvent.CharacterId,
+                completedOrders,
+                false,
+                0,
+                cancellationToken);
+        }
+
+        if (_achievementService is not null && weekly.Completed)
+        {
+            foreach (var participantId in weekly.ParticipantIds)
+            {
+                await _achievementService.RecordGuildProgressAsync(participantId, 0, true, 0, cancellationToken);
+            }
+        }
+
+        return new GuildContributionResult(true, false, weekly.Progress, completedOrders);
     }
 
     private async Task<Guild?> LoadGuildForCharacterAsync(Guid characterId, CancellationToken cancellationToken) =>
@@ -367,7 +398,7 @@ public class GuildMissionService : IGuildMissionService
         return completed;
     }
 
-    private async Task<long> ProgressWeeklyMissionAsync(Guild guild, Guid characterId, GuildContributionMetric metric, long amount, DateTimeOffset now, CancellationToken cancellationToken)
+    private async Task<(long Progress, bool Completed, IReadOnlyList<Guid> ParticipantIds)> ProgressWeeklyMissionAsync(Guild guild, Guid characterId, GuildContributionMetric metric, long amount, DateTimeOffset now, CancellationToken cancellationToken)
     {
         var week = GetWeek(now);
         var instance = await _context.GuildMissionInstances
@@ -377,9 +408,10 @@ public class GuildMissionService : IGuildMissionService
                 && x.WeekKey == week.Key
                 && (x.Status == GuildMissionStatus.Active || x.Status == GuildMissionStatus.Completed),
                 cancellationToken);
-        if (instance is null) return 0;
-        if (!_allDefinitions.TryGetValue(instance.MissionDefinitionId, out var definition) || definition.Metric != metric) return 0;
+        if (instance is null) return (0, false, []);
+        if (!_allDefinitions.TryGetValue(instance.MissionDefinitionId, out var definition) || definition.Metric != metric) return (0, false, []);
 
+        var wasCompleted = instance.Status == GuildMissionStatus.Completed;
         var progress = Math.Min(amount, Math.Max(0, instance.TargetAmount - instance.CurrentAmount));
         instance.CurrentAmount += progress;
         var contribution = instance.Contributions.FirstOrDefault(x => x.CharacterId == characterId);
@@ -392,6 +424,7 @@ public class GuildMissionService : IGuildMissionService
                 CharacterId = characterId
             };
             _context.GuildMissionContributions.Add(contribution);
+            instance.Contributions.Add(contribution);
         }
 
         contribution.Amount += amount;
@@ -399,7 +432,13 @@ public class GuildMissionService : IGuildMissionService
         contribution.ContributionTier = CalculateTier(contribution.Amount, instance.TargetAmount);
 
         CompleteMissionIfNeeded(instance, now);
-        return progress;
+        var newlyCompleted = !wasCompleted && instance.Status == GuildMissionStatus.Completed;
+        return (
+            progress,
+            newlyCompleted,
+            newlyCompleted
+                ? instance.Contributions.Where(x => x.Amount > 0).Select(x => x.CharacterId).Distinct().ToList()
+                : []);
     }
 
     private void AddContributionPeriod(Guid guildId, Guid characterId, GuildMissionPeriodType type, string key, long score, long weeklyProgress, DateTimeOffset now)

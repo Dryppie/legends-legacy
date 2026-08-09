@@ -1,6 +1,7 @@
 using Application.Common.Interfaces;
 using Application.Interfaces.Services.LL;
 using Application.Interfaces.Services.LL.Entities;
+using Application.Interfaces.Services.LL.Achievements;
 using Common.Primitives;
 using Domain.Models.Entities.Characters;
 using Domain.Models.Soulstones;
@@ -16,15 +17,18 @@ public sealed class SoulstoneUpgradeService : ISoulstoneUpgradeService
     private readonly ICharacterService _characterService;
     private readonly SoulstoneUpgradeDefinitionProvider _provider;
     private readonly IDbContext _dbContext;
+    private readonly IAchievementService? _achievementService;
 
     public SoulstoneUpgradeService(
         ICharacterService characterService,
         SoulstoneUpgradeDefinitionProvider provider,
-        IDbContext dbContext)
+        IDbContext dbContext,
+        IAchievementService? achievementService = null)
     {
         _characterService = characterService;
         _provider = provider;
         _dbContext = dbContext;
+        _achievementService = achievementService;
     }
 
     public async Task<List<SoulstoneUpgradeView>> GetForCharacterAsync(Guid characterId, CancellationToken cancellationToken)
@@ -107,6 +111,16 @@ public sealed class SoulstoneUpgradeService : ISoulstoneUpgradeService
         }
 
         await _dbContext.SaveChangesAsync(cancellationToken);
+        if (_achievementService is not null)
+        {
+            var upgrades = BuildViews(character);
+            await _achievementService.RecordSoulstoneUpgradePurchasedAsync(
+                characterId,
+                upgrades.Count > 0 && upgrades.All(x => x.CurrentRank >= x.MaxRank),
+                cancellationToken);
+            await _dbContext.SaveChangesAsync(cancellationToken);
+        }
+
         if (transaction is not null)
         {
             await transaction.CommitAsync(cancellationToken);

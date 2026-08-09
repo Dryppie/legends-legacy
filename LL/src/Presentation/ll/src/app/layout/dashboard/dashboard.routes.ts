@@ -54,6 +54,13 @@ export const DASHBOARD_ROUTES: Routes = [
           ),
       },
       {
+        path: 'quests',
+        loadChildren: () =>
+          import('./../../features/game/quests/quests.routes').then(
+            (m) => m.QUESTS_ROUTES,
+          ),
+      },
+      {
         path: 'settings',
         loadChildren: () =>
           import('./../../features/game/settings/settings.routes').then(

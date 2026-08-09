@@ -1,0 +1,46 @@
+{
+  "id": "quest.onboarding.soul_archive",
+  "version": 1,
+  "title": "The Soul Archive",
+  "summary": "Bind your first Essence and attune it for battle.",
+  "category": "Tutorial",
+  "sortOrder": 20,
+  "autoAccept": true,
+  "objectiveMode": "Sequential",
+  "availability": {
+    "minimumLevel": 1,
+    "completedQuestIds": ["quest.onboarding.training_day"]
+  },
+  "objectives": [
+    {
+      "key": "absorb_goblin_essence",
+      "description": "Absorb the Unbound Goblin Essence into your Soul Archive.",
+      "type": "EssenceAbsorbed",
+      "requiredAmount": 1,
+      "filters": { "essenceDefinitionId": "essence.goblin" },
+      "presentation": {
+        "actionLabel": "Head to Essences",
+        "destinationRoute": "/game/character/essences",
+        "guidePageId": "tutorial-essence-absorb",
+        "tourPageId": "tutorial-essence-absorb"
+      }
+    },
+    {
+      "key": "equip_goblin_essence",
+      "description": "Attune the Goblin Essence in your active Essence loadout.",
+      "type": "EssenceEquipped",
+      "requiredAmount": 1,
+      "filters": { "essenceDefinitionId": "essence.goblin" },
+      "presentation": {
+        "actionLabel": "Head to Essences",
+        "destinationRoute": "/game/character/essences",
+        "guidePageId": "tutorial-essence-loadout",
+        "tourPageId": "tutorial-essence-loadout"
+      }
+    }
+  ],
+  "rewards": [
+    { "key": "crafting_ore", "type": "Item", "itemBaseId": "ore", "quantity": 10 },
+    { "key": "crafting_wood", "type": "Item", "itemBaseId": "wood", "quantity": 3 }
+  ]
+}

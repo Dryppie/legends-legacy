@@ -2940,6 +2940,112 @@ namespace Persistence.LL.Migrations
                     b.ToTable("WeeklyRevelationProgress");
                 });
 
+            modelBuilder.Entity("Domain.Models.Quests.CharacterQuestObjectiveProgress", b =>
+                {
+                    b.Property<Guid>("CharacterId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("QuestId")
+                        .HasMaxLength(160)
+                        .HasColumnType("character varying(160)");
+
+                    b.Property<string>("ObjectiveKey")
+                        .HasMaxLength(160)
+                        .HasColumnType("character varying(160)");
+
+                    b.Property<DateTimeOffset?>("CompletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<long>("CurrentAmount")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("RequiredAmount")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("CharacterId", "QuestId", "ObjectiveKey");
+
+                    b.ToTable("CharacterQuestObjectiveProgresses");
+                });
+
+            modelBuilder.Entity("Domain.Models.Quests.CharacterQuestProgress", b =>
+                {
+                    b.Property<Guid>("CharacterId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("QuestId")
+                        .HasMaxLength(160)
+                        .HasColumnType("character varying(160)");
+
+                    b.Property<DateTimeOffset?>("AcceptedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset?>("CompletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("DefinitionVersion")
+                        .HasColumnType("integer");
+
+                    b.Property<bool>("IsPinned")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTimeOffset?>("RewardsGrantedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<long>("RowVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("bigint");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("CharacterId", "QuestId");
+
+                    b.HasIndex("CharacterId", "IsPinned");
+
+                    b.HasIndex("CharacterId", "Status");
+
+                    b.ToTable("CharacterQuestProgresses");
+                });
+
+            modelBuilder.Entity("Domain.Models.Quests.QuestEventLedger", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("CharacterId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("EventType")
+                        .IsRequired()
+                        .HasMaxLength(160)
+                        .HasColumnType("character varying(160)");
+
+                    b.Property<Guid>("OutboxMessageId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("ProcessedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OutboxMessageId")
+                        .IsUnique();
+
+                    b.HasIndex("CharacterId", "ProcessedAt");
+
+                    b.ToTable("QuestEventLedgers");
+                });
+
             modelBuilder.Entity("Domain.Models.Regions.Areas.Area", b =>
                 {
                     b.Property<string>("Id")
@@ -2947,6 +3053,9 @@ namespace Persistence.LL.Migrations
 
                     b.Property<int>("DifficultyTier")
                         .HasColumnType("integer");
+
+                    b.Property<bool>("HideWhenLocked")
+                        .HasColumnType("boolean");
 
                     b.Property<int>("LevelRequirement")
                         .HasColumnType("integer");
@@ -2957,6 +3066,14 @@ namespace Persistence.LL.Migrations
 
                     b.Property<int?>("RegionId")
                         .HasColumnType("integer");
+
+                    b.Property<string>("RequiredActiveQuestId")
+                        .HasMaxLength(160)
+                        .HasColumnType("character varying(160)");
+
+                    b.Property<string>("RequiredCompletedQuestId")
+                        .HasMaxLength(160)
+                        .HasColumnType("character varying(160)");
 
                     b.PrimitiveCollection<List<float>>("SpawnProbabilities")
                         .IsRequired()
@@ -3196,60 +3313,6 @@ namespace Persistence.LL.Migrations
                     b.HasKey("CharacterId", "SoulstoneUpgradeDefinitionId");
 
                     b.ToTable("CharacterSoulstoneUpgrades");
-                });
-
-            modelBuilder.Entity("Domain.Models.Tutorials.CharacterTutorialProgress", b =>
-                {
-                    b.Property<Guid>("CharacterId")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("TutorialId")
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.Property<DateTimeOffset?>("CompletedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<bool>("CompletionRewardGranted")
-                        .HasColumnType("boolean");
-
-                    b.Property<int>("CraftedTierOneEquipmentCount")
-                        .HasColumnType("integer");
-
-                    b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("CurrentStep")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.Property<int>("EquippedTierOneEquipmentCount")
-                        .HasColumnType("integer");
-
-                    b.Property<DateTimeOffset?>("EssenceAbsorbedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTimeOffset?>("EssenceEquippedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTimeOffset?>("TrainingCombatWonAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<bool>("TrainingEssenceRewardGranted")
-                        .HasColumnType("boolean");
-
-                    b.Property<DateTimeOffset>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTimeOffset?>("WelcomeAcknowledgedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.HasKey("CharacterId", "TutorialId");
-
-                    b.HasIndex("CurrentStep");
-
-                    b.ToTable("CharacterTutorialProgresses");
                 });
 
             modelBuilder.Entity("Domain.Models.Users.AppUser", b =>
@@ -4194,6 +4257,17 @@ namespace Persistence.LL.Migrations
                     b.Navigation("ProphecyDefinition");
                 });
 
+            modelBuilder.Entity("Domain.Models.Quests.CharacterQuestObjectiveProgress", b =>
+                {
+                    b.HasOne("Domain.Models.Quests.CharacterQuestProgress", "QuestProgress")
+                        .WithMany("Objectives")
+                        .HasForeignKey("CharacterId", "QuestId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("QuestProgress");
+                });
+
             modelBuilder.Entity("Domain.Models.Regions.Areas.Area", b =>
                 {
                     b.HasOne("Domain.Models.Regions.Region", null)
@@ -4387,6 +4461,11 @@ namespace Persistence.LL.Migrations
             modelBuilder.Entity("Domain.Models.Outbox.GameEventOutboxMessage", b =>
                 {
                     b.Navigation("Deliveries");
+                });
+
+            modelBuilder.Entity("Domain.Models.Quests.CharacterQuestProgress", b =>
+                {
+                    b.Navigation("Objectives");
                 });
 
             modelBuilder.Entity("Domain.Models.Regions.Areas.Area", b =>

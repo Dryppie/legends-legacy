@@ -31,9 +31,8 @@ import { GuildStateService } from '../../../core/services/api/guild/guild-state.
 import { SidebarLayoutPreferenceService } from '../../../core/services/client-side/sidebar-layout/sidebar-layout-preference.service';
 import { TimeSyncService } from '../../../core/services/api/time-sync/time-sync.service';
 import { environment } from '../../../../environments/environment';
-import { TutorialStateService } from '../../../core/services/api/tutorial/tutorial-state.service';
-import { TutorialPresenterService } from '../../../core/services/api/tutorial/tutorial-presenter.service';
-import { TUTORIAL_STEP_EQUIP_ESSENCE } from '../../../shared/models/tutorial';
+import { QuestStateService } from '../../../core/services/api/quest/quest-state.service';
+import { QuestPresenterService } from '../../../core/services/api/quest/quest-presenter.service';
 
 @Component({
   selector: 'app-sidebar',
@@ -81,8 +80,8 @@ export class SidebarComponent implements OnInit, OnDestroy {
     private readonly sidebarLayoutPreference: SidebarLayoutPreferenceService,
     private readonly router: Router,
     private readonly timeSync: TimeSyncService,
-    private readonly tutorialState: TutorialStateService,
-    private readonly tutorialPresenter: TutorialPresenterService,
+    private readonly questState: QuestStateService,
+    private readonly questPresenter: QuestPresenterService,
     dungeonState: DungeonStateService,
   ) {
     this.hasActiveDungeon = dungeonState.hasActiveDungeon;
@@ -149,10 +148,10 @@ export class SidebarComponent implements OnInit, OnDestroy {
   onNavigate(item: Tab): void {
     if (
       item.id === 'essences' &&
-      this.tutorialState.state()?.currentStep === TUTORIAL_STEP_EQUIP_ESSENCE
+      this.questState.pinnedObjective()?.type === 'EssenceEquipped'
     ) {
       this.essenceState.setActiveView('archive');
-      this.tutorialPresenter.presentCurrentStep();
+      this.questPresenter.presentCurrentObjective();
     }
 
     this.itemTapped.emit();
@@ -200,12 +199,10 @@ export class SidebarComponent implements OnInit, OnDestroy {
     }
   }
 
-  isTutorialDestination(item: Tab): boolean {
-    const tutorial = this.tutorialState.state();
-    if (!tutorial || !this.tutorialState.presentationReady()) return false;
-
+  isQuestDestination(item: Tab): boolean {
     const destinationRoute =
-      tutorial.presentation?.destinationRoute ?? tutorial.destinationRoute;
+      this.questState.pinnedObjective()?.presentation.destinationRoute;
+    if (!destinationRoute) return false;
     const destinationPath = this.routePath(destinationRoute);
     const itemRoute = `/${item.route.join('/')}`;
     const itemPath = itemRoute.startsWith('/game/')

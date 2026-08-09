@@ -2,7 +2,7 @@ using Domain.Models.Essences;
 using Domain.Models.Regions;
 using Domain.Models.Regions.Areas;
 using Domain.Models.Professions.Gathering.GatheringNodes;
-using Domain.Models.Tutorials;
+using Domain.Models.Quests;
 using Microsoft.EntityFrameworkCore;
 using Persistence.LL;
 using Persistence.LL.Seeds.Seeding;
@@ -124,7 +124,7 @@ public sealed class RegionOneIdleAreaSeedTests
 
         var lumoRuins = await db.Areas
             .Include(area => area.GatheringNodes)
-            .SingleAsync(area => area.Id == TutorialConstants.LumoRuinsAreaId);
+            .SingleAsync(area => area.Id == QuestConstants.LumoRuinsAreaId);
 
         Assert.Equal(3, lumoRuins.GatheringNodes.Count);
         Assert.Equal(

@@ -9,6 +9,8 @@ using Domain.Models.Entities.Characters;
 using Domain.Models.Items;
 using Domain.Models.Items.Equipments;
 using System.Globalization;
+using System.Text.Json;
+using Services.LL.Providers;
 
 namespace Services.LL.Achievements;
 
@@ -32,15 +34,18 @@ public sealed class AchievementService : IAchievementService
     private readonly IAchievementRepository _repository;
     private readonly IGameEventPublisher? _eventPublisher;
     private readonly IAchievementSystemChatPublisher? _systemChatPublisher;
+    private readonly SoulstoneUpgradeDefinitionProvider? _soulstoneUpgrades;
 
     public AchievementService(
         IAchievementRepository repository,
         IGameEventPublisher? eventPublisher = null,
-        IAchievementSystemChatPublisher? systemChatPublisher = null)
+        IAchievementSystemChatPublisher? systemChatPublisher = null,
+        SoulstoneUpgradeDefinitionProvider? soulstoneUpgrades = null)
     {
         _repository = repository;
         _eventPublisher = eventPublisher;
         _systemChatPublisher = systemChatPublisher;
+        _soulstoneUpgrades = soulstoneUpgrades;
     }
 
     public async Task<AchievementOverviewDto> GetOverviewAsync(Guid accountId, Guid characterId, CancellationToken cancellationToken)
@@ -290,7 +295,7 @@ public sealed class AchievementService : IAchievementService
 
         if (syncLegacyProgress && unlocks.Count > 0)
         {
-            unlocks.AddRange(await SyncLegacyAchievementProgressAsync(accountId, characterId, cancellationToken));
+            unlocks.AddRange(await SyncDependentAchievementProgressAsync(accountId, characterId, cancellationToken));
         }
 
         return unlocks;
@@ -414,6 +419,7 @@ public sealed class AchievementService : IAchievementService
         string dungeonDefinitionId,
         bool completedWithoutDefeat,
         bool completedWithoutRetreat,
+        bool completedWithoutWeapon,
         IReadOnlyCollection<string> defeatedBossKeys,
         CancellationToken cancellationToken)
     {
@@ -433,6 +439,11 @@ public sealed class AchievementService : IAchievementService
         if (completedWithoutRetreat)
         {
             await AddProgressAsync(accountId, characterId, AchievementRequirementType.DungeonCompletedWithoutRetreat, cancellationToken: cancellationToken);
+        }
+
+        if (completedWithoutWeapon)
+        {
+            await AddProgressAsync(accountId, characterId, AchievementRequirementType.DungeonCompletedWithoutWeapon, cancellationToken: cancellationToken);
         }
 
         foreach (var bossKey in defeatedBossKeys)
@@ -582,6 +593,7 @@ public sealed class AchievementService : IAchievementService
     public async Task RecordItemsCraftedAsync(
         Guid characterId,
         IReadOnlyCollection<EquipmentInstance> craftedItems,
+        int? craftingMasteryLevel,
         CancellationToken cancellationToken)
     {
         var accountId = await GetAccountIdForCharacterAsync(characterId, cancellationToken);
@@ -605,6 +617,19 @@ public sealed class AchievementService : IAchievementService
                 characterId,
                 AchievementRequirementType.SetItemsCrafted,
                 setItemCount,
+                cancellationToken: cancellationToken);
+        }
+
+        await RecordUniqueItemVariantsAsync(accountId, characterId, craftedItems, cancellationToken);
+
+        if (craftingMasteryLevel is > 0)
+        {
+            await AddProgressAsync(
+                accountId,
+                characterId,
+                AchievementRequirementType.CraftingMasteryLevelReached,
+                craftingMasteryLevel.Value,
+                setToMax: true,
                 cancellationToken: cancellationToken);
         }
     }
@@ -706,6 +731,104 @@ public sealed class AchievementService : IAchievementService
             cancellationToken: cancellationToken);
     }
 
+    public async Task RecordProphecyCompletedAsync(Guid characterId, bool completedWeeklyCycle, CancellationToken cancellationToken)
+    {
+        var accountId = await GetAccountIdForCharacterAsync(characterId, cancellationToken);
+        if (accountId == Guid.Empty)
+        {
+            return;
+        }
+
+        await AddProgressAsync(accountId, characterId, AchievementRequirementType.PropheciesCompleted, cancellationToken: cancellationToken);
+        if (completedWeeklyCycle)
+        {
+            await AddProgressAsync(accountId, characterId, AchievementRequirementType.WeeklyProphecyCycleCompleted, cancellationToken: cancellationToken);
+        }
+    }
+
+    public async Task RecordGuildJoinedAsync(Guid characterId, CancellationToken cancellationToken)
+    {
+        var accountId = await GetAccountIdForCharacterAsync(characterId, cancellationToken);
+        if (accountId != Guid.Empty)
+        {
+            await AddProgressAsync(accountId, characterId, AchievementRequirementType.GuildJoined, cancellationToken: cancellationToken);
+        }
+    }
+
+    public async Task RecordGuildProgressAsync(
+        Guid characterId,
+        int ordersCompleted,
+        bool missionCompleted,
+        long suppliesGenerated,
+        CancellationToken cancellationToken)
+    {
+        var accountId = await GetAccountIdForCharacterAsync(characterId, cancellationToken);
+        if (accountId == Guid.Empty)
+        {
+            return;
+        }
+
+        if (ordersCompleted > 0)
+        {
+            await AddProgressAsync(accountId, characterId, AchievementRequirementType.GuildOrdersCompleted, ordersCompleted, cancellationToken: cancellationToken);
+        }
+
+        if (missionCompleted)
+        {
+            await AddProgressAsync(accountId, characterId, AchievementRequirementType.GuildMissionsCompleted, cancellationToken: cancellationToken);
+        }
+
+        if (suppliesGenerated > 0)
+        {
+            await AddProgressAsync(accountId, characterId, AchievementRequirementType.GuildSuppliesGenerated, suppliesGenerated, cancellationToken: cancellationToken);
+        }
+    }
+
+    public async Task RecordMarketplaceSaleAsync(Guid characterId, CancellationToken cancellationToken) =>
+        await RecordSingleProgressAsync(characterId, AchievementRequirementType.MarketplaceSalesCompleted, cancellationToken);
+
+    public async Task RecordSoulstoneUpgradePurchasedAsync(Guid characterId, bool allUpgradesMaxed, CancellationToken cancellationToken)
+    {
+        var accountId = await GetAccountIdForCharacterAsync(characterId, cancellationToken);
+        if (accountId == Guid.Empty)
+        {
+            return;
+        }
+
+        await AddProgressAsync(accountId, characterId, AchievementRequirementType.SoulstoneUpgradesPurchased, cancellationToken: cancellationToken);
+        if (allUpgradesMaxed)
+        {
+            await AddProgressAsync(accountId, characterId, AchievementRequirementType.AllSoulstoneUpgradesMaxed, cancellationToken: cancellationToken);
+        }
+    }
+
+    public async Task RecordDungeonMasteryLevelReachedAsync(Guid characterId, int level, CancellationToken cancellationToken)
+    {
+        var accountId = await GetAccountIdForCharacterAsync(characterId, cancellationToken);
+        if (accountId != Guid.Empty && level > 0)
+        {
+            await AddProgressAsync(accountId, characterId, AchievementRequirementType.DungeonMasteryLevelReached, level, setToMax: true, cancellationToken: cancellationToken);
+        }
+    }
+
+    public async Task RecordColosseumTournamentAsync(Guid characterId, bool won, CancellationToken cancellationToken)
+    {
+        var accountId = await GetAccountIdForCharacterAsync(characterId, cancellationToken);
+        if (accountId == Guid.Empty)
+        {
+            return;
+        }
+
+        await AddProgressAsync(accountId, characterId, AchievementRequirementType.ColosseumTournamentsCompleted, cancellationToken: cancellationToken);
+        if (won)
+        {
+            await AddProgressAsync(accountId, characterId, AchievementRequirementType.ColosseumTournamentsWon, cancellationToken: cancellationToken);
+        }
+    }
+
+    public async Task RecordChampionMarketPurchaseAsync(Guid characterId, CancellationToken cancellationToken) =>
+        await RecordSingleProgressAsync(characterId, AchievementRequirementType.ChampionMarketPurchases, cancellationToken);
+
     public async Task<AchievementRecalculationResultDto?> RecalculateProgressAsync(
         Guid accountId,
         Guid characterId,
@@ -741,11 +864,9 @@ public sealed class AchievementService : IAchievementService
         await RecalculateCraftingProgressAsync(accountId, characterId, unlocks, cancellationToken);
         await RecalculateDungeonProgressAsync(accountId, characterId, unlocks, cancellationToken);
         await RecalculateColosseumProgressAsync(accountId, characterId, unlocks, cancellationToken);
+        await RecalculateAdditionalProgressAsync(accountId, characterId, unlocks, cancellationToken);
 
-        if (unlocks.Count > 0)
-        {
-            unlocks.AddRange(await SyncLegacyAchievementProgressAsync(accountId, characterId, cancellationToken));
-        }
+        unlocks.AddRange(await SyncDependentAchievementProgressAsync(accountId, characterId, cancellationToken));
 
         await PublishUnlockAnnouncementsAsync(characterId, unlocks, cancellationToken);
         var completedAfter = completedBefore + unlocks.Select(x => x.AchievementKey).Distinct(StringComparer.OrdinalIgnoreCase).Count();
@@ -772,6 +893,18 @@ public sealed class AchievementService : IAchievementService
 
     private async Task<Guid> GetAccountIdForCharacterAsync(Guid characterId, CancellationToken cancellationToken) =>
         await _repository.GetAccountIdForCharacterAsync(characterId, cancellationToken);
+
+    private async Task RecordSingleProgressAsync(
+        Guid characterId,
+        AchievementRequirementType requirementType,
+        CancellationToken cancellationToken)
+    {
+        var accountId = await GetAccountIdForCharacterAsync(characterId, cancellationToken);
+        if (accountId != Guid.Empty)
+        {
+            await AddProgressAsync(accountId, characterId, requirementType, cancellationToken: cancellationToken);
+        }
+    }
 
     private async Task<int> CountCompletedAchievementsAsync(Guid accountId, CancellationToken cancellationToken) =>
         await _repository.CountCompletedAchievementsAsync(accountId, cancellationToken);
@@ -886,11 +1019,81 @@ public sealed class AchievementService : IAchievementService
             syncLegacyProgress: false,
             cancellationToken: cancellationToken));
 
+        var uniqueVariantCount = craftedItems
+            .Select(x => $"{x.BaseRecipeId}\u001f{x.BlueprintId}")
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .Count();
+        unlocks.AddRange(await AddProgressCoreAsync(
+            accountId,
+            characterId,
+            AchievementRequirementType.UniqueItemVariantsCrafted,
+            uniqueVariantCount,
+            setToMax: true,
+            syncLegacyProgress: false,
+            cancellationToken: cancellationToken));
+
+        unlocks.AddRange(await AddProgressCoreAsync(
+            accountId,
+            characterId,
+            AchievementRequirementType.CraftingMasteryLevelReached,
+            await _repository.GetMaxCraftingMasteryLevelAsync(characterId, cancellationToken),
+            setToMax: true,
+            syncLegacyProgress: false,
+            cancellationToken: cancellationToken));
+
         unlocks.AddRange(await CompleteHighQualityLowPotentialAchievementsAsync(
             accountId,
             characterId,
             craftedItems,
             cancellationToken));
+    }
+
+    private async Task RecordUniqueItemVariantsAsync(
+        Guid accountId,
+        Guid characterId,
+        IReadOnlyCollection<EquipmentInstance> craftedItems,
+        CancellationToken cancellationToken)
+    {
+        var definitions = await _repository.GetActiveDefinitionsAsync(
+            AchievementRequirementType.UniqueItemVariantsCrafted,
+            cancellationToken);
+        var definition = definitions.FirstOrDefault();
+        if (definition is null)
+        {
+            return;
+        }
+
+        var progress = await _repository.GetProgressAsync(
+            accountId,
+            definition.Scope == AchievementScope.Character ? characterId : null,
+            definition.Id,
+            null,
+            cancellationToken);
+        var variants = new HashSet<string>(
+            string.IsNullOrWhiteSpace(progress?.MetadataJson)
+                ? []
+                : JsonSerializer.Deserialize<HashSet<string>>(progress.MetadataJson) ?? [],
+            StringComparer.OrdinalIgnoreCase);
+
+        // Preserve progress created before variant identities were recorded.
+        for (var index = variants.Count; index < (progress?.CurrentAmount ?? 0); index++)
+        {
+            variants.Add($"legacy:{index}");
+        }
+
+        foreach (var item in craftedItems.Where(x => !string.IsNullOrWhiteSpace(x.BaseRecipeId)))
+        {
+            variants.Add($"{item.BaseRecipeId}\u001f{item.BlueprintId}");
+        }
+
+        await AddProgressAsync(
+            accountId,
+            characterId,
+            AchievementRequirementType.UniqueItemVariantsCrafted,
+            variants.Count,
+            setToMax: true,
+            metadataJson: JsonSerializer.Serialize(variants),
+            cancellationToken: cancellationToken);
     }
 
     private async Task RecalculateDungeonProgressAsync(
@@ -1008,6 +1211,60 @@ public sealed class AchievementService : IAchievementService
             cancellationToken: cancellationToken));
     }
 
+    private async Task RecalculateAdditionalProgressAsync(
+        Guid accountId,
+        Guid characterId,
+        List<AchievementUnlockDto> unlocks,
+        CancellationToken cancellationToken)
+    {
+        unlocks.AddRange(await AddProgressCoreAsync(accountId, characterId, AchievementRequirementType.PropheciesCompleted,
+            await _repository.GetCompletedProphecyCountAsync(accountId, cancellationToken), setToMax: true, syncLegacyProgress: false, cancellationToken: cancellationToken));
+        if (await _repository.HasCompletedWeeklyProphecyCycleAsync(accountId, cancellationToken))
+        {
+            unlocks.AddRange(await AddProgressCoreAsync(accountId, characterId, AchievementRequirementType.WeeklyProphecyCycleCompleted,
+                setToMax: true, syncLegacyProgress: false, cancellationToken: cancellationToken));
+        }
+
+        if (await _repository.IsGuildMemberAsync(characterId, cancellationToken))
+        {
+            unlocks.AddRange(await AddProgressCoreAsync(accountId, characterId, AchievementRequirementType.GuildJoined,
+                setToMax: true, syncLegacyProgress: false, cancellationToken: cancellationToken));
+        }
+        unlocks.AddRange(await AddProgressCoreAsync(accountId, characterId, AchievementRequirementType.GuildOrdersCompleted,
+            await _repository.GetCompletedGuildOrderCountAsync(accountId, cancellationToken), setToMax: true, syncLegacyProgress: false, cancellationToken: cancellationToken));
+        unlocks.AddRange(await AddProgressCoreAsync(accountId, characterId, AchievementRequirementType.GuildMissionsCompleted,
+            await _repository.GetCompletedGuildMissionCountAsync(characterId, cancellationToken), setToMax: true, syncLegacyProgress: false, cancellationToken: cancellationToken));
+        unlocks.AddRange(await AddProgressCoreAsync(accountId, characterId, AchievementRequirementType.GuildSuppliesGenerated,
+            await _repository.GetGuildSuppliesGeneratedAsync(accountId, cancellationToken), setToMax: true, syncLegacyProgress: false, cancellationToken: cancellationToken));
+
+        unlocks.AddRange(await AddProgressCoreAsync(accountId, characterId, AchievementRequirementType.MarketplaceSalesCompleted,
+            await _repository.GetMarketplaceSaleCountAsync(accountId, cancellationToken), setToMax: true, syncLegacyProgress: false, cancellationToken: cancellationToken));
+        unlocks.AddRange(await AddProgressCoreAsync(accountId, characterId, AchievementRequirementType.SoulstoneUpgradesPurchased,
+            await _repository.GetSoulstoneUpgradeRankCountAsync(accountId, cancellationToken), setToMax: true, syncLegacyProgress: false, cancellationToken: cancellationToken));
+
+        if (_soulstoneUpgrades is not null)
+        {
+            var ranks = await _repository.GetSoulstoneUpgradeRanksAsync(characterId, cancellationToken);
+            var enabled = _soulstoneUpgrades.All.Values.Where(x => x.Enabled).ToList();
+            if (enabled.Count > 0 && enabled.All(x => ranks.GetValueOrDefault(x.Id) >= x.MaxRank))
+            {
+                unlocks.AddRange(await AddProgressCoreAsync(accountId, characterId, AchievementRequirementType.AllSoulstoneUpgradesMaxed,
+                    setToMax: true, syncLegacyProgress: false, cancellationToken: cancellationToken));
+            }
+        }
+
+        unlocks.AddRange(await AddProgressCoreAsync(accountId, characterId, AchievementRequirementType.DungeonMasteryLevelReached,
+            await _repository.GetMaxDungeonMasteryLevelAsync(characterId, cancellationToken), setToMax: true, syncLegacyProgress: false, cancellationToken: cancellationToken));
+
+        var tournaments = await _repository.GetTournamentSummaryAsync(characterId, cancellationToken);
+        unlocks.AddRange(await AddProgressCoreAsync(accountId, characterId, AchievementRequirementType.ColosseumTournamentsCompleted,
+            tournaments.Completed, setToMax: true, syncLegacyProgress: false, cancellationToken: cancellationToken));
+        unlocks.AddRange(await AddProgressCoreAsync(accountId, characterId, AchievementRequirementType.ColosseumTournamentsWon,
+            tournaments.Won, setToMax: true, syncLegacyProgress: false, cancellationToken: cancellationToken));
+        unlocks.AddRange(await AddProgressCoreAsync(accountId, characterId, AchievementRequirementType.ChampionMarketPurchases,
+            await _repository.GetChampionMarketPurchaseCountAsync(characterId, cancellationToken), setToMax: true, syncLegacyProgress: false, cancellationToken: cancellationToken));
+    }
+
     private async Task<long> GetProgressAmountAsync(
         Guid accountId,
         Guid? characterId,
@@ -1106,7 +1363,7 @@ public sealed class AchievementService : IAchievementService
 
         if (unlocks.Count > 0)
         {
-            unlocks.AddRange(await SyncLegacyAchievementProgressAsync(accountId, characterId, cancellationToken));
+            unlocks.AddRange(await SyncDependentAchievementProgressAsync(accountId, characterId, cancellationToken));
         }
 
         return unlocks;
@@ -1234,20 +1491,59 @@ public sealed class AchievementService : IAchievementService
         return unlock;
     }
 
-    private async Task<IReadOnlyList<AchievementUnlockDto>> SyncLegacyAchievementProgressAsync(
+    private async Task<IReadOnlyList<AchievementUnlockDto>> SyncDependentAchievementProgressAsync(
         Guid accountId,
         Guid? characterId,
         CancellationToken cancellationToken)
     {
-        var points = await GetTotalAchievementPointsAsync(accountId, cancellationToken);
-        return await AddProgressCoreAsync(
-            accountId,
-            characterId,
-            AchievementRequirementType.AchievementPointsReached,
-            points,
-            setToMax: true,
-            syncLegacyProgress: false,
-            cancellationToken: cancellationToken);
+        var unlocks = new List<AchievementUnlockDto>();
+
+        // Meta-achievements can unlock one another, so repeat until the account state stabilizes.
+        for (var pass = 0; pass < 8; pass++)
+        {
+            var passUnlocks = new List<AchievementUnlockDto>();
+            passUnlocks.AddRange(await AddProgressCoreAsync(
+                accountId,
+                characterId,
+                AchievementRequirementType.AchievementPointsReached,
+                await GetTotalAchievementPointsAsync(accountId, cancellationToken),
+                setToMax: true,
+                syncLegacyProgress: false,
+                cancellationToken: cancellationToken));
+            passUnlocks.AddRange(await AddProgressCoreAsync(
+                accountId,
+                characterId,
+                AchievementRequirementType.AchievementsUnlocked,
+                await _repository.CountCompletedAchievementsAsync(accountId, cancellationToken),
+                setToMax: true,
+                syncLegacyProgress: false,
+                cancellationToken: cancellationToken));
+            passUnlocks.AddRange(await AddProgressCoreAsync(
+                accountId,
+                characterId,
+                AchievementRequirementType.NonHiddenAchievementsCompleted,
+                await _repository.CountCompletedNonHiddenAchievementsAsync(accountId, cancellationToken),
+                setToMax: true,
+                syncLegacyProgress: false,
+                cancellationToken: cancellationToken));
+            passUnlocks.AddRange(await AddProgressCoreAsync(
+                accountId,
+                characterId,
+                AchievementRequirementType.TitlesUnlocked,
+                await _repository.CountTitleUnlocksAsync(accountId, cancellationToken),
+                setToMax: true,
+                syncLegacyProgress: false,
+                cancellationToken: cancellationToken));
+
+            if (passUnlocks.Count == 0)
+            {
+                break;
+            }
+
+            unlocks.AddRange(passUnlocks);
+        }
+
+        return unlocks;
     }
 
     private async Task<IReadOnlyList<AchievementUnlockDto>> CompleteHighQualityLowPotentialAchievementsAsync(
@@ -1291,7 +1587,7 @@ public sealed class AchievementService : IAchievementService
 
         if (unlocks.Count > 0)
         {
-            unlocks.AddRange(await SyncLegacyAchievementProgressAsync(accountId, characterId, cancellationToken));
+            unlocks.AddRange(await SyncDependentAchievementProgressAsync(accountId, characterId, cancellationToken));
         }
 
         return unlocks;

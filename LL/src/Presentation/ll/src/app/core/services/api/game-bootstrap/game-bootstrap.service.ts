@@ -3,13 +3,13 @@ import { map, Observable } from 'rxjs';
 import { CharacterActionDto } from '../../../../shared/models/Dtos/characterActionDto';
 import { CharacterDto } from '../../../../shared/models/Dtos/characterDto';
 import { ApiResponse } from '../../../../shared/models/response';
-import { TutorialState } from '../../../../shared/models/tutorial';
+import { QuestJournal } from '../../../../shared/models/quest';
 import { AttributeDefinition } from '../../../../shared/models/attribute-definition';
 import { ApiService } from '../api.service';
 
 export interface GameBootstrapDto {
   character: CharacterDto;
-  tutorial: TutorialState | null;
+  questJournal: QuestJournal;
   currentAction: CharacterActionDto | null;
   serverTimeUtc: string;
   attributeDefinitions: AttributeDefinition[];

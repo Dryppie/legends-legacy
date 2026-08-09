@@ -1,5 +1,6 @@
 using Application.Interfaces.Services.LL;
 using Application.Interfaces.Services.LL.Colosseum;
+using Application.Interfaces.Services.LL.Achievements;
 using Application.Interfaces.Services.LL.Entities;
 using Domain.Models.Colosseum;
 using Domain.Models.Combat;
@@ -32,6 +33,7 @@ public class ColosseumService : IColosseumService
     private readonly IChampionMarketCatalog _championMarketCatalog;
     private readonly IInventoryService _inventoryService;
     private readonly IInventoryItemFactory _inventoryItemFactory;
+    private readonly IAchievementService? _achievementService;
 
     public ColosseumService(
         IEntityService es,
@@ -45,7 +47,8 @@ public class ColosseumService : IColosseumService
         IItemBaseRepository itemBaseRepository,
         IChampionMarketCatalog championMarketCatalog,
         IInventoryService inventoryService,
-        IInventoryItemFactory inventoryItemFactory)
+        IInventoryItemFactory inventoryItemFactory,
+        IAchievementService? achievementService = null)
     {
         _entityService = es;
         _characterService = cs;
@@ -59,6 +62,7 @@ public class ColosseumService : IColosseumService
         _championMarketCatalog = championMarketCatalog;
         _inventoryService = inventoryService;
         _inventoryItemFactory = inventoryItemFactory;
+        _achievementService = achievementService;
     }
 
     public async Task<StartArenaBattleResult?> StartArenaBattle(Guid characterId, Guid enemyId, CancellationToken cancellationToken)
@@ -480,6 +484,10 @@ public class ColosseumService : IColosseumService
             GloryCostPaid = totalCost,
             PurchasedAt = now
         }, cancellationToken);
+        if (_achievementService is not null)
+        {
+            await _achievementService.RecordChampionMarketPurchaseAsync(characterId, cancellationToken);
+        }
 
         return new ChampionMarketPurchaseResult(
             item,

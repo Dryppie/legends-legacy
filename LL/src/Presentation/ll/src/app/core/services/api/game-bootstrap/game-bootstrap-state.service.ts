@@ -14,7 +14,7 @@ import {
   GameBootstrapDto,
   GameBootstrapService,
 } from './game-bootstrap.service';
-import { TutorialStateService } from '../tutorial/tutorial-state.service';
+import { QuestStateService } from '../quest/quest-state.service';
 import { GameEventService } from '../../real-time/game-event.service';
 import { setAttributeDefinitions } from '../../../../shared/models/attribute-definition';
 import { TimeSyncService } from '../time-sync/time-sync.service';
@@ -37,7 +37,7 @@ export class GameBootstrapStateService {
   constructor(
     private readonly bootstrapService: GameBootstrapService,
     private readonly auth: AuthService,
-    private readonly tutorialState: TutorialStateService,
+    private readonly questState: QuestStateService,
     private readonly characterActionsState: CharacterActionsStateService,
     private readonly gameEvents: GameEventService,
     private readonly timeSync: TimeSyncService,
@@ -121,7 +121,8 @@ export class GameBootstrapStateService {
     this.timeSync.updateFromServerTime(bootstrap.serverTimeUtc);
     setAttributeDefinitions(bootstrap.attributeDefinitions);
     this.auth.updateCharacter(bootstrap.character);
-    this.tutorialState.initialize(bootstrap.tutorial);
+    this.questState.initialize(bootstrap.questJournal);
+    this.questState.loadAreaAccess();
     this.characterActionsState.initializeFromBootstrap(bootstrap.currentAction);
     this._loaded.set(true);
   }

@@ -8,6 +8,8 @@
           "name": "Training Area",
           "levelRequirement": 1,
           "difficultyTier": 0,
+          "requiredActiveQuestId": "quest.onboarding.training_day",
+          "hideWhenLocked": true,
           "spawnProbabilities": [
             1.0
           ],
@@ -23,6 +25,7 @@
           "name": "Lumo Ruins",
           "levelRequirement": 1,
           "difficultyTier": 1,
+          "requiredCompletedQuestId": "quest.onboarding.tools_of_trade",
           "spawnProbabilities": [
             0.969,
             0.03,
@@ -79,6 +82,7 @@
           "name": "Blood Grove",
           "levelRequirement": 5,
           "difficultyTier": 2,
+          "requiredCompletedQuestId": "quest.region01.into_lumo_ruins",
           "spawnProbabilities": [
             0.03,
             0.969,

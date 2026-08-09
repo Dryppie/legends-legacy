@@ -373,14 +373,6 @@ public class CraftingService : ICraftingService
 
         await _inventoryService.AddItemsToInventory(characterId, created, cancellationToken);
         var craftedEquipment = created.Select(x => (EquipmentInstance)x.ItemInstance).ToList();
-        await _outbox.EnqueueAsync(
-            GameEventTypes.EquipmentCrafted,
-            new EquipmentCraftedPayload(
-                characterId,
-                [.. craftedEquipment.Select(ToOutboxEquipmentItem)]),
-            characterId,
-            null,
-            cancellationToken);
         var craftedAt = DateTimeOffset.UtcNow;
         await _guildMissionService.RecordContributionAsync(
             new GuildContributionEvent(
@@ -398,6 +390,16 @@ public class CraftingService : ICraftingService
         mastery.Experience += xpGained;
         mastery.Level = CraftingMasteryProgression.GetLevelForExperience(mastery.Experience);
         mastery.UpdatedAt = DateTimeOffset.UtcNow;
+
+        await _outbox.EnqueueAsync(
+            GameEventTypes.EquipmentCrafted,
+            new EquipmentCraftedPayload(
+                characterId,
+                [.. craftedEquipment.Select(ToOutboxEquipmentItem)],
+                mastery.Level),
+            characterId,
+            null,
+            cancellationToken);
 
         return Response<CraftItemsResult>.Success(new CraftItemsResult(
             recipe.Id,

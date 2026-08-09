@@ -28,14 +28,12 @@ import {
   DropdownOption,
   DropdownSelection,
 } from '../../../../shared/components/custom-components/dropdown/dropdown.component';
-import { TutorialStateService } from '../../../../core/services/api/tutorial/tutorial-state.service';
-import { TutorialPresenterService } from '../../../../core/services/api/tutorial/tutorial-presenter.service';
+import { QuestStateService } from '../../../../core/services/api/quest/quest-state.service';
+import { QuestPresenterService } from '../../../../core/services/api/quest/quest-presenter.service';
 import {
-  TUTORIAL_GATHERING_TOOL_ITEM_BASE_IDS,
-  TUTORIAL_STEP_EQUIP_EQUIPMENT,
-  TUTORIAL_STEP_EQUIP_GATHERING_TOOL,
-  TUTORIAL_ONE_HANDED_WEAPON_ITEM_BASE_IDS,
-} from '../../../../shared/models/tutorial';
+  ONBOARDING_GATHERING_TOOL_ITEM_BASE_IDS,
+  ONBOARDING_ONE_HANDED_WEAPON_ITEM_BASE_IDS,
+} from '../../../../shared/models/quest';
 type MobileInventoryView = 'Inventory' | 'Equipment';
 
 @Component({
@@ -117,20 +115,19 @@ export class InventoryComponent implements OnInit {
 
   constructor(
     public state: InventoryStateService,
-    private readonly tutorialState: TutorialStateService,
-    private readonly tutorialPresenter: TutorialPresenterService,
+    private readonly questState: QuestStateService,
+    private readonly questPresenter: QuestPresenterService,
   ) {
     effect(() => {
-      const tutorial = this.tutorialState.state();
+      const objectiveType = this.questState.pinnedObjective()?.type;
       if (
-        (tutorial?.currentStep === TUTORIAL_STEP_EQUIP_EQUIPMENT ||
-          tutorial?.currentStep === TUTORIAL_STEP_EQUIP_GATHERING_TOOL) &&
-        !tutorial.isCompleted
+        objectiveType === 'EquipmentEquipped' ||
+        objectiveType === 'GatheringToolEquipped'
       ) {
         this.enterBrowseMode();
 
-        if (tutorial.currentStep === TUTORIAL_STEP_EQUIP_GATHERING_TOOL) {
-          untracked(() => this.tutorialPresenter.presentCurrentStep());
+        if (objectiveType === 'GatheringToolEquipped') {
+          untracked(() => this.questPresenter.presentCurrentObjective());
         }
       }
     });
@@ -222,20 +219,20 @@ export class InventoryComponent implements OnInit {
       : null;
   }
 
-  isTutorialCraftedWeapon(item: InventoryItem): boolean {
+  isOnboardingCraftedWeapon(item: InventoryItem): boolean {
     const equipment = this.equipmentInstance(item);
     return (
       equipment?.tier === 1 &&
       !!equipment.baseRecipeId &&
-      TUTORIAL_ONE_HANDED_WEAPON_ITEM_BASE_IDS.has(equipment.itemBase.id)
+      ONBOARDING_ONE_HANDED_WEAPON_ITEM_BASE_IDS.has(equipment.itemBase.id)
     );
   }
 
-  isTutorialGatheringTool(item: InventoryItem): boolean {
+  isOnboardingGatheringTool(item: InventoryItem): boolean {
     const equipment = this.equipmentInstance(item);
     return (
       equipment?.equipmentBase.equipmentType === EquipmentType.Tool &&
-      TUTORIAL_GATHERING_TOOL_ITEM_BASE_IDS.has(equipment.itemBase.id)
+      ONBOARDING_GATHERING_TOOL_ITEM_BASE_IDS.has(equipment.itemBase.id)
     );
   }
 

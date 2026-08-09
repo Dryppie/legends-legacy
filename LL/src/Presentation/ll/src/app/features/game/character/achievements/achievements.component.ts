@@ -48,6 +48,9 @@ export class AchievementsComponent implements OnInit {
     'Dungeons',
     'Crafting',
     'Colosseum',
+    'Guild',
+    'Prophecies',
+    'Economy',
     'Hidden',
     'Legacy',
   ];

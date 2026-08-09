@@ -299,6 +299,9 @@ public static class SeedCreatures
             Name = seed.Name,
             LevelRequirement = seed.LevelRequirement,
             DifficultyTier = seed.DifficultyTier,
+            RequiredActiveQuestId = seed.RequiredActiveQuestId,
+            RequiredCompletedQuestId = seed.RequiredCompletedQuestId,
+            HideWhenLocked = seed.HideWhenLocked,
             SpawnProbabilities = seed.SpawnProbabilities.ToList(),
             Creatures = seed.Creatures
                 .Select(creature => new AreaCreature
@@ -319,6 +322,9 @@ public static class SeedCreatures
         changed |= SetIfChanged(area.Name, seed.Name, value => area.Name = value);
         changed |= SetIfChanged(area.LevelRequirement, seed.LevelRequirement, value => area.LevelRequirement = value);
         changed |= SetIfChanged(area.DifficultyTier, seed.DifficultyTier, value => area.DifficultyTier = value);
+        changed |= SetIfChanged(area.RequiredActiveQuestId, seed.RequiredActiveQuestId, value => area.RequiredActiveQuestId = value);
+        changed |= SetIfChanged(area.RequiredCompletedQuestId, seed.RequiredCompletedQuestId, value => area.RequiredCompletedQuestId = value);
+        changed |= SetIfChanged(area.HideWhenLocked, seed.HideWhenLocked, value => area.HideWhenLocked = value);
 
         if (!FloatsEqual(area.SpawnProbabilities, seed.SpawnProbabilities))
         {
@@ -500,6 +506,9 @@ public static class SeedCreatures
         public string Name { get; set; } = string.Empty;
         public int LevelRequirement { get; set; }
         public int DifficultyTier { get; set; }
+        public string? RequiredActiveQuestId { get; set; }
+        public string? RequiredCompletedQuestId { get; set; }
+        public bool HideWhenLocked { get; set; }
         public List<float> SpawnProbabilities { get; set; } = [];
         public List<AreaCreatureSeed> Creatures { get; set; } = [];
         public List<AreaGatheringNodeSeed> GatheringNodes { get; set; } = [];

@@ -28,11 +28,11 @@ using Domain.Models.Outbox;
 using Domain.Models.Professions;
 using Domain.Models.Professions.Crafting;
 using Domain.Models.Prophecies;
+using Domain.Models.Quests;
 using Domain.Models.Regions;
 using Domain.Models.Regions.Areas;
 using Domain.Models.Snapshots;
 using Domain.Models.Soulstones;
-using Domain.Models.Tutorials;
 using Domain.Models.Users;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
@@ -174,7 +174,9 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : DbContext(opti
     public DbSet<TournamentRewardGrant> TournamentRewardGrants => Set<TournamentRewardGrant>();
     public DbSet<Character> Characters => Set<Character>();
     public DbSet<CharacterSoulstoneUpgrade> CharacterSoulstoneUpgrades => Set<CharacterSoulstoneUpgrade>();
-    public DbSet<CharacterTutorialProgress> CharacterTutorialProgresses => Set<CharacterTutorialProgress>();
+    public DbSet<CharacterQuestProgress> CharacterQuestProgresses => Set<CharacterQuestProgress>();
+    public DbSet<CharacterQuestObjectiveProgress> CharacterQuestObjectiveProgresses => Set<CharacterQuestObjectiveProgress>();
+    public DbSet<QuestEventLedger> QuestEventLedgers => Set<QuestEventLedger>();
     public DbSet<Creature> Creatures => Set<Creature>();
 
     //public DbSet<Echo> Echoes => Set<Echo>();

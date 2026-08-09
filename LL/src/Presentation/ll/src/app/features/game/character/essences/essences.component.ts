@@ -37,19 +37,15 @@ import {
   DropdownOption,
   DropdownSelection,
 } from '../../../../shared/components/custom-components/dropdown/dropdown.component';
-import { TutorialStateService } from '../../../../core/services/api/tutorial/tutorial-state.service';
-import { TutorialPresenterService } from '../../../../core/services/api/tutorial/tutorial-presenter.service';
+import { QuestStateService } from '../../../../core/services/api/quest/quest-state.service';
+import { QuestPresenterService } from '../../../../core/services/api/quest/quest-presenter.service';
 import { InventoryStateService } from '../../../../core/services/api/inventory/inventory-state.service';
 import {
   canSpendEssenceDust,
   essenceDustActionLabel,
   essenceDustLevelingDescription,
 } from './essence-leveling.utils';
-import {
-  TUTORIAL_GOBLIN_ESSENCE_DEFINITION_ID,
-  TUTORIAL_STEP_ABSORB_ESSENCE,
-  TUTORIAL_STEP_EQUIP_ESSENCE,
-} from '../../../../shared/models/tutorial';
+import { ONBOARDING_GOBLIN_ESSENCE_DEFINITION_ID } from '../../../../shared/models/quest';
 
 type ArchiveFilter = 'all' | 'favorites' | 'attuned' | 'ready';
 type ArchiveSort = 'name' | 'level' | 'tier';
@@ -80,7 +76,7 @@ interface AscendRequirementView {
   styleUrls: ['./essences.component.scss'],
 })
 export class EssencesComponent implements OnInit {
-  private lastPreparedTutorialStep: string | null = null;
+  private lastPreparedQuestObjective: string | null = null;
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly routeEssenceId = toSignal(
@@ -261,29 +257,29 @@ export class EssencesComponent implements OnInit {
 
   constructor(
     public readonly essenceState: EssenceStateService,
-    public readonly tutorialState: TutorialStateService,
-    private readonly tutorialPresenter: TutorialPresenterService,
+    public readonly questState: QuestStateService,
+    private readonly questPresenter: QuestPresenterService,
     private readonly inventoryState: InventoryStateService,
   ) {
     effect(
       () => {
-        const tutorial = this.tutorialState.state();
-        if (!tutorial || tutorial.isCompleted) {
-          this.lastPreparedTutorialStep = null;
+        const objective = this.questState.pinnedObjective();
+        if (!objective) {
+          this.lastPreparedQuestObjective = null;
           return;
         }
 
-        if (tutorial.currentStep === this.lastPreparedTutorialStep) return;
-        this.lastPreparedTutorialStep = tutorial.currentStep;
+        if (objective.key === this.lastPreparedQuestObjective) return;
+        this.lastPreparedQuestObjective = objective.key;
 
-        if (tutorial.currentStep === TUTORIAL_STEP_ABSORB_ESSENCE) {
+        if (objective.type === 'EssenceAbsorbed') {
           this.essenceState.setActiveView('absorb');
           return;
         }
 
-        if (tutorial.currentStep === TUTORIAL_STEP_EQUIP_ESSENCE) {
+        if (objective.type === 'EssenceEquipped') {
           this.essenceState.setActiveView('archive');
-          untracked(() => this.tutorialPresenter.presentCurrentStep());
+          untracked(() => this.questPresenter.presentCurrentObjective());
         }
       },
       { allowSignalWrites: true },
@@ -327,10 +323,9 @@ export class EssencesComponent implements OnInit {
         this.essenceState.setActiveView(view as EssenceView);
         if (
           view === 'archive' &&
-          this.tutorialState.state()?.currentStep ===
-            TUTORIAL_STEP_EQUIP_ESSENCE
+          this.questState.pinnedObjective()?.type === 'EssenceEquipped'
         ) {
-          this.tutorialPresenter.presentCurrentStep();
+          this.questPresenter.presentCurrentObjective();
         }
     }
   }
@@ -488,15 +483,14 @@ export class EssencesComponent implements OnInit {
     this.essenceState.setDraftSlot(slotIndex, essence.id);
   }
 
-  public isTutorialStarterAttunement(essence: PlayerEssenceDto): boolean {
-    const tutorial = this.tutorialState.state();
+  public isOnboardingStarterAttunement(essence: PlayerEssenceDto): boolean {
     return (
-      tutorial?.currentStep === TUTORIAL_STEP_EQUIP_ESSENCE &&
-      essence.essenceDefinitionId === TUTORIAL_GOBLIN_ESSENCE_DEFINITION_ID
+      this.questState.pinnedObjective()?.type === 'EssenceEquipped' &&
+      essence.essenceDefinitionId === ONBOARDING_GOBLIN_ESSENCE_DEFINITION_ID
     );
   }
 
-  public equipTutorialStarterEssence(essence: PlayerEssenceDto): void {
+  public equipOnboardingStarterEssence(essence: PlayerEssenceDto): void {
     if (this.equippedDraftSlot(essence) !== null) return;
 
     const slotIndex = this.nextEquipSlot(essence);
@@ -505,7 +499,7 @@ export class EssencesComponent implements OnInit {
     this.essenceState.setDraftSlot(slotIndex, essence.id);
   }
 
-  public tutorialEquipButtonText(essence: PlayerEssenceDto): string {
+  public onboardingEquipButtonText(essence: PlayerEssenceDto): string {
     const slotIndex = this.equippedDraftSlot(essence);
     return slotIndex === null
       ? 'Equip Essence'
@@ -513,8 +507,7 @@ export class EssencesComponent implements OnInit {
   }
 
   public saveLoadout(): void {
-    const tutorial = this.tutorialState.state();
-    const hasTutorialStarterDrafted = this.essenceState
+    const hasOnboardingStarterDrafted = this.essenceState
       .draftSlots()
       .some((playerEssenceId) =>
         this.essenceState
@@ -523,13 +516,13 @@ export class EssencesComponent implements OnInit {
             (essence) =>
               essence.id === playerEssenceId &&
               essence.essenceDefinitionId ===
-                TUTORIAL_GOBLIN_ESSENCE_DEFINITION_ID,
+                ONBOARDING_GOBLIN_ESSENCE_DEFINITION_ID,
           ),
       );
 
     this.essenceState.saveDraftLoadout(
-      tutorial?.currentStep === TUTORIAL_STEP_EQUIP_ESSENCE &&
-        hasTutorialStarterDrafted,
+      this.questState.pinnedObjective()?.type === 'EssenceEquipped' &&
+        hasOnboardingStarterDrafted,
     );
   }
 

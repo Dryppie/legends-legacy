@@ -222,16 +222,16 @@
           <div class="soul-detail-actions flex flex-wrap gap-2">
             <button
               *ngIf="
-                isTutorialStarterAttunement(essence);
+                isOnboardingStarterAttunement(essence);
                 else regularAttunementButton
               "
               type="button"
               class="ll-button ll-button-primary"
               data-tour="tutorial-equip-essence"
               [disabled]="!canToggleEssenceSlot(essence)"
-              (click)="equipTutorialStarterEssence(essence)"
+              (click)="equipOnboardingStarterEssence(essence)"
             >
-              {{ tutorialEquipButtonText(essence) }}
+              {{ onboardingEquipButtonText(essence) }}
             </button>
             <ng-template #regularAttunementButton>
               <button
@@ -424,7 +424,7 @@
         <footer class="soul-mobile-detail-footer bg-texture bg-auto">
           <ng-container
             *ngIf="
-              isTutorialStarterAttunement(essence);
+              isOnboardingStarterAttunement(essence);
               else mobileRegularAttunementButton
             "
           >
@@ -433,9 +433,9 @@
               class="ll-button ll-button-primary"
               data-tour="tutorial-equip-essence"
               [disabled]="!canToggleEssenceSlot(essence)"
-              (click)="equipTutorialStarterEssence(essence)"
+              (click)="equipOnboardingStarterEssence(essence)"
             >
-              {{ tutorialEquipButtonText(essence) }}
+              {{ onboardingEquipButtonText(essence) }}
             </button>
           </ng-container>
           <ng-template #mobileRegularAttunementButton>

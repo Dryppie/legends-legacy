@@ -1,5 +1,6 @@
 using Application.Interfaces.Services.LL;
 using Application.Interfaces.Services.LL.Entities;
+using Application.Interfaces.Services.LL.Achievements;
 using Domain.Models.Entities.Characters;
 using Domain.Models.Inventories;
 using Domain.Models.Items;
@@ -16,6 +17,7 @@ public class MarketPlaceService : IMarketPlaceService
     private readonly ICharacterService _characterService;
     private readonly MarketPlaceOptions _options;
     private readonly TimeProvider _timeProvider;
+    private readonly IAchievementService? _achievementService;
 
     public MarketPlaceService(
         IMarketPlaceRepository marketPlaceRepository,
@@ -23,7 +25,8 @@ public class MarketPlaceService : IMarketPlaceService
         IInventoryService inventoryService,
         ICharacterService characterService,
         IOptions<MarketPlaceOptions> options,
-        TimeProvider timeProvider)
+        TimeProvider timeProvider,
+        IAchievementService? achievementService = null)
     {
         _marketPlaceRepository = marketPlaceRepository;
         _itemBaseRepository = itemBaseRepository;
@@ -31,6 +34,7 @@ public class MarketPlaceService : IMarketPlaceService
         _characterService = characterService;
         _options = options.Value;
         _timeProvider = timeProvider;
+        _achievementService = achievementService;
     }
 
     public async Task<List<MarketPlaceListing>> GetMarketPlaceListingsAsync(CancellationToken cancellationToken)
@@ -231,6 +235,7 @@ public class MarketPlaceService : IMarketPlaceService
                 Source = MarketPlaceTradeSource.BuyOrder,
                 PurchasedAt = now
             }, cancellationToken);
+            await RecordMarketplaceSaleAsync(characterId, cancellationToken);
 
             fills.Add(new FulfillMarketPlaceBuyOrderResult(
                 order.Id,
@@ -426,6 +431,7 @@ public class MarketPlaceService : IMarketPlaceService
                 Source = MarketPlaceTradeSource.SellListing,
                 PurchasedAt = now
             }, cancellationToken);
+            await RecordMarketplaceSaleAsync(listing.SellerId, cancellationToken);
 
             fills.Add(new BuyoutMarketPlaceListingResult(
                 listing.Id,
@@ -499,6 +505,7 @@ public class MarketPlaceService : IMarketPlaceService
             Source = MarketPlaceTradeSource.SellListing,
             PurchasedAt = now
         }, cancellationToken);
+        await RecordMarketplaceSaleAsync(listing.SellerId, cancellationToken);
 
         return new BuyoutMarketPlaceListingResult(
             listingId,
@@ -622,6 +629,7 @@ public class MarketPlaceService : IMarketPlaceService
                 Source = MarketPlaceTradeSource.SellListing,
                 PurchasedAt = now
             }, cancellationToken);
+            await RecordMarketplaceSaleAsync(listing.SellerId, cancellationToken);
 
             fills.Add(new BuyoutMarketPlaceListingResult(
                 listing.Id,
@@ -700,6 +708,7 @@ public class MarketPlaceService : IMarketPlaceService
             Source = MarketPlaceTradeSource.BuyOrder,
             PurchasedAt = now
         }, cancellationToken);
+        await RecordMarketplaceSaleAsync(characterId, cancellationToken);
 
         var remainingSellerInventoryItem = await _inventoryService.GetInventoryItemAsync(characterId, itemInstanceId, cancellationToken);
 
@@ -837,6 +846,7 @@ public class MarketPlaceService : IMarketPlaceService
                 Source = MarketPlaceTradeSource.BuyOrder,
                 PurchasedAt = now
             }, cancellationToken);
+            await RecordMarketplaceSaleAsync(characterId, cancellationToken);
 
             fills.Add(new FulfillMarketPlaceBuyOrderResult(
                 order.Id,
@@ -981,5 +991,12 @@ public class MarketPlaceService : IMarketPlaceService
         var proportionalFee = (long)decimal.Ceiling(
             totalPrice * (decimal)_options.SellerFeeBasisPoints / 10_000m);
         return Math.Min(totalPrice, Math.Max(_options.MinimumSellerFee, proportionalFee));
+    }
+    private async Task RecordMarketplaceSaleAsync(Guid sellerId, CancellationToken cancellationToken)
+    {
+        if (_achievementService is not null)
+        {
+            await _achievementService.RecordMarketplaceSaleAsync(sellerId, cancellationToken);
+        }
     }
 }

@@ -2,7 +2,7 @@ using Application.MediatR.Markers;
 using Application.UseCases.CharacterActions.Commands.ResolveCharacterAction;
 using Application.UseCases.Characters.Queries.GetCharacter;
 using Application.UseCases.GameBootstrap.Dtos;
-using Application.UseCases.Tutorials.Queries.GetTutorialState;
+using Application.UseCases.Quests.Queries.GetQuestJournal;
 using AutoMapper;
 using Common.Primitives;
 using Domain.Models.Attributes;
@@ -40,8 +40,8 @@ public sealed class GetGameBootstrapQueryHandler
             return Response<GameBootstrapDto>.Fail("Character was not found.");
         }
 
-        var tutorial = await _sender.Send(
-            new GetTutorialStateQuery(request.CharacterId),
+        var questJournal = await _sender.Send(
+            new GetQuestJournalQuery(request.CharacterId),
             cancellationToken);
 
         var currentActionResponse = await _sender.Send(
@@ -56,7 +56,7 @@ public sealed class GetGameBootstrapQueryHandler
         var snapshot = new GameBootstrapSnapshot
         {
             Character = characterResponse.Data,
-            Tutorial = tutorial,
+            QuestJournal = questJournal,
             CurrentAction = currentActionResponse.Data,
             ServerTimeUtc = DateTimeOffset.UtcNow,
             AttributeDefinitions = AttributeCatalog.All,

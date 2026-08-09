@@ -1,5 +1,6 @@
 using Application.Interfaces.Services.LL;
 using Application.Interfaces.Services.LL.Dungeons;
+using Application.Interfaces.Services.LL.Achievements;
 using Application.Interfaces.Services.LL.Rewards;
 using Domain.Models.Dungeons.Definitions;
 using Domain.Models.Dungeons.Runs;
@@ -21,6 +22,7 @@ public sealed class DungeonCompletionRewardApplier : IDungeonCompletionRewardApp
     private readonly IDungeonPendingRewardWriter _pendingRewardWriter;
     private readonly IInventoryItemFactory _inventoryItemFactory;
     private readonly IDungeonMasteryService _mastery;
+    private readonly IAchievementService? _achievementService;
 
     public DungeonCompletionRewardApplier(
         IDungeonDefinitions dungeonDefinitions,
@@ -29,7 +31,8 @@ public sealed class DungeonCompletionRewardApplier : IDungeonCompletionRewardApp
         IRewardRoller rewardRoller,
         IDungeonPendingRewardWriter pendingRewardWriter,
         IInventoryItemFactory inventoryItemFactory,
-        IDungeonMasteryService mastery)
+        IDungeonMasteryService mastery,
+        IAchievementService? achievementService = null)
     {
         _dungeonDefinitions = dungeonDefinitions;
         _dungeonRuns = dungeonRuns;
@@ -38,6 +41,7 @@ public sealed class DungeonCompletionRewardApplier : IDungeonCompletionRewardApp
         _pendingRewardWriter = pendingRewardWriter;
         _inventoryItemFactory = inventoryItemFactory;
         _mastery = mastery;
+        _achievementService = achievementService;
     }
 
     public async Task ApplyAsync(DungeonRun run, CancellationToken cancellationToken)
@@ -80,6 +84,11 @@ public sealed class DungeonCompletionRewardApplier : IDungeonCompletionRewardApp
         await AddMonsterCoreRewardsAsync(run.Id, dungeon.Grade, cancellationToken);
         await AddFirstCompletionRewardsIfNeededAsync(run, dungeon, cancellationToken);
         var masteryAward = await _mastery.AwardCompletionAsync(run, cancellationToken);
+        if (_achievementService is not null)
+        {
+            await _achievementService.RecordDungeonMasteryLevelReachedAsync(run.CharacterId, masteryAward.Level, cancellationToken);
+        }
+
         if (!masteryAward.AlreadyAwarded &&
             masteryAward.PreviousLevel < DungeonMasteryBenefits.MaxLevel &&
             masteryAward.Level >= DungeonMasteryBenefits.MaxLevel)

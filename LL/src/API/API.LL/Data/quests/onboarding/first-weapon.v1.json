@@ -1,0 +1,54 @@
+{
+  "id": "quest.onboarding.first_weapon",
+  "version": 1,
+  "title": "Forge Your Path",
+  "summary": "Craft and equip your first weapon.",
+  "category": "Tutorial",
+  "sortOrder": 30,
+  "autoAccept": true,
+  "objectiveMode": "Sequential",
+  "availability": {
+    "minimumLevel": 1,
+    "completedQuestIds": ["quest.onboarding.soul_archive"]
+  },
+  "objectives": [
+    {
+      "key": "craft_tier_one_weapon",
+      "description": "Craft a Tier 1 one-handed weapon of your choice.",
+      "type": "EquipmentCrafted",
+      "requiredAmount": 1,
+      "filters": {
+        "tier": 1,
+        "itemBaseIds": ["shortsword", "dagger", "hatchet", "mace", "wand"]
+      },
+      "presentation": {
+        "actionLabel": "Head to Crafting",
+        "destinationRoute": "/game/professions/crafting",
+        "guidePageId": "crafting",
+        "tourPageId": "tutorial-crafting"
+      }
+    },
+    {
+      "key": "equip_crafted_weapon",
+      "description": "Equip the weapon you crafted.",
+      "type": "EquipmentEquipped",
+      "requiredAmount": 1,
+      "filters": {
+        "tier": 1,
+        "mustBeCrafted": true,
+        "itemBaseIds": ["shortsword", "dagger", "hatchet", "mace", "wand"]
+      },
+      "presentation": {
+        "actionLabel": "Head to Inventory",
+        "destinationRoute": "/game/character/inventory",
+        "guidePageId": "tutorial-equipment",
+        "tourPageId": "tutorial-inventory"
+      }
+    }
+  ],
+  "rewards": [
+    { "key": "basic_pickaxe", "type": "Item", "itemBaseId": "basic_pickaxe", "quantity": 1 },
+    { "key": "basic_hatchet", "type": "Item", "itemBaseId": "basic_hatchet", "quantity": 1 },
+    { "key": "basic_skinning_knife", "type": "Item", "itemBaseId": "basic_skinning_knife", "quantity": 1 }
+  ]
+}

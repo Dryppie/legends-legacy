@@ -8,70 +8,27 @@ public sealed class GameEventOutboxConsumerRegistry : IGameEventOutboxConsumerRe
     private static readonly IReadOnlyDictionary<string, IReadOnlyList<string>> ConsumersByEvent =
         new Dictionary<string, IReadOnlyList<string>>(StringComparer.OrdinalIgnoreCase)
         {
-            [GameEventTypes.EquipmentChanged] =
-            [
-                GameEventOutboxConsumerNames.Tutorial
-            ],
+            [GameEventTypes.EquipmentChanged] = [GameEventOutboxConsumerNames.Quests],
             [GameEventTypes.EssenceAbsorbed] =
-            [
-                GameEventOutboxConsumerNames.Tutorial,
-                GameEventOutboxConsumerNames.Achievements
-            ],
+                [GameEventOutboxConsumerNames.Quests, GameEventOutboxConsumerNames.Achievements],
             [GameEventTypes.EssenceLoadoutChanged] =
-            [
-                GameEventOutboxConsumerNames.Tutorial,
-                GameEventOutboxConsumerNames.Achievements
-            ],
-            [GameEventTypes.EssenceAscended] =
-            [
-                GameEventOutboxConsumerNames.Achievements
-            ],
+                [GameEventOutboxConsumerNames.Quests, GameEventOutboxConsumerNames.Achievements],
+            [GameEventTypes.EssenceAscended] = [GameEventOutboxConsumerNames.Achievements],
             [GameEventTypes.EquipmentCrafted] =
-            [
-                GameEventOutboxConsumerNames.Tutorial,
-                GameEventOutboxConsumerNames.Achievements
-            ],
-            [GameEventTypes.EquipmentTempered] =
-            [
-                GameEventOutboxConsumerNames.Achievements
-            ],
-            [GameEventTypes.BlueprintUnlocked] =
-            [
-                GameEventOutboxConsumerNames.Achievements
-            ],
+                [GameEventOutboxConsumerNames.Quests, GameEventOutboxConsumerNames.Achievements],
+            [GameEventTypes.EquipmentTempered] = [GameEventOutboxConsumerNames.Achievements],
+            [GameEventTypes.BlueprintUnlocked] = [GameEventOutboxConsumerNames.Achievements],
             [GameEventTypes.IdleCombatEncounterCompleted] =
-            [
-                GameEventOutboxConsumerNames.Tutorial,
-                GameEventOutboxConsumerNames.Achievements
-            ],
+                [GameEventOutboxConsumerNames.Quests, GameEventOutboxConsumerNames.Achievements],
             [GameEventTypes.CharacterCreated] =
-            [
-                GameEventOutboxConsumerNames.Achievements
-            ],
+                [GameEventOutboxConsumerNames.Quests, GameEventOutboxConsumerNames.Achievements],
             [GameEventTypes.CharacterLevelReached] =
-            [
-                GameEventOutboxConsumerNames.Achievements
-            ],
-            [GameEventTypes.DungeonRunStarted] =
-            [
-                GameEventOutboxConsumerNames.Achievements
-            ],
-            [GameEventTypes.DungeonRunCompleted] =
-            [
-                GameEventOutboxConsumerNames.Achievements
-            ],
-            [GameEventTypes.ColosseumBattleCompleted] =
-            [
-                GameEventOutboxConsumerNames.Achievements
-            ],
-            [GameEventTypes.ClientTutorialStep] =
-            [
-                GameEventOutboxConsumerNames.Tutorial
-            ]
+                [GameEventOutboxConsumerNames.Quests, GameEventOutboxConsumerNames.Achievements],
+            [GameEventTypes.DungeonRunStarted] = [GameEventOutboxConsumerNames.Achievements],
+            [GameEventTypes.DungeonRunCompleted] = [GameEventOutboxConsumerNames.Achievements],
+            [GameEventTypes.ColosseumBattleCompleted] = [GameEventOutboxConsumerNames.Achievements]
         };
 
     public IReadOnlyList<string> GetConsumers(string eventType) =>
-        ConsumersByEvent.TryGetValue(eventType, out var consumers)
-            ? consumers
-            : [];
+        ConsumersByEvent.TryGetValue(eventType, out var consumers) ? consumers : [];
 }

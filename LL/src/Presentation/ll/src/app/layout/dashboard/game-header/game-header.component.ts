@@ -14,7 +14,7 @@ import { CurrentDungeonComponent } from '../../../shared/components/current-dung
 import { SidebarSection, Tab } from '../../../shared/models/sidebar-item';
 import { NumberFormatPipe } from '../../../shared/pipes/number-format/number-format.pipe';
 import { ShortNumberPipe } from '../../../shared/pipes/number-format/short-number.pipe';
-import { TutorialQuestComponent } from '../tutorial-quest/tutorial-quest.component';
+import { QuestTrackerComponent } from '../quest-tracker/quest-tracker.component';
 
 @Component({
   selector: 'app-game-header',
@@ -23,7 +23,7 @@ import { TutorialQuestComponent } from '../tutorial-quest/tutorial-quest.compone
     CurrentDungeonComponent,
     NumberFormatPipe,
     ShortNumberPipe,
-    TutorialQuestComponent,
+    QuestTrackerComponent,
   ],
   templateUrl: './game-header.component.html',
 })

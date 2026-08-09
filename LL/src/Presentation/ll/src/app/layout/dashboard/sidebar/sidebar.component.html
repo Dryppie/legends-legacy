@@ -40,7 +40,7 @@
               [item]="item"
               [routerLink]="item.route"
               [isActive]="isItemActive(item.route)"
-              [tutorialAttention]="isTutorialDestination(item)"
+              [questAttention]="isQuestDestination(item)"
               [notificationCount]="getSidebarItemNotificationCount(item.id)"
               (click)="onNavigate(item)"
             >
@@ -114,7 +114,7 @@
           [compact]="true"
           [routerLink]="item.route"
           [isActive]="isItemActive(item.route)"
-          [tutorialAttention]="isTutorialDestination(item)"
+          [questAttention]="isQuestDestination(item)"
           [notificationCount]="getSidebarItemNotificationCount(item.id)"
           (click)="onNavigate(item)"
         ></app-sidebar-item>

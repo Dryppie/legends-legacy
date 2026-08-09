@@ -38,10 +38,9 @@ import {
   DropdownSelection,
 } from '../../../../../shared/components/custom-components/dropdown/dropdown.component';
 import {
-  TUTORIAL_ONE_HANDED_WEAPON_ITEM_BASE_IDS,
-  TUTORIAL_STEP_CRAFT_EQUIPMENT,
-} from '../../../../../shared/models/tutorial';
-import { TutorialStateService } from '../../../../../core/services/api/tutorial/tutorial-state.service';
+  ONBOARDING_ONE_HANDED_WEAPON_ITEM_BASE_IDS,
+} from '../../../../../shared/models/quest';
+import { QuestStateService } from '../../../../../core/services/api/quest/quest-state.service';
 import { FirstPartyTourService } from '../../../../../core/services/client-side/first-party-tour/first-party-tour.service';
 
 interface BaseAttributeDisplay {
@@ -100,24 +99,22 @@ export class RegularCraftingComponent {
   private readonly selectedRecipeId = signal<string | null>(null);
   private readonly selectedBlueprintId = signal<string | null>(null);
   private readonly destroyRef = inject(DestroyRef);
-  private readonly tutorialState = inject(TutorialStateService);
+  private readonly questState = inject(QuestStateService);
   private readonly firstPartyTour = inject(FirstPartyTourService);
 
-  readonly isTutorialWeaponSelectionActive = computed(
-    () =>
-      this.tutorialState.state()?.currentStep ===
-      TUTORIAL_STEP_CRAFT_EQUIPMENT,
+  readonly isOnboardingWeaponSelectionActive = computed(
+    () => this.questState.pinnedObjective()?.type === 'EquipmentCrafted',
   );
 
-  private readonly tutorialScopedRecipes = computed(() => {
+  private readonly onboardingScopedRecipes = computed(() => {
     const recipes = this.recipesV2();
-    if (!this.isTutorialWeaponSelectionActive()) return recipes;
+    if (!this.isOnboardingWeaponSelectionActive()) return recipes;
 
-    return recipes.filter((recipe) => this.isTutorialWeaponRecipe(recipe));
+    return recipes.filter((recipe) => this.isOnboardingWeaponRecipe(recipe));
   });
 
   readonly selectedRecipe = computed(() => {
-    const recipes = this.tutorialScopedRecipes();
+    const recipes = this.onboardingScopedRecipes();
     return (
       recipes.find((recipe) => recipe.id === this.selectedRecipeId()) ??
       recipes[0] ??
@@ -266,7 +263,7 @@ export class RegularCraftingComponent {
 
   readonly recipeCategories = computed(() =>
     Array.from(
-      new Set(this.tutorialScopedRecipes().map((recipe) => recipe.category)),
+      new Set(this.onboardingScopedRecipes().map((recipe) => recipe.category)),
     ).sort((left, right) => left.localeCompare(right)),
   );
   readonly recipeCategoryOptions = computed<readonly DropdownOption<string>[]>(
@@ -306,8 +303,8 @@ export class RegularCraftingComponent {
   );
 
   private readonly recipeSearchMatches = computed(() => {
-    const tutorialRecipes = this.tutorialScopedRecipes();
-    if (this.isTutorialWeaponSelectionActive()) return tutorialRecipes;
+    const onboardingRecipes = this.onboardingScopedRecipes();
+    if (this.isOnboardingWeaponSelectionActive()) return onboardingRecipes;
 
     const queryTerms = this.recipeSearch()
       .trim()
@@ -317,7 +314,7 @@ export class RegularCraftingComponent {
     const category = this.recipeCategory();
     const subcategory = this.recipeSubcategory();
 
-    return tutorialRecipes.filter((recipe) => {
+    return onboardingRecipes.filter((recipe) => {
       if (category !== 'all' && recipe.category !== category) return false;
       if (
         subcategory !== 'all' &&
@@ -358,7 +355,7 @@ export class RegularCraftingComponent {
 
   readonly filteredRecipes = computed(() => {
     const recipes = this.recipeSearchMatches();
-    if (this.isTutorialWeaponSelectionActive()) return recipes;
+    if (this.isOnboardingWeaponSelectionActive()) return recipes;
 
     const mode = this.filterMode();
     return recipes.filter((recipe) => {
@@ -431,7 +428,7 @@ export class RegularCraftingComponent {
     });
     effect(
       () => {
-        this.isTutorialWeaponSelectionActive();
+        this.isOnboardingWeaponSelectionActive();
         this.selectFirstVisibleRecipeIfNeeded();
       },
       { allowSignalWrites: true },
@@ -579,10 +576,10 @@ export class RegularCraftingComponent {
     return this.selectedRecipeId() === recipe.id;
   }
 
-  isTutorialWeaponRecipe(recipe: CraftingRecipe): boolean {
+  isOnboardingWeaponRecipe(recipe: CraftingRecipe): boolean {
     return (
       recipe.minTier === 1 &&
-      TUTORIAL_ONE_HANDED_WEAPON_ITEM_BASE_IDS.has(recipe.outputItemId)
+      ONBOARDING_ONE_HANDED_WEAPON_ITEM_BASE_IDS.has(recipe.outputItemId)
     );
   }
 

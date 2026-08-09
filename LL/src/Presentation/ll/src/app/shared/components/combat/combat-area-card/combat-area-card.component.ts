@@ -6,19 +6,19 @@ import {
   StartCombatActionRequest,
 } from '../../../../shared/models/Dtos/characterActionDto';
 import { CommonModule, NgIf } from '@angular/common';
-import { CharacterService } from '../../../../core/services/api/character/character.service';
 import { CharacterActionsStateService } from '../../../../core/services/api/character-actions/character-actions.state.service';
 import { CharacterActionType } from '../../../models/enums/characterActionType';
 import { GatheringType } from '../../../models/enums/gatheringType';
-import { TutorialStateService } from '../../../../core/services/api/tutorial/tutorial-state.service';
-import { TutorialService } from '../../../../core/services/api/tutorial/tutorial.service';
+import { QuestStateService } from '../../../../core/services/api/quest/quest-state.service';
+import { QuestService } from '../../../../core/services/api/quest/quest.service';
 import { CombatService } from '../../../../core/services/client-side/combat/combat.service';
 import {
-  TUTORIAL_STEP_DEFEAT_TRAINING_CREATURE,
-  TUTORIAL_STEP_START_LUMO_RUINS,
-  TUTORIAL_LUMO_RUINS_AREA_ID,
-  TUTORIAL_TRAINING_GROUNDS_AREA_ID,
-} from '../../../models/tutorial';
+  INTO_LUMO_RUINS_QUEST_ID,
+  LUMO_RUINS_AREA_ID,
+  QuestStatus,
+  TRAINING_DAY_QUEST_ID,
+  TRAINING_GROUNDS_AREA_ID,
+} from '../../../models/quest';
 import { catchError, finalize, of, tap } from 'rxjs';
 
 @Component({
@@ -31,19 +31,16 @@ export class CombatAreaCardComponent implements OnInit {
   @Input() isLastInRow = false;
 
   currentAction: CharacterActionDto | null = null;
-  readonly currentCharacter;
   readonly isStartingIdleCombat;
   isLocked = true;
   isStartingTrainingBattle = false;
 
   constructor(
     private readonly characterActionService: CharacterActionsStateService,
-    private readonly characterService: CharacterService,
-    private readonly tutorialState: TutorialStateService,
-    private readonly tutorialService: TutorialService,
+    private readonly questState: QuestStateService,
+    private readonly questService: QuestService,
     private readonly combatService: CombatService,
   ) {
-    this.currentCharacter = this.characterService.getCurrentCharacter();
     this.isStartingIdleCombat = this.characterActionService.loadingCombat;
 
     effect(() => {
@@ -51,19 +48,17 @@ export class CombatAreaCardComponent implements OnInit {
     });
 
     effect(() => {
-      this.tutorialState.state();
-      this.tutorialState.hasLoaded();
+      this.questState.areaAccess();
+      this.questState.loaded();
       this.setIsLocked();
     });
 
     effect(() => {
       const error = this.characterActionService.idleCombatError();
       if (
-        error &&
-        this.tutorialState.state()?.currentStep ===
-          TUTORIAL_STEP_START_LUMO_RUINS
+        error && this.isIntoLumoRuinsActive()
       ) {
-        this.tutorialState.reportError(error);
+        this.questState.reportError(error);
       }
     });
   }
@@ -84,7 +79,7 @@ export class CombatAreaCardComponent implements OnInit {
   startCombat(): void {
     if (this.isStartingTrainingBattle || this.isStartingIdleCombat()) return;
 
-    this.tutorialState.clearError();
+    this.questState.clearError();
     if (this.shouldStartTrainingBattle()) {
       this.startTrainingBattle();
       return;
@@ -106,23 +101,23 @@ export class CombatAreaCardComponent implements OnInit {
   }
 
   trainingAreaTourId(): string | null {
-    if (this.area?.id === TUTORIAL_TRAINING_GROUNDS_AREA_ID) {
+    if (this.area?.id === TRAINING_GROUNDS_AREA_ID) {
       return 'training-area-card';
     }
 
-    return this.isTutorialLumoArea() ? 'lumo-ruins-card' : null;
+    return this.isQuestGuidedLumoArea() ? 'lumo-ruins-card' : null;
   }
 
   trainingBattleButtonTourId(): string | null {
-    if (this.area?.id === TUTORIAL_TRAINING_GROUNDS_AREA_ID) {
+    if (this.area?.id === TRAINING_GROUNDS_AREA_ID) {
       return 'training-area-battle';
     }
 
-    return this.isTutorialLumoArea() ? 'lumo-ruins-battle' : null;
+    return this.isQuestGuidedLumoArea() ? 'lumo-ruins-battle' : null;
   }
 
   gatheringTourId(): string | null {
-    return this.isTutorialLumoArea() ? 'lumo-ruins-gathering' : null;
+    return this.isQuestGuidedLumoArea() ? 'lumo-ruins-gathering' : null;
   }
 
   setIsLocked(): void {
@@ -130,25 +125,8 @@ export class CombatAreaCardComponent implements OnInit {
       return;
     }
 
-    const character = this.currentCharacter();
-    const tutorial = this.tutorialState.state();
-    const isTrainingArea = this.area.id === TUTORIAL_TRAINING_GROUNDS_AREA_ID;
-    const isTutorialUnknown = !this.tutorialState.hasLoaded();
-    const isTutorialActive = !!tutorial && !tutorial.isCompleted;
-    const isFirstTutorialStep =
-      tutorial?.currentStep === TUTORIAL_STEP_DEFEAT_TRAINING_CREATURE;
-    const isLumoTutorialStep =
-      tutorial?.currentStep === TUTORIAL_STEP_START_LUMO_RUINS;
-    const isLumoRuins = this.area.id === TUTORIAL_LUMO_RUINS_AREA_ID;
-
-    this.isLocked =
-      !character ||
-      character.level < this.area.levelRequirement ||
-      (isTrainingArea && !isFirstTutorialStep) ||
-      (isTutorialUnknown && !isTrainingArea) ||
-      (isTutorialActive &&
-        !isTrainingArea &&
-        !(isLumoTutorialStep && isLumoRuins));
+    const access = this.questState.accessFor(this.area.id);
+    this.isLocked = !access?.canAccess;
   }
 
   gatheringTypes(): GatheringType[] {
@@ -160,22 +138,22 @@ export class CombatAreaCardComponent implements OnInit {
   }
 
   private shouldStartTrainingBattle(): boolean {
-    return this.area.id === TUTORIAL_TRAINING_GROUNDS_AREA_ID;
+    return this.area.id === TRAINING_GROUNDS_AREA_ID;
   }
 
   private startTrainingBattle(): void {
     if (this.isStartingTrainingBattle) return;
 
     this.isStartingTrainingBattle = true;
-    this.tutorialService
-      .startTrainingBattle()
+    this.questService
+      .startEncounter(TRAINING_DAY_QUEST_ID, 'training')
       .pipe(
         tap((result) => {
           this.combatService.startTrainingBattleSummary(result);
         }),
         catchError((err) => {
           console.error('Failed to start training battle', err);
-          this.tutorialState.reportError(
+          this.questState.reportError(
             err?.message ?? 'Failed to start the training battle.',
           );
           return of(null);
@@ -187,10 +165,19 @@ export class CombatAreaCardComponent implements OnInit {
       .subscribe();
   }
 
-  private isTutorialLumoArea(): boolean {
+  private isQuestGuidedLumoArea(): boolean {
     return (
-      this.area?.id === TUTORIAL_LUMO_RUINS_AREA_ID &&
-      this.tutorialState.state()?.currentStep === TUTORIAL_STEP_START_LUMO_RUINS
+      this.area?.id === LUMO_RUINS_AREA_ID && this.isIntoLumoRuinsActive()
     );
+  }
+
+  private isIntoLumoRuinsActive(): boolean {
+    return this.questState
+      .journal()
+      .quests.some(
+        (quest) =>
+          quest.questId === INTO_LUMO_RUINS_QUEST_ID &&
+          quest.status === QuestStatus.Active,
+      );
   }
 }

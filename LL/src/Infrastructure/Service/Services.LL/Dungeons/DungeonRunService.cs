@@ -111,6 +111,7 @@ public sealed class DungeonRunService : IDungeonRunService
             DungeonDefinitionId = run.DungeonDefinitionId,
             CompletedWithoutDefeat = run.DeathsDuringRun == 0,
             CompletedWithoutRetreat = !run.UsedRetreat,
+            CompletedWithoutWeapon = run.State.StartedWithoutWeapon,
             DefeatedBossKeys = run.Rooms
                 .Where(room => room.Type == RoomType.Boss && room.Status == RoomInstanceStatus.Completed)
                 .SelectMany(room => room.EncounterIds)
