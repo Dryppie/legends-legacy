@@ -85,6 +85,11 @@
 }
 
 .dungeon-result {
+  --result-color: var(--ll-color-primary);
+  --result-soft: var(--ll-color-primary-soft);
+  --result-border: var(--ll-color-border);
+  --result-mark-border: var(--ll-color-border);
+
   display: grid;
   min-height: 0;
   flex: 1;
@@ -97,6 +102,11 @@
 }
 
 .dungeon-result--failure {
+  --result-color: var(--ll-color-danger);
+  --result-soft: var(--ll-color-danger-soft);
+  --result-border: rgba(255, 154, 162, 0.3);
+  --result-mark-border: rgba(255, 154, 162, 0.38);
+
   background: radial-gradient(
       circle at 38% 42%,
       rgba(255, 154, 162, 0.08),
@@ -106,6 +116,11 @@
 }
 
 .dungeon-result--success {
+  --result-color: var(--ll-color-success);
+  --result-soft: var(--ll-color-success-soft);
+  --result-border: rgba(65, 241, 182, 0.3);
+  --result-mark-border: rgba(65, 241, 182, 0.38);
+
   background: radial-gradient(
       circle at 38% 42%,
       rgba(65, 241, 182, 0.08),
@@ -123,29 +138,15 @@
 .dungeon-result__summary {
   position: relative;
   overflow: hidden;
-}
-
-.dungeon-result--failure .dungeon-result__summary {
-  border-color: rgba(255, 154, 162, 0.3);
-}
-
-.dungeon-result--success .dungeon-result__summary {
-  border-color: rgba(65, 241, 182, 0.3);
+  border-color: var(--result-border);
 }
 
 .dungeon-result__summary::after {
   position: absolute;
   inset: 0 auto 0 0;
   width: 2px;
+  background: var(--result-color);
   content: "";
-}
-
-.dungeon-result--failure .dungeon-result__summary::after {
-  background: var(--ll-color-danger);
-}
-
-.dungeon-result--success .dungeon-result__summary::after {
-  background: var(--ll-color-success);
 }
 
 .dungeon-result__mark {
@@ -154,29 +155,16 @@
   height: 3rem;
   margin-bottom: var(--ll-space-4);
   place-items: center;
+  border: 1px solid var(--result-mark-border);
   border-radius: var(--ll-radius-full);
+  background: var(--result-soft);
+  color: var(--result-color);
   font-family: var(--ll-font-display);
   font-size: var(--ll-text-2xl);
 }
 
-.dungeon-result--failure .dungeon-result__mark {
-  border: 1px solid rgba(255, 154, 162, 0.38);
-  background: var(--ll-color-danger-soft);
-  color: var(--ll-color-danger);
-}
-
-.dungeon-result--success .dungeon-result__mark {
-  border: 1px solid rgba(65, 241, 182, 0.38);
-  background: var(--ll-color-success-soft);
-  color: var(--ll-color-success);
-}
-
-.dungeon-result--failure .dungeon-result__eyebrow {
-  color: var(--ll-color-danger);
-}
-
-.dungeon-result--success .dungeon-result__eyebrow {
-  color: var(--ll-color-success);
+.dungeon-result__eyebrow {
+  color: var(--result-color);
 }
 
 .dungeon-result h2 {

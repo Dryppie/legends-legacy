@@ -1,9 +1,10 @@
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
-import { of, throwError } from 'rxjs';
+import { of, Subject, throwError } from 'rxjs';
 import { CharacterActionDto } from '../../../../shared/models/Dtos/characterActionDto';
 import { CharacterActionType } from '../../../../shared/models/enums/characterActionType';
+import { BattleType } from '../../../state/combat-state/combatState';
 import { EventBusService } from '../../client-side/event-bus/event-bus.service';
 import { GameService } from '../../client-side/game/game.service';
 import { CombatService } from '../../client-side/combat/combat.service';
@@ -20,6 +21,7 @@ describe('CharacterActionsStateService', () => {
   let actions: jasmine.SpyObj<CharacterActionsService>;
   let polling: jasmine.SpyObj<CharacterActionsPollingService>;
   let router: jasmine.SpyObj<Router>;
+  let combat: jasmine.SpyObj<CombatService>;
 
   beforeEach(() => {
     actions = jasmine.createSpyObj<CharacterActionsService>(
@@ -31,6 +33,10 @@ describe('CharacterActionsStateService', () => {
       ['start', 'stop'],
     );
     router = jasmine.createSpyObj<Router>('Router', ['navigate']);
+    combat = jasmine.createSpyObj<CombatService>('CombatService', [
+      'clearAllCombat',
+      'stop',
+    ]);
 
     TestBed.configureTestingModule({
       providers: [
@@ -58,7 +64,7 @@ describe('CharacterActionsStateService', () => {
         },
         {
           provide: CombatService,
-          useValue: jasmine.createSpyObj('CombatService', ['clearAllCombat']),
+          useValue: combat,
         },
         {
           provide: InventoryStateService,
@@ -79,14 +85,67 @@ describe('CharacterActionsStateService', () => {
     service.startAction(CharacterActionType.Combat, { areaId: 'lumo-ruins' });
 
     expect(service.currentAction()).toBe(action);
+    expect(combat.stop).toHaveBeenCalledOnceWith(BattleType.Training);
     expect(polling.start).toHaveBeenCalled();
     expect(router.navigate).toHaveBeenCalledWith(['/game/combat']);
+  });
+
+  it('waits for the confirmed start response before opening combat', () => {
+    const startResult = new Subject<CharacterActionDto>();
+    actions.startCombat.and.returnValue(startResult.asObservable());
+
+    service.startAction(CharacterActionType.Combat, { areaId: 'lumo-ruins' });
+
+    expect(router.navigate).not.toHaveBeenCalled();
+    expect(service.loadingCombat()).toBeTrue();
+    expect(service.currentAction()).toBeNull();
+
+    startResult.next(combatAction());
+    startResult.complete();
+
+    expect(service.currentAction()).not.toBeNull();
+    expect(router.navigate).toHaveBeenCalledWith(['/game/combat']);
+  });
+
+  it('replaces stale cached combat state with the successful start response', () => {
+    const staleAction: CharacterActionDto = {
+      ...combatAction(),
+      updatedAt: new Date('2026-08-08T12:00:20Z'),
+      nextResolutionAt: new Date('2026-08-08T12:00:20Z'),
+      revision: 'stale-combat-revision',
+      isDeleted: true,
+    };
+    const startedAction = combatAction();
+    actions.startCombat.and.returnValue(of(startedAction));
+
+    service.initializeFromBootstrap(staleAction);
+    const applyBootstrapAction = polling.start.calls.mostRecent().args[1];
+    applyBootstrapAction(staleAction);
+
+    service.startAction(CharacterActionType.Combat, { areaId: 'lumo-ruins' });
+
+    expect(service.currentAction()).toBe(startedAction);
   });
 
   it('recovers an already-started combat after an ambiguous start error', () => {
     const action = combatAction();
     actions.startCombat.and.returnValue(
       throwError(() => new Error('Connection closed')),
+    );
+    actions.resolveCurrentAction.and.returnValue(of(action));
+
+    service.startAction(CharacterActionType.Combat, { areaId: 'lumo-ruins' });
+
+    expect(actions.resolveCurrentAction).toHaveBeenCalled();
+    expect(service.currentAction()).toBe(action);
+    expect(router.navigate).toHaveBeenCalledWith(['/game/combat']);
+    expect(service.idleCombatError()).toBeNull();
+  });
+
+  it('reconciles combat when the start response has no action body', () => {
+    const action = combatAction();
+    actions.startCombat.and.returnValue(
+      of(null as unknown as CharacterActionDto),
     );
     actions.resolveCurrentAction.and.returnValue(of(action));
 

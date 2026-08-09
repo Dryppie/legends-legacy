@@ -17,6 +17,7 @@ import { InventoryStateService } from '../inventory/inventory-state.service';
 import { EventBusService } from '../../client-side/event-bus/event-bus.service';
 import { Router } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
+import { BattleType } from '../../../state/combat-state/combatState';
 
 export type IdleCombatPhase =
   | 'idle'
@@ -173,6 +174,10 @@ export class CharacterActionsStateService {
     let isCombat = false;
     switch (type) {
       case CharacterActionType.Combat:
+        // First Hunt uses the separate Training slot. If its summary was left
+        // open and navigation moved on without the explicit close action,
+        // finalize that client-only state before starting persistent combat.
+        this.combatService.stop(BattleType.Training);
         this._loadingCombat.set(true);
         this._idleCombatPhase.set('starting');
         call$ = this.actionsService.startCombat(
@@ -194,6 +199,11 @@ export class CharacterActionsStateService {
       .pipe(
         tap((result) => {
           if (!result) {
+            if (isCombat) {
+              throw new Error(
+                'Combat start completed without returning an action.',
+              );
+            }
             this.reset();
           } else {
             if (isCombat) {
@@ -479,7 +489,11 @@ export class CharacterActionsStateService {
     }
 
     this._idleCombatError.set(null);
-    this.applyActionUpdate(action);
+    // A successful command response is authoritative. Polling updates still
+    // use freshness checks, but a previously cached/deleted combat action must
+    // never prevent the newly started action from becoming visible.
+    this._currentAction.set(action);
+    this.persistence.set(action.characterActionType);
     this.startPolling(action);
     void this.router.navigate(['/game/combat']);
   }
