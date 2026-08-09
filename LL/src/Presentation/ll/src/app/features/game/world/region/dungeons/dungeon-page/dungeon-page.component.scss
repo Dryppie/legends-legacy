@@ -406,11 +406,6 @@
   cursor: default;
 }
 
-.dungeon-node[data-room-type="Combat"] {
-  --dungeon-node-color: var(--ll-color-primary);
-  --dungeon-node-soft: var(--ll-color-primary-soft);
-}
-
 .dungeon-node[data-room-type="MiniBoss"],
 .dungeon-node[data-room-type="Boss"] {
   --dungeon-node-color: var(--ll-color-danger);
@@ -433,11 +428,7 @@
   color: var(--ll-color-text-muted);
   font-size: var(--ll-text-lg);
   box-shadow: var(--ll-shadow-sm);
-  transition:
-    transform 160ms ease,
-    border-color 160ms ease,
-    background-color 160ms ease,
-    box-shadow 160ms ease;
+  transition: all 160ms ease;
 }
 
 .dungeon-node__label {
@@ -477,7 +468,9 @@
   box-shadow: 0 0 0 5px var(--dungeon-node-soft);
 }
 
-.dungeon-node--cleared {
+.dungeon-node--cleared,
+.dungeon-node--current,
+.dungeon-node--available {
   color: var(--dungeon-node-color);
 }
 
@@ -491,10 +484,6 @@
   color: var(--dungeon-node-color);
 }
 
-.dungeon-node--current {
-  color: var(--dungeon-node-color);
-}
-
 .dungeon-node--current .dungeon-node__circle {
   border-color: var(--dungeon-node-color);
   background-color: var(--dungeon-node-color);
@@ -505,10 +494,6 @@
 
 .dungeon-node--current.dungeon-node--clickable .dungeon-node__circle {
   animation: dungeon-pulse 1.65s ease-in-out infinite;
-}
-
-.dungeon-node--available {
-  color: var(--dungeon-node-color);
 }
 
 .dungeon-node--available .dungeon-node__circle {
@@ -700,10 +685,7 @@
   font-size: var(--ll-text-xs);
   font-weight: var(--ll-weight-semibold);
   cursor: pointer;
-  transition:
-    border-color 150ms ease,
-    background-color 150ms ease,
-    color 150ms ease;
+  transition: all 150ms ease;
 }
 
 .dungeon-vigor-thresholds__toggle:hover,
@@ -775,10 +757,7 @@
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
-  transition:
-    transform 150ms ease,
-    opacity 150ms ease,
-    visibility 150ms ease;
+  transition: all 150ms ease;
 }
 
 .dungeon-vigor-thresholds:hover .dungeon-vigor-thresholds__popover,
@@ -1085,7 +1064,6 @@
     overflow-y: auto;
     overscroll-behavior-y: contain;
     touch-action: pan-y;
-    -webkit-overflow-scrolling: touch;
   }
 
   .dungeon-map-panel,

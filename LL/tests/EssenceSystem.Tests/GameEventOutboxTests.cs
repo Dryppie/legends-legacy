@@ -85,6 +85,22 @@ public sealed class GameEventOutboxTests
     }
 
     [Fact]
+    public void Consumer_registry_routes_new_activity_events_to_quests()
+    {
+        var registry = new GameEventOutboxConsumerRegistry();
+
+        Assert.Equal(
+            [GameEventOutboxConsumerNames.Quests],
+            registry.GetConsumers(GameEventTypes.EssenceFocusSet));
+        Assert.Contains(
+            GameEventOutboxConsumerNames.Quests,
+            registry.GetConsumers(GameEventTypes.ColosseumBattleCompleted));
+        Assert.Equal(
+            [GameEventOutboxConsumerNames.Quests],
+            registry.GetConsumers(GameEventTypes.ProphecyCompleted));
+    }
+
+    [Fact]
     public async Task Achievement_consumer_records_ledger_and_skips_duplicate_message()
     {
         await using var db = CreateDb();
