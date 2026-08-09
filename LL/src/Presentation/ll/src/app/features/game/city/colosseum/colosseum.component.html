@@ -21,9 +21,12 @@
     ></app-default-header>
 
     <section
-      class="grid w-full grid-cols-4 gap-1.5 text-white sm:gap-2 md:grid-cols-4 xl:grid-cols-7"
+      class="ll-scrollbar-none flex w-full snap-x snap-mandatory flex-nowrap gap-1.5 overflow-x-auto overscroll-x-contain pb-1 text-white sm:grid sm:grid-cols-4 sm:gap-2 sm:overflow-visible sm:pb-0 xl:grid-cols-7"
+      aria-label="Colosseum status"
     >
-      <div class="ll-stat-card min-w-0 p-2 sm:p-3">
+      <div
+        class="ll-stat-card w-[5.75rem] flex-none snap-start p-2 sm:w-auto sm:min-w-0 sm:p-3"
+      >
         <p class="ll-stat-label truncate">Tickets</p>
         <p class="ll-heading mt-0.5 truncate text-base sm:mt-1 sm:text-lg">
           {{
@@ -40,28 +43,36 @@
         </p>
       </div>
 
-      <div class="ll-stat-card min-w-0 p-2 sm:p-3">
+      <div
+        class="ll-stat-card w-[5.75rem] flex-none snap-start p-2 sm:w-auto sm:min-w-0 sm:p-3"
+      >
         <p class="ll-stat-label truncate">Tier</p>
         <p class="ll-heading mt-0.5 truncate text-base sm:mt-1 sm:text-lg">
           {{ state.status()?.rankProgress?.currentTierName ?? "-" }}
         </p>
       </div>
 
-      <div class="ll-stat-card min-w-0 p-2 sm:p-3">
+      <div
+        class="ll-stat-card w-[5.75rem] flex-none snap-start p-2 sm:w-auto sm:min-w-0 sm:p-3"
+      >
         <p class="ll-stat-label truncate">Rating</p>
         <p class="ll-heading mt-0.5 truncate text-base sm:mt-1 sm:text-lg">
           {{ state.status()?.rating ?? myRanking?.level | numberFormat }}
         </p>
       </div>
 
-      <div class="ll-stat-card min-w-0 p-2 sm:p-3">
+      <div
+        class="ll-stat-card w-[5.75rem] flex-none snap-start p-2 sm:w-auto sm:min-w-0 sm:p-3"
+      >
         <p class="ll-stat-label truncate">Glory</p>
         <p class="ll-heading mt-0.5 truncate text-base sm:mt-1 sm:text-lg">
           {{ state.status()?.glory ?? 0 | numberFormat }}
         </p>
       </div>
 
-      <div class="ll-stat-card min-w-0 p-2 sm:p-3">
+      <div
+        class="ll-stat-card w-[5.75rem] flex-none snap-start p-2 sm:w-auto sm:min-w-0 sm:p-3"
+      >
         <p class="ll-stat-label truncate">Streak</p>
         <p class="ll-heading mt-0.5 truncate text-base sm:mt-1 sm:text-lg">
           {{ state.status()?.currentAttackWinStreak ?? 0 }}
@@ -71,7 +82,9 @@
         </p>
       </div>
 
-      <div class="ll-stat-card min-w-0 p-2 sm:p-3">
+      <div
+        class="ll-stat-card w-[5.75rem] flex-none snap-start p-2 sm:w-auto sm:min-w-0 sm:p-3"
+      >
         <p class="ll-stat-label truncate">Daily Win</p>
         <p class="ll-heading mt-0.5 truncate text-base sm:mt-1 sm:text-lg">
           {{ state.status()?.dailyFirstWinAvailable ? "Available" : "Claimed" }}
@@ -84,7 +97,9 @@
         </p>
       </div>
 
-      <div class="ll-stat-card min-w-0 p-2 sm:p-3">
+      <div
+        class="ll-stat-card w-[5.75rem] flex-none snap-start p-2 sm:w-auto sm:min-w-0 sm:p-3"
+      >
         <p class="ll-stat-label truncate">Record</p>
         <p class="ll-heading mt-0.5 truncate text-base sm:mt-1 sm:text-lg">
           {{ state.status()?.attackRecord?.wins ?? recentRecord.wins }}-{{
@@ -94,7 +109,7 @@
       </div>
     </section>
 
-    <app-tabs class="flex w-full flex-col gap-2 overflow-hidden">
+    <app-tabs class="flex min-h-0 w-full flex-1 flex-col gap-2 overflow-hidden">
       <app-tab label="Arena">
         <div
           class="flex h-full min-h-0 flex-1 flex-col gap-3 overflow-y-auto overscroll-contain pb-24 pr-1 sm:pb-0"
@@ -149,7 +164,8 @@
       </app-tab>
 
       <app-tab label="Champion's Market">
-        <app-champions-market class="overflow-hidden"> </app-champions-market>
+        <app-champions-market class="min-h-0 flex-1 overflow-hidden">
+        </app-champions-market>
       </app-tab>
 
       <app-tab label="Rankings">
@@ -162,7 +178,7 @@
 
       <app-tab label="Record of Battles">
         <app-record-of-battle
-          class="overflow-hidden"
+          class="min-h-0 flex-1 overflow-hidden"
           [previousMatches]="state.previousMatches()"
         >
         </app-record-of-battle>

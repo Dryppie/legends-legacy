@@ -51,6 +51,7 @@ export class DashboardComponent implements OnInit {
   private sidebarSwipeStartX = 0;
   private sidebarSwipeStartY = 0;
   private sidebarSwipeStartTime = 0;
+  private sidebarSwipeStartedOpen = false;
 
   constructor(
     private readonly state: CharacterActionsStateService,
@@ -123,14 +124,21 @@ export class DashboardComponent implements OnInit {
       );
 
     const touch = event.changedTouches.item(0);
+    const targetSidebarWidth = window.innerWidth * 0.64;
+    const canStartClosingSwipe =
+      this.isSidebarOpen && !!touch && touch.clientX <= targetSidebarWidth;
+    const canStartOpeningSwipe =
+      !this.isSidebarOpen &&
+      !!touch &&
+      touch.clientX >= DashboardComponent.sidebarSwipeStartInset &&
+      touch.clientX <= DashboardComponent.sidebarSwipeEndInset &&
+      !startedOnInteractiveElement;
+
     if (
       !this.isScreenSmall ||
-      this.isSidebarOpen ||
       event.touches.length !== 1 ||
       !touch ||
-      touch.clientX < DashboardComponent.sidebarSwipeStartInset ||
-      touch.clientX > DashboardComponent.sidebarSwipeEndInset ||
-      startedOnInteractiveElement
+      (!canStartClosingSwipe && !canStartOpeningSwipe)
     ) {
       return;
     }
@@ -139,7 +147,10 @@ export class DashboardComponent implements OnInit {
     this.sidebarSwipeStartX = touch.clientX;
     this.sidebarSwipeStartY = touch.clientY;
     this.sidebarSwipeStartTime = event.timeStamp;
-    this.sidebarSwipeOffset = 0;
+    this.sidebarSwipeStartedOpen = this.isSidebarOpen;
+    this.sidebarSwipeOffset = this.sidebarSwipeStartedOpen
+      ? targetSidebarWidth
+      : 0;
   }
 
   updateSidebarSwipe(event: TouchEvent): void {
@@ -169,22 +180,30 @@ export class DashboardComponent implements OnInit {
       1,
     );
     const horizontalVelocity = horizontalDistance / elapsedTime;
-    const hasOpeningDirection =
-      horizontalDistance >=
+    const directionalDistance = this.sidebarSwipeStartedOpen
+      ? -horizontalDistance
+      : horizontalDistance;
+    const directionalVelocity = this.sidebarSwipeStartedOpen
+      ? -horizontalVelocity
+      : horizontalVelocity;
+    const hasExpectedDirection =
+      directionalDistance >=
       verticalDistance * DashboardComponent.sidebarSwipeDirectionRatio;
-    const isOpeningSwipe =
-      hasOpeningDirection &&
-      (horizontalDistance >= DashboardComponent.sidebarSwipeDistance ||
-        (horizontalDistance >= DashboardComponent.sidebarSwipeFlickDistance &&
-          horizontalVelocity >= DashboardComponent.sidebarSwipeFlickVelocity));
+    const completedSwipe =
+      hasExpectedDirection &&
+      (directionalDistance >= DashboardComponent.sidebarSwipeDistance ||
+        (directionalDistance >= DashboardComponent.sidebarSwipeFlickDistance &&
+          directionalVelocity >= DashboardComponent.sidebarSwipeFlickVelocity));
 
-    if (isOpeningSwipe) {
+    if (completedSwipe && !this.sidebarSwipeStartedOpen) {
       this.isFloatingChatOpen = false;
       this.isFloatingDrawerOpen = false;
       this.isMobileChatExpanded = false;
     }
 
-    this.isSidebarOpen = isOpeningSwipe;
+    this.isSidebarOpen = this.sidebarSwipeStartedOpen
+      ? !completedSwipe
+      : completedSwipe;
     this.isSidebarSwiping = false;
     this.sidebarSwipeOffset = 0;
     this.resetSidebarSwipePointer();
@@ -251,6 +270,9 @@ export class DashboardComponent implements OnInit {
   ): boolean {
     const horizontalDistance = clientX - this.sidebarSwipeStartX;
     const verticalDistance = Math.abs(clientY - this.sidebarSwipeStartY);
+    const directionalDistance = this.sidebarSwipeStartedOpen
+      ? -horizontalDistance
+      : horizontalDistance;
 
     if (!this.isSidebarSwiping) {
       const movedDistance = Math.max(
@@ -262,8 +284,8 @@ export class DashboardComponent implements OnInit {
       }
 
       const hasHorizontalIntent =
-        horizontalDistance > 0 &&
-        horizontalDistance >=
+        directionalDistance > 0 &&
+        directionalDistance >=
           verticalDistance * DashboardComponent.sidebarSwipeDirectionRatio;
       if (!hasHorizontalIntent) {
         this.cancelActiveSidebarSwipe();
@@ -275,7 +297,12 @@ export class DashboardComponent implements OnInit {
 
     const targetSidebarWidth = window.innerWidth * 0.64;
     this.sidebarSwipeOffset = Math.min(
-      Math.max(horizontalDistance, 0),
+      Math.max(
+        this.sidebarSwipeStartedOpen
+          ? targetSidebarWidth + horizontalDistance
+          : horizontalDistance,
+        0,
+      ),
       targetSidebarWidth,
     );
     return true;
@@ -299,5 +326,6 @@ export class DashboardComponent implements OnInit {
     this.sidebarSwipeStartX = 0;
     this.sidebarSwipeStartY = 0;
     this.sidebarSwipeStartTime = 0;
+    this.sidebarSwipeStartedOpen = false;
   }
 }

@@ -4,11 +4,15 @@ import {
   Component,
   computed,
   effect,
+  inject,
   OnInit,
   signal,
   untracked,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { map } from 'rxjs';
 import {
   EssenceStateService,
   EssenceView,
@@ -77,8 +81,25 @@ interface AscendRequirementView {
 })
 export class EssencesComponent implements OnInit {
   private lastPreparedTutorialStep: string | null = null;
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+  private readonly routeEssenceId = toSignal(
+    this.route.paramMap.pipe(map((params) => params.get('essenceId'))),
+    { initialValue: null },
+  );
 
   readonly archiveSearch = signal('');
+  readonly mobileLoadoutOpen = signal(false);
+  readonly mobileDetailOpen = computed(() => this.routeEssenceId() !== null);
+  readonly attunedEssenceCount = computed(
+    () =>
+      this.essenceState
+        .archive()
+        ?.essences.filter(
+          (essence) =>
+            essence.attunedSlot !== null && essence.attunedSlot !== undefined,
+        ).length ?? 0,
+  );
   readonly creatureSearch = signal('');
   readonly creatureRegionFilter = signal('all');
   readonly creatureSourceFilter = signal<CreatureSourceFilter>('all');
@@ -267,6 +288,25 @@ export class EssencesComponent implements OnInit {
       },
       { allowSignalWrites: true },
     );
+
+    effect(() => {
+      const essenceId = this.routeEssenceId();
+      const archive = this.essenceState.archive();
+      if (!essenceId || !archive) return;
+
+      const essence = archive.essences.find((entry) => entry.id === essenceId);
+      untracked(() => {
+        this.essenceState.setActiveView('archive');
+        if (essence) {
+          this.essenceState.selectPlayerEssence(essence);
+          return;
+        }
+
+        this.router.navigate(['/game/character/essences'], {
+          replaceUrl: true,
+        });
+      });
+    });
   }
 
   public ngOnInit(): void {
@@ -274,6 +314,11 @@ export class EssencesComponent implements OnInit {
   }
 
   public selectView(view: string): void {
+    this.mobileLoadoutOpen.set(false);
+    if (this.routeEssenceId()) {
+      this.router.navigate(['/game/character/essences'], { replaceUrl: true });
+    }
+
     switch (view) {
       case 'archive':
       case 'absorb':
@@ -308,6 +353,19 @@ export class EssencesComponent implements OnInit {
 
   public selectPlayerEssence(essence: PlayerEssenceDto): void {
     this.essenceState.selectPlayerEssence(essence);
+
+    if (window.matchMedia('(max-width: 639px)').matches) {
+      this.mobileLoadoutOpen.set(false);
+      this.router.navigate(['/game/character/essences', essence.id]);
+    }
+  }
+
+  public backToArchive(): void {
+    this.router.navigate(['/game/character/essences'], { replaceUrl: true });
+  }
+
+  public toggleMobileLoadout(): void {
+    this.mobileLoadoutOpen.update((isOpen) => !isOpen);
   }
 
   public favorite(essence: PlayerEssenceDto): void {

@@ -2,13 +2,16 @@
   <div
     class="h-full w-full rounded-[3px] border border-[#F9DCA0] bg-[#363636]"
     [ngClass]="{
-      'shadow-[inset_0_0_14px_0px_#FF9B2570] after:inset-0 after:content-[\'\']':
-        !disabled,
+      'shadow-[inset_0_0_14px_0px_#FF9B2570]': !disabled,
     }"
   ></div>
   <div class="absolute inset-0 flex w-full items-center justify-center">
     <label class="cursor-pointer text-white">
-      {{ text }}
+      <ng-container *ngIf="mobileText; else defaultText">
+        <span class="sm:hidden">{{ mobileText }}</span>
+        <span class="hidden sm:inline">{{ text }}</span>
+      </ng-container>
+      <ng-template #defaultText>{{ text }}</ng-template>
     </label>
   </div>
 </button>

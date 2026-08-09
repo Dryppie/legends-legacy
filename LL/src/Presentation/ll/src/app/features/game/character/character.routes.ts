@@ -28,6 +28,11 @@ export const CHARACTER_ROUTES: Routes = [
         data: { guidePageId: GUIDE_PAGE_IDS.inventory },
       },
       {
+        path: 'essences/:essenceId',
+        component: EssencesComponent,
+        data: { guidePageId: GUIDE_PAGE_IDS.essences },
+      },
+      {
         path: 'essences',
         component: EssencesComponent,
         data: { guidePageId: GUIDE_PAGE_IDS.essences },

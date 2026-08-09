@@ -434,6 +434,9 @@
 @media (max-width: 699px) {
   :host {
     height: auto;
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+    touch-action: pan-y;
   }
 
   .shop-shell {

@@ -28,6 +28,7 @@ import { NumberFormatPipe } from '../../../../../shared/pipes/number-format/numb
     NumberFormatPipe,
   ],
   templateUrl: './in-a-guild.component.html',
+  styleUrl: './in-a-guild.component.scss',
 })
 export class InAGuildComponent {
   @Input() guild!: Guild;

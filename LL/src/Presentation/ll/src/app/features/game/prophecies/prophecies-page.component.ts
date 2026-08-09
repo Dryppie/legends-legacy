@@ -33,7 +33,8 @@ interface RewardDisplayItem {
 @Component({
     selector: 'app-prophecies-page',
     imports: [DefaultHeaderComponent, NgClass, NgFor, NgIf, OverlayModule, RouterLink],
-    templateUrl: './prophecies-page.component.html'
+    templateUrl: './prophecies-page.component.html',
+    styleUrl: './prophecies-page.component.scss'
 })
 export class PropheciesPageComponent implements OnInit, OnDestroy {
   private readonly guidanceRoutes: Record<ProphecyGuidanceDestination, string[]> = {

@@ -90,10 +90,16 @@ describe('CombatComponent', () => {
     expect(fixture.componentInstance.combatActionButtonText()).toBe(
       'Close Summary (Esc)',
     );
+    expect(fixture.componentInstance.combatActionButtonMobileText()).toBe(
+      'Close Summary',
+    );
 
     fixture.componentInstance.battleType = BattleType.Dungeon;
     expect(fixture.componentInstance.combatActionButtonText()).toBe(
       'Close Summary (Esc)',
+    );
+    expect(fixture.componentInstance.combatActionButtonMobileText()).toBe(
+      'Close Summary',
     );
   });
 

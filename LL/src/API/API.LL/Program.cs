@@ -176,7 +176,8 @@ using (var scope = app.Services.CreateScope())
 
     // Migrate and Seed
     await context.Database.MigrateAsync();
-    await context.SeedData(hasher, app.Environment.IsDevelopment());
+    var seedLocalGuestAccounts = config.GetValue<bool>("FeatureManagement:SeedLocalGuestAccounts");
+    await context.SeedData(hasher, seedLocalGuestAccounts);
 }
 
 await app.Services.ValidateCreatureBuildProfilesAsync();

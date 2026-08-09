@@ -1,0 +1,208 @@
+.prophecy-greater-heading {
+  display: none;
+}
+
+@media (max-width: 39.999rem) {
+  .prophecies-page {
+    gap: 0.75rem;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding-bottom: 1rem;
+  }
+
+  .prophecies-page-header {
+    flex: none;
+  }
+
+  .prophecy-weekly-panel {
+    margin: 0 0.25rem;
+    border-color: rgba(249, 220, 160, 0.14);
+    border-radius: 0.85rem;
+  }
+
+  .prophecy-weekly-grid {
+    display: block;
+  }
+
+  .prophecy-weekly-favor {
+    display: grid;
+    min-height: 4.2rem;
+    grid-template-columns: 2.75rem minmax(0, 1fr) auto;
+    grid-template-rows: auto auto;
+    align-items: center;
+    column-gap: 0.75rem;
+    padding: 0.85rem;
+  }
+
+  .prophecy-weekly-favor::before {
+    grid-row: 1 / span 2;
+    width: 2.5rem;
+    height: 2.5rem;
+    border: 3px solid rgba(249, 220, 160, 0.9);
+    border-radius: 999px;
+    box-shadow:
+      inset 0 0 0 2px rgba(0, 0, 0, 0.5),
+      0 0 14px rgba(249, 220, 160, 0.08);
+    content: "";
+  }
+
+  .prophecy-weekly-favor > .ll-eyebrow {
+    grid-column: 2;
+    align-self: end;
+  }
+
+  .prophecy-weekly-favor-value {
+    grid-column: 2;
+    align-self: start;
+    margin-top: 0;
+    gap: 0.25rem;
+  }
+
+  .prophecy-weekly-favor-value .ll-heading {
+    font-size: 1.15rem;
+  }
+
+  .prophecy-weekly-favor-value span:last-child {
+    font-size: 0.65rem;
+  }
+
+  .prophecy-weekly-expiry {
+    grid-column: 3;
+    grid-row: 1 / span 2;
+    margin-top: 0;
+  }
+
+  .prophecy-weekly-expiry .ll-badge {
+    padding: 0.35rem 0.55rem;
+    font-size: 0.6rem;
+    white-space: nowrap;
+  }
+
+  .prophecy-weekly-revelation {
+    min-height: 7rem;
+    padding: 0.75rem 0.85rem 0.6rem;
+  }
+
+  .prophecy-weekly-revelation > div:first-child {
+    margin-bottom: 0.25rem;
+  }
+
+  .prophecy-weekly-revelation .ll-heading {
+    font-size: 0.95rem;
+  }
+
+  .prophecy-weekly-track {
+    height: 4.4rem;
+    margin: 0 0.35rem;
+  }
+
+  .prophecy-weekly-track article {
+    width: 4rem;
+  }
+
+  .prophecy-weekly-track article > div:last-child {
+    font-size: 0.6rem;
+  }
+
+  .prophecy-scroll-content {
+    min-height: auto;
+    flex: none;
+    gap: 0.75rem;
+    overflow: visible;
+  }
+
+  .prophecy-daily-panel {
+    overflow: visible;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+    padding: 0 0.25rem;
+  }
+
+  .prophecy-daily-header {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: end;
+    margin-bottom: 0.65rem;
+    padding: 0 0.15rem;
+  }
+
+  .prophecy-daily-header .ll-heading {
+    font-size: 1.2rem;
+  }
+
+  .prophecy-daily-controls {
+    display: flex;
+    grid-column: 1 / -1;
+    gap: 0.45rem;
+    overflow: visible;
+    margin-top: 0.55rem;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+  }
+
+  .prophecy-fate-echo,
+  .prophecy-reroll {
+    border: 1px solid rgba(249, 220, 160, 0.25);
+    border-radius: 0.35rem;
+    background: rgba(0, 0, 0, 0.18);
+  }
+
+  .prophecy-daily-reset {
+    position: absolute;
+    top: 0.65rem;
+    right: 0.15rem;
+    height: auto;
+    padding: 0 0 0 0.65rem;
+    color: rgba(161, 161, 170, 0.7);
+    font-size: 0.58rem;
+  }
+
+  .prophecy-daily-grid {
+    gap: 0.65rem;
+  }
+
+  .prophecy-card {
+    min-height: 0;
+    gap: 0.65rem;
+    border-color: rgba(249, 220, 160, 0.16);
+    border-radius: 0.8rem;
+    padding: 0.85rem;
+  }
+
+  .prophecy-card .ll-heading {
+    font-size: 1rem;
+  }
+
+  .prophecy-card .ll-progress-track {
+    height: 0.25rem;
+  }
+
+  .prophecy-card-actions {
+    width: 100%;
+  }
+
+  .prophecy-card-actions > .ll-button {
+    min-height: 2.5rem;
+    flex: 1;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .prophecy-greater-heading {
+    display: block;
+    margin: 0 0.4rem -0.35rem;
+  }
+
+  .prophecy-greater-heading .ll-heading {
+    font-size: 1.2rem;
+  }
+
+  .prophecy-greater-panel {
+    margin: 0 0.25rem;
+    border-radius: 0.8rem;
+    padding: 0.85rem;
+  }
+}

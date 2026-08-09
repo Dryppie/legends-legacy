@@ -42,6 +42,7 @@ export class ChatService {
   private readonly whisperDraftRequests = new Subject<string>();
   private activeIdentity?: string;
   private activeGuildId: string | null = null;
+  private activeAuthenticationContextVersion = -1;
   private connectAndLoadPromise?: Promise<void>;
   private unavailableUntil = 0;
   private lastConnectionWarningAt = 0;
@@ -91,6 +92,8 @@ export class ChatService {
       () => {
         const id = this.auth.identity(); // ← depends on username + login
         const guildId = this.guildState.guild()?.id ?? null;
+        const authenticationContextVersion =
+          this.auth.authenticationContextVersion();
 
         if (!id) {
           if (this.hub || this.activeIdentity) {
@@ -99,9 +102,14 @@ export class ChatService {
           return;
         }
 
+        const connectionContextChanged =
+          this.activeIdentity !== id ||
+          this.activeGuildId !== guildId ||
+          this.activeAuthenticationContextVersion !==
+            authenticationContextVersion;
+
         if (
-          this.activeIdentity === id &&
-          this.activeGuildId === guildId &&
+          !connectionContextChanged &&
           (this.connectAndLoadPromise ||
             this.hub?.state === signalR.HubConnectionState.Connected ||
             this.hub?.state === signalR.HubConnectionState.Reconnecting)
@@ -111,16 +119,29 @@ export class ChatService {
 
         if (this.isTemporarilyUnavailable()) return;
 
+        const replaceExistingHub = !!this.hub && connectionContextChanged;
+        const clearMessages =
+          this.activeIdentity !== undefined && this.activeIdentity !== id;
+
         this.activeIdentity = id;
         this.activeGuildId = guildId;
-        this.connectAndLoadPromise = this.connectAndLoad(guildId ?? undefined)
-          .catch((error) => {
-            this.unavailableUntil = Date.now() + this.unavailableRetryDelayMs;
-            this.handleConnectionError(error);
-          })
-          .finally(() => {
+        this.activeAuthenticationContextVersion = authenticationContextVersion;
+
+        const connectionAttempt = this.connectForContext(
+          guildId ?? undefined,
+          replaceExistingHub,
+          clearMessages,
+        ).catch((error) => {
+          this.unavailableUntil = Date.now() + this.unavailableRetryDelayMs;
+          this.handleConnectionError(error);
+        });
+
+        this.connectAndLoadPromise = connectionAttempt;
+        void connectionAttempt.finally(() => {
+          if (this.connectAndLoadPromise === connectionAttempt) {
             this.connectAndLoadPromise = undefined;
-          }); // or current channel from state
+          }
+        }); // or current channel from state
       },
       { allowSignalWrites: true },
     );
@@ -247,6 +268,20 @@ export class ChatService {
     );
   }
 
+  private async connectForContext(
+    guildId: string | undefined,
+    replaceExistingHub: boolean,
+    clearMessages: boolean,
+  ): Promise<void> {
+    if (replaceExistingHub) {
+      await this.stopHubConnection(clearMessages);
+    } else if (clearMessages) {
+      this.messageList.set([]);
+    }
+
+    await this.connectAndLoad(guildId);
+  }
+
   private async buildHubConnection(): Promise<void> {
     await firstValueFrom(this.auth.ensureValidToken());
 
@@ -313,21 +348,32 @@ export class ChatService {
   // }
 
   async disconnect(): Promise<void> {
-    if (
-      this.hub &&
-      this.hub.state !== signalR.HubConnectionState.Disconnected
-    ) {
-      await this.hub.stop();
-    }
-    this.hub = undefined;
+    await this.stopHubConnection(true);
     this.activeIdentity = undefined;
     this.activeGuildId = null;
+    this.activeAuthenticationContextVersion = -1;
     this.connectAndLoadPromise = undefined;
-    this.messageList.set([]);
-    this._onlinePlayerCount.set(null);
 
     this.incoming$.complete(); // ends the old stream
     this.incoming$ = new ReplaySubject<ChatMessageDto>();
+  }
+
+  private async stopHubConnection(clearMessages: boolean): Promise<void> {
+    const hub = this.hub;
+
+    if (hub && hub.state !== signalR.HubConnectionState.Disconnected) {
+      await hub.stop();
+    }
+
+    if (this.hub === hub) {
+      this.hub = undefined;
+    }
+
+    if (clearMessages) {
+      this.messageList.set([]);
+    }
+
+    this._onlinePlayerCount.set(null);
   }
 
   private handleConnectionError(error: unknown): void {

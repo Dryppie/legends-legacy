@@ -278,19 +278,49 @@
         </main>
 
         <ng-template #playableRun>
-          <main class="dungeon-layout">
-            <section class="dungeon-map-panel">
-              <div class="dungeon-map-scroll" #dungeonMapScroll>
+          <main class="dungeon-layout" #dungeonLayout>
+            <div class="dungeon-mobile-vigor bg-texture">
+              <div class="dungeon-mobile-vigor__summary">
+                <strong>Vigor · {{ run.state.vigorState }}</strong>
+                <span>{{ run.state.vigor }}/100</span>
+              </div>
+              <div
+                class="dungeon-meter"
+                role="progressbar"
+                aria-label="Current expedition Vigor"
+                aria-valuemin="0"
+                aria-valuemax="100"
+                [attr.aria-valuenow]="vigorPercent()"
+              >
+                <span
+                  class="dungeon-meter__fill"
+                  aria-hidden="true"
+                  [style.clip-path]="vigorGradientClipPath()"
+                ></span>
+              </div>
+            </div>
+
+            <section
+              class="dungeon-map-panel"
+              [class.dungeon-map-panel--vertical]="isVerticalMap()"
+            >
+              <div
+                class="dungeon-map-scroll"
+                [class.dungeon-map-scroll--vertical]="isVerticalMap()"
+                [style.height.px]="isVerticalMap() ? graphHeight() : null"
+                #dungeonMapScroll
+              >
                 <div
                   class="dungeon-map"
+                  [class.dungeon-map--vertical]="isVerticalMap()"
                   [style.width.px]="graphWidth()"
-                  [style.height.px]="graphHeight"
+                  [style.height.px]="graphHeight()"
                 >
                   <svg
                     class="dungeon-edges"
                     [attr.width]="graphWidth()"
-                    [attr.height]="graphHeight"
-                    [attr.viewBox]="'0 0 ' + graphWidth() + ' ' + graphHeight"
+                    [attr.height]="graphHeight()"
+                    [attr.viewBox]="'0 0 ' + graphWidth() + ' ' + graphHeight()"
                     aria-hidden="true"
                   >
                     <line

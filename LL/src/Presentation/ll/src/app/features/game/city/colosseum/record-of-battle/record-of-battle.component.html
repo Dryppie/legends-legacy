@@ -1,51 +1,56 @@
 <div class="flex h-full w-full flex-col overflow-hidden text-white">
-  <section class="grid grid-cols-2 gap-2 sm:gap-3">
-    <div class="ll-stat-card p-3 sm:p-4">
+  <section class="grid grid-cols-2 gap-1.5 sm:gap-3">
+    <div
+      class="ll-stat-card flex items-center justify-between gap-2 p-2 sm:block sm:p-4"
+    >
       <p class="ll-stat-label">Battle Log</p>
-      <p class="ll-stat-value">
+      <p class="ll-stat-value mt-0 text-lg sm:mt-2 sm:text-2xl">
         {{ previousMatches.length | numberFormat }}
       </p>
-      <p class="ll-copy mt-1">Recorded arena matches</p>
+      <p class="ll-copy mt-1 hidden sm:block">Recorded arena matches</p>
     </div>
 
-    <div class="ll-stat-card p-3 sm:p-4">
+    <div
+      class="ll-stat-card flex items-center justify-between gap-2 p-2 sm:block sm:p-4"
+    >
       <p class="ll-stat-label">Rating Swing</p>
       <p
-        class="mt-2 text-2xl font-semibold"
+        class="text-lg font-semibold sm:mt-2 sm:text-2xl"
         [ngClass]="deltaClass(ratingSwing)"
       >
         {{ formatDelta(ratingSwing) }}
       </p>
-      <p class="ll-copy mt-1">Across visible records</p>
+      <p class="ll-copy mt-1 hidden sm:block">Across visible records</p>
     </div>
   </section>
 
   <app-filter-tabs
-    class="mt-4 block max-w-md"
+    class="mt-2 block max-w-md sm:mt-4"
     [tabs]="filters"
     [activeTab]="activeFilterTab"
     (tabSelected)="setFilterTab($event)"
   ></app-filter-tabs>
 
   <div
-    class="mt-4 flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto pr-1"
+    class="mt-2 flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto overscroll-contain pr-1 sm:mt-4 sm:gap-3"
     *ngIf="filteredMatches.length; else noMatches"
   >
-    <article class="ll-card p-3 sm:p-4" *ngFor="let match of filteredMatches">
+    <article class="ll-card p-2.5 sm:p-4" *ngFor="let match of filteredMatches">
       <div
-        class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between"
+        class="grid gap-2 sm:flex sm:items-start sm:justify-between sm:gap-3"
       >
         <div
-          class="flex min-w-0 flex-1 flex-col gap-3 sm:flex-row sm:items-start sm:justify-between"
+          class="grid min-w-0 flex-1 grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-2 sm:flex sm:items-start sm:justify-between sm:gap-3"
         >
           <div class="min-w-0">
             <p class="ll-eyebrow">Attacker</p>
             <app-character-tag
+              class="block min-w-0 truncate text-sm"
               [id]="match.characterAId"
               [name]="match.characterAName"
             ></app-character-tag>
             <p
-              class="mt-2 text-sm font-semibold"
+              class="mt-1 text-sm font-semibold sm:mt-2"
               [ngClass]="
                 deltaClass(
                   ratingDelta(
@@ -66,18 +71,21 @@
             </p>
           </div>
 
-          <div class="text-sm font-semibold text-secondary sm:self-center">
+          <div
+            class="self-center text-xs font-semibold text-secondary sm:text-sm"
+          >
             vs
           </div>
 
-          <div class="min-w-0 sm:text-right">
+          <div class="min-w-0 text-right">
             <p class="ll-eyebrow">Defender</p>
             <app-character-tag
+              class="block min-w-0 truncate text-sm"
               [id]="match.characterBId"
               [name]="match.characterBName"
             ></app-character-tag>
             <p
-              class="mt-2 text-sm font-semibold"
+              class="mt-1 text-sm font-semibold sm:mt-2"
               [ngClass]="
                 deltaClass(
                   ratingDelta(
@@ -100,7 +108,7 @@
         </div>
 
         <div
-          class="flex shrink-0 flex-col gap-2 border-t border-light_gray/50 pt-3 sm:items-end sm:border-t-0 sm:pl-4 sm:pt-0"
+          class="flex shrink-0 flex-wrap items-center justify-between gap-2 border-t border-light_gray/50 pt-2 sm:flex-col sm:items-end sm:border-t-0 sm:pl-4 sm:pt-0"
         >
           <span
             class="rounded border bg-black/30 px-3 py-1 text-sm font-semibold"
@@ -108,13 +116,22 @@
           >
             {{ resultLabel(match) }}
           </span>
-          <span class="text-sm text-zinc-300">
+          <span class="text-xs text-zinc-300 sm:hidden">
+            {{ match.playedAt | date: "short" }}
+          </span>
+          <span class="hidden text-sm text-zinc-300 sm:inline">
             {{ match.playedAt | date: "medium" }}
           </span>
-          <span class="text-sm text-primary" *ngIf="match.winnerName">
+          <span
+            class="hidden text-sm text-primary sm:inline"
+            *ngIf="match.winnerName"
+          >
             Winner: {{ match.winnerName }}
           </span>
-          <span class="text-sm text-secondary" *ngIf="gloryEarned(match) > 0">
+          <span
+            class="text-xs text-secondary sm:text-sm"
+            *ngIf="gloryEarned(match) > 0"
+          >
             +{{ gloryEarned(match) }} Glory
           </span>
         </div>

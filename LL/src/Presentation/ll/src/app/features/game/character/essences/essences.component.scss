@@ -26,6 +26,17 @@
   box-shadow: none;
 }
 
+.soul-mobile-detail-back,
+.soul-mobile-detail-footer,
+.soul-mobile-archive-heading,
+.soul-mobile-loadout-toggle {
+  display: none;
+}
+
+.soul-mobile-loadout-content {
+  display: block;
+}
+
 .soul-archive-list {
   height: 30rem;
   padding: 1rem;
@@ -435,6 +446,218 @@
 }
 
 @media (max-width: 39.999rem) {
+  .soul-archive-page {
+    gap: 0.5rem;
+  }
+
+  .soul-archive-page-header {
+    display: none;
+  }
+
+  .soul-mobile-archive-heading {
+    display: flex;
+    min-height: 3.5rem;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.25rem 0.35rem;
+  }
+
+  .soul-archive-workspace {
+    display: flex;
+    min-height: 0;
+    flex: 1;
+    flex-direction: column;
+    overflow: hidden;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .soul-archive-list {
+    min-height: 0;
+    height: auto;
+    flex: 1;
+    padding: 0.65rem;
+  }
+
+  .soul-archive-list cdk-virtual-scroll-viewport {
+    height: auto;
+    flex: 1;
+  }
+
+  .soul-archive-filter-buttons,
+  .soul-archive-list-meta {
+    display: none;
+  }
+
+  .soul-archive-columns {
+    display: contents;
+    padding: 0;
+  }
+
+  .soul-archive-detail {
+    display: none;
+  }
+
+  .soul-archive-loadout {
+    display: flex;
+    max-height: 4.75rem;
+    flex: none;
+    flex-direction: column;
+    overflow: hidden;
+    padding: 0.75rem 0.9rem;
+    border: 0;
+    border-top: 1px solid var(--ll-color-border-strong);
+    border-radius: 0;
+    box-shadow: 0 -0.75rem 2rem rgba(0, 0, 0, 0.42);
+    transition: max-height 240ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .soul-archive-loadout-open {
+    max-height: min(72dvh, 38rem);
+  }
+
+  .soul-mobile-loadout-toggle {
+    position: relative;
+    display: grid;
+    width: 100%;
+    min-height: 3.25rem;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    align-items: center;
+    flex: none;
+    gap: 0.75rem;
+  }
+
+  .soul-mobile-loadout-slots {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  .soul-mobile-loadout-slots > span {
+    width: 1.15rem;
+    height: 1.15rem;
+    border: 1px solid rgba(249, 220, 160, 0.25);
+    border-radius: 0.3rem;
+    background: rgba(255, 255, 255, 0.025);
+  }
+
+  .soul-mobile-loadout-slots > .soul-mobile-loadout-slot-filled {
+    border-color: rgba(249, 220, 160, 0.65);
+    background: rgba(249, 220, 160, 0.5);
+  }
+
+  .soul-mobile-loadout-content {
+    display: block;
+    min-height: 0;
+    max-height: 0;
+    flex: 1;
+    overflow: hidden;
+    overscroll-behavior: contain;
+    padding: 0;
+    opacity: 0;
+    transition:
+      max-height 240ms cubic-bezier(0.4, 0, 0.2, 1),
+      padding 240ms cubic-bezier(0.4, 0, 0.2, 1),
+      opacity 160ms ease;
+  }
+
+  .soul-mobile-loadout-content-open {
+    max-height: calc(min(72dvh, 38rem) - 4.75rem);
+    overflow-y: auto;
+    padding: 0.9rem 0 1rem;
+    opacity: 1;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .soul-archive-loadout,
+    .soul-mobile-loadout-content {
+      transition: none;
+    }
+  }
+
+  .soul-mobile-detail-open .soul-archive-page-header,
+  .soul-mobile-detail-open .soul-mobile-archive-heading,
+  .soul-mobile-detail-open .soul-archive-view-tabs,
+  .soul-mobile-detail-open .soul-archive-list,
+  .soul-mobile-detail-open .soul-archive-loadout {
+    display: none;
+  }
+
+  .soul-mobile-detail-open .soul-archive-columns {
+    display: block;
+    min-height: 0;
+    height: 100%;
+    flex: 1;
+    overflow: hidden;
+  }
+
+  .soul-mobile-detail-open .soul-archive-detail {
+    display: block;
+    height: 100%;
+    overflow-y: auto;
+    padding: 0.9rem;
+  }
+
+  .soul-detail-header {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: start;
+    gap: 0.65rem;
+    padding-bottom: 0.8rem;
+  }
+
+  .soul-detail-header .ll-heading {
+    font-size: 1.15rem;
+  }
+
+  .soul-detail-actions {
+    display: none;
+  }
+
+  .soul-mobile-detail-back {
+    display: flex;
+    width: 2.75rem;
+    height: 2.75rem;
+    align-items: center;
+    justify-content: center;
+    margin: -0.35rem 0 0 -0.45rem;
+    border: 1px solid rgba(249, 220, 160, 0.2);
+    border-radius: 0.5rem;
+    background: rgba(15, 18, 21, 0.48);
+    color: var(--ll-color-primary);
+    font-size: 2rem;
+    line-height: 1;
+  }
+
+  .soul-mobile-detail-footer {
+    position: sticky;
+    bottom: -0.9rem;
+    z-index: 5;
+    display: flex;
+    gap: 0.5rem;
+    margin: 1rem -0.9rem -0.9rem;
+    padding: 0.75rem 0.9rem;
+    border-top: 1px solid var(--ll-color-border-strong);
+    background-color: var(--ll-color-surface-strong);
+  }
+
+  .soul-mobile-detail-footer > .ll-button,
+  .soul-mobile-detail-footer > ng-container + .ll-button {
+    min-height: 2.75rem;
+  }
+
+  .soul-mobile-detail-footer > .ll-button:first-child {
+    flex: 1;
+  }
+
+  .soul-mobile-favorite-button {
+    width: 2.75rem;
+    flex: none;
+    color: var(--ll-color-primary);
+    font-size: 1rem;
+  }
+
   .soul-progression-details {
     grid-template-columns: minmax(0, 1fr);
   }

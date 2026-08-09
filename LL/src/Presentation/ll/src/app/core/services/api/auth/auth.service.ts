@@ -47,11 +47,14 @@ export class AuthService {
   private readonly _currentCharacter = signal<CharacterDto | null>(null);
   private readonly _isAuthenticated = signal(false);
   private readonly _userInfo = signal<UserInfoDto | null>(null);
+  private readonly _authenticationContextVersion = signal(0);
 
   /* public read-only selectors */
   readonly currentCharacter = computed(() => this._currentCharacter());
   readonly isAuthenticated = computed(() => this._isAuthenticated());
   readonly userInfo = computed(() => this._userInfo());
+  readonly authenticationContextVersion =
+    this._authenticationContextVersion.asReadonly();
   public returnUrl = '/';
 
   readonly identity = computed(() => {
@@ -294,6 +297,7 @@ export class AuthService {
   private applyAuthenticatedTokens(accessToken: string, accessExpiresAt: number) {
     this.setAccessToken(accessToken, accessExpiresAt);
     this.markAuthenticated();
+    this._authenticationContextVersion.update((version) => version + 1);
   }
 
   getUserInfo(): Observable<UserInfoDto> {

@@ -2,6 +2,7 @@ import { DecimalPipe, NgClass, NgFor, NgIf } from '@angular/common';
 import {
   Component,
   ElementRef,
+  HostListener,
   ViewChild,
   computed,
   effect,
@@ -76,6 +77,19 @@ export class DungeonPageComponent {
   private readonly router = inject(Router);
 
   private dungeonMapScrollElement?: ElementRef<HTMLDivElement>;
+  private dungeonLayoutScrollElement?: ElementRef<HTMLElement>;
+
+  @ViewChild('dungeonLayout')
+  private set dungeonLayoutScroll(
+    element: ElementRef<HTMLElement> | undefined,
+  ) {
+    this.dungeonLayoutScrollElement = element;
+
+    const roomIndex = this.activeDungeon()?.currentRoomIndex;
+    if (element && roomIndex !== undefined && this.isVerticalMap()) {
+      requestAnimationFrame(() => this.scrollMapToRoom(roomIndex));
+    }
+  }
 
   @ViewChild('dungeonMapScroll')
   private set dungeonMapScroll(
@@ -98,6 +112,10 @@ export class DungeonPageComponent {
   readonly error = this.dungeonState.error;
   readonly message = this.dungeonState.message;
   readonly claimedRewardResult = signal<DungeonRewardResult | null>(null);
+  readonly viewportWidth = signal(
+    typeof window === 'undefined' ? 1024 : window.innerWidth,
+  );
+  readonly isVerticalMap = computed(() => this.viewportWidth() < 640);
 
   readonly currentRoom = computed(() => {
     const run = this.activeDungeon();
@@ -171,24 +189,51 @@ export class DungeonPageComponent {
       ) ?? []
     );
   });
-  readonly graphWidth = computed(() =>
-    Math.max(760, (this.totalDepths() - 1) * 154 + 140),
+  readonly graphWidth = computed(() => {
+    if (this.isVerticalMap()) {
+      return Math.max(280, Math.min(360, this.viewportWidth() - 16));
+    }
+
+    return Math.max(760, (this.totalDepths() - 1) * 154 + 140);
+  });
+  readonly graphHeight = computed(() =>
+    this.isVerticalMap()
+      ? Math.max(560, (this.totalDepths() - 1) * 140 + 180)
+      : 470,
   );
-  readonly graphHeight = 470;
 
   readonly graphNodes = computed<DungeonGraphNode[]>(() => {
     const run = this.activeDungeon();
     if (!run) return [];
     const routes = this.routeOptions();
 
+    const vertical = this.isVerticalMap();
+    const width = this.graphWidth();
+    const laneSpacing = Math.min(92, (width - 150) / 2);
+
     return this.mapNodes().map((node) => ({
       ...node,
-      x: 70 + node.depth * 154,
-      y: this.graphHeight / 2 + node.lane * 104,
+      x: vertical ? width / 2 + node.lane * laneSpacing : 70 + node.depth * 154,
+      y: vertical
+        ? this.graphHeight() - 75 - node.depth * 140
+        : this.graphHeight() / 2 + node.lane * 104,
       room: run.rooms.find((room) => room.index === node.roomIndex) ?? null,
       route: routes.find((route) => route.roomIndex === node.roomIndex) ?? null,
     }));
   });
+
+  @HostListener('window:resize')
+  onViewportResize(): void {
+    const nextWidth = window.innerWidth;
+    if (nextWidth === this.viewportWidth()) return;
+
+    const orientationChanged = nextWidth < 640 !== this.isVerticalMap();
+    this.viewportWidth.set(nextWidth);
+
+    if (orientationChanged) {
+      this.lastFollowedRoomIndex = null;
+    }
+  }
 
   constructor() {
     effect(() => {
@@ -209,7 +254,9 @@ export class DungeonPageComponent {
   }
 
   private scrollMapToRoom(roomIndex: number): void {
-    const viewport = this.dungeonMapScrollElement?.nativeElement;
+    const viewport = this.isVerticalMap()
+      ? this.dungeonLayoutScrollElement?.nativeElement
+      : this.dungeonMapScrollElement?.nativeElement;
     const node = this.graphNodes().find(
       (candidate) => candidate.roomIndex === roomIndex,
     );
@@ -219,20 +266,37 @@ export class DungeonPageComponent {
       return;
     }
 
-    const maxScrollLeft = Math.max(
-      0,
-      viewport.scrollWidth - viewport.clientWidth,
-    );
-    const targetScrollLeft = Math.min(
-      maxScrollLeft,
-      Math.max(0, node.x - viewport.clientWidth * 0.35),
-    );
     const behavior = this.lastFollowedRoomIndex === null ? 'auto' : 'smooth';
 
-    viewport.scrollTo({
-      left: targetScrollLeft,
-      behavior,
-    });
+    if (this.isVerticalMap()) {
+      const maxScrollTop = Math.max(
+        0,
+        viewport.scrollHeight - viewport.clientHeight,
+      );
+      const targetScrollTop = Math.min(
+        maxScrollTop,
+        Math.max(0, node.y - viewport.clientHeight * 0.7),
+      );
+
+      viewport.scrollTo({
+        top: targetScrollTop,
+        behavior,
+      });
+    } else {
+      const maxScrollLeft = Math.max(
+        0,
+        viewport.scrollWidth - viewport.clientWidth,
+      );
+      const targetScrollLeft = Math.min(
+        maxScrollLeft,
+        Math.max(0, node.x - viewport.clientWidth * 0.35),
+      );
+
+      viewport.scrollTo({
+        left: targetScrollLeft,
+        behavior,
+      });
+    }
 
     this.lastFollowedRoomIndex = roomIndex;
     this.pendingRoomIndex = null;

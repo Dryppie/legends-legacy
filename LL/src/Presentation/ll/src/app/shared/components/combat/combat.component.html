@@ -97,6 +97,7 @@
           <app-mini-button
             class="block"
             [text]="combatActionButtonText()"
+            [mobileText]="combatActionButtonMobileText()"
             [disabled]="isStoppingCombat"
             [width]="battleType === 'IdleCombat' ? '72px' : '156px'"
             (click)="onStopOrSkip()"

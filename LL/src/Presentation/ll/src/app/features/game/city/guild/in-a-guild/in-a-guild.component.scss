@@ -1,0 +1,13 @@
+:host {
+  display: block;
+  height: 100%;
+  min-height: 0;
+}
+
+@media (max-width: 699px) {
+  .guild-tab-content {
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+    touch-action: pan-y;
+  }
+}

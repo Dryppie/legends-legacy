@@ -1,6 +1,6 @@
-<div class="ll-page-stack overflow-y-auto">
+<div class="ll-page-stack overflow-hidden">
   <section
-    class="ll-page-header flex flex-wrap items-start justify-between gap-4"
+    class="ll-page-header flex shrink-0 flex-wrap items-start justify-between gap-4"
   >
     <div>
       <p class="ll-eyebrow">Guild Headquarters</p>
@@ -37,10 +37,10 @@
     </div>
   </section>
 
-  <app-tabs class="flex h-full flex-col overflow-hidden">
+  <app-tabs class="flex min-h-0 flex-1 flex-col overflow-hidden">
     <app-tab label="Guild">
       <app-guild-info
-        class="overflow-hidden"
+        class="guild-tab-content min-h-0 flex-1 overflow-hidden"
         [guild]="guild"
         (inviteEvent)="inviteCharacterByName($event)"
         (leaveEvent)="leaveGuild()"
@@ -51,7 +51,7 @@
     </app-tab>
     <app-tab label="Buildings">
       <app-guild-buildings
-        class="h-full overflow-hidden"
+        class="guild-tab-content min-h-0 flex-1 overflow-hidden"
         [memberCap]="guild.maxMembers"
       ></app-guild-buildings>
     </app-tab>
@@ -60,13 +60,19 @@
       [notificationCount]="claimableDailyOrderCount()"
       notificationLabel="Daily guild order ready to claim"
     >
-      <app-guild-missions class="h-full overflow-hidden"></app-guild-missions>
+      <app-guild-missions
+        class="guild-tab-content min-h-0 flex-1 overflow-hidden"
+      ></app-guild-missions>
     </app-tab>
     <app-tab label="Shop">
-      <app-guild-shop class="h-full overflow-hidden"></app-guild-shop>
+      <app-guild-shop
+        class="guild-tab-content min-h-0 flex-1 overflow-hidden"
+      ></app-guild-shop>
     </app-tab>
     <app-tab label="Rankings">
-      <app-guild-rankings class="h-full overflow-hidden"></app-guild-rankings>
+      <app-guild-rankings
+        class="guild-tab-content min-h-0 flex-1 overflow-hidden"
+      ></app-guild-rankings>
     </app-tab>
   </app-tabs>
 </div>

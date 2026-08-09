@@ -248,6 +248,10 @@ export class CombatComponent implements OnInit, OnDestroy {
     return 'Close Summary';
   }
 
+  combatActionButtonMobileText(): string {
+    return this.isEscapeDismissibleBattleType() ? 'Close Summary' : '';
+  }
+
   @HostListener('document:keydown.escape')
   onEscapeKey(): void {
     if (!this.displayCombat || !this.outcome) return;
