@@ -1,4 +1,4 @@
-import { Injectable, signal, computed, effect } from '@angular/core';
+import { Injectable, signal, computed, effect, untracked } from '@angular/core';
 import {
   CharacterActionDto,
   StartCombatActionRequest,
@@ -17,7 +17,6 @@ import { InventoryStateService } from '../inventory/inventory-state.service';
 import { EventBusService } from '../../client-side/event-bus/event-bus.service';
 import { Router } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
-import { BattleType } from '../../../state/combat-state/combatState';
 
 export type IdleCombatPhase =
   | 'idle'
@@ -126,7 +125,7 @@ export class CharacterActionsStateService {
     effect(
       () => {
         if (this.eventBus.logout()) {
-          this.reset();
+          untracked(() => this.reset());
         }
       },
       { allowSignalWrites: true },
@@ -174,10 +173,6 @@ export class CharacterActionsStateService {
     let isCombat = false;
     switch (type) {
       case CharacterActionType.Combat:
-        // First Hunt uses the separate Training slot. If its summary was left
-        // open and navigation moved on without the explicit close action,
-        // finalize that client-only state before starting persistent combat.
-        this.combatService.stop(BattleType.Training);
         this._loadingCombat.set(true);
         this._idleCombatPhase.set('starting');
         call$ = this.actionsService.startCombat(
@@ -311,7 +306,14 @@ export class CharacterActionsStateService {
       this._showAction.set(false);
     } else {
       this._showAction.set(true);
+      const deletedActionKey = this.getActionUpdateKey(action);
       setTimeout(() => {
+        if (
+          this.getActionUpdateKey(this._currentAction()) !== deletedActionKey
+        ) {
+          return;
+        }
+
         this._showAction.set(false);
         this.combatService.clearAllCombat();
         this._currentAction.set(null);
@@ -489,13 +491,23 @@ export class CharacterActionsStateService {
     }
 
     this._idleCombatError.set(null);
+    this._idleCombatPhase.set('active');
     // A successful command response is authoritative. Polling updates still
     // use freshness checks, but a previously cached/deleted combat action must
     // never prevent the newly started action from becoming visible.
     this._currentAction.set(action);
     this.persistence.set(action.characterActionType);
-    this.startPolling(action);
+
+    // Starting the follow-up poller is secondary to opening the combat that the
+    // server has already accepted. Replacing an older action poller must not be
+    // able to throw here and prevent the route change.
     void this.router.navigate(['/game/combat']);
+
+    try {
+      this.startPolling(action);
+    } catch (error) {
+      console.error('Failed to start combat polling', error);
+    }
   }
 
   private recoverStartedCombat(

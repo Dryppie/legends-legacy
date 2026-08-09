@@ -1,4 +1,4 @@
-import { Injectable, signal, computed, effect } from '@angular/core';
+import { Injectable, signal, computed, effect, untracked } from '@angular/core';
 import { finalize } from 'rxjs';
 import {
   EquipmentSlot,
@@ -37,7 +37,7 @@ export class EquipmentStateService {
     effect(
       () => {
         if (this.eventBus.logout()) {
-          this.reset();
+          untracked(() => this.reset());
         }
       },
       { allowSignalWrites: true },

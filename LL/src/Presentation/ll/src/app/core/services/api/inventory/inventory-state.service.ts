@@ -1,6 +1,6 @@
 import { finalize } from 'rxjs';
 import { InventoryItem } from '../../../../shared/models/inventoryItem';
-import { computed, effect, Injectable, signal } from '@angular/core';
+import { computed, effect, Injectable, signal, untracked } from '@angular/core';
 import { InventoryService } from './inventory.service';
 import { ItemType } from '../../../../shared/models/enums/itemType';
 import { GameEventService } from '../../real-time/game-event.service';
@@ -35,7 +35,7 @@ export class InventoryStateService {
     effect(
       () => {
         if (this.eventBus.logout()) {
-          this.reset();
+          untracked(() => this.reset());
         }
       },
       { allowSignalWrites: true },

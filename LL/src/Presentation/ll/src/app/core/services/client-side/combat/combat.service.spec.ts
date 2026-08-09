@@ -14,6 +14,7 @@ import { CombatService } from './combat.service';
 describe('CombatService', () => {
   let service: CombatService;
   let state: CombatStateService;
+  let eventBus: EventBusService;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -30,6 +31,7 @@ describe('CombatService', () => {
 
     service = TestBed.inject(CombatService);
     state = TestBed.inject(CombatStateService);
+    eventBus = TestBed.inject(EventBusService);
   });
 
   it('keeps idle combat active when the completed First Hunt state is cleared', () => {
@@ -44,6 +46,18 @@ describe('CombatService', () => {
     service.stop(BattleType.Training);
 
     expect(state.getIsCombatActive(BattleType.Training)()).toBeFalse();
+    expect(state.getIsCombatActive(BattleType.IdleCombat)()).toBeTrue();
+    expect(state.getCombatResult(BattleType.IdleCombat)()).toBe(idleResult);
+  });
+
+  it('does not clear a new idle encounter after an earlier logout', () => {
+    eventBus.emitLogout();
+    TestBed.flushEffects();
+
+    const idleResult = combatResult(BattleType.IdleCombat);
+    service.startCombatSimulation(combatAction(idleResult));
+    TestBed.flushEffects();
+
     expect(state.getIsCombatActive(BattleType.IdleCombat)()).toBeTrue();
     expect(state.getCombatResult(BattleType.IdleCombat)()).toBe(idleResult);
   });

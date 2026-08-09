@@ -1,4 +1,4 @@
-import { effect, Injectable } from '@angular/core';
+import { effect, Injectable, untracked } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { CharacterActionDto } from '../../../../shared/models/Dtos/characterActionDto';
 import { CombatStateService } from '../../../state/combat-state/combat-state.service';
@@ -21,7 +21,7 @@ export class CombatService {
     effect(
       () => {
         if (this.eventBus.logout()) {
-          this.handleLogout();
+          untracked(() => this.handleLogout());
         }
       },
       { allowSignalWrites: true },
@@ -100,7 +100,6 @@ export class CombatService {
       this.combatStateService.setCombatOutcome(type, combatAction.outcome);
       return;
     }
-
   }
 
   skipCurrentColosseum(): void {

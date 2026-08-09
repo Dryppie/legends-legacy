@@ -2,6 +2,7 @@ import { signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { CharacterActionsStateService } from '../../../core/services/api/character-actions/character-actions.state.service';
+import { GameBootstrapStateService } from '../../../core/services/api/game-bootstrap/game-bootstrap-state.service';
 import { FirstPartyTourService } from '../../../core/services/client-side/first-party-tour/first-party-tour.service';
 import { GameService } from '../../../core/services/client-side/game/game.service';
 import { CombatStateService } from '../../../core/state/combat-state/combat-state.service';
@@ -13,16 +14,25 @@ import { CombatComponent } from './combat.component';
 describe('CombatComponent', () => {
   let fixture: ComponentFixture<CombatComponent>;
   let currentAction: ReturnType<typeof signal<Record<string, unknown> | null>>;
+  let bootstrapLoaded: ReturnType<typeof signal<boolean>>;
   let router: { url: string; navigate: jasmine.Spy };
+  let tour: { start: jasmine.Spy; stop: jasmine.Spy };
+  let refreshCurrentAction: jasmine.Spy;
 
   beforeEach(async () => {
     currentAction = signal<Record<string, unknown> | null>({
       characterActionType: CharacterActionType.Combat,
       isDeleted: false,
     });
+    bootstrapLoaded = signal(true);
+    refreshCurrentAction = jasmine.createSpy('refreshCurrentAction');
     router = {
       url: '/game/combat',
       navigate: jasmine.createSpy('navigate').and.resolveTo(true),
+    };
+    tour = {
+      start: jasmine.createSpy('start'),
+      stop: jasmine.createSpy('stop'),
     };
 
     const characterActions = {
@@ -32,6 +42,7 @@ describe('CombatComponent', () => {
       idleCombatError: signal(null),
       stopAction: jasmine.createSpy('stopAction'),
       clear: jasmine.createSpy('clear'),
+      refreshCurrentAction,
       retryIdleCombatResolution: jasmine.createSpy('retryIdleCombatResolution'),
     };
     const combatState = {
@@ -48,6 +59,10 @@ describe('CombatComponent', () => {
       imports: [CombatComponent],
       providers: [
         { provide: CharacterActionsStateService, useValue: characterActions },
+        {
+          provide: GameBootstrapStateService,
+          useValue: { loaded: bootstrapLoaded },
+        },
         { provide: CombatStateService, useValue: combatState },
         {
           provide: GameService,
@@ -55,7 +70,7 @@ describe('CombatComponent', () => {
         },
         {
           provide: FirstPartyTourService,
-          useValue: { start: jasmine.createSpy('start') },
+          useValue: tour,
         },
         { provide: Router, useValue: router },
       ],
@@ -71,18 +86,62 @@ describe('CombatComponent', () => {
     expect(fixture.nativeElement.querySelector('app-help-launcher')).toBeNull();
   });
 
-  it('returns to the world when the idle-combat action is stopped', async () => {
+  it('keeps the combat route stable while a missing action is reconciled', async () => {
     fixture.detectChanges();
-    expect(router.navigate).not.toHaveBeenCalled();
 
-    currentAction.set({
-      characterActionType: CharacterActionType.Combat,
-      isDeleted: true,
-    });
+    currentAction.set(null);
     fixture.detectChanges();
     await Promise.resolve();
 
+    expect(refreshCurrentAction).toHaveBeenCalledTimes(1);
+    expect(router.navigate).not.toHaveBeenCalled();
+  });
+
+  it('does not reconcile while a confirmed combat start is settling', async () => {
+    currentAction.set(null);
+    const characterActions = TestBed.inject(
+      CharacterActionsStateService,
+    ) as any;
+    characterActions.loadingCombat.set?.(true);
+
+    fixture.detectChanges();
+    await Promise.resolve();
+
+    expect(refreshCurrentAction).not.toHaveBeenCalled();
+    expect(router.navigate).not.toHaveBeenCalled();
+  });
+
+  it('waits for bootstrap before reconciling a directly loaded combat route', async () => {
+    currentAction.set(null);
+    bootstrapLoaded.set(false);
+
+    fixture.detectChanges();
+    await Promise.resolve();
+
+    expect(refreshCurrentAction).not.toHaveBeenCalled();
+  });
+
+  it('offers an explicit return when no server combat exists', async () => {
+    currentAction.set(null);
+    fixture.detectChanges();
+    await Promise.resolve();
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.textContent).toContain('No Active Combat');
+
+    fixture.componentInstance.returnToWorld();
     expect(router.navigate).toHaveBeenCalledOnceWith(['/game/world']);
+  });
+
+  it('does not start delayed tutorial guidance after the summary is destroyed', async () => {
+    fixture.componentInstance.battleType = BattleType.Training;
+    fixture.detectChanges();
+
+    fixture.destroy();
+    await new Promise((resolve) => setTimeout(resolve, 15));
+
+    expect(tour.start).not.toHaveBeenCalled();
+    expect(tour.stop).toHaveBeenCalledOnceWith(false);
   });
 
   it('shows the Escape shortcut on Arena and Dungeon summary buttons', () => {

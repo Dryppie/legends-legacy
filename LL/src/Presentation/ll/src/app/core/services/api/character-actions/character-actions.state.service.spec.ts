@@ -1,10 +1,14 @@
 import { signal } from '@angular/core';
-import { TestBed } from '@angular/core/testing';
+import {
+  fakeAsync,
+  flushMicrotasks,
+  TestBed,
+  tick,
+} from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { of, Subject, throwError } from 'rxjs';
 import { CharacterActionDto } from '../../../../shared/models/Dtos/characterActionDto';
 import { CharacterActionType } from '../../../../shared/models/enums/characterActionType';
-import { BattleType } from '../../../state/combat-state/combatState';
 import { EventBusService } from '../../client-side/event-bus/event-bus.service';
 import { GameService } from '../../client-side/game/game.service';
 import { CombatService } from '../../client-side/combat/combat.service';
@@ -22,6 +26,7 @@ describe('CharacterActionsStateService', () => {
   let polling: jasmine.SpyObj<CharacterActionsPollingService>;
   let router: jasmine.SpyObj<Router>;
   let combat: jasmine.SpyObj<CombatService>;
+  let logoutCount: ReturnType<typeof signal<number>>;
 
   beforeEach(() => {
     actions = jasmine.createSpyObj<CharacterActionsService>(
@@ -32,11 +37,15 @@ describe('CharacterActionsStateService', () => {
       'CharacterActionsPollingService',
       ['start', 'stop'],
     );
-    router = jasmine.createSpyObj<Router>('Router', ['navigate']);
+    router = jasmine.createSpyObj<Router>('Router', ['navigate'], {
+      url: '/game/combat',
+    });
+    router.navigate.and.resolveTo(true);
     combat = jasmine.createSpyObj<CombatService>('CombatService', [
       'clearAllCombat',
       'stop',
     ]);
+    logoutCount = signal(0);
 
     TestBed.configureTestingModule({
       providers: [
@@ -70,7 +79,7 @@ describe('CharacterActionsStateService', () => {
           provide: InventoryStateService,
           useValue: jasmine.createSpyObj('InventoryStateService', ['load']),
         },
-        { provide: EventBusService, useValue: { logout: signal(0) } },
+        { provide: EventBusService, useValue: { logout: logoutCount } },
         { provide: Router, useValue: router },
       ],
     });
@@ -85,9 +94,21 @@ describe('CharacterActionsStateService', () => {
     service.startAction(CharacterActionType.Combat, { areaId: 'lumo-ruins' });
 
     expect(service.currentAction()).toBe(action);
-    expect(combat.stop).toHaveBeenCalledOnceWith(BattleType.Training);
+    expect(service.idleCombatPhase()).toBe('active');
     expect(polling.start).toHaveBeenCalled();
     expect(router.navigate).toHaveBeenCalledWith(['/game/combat']);
+  });
+
+  it('opens confirmed combat even if replacing the previous poller fails', () => {
+    const action = combatAction();
+    actions.startCombat.and.returnValue(of(action));
+    polling.start.and.throwError(new Error('stale poller teardown failed'));
+
+    service.startAction(CharacterActionType.Combat, { areaId: 'lumo-ruins' });
+
+    expect(service.currentAction()).toBe(action);
+    expect(router.navigate).toHaveBeenCalledWith(['/game/combat']);
+    expect(service.idleCombatError()).toBeNull();
   });
 
   it('waits for the confirmed start response before opening combat', () => {
@@ -126,6 +147,44 @@ describe('CharacterActionsStateService', () => {
 
     expect(service.currentAction()).toBe(startedAction);
   });
+
+  it('does not let delayed cleanup from a deleted action erase newly started combat', fakeAsync(() => {
+    const deletedAt = new Date(Date.now() + 1_000);
+    const deletedAction: CharacterActionDto = {
+      ...combatAction(),
+      characterActionType: CharacterActionType.Crafting,
+      updatedAt: deletedAt,
+      nextResolutionAt: deletedAt,
+      revision: 'deleted-crafting-revision',
+      isDeleted: true,
+    };
+    const startedAction = combatAction();
+    actions.startCombat.and.returnValue(of(startedAction));
+
+    service.initializeFromBootstrap(deletedAction);
+    const applyDeletedAction = polling.start.calls.mostRecent().args[1];
+    applyDeletedAction(deletedAction);
+    flushMicrotasks();
+
+    service.startAction(CharacterActionType.Combat, { areaId: 'lumo-ruins' });
+    tick(1_001);
+
+    expect(service.currentAction()).toBe(startedAction);
+    expect(combat.clearAllCombat).not.toHaveBeenCalled();
+  }));
+
+  it('does not treat later action changes as another logout', fakeAsync(() => {
+    logoutCount.set(1);
+    TestBed.flushEffects();
+
+    const startedAction = combatAction();
+    actions.startCombat.and.returnValue(of(startedAction));
+    service.startAction(CharacterActionType.Combat, { areaId: 'lumo-ruins' });
+    TestBed.flushEffects();
+
+    expect(service.currentAction()).toBe(startedAction);
+    expect(router.navigate).toHaveBeenCalledWith(['/game/combat']);
+  }));
 
   it('recovers an already-started combat after an ambiguous start error', () => {
     const action = combatAction();

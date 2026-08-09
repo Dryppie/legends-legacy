@@ -64,6 +64,29 @@
   </div>
 
   <div
+    *ngIf="
+      !displayCombat &&
+      battleType === 'IdleCombat' &&
+      bootstrapLoaded() &&
+      !hasActiveIdleCombat() &&
+      !isLoading
+    "
+    class="flex h-full w-full items-center justify-center px-4 text-center"
+  >
+    <div class="ll-panel w-full max-w-xl p-6">
+      <p class="ll-eyebrow">Idle Combat</p>
+      <h2 class="ll-heading mt-2 text-2xl">No Active Combat</h2>
+      <p class="ll-copy mt-3">Choose an available area to begin fighting.</p>
+      <app-mini-button
+        text="Return to World"
+        [width]="'144px'"
+        (click)="returnToWorld()"
+        class="mt-6 block"
+      ></app-mini-button>
+    </div>
+  </div>
+
+  <div
     *ngIf="displayCombat"
     class="flex h-full min-h-0 w-full flex-col overflow-y-auto overscroll-contain lg:overflow-hidden"
   >

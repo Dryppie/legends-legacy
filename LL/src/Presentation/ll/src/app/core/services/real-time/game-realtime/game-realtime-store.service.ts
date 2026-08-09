@@ -1,4 +1,4 @@
-import { Injectable, computed, effect, signal } from '@angular/core';
+import { Injectable, computed, effect, signal, untracked } from '@angular/core';
 import { CharacterActionDto } from '../../../../shared/models/Dtos/characterActionDto';
 import { InventoryItem } from '../../../../shared/models/inventoryItem';
 import { LootHistoryEntry } from '../../../../shared/models/loot-history';
@@ -19,7 +19,7 @@ export class GameRealtimeStore {
     effect(
       () => {
         if (this.eventBus.logout()) {
-          this.clear();
+          untracked(() => this.clear());
         }
       },
       { allowSignalWrites: true },

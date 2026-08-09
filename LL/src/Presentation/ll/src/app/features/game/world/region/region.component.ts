@@ -84,13 +84,15 @@ export class RegionComponent implements OnInit, OnDestroy {
 
     this.route.queryParamMap.subscribe((params) => {
       this.targetAreaId = params.get('area');
-      this.dismissTrainingSummaryOutsideTrainingArea();
+      if (this.targetAreaId !== TRAINING_GROUNDS_AREA_ID) {
+        this.closeTrainingSummary();
+      }
       this.applyRegionView();
     });
   }
 
   ngOnDestroy(): void {
-    this.combatService.stop(BattleType.Training);
+    this.closeTrainingSummary();
   }
 
   getRegionDetails(id: string) {
@@ -141,14 +143,5 @@ export class RegionComponent implements OnInit, OnDestroy {
 
   closeTrainingSummary(): void {
     this.combatService.closeCurrentTrainingBattle();
-  }
-
-  private dismissTrainingSummaryOutsideTrainingArea(): void {
-    if (
-      this.targetAreaId !== TRAINING_GROUNDS_AREA_ID &&
-      this.combatStateService.getIsCombatActive(BattleType.Training)()
-    ) {
-      this.combatService.stop(BattleType.Training);
-    }
   }
 }

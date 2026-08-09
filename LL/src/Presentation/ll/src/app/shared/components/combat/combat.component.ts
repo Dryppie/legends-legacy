@@ -32,6 +32,7 @@ import { Router } from '@angular/router';
 import { HelpLauncherComponent } from '../../help/help-launcher.component';
 import { GUIDE_PAGE_IDS } from '../../help/guide-catalog';
 import { CharacterActionType } from '../../models/enums/characterActionType';
+import { GameBootstrapStateService } from '../../../core/services/api/game-bootstrap/game-bootstrap-state.service';
 
 @Component({
   selector: 'app-combat',
@@ -56,6 +57,8 @@ export class CombatComponent implements OnInit, OnDestroy {
   private flavorIntervalId: ReturnType<typeof setInterval> | null = null;
   private flavorVisibilityTimeoutId: ReturnType<typeof setTimeout> | null =
     null;
+  private isDestroyed = false;
+  private idleCombatRecoveryAttempted = false;
   private readonly battleTypeSignal = signal<BattleType>(BattleType.IdleCombat);
 
   @Input()
@@ -80,6 +83,7 @@ export class CombatComponent implements OnInit, OnDestroy {
   readonly currentAction;
   readonly hasActiveIdleCombat;
   readonly idleCombatError;
+  readonly bootstrapLoaded;
   // Only set to true if a combat result has been received, or if start combat has been
   displayCombat = false;
   isLoading = false;
@@ -97,6 +101,7 @@ export class CombatComponent implements OnInit, OnDestroy {
     public readonly combatStateService: CombatStateService,
     private readonly tour: FirstPartyTourService,
     private readonly router: Router,
+    bootstrapState: GameBootstrapStateService,
   ) {
     this.currentAction = this.characterActionService.currentAction;
     this.hasActiveIdleCombat = computed(() => {
@@ -107,6 +112,7 @@ export class CombatComponent implements OnInit, OnDestroy {
       );
     });
     this.idleCombatError = this.characterActionService.idleCombatError;
+    this.bootstrapLoaded = bootstrapState.loaded;
 
     const isStartingCombatSig = this.characterActionService.loadingCombat;
     const isRefreshingActionSig =
@@ -117,18 +123,30 @@ export class CombatComponent implements OnInit, OnDestroy {
     });
 
     effect(() => {
-      const shouldLeaveCombatRoute =
+      const shouldRecoverCombat =
         this.battleTypeSignal() === BattleType.IdleCombat &&
+        this.bootstrapLoaded() &&
         !this.hasActiveIdleCombat() &&
         !isStartingCombatSig() &&
-        !isRefreshingActionSig();
+        !isRefreshingActionSig() &&
+        !this.idleCombatRecoveryAttempted;
 
-      if (!shouldLeaveCombatRoute) return;
+      if (!shouldRecoverCombat) return;
 
       queueMicrotask(() => {
-        if (this.router.url.startsWith('/game/combat')) {
-          void this.router.navigate(['/game/world']);
+        if (
+          this.isDestroyed ||
+          this.battleTypeSignal() !== BattleType.IdleCombat ||
+          this.hasActiveIdleCombat() ||
+          isStartingCombatSig() ||
+          isRefreshingActionSig() ||
+          this.idleCombatRecoveryAttempted
+        ) {
+          return;
         }
+
+        this.idleCombatRecoveryAttempted = true;
+        this.characterActionService.refreshCurrentAction();
       });
     });
 
@@ -217,6 +235,10 @@ export class CombatComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.isDestroyed = true;
+    if (this.battleType === BattleType.Training) {
+      this.tour.stop(false);
+    }
     this.subscriptions.unsubscribe();
     if (this.flavorIntervalId) clearInterval(this.flavorIntervalId);
     if (this.flavorVisibilityTimeoutId) {
@@ -305,6 +327,10 @@ export class CombatComponent implements OnInit, OnDestroy {
     this.characterActionService.retryIdleCombatResolution();
   }
 
+  returnToWorld(): void {
+    void this.router.navigate(['/game/world']);
+  }
+
   private updateCharacter(
     combatEntity: SimpleCombatEntityDto | null | undefined,
   ) {
@@ -389,7 +415,7 @@ export class CombatComponent implements OnInit, OnDestroy {
 
   ngAfterViewInit(): void {
     this.waitForTourElements().then(() => {
-      if (this.battleType === BattleType.Training) {
+      if (!this.isDestroyed && this.battleType === BattleType.Training) {
         this.tour.start('tutorial-combat');
       }
     });
@@ -400,6 +426,7 @@ export class CombatComponent implements OnInit, OnDestroy {
     const delay = 10; // ms
 
     for (let attempt = 0; attempt < maxAttempts; attempt++) {
+      if (this.isDestroyed) return;
       const allExist = !!this.entityStats.length;
       if (allExist) return;
       await new Promise((resolve) => setTimeout(resolve, delay));

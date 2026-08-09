@@ -1,4 +1,4 @@
-import { Injectable, computed, effect, signal } from '@angular/core';
+import { Injectable, computed, effect, signal, untracked } from '@angular/core';
 import { EMPTY, forkJoin, Observable, catchError, finalize, tap } from 'rxjs';
 import { InventoryStateService } from '../inventory/inventory-state.service';
 import { QuestStateService } from '../quest/quest-state.service';
@@ -251,7 +251,7 @@ export class EssenceStateService {
     effect(
       () => {
         if (this.eventBus.logout()) {
-          this.reset();
+          untracked(() => this.reset());
         }
       },
       { allowSignalWrites: true },

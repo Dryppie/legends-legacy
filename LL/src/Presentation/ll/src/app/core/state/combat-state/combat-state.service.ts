@@ -3,6 +3,7 @@ import {
   effect,
   Injectable,
   signal,
+  untracked,
   WritableSignal,
 } from '@angular/core';
 import {
@@ -37,10 +38,11 @@ export class CombatStateService {
 
   constructor(private readonly eventBus: EventBusService) {
     effect(() => {
+      const logoutCount = this.eventBus.logout();
+      if (!logoutCount) return;
+
       queueMicrotask(() => {
-        if (this.eventBus.logout()) {
-          this.handleLogout();
-        }
+        untracked(() => this.handleLogout());
       });
     });
   }
