@@ -13,6 +13,11 @@ import {
   QuestState,
   QuestStatus,
 } from '../../../shared/models/quest';
+import {
+  buildQuestJournalEntries,
+  preferredQuestForEntry,
+  QuestJournalEntry,
+} from './quest-journal-entry';
 
 type QuestJournalTab = QuestStatus.Active | QuestStatus.Completed;
 type QuestSortMode = 'Order' | 'Progress';
@@ -30,37 +35,46 @@ export class QuestJournalPageComponent implements OnInit {
   ];
   readonly activeTab = signal<QuestJournalTab>(QuestStatus.Active);
   readonly sortMode = signal<QuestSortMode>('Order');
-  readonly selectedQuestId = signal<string | null>(null);
+  readonly selectedEntryKey = signal<string | null>(null);
+  readonly selectedPartQuestId = signal<string | null>(null);
   readonly pendingChoiceKey = signal<string | null>(null);
-  readonly visibleQuests = computed(() => {
-    let quests: QuestState[];
-    switch (this.activeTab()) {
-      case QuestStatus.Completed:
-        quests = this.questState.completedQuests();
-        break;
-      default:
-        quests = this.questState.activeQuests();
-        break;
-    }
-
-    return [...quests].sort((a, b) =>
-      this.sortMode() === 'Progress'
-        ? this.questProgress(b) - this.questProgress(a) ||
-          a.sortOrder - b.sortOrder
-        : a.sortOrder - b.sortOrder,
-    );
-  });
-  readonly selectedQuest = computed(() => {
-    const quests = this.visibleQuests();
+  readonly journalEntries = computed(() =>
+    buildQuestJournalEntries(this.questState.journal().quests),
+  );
+  readonly visibleEntries = computed(() =>
+    this.journalEntries()
+      .filter((entry) => entry.status === this.activeTab())
+      .sort((a, b) =>
+        this.sortMode() === 'Progress'
+          ? this.entryProgress(b) - this.entryProgress(a) ||
+            a.sortOrder - b.sortOrder
+          : a.sortOrder - b.sortOrder,
+      ),
+  );
+  readonly selectedEntry = computed(() => {
+    const entries = this.visibleEntries();
     return (
-      quests.find((quest) => quest.questId === this.selectedQuestId()) ??
-      quests.find((quest) => quest.isPinned) ??
-      quests[0] ??
+      entries.find((entry) => entry.key === this.selectedEntryKey()) ??
+      entries.find((entry) => entry.quests.some((quest) => quest.isPinned)) ??
+      entries[0] ??
       null
     );
   });
+  readonly selectedQuest = computed(() => {
+    const entry = this.selectedEntry();
+    if (!entry) return null;
+
+    return (
+      entry.quests.find(
+        (quest) => quest.questId === this.selectedPartQuestId(),
+      ) ?? preferredQuestForEntry(entry)
+    );
+  });
   readonly trackedQuestCount = computed(
-    () => this.questState.activeQuests().length,
+    () =>
+      this.journalEntries().filter(
+        (entry) => entry.status === QuestStatus.Active,
+      ).length,
   );
 
   readonly QuestStatus = QuestStatus;
@@ -77,17 +91,19 @@ export class QuestJournalPageComponent implements OnInit {
 
   setTab(tab: QuestJournalTab): void {
     this.activeTab.set(tab);
-    this.selectedQuestId.set(null);
+    this.selectedEntryKey.set(null);
+    this.selectedPartQuestId.set(null);
     this.pendingChoiceKey.set(null);
   }
 
-  selectQuest(quest: QuestState): void {
-    this.selectedQuestId.set(quest.questId);
+  selectEntry(entry: QuestJournalEntry): void {
+    this.selectedEntryKey.set(entry.key);
+    this.selectedPartQuestId.set(preferredQuestForEntry(entry).questId);
     this.pendingChoiceKey.set(null);
   }
 
-  isSelected(quest: QuestState): boolean {
-    return this.selectedQuest()?.questId === quest.questId;
+  isSelected(entry: QuestJournalEntry): boolean {
+    return this.selectedEntry()?.key === entry.key;
   }
 
   toggleSort(): void {
@@ -95,12 +111,7 @@ export class QuestJournalPageComponent implements OnInit {
   }
 
   tabCount(tab: QuestJournalTab): number {
-    switch (tab) {
-      case QuestStatus.Completed:
-        return this.questState.completedQuests().length;
-      default:
-        return this.questState.activeQuests().length;
-    }
+    return this.journalEntries().filter((entry) => entry.status === tab).length;
   }
 
   currentObjective(quest: QuestState): QuestObjectiveState | null {
@@ -142,8 +153,93 @@ export class QuestJournalPageComponent implements OnInit {
     return Math.round(progress / quest.objectives.length);
   }
 
+  entryProgress(entry: QuestJournalEntry): number {
+    if (!entry.isChain) {
+      return this.questProgress(entry.quests[0]);
+    }
+
+    const total = entry.quests.reduce(
+      (progress, quest) => progress + this.questProgress(quest),
+      0,
+    );
+    return Math.round(total / entry.totalParts);
+  }
+
+  completedPartCount(entry: QuestJournalEntry): number {
+    return entry.quests.filter(
+      (quest) => quest.status === QuestStatus.Completed,
+    ).length;
+  }
+
+  entryCurrentPart(entry: QuestJournalEntry): QuestState {
+    return preferredQuestForEntry(entry);
+  }
+
+  entrySummary(entry: QuestJournalEntry): string {
+    const current = this.entryCurrentPart(entry);
+    if (!entry.isChain) {
+      return (
+        (this.requiresChoice(current)
+          ? current.choice?.selectionSummary
+          : this.currentObjective(current)?.description) ??
+        (current.status === QuestStatus.Completed
+          ? 'Quest completed'
+          : current.summary)
+      );
+    }
+
+    if (current.status === QuestStatus.Active) {
+      return 'Current: ' + current.title;
+    }
+
+    if (entry.status === QuestStatus.Completed) {
+      const completedParts = this.completedPartCount(entry);
+      return completedParts === entry.totalParts
+        ? 'Chain completed'
+        : completedParts + ' parts completed';
+    }
+
+    return 'Next part unlocks as you progress';
+  }
+
   chainSteps(totalSteps: number): number[] {
     return Array.from({ length: totalSteps }, (_, index) => index + 1);
+  }
+
+  chainNavigationSteps(entry: QuestJournalEntry): number[] {
+    if (entry.status === QuestStatus.Completed) {
+      return entry.quests
+        .map((quest) => quest.chain?.step)
+        .filter((step): step is number => step !== undefined);
+    }
+
+    return this.chainSteps(entry.totalParts);
+  }
+
+  chainQuestForStep(entry: QuestJournalEntry, step: number): QuestState | null {
+    return entry.quests.find((quest) => quest.chain?.step === step) ?? null;
+  }
+
+  selectChainStep(entry: QuestJournalEntry, step: number): void {
+    const quest = this.chainQuestForStep(entry, step);
+    if (!quest) return;
+
+    this.selectedPartQuestId.set(quest.questId);
+    this.pendingChoiceKey.set(null);
+  }
+
+  isSelectedChainStep(step: number): boolean {
+    return this.selectedQuest()?.chain?.step === step;
+  }
+
+  isCompletedChainStep(entry: QuestJournalEntry, step: number): boolean {
+    return (
+      this.chainQuestForStep(entry, step)?.status === QuestStatus.Completed
+    );
+  }
+
+  chainStepTitle(entry: QuestJournalEntry, step: number): string {
+    return this.chainQuestForStep(entry, step)?.title ?? 'Locked';
   }
 
   rewardLabel(reward: QuestRewardState, includeQuantity = true): string {

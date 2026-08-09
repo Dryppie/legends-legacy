@@ -92,24 +92,24 @@
           </div>
 
           <div
-            *ngIf="questState.loaded() && !visibleQuests().length"
+            *ngIf="questState.loaded() && !visibleEntries().length"
             class="ll-empty-state h-full min-h-40"
           >
             No {{ activeTab().toLowerCase() }} quests.
           </div>
 
           <button
-            *ngFor="let quest of visibleQuests()"
+            *ngFor="let entry of visibleEntries()"
             type="button"
             class="relative mb-1.5 block w-full overflow-hidden rounded border border-light_gray/20 bg-black/10 px-4 py-3 text-left transition-colors hover:border-primary/30 hover:bg-primary/5"
             [ngClass]="{
-              'border-primary/40 bg-primary/5': isSelected(quest),
-              'opacity-70': quest.status === QuestStatus.Completed,
+              'border-primary/40 bg-primary/5': isSelected(entry),
+              'opacity-70': entry.status === QuestStatus.Completed,
             }"
-            (click)="selectQuest(quest)"
+            (click)="selectEntry(entry)"
           >
             <span
-              *ngIf="isSelected(quest)"
+              *ngIf="isSelected(entry)"
               class="absolute inset-y-0 left-0 w-0.5 bg-primary"
               aria-hidden="true"
             ></span>
@@ -118,11 +118,16 @@
               <span
                 class="min-w-0 truncate text-sm font-[var(--ll-font-display)] font-semibold text-primary"
               >
-                {{ quest.title }}
+                {{ entry.title }}
               </span>
               <span class="shrink-0 text-[10px] text-primary">
-                {{ completedObjectiveCount(quest) }} /
-                {{ quest.objectives.length }}
+                <ng-container *ngIf="entry.isChain; else objectiveCount">
+                  {{ completedPartCount(entry) }} / {{ entry.totalParts }}
+                </ng-container>
+                <ng-template #objectiveCount>
+                  {{ completedObjectiveCount(entry.quests[0]) }} /
+                  {{ entry.quests[0].objectives.length }}
+                </ng-template>
               </span>
             </span>
 
@@ -132,23 +137,16 @@
               <span
                 class="rounded-sm bg-primary/10 px-1.5 py-0.5 font-semibold uppercase tracking-wider text-primary"
               >
-                {{ quest.category }}
+                {{ entry.category }}
               </span>
               <span
-                *ngIf="quest.chain as chain"
+                *ngIf="entry.isChain"
                 class="shrink-0 rounded-sm border border-primary/25 px-1.5 py-0.5 font-semibold uppercase tracking-wider text-primary"
               >
-                Chain {{ chain.step }}/{{ chain.totalSteps }}
+                Quest chain
               </span>
               <span class="truncate">
-                {{
-                  (requiresChoice(quest)
-                    ? quest.choice?.selectionSummary
-                    : currentObjective(quest)?.description) ||
-                    (quest.status === QuestStatus.Completed
-                      ? "Quest completed"
-                      : quest.summary)
-                }}
+                {{ entrySummary(entry) }}
               </span>
             </span>
 
@@ -157,7 +155,7 @@
             >
               <span
                 class="block h-full bg-primary"
-                [style.width.%]="questProgress(quest)"
+                [style.width.%]="entryProgress(entry)"
               ></span>
             </span>
           </button>
@@ -198,49 +196,79 @@
                 {{ quest.title }}
               </h2>
 
-              <div
-                *ngIf="quest.chain as chain"
-                class="mt-3 flex flex-wrap items-center gap-3"
-              >
-                <span
-                  class="text-[10px] font-semibold uppercase tracking-[0.18em] text-zinc-400"
+              <ng-container *ngIf="selectedEntry() as entry">
+                <div
+                  *ngIf="quest.chain as chain"
+                  class="mt-3 rounded border border-primary/20 bg-primary/[0.025] p-3"
                 >
-                  Chain
-                </span>
-                <span class="flex items-center" aria-hidden="true">
-                  <ng-container
-                    *ngFor="
-                      let chainStep of chainSteps(chain.totalSteps);
-                      let last = last
-                    "
+                  <div class="flex flex-wrap items-start justify-between gap-2">
+                    <div>
+                      <div
+                        class="text-[10px] font-semibold uppercase tracking-[0.18em] text-primary"
+                      >
+                        {{ chain.title }}
+                      </div>
+                      <p class="mt-1 text-xs leading-5 text-zinc-400">
+                        {{ chain.description }}
+                      </p>
+                    </div>
+                    <span class="shrink-0 text-[10px] text-zinc-400">
+                      {{ completedPartCount(entry) }} /
+                      {{ entry.totalParts }} parts completed
+                    </span>
+                  </div>
+
+                  <nav
+                    class="mt-3 grid grid-cols-5 gap-1.5 sm:grid-cols-10"
+                    aria-label="Quest chain parts"
                   >
-                    <span
-                      class="h-2.5 w-2.5 rounded-full border border-primary/50"
+                    <button
+                      *ngFor="let chainStep of chainNavigationSteps(entry)"
+                      type="button"
+                      class="min-w-0 rounded border px-1 py-1.5 text-center transition-colors"
                       [ngClass]="{
-                        'bg-primary': chainStep < chain.step,
-                        'ring-1 ring-primary ring-offset-2 ring-offset-black/60':
-                          chainStep === chain.step,
-                        'bg-black/40': chainStep >= chain.step,
+                        'border-primary bg-primary/10':
+                          isSelectedChainStep(chainStep),
+                        'border-primary/30 bg-primary/5':
+                          !isSelectedChainStep(chainStep) &&
+                          isCompletedChainStep(entry, chainStep),
+                        'border-light_gray/20 bg-black/10':
+                          !isSelectedChainStep(chainStep) &&
+                          !isCompletedChainStep(entry, chainStep),
+                        'cursor-not-allowed opacity-45': !chainQuestForStep(
+                          entry,
+                          chainStep
+                        ),
                       }"
-                    ></span>
-                    <span
-                      *ngIf="!last"
-                      class="h-px w-4 sm:w-6"
-                      [ngClass]="{
-                        'bg-primary/70': chainStep < chain.step,
-                        'bg-primary/25': chainStep >= chain.step,
-                      }"
-                    ></span>
-                  </ng-container>
-                </span>
-                <span class="text-[10px] text-zinc-400">
-                  {{ chain.title }} · step {{ chain.step }} of
-                  {{ chain.totalSteps }}
-                </span>
-                <p class="w-full text-xs leading-5 text-zinc-400">
-                  {{ chain.description }}
-                </p>
-              </div>
+                      [disabled]="!chainQuestForStep(entry, chainStep)"
+                      [title]="chainStepTitle(entry, chainStep)"
+                      [attr.aria-label]="
+                        'Part ' +
+                        chainStep +
+                        ': ' +
+                        chainStepTitle(entry, chainStep)
+                      "
+                      (click)="selectChainStep(entry, chainStep)"
+                    >
+                      <span
+                        class="block text-[8px] font-semibold uppercase tracking-[0.12em] text-zinc-500"
+                      >
+                        Part
+                      </span>
+                      <span
+                        class="mt-0.5 block text-sm font-semibold"
+                        [ngClass]="
+                          isSelectedChainStep(chainStep)
+                            ? 'text-primary'
+                            : 'text-zinc-300'
+                        "
+                      >
+                        {{ chainStep }}
+                      </span>
+                    </button>
+                  </nav>
+                </div>
+              </ng-container>
 
               <div
                 *ngIf="!requiresChoice(quest)"
