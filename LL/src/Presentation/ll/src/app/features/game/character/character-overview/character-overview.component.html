@@ -47,49 +47,116 @@
 
   <div *ngIf="character() as characterOverview" class="min-h-0 overflow-y-auto">
     <section class="ll-page-header">
-      <div
-        class="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(360px,480px)] lg:items-end"
-      >
-        <div>
-          <p class="ll-eyebrow text-primary">Combat Profile</p>
-          <h2 class="ll-heading mt-1 text-2xl text-white">
-            {{ profileLabel() }}
-          </h2>
-        </div>
+      <div>
+        <p class="ll-eyebrow text-primary">Combat Profile</p>
+        <h2 class="ll-heading mt-1 text-2xl text-white">
+          {{ profileLabel() }}
+        </h2>
+      </div>
 
-        <div class="grid gap-3 sm:grid-cols-2">
-          <article class="ll-stat-card">
-            <div class="ll-stat-label">Character Level</div>
-            <div class="mt-1">
-              <h2 class="ll-heading text-3xl leading-none">
-                Level {{ characterOverview.level }}
-              </h2>
+      <div class="mt-4 grid gap-3 sm:grid-cols-3">
+        <article class="ll-stat-card">
+          <div class="ll-stat-label">Character Level</div>
+          <div class="mt-1">
+            <h2 class="ll-heading text-3xl leading-none">
+              Level {{ characterOverview.level }}
+            </h2>
+          </div>
+          <div class="mt-3">
+            <div
+              class="mb-1 flex items-center justify-between gap-3 text-[0.7rem] font-semibold uppercase tracking-wide text-secondary"
+            >
+              <span>Combat XP</span>
+              <span class="tabular-nums text-white">
+                {{ characterOverview.experience | number }}/{{
+                  characterOverview.experienceUntilNextLevel | number
+                }}
+              </span>
             </div>
-          </article>
+            <div
+              class="h-2 overflow-hidden rounded-full border border-primary/30 bg-black/50"
+              role="progressbar"
+              aria-label="Combat experience"
+              [attr.aria-valuenow]="characterOverview.experience"
+              aria-valuemin="0"
+              [attr.aria-valuemax]="characterOverview.experienceUntilNextLevel"
+            >
+              <div
+                class="h-full rounded-full bg-primary transition-[width]"
+                [style.width.%]="
+                  experiencePercent(
+                    characterOverview.experience,
+                    characterOverview.experienceUntilNextLevel
+                  )
+                "
+              ></div>
+            </div>
+          </div>
+        </article>
 
-          <article
-            class="ll-stat-card ll-card-accent relative overflow-hidden text-left"
-            title="Combat Rating summarizes permanent combat attributes and the equipped build."
-          >
-            <div class="relative">
-              <div class="ll-stat-label">Combat Rating</div>
-              <div class="ll-heading mt-1 text-3xl leading-none">
-                <ng-container
-                  *ngIf="
-                    characterOverview.power?.state === 'Available';
-                    else powerUnavailable
-                  "
-                >
-                  {{
-                    displayCombatRating(characterOverview.power!.overall)
-                      | number: "1.0-0"
-                  }}
-                </ng-container>
-                <ng-template #powerUnavailable>Unavailable</ng-template>
-              </div>
+        <article class="ll-stat-card">
+          <div class="ll-stat-label">Crafting Level</div>
+          <div class="mt-1">
+            <h2 class="ll-heading text-3xl leading-none">
+              Level {{ characterOverview.craftingLevel }}
+            </h2>
+          </div>
+          <div class="mt-3">
+            <div
+              class="mb-1 flex items-center justify-between gap-3 text-[0.7rem] font-semibold uppercase tracking-wide text-secondary"
+            >
+              <span>Crafting XP</span>
+              <span class="tabular-nums text-white">
+                {{ characterOverview.craftingExperience | number }}/{{
+                  characterOverview.craftingExperienceUntilNextLevel | number
+                }}
+              </span>
             </div>
-          </article>
-        </div>
+            <div
+              class="h-2 overflow-hidden rounded-full border border-primary/30 bg-black/50"
+              role="progressbar"
+              aria-label="Crafting experience"
+              [attr.aria-valuenow]="characterOverview.craftingExperience"
+              aria-valuemin="0"
+              [attr.aria-valuemax]="
+                characterOverview.craftingExperienceUntilNextLevel
+              "
+            >
+              <div
+                class="h-full rounded-full bg-primary transition-[width]"
+                [style.width.%]="
+                  experiencePercent(
+                    characterOverview.craftingExperience,
+                    characterOverview.craftingExperienceUntilNextLevel
+                  )
+                "
+              ></div>
+            </div>
+          </div>
+        </article>
+
+        <article
+          class="ll-stat-card ll-card-accent relative overflow-hidden text-left"
+          title="Combat Rating summarizes permanent combat attributes and the equipped build."
+        >
+          <div class="relative">
+            <div class="ll-stat-label">Combat Rating</div>
+            <div class="ll-heading mt-1 text-3xl leading-none">
+              <ng-container
+                *ngIf="
+                  characterOverview.power?.state === 'Available';
+                  else powerUnavailable
+                "
+              >
+                {{
+                  displayCombatRating(characterOverview.power!.overall)
+                    | number: "1.0-0"
+                }}
+              </ng-container>
+              <ng-template #powerUnavailable>Unavailable</ng-template>
+            </div>
+          </div>
+        </article>
       </div>
     </section>
 

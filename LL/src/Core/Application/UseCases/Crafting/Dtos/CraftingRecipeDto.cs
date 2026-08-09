@@ -17,6 +17,8 @@ public sealed class CraftingRecipeDto
     public int MinTier { get; init; }
     public int MaxTier { get; init; }
     public int CurrentMasteryLevel { get; init; }
+    public int CurrentMasteryExperience { get; init; }
+    public int MasteryExperienceRequiredForNextLevel { get; init; }
     public int MinimumProfessionLevel { get; init; }
     public EquipmentBehaviorDefinition Behavior { get; init; } = new();
     public IReadOnlyDictionary<AttributeType, double> InitialStatProfile { get; init; } =

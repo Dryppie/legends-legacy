@@ -505,6 +505,39 @@ public sealed class QuestSystemTests
     }
 
     [Fact]
+    public async Task Arms_of_choice_counts_a_weapon_crafted_before_the_quest_unlocked()
+    {
+        var characterId = Guid.NewGuid();
+        var definitions = CreateDefinitions();
+        var repository = new RecordingQuestRepository(level: 5);
+        repository.Progresses.Add(CreateCompletedProgress(
+            characterId,
+            definitions.Get(QuestConstants.ToolsOfTheTrade)));
+        repository.CraftedRecipeIds.Add("recipe.weapon.one_handed.hand_axe");
+        var service = new QuestService(
+            repository,
+            definitions,
+            itemBases: new RecordingItemBaseRepository(),
+            inventoryItemFactory: new RecordingInventoryItemFactory(),
+            lootRewardWriter: new RecordingLootRewardWriter(),
+            TimeProvider.System);
+
+        var journal = await service.GetJournalAsync(
+            characterId,
+            CancellationToken.None);
+
+        var armsOfChoice = journal.Quests.Single(
+            quest => quest.QuestId == QuestConstants.ArmsOfChoice);
+        var handAxe = armsOfChoice.Objectives.Single(
+            objective => objective.Key == "craft_hatchet");
+        Assert.Equal(1, handAxe.CurrentAmount);
+        Assert.True(handAxe.IsCompleted);
+        Assert.All(
+            armsOfChoice.Objectives.Where(objective => objective != handAxe),
+            objective => Assert.Equal(0, objective.CurrentAmount));
+    }
+
+    [Fact]
     public async Task Stone_timber_and_hide_counts_Lumo_actions_for_each_equipped_tool_and_grants_materials()
     {
         var characterId = Guid.NewGuid();
@@ -784,6 +817,8 @@ public sealed class QuestSystemTests
     private sealed class RecordingQuestRepository(int level) : IQuestRepository
     {
         public List<CharacterQuestProgress> Progresses { get; } = [];
+        public HashSet<string> CraftedRecipeIds { get; } =
+            new(StringComparer.OrdinalIgnoreCase);
         public int SaveCalls { get; private set; }
 
         public Task<IReadOnlyList<CharacterQuestProgress>> GetProgressesAsync(Guid characterId, CancellationToken cancellationToken) =>
@@ -803,6 +838,11 @@ public sealed class QuestSystemTests
 
         public Task<bool> HasQualifyingEquipmentEquippedAsync(Guid characterId, IReadOnlyCollection<string> itemBaseIds, int? tier, bool mustBeCrafted, bool toolSlotOnly, CancellationToken cancellationToken) =>
             Task.FromResult(false);
+
+        public Task<IReadOnlySet<string>> GetCraftedRecipeIdsAsync(
+            Guid characterId,
+            CancellationToken cancellationToken) =>
+            Task.FromResult<IReadOnlySet<string>>(CraftedRecipeIds);
 
         public void AddProgress(CharacterQuestProgress progress) => Progresses.Add(progress);
         public void AddEventLedger(QuestEventLedger ledger) { }

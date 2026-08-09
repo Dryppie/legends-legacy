@@ -198,6 +198,14 @@ public sealed class JsonQuestDefinitionProvider : IQuestDefinitionProvider
                     throw new InvalidOperationException(
                         $"Quest '{definition.Id}' objective '{objective.Key}' requires a valid area and gathering type.");
                 }
+
+                if (objective.Filters.IncludePreviousCrafts &&
+                    (objective.Type != "EquipmentCrafted" ||
+                     objective.Filters.BaseRecipeIds.Count == 0))
+                {
+                    throw new InvalidOperationException(
+                        $"Quest '{definition.Id}' objective '{objective.Key}' can include previous crafts only when it matches equipment base recipes.");
+                }
             }
 
             foreach (var reward in definition.Rewards)

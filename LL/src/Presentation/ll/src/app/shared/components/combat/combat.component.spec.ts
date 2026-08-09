@@ -3,6 +3,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { CharacterActionsStateService } from '../../../core/services/api/character-actions/character-actions.state.service';
 import { GameBootstrapStateService } from '../../../core/services/api/game-bootstrap/game-bootstrap-state.service';
+import { EquipmentStateService } from '../../../core/services/api/equipment/equipment-state.service';
 import { FirstPartyTourService } from '../../../core/services/client-side/first-party-tour/first-party-tour.service';
 import { GameService } from '../../../core/services/client-side/game/game.service';
 import { CombatStateService } from '../../../core/state/combat-state/combat-state.service';
@@ -65,6 +66,10 @@ describe('CombatComponent', () => {
         },
         { provide: CombatStateService, useValue: combatState },
         {
+          provide: EquipmentStateService,
+          useValue: { getSlot: jasmine.createSpy('getSlot') },
+        },
+        {
           provide: GameService,
           useValue: { endCombat: jasmine.createSpy('endCombat') },
         },
@@ -84,6 +89,33 @@ describe('CombatComponent', () => {
 
     expect(fixture.nativeElement.textContent).toContain('Combat Is Ongoing');
     expect(fixture.nativeElement.querySelector('app-help-launcher')).toBeNull();
+  });
+
+  it('keeps a gathering-tool mismatch visible during idle combat', () => {
+    currentAction.set({
+      characterActionType: CharacterActionType.Combat,
+      isDeleted: false,
+      combatActionDetails: {
+        area: {
+          gatheringNodes: [{ type: 'Woodcutting' }],
+        },
+      },
+    });
+    const equipmentState = TestBed.inject(
+      EquipmentStateService,
+    ) as jasmine.SpyObj<EquipmentStateService>;
+    equipmentState.getSlot.and.returnValue({
+      id: 'tool-slot',
+      iconPath: '',
+      equipmentSlotType: 'Tool',
+      equipmentInstance: {
+        equipmentBase: { gatheringType: 'Mining' },
+      },
+    } as any);
+
+    expect(fixture.componentInstance.gatheringToolWarning()).toContain(
+      'cannot gather here',
+    );
   });
 
   it('keeps the combat route stable while a missing action is reconciled', async () => {

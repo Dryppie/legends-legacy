@@ -81,6 +81,8 @@ export interface CraftingRecipe {
   minTier: number;
   maxTier: number;
   currentMasteryLevel: number;
+  currentMasteryExperience: number;
+  masteryExperienceRequiredForNextLevel: number;
   minimumProfessionLevel: number;
   behavior: EquipmentBehavior;
   initialStatProfile: Record<string, number>;

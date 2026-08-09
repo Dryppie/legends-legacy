@@ -1,27 +1,36 @@
 [
   {
     "id": "choose-tutorial-weapon",
-    "kind": "info",
+    "kind": "click",
     "element": "[data-tour=crafting-introduction]",
-    "includeSelectors": ["[data-tour=tutorial-weapon-recipe]"],
+    "actionSelector": "[data-tour=tutorial-weapon-recipe]",
     "targetTimeoutMs": 5000,
-    "showNext": true,
     "title": "1. Choose your weapon",
-    "description": "Explore the Tier 1 one-handed weapons and select the one you want to craft. You have exactly enough Ore and Wood for one. When you are ready, select Next.",
+    "description": "Choose a Tier 1 one-handed weapon to craft. You have exactly enough Ore and Wood for one. Tap its recipe to continue.",
+    "restoreOnBack": {
+      "type": "click",
+      "selector": "[data-tour=crafting-mobile-recipes]"
+    },
     "position": "right"
   },
   {
     "id": "explain-common-base",
+    "kind": "click",
     "element": "[data-tour=crafting-base-recipe]",
+    "actionSelector": "[data-tour=crafting-base-recipe]",
     "targetTimeoutMs": 5000,
     "showBack": true,
     "title": "2. Common base",
-    "description": "The Common Base is the standard version of this weapon. It uses the recipe's base materials and determines the weapon type and its core attributes. New variants of a recipe can be unlocked by collecting Blueprints.",
+    "description": "The Common Base is the standard version of this weapon. It uses the recipe's base materials and determines its core attributes. Tap it to preview the result. New variants can be unlocked by collecting Blueprints.",
+    "restoreOnBack": {
+      "type": "click",
+      "selector": "[data-tour=crafting-mobile-blueprints]"
+    },
     "position": "bottom"
   },
   {
     "id": "explain-item-preview",
-    "element": "[data-tour=crafting-item-preview]",
+    "element": "[data-tour=crafting-item-preview-summary]",
     "targetTimeoutMs": 5000,
     "showBack": true,
     "title": "3. Crafted item preview",

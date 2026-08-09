@@ -129,8 +129,14 @@ export class PopoverComponent implements AfterViewInit, OnDestroy {
     this.handleCtrl.requestToggle();
   }
 
-  onOriginEnter() {
-    if (this.disabled || this.trigger !== 'hover') return;
+  onOriginEnter(event: PointerEvent) {
+    if (
+      this.disabled ||
+      this.trigger !== 'hover' ||
+      event.pointerType !== 'mouse'
+    ) {
+      return;
+    }
     this.clearCloseTimer();
     this.hoverOpenTimer = setTimeout(
       () => this.handleCtrl.requestOpen(),

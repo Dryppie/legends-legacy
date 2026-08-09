@@ -16,19 +16,19 @@ import { toDisplayedCombatRating } from '../../../../shared/models/combat-rating
 import { AttributeTooltipDirective } from '../../../../shared/directives/attribute-tooltip/attribute-tooltip.directive';
 
 @Component({
-    selector: 'app-character-overview',
-    imports: [
-        DefaultHeaderComponent,
-        NgIf,
-        NgFor,
-        FormsModule,
-        RegularButtonComponent,
-        AttributeTypeFormatPipe,
-        AttributeValueFormatPipe,
-        AttributeTooltipDirective,
-        DecimalPipe,
-    ],
-    templateUrl: './character-overview.component.html'
+  selector: 'app-character-overview',
+  imports: [
+    DefaultHeaderComponent,
+    NgIf,
+    NgFor,
+    FormsModule,
+    RegularButtonComponent,
+    AttributeTypeFormatPipe,
+    AttributeValueFormatPipe,
+    AttributeTooltipDirective,
+    DecimalPipe,
+  ],
+  templateUrl: './character-overview.component.html',
 })
 export class CharacterOverviewComponent {
   readonly AttributeType = AttributeType;
@@ -52,7 +52,9 @@ export class CharacterOverviewComponent {
   readonly errorMessage = computed(
     () =>
       this.searchErrorMessage() ||
-      (!this.isViewingSearchResult() ? this.characterState.error() ?? '' : ''),
+      (!this.isViewingSearchResult()
+        ? (this.characterState.error() ?? '')
+        : ''),
   );
   viewedCharacterName = signal('');
   isViewingSearchResult = signal(false);
@@ -220,6 +222,18 @@ export class CharacterOverviewComponent {
 
   getSectionAttributes(attributes: AttributeType[]): AttributeDto[] {
     return attributes.map((type) => this.getAttribute(type));
+  }
+
+  experiencePercent(
+    experience: number,
+    experienceUntilNextLevel: number,
+  ): number {
+    if (experienceUntilNextLevel <= 0) return 100;
+
+    return Math.min(
+      100,
+      Math.max(0, (experience / experienceUntilNextLevel) * 100),
+    );
   }
 
   get filledLoadoutSlots(): number {

@@ -85,6 +85,32 @@ describe('FirstPartyTourService', () => {
     expect(service.state()).toBeNull();
   });
 
+  it('keeps an active tour while navigating to a child detail route', async () => {
+    spyOn(window, 'fetch').and.resolveTo({
+      ok: true,
+      json: async () => [
+        {
+          kind: 'click',
+          element: '[data-tour=route-target]',
+          description: 'Continue into the detail view.',
+          targetTimeoutMs: 0,
+        },
+      ],
+    } as Response);
+
+    await service.start('tutorial-child-route');
+    router.url = '/game/world/shenic/essence-id';
+    routerEvents.next(
+      new NavigationEnd(
+        1,
+        '/game/world/shenic/essence-id',
+        '/game/world/shenic/essence-id',
+      ),
+    );
+
+    expect(service.state()?.pageId).toBe('tutorial-child-route');
+  });
+
   it('does not activate a tour whose load completes after navigation', async () => {
     let resolveFetch!: (response: Response) => void;
     spyOn(window, 'fetch').and.returnValue(

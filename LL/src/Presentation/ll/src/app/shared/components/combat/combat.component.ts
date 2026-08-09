@@ -33,6 +33,9 @@ import { HelpLauncherComponent } from '../../help/help-launcher.component';
 import { GUIDE_PAGE_IDS } from '../../help/guide-catalog';
 import { CharacterActionType } from '../../models/enums/characterActionType';
 import { GameBootstrapStateService } from '../../../core/services/api/game-bootstrap/game-bootstrap-state.service';
+import { EquipmentStateService } from '../../../core/services/api/equipment/equipment-state.service';
+import { EquipmentSlotType } from '../../models/Dtos/equipment-slots/equipmentSlot';
+import { GatheringType } from '../../models/enums/gatheringType';
 
 @Component({
   selector: 'app-combat',
@@ -101,6 +104,7 @@ export class CombatComponent implements OnInit, OnDestroy {
     public readonly combatStateService: CombatStateService,
     private readonly tour: FirstPartyTourService,
     private readonly router: Router,
+    private readonly equipmentState: EquipmentStateService,
     bootstrapState: GameBootstrapStateService,
   ) {
     this.currentAction = this.characterActionService.currentAction;
@@ -207,6 +211,34 @@ export class CombatComponent implements OnInit, OnDestroy {
       }
     });
   }
+
+  readonly gatheringToolWarning = computed(() => {
+    if (this.battleTypeSignal() !== BattleType.IdleCombat) return null;
+
+    const area = this.currentAction()?.combatActionDetails?.area;
+    const availableTypes = Array.from(
+      new Set([
+        ...(area?.gatheringTypes ?? []),
+        ...(area?.gatheringNodes ?? []).map((node) => node.type),
+      ]),
+    );
+    if (!availableTypes.length) return null;
+
+    const equippedType = this.equipmentState.getSlot(EquipmentSlotType.Tool)
+      ?.equipmentInstance?.equipmentBase.gatheringType;
+    if (equippedType && availableTypes.includes(equippedType)) return null;
+
+    const requiredTools = this.formatGatheringTypes(availableTypes);
+    return equippedType
+      ? 'Your ' +
+          equippedType +
+          ' tool cannot gather resources here. Equip a ' +
+          requiredTools +
+          ' tool to collect resources while fighting.'
+      : 'No gathering tool is equipped. Equip a ' +
+          requiredTools +
+          ' tool to collect resources while fighting here.';
+  });
 
   private syncCharactersFromResult(result: CombatResultDto) {
     // Update all player team members
@@ -363,6 +395,12 @@ export class CombatComponent implements OnInit, OnDestroy {
     if (this.battleType === BattleType.Training) return 'Training Battle';
 
     return 'Battle';
+  }
+
+  private formatGatheringTypes(types: GatheringType[]): string {
+    if (types.length <= 1) return types[0] ?? 'matching gathering';
+
+    return types.slice(0, -1).join(', ') + ' or ' + types.at(-1);
   }
 
   flavorMessages: string[] = [

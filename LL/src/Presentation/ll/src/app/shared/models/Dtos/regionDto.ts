@@ -14,7 +14,14 @@ export interface Area {
   creatures: string[];
   description: string;
   gatheringTypes?: GatheringType[];
+  gatheringNodes?: AreaGatheringNode[];
   // creatures: Creature[];
+}
+
+export interface AreaGatheringNode {
+  id: string;
+  name: string;
+  type: GatheringType;
 }
 
 export interface Dungeon {

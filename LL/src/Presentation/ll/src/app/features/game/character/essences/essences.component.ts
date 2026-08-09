@@ -104,10 +104,11 @@ export class EssencesComponent implements OnInit {
     this.route.queryParamMap.pipe(map((params) => params.get('view'))),
     { initialValue: null },
   );
-
   readonly archiveSearch = signal('');
   readonly mobileLoadoutOpen = signal(false);
-  readonly mobileDetailOpen = computed(() => this.routeEssenceId() !== null);
+  readonly mobileDetailOpen = computed(
+    () => this.routeEssenceId() !== null && !this.mobileLoadoutOpen(),
+  );
   readonly attunedEssenceCount = computed(
     () =>
       this.essenceState
@@ -559,6 +560,13 @@ export class EssencesComponent implements OnInit {
     if (slotIndex === null) return;
 
     this.essenceState.setDraftSlot(slotIndex, essence.id);
+
+    if (window.matchMedia('(max-width: 639px)').matches) {
+      this.mobileLoadoutOpen.set(true);
+      requestAnimationFrame(() =>
+        window.dispatchEvent(new Event('ll-tour-layout-change')),
+      );
+    }
   }
 
   public onboardingEquipButtonText(essence: PlayerEssenceDto): string {

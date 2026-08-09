@@ -9,6 +9,7 @@ public static class CharacterQueryProfiles
     public static IQueryable<Character> EntireCharacter(this IQueryable<Character> q)
         => q
             .Include(c => c.BaseAttributes)
+            .Include(c => c.Professions)
             .Include(c => c.EssenceLoadouts.Where(x => x.IsActive))
                 .ThenInclude(x => x.Slots)
                     .ThenInclude(x => x.PlayerEssence)

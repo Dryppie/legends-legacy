@@ -28,6 +28,10 @@ public interface IQuestRepository
         bool toolSlotOnly,
         CancellationToken cancellationToken);
 
+    Task<IReadOnlySet<string>> GetCraftedRecipeIdsAsync(
+        Guid characterId,
+        CancellationToken cancellationToken);
+
     void AddProgress(CharacterQuestProgress progress);
     void AddEventLedger(QuestEventLedger ledger);
     Task SaveChangesAsync(CancellationToken cancellationToken);

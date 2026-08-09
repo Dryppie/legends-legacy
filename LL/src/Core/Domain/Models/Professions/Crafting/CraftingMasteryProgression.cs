@@ -9,10 +9,11 @@ public static class CraftingMasteryProgression
     private const double GrowthFactor = 1.15;
 
     public static int GetLevelForExperience(int experience)
-    {
-        if (experience <= 0) return 0;
+        => GetProgressForExperience(experience).Level;
 
-        var remaining = experience;
+    public static CraftingMasteryProgress GetProgressForExperience(int experience)
+    {
+        var remaining = Math.Max(0, experience);
         var level = 0;
 
         while (level < MaxLevel)
@@ -24,7 +25,12 @@ public static class CraftingMasteryProgression
             level++;
         }
 
-        return level;
+        return level >= MaxLevel
+            ? new CraftingMasteryProgress(MaxLevel, 0, 0)
+            : new CraftingMasteryProgress(
+                level,
+                remaining,
+                GetExperienceRequiredForNextLevel(level));
     }
 
     public static int GetExperienceRequiredForNextLevel(int currentLevel)
@@ -35,3 +41,8 @@ public static class CraftingMasteryProgression
             MidpointRounding.AwayFromZero);
     }
 }
+
+public readonly record struct CraftingMasteryProgress(
+    int Level,
+    int Experience,
+    int ExperienceRequiredForNextLevel);

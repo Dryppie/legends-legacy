@@ -68,6 +68,19 @@ public sealed class QuestRepository(IDbContext context) : IQuestRepository
                 cancellationToken);
     }
 
+    public async Task<IReadOnlySet<string>> GetCraftedRecipeIdsAsync(
+        Guid characterId,
+        CancellationToken cancellationToken)
+    {
+        var recipeIds = await context.CharacterRecipeMasteries
+            .AsNoTracking()
+            .Where(x => x.CharacterId == characterId && x.Experience > 0)
+            .Select(x => x.RecipeId)
+            .ToListAsync(cancellationToken);
+
+        return recipeIds.ToHashSet(StringComparer.OrdinalIgnoreCase);
+    }
+
     public void AddProgress(CharacterQuestProgress progress) =>
         context.CharacterQuestProgresses.Add(progress);
 

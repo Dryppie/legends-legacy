@@ -77,6 +77,7 @@ public sealed class QuestObjectiveFilterDefinition
     public string? EssenceDefinitionFromChoiceQuestId { get; set; }
     public int? Tier { get; set; }
     public bool MustBeCrafted { get; set; }
+    public bool IncludePreviousCrafts { get; set; }
     public bool ToolSlotOnly { get; set; }
     public string? GatheringType { get; set; }
     public List<string> ItemBaseIds { get; set; } = [];

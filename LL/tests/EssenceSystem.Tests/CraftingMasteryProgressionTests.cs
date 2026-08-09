@@ -16,4 +16,17 @@ public sealed class CraftingMasteryProgressionTests
         Assert.Equal(1, CraftingMasteryProgression.GetLevelForExperience(levelOneRequired));
         Assert.Equal(2, CraftingMasteryProgression.GetLevelForExperience(levelOneRequired + levelTwoRequired));
     }
+
+    [Fact]
+    public void GetProgressForExperience_ReturnsExperienceWithinCurrentLevel()
+    {
+        var firstLevel = CraftingMasteryProgression.GetExperienceRequiredForNextLevel(0);
+        var secondLevel = CraftingMasteryProgression.GetExperienceRequiredForNextLevel(1);
+
+        var progress = CraftingMasteryProgression.GetProgressForExperience(firstLevel + 25);
+
+        Assert.Equal(1, progress.Level);
+        Assert.Equal(25, progress.Experience);
+        Assert.Equal(secondLevel, progress.ExperienceRequiredForNextLevel);
+    }
 }

@@ -178,7 +178,8 @@ public class CraftingService : ICraftingService
     public async Task<Response<IReadOnlyList<CraftingRecipeDto>>> GetCraftingRecipesAsync(Guid characterId, int targetTier, CancellationToken cancellationToken)
     {
         var blueprintUnlocks = await _progressionService.GetBlueprintUnlocksAsync(characterId, cancellationToken);
-        var masteries = await _progressionService.GetRecipeMasteryLevelsAsync(characterId, cancellationToken);
+        var masteries = (await _progressionService.GetRecipeMasteriesAsync(characterId, cancellationToken))
+            .ToDictionary(x => x.RecipeId, StringComparer.OrdinalIgnoreCase);
         var ownedByItemId = await GetOwnedItemQuantitiesAsync(characterId, cancellationToken);
         var recipeDefinitions = _definitions.GetRecipes();
         var itemBases = await _itemCatalogService.GetCraftableEquipmentBasesAsync(
@@ -529,12 +530,15 @@ public class CraftingService : ICraftingService
     private CraftingRecipeDto ToRecipeDto(
         CraftingRecipeDefinition recipe,
         int targetTier,
-        int masteryLevel,
+        CharacterRecipeMastery? mastery,
         IReadOnlyDictionary<string, int> ownedByItemId,
         IReadOnlySet<string> unlockedBlueprintIds,
         IReadOnlyDictionary<string, EquipmentBase> itemBases,
         int craftingLevel)
     {
+        var masteryProgress = CraftingMasteryProgression.GetProgressForExperience(
+            mastery?.Experience ?? 0);
+        var masteryLevel = masteryProgress.Level;
         var tier = Math.Clamp(targetTier, recipe.TierRange.Min, recipe.TierRange.Max);
         var costs = MapMaterialCosts(_requirementResolver.ResolveCosts(recipe, tier), ownedByItemId);
         itemBases.TryGetValue(recipe.OutputItemId, out var itemBase);
@@ -596,6 +600,8 @@ public class CraftingService : ICraftingService
             MinTier = recipe.TierRange.Min,
             MaxTier = recipe.TierRange.Max,
             CurrentMasteryLevel = masteryLevel,
+            CurrentMasteryExperience = masteryProgress.Experience,
+            MasteryExperienceRequiredForNextLevel = masteryProgress.ExperienceRequiredForNextLevel,
             MinimumProfessionLevel = recipe.MinimumProfessionLevel,
             Behavior = baseDesign.Behavior,
             InitialStatProfile = baseDesign.InitialStatProfile,

@@ -5,6 +5,7 @@ using Application.UseCases.Achievements.Dtos;
 using Application.UseCases.Essences.Dtos;
 using AutoMapper;
 using Domain.Components.Attributes;
+using Domain.Helpers.Constants;
 using Domain.Models.Achievements;
 using Domain.Models.Attributes;
 using Domain.Models.Entities.Characters;
@@ -16,6 +17,11 @@ public class CharacterOverviewDto : IMapFrom<Character>
     public Guid Id { get; set; }
     public string Name { get; set; } = string.Empty;
     public int Level { get; set; }
+    public long Experience { get; set; }
+    public long ExperienceUntilNextLevel { get; set; }
+    public int CraftingLevel { get; set; }
+    public int CraftingExperience { get; set; }
+    public int CraftingExperienceUntilNextLevel { get; set; }
     public OverallPowerRating? Power { get; set; }
     public List<EntityAttribute> BaseAttributes { get; set; } = [];
     public List<EntityAttribute> BaseCombatAttributes { get; set; } = [];
@@ -40,11 +46,23 @@ public sealed class CharacterOverviewConverter : ITypeConverter<Character, Chara
 
     public CharacterOverviewDto Convert(Character source, CharacterOverviewDto destination, ResolutionContext context)
     {
+        var craftingProfession = source.Professions
+            .Where(profession => (int)profession.ProfessionType is 1 or 2 or 3)
+            .OrderByDescending(profession => profession.Level)
+            .ThenByDescending(profession => profession.Experience)
+            .FirstOrDefault();
+        var craftingLevel = craftingProfession?.Level ?? 1;
+
         return new CharacterOverviewDto
         {
             Id = source.Id,
             Name = source.Name,
             Level = source.Level,
+            Experience = source.Experience,
+            ExperienceUntilNextLevel = source.ExperienceUntilNextLevel,
+            CraftingLevel = craftingLevel,
+            CraftingExperience = (int)MathF.Floor(craftingProfession?.Experience ?? 0),
+            CraftingExperienceUntilNextLevel = EntityLevelConstants.XP_REQUIRED(craftingLevel),
             BaseAttributes = source.BaseAttributes.ToList(),
             BaseCombatAttributes = source.BaseCombatAttributes.Select(kvp => new EntityAttribute
             {

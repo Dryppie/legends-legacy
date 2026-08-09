@@ -274,6 +274,80 @@ public sealed class QuestService(
             changed = true;
         }
 
+        changed |= await ApplyPreviousCraftsAsync(
+            characterId,
+            progresses,
+            now,
+            cancellationToken);
+
+        return changed;
+    }
+
+    private async Task<bool> ApplyPreviousCraftsAsync(
+        Guid characterId,
+        IReadOnlyCollection<CharacterQuestProgress> progresses,
+        DateTimeOffset now,
+        CancellationToken cancellationToken)
+    {
+        var candidates = progresses
+            .Where(progress => progress.Status == QuestStatus.Active)
+            .SelectMany(progress =>
+            {
+                var definition = definitions.Get(
+                    progress.QuestId,
+                    progress.DefinitionVersion);
+                var objectives = definition.Objectives.ToDictionary(
+                    objective => objective.Key,
+                    StringComparer.OrdinalIgnoreCase);
+
+                return progress.Objectives
+                    .Where(objectiveProgress =>
+                        !objectiveProgress.CompletedAt.HasValue &&
+                        objectives.TryGetValue(
+                            objectiveProgress.ObjectiveKey,
+                            out var objective) &&
+                        objective.Filters.IncludePreviousCrafts)
+                    .Select(objectiveProgress => (
+                        Progress: progress,
+                        ObjectiveProgress: objectiveProgress,
+                        Objective: objectives[objectiveProgress.ObjectiveKey]));
+            })
+            .ToList();
+        if (candidates.Count == 0)
+        {
+            return false;
+        }
+
+        var craftedRecipeIds = await repository.GetCraftedRecipeIdsAsync(
+            characterId,
+            cancellationToken);
+        var changed = false;
+
+        foreach (var candidate in candidates)
+        {
+            var amount = candidate.Objective.Filters.BaseRecipeIds
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .LongCount(craftedRecipeIds.Contains);
+            if (amount <= candidate.ObjectiveProgress.CurrentAmount)
+            {
+                continue;
+            }
+
+            candidate.ObjectiveProgress.CurrentAmount = Math.Min(
+                candidate.ObjectiveProgress.RequiredAmount,
+                amount);
+            candidate.ObjectiveProgress.UpdatedAt = now;
+            if (candidate.ObjectiveProgress.CurrentAmount >=
+                candidate.ObjectiveProgress.RequiredAmount)
+            {
+                candidate.ObjectiveProgress.CompletedAt = now;
+            }
+
+            candidate.Progress.UpdatedAt = now;
+            candidate.Progress.RowVersion++;
+            changed = true;
+        }
+
         return changed;
     }
 

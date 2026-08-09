@@ -5,12 +5,14 @@
     class="ll-panel pointer-events-none invisible absolute bottom-full left-1/2 z-50 mb-2 w-64 max-w-[calc(100vw-2rem)] -translate-x-1/2 translate-y-1 bg-texture p-3 text-left text-xs font-normal normal-case tracking-normal text-zinc-200 opacity-0 shadow-xl transition duration-150 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus:visible group-focus:translate-y-0 group-focus:opacity-100"
   >
     <span class="block text-[0.6rem] uppercase tracking-[0.18em] text-secondary"
-    >Where to find</span
+      >Where to find</span
     >
     <span class="mt-1 block text-sm text-primary">{{ material.name }}</span>
     <span class="mt-1 flex items-center justify-between gap-4 text-secondary">
       <span>Owned</span>
-      <span class="font-medium tabular-nums text-primary">{{ material.owned }}</span>
+      <span class="font-medium tabular-nums text-primary">{{
+        material.owned
+      }}</span>
     </span>
     <span
       *ngFor="let source of material.sources"
@@ -146,7 +148,7 @@
             canCraftAnyDesign(recipe) ? null : 'Requirements not met'
           "
           [attr.data-tour]="
-            isOnboardingWeaponRecipe(recipe) ? 'onboarding-weapon-recipe' : null
+            isOnboardingWeaponRecipe(recipe) ? 'tutorial-weapon-recipe' : null
           "
           (click)="selectRecipe(recipe, true)"
         >
@@ -165,7 +167,19 @@
               recipe.blueprints.length
             }}
             learned ·  -->
-            Mastery {{ recipe.currentMasteryLevel }}
+            Mastery {{ recipe.currentMasteryLevel }} ·
+            <ng-container
+              *ngIf="
+                recipe.masteryExperienceRequiredForNextLevel;
+                else maxMastery
+              "
+            >
+              {{ recipe.currentMasteryExperience }}/{{
+                recipe.masteryExperienceRequiredForNextLevel
+              }}
+              XP
+            </ng-container>
+            <ng-template #maxMastery>Max</ng-template>
           </div>
         </button>
       </div>
@@ -191,7 +205,19 @@
             </h2>
             <p class="mt-1 text-xs text-secondary">
               {{ recipe.blueprints.length }} reusable Blueprints · Mastery
-              {{ recipe.currentMasteryLevel }}
+              {{ recipe.currentMasteryLevel }} ·
+              <ng-container
+                *ngIf="
+                  recipe.masteryExperienceRequiredForNextLevel;
+                  else selectedMaxMastery
+                "
+              >
+                {{ recipe.currentMasteryExperience }}/{{
+                  recipe.masteryExperienceRequiredForNextLevel
+                }}
+                XP
+              </ng-container>
+              <ng-template #selectedMaxMastery>Max</ng-template>
             </p>
           </div>
           <div class="flex max-w-xs flex-wrap justify-end gap-2 text-xs">
@@ -265,7 +291,7 @@
           data-tour="crafting-base-recipe"
           class="w-full rounded-md border border-primary/35 bg-primary/[0.03] p-2 text-left transition-colors hover:bg-primary/[0.06] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary"
           [ngClass]="{ 'ring-1 ring-primary/60': !selectedBlueprint() }"
-          (click)="selectBaseRecipe()"
+          (click)="selectBaseRecipe(true)"
         >
           <div class="flex items-center justify-between gap-3 px-2 py-1">
             <div
@@ -401,6 +427,7 @@
     <ng-container *ngIf="selectedRecipe() as recipe">
       <ng-container *ngIf="selectedDesign() as design">
         <div
+          data-tour="crafting-item-preview-summary"
           class="border-b border-white/10 px-5 py-4 text-xs font-semibold uppercase tracking-wider text-secondary"
         >
           Crafted item preview
@@ -884,6 +911,7 @@
   >
     <button
       type="button"
+      data-tour="crafting-mobile-recipes"
       class="flex flex-col items-center justify-center gap-1 rounded-lg text-[0.6rem] tracking-wider transition-colors"
       [ngClass]="
         mobilePane() === 'recipes'
@@ -898,6 +926,7 @@
     </button>
     <button
       type="button"
+      data-tour="crafting-mobile-blueprints"
       class="flex flex-col items-center justify-center gap-1 rounded-lg text-[0.6rem] tracking-wider transition-colors"
       [ngClass]="
         mobilePane() === 'blueprints'

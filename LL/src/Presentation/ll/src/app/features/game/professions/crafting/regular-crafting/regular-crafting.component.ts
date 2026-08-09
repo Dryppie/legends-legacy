@@ -37,9 +37,7 @@ import {
   DropdownOption,
   DropdownSelection,
 } from '../../../../../shared/components/custom-components/dropdown/dropdown.component';
-import {
-  ONBOARDING_ONE_HANDED_WEAPON_ITEM_BASE_IDS,
-} from '../../../../../shared/models/quest';
+import { ONBOARDING_ONE_HANDED_WEAPON_ITEM_BASE_IDS } from '../../../../../shared/models/quest';
 import { QuestStateService } from '../../../../../core/services/api/quest/quest-state.service';
 import { FirstPartyTourService } from '../../../../../core/services/client-side/first-party-tour/first-party-tour.service';
 
@@ -237,9 +235,7 @@ export class RegularCraftingComponent {
           ...blueprint.tags,
         ].some((value) => value.toLowerCase().includes(query));
       })
-      .sort(
-        (left, right) => Number(left.isLocked) - Number(right.isLocked),
-      );
+      .sort((left, right) => Number(left.isLocked) - Number(right.isLocked));
   });
 
   readonly craftableDesignCount = computed(() => {
@@ -439,11 +435,15 @@ export class RegularCraftingComponent {
         if (tour?.pageId !== 'tutorial-crafting') return;
 
         switch (tour.step.id) {
+          case 'choose-tutorial-weapon':
+            this.mobilePane.set('recipes');
+            break;
           case 'explain-common-base':
           case 'explain-blueprints':
             this.mobilePane.set('blueprints');
             break;
           case 'explain-item-preview':
+          case 'craft-tutorial-weapon':
             this.mobilePane.set('preview');
             break;
         }
@@ -495,8 +495,14 @@ export class RegularCraftingComponent {
     this.selectFirstVisibleRecipeIfNeeded();
   }
 
-  selectBaseRecipe(): void {
+  selectBaseRecipe(openPreview = false): void {
     this.selectedBlueprintId.set(null);
+    if (
+      openPreview &&
+      this.isActiveCraftingTutorialStep('explain-common-base')
+    ) {
+      this.mobilePane.set('preview');
+    }
   }
 
   selectBlueprint(blueprint: CraftingBlueprint): void {
@@ -607,8 +613,7 @@ export class RegularCraftingComponent {
     if (this.characterProfession.level < recipe.minimumProfessionLevel)
       return false;
     return costs.every(
-      (cost) =>
-        this.getOwnedQuantity(cost.itemId) >= cost.required * quantity,
+      (cost) => this.getOwnedQuantity(cost.itemId) >= cost.required * quantity,
     );
   }
 
@@ -636,6 +641,11 @@ export class RegularCraftingComponent {
     return recipe.blueprints.some(
       (blueprint) => blueprint.isLearned || !blueprint.isLocked,
     );
+  }
+
+  private isActiveCraftingTutorialStep(stepId: string): boolean {
+    const tour = this.firstPartyTour.state();
+    return tour?.pageId === 'tutorial-crafting' && tour.step.id === stepId;
   }
 
   private matchesRecipeSubcategory(

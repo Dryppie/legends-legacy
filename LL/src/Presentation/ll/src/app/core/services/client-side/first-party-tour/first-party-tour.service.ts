@@ -232,6 +232,11 @@ export class FirstPartyTourService {
     }
 
     if (target) {
+      await this.waitForTargetLayoutToSettle(target, tour, stepIndex);
+      if (!this.isCurrentActivation(tour, stepIndex)) {
+        return;
+      }
+
       this.scrollElementIntoView(target);
       await this.waitForAnimationFrame();
       if (!this.isCurrentActivation(tour, stepIndex)) {
@@ -247,6 +252,47 @@ export class FirstPartyTourService {
       statePredicates: this.statePredicates,
     });
     this.isTransitioning = false;
+  }
+
+  private async waitForTargetLayoutToSettle(
+    target: HTMLElement,
+    tour: ActiveFirstPartyTour,
+    stepIndex: number,
+  ): Promise<void> {
+    const stableDurationMs = 100;
+    const maximumWaitMs = 650;
+    const movementTolerancePx = 0.5;
+    const startedAt = performance.now();
+    let stableSince = startedAt;
+    let previousRect = this.measure(target);
+
+    while (performance.now() - startedAt < maximumWaitMs) {
+      await this.waitForAnimationFrame();
+      if (!this.isCurrentActivation(tour, stepIndex) || !target.isConnected) {
+        return;
+      }
+
+      const currentRect = this.measure(target);
+      if (!previousRect || !currentRect) {
+        return;
+      }
+
+      const moved =
+        Math.abs(currentRect.top - previousRect.top) > movementTolerancePx ||
+        Math.abs(currentRect.left - previousRect.left) > movementTolerancePx ||
+        Math.abs(currentRect.width - previousRect.width) >
+          movementTolerancePx ||
+        Math.abs(currentRect.height - previousRect.height) >
+          movementTolerancePx;
+
+      if (moved) {
+        stableSince = performance.now();
+      } else if (performance.now() - stableSince >= stableDurationMs) {
+        return;
+      }
+
+      previousRect = currentRect;
+    }
   }
 
   private isCurrentActivation(
@@ -275,6 +321,10 @@ export class FirstPartyTourService {
 
     const tour = this.activeTour;
     if (!tour || destinationPath === tour.routePath) {
+      return false;
+    }
+
+    if (destinationPath.startsWith(tour.routePath + '/')) {
       return false;
     }
 

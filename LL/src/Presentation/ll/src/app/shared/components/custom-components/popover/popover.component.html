@@ -4,8 +4,8 @@
   [attr.aria-haspopup]="disabled ? null : true"
   [attr.aria-expanded]="overlayRef ? 'true' : 'false'"
   (click)="onOriginClick($event)"
-  (mouseenter)="onOriginEnter()"
-  (mouseleave)="onOriginLeave()"
+  (pointerenter)="onOriginEnter($event)"
+  (pointerleave)="onOriginLeave()"
 >
   <ng-content></ng-content>
 </div>

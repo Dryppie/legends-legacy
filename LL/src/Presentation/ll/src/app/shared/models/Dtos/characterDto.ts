@@ -21,6 +21,11 @@ export interface CharacterOverviewDto {
   id: string;
   name: string;
   level: number;
+  experience: number;
+  experienceUntilNextLevel: number;
+  craftingLevel: number;
+  craftingExperience: number;
+  craftingExperienceUntilNextLevel: number;
   power?: OverallPowerRating | null;
   baseAttributes: AttributeDto[];
   baseCombatAttributes: AttributeDto[];

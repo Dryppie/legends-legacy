@@ -23,7 +23,9 @@ interface PopoverCoordinates {
           class="first-party-tour-backdrop"
           [class.first-party-tour-backdrop-tutorial]="isTutorial(tour)"
           [ngStyle]="style"
-          [style.pointer-events]="tour.blocksInteraction || isTutorial(tour) ? 'auto' : 'none'"
+          [style.pointer-events]="
+            tour.blocksInteraction || isTutorial(tour) ? 'auto' : 'none'
+          "
         ></div>
 
         <div
@@ -340,13 +342,37 @@ export class FirstPartyTourOverlayComponent {
     tour: FirstPartyTourViewState,
   ): Record<string, string> {
     const margin = 12;
-    const maxHeight = Math.max(
-      180,
-      Math.min(280, window.innerHeight * 0.46),
-    );
+    const maxHeight = Math.max(180, Math.min(280, window.innerHeight * 0.46));
     const target = this.mobilePlacementTarget(tour) ?? tour.targetRect;
-    const placeAtTop =
-      !!target && target.top + target.height / 2 > window.innerHeight / 2;
+
+    if (target) {
+      const gap = 12;
+      const spaceAbove = Math.max(0, target.top - gap - margin);
+      const spaceBelow = Math.max(
+        0,
+        window.innerHeight - target.bottom - gap - margin,
+      );
+      const placeAbove = spaceAbove >= maxHeight || spaceAbove > spaceBelow;
+      const availableSpace = placeAbove ? spaceAbove : spaceBelow;
+
+      return {
+        left: margin + 'px',
+        right: margin + 'px',
+        width: 'auto',
+        ...(placeAbove
+          ? {
+              top: 'auto',
+              bottom: window.innerHeight - target.top + gap + 'px',
+            }
+          : {
+              top: target.bottom + gap + 'px',
+              bottom: 'auto',
+            }),
+        maxHeight: Math.max(80, Math.min(maxHeight, availableSpace)) + 'px',
+      };
+    }
+
+    const placeAtTop = false;
 
     return {
       left: `${margin}px`,
@@ -365,26 +391,29 @@ export class FirstPartyTourOverlayComponent {
   private mobilePlacementTarget(
     tour: FirstPartyTourViewState,
   ): FirstPartyTourRect | null {
-    const selector =
-      tour.step.advanceOn?.selector ?? tour.step.actionSelector;
+    const selector = tour.step.advanceOn?.selector ?? tour.step.actionSelector;
     if (!selector) return null;
 
     const actionable = Array.from(
       document.querySelectorAll<HTMLElement>(selector),
-    ).find((element) => {
+    ).filter((element) => {
       const rect = element.getBoundingClientRect();
       return rect.width > 0 && rect.height > 0;
     });
-    if (!actionable) return null;
+    if (!actionable.length) return null;
 
-    const rect = actionable.getBoundingClientRect();
+    const rects = actionable.map((element) => element.getBoundingClientRect());
+    const top = Math.min(...rects.map((rect) => rect.top));
+    const right = Math.max(...rects.map((rect) => rect.right));
+    const bottom = Math.max(...rects.map((rect) => rect.bottom));
+    const left = Math.min(...rects.map((rect) => rect.left));
     return {
-      top: rect.top,
-      right: rect.right,
-      bottom: rect.bottom,
-      left: rect.left,
-      width: rect.width,
-      height: rect.height,
+      top,
+      right,
+      bottom,
+      left,
+      width: right - left,
+      height: bottom - top,
     };
   }
 

@@ -1,15 +1,11 @@
 [
   {
+    "kind": "click",
     "element": "[data-tour=essence-archive-list]",
+    "actionSelector": "[data-tour=essence-archive-list]",
     "title": "1. Soul Archive",
-    "description": "Absorbed Essences appear in your Soul Archive.",
+    "description": "Absorbed Essences appear in your Soul Archive. Select your archived Essence to view it and prepare it for your active loadout.",
     "position": "right"
-  },
-  {
-    "element": "[data-tour=essence-loadouts]",
-    "title": "2. Active loadout",
-    "description": "Essences in your active loadout provide their abilities during combat. Changes remain a draft until you save them.",
-    "position": "left"
   },
   {
     "kind": "click",
@@ -17,8 +13,8 @@
     "actionSelector": "[data-tour=tutorial-equip-essence]",
     "waitForEnabled": true,
     "targetTimeoutMs": 5000,
-    "title": "3. Equip your Essence",
-    "description": "Equip your first Essence.",
+    "title": "2. Equip your Essence",
+    "description": "Equip your first Essence. It will provide its abilities during combat after you save the loadout.",
     "position": "left"
   },
   {
@@ -27,7 +23,7 @@
     "actionSelector": "[data-tour=essence-loadout-save]",
     "waitForEnabled": true,
     "targetTimeoutMs": 5000,
-    "title": "4. Save your loadout",
+    "title": "3. Save your loadout",
     "description": "Your draft has unsaved changes. Save the loadout to attune the Essence and make its abilities available in combat.",
     "position": "left"
   }
