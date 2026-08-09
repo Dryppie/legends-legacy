@@ -15,7 +15,9 @@ import { filter, Subject, takeUntil } from 'rxjs';
 import { SidebarItemComponent } from './sidebar-item/sidebar-item.component';
 import { SidebarService } from '../../../core/services/client-side/sidebar/sidebar.service';
 import { CurrentActionComponent } from '../../../shared/components/current-action/current-action.component';
+import { CurrentDungeonComponent } from '../../../shared/components/current-dungeon/current-dungeon.component';
 import { CharacterActionsStateService } from '../../../core/services/api/character-actions/character-actions.state.service';
+import { DungeonStateService } from '../../../core/services/api/dungeon/dungeon-state.service';
 import { CharacterActionType } from '../../../shared/models/enums/characterActionType';
 import { CharacterStateService } from '../../../core/services/api/character/character-state.service';
 import { SidebarSection, Tab } from '../../../shared/models/sidebar-item';
@@ -41,6 +43,7 @@ import { TUTORIAL_STEP_EQUIP_ESSENCE } from '../../../shared/models/tutorial';
     SidebarItemComponent,
     RouterLink,
     CurrentActionComponent,
+    CurrentDungeonComponent,
   ],
   templateUrl: './sidebar.component.html',
 })
@@ -66,6 +69,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
   });
   readonly compactActionProgress = signal(0);
   readonly compactActionTransitionDuration = signal(0);
+  readonly hasActiveDungeon: DungeonStateService['hasActiveDungeon'];
   constructor(
     private readonly sidebarService: SidebarService,
     private readonly state: CharacterActionsStateService,
@@ -79,7 +83,9 @@ export class SidebarComponent implements OnInit, OnDestroy {
     private readonly timeSync: TimeSyncService,
     private readonly tutorialState: TutorialStateService,
     private readonly tutorialPresenter: TutorialPresenterService,
+    dungeonState: DungeonStateService,
   ) {
+    this.hasActiveDungeon = dungeonState.hasActiveDungeon;
     this.sidebarLayout = this.sidebarLayoutPreference.layout;
 
     effect(() => {
