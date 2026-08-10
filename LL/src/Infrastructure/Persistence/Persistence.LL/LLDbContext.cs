@@ -30,6 +30,7 @@ using Domain.Models.Professions;
 using Domain.Models.Professions.Crafting;
 using Domain.Models.Prophecies;
 using Domain.Models.Quests;
+using Domain.Models.Quests.Events;
 using Domain.Models.Regions;
 using Domain.Models.Regions.Areas;
 using Domain.Models.Snapshots;
@@ -178,6 +179,12 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : DbContext(opti
     public DbSet<CharacterQuestProgress> CharacterQuestProgresses => Set<CharacterQuestProgress>();
     public DbSet<CharacterQuestObjectiveProgress> CharacterQuestObjectiveProgresses => Set<CharacterQuestObjectiveProgress>();
     public DbSet<QuestEventLedger> QuestEventLedgers => Set<QuestEventLedger>();
+    public DbSet<EventQuestInstance> EventQuestInstances => Set<EventQuestInstance>();
+    public DbSet<EventQuestObjectiveProgress> EventQuestObjectiveProgresses => Set<EventQuestObjectiveProgress>();
+    public DbSet<EventQuestCharacterContribution> EventQuestCharacterContributions => Set<EventQuestCharacterContribution>();
+    public DbSet<EventQuestEventLedger> EventQuestEventLedgers => Set<EventQuestEventLedger>();
+    public DbSet<EventQuestRewardClaim> EventQuestRewardClaims => Set<EventQuestRewardClaim>();
+    public DbSet<EventQuestMilestoneClaim> EventQuestMilestoneClaims => Set<EventQuestMilestoneClaim>();
     public DbSet<Creature> Creatures => Set<Creature>();
 
     //public DbSet<Echo> Echoes => Set<Echo>();

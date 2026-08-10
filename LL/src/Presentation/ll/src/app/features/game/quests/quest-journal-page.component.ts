@@ -1,11 +1,18 @@
 import { NgClass, NgFor, NgIf } from '@angular/common';
-import { Component, computed, OnInit, signal } from '@angular/core';
+import { Component, computed, OnDestroy, OnInit, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { QuestStateService } from '../../../core/services/api/quest/quest-state.service';
+import { EventQuestStateService } from '../../../core/services/api/quest/event-quest-state.service';
 import { EssenceItemViewService } from '../../../core/services/api/essences/essence-item-view.service';
 import { BaseItemComponent } from '../../../shared/components/base-item/base-item.component';
 import { Essence } from '../../../shared/models/essence';
 import { EssenceItem } from '../../../shared/models/item';
+import {
+  EventQuestObjectiveState,
+  EventQuestPersonalMilestoneState,
+  EventQuestState,
+  EventQuestStatus,
+} from '../../../shared/models/event-quest';
 import {
   QuestChoiceOption,
   QuestObjectiveState,
@@ -28,7 +35,7 @@ type QuestSortMode = 'Order' | 'Progress';
   imports: [NgClass, NgFor, NgIf, BaseItemComponent],
   templateUrl: './quest-journal-page.component.html',
 })
-export class QuestJournalPageComponent implements OnInit {
+export class QuestJournalPageComponent implements OnInit, OnDestroy {
   readonly tabs: QuestJournalTab[] = [
     QuestStatus.Active,
     QuestStatus.Completed,
@@ -38,6 +45,10 @@ export class QuestJournalPageComponent implements OnInit {
   readonly selectedEntryKey = signal<string | null>(null);
   readonly selectedPartQuestId = signal<string | null>(null);
   readonly pendingChoiceKey = signal<string | null>(null);
+  readonly selectedEventQuestId = signal<string | null>(null);
+  readonly clock = signal(Date.now());
+  readonly realmProgressMarkers = [25, 50, 75, 100];
+  private countdownTimer: number | null = null;
   readonly journalEntries = computed(() =>
     buildQuestJournalEntries(this.questState.journal().quests),
   );
@@ -51,6 +62,22 @@ export class QuestJournalPageComponent implements OnInit {
           : a.sortOrder - b.sortOrder,
       ),
   );
+  readonly visibleEvents = computed(() =>
+    this.eventQuestState
+      .journal()
+      .events.filter((event) => event.status !== EventQuestStatus.Expired)
+      .sort((a, b) => a.sortOrder - b.sortOrder),
+  );
+  readonly selectedEvent = computed(() => {
+    const events = this.visibleEvents();
+    return (
+      events.find(
+        (event) => event.eventQuestId === this.selectedEventQuestId(),
+      ) ??
+      events[0] ??
+      null
+    );
+  });
   readonly selectedEntry = computed(() => {
     const entries = this.visibleEntries();
     return (
@@ -60,6 +87,12 @@ export class QuestJournalPageComponent implements OnInit {
       null
     );
   });
+  readonly showingEventDetail = computed(
+    () =>
+      this.activeTab() === QuestStatus.Active &&
+      this.visibleEvents().length > 0 &&
+      this.selectedEntryKey() === null,
+  );
   readonly selectedQuest = computed(() => {
     const entry = this.selectedEntry();
     if (!entry) return null;
@@ -78,15 +111,28 @@ export class QuestJournalPageComponent implements OnInit {
   );
 
   readonly QuestStatus = QuestStatus;
+  readonly EventQuestStatus = EventQuestStatus;
 
   constructor(
     readonly questState: QuestStateService,
+    readonly eventQuestState: EventQuestStateService,
     private readonly router: Router,
     private readonly essenceItemView: EssenceItemViewService,
   ) {}
 
   ngOnInit(): void {
     this.questState.load();
+    this.eventQuestState.load();
+    this.countdownTimer = window.setInterval(
+      () => this.clock.set(Date.now()),
+      60_000,
+    );
+  }
+
+  ngOnDestroy(): void {
+    if (this.countdownTimer !== null) {
+      window.clearInterval(this.countdownTimer);
+    }
   }
 
   setTab(tab: QuestJournalTab): void {
@@ -94,9 +140,11 @@ export class QuestJournalPageComponent implements OnInit {
     this.selectedEntryKey.set(null);
     this.selectedPartQuestId.set(null);
     this.pendingChoiceKey.set(null);
+    this.selectedEventQuestId.set(null);
   }
 
   selectEntry(entry: QuestJournalEntry): void {
+    this.selectedEventQuestId.set(null);
     this.selectedEntryKey.set(entry.key);
     this.selectedPartQuestId.set(preferredQuestForEntry(entry).questId);
     this.pendingChoiceKey.set(null);
@@ -112,6 +160,157 @@ export class QuestJournalPageComponent implements OnInit {
 
   tabCount(tab: QuestJournalTab): number {
     return this.journalEntries().filter((entry) => entry.status === tab).length;
+  }
+
+  selectEvent(event: EventQuestState): void {
+    this.selectedEntryKey.set(null);
+    this.selectedPartQuestId.set(null);
+    this.pendingChoiceKey.set(null);
+    this.selectedEventQuestId.set(event.eventQuestId);
+  }
+
+  isSelectedEvent(event: EventQuestState): boolean {
+    return (
+      this.showingEventDetail() &&
+      this.selectedEvent()?.eventQuestId === event.eventQuestId
+    );
+  }
+
+  eventObjectiveProgress(objective: EventQuestObjectiveState): number {
+    if (objective.requiredAmount <= 0) return 0;
+    return Math.min(
+      100,
+      Math.round((objective.currentAmount / objective.requiredAmount) * 100),
+    );
+  }
+
+  eventProgress(event: EventQuestState): number {
+    const required = this.eventRequiredAmount(event);
+    if (required <= 0) return 0;
+    return Math.min(
+      100,
+      Math.round((this.eventCurrentAmount(event) / required) * 100),
+    );
+  }
+
+  eventCurrentAmount(event: EventQuestState): number {
+    return event.objectives.reduce(
+      (total, objective) => total + objective.currentAmount,
+      0,
+    );
+  }
+
+  eventRequiredAmount(event: EventQuestState): number {
+    return event.objectives.reduce(
+      (total, objective) => total + objective.requiredAmount,
+      0,
+    );
+  }
+
+  formatAmount(amount: number): string {
+    return new Intl.NumberFormat().format(amount);
+  }
+
+  eventTimeLabel(event: EventQuestState): string {
+    const now = this.clock();
+    if (now < new Date(event.startsAtUtc).getTime()) return 'Starts in';
+    if (now <= new Date(event.endsAtUtc).getTime()) return 'Ends in';
+    return 'Claims close in';
+  }
+
+  eventTimeRemaining(event: EventQuestState): string {
+    const now = this.clock();
+    const start = new Date(event.startsAtUtc).getTime();
+    const end = new Date(event.endsAtUtc).getTime();
+    const claimEnd = new Date(event.claimEndsAtUtc).getTime();
+    const target = now < start ? start : now <= end ? end : claimEnd;
+    const remainingMinutes = Math.max(0, Math.ceil((target - now) / 60_000));
+    const days = Math.floor(remainingMinutes / 1_440);
+    const hours = Math.floor((remainingMinutes % 1_440) / 60);
+    const minutes = remainingMinutes % 60;
+    return `${days}d ${hours.toString().padStart(2, '0')}h ${minutes
+      .toString()
+      .padStart(2, '0')}m`;
+  }
+
+  claimedMilestoneCount(event: EventQuestState): number {
+    return event.personalMilestones.filter((milestone) => milestone.isClaimed)
+      .length;
+  }
+
+  isHighlightedMilestone(
+    event: EventQuestState,
+    milestone: EventQuestPersonalMilestoneState,
+  ): boolean {
+    return (
+      event.personalMilestones.find((candidate) => !candidate.isClaimed)
+        ?.key === milestone.key
+    );
+  }
+
+  milestoneTitle(milestone: EventQuestPersonalMilestoneState): string {
+    return milestone.key
+      .split(/[._-]/)
+      .filter(Boolean)
+      .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+      .join(' ');
+  }
+
+  milestoneIndex(index: number): string {
+    return ['I', 'II', 'III', 'IV', 'V', 'VI'][index] ?? `${index + 1}`;
+  }
+
+  milestoneRemaining(
+    event: EventQuestState,
+    milestone: EventQuestPersonalMilestoneState,
+  ): number {
+    return Math.max(0, milestone.requiredContribution - event.myContribution);
+  }
+
+  canClaimEvent(event: EventQuestState): boolean {
+    return (
+      event.status === EventQuestStatus.Completed &&
+      event.isEligible &&
+      !event.hasClaimed &&
+      new Date(event.claimEndsAtUtc).getTime() >= Date.now()
+    );
+  }
+
+  claimableMilestones(
+    event: EventQuestState,
+  ): EventQuestPersonalMilestoneState[] {
+    return event.personalMilestones.filter(
+      (milestone) => milestone.isUnlocked && !milestone.isClaimed,
+    );
+  }
+
+  canClaimEventMilestones(event: EventQuestState): boolean {
+    return (
+      this.claimableMilestones(event).length > 0 &&
+      new Date(event.claimEndsAtUtc).getTime() >= Date.now()
+    );
+  }
+
+  canClaimEventMilestone(
+    event: EventQuestState,
+    milestone: EventQuestPersonalMilestoneState,
+  ): boolean {
+    return (
+      milestone.isUnlocked &&
+      !milestone.isClaimed &&
+      new Date(event.claimEndsAtUtc).getTime() >= Date.now()
+    );
+  }
+
+  milestoneProgress(
+    event: EventQuestState,
+    milestone: EventQuestPersonalMilestoneState,
+  ): number {
+    if (milestone.requiredContribution <= 0) return 100;
+    return Math.min(
+      100,
+      Math.round((event.myContribution / milestone.requiredContribution) * 100),
+    );
   }
 
   currentObjective(quest: QuestState): QuestObjectiveState | null {

@@ -4,9 +4,15 @@
   "title": "The Restless Dead",
   "summary": "Break the dead's hold over the paths through Moonlit Graves.",
   "category": "Shenic",
-  "chain": { "id": "chain.shenic", "title": "Shenic Campaign", "description": "New Shenic areas unlock as you reach their required character levels and complete each campaign quest.", "step": 4, "totalSteps": 10 },
+  "chain": {
+    "id": "chain.shenic",
+    "title": "Shenic Campaign",
+    "description": "New Shenic areas unlock as you reach their required character levels and complete each campaign quest.",
+    "step": 4,
+    "totalSteps": 10
+  },
   "sortOrder": 130,
-  "objectiveMode": "Sequential",
+  "objectiveMode": "All",
   "availability": {
     "minimumLevel": 15,
     "completedQuestIds": ["quest.shenic.crystal_currents"]
@@ -25,10 +31,26 @@
         "actionLabel": "Head to Moonlit Graves",
         "destinationRoute": "/game/world/shenic?area=region_01_area_04"
       }
+    },
+    {
+      "key": "reach_level_20",
+      "description": "Reach character level 20 to unlock Twilight Clearing.",
+      "type": "CharacterLevelReached",
+      "requiredAmount": 20,
+      "filters": {},
+      "presentation": {
+        "actionLabel": "View Shenic",
+        "destinationRoute": "/game/world/shenic"
+      }
     }
   ],
   "rewards": [
     { "key": "grave_ore", "type": "Item", "itemBaseId": "ore", "quantity": 20 },
-    { "key": "grave_hide", "type": "Item", "itemBaseId": "rawhide", "quantity": 20 }
+    {
+      "key": "grave_hide",
+      "type": "Item",
+      "itemBaseId": "rawhide",
+      "quantity": 20
+    }
   ]
 }

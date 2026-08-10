@@ -26,6 +26,7 @@ using Domain.Models.Professions;
 using Domain.Models.Professions.Crafting;
 using Domain.Models.Prophecies;
 using Domain.Models.Quests;
+using Domain.Models.Quests.Events;
 using Domain.Models.Regions;
 using Domain.Models.Regions.Areas;
 using Domain.Models.Snapshots;
@@ -68,6 +69,12 @@ public interface IDbContext
     DbSet<CharacterQuestProgress> CharacterQuestProgresses { get; }
     DbSet<CharacterQuestObjectiveProgress> CharacterQuestObjectiveProgresses { get; }
     DbSet<QuestEventLedger> QuestEventLedgers { get; }
+    DbSet<EventQuestInstance> EventQuestInstances { get; }
+    DbSet<EventQuestObjectiveProgress> EventQuestObjectiveProgresses { get; }
+    DbSet<EventQuestCharacterContribution> EventQuestCharacterContributions { get; }
+    DbSet<EventQuestEventLedger> EventQuestEventLedgers { get; }
+    DbSet<EventQuestRewardClaim> EventQuestRewardClaims { get; }
+    DbSet<EventQuestMilestoneClaim> EventQuestMilestoneClaims { get; }
     DbSet<Creature> Creatures { get; }
     //DbSet<Echo> Echoes { get; }
     DbSet<Entity> Entities { get; }

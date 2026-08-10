@@ -92,12 +92,12 @@ export class InventoryService {
     );
   }
 
-  openCatalystSelectionCrate(
-    crateItemInstanceId: string,
+  openSelectionContainer(
+    containerItemInstanceId: string,
     optionId: string,
   ): Observable<OpenSelectionCrateResponse> {
     return this.apiService.post(
-      `inventory/items/${crateItemInstanceId}/open-catalyst-selection-crate`,
+      `inventory/items/${containerItemInstanceId}/open-selection-container`,
       { optionId },
     );
   }

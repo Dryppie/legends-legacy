@@ -83,7 +83,7 @@ export class InventoryItemModalComponent implements OnInit {
     this.isOpeningCrate.set(true);
     this.error.set(null);
     this.inventoryService
-      .openCatalystSelectionCrate(this.inventoryItem.itemInstance.id, optionId)
+      .openSelectionContainer(this.inventoryItem.itemInstance.id, optionId)
       .subscribe({
         next: (response) => {
           this.inventoryState.decrementItem(response.consumedItemInstanceId, 1);

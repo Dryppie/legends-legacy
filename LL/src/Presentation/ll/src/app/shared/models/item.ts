@@ -51,6 +51,7 @@ export interface ItemBase {
 }
 
 export interface SelectionCrateMetadata {
+  selectionLabel: string;
   options: SelectionCrateOption[];
 }
 

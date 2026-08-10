@@ -24,6 +24,7 @@ using Domain.Models.Professions;
 using Domain.Models.Professions.Crafting;
 using Domain.Models.Prophecies;
 using Domain.Models.Quests;
+using Domain.Models.Quests.Events;
 using Domain.Models.Regions;
 using Domain.Models.Regions.Areas;
 using Domain.Models.Snapshots;
@@ -122,6 +123,7 @@ public static class DependencyInjection
         services.AddScoped<ICraftingRepository, CraftingRepository>();
         services.AddScoped<IProphecyRepository, ProphecyRepository>();
         services.AddScoped<IQuestRepository, QuestRepository>();
+        services.AddScoped<IEventQuestRepository, EventQuestRepository>();
 
         services.AddScoped<IPlayerRepository, PlayerRepository>();
 

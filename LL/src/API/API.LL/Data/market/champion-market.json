@@ -28,8 +28,8 @@
     },
     {
       "id": "cache.catalyst_selection",
-      "name": "Catalyst Selection Crate",
-      "description": "Open this crate from your inventory to choose six catalysts for a specialized Blueprint recipe.",
+      "name": "Catalyst Selection Cache",
+      "description": "Open this cache from your inventory to choose six catalysts for a specialized Blueprint recipe.",
       "category": "Weekly Cache",
       "gloryCost": 220,
       "weeklyPurchaseLimit": 1,
@@ -39,7 +39,7 @@
       "isEnabled": true,
       "sortOrder": 30,
       "rewardItemId": "item.catalyst_selection_crate",
-      "rewardItemName": "Catalyst Selection Crate",
+      "rewardItemName": "Catalyst Selection Cache",
       "rewardItemQuantity": 1
     },
     {

@@ -4,9 +4,15 @@
   "title": "Between Day and Night",
   "summary": "Survive the creatures gathering beneath the clearing's permanent dusk.",
   "category": "Shenic",
-  "chain": { "id": "chain.shenic", "title": "Shenic Campaign", "description": "New Shenic areas unlock as you reach their required character levels and complete each campaign quest.", "step": 5, "totalSteps": 10 },
+  "chain": {
+    "id": "chain.shenic",
+    "title": "Shenic Campaign",
+    "description": "New Shenic areas unlock as you reach their required character levels and complete each campaign quest.",
+    "step": 5,
+    "totalSteps": 10
+  },
   "sortOrder": 140,
-  "objectiveMode": "Sequential",
+  "objectiveMode": "All",
   "availability": {
     "minimumLevel": 20,
     "completedQuestIds": ["quest.shenic.restless_dead"]
@@ -25,10 +31,26 @@
         "actionLabel": "Head to Twilight Clearing",
         "destinationRoute": "/game/world/shenic?area=region_01_area_06"
       }
+    },
+    {
+      "key": "reach_level_25",
+      "description": "Reach character level 25 to unlock Old Forest.",
+      "type": "CharacterLevelReached",
+      "requiredAmount": 25,
+      "filters": {},
+      "presentation": {
+        "actionLabel": "View Shenic",
+        "destinationRoute": "/game/world/shenic"
+      }
     }
   ],
   "rewards": [
     { "key": "duskwood", "type": "Item", "itemBaseId": "wood", "quantity": 30 },
-    { "key": "twilight_dust", "type": "Item", "itemBaseId": "soul_dust", "quantity": 15 }
+    {
+      "key": "twilight_dust",
+      "type": "Item",
+      "itemBaseId": "soul_dust",
+      "quantity": 15
+    }
   ]
 }

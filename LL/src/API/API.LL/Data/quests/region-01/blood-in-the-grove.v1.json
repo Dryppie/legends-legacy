@@ -4,9 +4,15 @@
   "title": "Blood in the Grove",
   "summary": "Thin the creatures feeding Blood Grove's unnatural growth.",
   "category": "Shenic",
-  "chain": { "id": "chain.shenic", "title": "Shenic Campaign", "description": "New Shenic areas unlock as you reach their required character levels and complete each campaign quest.", "step": 2, "totalSteps": 10 },
+  "chain": {
+    "id": "chain.shenic",
+    "title": "Shenic Campaign",
+    "description": "New Shenic areas unlock as you reach their required character levels and complete each campaign quest.",
+    "step": 2,
+    "totalSteps": 10
+  },
   "sortOrder": 110,
-  "objectiveMode": "Sequential",
+  "objectiveMode": "All",
   "availability": {
     "minimumLevel": 5,
     "completedQuestIds": ["quest.shenic.trial_of_lumo"]
@@ -25,10 +31,31 @@
         "actionLabel": "Head to Blood Grove",
         "destinationRoute": "/game/world/shenic?area=region_01_area_02"
       }
+    },
+    {
+      "key": "reach_level_10",
+      "description": "Reach character level 10 to unlock Crystal Creek.",
+      "type": "CharacterLevelReached",
+      "requiredAmount": 10,
+      "filters": {},
+      "presentation": {
+        "actionLabel": "View Shenic",
+        "destinationRoute": "/game/world/shenic"
+      }
     }
   ],
   "rewards": [
-    { "key": "bloodwood", "type": "Item", "itemBaseId": "wood", "quantity": 15 },
-    { "key": "grove_hide", "type": "Item", "itemBaseId": "rawhide", "quantity": 20 }
+    {
+      "key": "bloodwood",
+      "type": "Item",
+      "itemBaseId": "wood",
+      "quantity": 15
+    },
+    {
+      "key": "grove_hide",
+      "type": "Item",
+      "itemBaseId": "rawhide",
+      "quantity": 20
+    }
   ]
 }

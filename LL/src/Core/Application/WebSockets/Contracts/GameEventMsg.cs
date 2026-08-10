@@ -26,3 +26,4 @@ public record AchievementUnlockedMsg(
     bool IsGlobal) : GameEventMsg;
 
 public record QuestJournalChangedMsg(QuestJournal Journal) : GameEventMsg;
+public record EventQuestChangedMsg(string EventQuestId, DateTimeOffset UpdatedAt) : GameEventMsg;

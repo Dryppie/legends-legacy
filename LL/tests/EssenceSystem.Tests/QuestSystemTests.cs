@@ -51,6 +51,30 @@ public sealed class QuestSystemTests
         Assert.Equal(1, trialChain.Step);
         Assert.Equal(10, trialChain.TotalSteps);
         Assert.Equal(10, provider.Get(QuestConstants.LastLightInDuskmire).Chain?.Step);
+        var shenicLevelRequirements = new[]
+        {
+            (QuestConstants.TrialOfLumo, 5, "Blood Grove"),
+            (QuestConstants.BloodInTheGrove, 10, "Crystal Creek"),
+            (QuestConstants.CrystalCurrents, 15, "Moonlit Graves"),
+            (QuestConstants.RestlessDead, 20, "Twilight Clearing"),
+            (QuestConstants.BetweenDayAndNight, 25, "Old Forest"),
+            (QuestConstants.RootsRemember, 30, "Thornroot Hollow"),
+            (QuestConstants.HeartOfTheHollow, 35, "Embercap Burrows"),
+            (QuestConstants.AshBeneathTheEarth, 40, "Moonveil Marsh"),
+            (QuestConstants.VeilOverTheMarsh, 45, "Duskmire Hollow")
+        };
+        foreach (var (questId, level, nextArea) in shenicLevelRequirements)
+        {
+            var quest = provider.Get(questId);
+            Assert.Equal("All", quest.ObjectiveMode);
+            var levelObjective = Assert.Single(quest.Objectives, objective =>
+                objective.Type == "CharacterLevelReached");
+            Assert.Equal(level, levelObjective.RequiredAmount);
+            Assert.Contains(nextArea, levelObjective.Description);
+        }
+        Assert.DoesNotContain(
+            provider.Get(QuestConstants.LastLightInDuskmire).Objectives,
+            objective => objective.Type == "CharacterLevelReached");
         Assert.Equal("All", provider.Get(QuestConstants.ArmsOfChoice).ObjectiveMode);
         var armorAndAdornment = provider.Get(QuestConstants.ArmorAndAdornment);
         Assert.Equal("Crafting", armorAndAdornment.Category);
@@ -189,6 +213,83 @@ public sealed class QuestSystemTests
         Assert.All(choice.Options, option => Assert.NotNull(option.RewardItemBase));
         Assert.Empty(quest.Rewards);
         Assert.Equal(1, repository.SaveCalls);
+    }
+
+    [Fact]
+    public async Task Shenic_level_objectives_start_from_the_current_character_level()
+    {
+        var characterId = Guid.NewGuid();
+        var definitions = CreateDefinitions();
+        var repository = new RecordingQuestRepository(level: 20);
+        repository.Progresses.Add(CreateCompletedProgress(
+            characterId,
+            definitions.Get(QuestConstants.CrystalCurrents)));
+        var service = new QuestService(
+            repository,
+            definitions,
+            new RecordingItemBaseRepository(),
+            inventoryItemFactory: null!,
+            lootRewardWriter: null!,
+            TimeProvider.System);
+
+        var journal = await service.GetJournalAsync(characterId, CancellationToken.None);
+
+        var restlessDead = journal.Quests.Single(quest =>
+            quest.QuestId == QuestConstants.RestlessDead);
+        var levelObjective = restlessDead.Objectives.Single(objective =>
+            objective.Type == "CharacterLevelReached");
+        Assert.Equal(20, levelObjective.CurrentAmount);
+        Assert.Equal(20, levelObjective.RequiredAmount);
+        Assert.True(levelObjective.IsCompleted);
+    }
+
+    [Fact]
+    public async Task Shenic_level_objectives_are_backfilled_for_existing_completed_progress()
+    {
+        var characterId = Guid.NewGuid();
+        var definitions = CreateDefinitions();
+        var definition = definitions.Get(QuestConstants.RestlessDead);
+        var combatObjective = definition.Objectives.Single(objective =>
+            objective.Type == "CombatEncounterCompleted");
+        var repository = new RecordingQuestRepository(level: 20);
+        repository.Progresses.Add(new CharacterQuestProgress
+        {
+            CharacterId = characterId,
+            QuestId = definition.Id,
+            DefinitionVersion = definition.Version,
+            Status = QuestStatus.Completed,
+            CompletedAt = DateTimeOffset.UtcNow,
+            Objectives =
+            [
+                new CharacterQuestObjectiveProgress
+                {
+                    CharacterId = characterId,
+                    QuestId = definition.Id,
+                    ObjectiveKey = combatObjective.Key,
+                    CurrentAmount = combatObjective.RequiredAmount,
+                    RequiredAmount = combatObjective.RequiredAmount,
+                    CompletedAt = DateTimeOffset.UtcNow
+                }
+            ]
+        });
+        var service = new QuestService(
+            repository,
+            definitions,
+            new RecordingItemBaseRepository(),
+            inventoryItemFactory: null!,
+            lootRewardWriter: null!,
+            TimeProvider.System);
+
+        var journal = await service.GetJournalAsync(characterId, CancellationToken.None);
+
+        var restlessDead = journal.Quests.Single(quest =>
+            quest.QuestId == QuestConstants.RestlessDead);
+        var levelObjective = restlessDead.Objectives.Single(objective =>
+            objective.Type == "CharacterLevelReached");
+        Assert.Equal(20, levelObjective.CurrentAmount);
+        Assert.True(levelObjective.IsCompleted);
+        Assert.Equal(2, repository.Progresses.Single(progress =>
+            progress.QuestId == QuestConstants.RestlessDead).Objectives.Count);
     }
 
     [Fact]

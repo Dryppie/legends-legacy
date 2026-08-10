@@ -227,6 +227,7 @@ public sealed class QuestService(
         var changed = UpgradeUnstartedChoiceDefinitions(progresses, now);
         var level = await repository.GetCharacterLevelAsync(characterId, cancellationToken)
             ?? throw new InvalidOperationException("Character was not found.");
+        changed |= ApplyCharacterLevelProgress(progresses, level, now);
 
         foreach (var latestDefinition in definitions.GetAll())
         {
@@ -260,14 +261,21 @@ public sealed class QuestService(
                 CreatedAt = now,
                 UpdatedAt = now,
                 Objectives = definition.Objectives.Select(objective =>
-                    new CharacterQuestObjectiveProgress
+                {
+                    var currentAmount = objective.Type == "CharacterLevelReached"
+                        ? Math.Min(objective.RequiredAmount, level)
+                        : 0;
+                    return new CharacterQuestObjectiveProgress
                     {
                         CharacterId = characterId,
                         QuestId = definition.Id,
                         ObjectiveKey = objective.Key,
+                        CurrentAmount = currentAmount,
                         RequiredAmount = objective.RequiredAmount,
+                        CompletedAt = currentAmount >= objective.RequiredAmount ? now : null,
                         UpdatedAt = now
-                    }).ToList()
+                    };
+                }).ToList()
             };
             progresses.Add(progress);
             repository.AddProgress(progress);
@@ -279,6 +287,72 @@ public sealed class QuestService(
             progresses,
             now,
             cancellationToken);
+
+        return changed;
+    }
+
+    private bool ApplyCharacterLevelProgress(
+        IReadOnlyCollection<CharacterQuestProgress> progresses,
+        int characterLevel,
+        DateTimeOffset now)
+    {
+        var changed = false;
+        foreach (var progress in progresses)
+        {
+            var definition = definitions.Get(progress.QuestId, progress.DefinitionVersion);
+            var progressChanged = false;
+            foreach (var objective in definition.Objectives.Where(x =>
+                         x.Type == "CharacterLevelReached"))
+            {
+                var objectiveProgress = progress.Objectives.FirstOrDefault(x =>
+                    x.ObjectiveKey.Equals(objective.Key, StringComparison.OrdinalIgnoreCase));
+                if (objectiveProgress is null)
+                {
+                    objectiveProgress = new CharacterQuestObjectiveProgress
+                    {
+                        CharacterId = progress.CharacterId,
+                        QuestId = progress.QuestId,
+                        ObjectiveKey = objective.Key,
+                        RequiredAmount = objective.RequiredAmount,
+                        UpdatedAt = now
+                    };
+                    progress.Objectives.Add(objectiveProgress);
+                    progressChanged = true;
+                }
+
+                var targetAmount = progress.Status == QuestStatus.Completed
+                    ? objective.RequiredAmount
+                    : Math.Min(objective.RequiredAmount, characterLevel);
+                if (objectiveProgress.RequiredAmount != objective.RequiredAmount)
+                {
+                    objectiveProgress.RequiredAmount = objective.RequiredAmount;
+                    progressChanged = true;
+                }
+
+                if (objectiveProgress.CurrentAmount < targetAmount)
+                {
+                    objectiveProgress.CurrentAmount = targetAmount;
+                    progressChanged = true;
+                }
+
+                if (objectiveProgress.CurrentAmount >= objectiveProgress.RequiredAmount &&
+                    !objectiveProgress.CompletedAt.HasValue)
+                {
+                    objectiveProgress.CompletedAt = now;
+                    progressChanged = true;
+                }
+
+                if (progressChanged)
+                {
+                    objectiveProgress.UpdatedAt = now;
+                }
+            }
+
+            if (!progressChanged) continue;
+            progress.UpdatedAt = now;
+            progress.RowVersion++;
+            changed = true;
+        }
 
         return changed;
     }

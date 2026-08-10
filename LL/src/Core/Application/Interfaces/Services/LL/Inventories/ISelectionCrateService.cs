@@ -9,9 +9,9 @@ public sealed record SelectionCrateOpenResult(
 
 public interface ISelectionCrateService
 {
-    Task<SelectionCrateOpenResult> OpenCatalystSelectionCrateAsync(
+    Task<SelectionCrateOpenResult> OpenSelectionContainerAsync(
         Guid characterId,
-        Guid crateItemInstanceId,
+        Guid containerItemInstanceId,
         string optionId,
         CancellationToken cancellationToken);
 }

@@ -14,6 +14,7 @@ using Application.Interfaces.Services.LL.Items;
 using Application.Interfaces.Services.LL.Inventories;
 using Application.Interfaces.Services.LL.Prophecies;
 using Application.Interfaces.Services.LL.Quests;
+using Application.Interfaces.Services.LL.Quests.Events;
 using Application.Interfaces.Services.LL.Professions;
 using Application.Interfaces.Services.LL.PowerRatings;
 using Application.Interfaces.Services.LL.Regions;
@@ -48,6 +49,7 @@ using Services.LL.Combat.Layers.Rewards.Idle;
 using Services.LL.Combat.Layers.Rewards.Models;
 using Services.LL.Combat.Stats;
 using Services.LL.Combat.Engine;
+using Services.LL.Quests.Events;
 using Services.LL.Dungeons;
 using Services.LL.Entities;
 using Services.LL.Entities.Characters;
@@ -350,15 +352,24 @@ public static class DependencyInjection
         services.AddScoped<IGameEventOutbox, GameEventOutbox>();
         services.AddSingleton<IGameEventOutboxConsumerRegistry, GameEventOutboxConsumerRegistry>();
         services.AddScoped<IGameEventOutboxConsumer, QuestGameEventOutboxConsumer>();
+        services.AddScoped<IGameEventOutboxConsumer, EventQuestGameEventOutboxConsumer>();
         services.AddScoped<IGameEventOutboxConsumer, AchievementGameEventOutboxConsumer>();
         services.AddSingleton<IQuestDefinitionProvider>(sp =>
             new JsonQuestDefinitionProvider(
                 config,
                 contentRootPath,
                 sp.GetRequiredService<JsonSerializerOptions>()));
+        services.AddSingleton<IEventQuestDefinitionProvider>(sp =>
+            new JsonEventQuestDefinitionProvider(
+                config,
+                contentRootPath,
+                sp.GetRequiredService<JsonSerializerOptions>()));
         services.AddScoped<QuestService>();
         services.AddScoped<IQuestService>(sp => sp.GetRequiredService<QuestService>());
         services.AddScoped<IQuestProgressionService>(sp => sp.GetRequiredService<QuestService>());
+        services.AddScoped<EventQuestService>();
+        services.AddScoped<IEventQuestService>(sp => sp.GetRequiredService<EventQuestService>());
+        services.AddScoped<IEventQuestProgressionService>(sp => sp.GetRequiredService<EventQuestService>());
         services.AddScoped<ICombatAreaAccessService, CombatAreaAccessService>();
         services.AddScoped<IQuestEncounterService, QuestEncounterService>();
 

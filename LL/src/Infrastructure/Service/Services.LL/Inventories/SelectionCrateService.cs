@@ -22,30 +22,32 @@ public sealed class SelectionCrateService : ISelectionCrateService
         _inventoryItemFactory = inventoryItemFactory;
     }
 
-    public async Task<SelectionCrateOpenResult> OpenCatalystSelectionCrateAsync(
+    public async Task<SelectionCrateOpenResult> OpenSelectionContainerAsync(
         Guid characterId,
-        Guid crateItemInstanceId,
+        Guid containerItemInstanceId,
         string optionId,
         CancellationToken cancellationToken)
     {
-        var crate = await _inventory.GetInventoryItemAsync(
+        var container = await _inventory.GetInventoryItemAsync(
             characterId,
-            crateItemInstanceId,
+            containerItemInstanceId,
             cancellationToken);
-        if (crate is null ||
-            crate.Quantity <= 0 ||
-            !crate.ItemInstance.ItemBaseId.Equals(
-                CatalystSelectionCrateCatalog.ItemBaseId,
-                StringComparison.OrdinalIgnoreCase))
+        if (container is null || container.Quantity <= 0)
         {
-            return Fail("The Catalyst Selection Crate was not found in your inventory.");
+            return Fail("The selection container was not found in your inventory.");
         }
 
-        var option = CatalystSelectionCrateCatalog.Options.FirstOrDefault(candidate =>
+        var definition = SelectionContainerCatalog.Find(container.ItemInstance.ItemBaseId);
+        if (definition is null)
+        {
+            return Fail("This item is not a selection container.");
+        }
+
+        var option = definition.Options.FirstOrDefault(candidate =>
             candidate.Id.Equals(optionId, StringComparison.OrdinalIgnoreCase));
         if (option is null)
         {
-            return Fail("Select a valid catalyst before opening the crate.");
+            return Fail($"Select a valid {definition.SelectionLabel.ToLowerInvariant()} before opening the container.");
         }
 
         var itemBases = await _itemBases.GetItemBasesByIdsAsync(
@@ -53,15 +55,15 @@ public sealed class SelectionCrateService : ISelectionCrateService
             cancellationToken);
         if (!itemBases.TryGetValue(option.ItemId, out var rewardItemBase))
         {
-            return Fail("The selected catalyst is currently unavailable.");
+            return Fail($"The selected {definition.SelectionLabel.ToLowerInvariant()} is currently unavailable.");
         }
 
         if (!await _inventory.TryConsumeInventoryItemAsync(
                 characterId,
-                crateItemInstanceId,
+                containerItemInstanceId,
                 cancellationToken))
         {
-            return Fail("The Catalyst Selection Crate could not be consumed.");
+            return Fail($"The {definition.DisplayName} could not be consumed.");
         }
 
         var rewards = _inventoryItemFactory

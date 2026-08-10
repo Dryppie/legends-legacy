@@ -1099,9 +1099,21 @@
     "gatheringType": null
   },
   {
+    "id": "item.blueprint_selection_box",
+    "name": "Blueprint Selection Box",
+    "description": "Open this box from your inventory to choose one Blueprint.",
+    "itemType": "Resource",
+    "rarity": "Rare",
+    "isBound": true,
+    "equipmentType": "Head",
+    "attributeModifiers": [],
+    "toolBonuses": [],
+    "gatheringType": null
+  },
+  {
     "id": "item.catalyst_selection_crate",
-    "name": "Catalyst Selection Crate",
-    "description": "Open this crate from your inventory to choose six catalysts for a specialized Blueprint recipe.",
+    "name": "Catalyst Selection Cache",
+    "description": "Open this cache from your inventory to choose six catalysts for a specialized Blueprint recipe.",
     "itemType": "Resource",
     "rarity": "Rare",
     "isBound": true,

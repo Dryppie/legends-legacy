@@ -4,9 +4,15 @@
   "title": "Trial of Lumo",
   "summary": "Prove that you can endure the dangers beyond the training route.",
   "category": "Shenic",
-  "chain": { "id": "chain.shenic", "title": "Shenic Campaign", "description": "New Shenic areas unlock as you reach their required character levels and complete each campaign quest.", "step": 1, "totalSteps": 10 },
+  "chain": {
+    "id": "chain.shenic",
+    "title": "Shenic Campaign",
+    "description": "New Shenic areas unlock as you reach their required character levels and complete each campaign quest.",
+    "step": 1,
+    "totalSteps": 10
+  },
   "sortOrder": 100,
-  "objectiveMode": "Sequential",
+  "objectiveMode": "All",
   "availability": {
     "minimumLevel": 1,
     "completedQuestIds": ["quest.region01.into_lumo_ruins"]
@@ -24,6 +30,17 @@
       "presentation": {
         "actionLabel": "Head to Lumo Ruins",
         "destinationRoute": "/game/world/shenic?area=region_01_area_01"
+      }
+    },
+    {
+      "key": "reach_level_5",
+      "description": "Reach character level 5 to unlock Blood Grove.",
+      "type": "CharacterLevelReached",
+      "requiredAmount": 5,
+      "filters": {},
+      "presentation": {
+        "actionLabel": "View Shenic",
+        "destinationRoute": "/game/world/shenic"
       }
     }
   ],

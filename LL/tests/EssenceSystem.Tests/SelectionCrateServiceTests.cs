@@ -34,7 +34,7 @@ public sealed class SelectionCrateServiceTests
             itemBases,
             new InventoryItemFactory());
 
-        var result = await service.OpenCatalystSelectionCrateAsync(
+        var result = await service.OpenSelectionContainerAsync(
             characterId,
             crate.ItemInstanceId,
             "fury",
@@ -63,7 +63,7 @@ public sealed class SelectionCrateServiceTests
             new FakeItemBaseRepository([]),
             new InventoryItemFactory());
 
-        var result = await service.OpenCatalystSelectionCrateAsync(
+        var result = await service.OpenSelectionContainerAsync(
             characterId,
             crate.ItemInstanceId,
             "unknown",
@@ -72,6 +72,42 @@ public sealed class SelectionCrateServiceTests
         Assert.False(result.IsSuccess);
         Assert.Equal(1, crate.Quantity);
         Assert.Empty(inventory.AddedRewards);
+    }
+
+    [Fact]
+    public async Task OpeningBlueprintBoxConsumesOneBoxAndGrantsSelectedBlueprint()
+    {
+        var characterId = Guid.NewGuid();
+        var box = CreateInventoryItem(
+            characterId,
+            BlueprintSelectionBoxCatalog.ItemBaseId,
+            ItemType.Resource,
+            quantity: 1);
+        var inventory = new FakeInventoryService(box);
+        var itemBases = new FakeItemBaseRepository(BlueprintSelectionBoxCatalog.Options.Select(option =>
+            new ItemBase
+            {
+                Id = option.ItemId,
+                Name = option.Name,
+                ItemType = ItemType.Resource,
+                Stackable = true
+            }));
+        var service = new SelectionCrateService(
+            inventory,
+            itemBases,
+            new InventoryItemFactory());
+
+        var result = await service.OpenSelectionContainerAsync(
+            characterId,
+            box.ItemInstanceId,
+            "primal",
+            CancellationToken.None);
+
+        Assert.True(result.IsSuccess);
+        Assert.Equal(0, box.Quantity);
+        var reward = Assert.Single(result.Rewards);
+        Assert.Equal("blueprint_primal", reward.ItemInstance.ItemBaseId);
+        Assert.Equal(1, reward.Quantity);
     }
 
     private static InventoryItem CreateInventoryItem(

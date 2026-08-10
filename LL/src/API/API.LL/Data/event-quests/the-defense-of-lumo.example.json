@@ -1,0 +1,70 @@
+{
+  "id": "event.lumo_defense.example",
+  "version": 1,
+  "enabled": true,
+  "title": "The Defense of Lumo",
+  "summary": "Creatures are overflowing Lumo Ruins. Help exterminate them before all hell breaks loose.",
+  "startsAtUtc": "2026-08-10T00:00:00Z",
+  "endsAtUtc": "2026-08-16T23:59:59Z",
+  "claimEndsAtUtc": "2026-08-18T23:59:59Z",
+  "minimumContribution": 100,
+  "sortOrder": 100,
+  "objectives": [
+    {
+      "key": "lumo-victories",
+      "description": "Win 250,000 encounters in Lumo Ruins.",
+      "type": "CombatEncounterCompleted",
+      "requiredAmount": 250000,
+      "filters": {
+        "areaId": "region_01_area_01",
+        "requiresVictory": true
+      }
+    }
+  ],
+  "rewards": [
+    {
+      "key": "catalyst-selection-cache",
+      "type": "Item",
+      "itemBaseId": "item.catalyst_selection_crate",
+      "quantity": 1
+    }
+  ],
+  "personalMilestones": [
+    {
+      "key": "first-response",
+      "requiredContribution": 250,
+      "rewards": [
+        {
+          "key": "soul-dust",
+          "type": "Item",
+          "itemBaseId": "soul_dust",
+          "quantity": 5
+        }
+      ]
+    },
+    {
+      "key": "steadfast-defender",
+      "requiredContribution": 1000,
+      "rewards": [
+        {
+          "key": "lesser-monster-cores",
+          "type": "Item",
+          "itemBaseId": "item.monster_core.lesser",
+          "quantity": 6
+        }
+      ]
+    },
+    {
+      "key": "champion-of-lumo",
+      "requiredContribution": 2500,
+      "rewards": [
+        {
+          "key": "blueprint-selection-box",
+          "type": "Item",
+          "itemBaseId": "item.blueprint_selection_box",
+          "quantity": 1
+        }
+      ]
+    }
+  ]
+}

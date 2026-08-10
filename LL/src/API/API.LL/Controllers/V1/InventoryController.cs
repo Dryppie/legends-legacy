@@ -20,7 +20,8 @@ public class InventoryController : BaseController
         await Mediator.Send(new ScrapEquipmentsCommand(CurrentCharacterGuid, itemIds));
 
     [HttpPost("items/{crateItemInstanceId:guid}/open-catalyst-selection-crate")]
-    public async Task<ActionResult<Response<OpenSelectionCrateResultDto>>> OpenCatalystSelectionCrate(
+    [HttpPost("items/{crateItemInstanceId:guid}/open-selection-container")]
+    public async Task<ActionResult<Response<OpenSelectionCrateResultDto>>> OpenSelectionContainer(
         Guid crateItemInstanceId,
         [FromBody] OpenSelectionCrateRequestDto request) =>
         await Mediator.Send(new OpenCatalystSelectionCrateCommand(

@@ -4,9 +4,15 @@
   "title": "Heart of the Hollow",
   "summary": "Cut through Thornroot Hollow before it strangles the forest around it.",
   "category": "Shenic",
-  "chain": { "id": "chain.shenic", "title": "Shenic Campaign", "description": "New Shenic areas unlock as you reach their required character levels and complete each campaign quest.", "step": 7, "totalSteps": 10 },
+  "chain": {
+    "id": "chain.shenic",
+    "title": "Shenic Campaign",
+    "description": "New Shenic areas unlock as you reach their required character levels and complete each campaign quest.",
+    "step": 7,
+    "totalSteps": 10
+  },
   "sortOrder": 160,
-  "objectiveMode": "Sequential",
+  "objectiveMode": "All",
   "availability": {
     "minimumLevel": 30,
     "completedQuestIds": ["quest.shenic.roots_remember"]
@@ -25,10 +31,26 @@
         "actionLabel": "Head to Thornroot Hollow",
         "destinationRoute": "/game/world/shenic?area=region_01_area_09"
       }
+    },
+    {
+      "key": "reach_level_35",
+      "description": "Reach character level 35 to unlock Embercap Burrows.",
+      "type": "CharacterLevelReached",
+      "requiredAmount": 35,
+      "filters": {},
+      "presentation": {
+        "actionLabel": "View Shenic",
+        "destinationRoute": "/game/world/shenic"
+      }
     }
   ],
   "rewards": [
-    { "key": "thornroot_wood", "type": "Item", "itemBaseId": "wood", "quantity": 50 },
+    {
+      "key": "thornroot_wood",
+      "type": "Item",
+      "itemBaseId": "wood",
+      "quantity": 50
+    },
     { "key": "hollow_ore", "type": "Item", "itemBaseId": "ore", "quantity": 25 }
   ]
 }

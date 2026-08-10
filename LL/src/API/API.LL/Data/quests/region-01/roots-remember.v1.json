@@ -4,9 +4,15 @@
   "title": "The Roots Remember",
   "summary": "Follow the Old Forest's corrupted roots deeper into Shenic.",
   "category": "Shenic",
-  "chain": { "id": "chain.shenic", "title": "Shenic Campaign", "description": "New Shenic areas unlock as you reach their required character levels and complete each campaign quest.", "step": 6, "totalSteps": 10 },
+  "chain": {
+    "id": "chain.shenic",
+    "title": "Shenic Campaign",
+    "description": "New Shenic areas unlock as you reach their required character levels and complete each campaign quest.",
+    "step": 6,
+    "totalSteps": 10
+  },
   "sortOrder": 150,
-  "objectiveMode": "Sequential",
+  "objectiveMode": "All",
   "availability": {
     "minimumLevel": 25,
     "completedQuestIds": ["quest.shenic.between_day_and_night"]
@@ -25,10 +31,31 @@
         "actionLabel": "Head to Old Forest",
         "destinationRoute": "/game/world/shenic?area=region_01_area_08"
       }
+    },
+    {
+      "key": "reach_level_30",
+      "description": "Reach character level 30 to unlock Thornroot Hollow.",
+      "type": "CharacterLevelReached",
+      "requiredAmount": 30,
+      "filters": {},
+      "presentation": {
+        "actionLabel": "View Shenic",
+        "destinationRoute": "/game/world/shenic"
+      }
     }
   ],
   "rewards": [
-    { "key": "ancient_wood", "type": "Item", "itemBaseId": "wood", "quantity": 40 },
-    { "key": "stag_hide", "type": "Item", "itemBaseId": "rawhide", "quantity": 25 }
+    {
+      "key": "ancient_wood",
+      "type": "Item",
+      "itemBaseId": "wood",
+      "quantity": 40
+    },
+    {
+      "key": "stag_hide",
+      "type": "Item",
+      "itemBaseId": "rawhide",
+      "quantity": 25
+    }
   ]
 }

@@ -4,9 +4,15 @@
   "title": "Crystal Currents",
   "summary": "Secure the creek before its strange resonance draws something worse.",
   "category": "Shenic",
-  "chain": { "id": "chain.shenic", "title": "Shenic Campaign", "description": "New Shenic areas unlock as you reach their required character levels and complete each campaign quest.", "step": 3, "totalSteps": 10 },
+  "chain": {
+    "id": "chain.shenic",
+    "title": "Shenic Campaign",
+    "description": "New Shenic areas unlock as you reach their required character levels and complete each campaign quest.",
+    "step": 3,
+    "totalSteps": 10
+  },
   "sortOrder": 120,
-  "objectiveMode": "Sequential",
+  "objectiveMode": "All",
   "availability": {
     "minimumLevel": 10,
     "completedQuestIds": ["quest.shenic.blood_in_the_grove"]
@@ -25,10 +31,31 @@
         "actionLabel": "Head to Crystal Creek",
         "destinationRoute": "/game/world/shenic?area=region_01_area_03"
       }
+    },
+    {
+      "key": "reach_level_15",
+      "description": "Reach character level 15 to unlock Moonlit Graves.",
+      "type": "CharacterLevelReached",
+      "requiredAmount": 15,
+      "filters": {},
+      "presentation": {
+        "actionLabel": "View Shenic",
+        "destinationRoute": "/game/world/shenic"
+      }
     }
   ],
   "rewards": [
-    { "key": "crystal_ore", "type": "Item", "itemBaseId": "ore", "quantity": 25 },
-    { "key": "resonant_dust", "type": "Item", "itemBaseId": "soul_dust", "quantity": 10 }
+    {
+      "key": "crystal_ore",
+      "type": "Item",
+      "itemBaseId": "ore",
+      "quantity": 25
+    },
+    {
+      "key": "resonant_dust",
+      "type": "Item",
+      "itemBaseId": "soul_dust",
+      "quantity": 10
+    }
   ]
 }

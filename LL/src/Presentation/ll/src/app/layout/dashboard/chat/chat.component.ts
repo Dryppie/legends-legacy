@@ -355,41 +355,51 @@ export class ChatComponent implements OnInit, OnDestroy {
   }
 
   channelBadgeClasses(message: ChatMessageDto): string {
-    switch (message.channelType) {
+    switch (this.displayChannelType(message)) {
       case ChatChannelType.Trade:
-        return 'll-badge-warning';
+        return 'border-emerald-400/40 bg-emerald-400/10 text-emerald-300';
       case ChatChannelType.Help:
-        return 'll-badge-info';
+        return 'border-sky-400/40 bg-sky-400/10 text-sky-300';
       case ChatChannelType.Guild:
-        return 'll-badge-accent';
+        return 'border-rose-400/40 bg-rose-400/10 text-rose-300';
       case ChatChannelType.Whisper:
-        return 'll-badge-accent';
+        return 'border-fuchsia-400/40 bg-fuchsia-400/10 text-fuchsia-300';
       case ChatChannelType.System:
         return isWorldSystemMessage(message)
-          ? 'll-badge-warning'
-          : 'll-badge-muted';
+          ? 'border-amber-400/40 bg-amber-400/10 text-amber-300'
+          : 'border-slate-400/40 bg-slate-400/10 text-slate-300';
       default:
-        return 'll-badge-accent';
+        return 'border-primary/40 bg-primary/10 text-primary';
     }
   }
 
   messageRowClasses(message: ChatMessageDto): string {
-    switch (message.channelType) {
+    switch (this.displayChannelType(message)) {
       case ChatChannelType.Trade:
-        return 'border-l-[var(--ll-color-warning)]';
+        return 'border-l-emerald-400';
       case ChatChannelType.Help:
-        return 'border-l-[var(--ll-color-info)]';
+        return 'border-l-sky-400';
       case ChatChannelType.Guild:
-        return 'border-l-[var(--ll-color-primary)]';
+        return 'border-l-rose-400';
       case ChatChannelType.Whisper:
-        return 'border-l-[var(--ll-color-primary-strong)] bg-[var(--ll-color-primary-soft)]';
+        return 'border-l-fuchsia-400 bg-fuchsia-400/5';
       case ChatChannelType.System:
         return isWorldSystemMessage(message)
-          ? 'border-l-[var(--ll-color-warning)] bg-[var(--ll-color-warning-soft)] shadow-[inset_0_0_18px_rgba(245,158,11,0.05)] hover:bg-[var(--ll-color-warning-soft)]'
-          : 'border-l-[var(--ll-color-text-subtle)] bg-[var(--ll-color-surface-soft)]';
+          ? 'border-l-amber-400 bg-amber-400/5 shadow-[inset_0_0_18px_rgba(245,158,11,0.05)] hover:bg-amber-400/10'
+          : 'border-l-slate-400 bg-slate-400/5';
       default:
-        return 'border-l-[var(--ll-color-border-strong)]';
+        return 'border-l-primary';
     }
+  }
+
+  private displayChannelType(message: ChatMessageDto): ChatChannelType {
+    if (message.channelType !== ChatChannelType.General) {
+      return message.channelType;
+    }
+
+    if (message.contextKey === 'trade') return ChatChannelType.Trade;
+    if (message.contextKey === 'help') return ChatChannelType.Help;
+    return ChatChannelType.General;
   }
 
   isWorldAnnouncement(message: ChatMessageDto): boolean {

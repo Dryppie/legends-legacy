@@ -4,6 +4,7 @@ using Application.Interfaces.Outbox;
 using Application.Interfaces.Services.LL.Achievements;
 using Application.Interfaces.Services.LL.Essences;
 using Application.Interfaces.Services.LL.Quests;
+using Application.Interfaces.Services.LL.Quests.Events;
 using Application.UseCases.Achievements.Dtos;
 using Application.UseCases.Outbox;
 using Application.UseCases.Prophecies.Events;
@@ -79,6 +80,12 @@ public sealed class GameEventOutboxTests
             },
             delivery =>
             {
+                Assert.Equal(GameEventOutboxConsumerNames.EventQuests, delivery.Consumer);
+                Assert.Equal(GameEventOutboxDeliveryStatus.Pending, delivery.Status);
+                Assert.Equal(message.Id, delivery.MessageId);
+            },
+            delivery =>
+            {
                 Assert.Equal(GameEventOutboxConsumerNames.Quests, delivery.Consumer);
                 Assert.Equal(GameEventOutboxDeliveryStatus.Pending, delivery.Status);
                 Assert.Equal(message.Id, delivery.MessageId);
@@ -90,18 +97,15 @@ public sealed class GameEventOutboxTests
     {
         var registry = new GameEventOutboxConsumerRegistry();
 
-        Assert.Equal(
-            [GameEventOutboxConsumerNames.Quests],
-            registry.GetConsumers(GameEventTypes.EssenceFocusSet));
-        Assert.Equal(
-            [GameEventOutboxConsumerNames.Quests],
-            registry.GetConsumers(GameEventTypes.FocusedCreatureEssenceReceived));
+        Assert.Contains(GameEventOutboxConsumerNames.Quests, registry.GetConsumers(GameEventTypes.EssenceFocusSet));
+        Assert.Contains(GameEventOutboxConsumerNames.EventQuests, registry.GetConsumers(GameEventTypes.EssenceFocusSet));
+        Assert.Contains(GameEventOutboxConsumerNames.Quests, registry.GetConsumers(GameEventTypes.FocusedCreatureEssenceReceived));
+        Assert.Contains(GameEventOutboxConsumerNames.EventQuests, registry.GetConsumers(GameEventTypes.FocusedCreatureEssenceReceived));
         Assert.Contains(
             GameEventOutboxConsumerNames.Quests,
             registry.GetConsumers(GameEventTypes.ColosseumBattleCompleted));
-        Assert.Equal(
-            [GameEventOutboxConsumerNames.Quests],
-            registry.GetConsumers(GameEventTypes.ProphecyCompleted));
+        Assert.Contains(GameEventOutboxConsumerNames.Quests, registry.GetConsumers(GameEventTypes.ProphecyCompleted));
+        Assert.Contains(GameEventOutboxConsumerNames.EventQuests, registry.GetConsumers(GameEventTypes.ProphecyCompleted));
         Assert.Contains(
             GameEventOutboxConsumerNames.Quests,
             registry.GetConsumers(GameEventTypes.EssenceAscended));
@@ -114,9 +118,42 @@ public sealed class GameEventOutboxTests
         Assert.Contains(
             GameEventOutboxConsumerNames.Quests,
             registry.GetConsumers(GameEventTypes.DungeonRunCompleted));
-        Assert.Equal(
-            [GameEventOutboxConsumerNames.Quests],
-            registry.GetConsumers(GameEventTypes.TournamentBattleCompleted));
+        Assert.Contains(GameEventOutboxConsumerNames.Quests, registry.GetConsumers(GameEventTypes.TournamentBattleCompleted));
+        Assert.Contains(GameEventOutboxConsumerNames.EventQuests, registry.GetConsumers(GameEventTypes.TournamentBattleCompleted));
+    }
+
+    [Fact]
+    public async Task Event_quest_consumer_maps_combat_and_daily_prophecy_events()
+    {
+        var characterId = Guid.NewGuid();
+        var progression = new RecordingEventQuestProgressionService();
+        var consumer = new EventQuestGameEventOutboxConsumer(progression, CreateJsonOptions());
+
+        await consumer.HandleAsync(
+            CreateOutboxMessage(
+                characterId,
+                GameEventTypes.IdleCombatEncounterCompleted,
+                new IdleCombatEncounterCompletedPayload(
+                    characterId,
+                    "region_01_area_01",
+                    true,
+                    1,
+                    [],
+                    0,
+                    100,
+                    3,
+                    "Mining")),
+            CancellationToken.None);
+        await consumer.HandleAsync(
+            CreateOutboxMessage(
+                characterId,
+                GameEventTypes.ProphecyCompleted,
+                new ProphecyCompletedPayload(characterId, Guid.NewGuid(), "Daily")),
+            CancellationToken.None);
+
+        Assert.Equal(["CombatEncounterCompleted", "DailyProphecyCompleted"], progression.Triggers.Select(x => x.Type));
+        Assert.Equal(3, progression.Triggers[0].ActionCount);
+        Assert.Equal("Mining", progression.Triggers[0].EquippedGatheringType);
     }
 
     [Fact]
@@ -489,6 +526,22 @@ public sealed class GameEventOutboxTests
                 new QuestJournal([], null),
                 [],
                 []));
+        }
+    }
+
+    private sealed class RecordingEventQuestProgressionService : IEventQuestProgressionService
+    {
+        public List<QuestTrigger> Triggers { get; } = [];
+
+        public Task ProcessAsync(
+            Guid characterId,
+            QuestTrigger trigger,
+            Guid outboxMessageId,
+            string eventType,
+            CancellationToken cancellationToken)
+        {
+            Triggers.Add(trigger);
+            return Task.CompletedTask;
         }
     }
 

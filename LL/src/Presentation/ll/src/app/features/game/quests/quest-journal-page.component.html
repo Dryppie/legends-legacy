@@ -37,8 +37,8 @@
         <button
           type="button"
           class="ll-button px-3 py-2 text-[11px]"
-          [disabled]="questState.loading()"
-          (click)="questState.load()"
+          [disabled]="questState.loading() || eventQuestState.loading()"
+          (click)="questState.load(); eventQuestState.load()"
         >
           {{ questState.loading() ? "Refreshing" : "Refresh" }}
         </button>
@@ -54,6 +54,12 @@
 
     <p
       *ngIf="questState.error() as error"
+      class="ll-state ll-state-danger m-3 shrink-0"
+    >
+      {{ error }}
+    </p>
+    <p
+      *ngIf="eventQuestState.error() as error"
       class="ll-state ll-state-danger m-3 shrink-0"
     >
       {{ error }}
@@ -84,6 +90,78 @@
         </nav>
 
         <div class="min-h-0 flex-1 overflow-y-auto p-2">
+          <section
+            *ngIf="
+              activeTab() === QuestStatus.Active &&
+              (visibleEvents().length || eventQuestState.loading())
+            "
+            class="mb-3"
+          >
+            <div
+              class="mb-2 px-1 text-[9px] font-semibold uppercase tracking-[0.16em] text-primary"
+            >
+              ● Server-wide
+            </div>
+
+            <div
+              *ngIf="eventQuestState.loading() && !eventQuestState.loaded()"
+              class="ll-state mb-2 px-3 py-2 text-[10px]"
+            >
+              Loading server event...
+            </div>
+
+            <button
+              *ngFor="let event of visibleEvents()"
+              type="button"
+              class="relative mb-1.5 block w-full overflow-hidden rounded border border-primary/25 bg-primary/5 px-4 py-3 text-left transition-colors hover:border-primary/40 hover:bg-primary/10"
+              [ngClass]="{
+                'border-primary/50 bg-primary/10': isSelectedEvent(event),
+                'opacity-65':
+                  event.status === EventQuestStatus.Ended ||
+                  event.status === EventQuestStatus.Expired,
+              }"
+              (click)="selectEvent(event)"
+            >
+              <span
+                *ngIf="isSelectedEvent(event)"
+                class="absolute inset-y-0 left-0 w-0.5 bg-primary"
+                aria-hidden="true"
+              ></span>
+              <span class="flex items-start justify-between gap-3">
+                <span
+                  class="min-w-0 truncate text-sm font-[var(--ll-font-display)] font-semibold text-primary"
+                >
+                  {{ event.title }}
+                </span>
+                <span
+                  class="shrink-0 font-mono text-[10px] font-semibold text-primary"
+                >
+                  {{ eventProgress(event) }}%
+                </span>
+              </span>
+              <span class="mt-1 block truncate text-[10px] text-zinc-400">
+                Event · {{ formatAmount(event.myContribution) }} contributed ·
+                {{ eventTimeLabel(event).toLowerCase() }}
+                {{ eventTimeRemaining(event) }}
+              </span>
+              <span
+                class="mt-2 block h-1 overflow-hidden rounded bg-light_gray/20"
+              >
+                <span
+                  class="block h-full bg-primary"
+                  [style.width.%]="eventProgress(event)"
+                ></span>
+              </span>
+            </button>
+
+            <div
+              *ngIf="visibleEvents().length"
+              class="mt-4 px-1 text-[9px] font-semibold uppercase tracking-[0.16em] text-zinc-500"
+            >
+              Active
+            </div>
+          </section>
+
           <div
             *ngIf="questState.loading() && !questState.loaded()"
             class="ll-empty-state h-full min-h-40"
@@ -92,7 +170,11 @@
           </div>
 
           <div
-            *ngIf="questState.loaded() && !visibleEntries().length"
+            *ngIf="
+              questState.loaded() &&
+              !visibleEntries().length &&
+              (activeTab() !== QuestStatus.Active || !visibleEvents().length)
+            "
             class="ll-empty-state h-full min-h-40"
           >
             No {{ activeTab().toLowerCase() }} quests.
@@ -163,397 +245,799 @@
       </aside>
 
       <main class="min-h-[28rem] overflow-y-auto p-3 sm:p-4 lg:min-h-0">
-        <ng-container *ngIf="selectedQuest() as quest; else noQuestSelected">
-          <div class="flex min-h-full flex-col">
-            <div>
-              <div class="flex flex-wrap items-center gap-2">
-                <span
-                  class="rounded-sm bg-primary/10 px-2 py-1 text-[9px] font-semibold uppercase tracking-[0.16em] text-primary"
-                >
-                  {{ quest.category }}
-                </span>
-                <span
-                  *ngIf="quest.isPinned"
-                  class="rounded-sm border border-primary/30 px-2 py-1 text-[9px] font-semibold uppercase tracking-[0.16em] text-primary"
-                >
-                  Pinned
-                </span>
-                <span
-                  *ngIf="quest.chain as chain"
-                  class="rounded-sm border border-primary/30 px-2 py-1 text-[9px] font-semibold uppercase tracking-[0.16em] text-primary"
-                >
-                  {{ chain.title }} · Chain {{ chain.step }} of
-                  {{ chain.totalSteps }}
-                </span>
-                <span class="text-[10px] text-zinc-400">
-                  {{ quest.status }} quest
-                </span>
-              </div>
-
-              <h2
-                class="mt-2 text-3xl font-[var(--ll-font-display)] font-semibold leading-tight text-primary sm:text-4xl"
-              >
-                {{ quest.title }}
-              </h2>
-
-              <ng-container *ngIf="selectedEntry() as entry">
-                <div
-                  *ngIf="quest.chain as chain"
-                  class="mt-3 rounded border border-primary/20 bg-primary/[0.025] p-3"
-                >
-                  <div class="flex flex-wrap items-start justify-between gap-2">
-                    <div>
-                      <div
-                        class="text-[10px] font-semibold uppercase tracking-[0.18em] text-primary"
-                      >
-                        {{ chain.title }}
-                      </div>
-                      <p class="mt-1 text-xs leading-5 text-zinc-400">
-                        {{ chain.description }}
-                      </p>
-                    </div>
-                    <span class="shrink-0 text-[10px] text-zinc-400">
-                      {{ completedPartCount(entry) }} /
-                      {{ entry.totalParts }} parts completed
+        <ng-container *ngIf="showingEventDetail(); else personalQuestDetail">
+          <ng-container *ngIf="selectedEvent() as event; else noEventSelected">
+            <div class="flex min-h-full flex-col pb-2">
+              <header class="flex flex-wrap items-start justify-between gap-5">
+                <div class="min-w-0 flex-1">
+                  <div class="flex flex-wrap items-center gap-2">
+                    <span
+                      class="rounded-sm bg-primary px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.15em] text-black"
+                    >
+                      Server-wide
+                    </span>
+                    <span
+                      class="rounded-sm border border-primary/35 px-2.5 py-1 text-[9px] font-semibold uppercase tracking-[0.15em] text-primary"
+                    >
+                      Event
+                    </span>
+                    <span class="text-[11px] text-zinc-400">
+                      All players, one shared goal · no level requirement
                     </span>
                   </div>
-
-                  <nav
-                    class="mt-3 grid grid-cols-5 gap-1.5 sm:grid-cols-10"
-                    aria-label="Quest chain parts"
+                  <h2
+                    class="mt-3 text-3xl font-[var(--ll-font-display)] font-semibold leading-none text-primary sm:text-4xl"
                   >
-                    <button
-                      *ngFor="let chainStep of chainNavigationSteps(entry)"
-                      type="button"
-                      class="min-w-0 rounded border px-1 py-1.5 text-center transition-colors"
-                      [ngClass]="{
-                        'border-primary bg-primary/10':
-                          isSelectedChainStep(chainStep),
-                        'border-primary/30 bg-primary/5':
-                          !isSelectedChainStep(chainStep) &&
-                          isCompletedChainStep(entry, chainStep),
-                        'border-light_gray/20 bg-black/10':
-                          !isSelectedChainStep(chainStep) &&
-                          !isCompletedChainStep(entry, chainStep),
-                        'cursor-not-allowed opacity-45': !chainQuestForStep(
-                          entry,
-                          chainStep
-                        ),
-                      }"
-                      [disabled]="!chainQuestForStep(entry, chainStep)"
-                      [title]="chainStepTitle(entry, chainStep)"
-                      [attr.aria-label]="
-                        'Part ' +
-                        chainStep +
-                        ': ' +
-                        chainStepTitle(entry, chainStep)
-                      "
-                      (click)="selectChainStep(entry, chainStep)"
-                    >
-                      <span
-                        class="block text-[8px] font-semibold uppercase tracking-[0.12em] text-zinc-500"
-                      >
-                        Part
-                      </span>
-                      <span
-                        class="mt-0.5 block text-sm font-semibold"
-                        [ngClass]="
-                          isSelectedChainStep(chainStep)
-                            ? 'text-primary'
-                            : 'text-zinc-300'
-                        "
-                      >
-                        {{ chainStep }}
-                      </span>
-                    </button>
-                  </nav>
+                    {{ event.title }}
+                  </h2>
                 </div>
-              </ng-container>
-
-              <div
-                *ngIf="!requiresChoice(quest)"
-                class="mt-3 flex flex-wrap items-center gap-3"
-              >
-                <span
-                  class="text-[10px] font-semibold uppercase tracking-[0.18em] text-zinc-400"
-                >
-                  Progress
-                </span>
-                <span class="flex items-center" aria-hidden="true">
-                  <ng-container
-                    *ngFor="let objective of quest.objectives; let last = last"
+                <div class="shrink-0 text-right">
+                  <div
+                    class="text-[9px] font-semibold uppercase tracking-[0.2em] text-zinc-500"
                   >
-                    <span
-                      class="h-2.5 w-2.5 rounded-full border border-primary/50"
-                      [ngClass]="{
-                        'bg-primary': objective.isCompleted,
-                        'bg-black/40': !objective.isCompleted,
-                      }"
-                    ></span>
-                    <span *ngIf="!last" class="h-px w-8 bg-primary/30"></span>
-                  </ng-container>
-                </span>
-                <span class="text-[10px] text-zinc-400">
-                  {{ completedObjectiveCount(quest) }} of
-                  {{ quest.objectives.length }} objectives
-                </span>
-              </div>
+                    {{ eventTimeLabel(event) }}
+                  </div>
+                  <div
+                    class="mt-1 font-mono text-xl font-semibold tabular-nums text-primary"
+                  >
+                    {{ eventTimeRemaining(event) }}
+                  </div>
+                </div>
+              </header>
 
               <blockquote
-                class="mt-4 border-l-2 border-primary/30 bg-white/[0.025] px-4 py-4 text-base font-[var(--ll-font-display)] italic leading-7 text-zinc-300"
+                class="mt-5 border-l-2 border-primary/35 bg-black/15 px-5 py-5 text-base font-[var(--ll-font-display)] italic leading-7 text-zinc-300"
               >
-                “{{ quest.summary }}”
+                “{{ event.summary }}”
                 <footer
-                  class="mt-3 text-[10px] uppercase not-italic tracking-[0.16em] text-zinc-500"
+                  class="mt-3 font-sans text-[10px] uppercase not-italic tracking-[0.16em] text-zinc-500"
                 >
-                  — {{ quest.category }}
+                  — Realm chronicle
                 </footer>
               </blockquote>
-            </div>
 
-            <section
-              *ngIf="!requiresChoice(quest); else firstHuntChoice"
-              class="mt-4"
-            >
-              <div
-                class="mb-2 flex items-center justify-between gap-4 text-[10px] font-semibold uppercase tracking-[0.16em]"
-              >
-                <span class="flex items-center gap-2 text-zinc-400">
-                  Objectives
-                  <span
-                    *ngIf="
-                      quest.objectiveMode === 'All' &&
-                      quest.objectives.length > 1
-                    "
-                    class="normal-case tracking-normal text-zinc-500"
-                  >
-                    Complete in any order
-                  </span>
-                </span>
-                <span class="text-primary">
-                  {{ completedObjectiveCount(quest) }} /
-                  {{ quest.objectives.length }}
-                </span>
-              </div>
-
-              <div class="grid gap-2">
+              <section class="mt-5">
                 <div
-                  *ngFor="let objective of quest.objectives"
-                  class="flex items-center justify-between gap-4 rounded border border-light_gray/20 bg-white/[0.025] px-4 py-3"
-                  [ngClass]="{
-                    'border-primary/30 bg-primary/5': isObjectiveAvailable(
-                      quest,
-                      objective
-                    ),
-                    'opacity-60': objective.isCompleted,
-                  }"
+                  class="flex flex-wrap items-end justify-between gap-2 text-[10px] tracking-[0.16em] text-zinc-400"
                 >
-                  <div class="flex min-w-0 items-center gap-3">
-                    <span
-                      class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border text-[10px]"
-                      [ngClass]="{
-                        'border-primary/40 bg-primary/20 text-primary':
-                          objective.isCompleted,
-                        'border-primary text-primary': isObjectiveAvailable(
-                          quest,
-                          objective
-                        ),
-                        'border-light_gray/30 text-zinc-500':
-                          !objective.isCompleted &&
-                          !isObjectiveAvailable(quest, objective),
-                      }"
+                  <div>
+                    <span class="uppercase">Realm progress</span>
+                    <div
+                      *ngFor="let objective of event.objectives"
+                      class="flex items-center justify-between gap-4"
                     >
-                      {{ objective.isCompleted ? "✓" : "" }}
-                    </span>
-                    <span
-                      class="text-sm text-zinc-200"
-                      [ngClass]="{
-                        'line-through': objective.isCompleted,
-                        'font-semibold text-primary': isObjectiveAvailable(
-                          quest,
-                          objective
-                        ),
-                      }"
+                      <span class="text-zinc-400">{{
+                        objective.description
+                      }}</span>
+                    </div>
+                  </div>
+                  <span class="font-mono text-xs tracking-normal text-primary">
+                    {{ formatAmount(eventCurrentAmount(event)) }} /
+                    {{ formatAmount(eventRequiredAmount(event)) }}
+                  </span>
+                </div>
+                <div
+                  class="relative mt-3 h-3 overflow-hidden rounded-full border border-primary/25 bg-black/30"
+                >
+                  <span
+                    class="block h-full bg-gradient-to-r from-primary/70 to-primary transition-[width] duration-500"
+                    [style.width.%]="eventProgress(event)"
+                  ></span>
+                  <span
+                    class="absolute inset-y-0 left-1/4 w-px bg-black/50"
+                  ></span>
+                  <span
+                    class="absolute inset-y-0 left-1/2 w-px bg-black/50"
+                  ></span>
+                  <span
+                    class="absolute inset-y-0 left-3/4 w-px bg-black/50"
+                  ></span>
+                </div>
+                <div class="relative mt-2 h-3 text-[9px] text-zinc-500">
+                  <span
+                    *ngFor="let marker of realmProgressMarkers"
+                    class="absolute top-0 whitespace-nowrap"
+                    [style.left.%]="marker"
+                    [ngClass]="{
+                      'text-primary': eventProgress(event) >= marker,
+                      '-translate-x-1/2': marker < 100,
+                      '-translate-x-full': marker === 100,
+                    }"
+                  >
+                    {{ marker }}%<span *ngIf="eventProgress(event) >= marker">
+                      ✓</span
                     >
-                      {{ objective.description }}
+                  </span>
+                </div>
+              </section>
+
+              <section class="mt-5 grid gap-3 xl:grid-cols-2">
+                <article
+                  class="rounded-lg border border-primary/20 bg-black/10 px-5 py-4"
+                >
+                  <div
+                    class="text-[10px] font-semibold uppercase tracking-[0.16em] text-zinc-400"
+                  >
+                    Your contribution
+                  </div>
+                  <div
+                    class="mt-2 flex flex-wrap items-baseline gap-x-3 gap-y-1"
+                  >
+                    <strong
+                      class="text-3xl font-[var(--ll-font-display)] font-semibold text-primary"
+                    >
+                      {{ formatAmount(event.myContribution) }}
+                    </strong>
+                    <span class="text-xs text-zinc-400">
+                      contributed<span *ngIf="event.myContributionRank">
+                        · rank {{ event.myContributionRank }} of
+                        {{ formatAmount(event.contributorCount) }}</span
+                      >
                     </span>
                   </div>
-                  <span class="shrink-0 text-[10px] text-primary">
-                    {{ objective.currentAmount }} /
-                    {{ objective.requiredAmount }}
+                  <span
+                    class="mt-2 block h-0.5 overflow-hidden bg-light_gray/15"
+                  >
+                    <span
+                      class="block h-full bg-primary"
+                      [style.width.%]="
+                        event.contributionToNextRank
+                          ? (event.myContribution /
+                              (event.myContribution +
+                                event.contributionToNextRank)) *
+                            100
+                          : 100
+                      "
+                    ></span>
+                  </span>
+                  <p class="mt-2 text-[11px] text-zinc-400">
+                    <ng-container
+                      *ngIf="
+                        event.contributionToNextRank;
+                        else leadingContribution
+                      "
+                    >
+                      {{ formatAmount(event.contributionToNextRank) }} more to
+                      reach the next contributor.
+                    </ng-container>
+                    <ng-template #leadingContribution>
+                      {{
+                        event.myContributionRank === 1
+                          ? "You currently lead the realm."
+                          : "Contribute to enter the realm ranking."
+                      }}
+                    </ng-template>
+                  </p>
+                </article>
+
+                <article
+                  class="rounded-lg border border-primary/20 bg-black/10 px-5 py-4"
+                >
+                  <div
+                    class="text-[10px] font-semibold uppercase tracking-[0.16em] text-zinc-400"
+                  >
+                    Top contributors
+                  </div>
+                  <ol
+                    *ngIf="event.topContributors.length; else noContributors"
+                    class="mt-2 grid gap-1.5"
+                  >
+                    <li
+                      *ngFor="let contributor of event.topContributors"
+                      class="grid grid-cols-[1.25rem_minmax(0,1fr)_auto] items-center gap-2 text-xs"
+                    >
+                      <span class="font-mono text-primary">{{
+                        contributor.rank
+                      }}</span>
+                      <span class="truncate font-semibold text-zinc-200">
+                        {{ contributor.characterName }}
+                      </span>
+                      <span class="font-mono tabular-nums text-zinc-400">
+                        {{ formatAmount(contributor.contribution) }}
+                      </span>
+                    </li>
+                  </ol>
+                  <ng-template #noContributors>
+                    <p class="mt-3 text-xs text-zinc-500">
+                      Be the first to contribute to this event.
+                    </p>
+                  </ng-template>
+                </article>
+              </section>
+
+              <section *ngIf="event.personalMilestones.length" class="mt-6">
+                <div class="flex flex-wrap items-end justify-between gap-3">
+                  <div
+                    class="text-[10px] font-semibold uppercase tracking-[0.16em] text-zinc-400"
+                  >
+                    Your milestones
+                  </div>
+                  <div
+                    class="flex items-center gap-3 text-[11px] text-zinc-400"
+                  >
+                    <span>
+                      {{ formatAmount(event.myContribution) }} contributed ·
+                      {{ claimedMilestoneCount(event) }} of
+                      {{ event.personalMilestones.length }} claimed
+                    </span>
+                    <button
+                      *ngIf="canClaimEventMilestones(event)"
+                      type="button"
+                      class="ll-button px-3 py-1.5 text-[10px]"
+                      [disabled]="eventQuestState.loading()"
+                      (click)="
+                        eventQuestState.claimAllMilestones(event.eventQuestId)
+                      "
+                    >
+                      Claim all
+                    </button>
+                  </div>
+                </div>
+
+                <div class="mt-3 grid gap-2 sm:grid-cols-2 2xl:grid-cols-4">
+                  <article
+                    *ngFor="
+                      let milestone of event.personalMilestones;
+                      let index = index
+                    "
+                    class="flex min-h-48 flex-col rounded-lg border bg-black/10 p-4"
+                    [ngClass]="{
+                      'border-primary/45 bg-primary/[0.055]':
+                        isHighlightedMilestone(event, milestone),
+                      'border-primary/25': milestone.isClaimed,
+                      'border-light_gray/15 opacity-60':
+                        !milestone.isClaimed &&
+                        !isHighlightedMilestone(event, milestone),
+                    }"
+                  >
+                    <div class="flex items-center justify-between gap-3">
+                      <span
+                        class="text-[9px] font-semibold uppercase tracking-[0.12em] text-primary"
+                      >
+                        {{ milestoneIndex(index) }} ·
+                        {{ formatAmount(milestone.requiredContribution) }}
+                        contribution
+                      </span>
+                      <span
+                        class="flex h-5 w-5 items-center justify-center rounded-full border text-[10px]"
+                        [ngClass]="{
+                          'border-primary/40 bg-primary/20 text-primary':
+                            milestone.isClaimed,
+                          'border-primary text-primary':
+                            milestone.isUnlocked && !milestone.isClaimed,
+                          'border-light_gray/25 text-zinc-600':
+                            !milestone.isUnlocked,
+                        }"
+                      >
+                        {{ milestone.isClaimed ? "✓" : "" }}
+                      </span>
+                    </div>
+                    <h3
+                      class="mt-2 text-base font-[var(--ll-font-display)] font-semibold text-zinc-200"
+                    >
+                      {{ milestoneTitle(milestone) }}
+                    </h3>
+                    <span
+                      class="mt-2 block h-0.5 overflow-hidden bg-light_gray/15"
+                    >
+                      <span
+                        class="block h-full bg-primary"
+                        [style.width.%]="milestoneProgress(event, milestone)"
+                      ></span>
+                    </span>
+                    <div class="mt-3 grid gap-1.5">
+                      <span
+                        *ngFor="let reward of milestone.rewards"
+                        class="flex items-center gap-2 text-xs text-zinc-400"
+                      >
+                        3
+                        <span class="text-primary">{{ reward.quantity }}</span>
+                        <app-base-item
+                          *ngIf="
+                            reward.itemBase as itemBase;
+                            else eventMilestoneRewardFallback
+                          "
+                          [item]="itemBase"
+                        ></app-base-item>
+                        <ng-template #eventMilestoneRewardFallback>
+                          <span>{{ rewardLabel(reward, false) }}</span>
+                        </ng-template>
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      class="mt-auto pt-3 text-left text-[10px] font-semibold uppercase tracking-[0.12em]"
+                      [ngClass]="{
+                        'text-primary': canClaimEventMilestone(
+                          event,
+                          milestone
+                        ),
+                        'cursor-default text-zinc-500': !canClaimEventMilestone(
+                          event,
+                          milestone
+                        ),
+                      }"
+                      [disabled]="
+                        !canClaimEventMilestone(event, milestone) ||
+                        eventQuestState.loading()
+                      "
+                      (click)="
+                        eventQuestState.claimMilestone(
+                          event.eventQuestId,
+                          milestone.key
+                        )
+                      "
+                    >
+                      {{
+                        milestone.isClaimed
+                          ? "Claimed"
+                          : milestone.isUnlocked
+                            ? "Claim reward"
+                            : formatAmount(
+                                milestoneRemaining(event, milestone)
+                              ) + " contribution to go"
+                      }}
+                    </button>
+                  </article>
+                </div>
+              </section>
+
+              <footer
+                class="mt-6 flex flex-wrap items-end justify-between gap-4 border-t border-light_gray/15 pt-5"
+              >
+                <div>
+                  <div
+                    class="mb-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-zinc-400"
+                  >
+                    Community reward · {{ event.minimumContribution }} minimum
+                    contribution
+                  </div>
+                  <div class="flex flex-wrap gap-2">
+                    <span
+                      *ngFor="let reward of event.rewards"
+                      class="flex items-center gap-2 rounded border border-primary/20 bg-primary/5 px-3 py-2 text-xs text-primary"
+                    >
+                      {{ reward.quantity }}
+                      <app-base-item
+                        *ngIf="
+                          reward.itemBase as itemBase;
+                          else eventRewardFallback
+                        "
+                        [item]="itemBase"
+                      ></app-base-item>
+                      <ng-template #eventRewardFallback>
+                        <span>{{ rewardLabel(reward, false) }}</span>
+                      </ng-template>
+                    </span>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  class="ll-button ll-button-primary px-6 py-3 text-xs"
+                  [disabled]="
+                    !canClaimEvent(event) || eventQuestState.loading()
+                  "
+                  (click)="eventQuestState.claim(event.eventQuestId)"
+                >
+                  {{
+                    event.hasClaimed
+                      ? "Reward claimed"
+                      : "Claim community reward"
+                  }}
+                </button>
+              </footer>
+            </div>
+          </ng-container>
+          <ng-template #noEventSelected>
+            <div class="ll-empty-state h-full min-h-72">
+              No server event is currently scheduled.
+            </div>
+          </ng-template>
+        </ng-container>
+
+        <ng-template #personalQuestDetail>
+          <ng-container *ngIf="selectedQuest() as quest; else noQuestSelected">
+            <div class="flex min-h-full flex-col">
+              <div>
+                <div class="flex flex-wrap items-center gap-2">
+                  <span
+                    class="rounded-sm bg-primary/10 px-2 py-1 text-[9px] font-semibold uppercase tracking-[0.16em] text-primary"
+                  >
+                    {{ quest.category }}
+                  </span>
+                  <span
+                    *ngIf="quest.isPinned"
+                    class="rounded-sm border border-primary/30 px-2 py-1 text-[9px] font-semibold uppercase tracking-[0.16em] text-primary"
+                  >
+                    Pinned
+                  </span>
+                  <span
+                    *ngIf="quest.chain as chain"
+                    class="rounded-sm border border-primary/30 px-2 py-1 text-[9px] font-semibold uppercase tracking-[0.16em] text-primary"
+                  >
+                    {{ chain.title }} · Chain {{ chain.step }} of
+                    {{ chain.totalSteps }}
+                  </span>
+                  <span class="text-[10px] text-zinc-400">
+                    {{ quest.status }} quest
                   </span>
                 </div>
-              </div>
-            </section>
 
-            <ng-template #firstHuntChoice>
-              <section *ngIf="quest.choice as choice" class="mt-4">
-                <div class="mb-3">
-                  <div class="ll-eyebrow text-[10px]">First Hunts</div>
-                  <p class="mt-1 text-sm text-zinc-300">
-                    {{ choice.selectionSummary }}
-                  </p>
-                </div>
+                <h2
+                  class="mt-2 text-3xl font-[var(--ll-font-display)] font-semibold leading-tight text-primary sm:text-4xl"
+                >
+                  {{ quest.title }}
+                </h2>
 
-                <div class="grid gap-3 xl:grid-cols-3">
-                  <button
-                    *ngFor="let option of choice.options"
-                    type="button"
-                    class="overflow-hidden rounded border border-light_gray/20 bg-black/15 text-left transition-colors hover:border-primary/40 hover:bg-primary/5"
-                    [ngClass]="{
-                      'border-primary bg-primary/10':
-                        pendingChoiceKey() === option.key,
-                    }"
-                    [disabled]="questState.loading()"
-                    (click)="chooseOption(option)"
+                <ng-container *ngIf="selectedEntry() as entry">
+                  <div
+                    *ngIf="quest.chain as chain"
+                    class="mt-3 rounded border border-primary/20 bg-primary/[0.025] p-3"
                   >
-                    <div class="border-b border-light_gray/20 p-3">
-                      <span class="block min-w-0">
-                        <span
-                          class="block text-lg font-[var(--ll-font-display)] font-semibold text-primary"
+                    <div
+                      class="flex flex-wrap items-start justify-between gap-2"
+                    >
+                      <div>
+                        <div
+                          class="text-[10px] font-semibold uppercase tracking-[0.18em] text-primary"
                         >
-                          {{ option.creatureName }}
-                        </span>
-                        <span
-                          class="mt-1 block text-[11px] leading-4 text-zinc-400"
-                        >
-                          {{ option.summary }}
-                        </span>
+                          {{ chain.title }}
+                        </div>
+                        <p class="mt-1 text-xs leading-5 text-zinc-400">
+                          {{ chain.description }}
+                        </p>
+                      </div>
+                      <span class="shrink-0 text-[10px] text-zinc-400">
+                        {{ completedPartCount(entry) }} /
+                        {{ entry.totalParts }} parts completed
                       </span>
                     </div>
 
-                    <ng-container *ngIf="choiceEssence(option) as essence">
-                      <div class="grid gap-2 p-3">
-                        <div
-                          class="rounded border border-light_gray/15 bg-white/[0.025] p-2.5"
-                        >
-                          <div class="ll-eyebrow text-[9px]">
-                            Active Essence
-                          </div>
-                          <div class="mt-1 text-xs font-semibold text-primary">
-                            {{ essence.active.name }}
-                          </div>
-                          <p class="mt-1 text-[11px] leading-4 text-zinc-300">
-                            {{ essence.active.description }}
-                          </p>
-                        </div>
-                        <div
-                          class="rounded border border-light_gray/15 bg-white/[0.025] p-2.5"
-                        >
-                          <div class="ll-eyebrow text-[9px]">
-                            Passive Essence
-                          </div>
-                          <div class="mt-1 text-xs font-semibold text-primary">
-                            {{ essence.passive.name }}
-                          </div>
-                          <p class="mt-1 text-[11px] leading-4 text-zinc-300">
-                            {{ essence.passive.description }}
-                          </p>
-                        </div>
-                      </div>
-                    </ng-container>
-
-                    <span
-                      class="flex items-center gap-2 border-t border-light_gray/20 px-3 py-2.5 text-[11px] text-zinc-300"
+                    <nav
+                      class="mt-3 grid grid-cols-5 gap-1.5 sm:grid-cols-10"
+                      aria-label="Quest chain parts"
                     >
-                      <span class="ll-eyebrow text-[9px]">Guaranteed</span>
-                      <app-base-item
-                        *ngIf="option.rewardItemBase as rewardItem"
-                        [item]="rewardItem"
-                      ></app-base-item>
-                    </span>
-                  </button>
-                </div>
+                      <button
+                        *ngFor="let chainStep of chainNavigationSteps(entry)"
+                        type="button"
+                        class="min-w-0 rounded border px-1 py-1.5 text-center transition-colors"
+                        [ngClass]="{
+                          'border-primary bg-primary/10':
+                            isSelectedChainStep(chainStep),
+                          'border-primary/30 bg-primary/5':
+                            !isSelectedChainStep(chainStep) &&
+                            isCompletedChainStep(entry, chainStep),
+                          'border-light_gray/20 bg-black/10':
+                            !isSelectedChainStep(chainStep) &&
+                            !isCompletedChainStep(entry, chainStep),
+                          'cursor-not-allowed opacity-45': !chainQuestForStep(
+                            entry,
+                            chainStep
+                          ),
+                        }"
+                        [disabled]="!chainQuestForStep(entry, chainStep)"
+                        [title]="chainStepTitle(entry, chainStep)"
+                        [attr.aria-label]="
+                          'Part ' +
+                          chainStep +
+                          ': ' +
+                          chainStepTitle(entry, chainStep)
+                        "
+                        (click)="selectChainStep(entry, chainStep)"
+                      >
+                        <span
+                          class="block text-[8px] font-semibold uppercase tracking-[0.12em] text-zinc-500"
+                        >
+                          Part
+                        </span>
+                        <span
+                          class="mt-0.5 block text-sm font-semibold"
+                          [ngClass]="
+                            isSelectedChainStep(chainStep)
+                              ? 'text-primary'
+                              : 'text-zinc-300'
+                          "
+                        >
+                          {{ chainStep }}
+                        </span>
+                      </button>
+                    </nav>
+                  </div>
+                </ng-container>
 
                 <div
-                  *ngIf="pendingChoiceKey()"
-                  class="mt-3 flex flex-wrap items-center justify-between gap-3 rounded border border-primary/30 bg-primary/5 p-3"
+                  *ngIf="!requiresChoice(quest)"
+                  class="mt-3 flex flex-wrap items-center gap-3"
                 >
-                  <p class="text-xs text-zinc-300">
-                    {{ choice.confirmationText }} This choice cannot be changed.
-                  </p>
-                  <button
-                    type="button"
-                    class="ll-button ll-button-primary px-5 py-2.5 text-xs"
-                    [disabled]="questState.loading()"
-                    (click)="confirmChoice(quest)"
+                  <span
+                    class="text-[10px] font-semibold uppercase tracking-[0.18em] text-zinc-400"
                   >
-                    {{
-                      questState.loading()
-                        ? "Confirming..."
-                        : "Confirm First Hunt"
-                    }}
-                  </button>
+                    Progress
+                  </span>
+                  <span class="flex items-center" aria-hidden="true">
+                    <ng-container
+                      *ngFor="
+                        let objective of quest.objectives;
+                        let last = last
+                      "
+                    >
+                      <span
+                        class="h-2.5 w-2.5 rounded-full border border-primary/50"
+                        [ngClass]="{
+                          'bg-primary': objective.isCompleted,
+                          'bg-black/40': !objective.isCompleted,
+                        }"
+                      ></span>
+                      <span *ngIf="!last" class="h-px w-8 bg-primary/30"></span>
+                    </ng-container>
+                  </span>
+                  <span class="text-[10px] text-zinc-400">
+                    {{ completedObjectiveCount(quest) }} of
+                    {{ quest.objectives.length }} objectives
+                  </span>
+                </div>
+
+                <blockquote
+                  class="mt-4 border-l-2 border-primary/30 bg-white/[0.025] px-4 py-4 text-base font-[var(--ll-font-display)] italic leading-7 text-zinc-300"
+                >
+                  “{{ quest.summary }}”
+                  <footer
+                    class="mt-3 text-[10px] uppercase not-italic tracking-[0.16em] text-zinc-500"
+                  >
+                    — {{ quest.category }}
+                  </footer>
+                </blockquote>
+              </div>
+
+              <section
+                *ngIf="!requiresChoice(quest); else firstHuntChoice"
+                class="mt-4"
+              >
+                <div
+                  class="mb-2 flex items-center justify-between gap-4 text-[10px] font-semibold uppercase tracking-[0.16em]"
+                >
+                  <span class="flex items-center gap-2 text-zinc-400">
+                    Objectives
+                    <span
+                      *ngIf="
+                        quest.objectiveMode === 'All' &&
+                        quest.objectives.length > 1
+                      "
+                      class="normal-case tracking-normal text-zinc-500"
+                    >
+                      Complete in any order
+                    </span>
+                  </span>
+                  <span class="text-primary">
+                    {{ completedObjectiveCount(quest) }} /
+                    {{ quest.objectives.length }}
+                  </span>
+                </div>
+
+                <div class="grid gap-2">
+                  <div
+                    *ngFor="let objective of quest.objectives"
+                    class="flex items-center justify-between gap-4 rounded border border-light_gray/20 bg-white/[0.025] px-4 py-3"
+                    [ngClass]="{
+                      'border-primary/30 bg-primary/5': isObjectiveAvailable(
+                        quest,
+                        objective
+                      ),
+                      'opacity-60': objective.isCompleted,
+                    }"
+                  >
+                    <div class="flex min-w-0 items-center gap-3">
+                      <span
+                        class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border text-[10px]"
+                        [ngClass]="{
+                          'border-primary/40 bg-primary/20 text-primary':
+                            objective.isCompleted,
+                          'border-primary text-primary': isObjectiveAvailable(
+                            quest,
+                            objective
+                          ),
+                          'border-light_gray/30 text-zinc-500':
+                            !objective.isCompleted &&
+                            !isObjectiveAvailable(quest, objective),
+                        }"
+                      >
+                        {{ objective.isCompleted ? "✓" : "" }}
+                      </span>
+                      <span
+                        class="text-sm text-zinc-200"
+                        [ngClass]="{
+                          'line-through': objective.isCompleted,
+                          'font-semibold text-primary': isObjectiveAvailable(
+                            quest,
+                            objective
+                          ),
+                        }"
+                      >
+                        {{ objective.description }}
+                      </span>
+                    </div>
+                    <span class="shrink-0 text-[10px] text-primary">
+                      {{ objective.currentAmount }} /
+                      {{ objective.requiredAmount }}
+                    </span>
+                  </div>
                 </div>
               </section>
-            </ng-template>
 
-            <footer
-              class="mt-4 flex flex-wrap items-end justify-between gap-4 border-t border-light_gray/20 pt-4 lg:mt-auto"
-            >
-              <div>
-                <div
-                  class="mb-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-zinc-400"
-                >
-                  Rewards
+              <ng-template #firstHuntChoice>
+                <section *ngIf="quest.choice as choice" class="mt-4">
+                  <div class="mb-3">
+                    <div class="ll-eyebrow text-[10px]">First Hunts</div>
+                    <p class="mt-1 text-sm text-zinc-300">
+                      {{ choice.selectionSummary }}
+                    </p>
+                  </div>
+
+                  <div class="grid gap-3 xl:grid-cols-3">
+                    <button
+                      *ngFor="let option of choice.options"
+                      type="button"
+                      class="overflow-hidden rounded border border-light_gray/20 bg-black/15 text-left transition-colors hover:border-primary/40 hover:bg-primary/5"
+                      [ngClass]="{
+                        'border-primary bg-primary/10':
+                          pendingChoiceKey() === option.key,
+                      }"
+                      [disabled]="questState.loading()"
+                      (click)="chooseOption(option)"
+                    >
+                      <div class="border-b border-light_gray/20 p-3">
+                        <span class="block min-w-0">
+                          <span
+                            class="block text-lg font-[var(--ll-font-display)] font-semibold text-primary"
+                          >
+                            {{ option.creatureName }}
+                          </span>
+                          <span
+                            class="mt-1 block text-[11px] leading-4 text-zinc-400"
+                          >
+                            {{ option.summary }}
+                          </span>
+                        </span>
+                      </div>
+
+                      <ng-container *ngIf="choiceEssence(option) as essence">
+                        <div class="grid gap-2 p-3">
+                          <div
+                            class="rounded border border-light_gray/15 bg-white/[0.025] p-2.5"
+                          >
+                            <div class="ll-eyebrow text-[9px]">
+                              Active Essence
+                            </div>
+                            <div
+                              class="mt-1 text-xs font-semibold text-primary"
+                            >
+                              {{ essence.active.name }}
+                            </div>
+                            <p class="mt-1 text-[11px] leading-4 text-zinc-300">
+                              {{ essence.active.description }}
+                            </p>
+                          </div>
+                          <div
+                            class="rounded border border-light_gray/15 bg-white/[0.025] p-2.5"
+                          >
+                            <div class="ll-eyebrow text-[9px]">
+                              Passive Essence
+                            </div>
+                            <div
+                              class="mt-1 text-xs font-semibold text-primary"
+                            >
+                              {{ essence.passive.name }}
+                            </div>
+                            <p class="mt-1 text-[11px] leading-4 text-zinc-300">
+                              {{ essence.passive.description }}
+                            </p>
+                          </div>
+                        </div>
+                      </ng-container>
+
+                      <span
+                        class="flex items-center gap-2 border-t border-light_gray/20 px-3 py-2.5 text-[11px] text-zinc-300"
+                      >
+                        <span class="ll-eyebrow text-[9px]">Guaranteed</span>
+                        <app-base-item
+                          *ngIf="option.rewardItemBase as rewardItem"
+                          [item]="rewardItem"
+                        ></app-base-item>
+                      </span>
+                    </button>
+                  </div>
+
+                  <div
+                    *ngIf="pendingChoiceKey()"
+                    class="mt-3 flex flex-wrap items-center justify-between gap-3 rounded border border-primary/30 bg-primary/5 p-3"
+                  >
+                    <p class="text-xs text-zinc-300">
+                      {{ choice.confirmationText }} This choice cannot be
+                      changed.
+                    </p>
+                    <button
+                      type="button"
+                      class="ll-button ll-button-primary px-5 py-2.5 text-xs"
+                      [disabled]="questState.loading()"
+                      (click)="confirmChoice(quest)"
+                    >
+                      {{
+                        questState.loading()
+                          ? "Confirming..."
+                          : "Confirm First Hunt"
+                      }}
+                    </button>
+                  </div>
+                </section>
+              </ng-template>
+
+              <footer
+                class="mt-4 flex flex-wrap items-end justify-between gap-4 border-t border-light_gray/20 pt-4 lg:mt-auto"
+              >
+                <div>
+                  <div
+                    class="mb-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-zinc-400"
+                  >
+                    Rewards
+                  </div>
+                  <div class="flex flex-wrap gap-2">
+                    <span
+                      *ngFor="let reward of quest.rewards"
+                      class="flex items-center gap-2 rounded border border-primary/20 bg-primary/5 px-3 py-2 text-xs text-primary"
+                    >
+                      <span class="tabular-nums">{{ reward.quantity }}</span>
+                      <app-base-item
+                        *ngIf="reward.itemBase as itemBase; else rewardFallback"
+                        [item]="itemBase"
+                      ></app-base-item>
+                      <ng-template #rewardFallback>
+                        <span>{{ rewardLabel(reward, false) }}</span>
+                      </ng-template>
+                    </span>
+                    <span
+                      *ngIf="!quest.rewards.length"
+                      class="text-xs text-zinc-500"
+                    >
+                      No item rewards
+                    </span>
+                  </div>
                 </div>
+
                 <div class="flex flex-wrap gap-2">
-                  <span
-                    *ngFor="let reward of quest.rewards"
-                    class="flex items-center gap-2 rounded border border-primary/20 bg-primary/5 px-3 py-2 text-xs text-primary"
-                  >
-                    <span class="tabular-nums">{{ reward.quantity }}</span>
-                    <app-base-item
-                      *ngIf="reward.itemBase as itemBase; else rewardFallback"
-                      [item]="itemBase"
-                    ></app-base-item>
-                    <ng-template #rewardFallback>
-                      <span>{{ rewardLabel(reward, false) }}</span>
-                    </ng-template>
-                  </span>
-                  <span
-                    *ngIf="!quest.rewards.length"
-                    class="text-xs text-zinc-500"
-                  >
-                    No item rewards
-                  </span>
+                  <ng-container *ngIf="quest.status === QuestStatus.Active">
+                    <button
+                      type="button"
+                      class="ll-button px-4 py-3 text-xs"
+                      [disabled]="questState.loading()"
+                      (click)="togglePinned(quest)"
+                    >
+                      {{ quest.isPinned ? "Unpin" : "Pin Quest" }}
+                    </button>
+                    <button
+                      *ngIf="
+                        !requiresChoice(quest) &&
+                        currentObjective(quest)?.presentation?.destinationRoute
+                      "
+                      type="button"
+                      class="ll-button ll-button-primary px-5 py-3 text-xs"
+                      (click)="navigateToObjective(quest)"
+                    >
+                      {{
+                        currentObjective(quest)?.presentation?.actionLabel ||
+                          "Continue Quest"
+                      }}
+                    </button>
+                  </ng-container>
                 </div>
-              </div>
+              </footer>
+            </div>
+          </ng-container>
 
-              <div class="flex flex-wrap gap-2">
-                <ng-container *ngIf="quest.status === QuestStatus.Active">
-                  <button
-                    type="button"
-                    class="ll-button px-4 py-3 text-xs"
-                    [disabled]="questState.loading()"
-                    (click)="togglePinned(quest)"
-                  >
-                    {{ quest.isPinned ? "Unpin" : "Pin Quest" }}
-                  </button>
-                  <button
-                    *ngIf="
-                      !requiresChoice(quest) &&
-                      currentObjective(quest)?.presentation?.destinationRoute
-                    "
-                    type="button"
-                    class="ll-button ll-button-primary px-5 py-3 text-xs"
-                    (click)="navigateToObjective(quest)"
-                  >
-                    {{
-                      currentObjective(quest)?.presentation?.actionLabel ||
-                        "Continue Quest"
-                    }}
-                  </button>
-                </ng-container>
-              </div>
-            </footer>
-          </div>
-        </ng-container>
-
-        <ng-template #noQuestSelected>
-          <div class="ll-empty-state h-full min-h-72">
-            Select a quest to view its details.
-          </div>
+          <ng-template #noQuestSelected>
+            <div class="ll-empty-state h-full min-h-72">
+              Select a quest to view its details.
+            </div>
+          </ng-template>
         </ng-template>
       </main>
     </div>

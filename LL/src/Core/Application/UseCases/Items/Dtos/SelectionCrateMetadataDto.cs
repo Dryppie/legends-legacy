@@ -6,6 +6,7 @@ namespace Application.UseCases.Items.Dtos;
 
 public sealed class SelectionCrateMetadataDto
 {
+    public string SelectionLabel { get; init; } = string.Empty;
     public IReadOnlyList<SelectionCrateOptionDto> Options { get; init; } = [];
 }
 
@@ -25,16 +26,13 @@ public sealed class SelectionCrateMetadataResolver
         SelectionCrateMetadataDto? destinationMember,
         ResolutionContext context)
     {
-        if (!source.Id.Equals(
-                CatalystSelectionCrateCatalog.ItemBaseId,
-                StringComparison.OrdinalIgnoreCase))
-        {
-            return null;
-        }
+        var definition = SelectionContainerCatalog.Find(source.Id);
+        if (definition is null) return null;
 
         return new SelectionCrateMetadataDto
         {
-            Options = CatalystSelectionCrateCatalog.Options
+            SelectionLabel = definition.SelectionLabel,
+            Options = definition.Options
                 .Select(option => new SelectionCrateOptionDto
                 {
                     Id = option.Id,

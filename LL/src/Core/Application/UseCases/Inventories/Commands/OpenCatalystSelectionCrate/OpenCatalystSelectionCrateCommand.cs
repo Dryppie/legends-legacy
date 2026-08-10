@@ -30,7 +30,7 @@ public sealed class OpenCatalystSelectionCrateCommandHandler
         OpenCatalystSelectionCrateCommand request,
         CancellationToken cancellationToken)
     {
-        var result = await _selectionCrates.OpenCatalystSelectionCrateAsync(
+        var result = await _selectionCrates.OpenSelectionContainerAsync(
             request.CharacterId,
             request.CrateItemInstanceId,
             request.OptionId,
@@ -39,7 +39,7 @@ public sealed class OpenCatalystSelectionCrateCommandHandler
         if (!result.IsSuccess)
         {
             return Response<OpenSelectionCrateResultDto>.Fail(
-                result.ErrorMessage ?? "The Catalyst Selection Crate could not be opened.");
+                result.ErrorMessage ?? "The selection container could not be opened.");
         }
 
         return Response<OpenSelectionCrateResultDto>.Success(new OpenSelectionCrateResultDto
