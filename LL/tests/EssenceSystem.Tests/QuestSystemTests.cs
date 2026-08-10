@@ -144,6 +144,28 @@ public sealed class QuestSystemTests
         Assert.Equal(
             "TournamentBattleCompleted",
             Assert.Single(provider.Get(QuestConstants.TournamentTested).Objectives).Type);
+        var formerAdvancementStoneRewards = new Dictionary<string, int>
+        {
+            [QuestConstants.LastLightInDuskmire] = 3,
+            [QuestConstants.TheArenaCalls] = 1,
+            [QuestConstants.AnOmenFulfilled] = 1,
+            [QuestConstants.ANameInShenic] = 1,
+            [QuestConstants.TestedWanderer] = 2,
+            [QuestConstants.WardenOfShenic] = 5,
+            [QuestConstants.ExceptionalWork] = 2,
+            [QuestConstants.SigilsInTheDust] = 1,
+            [QuestConstants.IntoTheDepths] = 3,
+            [QuestConstants.TournamentTested] = 2
+        };
+        foreach (var (questId, expectedQuantity) in formerAdvancementStoneRewards)
+        {
+            var reward = Assert.Single(provider.Get(questId).Rewards, candidate =>
+                candidate.ItemBaseId == "item.monster_core.lesser");
+            Assert.Equal(expectedQuantity, reward.Quantity);
+        }
+        Assert.DoesNotContain(
+            definitions.SelectMany(quest => quest.Rewards),
+            reward => reward.ItemBaseId == "advancement_stone");
         Assert.All(
             definitions.SelectMany(quest => quest.Objectives),
             objective => Assert.False(string.IsNullOrWhiteSpace(objective.Presentation.DestinationRoute)));

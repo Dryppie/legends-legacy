@@ -7,9 +7,8 @@
         {
           "id": "tier_1_weighted_drop",
           "type": "WeightedWithNoDrop",
-          "noDropWeight": 48,
+          "noDropWeight": 80,
           "entries": [
-            { "id": "advancement_stone", "type": "Item", "itemId": "advancement_stone", "weight": 32 },
             { "id": "pickaxe", "type": "Item", "itemId": "pickaxe", "weight": 5 },
             { "id": "woodcutting_hatchet", "type": "Item", "itemId": "woodcutting_hatchet", "weight": 5 },
             { "id": "skinning_knife", "type": "Item", "itemId": "skinning_knife", "weight": 8 },
@@ -26,9 +25,8 @@
         {
           "id": "tier_2_weighted_drop",
           "type": "WeightedWithNoDrop",
-          "noDropWeight": 53,
+          "noDropWeight": 78,
           "entries": [
-            { "id": "advancement_stone", "type": "Item", "itemId": "advancement_stone", "weight": 25 },
             { "id": "rare_pickaxe", "type": "Item", "itemId": "rare_pickaxe", "weight": 4, "tags": [ "rare", "tool" ] },
             { "id": "rare_hatchet", "type": "Item", "itemId": "rare_hatchet", "weight": 4, "tags": [ "rare", "tool" ] },
             { "id": "rare_skinning_knife", "type": "Item", "itemId": "rare_skinning_knife", "weight": 8, "tags": [ "rare", "tool" ] },
@@ -46,9 +44,8 @@
         {
           "id": "tier_3_weighted_drop",
           "type": "WeightedWithNoDrop",
-          "noDropWeight": 54.2,
+          "noDropWeight": 72.2,
           "entries": [
-            { "id": "advancement_stone", "type": "Item", "itemId": "advancement_stone", "weight": 18 },
             { "id": "epic_pickaxe", "type": "Item", "itemId": "epic_pickaxe", "weight": 4, "tags": [ "rare", "tool" ] },
             { "id": "epic_hatchet", "type": "Item", "itemId": "epic_hatchet", "weight": 4, "tags": [ "rare", "tool" ] },
             { "id": "epic_skinning_knife", "type": "Item", "itemId": "epic_skinning_knife", "weight": 8, "tags": [ "rare", "tool" ] },

@@ -36,7 +36,7 @@ public sealed class EventQuestSystemTests
         Assert.True(definition.Enabled);
         Assert.Equal("CombatEncounterCompleted", Assert.Single(definition.Objectives).Type);
         var communityReward = Assert.Single(definition.Rewards);
-        Assert.Equal("SigilFragments", communityReward.Type);
+        Assert.Equal("Item", communityReward.Type);
         Assert.Equal(20, communityReward.Quantity);
         Assert.Null(communityReward.ItemBaseId);
         Assert.Equal(3, definition.PersonalMilestones.Count);

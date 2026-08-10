@@ -411,6 +411,40 @@ public sealed class CraftingRegionOneContentTests
     }
 
     [Fact]
+    public void DungeonRewardTablesDoNotDropAdvancementStones()
+    {
+        var dungeonTables = ChildArray(ReadDocument("rewards/reward-tables.json"), "rewardTables")
+            .Where(table =>
+                (table?["id"]?.GetValue<string>() ?? string.Empty)
+                .StartsWith("reward.dungeon.", StringComparison.OrdinalIgnoreCase))
+            .ToList();
+
+        Assert.NotEmpty(dungeonTables);
+        Assert.DoesNotContain(
+            dungeonTables
+                .SelectMany(table => ChildArray(table, "rolls"))
+                .SelectMany(roll => ChildArray(roll, "entries")),
+            entry => string.Equals(
+                entry?["itemId"]?.GetValue<string>(),
+                "advancement_stone",
+                StringComparison.OrdinalIgnoreCase));
+
+        var expectedTierNoDropWeights = new Dictionary<string, double>
+        {
+            ["reward.dungeon.tier.1"] = 80,
+            ["reward.dungeon.tier.2"] = 78,
+            ["reward.dungeon.tier.3"] = 72.2
+        };
+        foreach (var (tableId, expectedNoDropWeight) in expectedTierNoDropWeights)
+        {
+            var table = Assert.Single(dungeonTables, candidate =>
+                candidate?["id"]?.GetValue<string>() == tableId);
+            var roll = Assert.Single(ChildArray(table, "rolls"));
+            Assert.Equal(expectedNoDropWeight, roll?["noDropWeight"]?.GetValue<double>());
+        }
+    }
+
+    [Fact]
     public void Dungeons_DoNotRewardCatalogedCraftingMaterialsAboveTheirOwnTier()
     {
         var materialTierByItemId = ReadArray("crafting/materials.json")

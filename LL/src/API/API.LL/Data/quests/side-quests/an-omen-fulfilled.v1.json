@@ -24,6 +24,6 @@
     }
   ],
   "rewards": [
-    { "key": "advancement_stone", "type": "Item", "itemBaseId": "advancement_stone", "quantity": 1 }
+    { "key": "lesser_monster_core", "type": "Item", "itemBaseId": "item.monster_core.lesser", "quantity": 1 }
   ]
 }
