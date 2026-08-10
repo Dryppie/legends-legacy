@@ -108,9 +108,13 @@ public sealed record QuestTrigger(
     IReadOnlyCollection<string>? CraftedItemBaseIds = null,
     IReadOnlyCollection<int>? CraftedItemTiers = null,
     IReadOnlyCollection<string?>? CraftedBaseRecipeIds = null,
+    IReadOnlyCollection<ItemQuality>? CraftedItemQualities = null,
+    IReadOnlyCollection<int?>? CraftedItemPotentials = null,
     int? CharacterLevel = null,
     int ActionCount = 1,
-    string? EquippedGatheringType = null)
+    string? EquippedGatheringType = null,
+    bool HasCompatibleEssenceTrio = false,
+    string? CreatureDefinitionId = null)
 {
     public static QuestTrigger CombatCompleted(
         string areaId,
@@ -127,19 +131,48 @@ public sealed record QuestTrigger(
     public static QuestTrigger EssenceAbsorbed(string essenceDefinitionId) =>
         new("EssenceAbsorbed", EssenceDefinitionId: essenceDefinitionId);
 
-    public static QuestTrigger EssenceLoadoutChanged() => new("EssenceLoadoutChanged");
+    public static QuestTrigger EssenceLoadoutChanged(bool hasCompatibleEssenceTrio = false) =>
+        new("EssenceLoadoutChanged", HasCompatibleEssenceTrio: hasCompatibleEssenceTrio);
 
     public static QuestTrigger EssenceFocusSet() => new("EssenceFocusSet");
+
+    public static QuestTrigger FocusedCreatureEssenceReceived(
+        string creatureDefinitionId,
+        string essenceDefinitionId) =>
+        new(
+            "FocusedCreatureEssenceReceived",
+            EssenceDefinitionId: essenceDefinitionId,
+            CreatureDefinitionId: creatureDefinitionId);
+
+    public static QuestTrigger EssenceAscended() => new("EssenceAscended");
 
     public static QuestTrigger EquipmentCrafted(
         IReadOnlyCollection<string> itemBaseIds,
         IReadOnlyCollection<int> tiers,
-        IReadOnlyCollection<string?>? baseRecipeIds = null) =>
+        IReadOnlyCollection<string?>? baseRecipeIds = null,
+        IReadOnlyCollection<ItemQuality>? qualities = null,
+        IReadOnlyCollection<int?>? potentials = null) =>
         new(
             "EquipmentCrafted",
             CraftedItemBaseIds: itemBaseIds,
             CraftedItemTiers: tiers,
-            CraftedBaseRecipeIds: baseRecipeIds);
+            CraftedBaseRecipeIds: baseRecipeIds,
+            CraftedItemQualities: qualities,
+            CraftedItemPotentials: potentials);
+
+    public static QuestTrigger EquipmentTempered(
+        IReadOnlyCollection<string> itemBaseIds,
+        IReadOnlyCollection<int> tiers,
+        IReadOnlyCollection<string?> baseRecipeIds,
+        IReadOnlyCollection<ItemQuality> qualities,
+        IReadOnlyCollection<int?> potentials) =>
+        new(
+            "EquipmentTempered",
+            CraftedItemBaseIds: itemBaseIds,
+            CraftedItemTiers: tiers,
+            CraftedBaseRecipeIds: baseRecipeIds,
+            CraftedItemQualities: qualities,
+            CraftedItemPotentials: potentials);
 
     public static QuestTrigger EquipmentChanged() => new("EquipmentChanged");
 
@@ -147,6 +180,12 @@ public sealed record QuestTrigger(
         new("CharacterLevelReached", CharacterLevel: level);
 
     public static QuestTrigger ColosseumBattleStarted() => new("ColosseumBattleStarted");
+
+    public static QuestTrigger TournamentBattleCompleted() => new("TournamentBattleCompleted");
+
+    public static QuestTrigger DungeonRunStarted() => new("DungeonRunStarted");
+
+    public static QuestTrigger DungeonRunCompleted() => new("DungeonRunCompleted");
 
     public static QuestTrigger DailyProphecyCompleted() => new("DailyProphecyCompleted");
 }

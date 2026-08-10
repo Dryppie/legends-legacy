@@ -31,6 +31,14 @@ public static class QuestConstants
     public const string ANameInShenic = "quest.character.a_name_in_shenic";
     public const string TestedWanderer = "quest.character.tested_wanderer";
     public const string WardenOfShenic = "quest.character.warden_of_shenic";
+    public const string TemperedResolve = "quest.crafting.tempered_resolve";
+    public const string ACraftersSignature = "quest.crafting.a_crafters_signature";
+    public const string ExceptionalWork = "quest.crafting.exceptional_work";
+    public const string TheArchiveDeepens = "quest.essences.the_archive_deepens";
+    public const string ResonantPair = "quest.essences.resonant_pair";
+    public const string SigilsInTheDust = "quest.dungeons.sigils_in_the_dust";
+    public const string IntoTheDepths = "quest.dungeons.into_the_depths";
+    public const string TournamentTested = "quest.colosseum.tournament_tested";
 
     public const string TrainingGroundsAreaId = "tutorial_area_training_grounds";
     public const string LumoRuinsAreaId = "region_01_area_01";

@@ -93,12 +93,30 @@ public sealed class GameEventOutboxTests
         Assert.Equal(
             [GameEventOutboxConsumerNames.Quests],
             registry.GetConsumers(GameEventTypes.EssenceFocusSet));
+        Assert.Equal(
+            [GameEventOutboxConsumerNames.Quests],
+            registry.GetConsumers(GameEventTypes.FocusedCreatureEssenceReceived));
         Assert.Contains(
             GameEventOutboxConsumerNames.Quests,
             registry.GetConsumers(GameEventTypes.ColosseumBattleCompleted));
         Assert.Equal(
             [GameEventOutboxConsumerNames.Quests],
             registry.GetConsumers(GameEventTypes.ProphecyCompleted));
+        Assert.Contains(
+            GameEventOutboxConsumerNames.Quests,
+            registry.GetConsumers(GameEventTypes.EssenceAscended));
+        Assert.Contains(
+            GameEventOutboxConsumerNames.Quests,
+            registry.GetConsumers(GameEventTypes.EquipmentTempered));
+        Assert.Contains(
+            GameEventOutboxConsumerNames.Quests,
+            registry.GetConsumers(GameEventTypes.DungeonRunStarted));
+        Assert.Contains(
+            GameEventOutboxConsumerNames.Quests,
+            registry.GetConsumers(GameEventTypes.DungeonRunCompleted));
+        Assert.Equal(
+            [GameEventOutboxConsumerNames.Quests],
+            registry.GetConsumers(GameEventTypes.TournamentBattleCompleted));
     }
 
     [Fact]
@@ -143,7 +161,7 @@ public sealed class GameEventOutboxTests
     }
 
     [Fact]
-    public async Task Quest_consumer_maps_focus_colosseum_and_daily_prophecy_events()
+    public async Task Quest_consumer_maps_focused_drop_colosseum_and_daily_prophecy_events()
     {
         var characterId = Guid.NewGuid();
         var progression = new RecordingQuestProgressionService();
@@ -154,6 +172,15 @@ public sealed class GameEventOutboxTests
                 characterId,
                 GameEventTypes.EssenceFocusSet,
                 new EssenceFocusSetPayload(characterId, "monster.goblin")),
+            CancellationToken.None);
+        await consumer.HandleAsync(
+            CreateOutboxMessage(
+                characterId,
+                GameEventTypes.FocusedCreatureEssenceReceived,
+                new FocusedCreatureEssenceReceivedPayload(
+                    characterId,
+                    "monster.goblin",
+                    "essence.goblin")),
             CancellationToken.None);
         await consumer.HandleAsync(
             CreateOutboxMessage(
@@ -180,8 +207,16 @@ public sealed class GameEventOutboxTests
             CancellationToken.None);
 
         Assert.Equal(
-            ["EssenceFocusSet", "ColosseumBattleStarted", "DailyProphecyCompleted"],
+            [
+                "EssenceFocusSet",
+                "FocusedCreatureEssenceReceived",
+                "ColosseumBattleStarted",
+                "DailyProphecyCompleted"
+            ],
             progression.Triggers.Select(trigger => trigger.Type));
+        var focusedDrop = progression.Triggers[1];
+        Assert.Equal("monster.goblin", focusedDrop.CreatureDefinitionId);
+        Assert.Equal("essence.goblin", focusedDrop.EssenceDefinitionId);
     }
 
     [Fact]
@@ -214,6 +249,76 @@ public sealed class GameEventOutboxTests
         Assert.Equal(
             ["recipe.weapon.one_handed.hand_axe"],
             trigger.CraftedBaseRecipeIds);
+        Assert.Equal([ItemQuality.Standard], trigger.CraftedItemQualities);
+        Assert.Equal([10], trigger.CraftedItemPotentials);
+    }
+
+    [Fact]
+    public async Task Quest_consumer_maps_new_quest_activity_events()
+    {
+        var characterId = Guid.NewGuid();
+        var progression = new RecordingQuestProgressionService();
+        var consumer = new QuestGameEventOutboxConsumer(progression, CreateJsonOptions());
+        var temperedItem = new OutboxEquipmentItemPayload(
+            "shortsword",
+            2,
+            Rarity.Common,
+            ItemQuality.Fine,
+            0,
+            "recipe.weapon.one_handed.shortsword",
+            null,
+            [],
+            false);
+
+        await consumer.HandleAsync(
+            CreateOutboxMessage(
+                characterId,
+                GameEventTypes.EssenceLoadoutChanged,
+                new EssenceLoadoutChangedPayload(characterId, [], 3, true)),
+            CancellationToken.None);
+        await consumer.HandleAsync(
+            CreateOutboxMessage(
+                characterId,
+                GameEventTypes.EssenceAscended,
+                new EssenceAscendedPayload(characterId, 1, 1)),
+            CancellationToken.None);
+        await consumer.HandleAsync(
+            CreateOutboxMessage(
+                characterId,
+                GameEventTypes.EquipmentTempered,
+                new EquipmentTemperedPayload(characterId, new TemperingSummary(), [temperedItem])),
+            CancellationToken.None);
+        await consumer.HandleAsync(
+            CreateOutboxMessage(
+                characterId,
+                GameEventTypes.DungeonRunStarted,
+                new DungeonRunStartedPayload(characterId)),
+            CancellationToken.None);
+        await consumer.HandleAsync(
+            CreateOutboxMessage(
+                characterId,
+                GameEventTypes.DungeonRunCompleted,
+                new DungeonRunCompletedPayload(characterId, "goblin_mines", false, false, false, [])),
+            CancellationToken.None);
+        await consumer.HandleAsync(
+            CreateOutboxMessage(
+                characterId,
+                GameEventTypes.TournamentBattleCompleted,
+                new TournamentBattleCompletedPayload(characterId, Guid.NewGuid(), Guid.NewGuid())),
+            CancellationToken.None);
+
+        Assert.Equal(
+            [
+                "EssenceLoadoutChanged",
+                "EssenceAscended",
+                "EquipmentTempered",
+                "DungeonRunStarted",
+                "DungeonRunCompleted",
+                "TournamentBattleCompleted"
+            ],
+            progression.Triggers.Select(trigger => trigger.Type));
+        Assert.True(progression.Triggers[0].HasCompatibleEssenceTrio);
+        Assert.Equal([0], progression.Triggers[2].CraftedItemPotentials);
     }
 
     [Fact]

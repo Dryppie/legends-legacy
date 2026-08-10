@@ -17,11 +17,17 @@ public sealed class QuestGameEventOutboxConsumer(
             or GameEventTypes.EssenceAbsorbed
             or GameEventTypes.EssenceLoadoutChanged
             or GameEventTypes.EssenceFocusSet
+            or GameEventTypes.FocusedCreatureEssenceReceived
+            or GameEventTypes.EssenceAscended
             or GameEventTypes.EquipmentCrafted
+            or GameEventTypes.EquipmentTempered
             or GameEventTypes.IdleCombatEncounterCompleted
             or GameEventTypes.CharacterCreated
             or GameEventTypes.CharacterLevelReached
             or GameEventTypes.ColosseumBattleCompleted
+            or GameEventTypes.TournamentBattleCompleted
+            or GameEventTypes.DungeonRunStarted
+            or GameEventTypes.DungeonRunCompleted
             or GameEventTypes.ProphecyCompleted;
 
     public Task HandleAsync(GameEventOutboxMessage message, CancellationToken cancellationToken)
@@ -36,16 +42,25 @@ public sealed class QuestGameEventOutboxConsumer(
             GameEventTypes.EquipmentChanged => QuestTrigger.EquipmentChanged(),
             GameEventTypes.EssenceAbsorbed => QuestTrigger.EssenceAbsorbed(
                 Read<EssenceAbsorbedPayload>(message).EssenceDefinitionId),
-            GameEventTypes.EssenceLoadoutChanged => QuestTrigger.EssenceLoadoutChanged(),
+            GameEventTypes.EssenceLoadoutChanged => QuestTrigger.EssenceLoadoutChanged(
+                Read<EssenceLoadoutChangedPayload>(message).HasCompatibleEssenceTrio),
             GameEventTypes.EssenceFocusSet => QuestTrigger.EssenceFocusSet(),
+            GameEventTypes.FocusedCreatureEssenceReceived => CreateFocusedEssenceTrigger(
+                Read<FocusedCreatureEssenceReceivedPayload>(message)),
+            GameEventTypes.EssenceAscended => QuestTrigger.EssenceAscended(),
             GameEventTypes.EquipmentCrafted => CreateEquipmentCraftedTrigger(
                 Read<EquipmentCraftedPayload>(message)),
+            GameEventTypes.EquipmentTempered => CreateEquipmentTemperedTrigger(
+                Read<EquipmentTemperedPayload>(message)),
             GameEventTypes.IdleCombatEncounterCompleted => CreateCombatTrigger(
                 Read<IdleCombatEncounterCompletedPayload>(message)),
             GameEventTypes.CharacterCreated => QuestTrigger.CharacterLevelReached(1),
             GameEventTypes.CharacterLevelReached => QuestTrigger.CharacterLevelReached(
                 Read<CharacterLevelReachedPayload>(message).Level),
             GameEventTypes.ColosseumBattleCompleted => QuestTrigger.ColosseumBattleStarted(),
+            GameEventTypes.TournamentBattleCompleted => QuestTrigger.TournamentBattleCompleted(),
+            GameEventTypes.DungeonRunStarted => QuestTrigger.DungeonRunStarted(),
+            GameEventTypes.DungeonRunCompleted => QuestTrigger.DungeonRunCompleted(),
             GameEventTypes.ProphecyCompleted when
                 Read<ProphecyCompletedPayload>(message).Scope.Equals(
                     "Daily",
@@ -67,7 +82,23 @@ public sealed class QuestGameEventOutboxConsumer(
         QuestTrigger.EquipmentCrafted(
             payload.CraftedItems.Select(x => x.ItemBaseId).ToList(),
             payload.CraftedItems.Select(x => x.Tier).ToList(),
-            payload.CraftedItems.Select(x => x.BaseRecipeId).ToList());
+            payload.CraftedItems.Select(x => x.BaseRecipeId).ToList(),
+            payload.CraftedItems.Select(x => x.Quality).ToList(),
+            payload.CraftedItems.Select(x => x.Potential).ToList());
+
+    private static QuestTrigger CreateFocusedEssenceTrigger(
+        FocusedCreatureEssenceReceivedPayload payload) =>
+        QuestTrigger.FocusedCreatureEssenceReceived(
+            payload.CreatureDefinitionId,
+            payload.EssenceDefinitionId);
+
+    private static QuestTrigger CreateEquipmentTemperedTrigger(EquipmentTemperedPayload payload) =>
+        QuestTrigger.EquipmentTempered(
+            payload.CompletedItems.Select(x => x.ItemBaseId).ToList(),
+            payload.CompletedItems.Select(x => x.Tier).ToList(),
+            payload.CompletedItems.Select(x => x.BaseRecipeId).ToList(),
+            payload.CompletedItems.Select(x => x.Quality).ToList(),
+            payload.CompletedItems.Select(x => x.Potential).ToList());
 
     private static QuestTrigger CreateCombatTrigger(IdleCombatEncounterCompletedPayload payload) =>
         QuestTrigger.CombatCompleted(

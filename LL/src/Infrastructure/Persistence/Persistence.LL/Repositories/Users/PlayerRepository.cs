@@ -1,5 +1,6 @@
 ﻿using Application.Common.Interfaces;
 using Domain.Models.Users;
+using Domain.Helpers.Constants;
 using Microsoft.EntityFrameworkCore;
 
 namespace Persistence.LL.Repositories.Users;
@@ -13,6 +14,6 @@ public class PlayerRepository : IPlayerRepository
     }
 
     public async Task<int> GetOnlinePlayerCountAsync(CancellationToken cancellationToken) => await _context.CharacterActions
-            .Where(ca => ca.UpdatedAt > DateTimeOffset.UtcNow.AddMinutes(-20))
+            .Where(ca => ca.UpdatedAt > DateTimeOffset.UtcNow.Subtract(PlayerActivityConstants.OnlineWindow))
             .CountAsync(cancellationToken);
 }

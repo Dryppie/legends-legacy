@@ -14,10 +14,13 @@ public sealed class GameEventOutboxConsumerRegistry : IGameEventOutboxConsumerRe
             [GameEventTypes.EssenceLoadoutChanged] =
                 [GameEventOutboxConsumerNames.Quests, GameEventOutboxConsumerNames.Achievements],
             [GameEventTypes.EssenceFocusSet] = [GameEventOutboxConsumerNames.Quests],
-            [GameEventTypes.EssenceAscended] = [GameEventOutboxConsumerNames.Achievements],
+            [GameEventTypes.FocusedCreatureEssenceReceived] = [GameEventOutboxConsumerNames.Quests],
+            [GameEventTypes.EssenceAscended] =
+                [GameEventOutboxConsumerNames.Quests, GameEventOutboxConsumerNames.Achievements],
             [GameEventTypes.EquipmentCrafted] =
                 [GameEventOutboxConsumerNames.Quests, GameEventOutboxConsumerNames.Achievements],
-            [GameEventTypes.EquipmentTempered] = [GameEventOutboxConsumerNames.Achievements],
+            [GameEventTypes.EquipmentTempered] =
+                [GameEventOutboxConsumerNames.Quests, GameEventOutboxConsumerNames.Achievements],
             [GameEventTypes.BlueprintUnlocked] = [GameEventOutboxConsumerNames.Achievements],
             [GameEventTypes.IdleCombatEncounterCompleted] =
                 [GameEventOutboxConsumerNames.Quests, GameEventOutboxConsumerNames.Achievements],
@@ -25,10 +28,13 @@ public sealed class GameEventOutboxConsumerRegistry : IGameEventOutboxConsumerRe
                 [GameEventOutboxConsumerNames.Quests, GameEventOutboxConsumerNames.Achievements],
             [GameEventTypes.CharacterLevelReached] =
                 [GameEventOutboxConsumerNames.Quests, GameEventOutboxConsumerNames.Achievements],
-            [GameEventTypes.DungeonRunStarted] = [GameEventOutboxConsumerNames.Achievements],
-            [GameEventTypes.DungeonRunCompleted] = [GameEventOutboxConsumerNames.Achievements],
+            [GameEventTypes.DungeonRunStarted] =
+                [GameEventOutboxConsumerNames.Quests, GameEventOutboxConsumerNames.Achievements],
+            [GameEventTypes.DungeonRunCompleted] =
+                [GameEventOutboxConsumerNames.Quests, GameEventOutboxConsumerNames.Achievements],
             [GameEventTypes.ColosseumBattleCompleted] =
                 [GameEventOutboxConsumerNames.Quests, GameEventOutboxConsumerNames.Achievements],
+            [GameEventTypes.TournamentBattleCompleted] = [GameEventOutboxConsumerNames.Quests],
             [GameEventTypes.ProphecyCompleted] = [GameEventOutboxConsumerNames.Quests]
         };
 

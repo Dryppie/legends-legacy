@@ -31,6 +31,8 @@ export interface CharacterOverviewDto {
   baseCombatAttributes: AttributeDto[];
   activeEssenceLoadout?: EssenceLoadoutDto | null;
   equippedTitle?: EquippedTitleDto | null;
+  isOnline: boolean;
+  lastSeenAt?: string | null;
 }
 
 export interface EquippedTitleDto {

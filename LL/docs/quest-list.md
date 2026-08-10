@@ -27,62 +27,29 @@ Requirements below are the objectives that must be completed, not the prerequisi
 
 ### Other Quests
 
+Crafting quality progression unlocks in this order: **Arms of Choice** → **A Crafter's Signature** → **Exceptional Work**.
+
 - [x] **A Second Soul** — absorb one additional Essence into the Soul Archive.
 - [x] **An Adaptable Archive** — attune Goblin, Lumo Wisp, and Lumo Sentinel Essences in sequence.
 - [x] **Armor and Adornment** — craft one Tier 1 armor piece and one Tier 1 jewelry piece, in either order.
 - [x] **Arms of Choice** — craft one one-handed shortsword, dagger, Hand Axe, mace, and wand, in any order.
 - [x] **Made by Your Own Hand** — craft a Tier 2 one-handed weapon, then equip a Tier 2 weapon you crafted.
 - [x] **Stone, Timber, and Hide** — complete 10 actions in Lumo Ruins with a pickaxe, 10 with a hatchet, and 10 with a skinning knife equipped.
-- [x] **Focused Pursuit** — set Essence Focus for one creature from the Creatures tab.
+- [x] **Focused Pursuit** — receive an Essence drop from the creature currently set as your Essence Focus.
 - [x] **The Arena Calls** — start one Colosseum battle; winning is not required.
 - [x] **An Omen Fulfilled** — complete one daily Prophecy.
 - [x] **Blood Grove Veteran** — win 25 encounters in Blood Grove.
 - [x] **A Name in Shenic** — reach character level 10.
 - [x] **Tested Wanderer** — reach character level 25.
 - [x] **Warden of Shenic** — win one encounter in Duskmire Hollow as a level 45 character.
-
-## Quest Ideas Not Yet Implemented
-
-### Gathering
-
-- [ ] **The Bloodwood Cut** — gather Bloodwood several times in Blood Grove.
-- [ ] **Relics in the Seam** — mine both Crystal Seam and Grave Ore nodes.
-
-### Crafting and Tempering
-
-- [ ] **Tempered Resolve** — temper a crafted weapon once, then equip it.
-- [ ] **A Crafter's Signature** — craft an uncommon-or-better item that meets a minimum potential requirement.
-- [ ] **Tools Worth Keeping** — craft or temper one tool for each gathering profession.
-
-### Essences and Soulstones
-
-- [ ] **The Archive Deepens** — upgrade or ascend an Essence after absorbing it.
-- [ ] **Resonant Pair** — equip two Essences that share a compatible tag or role.
-- [ ] **Stone Awakening** — purchase the first Soulstone upgrade.
-
-### Dungeons
-
-- [ ] **Sigils in the Dust** — assemble a dungeon sigil and inspect an available route.
-- [ ] **Into the Depths** — complete the first dungeon run and claim its rewards.
-- [ ] **No Room Unanswered** — complete every room in one dungeon run without abandoning it.
-
-### City and Social Activities
-
-- [ ] **The Bazaar Beckons** — visit the Cinder Bazaar and create one marketplace listing.
-- [ ] **A Fair Exchange** — complete one marketplace purchase and one marketplace sale.
-- [ ] **Oathbound** — join or create a Guild.
-- [ ] **For the Guild** — contribute to a Guild building and complete one Guild mission.
-- [ ] **Tournament Tested** — complete a tournament and reach the required placement.
-
-### Creature Hunts
-
-- [ ] **Goblin Trouble** — defeat the required Goblins, Goblin Archers, Goblin Shamans, and Goblin Warriors in Lumo Ruins.
-- [ ] **Fangs in the Grove** — defeat the required Blood Grove predator creatures.
-- [ ] **Lights Beneath the Water** — defeat the required Crystal Wisps and related creatures around Crystal Creek.
-- [ ] **Restless Company** — defeat the required Skeletons, Undead, Grave Wisps, and Grave Hounds in Moonlit Graves.
-- [ ] **Root and Thorn** — defeat the required Treant Saplings, Forest Spirits, and Rotroot Shamblers across Old Forest and Thornroot Hollow.
-- [ ] **Fire Below** — defeat the required Flame Imps, Cinder Beetles, and Smolder Rats in Embercap Burrows.
-- [ ] **Mire Hunters** — defeat the required predator creatures in Moonveil Marsh and Duskmire Hollow.
+- [x] **Tempered Resolve** — temper a crafted weapon until no Potential is left.
+- [x] **A Crafter's Signature** — craft an item with Fine Quality.
+- [x] **Exceptional Work** — craft an item with Exceptional Quality.
+- [x] **The Archive Deepens** — ascend an Essence.
+- [x] **Resonant Pair** — equip three Essences that share an ability tag other than Physical or Melee.
+- [x] **Sigils in the Dust** — enter a dungeon.
+- [x] **Into the Depths** — complete a dungeon run and claim its rewards.
+- [x] **Tournament Tested** — battle in a tournament.
 
 ### Future Quest-System Ideas
 

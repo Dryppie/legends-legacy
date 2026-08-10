@@ -1,0 +1,29 @@
+{
+  "id": "quest.essences.the_archive_deepens",
+  "version": 1,
+  "title": "The Archive Deepens",
+  "summary": "Strengthen one of the souls bound within your Archive.",
+  "category": "Essences",
+  "sortOrder": 350,
+  "objectiveMode": "Sequential",
+  "availability": {
+    "minimumLevel": 1,
+    "completedQuestIds": ["quest.essences.a_second_soul"]
+  },
+  "objectives": [
+    {
+      "key": "ascend_essence",
+      "description": "Ascend an Essence.",
+      "type": "EssenceAscended",
+      "requiredAmount": 1,
+      "filters": {},
+      "presentation": {
+        "actionLabel": "Head to Essences",
+        "destinationRoute": "/game/character/essences"
+      }
+    }
+  ],
+  "rewards": [
+    { "key": "soul_dust", "type": "Item", "itemBaseId": "soul_dust", "quantity": 25 }
+  ]
+}

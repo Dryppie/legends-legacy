@@ -12,14 +12,24 @@ public sealed class JsonQuestDefinitionProvider : IQuestDefinitionProvider
         "EssenceAbsorbed",
         "EssenceEquipped",
         "EssenceFocusSet",
+        "FocusedCreatureEssenceReceived",
+        "EssenceAscended",
+        "CompatibleEssenceLoadout",
         "EquipmentCrafted",
+        "EquipmentTempered",
         "EquipmentEquipped",
         "GatheringToolEquipped",
         "AreaActionCompletedWithTool",
         "CharacterLevelReached",
         "ColosseumBattleStarted",
+        "TournamentBattleCompleted",
+        "DungeonRunStarted",
+        "DungeonRunCompleted",
         "DailyProphecyCompleted"
     ];
+
+    private static readonly HashSet<string> ItemQualities =
+        ["Crude", "Standard", "Fine", "Exceptional", "Masterwork"];
 
     private static readonly HashSet<string> GatheringTypes =
         ["Mining", "Woodcutting", "Skinning"];
@@ -205,6 +215,21 @@ public sealed class JsonQuestDefinitionProvider : IQuestDefinitionProvider
                 {
                     throw new InvalidOperationException(
                         $"Quest '{definition.Id}' objective '{objective.Key}' can include previous crafts only when it matches equipment base recipes.");
+                }
+
+                if (!string.IsNullOrWhiteSpace(objective.Filters.Quality) &&
+                    (objective.Type != "EquipmentCrafted" ||
+                     !ItemQualities.Contains(objective.Filters.Quality)))
+                {
+                    throw new InvalidOperationException(
+                        $"Quest '{definition.Id}' objective '{objective.Key}' has an invalid crafted item quality filter.");
+                }
+
+                if (objective.Filters.RequiresNoPotential &&
+                    objective.Type != "EquipmentTempered")
+                {
+                    throw new InvalidOperationException(
+                        $"Quest '{definition.Id}' objective '{objective.Key}' can require exhausted Potential only for tempered equipment.");
                 }
             }
 

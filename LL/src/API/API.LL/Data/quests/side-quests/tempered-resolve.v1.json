@@ -1,0 +1,37 @@
+{
+  "id": "quest.crafting.tempered_resolve",
+  "version": 1,
+  "title": "Tempered Resolve",
+  "summary": "Work a weapon until every last measure of its Potential has been spent.",
+  "category": "Crafting",
+  "sortOrder": 320,
+  "objectiveMode": "Sequential",
+  "availability": {
+    "minimumLevel": 10,
+    "completedQuestIds": ["quest.crafting.made_by_your_own_hand"]
+  },
+  "objectives": [
+    {
+      "key": "exhaust_weapon_potential",
+      "description": "Temper a crafted weapon until it has no Potential left.",
+      "type": "EquipmentTempered",
+      "requiredAmount": 1,
+      "filters": {
+        "mustBeCrafted": true,
+        "requiresNoPotential": true,
+        "itemBaseIds": [
+          "shortsword", "dagger", "hatchet", "mace", "wand",
+          "greatsword", "battle_axe", "maul", "spear", "staff",
+          "longbow", "crossbow", "gauntlets"
+        ]
+      },
+      "presentation": {
+        "actionLabel": "Head to Tempering",
+        "destinationRoute": "/game/professions/crafting"
+      }
+    }
+  ],
+  "rewards": [
+    { "key": "tempered_scrap", "type": "Item", "itemBaseId": "tempered_scrap", "quantity": 10 }
+  ]
+}

@@ -1,9 +1,11 @@
 using Application.BackgroundJobs;
+using Application.Interfaces.Outbox;
 using Application.Interfaces.Services.LL.Colosseum;
 using Application.Interfaces.Services.LL.Entities;
 using Application.Interfaces.WebSockets;
 using Application.MediatR.Attributes;
 using Application.UseCases.Colosseum.Tournaments.Commands;
+using Application.UseCases.Outbox;
 using Application.WebSockets.Contracts;
 using Domain.Models.Colosseum;
 using Domain.Models.Colosseum.Tournaments;
@@ -439,13 +441,15 @@ public sealed class TournamentGroundsServiceTests
             BattleOutcome.Victory,
             BattleOutcome.Victory,
             BattleOutcome.Victory);
+        var outbox = new RecordingGameEventOutbox();
         var service = CreateService(
             db,
             realtime,
             entityService: new DbEntityService(db),
             combatSetupService: new SimpleCombatSetupService(),
             combatEngineExecutor: combatExecutor,
-            combatEncounterResultFactory: new PassthroughCombatEncounterResultFactory());
+            combatEncounterResultFactory: new PassthroughCombatEncounterResultFactory(),
+            outbox: outbox);
         var tournament = SeedTournament(db, TournamentStatus.RegistrationClosed);
         tournament.StartsAtUtc = Now.AddMinutes(-1);
         tournament.RoundIntervalMinutes = 0;
@@ -466,6 +470,12 @@ public sealed class TournamentGroundsServiceTests
         Assert.Equal(3, await db.TournamentCombatReplays.CountAsync());
         Assert.Equal(10, await db.TournamentRewardGrants.CountAsync());
         Assert.Contains(realtime.Events, e => e.Event == "TournamentCompleted");
+        Assert.All(
+            outbox.Events,
+            entry => Assert.Equal(GameEventTypes.TournamentBattleCompleted, entry.EventType));
+        Assert.Equal(
+            10,
+            outbox.Events.Select(entry => entry.CharacterId).Distinct().Count());
 
         var matches = await db.TournamentMatches.OrderBy(m => m.RoundNumber).ThenBy(m => m.MatchNumber).ToListAsync();
         Assert.All(matches, match =>
@@ -745,7 +755,8 @@ public sealed class TournamentGroundsServiceTests
         ICombatEncounterResultFactory? combatEncounterResultFactory = null,
         ITournamentLockService? tournamentLockService = null,
         TimeProvider? timeProvider = null,
-        TournamentGroundsOptions? options = null)
+        TournamentGroundsOptions? options = null,
+        IGameEventOutbox? outbox = null)
     {
         var tournaments = new TournamentGroundsRepository(db);
         var tournamentOptions = options ?? new TournamentGroundsOptions
@@ -769,7 +780,9 @@ public sealed class TournamentGroundsServiceTests
                 tournaments,
                 Options.Create(tournamentOptions)),
             timeProvider ?? new FixedTimeProvider(Now),
-            Options.Create(tournamentOptions));
+            Options.Create(tournamentOptions),
+            achievementService: null,
+            outbox);
     }
 
     private static TournamentGroundsProgressionJob CreateProgressionJob(
@@ -1225,5 +1238,21 @@ public sealed class TournamentGroundsServiceTests
                 combatResult,
                 combatResult.PlayerTeam,
                 combatResult.EnemyTeam);
+    }
+
+    private sealed class RecordingGameEventOutbox : IGameEventOutbox
+    {
+        public List<(string EventType, Guid? CharacterId)> Events { get; } = [];
+
+        public Task EnqueueAsync<TPayload>(
+            string eventType,
+            TPayload payload,
+            Guid? characterId,
+            Guid? accountId,
+            CancellationToken cancellationToken)
+        {
+            Events.Add((eventType, characterId));
+            return Task.CompletedTask;
+        }
     }
 }

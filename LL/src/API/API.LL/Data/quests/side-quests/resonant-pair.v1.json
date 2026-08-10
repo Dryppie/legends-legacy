@@ -1,0 +1,29 @@
+{
+  "id": "quest.essences.resonant_pair",
+  "version": 1,
+  "title": "Resonant Pair",
+  "summary": "Build an Essence loadout around a meaningful shared combat identity.",
+  "category": "Essences",
+  "sortOrder": 360,
+  "objectiveMode": "Sequential",
+  "availability": {
+    "minimumLevel": 20,
+    "completedQuestIds": ["quest.essences.a_second_soul"]
+  },
+  "objectives": [
+    {
+      "key": "attune_compatible_trio",
+      "description": "Equip three Essences that share an ability tag other than Physical or Melee.",
+      "type": "CompatibleEssenceLoadout",
+      "requiredAmount": 1,
+      "filters": {},
+      "presentation": {
+        "actionLabel": "Head to Essences",
+        "destinationRoute": "/game/character/essences"
+      }
+    }
+  ],
+  "rewards": [
+    { "key": "soul_dust", "type": "Item", "itemBaseId": "soul_dust", "quantity": 30 }
+  ]
+}

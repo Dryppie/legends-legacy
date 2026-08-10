@@ -1,6 +1,7 @@
 using Application.Interfaces.Outbox;
 using Application.Interfaces.Services.LL.Essences;
 using Application.UseCases.Essences.Dtos;
+using Application.UseCases.Outbox;
 using Domain.Components.Attributes;
 using Domain.Models.Achievements;
 using Domain.Models.Attributes;
@@ -226,6 +227,63 @@ public sealed class EssenceSystemServiceTests
         Assert.Empty(bonuses);
         Assert.Equal(50, db.PlayerEssences.Single(x => x.Id == attunedId).CurrentXp);
         Assert.Equal(0, db.PlayerEssences.Single(x => x.Id == inactiveId).CurrentXp);
+    }
+
+    [Fact]
+    public async Task Saving_an_active_loadout_detects_three_essences_with_a_non_generic_shared_ability_tag()
+    {
+        await using var db = CreateDb();
+        var characterId = await SeedCharacterAndInventoryAsync(db, level: 20);
+        var definitions = new[]
+        {
+            FakeDefinitionRepository.CreateDefinition("essence.first", "monster.first"),
+            FakeDefinitionRepository.CreateDefinition("essence.second", "monster.second"),
+            FakeDefinitionRepository.CreateDefinition("essence.third", "monster.third")
+        };
+        foreach (var definition in definitions)
+        {
+            definition.ActiveAbility.Tags = ["Physical", "Melee", "Poison"];
+        }
+
+        var playerEssences = definitions.Select(definition => new PlayerEssence
+        {
+            Id = Guid.NewGuid(),
+            CharacterId = characterId,
+            EssenceDefinitionId = definition.Id
+        }).ToList();
+        var loadout = new EssenceLoadout
+        {
+            Id = Guid.NewGuid(),
+            CharacterId = characterId,
+            Name = "Resonant",
+            Slots = playerEssences.Select((essence, index) => new EssenceLoadoutSlot
+            {
+                Id = Guid.NewGuid(),
+                SlotIndex = index,
+                PlayerEssenceId = essence.Id,
+                PlayerEssence = essence
+            }).ToList()
+        };
+        db.PlayerEssences.AddRange(playerEssences);
+        db.EssenceLoadouts.Add(loadout);
+        await db.SaveChangesAsync();
+        var outbox = new RecordingGameEventOutbox();
+        var service = CreateService(
+            db,
+            definitions: new ListDefinitionRepository(definitions),
+            creatureEssenceLootTables: new StaticCreatureEssenceLootTableRepository(
+                definitions.Select(definition =>
+                    CreateLootTable(definition.SourceMonsterId, definition.Id)).ToList()),
+            outbox: outbox);
+
+        var result = await service.ActivateLoadoutAsync(
+            characterId,
+            loadout.Id,
+            CancellationToken.None);
+
+        Assert.True(result.Succeeded);
+        var payload = Assert.IsType<EssenceLoadoutChangedPayload>(Assert.Single(outbox.Payloads));
+        Assert.True(payload.HasCompatibleEssenceTrio);
     }
 
     [Fact]
@@ -1028,6 +1086,72 @@ public sealed class EssenceSystemServiceTests
     }
 
     [Fact]
+    public async Task RollEssenceDrops_emits_quest_event_when_the_source_creature_is_focused()
+    {
+        await using var db = CreateDb();
+        var characterId = await SeedCharacterAndInventoryAsync(db);
+        db.ItemBases.Add(new EssenceItemBase
+        {
+            Id = "item.essence.test",
+            Name = "Test Essence",
+            ItemType = ItemType.Essence,
+            EssenceDefinitionId = "essence.test"
+        });
+        await db.SaveChangesAsync();
+        var outbox = new RecordingGameEventOutbox();
+        var service = CreateService(
+            db,
+            new QueueRandomProvider(0.0),
+            creatureArchiveService: new StaticCreatureArchiveService("monster.test"),
+            outbox: outbox);
+
+        var drops = await service.RollEssenceDropsAsync(
+            characterId,
+            [new Creature { Name = "Test" }],
+            true,
+            CancellationToken.None);
+
+        Assert.Single(drops);
+        Assert.Equal([GameEventTypes.FocusedCreatureEssenceReceived], outbox.EventTypes);
+        var payload = Assert.IsType<FocusedCreatureEssenceReceivedPayload>(
+            Assert.Single(outbox.Payloads));
+        Assert.Equal(characterId, payload.CharacterId);
+        Assert.Equal("monster.test", payload.CreatureDefinitionId);
+        Assert.Equal("essence.test", payload.EssenceDefinitionId);
+    }
+
+    [Fact]
+    public async Task RollEssenceDrops_does_not_emit_focused_quest_event_for_an_unfocused_creature()
+    {
+        await using var db = CreateDb();
+        var characterId = await SeedCharacterAndInventoryAsync(db);
+        db.ItemBases.Add(new EssenceItemBase
+        {
+            Id = "item.essence.test",
+            Name = "Test Essence",
+            ItemType = ItemType.Essence,
+            EssenceDefinitionId = "essence.test"
+        });
+        await db.SaveChangesAsync();
+        var outbox = new RecordingGameEventOutbox();
+        var service = CreateService(
+            db,
+            new QueueRandomProvider(0.0),
+            creatureArchiveService: new StaticCreatureArchiveService("monster.other"),
+            outbox: outbox);
+
+        var drops = await service.RollEssenceDropsAsync(
+            characterId,
+            [new Creature { Name = "Test" }],
+            true,
+            CancellationToken.None);
+
+        Assert.Single(drops);
+        Assert.Empty(outbox.EventTypes);
+        Assert.Empty(outbox.Payloads);
+    }
+
+    [Fact]
     public async Task Successful_creature_drop_uses_weighted_essence_loot_table()
     {
         await using var db = CreateDb();
@@ -1151,7 +1275,8 @@ public sealed class EssenceSystemServiceTests
         IEssenceDefinitionRepository? definitions = null,
         ICreatureEssenceLootTableRepository? creatureEssenceLootTables = null,
         IBonusService? bonusService = null,
-        ICreatureArchiveService? creatureArchiveService = null)
+        ICreatureArchiveService? creatureArchiveService = null,
+        IGameEventOutbox? outbox = null)
     {
         definitions ??= new FakeDefinitionRepository();
         creatureEssenceLootTables ??= new StaticCreatureEssenceLootTableRepository(
@@ -1170,7 +1295,7 @@ public sealed class EssenceSystemServiceTests
             new EssenceLoadoutLimitService(),
             new InventoryItemFactory(),
             random ?? new QueueRandomProvider(0.99),
-            new NoopGameEventOutbox(),
+            outbox ?? new NoopGameEventOutbox(),
             bonusService: bonusService,
             creatureArchiveService: creatureArchiveService);
     }
@@ -1383,6 +1508,32 @@ public sealed class EssenceSystemServiceTests
             [definition.ActiveAbility, definition.PassiveAbility];
     }
 
+    private sealed class ListDefinitionRepository(IReadOnlyList<EssenceDefinition> definitions)
+        : IEssenceDefinitionRepository
+    {
+        public IReadOnlyList<EssenceDefinition> GetAll() => definitions;
+
+        public EssenceDefinition? GetById(string essenceDefinitionId) =>
+            definitions.FirstOrDefault(definition =>
+                definition.Id.Equals(essenceDefinitionId, StringComparison.OrdinalIgnoreCase));
+
+        public AbilitySpec? GetAbilityById(string abilityId) =>
+            definitions.SelectMany(definition => new[]
+                {
+                    definition.ActiveAbility,
+                    definition.PassiveAbility
+                })
+                .FirstOrDefault(ability =>
+                    ability.Id.Equals(abilityId, StringComparison.OrdinalIgnoreCase));
+
+        public IReadOnlyList<AbilitySpec> GetAllAbilities() =>
+            definitions.SelectMany(definition => new[]
+            {
+                definition.ActiveAbility,
+                definition.PassiveAbility
+            }).ToList();
+    }
+
     private sealed class NoopCreatureScaler : ICreatureScaler
     {
         public void ApplyScaling(Creature creature, Area area)
@@ -1463,5 +1614,23 @@ public sealed class EssenceSystemServiceTests
             Guid? accountId,
             CancellationToken cancellationToken) =>
             Task.CompletedTask;
+    }
+
+    private sealed class RecordingGameEventOutbox : IGameEventOutbox
+    {
+        public List<string> EventTypes { get; } = [];
+        public List<object?> Payloads { get; } = [];
+
+        public Task EnqueueAsync<TPayload>(
+            string eventType,
+            TPayload payload,
+            Guid? characterId,
+            Guid? accountId,
+            CancellationToken cancellationToken)
+        {
+            EventTypes.Add(eventType);
+            Payloads.Add(payload);
+            return Task.CompletedTask;
+        }
     }
 }

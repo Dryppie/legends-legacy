@@ -485,7 +485,19 @@ public sealed class QuestService(
 
             "EssenceFocusSet" when trigger.Type == "EssenceFocusSet" => 1,
 
+            "FocusedCreatureEssenceReceived" when
+                trigger.Type == "FocusedCreatureEssenceReceived" => 1,
+
+            "EssenceAscended" when trigger.Type == "EssenceAscended" => 1,
+
+            "CompatibleEssenceLoadout" when
+                trigger.Type == "EssenceLoadoutChanged" &&
+                trigger.HasCompatibleEssenceTrio => 1,
+
             "EquipmentCrafted" when trigger.Type == "EquipmentCrafted" =>
+                CountMatchingCraftedItems(trigger, filters),
+
+            "EquipmentTempered" when trigger.Type == "EquipmentTempered" =>
                 CountMatchingCraftedItems(trigger, filters),
 
             "EquipmentEquipped" when trigger.Type == "EquipmentChanged" =>
@@ -512,6 +524,12 @@ public sealed class QuestService(
 
             "ColosseumBattleStarted" when trigger.Type == "ColosseumBattleStarted" => 1,
 
+            "TournamentBattleCompleted" when trigger.Type == "TournamentBattleCompleted" => 1,
+
+            "DungeonRunStarted" when trigger.Type == "DungeonRunStarted" => 1,
+
+            "DungeonRunCompleted" when trigger.Type == "DungeonRunCompleted" => 1,
+
             "DailyProphecyCompleted" when trigger.Type == "DailyProphecyCompleted" => 1,
 
             _ => 0
@@ -525,6 +543,8 @@ public sealed class QuestService(
         var itemBaseIds = trigger.CraftedItemBaseIds?.ToList() ?? [];
         var tiers = trigger.CraftedItemTiers?.ToList() ?? [];
         var baseRecipeIds = trigger.CraftedBaseRecipeIds?.ToList() ?? [];
+        var qualities = trigger.CraftedItemQualities?.ToList() ?? [];
+        var potentials = trigger.CraftedItemPotentials?.ToList() ?? [];
         var itemCount = Math.Min(itemBaseIds.Count, tiers.Count);
 
         return Enumerable.Range(0, itemCount).LongCount(index =>
@@ -534,7 +554,16 @@ public sealed class QuestService(
              index < baseRecipeIds.Count &&
              baseRecipeIds[index] is not null &&
              filters.BaseRecipeIds.Contains(baseRecipeIds[index]!, StringComparer.OrdinalIgnoreCase)) &&
-            (!filters.Tier.HasValue || tiers[index] == filters.Tier.Value));
+            (!filters.MustBeCrafted ||
+             index < baseRecipeIds.Count &&
+             !string.IsNullOrWhiteSpace(baseRecipeIds[index])) &&
+            (!filters.Tier.HasValue || tiers[index] == filters.Tier.Value) &&
+            (string.IsNullOrWhiteSpace(filters.Quality) ||
+             index < qualities.Count &&
+             filters.Quality.Equals(qualities[index].ToString(), StringComparison.OrdinalIgnoreCase)) &&
+            (!filters.RequiresNoPotential ||
+             index < potentials.Count &&
+             potentials[index] is <= 0));
     }
 
     private async Task<string?> ResolveExpectedEssenceDefinitionIdAsync(

@@ -27,6 +27,8 @@ public class CharacterOverviewDto : IMapFrom<Character>
     public List<EntityAttribute> BaseCombatAttributes { get; set; } = [];
     public EssenceLoadoutDto? ActiveEssenceLoadout { get; set; }
     public EquippedTitleDto? EquippedTitle { get; set; }
+    public bool IsOnline { get; set; }
+    public DateTimeOffset? LastSeenAt { get; set; }
 
     public void Mapping(Profile profile)
     {
@@ -38,10 +40,14 @@ public class CharacterOverviewDto : IMapFrom<Character>
 public sealed class CharacterOverviewConverter : ITypeConverter<Character, CharacterOverviewDto>
 {
     private readonly IEssenceDefinitionRepository _essenceDefinitions;
+    private readonly TimeProvider _timeProvider;
 
-    public CharacterOverviewConverter(IEssenceDefinitionRepository essenceDefinitions)
+    public CharacterOverviewConverter(
+        IEssenceDefinitionRepository essenceDefinitions,
+        TimeProvider? timeProvider = null)
     {
         _essenceDefinitions = essenceDefinitions;
+        _timeProvider = timeProvider ?? TimeProvider.System;
     }
 
     public CharacterOverviewDto Convert(Character source, CharacterOverviewDto destination, ResolutionContext context)
@@ -71,7 +77,10 @@ public sealed class CharacterOverviewConverter : ITypeConverter<Character, Chara
                 Value = kvp.Value
             }).ToList(),
             ActiveEssenceLoadout = MapActiveLoadout(source),
-            EquippedTitle = MapEquippedTitle(source)
+            EquippedTitle = MapEquippedTitle(source),
+            LastSeenAt = source.CharacterAction?.UpdatedAt,
+            IsOnline = source.CharacterAction?.UpdatedAt >
+                       _timeProvider.GetUtcNow().Subtract(PlayerActivityConstants.OnlineWindow)
         };
     }
 

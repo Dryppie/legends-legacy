@@ -1,0 +1,29 @@
+{
+  "id": "quest.dungeons.sigils_in_the_dust",
+  "version": 1,
+  "title": "Sigils in the Dust",
+  "summary": "Use a sigil to cross the threshold into your first dungeon.",
+  "category": "Dungeons",
+  "sortOrder": 370,
+  "objectiveMode": "Sequential",
+  "availability": {
+    "minimumLevel": 5,
+    "completedQuestIds": ["quest.region01.into_lumo_ruins"]
+  },
+  "objectives": [
+    {
+      "key": "enter_dungeon",
+      "description": "Enter a dungeon.",
+      "type": "DungeonRunStarted",
+      "requiredAmount": 1,
+      "filters": {},
+      "presentation": {
+        "actionLabel": "Head to Dungeons",
+        "destinationRoute": "/game/world/shenic"
+      }
+    }
+  ],
+  "rewards": [
+    { "key": "advancement_stone", "type": "Item", "itemBaseId": "advancement_stone", "quantity": 1 }
+  ]
+}

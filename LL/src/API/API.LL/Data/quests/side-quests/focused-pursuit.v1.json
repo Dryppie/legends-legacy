@@ -2,7 +2,7 @@
   "id": "quest.essences.focused_pursuit",
   "version": 1,
   "title": "Focused Pursuit",
-  "summary": "Choose a creature whose Essence you want to pursue more deliberately.",
+  "summary": "Pursue the creature marked as your Essence Focus until it yields its Essence.",
   "category": "Essences",
   "sortOrder": 290,
   "objectiveMode": "Sequential",
@@ -13,8 +13,8 @@
   "objectives": [
     {
       "key": "set_essence_focus",
-      "description": "Set Essence Focus for a creature in the Creatures tab.",
-      "type": "EssenceFocusSet",
+      "description": "Receive an Essence from the creature set as your Essence Focus.",
+      "type": "FocusedCreatureEssenceReceived",
       "requiredAmount": 1,
       "filters": {},
       "presentation": {

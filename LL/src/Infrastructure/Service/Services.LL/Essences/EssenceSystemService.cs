@@ -305,7 +305,11 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
         {
             await _outbox.EnqueueAsync(
                 GameEventTypes.EssenceLoadoutChanged,
-                new EssenceLoadoutChangedPayload(characterId, essenceIds, normalizedSlots.Count),
+                new EssenceLoadoutChangedPayload(
+                    characterId,
+                    essenceIds,
+                    normalizedSlots.Count,
+                    await HasCompatibleEssenceTrioAsync(characterId, essenceIds, cancellationToken)),
                 characterId,
                 null,
                 cancellationToken);
@@ -349,11 +353,48 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
             new EssenceLoadoutChangedPayload(
                 characterId,
                 essenceIds,
-                selected.Slots.Count(x => x.PlayerEssenceId.HasValue)),
+                selected.Slots.Count(x => x.PlayerEssenceId.HasValue),
+                await HasCompatibleEssenceTrioAsync(characterId, essenceIds, cancellationToken)),
             characterId,
             null,
             cancellationToken);
         return Ok("Essence loadout activated.");
+    }
+
+    private async Task<bool> HasCompatibleEssenceTrioAsync(
+        Guid characterId,
+        IReadOnlyCollection<Guid> playerEssenceIds,
+        CancellationToken cancellationToken)
+    {
+        if (playerEssenceIds.Count < 3)
+        {
+            return false;
+        }
+
+        var selectedIds = playerEssenceIds.ToHashSet();
+        var selectedEssences = (await _essences.GetPlayerEssencesAsync(characterId, cancellationToken))
+            .Where(essence => selectedIds.Contains(essence.Id))
+            .ToList();
+        var compatibleTags = selectedEssences
+            .SelectMany(essence =>
+            {
+                var definition = _definitions.GetById(essence.EssenceDefinitionId);
+                if (definition is null)
+                {
+                    return Enumerable.Empty<(Guid EssenceId, string Tag)>();
+                }
+
+                return definition.ActiveAbility.Tags
+                    .Concat(definition.PassiveAbility.Tags)
+                    .Where(tag =>
+                        !tag.Equals("Physical", StringComparison.OrdinalIgnoreCase) &&
+                        !tag.Equals("Melee", StringComparison.OrdinalIgnoreCase))
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                    .Select(tag => (EssenceId: essence.Id, Tag: tag));
+            })
+            .GroupBy(entry => entry.Tag, StringComparer.OrdinalIgnoreCase);
+
+        return compatibleTags.Any(group => group.Select(entry => entry.EssenceId).Distinct().Count() >= 3);
     }
 
     private async Task<bool> HasUniqueCreatureSourcesAsync(
@@ -664,6 +705,18 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
             }
 
             drops.Add(_inventoryItemFactory.Create(itemBase, 1, characterId));
+            if (await IsEssenceFocusAsync(characterId, monsterId, cancellationToken))
+            {
+                await _outbox.EnqueueAsync(
+                    GameEventTypes.FocusedCreatureEssenceReceived,
+                    new FocusedCreatureEssenceReceivedPayload(
+                        characterId,
+                        monsterId,
+                        roll.EssenceDefinitionId),
+                    characterId,
+                    null,
+                    cancellationToken);
+            }
         }
 
         return drops;

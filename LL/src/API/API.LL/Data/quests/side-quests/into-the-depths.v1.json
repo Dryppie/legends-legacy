@@ -1,0 +1,29 @@
+{
+  "id": "quest.dungeons.into_the_depths",
+  "version": 1,
+  "title": "Into the Depths",
+  "summary": "See a dungeon expedition through and return with its spoils.",
+  "category": "Dungeons",
+  "sortOrder": 380,
+  "objectiveMode": "Sequential",
+  "availability": {
+    "minimumLevel": 5,
+    "completedQuestIds": ["quest.dungeons.sigils_in_the_dust"]
+  },
+  "objectives": [
+    {
+      "key": "complete_and_claim_dungeon",
+      "description": "Complete a dungeon run and claim its rewards.",
+      "type": "DungeonRunCompleted",
+      "requiredAmount": 1,
+      "filters": {},
+      "presentation": {
+        "actionLabel": "Head to Dungeons",
+        "destinationRoute": "/game/world/shenic"
+      }
+    }
+  ],
+  "rewards": [
+    { "key": "advancement_stone", "type": "Item", "itemBaseId": "advancement_stone", "quantity": 3 }
+  ]
+}

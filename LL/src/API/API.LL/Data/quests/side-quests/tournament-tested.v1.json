@@ -1,0 +1,29 @@
+{
+  "id": "quest.colosseum.tournament_tested",
+  "version": 1,
+  "title": "Tournament Tested",
+  "summary": "Put your prepared team to the test in tournament combat.",
+  "category": "Colosseum",
+  "sortOrder": 390,
+  "objectiveMode": "Sequential",
+  "availability": {
+    "minimumLevel": 1,
+    "completedQuestIds": ["quest.colosseum.the_arena_calls"]
+  },
+  "objectives": [
+    {
+      "key": "battle_in_tournament",
+      "description": "Battle in a tournament.",
+      "type": "TournamentBattleCompleted",
+      "requiredAmount": 1,
+      "filters": {},
+      "presentation": {
+        "actionLabel": "Head to the Colosseum",
+        "destinationRoute": "/game/city/colosseum"
+      }
+    }
+  ],
+  "rewards": [
+    { "key": "advancement_stone", "type": "Item", "itemBaseId": "advancement_stone", "quantity": 2 }
+  ]
+}

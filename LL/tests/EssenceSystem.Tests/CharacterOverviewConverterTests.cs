@@ -2,6 +2,7 @@ using Application.Interfaces.Services.LL.Essences;
 using Application.UseCases.Characters.Dtos;
 using Domain.Helpers.Constants;
 using Domain.Models.Combat.Abilities;
+using Domain.Models.CharacterActions;
 using Domain.Models.Entities.Characters;
 using Domain.Models.Essences.Definitions;
 using Domain.Models.Professions;
@@ -61,6 +62,32 @@ public sealed class CharacterOverviewConverterTests
             result.CraftingExperienceUntilNextLevel);
     }
 
+    [Theory]
+    [InlineData(-10, true)]
+    [InlineData(-21, false)]
+    public void Convert_UsesIdleActionActivityForOnlineAndLastSeen(
+        int activityOffsetMinutes,
+        bool expectedOnline)
+    {
+        var now = new DateTimeOffset(2026, 8, 10, 12, 0, 0, TimeSpan.Zero);
+        var lastSeenAt = now.AddMinutes(activityOffsetMinutes);
+        var character = new Character
+        {
+            CharacterAction = new CharacterAction
+            {
+                UpdatedAt = lastSeenAt
+            }
+        };
+
+        var result = new CharacterOverviewConverter(
+                new EmptyEssenceDefinitions(),
+                new FixedTimeProvider(now))
+            .Convert(character, null!, null!);
+
+        Assert.Equal(expectedOnline, result.IsOnline);
+        Assert.Equal(lastSeenAt, result.LastSeenAt);
+    }
+
     private sealed class EmptyEssenceDefinitions : IEssenceDefinitionRepository
     {
         public IReadOnlyList<EssenceDefinition> GetAll() => [];
@@ -70,5 +97,10 @@ public sealed class CharacterOverviewConverterTests
         public EssenceDefinition? GetById(string essenceDefinitionId) => null;
 
         public AbilitySpec? GetAbilityById(string abilityId) => null;
+    }
+
+    private sealed class FixedTimeProvider(DateTimeOffset now) : TimeProvider
+    {
+        public override DateTimeOffset GetUtcNow() => now;
     }
 }

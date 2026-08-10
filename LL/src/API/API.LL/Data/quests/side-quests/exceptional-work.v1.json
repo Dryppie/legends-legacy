@@ -1,0 +1,29 @@
+{
+  "id": "quest.crafting.exceptional_work",
+  "version": 1,
+  "title": "Exceptional Work",
+  "summary": "Create a piece that stands well above ordinary craftsmanship.",
+  "category": "Crafting",
+  "sortOrder": 340,
+  "objectiveMode": "Sequential",
+  "availability": {
+    "minimumLevel": 1,
+    "completedQuestIds": ["quest.crafting.a_crafters_signature"]
+  },
+  "objectives": [
+    {
+      "key": "craft_exceptional_item",
+      "description": "Craft an item with Exceptional Quality.",
+      "type": "EquipmentCrafted",
+      "requiredAmount": 1,
+      "filters": { "quality": "Exceptional" },
+      "presentation": {
+        "actionLabel": "Head to Crafting",
+        "destinationRoute": "/game/professions/crafting"
+      }
+    }
+  ],
+  "rewards": [
+    { "key": "advancement_stone", "type": "Item", "itemBaseId": "advancement_stone", "quantity": 2 }
+  ]
+}

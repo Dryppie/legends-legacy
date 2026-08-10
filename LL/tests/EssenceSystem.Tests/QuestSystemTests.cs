@@ -22,7 +22,7 @@ public sealed class QuestSystemTests
 
         var definitions = provider.GetAll();
 
-        Assert.Equal(28, definitions.Count);
+        Assert.Equal(36, definitions.Count);
         Assert.Equal(QuestConstants.TrainingDay, definitions[0].Id);
         var firstHunt = provider.Get(QuestConstants.TrainingDay);
         Assert.Equal(4, firstHunt.Version);
@@ -71,7 +71,9 @@ public sealed class QuestSystemTests
             [12, 12, 12],
             stoneTimberAndHide.Rewards.Select(reward => reward.Quantity));
         var focusedPursuit = provider.Get(QuestConstants.FocusedPursuit);
-        Assert.Equal("EssenceFocusSet", Assert.Single(focusedPursuit.Objectives).Type);
+        Assert.Equal(
+            "FocusedCreatureEssenceReceived",
+            Assert.Single(focusedPursuit.Objectives).Type);
         Assert.Equal(
             "/game/character/essences?view=creatures",
             focusedPursuit.Objectives[0].Presentation.DestinationRoute);
@@ -81,6 +83,43 @@ public sealed class QuestSystemTests
         Assert.Equal(
             "DailyProphecyCompleted",
             Assert.Single(provider.Get(QuestConstants.AnOmenFulfilled).Objectives).Type);
+        Assert.Equal(
+            "EquipmentTempered",
+            Assert.Single(provider.Get(QuestConstants.TemperedResolve).Objectives).Type);
+        Assert.True(provider.Get(QuestConstants.TemperedResolve).Objectives[0].Filters.MustBeCrafted);
+        Assert.True(provider.Get(QuestConstants.TemperedResolve).Objectives[0].Filters.RequiresNoPotential);
+        Assert.Equal(
+            "Fine",
+            Assert.Single(provider.Get(QuestConstants.ACraftersSignature).Objectives).Filters.Quality);
+        Assert.Equal(
+            [QuestConstants.ArmsOfChoice],
+            provider.Get(QuestConstants.ACraftersSignature).Availability.CompletedQuestIds);
+        Assert.Equal("Exceptional Work", provider.Get(QuestConstants.ExceptionalWork).Title);
+        Assert.Equal(
+            "Exceptional",
+            Assert.Single(provider.Get(QuestConstants.ExceptionalWork).Objectives).Filters.Quality);
+        Assert.Equal(
+            [QuestConstants.ACraftersSignature],
+            provider.Get(QuestConstants.ExceptionalWork).Availability.CompletedQuestIds);
+        Assert.Equal(
+            "EssenceAscended",
+            Assert.Single(provider.Get(QuestConstants.TheArchiveDeepens).Objectives).Type);
+        Assert.Equal(20, provider.Get(QuestConstants.ResonantPair).Availability.MinimumLevel);
+        Assert.Equal(
+            "CompatibleEssenceLoadout",
+            Assert.Single(provider.Get(QuestConstants.ResonantPair).Objectives).Type);
+        Assert.Equal(
+            "DungeonRunStarted",
+            Assert.Single(provider.Get(QuestConstants.SigilsInTheDust).Objectives).Type);
+        Assert.Equal(
+            [QuestConstants.SigilsInTheDust],
+            provider.Get(QuestConstants.IntoTheDepths).Availability.CompletedQuestIds);
+        Assert.Equal(
+            "DungeonRunCompleted",
+            Assert.Single(provider.Get(QuestConstants.IntoTheDepths).Objectives).Type);
+        Assert.Equal(
+            "TournamentBattleCompleted",
+            Assert.Single(provider.Get(QuestConstants.TournamentTested).Objectives).Type);
         Assert.All(
             definitions.SelectMany(quest => quest.Objectives),
             objective => Assert.False(string.IsNullOrWhiteSpace(objective.Presentation.DestinationRoute)));
@@ -626,7 +665,7 @@ public sealed class QuestSystemTests
     }
 
     [Fact]
-    public async Task Side_activity_quests_complete_from_focus_arena_and_daily_prophecy_events()
+    public async Task Side_activity_quests_complete_from_focused_drop_arena_and_daily_prophecy_events()
     {
         var characterId = Guid.NewGuid();
         var definitions = CreateDefinitions();
@@ -660,7 +699,7 @@ public sealed class QuestSystemTests
             CancellationToken.None);
 
         Assert.Equal(
-            QuestStatus.Completed,
+            QuestStatus.Active,
             repository.Progresses.Single(x => x.QuestId == QuestConstants.FocusedPursuit).Status);
         Assert.Equal(
             QuestStatus.Active,
@@ -668,6 +707,17 @@ public sealed class QuestSystemTests
         Assert.Equal(
             QuestStatus.Active,
             repository.Progresses.Single(x => x.QuestId == QuestConstants.AnOmenFulfilled).Status);
+
+        await service.ProcessAsync(
+            characterId,
+            QuestTrigger.FocusedCreatureEssenceReceived("monster.goblin", "essence.goblin"),
+            null,
+            GameEventTypes.FocusedCreatureEssenceReceived,
+            CancellationToken.None);
+
+        Assert.Equal(
+            QuestStatus.Completed,
+            repository.Progresses.Single(x => x.QuestId == QuestConstants.FocusedPursuit).Status);
 
         await service.ProcessAsync(
             characterId,
@@ -728,6 +778,93 @@ public sealed class QuestSystemTests
         Assert.True(lumo.IsVisible);
         Assert.Equal("quest_requirement", lumo.ReasonCode);
         Assert.Equal([QuestConstants.ToolsOfTheTrade], lumo.UnmetQuestIds);
+    }
+
+    [Fact]
+    public async Task New_side_quests_complete_from_their_activity_events_and_item_filters()
+    {
+        var characterId = Guid.NewGuid();
+        var definitions = CreateDefinitions();
+        var repository = new RecordingQuestRepository(level: 20);
+        var questIds = new[]
+        {
+            QuestConstants.TemperedResolve,
+            QuestConstants.ACraftersSignature,
+            QuestConstants.ExceptionalWork,
+            QuestConstants.TheArchiveDeepens,
+            QuestConstants.ResonantPair,
+            QuestConstants.SigilsInTheDust,
+            QuestConstants.IntoTheDepths,
+            QuestConstants.TournamentTested
+        };
+        repository.Progresses.AddRange(questIds.Select(questId =>
+            CreateActiveProgress(characterId, definitions.Get(questId), isPinned: false)));
+        var service = new QuestService(
+            repository,
+            definitions,
+            new RecordingItemBaseRepository(),
+            new RecordingInventoryItemFactory(),
+            new RecordingLootRewardWriter(),
+            TimeProvider.System);
+
+        await service.ProcessAsync(
+            characterId,
+            QuestTrigger.EquipmentCrafted(
+                ["band"],
+                [1],
+                ["recipe.jewelry.band"],
+                [ItemQuality.Fine],
+                [10]),
+            null,
+            GameEventTypes.EquipmentCrafted,
+            CancellationToken.None);
+        Assert.Equal(QuestStatus.Completed, GetStatus(QuestConstants.ACraftersSignature));
+        Assert.Equal(QuestStatus.Active, GetStatus(QuestConstants.ExceptionalWork));
+
+        await service.ProcessAsync(
+            characterId,
+            QuestTrigger.EquipmentCrafted(
+                ["band"],
+                [1],
+                ["recipe.jewelry.band"],
+                [ItemQuality.Exceptional],
+                [10]),
+            null,
+            GameEventTypes.EquipmentCrafted,
+            CancellationToken.None);
+        await service.ProcessAsync(
+            characterId,
+            QuestTrigger.EquipmentTempered(
+                ["shortsword"],
+                [2],
+                ["recipe.weapon.one_handed.shortsword"],
+                [ItemQuality.Standard],
+                [1]),
+            null,
+            GameEventTypes.EquipmentTempered,
+            CancellationToken.None);
+        Assert.Equal(QuestStatus.Active, GetStatus(QuestConstants.TemperedResolve));
+
+        await service.ProcessAsync(
+            characterId,
+            QuestTrigger.EquipmentTempered(
+                ["shortsword"],
+                [2],
+                ["recipe.weapon.one_handed.shortsword"],
+                [ItemQuality.Standard],
+                [0]),
+            null,
+            GameEventTypes.EquipmentTempered,
+            CancellationToken.None);
+        await service.ProcessAsync(characterId, QuestTrigger.EssenceAscended(), null, GameEventTypes.EssenceAscended, CancellationToken.None);
+        await service.ProcessAsync(characterId, QuestTrigger.EssenceLoadoutChanged(true), null, GameEventTypes.EssenceLoadoutChanged, CancellationToken.None);
+        await service.ProcessAsync(characterId, QuestTrigger.DungeonRunStarted(), null, GameEventTypes.DungeonRunStarted, CancellationToken.None);
+        await service.ProcessAsync(characterId, QuestTrigger.DungeonRunCompleted(), null, GameEventTypes.DungeonRunCompleted, CancellationToken.None);
+        await service.ProcessAsync(characterId, QuestTrigger.TournamentBattleCompleted(), null, GameEventTypes.TournamentBattleCompleted, CancellationToken.None);
+
+        Assert.All(questIds, questId => Assert.Equal(QuestStatus.Completed, GetStatus(questId)));
+
+        QuestStatus GetStatus(string questId) => repository.Progresses.Single(x => x.QuestId == questId).Status;
     }
 
     private static JsonQuestDefinitionProvider CreateDefinitions()

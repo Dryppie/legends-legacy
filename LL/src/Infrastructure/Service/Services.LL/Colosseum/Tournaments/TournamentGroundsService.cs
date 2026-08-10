@@ -1,7 +1,9 @@
 using Application.Interfaces.WebSockets;
+using Application.Interfaces.Outbox;
 using Application.Interfaces.Services.LL.Colosseum;
 using Application.Interfaces.Services.LL.Achievements;
 using Application.Interfaces.Services.LL.Entities;
+using Application.UseCases.Outbox;
 using Domain.Models.Colosseum;
 using Domain.Models.Colosseum.Tournaments;
 using Domain.Models.Combat;
@@ -50,6 +52,7 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
     private readonly TimeProvider _timeProvider;
     private readonly TournamentGroundsOptions _options;
     private readonly IAchievementService? _achievementService;
+    private readonly IGameEventOutbox? _outbox;
 
     public TournamentGroundsService(
         ITournamentGroundsRepository tournaments,
@@ -63,7 +66,8 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
         ITournamentLockService tournamentLockService,
         TimeProvider timeProvider,
         IOptions<TournamentGroundsOptions> options,
-        IAchievementService? achievementService = null)
+        IAchievementService? achievementService = null,
+        IGameEventOutbox? outbox = null)
     {
         _tournaments = tournaments;
         _entityService = entityService;
@@ -77,6 +81,7 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
         _timeProvider = timeProvider;
         _options = options.Value;
         _achievementService = achievementService;
+        _outbox = outbox;
     }
 
     public async Task EnsureUpcomingTournamentsAsync(CancellationToken cancellationToken)
@@ -1158,6 +1163,12 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
         if (p1 is null || p2 is null) return;
 
         var result = await ExecuteTournamentCombatAsync(tournament.Id, match.Id, p1, p2, now, cancellationToken);
+        await EnqueueTournamentBattleEventsAsync(
+            tournament.Id,
+            match.Id,
+            p1.Id,
+            p2.Id,
+            cancellationToken);
         var p1Wins = result.Outcome switch
         {
             BattleOutcome.Victory => true,
@@ -1204,6 +1215,34 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
         }
 
         await AdvanceWinnerAsync(tournament.Id, match, winner.Id, now, cancellationToken);
+    }
+
+    private async Task EnqueueTournamentBattleEventsAsync(
+        Guid tournamentId,
+        Guid matchId,
+        Guid playerOneTeamId,
+        Guid playerTwoTeamId,
+        CancellationToken cancellationToken)
+    {
+        if (_outbox is null)
+        {
+            return;
+        }
+
+        var participants = (await GetTeamMembersAsync(playerOneTeamId, cancellationToken))
+            .Concat(await GetTeamMembersAsync(playerTwoTeamId, cancellationToken))
+            .Select(participant => participant.CharacterId)
+            .Distinct()
+            .ToList();
+        foreach (var characterId in participants)
+        {
+            await _outbox.EnqueueAsync(
+                GameEventTypes.TournamentBattleCompleted,
+                new TournamentBattleCompletedPayload(characterId, tournamentId, matchId),
+                characterId,
+                null,
+                cancellationToken);
+        }
     }
 
     private async Task<Guid> SaveTournamentBattleHistoryAsync(

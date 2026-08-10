@@ -46,6 +46,12 @@ export class TemperingComponent {
   readonly waitingQueue = computed<CraftingQueueItem[]>(() =>
     this.craftingQueue().slice(1),
   );
+  readonly combatInProgress = computed(
+    () =>
+      this.characterActionsState.loadingCombat() ||
+      (this.characterActionsState.isCombatAction() &&
+        this.characterActionsState.isActiveAction()),
+  );
 
   readonly equipmentInventory = computed(() =>
     this.inventory().filter((inventoryItem) =>
@@ -114,6 +120,7 @@ export class TemperingComponent {
     const eq = this.selectedEquipmentInstance();
     return (
       !!eq &&
+      !this.combatInProgress() &&
       this.isNonToolEquipment(eq) &&
       (eq.potential ?? 0) >= 1 &&
       eq.rarity !== Rarity.Legacy &&
@@ -124,6 +131,8 @@ export class TemperingComponent {
   readonly selectedIneligibilityReason = computed<string | null>(() => {
     const equipment = this.selectedEquipmentInstance();
     if (!equipment || this.canTemper()) return null;
+    if (this.combatInProgress())
+      return 'Tempering cannot be started while combat is in progress.';
     if ((equipment.potential ?? 0) < 1)
       return 'This item has no remaining Potential.';
     if (equipment.rarity === Rarity.Legacy)
@@ -162,7 +171,7 @@ export class TemperingComponent {
   }
 
   temper(equipment: EquipmentInstance): void {
-    if (!equipment || !this.canTemper()) return;
+    if (!equipment || this.combatInProgress() || !this.canTemper()) return;
 
     const queueId = crypto.randomUUID();
     const queueItem: CraftingQueueItem = {

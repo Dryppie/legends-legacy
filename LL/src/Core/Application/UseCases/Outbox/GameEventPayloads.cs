@@ -15,11 +15,17 @@ public sealed record EssenceAbsorbedPayload(
 public sealed record EssenceLoadoutChangedPayload(
     Guid CharacterId,
     IReadOnlyCollection<Guid> AttunedPlayerEssenceIds,
-    int EquippedEssenceCount);
+    int EquippedEssenceCount,
+    bool HasCompatibleEssenceTrio = false);
 
 public sealed record EssenceFocusSetPayload(
     Guid CharacterId,
     string CreatureDefinitionId);
+
+public sealed record FocusedCreatureEssenceReceivedPayload(
+    Guid CharacterId,
+    string CreatureDefinitionId,
+    string EssenceDefinitionId);
 
 public sealed record EssenceAscendedPayload(
     Guid CharacterId,
@@ -71,6 +77,11 @@ public sealed record ColosseumBattleCompletedPayload(
     BattleOutcome Outcome,
     int CharacterRatingBefore,
     int OpponentRatingBefore);
+
+public sealed record TournamentBattleCompletedPayload(
+    Guid CharacterId,
+    Guid TournamentId,
+    Guid MatchId);
 
 public sealed record ProphecyCompletedPayload(
     Guid CharacterId,
