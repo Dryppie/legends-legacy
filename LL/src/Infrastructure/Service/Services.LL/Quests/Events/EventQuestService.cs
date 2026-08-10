@@ -521,8 +521,7 @@ public sealed class EventQuestService(
         return objective.Type switch
         {
             "CombatEncounterCompleted" when trigger.Type == "CombatEncounterCompleted" &&
-                Matches(filters.AreaId, trigger.AreaId) &&
-                (filters.RequiresVictory != true || trigger.WonEncounter == true) => 1,
+                Matches(filters.AreaId, trigger.AreaId) => CountCombatEncounters(trigger, filters.RequiresVictory),
             "AreaActionCompletedWithTool" when trigger.Type == "CombatEncounterCompleted" &&
                 Matches(filters.AreaId, trigger.AreaId) &&
                 Matches(filters.GatheringType, trigger.EquippedGatheringType) => Math.Max(0, trigger.ActionCount),
@@ -543,6 +542,18 @@ public sealed class EventQuestService(
             "DailyProphecyCompleted" when trigger.Type == "DailyProphecyCompleted" => 1,
             _ => 0
         };
+    }
+
+    private static long CountCombatEncounters(QuestTrigger trigger, bool? requiresVictory)
+    {
+        if (requiresVictory != true)
+        {
+            return Math.Max(0, trigger.ActionCount);
+        }
+
+        return Math.Max(
+            0,
+            trigger.WinningEncounterCount ?? (trigger.WonEncounter == true ? 1 : 0));
     }
 
     private static long CountMatchingItems(QuestTrigger trigger, QuestObjectiveFilterDefinition filters)

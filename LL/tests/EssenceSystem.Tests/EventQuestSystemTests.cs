@@ -98,6 +98,39 @@ public sealed class EventQuestSystemTests
     }
 
     [Fact]
+    public async Task Offline_combat_batch_contributes_each_victory()
+    {
+        await using var db = CreateDb();
+        var definition = CreateActiveDefinition(requiredAmount: 10);
+        var service = CreateService(db, definition, new RecordingPublisher());
+        var characterId = Guid.NewGuid();
+        db.Characters.Add(new Character
+        {
+            Id = characterId,
+            Name = "OfflineFighter",
+            NormalizedName = "OFFLINEFIGHTER"
+        });
+        CompleteTutorial(db, characterId);
+        await db.SaveChangesAsync();
+
+        await service.ProcessAsync(
+            characterId,
+            QuestTrigger.CombatCompleted(
+                "region_01_area_01",
+                true,
+                actionCount: 5,
+                winningEncounterCount: 3),
+            Guid.NewGuid(),
+            "IdleCombatEncounterCompleted",
+            CancellationToken.None);
+
+        var state = Assert.Single((await service.GetJournalAsync(characterId, CancellationToken.None)).Events);
+        Assert.Equal(3, Assert.Single(state.Objectives).CurrentAmount);
+        Assert.Equal(3, state.MyContribution);
+        Assert.Equal(3, Assert.Single(await db.EventQuestEventLedgers.ToListAsync()).ContributionAmount);
+    }
+
+    [Fact]
     public async Task Event_completes_when_the_shared_target_is_reached()
     {
         await using var db = CreateDb();

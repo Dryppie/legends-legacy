@@ -113,7 +113,8 @@ public sealed class IdleCombatOutcomeProcessor : ICombatOutcomeProcessor
                 facts.Encounters.Count(x => x.Outcome == BattleOutcome.Defeat),
                 lowestWinningHealthPercent == 0 ? null : lowestWinningHealthPercent,
                 facts.Encounters.Count,
-                facts.EquippedTool?.GatheringType.ToString()),
+                facts.EquippedTool?.GatheringType.ToString(),
+                facts.Encounters.Count(x => x.Outcome == BattleOutcome.Victory)),
             facts.CharacterId,
             null,
             cancellationToken);

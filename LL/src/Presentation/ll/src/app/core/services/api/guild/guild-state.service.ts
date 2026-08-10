@@ -4,7 +4,10 @@ import { Guild, GuildSimple } from '../../../../shared/models/Dtos/guild/guild';
 import { GuildInvite } from '../../../../shared/models/Dtos/guild/guildInvite';
 import { InviteToGuild } from '../../../../shared/models/requestDtos/guilds/inviteToGuild';
 import { GuildService } from './guild.service';
-import { GuildMissionOverview } from '../../../../shared/models/Dtos/guild/guildMission';
+import {
+  GuildMissionOverview,
+  PersonalGuildOrder,
+} from '../../../../shared/models/Dtos/guild/guildMission';
 import { GuildShopOverview } from '../../../../shared/models/Dtos/guild/guildShop';
 import {
   GuildBuilding,
@@ -58,6 +61,34 @@ interface GuildRealtimeHandler {
   refresh?: boolean;
 }
 
+export function normalizeGuildMissionOverview(
+  missions: GuildMissionOverview | null,
+  guildId: string | null,
+): GuildMissionOverview | null {
+  if (!missions || !guildId || missions.guildId !== guildId) return null;
+
+  const originalOrders = Array.isArray(missions.personalOrders)
+    ? missions.personalOrders
+    : [];
+  const personalOrders = originalOrders.filter(isValidPersonalGuildOrder);
+
+  return originalOrders === missions.personalOrders &&
+    personalOrders.length === originalOrders.length
+    ? missions
+    : { ...missions, personalOrders };
+}
+
+function isValidPersonalGuildOrder(
+  order: PersonalGuildOrder | null | undefined,
+): order is PersonalGuildOrder {
+  return !!(
+    order?.id &&
+    order.definition?.id &&
+    order.definition.name?.trim() &&
+    order.reward
+  );
+}
+
 @Injectable({ providedIn: 'root' })
 export class GuildStateService {
   /* ─────────── writable signals ─────────── */
@@ -73,6 +104,7 @@ export class GuildStateService {
   private readonly guildRealtimeHandlers = this.createGuildRealtimeHandlers();
   private hasLoaded = false;
   private lastTokenGuildId: string | null | undefined = undefined;
+  private refreshRequestId = 0;
 
   /* ─────────── public, read-only selectors ─────────── */
   readonly guild = computed(() => this._guild());
@@ -85,11 +117,14 @@ export class GuildStateService {
   readonly error = computed(() => this._error());
   readonly isInGuild = computed(() => !!this._guild());
   readonly hasInvites = computed(() => this._invites().length > 0);
-  readonly claimableDailyOrderCount = computed(
-    () =>
-      this._missions()?.personalOrders.filter((order) => order.canClaimReward)
-        .length ?? 0,
-  );
+  readonly claimableDailyOrderCount = computed(() => {
+    const guildId = this._guild()?.id ?? null;
+    const missions = normalizeGuildMissionOverview(this._missions(), guildId);
+    return (
+      missions?.personalOrders.filter((order) => order.canClaimReward).length ??
+      0
+    );
+  });
   readonly guildNotificationCount = computed(() =>
     this.notificationService.count(
       NOTIFICATION_SURFACE.Sidebar,
@@ -278,13 +313,24 @@ export class GuildStateService {
   refresh(): void {
     this.hasLoaded = true;
     this._loading.set(true);
+    const requestId = ++this.refreshRequestId;
 
     this.service
       .getMyGuild()
-      .pipe(finalize(() => this._loading.set(false)))
+      .pipe(
+        finalize(() => {
+          if (requestId === this.refreshRequestId) this._loading.set(false);
+        }),
+      )
       .subscribe({
         next: (guild) => {
+          if (requestId !== this.refreshRequestId) return;
+
           const nextGuildId = guild?.id ?? null;
+          const previousGuildId = this._guild()?.id ?? null;
+          if (previousGuildId !== nextGuildId) {
+            this.clearGuildScopedState();
+          }
           this.refreshAuthSessionIfGuildChanged(nextGuildId);
 
           if (guild) {
@@ -295,15 +341,13 @@ export class GuildStateService {
             );
             this._invites.set([]);
             this._allGuilds.set([]);
-            this.loadGuildBuildings();
-            this.loadGuildMissions();
-            this.loadGuildShop();
+            this.loadGuildBuildings(guild.id);
+            this.loadGuildMissions(guild.id);
+            this.loadGuildShop(guild.id);
             this.loadAllGuilds();
           } else {
             this._guild.set(null);
-            this._buildings.set(null);
-            this._missions.set(null);
-            this._shop.set(null);
+            this.clearGuildScopedState();
             this.loadAllGuilds();
             this.loadMyInvites();
           }
@@ -339,7 +383,7 @@ export class GuildStateService {
       .subscribe({
         next: () => {
           this._guild.set(null);
-          this._buildings.set(null);
+          this.clearGuildScopedState();
           this.refresh();
         },
         error: (e) => this._error.set(e.message ?? 'Failed to leave guild'),
@@ -355,7 +399,7 @@ export class GuildStateService {
       .subscribe({
         next: () => {
           this._guild.set(null);
-          this._buildings.set(null);
+          this.clearGuildScopedState();
           this.refresh();
         },
         error: (e) => this._error.set(e.message ?? 'Failed to disband guild'),
@@ -370,7 +414,9 @@ export class GuildStateService {
       .pipe(finalize(() => this._loading.set(false)))
       .subscribe({
         next: (buildings) => {
-          this._buildings.set(buildings);
+          if (buildings.guildId === this._guild()?.id) {
+            this._buildings.set(buildings);
+          }
           this.refresh();
         },
         error: (e) =>
@@ -388,7 +434,9 @@ export class GuildStateService {
       .pipe(finalize(() => this._loading.set(false)))
       .subscribe({
         next: (buildings) => {
-          this._buildings.set(buildings);
+          if (buildings.guildId === this._guild()?.id) {
+            this._buildings.set(buildings);
+          }
           this.refresh();
         },
         error: (e) =>
@@ -403,7 +451,7 @@ export class GuildStateService {
       .selectMission(optionId)
       .pipe(finalize(() => this._loading.set(false)))
       .subscribe({
-        next: (missions) => this._missions.set(missions),
+        next: (missions) => this.setMissionOverviewIfCurrent(missions),
         error: (e) =>
           this._error.set(e.message ?? 'Failed to select guild mission'),
       });
@@ -417,8 +465,8 @@ export class GuildStateService {
       .pipe(finalize(() => this._loading.set(false)))
       .subscribe({
         next: (missions) => {
-          this._missions.set(missions);
-          this.loadGuildShop();
+          this.setMissionOverviewIfCurrent(missions);
+          this.loadGuildShop(this._guild()?.id ?? null);
           this.refresh();
         },
         error: (e) =>
@@ -434,8 +482,8 @@ export class GuildStateService {
       .pipe(finalize(() => this._loading.set(false)))
       .subscribe({
         next: (missions) => {
-          this._missions.set(missions);
-          this.loadGuildShop();
+          this.setMissionOverviewIfCurrent(missions);
+          this.loadGuildShop(this._guild()?.id ?? null);
           this.refresh();
         },
         error: (e) =>
@@ -453,7 +501,9 @@ export class GuildStateService {
       .pipe(finalize(() => this._loading.set(false)))
       .subscribe({
         next: (shop) => {
-          this._shop.set(shop);
+          if (shop.guildId === this._guild()?.id) {
+            this._shop.set(shop);
+          }
           this.auth.refreshCurrentCharacter();
         },
         error: (e) =>
@@ -482,23 +532,41 @@ export class GuildStateService {
     });
   }
 
-  private loadGuildBuildings(): void {
+  private loadGuildBuildings(expectedGuildId: string): void {
     this.service.getBuildings().subscribe({
-      next: (buildings) => this._buildings.set(buildings),
+      next: (buildings) => {
+        if (this._guild()?.id !== expectedGuildId) return;
+        this._buildings.set(
+          buildings?.guildId === expectedGuildId ? buildings : null,
+        );
+      },
       error: (e) => this._error.set(e.message ?? 'Failed to load buildings'),
     });
   }
 
-  private loadGuildMissions(): void {
+  private loadGuildMissions(expectedGuildId: string): void {
     this.service.getMissions().subscribe({
-      next: (missions) => this._missions.set(missions),
+      next: (missions) => {
+        if (this._guild()?.id !== expectedGuildId) return;
+        this._missions.set(
+          normalizeGuildMissionOverview(missions, expectedGuildId),
+        );
+      },
       error: (e) => this._error.set(e.message ?? 'Failed to load missions'),
     });
   }
 
-  private loadGuildShop(): void {
+  private loadGuildShop(expectedGuildId: string | null): void {
+    if (!expectedGuildId) {
+      this._shop.set(null);
+      return;
+    }
+
     this.service.getShop().subscribe({
-      next: (shop) => this._shop.set(shop),
+      next: (shop) => {
+        if (this._guild()?.id !== expectedGuildId) return;
+        this._shop.set(shop?.guildId === expectedGuildId ? shop : null);
+      },
       error: (e) => this._error.set(e.message ?? 'Failed to load guild shop'),
     });
   }
@@ -554,6 +622,9 @@ export class GuildStateService {
 
   /* ─────────── optional optimistic helpers ─────────── */
   setGuild(guild: Guild | null) {
+    if ((this._guild()?.id ?? null) !== (guild?.id ?? null)) {
+      this.clearGuildScopedState();
+    }
     this._guild.set(guild);
   }
   setInvites(inv: GuildInvite[]) {
@@ -594,5 +665,19 @@ export class GuildStateService {
     this.auth.refreshSession().subscribe({
       error: () => undefined,
     });
+  }
+
+  private setMissionOverviewIfCurrent(
+    missions: GuildMissionOverview | null,
+  ): void {
+    this._missions.set(
+      normalizeGuildMissionOverview(missions, this._guild()?.id ?? null),
+    );
+  }
+
+  private clearGuildScopedState(): void {
+    this._buildings.set(null);
+    this._missions.set(null);
+    this._shop.set(null);
   }
 }

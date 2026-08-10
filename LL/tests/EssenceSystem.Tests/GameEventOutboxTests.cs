@@ -142,7 +142,8 @@ public sealed class GameEventOutboxTests
                     0,
                     100,
                     3,
-                    "Mining")),
+                    "Mining",
+                    2)),
             CancellationToken.None);
         await consumer.HandleAsync(
             CreateOutboxMessage(
@@ -154,6 +155,7 @@ public sealed class GameEventOutboxTests
         Assert.Equal(["CombatEncounterCompleted", "DailyProphecyCompleted"], progression.Triggers.Select(x => x.Type));
         Assert.Equal(3, progression.Triggers[0].ActionCount);
         Assert.Equal("Mining", progression.Triggers[0].EquippedGatheringType);
+        Assert.Equal(2, progression.Triggers[0].WinningEncounterCount);
     }
 
     [Fact]
@@ -455,6 +457,7 @@ public sealed class GameEventOutboxTests
         Assert.Equal(12, payload.LowestWinningHealthPercent);
         Assert.Equal(3, payload.ActionCount);
         Assert.Equal("Mining", payload.EquippedGatheringType);
+        Assert.Equal(2, payload.WinningEncounterCount);
 
         var prophecyBatch = Assert.Single(publisher.Notifications.OfType<ProphecyProgressBatchNotification>());
         Assert.Equal(6, prophecyBatch.ProgressEvents.Count);
