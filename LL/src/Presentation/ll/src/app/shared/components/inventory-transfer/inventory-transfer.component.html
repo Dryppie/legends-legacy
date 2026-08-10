@@ -1,0 +1,77 @@
+<div class="ll-card p-3">
+  <div class="flex items-center justify-between gap-3">
+    <div>
+      <h3 class="ll-heading text-base">Transfer</h3>
+      <p class="ll-copy mt-1 text-sm">
+        Send this item directly to another player.
+      </p>
+    </div>
+    <button
+      *ngIf="!isFormOpen()"
+      type="button"
+      class="ll-button shrink-0"
+      [disabled]="!!transferRestriction"
+      (click)="openForm()"
+    >
+      Transfer
+    </button>
+  </div>
+
+  <div *ngIf="transferRestriction as restriction" class="ll-state mt-3">
+    {{ restriction }}
+  </div>
+
+  <div *ngIf="isFormOpen()" class="mt-3 space-y-3">
+    <label class="ll-field block">
+      <span>Player name</span>
+      <input
+        type="text"
+        class="ll-input mt-1 w-full"
+        name="transferRecipientName"
+        autocomplete="off"
+        maxlength="80"
+        [(ngModel)]="recipientName"
+        [disabled]="isTransferring()"
+      />
+    </label>
+
+    <label *ngIf="isStackable" class="ll-field block">
+      <span>Quantity (maximum {{ inventoryItem.quantity }})</span>
+      <input
+        type="number"
+        class="ll-input no-spinner mt-1 w-full"
+        name="transferQuantity"
+        min="1"
+        [max]="inventoryItem.quantity"
+        step="1"
+        [(ngModel)]="quantity"
+        [disabled]="isTransferring()"
+      />
+    </label>
+
+    <div *ngIf="error() as message" class="ll-state ll-state-danger">
+      {{ message }}
+    </div>
+
+    <div class="flex justify-end gap-2">
+      <button
+        type="button"
+        class="ll-button"
+        [disabled]="isTransferring()"
+        (click)="cancel()"
+      >
+        Cancel
+      </button>
+      <button
+        type="button"
+        class="ll-button"
+        [disabled]="
+          isTransferring() || !recipientName.trim() || quantity < 1
+        "
+        (click)="transfer()"
+      >
+        {{ isTransferring() ? "Sending..." : "Send" }}
+      </button>
+    </div>
+  </div>
+</div>

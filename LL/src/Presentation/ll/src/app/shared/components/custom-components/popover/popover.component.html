@@ -3,9 +3,10 @@
   #origin
   [attr.aria-haspopup]="disabled ? null : true"
   [attr.aria-expanded]="overlayRef ? 'true' : 'false'"
+  (pointerdown)="onOriginPointerDown($event)"
   (click)="onOriginClick($event)"
   (pointerenter)="onOriginEnter($event)"
-  (pointerleave)="onOriginLeave()"
+  (pointerleave)="onOriginLeave($event)"
 >
   <ng-content></ng-content>
 </div>

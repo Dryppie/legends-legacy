@@ -31,6 +31,7 @@ using Domain.Models.Regions;
 using Domain.Models.Regions.Areas;
 using Domain.Models.Snapshots;
 using Domain.Models.Soulstones;
+using Domain.Models.Transfers;
 using Domain.Models.Users;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
@@ -117,6 +118,7 @@ public interface IDbContext
     DbSet<Inventory> Inventories { get; }
     DbSet<InventoryItem> InventoryItems { get; }
     DbSet<LootHistoryEntry> LootHistoryEntries { get; }
+    DbSet<PlayerTransferRecord> PlayerTransferHistory { get; }
     DbSet<ItemBase> ItemBases { get; }
     DbSet<ItemInstance> ItemInstances { get; }
     DbSet<MarketPlaceListing> MarketPlaceListings { get; }

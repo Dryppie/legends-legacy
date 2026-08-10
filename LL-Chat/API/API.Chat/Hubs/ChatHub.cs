@@ -126,6 +126,8 @@ public sealed class ChatHub : Hub<IChatClient>
     public Task LeaveGuild(string guildId)
         => Groups.RemoveFromGroupAsync(Context.ConnectionId, GuildPrefix + guildId);
 
+    public static string GuildGroupName(string guildId) => GuildPrefix + guildId;
+
     // ---------------------------  LIFECYCLE  ---------------------------
 
     public override async Task OnConnectedAsync()

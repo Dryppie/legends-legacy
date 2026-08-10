@@ -35,6 +35,17 @@ public class SendSystemMessageCommandHandler : IRequestHandler<SendSystemMessage
             return null;
         }
 
+        if (request.MessageId.HasValue)
+        {
+            var existing = await _chatService.GetByIdAsync(
+                request.MessageId.Value,
+                cancellationToken);
+            if (existing is not null)
+            {
+                return ChatMessageDto.FromDomain(existing);
+            }
+        }
+
         var message = new ChatMessage
         {
             Id = request.MessageId ?? Guid.NewGuid(),

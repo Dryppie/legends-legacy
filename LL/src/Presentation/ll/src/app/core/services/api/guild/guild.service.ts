@@ -151,6 +151,10 @@ export class GuildService {
     return this.api.post('guild/returnVaultItem', vaultItemId);
   }
 
+  withdrawVaultItem(vaultItemId: string): Observable<void> {
+    return this.api.post('guild/withdrawVaultItem', vaultItemId);
+  }
+
   changeMemberRole(characterId: string, role: GuildRole): Observable<void> {
     return this.api.post('guild/changeMemberRole', { characterId, role });
   }
@@ -163,7 +167,9 @@ export class GuildService {
     return this.api.post('guild/updateRolePermissions', permissions);
   }
 
-  constructBuilding(buildingType: GuildBuildingType): Observable<GuildBuildingOverview> {
+  constructBuilding(
+    buildingType: GuildBuildingType,
+  ): Observable<GuildBuildingOverview> {
     return this.api.post('guild/constructBuilding', buildingType).pipe(
       map((buildings) => {
         return buildings;

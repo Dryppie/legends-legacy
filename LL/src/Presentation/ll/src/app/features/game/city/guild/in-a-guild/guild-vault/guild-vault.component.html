@@ -97,9 +97,9 @@
     </header>
 
     <div class="min-h-0 flex-1 overflow-auto">
-      <div class="min-w-[52rem]">
+      <div class="min-w-[56rem]">
         <div
-          class="ll-table-header sticky top-0 z-10 grid grid-cols-[minmax(15rem,1fr)_7rem_7rem_10rem_7rem] gap-3"
+          class="ll-table-header sticky top-0 z-10 grid grid-cols-[minmax(15rem,1fr)_7rem_7rem_10rem_13rem] gap-3"
         >
           <div>Equipment</div>
           <div>Slot</div>
@@ -118,7 +118,7 @@
 
         <div
           *ngFor="let vaultItem of visibleVaultItems"
-          class="ll-table-row grid min-h-[4.75rem] grid-cols-[minmax(15rem,1fr)_7rem_7rem_10rem_7rem] items-center gap-3"
+          class="ll-table-row grid min-h-[4.75rem] grid-cols-[minmax(15rem,1fr)_7rem_7rem_10rem_13rem] items-center gap-3"
         >
           <div class="min-w-0">
             <app-item [item]="vaultItem.equipment"></app-item>
@@ -158,18 +158,44 @@
             </ng-template>
           </div>
 
-          <div class="justify-self-stretch">
-            <app-regular-button
-              *ngIf="!vaultItem.borrowedByCharacterId"
-              fullWidth=""
-              [disabled]="!canBorrow || busy"
-              (pressed)="borrow(vaultItem.id)"
+          <div class="flex justify-end gap-1 justify-self-stretch">
+            <ng-container
+              *ngIf="pendingWithdrawId === vaultItem.id; else vaultActions"
             >
-              Borrow
-            </app-regular-button>
+              <app-regular-button
+                variant="danger"
+                [disabled]="busy"
+                (pressed)="withdraw(vaultItem.id)"
+              >
+                Confirm
+              </app-regular-button>
+              <app-regular-button
+                variant="secondary"
+                [disabled]="busy"
+                (pressed)="cancelWithdraw()"
+              >
+                Cancel
+              </app-regular-button>
+            </ng-container>
+            <ng-template #vaultActions>
+              <app-regular-button
+                *ngIf="!vaultItem.borrowedByCharacterId && canBorrow"
+                [disabled]="busy"
+                (pressed)="borrow(vaultItem.id)"
+              >
+                Borrow
+              </app-regular-button>
+              <app-regular-button
+                *ngIf="!vaultItem.borrowedByCharacterId && canWithdraw"
+                variant="danger"
+                [disabled]="busy"
+                (pressed)="requestWithdraw(vaultItem.id)"
+              >
+                Withdraw
+              </app-regular-button>
+            </ng-template>
             <app-regular-button
               *ngIf="vaultItem.borrowedByCharacterId === myCharacterId()"
-              fullWidth=""
               variant="secondary"
               [disabled]="busy"
               (pressed)="returnItem(vaultItem.id)"

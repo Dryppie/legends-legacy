@@ -1,4 +1,5 @@
 using Domain.Models.Chats;
+using System.Text.Json;
 
 namespace Application.UsesCases.Chats.Dtos;
 
@@ -11,6 +12,7 @@ public class ChatMessageDto
     public string SenderName { get; init; } = string.Empty;
     public string? SenderTitleDisplayName { get; init; }
     public string Body { get; init; } = string.Empty;
+    public JsonElement? LinkedItem { get; init; }
     public Guid? TargetCharacterId { get; init; }
     public string? TargetCharacterName { get; init; }
     public string? TargetCharacterTitleDisplayName { get; init; }
@@ -27,10 +29,26 @@ public class ChatMessageDto
             SenderName = message.SenderName,
             SenderTitleDisplayName = message.SenderTitleDisplayName,
             Body = message.Body,
+            LinkedItem = ParseLinkedItem(message.LinkedItemJson),
             TargetCharacterId = message.TargetCharacterId,
             TargetCharacterName = message.TargetCharacterName,
             TargetCharacterTitleDisplayName = message.TargetCharacterTitleDisplayName,
             SentAt = message.SentAt
         };
+    }
+
+    private static JsonElement? ParseLinkedItem(string? json)
+    {
+        if (string.IsNullOrWhiteSpace(json)) return null;
+
+        try
+        {
+            using var document = JsonDocument.Parse(json);
+            return document.RootElement.Clone();
+        }
+        catch (JsonException)
+        {
+            return null;
+        }
     }
 }

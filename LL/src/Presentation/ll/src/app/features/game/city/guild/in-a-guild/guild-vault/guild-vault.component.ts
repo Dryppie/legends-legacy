@@ -48,6 +48,7 @@ export class GuildVaultComponent {
   activeFilter: VaultFilter = 'all';
   selectedSlot: VaultSlotFilter = 'all';
   sortBy: VaultSort = 'slot';
+  pendingWithdrawId: string | null = null;
   readonly filters: ReadonlyArray<{ value: VaultFilter; label: string }> = [
     { value: 'all', label: 'All' },
     { value: 'available', label: 'Available' },
@@ -94,6 +95,18 @@ export class GuildVaultComponent {
     );
     if (!me) return false;
     return this.permissionFor(me.role)?.canBorrowVault ?? false;
+  }
+
+  get canWithdraw(): boolean {
+    const me = this.guild.members.find(
+      (member) => member.characterId === this.myCharacterId(),
+    );
+    if (!me) return false;
+    if (me.role === GuildRole.Leader) return true;
+    return (
+      me.role === GuildRole.Officer &&
+      (this.permissionFor(me.role)?.canWithdrawVault ?? false)
+    );
   }
 
   get availableCount(): number {
@@ -221,6 +234,29 @@ export class GuildVaultComponent {
       .returnVaultItem(vaultItemId)
       .pipe(finalize(() => (this.busy = false)))
       .subscribe({ next: () => this.refreshAll() });
+  }
+
+  requestWithdraw(vaultItemId: string): void {
+    if (this.busy) return;
+    this.pendingWithdrawId = vaultItemId;
+  }
+
+  cancelWithdraw(): void {
+    this.pendingWithdrawId = null;
+  }
+
+  withdraw(vaultItemId: string): void {
+    if (this.busy || this.pendingWithdrawId !== vaultItemId) return;
+    this.busy = true;
+    this.guildService
+      .withdrawVaultItem(vaultItemId)
+      .pipe(finalize(() => (this.busy = false)))
+      .subscribe({
+        next: () => {
+          this.pendingWithdrawId = null;
+          this.refreshAll();
+        },
+      });
   }
 
   private permissionFor(role: GuildRole): GuildRolePermission | undefined {

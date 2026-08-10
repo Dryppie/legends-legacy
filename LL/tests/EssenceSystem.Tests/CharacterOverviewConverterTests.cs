@@ -5,6 +5,7 @@ using Domain.Models.Combat.Abilities;
 using Domain.Models.CharacterActions;
 using Domain.Models.Entities.Characters;
 using Domain.Models.Essences.Definitions;
+using Domain.Models.Guilds;
 using Domain.Models.Professions;
 
 namespace EssenceSystem.Tests;
@@ -60,6 +61,33 @@ public sealed class CharacterOverviewConverterTests
         Assert.Equal(
             EntityLevelConstants.XP_REQUIRED(1),
             result.CraftingExperienceUntilNextLevel);
+    }
+
+    [Fact]
+    public void CharacterGuildDto_MapsPublicGuildIdentity()
+    {
+        var guildId = Guid.NewGuid();
+        var result = CharacterGuildDto.From(new GuildMember
+        {
+            GuildId = guildId,
+            Guild = new Guild
+            {
+                Id = guildId,
+                Name = "The Wayfinders",
+                Tag = "WAY"
+            }
+        });
+
+        Assert.NotNull(result);
+        Assert.Equal(guildId, result.Id);
+        Assert.Equal("The Wayfinders", result.Name);
+        Assert.Equal("WAY", result.Tag);
+    }
+
+    [Fact]
+    public void CharacterGuildDto_ReturnsNullForPlayerWithoutGuild()
+    {
+        Assert.Null(CharacterGuildDto.From(null));
     }
 
     [Theory]

@@ -1,6 +1,7 @@
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
+using Application.UseCases.Items.Dtos;
 using Domain.Models.Attributes;
 using Domain.Models.Items;
 using Domain.Models.Items.Equipments;
@@ -140,6 +141,27 @@ public sealed class CraftingCompositionContentTests
                 [AttributeType.DamageReduction] = 0.15d
             },
             aegis.BonusStatProfile);
+    }
+
+    [Fact]
+    public void BlueprintItemMetadataIncludesCraftedAttributeContribution()
+    {
+        var provider = CreateProvider();
+        var metadata = new BlueprintItemMetadataResolver(provider).Resolve(
+            new ItemBase { Id = "blueprint_fury" },
+            null!,
+            null,
+            null!);
+
+        Assert.NotNull(metadata);
+        Assert.Equal(
+            new Dictionary<AttributeType, double>
+            {
+                [AttributeType.Power] = 0.45d,
+                [AttributeType.CritChance] = 0.3d,
+                [AttributeType.CritDamage] = 0.25d
+            },
+            metadata.BonusStatProfile);
     }
 
     [Fact]

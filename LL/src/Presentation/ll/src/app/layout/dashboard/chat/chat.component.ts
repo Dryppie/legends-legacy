@@ -14,7 +14,7 @@ import {
   ChatMessageDto,
   ChatService,
 } from '../../../core/services/ll-chat/chat-service/chat.service';
-import { Subscription } from 'rxjs';
+import { firstValueFrom, Subscription } from 'rxjs';
 import { DatePipe, NgClass, NgFor, NgIf } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
@@ -25,6 +25,35 @@ import { CharacterStateService } from '../../../core/services/api/character/char
 import { CharacterTagComponent } from '../../../shared/components/character/character-tag/character-tag.component';
 import { AuthService } from '../../../core/services/api/auth/auth.service';
 import { UserInfoDto } from '../../../shared/models/Dtos/userInfoDto';
+import { CharacterService } from '../../../core/services/api/character/character.service';
+import { ItemComponent } from '../../../shared/components/item/item.component';
+
+export interface WireCommand {
+  recipientName: string;
+  amount: number;
+}
+
+export type WireCommandParseResult =
+  | { isWire: false }
+  | { isWire: true; command: WireCommand | null };
+
+export function parseWireCommand(body: string): WireCommandParseResult {
+  const trimmed = body.trim();
+  if (!/^\/wire(?:\s|$)/i.test(trimmed)) return { isWire: false };
+
+  const match = /^\/wire\s+(.+?)\s+(\d+)\s+cinders\s*$/i.exec(trimmed);
+  if (!match) return { isWire: true, command: null };
+
+  const amount = Number(match[2]);
+  if (!Number.isSafeInteger(amount) || amount <= 0) {
+    return { isWire: true, command: null };
+  }
+
+  return {
+    isWire: true,
+    command: { recipientName: match[1].trim(), amount },
+  };
+}
 
 interface ChatRoom {
   label: string;
@@ -51,6 +80,7 @@ export function isWorldSystemMessage(message: ChatMessageDto): boolean {
     StickyScrollDirective,
     DatePipe,
     CharacterTagComponent,
+    ItemComponent,
     RouterLink,
   ],
   templateUrl: './chat.component.html',
@@ -180,6 +210,7 @@ export class ChatComponent implements OnInit, OnDestroy {
     public chat: ChatService,
     private readonly guildState: GuildStateService,
     private readonly characterState: CharacterStateService,
+    private readonly characterService: CharacterService,
     private readonly authService: AuthService,
   ) {
     this.guild = this.guildState.guild;
@@ -462,6 +493,32 @@ export class ChatComponent implements OnInit, OnDestroy {
     let { type, contextKey } = this.activeChannel;
 
     try {
+      const wire = parseWireCommand(body);
+      if (wire.isWire) {
+        if (!wire.command) {
+          this.sendError = 'Usage: /wire Name Amount Cinders';
+          return;
+        }
+
+        const response = await firstValueFrom(
+          this.characterService.wireCinders(
+            wire.command.recipientName,
+            wire.command.amount,
+          ),
+        );
+        const currentCharacter = this.characterState.currentCharacter();
+        if (currentCharacter) {
+          this.characterState.updateCharacter({
+            ...currentCharacter,
+            cinders: response.remainingCinders,
+          });
+        }
+
+        this.draft = '';
+        this.sendError = '';
+        return;
+      }
+
       if (body.startsWith('/w ')) {
         const parts = body.split(' ');
         if (parts.length < 3) return; // Invalid
@@ -498,10 +555,44 @@ export class ChatComponent implements OnInit, OnDestroy {
       this.draft = '';
       this.sendError = '';
     } catch (err) {
-      this.sendError = getChatSendErrorMessage(err);
+      this.sendError = body.toLowerCase().startsWith('/wire')
+        ? getWireErrorMessage(err)
+        : getChatSendErrorMessage(err);
       console.warn('Unable to send chat message.', err);
     }
   }
+}
+
+export function getWireErrorMessage(error: unknown): string {
+  const candidate = error as {
+    errorMessage?: unknown;
+    message?: unknown;
+  };
+  const technicalMessage =
+    typeof candidate?.errorMessage === 'string'
+      ? candidate.errorMessage
+      : typeof candidate?.message === 'string'
+        ? candidate.message
+        : '';
+  const normalizedMessage = technicalMessage.toLowerCase();
+
+  if (normalizedMessage.includes('not enough cinders')) {
+    return 'You do not have enough Cinders for this wire.';
+  }
+  if (normalizedMessage.includes('yourself')) {
+    return 'You cannot wire Cinders to yourself.';
+  }
+  if (normalizedMessage.includes('not be found')) {
+    return "That player couldn't be found.";
+  }
+  if (normalizedMessage.includes('at least 1')) {
+    return 'The wire amount must be at least 1 Cinder.';
+  }
+  if (normalizedMessage.includes('only cinders')) {
+    return 'Only Cinders can currently be wired.';
+  }
+
+  return "The Cinders couldn't be wired. Please try again.";
 }
 
 export function getChatSendErrorMessage(error: unknown): string {

@@ -17,6 +17,7 @@ using Application.UseCases.Guilds.Commands.UpgradeGuildBuilding;
 using Application.UseCases.Guilds.Commands.DonateGuildVaultItem;
 using Application.UseCases.Guilds.Commands.BorrowGuildVaultItem;
 using Application.UseCases.Guilds.Commands.ReturnGuildVaultItem;
+using Application.UseCases.Guilds.Commands.WithdrawGuildVaultItem;
 using Application.UseCases.Guilds.Commands.ChangeGuildMemberRole;
 using Application.UseCases.Guilds.Commands.KickGuildMember;
 using Application.UseCases.Guilds.Commands.UpdateGuildRolePermissions;
@@ -140,6 +141,10 @@ public class GuildController : BaseController
     [HttpPost("ReturnVaultItem")]
     public async Task<ActionResult<Response<bool>>> ReturnVaultItem([FromBody] Guid vaultItemId) =>
         await Mediator.Send(new ReturnGuildVaultItemCommand(CurrentCharacterGuid, vaultItemId));
+
+    [HttpPost("WithdrawVaultItem")]
+    public async Task<ActionResult<Response<bool>>> WithdrawVaultItem([FromBody] Guid vaultItemId) =>
+        await Mediator.Send(new WithdrawGuildVaultItemCommand(CurrentCharacterGuid, vaultItemId));
 
     [HttpPost("ChangeMemberRole")]
     public async Task<ActionResult<Response<bool>>> ChangeMemberRole([FromBody] ChangeGuildMemberRoleDto request) =>

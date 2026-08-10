@@ -123,6 +123,17 @@ public sealed class GameEventOutboxTests
     }
 
     [Fact]
+    public void Consumer_registry_routes_transfer_chat_messages_to_durable_chat_delivery()
+    {
+        var registry = new GameEventOutboxConsumerRegistry();
+
+        var consumer = Assert.Single(
+            registry.GetConsumers(GameEventTypes.PlayerTransferChatMessage));
+
+        Assert.Equal(GameEventOutboxConsumerNames.TransferChat, consumer);
+    }
+
+    [Fact]
     public async Task Event_quest_consumer_maps_combat_and_daily_prophecy_events()
     {
         var characterId = Guid.NewGuid();

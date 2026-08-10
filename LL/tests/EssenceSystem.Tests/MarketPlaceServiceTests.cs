@@ -889,6 +889,7 @@ public sealed class MarketPlaceServiceTests
             return Task.CompletedTask;
         }
         public Task<InventoryItem?> ScrapEquipments(Guid characterId, List<Guid> parsedGuids, CancellationToken cancellationToken) => Task.FromResult<InventoryItem?>(null);
+        public Task<InventoryTransferResult> TransferItemAsync(Guid senderCharacterId, Guid recipientCharacterId, Guid itemInstanceId, int quantity, CancellationToken cancellationToken) => throw new NotSupportedException();
     }
 
     private sealed class FakeCharacterService(IEnumerable<Character> characters) : ICharacterService

@@ -23,16 +23,16 @@ import { CharacterTagComponent } from '../../../../../../shared/components/chara
 import { GuildRolePermission } from '../../../../../../shared/models/Dtos/guild/guildRolePermission';
 
 @Component({
-    selector: 'app-guild-info',
-    imports: [
-        NgFor,
-        NgIf,
-        NgClass,
-        FormsModule,
-        RegularButtonComponent,
-        CharacterTagComponent,
-    ],
-    templateUrl: './guild-info.component.html'
+  selector: 'app-guild-info',
+  imports: [
+    NgFor,
+    NgIf,
+    NgClass,
+    FormsModule,
+    RegularButtonComponent,
+    CharacterTagComponent,
+  ],
+  templateUrl: './guild-info.component.html',
 })
 export class GuildInfoComponent implements OnInit, OnChanges {
   @Input() guild!: Guild;
@@ -63,6 +63,7 @@ export class GuildInfoComponent implements OnInit, OnChanges {
 
   id!: string;
   leaderRole: GuildRole = GuildRole.Leader;
+  officerRole: GuildRole = GuildRole.Officer;
   memberRole: GuildRole = GuildRole.Member;
   subscriptions: Subscription = new Subscription();
   constructor(

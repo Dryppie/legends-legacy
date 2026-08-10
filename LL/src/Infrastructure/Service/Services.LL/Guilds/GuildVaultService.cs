@@ -17,20 +17,31 @@ public class GuildVaultService : IGuildVaultService
         _context = context;
     }
 
-    public async Task<GuildOperationResult<bool>> DonateAsync(Guid characterId, Guid equipmentInstanceId, CancellationToken cancellationToken)
+    public async Task<GuildOperationResult<GuildVaultMutation>> DonateAsync(Guid characterId, Guid equipmentInstanceId, CancellationToken cancellationToken)
     {
         var member = await GetMemberAsync(characterId, cancellationToken);
-        if (member is null) return GuildOperationResult<bool>.Fail("You are not in a guild.");
+        if (member is null) return GuildOperationResult<GuildVaultMutation>.Fail("You are not in a guild.");
 
         var inventoryItem = await _context.InventoryItems
             .Include(x => x.ItemInstance)
+                .ThenInclude(x => x.ItemBase)
+                    .ThenInclude(x => (x as EquipmentBase)!.AttributeModifiers)
+            .Include(x => x.ItemInstance)
+                .ThenInclude(x => x.ItemBase)
+                    .ThenInclude(x => (x as EquipmentBase)!.ToolBonuses)
+            .Include(x => (x.ItemInstance as EquipmentInstance)!.InstanceModifiers)
+            .Include(x => (x.ItemInstance as EquipmentInstance)!.ToolAffixes)
             .FirstOrDefaultAsync(
                 x => x.InventoryId == characterId && x.ItemInstanceId == equipmentInstanceId,
                 cancellationToken);
-        if (inventoryItem?.ItemInstance is not EquipmentInstance)
-            return GuildOperationResult<bool>.Fail("Only unequipped equipment can be donated.");
+        if (inventoryItem?.ItemInstance is not EquipmentInstance equipment)
+            return GuildOperationResult<GuildVaultMutation>.Fail("Only unequipped equipment can be donated.");
+        if (await _context.EquipmentSlots.AnyAsync(
+                x => x.EquipmentInstanceId == equipmentInstanceId,
+                cancellationToken))
+            return GuildOperationResult<GuildVaultMutation>.Fail("Equipped equipment must be unequipped before it can be donated.");
         if (await _context.GuildVaultItems.AnyAsync(x => x.EquipmentInstanceId == equipmentInstanceId, cancellationToken))
-            return GuildOperationResult<bool>.Fail("That equipment already belongs to a guild vault.");
+            return GuildOperationResult<GuildVaultMutation>.Fail("That equipment already belongs to a guild vault.");
 
         _context.InventoryItems.Remove(inventoryItem);
         _context.GuildVaultItems.Add(new GuildVaultItem
@@ -40,7 +51,11 @@ public class GuildVaultService : IGuildVaultService
             DonatedByCharacterId = characterId
         });
 
-        return GuildOperationResult<bool>.Success(true);
+        return GuildOperationResult<GuildVaultMutation>.Success(new(
+            member.GuildId,
+            characterId,
+            member.Character.Name,
+            equipment));
     }
 
     public async Task<GuildOperationResult<bool>> BorrowAsync(Guid characterId, Guid vaultItemId, CancellationToken cancellationToken)
@@ -97,8 +112,81 @@ public class GuildVaultService : IGuildVaultService
         return GuildOperationResult<bool>.Success(true);
     }
 
+    public async Task<GuildOperationResult<GuildVaultMutation>> WithdrawAsync(Guid characterId, Guid vaultItemId, CancellationToken cancellationToken)
+    {
+        var member = await GetMemberAsync(characterId, cancellationToken);
+        if (member is null) return GuildOperationResult<GuildVaultMutation>.Fail("You are not in a guild.");
+
+        var canWithdraw = member.Role == GuildRole.Leader
+            || member.Role == GuildRole.Officer && member.Guild.PermissionsFor(member.Role).CanWithdrawVault;
+        if (!canWithdraw)
+            return GuildOperationResult<GuildVaultMutation>.Fail("Your guild role cannot withdraw vault equipment.");
+
+        var vaultItem = await _context.GuildVaultItems
+            .Include(x => x.EquipmentInstance)
+                .ThenInclude(x => x.ItemBase)
+                    .ThenInclude(x => (x as EquipmentBase)!.AttributeModifiers)
+            .Include(x => x.EquipmentInstance)
+                .ThenInclude(x => x.ItemBase)
+                    .ThenInclude(x => (x as EquipmentBase)!.ToolBonuses)
+            .Include(x => x.EquipmentInstance)
+                .ThenInclude(x => x.InstanceModifiers)
+            .Include(x => x.EquipmentInstance)
+                .ThenInclude(x => x.ToolAffixes)
+            .FirstOrDefaultAsync(x => x.Id == vaultItemId && x.GuildId == member.GuildId, cancellationToken);
+        if (vaultItem is null) return GuildOperationResult<GuildVaultMutation>.Fail("Vault equipment was not found.");
+        if (vaultItem.BorrowedByCharacterId is not null)
+            return GuildOperationResult<GuildVaultMutation>.Fail("Borrowed equipment must be returned before it can be withdrawn.");
+
+        // The vault record is the ownership source of truth. Older or interrupted
+        // operations may have left a stale inventory/loadout reference behind;
+        // normalize those references while completing the authorized withdrawal.
+        var existingInventoryItems = await _context.InventoryItems
+            .Where(x => x.ItemInstanceId == vaultItem.EquipmentInstanceId)
+            .ToListAsync(cancellationToken);
+        var withdrawingCharacterItem = existingInventoryItems
+            .FirstOrDefault(x => x.InventoryId == characterId);
+        foreach (var existingInventoryItem in existingInventoryItems)
+        {
+            if (existingInventoryItem != withdrawingCharacterItem)
+                _context.InventoryItems.Remove(existingInventoryItem);
+        }
+
+        var equippedSlots = await _context.EquipmentSlots
+            .Where(x => x.EquipmentInstanceId == vaultItem.EquipmentInstanceId)
+            .ToListAsync(cancellationToken);
+        foreach (var equippedSlot in equippedSlots)
+        {
+            equippedSlot.EquipmentInstanceId = null;
+            equippedSlot.EquipmentInstance = null;
+        }
+
+        if (withdrawingCharacterItem is null)
+        {
+            _context.InventoryItems.Add(new InventoryItem
+            {
+                InventoryId = characterId,
+                ItemInstanceId = vaultItem.EquipmentInstanceId,
+                Quantity = 1
+            });
+        }
+        else
+        {
+            withdrawingCharacterItem.Quantity = 1;
+        }
+
+        _context.GuildVaultItems.Remove(vaultItem);
+
+        return GuildOperationResult<GuildVaultMutation>.Success(new(
+            member.GuildId,
+            characterId,
+            member.Character.Name,
+            vaultItem.EquipmentInstance));
+    }
+
     private Task<GuildMember?> GetMemberAsync(Guid characterId, CancellationToken cancellationToken) =>
         _context.GuildMembers
+            .Include(x => x.Character)
             .Include(x => x.Guild)
                 .ThenInclude(x => x.RolePermissions)
             .FirstOrDefaultAsync(x => x.CharacterId == characterId, cancellationToken);

@@ -30,9 +30,9 @@ import {
 let _nextId = 1;
 
 @Component({
-    selector: 'app-popover',
-    imports: [OverlayModule, PortalModule, CommonModule],
-    templateUrl: './popover.component.html'
+  selector: 'app-popover',
+  imports: [OverlayModule, PortalModule, CommonModule],
+  templateUrl: './popover.component.html',
 })
 export class PopoverComponent implements AfterViewInit, OnDestroy {
   @Input({ required: true }) template!: TemplateRef<any>;
@@ -66,6 +66,8 @@ export class PopoverComponent implements AfterViewInit, OnDestroy {
 
   private hoverOpenTimer?: ReturnType<typeof setTimeout>;
   private hoverCloseTimer?: ReturnType<typeof setTimeout>;
+  private lastOriginPointerType?: string;
+  private openedByTouch = false;
 
   // service handle
   private handleCtrl!: ReturnType<PopoverService['register']>;
@@ -124,9 +126,26 @@ export class PopoverComponent implements AfterViewInit, OnDestroy {
 
   // ========= Trigger handlers =========
   onOriginClick(e: MouseEvent) {
-    if (this.disabled || this.trigger !== 'click') return;
-    e.stopPropagation();
-    this.handleCtrl.requestToggle();
+    if (this.disabled) return;
+
+    if (this.trigger === 'click') {
+      e.stopPropagation();
+      this.handleCtrl.requestToggle();
+      return;
+    }
+
+    const pointerType =
+      (e as PointerEvent).pointerType || this.lastOriginPointerType;
+    this.lastOriginPointerType = undefined;
+    if (this.trigger === 'hover' && pointerType && pointerType !== 'mouse') {
+      this.clearTimers();
+      this.openedByTouch = true;
+      this.handleCtrl.requestToggle();
+    }
+  }
+
+  onOriginPointerDown(event: PointerEvent) {
+    this.lastOriginPointerType = event.pointerType;
   }
 
   onOriginEnter(event: PointerEvent) {
@@ -137,6 +156,7 @@ export class PopoverComponent implements AfterViewInit, OnDestroy {
     ) {
       return;
     }
+    this.openedByTouch = false;
     this.clearCloseTimer();
     this.hoverOpenTimer = setTimeout(
       () => this.handleCtrl.requestOpen(),
@@ -144,8 +164,8 @@ export class PopoverComponent implements AfterViewInit, OnDestroy {
     );
   }
 
-  onOriginLeave() {
-    if (this.trigger !== 'hover') return;
+  onOriginLeave(event: PointerEvent) {
+    if (this.trigger !== 'hover' || event.pointerType !== 'mouse') return;
     this.queueClose();
   }
 
@@ -180,6 +200,21 @@ export class PopoverComponent implements AfterViewInit, OnDestroy {
       this.subs.add(overlayRef.backdropClick().subscribe(() => this.detach()));
     }
 
+    if (this.openedByTouch && this.closeOnOutsideClick) {
+      this.subs.add(
+        overlayRef.outsidePointerEvents().subscribe((event) => {
+          const target = event.target;
+          if (
+            target instanceof Node &&
+            this.originRef.nativeElement.contains(target)
+          ) {
+            return;
+          }
+          this.handleCtrl.requestClose();
+        }),
+      );
+    }
+
     if (this.closeOnEscape) {
       this.subs.add(
         overlayRef.keydownEvents().subscribe((evt) => {
@@ -203,6 +238,7 @@ export class PopoverComponent implements AfterViewInit, OnDestroy {
       this.overlayRef.dispose();
       this.overlayRef = undefined;
       this.portal = undefined;
+      this.openedByTouch = false;
       this.closed.emit();
       this.cdr.markForCheck();
     }

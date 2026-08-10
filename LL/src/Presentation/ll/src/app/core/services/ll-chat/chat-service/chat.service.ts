@@ -10,6 +10,7 @@ import { AuthService } from '../../api/auth/auth.service';
 import { GuildStateService } from '../../api/guild/guild-state.service';
 import { CharacterService } from '../../api/character/character.service';
 import { GameEventService } from '../../real-time/game-event.service';
+import { EquipmentInstance } from '../../../../shared/models/item';
 
 export interface ChatMessageDto {
   id: string;
@@ -22,6 +23,7 @@ export interface ChatMessageDto {
   targetCharacterName?: string;
   targetCharacterTitleDisplayName?: string | null;
   body: string;
+  linkedItem?: EquipmentInstance | null;
   sentAt: Date;
 }
 export enum ChatChannelType {
@@ -81,6 +83,25 @@ export class ChatService {
           contextKey: 'system',
           senderId: this.systemSenderId,
           senderName: payload.isGlobal ? 'World' : 'System',
+          body: payload.message,
+          sentAt: new Date(envelope?.occurredAt ?? Date.now()),
+        });
+      },
+      { allowSignalWrites: true },
+    );
+
+    effect(
+      () => {
+        const envelope = this.gameEvents.eventEnvelope.PlayerTransferMsg();
+        const payload = envelope?.payload;
+        if (!payload?.message || !payload.messageId) return;
+
+        this.addMessage({
+          id: payload.messageId,
+          channelType: ChatChannelType.System,
+          contextKey: 'system',
+          senderId: this.systemSenderId,
+          senderName: 'System',
           body: payload.message,
           sentAt: new Date(envelope?.occurredAt ?? Date.now()),
         });
@@ -391,7 +412,9 @@ export class ChatService {
   }
 
   private currentSenderTitleDisplayName(): string | null {
-    return this.auth.currentCharacter()?.equippedTitle?.displayName?.trim() || null;
+    return (
+      this.auth.currentCharacter()?.equippedTitle?.displayName?.trim() || null
+    );
   }
 
   private setOnlinePlayerCount(count: number): void {

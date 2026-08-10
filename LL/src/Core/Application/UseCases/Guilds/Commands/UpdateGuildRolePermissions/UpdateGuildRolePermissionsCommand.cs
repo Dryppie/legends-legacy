@@ -32,7 +32,8 @@ public class UpdateGuildRolePermissionsCommandHandler : IRequestHandler<UpdateGu
             CanManageApplications = value.CanManageApplications,
             CanPromoteDemote = value.CanPromoteDemote,
             CanKick = value.CanKick,
-            CanBorrowVault = value.CanBorrowVault
+            CanBorrowVault = value.CanBorrowVault,
+            CanWithdrawVault = value.Role == GuildRole.Officer && value.CanWithdrawVault
         }, cancellationToken);
         if (!updated || guild is null) return Response<bool>.Fail("Only the guild leader can change role permissions.");
         await _events.PublishAsync(new Audience.Guild(guild.Id), new GuildStateChangedMsg(guild.Id));

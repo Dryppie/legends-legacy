@@ -298,6 +298,7 @@ public class GuildRepository : IGuildRepository
         existing.CanPromoteDemote = permissions.CanPromoteDemote;
         existing.CanKick = permissions.CanKick;
         existing.CanBorrowVault = permissions.CanBorrowVault;
+        existing.CanWithdrawVault = permissions.CanWithdrawVault;
         return true;
     }
 

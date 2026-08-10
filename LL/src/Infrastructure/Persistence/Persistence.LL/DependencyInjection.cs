@@ -91,6 +91,7 @@ public static class DependencyInjection
         services.AddScoped<IAttributeRepository, AttributeRepository>();
         services.AddScoped<IAchievementRepository, AchievementRepository>();
         services.AddScoped<ICharacterRepository, CharacterRepository>();
+        services.AddScoped<ICurrencyTransferRepository, CurrencyTransferRepository>();
         services.AddScoped<ICharacterActionRepository, CharacterActionRepository>();
         services.AddScoped<ICreatureRepository, CreatureRepository>();
 

@@ -14,6 +14,12 @@ export interface OpenSelectionCrateResponse {
   rewards: InventoryItem[];
 }
 
+export interface TransferInventoryItemResponse {
+  itemInstanceId: string;
+  recipientName: string;
+  quantity: number;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -100,5 +106,16 @@ export class InventoryService {
       `inventory/items/${containerItemInstanceId}/open-selection-container`,
       { optionId },
     );
+  }
+
+  transferItem(
+    itemInstanceId: string,
+    recipientName: string,
+    quantity: number,
+  ): Observable<TransferInventoryItemResponse> {
+    return this.apiService.post(`inventory/items/${itemInstanceId}/transfer`, {
+      recipientName,
+      quantity,
+    });
   }
 }

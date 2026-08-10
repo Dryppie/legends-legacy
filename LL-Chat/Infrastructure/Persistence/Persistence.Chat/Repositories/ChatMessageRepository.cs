@@ -18,6 +18,11 @@ public class ChatMessageRepository : IChatMessageRepository
         await _context.SaveChangesAsync(cancellationToken);
     }
 
+    public Task<ChatMessage?> GetByIdAsync(Guid id, CancellationToken cancellationToken) =>
+        _context.ChatMessages
+            .AsNoTracking()
+            .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+
     public async Task<IReadOnlyList<ChatMessage>> LatestAsync(Guid userId, int take, string? guildChannel, CancellationToken cancellationToken)
     {
         var publicChannels = new List<ChatChannelType> { ChatChannelType.General, ChatChannelType.Trade, ChatChannelType.Help };

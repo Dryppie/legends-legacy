@@ -299,6 +299,7 @@ public static class DependencyInjection
                 sp.GetRequiredService<IRewardTableDefinitionValidator>()));
         services.AddScoped<IRewardRoller, RewardRoller>();
         services.AddScoped<IInventoryService, InventoryService>();
+        services.AddScoped<ICurrencyTransferService, CurrencyTransferService>();
         services.AddScoped<ILootHistoryService, LootHistoryService>();
         services.AddScoped<IInventoryItemFactory, InventoryItemFactory>();
         services.AddScoped<ISelectionCrateService, SelectionCrateService>();
@@ -355,6 +356,8 @@ public static class DependencyInjection
         services.AddScoped<IGameEventOutboxConsumer, QuestGameEventOutboxConsumer>();
         services.AddScoped<IGameEventOutboxConsumer, EventQuestGameEventOutboxConsumer>();
         services.AddScoped<IGameEventOutboxConsumer, AchievementGameEventOutboxConsumer>();
+        services.AddScoped<IGameEventOutboxConsumer, TransferChatGameEventOutboxConsumer>();
+        services.AddScoped<IGameEventOutboxConsumer, GuildVaultChatGameEventOutboxConsumer>();
         services.AddSingleton<IQuestDefinitionProvider>(sp =>
             new JsonQuestDefinitionProvider(
                 config,

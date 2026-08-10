@@ -12,6 +12,7 @@ public class GuildRolePermissionDto : IMapFrom<GuildRolePermission>
     public bool CanPromoteDemote { get; set; }
     public bool CanKick { get; set; }
     public bool CanBorrowVault { get; set; }
+    public bool CanWithdrawVault { get; set; }
 
     public void Mapping(Profile profile)
     {

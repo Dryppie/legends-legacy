@@ -1,6 +1,8 @@
 import {
   getChatSendErrorMessage,
+  getWireErrorMessage,
   isWorldSystemMessage,
+  parseWireCommand,
 } from './chat.component';
 import {
   ChatChannelType,
@@ -56,5 +58,46 @@ describe('getChatSendErrorMessage', () => {
     );
 
     expect(result).toBe("Your message couldn't be sent. Please try again.");
+  });
+});
+
+describe('parseWireCommand', () => {
+  it('parses a valid Cinders wire case-insensitively', () => {
+    expect(parseWireCommand('/WIRE Ember 250 cInDeRs')).toEqual({
+      isWire: true,
+      command: { recipientName: 'Ember', amount: 250 },
+    });
+  });
+
+  it('supports player names containing spaces', () => {
+    expect(parseWireCommand('/wire Ember Knight 250 Cinders')).toEqual({
+      isWire: true,
+      command: { recipientName: 'Ember Knight', amount: 250 },
+    });
+  });
+
+  it('rejects malformed and non-positive wire commands', () => {
+    expect(parseWireCommand('/wire Ember Cinders')).toEqual({
+      isWire: true,
+      command: null,
+    });
+    expect(parseWireCommand('/wire Ember 0 Cinders')).toEqual({
+      isWire: true,
+      command: null,
+    });
+  });
+
+  it('does not intercept ordinary chat messages', () => {
+    expect(parseWireCommand('Selling ore')).toEqual({ isWire: false });
+  });
+});
+
+describe('getWireErrorMessage', () => {
+  it('shows an insufficient balance error without exposing transport details', () => {
+    expect(
+      getWireErrorMessage({
+        errorMessage: 'You do not have enough Cinders for this wire.',
+      }),
+    ).toBe('You do not have enough Cinders for this wire.');
   });
 });

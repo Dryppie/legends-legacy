@@ -8,4 +8,5 @@ public sealed record UpdateGuildRolePermissionsDto(
     bool CanManageApplications,
     bool CanPromoteDemote,
     bool CanKick,
-    bool CanBorrowVault);
+    bool CanBorrowVault,
+    bool CanWithdrawVault);

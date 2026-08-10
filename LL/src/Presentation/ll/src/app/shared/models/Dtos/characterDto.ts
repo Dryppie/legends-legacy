@@ -31,8 +31,15 @@ export interface CharacterOverviewDto {
   baseCombatAttributes: AttributeDto[];
   activeEssenceLoadout?: EssenceLoadoutDto | null;
   equippedTitle?: EquippedTitleDto | null;
+  guild?: CharacterGuildDto | null;
   isOnline: boolean;
   lastSeenAt?: string | null;
+}
+
+export interface CharacterGuildDto {
+  id: string;
+  name: string;
+  tag: string;
 }
 
 export interface EquippedTitleDto {

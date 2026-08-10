@@ -33,4 +33,10 @@ public interface IInventoryService
     Task<bool> AddItemInstanceBackToInventory(Guid characterId, ItemInstance itemInstance, CancellationToken cancellationToken);
     Task AddItemToInventoryFromMarketPlace(Guid characterId, InventoryItem inventoryItem, CancellationToken cancellationToken);
     Task<InventoryItem?> ScrapEquipments(Guid characterId, List<Guid> parsedGuids, CancellationToken cancellationToken);
+    Task<InventoryTransferResult> TransferItemAsync(
+        Guid senderCharacterId,
+        Guid recipientCharacterId,
+        Guid itemInstanceId,
+        int quantity,
+        CancellationToken cancellationToken);
 }

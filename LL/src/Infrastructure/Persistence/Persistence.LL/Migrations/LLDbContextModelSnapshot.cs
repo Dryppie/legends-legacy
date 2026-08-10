@@ -1935,6 +1935,9 @@ namespace Persistence.LL.Migrations
                     b.Property<bool>("CanPromoteDemote")
                         .HasColumnType("boolean");
 
+                    b.Property<bool>("CanWithdrawVault")
+                        .HasColumnType("boolean");
+
                     b.HasKey("GuildId", "Role");
 
                     b.ToTable("GuildRolePermissions");
@@ -3590,6 +3593,82 @@ namespace Persistence.LL.Migrations
                     b.HasKey("CharacterId", "SoulstoneUpgradeDefinitionId");
 
                     b.ToTable("CharacterSoulstoneUpgrades");
+                });
+
+            modelBuilder.Entity("Domain.Models.Transfers.PlayerTransferRecord", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("AssetId")
+                        .IsRequired()
+                        .HasMaxLength(160)
+                        .HasColumnType("character varying(160)");
+
+                    b.Property<string>("AssetName")
+                        .IsRequired()
+                        .HasMaxLength(160)
+                        .HasColumnType("character varying(160)");
+
+                    b.Property<Guid?>("DestinationItemInstanceId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Kind")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
+
+                    b.Property<DateTimeOffset>("OccurredAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<long>("Quantity")
+                        .HasColumnType("bigint");
+
+                    b.Property<Guid>("RecipientAccountId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("RecipientCharacterId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("RecipientCharacterName")
+                        .IsRequired()
+                        .HasMaxLength(26)
+                        .HasColumnType("character varying(26)");
+
+                    b.Property<Guid>("SenderAccountId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("SenderCharacterId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("SenderCharacterName")
+                        .IsRequired()
+                        .HasMaxLength(26)
+                        .HasColumnType("character varying(26)");
+
+                    b.Property<Guid?>("SourceItemInstanceId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DestinationItemInstanceId");
+
+                    b.HasIndex("SourceItemInstanceId");
+
+                    b.HasIndex("Kind", "OccurredAt");
+
+                    b.HasIndex("RecipientAccountId", "OccurredAt");
+
+                    b.HasIndex("RecipientCharacterId", "OccurredAt");
+
+                    b.HasIndex("SenderAccountId", "OccurredAt");
+
+                    b.HasIndex("SenderCharacterId", "OccurredAt");
+
+                    b.HasIndex("RecipientAccountId", "SenderAccountId", "OccurredAt");
+
+                    b.ToTable("PlayerTransferHistory", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Models.Users.AppUser", b =>

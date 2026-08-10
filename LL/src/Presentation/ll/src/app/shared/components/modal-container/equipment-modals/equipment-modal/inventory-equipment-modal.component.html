@@ -7,10 +7,16 @@
 
   <div class="border-t border-primary/20 pb-3"></div>
 
-  <div class="flex flex-col justify-between gap-4 sm:flex-row">
+  <div class="flex flex-col gap-4">
     <app-equipment-display [item]="equipmentInstance"> </app-equipment-display>
 
-    <div class="mt-6 flex place-items-end justify-end gap-2">
+    <app-inventory-transfer
+      *ngIf="inventoryItem as item"
+      [inventoryItem]="item"
+      (transferred)="onClose()"
+    ></app-inventory-transfer>
+
+    <div class="flex place-items-end justify-end gap-2">
       <button
         type="button"
         class="ll-button"

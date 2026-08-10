@@ -17,7 +17,7 @@ namespace Persistence.Chat.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.5")
+                .HasAnnotation("ProductVersion", "10.0.10")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -37,6 +37,9 @@ namespace Persistence.Chat.Migrations
 
                     b.Property<string>("ContextKey")
                         .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("LinkedItemJson")
                         .HasColumnType("text");
 
                     b.Property<Guid>("SenderId")

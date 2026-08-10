@@ -1,0 +1,175 @@
+using Domain.Models.Inventories;
+using Domain.Models.Entities.Characters;
+using Domain.Models.Items;
+using Domain.Models.Transfers;
+using Microsoft.EntityFrameworkCore;
+using Persistence.LL;
+using Persistence.LL.Repositories.Inventories;
+
+namespace EssenceSystem.Tests;
+
+public sealed class InventoryTransferTests
+{
+    [Fact]
+    public async Task Partial_stack_transfer_deducts_sender_and_adds_recipient_stack()
+    {
+        await using var db = CreateDb();
+        var senderId = Guid.NewGuid();
+        var recipientId = Guid.NewGuid();
+        AddInventories(db, senderId, recipientId);
+        var senderItem = AddItem(db, senderId, "iron_ore", quantity: 10, stackable: true);
+        var recipientItem = AddItem(db, recipientId, "iron_ore", quantity: 3, stackable: true, reuseBase: senderItem.ItemInstance.ItemBase);
+        await db.SaveChangesAsync();
+
+        var repository = new InventoryRepository(db);
+        var result = await repository.TransferItemAsync(
+            senderId,
+            recipientId,
+            senderItem.ItemInstanceId,
+            4,
+            CancellationToken.None);
+        await db.SaveChangesAsync();
+
+        Assert.True(result.IsSuccess);
+        Assert.Equal(4, result.TransferredItem!.Quantity);
+        Assert.Equal(6, (await db.InventoryItems.SingleAsync(x =>
+            x.InventoryId == senderId && x.ItemInstanceId == senderItem.ItemInstanceId)).Quantity);
+        Assert.Equal(7, (await db.InventoryItems.SingleAsync(x =>
+            x.InventoryId == recipientId && x.ItemInstanceId == recipientItem.ItemInstanceId)).Quantity);
+        var history = await db.PlayerTransferHistory.SingleAsync();
+        Assert.Equal(PlayerTransferKind.InventoryItem, history.Kind);
+        Assert.Equal("iron_ore", history.AssetId);
+        Assert.Equal(senderItem.ItemInstanceId, history.SourceItemInstanceId);
+        Assert.Equal(recipientItem.ItemInstanceId, history.DestinationItemInstanceId);
+        Assert.Equal(4, history.Quantity);
+    }
+
+    [Fact]
+    public async Task Full_non_stackable_transfer_moves_item_instance_to_recipient()
+    {
+        await using var db = CreateDb();
+        var senderId = Guid.NewGuid();
+        var recipientId = Guid.NewGuid();
+        AddInventories(db, senderId, recipientId);
+        var item = AddItem(db, senderId, "unique_relic", quantity: 1, stackable: false);
+        await db.SaveChangesAsync();
+
+        var repository = new InventoryRepository(db);
+        var result = await repository.TransferItemAsync(
+            senderId,
+            recipientId,
+            item.ItemInstanceId,
+            1,
+            CancellationToken.None);
+        await db.SaveChangesAsync();
+
+        Assert.True(result.IsSuccess);
+        Assert.False(await db.InventoryItems.AnyAsync(x =>
+            x.InventoryId == senderId && x.ItemInstanceId == item.ItemInstanceId));
+        Assert.True(await db.InventoryItems.AnyAsync(x =>
+            x.InventoryId == recipientId && x.ItemInstanceId == item.ItemInstanceId));
+        Assert.Single(db.PlayerTransferHistory);
+    }
+
+    [Fact]
+    public async Task Bound_item_transfer_is_rejected_without_mutating_inventory()
+    {
+        await using var db = CreateDb();
+        var senderId = Guid.NewGuid();
+        var recipientId = Guid.NewGuid();
+        AddInventories(db, senderId, recipientId);
+        var item = AddItem(db, senderId, "bound_token", quantity: 5, stackable: true, isBound: true);
+        await db.SaveChangesAsync();
+
+        var repository = new InventoryRepository(db);
+        var result = await repository.TransferItemAsync(
+            senderId,
+            recipientId,
+            item.ItemInstanceId,
+            2,
+            CancellationToken.None);
+
+        Assert.False(result.IsSuccess);
+        Assert.Equal(InventoryTransferFailure.ItemIsBound, result.Failure);
+        Assert.Equal(5, item.Quantity);
+        Assert.False(await db.InventoryItems.AnyAsync(x => x.InventoryId == recipientId));
+        Assert.Empty(db.PlayerTransferHistory);
+    }
+
+    [Fact]
+    public async Task Transfer_larger_than_owned_quantity_is_rejected()
+    {
+        await using var db = CreateDb();
+        var senderId = Guid.NewGuid();
+        var recipientId = Guid.NewGuid();
+        AddInventories(db, senderId, recipientId);
+        var item = AddItem(db, senderId, "wood", quantity: 2, stackable: true);
+        await db.SaveChangesAsync();
+
+        var repository = new InventoryRepository(db);
+        var result = await repository.TransferItemAsync(
+            senderId,
+            recipientId,
+            item.ItemInstanceId,
+            3,
+            CancellationToken.None);
+
+        Assert.Equal(InventoryTransferFailure.InsufficientQuantity, result.Failure);
+        Assert.Equal(2, item.Quantity);
+        Assert.Empty(db.PlayerTransferHistory);
+    }
+
+    private static void AddInventories(LLDbContext db, params Guid[] characterIds)
+    {
+        db.Characters.AddRange(characterIds.Select((id, index) => new Character
+        {
+            Id = id,
+            UserId = Guid.NewGuid(),
+            Name = $"TransferTester{index}-{id:N}"[..26]
+        }));
+        db.Inventories.AddRange(characterIds.Select(id => new Inventory { CharacterId = id }));
+    }
+
+    private static InventoryItem AddItem(
+        LLDbContext db,
+        Guid ownerId,
+        string itemBaseId,
+        int quantity,
+        bool stackable,
+        bool isBound = false,
+        ItemBase? reuseBase = null)
+    {
+        var itemBase = reuseBase ?? new ItemBase
+        {
+            Id = itemBaseId,
+            Name = itemBaseId,
+            Description = "Transfer test item.",
+            ItemType = ItemType.Resource,
+            Stackable = stackable,
+            IsBound = isBound
+        };
+        var itemInstance = new ItemInstance
+        {
+            Id = Guid.NewGuid(),
+            ItemBaseId = itemBase.Id,
+            ItemBase = itemBase
+        };
+        var inventoryItem = new InventoryItem
+        {
+            InventoryId = ownerId,
+            ItemInstanceId = itemInstance.Id,
+            ItemInstance = itemInstance,
+            Quantity = quantity
+        };
+        db.InventoryItems.Add(inventoryItem);
+        return inventoryItem;
+    }
+
+    private static LLDbContext CreateDb()
+    {
+        var options = new DbContextOptionsBuilder<LLDbContext>()
+            .UseInMemoryDatabase(Guid.NewGuid().ToString())
+            .Options;
+        return new LLDbContext(options);
+    }
+}

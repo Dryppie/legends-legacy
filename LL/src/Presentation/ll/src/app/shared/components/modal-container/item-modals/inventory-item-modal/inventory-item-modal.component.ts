@@ -18,10 +18,19 @@ import {
 import { ItemComponent } from '../../../item/item.component';
 import { InventoryService } from '../../../../../core/services/api/inventory/inventory.service';
 import { SelectionCrateOption } from '../../../../models/item';
+import { InventoryTransferComponent } from '../../../inventory-transfer/inventory-transfer.component';
+import { BlueprintAttributeSummaryComponent } from '../../../blueprint-attribute-summary/blueprint-attribute-summary.component';
 
 @Component({
   selector: 'app-inventory-item-modal',
-  imports: [NgFor, NgIf, DropdownComponent, ItemComponent],
+  imports: [
+    NgFor,
+    NgIf,
+    DropdownComponent,
+    ItemComponent,
+    InventoryTransferComponent,
+    BlueprintAttributeSummaryComponent,
+  ],
   templateUrl: './inventory-item-modal.component.html',
 })
 export class InventoryItemModalComponent implements OnInit {

@@ -24,6 +24,9 @@
       <div class="ll-copy mt-1">
         Learning permanently unlocks this Blueprint for one base recipe.
       </div>
+      <app-blueprint-attribute-summary
+        [blueprint]="metadata"
+      ></app-blueprint-attribute-summary>
       <div *ngIf="isLoadingRecipes()" class="ll-state mt-3">
         Loading available base recipes...
       </div>
@@ -82,6 +85,11 @@
       </div>
       <div class="ll-state mt-3">Opening consumes one {{ itemName }}.</div>
     </div>
+
+    <app-inventory-transfer
+      [inventoryItem]="inventoryItem"
+      (transferred)="close.emit()"
+    ></app-inventory-transfer>
 
     <div *ngIf="error() as message" class="ll-state ll-state-danger">
       {{ message }}

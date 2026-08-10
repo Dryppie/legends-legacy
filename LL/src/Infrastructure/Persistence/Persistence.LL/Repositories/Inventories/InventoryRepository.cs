@@ -3,6 +3,7 @@ using Common.Exceptions;
 using Domain.Models.Inventories;
 using Domain.Models.Items;
 using Domain.Models.Items.Equipments;
+using Domain.Models.Transfers;
 using Domain.Models.MarketPlaces;
 using Microsoft.EntityFrameworkCore;
 
@@ -351,5 +352,128 @@ public class InventoryRepository : IInventoryRepository
         }
 
         return temperedScrap;
+    }
+
+    public async Task<InventoryTransferResult> TransferItemAsync(
+        Guid senderCharacterId,
+        Guid recipientCharacterId,
+        Guid itemInstanceId,
+        int quantity,
+        CancellationToken cancellationToken)
+    {
+        if (senderCharacterId == recipientCharacterId)
+            return InventoryTransferResult.Fail(InventoryTransferFailure.SameRecipient);
+        if (quantity <= 0)
+            return InventoryTransferResult.Fail(InventoryTransferFailure.InvalidQuantity);
+
+        var senderItem = await _context.InventoryItems
+            .Include(x => x.ItemInstance)
+                .ThenInclude(x => x.ItemBase)
+                    .ThenInclude(x => (x as EquipmentBase).AttributeModifiers)
+            .Include(x => x.ItemInstance)
+                .ThenInclude(x => x.ItemBase)
+                    .ThenInclude(x => (x as EquipmentBase).ToolBonuses)
+            .Include(x => (x.ItemInstance as EquipmentInstance).InstanceModifiers)
+            .Include(x => (x.ItemInstance as EquipmentInstance).ToolAffixes)
+            .SingleOrDefaultAsync(
+                x => x.InventoryId == senderCharacterId && x.ItemInstanceId == itemInstanceId,
+                cancellationToken);
+
+        if (senderItem?.ItemInstance?.ItemBase is null)
+            return InventoryTransferResult.Fail(InventoryTransferFailure.ItemNotFound);
+        if (senderItem.ItemInstance.ItemBase.IsBound)
+            return InventoryTransferResult.Fail(InventoryTransferFailure.ItemIsBound);
+        if (!senderItem.ItemInstance.ItemBase.Stackable && quantity != 1)
+            return InventoryTransferResult.Fail(InventoryTransferFailure.NonStackableQuantity);
+        if (senderItem.Quantity < quantity)
+            return InventoryTransferResult.Fail(InventoryTransferFailure.InsufficientQuantity);
+        if (await _context.GuildVaultItems.AnyAsync(
+                x => x.EquipmentInstanceId == itemInstanceId && x.BorrowedByCharacterId == senderCharacterId,
+                cancellationToken))
+            return InventoryTransferResult.Fail(InventoryTransferFailure.BorrowedGuildItem);
+        if (!await _context.Inventories.AnyAsync(x => x.CharacterId == recipientCharacterId, cancellationToken))
+            return InventoryTransferResult.Fail(InventoryTransferFailure.RecipientInventoryNotFound);
+
+        var participants = await _context.Characters
+            .Where(x => x.Id == senderCharacterId || x.Id == recipientCharacterId)
+            .ToListAsync(cancellationToken);
+        var sender = participants.FirstOrDefault(x => x.Id == senderCharacterId);
+        if (sender is null)
+            return InventoryTransferResult.Fail(InventoryTransferFailure.SenderNotFound);
+        var recipient = participants.FirstOrDefault(x => x.Id == recipientCharacterId);
+        if (recipient is null)
+            return InventoryTransferResult.Fail(InventoryTransferFailure.RecipientNotFound);
+
+        var itemBase = senderItem.ItemInstance.ItemBase;
+        InventoryItem recipientItem;
+
+        if (itemBase.Stackable)
+        {
+            var existingRecipientStack = await _context.InventoryItems
+                .Include(x => x.ItemInstance)
+                    .ThenInclude(x => x.ItemBase)
+                .FirstOrDefaultAsync(
+                    x => x.InventoryId == recipientCharacterId &&
+                         x.ItemInstance.ItemBaseId == senderItem.ItemInstance.ItemBaseId,
+                    cancellationToken);
+
+            if (existingRecipientStack is not null)
+            {
+                existingRecipientStack.Quantity += quantity;
+                recipientItem = new InventoryItem
+                {
+                    InventoryId = recipientCharacterId,
+                    ItemInstanceId = existingRecipientStack.ItemInstanceId,
+                    ItemInstance = existingRecipientStack.ItemInstance,
+                    Quantity = quantity
+                };
+            }
+            else
+            {
+                recipientItem = new InventoryItem
+                {
+                    InventoryId = recipientCharacterId,
+                    ItemInstanceId = senderItem.ItemInstanceId,
+                    ItemInstance = senderItem.ItemInstance,
+                    Quantity = quantity
+                };
+                await _context.InventoryItems.AddAsync(recipientItem, cancellationToken);
+            }
+        }
+        else
+        {
+            recipientItem = new InventoryItem
+            {
+                InventoryId = recipientCharacterId,
+                ItemInstanceId = senderItem.ItemInstanceId,
+                ItemInstance = senderItem.ItemInstance,
+                Quantity = 1
+            };
+            await _context.InventoryItems.AddAsync(recipientItem, cancellationToken);
+        }
+
+        if (senderItem.Quantity == quantity)
+            _context.InventoryItems.Remove(senderItem);
+        else
+            senderItem.Quantity -= quantity;
+
+        var transferRecord = new PlayerTransferRecord
+        {
+            Kind = PlayerTransferKind.InventoryItem,
+            SenderAccountId = sender.UserId,
+            SenderCharacterId = sender.Id,
+            SenderCharacterName = sender.Name,
+            RecipientAccountId = recipient.UserId,
+            RecipientCharacterId = recipient.Id,
+            RecipientCharacterName = recipient.Name,
+            AssetId = itemBase.Id,
+            AssetName = itemBase.Name,
+            SourceItemInstanceId = itemInstanceId,
+            DestinationItemInstanceId = recipientItem.ItemInstanceId,
+            Quantity = quantity
+        };
+        _context.PlayerTransferHistory.Add(transferRecord);
+
+        return InventoryTransferResult.Success(recipientItem, transferRecord);
     }
 }

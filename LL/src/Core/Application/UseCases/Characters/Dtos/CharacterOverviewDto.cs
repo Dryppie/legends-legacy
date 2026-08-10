@@ -10,6 +10,7 @@ using Domain.Models.Achievements;
 using Domain.Models.Attributes;
 using Domain.Models.Entities.Characters;
 using Domain.Models.Essences;
+using Domain.Models.Guilds;
 
 namespace Application.UseCases.Characters.Dtos;
 public class CharacterOverviewDto : IMapFrom<Character>
@@ -27,6 +28,7 @@ public class CharacterOverviewDto : IMapFrom<Character>
     public List<EntityAttribute> BaseCombatAttributes { get; set; } = [];
     public EssenceLoadoutDto? ActiveEssenceLoadout { get; set; }
     public EquippedTitleDto? EquippedTitle { get; set; }
+    public CharacterGuildDto? Guild { get; set; }
     public bool IsOnline { get; set; }
     public DateTimeOffset? LastSeenAt { get; set; }
 
@@ -35,6 +37,16 @@ public class CharacterOverviewDto : IMapFrom<Character>
         profile.CreateMap<Character, CharacterOverviewDto>()
             .ConvertUsing<CharacterOverviewConverter>();
     }
+}
+
+public sealed record CharacterGuildDto(Guid Id, string Name, string Tag)
+{
+    public static CharacterGuildDto? From(GuildMember? membership) => membership is null
+        ? null
+        : new CharacterGuildDto(
+            membership.GuildId,
+            membership.Guild.Name,
+            membership.Guild.Tag);
 }
 
 public sealed class CharacterOverviewConverter : ITypeConverter<Character, CharacterOverviewDto>

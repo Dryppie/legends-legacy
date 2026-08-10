@@ -68,6 +68,7 @@ export interface BlueprintItemMetadata {
   blueprintId: string;
   name: string;
   description: string;
+  bonusStatProfile: Record<string, number>;
   requiredRecipeTags: string[];
   anyRecipeTags: string[];
   compatibleRecipeCount: number;

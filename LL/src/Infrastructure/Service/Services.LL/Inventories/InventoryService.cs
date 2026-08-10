@@ -70,4 +70,17 @@ public class InventoryService : IInventoryService
     {
         return await _inventoryRepository.ScrapEquipments(characterId, parsedGuids, cancellationToken);
     }
+
+    public async Task<InventoryTransferResult> TransferItemAsync(
+        Guid senderCharacterId,
+        Guid recipientCharacterId,
+        Guid itemInstanceId,
+        int quantity,
+        CancellationToken cancellationToken) =>
+        await _inventoryRepository.TransferItemAsync(
+            senderCharacterId,
+            recipientCharacterId,
+            itemInstanceId,
+            quantity,
+            cancellationToken);
 }

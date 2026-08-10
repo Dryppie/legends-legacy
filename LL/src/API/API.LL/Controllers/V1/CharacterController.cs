@@ -4,6 +4,7 @@ using Application.UseCases.Characters.Queries.GetCharacterIdByName;
 using Application.UseCases.Characters.Queries.GetCharacterOverview;
 using Application.UseCases.Characters.Queries.GetCharacterOverviewByName;
 using Application.UseCases.Characters.Queries.GetPowerRating;
+using Application.UseCases.Characters.Commands.WireCinders;
 using Application.Interfaces.Services.LL.PowerRatings;
 using Common.Primitives;
 using Microsoft.AspNetCore.Authorization;
@@ -45,4 +46,13 @@ public class CharacterController : BaseController
 
         return Ok(result.Data);
     }
+
+    [HttpPost("Wire")]
+    public async Task<ActionResult<Response<WireCindersResponseDto>>> Wire(
+        [FromBody] WireCurrencyRequestDto request) =>
+        await Mediator.Send(new WireCindersCommand(
+            CurrentCharacterGuid,
+            request.RecipientName,
+            request.Amount,
+            request.Currency));
 }

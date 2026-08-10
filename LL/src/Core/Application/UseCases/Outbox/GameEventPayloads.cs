@@ -1,6 +1,7 @@
 using Domain.Models.CharacterActions.Sessions;
 using Domain.Models.Combat;
 using Domain.Models.Items;
+using Application.UseCases.Equipments.Dtos;
 
 namespace Application.UseCases.Outbox;
 
@@ -88,6 +89,22 @@ public sealed record ProphecyCompletedPayload(
     Guid CharacterId,
     Guid ProphecyId,
     string Scope);
+
+public sealed record PlayerTransferChatMessagePayload(
+    Guid TransferId,
+    Guid MessageId,
+    Guid TargetCharacterId,
+    string Body,
+    DateTimeOffset SentAt);
+
+public sealed record GuildVaultChatMessagePayload(
+    Guid GuildId,
+    Guid ActorCharacterId,
+    string ActorName,
+    string Body,
+    EquipmentInstanceDto Equipment,
+    Guid MessageId,
+    DateTimeOffset SentAt);
 
 public sealed record OutboxEquipmentItemPayload(
     string ItemBaseId,

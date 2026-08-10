@@ -1,6 +1,6 @@
 <div
   *ngIf="character() as character"
-  class="flex h-full w-full flex-col gap-2 overflow-y-auto pt-2 pr-1 text-white"
+  class="flex h-full w-full flex-col gap-2 overflow-y-auto pr-1 pt-2 text-white"
 >
   <div class="ll-panel flex shrink-0 justify-between gap-4 p-4">
     <div>
@@ -10,7 +10,10 @@
       </p>
     </div>
     <div class="flex w-full flex-col items-end gap-2">
-      <div *ngIf="canInvite || canManageApplications" class="flex flex-col gap-2">
+      <div
+        *ngIf="canInvite || canManageApplications"
+        class="flex flex-col gap-2"
+      >
         <app-regular-button
           *ngIf="canInvite"
           [disabled]="isGuildFull()"
@@ -76,10 +79,7 @@
             <span>Applications</span>
           </label>
           <label class="ll-checkbox">
-            <input
-              type="checkbox"
-              [(ngModel)]="permissions.canPromoteDemote"
-            />
+            <input type="checkbox" [(ngModel)]="permissions.canPromoteDemote" />
             <span>Promote / demote</span>
           </label>
           <label class="ll-checkbox">
@@ -87,11 +87,15 @@
             <span>Kick members</span>
           </label>
           <label class="ll-checkbox sm:col-span-2">
-            <input
-              type="checkbox"
-              [(ngModel)]="permissions.canBorrowVault"
-            />
+            <input type="checkbox" [(ngModel)]="permissions.canBorrowVault" />
             <span>Borrow vault gear</span>
+          </label>
+          <label
+            *ngIf="permissions.role === officerRole"
+            class="ll-checkbox sm:col-span-2"
+          >
+            <input type="checkbox" [(ngModel)]="permissions.canWithdrawVault" />
+            <span>Withdraw vault gear</span>
           </label>
         </div>
         <app-regular-button
@@ -137,11 +141,33 @@
         >
           {{ member.role === leaderRole ? "Disband" : "Leave" }}
         </app-regular-button>
-        <div *ngIf="member.characterId !== character.characterId" class="col-start-4 flex justify-self-end gap-1">
-          <app-regular-button *ngIf="canPromote(member)" (pressed)="promote(member)">Promote</app-regular-button>
-          <app-regular-button *ngIf="canDemote(member)" (pressed)="demote(member)">Demote</app-regular-button>
-          <app-regular-button *ngIf="canKick(member)" variant="danger" (pressed)="kick(member)">Kick</app-regular-button>
-          <span *ngIf="!canPromote(member) && !canDemote(member) && !canKick(member)" class="text-xs text-zinc-500">-</span>
+        <div
+          *ngIf="member.characterId !== character.characterId"
+          class="col-start-4 flex gap-1 justify-self-end"
+        >
+          <app-regular-button
+            *ngIf="canPromote(member)"
+            (pressed)="promote(member)"
+            >Promote</app-regular-button
+          >
+          <app-regular-button
+            *ngIf="canDemote(member)"
+            (pressed)="demote(member)"
+            >Demote</app-regular-button
+          >
+          <app-regular-button
+            *ngIf="canKick(member)"
+            variant="danger"
+            (pressed)="kick(member)"
+            >Kick</app-regular-button
+          >
+          <span
+            *ngIf="
+              !canPromote(member) && !canDemote(member) && !canKick(member)
+            "
+            class="text-xs text-zinc-500"
+            >-</span
+          >
         </div>
       </div>
     </div>

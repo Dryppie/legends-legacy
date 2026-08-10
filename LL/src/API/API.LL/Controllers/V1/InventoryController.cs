@@ -1,6 +1,7 @@
 ﻿using Application.UseCases.Inventories.Commands.ScrapEquipments;
 using Application.UseCases.Inventories.Dtos;
 using Application.UseCases.Inventories.Commands.OpenCatalystSelectionCrate;
+using Application.UseCases.Inventories.Commands.TransferInventoryItem;
 using Application.UseCases.Inventories.Queries.GetInventoryById;
 using Common.Primitives;
 using Microsoft.AspNetCore.Authorization;
@@ -28,4 +29,14 @@ public class InventoryController : BaseController
             CurrentCharacterGuid,
             crateItemInstanceId,
             request.OptionId));
+
+    [HttpPost("items/{itemInstanceId:guid}/transfer")]
+    public async Task<ActionResult<Response<TransferInventoryItemResponseDto>>> Transfer(
+        Guid itemInstanceId,
+        [FromBody] TransferInventoryItemRequestDto request) =>
+        await Mediator.Send(new TransferInventoryItemCommand(
+            CurrentCharacterGuid,
+            itemInstanceId,
+            request.RecipientName,
+            request.Quantity));
 }

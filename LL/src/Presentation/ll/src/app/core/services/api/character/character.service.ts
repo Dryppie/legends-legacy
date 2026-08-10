@@ -18,6 +18,12 @@ import {
 import { AuthService } from '../auth/auth.service';
 import { HttpParams } from '@angular/common/http';
 
+export interface WireCindersResponse {
+  recipientName: string;
+  amount: number;
+  remainingCinders: number;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -119,5 +125,16 @@ export class CharacterService {
 
   renameCharacter(newName: string) {
     return this.authService.renameCharacter(newName);
+  }
+
+  wireCinders(
+    recipientName: string,
+    amount: number,
+  ): Observable<WireCindersResponse> {
+    return this.api.post('Character/Wire', {
+      recipientName,
+      amount,
+      currency: 'Cinders',
+    });
   }
 }

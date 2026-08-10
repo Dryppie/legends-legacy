@@ -8,6 +8,7 @@ public sealed class ChatMessage
     public string SenderName { get; init; } = string.Empty;
     public string? SenderTitleDisplayName { get; init; } = null;
     public string Body { get; init; } = string.Empty;   // markup lives here
+    public string? LinkedItemJson { get; init; }
     public Guid? TargetCharacterId { get; init; } = null; // for whispers, null for public/guild
     public string? TargetCharacterName { get; init; } = null; // for whispers, null for public/guild
     public string? TargetCharacterTitleDisplayName { get; init; } = null; // for whispers, null for public/guild

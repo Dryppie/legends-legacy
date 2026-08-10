@@ -10,6 +10,7 @@ public class GuildRolePermission
     public bool CanPromoteDemote { get; set; }
     public bool CanKick { get; set; }
     public bool CanBorrowVault { get; set; }
+    public bool CanWithdrawVault { get; set; }
 
     public static GuildRolePermission CreateDefault(Guid guildId, GuildRole role) => role switch
     {
@@ -21,7 +22,8 @@ public class GuildRolePermission
             CanManageApplications = true,
             CanPromoteDemote = true,
             CanKick = true,
-            CanBorrowVault = true
+            CanBorrowVault = true,
+            CanWithdrawVault = true
         },
         GuildRole.Officer => new GuildRolePermission
         {
@@ -29,13 +31,15 @@ public class GuildRolePermission
             Role = role,
             CanInvite = true,
             CanManageApplications = true,
-            CanBorrowVault = true
+            CanBorrowVault = true,
+            CanWithdrawVault = false
         },
         _ => new GuildRolePermission
         {
             GuildId = guildId,
             Role = role,
-            CanBorrowVault = true
+            CanBorrowVault = true,
+            CanWithdrawVault = false
         }
     };
 }

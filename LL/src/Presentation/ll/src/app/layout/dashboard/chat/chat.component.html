@@ -344,8 +344,8 @@
               </ng-template>
             </div>
 
-            <p
-              class="mt-0.5 break-words text-xs leading-5"
+            <div
+              class="mt-0.5 flex flex-wrap items-baseline gap-x-1 break-words text-xs leading-5"
               [ngClass]="{
                 'italic text-[var(--ll-color-text-muted)]':
                   m.channelType === 'System' && !isWorldAnnouncement(m),
@@ -354,8 +354,15 @@
                 'text-[var(--ll-color-text)]': m.channelType !== 'System',
               }"
             >
-              {{ m.body }}
-            </p>
+              <span>{{ m.body }}</span>
+              <ng-container *ngIf="m.linkedItem as linkedItem">
+                <app-item
+                  class="decoration-current/40 inline-block max-w-full cursor-help underline underline-offset-2"
+                  [item]="linkedItem"
+                ></app-item>
+                <span>.</span>
+              </ng-container>
+            </div>
           </article>
         </ng-container>
       </section>

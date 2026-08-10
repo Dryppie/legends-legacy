@@ -39,6 +39,7 @@ import {
   isMarketplaceBlueprintResource,
   matchesMarketplaceResourceSubcategory,
 } from '../../../../../shared/utils/market-place/market-place-category.utils';
+import { BlueprintAttributeSummaryComponent } from '../../../../../shared/components/blueprint-attribute-summary/blueprint-attribute-summary.component';
 
 interface Commodity {
   base: ItemBase;
@@ -70,7 +71,12 @@ type MarketTicketSide = 'buy' | 'sell';
 
 @Component({
   selector: 'app-market-place-commodity',
-  imports: [CommonModule, ReactiveFormsModule, NumberFormatPipe],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    NumberFormatPipe,
+    BlueprintAttributeSummaryComponent,
+  ],
   templateUrl: './market-place-commodity.component.html',
   styleUrl: './market-place-commodity.component.css',
 })

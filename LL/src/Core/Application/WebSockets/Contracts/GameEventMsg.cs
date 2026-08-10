@@ -25,5 +25,11 @@ public record AchievementUnlockedMsg(
     string Message,
     bool IsGlobal) : GameEventMsg;
 
+public record PlayerTransferMsg(
+    Guid TransferId,
+    Guid MessageId,
+    Guid CharacterId,
+    string Message) : GameEventMsg;
+
 public record QuestJournalChangedMsg(QuestJournal Journal) : GameEventMsg;
 public record EventQuestChangedMsg(string EventQuestId, DateTimeOffset UpdatedAt) : GameEventMsg;

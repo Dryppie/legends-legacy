@@ -68,6 +68,18 @@
             </ng-template>
           </ng-container>
         </div>
+        <div class="mt-2 flex flex-wrap items-center gap-2 text-sm">
+          <span class="text-secondary">Guild</span>
+          <ng-container *ngIf="characterOverview.guild as guild; else noGuild">
+            <span class="font-semibold text-zinc-200">{{ guild.name }}</span>
+            <span *ngIf="guild.tag" class="ll-badge ll-badge-accent rounded">
+              [{{ guild.tag }}]
+            </span>
+          </ng-container>
+          <ng-template #noGuild>
+            <span class="text-zinc-500">None</span>
+          </ng-template>
+        </div>
       </div>
 
       <div class="mt-4 grid gap-3 sm:grid-cols-3">

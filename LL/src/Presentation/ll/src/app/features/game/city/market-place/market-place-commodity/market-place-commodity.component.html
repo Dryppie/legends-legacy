@@ -153,6 +153,11 @@
             >
               {{ selected.base.description }}
             </p>
+            <app-blueprint-attribute-summary
+              *ngIf="selected.base.blueprint as blueprint"
+              class="mt-1 block max-w-2xl"
+              [blueprint]="blueprint"
+            ></app-blueprint-attribute-summary>
 
             <div class="mt-4 flex flex-wrap gap-2">
               <span class="ll-card px-2.5 py-1 text-xs text-zinc-400">

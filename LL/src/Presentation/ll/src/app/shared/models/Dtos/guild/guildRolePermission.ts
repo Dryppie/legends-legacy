@@ -7,4 +7,5 @@ export interface GuildRolePermission {
   canPromoteDemote: boolean;
   canKick: boolean;
   canBorrowVault: boolean;
+  canWithdrawVault: boolean;
 }

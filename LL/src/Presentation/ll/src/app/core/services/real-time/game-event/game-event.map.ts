@@ -32,6 +32,7 @@ import { ProphecyProgressedMsg } from '../prophecies/prophecy-progressed';
 import { AchievementUnlockedMsg } from '../achievement/achievement-unlocked';
 import { QuestJournalChangedMsg } from '../quest/quest-journal-changed';
 import { EventQuestChangedMsg } from '../quest/event-quest-changed';
+import { PlayerTransferMsg } from '../transfer/player-transfer';
 
 export const gameEventNames = [
   'LootReceivedMsg',
@@ -58,6 +59,7 @@ export const gameEventNames = [
   'AchievementUnlockedMsg',
   'QuestJournalChangedMsg',
   'EventQuestChangedMsg',
+  'PlayerTransferMsg',
 ] as const;
 
 export type GameEventSignalMap = {
@@ -94,6 +96,7 @@ export interface GameEventMap {
   AchievementUnlockedMsg: AchievementUnlockedMsg;
   QuestJournalChangedMsg: QuestJournalChangedMsg;
   EventQuestChangedMsg: EventQuestChangedMsg;
+  PlayerTransferMsg: PlayerTransferMsg;
   //   SaleCompleted: SaleCompletedMsg;
   //   RiftOpened:    RiftOpenedMsg;
   // 💡 when you add a new C# record and regenerate the client

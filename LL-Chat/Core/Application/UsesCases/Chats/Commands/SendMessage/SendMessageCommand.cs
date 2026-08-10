@@ -13,7 +13,10 @@ public record SendMessageCommand(
     ChatChannelType ChannelType,
     string? TargetCharacterId = null,
     string? TargetCharacterName = null,
-    string? TargetCharacterTitleDisplayName = null) : IRequest<ChatMessageDto?>;
+    string? TargetCharacterTitleDisplayName = null,
+    string? LinkedItemJson = null,
+    Guid? MessageId = null,
+    DateTimeOffset? SentAt = null) : IRequest<ChatMessageDto?>;
 public class SendMessageCommandHandler : IRequestHandler<SendMessageCommand, ChatMessageDto?>
 {
     private readonly IChatService _chatService;
@@ -26,6 +29,12 @@ public class SendMessageCommandHandler : IRequestHandler<SendMessageCommand, Cha
     public async Task<ChatMessageDto?> Handle(SendMessageCommand request, CancellationToken cancellationToken)
     {
         if (request.ChannelType == ChatChannelType.System) return null;
+
+        if (request.MessageId is Guid messageId)
+        {
+            var existing = await _chatService.GetByIdAsync(messageId, cancellationToken);
+            if (existing is not null) return ChatMessageDto.FromDomain(existing);
+        }
 
         if (!Guid.TryParse(request.SenderId, out var senderId)) return null;
         var targetCharacterId = Guid.Empty; // Default to empty GUID for whisper messages
@@ -41,12 +50,14 @@ public class SendMessageCommandHandler : IRequestHandler<SendMessageCommand, Cha
 
         var message = new ChatMessage()
         {
+            Id = request.MessageId ?? Guid.NewGuid(),
             SenderId = senderId,
             SenderName = request.SenderName,
             SenderTitleDisplayName = NormalizeTitle(request.SenderTitleDisplayName),
             Body = request.Body,
+            LinkedItemJson = request.LinkedItemJson,
             ContextKey = request.Channel,
-            SentAt = DateTime.UtcNow,
+            SentAt = request.SentAt ?? DateTimeOffset.UtcNow,
             ChannelType = request.ChannelType,
             TargetCharacterId = targetCharacterId,
             TargetCharacterName = request.TargetCharacterName,

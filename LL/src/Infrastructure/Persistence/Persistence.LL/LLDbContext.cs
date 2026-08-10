@@ -35,6 +35,7 @@ using Domain.Models.Regions;
 using Domain.Models.Regions.Areas;
 using Domain.Models.Snapshots;
 using Domain.Models.Soulstones;
+using Domain.Models.Transfers;
 using Domain.Models.Users;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
@@ -237,6 +238,7 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : DbContext(opti
 
     public DbSet<InventoryItem> InventoryItems => Set<InventoryItem>();
     public DbSet<LootHistoryEntry> LootHistoryEntries => Set<LootHistoryEntry>();
+    public DbSet<PlayerTransferRecord> PlayerTransferHistory => Set<PlayerTransferRecord>();
 
     public DbSet<ItemBase> ItemBases => Set<ItemBase>();
     public DbSet<ItemInstance> ItemInstances => Set<ItemInstance>();

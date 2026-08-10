@@ -16,6 +16,7 @@ import { EssenceItemViewService } from '../../../core/services/api/essences/esse
 import { InventoryStateService } from '../../../core/services/api/inventory/inventory-state.service';
 import { EquipmentStateService } from '../../../core/services/api/equipment/equipment-state.service';
 import { findEquippedComparison } from '../../utils/equipment/equipment.utils';
+import { BlueprintAttributeSummaryComponent } from '../blueprint-attribute-summary/blueprint-attribute-summary.component';
 
 @Component({
   selector: 'app-item',
@@ -25,6 +26,7 @@ import { findEquippedComparison } from '../../utils/equipment/equipment.utils';
     EssenceDetailsComponent,
     EquipmentDisplayComponent,
     PopoverComponent,
+    BlueprintAttributeSummaryComponent,
   ],
   templateUrl: './item.component.html',
 })
