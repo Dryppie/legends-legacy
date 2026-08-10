@@ -44,6 +44,7 @@ public sealed class GuildServiceAuthorizationTests
             Member = new GuildMember
             {
                 GuildId = memberGuildId,
+                Guild = new Guild { Id = memberGuildId },
                 CharacterId = currentCharacterId,
                 Role = GuildRole.Officer
             }
@@ -71,6 +72,7 @@ public sealed class GuildServiceAuthorizationTests
             Member = new GuildMember
             {
                 GuildId = guildId,
+                Guild = new Guild { Id = guildId },
                 CharacterId = currentCharacterId,
                 Role = GuildRole.Officer
             }
@@ -98,6 +100,7 @@ public sealed class GuildServiceAuthorizationTests
             Member = new GuildMember
             {
                 GuildId = memberGuildId,
+                Guild = new Guild { Id = memberGuildId },
                 CharacterId = currentCharacterId,
                 Role = GuildRole.Leader
             }
@@ -112,6 +115,39 @@ public sealed class GuildServiceAuthorizationTests
 
         Assert.False(result);
         Assert.False(repository.InviteByNameCalled);
+    }
+
+    [Fact]
+    public async Task InviteAsync_ReturnsFalse_WhenRoleInvitePermissionIsDisabled()
+    {
+        var guildId = Guid.NewGuid();
+        var characterId = Guid.NewGuid();
+        var guild = new Guild { Id = guildId };
+        guild.RolePermissions.Add(new GuildRolePermission
+        {
+            GuildId = guildId,
+            Role = GuildRole.Officer,
+            CanInvite = false
+        });
+        var repository = new FakeGuildRepository
+        {
+            Member = new GuildMember
+            {
+                GuildId = guildId,
+                Guild = guild,
+                CharacterId = characterId,
+                Role = GuildRole.Officer
+            }
+        };
+
+        var result = await new GuildService(repository).InviteAsync(
+            characterId,
+            guildId,
+            Guid.NewGuid(),
+            CancellationToken.None);
+
+        Assert.False(result);
+        Assert.False(repository.InviteCalled);
     }
 
     private sealed class FakeGuildRepository : IGuildRepository
@@ -173,5 +209,14 @@ public sealed class GuildServiceAuthorizationTests
 
         public Task<Guild?> GetGuildForMemberAsync(Guid characterId, CancellationToken cancellationToken) =>
             Task.FromResult<Guild?>(null);
+
+        public Task<bool> ChangeMemberRoleAsync(Guid guildId, Guid characterId, GuildRole role, CancellationToken cancellationToken) =>
+            Task.FromResult(true);
+
+        public Task<bool> KickMemberAsync(Guid guildId, Guid characterId, CancellationToken cancellationToken) =>
+            Task.FromResult(true);
+
+        public Task<bool> UpdateRolePermissionsAsync(Guid guildId, GuildRolePermission permissions, CancellationToken cancellationToken) =>
+            Task.FromResult(true);
     }
 }

@@ -230,6 +230,8 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : DbContext(opti
     public DbSet<GuildMemberContributionPeriod> GuildMemberContributionPeriods => Set<GuildMemberContributionPeriod>();
     public DbSet<GuildContributionLedger> GuildContributionLedgers => Set<GuildContributionLedger>();
     public DbSet<GuildShopPurchase> GuildShopPurchases => Set<GuildShopPurchase>();
+    public DbSet<GuildRolePermission> GuildRolePermissions => Set<GuildRolePermission>();
+    public DbSet<GuildVaultItem> GuildVaultItems => Set<GuildVaultItem>();
 
     public DbSet<Inventory> Inventories => Set<Inventory>();
 

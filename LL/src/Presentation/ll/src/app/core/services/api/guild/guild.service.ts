@@ -8,6 +8,8 @@ import {
   GuildBuildingOverview,
   GuildBuildingType,
 } from '../../../../shared/models/Dtos/guild/guildBuilding';
+import { GuildRole } from '../../../../shared/models/Dtos/guild/guildRole';
+import { GuildRolePermission } from '../../../../shared/models/Dtos/guild/guildRolePermission';
 
 @Injectable({
   providedIn: 'root',
@@ -135,6 +137,30 @@ export class GuildService {
         return throwError(() => new Error('Failed to purchase guild item'));
       }),
     );
+  }
+
+  donateVaultItem(equipmentInstanceId: string): Observable<void> {
+    return this.api.post('guild/donateVaultItem', equipmentInstanceId);
+  }
+
+  borrowVaultItem(vaultItemId: string): Observable<void> {
+    return this.api.post('guild/borrowVaultItem', vaultItemId);
+  }
+
+  returnVaultItem(vaultItemId: string): Observable<void> {
+    return this.api.post('guild/returnVaultItem', vaultItemId);
+  }
+
+  changeMemberRole(characterId: string, role: GuildRole): Observable<void> {
+    return this.api.post('guild/changeMemberRole', { characterId, role });
+  }
+
+  kickMember(characterId: string): Observable<void> {
+    return this.api.post('guild/kickMember', characterId);
+  }
+
+  updateRolePermissions(permissions: GuildRolePermission): Observable<void> {
+    return this.api.post('guild/updateRolePermissions', permissions);
   }
 
   constructBuilding(buildingType: GuildBuildingType): Observable<GuildBuildingOverview> {

@@ -1912,6 +1912,72 @@ namespace Persistence.LL.Migrations
                     b.ToTable("GuildResource");
                 });
 
+            modelBuilder.Entity("Domain.Models.Guilds.GuildRolePermission", b =>
+                {
+                    b.Property<Guid>("GuildId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Role")
+                        .HasColumnType("integer");
+
+                    b.Property<bool>("CanBorrowVault")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("CanInvite")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("CanKick")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("CanManageApplications")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("CanPromoteDemote")
+                        .HasColumnType("boolean");
+
+                    b.HasKey("GuildId", "Role");
+
+                    b.ToTable("GuildRolePermissions");
+                });
+
+            modelBuilder.Entity("Domain.Models.Guilds.GuildVaultItem", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset?>("BorrowedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("BorrowedByCharacterId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("DonatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("DonatedByCharacterId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("EquipmentInstanceId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("GuildId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BorrowedByCharacterId");
+
+                    b.HasIndex("DonatedByCharacterId");
+
+                    b.HasIndex("EquipmentInstanceId")
+                        .IsUnique();
+
+                    b.HasIndex("GuildId", "BorrowedByCharacterId");
+
+                    b.ToTable("GuildVaultItems");
+                });
+
             modelBuilder.Entity("Domain.Models.Guilds.Missions.GuildContributionLedger", b =>
                 {
                     b.Property<Guid>("Id")
@@ -4261,6 +4327,51 @@ namespace Persistence.LL.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("Domain.Models.Guilds.GuildRolePermission", b =>
+                {
+                    b.HasOne("Domain.Models.Guilds.Guild", "Guild")
+                        .WithMany("RolePermissions")
+                        .HasForeignKey("GuildId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Guild");
+                });
+
+            modelBuilder.Entity("Domain.Models.Guilds.GuildVaultItem", b =>
+                {
+                    b.HasOne("Domain.Models.Entities.Characters.Character", "BorrowedByCharacter")
+                        .WithMany()
+                        .HasForeignKey("BorrowedByCharacterId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("Domain.Models.Entities.Characters.Character", "DonatedByCharacter")
+                        .WithMany()
+                        .HasForeignKey("DonatedByCharacterId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Domain.Models.Items.Equipments.EquipmentInstance", "EquipmentInstance")
+                        .WithOne("GuildVaultItem")
+                        .HasForeignKey("Domain.Models.Guilds.GuildVaultItem", "EquipmentInstanceId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Domain.Models.Guilds.Guild", "Guild")
+                        .WithMany("VaultItems")
+                        .HasForeignKey("GuildId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("BorrowedByCharacter");
+
+                    b.Navigation("DonatedByCharacter");
+
+                    b.Navigation("EquipmentInstance");
+
+                    b.Navigation("Guild");
+                });
+
             modelBuilder.Entity("Domain.Models.Guilds.Missions.GuildMissionContribution", b =>
                 {
                     b.HasOne("Domain.Models.Guilds.Missions.GuildMissionInstance", "GuildMissionInstance")
@@ -4706,7 +4817,11 @@ namespace Persistence.LL.Migrations
 
                     b.Navigation("Resources");
 
+                    b.Navigation("RolePermissions");
+
                     b.Navigation("ShopPurchases");
+
+                    b.Navigation("VaultItems");
                 });
 
             modelBuilder.Entity("Domain.Models.Guilds.Missions.GuildMissionInstance", b =>
@@ -4821,6 +4936,8 @@ namespace Persistence.LL.Migrations
 
             modelBuilder.Entity("Domain.Models.Items.Equipments.EquipmentInstance", b =>
                 {
+                    b.Navigation("GuildVaultItem");
+
                     b.Navigation("InstanceModifiers");
 
                     b.Navigation("ToolAffixes");

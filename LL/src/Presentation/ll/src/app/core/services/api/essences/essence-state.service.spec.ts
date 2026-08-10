@@ -1,6 +1,6 @@
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { of } from 'rxjs';
+import { Subject, of, throwError } from 'rxjs';
 import { EventBusService } from '../../client-side/event-bus/event-bus.service';
 import { CharacterStateService } from '../character/character-state.service';
 import { InventoryStateService } from '../inventory/inventory-state.service';
@@ -8,6 +8,10 @@ import { QuestStateService } from '../quest/quest-state.service';
 import { EssenceItemViewService } from './essence-item-view.service';
 import { EssenceStateService } from './essence-state.service';
 import { EssencesService } from './essences.service';
+import {
+  EssenceMutationResponseDto,
+  PlayerEssenceDto,
+} from '../../../../shared/models/essence-system';
 
 describe('EssenceStateService loadout drafts', () => {
   let service: EssenceStateService;
@@ -22,6 +26,7 @@ describe('EssenceStateService loadout drafts', () => {
       'saveLoadout',
       'updateLoadout',
       'activateLoadout',
+      'spendDust',
     ]);
     essences.getArchive.and.returnValue(of({ essences: [], essenceDust: 0 }));
     essences.getLoadouts.and.returnValue(
@@ -172,5 +177,43 @@ describe('EssenceStateService loadout drafts', () => {
       slots: [],
     });
     expect(service.canSaveDraft()).toBeFalse();
+  });
+
+  it('allows only one pending Essence Dust request', () => {
+    const request = new Subject<EssenceMutationResponseDto>();
+    const essence = { id: 'essence-1' } as PlayerEssenceDto;
+    essences.spendDust.and.returnValue(request.asObservable());
+
+    service.spendDust(essence);
+    service.spendDust(essence);
+
+    expect(essences.spendDust).toHaveBeenCalledOnceWith('essence-1', 1);
+    expect(service.spendingDust()).toBeTrue();
+
+    request.error(new Error('Request failed'));
+
+    expect(service.spendingDust()).toBeFalse();
+  });
+
+  it('reconciles stale Dust state and shows the API validation message', () => {
+    const essence = { id: 'essence-1' } as PlayerEssenceDto;
+    essences.spendDust.and.returnValue(
+      throwError(() => ({
+        status: 400,
+        errorMessage: 'Not enough Essence Dust.',
+        message: 'Http failure response for /spend-dust: 400 OK',
+      })),
+    );
+    essences.getArchive.calls.reset();
+    essences.getArchive.and.returnValue(
+      of({ essences: [essence], essenceDust: 0 }),
+    );
+
+    service.spendDust(essence);
+
+    expect(essences.getArchive).toHaveBeenCalledTimes(1);
+    expect(service.archive()?.essenceDust).toBe(0);
+    expect(service.error()).toBe('Not enough Essence Dust.');
+    expect(service.spendingDust()).toBeFalse();
   });
 });

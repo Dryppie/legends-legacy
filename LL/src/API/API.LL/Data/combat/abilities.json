@@ -361,7 +361,7 @@
     "id": "ability.creature.lumo_sentinel.cracked_core",
     "kind": "Passive",
     "name": "Cracked Core",
-    "description": "Gain 30% Magical Defense above 66% Health; lose 15% below 33% Health.",
+    "description": "Gain 30% Magical Defense above 66% Health; lose 15% Magical Defense below 33% Health.",
     "cooldownTicks": 0,
     "tags": ["Buff", "Defensive"],
     "triggers": [

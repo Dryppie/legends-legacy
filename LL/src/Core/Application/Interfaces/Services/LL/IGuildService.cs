@@ -35,4 +35,7 @@ public interface IGuildService
     Task<bool> ApproveApplicationAsync(Guid characterId, Guid applicationCharacterId, CancellationToken cancellationToken);
     Task<bool> RejectApplicationAsync(Guid characterId, Guid applicationCharacterId, CancellationToken cancellationToken);
     Task<Guild?> GetGuildForMemberAsync(Guid characterId, CancellationToken cancellationToken);
+    Task<bool> ChangeMemberRoleAsync(Guid characterId, Guid targetCharacterId, GuildRole role, CancellationToken cancellationToken);
+    Task<bool> KickMemberAsync(Guid characterId, Guid targetCharacterId, CancellationToken cancellationToken);
+    Task<bool> UpdateRolePermissionsAsync(Guid characterId, GuildRolePermission permissions, CancellationToken cancellationToken);
 }

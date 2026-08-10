@@ -121,6 +121,7 @@ export class EssencesComponent implements OnInit {
   readonly creatureSearch = signal('');
   readonly creatureRegionFilter = signal('all');
   readonly creatureSourceFilter = signal<CreatureSourceFilter>('all');
+  readonly creatureLocationFilter = signal('all');
   readonly creatureEssenceFilter = signal<CreatureEssenceFilter>('all');
   readonly archiveFilter = signal<ArchiveFilter>('all');
   readonly archiveSort = signal<ArchiveSort>('name');
@@ -214,6 +215,7 @@ export class EssencesComponent implements OnInit {
     const search = this.creatureSearch().trim().toLowerCase();
     const region = this.creatureRegionFilter();
     const source = this.creatureSourceFilter();
+    const locationFilter = this.creatureLocationFilter();
     const essenceFilter = this.creatureEssenceFilter();
     const creatures = this.essenceState.creatureArchive()?.creatures ?? [];
 
@@ -221,9 +223,14 @@ export class EssencesComponent implements OnInit {
       const matchesLocation = creature.locations.some(
         (location) =>
           (region === 'all' || location.regionId.toString() === region) &&
-          (source === 'all' || location.sourceType === source),
+          (source === 'all' || location.sourceType === source) &&
+          (locationFilter === 'all' ||
+            this.creatureLocationKey(location) === locationFilter),
       );
-      if ((region !== 'all' || source !== 'all') && !matchesLocation) {
+      if (
+        (region !== 'all' || source !== 'all' || locationFilter !== 'all') &&
+        !matchesLocation
+      ) {
         return false;
       }
 
@@ -270,6 +277,47 @@ export class EssencesComponent implements OnInit {
       ];
     },
   );
+
+  readonly creatureLocationOptions = computed<
+    readonly DropdownOption<string>[]
+  >(() => {
+    const region = this.creatureRegionFilter();
+    const source = this.creatureSourceFilter();
+    const locations = new Map<
+      string,
+      { sourceName: string; sourceType: 'Area' | 'Dungeon' }
+    >();
+
+    for (const creature of this.essenceState.creatureArchive()?.creatures ??
+      []) {
+      for (const location of creature.locations) {
+        if (region !== 'all' && location.regionId.toString() !== region) {
+          continue;
+        }
+        if (source !== 'all' && location.sourceType !== source) continue;
+
+        locations.set(this.creatureLocationKey(location), {
+          sourceName: location.sourceName,
+          sourceType: location.sourceType,
+        });
+      }
+    }
+
+    return [
+      { label: 'All locations', value: 'all' },
+      ...[...locations.entries()]
+        .sort(([, left], [, right]) =>
+          left.sourceName.localeCompare(right.sourceName),
+        )
+        .map(([value, location]) => ({
+          label:
+            source === 'all'
+              ? `${location.sourceName} (${location.sourceType})`
+              : location.sourceName,
+          value,
+        })),
+    ];
+  });
 
   readonly unlockedCodexEntries = computed(
     () =>
@@ -376,18 +424,43 @@ export class EssencesComponent implements OnInit {
 
   public setCreatureRegionFilter(selection: DropdownSelection<string>): void {
     this.creatureRegionFilter.set(selection.main);
+    this.clearUnavailableCreatureLocation();
   }
 
   public setCreatureSourceFilter(
     selection: DropdownSelection<CreatureSourceFilter>,
   ): void {
     this.creatureSourceFilter.set(selection.main);
+    this.clearUnavailableCreatureLocation();
+  }
+
+  public setCreatureLocationFilter(selection: DropdownSelection<string>): void {
+    this.creatureLocationFilter.set(selection.main);
   }
 
   public setCreatureEssenceFilter(
     selection: DropdownSelection<CreatureEssenceFilter>,
   ): void {
     this.creatureEssenceFilter.set(selection.main);
+  }
+
+  private creatureLocationKey(location: {
+    sourceType: 'Area' | 'Dungeon';
+    sourceId: string;
+  }): string {
+    return `${location.sourceType}:${location.sourceId}`;
+  }
+
+  private clearUnavailableCreatureLocation(): void {
+    const selectedLocation = this.creatureLocationFilter();
+    if (
+      selectedLocation !== 'all' &&
+      !this.creatureLocationOptions().some(
+        (option) => option.value === selectedLocation,
+      )
+    ) {
+      this.creatureLocationFilter.set('all');
+    }
   }
 
   public selectPlayerEssence(essence: PlayerEssenceDto): void {

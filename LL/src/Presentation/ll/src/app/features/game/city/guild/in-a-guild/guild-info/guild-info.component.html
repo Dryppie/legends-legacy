@@ -1,8 +1,8 @@
 <div
   *ngIf="character() as character"
-  class="flex h-full w-full flex-col gap-2 pt-2 text-white"
+  class="flex h-full w-full flex-col gap-2 overflow-y-auto pt-2 pr-1 text-white"
 >
-  <div class="ll-panel flex justify-between gap-4 p-4">
+  <div class="ll-panel flex shrink-0 justify-between gap-4 p-4">
     <div>
       <h2 class="ll-heading">Guild Actions</h2>
       <p class="ll-copy mt-1">
@@ -10,8 +10,9 @@
       </p>
     </div>
     <div class="flex w-full flex-col items-end gap-2">
-      <div *ngIf="character.role !== memberRole" class="flex flex-col gap-2">
+      <div *ngIf="canInvite || canManageApplications" class="flex flex-col gap-2">
         <app-regular-button
+          *ngIf="canInvite"
           [disabled]="isGuildFull()"
           class="place-self-end"
           (pressed)="openModal()"
@@ -19,6 +20,7 @@
           Invite
         </app-regular-button>
         <app-regular-button
+          *ngIf="canManageApplications"
           class="place-self-end"
           (pressed)="openApplicationsModal()"
         >
@@ -32,9 +34,78 @@
       </div>
     </div>
   </div>
-  <div class="flex h-full flex-col overflow-hidden">
+  <section
+    *ngIf="character.role === leaderRole"
+    class="ll-panel shrink-0 overflow-hidden"
+  >
+    <button
+      type="button"
+      class="flex w-full items-center justify-between gap-3 px-4 py-3 text-left transition-colors hover:bg-zinc-300/10"
+      [attr.aria-expanded]="rolePermissionsOpen()"
+      aria-controls="guild-role-permissions"
+      (click)="toggleRolePermissions()"
+    >
+      <div>
+        <h2 class="ll-heading">Role Permissions</h2>
+        <p class="ll-copy mt-1 text-xs">
+          Choose what officers and members may manage.
+        </p>
+      </div>
+      <span class="shrink-0 text-sm text-primary">
+        {{ rolePermissionsOpen() ? "Hide" : "Show" }}
+      </span>
+    </button>
+
     <div
-      class="ll-table-header grid grid-cols-[minmax(0,1fr)_5rem_8rem_8rem] gap-2"
+      *ngIf="rolePermissionsOpen()"
+      id="guild-role-permissions"
+      class="grid gap-3 border-t border-light_gray/60 p-3 lg:grid-cols-2"
+    >
+      <div *ngFor="let permissions of rolePermissions" class="ll-card p-3">
+        <h3 class="ll-heading mb-3">{{ permissions.role }}</h3>
+        <div class="grid gap-2 sm:grid-cols-2">
+          <label class="ll-checkbox">
+            <input type="checkbox" [(ngModel)]="permissions.canInvite" />
+            <span>Invite</span>
+          </label>
+          <label class="ll-checkbox">
+            <input
+              type="checkbox"
+              [(ngModel)]="permissions.canManageApplications"
+            />
+            <span>Applications</span>
+          </label>
+          <label class="ll-checkbox">
+            <input
+              type="checkbox"
+              [(ngModel)]="permissions.canPromoteDemote"
+            />
+            <span>Promote / demote</span>
+          </label>
+          <label class="ll-checkbox">
+            <input type="checkbox" [(ngModel)]="permissions.canKick" />
+            <span>Kick members</span>
+          </label>
+          <label class="ll-checkbox sm:col-span-2">
+            <input
+              type="checkbox"
+              [(ngModel)]="permissions.canBorrowVault"
+            />
+            <span>Borrow vault gear</span>
+          </label>
+        </div>
+        <app-regular-button
+          class="mt-3"
+          (pressed)="savePermissions(permissions)"
+        >
+          Save
+        </app-regular-button>
+      </div>
+    </div>
+  </section>
+  <div class="flex min-h-64 flex-1 flex-col overflow-hidden">
+    <div
+      class="ll-table-header grid grid-cols-[minmax(0,1fr)_5rem_8rem_18rem] gap-2"
     >
       <div>Member</div>
       <div>Level</div>
@@ -43,7 +114,7 @@
     </div>
     <div class="overflow-y-auto">
       <div
-        class="ll-table-row grid grid-cols-[minmax(0,1fr)_5rem_8rem_8rem] items-center gap-2"
+        class="ll-table-row grid grid-cols-[minmax(0,1fr)_5rem_8rem_18rem] items-center gap-2"
         *ngFor="let member of guildMembers"
         [ngClass]="{
           'bg-zinc-300/10 text-primary':
@@ -66,11 +137,11 @@
         >
           {{ member.role === leaderRole ? "Disband" : "Leave" }}
         </app-regular-button>
-        <div
-          *ngIf="member.characterId !== character.characterId"
-          class="col-start-4 justify-self-end text-xs text-zinc-500"
-        >
-          -
+        <div *ngIf="member.characterId !== character.characterId" class="col-start-4 flex justify-self-end gap-1">
+          <app-regular-button *ngIf="canPromote(member)" (pressed)="promote(member)">Promote</app-regular-button>
+          <app-regular-button *ngIf="canDemote(member)" (pressed)="demote(member)">Demote</app-regular-button>
+          <app-regular-button *ngIf="canKick(member)" variant="danger" (pressed)="kick(member)">Kick</app-regular-button>
+          <span *ngIf="!canPromote(member) && !canDemote(member) && !canKick(member)" class="text-xs text-zinc-500">-</span>
         </div>
       </div>
     </div>
@@ -151,20 +222,15 @@
 >
   <div class="ll-modal-panel" (click)="$event.stopPropagation()">
     <h3 class="ll-heading mb-4">
-      {{ confirmAction === "disband" ? "Disband Guild?" : "Leave Guild?" }}
+      {{ confirmTitle }}
     </h3>
-    <p class="ll-copy mb-6">
-      Are you sure you want to
-      {{
-        confirmAction === "disband" ? "disband your guild" : "leave the guild"
-      }}? This action cannot be undone.
-    </p>
+    <p class="ll-copy mb-6">{{ confirmMessage }}</p>
     <div class="flex justify-end gap-2">
       <app-regular-button (pressed)="closeConfirmModal()">
         Cancel
       </app-regular-button>
       <app-regular-button variant="danger" (pressed)="confirmDecision()">
-        {{ confirmAction === "disband" ? "Disband" : "Leave" }}
+        {{ confirmButtonLabel }}
       </app-regular-button>
     </div>
   </div>

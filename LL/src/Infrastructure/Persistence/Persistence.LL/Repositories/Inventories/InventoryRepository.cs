@@ -30,6 +30,9 @@ public class InventoryRepository : IInventoryRepository
                 .ThenInclude(ii => (ii.ItemInstance as EquipmentInstance).InstanceModifiers)
             .Include(i => i.InventoryItems)
                 .ThenInclude(ii => (ii.ItemInstance as EquipmentInstance).ToolAffixes)
+            .Include(i => i.InventoryItems)
+                .ThenInclude(ii => (ii.ItemInstance as EquipmentInstance).GuildVaultItem)
+                    .ThenInclude(x => x!.Guild)
             .FirstOrDefaultAsync(i => i.CharacterId == characterId, cancellationToken); // Assuming CharacterId is the foreign key
 
         NotFoundException.ThrowIfNull(inventory, nameof(inventory), characterId);
@@ -209,6 +212,11 @@ public class InventoryRepository : IInventoryRepository
 
     public async Task<bool> TryRemoveItemsForMarketPlaceListingAsync(Guid characterId, MarketPlaceListing listing, CancellationToken cancellationToken)
     {
+        if (await _context.GuildVaultItems.AnyAsync(
+            x => x.EquipmentInstanceId == listing.ItemInstanceId && x.BorrowedByCharacterId == characterId,
+            cancellationToken))
+            return false;
+
         var invItem = await _context.InventoryItems
             .Where(i => i.InventoryId == characterId &&
                 i.ItemInstanceId == listing.ItemInstanceId)
@@ -286,6 +294,10 @@ public class InventoryRepository : IInventoryRepository
 
         if (!equipmentInventoryItems.Any()) return null;
         if (parsedGuids.Count == 0 || parsedGuids.Count != equipmentInventoryItems.Count()) return null;
+        if (await _context.GuildVaultItems.AnyAsync(
+            x => x.BorrowedByCharacterId == characterId && parsedGuids.Contains(x.EquipmentInstanceId),
+            cancellationToken))
+            return null;
         if (equipmentInventoryItems.Any(i =>
             i.ItemInstance is not EquipmentInstance equipmentInstance ||
             equipmentInstance.EquipmentBase.EquipmentType == EquipmentType.Tool))

@@ -1,0 +1,227 @@
+<div
+  class="grid h-full min-h-0 gap-4 overflow-y-auto pt-2 text-white xl:grid-cols-[minmax(0,1fr)_19rem] xl:overflow-hidden"
+>
+  <section
+    class="ll-panel flex min-h-[34rem] min-w-0 flex-col overflow-hidden xl:min-h-0"
+  >
+    <header class="shrink-0 border-b border-light_gray/50 p-4">
+      <div class="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <h2 class="ll-heading text-2xl">Guild Vault</h2>
+          <p class="ll-copy mt-1">
+            Donated equipment remains guild property while members borrow and
+            equip it.
+          </p>
+        </div>
+
+        <dl class="flex items-center divide-x divide-light_gray/50 text-right">
+          <div class="px-4">
+            <dd class="ll-heading text-lg text-emerald-300">
+              {{ availableCount }}
+            </dd>
+            <dt class="ll-stat-label mt-1">Available</dt>
+          </div>
+          <div class="px-4">
+            <dd class="ll-heading text-lg text-amber-300">
+              {{ borrowedCount }}
+            </dd>
+            <dt class="ll-stat-label mt-1">Borrowed</dt>
+          </div>
+          <div class="pl-4">
+            <dd class="ll-heading text-lg">{{ guild.vaultItems.length }}</dd>
+            <dt class="ll-stat-label mt-1">Items</dt>
+          </div>
+        </dl>
+      </div>
+
+      <div class="mt-4 flex flex-wrap items-center justify-between gap-3">
+        <div class="flex min-w-0 flex-1 flex-wrap items-center gap-3">
+          <label class="relative min-w-52 flex-1 sm:max-w-80">
+            <span
+              class="pointer-events-none absolute inset-y-0 left-3 flex items-center text-xs text-zinc-500"
+              aria-hidden="true"
+              >○</span
+            >
+            <input
+              class="ll-input w-full pl-8"
+              type="search"
+              [(ngModel)]="searchTerm"
+              placeholder="Search the vault"
+              aria-label="Search the guild vault"
+            />
+          </label>
+
+          <div class="ll-segmented" aria-label="Vault status filter">
+            <button
+              *ngFor="let filter of filters"
+              type="button"
+              class="ll-segmented-button"
+              [ngClass]="{
+                'll-segmented-button-active': activeFilter === filter.value,
+              }"
+              (click)="setFilter(filter.value)"
+            >
+              {{ filter.label }}
+            </button>
+          </div>
+        </div>
+
+        <div class="flex flex-wrap items-center justify-end gap-3">
+          <div class="flex items-center gap-2">
+            <span class="ll-stat-label">Slot</span>
+            <app-dropdown
+              class="w-32"
+              appearance="field"
+              label="All slots"
+              value="all"
+              [options]="slotOptions"
+              [selectedValue]="selectedSlot"
+              (selection)="setSlotFilter($event)"
+            ></app-dropdown>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <span class="ll-stat-label">Sort</span>
+            <app-dropdown
+              class="w-28"
+              appearance="field"
+              label="Slot"
+              value="slot"
+              [options]="sortOptions"
+              [selectedValue]="sortBy"
+              (selection)="setSort($event)"
+            ></app-dropdown>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <div class="min-h-0 flex-1 overflow-auto">
+      <div class="min-w-[52rem]">
+        <div
+          class="ll-table-header sticky top-0 z-10 grid grid-cols-[minmax(15rem,1fr)_7rem_7rem_10rem_7rem] gap-3"
+        >
+          <div>Equipment</div>
+          <div>Slot</div>
+          <div>Quality</div>
+          <div>Status</div>
+          <div></div>
+        </div>
+
+        <div *ngIf="!visibleVaultItems.length" class="ll-empty-state min-h-52">
+          {{
+            guild.vaultItems.length
+              ? "No vault equipment matches this view."
+              : "No equipment has been donated yet."
+          }}
+        </div>
+
+        <div
+          *ngFor="let vaultItem of visibleVaultItems"
+          class="ll-table-row grid min-h-[4.75rem] grid-cols-[minmax(15rem,1fr)_7rem_7rem_10rem_7rem] items-center gap-3"
+        >
+          <div class="min-w-0">
+            <app-item [item]="vaultItem.equipment"></app-item>
+            <p class="mt-1 truncate text-xs text-zinc-500">
+              Donated by
+              {{
+                vaultItem.donatedByCharacterId === myCharacterId()
+                  ? "you"
+                  : vaultItem.donatedByName
+              }}
+            </p>
+          </div>
+
+          <div class="text-sm text-secondary">
+            {{
+              vaultItem.equipment.equipmentBase.equipmentType | equipmentType
+            }}
+          </div>
+
+          <div
+            class="text-sm"
+            [ngClass]="qualityClass(vaultItem.equipment.quality)"
+          >
+            {{ vaultItem.equipment.quality }}
+          </div>
+
+          <div class="text-sm">
+            <ng-container *ngIf="vaultItem.borrowedByName; else available">
+              <div class="font-medium text-amber-300">Borrowed</div>
+              <div class="mt-1 truncate text-xs text-zinc-500">
+                by {{ vaultItem.borrowedByName }}
+              </div>
+            </ng-container>
+            <ng-template #available>
+              <div class="font-medium text-emerald-300">Available</div>
+              <div class="mt-1 text-xs text-zinc-500">On the shelf</div>
+            </ng-template>
+          </div>
+
+          <div class="justify-self-stretch">
+            <app-regular-button
+              *ngIf="!vaultItem.borrowedByCharacterId"
+              fullWidth=""
+              [disabled]="!canBorrow || busy"
+              (pressed)="borrow(vaultItem.id)"
+            >
+              Borrow
+            </app-regular-button>
+            <app-regular-button
+              *ngIf="vaultItem.borrowedByCharacterId === myCharacterId()"
+              fullWidth=""
+              variant="secondary"
+              [disabled]="busy"
+              (pressed)="returnItem(vaultItem.id)"
+            >
+              Return
+            </app-regular-button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <aside
+    class="ll-panel flex min-h-64 flex-col p-4 xl:min-h-0 xl:overflow-hidden"
+  >
+    <header class="shrink-0">
+      <p class="ll-eyebrow">Donate Equipment</p>
+      <p class="ll-copy mt-2 text-xs leading-relaxed">
+        Only unequipped items can be donated.<br />
+        Donations cannot be reclaimed.
+      </p>
+    </header>
+
+    <div class="mt-4 min-h-0 flex-1 space-y-2 xl:overflow-y-auto xl:pr-1">
+      <div *ngIf="!donateOptions().length" class="ll-empty-state min-h-40">
+        No unequipped equipment is available to donate.
+      </div>
+
+      <div
+        *ngFor="let inventoryItem of donateOptions()"
+        class="ll-card flex items-center justify-between gap-3 p-3"
+      >
+        <div class="min-w-0">
+          <app-item [item]="inventoryItem.itemInstance"></app-item>
+          <div
+            class="mt-1 truncate text-xs"
+            [ngClass]="qualityClass($any(inventoryItem.itemInstance).quality)"
+          >
+            {{
+              $any(inventoryItem.itemInstance).equipmentBase.equipmentType
+                | equipmentType
+            }}
+            · {{ $any(inventoryItem.itemInstance).quality }}
+          </div>
+        </div>
+        <app-regular-button
+          [disabled]="busy"
+          (pressed)="donate(inventoryItem.itemInstance.id)"
+        >
+          Donate
+        </app-regular-button>
+      </div>
+    </div>
+  </aside>
+</div>

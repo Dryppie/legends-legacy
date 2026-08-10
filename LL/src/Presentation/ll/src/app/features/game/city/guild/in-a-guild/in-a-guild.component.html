@@ -49,6 +49,12 @@
         (approveEvent)="approveApplication($event)"
       ></app-guild-info>
     </app-tab>
+    <app-tab label="Vault">
+      <app-guild-vault
+        class="guild-tab-content min-h-0 flex-1 overflow-hidden"
+        [guild]="guild"
+      ></app-guild-vault>
+    </app-tab>
     <app-tab label="Buildings">
       <app-guild-buildings
         class="guild-tab-content min-h-0 flex-1 overflow-hidden"

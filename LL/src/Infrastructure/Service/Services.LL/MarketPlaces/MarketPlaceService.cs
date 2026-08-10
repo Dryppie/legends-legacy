@@ -150,6 +150,8 @@ public class MarketPlaceService : IMarketPlaceService
         var seller = await _characterService.GetCharacterByCharacterIdAsync(characterId, cancellationToken);
         if (seller == null) return null;
 
+        var remainingInventoryItem = CreateRemainingInventoryItem(inventoryItem, requestedQuantity);
+
         var removalListing = new MarketPlaceListing
         {
             SellerId = characterId,
@@ -250,10 +252,6 @@ public class MarketPlaceService : IMarketPlaceService
                 seller.Cinders));
         }
 
-        var remainingInventoryItem = await _inventoryService.GetInventoryItemAsync(
-            characterId,
-            inventoryItem.ItemInstanceId,
-            cancellationToken);
         fills = fills.Select(fill => fill with
         {
             RemainingSellerInventoryItem = remainingInventoryItem
@@ -773,6 +771,8 @@ public class MarketPlaceService : IMarketPlaceService
 
         if (remaining != 0 || plan.Count == 0) return null;
 
+        var remainingInventoryItem = CreateRemainingInventoryItem(inventoryItem, quantity);
+
         var participantIds = plan
             .Select(x => x.Order.BuyerId)
             .Append(characterId)
@@ -861,16 +861,26 @@ public class MarketPlaceService : IMarketPlaceService
                 seller.Cinders));
         }
 
-        var remainingInventoryItem = await _inventoryService.GetInventoryItemAsync(
-            characterId,
-            itemInstanceId,
-            cancellationToken);
         fills = fills.Select(fill => fill with
         {
             RemainingSellerInventoryItem = remainingInventoryItem
         }).ToList();
 
         return new SellCommodityResult(fills, quantity, totalPrice, totalFees, seller.Cinders);
+    }
+
+    private static InventoryItem? CreateRemainingInventoryItem(InventoryItem inventoryItem, int removedQuantity)
+    {
+        var remainingQuantity = inventoryItem.Quantity - removedQuantity;
+        if (remainingQuantity <= 0) return null;
+
+        return new InventoryItem
+        {
+            InventoryId = inventoryItem.InventoryId,
+            ItemInstanceId = inventoryItem.ItemInstanceId,
+            ItemInstance = inventoryItem.ItemInstance,
+            Quantity = remainingQuantity
+        };
     }
 
     public async Task<InventoryItem?> CancelMarketPlaceListingAsync(Guid characterId, Guid listingId, CancellationToken cancellationToken)

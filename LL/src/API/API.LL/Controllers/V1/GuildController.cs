@@ -14,6 +14,12 @@ using Application.UseCases.Guilds.Commands.RejectApplication;
 using Application.UseCases.Guilds.Commands.RejectInvite;
 using Application.UseCases.Guilds.Commands.SelectGuildMission;
 using Application.UseCases.Guilds.Commands.UpgradeGuildBuilding;
+using Application.UseCases.Guilds.Commands.DonateGuildVaultItem;
+using Application.UseCases.Guilds.Commands.BorrowGuildVaultItem;
+using Application.UseCases.Guilds.Commands.ReturnGuildVaultItem;
+using Application.UseCases.Guilds.Commands.ChangeGuildMemberRole;
+using Application.UseCases.Guilds.Commands.KickGuildMember;
+using Application.UseCases.Guilds.Commands.UpdateGuildRolePermissions;
 using Application.UseCases.Guilds.Dtos.Requests;
 using Application.UseCases.Guilds.Dtos.Responses;
 using Application.UseCases.Guilds.Queries.GetAllGuilds;
@@ -122,4 +128,28 @@ public class GuildController : BaseController
     [HttpPost("PurchaseShopItem")]
     public async Task<ActionResult<Response<GuildShopOverviewDto>>> PurchaseShopItem([FromBody] string itemKey) =>
         await Mediator.Send(new PurchaseGuildShopItemCommand(CurrentCharacterGuid, itemKey));
+
+    [HttpPost("DonateVaultItem")]
+    public async Task<ActionResult<Response<bool>>> DonateVaultItem([FromBody] Guid equipmentInstanceId) =>
+        await Mediator.Send(new DonateGuildVaultItemCommand(CurrentCharacterGuid, equipmentInstanceId));
+
+    [HttpPost("BorrowVaultItem")]
+    public async Task<ActionResult<Response<bool>>> BorrowVaultItem([FromBody] Guid vaultItemId) =>
+        await Mediator.Send(new BorrowGuildVaultItemCommand(CurrentCharacterGuid, vaultItemId));
+
+    [HttpPost("ReturnVaultItem")]
+    public async Task<ActionResult<Response<bool>>> ReturnVaultItem([FromBody] Guid vaultItemId) =>
+        await Mediator.Send(new ReturnGuildVaultItemCommand(CurrentCharacterGuid, vaultItemId));
+
+    [HttpPost("ChangeMemberRole")]
+    public async Task<ActionResult<Response<bool>>> ChangeMemberRole([FromBody] ChangeGuildMemberRoleDto request) =>
+        await Mediator.Send(new ChangeGuildMemberRoleCommand(CurrentCharacterGuid, request));
+
+    [HttpPost("KickMember")]
+    public async Task<ActionResult<Response<bool>>> KickMember([FromBody] Guid characterId) =>
+        await Mediator.Send(new KickGuildMemberCommand(CurrentCharacterGuid, characterId));
+
+    [HttpPost("UpdateRolePermissions")]
+    public async Task<ActionResult<Response<bool>>> UpdateRolePermissions([FromBody] UpdateGuildRolePermissionsDto request) =>
+        await Mediator.Send(new UpdateGuildRolePermissionsCommand(CurrentCharacterGuid, request));
 }

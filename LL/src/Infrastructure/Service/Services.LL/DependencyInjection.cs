@@ -269,6 +269,7 @@ public static class DependencyInjection
         services.AddScoped<ICreatureArchiveService, CreatureArchiveService>();
 
         services.AddScoped<IGuildService, GuildService>();
+        services.AddScoped<IGuildVaultService, GuildVaultService>();
         services.AddSingleton<IGuildContentValidator, GuildContentValidator>();
         services.AddSingleton<IGuildContentProvider>(sp =>
             new JsonGuildContentProvider(

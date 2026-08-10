@@ -12,6 +12,7 @@ import { TabsComponent } from '../../../../../shared/components/custom-component
 import { NgFor, NgIf } from '@angular/common';
 import { HumanizeEnumPipe } from '../../../../../shared/pipes/enums/humanize-enum.pipe';
 import { NumberFormatPipe } from '../../../../../shared/pipes/number-format/number-format.pipe';
+import { GuildVaultComponent } from './guild-vault/guild-vault.component';
 
 @Component({
   selector: 'app-in-a-guild',
@@ -26,6 +27,7 @@ import { NumberFormatPipe } from '../../../../../shared/pipes/number-format/numb
     GuildRankingsComponent,
     HumanizeEnumPipe,
     NumberFormatPipe,
+    GuildVaultComponent,
   ],
   templateUrl: './in-a-guild.component.html',
   styleUrl: './in-a-guild.component.scss',

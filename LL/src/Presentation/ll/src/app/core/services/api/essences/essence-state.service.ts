@@ -404,7 +404,17 @@ export class EssenceStateService {
             resetVersion === this.resetVersion &&
             mutationVersion === this.dustMutationVersion
           ) {
-            this._error.set(error?.message ?? 'Failed to level up essence');
+            const message = this.getRequestErrorMessage(
+              error,
+              'Failed to level up essence',
+            );
+
+            if (this.isBadRequest(error)) {
+              this.reconcileArchiveAfterDustRejection(message, resetVersion);
+              return;
+            }
+
+            this._error.set(message);
           }
         },
       });
@@ -735,6 +745,80 @@ export class EssenceStateService {
     this.characterState.markOverviewDirty();
     this.ensureSelectedEssence(response.archive);
     this.refreshCompanionArchives();
+  }
+
+  private reconcileArchiveAfterDustRejection(
+    message: string,
+    resetVersion: number,
+  ): void {
+    const reconciliationVersion = ++this.dustMutationVersion;
+
+    this.essencesService
+      .getArchive()
+      .pipe(
+        finalize(() => {
+          if (
+            resetVersion === this.resetVersion &&
+            reconciliationVersion === this.dustMutationVersion
+          ) {
+            this._spendingDust.set(false);
+          }
+        }),
+      )
+      .subscribe({
+        next: (archive) => {
+          if (
+            resetVersion !== this.resetVersion ||
+            reconciliationVersion !== this.dustMutationVersion
+          ) {
+            return;
+          }
+
+          this._archive.set(archive);
+          this.ensureSelectedEssence(archive);
+          this._error.set(message);
+        },
+        error: () => {
+          if (
+            resetVersion === this.resetVersion &&
+            reconciliationVersion === this.dustMutationVersion
+          ) {
+            this._error.set(message);
+          }
+        },
+      });
+  }
+
+  private isBadRequest(error: unknown): boolean {
+    return (
+      typeof error === 'object' &&
+      error !== null &&
+      'status' in error &&
+      error.status === 400
+    );
+  }
+
+  private getRequestErrorMessage(error: unknown, fallback: string): string {
+    if (typeof error !== 'object' || error === null) return fallback;
+
+    const requestError = error as {
+      errorMessage?: unknown;
+      message?: unknown;
+    };
+    if (
+      typeof requestError.errorMessage === 'string' &&
+      requestError.errorMessage.trim()
+    ) {
+      return requestError.errorMessage;
+    }
+    if (
+      typeof requestError.message === 'string' &&
+      requestError.message.trim()
+    ) {
+      return requestError.message;
+    }
+
+    return fallback;
   }
 
   private refreshCompanionArchives(): void {

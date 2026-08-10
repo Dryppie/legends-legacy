@@ -17,6 +17,8 @@ public class GuildDto : IMapFrom<Guild>
     public List<GuildMemberDto> Members { get; set; } = [];
     public List<GuildInviteDto> Invites { get; set; } = [];
     public List<GuildResource> Resources { get; set; } = [];
+    public List<GuildRolePermissionDto> RolePermissions { get; set; } = [];
+    public List<GuildVaultItemDto> VaultItems { get; set; } = [];
 
     public void Mapping(Profile profile)
     {

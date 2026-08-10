@@ -93,6 +93,7 @@ export class InventoryComponent implements OnInit {
       .equipment()
       .filter(
         (item) =>
+          !(item.itemInstance as EquipmentInstance).isGuildBorrowed &&
           (item.itemInstance as EquipmentInstance).equipmentBase
             .equipmentType !== EquipmentType.Tool,
       ),

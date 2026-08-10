@@ -112,6 +112,8 @@ public interface IDbContext
     DbSet<GuildMemberContributionPeriod> GuildMemberContributionPeriods { get; }
     DbSet<GuildContributionLedger> GuildContributionLedgers { get; }
     DbSet<GuildShopPurchase> GuildShopPurchases { get; }
+    DbSet<GuildRolePermission> GuildRolePermissions { get; }
+    DbSet<GuildVaultItem> GuildVaultItems { get; }
     DbSet<Inventory> Inventories { get; }
     DbSet<InventoryItem> InventoryItems { get; }
     DbSet<LootHistoryEntry> LootHistoryEntries { get; }

@@ -36,6 +36,9 @@ export interface EquipmentInstance extends ItemInstance {
   affinityTags: string[];
   itemBudget: number;
   itemBudgetTier: number;
+  isGuildBorrowed: boolean;
+  guildVaultItemId?: string | null;
+  borrowedFromGuildName?: string | null;
 }
 
 export interface ItemBase {

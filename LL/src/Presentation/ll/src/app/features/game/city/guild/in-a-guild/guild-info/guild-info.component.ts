@@ -6,6 +6,7 @@ import {
   OnChanges,
   OnInit,
   Output,
+  signal,
   SimpleChanges,
 } from '@angular/core';
 import { NgClass, NgFor, NgIf } from '@angular/common';
@@ -19,6 +20,7 @@ import { GuildService } from '../../../../../../core/services/api/guild/guild.se
 import { RegularButtonComponent } from '../../../../../../shared/components/custom-components/buttons/regular-button/regular-button.component';
 import { GuildStateService } from '../../../../../../core/services/api/guild/guild-state.service';
 import { CharacterTagComponent } from '../../../../../../shared/components/character/character-tag/character-tag.component';
+import { GuildRolePermission } from '../../../../../../shared/models/Dtos/guild/guildRolePermission';
 
 @Component({
     selector: 'app-guild-info',
@@ -52,9 +54,12 @@ export class GuildInfoComponent implements OnInit, OnChanges {
   inviteName = '';
 
   showConfirmModal = false;
-  confirmAction: 'leave' | 'disband' | null = null;
+  confirmAction: 'leave' | 'disband' | 'kick' | null = null;
+  pendingKickMember: GuildMember | null = null;
 
   showApplicationsModal = false;
+  rolePermissions: GuildRolePermission[] = [];
+  readonly rolePermissionsOpen = signal(false);
 
   id!: string;
   leaderRole: GuildRole = GuildRole.Leader;
@@ -72,6 +77,9 @@ export class GuildInfoComponent implements OnInit, OnChanges {
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['guild']) {
       this.sortGuildMembers();
+      this.rolePermissions = (this.guild.rolePermissions ?? [])
+        .filter((permission) => permission.role !== GuildRole.Leader)
+        .map((permission) => ({ ...permission }));
     }
   }
 
@@ -129,6 +137,7 @@ export class GuildInfoComponent implements OnInit, OnChanges {
   closeConfirmModal() {
     this.showConfirmModal = false;
     this.confirmAction = null;
+    this.pendingKickMember = null;
   }
 
   confirmDecision() {
@@ -136,6 +145,8 @@ export class GuildInfoComponent implements OnInit, OnChanges {
       this.leaveEvent.emit();
     } else if (this.confirmAction === 'disband') {
       this.disbandEvent.emit();
+    } else if (this.confirmAction === 'kick' && this.pendingKickMember) {
+      this.state.kickMember(this.pendingKickMember.characterId);
     }
 
     this.closeConfirmModal();
@@ -143,5 +154,92 @@ export class GuildInfoComponent implements OnInit, OnChanges {
 
   isGuildFull(): boolean {
     return this.guildMembers.length >= this.guild.maxMembers;
+  }
+
+  permissionFor(role: GuildRole): GuildRolePermission | undefined {
+    return this.guild.rolePermissions?.find(
+      (permission) => permission.role === role,
+    );
+  }
+
+  get canInvite(): boolean {
+    const member = this.character();
+    return !!member && !!this.permissionFor(member.role)?.canInvite;
+  }
+
+  get canManageApplications(): boolean {
+    const member = this.character();
+    return !!member && !!this.permissionFor(member.role)?.canManageApplications;
+  }
+
+  canPromote(member: GuildMember): boolean {
+    const current = this.character();
+    if (!current || member.role !== GuildRole.Member) return false;
+    return !!this.permissionFor(current.role)?.canPromoteDemote;
+  }
+
+  canDemote(member: GuildMember): boolean {
+    const current = this.character();
+    return (
+      current?.role === GuildRole.Leader && member.role === GuildRole.Officer
+    );
+  }
+
+  canKick(member: GuildMember): boolean {
+    const current = this.character();
+    if (!current || member.characterId === current.characterId) return false;
+    const roleRank = {
+      [GuildRole.Leader]: 0,
+      [GuildRole.Officer]: 1,
+      [GuildRole.Member]: 2,
+    };
+    return (
+      !!this.permissionFor(current.role)?.canKick &&
+      roleRank[member.role] > roleRank[current.role]
+    );
+  }
+
+  promote(member: GuildMember): void {
+    this.state.changeMemberRole(member.characterId, GuildRole.Officer);
+  }
+
+  demote(member: GuildMember): void {
+    this.state.changeMemberRole(member.characterId, GuildRole.Member);
+  }
+
+  kick(member: GuildMember): void {
+    this.pendingKickMember = member;
+    this.confirmAction = 'kick';
+    this.showConfirmModal = true;
+  }
+
+  get confirmTitle(): string {
+    if (this.confirmAction === 'disband') return 'Disband Guild?';
+    if (this.confirmAction === 'kick') return 'Kick Member?';
+    return 'Leave Guild?';
+  }
+
+  get confirmMessage(): string {
+    if (this.confirmAction === 'disband') {
+      return 'Are you sure you want to disband your guild? This action cannot be undone.';
+    }
+    if (this.confirmAction === 'kick') {
+      return `Are you sure you want to kick ${this.pendingKickMember?.name ?? 'this member'} from the guild?`;
+    }
+    return 'Are you sure you want to leave the guild?';
+  }
+
+  get confirmButtonLabel(): string {
+    if (this.confirmAction === 'disband') return 'Disband';
+    if (this.confirmAction === 'kick') return 'Kick';
+    return 'Leave';
+  }
+
+  savePermissions(permissions: GuildRolePermission): void {
+    this.state.updateRolePermissions({ ...permissions });
+  }
+
+  toggleRolePermissions(): void {
+    this.rolePermissionsOpen.update((open) => !open);
   }
 }

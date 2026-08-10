@@ -24,15 +24,21 @@
         selectedItemType() ? 'll-panel' : 'll-panel rounded-t-none border-t-0'
       "
     >
-      <app-market-place-inventory-item
+      <div
         *ngFor="let item of filteredItems; trackBy: trackByItem"
-        [inventoryItem]="item"
         (click)="selectItem(item)"
+        [attr.aria-selected]="item.itemInstance.id === selectedItemId"
         [ngClass]="{
-          'bg-primary/20 text-white': item.itemInstance.id === selectedItemId,
+          'bg-primary/20 text-white ring-1 ring-inset ring-primary/50':
+            item.itemInstance.id === selectedItemId,
         }"
         class="transition hover:bg-zinc-600/30"
-      ></app-market-place-inventory-item>
+        role="option"
+      >
+        <app-market-place-inventory-item
+          [inventoryItem]="item"
+        ></app-market-place-inventory-item>
+      </div>
 
       <p
         *ngIf="!filteredItems.length"

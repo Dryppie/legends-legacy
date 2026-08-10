@@ -29,18 +29,42 @@ public class GuildRepository : IGuildRepository
             }
         };
 
+        newGuild.RolePermissions.Add(GuildRolePermission.CreateDefault(newGuild.Id, GuildRole.Leader));
+        newGuild.RolePermissions.Add(GuildRolePermission.CreateDefault(newGuild.Id, GuildRole.Officer));
+        newGuild.RolePermissions.Add(GuildRolePermission.CreateDefault(newGuild.Id, GuildRole.Member));
+
         _context.Guilds.Add(newGuild);
         return true;
     }
 
     public async Task<Guild?> GetMyGuildAsync(Guid characterId, CancellationToken cancellationToken) =>
         await _context.Guilds
+            .Include(g => g.Owner)
             .Include(g => g.Members)
                 .ThenInclude(m => m.Character)
             .Include(g => g.Invites)
                 .ThenInclude(i => i.Character)
             .Include(g => g.Resources)
             .Include(g => g.Buildings)
+            .Include(g => g.RolePermissions)
+            .Include(g => g.VaultItems)
+                .ThenInclude(x => x.DonatedByCharacter)
+            .Include(g => g.VaultItems)
+                .ThenInclude(x => x.BorrowedByCharacter)
+            .Include(g => g.VaultItems)
+                .ThenInclude(x => x.EquipmentInstance)
+                    .ThenInclude(x => x.InstanceModifiers)
+            .Include(g => g.VaultItems)
+                .ThenInclude(x => x.EquipmentInstance)
+                    .ThenInclude(x => x.ToolAffixes)
+            .Include(g => g.VaultItems)
+                .ThenInclude(x => x.EquipmentInstance)
+                    .ThenInclude(x => x.ItemBase)
+                        .ThenInclude(x => (x as Domain.Models.Items.Equipments.EquipmentBase).AttributeModifiers)
+            .Include(g => g.VaultItems)
+                .ThenInclude(x => x.EquipmentInstance)
+                    .ThenInclude(x => x.ItemBase)
+                        .ThenInclude(x => (x as Domain.Models.Items.Equipments.EquipmentBase).ToolBonuses)
             .SingleOrDefaultAsync(g => g.Members.Select(gm => gm.CharacterId).Contains(characterId), cancellationToken);
 
     public async Task<List<Guild>> GetAllGuildsAsync(CancellationToken cancellationToken) =>
@@ -54,8 +78,9 @@ public class GuildRepository : IGuildRepository
     {
         var member = await _context.GuildMembers.FirstOrDefaultAsync(gm => gm.CharacterId == characterId, cancellationToken);
 
-        if (member == null) return false;
+        if (member == null || member.Role == GuildRole.Leader) return false;
 
+        await ReturnBorrowedItemsAsync(characterId, cancellationToken);
         _context.GuildMembers.Remove(member);
         return true;
     }
@@ -65,9 +90,20 @@ public class GuildRepository : IGuildRepository
         var guild = await _context.Guilds
             .Include(g => g.Members)
             .Include(g => g.Invites)
+            .Include(g => g.VaultItems)
             .FirstOrDefaultAsync(g => g.OwnerId == characterId, cancellationToken);
 
         if (guild == null) return false;
+
+        foreach (var vaultItem in guild.VaultItems.Where(x => x.BorrowedByCharacterId is null))
+        {
+            _context.InventoryItems.Add(new Domain.Models.Inventories.InventoryItem
+            {
+                InventoryId = vaultItem.DonatedByCharacterId,
+                ItemInstanceId = vaultItem.EquipmentInstanceId,
+                Quantity = 1
+            });
+        }
 
         _context.GuildMembers.RemoveRange(guild.Members);
         _context.GuildInvites.RemoveRange(guild.Invites);
@@ -77,6 +113,8 @@ public class GuildRepository : IGuildRepository
 
     public async Task<GuildMember?> GetGuildMember(Guid currentCharacterId, CancellationToken cancellationToken) =>
         await _context.GuildMembers
+            .Include(x => x.Guild)
+                .ThenInclude(x => x.RolePermissions)
             .FirstOrDefaultAsync(gm => gm.CharacterId == currentCharacterId, cancellationToken);
 
     public async Task<bool> InviteAsync(Guid currentCharacterId, Guid guildId, Guid invitedCharacterId, CancellationToken cancellationToken)
@@ -219,5 +257,75 @@ public class GuildRepository : IGuildRepository
             .Include(g => g.Members)
             .Include(g => g.Resources)
             .Include(g => g.Buildings)
+            .Include(g => g.RolePermissions)
             .FirstOrDefaultAsync(g => g.Members.Select(gm => gm.CharacterId).Contains(characterId), cancellationToken);
+
+    public async Task<bool> ChangeMemberRoleAsync(Guid guildId, Guid characterId, GuildRole role, CancellationToken cancellationToken)
+    {
+        var member = await _context.GuildMembers
+            .FirstOrDefaultAsync(x => x.GuildId == guildId && x.CharacterId == characterId, cancellationToken);
+        if (member is null) return false;
+
+        member.Role = role;
+        return true;
+    }
+
+    public async Task<bool> KickMemberAsync(Guid guildId, Guid characterId, CancellationToken cancellationToken)
+    {
+        var member = await _context.GuildMembers
+            .FirstOrDefaultAsync(x => x.GuildId == guildId && x.CharacterId == characterId, cancellationToken);
+        if (member is null) return false;
+
+        await ReturnBorrowedItemsAsync(characterId, cancellationToken);
+        _context.GuildMembers.Remove(member);
+        return true;
+    }
+
+    public async Task<bool> UpdateRolePermissionsAsync(Guid guildId, GuildRolePermission permissions, CancellationToken cancellationToken)
+    {
+        var existing = await _context.GuildRolePermissions
+            .FirstOrDefaultAsync(x => x.GuildId == guildId && x.Role == permissions.Role, cancellationToken);
+
+        if (existing is null)
+        {
+            permissions.GuildId = guildId;
+            _context.GuildRolePermissions.Add(permissions);
+            return true;
+        }
+
+        existing.CanInvite = permissions.CanInvite;
+        existing.CanManageApplications = permissions.CanManageApplications;
+        existing.CanPromoteDemote = permissions.CanPromoteDemote;
+        existing.CanKick = permissions.CanKick;
+        existing.CanBorrowVault = permissions.CanBorrowVault;
+        return true;
+    }
+
+    private async Task ReturnBorrowedItemsAsync(Guid characterId, CancellationToken cancellationToken)
+    {
+        var borrowed = await _context.GuildVaultItems
+            .Where(x => x.BorrowedByCharacterId == characterId)
+            .ToListAsync(cancellationToken);
+        if (borrowed.Count == 0) return;
+
+        var itemIds = borrowed.Select(x => x.EquipmentInstanceId).ToList();
+        var inventoryItems = await _context.InventoryItems
+            .Where(x => x.InventoryId == characterId && itemIds.Contains(x.ItemInstanceId))
+            .ToListAsync(cancellationToken);
+        var slots = await _context.EquipmentSlots
+            .Where(x => x.EntityId == characterId && x.EquipmentInstanceId != null && itemIds.Contains(x.EquipmentInstanceId.Value))
+            .ToListAsync(cancellationToken);
+
+        _context.InventoryItems.RemoveRange(inventoryItems);
+        foreach (var slot in slots)
+        {
+            slot.EquipmentInstanceId = null;
+            slot.EquipmentInstance = null;
+        }
+        foreach (var item in borrowed)
+        {
+            item.BorrowedByCharacterId = null;
+            item.BorrowedAt = null;
+        }
+    }
 }

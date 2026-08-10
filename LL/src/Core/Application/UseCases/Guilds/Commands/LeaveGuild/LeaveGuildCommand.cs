@@ -2,6 +2,8 @@ using Application.Interfaces.Services.LL;
 using Application.Interfaces.WebSockets;
 using Application.MediatR.Markers;
 using Application.WebSockets.Contracts;
+using Application.Interfaces.Outbox;
+using Application.UseCases.Outbox;
 using Common.Primitives;
 using MediatR;
 
@@ -11,13 +13,16 @@ public class LeaveGuildCommandHandler : IRequestHandler<LeaveGuildCommand, Respo
 {
     private readonly IGuildService _guildService;
     private readonly IGameEventPublisher _eventPublisher;
+    private readonly IGameEventOutbox _outbox;
 
     public LeaveGuildCommandHandler(
         IGuildService guildService,
-        IGameEventPublisher eventPublisher)
+        IGameEventPublisher eventPublisher,
+        IGameEventOutbox outbox)
     {
         _guildService = guildService;
         _eventPublisher = eventPublisher;
+        _outbox = outbox;
     }
 
     public async Task<Response<bool>> Handle(LeaveGuildCommand request, CancellationToken cancellationToken)
@@ -29,6 +34,13 @@ public class LeaveGuildCommandHandler : IRequestHandler<LeaveGuildCommand, Respo
         var left = await _guildService.LeaveGuildAsync(request.CharacterId, cancellationToken);
         if (!left)
             return Response<bool>.Fail("Failed to leave guild");
+
+        await _outbox.EnqueueAsync(
+            GameEventTypes.EquipmentChanged,
+            new EquipmentChangedPayload(request.CharacterId),
+            request.CharacterId,
+            null,
+            cancellationToken);
 
         await _eventPublisher.PublishAsync(
             new Audience.Character(request.CharacterId),

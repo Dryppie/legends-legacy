@@ -25,4 +25,6 @@ public class Guild
     public ICollection<GuildMissionInstance> MissionInstances { get; set; } = [];
     public ICollection<PersonalGuildOrder> PersonalGuildOrders { get; set; } = [];
     public ICollection<GuildShopPurchase> ShopPurchases { get; set; } = [];
+    public ICollection<GuildRolePermission> RolePermissions { get; set; } = [];
+    public ICollection<GuildVaultItem> VaultItems { get; set; } = [];
 }

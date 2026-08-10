@@ -9,6 +9,8 @@ import {
   PersonalGuildOrder,
 } from '../../../../shared/models/Dtos/guild/guildMission';
 import { GuildShopOverview } from '../../../../shared/models/Dtos/guild/guildShop';
+import { GuildRole } from '../../../../shared/models/Dtos/guild/guildRole';
+import { GuildRolePermission } from '../../../../shared/models/Dtos/guild/guildRolePermission';
 import {
   GuildBuilding,
   GuildBuildingOverview,
@@ -617,6 +619,29 @@ export class GuildStateService {
       next: () => this.refresh(),
       error: (e) =>
         this._error.set(e.message ?? 'Failed to reject application'),
+    });
+  }
+
+  changeMemberRole(characterId: string, role: GuildRole): void {
+    this.service.changeMemberRole(characterId, role).subscribe({
+      next: () => this.refresh(),
+      error: (e) =>
+        this._error.set(e.message ?? 'Failed to change guild member role'),
+    });
+  }
+
+  kickMember(characterId: string): void {
+    this.service.kickMember(characterId).subscribe({
+      next: () => this.refresh(),
+      error: (e) => this._error.set(e.message ?? 'Failed to kick guild member'),
+    });
+  }
+
+  updateRolePermissions(permissions: GuildRolePermission): void {
+    this.service.updateRolePermissions(permissions).subscribe({
+      next: () => this.refresh(),
+      error: (e) =>
+        this._error.set(e.message ?? 'Failed to update role permissions'),
     });
   }
 

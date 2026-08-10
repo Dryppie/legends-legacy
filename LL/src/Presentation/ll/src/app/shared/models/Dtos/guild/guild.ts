@@ -1,6 +1,8 @@
 import { GuildInvite } from './guildInvite';
 import { GuildMember } from './guildMember';
 import { GuildResource } from './guildResource';
+import { GuildRolePermission } from './guildRolePermission';
+import { GuildVaultItem } from './guildVaultItem';
 
 export interface Guild {
   id: string;
@@ -13,6 +15,8 @@ export interface Guild {
   maxMembers: number;
   invites: GuildInvite[];
   resources: GuildResource[];
+  rolePermissions: GuildRolePermission[];
+  vaultItems: GuildVaultItem[];
 }
 
 export interface GuildSimple {

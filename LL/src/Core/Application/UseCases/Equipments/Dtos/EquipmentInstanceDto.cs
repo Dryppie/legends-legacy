@@ -31,6 +31,9 @@ public class EquipmentInstanceDto : ItemInstanceDto, IMapFrom<EquipmentInstance>
     public List<string> AffinityTags { get; set; } = [];
     public double ItemBudget { get; set; }
     public int ItemBudgetTier { get; set; }
+    public bool IsGuildBorrowed { get; set; }
+    public Guid? GuildVaultItemId { get; set; }
+    public string? BorrowedFromGuildName { get; set; }
     public void Mapping(Profile profile)
     {
         profile.CreateMap<EquipmentInstance, EquipmentInstanceDto>()
@@ -45,6 +48,15 @@ public class EquipmentInstanceDto : ItemInstanceDto, IMapFrom<EquipmentInstance>
                 options => options.MapFrom(source => source.Tier))
             .ForMember(
                 destination => destination.CraftingDesign,
-                options => options.MapFrom<EquipmentCraftingDesignMetadataResolver>());
+                options => options.MapFrom<EquipmentCraftingDesignMetadataResolver>())
+            .ForMember(
+                destination => destination.IsGuildBorrowed,
+                options => options.MapFrom(source => source.GuildVaultItem != null && source.GuildVaultItem.BorrowedByCharacterId != null))
+            .ForMember(
+                destination => destination.GuildVaultItemId,
+                options => options.MapFrom(source => source.GuildVaultItem == null ? (Guid?)null : source.GuildVaultItem.Id))
+            .ForMember(
+                destination => destination.BorrowedFromGuildName,
+                options => options.MapFrom(source => source.GuildVaultItem == null ? null : source.GuildVaultItem.Guild.Name));
     }
 }

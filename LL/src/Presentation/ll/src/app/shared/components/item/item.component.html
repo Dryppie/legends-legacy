@@ -1,6 +1,11 @@
 <app-popover [template]="hoverTpl" trigger="hover">
-  <div class="ll-item-name flex min-w-0" [ngClass]="rarityClasses">
-    {{ displayName }}
+  <div class="flex min-w-0 flex-col">
+    <div class="ll-item-name flex min-w-0" [ngClass]="rarityClasses">
+      {{ displayName }}
+    </div>
+    <span *ngIf="borrowedFromGuildName" class="text-[0.65rem] text-amber-300">
+      Borrowed from {{ borrowedFromGuildName }}
+    </span>
   </div>
 </app-popover>
 

@@ -42,18 +42,18 @@ import {
 import { aggregateAttributes } from '../../../../../shared/utils/attributes/attribute-order.utils';
 
 @Component({
-    selector: 'app-market-place-sell',
-    imports: [
-        CommonModule,
-        FormsModule,
-        ReactiveFormsModule,
-        MarketPlaceInventoryItemComponent,
-        RegularButtonComponent,
-        NumberFormatPipe,
-        FilterTabsComponent,
-        ItemComponent,
-    ],
-    templateUrl: './market-place-sell.component.html'
+  selector: 'app-market-place-sell',
+  imports: [
+    CommonModule,
+    FormsModule,
+    ReactiveFormsModule,
+    MarketPlaceInventoryItemComponent,
+    RegularButtonComponent,
+    NumberFormatPipe,
+    FilterTabsComponent,
+    ItemComponent,
+  ],
+  templateUrl: './market-place-sell.component.html',
 })
 export class MarketPlaceSellComponent implements OnInit {
   readonly myListings = signal<MarketPlaceListing[]>([]);
@@ -256,6 +256,7 @@ export class MarketPlaceSellComponent implements OnInit {
 
     this.marketplaceState.createListing(item, qty, unitPrice).subscribe(() => {
       this.pendingItem.set(null);
+      this.selectedItemId = '';
       this.priceCtrl.reset();
       this.qtyCtrl.reset();
     });
@@ -273,6 +274,7 @@ export class MarketPlaceSellComponent implements OnInit {
       )
       .subscribe(() => {
         this.pendingItem.set(null);
+        this.selectedItemId = '';
         this.priceCtrl.reset();
         this.qtyCtrl.setValue(1);
       });

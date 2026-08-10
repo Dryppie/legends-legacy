@@ -2,6 +2,7 @@
 using Domain.Models.Attributes;
 using Domain.Models.Attributes.Modifiers;
 using Domain.Models.Items.Equipments.Tools;
+using Domain.Models.Guilds;
 
 namespace Domain.Models.Items.Equipments;
 public class EquipmentInstance : ItemInstance
@@ -55,6 +56,7 @@ public class EquipmentInstance : ItemInstance
     public List<InstanceAttributeModifier> InstanceModifiers { get; set; } = [];
     public List<ToolBonusModifier> ToolAffixes { get; set; } = [];
     public List<string> AffinityTags { get; set; } = [];
+    public GuildVaultItem? GuildVaultItem { get; set; }
 
     [NotMapped]
     public List<AttributeModifierBase> AttributeModifiers =>

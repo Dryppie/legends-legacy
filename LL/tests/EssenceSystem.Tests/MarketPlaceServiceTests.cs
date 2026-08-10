@@ -14,6 +14,59 @@ namespace EssenceSystem.Tests;
 public sealed class MarketPlaceServiceTests
 {
     [Fact]
+    public async Task CreateListing_ForUniqueEquipment_ReturnsNoRemainingInventoryItem()
+    {
+        var characterId = Guid.NewGuid();
+        var equipmentBase = new EquipmentBase { Id = "sword", Name = "Sword" };
+        var inventory = new FakeInventoryService(CreateInventoryItem(equipmentBase, 1));
+        var service = CreateService(
+            new FakeMarketRepository(),
+            inventory,
+            [equipmentBase],
+            new Character { Id = characterId });
+
+        var result = await service.CreateMarketPlaceListingAsync(
+            characterId,
+            new MarketPlaceListing
+            {
+                ItemInstanceId = inventory.Item!.ItemInstanceId,
+                Quantity = 1,
+                UnitPrice = 100
+            },
+            CancellationToken.None);
+
+        Assert.NotNull(result);
+        Assert.Null(result.RemainingSellerInventoryItem);
+        Assert.Equal(1, inventory.RemoveForListingCalls);
+    }
+
+    [Fact]
+    public async Task CreateListing_ForPartOfStack_ReturnsReducedInventoryQuantity()
+    {
+        var characterId = Guid.NewGuid();
+        var resource = new ItemBase { Id = "ore", Name = "Ore", Stackable = true };
+        var inventory = new FakeInventoryService(CreateInventoryItem(resource, 20));
+        var service = CreateService(
+            new FakeMarketRepository(),
+            inventory,
+            [resource],
+            new Character { Id = characterId });
+
+        var result = await service.CreateMarketPlaceListingAsync(
+            characterId,
+            new MarketPlaceListing
+            {
+                ItemInstanceId = inventory.Item!.ItemInstanceId,
+                Quantity = 5,
+                UnitPrice = 10
+            },
+            CancellationToken.None);
+
+        Assert.NotNull(result);
+        Assert.Equal(15, result.RemainingSellerInventoryItem?.Quantity);
+    }
+
+    [Fact]
     public async Task CreateListing_RejectsMultipleCopiesOfUniqueItemBeforeEscrow()
     {
         var equipmentBase = new EquipmentBase { Id = "sword", Name = "Sword" };

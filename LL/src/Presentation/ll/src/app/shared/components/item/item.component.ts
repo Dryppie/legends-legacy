@@ -47,6 +47,14 @@ export class ItemComponent {
     return this.item.itemBase.itemType === ItemType.Equipment;
   }
 
+  get borrowedFromGuildName(): string | null {
+    if (!this.isEquipment) return null;
+    const equipment = this.item as EquipmentInstance;
+    return equipment.isGuildBorrowed
+      ? equipment.borrowedFromGuildName || 'guild vault'
+      : null;
+  }
+
   get isGenericItem(): boolean {
     return !this.isEssence && !this.isEquipment;
   }
