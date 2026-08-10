@@ -111,18 +111,7 @@
       </form>
 
       <div class="mt-4 flex justify-center">
-        <button
-          type="button"
-          (click)="onGoogleClick()"
-          class="flex items-center rounded-lg bg-white px-4 py-2 text-black shadow-md hover:bg-light_gray focus:outline-none"
-        >
-          <img
-            src="/assets/google-logo.png"
-            alt="Google Logo"
-            class="mr-2 h-6"
-          />
-          Continue with Google
-        </button>
+        <div #googleButton aria-label="Continue with Google"></div>
       </div>
       <div class="mt-4 flex justify-center">
         <button

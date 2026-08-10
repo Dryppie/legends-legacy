@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ElementRef, ViewChild } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { NgClass, NgIf } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
@@ -36,6 +36,17 @@ import { GoogleAuthService } from '../../../../core/services/api/auth/google-aut
   templateUrl: './login.component.html',
 })
 export class LoginComponent {
+  @ViewChild('googleButton')
+  set googleButton(element: ElementRef<HTMLDivElement> | undefined) {
+    if (!element) return;
+
+    void this.googleService
+      .renderButton(element.nativeElement)
+      .catch((error) =>
+        console.error('Google sign-in initialization failed.', error),
+      );
+  }
+
   readonly maintenance = environment.maintenance;
   document: any;
   constructor(
@@ -57,10 +68,6 @@ export class LoginComponent {
       Validators.minLength(8),
     ]),
   });
-
-  onGoogleClick() {
-    this.googleService.prompt();
-  }
 
   login() {
     const email = this.loginForm.value.email;

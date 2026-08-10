@@ -5,9 +5,10 @@ import { ToastService } from './core/services/client-side/components/toast/toast
 import { AppComponent } from './app.component';
 
 describe('AppComponent', () => {
-  const googleAuth = jasmine.createSpyObj<GoogleAuthService>('GoogleAuthService', [
-    'init',
-  ]);
+  const googleAuth = jasmine.createSpyObj<GoogleAuthService>(
+    'GoogleAuthService',
+    ['init'],
+  );
   const toastService = jasmine.createSpyObj<ToastService>('ToastService', [
     'register',
   ]);
@@ -17,6 +18,7 @@ describe('AppComponent', () => {
 
   beforeEach(async () => {
     googleAuth.init.calls.reset();
+    googleAuth.init.and.resolveTo();
     toastService.register.calls.reset();
     appUpdate.start.calls.reset();
 
@@ -41,7 +43,9 @@ describe('AppComponent', () => {
     const fixture = TestBed.createComponent(AppComponent);
 
     expect(fixture.componentInstance.title).toBe('ll');
-    expect(fixture.nativeElement.querySelector('[data-testid="app-shell"]')).toBeTruthy();
+    expect(
+      fixture.nativeElement.querySelector('[data-testid="app-shell"]'),
+    ).toBeTruthy();
   });
 
   it('starts authentication and update checks during initialization', () => {

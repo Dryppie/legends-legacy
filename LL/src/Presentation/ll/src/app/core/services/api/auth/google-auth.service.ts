@@ -1,35 +1,57 @@
 import { Injectable } from '@angular/core';
 import { AuthService } from './auth.service';
 import { environment } from '../../../../../environments/environment';
-declare const google: any; // GIS is loaded globally
+
+const GIS_SCRIPT_URL = 'https://accounts.google.com/gsi/client';
+
+interface GoogleCredentialResponse {
+  credential: string;
+}
+
+interface GoogleIdentityServices {
+  initialize(config: Record<string, unknown>): void;
+  renderButton(parent: HTMLElement, options: Record<string, unknown>): void;
+}
+
+declare global {
+  interface Window {
+    google?: {
+      accounts: {
+        id: GoogleIdentityServices;
+      };
+    };
+  }
+}
 
 @Injectable({ providedIn: 'root' })
 export class GoogleAuthService {
-  private scriptLoaded?: Promise<void>;
-  private gisReady = false;
+  private initialization?: Promise<void>;
 
   constructor(private readonly auth: AuthService) {}
 
-  /** Call once, e.g. from app.component.ts → ngOnInit() */
-  init(): void {
-    if (this.gisReady) return; // already initialised
-
-    (this.scriptLoaded ??= this.injectScript()).then(() => {
-      google.accounts.id.initialize({
+  init(): Promise<void> {
+    return (this.initialization ??= this.loadScript().then(() => {
+      this.identityServices.initialize({
         client_id: environment.googleClientId,
-        callback: ({ credential }: { credential: string }) =>
+        callback: ({ credential }: GoogleCredentialResponse) =>
           this.handleIdToken(credential),
-        use_fedcm_for_prompt: true,
         use_fedcm_for_button: true,
-        auto_select: true,
+        button_auto_select: true,
       });
-      this.gisReady = true;
-    });
+    }));
   }
 
-  prompt(): void {
-    this.init(); // guard: ensure GIS loaded
-    google.accounts.id.prompt(() => {}); // noop callback
+  async renderButton(parent: HTMLElement): Promise<void> {
+    await this.init();
+    parent.replaceChildren();
+    this.identityServices.renderButton(parent, {
+      type: 'standard',
+      theme: 'outline',
+      size: 'large',
+      text: 'continue_with',
+      shape: 'rectangular',
+      logo_alignment: 'left',
+    });
   }
 
   // ─────────────────────────────────────────────────────────
@@ -43,19 +65,39 @@ export class GoogleAuthService {
     }
   }
 
-  private injectScript(): Promise<void> {
+  private get identityServices(): GoogleIdentityServices {
+    const identityServices = window.google?.accounts?.id;
+    if (!identityServices) {
+      throw new Error('Google Identity Services failed to initialize.');
+    }
+
+    return identityServices;
+  }
+
+  private loadScript(): Promise<void> {
+    if (window.google?.accounts?.id) {
+      return Promise.resolve();
+    }
+
     return new Promise((resolve, reject) => {
-      if ((window as any).google?.accounts?.id) {
-        // already present
-        resolve();
+      const existingScript = document.querySelector<HTMLScriptElement>(
+        `script[src="${GIS_SCRIPT_URL}"]`,
+      );
+      const script = existingScript ?? document.createElement('script');
+
+      const handleLoad = () => resolve();
+      const handleError = () =>
+        reject(new Error('Unable to load Google Identity Services.'));
+
+      script.addEventListener('load', handleLoad, { once: true });
+      script.addEventListener('error', handleError, { once: true });
+
+      if (existingScript) {
         return;
       }
 
-      const script = document.createElement('script');
-      script.src = 'https://accounts.google.com/gsi/client';
+      script.src = GIS_SCRIPT_URL;
       script.async = script.defer = true;
-      script.onload = () => resolve();
-      script.onerror = (err) => reject(err);
       document.head.appendChild(script);
     });
   }

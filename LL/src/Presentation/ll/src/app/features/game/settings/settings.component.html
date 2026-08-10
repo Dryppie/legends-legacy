@@ -278,19 +278,12 @@
               </span>
             </div>
 
-            <button
-              type="button"
-              class="ll-button mt-4 inline-flex items-center gap-2 disabled:pointer-events-none disabled:opacity-60"
-              (click)="!userInfo?.isGmailBound && bindGmail()"
-              [disabled]="userInfo?.isGmailBound"
-            >
-              <img
-                src="/assets/google-logo.png"
-                alt="Google Logo"
-                class="h-5"
-              />
-              Bind Gmail
-            </button>
+            <div
+              *ngIf="!userInfo?.isGmailBound"
+              #googleBindButton
+              class="mt-4"
+              aria-label="Bind Google account"
+            ></div>
           </article>
 
           <article class="ll-card p-3">

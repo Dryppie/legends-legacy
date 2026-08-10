@@ -1,9 +1,4 @@
-import {
-  AfterViewInit,
-  Component,
-  OnInit,
-  ViewChild,
-} from '@angular/core';
+import { AfterViewInit, Component, OnInit, ViewChild } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { ToastComponent } from './shared/components/toast/toast.component';
 import { ModalContainerComponent } from './shared/components/modal-container/modal-container.component';
@@ -15,16 +10,16 @@ import { AppUpdateService } from './core/services/client-side/app-update/app-upd
 import { FirstPartyTourOverlayComponent } from './shared/components/first-party-tour-overlay/first-party-tour-overlay.component';
 
 @Component({
-    selector: 'app-root',
-    imports: [
-        RouterOutlet,
-        ToastComponent,
-        ModalContainerComponent,
-        SessionSummaryPopupComponent,
-        AppUpdatePopupComponent,
-        FirstPartyTourOverlayComponent,
-    ],
-    templateUrl: './app.component.html'
+  selector: 'app-root',
+  imports: [
+    RouterOutlet,
+    ToastComponent,
+    ModalContainerComponent,
+    SessionSummaryPopupComponent,
+    AppUpdatePopupComponent,
+    FirstPartyTourOverlayComponent,
+  ],
+  templateUrl: './app.component.html',
 })
 export class AppComponent implements OnInit, AfterViewInit {
   title = 'll';
@@ -38,7 +33,11 @@ export class AppComponent implements OnInit, AfterViewInit {
   ) {}
 
   ngOnInit(): void {
-    this.googleAuth.init(); // load GSI script once
+    void this.googleAuth
+      .init()
+      .catch((error) =>
+        console.error('Google sign-in initialization failed.', error),
+      );
     this.appUpdate.start();
   }
 

@@ -1,4 +1,4 @@
-import { Component, effect } from '@angular/core';
+import { Component, effect, ElementRef, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { UserInfoDto } from '../../../shared/models/Dtos/userInfoDto';
 import { AuthService } from '../../../core/services/api/auth/auth.service';
@@ -31,6 +31,17 @@ import {
   templateUrl: './settings.component.html',
 })
 export class SettingsComponent {
+  @ViewChild('googleBindButton')
+  set googleBindButton(element: ElementRef<HTMLDivElement> | undefined) {
+    if (!element) return;
+
+    void this.googleService
+      .renderButton(element.nativeElement)
+      .catch((error) =>
+        console.error('Google account binding initialization failed.', error),
+      );
+  }
+
   userInfo: UserInfoDto | null = null; // Initialize it to null first
   character: CharacterDto | null = null; // Initialize it to null first
 
@@ -111,10 +122,6 @@ export class SettingsComponent {
 
   closeNameModal() {
     this.showNameModal = false;
-  }
-
-  bindGmail() {
-    this.googleService.prompt();
   }
 
   changeCredentials() {}
