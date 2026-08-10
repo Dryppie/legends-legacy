@@ -37,10 +37,10 @@ public sealed class EventQuestSystemTests
         Assert.Equal("CombatEncounterCompleted", Assert.Single(definition.Objectives).Type);
         var communityReward = Assert.Single(definition.Rewards);
         Assert.Equal("Item", communityReward.Type);
-        Assert.Equal(20, communityReward.Quantity);
-        Assert.Null(communityReward.ItemBaseId);
+        Assert.Equal(1, communityReward.Quantity);
+        Assert.Equal("item.catalyst_selection_crate", communityReward.ItemBaseId);
         Assert.Equal(3, definition.PersonalMilestones.Count);
-        Assert.Equal(10, definition.PersonalMilestones[0].RequiredContribution);
+        Assert.Equal(250, definition.PersonalMilestones[0].RequiredContribution);
         Assert.Collection(
             definition.PersonalMilestones,
             milestone => Assert.Equal(
@@ -50,7 +50,7 @@ public sealed class EventQuestSystemTests
                 ("item.monster_core.lesser", 6),
                 (Assert.Single(milestone.Rewards).ItemBaseId, Assert.Single(milestone.Rewards).Quantity)),
             milestone => Assert.Equal(
-                ["item.blueprint_selection_box", "item.catalyst_selection_crate"],
+                ["item.blueprint_selection_box"],
                 milestone.Rewards.Select(reward => reward.ItemBaseId)));
     }
 
