@@ -3,7 +3,6 @@ import { RouterOutlet } from '@angular/router';
 import { ToastComponent } from './shared/components/toast/toast.component';
 import { ModalContainerComponent } from './shared/components/modal-container/modal-container.component';
 import { SessionSummaryPopupComponent } from './shared/components/session-summary-popup/session-summary-popup.component';
-import { GoogleAuthService } from './core/services/api/auth/google-auth.service';
 import { ToastService } from './core/services/client-side/components/toast/toast.service';
 import { AppUpdatePopupComponent } from './shared/components/app-update-popup/app-update-popup.component';
 import { AppUpdateService } from './core/services/client-side/app-update/app-update.service';
@@ -27,17 +26,11 @@ export class AppComponent implements OnInit, AfterViewInit {
   @ViewChild('toast', { static: true }) toastComponent!: ToastComponent;
 
   constructor(
-    private readonly googleAuth: GoogleAuthService,
     private readonly toastService: ToastService,
     private readonly appUpdate: AppUpdateService,
   ) {}
 
   ngOnInit(): void {
-    void this.googleAuth
-      .init()
-      .catch((error) =>
-        console.error('Google sign-in initialization failed.', error),
-      );
     this.appUpdate.start();
   }
 

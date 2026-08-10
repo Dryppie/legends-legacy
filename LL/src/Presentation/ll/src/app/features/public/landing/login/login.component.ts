@@ -1,4 +1,4 @@
-import { Component, ElementRef, ViewChild } from '@angular/core';
+import { Component } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { NgClass, NgIf } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
@@ -16,7 +16,7 @@ import { emailValidator } from '../../../../shared/validators/email-validator';
 import { passwordValidator } from '../../../../shared/validators/password-validator';
 import { ButtonComponent } from '../../../../shared/components/custom-components/buttons/button/button.component';
 import { environment } from '../../../../../environments/environment';
-import { GoogleAuthService } from '../../../../core/services/api/auth/google-auth.service';
+import { GoogleSignInButtonComponent } from '../../../../shared/components/google-sign-in-button/google-sign-in-button.component';
 
 @Component({
   selector: 'app-login',
@@ -32,26 +32,15 @@ import { GoogleAuthService } from '../../../../core/services/api/auth/google-aut
     MatFormFieldModule,
     MatInputModule,
     NgClass,
+    GoogleSignInButtonComponent,
   ],
   templateUrl: './login.component.html',
 })
 export class LoginComponent {
-  @ViewChild('googleButton')
-  set googleButton(element: ElementRef<HTMLDivElement> | undefined) {
-    if (!element) return;
-
-    void this.googleService
-      .renderButton(element.nativeElement)
-      .catch((error) =>
-        console.error('Google sign-in initialization failed.', error),
-      );
-  }
-
   readonly maintenance = environment.maintenance;
   document: any;
   constructor(
     private authService: AuthService,
-    private googleService: GoogleAuthService,
     private router: Router,
   ) {}
   loginError: boolean = false;

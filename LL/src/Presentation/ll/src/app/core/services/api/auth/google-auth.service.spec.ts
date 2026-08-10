@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+import { environment } from '../../../../../environments/environment';
 import { AuthService } from './auth.service';
 import { GoogleAuthService } from './google-auth.service';
 
@@ -14,8 +15,12 @@ describe('GoogleAuthService', () => {
   ]);
 
   beforeEach(() => {
+    environment.googleClientId = 'test-client-id.apps.googleusercontent.com';
     identityServices.initialize.calls.reset();
     identityServices.renderButton.calls.reset();
+    identityServices.renderButton.and.callFake((parent: HTMLElement) => {
+      parent.appendChild(document.createElement('iframe'));
+    });
 
     window.google = {
       accounts: {
@@ -30,6 +35,9 @@ describe('GoogleAuthService', () => {
 
   afterEach(() => {
     delete window.google;
+    document
+      .querySelectorAll('script[src="https://accounts.google.com/gsi/client"]')
+      .forEach((script) => script.remove());
   });
 
   it('initializes GIS once with click-scoped account selection enabled', async () => {
@@ -53,7 +61,7 @@ describe('GoogleAuthService', () => {
 
     await service.renderButton(parent);
 
-    expect(parent.childElementCount).toBe(0);
+    expect(parent.childElementCount).toBe(1);
     expect(identityServices.renderButton).toHaveBeenCalledWith(
       parent,
       jasmine.objectContaining({
@@ -61,6 +69,30 @@ describe('GoogleAuthService', () => {
         size: 'large',
       }),
     );
+    expect(identityServices.initialize).toHaveBeenCalledTimes(1);
+  });
+
+  it('allows initialization to be retried after the GIS script is blocked', async () => {
+    delete window.google;
+    const service = TestBed.inject(GoogleAuthService);
+    const firstAttempt = service.init();
+    const script = document.querySelector<HTMLScriptElement>(
+      'script[src="https://accounts.google.com/gsi/client"]',
+    );
+
+    expect(script).not.toBeNull();
+    script?.dispatchEvent(new Event('error'));
+    await expectAsync(firstAttempt).toBeRejectedWithError(
+      'Unable to load Google Identity Services.',
+    );
+
+    window.google = {
+      accounts: {
+        id: identityServices,
+      },
+    };
+
+    await expectAsync(service.init()).toBeResolved();
     expect(identityServices.initialize).toHaveBeenCalledTimes(1);
   });
 });

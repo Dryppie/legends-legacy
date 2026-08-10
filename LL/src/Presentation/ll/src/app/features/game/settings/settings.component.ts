@@ -1,10 +1,9 @@
-import { Component, effect, ElementRef, ViewChild } from '@angular/core';
+import { Component, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { UserInfoDto } from '../../../shared/models/Dtos/userInfoDto';
 import { AuthService } from '../../../core/services/api/auth/auth.service';
 import { CharacterDto } from '../../../shared/models/Dtos/characterDto';
 import { SignupComponent } from '../../public/landing/signup/signup.component';
-import { GoogleAuthService } from '../../../core/services/api/auth/google-auth.service';
 import { CharacterService } from '../../../core/services/api/character/character.service';
 import { FormsModule } from '@angular/forms';
 import { RegularButtonComponent } from '../../../shared/components/custom-components/buttons/regular-button/regular-button.component';
@@ -18,6 +17,7 @@ import {
   SidebarLayout,
   SidebarLayoutPreferenceService,
 } from '../../../core/services/client-side/sidebar-layout/sidebar-layout-preference.service';
+import { GoogleSignInButtonComponent } from '../../../shared/components/google-sign-in-button/google-sign-in-button.component';
 
 @Component({
   selector: 'app-settings',
@@ -27,21 +27,11 @@ import {
     FormsModule,
     RegularButtonComponent,
     DefaultHeaderComponent,
+    GoogleSignInButtonComponent,
   ],
   templateUrl: './settings.component.html',
 })
 export class SettingsComponent {
-  @ViewChild('googleBindButton')
-  set googleBindButton(element: ElementRef<HTMLDivElement> | undefined) {
-    if (!element) return;
-
-    void this.googleService
-      .renderButton(element.nativeElement)
-      .catch((error) =>
-        console.error('Google account binding initialization failed.', error),
-      );
-  }
-
   userInfo: UserInfoDto | null = null; // Initialize it to null first
   character: CharacterDto | null = null; // Initialize it to null first
 
@@ -58,7 +48,6 @@ export class SettingsComponent {
 
   constructor(
     private authService: AuthService,
-    private googleService: GoogleAuthService,
     private readonly characterService: CharacterService,
     private readonly guildState: GuildStateService,
     private readonly chatLayoutPreference: ChatLayoutPreferenceService,

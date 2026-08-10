@@ -45,10 +45,13 @@ public sealed class ProphecyBalanceProviderTests
         Assert.Equal(900, targets[(ProphecyScope.Daily, ProphecyObjectiveType.WinEncounters)].Rare);
         Assert.Equal(300, targets[(ProphecyScope.Daily, ProphecyObjectiveType.KillCreatures)].Common);
         Assert.Equal(900, targets[(ProphecyScope.Daily, ProphecyObjectiveType.KillCreatures)].Rare);
+        Assert.Equal(1, targets[(ProphecyScope.Daily, ProphecyObjectiveType.GatherResources)].Common);
+        Assert.Equal(6, targets[(ProphecyScope.Daily, ProphecyObjectiveType.GatherResources)].Rare);
         Assert.Equal(360, targets[(ProphecyScope.Daily, ProphecyObjectiveType.TemperItems)].Common);
         Assert.Equal(1, targets[(ProphecyScope.Daily, ProphecyObjectiveType.AbsorbEssence)].Epic);
         Assert.Equal(21_600, targets[(ProphecyScope.Weekly, ProphecyObjectiveType.TemperItems)].Uncommon);
         Assert.Equal(35_000, targets[(ProphecyScope.Weekly, ProphecyObjectiveType.KillCreatures)].Uncommon);
+        Assert.Equal(260, targets[(ProphecyScope.Weekly, ProphecyObjectiveType.GatherResources)].Uncommon);
         Assert.Equal(14, targets[(ProphecyScope.Weekly, ProphecyObjectiveType.CompleteDungeons)].Rare);
         Assert.All(catalog.Caches, cache =>
         {

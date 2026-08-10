@@ -278,12 +278,11 @@
               </span>
             </div>
 
-            <div
+            <app-google-sign-in-button
               *ngIf="!userInfo?.isGmailBound"
-              #googleBindButton
-              class="mt-4"
-              aria-label="Bind Google account"
-            ></div>
+              class="mt-4 block"
+              action="bind"
+            ></app-google-sign-in-button>
           </article>
 
           <article class="ll-card p-3">
