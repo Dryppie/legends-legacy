@@ -4,6 +4,8 @@ import { AuthService } from './auth.service';
 import { GoogleAuthService } from './google-auth.service';
 
 describe('GoogleAuthService', () => {
+  let originalIdentityCredential: PropertyDescriptor | undefined;
+  let originalBrave: PropertyDescriptor | undefined;
   const auth = jasmine.createSpyObj<AuthService>('AuthService', [
     'bindGoogle',
     'googleLogin',
@@ -15,6 +17,19 @@ describe('GoogleAuthService', () => {
   ]);
 
   beforeEach(() => {
+    originalIdentityCredential = Object.getOwnPropertyDescriptor(
+      window,
+      'IdentityCredential',
+    );
+    originalBrave = Object.getOwnPropertyDescriptor(navigator, 'brave');
+    Object.defineProperty(window, 'IdentityCredential', {
+      configurable: true,
+      value: class IdentityCredential {},
+    });
+    Object.defineProperty(navigator, 'brave', {
+      configurable: true,
+      value: undefined,
+    });
     environment.googleClientId = 'test-client-id.apps.googleusercontent.com';
     identityServices.initialize.calls.reset();
     identityServices.renderButton.calls.reset();
@@ -34,6 +49,8 @@ describe('GoogleAuthService', () => {
   });
 
   afterEach(() => {
+    restoreProperty(window, 'IdentityCredential', originalIdentityCredential);
+    restoreProperty(navigator, 'brave', originalBrave);
     delete window.google;
     document
       .querySelectorAll('script[src="https://accounts.google.com/gsi/client"]')
@@ -50,6 +67,38 @@ describe('GoogleAuthService', () => {
       jasmine.objectContaining({
         button_auto_select: true,
         use_fedcm_for_button: true,
+      }),
+    );
+  });
+
+  it('uses the non-FedCM button flow in Brave', async () => {
+    Object.defineProperty(navigator, 'brave', {
+      configurable: true,
+      value: {},
+    });
+    const service = TestBed.inject(GoogleAuthService);
+
+    await service.init();
+
+    expect(identityServices.initialize).toHaveBeenCalledWith(
+      jasmine.objectContaining({
+        button_auto_select: false,
+        use_fedcm_for_button: false,
+      }),
+    );
+  });
+
+  it('uses the non-FedCM button flow when FedCM is unavailable', async () => {
+    delete (window as Window & { IdentityCredential?: unknown })
+      .IdentityCredential;
+    const service = TestBed.inject(GoogleAuthService);
+
+    await service.init();
+
+    expect(identityServices.initialize).toHaveBeenCalledWith(
+      jasmine.objectContaining({
+        button_auto_select: false,
+        use_fedcm_for_button: false,
       }),
     );
   });
@@ -96,3 +145,16 @@ describe('GoogleAuthService', () => {
     expect(identityServices.initialize).toHaveBeenCalledTimes(1);
   });
 });
+
+function restoreProperty(
+  target: object,
+  property: string,
+  descriptor: PropertyDescriptor | undefined,
+): void {
+  if (descriptor) {
+    Object.defineProperty(target, property, descriptor);
+    return;
+  }
+
+  delete (target as Record<string, unknown>)[property];
+}

@@ -23,6 +23,10 @@ declare global {
       };
     };
   }
+
+  interface Navigator {
+    brave?: unknown;
+  }
 }
 
 @Injectable({ providedIn: 'root' })
@@ -41,12 +45,14 @@ export class GoogleAuthService {
     }
 
     const attempt = this.loadScript().then(() => {
+      const useFedCm = this.supportsFedCmButton();
+
       this.identityServices.initialize({
         client_id: environment.googleClientId,
         callback: ({ credential }: GoogleCredentialResponse) =>
           this.handleIdToken(credential),
-        use_fedcm_for_button: true,
-        button_auto_select: true,
+        use_fedcm_for_button: useFedCm,
+        button_auto_select: useFedCm,
       });
     });
 
@@ -94,6 +100,10 @@ export class GoogleAuthService {
     }
 
     return identityServices;
+  }
+
+  private supportsFedCmButton(): boolean {
+    return 'IdentityCredential' in window && !navigator.brave;
   }
 
   private loadScript(): Promise<void> {
