@@ -193,7 +193,9 @@ export class SidebarComponent implements OnInit, OnDestroy {
     }
 
     if (actionType === CharacterActionType.Crafting) {
-      this.router.navigate(['game', 'professions', 'crafting']);
+      this.router.navigate(['/game/professions/crafting'], {
+        queryParams: { tab: 'tempering' },
+      });
     } else {
       return;
     }

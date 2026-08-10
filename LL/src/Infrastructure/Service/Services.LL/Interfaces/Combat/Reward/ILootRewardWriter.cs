@@ -7,5 +7,7 @@ public interface ILootRewardWriter
     Task AddLootAsync(
         Guid characterId,
         IReadOnlyCollection<InventoryItem> items,
+        string source,
+        string? location,
         CancellationToken cancellationToken);
 }

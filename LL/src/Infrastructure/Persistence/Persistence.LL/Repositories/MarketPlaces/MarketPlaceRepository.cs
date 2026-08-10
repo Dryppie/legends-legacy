@@ -69,6 +69,8 @@ public class MarketPlaceRepository : IMarketPlaceRepository
             .Include(mpl => mpl.ItemInstance)
                 .ThenInclude(ii => (ii as EquipmentInstance).ToolAffixes)
             .Include(mpl => mpl.ItemInstance)
+                .ThenInclude(ii => (ii as EquipmentInstance).InstanceModifiers)
+            .Include(mpl => mpl.ItemInstance)
                 .ThenInclude(ii => ii.ItemBase)
                     .ThenInclude(ib => (ib as EquipmentBase).AttributeModifiers)
             .Include(mpl => mpl.ItemInstance)
@@ -250,6 +252,8 @@ public class MarketPlaceRepository : IMarketPlaceRepository
         return await _dbContext.MarketPlaceListings
             .Include(mpl => mpl.ItemInstance)
                 .ThenInclude(ii => (ii as EquipmentInstance).ToolAffixes)
+            .Include(mpl => mpl.ItemInstance)
+                .ThenInclude(ii => (ii as EquipmentInstance).InstanceModifiers)
             .Include(mpl => mpl.ItemInstance)
                 .ThenInclude(ii => ii.ItemBase)
                     .ThenInclude(ib => (ib as EquipmentBase).AttributeModifiers)

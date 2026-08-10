@@ -81,11 +81,12 @@ public class ClaimDungeonRewardsCommandHandler : IRequestHandler<ClaimDungeonRew
             request.CharacterId,
             claimedLoot,
             "dungeon-reward",
+            result.DungeonName,
             cancellationToken);
 
         await _gameRealtime.PublishAsync(
             new Audience.Character(request.CharacterId),
-            new DungeonRewardsClaimed(request.CharacterId, claimedLoot),
+            new DungeonRewardsClaimed(request.CharacterId, claimedLoot, result.DungeonName),
             nameof(ClaimDungeonRewardsCommandHandler),
             cancellationToken);
 

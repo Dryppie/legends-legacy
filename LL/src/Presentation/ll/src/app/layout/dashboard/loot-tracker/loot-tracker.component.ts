@@ -11,9 +11,9 @@ import { LootHistoryEntry } from '../../../shared/models/loot-history';
 import { LootHistoryService } from '../../../core/services/api/loot-history/loot-history.service';
 
 @Component({
-    selector: 'app-loot-tracker',
-    imports: [NgIf, NgFor, DatePipe, ItemComponent],
-    templateUrl: './loot-tracker.component.html'
+  selector: 'app-loot-tracker',
+  imports: [NgIf, NgFor, DatePipe, ItemComponent],
+  templateUrl: './loot-tracker.component.html',
 })
 export class LootTrackerComponent {
   private readonly maxEntries = 50;
@@ -47,7 +47,8 @@ export class LootTrackerComponent {
           this.realtimeStore.addLoot(
             this.compactLoot(loot.payload),
             envelope?.occurredAt,
-            'combat-reward',
+            loot.source ?? 'combat-reward',
+            loot.location,
           );
         }
       },
@@ -76,7 +77,24 @@ export class LootTrackerComponent {
   }
 
   trackEntry(index: number, entry: LootHistoryEntry): string {
-    return entry.id || `${entry.item.itemInstance.id}:${entry.receivedAt}:${index}`;
+    return (
+      entry.id || `${entry.item.itemInstance.id}:${entry.receivedAt}:${index}`
+    );
+  }
+
+  locationLabel(entry: LootHistoryEntry): string {
+    switch (entry.source) {
+      case 'quest-reward':
+        return 'Quest Rewards';
+      case 'event-quest-reward':
+        return 'Server-wide Event Rewards';
+      case 'combat-reward':
+        return entry.location?.trim() || 'Combat';
+      case 'dungeon-reward':
+        return entry.location?.trim() || 'Dungeon';
+      default:
+        return entry.location?.trim() || 'Loot Reward';
+    }
   }
 
   private loadHistory(): void {

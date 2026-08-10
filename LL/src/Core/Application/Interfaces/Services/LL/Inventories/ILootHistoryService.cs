@@ -13,6 +13,7 @@ public interface ILootHistoryService
         Guid characterId,
         IReadOnlyCollection<InventoryItemDto> items,
         string source,
+        string? location,
         CancellationToken cancellationToken);
 
     Task<int> ClearAsync(Guid characterId, CancellationToken cancellationToken);

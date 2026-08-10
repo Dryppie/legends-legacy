@@ -6,4 +6,5 @@ public sealed record LootHistoryEntryDto(
     Guid Id,
     InventoryItemDto Item,
     string Source,
+    string? Location,
     DateTimeOffset ReceivedAt);

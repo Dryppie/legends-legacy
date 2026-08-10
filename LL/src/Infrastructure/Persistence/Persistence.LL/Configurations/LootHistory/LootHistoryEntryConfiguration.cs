@@ -18,6 +18,9 @@ public sealed class LootHistoryEntryConfiguration : IEntityTypeConfiguration<Loo
             .HasMaxLength(80)
             .IsRequired();
 
+        builder.Property(x => x.Location)
+            .HasMaxLength(120);
+
         builder.HasOne(x => x.Character)
             .WithMany()
             .HasForeignKey(x => x.CharacterId)

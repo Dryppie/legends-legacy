@@ -23,12 +23,14 @@ export interface GameRealtimeEnvelope<TPayload = unknown> {
 export interface DungeonRewardsClaimed {
   characterId: string;
   claimedLoot: InventoryItem[];
+  location?: string | null;
 }
 
 export interface LootReceived {
   characterId: string;
   items: InventoryItem[];
   source: string;
+  location?: string | null;
 }
 
 export interface InventorySnapshot {

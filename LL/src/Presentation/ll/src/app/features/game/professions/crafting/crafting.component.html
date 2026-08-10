@@ -9,7 +9,11 @@
       [experienceUntilNextLevel]="characterProfession.experienceUntilNextLevel"
       [guidePageId]="guidePageId"
     ></app-profession-header>
-    <app-tabs class="flex h-full flex-col overflow-hidden">
+    <app-tabs
+      class="flex h-full flex-col overflow-hidden"
+      [selectedIndex]="selectedTabIndex()"
+      (selectedIndexChange)="selectTab($event)"
+    >
       <app-tab label="Crafting">
         <app-regular-crafting
           class="block min-h-0 flex-1 overflow-hidden"

@@ -9,5 +9,6 @@ public sealed class LootHistoryEntry
     public Character Character { get; set; } = null!;
     public string ItemSnapshotJson { get; set; } = string.Empty;
     public string Source { get; set; } = string.Empty;
+    public string? Location { get; set; }
     public DateTimeOffset ReceivedAt { get; set; }
 }

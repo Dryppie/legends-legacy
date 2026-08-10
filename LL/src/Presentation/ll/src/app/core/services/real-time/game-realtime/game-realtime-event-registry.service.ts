@@ -45,22 +45,31 @@ export class GameRealtimeEventRegistry {
   }
 
   private registerHandlers(): void {
-    this.addHandler(gameRealtimeEventNames.dungeonRewardsClaimed, (envelope) => {
-      const payload = envelope.payload as DungeonRewardsClaimed;
-      this.injector
-        .get(GameRealtimeStore)
-        .setRewardClaim(
-          payload.claimedLoot ?? [],
-          envelope.occurredAt,
-          'dungeon-reward',
-        );
-    });
+    this.addHandler(
+      gameRealtimeEventNames.dungeonRewardsClaimed,
+      (envelope) => {
+        const payload = envelope.payload as DungeonRewardsClaimed;
+        this.injector
+          .get(GameRealtimeStore)
+          .setRewardClaim(
+            payload.claimedLoot ?? [],
+            envelope.occurredAt,
+            'dungeon-reward',
+            payload.location,
+          );
+      },
+    );
 
     this.addHandler(gameRealtimeEventNames.lootReceived, (envelope) => {
       const payload = envelope.payload as LootReceived;
       this.injector
         .get(GameRealtimeStore)
-        .addLoot(payload.items ?? [], envelope.occurredAt, payload.source);
+        .addLoot(
+          payload.items ?? [],
+          envelope.occurredAt,
+          payload.source,
+          payload.location,
+        );
       this.injector
         .get(InventoryStateService)
         .addOrIncrementMany(payload.items ?? []);
@@ -68,19 +77,24 @@ export class GameRealtimeEventRegistry {
 
     this.addHandler(gameRealtimeEventNames.inventorySnapshot, (envelope) => {
       const payload = envelope.payload as InventorySnapshot;
-      this.injector.get(InventoryStateService).setInventory(payload.items ?? []);
+      this.injector
+        .get(InventoryStateService)
+        .setInventory(payload.items ?? []);
     });
 
     this.addHandler(gameRealtimeEventNames.characterSnapshot, (envelope) => {
       const payload = envelope.payload as CharacterSnapshot;
-      this.injector.get(CharacterStateService).updateCharacter(payload.character);
+      this.injector
+        .get(CharacterStateService)
+        .updateCharacter(payload.character);
     });
-
   }
 
   private addHandler(eventName: string, handler: Handler): void {
     if (this.handlers.has(eventName)) {
-      throw new Error(`Duplicate GameRealtime handler registered for ${eventName}`);
+      throw new Error(
+        `Duplicate GameRealtime handler registered for ${eventName}`,
+      );
     }
 
     this.handlers.set(eventName, handler);

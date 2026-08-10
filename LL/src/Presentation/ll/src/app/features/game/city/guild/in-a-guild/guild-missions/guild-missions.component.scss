@@ -183,6 +183,71 @@
   font-size: var(--ll-text-sm);
 }
 
+.weekly-rewards {
+  padding: 0 var(--ll-space-5) var(--ll-space-5);
+}
+
+.weekly-rewards > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ll-space-3);
+  margin-bottom: var(--ll-space-2);
+}
+
+.weekly-rewards > header > span {
+  color: var(--ll-color-text-subtle);
+  font-size: var(--ll-text-xs);
+}
+
+.weekly-reward-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--ll-space-2);
+}
+
+.weekly-reward-tier {
+  display: grid;
+  gap: var(--ll-space-2);
+  border: 1px solid var(--ll-color-border);
+  border-radius: var(--ll-radius-sm);
+  background: var(--ll-color-surface-strong);
+  padding: var(--ll-space-3);
+}
+
+.weekly-reward-tier.is-current {
+  border-color: var(--ll-color-border-strong);
+  background: var(--ll-color-primary-soft);
+}
+
+.reward-tier-heading {
+  display: grid;
+  gap: var(--ll-space-1);
+}
+
+.reward-tier-heading strong {
+  color: var(--ll-color-primary);
+  font-size: var(--ll-text-xs);
+  text-transform: uppercase;
+}
+
+.reward-tier-heading span,
+.reward-values span {
+  color: var(--ll-color-text-subtle);
+  font-size: var(--ll-text-xs);
+}
+
+.reward-values {
+  display: grid;
+  gap: var(--ll-space-1);
+}
+
+.reward-values strong,
+.order-reward strong {
+  color: var(--ll-color-text);
+  font-weight: var(--ll-weight-semibold);
+}
+
 .weekly-footer {
   display: flex;
   align-items: center;
@@ -326,6 +391,21 @@
 
 .order-copy > p strong {
   color: var(--ll-color-primary);
+}
+
+.order-reward {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ll-space-2) var(--ll-space-4);
+  margin-top: var(--ll-space-2);
+  color: var(--ll-color-text-subtle);
+  font-size: var(--ll-text-xs);
+}
+
+.order-reward-label {
+  color: var(--ll-color-primary);
+  font-weight: var(--ll-weight-semibold);
+  text-transform: uppercase;
 }
 
 .order-progress {
@@ -526,6 +606,12 @@
   }
 }
 
+@media (max-width: 899px) {
+  .weekly-reward-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
 @media (max-width: 699px) {
   :host {
     height: auto;
@@ -553,7 +639,8 @@
   }
 
   .weekly-metrics,
-  .missions-sidebar {
+  .missions-sidebar,
+  .weekly-reward-grid {
     grid-template-columns: 1fr;
   }
 

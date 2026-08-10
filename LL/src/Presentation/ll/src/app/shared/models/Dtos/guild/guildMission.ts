@@ -46,6 +46,19 @@ export interface GuildMissionInstance {
   startedAt: string;
   endsAt: string;
   rewardClaimDeadline: string;
+  rewardTiers: GuildWeeklyRewardTier[];
+}
+
+export interface GuildMissionReward {
+  guildFavor: number;
+  guildXp: number;
+  guildSupplies: number;
+}
+
+export interface GuildWeeklyRewardTier {
+  tier: Exclude<GuildContributionTier, 'None'>;
+  requiredContribution: number;
+  reward: GuildMissionReward;
 }
 
 export interface GuildMissionContribution {
@@ -64,6 +77,7 @@ export interface PersonalGuildOrder {
   currentAmount: number;
   status: PersonalGuildOrderStatus;
   canClaimReward: boolean;
+  reward: GuildMissionReward;
   generatedAt: string;
   completedAt?: string | null;
 }

@@ -114,7 +114,12 @@
           class="ll-table-row flex items-center justify-between gap-2"
           *ngFor="let application of guild.invites"
         >
-          <div class="truncate">{{ application.characterName }}</div>
+          <app-character-tag
+            class="min-w-0 truncate"
+            data-testid="guild-application-character"
+            [id]="application.characterId"
+            [name]="application.characterName"
+          ></app-character-tag>
           <div class="flex gap-2">
             <app-regular-button
               variant="danger"

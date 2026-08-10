@@ -186,6 +186,8 @@ public sealed class EventQuestSystemTests
         Assert.False(milestones[1].IsClaimed);
         Assert.Single(writer.Items);
         Assert.Equal("ore", writer.Items[0].ItemInstance.ItemBaseId);
+        Assert.Equal("event-quest-reward", writer.Source);
+        Assert.Null(writer.Location);
         await Assert.ThrowsAsync<InvalidOperationException>(() =>
             service.ClaimAllMilestonesAsync(characterId, definition.Id, CancellationToken.None));
     }
@@ -449,13 +451,19 @@ public sealed class EventQuestSystemTests
     private sealed class RecordingLootRewardWriter : ILootRewardWriter
     {
         public List<InventoryItem> Items { get; } = [];
+        public string? Source { get; private set; }
+        public string? Location { get; private set; }
 
         public Task AddLootAsync(
             Guid characterId,
             IReadOnlyCollection<InventoryItem> items,
+            string source,
+            string? location,
             CancellationToken cancellationToken)
         {
             Items.AddRange(items);
+            Source = source;
+            Location = location;
             return Task.CompletedTask;
         }
     }

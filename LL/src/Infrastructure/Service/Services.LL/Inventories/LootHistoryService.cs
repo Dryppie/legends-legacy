@@ -50,6 +50,7 @@ public sealed class LootHistoryService : ILootHistoryService
         Guid characterId,
         IReadOnlyCollection<InventoryItemDto> items,
         string source,
+        string? location,
         CancellationToken cancellationToken)
     {
         if (items.Count == 0)
@@ -61,6 +62,9 @@ public sealed class LootHistoryService : ILootHistoryService
         var normalizedSource = string.IsNullOrWhiteSpace(source)
             ? "unknown"
             : source.Trim();
+        var normalizedLocation = string.IsNullOrWhiteSpace(location)
+            ? null
+            : location.Trim();
 
         var entries = items.Select(item => new LootHistoryEntry
         {
@@ -68,6 +72,7 @@ public sealed class LootHistoryService : ILootHistoryService
             CharacterId = characterId,
             ItemSnapshotJson = JsonSerializer.Serialize(item, _jsonOptions),
             Source = normalizedSource,
+            Location = normalizedLocation,
             ReceivedAt = receivedAt
         });
 
@@ -98,6 +103,11 @@ public sealed class LootHistoryService : ILootHistoryService
             _jsonOptions) ?? throw new JsonException(
             $"Loot history entry '{entry.Id}' has an invalid item snapshot.");
 
-        return new LootHistoryEntryDto(entry.Id, item, entry.Source, entry.ReceivedAt);
+        return new LootHistoryEntryDto(
+            entry.Id,
+            item,
+            entry.Source,
+            entry.Location,
+            entry.ReceivedAt);
     }
 }

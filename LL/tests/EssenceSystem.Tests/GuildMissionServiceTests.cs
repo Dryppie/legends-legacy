@@ -89,6 +89,21 @@ public sealed class GuildMissionServiceTests
         var atPlatinum = await service.GetOverviewAsync(characterId, now, CancellationToken.None);
 
         Assert.Equal(GuildContributionTier.Gold, beforePlatinum!.MyWeeklyContribution!.Tier);
+        Assert.Equal(
+            [
+                GuildContributionTier.Bronze,
+                GuildContributionTier.Silver,
+                GuildContributionTier.Gold,
+                GuildContributionTier.Platinum
+            ],
+            beforePlatinum.ActiveMission!.RewardTiers.Select(x => x.Tier));
+        Assert.Equal(
+            [10_800L, 21_600L, 32_400L, 43_200L],
+            beforePlatinum.ActiveMission.RewardTiers.Select(x => x.RequiredContribution));
+        var platinumReward = beforePlatinum.ActiveMission.RewardTiers[^1].Reward;
+        Assert.Equal(225, platinumReward.GuildFavor);
+        Assert.Equal(650, platinumReward.GuildXp);
+        Assert.Equal(130, platinumReward.GuildSupplies);
         Assert.Equal(0, finalAction.WeeklyProgressAdded);
         Assert.Equal(GuildContributionTier.Platinum, atPlatinum!.MyWeeklyContribution!.Tier);
     }
@@ -135,6 +150,12 @@ public sealed class GuildMissionServiceTests
         Assert.NotNull(overview);
         Assert.Equal(3, overview!.WeeklyOptions.Count);
         Assert.Equal(3, overview.PersonalOrders.Count);
+        Assert.All(overview.PersonalOrders, order =>
+        {
+            Assert.Equal(50, order.Reward.GuildFavor);
+            Assert.Equal(20, order.Reward.GuildXp);
+            Assert.Equal(10, order.Reward.GuildSupplies);
+        });
         Assert.Null(overview.ActiveMission);
         Assert.True(overview.CanSelectMission);
     }

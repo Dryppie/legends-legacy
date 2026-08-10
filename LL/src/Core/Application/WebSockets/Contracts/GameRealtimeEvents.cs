@@ -8,12 +8,14 @@ public abstract record GameRealtimeEvent;
 
 public sealed record DungeonRewardsClaimed(
     Guid CharacterId,
-    IReadOnlyList<InventoryItemDto> ClaimedLoot) : GameRealtimeEvent;
+    IReadOnlyList<InventoryItemDto> ClaimedLoot,
+    string? Location) : GameRealtimeEvent;
 
 public sealed record LootReceived(
     Guid CharacterId,
     IReadOnlyList<InventoryItemDto> Items,
-    string Source) : GameRealtimeEvent;
+    string Source,
+    string? Location) : GameRealtimeEvent;
 
 public sealed record InventorySnapshot(
     Guid CharacterId,

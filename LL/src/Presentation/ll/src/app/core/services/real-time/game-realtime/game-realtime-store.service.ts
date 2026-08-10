@@ -34,6 +34,7 @@ export class GameRealtimeStore {
     items: InventoryItem[],
     receivedAt = new Date().toISOString(),
     source = 'loot',
+    location?: string | null,
   ): void {
     if (!items.length) return;
 
@@ -42,6 +43,7 @@ export class GameRealtimeStore {
       item,
       receivedAt,
       source,
+      location,
     }));
     this._recentLoot.update((current) =>
       [...entries, ...current].slice(0, this.maxLootEntries),
@@ -52,9 +54,10 @@ export class GameRealtimeStore {
     items: InventoryItem[],
     receivedAt?: string,
     source = 'dungeon-reward',
+    location?: string | null,
   ): void {
     this._lastRewardClaim.set(items.slice(0, this.maxLootEntries));
-    this.addLoot(items, receivedAt, source);
+    this.addLoot(items, receivedAt, source, location);
   }
 
   setIdleAction(action: CharacterActionDto): void {

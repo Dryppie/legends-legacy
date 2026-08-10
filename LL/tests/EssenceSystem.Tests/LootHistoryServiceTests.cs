@@ -32,6 +32,7 @@ public sealed class LootHistoryServiceTests
                 characterId,
                 [CreateItem(quantity)],
                 "combat-reward",
+                "Lumo Ruins",
                 CancellationToken.None);
             clock.Advance(TimeSpan.FromMinutes(1));
         }
@@ -40,6 +41,7 @@ public sealed class LootHistoryServiceTests
             otherCharacterId,
             [CreateItem(999)],
             "combat-reward",
+            "Shenic Forest",
             CancellationToken.None);
 
         var entries = await service.GetRecentAsync(characterId, CancellationToken.None);
@@ -51,6 +53,7 @@ public sealed class LootHistoryServiceTests
             new DateTimeOffset(2026, 8, 9, 12, 54, 0, TimeSpan.Zero),
             entries[0].ReceivedAt);
         Assert.All(entries, entry => Assert.Equal("combat-reward", entry.Source));
+        Assert.All(entries, entry => Assert.Equal("Lumo Ruins", entry.Location));
     }
 
     [Fact]
@@ -71,11 +74,13 @@ public sealed class LootHistoryServiceTests
             characterId,
             ownEntries,
             "combat-reward",
+            "Lumo Ruins",
             CancellationToken.None);
         await service.RecordAsync(
             otherCharacterId,
             [CreateItem(999)],
             "combat-reward",
+            null,
             CancellationToken.None);
 
         var deleted = await service.ClearAsync(characterId, CancellationToken.None);
@@ -119,6 +124,7 @@ public sealed class LootHistoryServiceTests
             characterId,
             [item],
             "combat-reward",
+            "Lumo Ruins",
             CancellationToken.None);
 
         var entry = Assert.Single(

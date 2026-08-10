@@ -53,7 +53,18 @@ public sealed record GuildMissionInstanceDto(
     GuildMissionStatus Status,
     DateTimeOffset StartedAt,
     DateTimeOffset EndsAt,
-    DateTimeOffset RewardClaimDeadline);
+    DateTimeOffset RewardClaimDeadline,
+    IReadOnlyList<GuildWeeklyRewardTierDto> RewardTiers);
+
+public sealed record GuildMissionRewardDto(
+    long GuildFavor,
+    long GuildXp,
+    int GuildSupplies);
+
+public sealed record GuildWeeklyRewardTierDto(
+    GuildContributionTier Tier,
+    long RequiredContribution,
+    GuildMissionRewardDto Reward);
 
 public sealed record GuildMissionContributionDto(
     long Amount,
@@ -70,6 +81,7 @@ public sealed record PersonalGuildOrderDto(
     long CurrentAmount,
     PersonalGuildOrderStatus Status,
     bool CanClaimReward,
+    GuildMissionRewardDto Reward,
     DateTimeOffset GeneratedAt,
     DateTimeOffset? CompletedAt);
 

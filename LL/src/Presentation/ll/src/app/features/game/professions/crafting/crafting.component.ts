@@ -10,7 +10,7 @@ import { ProfessionHeaderComponent } from '../../../../shared/components/profess
 import { NgIf } from '@angular/common';
 import { CraftingProfession } from '../../../../shared/models/profession';
 import { map } from 'rxjs';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { ProfessionsService } from '../../../../core/services/api/professions/professions.service';
 import { TabComponent } from '../../../../shared/components/custom-components/tabs/tab/tab.component';
 import { RegularCraftingComponent } from './regular-crafting/regular-crafting.component';
@@ -34,12 +34,19 @@ import { ProfessionType } from '../../../../shared/models/Dtos/characterProfessi
 })
 export class CraftingComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
   private readonly professionService = inject(ProfessionsService);
   private readonly inventoryState = inject(InventoryStateService);
 
   readonly professionId = toSignal(
     this.route.paramMap.pipe(map((p) => p.get('id') ?? '')),
     { initialValue: '' },
+  );
+  readonly selectedTabIndex = toSignal(
+    this.route.queryParamMap.pipe(
+      map((params) => craftingTabIndex(params.get('tab'))),
+    ),
+    { initialValue: 0 },
   );
 
   readonly profession = signal<CraftingProfession | null>(null);
@@ -83,4 +90,17 @@ export class CraftingComponent implements OnInit {
     ) as CraftingProfession;
     this.profession.set(prof);
   }
+
+  selectTab(index: number): void {
+    void this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { tab: index === 1 ? 'tempering' : null },
+      queryParamsHandling: 'merge',
+      replaceUrl: true,
+    });
+  }
+}
+
+export function craftingTabIndex(tab: string | null): number {
+  return tab?.toLowerCase() === 'tempering' ? 1 : 0;
 }

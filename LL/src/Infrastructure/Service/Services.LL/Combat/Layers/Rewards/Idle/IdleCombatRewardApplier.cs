@@ -43,6 +43,8 @@ public sealed class IdleCombatRewardApplier : IIdleCombatRewardApplier
             await _lootWriter.AddLootAsync(
                 facts.CharacterId,
                 outcome.TotalLoot,
+                "combat-reward",
+                facts.Area.Name,
                 cancellationToken);
         }
 

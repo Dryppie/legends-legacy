@@ -70,6 +70,49 @@
           </div>
         </div>
 
+        <section class="weekly-rewards" aria-label="Weekly reward tiers">
+          <header>
+            <h2 class="section-label">Reward Tiers</h2>
+            <span>Mission Board bonus included</span>
+          </header>
+          <div class="weekly-reward-grid">
+            <article
+              *ngFor="let rewardTier of active.rewardTiers"
+              class="weekly-reward-tier"
+              [class.is-current]="
+                rewardTier.tier === missions.myWeeklyContribution?.tier
+              "
+            >
+              <div class="reward-tier-heading">
+                <strong>{{ rewardTier.tier }}</strong>
+                <span>
+                  {{ rewardTier.requiredContribution | numberFormat }} required
+                </span>
+              </div>
+              <div class="reward-values">
+                <span>
+                  <strong>{{
+                    rewardTier.reward.guildFavor | numberFormat
+                  }}</strong>
+                  Favor
+                </span>
+                <span>
+                  <strong>{{
+                    rewardTier.reward.guildXp | numberFormat
+                  }}</strong>
+                  Guild XP
+                </span>
+                <span>
+                  <strong>{{
+                    rewardTier.reward.guildSupplies | numberFormat
+                  }}</strong>
+                  Supplies
+                </span>
+              </div>
+            </article>
+          </div>
+        </section>
+
         <footer class="weekly-footer">
           <p
             *ngIf="
@@ -152,6 +195,21 @@
               <strong>{{ order.currentAmount | numberFormat }}</strong> /
               {{ order.targetAmount | numberFormat }}
             </p>
+            <div class="order-reward" aria-label="Order reward">
+              <span class="order-reward-label">Reward</span>
+              <span>
+                <strong>{{ order.reward.guildFavor | numberFormat }}</strong>
+                Favor
+              </span>
+              <span>
+                <strong>{{ order.reward.guildXp | numberFormat }}</strong>
+                Guild XP
+              </span>
+              <span>
+                <strong>{{ order.reward.guildSupplies | numberFormat }}</strong>
+                Supplies
+              </span>
+            </div>
             <div class="order-progress" aria-hidden="true">
               <span [style.width.%]="orderProgress(order)"></span>
             </div>

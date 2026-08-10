@@ -74,10 +74,15 @@ export function mapInstanceToDisplay(
   inst: EquipmentInstance,
 ): EquipmentDisplay {
   const base = inst.equipmentBase;
-  const attributes = aggregateAttributes([
+  const splitModifiers = [
     ...(inst.baseModifiers ?? []),
     ...(inst.instanceModifiers ?? []),
-  ]);
+  ];
+  const attributes = aggregateAttributes(
+    splitModifiers.length > 0
+      ? splitModifiers
+      : (inst.attributeModifiers ?? []),
+  );
   const baseToolBonuses = base.toolBonuses ?? [];
   const toolAffixes = inst.toolAffixes ?? [];
   const effectiveToolBonuses = inst.effectiveToolBonuses?.length

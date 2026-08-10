@@ -38,6 +38,9 @@
             {{ entry.receivedAt | date: "MMM d, HH:mm" }}
           </time>
         </div>
+        <div class="mt-0.5 truncate text-[0.65rem] text-zinc-400">
+          {{ locationLabel(entry) }}
+        </div>
       </div>
     </ng-container>
     <ng-template #emptyState>

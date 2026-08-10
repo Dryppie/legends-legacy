@@ -696,7 +696,12 @@ public sealed class QuestService(
 
         if (items.Count > 0)
         {
-            await lootRewardWriter.AddLootAsync(progress.CharacterId, items, cancellationToken);
+            await lootRewardWriter.AddLootAsync(
+                progress.CharacterId,
+                items,
+                "quest-reward",
+                location: null,
+                cancellationToken);
         }
 
         progress.RewardsGrantedAt = timeProvider.GetUtcNow();

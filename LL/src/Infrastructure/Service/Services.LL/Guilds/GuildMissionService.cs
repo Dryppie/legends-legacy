@@ -100,7 +100,7 @@ public class GuildMissionService : IGuildMissionService
         var character = await _context.Characters.FirstOrDefaultAsync(x => x.Id == characterId, cancellationToken);
         if (character is null) return GuildOperationResult<GuildMissionOverviewDto>.Fail("Character was not found.");
 
-        var orderReward = ApplyMissionBoardRewardBonus(guild, new WeeklyReward(50, 20, 10));
+        var orderReward = ApplyMissionBoardRewardBonus(guild, GetPersonalOrderReward());
 
         character.GuildFavor += orderReward.Favor;
         AddGuildXp(guild, orderReward.GuildXp);
@@ -495,6 +495,7 @@ public class GuildMissionService : IGuildMissionService
     {
         var guild = await _context.Guilds
             .Include(x => x.Members)
+            .Include(x => x.Buildings)
             .FirstAsync(x => x.Id == guildId, cancellationToken);
         var week = GetWeek(now);
         var dailyKey = GetDailyKey(now);
@@ -534,7 +535,7 @@ public class GuildMissionService : IGuildMissionService
             week.EndsAt,
             member is not null && (member.IsGuildLeader() || member.Role == GuildRole.Officer) && activeMission is null,
             options.Select(ToOptionDto).ToList(),
-            activeMission is null ? null : ToInstanceDto(activeMission),
+            activeMission is null ? null : ToInstanceDto(activeMission, guild),
             myContribution is null
                 ? new GuildMissionContributionDto(0, GuildContributionTier.None, null, false, false)
                 : new GuildMissionContributionDto(
@@ -545,7 +546,7 @@ public class GuildMissionService : IGuildMissionService
                     activeMission!.CurrentAmount >= activeMission.TargetAmount
                         && myContribution.ContributionTier != GuildContributionTier.None
                         && !myContribution.RewardClaimedAt.HasValue),
-            personalOrders.Select(ToOrderDto).ToList(),
+            personalOrders.Select(order => ToOrderDto(order, guild)).ToList(),
             new GuildContributionSummaryDto(
                 dailyKey,
                 week.Key,
@@ -625,6 +626,28 @@ public class GuildMissionService : IGuildMissionService
         _ => new WeeklyReward(0, 0, 0)
     };
 
+    private static WeeklyReward GetPersonalOrderReward() => new(50, 20, 10);
+
+    private static IReadOnlyList<GuildWeeklyRewardTierDto> GetWeeklyRewardTiers(
+        Guild guild,
+        long targetAmount) =>
+    [
+        ToWeeklyRewardTierDto(guild, GuildContributionTier.Bronze, targetAmount, 0.025d),
+        ToWeeklyRewardTierDto(guild, GuildContributionTier.Silver, targetAmount, 0.05d),
+        ToWeeklyRewardTierDto(guild, GuildContributionTier.Gold, targetAmount, 0.075d),
+        ToWeeklyRewardTierDto(guild, GuildContributionTier.Platinum, targetAmount, 0.1d)
+    ];
+
+    private static GuildWeeklyRewardTierDto ToWeeklyRewardTierDto(
+        Guild guild,
+        GuildContributionTier tier,
+        long targetAmount,
+        double requiredRatio) =>
+        new(
+            tier,
+            (long)Math.Ceiling(targetAmount * requiredRatio),
+            ToRewardDto(ApplyMissionBoardRewardBonus(guild, GetWeeklyReward(tier))));
+
     private IReadOnlyList<GuildMissionDefinition> GetWeeklyMissionOptions(Guild guild, string weekKey)
     {
         var missionBoardLevel = GetMissionBoardLevel(guild);
@@ -683,7 +706,7 @@ public class GuildMissionService : IGuildMissionService
     private GuildMissionOptionDto ToOptionDto(GuildMissionOption option) =>
         new(option.Id, ToDefinitionDto(_allDefinitions[option.MissionDefinitionId]), option.WeekKey, option.ExpiresAt, option.IsSelected);
 
-    private GuildMissionInstanceDto ToInstanceDto(GuildMissionInstance instance) =>
+    private GuildMissionInstanceDto ToInstanceDto(GuildMissionInstance instance, Guild guild) =>
         new(
             instance.Id,
             ToDefinitionDto(_allDefinitions[instance.MissionDefinitionId]),
@@ -693,9 +716,10 @@ public class GuildMissionService : IGuildMissionService
             instance.Status,
             instance.StartedAt,
             instance.EndsAt,
-            instance.RewardClaimDeadline);
+            instance.RewardClaimDeadline,
+            GetWeeklyRewardTiers(guild, instance.TargetAmount));
 
-    private PersonalGuildOrderDto ToOrderDto(PersonalGuildOrder order) =>
+    private PersonalGuildOrderDto ToOrderDto(PersonalGuildOrder order, Guild guild) =>
         new(
             order.Id,
             ToDefinitionDto(_allDefinitions[order.MissionDefinitionId]),
@@ -704,8 +728,12 @@ public class GuildMissionService : IGuildMissionService
             order.CurrentAmount,
             order.Status,
             order.Status == PersonalGuildOrderStatus.Completed && !order.RewardClaimedAt.HasValue,
+            ToRewardDto(ApplyMissionBoardRewardBonus(guild, GetPersonalOrderReward())),
             order.GeneratedAt,
             order.CompletedAt);
+
+    private static GuildMissionRewardDto ToRewardDto(WeeklyReward reward) =>
+        new(reward.Favor, reward.GuildXp, reward.Supplies);
 
     private static GuildMissionDefinitionDto ToDefinitionDto(GuildMissionDefinition definition) =>
         new(

@@ -11,6 +11,7 @@ import {
   buildAttributeComparisons,
   buildToolBonusComparisons,
   EquipmentDisplay,
+  mapInstanceToDisplay,
 } from './equipment-display';
 import { EquipmentDisplayComponent } from './equipment-display/equipment-display.component';
 
@@ -87,6 +88,26 @@ describe('buildToolBonusComparisons', () => {
         scopeId: undefined,
         equippedAmount: 8,
         hoveredAmount: 12,
+      },
+    ]);
+  });
+});
+
+describe('mapInstanceToDisplay', () => {
+  it('uses combined attributes when a marketplace DTO omits split modifier lists', () => {
+    const item = equipmentInstance(
+      'marketplace-item',
+      AttributeType.MaxHealth,
+      70,
+    );
+    item.baseModifiers = [];
+    item.instanceModifiers = [];
+
+    expect(mapInstanceToDisplay(item).attributes).toEqual([
+      {
+        attributeType: AttributeType.MaxHealth,
+        amount: 70,
+        modifierType: ModifierType.Flat,
       },
     ]);
   });

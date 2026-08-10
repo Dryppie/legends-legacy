@@ -176,7 +176,12 @@ public sealed class EventQuestService(
             ClaimedAt = now,
             EventQuest = instance
         });
-        await lootRewardWriter.AddLootAsync(characterId, loot, cancellationToken);
+        await lootRewardWriter.AddLootAsync(
+            characterId,
+            loot,
+            "event-quest-reward",
+            location: null,
+            cancellationToken);
         await repository.SaveChangesAsync(cancellationToken);
         return await GetJournalAsync(characterId, cancellationToken);
     }
@@ -266,7 +271,12 @@ public sealed class EventQuestService(
             characterId,
             selected.SelectMany(x => x.Rewards).ToList(),
             cancellationToken);
-        await lootRewardWriter.AddLootAsync(characterId, loot, cancellationToken);
+        await lootRewardWriter.AddLootAsync(
+            characterId,
+            loot,
+            "event-quest-reward",
+            location: null,
+            cancellationToken);
         await repository.SaveChangesAsync(cancellationToken);
         return await GetJournalAsync(characterId, cancellationToken);
     }

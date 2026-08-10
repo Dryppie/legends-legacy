@@ -104,11 +104,13 @@ public sealed class DungeonRunService : IDungeonRunService
             return null;
 
         var claimedLoot = await _rewardClaimer.ClaimAsync(run, cancellationToken);
+        var dungeon = _dungeons.GetByKey(run.DungeonDefinitionId);
         var result = new ClaimDungeonRewardsResult
         {
             ClaimedLoot = claimedLoot,
             WasCompleted = run.Status == DungeonRunStatus.Completed,
             DungeonDefinitionId = run.DungeonDefinitionId,
+            DungeonName = dungeon.Name,
             CompletedWithoutDefeat = run.DeathsDuringRun == 0,
             CompletedWithoutRetreat = !run.UsedRetreat,
             CompletedWithoutWeapon = run.State.StartedWithoutWeapon,

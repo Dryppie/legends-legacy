@@ -34,6 +34,8 @@ public sealed class InventoryLootRewardWriter : ILootRewardWriter
     public async Task AddLootAsync(
         Guid ownerCharacterId,
         IReadOnlyCollection<InventoryItem> items,
+        string source,
+        string? location,
         CancellationToken cancellationToken)
     {
         if (items.Count == 0)
@@ -50,10 +52,11 @@ public sealed class InventoryLootRewardWriter : ILootRewardWriter
         await _lootHistory.RecordAsync(
             ownerCharacterId,
             mappedItems,
-            "combat-reward",
+            source,
+            location,
             cancellationToken);
 
-        var message = new LootReceivedMsg(ownerCharacterId, mappedItems);
+        var message = new LootReceivedMsg(ownerCharacterId, mappedItems, source, location);
 
         await _gameEventPublisher.PublishAsync(
             new Audience.Character(ownerCharacterId),
@@ -61,7 +64,7 @@ public sealed class InventoryLootRewardWriter : ILootRewardWriter
 
         await _gameRealtime.PublishAsync(
             new Audience.Character(ownerCharacterId),
-            new LootReceived(ownerCharacterId, mappedItems, "combat-reward"),
+            new LootReceived(ownerCharacterId, mappedItems, source, location),
             nameof(InventoryLootRewardWriter),
             cancellationToken);
     }
