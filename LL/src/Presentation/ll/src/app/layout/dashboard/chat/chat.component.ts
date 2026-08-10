@@ -15,7 +15,13 @@ import {
   ChatService,
 } from '../../../core/services/ll-chat/chat-service/chat.service';
 import { firstValueFrom, Subscription } from 'rxjs';
-import { DatePipe, NgClass, NgFor, NgIf } from '@angular/common';
+import {
+  DatePipe,
+  NgClass,
+  NgFor,
+  NgIf,
+  NgTemplateOutlet,
+} from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { RegularButtonComponent } from '../../../shared/components/custom-components/buttons/regular-button/regular-button.component';
@@ -75,6 +81,7 @@ export function isWorldSystemMessage(message: ChatMessageDto): boolean {
     NgFor,
     NgIf,
     NgClass,
+    NgTemplateOutlet,
     FormsModule,
     RegularButtonComponent,
     StickyScrollDirective,
@@ -96,6 +103,9 @@ export class ChatComponent implements OnInit, OnDestroy {
   @Output() expand = new EventEmitter<void>();
   @Output() collapsedChange = new EventEmitter<boolean>();
   @Output() drawerTallChange = new EventEmitter<boolean>();
+  @Output() drawerDragStart = new EventEmitter<PointerEvent>();
+  @Output() drawerDragMove = new EventEmitter<PointerEvent>();
+  @Output() drawerDragEnd = new EventEmitter<PointerEvent>();
   @ViewChild('chatInput') chatInput?: ElementRef<HTMLInputElement>;
   @ViewChild('channelScroller')
   channelScroller?: ElementRef<HTMLElement>;
@@ -345,6 +355,32 @@ export class ChatComponent implements OnInit, OnDestroy {
     if (!this.drawer) return;
 
     this.drawerTallChange.emit(!this.drawerTall);
+  }
+
+  startDrawerDrag(event: PointerEvent): void {
+    if (!this.drawer || (event.pointerType === 'mouse' && event.button !== 0)) {
+      return;
+    }
+
+    event.preventDefault();
+    (event.currentTarget as HTMLElement).setPointerCapture(event.pointerId);
+    this.drawerDragStart.emit(event);
+  }
+
+  moveDrawer(event: PointerEvent): void {
+    const handle = event.currentTarget as HTMLElement;
+    if (!this.drawer || !handle.hasPointerCapture(event.pointerId)) return;
+
+    event.preventDefault();
+    this.drawerDragMove.emit(event);
+  }
+
+  endDrawerDrag(event: PointerEvent): void {
+    const handle = event.currentTarget as HTMLElement;
+    if (!handle.hasPointerCapture(event.pointerId)) return;
+
+    this.drawerDragEnd.emit(event);
+    handle.releasePointerCapture(event.pointerId);
   }
 
   get filteredMessages(): ChatMessageDto[] {

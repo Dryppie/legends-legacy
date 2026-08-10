@@ -111,6 +111,29 @@ export class ChatService {
 
     effect(
       () => {
+        const envelope =
+          this.gameEvents.eventEnvelope.GuildVaultChatMessageMsg();
+        const payload = envelope?.payload;
+        if (!payload?.messageId || !payload.equipment) return;
+
+        this.addMessage({
+          id: payload.messageId,
+          channelType: ChatChannelType.Guild,
+          contextKey: payload.guildId,
+          senderId: payload.actorCharacterId,
+          senderName: payload.actorName,
+          body: payload.action,
+          linkedItem: payload.equipment,
+          sentAt: new Date(
+            payload.sentAt ?? envelope?.occurredAt ?? Date.now(),
+          ),
+        });
+      },
+      { allowSignalWrites: true },
+    );
+
+    effect(
+      () => {
         const id = this.auth.identity(); // ← depends on username + login
         const guildId = this.guildState.guild()?.id ?? null;
         const authenticationContextVersion =

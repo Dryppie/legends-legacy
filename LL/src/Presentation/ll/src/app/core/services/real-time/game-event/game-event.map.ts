@@ -25,6 +25,7 @@ import { GuildInviteReceivedMsg } from '../guild/guild-invite-received';
 import { GuildInviteRejectedMsg } from '../guild/guild-invite-rejected';
 import { GuildApplicationRejectedMsg } from '../guild/guild-application-rejected';
 import { GuildStateChangedMsg } from '../guild/guild-state-changed';
+import { GuildVaultChatMessageMsg } from '../guild/guild-vault-chat-message';
 import { GuildMembershipChangedMsg } from '../guild/guild-membership-changed';
 import { GuildDisbandedMsg } from '../guild/guild-disbanded';
 import { GuildDirectoryChangedMsg } from '../guild/guild-directory-changed';
@@ -52,6 +53,7 @@ export const gameEventNames = [
   'GuildInviteRejectedMsg',
   'GuildApplicationRejectedMsg',
   'GuildStateChangedMsg',
+  'GuildVaultChatMessageMsg',
   'GuildMembershipChangedMsg',
   'GuildDisbandedMsg',
   'GuildDirectoryChangedMsg',
@@ -89,6 +91,7 @@ export interface GameEventMap {
   GuildInviteRejectedMsg: GuildInviteRejectedMsg;
   GuildApplicationRejectedMsg: GuildApplicationRejectedMsg;
   GuildStateChangedMsg: GuildStateChangedMsg;
+  GuildVaultChatMessageMsg: GuildVaultChatMessageMsg;
   GuildMembershipChangedMsg: GuildMembershipChangedMsg;
   GuildDisbandedMsg: GuildDisbandedMsg;
   GuildDirectoryChangedMsg: GuildDirectoryChangedMsg;

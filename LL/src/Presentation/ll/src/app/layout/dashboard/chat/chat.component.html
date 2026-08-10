@@ -163,6 +163,11 @@
           </div>
 
           <div *ngIf="collapsible" class="flex shrink-0 items-center gap-1.5">
+            <ng-container
+              *ngIf="drawer"
+              [ngTemplateOutlet]="drawerDragHandle"
+            ></ng-container>
+
             <button
               *ngIf="drawer"
               type="button"
@@ -307,41 +312,43 @@
                 {{ channelLabel(m) }}
               </span>
 
-              <ng-container
-                *ngIf="m.channelType === 'System'; else playerSender"
-              >
-                <span
-                  *ngIf="m.senderName !== channelLabel(m)"
-                  class="text-xs font-semibold text-[var(--ll-color-text-muted)]"
-                >
-                  {{ m.senderName }}
-                </span>
-              </ng-container>
-
-              <ng-template #playerSender>
+              <ng-container *ngIf="!m.linkedItem">
                 <ng-container
-                  *ngIf="m.channelType === 'Whisper'; else normalSender"
+                  *ngIf="m.channelType === 'System'; else playerSender"
                 >
                   <span
-                    class="text-[10px] uppercase text-[var(--ll-color-text-subtle)]"
+                    *ngIf="m.senderName !== channelLabel(m)"
+                    class="text-xs font-semibold text-[var(--ll-color-text-muted)]"
                   >
-                    {{ m.senderId === characterId() ? "to" : "from" }}
+                    {{ m.senderName }}
                   </span>
-                  <app-character-tag
-                    [id]="whisperDisplayId(m)"
-                    [name]="whisperDisplayName(m)"
-                    [titleDisplayName]="whisperDisplayTitle(m)"
-                  ></app-character-tag>
                 </ng-container>
-              </ng-template>
 
-              <ng-template #normalSender>
-                <app-character-tag
-                  [id]="m.senderId"
-                  [name]="m.senderName"
-                  [titleDisplayName]="m.senderTitleDisplayName"
-                ></app-character-tag>
-              </ng-template>
+                <ng-template #playerSender>
+                  <ng-container
+                    *ngIf="m.channelType === 'Whisper'; else normalSender"
+                  >
+                    <span
+                      class="text-[10px] uppercase text-[var(--ll-color-text-subtle)]"
+                    >
+                      {{ m.senderId === characterId() ? "to" : "from" }}
+                    </span>
+                    <app-character-tag
+                      [id]="whisperDisplayId(m)"
+                      [name]="whisperDisplayName(m)"
+                      [titleDisplayName]="whisperDisplayTitle(m)"
+                    ></app-character-tag>
+                  </ng-container>
+                </ng-template>
+
+                <ng-template #normalSender>
+                  <app-character-tag
+                    [id]="m.senderId"
+                    [name]="m.senderName"
+                    [titleDisplayName]="m.senderTitleDisplayName"
+                  ></app-character-tag>
+                </ng-template>
+              </ng-container>
             </div>
 
             <div
@@ -354,7 +361,8 @@
                 'text-[var(--ll-color-text)]': m.channelType !== 'System',
               }"
             >
-              <span>{{ m.body }}</span>
+              <span *ngIf="m.linkedItem">{{ m.senderName }} {{ m.body }}</span>
+              <span *ngIf="!m.linkedItem">{{ m.body }}</span>
               <ng-container *ngIf="m.linkedItem as linkedItem">
                 <app-item
                   class="decoration-current/40 inline-block max-w-full cursor-help underline underline-offset-2"
@@ -417,43 +425,49 @@
   </ng-container>
 
   <ng-template #collapsedChat>
-    <button
+    <div
       *ngIf="drawer; else collapsedRail"
-      type="button"
-      class="group flex h-full w-full items-center justify-between gap-3 rounded-lg border border-[var(--ll-color-border-strong)] bg-[var(--ll-color-surface-strong)] bg-texture px-3 text-primary shadow-[var(--ll-shadow-md)] transition-colors hover:border-primary hover:bg-[var(--ll-color-primary-soft)]"
-      aria-label="Expand chat"
-      title="Expand chat"
-      (click)="toggleCollapsed()"
+      class="flex h-full w-full items-center gap-1.5 rounded-lg border border-[var(--ll-color-border-strong)] bg-[var(--ll-color-surface-strong)] bg-texture px-1.5 text-primary shadow-[var(--ll-shadow-md)]"
     >
-      <span class="flex min-w-0 items-center gap-2">
-        <span
-          class="shrink-0 text-sm uppercase tracking-wide [font-family:var(--ll-font-display)]"
-        >
-          Chat
-        </span>
-        <span
-          class="h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--ll-color-success)]"
-          aria-hidden="true"
-        ></span>
-        <span class="truncate text-[10px] text-[var(--ll-color-text-muted)]">
-          {{ onlinePlayerLabel }}
-        </span>
-      </span>
-      <svg
-        class="h-3.5 w-3.5 shrink-0 text-primary/80 transition-transform duration-150 group-hover:-translate-y-0.5"
-        viewBox="0 0 16 16"
-        fill="none"
-        aria-hidden="true"
+      <button
+        type="button"
+        class="group flex min-w-0 flex-1 items-center justify-between gap-3 rounded-md px-1.5 py-1 text-primary transition-colors hover:bg-[var(--ll-color-primary-soft)]"
+        aria-label="Expand chat"
+        title="Expand chat"
+        (click)="toggleCollapsed()"
       >
-        <path
-          d="m4 10 4-4 4 4"
-          stroke="currentColor"
-          stroke-width="1.5"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        />
-      </svg>
-    </button>
+        <span class="flex min-w-0 items-center gap-2">
+          <span
+            class="shrink-0 text-sm uppercase tracking-wide [font-family:var(--ll-font-display)]"
+          >
+            Chat
+          </span>
+          <span
+            class="h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--ll-color-success)]"
+            aria-hidden="true"
+          ></span>
+          <span class="truncate text-[10px] text-[var(--ll-color-text-muted)]">
+            {{ onlinePlayerLabel }}
+          </span>
+        </span>
+        <svg
+          class="h-3.5 w-3.5 shrink-0 text-primary/80 transition-transform duration-150 group-hover:-translate-y-0.5"
+          viewBox="0 0 16 16"
+          fill="none"
+          aria-hidden="true"
+        >
+          <path
+            d="m4 10 4-4 4 4"
+            stroke="currentColor"
+            stroke-width="1.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
+      </button>
+
+      <ng-container [ngTemplateOutlet]="drawerDragHandle"></ng-container>
+    </div>
   </ng-template>
 
   <ng-template #collapsedRail>
@@ -482,4 +496,32 @@
       <span class="sr-only">{{ onlinePlayerLabel }}</span>
     </button>
   </ng-template>
+</ng-template>
+
+<ng-template #drawerDragHandle>
+  <button
+    type="button"
+    class="group flex h-7 w-7 shrink-0 touch-none select-none items-center justify-center rounded-md border border-[var(--ll-color-border)] bg-[var(--ll-color-surface-soft)] text-primary transition-colors hover:border-[var(--ll-color-border-strong)] hover:bg-[var(--ll-color-primary-soft)] active:cursor-grabbing sm:cursor-grab"
+    aria-label="Drag chat"
+    title="Hold and drag to move chat"
+    (pointerdown)="startDrawerDrag($event)"
+    (pointermove)="moveDrawer($event)"
+    (pointerup)="endDrawerDrag($event)"
+    (pointercancel)="endDrawerDrag($event)"
+    (lostpointercapture)="drawerDragEnd.emit($event)"
+  >
+    <svg
+      class="h-4 w-4 transition-transform duration-150 group-hover:scale-110"
+      viewBox="0 0 16 16"
+      fill="currentColor"
+      aria-hidden="true"
+    >
+      <circle cx="5" cy="4" r="1" />
+      <circle cx="11" cy="4" r="1" />
+      <circle cx="5" cy="8" r="1" />
+      <circle cx="11" cy="8" r="1" />
+      <circle cx="5" cy="12" r="1" />
+      <circle cx="11" cy="12" r="1" />
+    </svg>
+  </button>
 </ng-template>

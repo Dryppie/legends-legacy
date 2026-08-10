@@ -2,6 +2,8 @@ using System.Net;
 using System.Text.Json;
 using Application.UseCases.Equipments.Dtos;
 using Application.UseCases.Outbox;
+using Domain.Models.Attributes;
+using Domain.Models.Attributes.Modifiers;
 using Domain.Models.Items;
 using Domain.Models.Items.Equipments;
 using Domain.Models.Outbox;
@@ -55,7 +57,11 @@ public sealed class GuildVaultChatOutboxTests
                     Name = "Heavy Helm",
                     ItemType = ItemType.Equipment,
                     EquipmentType = EquipmentType.Head
-                }
+                },
+                AttributeModifiers =
+                [
+                    new InstanceAttributeModifier(AttributeType.Power, 7)
+                ]
             },
             Guid.NewGuid(),
             DateTimeOffset.UtcNow);
@@ -79,6 +85,13 @@ public sealed class GuildVaultChatOutboxTests
         Assert.Equal(
             "Heavy Helm",
             request.RootElement.GetProperty("linkedItem").GetProperty("displayName").GetString());
+        Assert.Equal(
+            7,
+            request.RootElement
+                .GetProperty("linkedItem")
+                .GetProperty("attributeModifiers")[0]
+                .GetProperty("amount")
+                .GetSingle());
     }
 
     private sealed class RecordingHttpMessageHandler : HttpMessageHandler

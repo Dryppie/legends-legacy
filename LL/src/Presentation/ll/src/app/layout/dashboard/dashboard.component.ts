@@ -1,4 +1,12 @@
-import { Component, effect, HostListener, OnInit, Signal } from '@angular/core';
+import {
+  Component,
+  effect,
+  ElementRef,
+  HostListener,
+  OnInit,
+  Signal,
+  ViewChild,
+} from '@angular/core';
 import { SidebarComponent } from './sidebar/sidebar.component';
 import { RouterOutlet } from '@angular/router';
 import { NgClass, NgIf } from '@angular/common';
@@ -8,6 +16,43 @@ import { CharacterActionsStateService } from '../../core/services/api/character-
 import { GameBootstrapStateService } from '../../core/services/api/game-bootstrap/game-bootstrap-state.service';
 import { ChatLayoutPreferenceService } from '../../core/services/client-side/chat-layout/chat-layout-preference.service';
 import { GameHeaderComponent } from './game-header/game-header.component';
+
+export interface FloatingDrawerPosition {
+  left: number;
+  verticalOffset: number;
+  verticalAnchor: 'top' | 'bottom';
+}
+
+export function getFloatingDrawerVerticalAnchor(
+  drawerTop: number,
+  drawerBottom: number,
+  viewportHeight: number,
+): 'top' | 'bottom' {
+  return drawerTop <= viewportHeight - drawerBottom ? 'top' : 'bottom';
+}
+
+export function clampFloatingDrawerPosition(
+  position: FloatingDrawerPosition,
+  drawerWidth: number,
+  drawerHeight: number,
+  viewportWidth: number,
+  viewportHeight: number,
+  margin = 8,
+): FloatingDrawerPosition {
+  const maxLeft = Math.max(margin, viewportWidth - drawerWidth - margin);
+  const maxVerticalOffset = Math.max(
+    margin,
+    viewportHeight - drawerHeight - margin,
+  );
+  return {
+    left: Math.min(Math.max(position.left, margin), maxLeft),
+    verticalOffset: Math.min(
+      Math.max(position.verticalOffset, margin),
+      maxVerticalOffset,
+    ),
+    verticalAnchor: position.verticalAnchor,
+  };
+}
 
 @Component({
   selector: 'app-dashboard',
@@ -30,6 +75,10 @@ export class DashboardComponent implements OnInit {
   private static readonly sidebarSwipeIntentDistance = 10;
   private static readonly sidebarSwipeStartInset = 24;
   private static readonly sidebarSwipeEndInset = 112;
+  private static readonly floatingDrawerMargin = 8;
+
+  @ViewChild('floatingChatDrawer')
+  private floatingChatDrawer?: ElementRef<HTMLElement>;
 
   isSidebarOpen = false;
   isScreenSmall = false;
@@ -37,6 +86,7 @@ export class DashboardComponent implements OnInit {
   isChatOpenDesktop = true; // open by default on ≥ lg
   isFloatingDrawerOpen = false;
   isFloatingDrawerTall = false;
+  floatingDrawerPosition: FloatingDrawerPosition | null = null;
   isFloatingChatOpen = false;
   isMobileChatExpanded = false;
   isSidebarSwiping = false;
@@ -52,6 +102,10 @@ export class DashboardComponent implements OnInit {
   private sidebarSwipeStartY = 0;
   private sidebarSwipeStartTime = 0;
   private sidebarSwipeStartedOpen = false;
+  private floatingDrawerDragPointerId: number | null = null;
+  private floatingDrawerDragStartX = 0;
+  private floatingDrawerDragStartY = 0;
+  private floatingDrawerDragStartPosition: FloatingDrawerPosition | null = null;
 
   constructor(
     private readonly state: CharacterActionsStateService,
@@ -79,6 +133,7 @@ export class DashboardComponent implements OnInit {
   @HostListener('window:resize')
   onResize() {
     this.checkScreenSize();
+    this.constrainFloatingDrawer();
   }
 
   checkScreenSize() {
@@ -221,6 +276,7 @@ export class DashboardComponent implements OnInit {
   toggleChat(): void {
     if (this.chatLayout() === 'floating') {
       this.isFloatingDrawerOpen = !this.isFloatingDrawerOpen;
+      this.constrainFloatingDrawerAfterResize();
       return;
     }
 
@@ -231,6 +287,102 @@ export class DashboardComponent implements OnInit {
 
     this.closeSidebar();
     this.isFloatingChatOpen = !this.isFloatingChatOpen;
+  }
+
+  setFloatingDrawerCollapsed(collapsed: boolean): void {
+    this.isFloatingDrawerOpen = !collapsed;
+    this.constrainFloatingDrawerAfterResize();
+  }
+
+  setFloatingDrawerTall(tall: boolean): void {
+    this.isFloatingDrawerTall = tall;
+    this.constrainFloatingDrawerAfterResize();
+  }
+
+  startFloatingDrawerDrag(event: PointerEvent): void {
+    const drawer = this.floatingChatDrawer?.nativeElement;
+    if (!drawer || (event.pointerType === 'mouse' && event.button !== 0)) {
+      return;
+    }
+
+    const rect = drawer.getBoundingClientRect();
+    const verticalAnchor =
+      this.floatingDrawerPosition?.verticalAnchor ?? 'bottom';
+    this.floatingDrawerDragPointerId = event.pointerId;
+    this.floatingDrawerDragStartX = event.clientX;
+    this.floatingDrawerDragStartY = event.clientY;
+    this.floatingDrawerDragStartPosition = {
+      left: rect.left,
+      verticalOffset:
+        verticalAnchor === 'top' ? rect.top : window.innerHeight - rect.bottom,
+      verticalAnchor,
+    };
+    this.floatingDrawerPosition = this.floatingDrawerDragStartPosition;
+  }
+
+  moveFloatingDrawer(event: PointerEvent): void {
+    if (
+      this.floatingDrawerDragPointerId !== event.pointerId ||
+      !this.floatingDrawerDragStartPosition
+    ) {
+      return;
+    }
+
+    const drawer = this.floatingChatDrawer?.nativeElement;
+    if (!drawer) return;
+
+    const rect = drawer.getBoundingClientRect();
+    this.floatingDrawerPosition = clampFloatingDrawerPosition(
+      {
+        left:
+          this.floatingDrawerDragStartPosition.left +
+          event.clientX -
+          this.floatingDrawerDragStartX,
+        verticalOffset:
+          this.floatingDrawerDragStartPosition.verticalOffset +
+          (this.floatingDrawerDragStartPosition.verticalAnchor === 'top'
+            ? event.clientY - this.floatingDrawerDragStartY
+            : this.floatingDrawerDragStartY - event.clientY),
+        verticalAnchor: this.floatingDrawerDragStartPosition.verticalAnchor,
+      },
+      rect.width,
+      rect.height,
+      window.innerWidth,
+      window.innerHeight,
+      DashboardComponent.floatingDrawerMargin,
+    );
+  }
+
+  endFloatingDrawerDrag(event: PointerEvent): void {
+    if (this.floatingDrawerDragPointerId !== event.pointerId) return;
+
+    const drawer = this.floatingChatDrawer?.nativeElement;
+    if (drawer) {
+      const rect = drawer.getBoundingClientRect();
+      const verticalAnchor = getFloatingDrawerVerticalAnchor(
+        rect.top,
+        rect.bottom,
+        window.innerHeight,
+      );
+      this.floatingDrawerPosition = clampFloatingDrawerPosition(
+        {
+          left: rect.left,
+          verticalOffset:
+            verticalAnchor === 'top'
+              ? rect.top
+              : window.innerHeight - rect.bottom,
+          verticalAnchor,
+        },
+        rect.width,
+        rect.height,
+        window.innerWidth,
+        window.innerHeight,
+        DashboardComponent.floatingDrawerMargin,
+      );
+    }
+
+    this.floatingDrawerDragPointerId = null;
+    this.floatingDrawerDragStartPosition = null;
   }
 
   openSidebar() {
@@ -262,6 +414,25 @@ export class DashboardComponent implements OnInit {
     this.isSidebarSwiping = false;
     this.sidebarSwipeOffset = 0;
     this.resetSidebarSwipePointer();
+  }
+
+  private constrainFloatingDrawer(): void {
+    const drawer = this.floatingChatDrawer?.nativeElement;
+    if (!drawer || !this.floatingDrawerPosition) return;
+
+    const rect = drawer.getBoundingClientRect();
+    this.floatingDrawerPosition = clampFloatingDrawerPosition(
+      this.floatingDrawerPosition,
+      rect.width,
+      rect.height,
+      window.innerWidth,
+      window.innerHeight,
+      DashboardComponent.floatingDrawerMargin,
+    );
+  }
+
+  private constrainFloatingDrawerAfterResize(): void {
+    setTimeout(() => this.constrainFloatingDrawer(), 220);
   }
 
   private updateSidebarSwipePosition(

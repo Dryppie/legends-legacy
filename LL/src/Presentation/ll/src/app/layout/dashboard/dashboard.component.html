@@ -161,12 +161,29 @@
 </div>
 
 <aside
+  #floatingChatDrawer
   *ngIf="
     chatLayout() === 'floating' &&
     !isScreenSmall &&
     !(isScreenSmall && isSidebarOpen)
   "
   class="fixed bottom-20 left-3 right-3 z-40 max-h-[calc(100dvh-6rem)] overflow-hidden rounded-lg shadow-2xl shadow-black/70 transition-[height] duration-200 sm:bottom-4 sm:left-auto sm:right-4 sm:max-h-[calc(100dvh-2rem)] sm:w-[22rem] 2xl:right-6 2xl:w-96"
+  [style.left.px]="floatingDrawerPosition?.left"
+  [style.top]="
+    floatingDrawerPosition
+      ? floatingDrawerPosition.verticalAnchor === 'top'
+        ? floatingDrawerPosition.verticalOffset + 'px'
+        : 'auto'
+      : null
+  "
+  [style.bottom]="
+    floatingDrawerPosition
+      ? floatingDrawerPosition.verticalAnchor === 'bottom'
+        ? floatingDrawerPosition.verticalOffset + 'px'
+        : 'auto'
+      : null
+  "
+  [style.right]="floatingDrawerPosition ? 'auto' : null"
   [ngClass]="
     isFloatingDrawerOpen
       ? isFloatingDrawerTall
@@ -181,8 +198,11 @@
     [collapsed]="!isFloatingDrawerOpen"
     [drawer]="true"
     [drawerTall]="isFloatingDrawerTall"
-    (collapsedChange)="isFloatingDrawerOpen = !$event"
-    (drawerTallChange)="isFloatingDrawerTall = $event"
+    (collapsedChange)="setFloatingDrawerCollapsed($event)"
+    (drawerTallChange)="setFloatingDrawerTall($event)"
+    (drawerDragStart)="startFloatingDrawerDrag($event)"
+    (drawerDragMove)="moveFloatingDrawer($event)"
+    (drawerDragEnd)="endFloatingDrawerDrag($event)"
   ></app-chat>
 </aside>
 
