@@ -542,6 +542,7 @@
             <button
               type="button"
               class="ll-button px-2 py-1 text-xs"
+              [disabled]="essenceState.savingLoadout()"
               (click)="essenceState.newLoadout()"
             >
               + New
@@ -557,6 +558,7 @@
                 'border-primary bg-primary/10':
                   essenceState.selectedLoadoutId() === loadout.id,
               }"
+              [disabled]="essenceState.savingLoadout()"
               (click)="selectLoadout(loadout)"
             >
               <div class="flex items-center justify-between gap-2">
@@ -573,6 +575,7 @@
             <input
               class="ll-input ll-input-compact w-full"
               [ngModel]="essenceState.draftLoadoutName()"
+              [disabled]="essenceState.savingLoadout()"
               (ngModelChange)="essenceState.setDraftLoadoutName($event)"
             />
           </label>
@@ -580,7 +583,7 @@
           <div
             class="ll-card mb-3 flex items-center justify-between px-3 py-2 text-xs"
           >
-            <span class="text-zinc-400">Draft slots</span>
+            <span class="text-zinc-400">Loadout slots</span>
             <span class="text-primary">
               {{ draftSlotsFilled() }} / {{ essenceState.slotIndexes().length }}
               filled
@@ -618,6 +621,7 @@
                     ' from slot ' +
                     (slotIndex + 1)
                   "
+                  [disabled]="essenceState.savingLoadout()"
                   (click)="clearDraftSlot(slotIndex)"
                 >
                   Remove
@@ -650,13 +654,14 @@
               [disabled]="!essenceState.canSaveDraft()"
               (click)="saveLoadout()"
             >
-              Save
+              Save name
             </button>
             <button
               type="button"
               class="ll-button"
               data-tour="essence-loadout-activate"
               [disabled]="
+                essenceState.savingLoadout() ||
                 !essenceState.selectedLoadoutId() ||
                 essenceState.selectedLoadout()?.isActive
               "
@@ -667,7 +672,10 @@
             <button
               type="button"
               class="ll-button"
-              [disabled]="!essenceState.selectedLoadoutId()"
+              [disabled]="
+                essenceState.savingLoadout() ||
+                !essenceState.selectedLoadoutId()
+              "
               (click)="essenceState.deleteSelectedLoadout()"
             >
               Delete

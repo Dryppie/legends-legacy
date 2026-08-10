@@ -42,6 +42,7 @@ export class EssenceStateService {
   private readonly _selectedInventoryItemId = signal<string | null>(null);
   private readonly _draftLoadoutName = signal('Default');
   private readonly _draftSlots = signal<(string | null)[]>([]);
+  private readonly _savingLoadout = signal(false);
   private readonly _loading = signal(false);
   private readonly _spendingDust = signal(false);
   private readonly _error = signal<string | null>(null);
@@ -93,6 +94,7 @@ export class EssenceStateService {
   readonly selectedLoadoutId = computed(() => this._selectedLoadoutId());
   readonly draftLoadoutName = computed(() => this._draftLoadoutName());
   readonly draftSlots = computed(() => this._draftSlots());
+  readonly savingLoadout = computed(() => this._savingLoadout());
   readonly loading = computed(() => this._loading());
   readonly spendingDust = computed(() => this._spendingDust());
   readonly error = computed(() => this._error());
@@ -221,6 +223,16 @@ export class EssenceStateService {
     );
   });
 
+  readonly hasDraftNameChanges = computed(() => {
+    if (!this._loadouts()) return false;
+
+    const draftName = this._draftLoadoutName().trim();
+    const selectedLoadout = this.selectedLoadout();
+    return selectedLoadout
+      ? draftName !== selectedLoadout.name
+      : draftName !== NEW_LOADOUT_NAME;
+  });
+
   readonly canSaveDraft = computed(() => {
     const name = this._draftLoadoutName().trim();
     const loadouts = this._loadouts();
@@ -231,9 +243,8 @@ export class EssenceStateService {
 
     return (
       !!name &&
-      this.hasDraftChanges() &&
-      !this.hasDuplicateDraftEssences() &&
-      !this.hasDuplicateDraftCreatureSources() &&
+      this.hasDraftNameChanges() &&
+      !this._savingLoadout() &&
       (!!selectedId || canCreate)
     );
   });
@@ -278,7 +289,7 @@ export class EssenceStateService {
     this._activeView.set(view);
   }
 
-  refresh(): void {
+  refresh(preserveLoadoutDraft = false): void {
     this._loading.set(true);
     this._error.set(null);
     const requestVersion = this.resetVersion;
@@ -291,12 +302,16 @@ export class EssenceStateService {
     }).subscribe({
       next: ({ archive, loadouts, creatureArchive, codex }) => {
         if (requestVersion !== this.resetVersion) return;
+        const shouldPreserveLoadoutDraft =
+          preserveLoadoutDraft &&
+          this.hasDraftChanges() &&
+          this.canPreserveLoadoutDraft(loadouts);
         this._archive.set(archive);
         this._loadouts.set(loadouts);
         this._creatureArchive.set(creatureArchive);
         this._codex.set(codex);
         this.ensureSelectedEssence(archive);
-        this.ensureSelectedLoadout(loadouts);
+        this.ensureSelectedLoadout(loadouts, shouldPreserveLoadoutDraft);
         this._loading.set(false);
       },
       error: (error) => {
@@ -335,6 +350,7 @@ export class EssenceStateService {
     this._selectedInventoryItemId.set(null);
     this._draftLoadoutName.set('Default');
     this._draftSlots.set([]);
+    this._savingLoadout.set(false);
     this._loading.set(false);
     this._spendingDust.set(false);
     this._error.set(null);
@@ -536,8 +552,32 @@ export class EssenceStateService {
   }
 
   saveDraftLoadout(activateAfterSave = false): void {
-    const name = this._draftLoadoutName().trim();
     if (!this.canSaveDraft()) return;
+
+    this.persistDraftLoadout(activateAfterSave, false);
+  }
+
+  saveDraftSlots(activateAfterSave = false): void {
+    if (!this.canPersistDraftLoadout()) return;
+
+    this.persistDraftLoadout(activateAfterSave, true);
+  }
+
+  private persistDraftLoadout(
+    activateAfterSave: boolean,
+    restoreSavedDraftOnError: boolean,
+  ): void {
+    const selectedLoadout = this.selectedLoadout();
+    const pendingDraftName = this._draftLoadoutName();
+    const preservePendingName =
+      restoreSavedDraftOnError &&
+      !!selectedLoadout &&
+      this.hasDraftNameChanges();
+    const name = preservePendingName
+      ? selectedLoadout.name
+      : pendingDraftName.trim();
+    this._savingLoadout.set(true);
+    this._error.set(null);
 
     const slots: SaveEssenceLoadoutSlotDto[] = this._draftSlots()
       .map((playerEssenceId, slotIndex) => ({ slotIndex, playerEssenceId }))
@@ -551,34 +591,85 @@ export class EssenceStateService {
 
     save.subscribe({
       next: (loadout) => {
-        this._selectedLoadoutId.set(loadout.id);
+        this.applySavedLoadout(loadout);
+        if (preservePendingName) {
+          this._draftLoadoutName.set(pendingDraftName);
+        }
 
         if (activateAfterSave && !loadout.isActive) {
           this.essencesService.activateLoadout(loadout.id).subscribe({
             next: () => {
+              this._savingLoadout.set(false);
               this.characterState.markOverviewDirty();
               this.refresh();
               this.questState.refreshAfterOutboxProgress();
             },
-            error: (error) =>
+            error: (error) => {
+              this._savingLoadout.set(false);
               this._error.set(
                 error?.message ?? 'Failed to activate Essence loadout',
-              ),
+              );
+            },
           });
           return;
         }
 
+        this._savingLoadout.set(false);
         if (loadout.isActive) {
           this.characterState.markOverviewDirty();
         }
-        this.refresh();
         if (activateAfterSave) {
           this.questState.refreshAfterOutboxProgress();
         }
       },
-      error: (error) =>
-        this._error.set(error?.message ?? 'Failed to save Essence loadout'),
+      error: (error) => {
+        this._savingLoadout.set(false);
+        if (restoreSavedDraftOnError) {
+          const selectedLoadout = this.selectedLoadout();
+          selectedLoadout
+            ? this.selectLoadout(selectedLoadout)
+            : this.newLoadout();
+          if (preservePendingName) {
+            this._draftLoadoutName.set(pendingDraftName);
+          }
+        }
+        this._error.set(error?.message ?? 'Failed to save Essence loadout');
+      },
     });
+  }
+
+  private canPersistDraftLoadout(): boolean {
+    const loadouts = this._loadouts();
+    const selectedId = this._selectedLoadoutId();
+    if (!loadouts || this._savingLoadout()) return false;
+    const persistedName =
+      this.selectedLoadout()?.name ?? this._draftLoadoutName().trim();
+
+    return (
+      !!persistedName &&
+      this.hasDraftChanges() &&
+      !this.hasDuplicateDraftEssences() &&
+      !this.hasDuplicateDraftCreatureSources() &&
+      (!!selectedId || loadouts.loadouts.length < loadouts.limit)
+    );
+  }
+
+  private applySavedLoadout(loadout: EssenceLoadoutDto): void {
+    const loadouts = this._loadouts();
+    if (loadouts) {
+      const existingIndex = loadouts.loadouts.findIndex(
+        (existing) => existing.id === loadout.id,
+      );
+      const savedLoadouts = [...loadouts.loadouts];
+      if (existingIndex >= 0) {
+        savedLoadouts[existingIndex] = loadout;
+      } else {
+        savedLoadouts.push(loadout);
+      }
+      this._loadouts.set({ ...loadouts, loadouts: savedLoadouts });
+    }
+
+    this.selectLoadout(loadout);
   }
 
   activateSelectedLoadout(): void {
@@ -685,7 +776,12 @@ export class EssenceStateService {
       });
   }
 
-  private ensureSelectedLoadout(loadouts: EssenceLoadoutsDto): void {
+  private ensureSelectedLoadout(
+    loadouts: EssenceLoadoutsDto,
+    preserveDraft = false,
+  ): void {
+    if (preserveDraft) return;
+
     const selectedLoadout =
       loadouts.loadouts.find(
         (loadout) => loadout.id === this._selectedLoadoutId(),
@@ -695,6 +791,14 @@ export class EssenceStateService {
       null;
 
     selectedLoadout ? this.selectLoadout(selectedLoadout) : this.newLoadout();
+  }
+
+  private canPreserveLoadoutDraft(loadouts: EssenceLoadoutsDto): boolean {
+    const selectedLoadoutId = this._selectedLoadoutId();
+    return (
+      selectedLoadoutId === null ||
+      loadouts.loadouts.some((loadout) => loadout.id === selectedLoadoutId)
+    );
   }
 
   private getLoadoutDraftSlots(loadout: EssenceLoadoutDto): (string | null)[] {

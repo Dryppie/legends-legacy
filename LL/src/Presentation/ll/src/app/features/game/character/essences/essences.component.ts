@@ -341,7 +341,16 @@ export class EssencesComponent implements OnInit {
   }
 
   public ngOnInit(): void {
-    this.essenceState.refresh();
+    if (
+      this.essenceState.archive() &&
+      this.essenceState.loadouts() &&
+      this.essenceState.creatureArchive() &&
+      this.essenceState.codex()
+    ) {
+      return;
+    }
+
+    this.essenceState.refresh(true);
   }
 
   public selectView(view: string): void {
@@ -532,9 +541,12 @@ export class EssencesComponent implements OnInit {
   }
 
   public toggleEssenceSlot(essence: PlayerEssenceDto): void {
+    if (this.essenceState.savingLoadout()) return;
+
     const equippedSlot = this.equippedDraftSlot(essence);
     if (equippedSlot !== null) {
       this.essenceState.setDraftSlot(equippedSlot, null);
+      this.essenceState.saveDraftSlots();
       return;
     }
 
@@ -542,6 +554,7 @@ export class EssencesComponent implements OnInit {
     if (slotIndex === null) return;
 
     this.essenceState.setDraftSlot(slotIndex, essence.id);
+    this.essenceState.saveDraftSlots();
   }
 
   public isOnboardingStarterAttunement(essence: PlayerEssenceDto): boolean {
@@ -554,12 +567,18 @@ export class EssencesComponent implements OnInit {
   }
 
   public equipOnboardingStarterEssence(essence: PlayerEssenceDto): void {
-    if (this.equippedDraftSlot(essence) !== null) return;
+    if (
+      this.essenceState.savingLoadout() ||
+      this.equippedDraftSlot(essence) !== null
+    ) {
+      return;
+    }
 
     const slotIndex = this.nextEquipSlot(essence);
     if (slotIndex === null) return;
 
     this.essenceState.setDraftSlot(slotIndex, essence.id);
+    this.essenceState.saveDraftSlots(true);
 
     if (window.matchMedia('(max-width: 639px)').matches) {
       this.mobileLoadoutOpen.set(true);
@@ -577,24 +596,7 @@ export class EssencesComponent implements OnInit {
   }
 
   public saveLoadout(): void {
-    const starterEssenceDefinitionId =
-      this.onboardingStarterEssenceDefinitionId();
-    const hasOnboardingStarterDrafted = this.essenceState
-      .draftSlots()
-      .some((playerEssenceId) =>
-        this.essenceState
-          .essenceOptions()
-          .some(
-            (essence) =>
-              essence.id === playerEssenceId &&
-              essence.essenceDefinitionId === starterEssenceDefinitionId,
-          ),
-      );
-
-    this.essenceState.saveDraftLoadout(
-      this.questState.pinnedObjective()?.type === 'EssenceEquipped' &&
-        hasOnboardingStarterDrafted,
-    );
+    this.essenceState.saveDraftLoadout();
   }
 
   private onboardingStarterEssenceDefinitionId(): string {
@@ -614,8 +616,9 @@ export class EssencesComponent implements OnInit {
 
   public canToggleEssenceSlot(essence: PlayerEssenceDto): boolean {
     return (
-      this.equippedDraftSlot(essence) !== null ||
-      this.nextEquipSlot(essence) !== null
+      !this.essenceState.savingLoadout() &&
+      (this.equippedDraftSlot(essence) !== null ||
+        this.nextEquipSlot(essence) !== null)
     );
   }
 
@@ -637,6 +640,8 @@ export class EssencesComponent implements OnInit {
   }
 
   public equipButtonText(essence: PlayerEssenceDto): string {
+    if (this.essenceState.savingLoadout()) return 'Saving...';
+
     const equippedSlot = this.equippedDraftSlot(essence);
     if (equippedSlot !== null) return `Remove from Slot ${equippedSlot + 1}`;
     if (!this.essenceState.loadouts()) return 'Loading slots';
@@ -665,7 +670,10 @@ export class EssencesComponent implements OnInit {
   }
 
   public clearDraftSlot(slotIndex: number): void {
+    if (this.essenceState.savingLoadout()) return;
+
     this.essenceState.setDraftSlot(slotIndex, null);
+    this.essenceState.saveDraftSlots();
   }
 
   public equippedDraftSlot(essence: PlayerEssenceDto): number | null {
@@ -700,15 +708,9 @@ export class EssencesComponent implements OnInit {
 
   public loadoutSaveHint(): string {
     if (!this.essenceState.loadouts()) return 'Loading loadout slots.';
+    if (this.essenceState.savingLoadout()) return 'Saving loadout changes...';
     if (this.essenceState.canSaveDraft()) return '';
-    if (!this.essenceState.hasDraftChanges()) return 'No unsaved changes.';
     if (!this.essenceState.draftLoadoutName().trim()) return 'Name required.';
-    if (this.essenceState.hasDuplicateDraftEssences()) {
-      return 'Each Essence can only be assigned once.';
-    }
-    if (this.essenceState.hasDuplicateDraftCreatureSources()) {
-      return 'Only one Essence from each creature can be active.';
-    }
     if (
       !this.essenceState.selectedLoadoutId() &&
       (this.essenceState.loadouts()?.loadouts?.length ?? 0) >=
@@ -716,7 +718,7 @@ export class EssencesComponent implements OnInit {
     ) {
       return 'Loadout limit reached.';
     }
-    return 'Select at least one valid change.';
+    return 'Essence changes save automatically.';
   }
 
   public trackEssence(_: number, essence: PlayerEssenceDto): string {

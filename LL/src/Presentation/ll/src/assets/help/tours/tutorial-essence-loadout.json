@@ -14,17 +14,7 @@
     "waitForEnabled": true,
     "targetTimeoutMs": 5000,
     "title": "2. Equip your Essence",
-    "description": "Equip your first Essence. It will provide its abilities during combat after you save the loadout.",
-    "position": "left"
-  },
-  {
-    "kind": "click",
-    "element": "[data-tour=essence-loadout-save]",
-    "actionSelector": "[data-tour=essence-loadout-save]",
-    "waitForEnabled": true,
-    "targetTimeoutMs": 5000,
-    "title": "3. Save your loadout",
-    "description": "Your draft has unsaved changes. Save the loadout to attune the Essence and make its abilities available in combat.",
+    "description": "Equip your first Essence. Loadout slot changes save automatically, and this first loadout will be activated for combat.",
     "position": "left"
   }
 ]

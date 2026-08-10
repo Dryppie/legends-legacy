@@ -12,7 +12,7 @@
     },
     {
       "heading": "Loadouts",
-      "body": "Only equipped Essences in your active Loadout are used in combat."
+      "body": "Only equipped Essences in your active Loadout are used in combat. Equipping and removing Essences saves automatically; use Save name after renaming a loadout."
     },
     {
       "heading": "Creature Archive",
