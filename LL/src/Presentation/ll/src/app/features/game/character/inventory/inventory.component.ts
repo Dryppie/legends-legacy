@@ -1,4 +1,4 @@
-import { NgClass, NgFor, NgIf } from '@angular/common';
+import { DecimalPipe, NgClass, NgFor, NgIf } from '@angular/common';
 import {
   Component,
   computed,
@@ -42,6 +42,7 @@ type MobileInventoryView = 'Inventory' | 'Equipment';
     NgFor,
     NgIf,
     NgClass,
+    DecimalPipe,
     FilterTabsComponent,
     InventoryItemComponent,
     DefaultHeaderComponent,

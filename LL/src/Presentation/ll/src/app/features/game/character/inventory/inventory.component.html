@@ -169,7 +169,6 @@
                 isOnboardingGatheringTool(inventoryItem) ? 'true' : null
               "
               [inventoryItem]="inventoryItem"
-              [showEquipmentSummary]="true"
             ></app-inventory-item>
 
             <ng-container *ngIf="activeTab === 'Equipment' || isScrapMode">
@@ -185,6 +184,19 @@
                   [ngClass]="equipmentRarityClass(inventoryItem)"
                 >
                   {{ equipment.rarity }}
+                </span>
+                <span
+                  *ngIf="isBrowseMode && activeTab === 'Equipment'"
+                  class="ll-badge rounded text-primary"
+                >
+                  {{ equipment.quality }}
+                </span>
+                <span
+                  *ngIf="isBrowseMode && activeTab === 'Equipment'"
+                  class="ll-badge rounded tabular-nums text-secondary"
+                >
+                  Gear Value
+                  {{ equipment.itemBudget | number: "1.0-2" }}
                 </span>
                 <span
                   class="ll-badge rounded"

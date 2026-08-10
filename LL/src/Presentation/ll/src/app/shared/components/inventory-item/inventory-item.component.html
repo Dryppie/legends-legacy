@@ -1,18 +1,6 @@
 <div class="ll-item-row" (click)="openModal()">
   <div class="min-w-0 flex-1">
     <app-item [item]="inventoryItem.itemInstance"></app-item>
-
-    <div
-      *ngIf="showEquipmentSummary && equipment as equipmentItem"
-      class="mt-1 flex flex-wrap items-center gap-1.5"
-    >
-      <span class="ll-item-chip ll-item-chip-accent">
-        Quality: {{ equipmentItem.quality }}
-      </span>
-      <span class="ll-item-chip tabular-nums">
-        Gear Value: {{ equipmentItem.itemBudget | number: "1.0-2" }}
-      </span>
-    </div>
   </div>
 
   <div *ngIf="!isEquipment" class="ll-item-chip">
