@@ -1,4 +1,3 @@
-using Application.Interfaces.Services.LL;
 using Application.Interfaces.Services.LL.Guilds;
 using Application.Interfaces.Outbox;
 using Application.Interfaces.WebSockets;
@@ -17,20 +16,17 @@ public record WithdrawGuildVaultItemCommand(Guid CharacterId, Guid VaultItemId) 
 public class WithdrawGuildVaultItemCommandHandler : IRequestHandler<WithdrawGuildVaultItemCommand, Response<bool>>
 {
     private readonly IGuildVaultService _vault;
-    private readonly IGuildService _guild;
     private readonly IGameEventPublisher _events;
     private readonly IGameEventOutbox _outbox;
     private readonly IMapper _mapper;
 
     public WithdrawGuildVaultItemCommandHandler(
         IGuildVaultService vault,
-        IGuildService guild,
         IGameEventPublisher events,
         IGameEventOutbox outbox,
         IMapper mapper)
     {
         _vault = vault;
-        _guild = guild;
         _events = events;
         _outbox = outbox;
         _mapper = mapper;
@@ -38,11 +34,13 @@ public class WithdrawGuildVaultItemCommandHandler : IRequestHandler<WithdrawGuil
 
     public async Task<Response<bool>> Handle(WithdrawGuildVaultItemCommand request, CancellationToken cancellationToken)
     {
-        var guild = await _guild.GetGuildForMemberAsync(request.CharacterId, cancellationToken);
         var result = await _vault.WithdrawAsync(request.CharacterId, request.VaultItemId, cancellationToken);
         if (!result.Succeeded) return Response<bool>.Fail(result.Error ?? "Failed to withdraw equipment.");
 
         var mutation = result.Value!;
+        var equipment = _mapper.Map<EquipmentInstanceDto>(mutation.Equipment);
+        var messageId = Guid.NewGuid();
+        var sentAt = DateTimeOffset.UtcNow;
         await _outbox.EnqueueAsync(
             GameEventTypes.GuildVaultChatMessage,
             new GuildVaultChatMessagePayload(
@@ -50,15 +48,27 @@ public class WithdrawGuildVaultItemCommandHandler : IRequestHandler<WithdrawGuil
                 mutation.CharacterId,
                 mutation.CharacterName,
                 "withdrew",
-                _mapper.Map<EquipmentInstanceDto>(mutation.Equipment),
-                Guid.NewGuid(),
-                DateTimeOffset.UtcNow),
+                equipment,
+                messageId,
+                sentAt),
             request.CharacterId,
             null,
             cancellationToken);
 
-        if (guild is not null)
-            await _events.PublishAsync(new Audience.Guild(guild.Id), new GuildStateChangedMsg(guild.Id));
+        await _events.PublishAsync(
+            new Audience.Guild(mutation.GuildId),
+            new GuildVaultChatMessageMsg(
+                mutation.GuildId,
+                messageId,
+                mutation.CharacterId,
+                mutation.CharacterName,
+                "withdrew",
+                equipment,
+                sentAt));
+
+        await _events.PublishAsync(
+            new Audience.Guild(mutation.GuildId),
+            new GuildStateChangedMsg(mutation.GuildId));
         return Response<bool>.Success(true);
     }
 }

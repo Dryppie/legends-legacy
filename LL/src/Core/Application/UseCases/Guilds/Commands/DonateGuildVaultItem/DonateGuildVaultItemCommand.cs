@@ -1,5 +1,4 @@
 using Application.Interfaces.Services.LL.Guilds;
-using Application.Interfaces.Services.LL;
 using Application.Interfaces.Outbox;
 using Application.Interfaces.WebSockets;
 using Application.MediatR.Markers;
@@ -18,31 +17,30 @@ public class DonateGuildVaultItemCommandHandler : IRequestHandler<DonateGuildVau
 {
     private readonly IGuildVaultService _vault;
     private readonly IGameEventPublisher _events;
-    private readonly IGuildService _guild;
     private readonly IGameEventOutbox _outbox;
     private readonly IMapper _mapper;
 
     public DonateGuildVaultItemCommandHandler(
         IGuildVaultService vault,
         IGameEventPublisher events,
-        IGuildService guild,
         IGameEventOutbox outbox,
         IMapper mapper)
     {
         _vault = vault;
         _events = events;
-        _guild = guild;
         _outbox = outbox;
         _mapper = mapper;
     }
 
     public async Task<Response<bool>> Handle(DonateGuildVaultItemCommand request, CancellationToken cancellationToken)
     {
-        var guild = await _guild.GetGuildForMemberAsync(request.CharacterId, cancellationToken);
         var result = await _vault.DonateAsync(request.CharacterId, request.EquipmentInstanceId, cancellationToken);
         if (!result.Succeeded) return Response<bool>.Fail(result.Error ?? "Failed to donate equipment.");
 
         var mutation = result.Value!;
+        var equipment = _mapper.Map<EquipmentInstanceDto>(mutation.Equipment);
+        var messageId = Guid.NewGuid();
+        var sentAt = DateTimeOffset.UtcNow;
         await _outbox.EnqueueAsync(
             GameEventTypes.GuildVaultChatMessage,
             new GuildVaultChatMessagePayload(
@@ -50,15 +48,27 @@ public class DonateGuildVaultItemCommandHandler : IRequestHandler<DonateGuildVau
                 mutation.CharacterId,
                 mutation.CharacterName,
                 "donated",
-                _mapper.Map<EquipmentInstanceDto>(mutation.Equipment),
-                Guid.NewGuid(),
-                DateTimeOffset.UtcNow),
+                equipment,
+                messageId,
+                sentAt),
             request.CharacterId,
             null,
             cancellationToken);
 
-        if (guild is not null)
-            await _events.PublishAsync(new Audience.Guild(guild.Id), new GuildStateChangedMsg(guild.Id));
+        await _events.PublishAsync(
+            new Audience.Guild(mutation.GuildId),
+            new GuildVaultChatMessageMsg(
+                mutation.GuildId,
+                messageId,
+                mutation.CharacterId,
+                mutation.CharacterName,
+                "donated",
+                equipment,
+                sentAt));
+
+        await _events.PublishAsync(
+            new Audience.Guild(mutation.GuildId),
+            new GuildStateChangedMsg(mutation.GuildId));
         return Response<bool>.Success(true);
     }
 }

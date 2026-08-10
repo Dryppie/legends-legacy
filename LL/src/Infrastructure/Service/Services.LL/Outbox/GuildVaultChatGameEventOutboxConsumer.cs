@@ -1,7 +1,6 @@
 using System.Net.Http.Json;
 using System.Text.Json;
 using Application.Interfaces.Outbox;
-using Application.UseCases.Equipments.Dtos;
 using Application.UseCases.Outbox;
 using Domain.Models.Outbox;
 using Microsoft.Extensions.Options;
@@ -24,8 +23,11 @@ public sealed class GuildVaultChatGameEventOutboxConsumer(
 
     public async Task HandleAsync(GameEventOutboxMessage message, CancellationToken cancellationToken)
     {
-        var payload = JsonSerializer.Deserialize<GuildVaultChatMessagePayload>(message.PayloadJson, jsonOptions)
+        var payload = JsonSerializer.Deserialize<GuildVaultChatMessageEnvelope>(message.PayloadJson, jsonOptions)
             ?? throw new InvalidOperationException("Guild vault chat payload is invalid.");
+
+        if (payload.Equipment.ValueKind != JsonValueKind.Object)
+            throw new InvalidOperationException("Guild vault chat equipment snapshot is invalid.");
 
         if (string.IsNullOrWhiteSpace(_options.BaseUrl) || string.IsNullOrWhiteSpace(_options.Secret))
             throw new InvalidOperationException("System chat publishing is not configured.");
@@ -62,7 +64,16 @@ public sealed class GuildVaultChatGameEventOutboxConsumer(
         Guid ActorCharacterId,
         string ActorName,
         string Body,
-        EquipmentInstanceDto LinkedItem,
+        JsonElement LinkedItem,
+        Guid MessageId,
+        DateTimeOffset SentAt);
+
+    private sealed record GuildVaultChatMessageEnvelope(
+        Guid GuildId,
+        Guid ActorCharacterId,
+        string ActorName,
+        string Body,
+        JsonElement Equipment,
         Guid MessageId,
         DateTimeOffset SentAt);
 }
