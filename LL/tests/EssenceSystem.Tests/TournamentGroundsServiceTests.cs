@@ -179,6 +179,163 @@ public sealed class TournamentGroundsServiceTests
     }
 
     [Fact]
+    public async Task AcceptTeamInviteAsync_rejects_and_cancels_invites_when_actual_team_is_full()
+    {
+        await using var db = CreateDbContext();
+        var realtime = new CapturingGameRealtimeBroadcaster();
+        var service = CreateService(db, realtime);
+        var tournament = SeedTournament(db, TournamentStatus.RegistrationOpen);
+        var owner = SeedParticipant(db, tournament, 1600, 0);
+        var secondMember = SeedParticipant(db, tournament, 1500, 1);
+        var thirdMember = SeedParticipant(db, tournament, 1400, 2);
+        var invited = SeedParticipant(db, tournament, 1300, 3);
+        var team = SeedTeam(db, tournament, "Full Team", owner, secondMember, thirdMember);
+        team.MemberCount = 2;
+        var invite = new TournamentTeamInvite
+        {
+            Id = Guid.NewGuid(),
+            TournamentId = tournament.Id,
+            TeamId = team.Id,
+            Team = team,
+            InviterParticipantId = owner.Id,
+            InvitedParticipantId = invited.Id,
+            Status = TournamentTeamRequestStatus.Pending,
+            CreatedAtUtc = Now,
+            UpdatedAtUtc = Now
+        };
+        db.TournamentTeamInvites.Add(invite);
+        await db.SaveChangesAsync();
+
+        var result = await service.AcceptTeamInviteAsync(invited.CharacterId, invite.Id, CancellationToken.None);
+
+        Assert.NotNull(result);
+        Assert.False(result.Succeeded);
+        Assert.Contains("already full", result.ErrorMessage);
+        Assert.Equal(TournamentTeamRequestStatus.Cancelled, invite.Status);
+        Assert.Null(invited.TeamId);
+        Assert.Equal(3, team.MemberCount);
+        Assert.Contains(realtime.Events, e => e.Event == "TournamentTeamUpdated");
+    }
+
+    [Fact]
+    public async Task AcceptTeamInviteAsync_uses_actual_capacity_and_cancels_requests_when_last_slot_is_filled()
+    {
+        await using var db = CreateDbContext();
+        var service = CreateService(db);
+        var tournament = SeedTournament(db, TournamentStatus.RegistrationOpen);
+        var owner = SeedParticipant(db, tournament, 1600, 0);
+        var secondMember = SeedParticipant(db, tournament, 1500, 1);
+        var invited = SeedParticipant(db, tournament, 1400, 2);
+        var waitingInvitee = SeedParticipant(db, tournament, 1300, 3);
+        var waitingApplicant = SeedParticipant(db, tournament, 1200, 4);
+        var team = SeedTeam(db, tournament, "One Slot", owner, secondMember);
+        team.MemberCount = 3;
+        var acceptedInvite = new TournamentTeamInvite
+        {
+            Id = Guid.NewGuid(),
+            TournamentId = tournament.Id,
+            TeamId = team.Id,
+            Team = team,
+            InviterParticipantId = owner.Id,
+            InvitedParticipantId = invited.Id,
+            Status = TournamentTeamRequestStatus.Pending,
+            CreatedAtUtc = Now,
+            UpdatedAtUtc = Now
+        };
+        var waitingInvite = new TournamentTeamInvite
+        {
+            Id = Guid.NewGuid(),
+            TournamentId = tournament.Id,
+            TeamId = team.Id,
+            Team = team,
+            InviterParticipantId = owner.Id,
+            InvitedParticipantId = waitingInvitee.Id,
+            Status = TournamentTeamRequestStatus.Pending,
+            CreatedAtUtc = Now,
+            UpdatedAtUtc = Now
+        };
+        var waitingApplication = new TournamentTeamApplication
+        {
+            Id = Guid.NewGuid(),
+            TournamentId = tournament.Id,
+            TeamId = team.Id,
+            Team = team,
+            ApplicantParticipantId = waitingApplicant.Id,
+            Status = TournamentTeamRequestStatus.Pending,
+            CreatedAtUtc = Now,
+            UpdatedAtUtc = Now
+        };
+        db.TournamentTeamInvites.AddRange(acceptedInvite, waitingInvite);
+        db.TournamentTeamApplications.Add(waitingApplication);
+        await db.SaveChangesAsync();
+
+        var result = await service.AcceptTeamInviteAsync(
+            invited.CharacterId,
+            acceptedInvite.Id,
+            CancellationToken.None);
+
+        Assert.NotNull(result);
+        Assert.True(result.Succeeded);
+        Assert.Equal(team.Id, invited.TeamId);
+        Assert.Equal(3, team.MemberCount);
+        Assert.Equal(TournamentTeamRequestStatus.Accepted, acceptedInvite.Status);
+        Assert.Equal(TournamentTeamRequestStatus.Cancelled, waitingInvite.Status);
+        Assert.Equal(TournamentTeamRequestStatus.Cancelled, waitingApplication.Status);
+    }
+
+    [Fact]
+    public async Task AcceptTeamApplicationAsync_cancels_remaining_invites_when_last_slot_is_filled()
+    {
+        await using var db = CreateDbContext();
+        var service = CreateService(db);
+        var tournament = SeedTournament(db, TournamentStatus.RegistrationOpen);
+        var owner = SeedParticipant(db, tournament, 1600, 0);
+        var secondMember = SeedParticipant(db, tournament, 1500, 1);
+        var applicant = SeedParticipant(db, tournament, 1400, 2);
+        var invited = SeedParticipant(db, tournament, 1300, 3);
+        var team = SeedTeam(db, tournament, "Application Slot", owner, secondMember);
+        team.MemberCount = 3;
+        var acceptedApplication = new TournamentTeamApplication
+        {
+            Id = Guid.NewGuid(),
+            TournamentId = tournament.Id,
+            TeamId = team.Id,
+            Team = team,
+            ApplicantParticipantId = applicant.Id,
+            Status = TournamentTeamRequestStatus.Pending,
+            CreatedAtUtc = Now,
+            UpdatedAtUtc = Now
+        };
+        var waitingInvite = new TournamentTeamInvite
+        {
+            Id = Guid.NewGuid(),
+            TournamentId = tournament.Id,
+            TeamId = team.Id,
+            Team = team,
+            InviterParticipantId = owner.Id,
+            InvitedParticipantId = invited.Id,
+            Status = TournamentTeamRequestStatus.Pending,
+            CreatedAtUtc = Now,
+            UpdatedAtUtc = Now
+        };
+        db.TournamentTeamApplications.Add(acceptedApplication);
+        db.TournamentTeamInvites.Add(waitingInvite);
+        await db.SaveChangesAsync();
+
+        var result = await service.AcceptTeamApplicationAsync(
+            owner.CharacterId,
+            acceptedApplication.Id,
+            CancellationToken.None);
+
+        Assert.NotNull(result);
+        Assert.True(result.Succeeded);
+        Assert.Equal(team.Id, applicant.TeamId);
+        Assert.Equal(3, team.MemberCount);
+        Assert.Equal(TournamentTeamRequestStatus.Accepted, acceptedApplication.Status);
+        Assert.Equal(TournamentTeamRequestStatus.Cancelled, waitingInvite.Status);
+    }
+
+    [Fact]
     public async Task RegisterAsync_reactivates_withdrawn_participant_instead_of_inserting_duplicate()
     {
         await using var db = CreateDbContext();

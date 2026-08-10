@@ -96,13 +96,10 @@
       <div
         *ngFor="let l of filteredListings(); trackBy: trackByListing"
         (click)="selectListing(l)"
-        [attr.aria-disabled]="isOwnListing(l)"
         [ngClass]="{
           'bg-primary/20 text-white': l.id === selectedListingId,
-          'cursor-pointer hover:bg-zinc-600/30': !isOwnListing(l),
-          'cursor-not-allowed opacity-60': isOwnListing(l),
         }"
-        class="transition"
+        class="cursor-pointer transition hover:bg-zinc-600/30"
       >
         <app-market-place-listing-item
           [listing]="l"

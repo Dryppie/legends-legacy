@@ -65,9 +65,13 @@ public sealed class AcceptTournamentTeamInviteCommandHandler(ITournamentGroundsS
         CancellationToken cancellationToken)
     {
         var result = await service.AcceptTeamInviteAsync(request.CharacterId, request.InviteId, cancellationToken);
-        return result is null
-            ? Response<TournamentTeamActionResponseDto>.Fail("Tournament team invite acceptance failed.")
-            : Response<TournamentTeamActionResponseDto>.Success(mapper.Map<TournamentTeamActionResponseDto>(result));
+        if (result is null)
+            return Response<TournamentTeamActionResponseDto>.Fail("Tournament team invite acceptance failed.");
+
+        return result.Succeeded
+            ? Response<TournamentTeamActionResponseDto>.Success(mapper.Map<TournamentTeamActionResponseDto>(result))
+            : Response<TournamentTeamActionResponseDto>.Fail(
+                result.ErrorMessage ?? "Tournament team invite acceptance failed.");
     }
 }
 
@@ -101,9 +105,13 @@ public sealed class AcceptTournamentTeamApplicationCommandHandler(ITournamentGro
         CancellationToken cancellationToken)
     {
         var result = await service.AcceptTeamApplicationAsync(request.CharacterId, request.ApplicationId, cancellationToken);
-        return result is null
-            ? Response<TournamentTeamActionResponseDto>.Fail("Tournament team application acceptance failed.")
-            : Response<TournamentTeamActionResponseDto>.Success(mapper.Map<TournamentTeamActionResponseDto>(result));
+        if (result is null)
+            return Response<TournamentTeamActionResponseDto>.Fail("Tournament team application acceptance failed.");
+
+        return result.Succeeded
+            ? Response<TournamentTeamActionResponseDto>.Success(mapper.Map<TournamentTeamActionResponseDto>(result))
+            : Response<TournamentTeamActionResponseDto>.Fail(
+                result.ErrorMessage ?? "Tournament team application acceptance failed.");
     }
 }
 

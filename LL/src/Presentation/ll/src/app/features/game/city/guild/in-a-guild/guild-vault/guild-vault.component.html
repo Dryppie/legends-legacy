@@ -28,7 +28,7 @@
             <dt class="ll-stat-label mt-1">Borrowed</dt>
           </div>
           <div class="pl-4">
-            <dd class="ll-heading text-lg">{{ guild.vaultItems.length }}</dd>
+            <dd class="ll-heading text-lg">{{ vaultItems.length }}</dd>
             <dt class="ll-stat-label mt-1">Items</dt>
           </div>
         </dl>
@@ -110,7 +110,7 @@
 
         <div *ngIf="!visibleVaultItems.length" class="ll-empty-state min-h-52">
           {{
-            guild.vaultItems.length
+            vaultItems.length
               ? "No vault equipment matches this view."
               : "No equipment has been donated yet."
           }}

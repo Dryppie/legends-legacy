@@ -169,6 +169,7 @@
                 isOnboardingGatheringTool(inventoryItem) ? 'true' : null
               "
               [inventoryItem]="inventoryItem"
+              [showEquipmentSummary]="true"
             ></app-inventory-item>
 
             <ng-container *ngIf="activeTab === 'Equipment' || isScrapMode">

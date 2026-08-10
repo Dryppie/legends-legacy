@@ -80,6 +80,20 @@ export function normalizeGuildMissionOverview(
     : { ...missions, personalOrders };
 }
 
+export function normalizeGuild(guild: Guild | null): Guild | null {
+  if (!guild) return null;
+
+  const rolePermissions = Array.isArray(guild.rolePermissions)
+    ? guild.rolePermissions
+    : [];
+  const vaultItems = Array.isArray(guild.vaultItems) ? guild.vaultItems : [];
+
+  return rolePermissions === guild.rolePermissions &&
+    vaultItems === guild.vaultItems
+    ? guild
+    : { ...guild, rolePermissions, vaultItems };
+}
+
 function isValidPersonalGuildOrder(
   order: PersonalGuildOrder | null | undefined,
 ): order is PersonalGuildOrder {
@@ -325,8 +339,10 @@ export class GuildStateService {
         }),
       )
       .subscribe({
-        next: (guild) => {
+        next: (responseGuild) => {
           if (requestId !== this.refreshRequestId) return;
+
+          const guild = normalizeGuild(responseGuild);
 
           const nextGuildId = guild?.id ?? null;
           const previousGuildId = this._guild()?.id ?? null;
@@ -650,7 +666,7 @@ export class GuildStateService {
     if ((this._guild()?.id ?? null) !== (guild?.id ?? null)) {
       this.clearGuildScopedState();
     }
-    this._guild.set(guild);
+    this._guild.set(normalizeGuild(guild));
   }
   setInvites(inv: GuildInvite[]) {
     this._invites.set(inv);

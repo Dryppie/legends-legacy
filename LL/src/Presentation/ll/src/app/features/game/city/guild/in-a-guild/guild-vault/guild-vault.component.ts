@@ -110,12 +110,15 @@ export class GuildVaultComponent {
   }
 
   get availableCount(): number {
-    return this.guild.vaultItems.filter((item) => !item.borrowedByCharacterId)
-      .length;
+    return this.vaultItems.filter((item) => !item.borrowedByCharacterId).length;
   }
 
   get borrowedCount(): number {
-    return this.guild.vaultItems.length - this.availableCount;
+    return this.vaultItems.length - this.availableCount;
+  }
+
+  get vaultItems(): GuildVaultItem[] {
+    return Array.isArray(this.guild.vaultItems) ? this.guild.vaultItems : [];
   }
 
   get visibleVaultItems(): GuildVaultItem[] {
@@ -128,7 +131,7 @@ export class GuildVaultComponent {
       [ItemQuality.Masterwork]: 4,
     };
 
-    return this.guild.vaultItems
+    return this.vaultItems
       .filter((item) => {
         const matchesFilter =
           this.activeFilter === 'all' ||
@@ -260,7 +263,10 @@ export class GuildVaultComponent {
   }
 
   private permissionFor(role: GuildRole): GuildRolePermission | undefined {
-    return this.guild.rolePermissions.find(
+    const rolePermissions = Array.isArray(this.guild.rolePermissions)
+      ? this.guild.rolePermissions
+      : [];
+    return rolePermissions.find(
       (permission) => permission.role === role,
     );
   }

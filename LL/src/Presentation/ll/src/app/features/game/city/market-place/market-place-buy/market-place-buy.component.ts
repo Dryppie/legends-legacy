@@ -462,12 +462,6 @@ export class MarketPlaceBuyComponent implements OnInit {
   }
 
   selectListing(listing: MarketPlaceListing) {
-    if (this.isOwnListing(listing)) {
-      this.selectedListing.set(null);
-      this.selectedListingId = '';
-      return;
-    }
-
     this.selectedListing.set(listing);
     this.selectedListingId = listing.id;
   }

@@ -1,5 +1,29 @@
 import { GuildMissionOverview } from '../../../../shared/models/Dtos/guild/guildMission';
-import { normalizeGuildMissionOverview } from './guild-state.service';
+import {
+  normalizeGuild,
+  normalizeGuildMissionOverview,
+} from './guild-state.service';
+
+describe('normalizeGuild', () => {
+  it('defaults guild-vault fields omitted by an older API response', () => {
+    const guild = {
+      id: 'guild-id',
+      name: 'Guild',
+      tag: 'TAG',
+      guildXp: 0,
+      guildLevel: 1,
+      members: [],
+      maxMembers: 10,
+      invites: [],
+      resources: [],
+    } as never;
+
+    const normalized = normalizeGuild(guild);
+
+    expect(normalized?.rolePermissions).toEqual([]);
+    expect(normalized?.vaultItems).toEqual([]);
+  });
+});
 
 describe('normalizeGuildMissionOverview', () => {
   it('rejects mission state returned for a previous guild', () => {

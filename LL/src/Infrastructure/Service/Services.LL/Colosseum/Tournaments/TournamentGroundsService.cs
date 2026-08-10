@@ -715,26 +715,71 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
     {
         await using var transaction = await BeginOwnedTransactionIfNeededAsync(cancellationToken);
 
+        var tournamentId = await _tournaments.TeamInvites
+            .Where(i => i.Id == inviteId)
+            .Select(i => (Guid?)i.TournamentId)
+            .FirstOrDefaultAsync(cancellationToken);
+        if (!tournamentId.HasValue)
+            return new TournamentTeamActionResult(false, "This tournament team invite is no longer available.");
+
+        await _tournamentLockService.LockTournamentAsync(tournamentId.Value, cancellationToken);
+
         var invite = await _tournaments.TeamInvites
             .Include(i => i.Team)
             .FirstOrDefaultAsync(i => i.Id == inviteId, cancellationToken);
-        if (invite is null || invite.Status != TournamentTeamRequestStatus.Pending || invite.Team.MemberCount >= 3) return null;
+        if (invite is null || invite.Status != TournamentTeamRequestStatus.Pending)
+            return new TournamentTeamActionResult(false, "This tournament team invite is no longer available.");
 
-        await _tournamentLockService.LockTournamentAsync(invite.TournamentId, cancellationToken);
         var now = UtcNow();
-        if (!await CanMutateTeamsAsync(invite.TournamentId, now, cancellationToken)) return null;
+        if (!await CanMutateTeamsAsync(invite.TournamentId, now, cancellationToken))
+            return new TournamentTeamActionResult(false, "Tournament teams can no longer be changed.");
+
+        if (invite.Team.Status != TournamentTeamStatus.Forming)
+        {
+            await CancelPendingRequestsForTeamAsync(invite.TournamentId, invite.TeamId, now, cancellationToken);
+            await _tournaments.SaveChangesAsync(cancellationToken);
+            await transaction.CommitAsync(cancellationToken);
+            await PublishTournamentEventAsync(invite.TournamentId, "TournamentTeamUpdated", now, cancellationToken);
+            return new TournamentTeamActionResult(false, "This tournament team invite is no longer available.");
+        }
+
+        var memberCount = await GetActiveTeamMemberCountAsync(invite.TeamId, cancellationToken);
+        invite.Team.MemberCount = memberCount;
+        if (memberCount >= 3)
+        {
+            invite.Team.UpdatedAtUtc = now;
+            await CancelPendingRequestsForTeamAsync(invite.TournamentId, invite.TeamId, now, cancellationToken);
+            await _tournaments.SaveChangesAsync(cancellationToken);
+            await transaction.CommitAsync(cancellationToken);
+            await PublishTournamentEventAsync(invite.TournamentId, "TournamentTeamUpdated", now, cancellationToken);
+            return new TournamentTeamActionResult(
+                false,
+                "That tournament team is already full. Ask the team owner for a new invite if a slot opens.");
+        }
 
         var participant = await GetRegisteredParticipantAsync(characterId, invite.TournamentId, cancellationToken);
-        if (participant is null || participant.Id != invite.InvitedParticipantId || participant.TeamId.HasValue) return null;
+        if (participant is null || participant.Id != invite.InvitedParticipantId) return null;
+        if (participant.TeamId.HasValue)
+        {
+            await CancelPendingRequestsForParticipantAsync(invite.TournamentId, participant.Id, now, cancellationToken);
+            await _tournaments.SaveChangesAsync(cancellationToken);
+            await transaction.CommitAsync(cancellationToken);
+            await PublishTournamentEventAsync(invite.TournamentId, "TournamentTeamUpdated", now, cancellationToken);
+            return new TournamentTeamActionResult(false, "You already belong to a tournament team.");
+        }
 
         participant.TeamId = invite.TeamId;
         participant.IsTeamOwner = false;
         participant.UpdatedAtUtc = now;
-        invite.Team.MemberCount++;
+        invite.Team.MemberCount = memberCount + 1;
         invite.Team.UpdatedAtUtc = now;
+        await CancelPendingRequestsForParticipantAsync(invite.TournamentId, participant.Id, now, cancellationToken);
+        if (invite.Team.MemberCount >= 3)
+        {
+            await CancelPendingRequestsForTeamAsync(invite.TournamentId, invite.TeamId, now, cancellationToken);
+        }
         invite.Status = TournamentTeamRequestStatus.Accepted;
         invite.UpdatedAtUtc = now;
-        await CancelPendingRequestsForParticipantAsync(invite.TournamentId, participant.Id, now, cancellationToken);
 
         await _tournaments.SaveChangesAsync(cancellationToken);
         await transaction.CommitAsync(cancellationToken);
@@ -786,16 +831,47 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
     {
         await using var transaction = await BeginOwnedTransactionIfNeededAsync(cancellationToken);
 
+        var tournamentId = await _tournaments.TeamApplications
+            .Where(a => a.Id == applicationId)
+            .Select(a => (Guid?)a.TournamentId)
+            .FirstOrDefaultAsync(cancellationToken);
+        if (!tournamentId.HasValue)
+            return new TournamentTeamActionResult(false, "This tournament team application is no longer available.");
+
+        await _tournamentLockService.LockTournamentAsync(tournamentId.Value, cancellationToken);
+
         var application = await _tournaments.TeamApplications
             .Include(a => a.Team)
             .FirstOrDefaultAsync(a => a.Id == applicationId, cancellationToken);
-        if (application is null || application.Status != TournamentTeamRequestStatus.Pending || application.Team.MemberCount >= 3) return null;
+        if (application is null || application.Status != TournamentTeamRequestStatus.Pending)
+            return new TournamentTeamActionResult(false, "This tournament team application is no longer available.");
 
-        await _tournamentLockService.LockTournamentAsync(application.TournamentId, cancellationToken);
         var now = UtcNow();
-        if (!await CanMutateTeamsAsync(application.TournamentId, now, cancellationToken)) return null;
+        if (!await CanMutateTeamsAsync(application.TournamentId, now, cancellationToken))
+            return new TournamentTeamActionResult(false, "Tournament teams can no longer be changed.");
 
         if (!await IsTeamOwnerAsync(characterId, application.Team, cancellationToken)) return null;
+
+        if (application.Team.Status != TournamentTeamStatus.Forming)
+        {
+            await CancelPendingRequestsForTeamAsync(application.TournamentId, application.TeamId, now, cancellationToken);
+            await _tournaments.SaveChangesAsync(cancellationToken);
+            await transaction.CommitAsync(cancellationToken);
+            await PublishTournamentEventAsync(application.TournamentId, "TournamentTeamUpdated", now, cancellationToken);
+            return new TournamentTeamActionResult(false, "This tournament team application is no longer available.");
+        }
+
+        var memberCount = await GetActiveTeamMemberCountAsync(application.TeamId, cancellationToken);
+        application.Team.MemberCount = memberCount;
+        if (memberCount >= 3)
+        {
+            application.Team.UpdatedAtUtc = now;
+            await CancelPendingRequestsForTeamAsync(application.TournamentId, application.TeamId, now, cancellationToken);
+            await _tournaments.SaveChangesAsync(cancellationToken);
+            await transaction.CommitAsync(cancellationToken);
+            await PublishTournamentEventAsync(application.TournamentId, "TournamentTeamUpdated", now, cancellationToken);
+            return new TournamentTeamActionResult(false, "That tournament team is already full.");
+        }
 
         var participant = await _tournaments.Participants
             .FirstOrDefaultAsync(p => p.Id == application.ApplicantParticipantId, cancellationToken);
@@ -804,11 +880,15 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
         participant.TeamId = application.TeamId;
         participant.IsTeamOwner = false;
         participant.UpdatedAtUtc = now;
-        application.Team.MemberCount++;
+        application.Team.MemberCount = memberCount + 1;
         application.Team.UpdatedAtUtc = now;
+        await CancelPendingRequestsForParticipantAsync(application.TournamentId, participant.Id, now, cancellationToken);
+        if (application.Team.MemberCount >= 3)
+        {
+            await CancelPendingRequestsForTeamAsync(application.TournamentId, application.TeamId, now, cancellationToken);
+        }
         application.Status = TournamentTeamRequestStatus.Accepted;
         application.UpdatedAtUtc = now;
-        await CancelPendingRequestsForParticipantAsync(application.TournamentId, participant.Id, now, cancellationToken);
 
         await _tournaments.SaveChangesAsync(cancellationToken);
         await transaction.CommitAsync(cancellationToken);
@@ -2004,6 +2084,36 @@ public sealed class TournamentGroundsService : ITournamentGroundsService
             invite.UpdatedAtUtc = now;
         }
     }
+
+    private async Task CancelPendingRequestsForTeamAsync(
+        Guid tournamentId,
+        Guid teamId,
+        DateTimeOffset now,
+        CancellationToken cancellationToken)
+    {
+        var applications = await _tournaments.TeamApplications
+            .Where(a => a.TournamentId == tournamentId && a.TeamId == teamId && a.Status == TournamentTeamRequestStatus.Pending)
+            .ToListAsync(cancellationToken);
+        foreach (var application in applications)
+        {
+            application.Status = TournamentTeamRequestStatus.Cancelled;
+            application.UpdatedAtUtc = now;
+        }
+
+        var invites = await _tournaments.TeamInvites
+            .Where(i => i.TournamentId == tournamentId && i.TeamId == teamId && i.Status == TournamentTeamRequestStatus.Pending)
+            .ToListAsync(cancellationToken);
+        foreach (var invite in invites)
+        {
+            invite.Status = TournamentTeamRequestStatus.Cancelled;
+            invite.UpdatedAtUtc = now;
+        }
+    }
+
+    private async Task<int> GetActiveTeamMemberCountAsync(Guid teamId, CancellationToken cancellationToken)
+        => await _tournaments.Participants.CountAsync(
+            p => p.TeamId == teamId && p.Status != TournamentParticipantStatus.Withdrawn,
+            cancellationToken);
 
     private static string NormalizeTeamName(string name, Guid fallbackId)
     {

@@ -161,7 +161,7 @@ public sealed record WithdrawTournamentResult(bool Withdrawn);
 
 public sealed record CreateTournamentTeamResult(bool Created, Guid TeamId);
 
-public sealed record TournamentTeamActionResult(bool Succeeded);
+public sealed record TournamentTeamActionResult(bool Succeeded, string? ErrorMessage = null);
 
 public sealed record TournamentRewardGrantEntry(
     Guid Id,
