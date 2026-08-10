@@ -3,6 +3,8 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { LeaderboardStateService } from '../../../../core/services/api/leaderboard/leaderboard-state.service';
 import { LeaderboardBoard } from '../../../../shared/models/Dtos/leaderboard/leaderboard';
 import { TavernComponent } from './tavern.component';
+import { Router } from '@angular/router';
+import { ChatService } from '../../../../core/services/ll-chat/chat-service/chat.service';
 
 describe('TavernComponent', () => {
   let fixture: ComponentFixture<TavernComponent>;
@@ -28,7 +30,14 @@ describe('TavernComponent', () => {
 
     await TestBed.configureTestingModule({
       imports: [TavernComponent],
-      providers: [{ provide: LeaderboardStateService, useValue: state }],
+      providers: [
+        { provide: LeaderboardStateService, useValue: state },
+        { provide: Router, useValue: { navigate: jasmine.createSpy() } },
+        {
+          provide: ChatService,
+          useValue: { prepareWhisperToName: jasmine.createSpy() },
+        },
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(TavernComponent);
@@ -184,6 +193,9 @@ describe('TavernComponent', () => {
     expect(podiumEntries[1].textContent).toContain('Second place');
     expect(podiumEntries[2].textContent).toContain('Third place');
     expect(podiumEntries[0].getAttribute('aria-label')).toBe('Rank 1: First');
+    expect(
+      fixture.nativeElement.querySelectorAll('app-character-tag').length,
+    ).toBe(4);
   });
 
   it('keeps page chrome fixed while the standings own vertical scrolling', () => {
@@ -218,6 +230,9 @@ describe('TavernComponent', () => {
 
     expect(participantHeader.textContent?.trim()).toBe('Guild');
     expect(fixture.componentInstance.isViewer('viewer-guild')).toBeTrue();
+    expect(
+      fixture.nativeElement.querySelectorAll('app-character-tag').length,
+    ).toBe(0);
   });
 });
 

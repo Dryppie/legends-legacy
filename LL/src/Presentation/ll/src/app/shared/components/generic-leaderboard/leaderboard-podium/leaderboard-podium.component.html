@@ -13,7 +13,14 @@
         >
           <ng-container *ngFor="let col of columns.slice(0, 1)">
             <div class="max-w-full truncate text-xl font-bold">
-              {{ col.value(entries[medal]) }}
+              <app-character-tag
+                *ngIf="col.isCharacterName; else plainPodiumValue"
+                [id]="entries[medal].characterId"
+                [name]="entries[medal].characterName"
+              ></app-character-tag>
+              <ng-template #plainPodiumValue>
+                {{ col.value(entries[medal]) }}
+              </ng-template>
             </div>
           </ng-container>
 

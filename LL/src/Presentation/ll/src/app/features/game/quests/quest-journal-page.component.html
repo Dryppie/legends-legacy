@@ -430,7 +430,10 @@
                         contributor.rank
                       }}</span>
                       <span class="truncate font-semibold text-zinc-200">
-                        {{ contributor.characterName }}
+                        <app-character-tag
+                          [id]="contributor.characterId"
+                          [name]="contributor.characterName"
+                        ></app-character-tag>
                       </span>
                       <span class="font-mono tabular-nums text-zinc-400">
                         {{ formatAmount(contributor.contribution) }}

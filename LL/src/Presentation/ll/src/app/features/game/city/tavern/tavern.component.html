@@ -188,7 +188,14 @@
       >
         <ng-container *ngIf="board.searchMatch as match; else noSearchMatch">
           Jumped to #{{ match.rank | numberFormat }} —
-          {{ match.participantName }}
+          <app-character-tag
+            *ngIf="isCharacterBoard(board); else searchMatchName"
+            [id]="match.participantId"
+            [name]="match.participantName"
+          ></app-character-tag>
+          <ng-template #searchMatchName>{{
+            match.participantName
+          }}</ng-template>
         </ng-container>
         <ng-template #noSearchMatch>
           No {{ board.participantLabel.toLowerCase() }} matching “{{
@@ -258,7 +265,14 @@
                     'text-lg': podiumIndex !== 0,
                   }"
                 >
-                  {{ entry.participantName }}
+                  <app-character-tag
+                    *ngIf="isCharacterBoard(board); else podiumParticipantName"
+                    [id]="entry.participantId"
+                    [name]="entry.participantName"
+                  ></app-character-tag>
+                  <ng-template #podiumParticipantName>
+                    {{ entry.participantName }}
+                  </ng-template>
                 </h4>
               </div>
 
@@ -362,7 +376,16 @@
                   #{{ entry.rank | numberFormat }}
                 </td>
                 <th scope="row" class="px-3 py-2.5 font-normal">
-                  <span class="break-words">{{ entry.participantName }}</span>
+                  <span class="break-words">
+                    <app-character-tag
+                      *ngIf="isCharacterBoard(board); else tableParticipantName"
+                      [id]="entry.participantId"
+                      [name]="entry.participantName"
+                    ></app-character-tag>
+                    <ng-template #tableParticipantName>
+                      {{ entry.participantName }}
+                    </ng-template>
+                  </span>
                   <span
                     *ngIf="isViewer(entry.participantId)"
                     class="ml-2 text-xs font-semibold uppercase text-primary"

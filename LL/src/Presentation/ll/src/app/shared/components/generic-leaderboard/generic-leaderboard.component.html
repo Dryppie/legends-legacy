@@ -39,7 +39,12 @@
             [class.text-right]="col.alignRight"
             [ngClass]="col.cellClass ?? ''"
           >
-            {{ col.value(row) }}
+            <app-character-tag
+              *ngIf="col.isCharacterName; else plainCellValue"
+              [id]="row.characterId"
+              [name]="row.characterName"
+            ></app-character-tag>
+            <ng-template #plainCellValue>{{ col.value(row) }}</ng-template>
           </div>
         </ng-container>
       </div>

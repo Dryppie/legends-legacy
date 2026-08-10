@@ -6,6 +6,10 @@ export interface ArenaRow extends LeaderboardEntry {
 }
 
 export const ARENA_COLUMNS: readonly LeaderboardColumn<ArenaRow>[] = [
-  { header: 'Name', value: (r) => r.characterName },
+  {
+    header: 'Name',
+    value: (r) => r.characterName,
+    isCharacterName: true,
+  },
   { header: 'Rating', value: (r) => r.level, alignRight: true },
 ];

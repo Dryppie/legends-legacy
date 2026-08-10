@@ -96,8 +96,8 @@
       >
         <div class="flex flex-wrap items-center gap-2">
           <app-regular-button
-            text="Select all tempered"
-            (pressed)="selectAllTempered()"
+            text="Select all equipment"
+            (pressed)="selectAllEquipment()"
           ></app-regular-button>
 
           <div class="flex items-center rounded-md border border-light_gray">
@@ -253,7 +253,7 @@
           *ngIf="!selectedItems.length"
           class="ll-empty-state h-full min-h-52"
         >
-          <p class="italic">Select tempered equipment from the list.</p>
+          <p class="italic">Select equipment from the list.</p>
         </div>
 
         <ul *ngIf="selectedItems.length" class="space-y-2">

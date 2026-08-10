@@ -266,6 +266,35 @@ public sealed class QuestSystemTests
     }
 
     [Fact]
+    public async Task Shenic_level_objectives_do_not_complete_before_the_required_level()
+    {
+        var characterId = Guid.NewGuid();
+        var definitions = CreateDefinitions();
+        var repository = new RecordingQuestRepository(level: 19);
+        repository.Progresses.Add(CreateCompletedProgress(
+            characterId,
+            definitions.Get(QuestConstants.CrystalCurrents)));
+        var service = new QuestService(
+            repository,
+            definitions,
+            new RecordingItemBaseRepository(),
+            inventoryItemFactory: null!,
+            lootRewardWriter: null!,
+            TimeProvider.System);
+
+        var journal = await service.GetJournalAsync(characterId, CancellationToken.None);
+
+        var restlessDead = journal.Quests.Single(quest =>
+            quest.QuestId == QuestConstants.RestlessDead);
+        var levelObjective = restlessDead.Objectives.Single(objective =>
+            objective.Type == "CharacterLevelReached");
+        Assert.Equal(19, levelObjective.CurrentAmount);
+        Assert.Equal(20, levelObjective.RequiredAmount);
+        Assert.False(levelObjective.IsCompleted);
+        Assert.Equal(QuestStatus.Active, restlessDead.Status);
+    }
+
+    [Fact]
     public async Task Shenic_level_objectives_are_backfilled_for_existing_completed_progress()
     {
         var characterId = Guid.NewGuid();

@@ -88,11 +88,15 @@ export class InventoryComponent implements OnInit {
 
   inventoryMode: 'Scrap Mode' | 'Regular Mode' = 'Regular Mode';
 
-  temperedItems = computed(() => {
-    return this.state
+  scrapableEquipment = computed(() =>
+    this.state
       .equipment()
-      .filter((i) => (i.itemInstance as EquipmentInstance).potential === 0);
-  });
+      .filter(
+        (item) =>
+          (item.itemInstance as EquipmentInstance).equipmentBase
+            .equipmentType !== EquipmentType.Tool,
+      ),
+  );
 
   selectedItems: InventoryItem[] = [];
   scrapRarityThreshold: Rarity = Rarity.Common;
@@ -154,16 +158,16 @@ export class InventoryComponent implements OnInit {
     this.enterBrowseMode();
   }
 
-  selectAllTempered() {
+  selectAllEquipment() {
     this.selectedItems = [];
-    this.temperedItems().forEach((item) => this.selectedItems.push(item));
+    this.scrapableEquipment().forEach((item) => this.selectedItems.push(item));
   }
 
   selectAllBelowRarity() {
     const thresholdRank = this.RARITY_ORDER[this.scrapRarityThreshold];
 
     this.selectedItems = [];
-    this.temperedItems()
+    this.scrapableEquipment()
       .filter((item) => {
         const itemRank =
           this.RARITY_ORDER[(item.itemInstance as EquipmentInstance).rarity];
@@ -277,7 +281,7 @@ export class InventoryComponent implements OnInit {
       case 'Equipment':
         return this.isBrowseMode
           ? this.state.equipment()
-          : this.temperedItems();
+          : this.scrapableEquipment();
 
       case 'Resources':
         return this.sortResourcesForDisplay(this.state.materials());
@@ -314,16 +318,16 @@ export class InventoryComponent implements OnInit {
   }
 
   get activeListTitle(): string {
-    return 'Tempered Equipment';
+    return 'Equipment';
   }
 
   get activeListDescription(): string {
-    return 'Only equipment with 0 potential can be turned into tempered scrap.';
+    return 'Any unequipped non-tool equipment can be turned into tempered scrap.';
   }
 
   get emptyStateText(): string {
     return this.isScrapMode
-      ? 'No tempered equipment is ready to scrap.'
+      ? 'No equipment is ready to scrap.'
       : 'No items in this category.';
   }
 

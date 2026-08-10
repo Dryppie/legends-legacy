@@ -11,6 +11,7 @@ import {
   LeaderboardBoardEntry,
 } from '../../../../shared/models/Dtos/leaderboard/leaderboard';
 import { NumberFormatPipe } from '../../../../shared/pipes/number-format/number-format.pipe';
+import { CharacterTagComponent } from '../../../../shared/components/character/character-tag/character-tag.component';
 
 type LeaderboardCategory = 'Overall' | 'PvE' | 'PvP' | 'Professions' | 'Guilds';
 
@@ -21,17 +22,18 @@ interface BoardOption {
 }
 
 @Component({
-    selector: 'app-tavern',
-    imports: [
-        DatePipe,
-        DefaultHeaderComponent,
-        DropdownComponent,
-        NgClass,
-        NgFor,
-        NgIf,
-        NumberFormatPipe,
-    ],
-    templateUrl: './tavern.component.html'
+  selector: 'app-tavern',
+  imports: [
+    DatePipe,
+    DefaultHeaderComponent,
+    DropdownComponent,
+    NgClass,
+    NgFor,
+    NgIf,
+    NumberFormatPipe,
+    CharacterTagComponent,
+  ],
+  templateUrl: './tavern.component.html',
 })
 export class TavernComponent implements OnInit {
   readonly podiumOrder = [0, 1, 2];
@@ -156,6 +158,10 @@ export class TavernComponent implements OnInit {
 
   showPodium(board: LeaderboardBoard): boolean {
     return board.pageStartRank === 1;
+  }
+
+  isCharacterBoard(board: LeaderboardBoard): boolean {
+    return board.participantLabel !== 'Guild';
   }
 
   tableEntries(board: LeaderboardBoard): LeaderboardBoardEntry[] {

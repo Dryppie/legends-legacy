@@ -41,6 +41,13 @@ export interface EquipmentAttributeComparison {
   hoveredAmount: number;
 }
 
+export interface ToolBonusComparison {
+  bonusType: ToolBonusModifier['bonusType'];
+  scopeId?: string;
+  equippedAmount: number;
+  hoveredAmount: number;
+}
+
 export function mapEquipmentToDisplay(
   e: Equipment,
   useBaseName = false,
@@ -121,6 +128,33 @@ export function buildAttributeComparisons(
   );
 }
 
+export function buildToolBonusComparisons(
+  hovered: EquipmentDisplay,
+  equipped: EquipmentDisplay,
+): ToolBonusComparison[] {
+  const hoveredByKey = sumToolBonusesByKey(hovered.toolBonuses);
+  const equippedByKey = sumToolBonusesByKey(equipped.toolBonuses);
+  const keys = new Set([...hoveredByKey.keys(), ...equippedByKey.keys()]);
+
+  return [...keys]
+    .map((key) => {
+      const hoveredBonus = hoveredByKey.get(key);
+      const equippedBonus = equippedByKey.get(key);
+
+      return {
+        bonusType: (hoveredBonus ?? equippedBonus)!.bonusType,
+        scopeId: (hoveredBonus ?? equippedBonus)!.scopeId,
+        equippedAmount: equippedBonus?.amount ?? 0,
+        hoveredAmount: hoveredBonus?.amount ?? 0,
+      };
+    })
+    .sort((first, second) =>
+      `${first.bonusType}:${first.scopeId ?? ''}`.localeCompare(
+        `${second.bonusType}:${second.scopeId ?? ''}`,
+      ),
+    );
+}
+
 function sumAttributesByType(
   attributes: readonly AttributeModifier[],
 ): Map<AttributeType, number> {
@@ -131,6 +165,23 @@ function sumAttributesByType(
       attribute.attributeType,
       (totals.get(attribute.attributeType) ?? 0) + attribute.amount,
     );
+  }
+
+  return totals;
+}
+
+function sumToolBonusesByKey(
+  bonuses: readonly ToolBonusModifier[],
+): Map<string, ToolBonusModifier> {
+  const totals = new Map<string, ToolBonusModifier>();
+
+  for (const bonus of bonuses) {
+    const key = `${bonus.bonusType}\u0000${bonus.scopeId ?? ''}`;
+    const existing = totals.get(key);
+    totals.set(key, {
+      ...bonus,
+      amount: (existing?.amount ?? 0) + bonus.amount,
+    });
   }
 
   return totals;

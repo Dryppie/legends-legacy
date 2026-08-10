@@ -5,6 +5,7 @@ import { QuestStateService } from '../../../core/services/api/quest/quest-state.
 import { EventQuestStateService } from '../../../core/services/api/quest/event-quest-state.service';
 import { EssenceItemViewService } from '../../../core/services/api/essences/essence-item-view.service';
 import { BaseItemComponent } from '../../../shared/components/base-item/base-item.component';
+import { CharacterTagComponent } from '../../../shared/components/character/character-tag/character-tag.component';
 import { Essence } from '../../../shared/models/essence';
 import { EssenceItem } from '../../../shared/models/item';
 import {
@@ -32,7 +33,7 @@ type QuestSortMode = 'Order' | 'Progress';
 @Component({
   selector: 'app-quest-journal-page',
   host: { class: 'block h-full min-h-0' },
-  imports: [NgClass, NgFor, NgIf, BaseItemComponent],
+  imports: [NgClass, NgFor, NgIf, BaseItemComponent, CharacterTagComponent],
   templateUrl: './quest-journal-page.component.html',
 })
 export class QuestJournalPageComponent implements OnInit, OnDestroy {
@@ -151,7 +152,9 @@ export class QuestJournalPageComponent implements OnInit, OnDestroy {
   }
 
   isSelected(entry: QuestJournalEntry): boolean {
-    return this.selectedEntry()?.key === entry.key;
+    return (
+      !this.showingEventDetail() && this.selectedEntry()?.key === entry.key
+    );
   }
 
   toggleSort(): void {

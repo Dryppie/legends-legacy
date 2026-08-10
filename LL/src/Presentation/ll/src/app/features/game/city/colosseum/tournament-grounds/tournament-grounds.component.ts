@@ -6,6 +6,7 @@ import { ColosseumService } from '../../../../../core/services/api/colosseum/col
 import { ToastService } from '../../../../../core/services/client-side/components/toast/toast.service';
 import { GameEventService } from '../../../../../core/services/real-time/game-event.service';
 import { TournamentGroundsUpdated } from '../../../../../core/services/real-time/colosseum/tournament-grounds-updated';
+import { CharacterTagComponent } from '../../../../../shared/components/character/character-tag/character-tag.component';
 import {
   TournamentBracket,
   TournamentDetails,
@@ -23,7 +24,7 @@ import {
 
 @Component({
     selector: 'app-tournament-grounds',
-    imports: [DatePipe, NgFor, NgIf, RouterLink],
+    imports: [DatePipe, NgFor, NgIf, RouterLink, CharacterTagComponent],
     templateUrl: './tournament-grounds.component.html'
 })
 export class TournamentGroundsComponent implements OnInit {

@@ -1,4 +1,4 @@
-import { Component, computed, signal } from '@angular/core';
+import { Component, OnInit, computed, signal } from '@angular/core';
 import { NgClass, NgFor, NgIf } from '@angular/common';
 import { DungeonCardComponent } from '../../../../../shared/components/dungeons/dungeon-card/dungeon-card.component';
 import { DungeonPreviewData } from '../../../../../shared/models/Dtos/dungeons/dungeonPreviewData';
@@ -69,7 +69,7 @@ const dungeonPresentation: Record<string, Partial<DungeonPreviewData>> = {
     imports: [DungeonCardComponent, NgFor, NgIf, NgClass, CharacterTagComponent],
     templateUrl: './dungeons.component.html'
 })
-export class DungeonsComponent {
+export class DungeonsComponent implements OnInit {
   selectedRecordsDungeon = signal<DungeonPreviewData | null>(null);
   recordsData = signal<DungeonRecordsData | null>(null);
   recordsLoading = signal(false);
@@ -107,6 +107,10 @@ export class DungeonsComponent {
     characterState: CharacterStateService,
   ) {
     characterState.refreshIfDirty();
+  }
+
+  ngOnInit(): void {
+    this.dungeonState.refresh();
   }
 
   openRecords(dungeon: DungeonPreviewData): void {

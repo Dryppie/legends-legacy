@@ -14,6 +14,8 @@ import { AttributeValueFormatPipe } from '../../../../shared/pipes/attributes/at
 import { ActivatedRoute, Router } from '@angular/router';
 import { toDisplayedCombatRating } from '../../../../shared/models/combat-rating-display';
 import { AttributeTooltipDirective } from '../../../../shared/directives/attribute-tooltip/attribute-tooltip.directive';
+import { ProfessionsService } from '../../../../core/services/api/professions/professions.service';
+import { ProfessionType } from '../../../../shared/models/Dtos/characterProfession';
 
 @Component({
   selector: 'app-character-overview',
@@ -42,8 +44,34 @@ export class CharacterOverviewComponent {
   readonly character = computed(() =>
     this.isViewingSearchResult()
       ? this.searchedCharacter()
-      : this.characterState.overview(),
+      : this.currentCharacterOverview(),
   );
+  private readonly currentCharacterOverview = computed(() => {
+    const overview = this.characterState.overview();
+    const currentCharacter = this.characterState.currentCharacter();
+    if (!overview || !currentCharacter || overview.id !== currentCharacter.id) {
+      return overview;
+    }
+
+    const craftingProfession = this.professionsService.getProfession(
+      ProfessionType.Crafting,
+    );
+
+    return {
+      ...overview,
+      level: currentCharacter.level,
+      experience: currentCharacter.experience,
+      experienceUntilNextLevel: currentCharacter.experienceUntilNextLevel,
+      ...(craftingProfession
+        ? {
+            craftingLevel: craftingProfession.level,
+            craftingExperience: craftingProfession.experience,
+            craftingExperienceUntilNextLevel:
+              craftingProfession.experienceUntilNextLevel,
+          }
+        : {}),
+    };
+  });
   readonly isLoading = computed(
     () =>
       this.searchLoading() ||
@@ -115,6 +143,7 @@ export class CharacterOverviewComponent {
   constructor(
     private characterService: CharacterService,
     private readonly characterState: CharacterStateService,
+    private readonly professionsService: ProfessionsService,
     private readonly route: ActivatedRoute,
     private readonly router: Router,
   ) {

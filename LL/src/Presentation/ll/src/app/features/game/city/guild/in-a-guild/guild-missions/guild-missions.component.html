@@ -108,6 +108,11 @@
             <span>
               <strong>{{ option.definition.name }}</strong>
               <small>{{ option.definition.description }}</small>
+              <small>
+                Requirement:
+                {{ option.definition.baseTarget | numberFormat }}
+                {{ option.definition.metric | humanize }}
+              </small>
             </span>
             <span class="option-category">
               {{ option.definition.category | humanize }}
@@ -216,7 +221,12 @@
         >
           <span class="contributor-rank">{{ index + 1 }}</span>
           <span class="contributor-name">
-            <strong>{{ entry.characterName }}</strong>
+            <strong>
+              <app-character-tag
+                [id]="entry.characterId"
+                [name]="entry.characterName"
+              ></app-character-tag>
+            </strong>
             <small>
               {{ entry.weeklyMissionContribution | numberFormat }} mission ·
               {{ entry.ordersCompleted }} orders

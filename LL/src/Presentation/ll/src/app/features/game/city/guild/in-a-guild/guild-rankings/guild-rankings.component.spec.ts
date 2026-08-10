@@ -4,6 +4,8 @@ import { GuildStateService } from '../../../../../../core/services/api/guild/gui
 import { LeaderboardStateService } from '../../../../../../core/services/api/leaderboard/leaderboard-state.service';
 import { LeaderboardBoard } from '../../../../../../shared/models/Dtos/leaderboard/leaderboard';
 import { GuildRankingsComponent } from './guild-rankings.component';
+import { Router } from '@angular/router';
+import { ChatService } from '../../../../../../core/services/ll-chat/chat-service/chat.service';
 
 describe('GuildRankingsComponent', () => {
   let fixture: ComponentFixture<GuildRankingsComponent>;
@@ -50,6 +52,11 @@ describe('GuildRankingsComponent', () => {
           },
         },
         { provide: LeaderboardStateService, useValue: leaderboardState },
+        { provide: Router, useValue: { navigate: jasmine.createSpy() } },
+        {
+          provide: ChatService,
+          useValue: { prepareWhisperToName: jasmine.createSpy() },
+        },
       ],
     }).compileComponents();
 
@@ -72,6 +79,9 @@ describe('GuildRankingsComponent', () => {
     );
     expect(text).toContain('Guild XP');
     expect(text).not.toContain('Upgrades');
+    expect(
+      fixture.nativeElement.querySelectorAll('app-character-tag').length,
+    ).toBe(2);
   });
 });
 

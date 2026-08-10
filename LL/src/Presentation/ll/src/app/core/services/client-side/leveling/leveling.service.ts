@@ -24,12 +24,12 @@ export class LevelingService {
     const experienceUntilNextLevel = char.experienceUntilNextLevel;
 
     if (experienceUntilNextLevel <= 0) {
-      this.state.refresh();
+      this.state.refreshCurrentCharacter();
       return;
     }
 
     if (experience >= experienceUntilNextLevel) {
-      this.state.refresh();
+      this.state.refreshCurrentCharacter();
       return;
     }
 

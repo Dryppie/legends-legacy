@@ -5,11 +5,18 @@ import {
   LeaderboardEntry,
 } from '../../models/Dtos/leaderboard/leaderboardEntry';
 import { LeaderboardPodiumComponent } from './leaderboard-podium/leaderboard-podium.component';
+import { CharacterTagComponent } from '../character/character-tag/character-tag.component';
 
 @Component({
-    selector: 'app-leaderboard',
-    imports: [NgClass, NgIf, NgFor, LeaderboardPodiumComponent],
-    templateUrl: './generic-leaderboard.component.html'
+  selector: 'app-leaderboard',
+  imports: [
+    NgClass,
+    NgIf,
+    NgFor,
+    LeaderboardPodiumComponent,
+    CharacterTagComponent,
+  ],
+  templateUrl: './generic-leaderboard.component.html',
 })
 export class LeaderboardComponent<T extends LeaderboardEntry> {
   @Input({ required: true }) title!: string;

@@ -8,7 +8,9 @@ import { AttributeValueFormatPipe } from '../../../pipes/attributes/attribute-va
 import {
   EquipmentDisplay,
   EquipmentAttributeComparison,
+  ToolBonusComparison,
   buildAttributeComparisons,
+  buildToolBonusComparisons,
   mapEquipmentToDisplay,
   mapInstanceToDisplay,
 } from '../equipment-display';
@@ -50,6 +52,7 @@ export class EquipmentDisplayComponent {
   data!: EquipmentDisplay;
   comparisonData: EquipmentDisplay | null = null;
   comparisonRows: EquipmentAttributeComparison[] = [];
+  toolComparisonRows: ToolBonusComparison[] = [];
 
   ngOnChanges(): void {
     this.data = isInstance(this.item)
@@ -60,6 +63,9 @@ export class EquipmentDisplayComponent {
       : null;
     this.comparisonRows = this.comparisonData
       ? buildAttributeComparisons(this.data, this.comparisonData)
+      : [];
+    this.toolComparisonRows = this.comparisonData
+      ? buildToolBonusComparisons(this.data, this.comparisonData)
       : [];
   }
 
@@ -125,15 +131,7 @@ export class EquipmentDisplayComponent {
   }
 
   get hasToolDetails(): boolean {
-    return (
-      this.isTool &&
-      (this.data.toolAffixes.length > 0 || this.data.baseToolBonuses.length > 0)
-    );
-  }
-
-  get toolAffixSummary(): string {
-    const count = this.data?.toolAffixes?.length ?? 0;
-    return count === 1 ? '1 Affix' : `${count} Affixes`;
+    return this.isTool && this.data.toolBonuses.length > 0;
   }
 
   formatToolBonusType(type: string): string {
@@ -145,11 +143,33 @@ export class EquipmentDisplayComponent {
   }
 
   formatToolBonusAmount(bonus: ToolBonusModifier): string {
+    return this.formatToolBonusValue(bonus.amount, bonus.bonusType, true);
+  }
+
+  formatToolBonusValue(
+    amount: number,
+    bonusType: string,
+    forceSign = false,
+  ): string {
     const value = new Intl.NumberFormat(undefined, {
       maximumFractionDigits: 2,
-    }).format(bonus.amount);
+    }).format(amount);
+    const sign = forceSign && amount > 0 ? '+' : '';
 
-    return bonus.bonusType.endsWith('Percent') ? `+${value}%` : `+${value}`;
+    return bonusType.endsWith('Percent')
+      ? `${sign}${value}%`
+      : `${sign}${value}`;
+  }
+
+  formatToolBonusLabel(type: string, scopeId?: string): string {
+    const label = this.formatToolBonusType(type);
+    return scopeId ? `${label} · ${this.formatToolScope(scopeId)}` : label;
+  }
+
+  private formatToolScope(scopeId: string): string {
+    return scopeId
+      .replace(/[._-]+/g, ' ')
+      .replace(/\b\w/g, (character) => character.toUpperCase());
   }
 
   possibleDesignAttributes(

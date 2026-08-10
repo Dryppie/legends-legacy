@@ -3,6 +3,7 @@ using Application.Interfaces.Services.LL.Quests.Events;
 using Application.Interfaces.WebSockets;
 using Application.WebSockets.Contracts;
 using Domain.Models.Items;
+using Domain.Models.Quests;
 using Domain.Models.Quests.Events;
 using Services.LL.Interfaces;
 using Services.LL.Interfaces.Combat.Reward;
@@ -11,6 +12,7 @@ namespace Services.LL.Quests.Events;
 
 public sealed class EventQuestService(
     IEventQuestRepository repository,
+    IQuestRepository questRepository,
     IEventQuestDefinitionProvider definitions,
     IItemBaseRepository itemBases,
     IInventoryItemFactory inventoryItemFactory,
@@ -22,6 +24,11 @@ public sealed class EventQuestService(
         Guid characterId,
         CancellationToken cancellationToken)
     {
+        if (!await HasCompletedTutorialAsync(characterId, cancellationToken))
+        {
+            return new EventQuestJournal([]);
+        }
+
         await EnsureInstancesAsync(cancellationToken);
         var instances = await repository.GetAllAsync(characterId, cancellationToken);
         var changed = RefreshStatuses(instances, timeProvider.GetUtcNow());
@@ -36,6 +43,8 @@ public sealed class EventQuestService(
         string eventType,
         CancellationToken cancellationToken)
     {
+        if (!await HasCompletedTutorialAsync(characterId, cancellationToken)) return;
+
         await EnsureInstancesAsync(cancellationToken);
         var now = timeProvider.GetUtcNow();
         var instances = await repository.GetAllAsync(characterId, cancellationToken);
@@ -137,6 +146,7 @@ public sealed class EventQuestService(
         string eventQuestId,
         CancellationToken cancellationToken)
     {
+        await EnsureTutorialCompletedAsync(characterId, cancellationToken);
         await EnsureInstancesAsync(cancellationToken);
         var now = timeProvider.GetUtcNow();
         var instance = await repository.GetAsync(eventQuestId, characterId, cancellationToken)
@@ -201,6 +211,7 @@ public sealed class EventQuestService(
         bool claimAll,
         CancellationToken cancellationToken)
     {
+        await EnsureTutorialCompletedAsync(characterId, cancellationToken);
         await EnsureInstancesAsync(cancellationToken);
         var now = timeProvider.GetUtcNow();
         var instance = await repository.GetAsync(eventQuestId, characterId, cancellationToken)
@@ -470,6 +481,28 @@ public sealed class EventQuestService(
             .OrderBy(x => x.SortOrder)
             .ThenBy(x => x.StartsAtUtc)
             .ToList());
+    }
+
+    private async Task EnsureTutorialCompletedAsync(
+        Guid characterId,
+        CancellationToken cancellationToken)
+    {
+        if (!await HasCompletedTutorialAsync(characterId, cancellationToken))
+        {
+            throw new InvalidOperationException(
+                "Complete the tutorial before participating in server-wide events.");
+        }
+    }
+
+    private async Task<bool> HasCompletedTutorialAsync(
+        Guid characterId,
+        CancellationToken cancellationToken)
+    {
+        var progress = await questRepository.GetProgressAsync(
+            characterId,
+            QuestConstants.IntoLumoRuins,
+            cancellationToken);
+        return progress?.Status == QuestStatus.Completed;
     }
 
     private static long Evaluate(QuestTrigger trigger, QuestObjectiveDefinition objective)

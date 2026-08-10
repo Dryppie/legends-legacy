@@ -4,6 +4,7 @@ import { GuildStateService } from '../../../../../../core/services/api/guild/gui
 import { LeaderboardStateService } from '../../../../../../core/services/api/leaderboard/leaderboard-state.service';
 import { LeaderboardBoardEntry } from '../../../../../../shared/models/Dtos/leaderboard/leaderboard';
 import { NumberFormatPipe } from '../../../../../../shared/pipes/number-format/number-format.pipe';
+import { CharacterTagComponent } from '../../../../../../shared/components/character/character-tag/character-tag.component';
 
 interface GuildRankingRow extends LeaderboardBoardEntry {
   ownerName: string;
@@ -13,7 +14,7 @@ interface GuildRankingRow extends LeaderboardBoardEntry {
 
 @Component({
   selector: 'app-guild-rankings',
-  imports: [NgClass, NgIf, NgFor, NumberFormatPipe],
+  imports: [NgClass, NgIf, NgFor, NumberFormatPipe, CharacterTagComponent],
   templateUrl: './guild-rankings.component.html',
 })
 export class GuildRankingsComponent implements OnInit {

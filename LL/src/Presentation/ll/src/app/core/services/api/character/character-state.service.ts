@@ -170,6 +170,11 @@ export class CharacterStateService {
     this.refresh();
   }
 
+  refreshCurrentCharacter(): void {
+    this.auth.refreshCurrentCharacter();
+    this.refresh();
+  }
+
   /** Optimistic cache update (optional helper) */
   setOverview(ov: CharacterOverviewDto): void {
     this._overview.set(ov);
@@ -208,5 +213,4 @@ export class CharacterStateService {
       ...patch,
     });
   }
-
 }

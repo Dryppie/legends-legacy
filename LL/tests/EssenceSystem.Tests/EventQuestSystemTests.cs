@@ -6,6 +6,7 @@ using Application.WebSockets.Contracts;
 using Domain.Models.Items;
 using Domain.Models.Items.Equipments;
 using Domain.Models.Inventories;
+using Domain.Models.Quests;
 using Domain.Models.Quests.Events;
 using Domain.Models.Entities.Characters;
 using Microsoft.EntityFrameworkCore;
@@ -69,6 +70,7 @@ public sealed class EventQuestSystemTests
             Name = "RealmTester",
             NormalizedName = "REALMTESTER"
         });
+        CompleteTutorial(db, characterId);
         await db.SaveChangesAsync();
 
         await service.ProcessAsync(
@@ -101,15 +103,20 @@ public sealed class EventQuestSystemTests
         await using var db = CreateDb();
         var definition = CreateActiveDefinition(requiredAmount: 1);
         var service = CreateService(db, definition, new RecordingPublisher());
+        var contributorId = Guid.NewGuid();
+        var viewerId = Guid.NewGuid();
+        CompleteTutorial(db, contributorId);
+        CompleteTutorial(db, viewerId);
+        await db.SaveChangesAsync();
 
         await service.ProcessAsync(
-            Guid.NewGuid(),
+            contributorId,
             QuestTrigger.CombatCompleted("region_01_area_01", true),
             Guid.NewGuid(),
             "IdleCombatEncounterCompleted",
             CancellationToken.None);
 
-        var state = Assert.Single((await service.GetJournalAsync(Guid.NewGuid(), CancellationToken.None)).Events);
+        var state = Assert.Single((await service.GetJournalAsync(viewerId, CancellationToken.None)).Events);
         Assert.Equal(EventQuestStatus.Completed, state.Status);
         Assert.NotNull(state.CompletedAt);
     }
@@ -121,6 +128,8 @@ public sealed class EventQuestSystemTests
         var definition = CreateActiveDefinition(requiredAmount: 1);
         var service = CreateService(db, definition, new RecordingPublisher());
         var characterId = Guid.NewGuid();
+        CompleteTutorial(db, characterId);
+        await db.SaveChangesAsync();
 
         await service.ProcessAsync(
             characterId,
@@ -151,6 +160,8 @@ public sealed class EventQuestSystemTests
         var writer = new RecordingLootRewardWriter();
         var service = CreateService(db, definition, new RecordingPublisher(), writer);
         var characterId = Guid.NewGuid();
+        CompleteTutorial(db, characterId);
+        await db.SaveChangesAsync();
 
         await service.ProcessAsync(
             characterId,
@@ -201,6 +212,7 @@ public sealed class EventQuestSystemTests
             Name = "SigilTester",
             NormalizedName = "SIGILTESTER"
         });
+        CompleteTutorial(db, characterId);
         await db.SaveChangesAsync();
 
         await service.ProcessAsync(
@@ -218,6 +230,48 @@ public sealed class EventQuestSystemTests
         Assert.Equal(20, (await db.Characters.SingleAsync(x => x.Id == characterId)).SigilFragments);
     }
 
+    [Fact]
+    public async Task Tutorial_character_cannot_see_or_contribute_to_event_quests()
+    {
+        await using var db = CreateDb();
+        var definition = CreateActiveDefinition(requiredAmount: 2);
+        var service = CreateService(db, definition, new RecordingPublisher());
+        var eligibleCharacterId = Guid.NewGuid();
+        var tutorialCharacterId = Guid.NewGuid();
+        CompleteTutorial(db, eligibleCharacterId);
+        await db.SaveChangesAsync();
+
+        await service.ProcessAsync(
+            eligibleCharacterId,
+            QuestTrigger.CombatCompleted("region_01_area_01", true),
+            Guid.NewGuid(),
+            "IdleCombatEncounterCompleted",
+            CancellationToken.None);
+        await service.ProcessAsync(
+            tutorialCharacterId,
+            QuestTrigger.CombatCompleted("region_01_area_01", true),
+            Guid.NewGuid(),
+            "IdleCombatEncounterCompleted",
+            CancellationToken.None);
+
+        Assert.Empty((await service.GetJournalAsync(
+            tutorialCharacterId,
+            CancellationToken.None)).Events);
+        var instance = Assert.Single(await db.EventQuestInstances
+            .Include(x => x.Objectives)
+            .Include(x => x.Contributions)
+            .ToListAsync());
+        Assert.Equal(1, Assert.Single(instance.Objectives).CurrentAmount);
+        Assert.DoesNotContain(
+            instance.Contributions,
+            contribution => contribution.CharacterId == tutorialCharacterId);
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            service.ClaimAsync(
+                tutorialCharacterId,
+                definition.Id,
+                CancellationToken.None));
+    }
+
     private static EventQuestService CreateService(
         LLDbContext db,
         EventQuestDefinition definition,
@@ -225,12 +279,25 @@ public sealed class EventQuestSystemTests
         RecordingLootRewardWriter? lootRewardWriter = null) =>
         new(
             new EventQuestRepository(db),
+            new QuestRepository(db),
             new StubDefinitionProvider(definition),
             new StubItemBaseRepository(),
             new RecordingInventoryItemFactory(),
             lootRewardWriter ?? new RecordingLootRewardWriter(),
             new FixedTimeProvider(Now),
             publisher);
+
+    private static void CompleteTutorial(LLDbContext db, Guid characterId) =>
+        db.CharacterQuestProgresses.Add(new CharacterQuestProgress
+        {
+            CharacterId = characterId,
+            QuestId = QuestConstants.IntoLumoRuins,
+            DefinitionVersion = 1,
+            Status = QuestStatus.Completed,
+            CompletedAt = Now,
+            CreatedAt = Now,
+            UpdatedAt = Now
+        });
 
     private static EventQuestDefinition CreateActiveDefinition(long requiredAmount) =>
         new()

@@ -8,6 +8,7 @@ import {
 import { NumberFormatPipe } from '../../../../../../shared/pipes/number-format/number-format.pipe';
 import { HumanizeEnumPipe } from '../../../../../../shared/pipes/enums/humanize-enum.pipe';
 import { RegularButtonComponent } from '../../../../../../shared/components/custom-components/buttons/regular-button/regular-button.component';
+import { CharacterTagComponent } from '../../../../../../shared/components/character/character-tag/character-tag.component';
 
 @Component({
   selector: 'app-guild-missions',
@@ -19,6 +20,7 @@ import { RegularButtonComponent } from '../../../../../../shared/components/cust
     NumberFormatPipe,
     HumanizeEnumPipe,
     RegularButtonComponent,
+    CharacterTagComponent,
   ],
   templateUrl: './guild-missions.component.html',
   styleUrl: './guild-missions.component.scss',

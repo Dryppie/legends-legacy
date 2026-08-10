@@ -9,6 +9,7 @@ export interface LeaderboardEntry {
 export interface LeaderboardColumn<T extends LeaderboardEntry> {
   header: string; // Column header text
   value: (row: T) => string | number; // What to render
+  isCharacterName?: boolean;
   cellClass?: string; // Tailwind / CSS classes
   alignRight?: boolean; // Right-align numeric values
 }

@@ -287,7 +287,7 @@ public class InventoryRepository : IInventoryRepository
         if (!equipmentInventoryItems.Any()) return null;
         if (parsedGuids.Count == 0 || parsedGuids.Count != equipmentInventoryItems.Count()) return null;
         if (equipmentInventoryItems.Any(i =>
-            i.ItemInstance is EquipmentInstance equipmentInstance &&
+            i.ItemInstance is not EquipmentInstance equipmentInstance ||
             equipmentInstance.EquipmentBase.EquipmentType == EquipmentType.Tool))
         {
             return null;
@@ -297,8 +297,7 @@ public class InventoryRepository : IInventoryRepository
         const int temperedScrapPerEquipment = 1;
         var temperedScrapGained = temperedScrapPerEquipment * parsedGuids.Count;
 
-        // Remove equipment
-        if (equipmentInventoryItems.Any(i => (i.ItemInstance as EquipmentInstance).Potential != 0)) return null;
+        // Remaining potential does not affect scrap eligibility.
         _context.InventoryItems.RemoveRange(equipmentInventoryItems);
 
         // Try to find Tempered Scrap item

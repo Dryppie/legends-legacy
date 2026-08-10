@@ -6,9 +6,10 @@ import { EquipmentType } from '../../models/enums/equipmentType';
 import { ItemQuality } from '../../models/enums/itemQuality';
 import { ItemType } from '../../models/enums/itemType';
 import { Rarity } from '../../models/enums/rarity';
-import { Equipment, EquipmentInstance } from '../../models/item';
+import { Equipment, EquipmentInstance, ToolBonusType } from '../../models/item';
 import {
   buildAttributeComparisons,
+  buildToolBonusComparisons,
   EquipmentDisplay,
 } from './equipment-display';
 import { EquipmentDisplayComponent } from './equipment-display/equipment-display.component';
@@ -70,6 +71,27 @@ describe('buildAttributeComparisons', () => {
   });
 });
 
+describe('buildToolBonusComparisons', () => {
+  it('compares effective bonuses and aggregates matching affixes', () => {
+    const hovered = display([]);
+    const equipped = display([]);
+    hovered.toolBonuses = [
+      toolBonus('hovered-base', 5),
+      toolBonus('hovered-affix', 7),
+    ];
+    equipped.toolBonuses = [toolBonus('equipped-affix', 8)];
+
+    expect(buildToolBonusComparisons(hovered, equipped)).toEqual([
+      {
+        bonusType: ToolBonusType.GatheringYieldPercent,
+        scopeId: undefined,
+        equippedAmount: 8,
+        hoveredAmount: 12,
+      },
+    ]);
+  });
+});
+
 describe('EquipmentDisplayComponent', () => {
   afterEach(() => setAttributeDefinitions([]));
 
@@ -112,6 +134,36 @@ describe('EquipmentDisplayComponent', () => {
     );
 
     expect(difference?.textContent?.trim()).toBe('+8%');
+  });
+
+  it('renders tool affixes using the standard equipment attribute layout', async () => {
+    await TestBed.configureTestingModule({
+      imports: [EquipmentDisplayComponent],
+    }).compileComponents();
+    const fixture = TestBed.createComponent(EquipmentDisplayComponent);
+
+    fixture.componentRef.setInput('item', toolInstance());
+    fixture.componentRef.setInput(
+      'comparisonItem',
+      toolInstance(8, 'equipped-tool'),
+    );
+    fixture.detectChanges();
+
+    const section: HTMLElement | null = fixture.nativeElement.querySelector(
+      '[data-testid="tool-attributes"]',
+    );
+    const row: HTMLElement | null =
+      section?.querySelector('.ll-item-stat-row') ?? null;
+
+    expect(section?.classList).toContain('ll-item-detail-section');
+    expect(section?.textContent).toContain('Attributes');
+    expect(row?.textContent).toContain('Gathering Yield');
+    expect(row?.textContent).toContain('+12%');
+
+    const difference: HTMLElement | null = fixture.nativeElement.querySelector(
+      '[data-testid="tool-comparison-difference"]',
+    );
+    expect(difference?.textContent?.trim()).toBe('+4%');
   });
 });
 
@@ -181,5 +233,53 @@ function equipmentInstance(
     affinityTags: [],
     itemBudget: amount,
     itemBudgetTier: 1,
+  };
+}
+
+function toolInstance(amount = 12, id = 'test-tool'): EquipmentInstance {
+  const equipmentBase: Equipment = {
+    id: 'test-pickaxe',
+    name: 'Pickaxe',
+    rarity: Rarity.Common,
+    itemType: ItemType.Equipment,
+    description: '',
+    stackable: false,
+    equipmentType: EquipmentType.Tool,
+    attributeModifiers: [],
+    toolBonuses: [],
+    itemBudget: 0,
+    itemBudgetTier: 1,
+  };
+  const affix = toolBonus('test-affix', amount, id);
+
+  return {
+    id,
+    itemBase: equipmentBase,
+    displayName: 'Plain Pickaxe',
+    rarity: Rarity.Common,
+    quality: ItemQuality.Standard,
+    tier: 1,
+    equipmentBase,
+    potential: undefined,
+    temperingProgress: 0,
+    itemXp: 0,
+    baseModifiers: [],
+    instanceModifiers: [],
+    attributeModifiers: [],
+    toolAffixes: [affix],
+    effectiveToolBonuses: [affix],
+    affinityTags: [],
+    itemBudget: 0,
+    itemBudgetTier: 1,
+  };
+}
+
+function toolBonus(id: string, amount: number, equipmentInstanceId?: string) {
+  return {
+    id,
+    equipmentInstanceId,
+    name: "Prospector's",
+    bonusType: ToolBonusType.GatheringYieldPercent,
+    amount,
   };
 }
