@@ -357,6 +357,10 @@ export class CharacterActionsStateService {
     });
   }
 
+  applyCurrentActionSnapshot(action: CharacterActionDto): void {
+    this.applyActionUpdate(action);
+  }
+
   private applyActionUpdate(action: CharacterActionDto | null): void {
     if (
       action?.hasPendingCombatResolution &&
@@ -414,8 +418,13 @@ export class CharacterActionsStateService {
   private getActionUpdateKey(action: CharacterActionDto | null): string | null {
     if (!action) return null;
 
+    const craftingQueueOrder =
+      action.craftingActionDetails?.craftingQueueItems
+        ?.map((item) => item.id)
+        .join(',') ?? '';
+
     if (action.revision) {
-      return `${action.characterActionType}|${action.revision}|${action.isDeleted}`;
+      return `${action.characterActionType}|${action.revision}|${action.isDeleted}|${craftingQueueOrder}`;
     }
 
     const combat = action.combatSession?.combatResult;
@@ -435,7 +444,7 @@ export class CharacterActionsStateService {
       action.updatedAt,
       action.isDeleted,
       action.combatSession ? 'combat-session' : 'no-combat-session',
-      action.craftingActionDetails?.craftingQueueItems?.length ?? 0,
+      craftingQueueOrder,
     ].join('|');
   }
 

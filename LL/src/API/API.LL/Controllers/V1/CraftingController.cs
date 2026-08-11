@@ -5,6 +5,7 @@ using Application.UseCases.Crafting.Dtos;
 using Application.UseCases.Crafting.Queries.GetCraftingRecipes;
 using Application.UseCases.Crafting.Queries.GetRecipeMasteries;
 using Application.UseCases.Professions.Commands.RemoveCraftingQueueItem;
+using Application.UseCases.Professions.Commands.MoveCraftingQueueItem;
 using Application.UseCases.Professions.Dtos;
 using Common.Primitives;
 using Microsoft.AspNetCore.Mvc;
@@ -40,4 +41,12 @@ public class CraftingController : BaseController
     [HttpPost("RemoveCraftingQueueItem")]
     public async Task<ActionResult<Response<RemoveCraftingQueueItemResponseDto>>> RemoveCraftingQueueItem([FromBody] string queueItemId) =>
         await Mediator.Send(new RemoveCraftingQueueItemCommand(CurrentCharacterGuid, queueItemId));
+
+    [HttpPost("queue/move")]
+    public async Task<ActionResult<Response<MoveCraftingQueueItemResponseDto>>> MoveCraftingQueueItem(
+        [FromBody] MoveCraftingQueueItemRequestDto request) =>
+        await Mediator.Send(new MoveCraftingQueueItemCommand(
+            CurrentCharacterGuid,
+            request.QueueItemId,
+            request.Direction));
 }

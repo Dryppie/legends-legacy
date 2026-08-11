@@ -4,6 +4,11 @@ namespace Domain.Models.Professions.Crafting;
 public interface ICraftingRepository
 {
     Task<EquipmentInstance?> RemoveCraftingQueueItemAndReturnItemAsync(Guid characterId, Guid queueItemId, CancellationToken cancellationToken);
+    Task<bool> MoveCraftingQueueItemAsync(
+        Guid characterId,
+        Guid queueItemId,
+        CraftingQueueMoveDirection direction,
+        CancellationToken cancellationToken);
     Task<IReadOnlyList<CharacterRecipeUnlock>> GetBlueprintUnlocksAsync(Guid characterId, CancellationToken cancellationToken);
     Task<IReadOnlyDictionary<string, int>> GetRecipeMasteryLevelsAsync(Guid characterId, CancellationToken cancellationToken);
     Task<IReadOnlyList<CharacterRecipeMastery>> GetRecipeMasteriesAsync(Guid characterId, CancellationToken cancellationToken);

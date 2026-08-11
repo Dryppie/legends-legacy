@@ -26,6 +26,12 @@ export interface RemoveCraftingQueueItemResponse {
   currentAction: CharacterActionDto | null;
 }
 
+export type CraftingQueueMoveDirection = 'Up' | 'Down';
+
+export interface MoveCraftingQueueItemResponse {
+  currentAction: CharacterActionDto;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -110,6 +116,27 @@ export class CraftingService {
         return throwError(() => new Error('Failed to remove item from queue'));
       }),
     );
+  }
+
+  moveQueueItem(
+    queueItemId: string,
+    direction: CraftingQueueMoveDirection,
+  ): Observable<MoveCraftingQueueItemResponse> {
+    return this.api
+      .post('Crafting/queue/move', { queueItemId, direction })
+      .pipe(
+        map((response) =>
+          this.unwrapResponse<MoveCraftingQueueItemResponse>(response),
+        ),
+        catchError((error) =>
+          throwError(
+            () =>
+              new Error(
+                error?.message ?? 'Failed to reposition the queue item',
+              ),
+          ),
+        ),
+      );
   }
 
   setQueue(nextQueue: CraftingQueueItem[]): void {

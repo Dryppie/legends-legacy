@@ -14,7 +14,10 @@ import {
   EquipmentInstance,
   ItemInstance,
 } from '../../../../../shared/models/item';
-import { CraftingService } from '../../../../../core/services/api/crafting/crafting.service';
+import {
+  CraftingQueueMoveDirection,
+  CraftingService,
+} from '../../../../../core/services/api/crafting/crafting.service';
 import { InventoryStateService } from '../../../../../core/services/api/inventory/inventory-state.service';
 import { InventoryItem } from '../../../../../shared/models/inventoryItem';
 import { ItemComponent } from '../../../../../shared/components/item/item.component';
@@ -40,6 +43,7 @@ export class TemperingComponent {
   readonly error = signal<string | null>(null);
   readonly lastOutcome = signal<string | null>(null);
   readonly removingQueueItemId = signal<string | null>(null);
+  readonly movingQueueItemId = signal<string | null>(null);
   readonly activeQueueItem = computed<CraftingQueueItem | null>(
     () => this.craftingQueue()[0] ?? null,
   );
@@ -283,5 +287,41 @@ export class TemperingComponent {
         this.removingQueueItemId.set(null);
       },
     });
+  }
+
+  moveQueuedItem(
+    queueItem: CraftingQueueItem,
+    direction: CraftingQueueMoveDirection,
+    event: MouseEvent,
+  ): void {
+    event.stopPropagation();
+    if (this.movingQueueItemId() || this.removingQueueItemId()) return;
+
+    this.movingQueueItemId.set(queueItem.id);
+    this.error.set(null);
+
+    this.craftingService.moveQueueItem(queueItem.id, direction).subscribe({
+      next: (response) => {
+        const queue =
+          response.currentAction.craftingActionDetails?.craftingQueueItems ??
+          [];
+        this.craftingService.setQueue(queue);
+        this.characterActionsState.applyCurrentActionSnapshot(
+          response.currentAction,
+        );
+        this.lastOutcome.set(
+          `Moved ${queueItem.equipmentInstance.displayName ?? queueItem.equipmentInstance.itemBase.name} ${direction.toLowerCase()}`,
+        );
+        this.movingQueueItemId.set(null);
+      },
+      error: (err) => {
+        this.error.set(err.message ?? 'Failed to reposition the queue item.');
+        this.movingQueueItemId.set(null);
+      },
+    });
+  }
+
+  queueIsBusy(): boolean {
+    return !!this.movingQueueItemId() || !!this.removingQueueItemId();
   }
 }

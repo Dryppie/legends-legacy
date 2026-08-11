@@ -175,6 +175,17 @@ public class CraftingService : ICraftingService
         return anyItemAdded;
     }
 
+    public Task<bool> MoveCraftingQueueItemAsync(
+        Guid characterId,
+        Guid queueItemId,
+        CraftingQueueMoveDirection direction,
+        CancellationToken cancellationToken) =>
+        _craftingRepository.MoveCraftingQueueItemAsync(
+            characterId,
+            queueItemId,
+            direction,
+            cancellationToken);
+
     public async Task<Response<IReadOnlyList<CraftingRecipeDto>>> GetCraftingRecipesAsync(Guid characterId, int targetTier, CancellationToken cancellationToken)
     {
         var blueprintUnlocks = await _progressionService.GetBlueprintUnlocksAsync(characterId, cancellationToken);

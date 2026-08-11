@@ -35,6 +35,49 @@ public class CraftingRepository : ICraftingRepository
         return queueItem?.EquipmentInstance;
     }
 
+    public async Task<bool> MoveCraftingQueueItemAsync(
+        Guid characterId,
+        Guid queueItemId,
+        CraftingQueueMoveDirection direction,
+        CancellationToken cancellationToken)
+    {
+        var characterAction = await _dbContext.CharacterActions
+            .Include(action => action.ActionDetails)
+                .ThenInclude(details => (details as CraftingActionDetails).CraftingQueueItems)
+            .FirstOrDefaultAsync(
+                action => action.CharacterId == characterId,
+                cancellationToken);
+
+        if (characterAction?.ActionDetails is not CraftingActionDetails craftingDetails)
+        {
+            return false;
+        }
+
+        var orderedQueue = craftingDetails.CraftingQueueItems
+            .OrderBy(item => item.AddedAt)
+            .ThenBy(item => item.Id)
+            .ToList();
+        var currentIndex = orderedQueue.FindIndex(item => item.Id == queueItemId);
+        var targetIndex = currentIndex + (int)direction;
+
+        if (currentIndex < 0 || targetIndex < 0 || targetIndex >= orderedQueue.Count)
+        {
+            return false;
+        }
+
+        (orderedQueue[currentIndex], orderedQueue[targetIndex]) =
+            (orderedQueue[targetIndex], orderedQueue[currentIndex]);
+
+        var firstPosition = orderedQueue.Min(item => item.AddedAt);
+        for (var index = 0; index < orderedQueue.Count; index++)
+        {
+            orderedQueue[index].AddedAt = firstPosition.AddMilliseconds(index);
+        }
+
+        characterAction.RowVersion++;
+        return true;
+    }
+
     public async Task<IReadOnlyList<CharacterRecipeUnlock>> GetBlueprintUnlocksAsync(
         Guid characterId,
         CancellationToken cancellationToken) =>

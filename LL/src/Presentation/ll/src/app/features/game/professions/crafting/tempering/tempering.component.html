@@ -100,10 +100,31 @@
               </div>
             </div>
             <div class="flex shrink-0 flex-col items-end gap-2">
+              <div class="flex gap-1" aria-label="Queue position controls">
+                <button
+                  type="button"
+                  class="ll-button px-2 py-1 text-sm"
+                  disabled
+                  aria-label="Move item up"
+                  title="Already first"
+                >
+                  ↑
+                </button>
+                <button
+                  type="button"
+                  class="ll-button px-2 py-1 text-sm"
+                  [disabled]="craftingQueue().length === 1 || queueIsBusy()"
+                  (click)="moveQueuedItem(workingItem, 'Down', $event)"
+                  aria-label="Move item down"
+                  title="Move down"
+                >
+                  ↓
+                </button>
+              </div>
               <button
                 type="button"
                 class="ll-button px-2 py-1 text-xs"
-                [disabled]="removingQueueItemId() === workingItem.id"
+                [disabled]="queueIsBusy()"
                 (click)="removeQueuedItem(workingItem, $event)"
               >
                 Cancel
@@ -121,7 +142,7 @@
           </div>
 
           <div
-            *ngFor="let queueItem of waitingQueue()"
+            *ngFor="let queueItem of waitingQueue(); index as waitingIndex"
             class="ll-card mt-2 cursor-pointer p-3 transition-colors hover:border-primary"
             (click)="selectQueuedItem(queueItem)"
             [ngClass]="{
@@ -143,10 +164,39 @@
                 </div>
               </div>
               <div class="flex shrink-0 flex-col items-end gap-2">
+                <div class="flex gap-1" aria-label="Queue position controls">
+                  <button
+                    type="button"
+                    class="ll-button px-2 py-1 text-sm"
+                    [disabled]="queueIsBusy()"
+                    (click)="moveQueuedItem(queueItem, 'Up', $event)"
+                    aria-label="Move item up"
+                    title="Move up"
+                  >
+                    ↑
+                  </button>
+                  <button
+                    type="button"
+                    class="ll-button px-2 py-1 text-sm"
+                    [disabled]="
+                      waitingIndex === waitingQueue().length - 1 ||
+                      queueIsBusy()
+                    "
+                    (click)="moveQueuedItem(queueItem, 'Down', $event)"
+                    aria-label="Move item down"
+                    [title]="
+                      waitingIndex === waitingQueue().length - 1
+                        ? 'Already last'
+                        : 'Move down'
+                    "
+                  >
+                    ↓
+                  </button>
+                </div>
                 <button
                   type="button"
                   class="ll-button px-2 py-1 text-xs"
-                  [disabled]="removingQueueItemId() === queueItem.id"
+                  [disabled]="queueIsBusy()"
                   (click)="removeQueuedItem(queueItem, $event)"
                 >
                   Cancel
