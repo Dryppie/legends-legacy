@@ -28,7 +28,7 @@ public class TemperingService : ITemperingService
                (current.EquipmentInstance.Potential ?? 0) >= TemperingConstants.PotentialCost;
     }
 
-    public bool HandleTempering(
+    public TemperingAttemptResult? HandleTempering(
         CraftingQueueItem current,
         TemperingSummary temperingSummary,
         Random rng,
@@ -39,7 +39,7 @@ public class TemperingService : ITemperingService
         if (profile == null ||
             current.EquipmentInstance.Rarity >= Rarity.Legacy ||
             (current.EquipmentInstance.Potential ?? 0) < TemperingConstants.PotentialCost)
-            return false;
+            return null;
 
         var wasMasterpiece = current.EquipmentInstance.IsMasterpiece;
         var wasLevelingItem = current.EquipmentInstance.IsLevelingItem;
@@ -68,7 +68,7 @@ public class TemperingService : ITemperingService
         experience = experience.ApplyPositiveBps(craftingExperienceGainBps);
 
         AllocateExpBasedOnCraftingProfession(temperingSummary, experience, current.CraftType);
-        return true;
+        return result;
     }
 
     private TemperingProfileDefinition? GetQueuedProfile(CraftingQueueItem current)

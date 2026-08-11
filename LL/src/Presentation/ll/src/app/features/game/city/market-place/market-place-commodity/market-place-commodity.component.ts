@@ -29,7 +29,7 @@ import {
 } from '../../../../../core/services/api/market-place/market-place.service';
 import { MarketPlaceListing } from '../../../../../shared/models/Dtos/market-place/market-place-listing';
 import { MarketPlaceBuyOrder } from '../../../../../shared/models/Dtos/market-place/market-place-buy-order';
-import { ItemBase } from '../../../../../shared/models/item';
+import { EssenceItem, ItemBase } from '../../../../../shared/models/item';
 import { InventoryItem } from '../../../../../shared/models/inventoryItem';
 import { ItemType } from '../../../../../shared/models/enums/itemType';
 import { NumberFormatPipe } from '../../../../../shared/pipes/number-format/number-format.pipe';
@@ -40,6 +40,8 @@ import {
   matchesMarketplaceResourceSubcategory,
 } from '../../../../../shared/utils/market-place/market-place-category.utils';
 import { BlueprintAttributeSummaryComponent } from '../../../../../shared/components/blueprint-attribute-summary/blueprint-attribute-summary.component';
+import { EssenceDescriptionComponent } from '../../../../../shared/components/essences/essence-description/essence-description.component';
+import { AbilityTagsComponent } from '../../../../../shared/components/essences/ability-tags/ability-tags.component';
 
 interface Commodity {
   base: ItemBase;
@@ -76,6 +78,8 @@ type MarketTicketSide = 'buy' | 'sell';
     ReactiveFormsModule,
     NumberFormatPipe,
     BlueprintAttributeSummaryComponent,
+    EssenceDescriptionComponent,
+    AbilityTagsComponent,
   ],
   templateUrl: './market-place-commodity.component.html',
   styleUrl: './market-place-commodity.component.css',
@@ -244,6 +248,13 @@ export class MarketPlaceCommodityComponent implements OnInit {
         (commodity) => commodity.base.id === this.selectedCommodityId(),
       ) ?? commodities[0]
     );
+  });
+
+  readonly selectedEssenceDefinition = computed(() => {
+    const base = this.selectedCommodity()?.base;
+    if (base?.itemType !== ItemType.Essence) return null;
+
+    return (base as EssenceItem).essence ?? null;
   });
 
   readonly filteredCommodities = computed(() => {

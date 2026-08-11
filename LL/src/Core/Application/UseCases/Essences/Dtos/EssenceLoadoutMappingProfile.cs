@@ -29,11 +29,16 @@ public sealed class EssenceLoadoutConverter : ITypeConverter<EssenceLoadout, Ess
     }
 
     public EssenceLoadoutDto Convert(EssenceLoadout source, EssenceLoadoutDto destination, ResolutionContext context) =>
-        new(source.Id, source.Name, source.IsActive, source.Slots.OrderBy(x => x.SlotIndex).Select(MapSlot).ToList());
+        new(source.Id, source.Name, source.IsActive, source.Slots.OrderBy(x => x.SlotIndex).Select(slot => MapSlot(slot, context)).ToList());
 
-    private EssenceLoadoutSlotDto MapSlot(EssenceLoadoutSlot slot)
+    private EssenceLoadoutSlotDto MapSlot(EssenceLoadoutSlot slot, ResolutionContext context)
     {
         var definition = slot.PlayerEssence is null ? null : _definitions.GetById(slot.PlayerEssence.EssenceDefinitionId);
-        return new(slot.SlotIndex, slot.PlayerEssenceId, slot.PlayerEssence?.EssenceDefinitionId, definition?.DisplayName);
+        return new(
+            slot.SlotIndex,
+            slot.PlayerEssenceId,
+            slot.PlayerEssence?.EssenceDefinitionId,
+            definition?.DisplayName,
+            definition is null ? null : context.Mapper.Map<EssenceDefinitionDto>(definition));
     }
 }

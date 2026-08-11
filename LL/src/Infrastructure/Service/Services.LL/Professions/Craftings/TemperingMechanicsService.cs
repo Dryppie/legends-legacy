@@ -31,6 +31,10 @@ public sealed class TemperingMechanicsService : ITemperingMechanicsService
 
         QuantizeInstanceModifiers(equipment);
 
+        var previousPotential = equipment.Potential ?? 0;
+        var previousItemXp = equipment.ItemXp;
+        var wasMasterpiece = equipment.IsMasterpiece;
+        var wasLevelingItem = equipment.IsLevelingItem;
         var previousRarity = equipment.Rarity;
         var previousQuality = equipment.Quality;
         var outcome = RollOutcome(previousRarity, rng, negativeOutcomeReductionBps);
@@ -77,7 +81,13 @@ public sealed class TemperingMechanicsService : ITemperingMechanicsService
             qualityIncreased ? equipment.Quality : null,
             improvedStat,
             previousValue,
-            newValue);
+            newValue,
+            previousPotential,
+            equipment.Potential ?? 0,
+            previousItemXp,
+            equipment.ItemXp,
+            !wasMasterpiece && equipment.IsMasterpiece,
+            !wasLevelingItem && equipment.IsLevelingItem);
     }
 
     private static void HandleNegativeOutcome(EquipmentInstance equipment, Random rng)

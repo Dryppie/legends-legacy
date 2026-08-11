@@ -159,6 +159,64 @@
               [blueprint]="blueprint"
             ></app-blueprint-attribute-summary>
 
+            <section
+              *ngIf="selectedEssenceDefinition() as essence"
+              class="mt-4 border-t border-primary/20 pt-4"
+              aria-labelledby="selected-essence-abilities"
+            >
+              <h3
+                id="selected-essence-abilities"
+                class="ll-eyebrow text-primary"
+              >
+                Essence abilities
+              </h3>
+
+              <div class="mt-3 grid gap-3 xl:grid-cols-2">
+                <article class="ll-card min-w-0 p-3">
+                  <div class="mb-2 flex items-start justify-between gap-3">
+                    <h4 class="font-semibold text-primary">
+                      {{ essence.activeAbility.name }}
+                    </h4>
+                    <span class="ll-badge ll-badge-accent rounded">
+                      Active
+                    </span>
+                  </div>
+                  <app-essence-description
+                    class="block text-sm text-zinc-300"
+                    [abilityName]="essence.activeAbility.name"
+                    [description]="essence.activeAbility.description"
+                    [effects]="essence.activeAbility.effects"
+                  ></app-essence-description>
+                  <p class="mt-2 text-xs text-zinc-400">
+                    Cooldown: {{ essence.activeAbility.cooldownSeconds }}s
+                  </p>
+                  <app-ability-tags
+                    [tags]="essence.activeAbility.tags"
+                  ></app-ability-tags>
+                </article>
+
+                <article class="ll-card min-w-0 p-3">
+                  <div class="mb-2 flex items-start justify-between gap-3">
+                    <h4 class="font-semibold text-primary">
+                      {{ essence.passiveAbility.name }}
+                    </h4>
+                    <span class="ll-badge rounded text-zinc-300">
+                      Passive
+                    </span>
+                  </div>
+                  <app-essence-description
+                    class="block text-sm text-zinc-300"
+                    [abilityName]="essence.passiveAbility.name"
+                    [description]="essence.passiveAbility.description"
+                    [effects]="essence.passiveAbility.effects"
+                  ></app-essence-description>
+                  <app-ability-tags
+                    [tags]="essence.passiveAbility.tags"
+                  ></app-ability-tags>
+                </article>
+              </div>
+            </section>
+
             <div class="mt-4 flex flex-wrap gap-2">
               <span class="ll-card px-2.5 py-1 text-xs text-zinc-400">
                 Owned

@@ -16,7 +16,7 @@
     <div class="group relative flex sm:inline-block">
       <button
         type="button"
-        class="cursor-help border-none bg-transparent p-0"
+        class="border-none bg-transparent p-0"
         [attr.aria-label]="'Show possible drops for ' + area.name"
       >
         <img src="icons/Info.svg" class="size-6" />
@@ -58,7 +58,7 @@
     >
       <button
         type="button"
-        class="absolute inset-0 flex rotate-45 cursor-help items-center justify-center rounded-md border shadow-md backdrop-blur-sm transition duration-150 group-hover/node:-translate-y-0.5 group-hover/node:shadow-lg group-focus-within/node:-translate-y-0.5"
+        class="absolute inset-0 flex rotate-45 items-center justify-center rounded-md border shadow-md backdrop-blur-sm transition duration-150 group-hover/node:-translate-y-0.5 group-hover/node:shadow-lg group-focus-within/node:-translate-y-0.5"
         [class.border-slate-300/80]="gatheringType === GatheringType.Mining"
         [class.bg-slate-800/90]="gatheringType === GatheringType.Mining"
         [class.text-slate-100]="gatheringType === GatheringType.Mining"

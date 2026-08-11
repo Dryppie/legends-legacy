@@ -43,6 +43,74 @@
     </section>
 
     <section
+      class="ll-panel overflow-hidden"
+      aria-live="polite"
+      aria-label="Recent tempering outcomes"
+    >
+      <button
+        type="button"
+        class="flex w-full items-center justify-between gap-3 px-4 py-3 text-left transition-colors hover:bg-zinc-300/10"
+        [attr.aria-expanded]="outcomesOpen()"
+        aria-controls="tempering-outcome-list"
+        (click)="toggleOutcomes()"
+      >
+        <div>
+          <h2 class="text-sm font-semibold uppercase text-primary">
+            Latest Tempering Outcomes
+          </h2>
+        </div>
+        <span class="shrink-0 text-sm text-primary">
+          {{ outcomesOpen() ? "Hide" : "Show" }}
+        </span>
+      </button>
+
+      <div
+        id="tempering-outcome-list"
+        *ngIf="outcomesOpen()"
+        class="border-t border-light_gray/60 p-3"
+      >
+        <div
+          *ngIf="recentOutcomes().length; else waitingForOutcome"
+          class="space-y-2"
+        >
+          <article
+            *ngFor="
+              let outcome of recentOutcomes();
+              index as outcomeIndex;
+              trackBy: trackOutcome
+            "
+            class="rounded border px-3 py-2"
+            [ngClass]="outcomeCardClasses(outcome.outcome)"
+          >
+            <div class="flex items-center justify-between gap-3">
+              <div
+                class="ll-eyebrow"
+                [ngClass]="outcomeLabelClasses(outcome.outcome)"
+              >
+                {{ outcomeDetail(outcome) }}
+              </div>
+              <div class="shrink-0 text-right text-xs text-secondary">
+                <span *ngIf="outcomeIndex === 0" class="mr-2 text-primary">
+                  Latest
+                </span>
+                <span>{{ outcome.occurredAt | date: "mediumTime" }}</span>
+              </div>
+            </div>
+          </article>
+        </div>
+        <ng-template #waitingForOutcome>
+          <div class="ll-empty-state">
+            {{
+              activeQueueItem()
+                ? "Waiting for the next tempering result…"
+                : "Queue an item to see each tempering result here."
+            }}
+          </div>
+        </ng-template>
+      </div>
+    </section>
+
+    <section
       class="ll-panel max-h-72 min-h-24 overflow-y-auto p-4 sm:max-h-full"
     >
       <h2 class="ll-heading text-xl">Tempering Queue</h2>

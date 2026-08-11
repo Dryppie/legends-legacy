@@ -600,7 +600,7 @@
               <div class="group relative">
                 <button
                   type="button"
-                  class="ll-state cursor-help text-xs"
+                  class="ll-state text-xs"
                   aria-describedby="crafting-quality-chances"
                 >
                   View chances
@@ -692,7 +692,7 @@
             <span class="text-secondary">Requires:</span>
             <span
               *ngFor="let material of recipe.materialCosts"
-              class="group relative inline-flex cursor-help items-baseline gap-1 rounded-sm outline-none focus-visible:ring-1 focus-visible:ring-primary/70"
+              class="group relative inline-flex items-baseline gap-1 rounded-sm outline-none focus-visible:ring-1 focus-visible:ring-primary/70"
               tabindex="0"
               [attr.aria-label]="
                 material.name + '. Where to find: ' + material.sources.join(' ')
@@ -725,7 +725,7 @@
             </span>
             <span
               *ngFor="let material of blueprintSpecificMaterialCosts()"
-              class="group relative inline-flex cursor-help items-baseline gap-1 rounded-sm text-sky-300 outline-none focus-visible:ring-1 focus-visible:ring-primary/70"
+              class="group relative inline-flex items-baseline gap-1 rounded-sm text-sky-300 outline-none focus-visible:ring-1 focus-visible:ring-primary/70"
               tabindex="0"
               [attr.aria-label]="
                 material.name + '. Where to find: ' + material.sources.join(' ')
@@ -806,7 +806,7 @@
         <span class="uppercase tracking-[0.18em] text-secondary">Requires</span>
         <span
           *ngFor="let material of recipe.materialCosts"
-          class="group relative cursor-help rounded border px-2 py-1 outline-none focus-visible:ring-1 focus-visible:ring-primary/70"
+          class="group relative rounded border px-2 py-1 outline-none focus-visible:ring-1 focus-visible:ring-primary/70"
           tabindex="0"
           [attr.aria-label]="
             material.name + '. Where to find: ' + material.sources.join(' ')
@@ -833,7 +833,7 @@
         </span>
         <span
           *ngFor="let material of blueprintSpecificMaterialCosts()"
-          class="group relative cursor-help rounded border px-2 py-1 outline-none focus-visible:ring-1 focus-visible:ring-primary/70"
+          class="group relative rounded border px-2 py-1 outline-none focus-visible:ring-1 focus-visible:ring-primary/70"
           tabindex="0"
           [attr.aria-label]="
             material.name + '. Where to find: ' + material.sources.join(' ')

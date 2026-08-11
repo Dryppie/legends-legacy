@@ -88,7 +88,7 @@ public sealed class CharacterOverviewConverter : ITypeConverter<Character, Chara
                 AttributeType = kvp.Key,
                 Value = kvp.Value
             }).ToList(),
-            ActiveEssenceLoadout = MapActiveLoadout(source),
+            ActiveEssenceLoadout = MapActiveLoadout(source, context),
             EquippedTitle = MapEquippedTitle(source),
             LastSeenAt = source.CharacterAction?.UpdatedAt,
             IsOnline = source.CharacterAction?.UpdatedAt >
@@ -113,7 +113,7 @@ public sealed class CharacterOverviewConverter : ITypeConverter<Character, Chara
         };
     }
 
-    private EssenceLoadoutDto? MapActiveLoadout(Character source)
+    private EssenceLoadoutDto? MapActiveLoadout(Character source, ResolutionContext context)
     {
         var loadout = source.EssenceLoadouts.FirstOrDefault(x => x.IsActive);
         if (loadout is null) return null;
@@ -124,11 +124,11 @@ public sealed class CharacterOverviewConverter : ITypeConverter<Character, Chara
             loadout.IsActive,
             loadout.Slots
                 .OrderBy(slot => slot.SlotIndex)
-                .Select(MapSlot)
+                .Select(slot => MapSlot(slot, context))
                 .ToList());
     }
 
-    private EssenceLoadoutSlotDto MapSlot(EssenceLoadoutSlot slot)
+    private EssenceLoadoutSlotDto MapSlot(EssenceLoadoutSlot slot, ResolutionContext context)
     {
         var definition = slot.PlayerEssence is null
             ? null
@@ -138,6 +138,7 @@ public sealed class CharacterOverviewConverter : ITypeConverter<Character, Chara
             slot.SlotIndex,
             slot.PlayerEssenceId,
             slot.PlayerEssence?.EssenceDefinitionId,
-            definition?.Name);
+            definition?.Name,
+            definition is null ? null : context.Mapper.Map<EssenceDefinitionDto>(definition));
     }
 }

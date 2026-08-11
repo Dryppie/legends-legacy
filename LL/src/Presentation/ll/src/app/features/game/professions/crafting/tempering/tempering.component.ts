@@ -1,9 +1,10 @@
-import { NgClass, NgFor, NgIf } from '@angular/common';
+import { DatePipe, NgClass, NgFor, NgIf } from '@angular/common';
 import {
   Component,
   computed,
   effect,
   Input,
+  OnDestroy,
   signal,
   Signal,
 } from '@angular/core';
@@ -27,19 +28,34 @@ import { CharacterActionsStateService } from '../../../../../core/services/api/c
 import { CharacterActionType } from '../../../../../shared/models/enums/characterActionType';
 import { ItemType } from '../../../../../shared/models/enums/itemType';
 import { Rarity } from '../../../../../shared/models/enums/rarity';
+import {
+  TemperingOutcome,
+  TemperingOutcomeEntry,
+} from '../../../../../shared/models/Dtos/temperingSessionDto';
+import { formatAttributeType } from '../../../../../shared/pipes/attributes/attribute-type-format/attribute-type-format.pipe';
+import { formatAttributeValue } from '../../../../../shared/pipes/attributes/attribute-value-format/attribute-value-format.pipe';
 
 @Component({
-    selector: 'app-tempering',
-    imports: [NgFor, NgIf, NgClass, ItemComponent, EquipmentDisplayComponent],
-    templateUrl: './tempering.component.html'
+  selector: 'app-tempering',
+  imports: [
+    DatePipe,
+    NgFor,
+    NgIf,
+    NgClass,
+    ItemComponent,
+    EquipmentDisplayComponent,
+  ],
+  templateUrl: './tempering.component.html',
 })
-export class TemperingComponent {
+export class TemperingComponent implements OnDestroy {
   @Input({ required: true }) inventory!: Signal<InventoryItem[]>;
 
   private readonly itemXpPerRarity = 10;
   private readonly temperingActionDurationSeconds = 10;
 
   readonly craftingQueue: Signal<CraftingQueueItem[]>;
+  readonly recentOutcomes: Signal<TemperingOutcomeEntry[]>;
+  readonly outcomesOpen = signal(false);
   readonly error = signal<string | null>(null);
   readonly removingQueueItemId = signal<string | null>(null);
   readonly movingQueueItemId = signal<string | null>(null);
@@ -131,6 +147,8 @@ export class TemperingComponent {
     private readonly craftingService: CraftingService,
     private readonly characterActionsState: CharacterActionsStateService,
   ) {
+    this.craftingService.clearTemperingOutcomes();
+    this.recentOutcomes = this.craftingService.recentTemperingOutcomes;
     this.craftingQueue = toSignal(this.craftingService.craftingQueue$, {
       initialValue: [] as CraftingQueueItem[],
     });
@@ -151,6 +169,10 @@ export class TemperingComponent {
 
   selectItem(e: ItemInstance): void {
     this.selectedItemId.set(e.id);
+  }
+
+  ngOnDestroy(): void {
+    this.craftingService.clearTemperingOutcomes();
   }
 
   temper(equipment: EquipmentInstance): void {
@@ -259,6 +281,85 @@ export class TemperingComponent {
         this.removingQueueItemId.set(null);
       },
     });
+  }
+
+  outcomeLabel(outcome: TemperingOutcome): string {
+    return outcome === 'Critical' ? 'Critical success' : outcome;
+  }
+
+  toggleOutcomes(): void {
+    this.outcomesOpen.update((open) => !open);
+  }
+
+  outcomeDetail(entry: TemperingOutcomeEntry): string {
+    if (entry.becameLevelingItem) return 'Awakened as a Leveling Item';
+    if (entry.becameMasterpiece) return 'Became a Masterpiece';
+    if (entry.qualityIncreased && entry.previousQuality && entry.newQuality) {
+      return `Quality increased: ${entry.previousQuality} → ${entry.newQuality}`;
+    }
+    if (entry.rarityUpgraded) {
+      const improvement = this.statImprovement(entry);
+      return `Rarity increased: ${entry.previousRarity} → ${entry.newRarity}${
+        improvement ? ` · ${improvement}` : ''
+      }`;
+    }
+    if (entry.outcome === 'Positive') {
+      return `Tempering EXP: ${entry.previousItemXp} → ${entry.newItemXp}`;
+    }
+    if (entry.outcome === 'Negative') {
+      const extraPotentialLost = Math.max(
+        0,
+        entry.previousPotential - entry.newPotential - entry.potentialSpent,
+      );
+      if (extraPotentialLost > 0) {
+        return `Lost ${extraPotentialLost} additional Potential`;
+      }
+      const itemXpLost = Math.max(0, entry.previousItemXp - entry.newItemXp);
+      return itemXpLost > 0
+        ? `Lost ${itemXpLost} Tempering EXP`
+        : 'No additional penalty';
+    }
+    if (entry.outcome === 'Critical') return 'No further quality increase';
+    return 'No improvement this attempt';
+  }
+
+  outcomeCardClasses(outcome: TemperingOutcome): Record<string, boolean> {
+    return {
+      'border-amber-300/50 bg-amber-300/10': outcome === 'Critical',
+      'border-emerald-400/40 bg-emerald-400/10': outcome === 'Positive',
+      'border-rose-400/40 bg-rose-400/10': outcome === 'Negative',
+      'border-white/15 bg-white/5': outcome === 'Neutral',
+    };
+  }
+
+  outcomeLabelClasses(outcome: TemperingOutcome): Record<string, boolean> {
+    return {
+      'text-amber-200': outcome === 'Critical',
+      'text-emerald-300': outcome === 'Positive',
+      'text-rose-300': outcome === 'Negative',
+      'text-secondary': outcome === 'Neutral',
+    };
+  }
+
+  trackOutcome(_: number, outcome: TemperingOutcomeEntry): string {
+    return outcome.id;
+  }
+
+  private statImprovement(entry: TemperingOutcomeEntry): string | null {
+    if (
+      !entry.improvedStat ||
+      entry.previousStatValue == null ||
+      entry.newStatValue == null
+    ) {
+      return null;
+    }
+
+    const increase = entry.newStatValue - entry.previousStatValue;
+    return `${formatAttributeType(entry.improvedStat)} ${formatAttributeValue(
+      increase,
+      entry.improvedStat,
+      true,
+    )}`;
   }
 
   moveQueuedItem(

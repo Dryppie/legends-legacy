@@ -25,6 +25,7 @@ export class CraftingActionHandler {
     const tempering = action.temperingSession;
     if (!tempering) return;
 
+    this.craftingService.recordTemperingOutcomes(tempering.outcomes ?? []);
     this.sessionSummaryService.loadCraftingSince(tempering);
     const summary = tempering.temperingSummary;
 

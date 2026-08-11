@@ -96,6 +96,7 @@ public class CraftingService : ICraftingService
         var sessionStartedAt = characterAction.UpdatedAt;
 
         var temperingSummary = new TemperingSummary();
+        var outcomes = new List<TemperingOutcomeEntry>();
         var completedItems = new List<EquipmentInstance>();
         var rng = Random.Shared;
 
@@ -107,7 +108,13 @@ public class CraftingService : ICraftingService
         while (actionsToPerform > 0 && actionDetails.CraftingQueueItems.Count > 0)
         {
             var current = actionDetails.CraftingQueueItems.First();
-            if (!_temperingService.HandleTempering(current, temperingSummary, rng, craftingExperienceGainBps, negativeOutcomeReductionBps))
+            var result = _temperingService.HandleTempering(
+                current,
+                temperingSummary,
+                rng,
+                craftingExperienceGainBps,
+                negativeOutcomeReductionBps);
+            if (result == null)
             {
                 await CompleteCurrentQueueItemAsync(characterAction.CharacterId, actionDetails, current, temperingSummary, completedItems, cancellationToken);
                 continue;
@@ -116,6 +123,31 @@ public class CraftingService : ICraftingService
             characterAction.UpdatedAt += TimeSpan.FromSeconds(TemperingConstants.ActionDurationSeconds);
             actionsToPerform--;
             temperingSummary.TotalActions++;
+            outcomes.Add(new TemperingOutcomeEntry
+            {
+                Id = Guid.NewGuid(),
+                QueueItemId = current.Id,
+                EquipmentInstanceId = result.Equipment.Id,
+                EquipmentName = result.Equipment.DisplayName,
+                OccurredAt = characterAction.UpdatedAt,
+                Outcome = result.Outcome,
+                PotentialSpent = result.PotentialSpent,
+                PreviousPotential = result.PreviousPotential,
+                NewPotential = result.NewPotential,
+                PreviousItemXp = result.PreviousItemXp,
+                NewItemXp = result.NewItemXp,
+                BecameMasterpiece = result.BecameMasterpiece,
+                BecameLevelingItem = result.BecameLevelingItem,
+                PreviousRarity = result.PreviousRarity,
+                NewRarity = result.NewRarity,
+                RarityUpgraded = result.RarityUpgraded,
+                QualityIncreased = result.QualityIncreased,
+                PreviousQuality = result.PreviousQuality,
+                NewQuality = result.NewQuality,
+                ImprovedStat = result.ImprovedStat,
+                PreviousStatValue = result.PreviousStatValue,
+                NewStatValue = result.NewStatValue
+            });
 
             if (!_temperingService.CanTemper(current))
             {
@@ -155,7 +187,8 @@ public class CraftingService : ICraftingService
         {
             From = sessionStartedAt,
             To = now,
-            TemperingSummary = temperingSummary
+            TemperingSummary = temperingSummary,
+            Outcomes = outcomes
         };
     }
 

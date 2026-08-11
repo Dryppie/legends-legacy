@@ -205,6 +205,7 @@ export interface EssenceLoadoutSlotDto {
   playerEssenceId?: string | null;
   essenceDefinitionId?: string | null;
   essenceName?: string | null;
+  definition?: EssenceDefinitionDto | null;
 }
 
 export interface SaveEssenceLoadoutDto {

@@ -239,6 +239,7 @@
             <p class="ll-copy">
               {{ filledLoadoutSlots }} / {{ totalLoadoutSlots }} slots attuned
             </p>
+            <p class="ll-helper mt-1">Hover or tap an Essence for details.</p>
           </div>
 
           <div
@@ -248,31 +249,41 @@
             "
             class="mt-4 grid gap-2"
           >
-            <div
+            <app-essence-preview
               *ngFor="let slot of characterOverview.activeEssenceLoadout?.slots"
-              class="ll-card px-3 py-2"
+              [definition]="slot.definition"
+              originClass="relative block"
             >
-              <div class="flex items-center justify-between gap-2">
-                <span class="text-xs uppercase text-zinc-500">
-                  Slot {{ slot.slotIndex + 1 }}
-                </span>
-                <span
-                  class="ll-badge ll-badge-accent rounded"
-                  *ngIf="slot.playerEssenceId"
+              <div class="ll-card px-3 py-2">
+                <div class="flex items-center justify-between gap-2">
+                  <span class="text-xs uppercase text-zinc-500">
+                    Slot {{ slot.slotIndex + 1 }}
+                  </span>
+                  <span
+                    class="ll-badge ll-badge-accent rounded"
+                    *ngIf="slot.playerEssenceId"
+                  >
+                    Attuned
+                  </span>
+                  <span
+                    class="ll-badge rounded text-zinc-400"
+                    *ngIf="!slot.playerEssenceId"
+                  >
+                    Open
+                  </span>
+                </div>
+                <div
+                  class="mt-1 text-sm font-semibold"
+                  [class.border-b]="!!slot.definition"
+                  [class.border-dotted]="!!slot.definition"
+                  [class.border-primary]="!!slot.definition"
+                  [class.text-primary]="!!slot.definition"
+                  [class.text-zinc-200]="!slot.definition"
                 >
-                  Attuned
-                </span>
-                <span
-                  class="ll-badge rounded text-zinc-400"
-                  *ngIf="!slot.playerEssenceId"
-                >
-                  Open
-                </span>
+                  {{ slot.essenceName || "Empty" }}
+                </div>
               </div>
-              <div class="mt-1 text-sm font-semibold text-zinc-200">
-                {{ slot.essenceName || "Empty" }}
-              </div>
-            </div>
+            </app-essence-preview>
           </div>
 
           <ng-template #noLoadout>

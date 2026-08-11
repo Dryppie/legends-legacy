@@ -16,6 +16,7 @@ import { toDisplayedCombatRating } from '../../../../shared/models/combat-rating
 import { AttributeTooltipDirective } from '../../../../shared/directives/attribute-tooltip/attribute-tooltip.directive';
 import { ProfessionsService } from '../../../../core/services/api/professions/professions.service';
 import { ProfessionType } from '../../../../shared/models/Dtos/characterProfession';
+import { EssencePreviewComponent } from '../../../../shared/components/essences/essence-preview/essence-preview.component';
 
 @Component({
   selector: 'app-character-overview',
@@ -29,6 +30,7 @@ import { ProfessionType } from '../../../../shared/models/Dtos/characterProfessi
     AttributeValueFormatPipe,
     AttributeTooltipDirective,
     DecimalPipe,
+    EssencePreviewComponent,
   ],
   templateUrl: './character-overview.component.html',
 })

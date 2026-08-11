@@ -18,7 +18,13 @@ public sealed record TemperingAttemptResult(
     ItemQuality? NewQuality = null,
     AttributeType? ImprovedStat = null,
     float? PreviousStatValue = null,
-    float? NewStatValue = null);
+    float? NewStatValue = null,
+    int PreviousPotential = 0,
+    int NewPotential = 0,
+    int PreviousItemXp = 0,
+    int NewItemXp = 0,
+    bool BecameMasterpiece = false,
+    bool BecameLevelingItem = false);
 
 public interface ITemperingMechanicsService
 {

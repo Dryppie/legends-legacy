@@ -1,0 +1,18 @@
+<app-popover
+  trigger="hover"
+  [disabled]="!details()"
+  [originClass]="originClass()"
+  [popoverClass]="
+    'bg-texture max-w-[min(24rem,calc(100vw-1rem))] rounded border border-light_gray p-3 text-sm text-white shadow'
+  "
+  [template]="detailsTemplate"
+>
+  <ng-content></ng-content>
+</app-popover>
+
+<ng-template #detailsTemplate>
+  <app-essence-details
+    *ngIf="details() as essenceDetails"
+    [essence]="essenceDetails"
+  ></app-essence-details>
+</ng-template>

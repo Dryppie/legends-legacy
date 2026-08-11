@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, signal } from '@angular/core';
 import { HttpParams } from '@angular/common/http';
 import { ApiService } from '../api.service';
 import {
@@ -20,6 +20,7 @@ import {
   LearnBlueprintResult,
 } from '../../../../shared/models/crafting-v2';
 import { ApiResponse } from '../../../../shared/models/response';
+import { TemperingOutcomeEntry } from '../../../../shared/models/Dtos/temperingSessionDto';
 
 export interface RemoveCraftingQueueItemResponse {
   inventoryItems: InventoryItem[];
@@ -39,9 +40,14 @@ export class CraftingService {
   private readonly queueSubject = new BehaviorSubject<CraftingQueueItem[]>([]);
   private readonly blueprintLearnedSubject =
     new Subject<LearnBlueprintResult>();
+  private readonly recentTemperingOutcomesSignal = signal<
+    TemperingOutcomeEntry[]
+  >([]);
   /** Observable that callers (components, other services) can subscribe to */
   readonly craftingQueue$ = this.queueSubject.asObservable();
   readonly blueprintLearned$ = this.blueprintLearnedSubject.asObservable();
+  readonly recentTemperingOutcomes =
+    this.recentTemperingOutcomesSignal.asReadonly();
 
   constructor(
     private api: ApiService,
@@ -142,6 +148,30 @@ export class CraftingService {
   setQueue(nextQueue: CraftingQueueItem[]): void {
     // Use a defensive copy so callers can keep mutating their own array safely
     this.queueSubject.next([...nextQueue]);
+  }
+
+  recordTemperingOutcomes(outcomes: TemperingOutcomeEntry[]): void {
+    if (outcomes.length === 0) return;
+
+    const byId = new Map(
+      [...this.recentTemperingOutcomesSignal(), ...outcomes].map((outcome) => [
+        outcome.id,
+        outcome,
+      ]),
+    );
+    this.recentTemperingOutcomesSignal.set(
+      [...byId.values()]
+        .sort(
+          (left, right) =>
+            new Date(right.occurredAt).getTime() -
+            new Date(left.occurredAt).getTime(),
+        )
+        .slice(0, 5),
+    );
+  }
+
+  clearTemperingOutcomes(): void {
+    this.recentTemperingOutcomesSignal.set([]);
   }
 
   get currentQueue(): CraftingQueueItem[] {

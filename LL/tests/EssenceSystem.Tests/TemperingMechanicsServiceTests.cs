@@ -23,6 +23,10 @@ public sealed class TemperingMechanicsServiceTests
         Assert.Empty(equipment.InstanceModifiers);
         Assert.Equal(9, equipment.Potential);
         Assert.Equal(1, equipment.ItemXp);
+        Assert.Equal(10, result.PreviousPotential);
+        Assert.Equal(9, result.NewPotential);
+        Assert.Equal(0, result.PreviousItemXp);
+        Assert.Equal(1, result.NewItemXp);
     }
 
     [Fact]
@@ -125,6 +129,22 @@ public sealed class TemperingMechanicsServiceTests
             equipment.InstanceModifiers.Single(x => x.AttributeType == AttributeType.Power).Amount);
         Assert.True(
             equipment.InstanceModifiers.Single(x => x.AttributeType == AttributeType.MaxHealth).Amount > 100);
+    }
+
+    [Fact]
+    public void NegativeAttemptReportsItsAdditionalPotentialPenalty()
+    {
+        var equipment = CreateEquipment();
+        var result = new TemperingMechanicsService(Options.Create(new CraftingBalanceOptions
+        {
+            CriticalChanceBase = 0d,
+            CriticalChancePerRarityStep = 0d
+        })).ApplyTemperingAttempt(equipment, CreateProfile(), new FixedRandom(0.08d));
+
+        Assert.Equal(TemperingOutcome.Negative, result.Outcome);
+        Assert.Equal(10, result.PreviousPotential);
+        Assert.Equal(8, result.NewPotential);
+        Assert.Equal(1, result.PotentialSpent);
     }
 
     [Fact]
