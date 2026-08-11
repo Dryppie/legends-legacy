@@ -3,6 +3,7 @@ import {
   effect,
   ElementRef,
   EventEmitter,
+  Input,
   OnDestroy,
   Output,
   ViewChild,
@@ -15,14 +16,15 @@ import { CharacterActionsStateService } from '../../../core/services/api/charact
 import { TimeSyncService } from '../../../core/services/api/time-sync/time-sync.service';
 
 @Component({
-    selector: 'app-progress-bar',
-    imports: [],
-    templateUrl: './progress-bar.component.html'
+  selector: 'app-progress-bar',
+  imports: [],
+  templateUrl: './progress-bar.component.html',
 })
 export class ProgressBarComponent implements OnDestroy {
   @ViewChild('progressBar', { static: true })
   progressBar!: ElementRef<HTMLDivElement>;
   @Output() remainingTimeChange = new EventEmitter<string>();
+  @Input() vertical = false;
 
   private animationFrameId: number = 0;
   private actionSubscription: Subscription | null = null;
@@ -83,14 +85,13 @@ export class ProgressBarComponent implements OnDestroy {
       Math.min((elapsedTime / duration) * 100, 100),
     );
 
-    // Set initial progress bar width
-    progressBarElement.style.width = `${initialProgress}%`;
+    this.setProgress(progressBarElement, initialProgress);
 
     const updateProgress = () => {
       const elapsed = (this.timeSync.now() - startTime) / 1000;
       const progress = Math.max(0, Math.min((elapsed / duration) * 100, 100));
 
-      progressBarElement.style.width = `${progress}%`;
+      this.setProgress(progressBarElement, progress);
 
       const remainingSeconds = Math.max(duration - Math.floor(elapsed), 0);
       this.remainingTimeChange.emit(this.formatTime(remainingSeconds));
@@ -115,7 +116,20 @@ export class ProgressBarComponent implements OnDestroy {
 
   private stopProgressBar(): void {
     this.cancelAnimation();
-    this.progressBar.nativeElement.style.width = '0%';
+    this.setProgress(this.progressBar.nativeElement, 0);
+  }
+
+  private setProgress(element: HTMLDivElement, progress: number): void {
+    if (this.vertical) {
+      element.style.width = '100%';
+      element.style.height = '100%';
+      element.style.transform = `scaleY(${progress / 100})`;
+      return;
+    }
+
+    element.style.transform = '';
+    element.style.width = `${progress}%`;
+    element.style.height = '100%';
   }
 
   private cancelAnimation(): void {

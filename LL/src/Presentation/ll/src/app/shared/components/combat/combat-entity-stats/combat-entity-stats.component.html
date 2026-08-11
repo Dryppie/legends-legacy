@@ -60,9 +60,13 @@
             *ngIf="selectedEntityId !== participant.id"
             class="shrink-0 text-[10px] text-light_gray"
           >
-            {{ participant.entity.health | number }}/{{
-              participant.entity.maxHealth | number
-            }}
+            <ng-container
+              *ngIf="hasKnownHealth(participant.entity); else healthUnavailable"
+            >
+              {{ participant.entity.health | number }}/{{
+                participant.entity.maxHealth | number
+              }}
+            </ng-container>
           </span>
         </div>
 
@@ -104,12 +108,16 @@
             *ngIf="selectedEntityId === participant.id"
             class="shrink-0 text-xs font-semibold"
           >
-            {{ participant.entity.health | number }}/{{
-              participant.entity.maxHealth | number
-            }}
-            <span *ngIf="participant.entity.barrier > 0" class="ll-text-info"
-              >+{{ participant.entity.barrier | number }}</span
+            <ng-container
+              *ngIf="hasKnownHealth(participant.entity); else healthUnavailable"
             >
+              {{ participant.entity.health | number }}/{{
+                participant.entity.maxHealth | number
+              }}
+              <span *ngIf="participant.entity.barrier > 0" class="ll-text-info"
+                >+{{ participant.entity.barrier | number }}</span
+              >
+            </ng-container>
           </span>
         </div>
 
@@ -268,12 +276,21 @@
               class="whitespace-nowrap text-right font-semibold"
               [class.opacity-45]="isDefeated(participant.entity)"
             >
-              {{ participant.entity.health | number }}/{{
-                participant.entity.maxHealth | number
-              }}
-              <span *ngIf="participant.entity.barrier > 0" class="ll-text-info"
-                >+{{ participant.entity.barrier | number }}</span
+              <ng-container
+                *ngIf="
+                  hasKnownHealth(participant.entity);
+                  else healthUnavailable
+                "
               >
+                {{ participant.entity.health | number }}/{{
+                  participant.entity.maxHealth | number
+                }}
+                <span
+                  *ngIf="participant.entity.barrier > 0"
+                  class="ll-text-info"
+                  >+{{ participant.entity.barrier | number }}</span
+                >
+              </ng-container>
             </span>
             <span
               class="text-right font-semibold"
@@ -573,3 +590,5 @@
     </ng-container>
   </div>
 </div>
+
+<ng-template #healthUnavailable>—</ng-template>

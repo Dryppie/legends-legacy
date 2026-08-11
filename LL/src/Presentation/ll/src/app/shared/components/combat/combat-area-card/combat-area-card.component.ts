@@ -1,10 +1,7 @@
 import { Component, effect, Input, OnInit } from '@angular/core';
 import { Area } from '../../../models/Dtos/regionDto';
 import { MiniButtonComponent } from '../../custom-components/buttons/mini-button/mini-button.component';
-import {
-  CharacterActionDto,
-  StartCombatActionRequest,
-} from '../../../../shared/models/Dtos/characterActionDto';
+import { StartCombatActionRequest } from '../../../../shared/models/Dtos/characterActionDto';
 import { CommonModule, NgIf } from '@angular/common';
 import { CharacterActionsStateService } from '../../../../core/services/api/character-actions/character-actions.state.service';
 import { CharacterActionType } from '../../../models/enums/characterActionType';
@@ -32,7 +29,6 @@ export class CombatAreaCardComponent implements OnInit {
   @Input() area!: Area;
   @Input() isLastInRow = false;
 
-  currentAction: CharacterActionDto | null = null;
   readonly isStartingIdleCombat;
   isLocked = true;
   isStartingTrainingBattle = false;
@@ -44,10 +40,6 @@ export class CombatAreaCardComponent implements OnInit {
     private readonly combatService: CombatService,
   ) {
     this.isStartingIdleCombat = this.characterActionService.loadingCombat;
-
-    effect(() => {
-      this.currentAction = this.characterActionService.currentAction();
-    });
 
     effect(() => {
       this.questState.areaAccess();
@@ -70,14 +62,17 @@ export class CombatAreaCardComponent implements OnInit {
   canStartAction(): boolean {
     return (
       !this.isStartingIdleCombat() &&
-      (this.currentAction == null ||
-        (new Date(this.currentAction.updatedAt).getTime() <= Date.now() &&
-          this.currentAction.isDeleted))
+      this.characterActionService.canStartAction(CharacterActionType.Combat)
     );
   }
 
   startCombat(): void {
-    if (this.isStartingTrainingBattle || this.isStartingIdleCombat()) return;
+    if (
+      this.isStartingTrainingBattle ||
+      this.isStartingIdleCombat() ||
+      !this.canStartAction()
+    )
+      return;
 
     this.questState.clearError();
     if (this.shouldStartTrainingBattle()) {

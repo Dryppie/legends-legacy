@@ -45,8 +45,11 @@ export class CurrentActionComponent {
       return;
     }
 
-    if (action.isDeleted && new Date(action.updatedAt).getTime() > Date.now()) {
-      this.performingAction = 'Engaged in Combat - Stopping..';
+    const deadline = new Date(
+      action.nextResolutionAt ?? action.updatedAt,
+    ).getTime();
+    if (action.isDeleted && deadline > Date.now()) {
+      this.performingAction = 'Combat ending - recovery';
       return;
     }
 

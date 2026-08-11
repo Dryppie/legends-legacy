@@ -65,11 +65,10 @@ export class TemperingComponent implements OnDestroy {
   readonly waitingQueue = computed<CraftingQueueItem[]>(() =>
     this.craftingQueue().slice(1),
   );
-  readonly combatInProgress = computed(
+  readonly actionUnavailable = computed(
     () =>
       this.characterActionsState.loadingCombat() ||
-      (this.characterActionsState.isCombatAction() &&
-        this.characterActionsState.isActiveAction()),
+      !this.characterActionsState.canStartAction(CharacterActionType.Crafting),
   );
 
   readonly equipmentInventory = computed(() =>
@@ -120,7 +119,7 @@ export class TemperingComponent implements OnDestroy {
     const eq = this.selectedEquipmentInstance();
     return (
       !!eq &&
-      !this.combatInProgress() &&
+      !this.actionUnavailable() &&
       this.isNonToolEquipment(eq) &&
       (eq.potential ?? 0) >= 1 &&
       eq.rarity !== Rarity.Legacy &&
@@ -131,7 +130,9 @@ export class TemperingComponent implements OnDestroy {
   readonly selectedIneligibilityReason = computed<string | null>(() => {
     const equipment = this.selectedEquipmentInstance();
     if (!equipment || this.canTemper()) return null;
-    if (this.combatInProgress())
+    if (this.characterActionsState.isActionCooldown())
+      return 'Combat is stopping. Tempering will be available when the current action timer finishes.';
+    if (this.actionUnavailable())
       return 'Tempering cannot be started while combat is in progress.';
     if ((equipment.potential ?? 0) < 1)
       return 'This item has no remaining Potential.';
@@ -176,7 +177,7 @@ export class TemperingComponent implements OnDestroy {
   }
 
   temper(equipment: EquipmentInstance): void {
-    if (!equipment || this.combatInProgress() || !this.canTemper()) return;
+    if (!equipment || this.actionUnavailable() || !this.canTemper()) return;
 
     const queueId = crypto.randomUUID();
     const queueItem: CraftingQueueItem = {

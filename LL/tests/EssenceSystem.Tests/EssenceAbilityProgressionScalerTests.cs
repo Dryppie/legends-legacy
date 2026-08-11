@@ -64,6 +64,7 @@ public sealed class EssenceAbilityProgressionScalerTests
         var ability = new AbilitySpec
         {
             Kind = AbilitySpecKind.Passive,
+            Description = "Take 10% less damage. Every third attack deals 30% increased damage.",
             Effects =
             [
                 new AbilityEffectSpec
@@ -76,7 +77,7 @@ public sealed class EssenceAbilityProgressionScalerTests
                 {
                     Id = "effect.next-hit",
                     Operation = AbilityEffectOperation.ModifyNextBasicAttackDamage,
-                    BaseValue = 100
+                    BaseValue = 30
                 },
                 new AbilityEffectSpec
                 {
@@ -91,7 +92,13 @@ public sealed class EssenceAbilityProgressionScalerTests
         var scaled = EssenceAbilityProgressionScaler.Apply(ability, ascensionTier: 1);
 
         Assert.Equal(-11, scaled.Effects[0].BaseValue);
-        Assert.Equal(112, scaled.Effects[1].BaseValue);
+        Assert.Equal(34, scaled.Effects[1].BaseValue);
+        Assert.Equal(
+            "Take 11% less damage. Every third attack deals 34% increased damage.",
+            scaled.Description);
+        Assert.Equal(
+            "Take 10% less damage. Every third attack deals 30% increased damage.",
+            ability.Description);
         Assert.Equal(1.12, scaled.Effects[2].SummonPowerMultiplier, precision: 3);
         Assert.Equal(1.12, scaled.Effects[2].SummonHealthMultiplier, precision: 3);
     }

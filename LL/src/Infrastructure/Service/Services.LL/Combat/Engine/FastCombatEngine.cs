@@ -147,8 +147,10 @@ public sealed class FastCombatEngine
             combatant => combatant.Id,
             combatant => combatant.Team.ToString(),
             StringComparer.OrdinalIgnoreCase);
-        return AddHealthRegenerationTelemetry(
-            new CombatStatsAggregator().Aggregate(_log, teamsByEntityId),
+        return AddFinalCombatantState(
+            AddHealthRegenerationTelemetry(
+                new CombatStatsAggregator().Aggregate(_log, teamsByEntityId),
+                combatants),
             combatants);
     }
 
@@ -2114,6 +2116,30 @@ public sealed class FastCombatEngine
                 HealthRegenerationPotential: potential,
                 HealthRegenerationOverhealed: overhealed,
                 HealthRegenerationPulses: pulses));
+        }
+
+        return result;
+    }
+
+    private static IReadOnlyList<EntityStats> AddFinalCombatantState(
+        IReadOnlyList<EntityStats> aggregatedStats,
+        IReadOnlyList<RuntimeCombatant> combatants)
+    {
+        var result = aggregatedStats.ToList();
+
+        foreach (var combatant in combatants)
+        {
+            var index = result.FindIndex(stats =>
+                stats.EntityId.Equals(combatant.Id, StringComparison.OrdinalIgnoreCase));
+            if (index < 0)
+                continue;
+
+            result[index] = result[index] with
+            {
+                Health = (int)combatant.Health,
+                MaxHealth = (int)combatant.GetAttribute(AttributeType.MaxHealth),
+                Barrier = (int)combatant.Barrier
+            };
         }
 
         return result;

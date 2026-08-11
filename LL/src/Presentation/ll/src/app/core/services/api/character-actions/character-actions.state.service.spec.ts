@@ -173,6 +173,45 @@ describe('CharacterActionsStateService', () => {
     expect(combat.clearAllCombat).not.toHaveBeenCalled();
   }));
 
+  it('keeps a stopped combat visible and blocks new actions until its deadline', fakeAsync(() => {
+    const deadline = new Date(Date.now() + 10_000);
+    const stoppingCombat: CharacterActionDto = {
+      ...combatAction(),
+      updatedAt: deadline,
+      nextResolutionAt: deadline,
+      revision: 'stopping-combat-revision',
+      isDeleted: true,
+    };
+
+    service.applyCurrentActionSnapshot(stoppingCombat);
+    flushMicrotasks();
+
+    expect(service.displayCurrentAction()).toBeTrue();
+    expect(service.isActionCooldown()).toBeTrue();
+    expect(service.canStartAction(CharacterActionType.Combat)).toBeFalse();
+    expect(service.canStartAction(CharacterActionType.Crafting)).toBeFalse();
+
+    tick(10_001);
+
+    expect(service.displayCurrentAction()).toBeFalse();
+    expect(service.isActionCooldown()).toBeFalse();
+    expect(service.canStartAction(CharacterActionType.Crafting)).toBeTrue();
+  }));
+
+  it('allows more Tempering items during Tempering but blocks Combat', () => {
+    service.applyCurrentActionSnapshot({
+      ...combatAction(),
+      characterActionType: CharacterActionType.Crafting,
+      updatedAt: new Date(Date.now() - 1_000),
+      nextResolutionAt: new Date(Date.now() - 1_000),
+      revision: 'active-crafting-revision',
+      isDeleted: false,
+    });
+
+    expect(service.canStartAction(CharacterActionType.Crafting)).toBeTrue();
+    expect(service.canStartAction(CharacterActionType.Combat)).toBeFalse();
+  });
+
   it('does not treat later action changes as another logout', fakeAsync(() => {
     logoutCount.set(1);
     TestBed.flushEffects();

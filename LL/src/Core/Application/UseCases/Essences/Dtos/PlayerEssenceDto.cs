@@ -19,4 +19,5 @@ public sealed record PlayerEssenceDto(
     EssenceEvolveInfoDto EvolveInfo,
     IReadOnlyList<EssenceAttributeBonusDto> CurrentAttributeBonuses,
     EssenceAbilityDto ActiveAbility,
-    EssenceAbilityDto PassiveAbility);
+    EssenceAbilityDto PassiveAbility,
+    IReadOnlyList<string> Tags);

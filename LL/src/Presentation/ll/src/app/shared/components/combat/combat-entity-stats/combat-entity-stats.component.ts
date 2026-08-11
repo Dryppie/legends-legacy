@@ -160,7 +160,11 @@ export class CombatEntityStatsComponent implements OnChanges {
   }
 
   isDefeated(entity: SimpleCombatEntityDto): boolean {
-    return entity.health <= 0;
+    return this.hasKnownHealth(entity) && entity.health <= 0;
+  }
+
+  hasKnownHealth(entity: SimpleCombatEntityDto): boolean {
+    return entity.maxHealth > 0;
   }
 
   private refreshSelection(): void {
@@ -214,9 +218,9 @@ export class CombatEntityStatsComponent implements OnChanges {
           id: stats.entityId,
           name: stats.entityName || stats.entityId,
           imagePath: '',
-          health: 0,
-          maxHealth: 0,
-          barrier: 0,
+          health: stats.health ?? -1,
+          maxHealth: stats.maxHealth ?? -1,
+          barrier: stats.barrier ?? 0,
           level: 1,
         };
         participants.set(stats.entityId, {

@@ -191,6 +191,9 @@ export class EssencesComponent implements OnInit {
           essence.name,
           essence.activeAbility.name,
           essence.passiveAbility.name,
+          ...(essence.tags ?? []),
+          ...(essence.activeAbility.tags ?? []),
+          ...(essence.passiveAbility.tags ?? []),
         ]
           .join(' ')
           .toLowerCase();

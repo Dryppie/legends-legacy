@@ -80,6 +80,13 @@ export class CharacterActionsStateService {
       this._currentAction()!.characterActionType !== CharacterActionType.Idle,
   );
 
+  readonly isActionCooldown = computed(() => {
+    const action = this._currentAction();
+    if (!action?.isDeleted) return false;
+
+    return this.actionDeadline(action) > Date.now();
+  });
+
   constructor(
     private readonly actionsService: CharacterActionsService,
     private readonly polling: CharacterActionsPollingService,
@@ -271,6 +278,23 @@ export class CharacterActionsStateService {
     return this.showAction();
   }
 
+  canStartAction(type: CharacterActionType): boolean {
+    const action = this._currentAction();
+    if (!action) return true;
+    if (this.isActionCooldown()) return false;
+    if (
+      action.isDeleted ||
+      action.characterActionType === CharacterActionType.Idle
+    ) {
+      return true;
+    }
+
+    return (
+      type === CharacterActionType.Crafting &&
+      action.characterActionType === CharacterActionType.Crafting
+    );
+  }
+
   clear(): void {
     this.polling.stop();
     this.persistence.clear();
@@ -313,10 +337,10 @@ export class CharacterActionsStateService {
       return;
     }
 
-    const updatedAt = new Date(action.updatedAt).getTime();
+    const deadline = this.actionDeadline(action);
     const now = Date.now();
 
-    if (updatedAt < now) {
+    if (deadline < now) {
       this._showAction.set(false);
     } else {
       this._showAction.set(true);
@@ -332,7 +356,7 @@ export class CharacterActionsStateService {
         this.combatService.clearAllCombat();
         this._currentAction.set(null);
         this.hide();
-      }, updatedAt - now);
+      }, deadline - now);
     }
   }
 
@@ -606,5 +630,9 @@ export class CharacterActionsStateService {
     }
 
     return !action.combatSession?.combatResult;
+  }
+
+  private actionDeadline(action: CharacterActionDto): number {
+    return new Date(action.nextResolutionAt ?? action.updatedAt).getTime();
   }
 }

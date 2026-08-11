@@ -47,6 +47,9 @@ export interface EntityStats {
   team: string;
   barrierGenerated: number;
   damageBlocked: number;
+  health?: number | null;
+  maxHealth?: number | null;
+  barrier?: number | null;
 }
 
 export interface AbilityStats {

@@ -66,13 +66,10 @@
             class="absolute inset-0 overflow-hidden rounded-full border border-[var(--ll-color-border)] bg-[var(--ll-color-surface-soft)]"
             aria-hidden="true"
           >
-            <span
-              class="absolute inset-0 overflow-hidden bg-gradient-to-t from-primary/35 to-primary/15 transition-transform ease-linear will-change-transform"
-              [style.transition-duration.ms]="compactActionTransitionDuration()"
-              [style.transform]="
-                'translateY(' + (100 - compactActionProgress()) + '%)'
-              "
-            ></span>
+            <app-progress-bar
+              class="absolute inset-0 block"
+              [vertical]="true"
+            ></app-progress-bar>
           </span>
           <span
             class="relative flex h-full w-full items-center justify-center text-primary"

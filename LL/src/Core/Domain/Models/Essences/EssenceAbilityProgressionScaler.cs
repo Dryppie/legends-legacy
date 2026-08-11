@@ -47,7 +47,77 @@ public static class EssenceAbilityProgressionScaler
             }
         }
 
+        scaled.Description = ScaleAuthoredModifierValues(
+            ability.Description,
+            ability.Effects,
+            scaled.Effects);
+
         return scaled;
+    }
+
+    private static string ScaleAuthoredModifierValues(
+        string description,
+        IReadOnlyList<AbilityEffectSpec> originalEffects,
+        IReadOnlyList<AbilityEffectSpec> scaledEffects)
+    {
+        var scaledDescription = description;
+        for (var index = 0; index < Math.Min(originalEffects.Count, scaledEffects.Count); index++)
+        {
+            var original = originalEffects[index];
+            var scaled = scaledEffects[index];
+            if (!UsesAuthoredBaseValue(original.Operation)
+                || original.BaseValue == 0
+                || original.BaseValue == scaled.BaseValue)
+            {
+                continue;
+            }
+
+            scaledDescription = ReplaceFirstNumericToken(
+                scaledDescription,
+                Math.Abs(original.BaseValue).ToString(),
+                Math.Abs(scaled.BaseValue).ToString());
+        }
+
+        return scaledDescription;
+    }
+
+    private static bool UsesAuthoredBaseValue(AbilityEffectOperation operation) =>
+        operation is AbilityEffectOperation.ModifyAttribute
+            or AbilityEffectOperation.ModifyStatusStacks
+            or AbilityEffectOperation.ModifyThreat
+            or AbilityEffectOperation.ModifyRegenerationRate
+            or AbilityEffectOperation.ModifyRegenerationInterval
+            or AbilityEffectOperation.ModifyHealingReceived
+            or AbilityEffectOperation.ModifyDamageDealt
+            or AbilityEffectOperation.ModifyDamageTaken
+            or AbilityEffectOperation.ModifyDamageTakenFromCondition
+            or AbilityEffectOperation.ModifyNextBasicAttackDamage
+            or AbilityEffectOperation.ModifyNextBasicAttackArmorPenetration;
+
+    private static string ReplaceFirstNumericToken(
+        string value,
+        string original,
+        string replacement)
+    {
+        var searchFrom = 0;
+        while (searchFrom < value.Length)
+        {
+            var index = value.IndexOf(original, searchFrom, StringComparison.Ordinal);
+            if (index < 0)
+                return value;
+
+            var hasNumericCharacterBefore = index > 0
+                && (char.IsDigit(value[index - 1]) || value[index - 1] == '.');
+            var end = index + original.Length;
+            var hasNumericCharacterAfter = end < value.Length
+                && (char.IsDigit(value[end]) || value[end] == '.');
+            if (!hasNumericCharacterBefore && !hasNumericCharacterAfter)
+                return value[..index] + replacement + value[end..];
+
+            searchFrom = end;
+        }
+
+        return value;
     }
 
     private static int ScaleCooldownTicks(int ticks, int ascensionTier) =>

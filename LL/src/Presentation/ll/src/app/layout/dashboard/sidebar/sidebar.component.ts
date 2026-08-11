@@ -7,7 +7,6 @@ import {
   OnDestroy,
   OnInit,
   Output,
-  signal,
   untracked,
 } from '@angular/core';
 import { Router, RouterLink, NavigationEnd } from '@angular/router';
@@ -29,10 +28,9 @@ import { SidebarNotificationRefreshService } from '../../../core/services/client
 import { EssenceStateService } from '../../../core/services/api/essences/essence-state.service';
 import { GuildStateService } from '../../../core/services/api/guild/guild-state.service';
 import { SidebarLayoutPreferenceService } from '../../../core/services/client-side/sidebar-layout/sidebar-layout-preference.service';
-import { TimeSyncService } from '../../../core/services/api/time-sync/time-sync.service';
-import { environment } from '../../../../environments/environment';
 import { QuestStateService } from '../../../core/services/api/quest/quest-state.service';
 import { QuestPresenterService } from '../../../core/services/api/quest/quest-presenter.service';
+import { ProgressBarComponent } from '../../../shared/components/progress-bar/progress-bar.component';
 
 @Component({
   selector: 'app-sidebar',
@@ -43,6 +41,7 @@ import { QuestPresenterService } from '../../../core/services/api/quest/quest-pr
     RouterLink,
     CurrentActionComponent,
     CurrentDungeonComponent,
+    ProgressBarComponent,
   ],
   templateUrl: './sidebar.component.html',
 })
@@ -50,13 +49,13 @@ export class SidebarComponent implements OnInit, OnDestroy {
   @Output() itemTapped = new EventEmitter<void>();
 
   private readonly destroy$ = new Subject<void>();
-  private compactProgressAnimationFrame = 0;
-
   sections: SidebarSection[] = [];
   activeUrl = '';
   displayCurrentAction = false;
   readonly sidebarLayout;
   readonly currentActionLabel = computed(() => {
+    if (this.state.isActionCooldown()) return 'Stopping';
+
     switch (this.state.currentAction()?.characterActionType) {
       case CharacterActionType.Combat:
         return 'Battling';
@@ -66,8 +65,6 @@ export class SidebarComponent implements OnInit, OnDestroy {
         return 'Action';
     }
   });
-  readonly compactActionProgress = signal(0);
-  readonly compactActionTransitionDuration = signal(0);
   readonly hasActiveDungeon: DungeonStateService['hasActiveDungeon'];
   constructor(
     private readonly sidebarService: SidebarService,
@@ -79,7 +76,6 @@ export class SidebarComponent implements OnInit, OnDestroy {
     public readonly guildState: GuildStateService,
     private readonly sidebarLayoutPreference: SidebarLayoutPreferenceService,
     private readonly router: Router,
-    private readonly timeSync: TimeSyncService,
     private readonly questState: QuestStateService,
     private readonly questPresenter: QuestPresenterService,
     dungeonState: DungeonStateService,
@@ -88,16 +84,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
     this.sidebarLayout = this.sidebarLayoutPreference.layout;
 
     effect(() => {
-      const action = this.state.currentAction();
-      const isCompact = this.sidebarLayout() === 'compact';
       this.displayCurrentAction = this.state.displayCurrentAction();
-      untracked(() => {
-        if (isCompact) {
-          this.startCompactActionProgress(action);
-        } else {
-          this.cancelCompactActionProgress();
-        }
-      });
     });
 
     effect(() => {
@@ -136,7 +123,6 @@ export class SidebarComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.cancelCompactActionProgress();
     this.destroy$.next();
     this.destroy$.complete();
   }
@@ -216,60 +202,6 @@ export class SidebarComponent implements OnInit, OnDestroy {
     return (
       destinationPath === itemPath || destinationPath.startsWith(`${itemPath}/`)
     );
-  }
-
-  private startCompactActionProgress(
-    action: ReturnType<CharacterActionsStateService['currentAction']>,
-  ): void {
-    this.cancelCompactActionProgress();
-    this.compactActionTransitionDuration.set(0);
-
-    if (!action || action.characterActionType === CharacterActionType.Idle) {
-      this.compactActionProgress.set(0);
-      return;
-    }
-
-    const durationMs = environment.baseDuration * 1000;
-    let startedAt: number;
-
-    if (
-      action.characterActionType === CharacterActionType.Combat ||
-      action.isDeleted
-    ) {
-      const deadline = new Date(
-        action.nextResolutionAt ?? action.updatedAt,
-      ).getTime();
-      startedAt = deadline - durationMs;
-    } else {
-      startedAt = new Date(action.updatedAt).getTime();
-    }
-
-    const elapsed = this.timeSync.now() - startedAt;
-    const progress = Math.max(0, Math.min((elapsed / durationMs) * 100, 100));
-    this.compactActionProgress.set(progress);
-
-    if (progress >= 100) return;
-
-    // Let the initial position render without a transition, then hand the
-    // remaining movement to the browser compositor as one continuous animation.
-    this.compactProgressAnimationFrame = requestAnimationFrame(() => {
-      this.compactProgressAnimationFrame = requestAnimationFrame(() => {
-        const remainingMs = Math.max(
-          durationMs - (this.timeSync.now() - startedAt),
-          0,
-        );
-        this.compactActionTransitionDuration.set(remainingMs);
-        this.compactActionProgress.set(100);
-        this.compactProgressAnimationFrame = 0;
-      });
-    });
-  }
-
-  private cancelCompactActionProgress(): void {
-    if (!this.compactProgressAnimationFrame) return;
-
-    cancelAnimationFrame(this.compactProgressAnimationFrame);
-    this.compactProgressAnimationFrame = 0;
   }
 
   private routePath(route: string): string {

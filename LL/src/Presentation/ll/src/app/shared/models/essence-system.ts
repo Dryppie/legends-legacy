@@ -155,6 +155,7 @@ export interface PlayerEssenceDto {
   currentAttributeBonuses: EssenceAttributeBonusDto[];
   activeAbility: EssenceAbilityDto;
   passiveAbility: EssenceAbilityDto;
+  tags: string[];
 }
 
 export interface EssenceAscendInfoDto {

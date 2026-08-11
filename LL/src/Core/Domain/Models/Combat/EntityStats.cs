@@ -27,7 +27,10 @@ public sealed record EntityStats(
     int FinalHealthDamage = 0,
     int HealthRegenerationPotential = 0,
     int HealthRegenerationOverhealed = 0,
-    int HealthRegenerationPulses = 0)
+    int HealthRegenerationPulses = 0,
+    int? Health = null,
+    int? MaxHealth = null,
+    int? Barrier = null)
 {
     public int AccountedIncomingDamage =>
         AvoidedDamage

@@ -65,7 +65,8 @@ public sealed class PlayerEssenceArchiveEntryConverter : ITypeConverter<PlayerEs
             GetEvolveInfo(essence, definition, canEvolve),
             [],
             MapAbility(definition.ActiveAbility, essence),
-            MapAbility(definition.PassiveAbility, essence));
+            MapAbility(definition.PassiveAbility, essence),
+            definition.Tags);
     }
 
     private IEnumerable<string> GetMissingRequirements(PlayerEssence essence, EssenceDefinition definition)

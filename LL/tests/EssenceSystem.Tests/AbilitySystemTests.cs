@@ -2828,6 +2828,11 @@ public sealed class AbilitySystemTests
             x.ActorId == "friendly-slot"
             && x.TargetId == summonId
             && x.EventType == EventType.SummonExpired);
+        var summonStats = Assert.Single(
+            result.EntityStats,
+            stats => stats.EntityId == summonId);
+        Assert.Equal(0, summonStats.Health);
+        Assert.Equal(20, summonStats.MaxHealth);
     }
 
     [Fact]
@@ -3028,6 +3033,12 @@ public sealed class AbilitySystemTests
             && x.Source == "Basic Attack"
             && x.EventType == EventType.AbilityUse
             && x.Timestamp == 1);
+        var summonStats = Assert.Single(
+            defaultResult.EntityStats,
+            stats => stats.EntityId == summon.TargetId);
+        Assert.Equal(20, summonStats.Health);
+        Assert.Equal(20, summonStats.MaxHealth);
+        Assert.Equal(0, summonStats.Barrier);
     }
 
     [Fact]
