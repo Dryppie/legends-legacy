@@ -3834,7 +3834,7 @@ public sealed class AttributeMarginalValueAnalyzer : IAttributeMarginalValueAnal
                 new SummonAttributeSpec
                 {
                     Attribute = AttributeType.MaxHealth,
-                    BaseValue = 50,
+                    BaseValue = 75,
                     ScalingAttribute = AttributeType.Power,
                     ScalingCoefficient = 0.4f,
                     MinimumValue = 1

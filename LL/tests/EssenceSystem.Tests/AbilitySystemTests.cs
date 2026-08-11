@@ -2778,13 +2778,23 @@ public sealed class AbilitySystemTests
             [],
             out _,
             out _);
+        IncreaseMaxHealth(
+            runtime.HostileParticipants.Single().Combatant,
+            10_000);
         var provider = new JsonAbilityCatalogProvider(
             CreateConfig(),
             FindApiContentRoot(),
             CreateJsonOptions());
         var executor = new CombatEngineExecutor(provider);
 
-        var result = await executor.ExecuteAsync(runtime, CancellationToken.None);
+        var result = await executor.ExecuteSimulationAsync(
+            runtime,
+            new CombatSimulationOptions(
+                RandomSeed: 1337,
+                MaxTicks: 120,
+                StartActiveAbilitiesOnCooldown: true,
+                BasicAttackIntervalTicks: 1_000),
+            CancellationToken.None);
         var summonLog = result.EventLog.First(x =>
             x.Source == "effect.creature.shadow_imp.shadow_image.summon"
             && x.ActorId == "friendly-slot"
